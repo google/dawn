@@ -32,7 +32,7 @@ class BlockDecoratedStructs final : public utils::Castable<BlockDecoratedStructs
     ~BlockDecoratedStructs() override;
 
     /// @copydoc Transform::Run
-    void Run(ir::Module* module, const DataMap& inputs, DataMap& outputs) const override;
+    void Run(ir::Module* module) const override;
 };
 
 }  // namespace tint::ir::transform

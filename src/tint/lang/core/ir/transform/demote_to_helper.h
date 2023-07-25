@@ -33,7 +33,7 @@ class DemoteToHelper final : public utils::Castable<DemoteToHelper, Transform> {
     ~DemoteToHelper() override;
 
     /// @copydoc Transform::Run
-    void Run(ir::Module* module, const DataMap& inputs, DataMap& outputs) const override;
+    void Run(ir::Module* module) const override;
 
   private:
     struct State;

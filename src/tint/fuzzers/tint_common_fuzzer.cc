@@ -226,7 +226,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     };
 
     if (transform_manager_) {
-        transform::DataMap outputs;
+        ast::transform::DataMap outputs;
         auto out = transform_manager_->Run(&program, *transform_inputs_, outputs);
         if (!validate_program(out)) {  // Will move: program <- out on success
             return 0;

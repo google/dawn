@@ -29,7 +29,7 @@ class HandleMatrixArithmetic final : public utils::Castable<HandleMatrixArithmet
     ~HandleMatrixArithmetic() override;
 
     /// @copydoc Transform::Run
-    void Run(ir::Module* module, const DataMap& inputs, DataMap& outputs) const override;
+    void Run(ir::Module* module) const override;
 };
 
 }  // namespace tint::ir::transform

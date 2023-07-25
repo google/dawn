@@ -29,7 +29,7 @@ ExpandImplicitSplats::ExpandImplicitSplats() = default;
 
 ExpandImplicitSplats::~ExpandImplicitSplats() = default;
 
-void ExpandImplicitSplats::Run(ir::Module* ir, const DataMap&, DataMap&) const {
+void ExpandImplicitSplats::Run(ir::Module* ir) const {
     ir::Builder b(*ir);
 
     // Find the instructions that use implicit splats and either modify them in place or record them

@@ -142,8 +142,8 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     std::ostringstream errorStream;
     errorStream << "Tint HLSL failure:" << std::endl;
 
-    tint::transform::Manager transformManager;
-    tint::transform::DataMap transformInputs;
+    tint::ast::transform::Manager transformManager;
+    tint::ast::transform::DataMap transformInputs;
 
     // Run before the renamer so that the entry point name matches `entryPointName` still.
     transformManager.Add<tint::ast::transform::SingleEntryPoint>();
@@ -172,7 +172,7 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
     }
 
     tint::Program transformedProgram;
-    tint::transform::DataMap transformOutputs;
+    tint::ast::transform::DataMap transformOutputs;
     {
         TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "RunTransforms");
         DAWN_TRY_ASSIGN(transformedProgram,

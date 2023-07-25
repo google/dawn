@@ -57,7 +57,7 @@ TEST_F(FirstIndexOffsetTest, EmptyModule) {
     auto* src = "";
     auto* expect = "";
 
-    Transform::DataMap config;
+    DataMap config;
     config.Add<FirstIndexOffset::BindingPoint>(0, 0);
     auto got = Run<FirstIndexOffset>(src, std::move(config));
 
@@ -77,7 +77,7 @@ fn entry() -> @builtin(position) vec4<f32> {
 )";
     auto* expect = src;
 
-    Transform::DataMap config;
+    DataMap config;
     config.Add<FirstIndexOffset::BindingPoint>(0, 0);
     auto got = Run<FirstIndexOffset>(src, std::move(config));
 
@@ -122,7 +122,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
 }
 )";
 
-    Transform::DataMap config;
+    DataMap config;
     config.Add<FirstIndexOffset::BindingPoint>(1, 2);
     auto got = Run<FirstIndexOffset>(src, std::move(config));
 
@@ -167,7 +167,7 @@ fn test(vert_idx : u32) -> u32 {
 }
 )";
 
-    Transform::DataMap config;
+    DataMap config;
     config.Add<FirstIndexOffset::BindingPoint>(1, 2);
     auto got = Run<FirstIndexOffset>(src, std::move(config));
 
@@ -212,7 +212,7 @@ fn entry(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f32
 }
 )";
 
-    Transform::DataMap config;
+    DataMap config;
     config.Add<FirstIndexOffset::BindingPoint>(1, 7);
     auto got = Run<FirstIndexOffset>(src, std::move(config));
 
@@ -257,7 +257,7 @@ fn test(inst_idx : u32) -> u32 {
 }
 )";
 
-    Transform::DataMap config;
+    DataMap config;
     config.Add<FirstIndexOffset::BindingPoint>(1, 7);
     auto got = Run<FirstIndexOffset>(src, std::move(config));
 
@@ -314,7 +314,7 @@ fn entry(inputs : Inputs) -> @builtin(position) vec4<f32> {
 }
 )";
 
-    Transform::DataMap config;
+    DataMap config;
     config.Add<FirstIndexOffset::BindingPoint>(1, 2);
     auto got = Run<FirstIndexOffset>(src, std::move(config));
 
@@ -371,7 +371,7 @@ fn test(instance_idx : u32, vert_idx : u32) -> u32 {
 }
 )";
 
-    Transform::DataMap config;
+    DataMap config;
     config.Add<FirstIndexOffset::BindingPoint>(1, 2);
     auto got = Run<FirstIndexOffset>(src, std::move(config));
 
@@ -424,7 +424,7 @@ fn entry(@builtin(vertex_index) vert_idx : u32) -> @builtin(position) vec4<f32> 
 }
 )";
 
-    Transform::DataMap config;
+    DataMap config;
     config.Add<FirstIndexOffset::BindingPoint>(1, 2);
     auto got = Run<FirstIndexOffset>(src, std::move(config));
 
@@ -477,7 +477,7 @@ fn func1(vert_idx : u32) -> u32 {
 }
 )";
 
-    Transform::DataMap config;
+    DataMap config;
     config.Add<FirstIndexOffset::BindingPoint>(1, 2);
     auto got = Run<FirstIndexOffset>(src, std::move(config));
 
@@ -546,7 +546,7 @@ fn entry_c(@builtin(instance_index) inst_idx : u32) -> @builtin(position) vec4<f
 }
 )";
 
-    Transform::DataMap config;
+    DataMap config;
     config.Add<FirstIndexOffset::BindingPoint>(1, 2);
     auto got = Run<FirstIndexOffset>(src, std::move(config));
 
@@ -615,7 +615,7 @@ fn func(i : u32) -> u32 {
 }
 )";
 
-    Transform::DataMap config;
+    DataMap config;
     config.Add<FirstIndexOffset::BindingPoint>(1, 2);
     auto got = Run<FirstIndexOffset>(src, std::move(config));
 

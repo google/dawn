@@ -22,8 +22,8 @@
 #include "gtest/gtest.h"
 #include "src/tint/lang/hlsl/ast_writer/generator.h"
 #include "src/tint/lang/hlsl/ast_writer/generator_impl.h"
+#include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/renamer.h"
-#include "src/tint/transform/manager.h"
 
 namespace tint::writer::hlsl {
 
@@ -86,9 +86,9 @@ class TestHelperBase : public BODY, public ProgramBuilder {
                 << formatter.format(sanitized_result.program.Diagnostics());
         }();
 
-        transform::Manager transform_manager;
-        transform::DataMap transform_data;
-        transform::DataMap outputs;
+        ast::transform::Manager transform_manager;
+        ast::transform::DataMap transform_data;
+        ast::transform::DataMap outputs;
         transform_data.Add<ast::transform::Renamer::Config>(
             ast::transform::Renamer::Target::kHlslKeywords,
             /* preserve_unicode */ true);

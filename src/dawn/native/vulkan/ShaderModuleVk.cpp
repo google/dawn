@@ -279,8 +279,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     DAWN_TRY_LOAD_OR_RUN(
         compilation, GetDevice(), std::move(req), CompiledSpirv::FromBlob,
         [](SpirvCompilationRequest r) -> ResultOrError<CompiledSpirv> {
-            tint::transform::Manager transformManager;
-            tint::transform::DataMap transformInputs;
+            tint::ast::transform::Manager transformManager;
+            tint::ast::transform::DataMap transformInputs;
 
             // Many Vulkan drivers can't handle multi-entrypoint shader modules.
             // Run before the renamer so that the entry point name matches `entryPointName` still.
@@ -302,7 +302,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             }
 
             tint::Program program;
-            tint::transform::DataMap transformOutputs;
+            tint::ast::transform::DataMap transformOutputs;
             {
                 TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "RunTransforms");
                 DAWN_TRY_ASSIGN(program,

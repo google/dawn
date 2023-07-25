@@ -277,7 +277,7 @@ struct RenameConflictsWGSL::State {
 RenameConflictsWGSL::RenameConflictsWGSL() = default;
 RenameConflictsWGSL::~RenameConflictsWGSL() = default;
 
-void RenameConflictsWGSL::Run(Module* ir, const DataMap&, DataMap&) const {
+void RenameConflictsWGSL::Run(Module* ir) const {
     State{ir}.Process();
 }
 

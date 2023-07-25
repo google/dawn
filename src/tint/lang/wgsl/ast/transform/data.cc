@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/transform/transform.h"
+#include "src/tint/lang/wgsl/ast/transform/data.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Transform);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::Data);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Data);
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 Data::Data() = default;
 Data::Data(const Data&) = default;
@@ -29,7 +28,4 @@ DataMap::DataMap(DataMap&&) = default;
 DataMap::~DataMap() = default;
 DataMap& DataMap::operator=(DataMap&&) = default;
 
-Transform::Transform() = default;
-Transform::~Transform() = default;
-
-}  // namespace tint::transform
+}  // namespace tint::ast::transform

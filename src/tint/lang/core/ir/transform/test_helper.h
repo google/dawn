@@ -25,7 +25,6 @@
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/transform/transform.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/transform/manager.h"
 
 namespace tint::ir::transform {
 
@@ -33,36 +32,24 @@ namespace tint::ir::transform {
 template <typename BASE>
 class TransformTestBase : public BASE {
   public:
-    /// Transforms the module, using transforms in `TRANSFORMS`.
-    /// @param data the optional Transform::DataMap to pass to Transform::Run()
-    /// @returns the transform outputs, if any
+    /// Transforms the module, using the transforms `TRANSFORMS`.
     template <typename... TRANSFORMS>
-    Transform::DataMap Run(const Transform::DataMap& data = {}) {
-        tint::transform::Manager manager;
-        tint::transform::DataMap outputs;
-
+    void Run() {
         // Validate the input IR.
         {
             auto res = ir::Validate(mod);
             EXPECT_TRUE(res) << res.Failure().str();
             if (!res) {
-                return outputs;
+                return;
             }
         }
 
         // Run the transforms.
-        for (auto* transform_ptr : std::initializer_list<Transform*>{new TRANSFORMS()...}) {
-            manager.append(std::unique_ptr<Transform>(transform_ptr));
-        }
-        manager.Run(&mod, data, outputs);
+        (TRANSFORMS().Run(&mod), ...);
 
         // Validate the output IR.
-        {
-            auto res = ir::Validate(mod);
-            EXPECT_TRUE(res) << res.Failure().str();
-        }
-
-        return outputs;
+        auto res = ir::Validate(mod);
+        EXPECT_TRUE(res) << res.Failure().str();
     }
 
     /// @returns the transformed module as a disassembled string

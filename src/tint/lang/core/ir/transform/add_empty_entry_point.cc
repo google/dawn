@@ -27,7 +27,7 @@ AddEmptyEntryPoint::AddEmptyEntryPoint() = default;
 
 AddEmptyEntryPoint::~AddEmptyEntryPoint() = default;
 
-void AddEmptyEntryPoint::Run(ir::Module* ir, const DataMap&, DataMap&) const {
+void AddEmptyEntryPoint::Run(ir::Module* ir) const {
     for (auto* func : ir->functions) {
         if (func->Stage() != Function::PipelineStage::kUndefined) {
             return;

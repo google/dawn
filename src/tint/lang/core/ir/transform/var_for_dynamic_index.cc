@@ -116,7 +116,7 @@ VarForDynamicIndex::VarForDynamicIndex() = default;
 
 VarForDynamicIndex::~VarForDynamicIndex() = default;
 
-void VarForDynamicIndex::Run(ir::Module* ir, const DataMap&, DataMap&) const {
+void VarForDynamicIndex::Run(ir::Module* ir) const {
     ir::Builder builder(*ir);
 
     // Find the access instructions that need replacing.

@@ -201,7 +201,7 @@ struct DemoteToHelper::State {
     }
 };
 
-void DemoteToHelper::Run(Module* ir, const DataMap&, DataMap&) const {
+void DemoteToHelper::Run(Module* ir) const {
     State{ir}.Process();
 }
 

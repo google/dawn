@@ -31,7 +31,7 @@ class VarForDynamicIndex final : public utils::Castable<VarForDynamicIndex, Tran
     ~VarForDynamicIndex() override;
 
     /// @copydoc Transform::Run
-    void Run(ir::Module* module, const DataMap& inputs, DataMap& outputs) const override;
+    void Run(ir::Module* module) const override;
 };
 
 }  // namespace tint::ir::transform

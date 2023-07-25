@@ -246,7 +246,7 @@ fn frag_main() {
 
     auto expect = src;
 
-    Transform::DataMap inputs;
+    DataMap inputs;
     inputs.Add<Renamer::Config>(Renamer::Target::kMslKeywords,
                                 /* preserve_unicode */ true);
     auto got = Run<Renamer>(src, inputs);
@@ -270,7 +270,7 @@ fn tint_symbol() {
 }
 )";
 
-    Transform::DataMap inputs;
+    DataMap inputs;
     inputs.Add<Renamer::Config>(Renamer::Target::kAll,
                                 /* preserve_unicode */ true);
     auto got = Run<Renamer>(src, inputs);
@@ -380,7 +380,7 @@ fn frag_main() {
 }
 )";
 
-    Transform::DataMap inputs;
+    DataMap inputs;
     inputs.Add<Renamer::Config>(Renamer::Target::kGlslKeywords,
                                 /* preserve_unicode */ false);
     auto got = Run<Renamer>(src, inputs);
@@ -406,7 +406,7 @@ fn frag_main() {
 }
 )";
 
-    Transform::DataMap inputs;
+    DataMap inputs;
     inputs.Add<Renamer::Config>(Renamer::Target::kHlslKeywords,
                                 /* preserve_unicode */ false);
     auto got = Run<Renamer>(src, inputs);
@@ -432,7 +432,7 @@ fn frag_main() {
 }
 )";
 
-    Transform::DataMap inputs;
+    DataMap inputs;
     inputs.Add<Renamer::Config>(Renamer::Target::kMslKeywords,
                                 /* preserve_unicode */ false);
     auto got = Run<Renamer>(src, inputs);

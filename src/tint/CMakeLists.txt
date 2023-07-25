@@ -320,6 +320,8 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/ast/transform/clamp_frag_depth.h
   lang/wgsl/ast/transform/combine_samplers.cc
   lang/wgsl/ast/transform/combine_samplers.h
+  lang/wgsl/ast/transform/data.cc
+  lang/wgsl/ast/transform/data.h
   lang/wgsl/ast/transform/decompose_memory_access.cc
   lang/wgsl/ast/transform/decompose_memory_access.h
   lang/wgsl/ast/transform/decompose_strided_array.cc
@@ -342,6 +344,8 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/ast/transform/for_loop_to_loop.h
   lang/wgsl/ast/transform/localize_struct_array_assignment.cc
   lang/wgsl/ast/transform/localize_struct_array_assignment.h
+  lang/wgsl/ast/transform/manager.cc
+  lang/wgsl/ast/transform/manager.h
   lang/wgsl/ast/transform/merge_return.cc
   lang/wgsl/ast/transform/merge_return.h
   lang/wgsl/ast/transform/module_scope_var_to_entry_point_param.cc
@@ -523,10 +527,6 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/resolver/validator.cc
   lang/wgsl/resolver/validator.h
   tint.cc
-  transform/manager.cc
-  transform/manager.h
-  transform/transform.cc
-  transform/transform.h
   utils/cli/cli.cc
   utils/cli/cli.h
   utils/containers/bitset.h
@@ -1035,6 +1035,7 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/ast/templated_identifier_test.cc
     lang/wgsl/ast/test_helper.h
     lang/wgsl/ast/test_helper_test.cc
+    lang/wgsl/ast/transform/manager_test.cc
     lang/wgsl/ast/transform/transform_test.cc
     lang/wgsl/ast/traverse_expressions_test.cc
     lang/wgsl/ast/unary_op_expression_test.cc
@@ -1117,7 +1118,6 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/resolver/variable_test.cc
     lang/wgsl/resolver/variable_validation_test.cc
     test_main.cc
-    transform/manager_test.cc
     utils/cli/cli_test.cc
     utils/command/command_test.cc
     utils/containers/bitset_test.cc

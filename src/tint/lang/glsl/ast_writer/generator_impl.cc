@@ -47,6 +47,7 @@
 #include "src/tint/lang/wgsl/ast/transform/direct_variable_access.h"
 #include "src/tint/lang/wgsl/ast/transform/disable_uniformity_analysis.h"
 #include "src/tint/lang/wgsl/ast/transform/expand_compound_assignment.h"
+#include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/multiplanar_external_texture.h"
 #include "src/tint/lang/wgsl/ast/transform/pad_structs.h"
 #include "src/tint/lang/wgsl/ast/transform/preserve_padding.h"
@@ -74,7 +75,6 @@
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/transform/manager.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/debug/debug.h"
 #include "src/tint/utils/macros/defer.h"
@@ -152,8 +152,8 @@ SanitizedResult::SanitizedResult(SanitizedResult&&) = default;
 SanitizedResult Sanitize(const Program* in,
                          const Options& options,
                          const std::string& entry_point) {
-    transform::Manager manager;
-    transform::DataMap data;
+    ast::transform::Manager manager;
+    ast::transform::DataMap data;
 
     manager.Add<ast::transform::DisableUniformityAnalysis>();
 
@@ -248,7 +248,7 @@ SanitizedResult Sanitize(const Program* in,
         ast::transform::CanonicalizeEntryPointIO::ShaderStyle::kGlsl);
 
     SanitizedResult result;
-    transform::DataMap outputs;
+    ast::transform::DataMap outputs;
     result.program = manager.Run(in, data, outputs);
     return result;
 }

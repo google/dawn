@@ -99,8 +99,7 @@ class State {
             return Program{std::move(b)};
         }
 
-        transform::Transform::DataMap data;
-        transform::RenameConflictsWGSL{}.Run(&mod, data, data);
+        transform::RenameConflictsWGSL{}.Run(&mod);
 
         if (mod.root_block) {
             RootBlock(mod.root_block);

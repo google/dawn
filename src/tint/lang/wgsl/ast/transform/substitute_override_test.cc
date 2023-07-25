@@ -32,7 +32,7 @@ fn main() -> @builtin(position) vec4<f32> {
 
     auto* expect = "error: Missing override substitution data";
 
-    Transform::DataMap data;
+    DataMap data;
     auto got = Run<SubstituteOverride>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -50,7 +50,7 @@ fn main() -> @builtin(position) vec4<f32> {
     auto* expect = "error: Initializer not provided for override, and override not overridden.";
 
     SubstituteOverride::Config cfg;
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SubstituteOverride::Config>(cfg);
 
     auto got = Run<SubstituteOverride>(src, data);
@@ -75,7 +75,7 @@ fn main() -> @builtin(position) vec4<f32> {
 
     SubstituteOverride::Config cfg;
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SubstituteOverride::Config>(cfg);
     auto got = Run<SubstituteOverride>(src, data);
 
@@ -143,7 +143,7 @@ fn main() -> @builtin(position) vec4<f32> {
     cfg.map.insert({OverrideId{6}, 1.0});
     cfg.map.insert({OverrideId{7}, 0.0});
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SubstituteOverride::Config>(cfg);
     auto got = Run<SubstituteOverride>(src, data);
 
@@ -212,7 +212,7 @@ fn main() -> @builtin(position) vec4<f32> {
     cfg.map.insert({OverrideId{7}, 0.0});
     cfg.map.insert({OverrideId{5}, 13});
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SubstituteOverride::Config>(cfg);
     auto got = Run<SubstituteOverride>(src, data);
 
@@ -241,7 +241,7 @@ fn main() -> @builtin(position) vec4<f32> {
     SubstituteOverride::Config cfg;
     cfg.map.insert({OverrideId{0}, 11.0});
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SubstituteOverride::Config>(cfg);
     auto got = Run<SubstituteOverride>(src, data);
 
@@ -282,7 +282,7 @@ fn f() {
     SubstituteOverride::Config cfg;
     cfg.map.insert({OverrideId{0}, 0.0});
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SubstituteOverride::Config>(cfg);
     auto got = Run<SubstituteOverride>(src, data);
 

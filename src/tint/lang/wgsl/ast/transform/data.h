@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_TRANSFORM_TRANSFORM_H_
-#define SRC_TINT_TRANSFORM_TRANSFORM_H_
+#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_DATA_H_
+#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_DATA_H_
 
 #include <memory>
 #include <unordered_map>
@@ -21,7 +21,7 @@
 
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// Data is the base class for transforms that accept extra input or emit extra output information.
 class Data : public utils::Castable<Data> {
@@ -121,20 +121,6 @@ class DataMap {
     std::unordered_map<const utils::TypeInfo*, std::unique_ptr<Data>> map_;
 };
 
-/// Interface for transforms.
-class Transform : public utils::Castable<Transform> {
-  public:
-    /// @copydoc tint::transform::Data
-    using Data = tint::transform::Data;
-    /// @copydoc tint::transform::DataMap
-    using DataMap = tint::transform::DataMap;
+}  // namespace tint::ast::transform
 
-    /// Constructor
-    Transform();
-    /// Destructor
-    ~Transform() override;
-};
-
-}  // namespace tint::transform
-
-#endif  // SRC_TINT_TRANSFORM_TRANSFORM_H_
+#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_DATA_H_

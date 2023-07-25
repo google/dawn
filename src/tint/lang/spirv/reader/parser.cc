@@ -20,11 +20,11 @@
 #include "src/tint/lang/wgsl/ast/transform/decompose_strided_array.h"
 #include "src/tint/lang/wgsl/ast/transform/decompose_strided_matrix.h"
 #include "src/tint/lang/wgsl/ast/transform/fold_trivial_lets.h"
+#include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/remove_unreachable_statements.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
 #include "src/tint/lang/wgsl/ast/transform/spirv_atomic.h"
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
-#include "src/tint/transform/manager.h"
 
 namespace tint::reader::spirv {
 
@@ -57,8 +57,8 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
         return program;
     }
 
-    transform::Manager manager;
-    transform::DataMap outputs;
+    ast::transform::Manager manager;
+    ast::transform::DataMap outputs;
     manager.Add<ast::transform::Unshadow>();
     manager.Add<ast::transform::SimplifyPointers>();
     manager.Add<ast::transform::FoldTrivialLets>();

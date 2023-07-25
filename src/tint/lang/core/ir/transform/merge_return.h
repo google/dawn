@@ -29,7 +29,7 @@ class MergeReturn final : public utils::Castable<MergeReturn, Transform> {
     ~MergeReturn() override;
 
     /// @copydoc Transform::Run
-    void Run(ir::Module* module, const DataMap& inputs, DataMap& outputs) const override;
+    void Run(ir::Module* module) const override;
 
   private:
     struct State;

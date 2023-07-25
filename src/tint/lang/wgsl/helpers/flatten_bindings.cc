@@ -17,8 +17,8 @@
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/transform/binding_remapper.h"
+#include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
-#include "src/tint/transform/manager.h"
 #include "src/tint/writer/binding_point.h"
 
 namespace tint::writer {
@@ -64,9 +64,9 @@ std::optional<Program> FlattenBindings(const Program* program) {
 
     // Run the binding remapper transform.
     if (!binding_points.empty()) {
-        tint::transform::Manager manager;
-        tint::transform::DataMap inputs;
-        tint::transform::DataMap outputs;
+        tint::ast::transform::Manager manager;
+        tint::ast::transform::DataMap inputs;
+        tint::ast::transform::DataMap outputs;
         inputs.Add<tint::ast::transform::BindingRemapper::Remappings>(
             std::move(binding_points), tint::ast::transform::BindingRemapper::AccessControls{},
             /* mayCollide */ true);

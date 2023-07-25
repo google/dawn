@@ -77,7 +77,6 @@
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/spirv/ast_writer/generator.h"
 #include "src/tint/lang/spirv/ast_writer/module.h"
-#include "src/tint/transform/manager.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 
@@ -90,23 +89,15 @@ using namespace tint::number_suffixes;  // NOLINT
 constexpr uint32_t kWriterVersion = 1;
 
 void Sanitize(ir::Module* module) {
-    transform::Manager manager;
-    transform::DataMap data;
-
-    manager.Add<ir::transform::AddEmptyEntryPoint>();
-    manager.Add<ir::transform::BlockDecoratedStructs>();
-    manager.Add<ir::transform::BuiltinPolyfillSpirv>();
-    manager.Add<ir::transform::DemoteToHelper>();
-    manager.Add<ir::transform::ExpandImplicitSplats>();
-    manager.Add<ir::transform::HandleMatrixArithmetic>();
-    manager.Add<ir::transform::MergeReturn>();
-    manager.Add<ir::transform::ShaderIOSpirv>();
-    manager.Add<ir::transform::VarForDynamicIndex>();
-
-    data.Add<ir::transform::ShaderIO::Config>(ir::transform::ShaderIO::Config());
-
-    transform::DataMap outputs;
-    manager.Run(module, data, outputs);
+    ir::transform::AddEmptyEntryPoint{}.Run(module);
+    ir::transform::BlockDecoratedStructs{}.Run(module);
+    ir::transform::BuiltinPolyfillSpirv{}.Run(module);
+    ir::transform::DemoteToHelper{}.Run(module);
+    ir::transform::ExpandImplicitSplats{}.Run(module);
+    ir::transform::HandleMatrixArithmetic{}.Run(module);
+    ir::transform::MergeReturn{}.Run(module);
+    ir::transform::ShaderIOSpirv{}.Run(module);
+    ir::transform::VarForDynamicIndex{}.Run(module);
 }
 
 SpvStorageClass StorageClass(builtin::AddressSpace addrspace) {

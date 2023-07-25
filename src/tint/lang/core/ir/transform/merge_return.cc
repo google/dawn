@@ -287,7 +287,7 @@ struct MergeReturn::State {
     }
 };
 
-void MergeReturn::Run(Module* ir, const DataMap&, DataMap&) const {
+void MergeReturn::Run(Module* ir) const {
     // Process each function.
     for (auto* fn : ir->functions) {
         State{ir}.Process(fn);

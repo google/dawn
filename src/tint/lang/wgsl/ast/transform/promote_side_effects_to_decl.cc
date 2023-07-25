@@ -20,6 +20,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/get_insertion_point.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/hoist_to_decl_before.h"
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
@@ -30,7 +31,6 @@
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/lang/wgsl/sem/while_statement.h"
-#include "src/tint/transform/manager.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::PromoteSideEffectsToDecl);
@@ -670,7 +670,7 @@ PromoteSideEffectsToDecl::~PromoteSideEffectsToDecl() = default;
 Transform::ApplyResult PromoteSideEffectsToDecl::Apply(const Program* src,
                                                        const DataMap& inputs,
                                                        DataMap& outputs) const {
-    tint::transform::Manager manager;
+    Manager manager;
     manager.Add<SimplifySideEffectStatements>();
     manager.Add<DecomposeSideEffects>();
     return manager.Run(src, inputs, outputs);

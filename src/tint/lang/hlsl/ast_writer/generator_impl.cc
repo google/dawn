@@ -48,6 +48,7 @@
 #include "src/tint/lang/wgsl/ast/transform/disable_uniformity_analysis.h"
 #include "src/tint/lang/wgsl/ast/transform/expand_compound_assignment.h"
 #include "src/tint/lang/wgsl/ast/transform/localize_struct_array_assignment.h"
+#include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/multiplanar_external_texture.h"
 #include "src/tint/lang/wgsl/ast/transform/num_workgroups_from_uniform.h"
 #include "src/tint/lang/wgsl/ast/transform/promote_initializers_to_let.h"
@@ -74,7 +75,6 @@
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/transform/manager.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/debug/debug.h"
 #include "src/tint/utils/macros/compiler.h"
@@ -167,8 +167,8 @@ SanitizedResult::~SanitizedResult() = default;
 SanitizedResult::SanitizedResult(SanitizedResult&&) = default;
 
 SanitizedResult Sanitize(const Program* in, const Options& options) {
-    transform::Manager manager;
-    transform::DataMap data;
+    ast::transform::Manager manager;
+    ast::transform::DataMap data;
 
     manager.Add<ast::transform::DisableUniformityAnalysis>();
 
@@ -320,7 +320,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     data.Add<ast::transform::NumWorkgroupsFromUniform::Config>(options.root_constant_binding_point);
 
     SanitizedResult result;
-    transform::DataMap outputs;
+    ast::transform::DataMap outputs;
     result.program = manager.Run(in, data, outputs);
     if (auto* res = outputs.Get<ast::transform::ArrayLengthFromUniform::Result>()) {
         result.used_array_length_from_uniform_indices = std::move(res->used_size_indices);

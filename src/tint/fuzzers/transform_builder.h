@@ -45,10 +45,10 @@ class TransformBuilder {
     ~TransformBuilder() = default;
 
     /// @returns manager for transforms
-    transform::Manager* manager() { return &manager_; }
+    ast::transform::Manager* manager() { return &manager_; }
 
     /// @returns data for transforms
-    transform::DataMap* data_map() { return &data_map_; }
+    ast::transform::DataMap* data_map() { return &data_map_; }
 
     /// Adds a transform and needed data to |manager_| and |data_map_|.
     /// @tparam T - A class that inherits from ast::transform::Transform and has an
@@ -72,8 +72,8 @@ class TransformBuilder {
 
   private:
     DataBuilder builder_;
-    transform::Manager manager_;
-    transform::DataMap data_map_;
+    ast::transform::Manager manager_;
+    ast::transform::DataMap data_map_;
 
     DataBuilder* builder() { return &builder_; }
 

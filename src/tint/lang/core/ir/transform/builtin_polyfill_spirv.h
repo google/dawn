@@ -38,7 +38,7 @@ class BuiltinPolyfillSpirv final : public utils::Castable<BuiltinPolyfillSpirv, 
     ~BuiltinPolyfillSpirv() override;
 
     /// @copydoc Transform::Run
-    void Run(ir::Module* module, const DataMap& inputs, DataMap& outputs) const override;
+    void Run(ir::Module* module) const override;
 
     /// LiteralOperand is a type of constant value that is intended to be emitted as a literal in
     /// the SPIR-V instruction stream.

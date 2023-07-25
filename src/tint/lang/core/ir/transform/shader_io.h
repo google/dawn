@@ -28,25 +28,13 @@ namespace tint::ir::transform {
 /// prepare them for backend codegen.
 class ShaderIO : public utils::Castable<ShaderIO, Transform> {
   public:
-    /// Configuration options for the transform.
-    struct Config final : public utils::Castable<Config, Data> {
-        /// Constructor
-        Config();
-
-        /// Copy constructor
-        Config(const Config&) = default;
-
-        /// Destructor
-        ~Config() override;
-    };
-
     /// Constructor
     ShaderIO();
     /// Destructor
     ~ShaderIO() override;
 
     /// @copydoc Transform::Run
-    void Run(ir::Module* module, const DataMap& inputs, DataMap& outputs) const override;
+    void Run(ir::Module* module) const override;
 
     /// Abstract base class for the state needed to handle IO for a particular backend target.
     struct BackendState {

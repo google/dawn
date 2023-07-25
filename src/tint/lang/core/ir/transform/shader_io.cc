@@ -22,7 +22,6 @@
 #include "src/tint/lang/core/type/struct.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::ShaderIO);
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::ShaderIO::Config);
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
@@ -79,8 +78,6 @@ ShaderIO::~ShaderIO() = default;
 
 /// PIMPL state for the transform, for a single entry point function.
 struct ShaderIO::State {
-    /// The configuration data.
-    const ShaderIO::Config& config;
     /// The IR module.
     Module* ir = nullptr;
     /// The IR builder.
@@ -97,9 +94,8 @@ struct ShaderIO::State {
     std::unique_ptr<ShaderIO::BackendState> backend;
 
     /// Constructor
-    /// @param cfg the transform config
     /// @param mod the module
-    State(const ShaderIO::Config& cfg, Module* mod) : config(cfg), ir(mod) {}
+    explicit State(Module* mod) : ir(mod) {}
 
     /// Process an entry point.
     /// @param f the original entry point function
@@ -249,11 +245,8 @@ struct ShaderIO::State {
     }
 };
 
-void ShaderIO::Run(Module* ir, const DataMap& inputs, DataMap&) const {
-    auto* cfg = inputs.Get<Config>();
-    TINT_ASSERT(Transform, cfg);
-
-    ShaderIO::State state(*cfg, ir);
+void ShaderIO::Run(Module* ir) const {
+    ShaderIO::State state(ir);
     for (auto* func : ir->functions) {
         // Only process entry points.
         if (func->Stage() == Function::PipelineStage::kUndefined) {
@@ -269,10 +262,6 @@ void ShaderIO::Run(Module* ir, const DataMap& inputs, DataMap&) const {
     }
     state.Finalize();
 }
-
-ShaderIO::Config::Config() = default;
-
-ShaderIO::Config::~Config() = default;
 
 ShaderIO::BackendState::~BackendState() = default;
 

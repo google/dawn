@@ -804,7 +804,7 @@ struct BuiltinPolyfillSpirv::State {
     }
 };
 
-void BuiltinPolyfillSpirv::Run(ir::Module* ir, const DataMap&, DataMap&) const {
+void BuiltinPolyfillSpirv::Run(ir::Module* ir) const {
     State{ir}.Process();
 }
 

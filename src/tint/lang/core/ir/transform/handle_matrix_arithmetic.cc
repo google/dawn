@@ -30,7 +30,7 @@ HandleMatrixArithmetic::HandleMatrixArithmetic() = default;
 
 HandleMatrixArithmetic::~HandleMatrixArithmetic() = default;
 
-void HandleMatrixArithmetic::Run(ir::Module* ir, const DataMap&, DataMap&) const {
+void HandleMatrixArithmetic::Run(ir::Module* ir) const {
     ir::Builder b(*ir);
 
     // Find the instructions that need to be modified.

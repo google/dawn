@@ -62,7 +62,7 @@ class FirstIndexOffset final : public utils::Castable<FirstIndexOffset, Transfor
     /// BindingPoint is consumed by the FirstIndexOffset transform.
     /// BindingPoint specifies the binding point of the first index uniform
     /// buffer.
-    struct BindingPoint final : public utils::Castable<BindingPoint, Transform::Data> {
+    struct BindingPoint final : public utils::Castable<BindingPoint, Data> {
         /// Constructor
         BindingPoint();
 
@@ -82,7 +82,7 @@ class FirstIndexOffset final : public utils::Castable<FirstIndexOffset, Transfor
 
     /// Data is outputted by the FirstIndexOffset transform.
     /// Data holds information about shader usage and constant buffer offsets.
-    struct Data final : public utils::Castable<Data, Transform::Data> {
+    struct Data final : public utils::Castable<Data, transform::Data> {
         /// Constructor
         /// @param has_vtx_index True if the shader uses vertex_index
         /// @param has_inst_index True if the shader uses instance_index

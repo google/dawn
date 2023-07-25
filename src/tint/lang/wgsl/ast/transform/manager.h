@@ -12,24 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_TRANSFORM_MANAGER_H_
-#define SRC_TINT_TRANSFORM_MANAGER_H_
+#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_MANAGER_H_
+#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_MANAGER_H_
 
 #include <memory>
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/wgsl/ast/transform/data.h"
+#include "src/tint/lang/wgsl/ast/transform/transform.h"
 #include "src/tint/lang/wgsl/program/program.h"
-#include "src/tint/transform/transform.h"
 
-#if TINT_BUILD_IR
-// Forward declarations
-namespace tint::ir {
-class Module;
-}  // namespace tint::ir
-#endif  // TINT_BUILD_IR
-
-namespace tint::transform {
+namespace tint::ast::transform {
 
 /// A collection of Transforms that act as a single Transform.
 /// The inner transforms will execute in the appended order.
@@ -62,21 +56,10 @@ class Manager {
     /// @returns the transformed program
     Program Run(const Program* program, const DataMap& inputs, DataMap& outputs) const;
 
-#if TINT_BUILD_IR
-    /// Runs the transforms on @p module
-    /// @param module the module to transform
-    /// @param inputs optional extra transform-specific input data
-    /// @param outputs optional extra transform-specific output data
-    void Run(ir::Module* module, const DataMap& inputs, DataMap& outputs) const;
-#endif  // TINT_BUILD_IR
-
   private:
     std::vector<std::unique_ptr<Transform>> transforms_;
-
-    template <typename OUTPUT, typename INPUT>
-    OUTPUT RunTransforms(INPUT in, const DataMap& inputs, DataMap& outputs) const;
 };
 
-}  // namespace tint::transform
+}  // namespace tint::ast::transform
 
-#endif  // SRC_TINT_TRANSFORM_MANAGER_H_
+#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_MANAGER_H_

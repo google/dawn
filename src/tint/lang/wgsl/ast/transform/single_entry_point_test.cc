@@ -38,7 +38,7 @@ TEST_F(SingleEntryPointTest, Error_NoEntryPoints) {
 
     auto* expect = "error: entry point 'main' not found";
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SingleEntryPoint::Config>("main");
     auto got = Run<SingleEntryPoint>(src, data);
 
@@ -57,7 +57,7 @@ fn main() -> @builtin(position) vec4<f32> {
 
     SingleEntryPoint::Config cfg("_");
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SingleEntryPoint::Config>(cfg);
     auto got = Run<SingleEntryPoint>(src, data);
 
@@ -76,7 +76,7 @@ fn main() {}
 
     SingleEntryPoint::Config cfg("foo");
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SingleEntryPoint::Config>(cfg);
     auto got = Run<SingleEntryPoint>(src, data);
 
@@ -92,7 +92,7 @@ fn main() {
 
     SingleEntryPoint::Config cfg("main");
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SingleEntryPoint::Config>(cfg);
     auto got = Run<SingleEntryPoint>(src, data);
 
@@ -127,7 +127,7 @@ fn comp_main1() {
 
     SingleEntryPoint::Config cfg("comp_main1");
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SingleEntryPoint::Config>(cfg);
     auto got = Run<SingleEntryPoint>(src, data);
 
@@ -177,7 +177,7 @@ fn comp_main1() {
 
     SingleEntryPoint::Config cfg("comp_main1");
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SingleEntryPoint::Config>(cfg);
     auto got = Run<SingleEntryPoint>(src, data);
 
@@ -233,7 +233,7 @@ fn comp_main1() {
 
     SingleEntryPoint::Config cfg("comp_main1");
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SingleEntryPoint::Config>(cfg);
     auto got = Run<SingleEntryPoint>(src, data);
 
@@ -253,7 +253,7 @@ fn main() {
 
     SingleEntryPoint::Config cfg("main");
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SingleEntryPoint::Config>(cfg);
     auto got = Run<SingleEntryPoint>(src, data);
 
@@ -303,7 +303,7 @@ fn comp_main1() {
   let local_d = c1;
 }
 )";
-        Transform::DataMap data;
+        DataMap data;
         data.Add<SingleEntryPoint::Config>(cfg);
         auto got = Run<SingleEntryPoint>(src, data);
         EXPECT_EQ(expect, str(got));
@@ -321,7 +321,7 @@ fn comp_main2() {
   let local_d = c2;
 }
 )";
-        Transform::DataMap data;
+        DataMap data;
         data.Add<SingleEntryPoint::Config>(cfg);
         auto got = Run<SingleEntryPoint>(src, data);
         EXPECT_EQ(expect, str(got));
@@ -337,7 +337,7 @@ fn comp_main3() {
   let local_d = c3;
 }
 )";
-        Transform::DataMap data;
+        DataMap data;
         data.Add<SingleEntryPoint::Config>(cfg);
         auto got = Run<SingleEntryPoint>(src, data);
         EXPECT_EQ(expect, str(got));
@@ -353,7 +353,7 @@ fn comp_main4() {
   let local_d = c4;
 }
 )";
-        Transform::DataMap data;
+        DataMap data;
         data.Add<SingleEntryPoint::Config>(cfg);
         auto got = Run<SingleEntryPoint>(src, data);
         EXPECT_EQ(expect, str(got));
@@ -367,7 +367,7 @@ fn comp_main5() {
   let local_d = 1u;
 }
 )";
-        Transform::DataMap data;
+        DataMap data;
         data.Add<SingleEntryPoint::Config>(cfg);
         auto got = Run<SingleEntryPoint>(src, data);
         EXPECT_EQ(expect, str(got));
@@ -403,7 +403,7 @@ fn main() {
     auto* expect = src;
 
     SingleEntryPoint::Config cfg("main");
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SingleEntryPoint::Config>(cfg);
     auto got = Run<SingleEntryPoint>(src, data);
     EXPECT_EQ(expect, str(got));
@@ -440,7 +440,7 @@ fn main() {
 )";
 
     SingleEntryPoint::Config cfg("main");
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SingleEntryPoint::Config>(cfg);
     auto got = Run<SingleEntryPoint>(src, data);
     EXPECT_EQ(expect, str(got));
@@ -498,7 +498,7 @@ fn comp_main1() {
 
     SingleEntryPoint::Config cfg("comp_main1");
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SingleEntryPoint::Config>(cfg);
     auto got = Run<SingleEntryPoint>(src, data);
 
@@ -581,7 +581,7 @@ fn comp_main1() {
 
     SingleEntryPoint::Config cfg("comp_main1");
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SingleEntryPoint::Config>(cfg);
     auto got = Run<SingleEntryPoint>(src, data);
 
@@ -604,7 +604,7 @@ fn main() {
 
     SingleEntryPoint::Config cfg("main");
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SingleEntryPoint::Config>(cfg);
     auto got = Run<SingleEntryPoint>(src, data);
 
@@ -624,7 +624,7 @@ fn main() {
 
     SingleEntryPoint::Config cfg("main");
 
-    Transform::DataMap data;
+    DataMap data;
     data.Add<SingleEntryPoint::Config>(cfg);
     auto got = Run<SingleEntryPoint>(src, data);
 

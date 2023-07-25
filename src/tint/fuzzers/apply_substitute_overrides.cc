@@ -35,13 +35,13 @@ Program ApplySubstituteOverrides(Program&& program) {
         return std::move(program);
     }
 
-    transform::DataMap override_data;
+    ast::transform::DataMap override_data;
     override_data.Add<ast::transform::SubstituteOverride::Config>(cfg);
 
-    transform::Manager mgr;
+    ast::transform::Manager mgr;
     mgr.append(std::make_unique<ast::transform::SubstituteOverride>());
 
-    transform::DataMap outputs;
+    ast::transform::DataMap outputs;
     return mgr.Run(&program, override_data, outputs);
 }
 

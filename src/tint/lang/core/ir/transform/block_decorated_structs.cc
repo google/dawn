@@ -31,7 +31,7 @@ BlockDecoratedStructs::BlockDecoratedStructs() = default;
 
 BlockDecoratedStructs::~BlockDecoratedStructs() = default;
 
-void BlockDecoratedStructs::Run(Module* ir, const DataMap&, DataMap&) const {
+void BlockDecoratedStructs::Run(Module* ir) const {
     Builder builder(*ir);
 
     if (!ir->root_block) {

@@ -21,10 +21,10 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 #include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
-#include "src/tint/transform/manager.h"
 
 namespace tint::ast::transform {
 
@@ -67,11 +67,11 @@ class TransformTestBase : public BASE {
     /// `transform`.
     /// @param transform the transform to apply
     /// @param in the input WGSL source
-    /// @param data the optional Transform::DataMap to pass to Transform::Run()
+    /// @param data the optional DataMap to pass to Transform::Run()
     /// @return the transformed output
     Output Run(std::string in,
                std::unique_ptr<transform::Transform> transform,
-               const tint::transform::DataMap& data = {}) {
+               const DataMap& data = {}) {
         std::vector<std::unique_ptr<transform::Transform>> transforms;
         transforms.emplace_back(std::move(transform));
         return Run(std::move(in), std::move(transforms), data);
@@ -80,10 +80,10 @@ class TransformTestBase : public BASE {
     /// Transforms and returns the WGSL source `in`, transformed using
     /// a transform of type `TRANSFORM`.
     /// @param in the input WGSL source
-    /// @param data the optional Transform::DataMap to pass to Transform::Run()
+    /// @param data the optional DataMap to pass to Transform::Run()
     /// @return the transformed output
     template <typename... TRANSFORMS>
-    Output Run(std::string in, const tint::transform::DataMap& data = {}) {
+    Output Run(std::string in, const DataMap& data = {}) {
         auto file = std::make_unique<Source::File>("test", in);
         auto program = reader::wgsl::Parse(file.get());
 
@@ -96,16 +96,16 @@ class TransformTestBase : public BASE {
     /// Transforms and returns program `program`, transformed using a transform of
     /// type `TRANSFORM`.
     /// @param program the input Program
-    /// @param data the optional Transform::DataMap to pass to Transform::Run()
+    /// @param data the optional DataMap to pass to Transform::Run()
     /// @return the transformed output
     template <typename... TRANSFORMS>
-    Output Run(Program&& program, const tint::transform::DataMap& data = {}) {
+    Output Run(Program&& program, const DataMap& data = {}) {
         if (!program.IsValid()) {
             return Output(std::move(program));
         }
 
-        tint::transform::Manager manager;
-        tint::transform::DataMap outputs;
+        Manager manager;
+        DataMap outputs;
         for (auto* transform_ptr : std::initializer_list<Transform*>{new TRANSFORMS()...}) {
             manager.append(std::unique_ptr<Transform>(transform_ptr));
         }
@@ -114,10 +114,10 @@ class TransformTestBase : public BASE {
     }
 
     /// @param program the input program
-    /// @param data the optional Transform::DataMap to pass to Transform::Run()
+    /// @param data the optional DataMap to pass to Transform::Run()
     /// @return true if the transform should be run for the given input.
     template <typename TRANSFORM>
-    bool ShouldRun(Program&& program, const tint::transform::DataMap& data = {}) {
+    bool ShouldRun(Program&& program, const DataMap& data = {}) {
         if (!program.IsValid()) {
             ADD_FAILURE() << "ShouldRun() called with invalid program: "
                           << program.Diagnostics().str();
@@ -126,7 +126,7 @@ class TransformTestBase : public BASE {
 
         const Transform& t = TRANSFORM();
 
-        tint::transform::DataMap outputs;
+        DataMap outputs;
         auto result = t.Apply(&program, data, outputs);
         if (!result) {
             return false;
@@ -140,10 +140,10 @@ class TransformTestBase : public BASE {
     }
 
     /// @param in the input WGSL source
-    /// @param data the optional Transform::DataMap to pass to Transform::Run()
+    /// @param data the optional DataMap to pass to Transform::Run()
     /// @return true if the transform should be run for the given input.
     template <typename TRANSFORM>
-    bool ShouldRun(std::string in, const tint::transform::DataMap& data = {}) {
+    bool ShouldRun(std::string in, const DataMap& data = {}) {
         auto file = std::make_unique<Source::File>("test", in);
         auto program = reader::wgsl::Parse(file.get());
         return ShouldRun<TRANSFORM>(std::move(program), data);

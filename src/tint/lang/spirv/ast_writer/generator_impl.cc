@@ -28,6 +28,7 @@
 #include "src/tint/lang/wgsl/ast/transform/disable_uniformity_analysis.h"
 #include "src/tint/lang/wgsl/ast/transform/expand_compound_assignment.h"
 #include "src/tint/lang/wgsl/ast/transform/for_loop_to_loop.h"
+#include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/merge_return.h"
 #include "src/tint/lang/wgsl/ast/transform/multiplanar_external_texture.h"
 #include "src/tint/lang/wgsl/ast/transform/preserve_padding.h"
@@ -43,13 +44,12 @@
 #include "src/tint/lang/wgsl/ast/transform/vectorize_scalar_matrix_initializers.h"
 #include "src/tint/lang/wgsl/ast/transform/while_to_loop.h"
 #include "src/tint/lang/wgsl/ast/transform/zero_init_workgroup_memory.h"
-#include "src/tint/transform/manager.h"
 
 namespace tint::writer::spirv {
 
 SanitizedResult Sanitize(const Program* in, const Options& options) {
-    transform::Manager manager;
-    transform::DataMap data;
+    ast::transform::Manager manager;
+    ast::transform::DataMap data;
 
     if (options.clamp_frag_depth) {
         manager.Add<tint::ast::transform::ClampFragDepth>();
@@ -174,7 +174,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
             options.emit_vertex_point_size));
 
     SanitizedResult result;
-    transform::DataMap outputs;
+    ast::transform::DataMap outputs;
     result.program = manager.Run(in, data, outputs);
     return result;
 }

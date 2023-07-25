@@ -15,8 +15,6 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_TRANSFORM_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_TRANSFORM_H_
 
-#include "src/tint/transform/transform.h"
-
 #include <utility>
 
 #include "src/tint/lang/core/builtin/address_space.h"
@@ -30,7 +28,7 @@ class Module;
 namespace tint::ir::transform {
 
 /// Interface for IR Module transforms.
-class Transform : public utils::Castable<Transform, tint::transform::Transform> {
+class Transform : public utils::Castable<Transform> {
   public:
     /// Constructor
     Transform();
@@ -39,9 +37,7 @@ class Transform : public utils::Castable<Transform, tint::transform::Transform> 
 
     /// Run the transform on @p module
     /// @param module the source module to transform
-    /// @param inputs optional extra transform-specific input data
-    /// @param outputs optional extra transform-specific output data
-    virtual void Run(ir::Module* module, const DataMap& inputs, DataMap& outputs) const = 0;
+    virtual void Run(ir::Module* module) const = 0;
 };
 
 }  // namespace tint::ir::transform

@@ -37,20 +37,13 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/msl/ast_writer/generator_support.h"
-#include "src/tint/transform/manager.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 
 namespace tint::writer::msl {
 namespace {
 
-void Sanitize(ir::Module* module) {
-    transform::Manager manager;
-    transform::DataMap data;
-
-    transform::DataMap outputs;
-    manager.Run(module, data, outputs);
-}
+void Sanitize(ir::Module*) {}
 
 }  // namespace
 
