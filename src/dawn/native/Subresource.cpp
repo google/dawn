@@ -14,6 +14,7 @@
 
 #include "dawn/native/Subresource.h"
 
+#include "absl/numeric/bits.h"
 #include "dawn/common/Assert.h"
 #include "dawn/native/Format.h"
 
@@ -79,22 +80,12 @@ uint8_t GetAspectIndex(Aspect aspect) {
 }
 
 uint8_t GetAspectCount(Aspect aspects) {
-    // TODO(crbug.com/dawn/829): This should use popcount once Dawn has such a function.
-    // Note that we can't do a switch because compilers complain that Depth | Stencil is not
-    // a valid enum value.
-    if (aspects == Aspect::Color || aspects == Aspect::Depth ||
-        aspects == Aspect::CombinedDepthStencil) {
-        return 1;
-    } else if (aspects == (Aspect::Plane0 | Aspect::Plane1)) {
-        return 2;
-    } else if (aspects == Aspect::Stencil) {
+    if (aspects == Aspect::Stencil) {
         // Fake a the existence of a depth aspect so that the stencil data stays at index 1.
         ASSERT(GetAspectIndex(Aspect::Stencil) == 1);
         return 2;
-    } else {
-        ASSERT(aspects == (Aspect::Depth | Aspect::Stencil));
-        return 2;
     }
+    return absl::popcount(static_cast<uint8_t>(aspects));
 }
 
 SubresourceRange::SubresourceRange(Aspect aspects,
