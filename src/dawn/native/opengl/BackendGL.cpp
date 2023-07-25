@@ -44,13 +44,17 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         return std::vector<Ref<PhysicalDeviceBase>>{};
     }
 
+    void* (*getProc)(const char* name) = nullptr;
+
     const RequestAdapterOptionsGetGLProc* glGetProcOptions = nullptr;
     FindInChain(options->nextInChain, &glGetProcOptions);
+    if (glGetProcOptions) {
+        getProc = glGetProcOptions->getProc;
+    }
 
-    if (glGetProcOptions == nullptr || glGetProcOptions->getProc == nullptr) {
+    if (getProc == nullptr) {
         // getProc not passed. Try to load it from libEGL.
 
-        RequestAdapterOptionsGetGLProc eglGetProcOptions;
 #if DAWN_PLATFORM_IS(WINDOWS)
         const char* eglLib = "libEGL.dll";
 #elif DAWN_PLATFORM_IS(MACOS)
@@ -64,36 +68,32 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
             return {};
         }
 
-        eglGetProcOptions.getProc =
-            reinterpret_cast<void* (*)(const char*)>(mLibEGL.GetProc("eglGetProcAddress"));
-        if (!eglGetProcOptions.getProc) {
+        getProc = reinterpret_cast<void* (*)(const char*)>(mLibEGL.GetProc("eglGetProcAddress"));
+        if (!getProc) {
             GetInstance()->ConsumedErrorAndWarnOnce(
                 DAWN_VALIDATION_ERROR("eglGetProcAddress return nullptr"));
             return {};
         }
-
-        EGLFunctions egl;
-        egl.Init(eglGetProcOptions.getProc);
-
-        EGLenum api = GetType() == wgpu::BackendType::OpenGLES ? EGL_OPENGL_ES_API : EGL_OPENGL_API;
-        std::unique_ptr<ContextEGL> context;
-        if (GetInstance()->ConsumedErrorAndWarnOnce(ContextEGL::Create(egl, api), &context)) {
-            return {};
-        }
-
-        EGLDisplay prevDisplay = egl.GetCurrentDisplay();
-        EGLContext prevDrawSurface = egl.GetCurrentSurface(EGL_DRAW);
-        EGLContext prevReadSurface = egl.GetCurrentSurface(EGL_READ);
-        EGLContext prevContext = egl.GetCurrentContext();
-
-        context->MakeCurrent();
-        auto physicalDevices = DiscoverPhysicalDevicesWithProcs(eglGetProcOptions.getProc);
-        egl.MakeCurrent(prevDisplay, prevDrawSurface, prevReadSurface, prevContext);
-        return physicalDevices;
     }
 
-    ASSERT(glGetProcOptions != nullptr && glGetProcOptions->getProc != nullptr);
-    return DiscoverPhysicalDevicesWithProcs(glGetProcOptions->getProc);
+    EGLFunctions egl;
+    egl.Init(getProc);
+
+    EGLenum api = GetType() == wgpu::BackendType::OpenGLES ? EGL_OPENGL_ES_API : EGL_OPENGL_API;
+    std::unique_ptr<ContextEGL> context;
+    if (GetInstance()->ConsumedErrorAndWarnOnce(ContextEGL::Create(egl, api), &context)) {
+        return {};
+    }
+
+    EGLDisplay prevDisplay = egl.GetCurrentDisplay();
+    EGLContext prevDrawSurface = egl.GetCurrentSurface(EGL_DRAW);
+    EGLContext prevReadSurface = egl.GetCurrentSurface(EGL_READ);
+    EGLContext prevContext = egl.GetCurrentContext();
+
+    context->MakeCurrent();
+    auto physicalDevices = DiscoverPhysicalDevicesWithProcs(getProc);
+    egl.MakeCurrent(prevDisplay, prevDrawSurface, prevReadSurface, prevContext);
+    return physicalDevices;
 }
 
 std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevicesWithProcs(
