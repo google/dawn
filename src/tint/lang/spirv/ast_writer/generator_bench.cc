@@ -19,7 +19,7 @@
 namespace tint::writer::spirv {
 namespace {
 
-void GenerateSPIRV(benchmark::State& state, std::string input_name) {
+void RunBenchmark(benchmark::State& state, std::string input_name, Options options) {
     auto res = bench::LoadProgram(input_name);
     if (auto err = std::get_if<bench::Error>(&res)) {
         state.SkipWithError(err->msg.c_str());
@@ -27,14 +27,25 @@ void GenerateSPIRV(benchmark::State& state, std::string input_name) {
     }
     auto& program = std::get<bench::ProgramAndFile>(res).program;
     for (auto _ : state) {
-        auto res = Generate(&program, {});
+        auto res = Generate(&program, options);
         if (!res.error.empty()) {
             state.SkipWithError(res.error.c_str());
         }
     }
 }
 
+void GenerateSPIRV(benchmark::State& state, std::string input_name) {
+    RunBenchmark(state, input_name, {});
+}
+
+void GenerateSPIRV_UseIR(benchmark::State& state, std::string input_name) {
+    Options options;
+    options.use_tint_ir = true;
+    RunBenchmark(state, input_name, std::move(options));
+}
+
 TINT_BENCHMARK_PROGRAMS(GenerateSPIRV);
+TINT_BENCHMARK_PROGRAMS(GenerateSPIRV_UseIR);
 
 }  // namespace
 }  // namespace tint::writer::spirv
