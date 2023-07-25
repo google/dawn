@@ -41,7 +41,7 @@ Program ParseAndBuild(std::string spirv) {
         builder.Diagnostics().add_error(diag::System::Reader, p->error());
         return Program(std::move(builder));
     }
-    return p->program();
+    return p->Program();
 }
 
 TEST_F(SpvParserTest, WorkgroupBarrier) {

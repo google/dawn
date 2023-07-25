@@ -509,8 +509,6 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/sem/variable.cc
   lang/wgsl/sem/while_statement.cc
   lang/wgsl/sem/while_statement.h
-  reader/reader.cc
-  reader/reader.h
   lang/wgsl/resolver/const_eval.cc
   lang/wgsl/resolver/const_eval.h
   lang/wgsl/resolver/dependency_graph.cc

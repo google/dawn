@@ -77,7 +77,7 @@ class ParserImplWrapperForTest {
 
     /// @returns the program. The program builder in the parser will be reset
     /// after this.
-    Program program() { return impl_.program(); }
+    Program program() { return impl_.Program(); }
 
     /// @returns the namer object
     Namer& namer() { return impl_.namer(); }

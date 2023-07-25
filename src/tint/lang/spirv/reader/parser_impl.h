@@ -43,7 +43,6 @@ TINT_END_DISABLE_WARNING(NEWLINE_EOF);
 #include "src/tint/lang/spirv/reader/parser_type.h"
 #include "src/tint/lang/spirv/reader/usage.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
-#include "src/tint/reader/reader.h"
 
 /// This is the implementation of the SPIR-V parser for Tint.
 
@@ -123,23 +122,24 @@ struct WorkgroupSizeInfo {
 };
 
 /// Parser implementation for SPIR-V.
-class ParserImpl : Reader {
+class ParserImpl {
     using ExpressionList = utils::Vector<const ast::Expression*, 8>;
 
   public:
     /// Creates a new parser
     /// @param input the input data to parse
     explicit ParserImpl(const std::vector<uint32_t>& input);
+
     /// Destructor
-    ~ParserImpl() override;
+    ~ParserImpl();
 
     /// Run the parser
     /// @returns true if the parse was successful, false otherwise.
-    bool Parse() override;
+    bool Parse();
 
     /// @returns the program. The program builder in the parser will be reset
     /// after this.
-    Program program() override;
+    tint::Program Program();
 
     /// @returns a reference to the internal builder, without building the
     /// program. To be used only for testing.

@@ -277,8 +277,7 @@ TypedExpression::TypedExpression(const Type* type_in, const ast::Expression* exp
     : type(type_in), expr(expr_in) {}
 
 ParserImpl::ParserImpl(const std::vector<uint32_t>& spv_binary)
-    : Reader(),
-      spv_binary_(spv_binary),
+    : spv_binary_(spv_binary),
       fail_stream_(&success_, &errors_),
       namer_(fail_stream_),
       enum_converter_(fail_stream_),
@@ -331,7 +330,7 @@ bool ParserImpl::Parse() {
     return success_;
 }
 
-Program ParserImpl::program() {
+Program ParserImpl::Program() {
     // TODO(dneto): Should we clear out spv_binary_ here, to reduce
     // memory usage?
     return tint::Program(std::move(builder_));
