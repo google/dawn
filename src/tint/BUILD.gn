@@ -1885,7 +1885,7 @@ if (tint_build_unittests) {
       }
 
       if (tint_build_wgsl_writer) {
-        sources += [ "lang/core/ir/transform/rename_conflicts_test.cc" ]
+        sources += [ "lang/core/ir/transform/rename_conflicts_wgsl_test.cc" ]
       }
     }
   }
