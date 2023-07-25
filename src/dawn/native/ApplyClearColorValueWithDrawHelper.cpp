@@ -56,9 +56,9 @@ const char* GetTextureComponentTypeString(DeviceBase* device, wgpu::TextureForma
         case TextureComponentType::Uint:
             return "u32";
         case TextureComponentType::Float:
-            UNREACHABLE();
-            return "";
+            break;
     }
+    DAWN_UNREACHABLE();
 }
 
 // Construct the fragment shader to apply the input color values to the corresponding color

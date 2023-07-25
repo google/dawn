@@ -814,6 +814,7 @@ bool TextureBase::CoverFullSubresource(uint32_t mipLevel, const Extent3D& size) 
         case wgpu::TextureDimension::e3D:
             return size == levelSize;
     }
+    DAWN_UNREACHABLE();
 }
 
 Extent3D TextureBase::GetMipLevelSingleSubresourceVirtualSize(uint32_t level) const {

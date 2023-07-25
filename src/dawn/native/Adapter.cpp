@@ -215,6 +215,7 @@ std::vector<Ref<AdapterBase>> SortAdapters(std::vector<Ref<AdapterBase>> adapter
             case wgpu::AdapterType::Unknown:
                 return 3;
         }
+        DAWN_UNREACHABLE();
     };
 
     const auto ComputeBackendTypeRank = [](const Ref<AdapterBase>& a) {
@@ -237,8 +238,9 @@ std::vector<Ref<AdapterBase>> SortAdapters(std::vector<Ref<AdapterBase>> adapter
             case wgpu::BackendType::Null:
                 return 6;
             case wgpu::BackendType::Undefined:
-                UNREACHABLE();
+                break;
         }
+        DAWN_UNREACHABLE();
     };
 
     std::sort(adapters.begin(), adapters.end(),

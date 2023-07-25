@@ -384,6 +384,7 @@ WGPUBufferMapState Buffer::GetMapState() const {
                 return WGPUBufferMapState_Unmapped;
             }
     }
+    DAWN_UNREACHABLE();
 }
 
 bool Buffer::IsMappedForReading() const {
