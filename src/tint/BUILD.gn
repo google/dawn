@@ -987,10 +987,6 @@ libtint_source_set("libtint_writer_src") {
     "writer/binding_remapper_options.h",
     "writer/external_texture_options.cc",
     "writer/external_texture_options.h",
-    "writer/text.cc",
-    "writer/text.h",
-    "writer/writer.cc",
-    "writer/writer.h",
   ]
 
   deps = [

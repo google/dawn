@@ -30,7 +30,6 @@
 #include "src/tint/writer/array_length_from_uniform_options.h"
 #include "src/tint/writer/binding_remapper_options.h"
 #include "src/tint/writer/external_texture_options.h"
-#include "src/tint/writer/text.h"
 
 // Forward declarations
 namespace tint {

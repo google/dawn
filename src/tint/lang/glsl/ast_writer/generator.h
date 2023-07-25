@@ -28,7 +28,6 @@
 #include "src/tint/lang/wgsl/sem/binding_point.h"
 #include "src/tint/lang/wgsl/sem/sampler_texture_pair.h"
 #include "src/tint/writer/external_texture_options.h"
-#include "src/tint/writer/text.h"
 
 // Forward declarations
 namespace tint {

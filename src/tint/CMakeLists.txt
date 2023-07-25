@@ -579,10 +579,6 @@ list(APPEND TINT_LIB_SRCS
   writer/external_texture_options.h
   writer/ir_text_generator.cc
   writer/ir_text_generator.h
-  writer/text.cc
-  writer/text.h
-  writer/writer.cc
-  writer/writer.h
 )
 
 tint_generated(lang/core/builtin/access BENCH TEST)

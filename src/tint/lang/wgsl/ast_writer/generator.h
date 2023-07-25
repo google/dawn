@@ -18,8 +18,6 @@
 #include <memory>
 #include <string>
 
-#include "src/tint/writer/text.h"
-
 // Forward declarations
 namespace tint {
 class Program;

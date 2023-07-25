@@ -22,7 +22,6 @@
 #include "src/tint/utils/reflection/reflection.h"
 #include "src/tint/writer/binding_remapper_options.h"
 #include "src/tint/writer/external_texture_options.h"
-#include "src/tint/writer/writer.h"
 
 // Forward declarations
 namespace tint {
