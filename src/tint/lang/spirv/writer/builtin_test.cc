@@ -39,7 +39,7 @@ TEST_P(Builtin_1arg, Scalar) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         b.Call(MakeScalarType(params.type), params.function, MakeScalarValue(params.type));
         b.Return(func);
     });
@@ -51,7 +51,7 @@ TEST_P(Builtin_1arg, Vector) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         b.Call(MakeVectorType(params.type), params.function, MakeVectorValue(params.type));
         b.Return(func);
     });
@@ -136,7 +136,7 @@ INSTANTIATE_TEST_SUITE_P(
 // Test that abs of an unsigned value just folds away.
 TEST_F(SpirvWriterTest, Builtin_Abs_u32) {
     auto* func = b.Function("foo", MakeScalarType(kU32));
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* arg = MakeScalarValue(kU32);
         auto* result = b.Call(MakeScalarType(kU32), builtin::Function::kAbs, arg);
         b.Return(func, result);
@@ -154,7 +154,7 @@ TEST_F(SpirvWriterTest, Builtin_Abs_u32) {
 
 TEST_F(SpirvWriterTest, Builtin_Abs_vec2u) {
     auto* func = b.Function("foo", MakeVectorType(kU32));
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* arg = MakeVectorValue(kU32);
         auto* result = b.Call(MakeVectorType(kU32), builtin::Function::kAbs, arg);
         b.Return(func, result);
@@ -175,7 +175,7 @@ TEST_F(SpirvWriterTest, Builtin_All_Scalar) {
     auto* arg = b.FunctionParam("arg", ty.bool_());
     auto* func = b.Function("foo", ty.bool_());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.bool_(), builtin::Function::kAll, arg);
         b.Return(func, result);
     });
@@ -188,7 +188,7 @@ TEST_F(SpirvWriterTest, Builtin_All_Vector) {
     auto* arg = b.FunctionParam("arg", ty.vec4<bool>());
     auto* func = b.Function("foo", ty.bool_());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.bool_(), builtin::Function::kAll, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -203,7 +203,7 @@ TEST_F(SpirvWriterTest, Builtin_Any_Scalar) {
     auto* arg = b.FunctionParam("arg", ty.bool_());
     auto* func = b.Function("foo", ty.bool_());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.bool_(), builtin::Function::kAny, arg);
         b.Return(func, result);
     });
@@ -216,7 +216,7 @@ TEST_F(SpirvWriterTest, Builtin_Any_Vector) {
     auto* arg = b.FunctionParam("arg", ty.vec4<bool>());
     auto* func = b.Function("foo", ty.bool_());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.bool_(), builtin::Function::kAny, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -230,7 +230,7 @@ TEST_F(SpirvWriterTest, Builtin_Determinant_Mat4x4f) {
     auto* arg = b.FunctionParam("arg", ty.mat4x4<f32>());
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.f32(), builtin::Function::kDeterminant, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -244,7 +244,7 @@ TEST_F(SpirvWriterTest, Builtin_Determinant_Mat3x3h) {
     auto* arg = b.FunctionParam("arg", ty.mat3x3<f16>());
     auto* func = b.Function("foo", ty.f16());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.f16(), builtin::Function::kDeterminant, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -259,7 +259,7 @@ TEST_F(SpirvWriterTest, Builtin_Frexp_F32) {
     auto* arg = b.FunctionParam("arg", ty.f32());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(str, builtin::Function::kFrexp, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -274,7 +274,7 @@ TEST_F(SpirvWriterTest, Builtin_Frexp_F16) {
     auto* arg = b.FunctionParam("arg", ty.f16());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(str, builtin::Function::kFrexp, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -289,7 +289,7 @@ TEST_F(SpirvWriterTest, Builtin_Frexp_Vec2f) {
     auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(str, builtin::Function::kFrexp, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -304,7 +304,7 @@ TEST_F(SpirvWriterTest, Builtin_Frexp_Vec3h) {
     auto* arg = b.FunctionParam("arg", ty.vec3<f16>());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(str, builtin::Function::kFrexp, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -318,7 +318,7 @@ TEST_F(SpirvWriterTest, Builtin_Length_vec4f) {
     auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.f32(), builtin::Function::kLength, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -333,7 +333,7 @@ TEST_F(SpirvWriterTest, Builtin_Modf_F32) {
     auto* arg = b.FunctionParam("arg", ty.f32());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(str, builtin::Function::kModf, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -348,7 +348,7 @@ TEST_F(SpirvWriterTest, Builtin_Modf_F16) {
     auto* arg = b.FunctionParam("arg", ty.f16());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(str, builtin::Function::kModf, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -363,7 +363,7 @@ TEST_F(SpirvWriterTest, Builtin_Modf_Vec2f) {
     auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(str, builtin::Function::kModf, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -378,7 +378,7 @@ TEST_F(SpirvWriterTest, Builtin_Modf_Vec3h) {
     auto* arg = b.FunctionParam("arg", ty.vec3<f16>());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(str, builtin::Function::kModf, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -392,7 +392,7 @@ TEST_F(SpirvWriterTest, Builtin_Normalize_vec4f) {
     auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kNormalize, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -406,7 +406,7 @@ TEST_F(SpirvWriterTest, Builtin_Transpose_Mat2x3f) {
     auto* arg = b.FunctionParam("arg", ty.mat2x3<f32>());
     auto* func = b.Function("foo", ty.mat3x2<f32>());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.mat3x2<f32>(), builtin::Function::kTranspose, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -420,7 +420,7 @@ TEST_F(SpirvWriterTest, Builtin_Transpose_Mat4x4f) {
     auto* arg = b.FunctionParam("arg", ty.mat4x4<f32>());
     auto* func = b.Function("foo", ty.mat4x4<f32>());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.mat4x4<f32>(), builtin::Function::kTranspose, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -434,7 +434,7 @@ TEST_F(SpirvWriterTest, Builtin_Transpose_Mat4x3h) {
     auto* arg = b.FunctionParam("arg", ty.mat4x3<f16>());
     auto* func = b.Function("foo", ty.mat3x4<f16>());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.mat3x4<f16>(), builtin::Function::kTranspose, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -448,7 +448,7 @@ TEST_F(SpirvWriterTest, Builtin_Transpose_Mat2x2h) {
     auto* arg = b.FunctionParam("arg", ty.mat2x2<f16>());
     auto* func = b.Function("foo", ty.mat2x2<f16>());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.mat2x2<f16>(), builtin::Function::kTranspose, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -462,7 +462,7 @@ TEST_F(SpirvWriterTest, Builtin_Pack2X16Float) {
     auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.u32(), builtin::Function::kPack2X16Float, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -476,7 +476,7 @@ TEST_F(SpirvWriterTest, Builtin_Pack2X16Snorm) {
     auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.u32(), builtin::Function::kPack2X16Snorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -490,7 +490,7 @@ TEST_F(SpirvWriterTest, Builtin_Pack2X16Unorm) {
     auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.u32(), builtin::Function::kPack2X16Unorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -504,7 +504,7 @@ TEST_F(SpirvWriterTest, Builtin_Pack4X8Snorm) {
     auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.u32(), builtin::Function::kPack4X8Snorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -518,7 +518,7 @@ TEST_F(SpirvWriterTest, Builtin_Pack4X8Unorm) {
     auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.u32(), builtin::Function::kPack4X8Unorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -532,7 +532,7 @@ TEST_F(SpirvWriterTest, Builtin_Unpack2X16Float) {
     auto* arg = b.FunctionParam("arg", ty.u32());
     auto* func = b.Function("foo", ty.vec2<f32>());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec2<f32>(), builtin::Function::kUnpack2X16Float, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -546,7 +546,7 @@ TEST_F(SpirvWriterTest, Builtin_Unpack2X16Snorm) {
     auto* arg = b.FunctionParam("arg", ty.u32());
     auto* func = b.Function("foo", ty.vec2<f32>());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec2<f32>(), builtin::Function::kUnpack2X16Snorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -560,7 +560,7 @@ TEST_F(SpirvWriterTest, Builtin_Unpack2X16Unorm) {
     auto* arg = b.FunctionParam("arg", ty.u32());
     auto* func = b.Function("foo", ty.vec2<f32>());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec2<f32>(), builtin::Function::kUnpack2X16Unorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -574,7 +574,7 @@ TEST_F(SpirvWriterTest, Builtin_Unpack4X8Snorm) {
     auto* arg = b.FunctionParam("arg", ty.u32());
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kUnpack4X8Snorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -588,7 +588,7 @@ TEST_F(SpirvWriterTest, Builtin_Unpack4X8Unorm) {
     auto* arg = b.FunctionParam("arg", ty.u32());
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({arg});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kUnpack4X8Unorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -604,7 +604,7 @@ TEST_P(Builtin_2arg, Scalar) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         b.Call(MakeScalarType(params.type), params.function, MakeScalarValue(params.type),
                MakeScalarValue(params.type));
         b.Return(func);
@@ -617,7 +617,7 @@ TEST_P(Builtin_2arg, Vector) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         b.Call(MakeVectorType(params.type), params.function, MakeVectorValue(params.type),
                MakeVectorValue(params.type));
         b.Return(func);
@@ -645,7 +645,7 @@ TEST_F(SpirvWriterTest, Builtin_Cross_vec3f) {
     auto* arg2 = b.FunctionParam("arg2", ty.vec3<f32>());
     auto* func = b.Function("foo", ty.vec3<f32>());
     func->SetParams({arg1, arg2});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec3<f32>(), builtin::Function::kCross, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -660,7 +660,7 @@ TEST_F(SpirvWriterTest, Builtin_Distance_vec2f) {
     auto* arg2 = b.FunctionParam("arg2", MakeVectorType(kF32));
     auto* func = b.Function("foo", MakeScalarType(kF32));
     func->SetParams({arg1, arg2});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(MakeScalarType(kF32), builtin::Function::kDistance, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -675,7 +675,7 @@ TEST_F(SpirvWriterTest, Builtin_Distance_vec3h) {
     auto* arg2 = b.FunctionParam("arg2", MakeVectorType(kF16));
     auto* func = b.Function("foo", MakeScalarType(kF16));
     func->SetParams({arg1, arg2});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(MakeScalarType(kF16), builtin::Function::kDistance, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -690,7 +690,7 @@ TEST_F(SpirvWriterTest, Builtin_Dot_vec4f) {
     auto* arg2 = b.FunctionParam("arg2", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({arg1, arg2});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.f32(), builtin::Function::kDot, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -705,7 +705,7 @@ TEST_F(SpirvWriterTest, Builtin_Dot_vec2i) {
     auto* arg2 = b.FunctionParam("arg2", ty.vec2<i32>());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({arg1, arg2});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.i32(), builtin::Function::kDot, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -728,7 +728,7 @@ TEST_F(SpirvWriterTest, Builtin_Dot_vec4u) {
     auto* arg2 = b.FunctionParam("arg2", ty.vec4<u32>());
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg1, arg2});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.u32(), builtin::Function::kDot, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -759,7 +759,7 @@ TEST_F(SpirvWriterTest, Builtin_Ldexp_F32) {
     auto* arg2 = b.FunctionParam("arg2", ty.i32());
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({arg1, arg2});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.f32(), builtin::Function::kLdexp, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -774,7 +774,7 @@ TEST_F(SpirvWriterTest, Builtin_Ldexp_F16) {
     auto* arg2 = b.FunctionParam("arg2", ty.i32());
     auto* func = b.Function("foo", ty.f16());
     func->SetParams({arg1, arg2});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.f16(), builtin::Function::kLdexp, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -789,7 +789,7 @@ TEST_F(SpirvWriterTest, Builtin_Ldexp_Vec2_F32) {
     auto* arg2 = b.FunctionParam("arg2", ty.vec2<i32>());
     auto* func = b.Function("foo", ty.vec2<f32>());
     func->SetParams({arg1, arg2});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec2<f32>(), builtin::Function::kLdexp, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -804,7 +804,7 @@ TEST_F(SpirvWriterTest, Builtin_Ldexp_Vec3_F16) {
     auto* arg2 = b.FunctionParam("arg2", ty.vec3<i32>());
     auto* func = b.Function("foo", ty.vec3<f16>());
     func->SetParams({arg1, arg2});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec3<f16>(), builtin::Function::kLdexp, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -819,7 +819,7 @@ TEST_F(SpirvWriterTest, Builtin_Reflect_F32) {
     auto* arg2 = b.FunctionParam("arg2", ty.vec3<f32>());
     auto* func = b.Function("foo", ty.vec3<f32>());
     func->SetParams({arg1, arg2});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec3<f32>(), builtin::Function::kReflect, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -834,7 +834,7 @@ TEST_F(SpirvWriterTest, Builtin_Reflect_F16) {
     auto* arg2 = b.FunctionParam("arg2", ty.vec4<f16>());
     auto* func = b.Function("foo", ty.vec4<f16>());
     func->SetParams({arg1, arg2});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec4<f16>(), builtin::Function::kReflect, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -850,7 +850,7 @@ TEST_P(Builtin_3arg, Scalar) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         b.Call(MakeScalarType(params.type), params.function, MakeScalarValue(params.type),
                MakeScalarValue(params.type), MakeScalarValue(params.type));
         b.Return(func);
@@ -863,7 +863,7 @@ TEST_P(Builtin_3arg, Vector) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         b.Call(MakeVectorType(params.type), params.function, MakeVectorValue(params.type),
                MakeVectorValue(params.type), MakeVectorValue(params.type));
         b.Return(func);
@@ -892,7 +892,7 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_I32) {
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({arg, offset, count});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.i32(), builtin::Function::kExtractBits, arg, offset, count);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -909,7 +909,7 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_U32) {
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg, offset, count});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.u32(), builtin::Function::kExtractBits, arg, offset, count);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -926,7 +926,7 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Vector_I32) {
     auto* func = b.Function("foo", ty.vec4<i32>());
     func->SetParams({arg, offset, count});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec4<i32>(), builtin::Function::kExtractBits, arg, offset, count);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -943,7 +943,7 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Vector_U32) {
     auto* func = b.Function("foo", ty.vec2<u32>());
     func->SetParams({arg, offset, count});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec2<u32>(), builtin::Function::kExtractBits, arg, offset, count);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -961,7 +961,7 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Scalar_I32) {
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({arg, newbits, offset, count});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result =
             b.Call(ty.i32(), builtin::Function::kInsertBits, arg, newbits, offset, count);
         b.Return(func, result);
@@ -980,7 +980,7 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Scalar_U32) {
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg, newbits, offset, count});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result =
             b.Call(ty.u32(), builtin::Function::kInsertBits, arg, newbits, offset, count);
         b.Return(func, result);
@@ -999,7 +999,7 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Vector_I32) {
     auto* func = b.Function("foo", ty.vec4<i32>());
     func->SetParams({arg, newbits, offset, count});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result =
             b.Call(ty.vec4<i32>(), builtin::Function::kInsertBits, arg, newbits, offset, count);
         b.Return(func, result);
@@ -1018,7 +1018,7 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Vector_U32) {
     auto* func = b.Function("foo", ty.vec2<u32>());
     func->SetParams({arg, newbits, offset, count});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result =
             b.Call(ty.vec2<u32>(), builtin::Function::kInsertBits, arg, newbits, offset, count);
         b.Return(func, result);
@@ -1035,7 +1035,7 @@ TEST_F(SpirvWriterTest, Builtin_FaceForward_F32) {
     auto* arg3 = b.FunctionParam("arg3", ty.vec3<f32>());
     auto* func = b.Function("foo", ty.vec3<f32>());
     func->SetParams({arg1, arg2, arg3});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec3<f32>(), builtin::Function::kFaceForward, arg1, arg2, arg3);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -1051,7 +1051,7 @@ TEST_F(SpirvWriterTest, Builtin_FaceForward_F16) {
     auto* arg3 = b.FunctionParam("arg3", ty.vec4<f16>());
     auto* func = b.Function("foo", ty.vec4<f16>());
     func->SetParams({arg1, arg2, arg3});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec4<f16>(), builtin::Function::kFaceForward, arg1, arg2, arg3);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -1068,7 +1068,7 @@ TEST_F(SpirvWriterTest, Builtin_Mix_VectorOperands_ScalarFactor) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({arg1, arg2, factor});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kMix, arg1, arg2, factor);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -1086,7 +1086,7 @@ TEST_F(SpirvWriterTest, Builtin_Mix_VectorOperands_VectorFactor) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({arg1, arg2, factor});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kMix, arg1, arg2, factor);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -1103,7 +1103,7 @@ TEST_F(SpirvWriterTest, Builtin_Refract_F32) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({arg1, arg2, i});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kRefract, arg1, arg2, i);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -1120,7 +1120,7 @@ TEST_F(SpirvWriterTest, Builtin_Refract_F16) {
     auto* func = b.Function("foo", ty.vec4<f16>());
     func->SetParams({arg1, arg2, i});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec4<f16>(), builtin::Function::kRefract, arg1, arg2, i);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -1137,7 +1137,7 @@ TEST_F(SpirvWriterTest, Builtin_Select_ScalarCondition_ScalarOperands) {
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({argf, argt, cond});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.i32(), builtin::Function::kSelect, argf, argt, cond);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -1154,7 +1154,7 @@ TEST_F(SpirvWriterTest, Builtin_Select_VectorCondition_VectorOperands) {
     auto* func = b.Function("foo", ty.vec4<i32>());
     func->SetParams({argf, argt, cond});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec4<i32>(), builtin::Function::kSelect, argf, argt, cond);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -1171,7 +1171,7 @@ TEST_F(SpirvWriterTest, Builtin_Select_ScalarCondition_VectorOperands) {
     auto* func = b.Function("foo", ty.vec4<i32>());
     func->SetParams({argf, argt, cond});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec4<i32>(), builtin::Function::kSelect, argf, argt, cond);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -1184,7 +1184,7 @@ TEST_F(SpirvWriterTest, Builtin_Select_ScalarCondition_VectorOperands) {
 
 TEST_F(SpirvWriterTest, Builtin_StorageBarrier) {
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         b.Call(ty.void_(), builtin::Function::kStorageBarrier);
         b.Return(func);
     });
@@ -1195,7 +1195,7 @@ TEST_F(SpirvWriterTest, Builtin_StorageBarrier) {
 
 TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier) {
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         b.Call(ty.void_(), builtin::Function::kWorkgroupBarrier);
         b.Return(func);
     });
@@ -1210,7 +1210,7 @@ TEST_F(SpirvWriterTest, Builtin_ArrayLength) {
     b.RootBlock()->Append(var);
 
     auto* func = b.Function("foo", ty.u32());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* ptr = b.Let("ptr", var);
         auto* result = b.Call(ty.u32(), builtin::Function::kArrayLength, ptr);
         b.Return(func, result);
@@ -1234,7 +1234,7 @@ TEST_F(SpirvWriterTest, Builtin_ArrayLength_WithStruct) {
     b.RootBlock()->Append(var);
 
     auto* func = b.Function("foo", ty.u32());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* ptr = b.Let("ptr", b.Access(ty.ptr(storage, arr), var, 2_u));
         auto* result = b.Call(ty.u32(), builtin::Function::kArrayLength, ptr);
         b.Return(func, result);

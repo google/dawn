@@ -38,7 +38,7 @@ TEST_P(Arithmetic_Bitwise, Scalar) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* lhs = MakeScalarValue(params.type);
         auto* rhs = MakeScalarValue(params.type);
         auto* result = b.Binary(params.kind, MakeScalarType(params.type), lhs, rhs);
@@ -53,7 +53,7 @@ TEST_P(Arithmetic_Bitwise, Vector) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* lhs = MakeVectorValue(params.type);
         auto* rhs = MakeVectorValue(params.type);
         auto* result = b.Binary(params.kind, MakeVectorType(params.type), lhs, rhs);
@@ -119,7 +119,7 @@ TEST_F(SpirvWriterTest, Binary_ScalarTimesVector_F32) {
     auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({scalar, vector});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Multiply(ty.vec4<f32>(), scalar, vector);
         b.Return(func);
         mod.SetName(result, "result");
@@ -134,7 +134,7 @@ TEST_F(SpirvWriterTest, Binary_VectorTimesScalar_F32) {
     auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({scalar, vector});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Multiply(ty.vec4<f32>(), vector, scalar);
         b.Return(func);
         mod.SetName(result, "result");
@@ -149,7 +149,7 @@ TEST_F(SpirvWriterTest, Binary_ScalarTimesMatrix_F32) {
     auto* matrix = b.FunctionParam("matrix", ty.mat3x4<f32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({scalar, matrix});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Multiply(ty.mat3x4<f32>(), scalar, matrix);
         b.Return(func);
         mod.SetName(result, "result");
@@ -164,7 +164,7 @@ TEST_F(SpirvWriterTest, Binary_MatrixTimesScalar_F32) {
     auto* matrix = b.FunctionParam("matrix", ty.mat3x4<f32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({scalar, matrix});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Multiply(ty.mat3x4<f32>(), matrix, scalar);
         b.Return(func);
         mod.SetName(result, "result");
@@ -179,7 +179,7 @@ TEST_F(SpirvWriterTest, Binary_VectorTimesMatrix_F32) {
     auto* matrix = b.FunctionParam("matrix", ty.mat3x4<f32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({vector, matrix});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Multiply(ty.vec3<f32>(), vector, matrix);
         b.Return(func);
         mod.SetName(result, "result");
@@ -194,7 +194,7 @@ TEST_F(SpirvWriterTest, Binary_MatrixTimesVector_F32) {
     auto* matrix = b.FunctionParam("matrix", ty.mat3x4<f32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({vector, matrix});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Multiply(ty.vec4<f32>(), matrix, vector);
         b.Return(func);
         mod.SetName(result, "result");
@@ -209,7 +209,7 @@ TEST_F(SpirvWriterTest, Binary_MatrixTimesMatrix_F32) {
     auto* mat2 = b.FunctionParam("mat2", ty.mat3x4<f32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({mat1, mat2});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Multiply(ty.mat3x3<f32>(), mat1, mat2);
         b.Return(func);
         mod.SetName(result, "result");
@@ -224,7 +224,7 @@ TEST_P(Comparison, Scalar) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* lhs = MakeScalarValue(params.type);
         auto* rhs = MakeScalarValue(params.type);
         auto* result = b.Binary(params.kind, ty.bool_(), lhs, rhs);
@@ -240,7 +240,7 @@ TEST_P(Comparison, Vector) {
     auto params = GetParam();
 
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* lhs = MakeVectorValue(params.type);
         auto* rhs = MakeVectorValue(params.type);
         auto* result = b.Binary(params.kind, ty.vec2<bool>(), lhs, rhs);
@@ -301,7 +301,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest_Binary_Bool,
 TEST_F(SpirvWriterTest, Binary_Chain) {
     auto* func = b.Function("foo", ty.void_());
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* sub = b.Subtract(ty.i32(), 1_i, 2_i);
         auto* add = b.Add(ty.i32(), sub, sub);
         b.Return(func);

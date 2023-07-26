@@ -37,7 +37,7 @@ TEST_F(IR_DemoteToHelperTest, NoModify_NoDiscard) {
     auto* ep = b.Function("ep", ty.f32(), Function::PipelineStage::kFragment);
     ep->SetReturnLocation(0_u, {});
 
-    b.With(ep->Block(), [&] {  //
+    b.Append(ep->Block(), [&] {  //
         b.Store(buffer, 42_i);
         b.Return(ep, 0.5_f);
     });
@@ -74,9 +74,9 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInEntryPoint) {
     ep->SetParams({front_facing});
     ep->SetReturnLocation(0_u, {});
 
-    b.With(ep->Block(), [&] {
+    b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
-        b.With(ifelse->True(), [&] {  //
+        b.Append(ifelse->True(), [&] {  //
             b.Discard();
             b.ExitIf(ifelse);
         });
@@ -147,7 +147,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInHelper) {
     b.RootBlock()->Append(buffer);
 
     auto* helper = b.Function("foo", ty.void_());
-    b.With(helper->Block(), [&] {
+    b.Append(helper->Block(), [&] {
         b.Store(buffer, 42_i);
         b.Return(helper);
     });
@@ -158,9 +158,9 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInHelper) {
     ep->SetParams({front_facing});
     ep->SetReturnLocation(0_u, {});
 
-    b.With(ep->Block(), [&] {
+    b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
-        b.With(ifelse->True(), [&] {  //
+        b.Append(ifelse->True(), [&] {  //
             b.Discard();
             b.ExitIf(ifelse);
         });
@@ -245,9 +245,9 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInEntryPoint) {
     auto* cond = b.FunctionParam("cond", ty.bool_());
     auto* helper = b.Function("foo", ty.void_());
     helper->SetParams({cond});
-    b.With(helper->Block(), [&] {
+    b.Append(helper->Block(), [&] {
         auto* ifelse = b.If(cond);
-        b.With(ifelse->True(), [&] {  //
+        b.Append(ifelse->True(), [&] {  //
             b.Discard();
             b.ExitIf(ifelse);
         });
@@ -260,7 +260,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInEntryPoint) {
     ep->SetParams({front_facing});
     ep->SetReturnLocation(0_u, {});
 
-    b.With(ep->Block(), [&] {
+    b.Append(ep->Block(), [&] {
         b.Call(ty.void_(), helper, front_facing);
         b.Store(buffer, 42_i);
         b.Return(ep, 0.5_f);
@@ -343,9 +343,9 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInHelper) {
     auto* cond = b.FunctionParam("cond", ty.bool_());
     auto* helper = b.Function("foo", ty.void_());
     helper->SetParams({cond});
-    b.With(helper->Block(), [&] {
+    b.Append(helper->Block(), [&] {
         auto* ifelse = b.If(cond);
-        b.With(ifelse->True(), [&] {  //
+        b.Append(ifelse->True(), [&] {  //
             b.Discard();
             b.ExitIf(ifelse);
         });
@@ -359,7 +359,7 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInHelper) {
     ep->SetParams({front_facing});
     ep->SetReturnLocation(0_u, {});
 
-    b.With(ep->Block(), [&] {
+    b.Append(ep->Block(), [&] {
         b.Call(ty.void_(), helper, front_facing);
         b.Return(ep, 0.5_f);
     });
@@ -441,10 +441,10 @@ TEST_F(IR_DemoteToHelperTest, WriteToInvocationPrivateAddressSpace) {
     ep->SetParams({front_facing});
     ep->SetReturnLocation(0_u, {});
 
-    b.With(ep->Block(), [&] {
+    b.Append(ep->Block(), [&] {
         auto* func = b.Var("func", ty.ptr<function, i32>());
         auto* ifelse = b.If(front_facing);
-        b.With(ifelse->True(), [&] {  //
+        b.Append(ifelse->True(), [&] {  //
             b.Discard();
             b.ExitIf(ifelse);
         });
@@ -525,9 +525,9 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
     ep->SetParams({front_facing, coord});
     ep->SetReturnLocation(0_u, {});
 
-    b.With(ep->Block(), [&] {
+    b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
-        b.With(ifelse->True(), [&] {  //
+        b.Append(ifelse->True(), [&] {  //
             b.Discard();
             b.ExitIf(ifelse);
         });
@@ -603,9 +603,9 @@ TEST_F(IR_DemoteToHelperTest, AtomicStore) {
     ep->SetParams({front_facing});
     ep->SetReturnLocation(0_u, {});
 
-    b.With(ep->Block(), [&] {
+    b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
-        b.With(ifelse->True(), [&] {  //
+        b.Append(ifelse->True(), [&] {  //
             b.Discard();
             b.ExitIf(ifelse);
         });
@@ -681,9 +681,9 @@ TEST_F(IR_DemoteToHelperTest, AtomicAdd) {
     ep->SetParams({front_facing});
     ep->SetReturnLocation(0_u, {});
 
-    b.With(ep->Block(), [&] {
+    b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
-        b.With(ifelse->True(), [&] {  //
+        b.Append(ifelse->True(), [&] {  //
             b.Discard();
             b.ExitIf(ifelse);
         });
@@ -763,9 +763,9 @@ TEST_F(IR_DemoteToHelperTest, AtomicCompareExchange) {
     ep->SetParams({front_facing});
     ep->SetReturnLocation(0_u, {});
 
-    b.With(ep->Block(), [&] {
+    b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
-        b.With(ifelse->True(), [&] {  //
+        b.Append(ifelse->True(), [&] {  //
             b.Discard();
             b.ExitIf(ifelse);
         });

@@ -117,7 +117,7 @@ TEST_F(IR_BlockDecoratedStructsTest, Scalar_PushConstant) {
     b.RootBlock()->Append(buffer);
 
     auto* func = b.Function("foo", ty.i32());
-    b.With(func->Block(), [&] {  //
+    b.Append(func->Block(), [&] {  //
         b.Return(func, b.Load(buffer));
     });
 
@@ -151,7 +151,7 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray) {
 
     auto* func = b.Function("foo", ty.void_());
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* access = b.Access(ty.ptr<storage, i32>(), buffer, 1_u);
         b.Store(access, 42_i);
         b.Return(func);
@@ -196,7 +196,7 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray_InStruct) {
 
     auto* func = b.Function("foo", ty.void_());
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* val_ptr = b.Access(i32_ptr, buffer, 0_u);
         auto* load = b.Load(val_ptr);
         auto* elem_ptr = b.Access(i32_ptr, buffer, 1_u, 3_u);

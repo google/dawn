@@ -24,7 +24,7 @@ TEST_F(SpirvWriterTest, Swizzle_TwoElements) {
     auto* vec = b.FunctionParam("vec", ty.vec4<i32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({vec});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Swizzle(ty.vec2<i32>(), vec, {3_u, 2_u});
         b.Return(func);
         mod.SetName(result, "result");
@@ -38,7 +38,7 @@ TEST_F(SpirvWriterTest, Swizzle_ThreeElements) {
     auto* vec = b.FunctionParam("vec", ty.vec4<i32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({vec});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Swizzle(ty.vec3<i32>(), vec, {3_u, 2_u, 1_u});
         b.Return(func);
         mod.SetName(result, "result");
@@ -52,7 +52,7 @@ TEST_F(SpirvWriterTest, Swizzle_FourElements) {
     auto* vec = b.FunctionParam("vec", ty.vec4<i32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({vec});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Swizzle(ty.vec4<i32>(), vec, {3_u, 2_u, 1_u, 0u});
         b.Return(func);
         mod.SetName(result, "result");
@@ -66,7 +66,7 @@ TEST_F(SpirvWriterTest, Swizzle_RepeatedElements) {
     auto* vec = b.FunctionParam("vec", ty.vec2<i32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({vec});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Swizzle(ty.vec4<i32>(), vec, {1_u, 3_u, 1_u, 3_u});
         b.Return(func);
         mod.SetName(result, "result");

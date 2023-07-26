@@ -21,12 +21,12 @@ namespace {
 
 TEST_F(SpirvWriterTest, If_TrueEmpty_FalseEmpty) {
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* i = b.If(true);
-        b.With(i->True(), [&] {  //
+        b.Append(i->True(), [&] {  //
             b.ExitIf(i);
         });
-        b.With(i->False(), [&] {  //
+        b.Append(i->False(), [&] {  //
             b.ExitIf(i);
         });
         b.Return(func);
@@ -44,13 +44,13 @@ TEST_F(SpirvWriterTest, If_TrueEmpty_FalseEmpty) {
 
 TEST_F(SpirvWriterTest, If_FalseEmpty) {
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* i = b.If(true);
-        b.With(i->True(), [&] {
+        b.Append(i->True(), [&] {
             b.Add(ty.i32(), 1_i, 1_i);
             b.ExitIf(i);
         });
-        b.With(i->False(), [&] {  //
+        b.Append(i->False(), [&] {  //
             b.ExitIf(i);
         });
         b.Return(func);
@@ -71,12 +71,12 @@ TEST_F(SpirvWriterTest, If_FalseEmpty) {
 
 TEST_F(SpirvWriterTest, If_TrueEmpty) {
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* i = b.If(true);
-        b.With(i->True(), [&] {  //
+        b.Append(i->True(), [&] {  //
             b.ExitIf(i);
         });
-        b.With(i->False(), [&] {
+        b.Append(i->False(), [&] {
             b.Add(ty.i32(), 1_i, 1_i);
             b.ExitIf(i);
         });
@@ -98,12 +98,12 @@ TEST_F(SpirvWriterTest, If_TrueEmpty) {
 
 TEST_F(SpirvWriterTest, If_BothBranchesReturn) {
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* i = b.If(true);
-        b.With(i->True(), [&] {  //
+        b.Append(i->True(), [&] {  //
             b.Return(func);
         });
-        b.With(i->False(), [&] {  //
+        b.Append(i->False(), [&] {  //
             b.Return(func);
         });
         b.Unreachable();
@@ -121,13 +121,13 @@ TEST_F(SpirvWriterTest, If_BothBranchesReturn) {
 
 TEST_F(SpirvWriterTest, If_Phi_SingleValue) {
     auto* func = b.Function("foo", ty.i32());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         i->SetResults(b.InstructionResult(ty.i32()));
-        b.With(i->True(), [&] {  //
+        b.Append(i->True(), [&] {  //
             b.ExitIf(i, 10_i);
         });
-        b.With(i->False(), [&] {  //
+        b.Append(i->False(), [&] {  //
             b.ExitIf(i, 20_i);
         });
         b.Return(func, i);
@@ -150,13 +150,13 @@ TEST_F(SpirvWriterTest, If_Phi_SingleValue) {
 
 TEST_F(SpirvWriterTest, If_Phi_SingleValue_TrueReturn) {
     auto* func = b.Function("foo", ty.i32());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         i->SetResults(b.InstructionResult(ty.i32()));
-        b.With(i->True(), [&] {  //
+        b.Append(i->True(), [&] {  //
             b.Return(func, 42_i);
         });
-        b.With(i->False(), [&] {  //
+        b.Append(i->False(), [&] {  //
             b.ExitIf(i, 20_i);
         });
         b.Return(func, i);
@@ -190,13 +190,13 @@ TEST_F(SpirvWriterTest, If_Phi_SingleValue_TrueReturn) {
 
 TEST_F(SpirvWriterTest, If_Phi_SingleValue_FalseReturn) {
     auto* func = b.Function("foo", ty.i32());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         i->SetResults(b.InstructionResult(ty.i32()));
-        b.With(i->True(), [&] {  //
+        b.Append(i->True(), [&] {  //
             b.ExitIf(i, 10_i);
         });
-        b.With(i->False(), [&] {  //
+        b.Append(i->False(), [&] {  //
             b.Return(func, 42_i);
         });
         b.Return(func, i);
@@ -230,13 +230,13 @@ TEST_F(SpirvWriterTest, If_Phi_SingleValue_FalseReturn) {
 
 TEST_F(SpirvWriterTest, If_Phi_MultipleValue_0) {
     auto* func = b.Function("foo", ty.i32());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         i->SetResults(b.InstructionResult(ty.i32()), b.InstructionResult(ty.bool_()));
-        b.With(i->True(), [&] {  //
+        b.Append(i->True(), [&] {  //
             b.ExitIf(i, 10_i, true);
         });
-        b.With(i->False(), [&] {  //
+        b.Append(i->False(), [&] {  //
             b.ExitIf(i, 20_i, false);
         });
         b.Return(func, i->Result(0));
@@ -260,13 +260,13 @@ TEST_F(SpirvWriterTest, If_Phi_MultipleValue_0) {
 
 TEST_F(SpirvWriterTest, If_Phi_MultipleValue_1) {
     auto* func = b.Function("foo", ty.bool_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* i = b.If(true);
         i->SetResults(b.InstructionResult(ty.i32()), b.InstructionResult(ty.bool_()));
-        b.With(i->True(), [&] {  //
+        b.Append(i->True(), [&] {  //
             b.ExitIf(i, 10_i, true);
         });
-        b.With(i->False(), [&] {  //
+        b.Append(i->False(), [&] {  //
             b.ExitIf(i, 20_i, false);
         });
         b.Return(func, i->Result(1));

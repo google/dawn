@@ -155,7 +155,7 @@ class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCas
         auto* func = b.Function("foo", result_ty);
         func->SetParams(std::move(func_params));
 
-        b.With(func->Block(), [&] {
+        b.Append(func->Block(), [&] {
             uint32_t arg_value = 1;
 
             utils::Vector<ir::Value*, 4> args;

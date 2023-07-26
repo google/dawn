@@ -31,19 +31,19 @@ OpMemoryModel Logical GLSL450
 
 TEST_F(SpirvWriterTest, Unreachable) {
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* loop = b.Loop();
-        b.With(loop->Body(), [&] {
+        b.Append(loop->Body(), [&] {
             auto* ifelse = b.If(true);
-            b.With(ifelse->True(), [&] {  //
+            b.Append(ifelse->True(), [&] {  //
                 b.Continue(loop);
             });
-            b.With(ifelse->False(), [&] {  //
+            b.Append(ifelse->False(), [&] {  //
                 b.Continue(loop);
             });
             b.Unreachable();
 
-            b.With(loop->Continuing(), [&] {  //
+            b.Append(loop->Continuing(), [&] {  //
                 b.NextIteration(loop);
             });
         });

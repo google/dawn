@@ -118,16 +118,16 @@ class Builder {
     /// Destructor
     ~Builder();
 
-    /// Creates a new builder wrapping the given block
-    /// @param b the block to set as the current block
+    /// Creates a new builder that will append to the given block
+    /// @param b the block to append new instructions to
     /// @returns the builder
-    Builder With(ir::Block* b) { return Builder(ir, b); }
+    Builder Append(ir::Block* b) { return Builder(ir, b); }
 
     /// Calls @p cb with the builder appending to block @p b
     /// @param b the block to set as the block to append to
     /// @param cb the function to call with the builder appending to block @p b
     template <typename FUNCTION>
-    void With(ir::Block* b, FUNCTION&& cb) {
+    void Append(ir::Block* b, FUNCTION&& cb) {
         TINT_SCOPED_ASSIGNMENT(current_block_, b);
         TINT_SCOPED_ASSIGNMENT(current_insertion_point_, nullptr);
         cb();

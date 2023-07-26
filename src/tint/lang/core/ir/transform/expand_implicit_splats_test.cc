@@ -31,7 +31,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, NoModify_Construct_VectorIdentity) {
     auto* func = b.Function("foo", ty.vec2<i32>());
     func->SetParams({vector});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Construct(ty.vec2<i32>(), vector);
         b.Return(func, result);
     });
@@ -56,7 +56,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, NoModify_Construct_MixedScalarVector) {
     auto* func = b.Function("foo", ty.vec3<i32>());
     func->SetParams({scalar, vector});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Construct(ty.vec3<i32>(), scalar, vector);
         b.Return(func, result);
     });
@@ -80,7 +80,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, NoModify_Construct_AllScalars) {
     auto* func = b.Function("foo", ty.vec3<i32>());
     func->SetParams({scalar});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Construct(ty.vec3<i32>(), scalar, scalar, scalar);
         b.Return(func, result);
     });
@@ -104,7 +104,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, Construct_Splat_Vec2i) {
     auto* func = b.Function("foo", ty.vec2<i32>());
     func->SetParams({scalar});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Construct(ty.vec2<i32>(), scalar);
         b.Return(func, result);
     });
@@ -138,7 +138,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, Construct_Splat_Vec3u) {
     auto* func = b.Function("foo", ty.vec3<u32>());
     func->SetParams({scalar});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Construct(ty.vec3<u32>(), scalar);
         b.Return(func, result);
     });
@@ -172,7 +172,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, Construct_Splat_Vec4f) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({scalar});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Construct(ty.vec4<f32>(), scalar);
         b.Return(func, result);
     });
@@ -207,7 +207,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryAdd_VectorScalar_Vec4f) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({scalar, vector});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Add(ty.vec4<f32>(), vector, scalar);
         b.Return(func, result);
     });
@@ -243,7 +243,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryAdd_ScalarVector_Vec4f) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({scalar, vector});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Add(ty.vec4<f32>(), scalar, vector);
         b.Return(func, result);
     });
@@ -279,7 +279,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinarySubtract_VectorScalar_Vec4f) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({scalar, vector});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Subtract(ty.vec4<f32>(), vector, scalar);
         b.Return(func, result);
     });
@@ -315,7 +315,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinarySubtract_ScalarVector_Vec4f) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({scalar, vector});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Subtract(ty.vec4<f32>(), scalar, vector);
         b.Return(func, result);
     });
@@ -351,7 +351,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryDivide_VectorScalar_Vec4f) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({scalar, vector});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Divide(ty.vec4<f32>(), vector, scalar);
         b.Return(func, result);
     });
@@ -387,7 +387,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryDivide_ScalarVector_Vec4f) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({scalar, vector});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Divide(ty.vec4<f32>(), scalar, vector);
         b.Return(func, result);
     });
@@ -423,7 +423,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryModulo_VectorScalar_Vec4f) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({scalar, vector});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Modulo(ty.vec4<f32>(), vector, scalar);
         b.Return(func, result);
     });
@@ -459,7 +459,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryModulo_ScalarVector_Vec4f) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({scalar, vector});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Modulo(ty.vec4<f32>(), scalar, vector);
         b.Return(func, result);
     });
@@ -495,7 +495,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_VectorScalar_Vec4f) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({scalar, vector});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Multiply(ty.vec4<f32>(), vector, scalar);
         b.Return(func, result);
     });
@@ -530,7 +530,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_ScalarVector_Vec4f) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({scalar, vector});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Multiply(ty.vec4<f32>(), scalar, vector);
         b.Return(func, result);
     });
@@ -565,7 +565,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_VectorScalar_Vec4i) {
     auto* func = b.Function("foo", ty.vec4<i32>());
     func->SetParams({scalar, vector});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Multiply(ty.vec4<i32>(), vector, scalar);
         b.Return(func, result);
     });
@@ -601,7 +601,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_ScalarVector_Vec4i) {
     auto* func = b.Function("foo", ty.vec4<i32>());
     func->SetParams({scalar, vector});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Multiply(ty.vec4<i32>(), scalar, vector);
         b.Return(func, result);
     });
@@ -638,7 +638,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, Mix_VectorOperands_ScalarFactor) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({arg1, arg2, factor});
 
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kMix, arg1, arg2, factor);
         b.Return(func, result);
     });

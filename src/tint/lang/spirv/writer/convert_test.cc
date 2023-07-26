@@ -42,7 +42,7 @@ TEST_P(Convert, Scalar) {
     auto& params = GetParam();
     auto* func = b.Function("foo", MakeScalarType(params.out));
     func->SetParams({b.FunctionParam("arg", MakeScalarType(params.in))});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Convert(MakeScalarType(params.out), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -55,7 +55,7 @@ TEST_P(Convert, Vector) {
     auto& params = GetParam();
     auto* func = b.Function("foo", MakeVectorType(params.out));
     func->SetParams({b.FunctionParam("arg", MakeVectorType(params.in))});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Convert(MakeVectorType(params.out), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -101,7 +101,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
 TEST_F(SpirvWriterTest, Convert_Mat2x3_F16_to_F32) {
     auto* func = b.Function("foo", ty.mat2x3<f32>());
     func->SetParams({b.FunctionParam("arg", ty.mat2x3<f16>())});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Convert(ty.mat2x3<f32>(), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -120,7 +120,7 @@ TEST_F(SpirvWriterTest, Convert_Mat2x3_F16_to_F32) {
 TEST_F(SpirvWriterTest, Convert_Mat4x2_F32_to_F16) {
     auto* func = b.Function("foo", ty.mat4x2<f16>());
     func->SetParams({b.FunctionParam("arg", ty.mat4x2<f32>())});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Convert(ty.mat4x2<f16>(), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");

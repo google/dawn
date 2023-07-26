@@ -509,7 +509,7 @@ class Impl {
             return;
         }
 
-        auto b = builder_.With(current_block_);
+        auto b = builder_.Append(current_block_);
         if (auto* v = std::get_if<ir::Value*>(&lhs)) {
             b.Store(*v, rhs);
         } else if (auto ref = std::get_if<VectorRefElementAccess>(&lhs)) {
@@ -540,7 +540,7 @@ class Impl {
     }
 
     void EmitCompoundAssignment(ValueOrVecElAccess lhs, ir::Value* rhs, ast::BinaryOp op) {
-        auto b = builder_.With(current_block_);
+        auto b = builder_.Append(current_block_);
         if (auto* v = std::get_if<ir::Value*>(&lhs)) {
             auto* load = b.Load(*v);
             auto* ty = load->Result()->Type();

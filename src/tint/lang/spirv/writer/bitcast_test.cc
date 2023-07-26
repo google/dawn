@@ -40,7 +40,7 @@ TEST_P(Bitcast, Scalar) {
     auto& params = GetParam();
     auto* func = b.Function("foo", MakeScalarType(params.out));
     func->SetParams({b.FunctionParam("arg", MakeScalarType(params.in))});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Bitcast(MakeScalarType(params.out), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -57,7 +57,7 @@ TEST_P(Bitcast, Vector) {
     auto& params = GetParam();
     auto* func = b.Function("foo", MakeVectorType(params.out));
     func->SetParams({b.FunctionParam("arg", MakeVectorType(params.in))});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Bitcast(MakeVectorType(params.out), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -95,7 +95,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
 TEST_F(SpirvWriterTest, Bitcast_u32_to_vec2h) {
     auto* func = b.Function("foo", ty.vec2<f16>());
     func->SetParams({b.FunctionParam("arg", ty.u32())});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Bitcast(ty.vec2<f16>(), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -108,7 +108,7 @@ TEST_F(SpirvWriterTest, Bitcast_u32_to_vec2h) {
 TEST_F(SpirvWriterTest, Bitcast_vec2i_to_vec4h) {
     auto* func = b.Function("foo", ty.vec4<f16>());
     func->SetParams({b.FunctionParam("arg", ty.vec2<i32>())});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Bitcast(ty.vec4<f16>(), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -121,7 +121,7 @@ TEST_F(SpirvWriterTest, Bitcast_vec2i_to_vec4h) {
 TEST_F(SpirvWriterTest, Bitcast_vec2h_to_u32) {
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({b.FunctionParam("arg", ty.vec2<f16>())});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Bitcast(ty.u32(), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");
@@ -134,7 +134,7 @@ TEST_F(SpirvWriterTest, Bitcast_vec2h_to_u32) {
 TEST_F(SpirvWriterTest, Bitcast_vec4h_to_vec2i) {
     auto* func = b.Function("foo", ty.vec2<i32>());
     func->SetParams({b.FunctionParam("arg", ty.vec4<f16>())});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* result = b.Bitcast(ty.vec2<i32>(), func->Params()[0]);
         b.Return(func, result);
         mod.SetName(result, "result");

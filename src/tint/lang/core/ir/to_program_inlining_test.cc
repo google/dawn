@@ -35,7 +35,7 @@ using IRToProgramInliningTest = IRToProgramTest;
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramInliningTest, LoadVar_ThenStoreVar_ThenUseLoad) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         b.Store(var, 1_i);
         auto* load = b.Load(var);
@@ -59,11 +59,11 @@ fn f() -> i32 {
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramInliningTest, BinaryOpUnsequencedLHSThenUnsequencedRHS) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn_b = b.Function("b", ty.i32());
-    b.With(fn_b->Block(), [&] {
+    b.Append(fn_b->Block(), [&] {
         auto* lhs = b.Add(ty.i32(), 1_i, 2_i);
         auto* rhs = b.Add(ty.i32(), 3_i, 4_i);
         auto* bin = b.Add(ty.i32(), lhs, rhs);
@@ -83,11 +83,11 @@ fn b() -> i32 {
 
 TEST_F(IRToProgramInliningTest, BinaryOpSequencedLHSThenUnsequencedRHS) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn_b = b.Function("b", ty.i32());
-    b.With(fn_b->Block(), [&] {
+    b.Append(fn_b->Block(), [&] {
         auto* lhs = b.Call(ty.i32(), fn_a, 1_i);
         auto* rhs = b.Add(ty.i32(), 2_i, 3_i);
         auto* bin = b.Add(ty.i32(), lhs, rhs);
@@ -107,11 +107,11 @@ fn b() -> i32 {
 
 TEST_F(IRToProgramInliningTest, BinaryOpUnsequencedLHSThenSequencedRHS) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn_b = b.Function("b", ty.i32());
-    b.With(fn_b->Block(), [&] {
+    b.Append(fn_b->Block(), [&] {
         auto* lhs = b.Add(ty.i32(), 1_i, 2_i);
         auto* rhs = b.Call(ty.i32(), fn_a, 3_i);
         auto* bin = b.Add(ty.i32(), lhs, rhs);
@@ -131,11 +131,11 @@ fn b() -> i32 {
 
 TEST_F(IRToProgramInliningTest, BinaryOpSequencedLHSThenSequencedRHS) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn_b = b.Function("b", ty.i32());
-    b.With(fn_b->Block(), [&] {
+    b.Append(fn_b->Block(), [&] {
         auto* lhs = b.Call(ty.i32(), fn_a, 1_i);
         auto* rhs = b.Call(ty.i32(), fn_a, 2_i);
         auto* bin = b.Add(ty.i32(), lhs, rhs);
@@ -155,11 +155,11 @@ fn b() -> i32 {
 
 TEST_F(IRToProgramInliningTest, BinaryOpUnsequencedRHSThenUnsequencedLHS) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn_b = b.Function("b", ty.i32());
-    b.With(fn_b->Block(), [&] {
+    b.Append(fn_b->Block(), [&] {
         auto* rhs = b.Add(ty.i32(), 3_i, 4_i);
         auto* lhs = b.Add(ty.i32(), 1_i, 2_i);
         auto* bin = b.Add(ty.i32(), lhs, rhs);
@@ -179,11 +179,11 @@ fn b() -> i32 {
 
 TEST_F(IRToProgramInliningTest, BinaryOpUnsequencedRHSThenSequencedLHS) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn_b = b.Function("b", ty.i32());
-    b.With(fn_b->Block(), [&] {
+    b.Append(fn_b->Block(), [&] {
         auto* rhs = b.Add(ty.i32(), 2_i, 3_i);
         auto* lhs = b.Call(ty.i32(), fn_a, 1_i);
         auto* bin = b.Add(ty.i32(), lhs, rhs);
@@ -203,11 +203,11 @@ fn b() -> i32 {
 
 TEST_F(IRToProgramInliningTest, BinaryOpSequencedRHSThenUnsequencedLHS) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn_b = b.Function("b", ty.i32());
-    b.With(fn_b->Block(), [&] {
+    b.Append(fn_b->Block(), [&] {
         auto* rhs = b.Call(ty.i32(), fn_a, 3_i);
         auto* lhs = b.Add(ty.i32(), 1_i, 2_i);
         auto* bin = b.Add(ty.i32(), lhs, rhs);
@@ -227,11 +227,11 @@ fn b() -> i32 {
 
 TEST_F(IRToProgramInliningTest, BinaryOpSequencedRHSThenSequencedLHS) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn_b = b.Function("b", ty.i32());
-    b.With(fn_b->Block(), [&] {
+    b.Append(fn_b->Block(), [&] {
         auto* rhs = b.Call(ty.i32(), fn_a, 2_i);
         auto* lhs = b.Call(ty.i32(), fn_a, 1_i);
         auto* bin = b.Add(ty.i32(), lhs, rhs);
@@ -255,16 +255,16 @@ fn b() -> i32 {
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramInliningTest, CallSequencedXYZ) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn_b = b.Function("b", ty.i32());
-    b.With(fn_b->Block(), [&] { b.Return(fn_b, 0_i); });
+    b.Append(fn_b->Block(), [&] { b.Return(fn_b, 0_i); });
     fn_b->SetParams(
         {b.FunctionParam(ty.i32()), b.FunctionParam(ty.i32()), b.FunctionParam(ty.i32())});
 
     auto* fn_c = b.Function("c", ty.i32());
-    b.With(fn_c->Block(), [&] {
+    b.Append(fn_c->Block(), [&] {
         auto* x = b.Call(ty.i32(), fn_a, 1_i);
         auto* y = b.Call(ty.i32(), fn_a, 2_i);
         auto* z = b.Call(ty.i32(), fn_a, 3_i);
@@ -289,16 +289,16 @@ fn c() -> i32 {
 
 TEST_F(IRToProgramInliningTest, CallSequencedYXZ) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn_b = b.Function("b", ty.i32());
-    b.With(fn_b->Block(), [&] { b.Return(fn_b, 0_i); });
+    b.Append(fn_b->Block(), [&] { b.Return(fn_b, 0_i); });
     fn_b->SetParams(
         {b.FunctionParam(ty.i32()), b.FunctionParam(ty.i32()), b.FunctionParam(ty.i32())});
 
     auto* fn_c = b.Function("c", ty.i32());
-    b.With(fn_c->Block(), [&] {
+    b.Append(fn_c->Block(), [&] {
         auto* y = b.Call(ty.i32(), fn_a, 2_i);
         auto* x = b.Call(ty.i32(), fn_a, 1_i);
         auto* z = b.Call(ty.i32(), fn_a, 3_i);
@@ -324,16 +324,16 @@ fn c() -> i32 {
 
 TEST_F(IRToProgramInliningTest, CallSequencedXZY) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn_b = b.Function("b", ty.i32());
-    b.With(fn_b->Block(), [&] { b.Return(fn_b, 0_i); });
+    b.Append(fn_b->Block(), [&] { b.Return(fn_b, 0_i); });
     fn_b->SetParams(
         {b.FunctionParam(ty.i32()), b.FunctionParam(ty.i32()), b.FunctionParam(ty.i32())});
 
     auto* fn_c = b.Function("c", ty.i32());
-    b.With(fn_c->Block(), [&] {
+    b.Append(fn_c->Block(), [&] {
         auto* x = b.Call(ty.i32(), fn_a, 1_i);
         auto* z = b.Call(ty.i32(), fn_a, 3_i);
         auto* y = b.Call(ty.i32(), fn_a, 2_i);
@@ -360,16 +360,16 @@ fn c() -> i32 {
 
 TEST_F(IRToProgramInliningTest, CallSequencedZXY) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn_b = b.Function("b", ty.i32());
-    b.With(fn_b->Block(), [&] { b.Return(fn_b, 0_i); });
+    b.Append(fn_b->Block(), [&] { b.Return(fn_b, 0_i); });
     fn_b->SetParams(
         {b.FunctionParam(ty.i32()), b.FunctionParam(ty.i32()), b.FunctionParam(ty.i32())});
 
     auto* fn_c = b.Function("c", ty.i32());
-    b.With(fn_c->Block(), [&] {
+    b.Append(fn_c->Block(), [&] {
         auto* z = b.Call(ty.i32(), fn_a, 3_i);
         auto* x = b.Call(ty.i32(), fn_a, 1_i);
         auto* y = b.Call(ty.i32(), fn_a, 2_i);
@@ -395,16 +395,16 @@ fn c() -> i32 {
 
 TEST_F(IRToProgramInliningTest, CallSequencedYZX) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn_b = b.Function("b", ty.i32());
-    b.With(fn_b->Block(), [&] { b.Return(fn_b, 0_i); });
+    b.Append(fn_b->Block(), [&] { b.Return(fn_b, 0_i); });
     fn_b->SetParams(
         {b.FunctionParam(ty.i32()), b.FunctionParam(ty.i32()), b.FunctionParam(ty.i32())});
 
     auto* fn_c = b.Function("c", ty.i32());
-    b.With(fn_c->Block(), [&] {
+    b.Append(fn_c->Block(), [&] {
         auto* y = b.Call(ty.i32(), fn_a, 2_i);
         auto* z = b.Call(ty.i32(), fn_a, 3_i);
         auto* x = b.Call(ty.i32(), fn_a, 1_i);
@@ -431,16 +431,16 @@ fn c() -> i32 {
 
 TEST_F(IRToProgramInliningTest, CallSequencedZYX) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 0_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn_b = b.Function("b", ty.i32());
-    b.With(fn_b->Block(), [&] { b.Return(fn_b, 0_i); });
+    b.Append(fn_b->Block(), [&] { b.Return(fn_b, 0_i); });
     fn_b->SetParams(
         {b.FunctionParam(ty.i32()), b.FunctionParam(ty.i32()), b.FunctionParam(ty.i32())});
 
     auto* fn_c = b.Function("c", ty.i32());
-    b.With(fn_c->Block(), [&] {
+    b.Append(fn_c->Block(), [&] {
         auto* z = b.Call(ty.i32(), fn_a, 3_i);
         auto* y = b.Call(ty.i32(), fn_a, 2_i);
         auto* x = b.Call(ty.i32(), fn_a, 1_i);
@@ -467,10 +467,10 @@ fn c() -> i32 {
 
 TEST_F(IRToProgramInliningTest, LoadVar_ThenCallVoidFn_ThenUseLoad) {
     auto* fn_a = b.Function("a", ty.void_());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a); });
 
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         b.Store(var, 1_i);
         auto* load = b.Load(var);
@@ -494,10 +494,10 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, LoadVar_ThenCallUnusedi32Fn_ThenUseLoad) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
 
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         b.Store(var, 1_i);
         auto* load = b.Load(var);
@@ -522,10 +522,10 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, LoadVar_ThenCalli32Fn_ThenUseLoadBeforeCall) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
 
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         b.Store(var, 1_i);
         auto* load = b.Load(var);
@@ -548,10 +548,10 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, LoadVar_ThenCalli32Fn_ThenUseCallBeforeLoad) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
 
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         b.Store(var, 1_i);
         auto* load = b.Load(var);
@@ -578,11 +578,11 @@ fn f() -> i32 {
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramInliningTest, Access_ArrayOfArrayOfArray_XYZ) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* arr = b.Var(ty.ptr<function, array<array<array<i32, 3>, 4>, 5>>());
         auto* x = b.Call(ty.i32(), fn_a, 1_i);
         auto* y = b.Call(ty.i32(), fn_a, 2_i);
@@ -605,11 +605,11 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, Access_ArrayOfArrayOfArray_YXZ) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* arr = b.Var(ty.ptr<function, array<array<array<i32, 3>, 4>, 5>>());
         auto* y = b.Call(ty.i32(), fn_a, 2_i);
         auto* x = b.Call(ty.i32(), fn_a, 1_i);
@@ -633,11 +633,11 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, Access_ArrayOfArrayOfArray_ZXY) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* arr = b.Var(ty.ptr<function, array<array<array<i32, 3>, 4>, 5>>());
         auto* z = b.Call(ty.i32(), fn_a, 3_i);
         auto* x = b.Call(ty.i32(), fn_a, 1_i);
@@ -661,11 +661,11 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, Access_ArrayOfArrayOfArray_ZYX) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* arr = b.Var(ty.ptr<function, array<array<array<i32, 3>, 4>, 5>>());
         auto* z = b.Call(ty.i32(), fn_a, 3_i);
         auto* y = b.Call(ty.i32(), fn_a, 2_i);
@@ -690,11 +690,11 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, Access_ArrayOfMat3x4f_XYZ) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn = b.Function("f", ty.f32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* arr = b.Construct(ty.array<mat3x4<f32>, 5>());
         auto* x = b.Call(ty.i32(), fn_a, 1_i);
         auto* y = b.Call(ty.i32(), fn_a, 2_i);
@@ -716,11 +716,11 @@ fn f() -> f32 {
 
 TEST_F(IRToProgramInliningTest, Access_ArrayOfMat3x4f_YXZ) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn = b.Function("f", ty.f32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* arr = b.Construct(ty.array<mat3x4<f32>, 5>());
         auto* y = b.Call(ty.i32(), fn_a, 2_i);
         auto* x = b.Call(ty.i32(), fn_a, 1_i);
@@ -744,11 +744,11 @@ fn f() -> f32 {
 
 TEST_F(IRToProgramInliningTest, Access_ArrayOfMat3x4f_ZXY) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn = b.Function("f", ty.f32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* arr = b.Construct(ty.array<mat3x4<f32>, 5>());
         auto* z = b.Call(ty.i32(), fn_a, 3_i);
         auto* x = b.Call(ty.i32(), fn_a, 1_i);
@@ -772,11 +772,11 @@ fn f() -> f32 {
 
 TEST_F(IRToProgramInliningTest, Access_ArrayOfMat3x4f_ZYX) {
     auto* fn_a = b.Function("a", ty.i32());
-    b.With(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
+    b.Append(fn_a->Block(), [&] { b.Return(fn_a, 1_i); });
     fn_a->SetParams({b.FunctionParam(ty.i32())});
 
     auto* fn = b.Function("f", ty.f32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* arr = b.Construct(ty.array<mat3x4<f32>, 5>());
         auto* z = b.Call(ty.i32(), fn_a, 3_i);
         auto* y = b.Call(ty.i32(), fn_a, 2_i);
@@ -804,10 +804,10 @@ fn f() -> f32 {
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramInliningTest, UnsequencedOutsideIf) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* v = b.Add(ty.i32(), 1_i, 2_i);
         auto* if_ = b.If(true);
-        b.With(if_->True(), [&] { b.Return(fn, v); });
+        b.Append(if_->True(), [&] { b.Return(fn, v); });
         b.Return(fn, 0_i);
     });
 
@@ -823,13 +823,13 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, SequencedOutsideIf) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         var->SetInitializer(b.Constant(1_i));
         auto* v_1 = b.Load(var);
         auto* v_2 = b.Add(ty.i32(), v_1, 2_i);
         auto* if_ = b.If(true);
-        b.With(if_->True(), [&] { b.Return(fn, v_2); });
+        b.Append(if_->True(), [&] { b.Return(fn, v_2); });
         b.Return(fn, 0_i);
     });
 
@@ -847,10 +847,10 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, UnsequencedUsedByIfCondition) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* v = b.Equal(ty.bool_(), 1_i, 2_i);
         auto* if_ = b.If(v);
-        b.With(if_->True(), [&] { b.Return(fn, 3_i); });
+        b.Append(if_->True(), [&] { b.Return(fn, 3_i); });
         b.Return(fn, 0_i);
     });
 
@@ -866,13 +866,13 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, SequencedUsedByIfCondition) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         var->SetInitializer(b.Constant(1_i));
         auto* v_1 = b.Load(var);
         auto* v_2 = b.Equal(ty.bool_(), v_1, 2_i);
         auto* if_ = b.If(v_2);
-        b.With(if_->True(), [&] { b.Return(fn, 3_i); });
+        b.Append(if_->True(), [&] { b.Return(fn, 3_i); });
         b.Return(fn, 0_i);
     });
 
@@ -889,12 +889,12 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, LoadVar_ThenWriteToVarInIf_ThenUseLoad) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         b.Store(var, 1_i);
         auto* load = b.Load(var);
         auto* if_ = b.If(true);
-        b.With(if_->True(), [&] {
+        b.Append(if_->True(), [&] {
             b.Store(var, 2_i);
             b.ExitIf(if_);
         });
@@ -919,11 +919,11 @@ fn f() -> i32 {
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramInliningTest, UnsequencedOutsideSwitch) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* v = b.Add(ty.i32(), 1_i, 2_i);
         auto* switch_ = b.Switch(3_i);
         auto* case_ = b.Case(switch_, {Switch::CaseSelector{}});
-        b.With(case_, [&] { b.Return(fn, v); });
+        b.Append(case_, [&] { b.Return(fn, v); });
         b.Return(fn, 0_i);
     });
 
@@ -941,14 +941,14 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, SequencedOutsideSwitch) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         var->SetInitializer(b.Constant(1_i));
         auto* v_1 = b.Load(var);
         auto* v_2 = b.Add(ty.i32(), v_1, 2_i);
         auto* switch_ = b.Switch(3_i);
         auto* case_ = b.Case(switch_, {Switch::CaseSelector{}});
-        b.With(case_, [&] { b.Return(fn, v_2); });
+        b.Append(case_, [&] { b.Return(fn, v_2); });
         b.Return(fn, 0_i);
     });
 
@@ -968,11 +968,11 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, UnsequencedUsedBySwitchCondition) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* v = b.Add(ty.i32(), 1_i, 2_i);
         auto* switch_ = b.Switch(v);
         auto* case_ = b.Case(switch_, {Switch::CaseSelector{}});
-        b.With(case_, [&] { b.Return(fn, 3_i); });
+        b.Append(case_, [&] { b.Return(fn, 3_i); });
         b.Return(fn, 0_i);
     });
 
@@ -990,13 +990,13 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, SequencedUsedBySwitchCondition) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         var->SetInitializer(b.Constant(1_i));
         auto* v_1 = b.Load(var);
         auto* switch_ = b.Switch(v_1);
         auto* case_ = b.Case(switch_, {Switch::CaseSelector{}});
-        b.With(case_, [&] { b.Return(fn, 3_i); });
+        b.Append(case_, [&] { b.Return(fn, 3_i); });
         b.Return(fn, 0_i);
     });
 
@@ -1015,13 +1015,13 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, LoadVar_ThenWriteToVarInSwitch_ThenUseLoad) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         b.Store(var, 1_i);
         auto* load = b.Load(var);
         auto* switch_ = b.Switch(1_i);
         auto* case_ = b.Case(switch_, {Switch::CaseSelector{}});
-        b.With(case_, [&] {
+        b.Append(case_, [&] {
             b.Store(var, 2_i);
             b.ExitSwitch(switch_);
         });
@@ -1048,15 +1048,15 @@ fn f() -> i32 {
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(IRToProgramInliningTest, UnsequencedOutsideLoopInitializer) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         auto* v = b.Add(ty.i32(), 1_i, 2_i);
         auto* loop = b.Loop();
-        b.With(loop->Initializer(), [&] {
+        b.Append(loop->Initializer(), [&] {
             b.Store(var, v);
             b.NextIteration(loop);
         });
-        b.With(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
         b.Return(fn, 0_i);
     });
 
@@ -1076,16 +1076,16 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, SequencedOutsideLoopInitializer) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         auto* v_1 = b.Load(var);
         auto* v_2 = b.Add(ty.i32(), v_1, 2_i);
         auto* loop = b.Loop();
-        b.With(loop->Initializer(), [&] {
+        b.Append(loop->Initializer(), [&] {
             b.Store(var, v_2);
             b.NextIteration(loop);
         });
-        b.With(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
         b.Return(fn, 0_i);
     });
 
@@ -1106,16 +1106,16 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, LoadVar_ThenWriteToVarInLoopInitializer_ThenUseLoad) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         b.Store(var, 1_i);
         auto* load = b.Load(var);
         auto* loop = b.Loop();
-        b.With(loop->Initializer(), [&] {
+        b.Append(loop->Initializer(), [&] {
             b.Store(var, 2_i);
             b.NextIteration(loop);
         });
-        b.With(loop->Body(), [&] { b.ExitLoop(loop); });
+        b.Append(loop->Body(), [&] { b.ExitLoop(loop); });
         b.Return(fn, load);
     });
 
@@ -1137,10 +1137,10 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, UnsequencedOutsideLoopBody) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* v = b.Add(ty.i32(), 1_i, 2_i);
         auto* loop = b.Loop();
-        b.With(loop->Body(), [&] { b.Return(fn, v); });
+        b.Append(loop->Body(), [&] { b.Return(fn, v); });
         b.Return(fn, 0_i);
     });
 
@@ -1156,12 +1156,12 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, SequencedOutsideLoopBody) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         auto* v_1 = b.Load(var);
         auto* v_2 = b.Add(ty.i32(), v_1, 2_i);
         auto* loop = b.Loop();
-        b.With(loop->Body(), [&] { b.Return(fn, v_2); });
+        b.Append(loop->Body(), [&] { b.Return(fn, v_2); });
         b.Return(fn, 0_i);
     });
 
@@ -1179,12 +1179,12 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, LoadVar_ThenWriteToVarInLoopBody_ThenUseLoad) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         b.Store(var, 1_i);
         auto* load = b.Load(var);
         auto* loop = b.Loop();
-        b.With(loop->Body(), [&] {
+        b.Append(loop->Body(), [&] {
             b.Store(var, 2_i);
             b.ExitLoop(loop);
         });
@@ -1207,11 +1207,11 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, UnsequencedOutsideLoopContinuing) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* v = b.Add(ty.i32(), 1_i, 2_i);
         auto* loop = b.Loop();
-        b.With(loop->Body(), [&] { b.Continue(loop); });
-        b.With(loop->Continuing(), [&] { b.BreakIf(loop, b.Equal(ty.bool_(), v, 3_i)); });
+        b.Append(loop->Body(), [&] { b.Continue(loop); });
+        b.Append(loop->Continuing(), [&] { b.BreakIf(loop, b.Equal(ty.bool_(), v, 3_i)); });
         b.Return(fn, 0_i);
     });
 
@@ -1230,13 +1230,13 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, SequencedOutsideLoopContinuing) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         auto* v_1 = b.Load(var);
         auto* v_2 = b.Add(ty.i32(), v_1, 2_i);
         auto* loop = b.Loop();
-        b.With(loop->Body(), [&] { b.Continue(loop); });
-        b.With(loop->Continuing(), [&] { b.BreakIf(loop, b.Equal(ty.bool_(), v_2, 3_i)); });
+        b.Append(loop->Body(), [&] { b.Continue(loop); });
+        b.Append(loop->Continuing(), [&] { b.BreakIf(loop, b.Equal(ty.bool_(), v_2, 3_i)); });
         b.Return(fn, 0_i);
     });
 
@@ -1257,13 +1257,13 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, LoadVar_ThenWriteToVarInLoopContinuing_ThenUseLoad) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         b.Store(var, 1_i);
         auto* load = b.Load(var);
         auto* loop = b.Loop();
-        b.With(loop->Body(), [&] { b.Continue(loop); });
-        b.With(loop->Continuing(), [&] {
+        b.Append(loop->Body(), [&] { b.Continue(loop); });
+        b.Append(loop->Continuing(), [&] {
             b.Store(var, 2_i);
             b.BreakIf(loop, true);
         });
@@ -1289,14 +1289,14 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, LoadVarInLoopInitializer_ThenReadAndWriteToVarInLoopBody) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         b.Store(var, 1_i);
         auto* loop = b.Loop();
-        b.With(loop->Initializer(), [&] {
+        b.Append(loop->Initializer(), [&] {
             auto* load = b.Load(var);
             b.NextIteration(loop);
-            b.With(loop->Body(), [&] {
+            b.Append(loop->Body(), [&] {
                 b.Store(var, b.Add(ty.i32(), load, 1_i));
                 b.ExitLoop(loop);
             });
@@ -1322,15 +1322,15 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, LoadVarInLoopInitializer_ThenReadAndWriteToVarInLoopContinuing) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         b.Store(var, 1_i);
         auto* loop = b.Loop();
-        b.With(loop->Initializer(), [&] {
+        b.Append(loop->Initializer(), [&] {
             auto* load = b.Load(var);
             b.NextIteration(loop);
-            b.With(loop->Body(), [&] { b.Continue(loop); });
-            b.With(loop->Continuing(), [&] {
+            b.Append(loop->Body(), [&] { b.Continue(loop); });
+            b.Append(loop->Continuing(), [&] {
                 b.Store(var, b.Add(ty.i32(), load, 1_i));
                 b.BreakIf(loop, true);
             });
@@ -1359,15 +1359,15 @@ fn f() -> i32 {
 
 TEST_F(IRToProgramInliningTest, LoadVarInLoopBody_ThenReadAndWriteToVarInLoopContinuing) {
     auto* fn = b.Function("f", ty.i32());
-    b.With(fn->Block(), [&] {
+    b.Append(fn->Block(), [&] {
         auto* var = b.Var(ty.ptr<function, i32>());
         b.Store(var, 1_i);
         auto* loop = b.Loop();
-        b.With(loop->Body(), [&] {
+        b.Append(loop->Body(), [&] {
             auto* load = b.Load(var);
             b.Continue(loop);
 
-            b.With(loop->Continuing(), [&] {
+            b.Append(loop->Continuing(), [&] {
                 b.Store(var, b.Add(ty.i32(), load, 1_i));
                 b.BreakIf(loop, true);
             });

@@ -31,9 +31,9 @@ TEST_F(SpirvWriterTest, Discard) {
     ep->SetParams({front_facing});
     ep->SetReturnLocation(0_u, {});
 
-    b.With(ep->Block(), [&] {
+    b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
-        b.With(ifelse->True(), [&] {  //
+        b.Append(ifelse->True(), [&] {  //
             b.Discard();
             b.ExitIf(ifelse);
         });

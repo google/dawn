@@ -24,7 +24,7 @@ using namespace tint::number_suffixes;        // NOLINT
 
 TEST_F(SpirvWriterTest, FunctionVar_NoInit) {
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         b.Var("v", ty.ptr<function, i32>());
         b.Return(func);
     });
@@ -35,7 +35,7 @@ TEST_F(SpirvWriterTest, FunctionVar_NoInit) {
 
 TEST_F(SpirvWriterTest, FunctionVar_WithInit) {
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* v = b.Var("v", ty.ptr<function, i32>());
         v->SetInitializer(b.Constant(42_i));
         b.Return(func);
@@ -48,9 +48,9 @@ TEST_F(SpirvWriterTest, FunctionVar_WithInit) {
 
 TEST_F(SpirvWriterTest, FunctionVar_DeclInsideBlock) {
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* i = b.If(true);
-        b.With(i->True(), [&] {
+        b.Append(i->True(), [&] {
             auto* v = b.Var("v", ty.ptr<function, i32>());
             v->SetInitializer(b.Constant(42_i));
             b.ExitIf(i);
@@ -76,7 +76,7 @@ TEST_F(SpirvWriterTest, FunctionVar_DeclInsideBlock) {
 
 TEST_F(SpirvWriterTest, FunctionVar_Load) {
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* v = b.Var("v", ty.ptr<function, i32>());
         auto* result = b.Load(v);
         b.Return(func);
@@ -90,7 +90,7 @@ TEST_F(SpirvWriterTest, FunctionVar_Load) {
 
 TEST_F(SpirvWriterTest, FunctionVar_Store) {
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* v = b.Var("v", ty.ptr<function, i32>());
         b.Store(v, 42_i);
         b.Return(func);
@@ -123,7 +123,7 @@ TEST_F(SpirvWriterTest, PrivateVar_LoadAndStore) {
     b.RootBlock()->Append(v);
 
     auto* func = b.Function("foo", ty.void_(), ir::Function::PipelineStage::kFragment);
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* load = b.Load(v);
         auto* add = b.Add(ty.i32(), load, 1_i);
         b.Store(v, add);
@@ -150,7 +150,7 @@ TEST_F(SpirvWriterTest, WorkgroupVar_LoadAndStore) {
 
     auto* func = b.Function("foo", ty.void_(), ir::Function::PipelineStage::kCompute,
                             std::array{1u, 1u, 1u});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* load = b.Load(v);
         auto* add = b.Add(ty.i32(), load, 1_i);
         b.Store(v, add);
@@ -200,7 +200,7 @@ TEST_F(SpirvWriterTest, StorageVar_LoadAndStore) {
 
     auto* func = b.Function("foo", ty.void_(), ir::Function::PipelineStage::kCompute,
                             std::array{1u, 1u, 1u});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* load = b.Load(v);
         auto* add = b.Add(ty.i32(), load, 1_i);
         b.Store(v, add);
@@ -244,7 +244,7 @@ TEST_F(SpirvWriterTest, UniformVar_Load) {
 
     auto* func = b.Function("foo", ty.void_(), ir::Function::PipelineStage::kCompute,
                             std::array{1u, 1u, 1u});
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* load = b.Load(v);
         b.Return(func);
         mod.SetName(load, "load");
@@ -277,7 +277,7 @@ TEST_F(SpirvWriterTest, PushConstantVar_Load) {
     b.RootBlock()->Append(v);
 
     auto* func = b.Function("foo", ty.i32());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* load = b.Load(v);
         b.Return(func, load);
         mod.SetName(load, "load");
@@ -316,7 +316,7 @@ TEST_F(SpirvWriterTest, SamplerVar_Load) {
     b.RootBlock()->Append(v);
 
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* load = b.Load(v);
         b.Return(func);
         mod.SetName(load, "load");
@@ -353,7 +353,7 @@ TEST_F(SpirvWriterTest, TextureVar_Load) {
     b.RootBlock()->Append(v);
 
     auto* func = b.Function("foo", ty.void_());
-    b.With(func->Block(), [&] {
+    b.Append(func->Block(), [&] {
         auto* load = b.Load(v);
         b.Return(func);
         mod.SetName(load, "load");
