@@ -1472,7 +1472,9 @@ if(TINT_BUILD_TESTS)
     list(APPEND TINT_TEST_SRCS
       lang/msl/writer/ast_printer/array_accessor_test.cc
       lang/msl/writer/ast_printer/assign_test.cc
+      lang/msl/writer/ast_printer/ast_function_test.cc
       lang/msl/writer/ast_printer/ast_printer_test.cc
+      lang/msl/writer/ast_printer/ast_type_test.cc
       lang/msl/writer/ast_printer/binary_test.cc
       lang/msl/writer/ast_printer/bitcast_test.cc
       lang/msl/writer/ast_printer/block_test.cc
@@ -1486,7 +1488,6 @@ if(TINT_BUILD_TESTS)
       lang/msl/writer/ast_printer/constructor_test.cc
       lang/msl/writer/ast_printer/continue_test.cc
       lang/msl/writer/ast_printer/discard_test.cc
-      lang/msl/writer/ast_printer/function_test.cc
       lang/msl/writer/ast_printer/identifier_test.cc
       lang/msl/writer/ast_printer/if_test.cc
       lang/msl/writer/ast_printer/import_test.cc
@@ -1496,10 +1497,9 @@ if(TINT_BUILD_TESTS)
       lang/msl/writer/ast_printer/return_test.cc
       lang/msl/writer/ast_printer/sanitizer_test.cc
       lang/msl/writer/ast_printer/switch_test.cc
-      lang/msl/writer/ast_printer/type_test.cc
+      lang/msl/writer/ast_printer/test_helper.h
       lang/msl/writer/ast_printer/unary_op_test.cc
       lang/msl/writer/ast_printer/variable_decl_statement_test.cc
-      lang/msl/writer/ast_printer/test_helper.h
       lang/msl/writer/printer_support_test.cc
     )
 
