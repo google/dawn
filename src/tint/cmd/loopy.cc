@@ -215,7 +215,7 @@ bool GenerateMsl(const tint::Program* program) {
         input_program = &*flattened;
     }
 
-    tint::writer::msl::Options gen_options;
+    tint::msl::writer::Options gen_options;
     gen_options.external_texture_options.bindings_map =
         tint::cmd::GenerateExternalTextureBindings(input_program);
     gen_options.array_length_from_uniform.ubo_binding = tint::BindingPoint{0, 30};
@@ -223,7 +223,7 @@ bool GenerateMsl(const tint::Program* program) {
                                                                           0);
     gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 1},
                                                                           1);
-    auto result = tint::writer::msl::Generate(input_program, gen_options);
+    auto result = tint::msl::writer::Generate(input_program, gen_options);
     if (!result.success) {
         tint::cmd::PrintWGSL(std::cerr, *program);
         std::cerr << "Failed to generate: " << result.error << std::endl;

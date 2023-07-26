@@ -22,7 +22,7 @@
 #include "src/tint/fuzzers/apply_substitute_overrides.h"
 #include "src/tint/lang/glsl/ast_writer/generator.h"
 #include "src/tint/lang/hlsl/ast_writer/generator.h"
-#include "src/tint/lang/msl/ast_writer/generator.h"
+#include "src/tint/lang/msl/writer/writer.h"
 #include "src/tint/lang/spirv/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
@@ -112,7 +112,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
                 case Writer::kMSL: {
                     // Remap resource numbers to a flat namespace.
                     if (auto flattened = tint::writer::FlattenBindings(&program)) {
-                        tint::writer::msl::Generate(&flattened.value(), {});
+                        tint::msl::writer::Generate(&flattened.value(), {});
                     }
                     break;
                 }

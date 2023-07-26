@@ -41,7 +41,7 @@ void GenerateWgslOptions(DataBuilder* b, writer::wgsl::Options* options);
 void GenerateHlslOptions(DataBuilder* b, writer::hlsl::Options* options);
 
 /// Generates random set of options for MSL generation
-void GenerateMslOptions(DataBuilder* b, writer::msl::Options* options);
+void GenerateMslOptions(DataBuilder* b, msl::writer::Options* options);
 
 /// Shader language the fuzzer is reading
 enum class InputFormat { kWGSL, kSpv };
@@ -115,7 +115,7 @@ class CommonFuzzer {
     void SetOptionsHlsl(const writer::hlsl::Options& options) { options_hlsl_ = options; }
 
     /// @param options MSL emission options
-    void SetOptionsMsl(const writer::msl::Options& options) { options_msl_ = options; }
+    void SetOptionsMsl(const msl::writer::Options& options) { options_msl_ = options; }
 
   private:
     InputFormat input_;
@@ -134,7 +134,7 @@ class CommonFuzzer {
     writer::spirv::Options options_spirv_;
     writer::wgsl::Options options_wgsl_;
     writer::hlsl::Options options_hlsl_;
-    writer::msl::Options options_msl_;
+    msl::writer::Options options_msl_;
 
 #if TINT_BUILD_WGSL_READER
     /// The source file needs to live at least as long as #diagnostics_

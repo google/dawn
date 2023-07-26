@@ -127,7 +127,7 @@ int main(int argc, const char** argv) {
             return fuzzer.Run(data.data(), data.size());
         }
         case TargetLanguage::kMsl: {
-            tint::writer::msl::Options options;
+            tint::msl::writer::Options options;
             GenerateMslOptions(&builder, &options);
             tint::fuzzers::CommonFuzzer fuzzer(tint::fuzzers::InputFormat::kWGSL,
                                                tint::fuzzers::OutputFormat::kMSL);

@@ -116,8 +116,8 @@ void GenerateHlslOptions(DataBuilder* b, writer::hlsl::Options* options) {
     *options = b->build<writer::hlsl::Options>();
 }
 
-void GenerateMslOptions(DataBuilder* b, writer::msl::Options* options) {
-    *options = b->build<writer::msl::Options>();
+void GenerateMslOptions(DataBuilder* b, msl::writer::Options* options) {
+    *options = b->build<msl::writer::Options>();
 }
 
 CommonFuzzer::CommonFuzzer(InputFormat input, OutputFormat output)
@@ -323,7 +323,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
                 input_program = &*flattened;
             }
 
-            writer::msl::Generate(input_program, options_msl_);
+            msl::writer::Generate(input_program, options_msl_);
 #endif  // TINT_BUILD_MSL_WRITER
             break;
         }
