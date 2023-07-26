@@ -15,7 +15,7 @@
 #include "src/tint/lang/core/ir/from_program.h"
 #include "src/tint/lang/core/ir/program_test_helper.h"
 #include "src/tint/lang/core/ir/to_program.h"
-#include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/text/string.h"
 
@@ -33,7 +33,7 @@ class IRToProgramRoundtripTest : public ProgramTestHelper {
     void Test(std::string_view input_wgsl, std::string_view expected_wgsl) {
         auto input = utils::TrimSpace(input_wgsl);
         Source::File file("test.wgsl", std::string(input));
-        auto input_program = reader::wgsl::Parse(&file);
+        auto input_program = wgsl::reader::Parse(&file);
         ASSERT_TRUE(input_program.IsValid()) << input_program.Diagnostics().str();
 
         auto ir_module = FromProgram(&input_program);

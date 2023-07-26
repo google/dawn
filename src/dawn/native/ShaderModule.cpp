@@ -301,7 +301,7 @@ EntryPointMetadata::Override::Type FromTintOverrideType(tint::inspector::Overrid
 ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,
                                        OwnedCompilationMessages* outMessages) {
 #if TINT_BUILD_WGSL_READER
-    tint::Program program = tint::reader::wgsl::Parse(file);
+    tint::Program program = tint::wgsl::reader::Parse(file);
     if (outMessages != nullptr) {
         DAWN_TRY(outMessages->AddMessages(program.Diagnostics()));
     }

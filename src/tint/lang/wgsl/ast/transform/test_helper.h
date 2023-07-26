@@ -23,7 +23,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
-#include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 
 namespace tint::ast::transform {
@@ -85,7 +85,7 @@ class TransformTestBase : public BASE {
     template <typename... TRANSFORMS>
     Output Run(std::string in, const DataMap& data = {}) {
         auto file = std::make_unique<Source::File>("test", in);
-        auto program = reader::wgsl::Parse(file.get());
+        auto program = wgsl::reader::Parse(file.get());
 
         // Keep this pointer alive after Transform() returns
         files_.emplace_back(std::move(file));
@@ -145,7 +145,7 @@ class TransformTestBase : public BASE {
     template <typename TRANSFORM>
     bool ShouldRun(std::string in, const DataMap& data = {}) {
         auto file = std::make_unique<Source::File>("test", in);
-        auto program = reader::wgsl::Parse(file.get());
+        auto program = wgsl::reader::Parse(file.get());
         return ShouldRun<TRANSFORM>(std::move(program), data);
     }
 

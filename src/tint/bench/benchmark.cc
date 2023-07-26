@@ -122,7 +122,7 @@ std::variant<ProgramAndFile, Error> LoadProgram(std::string name) {
         return *err;
     }
     auto file = std::make_unique<Source::File>(std::move(std::get<Source::File>(res)));
-    auto program = reader::wgsl::Parse(file.get());
+    auto program = wgsl::reader::Parse(file.get());
     if (program.Diagnostics().contains_errors()) {
         return Error{program.Diagnostics().str()};
     }

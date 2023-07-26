@@ -166,7 +166,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
             if (dump_input_) {
                 dump_input_data(str, ".wgsl");
             }
-            program = reader::wgsl::Parse(file_.get());
+            program = wgsl::reader::Parse(file_.get());
 #endif  // TINT_BUILD_WGSL_READER
             break;
         }

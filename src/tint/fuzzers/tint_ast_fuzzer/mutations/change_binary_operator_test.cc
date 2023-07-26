@@ -23,7 +23,7 @@
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutator.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/node_id_map.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
-#include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 
 namespace tint::fuzzers::ast_fuzzer {
@@ -80,7 +80,7 @@ TEST(ChangeBinaryOperatorTest, NotApplicable_Simple) {
     }
   )";
     Source::File file("test.wgsl", content);
-    auto program = reader::wgsl::Parse(&file);
+    auto program = wgsl::reader::Parse(&file);
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
     NodeIdMap node_id_map(program);
@@ -121,7 +121,7 @@ TEST(ChangeBinaryOperatorTest, Applicable_Simple) {
 }
 )";
     Source::File file("test.wgsl", shader);
-    auto program = reader::wgsl::Parse(&file);
+    auto program = wgsl::reader::Parse(&file);
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
     NodeIdMap node_id_map(program);
@@ -184,7 +184,7 @@ void CheckMutations(const std::string& lhs_type,
 
     for (auto new_operator : all_operators) {
         Source::File file("test.wgsl", shader.str());
-        auto program = reader::wgsl::Parse(&file);
+        auto program = wgsl::reader::Parse(&file);
         ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
         NodeIdMap node_id_map(program);
@@ -211,7 +211,7 @@ void CheckMutations(const std::string& lhs_type,
             ASSERT_FALSE(mutation.IsApplicable(program, node_id_map));
             if (new_operator != binary_expr->op) {
                 Source::File invalid_file("test.wgsl", expected_shader.str());
-                auto invalid_program = reader::wgsl::Parse(&invalid_file);
+                auto invalid_program = wgsl::reader::Parse(&invalid_file);
                 ASSERT_FALSE(invalid_program.IsValid()) << program.Diagnostics().str();
             }
         } else {

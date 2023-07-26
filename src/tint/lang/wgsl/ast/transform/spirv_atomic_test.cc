@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "src/tint/lang/wgsl/ast/transform/test_helper.h"
-#include "src/tint/lang/wgsl/reader/parser_impl.h"
+#include "src/tint/lang/wgsl/reader/parser/parser.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -31,7 +31,7 @@ class SpirvAtomicTest : public TransformTest {
   public:
     Output Run(std::string in) {
         auto file = std::make_unique<Source::File>("test", std::move(in));
-        auto parser = reader::wgsl::ParserImpl(file.get());
+        auto parser = wgsl::reader::Parser(file.get());
         parser.Parse();
 
         auto& b = parser.builder();

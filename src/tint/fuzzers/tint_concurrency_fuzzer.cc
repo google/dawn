@@ -26,7 +26,7 @@
 #include "src/tint/lang/spirv/writer/writer.h"
 #include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
-#include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/math/hash.h"
 
@@ -43,7 +43,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
     std::string str(reinterpret_cast<const char*>(data), size);
     auto file = std::make_unique<tint::Source::File>("test.wgsl", str);
-    auto program = tint::reader::wgsl::Parse(file.get());
+    auto program = tint::wgsl::reader::Parse(file.get());
     if (!program.IsValid()) {
         return 0;
     }

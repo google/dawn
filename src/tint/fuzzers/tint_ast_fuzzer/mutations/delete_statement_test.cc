@@ -29,7 +29,7 @@
 #include "src/tint/lang/wgsl/ast/if_statement.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
-#include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 
 namespace tint::fuzzers::ast_fuzzer {
@@ -40,10 +40,10 @@ void CheckStatementDeletionWorks(
     const std::string& expected,
     const std::function<const ast::Statement*(const Program&)>& statement_finder) {
     Source::File original_file("original.wgsl", original);
-    auto program = reader::wgsl::Parse(&original_file);
+    auto program = wgsl::reader::Parse(&original_file);
 
     Source::File expected_file("expected.wgsl", expected);
-    auto expected_program = reader::wgsl::Parse(&expected_file);
+    auto expected_program = wgsl::reader::Parse(&expected_file);
 
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
     ASSERT_TRUE(expected_program.IsValid()) << expected_program.Diagnostics().str();
@@ -68,7 +68,7 @@ void CheckStatementDeletionNotAllowed(
     const std::string& original,
     const std::function<const ast::Statement*(const Program&)>& statement_finder) {
     Source::File original_file("original.wgsl", original);
-    auto program = reader::wgsl::Parse(&original_file);
+    auto program = wgsl::reader::Parse(&original_file);
 
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 

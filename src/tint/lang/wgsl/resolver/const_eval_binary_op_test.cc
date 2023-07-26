@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/wgsl/resolver/const_eval_test.h"
 
-#include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/utils/result/result.h"
 
 using namespace tint::builtin::fluent_types;  // NOLINT
@@ -2162,7 +2162,7 @@ const result = (one == 0) && (1111111111111111111111111111111i == 0);
 )";
 
     auto file = std::make_unique<Source::File>("test", src);
-    auto program = reader::wgsl::Parse(file.get());
+    auto program = wgsl::reader::Parse(file.get());
     EXPECT_FALSE(program.IsValid());
 
     diag::Formatter::Style style;
@@ -2183,7 +2183,7 @@ const result = (one == 1) || (1111111111111111111111111111111i == 0);
 )";
 
     auto file = std::make_unique<Source::File>("test", src);
-    auto program = reader::wgsl::Parse(file.get());
+    auto program = wgsl::reader::Parse(file.get());
     EXPECT_FALSE(program.IsValid());
 
     diag::Formatter::Style style;
@@ -2393,7 +2393,7 @@ const one = 1;
 const result = )");
     src = src + expr + ";";
     auto file = std::make_unique<Source::File>("test", src);
-    auto program = reader::wgsl::Parse(file.get());
+    auto program = wgsl::reader::Parse(file.get());
 
     if (should_pass) {
         diag::Formatter::Style style;

@@ -22,7 +22,7 @@
 #include "src/tint/lang/wgsl/ast/expression.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 #include "src/tint/lang/wgsl/program/program.h"
-#include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/reader/reader.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 namespace {
@@ -34,7 +34,7 @@ TEST(ExpressionSizeTest, Basic) {
     }
   )";
     Source::File file("test.wgsl", content);
-    auto program = reader::wgsl::Parse(&file);
+    auto program = wgsl::reader::Parse(&file);
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
     ExpressionSize expression_size(program);

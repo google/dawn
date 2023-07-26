@@ -25,7 +25,7 @@
 #include "src/tint/lang/core/ir/from_program.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
-#include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/utils/text/string_stream.h"
 
 namespace tint::ir {
@@ -63,7 +63,7 @@ class ProgramTestHelperBase : public BASE, public ProgramBuilder {
     utils::Result<Module, std::string> Build(std::string wgsl) {
 #if TINT_BUILD_WGSL_READER
         Source::File file("test.wgsl", std::move(wgsl));
-        auto program = reader::wgsl::Parse(&file);
+        auto program = wgsl::reader::Parse(&file);
         if (!program.IsValid()) {
             return program.Diagnostics().str();
         }

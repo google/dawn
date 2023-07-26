@@ -18,7 +18,7 @@
 #include <utility>
 
 #include "src/tint/lang/wgsl/program/program_builder.h"
-#include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/resolver/uniformity.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -59,7 +59,7 @@ class UniformityAnalysisTestBase {
     /// @param should_pass true if `src` should pass the analysis, otherwise false
     void RunTest(std::string src, bool should_pass) {
         auto file = std::make_unique<Source::File>("test", src);
-        auto program = reader::wgsl::Parse(file.get());
+        auto program = wgsl::reader::Parse(file.get());
         return RunTest(std::move(program), should_pass);
     }
 

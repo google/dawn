@@ -580,7 +580,7 @@ bool GenerateWgsl(const tint::Program* program, const Options& options) {
     if (options.validate && options.skip_hash.count(hash) == 0) {
         // Attempt to re-parse the output program with Tint's WGSL reader.
         auto source = std::make_unique<tint::Source::File>(options.input_filename, result.wgsl);
-        auto reparsed_program = tint::reader::wgsl::Parse(source.get());
+        auto reparsed_program = tint::wgsl::reader::Parse(source.get());
         if (!reparsed_program.IsValid()) {
             auto diag_printer = tint::diag::Printer::create(stderr, true);
             tint::diag::Formatter diag_formatter;

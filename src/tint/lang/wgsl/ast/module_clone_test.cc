@@ -15,7 +15,7 @@
 #include <unordered_set>
 
 #include "gtest/gtest.h"
-#include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 
 namespace tint::ast {
@@ -122,7 +122,7 @@ const declaration_order_check_4 : i32 = 1;
 )");
 
     // Parse the wgsl, create the src program
-    auto src = reader::wgsl::Parse(&file);
+    auto src = wgsl::reader::Parse(&file);
 
     ASSERT_TRUE(src.IsValid()) << diag::Formatter().format(src.Diagnostics());
 

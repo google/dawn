@@ -16,7 +16,7 @@
 #include <string>
 #include <unordered_set>
 
-#include "src/tint/lang/wgsl/reader/parser_impl.h"
+#include "src/tint/lang/wgsl/reader/parser/parser.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 
 #define ASSERT_EQ(A, B)                                        \
@@ -54,7 +54,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     tint::Source::File file("test.wgsl", str);
 
     // Parse the wgsl, create the src program
-    tint::reader::wgsl::ParserImpl parser(&file);
+    tint::wgsl::reader::Parser parser(&file);
     parser.set_max_errors(1);
     if (!parser.Parse()) {
         return 0;

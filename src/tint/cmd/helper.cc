@@ -113,7 +113,7 @@ ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts) {
             }
             source_file = std::make_unique<tint::Source::File>(
                 opts.filename, std::string(data.begin(), data.end()));
-            program = std::make_unique<tint::Program>(tint::reader::wgsl::Parse(source_file.get()));
+            program = std::make_unique<tint::Program>(tint::wgsl::reader::Parse(source_file.get()));
             break;
 #else
             std::cerr << "Tint not built with the WGSL reader enabled" << std::endl;
