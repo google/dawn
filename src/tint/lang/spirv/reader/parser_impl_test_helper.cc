@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/lang/spirv/reader/parser_impl_test_helper.h"
-#include "src/tint/lang/wgsl/ast_writer/generator_impl.h"
+#include "src/tint/lang/wgsl/writer/ast_printer/ast_printer.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -36,7 +36,7 @@ ParserImplWrapperForTest::~ParserImplWrapperForTest() {
 }
 
 std::string ToString(const Program& program) {
-    writer::wgsl::GeneratorImpl writer(&program);
+    wgsl::writer::ASTPrinter writer(&program);
     writer.Generate();
 
     if (!writer.Diagnostics().empty()) {
@@ -46,7 +46,7 @@ std::string ToString(const Program& program) {
 }
 
 std::string ToString(const Program& program, utils::VectorRef<const ast::Statement*> stmts) {
-    writer::wgsl::GeneratorImpl writer(&program);
+    wgsl::writer::ASTPrinter writer(&program);
     for (const auto* stmt : stmts) {
         writer.EmitStatement(stmt);
     }
@@ -57,7 +57,7 @@ std::string ToString(const Program& program, utils::VectorRef<const ast::Stateme
 }
 
 std::string ToString(const Program& program, const ast::Node* node) {
-    writer::wgsl::GeneratorImpl writer(&program);
+    wgsl::writer::ASTPrinter writer(&program);
     return Switch(
         node,
         [&](const ast::Expression* expr) {

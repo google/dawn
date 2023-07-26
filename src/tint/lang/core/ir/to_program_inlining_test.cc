@@ -19,7 +19,7 @@
 #include "src/tint/lang/core/ir/to_program_test.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/matrix.h"
-#include "src/tint/lang/wgsl/ast_writer/generator.h"
+#include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/text/string.h"
 
 namespace tint::ir::test {

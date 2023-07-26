@@ -21,8 +21,8 @@
 #include "src/tint/fuzzers/tint_ast_fuzzer/override_cli_params.h"
 #include "src/tint/fuzzers/tint_common_fuzzer.h"
 #include "src/tint/fuzzers/transform_builder.h"
-#include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/writer/writer.h"
 #include "testing/libfuzzer/libfuzzer_exports.h"
 
 namespace tint::fuzzers::ast_fuzzer {
@@ -65,7 +65,7 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
         return 0;
     }
 
-    auto result = writer::wgsl::Generate(&program, writer::wgsl::Options());
+    auto result = wgsl::writer::Generate(&program, wgsl::writer::Options());
     if (!result.success) {
         std::cout << "Can't generate WGSL for a valid tint::Program:" << std::endl
                   << result.error << std::endl;

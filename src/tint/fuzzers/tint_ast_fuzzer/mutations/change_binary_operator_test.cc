@@ -22,9 +22,9 @@
 
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutator.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/node_id_map.h"
-#include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/writer/writer.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 namespace {
@@ -142,8 +142,8 @@ TEST(ChangeBinaryOperatorTest, Applicable_Simple) {
         &program, &node_id_map, nullptr));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
-    writer::wgsl::Options options;
-    auto result = writer::wgsl::Generate(&program, options);
+    wgsl::writer::Options options;
+    auto result = wgsl::writer::Generate(&program, options);
     ASSERT_TRUE(result.success) << result.error;
 
     std::string expected_shader = R"(fn main() {
@@ -219,8 +219,8 @@ void CheckMutations(const std::string& lhs_type,
                                            nullptr));
             ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
-            writer::wgsl::Options options;
-            auto result = writer::wgsl::Generate(&program, options);
+            wgsl::writer::Options options;
+            auto result = wgsl::writer::Generate(&program, options);
             ASSERT_TRUE(result.success) << result.error;
 
             ASSERT_EQ(expected_shader.str(), result.wgsl);

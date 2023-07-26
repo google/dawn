@@ -23,8 +23,8 @@
 #include "gtest/gtest.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
-#include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/writer/writer.h"
 
 namespace tint::ast::transform {
 
@@ -39,8 +39,8 @@ inline std::string str(const Program& program) {
         return diag::Formatter(style).format(program.Diagnostics());
     }
 
-    writer::wgsl::Options options;
-    auto result = writer::wgsl::Generate(&program, options);
+    wgsl::writer::Options options;
+    auto result = wgsl::writer::Generate(&program, options);
     if (!result.success) {
         return "WGSL writer failed:\n" + result.error;
     }

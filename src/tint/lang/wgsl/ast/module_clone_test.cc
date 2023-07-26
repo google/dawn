@@ -15,8 +15,8 @@
 #include <unordered_set>
 
 #include "gtest/gtest.h"
-#include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/writer/writer.h"
 
 namespace tint::ast {
 namespace {
@@ -153,10 +153,10 @@ const declaration_order_check_4 : i32 = 1;
     // Regenerate the wgsl for the src program. We use this instead of the
     // original source so that reformatting doesn't impact the final wgsl
     // comparison.
-    writer::wgsl::Options options;
+    wgsl::writer::Options options;
     std::string src_wgsl;
     {
-        auto result = writer::wgsl::Generate(&src, options);
+        auto result = wgsl::writer::Generate(&src, options);
         ASSERT_TRUE(result.success) << result.error;
         src_wgsl = result.wgsl;
 
@@ -169,7 +169,7 @@ const declaration_order_check_4 : i32 = 1;
     }
 
     // Print the dst module, check it matches the original source
-    auto result = writer::wgsl::Generate(&dst, options);
+    auto result = wgsl::writer::Generate(&dst, options);
     ASSERT_TRUE(result.success);
     auto dst_wgsl = result.wgsl;
     ASSERT_EQ(src_wgsl, dst_wgsl);

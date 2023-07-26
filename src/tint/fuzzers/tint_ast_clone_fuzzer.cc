@@ -16,8 +16,8 @@
 #include <string>
 #include <unordered_set>
 
-#include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/reader/parser_impl.h"
+#include "src/tint/lang/wgsl/writer/writer.h"
 
 #define ASSERT_EQ(A, B)                                        \
     do {                                                       \
@@ -90,9 +90,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     // original source so that reformatting doesn't impact the final wgsl
     // comparison.
     std::string src_wgsl;
-    tint::writer::wgsl::Options wgsl_options;
+    tint::wgsl::writer::Options wgsl_options;
     {
-        auto result = tint::writer::wgsl::Generate(&src, wgsl_options);
+        auto result = tint::wgsl::writer::Generate(&src, wgsl_options);
         ASSERT_TRUE(result.success);
         src_wgsl = result.wgsl;
 
@@ -105,7 +105,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     }
 
     // Print the dst program, check it matches the original source
-    auto result = tint::writer::wgsl::Generate(&dst, wgsl_options);
+    auto result = tint::wgsl::writer::Generate(&dst, wgsl_options);
     ASSERT_TRUE(result.success);
     auto dst_wgsl = result.wgsl;
     ASSERT_EQ(src_wgsl, dst_wgsl);

@@ -108,8 +108,8 @@ void GenerateSpirvOptions(DataBuilder* b, writer::spirv::Options* options) {
     *options = b->build<writer::spirv::Options>();
 }
 
-void GenerateWgslOptions(DataBuilder* b, writer::wgsl::Options* options) {
-    *options = b->build<writer::wgsl::Options>();
+void GenerateWgslOptions(DataBuilder* b, wgsl::writer::Options* options) {
+    *options = b->build<wgsl::writer::Options>();
 }
 
 void GenerateHlslOptions(DataBuilder* b, writer::hlsl::Options* options) {
@@ -130,7 +130,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 
 #if TINT_BUILD_WGSL_WRITER
     tint::Program::printer = [](const tint::Program* program) {
-        auto result = tint::writer::wgsl::Generate(program, {});
+        auto result = tint::wgsl::writer::Generate(program, {});
         if (!result.error.empty()) {
             return "error: " + result.error;
         }
@@ -290,7 +290,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     switch (output_) {
         case OutputFormat::kWGSL: {
 #if TINT_BUILD_WGSL_WRITER
-            writer::wgsl::Generate(&program, options_wgsl_);
+            wgsl::writer::Generate(&program, options_wgsl_);
 #endif  // TINT_BUILD_WGSL_WRITER
             break;
         }

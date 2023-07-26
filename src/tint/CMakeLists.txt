@@ -679,10 +679,14 @@ endif()
 
 if(${TINT_BUILD_WGSL_WRITER})
   list(APPEND TINT_LIB_SRCS
-    lang/wgsl/ast_writer/generator.cc
-    lang/wgsl/ast_writer/generator.h
-    lang/wgsl/ast_writer/generator_impl.cc
-    lang/wgsl/ast_writer/generator_impl.h
+    lang/wgsl/writer/options.cc
+    lang/wgsl/writer/options.h
+    lang/wgsl/writer/result.cc
+    lang/wgsl/writer/result.h
+    lang/wgsl/writer/writer.cc
+    lang/wgsl/writer/writer.h
+    lang/wgsl/writer/ast_printer/ast_printer.cc
+    lang/wgsl/writer/ast_printer/ast_printer.h
   )
 endif()
 
@@ -730,10 +734,8 @@ endif()
 
 if(${TINT_BUILD_SYNTAX_TREE_WRITER})
     list(APPEND TINT_LIB_SRCS
-      lang/wgsl/syntax_tree_writer/generator.cc
-      lang/wgsl/syntax_tree_writer/generator.h
-      lang/wgsl/syntax_tree_writer/generator_impl.cc
-      lang/wgsl/syntax_tree_writer/generator_impl.h
+      lang/wgsl/writer/syntax_tree_printer/syntax_tree_printer.cc
+      lang/wgsl/writer/syntax_tree_printer/syntax_tree_printer.h
     )
 endif()
 
@@ -1364,37 +1366,37 @@ if(TINT_BUILD_TESTS)
 
   if(${TINT_BUILD_WGSL_WRITER})
     list(APPEND TINT_TEST_SRCS
-      lang/wgsl/ast_writer/generator_impl_test.cc
-      lang/wgsl/ast_writer/generator_impl_alias_type_test.cc
-      lang/wgsl/ast_writer/generator_impl_array_accessor_test.cc
-      lang/wgsl/ast_writer/generator_impl_assign_test.cc
-      lang/wgsl/ast_writer/generator_impl_binary_test.cc
-      lang/wgsl/ast_writer/generator_impl_bitcast_test.cc
-      lang/wgsl/ast_writer/generator_impl_block_test.cc
-      lang/wgsl/ast_writer/generator_impl_break_test.cc
-      lang/wgsl/ast_writer/generator_impl_call_test.cc
-      lang/wgsl/ast_writer/generator_impl_case_test.cc
-      lang/wgsl/ast_writer/generator_impl_cast_test.cc
-      lang/wgsl/ast_writer/generator_impl_const_assert_test.cc
-      lang/wgsl/ast_writer/generator_impl_constructor_test.cc
-      lang/wgsl/ast_writer/generator_impl_continue_test.cc
-      lang/wgsl/ast_writer/generator_impl_diagnostic_test.cc
-      lang/wgsl/ast_writer/generator_impl_discard_test.cc
-      lang/wgsl/ast_writer/generator_impl_enable_test.cc
-      lang/wgsl/ast_writer/generator_impl_function_test.cc
-      lang/wgsl/ast_writer/generator_impl_global_decl_test.cc
-      lang/wgsl/ast_writer/generator_impl_identifier_test.cc
-      lang/wgsl/ast_writer/generator_impl_if_test.cc
-      lang/wgsl/ast_writer/generator_impl_loop_test.cc
-      lang/wgsl/ast_writer/generator_impl_literal_test.cc
-      lang/wgsl/ast_writer/generator_impl_member_accessor_test.cc
-      lang/wgsl/ast_writer/generator_impl_return_test.cc
-      lang/wgsl/ast_writer/generator_impl_switch_test.cc
-      lang/wgsl/ast_writer/generator_impl_type_test.cc
-      lang/wgsl/ast_writer/generator_impl_unary_op_test.cc
-      lang/wgsl/ast_writer/generator_impl_variable_decl_statement_test.cc
-      lang/wgsl/ast_writer/generator_impl_variable_test.cc
-      lang/wgsl/ast_writer/test_helper.h
+      lang/wgsl/writer/ast_printer/ast_printer_test.cc
+      lang/wgsl/writer/ast_printer/alias_type_test.cc
+      lang/wgsl/writer/ast_printer/array_accessor_test.cc
+      lang/wgsl/writer/ast_printer/assign_test.cc
+      lang/wgsl/writer/ast_printer/binary_test.cc
+      lang/wgsl/writer/ast_printer/bitcast_test.cc
+      lang/wgsl/writer/ast_printer/block_test.cc
+      lang/wgsl/writer/ast_printer/break_test.cc
+      lang/wgsl/writer/ast_printer/call_test.cc
+      lang/wgsl/writer/ast_printer/case_test.cc
+      lang/wgsl/writer/ast_printer/cast_test.cc
+      lang/wgsl/writer/ast_printer/const_assert_test.cc
+      lang/wgsl/writer/ast_printer/constructor_test.cc
+      lang/wgsl/writer/ast_printer/continue_test.cc
+      lang/wgsl/writer/ast_printer/diagnostic_test.cc
+      lang/wgsl/writer/ast_printer/discard_test.cc
+      lang/wgsl/writer/ast_printer/enable_test.cc
+      lang/wgsl/writer/ast_printer/function_test.cc
+      lang/wgsl/writer/ast_printer/global_decl_test.cc
+      lang/wgsl/writer/ast_printer/identifier_test.cc
+      lang/wgsl/writer/ast_printer/if_test.cc
+      lang/wgsl/writer/ast_printer/loop_test.cc
+      lang/wgsl/writer/ast_printer/literal_test.cc
+      lang/wgsl/writer/ast_printer/member_accessor_test.cc
+      lang/wgsl/writer/ast_printer/return_test.cc
+      lang/wgsl/writer/ast_printer/switch_test.cc
+      lang/wgsl/writer/ast_printer/type_test.cc
+      lang/wgsl/writer/ast_printer/unary_op_test.cc
+      lang/wgsl/writer/ast_printer/variable_decl_statement_test.cc
+      lang/wgsl/writer/ast_printer/variable_test.cc
+      lang/wgsl/writer/ast_printer/test_helper.h
     )
   endif()
 
@@ -1727,7 +1729,7 @@ if(TINT_BUILD_BENCHMARKS)
     list(APPEND TINT_BENCHMARK_SRCS lang/spirv/ast_writer/generator_bench.cc)
   endif()
   if (${TINT_BUILD_WGSL_WRITER})
-    list(APPEND TINT_BENCHMARK_SRCS lang/wgsl/ast_writer/generator_bench.cc)
+    list(APPEND TINT_BENCHMARK_SRCS lang/wgsl/writer/writer_bench.cc)
   endif()
 
   add_executable(tint-benchmark ${TINT_BENCHMARK_SRCS})

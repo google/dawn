@@ -15,8 +15,8 @@
 #include "src/tint/lang/core/ir/from_program.h"
 #include "src/tint/lang/core/ir/program_test_helper.h"
 #include "src/tint/lang/core/ir/to_program.h"
-#include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/text/string.h"
 
 #if !TINT_BUILD_WGSL_READER || !TINT_BUILD_WGSL_WRITER
@@ -53,7 +53,7 @@ class IRToProgramRoundtripTest : public ProgramTestHelper {
 
         ASSERT_TRUE(output_program.IsValid()) << output_program.Diagnostics().str();
 
-        auto output = writer::wgsl::Generate(&output_program, {});
+        auto output = wgsl::writer::Generate(&output_program, {});
         ASSERT_TRUE(output.success) << output.error;
 
         auto expected = expected_wgsl.empty() ? input : utils::TrimSpace(expected_wgsl);

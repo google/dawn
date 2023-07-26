@@ -29,11 +29,6 @@
 #include "glslang/Public/ShaderLang.h"
 #endif  // TINT_BUILD_GLSL_WRITER
 
-#if TINT_BUILD_SYNTAX_TREE_WRITER
-#include "src/tint/lang/wgsl/syntax_tree_writer/generator.h"  // nogncheck
-
-#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
-
 #if TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
@@ -566,8 +561,8 @@ bool GenerateSpirv(const tint::Program* program, const Options& options) {
 bool GenerateWgsl(const tint::Program* program, const Options& options) {
 #if TINT_BUILD_WGSL_WRITER
     // TODO(jrprice): Provide a way for the user to set non-default options.
-    tint::writer::wgsl::Options gen_options;
-    auto result = tint::writer::wgsl::Generate(program, gen_options);
+    tint::wgsl::writer::Options gen_options;
+    auto result = tint::wgsl::writer::Generate(program, gen_options);
     if (!result.success) {
         std::cerr << "Failed to generate: " << result.error << std::endl;
         return false;
@@ -910,7 +905,7 @@ int main(int argc, const char** argv) {
 
 #if TINT_BUILD_WGSL_WRITER
     tint::Program::printer = [](const tint::Program* program) {
-        auto result = tint::writer::wgsl::Generate(program, {});
+        auto result = tint::wgsl::writer::Generate(program, {});
         if (!result.error.empty()) {
             return "error: " + result.error;
         }
@@ -1033,12 +1028,13 @@ int main(int argc, const char** argv) {
 
 #if TINT_BUILD_SYNTAX_TREE_WRITER
     if (options.dump_ast) {
-        tint::writer::syntax_tree::Options gen_options;
-        auto result = tint::writer::syntax_tree::Generate(program.get(), gen_options);
+        tint::wgsl::writer::Options gen_options;
+        gen_options.use_syntax_tree_writer = true;
+        auto result = tint::wgsl::writer::Generate(program.get(), gen_options);
         if (!result.success) {
             std::cerr << "Failed to dump AST: " << result.error << std::endl;
         } else {
-            std::cout << result.ast << std::endl;
+            std::cout << result.wgsl << std::endl;
         }
     }
 #endif  // TINT_BUILD_SYNTAX_TREE_WRITER

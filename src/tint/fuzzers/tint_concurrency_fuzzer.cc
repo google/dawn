@@ -24,10 +24,10 @@
 #include "src/tint/lang/hlsl/ast_writer/generator.h"
 #include "src/tint/lang/msl/writer/writer.h"
 #include "src/tint/lang/spirv/ast_writer/generator.h"
-#include "src/tint/lang/wgsl/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
+#include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/math/hash.h"
 
 static constexpr size_t kNumThreads = 8;
@@ -82,7 +82,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
             switch (static_cast<Writer>(thread_idx % static_cast<size_t>(Writer::kCount))) {
 #if TINT_BUILD_WGSL_WRITER
                 case Writer::kWGSL: {
-                    tint::writer::wgsl::Generate(&program, {});
+                    tint::wgsl::writer::Generate(&program, {});
                     break;
                 }
 #endif  // TINT_BUILD_WGSL_WRITER

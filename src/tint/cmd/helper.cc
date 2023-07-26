@@ -86,8 +86,8 @@ void PrintBindings(tint::inspector::Inspector& inspector, const std::string& ep_
 
 void PrintWGSL(std::ostream& out, const tint::Program& program) {
 #if TINT_BUILD_WGSL_WRITER
-    tint::writer::wgsl::Options options;
-    auto result = tint::writer::wgsl::Generate(&program, options);
+    tint::wgsl::writer::Options options;
+    auto result = tint::wgsl::writer::Generate(&program, options);
     out << std::endl << result.wgsl << std::endl;
 #else
     (void)out;

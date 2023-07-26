@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/to_program.h"
 #include "src/tint/lang/core/ir/to_program_test.h"
-#include "src/tint/lang/wgsl/ast_writer/generator.h"
+#include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/text/string.h"
 
 namespace tint::ir::test {
@@ -39,7 +39,7 @@ IRToProgramTest::Result IRToProgramTest::Run() {
         return result;
     }
 
-    auto output = writer::wgsl::Generate(&output_program, {});
+    auto output = wgsl::writer::Generate(&output_program, {});
     if (!output.success) {
         std::stringstream ss;
         ss << "wgsl::Generate() errored: " << output.error;
