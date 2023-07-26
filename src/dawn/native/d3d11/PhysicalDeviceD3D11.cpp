@@ -233,7 +233,6 @@ void PhysicalDevice::SetupBackendAdapterToggles(TogglesState* adpterToggles) con
 void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) const {
     // D3D11 can only clear RTV with float values.
     deviceToggles->Default(Toggle::ApplyClearBigIntegerColorValueWithDraw, true);
-    // TODO(dawn:1848): Support depth-stencil texture write.
     deviceToggles->Default(Toggle::UseBlitForBufferToStencilTextureCopy, true);
 }
 

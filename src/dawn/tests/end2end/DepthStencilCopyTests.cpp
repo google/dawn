@@ -1278,9 +1278,6 @@ TEST_P(StencilCopyTests, CopyNonzeroMipThenReadWithStencilTest) {
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
-    // TODO(dawn:1848): support depth-stencil texture write on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
-
     // Create a stencil texture
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;

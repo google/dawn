@@ -794,8 +794,6 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
 TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndReadBySampling) {
     // Copies to a single aspect are unsupported on OpenGL.
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-    // TODO(dawn:1848): support depth-stencil texture write on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     for (wgpu::TextureFormat format :
          {wgpu::TextureFormat::Stencil8, wgpu::TextureFormat::Depth24PlusStencil8}) {
@@ -827,8 +825,6 @@ TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndReadBySampling) {
 TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndReadByCopy) {
     // Copies to a single aspect are unsupported on OpenGL.
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-    // TODO(dawn:1848): support depth-stencil texture write on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     for (wgpu::TextureFormat format :
          {wgpu::TextureFormat::Stencil8, wgpu::TextureFormat::Depth24PlusStencil8}) {
@@ -862,8 +858,6 @@ TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndReadByCopy) {
 TEST_P(TextureZeroInitTest, StencilCopyThenDiscardAndCopyToTextureThenReadByCopy) {
     // Copies to a single aspect are unsupported on OpenGL.
     DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-    // TODO(dawn:1848): support depth-stencil texture write on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     for (wgpu::TextureFormat format :
          {wgpu::TextureFormat::Stencil8, wgpu::TextureFormat::Depth24PlusStencil8}) {
