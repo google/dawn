@@ -112,8 +112,8 @@ void GenerateWgslOptions(DataBuilder* b, wgsl::writer::Options* options) {
     *options = b->build<wgsl::writer::Options>();
 }
 
-void GenerateHlslOptions(DataBuilder* b, writer::hlsl::Options* options) {
-    *options = b->build<writer::hlsl::Options>();
+void GenerateHlslOptions(DataBuilder* b, hlsl::writer::Options* options) {
+    *options = b->build<hlsl::writer::Options>();
 }
 
 void GenerateMslOptions(DataBuilder* b, msl::writer::Options* options) {
@@ -309,7 +309,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
         }
         case OutputFormat::kHLSL: {
 #if TINT_BUILD_HLSL_WRITER
-            writer::hlsl::Generate(&program, options_hlsl_);
+            hlsl::writer::Generate(&program, options_hlsl_);
 #endif  // TINT_BUILD_HLSL_WRITER
             break;
         }

@@ -243,10 +243,10 @@ bool GenerateMsl(const tint::Program* program) {
 /// @returns true on success
 bool GenerateHlsl(const tint::Program* program) {
 #if TINT_BUILD_HLSL_WRITER
-    tint::writer::hlsl::Options gen_options;
+    tint::hlsl::writer::Options gen_options;
     gen_options.external_texture_options.bindings_map =
         tint::cmd::GenerateExternalTextureBindings(program);
-    auto result = tint::writer::hlsl::Generate(program, gen_options);
+    auto result = tint::hlsl::writer::Generate(program, gen_options);
     if (!result.success) {
         tint::cmd::PrintWGSL(std::cerr, *program);
         std::cerr << "Failed to generate: " << result.error << std::endl;

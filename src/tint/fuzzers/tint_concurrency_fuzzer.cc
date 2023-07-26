@@ -21,7 +21,7 @@
 
 #include "src/tint/fuzzers/apply_substitute_overrides.h"
 #include "src/tint/lang/glsl/ast_writer/generator.h"
-#include "src/tint/lang/hlsl/ast_writer/generator.h"
+#include "src/tint/lang/hlsl/writer/writer.h"
 #include "src/tint/lang/msl/writer/writer.h"
 #include "src/tint/lang/spirv/ast_writer/generator.h"
 #include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
@@ -96,7 +96,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
 #if TINT_BUILD_HLSL_WRITER
                 case Writer::kHLSL: {
-                    tint::writer::hlsl::Generate(&program, {});
+                    tint::hlsl::writer::Generate(&program, {});
                     break;
                 }
 #endif  // TINT_BUILD_HLSL_WRITER

@@ -683,13 +683,13 @@ bool GenerateMsl(const tint::Program* program, const Options& options) {
 bool GenerateHlsl(const tint::Program* program, const Options& options) {
 #if TINT_BUILD_HLSL_WRITER
     // TODO(jrprice): Provide a way for the user to set non-default options.
-    tint::writer::hlsl::Options gen_options;
+    tint::hlsl::writer::Options gen_options;
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.external_texture_options.bindings_map =
         tint::cmd::GenerateExternalTextureBindings(program);
     gen_options.root_constant_binding_point = options.hlsl_root_constant_binding_point;
-    auto result = tint::writer::hlsl::Generate(program, gen_options);
+    auto result = tint::hlsl::writer::Generate(program, gen_options);
     if (!result.success) {
         tint::cmd::PrintWGSL(std::cerr, *program);
         std::cerr << "Failed to generate: " << result.error << std::endl;
