@@ -382,8 +382,8 @@ _os_arch_to_min_milestone = {
     "linux": 112,
     "mac": 112,
     "win": 112,
-    "android-arm": 112,
-    "android-arm64": 115,
+    "android-arm": None,
+    "android-arm64": None,
 }
 
 def chromium_dawn_tryjob(os, arch = None):
