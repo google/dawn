@@ -23,7 +23,7 @@
 #include "src/tint/lang/glsl/writer/writer.h"
 #include "src/tint/lang/hlsl/writer/writer.h"
 #include "src/tint/lang/msl/writer/writer.h"
-#include "src/tint/lang/spirv/ast_writer/generator.h"
+#include "src/tint/lang/spirv/writer/writer.h"
 #include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
 #include "src/tint/lang/wgsl/reader/parser.h"
@@ -89,7 +89,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
 #if TINT_BUILD_SPV_WRITER
                 case Writer::kSPIRV: {
-                    tint::writer::spirv::Generate(&program, {});
+                    tint::spirv::writer::Generate(&program, {});
                     break;
                 }
 #endif  // TINT_BUILD_SPV_WRITER

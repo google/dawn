@@ -502,7 +502,7 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
 bool GenerateSpirv(const tint::Program* program, const Options& options) {
 #if TINT_BUILD_SPV_WRITER
     // TODO(jrprice): Provide a way for the user to set non-default options.
-    tint::writer::spirv::Options gen_options;
+    tint::spirv::writer::Options gen_options;
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.external_texture_options.bindings_map =
@@ -510,7 +510,7 @@ bool GenerateSpirv(const tint::Program* program, const Options& options) {
 #if TINT_BUILD_IR
     gen_options.use_tint_ir = options.use_ir;
 #endif
-    auto result = tint::writer::spirv::Generate(program, gen_options);
+    auto result = tint::spirv::writer::Generate(program, gen_options);
     if (!result.success) {
         tint::cmd::PrintWGSL(std::cerr, *program);
         std::cerr << "Failed to generate: " << result.error << std::endl;

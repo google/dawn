@@ -24,10 +24,16 @@
 #include "spirv-tools/libspirv.hpp"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/lang/spirv/ast_writer/spv_dump.h"
-#include "src/tint/lang/spirv/writer/writer.h"
+#include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/matrix.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/storage_texture.h"
+#include "src/tint/lang/spirv/writer/printer/printer.h"
+#include "src/tint/lang/spirv/writer/spv_dump.h"
 
-namespace tint::writer::spirv {
+namespace tint::spirv::writer {
 
 // Helper macro to check whether the SPIR-V output contains an instruction, dumping the full output
 // if the instruction was not present.
@@ -77,7 +83,7 @@ class SpirvWriterTestHelperBase : public BASE {
 
   protected:
     /// The SPIR-V writer.
-    Writer writer_;
+    Printer writer_;
 
     /// Errors produced during codegen or SPIR-V validation.
     std::string err_;
@@ -91,7 +97,7 @@ class SpirvWriterTestHelperBase : public BASE {
     /// Run the specified writer on the IR module and validate the result.
     /// @param writer the writer to use for SPIR-V generation
     /// @returns true if generation and validation succeeded
-    bool Generate(Writer& writer) {
+    bool Generate(Printer& writer) {
         if (!writer.Generate()) {
             err_ = writer.Diagnostics().str();
             return false;
@@ -234,6 +240,6 @@ using SpirvWriterTest = SpirvWriterTestHelperBase<testing::Test>;
 template <typename T>
 using SpirvWriterTestWithParam = SpirvWriterTestHelperBase<testing::TestWithParam<T>>;
 
-}  // namespace tint::writer::spirv
+}  // namespace tint::spirv::writer
 
 #endif  // SRC_TINT_LANG_SPIRV_WRITER_TEST_HELPER_H_

@@ -20,7 +20,7 @@
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-namespace tint::writer::spirv {
+namespace tint::spirv::writer {
 namespace {
 
 TEST_F(SpirvWriterTest, AtomicAdd_Storage) {
@@ -270,4 +270,4 @@ TEST_F(SpirvWriterTest, AtomicXor) {
 }
 
 }  // namespace
-}  // namespace tint::writer::spirv
+}  // namespace tint::spirv::writer

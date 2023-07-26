@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/spirv/writer/test_helper.h"
 
-namespace tint::writer::spirv {
+namespace tint::spirv::writer {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -226,4 +226,4 @@ TEST_F(SpirvWriterTest, Constant_Deduplicate) {
 }
 
 }  // namespace
-}  // namespace tint::writer::spirv
+}  // namespace tint::spirv::writer

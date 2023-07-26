@@ -20,7 +20,7 @@
 using namespace tint::number_suffixes;        // NOLINT
 using namespace tint::builtin::fluent_types;  // NOLINT
 
-namespace tint::writer::spirv {
+namespace tint::spirv::writer {
 namespace {
 
 /// A parameterized builtin function test case.
@@ -1247,4 +1247,4 @@ TEST_F(SpirvWriterTest, Builtin_ArrayLength_WithStruct) {
 }
 
 }  // namespace
-}  // namespace tint::writer::spirv
+}  // namespace tint::spirv::writer

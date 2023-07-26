@@ -19,7 +19,7 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::writer::spirv {
+namespace tint::spirv::writer {
 namespace {
 
 enum TextureType {
@@ -1872,4 +1872,4 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          PrintCase);
 
 }  // namespace
-}  // namespace tint::writer::spirv
+}  // namespace tint::spirv::writer

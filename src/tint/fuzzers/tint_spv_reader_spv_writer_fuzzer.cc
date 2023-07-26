@@ -21,7 +21,7 @@ namespace tint::fuzzers {
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     DataBuilder db(data, size);
-    writer::spirv::Options options;
+    spirv::writer::Options options;
     GenerateSpirvOptions(&db, &options);
     tint::fuzzers::ReaderWriterFuzzer fuzzer(InputFormat::kSpv, OutputFormat::kSpv);
     fuzzer.SetOptionsSpirv(options);

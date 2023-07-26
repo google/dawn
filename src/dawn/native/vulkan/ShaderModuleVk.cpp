@@ -331,7 +331,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                                        program, remappedEntryPoint.c_str(), r.limits));
             }
 
-            tint::writer::spirv::Options options;
+            tint::spirv::writer::Options options;
             options.clamp_frag_depth = r.clampFragDepth;
             options.disable_robustness = !r.isRobustnessEnabled;
             options.emit_vertex_point_size = true;
@@ -345,8 +345,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                 r.disableRuntimeSizedArrayIndexClamping;
 
             TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General,
-                         "tint::writer::spirv::Generate()");
-            auto tintResult = tint::writer::spirv::Generate(&program, options);
+                         "tint::spirv::writer::Generate()");
+            auto tintResult = tint::spirv::writer::Generate(&program, options);
             DAWN_INVALID_IF(!tintResult.success, "An error occured while generating SPIR-V: %s.",
                             tintResult.error);
 

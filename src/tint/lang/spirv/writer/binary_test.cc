@@ -18,7 +18,7 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::writer::spirv {
+namespace tint::spirv::writer {
 namespace {
 
 /// A parameterized test case.
@@ -315,4 +315,4 @@ TEST_F(SpirvWriterTest, Binary_Chain) {
 }
 
 }  // namespace
-}  // namespace tint::writer::spirv
+}  // namespace tint::spirv::writer

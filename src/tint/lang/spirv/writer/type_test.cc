@@ -26,7 +26,7 @@
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/spirv/writer/test_helper.h"
 
-namespace tint::writer::spirv {
+namespace tint::spirv::writer {
 namespace {
 
 TEST_F(SpirvWriterTest, Type_Void) {
@@ -425,4 +425,4 @@ TEST_F(SpirvWriterTest, Type_Deduplicate) {
 }
 
 }  // namespace
-}  // namespace tint::writer::spirv
+}  // namespace tint::spirv::writer

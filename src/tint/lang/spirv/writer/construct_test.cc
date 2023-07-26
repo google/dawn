@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/spirv/writer/test_helper.h"
 
-namespace tint::writer::spirv {
+namespace tint::spirv::writer {
 namespace {
 
 using namespace tint::builtin::fluent_types;  // NOLINT
@@ -121,4 +121,4 @@ TEST_F(SpirvWriterTest, Construct_Vector_Identity) {
 }
 
 }  // namespace
-}  // namespace tint::writer::spirv
+}  // namespace tint::spirv::writer

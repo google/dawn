@@ -135,7 +135,7 @@ int main(int argc, const char** argv) {
             return fuzzer.Run(data.data(), data.size());
         }
         case TargetLanguage::kSpv: {
-            tint::writer::spirv::Options options;
+            tint::spirv::writer::Options options;
             GenerateSpirvOptions(&builder, &options);
             tint::fuzzers::CommonFuzzer fuzzer(tint::fuzzers::InputFormat::kWGSL,
                                                tint::fuzzers::OutputFormat::kSpv);

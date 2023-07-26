@@ -104,8 +104,8 @@ bool SPIRVToolsValidationCheck(const tint::Program& program, const std::vector<u
 
 }  // namespace
 
-void GenerateSpirvOptions(DataBuilder* b, writer::spirv::Options* options) {
-    *options = b->build<writer::spirv::Options>();
+void GenerateSpirvOptions(DataBuilder* b, spirv::writer::Options* options) {
+    *options = b->build<spirv::writer::Options>();
 }
 
 void GenerateWgslOptions(DataBuilder* b, wgsl::writer::Options* options) {
@@ -296,7 +296,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
         }
         case OutputFormat::kSpv: {
 #if TINT_BUILD_SPV_WRITER
-            auto result = writer::spirv::Generate(&program, options_spirv_);
+            auto result = spirv::writer::Generate(&program, options_spirv_);
             generated_spirv_ = std::move(result.spirv);
 
             if (!SPIRVToolsValidationCheck(program, generated_spirv_)) {

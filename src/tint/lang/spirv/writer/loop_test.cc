@@ -16,7 +16,7 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::writer::spirv {
+namespace tint::spirv::writer {
 namespace {
 
 TEST_F(SpirvWriterTest, Loop_BreakIf) {
@@ -428,4 +428,4 @@ TEST_F(SpirvWriterTest, Loop_Phi_MultipleValue) {
 }
 
 }  // namespace
-}  // namespace tint::writer::spirv
+}  // namespace tint::spirv::writer

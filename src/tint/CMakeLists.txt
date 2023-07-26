@@ -638,23 +638,23 @@ endif()
 
 if(${TINT_BUILD_SPV_WRITER})
   list(APPEND TINT_LIB_SRCS
-    lang/spirv/ast_writer/binary_writer.cc
-    lang/spirv/ast_writer/binary_writer.h
-    lang/spirv/ast_writer/builder.cc
-    lang/spirv/ast_writer/builder.h
-    lang/spirv/ast_writer/function.cc
-    lang/spirv/ast_writer/function.h
-    lang/spirv/ast_writer/generator.cc
-    lang/spirv/ast_writer/generator.h
-    lang/spirv/ast_writer/generator_impl.cc
-    lang/spirv/ast_writer/generator_impl.h
-    lang/spirv/ast_writer/instruction.cc
-    lang/spirv/ast_writer/instruction.h
-    lang/spirv/ast_writer/module.cc
-    lang/spirv/ast_writer/module.h
-    lang/spirv/ast_writer/operand.cc
-    lang/spirv/ast_writer/operand.h
-    lang/spirv/ast_writer/scalar_constant.h
+    lang/spirv/writer/binary_writer.cc
+    lang/spirv/writer/binary_writer.h
+    lang/spirv/writer/function.cc
+    lang/spirv/writer/function.h
+    lang/spirv/writer/instruction.cc
+    lang/spirv/writer/instruction.h
+    lang/spirv/writer/module.cc
+    lang/spirv/writer/module.h
+    lang/spirv/writer/operand.cc
+    lang/spirv/writer/operand.h
+    lang/spirv/writer/writer.cc
+    lang/spirv/writer/writer.h
+    lang/spirv/writer/ast_printer/builder.cc
+    lang/spirv/writer/ast_printer/builder.h
+    lang/spirv/writer/ast_printer/ast_printer.cc
+    lang/spirv/writer/ast_printer/ast_printer.h
+    lang/spirv/writer/ast_printer/scalar_constant.h
   )
 
   if(${TINT_BUILD_IR})
@@ -671,8 +671,8 @@ if(${TINT_BUILD_SPV_WRITER})
       lang/core/ir/transform/shader_io_spirv.h
       lang/core/ir/transform/var_for_dynamic_index.cc
       lang/core/ir/transform/var_for_dynamic_index.h
-      lang/spirv/writer/writer.cc
-      lang/spirv/writer/writer.h
+      lang/spirv/writer/printer/printer.cc
+      lang/spirv/writer/printer/printer.h
     )
   endif()
 endif()
@@ -1296,40 +1296,40 @@ if(TINT_BUILD_TESTS)
 
   if(${TINT_BUILD_SPV_WRITER})
     list(APPEND TINT_TEST_SRCS
-      lang/spirv/ast_writer/binary_writer_test.cc
-      lang/spirv/ast_writer/builder_accessor_expression_test.cc
-      lang/spirv/ast_writer/builder_assign_test.cc
-      lang/spirv/ast_writer/builder_binary_expression_test.cc
-      lang/spirv/ast_writer/builder_bitcast_expression_test.cc
-      lang/spirv/ast_writer/builder_block_test.cc
-      lang/spirv/ast_writer/builder_builtin_test.cc
-      lang/spirv/ast_writer/builder_builtin_texture_test.cc
-      lang/spirv/ast_writer/builder_call_test.cc
-      lang/spirv/ast_writer/builder_const_assert_test.cc
-      lang/spirv/ast_writer/builder_constructor_expression_test.cc
-      lang/spirv/ast_writer/builder_discard_test.cc
-      lang/spirv/ast_writer/builder_entry_point_test.cc
-      lang/spirv/ast_writer/builder_format_conversion_test.cc
-      lang/spirv/ast_writer/builder_function_attribute_test.cc
-      lang/spirv/ast_writer/builder_function_test.cc
-      lang/spirv/ast_writer/builder_function_variable_test.cc
-      lang/spirv/ast_writer/builder_global_variable_test.cc
-      lang/spirv/ast_writer/builder_ident_expression_test.cc
-      lang/spirv/ast_writer/builder_if_test.cc
-      lang/spirv/ast_writer/builder_literal_test.cc
-      lang/spirv/ast_writer/builder_loop_test.cc
-      lang/spirv/ast_writer/builder_return_test.cc
-      lang/spirv/ast_writer/builder_switch_test.cc
-      lang/spirv/ast_writer/builder_test.cc
-      lang/spirv/ast_writer/builder_type_test.cc
-      lang/spirv/ast_writer/builder_unary_op_expression_test.cc
-      lang/spirv/ast_writer/instruction_test.cc
-      lang/spirv/ast_writer/module_test.cc
-      lang/spirv/ast_writer/operand_test.cc
-      lang/spirv/ast_writer/scalar_constant_test.cc
-      lang/spirv/ast_writer/spv_dump.cc
-      lang/spirv/ast_writer/spv_dump.h
-      lang/spirv/ast_writer/test_helper.h
+      lang/spirv/writer/ast_printer/accessor_expression_test.cc
+      lang/spirv/writer/ast_printer/assign_test.cc
+      lang/spirv/writer/ast_printer/ast_builtin_test.cc
+      lang/spirv/writer/ast_printer/ast_discard_test.cc
+      lang/spirv/writer/ast_printer/ast_function_test.cc
+      lang/spirv/writer/ast_printer/ast_if_test.cc
+      lang/spirv/writer/ast_printer/ast_loop_test.cc
+      lang/spirv/writer/ast_printer/ast_printer_test.cc
+      lang/spirv/writer/ast_printer/ast_switch_test.cc
+      lang/spirv/writer/ast_printer/ast_type_test.cc
+      lang/spirv/writer/ast_printer/binary_expression_test.cc
+      lang/spirv/writer/ast_printer/bitcast_expression_test.cc
+      lang/spirv/writer/ast_printer/block_test.cc
+      lang/spirv/writer/ast_printer/builtin_texture_test.cc
+      lang/spirv/writer/ast_printer/call_test.cc
+      lang/spirv/writer/ast_printer/const_assert_test.cc
+      lang/spirv/writer/ast_printer/constructor_expression_test.cc
+      lang/spirv/writer/ast_printer/entry_point_test.cc
+      lang/spirv/writer/ast_printer/format_conversion_test.cc
+      lang/spirv/writer/ast_printer/function_attribute_test.cc
+      lang/spirv/writer/ast_printer/function_variable_test.cc
+      lang/spirv/writer/ast_printer/global_variable_test.cc
+      lang/spirv/writer/ast_printer/ident_expression_test.cc
+      lang/spirv/writer/ast_printer/literal_test.cc
+      lang/spirv/writer/ast_printer/return_test.cc
+      lang/spirv/writer/ast_printer/scalar_constant_test.cc
+      lang/spirv/writer/ast_printer/test_helper.h
+      lang/spirv/writer/ast_printer/unary_op_expression_test.cc
+      lang/spirv/writer/binary_writer_test.cc
+      lang/spirv/writer/instruction_test.cc
+      lang/spirv/writer/module_test.cc
+      lang/spirv/writer/operand_test.cc
+      lang/spirv/writer/spv_dump.cc
+      lang/spirv/writer/spv_dump.h
     )
 
     if(${TINT_BUILD_IR})
@@ -1733,7 +1733,7 @@ if(TINT_BUILD_BENCHMARKS)
     list(APPEND TINT_BENCHMARK_SRCS lang/msl/writer/writer_bench.cc)
   endif()
   if (${TINT_BUILD_SPV_WRITER})
-    list(APPEND TINT_BENCHMARK_SRCS lang/spirv/ast_writer/generator_bench.cc)
+    list(APPEND TINT_BENCHMARK_SRCS lang/spirv/writer/writer_bench.cc)
   endif()
   if (${TINT_BUILD_WGSL_WRITER})
     list(APPEND TINT_BENCHMARK_SRCS lang/wgsl/writer/writer_bench.cc)

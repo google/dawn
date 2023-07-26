@@ -16,7 +16,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint::writer::spirv {
+namespace tint::spirv::writer {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -76,4 +76,4 @@ TEST_F(SpirvWriterTest, Unreachable) {
 }
 
 }  // namespace
-}  // namespace tint::writer::spirv
+}  // namespace tint::spirv::writer

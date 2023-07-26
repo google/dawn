@@ -18,7 +18,7 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::writer::spirv {
+namespace tint::spirv::writer {
 namespace {
 
 /// A parameterized test case.
@@ -74,4 +74,4 @@ INSTANTIATE_TEST_SUITE_P(
                     UnaryTestCase{kF16, ir::Unary::Kind::kNegation, "OpFNegate", "half"}));
 
 }  // namespace
-}  // namespace tint::writer::spirv
+}  // namespace tint::spirv::writer

@@ -16,7 +16,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/spirv/writer/test_helper.h"
 
-namespace tint::writer::spirv {
+namespace tint::spirv::writer {
 namespace {
 
 using namespace tint::builtin::fluent_types;  // NOLINT
@@ -169,7 +169,7 @@ TEST_F(SpirvWriterTest, WorkgroupVar_ZeroInitializeWithExtension) {
     b.RootBlock()->Append(b.Var("v", ty.ptr<workgroup, i32>()));
 
     // Create a writer with the zero_init_workgroup_memory flag set to `true`.
-    spirv::Writer gen(&mod, true);
+    Printer gen(&mod, true);
     ASSERT_TRUE(Generate(gen)) << Error() << output_;
     EXPECT_INST("%4 = OpConstantNull %int");
     EXPECT_INST("%v = OpVariable %_ptr_Workgroup_int Workgroup %4");
@@ -364,4 +364,4 @@ TEST_F(SpirvWriterTest, TextureVar_Load) {
 }
 
 }  // namespace
-}  // namespace tint::writer::spirv
+}  // namespace tint::spirv::writer

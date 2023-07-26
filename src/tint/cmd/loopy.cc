@@ -165,10 +165,10 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
 /// @returns true on success
 bool GenerateSpirv(const tint::Program* program) {
 #if TINT_BUILD_SPV_WRITER
-    tint::writer::spirv::Options gen_options;
+    tint::spirv::writer::Options gen_options;
     gen_options.external_texture_options.bindings_map =
         tint::cmd::GenerateExternalTextureBindings(program);
-    auto result = tint::writer::spirv::Generate(program, gen_options);
+    auto result = tint::spirv::writer::Generate(program, gen_options);
     if (!result.success) {
         tint::cmd::PrintWGSL(std::cerr, *program);
         std::cerr << "Failed to generate: " << result.error << std::endl;
