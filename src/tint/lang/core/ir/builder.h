@@ -104,6 +104,9 @@ class Builder {
     /// If set, any created instruction will be auto-appended to the block.
     ir::Block* current_block_ = nullptr;
 
+    /// If set, any created instruction will be auto-inserted before this instruction.
+    ir::Instruction* current_insertion_point_ = nullptr;
+
   public:
     /// Constructor
     /// @param mod the ir::Module to wrap with this builder
@@ -126,16 +129,29 @@ class Builder {
     template <typename FUNCTION>
     void With(ir::Block* b, FUNCTION&& cb) {
         TINT_SCOPED_ASSIGNMENT(current_block_, b);
+        TINT_SCOPED_ASSIGNMENT(current_insertion_point_, nullptr);
         cb();
     }
 
-    /// Appends and returns the instruction @p val to the current block. If there is no current
-    /// block bound, then @p val is just returned.
+    /// Calls @p cb with the builder inserting before @p ip
+    /// @param ip the insertion point for new instructions
+    /// @param cb the function to call with the builder inserting new instructions before @p ip
+    template <typename FUNCTION>
+    void InsertBefore(ir::Instruction* ip, FUNCTION&& cb) {
+        TINT_SCOPED_ASSIGNMENT(current_block_, nullptr);
+        TINT_SCOPED_ASSIGNMENT(current_insertion_point_, ip);
+        cb();
+    }
+
+    /// Appends and returns the instruction @p val to the current insertion point. If there is no
+    /// current insertion point set, then @p val is just returned.
     /// @param val the instruction to append
     /// @returns the instruction
     template <typename T>
     T* Append(T* val) {
-        if (current_block_) {
+        if (current_insertion_point_) {
+            val->InsertBefore(current_insertion_point_);
+        } else if (current_block_) {
             current_block_->Append(val);
         }
         return val;

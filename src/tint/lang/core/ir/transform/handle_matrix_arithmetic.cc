@@ -76,13 +76,12 @@ void HandleMatrixArithmetic::Run(ir::Module* ir) const {
             auto* mat = ty->As<type::Matrix>();
             utils::Vector<Value*, 4> args;
             for (uint32_t col = 0; col < mat->columns(); col++) {
-                auto* lhs_col = b.Access(mat->ColumnType(), lhs, u32(col));
-                lhs_col->InsertBefore(binary);
-                auto* rhs_col = b.Access(mat->ColumnType(), rhs, u32(col));
-                rhs_col->InsertBefore(binary);
-                auto* add = b.Binary(op, mat->ColumnType(), lhs_col, rhs_col);
-                add->InsertBefore(binary);
-                args.Push(add->Result());
+                b.InsertBefore(binary, [&] {
+                    auto* lhs_col = b.Access(mat->ColumnType(), lhs, u32(col));
+                    auto* rhs_col = b.Access(mat->ColumnType(), rhs, u32(col));
+                    auto* add = b.Binary(op, mat->ColumnType(), lhs_col, rhs_col);
+                    args.Push(add->Result());
+                });
             }
             replace(b.Construct(ty, std::move(args)));
         };
@@ -128,11 +127,11 @@ void HandleMatrixArithmetic::Run(ir::Module* ir) const {
         // Extract and convert each column separately.
         utils::Vector<Value*, 4> args;
         for (uint32_t c = 0; c < out_mat->columns(); c++) {
-            auto* col = b.Access(in_mat->ColumnType(), arg, u32(c));
-            col->InsertBefore(convert);
-            auto* new_col = b.Convert(out_mat->ColumnType(), col);
-            new_col->InsertBefore(convert);
-            args.Push(new_col->Result());
+            b.InsertBefore(convert, [&] {
+                auto* col = b.Access(in_mat->ColumnType(), arg, u32(c));
+                auto* new_col = b.Convert(out_mat->ColumnType(), col);
+                args.Push(new_col->Result());
+            });
         }
 
         // Reconstruct the result matrix from the converted columns.

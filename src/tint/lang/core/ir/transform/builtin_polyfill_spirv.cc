@@ -308,18 +308,16 @@ struct BuiltinPolyfillSpirv::State {
             auto* vec = v1->Type()->As<type::Vector>();
             auto* elty = vec->type();
             for (uint32_t i = 0; i < vec->Width(); i++) {
-                auto* e1 = b.Access(elty, v1, u32(i));
-                e1->InsertBefore(builtin);
-                auto* e2 = b.Access(elty, v2, u32(i));
-                e2->InsertBefore(builtin);
-                auto* mul = b.Multiply(elty, e1, e2);
-                mul->InsertBefore(builtin);
-                if (sum) {
-                    sum = b.Add(elty, sum, mul);
-                    sum->InsertBefore(builtin);
-                } else {
-                    sum = mul;
-                }
+                b.InsertBefore(builtin, [&] {
+                    auto* e1 = b.Access(elty, v1, u32(i));
+                    auto* e2 = b.Access(elty, v2, u32(i));
+                    auto* mul = b.Multiply(elty, e1, e2);
+                    if (sum) {
+                        sum = b.Add(elty, sum, mul);
+                    } else {
+                        sum = mul;
+                    }
+                });
             }
             return sum->Result();
         }
