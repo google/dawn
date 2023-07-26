@@ -826,11 +826,11 @@ bool GenerateGlsl(const tint::Program* program, const Options& options) {
     }
 
     auto generate = [&](const tint::Program* prg, const std::string entry_point_name) -> bool {
-        tint::writer::glsl::Options gen_options;
+        tint::glsl::writer::Options gen_options;
         gen_options.disable_robustness = !options.enable_robustness;
         gen_options.external_texture_options.bindings_map =
             tint::cmd::GenerateExternalTextureBindings(prg);
-        auto result = tint::writer::glsl::Generate(prg, gen_options, entry_point_name);
+        auto result = tint::glsl::writer::Generate(prg, gen_options, entry_point_name);
         if (!result.success) {
             tint::cmd::PrintWGSL(std::cerr, *prg);
             std::cerr << "Failed to generate: " << result.error << std::endl;

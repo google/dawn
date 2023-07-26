@@ -20,7 +20,7 @@
 #include <thread>
 
 #include "src/tint/fuzzers/apply_substitute_overrides.h"
-#include "src/tint/lang/glsl/ast_writer/generator.h"
+#include "src/tint/lang/glsl/writer/writer.h"
 #include "src/tint/lang/hlsl/writer/writer.h"
 #include "src/tint/lang/msl/writer/writer.h"
 #include "src/tint/lang/spirv/ast_writer/generator.h"
@@ -103,7 +103,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
 #if TINT_BUILD_GLSL_WRITER
                 case Writer::kGLSL: {
-                    tint::writer::glsl::Generate(&program, {}, entry_point);
+                    tint::glsl::writer::Generate(&program, {}, entry_point);
                     break;
                 }
 #endif  // TINT_BUILD_GLSL_WRITER

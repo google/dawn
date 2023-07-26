@@ -266,10 +266,10 @@ bool GenerateHlsl(const tint::Program* program) {
 /// @returns true on success
 bool GenerateGlsl(const tint::Program* program) {
 #if TINT_BUILD_GLSL_WRITER
-    tint::writer::glsl::Options gen_options;
+    tint::glsl::writer::Options gen_options;
     gen_options.external_texture_options.bindings_map =
         tint::cmd::GenerateExternalTextureBindings(program);
-    auto result = tint::writer::glsl::Generate(program, gen_options, "");
+    auto result = tint::glsl::writer::Generate(program, gen_options, "");
     if (!result.success) {
         tint::cmd::PrintWGSL(std::cerr, *program);
         std::cerr << "Failed to generate: " << result.error << std::endl;

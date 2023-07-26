@@ -45,12 +45,12 @@ GLenum GLShaderType(SingleShaderStage stage) {
     UNREACHABLE();
 }
 
-tint::writer::glsl::Version::Standard ToTintGLStandard(opengl::OpenGLVersion::Standard standard) {
+tint::glsl::writer::Version::Standard ToTintGLStandard(opengl::OpenGLVersion::Standard standard) {
     switch (standard) {
         case opengl::OpenGLVersion::Standard::Desktop:
-            return tint::writer::glsl::Version::Standard::kDesktop;
+            return tint::glsl::writer::Version::Standard::kDesktop;
         case opengl::OpenGLVersion::Standard::ES:
-            return tint::writer::glsl::Version::Standard::kES;
+            return tint::glsl::writer::Version::Standard::kES;
     }
     UNREACHABLE();
 }
@@ -219,8 +219,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(const OpenGLFunctions& gl,
                                        program, r.entryPointName.c_str(), r.limits));
             }
 
-            tint::writer::glsl::Options tintOptions;
-            tintOptions.version = tint::writer::glsl::Version(ToTintGLStandard(r.glVersionStandard),
+            tint::glsl::writer::Options tintOptions;
+            tintOptions.version = tint::glsl::writer::Version(ToTintGLStandard(r.glVersionStandard),
                                                               r.glVersionMajor, r.glVersionMinor);
 
             // TODO(crbug.com/dawn/1686): Robustness causes shader compilation failures.
@@ -264,7 +264,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(const OpenGLFunctions& gl,
             tintOptions.binding_points = std::move(r.glBindings);
             tintOptions.allow_collisions = true;
 
-            auto result = tint::writer::glsl::Generate(&program, tintOptions, r.entryPointName);
+            auto result = tint::glsl::writer::Generate(&program, tintOptions, r.entryPointName);
             DAWN_INVALID_IF(!result.success, "An error occured while generating GLSL: %s.",
                             result.error);
 
