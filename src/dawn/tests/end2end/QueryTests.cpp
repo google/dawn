@@ -231,6 +231,9 @@ TEST_P(OcclusionQueryTests, QuerySetDestroy) {
 // zero indicates that no sample passed depth/stencil testing,
 // non-zero indicates that at least one sample passed depth/stencil testing.
 TEST_P(OcclusionQueryTests, QueryWithDepthStencilTest) {
+    // TODO(dawn:1870): D3D11_QUERY_OCCLUSION_PREDICATE doesn't work on Intel Gen12.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12());
+
     // Disable depth/stencil testing, the samples always pass the testing, the expected occlusion
     // result is non-zero.
     TestOcclusionQueryWithDepthStencilTest(false, false, OcclusionExpectation::Result::NonZero);
@@ -249,6 +252,9 @@ TEST_P(OcclusionQueryTests, QueryWithDepthStencilTest) {
 // zero indicates that no sample passed scissor testing,
 // non-zero indicates that at least one sample passed scissor testing.
 TEST_P(OcclusionQueryTests, QueryWithScissorTest) {
+    // TODO(dawn:1870): D3D11_QUERY_OCCLUSION_PREDICATE doesn't work on Intel Gen12.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12());
+
     // Test there are samples passed scissor testing, the expected occlusion result is non-zero.
     TestOcclusionQueryWithScissorTest({2, 1, 2, 1}, OcclusionExpectation::Result::NonZero);
 
@@ -369,6 +375,9 @@ TEST_P(OcclusionQueryTests, ResolveWithoutWritten) {
 
 // Test setting an occlusion query to non-zero, then rewriting it without drawing, resolves to 0.
 TEST_P(OcclusionQueryTests, RewriteNoDrawToZero) {
+    // TODO(dawn:1870): D3D11_QUERY_OCCLUSION_PREDICATE doesn't work on Intel Gen12.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12());
+
     constexpr uint32_t kQueryCount = 1;
 
     wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
@@ -407,6 +416,9 @@ TEST_P(OcclusionQueryTests, RewriteNoDrawToZero) {
 // Test setting an occlusion query to non-zero, then rewriting it without drawing, resolves to 0.
 // Do the two queries+resolves in separate submits.
 TEST_P(OcclusionQueryTests, RewriteNoDrawToZeroSeparateSubmit) {
+    // TODO(dawn:1870): D3D11_QUERY_OCCLUSION_PREDICATE doesn't work on Intel Gen12.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12());
+
     constexpr uint32_t kQueryCount = 1;
 
     wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
@@ -447,6 +459,9 @@ TEST_P(OcclusionQueryTests, RewriteNoDrawToZeroSeparateSubmit) {
 // Test that resetting an occlusion query to zero works when a draw is done where all primitives
 // fail the depth test.
 TEST_P(OcclusionQueryTests, RewriteToZeroWithDraw) {
+    // TODO(dawn:1870): D3D11_QUERY_OCCLUSION_PREDICATE doesn't work on Intel Gen12.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12());
+
     constexpr uint32_t kQueryCount = 1;
 
     utils::ComboRenderPipelineDescriptor descriptor;

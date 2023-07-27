@@ -536,6 +536,9 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapOnWholeTexture) {
 
 // Test sampling from a cube map texture view that covers a sub part of a 2D array texture.
 TEST_P(TextureViewSamplingTest, TextureCubeMapViewOnPartOfTexture) {
+    // TODO(dawn:1935): Total layers have to be at least 12 on Intel D3D11 Gen12.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntelGen12());
+
     TextureCubeMapTest(10, 2, 6, false);
 }
 
