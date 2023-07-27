@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_CORE_IR_PROGRAM_TEST_HELPER_H_
-#define SRC_TINT_LANG_CORE_IR_PROGRAM_TEST_HELPER_H_
+#ifndef SRC_TINT_LANG_WGSL_HELPERS_IR_PROGRAM_TEST_H_
+#define SRC_TINT_LANG_WGSL_HELPERS_IR_PROGRAM_TEST_H_
 
 #include <memory>
 #include <string>
@@ -28,18 +28,18 @@
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::ir {
+namespace tint::wgsl::helpers {
 
-/// Helper class for testing
+/// Helper class for testing IR with an input WGSL program.
 template <typename BASE>
-class ProgramTestHelperBase : public BASE, public ProgramBuilder {
+class IRProgramTestBase : public BASE, public ProgramBuilder {
   public:
-    ProgramTestHelperBase() = default;
-    ~ProgramTestHelperBase() override = default;
+    IRProgramTestBase() = default;
+    ~IRProgramTestBase() override = default;
 
     /// Build the module, cleaning up the program before returning.
     /// @returns the generated module
-    utils::Result<Module, std::string> Build() {
+    utils::Result<ir::Module, std::string> Build() {
         SetResolveOnBuild(true);
 
         Program program{std::move(*this)};
@@ -60,7 +60,7 @@ class ProgramTestHelperBase : public BASE, public ProgramBuilder {
     /// Build the module from the given WGSL.
     /// @param wgsl the WGSL to convert to IR
     /// @returns the generated module
-    utils::Result<Module, std::string> Build(std::string wgsl) {
+    utils::Result<ir::Module, std::string> Build(std::string wgsl) {
 #if TINT_BUILD_WGSL_READER
         Source::File file("test.wgsl", std::move(wgsl));
         auto program = wgsl::reader::Parse(&file);
@@ -83,17 +83,17 @@ class ProgramTestHelperBase : public BASE, public ProgramBuilder {
 
     /// @param mod the module
     /// @returns the disassembly string of the module
-    std::string Disassemble(Module& mod) {
-        Disassembler d(mod);
+    std::string Disassemble(ir::Module& mod) {
+        ir::Disassembler d(mod);
         return d.Disassemble();
     }
 };
 
-using ProgramTestHelper = ProgramTestHelperBase<testing::Test>;
+using IRProgramTest = IRProgramTestBase<testing::Test>;
 
 template <typename T>
-using ProgramTestParamHelper = ProgramTestHelperBase<testing::TestWithParam<T>>;
+using IRProgramTestParam = IRProgramTestBase<testing::TestWithParam<T>>;
 
-}  // namespace tint::ir
+}  // namespace tint::wgsl::helpers
 
-#endif  // SRC_TINT_LANG_CORE_IR_PROGRAM_TEST_HELPER_H_
+#endif  // SRC_TINT_LANG_WGSL_HELPERS_IR_PROGRAM_TEST_H_

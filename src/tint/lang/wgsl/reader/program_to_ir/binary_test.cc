@@ -14,16 +14,16 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/lang/core/constant/scalar.h"
-#include "src/tint/lang/core/ir/program_test_helper.h"
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
+#include "src/tint/lang/wgsl/helpers/ir_program_test.h"
 
 namespace tint::wgsl::reader {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using ProgramToIRBinaryTest = ir::ProgramTestHelper;
+using ProgramToIRBinaryTest = helpers::IRProgramTest;
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Add) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});

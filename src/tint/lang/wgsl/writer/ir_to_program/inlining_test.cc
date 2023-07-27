@@ -15,14 +15,14 @@
 #include <string>
 
 #include "src/tint/lang/core/ir/disassembler.h"
-#include "src/tint/lang/core/ir/to_program.h"
-#include "src/tint/lang/core/ir/to_program_test.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/matrix.h"
+#include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
+#include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program_test.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/text/string.h"
 
-namespace tint::ir::test {
+namespace tint::wgsl::writer {
 namespace {
 
 using namespace tint::number_suffixes;        // NOLINT
@@ -922,7 +922,7 @@ TEST_F(IRToProgramInliningTest, UnsequencedOutsideSwitch) {
     b.Append(fn->Block(), [&] {
         auto* v = b.Add(ty.i32(), 1_i, 2_i);
         auto* switch_ = b.Switch(3_i);
-        auto* case_ = b.Case(switch_, {Switch::CaseSelector{}});
+        auto* case_ = b.Case(switch_, {ir::Switch::CaseSelector{}});
         b.Append(case_, [&] { b.Return(fn, v); });
         b.Return(fn, 0_i);
     });
@@ -947,7 +947,7 @@ TEST_F(IRToProgramInliningTest, SequencedOutsideSwitch) {
         auto* v_1 = b.Load(var);
         auto* v_2 = b.Add(ty.i32(), v_1, 2_i);
         auto* switch_ = b.Switch(3_i);
-        auto* case_ = b.Case(switch_, {Switch::CaseSelector{}});
+        auto* case_ = b.Case(switch_, {ir::Switch::CaseSelector{}});
         b.Append(case_, [&] { b.Return(fn, v_2); });
         b.Return(fn, 0_i);
     });
@@ -971,7 +971,7 @@ TEST_F(IRToProgramInliningTest, UnsequencedUsedBySwitchCondition) {
     b.Append(fn->Block(), [&] {
         auto* v = b.Add(ty.i32(), 1_i, 2_i);
         auto* switch_ = b.Switch(v);
-        auto* case_ = b.Case(switch_, {Switch::CaseSelector{}});
+        auto* case_ = b.Case(switch_, {ir::Switch::CaseSelector{}});
         b.Append(case_, [&] { b.Return(fn, 3_i); });
         b.Return(fn, 0_i);
     });
@@ -995,7 +995,7 @@ TEST_F(IRToProgramInliningTest, SequencedUsedBySwitchCondition) {
         var->SetInitializer(b.Constant(1_i));
         auto* v_1 = b.Load(var);
         auto* switch_ = b.Switch(v_1);
-        auto* case_ = b.Case(switch_, {Switch::CaseSelector{}});
+        auto* case_ = b.Case(switch_, {ir::Switch::CaseSelector{}});
         b.Append(case_, [&] { b.Return(fn, 3_i); });
         b.Return(fn, 0_i);
     });
@@ -1020,7 +1020,7 @@ TEST_F(IRToProgramInliningTest, LoadVar_ThenWriteToVarInSwitch_ThenUseLoad) {
         b.Store(var, 1_i);
         auto* load = b.Load(var);
         auto* switch_ = b.Switch(1_i);
-        auto* case_ = b.Case(switch_, {Switch::CaseSelector{}});
+        auto* case_ = b.Case(switch_, {ir::Switch::CaseSelector{}});
         b.Append(case_, [&] {
             b.Store(var, 2_i);
             b.ExitSwitch(switch_);
@@ -1393,4 +1393,4 @@ fn f() -> i32 {
 }
 
 }  // namespace
-}  // namespace tint::ir::test
+}  // namespace tint::wgsl::writer

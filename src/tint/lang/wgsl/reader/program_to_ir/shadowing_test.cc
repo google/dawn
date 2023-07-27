@@ -16,18 +16,18 @@
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/constant.h"
-#include "src/tint/lang/core/ir/program_test_helper.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
+#include "src/tint/lang/wgsl/helpers/ir_program_test.h"
 
-namespace tint::ir {
+namespace tint::wgsl {
 namespace {
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-using ProgramToIRShadowingTest = ProgramTestHelper;
+using ProgramToIRShadowingTest = helpers::IRProgramTest;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Shadowing tests
@@ -807,4 +807,4 @@ fn f() -> i32 {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::wgsl

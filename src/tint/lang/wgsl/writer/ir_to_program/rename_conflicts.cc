@@ -22,12 +22,12 @@
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
-#include "src/tint/lang/core/ir/transform/rename_conflicts_wgsl.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/scalar.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/vector.h"
+#include "src/tint/lang/wgsl/writer/ir_to_program/rename_conflicts.h"
 #include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/containers/reverse.h"
 #include "src/tint/utils/containers/scope_stack.h"
@@ -35,15 +35,15 @@
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::RenameConflictsWGSL);
+TINT_INSTANTIATE_TYPEINFO(tint::wgsl::writer::RenameConflicts);
 
-namespace tint::ir::transform {
+namespace tint::wgsl::writer {
 
 /// PIMPL state for the transform, for a single function.
-struct RenameConflictsWGSL::State {
+struct RenameConflicts::State {
     /// Constructor
     /// @param i the IR module
-    explicit State(Module* i) : ir(i) {}
+    explicit State(ir::Module* i) : ir(i) {}
 
     /// Processes the module, renaming all declarations that would prevent an identifier resolving
     /// to the correct declaration.
@@ -80,7 +80,7 @@ struct RenameConflictsWGSL::State {
     using Scope = utils::Hashmap<std::string_view, CastableBase*, 8>;
 
     /// The IR module.
-    Module* ir = nullptr;
+    ir::Module* ir = nullptr;
 
     /// Stack of scopes
     utils::Vector<Scope, 8> scopes{};
@@ -118,7 +118,7 @@ struct RenameConflictsWGSL::State {
     }
 
     /// Processes the instructions of the block
-    void Process(Block* block) {
+    void Process(ir::Block* block) {
         for (auto* inst : *block) {
             Process(inst);
         }
@@ -126,7 +126,7 @@ struct RenameConflictsWGSL::State {
 
     /// Processes an instruction, ensuring that all identifier references resolve to the correct
     /// declaration. This may involve renaming of declarations in the outer scopes.
-    void Process(Instruction* inst) {
+    void Process(ir::Instruction* inst) {
         // Check resolving of operands
         for (auto* operand : inst->Operands()) {
             if (operand) {
@@ -135,7 +135,7 @@ struct RenameConflictsWGSL::State {
                     EnsureResolvesTo(symbol.NameView(), operand);
                 }
                 // If the operand is a constant, then ensure that type name can be resolved.
-                if (auto* c = operand->As<Constant>()) {
+                if (auto* c = operand->As<ir::Constant>()) {
                     EnsureResolvable(c->Type());
                 }
             }
@@ -143,7 +143,7 @@ struct RenameConflictsWGSL::State {
 
         Switch(
             inst,  //
-            [&](Loop* loop) {
+            [&](ir::Loop* loop) {
                 // Initializer's scope encompasses the body and continuing
                 scopes.Push(Scope{});
                 TINT_DEFER(scopes.Pop());
@@ -160,23 +160,23 @@ struct RenameConflictsWGSL::State {
                     }
                 }
             },
-            [&](ControlInstruction* ctrl) {
+            [&](ir::ControlInstruction* ctrl) {
                 // Traverse into the control instruction's blocks
-                ctrl->ForeachBlock([&](Block* block) {
+                ctrl->ForeachBlock([&](ir::Block* block) {
                     scopes.Push(Scope{});
                     TINT_DEFER(scopes.Pop());
                     Process(block);
                 });
             },
-            [&](Var*) {
+            [&](ir::Var*) {
                 // Ensure the var's type is resolvable
                 EnsureResolvable(inst->Result()->Type());
             },
-            [&](Construct*) {
+            [&](ir::Construct*) {
                 // Ensure the type of a type constructor is resolvable
                 EnsureResolvable(inst->Result()->Type());
             },
-            [&](CoreBuiltinCall* call) {
+            [&](ir::CoreBuiltinCall* call) {
                 // Ensure builtin of a builtin call is resolvable
                 auto name = utils::ToString(call->Func());
                 EnsureResolvesTo(name, nullptr);
@@ -274,11 +274,11 @@ struct RenameConflictsWGSL::State {
     }
 };
 
-RenameConflictsWGSL::RenameConflictsWGSL() = default;
-RenameConflictsWGSL::~RenameConflictsWGSL() = default;
+RenameConflicts::RenameConflicts() = default;
+RenameConflicts::~RenameConflicts() = default;
 
-void RenameConflictsWGSL::Run(Module* ir) const {
+void RenameConflicts::Run(ir::Module* ir) const {
     State{ir}.Process();
 }
 
-}  // namespace tint::ir::transform
+}  // namespace tint::wgsl::writer

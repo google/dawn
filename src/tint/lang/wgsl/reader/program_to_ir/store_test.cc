@@ -14,16 +14,16 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/lang/core/constant/scalar.h"
-#include "src/tint/lang/core/ir/program_test_helper.h"
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
+#include "src/tint/lang/wgsl/helpers/ir_program_test.h"
 
 namespace tint::wgsl::reader {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using ProgramToIRStoreTest = ir::ProgramTestHelper;
+using ProgramToIRStoreTest = helpers::IRProgramTest;
 
 TEST_F(ProgramToIRStoreTest, EmitStatement_Assign) {
     GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate);

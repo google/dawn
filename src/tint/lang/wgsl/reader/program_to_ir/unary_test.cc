@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/core/ir/program_test_helper.h"
+#include "src/tint/lang/wgsl/helpers/ir_program_test.h"
 
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/wgsl/ast/case_selector.h"
@@ -23,7 +23,7 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using ProgramToIRUnaryTest = ir::ProgramTestHelper;
+using ProgramToIRUnaryTest = helpers::IRProgramTest;
 
 TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Not) {
     Func("my_func", utils::Empty, ty.bool_(), utils::Vector{Return(false)});

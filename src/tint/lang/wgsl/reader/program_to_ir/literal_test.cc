@@ -16,10 +16,10 @@
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/constant.h"
-#include "src/tint/lang/core/ir/program_test_helper.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
+#include "src/tint/lang/wgsl/helpers/ir_program_test.h"
 
 namespace tint::wgsl::reader {
 namespace {
@@ -41,7 +41,7 @@ ir::Value* GlobalVarInitializer(ir::Module& m) {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using ProgramToIRLiteralTest = ir::ProgramTestHelper;
+using ProgramToIRLiteralTest = helpers::IRProgramTest;
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_True) {
     auto* expr = Expr(true);

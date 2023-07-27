@@ -12,38 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_RENAME_CONFLICTS_WGSL_H_
-#define SRC_TINT_LANG_CORE_IR_TRANSFORM_RENAME_CONFLICTS_WGSL_H_
+#ifndef SRC_TINT_LANG_WGSL_WRITER_IR_TO_PROGRAM_RENAME_CONFLICTS_H_
+#define SRC_TINT_LANG_WGSL_WRITER_IR_TO_PROGRAM_RENAME_CONFLICTS_H_
 
 #include "src/tint/lang/core/ir/transform/transform.h"
 
-// Forward declarations
-namespace tint::ir {
-class BuiltinCall;
-}  // namespace tint::ir
-namespace tint::type {
-class Type;
-}  // namespace tint::type
+namespace tint::wgsl::writer {
 
-namespace tint::ir::transform {
-
-/// RenameConflictsWGSL is a transform that renames declarations which prevent identifiers from
+/// RenameConflicts is a transform that renames declarations which prevent identifiers from
 /// resolving to the correct declaration, and those with identical identifiers declared in the same
 /// scope.
-class RenameConflictsWGSL final : public utils::Castable<RenameConflictsWGSL, Transform> {
+class RenameConflicts final : public utils::Castable<RenameConflicts, ir::transform::Transform> {
   public:
     /// Constructor
-    RenameConflictsWGSL();
+    RenameConflicts();
     /// Destructor
-    ~RenameConflictsWGSL() override;
+    ~RenameConflicts() override;
 
-    /// @copydoc Transform::Run
+    /// @copydoc ir::transform::Transform::Run
     void Run(ir::Module* module) const override;
 
   private:
     struct State;
 };
 
-}  // namespace tint::ir::transform
+}  // namespace tint::wgsl::writer
 
-#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_RENAME_CONFLICTS_WGSL_H_
+#endif  // SRC_TINT_LANG_WGSL_WRITER_IR_TO_PROGRAM_RENAME_CONFLICTS_H_

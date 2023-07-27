@@ -12,21 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TO_PROGRAM_TEST_H_
-#define SRC_TINT_LANG_CORE_IR_TO_PROGRAM_TEST_H_
+#ifndef SRC_TINT_LANG_WGSL_WRITER_IR_TO_PROGRAM_IR_TO_PROGRAM_TEST_H_
+#define SRC_TINT_LANG_WGSL_WRITER_IR_TO_PROGRAM_IR_TO_PROGRAM_TEST_H_
 
 #include <string>
 
 #include "src/tint/lang/core/ir/ir_test_helper.h"
 
-#if !TINT_BUILD_WGSL_WRITER
-#error "to_program_test.h requires the WGSL writer to be enabled"
-#endif
-
-namespace tint::ir::test {
+namespace tint::wgsl::writer {
 
 /// Class used for IR to Program tests
-class IRToProgramTest : public IRTestHelper {
+class IRToProgramTest : public ir::IRTestHelper {
   public:
     /// The result of Run()
     struct Result {
@@ -58,6 +54,6 @@ class IRToProgramTest : public IRTestHelper {
         }                                                                 \
     } while (false)
 
-}  // namespace tint::ir::test
+}  // namespace tint::wgsl::writer
 
-#endif  // SRC_TINT_LANG_CORE_IR_TO_PROGRAM_TEST_H_
+#endif  // SRC_TINT_LANG_WGSL_WRITER_IR_TO_PROGRAM_IR_TO_PROGRAM_TEST_H_

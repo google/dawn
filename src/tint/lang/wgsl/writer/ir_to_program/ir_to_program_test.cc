@@ -16,12 +16,12 @@
 #include <string>
 
 #include "src/tint/lang/core/ir/disassembler.h"
-#include "src/tint/lang/core/ir/to_program.h"
-#include "src/tint/lang/core/ir/to_program_test.h"
+#include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
+#include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program_test.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/text/string.h"
 
-namespace tint::ir::test {
+namespace tint::wgsl::writer {
 
 using namespace tint::number_suffixes;        // NOLINT
 using namespace tint::builtin::fluent_types;  // NOLINT
@@ -32,7 +32,7 @@ IRToProgramTest::Result IRToProgramTest::Run() {
     tint::ir::Disassembler d{mod};
     result.ir = d.Disassemble();
 
-    auto output_program = ToProgram(mod);
+    auto output_program = IRToProgram(mod);
     if (!output_program.IsValid()) {
         result.err = output_program.Diagnostics().str();
         result.ast = Program::printer(&output_program);
@@ -1819,7 +1819,7 @@ TEST_F(IRToProgramTest, Switch_Default) {
         v->SetInitializer(b.Constant(42_i));
 
         auto s = b.Switch(b.Load(v));
-        b.Append(b.Case(s, {Switch::CaseSelector{}}), [&] {
+        b.Append(b.Case(s, {ir::Switch::CaseSelector{}}), [&] {
             b.Call(ty.void_(), fn_a);
             b.ExitSwitch(s);
         });
@@ -1859,20 +1859,20 @@ TEST_F(IRToProgramTest, Switch_3_Cases) {
         v->SetInitializer(b.Constant(42_i));
 
         auto s = b.Switch(b.Load(v));
-        b.Append(b.Case(s, {Switch::CaseSelector{b.Constant(0_i)}}), [&] {
+        b.Append(b.Case(s, {ir::Switch::CaseSelector{b.Constant(0_i)}}), [&] {
             b.Call(ty.void_(), fn_a);
             b.ExitSwitch(s);
         });
         b.Append(b.Case(s,
                         {
-                            Switch::CaseSelector{b.Constant(1_i)},
-                            Switch::CaseSelector{},
+                            ir::Switch::CaseSelector{b.Constant(1_i)},
+                            ir::Switch::CaseSelector{},
                         }),
                  [&] {
                      b.Call(ty.void_(), fn_b);
                      b.ExitSwitch(s);
                  });
-        b.Append(b.Case(s, {Switch::CaseSelector{b.Constant(2_i)}}), [&] {
+        b.Append(b.Case(s, {ir::Switch::CaseSelector{b.Constant(2_i)}}), [&] {
             b.Call(ty.void_(), fn_c);
             b.ExitSwitch(s);
         });
@@ -1918,14 +1918,14 @@ TEST_F(IRToProgramTest, Switch_3_Cases_AllReturn) {
         v->SetInitializer(b.Constant(42_i));
 
         auto s = b.Switch(b.Load(v));
-        b.Append(b.Case(s, {Switch::CaseSelector{b.Constant(0_i)}}), [&] { b.Return(fn); });
+        b.Append(b.Case(s, {ir::Switch::CaseSelector{b.Constant(0_i)}}), [&] { b.Return(fn); });
         b.Append(b.Case(s,
                         {
-                            Switch::CaseSelector{b.Constant(1_i)},
-                            Switch::CaseSelector{},
+                            ir::Switch::CaseSelector{b.Constant(1_i)},
+                            ir::Switch::CaseSelector{},
                         }),
                  [&] { b.Return(fn); });
-        b.Append(b.Case(s, {Switch::CaseSelector{b.Constant(2_i)}}), [&] { b.Return(fn); });
+        b.Append(b.Case(s, {ir::Switch::CaseSelector{b.Constant(2_i)}}), [&] { b.Return(fn); });
 
         b.Call(ty.void_(), fn_a);
         b.Return(fn);
@@ -1972,29 +1972,29 @@ TEST_F(IRToProgramTest, Switch_Nested) {
         v2->SetInitializer(b.Constant(24_i));
 
         auto s1 = b.Switch(b.Load(v1));
-        b.Append(b.Case(s1, {Switch::CaseSelector{b.Constant(0_i)}}), [&] {
+        b.Append(b.Case(s1, {ir::Switch::CaseSelector{b.Constant(0_i)}}), [&] {
             b.Call(ty.void_(), fn_a);
             b.ExitSwitch(s1);
         });
         b.Append(b.Case(s1,
                         {
-                            Switch::CaseSelector{b.Constant(1_i)},
-                            Switch::CaseSelector{},
+                            ir::Switch::CaseSelector{b.Constant(1_i)},
+                            ir::Switch::CaseSelector{},
                         }),
                  [&] {
                      auto s2 = b.Switch(b.Load(v2));
-                     b.Append(b.Case(s2, {Switch::CaseSelector{b.Constant(0_i)}}),
+                     b.Append(b.Case(s2, {ir::Switch::CaseSelector{b.Constant(0_i)}}),
                               [&] { b.ExitSwitch(s2); });
                      b.Append(b.Case(s2,
                                      {
-                                         Switch::CaseSelector{b.Constant(1_i)},
-                                         Switch::CaseSelector{},
+                                         ir::Switch::CaseSelector{b.Constant(1_i)},
+                                         ir::Switch::CaseSelector{},
                                      }),
                               [&] { b.Return(fn); });
 
                      b.ExitSwitch(s1);
                  });
-        b.Append(b.Case(s1, {Switch::CaseSelector{b.Constant(2_i)}}), [&] {
+        b.Append(b.Case(s1, {ir::Switch::CaseSelector{b.Constant(2_i)}}), [&] {
             b.Call(ty.void_(), fn_c);
             b.ExitSwitch(s1);
         });
@@ -2724,4 +2724,4 @@ fn f() {
 }
 
 }  // namespace
-}  // namespace tint::ir::test
+}  // namespace tint::wgsl::writer

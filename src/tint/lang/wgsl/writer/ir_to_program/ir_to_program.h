@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TO_PROGRAM_H_
-#define SRC_TINT_LANG_CORE_IR_TO_PROGRAM_H_
+#ifndef SRC_TINT_LANG_WGSL_WRITER_IR_TO_PROGRAM_IR_TO_PROGRAM_H_
+#define SRC_TINT_LANG_WGSL_WRITER_IR_TO_PROGRAM_IR_TO_PROGRAM_H_
 
 #include "src/tint/lang/wgsl/program/program.h"
 
@@ -21,14 +21,14 @@ namespace tint::ir {
 class Module;
 }
 
-namespace tint::ir {
+namespace tint::wgsl::writer {
 
 /// Builds a tint::Program from an ir::Module
 /// @param module the IR module
 /// @return the tint::Program.
 /// @note Check the returned Program::Diagnostics() for any errors.
-Program ToProgram(Module& module);
+Program IRToProgram(ir::Module& module);
 
-}  // namespace tint::ir
+}  // namespace tint::wgsl::writer
 
-#endif  // SRC_TINT_LANG_CORE_IR_TO_PROGRAM_H_
+#endif  // SRC_TINT_LANG_WGSL_WRITER_IR_TO_PROGRAM_IR_TO_PROGRAM_H_

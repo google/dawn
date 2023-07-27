@@ -695,6 +695,15 @@ if(${TINT_BUILD_WGSL_WRITER})
     lang/wgsl/writer/ast_printer/ast_printer.cc
     lang/wgsl/writer/ast_printer/ast_printer.h
   )
+
+  if(${TINT_BUILD_IR})
+    list(APPEND TINT_LIB_SRCS
+      lang/wgsl/writer/ir_to_program/ir_to_program.cc
+      lang/wgsl/writer/ir_to_program/ir_to_program.h
+      lang/wgsl/writer/ir_to_program/rename_conflicts.cc
+      lang/wgsl/writer/ir_to_program/rename_conflicts.h
+    )
+  endif()
 endif()
 
 if(${TINT_BUILD_MSL_WRITER})
@@ -841,8 +850,6 @@ if(${TINT_BUILD_IR})
     lang/core/ir/terminate_invocation.h
     lang/core/ir/terminator.cc
     lang/core/ir/terminator.h
-    lang/core/ir/to_program.cc
-    lang/core/ir/to_program.h
     lang/core/ir/unary.cc
     lang/core/ir/unary.h
     lang/core/ir/unreachable.cc
@@ -861,8 +868,6 @@ if(${TINT_BUILD_IR})
     lang/core/ir/transform/block_decorated_structs.h
     lang/core/ir/transform/demote_to_helper.cc
     lang/core/ir/transform/demote_to_helper.h
-    lang/core/ir/transform/rename_conflicts_wgsl.cc
-    lang/core/ir/transform/rename_conflicts_wgsl.h
     lang/core/ir/transform/shader_io.cc
     lang/core/ir/transform/shader_io.h
     lang/core/ir/transform/transform.cc
@@ -1161,7 +1166,7 @@ if(TINT_BUILD_TESTS)
     utils/traits/traits_test.cc
   )
 
-  # Noet, the source files are included here otherwise the cmd sources would not be included in the
+  # Note, the source files are included here otherwise the cmd sources would not be included in the
   # test binary.
   list(APPEND TINT_TEST_SRCS
     cmd/generate_external_texture_bindings.cc
@@ -1223,6 +1228,13 @@ if(TINT_BUILD_TESTS)
       lang/spirv/reader/spirv_tools_helpers_test.cc
       lang/spirv/reader/spirv_tools_helpers_test.h
       lang/spirv/reader/usage_test.cc
+    )
+  endif()
+
+
+  if(${TINT_BUILD_IR})
+    list(APPEND TINT_TEST_SRCS
+      lang/wgsl/helpers/ir_program_test.h
     )
   endif()
 
@@ -1384,12 +1396,6 @@ if(TINT_BUILD_TESTS)
         lang/spirv/writer/var_test.cc
         lang/spirv/writer/writer_test.cc
       )
-
-      if (${TINT_BUILD_WGSL_WRITER})
-        list(APPEND TINT_TEST_SRCS
-          lang/core/ir/transform/rename_conflicts_wgsl_test.cc
-        )
-      endif()
     endif()
   endif()
 
@@ -1427,7 +1433,17 @@ if(TINT_BUILD_TESTS)
       lang/wgsl/writer/ast_printer/variable_test.cc
       lang/wgsl/writer/ast_printer/test_helper.h
     )
+
+    if (${TINT_BUILD_IR})
+      list(APPEND TINT_TEST_SRCS
+        lang/wgsl/writer/ir_to_program/inlining_test.cc
+        lang/wgsl/writer/ir_to_program/ir_to_program_test.cc
+        lang/wgsl/writer/ir_to_program/rename_conflicts_test.cc
+      )
+    endif()
   endif()
+
+
 
   if(${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
     list(APPEND TINT_TEST_SRCS
@@ -1631,7 +1647,6 @@ if(TINT_BUILD_TESTS)
       lang/core/ir/instruction_result_test.cc
       lang/core/ir/instruction_test.cc
       lang/core/ir/intrinsic_call_test.cc
-      lang/core/ir/ir_test_helper.h
       lang/core/ir/let_test.cc
       lang/core/ir/load_test.cc
       lang/core/ir/load_vector_element_test.cc
@@ -1640,7 +1655,6 @@ if(TINT_BUILD_TESTS)
       lang/core/ir/multi_in_block_test.cc
       lang/core/ir/next_iteration_test.cc
       lang/core/ir/operand_instruction_test.cc
-      lang/core/ir/program_test_helper.h
       lang/core/ir/return_test.cc
       lang/core/ir/store_test.cc
       lang/core/ir/store_vector_element_test.cc
@@ -1659,14 +1673,7 @@ if(TINT_BUILD_TESTS)
 
   if (${TINT_BUILD_IR} AND ${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
     list(APPEND TINT_TEST_SRCS
-      lang/core/ir/to_program_roundtrip_test.cc
-    )
-  endif()
-
-  if (${TINT_BUILD_IR} AND ${TINT_BUILD_WGSL_WRITER})
-    list(APPEND TINT_TEST_SRCS
-      lang/core/ir/to_program_inlining_test.cc
-      lang/core/ir/to_program_test.cc
+      lang/wgsl/ir_roundtrip_test.cc
     )
   endif()
 

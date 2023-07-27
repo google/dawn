@@ -14,9 +14,9 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/lang/core/constant/scalar.h"
-#include "src/tint/lang/core/ir/program_test_helper.h"
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
+#include "src/tint/lang/wgsl/helpers/ir_program_test.h"
 
 namespace tint::wgsl::reader {
 namespace {
@@ -24,7 +24,7 @@ namespace {
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-using ProgramToIRFunctionTest = ir::ProgramTestHelper;
+using ProgramToIRFunctionTest = helpers::IRProgramTest;
 
 TEST_F(ProgramToIRFunctionTest, EmitFunction_Vertex) {
     Func("test", utils::Empty, ty.vec4<f32>(),

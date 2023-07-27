@@ -12,22 +12,59 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/core/ir/transform/rename_conflicts_wgsl.h"
+#include "src/tint/lang/wgsl/writer/ir_to_program/rename_conflicts.h"
 
+#include <string>
 #include <utility>
 
-#include "src/tint/lang/core/ir/transform/test_helper.h"
+#include "gtest/gtest.h"
+#include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/matrix.h"
 
-namespace tint::ir::transform {
+namespace tint::wgsl::writer {
 namespace {
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-using IR_RenameConflictsWGSLTest = TransformTest;
+class IRToProgramRenameConflictsTest : public testing::Test {
+  public:
+    /// Transforms the module, using the transforms `TRANSFORMS`.
+    void Run() {
+        // Validate the input IR.
+        {
+            auto res = ir::Validate(mod);
+            EXPECT_TRUE(res) << res.Failure().str();
+            if (!res) {
+                return;
+            }
+        }
 
-TEST_F(IR_RenameConflictsWGSLTest, NoModify_SingleNamedRootBlockVar) {
+        // Run the transforms.
+        RenameConflicts{}.Run(&mod);
+
+        // Validate the output IR.
+        auto res = ir::Validate(mod);
+        EXPECT_TRUE(res) << res.Failure().str();
+    }
+
+    /// @returns the transformed module as a disassembled string
+    std::string str() {
+        ir::Disassembler dis(mod);
+        return "\n" + dis.Disassemble();
+    }
+
+  protected:
+    /// The test IR module.
+    ir::Module mod;
+    /// The test IR builder.
+    ir::Builder b{mod};
+    /// The type manager.
+    type::Manager& ty{mod.Types()};
+};
+
+TEST_F(IRToProgramRenameConflictsTest, NoModify_SingleNamedRootBlockVar) {
     b.Append(b.RootBlock(), [&] { b.ir.SetName(b.Var(ty.ptr<private_, i32>()), "v"); });
 
     auto* src = R"(
@@ -40,12 +77,12 @@ TEST_F(IR_RenameConflictsWGSLTest, NoModify_SingleNamedRootBlockVar) {
 
     auto* expect = src;
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, Conflict_TwoRootBlockVarsWithSameName) {
+TEST_F(IRToProgramRenameConflictsTest, Conflict_TwoRootBlockVarsWithSameName) {
     b.Append(b.RootBlock(), [&] {
         b.ir.SetName(b.Var(ty.ptr<private_, i32>()), "v");
         b.ir.SetName(b.Var(ty.ptr<private_, u32>()), "v");
@@ -68,12 +105,12 @@ TEST_F(IR_RenameConflictsWGSLTest, Conflict_TwoRootBlockVarsWithSameName) {
 
 )";
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, Conflict_RootBlockVarAndStructWithSameName) {
+TEST_F(IRToProgramRenameConflictsTest, Conflict_RootBlockVarAndStructWithSameName) {
     auto* s = ty.Struct(b.ir.symbols.New("v"), {{b.ir.symbols.New("x"), ty.i32()}});
     b.Append(b.RootBlock(), [&] { b.ir.SetName(b.Var(ty.ptr(function, s)), "v"); });
 
@@ -100,12 +137,12 @@ v = struct @align(4) {
 
 )";
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, Conflict_RootBlockVarAndFnWithSameName) {
+TEST_F(IRToProgramRenameConflictsTest, Conflict_RootBlockVarAndFnWithSameName) {
     b.Append(b.RootBlock(), [&] { b.ir.SetName(b.Var(ty.ptr<private_, i32>()), "v"); });
 
     auto* fn = b.Function("v", ty.void_());
@@ -136,12 +173,12 @@ TEST_F(IR_RenameConflictsWGSLTest, Conflict_RootBlockVarAndFnWithSameName) {
 }
 )";
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, NoModify_RootBlockVar_ShadowedBy_FnVar) {
+TEST_F(IRToProgramRenameConflictsTest, NoModify_RootBlockVar_ShadowedBy_FnVar) {
     b.Append(b.RootBlock(), [&] {
         auto* outer = b.Var(ty.ptr<private_, i32>());
         b.ir.SetName(outer, "v");
@@ -177,12 +214,12 @@ TEST_F(IR_RenameConflictsWGSLTest, NoModify_RootBlockVar_ShadowedBy_FnVar) {
 
     auto* expect = src;
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, Conflict_RootBlockVar_ShadowedBy_FnVar) {
+TEST_F(IRToProgramRenameConflictsTest, Conflict_RootBlockVar_ShadowedBy_FnVar) {
     b.Append(b.RootBlock(), [&] {
         auto* outer = b.Var(ty.ptr<private_, i32>());
         b.ir.SetName(outer, "v");
@@ -231,12 +268,12 @@ TEST_F(IR_RenameConflictsWGSLTest, Conflict_RootBlockVar_ShadowedBy_FnVar) {
 }
 )";
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, NoModify_FnVar_ShadowedBy_IfVar) {
+TEST_F(IRToProgramRenameConflictsTest, NoModify_FnVar_ShadowedBy_IfVar) {
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {
         auto* outer = b.Var(ty.ptr<function, f32>());
@@ -277,12 +314,12 @@ TEST_F(IR_RenameConflictsWGSLTest, NoModify_FnVar_ShadowedBy_IfVar) {
 
     auto* expect = src;
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, Conflict_FnVar_ShadowedBy_IfVar) {
+TEST_F(IRToProgramRenameConflictsTest, Conflict_FnVar_ShadowedBy_IfVar) {
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {
         auto* outer = b.Var(ty.ptr<function, f32>());
@@ -338,12 +375,12 @@ TEST_F(IR_RenameConflictsWGSLTest, Conflict_FnVar_ShadowedBy_IfVar) {
 }
 )";
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, NoModify_LoopInitVar_ShadowedBy_LoopBodyVar) {
+TEST_F(IRToProgramRenameConflictsTest, NoModify_LoopInitVar_ShadowedBy_LoopBodyVar) {
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {
         auto* loop = b.Loop();
@@ -390,12 +427,12 @@ TEST_F(IR_RenameConflictsWGSLTest, NoModify_LoopInitVar_ShadowedBy_LoopBodyVar) 
 
     auto* expect = src;
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, Conflict_LoopInitVar_ShadowedBy_LoopBodyVar) {
+TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopInitVar_ShadowedBy_LoopBodyVar) {
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {
         auto* loop = b.Loop();
@@ -460,12 +497,12 @@ TEST_F(IR_RenameConflictsWGSLTest, Conflict_LoopInitVar_ShadowedBy_LoopBodyVar) 
 }
 )";
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, NoModify_LoopBodyVar_ShadowedBy_LoopContVar) {
+TEST_F(IRToProgramRenameConflictsTest, NoModify_LoopBodyVar_ShadowedBy_LoopContVar) {
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {
         auto* loop = b.Loop();
@@ -516,12 +553,12 @@ TEST_F(IR_RenameConflictsWGSLTest, NoModify_LoopBodyVar_ShadowedBy_LoopContVar) 
 
     auto* expect = src;
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, Conflict_LoopBodyVar_ShadowedBy_LoopContVar) {
+TEST_F(IRToProgramRenameConflictsTest, Conflict_LoopBodyVar_ShadowedBy_LoopContVar) {
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {
         auto* loop = b.Loop();
@@ -593,12 +630,12 @@ TEST_F(IR_RenameConflictsWGSLTest, Conflict_LoopBodyVar_ShadowedBy_LoopContVar) 
 }
 )";
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinScalar_ShadowedBy_Param) {
+TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_Param) {
     auto* fn = b.Function("f", ty.void_());
     auto* p = b.FunctionParam(ty.i32());
     b.ir.SetName(p, "i32");
@@ -628,12 +665,12 @@ TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinScalar_ShadowedBy_Param) {
 }
 )";
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, NoModify_BuiltinVector_ShadowedBy_Param) {
+TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinVector_ShadowedBy_Param) {
     auto* fn = b.Function("f", ty.void_());
     auto* p = b.FunctionParam(ty.i32());
     b.ir.SetName(p, "vec2");
@@ -656,12 +693,12 @@ TEST_F(IR_RenameConflictsWGSLTest, NoModify_BuiltinVector_ShadowedBy_Param) {
 
     auto* expect = src;
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinVector_ShadowedBy_Param) {
+TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinVector_ShadowedBy_Param) {
     auto* fn = b.Function("f", ty.void_());
     auto* p = b.FunctionParam(ty.i32());
     b.ir.SetName(p, "vec3");
@@ -691,12 +728,12 @@ TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinVector_ShadowedBy_Param) {
 }
 )";
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, NoModify_BuiltinMatrix_ShadowedBy_Param) {
+TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinMatrix_ShadowedBy_Param) {
     auto* fn = b.Function("f", ty.void_());
     auto* p = b.FunctionParam(ty.i32());
     b.ir.SetName(p, "mat3x2");
@@ -719,12 +756,12 @@ TEST_F(IR_RenameConflictsWGSLTest, NoModify_BuiltinMatrix_ShadowedBy_Param) {
 
     auto* expect = src;
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinMatrix_ShadowedBy_Param) {
+TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinMatrix_ShadowedBy_Param) {
     auto* fn = b.Function("f", ty.void_());
     auto* p = b.FunctionParam(ty.i32());
     b.ir.SetName(p, "mat2x4");
@@ -754,12 +791,12 @@ TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinMatrix_ShadowedBy_Param) {
 }
 )";
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, NoModify_BuiltinScalar_ShadowedBy_FnVar) {
+TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinScalar_ShadowedBy_FnVar) {
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {
         auto* v = b.Var(ty.ptr<function, i32>());
@@ -781,12 +818,12 @@ TEST_F(IR_RenameConflictsWGSLTest, NoModify_BuiltinScalar_ShadowedBy_FnVar) {
 
     auto* expect = src;
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinScalar_ShadowedBy_FnVar) {
+TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_FnVar) {
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {
         auto* v = b.Var(ty.ptr<function, i32>());
@@ -816,12 +853,12 @@ TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinScalar_ShadowedBy_FnVar) {
 }
 )";
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, NoModify_BuiltinScalar_ShadowedBy_NamedInst) {
+TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinScalar_ShadowedBy_NamedInst) {
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {
         auto* i = b.Add(ty.i32(), 1_i, 2_i);
@@ -842,12 +879,12 @@ TEST_F(IR_RenameConflictsWGSLTest, NoModify_BuiltinScalar_ShadowedBy_NamedInst) 
 
     auto* expect = src;
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinScalar_ShadowedBy_NamedInst) {
+TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinScalar_ShadowedBy_NamedInst) {
     auto* fn = b.Function("f", ty.f32());
     b.Append(fn->Block(), [&] {
         auto* i = b.Add(ty.i32(), 1_i, 2_i);
@@ -877,12 +914,12 @@ TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinScalar_ShadowedBy_NamedInst) 
 }
 )";
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, NoModify_BuiltinAddressSpace_ShadowedBy_RootBlockVar) {
+TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinAddressSpace_ShadowedBy_RootBlockVar) {
     b.Append(b.RootBlock(), [&] {  //
         b.ir.SetName(b.Var(ty.ptr<private_, i32>()), "function");
     });
@@ -897,12 +934,12 @@ TEST_F(IR_RenameConflictsWGSLTest, NoModify_BuiltinAddressSpace_ShadowedBy_RootB
 
     auto* expect = src;
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinAddressSpace_ShadowedBy_RootBlockVar) {
+TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinAddressSpace_ShadowedBy_RootBlockVar) {
     b.Append(b.RootBlock(), [&] {  //
         b.ir.SetName(b.Var(ty.ptr<private_, i32>()), "private");
     });
@@ -922,12 +959,12 @@ TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinAddressSpace_ShadowedBy_RootB
 
 )";
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, NoModify_BuiltinAccess_ShadowedBy_RootBlockVar) {
+TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinAccess_ShadowedBy_RootBlockVar) {
     b.Append(b.RootBlock(), [&] {  //
         b.ir.SetName(b.Var(ty.ptr<private_, i32>()), "read");
     });
@@ -942,12 +979,12 @@ TEST_F(IR_RenameConflictsWGSLTest, NoModify_BuiltinAccess_ShadowedBy_RootBlockVa
 
     auto* expect = src;
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinAccess_ShadowedBy_RootBlockVar) {
+TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinAccess_ShadowedBy_RootBlockVar) {
     b.Append(b.RootBlock(), [&] {  //
         b.ir.SetName(b.Var(ty.ptr<private_, i32>()), "read_write");
     });
@@ -967,12 +1004,12 @@ TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinAccess_ShadowedBy_RootBlockVa
 
 )";
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, NoModify_BuiltinFn_ShadowedBy_RootBlockVar) {
+TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinFn_ShadowedBy_RootBlockVar) {
     b.Append(b.RootBlock(), [&] {  //
         auto* v = b.Var(ty.ptr<private_, i32>());
         b.ir.SetName(v, "min");
@@ -1000,12 +1037,12 @@ TEST_F(IR_RenameConflictsWGSLTest, NoModify_BuiltinFn_ShadowedBy_RootBlockVar) {
 
     auto* expect = src;
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinFn_ShadowedBy_RootBlockVar) {
+TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinFn_ShadowedBy_RootBlockVar) {
     b.Append(b.RootBlock(), [&] {  //
         auto* v = b.Var(ty.ptr<private_, i32>());
         b.ir.SetName(v, "max");
@@ -1044,10 +1081,10 @@ TEST_F(IR_RenameConflictsWGSLTest, Conflict_BuiltinFn_ShadowedBy_RootBlockVar) {
 }
 )";
 
-    Run<RenameConflictsWGSL>();
+    Run();
 
     EXPECT_EQ(expect, str());
 }
 
 }  // namespace
-}  // namespace tint::ir::transform
+}  // namespace tint::wgsl::writer

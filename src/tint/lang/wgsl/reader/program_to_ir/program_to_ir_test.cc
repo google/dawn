@@ -18,10 +18,10 @@
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
-#include "src/tint/lang/core/ir/program_test_helper.h"
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
+#include "src/tint/lang/wgsl/helpers/ir_program_test.h"
 
 namespace tint::wgsl::reader {
 namespace {
@@ -51,7 +51,7 @@ T* FindSingleInstruction(ir::Module& mod) {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_FromProgramTest = ir::ProgramTestHelper;
+using IR_FromProgramTest = helpers::IRProgramTest;
 
 TEST_F(IR_FromProgramTest, Func) {
     Func("f", utils::Empty, ty.void_(), utils::Empty);

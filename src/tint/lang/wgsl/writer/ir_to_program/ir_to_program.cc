@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/core/ir/to_program.h"
+#include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
 
 #include <string>
 #include <tuple>
@@ -49,7 +49,6 @@
 #include "src/tint/lang/core/ir/store_vector_element.h"
 #include "src/tint/lang/core/ir/switch.h"
 #include "src/tint/lang/core/ir/swizzle.h"
-#include "src/tint/lang/core/ir/transform/rename_conflicts_wgsl.h"
 #include "src/tint/lang/core/ir/unary.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
@@ -64,6 +63,7 @@
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/writer/ir_to_program/rename_conflicts.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/predicates.h"
 #include "src/tint/utils/containers/reverse.h"
@@ -84,22 +84,22 @@
     nesting_depth_++;    \
     TINT_DEFER(nesting_depth_--)
 
-namespace tint::ir {
+namespace tint::wgsl::writer {
 
 namespace {
 
 class State {
   public:
-    explicit State(Module& m) : mod(m) {}
+    explicit State(ir::Module& m) : mod(m) {}
 
     Program Run() {
-        if (auto res = Validate(mod); !res) {
+        if (auto res = ir::Validate(mod); !res) {
             // IR module failed validation.
             b.Diagnostics() = res.Failure();
             return Program{std::move(b)};
         }
 
-        transform::RenameConflictsWGSL{}.Run(&mod);
+        RenameConflicts{}.Run(&mod);
 
         if (mod.root_block) {
             RootBlock(mod.root_block);
@@ -119,7 +119,7 @@ class State {
     };
 
     /// The source IR module
-    Module& mod;
+    ir::Module& mod;
 
     /// The target ProgramBuilder
     ProgramBuilder b;
@@ -144,10 +144,10 @@ class State {
     using ValueBinding = std::variant<VariableValue, InlinedValue, ConsumedValue>;
 
     /// IR values to their representation
-    utils::Hashmap<Value*, ValueBinding, 32> bindings_;
+    utils::Hashmap<ir::Value*, ValueBinding, 32> bindings_;
 
     /// Names for values
-    utils::Hashmap<Value*, Symbol, 32> names_;
+    utils::Hashmap<ir::Value*, Symbol, 32> names_;
 
     /// The nesting depth of the currently generated AST
     /// 0  is module scope
@@ -187,7 +187,7 @@ class State {
 
         // TODO(crbug.com/tint/1915): Properly implement this when we've fleshed out Function
         static constexpr size_t N = decltype(ast::Function::params)::static_length;
-        auto params = utils::Transform<N>(fn->Params(), [&](FunctionParam* param) {
+        auto params = utils::Transform<N>(fn->Params(), [&](ir::FunctionParam* param) {
             auto ty = Type(param->Type());
             auto name = NameFor(param);
             Bind(param, name, PtrKind::kPtr);
@@ -987,7 +987,7 @@ class State {
 
     /// @returns the AST name for the given value, creating and returning a new name on the first
     /// call.
-    Symbol NameFor(Value* value, std::string_view suggested = {}) {
+    Symbol NameFor(ir::Value* value, std::string_view suggested = {}) {
         return names_.GetOrCreate(value, [&] {
             if (!suggested.empty()) {
                 return b.Symbols().Register(suggested);
@@ -1155,8 +1155,8 @@ class State {
 
 }  // namespace
 
-Program ToProgram(Module& i) {
+Program IRToProgram(ir::Module& i) {
     return State{i}.Run();
 }
 
-}  // namespace tint::ir
+}  // namespace tint::wgsl::writer
