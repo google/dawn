@@ -331,6 +331,14 @@ MaybeError VulkanInstance::Initialize(const InstanceBase* instance, ICD icd) {
     DAWN_TRY(mFunctions.LoadGlobalProcs(mVulkanLib));
 
     DAWN_TRY_ASSIGN(mGlobalInfo, GatherGlobalInfo(mFunctions));
+#if DAWN_PLATFORM_IS(WINDOWS)
+    if (icd != ICD::SwiftShader && mGlobalInfo.apiVersion < VK_MAKE_API_VERSION(1, 1, 0, 0)) {
+        // See crbug.com/850881, crbug.com/863086, crbug.com/1465064
+        return DAWN_INTERNAL_ERROR(
+            "Windows Vulkan 1.0 driver is unsupported. At least Vulkan 1.1 is required on "
+            "Windows.");
+    }
+#endif
 
     VulkanGlobalKnobs usedGlobalKnobs = {};
     DAWN_TRY_ASSIGN(usedGlobalKnobs, CreateVkInstance(instance));
