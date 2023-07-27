@@ -24,14 +24,16 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUSampler
 ////////////////////////////////////////////////////////////////////////////////
-GPUSampler::GPUSampler(wgpu::Sampler sampler) : sampler_(std::move(sampler)) {}
+GPUSampler::GPUSampler(const wgpu::SamplerDescriptor& desc, wgpu::Sampler sampler)
+    : sampler_(std::move(sampler)), label_(desc.label ? desc.label : "") {}
 
 std::string GPUSampler::getLabel(Napi::Env) {
-    UNIMPLEMENTED();
+    return label_;
 }
 
 void GPUSampler::setLabel(Napi::Env, std::string value) {
-    UNIMPLEMENTED();
+    sampler_.SetLabel(value.c_str());
+    label_ = value;
 }
 
 }  // namespace wgpu::binding

@@ -24,14 +24,17 @@ namespace wgpu::binding {
 // wgpu::bindings::GPUCommandBuffer
 ////////////////////////////////////////////////////////////////////////////////
 
-GPUCommandBuffer::GPUCommandBuffer(wgpu::CommandBuffer cmd_buf) : cmd_buf_(std::move(cmd_buf)) {}
+GPUCommandBuffer::GPUCommandBuffer(const wgpu::CommandBufferDescriptor& desc,
+                                   wgpu::CommandBuffer cmd_buf)
+    : cmd_buf_(std::move(cmd_buf)), label_(desc.label ? desc.label : "") {}
 
 std::string GPUCommandBuffer::getLabel(Napi::Env) {
-    UNIMPLEMENTED();
+    return label_;
 }
 
 void GPUCommandBuffer::setLabel(Napi::Env, std::string value) {
-    UNIMPLEMENTED();
+    cmd_buf_.SetLabel(value.c_str());
+    label_ = value;
 }
 
 }  // namespace wgpu::binding

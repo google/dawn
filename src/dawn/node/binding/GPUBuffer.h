@@ -82,6 +82,7 @@ class GPUBuffer final : public interop::GPUBuffer {
     std::shared_ptr<AsyncRunner> async_;
     State state_ = State::Unmapped;
     std::vector<Mapping> mapped_;
+    std::string label_;
 };
 
 }  // namespace wgpu::binding

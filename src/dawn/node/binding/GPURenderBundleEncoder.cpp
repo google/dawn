@@ -28,15 +28,20 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPURenderBundleEncoder
 ////////////////////////////////////////////////////////////////////////////////
-GPURenderBundleEncoder::GPURenderBundleEncoder(wgpu::RenderBundleEncoder enc)
-    : enc_(std::move(enc)) {}
+GPURenderBundleEncoder::GPURenderBundleEncoder(const RenderBundleEncoderDescriptor& desc,
+                                               wgpu::RenderBundleEncoder enc)
+    : enc_(std::move(enc)), label_(desc.label ? desc.label : "") {}
 
 interop::Interface<interop::GPURenderBundle> GPURenderBundleEncoder::finish(
     Napi::Env env,
     interop::GPURenderBundleDescriptor descriptor) {
     wgpu::RenderBundleDescriptor desc{};
+    Converter conv(env);
+    if (!conv(desc.label, descriptor.label)) {
+        return {};
+    }
 
-    return interop::GPURenderBundle::Create<GPURenderBundle>(env, enc_.Finish(&desc));
+    return interop::GPURenderBundle::Create<GPURenderBundle>(env, desc, enc_.Finish(&desc));
 }
 
 void GPURenderBundleEncoder::setBindGroup(
@@ -184,11 +189,12 @@ void GPURenderBundleEncoder::drawIndexedIndirect(
 }
 
 std::string GPURenderBundleEncoder::getLabel(Napi::Env) {
-    UNIMPLEMENTED();
+    return label_;
 }
 
 void GPURenderBundleEncoder::setLabel(Napi::Env, std::string value) {
-    UNIMPLEMENTED();
+    enc_.SetLabel(value.c_str());
+    label_ = value;
 }
 
 }  // namespace wgpu::binding

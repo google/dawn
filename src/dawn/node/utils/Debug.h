@@ -128,12 +128,12 @@ template <typename... MSG_ARGS>
                          ##__VA_ARGS__)                                                           \
         << std::endl
 
-// UNIMPLEMENTED() prints 'UNIMPLEMENTED' with the current file, line and
-// function to stdout, along with the optional message, then calls abort().
-// The macro calls Fatal(), which is annotated with [[noreturn]].
-// Used to stub code that has not yet been implemented.
-#define UNIMPLEMENTED(...) \
-    ::wgpu::utils::Fatal("UNIMPLEMENTED", __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+// UNIMPLEMENTED(env) raises a JS exception. Used to stub code that has not yet been implemented.
+#define UNIMPLEMENTED(env, ...)                                              \
+    do {                                                                     \
+        Napi::Error::New(env, "UNIMPLEMENTED").ThrowAsJavaScriptException(); \
+        return __VA_ARGS__;                                                  \
+    } while (false)
 
 // UNREACHABLE() prints 'UNREACHABLE' with the current file, line and
 // function to stdout, along with the optional message, then calls abort().

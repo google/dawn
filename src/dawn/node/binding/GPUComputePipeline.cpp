@@ -25,22 +25,28 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUComputePipeline
 ////////////////////////////////////////////////////////////////////////////////
-GPUComputePipeline::GPUComputePipeline(wgpu::ComputePipeline pipeline)
-    : pipeline_(std::move(pipeline)) {}
+GPUComputePipeline::GPUComputePipeline(const wgpu::ComputePipelineDescriptor& desc,
+                                       wgpu::ComputePipeline pipeline)
+    : pipeline_(std::move(pipeline)), label_(desc.label ? desc.label : "") {}
+
+GPUComputePipeline::GPUComputePipeline(wgpu::ComputePipeline pipeline, std::string label)
+    : pipeline_(std::move(pipeline)), label_(label) {}
 
 interop::Interface<interop::GPUBindGroupLayout> GPUComputePipeline::getBindGroupLayout(
     Napi::Env env,
     uint32_t index) {
+    wgpu::BindGroupLayoutDescriptor desc{};
     return interop::GPUBindGroupLayout::Create<GPUBindGroupLayout>(
-        env, pipeline_.GetBindGroupLayout(index));
+        env, desc, pipeline_.GetBindGroupLayout(index));
 }
 
 std::string GPUComputePipeline::getLabel(Napi::Env) {
-    UNIMPLEMENTED();
+    return label_;
 }
 
 void GPUComputePipeline::setLabel(Napi::Env, std::string value) {
-    UNIMPLEMENTED();
+    pipeline_.SetLabel(value.c_str());
+    label_ = value;
 }
 
 }  // namespace wgpu::binding

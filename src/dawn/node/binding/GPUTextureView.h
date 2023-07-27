@@ -28,7 +28,7 @@ namespace wgpu::binding {
 // wgpu::TextureView.
 class GPUTextureView final : public interop::GPUTextureView {
   public:
-    explicit GPUTextureView(wgpu::TextureView view);
+    GPUTextureView(const wgpu::TextureViewDescriptor& desc, wgpu::TextureView view);
 
     // Implicit cast operator to Dawn GPU object
     inline operator const wgpu::TextureView&() const { return view_; }
@@ -39,6 +39,7 @@ class GPUTextureView final : public interop::GPUTextureView {
 
   private:
     wgpu::TextureView view_;
+    std::string label_;
 };
 
 }  // namespace wgpu::binding

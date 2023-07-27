@@ -27,7 +27,7 @@ namespace wgpu::binding {
 // GPUTexture is an implementation of interop::GPUTexture that wraps a wgpu::Texture.
 class GPUTexture final : public interop::GPUTexture {
   public:
-    explicit GPUTexture(wgpu::Device device, wgpu::Texture texture);
+    GPUTexture(wgpu::Device device, const wgpu::TextureDescriptor& desc, wgpu::Texture texture);
 
     // Implicit cast operator to Dawn GPU object
     inline operator const wgpu::Texture&() const { return texture_; }
@@ -51,6 +51,7 @@ class GPUTexture final : public interop::GPUTexture {
   private:
     wgpu::Device device_;
     wgpu::Texture texture_;
+    std::string label_;
 };
 
 }  // namespace wgpu::binding

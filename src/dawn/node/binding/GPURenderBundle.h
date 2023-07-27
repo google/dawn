@@ -28,7 +28,7 @@ namespace wgpu::binding {
 // wgpu::RenderBundle.
 class GPURenderBundle final : public interop::GPURenderBundle {
   public:
-    explicit GPURenderBundle(wgpu::RenderBundle bundle);
+    GPURenderBundle(const wgpu::RenderBundleDescriptor& desc, wgpu::RenderBundle bundle);
 
     // Implicit cast operator to Dawn GPU object
     inline operator const wgpu::RenderBundle&() const { return bundle_; }
@@ -39,6 +39,7 @@ class GPURenderBundle final : public interop::GPURenderBundle {
 
   private:
     wgpu::RenderBundle bundle_;
+    std::string label_;
 };
 
 }  // namespace wgpu::binding

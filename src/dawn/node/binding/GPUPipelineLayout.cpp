@@ -23,14 +23,17 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUPipelineLayout
 ////////////////////////////////////////////////////////////////////////////////
-GPUPipelineLayout::GPUPipelineLayout(wgpu::PipelineLayout layout) : layout_(std::move(layout)) {}
+GPUPipelineLayout::GPUPipelineLayout(const wgpu::PipelineLayoutDescriptor& desc,
+                                     wgpu::PipelineLayout layout)
+    : layout_(std::move(layout)), label_(desc.label ? desc.label : "") {}
 
 std::string GPUPipelineLayout::getLabel(Napi::Env) {
-    UNIMPLEMENTED();
+    return label_;
 }
 
 void GPUPipelineLayout::setLabel(Napi::Env, std::string value) {
-    UNIMPLEMENTED();
+    layout_.SetLabel(value.c_str());
+    label_ = value;
 }
 
 }  // namespace wgpu::binding

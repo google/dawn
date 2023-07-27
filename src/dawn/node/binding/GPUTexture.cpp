@@ -26,8 +26,12 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUTexture
 ////////////////////////////////////////////////////////////////////////////////
-GPUTexture::GPUTexture(wgpu::Device device, wgpu::Texture texture)
-    : device_(std::move(device)), texture_(std::move(texture)) {}
+GPUTexture::GPUTexture(wgpu::Device device,
+                       const wgpu::TextureDescriptor& desc,
+                       wgpu::Texture texture)
+    : device_(std::move(device)),
+      texture_(std::move(texture)),
+      label_(desc.label ? desc.label : "") {}
 
 interop::Interface<interop::GPUTextureView> GPUTexture::createView(
     Napi::Env env,
@@ -45,10 +49,10 @@ interop::Interface<interop::GPUTextureView> GPUTexture::createView(
         !conv(desc.arrayLayerCount, descriptor.arrayLayerCount) ||  //
         !conv(desc.format, descriptor.format) ||                    //
         !conv(desc.dimension, descriptor.dimension) ||              //
-        !conv(desc.aspect, descriptor.aspect)) {
+        !conv(desc.aspect, descriptor.aspect) || !conv(desc.label, descriptor.label)) {
         return {};
     }
-    return interop::GPUTextureView::Create<GPUTextureView>(env, texture_.CreateView(&desc));
+    return interop::GPUTextureView::Create<GPUTextureView>(env, desc, texture_.CreateView(&desc));
 }
 
 void GPUTexture::destroy(Napi::Env) {
@@ -115,11 +119,12 @@ interop::GPUFlagsConstant GPUTexture::getUsage(Napi::Env env) {
 }
 
 std::string GPUTexture::getLabel(Napi::Env) {
-    UNIMPLEMENTED();
+    return label_;
 }
 
 void GPUTexture::setLabel(Napi::Env, std::string value) {
-    UNIMPLEMENTED();
+    texture_.SetLabel(value.c_str());
+    label_ = value;
 }
 
 }  // namespace wgpu::binding

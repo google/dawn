@@ -30,7 +30,7 @@ namespace wgpu::binding {
 // wgpu::bindings::GPUQueue
 ////////////////////////////////////////////////////////////////////////////////
 GPUQueue::GPUQueue(wgpu::Queue queue, std::shared_ptr<AsyncRunner> async)
-    : queue_(std::move(queue)), async_(std::move(async)) {}
+    : queue_(std::move(queue)), async_(std::move(async)), label_("") {}
 
 void GPUQueue::submit(Napi::Env env,
                       std::vector<interop::Interface<interop::GPUCommandBuffer>> commandBuffers) {
@@ -141,19 +141,20 @@ void GPUQueue::writeTexture(Napi::Env env,
     queue_.WriteTexture(&dst, src.data, src.size, &layout, &sz);
 }
 
-void GPUQueue::copyExternalImageToTexture(Napi::Env,
+void GPUQueue::copyExternalImageToTexture(Napi::Env env,
                                           interop::GPUImageCopyExternalImage source,
                                           interop::GPUImageCopyTextureTagged destination,
                                           interop::GPUExtent3D copySize) {
-    UNIMPLEMENTED();
+    UNIMPLEMENTED(env);
 }
 
 std::string GPUQueue::getLabel(Napi::Env) {
-    UNIMPLEMENTED();
+    return label_;
 }
 
 void GPUQueue::setLabel(Napi::Env, std::string value) {
-    UNIMPLEMENTED();
+    queue_.SetLabel(value.c_str());
+    label_ = value;
 }
 
 }  // namespace wgpu::binding

@@ -26,14 +26,17 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPURenderBundle
 ////////////////////////////////////////////////////////////////////////////////
-GPURenderBundle::GPURenderBundle(wgpu::RenderBundle bundle) : bundle_(std::move(bundle)) {}
+GPURenderBundle::GPURenderBundle(const wgpu::RenderBundleDescriptor& desc,
+                                 wgpu::RenderBundle bundle)
+    : bundle_(std::move(bundle)), label_(desc.label ? desc.label : "") {}
 
 std::string GPURenderBundle::getLabel(Napi::Env) {
-    UNIMPLEMENTED();
+    return label_;
 }
 
 void GPURenderBundle::setLabel(Napi::Env, std::string value) {
-    UNIMPLEMENTED();
+    bundle_.SetLabel(value.c_str());
+    label_ = value;
 }
 
 }  // namespace wgpu::binding

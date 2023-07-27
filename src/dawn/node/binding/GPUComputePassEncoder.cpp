@@ -28,7 +28,9 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUComputePassEncoder
 ////////////////////////////////////////////////////////////////////////////////
-GPUComputePassEncoder::GPUComputePassEncoder(wgpu::ComputePassEncoder enc) : enc_(std::move(enc)) {}
+GPUComputePassEncoder::GPUComputePassEncoder(const wgpu::ComputePassDescriptor& desc,
+                                             wgpu::ComputePassEncoder enc)
+    : enc_(std::move(enc)), label_(desc.label ? desc.label : "") {}
 
 void GPUComputePassEncoder::setPipeline(Napi::Env,
                                         interop::Interface<interop::GPUComputePipeline> pipeline) {
@@ -115,11 +117,12 @@ void GPUComputePassEncoder::insertDebugMarker(Napi::Env, std::string markerLabel
 }
 
 std::string GPUComputePassEncoder::getLabel(Napi::Env) {
-    UNIMPLEMENTED();
+    return label_;
 }
 
 void GPUComputePassEncoder::setLabel(Napi::Env, std::string value) {
-    UNIMPLEMENTED();
+    enc_.SetLabel(value.c_str());
+    label_ = value;
 }
 
 }  // namespace wgpu::binding

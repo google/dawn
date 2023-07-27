@@ -31,8 +31,10 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUCommandEncoder
 ////////////////////////////////////////////////////////////////////////////////
-GPUCommandEncoder::GPUCommandEncoder(wgpu::Device device, wgpu::CommandEncoder enc)
-    : device_(std::move(device)), enc_(std::move(enc)) {}
+GPUCommandEncoder::GPUCommandEncoder(wgpu::Device device,
+                                     const wgpu::CommandEncoderDescriptor& desc,
+                                     wgpu::CommandEncoder enc)
+    : device_(std::move(device)), enc_(std::move(enc)), label_(desc.label ? desc.label : "") {}
 
 interop::Interface<interop::GPURenderPassEncoder> GPUCommandEncoder::beginRenderPass(
     Napi::Env env,
@@ -58,7 +60,7 @@ interop::Interface<interop::GPURenderPassEncoder> GPUCommandEncoder::beginRender
         return {};
     }
 
-    return interop::GPURenderPassEncoder::Create<GPURenderPassEncoder>(env,
+    return interop::GPURenderPassEncoder::Create<GPURenderPassEncoder>(env, desc,
                                                                        enc_.BeginRenderPass(&desc));
 }
 
@@ -72,9 +74,14 @@ interop::Interface<interop::GPUComputePassEncoder> GPUCommandEncoder::beginCompu
         return {};
     }
 
+    Converter conv(env, device_);
+
     wgpu::ComputePassDescriptor desc{};
+    if (!conv(desc.label, descriptor.label)) {
+        return {};
+    }
     return interop::GPUComputePassEncoder::Create<GPUComputePassEncoder>(
-        env, enc_.BeginComputePass(&desc));
+        env, desc, enc_.BeginComputePass(&desc));
 }
 
 void GPUCommandEncoder::clearBuffer(Napi::Env env,
@@ -224,16 +231,21 @@ void GPUCommandEncoder::resolveQuerySet(Napi::Env env,
 interop::Interface<interop::GPUCommandBuffer> GPUCommandEncoder::finish(
     Napi::Env env,
     interop::GPUCommandBufferDescriptor descriptor) {
+    Converter conv(env);
     wgpu::CommandBufferDescriptor desc{};
-    return interop::GPUCommandBuffer::Create<GPUCommandBuffer>(env, enc_.Finish(&desc));
+    if (!conv(desc.label, descriptor.label)) {
+        return {};
+    }
+    return interop::GPUCommandBuffer::Create<GPUCommandBuffer>(env, desc, enc_.Finish(&desc));
 }
 
 std::string GPUCommandEncoder::getLabel(Napi::Env) {
-    UNIMPLEMENTED();
+    return label_;
 }
 
 void GPUCommandEncoder::setLabel(Napi::Env, std::string value) {
-    UNIMPLEMENTED();
+    enc_.SetLabel(value.c_str());
+    label_ = value;
 }
 
 }  // namespace wgpu::binding

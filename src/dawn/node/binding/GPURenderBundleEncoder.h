@@ -29,7 +29,8 @@ namespace wgpu::binding {
 // wgpu::RenderBundleEncoder.
 class GPURenderBundleEncoder final : public interop::GPURenderBundleEncoder {
   public:
-    explicit GPURenderBundleEncoder(wgpu::RenderBundleEncoder enc);
+    GPURenderBundleEncoder(const wgpu::RenderBundleEncoderDescriptor& desc,
+                           wgpu::RenderBundleEncoder enc);
 
     // interop::GPURenderBundleEncoder interface compliance
     interop::Interface<interop::GPURenderBundle> finish(
@@ -81,6 +82,7 @@ class GPURenderBundleEncoder final : public interop::GPURenderBundleEncoder {
 
   private:
     wgpu::RenderBundleEncoder enc_;
+    std::string label_;
 };
 
 }  // namespace wgpu::binding

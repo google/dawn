@@ -57,6 +57,7 @@ class GPUQueue final : public interop::GPUQueue {
   private:
     wgpu::Queue queue_;
     std::shared_ptr<AsyncRunner> async_;
+    std::string label_;
 };
 
 }  // namespace wgpu::binding

@@ -23,14 +23,16 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUTextureView
 ////////////////////////////////////////////////////////////////////////////////
-GPUTextureView::GPUTextureView(wgpu::TextureView view) : view_(std::move(view)) {}
+GPUTextureView::GPUTextureView(const wgpu::TextureViewDescriptor& desc, wgpu::TextureView view)
+    : view_(std::move(view)), label_(desc.label ? desc.label : "") {}
 
 std::string GPUTextureView::getLabel(Napi::Env) {
-    UNIMPLEMENTED();
+    return label_;
 }
 
 void GPUTextureView::setLabel(Napi::Env, std::string value) {
-    UNIMPLEMENTED();
+    view_.SetLabel(value.c_str());
+    label_ = value;
 }
 
 }  // namespace wgpu::binding

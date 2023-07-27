@@ -29,7 +29,9 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPURenderPassEncoder
 ////////////////////////////////////////////////////////////////////////////////
-GPURenderPassEncoder::GPURenderPassEncoder(wgpu::RenderPassEncoder enc) : enc_(std::move(enc)) {}
+GPURenderPassEncoder::GPURenderPassEncoder(const wgpu::RenderPassDescriptor& desc,
+                                           wgpu::RenderPassEncoder enc)
+    : enc_(std::move(enc)), label_(desc.label ? desc.label : "") {}
 
 void GPURenderPassEncoder::setViewport(Napi::Env,
                                        float x,
@@ -244,11 +246,12 @@ void GPURenderPassEncoder::drawIndexedIndirect(
 }
 
 std::string GPURenderPassEncoder::getLabel(Napi::Env) {
-    UNIMPLEMENTED();
+    return label_;
 }
 
 void GPURenderPassEncoder::setLabel(Napi::Env, std::string value) {
-    UNIMPLEMENTED();
+    enc_.SetLabel(value.c_str());
+    label_ = value;
 }
 
 }  // namespace wgpu::binding

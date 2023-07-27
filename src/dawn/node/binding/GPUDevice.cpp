@@ -126,11 +126,12 @@ class ValidationError : public interop::GPUValidationError {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUDevice
 ////////////////////////////////////////////////////////////////////////////////
-GPUDevice::GPUDevice(Napi::Env env, wgpu::Device device)
+GPUDevice::GPUDevice(Napi::Env env, const wgpu::DeviceDescriptor& desc, wgpu::Device device)
     : env_(env),
       device_(device),
       async_(std::make_shared<AsyncRunner>(env, device)),
-      lost_promise_(env, PROMISE_INFO) {
+      lost_promise_(env, PROMISE_INFO),
+      label_(desc.label ? desc.label : "") {
     device_.SetLoggingCallback(
         [](WGPULoggingType type, char const* message, void* userdata) {
             printf("%s:\n", str(type));
@@ -238,7 +239,8 @@ interop::Interface<interop::GPUTexture> GPUDevice::createTexture(
         !conv(desc.viewFormats, desc.viewFormatCount, descriptor.viewFormats)) {
         return {};
     }
-    return interop::GPUTexture::Create<GPUTexture>(env, device_, device_.CreateTexture(&desc));
+    return interop::GPUTexture::Create<GPUTexture>(env, device_, desc,
+                                                   device_.CreateTexture(&desc));
 }
 
 interop::Interface<interop::GPUSampler> GPUDevice::createSampler(
@@ -260,13 +262,13 @@ interop::Interface<interop::GPUSampler> GPUDevice::createSampler(
         !conv(desc.maxAnisotropy, descriptor.maxAnisotropy)) {
         return {};
     }
-    return interop::GPUSampler::Create<GPUSampler>(env, device_.CreateSampler(&desc));
+    return interop::GPUSampler::Create<GPUSampler>(env, desc, device_.CreateSampler(&desc));
 }
 
 interop::Interface<interop::GPUExternalTexture> GPUDevice::importExternalTexture(
-    Napi::Env,
+    Napi::Env env,
     interop::GPUExternalTextureDescriptor descriptor) {
-    UNIMPLEMENTED();
+    UNIMPLEMENTED(env, {});
 }
 
 interop::Interface<interop::GPUBindGroupLayout> GPUDevice::createBindGroupLayout(
@@ -281,7 +283,7 @@ interop::Interface<interop::GPUBindGroupLayout> GPUDevice::createBindGroupLayout
     }
 
     return interop::GPUBindGroupLayout::Create<GPUBindGroupLayout>(
-        env, device_.CreateBindGroupLayout(&desc));
+        env, desc, device_.CreateBindGroupLayout(&desc));
 }
 
 interop::Interface<interop::GPUPipelineLayout> GPUDevice::createPipelineLayout(
@@ -296,7 +298,7 @@ interop::Interface<interop::GPUPipelineLayout> GPUDevice::createPipelineLayout(
     }
 
     return interop::GPUPipelineLayout::Create<GPUPipelineLayout>(
-        env, device_.CreatePipelineLayout(&desc));
+        env, desc, device_.CreatePipelineLayout(&desc));
 }
 
 interop::Interface<interop::GPUBindGroup> GPUDevice::createBindGroup(
@@ -310,7 +312,7 @@ interop::Interface<interop::GPUBindGroup> GPUDevice::createBindGroup(
         return {};
     }
 
-    return interop::GPUBindGroup::Create<GPUBindGroup>(env, device_.CreateBindGroup(&desc));
+    return interop::GPUBindGroup::Create<GPUBindGroup>(env, desc, device_.CreateBindGroup(&desc));
 }
 
 interop::Interface<interop::GPUShaderModule> GPUDevice::createShaderModule(
@@ -326,7 +328,7 @@ interop::Interface<interop::GPUShaderModule> GPUDevice::createShaderModule(
     sm_desc.nextInChain = &wgsl_desc;
 
     return interop::GPUShaderModule::Create<GPUShaderModule>(
-        env, device_.CreateShaderModule(&sm_desc), async_);
+        env, sm_desc, device_.CreateShaderModule(&sm_desc), async_);
 }
 
 interop::Interface<interop::GPUComputePipeline> GPUDevice::createComputePipeline(
@@ -340,7 +342,7 @@ interop::Interface<interop::GPUComputePipeline> GPUDevice::createComputePipeline
     }
 
     return interop::GPUComputePipeline::Create<GPUComputePipeline>(
-        env, device_.CreateComputePipeline(&desc));
+        env, desc, device_.CreateComputePipeline(&desc));
 }
 
 interop::Interface<interop::GPURenderPipeline> GPUDevice::createRenderPipeline(
@@ -354,7 +356,7 @@ interop::Interface<interop::GPURenderPipeline> GPUDevice::createRenderPipeline(
     }
 
     return interop::GPURenderPipeline::Create<GPURenderPipeline>(
-        env, device_.CreateRenderPipeline(&desc));
+        env, desc, device_.CreateRenderPipeline(&desc));
 }
 
 interop::Promise<interop::Interface<interop::GPUComputePipeline>>
@@ -375,8 +377,10 @@ GPUDevice::createComputePipelineAsync(Napi::Env env,
         Napi::Env env;
         Promise promise;
         AsyncTask task;
+        std::string label;
     };
-    auto ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(async_)};
+    auto ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(async_),
+                           desc.label ? desc.label : ""};
     auto promise = ctx->promise;
 
     device_.CreateComputePipelineAsync(
@@ -387,8 +391,8 @@ GPUDevice::createComputePipelineAsync(Napi::Env env,
 
             switch (status) {
                 case WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Success:
-                    c->promise.Resolve(
-                        interop::GPUComputePipeline::Create<GPUComputePipeline>(c->env, pipeline));
+                    c->promise.Resolve(interop::GPUComputePipeline::Create<GPUComputePipeline>(
+                        c->env, pipeline, c->label));
                     break;
                 default:
                     c->promise.Reject(Errors::OperationError(c->env));
@@ -418,8 +422,10 @@ GPUDevice::createRenderPipelineAsync(Napi::Env env,
         Napi::Env env;
         Promise promise;
         AsyncTask task;
+        std::string label;
     };
-    auto ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(async_)};
+    auto ctx = new Context{env, Promise(env, PROMISE_INFO), AsyncTask(async_),
+                           desc.label ? desc.label : ""};
     auto promise = ctx->promise;
 
     device_.CreateRenderPipelineAsync(
@@ -430,8 +436,8 @@ GPUDevice::createRenderPipelineAsync(Napi::Env env,
 
             switch (status) {
                 case WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Success:
-                    c->promise.Resolve(
-                        interop::GPURenderPipeline::Create<GPURenderPipeline>(c->env, pipeline));
+                    c->promise.Resolve(interop::GPURenderPipeline::Create<GPURenderPipeline>(
+                        c->env, pipeline, c->label));
                     break;
                 default:
                     c->promise.Reject(Errors::OperationError(c->env));
@@ -446,9 +452,13 @@ GPUDevice::createRenderPipelineAsync(Napi::Env env,
 interop::Interface<interop::GPUCommandEncoder> GPUDevice::createCommandEncoder(
     Napi::Env env,
     interop::GPUCommandEncoderDescriptor descriptor) {
+    Converter conv(env, device_);
     wgpu::CommandEncoderDescriptor desc{};
+    if (!conv(desc.label, descriptor.label)) {
+        return {};
+    }
     return interop::GPUCommandEncoder::Create<GPUCommandEncoder>(
-        env, device_, device_.CreateCommandEncoder(&desc));
+        env, device_, desc, device_.CreateCommandEncoder(&desc));
 }
 
 interop::Interface<interop::GPURenderBundleEncoder> GPUDevice::createRenderBundleEncoder(
@@ -467,7 +477,7 @@ interop::Interface<interop::GPURenderBundleEncoder> GPUDevice::createRenderBundl
     }
 
     return interop::GPURenderBundleEncoder::Create<GPURenderBundleEncoder>(
-        env, device_.CreateRenderBundleEncoder(&desc));
+        env, desc, device_.CreateRenderBundleEncoder(&desc));
 }
 
 interop::Interface<interop::GPUQuerySet> GPUDevice::createQuerySet(
@@ -481,7 +491,7 @@ interop::Interface<interop::GPUQuerySet> GPUDevice::createQuerySet(
         return {};
     }
 
-    return interop::GPUQuerySet::Create<GPUQuerySet>(env, device_.CreateQuerySet(&desc));
+    return interop::GPUQuerySet::Create<GPUQuerySet>(env, desc, device_.CreateQuerySet(&desc));
 }
 
 interop::Promise<interop::Interface<interop::GPUDeviceLostInfo>> GPUDevice::getLost(Napi::Env env) {
@@ -553,44 +563,46 @@ interop::Promise<std::optional<interop::Interface<interop::GPUError>>> GPUDevice
 }
 
 std::string GPUDevice::getLabel(Napi::Env) {
-    UNIMPLEMENTED();
+    return label_;
 }
 
 void GPUDevice::setLabel(Napi::Env, std::string value) {
-    UNIMPLEMENTED();
+    device_.SetLabel(value.c_str());
+    label_ = value;
 }
 
-interop::Interface<interop::EventHandler> GPUDevice::getOnuncapturederror(Napi::Env) {
+interop::Interface<interop::EventHandler> GPUDevice::getOnuncapturederror(Napi::Env env) {
     // TODO(dawn:1348): Implement support for the "unhandlederror" event.
-    UNIMPLEMENTED();
+    UNIMPLEMENTED(env, {});
 }
 
-void GPUDevice::setOnuncapturederror(Napi::Env, interop::Interface<interop::EventHandler> value) {
+void GPUDevice::setOnuncapturederror(Napi::Env env,
+                                     interop::Interface<interop::EventHandler> value) {
     // TODO(dawn:1348): Implement support for the "unhandlederror" event.
-    UNIMPLEMENTED();
+    UNIMPLEMENTED(env);
 }
 
 void GPUDevice::addEventListener(
-    Napi::Env,
+    Napi::Env env,
     std::string type,
     std::optional<interop::Interface<interop::EventListener>> callback,
     std::optional<std::variant<interop::AddEventListenerOptions, bool>> options) {
     // TODO(dawn:1348): Implement support for the "unhandlederror" event.
-    UNIMPLEMENTED();
+    UNIMPLEMENTED(env);
 }
 
 void GPUDevice::removeEventListener(
-    Napi::Env,
+    Napi::Env env,
     std::string type,
     std::optional<interop::Interface<interop::EventListener>> callback,
     std::optional<std::variant<interop::EventListenerOptions, bool>> options) {
     // TODO(dawn:1348): Implement support for the "unhandlederror" event.
-    UNIMPLEMENTED();
+    UNIMPLEMENTED(env);
 }
 
-bool GPUDevice::dispatchEvent(Napi::Env, interop::Interface<interop::Event> event) {
+bool GPUDevice::dispatchEvent(Napi::Env env, interop::Interface<interop::Event> event) {
     // TODO(dawn:1348): Implement support for the "unhandlederror" event.
-    UNIMPLEMENTED();
+    UNIMPLEMENTED(env, {});
 }
 
 }  // namespace wgpu::binding

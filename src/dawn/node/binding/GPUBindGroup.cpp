@@ -23,14 +23,16 @@ namespace wgpu::binding {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUBindGroup
 ////////////////////////////////////////////////////////////////////////////////
-GPUBindGroup::GPUBindGroup(wgpu::BindGroup group) : group_(std::move(group)) {}
+GPUBindGroup::GPUBindGroup(const wgpu::BindGroupDescriptor& desc, wgpu::BindGroup group)
+    : group_(std::move(group)), label_(desc.label ? desc.label : "") {}
 
 std::string GPUBindGroup::getLabel(Napi::Env) {
-    UNIMPLEMENTED();
+    return label_;
 }
 
 void GPUBindGroup::setLabel(Napi::Env, std::string value) {
-    UNIMPLEMENTED();
+    group_.SetLabel(value.c_str());
+    label_ = value;
 }
 
 }  // namespace wgpu::binding

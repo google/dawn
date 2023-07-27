@@ -94,7 +94,9 @@ interop::Interface<interop::GPUSupportedLimits> GPUAdapter::getLimits(Napi::Env 
 }
 
 bool GPUAdapter::getIsFallbackAdapter(Napi::Env) {
-    UNIMPLEMENTED();
+    WGPUAdapterProperties adapterProperties = {};
+    adapter_.GetProperties(&adapterProperties);
+    return adapterProperties.adapterType == WGPUAdapterType_CPU;
 }
 
 interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevice(
@@ -143,7 +145,7 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
 
     auto wgpu_device = adapter_.CreateDevice(&desc);
     if (wgpu_device) {
-        promise.Resolve(interop::GPUDevice::Create<GPUDevice>(env, env, wgpu_device));
+        promise.Resolve(interop::GPUDevice::Create<GPUDevice>(env, env, desc, wgpu_device));
     } else {
         promise.Reject(binding::Errors::OperationError(env, "failed to create device"));
     }

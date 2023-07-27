@@ -26,7 +26,7 @@ namespace wgpu::binding {
 // GPUSampler is an implementation of interop::GPUSampler that wraps a wgpu::Sampler.
 class GPUSampler final : public interop::GPUSampler {
   public:
-    explicit GPUSampler(wgpu::Sampler sampler);
+    GPUSampler(const wgpu::SamplerDescriptor& desc, wgpu::Sampler sampler);
 
     // Implicit cast operator to Dawn GPU object
     inline operator const wgpu::Sampler&() const { return sampler_; }
@@ -37,6 +37,7 @@ class GPUSampler final : public interop::GPUSampler {
 
   private:
     wgpu::Sampler sampler_;
+    std::string label_;
 };
 
 }  // namespace wgpu::binding

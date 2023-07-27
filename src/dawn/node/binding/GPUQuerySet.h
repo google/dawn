@@ -27,7 +27,7 @@ namespace wgpu::binding {
 // GPUQuerySet is an implementation of interop::GPUQuerySet that wraps a wgpu::QuerySet.
 class GPUQuerySet final : public interop::GPUQuerySet {
   public:
-    explicit GPUQuerySet(wgpu::QuerySet query_set);
+    GPUQuerySet(const wgpu::QuerySetDescriptor& desc, wgpu::QuerySet query_set);
 
     // Implicit cast operator to Dawn GPU object
     inline operator const wgpu::QuerySet&() const { return query_set_; }
@@ -41,6 +41,7 @@ class GPUQuerySet final : public interop::GPUQuerySet {
 
   private:
     wgpu::QuerySet query_set_;
+    std::string label_;
 };
 
 }  // namespace wgpu::binding

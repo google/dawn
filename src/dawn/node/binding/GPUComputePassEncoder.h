@@ -29,7 +29,7 @@ namespace wgpu::binding {
 // wgpu::ComputePassEncoder.
 class GPUComputePassEncoder final : public interop::GPUComputePassEncoder {
   public:
-    explicit GPUComputePassEncoder(wgpu::ComputePassEncoder enc);
+    GPUComputePassEncoder(const wgpu::ComputePassDescriptor& desc, wgpu::ComputePassEncoder enc);
 
     // Implicit cast operator to Dawn GPU object
     inline operator const wgpu::ComputePassEncoder&() const { return enc_; }
@@ -62,6 +62,7 @@ class GPUComputePassEncoder final : public interop::GPUComputePassEncoder {
 
   private:
     wgpu::ComputePassEncoder enc_;
+    std::string label_;
 };
 
 }  // namespace wgpu::binding

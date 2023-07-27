@@ -28,7 +28,9 @@ namespace wgpu::binding {
 // wgpu::CommandEncoder.
 class GPUCommandEncoder final : public interop::GPUCommandEncoder {
   public:
-    GPUCommandEncoder(wgpu::Device device, wgpu::CommandEncoder enc);
+    GPUCommandEncoder(wgpu::Device device,
+                      const wgpu::CommandEncoderDescriptor& desc,
+                      wgpu::CommandEncoder enc);
 
     // interop::GPUCommandEncoder interface compliance
     interop::Interface<interop::GPURenderPassEncoder> beginRenderPass(
@@ -80,6 +82,7 @@ class GPUCommandEncoder final : public interop::GPUCommandEncoder {
   private:
     wgpu::Device device_;
     wgpu::CommandEncoder enc_;
+    std::string label_;
 };
 
 }  // namespace wgpu::binding

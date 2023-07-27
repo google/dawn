@@ -35,7 +35,8 @@ GPUBuffer::GPUBuffer(wgpu::Buffer buffer,
     : buffer_(std::move(buffer)),
       desc_(desc),
       device_(std::move(device)),
-      async_(std::move(async)) {
+      async_(std::move(async)),
+      label_(desc.label ? desc.label : "") {
     if (desc.mappedAtCreation) {
         state_ = State::MappedAtCreation;
     }
@@ -203,11 +204,12 @@ void GPUBuffer::DetachMappings() {
 }
 
 std::string GPUBuffer::getLabel(Napi::Env) {
-    UNIMPLEMENTED();
+    return label_;
 }
 
 void GPUBuffer::setLabel(Napi::Env, std::string value) {
-    UNIMPLEMENTED();
+    buffer_.SetLabel(value.c_str());
+    label_ = value;
 }
 
 }  // namespace wgpu::binding

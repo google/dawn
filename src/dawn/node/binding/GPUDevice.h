@@ -27,7 +27,7 @@ namespace wgpu::binding {
 // GPUDevice is an implementation of interop::GPUDevice that wraps a wgpu::Device.
 class GPUDevice final : public interop::GPUDevice {
   public:
-    GPUDevice(Napi::Env env, wgpu::Device device);
+    GPUDevice(Napi::Env env, const wgpu::DeviceDescriptor& desc, wgpu::Device device);
     ~GPUDevice();
 
     // interop::GPUDevice interface compliance
@@ -111,6 +111,7 @@ class GPUDevice final : public interop::GPUDevice {
     // This promise's JS object lives as long as the device because it is stored in .lost
     // of the wrapper JS object.
     interop::Promise<interop::Interface<interop::GPUDeviceLostInfo>> lost_promise_;
+    std::string label_;
 
     bool destroyed_ = false;
 };

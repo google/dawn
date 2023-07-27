@@ -661,7 +661,7 @@ class Converter<std::variant<TYPES...>> {
 template <typename T>
 class Converter<Promise<T>> {
   public:
-    static inline Result FromJS(Napi::Env, Napi::Value, Promise<T>&) { UNIMPLEMENTED(); }
+    static inline Result FromJS(Napi::Env env, Napi::Value, Promise<T>&) { UNIMPLEMENTED(env, {}); }
     static inline Napi::Value ToJS(Napi::Env, Promise<T> promise) { return promise; }
 };
 

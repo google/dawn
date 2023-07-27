@@ -190,11 +190,7 @@ This command is then possible to run in your debugger of choice.
 
 ## Known issues
 
-- Many WebGPU CTS tests are currently known to fail
-- Dawn uses special token values for some parameters / fields. These are currently passed straight through to dawn from the JavaScript. discussions: [1](https://dawn-review.googlesource.com/c/dawn/+/64907/5/src/dawn/node/binding/Converter.cpp#167), [2](https://dawn-review.googlesource.com/c/dawn/+/64907/5/src/dawn/node/binding/Converter.cpp#928), [3](https://dawn-review.googlesource.com/c/dawn/+/64909/4/src/dawn/node/binding/GPUTexture.cpp#42)
-- Backend validation is currently always set to 'full' to aid in debugging. This can be extremely slow. [discussion](https://dawn-review.googlesource.com/c/dawn/+/64916/4/src/dawn/node/binding/GPU.cpp#25)
-- Attempting to call `new T` in JavaScript, where `T` is an IDL interface type, should result in a TypeError "Illegal constructor". [discussion](https://dawn-review.googlesource.com/c/dawn/+/64902/9/src/dawn/node/interop/WebGPU.cpp.tmpl#293)
-- `GPUDevice` currently maintains a list of "lost promises". This should return the same promise. [discussion](https://dawn-review.googlesource.com/c/dawn/+/64906/6/src/dawn/node/binding/GPUDevice.h#107)
+See https://bugs.chromium.org/p/dawn/issues/list?q=component%3ADawnNode&can=2 for tracked bugs, and `TODO`s in the code.
 
 ## Remaining work
 
