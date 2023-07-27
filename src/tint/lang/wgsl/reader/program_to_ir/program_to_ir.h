@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_CORE_IR_FROM_PROGRAM_H_
-#define SRC_TINT_LANG_CORE_IR_FROM_PROGRAM_H_
+#ifndef SRC_TINT_LANG_WGSL_READER_PROGRAM_TO_IR_PROGRAM_TO_IR_H_
+#define SRC_TINT_LANG_WGSL_READER_PROGRAM_TO_IR_PROGRAM_TO_IR_H_
 
 #include <string>
 
@@ -25,7 +25,7 @@ namespace tint {
 class Program;
 }  // namespace tint
 
-namespace tint::ir {
+namespace tint::wgsl::reader {
 
 /// Builds an ir::Module from the given Program
 /// @param program the Program to use.
@@ -35,8 +35,8 @@ namespace tint::ir {
 /// @note this assumes the `program.IsValid()`, and has had const-eval done so
 /// any abstract values have been calculated and converted into the relevant
 /// concrete types.
-utils::Result<Module, std::string> FromProgram(const Program* program);
+utils::Result<ir::Module, std::string> ProgramToIR(const Program* program);
 
-}  // namespace tint::ir
+}  // namespace tint::wgsl::reader
 
-#endif  // SRC_TINT_LANG_CORE_IR_FROM_PROGRAM_H_
+#endif  // SRC_TINT_LANG_WGSL_READER_PROGRAM_TO_IR_PROGRAM_TO_IR_H_

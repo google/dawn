@@ -18,14 +18,14 @@
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 
-namespace tint::ir {
+namespace tint::wgsl::reader {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_FromProgramLetTest = ProgramTestHelper;
+using ProgramToIRLetTest = ir::ProgramTestHelper;
 
-TEST_F(IR_FromProgramLetTest, Constant) {
+TEST_F(ProgramToIRLetTest, Constant) {
     WrapInFunction(Let("a", Expr(42_i)));
 
     auto m = Build();
@@ -41,7 +41,7 @@ TEST_F(IR_FromProgramLetTest, Constant) {
 )");
 }
 
-TEST_F(IR_FromProgramLetTest, BinaryOp) {
+TEST_F(ProgramToIRLetTest, BinaryOp) {
     WrapInFunction(Let("a", Add(1_i, 2_i)));
 
     auto m = Build();
@@ -57,7 +57,7 @@ TEST_F(IR_FromProgramLetTest, BinaryOp) {
 )");
 }
 
-TEST_F(IR_FromProgramLetTest, Chain) {
+TEST_F(ProgramToIRLetTest, Chain) {
     WrapInFunction(Let("a", Expr(1_i)),  //
                    Let("b", Expr("a")),  //
                    Let("c", Expr("b")));
@@ -78,4 +78,4 @@ TEST_F(IR_FromProgramLetTest, Chain) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::wgsl::reader

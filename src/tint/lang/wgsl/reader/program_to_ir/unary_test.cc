@@ -18,14 +18,14 @@
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 
-namespace tint::ir {
+namespace tint::wgsl::reader {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_FromProgramUnaryTest = ProgramTestHelper;
+using ProgramToIRUnaryTest = ir::ProgramTestHelper;
 
-TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_Not) {
+TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Not) {
     Func("my_func", utils::Empty, ty.bool_(), utils::Vector{Return(false)});
     auto* expr = Not(Call("my_func"));
     WrapInFunction(expr);
@@ -48,7 +48,7 @@ TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_Not) {
 )");
 }
 
-TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_Not_Vector) {
+TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Not_Vector) {
     Func("my_func", utils::Empty, ty.vec4<bool>(),
          utils::Vector{Return(vec(ty.bool_(), 4, false))});
     auto* expr = Not(Call("my_func"));
@@ -72,7 +72,7 @@ TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_Not_Vector) {
 )");
 }
 
-TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_Complement) {
+TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Complement) {
     Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(1_u)});
     auto* expr = Complement(Call("my_func"));
     WrapInFunction(expr);
@@ -95,7 +95,7 @@ TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_Complement) {
 )");
 }
 
-TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_Negation) {
+TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Negation) {
     Func("my_func", utils::Empty, ty.i32(), utils::Vector{Return(1_i)});
     auto* expr = Negation(Call("my_func"));
     WrapInFunction(expr);
@@ -118,7 +118,7 @@ TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_Negation) {
 )");
 }
 
-TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_AddressOf) {
+TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_AddressOf) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.i32());
 
     auto* expr = Decl(Let("v2", AddressOf("v1")));
@@ -140,7 +140,7 @@ TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_AddressOf) {
 )");
 }
 
-TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_Indirection) {
+TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Indirection) {
     GlobalVar("v1", builtin::AddressSpace::kPrivate, ty.i32());
     utils::Vector stmts = {
         Decl(Let("v3", AddressOf("v1"))),
@@ -166,4 +166,4 @@ TEST_F(IR_FromProgramUnaryTest, EmitExpression_Unary_Indirection) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::wgsl::reader

@@ -18,15 +18,15 @@
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 
-namespace tint::ir {
+namespace tint::wgsl::reader {
 namespace {
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-using IR_FromProgramVarTest = ProgramTestHelper;
+using ProgramToIRVarTest = ir::ProgramTestHelper;
 
-TEST_F(IR_FromProgramVarTest, Emit_GlobalVar_NoInit) {
+TEST_F(ProgramToIRVarTest, Emit_GlobalVar_NoInit) {
     GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate);
 
     auto m = Build();
@@ -39,7 +39,7 @@ TEST_F(IR_FromProgramVarTest, Emit_GlobalVar_NoInit) {
 )");
 }
 
-TEST_F(IR_FromProgramVarTest, Emit_GlobalVar_Init) {
+TEST_F(ProgramToIRVarTest, Emit_GlobalVar_Init) {
     auto* expr = Expr(2_u);
     GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate, expr);
 
@@ -53,7 +53,7 @@ TEST_F(IR_FromProgramVarTest, Emit_GlobalVar_Init) {
 )");
 }
 
-TEST_F(IR_FromProgramVarTest, Emit_GlobalVar_GroupBinding) {
+TEST_F(ProgramToIRVarTest, Emit_GlobalVar_GroupBinding) {
     GlobalVar("a", ty.u32(), builtin::AddressSpace::kStorage,
               utils::Vector{Group(2_u), Binding(3_u)});
 
@@ -67,7 +67,7 @@ TEST_F(IR_FromProgramVarTest, Emit_GlobalVar_GroupBinding) {
 )");
 }
 
-TEST_F(IR_FromProgramVarTest, Emit_Var_NoInit) {
+TEST_F(ProgramToIRVarTest, Emit_Var_NoInit) {
     auto* a = Var("a", ty.u32(), builtin::AddressSpace::kFunction);
     WrapInFunction(a);
 
@@ -84,7 +84,7 @@ TEST_F(IR_FromProgramVarTest, Emit_Var_NoInit) {
 )");
 }
 
-TEST_F(IR_FromProgramVarTest, Emit_Var_Init_Constant) {
+TEST_F(ProgramToIRVarTest, Emit_Var_Init_Constant) {
     auto* expr = Expr(2_u);
     auto* a = Var("a", ty.u32(), builtin::AddressSpace::kFunction, expr);
     WrapInFunction(a);
@@ -102,7 +102,7 @@ TEST_F(IR_FromProgramVarTest, Emit_Var_Init_Constant) {
 )");
 }
 
-TEST_F(IR_FromProgramVarTest, Emit_Var_Init_NonConstant) {
+TEST_F(ProgramToIRVarTest, Emit_Var_Init_NonConstant) {
     auto* a = Var("a", ty.u32(), builtin::AddressSpace::kFunction);
     auto* b = Var("b", ty.u32(), builtin::AddressSpace::kFunction, Add("a", 2_u));
     WrapInFunction(a, b);
@@ -123,7 +123,7 @@ TEST_F(IR_FromProgramVarTest, Emit_Var_Init_NonConstant) {
 )");
 }
 
-TEST_F(IR_FromProgramVarTest, Emit_Var_Assign_42i) {
+TEST_F(ProgramToIRVarTest, Emit_Var_Assign_42i) {
     WrapInFunction(Var("a", ty.i32(), builtin::AddressSpace::kFunction),  //
                    Assign("a", 42_i));
 
@@ -141,7 +141,7 @@ TEST_F(IR_FromProgramVarTest, Emit_Var_Assign_42i) {
 )");
 }
 
-TEST_F(IR_FromProgramVarTest, Emit_Var_Assign_ArrayOfArray_EvalOrder) {
+TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfArray_EvalOrder) {
     Func("f", utils::Vector{Param("p", ty.i32())}, ty.i32(), utils::Vector{Return("p")});
 
     auto* lhs =                                 //
@@ -192,7 +192,7 @@ TEST_F(IR_FromProgramVarTest, Emit_Var_Assign_ArrayOfArray_EvalOrder) {
 )");
 }
 
-TEST_F(IR_FromProgramVarTest, Emit_Var_Assign_ArrayOfVec_EvalOrder) {
+TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfVec_EvalOrder) {
     Func("f", utils::Vector{Param("p", ty.i32())}, ty.i32(), utils::Vector{Return("p")});
 
     auto* lhs =                             //
@@ -236,7 +236,7 @@ TEST_F(IR_FromProgramVarTest, Emit_Var_Assign_ArrayOfVec_EvalOrder) {
 )");
 }
 
-TEST_F(IR_FromProgramVarTest, Emit_Var_Assign_ArrayOfMatrix_EvalOrder) {
+TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfMatrix_EvalOrder) {
     Func("f", utils::Vector{Param("p", ty.i32())}, ty.i32(), utils::Vector{Return("p")});
 
     auto* lhs =                                 //
@@ -286,7 +286,7 @@ TEST_F(IR_FromProgramVarTest, Emit_Var_Assign_ArrayOfMatrix_EvalOrder) {
 )");
 }
 
-TEST_F(IR_FromProgramVarTest, Emit_Var_CompoundAssign_42i) {
+TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_42i) {
     WrapInFunction(Var("a", ty.i32(), builtin::AddressSpace::kFunction),  //
                    CompoundAssign("a", 42_i, ast::BinaryOp::kAdd));
 
@@ -306,7 +306,7 @@ TEST_F(IR_FromProgramVarTest, Emit_Var_CompoundAssign_42i) {
 )");
 }
 
-TEST_F(IR_FromProgramVarTest, Emit_Var_CompoundAssign_ArrayOfArray_EvalOrder) {
+TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_ArrayOfArray_EvalOrder) {
     Func("f", utils::Vector{Param("p", ty.i32())}, ty.i32(), utils::Vector{Return("p")});
 
     auto* lhs =                                 //
@@ -359,7 +359,7 @@ TEST_F(IR_FromProgramVarTest, Emit_Var_CompoundAssign_ArrayOfArray_EvalOrder) {
 )");
 }
 
-TEST_F(IR_FromProgramVarTest, Emit_Var_CompoundAssign_ArrayOfMatrix_EvalOrder) {
+TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_ArrayOfMatrix_EvalOrder) {
     Func("f", utils::Vector{Param("p", ty.i32())}, ty.i32(), utils::Vector{Return("p")});
 
     auto* lhs =                                 //
@@ -412,4 +412,4 @@ TEST_F(IR_FromProgramVarTest, Emit_Var_CompoundAssign_ArrayOfMatrix_EvalOrder) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::wgsl::reader

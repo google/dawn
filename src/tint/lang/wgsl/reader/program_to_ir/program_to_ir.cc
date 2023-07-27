@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/core/ir/from_program.h"
+#include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 
 #include <iostream>
 #include <unordered_map>
@@ -106,11 +106,11 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::ir {
+namespace tint::wgsl::reader {
 
 namespace {
 
-using ResultType = utils::Result<Module, diag::List>;
+using ResultType = utils::Result<ir::Module, diag::List>;
 
 /// Impl is the private-implementation of FromProgram().
 class Impl {
@@ -130,10 +130,10 @@ class Impl {
     const Program* program_ = nullptr;
 
     /// The IR module being built
-    Module mod;
+    ir::Module mod;
 
     /// The IR builder being used by the impl.
-    Builder builder_{mod};
+    ir::Builder builder_{mod};
 
     // The clone context used to clone data from #program_
     constant::CloneContext clone_ctx_{
@@ -145,7 +145,7 @@ class Impl {
     };
 
     /// The stack of flow control instructions.
-    utils::Vector<ControlInstruction*, 8> control_stack_;
+    utils::Vector<ir::ControlInstruction*, 8> control_stack_;
 
     struct VectorRefElementAccess {
         ir::Value* vector = nullptr;
@@ -155,13 +155,13 @@ class Impl {
     using ValueOrVecElAccess = std::variant<ir::Value*, VectorRefElementAccess>;
 
     /// The current block for expressions.
-    Block* current_block_ = nullptr;
+    ir::Block* current_block_ = nullptr;
 
     /// The current function being processed.
-    Function* current_function_ = nullptr;
+    ir::Function* current_function_ = nullptr;
 
     /// The current stack of scopes being processed.
-    ScopeStack<Symbol, Value*> scopes_;
+    ScopeStack<Symbol, ir::Value*> scopes_;
 
     /// The diagnostic that have been raised.
     diag::List diagnostics_;
@@ -178,7 +178,7 @@ class Impl {
 
     class ControlStackScope : public StackScope {
       public:
-        ControlStackScope(Impl* impl, ControlInstruction* b) : StackScope(impl) {
+        ControlStackScope(Impl* impl, ir::ControlInstruction* b) : StackScope(impl) {
             impl_->control_stack_.Push(b);
         }
 
@@ -191,7 +191,7 @@ class Impl {
 
     bool NeedTerminator() { return current_block_ && !current_block_->HasTerminator(); }
 
-    void SetTerminator(Terminator* terminator) {
+    void SetTerminator(ir::Terminator* terminator) {
         TINT_ASSERT(IR, current_block_);
         TINT_ASSERT(IR, !current_block_->HasTerminator());
 
@@ -199,15 +199,15 @@ class Impl {
         current_block_ = nullptr;
     }
 
-    Instruction* FindEnclosingControl(ControlFlags flags) {
+    ir::Instruction* FindEnclosingControl(ControlFlags flags) {
         for (auto it = control_stack_.rbegin(); it != control_stack_.rend(); ++it) {
-            if ((*it)->Is<Loop>()) {
+            if ((*it)->Is<ir::Loop>()) {
                 return *it;
             }
             if (flags == ControlFlags::kExcludeSwitch) {
                 continue;
             }
-            if ((*it)->Is<Switch>()) {
+            if ((*it)->Is<ir::Switch>()) {
                 return *it;
             }
         }
@@ -289,13 +289,13 @@ class Impl {
         if (ast_func->IsEntryPoint()) {
             switch (ast_func->PipelineStage()) {
                 case ast::PipelineStage::kVertex:
-                    ir_func->SetStage(Function::PipelineStage::kVertex);
+                    ir_func->SetStage(ir::Function::PipelineStage::kVertex);
                     break;
                 case ast::PipelineStage::kFragment:
-                    ir_func->SetStage(Function::PipelineStage::kFragment);
+                    ir_func->SetStage(ir::Function::PipelineStage::kFragment);
                     break;
                 case ast::PipelineStage::kCompute: {
-                    ir_func->SetStage(Function::PipelineStage::kCompute);
+                    ir_func->SetStage(ir::Function::PipelineStage::kCompute);
 
                     auto wg_size = sem->WorkgroupSize();
                     ir_func->SetWorkgroupSize(wg_size[0].value(), wg_size[1].value_or(1),
@@ -325,13 +325,16 @@ class Impl {
                                     ->As<sem::BuiltinEnumExpression<builtin::BuiltinValue>>()) {
                             switch (ident_sem->Value()) {
                                 case builtin::BuiltinValue::kPosition:
-                                    ir_func->SetReturnBuiltin(Function::ReturnBuiltin::kPosition);
+                                    ir_func->SetReturnBuiltin(
+                                        ir::Function::ReturnBuiltin::kPosition);
                                     break;
                                 case builtin::BuiltinValue::kFragDepth:
-                                    ir_func->SetReturnBuiltin(Function::ReturnBuiltin::kFragDepth);
+                                    ir_func->SetReturnBuiltin(
+                                        ir::Function::ReturnBuiltin::kFragDepth);
                                     break;
                                 case builtin::BuiltinValue::kSampleMask:
-                                    ir_func->SetReturnBuiltin(Function::ReturnBuiltin::kSampleMask);
+                                    ir_func->SetReturnBuiltin(
+                                        ir::Function::ReturnBuiltin::kSampleMask);
                                     break;
                                 default:
                                     TINT_ICE(IR, diagnostics_)
@@ -353,7 +356,7 @@ class Impl {
         scopes_.Push();
         TINT_DEFER(scopes_.Pop());
 
-        utils::Vector<FunctionParam*, 1> params;
+        utils::Vector<ir::FunctionParam*, 1> params;
         for (auto* p : ast_func->params) {
             const auto* param_sem = program_->Sem().Get(p)->As<sem::Parameter>();
             auto* ty = param_sem->Type()->Clone(clone_ctx_.type_ctx);
@@ -376,38 +379,40 @@ class Impl {
                                     ->As<sem::BuiltinEnumExpression<builtin::BuiltinValue>>()) {
                             switch (ident_sem->Value()) {
                                 case builtin::BuiltinValue::kVertexIndex:
-                                    param->SetBuiltin(FunctionParam::Builtin::kVertexIndex);
+                                    param->SetBuiltin(ir::FunctionParam::Builtin::kVertexIndex);
                                     break;
                                 case builtin::BuiltinValue::kInstanceIndex:
-                                    param->SetBuiltin(FunctionParam::Builtin::kInstanceIndex);
+                                    param->SetBuiltin(ir::FunctionParam::Builtin::kInstanceIndex);
                                     break;
                                 case builtin::BuiltinValue::kPosition:
-                                    param->SetBuiltin(FunctionParam::Builtin::kPosition);
+                                    param->SetBuiltin(ir::FunctionParam::Builtin::kPosition);
                                     break;
                                 case builtin::BuiltinValue::kFrontFacing:
-                                    param->SetBuiltin(FunctionParam::Builtin::kFrontFacing);
+                                    param->SetBuiltin(ir::FunctionParam::Builtin::kFrontFacing);
                                     break;
                                 case builtin::BuiltinValue::kLocalInvocationId:
-                                    param->SetBuiltin(FunctionParam::Builtin::kLocalInvocationId);
+                                    param->SetBuiltin(
+                                        ir::FunctionParam::Builtin::kLocalInvocationId);
                                     break;
                                 case builtin::BuiltinValue::kLocalInvocationIndex:
                                     param->SetBuiltin(
-                                        FunctionParam::Builtin::kLocalInvocationIndex);
+                                        ir::FunctionParam::Builtin::kLocalInvocationIndex);
                                     break;
                                 case builtin::BuiltinValue::kGlobalInvocationId:
-                                    param->SetBuiltin(FunctionParam::Builtin::kGlobalInvocationId);
+                                    param->SetBuiltin(
+                                        ir::FunctionParam::Builtin::kGlobalInvocationId);
                                     break;
                                 case builtin::BuiltinValue::kWorkgroupId:
-                                    param->SetBuiltin(FunctionParam::Builtin::kWorkgroupId);
+                                    param->SetBuiltin(ir::FunctionParam::Builtin::kWorkgroupId);
                                     break;
                                 case builtin::BuiltinValue::kNumWorkgroups:
-                                    param->SetBuiltin(FunctionParam::Builtin::kNumWorkgroups);
+                                    param->SetBuiltin(ir::FunctionParam::Builtin::kNumWorkgroups);
                                     break;
                                 case builtin::BuiltinValue::kSampleIndex:
-                                    param->SetBuiltin(FunctionParam::Builtin::kSampleIndex);
+                                    param->SetBuiltin(ir::FunctionParam::Builtin::kSampleIndex);
                                     break;
                                 case builtin::BuiltinValue::kSampleMask:
-                                    param->SetBuiltin(FunctionParam::Builtin::kSampleMask);
+                                    param->SetBuiltin(ir::FunctionParam::Builtin::kSampleMask);
                                     break;
                                 default:
                                     TINT_ICE(IR, diagnostics_)
@@ -740,7 +745,7 @@ class Impl {
 
         const auto* sem = program_->Sem().Get(stmt);
         for (const auto* c : sem->Cases()) {
-            utils::Vector<Switch::CaseSelector, 4> selectors;
+            utils::Vector<ir::Switch::CaseSelector, 4> selectors;
             for (const auto* selector : c->Selectors()) {
                 if (selector->IsDefault()) {
                     selectors.Push({nullptr});
@@ -759,7 +764,7 @@ class Impl {
     }
 
     void EmitReturn(const ast::ReturnStatement* stmt) {
-        Value* ret_value = nullptr;
+        ir::Value* ret_value = nullptr;
         if (stmt->value) {
             auto ret = EmitValueExpression(stmt->value);
             if (!ret) {
@@ -778,9 +783,9 @@ class Impl {
         auto* current_control = FindEnclosingControl(ControlFlags::kNone);
         TINT_ASSERT(IR, current_control);
 
-        if (auto* c = current_control->As<Loop>()) {
+        if (auto* c = current_control->As<ir::Loop>()) {
             SetTerminator(builder_.ExitLoop(c));
-        } else if (auto* s = current_control->As<Switch>()) {
+        } else if (auto* s = current_control->As<ir::Switch>()) {
             SetTerminator(builder_.ExitSwitch(s));
         } else {
             TINT_UNREACHABLE(IR, diagnostics_);
@@ -791,7 +796,7 @@ class Impl {
         auto* current_control = FindEnclosingControl(ControlFlags::kExcludeSwitch);
         TINT_ASSERT(IR, current_control);
 
-        if (auto* c = current_control->As<Loop>()) {
+        if (auto* c = current_control->As<ir::Loop>()) {
             SetTerminator(builder_.Continue(c));
         } else {
             TINT_UNREACHABLE(IR, diagnostics_);
@@ -871,9 +876,9 @@ class Impl {
                 return *val;
             }
 
-            Value* GetValue(const ast::Expression* expr) {
+            ir::Value* GetValue(const ast::Expression* expr) {
                 auto res = Get(expr);
-                if (auto** val = std::get_if<Value*>(&res)) {
+                if (auto** val = std::get_if<ir::Value*>(&res)) {
                     return *val;
                 }
                 TINT_ICE(IR, impl.diagnostics_) << "expression did not resolve to a value";
@@ -887,7 +892,7 @@ class Impl {
 
             void PopBlock() { impl.current_block_ = blocks.Pop(); }
 
-            Value* EmitConstant(const ast::Expression* expr) {
+            ir::Value* EmitConstant(const ast::Expression* expr) {
                 if (auto* sem = impl.program_->Sem().GetVal(expr)) {
                     if (auto* v = sem->ConstantValue()) {
                         if (auto* cv = v->Clone(impl.clone_ctx_)) {
@@ -961,8 +966,8 @@ class Impl {
                 // If the object is an unnamed value (a subexpression, not a let) and is the result
                 // of another access, then we can just append the index to that access.
                 if (!impl.mod.NameOf(obj).IsValid()) {
-                    if (auto* inst_res = obj->As<InstructionResult>()) {
-                        if (auto* access = inst_res->Source()->As<Access>()) {
+                    if (auto* inst_res = obj->As<ir::InstructionResult>()) {
+                        if (auto* access = inst_res->Source()->As<ir::Access>()) {
                             access->AddIndex(index);
                             access->Result()->SetType(ty);
                             bindings_.Remove(expr->object);
@@ -994,7 +999,7 @@ class Impl {
                 if (!rhs) {
                     return;
                 }
-                Binary* inst = impl.BinaryOp(ty, lhs, rhs, b->op);
+                ir::Binary* inst = impl.BinaryOp(ty, lhs, rhs, b->op);
                 if (!inst) {
                     return;
                 }
@@ -1009,7 +1014,7 @@ class Impl {
                 }
                 auto* sem = impl.program_->Sem().Get(expr);
                 auto* ty = sem->Type()->Clone(impl.clone_ctx_.type_ctx);
-                Instruction* inst = nullptr;
+                ir::Instruction* inst = nullptr;
                 switch (expr->op) {
                     case ast::UnaryOp::kAddressOf:
                     case ast::UnaryOp::kIndirection:
@@ -1057,7 +1062,7 @@ class Impl {
                         return;
                     }
                 }
-                utils::Vector<Value*, 8> args;
+                utils::Vector<ir::Value*, 8> args;
                 args.Reserve(expr->args.Length());
                 // Emit the arguments
                 for (const auto* arg : expr->args) {
@@ -1075,7 +1080,7 @@ class Impl {
                     return;
                 }
                 auto* ty = sem->Target()->ReturnType()->Clone(impl.clone_ctx_.type_ctx);
-                Instruction* inst = nullptr;
+                ir::Instruction* inst = nullptr;
                 // If this is a builtin function, emit the specific builtin value
                 if (auto* b = sem->Target()->As<sem::Builtin>()) {
                     inst = impl.builder_.Call(ty, b->Type(), args);
@@ -1193,7 +1198,7 @@ class Impl {
 
             void EndShortCircuit(const ast::BinaryExpression* b) {
                 auto res = GetValue(b);
-                auto* src = res->As<InstructionResult>()->Source();
+                auto* src = res->As<ir::InstructionResult>()->Source();
                 auto* if_ = src->As<ir::If>();
                 TINT_ASSERT_OR_RETURN(IR, if_);
                 auto rhs = GetValue(b->rhs);
@@ -1261,9 +1266,9 @@ class Impl {
         return Emitter(*this).Emit(root);
     }
 
-    Value* EmitValueExpression(const ast::Expression* root) {
+    ir::Value* EmitValueExpression(const ast::Expression* root) {
         auto res = EmitExpression(root);
-        if (auto** val = std::get_if<Value*>(&res)) {
+        if (auto** val = std::get_if<ir::Value*>(&res)) {
             return *val;
         }
         TINT_ICE(IR, diagnostics_) << "expression did not resolve to a value";
@@ -1396,7 +1401,7 @@ class Impl {
 
 }  // namespace
 
-utils::Result<Module, std::string> FromProgram(const Program* program) {
+utils::Result<ir::Module, std::string> ProgramToIR(const Program* program) {
     if (!program->IsValid()) {
         return std::string("input program is not valid");
     }
@@ -1410,4 +1415,4 @@ utils::Result<Module, std::string> FromProgram(const Program* program) {
     return r.Move();
 }
 
-}  // namespace tint::ir
+}  // namespace tint::wgsl::reader

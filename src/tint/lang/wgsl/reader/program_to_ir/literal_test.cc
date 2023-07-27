@@ -21,10 +21,10 @@
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 
-namespace tint::ir {
+namespace tint::wgsl::reader {
 namespace {
 
-Value* GlobalVarInitializer(Module& m) {
+ir::Value* GlobalVarInitializer(ir::Module& m) {
     if (m.root_block->Length() == 0u) {
         ADD_FAILURE() << "m.root_block has no instruction";
         return nullptr;
@@ -41,9 +41,9 @@ Value* GlobalVarInitializer(Module& m) {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_FromProgramLiteralTest = ProgramTestHelper;
+using ProgramToIRLiteralTest = ir::ProgramTestHelper;
 
-TEST_F(IR_FromProgramLiteralTest, EmitLiteral_Bool_True) {
+TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_True) {
     auto* expr = Expr(true);
     GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate, expr);
 
@@ -51,13 +51,13 @@ TEST_F(IR_FromProgramLiteralTest, EmitLiteral_Bool_True) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto* init = GlobalVarInitializer(m.Get());
-    ASSERT_TRUE(Is<Constant>(init));
-    auto* val = init->As<Constant>()->Value();
+    ASSERT_TRUE(Is<ir::Constant>(init));
+    auto* val = init->As<ir::Constant>()->Value();
     EXPECT_TRUE(val->Is<constant::Scalar<bool>>());
     EXPECT_TRUE(val->As<constant::Scalar<bool>>()->ValueAs<bool>());
 }
 
-TEST_F(IR_FromProgramLiteralTest, EmitLiteral_Bool_False) {
+TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_False) {
     auto* expr = Expr(false);
     GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate, expr);
 
@@ -65,13 +65,13 @@ TEST_F(IR_FromProgramLiteralTest, EmitLiteral_Bool_False) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto* init = GlobalVarInitializer(m.Get());
-    ASSERT_TRUE(Is<Constant>(init));
-    auto* val = init->As<Constant>()->Value();
+    ASSERT_TRUE(Is<ir::Constant>(init));
+    auto* val = init->As<ir::Constant>()->Value();
     EXPECT_TRUE(val->Is<constant::Scalar<bool>>());
     EXPECT_FALSE(val->As<constant::Scalar<bool>>()->ValueAs<bool>());
 }
 
-TEST_F(IR_FromProgramLiteralTest, EmitLiteral_Bool_Deduped) {
+TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_Deduped) {
     GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate, Expr(true));
     GlobalVar("b", ty.bool_(), builtin::AddressSpace::kPrivate, Expr(false));
     GlobalVar("c", ty.bool_(), builtin::AddressSpace::kPrivate, Expr(true));
@@ -101,7 +101,7 @@ TEST_F(IR_FromProgramLiteralTest, EmitLiteral_Bool_Deduped) {
     ASSERT_NE(var_a->Initializer(), var_b->Initializer());
 }
 
-TEST_F(IR_FromProgramLiteralTest, EmitLiteral_F32) {
+TEST_F(ProgramToIRLiteralTest, EmitLiteral_F32) {
     auto* expr = Expr(1.2_f);
     GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate, expr);
 
@@ -109,13 +109,13 @@ TEST_F(IR_FromProgramLiteralTest, EmitLiteral_F32) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto* init = GlobalVarInitializer(m.Get());
-    ASSERT_TRUE(Is<Constant>(init));
-    auto* val = init->As<Constant>()->Value();
+    ASSERT_TRUE(Is<ir::Constant>(init));
+    auto* val = init->As<ir::Constant>()->Value();
     EXPECT_TRUE(val->Is<constant::Scalar<f32>>());
     EXPECT_EQ(1.2_f, val->As<constant::Scalar<f32>>()->ValueAs<f32>());
 }
 
-TEST_F(IR_FromProgramLiteralTest, EmitLiteral_F32_Deduped) {
+TEST_F(ProgramToIRLiteralTest, EmitLiteral_F32_Deduped) {
     GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate, Expr(1.2_f));
     GlobalVar("b", ty.f32(), builtin::AddressSpace::kPrivate, Expr(1.25_f));
     GlobalVar("c", ty.f32(), builtin::AddressSpace::kPrivate, Expr(1.2_f));
@@ -139,7 +139,7 @@ TEST_F(IR_FromProgramLiteralTest, EmitLiteral_F32_Deduped) {
     ASSERT_NE(var_a->Initializer(), var_b->Initializer());
 }
 
-TEST_F(IR_FromProgramLiteralTest, EmitLiteral_F16) {
+TEST_F(ProgramToIRLiteralTest, EmitLiteral_F16) {
     Enable(builtin::Extension::kF16);
     auto* expr = Expr(1.2_h);
     GlobalVar("a", ty.f16(), builtin::AddressSpace::kPrivate, expr);
@@ -148,13 +148,13 @@ TEST_F(IR_FromProgramLiteralTest, EmitLiteral_F16) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto* init = GlobalVarInitializer(m.Get());
-    ASSERT_TRUE(Is<Constant>(init));
-    auto* val = init->As<Constant>()->Value();
+    ASSERT_TRUE(Is<ir::Constant>(init));
+    auto* val = init->As<ir::Constant>()->Value();
     EXPECT_TRUE(val->Is<constant::Scalar<f16>>());
     EXPECT_EQ(1.2_h, val->As<constant::Scalar<f16>>()->ValueAs<f32>());
 }
 
-TEST_F(IR_FromProgramLiteralTest, EmitLiteral_F16_Deduped) {
+TEST_F(ProgramToIRLiteralTest, EmitLiteral_F16_Deduped) {
     Enable(builtin::Extension::kF16);
     GlobalVar("a", ty.f16(), builtin::AddressSpace::kPrivate, Expr(1.2_h));
     GlobalVar("b", ty.f16(), builtin::AddressSpace::kPrivate, Expr(1.25_h));
@@ -179,7 +179,7 @@ TEST_F(IR_FromProgramLiteralTest, EmitLiteral_F16_Deduped) {
     ASSERT_NE(var_a->Initializer(), var_b->Initializer());
 }
 
-TEST_F(IR_FromProgramLiteralTest, EmitLiteral_I32) {
+TEST_F(ProgramToIRLiteralTest, EmitLiteral_I32) {
     auto* expr = Expr(-2_i);
     GlobalVar("a", ty.i32(), builtin::AddressSpace::kPrivate, expr);
 
@@ -187,13 +187,13 @@ TEST_F(IR_FromProgramLiteralTest, EmitLiteral_I32) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto* init = GlobalVarInitializer(m.Get());
-    ASSERT_TRUE(Is<Constant>(init));
-    auto* val = init->As<Constant>()->Value();
+    ASSERT_TRUE(Is<ir::Constant>(init));
+    auto* val = init->As<ir::Constant>()->Value();
     EXPECT_TRUE(val->Is<constant::Scalar<i32>>());
     EXPECT_EQ(-2_i, val->As<constant::Scalar<i32>>()->ValueAs<f32>());
 }
 
-TEST_F(IR_FromProgramLiteralTest, EmitLiteral_I32_Deduped) {
+TEST_F(ProgramToIRLiteralTest, EmitLiteral_I32_Deduped) {
     GlobalVar("a", ty.i32(), builtin::AddressSpace::kPrivate, Expr(-2_i));
     GlobalVar("b", ty.i32(), builtin::AddressSpace::kPrivate, Expr(2_i));
     GlobalVar("c", ty.i32(), builtin::AddressSpace::kPrivate, Expr(-2_i));
@@ -217,7 +217,7 @@ TEST_F(IR_FromProgramLiteralTest, EmitLiteral_I32_Deduped) {
     ASSERT_NE(var_a->Initializer(), var_b->Initializer());
 }
 
-TEST_F(IR_FromProgramLiteralTest, EmitLiteral_U32) {
+TEST_F(ProgramToIRLiteralTest, EmitLiteral_U32) {
     auto* expr = Expr(2_u);
     GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate, expr);
 
@@ -225,13 +225,13 @@ TEST_F(IR_FromProgramLiteralTest, EmitLiteral_U32) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto* init = GlobalVarInitializer(m.Get());
-    ASSERT_TRUE(Is<Constant>(init));
-    auto* val = init->As<Constant>()->Value();
+    ASSERT_TRUE(Is<ir::Constant>(init));
+    auto* val = init->As<ir::Constant>()->Value();
     EXPECT_TRUE(val->Is<constant::Scalar<u32>>());
     EXPECT_EQ(2_u, val->As<constant::Scalar<u32>>()->ValueAs<f32>());
 }
 
-TEST_F(IR_FromProgramLiteralTest, EmitLiteral_U32_Deduped) {
+TEST_F(ProgramToIRLiteralTest, EmitLiteral_U32_Deduped) {
     GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate, Expr(2_u));
     GlobalVar("b", ty.u32(), builtin::AddressSpace::kPrivate, Expr(3_u));
     GlobalVar("c", ty.u32(), builtin::AddressSpace::kPrivate, Expr(2_u));
@@ -256,4 +256,4 @@ TEST_F(IR_FromProgramLiteralTest, EmitLiteral_U32_Deduped) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::wgsl::reader

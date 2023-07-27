@@ -47,10 +47,10 @@
 #include "tint/tint.h"
 
 #if TINT_BUILD_IR
-#include "src/tint/lang/core/ir/disassembler.h"  // nogncheck
-#include "src/tint/lang/core/ir/from_program.h"  // nogncheck
-#include "src/tint/lang/core/ir/module.h"        // nogncheck
-#endif                                           // TINT_BUILD_IR
+#include "src/tint/lang/core/ir/disassembler.h"                     // nogncheck
+#include "src/tint/lang/core/ir/module.h"                           // nogncheck
+#include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"  // nogncheck
+#endif                                                              // TINT_BUILD_IR
 
 #if TINT_BUILD_SPV_WRITER
 #define SPV_WRITER_ONLY(x) x
@@ -1039,9 +1039,9 @@ int main(int argc, const char** argv) {
     }
 #endif  // TINT_BUILD_SYNTAX_TREE_WRITER
 
-#if TINT_BUILD_IR
+#if TINT_BUILD_WGSL_READER && TINT_BUILD_IR
     if (options.dump_ir) {
-        auto result = tint::ir::FromProgram(program.get());
+        auto result = tint::wgsl::reader::ProgramToIR(program.get());
         if (!result) {
             std::cerr << "Failed to build IR from program: " << result.Failure() << std::endl;
         } else {
@@ -1052,7 +1052,7 @@ int main(int argc, const char** argv) {
             }
         }
     }
-#endif  // TINT_BUILD_IR
+#endif  // TINT_BUILD_WGSL_READER && TINT_BUILD_IR
 
     tint::inspector::Inspector inspector(program.get());
     if (options.dump_inspector_bindings) {

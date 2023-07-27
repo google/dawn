@@ -18,15 +18,15 @@
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 
-namespace tint::ir {
+namespace tint::wgsl::reader {
 namespace {
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-using IR_FromProgramFunctionTest = ProgramTestHelper;
+using ProgramToIRFunctionTest = ir::ProgramTestHelper;
 
-TEST_F(IR_FromProgramFunctionTest, EmitFunction_Vertex) {
+TEST_F(ProgramToIRFunctionTest, EmitFunction_Vertex) {
     Func("test", utils::Empty, ty.vec4<f32>(),
          utils::Vector{Return(Call<vec4<f32>>(0_f, 0_f, 0_f, 0_f))},
          utils::Vector{Stage(ast::PipelineStage::kVertex)},
@@ -43,7 +43,7 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_Vertex) {
 )");
 }
 
-TEST_F(IR_FromProgramFunctionTest, EmitFunction_Fragment) {
+TEST_F(ProgramToIRFunctionTest, EmitFunction_Fragment) {
     Func("test", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
@@ -58,7 +58,7 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_Fragment) {
 )");
 }
 
-TEST_F(IR_FromProgramFunctionTest, EmitFunction_Compute) {
+TEST_F(ProgramToIRFunctionTest, EmitFunction_Compute) {
     Func("test", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(8_i, 4_i, 2_i)});
 
@@ -74,7 +74,7 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_Compute) {
 )");
 }
 
-TEST_F(IR_FromProgramFunctionTest, EmitFunction_Return) {
+TEST_F(ProgramToIRFunctionTest, EmitFunction_Return) {
     Func("test", utils::Empty, ty.vec3<f32>(),
          utils::Vector{Return(Call<vec3<f32>>(0_f, 0_f, 0_f))}, utils::Empty);
 
@@ -89,7 +89,7 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_Return) {
 )");
 }
 
-TEST_F(IR_FromProgramFunctionTest, EmitFunction_UnreachableEnd_ReturnValue) {
+TEST_F(ProgramToIRFunctionTest, EmitFunction_UnreachableEnd_ReturnValue) {
     Func("test", utils::Empty, ty.f32(),
          utils::Vector{If(true, Block(Return(0_f)), Else(Block(Return(1_f))))}, utils::Empty);
 
@@ -112,7 +112,7 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_UnreachableEnd_ReturnValue) {
 )");
 }
 
-TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnPosition) {
+TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnPosition) {
     Func("test", utils::Empty, ty.vec4<f32>(),
          utils::Vector{Return(Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f))},
          utils::Vector{Stage(ast::PipelineStage::kVertex)},
@@ -129,7 +129,7 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnPosition) {
 )");
 }
 
-TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnPositionInvariant) {
+TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnPositionInvariant) {
     Func("test", utils::Empty, ty.vec4<f32>(),
          utils::Vector{Return(Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f))},
          utils::Vector{Stage(ast::PipelineStage::kVertex)},
@@ -147,7 +147,7 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnPositionInvariant) {
 )");
 }
 
-TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnLocation) {
+TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnLocation) {
     Func("test", utils::Empty, ty.vec4<f32>(),
          utils::Vector{Return(Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f))},
          utils::Vector{Stage(ast::PipelineStage::kFragment)}, utils::Vector{Location(1_i)});
@@ -164,7 +164,7 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnLocation) {
 )");
 }
 
-TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnLocation_Interpolate) {
+TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnLocation_Interpolate) {
     Func("test", utils::Empty, ty.vec4<f32>(),
          utils::Vector{Return(Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f))},
          utils::Vector{Stage(ast::PipelineStage::kFragment)},
@@ -184,7 +184,7 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnLocation_Interpolate) {
 )");
 }
 
-TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnFragDepth) {
+TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnFragDepth) {
     Func("test", utils::Empty, ty.f32(), utils::Vector{Return(1_f)},
          utils::Vector{Stage(ast::PipelineStage::kFragment)},
          utils::Vector{Builtin(builtin::BuiltinValue::kFragDepth)});
@@ -200,7 +200,7 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnFragDepth) {
 )");
 }
 
-TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnSampleMask) {
+TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnSampleMask) {
     Func("test", utils::Empty, ty.u32(), utils::Vector{Return(1_u)},
          utils::Vector{Stage(ast::PipelineStage::kFragment)},
          utils::Vector{Builtin(builtin::BuiltinValue::kSampleMask)});
@@ -217,4 +217,4 @@ TEST_F(IR_FromProgramFunctionTest, EmitFunction_ReturnSampleMask) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::wgsl::reader

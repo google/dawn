@@ -23,7 +23,7 @@
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 
-namespace tint::ir {
+namespace tint::wgsl::reader {
 namespace {
 
 /// Looks for the instruction with the given type T.
@@ -31,7 +31,7 @@ namespace {
 /// If multiple instructions are found with the type T, then an error is raised and the first is
 /// returned.
 template <typename T>
-T* FindSingleInstruction(Module& mod) {
+T* FindSingleInstruction(ir::Module& mod) {
     T* found = nullptr;
     size_t count = 0;
     for (auto* node : mod.instructions.Objects()) {
@@ -51,7 +51,7 @@ T* FindSingleInstruction(Module& mod) {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_FromProgramTest = ProgramTestHelper;
+using IR_FromProgramTest = ir::ProgramTestHelper;
 
 TEST_F(IR_FromProgramTest, Func) {
     Func("f", utils::Empty, ty.void_(), utils::Empty);
@@ -64,7 +64,7 @@ TEST_F(IR_FromProgramTest, Func) {
     auto* f = m->functions[0];
     ASSERT_NE(f->Block(), nullptr);
 
-    EXPECT_EQ(m->functions[0]->Stage(), Function::PipelineStage::kUndefined);
+    EXPECT_EQ(m->functions[0]->Stage(), ir::Function::PipelineStage::kUndefined);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():void -> %b1 {
   %b1 = block {
@@ -85,7 +85,7 @@ TEST_F(IR_FromProgramTest, Func_WithParam) {
     auto* f = m->functions[0];
     ASSERT_NE(f->Block(), nullptr);
 
-    EXPECT_EQ(m->functions[0]->Stage(), Function::PipelineStage::kUndefined);
+    EXPECT_EQ(m->functions[0]->Stage(), ir::Function::PipelineStage::kUndefined);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func(%a:u32):u32 -> %b1 {
   %b1 = block {
@@ -107,7 +107,7 @@ TEST_F(IR_FromProgramTest, Func_WithMultipleParam) {
     auto* f = m->functions[0];
     ASSERT_NE(f->Block(), nullptr);
 
-    EXPECT_EQ(m->functions[0]->Stage(), Function::PipelineStage::kUndefined);
+    EXPECT_EQ(m->functions[0]->Stage(), ir::Function::PipelineStage::kUndefined);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func(%a:u32, %b:i32, %c:bool):void -> %b1 {
   %b1 = block {
@@ -124,7 +124,7 @@ TEST_F(IR_FromProgramTest, EntryPoint) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(m->functions[0]->Stage(), Function::PipelineStage::kFragment);
+    EXPECT_EQ(m->functions[0]->Stage(), ir::Function::PipelineStage::kFragment);
 }
 
 TEST_F(IR_FromProgramTest, IfStatement) {
@@ -1134,4 +1134,4 @@ TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location_WithInterpolati
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::wgsl::reader

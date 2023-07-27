@@ -634,6 +634,13 @@ if(${TINT_BUILD_WGSL_READER})
     lang/wgsl/reader/reader.cc
     lang/wgsl/reader/reader.h
   )
+
+  if(${TINT_BUILD_IR})
+    list(APPEND TINT_LIB_SRCS
+      lang/wgsl/reader/program_to_ir/program_to_ir.cc
+      lang/wgsl/reader/program_to_ir/program_to_ir.h
+    )
+  endif()
 endif()
 
 if(${TINT_BUILD_SPV_WRITER})
@@ -791,8 +798,6 @@ if(${TINT_BUILD_IR})
     lang/core/ir/exit_switch.h
     lang/core/ir/exit.cc
     lang/core/ir/exit.h
-    lang/core/ir/from_program.cc
-    lang/core/ir/from_program.h
     lang/core/ir/function.cc
     lang/core/ir/function.h
     lang/core/ir/function_param.cc
@@ -1291,6 +1296,24 @@ if(TINT_BUILD_TESTS)
       lang/wgsl/reader/parser/variable_stmt_test.cc
       lang/wgsl/reader/parser/while_stmt_test.cc
     )
+
+    if(${TINT_BUILD_IR})
+      list(APPEND TINT_TEST_SRCS
+        lang/wgsl/reader/program_to_ir/accessor_test.cc
+        lang/wgsl/reader/program_to_ir/binary_test.cc
+        lang/wgsl/reader/program_to_ir/builtin_test.cc
+        lang/wgsl/reader/program_to_ir/call_test.cc
+        lang/wgsl/reader/program_to_ir/function_test.cc
+        lang/wgsl/reader/program_to_ir/let_test.cc
+        lang/wgsl/reader/program_to_ir/literal_test.cc
+        lang/wgsl/reader/program_to_ir/materialize_test.cc
+        lang/wgsl/reader/program_to_ir/program_to_ir_test.cc
+        lang/wgsl/reader/program_to_ir/shadowing_test.cc
+        lang/wgsl/reader/program_to_ir/store_test.cc
+        lang/wgsl/reader/program_to_ir/unary_test.cc
+        lang/wgsl/reader/program_to_ir/var_test.cc
+      )
+    endif()
   endif()
 
   if(${TINT_BUILD_SPV_WRITER})
@@ -1602,18 +1625,6 @@ if(TINT_BUILD_TESTS)
       lang/core/ir/exit_if_test.cc
       lang/core/ir/exit_loop_test.cc
       lang/core/ir/exit_switch_test.cc
-      lang/core/ir/from_program_accessor_test.cc
-      lang/core/ir/from_program_binary_test.cc
-      lang/core/ir/from_program_builtin_test.cc
-      lang/core/ir/from_program_call_test.cc
-      lang/core/ir/from_program_function_test.cc
-      lang/core/ir/from_program_let_test.cc
-      lang/core/ir/from_program_literal_test.cc
-      lang/core/ir/from_program_materialize_test.cc
-      lang/core/ir/from_program_store_test.cc
-      lang/core/ir/from_program_test.cc
-      lang/core/ir/from_program_unary_test.cc
-      lang/core/ir/from_program_var_test.cc
       lang/core/ir/function_param_test.cc
       lang/core/ir/function_test.cc
       lang/core/ir/if_test.cc
@@ -1649,12 +1660,6 @@ if(TINT_BUILD_TESTS)
   if (${TINT_BUILD_IR} AND ${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
     list(APPEND TINT_TEST_SRCS
       lang/core/ir/to_program_roundtrip_test.cc
-    )
-  endif()
-
-  if (${TINT_BUILD_IR} AND ${TINT_BUILD_WGSL_READER})
-    list(APPEND TINT_TEST_SRCS
-      lang/core/ir/from_program_shadowing_test.cc
     )
   endif()
 

@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/core/ir/from_program.h"
 #include "src/tint/lang/core/ir/program_test_helper.h"
 #include "src/tint/lang/core/ir/to_program.h"
+#include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/text/string.h"
@@ -36,7 +36,7 @@ class IRToProgramRoundtripTest : public ProgramTestHelper {
         auto input_program = wgsl::reader::Parse(&file);
         ASSERT_TRUE(input_program.IsValid()) << input_program.Diagnostics().str();
 
-        auto ir_module = FromProgram(&input_program);
+        auto ir_module = wgsl::reader::ProgramToIR(&input_program);
         ASSERT_TRUE(ir_module) << (ir_module ? "" : ir_module.Failure());
 
         tint::ir::Disassembler d{ir_module.Get()};

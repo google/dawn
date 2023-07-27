@@ -27,12 +27,12 @@ namespace {
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-using IR_FromProgramShadowingTest = ProgramTestHelper;
+using ProgramToIRShadowingTest = ProgramTestHelper;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Shadowing tests
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(IR_FromProgramShadowingTest, Shadow_Struct_With_FnVar) {
+TEST_F(ProgramToIRShadowingTest, Shadow_Struct_With_FnVar) {
     auto m = Build(R"(
 struct S {
   i : i32,
@@ -62,7 +62,7 @@ S = struct @align(4) {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_Struct_With_Param) {
+TEST_F(ProgramToIRShadowingTest, Shadow_Struct_With_Param) {
     auto m = Build(R"(
 struct S {
   i : i32,
@@ -89,7 +89,7 @@ S = struct @align(4) {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_ModVar_With_FnVar) {
+TEST_F(ProgramToIRShadowingTest, Shadow_ModVar_With_FnVar) {
     auto m = Build(R"(
 var<private> i : i32 = 1i;
 
@@ -122,7 +122,7 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_ModVar_With_FnLet) {
+TEST_F(ProgramToIRShadowingTest, Shadow_ModVar_With_FnLet) {
     auto m = Build(R"(
 var<private> i : i32 = 1i;
 
@@ -153,7 +153,7 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_FnVar_With_IfVar) {
+TEST_F(ProgramToIRShadowingTest, Shadow_FnVar_With_IfVar) {
     auto m = Build(R"(
 fn f() -> i32 {
   var i : i32;
@@ -193,7 +193,7 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_FnVar_With_IfLet) {
+TEST_F(ProgramToIRShadowingTest, Shadow_FnVar_With_IfLet) {
     auto m = Build(R"(
 fn f() -> i32 {
   var i : i32;
@@ -229,7 +229,7 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_FnVar_With_WhileVar) {
+TEST_F(ProgramToIRShadowingTest, Shadow_FnVar_With_WhileVar) {
     auto m = Build(R"(
 fn f() -> i32 {
   var i : i32;
@@ -276,7 +276,7 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_FnVar_With_WhileLet) {
+TEST_F(ProgramToIRShadowingTest, Shadow_FnVar_With_WhileLet) {
     auto m = Build(R"(
 fn f() -> i32 {
   var i : i32;
@@ -321,7 +321,7 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_FnVar_With_ForInitVar) {
+TEST_F(ProgramToIRShadowingTest, Shadow_FnVar_With_ForInitVar) {
     auto m = Build(R"(
 fn f() -> i32 {
   var i : i32;
@@ -365,7 +365,7 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_FnVar_With_ForInitLet) {
+TEST_F(ProgramToIRShadowingTest, Shadow_FnVar_With_ForInitLet) {
     auto m = Build(R"(
 fn f() -> i32 {
   var i : i32;
@@ -408,7 +408,7 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_FnVar_With_ForBodyVar) {
+TEST_F(ProgramToIRShadowingTest, Shadow_FnVar_With_ForBodyVar) {
     auto m = Build(R"(
 fn f() -> i32 {
   var i : i32;
@@ -456,7 +456,7 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_FnVar_With_ForBodyLet) {
+TEST_F(ProgramToIRShadowingTest, Shadow_FnVar_With_ForBodyLet) {
     auto m = Build(R"(
 fn f() -> i32 {
   var i : i32;
@@ -502,7 +502,7 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_FnVar_With_LoopBodyVar) {
+TEST_F(ProgramToIRShadowingTest, Shadow_FnVar_With_LoopBodyVar) {
     auto m = Build(R"(
 fn f() -> i32 {
   var i : i32;
@@ -557,7 +557,7 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_FnVar_With_LoopBodyLet) {
+TEST_F(ProgramToIRShadowingTest, Shadow_FnVar_With_LoopBodyLet) {
     auto m = Build(R"(
 fn f() -> i32 {
   var i : i32;
@@ -610,7 +610,7 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_FnVar_With_LoopContinuingVar) {
+TEST_F(ProgramToIRShadowingTest, Shadow_FnVar_With_LoopContinuingVar) {
     auto m = Build(R"(
 fn f() -> i32 {
   var i : i32;
@@ -661,7 +661,7 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_FnVar_With_LoopContinuingLet) {
+TEST_F(ProgramToIRShadowingTest, Shadow_FnVar_With_LoopContinuingLet) {
     auto m = Build(R"(
 fn f() -> i32 {
   var i : i32;
@@ -710,7 +710,7 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_FnVar_With_SwitchCaseVar) {
+TEST_F(ProgramToIRShadowingTest, Shadow_FnVar_With_SwitchCaseVar) {
     auto m = Build(R"(
 fn f() -> i32 {
   var i : i32;
@@ -759,7 +759,7 @@ fn f() -> i32 {
 )");
 }
 
-TEST_F(IR_FromProgramShadowingTest, Shadow_FnVar_With_SwitchCaseLet) {
+TEST_F(ProgramToIRShadowingTest, Shadow_FnVar_With_SwitchCaseLet) {
     auto m = Build(R"(
 fn f() -> i32 {
   var i : i32;

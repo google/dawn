@@ -1038,6 +1038,7 @@ libtint_source_set("libtint_spv_writer_src") {
       ":libtint_ir_builder_src",
       ":libtint_ir_src",
       ":libtint_ir_transform_src",
+      ":libtint_wgsl_reader_program_to_ir_src",
     ]
   }
 }
@@ -1065,6 +1066,27 @@ libtint_source_set("libtint_wgsl_reader_src") {
     ":libtint_type_src",
     ":libtint_utils_src",
   ]
+}
+
+libtint_source_set("libtint_wgsl_reader_program_to_ir_src") {
+  sources = []
+  deps = []
+
+  if (tint_build_ir) {
+    sources += [
+      "lang/wgsl/reader/program_to_ir/program_to_ir.cc",
+      "lang/wgsl/reader/program_to_ir/program_to_ir.h",
+    ]
+    deps += [
+      ":libtint_ast_src",
+      ":libtint_ir_src",
+      ":libtint_program_src",
+      ":libtint_sem_src",
+      ":libtint_symbols_src",
+      ":libtint_type_src",
+      ":libtint_utils_src",
+    ]
+  }
 }
 
 libtint_source_set("libtint_wgsl_writer_src") {
@@ -1208,8 +1230,6 @@ libtint_source_set("libtint_syntax_tree_writer_src") {
 if (tint_build_ir) {
   libtint_source_set("libtint_ir_builder_src") {
     sources = [
-      "lang/core/ir/from_program.cc",
-      "lang/core/ir/from_program.h",
       "lang/core/ir/to_program.cc",
       "lang/core/ir/to_program.h",
     ]
@@ -1488,7 +1508,7 @@ if (tint_build_unittests) {
       }
 
       if (tint_build_msl_writer) {
-        deps += [ ":tint_unittests_msl_writer_src" ]
+        deps += [ ":tint_unittests_msl_writer_ast_printer_src" ]
       }
 
       if (tint_build_spv_reader) {
@@ -2145,6 +2165,33 @@ if (tint_build_unittests) {
     ]
   }
 
+  tint_unittests_source_set("tint_unittests_wgsl_reader_program_to_ir_src") {
+    sources = []
+    deps = []
+
+    if (tint_build_ir) {
+      sources += [
+        "lang/wgsl/reader/program_to_ir/accessor_test.cc",
+        "lang/wgsl/reader/program_to_ir/binary_test.cc",
+        "lang/wgsl/reader/program_to_ir/builtin_test.cc",
+        "lang/wgsl/reader/program_to_ir/call_test.cc",
+        "lang/wgsl/reader/program_to_ir/function_test.cc",
+        "lang/wgsl/reader/program_to_ir/let_test.cc",
+        "lang/wgsl/reader/program_to_ir/literal_test.cc",
+        "lang/wgsl/reader/program_to_ir/materialize_test.cc",
+        "lang/wgsl/reader/program_to_ir/program_to_ir_test.cc",
+        "lang/wgsl/reader/program_to_ir/shadowing_test.cc",
+        "lang/wgsl/reader/program_to_ir/store_test.cc",
+        "lang/wgsl/reader/program_to_ir/unary_test.cc",
+        "lang/wgsl/reader/program_to_ir/var_test.cc",
+      ]
+      deps += [
+        ":libtint_ir_src",
+        ":tint_unittests_ir_src",
+      ]
+    }
+  }
+
   tint_unittests_source_set("tint_unittests_wgsl_writer_src") {
     sources = [
       "lang/wgsl/writer/ast_printer/alias_type_test.cc",
@@ -2188,7 +2235,7 @@ if (tint_build_unittests) {
     ]
   }
 
-  tint_unittests_source_set("tint_unittests_msl_writer_src") {
+  tint_unittests_source_set("tint_unittests_msl_writer_ast_printer_src") {
     sources = [
       "lang/msl/writer/ast_printer/array_accessor_test.cc",
       "lang/msl/writer/ast_printer/assign_test.cc",
@@ -2228,6 +2275,16 @@ if (tint_build_unittests) {
       ":libtint_utils_src",
       ":tint_unittests_ast_src",
     ]
+  }
+
+  tint_unittests_source_set("tint_unittests_msl_writer_printer_src") {
+    sources = []
+
+    deps = [
+      ":libtint_msl_writer_src",
+      ":libtint_utils_src",
+      ":tint_unittests_ast_src",
+    ]
 
     if (tint_build_ir) {
       sources += [
@@ -2236,7 +2293,12 @@ if (tint_build_unittests) {
         "lang/msl/writer/printer/test_helper.h",
         "lang/msl/writer/printer/type_test.cc",
       ]
-      deps += [ ":libtint_ir_src" ]
+      deps += [
+        ":libtint_ir_src",
+        ":libtint_msl_writer_src",
+        ":libtint_utils_src",
+        ":tint_unittests_ast_src",
+      ]
     }
   }
 
@@ -2380,19 +2442,6 @@ if (tint_build_unittests) {
         "lang/core/ir/exit_if_test.cc",
         "lang/core/ir/exit_loop_test.cc",
         "lang/core/ir/exit_switch_test.cc",
-        "lang/core/ir/from_program_accessor_test.cc",
-        "lang/core/ir/from_program_binary_test.cc",
-        "lang/core/ir/from_program_builtin_test.cc",
-        "lang/core/ir/from_program_call_test.cc",
-        "lang/core/ir/from_program_function_test.cc",
-        "lang/core/ir/from_program_let_test.cc",
-        "lang/core/ir/from_program_literal_test.cc",
-        "lang/core/ir/from_program_materialize_test.cc",
-        "lang/core/ir/from_program_shadowing_test.cc",
-        "lang/core/ir/from_program_store_test.cc",
-        "lang/core/ir/from_program_test.cc",
-        "lang/core/ir/from_program_unary_test.cc",
-        "lang/core/ir/from_program_var_test.cc",
         "lang/core/ir/function_param_test.cc",
         "lang/core/ir/function_test.cc",
         "lang/core/ir/if_test.cc",
@@ -2428,6 +2477,7 @@ if (tint_build_unittests) {
         ":libtint_builtins_src",
         ":libtint_ir_builder_src",
         ":libtint_ir_src",
+        ":libtint_wgsl_reader_program_to_ir_src",
       ]
     }
   }
@@ -2482,7 +2532,10 @@ if (tint_build_unittests) {
     }
 
     if (tint_build_msl_writer) {
-      deps += [ ":tint_unittests_msl_writer_src" ]
+      deps += [
+        ":tint_unittests_msl_writer_ast_printer_src",
+        ":tint_unittests_msl_writer_printer_src",
+      ]
     }
 
     if (tint_build_hlsl_writer) {
@@ -2497,6 +2550,7 @@ if (tint_build_unittests) {
       deps += [
         ":tint_unittests_ir_src",
         ":tint_unittests_ir_transform_src",
+        ":tint_unittests_wgsl_reader_program_to_ir_src",
       ]
     }
 

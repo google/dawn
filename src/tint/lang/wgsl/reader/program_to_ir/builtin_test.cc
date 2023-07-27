@@ -18,29 +18,29 @@
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 
-namespace tint::ir {
+namespace tint::wgsl::reader {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-using IR_FromProgramStoreTest = ProgramTestHelper;
+using ProgramToIRBuiltinTest = ir::ProgramTestHelper;
 
-TEST_F(IR_FromProgramStoreTest, EmitStatement_Assign) {
-    GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate);
-
-    auto* expr = Assign("a", 4_u);
+TEST_F(ProgramToIRBuiltinTest, EmitExpression_Builtin) {
+    auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_f));
+    auto* expr = Call("asin", i);
     WrapInFunction(expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
-  %a:ptr<private, u32, read_write> = var
+  %i:ptr<private, f32, read_write> = var, 1.0f
 }
 
 %test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b2 {
   %b2 = block {
-    store %a, 4u
+    %3:f32 = load %i
+    %tint_symbol:f32 = asin %3
     ret
   }
 }
@@ -48,4 +48,4 @@ TEST_F(IR_FromProgramStoreTest, EmitStatement_Assign) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::wgsl::reader

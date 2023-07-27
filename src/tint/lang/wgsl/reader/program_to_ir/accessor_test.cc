@@ -21,15 +21,15 @@
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 
-namespace tint::ir {
+namespace tint::wgsl::reader {
 namespace {
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-using IR_FromProgramAccessorTest = ProgramTestHelper;
+using ProgramToIRAccessorTest = ir::ProgramTestHelper;
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Var_ArraySingleIndex) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraySingleIndex) {
     // var a: array<u32, 3>
     // let b = a[2]
 
@@ -52,7 +52,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_ArraySingleIndex) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Multiple) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Multiple) {
     // let a: vec4<u32> = vec4();
     // let b = a[2]
     // let c = a[1]
@@ -78,7 +78,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Multiple) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Var_VectorSingleIndex) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorSingleIndex) {
     // var a: vec3<u32>
     // let b = a[2]
 
@@ -100,7 +100,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_VectorSingleIndex) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Var_ArraysMultiIndex) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraysMultiIndex) {
     // var a: array<array<f32, 4>, 3>
     // let b = a[2][3]
 
@@ -123,7 +123,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_ArraysMultiIndex) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MatrixMultiIndex) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Var_MatrixMultiIndex) {
     // var a: mat3x4<f32>
     // let b = a[2][3]
 
@@ -146,7 +146,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MatrixMultiIndex) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Var_SingleMember) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Var_SingleMember) {
     // struct MyStruct { foo: i32 }
     // var a: MyStruct;
     // let b = a.foo
@@ -177,7 +177,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_SingleMember) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiMember) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiMember) {
     // struct Inner { bar: f32 }
     // struct Outer { a: i32, foo: Inner }
     // var a: Outer;
@@ -218,7 +218,7 @@ Outer = struct @align(4) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Var_Mixed) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Var_Mixed) {
     // struct Inner { b: i32, c: f32, bar: vec4<f32> }
     // struct Outer { a: i32, foo: array<Inner, 4> }
     // var a: array<Outer, 4>
@@ -265,7 +265,7 @@ Outer = struct @align(16) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Var_AssignmentLHS) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Var_AssignmentLHS) {
     // var a: array<u32, 4>();
     // a[2] = 0;
 
@@ -288,7 +288,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_AssignmentLHS) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Var_VectorElementSwizzle) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorElementSwizzle) {
     // var a: vec2<f32>
     // let b = a.y
 
@@ -310,7 +310,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_VectorElementSwizzle) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiElementSwizzle) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzle) {
     // var a: vec3<f32>
     // let b = a.zyxz
 
@@ -333,7 +333,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiElementSwizzle) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiElementSwizzleOfSwizzle) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzleOfSwizzle) {
     // var a: vec3<f32>
     // let b = a.zyx.yy
 
@@ -357,7 +357,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiElementSwizzleOfSwizzle) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiElementSwizzle_MiddleOfChain) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzle_MiddleOfChain) {
     // struct MyStruct { a: i32; foo: vec4<f32> }
     // var a: MyStruct;
     // let b = a.foo.zyx.yx[0]
@@ -395,7 +395,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Var_MultiElementSwizzle_MiddleOfChai
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleIndex) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleIndex) {
     // let a: vec3<u32> = vec3()
     // let b = a[2]
     auto* a = Let("a", ty.vec3<u32>(), vec(ty.u32(), 3));
@@ -416,7 +416,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleIndex) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiIndex) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiIndex) {
     // let a: mat3x4<f32> = mat3x4<u32>()
     // let b = a[2][3]
 
@@ -438,7 +438,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiIndex) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleMember) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleMember) {
     // struct MyStruct { foo: i32 }
     // let a: MyStruct = MyStruct();
     // let b = a.foo
@@ -468,7 +468,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleMember) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiMember) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiMember) {
     // struct Inner { bar: f32 }
     // struct Outer { a: i32, foo: Inner }
     // let a: Outer = Outer();
@@ -508,7 +508,7 @@ Outer = struct @align(4) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Let_Mixed) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Let_Mixed) {
     // struct Outer { a: i32, foo: array<Inner, 4> }
     // struct Inner { b: i32, c: f32, bar: vec4<f32> }
     // let a: array<Outer, 4> = array();
@@ -554,7 +554,7 @@ Outer = struct @align(16) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleElement) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleElement) {
     // let a: vec2<f32> = vec2()
     // let b = a.y
 
@@ -576,7 +576,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_SingleElement) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzle) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzle) {
     // let a: vec3<f32 = vec3()>
     // let b = a.zyxz
 
@@ -598,7 +598,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzle) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzleOfSwizzle) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzleOfSwizzle) {
     // let a: vec3<f32> = vec3();
     // let b = a.zyx.yy
 
@@ -621,7 +621,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzleOfSwizzle) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzle_MiddleOfChain) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzle_MiddleOfChain) {
     // struct MyStruct { a: i32; foo: vec4<f32> }
     // let a: MyStruct = MyStruct();
     // let b = a.foo.zyx.yx[0]
@@ -658,7 +658,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Let_MultiElementSwizzle_MiddleOfChai
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Const_AbstractVectorWithIndex) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Const_AbstractVectorWithIndex) {
     // const v = vec3(1, 2, 3);
     // let i = 1;
     // var b = v[i];
@@ -683,7 +683,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Const_AbstractVectorWithIndex) {
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Const_AbstractVectorWithSwizzleAndIndex) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Const_AbstractVectorWithSwizzleAndIndex) {
     // const v = vec3(1, 2, 3);
     // let i = 1;
     // var b = v.rg[i];
@@ -708,7 +708,7 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Const_AbstractVectorWithSwizzleAndIn
 )");
 }
 
-TEST_F(IR_FromProgramAccessorTest, Accessor_Const_ExpressionIndex) {
+TEST_F(ProgramToIRAccessorTest, Accessor_Const_ExpressionIndex) {
     // const v = vec3(1, 2, 3);
     // let i = 1;
     // var b = v.rg[i + 2 - 3];
@@ -736,4 +736,4 @@ TEST_F(IR_FromProgramAccessorTest, Accessor_Const_ExpressionIndex) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::wgsl::reader

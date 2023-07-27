@@ -22,9 +22,9 @@
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/builtin/number.h"
 #include "src/tint/lang/core/ir/disassembler.h"
-#include "src/tint/lang/core/ir/from_program.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -47,7 +47,7 @@ class ProgramTestHelperBase : public BASE, public ProgramBuilder {
             return program.Diagnostics().str();
         }
 
-        auto result = FromProgram(&program);
+        auto result = wgsl::reader::ProgramToIR(&program);
         if (result) {
             auto validated = ir::Validate(result.Get());
             if (!validated) {
@@ -68,7 +68,7 @@ class ProgramTestHelperBase : public BASE, public ProgramBuilder {
             return program.Diagnostics().str();
         }
 
-        auto result = FromProgram(&program);
+        auto result = wgsl::reader::ProgramToIR(&program);
         if (result) {
             auto validated = ir::Validate(result.Get());
             if (!validated) {
