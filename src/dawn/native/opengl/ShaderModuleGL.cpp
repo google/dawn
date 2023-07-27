@@ -26,6 +26,7 @@
 #include "dawn/native/stream/BlobSource.h"
 #include "dawn/native/stream/ByteVectorSink.h"
 #include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/metrics/HistogramMacros.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 
 #include "tint/tint.h"
@@ -67,7 +68,8 @@ using BindingMap = std::unordered_map<tint::BindingPoint, tint::BindingPoint>;
     X(LimitsForCompilationRequest, limits)                                                       \
     X(opengl::OpenGLVersion::Standard, glVersionStandard)                                        \
     X(uint32_t, glVersionMajor)                                                                  \
-    X(uint32_t, glVersionMinor)
+    X(uint32_t, glVersionMinor)                                                                  \
+    X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(GLSLCompilationRequest, GLSL_COMPILATION_REQUEST_MEMBERS);
 #undef GLSL_COMPILATION_REQUEST_MEMBERS
@@ -189,6 +191,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(const OpenGLFunctions& gl,
     req.glVersionStandard = version.GetStandard();
     req.glVersionMajor = version.GetMajor();
     req.glVersionMinor = version.GetMinor();
+    req.platform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
 
     CacheResult<GLSLCompilation> compilationResult;
     DAWN_TRY_LOAD_OR_RUN(
@@ -270,7 +273,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(const OpenGLFunctions& gl,
 
             return GLSLCompilation{
                 {std::move(result.glsl), needsPlaceholderSampler, std::move(combinedSamplerInfo)}};
-        });
+        },
+        "OpenGL.CompileShaderToGLSL");
 
     if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {
         std::ostringstream dumpedMsg;

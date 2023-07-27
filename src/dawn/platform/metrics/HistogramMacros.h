@@ -20,6 +20,7 @@
 #define SRC_DAWN_PLATFORM_METRICS_HISTOGRAM_MACROS_H_
 
 #include "dawn/platform/DawnPlatform.h"
+#include "dawn/platform/dawn_platform_export.h"
 
 // Short timings - up to 10 seconds.
 #define DAWN_HISTOGRAM_TIMES(platform, name, sample_ms) \
@@ -86,7 +87,7 @@
     platformObj->HistogramCustomCounts(name, sample, min, max, bucket_count)
 
 // Same as DAWN_HISTOGRAM_CUSTOM_COUNTS, but the stat will be dropped if the
-// client does not support high-performance counters (HPC). Ueful for logging
+// client does not support high-performance counters (HPC). Useful for logging
 // microsecond-resolution timings.
 #define DAWN_HISTOGRAM_CUSTOM_COUNTS_HPC(platformObj, name, sample, min, max, bucket_count) \
     platformObj->HistogramCustomCountsHPC(name, sample, min, max, bucket_count)
@@ -194,5 +195,28 @@ enum class ScopedHistogramTiming { kMicrosecondTimes, kMediumTimes, kLongTimes }
         Platform* platform_;                                                                \
         double constructed_;                                                                \
     } scoped_histogram_timer_##key(platform)
+
+namespace dawn::platform::metrics {
+
+// Timer class that gives more flexibility for recording over the macros when there may be
+// conditionals on the name or whether to record at all.
+class DAWN_PLATFORM_EXPORT DawnHistogramTimer {
+  public:
+    explicit DawnHistogramTimer(dawn::platform::Platform* platform);
+
+    // Timing recording function(s) records the time since this object was constructed until when
+    // the recording function is called.
+    void RecordMicroseconds(const char* name);
+
+    // Resets the effective start timer. Useful to reuse the same timer instead of constructing a
+    // new one when dealing with conditional scopes.
+    void Reset();
+
+  private:
+    dawn::platform::Platform* const mPlatform;
+    double mConstructed;
+};
+
+}  // namespace dawn::platform::metrics
 
 #endif  // SRC_DAWN_PLATFORM_METRICS_HISTOGRAM_MACROS_H_
