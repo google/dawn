@@ -33,7 +33,7 @@ struct Options {
     bool show_help = false;
 
 #if TINT_BUILD_SPV_READER
-    tint::reader::spirv::Options spirv_reader_options;
+    tint::spirv::reader::Options spirv_reader_options;
 #endif
 
     std::string input_filename;

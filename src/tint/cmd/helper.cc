@@ -127,7 +127,7 @@ ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts) {
                 exit(1);
             }
             program = std::make_unique<tint::Program>(
-                tint::reader::spirv::Parse(data, opts.spirv_reader_options));
+                tint::spirv::reader::Parse(data, opts.spirv_reader_options));
             break;
 #else
             std::cerr << "Tint not built with the SPIR-V reader enabled" << std::endl;
@@ -152,7 +152,7 @@ ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts) {
                 exit(1);
             }
             program = std::make_unique<tint::Program>(
-                tint::reader::spirv::Parse(data, opts.spirv_reader_options));
+                tint::spirv::reader::Parse(data, opts.spirv_reader_options));
             break;
 #else
             std::cerr << "Tint not built with the SPIR-V reader enabled" << std::endl;

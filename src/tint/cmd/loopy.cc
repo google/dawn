@@ -353,7 +353,7 @@ int main(int argc, const char** argv) {
 
             uint32_t loop_count = options.loop_count;
             for (uint32_t i = 0; i < loop_count; ++i) {
-                program = std::make_unique<tint::Program>(tint::reader::spirv::Parse(data, {}));
+                program = std::make_unique<tint::Program>(tint::spirv::reader::Parse(data, {}));
             }
 #else
             std::cerr << "Tint not built with the SPIR-V reader enabled" << std::endl;

@@ -3,7 +3,7 @@
 This document describes the challenges in converting SPIR-V into WGSL.
 
 Note: Unless otherwise specified, the namespace for C++ code is
-`tint::reader::spirv::`.
+`tint::spirv::reader::`.
 
 ## Overall flow
 
