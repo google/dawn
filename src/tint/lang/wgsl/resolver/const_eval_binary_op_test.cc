@@ -751,6 +751,39 @@ INSTANTIATE_TEST_SUITE_P(LessThanEqual,
                                  OpGreaterThanCases<f32, false>(),
                                  OpGreaterThanCases<f16, false>()))));
 
+// Test that we can compare the maximum and minimum AFloat values in vectors (crbug.com/tint/1999).
+struct AbstractFloatVectorCompareCase {
+    ast::BinaryOp op;
+    bool expected_0;
+    bool expected_1;
+};
+using ResolverConstEvalBinaryOpAbstractFloatVectorCompareTest =
+    ResolverTestWithParam<AbstractFloatVectorCompareCase>;
+TEST_P(ResolverConstEvalBinaryOpAbstractFloatVectorCompareTest, Test) {
+    auto params = GetParam();
+
+    auto* lhs_expr = Call(ty.vec2<AFloat>(), AFloat::Highest(), AFloat::Lowest());
+    auto* rhs_expr = Call(ty.vec2<AFloat>(), AFloat::Lowest(), AFloat::Highest());
+    auto* expr = create<ast::BinaryExpression>(Source{{12, 34}}, params.op, lhs_expr, rhs_expr);
+    GlobalConst("C", expr);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* value = Sem().Get(expr)->ConstantValue();
+    ASSERT_NE(value, nullptr);
+    CheckConstant(value, Value::Create<bool>(utils::Vector{builder::Scalar(params.expected_0),
+                                                           builder::Scalar(params.expected_1)}));
+}
+INSTANTIATE_TEST_SUITE_P(
+    HighestLowest,
+    ResolverConstEvalBinaryOpAbstractFloatVectorCompareTest,
+    testing::Values(AbstractFloatVectorCompareCase{ast::BinaryOp::kEqual, false, false},
+                    AbstractFloatVectorCompareCase{ast::BinaryOp::kNotEqual, true, true},
+                    AbstractFloatVectorCompareCase{ast::BinaryOp::kLessThan, false, true},
+                    AbstractFloatVectorCompareCase{ast::BinaryOp::kLessThanEqual, false, true},
+                    AbstractFloatVectorCompareCase{ast::BinaryOp::kGreaterThan, true, false},
+                    AbstractFloatVectorCompareCase{ast::BinaryOp::kGreaterThanEqual, true, false}));
+
 static std::vector<Case> OpLogicalAndCases() {
     return {
         C(true, true, true),

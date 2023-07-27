@@ -1136,7 +1136,7 @@ ctor mat4x4<T: fa_f32_f16>(T, T, T, T,
 @must_use @const op <= <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 
 @must_use @const op >= <T: fia_fiu32_f16>(T, T) -> bool
-@must_use @const op >= <T: fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+@must_use @const op >= <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 
 @must_use @const op << <T: ia_iu32>(T, u32) -> T
 @must_use @const op << <T: ia_iu32, N: num> (vec<N, T>, vec<N, u32>) -> vec<N, T>
