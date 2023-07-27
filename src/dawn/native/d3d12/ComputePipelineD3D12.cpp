@@ -25,6 +25,7 @@
 #include "dawn/native/d3d12/PlatformFunctionsD3D12.h"
 #include "dawn/native/d3d12/ShaderModuleD3D12.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
+#include "dawn/platform/metrics/HistogramMacros.h"
 
 namespace dawn::native::d3d12 {
 
@@ -76,7 +77,10 @@ MaybeError ComputePipeline::Initialize() {
         d3dDesc.CachedPSO.CachedBlobSizeInBytes = blob.Size();
     }
 
+    // We don't use the scoped cache histogram counters for the cache hit here so that we can
+    // condition on whether it fails appropriately.
     auto* d3d12Device = device->GetD3D12Device();
+    platform::metrics::DawnHistogramTimer cacheTimer(device->GetPlatform());
     HRESULT result =
         d3d12Device->CreateComputePipelineState(&d3dDesc, IID_PPV_ARGS(&mPipelineState));
     if (cacheHit && result == D3D12_ERROR_DRIVER_VERSION_MISMATCH) {
@@ -84,16 +88,20 @@ MaybeError ComputePipeline::Initialize() {
         cacheHit = false;
         d3dDesc.CachedPSO.pCachedBlob = nullptr;
         d3dDesc.CachedPSO.CachedBlobSizeInBytes = 0;
+        cacheTimer.Reset();
         result = d3d12Device->CreateComputePipelineState(&d3dDesc, IID_PPV_ARGS(&mPipelineState));
     }
     DAWN_TRY(CheckHRESULT(result, "D3D12 creating pipeline state"));
 
     if (!cacheHit) {
         // Cache misses, need to get pipeline cached blob and store.
+        cacheTimer.RecordMicroseconds("D3D12.CreateComputePipelineState.CacheMiss");
         ComPtr<ID3DBlob> d3dBlob;
         DAWN_TRY(CheckHRESULT(GetPipelineState()->GetCachedBlob(&d3dBlob),
                               "D3D12 compute pipeline state get cached blob"));
         device->StoreCachedBlob(GetCacheKey(), CreateBlob(std::move(d3dBlob)));
+    } else {
+        cacheTimer.RecordMicroseconds("D3D12.CreateComputePipelineState.CacheHit");
     }
 
     SetLabelImpl();
