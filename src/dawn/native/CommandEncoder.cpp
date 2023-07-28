@@ -1272,8 +1272,9 @@ ResultOrError<std::function<void()>> CommandEncoder::ApplyRenderPassWorkarounds(
 
                         Extent3D extent3D = copyTarget.copySrc->GetTexture()->GetSize();
 
-                        this->APICopyTextureToTextureInternal(&srcImageCopyTexture,
-                                                              &dstImageCopyTexture, &extent3D);
+                        auto internalUsageScope = MakeInternalUsageScope();
+                        this->APICopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture,
+                                                      &extent3D);
                     }
 
                     // If there were any other callbacks in the workaround stack, call the next one.
@@ -1567,19 +1568,6 @@ void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
 void CommandEncoder::APICopyTextureToTexture(const ImageCopyTexture* source,
                                              const ImageCopyTexture* destination,
                                              const Extent3D* copySize) {
-    APICopyTextureToTextureHelper<false>(source, destination, copySize);
-}
-
-void CommandEncoder::APICopyTextureToTextureInternal(const ImageCopyTexture* source,
-                                                     const ImageCopyTexture* destination,
-                                                     const Extent3D* copySize) {
-    APICopyTextureToTextureHelper<true>(source, destination, copySize);
-}
-
-template <bool Internal>
-void CommandEncoder::APICopyTextureToTextureHelper(const ImageCopyTexture* source,
-                                                   const ImageCopyTexture* destination,
-                                                   const Extent3D* copySize) {
     mEncodingContext.TryEncode(
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
@@ -1600,19 +1588,10 @@ void CommandEncoder::APICopyTextureToTextureHelper(const ImageCopyTexture* sourc
                 DAWN_TRY_CONTEXT(ValidateTextureCopyRange(GetDevice(), *destination, *copySize),
                                  "validating source %s copy range.", destination->texture);
 
-                // For internal usages (CopyToCopyInternal) we don't care if the user has added
-                // CopySrc as a usage for this texture, but we will always add it internally.
-                if (Internal) {
-                    DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc,
-                                              UsageValidationMode::Internal));
-                    DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst,
-                                              UsageValidationMode::Internal));
-                } else {
-                    DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc,
-                                              mUsageValidationMode));
-                    DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst,
-                                              mUsageValidationMode));
-                }
+                DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc,
+                                          mUsageValidationMode));
+                DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst,
+                                          mUsageValidationMode));
             }
 
             mTopLevelTextures.insert(source->texture);

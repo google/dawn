@@ -639,15 +639,6 @@
                 ]
             },
             {
-                "name": "copy texture to texture internal",
-                "tags": ["dawn"],
-                "args": [
-                    {"name": "source", "type": "image copy texture", "annotation": "const*"},
-                    {"name": "destination", "type": "image copy texture", "annotation": "const*"},
-                    {"name": "copy size", "type": "extent 3D", "annotation": "const*"}
-                ]
-            },
-            {
                 "name": "clear buffer",
                 "args": [
                     {"name": "buffer", "type": "buffer"},

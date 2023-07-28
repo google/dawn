@@ -34,5 +34,3 @@ encoder.CopyTextureToBuffer(&src, ...);
 ```
 
 One use case for this is so that Chromium can use an internal copyTextureToTexture command to implement copies from a WebGPU texture-backed canvas to other Web platform primitives when the swapchain texture was not explicitly created with CopySrc usage in Javascript.
-
-Note: copyTextureToTextureInternal will be removed in favor of `WGPUDawnEncoderInternalUsageDescriptor`.

@@ -390,16 +390,6 @@ class CopyTests_B2T : public CopyTests, public DawnTest {
     }
 };
 
-namespace {
-// The CopyTests Texture to Texture in this class will validate both CopyTextureToTexture and
-// CopyTextureToTextureInternal.
-using UsageCopySrc = bool;
-DAWN_TEST_PARAM_STRUCT(CopyTestsParams, UsageCopySrc);
-
-using SrcColorFormat = wgpu::TextureFormat;
-DAWN_TEST_PARAM_STRUCT(SrcColorFormatParams, SrcColorFormat);
-}  // namespace
-
 template <typename Parent>
 class CopyTests_T2TBase : public CopyTests, public Parent {
   protected:
@@ -412,8 +402,7 @@ class CopyTests_T2TBase : public CopyTests, public Parent {
                 const wgpu::Extent3D& copySize,
                 wgpu::TextureDimension srcDimension,
                 wgpu::TextureDimension dstDimension,
-                bool copyWithinSameTexture = false,
-                bool usageCopySrc = false) {
+                bool copyWithinSameTexture = false) {
         const wgpu::TextureFormat format = srcSpec.format;
 
         wgpu::TextureDescriptor srcDescriptor;
@@ -422,17 +411,7 @@ class CopyTests_T2TBase : public CopyTests, public Parent {
         srcDescriptor.sampleCount = 1;
         srcDescriptor.format = format;
         srcDescriptor.mipLevelCount = srcSpec.levelCount;
-        srcDescriptor.usage = wgpu::TextureUsage::CopyDst;
-        // This test will have two versions, one where we check the normal CopyToCopy, and for that
-        // we will add the CopySrc usage, and the one where we test the CopyToCopyInternal, and then
-        // we have to add the CopySrc to the Internal usage.
-        wgpu::DawnTextureInternalUsageDescriptor internalDesc = {};
-        srcDescriptor.nextInChain = &internalDesc;
-        if (usageCopySrc) {
-            srcDescriptor.usage |= wgpu::TextureUsage::CopySrc;
-        } else {
-            internalDesc.internalUsage = wgpu::TextureUsage::CopySrc;
-        }
+        srcDescriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
         wgpu::Texture srcTexture = this->device.CreateTexture(&srcDescriptor);
 
         wgpu::Texture dstTexture;
@@ -479,13 +458,7 @@ class CopyTests_T2TBase : public CopyTests, public Parent {
             utils::CreateImageCopyTexture(srcTexture, srcSpec.copyLevel, srcSpec.copyOrigin);
         wgpu::ImageCopyTexture dstImageCopyTexture =
             utils::CreateImageCopyTexture(dstTexture, dstSpec.copyLevel, dstSpec.copyOrigin);
-
-        if (usageCopySrc) {
-            encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &copySize);
-        } else {
-            encoder.CopyTextureToTextureInternal(&srcImageCopyTexture, &dstImageCopyTexture,
-                                                 &copySize);
-        }
+        encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &copySize);
 
         // Create an output buffer and use it to completely populate the subresources of the dst
         // texture that will be copied to at the given mip level.
@@ -560,10 +533,7 @@ class CopyTests_T2TBase : public CopyTests, public Parent {
             }
         }
     }
-};
 
-class CopyTests_T2T : public CopyTests_T2TBase<DawnTestWithParams<CopyTestsParams>> {
-  protected:
     void DoTest(const TextureSpec& srcSpec,
                 const TextureSpec& dstSpec,
                 const wgpu::Extent3D& copySize,
@@ -571,26 +541,14 @@ class CopyTests_T2T : public CopyTests_T2TBase<DawnTestWithParams<CopyTestsParam
                 wgpu::TextureDimension dimension = wgpu::TextureDimension::e2D) {
         DoTest(srcSpec, dstSpec, copySize, dimension, dimension, copyWithinSameTexture);
     }
-
-    void DoTest(const TextureSpec& srcSpec,
-                const TextureSpec& dstSpec,
-                const wgpu::Extent3D& copySize,
-                wgpu::TextureDimension srcDimension,
-                wgpu::TextureDimension dstDimension,
-                bool copyWithinSameTexture = false) {
-        const bool usageCopySrc = GetParam().mUsageCopySrc;
-        // If we do this test with a CopyWithinSameTexture, it will need to have usageCopySrc in the
-        // public usage of the texture as it will later use a CopyTextureToBuffer, that needs the
-        // public usage of it.
-        DAWN_TEST_UNSUPPORTED_IF(!usageCopySrc && copyWithinSameTexture);
-
-        ASSERT_EQ(srcSpec.format, dstSpec.format);
-
-        CopyTests_T2TBase<DawnTestWithParams<CopyTestsParams>>::DoTest(
-            srcSpec, dstSpec, copySize, srcDimension, dstDimension, copyWithinSameTexture,
-            usageCopySrc);
-    }
 };
+
+class CopyTests_T2T : public CopyTests_T2TBase<DawnTest> {};
+
+namespace {
+using SrcColorFormat = wgpu::TextureFormat;
+DAWN_TEST_PARAM_STRUCT(SrcColorFormatParams, SrcColorFormat);
+}  // namespace
 
 class CopyTests_Formats : public CopyTests_T2TBase<DawnTestWithParams<SrcColorFormatParams>> {
   protected:
@@ -2608,15 +2566,16 @@ TEST_P(CopyTests_T2T, Texture3DMipUnaligned) {
 }
 
 // TODO(dawn:1705): enable this test for D3D11
-DAWN_INSTANTIATE_TEST_P(
+DAWN_INSTANTIATE_TEST(
     CopyTests_T2T,
-    {D3D12Backend(),
-     D3D12Backend({"use_temp_buffer_in_small_format_texture_to_texture_copy_from_greater_to_less_"
-                   "mip_level"}),
-     D3D12Backend(
-         {"d3d12_use_temp_buffer_in_texture_to_texture_copy_between_different_dimensions"}),
-     MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
-    {true, false});
+    D3D12Backend(),
+    D3D12Backend({"use_temp_buffer_in_small_format_texture_to_texture_copy_from_greater_to_less_"
+                  "mip_level"}),
+    D3D12Backend({"d3d12_use_temp_buffer_in_texture_to_texture_copy_between_different_dimensions"}),
+    MetalBackend(),
+    OpenGLBackend(),
+    OpenGLESBackend(),
+    VulkanBackend());
 
 // Test copying between textures that have srgb compatible texture formats;
 TEST_P(CopyTests_Formats, SrgbCompatibility) {

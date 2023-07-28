@@ -73,9 +73,6 @@ class CommandEncoder final : public ApiObjectBase {
     void APICopyTextureToTexture(const ImageCopyTexture* source,
                                  const ImageCopyTexture* destination,
                                  const Extent3D* copySize);
-    void APICopyTextureToTextureInternal(const ImageCopyTexture* source,
-                                         const ImageCopyTexture* destination,
-                                         const Extent3D* copySize);
     void APIClearBuffer(BufferBase* destination, uint64_t destinationOffset, uint64_t size);
 
     void APIInjectValidationError(const char* message);
@@ -120,7 +117,7 @@ class CommandEncoder final : public ApiObjectBase {
         UsageValidationMode mUsageValidationMode;
     };
 
-    InternalUsageScope MakeInternalUsageScope();
+    [[nodiscard]] InternalUsageScope MakeInternalUsageScope();
 
   private:
     CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor* descriptor);
@@ -133,14 +130,6 @@ class CommandEncoder final : public ApiObjectBase {
         RenderPassResourceUsageTracker* usageTracker,
         BeginRenderPassCmd* cmd,
         std::function<void()> passEndCallback = nullptr);
-
-    // Helper to be able to implement both APICopyTextureToTexture and
-    // APICopyTextureToTextureInternal. The only difference between both
-    // copies, is that the Internal one will also check internal usage.
-    template <bool Internal>
-    void APICopyTextureToTextureHelper(const ImageCopyTexture* source,
-                                       const ImageCopyTexture* destination,
-                                       const Extent3D* copySize);
 
     MaybeError ValidateFinish() const;
 
