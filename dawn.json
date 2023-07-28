@@ -1371,10 +1371,9 @@
     "extent 2D": {
         "category": "structure",
         "tags": ["dawn"],
-        "_TODO": "crbug.com/1316671: Remove default value of 'width' after chromium side chagnes landed",
         "members": [
-            {"name": "width", "type": "uint32_t", "default": 0},
-            {"name": "height", "type": "uint32_t", "default": 1}
+            {"name": "width", "type": "uint32_t"},
+            {"name": "height", "type": "uint32_t"}
         ]
     },
     "extent 3D": {

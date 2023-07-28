@@ -175,11 +175,13 @@ TEST_F(AllowedErrorTests, QueueCopyExternalTextureForBrowserOomBuffer) {
     externalTextureDesc.gamutConversionMatrix = placeholderConstantArray.data();
     externalTextureDesc.srcTransferFunctionParameters = placeholderConstantArray.data();
     externalTextureDesc.dstTransferFunctionParameters = placeholderConstantArray.data();
+    externalTextureDesc.visibleOrigin = {0, 0};
     externalTextureDesc.visibleSize = {4, 4};
     externalTextureDesc.plane0 = device.CreateTexture(&textureDesc).CreateView(&textureViewDesc);
 
     wgpu::ImageCopyExternalTexture src = {};
     src.externalTexture = device.CreateExternalTexture(&externalTextureDesc);
+    src.naturalSize = {4, 4};
     wgpu::ImageCopyTexture dst = {};
     dst.texture = device.CreateTexture(&textureDesc);
     wgpu::Extent3D size = {4, 4};

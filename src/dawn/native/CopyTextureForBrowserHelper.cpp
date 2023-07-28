@@ -695,15 +695,8 @@ MaybeError ValidateCopyExternalTextureForBrowser(DeviceBase* device,
     DAWN_TRY(source->externalTexture->ValidateCanUseInSubmitNow());
 
     Extent2D sourceSize;
-
-    // TODO(crbug.com/dawn/1694): Remove this workaround that use visible rect
-    // if natural size it not set after chromium side changes ready.
-    if (source->naturalSize.width == 0) {
-        sourceSize = source->externalTexture->GetVisibleSize();
-    } else {
-        sourceSize.width = source->naturalSize.width;
-        sourceSize.height = source->naturalSize.height;
-    }
+    sourceSize.width = source->naturalSize.width;
+    sourceSize.height = source->naturalSize.height;
 
     // All texture dimensions are in uint32_t so by doing checks in uint64_t we avoid
     // overflows.
@@ -741,13 +734,6 @@ MaybeError DoCopyExternalTextureForBrowser(DeviceBase* device,
     TextureInfo info;
     info.origin = source->origin;
     info.size = {source->naturalSize.width, source->naturalSize.height, 1};
-
-    // TODO(crbug.com/dawn/1694): Remove this workaround that use visible rect
-    // if natural size it not set after chromium side changes ready.
-    if (info.size.width == 0) {
-        const Extent2D& visibleSize = source->externalTexture->GetVisibleSize();
-        info.size = {visibleSize.width, visibleSize.height, 1};
-    }
 
     RenderPipelineBase* pipeline;
     DAWN_TRY_ASSIGN(pipeline, GetOrCreateCopyExternalTextureForBrowserPipeline(
