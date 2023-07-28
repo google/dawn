@@ -95,9 +95,12 @@ func LoadCredentials(url string) Credentials {
 	if cookies, err := ioutil.ReadFile(cookiesFile); err == nil {
 		url := strings.TrimSuffix(strings.TrimPrefix(url, "https://"), "/")
 		re := regexp.MustCompile(url + `/?\s+(?:FALSE|TRUE)[\s/]+(?:FALSE|TRUE)\s+[0-9]+\s+.\s+(.*)=(.*)`)
-		match := re.FindStringSubmatch(string(cookies))
-		if len(match) == 3 {
-			return Credentials{match[1], match[2]}
+		matches := re.FindAllStringSubmatch(string(cookies), -1)
+		if matches != nil {
+			match := matches[len(matches)-1]
+			if len(match) == 3 {
+				return Credentials{match[1], match[2]}
+			}
 		}
 	}
 	return Credentials{}
