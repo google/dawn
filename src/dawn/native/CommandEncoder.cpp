@@ -749,13 +749,18 @@ MaybeError ApplyMSAARenderToSingleSampledLoadOp(DeviceBase* device,
 }
 // Tracks the temporary resolve attachments used when the AlwaysResolveIntoZeroLevelAndLayer toggle
 // is active so that the results can be copied from the temporary resolve attachment into the
-// intended target after the render pass is complete.
+// intended target after the render pass is complete. Also used by the
+// ResolveMultipleAttachmentInSeparatePasses toggle to track resolves that need to be done in their
+// own passes.
 struct TemporaryResolveAttachment {
-    TemporaryResolveAttachment(Ref<TextureViewBase> src, Ref<TextureViewBase> dst)
-        : copySrc(std::move(src)), copyDst(std::move(dst)) {}
+    TemporaryResolveAttachment(Ref<TextureViewBase> src,
+                               Ref<TextureViewBase> dst,
+                               wgpu::StoreOp storeOp = wgpu::StoreOp::Store)
+        : copySrc(std::move(src)), copyDst(std::move(dst)), storeOp(storeOp) {}
 
     Ref<TextureViewBase> copySrc;
     Ref<TextureViewBase> copyDst;
+    wgpu::StoreOp storeOp;
 };
 
 bool ShouldUseTextureToBufferBlit(const DeviceBase* device,
@@ -1192,11 +1197,82 @@ ResultOrError<std::function<void()>> CommandEncoder::ApplyRenderPassWorkarounds(
     RenderPassResourceUsageTracker* usageTracker,
     BeginRenderPassCmd* cmd,
     std::function<void()> passEndCallback) {
+    // dawn:1550
+    // Handle toggle ResolveMultipleAttachmentInSeparatePasses. This identifies passes where there
+    // are multiple MSAA color targets and at least one of them has a resolve target. If that's the
+    // case then the resolves are deferred by removing the resolve targets and forcing the storeOp
+    // to Store. After the pass has ended an new pass is recorded for each resolve target that
+    // resolves it separately.
+    if (device->IsToggleEnabled(Toggle::ResolveMultipleAttachmentInSeparatePasses) &&
+        cmd->attachmentState->GetColorAttachmentsMask().count() > 1) {
+        bool splitResolvesIntoSeparatePasses = false;
+
+        // This workaround needs to apply if there are multiple MSAA color targets (checked above)
+        // and at least one resolve target.
+        for (ColorAttachmentIndex i :
+             IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
+            if (cmd->colorAttachments[i].resolveTarget.Get() != nullptr) {
+                splitResolvesIntoSeparatePasses = true;
+                break;
+            }
+        }
+
+        if (splitResolvesIntoSeparatePasses) {
+            std::vector<TemporaryResolveAttachment> temporaryResolveAttachments;
+
+            for (ColorAttachmentIndex i :
+                 IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
+                auto& attachmentInfo = cmd->colorAttachments[i];
+                TextureViewBase* resolveTarget = attachmentInfo.resolveTarget.Get();
+                if (resolveTarget != nullptr) {
+                    // Save the color and resolve targets together for an explicit resolve pass
+                    // after this one ends, then remove the resolve target from this pass and
+                    // force the storeOp to Store.
+                    temporaryResolveAttachments.emplace_back(attachmentInfo.view.Get(),
+                                                             resolveTarget, attachmentInfo.storeOp);
+                    attachmentInfo.storeOp = wgpu::StoreOp::Store;
+                    attachmentInfo.resolveTarget = nullptr;
+                }
+            }
+
+            // Check for other workarounds that need to be applied recursively.
+            return ApplyRenderPassWorkarounds(
+                device, usageTracker, cmd,
+                [this, passEndCallback = std::move(passEndCallback),
+                 temporaryResolveAttachments = std::move(temporaryResolveAttachments)]() -> void {
+                    // Called once the render pass has been ended.
+                    // Handles any separate resolve passes needed for the
+                    // ResolveMultipleAttachmentInSeparatePasses workaround immediately after the
+                    // render pass ends and before any additional commands are recorded.
+                    for (auto& deferredResolve : temporaryResolveAttachments) {
+                        RenderPassColorAttachment attachment = {};
+                        attachment.view = deferredResolve.copySrc.Get();
+                        attachment.resolveTarget = deferredResolve.copyDst.Get();
+                        attachment.loadOp = wgpu::LoadOp::Load;
+                        attachment.storeOp = deferredResolve.storeOp;
+
+                        RenderPassDescriptor resolvePass = {};
+                        resolvePass.colorAttachmentCount = 1;
+                        resolvePass.colorAttachments = &attachment;
+
+                        // Begin and end an empty render pass to force the resolve.
+                        Ref<RenderPassEncoder> encoder = this->BeginRenderPass(&resolvePass);
+                        encoder->APIEnd();
+                    }
+
+                    // If there were any other callbacks in the workaround stack, call the next one.
+                    if (passEndCallback) {
+                        passEndCallback();
+                    }
+                });
+        }
+    }
+
     // dawn:56, dawn:1569
     // Handle Toggle AlwaysResolveIntoZeroLevelAndLayer. This swaps out the given resolve attachment
     // for a temporary one that has no layers or mip levels. The results are copied from the
     // temporary attachment into the given attachment when the render pass ends. (Handled at the
-    // bottom of this function)
+    // bottom of this branch)
     if (device->IsToggleEnabled(Toggle::AlwaysResolveIntoZeroLevelAndLayer)) {
         std::vector<TemporaryResolveAttachment> temporaryResolveAttachments;
 

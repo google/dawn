@@ -113,6 +113,25 @@ class MultisampledRenderingTest : public DawnTest {
                                            enableMSAARenderToSingleSampled);
     }
 
+    wgpu::RenderPipeline CreateRenderPipelineWithNonZeroLocationOutputForTest(
+        uint32_t sampleMask = 0xFFFFFFFF,
+        bool alphaToCoverageEnabled = false,
+        bool enableMSAARenderToSingleSampled = false) {
+        const char* kFsNonZeroLocationOutputs = R"(
+            struct U {
+                color : vec4f
+            }
+            @group(0) @binding(0) var<uniform> uBuffer : U;
+
+            @fragment fn main() -> @location(1) vec4f {
+                return uBuffer.color;
+            })";
+
+        return CreateRenderPipelineForTest(kFsNonZeroLocationOutputs, 1, false, sampleMask,
+                                           alphaToCoverageEnabled, /*flipTriangle=*/false,
+                                           enableMSAARenderToSingleSampled, 1);
+    }
+
     wgpu::Texture CreateTextureForRenderAttachment(wgpu::TextureFormat format,
                                                    uint32_t sampleCount,
                                                    uint32_t mipLevelCount = 1,
@@ -239,7 +258,8 @@ class MultisampledRenderingTest : public DawnTest {
                                                      uint32_t sampleMask = 0xFFFFFFFF,
                                                      bool alphaToCoverageEnabled = false,
                                                      bool flipTriangle = false,
-                                                     bool enableMSAARenderToSingleSampled = false) {
+                                                     bool enableMSAARenderToSingleSampled = false,
+                                                     uint32_t firstAttachmentLocation = 0) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
 
         // Draw a bottom-right triangle. In standard 4xMSAA pattern, for the pixels on diagonal,
@@ -292,9 +312,14 @@ class MultisampledRenderingTest : public DawnTest {
             pipelineDescriptor.multisample.nextInChain = &mssaRenderToSingleSampledDesc;
         }
 
-        pipelineDescriptor.cFragment.targetCount = numColorAttachments;
-        for (uint32_t i = 0; i < numColorAttachments; ++i) {
-            pipelineDescriptor.cTargets[i].format = kColorFormat;
+        pipelineDescriptor.cFragment.targetCount = numColorAttachments + firstAttachmentLocation;
+        for (uint32_t i = 0; i < numColorAttachments + firstAttachmentLocation; ++i) {
+            if (i < firstAttachmentLocation) {
+                pipelineDescriptor.cTargets[i].writeMask = wgpu::ColorWriteMask::None;
+                pipelineDescriptor.cTargets[i].format = wgpu::TextureFormat::Undefined;
+            } else {
+                pipelineDescriptor.cTargets[i].format = kColorFormat;
+            }
         }
 
         wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
@@ -425,8 +450,9 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargets) {
     // TODO(dawn:462): Issue in the D3D12 validation layers.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia() && IsBackendValidationEnabled());
 
-    // TODO(dawn:1550) Fails on ARM-based Android devices.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
+    // TODO(dawn:1550) Workaround introduces a bug on Qualcomm GPUs, but is necessary for ARM GPUs.
+    DAWN_TEST_UNSUPPORTED_IF(IsAndroid() && IsQualcomm() &&
+                             HasToggleEnabled("resolve_multiple_attachments_in_separate_passes"));
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -462,6 +488,90 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargets) {
 
     VerifyResolveTarget(kRed, mResolveTexture);
     VerifyResolveTarget(kGreen, resolveTexture2);
+}
+
+// Test that resolving only one of multiple MSAA targets works correctly. (dawn:1550)
+TEST_P(MultisampledRenderingTest, ResolveOneOfMultipleTargets) {
+    // TODO(dawn:1550) Workaround introduces a bug on Qualcomm GPUs, but is necessary for ARM GPUs.
+    DAWN_TEST_UNSUPPORTED_IF(IsAndroid() && IsQualcomm() &&
+                             HasToggleEnabled("resolve_multiple_attachments_in_separate_passes"));
+
+    wgpu::TextureView multisampledColorView2 =
+        CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
+
+    wgpu::RenderPipeline pipeline = CreateRenderPipelineWithTwoOutputsForTest();
+
+    constexpr wgpu::Color kRed = {0.8f, 0.0f, 0.0f, 0.8f};
+    constexpr wgpu::Color kGreen = {0.0f, 0.8f, 0.0f, 0.8f};
+    constexpr bool kTestDepth = false;
+
+    std::array<float, 8> kUniformData = {
+        static_cast<float>(kRed.r),   static_cast<float>(kRed.g),   static_cast<float>(kRed.b),
+        static_cast<float>(kRed.a),   static_cast<float>(kGreen.r), static_cast<float>(kGreen.g),
+        static_cast<float>(kGreen.b), static_cast<float>(kGreen.a)};
+    constexpr uint32_t kSize = sizeof(kUniformData);
+
+    // Draws a red triangle to the first color attachment, and a blue triangle to the second color
+    // attachment.
+
+    // Do MSAA resolve on the first render target.
+    {
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {mMultisampledColorView, multisampledColorView2}, {mResolveView, nullptr},
+            wgpu::LoadOp::Clear, wgpu::LoadOp::Clear, kTestDepth);
+
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(), kSize);
+
+        wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+        queue.Submit(1, &commandBuffer);
+
+        VerifyResolveTarget(kRed, mResolveTexture);
+    }
+
+    // Do MSAA resolve on the second render target.
+    {
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {mMultisampledColorView, multisampledColorView2}, {nullptr, mResolveView},
+            wgpu::LoadOp::Clear, wgpu::LoadOp::Clear, kTestDepth);
+
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kUniformData.data(), kSize);
+
+        wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+        queue.Submit(1, &commandBuffer);
+
+        VerifyResolveTarget(kGreen, mResolveTexture);
+    }
+}
+
+// Test that resolving a single render target at a non-zero location works correctly.
+TEST_P(MultisampledRenderingTest, ResolveIntoNonZeroLocation) {
+    wgpu::TextureView multisampledColorView2 =
+        CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
+
+    wgpu::RenderPipeline pipeline = CreateRenderPipelineWithNonZeroLocationOutputForTest();
+
+    constexpr wgpu::Color kRed = {0.8f, 0.0f, 0.0f, 0.8f};
+    constexpr bool kTestDepth = false;
+
+    // Draws a red triangle to the first color attachment, and a blue triangle to the second color
+    // attachment.
+
+    // Do MSAA resolve on the first render target.
+    {
+        wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPass = CreateComboRenderPassDescriptorForTest(
+            {nullptr, mMultisampledColorView}, {nullptr, mResolveView}, wgpu::LoadOp::Clear,
+            wgpu::LoadOp::Clear, kTestDepth);
+
+        EncodeRenderPassForTest(commandEncoder, renderPass, pipeline, kRed);
+
+        wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
+        queue.Submit(1, &commandBuffer);
+
+        VerifyResolveTarget(kRed, mResolveTexture);
+    }
 }
 
 // Test doing MSAA resolve on one multisampled texture twice works correctly.
@@ -547,8 +657,9 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
     // TODO(dawn:462): Issue in the D3D12 validation layers.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
-    // TODO(dawn:1550) Fails on ARM-based Android devices.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
+    // TODO(dawn:1550) Workaround introduces a bug on Qualcomm GPUs, but is necessary for ARM GPUs.
+    DAWN_TEST_UNSUPPORTED_IF(IsAndroid() && IsQualcomm() &&
+                             HasToggleEnabled("resolve_multiple_attachments_in_separate_passes"));
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -668,8 +779,9 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithEmptyFinalSampleMask) 
 // Test doing MSAA resolve into multiple resolve targets works correctly with a non-default sample
 // mask.
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithSampleMask) {
-    // TODO(dawn:1550) Fails on ARM-based Android devices.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
+    /// TODO(dawn:1550) Workaround introduces a bug on Qualcomm GPUs, but is necessary for ARM GPUs.
+    DAWN_TEST_UNSUPPORTED_IF(IsAndroid() && IsQualcomm() &&
+                             HasToggleEnabled("resolve_multiple_attachments_in_separate_passes"));
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -839,12 +951,13 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOut
     // sample_mask is not supported in compat.
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
 
-    // TODO(dawn:1550) Fails on ARM-based Android devices.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
-
     // TODO(crbug.com/dawn/673): Work around or enforce via validation that sample variables are not
     // supported on some platforms.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_sample_variables"));
+
+    // TODO(dawn:1550) Workaround introduces a bug on Qualcomm GPUs, but is necessary for ARM GPUs.
+    DAWN_TEST_UNSUPPORTED_IF(IsAndroid() && IsQualcomm() &&
+                             HasToggleEnabled("resolve_multiple_attachments_in_separate_passes"));
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -956,8 +1069,9 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverage) {
 // alphaToCoverage. The alphaToCoverage mask is computed based on the alpha
 // component of the first color render attachment.
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithAlphaToCoverage) {
-    // TODO(dawn:1550) Fails on ARM-based Android devices.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
+    // TODO(dawn:1550) Workaround introduces a bug on Qualcomm GPUs, but is necessary for ARM GPUs.
+    DAWN_TEST_UNSUPPORTED_IF(IsAndroid() && IsQualcomm() &&
+                             HasToggleEnabled("resolve_multiple_attachments_in_separate_passes"));
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -1396,6 +1510,7 @@ DAWN_INSTANTIATE_TEST(MultisampledRenderingTest,
                       OpenGLESBackend(),
                       VulkanBackend(),
                       VulkanBackend({"always_resolve_into_zero_level_and_layer"}),
+                      VulkanBackend({"resolve_multiple_attachments_in_separate_passes"}),
                       MetalBackend({"emulate_store_and_msaa_resolve"}),
                       MetalBackend({"always_resolve_into_zero_level_and_layer"}),
                       MetalBackend({"always_resolve_into_zero_level_and_layer",

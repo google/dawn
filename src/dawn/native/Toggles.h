@@ -102,6 +102,7 @@ enum class Toggle {
     VulkanUseImageRobustAccess2,
     VulkanUseBufferRobustAccess2,
     D3D12Use64KBAlignedMSAATexture,
+    ResolveMultipleAttachmentInSeparatePasses,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,

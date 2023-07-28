@@ -211,7 +211,6 @@ MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
         for (ColorAttachmentIndex i :
              IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
             const auto& attachmentInfo = renderPass->colorAttachments[i];
-
             bool hasResolveTarget = attachmentInfo.resolveTarget != nullptr;
 
             query.SetColor(i, attachmentInfo.view->GetFormat().format, attachmentInfo.loadOp,

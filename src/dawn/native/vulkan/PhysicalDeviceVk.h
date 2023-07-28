@@ -43,6 +43,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
     bool IsDepthStencilFormatSupported(VkFormat format) const;
 
     bool IsAndroidQualcomm() const;
+    bool IsAndroidARM() const;
     bool IsIntelMesa() const;
 
     uint32_t GetDefaultComputeSubgroupSize() const;

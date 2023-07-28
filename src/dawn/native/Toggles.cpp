@@ -439,6 +439,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
      {"d3d12_use_64kb_alignment_msaa_texture",
       "Create MSAA textures with 64KB (D3D12_SMALL_MSAA_RESOURCE_PLACEMENT_ALIGNMENT) alignment.",
       "https://crbug.com/dawn/282", ToggleStage::Device}},
+    {Toggle::ResolveMultipleAttachmentInSeparatePasses,
+     {"resolve_multiple_attachments_in_separate_passes",
+      "When multiple MSAA attachments are used in a render pass, splits any resolve steps into a "
+      "separate render pass per resolve target. "
+      "This workaround is enabled by default on ARM Mali drivers.",
+      "https://crbug.com/dawn/1550", ToggleStage::Device}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "

@@ -482,6 +482,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
         deviceToggles->Default(Toggle::AlwaysResolveIntoZeroLevelAndLayer, true);
     }
 
+    if (IsAndroidARM()) {
+        // dawn:1550: Resolving multiple color targets in a single pass fails on ARM GPUs. To
+        // work around the issue, passes that resolve to multiple color targets will instead be
+        // forced to store the multisampled targets and do the resolves as separate passes injected
+        // after the original one.
+        deviceToggles->Default(Toggle::ResolveMultipleAttachmentInSeparatePasses, true);
+    }
+
     if (IsIntelMesa() && gpu_info::IsIntelGen12LP(GetVendorId(), GetDeviceId())) {
         // dawn:1688: Intel Mesa driver has a bug about reusing the VkDeviceMemory that was
         // previously bound to a 2D VkImage. To work around that bug we have to disable the resource
@@ -592,6 +600,15 @@ MaybeError PhysicalDevice::ValidateFeatureSupportedWithTogglesImpl(
 bool PhysicalDevice::IsAndroidQualcomm() const {
 #if DAWN_PLATFORM_IS(ANDROID)
     return gpu_info::IsQualcomm(GetVendorId());
+#else
+    return false;
+#endif
+}
+
+// Android devices with ARM GPUs have known issues. (dawn:1550)
+bool PhysicalDevice::IsAndroidARM() const {
+#if DAWN_PLATFORM_IS(ANDROID)
+    return gpu_info::IsARM(GetVendorId());
 #else
     return false;
 #endif
