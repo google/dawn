@@ -71,7 +71,7 @@ const type::Type* Ia::Match(MatchState& state, const type::Type* ty) const {
 }
 
 std::string Ia::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   ss << "abstract-int";
   return ss.str();
 }
@@ -99,7 +99,7 @@ const type::Type* Fa::Match(MatchState& state, const type::Type* ty) const {
 }
 
 std::string Fa::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   ss << "abstract-float";
   return ss.str();
 }
@@ -627,7 +627,7 @@ const type::Type* Vec::Match(MatchState& state, const type::Type* ty) const {
 std::string Vec::String(MatchState* state) const {
   const std::string N = state->NumName();
   const std::string T = state->TypeName();
-  utils::StringStream ss;
+  StringStream ss;
   ss << "vec" << N << "<" << T << ">";
   return ss.str();
 }
@@ -673,7 +673,7 @@ std::string Mat::String(MatchState* state) const {
   const std::string N = state->NumName();
   const std::string M = state->NumName();
   const std::string T = state->TypeName();
-  utils::StringStream ss;
+  StringStream ss;
   ss << "mat" << N << "x" << M << "<" << T << ">";
   return ss.str();
 }
@@ -1431,7 +1431,7 @@ const type::Type* ModfResult::Match(MatchState& state, const type::Type* ty) con
 
 std::string ModfResult::String(MatchState* state) const {
   const std::string T = state->TypeName();
-  utils::StringStream ss;
+  StringStream ss;
   ss << "__modf_result_" << T;
   return ss.str();
 }
@@ -1471,7 +1471,7 @@ const type::Type* ModfResultVec::Match(MatchState& state, const type::Type* ty) 
 std::string ModfResultVec::String(MatchState* state) const {
   const std::string N = state->NumName();
   const std::string T = state->TypeName();
-  utils::StringStream ss;
+  StringStream ss;
   ss << "__modf_result_vec" << N << "_" << T;
   return ss.str();
 }
@@ -1505,7 +1505,7 @@ const type::Type* FrexpResult::Match(MatchState& state, const type::Type* ty) co
 
 std::string FrexpResult::String(MatchState* state) const {
   const std::string T = state->TypeName();
-  utils::StringStream ss;
+  StringStream ss;
   ss << "__frexp_result_" << T;
   return ss.str();
 }
@@ -1545,7 +1545,7 @@ const type::Type* FrexpResultVec::Match(MatchState& state, const type::Type* ty)
 std::string FrexpResultVec::String(MatchState* state) const {
   const std::string N = state->NumName();
   const std::string T = state->TypeName();
-  utils::StringStream ss;
+  StringStream ss;
   ss << "__frexp_result_vec" << N << "_" << T;
   return ss.str();
 }
@@ -1624,7 +1624,7 @@ const type::Type* Scalar::Match(MatchState& state, const type::Type* ty) const {
 }
 
 std::string Scalar::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << Ia().String(nullptr) << ", " << Fa().String(nullptr) << ", " << F32().String(nullptr) << ", " << F16().String(nullptr) << ", " << I32().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
@@ -1667,7 +1667,7 @@ const type::Type* ConcreteScalar::Match(MatchState& state, const type::Type* ty)
 }
 
 std::string ConcreteScalar::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << F32().String(nullptr) << ", " << F16().String(nullptr) << ", " << I32().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
@@ -1713,7 +1713,7 @@ const type::Type* ScalarNoF32::Match(MatchState& state, const type::Type* ty) co
 }
 
 std::string ScalarNoF32::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << Ia().String(nullptr) << ", " << Fa().String(nullptr) << ", " << I32().String(nullptr) << ", " << F16().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
@@ -1759,7 +1759,7 @@ const type::Type* ScalarNoF16::Match(MatchState& state, const type::Type* ty) co
 }
 
 std::string ScalarNoF16::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << Ia().String(nullptr) << ", " << Fa().String(nullptr) << ", " << F32().String(nullptr) << ", " << I32().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
@@ -1805,7 +1805,7 @@ const type::Type* ScalarNoI32::Match(MatchState& state, const type::Type* ty) co
 }
 
 std::string ScalarNoI32::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << Ia().String(nullptr) << ", " << Fa().String(nullptr) << ", " << F32().String(nullptr) << ", " << F16().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
@@ -1851,7 +1851,7 @@ const type::Type* ScalarNoU32::Match(MatchState& state, const type::Type* ty) co
 }
 
 std::string ScalarNoU32::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << Ia().String(nullptr) << ", " << Fa().String(nullptr) << ", " << F32().String(nullptr) << ", " << F16().String(nullptr) << ", " << I32().String(nullptr) << " or " << Bool().String(nullptr);
@@ -1897,7 +1897,7 @@ const type::Type* ScalarNoBool::Match(MatchState& state, const type::Type* ty) c
 }
 
 std::string ScalarNoBool::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << Ia().String(nullptr) << ", " << Fa().String(nullptr) << ", " << F32().String(nullptr) << ", " << F16().String(nullptr) << ", " << I32().String(nullptr) << " or " << U32().String(nullptr);
@@ -1943,7 +1943,7 @@ const type::Type* FiaFiu32F16::Match(MatchState& state, const type::Type* ty) co
 }
 
 std::string FiaFiu32F16::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << Fa().String(nullptr) << ", " << Ia().String(nullptr) << ", " << F32().String(nullptr) << ", " << I32().String(nullptr) << ", " << U32().String(nullptr) << " or " << F16().String(nullptr);
@@ -1986,7 +1986,7 @@ const type::Type* FiaFi32F16::Match(MatchState& state, const type::Type* ty) con
 }
 
 std::string FiaFi32F16::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << Fa().String(nullptr) << ", " << Ia().String(nullptr) << ", " << F32().String(nullptr) << ", " << I32().String(nullptr) << " or " << F16().String(nullptr);
@@ -2029,7 +2029,7 @@ const type::Type* FiaFiu32::Match(MatchState& state, const type::Type* ty) const
 }
 
 std::string FiaFiu32::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << Fa().String(nullptr) << ", " << Ia().String(nullptr) << ", " << F32().String(nullptr) << ", " << I32().String(nullptr) << " or " << U32().String(nullptr);
@@ -2063,7 +2063,7 @@ const type::Type* FaF32::Match(MatchState& state, const type::Type* ty) const {
 }
 
 std::string FaF32::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << Fa().String(nullptr) << " or " << F32().String(nullptr);
@@ -2100,7 +2100,7 @@ const type::Type* FaF32F16::Match(MatchState& state, const type::Type* ty) const
 }
 
 std::string FaF32F16::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << Fa().String(nullptr) << ", " << F32().String(nullptr) << " or " << F16().String(nullptr);
@@ -2137,7 +2137,7 @@ const type::Type* IaIu32::Match(MatchState& state, const type::Type* ty) const {
 }
 
 std::string IaIu32::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << Ia().String(nullptr) << ", " << I32().String(nullptr) << " or " << U32().String(nullptr);
@@ -2171,7 +2171,7 @@ const type::Type* IaI32::Match(MatchState& state, const type::Type* ty) const {
 }
 
 std::string IaI32::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << Ia().String(nullptr) << " or " << I32().String(nullptr);
@@ -2211,7 +2211,7 @@ const type::Type* Fiu32F16::Match(MatchState& state, const type::Type* ty) const
 }
 
 std::string Fiu32F16::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << F32().String(nullptr) << ", " << I32().String(nullptr) << ", " << U32().String(nullptr) << " or " << F16().String(nullptr);
@@ -2248,7 +2248,7 @@ const type::Type* Fiu32::Match(MatchState& state, const type::Type* ty) const {
 }
 
 std::string Fiu32::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << F32().String(nullptr) << ", " << I32().String(nullptr) << " or " << U32().String(nullptr);
@@ -2285,7 +2285,7 @@ const type::Type* Fi32F16::Match(MatchState& state, const type::Type* ty) const 
 }
 
 std::string Fi32F16::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << F32().String(nullptr) << ", " << I32().String(nullptr) << " or " << F16().String(nullptr);
@@ -2319,7 +2319,7 @@ const type::Type* Fi32::Match(MatchState& state, const type::Type* ty) const {
 }
 
 std::string Fi32::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << F32().String(nullptr) << " or " << I32().String(nullptr);
@@ -2353,7 +2353,7 @@ const type::Type* F32F16::Match(MatchState& state, const type::Type* ty) const {
 }
 
 std::string F32F16::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << F32().String(nullptr) << " or " << F16().String(nullptr);
@@ -2387,7 +2387,7 @@ const type::Type* Iu32::Match(MatchState& state, const type::Type* ty) const {
 }
 
 std::string Iu32::String(MatchState*) const {
-  utils::StringStream ss;
+  StringStream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
   ss << I32().String(nullptr) << " or " << U32().String(nullptr);

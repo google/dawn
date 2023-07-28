@@ -58,23 +58,22 @@ struct RemoveContinueInSwitch::State {
 
             made_changes = true;
 
-            auto cont_var_name =
-                tint::utils::GetOrCreate(switch_to_cont_var_name, switch_stmt, [&] {
-                    // Create and insert 'var tint_continue : bool = false;' before the
-                    // switch.
-                    auto var_name = b.Symbols().New("tint_continue");
-                    auto* decl = b.Decl(b.Var(var_name, b.ty.bool_(), b.Expr(false)));
-                    auto ip = utils::GetInsertionPoint(ctx, switch_stmt);
-                    ctx.InsertBefore(ip.first->Declaration()->statements, ip.second, decl);
+            auto cont_var_name = tint::GetOrCreate(switch_to_cont_var_name, switch_stmt, [&] {
+                // Create and insert 'var tint_continue : bool = false;' before the
+                // switch.
+                auto var_name = b.Symbols().New("tint_continue");
+                auto* decl = b.Decl(b.Var(var_name, b.ty.bool_(), b.Expr(false)));
+                auto ip = utils::GetInsertionPoint(ctx, switch_stmt);
+                ctx.InsertBefore(ip.first->Declaration()->statements, ip.second, decl);
 
-                    // Create and insert 'if (tint_continue) { continue; }' after
-                    // switch.
-                    auto* if_stmt = b.If(b.Expr(var_name), b.Block(b.Continue()));
-                    ctx.InsertAfter(ip.first->Declaration()->statements, ip.second, if_stmt);
+                // Create and insert 'if (tint_continue) { continue; }' after
+                // switch.
+                auto* if_stmt = b.If(b.Expr(var_name), b.Block(b.Continue()));
+                ctx.InsertAfter(ip.first->Declaration()->statements, ip.second, if_stmt);
 
-                    // Return the new var name
-                    return var_name;
-                });
+                // Return the new var name
+                return var_name;
+            });
 
             // Replace 'continue;' with '{ tint_continue = true; break; }'
             auto* new_stmt = b.Block(                   //

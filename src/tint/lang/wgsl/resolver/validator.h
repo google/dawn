@@ -102,8 +102,8 @@ class Validator {
     Validator(ProgramBuilder* builder,
               SemHelper& helper,
               const builtin::Extensions& enabled_extensions,
-              const utils::Hashmap<const type::Type*, const Source*, 8>& atomic_composite_info,
-              utils::Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts);
+              const Hashmap<const type::Type*, const Source*, 8>& atomic_composite_info,
+              Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts);
     ~Validator();
 
     /// Adds the given error message to the diagnostics
@@ -152,12 +152,12 @@ class Validator {
     /// Validates pipeline stages
     /// @param entry_points the entry points to the module
     /// @returns true on success, false otherwise.
-    bool PipelineStages(utils::VectorRef<sem::Function*> entry_points) const;
+    bool PipelineStages(VectorRef<sem::Function*> entry_points) const;
 
     /// Validates push_constant variables
     /// @param entry_points the entry points to the module
     /// @returns true on success, false otherwise.
-    bool PushConstants(utils::VectorRef<sem::Function*> entry_points) const;
+    bool PushConstants(VectorRef<sem::Function*> entry_points) const;
 
     /// Validates aliases
     /// @param alias the alias to validate
@@ -274,9 +274,8 @@ class Validator {
     /// @param var the global variable to validate
     /// @param override_id the set of override ids in the module
     /// @returns true on success, false otherwise
-    bool GlobalVariable(
-        const sem::GlobalVariable* var,
-        const utils::Hashmap<OverrideId, const sem::Variable*, 8>& override_id) const;
+    bool GlobalVariable(const sem::GlobalVariable* var,
+                        const Hashmap<OverrideId, const sem::Variable*, 8>& override_id) const;
 
     /// Validates a break-if statement
     /// @param stmt the statement to validate
@@ -368,7 +367,7 @@ class Validator {
     /// Validates a list of statements
     /// @param stmts the statements to validate
     /// @returns true on success, false otherwise
-    bool Statements(utils::VectorRef<const ast::Statement*> stmts) const;
+    bool Statements(VectorRef<const ast::Statement*> stmts) const;
 
     /// Validates a storage texture
     /// @param t the texture to validate
@@ -421,7 +420,7 @@ class Validator {
     /// @param override_id the set of override ids in the module
     /// @returns true on success, false otherwise.
     bool Override(const sem::GlobalVariable* v,
-                  const utils::Hashmap<OverrideId, const sem::Variable*, 8>& override_id) const;
+                  const Hashmap<OverrideId, const sem::Variable*, 8>& override_id) const;
 
     /// Validates a 'const' variable declaration
     /// @param v the variable to validate
@@ -472,13 +471,13 @@ class Validator {
     /// Validates there are no duplicate attributes
     /// @param attributes the list of attributes to validate
     /// @returns true on success, false otherwise.
-    bool NoDuplicateAttributes(utils::VectorRef<const ast::Attribute*> attributes) const;
+    bool NoDuplicateAttributes(VectorRef<const ast::Attribute*> attributes) const;
 
     /// Validates a set of diagnostic controls.
     /// @param controls the diagnostic controls to validate
     /// @param use the place where the controls are being used ("directive" or "attribute")
     /// @returns true on success, false otherwise.
-    bool DiagnosticControls(utils::VectorRef<const ast::DiagnosticControl*> controls,
+    bool DiagnosticControls(VectorRef<const ast::DiagnosticControl*> controls,
                             const char* use) const;
 
     /// Validates a address space layout
@@ -493,7 +492,7 @@ class Validator {
     /// `validation`
     /// @param attributes the attribute list to check
     /// @param validation the validation mode to check
-    bool IsValidationDisabled(utils::VectorRef<const ast::Attribute*> attributes,
+    bool IsValidationDisabled(VectorRef<const ast::Attribute*> attributes,
                               ast::DisabledValidation validation) const;
 
     /// @returns true if the attribute list does not contains a
@@ -501,7 +500,7 @@ class Validator {
     /// `validation`
     /// @param attributes the attribute list to check
     /// @param validation the validation mode to check
-    bool IsValidationEnabled(utils::VectorRef<const ast::Attribute*> attributes,
+    bool IsValidationEnabled(VectorRef<const ast::Attribute*> attributes,
                              ast::DisabledValidation validation) const;
 
   private:
@@ -542,15 +541,15 @@ class Validator {
     bool CheckTypeAccessAddressSpace(const type::Type* store_ty,
                                      builtin::Access access,
                                      builtin::AddressSpace address_space,
-                                     utils::VectorRef<const tint::ast::Attribute*> attributes,
+                                     VectorRef<const tint::ast::Attribute*> attributes,
                                      const Source& source) const;
     SymbolTable& symbols_;
     diag::List& diagnostics_;
     SemHelper& sem_;
     DiagnosticFilterStack diagnostic_filters_;
     const builtin::Extensions& enabled_extensions_;
-    const utils::Hashmap<const type::Type*, const Source*, 8>& atomic_composite_info_;
-    utils::Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts_;
+    const Hashmap<const type::Type*, const Source*, 8>& atomic_composite_info_;
+    Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts_;
 };
 
 }  // namespace tint::resolver
@@ -564,7 +563,7 @@ class hash<tint::resolver::TypeAndAddressSpace> {
     /// @param tas the TypeAndAddressSpace
     /// @return the hash value
     inline std::size_t operator()(const tint::resolver::TypeAndAddressSpace& tas) const {
-        return tint::utils::Hash(tas.type, tas.address_space);
+        return Hash(tas.type, tas.address_space);
     }
 };
 

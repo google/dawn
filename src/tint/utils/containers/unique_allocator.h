@@ -21,7 +21,7 @@
 
 #include "src/tint/utils/memory/block_allocator.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// UniqueAllocator is used to allocate unique instances of the template type
 /// `T`.
@@ -114,6 +114,6 @@ class UniqueAllocator {
     std::unordered_set<Entry, Comparator, Comparator> items;
 };
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_CONTAINERS_UNIQUE_ALLOCATOR_H_

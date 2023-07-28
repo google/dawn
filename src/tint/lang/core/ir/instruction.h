@@ -28,7 +28,7 @@ class Block;
 namespace tint::ir {
 
 /// An instruction in the IR.
-class Instruction : public utils::Castable<Instruction> {
+class Instruction : public Castable<Instruction> {
   public:
     /// Destructor
     ~Instruction() override;
@@ -39,7 +39,7 @@ class Instruction : public utils::Castable<Instruction> {
     virtual void SetOperand(size_t index, ir::Value* value) = 0;
 
     /// @returns the operands of the instruction
-    virtual utils::VectorRef<ir::Value*> Operands() = 0;
+    virtual VectorRef<ir::Value*> Operands() = 0;
 
     /// @returns true if the instruction has result values
     virtual bool HasResults() { return false; }
@@ -51,7 +51,7 @@ class Instruction : public utils::Castable<Instruction> {
     virtual InstructionResult* Result() { return nullptr; }
 
     /// @returns the result values for this instruction
-    virtual utils::VectorRef<InstructionResult*> Results() { return utils::Empty; }
+    virtual VectorRef<InstructionResult*> Results() { return tint::Empty; }
 
     /// Removes the instruction from the block, and destroys all the result values.
     /// The result values must not be in use.
@@ -115,7 +115,7 @@ class Instruction : public utils::Castable<Instruction> {
     ir::Block* block_ = nullptr;
 
     /// Bitset of instruction flags
-    utils::EnumSet<Flag> flags_;
+    tint::EnumSet<Flag> flags_;
 };
 
 }  // namespace tint::ir

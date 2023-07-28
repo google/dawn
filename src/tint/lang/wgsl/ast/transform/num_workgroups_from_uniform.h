@@ -44,7 +44,7 @@ namespace tint::ast::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * CanonicalizeEntryPointIO
-class NumWorkgroupsFromUniform final : public utils::Castable<NumWorkgroupsFromUniform, Transform> {
+class NumWorkgroupsFromUniform final : public Castable<NumWorkgroupsFromUniform, Transform> {
   public:
     /// Constructor
     NumWorkgroupsFromUniform();
@@ -52,7 +52,7 @@ class NumWorkgroupsFromUniform final : public utils::Castable<NumWorkgroupsFromU
     ~NumWorkgroupsFromUniform() override;
 
     /// Configuration options for the NumWorkgroupsFromUniform transform.
-    struct Config final : public utils::Castable<Config, Data> {
+    struct Config final : public Castable<Config, Data> {
         /// Constructor
         /// @param ubo_bp the binding point to use for the generated uniform buffer. If ubo_bp
         /// contains no value, a free binding point will be used to ensure the generated program is

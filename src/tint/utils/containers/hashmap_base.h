@@ -27,7 +27,7 @@
 
 #define TINT_ASSERT_ITERATORS_NOT_INVALIDATED
 
-namespace tint::utils {
+namespace tint {
 
 /// Action taken by a map mutation
 enum class MapAction {
@@ -98,7 +98,7 @@ struct KeyValueRef {
 /// @param key_value the KeyValue to write
 /// @returns out so calls can be chained
 template <typename KEY, typename VALUE>
-utils::StringStream& operator<<(utils::StringStream& out, const KeyValue<KEY, VALUE>& key_value) {
+StringStream& operator<<(StringStream& out, const KeyValue<KEY, VALUE>& key_value) {
     return out << "[" << key_value.key << ": " << key_value.value << "]";
 }
 
@@ -631,6 +631,6 @@ class HashmapBase {
     size_t generation_ = 0;
 };
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_CONTAINERS_HASHMAP_BASE_H_

@@ -45,7 +45,7 @@ std::string ToString(const Program& program) {
     return writer.Result();
 }
 
-std::string ToString(const Program& program, utils::VectorRef<const ast::Statement*> stmts) {
+std::string ToString(const Program& program, VectorRef<const ast::Statement*> stmts) {
     wgsl::writer::ASTPrinter writer(&program);
     for (const auto* stmt : stmts) {
         writer.EmitStatement(stmt);
@@ -61,7 +61,7 @@ std::string ToString(const Program& program, const ast::Node* node) {
     return Switch(
         node,
         [&](const ast::Expression* expr) {
-            utils::StringStream out;
+            StringStream out;
             writer.EmitExpression(out, expr);
             if (!writer.Diagnostics().empty()) {
                 return "WGSL writer error: " + writer.Diagnostics().str();

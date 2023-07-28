@@ -40,7 +40,7 @@ inline const auto k3PiOver4 = T(UnwrapNumber<T>(2.356194490192344928846));
 
 /// Walks the constant::Value @p c, accumulating all the inner-most scalar values into @p args
 template <size_t N>
-inline void CollectScalars(const constant::Value* c, utils::Vector<builder::Scalar, N>& scalars) {
+inline void CollectScalars(const constant::Value* c, Vector<builder::Scalar, N>& scalars) {
     Switch(
         c->Type(),  //
         [&](const type::AbstractInt*) { scalars.Push(c->ValueAs<AInt>()); },
@@ -59,8 +59,8 @@ inline void CollectScalars(const constant::Value* c, utils::Vector<builder::Scal
 }
 
 /// Walks the constant::Value @p c, returning all the inner-most scalar values.
-inline utils::Vector<builder::Scalar, 16> ScalarsFrom(const constant::Value* c) {
-    utils::Vector<builder::Scalar, 16> out;
+inline Vector<builder::Scalar, 16> ScalarsFrom(const constant::Value* c) {
+    Vector<builder::Scalar, 16> out;
     CollectScalars(c, out);
     return out;
 }
@@ -220,7 +220,7 @@ inline void ConcatIntoIf([[maybe_unused]] Vec& v1, [[maybe_unused]] Vecs&&... vs
 /// Returns the overflow error message for binary ops
 template <typename NumberT>
 inline std::string OverflowErrorMessage(NumberT lhs, const char* op, NumberT rhs) {
-    utils::StringStream ss;
+    StringStream ss;
     ss << "'" << lhs.value << " " << op << " " << rhs.value << "' cannot be represented as '"
        << FriendlyName<NumberT>() << "'";
     return ss.str();
@@ -229,7 +229,7 @@ inline std::string OverflowErrorMessage(NumberT lhs, const char* op, NumberT rhs
 /// Returns the overflow error message for conversions
 template <typename VALUE_TY>
 std::string OverflowErrorMessage(VALUE_TY value, std::string_view target_ty) {
-    utils::StringStream ss;
+    StringStream ss;
     ss << "value " << value << " cannot be represented as "
        << "'" << target_ty << "'";
     return ss.str();
@@ -238,7 +238,7 @@ std::string OverflowErrorMessage(VALUE_TY value, std::string_view target_ty) {
 /// Returns the overflow error message for exponentiation
 template <typename NumberT>
 std::string OverflowExpErrorMessage(std::string_view base, NumberT exp) {
-    utils::StringStream ss;
+    StringStream ss;
     ss << base << "^" << exp << " cannot be represented as "
        << "'" << FriendlyName<NumberT>() << "'";
     return ss.str();

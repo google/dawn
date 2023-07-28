@@ -27,7 +27,7 @@ TEST_F(BlockStatementTest, Creation) {
     auto* d = create<DiscardStatement>();
     auto* ptr = d;
 
-    auto* b = create<BlockStatement>(utils::Vector{d}, utils::Empty);
+    auto* b = create<BlockStatement>(tint::Vector{d}, tint::Empty);
 
     ASSERT_EQ(b->statements.Length(), 1u);
     EXPECT_EQ(b->statements[0], ptr);
@@ -35,7 +35,7 @@ TEST_F(BlockStatementTest, Creation) {
 }
 
 TEST_F(BlockStatementTest, Creation_WithSource) {
-    auto* b = create<BlockStatement>(Source{Source::Location{20, 2}}, utils::Empty, utils::Empty);
+    auto* b = create<BlockStatement>(Source{Source::Location{20, 2}}, tint::Empty, tint::Empty);
     auto src = b->source;
     EXPECT_EQ(src.range.begin.line, 20u);
     EXPECT_EQ(src.range.begin.column, 2u);
@@ -47,7 +47,7 @@ TEST_F(BlockStatementTest, Creation_WithAttributes) {
 
     auto* attr1 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "foo");
     auto* attr2 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "bar");
-    auto* b = create<BlockStatement>(utils::Vector{d}, utils::Vector{attr1, attr2});
+    auto* b = create<BlockStatement>(tint::Vector{d}, tint::Vector{attr1, attr2});
 
     ASSERT_EQ(b->statements.Length(), 1u);
     EXPECT_EQ(b->statements[0], ptr);
@@ -55,7 +55,7 @@ TEST_F(BlockStatementTest, Creation_WithAttributes) {
 }
 
 TEST_F(BlockStatementTest, IsBlock) {
-    auto* b = create<BlockStatement>(utils::Empty, utils::Empty);
+    auto* b = create<BlockStatement>(tint::Empty, tint::Empty);
     EXPECT_TRUE(b->Is<BlockStatement>());
 }
 
@@ -63,7 +63,7 @@ TEST_F(BlockStatementTest, Assert_Null_Statement) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<BlockStatement>(utils::Vector<const Statement*, 1>{nullptr}, utils::Empty);
+            b.create<BlockStatement>(tint::Vector<const Statement*, 1>{nullptr}, tint::Empty);
         },
         "internal compiler error");
 }
@@ -73,7 +73,7 @@ TEST_F(BlockStatementTest, Assert_DifferentGenerationID_Statement) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<BlockStatement>(utils::Vector{b2.create<DiscardStatement>()}, utils::Empty);
+            b1.create<BlockStatement>(tint::Vector{b2.create<DiscardStatement>()}, tint::Empty);
         },
         "internal compiler error");
 }

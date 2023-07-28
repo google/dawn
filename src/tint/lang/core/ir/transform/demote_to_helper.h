@@ -25,7 +25,7 @@ namespace tint::ir::transform {
 /// program to ensure that discarding the fragment does not affect uniformity with respect to
 /// derivative operations. We do this by setting a global flag and masking all writes to storage
 /// buffers and textures.
-class DemoteToHelper final : public utils::Castable<DemoteToHelper, Transform> {
+class DemoteToHelper final : public Castable<DemoteToHelper, Transform> {
   public:
     /// Constructor
     DemoteToHelper();

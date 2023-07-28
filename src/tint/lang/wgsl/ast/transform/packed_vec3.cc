@@ -51,16 +51,16 @@ struct PackedVec3::State {
     static constexpr const char* kStructMemberName = "elements";
 
     /// The names of the structures used to wrap packed vec3 types.
-    utils::Hashmap<const type::Type*, Symbol, 4> packed_vec3_wrapper_struct_names;
+    Hashmap<const type::Type*, Symbol, 4> packed_vec3_wrapper_struct_names;
 
     /// A cache of host-shareable structures that have been rewritten.
-    utils::Hashmap<const type::Type*, Symbol, 4> rewritten_structs;
+    Hashmap<const type::Type*, Symbol, 4> rewritten_structs;
 
     /// A map from type to the name of a helper function used to pack that type.
-    utils::Hashmap<const type::Type*, Symbol, 4> pack_helpers;
+    Hashmap<const type::Type*, Symbol, 4> pack_helpers;
 
     /// A map from type to the name of a helper function used to unpack that type.
-    utils::Hashmap<const type::Type*, Symbol, 4> unpack_helpers;
+    Hashmap<const type::Type*, Symbol, 4> unpack_helpers;
 
     /// @param ty the type to test
     /// @returns true if `ty` is a vec3, false otherwise
@@ -124,8 +124,8 @@ struct PackedVec3::State {
                                 (array_element ? "_array_element" : "_struct_member"));
                             auto* member =
                                 b.Member(kStructMemberName, MakePackedVec3(vec),
-                                         utils::Vector{b.MemberAlign(AInt(vec->Align()))});
-                            b.Structure(b.Ident(name), utils::Vector{member}, utils::Empty);
+                                         tint::Vector{b.MemberAlign(AInt(vec->Align()))});
+                            b.Structure(b.Ident(name), tint::Vector{member}, tint::Empty);
                             return name;
                         }));
                     } else {
@@ -146,7 +146,7 @@ struct PackedVec3::State {
                 // Rewrite the array with the modified element type.
                 auto new_type = RewriteType(arr->ElemType(), /* array_element */ true);
                 if (new_type) {
-                    utils::Vector<const Attribute*, 1> attrs;
+                    tint::Vector<const Attribute*, 1> attrs;
                     if (arr->Count()->Is<type::RuntimeArrayCount>()) {
                         return b.ty.array(new_type, std::move(attrs));
                     } else if (auto count = arr->ConstantCount()) {
@@ -162,14 +162,14 @@ struct PackedVec3::State {
             [&](const type::Struct* str) -> Type {
                 if (ContainsVec3(str)) {
                     auto name = rewritten_structs.GetOrCreate(str, [&] {
-                        utils::Vector<const StructMember*, 4> members;
+                        tint::Vector<const StructMember*, 4> members;
                         for (auto* member : str->Members()) {
                             // If the member type contains a vec3, rewrite it.
                             auto new_type = RewriteType(member->Type());
                             if (new_type) {
                                 // Copy the member attributes.
                                 bool needs_align = true;
-                                utils::Vector<const Attribute*, 4> attributes;
+                                tint::Vector<const Attribute*, 4> attributes;
                                 if (auto* sem_mem = member->As<sem::StructMember>()) {
                                     for (auto* attr : sem_mem->Declaration()->attributes) {
                                         if (attr->IsAnyOf<StructMemberAlignAttribute,
@@ -192,8 +192,8 @@ struct PackedVec3::State {
                                 if (auto* sem_mem = member->As<sem::StructMember>()) {
                                     members.Push(ctx.Clone(sem_mem->Declaration()));
                                 } else {
-                                    members.Push(b.Member(ctx.Clone(member->Name()), new_type,
-                                                          utils::Empty));
+                                    members.Push(
+                                        b.Member(ctx.Clone(member->Name()), new_type, tint::Empty));
                                 }
                             }
                         }
@@ -224,7 +224,7 @@ struct PackedVec3::State {
         const std::function<Type()>& in_type,
         const std::function<Type()>& out_type) {
         // Allocate a variable to hold the return value of the function.
-        utils::Vector<const Statement*, 4> statements;
+        tint::Vector<const Statement*, 4> statements;
         statements.Push(b.Decl(b.Var("result", out_type())));
 
         // Helper that generates a loop to copy and pack/unpack elements of an array to the result:
@@ -238,7 +238,7 @@ struct PackedVec3::State {
                 b.Decl(b.Var("i", b.ty.u32())),      //
                 b.LessThan("i", u32(num_elements)),  //
                 b.Assign("i", b.Add("i", 1_a)),      //
-                b.Block(utils::Vector{
+                b.Block(tint::Vector{
                     b.Assign(b.IndexAccessor("result", "i"), element),
                 })));
         };
@@ -271,7 +271,7 @@ struct PackedVec3::State {
 
         // Create the function and return its name.
         auto name = b.Symbols().New(name_prefix);
-        b.Func(name, utils::Vector{b.Param("in", in_type())}, out_type(), std::move(statements));
+        b.Func(name, tint::Vector{b.Param("in", in_type())}, out_type(), std::move(statements));
         return name;
     }
 
@@ -363,8 +363,8 @@ struct PackedVec3::State {
         b.Enable(builtin::Extension::kChromiumInternalRelaxedUniformLayout);
 
         // Track expressions that need to be packed or unpacked.
-        utils::Hashset<const sem::ValueExpression*, 8> to_pack;
-        utils::Hashset<const sem::ValueExpression*, 8> to_unpack;
+        Hashset<const sem::ValueExpression*, 8> to_pack;
+        Hashset<const sem::ValueExpression*, 8> to_unpack;
 
         // Replace vec3 types in host-shareable address spaces with `__packed_vec3` types, and
         // collect expressions that need to be converted to or from values that use the

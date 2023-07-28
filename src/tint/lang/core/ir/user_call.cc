@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::UserCall);
 
 namespace tint::ir {
 
-UserCall::UserCall(InstructionResult* result, Function* func, utils::VectorRef<Value*> arguments) {
+UserCall::UserCall(InstructionResult* result, Function* func, VectorRef<Value*> arguments) {
     AddOperand(UserCall::kFunctionOperandOffset, func);
     AddOperands(UserCall::kArgsOperandOffset, std::move(arguments));
     AddResult(result);

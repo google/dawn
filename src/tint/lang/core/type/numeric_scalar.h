@@ -21,7 +21,7 @@ namespace tint::type {
 
 /// Base class for all numeric-scalar types
 /// @see https://www.w3.org/TR/WGSL/#scalar-types
-class NumericScalar : public utils::Castable<NumericScalar, Scalar> {
+class NumericScalar : public Castable<NumericScalar, Scalar> {
   public:
     /// Destructor
     ~NumericScalar() override;

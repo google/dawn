@@ -14,20 +14,20 @@
 
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// The unique TypeInfo for the CastableBase type
 /// @return doxygen-thinks-this-static-field-is-a-function :(
 template <>
-const TypeInfo utils::detail::TypeInfoOf<CastableBase>::info{
+const TypeInfo tint::detail::TypeInfoOf<CastableBase>::info{
     nullptr,
     "CastableBase",
-    tint::utils::TypeInfo::HashCodeOf<CastableBase>(),
-    tint::utils::TypeInfo::FullHashCodeOf<CastableBase>(),
+    tint::TypeInfo::HashCodeOf<CastableBase>(),
+    tint::TypeInfo::FullHashCodeOf<CastableBase>(),
 };
 
 CastableBase::CastableBase(const CastableBase&) = default;
 
 CastableBase::~CastableBase() = default;
 
-}  // namespace tint::utils
+}  // namespace tint

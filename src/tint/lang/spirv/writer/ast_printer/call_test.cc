@@ -26,13 +26,13 @@ using SpirvASTPrinterTest = TestHelper;
 
 TEST_F(SpirvASTPrinterTest, Expression_Call) {
     auto* a_func = Func("a_func",
-                        utils::Vector{
+                        Vector{
                             Param("a", ty.f32()),
                             Param("b", ty.f32()),
                         },
-                        ty.f32(), utils::Vector{Return(Add("a", "b"))});
-    auto* func = Func("main", utils::Empty, ty.void_(),
-                      utils::Vector{Assign(Phony(), Call("a_func", 1_f, 1_f))});
+                        ty.f32(), Vector{Return(Add("a", "b"))});
+    auto* func =
+        Func("main", tint::Empty, ty.void_(), Vector{Assign(Phony(), Call("a_func", 1_f, 1_f))});
 
     Builder& b = Build();
 
@@ -65,14 +65,13 @@ OpFunctionEnd
 
 TEST_F(SpirvASTPrinterTest, Statement_Call) {
     auto* a_func = Func("a_func",
-                        utils::Vector{
+                        Vector{
                             Param("a", ty.f32()),
                             Param("b", ty.f32()),
                         },
-                        ty.f32(), utils::Vector{Return(Add("a", "b"))});
+                        ty.f32(), Vector{Return(Add("a", "b"))});
 
-    auto* func =
-        Func("main", utils::Empty, ty.void_(), utils::Vector{CallStmt(Call("a_func", 1_f, 1_f))});
+    auto* func = Func("main", tint::Empty, ty.void_(), Vector{CallStmt(Call("a_func", 1_f, 1_f))});
 
     Builder& b = Build();
 

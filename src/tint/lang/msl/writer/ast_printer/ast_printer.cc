@@ -91,13 +91,13 @@ namespace tint::msl::writer {
 namespace {
 
 bool last_is_break(const ast::BlockStatement* stmts) {
-    return utils::IsAnyOf<ast::BreakStatement>(stmts->Last());
+    return tint::IsAnyOf<ast::BreakStatement>(stmts->Last());
 }
 
 class ScopedBitCast {
   public:
     ScopedBitCast(ASTPrinter* generator,
-                  utils::StringStream& stream,
+                  StringStream& stream,
                   const type::Type* curr_type,
                   const type::Type* target_type)
         : s(stream) {
@@ -118,7 +118,7 @@ class ScopedBitCast {
     ~ScopedBitCast() { s << ")"; }
 
   private:
-    utils::StringStream& s;
+    StringStream& s;
 };
 
 }  // namespace
@@ -239,7 +239,7 @@ ASTPrinter::~ASTPrinter() = default;
 bool ASTPrinter::Generate() {
     if (!tint::writer::CheckSupportedExtensions(
             "MSL", builder_.AST(), diagnostics_,
-            utils::Vector{
+            Vector{
                 builtin::Extension::kChromiumDisableUniformityAnalysis,
                 builtin::Extension::kChromiumExperimentalFullPtrParameters,
                 builtin::Extension::kChromiumExperimentalPushConstant,
@@ -338,8 +338,7 @@ bool ASTPrinter::EmitTypeDecl(const type::Type* ty) {
     return true;
 }
 
-bool ASTPrinter::EmitIndexAccessor(utils::StringStream& out,
-                                   const ast::IndexAccessorExpression* expr) {
+bool ASTPrinter::EmitIndexAccessor(StringStream& out, const ast::IndexAccessorExpression* expr) {
     bool paren_lhs =
         !expr->object
              ->IsAnyOf<ast::AccessorExpression, ast::CallExpression, ast::IdentifierExpression>();
@@ -364,7 +363,7 @@ bool ASTPrinter::EmitIndexAccessor(utils::StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitBitcast(utils::StringStream& out, const ast::BitcastExpression* expr) {
+bool ASTPrinter::EmitBitcast(StringStream& out, const ast::BitcastExpression* expr) {
     out << "as_type<";
     if (!EmitType(out, TypeOf(expr)->UnwrapRef())) {
         return false;
@@ -397,7 +396,7 @@ bool ASTPrinter::EmitAssign(const ast::AssignmentStatement* stmt) {
     return true;
 }
 
-bool ASTPrinter::EmitBinary(utils::StringStream& out, const ast::BinaryExpression* expr) {
+bool ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr) {
     auto emit_op = [&] {
         out << " ";
 
@@ -606,7 +605,7 @@ bool ASTPrinter::EmitBreakIf(const ast::BreakIfStatement* b) {
     return true;
 }
 
-bool ASTPrinter::EmitCall(utils::StringStream& out, const ast::CallExpression* expr) {
+bool ASTPrinter::EmitCall(StringStream& out, const ast::CallExpression* expr) {
     auto* call = builder_.Sem().Get<sem::Call>(expr);
     auto* target = call->Target();
     return Switch(
@@ -620,7 +619,7 @@ bool ASTPrinter::EmitCall(utils::StringStream& out, const ast::CallExpression* e
         });
 }
 
-bool ASTPrinter::EmitFunctionCall(utils::StringStream& out,
+bool ASTPrinter::EmitFunctionCall(StringStream& out,
                                   const sem::Call* call,
                                   const sem::Function* fn) {
     out << fn->Declaration()->name->symbol.Name() << "(";
@@ -641,7 +640,7 @@ bool ASTPrinter::EmitFunctionCall(utils::StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitBuiltinCall(utils::StringStream& out,
+bool ASTPrinter::EmitBuiltinCall(StringStream& out,
                                  const sem::Call* call,
                                  const sem::Builtin* builtin) {
     auto* expr = call->Declaration();
@@ -755,7 +754,7 @@ bool ASTPrinter::EmitBuiltinCall(utils::StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitTypeConversion(utils::StringStream& out,
+bool ASTPrinter::EmitTypeConversion(StringStream& out,
                                     const sem::Call* call,
                                     const sem::ValueConversion* conv) {
     if (!EmitType(out, conv->Target())) {
@@ -771,7 +770,7 @@ bool ASTPrinter::EmitTypeConversion(utils::StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitTypeInitializer(utils::StringStream& out,
+bool ASTPrinter::EmitTypeInitializer(StringStream& out,
                                      const sem::Call* call,
                                      const sem::ValueConstructor* ctor) {
     auto* type = ctor->ReturnType();
@@ -827,7 +826,7 @@ bool ASTPrinter::EmitTypeInitializer(utils::StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitAtomicCall(utils::StringStream& out,
+bool ASTPrinter::EmitAtomicCall(StringStream& out,
                                 const ast::CallExpression* expr,
                                 const sem::Builtin* builtin) {
     auto call = [&](const std::string& name, bool append_memory_order_relaxed) {
@@ -886,7 +885,7 @@ bool ASTPrinter::EmitAtomicCall(utils::StringStream& out,
             auto sc = ptr_ty->AddressSpace();
             auto* str = builtin->ReturnType()->As<type::Struct>();
 
-            auto func = utils::GetOrCreate(
+            auto func = tint::GetOrCreate(
                 atomicCompareExchangeWeak_, ACEWKeyType{{sc, str}}, [&]() -> std::string {
                     if (!EmitStructType(&helpers_, builtin->ReturnType()->As<type::Struct>())) {
                         return "";
@@ -951,7 +950,7 @@ bool ASTPrinter::EmitAtomicCall(utils::StringStream& out,
     return false;
 }
 
-bool ASTPrinter::EmitTextureCall(utils::StringStream& out,
+bool ASTPrinter::EmitTextureCall(StringStream& out,
                                  const sem::Call* call,
                                  const sem::Builtin* builtin) {
     using Usage = sem::ParameterUsage;
@@ -1200,7 +1199,7 @@ bool ASTPrinter::EmitTextureCall(utils::StringStream& out,
                 out << "gradientcube(";
                 break;
             default: {
-                utils::StringStream err;
+                StringStream err;
                 err << "MSL does not support gradients for " << dim << " textures";
                 diagnostics_.add_error(diag::System::Writer, err.str());
                 return false;
@@ -1263,7 +1262,7 @@ bool ASTPrinter::EmitTextureCall(utils::StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitDotCall(utils::StringStream& out,
+bool ASTPrinter::EmitDotCall(StringStream& out,
                              const ast::CallExpression* expr,
                              const sem::Builtin* builtin) {
     auto* vec_ty = builtin->Parameters()[0]->Type()->As<type::Vector>();
@@ -1271,7 +1270,7 @@ bool ASTPrinter::EmitDotCall(utils::StringStream& out,
     if (vec_ty->type()->is_integer_scalar()) {
         // MSL does not have a builtin for dot() with integer vector types.
         // Generate the helper function if it hasn't been created already
-        fn = utils::GetOrCreate(int_dot_funcs_, vec_ty->Width(), [&]() -> std::string {
+        fn = tint::GetOrCreate(int_dot_funcs_, vec_ty->Width(), [&]() -> std::string {
             TextBuffer b;
             TINT_DEFER(helpers_.Append(b));
 
@@ -1308,7 +1307,7 @@ bool ASTPrinter::EmitDotCall(utils::StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitModfCall(utils::StringStream& out,
+bool ASTPrinter::EmitModfCall(StringStream& out,
                               const ast::CallExpression* expr,
                               const sem::Builtin* builtin) {
     return CallBuiltinHelper(
@@ -1334,7 +1333,7 @@ bool ASTPrinter::EmitModfCall(utils::StringStream& out,
         });
 }
 
-bool ASTPrinter::EmitFrexpCall(utils::StringStream& out,
+bool ASTPrinter::EmitFrexpCall(StringStream& out,
                                const ast::CallExpression* expr,
                                const sem::Builtin* builtin) {
     return CallBuiltinHelper(
@@ -1360,7 +1359,7 @@ bool ASTPrinter::EmitFrexpCall(utils::StringStream& out,
         });
 }
 
-bool ASTPrinter::EmitDegreesCall(utils::StringStream& out,
+bool ASTPrinter::EmitDegreesCall(StringStream& out,
                                  const ast::CallExpression* expr,
                                  const sem::Builtin* builtin) {
     return CallBuiltinHelper(out, expr, builtin,
@@ -1371,7 +1370,7 @@ bool ASTPrinter::EmitDegreesCall(utils::StringStream& out,
                              });
 }
 
-bool ASTPrinter::EmitRadiansCall(utils::StringStream& out,
+bool ASTPrinter::EmitRadiansCall(StringStream& out,
                                  const ast::CallExpression* expr,
                                  const sem::Builtin* builtin) {
     return CallBuiltinHelper(out, expr, builtin,
@@ -1583,7 +1582,7 @@ bool ASTPrinter::EmitContinue(const ast::ContinueStatement*) {
     return true;
 }
 
-bool ASTPrinter::EmitZeroValue(utils::StringStream& out, const type::Type* type) {
+bool ASTPrinter::EmitZeroValue(StringStream& out, const type::Type* type) {
     return Switch(
         type,
         [&](const type::Bool*) {
@@ -1631,7 +1630,7 @@ bool ASTPrinter::EmitZeroValue(utils::StringStream& out, const type::Type* type)
         });
 }
 
-bool ASTPrinter::EmitConstant(utils::StringStream& out, const constant::Value* constant) {
+bool ASTPrinter::EmitConstant(StringStream& out, const constant::Value* constant) {
     return Switch(
         constant->Type(),  //
         [&](const type::Bool*) {
@@ -1757,7 +1756,7 @@ bool ASTPrinter::EmitConstant(utils::StringStream& out, const constant::Value* c
         });
 }
 
-bool ASTPrinter::EmitLiteral(utils::StringStream& out, const ast::LiteralExpression* lit) {
+bool ASTPrinter::EmitLiteral(StringStream& out, const ast::LiteralExpression* lit) {
     return Switch(
         lit,
         [&](const ast::BoolLiteralExpression* l) {
@@ -1793,7 +1792,7 @@ bool ASTPrinter::EmitLiteral(utils::StringStream& out, const ast::LiteralExpress
         });
 }
 
-bool ASTPrinter::EmitExpression(utils::StringStream& out, const ast::Expression* expr) {
+bool ASTPrinter::EmitExpression(StringStream& out, const ast::Expression* expr) {
     if (auto* sem = builder_.Sem().GetVal(expr)) {
         if (auto* constant = sem->ConstantValue()) {
             return EmitConstant(out, constant);
@@ -1816,7 +1815,7 @@ bool ASTPrinter::EmitExpression(utils::StringStream& out, const ast::Expression*
         });
 }
 
-void ASTPrinter::EmitStage(utils::StringStream& out, ast::PipelineStage stage) {
+void ASTPrinter::EmitStage(StringStream& out, ast::PipelineStage stage) {
     switch (stage) {
         case ast::PipelineStage::kFragment:
             out << "fragment";
@@ -2021,7 +2020,7 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
     return true;
 }
 
-bool ASTPrinter::EmitIdentifier(utils::StringStream& out, const ast::IdentifierExpression* expr) {
+bool ASTPrinter::EmitIdentifier(StringStream& out, const ast::IdentifierExpression* expr) {
     out << expr->identifier->symbol.Name();
     return true;
 }
@@ -2062,7 +2061,7 @@ bool ASTPrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
     }
 
     TextBuffer cond_pre;
-    utils::StringStream cond_buf;
+    StringStream cond_buf;
     if (auto* cond = stmt->condition) {
         TINT_SCOPED_ASSIGNMENT(current_buffer_, &cond_pre);
         if (!EmitExpression(cond_buf, cond)) {
@@ -2143,7 +2142,7 @@ bool ASTPrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
                 out << cond_buf.str() << "; ";
 
                 if (!cont_buf.lines.empty()) {
-                    out << utils::TrimSuffix(cont_buf.lines[0].content, ";");
+                    out << tint::TrimSuffix(cont_buf.lines[0].content, ";");
                 }
             }
             out << " {";
@@ -2163,7 +2162,7 @@ bool ASTPrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
 
 bool ASTPrinter::EmitWhile(const ast::WhileStatement* stmt) {
     TextBuffer cond_pre;
-    utils::StringStream cond_buf;
+    StringStream cond_buf;
 
     {
         auto* cond = stmt->condition;
@@ -2239,7 +2238,7 @@ bool ASTPrinter::EmitIf(const ast::IfStatement* stmt) {
                 return false;
             }
         } else {
-            if (!EmitStatementsWithIndent(utils::Vector{stmt->else_statement})) {
+            if (!EmitStatementsWithIndent(Vector{stmt->else_statement})) {
                 return false;
             }
         }
@@ -2249,8 +2248,7 @@ bool ASTPrinter::EmitIf(const ast::IfStatement* stmt) {
     return true;
 }
 
-bool ASTPrinter::EmitMemberAccessor(utils::StringStream& out,
-                                    const ast::MemberAccessorExpression* expr) {
+bool ASTPrinter::EmitMemberAccessor(StringStream& out, const ast::MemberAccessorExpression* expr) {
     auto write_lhs = [&] {
         bool paren_lhs = !expr->object->IsAnyOf<ast::AccessorExpression, ast::CallExpression,
                                                 ast::IdentifierExpression>();
@@ -2398,7 +2396,7 @@ bool ASTPrinter::EmitStatement(const ast::Statement* stmt) {
         });
 }
 
-bool ASTPrinter::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) {
+bool ASTPrinter::EmitStatements(VectorRef<const ast::Statement*> stmts) {
     for (auto* s : stmts) {
         if (!EmitStatement(s)) {
             return false;
@@ -2407,7 +2405,7 @@ bool ASTPrinter::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) {
     return true;
 }
 
-bool ASTPrinter::EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts) {
+bool ASTPrinter::EmitStatementsWithIndent(VectorRef<const ast::Statement*> stmts) {
     ScopedIndent si(this);
     return EmitStatements(stmts);
 }
@@ -2436,7 +2434,7 @@ bool ASTPrinter::EmitSwitch(const ast::SwitchStatement* stmt) {
     return true;
 }
 
-bool ASTPrinter::EmitType(utils::StringStream& out, const type::Type* type) {
+bool ASTPrinter::EmitType(StringStream& out, const type::Type* type) {
     return Switch(
         type,
         [&](const type::Atomic* atomic) {
@@ -2633,7 +2631,7 @@ bool ASTPrinter::EmitType(utils::StringStream& out, const type::Type* type) {
         });
 }
 
-bool ASTPrinter::EmitTypeAndName(utils::StringStream& out,
+bool ASTPrinter::EmitTypeAndName(StringStream& out,
                                  const type::Type* type,
                                  const std::string& name) {
     if (!EmitType(out, type)) {
@@ -2643,7 +2641,7 @@ bool ASTPrinter::EmitTypeAndName(utils::StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitAddressSpace(utils::StringStream& out, builtin::AddressSpace sc) {
+bool ASTPrinter::EmitAddressSpace(StringStream& out, builtin::AddressSpace sc) {
     switch (sc) {
         case builtin::AddressSpace::kFunction:
         case builtin::AddressSpace::kPrivate:
@@ -2677,7 +2675,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const type::Struct* str) {
     bool is_host_shareable = str->IsHostShareable();
 
     // Emits a `/* 0xnnnn */` byte offset comment for a struct member.
-    auto add_byte_offset_comment = [&](utils::StringStream& out, uint32_t offset) {
+    auto add_byte_offset_comment = [&](StringStream& out, uint32_t offset) {
         std::ios_base::fmtflags saved_flag_state(out.flags());
         out << "/* 0x" << std::hex << std::setfill('0') << std::setw(4) << offset << " */ ";
         out.flags(saved_flag_state);
@@ -2803,12 +2801,12 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const type::Struct* str) {
     return true;
 }
 
-bool ASTPrinter::EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpression* expr) {
+bool ASTPrinter::EmitUnaryOp(StringStream& out, const ast::UnaryOpExpression* expr) {
     // Handle `-e` when `e` is signed, so that we ensure that if `e` is the
     // largest negative value, it returns `e`.
     auto* expr_type = TypeOf(expr->expr)->UnwrapRef();
     if (expr->op == ast::UnaryOp::kNegation && expr_type->is_signed_integer_scalar_or_vector()) {
-        auto fn = utils::GetOrCreate(unary_minus_funcs_, expr_type, [&]() -> std::string {
+        auto fn = tint::GetOrCreate(unary_minus_funcs_, expr_type, [&]() -> std::string {
             // e.g.:
             // int tint_unary_minus(const int v) {
             //     return (v == -2147483648) ? v : -v;
@@ -2957,12 +2955,12 @@ bool ASTPrinter::EmitLet(const ast::Let* let) {
 }
 
 template <typename F>
-bool ASTPrinter::CallBuiltinHelper(utils::StringStream& out,
+bool ASTPrinter::CallBuiltinHelper(StringStream& out,
                                    const ast::CallExpression* call,
                                    const sem::Builtin* builtin,
                                    F&& build) {
     // Generate the helper function if it hasn't been created already
-    auto fn = utils::GetOrCreate(builtins_, builtin, [&]() -> std::string {
+    auto fn = tint::GetOrCreate(builtins_, builtin, [&]() -> std::string {
         TextBuffer b;
         TINT_DEFER(helpers_.Append(b));
 

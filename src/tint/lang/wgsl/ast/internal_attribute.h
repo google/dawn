@@ -30,7 +30,7 @@ namespace tint::ast {
 /// An attribute used to indicate that a function is tint-internal.
 /// These attributes are not produced by generators, but instead are usually
 /// created by transforms for consumption by a particular backend.
-class InternalAttribute : public utils::Castable<InternalAttribute, Attribute> {
+class InternalAttribute : public Castable<InternalAttribute, Attribute> {
   public:
     /// Constructor
     /// @param generation_id the identifier of the program that owns this node
@@ -38,7 +38,7 @@ class InternalAttribute : public utils::Castable<InternalAttribute, Attribute> {
     /// @param deps a list of identifiers that this attribute is dependent on
     InternalAttribute(GenerationID generation_id,
                       NodeID nid,
-                      utils::VectorRef<const IdentifierExpression*> deps);
+                      VectorRef<const IdentifierExpression*> deps);
 
     /// Destructor
     ~InternalAttribute() override;
@@ -51,7 +51,7 @@ class InternalAttribute : public utils::Castable<InternalAttribute, Attribute> {
     std::string Name() const override;
 
     /// A list of identifiers that this attribute is dependent on
-    const utils::Vector<const IdentifierExpression*, 1> dependencies;
+    const tint::Vector<const IdentifierExpression*, 1> dependencies;
 };
 
 }  // namespace tint::ast

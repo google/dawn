@@ -27,7 +27,7 @@ TEST_F(CheckSupportedExtensionsTest, Supported) {
     Enable(builtin::Extension::kF16);
 
     ASSERT_TRUE(CheckSupportedExtensions("writer", AST(), Diagnostics(),
-                                         utils::Vector{
+                                         Vector{
                                              builtin::Extension::kF16,
                                              builtin::Extension::kChromiumExperimentalDp4A,
                                          }));
@@ -37,7 +37,7 @@ TEST_F(CheckSupportedExtensionsTest, Unsupported) {
     Enable(Source{{12, 34}}, builtin::Extension::kF16);
 
     ASSERT_FALSE(CheckSupportedExtensions("writer", AST(), Diagnostics(),
-                                          utils::Vector{
+                                          Vector{
                                               builtin::Extension::kChromiumExperimentalDp4A,
                                           }));
     EXPECT_EQ(Diagnostics().str(), "12:34 error: writer backend does not support extension 'f16'");

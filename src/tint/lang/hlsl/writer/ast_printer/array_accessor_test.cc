@@ -29,7 +29,7 @@ TEST_F(HlslASTPrinterTest_Expression, IndexAccessor) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "ary[5]");
 }

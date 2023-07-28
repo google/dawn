@@ -40,7 +40,7 @@ struct MatrixInfo {
     /// @returns the identifier of an array that holds an vector column for each row of the matrix.
     Type array(ProgramBuilder* b) const {
         return b->ty.array(b->ty.vec<f32>(matrix->rows()), u32(matrix->columns()),
-                           utils::Vector{
+                           tint::Vector{
                                b->Stride(stride),
                            });
     }
@@ -51,7 +51,7 @@ struct MatrixInfo {
     }
     /// Hash function
     struct Hasher {
-        size_t operator()(const MatrixInfo& t) const { return utils::Hash(t.stride, t.matrix); }
+        size_t operator()(const MatrixInfo& t) const { return Hash(t.stride, t.matrix); }
     };
 };
 
@@ -70,7 +70,7 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
     // Scan the program for all storage and uniform structure matrix members with
     // a custom stride attribute. Replace these matrices with an equivalent array,
     // and populate the `decomposed` map with the members that have been replaced.
-    utils::Hashmap<const type::StructMember*, MatrixInfo, 8> decomposed;
+    Hashmap<const type::StructMember*, MatrixInfo, 8> decomposed;
     for (auto* node : src->ASTNodes().Objects()) {
         if (auto* str = node->As<Struct>()) {
             auto* str_ty = src->Sem().Get(str);
@@ -130,7 +130,7 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
     ctx.ReplaceAll([&](const AssignmentStatement* stmt) -> const Statement* {
         if (auto* access = src->Sem().Get<sem::StructMemberAccess>(stmt->lhs)) {
             if (auto info = decomposed.Find(access->Member())) {
-                auto fn = utils::GetOrCreate(mat_to_arr, *info, [&] {
+                auto fn = tint::GetOrCreate(mat_to_arr, *info, [&] {
                     auto name =
                         b.Symbols().New("mat" + std::to_string(info->matrix->columns()) + "x" +
                                         std::to_string(info->matrix->rows()) + "_stride_" +
@@ -140,16 +140,16 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
                     auto array = [&] { return info->array(ctx.dst); };
 
                     auto mat = b.Sym("m");
-                    utils::Vector<const Expression*, 4> columns;
+                    tint::Vector<const Expression*, 4> columns;
                     for (uint32_t i = 0; i < static_cast<uint32_t>(info->matrix->columns()); i++) {
                         columns.Push(b.IndexAccessor(mat, u32(i)));
                     }
                     b.Func(name,
-                           utils::Vector{
+                           tint::Vector{
                                b.Param(mat, matrix()),
                            },
                            array(),
-                           utils::Vector{
+                           tint::Vector{
                                b.Return(b.Call(array(), columns)),
                            });
                     return name;
@@ -169,7 +169,7 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
     ctx.ReplaceAll([&](const MemberAccessorExpression* expr) -> const Expression* {
         if (auto* access = src->Sem().Get(expr)->UnwrapLoad()->As<sem::StructMemberAccess>()) {
             if (auto info = decomposed.Find(access->Member())) {
-                auto fn = utils::GetOrCreate(arr_to_mat, *info, [&] {
+                auto fn = tint::GetOrCreate(arr_to_mat, *info, [&] {
                     auto name =
                         b.Symbols().New("arr_to_mat" + std::to_string(info->matrix->columns()) +
                                         "x" + std::to_string(info->matrix->rows()) + "_stride_" +
@@ -179,16 +179,16 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
                     auto array = [&] { return info->array(ctx.dst); };
 
                     auto arr = b.Sym("arr");
-                    utils::Vector<const Expression*, 4> columns;
+                    tint::Vector<const Expression*, 4> columns;
                     for (uint32_t i = 0; i < static_cast<uint32_t>(info->matrix->columns()); i++) {
                         columns.Push(b.IndexAccessor(arr, u32(i)));
                     }
                     b.Func(name,
-                           utils::Vector{
+                           tint::Vector{
                                b.Param(arr, array()),
                            },
                            matrix(),
-                           utils::Vector{
+                           tint::Vector{
                                b.Return(b.Call(matrix(), columns)),
                            });
                     return name;

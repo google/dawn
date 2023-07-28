@@ -62,9 +62,9 @@ fn main() {
   let m = ${matrix}(${values});
 }
 )";
-    tmpl = utils::ReplaceAll(tmpl, "${matrix}", mat_type);
-    auto src = utils::ReplaceAll(tmpl, "${values}", scalar_values);
-    auto expect = utils::ReplaceAll(tmpl, "${values}", vector_values);
+    tmpl = tint::ReplaceAll(tmpl, "${matrix}", mat_type);
+    auto src = tint::ReplaceAll(tmpl, "${values}", scalar_values);
+    auto expect = tint::ReplaceAll(tmpl, "${values}", vector_values);
 
     EXPECT_TRUE(ShouldRun<VectorizeScalarMatrixInitializers>(src));
 
@@ -105,9 +105,9 @@ fn main() {
   let m = ${matrix}(${values});
 }
 )";
-    tmpl = utils::ReplaceAll(tmpl, "${matrix}", mat_type);
-    auto src = utils::ReplaceAll(tmpl, "${values}", scalar_values);
-    auto expect = utils::ReplaceAll(tmpl, "${values}", vector_values);
+    tmpl = tint::ReplaceAll(tmpl, "${matrix}", mat_type);
+    auto src = tint::ReplaceAll(tmpl, "${values}", scalar_values);
+    auto expect = tint::ReplaceAll(tmpl, "${values}", vector_values);
 
     EXPECT_TRUE(ShouldRun<VectorizeScalarMatrixInitializers>(src));
 
@@ -135,8 +135,8 @@ fn main() {
   let m = ${matrix}(${columns});
 }
 )";
-    tmpl = utils::ReplaceAll(tmpl, "${matrix}", mat_type);
-    auto src = utils::ReplaceAll(tmpl, "${columns}", columns);
+    tmpl = tint::ReplaceAll(tmpl, "${matrix}", mat_type);
+    auto src = tint::ReplaceAll(tmpl, "${columns}", columns);
     auto expect = src;
 
     EXPECT_FALSE(ShouldRun<VectorizeScalarMatrixInitializers>(src));

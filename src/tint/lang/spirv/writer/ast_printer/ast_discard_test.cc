@@ -23,8 +23,7 @@ using SpirvASTPrinterTest = TestHelper;
 TEST_F(SpirvASTPrinterTest, Discard) {
     auto* stmt = Discard();
 
-    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
-         utils::Vector{Stage(ast::PipelineStage::kFragment)});
+    Func("F", tint::Empty, ty.void_(), Vector{stmt}, Vector{Stage(ast::PipelineStage::kFragment)});
 
     Builder& b = Build();
 

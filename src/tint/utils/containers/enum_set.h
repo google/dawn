@@ -22,7 +22,7 @@
 
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// EnumSet is a set of enum values.
 /// @note As the EnumSet is backed by a single uint64_t value, it can only hold
@@ -228,7 +228,7 @@ struct EnumSet {
 /// @param set the EnumSet to write
 /// @returns out so calls can be chained
 template <typename ENUM>
-inline utils::StringStream& operator<<(utils::StringStream& out, EnumSet<ENUM> set) {
+inline StringStream& operator<<(StringStream& out, EnumSet<ENUM> set) {
     out << "{";
     bool first = true;
     for (auto e : set) {
@@ -241,17 +241,17 @@ inline utils::StringStream& operator<<(utils::StringStream& out, EnumSet<ENUM> s
     return out << "}";
 }
 
-}  // namespace tint::utils
+}  // namespace tint
 
 namespace std {
 
-/// Custom std::hash specialization for tint::utils::EnumSet<T>
+/// Custom std::hash specialization for tint::EnumSet<T>
 template <typename T>
-class hash<tint::utils::EnumSet<T>> {
+class hash<tint::EnumSet<T>> {
   public:
     /// @param e the EnumSet to create a hash for
     /// @return the hash value
-    inline std::size_t operator()(const tint::utils::EnumSet<T>& e) const {
+    inline std::size_t operator()(const tint::EnumSet<T>& e) const {
         return std::hash<uint64_t>()(e.Value());
     }
 };

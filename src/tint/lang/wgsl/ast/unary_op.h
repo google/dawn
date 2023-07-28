@@ -31,7 +31,7 @@ enum class UnaryOp {
 /// @param out the stream to write to
 /// @param mod the UnaryOp
 /// @return the stream so calls can be chained
-utils::StringStream& operator<<(utils::StringStream& out, UnaryOp mod);
+StringStream& operator<<(StringStream& out, UnaryOp mod);
 
 }  // namespace tint::ast
 

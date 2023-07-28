@@ -25,8 +25,8 @@ using namespace tint::number_suffixes;        // NOLINT
 using MslASTPrinterTest = TestHelper;
 
 TEST_F(MslASTPrinterTest, Emit_Function) {
-    Func("my_func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("my_func", tint::Empty, ty.void_(),
+         Vector{
              Return(),
          });
 
@@ -47,12 +47,12 @@ TEST_F(MslASTPrinterTest, Emit_Function) {
 
 TEST_F(MslASTPrinterTest, Emit_Function_WithParams) {
     Func("my_func",
-         utils::Vector{
+         Vector{
              Param("a", ty.f32()),
              Param("b", ty.i32()),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Return(),
          });
 
@@ -72,8 +72,8 @@ TEST_F(MslASTPrinterTest, Emit_Function_WithParams) {
 }
 
 TEST_F(MslASTPrinterTest, Emit_Attribute_EntryPoint_NoReturn_Void) {
-    Func("main", utils::Empty, ty.void_(), {/* no explicit return */},
-         utils::Vector{Stage(ast::PipelineStage::kFragment)});
+    Func("main", tint::Empty, ty.void_(), {/* no explicit return */},
+         Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASTPrinter& gen = Build();
 
@@ -92,15 +92,15 @@ TEST_F(MslASTPrinterTest, Emit_Attribute_EntryPoint_WithInOutVars) {
     // fn frag_main(@location(0) foo : f32) -> @location(1) f32 {
     //   return foo;
     // }
-    auto* foo_in = Param("foo", ty.f32(), utils::Vector{Location(0_a)});
-    Func("frag_main", utils::Vector{foo_in}, ty.f32(),
-         utils::Vector{
+    auto* foo_in = Param("foo", ty.f32(), Vector{Location(0_a)});
+    Func("frag_main", Vector{foo_in}, ty.f32(),
+         Vector{
              Return("foo"),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         utils::Vector{
+         Vector{
              Location(1_a),
          });
 
@@ -137,15 +137,15 @@ TEST_F(MslASTPrinterTest, Emit_Attribute_EntryPoint_WithInOut_Builtins) {
     //   return coord.x;
     // }
     auto* coord_in =
-        Param("coord", ty.vec4<f32>(), utils::Vector{Builtin(builtin::BuiltinValue::kPosition)});
-    Func("frag_main", utils::Vector{coord_in}, ty.f32(),
-         utils::Vector{
+        Param("coord", ty.vec4<f32>(), Vector{Builtin(builtin::BuiltinValue::kPosition)});
+    Func("frag_main", Vector{coord_in}, ty.f32(),
+         Vector{
              Return(MemberAccessor("coord", "x")),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         utils::Vector{
+         Vector{
              Builtin(builtin::BuiltinValue::kFragDepth),
          });
 
@@ -188,22 +188,22 @@ TEST_F(MslASTPrinterTest, Emit_Attribute_EntryPoint_SharedStruct_DifferentStages
     // }
     auto* interface_struct = Structure(
         "Interface",
-        utils::Vector{
-            Member("col1", ty.f32(), utils::Vector{Location(1_a)}),
-            Member("col2", ty.f32(), utils::Vector{Location(2_a)}),
-            Member("pos", ty.vec4<f32>(), utils::Vector{Builtin(builtin::BuiltinValue::kPosition)}),
+        Vector{
+            Member("col1", ty.f32(), Vector{Location(1_a)}),
+            Member("col2", ty.f32(), Vector{Location(2_a)}),
+            Member("pos", ty.vec4<f32>(), Vector{Builtin(builtin::BuiltinValue::kPosition)}),
         });
 
-    Func("vert_main", utils::Empty, ty.Of(interface_struct),
-         utils::Vector{Return(Call(ty.Of(interface_struct), 0.5_f, 0.25_f, Call<vec4<f32>>()))},
-         utils::Vector{Stage(ast::PipelineStage::kVertex)});
+    Func("vert_main", tint::Empty, ty.Of(interface_struct),
+         Vector{Return(Call(ty.Of(interface_struct), 0.5_f, 0.25_f, Call<vec4<f32>>()))},
+         Vector{Stage(ast::PipelineStage::kVertex)});
 
-    Func("frag_main", utils::Vector{Param("colors", ty.Of(interface_struct))}, ty.void_(),
-         utils::Vector{
+    Func("frag_main", Vector{Param("colors", ty.Of(interface_struct))}, ty.void_(),
+         Vector{
              WrapInStatement(Let("r", ty.f32(), MemberAccessor("colors", "col1"))),
              WrapInStatement(Let("g", ty.f32(), MemberAccessor("colors", "col2"))),
          },
-         utils::Vector{Stage(ast::PipelineStage::kFragment)});
+         Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASTPrinter& gen = SanitizeAndBuild();
 
@@ -271,21 +271,21 @@ TEST_F(MslASTPrinterTest, Emit_Attribute_EntryPoint_SharedStruct_HelperFunction)
     // }
     auto* vertex_output_struct = Structure(
         "VertexOutput",
-        utils::Vector{
-            Member("pos", ty.vec4<f32>(), utils::Vector{Builtin(builtin::BuiltinValue::kPosition)}),
+        Vector{
+            Member("pos", ty.vec4<f32>(), Vector{Builtin(builtin::BuiltinValue::kPosition)}),
         });
 
-    Func("foo", utils::Vector{Param("x", ty.f32())}, ty.Of(vertex_output_struct),
-         utils::Vector{
+    Func("foo", Vector{Param("x", ty.f32())}, ty.Of(vertex_output_struct),
+         Vector{
              Return(Call(ty.Of(vertex_output_struct), Call<vec4<f32>>("x", "x", "x", 1_f))),
          });
-    Func("vert_main1", utils::Empty, ty.Of(vertex_output_struct),
-         utils::Vector{Return(Expr(Call("foo", Expr(0.5_f))))},
-         utils::Vector{Stage(ast::PipelineStage::kVertex)});
+    Func("vert_main1", tint::Empty, ty.Of(vertex_output_struct),
+         Vector{Return(Expr(Call("foo", Expr(0.5_f))))},
+         Vector{Stage(ast::PipelineStage::kVertex)});
 
-    Func("vert_main2", utils::Empty, ty.Of(vertex_output_struct),
-         utils::Vector{Return(Expr(Call("foo", Expr(0.25_f))))},
-         utils::Vector{Stage(ast::PipelineStage::kVertex)});
+    Func("vert_main2", tint::Empty, ty.Of(vertex_output_struct),
+         Vector{Return(Expr(Call("foo", Expr(0.25_f))))},
+         Vector{Stage(ast::PipelineStage::kVertex)});
 
     ASTPrinter& gen = SanitizeAndBuild();
 
@@ -336,7 +336,7 @@ vertex tint_symbol_1 vert_main2() {
 }
 
 TEST_F(MslASTPrinterTest, Emit_FunctionAttribute_EntryPoint_With_RW_StorageBuffer) {
-    auto* s = Structure("Data", utils::Vector{
+    auto* s = Structure("Data", Vector{
                                     Member("a", ty.i32()),
                                     Member("b", ty.f32()),
                                 });
@@ -346,12 +346,12 @@ TEST_F(MslASTPrinterTest, Emit_FunctionAttribute_EntryPoint_With_RW_StorageBuffe
 
     auto* var = Var("v", ty.f32(), MemberAccessor("coord", "b"));
 
-    Func("frag_main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("frag_main", tint::Empty, ty.void_(),
+         Vector{
              Decl(var),
              Return(),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -375,7 +375,7 @@ fragment void frag_main(device Data* tint_symbol [[buffer(0)]]) {
 }
 
 TEST_F(MslASTPrinterTest, Emit_FunctionAttribute_EntryPoint_With_RO_StorageBuffer) {
-    auto* s = Structure("Data", utils::Vector{
+    auto* s = Structure("Data", Vector{
                                     Member("a", ty.i32()),
                                     Member("b", ty.f32()),
                                 });
@@ -385,12 +385,12 @@ TEST_F(MslASTPrinterTest, Emit_FunctionAttribute_EntryPoint_With_RO_StorageBuffe
 
     auto* var = Var("v", ty.f32(), MemberAccessor("coord", "b"));
 
-    Func("frag_main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("frag_main", tint::Empty, ty.void_(),
+         Vector{
              Decl(var),
              Return(),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -414,27 +414,27 @@ fragment void frag_main(const device Data* tint_symbol [[buffer(0)]]) {
 }
 
 TEST_F(MslASTPrinterTest, Emit_Attribute_Called_By_EntryPoint_With_Uniform) {
-    auto* ubo_ty = Structure("UBO", utils::Vector{Member("coord", ty.vec4<f32>())});
+    auto* ubo_ty = Structure("UBO", Vector{Member("coord", ty.vec4<f32>())});
     auto* ubo =
         GlobalVar("ubo", ty.Of(ubo_ty), builtin::AddressSpace::kUniform, Group(0_a), Binding(0_a));
 
     Func("sub_func",
-         utils::Vector{
+         Vector{
              Param("param", ty.f32()),
          },
          ty.f32(),
-         utils::Vector{
+         Vector{
              Return(MemberAccessor(MemberAccessor(ubo, "coord"), "x")),
          });
 
     auto* var = Var("v", ty.f32(), Call("sub_func", 1_f));
 
-    Func("frag_main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("frag_main", tint::Empty, ty.void_(),
+         Vector{
              Decl(var),
              Return(),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -461,7 +461,7 @@ fragment void frag_main(const constant UBO* tint_symbol_1 [[buffer(0)]]) {
 }
 
 TEST_F(MslASTPrinterTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RW_StorageBuffer) {
-    auto* s = Structure("Data", utils::Vector{
+    auto* s = Structure("Data", Vector{
                                     Member("a", ty.i32()),
                                     Member("b", ty.f32()),
                                 });
@@ -470,22 +470,22 @@ TEST_F(MslASTPrinterTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RW_St
               Group(0_a), Binding(0_a));
 
     Func("sub_func",
-         utils::Vector{
+         Vector{
              Param("param", ty.f32()),
          },
          ty.f32(),
-         utils::Vector{
+         Vector{
              Return(MemberAccessor("coord", "b")),
          });
 
     auto* var = Var("v", ty.f32(), Call("sub_func", 1_f));
 
-    Func("frag_main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("frag_main", tint::Empty, ty.void_(),
+         Vector{
              Decl(var),
              Return(),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -513,7 +513,7 @@ fragment void frag_main(device Data* tint_symbol_1 [[buffer(0)]]) {
 }
 
 TEST_F(MslASTPrinterTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RO_StorageBuffer) {
-    auto* s = Structure("Data", utils::Vector{
+    auto* s = Structure("Data", Vector{
                                     Member("a", ty.i32()),
                                     Member("b", ty.f32()),
                                 });
@@ -522,22 +522,22 @@ TEST_F(MslASTPrinterTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RO_St
               Group(0_a), Binding(0_a));
 
     Func("sub_func",
-         utils::Vector{
+         Vector{
              Param("param", ty.f32()),
          },
          ty.f32(),
-         utils::Vector{
+         Vector{
              Return(MemberAccessor("coord", "b")),
          });
 
     auto* var = Var("v", ty.f32(), Call("sub_func", 1_f));
 
-    Func("frag_main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("frag_main", tint::Empty, ty.void_(),
+         Vector{
              Decl(var),
              Return(),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -566,11 +566,11 @@ fragment void frag_main(const device Data* tint_symbol_1 [[buffer(0)]]) {
 
 TEST_F(MslASTPrinterTest, Emit_Function_WithArrayParams) {
     Func("my_func",
-         utils::Vector{
+         Vector{
              Param("a", ty.array<f32, 5>()),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Return(),
          });
 
@@ -603,8 +603,8 @@ struct tint_array {
 }
 
 TEST_F(MslASTPrinterTest, Emit_Function_WithArrayReturn) {
-    Func("my_func", utils::Empty, ty.array<f32, 5>(),
-         utils::Vector{
+    Func("my_func", tint::Empty, ty.array<f32, 5>(),
+         Vector{
              Return(Call(ty.array<f32, 5>())),
          });
 
@@ -654,7 +654,7 @@ TEST_F(MslASTPrinterTest, Emit_Function_Multiple_EntryPoint_With_Same_ModuleVar)
     //   return;
     // }
 
-    auto* s = Structure("Data", utils::Vector{Member("d", ty.f32())});
+    auto* s = Structure("Data", Vector{Member("d", ty.f32())});
 
     GlobalVar("data", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
               Group(0_a), Binding(0_a));
@@ -662,12 +662,12 @@ TEST_F(MslASTPrinterTest, Emit_Function_Multiple_EntryPoint_With_Same_ModuleVar)
     {
         auto* var = Var("v", ty.f32(), MemberAccessor("data", "d"));
 
-        Func("a", utils::Empty, ty.void_(),
-             utils::Vector{
+        Func("a", tint::Empty, ty.void_(),
+             Vector{
                  Decl(var),
                  Return(),
              },
-             utils::Vector{
+             Vector{
                  Stage(ast::PipelineStage::kCompute),
                  WorkgroupSize(1_i),
              });
@@ -676,12 +676,12 @@ TEST_F(MslASTPrinterTest, Emit_Function_Multiple_EntryPoint_With_Same_ModuleVar)
     {
         auto* var = Var("v", ty.f32(), MemberAccessor("data", "d"));
 
-        Func("b", utils::Empty, ty.void_(),
-             utils::Vector{
+        Func("b", tint::Empty, ty.void_(),
+             Vector{
                  Decl(var),
                  Return(),
              },
-             utils::Vector{
+             Vector{
                  Stage(ast::PipelineStage::kCompute),
                  WorkgroupSize(1_i),
              });

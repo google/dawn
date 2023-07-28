@@ -22,7 +22,7 @@ namespace tint::wgsl::writer {
 /// RenameConflicts is a transform that renames declarations which prevent identifiers from
 /// resolving to the correct declaration, and those with identical identifiers declared in the same
 /// scope.
-class RenameConflicts final : public utils::Castable<RenameConflicts, ir::transform::Transform> {
+class RenameConflicts final : public Castable<RenameConflicts, ir::transform::Transform> {
   public:
     /// Constructor
     RenameConflicts();

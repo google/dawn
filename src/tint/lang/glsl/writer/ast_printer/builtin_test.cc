@@ -64,7 +64,7 @@ const ast::CallExpression* GenerateCall(builtin::Function builtin,
                                         CallParamType type,
                                         ProgramBuilder* builder) {
     std::string name;
-    utils::StringStream str;
+    StringStream str;
     str << name << builtin;
     switch (builtin) {
         case builtin::Function::kAcos:
@@ -213,11 +213,11 @@ TEST_P(GlslBuiltinTest, Emit) {
 
     auto* call = GenerateCall(param.builtin, param.type, this);
     ASSERT_NE(nullptr, call) << "Unhandled builtin";
-    Func("func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("func", tint::Empty, ty.void_(),
+         Vector{
              Assign(Phony(), call),
          },
-         utils::Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
+         Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
     ASTPrinter& gen = Build();
 
@@ -350,7 +350,7 @@ TEST_F(GlslASTPrinterTest_Builtin, Builtin_Call) {
     ASTPrinter& gen = Build();
 
     gen.IncrementIndent();
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, call);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "dot(param1, param2)");
@@ -364,7 +364,7 @@ TEST_F(GlslASTPrinterTest_Builtin, Select_Scalar) {
     ASTPrinter& gen = Build();
 
     gen.IncrementIndent();
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, call);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(true ? b : a)");
@@ -378,7 +378,7 @@ TEST_F(GlslASTPrinterTest_Builtin, Select_Vector) {
     ASTPrinter& gen = Build();
 
     gen.IncrementIndent();
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, call);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "tint_select(a, b, bvec2(true, false))");
@@ -396,7 +396,7 @@ TEST_F(GlslASTPrinterTest_Builtin, FMA_f32) {
     ASTPrinter& gen = Build();
 
     gen.IncrementIndent();
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, call);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "((a) * (b) + (c))");
@@ -415,7 +415,7 @@ TEST_F(GlslASTPrinterTest_Builtin, FMA_f16) {
     ASTPrinter& gen = Build();
 
     gen.IncrementIndent();
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, call);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "((a) * (b) + (c))");
@@ -1446,11 +1446,11 @@ void test_function() {
 }
 
 TEST_F(GlslASTPrinterTest_Builtin, StorageBarrier) {
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              CallStmt(Call("storageBarrier")),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -1470,11 +1470,11 @@ void main() {
 }
 
 TEST_F(GlslASTPrinterTest_Builtin, WorkgroupBarrier) {
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              CallStmt(Call("workgroupBarrier")),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });

@@ -40,7 +40,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Array) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                  builtin::Access::kReadWrite, "ary");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
@@ -53,7 +53,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_ArrayOfArray) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                  builtin::Access::kReadWrite, "ary");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
@@ -66,7 +66,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_ArrayOfArrayOfArray) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                  builtin::Access::kReadWrite, "ary");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
@@ -79,7 +79,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Array_WithoutName) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                  builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
@@ -91,7 +91,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Bool) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, bool_, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "bool");
@@ -102,7 +102,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_F32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, f32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "float");
@@ -115,7 +115,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_F16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, f16, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "float16_t");
@@ -126,7 +126,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_I32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, i32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "int");
@@ -139,7 +139,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Matrix_F32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, mat2x3, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "mat2x3");
@@ -154,14 +154,14 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Matrix_F16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, mat2x3, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "f16mat2x3");
 }
 
 TEST_F(GlslASTPrinterTest_Type, EmitType_StructDecl) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
@@ -169,7 +169,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_StructDecl) {
 
     ASTPrinter& gen = Build();
 
-    utils::TextGenerator::TextBuffer buf;
+    tint::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(s)->As<type::Struct>();
     gen.EmitStructType(&buf, str);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
@@ -182,7 +182,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_StructDecl) {
 }
 
 TEST_F(GlslASTPrinterTest_Type, EmitType_Struct) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
@@ -191,14 +191,14 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Struct) {
     ASTPrinter& gen = Build();
 
     auto* str = program->TypeOf(s)->As<type::Struct>();
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, str, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "S");
 }
 
 TEST_F(GlslASTPrinterTest_Type, EmitType_Struct_NameCollision) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("double", ty.i32()),
                                  Member("float", ty.f32()),
                              });
@@ -215,15 +215,15 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Struct_NameCollision) {
 }
 
 TEST_F(GlslASTPrinterTest_Type, EmitType_Struct_WithOffsetAttributes) {
-    auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.i32(), utils::Vector{MemberOffset(0_a)}),
-                                 Member("b", ty.f32(), utils::Vector{MemberOffset(8_a)}),
+    auto* s = Structure("S", Vector{
+                                 Member("a", ty.i32(), Vector{MemberOffset(0_a)}),
+                                 Member("b", ty.f32(), Vector{MemberOffset(8_a)}),
                              });
     GlobalVar("g", ty.Of(s), builtin::AddressSpace::kPrivate);
 
     ASTPrinter& gen = Build();
 
-    utils::TextGenerator::TextBuffer buf;
+    tint::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(s)->As<type::Struct>();
     gen.EmitStructType(&buf, str);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
@@ -240,7 +240,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_U32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, u32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "uint");
@@ -252,7 +252,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Vector_F32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, vec3, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "vec3");
@@ -266,7 +266,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Vector_F16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, vec3, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "f16vec3");
@@ -277,7 +277,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Void) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, void_, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "void");
@@ -288,7 +288,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitSampler) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, sampler, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
 }
@@ -298,7 +298,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitSamplerComparison) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, sampler, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
 }
@@ -308,7 +308,7 @@ struct GlslDepthTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, GlslDepthTextureData data) {
-    utils::StringStream s;
+    StringStream s;
     s << data.dim;
     out << s.str();
     return out;
@@ -321,11 +321,11 @@ TEST_P(GlslDepthTexturesTest, Emit) {
 
     GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("v", Call("textureDimensions", "tex"))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -350,11 +350,11 @@ TEST_F(GlslDepthMultisampledTexturesTest, Emit) {
 
     GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("v", Call("textureDimensions", "tex"))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -371,7 +371,7 @@ struct GlslSampledTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, GlslSampledTextureData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.dim;
     out << str.str();
     return out;
@@ -396,11 +396,11 @@ TEST_P(GlslSampledTexturesTest, Emit) {
 
     GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("v", Call("textureDimensions", "tex"))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -509,7 +509,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitMultisampledTexture) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitType(out, s, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "highp sampler2DMS");
@@ -521,7 +521,7 @@ struct GlslStorageTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, GlslStorageTextureData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.dim;
     return out << str.str();
 }
@@ -533,11 +533,11 @@ TEST_P(GlslStorageTexturesTest, Emit) {
 
     GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("v", Call("textureDimensions", "tex"))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 

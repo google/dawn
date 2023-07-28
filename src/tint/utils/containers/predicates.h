@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_UTILS_CONTAINERS_PREDICATES_H_
 #define SRC_TINT_UTILS_CONTAINERS_PREDICATES_H_
 
-namespace tint::utils {
+namespace tint {
 
 /// @param value the value to compare against
 /// @return a function with the signature `bool(const T&)` which returns true if the argument is
@@ -73,6 +73,6 @@ static inline bool IsNull(const void* ptr) {
     return ptr == nullptr;
 }
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_CONTAINERS_PREDICATES_H_

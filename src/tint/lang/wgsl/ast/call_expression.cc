@@ -26,7 +26,7 @@ CallExpression::CallExpression(GenerationID pid,
                                NodeID nid,
                                const Source& src,
                                const IdentifierExpression* t,
-                               utils::VectorRef<const Expression*> a)
+                               VectorRef<const Expression*> a)
     : Base(pid, nid, src), target(t), args(std::move(a)) {
     TINT_ASSERT(AST, target);
     TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, target, generation_id);

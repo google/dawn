@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 TEST(MathTests, RoundUp) {
@@ -142,4 +142,4 @@ TEST(MathTests, MaxAlignOf) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

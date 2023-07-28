@@ -48,7 +48,7 @@ struct Unshadow::State {
         auto& sem = src->Sem();
 
         // Maps a variable to its new name.
-        utils::Hashmap<const sem::Variable*, Symbol, 8> renamed_to;
+        Hashmap<const sem::Variable*, Symbol, 8> renamed_to;
 
         auto rename = [&](const sem::Variable* v) -> const Variable* {
             auto* decl = v->Declaration();

@@ -50,13 +50,13 @@ using namespace tint::number_suffixes;        // NOLINT
 
 using ResolverValidationTest = ResolverTest;
 
-class FakeStmt final : public utils::Castable<FakeStmt, ast::Statement> {
+class FakeStmt final : public Castable<FakeStmt, ast::Statement> {
   public:
     FakeStmt(GenerationID pid, ast::NodeID nid, Source src) : Base(pid, nid, src) {}
     FakeStmt* Clone(CloneContext*) const override { return nullptr; }
 };
 
-class FakeExpr final : public utils::Castable<FakeExpr, ast::Expression> {
+class FakeExpr final : public Castable<FakeExpr, ast::Expression> {
   public:
     FakeExpr(GenerationID pid, ast::NodeID nid, Source src) : Base(pid, nid, src) {}
     FakeExpr* Clone(CloneContext*) const override { return nullptr; }
@@ -67,15 +67,15 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInVertexStage) {
     GlobalVar("dst", ty.vec4<f32>(), builtin::AddressSpace::kPrivate);
     auto* stmt = Assign(Expr("dst"), Expr(Source{{3, 4}}, "wg"));
 
-    Func(Source{{9, 10}}, "f0", utils::Empty, ty.vec4<f32>(),
-         utils::Vector{
+    Func(Source{{9, 10}}, "f0", tint::Empty, ty.vec4<f32>(),
+         Vector{
              stmt,
              Return(Expr("dst")),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kVertex),
          },
-         utils::Vector{
+         Vector{
              Builtin(builtin::BuiltinValue::kPosition),
          });
 
@@ -99,13 +99,13 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInFragmentStage) {
     GlobalVar("dst", ty.vec4<f32>(), builtin::AddressSpace::kPrivate);
     auto* stmt = Assign(Expr("dst"), Expr(Source{{3, 4}}, "wg"));
 
-    Func(Source{{5, 6}}, "f2", utils::Empty, ty.void_(), utils::Vector{stmt});
-    Func(Source{{7, 8}}, "f1", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func(Source{{5, 6}}, "f2", tint::Empty, ty.void_(), Vector{stmt});
+    Func(Source{{7, 8}}, "f1", tint::Empty, ty.void_(),
+         Vector{
              CallStmt(Call("f2")),
          });
-    Func(Source{{9, 10}}, "f0", utils::Empty, ty.void_(), utils::Vector{CallStmt(Call("f1"))},
-         utils::Vector{
+    Func(Source{{9, 10}}, "f0", tint::Empty, ty.void_(), Vector{CallStmt(Call("f1"))},
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -195,8 +195,8 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariable_Pass) {
 
     GlobalVar("global_var", ty.f32(), builtin::AddressSpace::kPrivate, Expr(2.1_f));
 
-    Func("my_func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("my_func", tint::Empty, ty.void_(),
+         Vector{
              Assign(Expr(Source{{12, 34}}, "global_var"), 3.14_f),
              Return(),
          });
@@ -269,8 +269,8 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableDifferentScope_Fail) {
 TEST_F(ResolverValidationTest, AddressSpace_FunctionVariableWorkgroupClass) {
     auto* var = Var("var", ty.i32(), builtin::AddressSpace::kWorkgroup);
 
-    Func("func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("func", tint::Empty, ty.void_(),
+         Vector{
              Decl(var),
          });
 
@@ -283,8 +283,8 @@ TEST_F(ResolverValidationTest, AddressSpace_FunctionVariableWorkgroupClass) {
 TEST_F(ResolverValidationTest, AddressSpace_FunctionVariableI32) {
     auto* var = Var("s", ty.i32(), builtin::AddressSpace::kPrivate);
 
-    Func("func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("func", tint::Empty, ty.void_(),
+         Vector{
              Decl(var),
          });
 
@@ -384,8 +384,8 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncGoodParent) {
     auto* star_p = Deref(p);
     auto* accessor_expr = MemberAccessor(star_p, "z");
     auto* x = Var("x", ty.f32(), accessor_expr);
-    Func("func", utils::Vector{p}, ty.f32(),
-         utils::Vector{
+    Func("func", Vector{p}, ty.f32(),
+         Vector{
              Decl(x),
              Return(x),
          });
@@ -401,8 +401,8 @@ TEST_F(ResolverValidationTest, EXpr_MemberAccessor_FuncBadParent) {
     auto* accessor_expr = MemberAccessor(p, Ident(Source{{12, 34}}, "z"));
     auto* star_p = Deref(accessor_expr);
     auto* x = Var("x", ty.f32(), star_p);
-    Func("func", utils::Vector{p}, ty.f32(),
-         utils::Vector{
+    Func("func", Vector{p}, ty.f32(),
+         Vector{
              Decl(x),
              Return(x),
          });
@@ -731,10 +731,10 @@ TEST_F(ResolverTest, Stmt_Loop_DiscardInContinuing_Direct) {
     //   }
     // }
 
-    Func("my_func", utils::Empty, ty.void_(),
-         utils::Vector{Loop(  // loop
-             Block(),         //   loop block
-             Block(           //   loop continuing block
+    Func("my_func", tint::Empty, ty.void_(),
+         Vector{Loop(  // loop
+             Block(),  //   loop block
+             Block(    //   loop continuing block
                  Discard(Source{{12, 34}}), BreakIf(true)))});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -885,9 +885,9 @@ TEST_F(ResolverTest, Stmt_ForLoop_DiscardInContinuing_Direct) {
     //   break;
     // }
 
-    Func("my_func", utils::Empty, ty.void_(),
-         utils::Vector{For(nullptr, nullptr, Discard(Source{{12, 34}}),  //
-                           Block(Break()))});
+    Func("my_func", tint::Empty, ty.void_(),
+         Vector{For(nullptr, nullptr, Discard(Source{{12, 34}}),  //
+                    Block(Break()))});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -1132,7 +1132,7 @@ TEST_F(ResolverValidationTest, Stmt_BreakNotInLoopOrSwitch) {
 }
 
 TEST_F(ResolverValidationTest, StructMemberDuplicateName) {
-    Structure("S", utils::Vector{
+    Structure("S", Vector{
                        Member(Source{{12, 34}}, "a", ty.i32()),
                        Member(Source{{56, 78}}, "a", ty.i32()),
                    });
@@ -1142,7 +1142,7 @@ TEST_F(ResolverValidationTest, StructMemberDuplicateName) {
               "is here");
 }
 TEST_F(ResolverValidationTest, StructMemberDuplicateNameDifferentTypes) {
-    Structure("S", utils::Vector{
+    Structure("S", Vector{
                        Member(Source{{12, 34}}, "a", ty.bool_()),
                        Member(Source{{12, 34}}, "a", ty.vec3<f32>()),
                    });
@@ -1152,11 +1152,11 @@ TEST_F(ResolverValidationTest, StructMemberDuplicateNameDifferentTypes) {
               "is here");
 }
 TEST_F(ResolverValidationTest, StructMemberDuplicateNamePass) {
-    Structure("S", utils::Vector{
+    Structure("S", Vector{
                        Member("a", ty.i32()),
                        Member("b", ty.f32()),
                    });
-    Structure("S1", utils::Vector{
+    Structure("S1", Vector{
                         Member("a", ty.i32()),
                         Member("b", ty.f32()),
                     });
@@ -1164,8 +1164,8 @@ TEST_F(ResolverValidationTest, StructMemberDuplicateNamePass) {
 }
 
 TEST_F(ResolverValidationTest, NegativeStructMemberAlignAttribute) {
-    Structure("S", utils::Vector{
-                       Member("a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, -2_i)}),
+    Structure("S", Vector{
+                       Member("a", ty.f32(), Vector{MemberAlign(Source{{12, 34}}, -2_i)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());
@@ -1174,8 +1174,8 @@ TEST_F(ResolverValidationTest, NegativeStructMemberAlignAttribute) {
 }
 
 TEST_F(ResolverValidationTest, NonPOTStructMemberAlignAttribute) {
-    Structure("S", utils::Vector{
-                       Member("a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, 3_i)}),
+    Structure("S", Vector{
+                       Member("a", ty.f32(), Vector{MemberAlign(Source{{12, 34}}, 3_i)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());
@@ -1184,8 +1184,8 @@ TEST_F(ResolverValidationTest, NonPOTStructMemberAlignAttribute) {
 }
 
 TEST_F(ResolverValidationTest, ZeroStructMemberAlignAttribute) {
-    Structure("S", utils::Vector{
-                       Member("a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, 0_i)}),
+    Structure("S", Vector{
+                       Member("a", ty.f32(), Vector{MemberAlign(Source{{12, 34}}, 0_i)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());
@@ -1194,8 +1194,8 @@ TEST_F(ResolverValidationTest, ZeroStructMemberAlignAttribute) {
 }
 
 TEST_F(ResolverValidationTest, ZeroStructMemberSizeAttribute) {
-    Structure("S", utils::Vector{
-                       Member("a", ty.f32(), utils::Vector{MemberSize(Source{{12, 34}}, 1_a)}),
+    Structure("S", Vector{
+                       Member("a", ty.f32(), Vector{MemberSize(Source{{12, 34}}, 1_a)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());
@@ -1203,9 +1203,9 @@ TEST_F(ResolverValidationTest, ZeroStructMemberSizeAttribute) {
 }
 
 TEST_F(ResolverValidationTest, OffsetAndSizeAttribute) {
-    Structure("S", utils::Vector{
+    Structure("S", Vector{
                        Member(Source{{12, 34}}, "a", ty.f32(),
-                              utils::Vector{MemberOffset(0_a), MemberSize(4_a)}),
+                              Vector{MemberOffset(0_a), MemberSize(4_a)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());
@@ -1213,9 +1213,9 @@ TEST_F(ResolverValidationTest, OffsetAndSizeAttribute) {
 }
 
 TEST_F(ResolverValidationTest, OffsetAndAlignAttribute) {
-    Structure("S", utils::Vector{
+    Structure("S", Vector{
                        Member(Source{{12, 34}}, "a", ty.f32(),
-                              utils::Vector{MemberOffset(0_a), MemberAlign(4_i)}),
+                              Vector{MemberOffset(0_a), MemberAlign(4_i)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());
@@ -1223,9 +1223,9 @@ TEST_F(ResolverValidationTest, OffsetAndAlignAttribute) {
 }
 
 TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeAttribute) {
-    Structure("S", utils::Vector{
+    Structure("S", Vector{
                        Member(Source{{12, 34}}, "a", ty.f32(),
-                              utils::Vector{MemberOffset(0_a), MemberAlign(4_i), MemberSize(4_a)}),
+                              Vector{MemberOffset(0_a), MemberAlign(4_i), MemberSize(4_a)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());

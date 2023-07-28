@@ -33,7 +33,7 @@ struct CallTargetSignature {
     /// Constructor
     /// @param ret_ty the call target return type
     /// @param params the call target parameters
-    CallTargetSignature(const type::Type* ret_ty, utils::VectorRef<const Parameter*> params);
+    CallTargetSignature(const type::Type* ret_ty, VectorRef<const Parameter*> params);
 
     /// Copy constructor
     CallTargetSignature(const CallTargetSignature&);
@@ -44,7 +44,7 @@ struct CallTargetSignature {
     /// The type of the call target return value
     const type::Type* return_type = nullptr;
     /// The parameters of the call target
-    utils::Vector<const sem::Parameter*, 8> parameters;
+    tint::Vector<const sem::Parameter*, 8> parameters;
 
     /// Equality operator
     /// @param other the signature to compare this to
@@ -67,7 +67,7 @@ struct CallTargetSignature {
 
 /// CallTarget is the base for callable functions, builtins, value constructors and value
 /// conversions.
-class CallTarget : public utils::Castable<CallTarget, Node> {
+class CallTarget : public Castable<CallTarget, Node> {
   public:
     /// Constructor
     /// @param stage the earliest evaluation stage for a call to this target
@@ -82,7 +82,7 @@ class CallTarget : public utils::Castable<CallTarget, Node> {
     /// @param must_use the result of the call target must be used, i.e. it cannot be used as a call
     /// statement.
     CallTarget(const type::Type* return_type,
-               utils::VectorRef<Parameter*> parameters,
+               VectorRef<Parameter*> parameters,
                EvaluationStage stage,
                bool must_use);
 

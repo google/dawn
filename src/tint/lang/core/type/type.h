@@ -46,8 +46,8 @@ enum Flag {
     kFixedFootprint,
 };
 
-/// An alias to utils::EnumSet<Flag>
-using Flags = utils::EnumSet<Flag>;
+/// An alias to tint::EnumSet<Flag>
+using Flags = tint::EnumSet<Flag>;
 
 /// TypeAndCount holds a type and count
 struct TypeAndCount {
@@ -66,7 +66,7 @@ inline bool operator==(TypeAndCount lhs, TypeAndCount rhs) {
 }
 
 /// Base class for a type in the system
-class Type : public utils::Castable<Type, UniqueNode> {
+class Type : public Castable<Type, UniqueNode> {
   public:
     /// Destructor
     ~Type() override;
@@ -221,7 +221,7 @@ class Type : public utils::Castable<Type, UniqueNode> {
     /// @returns the lowest-ranking type that all types in `types` can be implicitly converted to,
     ///          or nullptr if there is no consistent common type across all types in `types`.
     /// @see https://www.w3.org/TR/WGSL/#conversion-rank
-    static const Type* Common(utils::VectorRef<const Type*> types);
+    static const Type* Common(VectorRef<const Type*> types);
 
   protected:
     /// Constructor

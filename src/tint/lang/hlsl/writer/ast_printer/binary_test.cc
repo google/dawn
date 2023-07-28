@@ -33,7 +33,7 @@ struct BinaryData {
     Types valid_for = Types::All;
 };
 inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.op;
     out << str.str();
     return out;
@@ -66,7 +66,7 @@ TEST_P(HlslBinaryTest, Emit_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -98,7 +98,7 @@ TEST_P(HlslBinaryTest, Emit_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -121,7 +121,7 @@ TEST_P(HlslBinaryTest, Emit_u32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -149,7 +149,7 @@ TEST_P(HlslBinaryTest, Emit_i32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -186,7 +186,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_VectorScalar_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(1.0f).xxx");
 }
@@ -203,7 +203,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_VectorScalar_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(float16_t(1.0h)).xxx");
 }
@@ -218,7 +218,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_ScalarVector_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(1.0f).xxx");
 }
@@ -235,7 +235,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_ScalarVector_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(float16_t(1.0h)).xxx");
 }
@@ -250,7 +250,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixScalar_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(mat * 1.0f)");
 }
@@ -267,7 +267,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixScalar_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(mat * float16_t(1.0h))");
 }
@@ -282,7 +282,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_ScalarMatrix_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(1.0f * mat)");
 }
@@ -299,7 +299,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_ScalarMatrix_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(float16_t(1.0h) * mat)");
 }
@@ -314,7 +314,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixVector_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "mul((1.0f).xxx, mat)");
 }
@@ -331,7 +331,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixVector_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "mul((float16_t(1.0h)).xxx, mat)");
 }
@@ -346,7 +346,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_VectorMatrix_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "mul(mat, (1.0f).xxx)");
 }
@@ -363,7 +363,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_VectorMatrix_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "mul(mat, (float16_t(1.0h)).xxx)");
 }
@@ -377,7 +377,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixMatrix_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "mul(rhs, lhs)");
 }
@@ -393,7 +393,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixMatrix_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "mul(rhs, lhs)");
 }
@@ -407,7 +407,7 @@ TEST_F(HlslASTPrinterTest_Binary, Logical_And) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(tint_tmp)");
     EXPECT_EQ(gen.Result(), R"(bool tint_tmp = a;
@@ -432,7 +432,7 @@ TEST_F(HlslASTPrinterTest_Binary, Logical_Multi) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(tint_tmp)");
     EXPECT_EQ(gen.Result(), R"(bool tint_tmp_1 = a;
@@ -459,7 +459,7 @@ TEST_F(HlslASTPrinterTest_Binary, Logical_Or) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(tint_tmp)");
     EXPECT_EQ(gen.Result(), R"(bool tint_tmp = a;
@@ -487,7 +487,7 @@ TEST_F(HlslASTPrinterTest_Binary, If_WithLogical) {
            Block(Return(1_i)),
            Else(If(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"), Expr("c")),
                    Block(Return(2_i)), Else(Block(Return(3_i))))));
-    Func("func", utils::Empty, ty.i32(), utils::Vector{WrapInStatement(expr)});
+    Func("func", tint::Empty, ty.i32(), Vector{WrapInStatement(expr)});
 
     ASTPrinter& gen = Build();
 
@@ -523,7 +523,7 @@ TEST_F(HlslASTPrinterTest_Binary, Return_WithLogical) {
         ast::BinaryOp::kLogicalOr,
         create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
         Expr("c")));
-    Func("func", utils::Empty, ty.bool_(), utils::Vector{WrapInStatement(expr)});
+    Func("func", tint::Empty, ty.bool_(), Vector{WrapInStatement(expr)});
 
     ASTPrinter& gen = Build();
 
@@ -607,18 +607,18 @@ TEST_F(HlslASTPrinterTest_Binary, Call_WithLogical) {
     // foo(a && b, c || d, (a || c) && (b || d))
 
     Func("foo",
-         utils::Vector{
+         Vector{
              Param(Sym(), ty.bool_()),
              Param(Sym(), ty.bool_()),
              Param(Sym(), ty.bool_()),
          },
-         ty.void_(), utils::Empty, utils::Empty);
+         ty.void_(), tint::Empty, tint::Empty);
     GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate);
     GlobalVar("b", ty.bool_(), builtin::AddressSpace::kPrivate);
     GlobalVar("c", ty.bool_(), builtin::AddressSpace::kPrivate);
     GlobalVar("d", ty.bool_(), builtin::AddressSpace::kPrivate);
 
-    utils::Vector params{
+    Vector params{
         create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
         create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("c"), Expr("d")),
         create<ast::BinaryExpression>(

@@ -41,7 +41,7 @@ TEST_P(HlslImportData_SingleParamTest, FloatScalar) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1.0f)");
 }
@@ -78,7 +78,7 @@ TEST_P(HlslImportData_SingleIntParamTest, IntScalar) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1)");
 }
@@ -95,7 +95,7 @@ TEST_P(HlslImportData_SingleVectorParamTest, FloatVector) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(
         out.str(),
@@ -136,7 +136,7 @@ TEST_P(HlslImportData_DualParam_ScalarTest, Float) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1.0f, 2.0f)");
 }
@@ -158,7 +158,7 @@ TEST_P(HlslImportData_DualParam_VectorTest, Float) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.hlsl_name) +
                              "(float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f))");
@@ -183,7 +183,7 @@ TEST_P(HlslImportData_DualParam_Int_Test, IntScalar) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1, 2)");
 }
@@ -201,7 +201,7 @@ TEST_P(HlslImportData_TripleParam_ScalarTest, Float) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1.0f, 2.0f, 3.0f)");
 }
@@ -222,7 +222,7 @@ TEST_P(HlslImportData_TripleParam_VectorTest, Float) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(
         out.str(),
@@ -245,7 +245,7 @@ TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(1, 2, 3)");
 }
@@ -261,7 +261,7 @@ TEST_F(HlslASTPrinterTest_Import, HlslImportData_Determinant) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string("determinant(var)"));
 }
@@ -274,7 +274,7 @@ TEST_F(HlslASTPrinterTest_Import, HlslImportData_QuantizeToF16_Scalar) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string("f16tof32(f32tof16(v))"));
 }
@@ -287,7 +287,7 @@ TEST_F(HlslASTPrinterTest_Import, HlslImportData_QuantizeToF16_Vector) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string("f16tof32(f32tof16(v))"));
 }

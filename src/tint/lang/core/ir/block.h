@@ -30,7 +30,7 @@ namespace tint::ir {
 
 /// A block of statements. The instructions in the block are a linear list of instructions to
 /// execute. The block will terminate with a Terminator instruction at the end.
-class Block : public utils::Castable<Block> {
+class Block : public Castable<Block> {
   public:
     /// Constructor
     Block();

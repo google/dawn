@@ -32,12 +32,11 @@ namespace tint::ast::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * SimplifyPointers
-class CalculateArrayLength final : public utils::Castable<CalculateArrayLength, Transform> {
+class CalculateArrayLength final : public Castable<CalculateArrayLength, Transform> {
   public:
     /// BufferSizeIntrinsic is an InternalAttribute that's applied to intrinsic
     /// functions used to obtain the runtime size of a storage buffer.
-    class BufferSizeIntrinsic final
-        : public utils::Castable<BufferSizeIntrinsic, InternalAttribute> {
+    class BufferSizeIntrinsic final : public Castable<BufferSizeIntrinsic, InternalAttribute> {
       public:
         /// Constructor
         /// @param generation_id the identifier of the program that owns this node

@@ -19,7 +19,7 @@
 
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// TmpFile constructs a temporary file that can be written to, and is
 /// automatically deleted on destruction.
@@ -56,7 +56,7 @@ class TmpFile {
     /// @return a reference to this TmpFile
     template <typename T>
     inline TmpFile& operator<<(T&& data) {
-        utils::StringStream ss;
+        StringStream ss;
         ss << data;
         std::string str = ss.str();
         Append(str.data(), str.size());
@@ -70,6 +70,6 @@ class TmpFile {
     std::string path_;
 };
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_FILE_TMPFILE_H_

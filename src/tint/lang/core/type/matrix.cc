@@ -26,7 +26,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Matrix);
 namespace tint::type {
 
 Matrix::Matrix(const Vector* column_type, uint32_t columns)
-    : Base(utils::Hash(utils::TypeInfo::Of<Vector>().full_hashcode, columns, column_type),
+    : Base(Hash(tint::TypeInfo::Of<Vector>().full_hashcode, columns, column_type),
            type::Flags{
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
@@ -52,7 +52,7 @@ bool Matrix::Equals(const UniqueNode& other) const {
 }
 
 std::string Matrix::FriendlyName() const {
-    utils::StringStream out;
+    StringStream out;
     out << "mat" << columns_ << "x" << rows_ << "<" << subtype_->FriendlyName() << ">";
     return out.str();
 }

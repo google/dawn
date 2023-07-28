@@ -41,7 +41,7 @@ namespace tint::ir {
 ///                            ▼
 ///                           out
 /// ```
-class Switch : public utils::Castable<Switch, ControlInstruction> {
+class Switch : public Castable<Switch, ControlInstruction> {
   public:
     /// The offset in Operands() for the condition
     static constexpr size_t kConditionOperandOffset = 0;
@@ -58,7 +58,7 @@ class Switch : public utils::Castable<Switch, ControlInstruction> {
     /// A case label in the struct
     struct Case {
         /// The case selector for this node
-        utils::Vector<CaseSelector, 4> selectors;
+        Vector<CaseSelector, 4> selectors;
         /// The case block.
         ir::Block* block = nullptr;
 
@@ -75,7 +75,7 @@ class Switch : public utils::Castable<Switch, ControlInstruction> {
     void ForeachBlock(const std::function<void(ir::Block*)>& cb) override;
 
     /// @returns the switch cases
-    utils::Vector<Case, 4>& Cases() { return cases_; }
+    Vector<Case, 4>& Cases() { return cases_; }
 
     /// @returns the condition
     Value* Condition() { return operands_[kConditionOperandOffset]; }
@@ -84,7 +84,7 @@ class Switch : public utils::Castable<Switch, ControlInstruction> {
     std::string_view FriendlyName() override { return "switch"; }
 
   private:
-    utils::Vector<Case, 4> cases_;
+    Vector<Case, 4> cases_;
 };
 
 }  // namespace tint::ir

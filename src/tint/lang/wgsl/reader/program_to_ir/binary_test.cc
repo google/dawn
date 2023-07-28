@@ -26,7 +26,7 @@ using namespace tint::number_suffixes;  // NOLINT
 using ProgramToIRBinaryTest = helpers::IRProgramTest;
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Add) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = Add(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -95,7 +95,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundAdd) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Subtract) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = Sub(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -164,7 +164,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundSubtract) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Multiply) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = Mul(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -210,7 +210,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundMultiply) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Div) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = Div(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -256,7 +256,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundDiv) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Modulo) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = Mod(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -302,7 +302,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundModulo) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_And) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = And(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -348,7 +348,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundAnd) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Or) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = Or(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -394,7 +394,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundOr) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Xor) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = Xor(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -440,7 +440,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundXor) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LogicalAnd) {
-    Func("my_func", utils::Empty, ty.bool_(), utils::Vector{Return(true)});
+    Func("my_func", tint::Empty, ty.bool_(), Vector{Return(true)});
     auto* let = Let("logical_and", LogicalAnd(Call("my_func"), false));
     auto* expr = If(let, Block());
     WrapInFunction(let, expr);
@@ -476,7 +476,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LogicalAnd) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LogicalOr) {
-    Func("my_func", utils::Empty, ty.bool_(), utils::Vector{Return(true)});
+    Func("my_func", tint::Empty, ty.bool_(), Vector{Return(true)});
     auto* let = Let("logical_or", LogicalOr(Call("my_func"), true));
     auto* expr = If(let, Block());
     WrapInFunction(let, expr);
@@ -512,7 +512,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LogicalOr) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Equal) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = Equal(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -535,7 +535,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Equal) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_NotEqual) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = NotEqual(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -558,7 +558,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_NotEqual) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LessThan) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = LessThan(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -581,7 +581,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LessThan) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_GreaterThan) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = GreaterThan(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -604,7 +604,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_GreaterThan) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LessThanEqual) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = LessThanEqual(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -627,7 +627,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_LessThanEqual) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_GreaterThanEqual) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = GreaterThanEqual(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -650,7 +650,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_GreaterThanEqual) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_ShiftLeft) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = Shl(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -696,7 +696,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundShiftLeft) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_ShiftRight) {
-    Func("my_func", utils::Empty, ty.u32(), utils::Vector{Return(0_u)});
+    Func("my_func", tint::Empty, ty.u32(), Vector{Return(0_u)});
     auto* expr = Shr(Call("my_func"), 4_u);
     WrapInFunction(expr);
 
@@ -742,7 +742,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundShiftRight) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Compound) {
-    Func("my_func", utils::Empty, ty.f32(), utils::Vector{Return(0_f)});
+    Func("my_func", tint::Empty, ty.f32(), Vector{Return(0_f)});
 
     auto* expr = LogicalAnd(LessThan(Call("my_func"), 2_f),
                             GreaterThan(2.5_f, Div(Call("my_func"), Mul(2.3_f, Call("my_func")))));
@@ -780,7 +780,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Compound) {
 }
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Compound_WithConstEval) {
-    Func("my_func", utils::Vector{Param("p", ty.bool_())}, ty.bool_(), utils::Vector{Return(true)});
+    Func("my_func", Vector{Param("p", ty.bool_())}, ty.bool_(), Vector{Return(true)});
     auto* expr = Call("my_func", LogicalAnd(LessThan(2.4_f, 2_f),
                                             GreaterThan(2.5_f, Div(10_f, Mul(2.3_f, 9.4_f)))));
     WrapInFunction(expr);

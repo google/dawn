@@ -27,7 +27,7 @@ WhileStatement::WhileStatement(GenerationID pid,
                                const Source& src,
                                const Expression* cond,
                                const BlockStatement* b,
-                               utils::VectorRef<const ast::Attribute*> attrs)
+                               VectorRef<const ast::Attribute*> attrs)
     : Base(pid, nid, src), condition(cond), body(b), attributes(std::move(attrs)) {
     TINT_ASSERT(AST, cond);
     TINT_ASSERT(AST, body);

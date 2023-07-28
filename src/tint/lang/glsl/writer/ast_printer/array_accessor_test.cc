@@ -32,7 +32,7 @@ TEST_F(GlslASTPrinterTest_Expression, IndexAccessor) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "ary[5]");

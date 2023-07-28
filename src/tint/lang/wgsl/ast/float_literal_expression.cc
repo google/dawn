@@ -37,7 +37,7 @@ const FloatLiteralExpression* FloatLiteralExpression::Clone(CloneContext* ctx) c
     return ctx->dst->create<FloatLiteralExpression>(src, value, suffix);
 }
 
-utils::StringStream& operator<<(utils::StringStream& out, FloatLiteralExpression::Suffix suffix) {
+StringStream& operator<<(StringStream& out, FloatLiteralExpression::Suffix suffix) {
     switch (suffix) {
         default:
             return out;

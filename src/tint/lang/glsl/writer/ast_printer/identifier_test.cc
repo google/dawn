@@ -30,7 +30,7 @@ TEST_F(GlslASTPrinterTest_Identifier, EmitIdentifierExpression) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, i);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "foo");

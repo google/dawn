@@ -153,7 +153,7 @@ struct Texture1DTo2D::State {
                 return nullptr;
             }
 
-            utils::Vector<const Expression*, 8> args;
+            tint::Vector<const Expression*, 8> args;
             int index = 0;
             for (auto* arg : c->args) {
                 if (index == coords_index) {

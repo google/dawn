@@ -88,14 +88,14 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
             return nullptr;
         }
         if (!arr->IsStrideImplicit()) {
-            auto el_ty = utils::GetOrCreate(decomposed, arr, [&] {
+            auto el_ty = tint::GetOrCreate(decomposed, arr, [&] {
                 auto name = b.Symbols().New("strided_arr");
                 auto* member_ty = ctx.Clone(ident->arguments[0]->As<IdentifierExpression>());
                 auto* member = b.Member(kMemberName, Type{member_ty},
-                                        utils::Vector{
+                                        tint::Vector{
                                             b.MemberSize(AInt(arr->Stride())),
                                         });
-                b.Structure(name, utils::Vector{member});
+                b.Structure(name, tint::Vector{member});
                 return name;
             });
             if (ident->arguments.Length() > 1) {
@@ -153,7 +153,7 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
 
                         auto* target = ctx.Clone(expr->target);
 
-                        utils::Vector<const Expression*, 8> args;
+                        tint::Vector<const Expression*, 8> args;
                         if (auto it = decomposed.find(arr); it != decomposed.end()) {
                             args.Reserve(expr->args.Length());
                             for (auto* arg : expr->args) {

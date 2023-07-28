@@ -20,7 +20,7 @@
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/debug/debug.h"
 
-namespace tint::utils {
+namespace tint {
 
 TextGenerator::TextGenerator() = default;
 
@@ -34,8 +34,8 @@ std::string TextGenerator::UniqueIdentifier(const std::string& /* = "" */) {
 std::string TextGenerator::StructName(const type::Struct* s) {
     auto name = s->Name().Name();
     if (name.size() > 1 && name[0] == '_' && name[1] == '_') {
-        name = utils::GetOrCreate(builtin_struct_names_, s,
-                                  [&] { return UniqueIdentifier(name.substr(2)); });
+        name = tint::GetOrCreate(builtin_struct_names_, s,
+                                 [&] { return UniqueIdentifier(name.substr(2)); });
     }
     return name;
 }
@@ -106,7 +106,7 @@ void TextGenerator::TextBuffer::Insert(const TextBuffer& tb, size_t before, uint
 }
 
 std::string TextGenerator::TextBuffer::String(uint32_t indent /* = 0 */) const {
-    utils::StringStream ss;
+    StringStream ss;
     for (auto& line : lines) {
         if (!line.content.empty()) {
             for (uint32_t i = 0; i < indent + line.indent; i++) {
@@ -119,7 +119,7 @@ std::string TextGenerator::TextBuffer::String(uint32_t indent /* = 0 */) const {
     return ss.str();
 }
 
-TextGenerator::ScopedParen::ScopedParen(utils::StringStream& stream) : s(stream) {
+TextGenerator::ScopedParen::ScopedParen(StringStream& stream) : s(stream) {
     s << "(";
 }
 
@@ -137,4 +137,4 @@ TextGenerator::ScopedIndent::~ScopedIndent() {
     buffer_->DecrementIndent();
 }
 
-}  // namespace tint::utils
+}  // namespace tint

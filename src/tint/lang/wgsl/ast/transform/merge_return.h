@@ -20,7 +20,7 @@
 namespace tint::ast::transform {
 
 /// Merge return statements into a single return at the end of the function.
-class MergeReturn final : public utils::Castable<MergeReturn, Transform> {
+class MergeReturn final : public Castable<MergeReturn, Transform> {
   public:
     /// Constructor
     MergeReturn();

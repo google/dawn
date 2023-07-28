@@ -44,7 +44,7 @@ enum class AddressSpace {
 /// @param out the stream to write to
 /// @param value the AddressSpace
 /// @returns `out` so calls can be chained
-utils::StringStream& operator<<(utils::StringStream& out, AddressSpace value);
+StringStream& operator<<(StringStream& out, AddressSpace value);
 
 /// ParseAddressSpace parses a AddressSpace from a string.
 /// @param str the string to parse

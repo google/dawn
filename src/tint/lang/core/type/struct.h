@@ -51,11 +51,11 @@ enum StructFlag {
     kBlock,
 };
 
-/// An alias to utils::EnumSet<StructFlag>
-using StructFlags = utils::EnumSet<StructFlag>;
+/// An alias to tint::EnumSet<StructFlag>
+using StructFlags = tint::EnumSet<StructFlag>;
 
 /// Struct holds the Type information for structures.
-class Struct : public utils::Castable<Struct, Type> {
+class Struct : public Castable<Struct, Type> {
   public:
     /// Constructor
     /// @param name the name of the structure
@@ -65,7 +65,7 @@ class Struct : public utils::Castable<Struct, Type> {
     /// @param size_no_padding size of the members without the end of structure
     /// alignment padding
     Struct(Symbol name,
-           utils::VectorRef<const StructMember*> members,
+           VectorRef<const StructMember*> members,
            uint32_t align,
            uint32_t size,
            uint32_t size_no_padding);
@@ -85,7 +85,7 @@ class Struct : public utils::Castable<Struct, Type> {
     void SetName(Symbol name) { name_ = name; }
 
     /// @returns the members of the structure
-    utils::VectorRef<const StructMember*> Members() const { return members_; }
+    VectorRef<const StructMember*> Members() const { return members_; }
 
     /// @param name the member name to look for
     /// @returns the member with the given name, or nullptr if it was not found.
@@ -156,12 +156,12 @@ class Struct : public utils::Castable<Struct, Type> {
     std::string Layout() const;
 
     /// @param concrete the conversion-rank ordered concrete versions of this abstract structure.
-    void SetConcreteTypes(utils::VectorRef<const Struct*> concrete) { concrete_types_ = concrete; }
+    void SetConcreteTypes(VectorRef<const Struct*> concrete) { concrete_types_ = concrete; }
 
     /// @returns the conversion-rank ordered concrete versions of this abstract structure, or an
     /// empty vector if this structure is not abstract.
     /// @note only structures returned by builtins may be abstract (e.g. modf, frexp)
-    utils::VectorRef<const Struct*> ConcreteTypes() const { return concrete_types_; }
+    VectorRef<const Struct*> ConcreteTypes() const { return concrete_types_; }
 
     /// @copydoc Type::Elements
     TypeAndCount Elements(const Type* type_if_invalid = nullptr,
@@ -176,14 +176,14 @@ class Struct : public utils::Castable<Struct, Type> {
 
   private:
     Symbol name_;
-    const utils::Vector<const StructMember*, 4> members_;
+    const tint::Vector<const StructMember*, 4> members_;
     const uint32_t align_;
     const uint32_t size_;
     const uint32_t size_no_padding_;
     type::StructFlags struct_flags_;
     std::unordered_set<builtin::AddressSpace> address_space_usage_;
     std::unordered_set<PipelineStageUsage> pipeline_stage_uses_;
-    utils::Vector<const Struct*, 2> concrete_types_;
+    tint::Vector<const Struct*, 2> concrete_types_;
 };
 
 /// Attributes that can be applied to the StructMember
@@ -201,7 +201,7 @@ struct StructMemberAttributes {
 };
 
 /// StructMember holds the type information for structure members.
-class StructMember : public utils::Castable<StructMember, Node> {
+class StructMember : public Castable<StructMember, Node> {
   public:
     /// Constructor
     /// @param name the name of the structure member

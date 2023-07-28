@@ -39,14 +39,14 @@ class ResolverEntryPointValidationTest : public TestHelper, public testing::Test
 TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Location) {
     // @fragment
     // fn main() -> @location(0) f32 { return 1.0; }
-    Func(Source{{12, 34}}, "main", utils::Empty, ty.f32(),
-         utils::Vector{
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.f32(),
+         Vector{
              Return(1_f),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         utils::Vector{
+         Vector{
              Location(0_a),
          });
 
@@ -56,14 +56,14 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Location) {
 TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Builtin) {
     // @vertex
     // fn main() -> @builtin(position) vec4<f32> { return vec4<f32>(); }
-    Func(Source{{12, 34}}, "main", utils::Empty, ty.vec4<f32>(),
-         utils::Vector{
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.vec4<f32>(),
+         Vector{
              Return(Call<vec4<f32>>()),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kVertex),
          },
-         utils::Vector{
+         Vector{
              Builtin(builtin::BuiltinValue::kPosition),
          });
 
@@ -75,11 +75,11 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Missing) {
     // fn main() -> f32 {
     //   return 1.0;
     // }
-    Func(Source{{12, 34}}, "main", utils::Empty, ty.vec4<f32>(),
-         utils::Vector{
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.vec4<f32>(),
+         Vector{
              Return(Call<vec4<f32>>()),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kVertex),
          });
 
@@ -92,14 +92,14 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Multiple) {
     // fn main() -> @location(0) @builtin(position) vec4<f32> {
     //   return vec4<f32>();
     // }
-    Func(Source{{12, 34}}, "main", utils::Empty, ty.vec4<f32>(),
-         utils::Vector{
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.vec4<f32>(),
+         Vector{
              Return(Call<vec4<f32>>()),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kVertex),
          },
-         utils::Vector{
+         Vector{
              Location(Source{{13, 43}}, 0_a),
              Builtin(Source{{14, 52}}, builtin::BuiltinValue::kPosition),
          });
@@ -119,16 +119,15 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_Valid) {
     //   return Output();
     // }
     auto* output = Structure(
-        "Output",
-        utils::Vector{
-            Member("a", ty.f32(), utils::Vector{Location(0_a)}),
-            Member("b", ty.f32(), utils::Vector{Builtin(builtin::BuiltinValue::kFragDepth)}),
-        });
-    Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
-         utils::Vector{
+        "Output", Vector{
+                      Member("a", ty.f32(), Vector{Location(0_a)}),
+                      Member("b", ty.f32(), Vector{Builtin(builtin::BuiltinValue::kFragDepth)}),
+                  });
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.Of(output),
+         Vector{
              Return(Call(ty.Of(output))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -144,17 +143,16 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_MemberMultipleAttribu
     //   return Output();
     // }
     auto* output = Structure(
-        "Output",
-        utils::Vector{
-            Member("a", ty.f32(),
-                   utils::Vector{Location(Source{{13, 43}}, 0_a),
-                                 Builtin(Source{{14, 52}}, builtin::BuiltinValue::kFragDepth)}),
-        });
-    Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
-         utils::Vector{
+        "Output", Vector{
+                      Member("a", ty.f32(),
+                             Vector{Location(Source{{13, 43}}, 0_a),
+                                    Builtin(Source{{14, 52}}, builtin::BuiltinValue::kFragDepth)}),
+                  });
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.Of(output),
+         Vector{
              Return(Call(ty.Of(output))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -173,16 +171,16 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_MemberMissingAttribut
     // fn main() -> Output {
     //   return Output();
     // }
-    auto* output = Structure(
-        "Output", utils::Vector{
-                      Member(Source{{13, 43}}, "a", ty.f32(), utils::Vector{Location(0_a)}),
-                      Member(Source{{14, 52}}, "b", ty.f32(), {}),
-                  });
-    Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
-         utils::Vector{
+    auto* output =
+        Structure("Output", Vector{
+                                Member(Source{{13, 43}}, "a", ty.f32(), Vector{Location(0_a)}),
+                                Member(Source{{14, 52}}, "b", ty.f32(), {}),
+                            });
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.Of(output),
+         Vector{
              Return(Call(ty.Of(output))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -202,16 +200,15 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateBuiltins) {
     //   return Output();
     // }
     auto* output = Structure(
-        "Output",
-        utils::Vector{
-            Member("a", ty.f32(), utils::Vector{Builtin(builtin::BuiltinValue::kFragDepth)}),
-            Member("b", ty.f32(), utils::Vector{Builtin(builtin::BuiltinValue::kFragDepth)}),
-        });
-    Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
-         utils::Vector{
+        "Output", Vector{
+                      Member("a", ty.f32(), Vector{Builtin(builtin::BuiltinValue::kFragDepth)}),
+                      Member("b", ty.f32(), Vector{Builtin(builtin::BuiltinValue::kFragDepth)}),
+                  });
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.Of(output),
+         Vector{
              Return(Call(ty.Of(output))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -225,15 +222,15 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Location) {
     // @fragment
     // fn main(@location(0) param : f32) {}
     auto* param = Param("param", ty.f32(),
-                        utils::Vector{
+                        Vector{
                             Location(0_a),
                         });
     Func(Source{{12, 34}}, "main",
-         utils::Vector{
+         Vector{
              param,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -245,11 +242,11 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Missing) {
     // fn main(param : f32) {}
     auto* param = Param(Source{{13, 43}}, "param", ty.vec4<f32>());
     Func(Source{{12, 34}}, "main",
-         utils::Vector{
+         Vector{
              param,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -261,16 +258,16 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Multiple) {
     // @fragment
     // fn main(@location(0) @builtin(sample_index) param : u32) {}
     auto* param = Param("param", ty.u32(),
-                        utils::Vector{
+                        Vector{
                             Location(Source{{13, 43}}, 0_a),
                             Builtin(Source{{14, 52}}, builtin::BuiltinValue::kSampleIndex),
                         });
     Func(Source{{12, 34}}, "main",
-         utils::Vector{
+         Vector{
              param,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -287,18 +284,17 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_Valid) {
     // @fragment
     // fn main(param : Input) {}
     auto* input = Structure(
-        "Input",
-        utils::Vector{
-            Member("a", ty.f32(), utils::Vector{Location(0_a)}),
-            Member("b", ty.u32(), utils::Vector{Builtin(builtin::BuiltinValue::kSampleIndex)}),
-        });
+        "Input", Vector{
+                     Member("a", ty.f32(), Vector{Location(0_a)}),
+                     Member("b", ty.u32(), Vector{Builtin(builtin::BuiltinValue::kSampleIndex)}),
+                 });
     auto* param = Param("param", ty.Of(input));
     Func(Source{{12, 34}}, "main",
-         utils::Vector{
+         Vector{
              param,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -312,19 +308,18 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_MemberMultipleAttribut
     // @fragment
     // fn main(param : Input) {}
     auto* input = Structure(
-        "Input",
-        utils::Vector{
-            Member("a", ty.u32(),
-                   utils::Vector{Location(Source{{13, 43}}, 0_a),
-                                 Builtin(Source{{14, 52}}, builtin::BuiltinValue::kSampleIndex)}),
-        });
+        "Input", Vector{
+                     Member("a", ty.u32(),
+                            Vector{Location(Source{{13, 43}}, 0_a),
+                                   Builtin(Source{{14, 52}}, builtin::BuiltinValue::kSampleIndex)}),
+                 });
     auto* param = Param("param", ty.Of(input));
     Func(Source{{12, 34}}, "main",
-         utils::Vector{
+         Vector{
              param,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -341,18 +336,18 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_MemberMissingAttribute
     // };
     // @fragment
     // fn main(param : Input) {}
-    auto* input = Structure(
-        "Input", utils::Vector{
-                     Member(Source{{13, 43}}, "a", ty.f32(), utils::Vector{Location(0_a)}),
-                     Member(Source{{14, 52}}, "b", ty.f32(), {}),
-                 });
+    auto* input =
+        Structure("Input", Vector{
+                               Member(Source{{13, 43}}, "a", ty.f32(), Vector{Location(0_a)}),
+                               Member(Source{{14, 52}}, "b", ty.f32(), {}),
+                           });
     auto* param = Param("param", ty.Of(input));
     Func(Source{{12, 34}}, "main",
-         utils::Vector{
+         Vector{
              param,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -366,20 +361,20 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_DuplicateBuiltins) {
     // fn main(@builtin(sample_index) param_a : u32,
     //         @builtin(sample_index) param_b : u32) {}
     auto* param_a = Param("param_a", ty.u32(),
-                          utils::Vector{
+                          Vector{
                               Builtin(builtin::BuiltinValue::kSampleIndex),
                           });
     auto* param_b = Param("param_b", ty.u32(),
-                          utils::Vector{
+                          Vector{
                               Builtin(builtin::BuiltinValue::kSampleIndex),
                           });
     Func(Source{{12, 34}}, "main",
-         utils::Vector{
+         Vector{
              param_a,
              param_b,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -398,24 +393,22 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateBuiltins) {
     // @fragment
     // fn main(param_a : InputA, param_b : InputB) {}
     auto* input_a = Structure(
-        "InputA",
-        utils::Vector{
-            Member("a", ty.u32(), utils::Vector{Builtin(builtin::BuiltinValue::kSampleIndex)}),
-        });
+        "InputA", Vector{
+                      Member("a", ty.u32(), Vector{Builtin(builtin::BuiltinValue::kSampleIndex)}),
+                  });
     auto* input_b = Structure(
-        "InputB",
-        utils::Vector{
-            Member("a", ty.u32(), utils::Vector{Builtin(builtin::BuiltinValue::kSampleIndex)}),
-        });
+        "InputB", Vector{
+                      Member("a", ty.u32(), Vector{Builtin(builtin::BuiltinValue::kSampleIndex)}),
+                  });
     auto* param_a = Param("param_a", ty.Of(input_a));
     auto* param_b = Param("param_b", ty.Of(input_b));
     Func(Source{{12, 34}}, "main",
-         utils::Vector{
+         Vector{
              param_a,
              param_b,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -428,8 +421,8 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateBuiltins) {
 TEST_F(ResolverEntryPointValidationTest, VertexShaderMustReturnPosition) {
     // @vertex
     // fn main() {}
-    Func(Source{{12, 34}}, "main", utils::Empty, ty.void_(), utils::Empty,
-         utils::Vector{
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kVertex),
          });
 
@@ -461,7 +454,7 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantDisallowedWithoutEnable) {
 TEST_F(ResolverEntryPointValidationTest, PushConstantAllowedWithIgnoreAddressSpaceAttribute) {
     // var<push_constant> a : u32; // With ast::DisabledValidation::kIgnoreAddressSpace
     GlobalVar("a", ty.u32(), builtin::AddressSpace::kPushConstant,
-              utils::Vector{Disable(ast::DisabledValidation::kIgnoreAddressSpace)});
+              Vector{Disable(ast::DisabledValidation::kIgnoreAddressSpace)});
 
     EXPECT_TRUE(r()->Resolve());
 }
@@ -475,9 +468,8 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantOneVariableUsedInEntryPoint
     Enable(builtin::Extension::kChromiumExperimentalPushConstant);
     GlobalVar("a", ty.u32(), builtin::AddressSpace::kPushConstant);
 
-    Func("main", {}, ty.void_(), utils::Vector{Assign(Phony(), "a")},
-         utils::Vector{Stage(ast::PipelineStage::kCompute),
-                       create<ast::WorkgroupAttribute>(Expr(1_i))});
+    Func("main", {}, ty.void_(), Vector{Assign(Phony(), "a")},
+         Vector{Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
 
     EXPECT_TRUE(r()->Resolve());
 }
@@ -494,10 +486,8 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantTwoVariablesUsedInEntryPoin
     GlobalVar(Source{{1, 2}}, "a", ty.u32(), builtin::AddressSpace::kPushConstant);
     GlobalVar(Source{{3, 4}}, "b", ty.u32(), builtin::AddressSpace::kPushConstant);
 
-    Func(Source{{5, 6}}, "main", {}, ty.void_(),
-         utils::Vector{Assign(Phony(), "a"), Assign(Phony(), "b")},
-         utils::Vector{Stage(ast::PipelineStage::kCompute),
-                       create<ast::WorkgroupAttribute>(Expr(1_i))});
+    Func(Source{{5, 6}}, "main", {}, ty.void_(), Vector{Assign(Phony(), "a"), Assign(Phony(), "b")},
+         Vector{Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -525,13 +515,12 @@ TEST_F(ResolverEntryPointValidationTest,
     GlobalVar(Source{{1, 2}}, "a", ty.u32(), builtin::AddressSpace::kPushConstant);
     GlobalVar(Source{{3, 4}}, "b", ty.u32(), builtin::AddressSpace::kPushConstant);
 
-    Func(Source{{5, 6}}, "uses_a", {}, ty.void_(), utils::Vector{Assign(Phony(), "a")});
-    Func(Source{{7, 8}}, "uses_b", {}, ty.void_(), utils::Vector{Assign(Phony(), "b")});
+    Func(Source{{5, 6}}, "uses_a", {}, ty.void_(), Vector{Assign(Phony(), "a")});
+    Func(Source{{7, 8}}, "uses_b", {}, ty.void_(), Vector{Assign(Phony(), "b")});
 
     Func(Source{{9, 10}}, "main", {}, ty.void_(),
-         utils::Vector{CallStmt(Call("uses_a")), CallStmt(Call("uses_b"))},
-         utils::Vector{Stage(ast::PipelineStage::kCompute),
-                       create<ast::WorkgroupAttribute>(Expr(1_i))});
+         Vector{CallStmt(Call("uses_a")), CallStmt(Call("uses_b"))},
+         Vector{Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -558,12 +547,10 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantTwoVariablesUsedInDifferent
     GlobalVar("a", ty.u32(), builtin::AddressSpace::kPushConstant);
     GlobalVar("b", ty.u32(), builtin::AddressSpace::kPushConstant);
 
-    Func("uses_a", {}, ty.void_(), utils::Vector{Assign(Phony(), "a")},
-         utils::Vector{Stage(ast::PipelineStage::kCompute),
-                       create<ast::WorkgroupAttribute>(Expr(1_i))});
-    Func("uses_b", {}, ty.void_(), utils::Vector{Assign(Phony(), "b")},
-         utils::Vector{Stage(ast::PipelineStage::kCompute),
-                       create<ast::WorkgroupAttribute>(Expr(1_i))});
+    Func("uses_a", {}, ty.void_(), Vector{Assign(Phony(), "a")},
+         Vector{Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
+    Func("uses_b", {}, ty.void_(), Vector{Assign(Phony(), "b")},
+         Vector{Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
 
     EXPECT_TRUE(r()->Resolve());
 }
@@ -614,16 +601,16 @@ TEST_P(TypeValidationTest, BareInputs) {
     Enable(builtin::Extension::kF16);
 
     auto* a = Param("a", params.create_ast_type(*this),
-                    utils::Vector{
+                    Vector{
                         Location(0_a),
                         Flat(),
                     });
     Func(Source{{12, 34}}, "main",
-         utils::Vector{
+         Vector{
              a,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -644,17 +631,17 @@ TEST_P(TypeValidationTest, StructInputs) {
 
     Enable(builtin::Extension::kF16);
 
-    auto* input = Structure("Input", utils::Vector{
-                                         Member("a", params.create_ast_type(*this),
-                                                utils::Vector{Location(0_a), Flat()}),
-                                     });
+    auto* input = Structure(
+        "Input", Vector{
+                     Member("a", params.create_ast_type(*this), Vector{Location(0_a), Flat()}),
+                 });
     auto* a = Param("a", ty.Of(input), {});
     Func(Source{{12, 34}}, "main",
-         utils::Vector{
+         Vector{
              a,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -674,14 +661,14 @@ TEST_P(TypeValidationTest, BareOutputs) {
 
     Enable(builtin::Extension::kF16);
 
-    Func(Source{{12, 34}}, "main", utils::Empty, params.create_ast_type(*this),
-         utils::Vector{
+    Func(Source{{12, 34}}, "main", tint::Empty, params.create_ast_type(*this),
+         Vector{
              Return(Call(params.create_ast_type(*this))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         utils::Vector{
+         Vector{
              Location(0_a),
          });
 
@@ -704,15 +691,15 @@ TEST_P(TypeValidationTest, StructOutputs) {
 
     Enable(builtin::Extension::kF16);
 
-    auto* output = Structure(
-        "Output", utils::Vector{
-                      Member("a", params.create_ast_type(*this), utils::Vector{Location(0_a)}),
-                  });
-    Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
-         utils::Vector{
+    auto* output =
+        Structure("Output", Vector{
+                                Member("a", params.create_ast_type(*this), Vector{Location(0_a)}),
+                            });
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.Of(output),
+         Vector{
              Return(Call(ty.Of(output))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -737,16 +724,16 @@ TEST_F(LocationAttributeTests, Pass) {
     // fn frag_main(@location(0) @interpolate(flat) a: i32) {}
 
     auto* p = Param(Source{{12, 34}}, "a", ty.i32(),
-                    utils::Vector{
+                    Vector{
                         Location(0_a),
                         Flat(),
                     });
     Func("frag_main",
-         utils::Vector{
+         Vector{
              p,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -758,15 +745,15 @@ TEST_F(LocationAttributeTests, BadType_Input_bool) {
     // fn frag_main(@location(0) a: bool) {}
 
     auto* p = Param(Source{{12, 34}}, "a", ty.bool_(),
-                    utils::Vector{
+                    Vector{
                         Location(Source{{34, 56}}, 0_a),
                     });
     Func("frag_main",
-         utils::Vector{
+         Vector{
              p,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -780,14 +767,14 @@ TEST_F(LocationAttributeTests, BadType_Output_Array) {
     // @fragment
     // fn frag_main()->@location(0) array<f32, 2> { return array<f32, 2>(); }
 
-    Func(Source{{12, 34}}, "frag_main", utils::Empty, ty.array<f32, 2>(),
-         utils::Vector{
+    Func(Source{{12, 34}}, "frag_main", tint::Empty, ty.array<f32, 2>(),
+         Vector{
              Return(Call<array<f32, 2>>()),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         utils::Vector{
+         Vector{
              Location(Source{{34, 56}}, 0_a),
          });
 
@@ -803,19 +790,19 @@ TEST_F(LocationAttributeTests, BadType_Input_Struct) {
     // };
     // @fragment
     // fn main(@location(0) param : Input) {}
-    auto* input = Structure("Input", utils::Vector{
+    auto* input = Structure("Input", Vector{
                                          Member("a", ty.f32()),
                                      });
     auto* param = Param(Source{{12, 34}}, "param", ty.Of(input),
-                        utils::Vector{
+                        Vector{
                             Location(Source{{13, 43}}, 0_a),
                         });
     Func(Source{{12, 34}}, "main",
-         utils::Vector{
+         Vector{
              param,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -834,20 +821,20 @@ TEST_F(LocationAttributeTests, BadType_Input_Struct_NestedStruct) {
     // };
     // @fragment
     // fn main(param : Input) {}
-    auto* inner = Structure(
-        "Inner", utils::Vector{
-                     Member(Source{{13, 43}}, "a", ty.f32(), utils::Vector{Location(0_a)}),
-                 });
-    auto* input = Structure("Input", utils::Vector{
+    auto* inner =
+        Structure("Inner", Vector{
+                               Member(Source{{13, 43}}, "a", ty.f32(), Vector{Location(0_a)}),
+                           });
+    auto* input = Structure("Input", Vector{
                                          Member(Source{{14, 52}}, "a", ty.Of(inner)),
                                      });
     auto* param = Param("param", ty.Of(input));
     Func(Source{{12, 34}}, "main",
-         utils::Vector{
+         Vector{
              param,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -864,16 +851,16 @@ TEST_F(LocationAttributeTests, BadType_Input_Struct_RuntimeArray) {
     // @fragment
     // fn main(param : Input) {}
     auto* input = Structure(
-        "Input", utils::Vector{
-                     Member(Source{{13, 43}}, "a", ty.array<f32>(), utils::Vector{Location(0_a)}),
+        "Input", Vector{
+                     Member(Source{{13, 43}}, "a", ty.array<f32>(), Vector{Location(0_a)}),
                  });
     auto* param = Param("param", ty.Of(input));
     Func(Source{{12, 34}}, "main",
-         utils::Vector{
+         Vector{
              param,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -889,18 +876,18 @@ TEST_F(LocationAttributeTests, BadMemberType_Input) {
     // fn frag_main( a: S) {}
 
     auto* m = Member(Source{{34, 56}}, "m", ty.array<i32>(),
-                     utils::Vector{
+                     Vector{
                          Location(Source{{12, 34}}, 0_u),
                      });
-    auto* s = Structure("S", utils::Vector{m});
+    auto* s = Structure("S", Vector{m});
     auto* p = Param("a", ty.Of(s));
 
     Func("frag_main",
-         utils::Vector{
+         Vector{
              p,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -915,16 +902,16 @@ TEST_F(LocationAttributeTests, BadMemberType_Output) {
     // @fragment
     // fn frag_main() -> S {}
     auto* m = Member(Source{{34, 56}}, "m", ty.atomic<i32>(),
-                     utils::Vector{
+                     Vector{
                          Location(Source{{12, 34}}, 0_u),
                      });
-    auto* s = Structure("S", utils::Vector{m});
+    auto* s = Structure("S", Vector{m});
 
-    Func("frag_main", utils::Empty, ty.Of(s),
-         utils::Vector{
+    Func("frag_main", tint::Empty, ty.Of(s),
+         Vector{
              Return(Call(ty.Of(s))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          },
          {});
@@ -939,10 +926,10 @@ TEST_F(LocationAttributeTests, BadMemberType_Unused) {
     // struct S { @location(0) m: mat3x2<f32>; };
 
     auto* m = Member(Source{{34, 56}}, "m", ty.mat3x2<f32>(),
-                     utils::Vector{
+                     Vector{
                          Location(Source{{12, 34}}, 0_u),
                      });
-    Structure("S", utils::Vector{m});
+    Structure("S", Vector{m});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -960,16 +947,15 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_Valid) {
     //   return Output();
     // }
     auto* output = Structure(
-        "Output",
-        utils::Vector{
-            Member("a", ty.f32(), utils::Vector{Location(0_a)}),
-            Member("b", ty.f32(), utils::Vector{Builtin(builtin::BuiltinValue::kFragDepth)}),
-        });
-    Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
-         utils::Vector{
+        "Output", Vector{
+                      Member("a", ty.f32(), Vector{Location(0_a)}),
+                      Member("b", ty.f32(), Vector{Builtin(builtin::BuiltinValue::kFragDepth)}),
+                  });
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.Of(output),
+         Vector{
              Return(Call(ty.Of(output))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -984,17 +970,17 @@ TEST_F(LocationAttributeTests, ReturnType_Struct) {
     // fn main() -> @location(0) Output {
     //   return Output();
     // }
-    auto* output = Structure("Output", utils::Vector{
+    auto* output = Structure("Output", Vector{
                                            Member("a", ty.f32()),
                                        });
-    Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
-         utils::Vector{
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.Of(output),
+         Vector{
              Return(Call(ty.Of(output))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kVertex),
          },
-         utils::Vector{
+         Vector{
              Location(Source{{13, 43}}, 0_a),
          });
 
@@ -1012,18 +998,18 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_NestedStruct) {
     // };
     // @fragment
     // fn main() -> Output { return Output(); }
-    auto* inner = Structure(
-        "Inner", utils::Vector{
-                     Member(Source{{13, 43}}, "a", ty.f32(), utils::Vector{Location(0_a)}),
-                 });
-    auto* output = Structure("Output", utils::Vector{
+    auto* inner =
+        Structure("Inner", Vector{
+                               Member(Source{{13, 43}}, "a", ty.f32(), Vector{Location(0_a)}),
+                           });
+    auto* output = Structure("Output", Vector{
                                            Member(Source{{14, 52}}, "a", ty.Of(inner)),
                                        });
-    Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
-         utils::Vector{
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.Of(output),
+         Vector{
              Return(Call(ty.Of(output))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1041,15 +1027,15 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_RuntimeArray) {
     // fn main() -> Output {
     //   return Output();
     // }
-    auto* output = Structure("Output", utils::Vector{
+    auto* output = Structure("Output", Vector{
                                            Member(Source{{13, 43}}, "a", ty.array<f32>(),
-                                                  utils::Vector{Location(Source{{12, 34}}, 0_a)}),
+                                                  Vector{Location(Source{{12, 34}}, 0_a)}),
                                        });
-    Func(Source{{12, 34}}, "main", utils::Empty, ty.Of(output),
-         utils::Vector{
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.Of(output),
+         Vector{
              Return(Call(ty.Of(output))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1060,15 +1046,15 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_RuntimeArray) {
 }
 
 TEST_F(LocationAttributeTests, ComputeShaderLocation_Input) {
-    Func("main", utils::Empty, ty.i32(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.i32(),
+         Vector{
              Return(Expr(1_i)),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i)),
          },
-         utils::Vector{
+         Vector{
              Location(Source{{12, 34}}, 1_a),
          });
 
@@ -1078,11 +1064,11 @@ TEST_F(LocationAttributeTests, ComputeShaderLocation_Input) {
 
 TEST_F(LocationAttributeTests, ComputeShaderLocation_Output) {
     auto* input = Param("input", ty.i32(),
-                        utils::Vector{
+                        Vector{
                             Location(Source{{12, 34}}, 0_u),
                         });
-    Func("main", utils::Vector{input}, ty.void_(), utils::Empty,
-         utils::Vector{
+    Func("main", Vector{input}, ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i)),
          });
@@ -1093,15 +1079,15 @@ TEST_F(LocationAttributeTests, ComputeShaderLocation_Output) {
 
 TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Output) {
     auto* m = Member("m", ty.i32(),
-                     utils::Vector{
+                     Vector{
                          Location(Source{{12, 34}}, 0_u),
                      });
-    auto* s = Structure("S", utils::Vector{m});
-    Func(Source{{56, 78}}, "main", utils::Empty, ty.Of(s),
-         utils::Vector{
+    auto* s = Structure("S", Vector{m});
+    Func(Source{{56, 78}}, "main", tint::Empty, ty.Of(s),
+         Vector{
              Return(Expr(Call(ty.Of(s)))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i)),
          });
@@ -1114,13 +1100,13 @@ TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Output) {
 
 TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Input) {
     auto* m = Member("m", ty.i32(),
-                     utils::Vector{
+                     Vector{
                          Location(Source{{12, 34}}, 0_u),
                      });
-    auto* s = Structure("S", utils::Vector{m});
+    auto* s = Structure("S", Vector{m});
     auto* input = Param("input", ty.Of(s));
-    Func(Source{{56, 78}}, "main", utils::Vector{input}, ty.void_(), utils::Empty,
-         utils::Vector{
+    Func(Source{{56, 78}}, "main", Vector{input}, ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i)),
          });
@@ -1136,20 +1122,20 @@ TEST_F(LocationAttributeTests, Duplicate_input) {
     // fn main(@location(1) param_a : f32,
     //         @location(1) param_b : f32) {}
     auto* param_a = Param("param_a", ty.f32(),
-                          utils::Vector{
+                          Vector{
                               Location(1_a),
                           });
     auto* param_b = Param("param_b", ty.f32(),
-                          utils::Vector{
+                          Vector{
                               Location(Source{{12, 34}}, 1_a),
                           });
     Func(Source{{12, 34}}, "main",
-         utils::Vector{
+         Vector{
              param_a,
              param_b,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1166,22 +1152,22 @@ TEST_F(LocationAttributeTests, Duplicate_struct) {
     // };
     // @fragment
     // fn main(param_a : InputA, param_b : InputB) {}
-    auto* input_a = Structure("InputA", utils::Vector{
-                                            Member("a", ty.f32(), utils::Vector{Location(1_a)}),
+    auto* input_a = Structure("InputA", Vector{
+                                            Member("a", ty.f32(), Vector{Location(1_a)}),
                                         });
-    auto* input_b = Structure(
-        "InputB", utils::Vector{
-                      Member("a", ty.f32(), utils::Vector{Location(Source{{34, 56}}, 1_a)}),
-                  });
+    auto* input_b =
+        Structure("InputB", Vector{
+                                Member("a", ty.f32(), Vector{Location(Source{{34, 56}}, 1_a)}),
+                            });
     auto* param_a = Param("param_a", ty.Of(input_a));
     auto* param_b = Param("param_b", ty.Of(input_b));
     Func(Source{{12, 34}}, "main",
-         utils::Vector{
+         Vector{
              param_a,
              param_b,
          },
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 

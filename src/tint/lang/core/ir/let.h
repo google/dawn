@@ -20,7 +20,7 @@
 namespace tint::ir {
 
 /// A no-op instruction in the IR, used to position and name a value
-class Let : public utils::Castable<Let, OperandInstruction<1, 1>> {
+class Let : public Castable<Let, OperandInstruction<1, 1>> {
   public:
     /// The offset in Operands() for the value
     static constexpr size_t kValueOperandOffset = 0;

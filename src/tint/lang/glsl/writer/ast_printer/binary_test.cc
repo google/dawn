@@ -32,7 +32,7 @@ struct BinaryData {
     ast::BinaryOp op;
 };
 inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.op;
     out << str.str();
     return out;
@@ -61,7 +61,7 @@ TEST_P(GlslBinaryTest, Emit_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), params.result);
@@ -90,7 +90,7 @@ TEST_P(GlslBinaryTest, Emit_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), params.result);
@@ -110,7 +110,7 @@ TEST_P(GlslBinaryTest, Emit_u32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), params.result);
@@ -135,7 +135,7 @@ TEST_P(GlslBinaryTest, Emit_i32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), params.result);
@@ -171,7 +171,7 @@ TEST_F(GlslASTPrinterTest_Binary, Multiply_VectorScalar_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(a * 1.0f)");
@@ -190,7 +190,7 @@ TEST_F(GlslASTPrinterTest_Binary, Multiply_VectorScalar_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(a * 1.0hf)");
@@ -207,7 +207,7 @@ TEST_F(GlslASTPrinterTest_Binary, Multiply_ScalarVector_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(1.0f * a)");
@@ -226,7 +226,7 @@ TEST_F(GlslASTPrinterTest_Binary, Multiply_ScalarVector_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(1.0hf * a)");
@@ -242,7 +242,7 @@ TEST_F(GlslASTPrinterTest_Binary, Multiply_MatrixScalar_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(mat * 1.0f)");
@@ -260,7 +260,7 @@ TEST_F(GlslASTPrinterTest_Binary, Multiply_MatrixScalar_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(mat * 1.0hf)");
@@ -276,7 +276,7 @@ TEST_F(GlslASTPrinterTest_Binary, Multiply_ScalarMatrix_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(1.0f * mat)");
@@ -294,7 +294,7 @@ TEST_F(GlslASTPrinterTest_Binary, Multiply_ScalarMatrix_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(1.0hf * mat)");
@@ -310,7 +310,7 @@ TEST_F(GlslASTPrinterTest_Binary, Multiply_MatrixVector_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(mat * vec3(1.0f))");
@@ -328,7 +328,7 @@ TEST_F(GlslASTPrinterTest_Binary, Multiply_MatrixVector_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(mat * f16vec3(1.0hf))");
@@ -344,7 +344,7 @@ TEST_F(GlslASTPrinterTest_Binary, Multiply_VectorMatrix_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(vec3(1.0f) * mat)");
@@ -362,7 +362,7 @@ TEST_F(GlslASTPrinterTest_Binary, Multiply_VectorMatrix_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(f16vec3(1.0hf) * mat)");
@@ -377,7 +377,7 @@ TEST_F(GlslASTPrinterTest_Binary, Multiply_MatrixMatrix_f32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(lhs * rhs)");
@@ -394,7 +394,7 @@ TEST_F(GlslASTPrinterTest_Binary, Multiply_MatrixMatrix_f16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(lhs * rhs)");
@@ -409,7 +409,7 @@ TEST_F(GlslASTPrinterTest_Binary, ModF32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "tint_float_modulo(a, b)");
@@ -426,7 +426,7 @@ TEST_F(GlslASTPrinterTest_Binary, ModF16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "tint_float_modulo(a, b)");
@@ -441,7 +441,7 @@ TEST_F(GlslASTPrinterTest_Binary, ModVec3F32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "tint_float_modulo(a, b)");
@@ -458,7 +458,7 @@ TEST_F(GlslASTPrinterTest_Binary, ModVec3F16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "tint_float_modulo(a, b)");
@@ -473,7 +473,7 @@ TEST_F(GlslASTPrinterTest_Binary, ModVec3F32ScalarF32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "tint_float_modulo(a, b)");
@@ -490,7 +490,7 @@ TEST_F(GlslASTPrinterTest_Binary, ModVec3F16ScalarF16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "tint_float_modulo(a, b)");
@@ -505,7 +505,7 @@ TEST_F(GlslASTPrinterTest_Binary, ModScalarF32Vec3F32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "tint_float_modulo(a, b)");
@@ -522,7 +522,7 @@ TEST_F(GlslASTPrinterTest_Binary, ModScalarF16Vec3F16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "tint_float_modulo(a, b)");
@@ -626,7 +626,7 @@ TEST_F(GlslASTPrinterTest_Binary, Logical_And) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(tint_tmp)");
@@ -652,7 +652,7 @@ TEST_F(GlslASTPrinterTest_Binary, Logical_Multi) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(tint_tmp)");
@@ -680,7 +680,7 @@ TEST_F(GlslASTPrinterTest_Binary, Logical_Or) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(tint_tmp)");
@@ -709,7 +709,7 @@ TEST_F(GlslASTPrinterTest_Binary, If_WithLogical) {
            Block(Return(1_i)),
            Else(If(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"), Expr("c")),
                    Block(Return(2_i)), Else(Block(Return(3_i))))));
-    Func("func", utils::Empty, ty.i32(), utils::Vector{WrapInStatement(expr)});
+    Func("func", tint::Empty, ty.i32(), Vector{WrapInStatement(expr)});
 
     ASTPrinter& gen = Build();
 
@@ -746,7 +746,7 @@ TEST_F(GlslASTPrinterTest_Binary, Return_WithLogical) {
         ast::BinaryOp::kLogicalOr,
         create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
         Expr("c")));
-    Func("func", utils::Empty, ty.bool_(), utils::Vector{WrapInStatement(expr)});
+    Func("func", tint::Empty, ty.bool_(), Vector{WrapInStatement(expr)});
 
     ASTPrinter& gen = Build();
 
@@ -833,18 +833,18 @@ TEST_F(GlslASTPrinterTest_Binary, Call_WithLogical) {
     // foo(a && b, c || d, (a || c) && (b || d))
 
     Func("foo",
-         utils::Vector{
+         Vector{
              Param(Sym(), ty.bool_()),
              Param(Sym(), ty.bool_()),
              Param(Sym(), ty.bool_()),
          },
-         ty.void_(), utils::Empty, utils::Empty);
+         ty.void_(), tint::Empty, tint::Empty);
     GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate);
     GlobalVar("b", ty.bool_(), builtin::AddressSpace::kPrivate);
     GlobalVar("c", ty.bool_(), builtin::AddressSpace::kPrivate);
     GlobalVar("d", ty.bool_(), builtin::AddressSpace::kPrivate);
 
-    utils::Vector params{
+    Vector params{
         create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
         create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("c"), Expr("d")),
         create<ast::BinaryExpression>(

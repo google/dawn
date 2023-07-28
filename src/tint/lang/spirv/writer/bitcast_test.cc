@@ -30,7 +30,7 @@ struct BitcastCase {
     std::string spirv_type_name;
 };
 std::string PrintCase(testing::TestParamInfo<BitcastCase> cc) {
-    utils::StringStream ss;
+    StringStream ss;
     ss << cc.param.in << "_to_" << cc.param.out;
     return ss.str();
 }

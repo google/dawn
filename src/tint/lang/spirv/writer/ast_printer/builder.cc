@@ -255,7 +255,7 @@ Builder::~Builder() = default;
 bool Builder::Build() {
     if (!tint::writer::CheckSupportedExtensions(
             "SPIR-V", builder_.AST(), builder_.Diagnostics(),
-            utils::Vector{
+            Vector{
                 builtin::Extension::kChromiumDisableUniformityAnalysis,
                 builtin::Extension::kChromiumExperimentalDp4A,
                 builtin::Extension::kChromiumExperimentalFullPtrParameters,
@@ -600,7 +600,7 @@ bool Builder::GenerateFunction(const ast::Function* func_ast) {
 }
 
 uint32_t Builder::GenerateFunctionTypeIfNeeded(const sem::Function* func) {
-    return utils::GetOrCreate(func_sig_to_id_, func->Signature(), [&]() -> uint32_t {
+    return tint::GetOrCreate(func_sig_to_id_, func->Signature(), [&]() -> uint32_t {
         auto func_op = result_op();
         auto func_type_id = std::get<uint32_t>(func_op);
 
@@ -1385,7 +1385,7 @@ uint32_t Builder::GenerateValueConstructorOrConversion(const sem::Call* call,
                       ? scope_stack_[0]       // Global scope
                       : scope_stack_.back();  // Lexical scope
 
-    return utils::GetOrCreate(stack.type_init_to_id_, OperandListKey{ops}, [&]() -> uint32_t {
+    return tint::GetOrCreate(stack.type_init_to_id_, OperandListKey{ops}, [&]() -> uint32_t {
         auto result = result_op();
         ops[kOpsResultIdx] = result;
 
@@ -1627,13 +1627,13 @@ uint32_t Builder::GenerateConstantIfNeeded(const constant::Value* constant) {
         }
 
         auto& global_scope = scope_stack_[0];
-        return utils::GetOrCreate(
-            global_scope.type_init_to_id_, OperandListKey{ops}, [&]() -> uint32_t {
-                auto result = result_op();
-                ops[kOpsResultIdx] = result;
-                module_.PushType(spv::Op::OpConstantComposite, std::move(ops));
-                return std::get<uint32_t>(result);
-            });
+        return tint::GetOrCreate(global_scope.type_init_to_id_, OperandListKey{ops},
+                                 [&]() -> uint32_t {
+                                     auto result = result_op();
+                                     ops[kOpsResultIdx] = result;
+                                     module_.PushType(spv::Op::OpConstantComposite, std::move(ops));
+                                     return std::get<uint32_t>(result);
+                                 });
     };
 
     return Switch(
@@ -1756,7 +1756,7 @@ uint32_t Builder::GenerateConstantNullIfNeeded(const type::Type* type) {
         return 0;
     }
 
-    return utils::GetOrCreate(const_null_to_id_, type, [&] {
+    return tint::GetOrCreate(const_null_to_id_, type, [&] {
         auto result = result_op();
 
         module_.PushType(spv::Op::OpConstantNull, {Operand(type_id), result});
@@ -1772,7 +1772,7 @@ uint32_t Builder::GenerateConstantVectorSplatIfNeeded(const type::Vector* type, 
     }
 
     uint64_t key = (static_cast<uint64_t>(type->Width()) << 32) + value_id;
-    return utils::GetOrCreate(const_splat_to_id_, key, [&] {
+    return tint::GetOrCreate(const_splat_to_id_, key, [&] {
         auto result = result_op();
         auto result_id = std::get<uint32_t>(result);
 
@@ -3251,7 +3251,7 @@ uint32_t Builder::GenerateSampledImage(const type::Type* texture_type,
     }
 
     uint32_t sampled_image_type_id =
-        utils::GetOrCreate(texture_type_to_sampled_image_type_id_, texture_type, [&] {
+        tint::GetOrCreate(texture_type_to_sampled_image_type_id_, texture_type, [&] {
             // We need to create the sampled image type and cache the result.
             auto sampled_image_type = result_op();
             auto texture_type_id = GenerateTypeIfNeeded(texture_type);
@@ -3635,7 +3635,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const type::Type* type) {
                                               builtin::Access::kReadWrite);
     }
 
-    return utils::GetOrCreate(type_to_id_, type, [&]() -> uint32_t {
+    return tint::GetOrCreate(type_to_id_, type, [&]() -> uint32_t {
         auto result = result_op();
         auto id = std::get<uint32_t>(result);
         bool ok = Switch(
@@ -4104,7 +4104,7 @@ SpvImageFormat Builder::convert_texel_format_to_spv(const builtin::TexelFormat f
 
 bool Builder::push_function_inst(spv::Op op, const OperandList& operands) {
     if (!current_function_) {
-        utils::StringStream ss;
+        StringStream ss;
         ss << "Internal error: trying to add SPIR-V instruction " << int(op)
            << " outside a function";
         TINT_ICE(Writer, builder_.Diagnostics()) << ss.str();

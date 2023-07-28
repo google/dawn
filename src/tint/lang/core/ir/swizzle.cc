@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::Swizzle);
 
 namespace tint::ir {
 
-Swizzle::Swizzle(InstructionResult* result, Value* object, utils::VectorRef<uint32_t> indices)
+Swizzle::Swizzle(InstructionResult* result, Value* object, VectorRef<uint32_t> indices)
     : indices_(std::move(indices)) {
     TINT_ASSERT(IR, !indices.IsEmpty());
     TINT_ASSERT(IR, indices.Length() <= 4);

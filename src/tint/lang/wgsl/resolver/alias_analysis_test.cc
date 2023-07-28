@@ -43,7 +43,7 @@ struct TwoPointerConfig {
 class TwoPointers : public ResolverTestWithParam<TwoPointerConfig> {
   protected:
     void SetUp() override {
-        utils::Vector<const ast::Statement*, 4> body;
+        Vector<const ast::Statement*, 4> body;
         if (GetParam().address_space == builtin::AddressSpace::kFunction) {
             body.Push(Decl(Var("v1", ty.i32())));
             body.Push(Decl(Var("v2", ty.i32())));
@@ -53,13 +53,13 @@ class TwoPointers : public ResolverTestWithParam<TwoPointerConfig> {
         }
         body.Push(CallStmt(Call("target", AddressOf(Source{{12, 34}}, "v1"),
                                 AddressOf(Source{{56, 78}}, GetParam().aliased ? "v1" : "v2"))));
-        Func("caller", utils::Empty, ty.void_(), body);
+        Func("caller", tint::Empty, ty.void_(), body);
     }
 
-    void Run(utils::Vector<const ast::Statement*, 4>&& body, const char* err = nullptr) {
+    void Run(Vector<const ast::Statement*, 4>&& body, const char* err = nullptr) {
         auto addrspace = GetParam().address_space;
         Func("target",
-             utils::Vector{
+             Vector{
                  Param("p1", ty.ptr<i32>(addrspace)),
                  Param("p2", ty.ptr<i32>(addrspace)),
              },
@@ -129,22 +129,22 @@ TEST_P(TwoPointers, ReadWriteThroughChain) {
     //
     // f1(p1, p2);
     Func("f2",
-         utils::Vector{
+         Vector{
              Param("p1", ty.ptr<i32>(GetParam().address_space)),
              Param("p2", ty.ptr<i32>(GetParam().address_space)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Assign(Phony(), Deref("p1")),
              Assign(Deref("p2"), 42_a),
          });
     Func("f1",
-         utils::Vector{
+         Vector{
              Param("p1", ty.ptr<i32>(GetParam().address_space)),
              Param("p2", ty.ptr<i32>(GetParam().address_space)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              CallStmt(Call("f2", "p1", "p2")),
          });
     Run(
@@ -166,19 +166,19 @@ TEST_P(TwoPointers, ReadWriteAcrossDifferentFunctions) {
     // f1(p1);
     // f2(p2);
     Func("f1",
-         utils::Vector<const ast::Parameter*, 4>{
+         Vector<const ast::Parameter*, 4>{
              Param("p1", ty.ptr<i32>(GetParam().address_space)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Assign(Phony(), Deref("p1")),
          });
     Func("f2",
-         utils::Vector<const ast::Parameter*, 4>{
+         Vector<const ast::Parameter*, 4>{
              Param("p2", ty.ptr<i32>(GetParam().address_space)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Assign(Deref("p2"), 42_a),
          });
     Run(
@@ -198,7 +198,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
                                            TwoPointerConfig{builtin::AddressSpace::kPrivate, false},
                                            TwoPointerConfig{builtin::AddressSpace::kPrivate, true}),
                          [](const ::testing::TestParamInfo<TwoPointers::ParamType>& p) {
-                             utils::StringStream ss;
+                             StringStream ss;
                              ss << (p.param.aliased ? "Aliased" : "Unaliased") << "_"
                                 << p.param.address_space;
                              return ss.str();
@@ -219,16 +219,16 @@ class OnePointerOneModuleScope : public ResolverTestWithParam<bool> {
     void SetUp() override {
         GlobalVar("global_1", builtin::AddressSpace::kPrivate, ty.i32());
         GlobalVar("global_2", builtin::AddressSpace::kPrivate, ty.i32());
-        Func("caller", utils::Empty, ty.void_(),
-             utils::Vector{
+        Func("caller", tint::Empty, ty.void_(),
+             Vector{
                  CallStmt(Call("target",
                                AddressOf(Source{{12, 34}}, GetParam() ? "global_1" : "global_2"))),
              });
     }
 
-    void Run(utils::Vector<const ast::Statement*, 4>&& body, const char* err = nullptr) {
+    void Run(Vector<const ast::Statement*, 4>&& body, const char* err = nullptr) {
         Func("target",
-             utils::Vector<const ast::Parameter*, 4>{
+             Vector<const ast::Parameter*, 4>{
                  Param("p1", ty.ptr<i32>(builtin::AddressSpace::kPrivate)),
              },
              ty.void_(), std::move(body));
@@ -297,19 +297,19 @@ TEST_P(OnePointerOneModuleScope, ReadWriteThroughChain_GlobalViaArg) {
     //
     // f1(p1);
     Func("f2",
-         utils::Vector<const ast::Parameter*, 4>{
+         Vector<const ast::Parameter*, 4>{
              Param("p1", ty.ptr<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Assign(Deref("p1"), 42_a),
          });
     Func("f1",
-         utils::Vector<const ast::Parameter*, 4>{
+         Vector<const ast::Parameter*, 4>{
              Param("p1", ty.ptr<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Assign(Phony(), Deref("p1")),
              CallStmt(Call("f2", AddressOf(Source{{56, 78}}, "global_1"))),
          });
@@ -332,20 +332,20 @@ TEST_P(OnePointerOneModuleScope, ReadWriteThroughChain_Both) {
     //
     // f1(p1);
     Func("f2",
-         utils::Vector<const ast::Parameter*, 4>{
+         Vector<const ast::Parameter*, 4>{
              Param("p1", ty.ptr<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Assign(Phony(), Deref("p1")),
              Assign(Expr(Source{{56, 78}}, "global_1"), 42_a),
          });
     Func("f1",
-         utils::Vector<const ast::Parameter*, 4>{
+         Vector<const ast::Parameter*, 4>{
              Param("p1", ty.ptr<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              CallStmt(Call("f2", "p1")),
          });
     Run(
@@ -367,19 +367,19 @@ TEST_P(OnePointerOneModuleScope, WriteReadThroughChain_GlobalViaArg) {
     //
     // f1(p1);
     Func("f2",
-         utils::Vector<const ast::Parameter*, 4>{
+         Vector<const ast::Parameter*, 4>{
              Param("p1", ty.ptr<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Assign(Phony(), Deref("p1")),
          });
     Func("f1",
-         utils::Vector<const ast::Parameter*, 4>{
+         Vector<const ast::Parameter*, 4>{
              Param("p1", ty.ptr<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Assign(Deref("p1"), 42_a),
              CallStmt(Call("f2", AddressOf(Source{{56, 78}}, "global_1"))),
          });
@@ -402,20 +402,20 @@ TEST_P(OnePointerOneModuleScope, WriteReadThroughChain_Both) {
     //
     // f1(p1);
     Func("f2",
-         utils::Vector{
+         Vector{
              Param("p1", ty.ptr<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Assign(Deref("p1"), 42_a),
              Assign(Phony(), Expr(Source{{56, 78}}, "global_1")),
          });
     Func("f1",
-         utils::Vector{
+         Vector{
              Param("p1", ty.ptr<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              CallStmt(Call("f2", "p1")),
          });
     Run(
@@ -437,15 +437,15 @@ TEST_P(OnePointerOneModuleScope, ReadWriteAcrossDifferentFunctions) {
     // f1(p1);
     // f2();
     Func("f1",
-         utils::Vector{
+         Vector{
              Param("p1", ty.ptr<i32>(builtin::AddressSpace::kPrivate)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Assign(Phony(), Deref("p1")),
          });
-    Func("f2", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("f2", tint::Empty, ty.void_(),
+         Vector{
              Assign(Expr(Source{{56, 78}}, "global_1"), 42_a),
          });
     Run(
@@ -478,8 +478,8 @@ INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
 class Use : public ResolverTestWithParam<bool> {
   protected:
     void SetUp() override {
-        Func("caller", utils::Empty, ty.void_(),
-             utils::Vector{
+        Func("caller", tint::Empty, ty.void_(),
+             Vector{
                  Decl(Var("v1", ty.i32())),
                  Decl(Var("v2", ty.i32())),
                  CallStmt(Call("target", AddressOf(Source{{12, 34}}, "v1"),
@@ -489,12 +489,12 @@ class Use : public ResolverTestWithParam<bool> {
 
     void Run(const ast::Statement* stmt, const char* err = nullptr) {
         Func("target",
-             utils::Vector{
+             Vector{
                  Param("p1", ty.ptr<i32>(builtin::AddressSpace::kFunction)),
                  Param("p2", ty.ptr<i32>(builtin::AddressSpace::kFunction)),
              },
              ty.void_(),
-             utils::Vector{
+             Vector{
                  Assign(Deref("p1"), 42_a),
                  stmt,
              });
@@ -604,11 +604,11 @@ TEST_P(Use, Read_ReturnValue) {
     // fn foo(p : ptr<function, i32>) -> i32 { return *p; }
     // foo(p2);
     Func("foo",
-         utils::Vector{
+         Vector{
              Param("p", ty.ptr<i32>(builtin::AddressSpace::kFunction)),
          },
          ty.i32(),
-         utils::Vector{
+         Vector{
              Return(Deref("p")),
          });
     Run(Assign(Phony(), Call("foo", "p2")), R"(56:78 error: invalid aliased pointer argument
@@ -617,7 +617,7 @@ TEST_P(Use, Read_ReturnValue) {
 
 TEST_P(Use, Read_Switch) {
     // Switch (*p2) { default {} }
-    Run(Switch(Deref("p2"), utils::Vector{DefaultCase(Block())}),
+    Run(Switch(Deref("p2"), Vector{DefaultCase(Block())}),
         R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
@@ -650,8 +650,8 @@ INSTANTIATE_TEST_SUITE_P(ResolverAliasAnalysisTest,
 class UseBool : public ResolverTestWithParam<bool> {
   protected:
     void SetUp() override {
-        Func("caller", utils::Empty, ty.void_(),
-             utils::Vector{
+        Func("caller", tint::Empty, ty.void_(),
+             Vector{
                  Decl(Var("v1", ty.bool_())),
                  Decl(Var("v2", ty.bool_())),
                  CallStmt(Call("target", AddressOf(Source{{12, 34}}, "v1"),
@@ -661,12 +661,12 @@ class UseBool : public ResolverTestWithParam<bool> {
 
     void Run(const ast::Statement* stmt, const char* err = nullptr) {
         Func("target",
-             utils::Vector{
+             Vector{
                  Param("p1", ty.ptr<bool>(builtin::AddressSpace::kFunction)),
                  Param("p2", ty.ptr<bool>(builtin::AddressSpace::kFunction)),
              },
              ty.void_(),
-             utils::Vector{
+             Vector{
                  Assign(Deref("p1"), true),
                  stmt,
              });
@@ -724,19 +724,19 @@ TEST_F(ResolverAliasAnalysisTest, NoAccess_MemberAccessor) {
     //   var v : S;
     //   f2(&v, &v);
     // }
-    Structure("S", utils::Vector{Member("a", ty.i32())});
+    Structure("S", Vector{Member("a", ty.i32())});
     Func("f2",
-         utils::Vector{
+         Vector{
              Param("p1", ty.ptr<function>(ty("S"))),
              Param("p2", ty.ptr<function>(ty("S"))),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Decl(Let("newp", AddressOf(MemberAccessor(Deref("p2"), "a")))),
              Assign(MemberAccessor(Deref("p1"), "a"), 42_a),
          });
-    Func("f1", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("f1", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("v", ty("S"))),
              CallStmt(Call("f2", AddressOf("v"), AddressOf("v"))),
          });
@@ -753,19 +753,19 @@ TEST_F(ResolverAliasAnalysisTest, Read_MemberAccessor) {
     //   var v : S;
     //   f2(&v, &v);
     // }
-    Structure("S", utils::Vector{Member("a", ty.i32())});
+    Structure("S", Vector{Member("a", ty.i32())});
     Func("f2",
-         utils::Vector{
+         Vector{
              Param("p1", ty.ptr<function>(ty("S"))),
              Param("p2", ty.ptr<function>(ty("S"))),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Assign(Phony(), MemberAccessor(Deref("p2"), "a")),
              Assign(Deref("p1"), Call("S")),
          });
-    Func("f1", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("f1", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("v", ty("S"))),
              CallStmt(
                  Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
@@ -785,19 +785,19 @@ TEST_F(ResolverAliasAnalysisTest, Write_MemberAccessor) {
     //   var v : S;
     //   f2(&v, &v);
     // }
-    Structure("S", utils::Vector{Member("a", ty.i32())});
+    Structure("S", Vector{Member("a", ty.i32())});
     Func("f2",
-         utils::Vector{
+         Vector{
              Param("p1", ty.ptr<function>(ty("S"))),
              Param("p2", ty.ptr<function>(ty("S"))),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Assign(Phony(), Deref("p2")),
              Assign(MemberAccessor(Deref("p1"), "a"), 42_a),
          });
-    Func("f1", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("f1", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("v", ty("S"))),
              CallStmt(
                  Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
@@ -816,19 +816,19 @@ TEST_F(ResolverAliasAnalysisTest, Read_MultiComponentSwizzle) {
     //   var v : vec4<f32>;
     //   f2(&v, &v);
     // }
-    Structure("S", utils::Vector{Member("a", ty.i32())});
+    Structure("S", Vector{Member("a", ty.i32())});
     Func("f2",
-         utils::Vector{
+         Vector{
              Param("p1", ty.ptr<function, vec4<f32>>()),
              Param("p2", ty.ptr<function, vec4<f32>>()),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Assign(Phony(), MemberAccessor(Deref("p2"), "zy")),
              Assign(Deref("p1"), Call<vec4<f32>>()),
          });
-    Func("f1", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("f1", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("v", ty.vec4<f32>())),
              CallStmt(
                  Call("f2", AddressOf(Source{{12, 34}}, "v"), AddressOf(Source{{56, 76}}, "v"))),
@@ -850,17 +850,17 @@ TEST_F(ResolverAliasAnalysisTest, SinglePointerReadWrite) {
     //   f1(&v);
     // }
     Func("f1",
-         utils::Vector{
+         Vector{
              Param("p", ty.ptr<i32>(builtin::AddressSpace::kFunction)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Decl(Var("v", ty.i32())),
              Assign(Phony(), Deref("p")),
              Assign(Deref("p"), 42_a),
          });
-    Func("f2", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("f2", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("v", ty.i32())),
              CallStmt(Call("f1", AddressOf("v"))),
          });
@@ -877,8 +877,8 @@ TEST_F(ResolverAliasAnalysisTest, AliasingInsideFunction) {
     //   *p1 = 42;
     //   *p2 = 42;
     // }
-    Func("f1", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("f1", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("v", ty.i32())),
              Decl(Let("p1", AddressOf("v"))),
              Decl(Let("p2", AddressOf("v"))),
@@ -903,23 +903,23 @@ TEST_F(ResolverAliasAnalysisTest, NonOverlappingCalls) {
     //   f3(&v);
     // }
     Func("f2",
-         utils::Vector{
+         Vector{
              Param("p", ty.ptr<i32>(builtin::AddressSpace::kFunction)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Assign(Deref("p"), 42_a),
          });
     Func("f3",
-         utils::Vector{
+         Vector{
              Param("p", ty.ptr<i32>(builtin::AddressSpace::kFunction)),
          },
          ty.void_(),
-         utils::Vector{
+         Vector{
              Assign(Deref("p"), 42_a),
          });
-    Func("f1", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("f1", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("v", ty.i32())),
              CallStmt(Call("f2", AddressOf("v"))),
              CallStmt(Call("f3", AddressOf("v"))),

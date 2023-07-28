@@ -47,7 +47,7 @@ enum TestElementType {
     kF32,
     kF16,
 };
-inline utils::StringStream& operator<<(utils::StringStream& out, TestElementType type) {
+inline StringStream& operator<<(StringStream& out, TestElementType type) {
     switch (type) {
         case kBool:
             out << "bool";
@@ -208,28 +208,28 @@ class SpirvWriterTestHelperBase : public BASE {
             case kBool:
                 return b.Constant(mod.constant_values.Composite(
                     MakeVectorType(type),
-                    utils::Vector<const constant::Value*, 2>{mod.constant_values.Get(true),
-                                                             mod.constant_values.Get(false)}));
+                    Vector<const constant::Value*, 2>{mod.constant_values.Get(true),
+                                                      mod.constant_values.Get(false)}));
             case kI32:
                 return b.Constant(mod.constant_values.Composite(
                     MakeVectorType(type),
-                    utils::Vector<const constant::Value*, 2>{mod.constant_values.Get(i32(42)),
-                                                             mod.constant_values.Get(i32(-10))}));
+                    Vector<const constant::Value*, 2>{mod.constant_values.Get(i32(42)),
+                                                      mod.constant_values.Get(i32(-10))}));
             case kU32:
                 return b.Constant(mod.constant_values.Composite(
                     MakeVectorType(type),
-                    utils::Vector<const constant::Value*, 2>{mod.constant_values.Get(u32(42)),
-                                                             mod.constant_values.Get(u32(10))}));
+                    Vector<const constant::Value*, 2>{mod.constant_values.Get(u32(42)),
+                                                      mod.constant_values.Get(u32(10))}));
             case kF32:
                 return b.Constant(mod.constant_values.Composite(
                     MakeVectorType(type),
-                    utils::Vector<const constant::Value*, 2>{mod.constant_values.Get(f32(42)),
-                                                             mod.constant_values.Get(f32(-0.5))}));
+                    Vector<const constant::Value*, 2>{mod.constant_values.Get(f32(42)),
+                                                      mod.constant_values.Get(f32(-0.5))}));
             case kF16:
                 return b.Constant(mod.constant_values.Composite(
                     MakeVectorType(type),
-                    utils::Vector<const constant::Value*, 2>{mod.constant_values.Get(f16(42)),
-                                                             mod.constant_values.Get(f16(-0.5))}));
+                    Vector<const constant::Value*, 2>{mod.constant_values.Get(f16(42)),
+                                                      mod.constant_values.Get(f16(-0.5))}));
         }
         return nullptr;
     }

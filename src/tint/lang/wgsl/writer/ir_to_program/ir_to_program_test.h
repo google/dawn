@@ -39,19 +39,19 @@ class IRToProgramTest : public ir::IRTestHelper {
     Result Run();
 };
 
-#define EXPECT_WGSL(expected_wgsl)                                        \
-    do {                                                                  \
-        if (auto got = Run(); got.err.empty()) {                          \
-            auto expected = std::string(utils::TrimSpace(expected_wgsl)); \
-            if (!expected.empty()) {                                      \
-                expected = "\n" + expected + "\n";                        \
-            }                                                             \
-            EXPECT_EQ(expected, got.wgsl) << "IR: " << got.ir;            \
-        } else {                                                          \
-            FAIL() << got.err << std::endl                                \
-                   << "IR: " << got.ir << std::endl                       \
-                   << "AST: " << got.ast << std::endl;                    \
-        }                                                                 \
+#define EXPECT_WGSL(expected_wgsl)                                       \
+    do {                                                                 \
+        if (auto got = Run(); got.err.empty()) {                         \
+            auto expected = std::string(tint::TrimSpace(expected_wgsl)); \
+            if (!expected.empty()) {                                     \
+                expected = "\n" + expected + "\n";                       \
+            }                                                            \
+            EXPECT_EQ(expected, got.wgsl) << "IR: " << got.ir;           \
+        } else {                                                         \
+            FAIL() << got.err << std::endl                               \
+                   << "IR: " << got.ir << std::endl                      \
+                   << "AST: " << got.ast << std::endl;                   \
+        }                                                                \
     } while (false)
 
 }  // namespace tint::wgsl::writer

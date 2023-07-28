@@ -23,7 +23,7 @@
 namespace tint::ast {
 
 /// An if statement
-class IfStatement final : public utils::Castable<IfStatement, Statement> {
+class IfStatement final : public Castable<IfStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
@@ -39,7 +39,7 @@ class IfStatement final : public utils::Castable<IfStatement, Statement> {
                 const Expression* condition,
                 const BlockStatement* body,
                 const Statement* else_stmt,
-                utils::VectorRef<const Attribute*> attributes);
+                VectorRef<const Attribute*> attributes);
 
     /// Destructor
     ~IfStatement() override;
@@ -60,7 +60,7 @@ class IfStatement final : public utils::Castable<IfStatement, Statement> {
     const Statement* const else_statement;
 
     /// The attribute list
-    const utils::Vector<const Attribute*, 1> attributes;
+    const tint::Vector<const Attribute*, 1> attributes;
 };
 
 }  // namespace tint::ast

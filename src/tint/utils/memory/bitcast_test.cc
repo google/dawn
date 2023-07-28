@@ -18,7 +18,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 TEST(Bitcast, Integer) {
@@ -34,4 +34,4 @@ TEST(Bitcast, Pointer) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

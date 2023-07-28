@@ -117,7 +117,7 @@ TEST_P(WgslGenerator_F32LiteralTest, Emit) {
     SetResolveOnBuild(false);
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitLiteral(out, v);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), GetParam().expected);
@@ -166,7 +166,7 @@ TEST_P(WgslGenerator_F16LiteralTest, Emit) {
     SetResolveOnBuild(false);
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitLiteral(out, v);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), GetParam().expected);

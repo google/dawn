@@ -29,7 +29,7 @@ TEST_F(WgslUnaryOpTest, AddressOf) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, op);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "&(expr)");
@@ -42,7 +42,7 @@ TEST_F(WgslUnaryOpTest, Complement) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, op);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "~(expr)");
@@ -56,7 +56,7 @@ TEST_F(WgslUnaryOpTest, Indirection) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, op);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "*(expr)");
@@ -69,7 +69,7 @@ TEST_F(WgslUnaryOpTest, Not) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, op);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "!(expr)");
@@ -82,7 +82,7 @@ TEST_F(WgslUnaryOpTest, Negation) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, op);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "-(expr)");

@@ -43,7 +43,7 @@ enum class BinaryOp {
 };
 
 /// An binary expression
-class BinaryExpression final : public utils::Castable<BinaryExpression, Expression> {
+class BinaryExpression final : public Castable<BinaryExpression, Expression> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
@@ -300,7 +300,7 @@ constexpr const char* Operator(BinaryOp op) {
 /// @param out the stream to write to
 /// @param op the BinaryOp
 /// @return the stream so calls can be chained
-inline utils::StringStream& operator<<(utils::StringStream& out, BinaryOp op) {
+inline StringStream& operator<<(StringStream& out, BinaryOp op) {
     out << FriendlyName(op);
     return out;
 }

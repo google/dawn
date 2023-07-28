@@ -45,7 +45,7 @@ namespace tint::sem {
 
 /// Variable is the base class for local variables, global variables and
 /// parameters.
-class Variable : public utils::Castable<Variable, Node> {
+class Variable : public Castable<Variable, Node> {
   public:
     /// Constructor
     /// @param declaration the AST declaration node
@@ -91,7 +91,7 @@ class Variable : public utils::Castable<Variable, Node> {
     void SetInitializer(const ValueExpression* initializer) { initializer_ = initializer; }
 
     /// @returns the expressions that use the variable
-    utils::VectorRef<const VariableUser*> Users() const { return users_; }
+    VectorRef<const VariableUser*> Users() const { return users_; }
 
     /// @param user the user to add
     void AddUser(const VariableUser* user) { users_.Push(user); }
@@ -104,11 +104,11 @@ class Variable : public utils::Castable<Variable, Node> {
     const builtin::Access access_;
     const constant::Value* constant_value_;
     const ValueExpression* initializer_ = nullptr;
-    utils::Vector<const VariableUser*, 8> users_;
+    tint::Vector<const VariableUser*, 8> users_;
 };
 
 /// LocalVariable is a function-scope variable
-class LocalVariable final : public utils::Castable<LocalVariable, Variable> {
+class LocalVariable final : public Castable<LocalVariable, Variable> {
   public:
     /// Constructor
     /// @param declaration the AST declaration node
@@ -133,19 +133,19 @@ class LocalVariable final : public utils::Castable<LocalVariable, Variable> {
     const sem::Statement* Statement() const { return statement_; }
 
     /// @returns the Type, Function or Variable that this local variable shadows
-    const utils::CastableBase* Shadows() const { return shadows_; }
+    const CastableBase* Shadows() const { return shadows_; }
 
     /// Sets the Type, Function or Variable that this local variable shadows
     /// @param shadows the Type, Function or Variable that this variable shadows
-    void SetShadows(const utils::CastableBase* shadows) { shadows_ = shadows; }
+    void SetShadows(const CastableBase* shadows) { shadows_ = shadows; }
 
   private:
     const sem::Statement* const statement_;
-    const utils::CastableBase* shadows_ = nullptr;
+    const CastableBase* shadows_ = nullptr;
 };
 
 /// GlobalVariable is a module-scope variable
-class GlobalVariable final : public utils::Castable<GlobalVariable, Variable> {
+class GlobalVariable final : public Castable<GlobalVariable, Variable> {
   public:
     /// Constructor
     /// @param declaration the AST declaration node
@@ -197,7 +197,7 @@ class GlobalVariable final : public utils::Castable<GlobalVariable, Variable> {
 };
 
 /// Parameter is a function parameter
-class Parameter final : public utils::Castable<Parameter, Variable> {
+class Parameter final : public Castable<Parameter, Variable> {
   public:
     /// Constructor for function parameters
     /// @param declaration the AST declaration node
@@ -238,11 +238,11 @@ class Parameter final : public utils::Castable<Parameter, Variable> {
     void SetOwner(CallTarget const* owner) { owner_ = owner; }
 
     /// @returns the Type, Function or Variable that this local variable shadows
-    const utils::CastableBase* Shadows() const { return shadows_; }
+    const CastableBase* Shadows() const { return shadows_; }
 
     /// Sets the Type, Function or Variable that this local variable shadows
     /// @param shadows the Type, Function or Variable that this variable shadows
-    void SetShadows(const utils::CastableBase* shadows) { shadows_ = shadows; }
+    void SetShadows(const CastableBase* shadows) { shadows_ = shadows; }
 
     /// @returns the resource binding point for the parameter
     std::optional<tint::BindingPoint> BindingPoint() const { return binding_point_; }
@@ -254,14 +254,14 @@ class Parameter final : public utils::Castable<Parameter, Variable> {
     const uint32_t index_;
     const ParameterUsage usage_;
     CallTarget const* owner_ = nullptr;
-    const utils::CastableBase* shadows_ = nullptr;
+    const CastableBase* shadows_ = nullptr;
     const std::optional<tint::BindingPoint> binding_point_;
     const std::optional<uint32_t> location_;
 };
 
 /// VariableUser holds the semantic information for an identifier expression
 /// node that resolves to a variable.
-class VariableUser final : public utils::Castable<VariableUser, ValueExpression> {
+class VariableUser final : public Castable<VariableUser, ValueExpression> {
   public:
     /// Constructor
     /// @param declaration the AST identifier node
@@ -297,7 +297,7 @@ class hash<tint::sem::VariablePair> {
     /// @param i the variable pair to create a hash for
     /// @return the hash value
     inline std::size_t operator()(const tint::sem::VariablePair& i) const {
-        return tint::utils::Hash(i.first, i.second);
+        return Hash(i.first, i.second);
     }
 };
 

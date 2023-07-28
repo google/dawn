@@ -34,8 +34,8 @@ void HandleMatrixArithmetic::Run(ir::Module* ir) const {
     ir::Builder b(*ir);
 
     // Find the instructions that need to be modified.
-    utils::Vector<Binary*, 4> binary_worklist;
-    utils::Vector<Convert*, 4> convert_worklist;
+    Vector<Binary*, 4> binary_worklist;
+    Vector<Convert*, 4> convert_worklist;
     for (auto* inst : ir->instructions.Objects()) {
         if (!inst->Alive()) {
             continue;
@@ -74,7 +74,7 @@ void HandleMatrixArithmetic::Run(ir::Module* ir) const {
         // Helper to replace the instruction with a column-wise operation.
         auto column_wise = [&](enum Binary::Kind op) {
             auto* mat = ty->As<type::Matrix>();
-            utils::Vector<Value*, 4> args;
+            Vector<Value*, 4> args;
             for (uint32_t col = 0; col < mat->columns(); col++) {
                 b.InsertBefore(binary, [&] {
                     auto* lhs_col = b.Access(mat->ColumnType(), lhs, u32(col));
@@ -125,7 +125,7 @@ void HandleMatrixArithmetic::Run(ir::Module* ir) const {
         auto* out_mat = convert->Result()->Type()->As<type::Matrix>();
 
         // Extract and convert each column separately.
-        utils::Vector<Value*, 4> args;
+        Vector<Value*, 4> args;
         for (uint32_t c = 0; c < out_mat->columns(); c++) {
             b.InsertBefore(convert, [&] {
                 auto* col = b.Access(in_mat->ColumnType(), arg, u32(c));

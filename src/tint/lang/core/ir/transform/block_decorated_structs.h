@@ -24,7 +24,7 @@ namespace tint::ir::transform {
 /// BlockDecoratedStructs is a transform that changes the store type of a buffer to be a special
 /// structure that is recognized as needing a block decoration in SPIR-V, potentially wrapping the
 /// existing store type in a new structure if necessary.
-class BlockDecoratedStructs final : public utils::Castable<BlockDecoratedStructs, Transform> {
+class BlockDecoratedStructs final : public Castable<BlockDecoratedStructs, Transform> {
   public:
     /// Constructor
     BlockDecoratedStructs();

@@ -26,8 +26,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::SampledTexture);
 namespace tint::type {
 
 SampledTexture::SampledTexture(TextureDimension dim, const Type* type)
-    : Base(utils::Hash(utils::TypeInfo::Of<SampledTexture>().full_hashcode, dim, type), dim),
-      type_(type) {
+    : Base(Hash(tint::TypeInfo::Of<SampledTexture>().full_hashcode, dim, type), dim), type_(type) {
     TINT_ASSERT(Type, type_);
 }
 
@@ -41,7 +40,7 @@ bool SampledTexture::Equals(const UniqueNode& other) const {
 }
 
 std::string SampledTexture::FriendlyName() const {
-    utils::StringStream out;
+    StringStream out;
     out << "texture_" << dim() << "<" << type_->FriendlyName() << ">";
     return out.str();
 }

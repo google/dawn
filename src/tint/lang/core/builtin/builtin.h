@@ -131,7 +131,7 @@ enum class Builtin {
 /// @param out the stream to write to
 /// @param value the Builtin
 /// @returns `out` so calls can be chained
-utils::StringStream& operator<<(utils::StringStream& out, Builtin value);
+StringStream& operator<<(StringStream& out, Builtin value);
 
 /// ParseBuiltin parses a Builtin from a string.
 /// @param str the string to parse

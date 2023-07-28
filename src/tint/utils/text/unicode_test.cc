@@ -22,7 +22,7 @@
 /// Helper for constructing a CodePoint
 #define C(x) CodePoint(x)
 
-namespace tint::utils {
+namespace tint {
 
 ////////////////////////////////////////////////////////////////////////////////
 // CodePoint character set tests
@@ -487,4 +487,4 @@ INSTANTIATE_TEST_SUITE_P(Invalid,
 
 }  // namespace
 
-}  // namespace tint::utils
+}  // namespace tint

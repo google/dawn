@@ -21,7 +21,7 @@
 namespace tint::ir {
 
 /// A builtin call instruction in the IR.
-class BuiltinCall : public utils::Castable<BuiltinCall, Call> {
+class BuiltinCall : public Castable<BuiltinCall, Call> {
   public:
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
@@ -29,7 +29,7 @@ class BuiltinCall : public utils::Castable<BuiltinCall, Call> {
     /// Constructor
     /// @param result the result value
     /// @param args the conversion arguments
-    explicit BuiltinCall(InstructionResult* result, utils::VectorRef<Value*> args = utils::Empty);
+    explicit BuiltinCall(InstructionResult* result, VectorRef<Value*> args = tint::Empty);
     ~BuiltinCall() override;
 };
 

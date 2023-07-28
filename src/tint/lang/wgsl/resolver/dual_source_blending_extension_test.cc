@@ -26,10 +26,10 @@ using DualSourceBlendingExtensionTest = ResolverTest;
 
 // Using the @index attribute without chromium_internal_dual_source_blending enabled should fail.
 TEST_F(DualSourceBlendingExtensionTest, UseIndexAttribWithoutExtensionError) {
-    Structure("Output", utils::Vector{
-                            Member("a", ty.vec4<f32>(),
-                                   utils::Vector{Location(0_a), Index(Source{{12, 34}}, 0_a)}),
-                        });
+    Structure("Output",
+              Vector{
+                  Member("a", ty.vec4<f32>(), Vector{Location(0_a), Index(Source{{12, 34}}, 0_a)}),
+              });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -46,9 +46,9 @@ class DualSourceBlendingExtensionTests : public ResolverTest {
 
 // Using an F32 as an index value should fail.
 TEST_F(DualSourceBlendingExtensionTests, IndexF32Error) {
-    Structure("Output", utils::Vector{
+    Structure("Output", Vector{
                             Member(Source{{12, 34}}, "a", ty.vec4<f32>(),
-                                   utils::Vector{Location(0_a), Index(Source{{12, 34}}, 0_f)}),
+                                   Vector{Location(0_a), Index(Source{{12, 34}}, 0_f)}),
                         });
 
     EXPECT_FALSE(r()->Resolve());
@@ -57,9 +57,9 @@ TEST_F(DualSourceBlendingExtensionTests, IndexF32Error) {
 
 // Using a floating point number as an index value should fail.
 TEST_F(DualSourceBlendingExtensionTests, IndexFloatValueError) {
-    Structure("Output", utils::Vector{
+    Structure("Output", Vector{
                             Member(Source{{12, 34}}, "a", ty.vec4<f32>(),
-                                   utils::Vector{Location(0_a), Index(Source{{12, 34}}, 1.0_a)}),
+                                   Vector{Location(0_a), Index(Source{{12, 34}}, 1.0_a)}),
                         });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: @location must be an i32 or u32 value");
@@ -67,9 +67,9 @@ TEST_F(DualSourceBlendingExtensionTests, IndexFloatValueError) {
 
 // Using a number less than zero as an index value should fail.
 TEST_F(DualSourceBlendingExtensionTests, IndexNegativeValue) {
-    Structure("Output", utils::Vector{
+    Structure("Output", Vector{
                             Member(Source{{12, 34}}, "a", ty.vec4<f32>(),
-                                   utils::Vector{Location(0_a), Index(Source{{12, 34}}, -1_a)}),
+                                   Vector{Location(0_a), Index(Source{{12, 34}}, -1_a)}),
                         });
 
     EXPECT_FALSE(r()->Resolve());
@@ -78,9 +78,9 @@ TEST_F(DualSourceBlendingExtensionTests, IndexNegativeValue) {
 
 // Using a number greater than one as an index value should fail.
 TEST_F(DualSourceBlendingExtensionTests, IndexValueAboveOne) {
-    Structure("Output", utils::Vector{
+    Structure("Output", Vector{
                             Member(Source{{12, 34}}, "a", ty.vec4<f32>(),
-                                   utils::Vector{Location(0_a), Index(Source{{12, 34}}, 2_a)}),
+                                   Vector{Location(0_a), Index(Source{{12, 34}}, 2_a)}),
                         });
 
     EXPECT_FALSE(r()->Resolve());
@@ -89,10 +89,10 @@ TEST_F(DualSourceBlendingExtensionTests, IndexValueAboveOne) {
 
 // Using an index value at the same location multiple times should fail.
 TEST_F(DualSourceBlendingExtensionTests, DuplicateIndexes) {
-    Structure("Output", utils::Vector{
-                            Member("a", ty.vec4<f32>(), utils::Vector{Location(0_a), Index(0_a)}),
+    Structure("Output", Vector{
+                            Member("a", ty.vec4<f32>(), Vector{Location(0_a), Index(0_a)}),
                             Member(Source{{12, 34}}, "b", ty.vec4<f32>(),
-                                   utils::Vector{Location(0_a), Index(Source{{12, 34}}, 0_a)}),
+                                   Vector{Location(0_a), Index(Source{{12, 34}}, 0_a)}),
                         });
 
     EXPECT_FALSE(r()->Resolve());
@@ -101,9 +101,9 @@ TEST_F(DualSourceBlendingExtensionTests, DuplicateIndexes) {
 
 // Using the index attribute without a location attribute should fail.
 TEST_F(DualSourceBlendingExtensionTests, IndexWithMissingLocationAttribute) {
-    Structure("Output", utils::Vector{
+    Structure("Output", Vector{
                             Member(Source{{12, 34}}, "a", ty.vec4<f32>(),
-                                   utils::Vector{Index(Source{{12, 34}}, 1_a)}),
+                                   Vector{Index(Source{{12, 34}}, 1_a)}),
                         });
 
     EXPECT_FALSE(r()->Resolve());
@@ -112,10 +112,10 @@ TEST_F(DualSourceBlendingExtensionTests, IndexWithMissingLocationAttribute) {
 
 // Using an index attribute on a struct member should pass.
 TEST_F(DualSourceBlendingExtensionTests, StructMemberIndexAttribute) {
-    Structure("Output", utils::Vector{
-                            Member("a", ty.vec4<f32>(),
-                                   utils::Vector{Location(0_a), Index(Source{{12, 34}}, 0_a)}),
-                        });
+    Structure("Output",
+              Vector{
+                  Member("a", ty.vec4<f32>(), Vector{Location(0_a), Index(Source{{12, 34}}, 0_a)}),
+              });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -124,20 +124,20 @@ TEST_F(DualSourceBlendingExtensionTests, StructMemberIndexAttribute) {
 // @index with the canonicalize_entry_point transform. This test uses an internal attribute to
 // ignore address space, which is how it is used with the canonicalize_entry_point transform.
 TEST_F(DualSourceBlendingExtensionTests, GlobalVariableIndexAttribute) {
-    GlobalVar("var", ty.vec4<f32>(),
-              utils::Vector{Location(0_a), Index(0_a),
-                            Disable(ast::DisabledValidation::kIgnoreAddressSpace)},
-              builtin::AddressSpace::kOut);
+    GlobalVar(
+        "var", ty.vec4<f32>(),
+        Vector{Location(0_a), Index(0_a), Disable(ast::DisabledValidation::kIgnoreAddressSpace)},
+        builtin::AddressSpace::kOut);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 // Using the index attribute with a non-zero location should fail.
 TEST_F(DualSourceBlendingExtensionTests, IndexWithNonZeroLocation) {
-    Structure("Output", utils::Vector{
-                            Member("a", ty.vec4<f32>(),
-                                   utils::Vector{Location(1_a), Index(Source{{12, 34}}, 0_a)}),
-                        });
+    Structure("Output",
+              Vector{
+                  Member("a", ty.vec4<f32>(), Vector{Location(1_a), Index(Source{{12, 34}}, 0_a)}),
+              });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: index attribute must only be used with @location(0)");

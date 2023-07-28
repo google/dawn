@@ -61,7 +61,7 @@ const ast::CallExpression* GenerateCall(builtin::Function builtin,
                                         CallParamType type,
                                         ProgramBuilder* builder) {
     std::string name;
-    utils::StringStream str;
+    StringStream str;
     str << name << builtin;
     switch (builtin) {
         case builtin::Function::kAcos:
@@ -234,8 +234,8 @@ TEST_P(MslBuiltinTest, Emit) {
 
     auto* call = GenerateCall(param.builtin, param.type, this);
     ASSERT_NE(nullptr, call) << "Unhandled builtin";
-    Func("func", utils::Empty, ty.void_(), utils::Vector{Ignore(call)},
-         utils::Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
+    Func("func", tint::Empty, ty.void_(), Vector{Ignore(call)},
+         Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
     ASTPrinter& gen = Build();
 
@@ -384,7 +384,7 @@ TEST_F(MslASTPrinterTest, Builtin_Call) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "dot(param1, param2)");
 }
@@ -395,7 +395,7 @@ TEST_F(MslASTPrinterTest, StorageBarrier) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "threadgroup_barrier(mem_flags::mem_device)");
 }
@@ -406,7 +406,7 @@ TEST_F(MslASTPrinterTest, WorkgroupBarrier) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "threadgroup_barrier(mem_flags::mem_threadgroup)");
 }
@@ -1058,7 +1058,7 @@ TEST_F(MslASTPrinterTest, Pack2x16Float) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "as_type<uint>(half2(p1))");
 }
@@ -1070,7 +1070,7 @@ TEST_F(MslASTPrinterTest, Unpack2x16Float) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float2(as_type<half2>(p1))");
 }
@@ -1104,11 +1104,11 @@ kernel void test_function() {
 }
 
 TEST_F(MslASTPrinterTest, Ignore) {
-    Func("f", utils::Vector{Param("a", ty.i32()), Param("b", ty.i32()), Param("c", ty.i32())},
-         ty.i32(), utils::Vector{Return(Mul(Add("a", "b"), "c"))});
+    Func("f", Vector{Param("a", ty.i32()), Param("b", ty.i32()), Param("c", ty.i32())}, ty.i32(),
+         Vector{Return(Mul(Add("a", "b"), "c"))});
 
-    Func("func", utils::Empty, ty.void_(), utils::Vector{CallStmt(Call("f", 1_i, 2_i, 3_i))},
-         utils::Vector{
+    Func("func", tint::Empty, ty.void_(), Vector{CallStmt(Call("f", 1_i, 2_i, 3_i))},
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });

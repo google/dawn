@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::BuiltinCall);
 
 namespace tint::ir {
 
-BuiltinCall::BuiltinCall(InstructionResult* result, utils::VectorRef<Value*> arguments) {
+BuiltinCall::BuiltinCall(InstructionResult* result, VectorRef<Value*> arguments) {
     AddOperands(BuiltinCall::kArgsOperandOffset, std::move(arguments));
     AddResult(result);
 }

@@ -28,8 +28,8 @@ using namespace tint::number_suffixes;        // NOLINT
 using SpirvASTPrinterTest = TestHelper;
 
 TEST_F(SpirvASTPrinterTest, Attribute_Stage) {
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
-                      utils::Vector{
+    auto* func = Func("main", tint::Empty, ty.void_(), tint::Empty,
+                      Vector{
                           Stage(ast::PipelineStage::kFragment),
                       });
 
@@ -46,7 +46,7 @@ struct FunctionStageData {
     SpvExecutionModel model;
 };
 inline std::ostream& operator<<(std::ostream& out, FunctionStageData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.stage;
     out << str.str();
     return out;
@@ -57,20 +57,20 @@ TEST_P(Attribute_StageTest, Emit) {
 
     const ast::Variable* var = nullptr;
     ast::Type ret_type;
-    utils::Vector<const ast::Attribute*, 2> ret_type_attrs;
-    utils::Vector<const ast::Statement*, 2> body;
+    Vector<const ast::Attribute*, 2> ret_type_attrs;
+    Vector<const ast::Statement*, 2> body;
     if (params.stage == ast::PipelineStage::kVertex) {
         ret_type = ty.vec4<f32>();
         ret_type_attrs.Push(Builtin(builtin::BuiltinValue::kPosition));
         body.Push(Return(Call<vec4<f32>>()));
     }
 
-    utils::Vector<const ast::Attribute*, 2> deco_list{Stage(params.stage)};
+    Vector<const ast::Attribute*, 2> deco_list{Stage(params.stage)};
     if (params.stage == ast::PipelineStage::kCompute) {
         deco_list.Push(WorkgroupSize(1_i));
     }
 
-    auto* func = Func("main", utils::Empty, ret_type, body, deco_list, ret_type_attrs);
+    auto* func = Func("main", tint::Empty, ret_type, body, deco_list, ret_type_attrs);
 
     Builder& b = Build();
 
@@ -94,8 +94,8 @@ INSTANTIATE_TEST_SUITE_P(
                     FunctionStageData{ast::PipelineStage::kCompute, SpvExecutionModelGLCompute}));
 
 TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_Fragment_OriginUpperLeft) {
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
-                      utils::Vector{
+    auto* func = Func("main", tint::Empty, ty.void_(), tint::Empty,
+                      Vector{
                           Stage(ast::PipelineStage::kFragment),
                       });
 
@@ -108,8 +108,8 @@ TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_Fragment_OriginUpperLeft) {
 }
 
 TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_WorkgroupSize_Default) {
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
-                      utils::Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+    auto* func = Func("main", tint::Empty, ty.void_(), tint::Empty,
+                      Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     Builder& b = Build();
 
@@ -120,8 +120,8 @@ TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_WorkgroupSize_Default) {
 }
 
 TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_WorkgroupSize_Literals) {
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
-                      utils::Vector{
+    auto* func = Func("main", tint::Empty, ty.void_(), tint::Empty,
+                      Vector{
                           WorkgroupSize(2_i, 4_i, 6_i),
                           Stage(ast::PipelineStage::kCompute),
                       });
@@ -138,8 +138,8 @@ TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_WorkgroupSize_Const) {
     GlobalConst("width", ty.i32(), Call<i32>(2_i));
     GlobalConst("height", ty.i32(), Call<i32>(3_i));
     GlobalConst("depth", ty.i32(), Call<i32>(4_i));
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
-                      utils::Vector{
+    auto* func = Func("main", tint::Empty, ty.void_(), tint::Empty,
+                      Vector{
                           WorkgroupSize("width", "height", "depth"),
                           Stage(ast::PipelineStage::kCompute),
                       });
@@ -159,8 +159,8 @@ TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_WorkgroupSize_OverridableCo
             pb.Override("width", pb.ty.i32(), pb.Call<i32>(2_i), pb.Id(7_u));
             pb.Override("height", pb.ty.i32(), pb.Call<i32>(3_i), pb.Id(8_u));
             pb.Override("depth", pb.ty.i32(), pb.Call<i32>(4_i), pb.Id(9_u));
-            auto* func = pb.Func("main", utils::Empty, pb.ty.void_(), utils::Empty,
-                                 utils::Vector{
+            auto* func = pb.Func("main", tint::Empty, pb.ty.void_(), tint::Empty,
+                                 Vector{
                                      pb.WorkgroupSize("width", "height", "depth"),
                                      pb.Stage(ast::PipelineStage::kCompute),
                                  });
@@ -179,8 +179,8 @@ TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndCon
 
             pb.Override("height", pb.ty.i32(), pb.Call<i32>(2_i), pb.Id(7_u));
             pb.GlobalConst("depth", pb.ty.i32(), pb.Call<i32>(3_i));
-            auto* func = pb.Func("main", utils::Empty, pb.ty.void_(), utils::Empty,
-                                 utils::Vector{
+            auto* func = pb.Func("main", tint::Empty, pb.ty.void_(), tint::Empty,
+                                 Vector{
                                      pb.WorkgroupSize(4_i, "height", "depth"),
                                      pb.Stage(ast::PipelineStage::kCompute),
                                  });
@@ -194,13 +194,13 @@ TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndCon
 }
 
 TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_MultipleFragment) {
-    auto* func1 = Func("main1", utils::Empty, ty.void_(), utils::Empty,
-                       utils::Vector{
+    auto* func1 = Func("main1", tint::Empty, ty.void_(), tint::Empty,
+                       Vector{
                            Stage(ast::PipelineStage::kFragment),
                        });
 
-    auto* func2 = Func("main2", utils::Empty, ty.void_(), utils::Empty,
-                       utils::Vector{
+    auto* func2 = Func("main2", tint::Empty, ty.void_(), tint::Empty,
+                       Vector{
                            Stage(ast::PipelineStage::kFragment),
                        });
 
@@ -229,14 +229,14 @@ OpFunctionEnd
 }
 
 TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_FragDepth) {
-    Func("main", utils::Empty, ty.f32(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.f32(),
+         Vector{
              Return(Expr(1_f)),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         utils::Vector{
+         Vector{
              Builtin(builtin::BuiltinValue::kFragDepth),
          });
 

@@ -77,13 +77,13 @@ struct RenameConflicts::State {
   private:
     /// Map of identifier to declaration.
     /// The declarations may be one of an ir::Value or type::Struct.
-    using Scope = utils::Hashmap<std::string_view, CastableBase*, 8>;
+    using Scope = Hashmap<std::string_view, CastableBase*, 8>;
 
     /// The IR module.
     ir::Module* ir = nullptr;
 
     /// Stack of scopes
-    utils::Vector<Scope, 8> scopes{};
+    Vector<Scope, 8> scopes{};
 
     /// Registers all the WGSL module-scope declarations in the root-scope.
     /// Duplicate declarations with the same name will renamed.
@@ -178,7 +178,7 @@ struct RenameConflicts::State {
             },
             [&](ir::CoreBuiltinCall* call) {
                 // Ensure builtin of a builtin call is resolvable
-                auto name = utils::ToString(call->Func());
+                auto name = tint::ToString(call->Func());
                 EnsureResolvesTo(name, nullptr);
             });
 
@@ -200,18 +200,18 @@ struct RenameConflicts::State {
                     return nullptr;
                 },
                 [&](const type::Vector* v) {
-                    EnsureResolvesTo("vec" + utils::ToString(v->Width()), nullptr);
+                    EnsureResolvesTo("vec" + tint::ToString(v->Width()), nullptr);
                     return v->type();
                 },
                 [&](const type::Matrix* m) {
                     EnsureResolvesTo(
-                        "mat" + utils::ToString(m->columns()) + "x" + utils::ToString(m->rows()),
+                        "mat" + tint::ToString(m->columns()) + "x" + tint::ToString(m->rows()),
                         nullptr);
                     return m->type();
                 },
                 [&](const type::Pointer* p) {
-                    EnsureResolvesTo(utils::ToString(p->Access()), nullptr);
-                    EnsureResolvesTo(utils::ToString(p->AddressSpace()), nullptr);
+                    EnsureResolvesTo(tint::ToString(p->Access()), nullptr);
+                    EnsureResolvesTo(tint::ToString(p->AddressSpace()), nullptr);
                     return p->StoreType();
                 },
                 [&](const type::Struct* s) {
@@ -228,7 +228,7 @@ struct RenameConflicts::State {
 
     /// Ensures that the identifier @p identifier resolves to the declaration @p thing
     void EnsureResolvesTo(std::string_view identifier, const CastableBase* thing) {
-        for (auto& scope : utils::Reverse(scopes)) {
+        for (auto& scope : tint::Reverse(scopes)) {
             if (auto decl = scope.Get(identifier)) {
                 if (decl.value() == thing) {
                     return;  // Resolved to the right thing.
@@ -270,7 +270,7 @@ struct RenameConflicts::State {
     /// @return true if @p s is a builtin (non-user declared) structure.
     bool IsBuiltinStruct(const type::Struct* s) {
         // TODO(bclayton): Need to do better than this.
-        return utils::HasPrefix(s->Name().NameView(), "_");
+        return tint::HasPrefix(s->Name().NameView(), "_");
     }
 };
 

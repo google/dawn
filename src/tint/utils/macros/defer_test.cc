@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 TEST(DeferTest, Basic) {
@@ -39,4 +39,4 @@ TEST(DeferTest, DeferOrder) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

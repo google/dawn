@@ -52,7 +52,7 @@ struct FoldTrivialLets::State {
         };
 
         // A map from semantic variables to their PendingLet descriptors.
-        utils::Hashmap<const sem::Variable*, PendingLet, 16> pending_lets;
+        Hashmap<const sem::Variable*, PendingLet, 16> pending_lets;
 
         // Helper that folds pending let declarations into `expr` if possible.
         auto fold_lets = [&](const Expression* expr) {

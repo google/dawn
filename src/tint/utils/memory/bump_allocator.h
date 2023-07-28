@@ -22,7 +22,7 @@
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/memory/bitcast.h"
 
-namespace tint::utils {
+namespace tint {
 
 constexpr size_t kBlockSize = 64 * 1024;
 
@@ -122,6 +122,6 @@ class BumpAllocator {
     } data;
 };
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_MEMORY_BUMP_ALLOCATOR_H_

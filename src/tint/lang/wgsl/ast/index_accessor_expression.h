@@ -20,8 +20,7 @@
 namespace tint::ast {
 
 /// An index accessor expression
-class IndexAccessorExpression final
-    : public utils::Castable<IndexAccessorExpression, AccessorExpression> {
+class IndexAccessorExpression final : public Castable<IndexAccessorExpression, AccessorExpression> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

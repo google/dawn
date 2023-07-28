@@ -27,12 +27,12 @@ class Block;
 namespace tint::ir {
 
 /// The base class of all instructions that terminate a block.
-class Terminator : public utils::Castable<Terminator, OperandInstruction<1, 0>> {
+class Terminator : public Castable<Terminator, OperandInstruction<1, 0>> {
   public:
     ~Terminator() override;
 
     /// @returns the terminator arguments
-    virtual utils::Slice<Value* const> Args() { return operands_.Slice(); }
+    virtual tint::Slice<Value* const> Args() { return operands_.Slice(); }
 };
 
 }  // namespace tint::ir

@@ -14,7 +14,7 @@
 
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::utils {
+namespace tint {
 
 StringStream::StringStream() {
     sstream_.flags(sstream_.flags() | std::ios_base::showpoint | std::ios_base::fixed);
@@ -24,7 +24,7 @@ StringStream::StringStream() {
 
 StringStream::~StringStream() = default;
 
-utils::StringStream& operator<<(utils::StringStream& out, CodePoint code_point) {
+StringStream& operator<<(StringStream& out, CodePoint code_point) {
     if (code_point < 0x7f) {
         // See https://en.cppreference.com/w/cpp/language/escape
         switch (code_point) {
@@ -48,4 +48,4 @@ utils::StringStream& operator<<(utils::StringStream& out, CodePoint code_point) 
     return out << "'U+" << std::hex << code_point.value << "'";
 }
 
-}  // namespace tint::utils
+}  // namespace tint

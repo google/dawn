@@ -45,10 +45,10 @@ struct DemoteToHelper::State {
     Var* continue_execution = nullptr;
 
     /// Map from function to a flag that indicates whether it (transitively) contains a discard.
-    utils::Hashmap<Function*, bool, 4> function_discard_status;
+    Hashmap<Function*, bool, 4> function_discard_status;
 
     /// Set of functions that have been processed.
-    utils::Hashset<Function*, 4> processed_functions;
+    Hashset<Function*, 4> processed_functions;
 
     /// Constructor
     /// @param mod the module
@@ -58,7 +58,7 @@ struct DemoteToHelper::State {
     void Process() {
         // Check each fragment shader entry point for discard instruction, potentially inside
         // functions called (transitively) by the entry point.
-        utils::Vector<Function*, 4> to_process;
+        Vector<Function*, 4> to_process;
         for (auto* func : ir->functions) {
             // If the function is a fragment shader that contains a discard, we need to process it.
             if (func->Stage() == Function::PipelineStage::kFragment) {
@@ -143,7 +143,7 @@ struct DemoteToHelper::State {
             TINT_ASSERT(Transform, !inst->HasMultiResults());
             if (inst->HasResults() && !inst->Result()->Type()->Is<type::Void>()) {
                 // The original instruction had a result, so return it from the if instruction.
-                ifelse->SetResults(utils::Vector{b.InstructionResult(inst->Result()->Type())});
+                ifelse->SetResults(Vector{b.InstructionResult(inst->Result()->Type())});
                 inst->Result()->ReplaceAllUsesWith(ifelse->Result());
                 ifelse->True()->Append(b.ExitIf(ifelse, result));
             } else {

@@ -20,7 +20,7 @@
 namespace tint::ast::transform {
 
 /// Unshadow is a Transform that renames any variables that shadow another variable.
-class Unshadow final : public utils::Castable<Unshadow, Transform> {
+class Unshadow final : public Castable<Unshadow, Transform> {
   public:
     /// Constructor
     Unshadow();

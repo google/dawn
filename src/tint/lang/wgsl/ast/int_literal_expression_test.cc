@@ -44,7 +44,7 @@ TEST_F(IntLiteralExpressionTest, SuffixU) {
 
 TEST_F(IntLiteralExpressionTest, SuffixStringStream) {
     auto to_str = [](IntLiteralExpression::Suffix suffix) {
-        utils::StringStream ss;
+        StringStream ss;
         ss << suffix;
         return ss.str();
     };

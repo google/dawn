@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 TEST(Bitset, Length) {
@@ -142,4 +142,4 @@ TEST(Bitset, ShinkGrowMisalignedClears_Spill) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

@@ -52,9 +52,9 @@ struct $struct {
   $member_a : i32,
   $member_b : f32,
 })";
-    src = utils::ReplaceAll(src, "$struct", struct_ident);
-    src = utils::ReplaceAll(src, "$member_a", member_a_ident);
-    src = utils::ReplaceAll(src, "$member_b", member_b_ident);
+    src = tint::ReplaceAll(src, "$struct", struct_ident);
+    src = tint::ReplaceAll(src, "$member_a", member_a_ident);
+    src = tint::ReplaceAll(src, "$member_b", member_b_ident);
 
     auto p = parser(src);
 

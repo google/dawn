@@ -27,7 +27,7 @@ Variable::Variable(GenerationID pid,
                    const Identifier* n,
                    Type ty,
                    const Expression* init,
-                   utils::VectorRef<const Attribute*> attrs)
+                   VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src), name(n), type(ty), initializer(init), attributes(std::move(attrs)) {
     TINT_ASSERT(AST, name);
     if (name) {

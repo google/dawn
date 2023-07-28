@@ -21,7 +21,7 @@ namespace tint::ir::transform {
 
 /// HandleMatrixArithmetic is a transform that converts arithmetic instruction that use matrix into
 /// SPIR-V intrinsics or polyfills.
-class HandleMatrixArithmetic final : public utils::Castable<HandleMatrixArithmetic, Transform> {
+class HandleMatrixArithmetic final : public Castable<HandleMatrixArithmetic, Transform> {
   public:
     /// Constructor
     HandleMatrixArithmetic();

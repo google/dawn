@@ -26,7 +26,7 @@ class Switch;
 namespace tint::ir {
 
 /// A exit switch instruction.
-class ExitSwitch : public utils::Castable<ExitSwitch, Exit> {
+class ExitSwitch : public Castable<ExitSwitch, Exit> {
   public:
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
@@ -34,7 +34,7 @@ class ExitSwitch : public utils::Castable<ExitSwitch, Exit> {
     /// Constructor
     /// @param sw the switch being exited
     /// @param args the target MultiInBlock arguments
-    explicit ExitSwitch(ir::Switch* sw, utils::VectorRef<Value*> args = utils::Empty);
+    explicit ExitSwitch(ir::Switch* sw, VectorRef<Value*> args = tint::Empty);
     ~ExitSwitch() override;
 
     /// Re-associates the exit with the given switch instruction

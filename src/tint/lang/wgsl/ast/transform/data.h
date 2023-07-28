@@ -24,7 +24,7 @@
 namespace tint::ast::transform {
 
 /// Data is the base class for transforms that accept extra input or emit extra output information.
-class Data : public utils::Castable<Data> {
+class Data : public Castable<Data> {
   public:
     /// Constructor
     Data();
@@ -70,7 +70,7 @@ class DataMap {
     template <typename T>
     void Put(std::unique_ptr<T>&& data) {
         static_assert(std::is_base_of<Data, T>::value, "T does not derive from Data");
-        map_[&utils::TypeInfo::Of<T>()] = std::move(data);
+        map_[&tint::TypeInfo::Of<T>()] = std::move(data);
     }
 
     /// Creates the data of type `T` with the provided arguments and adds it into DataMap keyed by
@@ -90,7 +90,7 @@ class DataMap {
     /// @returns a pointer to the Data placed into the DataMap with a call to Put()
     template <typename T>
     T* Get() {
-        auto it = map_.find(&utils::TypeInfo::Of<T>());
+        auto it = map_.find(&tint::TypeInfo::Of<T>());
         if (it == map_.end()) {
             return nullptr;
         }
@@ -118,7 +118,7 @@ class DataMap {
         PutAll(std::forward<Tn>(remainder)...);
     }
 
-    std::unordered_map<const utils::TypeInfo*, std::unique_ptr<Data>> map_;
+    std::unordered_map<const tint::TypeInfo*, std::unique_ptr<Data>> map_;
 };
 
 }  // namespace tint::ast::transform

@@ -123,7 +123,7 @@ struct WorkgroupSizeInfo {
 
 /// Parser implementation for SPIR-V.
 class ASTParser {
-    using ExpressionList = utils::Vector<const ast::Expression*, 8>;
+    using ExpressionList = tint::Vector<const ast::Expression*, 8>;
 
   public:
     /// Creates a new parser
@@ -819,7 +819,7 @@ class ASTParser {
     // Is the parse successful?
     bool success_ = true;
     // Collector for diagnostic messages.
-    utils::StringStream errors_;
+    StringStream errors_;
     FailStream fail_stream_;
     spvtools::MessageConsumer message_consumer_;
 
@@ -906,7 +906,7 @@ class ASTParser {
     std::unordered_map<const spvtools::opt::Instruction*, const Type*> handle_type_;
 
     /// Maps the SPIR-V ID of a module-scope variable to its AST variable.
-    utils::Hashmap<uint32_t, ModuleVariable, 16> module_variable_;
+    Hashmap<uint32_t, ModuleVariable, 16> module_variable_;
 
     // Set of symbols of declared type that have been added, used to avoid
     // adding duplicates.

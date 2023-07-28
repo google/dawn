@@ -22,7 +22,7 @@
 namespace tint::ir::transform {
 
 /// ShaderIOSpirv is the subclass of the ShaderIO transform used for the SPIR-V backend.
-class ShaderIOSpirv final : public utils::Castable<ShaderIOSpirv, ShaderIO> {
+class ShaderIOSpirv final : public Castable<ShaderIOSpirv, ShaderIO> {
   public:
     /// Constructor
     ShaderIOSpirv();

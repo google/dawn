@@ -56,7 +56,7 @@ struct HlslBuiltinData {
     const char* attribute_name;
 };
 inline std::ostream& operator<<(std::ostream& out, HlslBuiltinData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.builtin;
     out << str.str();
     return out;

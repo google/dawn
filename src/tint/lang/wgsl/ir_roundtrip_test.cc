@@ -31,7 +31,7 @@ using namespace tint::number_suffixes;  // NOLINT
 class IRToProgramRoundtripTest : public helpers::IRProgramTest {
   public:
     void Test(std::string_view input_wgsl, std::string_view expected_wgsl) {
-        auto input = utils::TrimSpace(input_wgsl);
+        auto input = tint::TrimSpace(input_wgsl);
         Source::File file("test.wgsl", std::string(input));
         auto input_program = wgsl::reader::Parse(&file);
         ASSERT_TRUE(input_program.IsValid()) << input_program.Diagnostics().str();
@@ -56,8 +56,8 @@ class IRToProgramRoundtripTest : public helpers::IRProgramTest {
         auto output = wgsl::writer::Generate(&output_program, {});
         ASSERT_TRUE(output.success) << output.error;
 
-        auto expected = expected_wgsl.empty() ? input : utils::TrimSpace(expected_wgsl);
-        auto got = utils::TrimSpace(output.wgsl);
+        auto expected = expected_wgsl.empty() ? input : tint::TrimSpace(expected_wgsl);
+        auto got = tint::TrimSpace(output.wgsl);
         EXPECT_EQ(expected, got) << "IR:" << std::endl << disassembly;
     }
 

@@ -51,7 +51,7 @@ constexpr std::array kModfVecAbstractNames{
 };
 Struct* CreateModfResult(Manager& types, SymbolTable& symbols, const Type* ty) {
     auto build = [&](builtin::Builtin name, const Type* t) {
-        return types.Struct(symbols.Register(utils::ToString(name)),
+        return types.Struct(symbols.Register(tint::ToString(name)),
                             {{symbols.Register("fract"), t}, {symbols.Register("whole"), t}});
     };
     return Switch(
@@ -60,7 +60,7 @@ Struct* CreateModfResult(Manager& types, SymbolTable& symbols, const Type* ty) {
         [&](const F16*) { return build(builtin::Builtin::kModfResultF16, ty); },
         [&](const AbstractFloat*) {
             auto* abstract = build(builtin::Builtin::kModfResultAbstract, ty);
-            abstract->SetConcreteTypes(utils::Vector{
+            abstract->SetConcreteTypes(tint::Vector{
                 build(builtin::Builtin::kModfResultF32, types.f32()),
                 build(builtin::Builtin::kModfResultF16, types.f16()),
             });
@@ -74,7 +74,7 @@ Struct* CreateModfResult(Manager& types, SymbolTable& symbols, const Type* ty) {
                 [&](const F16*) { return build(kModfVecF16Names[width - 2], vec); },
                 [&](const AbstractFloat*) {
                     auto* abstract = build(kModfVecAbstractNames[width - 2], vec);
-                    abstract->SetConcreteTypes(utils::Vector{
+                    abstract->SetConcreteTypes(tint::Vector{
                         build(kModfVecF32Names[width - 2], types.vec(types.f32(), width)),
                         build(kModfVecF16Names[width - 2], types.vec(types.f16(), width)),
                     });
@@ -109,7 +109,7 @@ constexpr std::array kFrexpVecAbstractNames{
 Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* ty) {
     auto build = [&](builtin::Builtin name, const Type* fract_ty, const Type* exp_ty) {
         return types.Struct(
-            symbols.Register(utils::ToString(name)),
+            symbols.Register(tint::ToString(name)),
             {{symbols.Register("fract"), fract_ty}, {symbols.Register("exp"), exp_ty}});
     };
     return Switch(
@@ -118,7 +118,7 @@ Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* ty) 
         [&](const F16*) { return build(builtin::Builtin::kFrexpResultF16, ty, types.i32()); },
         [&](const AbstractFloat*) {
             auto* abstract = build(builtin::Builtin::kFrexpResultAbstract, ty, types.AInt());
-            abstract->SetConcreteTypes(utils::Vector{
+            abstract->SetConcreteTypes(tint::Vector{
                 build(builtin::Builtin::kFrexpResultF32, types.f32(), types.i32()),
                 build(builtin::Builtin::kFrexpResultF16, types.f16(), types.i32()),
             });
@@ -140,7 +140,7 @@ Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* ty) 
                     auto* vec_i32 = types.vec(types.i32(), width);
                     auto* vec_ai = types.vec(types.AInt(), width);
                     auto* abstract = build(kFrexpVecAbstractNames[width - 2], ty, vec_ai);
-                    abstract->SetConcreteTypes(utils::Vector{
+                    abstract->SetConcreteTypes(tint::Vector{
                         build(kFrexpVecF32Names[width - 2], vec_f32, vec_i32),
                         build(kFrexpVecF16Names[width - 2], vec_f16, vec_i32),
                     });
@@ -159,7 +159,7 @@ Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* ty) 
 
 Struct* CreateAtomicCompareExchangeResult(Manager& types, SymbolTable& symbols, const Type* ty) {
     auto build = [&](builtin::Builtin name) {
-        return types.Struct(symbols.Register(utils::ToString(name)),
+        return types.Struct(symbols.Register(tint::ToString(name)),
                             {
                                 {symbols.Register("old_value"), ty},
                                 {symbols.Register("exchanged"), types.bool_()},

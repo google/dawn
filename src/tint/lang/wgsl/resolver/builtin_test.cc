@@ -49,7 +49,7 @@ namespace {
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-using ExpressionList = utils::Vector<const ast::Expression*, 8>;
+using ExpressionList = Vector<const ast::Expression*, 8>;
 
 using ResolverBuiltinTest = ResolverTest;
 
@@ -215,7 +215,7 @@ using ResolverBuiltinArrayTest = ResolverTest;
 
 TEST_F(ResolverBuiltinArrayTest, ArrayLength_Vector) {
     auto ary = ty.array<i32>();
-    auto* str = Structure("S", utils::Vector{Member("x", ary)});
+    auto* str = Structure("S", Vector{Member("x", ary)});
     GlobalVar("a", ty.Of(str), builtin::AddressSpace::kStorage, builtin::Access::kRead,
               Binding(0_a), Group(0_a));
 
@@ -2014,8 +2014,8 @@ TEST_P(ResolverBuiltinDerivativeTest, Scalar) {
     GlobalVar("ident", ty.f32(), builtin::AddressSpace::kPrivate);
 
     auto* expr = Call(name, "ident");
-    Func("func", utils::Empty, ty.void_(), utils::Vector{Ignore(expr)},
-         utils::Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
+    Func("func", tint::Empty, ty.void_(), Vector{Ignore(expr)},
+         Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -2028,8 +2028,8 @@ TEST_P(ResolverBuiltinDerivativeTest, Vector) {
     GlobalVar("ident", ty.vec4<f32>(), builtin::AddressSpace::kPrivate);
 
     auto* expr = Call(name, "ident");
-    Func("func", utils::Empty, ty.void_(), utils::Vector{Ignore(expr)},
-         utils::Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
+    Func("func", tint::Empty, ty.void_(), Vector{Ignore(expr)},
+         Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -2071,7 +2071,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
 namespace texture_builtin_tests {
 
 enum class Texture { kF32, kI32, kU32 };
-inline utils::StringStream& operator<<(utils::StringStream& out, Texture data) {
+inline StringStream& operator<<(StringStream& out, Texture data) {
     if (data == Texture::kF32) {
         out << "f32";
     } else if (data == Texture::kI32) {
@@ -2088,7 +2088,7 @@ struct TextureTestParams {
     builtin::TexelFormat format = builtin::TexelFormat::kR32Float;
 };
 inline std::ostream& operator<<(std::ostream& out, TextureTestParams data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.dim << "_" << data.type;
     out << str.str();
     return out;
@@ -2114,7 +2114,7 @@ class ResolverBuiltinTest_TextureOperation : public ResolverTestWithParam<Textur
                 return ty.vec3(scalar);
             default:
                 [=] {
-                    utils::StringStream str;
+                    StringStream str;
                     str << dim;
                     FAIL() << "Unsupported texture dimension: " << str.str();
                 }();
@@ -2124,7 +2124,7 @@ class ResolverBuiltinTest_TextureOperation : public ResolverTestWithParam<Textur
 
     void add_call_param(std::string name, ast::Type type, ExpressionList* call_params) {
         std::string type_name = type->identifier->symbol.Name();
-        if (utils::HasPrefix(type_name, "texture") || utils::HasPrefix(type_name, "sampler")) {
+        if (tint::HasPrefix(type_name, "texture") || tint::HasPrefix(type_name, "sampler")) {
             GlobalVar(name, type, Binding(0_a), Group(0_a));
         } else {
             GlobalVar(name, type, builtin::AddressSpace::kPrivate);
@@ -2191,8 +2191,8 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          ResolverBuiltinTest_Texture,
                          testing::ValuesIn(ast::test::TextureOverloadCase::ValidCases()));
 
-static std::string to_str(const std::string& func, utils::VectorRef<const sem::Parameter*> params) {
-    utils::StringStream out;
+static std::string to_str(const std::string& func, VectorRef<const sem::Parameter*> params) {
+    StringStream out;
     out << func << "(";
     bool first = true;
     for (auto* param : params) {
@@ -2447,15 +2447,15 @@ TEST_P(ResolverBuiltinTest_Texture, Call) {
     auto* call = Call(param.function, param.args(this));
     auto* stmt = param.returns_value ? static_cast<const ast::Statement*>(Assign(Phony(), call))
                                      : static_cast<const ast::Statement*>(CallStmt(call));
-    Func("func", utils::Empty, ty.void_(), utils::Vector{stmt},
-         utils::Vector{Stage(ast::PipelineStage::kFragment)});
+    Func("func", tint::Empty, ty.void_(), Vector{stmt},
+         Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     if (std::string(param.function) == "textureDimensions") {
         switch (param.texture_dimension) {
             default: {
-                utils::StringStream str;
+                StringStream str;
                 str << param.texture_dimension;
                 FAIL() << "invalid texture dimensions: " << str.str();
             }

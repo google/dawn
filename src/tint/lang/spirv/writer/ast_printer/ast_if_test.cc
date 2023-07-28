@@ -439,8 +439,8 @@ TEST_F(SpirvASTPrinterTest, If_WithReturn) {
     //   return;
     // }
 
-    auto* fn = Func("f", utils::Empty, ty.void_(),
-                    utils::Vector{
+    auto* fn = Func("f", tint::Empty, ty.void_(),
+                    Vector{
                         If(true, Block(Return())),
                     });
 
@@ -468,8 +468,8 @@ TEST_F(SpirvASTPrinterTest, If_WithReturnValue) {
     // }
     // return true;
 
-    auto* fn = Func("f", utils::Empty, ty.bool_(),
-                    utils::Vector{
+    auto* fn = Func("f", tint::Empty, ty.bool_(),
+                    Vector{
                         If(true, Block(Return(false))),
                         Return(true),
                     });
@@ -499,8 +499,8 @@ TEST_F(SpirvASTPrinterTest, IfElse_BothReturn) {
     //   return true;
     // }
 
-    auto* fn = Func("f", utils::Empty, ty.bool_(),
-                    utils::Vector{
+    auto* fn = Func("f", tint::Empty, ty.bool_(),
+                    Vector{
                         If(true,                 //
                            Block(Return(true)),  //
                            Else(Block(Return(true)))),
@@ -538,8 +538,8 @@ TEST_F(SpirvASTPrinterTest, If_WithNestedBlockReturnValue) {
     // }
     // return true;
 
-    auto* fn = Func("f", utils::Empty, ty.bool_(),
-                    utils::Vector{
+    auto* fn = Func("f", tint::Empty, ty.bool_(),
+                    Vector{
                         If(true, Block(Block(Block(Block(Return(false)))))),
                         Return(true),
                     });
@@ -568,8 +568,8 @@ TEST_F(SpirvASTPrinterTest, If_WithLoad_Bug327) {
     // }
 
     auto* var = GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate);
-    auto* fn = Func("f", utils::Empty, ty.void_(),
-                    utils::Vector{
+    auto* fn = Func("f", tint::Empty, ty.void_(),
+                    Vector{
                         If("a", Block()),
                     });
 
@@ -603,7 +603,7 @@ TEST_F(SpirvASTPrinterTest, If_ElseIf_WithReturn) {
     // }
 
     auto* if_stmt = If(false, Block(), Else(If(true, Block(Return()))));
-    auto* fn = Func("f", utils::Empty, ty.void_(), utils::Vector{if_stmt});
+    auto* fn = Func("f", tint::Empty, ty.void_(), Vector{if_stmt});
 
     Builder& b = Build();
 
@@ -641,8 +641,8 @@ TEST_F(SpirvASTPrinterTest, Loop_If_ElseIf_WithBreak) {
     // }
 
     auto* if_stmt = If(false, Block(), Else(If(true, Block(Break()))));
-    auto* fn = Func("f", utils::Empty, ty.void_(),
-                    utils::Vector{
+    auto* fn = Func("f", tint::Empty, ty.void_(),
+                    Vector{
                         Loop(Block(if_stmt)),
                     });
 

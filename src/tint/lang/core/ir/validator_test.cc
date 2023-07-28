@@ -703,7 +703,7 @@ TEST_F(IR_ValidatorTest, If_NullResult) {
     if_->True()->Append(b.Return(f));
     if_->False()->Append(b.Return(f));
 
-    if_->SetResults(utils::Vector<InstructionResult*, 1>{nullptr});
+    if_->SetResults(Vector<InstructionResult*, 1>{nullptr});
 
     f->Block()->Append(if_);
     f->Block()->Append(b.Return(f));
@@ -953,7 +953,7 @@ TEST_F(IR_ValidatorTest, Instruction_AppendedDead) {
     v->Destroy();
     v->InsertBefore(ret);
 
-    auto addr = utils::ToString(v);
+    auto addr = tint::ToString(v);
     auto arrows = std::string(addr.length(), '^');
 
     std::string expected = R"(:3:5 error: var: destroyed instruction found in instruction list
@@ -973,8 +973,8 @@ note: # Disassembly
 }
 )";
 
-    expected = utils::ReplaceAll(expected, "$ADDRESS", addr);
-    expected = utils::ReplaceAll(expected, "$ARROWS", arrows);
+    expected = tint::ReplaceAll(expected, "$ADDRESS", addr);
+    expected = tint::ReplaceAll(expected, "$ARROWS", arrows);
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
@@ -1294,7 +1294,7 @@ TEST_F(IR_ValidatorTest, ExitIf_LessOperandsThenIfParams) {
 
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
-    if_->SetResults(utils::Vector{r1, r2});
+    if_->SetResults(Vector{r1, r2});
 
     auto* f = b.Function("my_func", ty.void_());
     auto sb = b.Append(f->Block());
@@ -1338,7 +1338,7 @@ TEST_F(IR_ValidatorTest, ExitIf_MoreOperandsThenIfParams) {
 
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
-    if_->SetResults(utils::Vector{r1, r2});
+    if_->SetResults(Vector{r1, r2});
 
     auto* f = b.Function("my_func", ty.void_());
     auto sb = b.Append(f->Block());
@@ -1382,7 +1382,7 @@ TEST_F(IR_ValidatorTest, ExitIf_WithResult) {
 
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
-    if_->SetResults(utils::Vector{r1, r2});
+    if_->SetResults(Vector{r1, r2});
 
     auto* f = b.Function("my_func", ty.void_());
     auto sb = b.Append(f->Block());
@@ -1399,7 +1399,7 @@ TEST_F(IR_ValidatorTest, ExitIf_IncorrectResultType) {
 
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
-    if_->SetResults(utils::Vector{r1, r2});
+    if_->SetResults(Vector{r1, r2});
 
     auto* f = b.Function("my_func", ty.void_());
     auto sb = b.Append(f->Block());
@@ -1684,7 +1684,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_LessOperandsThenSwitchParams) {
 
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
-    switch_->SetResults(utils::Vector{r1, r2});
+    switch_->SetResults(Vector{r1, r2});
 
     auto* def = b.Case(switch_, {Switch::CaseSelector{}});
     def->Append(b.ExitSwitch(switch_, 1_i));
@@ -1728,7 +1728,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_MoreOperandsThenSwitchParams) {
     auto* switch_ = b.Switch(true);
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
-    switch_->SetResults(utils::Vector{r1, r2});
+    switch_->SetResults(Vector{r1, r2});
 
     auto* def = b.Case(switch_, {Switch::CaseSelector{}});
     def->Append(b.ExitSwitch(switch_, 1_i, 2_f, 3_i));
@@ -1772,7 +1772,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_WithResult) {
     auto* switch_ = b.Switch(true);
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
-    switch_->SetResults(utils::Vector{r1, r2});
+    switch_->SetResults(Vector{r1, r2});
 
     auto* def = b.Case(switch_, {Switch::CaseSelector{}});
     def->Append(b.ExitSwitch(switch_, 1_i, 2_f));
@@ -1790,7 +1790,7 @@ TEST_F(IR_ValidatorTest, ExitSwitch_IncorrectResultType) {
     auto* switch_ = b.Switch(true);
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
-    switch_->SetResults(utils::Vector{r1, r2});
+    switch_->SetResults(Vector{r1, r2});
 
     auto* def = b.Case(switch_, {Switch::CaseSelector{}});
     def->Append(b.ExitSwitch(switch_, 1_i, 2_i));
@@ -2067,7 +2067,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_LessOperandsThenLoopParams) {
     auto* loop = b.Loop();
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
-    loop->SetResults(utils::Vector{r1, r2});
+    loop->SetResults(Vector{r1, r2});
 
     loop->Continuing()->Append(b.NextIteration(loop));
     loop->Body()->Append(b.ExitLoop(loop, 1_i));
@@ -2114,7 +2114,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_MoreOperandsThenLoopParams) {
     auto* loop = b.Loop();
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
-    loop->SetResults(utils::Vector{r1, r2});
+    loop->SetResults(Vector{r1, r2});
 
     loop->Continuing()->Append(b.NextIteration(loop));
     loop->Body()->Append(b.ExitLoop(loop, 1_i, 2_f, 3_i));
@@ -2161,7 +2161,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_WithResult) {
     auto* loop = b.Loop();
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
-    loop->SetResults(utils::Vector{r1, r2});
+    loop->SetResults(Vector{r1, r2});
 
     loop->Continuing()->Append(b.NextIteration(loop));
     loop->Body()->Append(b.ExitLoop(loop, 1_i, 2_f));
@@ -2179,7 +2179,7 @@ TEST_F(IR_ValidatorTest, ExitLoop_IncorrectResultType) {
     auto* loop = b.Loop();
     auto* r1 = b.InstructionResult(ty.i32());
     auto* r2 = b.InstructionResult(ty.f32());
-    loop->SetResults(utils::Vector{r1, r2});
+    loop->SetResults(Vector{r1, r2});
 
     loop->Continuing()->Append(b.NextIteration(loop));
     loop->Body()->Append(b.ExitLoop(loop, 1_i, 2_i));

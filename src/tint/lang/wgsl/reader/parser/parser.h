@@ -72,13 +72,13 @@ class Parser {
   public:
     /// Pre-determined small vector sizes for AST pointers
     //! @cond Doxygen_Suppress
-    using AttributeList = utils::Vector<const ast::Attribute*, 4>;
-    using CaseSelectorList = utils::Vector<const ast::CaseSelector*, 4>;
-    using CaseStatementList = utils::Vector<const ast::CaseStatement*, 4>;
-    using ExpressionList = utils::Vector<const ast::Expression*, 8>;
-    using ParameterList = utils::Vector<const ast::Parameter*, 8>;
-    using StatementList = utils::Vector<const ast::Statement*, 8>;
-    using StructMemberList = utils::Vector<const ast::StructMember*, 8>;
+    using AttributeList = Vector<const ast::Attribute*, 4>;
+    using CaseSelectorList = Vector<const ast::CaseSelector*, 4>;
+    using CaseStatementList = Vector<const ast::CaseStatement*, 4>;
+    using ExpressionList = Vector<const ast::Expression*, 8>;
+    using ParameterList = Vector<const ast::Parameter*, 8>;
+    using StatementList = Vector<const ast::Statement*, 8>;
+    using StructMemberList = Vector<const ast::StructMember*, 8>;
     //! @endcond
 
     /// Empty structure used by functions that do not return a value, but need to signal success /
@@ -233,9 +233,9 @@ class Parser {
         /// @param ret_attrs return type attributes
         FunctionHeader(Source src,
                        const ast::Identifier* n,
-                       utils::VectorRef<const ast::Parameter*> p,
+                       VectorRef<const ast::Parameter*> p,
                        ast::Type ret_ty,
-                       utils::VectorRef<const ast::Attribute*> ret_attrs);
+                       VectorRef<const ast::Attribute*> ret_attrs);
         /// Destructor
         ~FunctionHeader();
         /// Assignment operator
@@ -248,7 +248,7 @@ class Parser {
         /// Function name
         const ast::Identifier* name;
         /// Function parameters
-        utils::Vector<const ast::Parameter*, 8> params;
+        Vector<const ast::Parameter*, 8> params;
         /// Function return type
         ast::Type return_type;
         /// Function return type attributes
@@ -824,7 +824,7 @@ class Parser {
 
     /// Reports an error if the attribute list `list` is not empty.
     /// Used to ensure that all attributes are consumed.
-    Expect<Void> expect_attributes_consumed(utils::VectorRef<const ast::Attribute*> list);
+    Expect<Void> expect_attributes_consumed(VectorRef<const ast::Attribute*> list);
 
     /// Raises an error if the next token is the start of a template list.
     /// Used to hint to the user that the parser interpreted the following as a templated identifier

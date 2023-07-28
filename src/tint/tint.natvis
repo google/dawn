@@ -21,7 +21,7 @@
 	<!-- utils -->
 	<!--=================================================================-->
 
-	<Type Name="tint::utils::Slice&lt;*&gt;">
+	<Type Name="tint::Slice&lt;*&gt;">
 		<DisplayString>{{ length={len}, capacity={cap} }}</DisplayString>
 		<Expand>
 			<!--<Item Name="[length]">len</Item>
@@ -33,7 +33,7 @@
 		</Expand>
 	</Type>
 
-	<Type Name="tint::utils::Vector&lt;*,*&gt;">
+	<Type Name="tint::Vector&lt;*,*&gt;">
 		<Intrinsic Name="Length" Expression="(size_t)(impl_.slice.len)" />
 		<Expand>
 			<Item Name="[heap]">impl_.slice.cap > (int)$T2</Item>
@@ -46,7 +46,7 @@
 		</Expand>
 	</Type>
 
-	<Type Name="tint::utils::VectorRef&lt;*&gt;">
+	<Type Name="tint::VectorRef&lt;*&gt;">
 		<Expand>
 			<Item Name="[can move]">can_move_</Item>
 			<ExpandedItem>slice_</ExpandedItem>

@@ -35,7 +35,7 @@ TEST_F(WgslASTPrinterTest, Emit_DiagnosticDirective) {
 TEST_F(WgslASTPrinterTest, Emit_DiagnosticAttribute) {
     auto* attr =
         DiagnosticAttribute(builtin::DiagnosticSeverity::kError, "chromium", "unreachable_code");
-    Func("foo", {}, ty.void_(), {}, utils::Vector{attr});
+    Func("foo", {}, ty.void_(), {}, Vector{attr});
 
     ASTPrinter& gen = Build();
     gen.Generate();

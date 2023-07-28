@@ -1899,7 +1899,7 @@ void Printer::EmitExitPhis(ir::ControlInstruction* inst) {
         auto* result = results[index];
         auto* ty = result->Type();
 
-        utils::Vector<Branch, 8> branches;
+        Vector<Branch, 8> branches;
         branches.Reserve(inst->Exits().Count());
         for (auto& exit : inst->Exits()) {
             branches.Push(Branch{Label(exit->Block()), exit->Args()[index]});

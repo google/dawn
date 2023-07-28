@@ -28,32 +28,32 @@ InspectorBuilder::InspectorBuilder() = default;
 InspectorBuilder::~InspectorBuilder() = default;
 
 void InspectorBuilder::MakeEmptyBodyFunction(std::string name,
-                                             utils::VectorRef<const ast::Attribute*> attributes) {
-    Func(name, utils::Empty, ty.void_(), utils::Vector{Return()}, attributes);
+                                             VectorRef<const ast::Attribute*> attributes) {
+    Func(name, tint::Empty, ty.void_(), Vector{Return()}, attributes);
 }
 
 void InspectorBuilder::MakeCallerBodyFunction(std::string caller,
-                                              utils::VectorRef<std::string> callees,
-                                              utils::VectorRef<const ast::Attribute*> attributes) {
-    utils::Vector<const ast::Statement*, 8> body;
+                                              VectorRef<std::string> callees,
+                                              VectorRef<const ast::Attribute*> attributes) {
+    Vector<const ast::Statement*, 8> body;
     body.Reserve(callees.Length() + 1);
     for (auto callee : callees) {
         body.Push(CallStmt(Call(callee)));
     }
     body.Push(Return());
 
-    Func(caller, utils::Empty, ty.void_(), body, attributes);
+    Func(caller, tint::Empty, ty.void_(), body, attributes);
 }
 
 const ast::Struct* InspectorBuilder::MakeInOutStruct(std::string name,
-                                                     utils::VectorRef<InOutInfo> inout_vars) {
-    utils::Vector<const ast::StructMember*, 8> members;
+                                                     VectorRef<InOutInfo> inout_vars) {
+    Vector<const ast::StructMember*, 8> members;
     for (auto var : inout_vars) {
         std::string member_name;
         uint32_t location;
         std::tie(member_name, location) = var;
         members.Push(Member(member_name, ty.u32(),
-                            utils::Vector{
+                            Vector{
                                 Location(AInt(location)),
                                 Flat(),
                             }));
@@ -65,15 +65,15 @@ const ast::Function* InspectorBuilder::MakePlainGlobalReferenceBodyFunction(
     std::string func,
     std::string var,
     ast::Type type,
-    utils::VectorRef<const ast::Attribute*> attributes) {
-    utils::Vector<const ast::Statement*, 3> stmts;
+    VectorRef<const ast::Attribute*> attributes) {
+    Vector<const ast::Statement*, 3> stmts;
     stmts.Push(Decl(Var("local_" + var, type)));
     stmts.Push(Assign("local_" + var, var));
     stmts.Push(Return());
-    return Func(func, utils::Empty, ty.void_(), std::move(stmts), std::move(attributes));
+    return Func(func, tint::Empty, ty.void_(), std::move(stmts), std::move(attributes));
 }
 
-bool InspectorBuilder::ContainsName(utils::VectorRef<StageVariable> vec, const std::string& name) {
+bool InspectorBuilder::ContainsName(VectorRef<StageVariable> vec, const std::string& name) {
     for (auto& s : vec) {
         if (s.name == name) {
             return true;
@@ -87,8 +87,8 @@ std::string InspectorBuilder::StructMemberName(size_t idx, ast::Type type) {
 }
 
 const ast::Struct* InspectorBuilder::MakeStructType(const std::string& name,
-                                                    utils::VectorRef<ast::Type> member_types) {
-    utils::Vector<const ast::StructMember*, 8> members;
+                                                    VectorRef<ast::Type> member_types) {
+    Vector<const ast::StructMember*, 8> members;
     for (auto type : member_types) {
         members.Push(MakeStructMember(members.Length(), type, {}));
     }
@@ -97,26 +97,25 @@ const ast::Struct* InspectorBuilder::MakeStructType(const std::string& name,
 
 const ast::Struct* InspectorBuilder::MakeStructTypeFromMembers(
     const std::string& name,
-    utils::VectorRef<const ast::StructMember*> members) {
+    VectorRef<const ast::StructMember*> members) {
     return Structure(name, std::move(members));
 }
 
 const ast::StructMember* InspectorBuilder::MakeStructMember(
     size_t index,
     ast::Type type,
-    utils::VectorRef<const ast::Attribute*> attributes) {
+    VectorRef<const ast::Attribute*> attributes) {
     return Member(StructMemberName(index, type), type, std::move(attributes));
 }
 
-const ast::Struct* InspectorBuilder::MakeUniformBufferType(
-    const std::string& name,
-    utils::VectorRef<ast::Type> member_types) {
+const ast::Struct* InspectorBuilder::MakeUniformBufferType(const std::string& name,
+                                                           VectorRef<ast::Type> member_types) {
     return MakeStructType(name, member_types);
 }
 
 std::function<ast::Type()> InspectorBuilder::MakeStorageBufferTypes(
     const std::string& name,
-    utils::VectorRef<ast::Type> member_types) {
+    VectorRef<ast::Type> member_types) {
     MakeStructType(name, member_types);
     return [this, name] { return ty(name); };
 }
@@ -145,8 +144,8 @@ void InspectorBuilder::AddStorageBuffer(const std::string& name,
 void InspectorBuilder::MakeStructVariableReferenceBodyFunction(
     std::string func_name,
     std::string struct_name,
-    utils::VectorRef<std::tuple<size_t, ast::Type>> members) {
-    utils::Vector<const ast::Statement*, 8> stmts;
+    VectorRef<std::tuple<size_t, ast::Type>> members) {
+    Vector<const ast::Statement*, 8> stmts;
     for (auto member : members) {
         size_t member_idx;
         ast::Type member_type;
@@ -167,7 +166,7 @@ void InspectorBuilder::MakeStructVariableReferenceBodyFunction(
 
     stmts.Push(Return());
 
-    Func(func_name, utils::Empty, ty.void_(), stmts);
+    Func(func_name, tint::Empty, ty.void_(), stmts);
 }
 
 void InspectorBuilder::AddSampler(const std::string& name, uint32_t group, uint32_t binding) {
@@ -199,15 +198,15 @@ const ast::Function* InspectorBuilder::MakeSamplerReferenceBodyFunction(
     const std::string& sampler_name,
     const std::string& coords_name,
     ast::Type base_type,
-    utils::VectorRef<const ast::Attribute*> attributes) {
+    VectorRef<const ast::Attribute*> attributes) {
     std::string result_name = "sampler_result";
 
-    utils::Vector stmts{
+    Vector stmts{
         Decl(Var(result_name, ty.vec(base_type, 4))),
         Assign(result_name, Call("textureSample", texture_name, sampler_name, coords_name)),
         Return(),
     };
-    return Func(func_name, utils::Empty, ty.void_(), std::move(stmts), std::move(attributes));
+    return Func(func_name, tint::Empty, ty.void_(), std::move(stmts), std::move(attributes));
 }
 
 const ast::Function* InspectorBuilder::MakeSamplerReferenceBodyFunction(
@@ -217,16 +216,16 @@ const ast::Function* InspectorBuilder::MakeSamplerReferenceBodyFunction(
     const std::string& coords_name,
     const std::string& array_index,
     ast::Type base_type,
-    utils::VectorRef<const ast::Attribute*> attributes) {
+    VectorRef<const ast::Attribute*> attributes) {
     std::string result_name = "sampler_result";
 
-    utils::Vector stmts{
+    Vector stmts{
         Decl(Var("sampler_result", ty.vec(base_type, 4))),
         Assign("sampler_result",
                Call("textureSample", texture_name, sampler_name, coords_name, array_index)),
         Return(),
     };
-    return Func(func_name, utils::Empty, ty.void_(), std::move(stmts), std::move(attributes));
+    return Func(func_name, tint::Empty, ty.void_(), std::move(stmts), std::move(attributes));
 }
 
 const ast::Function* InspectorBuilder::MakeComparisonSamplerReferenceBodyFunction(
@@ -236,16 +235,16 @@ const ast::Function* InspectorBuilder::MakeComparisonSamplerReferenceBodyFunctio
     const std::string& coords_name,
     const std::string& depth_name,
     ast::Type base_type,
-    utils::VectorRef<const ast::Attribute*> attributes) {
+    VectorRef<const ast::Attribute*> attributes) {
     std::string result_name = "sampler_result";
 
-    utils::Vector stmts{
+    Vector stmts{
         Decl(Var("sampler_result", base_type)),
         Assign("sampler_result",
                Call("textureSampleCompare", texture_name, sampler_name, coords_name, depth_name)),
         Return(),
     };
-    return Func(func_name, utils::Empty, ty.void_(), std::move(stmts), std::move(attributes));
+    return Func(func_name, tint::Empty, ty.void_(), std::move(stmts), std::move(attributes));
 }
 
 ast::Type InspectorBuilder::GetBaseType(ResourceBinding::SampledKind sampled_kind) {
@@ -274,7 +273,7 @@ ast::Type InspectorBuilder::GetCoordsType(type::TextureDimension dim, ast::Type 
             return ty.vec3(scalar);
         default:
             [=] {
-                utils::StringStream str;
+                StringStream str;
                 str << dim;
                 FAIL() << "Unsupported texture dimension: " << str.str();
             }();
@@ -298,14 +297,14 @@ const ast::Function* InspectorBuilder::MakeStorageTextureBodyFunction(
     const std::string& func_name,
     const std::string& st_name,
     ast::Type dim_type,
-    utils::VectorRef<const ast::Attribute*> attributes) {
-    utils::Vector stmts{
+    VectorRef<const ast::Attribute*> attributes) {
+    Vector stmts{
         Decl(Var("dim", dim_type)),
         Assign("dim", Call("textureDimensions", st_name)),
         Return(),
     };
 
-    return Func(func_name, utils::Empty, ty.void_(), std::move(stmts), std::move(attributes));
+    return Func(func_name, tint::Empty, ty.void_(), std::move(stmts), std::move(attributes));
 }
 
 std::function<ast::Type()> InspectorBuilder::GetTypeFunction(ComponentType component,

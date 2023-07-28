@@ -30,7 +30,7 @@ namespace tint::ir::transform {
 
 /// BuiltinPolyfillSpirv is a transform that replaces calls to builtins with polyfills and calls to
 /// SPIR-V backend intrinsic functions.
-class BuiltinPolyfillSpirv final : public utils::Castable<BuiltinPolyfillSpirv, Transform> {
+class BuiltinPolyfillSpirv final : public Castable<BuiltinPolyfillSpirv, Transform> {
   public:
     /// Constructor
     BuiltinPolyfillSpirv();
@@ -42,7 +42,7 @@ class BuiltinPolyfillSpirv final : public utils::Castable<BuiltinPolyfillSpirv, 
 
     /// LiteralOperand is a type of constant value that is intended to be emitted as a literal in
     /// the SPIR-V instruction stream.
-    class LiteralOperand final : public utils::Castable<LiteralOperand, ir::Constant> {
+    class LiteralOperand final : public Castable<LiteralOperand, ir::Constant> {
       public:
         /// Constructor
         /// @param value the operand value
@@ -52,7 +52,7 @@ class BuiltinPolyfillSpirv final : public utils::Castable<BuiltinPolyfillSpirv, 
     };
 
     /// SampledImage represents an OpTypeSampledImage in SPIR-V.
-    class SampledImage final : public utils::Castable<SampledImage, type::Type> {
+    class SampledImage final : public Castable<SampledImage, type::Type> {
       public:
         /// Constructor
         /// @param image the image type

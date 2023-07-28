@@ -49,7 +49,7 @@ GenerationID GenerationIDOf(const Program*);
 GenerationID GenerationIDOf(const ProgramBuilder*);
 
 /// Cloneable is the base class for all objects that can be cloned
-class Cloneable : public utils::Castable<Cloneable> {
+class Cloneable : public Castable<Cloneable> {
   public:
     /// Constructor
     Cloneable();
@@ -74,8 +74,8 @@ class CloneContext {
     /// ParamTypeIsPtrOf<F, T> is true iff the first parameter of
     /// F is a pointer of (or derives from) type T.
     template <typename F, typename T>
-    static constexpr bool ParamTypeIsPtrOf = utils::traits::
-        IsTypeOrDerived<typename std::remove_pointer<utils::traits::ParameterType<F, 0>>::type, T>;
+    static constexpr bool ParamTypeIsPtrOf = tint::traits::
+        IsTypeOrDerived<typename std::remove_pointer<tint::traits::ParameterType<F, 0>>::type, T>;
 
   public:
     /// SymbolTransform is a function that takes a symbol and returns a new
@@ -172,8 +172,8 @@ class CloneContext {
     /// @param v the vector to clone
     /// @return the cloned vector
     template <typename T, size_t N>
-    utils::Vector<T, N> Clone(const utils::Vector<T, N>& v) {
-        utils::Vector<T, N> out;
+    tint::Vector<T, N> Clone(const tint::Vector<T, N>& v) {
+        tint::Vector<T, N> out;
         out.reserve(v.size());
         for (auto& el : v) {
             out.Push(Clone(el));
@@ -190,8 +190,8 @@ class CloneContext {
     /// @param v the vector to clone
     /// @return the cloned vector
     template <typename T, size_t N>
-    utils::Vector<T*, N> Clone(const utils::Vector<T*, N>& v) {
-        utils::Vector<T*, N> out;
+    tint::Vector<T*, N> Clone(const tint::Vector<T*, N>& v) {
+        tint::Vector<T*, N> out;
         Clone(out, v);
         return out;
     }
@@ -205,7 +205,7 @@ class CloneContext {
     /// @param from the vector to clone
     /// @param to the cloned result
     template <typename T, size_t N>
-    void Clone(utils::Vector<T*, N>& to, const utils::Vector<T*, N>& from) {
+    void Clone(tint::Vector<T*, N>& to, const tint::Vector<T*, N>& from) {
         to.Reserve(from.Length());
 
         auto transforms = list_transforms_.Find(&from);
@@ -303,23 +303,22 @@ class CloneContext {
     ///        `T* (T*)`, where `T` derives from Cloneable
     /// @returns this CloneContext so calls can be chained
     template <typename F>
-    utils::traits::EnableIf<ParamTypeIsPtrOf<F, Cloneable>, CloneContext>& ReplaceAll(
-        F&& replacer) {
-        using TPtr = utils::traits::ParameterType<F, 0>;
+    tint::traits::EnableIf<ParamTypeIsPtrOf<F, Cloneable>, CloneContext>& ReplaceAll(F&& replacer) {
+        using TPtr = tint::traits::ParameterType<F, 0>;
         using T = typename std::remove_pointer<TPtr>::type;
         for (auto& transform : transforms_) {
-            bool already_registered = transform.typeinfo->Is(&utils::TypeInfo::Of<T>()) ||
-                                      utils::TypeInfo::Of<T>().Is(transform.typeinfo);
+            bool already_registered = transform.typeinfo->Is(&tint::TypeInfo::Of<T>()) ||
+                                      tint::TypeInfo::Of<T>().Is(transform.typeinfo);
             if (TINT_UNLIKELY(already_registered)) {
                 TINT_ICE(Clone, Diagnostics()) << "ReplaceAll() called with a handler for type "
-                                               << utils::TypeInfo::Of<T>().name
+                                               << tint::TypeInfo::Of<T>().name
                                                << " that is already handled by a handler for type "
                                                << transform.typeinfo->name;
                 return *this;
             }
         }
         CloneableTransform transform;
-        transform.typeinfo = &utils::TypeInfo::Of<T>();
+        transform.typeinfo = &tint::TypeInfo::Of<T>();
         transform.function = [=](const Cloneable* in) { return replacer(in->As<T>()); };
         transforms_.Push(std::move(transform));
         return *this;
@@ -358,7 +357,7 @@ class CloneContext {
     /// @returns this CloneContext so calls can be chained
     template <typename WHAT,
               typename WITH,
-              typename = utils::traits::EnableIfIsType<WITH, Cloneable>>
+              typename = tint::traits::EnableIfIsType<WITH, Cloneable>>
     CloneContext& Replace(const WHAT* what, const WITH* with) {
         TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, src, what);
         TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, dst, with);
@@ -392,7 +391,7 @@ class CloneContext {
     /// the cloned vector.
     /// @returns this CloneContext so calls can be chained
     template <typename T, size_t N, typename OBJECT>
-    CloneContext& Remove(const utils::Vector<T, N>& vector, OBJECT* object) {
+    CloneContext& Remove(const tint::Vector<T, N>& vector, OBJECT* object) {
         TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, src, object);
         if (TINT_UNLIKELY((std::find(vector.begin(), vector.end(), object) == vector.end()))) {
             TINT_ICE(Clone, Diagnostics())
@@ -410,7 +409,7 @@ class CloneContext {
     /// front of the vector
     /// @returns this CloneContext so calls can be chained
     template <typename T, size_t N, typename OBJECT>
-    CloneContext& InsertFront(const utils::Vector<T, N>& vector, OBJECT* object) {
+    CloneContext& InsertFront(const tint::Vector<T, N>& vector, OBJECT* object) {
         TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, dst, object);
         return InsertFront(vector, [object] { return object; });
     }
@@ -421,7 +420,7 @@ class CloneContext {
     /// @param builder a builder of the object that will be inserted at the front of the vector.
     /// @returns this CloneContext so calls can be chained
     template <typename T, size_t N, typename BUILDER>
-    CloneContext& InsertFront(const utils::Vector<T, N>& vector, BUILDER&& builder) {
+    CloneContext& InsertFront(const tint::Vector<T, N>& vector, BUILDER&& builder) {
         list_transforms_.GetOrZero(&vector)->insert_front_.Push(std::forward<BUILDER>(builder));
         return *this;
     }
@@ -432,7 +431,7 @@ class CloneContext {
     /// end of the vector
     /// @returns this CloneContext so calls can be chained
     template <typename T, size_t N, typename OBJECT>
-    CloneContext& InsertBack(const utils::Vector<T, N>& vector, OBJECT* object) {
+    CloneContext& InsertBack(const tint::Vector<T, N>& vector, OBJECT* object) {
         TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, dst, object);
         return InsertBack(vector, [object] { return object; });
     }
@@ -444,7 +443,7 @@ class CloneContext {
     /// vector.
     /// @returns this CloneContext so calls can be chained
     template <typename T, size_t N, typename BUILDER>
-    CloneContext& InsertBack(const utils::Vector<T, N>& vector, BUILDER&& builder) {
+    CloneContext& InsertBack(const tint::Vector<T, N>& vector, BUILDER&& builder) {
         list_transforms_.GetOrZero(&vector)->insert_back_.Push(std::forward<BUILDER>(builder));
         return *this;
     }
@@ -456,7 +455,7 @@ class CloneContext {
     /// any occurrence of the clone of @p before
     /// @returns this CloneContext so calls can be chained
     template <typename T, size_t N, typename BEFORE, typename OBJECT>
-    CloneContext& InsertBefore(const utils::Vector<T, N>& vector,
+    CloneContext& InsertBefore(const tint::Vector<T, N>& vector,
                                const BEFORE* before,
                                const OBJECT* object) {
         TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, src, before);
@@ -483,7 +482,7 @@ class CloneContext {
               typename BEFORE,
               typename BUILDER,
               typename _ = std::enable_if_t<!std::is_pointer_v<std::decay_t<BUILDER>>>>
-    CloneContext& InsertBefore(const utils::Vector<T, N>& vector,
+    CloneContext& InsertBefore(const tint::Vector<T, N>& vector,
                                const BEFORE* before,
                                BUILDER&& builder) {
         list_transforms_.GetOrZero(&vector)->insert_before_.GetOrZero(before)->Push(
@@ -498,7 +497,7 @@ class CloneContext {
     /// any occurrence of the clone of @p after
     /// @returns this CloneContext so calls can be chained
     template <typename T, size_t N, typename AFTER, typename OBJECT>
-    CloneContext& InsertAfter(const utils::Vector<T, N>& vector,
+    CloneContext& InsertAfter(const tint::Vector<T, N>& vector,
                               const AFTER* after,
                               const OBJECT* object) {
         TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, src, after);
@@ -525,7 +524,7 @@ class CloneContext {
               typename AFTER,
               typename BUILDER,
               typename _ = std::enable_if_t<!std::is_pointer_v<std::decay_t<BUILDER>>>>
-    CloneContext& InsertAfter(const utils::Vector<T, N>& vector,
+    CloneContext& InsertAfter(const tint::Vector<T, N>& vector,
                               const AFTER* after,
                               BUILDER&& builder) {
         list_transforms_.GetOrZero(&vector)->insert_after_.GetOrZero(after)->Push(
@@ -554,18 +553,18 @@ class CloneContext {
         /// Destructor
         ~CloneableTransform();
 
-        // utils::TypeInfo of the Cloneable that the transform operates on
-        const utils::TypeInfo* typeinfo;
+        // tint::TypeInfo of the Cloneable that the transform operates on
+        const tint::TypeInfo* typeinfo;
         std::function<const Cloneable*(const Cloneable*)> function;
     };
 
     /// A vector of const Cloneable*
-    using CloneableBuilderList = utils::Vector<std::function<const Cloneable*()>, 4>;
+    using CloneableBuilderList = tint::Vector<std::function<const Cloneable*()>, 4>;
 
     /// Transformations to be applied to a list (vector)
     struct ListTransforms {
         /// A map of object in #src to omit when cloned into #dst.
-        utils::Hashset<const Cloneable*, 4> remove_;
+        Hashset<const Cloneable*, 4> remove_;
 
         /// A list of objects in #dst to insert before any others when the vector is cloned.
         CloneableBuilderList insert_front_;
@@ -574,14 +573,14 @@ class CloneContext {
         CloneableBuilderList insert_back_;
 
         /// A map of object in #src to the list of cloned objects in #dst.
-        /// Clone(const utils::Vector<T*>& v) will use this to insert the map-value
+        /// Clone(const tint::Vector<T*>& v) will use this to insert the map-value
         /// list into the target vector before cloning and inserting the map-key.
-        utils::Hashmap<const Cloneable*, CloneableBuilderList, 4> insert_before_;
+        Hashmap<const Cloneable*, CloneableBuilderList, 4> insert_before_;
 
         /// A map of object in #src to the list of cloned objects in #dst.
-        /// Clone(const utils::Vector<T*>& v) will use this to insert the map-value
+        /// Clone(const tint::Vector<T*>& v) will use this to insert the map-value
         /// list into the target vector after cloning and inserting the map-key.
-        utils::Hashmap<const Cloneable*, CloneableBuilderList, 4> insert_after_;
+        Hashmap<const Cloneable*, CloneableBuilderList, 4> insert_after_;
     };
 
     CloneContext(const CloneContext&) = delete;
@@ -598,7 +597,7 @@ class CloneContext {
         if (TINT_LIKELY(cast)) {
             return cast;
         }
-        CheckedCastFailure(obj, utils::TypeInfo::Of<TO>());
+        CheckedCastFailure(obj, tint::TypeInfo::Of<TO>());
         return nullptr;
     }
 
@@ -608,22 +607,22 @@ class CloneContext {
 
     /// Adds an error diagnostic to Diagnostics() that the cloned object was not
     /// of the expected type.
-    void CheckedCastFailure(const Cloneable* got, const utils::TypeInfo& expected);
+    void CheckedCastFailure(const Cloneable* got, const tint::TypeInfo& expected);
 
     /// @returns the diagnostic list of #dst
     diag::List& Diagnostics() const;
 
     /// A map of object in #src to functions that create their replacement in #dst
-    utils::Hashmap<const Cloneable*, std::function<const Cloneable*()>, 8> replacements_;
+    Hashmap<const Cloneable*, std::function<const Cloneable*()>, 8> replacements_;
 
     /// A map of symbol in #src to their cloned equivalent in #dst
-    utils::Hashmap<Symbol, Symbol, 32> cloned_symbols_;
+    Hashmap<Symbol, Symbol, 32> cloned_symbols_;
 
     /// Cloneable transform functions registered with ReplaceAll()
-    utils::Vector<CloneableTransform, 8> transforms_;
+    tint::Vector<CloneableTransform, 8> transforms_;
 
     /// Transformations to apply to vectors
-    utils::Hashmap<const void*, ListTransforms, 4> list_transforms_;
+    Hashmap<const void*, ListTransforms, 4> list_transforms_;
 
     /// Symbol transform registered with ReplaceAll()
     SymbolTransform symbol_transform_;

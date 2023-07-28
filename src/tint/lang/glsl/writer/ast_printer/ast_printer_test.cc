@@ -31,7 +31,7 @@ TEST_F(GlslASTPrinterTest, InvalidProgram) {
 }
 
 TEST_F(GlslASTPrinterTest, Generate) {
-    Func("my_func", utils::Empty, ty.void_(), utils::Empty);
+    Func("my_func", tint::Empty, ty.void_(), tint::Empty);
 
     ASTPrinter& gen = Build();
     gen.Generate();
@@ -45,7 +45,7 @@ void my_func() {
 }
 
 TEST_F(GlslASTPrinterTest, GenerateDesktop) {
-    Func("my_func", utils::Empty, ty.void_(), utils::Empty);
+    Func("my_func", tint::Empty, ty.void_(), tint::Empty);
 
     ASTPrinter& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
     gen.Generate();
@@ -60,13 +60,13 @@ void my_func() {
 
 TEST_F(GlslASTPrinterTest, GenerateSampleIndexES) {
     GlobalVar("gl_SampleID", ty.i32(),
-              utils::Vector{
+              Vector{
                   Builtin(builtin::BuiltinValue::kSampleIndex),
                   Disable(ast::DisabledValidation::kIgnoreAddressSpace),
               },
               builtin::AddressSpace::kIn);
-    Func("my_func", utils::Empty, ty.i32(),
-         utils::Vector{
+    Func("my_func", tint::Empty, ty.i32(),
+         Vector{
              Return(Expr("gl_SampleID")),
          });
 
@@ -85,13 +85,13 @@ int my_func() {
 
 TEST_F(GlslASTPrinterTest, GenerateSampleIndexDesktop) {
     GlobalVar("gl_SampleID", ty.i32(),
-              utils::Vector{
+              Vector{
                   Builtin(builtin::BuiltinValue::kSampleIndex),
                   Disable(ast::DisabledValidation::kIgnoreAddressSpace),
               },
               builtin::AddressSpace::kIn);
-    Func("my_func", utils::Empty, ty.i32(),
-         utils::Vector{
+    Func("my_func", tint::Empty, ty.i32(),
+         Vector{
              Return(Expr("gl_SampleID")),
          });
 

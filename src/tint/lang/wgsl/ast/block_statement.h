@@ -27,7 +27,7 @@ class Attribute;
 namespace tint::ast {
 
 /// A block statement
-class BlockStatement final : public utils::Castable<BlockStatement, Statement> {
+class BlockStatement final : public Castable<BlockStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
@@ -38,8 +38,8 @@ class BlockStatement final : public utils::Castable<BlockStatement, Statement> {
     BlockStatement(GenerationID pid,
                    NodeID nid,
                    const Source& source,
-                   utils::VectorRef<const Statement*> statements,
-                   utils::VectorRef<const Attribute*> attributes);
+                   VectorRef<const Statement*> statements,
+                   VectorRef<const Attribute*> attributes);
 
     /// Destructor
     ~BlockStatement() override;
@@ -57,10 +57,10 @@ class BlockStatement final : public utils::Castable<BlockStatement, Statement> {
     const BlockStatement* Clone(CloneContext* ctx) const override;
 
     /// the statement list
-    const utils::Vector<const Statement*, 8> statements;
+    const tint::Vector<const Statement*, 8> statements;
 
     /// the attribute list
-    const utils::Vector<const Attribute*, 4> attributes;
+    const tint::Vector<const Attribute*, 4> attributes;
 };
 
 }  // namespace tint::ast

@@ -24,7 +24,7 @@ MultiInBlock::MultiInBlock() : Base() {}
 
 MultiInBlock::~MultiInBlock() = default;
 
-void MultiInBlock::SetParams(utils::VectorRef<BlockParam*> params) {
+void MultiInBlock::SetParams(VectorRef<BlockParam*> params) {
     params_ = std::move(params);
 }
 

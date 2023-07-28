@@ -39,7 +39,7 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
 
     /// Build the module, cleaning up the program before returning.
     /// @returns the generated module
-    utils::Result<ir::Module, std::string> Build() {
+    tint::Result<ir::Module, std::string> Build() {
         SetResolveOnBuild(true);
 
         Program program{std::move(*this)};
@@ -60,7 +60,7 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
     /// Build the module from the given WGSL.
     /// @param wgsl the WGSL to convert to IR
     /// @returns the generated module
-    utils::Result<ir::Module, std::string> Build(std::string wgsl) {
+    tint::Result<ir::Module, std::string> Build(std::string wgsl) {
 #if TINT_BUILD_WGSL_READER
         Source::File file("test.wgsl", std::move(wgsl));
         auto program = wgsl::reader::Parse(&file);

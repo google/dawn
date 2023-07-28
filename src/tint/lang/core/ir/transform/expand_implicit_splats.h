@@ -21,7 +21,7 @@ namespace tint::ir::transform {
 
 /// ExpandImplicitSplats is a transform that expands implicit vector splat operands in construct
 /// instructions and binary instructions where not supported by SPIR-V.
-class ExpandImplicitSplats final : public utils::Castable<ExpandImplicitSplats, Transform> {
+class ExpandImplicitSplats final : public Castable<ExpandImplicitSplats, Transform> {
   public:
     /// Constructor
     ExpandImplicitSplats();

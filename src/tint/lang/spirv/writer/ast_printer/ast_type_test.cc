@@ -28,7 +28,7 @@ using SpirvASTPrinterTest_Type = TestHelper;
 
 TEST_F(SpirvASTPrinterTest_Type, GenerateRuntimeArray) {
     auto ary = ty.array(ty.i32());
-    auto* str = Structure("S", utils::Vector{Member("x", ary)});
+    auto* str = Structure("S", Vector{Member("x", ary)});
     GlobalVar("a", ty.Of(str), builtin::AddressSpace::kStorage, builtin::Access::kRead,
               Binding(0_a), Group(0_a));
     ast::Type type = str->members[0]->type;
@@ -46,7 +46,7 @@ TEST_F(SpirvASTPrinterTest_Type, GenerateRuntimeArray) {
 
 TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedRuntimeArray) {
     auto ary = ty.array(ty.i32());
-    auto* str = Structure("S", utils::Vector{Member("x", ary)});
+    auto* str = Structure("S", Vector{Member("x", ary)});
     GlobalVar("a", ty.Of(str), builtin::AddressSpace::kStorage, builtin::Access::kRead,
               Binding(0_a), Group(0_a));
     ast::Type type = str->members[0]->type;
@@ -80,7 +80,7 @@ TEST_F(SpirvASTPrinterTest_Type, GenerateArray) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, GenerateArray_WithStride) {
-    auto ary = ty.array<i32, 4>(utils::Vector{Stride(16)});
+    auto ary = ty.array<i32, 4>(Vector{Stride(16)});
     ast::Type ty = GlobalVar("a", ary, builtin::AddressSpace::kPrivate)->type;
 
     Builder& b = Build();
@@ -324,7 +324,7 @@ TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedPtr) {
 TEST_F(SpirvASTPrinterTest_Type, GenerateStruct) {
     Enable(builtin::Extension::kF16);
 
-    auto* s = Structure("my_struct", utils::Vector{Member("a", ty.f32()), Member("b", ty.f16())});
+    auto* s = Structure("my_struct", Vector{Member("a", ty.f32()), Member("b", ty.f16())});
 
     Builder& b = Build();
 
@@ -345,10 +345,10 @@ OpMemberName %1 1 "b"
 TEST_F(SpirvASTPrinterTest_Type, GenerateStruct_DecoratedMembers) {
     Enable(builtin::Extension::kF16);
 
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.f32()),
-                                 Member("b", ty.f32(), utils::Vector{MemberAlign(8_i)}),
-                                 Member("c", ty.f16(), utils::Vector{MemberAlign(8_u)}),
+                                 Member("b", ty.f32(), Vector{MemberAlign(8_i)}),
+                                 Member("c", ty.f16(), Vector{MemberAlign(8_u)}),
                                  Member("d", ty.f16()),
                              });
 
@@ -378,15 +378,14 @@ OpMemberDecorate %1 3 Offset 18
 TEST_F(SpirvASTPrinterTest_Type, GenerateStruct_DecoratedMembers_Matrix) {
     Enable(builtin::Extension::kF16);
 
-    auto* s =
-        Structure("S", utils::Vector{
-                           Member("mat2x2_f32", ty.mat2x2<f32>()),
-                           Member("mat2x3_f32", ty.mat2x3<f32>(), utils::Vector{MemberAlign(64_i)}),
-                           Member("mat4x4_f32", ty.mat4x4<f32>()),
-                           Member("mat2x2_f16", ty.mat2x2<f16>(), utils::Vector{MemberAlign(32_i)}),
-                           Member("mat2x3_f16", ty.mat2x3<f16>()),
-                           Member("mat4x4_f16", ty.mat4x4<f16>(), utils::Vector{MemberAlign(64_i)}),
-                       });
+    auto* s = Structure("S", Vector{
+                                 Member("mat2x2_f32", ty.mat2x2<f32>()),
+                                 Member("mat2x3_f32", ty.mat2x3<f32>(), Vector{MemberAlign(64_i)}),
+                                 Member("mat4x4_f32", ty.mat4x4<f32>()),
+                                 Member("mat2x2_f16", ty.mat2x2<f16>(), Vector{MemberAlign(32_i)}),
+                                 Member("mat2x3_f16", ty.mat2x3<f16>()),
+                                 Member("mat4x4_f16", ty.mat4x4<f16>(), Vector{MemberAlign(64_i)}),
+                             });
 
     Builder& b = Build();
 
@@ -451,10 +450,10 @@ TEST_F(SpirvASTPrinterTest_Type, GenerateStruct_DecoratedMembers_ArraysOfMatrix)
     auto rtarr_mat4x4 = ty.array(ty.mat4x4<f32>());      // Runtime array
 
     auto* s = Structure(
-        "S", utils::Vector{
+        "S", Vector{
                  Member("arr_mat2x2_f32", arr_mat2x2_f32),
-                 Member("arr_mat2x2_f16", arr_mat2x2_f16, utils::Vector{MemberAlign(64_i)}),
-                 Member("arr_arr_mat2x3_f32", arr_arr_mat2x3_f32, utils::Vector{MemberAlign(64_i)}),
+                 Member("arr_mat2x2_f16", arr_mat2x2_f16, Vector{MemberAlign(64_i)}),
+                 Member("arr_arr_mat2x3_f32", arr_arr_mat2x3_f32, Vector{MemberAlign(64_i)}),
                  Member("arr_arr_mat2x3_f16", arr_arr_mat2x3_f16),
                  Member("rtarr_mat4x4", rtarr_mat4x4),
              });
@@ -611,7 +610,7 @@ struct PtrData {
     SpvStorageClass result;
 };
 inline std::ostream& operator<<(std::ostream& out, PtrData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.ast_class;
     out << str.str();
     return out;

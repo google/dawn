@@ -18,7 +18,7 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/text/string.h"
 
-namespace tint::utils {
+namespace tint {
 
 size_t Distance(std::string_view str_a, std::string_view str_b) {
     const auto len_a = str_a.size();
@@ -51,7 +51,7 @@ size_t Distance(std::string_view str_a, std::string_view str_b) {
 
 void SuggestAlternatives(std::string_view got,
                          Slice<char const* const> strings,
-                         utils::StringStream& ss,
+                         StringStream& ss,
                          const SuggestAlternativeOptions& options /* = {} */) {
     auto views = Transform<8>(strings, [](char const* const str) { return std::string_view(str); });
     SuggestAlternatives(got, views.Slice(), ss, options);
@@ -59,7 +59,7 @@ void SuggestAlternatives(std::string_view got,
 
 void SuggestAlternatives(std::string_view got,
                          Slice<std::string_view> strings,
-                         utils::StringStream& ss,
+                         StringStream& ss,
                          const SuggestAlternativeOptions& options /* = {} */) {
     // If the string typed was within kSuggestionDistance of one of the possible enum values,
     // suggest that. Don't bother with suggestions if the string was extremely long.
@@ -69,7 +69,7 @@ void SuggestAlternatives(std::string_view got,
         size_t candidate_dist = kSuggestionDistance;
         std::string_view candidate;
         for (auto str : strings) {
-            auto dist = utils::Distance(str, got);
+            auto dist = tint::Distance(str, got);
             if (dist < candidate_dist) {
                 candidate = str;
                 candidate_dist = dist;
@@ -95,4 +95,4 @@ void SuggestAlternatives(std::string_view got,
     }
 }
 
-}  // namespace tint::utils
+}  // namespace tint

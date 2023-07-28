@@ -43,8 +43,8 @@ struct LocalizeStructArrayAssignment::State {
     ApplyResult Run() {
         struct Shared {
             bool process_nested_nodes = false;
-            utils::Vector<const Statement*, 4> insert_before_stmts;
-            utils::Vector<const Statement*, 4> insert_after_stmts;
+            tint::Vector<const Statement*, 4> insert_before_stmts;
+            tint::Vector<const Statement*, 4> insert_after_stmts;
         } s;
 
         bool made_changes = false;
@@ -135,7 +135,7 @@ struct LocalizeStructArrayAssignment::State {
             // e.g. *(tint_symbol) = tint_symbol_1;
             auto* assign_rhs_to_temp = b.Assign(b.Deref(mem_access_ptr), tmp_var);
             {
-                utils::Vector<const Statement*, 8> stmts{assign_rhs_to_temp};
+                tint::Vector<const Statement*, 8> stmts{assign_rhs_to_temp};
                 for (auto* stmt : s.insert_after_stmts) {
                     stmts.Push(stmt);
                 }

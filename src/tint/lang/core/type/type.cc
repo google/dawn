@@ -261,7 +261,7 @@ const Type* Type::DeepestElement() const {
     }
 }
 
-const Type* Type::Common(utils::VectorRef<const Type*> types) {
+const Type* Type::Common(VectorRef<const Type*> types) {
     const auto count = types.Length();
     if (count == 0) {
         return nullptr;

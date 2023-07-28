@@ -53,9 +53,9 @@ TEST_F(ConstantTest_Value, Equal_Composite_Composite) {
     auto* vec3f = create<type::Vector>(create<type::F32>(), 3u);
 
     auto* vec3f_1_1_2 = constants.Composite(
-        vec3f, utils::Vector{constants.Get(1_f), constants.Get(1_f), constants.Get(2_f)});
+        vec3f, Vector{constants.Get(1_f), constants.Get(1_f), constants.Get(2_f)});
     auto* vec3f_1_2_1 = constants.Composite(
-        vec3f, utils::Vector{constants.Get(1_f), constants.Get(2_f), constants.Get(1_f)});
+        vec3f, Vector{constants.Get(1_f), constants.Get(2_f), constants.Get(1_f)});
 
     EXPECT_TRUE(vec3f_1_1_2->Equal(vec3f_1_1_2));
     EXPECT_FALSE(vec3f_1_2_1->Equal(vec3f_1_1_2));
@@ -67,7 +67,7 @@ TEST_F(ConstantTest_Value, Equal_Splat_Composite) {
 
     auto* vec3f_1_1_1 = constants.Splat(vec3f, constants.Get(1_f), 3);
     auto* vec3f_1_2_1 = constants.Composite(
-        vec3f, utils::Vector{constants.Get(1_f), constants.Get(2_f), constants.Get(1_f)});
+        vec3f, Vector{constants.Get(1_f), constants.Get(2_f), constants.Get(1_f)});
 
     EXPECT_TRUE(vec3f_1_1_1->Equal(vec3f_1_1_1));
     EXPECT_FALSE(vec3f_1_2_1->Equal(vec3f_1_1_1));

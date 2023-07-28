@@ -22,8 +22,7 @@ using HlslASTPrinterTest_Discard = TestHelper;
 TEST_F(HlslASTPrinterTest_Discard, Emit_Discard) {
     auto* stmt = Discard();
 
-    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
-         utils::Vector{Stage(ast::PipelineStage::kFragment)});
+    Func("F", tint::Empty, ty.void_(), Vector{stmt}, Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASTPrinter& gen = Build();
 

@@ -62,16 +62,15 @@ enum class TraverseOrder {
 /// @return true on success, false on error
 template <TraverseOrder ORDER = TraverseOrder::LeftToRight, typename CALLBACK>
 bool TraverseExpressions(const Expression* root, diag::List& diags, CALLBACK&& callback) {
-    using EXPR_TYPE = std::remove_pointer_t<utils::traits::ParameterType<CALLBACK, 0>>;
-    constexpr static bool kHasDepthArg =
-        utils::traits::SignatureOfT<CALLBACK>::parameter_count == 2;
+    using EXPR_TYPE = std::remove_pointer_t<tint::traits::ParameterType<CALLBACK, 0>>;
+    constexpr static bool kHasDepthArg = tint::traits::SignatureOfT<CALLBACK>::parameter_count == 2;
 
     struct Pending {
         const Expression* expr;
         size_t depth;
     };
 
-    utils::Vector<Pending, 32> to_visit{{root, 0}};
+    tint::Vector<Pending, 32> to_visit{{root, 0}};
 
     auto push_single = [&](const Expression* expr, size_t depth) { to_visit.Push({expr, depth}); };
     auto push_pair = [&](const Expression* left, const Expression* right, size_t depth) {
@@ -83,9 +82,9 @@ bool TraverseExpressions(const Expression* root, diag::List& diags, CALLBACK&& c
             to_visit.Push({right, depth});
         }
     };
-    auto push_list = [&](utils::VectorRef<const Expression*> exprs, size_t depth) {
+    auto push_list = [&](VectorRef<const Expression*> exprs, size_t depth) {
         if (ORDER == TraverseOrder::LeftToRight) {
-            for (auto* expr : utils::Reverse(exprs)) {
+            for (auto* expr : tint::Reverse(exprs)) {
                 to_visit.Push({expr, depth});
             }
         } else {

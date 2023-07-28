@@ -31,7 +31,7 @@ TEST_F(LoopStatementTest, Creation) {
 
     auto* continuing = Block(create<DiscardStatement>());
 
-    auto* l = create<LoopStatement>(body, continuing, utils::Empty);
+    auto* l = create<LoopStatement>(body, continuing, tint::Empty);
     ASSERT_EQ(l->body->statements.Length(), 1u);
     EXPECT_EQ(l->body->statements[0], b);
     ASSERT_EQ(l->continuing->statements.Length(), 1u);
@@ -43,8 +43,7 @@ TEST_F(LoopStatementTest, Creation_WithSource) {
 
     auto* continuing = Block(create<DiscardStatement>());
 
-    auto* l =
-        create<LoopStatement>(Source{Source::Location{20, 2}}, body, continuing, utils::Empty);
+    auto* l = create<LoopStatement>(Source{Source::Location{20, 2}}, body, continuing, tint::Empty);
     auto src = l->source;
     EXPECT_EQ(src.range.begin.line, 20u);
     EXPECT_EQ(src.range.begin.column, 2u);
@@ -55,20 +54,20 @@ TEST_F(LoopStatementTest, Creation_WithAttributes) {
     auto* attr2 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "bar");
 
     auto* body = Block(Return());
-    auto* l = create<LoopStatement>(body, nullptr, utils::Vector{attr1, attr2});
+    auto* l = create<LoopStatement>(body, nullptr, tint::Vector{attr1, attr2});
 
     EXPECT_THAT(l->attributes, testing::ElementsAre(attr1, attr2));
 }
 
 TEST_F(LoopStatementTest, IsLoop) {
-    auto* l = create<LoopStatement>(Block(), Block(), utils::Empty);
+    auto* l = create<LoopStatement>(Block(), Block(), tint::Empty);
     EXPECT_TRUE(l->Is<LoopStatement>());
 }
 
 TEST_F(LoopStatementTest, HasContinuing_WithoutContinuing) {
     auto* body = Block(create<DiscardStatement>());
 
-    auto* l = create<LoopStatement>(body, nullptr, utils::Empty);
+    auto* l = create<LoopStatement>(body, nullptr, tint::Empty);
     EXPECT_FALSE(l->continuing);
 }
 
@@ -77,7 +76,7 @@ TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
 
     auto* continuing = Block(create<DiscardStatement>());
 
-    auto* l = create<LoopStatement>(body, continuing, utils::Empty);
+    auto* l = create<LoopStatement>(body, continuing, tint::Empty);
     EXPECT_TRUE(l->continuing);
 }
 
@@ -85,7 +84,7 @@ TEST_F(LoopStatementTest, Assert_Null_Body) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<LoopStatement>(nullptr, nullptr, utils::Empty);
+            b.create<LoopStatement>(nullptr, nullptr, tint::Empty);
         },
         "internal compiler error");
 }
@@ -95,7 +94,7 @@ TEST_F(LoopStatementTest, Assert_DifferentGenerationID_Body) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<LoopStatement>(b2.Block(), b1.Block(), utils::Empty);
+            b1.create<LoopStatement>(b2.Block(), b1.Block(), tint::Empty);
         },
         "internal compiler error");
 }
@@ -105,7 +104,7 @@ TEST_F(LoopStatementTest, Assert_DifferentGenerationID_Continuing) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<LoopStatement>(b1.Block(), b2.Block(), utils::Empty);
+            b1.create<LoopStatement>(b1.Block(), b2.Block(), tint::Empty);
         },
         "internal compiler error");
 }

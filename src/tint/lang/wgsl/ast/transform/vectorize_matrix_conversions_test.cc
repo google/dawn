@@ -93,11 +93,11 @@ fn main() {
   let n : ${dst_mat_type} = ${dst_mat_type}(${args});
 }
 )";
-    tmpl = utils::ReplaceAll(tmpl, "${src_mat_type}", src_mat_type);
-    tmpl = utils::ReplaceAll(tmpl, "${dst_mat_type}", dst_mat_type);
-    tmpl = utils::ReplaceAll(tmpl, "${values}", vector_values);
-    auto src = utils::ReplaceAll(tmpl, "${args}", "m");
-    auto expect = utils::ReplaceAll(tmpl, "${args}", vectorized_args);
+    tmpl = tint::ReplaceAll(tmpl, "${src_mat_type}", src_mat_type);
+    tmpl = tint::ReplaceAll(tmpl, "${dst_mat_type}", dst_mat_type);
+    tmpl = tint::ReplaceAll(tmpl, "${values}", vector_values);
+    auto src = tint::ReplaceAll(tmpl, "${args}", "m");
+    auto expect = tint::ReplaceAll(tmpl, "${args}", vectorized_args);
 
     EXPECT_TRUE(ShouldRun<VectorizeMatrixConversions>(src));
 
@@ -168,11 +168,11 @@ fn main() {
   let n : ${dst_mat_type} = ${dst_mat_type}(${args});
 }
 )";
-    tmpl = utils::ReplaceAll(tmpl, "${src_mat_type}", src_mat_type);
-    tmpl = utils::ReplaceAll(tmpl, "${dst_mat_type}", dst_mat_type);
-    tmpl = utils::ReplaceAll(tmpl, "${values}", vector_values);
-    auto src = utils::ReplaceAll(tmpl, "${args}", "m");
-    auto expect = utils::ReplaceAll(tmpl, "${args}", vectorized_args);
+    tmpl = tint::ReplaceAll(tmpl, "${src_mat_type}", src_mat_type);
+    tmpl = tint::ReplaceAll(tmpl, "${dst_mat_type}", dst_mat_type);
+    tmpl = tint::ReplaceAll(tmpl, "${values}", vector_values);
+    auto src = tint::ReplaceAll(tmpl, "${args}", "m");
+    auto expect = tint::ReplaceAll(tmpl, "${args}", vectorized_args);
 
     EXPECT_TRUE(ShouldRun<VectorizeMatrixConversions>(src));
 
@@ -296,13 +296,13 @@ fn main() {
   let m16 : ${f16_mat_type} = ${f16_matrix_conversion};
 }
 )";
-    tmpl = utils::ReplaceAll(tmpl, "${f32_values}", f32_vector_values);
-    tmpl = utils::ReplaceAll(tmpl, "${f16_values}", f16_vector_values);
-    auto src = utils::ReplaceAll(tmpl, "${f32_matrix_conversion}", "${f32_mat_type}(mat_f16())");
-    src = utils::ReplaceAll(src, "${f16_matrix_conversion}", "${f16_mat_type}(mat_f32())");
-    src = utils::ReplaceAll(src, "${helper_function}", "");
-    src = utils::ReplaceAll(src, "${f32_mat_type}", f32_mat_type);
-    src = utils::ReplaceAll(src, "${f16_mat_type}", f16_mat_type);
+    tmpl = tint::ReplaceAll(tmpl, "${f32_values}", f32_vector_values);
+    tmpl = tint::ReplaceAll(tmpl, "${f16_values}", f16_vector_values);
+    auto src = tint::ReplaceAll(tmpl, "${f32_matrix_conversion}", "${f32_mat_type}(mat_f16())");
+    src = tint::ReplaceAll(src, "${f16_matrix_conversion}", "${f16_mat_type}(mat_f32())");
+    src = tint::ReplaceAll(src, "${helper_function}", "");
+    src = tint::ReplaceAll(src, "${f32_mat_type}", f32_mat_type);
+    src = tint::ReplaceAll(src, "${f16_mat_type}", f16_mat_type);
 
     auto helper_function = std::string(R"(
 fn convert_${mat_shape}_f16_f32(value : ${f16_mat_type}) -> ${f32_mat_type} {
@@ -313,16 +313,16 @@ fn convert_${mat_shape}_f32_f16(value : ${f32_mat_type}) -> ${f16_mat_type} {
   return ${f16_mat_type}(${f16_vectorized_args});
 }
 )");
-    auto expect = utils::ReplaceAll(tmpl, "${helper_function}", helper_function);
-    expect = utils::ReplaceAll(expect, "${f32_mat_type}", f32_mat_type);
-    expect = utils::ReplaceAll(expect, "${f16_mat_type}", f16_mat_type);
-    expect = utils::ReplaceAll(expect, "${f32_matrix_conversion}",
-                               "convert_${mat_shape}_f16_f32(mat_f16())");
-    expect = utils::ReplaceAll(expect, "${f16_matrix_conversion}",
-                               "convert_${mat_shape}_f32_f16(mat_f32())");
-    expect = utils::ReplaceAll(expect, "${mat_shape}", mat_shape);
-    expect = utils::ReplaceAll(expect, "${f32_vectorized_args}", f32_vectorized_args);
-    expect = utils::ReplaceAll(expect, "${f16_vectorized_args}", f16_vectorized_args);
+    auto expect = tint::ReplaceAll(tmpl, "${helper_function}", helper_function);
+    expect = tint::ReplaceAll(expect, "${f32_mat_type}", f32_mat_type);
+    expect = tint::ReplaceAll(expect, "${f16_mat_type}", f16_mat_type);
+    expect = tint::ReplaceAll(expect, "${f32_matrix_conversion}",
+                              "convert_${mat_shape}_f16_f32(mat_f16())");
+    expect = tint::ReplaceAll(expect, "${f16_matrix_conversion}",
+                              "convert_${mat_shape}_f32_f16(mat_f32())");
+    expect = tint::ReplaceAll(expect, "${mat_shape}", mat_shape);
+    expect = tint::ReplaceAll(expect, "${f32_vectorized_args}", f32_vectorized_args);
+    expect = tint::ReplaceAll(expect, "${f16_vectorized_args}", f16_vectorized_args);
 
     EXPECT_TRUE(ShouldRun<VectorizeMatrixConversions>(src));
 
@@ -351,8 +351,8 @@ fn main() {
   let m = ${matrix}(${columns});
 }
 )";
-    tmpl = utils::ReplaceAll(tmpl, "${matrix}", mat_type);
-    auto src = utils::ReplaceAll(tmpl, "${columns}", columns);
+    tmpl = tint::ReplaceAll(tmpl, "${matrix}", mat_type);
+    auto src = tint::ReplaceAll(tmpl, "${columns}", columns);
     auto expect = src;
 
     EXPECT_FALSE(ShouldRun<VectorizeMatrixConversions>(src));
@@ -384,8 +384,8 @@ fn main() {
   let n : ${matrix} = ${matrix}(m);
 }
 )";
-    tmpl = utils::ReplaceAll(tmpl, "${matrix}", mat_type);
-    auto src = utils::ReplaceAll(tmpl, "${columns}", columns);
+    tmpl = tint::ReplaceAll(tmpl, "${matrix}", mat_type);
+    auto src = tint::ReplaceAll(tmpl, "${columns}", columns);
     auto expect = src;
 
     EXPECT_FALSE(ShouldRun<VectorizeMatrixConversions>(src));

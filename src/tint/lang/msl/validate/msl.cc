@@ -24,14 +24,14 @@ namespace tint::msl::validate {
 Result Msl(const std::string& xcrun_path, const std::string& source) {
     Result result;
 
-    auto xcrun = utils::Command(xcrun_path);
+    auto xcrun = tint::Command(xcrun_path);
     if (!xcrun.Found()) {
         result.output = "xcrun not found at '" + std::string(xcrun_path) + "'";
         result.failed = true;
         return result;
     }
 
-    utils::TmpFile file(".metal");
+    tint::TmpFile file(".metal");
     file << source;
 
 #ifdef _WIN32

@@ -22,7 +22,7 @@ Usage::Usage() {}
 Usage::Usage(const Usage& other) = default;
 Usage::~Usage() = default;
 
-utils::StringStream& Usage::operator<<(utils::StringStream& out) const {
+StringStream& Usage::operator<<(StringStream& out) const {
     out << "Usage(";
     if (IsSampler()) {
         out << "Sampler(";
@@ -179,7 +179,7 @@ void Usage::AddDepthTexture() {
 }
 
 std::string Usage::to_str() const {
-    utils::StringStream ss;
+    StringStream ss;
     ss << *this;
     return ss.str();
 }

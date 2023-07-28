@@ -97,7 +97,7 @@ Type Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
     }
     if (auto* a = ty->As<type::Array>()) {
         auto el = CreateASTTypeFor(ctx, a->ElemType());
-        utils::Vector<const Attribute*, 1> attrs;
+        tint::Vector<const Attribute*, 1> attrs;
         if (!a->IsStrideImplicit()) {
             attrs.Push(ctx.dst->create<StrideAttribute>(a->Stride()));
         }

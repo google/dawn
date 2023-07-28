@@ -43,7 +43,7 @@ InterpolationSampling ParseInterpolationSampling(std::string_view str) {
     return InterpolationSampling::kUndefined;
 }
 
-utils::StringStream& operator<<(utils::StringStream& out, InterpolationSampling value) {
+StringStream& operator<<(StringStream& out, InterpolationSampling value) {
     switch (value) {
         case InterpolationSampling::kUndefined:
             return out << "undefined";

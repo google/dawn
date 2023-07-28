@@ -26,7 +26,7 @@ namespace tint::ir {
 /// @tparam N the number of operands before spilling to the heap
 /// @tparam R the number of result values before spilling to the heap
 template <unsigned N, unsigned R>
-class OperandInstruction : public utils::Castable<OperandInstruction<N, R>, Instruction> {
+class OperandInstruction : public Castable<OperandInstruction<N, R>, Instruction> {
   public:
     /// Destructor
     ~OperandInstruction() override = default;
@@ -53,7 +53,7 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N, R>, Inst
 
     /// Sets the operands to @p operands
     /// @param operands the new operands for the instruction
-    void SetOperands(utils::VectorRef<ir::Value*> operands) {
+    void SetOperands(VectorRef<ir::Value*> operands) {
         ClearOperands();
         operands_ = std::move(operands);
         for (size_t i = 0; i < operands_.Length(); i++) {
@@ -75,7 +75,7 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N, R>, Inst
     }
 
     /// @returns the operands of the instruction
-    utils::VectorRef<ir::Value*> Operands() override { return operands_; }
+    VectorRef<ir::Value*> Operands() override { return operands_; }
 
     /// @returns true if the instruction has result values
     bool HasResults() override { return !results_.IsEmpty(); }
@@ -94,7 +94,7 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N, R>, Inst
     using Instruction::Result;
 
     /// @returns the result values for this instruction
-    utils::VectorRef<InstructionResult*> Results() override { return results_; }
+    VectorRef<InstructionResult*> Results() override { return results_; }
 
   protected:
     /// Append a new operand to the operand list for this instruction.
@@ -112,7 +112,7 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N, R>, Inst
     /// Append a list of operands to the operand list for this instruction.
     /// @param start_idx the index from which the values should start
     /// @param values the operand values to append
-    void AddOperands(size_t start_idx, utils::VectorRef<ir::Value*> values) {
+    void AddOperands(size_t start_idx, VectorRef<ir::Value*> values) {
         size_t idx = start_idx;
         for (auto* val : values) {
             AddOperand(idx, val);
@@ -130,9 +130,9 @@ class OperandInstruction : public utils::Castable<OperandInstruction<N, R>, Inst
     }
 
     /// The operands to this instruction.
-    utils::Vector<ir::Value*, N> operands_;
+    Vector<ir::Value*, N> operands_;
     /// The results of this instruction.
-    utils::Vector<ir::InstructionResult*, R> results_;
+    Vector<ir::InstructionResult*, R> results_;
 };
 
 }  // namespace tint::ir

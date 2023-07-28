@@ -81,7 +81,7 @@ struct CombineSamplers::State {
     /// Group 0 and binding 0 are used, with collisions disabled.
     /// @returns the newly-created attribute list
     auto Attributes() const {
-        utils::Vector<const Attribute*, 3> attributes{ctx.dst->Group(0_a), ctx.dst->Binding(0_a)};
+        tint::Vector<const Attribute*, 3> attributes{ctx.dst->Group(0_a), ctx.dst->Binding(0_a)};
         attributes.Push(ctx.dst->Disable(DisabledValidation::kBindingPointCollision));
         return attributes;
     }
@@ -153,7 +153,7 @@ struct CombineSamplers::State {
         for (auto* global : ctx.src->AST().GlobalVariables()) {
             auto* global_sem = sem.Get(global)->As<sem::GlobalVariable>();
             auto* type = ctx.src->TypeOf(global->type);
-            if (tint::utils::IsAnyOf<type::Texture, type::Sampler>(type) &&
+            if (tint::IsAnyOf<type::Texture, type::Sampler>(type) &&
                 !type->Is<type::StorageTexture>()) {
                 ctx.Remove(ctx.src->AST().GlobalDeclarations(), global);
             } else if (auto binding_point = global_sem->BindingPoint()) {
@@ -172,7 +172,7 @@ struct CombineSamplers::State {
                 if (pairs.IsEmpty()) {
                     return nullptr;
                 }
-                utils::Vector<const Parameter*, 8> params;
+                tint::Vector<const Parameter*, 8> params;
                 for (auto pair : fn->TextureSamplerPairs()) {
                     const sem::Variable* texture_var = pair.first;
                     const sem::Variable* sampler_var = pair.second;
@@ -183,7 +183,7 @@ struct CombineSamplers::State {
                     if (IsGlobal(pair)) {
                         // Both texture and sampler are global; add a new global variable
                         // to represent the combined sampler (if not already created).
-                        utils::GetOrCreate(global_combined_texture_samplers_, pair, [&] {
+                        tint::GetOrCreate(global_combined_texture_samplers_, pair, [&] {
                             return CreateCombinedGlobal(texture_var, sampler_var, name);
                         });
                     } else {
@@ -221,7 +221,7 @@ struct CombineSamplers::State {
         // the combined global samplers, as appropriate.
         ctx.ReplaceAll([&](const CallExpression* expr) -> const Expression* {
             if (auto* call = sem.Get(expr)->UnwrapMaterialize()->As<sem::Call>()) {
-                utils::Vector<const Expression*, 8> args;
+                tint::Vector<const Expression*, 8> args;
                 // Replace all texture builtin calls.
                 if (auto* builtin = call->Target()->As<sem::Builtin>()) {
                     const auto& signature = builtin->Signature();

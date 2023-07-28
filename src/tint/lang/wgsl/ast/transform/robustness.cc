@@ -214,7 +214,7 @@ struct Robustness::State {
     /// Alias to the source program's semantic info
     const sem::Info& sem = ctx.src->Sem();
     /// Map of expression to predicate condition
-    utils::Hashmap<const Expression*, Symbol, 32> predicates{};
+    Hashmap<const Expression*, Symbol, 32> predicates{};
 
     /// @return the `u32` typed expression that represents the maximum indexable value for the index
     /// accessor @p expr, or nullptr if there is no robustness limit for this expression.
@@ -687,7 +687,7 @@ struct Robustness::State {
     /// TODO(tint:1890): make this function work with unrestricted pointer paramters. Note that this
     /// depends on transform::DirectVariableAccess to have been run first.
     bool IsIgnoredResourceBinding(const sem::Variable* variable) const {
-        auto* globalVariable = utils::As<sem::GlobalVariable>(variable);
+        auto* globalVariable = tint::As<sem::GlobalVariable>(variable);
         if (globalVariable == nullptr) {
             return false;
         }

@@ -39,7 +39,7 @@ namespace tint::sem {
 
 /// Struct holds the semantic information for structures.
 /// Unlike type::Struct, sem::Struct has an AST declaration node.
-class Struct final : public utils::Castable<Struct, type::Struct> {
+class Struct final : public Castable<Struct, type::Struct> {
   public:
     /// Constructor
     /// @param declaration the AST structure declaration
@@ -50,7 +50,7 @@ class Struct final : public utils::Castable<Struct, type::Struct> {
     /// @param size_no_padding size of the members without the end of structure alignment padding
     Struct(const ast::Struct* declaration,
            Symbol name,
-           utils::VectorRef<const StructMember*> members,
+           VectorRef<const StructMember*> members,
            uint32_t align,
            uint32_t size,
            uint32_t size_no_padding);
@@ -62,7 +62,7 @@ class Struct final : public utils::Castable<Struct, type::Struct> {
     const ast::Struct* Declaration() const { return declaration_; }
 
     /// @returns the members of the structure
-    utils::VectorRef<const StructMember*> Members() const {
+    VectorRef<const StructMember*> Members() const {
         return Base::Members().ReinterpretCast<const StructMember*>();
     }
 
@@ -72,7 +72,7 @@ class Struct final : public utils::Castable<Struct, type::Struct> {
 
 /// StructMember holds the semantic information for structure members.
 /// Unlike type::StructMember, sem::StructMember has an AST declaration node.
-class StructMember final : public utils::Castable<StructMember, type::StructMember> {
+class StructMember final : public Castable<StructMember, type::StructMember> {
   public:
     /// Constructor
     /// @param declaration the AST declaration node

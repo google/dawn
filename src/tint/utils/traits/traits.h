@@ -20,7 +20,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace tint::utils::traits {
+namespace tint::traits {
 
 /// Convience type definition for std::decay<T>::type
 template <typename T>
@@ -209,6 +209,6 @@ struct CharArrayToCharPtrImpl<const char[N]> {
 template <typename T>
 using CharArrayToCharPtr = typename traits::detail::CharArrayToCharPtrImpl<T>::type;
 
-}  // namespace tint::utils::traits
+}  // namespace tint::traits
 
 #endif  // SRC_TINT_UTILS_TRAITS_TRAITS_H_

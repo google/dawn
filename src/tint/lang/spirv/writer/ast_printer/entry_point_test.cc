@@ -44,17 +44,17 @@ TEST_F(SpirvASTPrinterTest, EntryPoint_Parameters) {
     //   var col : f32 = (coord.x * loc1);
     // }
     auto* coord = Param("coord", ty.vec4<f32>(),
-                        utils::Vector{
+                        Vector{
                             Builtin(builtin::BuiltinValue::kPosition),
                         });
     auto* loc1 = Param("loc1", ty.f32(),
-                       utils::Vector{
+                       Vector{
                            Location(1_u),
                        });
     auto* mul = Mul(Expr(MemberAccessor("coord", "x")), Expr("loc1"));
     auto* col = Var("col", ty.f32(), mul);
-    Func("frag_main", utils::Vector{coord, loc1}, ty.void_(), utils::Vector{WrapInStatement(col)},
-         utils::Vector{
+    Func("frag_main", Vector{coord, loc1}, ty.void_(), Vector{WrapInStatement(col)},
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -120,21 +120,21 @@ TEST_F(SpirvASTPrinterTest, EntryPoint_ReturnValue) {
     //   return 1.0;
     // }
     auto* loc_in = Param("loc_in", ty.u32(),
-                         utils::Vector{
+                         Vector{
                              Location(0_a),
                              Flat(),
                          });
     auto* cond =
         create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThan, Expr("loc_in"), Expr(10_u));
-    Func("frag_main", utils::Vector{loc_in}, ty.f32(),
-         utils::Vector{
+    Func("frag_main", Vector{loc_in}, ty.f32(),
+         Vector{
              If(cond, Block(Return(0.5_f))),
              Return(1_f),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         utils::Vector{
+         Vector{
              Location(0_a),
          });
 
@@ -211,24 +211,24 @@ TEST_F(SpirvASTPrinterTest, EntryPoint_SharedStruct) {
 
     auto* interface = Structure(
         "Interface",
-        utils::Vector{
-            Member("value", ty.f32(), utils::Vector{Location(1_u)}),
-            Member("pos", ty.vec4<f32>(), utils::Vector{Builtin(builtin::BuiltinValue::kPosition)}),
+        Vector{
+            Member("value", ty.f32(), Vector{Location(1_u)}),
+            Member("pos", ty.vec4<f32>(), Vector{Builtin(builtin::BuiltinValue::kPosition)}),
         });
 
     auto* vert_retval = Call(ty.Of(interface), 42_f, Call<vec4<f32>>());
-    Func("vert_main", utils::Empty, ty.Of(interface), utils::Vector{Return(vert_retval)},
-         utils::Vector{
+    Func("vert_main", tint::Empty, ty.Of(interface), Vector{Return(vert_retval)},
+         Vector{
              Stage(ast::PipelineStage::kVertex),
          });
 
     auto* frag_inputs = Param("inputs", ty.Of(interface));
-    Func("frag_main", utils::Vector{frag_inputs}, ty.f32(),
-         utils::Vector{
+    Func("frag_main", Vector{frag_inputs}, ty.f32(),
+         Vector{
              Return(MemberAccessor(Expr("inputs"), "value")),
          },
-         utils::Vector{Stage(ast::PipelineStage::kFragment)},
-         utils::Vector{
+         Vector{Stage(ast::PipelineStage::kFragment)},
+         Vector{
              Builtin(builtin::BuiltinValue::kFragDepth),
          });
 
@@ -322,10 +322,10 @@ OpFunctionEnd
 
 TEST_F(SpirvASTPrinterTest, SampleIndex_SampleRateShadingCapability) {
     Func("main",
-         utils::Vector{Param("sample_index", ty.u32(),
-                             utils::Vector{Builtin(builtin::BuiltinValue::kSampleIndex)})},
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         Vector{
+             Param("sample_index", ty.u32(), Vector{Builtin(builtin::BuiltinValue::kSampleIndex)})},
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 

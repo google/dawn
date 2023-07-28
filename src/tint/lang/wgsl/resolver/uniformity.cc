@@ -132,7 +132,7 @@ struct Node {
     uint32_t arg_index = 0xffffffffu;
 
     /// The set of edges from this node to other nodes in the graph.
-    utils::UniqueVector<Node*, 4> edges;
+    UniqueVector<Node*, 4> edges;
 
     /// The node that this node was visited from, or nullptr if not visited.
     Node* visited_from = nullptr;
@@ -159,10 +159,10 @@ struct ParameterInfo {
     bool pointer_may_become_non_uniform = false;
     /// The parameters that are required to be uniform for the contents of this pointer parameter to
     /// be uniform at function exit.
-    utils::Vector<const sem::Parameter*, 8> ptr_output_source_param_values;
+    Vector<const sem::Parameter*, 8> ptr_output_source_param_values;
     /// The pointer parameters whose contents are required to be uniform for the contents of this
     /// pointer parameter to be uniform at function exit.
-    utils::Vector<const sem::Parameter*, 8> ptr_output_source_param_contents;
+    Vector<const sem::Parameter*, 8> ptr_output_source_param_contents;
     /// The node in the graph that corresponds to this parameter's (immutable) value.
     Node* value;
     /// The node in the graph that corresponds to this pointer parameter's initial contents.
@@ -224,10 +224,10 @@ struct FunctionInfo {
     /// The function's uniformity effects.
     FunctionTag function_tag;
     /// The uniformity requirements of the function's parameters.
-    utils::Vector<ParameterInfo, 8> parameters;
+    Vector<ParameterInfo, 8> parameters;
 
     /// The control flow graph.
-    utils::BlockAllocator<Node> nodes;
+    BlockAllocator<Node> nodes;
 
     /// Special `RequiredToBeUniform` nodes.
     Node* required_to_be_uniform_error = nullptr;
@@ -247,20 +247,20 @@ struct FunctionInfo {
     /// in the analysis. This includes the contents of parameters to the function that are pointers.
     /// This is used by the analysis for if statements and loops to know which variables need extra
     /// nodes to capture their state when entering/exiting those constructs.
-    utils::Hashset<const sem::Variable*, 8> local_var_decls;
+    Hashset<const sem::Variable*, 8> local_var_decls;
 
     /// The set of partial pointer variables - pointers that point to a subobject (into an array or
     /// struct).
-    utils::Hashset<const sem::Variable*, 4> partial_ptrs;
+    Hashset<const sem::Variable*, 4> partial_ptrs;
 
     /// LoopSwitchInfo tracks information about the value of variables for a control flow construct.
     struct LoopSwitchInfo {
         /// The type of this control flow construct.
         std::string type;
         /// The input values for local variables at the start of this construct.
-        utils::Hashmap<const sem::Variable*, Node*, 4> var_in_nodes;
+        Hashmap<const sem::Variable*, Node*, 4> var_in_nodes;
         /// The exit values for local variables at the end of this construct.
-        utils::Hashmap<const sem::Variable*, Node*, 4> var_exit_nodes;
+        Hashmap<const sem::Variable*, Node*, 4> var_exit_nodes;
     };
 
     /// @returns the RequiredToBeUniform node that corresponds to `severity`
@@ -324,13 +324,13 @@ struct FunctionInfo {
 
   private:
     /// A list of tags that have already been used within the current function.
-    utils::Hashset<std::string, 8> tags_;
+    Hashset<std::string, 8> tags_;
 
     /// Map from control flow statements to the corresponding LoopSwitchInfo structure.
-    utils::Hashmap<const sem::Statement*, LoopSwitchInfo*, 8> loop_switch_infos;
+    Hashmap<const sem::Statement*, LoopSwitchInfo*, 8> loop_switch_infos;
 
     /// Allocator of LoopSwitchInfos
-    utils::BlockAllocator<LoopSwitchInfo> loop_switch_info_allocator;
+    BlockAllocator<LoopSwitchInfo> loop_switch_info_allocator;
 };
 
 /// UniformityGraph is used to analyze the uniformity requirements and effects of functions in a
@@ -379,7 +379,7 @@ class UniformityGraph {
     diag::List& diagnostics_;
 
     /// Map of analyzed function results.
-    utils::Hashmap<const ast::Function*, FunctionInfo, 8> functions_;
+    Hashmap<const ast::Function*, FunctionInfo, 8> functions_;
 
     /// The function currently being analyzed.
     FunctionInfo* current_function_;
@@ -439,7 +439,7 @@ class UniformityGraph {
 #endif
 
         /// Helper to generate a tag for the uniformity requirements of the parameter at `index`.
-        auto get_param_tag = [&](utils::UniqueVector<Node*, 4>& reachable, size_t index) {
+        auto get_param_tag = [&](UniqueVector<Node*, 4>& reachable, size_t index) {
             auto* param = sem_.Get(func->params[index]);
             auto& param_info = current_function_->parameters[index];
             if (param->Type()->Is<type::Pointer>()) {
@@ -459,7 +459,7 @@ class UniformityGraph {
 
         // Look at which nodes are reachable from "RequiredToBeUniform".
         {
-            utils::UniqueVector<Node*, 4> reachable;
+            UniqueVector<Node*, 4> reachable;
             auto traverse = [&](builtin::DiagnosticSeverity severity) {
                 Traverse(current_function_->RequiredToBeUniform(severity), &reachable);
                 if (reachable.Contains(current_function_->may_be_non_uniform)) {
@@ -496,7 +496,7 @@ class UniformityGraph {
         if (current_function_->value_return) {
             current_function_->ResetVisited();
 
-            utils::UniqueVector<Node*, 4> reachable;
+            UniqueVector<Node*, 4> reachable;
             Traverse(current_function_->value_return, &reachable);
             if (reachable.Contains(current_function_->may_be_non_uniform)) {
                 current_function_->function_tag = ReturnValueMayBeNonUniform;
@@ -519,7 +519,7 @@ class UniformityGraph {
             // Reset "visited" state for all nodes.
             current_function_->ResetVisited();
 
-            utils::UniqueVector<Node*, 4> reachable;
+            UniqueVector<Node*, 4> reachable;
             Traverse(param_info.ptr_output_contents, &reachable);
             if (reachable.Contains(current_function_->may_be_non_uniform)) {
                 param_info.pointer_may_become_non_uniform = true;
@@ -566,7 +566,7 @@ class UniformityGraph {
             },
 
             [&](const ast::BlockStatement* b) {
-                utils::Hashmap<const sem::Variable*, Node*, 4> scoped_assignments;
+                Hashmap<const sem::Variable*, Node*, 4> scoped_assignments;
                 {
                     // Push a new scope for variable assignments in the block.
                     current_function_->variables.Push();
@@ -901,15 +901,15 @@ class UniformityGraph {
                 v->affects_control_flow = true;
                 v->AddEdge(v_cond);
 
-                utils::Hashmap<const sem::Variable*, Node*, 4> true_vars;
-                utils::Hashmap<const sem::Variable*, Node*, 4> false_vars;
+                Hashmap<const sem::Variable*, Node*, 4> true_vars;
+                Hashmap<const sem::Variable*, Node*, 4> false_vars;
 
                 // Helper to process a statement with a new scope for variable assignments.
                 // Populates `assigned_vars` with new nodes for any variables that are assigned in
                 // this statement.
                 auto process_in_scope =
                     [&](Node* cf_in, const ast::Statement* s,
-                        utils::Hashmap<const sem::Variable*, Node*, 4>& assigned_vars) {
+                        Hashmap<const sem::Variable*, Node*, 4>& assigned_vars) {
                         // Push a new scope for variable assignments.
                         current_function_->variables.Push();
 
@@ -1491,8 +1491,8 @@ class UniformityGraph {
 
         // Process call arguments
         Node* cf_last_arg = cf;
-        utils::Vector<Node*, 8> args;
-        utils::Vector<Node*, 8> ptrarg_contents;
+        Vector<Node*, 8> args;
+        Vector<Node*, 8> ptrarg_contents;
         ptrarg_contents.Resize(call->args.Length());
         for (size_t i = 0; i < call->args.Length(); i++) {
             auto [cf_i, arg_i] = ProcessExpression(cf_last_arg, call->args[i]);
@@ -1692,8 +1692,8 @@ class UniformityGraph {
     /// recording which node they were reached from.
     /// @param source the starting node
     /// @param reachable the set of reachable nodes to populate, if required
-    void Traverse(Node* source, utils::UniqueVector<Node*, 4>* reachable = nullptr) {
-        utils::Vector<Node*, 8> to_visit{source};
+    void Traverse(Node* source, UniqueVector<Node*, 4>* reachable = nullptr) {
+        Vector<Node*, 8> to_visit{source};
 
         while (!to_visit.IsEmpty()) {
             auto* node = to_visit.Back();
@@ -1819,7 +1819,7 @@ class UniformityGraph {
             non_uniform_source->ast,
             [&](const ast::IdentifierExpression* ident) {
                 auto* var = sem_.GetVal(ident)->UnwrapLoad()->As<sem::VariableUser>()->Variable();
-                utils::StringStream ss;
+                StringStream ss;
                 if (auto* param = var->As<sem::Parameter>()) {
                     auto* func = param->Owner()->As<sem::Function>();
                     ss << param_type(param) << "'" << NameFor(ident) << "' of '" << NameFor(func)
@@ -1832,7 +1832,7 @@ class UniformityGraph {
             },
             [&](const ast::Variable* v) {
                 auto* var = sem_.Get(v);
-                utils::StringStream ss;
+                StringStream ss;
                 ss << "reading from " << var_type(var) << "'" << NameFor(v)
                    << "' may result in a non-uniform value";
                 diagnostics_.add_note(diag::System::Resolver, ss.str(), v->source);
@@ -1849,7 +1849,7 @@ class UniformityGraph {
                     case Node::kFunctionCallArgumentContents: {
                         auto* arg = c->args[non_uniform_source->arg_index];
                         auto* var = sem_.GetVal(arg)->RootIdentifier();
-                        utils::StringStream ss;
+                        StringStream ss;
                         ss << "reading from " << var_type(var) << "'" << NameFor(var)
                            << "' may result in a non-uniform value";
                         diagnostics_.add_note(diag::System::Resolver, ss.str(),
@@ -1936,7 +1936,7 @@ class UniformityGraph {
 
             // Show the place where the non-uniform argument was passed.
             // If this is a builtin, this will be the trigger location for the failure.
-            utils::StringStream ss;
+            StringStream ss;
             ss << "possibly non-uniform value passed" << (is_value ? "" : " via pointer")
                << " here";
             report(call->args[cause->arg_index]->source, ss.str(), /* note */ user_func != nullptr);
@@ -1948,7 +1948,7 @@ class UniformityGraph {
             {
                 // Show a builtin was reachable from this call (which may be the call itself).
                 // This will be the trigger location for the failure.
-                utils::StringStream ss;
+                StringStream ss;
                 ss << "'" << NameFor(builtin_call->target)
                    << "' must only be called from uniform control flow";
                 report(builtin_call->source, ss.str(), /* note */ false);
@@ -1956,7 +1956,7 @@ class UniformityGraph {
 
             if (builtin_call != call) {
                 // The call was to a user function, so show that call too.
-                utils::StringStream ss;
+                StringStream ss;
                 ss << "called ";
                 if (target->As<sem::Function>() != SemCall(builtin_call)->Stmt()->Function()) {
                     ss << "indirectly ";

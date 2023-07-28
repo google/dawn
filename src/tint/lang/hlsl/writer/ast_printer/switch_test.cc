@@ -49,7 +49,7 @@ TEST_F(HlslASTPrinterTest_Switch, Emit_Switch_MixedDefault) {
     GlobalVar("cond", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* s = Switch(  //
         Expr("cond"),  //
-        Case(utils::Vector{CaseSelector(5_i), DefaultCaseSelector()}, Block(Break())));
+        Case(Vector{CaseSelector(5_i), DefaultCaseSelector()}, Block(Break())));
     WrapInFunction(s);
 
     ASTPrinter& gen = Build();
@@ -111,9 +111,9 @@ TEST_F(HlslASTPrinterTest_Switch, Emit_Switch_OnlyDefaultCase_SideEffectsConditi
     // }
     GlobalVar("global", ty.i32(), builtin::AddressSpace::kPrivate);
     Func("bar", {}, ty.i32(),
-         utils::Vector{                               //
-                       Assign("global", Expr(84_i)),  //
-                       Return("global")});
+         Vector{                               //
+                Assign("global", Expr(84_i)),  //
+                Return("global")});
 
     GlobalVar("a", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* s = Switch(  //

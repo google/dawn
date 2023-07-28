@@ -120,7 +120,7 @@ using AttributePrintTest = testing::TestWithParam<Case>;
 TEST_P(AttributePrintTest, Print) {
     Attribute value = GetParam().value;
     const char* expect = GetParam().string;
-    EXPECT_EQ(expect, utils::ToString(value));
+    EXPECT_EQ(expect, tint::ToString(value));
 }
 
 INSTANTIATE_TEST_SUITE_P(ValidCases, AttributePrintTest, testing::ValuesIn(kValidCases));

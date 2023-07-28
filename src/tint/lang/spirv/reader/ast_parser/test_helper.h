@@ -272,7 +272,7 @@ std::string ToString(const Program& program);
 /// @param program the Program
 /// @param stmts the statement list
 /// @returns the WGSL printed string of a statement list.
-std::string ToString(const Program& program, utils::VectorRef<const ast::Statement*> stmts);
+std::string ToString(const Program& program, VectorRef<const ast::Statement*> stmts);
 
 /// Returns the WGSL printed string of an AST node.
 /// @param program the Program

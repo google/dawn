@@ -70,7 +70,7 @@ enum class TexelFormat;
 namespace tint::wgsl::writer {
 
 /// Implementation class for WGSL generator
-class ASTPrinter : public utils::TextGenerator {
+class ASTPrinter : public tint::TextGenerator {
   public:
     /// Constructor
     /// @param program the program
@@ -83,7 +83,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// Handles generating a diagnostic control
     /// @param out the output stream
     /// @param diagnostic the diagnostic control node
-    void EmitDiagnosticControl(utils::StringStream& out, const ast::DiagnosticControl& diagnostic);
+    void EmitDiagnosticControl(StringStream& out, const ast::DiagnosticControl& diagnostic);
     /// Handles generating an enable directive
     /// @param enable the enable node
     void EmitEnable(const ast::Enable* enable);
@@ -93,29 +93,29 @@ class ASTPrinter : public utils::TextGenerator {
     /// Handles an index accessor expression
     /// @param out the output stream
     /// @param expr the expression to emit
-    void EmitIndexAccessor(utils::StringStream& out, const ast::IndexAccessorExpression* expr);
+    void EmitIndexAccessor(StringStream& out, const ast::IndexAccessorExpression* expr);
     /// Handles an assignment statement
     /// @param stmt the statement to emit
     void EmitAssign(const ast::AssignmentStatement* stmt);
     /// Handles generating a binary expression
     /// @param out the output stream
     /// @param expr the binary expression
-    void EmitBinary(utils::StringStream& out, const ast::BinaryExpression* expr);
+    void EmitBinary(StringStream& out, const ast::BinaryExpression* expr);
     /// Handles generating a binary operator
     /// @param out the output stream
     /// @param op the binary operator
-    void EmitBinaryOp(utils::StringStream& out, const ast::BinaryOp op);
+    void EmitBinaryOp(StringStream& out, const ast::BinaryOp op);
     /// Handles generating a bitcast expression
     /// @param out the output stream
     /// @param expr the bitcast expression
-    void EmitBitcast(utils::StringStream& out, const ast::BitcastExpression* expr);
+    void EmitBitcast(StringStream& out, const ast::BitcastExpression* expr);
     /// Handles a block statement
     /// @param stmt the statement to emit
     void EmitBlock(const ast::BlockStatement* stmt);
     /// Handles emitting the start of a block statement (including attributes)
     /// @param out the output stream to write the header to
     /// @param stmt the block statement to emit the header for
-    void EmitBlockHeader(utils::StringStream& out, const ast::BlockStatement* stmt);
+    void EmitBlockHeader(StringStream& out, const ast::BlockStatement* stmt);
     /// Handles a break statement
     /// @param stmt the statement to emit
     void EmitBreak(const ast::BreakStatement* stmt);
@@ -125,7 +125,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// Handles generating a call expression
     /// @param out the output stream
     /// @param expr the call expression
-    void EmitCall(utils::StringStream& out, const ast::CallExpression* expr);
+    void EmitCall(StringStream& out, const ast::CallExpression* expr);
     /// Handles a case statement
     /// @param stmt the statement
     void EmitCase(const ast::CaseStatement* stmt);
@@ -135,25 +135,25 @@ class ASTPrinter : public utils::TextGenerator {
     /// Handles generating a literal expression
     /// @param out the output stream
     /// @param expr the literal expression expression
-    void EmitLiteral(utils::StringStream& out, const ast::LiteralExpression* expr);
+    void EmitLiteral(StringStream& out, const ast::LiteralExpression* expr);
     /// Handles a continue statement
     /// @param stmt the statement to emit
     void EmitContinue(const ast::ContinueStatement* stmt);
     /// Handles generate an Expression
     /// @param out the output stream
     /// @param expr the expression
-    void EmitExpression(utils::StringStream& out, const ast::Expression* expr);
+    void EmitExpression(StringStream& out, const ast::Expression* expr);
     /// Handles generating a function
     /// @param func the function to generate
     void EmitFunction(const ast::Function* func);
     /// Handles generating an identifier expression
     /// @param out the output stream
     /// @param expr the identifier expression
-    void EmitIdentifier(utils::StringStream& out, const ast::IdentifierExpression* expr);
+    void EmitIdentifier(StringStream& out, const ast::IdentifierExpression* expr);
     /// Handles generating an identifier
     /// @param out the output of the expression stream
     /// @param ident the identifier
-    void EmitIdentifier(utils::StringStream& out, const ast::Identifier* ident);
+    void EmitIdentifier(StringStream& out, const ast::Identifier* ident);
     /// Handles an if statement
     /// @param stmt the statement to emit
     void EmitIf(const ast::IfStatement* stmt);
@@ -175,7 +175,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// Handles a member accessor expression
     /// @param out the output stream
     /// @param expr the member accessor expression
-    void EmitMemberAccessor(utils::StringStream& out, const ast::MemberAccessorExpression* expr);
+    void EmitMemberAccessor(StringStream& out, const ast::MemberAccessorExpression* expr);
     /// Handles return statements
     /// @param stmt the statement to emit
     void EmitReturn(const ast::ReturnStatement* stmt);
@@ -187,10 +187,10 @@ class ASTPrinter : public utils::TextGenerator {
     void EmitStatement(const ast::Statement* stmt);
     /// Handles a statement list
     /// @param stmts the statements to emit
-    void EmitStatements(utils::VectorRef<const ast::Statement*> stmts);
+    void EmitStatements(VectorRef<const ast::Statement*> stmts);
     /// Handles a statement list with an increased indentation
     /// @param stmts the statements to emit
-    void EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts);
+    void EmitStatementsWithIndent(VectorRef<const ast::Statement*> stmts);
     /// Handles generating a switch statement
     /// @param stmt the statement to emit
     void EmitSwitch(const ast::SwitchStatement* stmt);
@@ -200,19 +200,19 @@ class ASTPrinter : public utils::TextGenerator {
     /// Handles emitting an image format
     /// @param out the output stream
     /// @param fmt the format to generate
-    void EmitImageFormat(utils::StringStream& out, const builtin::TexelFormat fmt);
+    void EmitImageFormat(StringStream& out, const builtin::TexelFormat fmt);
     /// Handles a unary op expression
     /// @param out the output stream
     /// @param expr the expression to emit
-    void EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpression* expr);
+    void EmitUnaryOp(StringStream& out, const ast::UnaryOpExpression* expr);
     /// Handles generating a variable
     /// @param out the output stream
     /// @param var the variable to generate
-    void EmitVariable(utils::StringStream& out, const ast::Variable* var);
+    void EmitVariable(StringStream& out, const ast::Variable* var);
     /// Handles generating a attribute list
     /// @param out the output stream
     /// @param attrs the attribute list
-    void EmitAttributes(utils::StringStream& out, utils::VectorRef<const ast::Attribute*> attrs);
+    void EmitAttributes(StringStream& out, VectorRef<const ast::Attribute*> attrs);
 
   private:
     Program const* const program_;

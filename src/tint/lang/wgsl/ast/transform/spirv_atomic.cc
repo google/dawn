@@ -55,7 +55,7 @@ struct SpirvAtomic::State {
     CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
     std::unordered_map<const type::Struct*, ForkedStruct> forked_structs;
     std::unordered_set<const sem::Variable*> atomic_variables;
-    utils::UniqueVector<const sem::ValueExpression*, 8> atomic_expressions;
+    UniqueVector<const sem::ValueExpression*, 8> atomic_expressions;
 
   public:
     /// Constructor
@@ -128,7 +128,7 @@ struct SpirvAtomic::State {
                     const auto& forked = it->second;
 
                     // Re-create the structure swapping in the atomic-flavoured members
-                    utils::Vector<const StructMember*, 8> members;
+                    tint::Vector<const StructMember*, 8> members;
                     members.Reserve(str->members.Length());
                     for (size_t i = 0; i < str->members.Length(); i++) {
                         auto* member = str->members[i];
@@ -294,7 +294,7 @@ SpirvAtomic::SpirvAtomic() = default;
 SpirvAtomic::~SpirvAtomic() = default;
 
 SpirvAtomic::Stub::Stub(GenerationID pid, NodeID nid, builtin::Function b)
-    : Base(pid, nid, utils::Empty), builtin(b) {}
+    : Base(pid, nid, tint::Empty), builtin(b) {}
 SpirvAtomic::Stub::~Stub() = default;
 std::string SpirvAtomic::Stub::InternalName() const {
     return "@internal(spirv-atomic " + std::string(builtin::str(builtin)) + ")";

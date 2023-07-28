@@ -57,7 +57,7 @@ using FindFirstParentReturnType = typename FindFirstParentReturn<TYPES...>::type
 }  // namespace detail
 
 /// Statement holds the semantic information for a statement.
-class Statement : public utils::Castable<Statement, Node> {
+class Statement : public Castable<Statement, Node> {
   public:
     /// Constructor
     /// @param declaration the AST node for this statement
@@ -133,7 +133,7 @@ class Statement : public utils::Castable<Statement, Node> {
 
 /// CompoundStatement is the base class of statements that can hold other
 /// statements.
-class CompoundStatement : public utils::Castable<CompoundStatement, Statement> {
+class CompoundStatement : public Castable<CompoundStatement, Statement> {
   public:
     /// Constructor
     /// @param declaration the AST node for this statement
@@ -155,7 +155,7 @@ class CompoundStatement : public utils::Castable<CompoundStatement, Statement> {
     };
 
     /// @returns a map of variable name to variable declarations associated with this block
-    const utils::Hashmap<Symbol, OrderedLocalVariable, 4>& Decls() const { return decls_; }
+    const Hashmap<Symbol, OrderedLocalVariable, 4>& Decls() const { return decls_; }
 
     /// Associates a declaration with this block.
     /// @note this method must be called in variable declaration order
@@ -163,7 +163,7 @@ class CompoundStatement : public utils::Castable<CompoundStatement, Statement> {
     void AddDecl(const LocalVariable* var);
 
   private:
-    utils::Hashmap<Symbol, OrderedLocalVariable, 4> decls_;
+    Hashmap<Symbol, OrderedLocalVariable, 4> decls_;
 };
 
 template <typename Pred>

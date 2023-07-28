@@ -54,8 +54,7 @@ TEST_F(ProgramToIRVarTest, Emit_GlobalVar_Init) {
 }
 
 TEST_F(ProgramToIRVarTest, Emit_GlobalVar_GroupBinding) {
-    GlobalVar("a", ty.u32(), builtin::AddressSpace::kStorage,
-              utils::Vector{Group(2_u), Binding(3_u)});
+    GlobalVar("a", ty.u32(), builtin::AddressSpace::kStorage, Vector{Group(2_u), Binding(3_u)});
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -142,7 +141,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_42i) {
 }
 
 TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfArray_EvalOrder) {
-    Func("f", utils::Vector{Param("p", ty.i32())}, ty.i32(), utils::Vector{Return("p")});
+    Func("f", Vector{Param("p", ty.i32())}, ty.i32(), Vector{Return("p")});
 
     auto* lhs =                                 //
         IndexAccessor(                          //
@@ -193,7 +192,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfArray_EvalOrder) {
 }
 
 TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfVec_EvalOrder) {
-    Func("f", utils::Vector{Param("p", ty.i32())}, ty.i32(), utils::Vector{Return("p")});
+    Func("f", Vector{Param("p", ty.i32())}, ty.i32(), Vector{Return("p")});
 
     auto* lhs =                             //
         IndexAccessor(                      //
@@ -237,7 +236,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfVec_EvalOrder) {
 }
 
 TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfMatrix_EvalOrder) {
-    Func("f", utils::Vector{Param("p", ty.i32())}, ty.i32(), utils::Vector{Return("p")});
+    Func("f", Vector{Param("p", ty.i32())}, ty.i32(), Vector{Return("p")});
 
     auto* lhs =                                 //
         IndexAccessor(                          //
@@ -307,7 +306,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_42i) {
 }
 
 TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_ArrayOfArray_EvalOrder) {
-    Func("f", utils::Vector{Param("p", ty.i32())}, ty.i32(), utils::Vector{Return("p")});
+    Func("f", Vector{Param("p", ty.i32())}, ty.i32(), Vector{Return("p")});
 
     auto* lhs =                                 //
         IndexAccessor(                          //
@@ -360,7 +359,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_ArrayOfArray_EvalOrder) {
 }
 
 TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_ArrayOfMatrix_EvalOrder) {
-    Func("f", utils::Vector{Param("p", ty.i32())}, ty.i32(), utils::Vector{Return("p")});
+    Func("f", Vector{Param("p", ty.i32())}, ty.i32(), Vector{Return("p")});
 
     auto* lhs =                                 //
         IndexAccessor(                          //

@@ -187,12 +187,12 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                             // Declare a struct to hold the result values.
                             auto* result_struct = sem_call->Type()->As<type::Struct>();
                             auto* atomic_ty = result_struct->Members()[0]->Type();
-                            result_ty = b.ty(
-                                utils::GetOrCreate(atomic_cmpxchg_result_types, atomic_ty, [&] {
+                            result_ty =
+                                b.ty(tint::GetOrCreate(atomic_cmpxchg_result_types, atomic_ty, [&] {
                                     auto name = b.Sym();
                                     b.Structure(
                                         name,
-                                        utils::Vector{
+                                        tint::Vector{
                                             b.Member("old_value", CreateASTTypeFor(ctx, atomic_ty)),
                                             b.Member("exchanged", b.ty.bool_()),
                                         });
@@ -208,7 +208,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                             auto tmp_result = b.Sym();
                             masked_call =
                                 b.If(b.Not(flag),
-                                     b.Block(utils::Vector{
+                                     b.Block(tint::Vector{
                                          b.Decl(b.Let(tmp_result, ctx.CloneWithoutTransform(call))),
                                          b.Assign(b.MemberAccessor(result, "old_value"),
                                                   b.MemberAccessor(tmp_result, "old_value")),

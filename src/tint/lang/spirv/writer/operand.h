@@ -39,7 +39,7 @@ uint32_t OperandLength(const Operand& o);
 /// A list of operands
 using OperandList = std::vector<Operand>;
 
-using OperandListKey = utils::UnorderedKeyWrapper<OperandList>;
+using OperandListKey = tint::UnorderedKeyWrapper<OperandList>;
 
 }  // namespace tint::spirv::writer
 

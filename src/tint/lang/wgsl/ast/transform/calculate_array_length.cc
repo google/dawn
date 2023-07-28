@@ -63,16 +63,14 @@ struct ArrayUsage {
         return block == rhs.block && buffer == rhs.buffer;
     }
     struct Hasher {
-        inline std::size_t operator()(const ArrayUsage& u) const {
-            return utils::Hash(u.block, u.buffer);
-        }
+        inline std::size_t operator()(const ArrayUsage& u) const { return Hash(u.block, u.buffer); }
     };
 };
 
 }  // namespace
 
 CalculateArrayLength::BufferSizeIntrinsic::BufferSizeIntrinsic(GenerationID pid, NodeID nid)
-    : Base(pid, nid, utils::Empty) {}
+    : Base(pid, nid, tint::Empty) {}
 CalculateArrayLength::BufferSizeIntrinsic::~BufferSizeIntrinsic() = default;
 std::string CalculateArrayLength::BufferSizeIntrinsic::InternalName() const {
     return "intrinsic_buffer_size";
@@ -103,19 +101,19 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
     // [RW]ByteAddressBuffer.GetDimensions().
     std::unordered_map<const type::Reference*, Symbol> buffer_size_intrinsics;
     auto get_buffer_size_intrinsic = [&](const type::Reference* buffer_type) {
-        return utils::GetOrCreate(buffer_size_intrinsics, buffer_type, [&] {
+        return tint::GetOrCreate(buffer_size_intrinsics, buffer_type, [&] {
             auto name = b.Sym();
             auto type = CreateASTTypeFor(ctx, buffer_type);
             auto* disable_validation = b.Disable(DisabledValidation::kFunctionParameter);
             b.Func(name,
-                   utils::Vector{
+                   tint::Vector{
                        b.Param("buffer",
                                b.ty.ptr(buffer_type->AddressSpace(), type, buffer_type->Access()),
-                               utils::Vector{disable_validation}),
+                               tint::Vector{disable_validation}),
                        b.Param("result", b.ty.ptr<function, u32>()),
                    },
                    b.ty.void_(), nullptr,
-                   utils::Vector{
+                   tint::Vector{
                        b.ASTNodes().Create<BufferSizeIntrinsic>(b.ID(), b.AllocateNodeID()),
                    });
 
@@ -176,7 +174,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                     auto* block = call->Stmt()->Block()->Declaration();
 
                     auto array_length =
-                        utils::GetOrCreate(array_length_by_usage, {block, storage_buffer_var}, [&] {
+                        tint::GetOrCreate(array_length_by_usage, {block, storage_buffer_var}, [&] {
                             // First time this array length is used for this block.
                             // Let's calculate it.
 

@@ -1433,7 +1433,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Zero) {
 }
 
 TEST_F(ResolverConstEvalTest, Array_Struct_f32_Zero) {
-    Structure("S", utils::Vector{
+    Structure("S", Vector{
                        Member("m1", ty.f32()),
                        Member("m2", ty.f32()),
                    });
@@ -1648,7 +1648,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Elements) {
 }
 
 TEST_F(ResolverConstEvalTest, Array_Struct_f32_Elements) {
-    Structure("S", utils::Vector{
+    Structure("S", Vector{
                        Member("m1", ty.f32()),
                        Member("m2", ty.f32()),
                    });
@@ -1687,7 +1687,7 @@ TEST_F(ResolverConstEvalTest, Array_Struct_f32_Elements) {
 
 TEST_F(ResolverConstEvalTest, Struct_ZeroInit) {
     Enable(builtin::Extension::kF16);
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
                                  Member("b", ty.u32()),
                                  Member("c", ty.f32()),
@@ -1730,7 +1730,7 @@ TEST_F(ResolverConstEvalTest, Struct_ZeroInit) {
 
 TEST_F(ResolverConstEvalTest, Struct_Nested_ZeroInit) {
     Enable(builtin::Extension::kF16);
-    auto* inner = Structure("Inner", utils::Vector{
+    auto* inner = Structure("Inner", Vector{
                                          Member("a", ty.i32()),
                                          Member("b", ty.u32()),
                                          Member("c", ty.f32()),
@@ -1738,7 +1738,7 @@ TEST_F(ResolverConstEvalTest, Struct_Nested_ZeroInit) {
                                          Member("e", ty.bool_()),
                                      });
     auto* s = Structure("s",  //
-                        utils::Vector{
+                        Vector{
                             Member("inner", ty.Of(inner)),
                         });
 
@@ -1779,8 +1779,7 @@ TEST_F(ResolverConstEvalTest, Struct_Nested_ZeroInit) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_I32s_ZeroInit) {
-    Structure(
-        "S", utils::Vector{Member("m1", ty.i32()), Member("m2", ty.i32()), Member("m3", ty.i32())});
+    Structure("S", Vector{Member("m1", ty.i32()), Member("m2", ty.i32()), Member("m3", ty.i32())});
     auto* expr = Call("S");
     WrapInFunction(expr);
 
@@ -1815,7 +1814,7 @@ TEST_F(ResolverConstEvalTest, Struct_I32s_ZeroInit) {
 TEST_F(ResolverConstEvalTest, Struct_MixedScalars_ZeroInit) {
     Enable(builtin::Extension::kF16);
 
-    Structure("S", utils::Vector{
+    Structure("S", Vector{
                        Member("m1", ty.i32()),
                        Member("m2", ty.u32()),
                        Member("m3", ty.f32()),
@@ -1864,7 +1863,7 @@ TEST_F(ResolverConstEvalTest, Struct_MixedScalars_ZeroInit) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_VectorF32s_ZeroInit) {
-    Structure("S", utils::Vector{
+    Structure("S", Vector{
                        Member("m1", ty.vec3<f32>()),
                        Member("m2", ty.vec3<f32>()),
                        Member("m3", ty.vec3<f32>()),
@@ -1915,7 +1914,7 @@ TEST_F(ResolverConstEvalTest, Struct_VectorF32s_ZeroInit) {
 TEST_F(ResolverConstEvalTest, Struct_MixedVectors_ZeroInit) {
     Enable(builtin::Extension::kF16);
 
-    Structure("S", utils::Vector{
+    Structure("S", Vector{
                        Member("m1", ty.vec2<i32>()),
                        Member("m2", ty.vec3<u32>()),
                        Member("m3", ty.vec4<f32>()),
@@ -1983,13 +1982,13 @@ TEST_F(ResolverConstEvalTest, Struct_MixedVectors_ZeroInit) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_Struct_ZeroInit) {
-    Structure("Inner", utils::Vector{
+    Structure("Inner", Vector{
                            Member("m1", ty.i32()),
                            Member("m2", ty.u32()),
                            Member("m3", ty.f32()),
                        });
 
-    Structure("Outer", utils::Vector{
+    Structure("Outer", Vector{
                            Member("m1", ty("Inner")),
                            Member("m2", ty("Inner")),
                        });
@@ -2026,7 +2025,7 @@ TEST_F(ResolverConstEvalTest, Struct_Struct_ZeroInit) {
 TEST_F(ResolverConstEvalTest, Struct_MixedScalars_Construct) {
     Enable(builtin::Extension::kF16);
 
-    Structure("S", utils::Vector{
+    Structure("S", Vector{
                        Member("m1", ty.i32()),
                        Member("m2", ty.u32()),
                        Member("m3", ty.f32()),
@@ -2077,7 +2076,7 @@ TEST_F(ResolverConstEvalTest, Struct_MixedScalars_Construct) {
 TEST_F(ResolverConstEvalTest, Struct_MixedVectors_Construct) {
     Enable(builtin::Extension::kF16);
 
-    Structure("S", utils::Vector{
+    Structure("S", Vector{
                        Member("m1", ty.vec2<i32>()),
                        Member("m2", ty.vec3<u32>()),
                        Member("m3", ty.vec4<f32>()),
@@ -2146,13 +2145,13 @@ TEST_F(ResolverConstEvalTest, Struct_MixedVectors_Construct) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_Struct_Construct) {
-    Structure("Inner", utils::Vector{
+    Structure("Inner", Vector{
                            Member("m1", ty.i32()),
                            Member("m2", ty.u32()),
                            Member("m3", ty.f32()),
                        });
 
-    Structure("Outer", utils::Vector{
+    Structure("Outer", Vector{
                            Member("m1", ty("Inner")),
                            Member("m2", ty("Inner")),
                        });
@@ -2188,7 +2187,7 @@ TEST_F(ResolverConstEvalTest, Struct_Struct_Construct) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_Array_Construct) {
-    Structure("S", utils::Vector{
+    Structure("S", Vector{
                        Member("m1", ty.array<i32, 2>()),
                        Member("m2", ty.array<f32, 3>()),
                    });

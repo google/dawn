@@ -236,7 +236,7 @@ std::string CommonTypes() {
 }
 
 std::string Bindings(std::vector<uint32_t> ids) {
-    utils::StringStream os;
+    StringStream os;
     int binding = 0;
     for (auto id : ids) {
         os << "  OpDecorate %" << id << " DescriptorSet 0\n"

@@ -28,7 +28,7 @@ TEST_F(IR_UserCallTest, Usage) {
     auto* func = b.Function("myfunc", mod.Types().void_());
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
-    auto* e = b.Call(mod.Types().void_(), func, utils::Vector{arg1, arg2});
+    auto* e = b.Call(mod.Types().void_(), func, Vector{arg1, arg2});
     EXPECT_THAT(func->Usages(), testing::UnorderedElementsAre(Usage{e, 0u}));
     EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{e, 1u}));
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{e, 2u}));
@@ -38,7 +38,7 @@ TEST_F(IR_UserCallTest, Results) {
     auto* func = b.Function("myfunc", mod.Types().void_());
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
-    auto* e = b.Call(mod.Types().void_(), func, utils::Vector{arg1, arg2});
+    auto* e = b.Call(mod.Types().void_(), func, Vector{arg1, arg2});
 
     EXPECT_TRUE(e->HasResults());
     EXPECT_FALSE(e->HasMultiResults());

@@ -22,7 +22,7 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// @param str the string to apply replacements to
 /// @param substr the string to search for
@@ -49,7 +49,7 @@ inline std::string ToString(bool value) {
 /// @returns value printed as a string via the stream `<<` operator
 template <typename T>
 std::string ToString(const T& value) {
-    utils::StringStream s;
+    StringStream s;
     s << value;
     return s.str();
 }
@@ -58,7 +58,7 @@ std::string ToString(const T& value) {
 /// @returns value printed as a string via the stream `<<` operator
 template <typename... TYs>
 std::string ToString(const std::variant<TYs...>& value) {
-    utils::StringStream s;
+    StringStream s;
     s << std::visit([&](auto& v) { return ToString(v); }, value);
     return s.str();
 }
@@ -97,7 +97,7 @@ struct SuggestAlternativeOptions {
 /// @param options options for the suggestion
 void SuggestAlternatives(std::string_view got,
                          Slice<char const* const> strings,
-                         utils::StringStream& ss,
+                         StringStream& ss,
                          const SuggestAlternativeOptions& options = {});
 
 /// Suggest alternatives for an unrecognized string from a list of possible values.
@@ -107,7 +107,7 @@ void SuggestAlternatives(std::string_view got,
 /// @param options options for the suggestion
 void SuggestAlternatives(std::string_view got,
                          Slice<std::string_view> strings,
-                         utils::StringStream& ss,
+                         StringStream& ss,
                          const SuggestAlternativeOptions& options = {});
 
 /// @param str the input string
@@ -178,8 +178,8 @@ inline std::string_view TrimSpace(std::string_view str) {
 /// @param str the input string
 /// @param delimiter the delimiter
 /// @return @p str split at each occurrence of @p delimiter
-inline utils::Vector<std::string_view, 8> Split(std::string_view str, std::string_view delimiter) {
-    utils::Vector<std::string_view, 8> out;
+inline Vector<std::string_view, 8> Split(std::string_view str, std::string_view delimiter) {
+    Vector<std::string_view, 8> out;
     while (str.length() > delimiter.length()) {
         auto pos = str.find(delimiter);
         if (pos == std::string_view::npos) {
@@ -201,8 +201,8 @@ inline std::string Quote(std::string_view str) {
 /// @param delimiter the delimiter
 /// @return @p parts joined as a string, delimited with @p delimiter
 template <typename T>
-inline std::string Join(utils::VectorRef<T> parts, std::string_view delimiter) {
-    utils::StringStream s;
+inline std::string Join(VectorRef<T> parts, std::string_view delimiter) {
+    StringStream s;
     for (auto& part : parts) {
         if (part != parts.Front()) {
             s << delimiter;
@@ -216,10 +216,10 @@ inline std::string Join(utils::VectorRef<T> parts, std::string_view delimiter) {
 /// @param delimiter the delimiter
 /// @return @p parts joined as a string, delimited with @p delimiter
 template <typename T, size_t N>
-inline std::string Join(const utils::Vector<T, N>& parts, std::string_view delimiter) {
-    return Join(utils::VectorRef<T>(parts), delimiter);
+inline std::string Join(const Vector<T, N>& parts, std::string_view delimiter) {
+    return Join(VectorRef<T>(parts), delimiter);
 }
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_TEXT_STRING_H_

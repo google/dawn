@@ -139,7 +139,7 @@ const type::Matrix* Manager::mat4x4(const type::Type* inner) {
 const type::Array* Manager::array(const type::Type* elem_ty,
                                   uint32_t count,
                                   uint32_t stride /* = 0*/) {
-    uint32_t implicit_stride = utils::RoundUp(elem_ty->Align(), elem_ty->Size());
+    uint32_t implicit_stride = tint::RoundUp(elem_ty->Align(), elem_ty->Size());
     if (stride == 0) {
         stride = implicit_stride;
     }
@@ -172,20 +172,20 @@ const type::Pointer* Manager::ptr(builtin::AddressSpace address_space,
     return Get<type::Pointer>(address_space, subtype, access);
 }
 
-type::Struct* Manager::Struct(Symbol name, utils::VectorRef<StructMemberDesc> md) {
-    utils::Vector<const type::StructMember*, 4> members;
+type::Struct* Manager::Struct(Symbol name, VectorRef<StructMemberDesc> md) {
+    tint::Vector<const type::StructMember*, 4> members;
     uint32_t current_size = 0u;
     uint32_t max_align = 0u;
     for (const auto& m : md) {
         uint32_t index = static_cast<uint32_t>(members.Length());
         uint32_t align = std::max<uint32_t>(m.type->Align(), 1u);
-        uint32_t offset = utils::RoundUp(align, current_size);
+        uint32_t offset = tint::RoundUp(align, current_size);
         members.Push(Get<type::StructMember>(m.name, m.type, index, offset, align, m.type->Size(),
                                              std::move(m.attributes)));
         current_size = offset + m.type->Size();
         max_align = std::max(max_align, align);
     }
-    return Get<type::Struct>(name, members, max_align, utils::RoundUp(max_align, current_size),
+    return Get<type::Struct>(name, members, max_align, tint::RoundUp(max_align, current_size),
                              current_size);
 }
 

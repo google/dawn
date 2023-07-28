@@ -27,7 +27,7 @@ Parameter::Parameter(GenerationID pid,
                      const Source& src,
                      const Identifier* n,
                      Type ty,
-                     utils::VectorRef<const Attribute*> attrs)
+                     VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src, n, ty, nullptr, std::move(attrs)) {}
 
 Parameter::~Parameter() = default;

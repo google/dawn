@@ -89,17 +89,17 @@ class Builder {
                       "Consider hoisting Builder call arguments to separate statements.");
     }
 
-    /// A helper used to enable overloads if the first type in `TYPES` is a utils::Vector or
-    /// utils::VectorRef.
+    /// A helper used to enable overloads if the first type in `TYPES` is a Vector or
+    /// VectorRef.
     template <typename... TYPES>
-    using EnableIfVectorLike = utils::traits::EnableIf<
-        utils::IsVectorLike<utils::traits::Decay<utils::traits::NthTypeOf<0, TYPES..., void>>>>;
+    using EnableIfVectorLike = tint::traits::EnableIf<
+        tint::IsVectorLike<tint::traits::Decay<tint::traits::NthTypeOf<0, TYPES..., void>>>>;
 
-    /// A helper used to disable overloads if the first type in `TYPES` is a utils::Vector or
-    /// utils::VectorRef.
+    /// A helper used to disable overloads if the first type in `TYPES` is a Vector or
+    /// VectorRef.
     template <typename... TYPES>
-    using DisableIfVectorLike = utils::traits::EnableIf<
-        !utils::IsVectorLike<utils::traits::Decay<utils::traits::NthTypeOf<0, TYPES..., void>>>>;
+    using DisableIfVectorLike = tint::traits::EnableIf<
+        !tint::IsVectorLike<tint::traits::Decay<tint::traits::NthTypeOf<0, TYPES..., void>>>>;
 
     /// If set, any created instruction will be auto-appended to the block.
     ir::Block* current_block_ = nullptr;
@@ -200,7 +200,7 @@ class Builder {
     /// @param s the switch to create the case into
     /// @param selectors the case selectors for the case statement
     /// @returns the start block for the case instruction
-    ir::Block* Case(ir::Switch* s, utils::VectorRef<Switch::CaseSelector> selectors);
+    ir::Block* Case(ir::Switch* s, VectorRef<Switch::CaseSelector> selectors);
 
     /// Creates a case for the switch @p s with the given selectors
     /// @param s the switch to create the case into
@@ -277,25 +277,25 @@ class Builder {
     /// Pass-through overload for Values() with vector-like argument
     /// @param vec the vector of ir::Value*
     /// @return @p vec
-    template <typename VEC, typename = EnableIfVectorLike<utils::traits::Decay<VEC>>>
+    template <typename VEC, typename = EnableIfVectorLike<tint::traits::Decay<VEC>>>
     auto Values(VEC&& vec) {
         return std::forward<VEC>(vec);
     }
 
-    /// Overload for Values() with utils::Empty argument
-    /// @return utils::Empty
-    utils::EmptyType Values(utils::EmptyType) { return utils::Empty; }
+    /// Overload for Values() with tint::Empty argument
+    /// @return tint::Empty
+    tint::EmptyType Values(tint::EmptyType) { return tint::Empty; }
 
     /// Overload for Values() with no arguments
-    /// @return utils::Empty
-    utils::EmptyType Values() { return utils::Empty; }
+    /// @return tint::Empty
+    tint::EmptyType Values() { return tint::Empty; }
 
     /// @param args the arguments to pass to Value()
     /// @returns a vector of ir::Value* built from transforming the arguments with Value()
     template <typename... ARGS, typename = DisableIfVectorLike<ARGS...>>
     auto Values(ARGS&&... args) {
         CheckForNonDeterministicEvaluation<ARGS...>();
-        return utils::Vector{Value(std::forward<ARGS>(args))...};
+        return Vector{Value(std::forward<ARGS>(args))...};
     }
 
     /// Creates an op for `lhs kind rhs`
@@ -805,7 +805,7 @@ class Builder {
     /// @param indices the swizzle indices
     /// @returns the instruction
     template <typename OBJ>
-    ir::Swizzle* Swizzle(const type::Type* type, OBJ&& object, utils::VectorRef<uint32_t> indices) {
+    ir::Swizzle* Swizzle(const type::Type* type, OBJ&& object, VectorRef<uint32_t> indices) {
         auto* obj_val = Value(std::forward<OBJ>(object));
         return Append(ir.instructions.Create<ir::Swizzle>(InstructionResult(type), obj_val,
                                                           std::move(indices)));
@@ -822,7 +822,7 @@ class Builder {
                          std::initializer_list<uint32_t> indices) {
         auto* obj_val = Value(std::forward<OBJ>(object));
         return Append(ir.instructions.Create<ir::Swizzle>(InstructionResult(type), obj_val,
-                                                          utils::Vector<uint32_t, 4>(indices)));
+                                                          Vector<uint32_t, 4>(indices)));
     }
 
     /// Creates a terminate invocation instruction

@@ -21,13 +21,13 @@
 
 #include "src/tint/utils/containers/transform.h"  // Used by ToStringList()
 
-namespace tint::utils::cli {
+namespace tint::cli {
 namespace {
 
 // Workaround for https://github.com/google/googletest/issues/3081
 // Remove when using C++20
 template <size_t N>
-utils::Vector<std::string, N> ToStringList(const utils::Vector<std::string_view, N>& views) {
+Vector<std::string, N> ToStringList(const Vector<std::string_view, N>& views) {
     return Transform(views, [](std::string_view view) { return std::string(view); });
 }
 
@@ -108,7 +108,7 @@ TEST_F(CLITest, ShowHelp_EnumValue) {
 
     OptionSet opts;
     opts.Add<EnumOption<E>>("my_enum_option", "sets the awesome value",
-                            utils::Vector{
+                            Vector{
                                 EnumName(E::X, "X"),
                                 EnumName(E::Y, "Y"),
                                 EnumName(E::Z, "Z"),
@@ -130,7 +130,7 @@ TEST_F(CLITest, ShowHelp_MixedValues) {
     opts.Add<ValueOption<int>>("option-a", "an integer");
     opts.Add<BoolOption>("option-b", "a boolean");
     opts.Add<EnumOption<E>>("option-c", "sets the awesome value",
-                            utils::Vector{
+                            Vector{
                                 EnumName(E::X, "X"),
                                 EnumName(E::Y, "Y"),
                                 EnumName(E::Z, "Z"),
@@ -235,7 +235,7 @@ TEST_F(CLITest, ParseEnum) {
 
     OptionSet opts;
     auto& opt = opts.Add<EnumOption<E>>("my_option", "sets the awesome value",
-                                        utils::Vector{
+                                        Vector{
                                             EnumName(E::X, "X"),
                                             EnumName(E::Y, "Y"),
                                             EnumName(E::Z, "Z"),
@@ -289,11 +289,11 @@ TEST_F(CLITest, SetValueToDefault) {
     auto& opt = opts.Add<BoolOption>("my_option", "a boolean value", Default{true});
 
     std::stringstream err;
-    auto res = opts.Parse(err, utils::Empty);
+    auto res = opts.Parse(err, tint::Empty);
     ASSERT_TRUE(res) << err.str();
     EXPECT_TRUE(err.str().empty());
     EXPECT_EQ(opt.value, true);
 }
 
 }  // namespace
-}  // namespace tint::utils::cli
+}  // namespace tint::cli

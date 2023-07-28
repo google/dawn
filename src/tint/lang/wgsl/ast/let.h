@@ -27,7 +27,7 @@ namespace tint::ast {
 ///   let twice_depth : i32 = width + width;  // Must have initializer
 /// ```
 /// @see https://www.w3.org/TR/WGSL/#let-decls
-class Let final : public utils::Castable<Let, Variable> {
+class Let final : public Castable<Let, Variable> {
   public:
     /// Create a 'let' variable
     /// @param pid the identifier of the program that owns this node
@@ -43,7 +43,7 @@ class Let final : public utils::Castable<Let, Variable> {
         const Identifier* name,
         Type type,
         const Expression* initializer,
-        utils::VectorRef<const Attribute*> attributes);
+        VectorRef<const Attribute*> attributes);
 
     /// Destructor
     ~Let() override;

@@ -20,7 +20,7 @@
 #include <string_view>
 #include <utility>
 
-namespace tint::utils {
+namespace tint {
 
 /// CodePoint is a unicode code point.
 struct CodePoint {
@@ -75,6 +75,6 @@ bool IsASCII(std::string_view);
 
 }  // namespace utf8
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_TEXT_UNICODE_H_

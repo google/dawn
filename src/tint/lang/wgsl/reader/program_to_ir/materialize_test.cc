@@ -28,7 +28,7 @@ using ProgramToIRMaterializeTest = helpers::IRProgramTest;
 TEST_F(ProgramToIRMaterializeTest, EmitExpression_MaterializedCall) {
     auto* expr = Return(Call("trunc", 2.5_f));
 
-    Func("test_function", {}, ty.f32(), expr, utils::Empty);
+    Func("test_function", {}, ty.f32(), expr, tint::Empty);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");

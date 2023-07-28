@@ -29,7 +29,7 @@ TEST_F(WgslASTPrinterTest, EmitIdentifierExpression_Single) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, i);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "glsl");

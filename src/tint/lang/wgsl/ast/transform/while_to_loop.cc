@@ -48,7 +48,7 @@ Transform::ApplyResult WhileToLoop::Apply(const Program* src, const DataMap&, Da
     CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     ctx.ReplaceAll([&](const WhileStatement* w) -> const Statement* {
-        utils::Vector<const Statement*, 16> stmts;
+        tint::Vector<const Statement*, 16> stmts;
         auto* cond = w->condition;
 
         // !condition

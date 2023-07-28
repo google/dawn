@@ -31,7 +31,7 @@ namespace tint::sem {
 
 /// Holds semantic information about a block, such as parent block and variables
 /// declared in the block.
-class BlockStatement : public utils::Castable<BlockStatement, CompoundStatement> {
+class BlockStatement : public Castable<BlockStatement, CompoundStatement> {
   public:
     /// Constructor
     /// @param declaration the AST node for this block statement
@@ -50,8 +50,7 @@ class BlockStatement : public utils::Castable<BlockStatement, CompoundStatement>
 };
 
 /// The root block statement for a function
-class FunctionBlockStatement final
-    : public utils::Castable<FunctionBlockStatement, BlockStatement> {
+class FunctionBlockStatement final : public Castable<FunctionBlockStatement, BlockStatement> {
   public:
     /// Constructor
     /// @param function the owning function
@@ -62,7 +61,7 @@ class FunctionBlockStatement final
 };
 
 /// Holds semantic information about a loop body block or for-loop body block
-class LoopBlockStatement final : public utils::Castable<LoopBlockStatement, BlockStatement> {
+class LoopBlockStatement final : public Castable<LoopBlockStatement, BlockStatement> {
   public:
     /// Constructor
     /// @param declaration the AST node for this block statement

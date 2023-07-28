@@ -37,7 +37,7 @@ Result UsingDXC(const std::string& dxc_path,
                 bool require_16bit_types) {
     Result result;
 
-    auto dxc = utils::Command(dxc_path);
+    auto dxc = tint::Command(dxc_path);
     if (!dxc.Found()) {
         result.output = "DXC not found at '" + std::string(dxc_path) + "'";
         result.failed = true;
@@ -47,7 +47,7 @@ Result UsingDXC(const std::string& dxc_path,
     // Native 16-bit types, e.g. float16_t, require SM6.2. Otherwise we use SM6.0.
     const char* shader_model_version = require_16bit_types ? "6_2" : "6_0";
 
-    utils::TmpFile file;
+    tint::TmpFile file;
     file << source;
 
     for (auto ep : entry_points) {
@@ -94,7 +94,7 @@ Result UsingDXC(const std::string& dxc_path,
         result.failed = (res.error_code != 0);
 
         // Remove the temporary file name from the output to keep output deterministic
-        result.output = utils::ReplaceAll(result.output, file.Path(), "shader.hlsl");
+        result.output = tint::ReplaceAll(result.output, file.Path(), "shader.hlsl");
     }
 
     if (entry_points.empty()) {

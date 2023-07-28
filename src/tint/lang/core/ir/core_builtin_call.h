@@ -22,7 +22,7 @@
 namespace tint::ir {
 
 /// A core builtin call instruction in the IR.
-class CoreBuiltinCall : public utils::Castable<CoreBuiltinCall, BuiltinCall> {
+class CoreBuiltinCall : public Castable<CoreBuiltinCall, BuiltinCall> {
   public:
     /// Constructor
     /// @param result the result value
@@ -30,7 +30,7 @@ class CoreBuiltinCall : public utils::Castable<CoreBuiltinCall, BuiltinCall> {
     /// @param args the conversion arguments
     CoreBuiltinCall(InstructionResult* result,
                     builtin::Function func,
-                    utils::VectorRef<Value*> args = utils::Empty);
+                    VectorRef<Value*> args = tint::Empty);
     ~CoreBuiltinCall() override;
 
     /// @returns the builtin function

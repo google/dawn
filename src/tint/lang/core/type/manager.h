@@ -52,7 +52,7 @@ namespace tint::type {
 class Manager final {
   public:
     /// Iterator is the type returned by begin() and end()
-    using TypeIterator = utils::BlockAllocator<Type>::ConstIterator;
+    using TypeIterator = BlockAllocator<Type>::ConstIterator;
 
     /// Constructor
     Manager();
@@ -116,9 +116,9 @@ class Manager final {
             return ptr<T::address, typename T::type, T::access>(std::forward<ARGS>(args)...);
         } else if constexpr (builtin::fluent_types::IsArray<T>) {
             return array<typename T::type, T::length>(std::forward<ARGS>(args)...);
-        } else if constexpr (utils::traits::IsTypeOrDerived<T, Type>) {
+        } else if constexpr (tint::traits::IsTypeOrDerived<T, Type>) {
             return types_.Get<T>(std::forward<ARGS>(args)...);
-        } else if constexpr (utils::traits::IsTypeOrDerived<T, UniqueNode>) {
+        } else if constexpr (tint::traits::IsTypeOrDerived<T, UniqueNode>) {
             return unique_nodes_.Get<T>(std::forward<ARGS>(args)...);
         } else {
             return nodes_.Create<T>(std::forward<ARGS>(args)...);
@@ -129,7 +129,7 @@ class Manager final {
     /// @return a pointer to an instance of `T` with the provided arguments, or nullptr if the item
     ///         was not found.
     template <typename TYPE,
-              typename _ = std::enable_if<utils::traits::IsTypeOrDerived<TYPE, Type>>,
+              typename _ = std::enable_if<tint::traits::IsTypeOrDerived<TYPE, Type>>,
               typename... ARGS>
     auto* Find(ARGS&&... args) const {
         return types_.Find<ToType<TYPE>>(std::forward<ARGS>(args)...);
@@ -429,14 +429,14 @@ class Manager final {
     /// @param name the name of the structure
     /// @param members the list of structure member descriptors
     /// @returns the structure type
-    type::Struct* Struct(Symbol name, utils::VectorRef<StructMemberDesc> members);
+    type::Struct* Struct(Symbol name, VectorRef<StructMemberDesc> members);
 
     /// Create a new structure declaration.
     /// @param name the name of the structure
     /// @param members the list of structure member descriptors
     /// @returns the structure type
     type::Struct* Struct(Symbol name, std::initializer_list<StructMemberDesc> members) {
-        return Struct(name, utils::Vector<StructMemberDesc, 4>(members));
+        return Struct(name, tint::Vector<StructMemberDesc, 4>(members));
     }
 
     /// @returns an iterator to the beginning of the types
@@ -456,11 +456,11 @@ class Manager final {
     using ToType = typename ToTypeImpl<T>::type;
 
     /// Unique types owned by the manager
-    utils::UniqueAllocator<Type> types_;
+    UniqueAllocator<Type> types_;
     /// Unique nodes (excluding types) owned by the manager
-    utils::UniqueAllocator<UniqueNode> unique_nodes_;
+    UniqueAllocator<UniqueNode> unique_nodes_;
     /// Non-unique nodes owned by the manager
-    utils::BlockAllocator<Node> nodes_;
+    BlockAllocator<Node> nodes_;
 };
 
 }  // namespace tint::type

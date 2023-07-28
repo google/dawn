@@ -31,17 +31,17 @@ Function::Function(const type::Type* rt,
 
 Function::~Function() = default;
 
-void Function::SetParams(utils::VectorRef<FunctionParam*> params) {
+void Function::SetParams(VectorRef<FunctionParam*> params) {
     params_ = std::move(params);
-    TINT_ASSERT(IR, !params_.Any(utils::IsNull));
+    TINT_ASSERT(IR, !params_.Any(tint::IsNull));
 }
 
 void Function::SetParams(std::initializer_list<FunctionParam*> params) {
     params_ = params;
-    TINT_ASSERT(IR, !params_.Any(utils::IsNull));
+    TINT_ASSERT(IR, !params_.Any(tint::IsNull));
 }
 
-utils::StringStream& operator<<(utils::StringStream& out, Function::PipelineStage value) {
+StringStream& operator<<(StringStream& out, Function::PipelineStage value) {
     switch (value) {
         case Function::PipelineStage::kVertex:
             return out << "vertex";
@@ -55,7 +55,7 @@ utils::StringStream& operator<<(utils::StringStream& out, Function::PipelineStag
     return out << "<unknown>";
 }
 
-utils::StringStream& operator<<(utils::StringStream& out, enum Function::ReturnBuiltin value) {
+StringStream& operator<<(StringStream& out, enum Function::ReturnBuiltin value) {
     switch (value) {
         case Function::ReturnBuiltin::kFragDepth:
             return out << "frag_depth";

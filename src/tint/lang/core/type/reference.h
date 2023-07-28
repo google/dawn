@@ -24,7 +24,7 @@
 namespace tint::type {
 
 /// A reference type.
-class Reference final : public utils::Castable<Reference, Type> {
+class Reference final : public Castable<Reference, Type> {
   public:
     /// Constructor
     /// @param address_space the address space of the reference

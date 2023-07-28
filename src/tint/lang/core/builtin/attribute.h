@@ -54,7 +54,7 @@ enum class Attribute {
 /// @param out the stream to write to
 /// @param value the Attribute
 /// @returns `out` so calls can be chained
-utils::StringStream& operator<<(utils::StringStream& out, Attribute value);
+StringStream& operator<<(StringStream& out, Attribute value);
 
 /// ParseAttribute parses a Attribute from a string.
 /// @param str the string to parse

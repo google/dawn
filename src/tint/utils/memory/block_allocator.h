@@ -22,7 +22,7 @@
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/memory/bitcast.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// A container and allocator of objects of (or deriving from) the template type `T`.
 /// Objects are allocated by calling Create(), and are owned by the BlockAllocator.
@@ -259,7 +259,7 @@ class BlockAllocator {
 
         auto& block = data.block;
 
-        block.current_offset = utils::RoundUp(alignof(TYPE), block.current_offset);
+        block.current_offset = tint::RoundUp(alignof(TYPE), block.current_offset);
         if (block.current_offset + sizeof(TYPE) > BLOCK_SIZE) {
             // Allocate a new block from the heap
             auto* prev_block = block.current;
@@ -277,7 +277,7 @@ class BlockAllocator {
         }
 
         auto* base = &block.current->data[0];
-        auto* ptr = utils::Bitcast<TYPE*>(base + block.current_offset);
+        auto* ptr = tint::Bitcast<TYPE*>(base + block.current_offset);
         block.current_offset += sizeof(TYPE);
         return ptr;
     }
@@ -336,6 +336,6 @@ class BlockAllocator {
     } data;
 };
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_MEMORY_BLOCK_ALLOCATOR_H_

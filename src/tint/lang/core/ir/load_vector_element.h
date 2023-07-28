@@ -21,7 +21,7 @@
 namespace tint::ir {
 
 /// A load instruction for a single vector element in the IR.
-class LoadVectorElement : public utils::Castable<LoadVectorElement, OperandInstruction<3, 0>> {
+class LoadVectorElement : public Castable<LoadVectorElement, OperandInstruction<3, 0>> {
   public:
     /// The offset in Operands() for the `from` value
     static constexpr size_t kFromOperandOffset = 0;

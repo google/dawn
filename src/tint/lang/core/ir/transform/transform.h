@@ -28,7 +28,7 @@ class Module;
 namespace tint::ir::transform {
 
 /// Interface for IR Module transforms.
-class Transform : public utils::Castable<Transform> {
+class Transform : public Castable<Transform> {
   public:
     /// Constructor
     Transform();

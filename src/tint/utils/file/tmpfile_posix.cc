@@ -19,7 +19,7 @@
 
 #include "src/tint/utils/debug/debug.h"
 
-namespace tint::utils {
+namespace tint {
 
 namespace {
 
@@ -63,4 +63,4 @@ bool TmpFile::Append(const void* data, size_t size) const {
     return false;
 }
 
-}  // namespace tint::utils
+}  // namespace tint

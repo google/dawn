@@ -33,10 +33,10 @@ void TestAlign(ProgramBuilder* ctx) {
     // };
     // @group(0) @binding(0) var<storage, read_write> nephews : Nephews;
     auto* nephews = ctx->Structure(
-        "Nephews", utils::Vector{
-                       ctx->Member("huey", ctx->ty.f32(), utils::Vector{ctx->MemberAlign(256_i)}),
-                       ctx->Member("dewey", ctx->ty.f32(), utils::Vector{ctx->MemberAlign(256_i)}),
-                       ctx->Member("louie", ctx->ty.f32(), utils::Vector{ctx->MemberAlign(256_i)}),
+        "Nephews", Vector{
+                       ctx->Member("huey", ctx->ty.f32(), Vector{ctx->MemberAlign(256_i)}),
+                       ctx->Member("dewey", ctx->ty.f32(), Vector{ctx->MemberAlign(256_i)}),
+                       ctx->Member("louie", ctx->ty.f32(), Vector{ctx->MemberAlign(256_i)}),
                    });
     ctx->GlobalVar("nephews", ctx->ty.Of(nephews), builtin::AddressSpace::kStorage,
                    ctx->Binding(0_a), ctx->Group(0_a));

@@ -26,9 +26,9 @@ SwitchStatement::SwitchStatement(GenerationID pid,
                                  NodeID nid,
                                  const Source& src,
                                  const Expression* cond,
-                                 utils::VectorRef<const CaseStatement*> b,
-                                 utils::VectorRef<const Attribute*> stmt_attrs,
-                                 utils::VectorRef<const Attribute*> body_attrs)
+                                 VectorRef<const CaseStatement*> b,
+                                 VectorRef<const Attribute*> stmt_attrs,
+                                 VectorRef<const Attribute*> body_attrs)
     : Base(pid, nid, src),
       condition(cond),
       body(std::move(b)),

@@ -144,10 +144,10 @@ class State {
     using ValueBinding = std::variant<VariableValue, InlinedValue, ConsumedValue>;
 
     /// IR values to their representation
-    utils::Hashmap<ir::Value*, ValueBinding, 32> bindings_;
+    Hashmap<ir::Value*, ValueBinding, 32> bindings_;
 
     /// Names for values
-    utils::Hashmap<ir::Value*, Symbol, 32> names_;
+    Hashmap<ir::Value*, Symbol, 32> names_;
 
     /// The nesting depth of the currently generated AST
     /// 0  is module scope
@@ -155,21 +155,21 @@ class State {
     /// 2+ is within control flow
     uint32_t nesting_depth_ = 0;
 
-    using StatementList = utils::Vector<const ast::Statement*,
-                                        decltype(ast::BlockStatement::statements)::static_length>;
+    using StatementList =
+        Vector<const ast::Statement*, decltype(ast::BlockStatement::statements)::static_length>;
     StatementList* statements_ = nullptr;
 
     /// The current switch case block
     ir::Block* current_switch_case_ = nullptr;
 
     /// Values that can be inlined.
-    utils::Hashset<ir::Value*, 64> can_inline_;
+    Hashset<ir::Value*, 64> can_inline_;
 
     /// Set of enable directives emitted.
-    utils::Hashset<builtin::Extension, 4> enables_;
+    Hashset<builtin::Extension, 4> enables_;
 
     /// Map of struct to output program name.
-    utils::Hashmap<const type::Struct*, Symbol, 8> structs_;
+    Hashmap<const type::Struct*, Symbol, 8> structs_;
 
     /// True if 'diagnostic(off, derivative_uniformity)' has been emitted
     bool disabled_derivative_uniformity_ = false;
@@ -187,7 +187,7 @@ class State {
 
         // TODO(crbug.com/tint/1915): Properly implement this when we've fleshed out Function
         static constexpr size_t N = decltype(ast::Function::params)::static_length;
-        auto params = utils::Transform<N>(fn->Params(), [&](ir::FunctionParam* param) {
+        auto params = tint::Transform<N>(fn->Params(), [&](ir::FunctionParam* param) {
             auto ty = Type(param->Type());
             auto name = NameFor(param);
             Bind(param, name, PtrKind::kPtr);
@@ -197,8 +197,8 @@ class State {
         auto name = NameFor(fn);
         auto ret_ty = Type(fn->ReturnType());
         auto* body = Block(fn->Block());
-        utils::Vector<const ast::Attribute*, 1> attrs{};
-        utils::Vector<const ast::Attribute*, 1> ret_attrs{};
+        Vector<const ast::Attribute*, 1> attrs{};
+        Vector<const ast::Attribute*, 1> ret_attrs{};
         return b.Func(name, std::move(params), ret_ty, body, std::move(attrs),
                       std::move(ret_attrs));
     }
@@ -223,7 +223,7 @@ class State {
     void MarkInlinable(ir::Block* block) {
         // An ordered list of possibly-inlinable values returned by sequenced instructions that have
         // not yet been marked-for or ruled-out-for inlining.
-        utils::UniqueVector<ir::Value*, 32> pending_resolution;
+        UniqueVector<ir::Value*, 32> pending_resolution;
 
         // Walk the instructions of the block starting with the first.
         for (auto* inst : *block) {
@@ -232,7 +232,7 @@ class State {
 
             // Walk the instruction's operands starting with the right-most.
             auto operands = inst->Operands();
-            for (auto* operand : utils::Reverse(operands)) {
+            for (auto* operand : tint::Reverse(operands)) {
                 if (!pending_resolution.Contains(operand)) {
                     continue;
                 }
@@ -447,7 +447,7 @@ class State {
 
         auto* cond = Expr(s->Condition());
 
-        auto cases = utils::Transform(
+        auto cases = tint::Transform(
             s->Cases(),  //
             [&](ir::Switch::Case c) -> const tint::ast::CaseStatement* {
                 SCOPED_NESTING();
@@ -458,12 +458,12 @@ class State {
                     body = Block(c.Block());
                 }
 
-                auto selectors = utils::Transform(c.selectors,  //
-                                                  [&](ir::Switch::CaseSelector cs) {
-                                                      return cs.IsDefault()
-                                                                 ? b.DefaultCaseSelector()
-                                                                 : b.CaseSelector(Expr(cs.val));
-                                                  });
+                auto selectors = tint::Transform(c.selectors,  //
+                                                 [&](ir::Switch::CaseSelector cs) {
+                                                     return cs.IsDefault()
+                                                                ? b.DefaultCaseSelector()
+                                                                : b.CaseSelector(Expr(cs.val));
+                                                 });
                 return b.Case(std::move(selectors), body);
             });
 
@@ -510,7 +510,7 @@ class State {
         Symbol name = NameFor(var->Result());
         Bind(var->Result(), name, PtrKind::kRef);
 
-        utils::Vector<const ast::Attribute*, 4> attrs;
+        Vector<const ast::Attribute*, 4> attrs;
         if (auto bp = var->BindingPoint()) {
             attrs.Push(b.Group(AInt(bp->group)));
             attrs.Push(b.Binding(AInt(bp->binding)));
@@ -555,7 +555,7 @@ class State {
     }
 
     void Call(ir::Call* call) {
-        auto args = utils::Transform<4>(call->Args(), [&](ir::Value* arg) {
+        auto args = tint::Transform<4>(call->Args(), [&](ir::Value* arg) {
             // Pointer-like arguments are passed by pointer, never reference.
             return Expr(arg, PtrKind::kPtr);
         });
@@ -657,7 +657,7 @@ class State {
 
     void Swizzle(ir::Swizzle* s) {
         auto* vec = Expr(s->Object());
-        utils::Vector<char, 4> components;
+        Vector<char, 4> components;
         for (uint32_t i : s->Indices()) {
             if (TINT_UNLIKELY(i >= 4)) {
                 TINT_ICE(IR, b.Diagnostics()) << "invalid swizzle index: " << i;
@@ -805,7 +805,7 @@ class State {
                 return b.Call(ty, Constant(c->Index(0)));
             }
 
-            utils::Vector<const ast::Expression*, 8> els;
+            Vector<const ast::Expression*, 8> els;
             for (size_t i = 0, n = c->NumElements(); i < n; i++) {
                 els.Push(Constant(c->Index(i)));
             }
@@ -876,7 +876,7 @@ class State {
             },
             [&](const type::Array* a) {
                 auto el = Type(a->ElemType());
-                utils::Vector<const ast::Attribute*, 1> attrs;
+                Vector<const ast::Attribute*, 1> attrs;
                 if (!a->IsStrideImplicit()) {
                     attrs.Push(b.Stride(a->Stride()));
                 }
@@ -931,10 +931,10 @@ class State {
 
     ast::Type Struct(const type::Struct* s) {
         auto n = structs_.GetOrCreate(s, [&] {
-            auto members = utils::Transform<8>(s->Members(), [&](const type::StructMember* m) {
+            auto members = tint::Transform<8>(s->Members(), [&](const type::StructMember* m) {
                 auto ty = Type(m->Type());
                 const auto& ir_attrs = m->Attributes();
-                utils::Vector<const ast::Attribute*, 4> ast_attrs;
+                Vector<const ast::Attribute*, 4> ast_attrs;
                 if (m->Type()->Align() != m->Align()) {
                     ast_attrs.Push(b.MemberAlign(u32(m->Align())));
                 }
@@ -961,7 +961,7 @@ class State {
             });
 
             // TODO(crbug.com/tint/1902): Emit structure attributes
-            utils::Vector<const ast::Attribute*, 2> attrs;
+            Vector<const ast::Attribute*, 2> attrs;
 
             auto name = b.Symbols().Register(s->Name().NameView());
             b.Structure(name, std::move(members), std::move(attrs));

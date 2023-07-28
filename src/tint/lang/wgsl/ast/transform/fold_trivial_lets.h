@@ -22,7 +22,7 @@ namespace tint::ast::transform {
 /// FoldTrivialLets is a transform that inlines the initializers of let declarations whose
 /// initializers are just identifier expressions, or lets that are only used once. This is used to
 /// clean up unnecessary let declarations created by the SPIR-V reader.
-class FoldTrivialLets final : public utils::Castable<FoldTrivialLets, Transform> {
+class FoldTrivialLets final : public Castable<FoldTrivialLets, Transform> {
   public:
     /// Constructor
     FoldTrivialLets();

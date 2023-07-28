@@ -127,29 +127,29 @@ struct HoistToDeclBefore::State {
     /// loop, so that declaration statements can be inserted before the
     /// condition expression or continuing statement.
     struct LoopInfo {
-        utils::Vector<StmtBuilder, 8> init_decls;
-        utils::Vector<StmtBuilder, 8> cond_decls;
-        utils::Vector<StmtBuilder, 8> cont_decls;
+        Vector<StmtBuilder, 8> init_decls;
+        Vector<StmtBuilder, 8> cond_decls;
+        Vector<StmtBuilder, 8> cont_decls;
     };
 
     /// Info for each else-if that needs decomposing
     struct ElseIfInfo {
         /// Decls to insert before condition
-        utils::Vector<StmtBuilder, 8> cond_decls;
+        Vector<StmtBuilder, 8> cond_decls;
     };
 
     /// For-loops that need to be decomposed to loops.
-    utils::Hashmap<const sem::ForLoopStatement*, LoopInfo, 4> for_loops;
+    Hashmap<const sem::ForLoopStatement*, LoopInfo, 4> for_loops;
 
     /// Whiles that need to be decomposed to loops.
-    utils::Hashmap<const sem::WhileStatement*, LoopInfo, 4> while_loops;
+    Hashmap<const sem::WhileStatement*, LoopInfo, 4> while_loops;
 
     /// 'else if' statements that need to be decomposed to 'else {if}'
-    utils::Hashmap<const IfStatement*, ElseIfInfo, 4> else_ifs;
+    Hashmap<const IfStatement*, ElseIfInfo, 4> else_ifs;
 
     template <size_t N>
-    static auto Build(const utils::Vector<StmtBuilder, N>& builders) {
-        return utils::Transform(builders, [&](auto& builder) { return builder(); });
+    static auto Build(const Vector<StmtBuilder, N>& builders) {
+        return tint::Transform(builders, [&](auto& builder) { return builder(); });
     }
 
     /// @returns a new LoopInfo reference for the given @p for_loop.
@@ -259,8 +259,8 @@ struct HoistToDeclBefore::State {
                     // Build the loop body's statements.
                     // Start with any let declarations for the conditional
                     // expression.
-                    auto body_stmts = utils::Transform(info->cond_decls,
-                                                       [&](auto& builder) { return builder(); });
+                    auto body_stmts =
+                        tint::Transform(info->cond_decls, [&](auto& builder) { return builder(); });
                     // Emit the condition as:
                     //   if (!cond) { break; }
                     auto* cond = while_loop->condition;

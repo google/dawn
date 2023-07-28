@@ -44,13 +44,13 @@ namespace tint::detail {
 /// @see Switch().
 template <typename FN>
 using SwitchCaseType =
-    std::remove_pointer_t<utils::traits::ParameterType<std::remove_reference_t<FN>, 0>>;
+    std::remove_pointer_t<tint::traits::ParameterType<std::remove_reference_t<FN>, 0>>;
 
 /// Evaluates to true if the function `FN` has the signature of a Default case in a Switch().
 /// @see Switch().
 template <typename FN>
 inline constexpr bool IsDefaultCase =
-    std::is_same_v<utils::traits::ParameterType<std::remove_reference_t<FN>, 0>, Default>;
+    std::is_same_v<tint::traits::ParameterType<std::remove_reference_t<FN>, 0>, Default>;
 
 /// Searches the list of Switch cases for a Default case, returning the index of the Default case.
 /// If the a Default case is not found in the tuple, then -1 is returned.
@@ -67,7 +67,7 @@ constexpr int IndexOfDefaultCase() {
 
 /// Resolves to T if T is not nullptr_t, otherwise resolves to Ignore.
 template <typename T>
-using NullptrToIgnore = std::conditional_t<std::is_same_v<T, std::nullptr_t>, utils::Ignore, T>;
+using NullptrToIgnore = std::conditional_t<std::is_same_v<T, std::nullptr_t>, tint::Ignore, T>;
 
 /// Resolves to `const TYPE` if any of `CASE_RETURN_TYPES` are const or pointer-to-const, otherwise
 /// resolves to TYPE.
@@ -92,7 +92,7 @@ struct SwitchReturnTypeImpl</*IS_CASTABLE*/ false, REQUESTED_TYPE, CASE_RETURN_T
 
 /// SwitchReturnTypeImpl specialization for non-castable case types and an inferred return type.
 template <typename... CASE_RETURN_TYPES>
-struct SwitchReturnTypeImpl</*IS_CASTABLE*/ false, utils::detail::Infer, CASE_RETURN_TYPES...> {
+struct SwitchReturnTypeImpl</*IS_CASTABLE*/ false, tint::detail::Infer, CASE_RETURN_TYPES...> {
     /// Resolves to the common type for all the cases return types.
     using type = std::common_type_t<CASE_RETURN_TYPES...>;
 };
@@ -108,10 +108,10 @@ struct SwitchReturnTypeImpl</*IS_CASTABLE*/ true, REQUESTED_TYPE, CASE_RETURN_TY
 
 /// SwitchReturnTypeImpl specialization for castable case types and an inferred return type.
 template <typename... CASE_RETURN_TYPES>
-struct SwitchReturnTypeImpl</*IS_CASTABLE*/ true, utils::detail::Infer, CASE_RETURN_TYPES...> {
+struct SwitchReturnTypeImpl</*IS_CASTABLE*/ true, tint::detail::Infer, CASE_RETURN_TYPES...> {
   private:
     using InferredType =
-        utils::CastableCommonBase<NullptrToIgnore<std::remove_pointer_t<CASE_RETURN_TYPES>>...>;
+        CastableCommonBase<NullptrToIgnore<std::remove_pointer_t<CASE_RETURN_TYPES>>...>;
 
   public:
     /// `const T*` or `T*`, where T is the common base type for all the castable case types.
@@ -123,7 +123,7 @@ struct SwitchReturnTypeImpl</*IS_CASTABLE*/ true, utils::detail::Infer, CASE_RET
 /// from the case return types.
 template <typename REQUESTED_TYPE, typename... CASE_RETURN_TYPES>
 using SwitchReturnType = typename SwitchReturnTypeImpl<
-    utils::IsCastable<NullptrToIgnore<std::remove_pointer_t<CASE_RETURN_TYPES>>...>,
+    tint::IsCastable<NullptrToIgnore<std::remove_pointer_t<CASE_RETURN_TYPES>>...>,
     REQUESTED_TYPE,
     CASE_RETURN_TYPES...>::type;
 
@@ -162,12 +162,10 @@ namespace tint {
 /// @param cases the switch cases
 /// @return the value returned by the called case. If no cases matched, then the zero value for the
 /// consistent case type.
-template <typename RETURN_TYPE = utils::detail::Infer,
-          typename T = utils::CastableBase,
-          typename... CASES>
+template <typename RETURN_TYPE = tint::detail::Infer, typename T = CastableBase, typename... CASES>
 inline auto Switch(T* object, CASES&&... cases) {
     using ReturnType =
-        tint::detail::SwitchReturnType<RETURN_TYPE, utils::traits::ReturnType<CASES>...>;
+        tint::detail::SwitchReturnType<RETURN_TYPE, tint::traits::ReturnType<CASES>...>;
     static constexpr int kDefaultIndex = tint::detail::IndexOfDefaultCase<std::tuple<CASES...>>();
     static constexpr bool kHasDefaultCase = kDefaultIndex >= 0;
     static constexpr bool kHasReturnType = !std::is_same_v<ReturnType, void>;
@@ -204,9 +202,9 @@ inline auto Switch(T* object, CASES&&... cases) {
         uint8_t data[sizeof(ReturnTypeOrU8)];
     };
     ReturnStorage return_storage;
-    auto* result = utils::Bitcast<ReturnTypeOrU8*>(&return_storage);
+    auto* result = tint::Bitcast<ReturnTypeOrU8*>(&return_storage);
 
-    const utils::TypeInfo& type_info = object->TypeInfo();
+    const tint::TypeInfo& type_info = object->TypeInfo();
 
     // Examines the parameter type of the case function.
     // If the parameter is a pointer type that `object` is of, or derives from, then that case

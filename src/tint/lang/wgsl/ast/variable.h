@@ -40,7 +40,7 @@ namespace tint::ast {
 /// declaration, "override" declaration, "const" declaration, or formal parameter to a function.
 ///
 /// @see https://www.w3.org/TR/WGSL/#value-decls
-class Variable : public utils::Castable<Variable, Node> {
+class Variable : public Castable<Variable, Node> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
@@ -56,7 +56,7 @@ class Variable : public utils::Castable<Variable, Node> {
              const Identifier* name,
              Type type,
              const Expression* initializer,
-             utils::VectorRef<const Attribute*> attributes);
+             VectorRef<const Attribute*> attributes);
 
     /// Destructor
     ~Variable() override;
@@ -83,7 +83,7 @@ class Variable : public utils::Castable<Variable, Node> {
     const Expression* const initializer;
 
     /// The attributes attached to this variable
-    const utils::Vector<const Attribute*, 2> attributes;
+    const tint::Vector<const Attribute*, 2> attributes;
 };
 
 }  // namespace tint::ast

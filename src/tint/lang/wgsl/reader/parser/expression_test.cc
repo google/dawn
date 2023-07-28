@@ -468,7 +468,7 @@ struct Case {
 static bool ParsedAsTemplateArgumentList(BinaryOperatorInfo lhs_op, BinaryOperatorInfo rhs_op) {
     return lhs_op.bit == kOpLt && rhs_op.bit & (kOpGt | kOpGe | kOpShr);
 }
-static utils::StringStream& operator<<(utils::StringStream& o, const Case& c) {
+static StringStream& operator<<(StringStream& o, const Case& c) {
     return o << "a " << c.lhs_op.symbol << " b " << c.rhs_op.symbol << " c ";
 }
 
@@ -488,7 +488,7 @@ static std::vector<Case> Cases() {
 using ParserImplMixedBinaryOpTest = WGSLParserTestWithParam<Case>;
 
 TEST_P(ParserImplMixedBinaryOpTest, Test) {
-    utils::StringStream wgsl;
+    StringStream wgsl;
     wgsl << GetParam();
     auto p = parser(wgsl.str());
     auto e = p->expression();
@@ -500,7 +500,7 @@ TEST_P(ParserImplMixedBinaryOpTest, Test) {
         EXPECT_TRUE(e.errored);
         EXPECT_EQ(e.value, nullptr);
         EXPECT_TRUE(p->has_error());
-        utils::StringStream expected;
+        StringStream expected;
         expected << "1:3: mixing '" << GetParam().lhs_op.symbol << "' and '"
                  << GetParam().rhs_op.symbol << "' requires parenthesis";
         EXPECT_EQ(p->error(), expected.str());

@@ -24,17 +24,17 @@ using TypeStructTest = TestHelper;
 
 TEST_F(TypeStructTest, Creation) {
     auto name = Sym("S");
-    auto* s = create<Struct>(name, utils::Empty, 4u /* align */, 8u /* size */,
-                             16u /* size_no_padding */);
+    auto* s =
+        create<Struct>(name, tint::Empty, 4u /* align */, 8u /* size */, 16u /* size_no_padding */);
     EXPECT_EQ(s->Align(), 4u);
     EXPECT_EQ(s->Size(), 8u);
     EXPECT_EQ(s->SizeNoPadding(), 16u);
 }
 
 TEST_F(TypeStructTest, Equals) {
-    auto* a = create<Struct>(Sym("a"), utils::Empty, 4u /* align */, 4u /* size */,
+    auto* a = create<Struct>(Sym("a"), tint::Empty, 4u /* align */, 4u /* size */,
                              4u /* size_no_padding */);
-    auto* b = create<Struct>(Sym("b"), utils::Empty, 4u /* align */, 4u /* size */,
+    auto* b = create<Struct>(Sym("b"), tint::Empty, 4u /* align */, 4u /* size */,
                              4u /* size_no_padding */);
 
     EXPECT_TRUE(a->Equals(*a));
@@ -45,13 +45,13 @@ TEST_F(TypeStructTest, Equals) {
 TEST_F(TypeStructTest, FriendlyName) {
     auto name = Sym("my_struct");
     auto* s =
-        create<Struct>(name, utils::Empty, 4u /* align */, 4u /* size */, 4u /* size_no_padding */);
+        create<Struct>(name, tint::Empty, 4u /* align */, 4u /* size */, 4u /* size_no_padding */);
     EXPECT_EQ(s->FriendlyName(), "my_struct");
 }
 
 TEST_F(TypeStructTest, Layout) {
     auto* inner_st =  //
-        Structure("Inner", utils::Vector{
+        Structure("Inner", tint::Vector{
                                Member("a", ty.i32()),
                                Member("b", ty.u32()),
                                Member("c", ty.f32()),
@@ -59,7 +59,7 @@ TEST_F(TypeStructTest, Layout) {
                                Member("e", ty.mat4x2<f32>()),
                            });
 
-    auto* outer_st = Structure("Outer", utils::Vector{
+    auto* outer_st = Structure("Outer", tint::Vector{
                                             Member("inner", ty("Inner")),
                                             Member("a", ty.i32()),
                                         });
@@ -90,8 +90,8 @@ TEST_F(TypeStructTest, Layout) {
 }
 
 TEST_F(TypeStructTest, Location) {
-    auto* st = Structure("st", utils::Vector{
-                                   Member("a", ty.i32(), utils::Vector{Location(1_u)}),
+    auto* st = Structure("st", tint::Vector{
+                                   Member("a", ty.i32(), tint::Vector{Location(1_u)}),
                                    Member("b", ty.u32()),
                                });
 
@@ -107,7 +107,7 @@ TEST_F(TypeStructTest, Location) {
 
 TEST_F(TypeStructTest, IsConstructable) {
     auto* inner =  //
-        Structure("Inner", utils::Vector{
+        Structure("Inner", tint::Vector{
                                Member("a", ty.i32()),
                                Member("b", ty.u32()),
                                Member("c", ty.f32()),
@@ -115,13 +115,13 @@ TEST_F(TypeStructTest, IsConstructable) {
                                Member("e", ty.mat4x2<f32>()),
                            });
 
-    auto* outer = Structure("Outer", utils::Vector{
+    auto* outer = Structure("Outer", tint::Vector{
                                          Member("inner", ty("Inner")),
                                          Member("a", ty.i32()),
                                      });
 
     auto* outer_runtime_sized_array =
-        Structure("OuterRuntimeSizedArray", utils::Vector{
+        Structure("OuterRuntimeSizedArray", tint::Vector{
                                                 Member("inner", ty("Inner")),
                                                 Member("a", ty.i32()),
                                                 Member("runtime_sized_array", ty.array<i32>()),
@@ -140,7 +140,7 @@ TEST_F(TypeStructTest, IsConstructable) {
 
 TEST_F(TypeStructTest, HasCreationFixedFootprint) {
     auto* inner =  //
-        Structure("Inner", utils::Vector{
+        Structure("Inner", tint::Vector{
                                Member("a", ty.i32()),
                                Member("b", ty.u32()),
                                Member("c", ty.f32()),
@@ -149,12 +149,12 @@ TEST_F(TypeStructTest, HasCreationFixedFootprint) {
                                Member("f", ty.array<f32, 32>()),
                            });
 
-    auto* outer = Structure("Outer", utils::Vector{
+    auto* outer = Structure("Outer", tint::Vector{
                                          Member("inner", ty("Inner")),
                                      });
 
     auto* outer_with_runtime_sized_array =
-        Structure("OuterRuntimeSizedArray", utils::Vector{
+        Structure("OuterRuntimeSizedArray", tint::Vector{
                                                 Member("inner", ty("Inner")),
                                                 Member("runtime_sized_array", ty.array<i32>()),
                                             });
@@ -173,7 +173,7 @@ TEST_F(TypeStructTest, HasCreationFixedFootprint) {
 
 TEST_F(TypeStructTest, HasFixedFootprint) {
     auto* inner =  //
-        Structure("Inner", utils::Vector{
+        Structure("Inner", tint::Vector{
                                Member("a", ty.i32()),
                                Member("b", ty.u32()),
                                Member("c", ty.f32()),
@@ -182,12 +182,12 @@ TEST_F(TypeStructTest, HasFixedFootprint) {
                                Member("f", ty.array<f32, 32>()),
                            });
 
-    auto* outer = Structure("Outer", utils::Vector{
+    auto* outer = Structure("Outer", tint::Vector{
                                          Member("inner", ty("Inner")),
                                      });
 
     auto* outer_with_runtime_sized_array =
-        Structure("OuterRuntimeSizedArray", utils::Vector{
+        Structure("OuterRuntimeSizedArray", tint::Vector{
                                                 Member("inner", ty("Inner")),
                                                 Member("runtime_sized_array", ty.array<i32>()),
                                             });
@@ -210,10 +210,10 @@ TEST_F(TypeStructTest, Clone) {
 
     auto* s = create<Struct>(
         Sym("my_struct"),
-        utils::Vector{create<StructMember>(Sym("b"), create<Vector>(create<F32>(), 3u), 0u, 0u, 16u,
-                                           12u, attrs_location_2),
-                      create<StructMember>(Sym("a"), create<I32>(), 1u, 16u, 4u, 4u,
-                                           type::StructMemberAttributes{})},
+        tint::Vector{create<StructMember>(Sym("b"), create<Vector>(create<F32>(), 3u), 0u, 0u, 16u,
+                                          12u, attrs_location_2),
+                     create<StructMember>(Sym("a"), create<I32>(), 1u, 16u, 4u, 4u,
+                                          type::StructMemberAttributes{})},
         4u /* align */, 8u /* size */, 16u /* size_no_padding */);
 
     GenerationID id;

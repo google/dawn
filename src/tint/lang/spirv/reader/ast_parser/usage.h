@@ -75,7 +75,7 @@ class Usage {
     /// Emits this usage to the given stream
     /// @param out the output stream.
     /// @returns the modified stream.
-    utils::StringStream& operator<<(utils::StringStream& out) const;
+    StringStream& operator<<(StringStream& out) const;
 
     /// Equality operator
     /// @param other the RHS of the equality test.
@@ -128,7 +128,7 @@ class Usage {
 /// @param out the stream
 /// @param u the Usage
 /// @returns the stream so calls can be chained
-inline utils::StringStream& operator<<(utils::StringStream& out, const Usage& u) {
+inline StringStream& operator<<(StringStream& out, const Usage& u) {
     return u.operator<<(out);
 }
 

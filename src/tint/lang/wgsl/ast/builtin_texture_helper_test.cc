@@ -26,7 +26,7 @@ namespace {
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-utils::StringStream& operator<<(utils::StringStream& out, const TextureKind& kind) {
+StringStream& operator<<(StringStream& out, const TextureKind& kind) {
     switch (kind) {
         case TextureKind::kRegular:
             out << "regular";
@@ -47,7 +47,7 @@ utils::StringStream& operator<<(utils::StringStream& out, const TextureKind& kin
     return out;
 }
 
-utils::StringStream& operator<<(utils::StringStream& out, const TextureDataType& ty) {
+StringStream& operator<<(StringStream& out, const TextureDataType& ty) {
     switch (ty) {
         case TextureDataType::kF32:
             out << "f32";
@@ -121,7 +121,7 @@ TextureOverloadCase::TextureOverloadCase(const TextureOverloadCase&) = default;
 TextureOverloadCase::~TextureOverloadCase() = default;
 
 std::ostream& operator<<(std::ostream& out, const TextureOverloadCase& data) {
-    utils::StringStream str;
+    StringStream str;
     str << "TextureOverloadCase " << static_cast<int>(data.overload) << "\n";
     str << data.description << "\n";
     str << "texture_kind:      " << data.texture_kind << "\n";
@@ -156,7 +156,7 @@ Type TextureOverloadCase::BuildResultVectorComponentType(ProgramBuilder* b) cons
 }
 
 const Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b) const {
-    utils::Vector attrs{
+    tint::Vector attrs{
         b->Group(0_u),
         b->Binding(0_a),
     };
@@ -190,7 +190,7 @@ const Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b) con
 }
 
 const Variable* TextureOverloadCase::BuildSamplerVariable(ProgramBuilder* b) const {
-    utils::Vector attrs = {b->Group(0_a), b->Binding(1_a)};
+    tint::Vector attrs = {b->Group(0_a), b->Binding(1_a)};
     return b->GlobalVar(kSamplerName, b->ty.sampler(sampler_kind), attrs);
 }
 

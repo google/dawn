@@ -139,7 +139,7 @@ class hash<tint::spirv::writer::ScalarConstant> {
     inline std::size_t operator()(const tint::spirv::writer::ScalarConstant& c) const {
         uint32_t value = 0;
         std::memcpy(&value, &c.value, sizeof(value));
-        return tint::utils::Hash(value, c.kind);
+        return tint::Hash(value, c.kind);
     }
 };
 

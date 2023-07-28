@@ -57,7 +57,7 @@ TEST_F(FailStreamTest, FailMethodReturnsSelf) {
 
 TEST_F(FailStreamTest, ShiftOperatorAccumulatesValues) {
     bool flag = true;
-    utils::StringStream ss;
+    StringStream ss;
     FailStream fs(&flag, &ss);
 
     ss << "prefix ";

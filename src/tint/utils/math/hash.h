@@ -27,7 +27,7 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/math/crc32.h"
 
-namespace tint::utils {
+namespace tint {
 namespace detail {
 
 /// Helper for obtaining a seed bias value for HashCombine with a bit-width
@@ -111,12 +111,12 @@ struct Hasher<std::vector<T>> {
     }
 };
 
-/// Hasher specialization for utils::Vector
+/// Hasher specialization for Vector
 template <typename T, size_t N>
-struct Hasher<utils::Vector<T, N>> {
+struct Hasher<Vector<T, N>> {
     /// @param vector the Vector to hash
     /// @returns a hash of the Vector
-    size_t operator()(const utils::Vector<T, N>& vector) const {
+    size_t operator()(const Vector<T, N>& vector) const {
         auto hash = Hash(vector.Length());
         for (auto& el : vector) {
             hash = HashCombine(hash, el);
@@ -125,12 +125,12 @@ struct Hasher<utils::Vector<T, N>> {
     }
 };
 
-/// Hasher specialization for utils::VectorRef
+/// Hasher specialization for VectorRef
 template <typename T>
-struct Hasher<utils::VectorRef<T>> {
+struct Hasher<VectorRef<T>> {
     /// @param vector the VectorRef reference to hash
     /// @returns a hash of the Vector
-    size_t operator()(const utils::VectorRef<T>& vector) const {
+    size_t operator()(const VectorRef<T>& vector) const {
         auto hash = Hash(vector.Length());
         for (auto& el : vector) {
             hash = HashCombine(hash, el);
@@ -209,7 +209,7 @@ size_t Hash(const ARGS&... args) {
 ///          The returned hash is dependent on the order of the arguments.
 template <typename... ARGS>
 size_t HashCombine(size_t hash, const ARGS&... values) {
-    constexpr size_t offset = utils::detail::HashCombineOffset<sizeof(size_t)>::value();
+    constexpr size_t offset = tint::detail::HashCombineOffset<sizeof(size_t)>::value();
     ((hash ^= Hash(values) + (offset ^ (hash >> 2))), ...);
     return hash;
 }
@@ -281,19 +281,17 @@ struct UnorderedKeyWrapper {
     bool operator==(const UnorderedKeyWrapper& other) const { return value == other.value; }
 };
 
-}  // namespace tint::utils
+}  // namespace tint
 
 namespace std {
 
-/// Custom std::hash specialization for tint::utils::UnorderedKeyWrapper
+/// Custom std::hash specialization for tint::UnorderedKeyWrapper
 template <typename T>
-class hash<tint::utils::UnorderedKeyWrapper<T>> {
+class hash<tint::UnorderedKeyWrapper<T>> {
   public:
     /// @param w the UnorderedKeyWrapper
     /// @return the hash value
-    inline std::size_t operator()(const tint::utils::UnorderedKeyWrapper<T>& w) const {
-        return w.hash;
-    }
+    inline std::size_t operator()(const tint::UnorderedKeyWrapper<T>& w) const { return w.hash; }
 };
 
 }  // namespace std

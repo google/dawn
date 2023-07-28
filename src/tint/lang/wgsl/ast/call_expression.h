@@ -29,7 +29,7 @@ namespace tint::ast {
 /// * sem::Builtin
 /// * sem::ValueConstructor
 /// * sem::ValueConversion
-class CallExpression final : public utils::Castable<CallExpression, Expression> {
+class CallExpression final : public Castable<CallExpression, Expression> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
@@ -41,7 +41,7 @@ class CallExpression final : public utils::Castable<CallExpression, Expression> 
                    NodeID nid,
                    const Source& source,
                    const IdentifierExpression* target,
-                   utils::VectorRef<const Expression*> args);
+                   VectorRef<const Expression*> args);
 
     /// Destructor
     ~CallExpression() override;
@@ -56,7 +56,7 @@ class CallExpression final : public utils::Castable<CallExpression, Expression> 
     const IdentifierExpression* target;
 
     /// The arguments
-    const utils::Vector<const Expression*, 8> args;
+    const tint::Vector<const Expression*, 8> args;
 };
 
 }  // namespace tint::ast

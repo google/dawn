@@ -39,7 +39,7 @@ TEST_F(SpirvASTParserTest, Usage_Trivial_Properties) {
 }
 
 TEST_F(SpirvASTParserTest, Usage_Trivial_Output) {
-    utils::StringStream ss;
+    StringStream ss;
     Usage u;
     ss << u;
     EXPECT_THAT(ss.str(), Eq("Usage()"));
@@ -90,13 +90,13 @@ TEST_F(SpirvASTParserTest, Usage_Add) {
     EXPECT_TRUE(a.IsStorageReadTexture());
     EXPECT_FALSE(a.IsStorageWriteTexture());
 
-    utils::StringStream ss;
+    StringStream ss;
     ss << a;
     EXPECT_THAT(ss.str(), Eq("Usage(Sampler( comparison )Texture( read ))"));
 }
 
 TEST_F(SpirvASTParserTest, Usage_AddSampler) {
-    utils::StringStream ss;
+    StringStream ss;
     Usage u;
     u.AddSampler();
 
@@ -121,7 +121,7 @@ TEST_F(SpirvASTParserTest, Usage_AddSampler) {
 }
 
 TEST_F(SpirvASTParserTest, Usage_AddComparisonSampler) {
-    utils::StringStream ss;
+    StringStream ss;
     Usage u;
     u.AddComparisonSampler();
 
@@ -145,7 +145,7 @@ TEST_F(SpirvASTParserTest, Usage_AddComparisonSampler) {
 }
 
 TEST_F(SpirvASTParserTest, Usage_AddTexture) {
-    utils::StringStream ss;
+    StringStream ss;
     Usage u;
     u.AddTexture();
 
@@ -169,7 +169,7 @@ TEST_F(SpirvASTParserTest, Usage_AddTexture) {
 }
 
 TEST_F(SpirvASTParserTest, Usage_AddSampledTexture) {
-    utils::StringStream ss;
+    StringStream ss;
     Usage u;
     u.AddSampledTexture();
 
@@ -193,7 +193,7 @@ TEST_F(SpirvASTParserTest, Usage_AddSampledTexture) {
 }
 
 TEST_F(SpirvASTParserTest, Usage_AddMultisampledTexture) {
-    utils::StringStream ss;
+    StringStream ss;
     Usage u;
     u.AddMultisampledTexture();
 
@@ -217,7 +217,7 @@ TEST_F(SpirvASTParserTest, Usage_AddMultisampledTexture) {
 }
 
 TEST_F(SpirvASTParserTest, Usage_AddDepthTexture) {
-    utils::StringStream ss;
+    StringStream ss;
     Usage u;
     u.AddDepthTexture();
 
@@ -241,7 +241,7 @@ TEST_F(SpirvASTParserTest, Usage_AddDepthTexture) {
 }
 
 TEST_F(SpirvASTParserTest, Usage_AddStorageReadTexture) {
-    utils::StringStream ss;
+    StringStream ss;
     Usage u;
     u.AddStorageReadTexture();
 
@@ -265,7 +265,7 @@ TEST_F(SpirvASTParserTest, Usage_AddStorageReadTexture) {
 }
 
 TEST_F(SpirvASTParserTest, Usage_AddStorageWriteTexture) {
-    utils::StringStream ss;
+    StringStream ss;
     Usage u;
     u.AddStorageWriteTexture();
 

@@ -27,7 +27,7 @@ using namespace tint::number_suffixes;        // NOLINT
 using ProgramToIRCallTest = helpers::IRProgramTest;
 
 TEST_F(ProgramToIRCallTest, EmitExpression_Bitcast) {
-    Func("my_func", utils::Empty, ty.f32(), utils::Vector{Return(0_f)});
+    Func("my_func", tint::Empty, ty.f32(), Vector{Return(0_f)});
 
     auto* expr = Bitcast<f32>(Call("my_func"));
     WrapInFunction(expr);
@@ -53,7 +53,7 @@ TEST_F(ProgramToIRCallTest, EmitExpression_Bitcast) {
 TEST_F(ProgramToIRCallTest, EmitStatement_Discard) {
     auto* expr = Discard();
     Func("test_function", {}, ty.void_(), expr,
-         utils::Vector{
+         Vector{
              create<ast::StageAttribute>(ast::PipelineStage::kFragment),
          });
 
@@ -70,7 +70,7 @@ TEST_F(ProgramToIRCallTest, EmitStatement_Discard) {
 }
 
 TEST_F(ProgramToIRCallTest, EmitStatement_UserFunction) {
-    Func("my_func", utils::Vector{Param("p", ty.f32())}, ty.void_(), utils::Empty);
+    Func("my_func", Vector{Param("p", ty.f32())}, ty.void_(), tint::Empty);
 
     auto* stmt = CallStmt(Call("my_func", Mul(2_a, 3_a)));
     WrapInFunction(stmt);

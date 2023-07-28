@@ -47,7 +47,7 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
 
     auto& sem = src->Sem();
 
-    utils::Hashmap<SinkSignature, Symbol, 8, utils::Hasher<SinkSignature>> sinks;
+    Hashmap<SinkSignature, Symbol, 8, Hasher<SinkSignature>> sinks;
 
     bool made_changes = false;
     for (auto* node : src->ASTNodes().Objects()) {
@@ -118,7 +118,7 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
                         }
                         auto sink = sinks.GetOrCreate(sig, [&] {
                             auto name = b.Symbols().New("phony_sink");
-                            utils::Vector<const Parameter*, 8> params;
+                            tint::Vector<const Parameter*, 8> params;
                             for (auto* ty : sig) {
                                 auto ast_ty = CreateASTTypeFor(ctx, ty);
                                 params.Push(b.Param("p" + std::to_string(params.Length()), ast_ty));
@@ -126,7 +126,7 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
                             b.Func(name, params, b.ty.void_(), {});
                             return name;
                         });
-                        utils::Vector<const Expression*, 8> args;
+                        tint::Vector<const Expression*, 8> args;
                         for (auto* arg : side_effects) {
                             args.Push(ctx.Clone(arg));
                         }

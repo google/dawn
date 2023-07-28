@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 TEST(PredicatesTest, Eq) {
@@ -80,4 +80,4 @@ TEST(PredicatesTest, IsNull) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

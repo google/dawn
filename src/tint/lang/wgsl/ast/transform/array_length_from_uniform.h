@@ -52,7 +52,7 @@ namespace tint::ast::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * SimplifyPointers
-class ArrayLengthFromUniform final : public utils::Castable<ArrayLengthFromUniform, Transform> {
+class ArrayLengthFromUniform final : public Castable<ArrayLengthFromUniform, Transform> {
   public:
     /// Constructor
     ArrayLengthFromUniform();
@@ -60,7 +60,7 @@ class ArrayLengthFromUniform final : public utils::Castable<ArrayLengthFromUnifo
     ~ArrayLengthFromUniform() override;
 
     /// Configuration options for the ArrayLengthFromUniform transform.
-    struct Config final : public utils::Castable<Config, Data> {
+    struct Config final : public Castable<Config, Data> {
         /// Constructor
         /// @param ubo_bp the binding point to use for the generated uniform buffer.
         explicit Config(BindingPoint ubo_bp);
@@ -85,7 +85,7 @@ class ArrayLengthFromUniform final : public utils::Castable<ArrayLengthFromUnifo
     /// Information produced about what the transform did.
     /// If there were no calls to the arrayLength() builtin, then no Result will
     /// be emitted.
-    struct Result final : public utils::Castable<Result, Data> {
+    struct Result final : public Castable<Result, Data> {
         /// Constructor
         /// @param used_size_indices Indices into the UBO that are statically used.
         explicit Result(std::unordered_set<uint32_t> used_size_indices);

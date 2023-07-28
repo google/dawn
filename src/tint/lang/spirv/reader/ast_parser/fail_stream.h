@@ -29,7 +29,7 @@ class FailStream {
     /// to be a valid pointer to bool.
     /// @param out output stream where a message should be written to explain
     /// the failure
-    FailStream(bool* status_ptr, utils::StringStream* out) : status_ptr_(status_ptr), out_(out) {}
+    FailStream(bool* status_ptr, StringStream* out) : status_ptr_(status_ptr), out_(out) {}
     /// Copy constructor
     /// @param other the fail stream to clone
     FailStream(const FailStream& other) = default;
@@ -61,7 +61,7 @@ class FailStream {
 
   private:
     bool* status_ptr_;
-    utils::StringStream* out_;
+    StringStream* out_;
 };
 
 }  // namespace tint::spirv::reader

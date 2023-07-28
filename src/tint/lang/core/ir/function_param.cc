@@ -24,7 +24,7 @@ FunctionParam::FunctionParam(const type::Type* ty) : type_(ty) {
 
 FunctionParam::~FunctionParam() = default;
 
-utils::StringStream& operator<<(utils::StringStream& out, enum FunctionParam::Builtin value) {
+StringStream& operator<<(StringStream& out, enum FunctionParam::Builtin value) {
     switch (value) {
         case FunctionParam::Builtin::kVertexIndex:
             out << "vertex_index";

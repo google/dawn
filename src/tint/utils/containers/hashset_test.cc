@@ -23,7 +23,7 @@
 #include "gmock/gmock.h"
 #include "src/tint/utils/containers/predicates.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 constexpr std::array kPrimes{
@@ -178,4 +178,4 @@ TEST(HashsetTest, All) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

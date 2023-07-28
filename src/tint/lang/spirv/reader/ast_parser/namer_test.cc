@@ -31,7 +31,7 @@ class SpvNamerTest : public testing::Test {
     std::string error() { return errors_.str(); }
 
   protected:
-    utils::StringStream errors_;
+    StringStream errors_;
     bool success_ = true;
     FailStream fail_stream_;
 };
@@ -353,7 +353,7 @@ using SpvNamerReservedWordTest = ::testing::TestWithParam<std::string>;
 
 TEST_P(SpvNamerReservedWordTest, ReservedWordsAreUsed) {
     bool success;
-    utils::StringStream errors;
+    StringStream errors;
     FailStream fail_stream(&success, &errors);
     Namer namer(fail_stream);
     const std::string reserved = GetParam();
@@ -398,7 +398,7 @@ using SpvNamerBuiltinFunctionTest = ::testing::TestWithParam<const char*>;
 
 TEST_P(SpvNamerBuiltinFunctionTest, BuiltinFunctionsAreUsed) {
     bool success;
-    utils::StringStream errors;
+    StringStream errors;
     FailStream fail_stream(&success, &errors);
     Namer namer(fail_stream);
     const std::string builtin_fn = GetParam();

@@ -40,7 +40,7 @@ TEST_F(ResolverAtomicValidationTest, AddressSpace_Storage) {
 }
 
 TEST_F(ResolverAtomicValidationTest, AddressSpace_Storage_Struct) {
-    auto* s = Structure("s", utils::Vector{Member(Source{{12, 34}}, "a", ty.atomic(ty.i32()))});
+    auto* s = Structure("s", Vector{Member(Source{{12, 34}}, "a", ty.atomic(ty.i32()))});
     GlobalVar("g", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
               Group(0_a), Binding(0_a));
 
@@ -71,7 +71,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Array) {
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Struct) {
-    auto* s = Structure("s", utils::Vector{Member("a", ty.atomic(ty.i32()))});
+    auto* s = Structure("s", Vector{Member("a", ty.atomic(ty.i32()))});
     GlobalVar(Source{{56, 78}}, "g", ty.Of(s), builtin::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
@@ -85,9 +85,8 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_StructOfStruct) {
     // struct Outer { m : array<Inner, 4>; };
     // var<private> g : Outer;
 
-    auto* Inner =
-        Structure("Inner", utils::Vector{Member("m", ty.atomic(Source{{12, 34}}, ty.i32()))});
-    auto* Outer = Structure("Outer", utils::Vector{Member("m", ty.Of(Inner))});
+    auto* Inner = Structure("Inner", Vector{Member("m", ty.atomic(Source{{12, 34}}, ty.i32()))});
+    auto* Outer = Structure("Outer", Vector{Member("m", ty.Of(Inner))});
     GlobalVar(Source{{56, 78}}, "g", ty.Of(Outer), builtin::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
@@ -101,9 +100,8 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_StructOfStructOfArray) 
     // struct Outer { m : array<Inner, 4>; };
     // var<private> g : Outer;
 
-    auto* Inner =
-        Structure("Inner", utils::Vector{Member(Source{{12, 34}}, "m", ty.atomic(ty.i32()))});
-    auto* Outer = Structure("Outer", utils::Vector{Member("m", ty.Of(Inner))});
+    auto* Inner = Structure("Inner", Vector{Member(Source{{12, 34}}, "m", ty.atomic(ty.i32()))});
+    auto* Outer = Structure("Outer", Vector{Member("m", ty.Of(Inner))});
     GlobalVar(Source{{56, 78}}, "g", ty.Of(Outer), builtin::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
@@ -131,7 +129,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_ArrayOfStruct) {
     // };
     // var<private> v: array<S, 5u>;
 
-    auto* s = Structure("S", utils::Vector{Member(Source{{12, 34}}, "m", ty.atomic<u32>())});
+    auto* s = Structure("S", Vector{Member(Source{{12, 34}}, "m", ty.atomic<u32>())});
     GlobalVar(Source{{56, 78}}, "v", ty.array(ty.Of(s), 5_u), builtin::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
@@ -148,7 +146,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_ArrayOfStructOfArray) {
     // var<private> v: array<S, 5u>;
 
     auto* atomic_array = Alias("AtomicArray", ty.atomic(ty.i32()));
-    auto* s = Structure("S", utils::Vector{Member(Source{{12, 34}}, "m", ty.Of(atomic_array))});
+    auto* s = Structure("S", Vector{Member(Source{{12, 34}}, "m", ty.Of(atomic_array))});
     GlobalVar(Source{{56, 78}}, "v", ty.array(ty.Of(s), 5_u), builtin::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
@@ -177,17 +175,17 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Complex) {
     auto array_atomic_u32_8 = ty.array(ty.atomic(ty.u32()), 8_u);
     auto array_atomic_i32_4 = ty.array(ty.atomic(ty.i32()), 4_u);
 
-    auto* s6 = Structure("S6", utils::Vector{Member("x", array_i32_4)});
-    auto* s5 = Structure("S5", utils::Vector{Member("x", ty.Of(s6)),                              //
-                                             Member(Source{{12, 34}}, "y", ty.Of(atomic_array)),  //
-                                             Member("z", array_atomic_u32_8)});                   //
-    auto* s4 = Structure("S4", utils::Vector{Member("x", ty.Of(s6)),                              //
-                                             Member("y", ty.Of(s5)),                              //
-                                             Member("z", array_atomic_i32_4)});                   //
-    auto* s3 = Structure("S3", utils::Vector{Member("x", ty.Of(s4))});
-    auto* s2 = Structure("S2", utils::Vector{Member("x", ty.Of(s3))});
-    auto* s1 = Structure("S1", utils::Vector{Member("x", ty.Of(s2))});
-    auto* s0 = Structure("S0", utils::Vector{Member("x", ty.Of(s1))});
+    auto* s6 = Structure("S6", Vector{Member("x", array_i32_4)});
+    auto* s5 = Structure("S5", Vector{Member("x", ty.Of(s6)),                              //
+                                      Member(Source{{12, 34}}, "y", ty.Of(atomic_array)),  //
+                                      Member("z", array_atomic_u32_8)});                   //
+    auto* s4 = Structure("S4", Vector{Member("x", ty.Of(s6)),                              //
+                                      Member("y", ty.Of(s5)),                              //
+                                      Member("z", array_atomic_i32_4)});                   //
+    auto* s3 = Structure("S3", Vector{Member("x", ty.Of(s4))});
+    auto* s2 = Structure("S2", Vector{Member("x", ty.Of(s3))});
+    auto* s1 = Structure("S1", Vector{Member("x", ty.Of(s2))});
+    auto* s0 = Structure("S0", Vector{Member("x", ty.Of(s1))});
     GlobalVar(Source{{56, 78}}, "g", ty.Of(s0), builtin::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
@@ -197,7 +195,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Complex) {
 }
 
 TEST_F(ResolverAtomicValidationTest, Struct_AccessMode_Read) {
-    auto* s = Structure("s", utils::Vector{Member(Source{{12, 34}}, "a", ty.atomic(ty.i32()))});
+    auto* s = Structure("s", Vector{Member(Source{{12, 34}}, "a", ty.atomic(ty.i32()))});
     GlobalVar(Source{{56, 78}}, "g", ty.Of(s), builtin::AddressSpace::kStorage,
               builtin::Access::kRead, Group(0_a), Binding(0_a));
 
@@ -209,7 +207,7 @@ TEST_F(ResolverAtomicValidationTest, Struct_AccessMode_Read) {
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_Struct) {
-    auto* s = Structure("s", utils::Vector{Member(Source{{12, 34}}, "a", ty.atomic(ty.i32()))});
+    auto* s = Structure("s", Vector{Member(Source{{12, 34}}, "a", ty.atomic(ty.i32()))});
     GlobalVar(Source{{56, 78}}, "g", ty.Of(s), builtin::AddressSpace::kStorage,
               builtin::Access::kRead, Group(0_a), Binding(0_a));
 
@@ -225,9 +223,8 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_StructOfStruct) {
     // struct Outer { m : array<Inner, 4>; };
     // var<storage, read> g : Outer;
 
-    auto* Inner =
-        Structure("Inner", utils::Vector{Member(Source{{12, 34}}, "m", ty.atomic(ty.i32()))});
-    auto* Outer = Structure("Outer", utils::Vector{Member("m", ty.Of(Inner))});
+    auto* Inner = Structure("Inner", Vector{Member(Source{{12, 34}}, "m", ty.atomic(ty.i32()))});
+    auto* Outer = Structure("Outer", Vector{Member("m", ty.Of(Inner))});
     GlobalVar(Source{{56, 78}}, "g", ty.Of(Outer), builtin::AddressSpace::kStorage,
               builtin::Access::kRead, Group(0_a), Binding(0_a));
 
@@ -243,9 +240,8 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_StructOfStructOfArray) {
     // struct Outer { m : array<Inner, 4>; };
     // var<storage, read> g : Outer;
 
-    auto* Inner =
-        Structure("Inner", utils::Vector{Member(Source{{12, 34}}, "m", ty.atomic(ty.i32()))});
-    auto* Outer = Structure("Outer", utils::Vector{Member("m", ty.Of(Inner))});
+    auto* Inner = Structure("Inner", Vector{Member(Source{{12, 34}}, "m", ty.atomic(ty.i32()))});
+    auto* Outer = Structure("Outer", Vector{Member("m", ty.Of(Inner))});
     GlobalVar(Source{{56, 78}}, "g", ty.Of(Outer), builtin::AddressSpace::kStorage,
               builtin::Access::kRead, Group(0_a), Binding(0_a));
 
@@ -276,17 +272,17 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_Complex) {
     auto array_atomic_u32_8 = ty.array(ty.atomic(ty.u32()), 8_u);
     auto array_atomic_i32_4 = ty.array(ty.atomic(ty.i32()), 4_u);
 
-    auto* s6 = Structure("S6", utils::Vector{Member("x", array_i32_4)});
-    auto* s5 = Structure("S5", utils::Vector{Member("x", ty.Of(s6)),                              //
-                                             Member(Source{{56, 78}}, "y", ty.Of(atomic_array)),  //
-                                             Member("z", array_atomic_u32_8)});                   //
-    auto* s4 = Structure("S4", utils::Vector{Member("x", ty.Of(s6)),                              //
-                                             Member("y", ty.Of(s5)),                              //
-                                             Member("z", array_atomic_i32_4)});                   //
-    auto* s3 = Structure("S3", utils::Vector{Member("x", ty.Of(s4))});
-    auto* s2 = Structure("S2", utils::Vector{Member("x", ty.Of(s3))});
-    auto* s1 = Structure("S1", utils::Vector{Member("x", ty.Of(s2))});
-    auto* s0 = Structure("S0", utils::Vector{Member("x", ty.Of(s1))});
+    auto* s6 = Structure("S6", Vector{Member("x", array_i32_4)});
+    auto* s5 = Structure("S5", Vector{Member("x", ty.Of(s6)),                              //
+                                      Member(Source{{56, 78}}, "y", ty.Of(atomic_array)),  //
+                                      Member("z", array_atomic_u32_8)});                   //
+    auto* s4 = Structure("S4", Vector{Member("x", ty.Of(s6)),                              //
+                                      Member("y", ty.Of(s5)),                              //
+                                      Member("z", array_atomic_i32_4)});                   //
+    auto* s3 = Structure("S3", Vector{Member("x", ty.Of(s4))});
+    auto* s2 = Structure("S2", Vector{Member("x", ty.Of(s3))});
+    auto* s1 = Structure("S1", Vector{Member("x", ty.Of(s2))});
+    auto* s0 = Structure("S0", Vector{Member("x", ty.Of(s1))});
     GlobalVar(Source{{12, 34}}, "g", ty.Of(s0), builtin::AddressSpace::kStorage,
               builtin::Access::kRead, Group(0_a), Binding(0_a));
 

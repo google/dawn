@@ -27,7 +27,7 @@ LoopStatement::LoopStatement(GenerationID pid,
                              const Source& src,
                              const BlockStatement* b,
                              const BlockStatement* cont,
-                             utils::VectorRef<const ast::Attribute*> attrs)
+                             VectorRef<const ast::Attribute*> attrs)
     : Base(pid, nid, src), body(b), continuing(cont), attributes(std::move(attrs)) {
     TINT_ASSERT(AST, body);
     TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, body, generation_id);

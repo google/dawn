@@ -27,13 +27,13 @@ TEST_F(GlslASTPrinterTest_Switch, Emit_Switch) {
     GlobalVar("cond", ty.i32(), builtin::AddressSpace::kPrivate);
 
     auto* def_body = Block(create<ast::BreakStatement>());
-    auto* def = create<ast::CaseStatement>(utils::Vector{DefaultCaseSelector()}, def_body);
+    auto* def = create<ast::CaseStatement>(Vector{DefaultCaseSelector()}, def_body);
 
     auto* case_body = Block(create<ast::BreakStatement>());
-    auto* case_stmt = create<ast::CaseStatement>(utils::Vector{CaseSelector(5_i)}, case_body);
+    auto* case_stmt = create<ast::CaseStatement>(Vector{CaseSelector(5_i)}, case_body);
 
     auto* cond = Expr("cond");
-    auto* s = Switch(cond, utils::Vector{case_stmt, def});
+    auto* s = Switch(cond, Vector{case_stmt, def});
     WrapInFunction(s);
 
     ASTPrinter& gen = Build();
@@ -55,11 +55,11 @@ TEST_F(GlslASTPrinterTest_Switch, Emit_Switch_MixedDefault) {
     GlobalVar("cond", ty.i32(), builtin::AddressSpace::kPrivate);
 
     auto* def_body = Block(create<ast::BreakStatement>());
-    auto* def = create<ast::CaseStatement>(utils::Vector{CaseSelector(5_i), DefaultCaseSelector()},
-                                           def_body);
+    auto* def =
+        create<ast::CaseStatement>(Vector{CaseSelector(5_i), DefaultCaseSelector()}, def_body);
 
     auto* cond = Expr("cond");
-    auto* s = Switch(cond, utils::Vector{def});
+    auto* s = Switch(cond, Vector{def});
     WrapInFunction(s);
 
     ASTPrinter& gen = Build();

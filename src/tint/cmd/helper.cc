@@ -36,11 +36,11 @@ enum class InputFormat {
 
 InputFormat InputFormatFromFilename(const std::string& filename) {
     auto input_format = InputFormat::kUnknown;
-    if (utils::HasSuffix(filename, ".wgsl")) {
+    if (tint::HasSuffix(filename, ".wgsl")) {
         input_format = InputFormat::kWgsl;
-    } else if (utils::HasSuffix(filename, ".spv")) {
+    } else if (tint::HasSuffix(filename, ".spv")) {
         input_format = InputFormat::kSpirvBin;
-    } else if (utils::HasSuffix(filename, ".spvasm")) {
+    } else if (tint::HasSuffix(filename, ".spvasm")) {
         input_format = InputFormat::kSpirvAsm;
     }
     return input_format;

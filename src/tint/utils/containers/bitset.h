@@ -19,7 +19,7 @@
 
 #include "src/tint/utils/containers/vector.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// Bitset is a dynamically sized, vector of bits, packed into integer words.
 /// Bits can be individually read and written using the index operator.
@@ -116,6 +116,6 @@ class Bitset {
     size_t len_ = 0;
 };
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_CONTAINERS_BITSET_H_

@@ -16,7 +16,7 @@
 
 namespace tint::type {
 
-utils::StringStream& operator<<(utils::StringStream& out, SamplerKind kind) {
+StringStream& operator<<(StringStream& out, SamplerKind kind) {
     switch (kind) {
         case SamplerKind::kSampler:
             out << "sampler";

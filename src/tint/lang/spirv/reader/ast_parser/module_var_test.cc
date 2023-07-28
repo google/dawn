@@ -3239,13 +3239,13 @@ fn main(@builtin(${wgsl_builtin}) x_1_param : ${unsigned_wgsl_type}) {
 }
 )";
 
-    expected = utils::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
-    expected = utils::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
-    expected = utils::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
-    expected = utils::ReplaceAll(expected, "${assignment_value}",
-                                 (wgsl_type == unsigned_wgsl_type)
-                                     ? "x_1_param"
-                                     : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
+    expected = tint::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
+    expected = tint::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
+    expected = tint::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
+    expected = tint::ReplaceAll(expected, "${assignment_value}",
+                                (wgsl_type == unsigned_wgsl_type)
+                                    ? "x_1_param"
+                                    : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
 
     EXPECT_EQ(module_str, expected) << module_str;
 }
@@ -3285,13 +3285,13 @@ fn main(@builtin(${wgsl_builtin}) x_1_param : ${unsigned_wgsl_type}) {
 }
 )";
 
-    expected = utils::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
-    expected = utils::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
-    expected = utils::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
-    expected = utils::ReplaceAll(expected, "${assignment_value}",
-                                 (wgsl_type == unsigned_wgsl_type)
-                                     ? "x_1_param"
-                                     : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
+    expected = tint::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
+    expected = tint::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
+    expected = tint::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
+    expected = tint::ReplaceAll(expected, "${assignment_value}",
+                                (wgsl_type == unsigned_wgsl_type)
+                                    ? "x_1_param"
+                                    : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
 
     EXPECT_EQ(module_str, expected) << module_str;
 }
@@ -3330,13 +3330,13 @@ fn main(@builtin(${wgsl_builtin}) x_1_param : ${unsigned_wgsl_type}) {
 }
 )";
 
-    expected = utils::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
-    expected = utils::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
-    expected = utils::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
-    expected = utils::ReplaceAll(expected, "${assignment_value}",
-                                 (wgsl_type == unsigned_wgsl_type)
-                                     ? "x_1_param"
-                                     : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
+    expected = tint::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
+    expected = tint::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
+    expected = tint::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
+    expected = tint::ReplaceAll(expected, "${assignment_value}",
+                                (wgsl_type == unsigned_wgsl_type)
+                                    ? "x_1_param"
+                                    : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
 
     EXPECT_EQ(module_str, expected) << module_str;
 }
@@ -3405,14 +3405,14 @@ fn main(@builtin(${wgsl_builtin}) x_1_param : ${unsigned_wgsl_type}) {
 }
 )";
 
-    expected = utils::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
-    expected = utils::ReplaceAll(expected, "${wgsl_component_type}", wgsl_component_type);
-    expected = utils::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
-    expected = utils::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
-    expected = utils::ReplaceAll(expected, "${assignment_value}",
-                                 (wgsl_type == unsigned_wgsl_type)
-                                     ? "x_1_param"
-                                     : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
+    expected = tint::ReplaceAll(expected, "${wgsl_type}", wgsl_type);
+    expected = tint::ReplaceAll(expected, "${wgsl_component_type}", wgsl_component_type);
+    expected = tint::ReplaceAll(expected, "${unsigned_wgsl_type}", unsigned_wgsl_type);
+    expected = tint::ReplaceAll(expected, "${wgsl_builtin}", wgsl_builtin);
+    expected = tint::ReplaceAll(expected, "${assignment_value}",
+                                (wgsl_type == unsigned_wgsl_type)
+                                    ? "x_1_param"
+                                    : "bitcast<" + signed_wgsl_type + ">(x_1_param)");
 
     EXPECT_EQ(module_str, expected) << module_str;
 }

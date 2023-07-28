@@ -23,7 +23,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ir::NextIteration);
 
 namespace tint::ir {
 
-NextIteration::NextIteration(ir::Loop* loop, utils::VectorRef<Value*> args /* = utils::Empty */)
+NextIteration::NextIteration(ir::Loop* loop, VectorRef<Value*> args /* = tint::Empty */)
     : loop_(loop) {
     TINT_ASSERT(IR, loop_);
 

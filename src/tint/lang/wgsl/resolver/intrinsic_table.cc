@@ -52,14 +52,14 @@ class Matchers;
 class NumberMatcher;
 class TypeMatcher;
 
-/// The utils::Vector `N` template argument value for arrays of parameters.
+/// The Vector `N` template argument value for arrays of parameters.
 constexpr static const size_t kNumFixedParams = 8;
 
-/// The utils::Vector `N` template argument value for arrays of overload candidates.
+/// The Vector `N` template argument value for arrays of overload candidates.
 constexpr static const size_t kNumFixedCandidates = 8;
 
 /// A special type that matches all TypeMatchers
-class Any final : public utils::Castable<Any, type::Type> {
+class Any final : public Castable<Any, type::Type> {
   public:
     Any() : Base(0u, type::Flags{}) {}
     ~Any() override = default;
@@ -135,7 +135,7 @@ class TemplateState {
             t = ty;
             return ty;
         }
-        ty = type::Type::Common(utils::Vector{t, ty});
+        ty = type::Type::Common(Vector{t, ty});
         if (ty) {
             t = ty;
         }
@@ -185,8 +185,8 @@ class TemplateState {
     size_t Count() const { return types_.Length() + numbers_.Length(); }
 
   private:
-    utils::Vector<const type::Type*, 4> types_;
-    utils::Vector<Number, 2> numbers_;
+    Vector<const type::Type*, 4> types_;
+    Vector<Number, 2> numbers_;
 };
 
 /// Index type used for matcher indices
@@ -354,7 +354,7 @@ enum class OverloadFlag {
 };
 
 // An enum set of OverloadFlag, used by OperatorInfo
-using OverloadFlags = utils::EnumSet<OverloadFlag>;
+using OverloadFlags = tint::EnumSet<OverloadFlag>;
 
 bool match_bool(MatchState&, const type::Type* ty) {
     return ty->IsAnyOf<Any, type::Bool>();
@@ -922,17 +922,17 @@ struct IntrinsicPrototype {
         /// @param i the IntrinsicPrototype to create a hash for
         /// @return the hash value
         inline std::size_t operator()(const IntrinsicPrototype& i) const {
-            size_t hash = utils::Hash(i.parameters.Length());
+            size_t hash = Hash(i.parameters.Length());
             for (auto& p : i.parameters) {
-                hash = utils::HashCombine(hash, p.type, p.usage);
+                hash = HashCombine(hash, p.type, p.usage);
             }
-            return utils::Hash(hash, i.overload, i.return_type);
+            return Hash(hash, i.overload, i.return_type);
         }
     };
 
     const OverloadInfo* overload = nullptr;
     type::Type const* return_type = nullptr;
-    utils::Vector<Parameter, kNumFixedParams> parameters;
+    Vector<Parameter, kNumFixedParams> parameters;
 };
 
 /// Equality operator for IntrinsicPrototype
@@ -957,7 +957,7 @@ class Impl : public IntrinsicTable {
     explicit Impl(ProgramBuilder& builder);
 
     Builtin Lookup(builtin::Function builtin_type,
-                   utils::VectorRef<const type::Type*> args,
+                   VectorRef<const type::Type*> args,
                    sem::EvaluationStage earliest_eval_stage,
                    const Source& source) override;
 
@@ -975,7 +975,7 @@ class Impl : public IntrinsicTable {
 
     CtorOrConv Lookup(CtorConvIntrinsic type,
                       const type::Type* template_arg,
-                      utils::VectorRef<const type::Type*> args,
+                      VectorRef<const type::Type*> args,
                       sem::EvaluationStage earliest_eval_stage,
                       const Source& source) override;
 
@@ -987,7 +987,7 @@ class Impl : public IntrinsicTable {
         /// The template types and numbers
         TemplateState templates;
         /// The parameter types for the candidate overload
-        utils::Vector<IntrinsicPrototype::Parameter, kNumFixedParams> parameters;
+        Vector<IntrinsicPrototype::Parameter, kNumFixedParams> parameters;
         /// The match-score of the candidate overload.
         /// A score of zero indicates an exact match.
         /// Non-zero scores are used for diagnostics when no overload matches.
@@ -996,10 +996,10 @@ class Impl : public IntrinsicTable {
     };
 
     /// A list of candidates
-    using Candidates = utils::Vector<Candidate, kNumFixedCandidates>;
+    using Candidates = Vector<Candidate, kNumFixedCandidates>;
 
     /// Callback function when no overloads match.
-    using OnNoMatch = std::function<void(utils::VectorRef<Candidate>)>;
+    using OnNoMatch = std::function<void(VectorRef<Candidate>)>;
 
     /// Sorts the candidates based on their score, with the lowest (best-ranking) scores first.
     static inline void SortCandidates(Candidates& candidates) {
@@ -1021,7 +1021,7 @@ class Impl : public IntrinsicTable {
     ///          IntrinsicPrototype::return_type.
     IntrinsicPrototype MatchIntrinsic(const IntrinsicInfo& intrinsic,
                                       const char* intrinsic_name,
-                                      utils::VectorRef<const type::Type*> args,
+                                      VectorRef<const type::Type*> args,
                                       sem::EvaluationStage earliest_eval_stage,
                                       TemplateState templates,
                                       const OnNoMatch& on_no_match) const;
@@ -1034,7 +1034,7 @@ class Impl : public IntrinsicTable {
     ///                  template as `f32`.
     /// @returns the evaluated Candidate information.
     Candidate ScoreOverload(const OverloadInfo* overload,
-                            utils::VectorRef<const type::Type*> args,
+                            VectorRef<const type::Type*> args,
                             sem::EvaluationStage earliest_eval_stage,
                             const TemplateState& templates) const;
 
@@ -1050,7 +1050,7 @@ class Impl : public IntrinsicTable {
     /// @returns the resolved Candidate.
     Candidate ResolveCandidate(Candidates&& candidates,
                                const char* intrinsic_name,
-                               utils::VectorRef<const type::Type*> args,
+                               VectorRef<const type::Type*> args,
                                TemplateState templates) const;
 
     /// Match constructs a new MatchState
@@ -1063,36 +1063,35 @@ class Impl : public IntrinsicTable {
                      sem::EvaluationStage earliest_eval_stage) const;
 
     // Prints the overload for emitting diagnostics
-    void PrintOverload(utils::StringStream& ss,
+    void PrintOverload(StringStream& ss,
                        const OverloadInfo* overload,
                        const char* intrinsic_name) const;
 
     // Prints the list of candidates for emitting diagnostics
-    void PrintCandidates(utils::StringStream& ss,
-                         utils::VectorRef<Candidate> candidates,
+    void PrintCandidates(StringStream& ss,
+                         VectorRef<Candidate> candidates,
                          const char* intrinsic_name) const;
 
     /// Raises an error when no overload is a clear winner of overload resolution
     void ErrAmbiguousOverload(const char* intrinsic_name,
-                              utils::VectorRef<const type::Type*> args,
+                              VectorRef<const type::Type*> args,
                               TemplateState templates,
-                              utils::VectorRef<Candidate> candidates) const;
+                              VectorRef<Candidate> candidates) const;
 
     ProgramBuilder& builder;
     Matchers matchers;
-    utils::Hashmap<IntrinsicPrototype, sem::Builtin*, 64, IntrinsicPrototype::Hasher> builtins;
-    utils::Hashmap<IntrinsicPrototype, sem::ValueConstructor*, 16, IntrinsicPrototype::Hasher>
+    Hashmap<IntrinsicPrototype, sem::Builtin*, 64, IntrinsicPrototype::Hasher> builtins;
+    Hashmap<IntrinsicPrototype, sem::ValueConstructor*, 16, IntrinsicPrototype::Hasher>
         constructors;
-    utils::Hashmap<IntrinsicPrototype, sem::ValueConversion*, 16, IntrinsicPrototype::Hasher>
-        converters;
+    Hashmap<IntrinsicPrototype, sem::ValueConversion*, 16, IntrinsicPrototype::Hasher> converters;
 };
 
 /// @return a string representing a call to a builtin with the given argument
 /// types.
 std::string CallSignature(const char* intrinsic_name,
-                          utils::VectorRef<const type::Type*> args,
+                          VectorRef<const type::Type*> args,
                           const type::Type* template_arg = nullptr) {
-    utils::StringStream ss;
+    StringStream ss;
     ss << intrinsic_name;
     if (template_arg) {
         ss << "<" << template_arg->FriendlyName() << ">";
@@ -1124,14 +1123,14 @@ std::string TemplateNumberMatcher::String(MatchState* state) const {
 Impl::Impl(ProgramBuilder& b) : builder(b) {}
 
 Impl::Builtin Impl::Lookup(builtin::Function builtin_type,
-                           utils::VectorRef<const type::Type*> args,
+                           VectorRef<const type::Type*> args,
                            sem::EvaluationStage earliest_eval_stage,
                            const Source& source) {
     const char* intrinsic_name = builtin::str(builtin_type);
 
     // Generates an error when no overloads match the provided arguments
-    auto on_no_match = [&](utils::VectorRef<Candidate> candidates) {
-        utils::StringStream ss;
+    auto on_no_match = [&](VectorRef<Candidate> candidates) {
+        StringStream ss;
         ss << "no matching call to " << CallSignature(intrinsic_name, args) << std::endl;
         if (!candidates.IsEmpty()) {
             ss << std::endl
@@ -1151,7 +1150,7 @@ Impl::Builtin Impl::Lookup(builtin::Function builtin_type,
 
     // De-duplicate builtins that are identical.
     auto* sem = builtins.GetOrCreate(match, [&] {
-        utils::Vector<sem::Parameter*, kNumFixedParams> params;
+        Vector<sem::Parameter*, kNumFixedParams> params;
         params.Reserve(match.parameters.Length());
         for (auto& p : match.parameters) {
             params.Push(builder.create<sem::Parameter>(
@@ -1196,11 +1195,11 @@ IntrinsicTable::UnaryOperator Impl::Lookup(ast::UnaryOp op,
         }
     }();
 
-    utils::Vector args{arg};
+    Vector args{arg};
 
     // Generates an error when no overloads match the provided arguments
-    auto on_no_match = [&, name = intrinsic_name](utils::VectorRef<Candidate> candidates) {
-        utils::StringStream ss;
+    auto on_no_match = [&, name = intrinsic_name](VectorRef<Candidate> candidates) {
+        StringStream ss;
         ss << "no matching overload for " << CallSignature(name, args) << std::endl;
         if (!candidates.IsEmpty()) {
             ss << std::endl
@@ -1274,11 +1273,11 @@ IntrinsicTable::BinaryOperator Impl::Lookup(ast::BinaryOp op,
         }
     }();
 
-    utils::Vector args{lhs, rhs};
+    Vector args{lhs, rhs};
 
     // Generates an error when no overloads match the provided arguments
-    auto on_no_match = [&, name = intrinsic_name](utils::VectorRef<Candidate> candidates) {
-        utils::StringStream ss;
+    auto on_no_match = [&, name = intrinsic_name](VectorRef<Candidate> candidates) {
+        StringStream ss;
         ss << "no matching overload for " << CallSignature(name, args) << std::endl;
         if (!candidates.IsEmpty()) {
             ss << std::endl
@@ -1306,14 +1305,14 @@ IntrinsicTable::BinaryOperator Impl::Lookup(ast::BinaryOp op,
 
 IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
                                         const type::Type* template_arg,
-                                        utils::VectorRef<const type::Type*> args,
+                                        VectorRef<const type::Type*> args,
                                         sem::EvaluationStage earliest_eval_stage,
                                         const Source& source) {
     auto name = str(type);
 
     // Generates an error when no overloads match the provided arguments
-    auto on_no_match = [&](utils::VectorRef<Candidate> candidates) {
-        utils::StringStream ss;
+    auto on_no_match = [&](VectorRef<Candidate> candidates) {
+        StringStream ss;
         ss << "no matching constructor for " << CallSignature(name, args, template_arg)
            << std::endl;
         Candidates ctor, conv;
@@ -1354,7 +1353,7 @@ IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
 
     // Was this overload a constructor or conversion?
     if (match.overload->flags.Contains(OverloadFlag::kIsConstructor)) {
-        utils::Vector<sem::Parameter*, 8> params;
+        Vector<sem::Parameter*, 8> params;
         params.Reserve(match.parameters.Length());
         for (auto& p : match.parameters) {
             params.Push(builder.create<sem::Parameter>(
@@ -1384,13 +1383,13 @@ IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
 
 IntrinsicPrototype Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,
                                         const char* intrinsic_name,
-                                        utils::VectorRef<const type::Type*> args,
+                                        VectorRef<const type::Type*> args,
                                         sem::EvaluationStage earliest_eval_stage,
                                         TemplateState templates,
                                         const OnNoMatch& on_no_match) const {
     size_t num_matched = 0;
     size_t match_idx = 0;
-    utils::Vector<Candidate, kNumFixedCandidates> candidates;
+    Vector<Candidate, kNumFixedCandidates> candidates;
     candidates.Reserve(intrinsic.num_overloads);
     for (size_t overload_idx = 0; overload_idx < static_cast<size_t>(intrinsic.num_overloads);
          overload_idx++) {
@@ -1441,7 +1440,7 @@ IntrinsicPrototype Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,
 }
 
 Impl::Candidate Impl::ScoreOverload(const OverloadInfo* overload,
-                                    utils::VectorRef<const type::Type*> args,
+                                    VectorRef<const type::Type*> args,
                                     sem::EvaluationStage earliest_eval_stage,
                                     const TemplateState& in_templates) const {
     // Penalty weights for overload mismatching.
@@ -1538,7 +1537,7 @@ Impl::Candidate Impl::ScoreOverload(const OverloadInfo* overload,
     }
 
     // Now that all the template types have been finalized, we can construct the parameters.
-    utils::Vector<IntrinsicPrototype::Parameter, kNumFixedParams> parameters;
+    Vector<IntrinsicPrototype::Parameter, kNumFixedParams> parameters;
     if (score == 0) {
         parameters.Reserve(num_params);
         for (size_t p = 0; p < num_params; p++) {
@@ -1555,9 +1554,9 @@ Impl::Candidate Impl::ScoreOverload(const OverloadInfo* overload,
 
 Impl::Candidate Impl::ResolveCandidate(Impl::Candidates&& candidates,
                                        const char* intrinsic_name,
-                                       utils::VectorRef<const type::Type*> args,
+                                       VectorRef<const type::Type*> args,
                                        TemplateState templates) const {
-    utils::Vector<uint32_t, kNumFixedParams> best_ranks;
+    Vector<uint32_t, kNumFixedParams> best_ranks;
     best_ranks.Resize(args.Length(), 0xffffffff);
     size_t num_matched = 0;
     Candidate* best = nullptr;
@@ -1625,7 +1624,7 @@ MatchState Impl::Match(TemplateState& templates,
     return MatchState(builder, templates, matchers, overload, matcher_indices, earliest_eval_stage);
 }
 
-void Impl::PrintOverload(utils::StringStream& ss,
+void Impl::PrintOverload(StringStream& ss,
                          const OverloadInfo* overload,
                          const char* intrinsic_name) const {
     TemplateState templates;
@@ -1697,8 +1696,8 @@ void Impl::PrintOverload(utils::StringStream& ss,
     }
 }
 
-void Impl::PrintCandidates(utils::StringStream& ss,
-                           utils::VectorRef<Candidate> candidates,
+void Impl::PrintCandidates(StringStream& ss,
+                           VectorRef<Candidate> candidates,
                            const char* intrinsic_name) const {
     for (auto& candidate : candidates) {
         ss << "  ";
@@ -1732,10 +1731,10 @@ std::string MatchState::NumName() {
 }
 
 void Impl::ErrAmbiguousOverload(const char* intrinsic_name,
-                                utils::VectorRef<const type::Type*> args,
+                                VectorRef<const type::Type*> args,
                                 TemplateState templates,
-                                utils::VectorRef<Candidate> candidates) const {
-    utils::StringStream ss;
+                                VectorRef<Candidate> candidates) const {
+    StringStream ss;
     ss << "ambiguous overload while attempting to match " << intrinsic_name;
     for (size_t i = 0; i < std::numeric_limits<size_t>::max(); i++) {
         if (auto* ty = templates.Type(i)) {

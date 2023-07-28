@@ -16,7 +16,7 @@
 
 namespace tint::ast {
 
-utils::StringStream& operator<<(utils::StringStream& out, UnaryOp mod) {
+StringStream& operator<<(StringStream& out, UnaryOp mod) {
     switch (mod) {
         case UnaryOp::kAddressOf: {
             out << "address-of";

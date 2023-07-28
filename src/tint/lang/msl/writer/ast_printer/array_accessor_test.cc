@@ -29,7 +29,7 @@ TEST_F(MslASTPrinterTest, IndexAccessor) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "ary[5]");
 }
@@ -43,7 +43,7 @@ TEST_F(MslASTPrinterTest, IndexAccessor_OfDref) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(*(p))[5]");
 }

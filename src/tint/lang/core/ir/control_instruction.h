@@ -29,7 +29,7 @@ namespace tint::ir {
 
 /// Base class of instructions that perform control flow to two or more blocks, owned by the
 /// ControlInstruction.
-class ControlInstruction : public utils::Castable<ControlInstruction, OperandInstruction<1, 1>> {
+class ControlInstruction : public Castable<ControlInstruction, OperandInstruction<1, 1>> {
   public:
     /// Constructor
     ControlInstruction();
@@ -43,7 +43,7 @@ class ControlInstruction : public utils::Castable<ControlInstruction, OperandIns
 
     /// Sets the results of the control instruction
     /// @param values the new result values
-    void SetResults(utils::VectorRef<InstructionResult*> values) {
+    void SetResults(VectorRef<InstructionResult*> values) {
         for (auto* value : results_) {
             if (value) {
                 value->SetSource(nullptr);
@@ -60,14 +60,14 @@ class ControlInstruction : public utils::Castable<ControlInstruction, OperandIns
     /// Sets the results of the control instruction
     /// @param values the new result values
     template <typename... ARGS,
-              typename = std::enable_if_t<!utils::IsVectorLike<
-                  utils::traits::Decay<utils::traits::NthTypeOf<0, ARGS..., void>>>>>
+              typename = std::enable_if_t<!tint::IsVectorLike<
+                  tint::traits::Decay<tint::traits::NthTypeOf<0, ARGS..., void>>>>>
     void SetResults(ARGS&&... values) {
-        SetResults(utils::Vector{std::forward<ARGS>(values)...});
+        SetResults(Vector{std::forward<ARGS>(values)...});
     }
 
     /// @return All the exits for the flow control instruction
-    const utils::Hashset<Exit*, 2>& Exits() const { return exits_; }
+    const Hashset<Exit*, 2>& Exits() const { return exits_; }
 
     /// Adds the exit to the flow control instruction
     /// @param exit the exit instruction
@@ -79,7 +79,7 @@ class ControlInstruction : public utils::Castable<ControlInstruction, OperandIns
 
   protected:
     /// The flow control exits
-    utils::Hashset<Exit*, 2> exits_;
+    Hashset<Exit*, 2> exits_;
 };
 
 }  // namespace tint::ir

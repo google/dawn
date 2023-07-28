@@ -162,8 +162,8 @@ TEST_F(ResolverIncrementDecrementValidationTest, Parameter) {
     //   a++;
     // }
     auto* a = Param(Source{{12, 34}}, "a", ty.i32());
-    Func("func", utils::Vector{a}, ty.void_(),
-         utils::Vector{
+    Func("func", Vector{a}, ty.void_(),
+         Vector{
              Increment(Expr(Source{{56, 78}}, "a")),
          });
 
@@ -179,8 +179,8 @@ TEST_F(ResolverIncrementDecrementValidationTest, ReturnValue) {
     // {
     //   a++;
     // }
-    Func("func", utils::Empty, ty.i32(),
-         utils::Vector{
+    Func("func", tint::Empty, ty.i32(),
+         Vector{
              Return(0_i),
          });
     WrapInFunction(Increment(Call(Source{{56, 78}}, "func")));

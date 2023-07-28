@@ -378,13 +378,13 @@ struct SymbolTestHelper {
     /// The program builder
     ProgramBuilder* const builder;
     /// Parameters to a function that may need to be built
-    utils::Vector<const ast::Parameter*, 8> parameters;
+    Vector<const ast::Parameter*, 8> parameters;
     /// Shallow function var / let declaration statements
-    utils::Vector<const ast::Statement*, 8> statements;
+    Vector<const ast::Statement*, 8> statements;
     /// Nested function local var / let declaration statements
-    utils::Vector<const ast::Statement*, 8> nested_statements;
+    Vector<const ast::Statement*, 8> nested_statements;
     /// Function attributes
-    utils::Vector<const ast::Attribute*, 8> func_attrs;
+    Vector<const ast::Attribute*, 8> func_attrs;
 
     /// Constructor
     /// @param builder the program builder
@@ -425,9 +425,9 @@ const ast::Node* SymbolTestHelper::Add(SymbolDeclKind kind, Symbol symbol, Sourc
         case SymbolDeclKind::Alias:
             return b.Alias(source, symbol, b.ty.i32());
         case SymbolDeclKind::Struct:
-            return b.Structure(source, symbol, utils::Vector{b.Member("m", b.ty.i32())});
+            return b.Structure(source, symbol, Vector{b.Member("m", b.ty.i32())});
         case SymbolDeclKind::Function:
-            return b.Func(source, symbol, utils::Empty, b.ty.void_(), utils::Empty);
+            return b.Func(source, symbol, tint::Empty, b.ty.void_(), tint::Empty);
         case SymbolDeclKind::Parameter: {
             auto* node = b.Param(source, symbol, b.ty.i32());
             parameters.Push(node);
@@ -539,7 +539,7 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
         }
         case SymbolUseKind::StructMemberType: {
             auto node = b.ty(source, symbol);
-            b.Structure(b.Sym(), utils::Vector{b.Member("m", node)});
+            b.Structure(b.Sym(), Vector{b.Member("m", node)});
             return node->identifier;
         }
         case SymbolUseKind::CallFunction: {
@@ -646,9 +646,8 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, FuncCall) {
     // fn A() { B(); }
     // fn B() {}
 
-    Func("A", utils::Empty, ty.void_(),
-         utils::Vector{CallStmt(Call(Ident(Source{{12, 34}}, "B")))});
-    Func(Source{{56, 78}}, "B", utils::Empty, ty.void_(), utils::Vector{Return()});
+    Func("A", tint::Empty, ty.void_(), Vector{CallStmt(Call(Ident(Source{{12, 34}}, "B")))});
+    Func(Source{{56, 78}}, "B", tint::Empty, ty.void_(), Vector{Return()});
 
     Build();
 }
@@ -659,8 +658,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeConstructed) {
     // }
     // type T = i32;
 
-    Func("F", utils::Empty, ty.void_(),
-         utils::Vector{Block(Ignore(Call(Ident(Source{{12, 34}}, "T"))))});
+    Func("F", tint::Empty, ty.void_(), Vector{Block(Ignore(Call(Ident(Source{{12, 34}}, "T"))))});
     Alias(Source{{56, 78}}, "T", ty.i32());
 
     Build();
@@ -672,8 +670,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeUsedByLocal) {
     // }
     // type T = i32;
 
-    Func("F", utils::Empty, ty.void_(),
-         utils::Vector{Block(Decl(Var("v", ty(Source{{12, 34}}, "T"))))});
+    Func("F", tint::Empty, ty.void_(), Vector{Block(Decl(Var("v", ty(Source{{12, 34}}, "T"))))});
     Alias(Source{{56, 78}}, "T", ty.i32());
 
     Build();
@@ -683,7 +680,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeUsedByParam) {
     // fn F(p : T) {}
     // type T = i32;
 
-    Func("F", utils::Vector{Param("p", ty(Source{{12, 34}}, "T"))}, ty.void_(), utils::Empty);
+    Func("F", Vector{Param("p", ty(Source{{12, 34}}, "T"))}, ty.void_(), tint::Empty);
     Alias(Source{{56, 78}}, "T", ty.i32());
 
     Build();
@@ -693,7 +690,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeUsedAsReturnType) {
     // fn F() -> T {}
     // type T = i32;
 
-    Func("F", utils::Empty, ty(Source{{12, 34}}, "T"), utils::Empty);
+    Func("F", tint::Empty, ty(Source{{12, 34}}, "T"), tint::Empty);
     Alias(Source{{56, 78}}, "T", ty.i32());
 
     Build();
@@ -703,7 +700,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, TypeByStructMember) {
     // struct S { m : T };
     // type T = i32;
 
-    Structure("S", utils::Vector{Member("m", ty(Source{{12, 34}}, "T"))});
+    Structure("S", Vector{Member("m", ty(Source{{12, 34}}, "T"))});
     Alias(Source{{56, 78}}, "T", ty.i32());
 
     Build();
@@ -715,8 +712,8 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, VarUsed) {
     // }
     // var G: f32 = 2.1;
 
-    Func("F", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("F", tint::Empty, ty.void_(),
+         Vector{
              Block(Assign(Expr(Source{{12, 34}}, "G"), 3.14_f)),
          });
 
@@ -826,8 +823,8 @@ using ResolverDependencyGraphCyclicRefTest = ResolverDependencyGraphTest;
 TEST_F(ResolverDependencyGraphCyclicRefTest, DirectCall) {
     // fn main() { main(); }
 
-    Func(Source{{12, 34}}, "main", utils::Empty, ty.void_(),
-         utils::Vector{CallStmt(Call(Ident(Source{{56, 78}}, "main")))});
+    Func(Source{{12, 34}}, "main", tint::Empty, ty.void_(),
+         Vector{CallStmt(Call(Ident(Source{{56, 78}}, "main")))});
 
     Build(R"(12:34 error: cyclic dependency found: 'main' -> 'main'
 56:78 note: function 'main' references function 'main' here)");
@@ -840,18 +837,18 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, IndirectCall) {
     // 4: fn c() { d(); }
     // 5: fn b() { c(); }
 
-    Func(Source{{1, 1}}, "a", utils::Empty, ty.void_(),
-         utils::Vector{CallStmt(Call(Ident(Source{{1, 10}}, "b")))});
-    Func(Source{{2, 1}}, "e", utils::Empty, ty.void_(), utils::Empty);
-    Func(Source{{3, 1}}, "d", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func(Source{{1, 1}}, "a", tint::Empty, ty.void_(),
+         Vector{CallStmt(Call(Ident(Source{{1, 10}}, "b")))});
+    Func(Source{{2, 1}}, "e", tint::Empty, ty.void_(), tint::Empty);
+    Func(Source{{3, 1}}, "d", tint::Empty, ty.void_(),
+         Vector{
              CallStmt(Call(Ident(Source{{3, 10}}, "e"))),
              CallStmt(Call(Ident(Source{{3, 10}}, "b"))),
          });
-    Func(Source{{4, 1}}, "c", utils::Empty, ty.void_(),
-         utils::Vector{CallStmt(Call(Ident(Source{{4, 10}}, "d")))});
-    Func(Source{{5, 1}}, "b", utils::Empty, ty.void_(),
-         utils::Vector{CallStmt(Call(Ident(Source{{5, 10}}, "c")))});
+    Func(Source{{4, 1}}, "c", tint::Empty, ty.void_(),
+         Vector{CallStmt(Call(Ident(Source{{4, 10}}, "d")))});
+    Func(Source{{5, 1}}, "b", tint::Empty, ty.void_(),
+         Vector{CallStmt(Call(Ident(Source{{5, 10}}, "c")))});
 
     Build(R"(5:1 error: cyclic dependency found: 'b' -> 'c' -> 'd' -> 'b'
 5:10 note: function 'b' references function 'c' here
@@ -892,7 +889,7 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, Struct_Direct) {
     //   a: S;
     // };
 
-    Structure(Source{{12, 34}}, "S", utils::Vector{Member("a", ty(Source{{56, 78}}, "S"))});
+    Structure(Source{{12, 34}}, "S", Vector{Member("a", ty(Source{{56, 78}}, "S"))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -905,9 +902,9 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, Struct_Indirect) {
     // 2: struct X { y: Y; };
     // 3: struct Z { x: X; };
 
-    Structure(Source{{1, 1}}, "Y", utils::Vector{Member("z", ty(Source{{1, 10}}, "Z"))});
-    Structure(Source{{2, 1}}, "X", utils::Vector{Member("y", ty(Source{{2, 10}}, "Y"))});
-    Structure(Source{{3, 1}}, "Z", utils::Vector{Member("x", ty(Source{{3, 10}}, "X"))});
+    Structure(Source{{1, 1}}, "Y", Vector{Member("z", ty(Source{{1, 10}}, "Z"))});
+    Structure(Source{{2, 1}}, "X", Vector{Member("y", ty(Source{{2, 10}}, "Y"))});
+    Structure(Source{{3, 1}}, "Z", Vector{Member("x", ty(Source{{3, 10}}, "X"))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -981,10 +978,10 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, Mixed_RecursiveDependencies) {
     // 5: type R = A;
     // 6: const L : S = Z;
 
-    Func(Source{{1, 1}}, "F", utils::Empty, ty(Source{{1, 5}}, "R"),
-         utils::Vector{Return(Expr(Source{{1, 10}}, "Z"))});
+    Func(Source{{1, 1}}, "F", tint::Empty, ty(Source{{1, 5}}, "R"),
+         Vector{Return(Expr(Source{{1, 10}}, "Z"))});
     Alias(Source{{2, 1}}, "A", ty(Source{{2, 10}}, "S"));
-    Structure(Source{{3, 1}}, "S", utils::Vector{Member("a", ty(Source{{3, 10}}, "A"))});
+    Structure(Source{{3, 1}}, "S", Vector{Member("a", ty(Source{{3, 10}}, "A"))});
     GlobalVar(Source{{4, 1}}, "Z", Expr(Source{{4, 10}}, "L"));
     Alias(Source{{5, 1}}, "R", ty(Source{{5, 10}}, "A"));
     GlobalConst(Source{{6, 1}}, "L", ty(Source{{5, 5}}, "S"), Expr(Source{{5, 10}}, "Z"));
@@ -1185,7 +1182,7 @@ using ResolverDependencyGraphResolveToBuiltinFunc =
 TEST_P(ResolverDependencyGraphResolveToBuiltinFunc, Resolve) {
     const auto use = std::get<0>(GetParam());
     const auto builtin = std::get<1>(GetParam());
-    const auto symbol = Symbols().New(utils::ToString(builtin));
+    const auto symbol = Symbols().New(tint::ToString(builtin));
 
     SymbolTestHelper helper(this);
     auto* ident = helper.Add(use, symbol);
@@ -1544,7 +1541,7 @@ using ResolverDependencyGraphShadowKindTest =
 TEST_P(ResolverDependencyGraphShadowKindTest, ShadowedByGlobalVar) {
     const auto use = std::get<0>(GetParam());
     const std::string_view name = std::get<1>(GetParam());
-    const auto symbol = Symbols().New(utils::ToString(name));
+    const auto symbol = Symbols().New(tint::ToString(name));
 
     SymbolTestHelper helper(this);
     auto* decl = GlobalVar(
@@ -1562,10 +1559,10 @@ TEST_P(ResolverDependencyGraphShadowKindTest, ShadowedByGlobalVar) {
 TEST_P(ResolverDependencyGraphShadowKindTest, ShadowedByStruct) {
     const auto use = std::get<0>(GetParam());
     const std::string_view name = std::get<1>(GetParam());
-    const auto symbol = Symbols().New(utils::ToString(name));
+    const auto symbol = Symbols().New(tint::ToString(name));
 
     SymbolTestHelper helper(this);
-    auto* decl = Structure(symbol, utils::Vector{
+    auto* decl = Structure(symbol, Vector{
                                        Member("m", name == "i32" ? ty.u32() : ty.i32()),
                                    });
     auto* ident = helper.Add(use, symbol);
@@ -1579,7 +1576,7 @@ TEST_P(ResolverDependencyGraphShadowKindTest, ShadowedByStruct) {
 TEST_P(ResolverDependencyGraphShadowKindTest, ShadowedByFunc) {
     const auto use = std::get<0>(GetParam());
     const auto name = std::get<1>(GetParam());
-    const auto symbol = Symbols().New(utils::ToString(name));
+    const auto symbol = Symbols().New(tint::ToString(name));
 
     SymbolTestHelper helper(this);
     auto* decl = helper.Add(SymbolDeclKind::Function, symbol);
@@ -1651,7 +1648,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
 
     const auto* value_decl = GlobalVar(value_sym, ty.i32(), builtin::AddressSpace::kPrivate);
     const auto* type_decl = Alias(type_sym, ty.i32());
-    const auto* func_decl = Func(func_sym, utils::Empty, ty.void_(), utils::Empty);
+    const auto* func_decl = Func(func_sym, tint::Empty, ty.void_(), tint::Empty);
 
     struct SymbolUse {
         const ast::Node* decl = nullptr;
@@ -1659,7 +1656,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
         std::string where;
     };
 
-    utils::Vector<SymbolUse, 64> symbol_uses;
+    Vector<SymbolUse, 64> symbol_uses;
 
     auto add_use = [&](const ast::Node* decl, auto use, int line, const char* kind) {
         symbol_uses.Push(
@@ -1674,17 +1671,17 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
 
     Alias(Sym(), T);
     Structure(Sym(),  //
-              utils::Vector{Member(Sym(), T,
-                                   utils::Vector{
-                                       //
-                                       MemberAlign(V), MemberSize(V)  //
-                                   })});
+              Vector{Member(Sym(), T,
+                            Vector{
+                                //
+                                MemberAlign(V), MemberSize(V)  //
+                            })});
     GlobalVar(Sym(), T, V);
     GlobalConst(Sym(), T, V);
     Func(Sym(),
-         utils::Vector{
+         Vector{
              Param(Sym(), T,
-                   utils::Vector{
+                   Vector{
                        Location(V),  // Parameter attributes
                        Builtin(V),
                        Interpolate(V),
@@ -1692,7 +1689,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
                    }),
          },
          T,  // Return type
-         utils::Vector{
+         Vector{
              Decl(Var(Sym(), T, V)),                    //
              Decl(Let(Sym(), T, V)),                    //
              CallStmt(Call(F, V)),                      //
@@ -1721,8 +1718,8 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
              Break(),                                   //
              Discard(),                                 //
          },
-         utils::Empty,                 // function attributes
-         utils::Vector{Location(V)});  // return attributes
+         tint::Empty,           // function attributes
+         Vector{Location(V)});  // return attributes
     // Exercise type traversal
     GlobalVar(Sym(), ty.atomic(T));
     GlobalVar(Sym(), ty.bool_());
@@ -1742,11 +1739,11 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
                                         builtin::TexelFormat::kR32Float, builtin::Access::kRead));
     GlobalVar(Sym(), ty.sampler(type::SamplerKind::kSampler));
 
-    GlobalVar(Sym(), ty.i32(), utils::Vector{Binding(V), Group(V)});
-    GlobalVar(Sym(), ty.i32(), utils::Vector{Location(V)});
-    Override(Sym(), ty.i32(), utils::Vector{Id(V)});
+    GlobalVar(Sym(), ty.i32(), Vector{Binding(V), Group(V)});
+    GlobalVar(Sym(), ty.i32(), Vector{Location(V)});
+    Override(Sym(), ty.i32(), Vector{Id(V)});
 
-    Func(Sym(), utils::Empty, ty.void_(), utils::Empty);
+    Func(Sym(), tint::Empty, ty.void_(), tint::Empty);
 #undef V
 #undef T
 #undef F
@@ -1772,10 +1769,10 @@ TEST_F(ResolverDependencyGraphTraversalTest, InferredType) {
 // DependencyAnalysis::SortGlobals(), found by clusterfuzz.
 // See: crbug.com/chromium/1273451
 TEST_F(ResolverDependencyGraphTraversalTest, chromium_1273451) {
-    Structure("A", utils::Vector{Member("a", ty.i32())});
-    Structure("B", utils::Vector{Member("b", ty.i32())});
-    Func("f", utils::Vector{Param("a", ty("A"))}, ty("B"),
-         utils::Vector{
+    Structure("A", Vector{Member("a", ty.i32())});
+    Structure("B", Vector{Member("b", ty.i32())});
+    Func("f", Vector{Param("a", ty("A"))}, ty("B"),
+         Vector{
              Return(Call("B")),
          });
     Build();

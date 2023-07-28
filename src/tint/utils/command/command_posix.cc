@@ -21,7 +21,7 @@
 #include <sstream>
 #include <vector>
 
-namespace tint::utils {
+namespace tint {
 
 namespace {
 
@@ -261,4 +261,4 @@ Command::Output Command::Exec(std::initializer_list<std::string> arguments) cons
     }
 }
 
-}  // namespace tint::utils
+}  // namespace tint

@@ -26,10 +26,7 @@ namespace tint::ast {
 
 Module::Module(GenerationID pid, NodeID nid, const Source& src) : Base(pid, nid, src) {}
 
-Module::Module(GenerationID pid,
-               NodeID nid,
-               const Source& src,
-               utils::VectorRef<const Node*> global_decls)
+Module::Module(GenerationID pid, NodeID nid, const Source& src, VectorRef<const Node*> global_decls)
     : Base(pid, nid, src), global_declarations_(std::move(global_decls)) {
     for (auto* decl : global_declarations_) {
         if (decl == nullptr) {

@@ -606,7 +606,7 @@ const char* str(Function i) {
     return "<unknown>";
 }
 
-utils::StringStream& operator<<(utils::StringStream& out, Function i) {
+StringStream& operator<<(StringStream& out, Function i) {
     out << str(i);
     return out;
 }

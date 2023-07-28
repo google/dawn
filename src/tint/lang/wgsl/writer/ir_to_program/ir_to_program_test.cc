@@ -47,7 +47,7 @@ IRToProgramTest::Result IRToProgramTest::Run() {
         return result;
     }
 
-    result.wgsl = std::string(utils::TrimSpace(output.wgsl));
+    result.wgsl = std::string(tint::TrimSpace(output.wgsl));
     if (!result.wgsl.empty()) {
         result.wgsl = "\n" + result.wgsl + "\n";
     }

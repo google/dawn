@@ -27,7 +27,7 @@
 #include "src/tint/utils/text/parse_num.h"
 #include "src/tint/utils/text/string.h"
 
-namespace tint::utils::cli {
+namespace tint::cli {
 
 /// Alias is a fluent-constructor helper for Options
 struct Alias {
@@ -155,7 +155,7 @@ class Option {
 class OptionSet {
   public:
     /// Unconsumed is a list of unconsumed command line arguments
-    using Unconsumed = utils::Vector<std::string_view, 8>;
+    using Unconsumed = Vector<std::string_view, 8>;
 
     /// Constructs and returns a new Option to be owned by the OptionSet
     /// @tparam T the Option type
@@ -175,11 +175,11 @@ class OptionSet {
     /// @param err the error stream
     /// @param arguments the command line arguments, excluding the initial executable name
     /// @return a Result holding a list of arguments that were not consumed as options
-    Result<Unconsumed> Parse(std::ostream& err, utils::VectorRef<std::string_view> arguments);
+    Result<Unconsumed> Parse(std::ostream& err, VectorRef<std::string_view> arguments);
 
   private:
     /// The list of options to parse
-    utils::BlockAllocator<Option, 1024> options;
+    BlockAllocator<Option, 1024> options;
 };
 
 /// ValueOption is an option that accepts a single value
@@ -329,7 +329,7 @@ class EnumOption : public Option {
     /// A description of the option.
     std::string description;
     /// The enum options as a pair of enum value to name
-    utils::Vector<EnumName<ENUM>, 8> enum_names;
+    Vector<EnumName<ENUM>, 8> enum_names;
     /// The default value.
     std::optional<ENUM> default_value;
     /// The option value. Populated with Parse().
@@ -347,7 +347,7 @@ class EnumOption : public Option {
     template <typename... SETTINGS>
     EnumOption(std::string option_name,
                std::string option_description,
-               utils::VectorRef<EnumName<ENUM>> names,
+               VectorRef<EnumName<ENUM>> names,
                SETTINGS&&... settings)
         : name(std::move(option_name)),
           description(std::move(option_description)),
@@ -405,6 +405,6 @@ class EnumOption : public Option {
     }
 };
 
-}  // namespace tint::utils::cli
+}  // namespace tint::cli
 
 #endif  // SRC_TINT_UTILS_CLI_CLI_H_

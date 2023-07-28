@@ -25,7 +25,7 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_ConstantTest = IRTestHelper;
 
 TEST_F(IR_ConstantTest, f32) {
-    utils::StringStream str;
+    StringStream str;
 
     auto* c = b.Constant(1.2_f);
     EXPECT_EQ(1.2_f, c->Value()->As<constant::Scalar<f32>>()->ValueAs<f32>());
@@ -38,7 +38,7 @@ TEST_F(IR_ConstantTest, f32) {
 }
 
 TEST_F(IR_ConstantTest, f16) {
-    utils::StringStream str;
+    StringStream str;
 
     auto* c = b.Constant(1.1_h);
     EXPECT_EQ(1.1_h, c->Value()->As<constant::Scalar<f16>>()->ValueAs<f16>());
@@ -51,7 +51,7 @@ TEST_F(IR_ConstantTest, f16) {
 }
 
 TEST_F(IR_ConstantTest, i32) {
-    utils::StringStream str;
+    StringStream str;
 
     auto* c = b.Constant(1_i);
     EXPECT_EQ(1_i, c->Value()->As<constant::Scalar<i32>>()->ValueAs<i32>());
@@ -64,7 +64,7 @@ TEST_F(IR_ConstantTest, i32) {
 }
 
 TEST_F(IR_ConstantTest, u32) {
-    utils::StringStream str;
+    StringStream str;
 
     auto* c = b.Constant(2_u);
     EXPECT_EQ(2_u, c->Value()->As<constant::Scalar<u32>>()->ValueAs<u32>());
@@ -78,14 +78,14 @@ TEST_F(IR_ConstantTest, u32) {
 
 TEST_F(IR_ConstantTest, bool) {
     {
-        utils::StringStream str;
+        StringStream str;
 
         auto* c = b.Constant(false);
         EXPECT_FALSE(c->Value()->As<constant::Scalar<bool>>()->ValueAs<bool>());
     }
 
     {
-        utils::StringStream str;
+        StringStream str;
         auto c = b.Constant(true);
         EXPECT_TRUE(c->Value()->As<constant::Scalar<bool>>()->ValueAs<bool>());
 

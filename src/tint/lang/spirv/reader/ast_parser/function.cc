@@ -674,7 +674,7 @@ class StructuredTraverser {
             VisitBackward(terminator->GetSingleWordInOperand(0));
         } else if (opcode == spv::Op::OpSwitch) {
             // TODO(dneto): Consider visiting the labels in literal-value order.
-            utils::Vector<uint32_t, 32> successors;
+            tint::Vector<uint32_t, 32> successors;
             bb->ForEachSuccessorLabel(
                 [&successors](const uint32_t succ_id) { successors.Push(succ_id); });
             for (auto succ_id : successors) {
@@ -687,14 +687,13 @@ class StructuredTraverser {
 
     const spvtools::opt::Function& function_;
     std::unordered_map<uint32_t, const spvtools::opt::BasicBlock*> id_to_block_;
-    utils::Vector<uint32_t, 32> visit_order_;
+    tint::Vector<uint32_t, 32> visit_order_;
     std::unordered_set<uint32_t> visited_;
 };
 
 /// A StatementBuilder for ast::SwitchStatement
 /// @see StatementBuilder
-struct SwitchStatementBuilder final
-    : public utils::Castable<SwitchStatementBuilder, StatementBuilder> {
+struct SwitchStatementBuilder final : public Castable<SwitchStatementBuilder, StatementBuilder> {
     /// Constructor
     /// @param cond the switch statement condition
     explicit SwitchStatementBuilder(const ast::Expression* cond) : condition(cond) {}
@@ -713,12 +712,12 @@ struct SwitchStatementBuilder final
     /// Switch statement condition
     const ast::Expression* const condition;
     /// Switch statement cases
-    utils::Vector<ast::CaseStatement*, 4> cases;
+    tint::Vector<ast::CaseStatement*, 4> cases;
 };
 
 /// A StatementBuilder for ast::IfStatement
 /// @see StatementBuilder
-struct IfStatementBuilder final : public utils::Castable<IfStatementBuilder, StatementBuilder> {
+struct IfStatementBuilder final : public Castable<IfStatementBuilder, StatementBuilder> {
     /// Constructor
     /// @param c the if-statement condition
     explicit IfStatementBuilder(const ast::Expression* c) : cond(c) {}
@@ -726,7 +725,7 @@ struct IfStatementBuilder final : public utils::Castable<IfStatementBuilder, Sta
     /// @param builder the program builder
     /// @returns the built ast::IfStatement
     const ast::IfStatement* Build(ProgramBuilder* builder) const override {
-        return builder->create<ast::IfStatement>(Source{}, cond, body, else_stmt, utils::Empty);
+        return builder->create<ast::IfStatement>(Source{}, cond, body, else_stmt, tint::Empty);
     }
 
     /// If-statement condition
@@ -739,11 +738,11 @@ struct IfStatementBuilder final : public utils::Castable<IfStatementBuilder, Sta
 
 /// A StatementBuilder for ast::LoopStatement
 /// @see StatementBuilder
-struct LoopStatementBuilder final : public utils::Castable<LoopStatementBuilder, StatementBuilder> {
+struct LoopStatementBuilder final : public Castable<LoopStatementBuilder, StatementBuilder> {
     /// @param builder the program builder
     /// @returns the built ast::LoopStatement
     ast::LoopStatement* Build(ProgramBuilder* builder) const override {
-        return builder->create<ast::LoopStatement>(Source{}, body, continuing, utils::Empty);
+        return builder->create<ast::LoopStatement>(Source{}, body, continuing, tint::Empty);
     }
 
     /// Loop-statement block body
@@ -873,7 +872,7 @@ void FunctionEmitter::PushGuard(const std::string& guard_name, uint32_t end_id) 
     auto* builder = AddStatementBuilder<IfStatementBuilder>(cond);
 
     PushNewStatementBlock(top.GetConstruct(), end_id, [=](const StatementList& stmts) {
-        builder->body = create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
+        builder->body = create<ast::BlockStatement>(Source{}, stmts, tint::Empty);
     });
 }
 
@@ -885,7 +884,7 @@ void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
     auto* builder = AddStatementBuilder<IfStatementBuilder>(cond);
 
     PushNewStatementBlock(top.GetConstruct(), end_id, [=](const StatementList& stmts) {
-        builder->body = create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
+        builder->body = create<ast::BlockStatement>(Source{}, stmts, tint::Empty);
     });
 }
 
@@ -975,7 +974,7 @@ const ast::BlockStatement* FunctionEmitter::MakeFunctionBody() {
 
     statements_stack_[0].Finalize(&builder_);
     auto& statements = statements_stack_[0].GetStatements();
-    auto* body = create<ast::BlockStatement>(Source{}, statements, utils::Empty);
+    auto* body = create<ast::BlockStatement>(Source{}, statements, tint::Empty);
 
     // Maintain the invariant by repopulating the one and only element.
     statements_stack_.Clear();
@@ -986,7 +985,7 @@ const ast::BlockStatement* FunctionEmitter::MakeFunctionBody() {
 
 bool FunctionEmitter::EmitPipelineInput(std::string var_name,
                                         const Type* var_type,
-                                        utils::Vector<int, 8> index_prefix,
+                                        tint::Vector<int, 8> index_prefix,
                                         const Type* tip_type,
                                         const Type* forced_param_type,
                                         Attributes& attrs,
@@ -1118,7 +1117,7 @@ void FunctionEmitter::IncrementLocation(Attributes& attributes) {
 
 bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
                                          const Type* var_type,
-                                         utils::Vector<int, 8> index_prefix,
+                                         tint::Vector<int, 8> index_prefix,
                                          const Type* tip_type,
                                          const Type* forced_member_type,
                                          Attributes& attrs,
@@ -1239,7 +1238,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
     Source source;
 
     // The statements in the body.
-    utils::Vector<const ast::Statement*, 8> stmts;
+    tint::Vector<const ast::Statement*, 8> stmts;
 
     FunctionDeclaration decl;
     decl.source = source;
@@ -1317,7 +1316,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
                 const auto var_name = namer_.GetName(var_id);
                 return_members.Push(
                     builder_.Member(var_name, param_type->Build(builder_),
-                                    utils::Vector{
+                                    tint::Vector{
                                         builder_.Builtin(source, builtin::BuiltinValue::kPosition),
                                     }));
                 return_exprs.Push(builder_.Expr(var_name));
@@ -1369,7 +1368,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
         } else {
             // Create and register the result type.
             auto* str = create<ast::Struct>(Source{}, builder_.Ident(return_struct_sym),
-                                            return_members, utils::Empty);
+                                            return_members, tint::Empty);
             parser_impl_.AddTypeDecl(return_struct_sym, str);
             return_type = builder_.ty.Of(str);
 
@@ -1379,7 +1378,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
         }
     }
 
-    utils::Vector<const ast::Attribute*, 2> fn_attrs{
+    tint::Vector<const ast::Attribute*, 2> fn_attrs{
         create<ast::StageAttribute>(source, ep_info_->stage),
     };
 
@@ -1771,7 +1770,7 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
     const auto entry_id = block_order_[0];
 
     // The stack of enclosing constructs.
-    utils::Vector<Construct*, 4> enclosing;
+    tint::Vector<Construct*, 4> enclosing;
 
     // Creates a control flow construct and pushes it onto the stack.
     // Its parent is the top of the stack, or nullptr if the stack is empty.
@@ -1852,7 +1851,7 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
                     // If the loop header branches to two different blocks inside the loop
                     // construct, then the loop body should be modeled as an if-selection
                     // construct
-                    utils::Vector<uint32_t, 4> targets;
+                    tint::Vector<uint32_t, 4> targets;
                     header_info->basic_block->ForEachSuccessorLabel(
                         [&targets](const uint32_t target) { targets.Push(target); });
                     if ((targets.Length() == 2u) && targets[0] != targets[1]) {
@@ -1946,8 +1945,8 @@ bool FunctionEmitter::FindSwitchCaseHeaders() {
         default_block->default_is_merge = default_block->pos == construct->end_pos;
 
         // Map a case target to the list of values selecting that case.
-        std::unordered_map<uint32_t, utils::Vector<uint64_t, 4>> block_to_values;
-        utils::Vector<uint32_t, 4> case_targets;
+        std::unordered_map<uint32_t, tint::Vector<uint64_t, 4>> block_to_values;
+        tint::Vector<uint32_t, 4> case_targets;
         std::unordered_set<uint64_t> case_values;
 
         // Process case targets.
@@ -2084,7 +2083,7 @@ bool FunctionEmitter::ClassifyCFGEdges() {
         const auto& src_construct = *(src_info->construct);
 
         // Compute the ordered list of unique successors.
-        utils::Vector<uint32_t, 4> successors;
+        tint::Vector<uint32_t, 4> successors;
         {
             std::unordered_set<uint32_t> visited;
             src_info->basic_block->ForEachSuccessorLabel(
@@ -2103,8 +2102,8 @@ bool FunctionEmitter::ClassifyCFGEdges() {
         // These count toward the need to have a merge instruction.  We also track kIfBreak edges
         // because when used with normal forward edges, we'll need to generate a flow guard
         // variable.
-        utils::Vector<uint32_t, 4> normal_forward_edges;
-        utils::Vector<uint32_t, 4> if_break_edges;
+        tint::Vector<uint32_t, 4> normal_forward_edges;
+        tint::Vector<uint32_t, 4> if_break_edges;
 
         if (successors.IsEmpty() && src_construct.enclosing_continue) {
             // Kill and return are not allowed in a continue construct.
@@ -2663,7 +2662,7 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
 
     // Enter new constructs.
 
-    utils::Vector<const Construct*, 4> entering_constructs;  // inner most comes first
+    tint::Vector<const Construct*, 4> entering_constructs;  // inner most comes first
     {
         auto* here = block_info.construct;
         auto* const top_construct = statements_stack_.Back().GetConstruct();
@@ -2906,7 +2905,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
             if (!stmts.IsEmpty()) {
                 // The "else" consists of the statement list from the top of
                 // statements stack, without an "else if" condition.
-                builder->else_stmt = create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
+                builder->else_stmt = create<ast::BlockStatement>(Source{}, stmts, tint::Empty);
             }
         });
         if (false_is_break) {
@@ -2953,7 +2952,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
 
         // Push the then clause onto the stack.
         PushNewStatementBlock(construct, then_end, [=](const StatementList& stmts) {
-            builder->body = create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
+            builder->body = create<ast::BlockStatement>(Source{}, stmts, tint::Empty);
         });
         if (true_is_break) {
             AddStatement(create<ast::BreakStatement>(Source{}));
@@ -2989,7 +2988,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
     // We will push statement-blocks onto the stack to gather the statements in
     // the default clause and cases clauses. Determine the list of blocks
     // that start each clause.
-    utils::Vector<const BlockInfo*, 4> clause_heads;
+    tint::Vector<const BlockInfo*, 4> clause_heads;
 
     // Collect the case clauses, even if they are just the merge block.
     // First the default clause.
@@ -3026,7 +3025,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
     for (size_t i = last_clause_index;; --i) {
         // Create a list of integer literals for the selector values leading to
         // this case clause.
-        utils::Vector<const ast::CaseSelector*, 4> selectors;
+        tint::Vector<const ast::CaseSelector*, 4> selectors;
         const bool has_selectors = clause_heads[i]->case_values.has_value();
         if (has_selectors) {
             auto values = clause_heads[i]->case_values.value();
@@ -3066,7 +3065,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
         auto case_idx = swch->cases.Length();
         swch->cases.Push(nullptr);
         PushNewStatementBlock(construct, end_id, [=](const StatementList& stmts) {
-            auto* body = create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
+            auto* body = create<ast::BlockStatement>(Source{}, stmts, tint::Empty);
             swch->cases[case_idx] = create<ast::CaseStatement>(Source{}, selectors, body);
         });
 
@@ -3081,7 +3080,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
 bool FunctionEmitter::EmitLoopStart(const Construct* construct) {
     auto* builder = AddStatementBuilder<LoopStatementBuilder>();
     PushNewStatementBlock(construct, construct->end_id, [=](const StatementList& stmts) {
-        builder->body = create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
+        builder->body = create<ast::BlockStatement>(Source{}, stmts, tint::Empty);
     });
     return success();
 }
@@ -3096,7 +3095,7 @@ bool FunctionEmitter::EmitContinuingStart(const Construct* construct) {
                          "expected loop on top of stack";
     }
     PushNewStatementBlock(construct, construct->end_id, [=](const StatementList& stmts) {
-        loop->continuing = create<ast::BlockStatement>(Source{}, stmts, utils::Empty);
+        loop->continuing = create<ast::BlockStatement>(Source{}, stmts, tint::Empty);
     });
 
     return success();
@@ -3318,15 +3317,15 @@ const ast::Statement* FunctionEmitter::MakeSimpleIf(const ast::Expression* condi
     if (then_stmt != nullptr) {
         if_stmts.Push(then_stmt);
     }
-    auto* if_block = create<ast::BlockStatement>(Source{}, if_stmts, utils::Empty);
+    auto* if_block = create<ast::BlockStatement>(Source{}, if_stmts, tint::Empty);
 
     const ast::Statement* else_block = nullptr;
     if (else_stmt) {
-        else_block = create<ast::BlockStatement>(StatementList{else_stmt}, utils::Empty);
+        else_block = create<ast::BlockStatement>(StatementList{else_stmt}, tint::Empty);
     }
 
     auto* if_stmt =
-        create<ast::IfStatement>(Source{}, condition, if_block, else_block, utils::Empty);
+        create<ast::IfStatement>(Source{}, condition, if_block, else_block, tint::Empty);
 
     return if_stmt;
 }
@@ -3380,7 +3379,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     // Do it in index order.
     if (!block_info.phi_assignments.IsEmpty()) {
         // Keep only the phis that are used.
-        utils::Vector<BlockInfo::PhiAssignment, 4> worklist;
+        tint::Vector<BlockInfo::PhiAssignment, 4> worklist;
         worklist.Reserve(block_info.phi_assignments.Length());
         for (const auto assignment : block_info.phi_assignments) {
             if (GetDefInfo(assignment.phi_id)->local->num_uses > 0) {
@@ -3400,13 +3399,13 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
         // the assignments.
 
         // The set of IDs that are read  by the assignments.
-        utils::Hashset<uint32_t, 8> read_set;
+        Hashset<uint32_t, 8> read_set;
         for (const auto assignment : worklist) {
             read_set.Add(assignment.value_id);
         }
         // Generate a let-declaration to capture the current value of each phi
         // that will be both read and written.
-        utils::Hashmap<uint32_t, Symbol, 8> copied_phis;
+        Hashmap<uint32_t, Symbol, 8> copied_phis;
         for (const auto assignment : worklist) {
             const auto phi_id = assignment.phi_id;
             if (read_set.Contains(phi_id)) {
@@ -3984,7 +3983,7 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
         auto e1 = MakeOperand(inst, 2);
         auto e2 = ToSignedIfUnsigned(MakeOperand(inst, 3));
 
-        return {e1.type, builder_.Call("ldexp", utils::Vector{e1.expr, e2.expr})};
+        return {e1.type, builder_.Call("ldexp", tint::Vector{e1.expr, e2.expr})};
     }
 
     auto* result_type = parser_impl_.ConvertType(inst.type_id());
@@ -4020,7 +4019,7 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
                     ty_.F32(),
                     builder_.Call(
                         Source{}, "select",
-                        utils::Vector{
+                        tint::Vector{
                             create<ast::UnaryOpExpression>(Source{}, ast::UnaryOp::kNegation,
                                                            normal.expr),
                             normal.expr,
@@ -4063,7 +4062,7 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
                     f32,
                     builder_.MemberAccessor(
                         builder_.Call("refract",
-                                      utils::Vector{
+                                      tint::Vector{
                                           builder_.Call("vec2f", incident.expr, 0_f),
                                           builder_.Call("vec2f", normal.expr, 0_f),
                                           eta.expr,
@@ -5720,7 +5719,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
             if (is_non_dref_sample || (op == spv::Op::OpImageFetch)) {
                 value = builder_.Call(Source{},
                                       result_type->Build(builder_),  // a vec4
-                                      utils::Vector{
+                                      tint::Vector{
                                           value,
                                           parser_impl_.MakeNullValue(result_component_type),
                                           parser_impl_.MakeNullValue(result_component_type),
@@ -5828,7 +5827,7 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
             // The WGSL bulitin returns u32.
             // If they aren't the same then convert the result.
             if (!result_type->Is<U32>()) {
-                ast_expr = builder_.Call(result_type->Build(builder_), utils::Vector{ast_expr});
+                ast_expr = builder_.Call(result_type->Build(builder_), tint::Vector{ast_expr});
             }
             TypedExpression expr{result_type, ast_expr};
             return EmitConstDefOrWriteToHoistedVar(inst, expr);
@@ -5865,7 +5864,7 @@ bool FunctionEmitter::EmitAtomicOp(const spvtools::opt::Instruction& inst) {
             Source{}, builder_.Symbols().New(std::string("stub_") + builtin::str(builtin)),
             std::move(params), ret_type,
             /* body */ nullptr,
-            utils::Vector{
+            tint::Vector{
                 builder_.ASTNodes().Create<ast::transform::SpirvAtomic::Stub>(
                     builder_.ID(), builder_.AllocateNodeID(), builtin),
                 builder_.Disable(ast::DisabledValidation::kFunctionHasNoBody),
@@ -6147,14 +6146,14 @@ TypedExpression FunctionEmitter::ToI32(TypedExpression value) {
     if (!value || value.type->Is<I32>()) {
         return value;
     }
-    return {ty_.I32(), builder_.Call(builder_.ty.i32(), utils::Vector{value.expr})};
+    return {ty_.I32(), builder_.Call(builder_.ty.i32(), tint::Vector{value.expr})};
 }
 
 TypedExpression FunctionEmitter::ToU32(TypedExpression value) {
     if (!value || value.type->Is<U32>()) {
         return value;
     }
-    return {ty_.U32(), builder_.Call(builder_.ty.u32(), utils::Vector{value.expr})};
+    return {ty_.U32(), builder_.Call(builder_.ty.u32(), tint::Vector{value.expr})};
 }
 
 TypedExpression FunctionEmitter::ToSignedIfUnsigned(TypedExpression value) {
@@ -6163,7 +6162,7 @@ TypedExpression FunctionEmitter::ToSignedIfUnsigned(TypedExpression value) {
     }
     if (auto* vec_type = value.type->As<Vector>()) {
         auto* new_type = ty_.Vector(ty_.I32(), vec_type->size);
-        return {new_type, builder_.Call(new_type->Build(builder_), utils::Vector{value.expr})};
+        return {new_type, builder_.Call(new_type->Build(builder_), tint::Vector{value.expr})};
     }
     return ToI32(value);
 }

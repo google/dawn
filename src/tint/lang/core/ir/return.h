@@ -26,7 +26,7 @@ class Function;
 namespace tint::ir {
 
 /// A return instruction.
-class Return : public utils::Castable<Return, Terminator> {
+class Return : public Castable<Return, Terminator> {
   public:
     /// The offset in Operands() for the function being returned
     static constexpr size_t kFunctionOperandOffset = 0;
@@ -58,7 +58,7 @@ class Return : public utils::Castable<Return, Terminator> {
     void SetValue(ir::Value* val) { SetOperand(kArgOperandOffset, val); }
 
     /// @returns the return arguments
-    utils::Slice<ir::Value* const> Args() override {
+    tint::Slice<ir::Value* const> Args() override {
         return operands_.Slice().Offset(kArgOperandOffset);
     }
 

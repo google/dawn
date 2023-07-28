@@ -82,9 +82,9 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
     };
 
     // A list of expressions that should be hoisted.
-    utils::Vector<const sem::ValueExpression*, 32> to_hoist;
+    tint::Vector<const sem::ValueExpression*, 32> to_hoist;
     // A set of expressions that are constant, which _may_ need to be hoisted.
-    utils::Hashset<const Expression*, 32> const_chains;
+    Hashset<const Expression*, 32> const_chains;
 
     // Walk the AST nodes. This order guarantees that leaf-expressions are visited first.
     for (auto* node : src->ASTNodes().Objects()) {

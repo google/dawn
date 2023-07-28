@@ -21,12 +21,12 @@
 namespace tint::ir {
 
 /// A Call instruction in the IR.
-class Call : public utils::Castable<Call, OperandInstruction<4, 1>> {
+class Call : public Castable<Call, OperandInstruction<4, 1>> {
   public:
     ~Call() override;
 
     /// @returns the call arguments
-    virtual utils::Slice<Value*> Args() { return operands_.Slice(); }
+    virtual tint::Slice<Value*> Args() { return operands_.Slice(); }
 
     /// Append a new argument to the argument list for this call instruction.
     /// @param arg the argument value to append

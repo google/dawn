@@ -176,7 +176,7 @@ TEST_F(SpirvASTPrinterTest, Assign_StructMember) {
     // var ident : my_struct
     // ident.b = 4.0;
 
-    auto* s = Structure("my_struct", utils::Vector{
+    auto* s = Structure("my_struct", Vector{
                                          Member("a", ty.f32()),
                                          Member("b", ty.f32()),
                                      });

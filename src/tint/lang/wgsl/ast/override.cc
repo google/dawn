@@ -28,7 +28,7 @@ Override::Override(GenerationID pid,
                    const Identifier* n,
                    Type ty,
                    const Expression* init,
-                   utils::VectorRef<const Attribute*> attrs)
+                   VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src, n, ty, init, std::move(attrs)) {}
 
 Override::~Override() = default;

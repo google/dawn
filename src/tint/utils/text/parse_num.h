@@ -21,7 +21,7 @@
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/result/result.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// Error returned by the number parsing functions
 enum class ParseNumberError {
@@ -126,6 +126,6 @@ inline Result<T, ParseNumberError> ParseNumber(std::string_view str) {
 
 TINT_END_DISABLE_WARNING(UNREACHABLE_CODE);
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_TEXT_PARSE_NUM_H_

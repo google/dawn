@@ -26,7 +26,7 @@ namespace tint::sem {
 
 /// Call is the base class for semantic nodes that hold semantic information for
 /// ast::CallExpression nodes.
-class Call final : public utils::Castable<Call, ValueExpression> {
+class Call final : public Castable<Call, ValueExpression> {
   public:
     /// Constructor
     /// @param declaration the AST node
@@ -39,7 +39,7 @@ class Call final : public utils::Castable<Call, ValueExpression> {
     Call(const ast::CallExpression* declaration,
          const CallTarget* target,
          EvaluationStage stage,
-         utils::VectorRef<const sem::ValueExpression*> arguments,
+         VectorRef<const sem::ValueExpression*> arguments,
          const Statement* statement,
          const constant::Value* constant,
          bool has_side_effects);
@@ -60,7 +60,7 @@ class Call final : public utils::Castable<Call, ValueExpression> {
 
   private:
     CallTarget const* const target_;
-    utils::Vector<const sem::ValueExpression*, 8> arguments_;
+    tint::Vector<const sem::ValueExpression*, 8> arguments_;
 };
 
 }  // namespace tint::sem

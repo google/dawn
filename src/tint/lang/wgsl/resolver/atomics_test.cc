@@ -49,7 +49,7 @@ TEST_F(ResolverAtomicTest, GlobalWorkgroupU32) {
 }
 
 TEST_F(ResolverAtomicTest, GlobalStorageStruct) {
-    auto* s = Structure("s", utils::Vector{Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
+    auto* s = Structure("s", Vector{Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
     auto* g = GlobalVar("g", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
                         Binding(0_a), Group(0_a));
 

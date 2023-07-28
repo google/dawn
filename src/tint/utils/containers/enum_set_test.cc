@@ -19,14 +19,14 @@
 #include "gmock/gmock.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 using ::testing::ElementsAre;
 
 enum class E { A = 0, B = 3, C = 7 };
 
-utils::StringStream& operator<<(utils::StringStream& out, E e) {
+StringStream& operator<<(StringStream& out, E e) {
     switch (e) {
         case E::A:
             return out << "A";
@@ -245,10 +245,10 @@ TEST(EnumSetTest, Loop) {
 }
 
 TEST(EnumSetTest, Ostream) {
-    utils::StringStream ss;
+    StringStream ss;
     ss << EnumSet<E>(E::A, E::C);
     EXPECT_EQ(ss.str(), "{A, C}");
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

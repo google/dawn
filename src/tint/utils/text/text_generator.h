@@ -24,7 +24,7 @@
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// Helper methods for generators which are creating text output
 class TextGenerator {
@@ -100,13 +100,13 @@ class TextGenerator {
         /// Destructor
         ~LineWriter();
 
-        /// @returns the utils::StringStream
-        operator utils::StringStream&() { return os; }
+        /// @returns the StringStream
+        operator StringStream&() { return os; }
 
         /// @param rhs the value to write to the line
-        /// @returns the utils::StringStream so calls can be chained
+        /// @returns the StringStream so calls can be chained
         template <typename T>
-        utils::StringStream& operator<<(T&& rhs) {
+        StringStream& operator<<(T&& rhs) {
             return os << std::forward<T>(rhs);
         }
 
@@ -114,7 +114,7 @@ class TextGenerator {
         LineWriter(const LineWriter&) = delete;
         LineWriter& operator=(const LineWriter&) = delete;
 
-        utils::StringStream os;
+        StringStream os;
         TextBuffer* buffer;
     };
 
@@ -154,8 +154,8 @@ class TextGenerator {
     /// Helper for writing a '(' on construction and a ')' destruction.
     struct ScopedParen {
         /// Constructor
-        /// @param stream the utils::StringStream that will be written to
-        explicit ScopedParen(utils::StringStream& stream);
+        /// @param stream the StringStream that will be written to
+        explicit ScopedParen(StringStream& stream);
         /// Destructor
         ~ScopedParen();
 
@@ -163,7 +163,7 @@ class TextGenerator {
         ScopedParen(ScopedParen&& rhs) = delete;
         ScopedParen(const ScopedParen&) = delete;
         ScopedParen& operator=(const ScopedParen&) = delete;
-        utils::StringStream& s;
+        StringStream& s;
     };
 
     /// Helper for incrementing indentation on construction and decrementing
@@ -203,6 +203,6 @@ class TextGenerator {
     std::unordered_map<const type::Struct*, std::string> builtin_struct_names_;
 };
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_TEXT_TEXT_GENERATOR_H_

@@ -29,20 +29,18 @@ namespace tint::sem {
 
 /// Module holds the top-level semantic types, functions and global variables
 /// used by a Program.
-class Module final : public utils::Castable<Module, Node> {
+class Module final : public Castable<Module, Node> {
   public:
     /// Constructor
     /// @param dep_ordered_decls the dependency-ordered module-scope declarations
     /// @param extensions the list of enabled extensions in the module
-    Module(utils::VectorRef<const ast::Node*> dep_ordered_decls, builtin::Extensions extensions);
+    Module(VectorRef<const ast::Node*> dep_ordered_decls, builtin::Extensions extensions);
 
     /// Destructor
     ~Module() override;
 
     /// @returns the dependency-ordered global declarations for the module
-    utils::VectorRef<const ast::Node*> DependencyOrderedDeclarations() const {
-        return dep_ordered_decls_;
-    }
+    VectorRef<const ast::Node*> DependencyOrderedDeclarations() const { return dep_ordered_decls_; }
 
     /// @returns the list of enabled extensions in the module
     const builtin::Extensions& Extensions() const { return extensions_; }
@@ -60,7 +58,7 @@ class Module final : public utils::Castable<Module, Node> {
     }
 
   private:
-    const utils::Vector<const ast::Node*, 64> dep_ordered_decls_;
+    const tint::Vector<const ast::Node*, 64> dep_ordered_decls_;
     builtin::Extensions extensions_;
     builtin::DiagnosticRuleSeverities diagnostic_severities_;
 };

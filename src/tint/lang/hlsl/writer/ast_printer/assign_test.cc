@@ -22,8 +22,8 @@ namespace {
 using HlslASTPrinterTest_Assign = TestHelper;
 
 TEST_F(HlslASTPrinterTest_Assign, Emit_Assign) {
-    Func("fn", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("fn", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("lhs", ty.i32())),
              Decl(Var("rhs", ty.i32())),
              Assign("lhs", "rhs"),
@@ -42,8 +42,8 @@ TEST_F(HlslASTPrinterTest_Assign, Emit_Assign) {
 }
 
 TEST_F(HlslASTPrinterTest_Assign, Emit_Vector_Assign_LetIndex) {
-    Func("fn", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("fn", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("lhs", ty.vec3<f32>())),
              Decl(Var("rhs", ty.f32())),
              Decl(Let("index", ty.u32(), Expr(0_u))),
@@ -68,8 +68,8 @@ void fn() {
 }
 
 TEST_F(HlslASTPrinterTest_Assign, Emit_Vector_Assign_ConstIndex) {
-    Func("fn", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("fn", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("lhs", ty.vec3<f32>())),
              Decl(Var("rhs", ty.f32())),
              Decl(Const("index", ty.u32(), Expr(0_u))),
@@ -89,8 +89,8 @@ TEST_F(HlslASTPrinterTest_Assign, Emit_Vector_Assign_ConstIndex) {
 }
 
 TEST_F(HlslASTPrinterTest_Assign, Emit_Vector_Assign_DynamicIndex) {
-    Func("fn", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("fn", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("lhs", ty.vec3<f32>())),
              Decl(Var("rhs", ty.f32())),
              Decl(Var("index", ty.u32())),
@@ -115,8 +115,8 @@ void fn() {
 }
 
 TEST_F(HlslASTPrinterTest_Assign, Emit_Matrix_Assign_Vector_LetIndex) {
-    Func("fn", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("fn", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("lhs", ty.mat4x2<f32>())),
              Decl(Var("rhs", ty.vec2<f32>())),
              Decl(Let("index", ty.u32(), Expr(0_u))),
@@ -146,8 +146,8 @@ void fn() {
 }
 
 TEST_F(HlslASTPrinterTest_Assign, Emit_Matrix_Assign_Vector_ConstIndex) {
-    Func("fn", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("fn", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("lhs", ty.mat4x2<f32>())),
              Decl(Var("rhs", ty.vec2<f32>())),
              Decl(Const("index", ty.u32(), Expr(0_u))),
@@ -167,8 +167,8 @@ TEST_F(HlslASTPrinterTest_Assign, Emit_Matrix_Assign_Vector_ConstIndex) {
 }
 
 TEST_F(HlslASTPrinterTest_Assign, Emit_Matrix_Assign_Vector_DynamicIndex) {
-    Func("fn", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("fn", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("lhs", ty.mat4x2<f32>())),
              Decl(Var("rhs", ty.vec2<f32>())),
              Decl(Var("index", ty.u32())),
@@ -200,8 +200,8 @@ void fn() {
 TEST_F(HlslASTPrinterTest_Assign, Emit_Matrix_Assign_Scalar_LetIndices) {
     auto* col = IndexAccessor("lhs", "col");
     auto* el = IndexAccessor(col, "row");
-    Func("fn", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("fn", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("lhs", ty.mat4x2<f32>())),
              Decl(Var("rhs", ty.f32())),
              Decl(Let("col", ty.u32(), Expr(0_u))),
@@ -243,8 +243,8 @@ void fn() {
 TEST_F(HlslASTPrinterTest_Assign, Emit_Matrix_Assign_Scalar_ConstIndices) {
     auto* col = IndexAccessor("lhs", "col");
     auto* el = IndexAccessor(col, "row");
-    Func("fn", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("fn", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("lhs", ty.mat4x2<f32>())),
              Decl(Var("rhs", ty.f32())),
              Decl(Const("col", ty.u32(), Expr(0_u))),
@@ -267,8 +267,8 @@ TEST_F(HlslASTPrinterTest_Assign, Emit_Matrix_Assign_Scalar_ConstIndices) {
 TEST_F(HlslASTPrinterTest_Assign, Emit_Matrix_Assign_Scalar_DynamicIndices) {
     auto* col = IndexAccessor("lhs", "col");
     auto* el = IndexAccessor(col, "row");
-    Func("fn", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("fn", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("lhs", ty.mat4x2<f32>())),
              Decl(Var("rhs", ty.f32())),
              Decl(Var("col", ty.u32())),

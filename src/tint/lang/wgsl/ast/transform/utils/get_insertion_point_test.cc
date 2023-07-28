@@ -35,7 +35,7 @@ TEST_F(GetInsertionPointTest, Block) {
     auto* expr = b.Expr(1_i);
     auto* var = b.Decl(b.Var("a", expr));
     auto* block = b.Block(var);
-    b.Func("f", tint::utils::Empty, b.ty.void_(), tint::utils::Vector{block});
+    b.Func("f", tint::Empty, b.ty.void_(), Vector{block});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -58,7 +58,7 @@ TEST_F(GetInsertionPointTest, ForLoopInit) {
     auto* var = b.Decl(b.Var("a", expr));
     auto* fl = b.For(var, b.Expr(true), nullptr, b.Block());
     auto* func_block = b.Block(fl);
-    b.Func("f", tint::utils::Empty, b.ty.void_(), tint::utils::Vector{func_block});
+    b.Func("f", tint::Empty, b.ty.void_(), Vector{func_block});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -79,7 +79,7 @@ TEST_F(GetInsertionPointTest, ForLoopCont_Invalid) {
     auto* expr = b.Expr(1_i);
     auto* var = b.Decl(b.Var("a", expr));
     auto* s = b.For({}, b.Expr(true), var, b.Block());
-    b.Func("f", tint::utils::Empty, b.ty.void_(), tint::utils::Vector{s});
+    b.Func("f", tint::Empty, b.ty.void_(), Vector{s});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;

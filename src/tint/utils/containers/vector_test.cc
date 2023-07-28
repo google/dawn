@@ -23,7 +23,7 @@
 #include "src/tint/utils/memory/bitcast.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 class C0 : public Castable<C0> {};
@@ -1991,7 +1991,7 @@ TEST(TintVectorTest, SliceConst) {
 }
 
 TEST(TintVectorTest, ostream) {
-    utils::StringStream ss;
+    StringStream ss;
     ss << Vector{1, 2, 3};
     EXPECT_EQ(ss.str(), "[1, 2, 3]");
 }
@@ -2262,7 +2262,7 @@ TEST(TintVectorRefTest, BeginEnd) {
 }
 
 TEST(TintVectorRefTest, ostream) {
-    utils::StringStream ss;
+    StringStream ss;
     Vector vec{1, 2, 3};
     const VectorRef<int> vec_ref(vec);
     ss << vec_ref;
@@ -2270,9 +2270,9 @@ TEST(TintVectorRefTest, ostream) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint
 
-TINT_INSTANTIATE_TYPEINFO(tint::utils::C0);
-TINT_INSTANTIATE_TYPEINFO(tint::utils::C1);
-TINT_INSTANTIATE_TYPEINFO(tint::utils::C2a);
-TINT_INSTANTIATE_TYPEINFO(tint::utils::C2b);
+TINT_INSTANTIATE_TYPEINFO(tint::C0);
+TINT_INSTANTIATE_TYPEINFO(tint::C1);
+TINT_INSTANTIATE_TYPEINFO(tint::C2a);
+TINT_INSTANTIATE_TYPEINFO(tint::C2b);

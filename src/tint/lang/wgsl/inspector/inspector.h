@@ -127,7 +127,7 @@ class Inspector {
     /// @param entry_point name of the entry point to get information about.
     /// @returns vector of all of the sampler/texture sampling pairs that are used
     /// by that entry point.
-    utils::VectorRef<SamplerTexturePair> GetSamplerTextureUses(const std::string& entry_point);
+    VectorRef<SamplerTexturePair> GetSamplerTextureUses(const std::string& entry_point);
 
     /// @param entry_point name of the entry point to get information about.
     /// @param placeholder the sampler binding point to use for texture-only
@@ -157,7 +157,7 @@ class Inspector {
   private:
     const Program* program_;
     diag::List diagnostics_;
-    std::unique_ptr<std::unordered_map<std::string, utils::UniqueVector<SamplerTexturePair, 4>>>
+    std::unique_ptr<std::unordered_map<std::string, UniqueVector<SamplerTexturePair, 4>>>
         sampler_targets_;
 
     /// @param name name of the entry point to find
@@ -175,7 +175,7 @@ class Inspector {
     /// @param variables the list to add the variables to
     void AddEntryPointInOutVariables(std::string name,
                                      const type::Type* type,
-                                     utils::VectorRef<const ast::Attribute*> attributes,
+                                     VectorRef<const ast::Attribute*> attributes,
                                      std::optional<uint32_t> location,
                                      std::vector<StageVariable>& variables) const;
 
@@ -184,7 +184,7 @@ class Inspector {
     /// Otherwise, check `attributes` for the attribute.
     bool ContainsBuiltin(builtin::BuiltinValue builtin,
                          const type::Type* type,
-                         utils::VectorRef<const ast::Attribute*> attributes) const;
+                         VectorRef<const ast::Attribute*> attributes) const;
 
     /// Gathers all the texture resource bindings of the given type for the given
     /// entry point.
@@ -195,7 +195,7 @@ class Inspector {
     /// @returns vector of all of the bindings for depth textures.
     std::vector<ResourceBinding> GetTextureResourceBindings(
         const std::string& entry_point,
-        const tint::utils::TypeInfo* texture_type,
+        const tint::TypeInfo* texture_type,
         ResourceBinding::ResourceType resource_type);
 
     /// @param entry_point name of the entry point to get information about.
@@ -227,7 +227,7 @@ class Inspector {
     /// @returns the interpolation type and sampling modes for the value
     std::tuple<InterpolationType, InterpolationSampling> CalculateInterpolationData(
         const type::Type* type,
-        utils::VectorRef<const ast::Attribute*> attributes) const;
+        VectorRef<const ast::Attribute*> attributes) const;
 
     /// For a N-uple of expressions, resolve to the appropriate global resources
     /// and call 'cb'.

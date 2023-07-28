@@ -34,7 +34,7 @@ TEST_F(WgslASTPrinterTest, Emit_GlobalConstAssert) {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_FunctionConstAssert) {
-    Func("f", utils::Empty, ty.void_(), utils::Vector{ConstAssert(true)});
+    Func("f", tint::Empty, ty.void_(), Vector{ConstAssert(true)});
 
     ASTPrinter& gen = Build();
     gen.Generate();

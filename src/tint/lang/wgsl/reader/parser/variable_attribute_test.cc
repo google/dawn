@@ -220,7 +220,7 @@ TEST_F(WGSLParserTest, Attribute_Location_MissingInvalid) {
 class BuiltinTest : public WGSLParserTestWithParam<builtin::BuiltinValue> {};
 
 TEST_P(BuiltinTest, Attribute_Builtin) {
-    auto str = utils::ToString(GetParam());
+    auto str = tint::ToString(GetParam());
     auto p = parser("builtin(" + str + ")");
 
     auto attr = p->attribute();
@@ -236,7 +236,7 @@ TEST_P(BuiltinTest, Attribute_Builtin) {
     ast::CheckIdentifier(builtin->builtin, str);
 }
 TEST_P(BuiltinTest, Attribute_Builtin_TrailingComma) {
-    auto str = utils::ToString(GetParam());
+    auto str = tint::ToString(GetParam());
     auto p = parser("builtin(" + str + ",)");
 
     auto attr = p->attribute();

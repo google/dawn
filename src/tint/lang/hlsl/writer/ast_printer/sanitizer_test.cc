@@ -26,15 +26,15 @@ using namespace tint::number_suffixes;        // NOLINT
 using HlslSanitizerTest = TestHelper;
 
 TEST_F(HlslSanitizerTest, Call_ArrayLength) {
-    auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>())});
+    auto* s = Structure("my_struct", Vector{Member(0, "a", ty.array<f32>())});
     GlobalVar("b", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
               Group(2_a));
 
-    Func("a_func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("a_func", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("len", ty.u32(), Call("arrayLength", AddressOf(MemberAccessor("b", "a"))))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -57,18 +57,18 @@ void a_func() {
 }
 
 TEST_F(HlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
-    auto* s = Structure("my_struct", utils::Vector{
+    auto* s = Structure("my_struct", Vector{
                                          Member(0, "z", ty.f32()),
                                          Member(4, "a", ty.array<f32>()),
                                      });
     GlobalVar("b", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
               Group(2_a));
 
-    Func("a_func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("a_func", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("len", ty.u32(), Call("arrayLength", AddressOf(MemberAccessor("b", "a"))))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -92,20 +92,20 @@ void a_func() {
 }
 
 TEST_F(HlslSanitizerTest, Call_ArrayLength_ViaLets) {
-    auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>())});
+    auto* s = Structure("my_struct", Vector{Member(0, "a", ty.array<f32>())});
     GlobalVar("b", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
               Group(2_a));
 
     auto* p = Let("p", AddressOf("b"));
     auto* p2 = Let("p2", AddressOf(MemberAccessor(Deref(p), "a")));
 
-    Func("a_func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("a_func", tint::Empty, ty.void_(),
+         Vector{
              Decl(p),
              Decl(p2),
              Decl(Var("len", ty.u32(), Call("arrayLength", p2))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -129,19 +129,19 @@ void a_func() {
 }
 
 TEST_F(HlslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
-    auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>())});
+    auto* s = Structure("my_struct", Vector{Member(0, "a", ty.array<f32>())});
     GlobalVar("b", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
               Group(2_a));
     GlobalVar("c", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(2_a),
               Group(2_a));
 
-    Func("a_func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("a_func", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("len", ty.u32(),
                       Add(Call("arrayLength", AddressOf(MemberAccessor("b", "a"))),
                           Call("arrayLength", AddressOf(MemberAccessor("c", "a")))))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -173,12 +173,12 @@ void a_func() {
 TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
     auto* array_init = Call<array<i32, 4>>(1_i, 2_i, 3_i, 4_i);
 
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("idx", Expr(3_i))),
              Decl(Var("pos", ty.i32(), IndexAccessor(array_init, "idx"))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -199,7 +199,7 @@ TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
 
 TEST_F(HlslSanitizerTest, PromoteStructInitializerToConstVar) {
     auto* runtime_value = Var("runtime_value", Expr(3_f));
-    auto* str = Structure("S", utils::Vector{
+    auto* str = Structure("S", Vector{
                                    Member("a", ty.i32()),
                                    Member("b", ty.vec3<f32>()),
                                    Member("c", ty.i32()),
@@ -208,12 +208,12 @@ TEST_F(HlslSanitizerTest, PromoteStructInitializerToConstVar) {
     auto* struct_access = MemberAccessor(struct_init, "b");
     auto* pos = Var("pos", ty.vec3<f32>(), struct_access);
 
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              Decl(runtime_value),
              Decl(pos),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -246,13 +246,13 @@ TEST_F(HlslSanitizerTest, SimplifyPointersBasic) {
     auto* p = Let("p", ty.ptr<function, i32>(), AddressOf(v));
     auto* x = Var("x", ty.i32(), Deref(p));
 
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              Decl(v),
              Decl(p),
              Decl(x),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -282,15 +282,15 @@ TEST_F(HlslSanitizerTest, SimplifyPointersComplexChain) {
     auto* vp = Let("vp", ty.ptr<function, vec4<f32>>(), AddressOf(IndexAccessor(Deref(mp), 2_i)));
     auto* v = Var("v", ty.vec4<f32>(), Deref(vp));
 
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              Decl(a),
              Decl(ap),
              Decl(mp),
              Decl(vp),
              Decl(v),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 

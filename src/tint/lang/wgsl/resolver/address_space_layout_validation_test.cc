@@ -35,9 +35,9 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, StorageBuffer_UnalignedMember) 
     // var<storage> a : S;
 
     Structure(Source{{12, 34}}, "S",
-              utils::Vector{
-                  Member("a", ty.f32(), utils::Vector{MemberSize(5_a)}),
-                  Member(Source{{34, 56}}, "b", ty.f32(), utils::Vector{MemberAlign(1_i)}),
+              Vector{
+                  Member("a", ty.f32(), Vector{MemberSize(5_a)}),
+                  Member(Source{{34, 56}}, "b", ty.f32(), Vector{MemberAlign(1_i)}),
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty("S"), builtin::AddressSpace::kStorage, Group(0_a),
@@ -65,9 +65,9 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, StorageBuffer_UnalignedMember_S
     // var<storage> a : S;
 
     Structure(Source{{12, 34}}, "S",
-              utils::Vector{
-                  Member("a", ty.f32(), utils::Vector{MemberSize(5_a)}),
-                  Member(Source{{34, 56}}, "b", ty.f32(), utils::Vector{MemberAlign(4_i)}),
+              Vector{
+                  Member("a", ty.f32(), Vector{MemberSize(5_a)}),
+                  Member(Source{{34, 56}}, "b", ty.f32(), Vector{MemberAlign(4_i)}),
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty("S"), builtin::AddressSpace::kStorage, Group(0_a),
@@ -91,12 +91,12 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_S
     // var<uniform> a : Outer;
 
     Structure(Source{{12, 34}}, "Inner",
-              utils::Vector{
+              Vector{
                   Member("scalar", ty.i32()),
               });
 
     Structure(Source{{34, 56}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member("scalar", ty.f32()),
                   Member(Source{{56, 78}}, "inner", ty("Inner")),
               });
@@ -135,14 +135,14 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest,
     // var<uniform> a : Outer;
 
     Structure(Source{{12, 34}}, "Inner",
-              utils::Vector{
+              Vector{
                   Member("scalar", ty.i32()),
               });
 
     Structure(Source{{34, 56}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member("scalar", ty.f32()),
-                  Member(Source{{56, 78}}, "inner", ty("Inner"), utils::Vector{MemberAlign(16_i)}),
+                  Member(Source{{56, 78}}, "inner", ty("Inner"), Vector{MemberAlign(16_i)}),
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty("Outer"), builtin::AddressSpace::kUniform, Group(0_a),
@@ -162,10 +162,10 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_A
     //
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
-    Alias("Inner", ty.array<f32, 10>(utils::Vector{Stride(16)}));
+    Alias("Inner", ty.array<f32, 10>(Vector{Stride(16)}));
 
     Structure(Source{{12, 34}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member("scalar", ty.f32()),
                   Member(Source{{56, 78}}, "inner", ty("Inner")),
               });
@@ -195,12 +195,12 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_A
     //
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
-    Alias("Inner", ty.array<f32, 10>(utils::Vector{Stride(16)}));
+    Alias("Inner", ty.array<f32, 10>(Vector{Stride(16)}));
 
     Structure(Source{{12, 34}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member("scalar", ty.f32()),
-                  Member(Source{{34, 56}}, "inner", ty("Inner"), utils::Vector{MemberAlign(16_i)}),
+                  Member(Source{{34, 56}}, "inner", ty("Inner"), Vector{MemberAlign(16_i)}),
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty("Outer"), builtin::AddressSpace::kUniform, Group(0_a),
@@ -225,12 +225,12 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_MembersOffsetNotM
     // var<uniform> a : Outer;
 
     Structure(Source{{12, 34}}, "Inner",
-              utils::Vector{
-                  Member("scalar", ty.i32(), utils::Vector{MemberAlign(1_i), MemberSize(5_a)}),
+              Vector{
+                  Member("scalar", ty.i32(), Vector{MemberAlign(1_i), MemberSize(5_a)}),
               });
 
     Structure(Source{{34, 56}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member(Source{{56, 78}}, "inner", ty("Inner")),
                   Member(Source{{78, 90}}, "scalar", ty.i32()),
               });
@@ -274,15 +274,15 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest,
     // var<uniform> a : Outer;
 
     Structure(Source{{12, 34}}, "Inner",
-              utils::Vector{
+              Vector{
                   Member("a", ty.i32()),
                   Member("b", ty.i32()),
                   Member("c", ty.i32()),
-                  Member("scalar", ty.i32(), utils::Vector{MemberAlign(1_i), MemberSize(5_a)}),
+                  Member("scalar", ty.i32(), Vector{MemberAlign(1_i), MemberSize(5_a)}),
               });
 
     Structure(Source{{34, 56}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member(Source{{56, 78}}, "inner", ty("Inner")),
                   Member(Source{{78, 90}}, "scalar", ty.i32()),
               });
@@ -325,14 +325,14 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest,
     // var<uniform> a : Outer;
 
     Structure(Source{{12, 34}}, "Inner",
-              utils::Vector{
-                  Member("scalar", ty.i32(), utils::Vector{MemberAlign(1_i), MemberSize(5_a)}),
+              Vector{
+                  Member("scalar", ty.i32(), Vector{MemberAlign(1_i), MemberSize(5_a)}),
               });
 
     Structure(Source{{34, 56}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member(Source{{56, 78}}, "inner", ty("Inner")),
-                  Member(Source{{78, 90}}, "scalar", ty.i32(), utils::Vector{MemberAlign(16_i)}),
+                  Member(Source{{78, 90}}, "scalar", ty.i32(), Vector{MemberAlign(16_i)}),
               });
 
     GlobalVar(Source{{22, 34}}, "a", ty("Outer"), builtin::AddressSpace::kUniform, Group(0_a),
@@ -351,7 +351,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_Vec3MemberOffset_
     // @group(0) @binding(0)
     // var<uniform> a : ScalarPackedAtEndOfVec3;
 
-    Structure("ScalarPackedAtEndOfVec3", utils::Vector{
+    Structure("ScalarPackedAtEndOfVec3", Vector{
                                              Member("v", ty.vec3(ty.f32())),
                                              Member("s", ty.f32()),
                                          });
@@ -374,7 +374,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_Vec3F16MemberOffs
 
     Enable(builtin::Extension::kF16);
 
-    Structure("ScalarPackedAtEndOfVec3", utils::Vector{
+    Structure("ScalarPackedAtEndOfVec3", Vector{
                                              Member("v", ty.vec3(ty.f16())),
                                              Member("s", ty.f16()),
                                          });
@@ -400,7 +400,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     Alias("Inner", ty.array<f32, 10>());
 
     Structure(Source{{12, 34}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member("inner", ty(Source{{34, 56}}, "Inner")),
                   Member("scalar", ty.i32()),
               });
@@ -434,7 +434,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     Alias("Inner", ty.array<vec2<f32>, 10>());
 
     Structure(Source{{12, 34}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member("inner", ty(Source{{34, 56}}, "Inner")),
                   Member("scalar", ty.i32()),
               });
@@ -470,14 +470,14 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
 
-    auto* array_elem = Structure("ArrayElem", utils::Vector{
+    auto* array_elem = Structure("ArrayElem", Vector{
                                                   Member("a", ty.f32()),
                                                   Member("b", ty.i32()),
                                               });
     Alias("Inner", ty.array(ty.Of(array_elem), 10_u));
 
     Structure(Source{{12, 34}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member("inner", ty(Source{{34, 56}}, "Inner")),
                   Member("scalar", ty.i32()),
               });
@@ -518,7 +518,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     // var<uniform> a : array<Outer, 4u>;
 
     Structure(Source{{12, 34}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member("inner", ty.array(Source{{34, 56}}, ty.array<f32, 4>(), 4_u)),
               });
 
@@ -547,10 +547,10 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
 
-    Alias("Inner", ty.array<f32, 10>(utils::Vector{Stride(16)}));
+    Alias("Inner", ty.array<f32, 10>(Vector{Stride(16)}));
 
     Structure(Source{{12, 34}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member("inner", ty(Source{{34, 56}}, "Inner")),
                   Member("scalar", ty.i32()),
               });
@@ -570,10 +570,9 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_UnalignedMember) {
     // };
     // var<push_constant> a : S;
     Enable(builtin::Extension::kChromiumExperimentalPushConstant);
-    Structure(
-        Source{{12, 34}}, "S",
-        utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(5_a)}),
-                      Member(Source{{34, 56}}, "b", ty.f32(), utils::Vector{MemberAlign(1_i)})});
+    Structure(Source{{12, 34}}, "S",
+              Vector{Member("a", ty.f32(), Vector{MemberSize(5_a)}),
+                     Member(Source{{34, 56}}, "b", ty.f32(), Vector{MemberAlign(1_i)})});
     GlobalVar(Source{{78, 90}}, "a", ty("S"), builtin::AddressSpace::kPushConstant);
 
     ASSERT_FALSE(r()->Resolve());
@@ -597,8 +596,8 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_Aligned) {
     // };
     // var<push_constant> a : S;
     Enable(builtin::Extension::kChromiumExperimentalPushConstant);
-    Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(5_a)}),
-                                 Member("b", ty.f32(), utils::Vector{MemberAlign(4_i)})});
+    Structure("S", Vector{Member("a", ty.f32(), Vector{MemberSize(5_a)}),
+                          Member("b", ty.f32(), Vector{MemberAlign(4_i)})});
     GlobalVar("a", ty("S"), builtin::AddressSpace::kPushConstant);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -622,12 +621,12 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_StructMemb
     Enable(builtin::Extension::kChromiumInternalRelaxedUniformLayout);
 
     Structure(Source{{12, 34}}, "Inner",
-              utils::Vector{
+              Vector{
                   Member("scalar", ty.i32()),
               });
 
     Structure(Source{{34, 56}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member("scalar", ty.f32()),
                   Member(Source{{56, 78}}, "inner", ty("Inner")),
               });
@@ -653,10 +652,10 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_StructMemb
 
     Enable(builtin::Extension::kChromiumInternalRelaxedUniformLayout);
 
-    Alias("Inner", ty.array<f32, 10>(utils::Vector{Stride(16)}));
+    Alias("Inner", ty.array<f32, 10>(Vector{Stride(16)}));
 
     Structure(Source{{12, 34}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member("scalar", ty.f32()),
                   Member(Source{{56, 78}}, "inner", ty("Inner")),
               });
@@ -685,12 +684,12 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_MemberOffs
     Enable(builtin::Extension::kChromiumInternalRelaxedUniformLayout);
 
     Structure(Source{{12, 34}}, "Inner",
-              utils::Vector{
-                  Member("scalar", ty.i32(), utils::Vector{MemberAlign(1_i), MemberSize(5_a)}),
+              Vector{
+                  Member("scalar", ty.i32(), Vector{MemberAlign(1_i), MemberSize(5_a)}),
               });
 
     Structure(Source{{34, 56}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member(Source{{56, 78}}, "inner", ty("Inner")),
                   Member(Source{{78, 90}}, "scalar", ty.i32()),
               });
@@ -714,7 +713,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_ArrayStrid
     Enable(builtin::Extension::kChromiumInternalRelaxedUniformLayout);
 
     Structure(Source{{12, 34}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member("arr", ty.array<f32, 10>()),
               });
 
@@ -739,7 +738,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_ArrayStrid
     Enable(builtin::Extension::kChromiumInternalRelaxedUniformLayout);
 
     Structure(Source{{12, 34}}, "Outer",
-              utils::Vector{
+              Vector{
                   Member("arr", ty.array<vec3<f16>, 10>()),
               });
 

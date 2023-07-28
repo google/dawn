@@ -29,7 +29,7 @@ TEST_F(MslASTPrinterTest, EmitExpression_Cast_Scalar) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "1.0f");
 }
@@ -40,7 +40,7 @@ TEST_F(MslASTPrinterTest, EmitExpression_Cast_Vector) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float3(1.0f, 2.0f, 3.0f)");
 }
@@ -51,7 +51,7 @@ TEST_F(MslASTPrinterTest, EmitExpression_Cast_IntMin) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "2147483648u");
 }

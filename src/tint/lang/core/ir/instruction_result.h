@@ -21,7 +21,7 @@
 namespace tint::ir {
 
 /// An instruction result in the IR.
-class InstructionResult : public utils::Castable<InstructionResult, Value> {
+class InstructionResult : public Castable<InstructionResult, Value> {
   public:
     /// Constructor
     /// @param type the type of the value

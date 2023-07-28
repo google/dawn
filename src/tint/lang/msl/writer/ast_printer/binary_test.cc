@@ -23,7 +23,7 @@ struct BinaryData {
     ast::BinaryOp op;
 };
 inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.op;
     out << str.str();
     return out;
@@ -47,7 +47,7 @@ TEST_P(MslBinaryTest, Emit) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -91,7 +91,7 @@ TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour, Emit) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -125,7 +125,7 @@ TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour_Chained, Emit) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr2)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -152,7 +152,7 @@ TEST_F(MslBinaryTest, ModF32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
@@ -167,7 +167,7 @@ TEST_F(MslBinaryTest, ModF16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
@@ -180,7 +180,7 @@ TEST_F(MslBinaryTest, ModVec3F32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
@@ -195,7 +195,7 @@ TEST_F(MslBinaryTest, ModVec3F16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "fmod(left, right)");
 }
@@ -208,7 +208,7 @@ TEST_F(MslBinaryTest, BoolAnd) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "bool(left & right)");
 }
@@ -221,7 +221,7 @@ TEST_F(MslBinaryTest, BoolOr) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "bool(left | right)");
 }

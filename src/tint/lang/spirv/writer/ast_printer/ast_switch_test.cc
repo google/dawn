@@ -59,8 +59,8 @@ TEST_F(SpirvASTPrinterTest, Switch_WithCase) {
     auto* v = GlobalVar("v", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* a = GlobalVar("a", ty.i32(), builtin::AddressSpace::kPrivate);
 
-    auto* func = Func("a_func", utils::Empty, ty.void_(),
-                      utils::Vector{
+    auto* func = Func("a_func", tint::Empty, ty.void_(),
+                      Vector{
                           Switch("a",                                               //
                                  Case(CaseSelector(1_i), Block(Assign("v", 1_i))),  //
                                  Case(CaseSelector(2_i), Block(Assign("v", 2_i))),  //
@@ -116,8 +116,8 @@ TEST_F(SpirvASTPrinterTest, Switch_WithCase_Unsigned) {
     auto* v = GlobalVar("v", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* a = GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate);
 
-    auto* func = Func("a_func", utils::Empty, ty.void_(),
-                      utils::Vector{
+    auto* func = Func("a_func", tint::Empty, ty.void_(),
+                      Vector{
                           Switch("a",                                               //
                                  Case(CaseSelector(1_u), Block(Assign("v", 1_i))),  //
                                  Case(CaseSelector(2_u), Block(Assign("v", 2_i))),  //
@@ -173,8 +173,8 @@ TEST_F(SpirvASTPrinterTest, Switch_WithDefault) {
     auto* v = GlobalVar("v", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* a = GlobalVar("a", ty.i32(), builtin::AddressSpace::kPrivate);
 
-    auto* func = Func("a_func", utils::Empty, ty.void_(),
-                      utils::Vector{
+    auto* func = Func("a_func", tint::Empty, ty.void_(),
+                      Vector{
                           Switch("a",                                    //
                                  DefaultCase(Block(Assign("v", 1_i)))),  //
                       });
@@ -223,13 +223,13 @@ TEST_F(SpirvASTPrinterTest, Switch_WithCaseAndDefault) {
     auto* v = GlobalVar("v", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* a = GlobalVar("a", ty.i32(), builtin::AddressSpace::kPrivate);
 
-    auto* func = Func("a_func", utils::Empty, ty.void_(),
-                      utils::Vector{
-                          Switch(Expr("a"),                                                 //
-                                 Case(CaseSelector(1_i),                                    //
-                                      Block(Assign("v", 1_i))),                             //
-                                 Case(utils::Vector{CaseSelector(2_i), CaseSelector(3_i)},  //
-                                      Block(Assign("v", 2_i))),                             //
+    auto* func = Func("a_func", tint::Empty, ty.void_(),
+                      Vector{
+                          Switch(Expr("a"),                                          //
+                                 Case(CaseSelector(1_i),                             //
+                                      Block(Assign("v", 1_i))),                      //
+                                 Case(Vector{CaseSelector(2_i), CaseSelector(3_i)},  //
+                                      Block(Assign("v", 2_i))),                      //
                                  DefaultCase(Block(Assign("v", 3_i)))),
                       });
 
@@ -283,14 +283,14 @@ TEST_F(SpirvASTPrinterTest, Switch_WithCaseAndMixedDefault) {
     auto* v = GlobalVar("v", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* a = GlobalVar("a", ty.i32(), builtin::AddressSpace::kPrivate);
 
-    auto* func = Func("a_func", utils::Empty, ty.void_(),
-                      utils::Vector{Switch(Expr("a"),                      //
-                                           Case(CaseSelector(1_i),         //
-                                                Block(Assign("v", 1_i))),  //
-                                           Case(utils::Vector{CaseSelector(2_i), CaseSelector(3_i),
-                                                              DefaultCaseSelector()},  //
-                                                Block(Assign("v", 2_i)))               //
-                                           )});
+    auto* func = Func(
+        "a_func", tint::Empty, ty.void_(),
+        Vector{Switch(Expr("a"),                                                                 //
+                      Case(CaseSelector(1_i),                                                    //
+                           Block(Assign("v", 1_i))),                                             //
+                      Case(Vector{CaseSelector(2_i), CaseSelector(3_i), DefaultCaseSelector()},  //
+                           Block(Assign("v", 2_i)))                                              //
+                      )});
 
     Builder& b = Build();
 
@@ -340,8 +340,8 @@ TEST_F(SpirvASTPrinterTest, Switch_WithNestedBreak) {
     auto* v = GlobalVar("v", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* a = GlobalVar("a", ty.i32(), builtin::AddressSpace::kPrivate);
 
-    auto* func = Func("a_func", utils::Empty, ty.void_(),
-                      utils::Vector{
+    auto* func = Func("a_func", tint::Empty, ty.void_(),
+                      Vector{
                           Switch("a",                     //
                                  Case(CaseSelector(1_i),  //
                                       Block(              //
@@ -403,8 +403,8 @@ TEST_F(SpirvASTPrinterTest, Switch_AllReturn) {
     //   }
     // }
 
-    auto* fn = Func("f", utils::Empty, ty.i32(),
-                    utils::Vector{
+    auto* fn = Func("f", tint::Empty, ty.i32(),
+                    Vector{
                         Switch(1_i,                                          //
                                Case(CaseSelector(1_i), Block(Return(1_i))),  //
                                Case(CaseSelector(2_i), Block(Return(1_i))),  //

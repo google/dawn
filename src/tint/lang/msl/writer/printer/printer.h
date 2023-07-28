@@ -27,7 +27,7 @@
 namespace tint::msl::writer {
 
 /// Implementation class for the MSL generator
-class Printer : public utils::TextGenerator {
+class Printer : public tint::TextGenerator {
   public:
     /// Constructor
     /// @param module the Tint IR module to generate
@@ -37,7 +37,7 @@ class Printer : public utils::TextGenerator {
     /// @returns true on successful generation; false otherwise
     bool Generate();
 
-    /// @copydoc utils::TextGenerator::Result
+    /// @copydoc tint::TextGenerator::Result
     std::string Result() const override;
 
     /// Emit the function
@@ -47,32 +47,32 @@ class Printer : public utils::TextGenerator {
     /// Emit a type
     /// @param out the stream to emit too
     /// @param ty the type to emit
-    void EmitType(utils::StringStream& out, const type::Type* ty);
+    void EmitType(StringStream& out, const type::Type* ty);
 
     /// Handles generating an array declaration
     /// @param out the output stream
     /// @param arr the array to emit
-    void EmitArrayType(utils::StringStream& out, const type::Array* arr);
+    void EmitArrayType(StringStream& out, const type::Array* arr);
     /// Handles generating an atomic declaration
     /// @param out the output stream
     /// @param atomic the atomic to emit
-    void EmitAtomicType(utils::StringStream& out, const type::Atomic* atomic);
+    void EmitAtomicType(StringStream& out, const type::Atomic* atomic);
     /// Handles generating a pointer declaration
     /// @param out the output stream
     /// @param ptr the pointer to emit
-    void EmitPointerType(utils::StringStream& out, const type::Pointer* ptr);
+    void EmitPointerType(StringStream& out, const type::Pointer* ptr);
     /// Handles generating a vector declaration
     /// @param out the output stream
     /// @param vec the vector to emit
-    void EmitVectorType(utils::StringStream& out, const type::Vector* vec);
+    void EmitVectorType(StringStream& out, const type::Vector* vec);
     /// Handles generating a matrix declaration
     /// @param out the output stream
     /// @param mat the matrix to emit
-    void EmitMatrixType(utils::StringStream& out, const type::Matrix* mat);
+    void EmitMatrixType(StringStream& out, const type::Matrix* mat);
     /// Handles generating a texture declaration
     /// @param out the output stream
     /// @param tex the texture to emit
-    void EmitTextureType(utils::StringStream& out, const type::Texture* tex);
+    void EmitTextureType(StringStream& out, const type::Texture* tex);
     /// Handles generating a struct declaration. If the structure has already been emitted, then
     /// this function will simply return without emitting anything.
     /// @param str the struct to generate
@@ -81,16 +81,16 @@ class Printer : public utils::TextGenerator {
     /// Handles generating a address space
     /// @param out the output of the type stream
     /// @param sc the address space to generate
-    void EmitAddressSpace(utils::StringStream& out, builtin::AddressSpace sc);
+    void EmitAddressSpace(StringStream& out, builtin::AddressSpace sc);
 
     /// Handles ir::Constant values
     /// @param out the stream to write the constant too
     /// @param c the constant to emit
-    void EmitConstant(utils::StringStream& out, ir::Constant* c);
+    void EmitConstant(StringStream& out, ir::Constant* c);
     /// Handles constant::Value values
     /// @param out the stream to write the constant too
     /// @param c the constant to emit
-    void EmitConstant(utils::StringStream& out, const constant::Value* c);
+    void EmitConstant(StringStream& out, const constant::Value* c);
 
     /// @returns the name of the templated `tint_array` helper type, generating it if needed
     const std::string& ArrayTemplateName();
@@ -100,7 +100,7 @@ class Printer : public utils::TextGenerator {
     std::string array_template_name_;
 
   private:
-    /// @copydoc utils::TextWrtiter::UniqueIdentifier
+    /// @copydoc tint::TextWrtiter::UniqueIdentifier
     std::string UniqueIdentifier(const std::string& prefix = "") override;
 
     ir::Module* const ir_;

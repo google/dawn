@@ -23,7 +23,7 @@ namespace tint::ast::transform {
 /// declarations before the statement of usage with the goal of ensuring
 /// left-to-right order of evaluation, while respecting short-circuit
 /// evaluation.
-class PromoteSideEffectsToDecl final : public utils::Castable<PromoteSideEffectsToDecl, Transform> {
+class PromoteSideEffectsToDecl final : public Castable<PromoteSideEffectsToDecl, Transform> {
   public:
     /// Constructor
     PromoteSideEffectsToDecl();

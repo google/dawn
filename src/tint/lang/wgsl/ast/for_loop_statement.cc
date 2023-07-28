@@ -29,7 +29,7 @@ ForLoopStatement::ForLoopStatement(GenerationID pid,
                                    const Expression* cond,
                                    const Statement* cont,
                                    const BlockStatement* b,
-                                   utils::VectorRef<const ast::Attribute*> attrs)
+                                   VectorRef<const ast::Attribute*> attrs)
     : Base(pid, nid, src),
       initializer(init),
       condition(cond),

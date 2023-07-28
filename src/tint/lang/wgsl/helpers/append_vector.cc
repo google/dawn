@@ -113,7 +113,7 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     // to convert a vector of a different type, e.g. vec2<i32>(vec2<u32>()).
     // In that case, preserve the original argument, or you'll get a type error.
 
-    utils::Vector<const sem::ValueExpression*, 4> packed;
+    Vector<const sem::ValueExpression*, 4> packed;
     if (auto vc = AsVectorConstructor(vector_sem)) {
         const auto num_supplied = vc.call->Arguments().Length();
         if (num_supplied == 0) {
@@ -143,7 +143,7 @@ const sem::Call* AppendVector(ProgramBuilder* b,
             sem::EvaluationStage::kRuntime);
         auto* scalar_cast_sem = b->create<sem::Call>(
             scalar_cast_ast, scalar_cast_target, sem::EvaluationStage::kRuntime,
-            utils::Vector<const sem::ValueExpression*, 1>{scalar_sem}, statement,
+            Vector<const sem::ValueExpression*, 1>{scalar_sem}, statement,
             /* constant_value */ nullptr, /* has_side_effects */ false);
         b->Sem().Add(scalar_cast_ast, scalar_cast_sem);
         packed.Push(scalar_cast_sem);
@@ -152,17 +152,17 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     }
 
     auto* ctor_ast =
-        b->Call(packed_ast_ty, utils::Transform(packed, [&](const sem::ValueExpression* expr) {
+        b->Call(packed_ast_ty, tint::Transform(packed, [&](const sem::ValueExpression* expr) {
                     return expr->Declaration();
                 }));
     auto* ctor_target = b->create<sem::ValueConstructor>(
         packed_sem_ty,
-        utils::Transform(packed,
-                         [&](const tint::sem::ValueExpression* arg, size_t i) {
-                             return b->create<sem::Parameter>(
-                                 nullptr, static_cast<uint32_t>(i), arg->Type()->UnwrapRef(),
-                                 builtin::AddressSpace::kUndefined, builtin::Access::kUndefined);
-                         }),
+        tint::Transform(packed,
+                        [&](const tint::sem::ValueExpression* arg, size_t i) {
+                            return b->create<sem::Parameter>(
+                                nullptr, static_cast<uint32_t>(i), arg->Type()->UnwrapRef(),
+                                builtin::AddressSpace::kUndefined, builtin::Access::kUndefined);
+                        }),
         sem::EvaluationStage::kRuntime);
     auto* ctor_sem = b->create<sem::Call>(ctor_ast, ctor_target, sem::EvaluationStage::kRuntime,
                                           std::move(packed), statement,

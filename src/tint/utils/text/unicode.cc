@@ -16,7 +16,7 @@
 
 #include <algorithm>
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 struct CodePointRange {
@@ -422,4 +422,4 @@ bool IsASCII(std::string_view str) {
 
 }  // namespace utf8
 
-}  // namespace tint::utils
+}  // namespace tint

@@ -32,7 +32,7 @@ namespace tint::ast::transform {
 ///       * BuiltinPolyfill as 'clamp' and binary operators may need to be polyfilled.
 ///       * CanonicalizeEntryPointIO as the transform does not support the 'in' and 'out' address
 ///         spaces.
-class Robustness final : public utils::Castable<Robustness, Transform> {
+class Robustness final : public Castable<Robustness, Transform> {
   public:
     /// Robustness action for out-of-bounds indexing.
     enum class Action {
@@ -48,7 +48,7 @@ class Robustness final : public utils::Castable<Robustness, Transform> {
     };
 
     /// Configuration options for the transform
-    struct Config final : public utils::Castable<Config, Data> {
+    struct Config final : public Castable<Config, Data> {
         /// Constructor
         Config();
 

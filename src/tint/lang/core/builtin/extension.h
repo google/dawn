@@ -44,7 +44,7 @@ enum class Extension {
 /// @param out the stream to write to
 /// @param value the Extension
 /// @returns `out` so calls can be chained
-utils::StringStream& operator<<(utils::StringStream& out, Extension value);
+StringStream& operator<<(StringStream& out, Extension value);
 
 /// ParseExtension parses a Extension from a string.
 /// @param str the string to parse
@@ -62,7 +62,7 @@ constexpr const char* kExtensionStrings[] = {
 };
 
 // A unique vector of extensions
-using Extensions = utils::UniqueVector<Extension, 4>;
+using Extensions = UniqueVector<Extension, 4>;
 
 }  // namespace tint::builtin
 

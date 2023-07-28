@@ -65,7 +65,7 @@ struct BindingPoint {
 /// @param o the stream to write to
 /// @param bp the BindingPoint
 /// @return the stream so calls can be chained
-inline utils::StringStream& operator<<(utils::StringStream& o, const BindingPoint& bp) {
+inline StringStream& operator<<(StringStream& o, const BindingPoint& bp) {
     return o << "[group: " << bp.group << ", binding: " << bp.binding << "]";
 }
 
@@ -81,7 +81,7 @@ class hash<tint::BindingPoint> {
     /// @param binding_point the binding point to create a hash for
     /// @return the hash value
     inline std::size_t operator()(const tint::BindingPoint& binding_point) const {
-        return tint::utils::Hash(binding_point.group, binding_point.binding);
+        return tint::Hash(binding_point.group, binding_point.binding);
     }
 };
 

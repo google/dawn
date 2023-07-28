@@ -29,13 +29,13 @@ enum class Behavior {
 };
 
 /// Behaviors is a set of Behavior
-using Behaviors = utils::EnumSet<Behavior>;
+using Behaviors = tint::EnumSet<Behavior>;
 
 /// Writes the Behavior to the stream.
 /// @param out the stream to write to
 /// @param behavior the Behavior to write
 /// @returns out so calls can be chained
-utils::StringStream& operator<<(utils::StringStream& out, Behavior behavior);
+StringStream& operator<<(StringStream& out, Behavior behavior);
 
 }  // namespace tint::sem
 

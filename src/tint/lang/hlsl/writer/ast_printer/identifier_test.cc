@@ -28,7 +28,7 @@ TEST_F(HlslASTPrinterTest_Identifier, EmitIdentifierExpression) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, i)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "foo");
 }

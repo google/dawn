@@ -388,7 +388,7 @@ TEST_F(MslASTPrinterTest_Constructor, Type_Array) {
 }
 
 TEST_F(MslASTPrinterTest_Constructor, Type_Struct) {
-    auto* str = Structure("S", utils::Vector{
+    auto* str = Structure("S", Vector{
                                    Member("a", ty.i32()),
                                    Member("b", ty.f32()),
                                    Member("c", ty.vec3<i32>()),
@@ -403,7 +403,7 @@ TEST_F(MslASTPrinterTest_Constructor, Type_Struct) {
 }
 
 TEST_F(MslASTPrinterTest_Constructor, Type_Struct_Empty) {
-    auto* str = Structure("S", utils::Vector{
+    auto* str = Structure("S", Vector{
                                    Member("a", ty.i32()),
                                    Member("b", ty.f32()),
                                    Member("c", ty.vec3<i32>()),

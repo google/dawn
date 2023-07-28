@@ -49,12 +49,12 @@ struct PartialAccess {
     // The base object.
     Value* base = nullptr;
     // The list of constant indices to get from the base to the source object.
-    utils::Vector<Value*, 4> indices;
+    Vector<Value*, 4> indices;
 
-    // A specialization of utils::Hasher for PartialAccess.
+    // A specialization of Hasher for PartialAccess.
     struct Hasher {
         inline std::size_t operator()(const PartialAccess& src) const {
-            return utils::Hash(src.base, src.indices);
+            return Hash(src.base, src.indices);
         }
     };
 
@@ -120,7 +120,7 @@ void VarForDynamicIndex::Run(ir::Module* ir) const {
     ir::Builder builder(*ir);
 
     // Find the access instructions that need replacing.
-    utils::Vector<AccessToReplace, 4> worklist;
+    Vector<AccessToReplace, 4> worklist;
     for (auto* inst : ir->instructions.Objects()) {
         if (auto* access = inst->As<Access>()) {
             if (auto to_replace = ShouldReplace(access)) {
@@ -130,8 +130,8 @@ void VarForDynamicIndex::Run(ir::Module* ir) const {
     }
 
     // Replace each access instruction that we recorded.
-    utils::Hashmap<Value*, Value*, 4> object_to_local;
-    utils::Hashmap<PartialAccess, Value*, 4, PartialAccess::Hasher> source_object_to_value;
+    Hashmap<Value*, Value*, 4> object_to_local;
+    Hashmap<PartialAccess, Value*, 4, PartialAccess::Hasher> source_object_to_value;
     for (const auto& to_replace : worklist) {
         auto* access = to_replace.access;
         auto* source_object = access->Object();
@@ -160,7 +160,7 @@ void VarForDynamicIndex::Run(ir::Module* ir) const {
         });
 
         // Create a new access instruction using the local variable as the source.
-        utils::Vector<Value*, 4> indices{access->Indices().Offset(to_replace.first_dynamic_index)};
+        Vector<Value*, 4> indices{access->Indices().Offset(to_replace.first_dynamic_index)};
         const type::Type* access_type = access->Result()->Type();
         Value* vector_index = nullptr;
         if (to_replace.vector_access_type) {

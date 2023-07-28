@@ -43,8 +43,8 @@ TEST_F(MslASTPrinterTest, UnsupportedExtension) {
 }
 
 TEST_F(MslASTPrinterTest, Generate) {
-    Func("my_func", utils::Empty, ty.void_(), utils::Empty,
-         utils::Vector{
+    Func("my_func", tint::Empty, ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -63,15 +63,15 @@ kernel void my_func() {
 }
 
 TEST_F(MslASTPrinterTest, HasInvariantAttribute_True) {
-    auto* out = Structure("Out", utils::Vector{
+    auto* out = Structure("Out", Vector{
                                      Member("pos", ty.vec4<f32>(),
-                                            utils::Vector{
+                                            Vector{
                                                 Builtin(builtin::BuiltinValue::kPosition),
                                                 Invariant(),
                                             }),
                                  });
-    Func("vert_main", utils::Empty, ty.Of(out), utils::Vector{Return(Call(ty.Of(out)))},
-         utils::Vector{
+    Func("vert_main", tint::Empty, ty.Of(out), Vector{Return(Call(ty.Of(out)))},
+         Vector{
              Stage(ast::PipelineStage::kVertex),
          });
 
@@ -101,14 +101,14 @@ vertex Out vert_main() {
 }
 
 TEST_F(MslASTPrinterTest, HasInvariantAttribute_False) {
-    auto* out = Structure("Out", utils::Vector{
+    auto* out = Structure("Out", Vector{
                                      Member("pos", ty.vec4<f32>(),
-                                            utils::Vector{
+                                            Vector{
                                                 Builtin(builtin::BuiltinValue::kPosition),
                                             }),
                                  });
-    Func("vert_main", utils::Empty, ty.Of(out), utils::Vector{Return(Call(ty.Of(out)))},
-         utils::Vector{
+    Func("vert_main", tint::Empty, ty.Of(out), Vector{Return(Call(ty.Of(out)))},
+         Vector{
              Stage(ast::PipelineStage::kVertex),
          });
 
@@ -132,8 +132,8 @@ vertex Out vert_main() {
 
 TEST_F(MslASTPrinterTest, WorkgroupMatrix) {
     GlobalVar("m", ty.mat2x2<f32>(), builtin::AddressSpace::kWorkgroup);
-    Func("comp_main", utils::Empty, ty.void_(), utils::Vector{Decl(Let("x", Expr("m")))},
-         utils::Vector{
+    Func("comp_main", tint::Empty, ty.void_(), Vector{Decl(Let("x", Expr("m")))},
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -172,8 +172,8 @@ kernel void comp_main(threadgroup tint_symbol_3* tint_symbol_2 [[threadgroup(0)]
 
 TEST_F(MslASTPrinterTest, WorkgroupMatrixInArray) {
     GlobalVar("m", ty.array(ty.mat2x2<f32>(), 4_i), builtin::AddressSpace::kWorkgroup);
-    Func("comp_main", utils::Empty, ty.void_(), utils::Vector{Decl(Let("x", Expr("m")))},
-         utils::Vector{
+    Func("comp_main", tint::Empty, ty.void_(), Vector{Decl(Let("x", Expr("m")))},
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -225,16 +225,16 @@ kernel void comp_main(threadgroup tint_symbol_3* tint_symbol_2 [[threadgroup(0)]
 }
 
 TEST_F(MslASTPrinterTest, WorkgroupMatrixInStruct) {
-    Structure("S1", utils::Vector{
+    Structure("S1", Vector{
                         Member("m1", ty.mat2x2<f32>()),
                         Member("m2", ty.mat4x4<f32>()),
                     });
-    Structure("S2", utils::Vector{
+    Structure("S2", Vector{
                         Member("s", ty("S1")),
                     });
     GlobalVar("s", ty("S2"), builtin::AddressSpace::kWorkgroup);
-    Func("comp_main", utils::Empty, ty.void_(), utils::Vector{Decl(Let("x", Expr("s")))},
-         utils::Vector{
+    Func("comp_main", tint::Empty, ty.void_(), Vector{Decl(Let("x", Expr("s")))},
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -291,38 +291,38 @@ TEST_F(MslASTPrinterTest, WorkgroupMatrix_Multiples) {
     GlobalVar("m7", ty.mat4x2<f32>(), builtin::AddressSpace::kWorkgroup);
     GlobalVar("m8", ty.mat4x3<f32>(), builtin::AddressSpace::kWorkgroup);
     GlobalVar("m9", ty.mat4x4<f32>(), builtin::AddressSpace::kWorkgroup);
-    Func("main1", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main1", tint::Empty, ty.void_(),
+         Vector{
              Decl(Let("a1", Expr("m1"))),
              Decl(Let("a2", Expr("m2"))),
              Decl(Let("a3", Expr("m3"))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
-    Func("main2", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main2", tint::Empty, ty.void_(),
+         Vector{
              Decl(Let("a1", Expr("m4"))),
              Decl(Let("a2", Expr("m5"))),
              Decl(Let("a3", Expr("m6"))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
-    Func("main3", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main3", tint::Empty, ty.void_(),
+         Vector{
              Decl(Let("a1", Expr("m7"))),
              Decl(Let("a2", Expr("m8"))),
              Decl(Let("a3", Expr("m9"))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
-    Func("main4_no_usages", utils::Empty, ty.void_(), utils::Empty,
-         utils::Vector{
+    Func("main4_no_usages", tint::Empty, ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });

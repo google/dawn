@@ -32,8 +32,7 @@ namespace tint::ast {
 /// trivial for the Resolver to handle `@offset(n)` or `@size(n)` /
 /// `@align(n)` attributes, so this is what we do, keeping all the layout
 /// logic in one place.
-class StructMemberOffsetAttribute final
-    : public utils::Castable<StructMemberOffsetAttribute, Attribute> {
+class StructMemberOffsetAttribute final : public Castable<StructMemberOffsetAttribute, Attribute> {
   public:
     /// constructor
     /// @param pid the identifier of the program that owns this node

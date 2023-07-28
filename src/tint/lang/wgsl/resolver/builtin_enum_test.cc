@@ -57,7 +57,7 @@ TEST_P(ResolverAddressSpaceUsedWithTemplateArgs, Test) {
 
     Enable(builtin::Extension::kChromiumExperimentalFullPtrParameters);
     auto* tmpl = Ident(Source{{12, 34}}, GetParam(), "T");
-    Func("f", utils::Vector{Param("p", ty("ptr", tmpl, ty.f32()))}, ty.void_(), utils::Empty);
+    Func("f", Vector{Param("p", ty("ptr", tmpl, ty.f32()))}, ty.void_(), tint::Empty);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: address space '" + std::string(GetParam()) +
                                 "' does not take template arguments");
@@ -75,8 +75,8 @@ using ResolverBuiltinValueUsedWithTemplateArgs = ResolverTestWithParam<const cha
 TEST_P(ResolverBuiltinValueUsedWithTemplateArgs, Test) {
     // fn f(@builtin(BUILTIN<T>) p : vec4<f32>) {}
     auto* tmpl = Ident(Source{{12, 34}}, GetParam(), "T");
-    Func("f", utils::Vector{Param("p", ty.vec4<f32>(), utils::Vector{Builtin(tmpl)})}, ty.void_(),
-         utils::Empty, utils::Vector{Stage(ast::PipelineStage::kFragment)});
+    Func("f", Vector{Param("p", ty.vec4<f32>(), Vector{Builtin(tmpl)})}, ty.void_(), tint::Empty,
+         Vector{Stage(ast::PipelineStage::kFragment)});
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: builtin value '" + std::string(GetParam()) +
                                 "' does not take template arguments");
@@ -96,13 +96,13 @@ TEST_P(ResolverInterpolationSamplingUsedWithTemplateArgs, Test) {
     // fn f(@location(0) @interpolate(linear, INTERPOLATION_SAMPLING<T>) p : vec4<f32>) {}
     auto* tmpl = Ident(Source{{12, 34}}, GetParam(), "T");
     Func("f",
-         utils::Vector{Param("p", ty.vec4<f32>(),
-                             utils::Vector{
-                                 Location(0_a),
-                                 Interpolate(builtin::InterpolationType::kLinear, tmpl),
-                             })},
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         Vector{Param("p", ty.vec4<f32>(),
+                      Vector{
+                          Location(0_a),
+                          Interpolate(builtin::InterpolationType::kLinear, tmpl),
+                      })},
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
     EXPECT_FALSE(r()->Resolve());
@@ -124,13 +124,13 @@ TEST_P(ResolverInterpolationTypeUsedWithTemplateArgs, Test) {
     // fn f(@location(0) @interpolate(INTERPOLATION_TYPE<T>, center) p : vec4<f32>) {}
     auto* tmpl = Ident(Source{{12, 34}}, GetParam(), "T");
     Func("f",
-         utils::Vector{Param("p", ty.vec4<f32>(),
-                             utils::Vector{
-                                 Location(0_a),
-                                 Interpolate(tmpl, builtin::InterpolationSampling::kCenter),
-                             })},
-         ty.void_(), utils::Empty,
-         utils::Vector{
+         Vector{Param("p", ty.vec4<f32>(),
+                      Vector{
+                          Location(0_a),
+                          Interpolate(tmpl, builtin::InterpolationSampling::kCenter),
+                      })},
+         ty.void_(), tint::Empty,
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
     EXPECT_FALSE(r()->Resolve());

@@ -26,7 +26,7 @@ class Loop;
 namespace tint::ir {
 
 /// A exit loop instruction.
-class ExitLoop : public utils::Castable<ExitLoop, Exit> {
+class ExitLoop : public Castable<ExitLoop, Exit> {
   public:
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
@@ -34,7 +34,7 @@ class ExitLoop : public utils::Castable<ExitLoop, Exit> {
     /// Constructor
     /// @param loop the loop being exited
     /// @param args the target MultiInBlock arguments
-    explicit ExitLoop(ir::Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
+    explicit ExitLoop(ir::Loop* loop, VectorRef<Value*> args = tint::Empty);
     ~ExitLoop() override;
 
     /// Re-associates the exit with the given loop instruction

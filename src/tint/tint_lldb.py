@@ -92,20 +92,16 @@ def __lldb_init_module(debugger, dict):
     tint_category = debugger.CreateCategory('tint')
     tint_category.SetEnabled(True)
 
-    attach_synthetic_to_type(
-        UtilsSlicePrinter, r'^tint::utils::Slice<.+>$', True)
+    attach_synthetic_to_type(UtilsSlicePrinter, r'^tint::Slice<.+>$', True)
 
-    attach_synthetic_to_type(
-        UtilsVectorPrinter, r'^tint::utils::Vector<.+>$', True)
+    attach_synthetic_to_type(UtilsVectorPrinter, r'^tint::Vector<.+>$', True)
 
-    attach_synthetic_to_type(
-        UtilsVectorRefPrinter, r'^tint::utils::VectorRef<.+>$', True)
+    attach_synthetic_to_type(UtilsVectorRefPrinter, r'^tint::VectorRef<.+>$',
+                             True)
 
-    attach_synthetic_to_type(
-        UtilsHashsetPrinter, r'^tint::utils::Hashset<.+>$', True)
+    attach_synthetic_to_type(UtilsHashsetPrinter, r'^tint::Hashset<.+>$', True)
 
-    attach_synthetic_to_type(
-        UtilsHashmapPrinter, r'^tint::utils::Hashmap<.+>$', True)
+    attach_synthetic_to_type(UtilsHashmapPrinter, r'^tint::Hashmap<.+>$', True)
 
 
 def attach_synthetic_to_type(synth_class, type_name, is_regex=False):
@@ -213,7 +209,7 @@ class Printer(object):
 
 
 class UtilsSlicePrinter(Printer):
-    '''Printer for tint::utils::Slice<T>'''
+    '''Printer for tint::Slice<T>'''
 
     def initialize(self):
         self.len = self.valobj.GetChildMemberWithName('len')
@@ -251,7 +247,7 @@ class UtilsSlicePrinter(Printer):
 
 
 class UtilsVectorPrinter(Printer):
-    '''Printer for tint::utils::Vector<T, N>'''
+    '''Printer for tint::Vector<T, N>'''
 
     def initialize(self):
         self.slice = self.member('impl_', 'slice')
@@ -277,7 +273,7 @@ class UtilsVectorPrinter(Printer):
 
 
 class UtilsVectorRefPrinter(Printer):
-    '''Printer for tint::utils::VectorRef<T>'''
+    '''Printer for tint::VectorRef<T>'''
 
     def initialize(self):
         self.slice = self.member('slice_')

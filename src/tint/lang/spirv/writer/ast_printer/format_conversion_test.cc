@@ -24,7 +24,7 @@ struct TestData {
     bool extended_format = false;
 };
 inline std::ostream& operator<<(std::ostream& out, TestData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.ast_format;
     out << str.str();
     return out;

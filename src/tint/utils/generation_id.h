@@ -75,7 +75,7 @@ inline GenerationID GenerationIDOf(GenerationID id) {
 /// @param out the stream to write to
 /// @param id the generation identifier to write
 /// @returns out so calls can be chained
-inline utils::StringStream& operator<<(utils::StringStream& out, GenerationID id) {
+inline StringStream& operator<<(StringStream& out, GenerationID id) {
     out << "Generation<" << id.Value() << ">";
     return out;
 }

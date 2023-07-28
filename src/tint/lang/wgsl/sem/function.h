@@ -47,7 +47,7 @@ namespace tint::sem {
 using WorkgroupSize = std::array<std::optional<uint32_t>, 3>;
 
 /// Function holds the semantic information for function nodes.
-class Function final : public utils::Castable<Function, CallTarget> {
+class Function final : public Castable<Function, CallTarget> {
   public:
     /// A vector of [Variable*, BindingPoint] pairs
     using VariableBindings = std::vector<std::pair<const Variable*, BindingPoint>>;
@@ -80,7 +80,7 @@ class Function final : public utils::Castable<Function, CallTarget> {
     }
 
     /// @returns all directly referenced global variables
-    const utils::UniqueVector<const GlobalVariable*, 4>& DirectlyReferencedGlobals() const {
+    const UniqueVector<const GlobalVariable*, 4>& DirectlyReferencedGlobals() const {
         return directly_referenced_globals_;
     }
 
@@ -93,7 +93,7 @@ class Function final : public utils::Castable<Function, CallTarget> {
     }
 
     /// @returns all transitively referenced global variables
-    const utils::UniqueVector<const GlobalVariable*, 8>& TransitivelyReferencedGlobals() const {
+    const UniqueVector<const GlobalVariable*, 8>& TransitivelyReferencedGlobals() const {
         return transitively_referenced_globals_;
     }
 
@@ -105,7 +105,7 @@ class Function final : public utils::Castable<Function, CallTarget> {
     }
 
     /// @returns the list of functions that this function transitively calls.
-    const utils::UniqueVector<const Function*, 8>& TransitivelyCalledFunctions() const {
+    const UniqueVector<const Function*, 8>& TransitivelyCalledFunctions() const {
         return transitively_called_functions_;
     }
 
@@ -116,7 +116,7 @@ class Function final : public utils::Castable<Function, CallTarget> {
     }
 
     /// @returns the list of builtins that this function directly calls.
-    const utils::UniqueVector<const Builtin*, 4>& DirectlyCalledBuiltins() const {
+    const UniqueVector<const Builtin*, 4>& DirectlyCalledBuiltins() const {
         return directly_called_builtins_;
     }
 
@@ -138,7 +138,7 @@ class Function final : public utils::Castable<Function, CallTarget> {
 
     /// @returns the list of texture/sampler pairs that this function uses
     /// (directly or indirectly).
-    utils::VectorRef<VariablePair> TextureSamplerPairs() const { return texture_sampler_pairs_; }
+    VectorRef<VariablePair> TextureSamplerPairs() const { return texture_sampler_pairs_; }
 
     /// @returns the list of direct calls to functions / builtins made by this
     /// function
@@ -223,14 +223,14 @@ class Function final : public utils::Castable<Function, CallTarget> {
     /// must be decorated with both binding and group attributes.
     /// @param type the type of the variables to find
     /// @returns the referenced variables
-    VariableBindings TransitivelyReferencedVariablesOfType(const tint::utils::TypeInfo* type) const;
+    VariableBindings TransitivelyReferencedVariablesOfType(const tint::TypeInfo* type) const;
 
     /// Retrieves any referenced variables of the given type. Note, the variables
     /// must be decorated with both binding and group attributes.
     /// @returns the referenced variables
     template <typename T>
     VariableBindings TransitivelyReferencedVariablesOfType() const {
-        return TransitivelyReferencedVariablesOfType(&utils::TypeInfo::Of<T>());
+        return TransitivelyReferencedVariablesOfType(&tint::TypeInfo::Of<T>());
     }
 
     /// Checks if the given entry point is an ancestor
@@ -284,11 +284,11 @@ class Function final : public utils::Castable<Function, CallTarget> {
     const ast::Function* const declaration_;
 
     sem::WorkgroupSize workgroup_size_;
-    utils::UniqueVector<const GlobalVariable*, 4> directly_referenced_globals_;
-    utils::UniqueVector<const GlobalVariable*, 8> transitively_referenced_globals_;
-    utils::UniqueVector<const Function*, 8> transitively_called_functions_;
-    utils::UniqueVector<const Builtin*, 4> directly_called_builtins_;
-    utils::UniqueVector<VariablePair, 8> texture_sampler_pairs_;
+    UniqueVector<const GlobalVariable*, 4> directly_referenced_globals_;
+    UniqueVector<const GlobalVariable*, 8> transitively_referenced_globals_;
+    UniqueVector<const Function*, 8> transitively_called_functions_;
+    UniqueVector<const Builtin*, 4> directly_called_builtins_;
+    UniqueVector<VariablePair, 8> texture_sampler_pairs_;
     std::vector<const Call*> direct_calls_;
     std::vector<const Call*> callsites_;
     std::vector<const Function*> ancestor_entry_points_;

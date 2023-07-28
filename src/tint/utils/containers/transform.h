@@ -23,7 +23,7 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/traits/traits.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// Transform performs an element-wise transformation of a vector.
 /// @param in the input vector.
@@ -170,6 +170,6 @@ auto TransformN(const std::vector<IN>& in, size_t n, TRANSFORMER&& transform)
     return result;
 }
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_CONTAINERS_TRANSFORM_H_

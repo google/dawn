@@ -110,7 +110,7 @@ namespace tint::wgsl::reader {
 
 namespace {
 
-using ResultType = utils::Result<ir::Module, diag::List>;
+using ResultType = tint::Result<ir::Module, diag::List>;
 
 /// Impl is the private-implementation of FromProgram().
 class Impl {
@@ -145,7 +145,7 @@ class Impl {
     };
 
     /// The stack of flow control instructions.
-    utils::Vector<ir::ControlInstruction*, 8> control_stack_;
+    Vector<ir::ControlInstruction*, 8> control_stack_;
 
     struct VectorRefElementAccess {
         ir::Value* vector = nullptr;
@@ -356,7 +356,7 @@ class Impl {
         scopes_.Push();
         TINT_DEFER(scopes_.Pop());
 
-        utils::Vector<ir::FunctionParam*, 1> params;
+        Vector<ir::FunctionParam*, 1> params;
         for (auto* p : ast_func->params) {
             const auto* param_sem = program_->Sem().Get(p)->As<sem::Parameter>();
             auto* ty = param_sem->Type()->Clone(clone_ctx_.type_ctx);
@@ -457,7 +457,7 @@ class Impl {
         current_function_ = nullptr;
     }
 
-    void EmitStatements(utils::VectorRef<const ast::Statement*> stmts) {
+    void EmitStatements(VectorRef<const ast::Statement*> stmts) {
         for (auto* s : stmts) {
             EmitStatement(s);
 
@@ -745,7 +745,7 @@ class Impl {
 
         const auto* sem = program_->Sem().Get(stmt);
         for (const auto* c : sem->Cases()) {
-            utils::Vector<ir::Switch::CaseSelector, 4> selectors;
+            Vector<ir::Switch::CaseSelector, 4> selectors;
             for (const auto* selector : c->Selectors()) {
                 if (selector->IsDefault()) {
                     selectors.Push({nullptr});
@@ -843,9 +843,9 @@ class Impl {
 
           private:
             Impl& impl;
-            utils::Vector<ir::Block*, 8> blocks;
-            utils::Vector<std::function<void()>, 64> tasks;
-            utils::Hashmap<const ast::Expression*, ValueOrVecElAccess, 64> bindings_;
+            Vector<ir::Block*, 8> blocks;
+            Vector<std::function<void()>, 64> tasks;
+            Hashmap<const ast::Expression*, ValueOrVecElAccess, 64> bindings_;
 
             void Bind(const ast::Expression* expr, ir::Value* value) {
                 // If this expression maps to sem::Load, insert a load instruction to get the result
@@ -1062,7 +1062,7 @@ class Impl {
                         return;
                     }
                 }
-                utils::Vector<ir::Value*, 8> args;
+                Vector<ir::Value*, 8> args;
                 args.Reserve(expr->args.Length());
                 // Emit the arguments
                 for (const auto* arg : expr->args) {
@@ -1246,7 +1246,7 @@ class Impl {
                     },
                     [&](const ast::CallExpression* e) {
                         tasks.Push([=] { EmitCall(e); });
-                        for (auto* arg : utils::Reverse(e->args)) {
+                        for (auto* arg : tint::Reverse(e->args)) {
                             tasks.Push([=] { Process(arg); });
                         }
                     },
@@ -1401,7 +1401,7 @@ class Impl {
 
 }  // namespace
 
-utils::Result<ir::Module, std::string> ProgramToIR(const Program* program) {
+tint::Result<ir::Module, std::string> ProgramToIR(const Program* program) {
     if (!program->IsValid()) {
         return std::string("input program is not valid");
     }

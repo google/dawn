@@ -62,7 +62,7 @@ enum class VertexDataType {
 /// @param out the stream to write to
 /// @param format the VertexFormat to write
 /// @returns out so calls can be chained
-utils::StringStream& operator<<(utils::StringStream& out, VertexFormat format) {
+StringStream& operator<<(StringStream& out, VertexFormat format) {
     switch (format) {
         case VertexFormat::kUint8x2:
             return out << "uint8x2";
@@ -295,12 +295,12 @@ struct VertexPulling::State {
     Symbol pulling_position_name;
     Symbol struct_buffer_name;
     std::unordered_map<uint32_t, Symbol> vertex_buffer_names;
-    utils::Vector<const Parameter*, 8> new_function_parameters;
+    tint::Vector<const Parameter*, 8> new_function_parameters;
 
     /// Generate the vertex buffer binding name
     /// @param index index to append to buffer name
     Symbol GetVertexBufferName(uint32_t index) {
-        return utils::GetOrCreate(vertex_buffer_names, index, [&] {
+        return tint::GetOrCreate(vertex_buffer_names, index, [&] {
             static const char kVertexBufferNamePrefix[] = "tint_pulling_vertex_buffer_";
             return b.Symbols().New(kVertexBufferNamePrefix + std::to_string(index));
         });
@@ -320,7 +320,7 @@ struct VertexPulling::State {
         // Creating the struct type
         static const char kStructName[] = "TintVertexData";
         auto* struct_type = b.Structure(b.Symbols().New(kStructName),
-                                        utils::Vector{
+                                        tint::Vector{
                                             b.Member(GetStructBufferName(), b.ty.array<u32>()),
                                         });
         for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
@@ -336,7 +336,7 @@ struct VertexPulling::State {
         // Assign by looking at the vertex descriptor to find attributes with
         // matching location.
 
-        utils::Vector<const Statement*, 8> stmts;
+        tint::Vector<const Statement*, 8> stmts;
 
         for (uint32_t buffer_idx = 0; buffer_idx < cfg.vertex_state.size(); ++buffer_idx) {
             const VertexBufferLayoutDescriptor& buffer_layout = cfg.vertex_state[buffer_idx];
@@ -382,7 +382,7 @@ struct VertexPulling::State {
 
                 // Base types must match between the vertex stream and the WGSL variable
                 if (!IsTypeCompatible(var_dt, fmt_dt)) {
-                    utils::StringStream err;
+                    StringStream err;
                     err << "VertexAttributeDescriptor for location "
                         << std::to_string(attribute_desc.shader_location) << " has format "
                         << attribute_desc.format << " but shader expects "
@@ -434,7 +434,7 @@ struct VertexPulling::State {
 
                     // The components of result vector variable, initialized with type-converted
                     // loaded data vector.
-                    utils::Vector<const Expression*, 8> values{fetch};
+                    tint::Vector<const Expression*, 8> values{fetch};
 
                     // Add padding elements. The result must be of vector types of signed/unsigned
                     // integer or float, so use the abstract integer or abstract float value to do
@@ -742,7 +742,7 @@ struct VertexPulling::State {
                               Type base_type,
                               VertexFormat base_format,
                               uint32_t count) {
-        utils::Vector<const Expression*, 8> expr_list;
+        tint::Vector<const Expression*, 8> expr_list;
         for (uint32_t i = 0; i < count; ++i) {
             // Offset read position by element_stride for each component
             uint32_t primitive_offset = offset + element_stride * i;
@@ -812,7 +812,7 @@ struct VertexPulling::State {
 
         // Process the struct members.
         bool has_locations = false;
-        utils::Vector<const StructMember*, 8> members_to_clone;
+        tint::Vector<const StructMember*, 8> members_to_clone;
         for (auto* member : struct_ty->members) {
             auto member_sym = ctx.Clone(member->name->symbol);
             std::function<const Expression*()> member_expr = [this, param_sym, member_sym] {
@@ -859,7 +859,7 @@ struct VertexPulling::State {
 
         if (!members_to_clone.IsEmpty()) {
             // Create a new struct without the location attributes.
-            utils::Vector<const StructMember*, 8> new_members;
+            tint::Vector<const StructMember*, 8> new_members;
             for (auto* member : members_to_clone) {
                 auto member_name = ctx.Clone(member->name);
                 auto member_type = ctx.Clone(member->type);
@@ -906,7 +906,7 @@ struct VertexPulling::State {
                     auto name = b.Symbols().New("tint_pulling_vertex_index");
                     new_function_parameters.Push(
                         b.Param(name, b.ty.u32(),
-                                utils::Vector{b.Builtin(builtin::BuiltinValue::kVertexIndex)}));
+                                tint::Vector{b.Builtin(builtin::BuiltinValue::kVertexIndex)}));
                     vertex_index_expr = [this, name] { return b.Expr(name); };
                     break;
                 }
@@ -918,7 +918,7 @@ struct VertexPulling::State {
                     auto name = b.Symbols().New("tint_pulling_instance_index");
                     new_function_parameters.Push(
                         b.Param(name, b.ty.u32(),
-                                utils::Vector{b.Builtin(builtin::BuiltinValue::kInstanceIndex)}));
+                                tint::Vector{b.Builtin(builtin::BuiltinValue::kInstanceIndex)}));
                     instance_index_expr = [this, name] { return b.Expr(name); };
                     break;
                 }

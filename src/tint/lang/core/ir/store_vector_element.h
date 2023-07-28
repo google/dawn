@@ -21,7 +21,7 @@
 namespace tint::ir {
 
 /// A store instruction for a single vector element in the IR.
-class StoreVectorElement : public utils::Castable<StoreVectorElement, OperandInstruction<3, 0>> {
+class StoreVectorElement : public Castable<StoreVectorElement, OperandInstruction<3, 0>> {
   public:
     /// The offset in Operands() for the `to` value
     static constexpr size_t kToOperandOffset = 0;

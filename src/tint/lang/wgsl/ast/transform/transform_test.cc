@@ -118,7 +118,7 @@ TEST_F(CreateASTTypeForTest, AliasedArrayWithComplexOverrideLength) {
 TEST_F(CreateASTTypeForTest, Struct) {
     auto str = create([](ProgramBuilder& b) {
         auto* decl = b.Structure("S", {});
-        return b.create<sem::Struct>(decl, decl->name->symbol, utils::Empty, 4u /* align */,
+        return b.create<sem::Struct>(decl, decl->name->symbol, tint::Empty, 4u /* align */,
                                      4u /* size */, 4u /* size_no_padding */);
     });
 

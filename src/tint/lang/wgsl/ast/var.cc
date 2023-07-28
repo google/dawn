@@ -28,7 +28,7 @@ Var::Var(GenerationID pid,
          const Expression* address_space,
          const Expression* access,
          const Expression* init,
-         utils::VectorRef<const Attribute*> attrs)
+         VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src, n, ty, init, std::move(attrs)),
       declared_address_space(address_space),
       declared_access(access) {}

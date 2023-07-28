@@ -18,7 +18,7 @@
 #include <string>
 #include <utility>
 
-namespace tint::utils {
+namespace tint {
 
 /// Command is a helper used by tests for executing a process with a number of
 /// arguments and an optional stdin string, and then collecting and returning
@@ -77,6 +77,6 @@ class Command {
     std::string input_;
 };
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_COMMAND_COMMAND_H_

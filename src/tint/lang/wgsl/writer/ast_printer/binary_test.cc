@@ -25,7 +25,7 @@ struct BinaryData {
     ast::BinaryOp op;
 };
 inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.op;
     out << str.str();
     return out;
@@ -52,7 +52,7 @@ TEST_P(WgslBinaryTest, Emit) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), params.result);

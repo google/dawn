@@ -133,7 +133,7 @@ Transform::ApplyResult BindingRemapper::Apply(const Program* src,
                     b.Diagnostics().add_error(
                         diag::System::Transform,
                         "cannot apply access control to variable with address space " +
-                            std::string(utils::ToString(sem->AddressSpace())));
+                            std::string(tint::ToString(sem->AddressSpace())));
                     return Program(std::move(b));
                 }
                 auto* ty = sem->Type()->UnwrapRef();

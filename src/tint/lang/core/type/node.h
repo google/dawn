@@ -20,7 +20,7 @@
 namespace tint::type {
 
 /// Node is the base class for all type nodes
-class Node : public utils::Castable<Node> {
+class Node : public Castable<Node> {
   public:
     /// Constructor
     Node();

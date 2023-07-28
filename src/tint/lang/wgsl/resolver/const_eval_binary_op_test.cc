@@ -34,7 +34,7 @@ struct Case {
 
     Value lhs;
     Value rhs;
-    utils::Result<Success, Failure> expected;
+    tint::Result<Success, Failure> expected;
 };
 
 struct ErrorCase {
@@ -771,8 +771,8 @@ TEST_P(ResolverConstEvalBinaryOpAbstractFloatVectorCompareTest, Test) {
 
     auto* value = Sem().Get(expr)->ConstantValue();
     ASSERT_NE(value, nullptr);
-    CheckConstant(value, Value::Create<bool>(utils::Vector{builder::Scalar(params.expected_0),
-                                                           builder::Scalar(params.expected_1)}));
+    CheckConstant(value, Value::Create<bool>(Vector{builder::Scalar(params.expected_0),
+                                                    builder::Scalar(params.expected_1)}));
 }
 INSTANTIATE_TEST_SUITE_P(
     HighestLowest,
@@ -2015,7 +2015,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_StructInit) {
     // }
     // const one = 1;
     // const result = (one == 0) && Foo(1, true).a == 0;
-    Structure("S", utils::Vector{Member("a", ty.i32()), Member("b", ty.f32())});
+    Structure("S", Vector{Member("a", ty.i32()), Member("b", ty.f32())});
     GlobalConst("one", Expr(1_a));
     auto* lhs = Equal("one", 0_a);
     auto* rhs = Equal(MemberAccessor(Call("S", Expr(1_a), Expr(Source{{12, 34}}, true)), "a"), 0_a);
@@ -2034,7 +2034,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_StructInit) {
     // }
     // const one = 1;
     // const result = (one == 1) || Foo(1, true).a == 0;
-    Structure("S", utils::Vector{Member("a", ty.i32()), Member("b", ty.f32())});
+    Structure("S", Vector{Member("a", ty.i32()), Member("b", ty.f32())});
     GlobalConst("one", Expr(1_a));
     auto* lhs = Equal("one", 1_a);
     auto* rhs = Equal(MemberAccessor(Call("S", Expr(1_a), Expr(Source{{12, 34}}, true)), "a"), 0_a);
@@ -2240,7 +2240,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_MemberAccess) {
     // const s = S(1, 2.0);
     // const one = 1;
     // const result = (one == 0) && (s.c == 0);
-    Structure("S", utils::Vector{Member("a", ty.i32()), Member("b", ty.f32())});
+    Structure("S", Vector{Member("a", ty.i32()), Member("b", ty.f32())});
     GlobalConst("s", Call("S", Expr(1_a), Expr(2.0_a)));
     GlobalConst("one", Expr(1_a));
     auto* lhs = Equal("one", 0_a);
@@ -2259,7 +2259,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_MemberAccess) {
     // const s = S(1, 2.0);
     // const one = 1;
     // const result = (one == 1) || (s.c == 0);
-    Structure("S", utils::Vector{Member("a", ty.i32()), Member("b", ty.f32())});
+    Structure("S", Vector{Member("a", ty.i32()), Member("b", ty.f32())});
     GlobalConst("s", Call("S", Expr(1_a), Expr(2.0_a)));
     GlobalConst("one", Expr(1_a));
     auto* lhs = Equal("one", 1_a);

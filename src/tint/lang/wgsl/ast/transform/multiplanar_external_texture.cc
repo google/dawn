@@ -66,7 +66,7 @@ struct MultiplanarExternalTexture::State {
     Symbol params_struct_sym;
 
     /// Symbol for the textureLoadExternal functions
-    utils::Hashmap<const sem::CallTarget*, Symbol, 2> texture_load_external_fns;
+    Hashmap<const sem::CallTarget*, Symbol, 2> texture_load_external_fns;
 
     /// Symbol for the textureSampleExternal function
     Symbol texture_sample_external_sym;
@@ -241,7 +241,7 @@ struct MultiplanarExternalTexture::State {
     /// Creates the parameter structs associated with the transform.
     void createExtTexParamsStructs() {
         // Create GammaTransferParams struct.
-        utils::Vector gamma_transfer_member_list{
+        tint::Vector gamma_transfer_member_list{
             b.Member("G", b.ty.f32()), b.Member("A", b.ty.f32()),      b.Member("B", b.ty.f32()),
             b.Member("C", b.ty.f32()), b.Member("D", b.ty.f32()),      b.Member("E", b.ty.f32()),
             b.Member("F", b.ty.f32()), b.Member("padding", b.ty.u32())};
@@ -251,7 +251,7 @@ struct MultiplanarExternalTexture::State {
         b.Structure(gamma_transfer_struct_sym, gamma_transfer_member_list);
 
         // Create ExternalTextureParams struct.
-        utils::Vector ext_tex_params_member_list{
+        tint::Vector ext_tex_params_member_list{
             b.Member("numPlanes", b.ty.u32()),
             b.Member("doYuvToRgbConversionOnly", b.ty.u32()),
             b.Member("yuvToRgbConversionMatrix", b.ty.mat3x4<f32>()),
@@ -272,12 +272,12 @@ struct MultiplanarExternalTexture::State {
         gamma_correction_sym = b.Symbols().New("gammaCorrection");
 
         b.Func(gamma_correction_sym,
-               utils::Vector{
+               tint::Vector{
                    b.Param("v", b.ty.vec3<f32>()),
                    b.Param("params", b.ty(gamma_transfer_struct_sym)),
                },
                b.ty.vec3<f32>(),
-               utils::Vector{
+               tint::Vector{
                    // let cond = abs(v) < vec3(params.D);
                    b.Decl(b.Let("cond",
                                 b.LessThan(b.Call("abs", "v"),
@@ -307,7 +307,7 @@ struct MultiplanarExternalTexture::State {
     /// @param call_type determines which function body to generate
     /// @returns a statement list that makes of the body of the chosen function
     auto buildTextureBuiltinBody(builtin::Function call_type) {
-        utils::Vector<const Statement*, 16> stmts;
+        tint::Vector<const Statement*, 16> stmts;
         const CallExpression* single_plane_call = nullptr;
         const CallExpression* plane_0_call = nullptr;
         const CallExpression* plane_1_call = nullptr;
@@ -419,7 +419,7 @@ struct MultiplanarExternalTexture::State {
 
             // Emit the textureSampleExternal function.
             b.Func(texture_sample_external_sym,
-                   utils::Vector{
+                   tint::Vector{
                        b.Param("plane0",
                                b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32())),
                        b.Param("plane1",
@@ -432,7 +432,7 @@ struct MultiplanarExternalTexture::State {
                    buildTextureBuiltinBody(builtin::Function::kTextureSampleBaseClampToEdge));
         }
 
-        return b.Call(texture_sample_external_sym, utils::Vector{
+        return b.Call(texture_sample_external_sym, tint::Vector{
                                                        plane_0_binding_param,
                                                        b.Expr(syms.plane_1),
                                                        ctx.Clone(expr->args[1]),
@@ -467,7 +467,7 @@ struct MultiplanarExternalTexture::State {
 
             // Emit the textureLoadExternal() function.
             b.Func(name,
-                   utils::Vector{
+                   tint::Vector{
                        b.Param("plane0",
                                b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32())),
                        b.Param("plane1",

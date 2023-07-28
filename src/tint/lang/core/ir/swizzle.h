@@ -21,7 +21,7 @@
 namespace tint::ir {
 
 /// A swizzle instruction in the IR.
-class Swizzle : public utils::Castable<Swizzle, OperandInstruction<1, 1>> {
+class Swizzle : public Castable<Swizzle, OperandInstruction<1, 1>> {
   public:
     /// The offset in Operands() for the object being swizzled
     static constexpr size_t kObjectOperandOffset = 0;
@@ -30,20 +30,20 @@ class Swizzle : public utils::Castable<Swizzle, OperandInstruction<1, 1>> {
     /// @param result the result value
     /// @param object the object being swizzled
     /// @param indices the indices to swizzle
-    Swizzle(InstructionResult* result, Value* object, utils::VectorRef<uint32_t> indices);
+    Swizzle(InstructionResult* result, Value* object, VectorRef<uint32_t> indices);
     ~Swizzle() override;
 
     /// @returns the object used for the access
     Value* Object() { return operands_[kObjectOperandOffset]; }
 
     /// @returns the swizzle indices
-    utils::VectorRef<uint32_t> Indices() { return indices_; }
+    VectorRef<uint32_t> Indices() { return indices_; }
 
     /// @returns the friendly name for the instruction
     std::string_view FriendlyName() override { return "swizzle"; }
 
   private:
-    utils::Vector<uint32_t, 4> indices_;
+    Vector<uint32_t, 4> indices_;
 };
 
 }  // namespace tint::ir

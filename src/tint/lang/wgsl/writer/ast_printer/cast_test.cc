@@ -31,7 +31,7 @@ TEST_F(WgslASTPrinterTest, EmitExpression_Cast_Scalar_F32_From_I32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, cast);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "f32(1i)");
@@ -45,7 +45,7 @@ TEST_F(WgslASTPrinterTest, EmitExpression_Cast_Scalar_F16_From_I32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, cast);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "f16(1i)");
@@ -57,7 +57,7 @@ TEST_F(WgslASTPrinterTest, EmitExpression_Cast_Vector_F32_From_I32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, cast);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "vec3<f32>(vec3<i32>(1i, 2i, 3i))");
@@ -71,7 +71,7 @@ TEST_F(WgslASTPrinterTest, EmitExpression_Cast_Vector_F16_From_I32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, cast);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "vec3<f16>(vec3<i32>(1i, 2i, 3i))");

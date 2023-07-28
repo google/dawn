@@ -26,7 +26,7 @@ IfStatement::IfStatement(GenerationID pid,
                          const Expression* cond,
                          const BlockStatement* b,
                          const Statement* else_stmt,
-                         utils::VectorRef<const Attribute*> attrs)
+                         VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src),
       condition(cond),
       body(b),

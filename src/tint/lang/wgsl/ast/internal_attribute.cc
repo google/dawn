@@ -22,7 +22,7 @@ namespace tint::ast {
 
 InternalAttribute::InternalAttribute(GenerationID pid,
                                      NodeID nid,
-                                     utils::VectorRef<const IdentifierExpression*> deps)
+                                     VectorRef<const IdentifierExpression*> deps)
     : Base(pid, nid, Source{}), dependencies(std::move(deps)) {}
 
 InternalAttribute::~InternalAttribute() = default;

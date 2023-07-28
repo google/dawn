@@ -21,7 +21,7 @@ namespace tint::type {
 
 /// Base class for all scalar types
 /// @see https://www.w3.org/TR/WGSL/#scalar-types
-class Scalar : public utils::Castable<Scalar, Type> {
+class Scalar : public Castable<Scalar, Type> {
   public:
     /// Destructor
     ~Scalar() override;

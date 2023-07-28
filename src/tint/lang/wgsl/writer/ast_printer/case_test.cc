@@ -43,7 +43,7 @@ TEST_F(WgslASTPrinterTest, Emit_Case) {
 TEST_F(WgslASTPrinterTest, Emit_Case_MultipleSelectors) {
     auto* s = Switch(1_i,
                      Case(
-                         utils::Vector{
+                         Vector{
                              CaseSelector(5_i),
                              CaseSelector(6_i),
                          },

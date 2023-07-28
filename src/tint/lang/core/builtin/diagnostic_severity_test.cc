@@ -76,7 +76,7 @@ using DiagnosticSeverityPrintTest = testing::TestWithParam<Case>;
 TEST_P(DiagnosticSeverityPrintTest, Print) {
     DiagnosticSeverity value = GetParam().value;
     const char* expect = GetParam().string;
-    EXPECT_EQ(expect, utils::ToString(value));
+    EXPECT_EQ(expect, tint::ToString(value));
 }
 
 INSTANTIATE_TEST_SUITE_P(ValidCases, DiagnosticSeverityPrintTest, testing::ValuesIn(kValidCases));

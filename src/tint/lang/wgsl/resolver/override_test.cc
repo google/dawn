@@ -108,8 +108,8 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_DirectUse) {
     auto* a = Override("a", ty.f32());
     auto* b = Override("b", ty.f32(), Expr(1_f));
     Override("unused", ty.f32(), Expr(1_f));
-    auto* func = Func("foo", utils::Empty, ty.void_(),
-                      utils::Vector{
+    auto* func = Func("foo", tint::Empty, ty.void_(),
+                      Vector{
                           Assign(Phony(), "a"),
                           Assign(Phony(), "b"),
                       });
@@ -126,8 +126,8 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_ViaOverrideInit) {
     auto* a = Override("a", ty.f32());
     auto* b = Override("b", ty.f32(), Mul(2_a, "a"));
     Override("unused", ty.f32(), Expr(1_f));
-    auto* func = Func("foo", utils::Empty, ty.void_(),
-                      utils::Vector{
+    auto* func = Func("foo", tint::Empty, ty.void_(),
+                      Vector{
                           Assign(Phony(), "b"),
                       });
 
@@ -153,8 +153,8 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_ViaPrivateInit) {
     auto* a = Override("a", ty.f32());
     auto* b = GlobalVar("b", builtin::AddressSpace::kPrivate, ty.f32(), Mul(2_a, "a"));
     Override("unused", ty.f32(), Expr(1_f));
-    auto* func = Func("foo", utils::Empty, ty.void_(),
-                      utils::Vector{
+    auto* func = Func("foo", tint::Empty, ty.void_(),
+                      Vector{
                           Assign(Phony(), "b"),
                       });
 
@@ -180,11 +180,11 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_ViaAttribute) {
     auto* a = Override("a", ty.i32());
     auto* b = Override("b", ty.i32(), Mul(2_a, "a"));
     Override("unused", ty.i32(), Expr(1_a));
-    auto* func = Func("foo", utils::Empty, ty.void_(),
-                      utils::Vector{
+    auto* func = Func("foo", tint::Empty, ty.void_(),
+                      Vector{
                           Assign(Phony(), "b"),
                       },
-                      utils::Vector{
+                      Vector{
                           Stage(ast::PipelineStage::kCompute),
                           WorkgroupSize(Mul(2_a, "b")),
                       });
@@ -204,8 +204,8 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_ViaArraySize) {
         GlobalVar("arr", builtin::AddressSpace::kWorkgroup, ty.array(ty.i32(), Mul(2_a, "b")));
     auto arr_ty = arr->type;
     Override("unused", ty.i32(), Expr(1_a));
-    auto* func = Func("foo", utils::Empty, ty.void_(),
-                      utils::Vector{
+    auto* func = Func("foo", tint::Empty, ty.void_(),
+                      Vector{
                           Assign(IndexAccessor("arr", 0_a), 42_a),
                       });
 
@@ -245,8 +245,8 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_ViaArraySize_Alias) {
     auto* arr = GlobalVar("arr", builtin::AddressSpace::kWorkgroup, ty("arr_ty"));
     auto arr_ty = arr->type;
     Override("unused", ty.i32(), Expr(1_a));
-    auto* func = Func("foo", utils::Empty, ty.void_(),
-                      utils::Vector{
+    auto* func = Func("foo", tint::Empty, ty.void_(),
+                      Vector{
                           Assign(IndexAccessor("arr", 0_a), 42_a),
                       });
 
@@ -291,19 +291,19 @@ TEST_F(ResolverOverrideTest, TransitiveReferences_MultipleEntryPoints) {
     auto* arr1 = GlobalVar("arr1", builtin::AddressSpace::kWorkgroup, ty("arr_ty1"));
     auto* arr2 = GlobalVar("arr2", builtin::AddressSpace::kWorkgroup, ty("arr_ty2"));
     Override("unused", ty.i32(), Expr(1_a));
-    auto* func1 = Func("foo1", utils::Empty, ty.void_(),
-                       utils::Vector{
+    auto* func1 = Func("foo1", tint::Empty, ty.void_(),
+                       Vector{
                            Assign(IndexAccessor("arr1", 0_a), 42_a),
                        },
-                       utils::Vector{
+                       Vector{
                            Stage(ast::PipelineStage::kCompute),
                            WorkgroupSize(Mul(2_a, "d")),
                        });
-    auto* func2 = Func("foo2", utils::Empty, ty.void_(),
-                       utils::Vector{
+    auto* func2 = Func("foo2", tint::Empty, ty.void_(),
+                       Vector{
                            Assign(IndexAccessor("arr2", 0_a), 42_a),
                        },
-                       utils::Vector{
+                       Vector{
                            Stage(ast::PipelineStage::kCompute),
                            WorkgroupSize(64_a),
                        });

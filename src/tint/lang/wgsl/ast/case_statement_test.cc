@@ -28,10 +28,10 @@ using CaseStatementTest = TestHelper;
 
 TEST_F(CaseStatementTest, Creation_i32) {
     auto* selector = CaseSelector(2_i);
-    utils::Vector b{selector};
+    tint::Vector b{selector};
 
     auto* discard = create<DiscardStatement>();
-    auto* body = create<BlockStatement>(utils::Vector{discard}, utils::Empty);
+    auto* body = create<BlockStatement>(tint::Vector{discard}, tint::Empty);
 
     auto* c = create<CaseStatement>(b, body);
     ASSERT_EQ(c->selectors.Length(), 1u);
@@ -42,10 +42,10 @@ TEST_F(CaseStatementTest, Creation_i32) {
 
 TEST_F(CaseStatementTest, Creation_u32) {
     auto* selector = CaseSelector(2_u);
-    utils::Vector b{selector};
+    tint::Vector b{selector};
 
     auto* discard = create<DiscardStatement>();
-    auto* body = create<BlockStatement>(utils::Vector{discard}, utils::Empty);
+    auto* body = create<BlockStatement>(tint::Vector{discard}, tint::Empty);
 
     auto* c = create<CaseStatement>(b, body);
     ASSERT_EQ(c->selectors.Length(), 1u);
@@ -55,25 +55,25 @@ TEST_F(CaseStatementTest, Creation_u32) {
 }
 
 TEST_F(CaseStatementTest, ContainsDefault_WithDefault) {
-    utils::Vector b{CaseSelector(2_u), DefaultCaseSelector()};
-    auto* c = create<CaseStatement>(b, create<BlockStatement>(utils::Empty, utils::Empty));
+    tint::Vector b{CaseSelector(2_u), DefaultCaseSelector()};
+    auto* c = create<CaseStatement>(b, create<BlockStatement>(tint::Empty, tint::Empty));
     EXPECT_TRUE(c->ContainsDefault());
 }
 
 TEST_F(CaseStatementTest, ContainsDefault_WithOutDefault) {
-    utils::Vector b{CaseSelector(2_u), CaseSelector(3_u)};
-    auto* c = create<CaseStatement>(b, create<BlockStatement>(utils::Empty, utils::Empty));
+    tint::Vector b{CaseSelector(2_u), CaseSelector(3_u)};
+    auto* c = create<CaseStatement>(b, create<BlockStatement>(tint::Empty, tint::Empty));
     EXPECT_FALSE(c->ContainsDefault());
 }
 
 TEST_F(CaseStatementTest, Creation_WithSource) {
-    utils::Vector b{CaseSelector(2_i)};
+    tint::Vector b{CaseSelector(2_i)};
 
     auto* body = create<BlockStatement>(
-        utils::Vector{
+        tint::Vector{
             create<DiscardStatement>(),
         },
-        utils::Empty);
+        tint::Empty);
     auto* c = create<CaseStatement>(Source{Source::Location{20, 2}}, b, body);
     auto src = c->source;
     EXPECT_EQ(src.range.begin.line, 20u);
@@ -81,8 +81,8 @@ TEST_F(CaseStatementTest, Creation_WithSource) {
 }
 
 TEST_F(CaseStatementTest, IsCase) {
-    auto* c = create<CaseStatement>(utils::Vector{DefaultCaseSelector()},
-                                    create<BlockStatement>(utils::Empty, utils::Empty));
+    auto* c = create<CaseStatement>(tint::Vector{DefaultCaseSelector()},
+                                    create<BlockStatement>(tint::Empty, tint::Empty));
     EXPECT_TRUE(c->Is<CaseStatement>());
 }
 
@@ -90,7 +90,7 @@ TEST_F(CaseStatementTest, Assert_Null_Body) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<CaseStatement>(utils::Vector{b.DefaultCaseSelector()}, nullptr);
+            b.create<CaseStatement>(tint::Vector{b.DefaultCaseSelector()}, nullptr);
         },
         "internal compiler error");
 }
@@ -99,8 +99,8 @@ TEST_F(CaseStatementTest, Assert_Null_Selector) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<CaseStatement>(utils::Vector<const ast::CaseSelector*, 1>{nullptr},
-                                    b.create<BlockStatement>(utils::Empty, utils::Empty));
+            b.create<CaseStatement>(tint::Vector<const ast::CaseSelector*, 1>{nullptr},
+                                    b.create<BlockStatement>(tint::Empty, tint::Empty));
         },
         "internal compiler error");
 }
@@ -110,8 +110,8 @@ TEST_F(CaseStatementTest, Assert_DifferentGenerationID_Call) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<CaseStatement>(utils::Vector{b1.DefaultCaseSelector()},
-                                     b2.create<BlockStatement>(utils::Empty, utils::Empty));
+            b1.create<CaseStatement>(tint::Vector{b1.DefaultCaseSelector()},
+                                     b2.create<BlockStatement>(tint::Empty, tint::Empty));
         },
         "internal compiler error");
 }
@@ -121,8 +121,8 @@ TEST_F(CaseStatementTest, Assert_DifferentGenerationID_Selector) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<CaseStatement>(utils::Vector{b2.CaseSelector(b2.Expr(2_i))},
-                                     b1.create<BlockStatement>(utils::Empty, utils::Empty));
+            b1.create<CaseStatement>(tint::Vector{b2.CaseSelector(b2.Expr(2_i))},
+                                     b1.create<BlockStatement>(tint::Empty, tint::Empty));
         },
         "internal compiler error");
 }

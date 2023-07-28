@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 using BumpAllocatorTest = testing::Test;
@@ -46,4 +46,4 @@ TEST_F(BumpAllocatorTest, MoveConstruct) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

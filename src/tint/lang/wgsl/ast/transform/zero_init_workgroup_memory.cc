@@ -48,7 +48,7 @@ bool ShouldRun(const Program* program) {
 
 }  // namespace
 
-using StatementList = utils::Vector<const Statement*, 8>;
+using StatementList = tint::Vector<const Statement*, 8>;
 
 /// PIMPL state for the transform
 struct ZeroInitWorkgroupMemory::State {
@@ -84,14 +84,12 @@ struct ZeroInitWorkgroupMemory::State {
         struct Hasher {
             /// @param i the ArrayIndex to calculate a hash for
             /// @returns the hash value for the ArrayIndex `i`
-            size_t operator()(const ArrayIndex& i) const {
-                return utils::Hash(i.modulo, i.division);
-            }
+            size_t operator()(const ArrayIndex& i) const { return Hash(i.modulo, i.division); }
         };
     };
 
     /// A list of unique ArrayIndex
-    using ArrayIndices = utils::UniqueVector<ArrayIndex, 4, ArrayIndex::Hasher>;
+    using ArrayIndices = UniqueVector<ArrayIndex, 4, ArrayIndex::Hasher>;
 
     /// Expression holds information about an expression that is being built for a
     /// statement will zero workgroup values.
@@ -186,7 +184,7 @@ struct ZeroInitWorkgroupMemory::State {
             // No existing local index parameter. Append one to the entry point.
             auto param_name = b.Symbols().New("local_invocation_index");
             auto* local_invocation_index = b.Builtin(builtin::BuiltinValue::kLocalInvocationIndex);
-            auto* param = b.Param(param_name, b.ty.u32(), utils::Vector{local_invocation_index});
+            auto* param = b.Param(param_name, b.ty.u32(), tint::Vector{local_invocation_index});
             ctx.InsertBack(fn->params, param);
             local_index = [=] { return b.Expr(param->name->symbol); };
         }
@@ -354,8 +352,8 @@ struct ZeroInitWorkgroupMemory::State {
                 }
                 auto array_indices = a.array_indices;
                 array_indices.Add(ArrayIndex{modulo, division});
-                auto index = utils::GetOrCreate(array_index_names, ArrayIndex{modulo, division},
-                                                [&] { return b.Symbols().New("i"); });
+                auto index = tint::GetOrCreate(array_index_names, ArrayIndex{modulo, division},
+                                               [&] { return b.Symbols().New("i"); });
                 return Expression{b.IndexAccessor(a.expr, index), a.num_iterations, array_indices};
             };
             return BuildZeroingStatements(arr->ElemType(), get_el);

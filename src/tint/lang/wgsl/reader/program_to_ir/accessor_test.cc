@@ -151,7 +151,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_SingleMember) {
     // var a: MyStruct;
     // let b = a.foo
 
-    auto* s = Structure("MyStruct", utils::Vector{
+    auto* s = Structure("MyStruct", Vector{
                                         Member("foo", ty.i32()),
                                     });
     auto* a = Var("a", ty.Of(s), builtin::AddressSpace::kFunction);
@@ -183,10 +183,10 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiMember) {
     // var a: Outer;
     // let b = a.foo.bar
 
-    auto* inner = Structure("Inner", utils::Vector{
+    auto* inner = Structure("Inner", Vector{
                                          Member("bar", ty.f32()),
                                      });
-    auto* outer = Structure("Outer", utils::Vector{
+    auto* outer = Structure("Outer", Vector{
                                          Member("a", ty.i32()),
                                          Member("foo", ty.Of(inner)),
                                      });
@@ -224,12 +224,12 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_Mixed) {
     // var a: array<Outer, 4>
     // let b = a[0].foo[1].bar
 
-    auto* inner = Structure("Inner", utils::Vector{
+    auto* inner = Structure("Inner", Vector{
                                          Member("b", ty.i32()),
                                          Member("c", ty.f32()),
                                          Member("bar", ty.vec4<f32>()),
                                      });
-    auto* outer = Structure("Outer", utils::Vector{
+    auto* outer = Structure("Outer", Vector{
                                          Member("a", ty.i32()),
                                          Member("foo", ty.array(ty.Of(inner), 4_u)),
                                      });
@@ -362,7 +362,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzle_MiddleOfChain) 
     // var a: MyStruct;
     // let b = a.foo.zyx.yx[0]
 
-    auto* s = Structure("MyStruct", utils::Vector{
+    auto* s = Structure("MyStruct", Vector{
                                         Member("a", ty.i32()),
                                         Member("foo", ty.vec4<f32>()),
                                     });
@@ -443,7 +443,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleMember) {
     // let a: MyStruct = MyStruct();
     // let b = a.foo
 
-    auto* s = Structure("MyStruct", utils::Vector{
+    auto* s = Structure("MyStruct", Vector{
                                         Member("foo", ty.i32()),
                                     });
     auto* a = Let("a", ty.Of(s), Call("MyStruct"));
@@ -474,10 +474,10 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiMember) {
     // let a: Outer = Outer();
     // let b = a.foo.bar
 
-    auto* inner = Structure("Inner", utils::Vector{
+    auto* inner = Structure("Inner", Vector{
                                          Member("bar", ty.f32()),
                                      });
-    auto* outer = Structure("Outer", utils::Vector{
+    auto* outer = Structure("Outer", Vector{
                                          Member("a", ty.i32()),
                                          Member("foo", ty.Of(inner)),
                                      });
@@ -514,12 +514,12 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_Mixed) {
     // let a: array<Outer, 4> = array();
     // let b = a[0].foo[1].bar
 
-    auto* inner = Structure("Inner", utils::Vector{
+    auto* inner = Structure("Inner", Vector{
                                          Member("b", ty.i32()),
                                          Member("c", ty.f32()),
                                          Member("bar", ty.vec4<f32>()),
                                      });
-    auto* outer = Structure("Outer", utils::Vector{
+    auto* outer = Structure("Outer", Vector{
                                          Member("a", ty.i32()),
                                          Member("foo", ty.array(ty.Of(inner), 4_u)),
                                      });
@@ -626,7 +626,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzle_MiddleOfChain) 
     // let a: MyStruct = MyStruct();
     // let b = a.foo.zyx.yx[0]
 
-    auto* s = Structure("MyStruct", utils::Vector{
+    auto* s = Structure("MyStruct", Vector{
                                         Member("a", ty.i32()),
                                         Member("foo", ty.vec4<f32>()),
                                     });

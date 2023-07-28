@@ -55,7 +55,7 @@ TEST_F(IR_OperandInstructionTest, ClearOperands_WithNullOperand) {
 
 TEST_F(IR_OperandInstructionTest, SetOperands_WithNullOperand) {
     auto* inst = b.Var(ty.ptr<private_, f32>());
-    utils::Vector<Value*, 1> ops;
+    Vector<Value*, 1> ops;
     ops.Push(nullptr);
 
     inst->SetOperands(ops);

@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 struct LifetimeCounter {
@@ -161,4 +161,4 @@ TEST_F(BlockAllocatorTest, ObjectOrder) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

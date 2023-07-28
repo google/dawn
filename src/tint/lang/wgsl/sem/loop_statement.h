@@ -25,7 +25,7 @@ class LoopStatement;
 namespace tint::sem {
 
 /// Holds semantic information about a loop statement
-class LoopStatement final : public utils::Castable<LoopStatement, CompoundStatement> {
+class LoopStatement final : public Castable<LoopStatement, CompoundStatement> {
   public:
     /// Constructor
     /// @param declaration the AST node for this loop statement
@@ -41,7 +41,7 @@ class LoopStatement final : public utils::Castable<LoopStatement, CompoundStatem
 
 /// Holds semantic information about a loop continuing block
 class LoopContinuingBlockStatement final
-    : public utils::Castable<LoopContinuingBlockStatement, BlockStatement> {
+    : public Castable<LoopContinuingBlockStatement, BlockStatement> {
   public:
     /// Constructor
     /// @param declaration the AST node for this block statement

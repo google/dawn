@@ -216,7 +216,7 @@ SizeAndAlign MslPackedTypeSizeAndAlign(diag::List diagnostics, const type::Type*
         });
 }
 
-void PrintF32(utils::StringStream& out, float value) {
+void PrintF32(StringStream& out, float value) {
     // Note: Currently inf and nan should not be constructable, but this is implemented for the day
     // we support them.
     if (std::isinf(value)) {
@@ -228,7 +228,7 @@ void PrintF32(utils::StringStream& out, float value) {
     }
 }
 
-void PrintF16(utils::StringStream& out, float value) {
+void PrintF16(StringStream& out, float value) {
     // Note: Currently inf and nan should not be constructable, but this is implemented for the day
     // we support them.
     if (std::isinf(value)) {
@@ -242,7 +242,7 @@ void PrintF16(utils::StringStream& out, float value) {
     }
 }
 
-void PrintI32(utils::StringStream& out, int32_t value) {
+void PrintI32(StringStream& out, int32_t value) {
     // MSL (and C++) parse `-2147483648` as a `long` because it parses unary minus and `2147483648`
     // as separate tokens, and the latter doesn't fit into an (32-bit) `int`.
     // WGSL, on the other hand, parses this as an `i32`.

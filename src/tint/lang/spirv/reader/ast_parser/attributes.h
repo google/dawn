@@ -71,9 +71,9 @@ struct Attributes {
     }
 
     /// The attributes
-    utils::Vector<const ast::Attribute*, 8> list;
+    tint::Vector<const ast::Attribute*, 8> list;
     /// The additional metadata flags
-    utils::EnumSet<Flags> flags;
+    tint::EnumSet<Flags> flags;
 };
 
 }  // namespace tint::spirv::reader

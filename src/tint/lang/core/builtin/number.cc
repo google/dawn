@@ -50,7 +50,7 @@ constexpr uint32_t kMinF32BiasedExpForF16SubnormalNumber = 103;
 
 }  // namespace
 
-utils::StringStream& operator<<(utils::StringStream& out, ConversionFailure failure) {
+StringStream& operator<<(StringStream& out, ConversionFailure failure) {
     switch (failure) {
         case ConversionFailure::kExceedsPositiveLimit:
             return out << "value exceeds positive limit for type";
@@ -72,7 +72,7 @@ f16::type f16::Quantize(f16::type value) {
     // Assert we use binary32 (i.e. float) as underlying type, which has 4 bytes.
     static_assert(std::is_same<f16::type, float>());
 
-    uint32_t u32 = utils::Bitcast<uint32_t>(value);
+    uint32_t u32 = tint::Bitcast<uint32_t>(value);
     if ((u32 & ~kF32SignMask) == 0) {
         return value;  // +/- zero
     }
@@ -260,7 +260,7 @@ f16::type f16::Quantize(f16::type value) {
         return value > 0 ? 0.0 : -0.0;
     }
 
-    return utils::Bitcast<f16::type>(u32);
+    return tint::Bitcast<f16::type>(u32);
 }
 
 uint16_t f16::BitsRepresentation() const {
@@ -288,7 +288,7 @@ uint16_t f16::BitsRepresentation() const {
     // |    Normal f16    |   [-14,  15]   |      [1, 30]     |    [113, 142]    |
     // ---------------------------------------------------------------------------
 
-    uint32_t f32_bit_pattern = utils::Bitcast<uint32_t>(value);
+    uint32_t f32_bit_pattern = tint::Bitcast<uint32_t>(value);
     uint32_t f32_biased_exponent = (f32_bit_pattern & kF32ExponentMask) >> kF32MantissaBits;
     uint32_t f32_mantissa = f32_bit_pattern & kF32MantissaMask;
 
@@ -410,7 +410,7 @@ Number<tint::detail::NumberKindF16> f16::FromBits(uint16_t bits) {
     uint32_t val = f32_sign_bit | f32_biased_exponent | f32_mantissa;
 
     // Bitcast to a F32 and then store into the F16 Number
-    return f16(utils::Bitcast<f16::type>(val));
+    return f16(tint::Bitcast<f16::type>(val));
 }
 
 }  // namespace tint

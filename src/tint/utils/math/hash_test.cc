@@ -21,7 +21,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/utils/containers/vector.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 TEST(HashTests, Basic) {
@@ -125,4 +125,4 @@ TEST(EqualTo, String) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

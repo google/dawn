@@ -70,7 +70,7 @@ enum class TexelFormat;
 namespace tint::wgsl::writer {
 
 /// Implementation class for AST generator
-class SyntaxTreePrinter : public utils::TextGenerator {
+class SyntaxTreePrinter : public tint::TextGenerator {
   public:
     /// Constructor
     /// @param program the program
@@ -175,10 +175,10 @@ class SyntaxTreePrinter : public utils::TextGenerator {
     void EmitStatement(const ast::Statement* stmt);
     /// Handles a statement list
     /// @param stmts the statements to emit
-    void EmitStatements(utils::VectorRef<const ast::Statement*> stmts);
+    void EmitStatements(VectorRef<const ast::Statement*> stmts);
     /// Handles a statement list with an increased indentation
     /// @param stmts the statements to emit
-    void EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts);
+    void EmitStatementsWithIndent(VectorRef<const ast::Statement*> stmts);
     /// Handles generating a switch statement
     /// @param stmt the statement to emit
     void EmitSwitch(const ast::SwitchStatement* stmt);
@@ -196,7 +196,7 @@ class SyntaxTreePrinter : public utils::TextGenerator {
     void EmitVariable(const ast::Variable* var);
     /// Handles generating a attribute list
     /// @param attrs the attribute list
-    void EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs);
+    void EmitAttributes(VectorRef<const ast::Attribute*> attrs);
 
   private:
     Program const* const program_;

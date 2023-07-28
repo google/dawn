@@ -35,7 +35,7 @@ TEST_F(SpirvASTPrinterTest, GlobalConstAssert) {
 }
 
 TEST_F(SpirvASTPrinterTest, FunctionConstAssert) {
-    Func("f", utils::Empty, ty.void_(), utils::Vector{ConstAssert(true)});
+    Func("f", tint::Empty, ty.void_(), Vector{ConstAssert(true)});
 
     Builder& b = Build();
 

@@ -72,7 +72,7 @@ class InternalCompilerError {
     const size_t line_;
     diag::System system_;
     diag::List& diagnostics_;
-    utils::StringStream msg_;
+    StringStream msg_;
 };
 
 }  // namespace tint

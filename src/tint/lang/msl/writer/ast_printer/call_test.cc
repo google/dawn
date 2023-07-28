@@ -24,26 +24,26 @@ namespace {
 using MslASTPrinterTest = TestHelper;
 
 TEST_F(MslASTPrinterTest, EmitExpression_Call_WithoutParams) {
-    Func("my_func", utils::Empty, ty.f32(), utils::Vector{Return(1.23_f)});
+    Func("my_func", tint::Empty, ty.f32(), Vector{Return(1.23_f)});
 
     auto* call = Call("my_func");
     WrapInFunction(call);
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "my_func()");
 }
 
 TEST_F(MslASTPrinterTest, EmitExpression_Call_WithParams) {
     Func("my_func",
-         utils::Vector{
+         Vector{
              Param(Sym(), ty.f32()),
              Param(Sym(), ty.f32()),
          },
          ty.f32(),
-         utils::Vector{
+         Vector{
              Return(1.23_f),
          });
     GlobalVar("param1", ty.f32(), builtin::AddressSpace::kPrivate);
@@ -54,18 +54,18 @@ TEST_F(MslASTPrinterTest, EmitExpression_Call_WithParams) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "my_func(param1, param2)");
 }
 
 TEST_F(MslASTPrinterTest, EmitStatement_Call) {
     Func("my_func",
-         utils::Vector{
+         Vector{
              Param(Sym(), ty.f32()),
              Param(Sym(), ty.f32()),
          },
-         ty.void_(), utils::Empty, utils::Empty);
+         ty.void_(), tint::Empty, tint::Empty);
     GlobalVar("param1", ty.f32(), builtin::AddressSpace::kPrivate);
     GlobalVar("param2", ty.f32(), builtin::AddressSpace::kPrivate);
 

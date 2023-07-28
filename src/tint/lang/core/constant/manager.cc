@@ -38,7 +38,7 @@ Manager& Manager::operator=(Manager&& rhs) = default;
 Manager::~Manager() = default;
 
 const constant::Value* Manager::Composite(const type::Type* type,
-                                          utils::VectorRef<const constant::Value*> elements) {
+                                          VectorRef<const constant::Value*> elements) {
     if (elements.IsEmpty()) {
         return nullptr;
     }

@@ -27,8 +27,7 @@ TEST_F(MslASTPrinterTest, Emit_Loop) {
     auto* continuing = Block();
     auto* l = Loop(body, continuing);
 
-    Func("F", utils::Empty, ty.void_(), utils::Vector{l},
-         utils::Vector{Stage(ast::PipelineStage::kFragment)});
+    Func("F", tint::Empty, ty.void_(), Vector{l}, Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASTPrinter& gen = Build();
 
@@ -42,14 +41,13 @@ TEST_F(MslASTPrinterTest, Emit_Loop) {
 }
 
 TEST_F(MslASTPrinterTest, Emit_LoopWithContinuing) {
-    Func("a_statement", {}, ty.void_(), utils::Empty);
+    Func("a_statement", {}, ty.void_(), tint::Empty);
 
     auto* body = Block(Break());
     auto* continuing = Block(CallStmt(Call("a_statement")));
     auto* l = Loop(body, continuing);
 
-    Func("F", utils::Empty, ty.void_(), utils::Vector{l},
-         utils::Vector{Stage(ast::PipelineStage::kFragment)});
+    Func("F", tint::Empty, ty.void_(), Vector{l}, Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASTPrinter& gen = Build();
 
@@ -72,8 +70,7 @@ TEST_F(MslASTPrinterTest, Emit_LoopWithContinuing_BreakIf) {
     auto* continuing = Block(CallStmt(Call("a_statement")), BreakIf(true));
     auto* l = Loop(body, continuing);
 
-    Func("F", utils::Empty, ty.void_(), utils::Vector{l},
-         utils::Vector{Stage(ast::PipelineStage::kFragment)});
+    Func("F", tint::Empty, ty.void_(), Vector{l}, Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASTPrinter& gen = Build();
 
@@ -91,7 +88,7 @@ TEST_F(MslASTPrinterTest, Emit_LoopWithContinuing_BreakIf) {
 }
 
 TEST_F(MslASTPrinterTest, Emit_LoopNestedWithContinuing) {
-    Func("a_statement", {}, ty.void_(), utils::Empty);
+    Func("a_statement", {}, ty.void_(), tint::Empty);
 
     GlobalVar("lhs", ty.f32(), builtin::AddressSpace::kPrivate);
     GlobalVar("rhs", ty.f32(), builtin::AddressSpace::kPrivate);
@@ -106,8 +103,7 @@ TEST_F(MslASTPrinterTest, Emit_LoopNestedWithContinuing) {
 
     auto* outer = Loop(body, continuing);
 
-    Func("F", utils::Empty, ty.void_(), utils::Vector{outer},
-         utils::Vector{Stage(ast::PipelineStage::kFragment)});
+    Func("F", tint::Empty, ty.void_(), Vector{outer}, Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASTPrinter& gen = Build();
 
@@ -213,7 +209,7 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithMultiStmtInit) {
     //   return;
     // }
 
-    Func("f", utils::Vector{Param("i", ty.i32())}, ty.void_(), utils::Empty);
+    Func("f", Vector{Param("i", ty.i32())}, ty.void_(), tint::Empty);
     auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
 
     GlobalVar("a", ty.atomic<i32>(), builtin::AddressSpace::kWorkgroup);
@@ -289,7 +285,7 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithMultiStmtCont) {
     //   return;
     // }
 
-    Func("f", utils::Vector{Param("i", ty.i32())}, ty.void_(), utils::Empty);
+    Func("f", Vector{Param("i", ty.i32())}, ty.void_(), tint::Empty);
     auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
 
     GlobalVar("a", ty.atomic<i32>(), builtin::AddressSpace::kWorkgroup);
@@ -318,7 +314,7 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithSimpleInitCondCont) {
     //   return;
     // }
 
-    Func("a_statement", {}, ty.void_(), utils::Empty);
+    Func("a_statement", {}, ty.void_(), tint::Empty);
 
     auto* f = For(Decl(Var("i", ty.i32())), true, Assign("i", Add("i", 1_i)),
                   Block(CallStmt(Call("a_statement"))));
@@ -344,7 +340,7 @@ TEST_F(MslASTPrinterTest, Emit_ForLoopWithMultiStmtInitCondCont) {
     //   return;
     // }
 
-    Func("f", utils::Vector{Param("i", ty.i32())}, ty.void_(), utils::Empty);
+    Func("f", Vector{Param("i", ty.i32())}, ty.void_(), tint::Empty);
     auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
 
     GlobalVar("a", ty.atomic<i32>(), builtin::AddressSpace::kWorkgroup);

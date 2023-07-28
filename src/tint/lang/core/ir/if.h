@@ -40,7 +40,7 @@ namespace tint::ir {
 ///                    ▼
 ///                   out
 /// ```
-class If : public utils::Castable<If, ControlInstruction> {
+class If : public Castable<If, ControlInstruction> {
   public:
     /// The index of the condition operand
     static constexpr size_t kConditionOperandOffset = 0;

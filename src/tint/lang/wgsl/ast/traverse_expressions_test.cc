@@ -97,7 +97,7 @@ TEST_F(TraverseExpressionsTest, DescendBitcastExpression) {
     auto* b2 = Bitcast<i32>(b1);
     auto* root = Bitcast<i32>(b2);
     {
-        utils::Vector<const Expression*, 8> l2r;
+        tint::Vector<const Expression*, 8> l2r;
         TraverseExpressions<TraverseOrder::LeftToRight>(root, Diagnostics(),
                                                         [&](const Expression* expr) {
                                                             l2r.Push(expr);
@@ -106,7 +106,7 @@ TEST_F(TraverseExpressionsTest, DescendBitcastExpression) {
         EXPECT_THAT(l2r, ElementsAre(root, b2, b1, b0, e));
     }
     {
-        utils::Vector<const Expression*, 8> r2l;
+        tint::Vector<const Expression*, 8> r2l;
         TraverseExpressions<TraverseOrder::RightToLeft>(root, Diagnostics(),
                                                         [&](const Expression* expr) {
                                                             r2l.Push(expr);
@@ -117,11 +117,11 @@ TEST_F(TraverseExpressionsTest, DescendBitcastExpression) {
 }
 
 TEST_F(TraverseExpressionsTest, DescendCallExpression) {
-    utils::Vector e{Expr(1_i), Expr(1_i), Expr(1_i), Expr(1_i)};
-    utils::Vector c{Call("a", e[0], e[1]), Call("b", e[2], e[3])};
+    tint::Vector e{Expr(1_i), Expr(1_i), Expr(1_i), Expr(1_i)};
+    tint::Vector c{Call("a", e[0], e[1]), Call("b", e[2], e[3])};
     auto* root = Call("c", c[0], c[1]);
     {
-        utils::Vector<const Expression*, 8> l2r;
+        tint::Vector<const Expression*, 8> l2r;
         TraverseExpressions<TraverseOrder::LeftToRight>(root, Diagnostics(),
                                                         [&](const Expression* expr) {
                                                             l2r.Push(expr);
@@ -130,7 +130,7 @@ TEST_F(TraverseExpressionsTest, DescendCallExpression) {
         EXPECT_THAT(l2r, ElementsAre(root, c[0], e[0], e[1], c[1], e[2], e[3]));
     }
     {
-        utils::Vector<const Expression*, 8> r2l;
+        tint::Vector<const Expression*, 8> r2l;
         TraverseExpressions<TraverseOrder::RightToLeft>(root, Diagnostics(),
                                                         [&](const Expression* expr) {
                                                             r2l.Push(expr);

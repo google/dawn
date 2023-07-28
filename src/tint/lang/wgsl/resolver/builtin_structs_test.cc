@@ -36,7 +36,7 @@ TEST_P(ResolverBuiltinStructs, Resolve) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* str = As<type::Struct>(TypeOf(var)->UnwrapRef());
     ASSERT_NE(str, nullptr);
-    EXPECT_EQ(str->Name().Name(), utils::ToString(GetParam()));
+    EXPECT_EQ(str->Name().Name(), tint::ToString(GetParam()));
     EXPECT_FALSE(Is<sem::Struct>(str));
 }
 

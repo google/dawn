@@ -31,7 +31,7 @@ TEST_F(WgslASTPrinterTest, IndexAccessor) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "ary[5i]");
@@ -46,7 +46,7 @@ TEST_F(WgslASTPrinterTest, IndexAccessor_OfDref) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "(*(p))[5i]");

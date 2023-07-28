@@ -26,7 +26,7 @@
 namespace tint::ast {
 
 /// A struct statement.
-class Struct final : public utils::Castable<Struct, TypeDecl> {
+class Struct final : public Castable<Struct, TypeDecl> {
   public:
     /// Create a new struct statement
     /// @param pid the identifier of the program that owns this node
@@ -39,8 +39,8 @@ class Struct final : public utils::Castable<Struct, TypeDecl> {
            NodeID nid,
            const Source& src,
            const Identifier* name,
-           utils::VectorRef<const StructMember*> members,
-           utils::VectorRef<const Attribute*> attributes);
+           VectorRef<const StructMember*> members,
+           VectorRef<const Attribute*> attributes);
 
     /// Destructor
     ~Struct() override;
@@ -52,10 +52,10 @@ class Struct final : public utils::Castable<Struct, TypeDecl> {
     const Struct* Clone(CloneContext* ctx) const override;
 
     /// The members
-    const utils::Vector<const StructMember*, 8> members;
+    const tint::Vector<const StructMember*, 8> members;
 
     /// The struct attributes
-    const utils::Vector<const Attribute*, 4> attributes;
+    const tint::Vector<const Attribute*, 4> attributes;
 };
 
 }  // namespace tint::ast

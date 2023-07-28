@@ -34,7 +34,7 @@ using namespace tint::number_suffixes;        // NOLINT
 TEST_F(MslPrinterTest, EmitType_Array) {
     generator_.EmitType(generator_.Line(), ty.array<bool, 4>());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
   device T& operator[](size_t i) device { return elements[i]; }
@@ -53,7 +53,7 @@ tint_array<bool, 4>)");
 TEST_F(MslPrinterTest, EmitType_ArrayOfArray) {
     generator_.EmitType(generator_.Line(), ty.array(ty.array<bool, 4>(), 5));
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
   device T& operator[](size_t i) device { return elements[i]; }
@@ -72,7 +72,7 @@ tint_array<tint_array<bool, 4>, 5>)");
 TEST_F(MslPrinterTest, EmitType_ArrayOfArrayOfArray) {
     generator_.EmitType(generator_.Line(), ty.array(ty.array(ty.array<bool, 4>(), 5), 6));
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
   device T& operator[](size_t i) device { return elements[i]; }
@@ -91,7 +91,7 @@ tint_array<tint_array<tint_array<bool, 4>, 5>, 6>)");
 TEST_F(MslPrinterTest, EmitType_RuntimeArray) {
     generator_.EmitType(generator_.Line(), ty.array<bool, 0>());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
   device T& operator[](size_t i) device { return elements[i]; }
@@ -110,85 +110,85 @@ tint_array<bool, 1>)");
 TEST_F(MslPrinterTest, EmitType_Bool) {
     generator_.EmitType(generator_.Line(), ty.bool_());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "bool");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "bool");
 }
 
 TEST_F(MslPrinterTest, EmitType_F32) {
     generator_.EmitType(generator_.Line(), ty.f32());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "float");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "float");
 }
 
 TEST_F(MslPrinterTest, EmitType_F16) {
     generator_.EmitType(generator_.Line(), ty.f16());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "half");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "half");
 }
 
 TEST_F(MslPrinterTest, EmitType_I32) {
     generator_.EmitType(generator_.Line(), ty.i32());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "int");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "int");
 }
 
 TEST_F(MslPrinterTest, EmitType_Matrix_F32) {
     generator_.EmitType(generator_.Line(), ty.mat2x3<f32>());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "float2x3");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "float2x3");
 }
 
 TEST_F(MslPrinterTest, EmitType_Matrix_F16) {
     generator_.EmitType(generator_.Line(), ty.mat2x3<f16>());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "half2x3");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "half2x3");
 }
 TEST_F(MslPrinterTest, EmitType_U32) {
     generator_.EmitType(generator_.Line(), ty.u32());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "uint");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "uint");
 }
 
 TEST_F(MslPrinterTest, EmitType_Atomic_U32) {
     generator_.EmitType(generator_.Line(), ty.atomic<u32>());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "atomic_uint");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "atomic_uint");
 }
 
 TEST_F(MslPrinterTest, EmitType_Atomic_I32) {
     generator_.EmitType(generator_.Line(), ty.atomic<i32>());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "atomic_int");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "atomic_int");
 }
 
 TEST_F(MslPrinterTest, EmitType_Vector) {
     generator_.EmitType(generator_.Line(), ty.vec3<f32>());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "float3");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "float3");
 }
 
 TEST_F(MslPrinterTest, EmitType_VectorPacked) {
     generator_.EmitType(generator_.Line(), ty.packed_vec(ty.f32(), 3));
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "packed_float3");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "packed_float3");
 }
 
 TEST_F(MslPrinterTest, EmitType_Void) {
     generator_.EmitType(generator_.Line(), ty.void_());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
 
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "void");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "void");
 }
 
 TEST_F(MslPrinterTest, EmitType_Pointer_Workgroup) {
     generator_.EmitType(generator_.Line(), ty.ptr<workgroup, f32, read_write>());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "threadgroup float*");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "threadgroup float*");
 }
 
 TEST_F(MslPrinterTest, EmitType_Pointer_Const) {
     generator_.EmitType(generator_.Line(), ty.ptr<function, f32, read>());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "const thread float*");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "const thread float*");
 }
 
 struct MslAddressSpaceData {
@@ -196,7 +196,7 @@ struct MslAddressSpaceData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, MslAddressSpaceData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.space;
     out << str.str();
     return out;
@@ -220,7 +220,7 @@ TEST_F(MslPrinterTest, EmitType_Struct) {
                                               });
     generator_.EmitType(generator_.Line(), s);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_STREQ(std::string(utils::TrimSpace(generator_.Result())).c_str(), R"(struct S {
+    EXPECT_STREQ(std::string(tint::TrimSpace(generator_.Result())).c_str(), R"(struct S {
   int a;
   float b;
 };
@@ -236,7 +236,7 @@ TEST_F(MslPrinterTest, EmitType_Struct_Dedup) {
     generator_.EmitType(generator_.Line(), s);
     generator_.EmitType(generator_.Line(), s);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_STREQ(std::string(utils::TrimSpace(generator_.Result())).c_str(), R"(struct S {
+    EXPECT_STREQ(std::string(tint::TrimSpace(generator_.Result())).c_str(), R"(struct S {
   int a;
   float b;
 };
@@ -245,7 +245,7 @@ S
 S)");
 }
 
-void FormatMSLField(utils::StringStream& out,
+void FormatMSLField(StringStream& out,
                     const char* addr,
                     const char* type,
                     size_t array_count,
@@ -308,8 +308,8 @@ struct MemberData {
 type::Struct* MkStruct(ir::Module& mod,
                        type::Manager& ty,
                        std::string_view name,
-                       utils::VectorRef<MemberData> data) {
-    utils::Vector<const type::StructMember*, 26> members;
+                       VectorRef<MemberData> data) {
+    Vector<const type::StructMember*, 26> members;
     uint32_t align = 0;
     uint32_t size = 0;
     for (uint32_t i = 0; i < data.Length(); ++i) {
@@ -318,7 +318,7 @@ type::Struct* MkStruct(ir::Module& mod,
         uint32_t mem_align = d.align == 0 ? d.type->Align() : d.align;
         uint32_t mem_size = d.size == 0 ? d.type->Size() : d.size;
 
-        uint32_t offset = utils::RoundUp(mem_align, size);
+        uint32_t offset = tint::RoundUp(mem_align, size);
         members.Push(ty.Get<type::StructMember>(d.name, d.type, i, offset, mem_align, mem_size,
                                                 type::StructMemberAttributes{}));
 
@@ -327,36 +327,36 @@ type::Struct* MkStruct(ir::Module& mod,
     }
 
     return ty.Get<type::Struct>(mod.symbols.New(name), std::move(members), align,
-                                utils::RoundUp(align, size), size);
+                                tint::RoundUp(align, size), size);
 }
 
 TEST_F(MslPrinterTest, EmitType_Struct_Layout_NonComposites) {
-    utils::Vector<MemberData, 26> data = {{mod.symbols.Register("a"), ty.i32(), 32},        //
-                                          {mod.symbols.Register("b"), ty.f32(), 128, 128},  //
-                                          {mod.symbols.Register("c"), ty.vec2<f32>()},      //
-                                          {mod.symbols.Register("d"), ty.u32()},            //
-                                          {mod.symbols.Register("e"), ty.vec3<f32>()},      //
-                                          {mod.symbols.Register("f"), ty.u32()},            //
-                                          {mod.symbols.Register("g"), ty.vec4<f32>()},      //
-                                          {mod.symbols.Register("h"), ty.u32()},            //
-                                          {mod.symbols.Register("i"), ty.mat2x2<f32>()},    //
-                                          {mod.symbols.Register("j"), ty.u32()},            //
-                                          {mod.symbols.Register("k"), ty.mat2x3<f32>()},    //
-                                          {mod.symbols.Register("l"), ty.u32()},            //
-                                          {mod.symbols.Register("m"), ty.mat2x4<f32>()},    //
-                                          {mod.symbols.Register("n"), ty.u32()},            //
-                                          {mod.symbols.Register("o"), ty.mat3x2<f32>()},    //
-                                          {mod.symbols.Register("p"), ty.u32()},            //
-                                          {mod.symbols.Register("q"), ty.mat3x3<f32>()},    //
-                                          {mod.symbols.Register("r"), ty.u32()},            //
-                                          {mod.symbols.Register("s"), ty.mat3x4<f32>()},    //
-                                          {mod.symbols.Register("t"), ty.u32()},            //
-                                          {mod.symbols.Register("u"), ty.mat4x2<f32>()},    //
-                                          {mod.symbols.Register("v"), ty.u32()},            //
-                                          {mod.symbols.Register("w"), ty.mat4x3<f32>()},    //
-                                          {mod.symbols.Register("x"), ty.u32()},            //
-                                          {mod.symbols.Register("y"), ty.mat4x4<f32>()},    //
-                                          {mod.symbols.Register("z"), ty.f32()}};
+    Vector<MemberData, 26> data = {{mod.symbols.Register("a"), ty.i32(), 32},        //
+                                   {mod.symbols.Register("b"), ty.f32(), 128, 128},  //
+                                   {mod.symbols.Register("c"), ty.vec2<f32>()},      //
+                                   {mod.symbols.Register("d"), ty.u32()},            //
+                                   {mod.symbols.Register("e"), ty.vec3<f32>()},      //
+                                   {mod.symbols.Register("f"), ty.u32()},            //
+                                   {mod.symbols.Register("g"), ty.vec4<f32>()},      //
+                                   {mod.symbols.Register("h"), ty.u32()},            //
+                                   {mod.symbols.Register("i"), ty.mat2x2<f32>()},    //
+                                   {mod.symbols.Register("j"), ty.u32()},            //
+                                   {mod.symbols.Register("k"), ty.mat2x3<f32>()},    //
+                                   {mod.symbols.Register("l"), ty.u32()},            //
+                                   {mod.symbols.Register("m"), ty.mat2x4<f32>()},    //
+                                   {mod.symbols.Register("n"), ty.u32()},            //
+                                   {mod.symbols.Register("o"), ty.mat3x2<f32>()},    //
+                                   {mod.symbols.Register("p"), ty.u32()},            //
+                                   {mod.symbols.Register("q"), ty.mat3x3<f32>()},    //
+                                   {mod.symbols.Register("r"), ty.u32()},            //
+                                   {mod.symbols.Register("s"), ty.mat3x4<f32>()},    //
+                                   {mod.symbols.Register("t"), ty.u32()},            //
+                                   {mod.symbols.Register("u"), ty.mat4x2<f32>()},    //
+                                   {mod.symbols.Register("v"), ty.u32()},            //
+                                   {mod.symbols.Register("w"), ty.mat4x3<f32>()},    //
+                                   {mod.symbols.Register("x"), ty.u32()},            //
+                                   {mod.symbols.Register("y"), ty.mat4x4<f32>()},    //
+                                   {mod.symbols.Register("z"), ty.f32()}};
 
     auto* s = MkStruct(mod, ty, "S", data);
     s->AddUsage(builtin::AddressSpace::kStorage);
@@ -405,7 +405,7 @@ TEST_F(MslPrinterTest, EmitType_Struct_Layout_NonComposites) {
     FIELD(0x0304, int8_t, 124, tint_pad_12)
 
     // Check that the generated string is as expected.
-    utils::StringStream expect;
+    StringStream expect;
     expect << R"(template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -429,7 +429,7 @@ struct tint_array {
 
     generator_.EmitType(generator_.Line(), s);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), expect.str());
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), expect.str());
 
     // 1.4 Metal and C++14
     // The Metal programming language is a C++14-based Specification with
@@ -456,13 +456,13 @@ struct tint_array {
 
 TEST_F(MslPrinterTest, EmitType_Struct_Layout_Structures) {
     // inner_x: size(1024), align(512)
-    utils::Vector<MemberData, 2> inner_x_data = {{{mod.symbols.Register("a"), ty.i32()},  //
-                                                  {mod.symbols.Register("b"), ty.f32(), 0, 512}}};
+    Vector<MemberData, 2> inner_x_data = {{{mod.symbols.Register("a"), ty.i32()},  //
+                                           {mod.symbols.Register("b"), ty.f32(), 0, 512}}};
     auto* inner_x = MkStruct(mod, ty, "inner_x", inner_x_data);
 
     // inner_y: size(516), align(4)
-    utils::Vector<MemberData, 2> inner_y_data = {{mod.symbols.Register("a"), ty.i32(), 512},
-                                                 {mod.symbols.Register("b"), ty.f32()}};
+    Vector<MemberData, 2> inner_y_data = {{mod.symbols.Register("a"), ty.i32(), 512},
+                                          {mod.symbols.Register("b"), ty.f32()}};
 
     auto* inner_y = MkStruct(mod, ty, "inner_y", inner_y_data);
 
@@ -485,7 +485,7 @@ TEST_F(MslPrinterTest, EmitType_Struct_Layout_Structures) {
     FIELD(0x080c, int8_t, 500, tint_pad_1)
 
     // Check that the generated string is as expected.
-    utils::StringStream expect;
+    StringStream expect;
     expect << R"(template<typename T, size_t N>
 struct tint_array {
   const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -517,7 +517,7 @@ struct inner_y {
 
     generator_.EmitType(generator_.Line(), s);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), expect.str());
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), expect.str());
 
     // 1.4 Metal and C++14
     // The Metal programming language is a C++14-based Specification with
@@ -557,8 +557,8 @@ struct inner_y {
 
 TEST_F(MslPrinterTest, EmitType_Struct_Layout_ArrayDefaultStride) {
     // inner: size(1024), align(512)
-    utils::Vector<MemberData, 2> inner_data = {{mod.symbols.Register("a"), ty.i32()},
-                                               {mod.symbols.Register("b"), ty.f32(), 0, 512}};
+    Vector<MemberData, 2> inner_data = {{mod.symbols.Register("a"), ty.i32()},
+                                        {mod.symbols.Register("b"), ty.f32(), 0, 512}};
 
     auto* inner = MkStruct(mod, ty, "inner", inner_data);
 
@@ -592,7 +592,7 @@ TEST_F(MslPrinterTest, EmitType_Struct_Layout_ArrayDefaultStride) {
     FIELD(0x1208, int8_t, 504, tint_pad_1)
 
     // Check that the generated string is as expected.
-    utils::StringStream expect;
+    StringStream expect;
 
     expect << R"(template<typename T, size_t N>
 struct tint_array {
@@ -621,7 +621,7 @@ struct inner {
 
     generator_.EmitType(generator_.Line(), s);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), expect.str());
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), expect.str());
 
     // 1.4 Metal and C++14
     // The Metal programming language is a C++14-based Specification with
@@ -686,7 +686,7 @@ TEST_F(MslPrinterTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
     FIELD(0x0054, int8_t, 12, tint_pad_1)
 
     // Check that the generated string is as expected.
-    utils::StringStream expect;
+    StringStream expect;
 
     expect << R"(template<typename T, size_t N>
 struct tint_array {
@@ -711,38 +711,37 @@ struct tint_array {
 
     generator_.EmitType(generator_.Line(), s);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), expect.str());
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), expect.str());
 }
 
 TEST_F(MslPrinterTest, AttemptTintPadSymbolCollision) {
-    utils::Vector<MemberData, 26> data = {
-        // uses symbols tint_pad_[0..9] and tint_pad_[20..35]
-        {mod.symbols.Register("tint_pad_2"), ty.i32(), 32},         //
-        {mod.symbols.Register("tint_pad_20"), ty.f32(), 128, 128},  //
-        {mod.symbols.Register("tint_pad_33"), ty.vec2<f32>()},      //
-        {mod.symbols.Register("tint_pad_1"), ty.u32()},             //
-        {mod.symbols.Register("tint_pad_3"), ty.vec3<f32>()},       //
-        {mod.symbols.Register("tint_pad_7"), ty.u32()},             //
-        {mod.symbols.Register("tint_pad_25"), ty.vec4<f32>()},      //
-        {mod.symbols.Register("tint_pad_5"), ty.u32()},             //
-        {mod.symbols.Register("tint_pad_27"), ty.mat2x2<f32>()},    //
-        {mod.symbols.Register("tint_pad_24"), ty.u32()},            //
-        {mod.symbols.Register("tint_pad_23"), ty.mat2x3<f32>()},    //
-        {mod.symbols.Register("tint_pad"), ty.u32()},               //
-        {mod.symbols.Register("tint_pad_8"), ty.mat2x4<f32>()},     //
-        {mod.symbols.Register("tint_pad_26"), ty.u32()},            //
-        {mod.symbols.Register("tint_pad_29"), ty.mat3x2<f32>()},    //
-        {mod.symbols.Register("tint_pad_6"), ty.u32()},             //
-        {mod.symbols.Register("tint_pad_22"), ty.mat3x3<f32>()},    //
-        {mod.symbols.Register("tint_pad_32"), ty.u32()},            //
-        {mod.symbols.Register("tint_pad_34"), ty.mat3x4<f32>()},    //
-        {mod.symbols.Register("tint_pad_35"), ty.u32()},            //
-        {mod.symbols.Register("tint_pad_30"), ty.mat4x2<f32>()},    //
-        {mod.symbols.Register("tint_pad_9"), ty.u32()},             //
-        {mod.symbols.Register("tint_pad_31"), ty.mat4x3<f32>()},    //
-        {mod.symbols.Register("tint_pad_28"), ty.u32()},            //
-        {mod.symbols.Register("tint_pad_4"), ty.mat4x4<f32>()},     //
-        {mod.symbols.Register("tint_pad_21"), ty.f32()}};
+    Vector<MemberData, 26> data = {// uses symbols tint_pad_[0..9] and tint_pad_[20..35]
+                                   {mod.symbols.Register("tint_pad_2"), ty.i32(), 32},         //
+                                   {mod.symbols.Register("tint_pad_20"), ty.f32(), 128, 128},  //
+                                   {mod.symbols.Register("tint_pad_33"), ty.vec2<f32>()},      //
+                                   {mod.symbols.Register("tint_pad_1"), ty.u32()},             //
+                                   {mod.symbols.Register("tint_pad_3"), ty.vec3<f32>()},       //
+                                   {mod.symbols.Register("tint_pad_7"), ty.u32()},             //
+                                   {mod.symbols.Register("tint_pad_25"), ty.vec4<f32>()},      //
+                                   {mod.symbols.Register("tint_pad_5"), ty.u32()},             //
+                                   {mod.symbols.Register("tint_pad_27"), ty.mat2x2<f32>()},    //
+                                   {mod.symbols.Register("tint_pad_24"), ty.u32()},            //
+                                   {mod.symbols.Register("tint_pad_23"), ty.mat2x3<f32>()},    //
+                                   {mod.symbols.Register("tint_pad"), ty.u32()},               //
+                                   {mod.symbols.Register("tint_pad_8"), ty.mat2x4<f32>()},     //
+                                   {mod.symbols.Register("tint_pad_26"), ty.u32()},            //
+                                   {mod.symbols.Register("tint_pad_29"), ty.mat3x2<f32>()},    //
+                                   {mod.symbols.Register("tint_pad_6"), ty.u32()},             //
+                                   {mod.symbols.Register("tint_pad_22"), ty.mat3x3<f32>()},    //
+                                   {mod.symbols.Register("tint_pad_32"), ty.u32()},            //
+                                   {mod.symbols.Register("tint_pad_34"), ty.mat3x4<f32>()},    //
+                                   {mod.symbols.Register("tint_pad_35"), ty.u32()},            //
+                                   {mod.symbols.Register("tint_pad_30"), ty.mat4x2<f32>()},    //
+                                   {mod.symbols.Register("tint_pad_9"), ty.u32()},             //
+                                   {mod.symbols.Register("tint_pad_31"), ty.mat4x3<f32>()},    //
+                                   {mod.symbols.Register("tint_pad_28"), ty.u32()},            //
+                                   {mod.symbols.Register("tint_pad_4"), ty.mat4x4<f32>()},     //
+                                   {mod.symbols.Register("tint_pad_21"), ty.f32()}};
 
     auto* s = MkStruct(mod, ty, "S", data);
     s->AddUsage(builtin::AddressSpace::kStorage);
@@ -805,19 +804,19 @@ S)";
 
     generator_.EmitType(generator_.Line(), s);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_STREQ(std::string(utils::TrimSpace(generator_.Result())).c_str(), expect);
+    EXPECT_STREQ(std::string(tint::TrimSpace(generator_.Result())).c_str(), expect);
 }
 
 TEST_F(MslPrinterTest, EmitType_Sampler) {
     generator_.EmitType(generator_.Line(), ty.sampler());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "sampler");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "sampler");
 }
 
 TEST_F(MslPrinterTest, EmitType_SamplerComparison) {
     generator_.EmitType(generator_.Line(), ty.comparison_sampler());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "sampler");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "sampler");
 }
 
 struct MslDepthTextureData {
@@ -825,7 +824,7 @@ struct MslDepthTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, MslDepthTextureData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.dim;
     out << str.str();
     return out;
@@ -837,7 +836,7 @@ TEST_P(MslPrinterDepthTexturesTest, Emit) {
     auto* t = ty.Get<type::DepthTexture>(params.dim);
     generator_.EmitType(generator_.Line(), t);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), params.result);
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
     MslPrinterTest,
@@ -854,7 +853,7 @@ TEST_F(MslPrinterTest, EmiType_DepthMultisampledTexture) {
     auto* t = ty.Get<type::DepthMultisampledTexture>(type::TextureDimension::k2d);
     generator_.EmitType(generator_.Line(), t);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "depth2d_ms<float, access::read>");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "depth2d_ms<float, access::read>");
 }
 
 struct MslTextureData {
@@ -862,7 +861,7 @@ struct MslTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, MslTextureData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.dim;
     out << str.str();
     return out;
@@ -874,7 +873,7 @@ TEST_P(MslPrinterSampledtexturesTest, Emit) {
     auto* t = ty.Get<type::SampledTexture>(params.dim, ty.f32());
     generator_.EmitType(generator_.Line(), t);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), params.result);
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
     MslPrinterTest,
@@ -892,7 +891,7 @@ TEST_F(MslPrinterTest, Emit_TypeMultisampledTexture) {
     auto* ms = ty.Get<type::MultisampledTexture>(type::TextureDimension::k2d, ty.u32());
     generator_.EmitType(generator_.Line(), ms);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), "texture2d_ms<uint, access::read>");
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), "texture2d_ms<uint, access::read>");
 }
 
 struct MslStorageTextureData {
@@ -900,7 +899,7 @@ struct MslStorageTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, MslStorageTextureData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.dim;
     return out << str.str();
 }
@@ -913,7 +912,7 @@ TEST_P(MslPrinterStorageTexturesTest, Emit) {
                                           builtin::Access::kWrite, f32);
     generator_.EmitType(generator_.Line(), s);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(utils::TrimSpace(generator_.Result()), params.result);
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
     MslPrinterTest,

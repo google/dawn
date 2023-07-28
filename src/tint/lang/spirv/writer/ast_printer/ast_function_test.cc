@@ -24,7 +24,7 @@ namespace {
 using SpirvASTPrinterTest = TestHelper;
 
 TEST_F(SpirvASTPrinterTest, Function_Empty) {
-    Func("a_func", utils::Empty, ty.void_(), utils::Empty);
+    Func("a_func", tint::Empty, ty.void_(), tint::Empty);
 
     Builder& b = Build();
 
@@ -41,8 +41,8 @@ OpFunctionEnd
 }
 
 TEST_F(SpirvASTPrinterTest, Function_Terminator_Return) {
-    Func("a_func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("a_func", tint::Empty, ty.void_(),
+         Vector{
              Return(),
          });
 
@@ -63,7 +63,7 @@ OpFunctionEnd
 TEST_F(SpirvASTPrinterTest, Function_Terminator_ReturnValue) {
     GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate);
 
-    Func("a_func", utils::Empty, ty.f32(), utils::Vector{Return("a")}, utils::Empty);
+    Func("a_func", tint::Empty, ty.f32(), Vector{Return("a")}, tint::Empty);
 
     Builder& b = Build();
 
@@ -88,8 +88,8 @@ OpFunctionEnd
 }
 
 TEST_F(SpirvASTPrinterTest, Function_Terminator_Discard) {
-    Func("a_func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("a_func", tint::Empty, ty.void_(),
+         Vector{
              Discard(),
          });
 
@@ -109,11 +109,11 @@ OpFunctionEnd
 
 TEST_F(SpirvASTPrinterTest, Function_WithParams) {
     Func("a_func",
-         utils::Vector{
+         Vector{
              Param("a", ty.f32()),
              Param("b", ty.i32()),
          },
-         ty.f32(), utils::Vector{Return("a")}, utils::Empty);
+         ty.f32(), Vector{Return("a")}, tint::Empty);
 
     Builder& b = Build();
 
@@ -135,8 +135,8 @@ OpFunctionEnd
 }
 
 TEST_F(SpirvASTPrinterTest, Function_WithBody) {
-    Func("a_func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("a_func", tint::Empty, ty.void_(),
+         Vector{
              Return(),
          });
 
@@ -155,7 +155,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpirvASTPrinterTest, FunctionType) {
-    Func("a_func", utils::Empty, ty.void_(), utils::Empty, utils::Empty);
+    Func("a_func", tint::Empty, ty.void_(), tint::Empty, tint::Empty);
 
     Builder& b = Build();
 
@@ -167,8 +167,8 @@ TEST_F(SpirvASTPrinterTest, FunctionType) {
 }
 
 TEST_F(SpirvASTPrinterTest, FunctionType_DeDuplicate) {
-    auto* func1 = Func("a_func", utils::Empty, ty.void_(), utils::Empty, utils::Empty);
-    auto* func2 = Func("b_func", utils::Empty, ty.void_(), utils::Empty, utils::Empty);
+    auto* func1 = Func("a_func", tint::Empty, ty.void_(), tint::Empty, tint::Empty);
+    auto* func2 = Func("b_func", tint::Empty, ty.void_(), tint::Empty, tint::Empty);
 
     Builder& b = Build();
 
@@ -196,7 +196,7 @@ TEST_F(SpirvASTPrinterTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     //   return;
     // }
 
-    auto* s = Structure("Data", utils::Vector{Member("d", ty.f32())});
+    auto* s = Structure("Data", Vector{Member("d", ty.f32())});
 
     GlobalVar("data", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
               Binding(0_a), Group(0_a));
@@ -204,23 +204,23 @@ TEST_F(SpirvASTPrinterTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     {
         auto* var = Var("v", ty.f32(), MemberAccessor("data", "d"));
 
-        Func("a", utils::Empty, ty.void_(),
-             utils::Vector{
+        Func("a", tint::Empty, ty.void_(),
+             Vector{
                  Decl(var),
                  Return(),
              },
-             utils::Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+             Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
     }
 
     {
         auto* var = Var("v", ty.f32(), MemberAccessor("data", "d"));
 
-        Func("b", utils::Empty, ty.void_(),
-             utils::Vector{
+        Func("b", tint::Empty, ty.void_(),
+             Vector{
                  Decl(var),
                  Return(),
              },
-             utils::Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+             Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
     }
 
     Builder& b = SanitizeAndBuild();

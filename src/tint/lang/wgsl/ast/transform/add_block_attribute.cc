@@ -41,7 +41,7 @@ Transform::ApplyResult AddBlockAttribute::Apply(const Program* src,
 
     // A map from a type in the source program to a block-decorated wrapper that contains it in the
     // destination program.
-    utils::Hashmap<const type::Type*, const Struct*, 8> wrapper_structs;
+    Hashmap<const type::Type*, const Struct*, 8> wrapper_structs;
 
     // Process global 'var' declarations that are buffers.
     bool made_changes = false;
@@ -71,10 +71,10 @@ Transform::ApplyResult AddBlockAttribute::Apply(const Program* src,
             auto* wrapper = wrapper_structs.GetOrCreate(ty, [&] {
                 auto* block = b.ASTNodes().Create<BlockAttribute>(b.ID(), b.AllocateNodeID());
                 auto wrapper_name = global->name->symbol.Name() + "_block";
-                auto* ret = b.create<Struct>(
-                    b.Ident(b.Symbols().New(wrapper_name)),
-                    utils::Vector{b.Member(kMemberName, CreateASTTypeFor(ctx, ty))},
-                    utils::Vector{block});
+                auto* ret =
+                    b.create<Struct>(b.Ident(b.Symbols().New(wrapper_name)),
+                                     tint::Vector{b.Member(kMemberName, CreateASTTypeFor(ctx, ty))},
+                                     tint::Vector{block});
                 ctx.InsertBefore(src->AST().GlobalDeclarations(), global, ret);
                 return ret;
             });
@@ -102,7 +102,7 @@ Transform::ApplyResult AddBlockAttribute::Apply(const Program* src,
 }
 
 AddBlockAttribute::BlockAttribute::BlockAttribute(GenerationID pid, NodeID nid)
-    : Base(pid, nid, utils::Empty) {}
+    : Base(pid, nid, tint::Empty) {}
 AddBlockAttribute::BlockAttribute::~BlockAttribute() = default;
 std::string AddBlockAttribute::BlockAttribute::InternalName() const {
     return "block";

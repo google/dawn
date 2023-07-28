@@ -33,7 +33,7 @@ class FunctionTerminator;
 namespace tint::ir {
 
 /// An IR representation of a function
-class Function : public utils::Castable<Function, Value> {
+class Function : public Castable<Function, Value> {
   public:
     /// The pipeline stage for an entry point
     enum class PipelineStage {
@@ -118,14 +118,14 @@ class Function : public utils::Castable<Function, Value> {
 
     /// Sets the function parameters
     /// @param params the function parameters
-    void SetParams(utils::VectorRef<FunctionParam*> params);
+    void SetParams(VectorRef<FunctionParam*> params);
 
     /// Sets the function parameters
     /// @param params the function parameters
     void SetParams(std::initializer_list<FunctionParam*> params);
 
     /// @returns the function parameters
-    const utils::VectorRef<FunctionParam*> Params() { return params_; }
+    const VectorRef<FunctionParam*> Params() { return params_; }
 
     /// Sets the root block for the function
     /// @param target the root block
@@ -147,12 +147,12 @@ class Function : public utils::Castable<Function, Value> {
         bool invariant = false;
     } return_;
 
-    utils::Vector<FunctionParam*, 1> params_;
+    Vector<FunctionParam*, 1> params_;
     ir::Block* block_ = nullptr;
 };
 
-utils::StringStream& operator<<(utils::StringStream& out, Function::PipelineStage value);
-utils::StringStream& operator<<(utils::StringStream& out, enum Function::ReturnBuiltin value);
+StringStream& operator<<(StringStream& out, Function::PipelineStage value);
+StringStream& operator<<(StringStream& out, enum Function::ReturnBuiltin value);
 
 }  // namespace tint::ir
 

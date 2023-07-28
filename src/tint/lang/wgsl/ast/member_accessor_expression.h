@@ -22,7 +22,7 @@ namespace tint::ast {
 
 /// A member accessor expression
 class MemberAccessorExpression final
-    : public utils::Castable<MemberAccessorExpression, AccessorExpression> {
+    : public Castable<MemberAccessorExpression, AccessorExpression> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

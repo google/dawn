@@ -119,7 +119,7 @@ const char* image_format_to_rwtexture_type(builtin::TexelFormat image_format) {
     }
 }
 
-void PrintF32(utils::StringStream& out, float value) {
+void PrintF32(StringStream& out, float value) {
     if (std::isinf(value)) {
         out << "0.0f " << (value >= 0 ? "/* inf */" : "/* -inf */");
     } else if (std::isnan(value)) {
@@ -129,7 +129,7 @@ void PrintF32(utils::StringStream& out, float value) {
     }
 }
 
-void PrintF16(utils::StringStream& out, float value) {
+void PrintF16(StringStream& out, float value) {
     if (std::isinf(value)) {
         out << "0.0h " << (value >= 0 ? "/* inf */" : "/* -inf */");
     } else if (std::isnan(value)) {
@@ -148,7 +148,7 @@ struct RegisterAndSpace {
     BindingPoint const binding_point;
 };
 
-utils::StringStream& operator<<(utils::StringStream& s, const RegisterAndSpace& rs) {
+StringStream& operator<<(StringStream& s, const RegisterAndSpace& rs) {
     s << " : register(" << rs.reg << rs.binding_point.binding;
     // Omit the space if it's 0, as it's the default.
     // SM 5.0 doesn't support spaces, so we don't emit them if group is 0 for better compatibility.
@@ -335,7 +335,7 @@ ASTPrinter::~ASTPrinter() = default;
 bool ASTPrinter::Generate() {
     if (!tint::writer::CheckSupportedExtensions(
             "HLSL", builder_.AST(), diagnostics_,
-            utils::Vector{
+            Vector{
                 builtin::Extension::kChromiumDisableUniformityAnalysis,
                 builtin::Extension::kChromiumExperimentalDp4A,
                 builtin::Extension::kChromiumExperimentalFullPtrParameters,
@@ -346,7 +346,7 @@ bool ASTPrinter::Generate() {
         return false;
     }
 
-    const utils::TypeInfo* last_kind = nullptr;
+    const tint::TypeInfo* last_kind = nullptr;
     size_t last_padding_line = 0;
 
     auto* mod = builder_.Sem().Module();
@@ -413,10 +413,10 @@ bool ASTPrinter::Generate() {
 
 bool ASTPrinter::EmitDynamicVectorAssignment(const ast::AssignmentStatement* stmt,
                                              const type::Vector* vec) {
-    auto name = utils::GetOrCreate(dynamic_vector_write_, vec, [&]() -> std::string {
+    auto name = tint::GetOrCreate(dynamic_vector_write_, vec, [&]() -> std::string {
         std::string fn;
         {
-            utils::StringStream ss;
+            StringStream ss;
             if (!EmitType(ss, vec, tint::builtin::AddressSpace::kUndefined,
                           builtin::Access::kUndefined, "")) {
                 return "";
@@ -487,10 +487,10 @@ bool ASTPrinter::EmitDynamicVectorAssignment(const ast::AssignmentStatement* stm
 
 bool ASTPrinter::EmitDynamicMatrixVectorAssignment(const ast::AssignmentStatement* stmt,
                                                    const type::Matrix* mat) {
-    auto name = utils::GetOrCreate(dynamic_matrix_vector_write_, mat, [&]() -> std::string {
+    auto name = tint::GetOrCreate(dynamic_matrix_vector_write_, mat, [&]() -> std::string {
         std::string fn;
         {
-            utils::StringStream ss;
+            StringStream ss;
             if (!EmitType(ss, mat, tint::builtin::AddressSpace::kUndefined,
                           builtin::Access::kUndefined, "")) {
                 return "";
@@ -556,10 +556,10 @@ bool ASTPrinter::EmitDynamicMatrixScalarAssignment(const ast::AssignmentStatemen
     auto* lhs_row_access = stmt->lhs->As<ast::IndexAccessorExpression>();
     auto* lhs_col_access = lhs_row_access->object->As<ast::IndexAccessorExpression>();
 
-    auto name = utils::GetOrCreate(dynamic_matrix_scalar_write_, mat, [&]() -> std::string {
+    auto name = tint::GetOrCreate(dynamic_matrix_scalar_write_, mat, [&]() -> std::string {
         std::string fn;
         {
-            utils::StringStream ss;
+            StringStream ss;
             if (!EmitType(ss, mat, tint::builtin::AddressSpace::kUndefined,
                           builtin::Access::kUndefined, "")) {
                 return "";
@@ -655,8 +655,7 @@ bool ASTPrinter::EmitDynamicMatrixScalarAssignment(const ast::AssignmentStatemen
     return true;
 }
 
-bool ASTPrinter::EmitIndexAccessor(utils::StringStream& out,
-                                   const ast::IndexAccessorExpression* expr) {
+bool ASTPrinter::EmitIndexAccessor(StringStream& out, const ast::IndexAccessorExpression* expr) {
     if (!EmitExpression(out, expr->object)) {
         return false;
     }
@@ -670,7 +669,7 @@ bool ASTPrinter::EmitIndexAccessor(utils::StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitBitcast(utils::StringStream& out, const ast::BitcastExpression* expr) {
+bool ASTPrinter::EmitBitcast(StringStream& out, const ast::BitcastExpression* expr) {
     auto* dst_type = TypeOf(expr)->UnwrapRef();
     auto* src_type = TypeOf(expr->expr)->UnwrapRef();
 
@@ -702,7 +701,7 @@ bool ASTPrinter::EmitBitcast(utils::StringStream& out, const ast::BitcastExpress
                 // f32tof16 to get the bits. This should be safe, because the convertion is precise
                 // for finite and infinite f16 value as they are exactly representable by f32, and
                 // WGSL spec allow any result if f16 value is NaN.
-                return utils::GetOrCreate(
+                return tint::GetOrCreate(
                     bitcast_funcs_, BinaryType{{src_type, dst_type}}, [&]() -> std::string {
                         TextBuffer b;
                         TINT_DEFER(helpers_.Append(b));
@@ -775,7 +774,7 @@ bool ASTPrinter::EmitBitcast(utils::StringStream& out, const ast::BitcastExpress
                 // convertion is precise for finite and infinite f16 result value as they are
                 // exactly representable by f32, and WGSL spec allow any result if f16 result value
                 // would be NaN.
-                return utils::GetOrCreate(
+                return tint::GetOrCreate(
                     bitcast_funcs_, BinaryType{{src_type, dst_type}}, [&]() -> std::string {
                         TextBuffer b;
                         TINT_DEFER(helpers_.Append(b));
@@ -913,7 +912,7 @@ bool ASTPrinter::EmitAssign(const ast::AssignmentStatement* stmt) {
     return true;
 }
 
-bool ASTPrinter::EmitBinary(utils::StringStream& out, const ast::BinaryExpression* expr) {
+bool ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr) {
     if (expr->op == ast::BinaryOp::kLogicalAnd || expr->op == ast::BinaryOp::kLogicalOr) {
         auto name = UniqueIdentifier(kTempNamePrefix);
 
@@ -1050,7 +1049,7 @@ bool ASTPrinter::EmitBinary(utils::StringStream& out, const ast::BinaryExpressio
     return true;
 }
 
-bool ASTPrinter::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) {
+bool ASTPrinter::EmitStatements(VectorRef<const ast::Statement*> stmts) {
     for (auto* s : stmts) {
         if (!EmitStatement(s)) {
             return false;
@@ -1059,7 +1058,7 @@ bool ASTPrinter::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) {
     return true;
 }
 
-bool ASTPrinter::EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts) {
+bool ASTPrinter::EmitStatementsWithIndent(VectorRef<const ast::Statement*> stmts) {
     ScopedIndent si(this);
     return EmitStatements(stmts);
 }
@@ -1088,7 +1087,7 @@ bool ASTPrinter::EmitBreakIf(const ast::BreakIfStatement* b) {
     return true;
 }
 
-bool ASTPrinter::EmitCall(utils::StringStream& out, const ast::CallExpression* expr) {
+bool ASTPrinter::EmitCall(StringStream& out, const ast::CallExpression* expr) {
     auto* call = builder_.Sem().Get<sem::Call>(expr);
     auto* target = call->Target();
     return Switch(
@@ -1103,7 +1102,7 @@ bool ASTPrinter::EmitCall(utils::StringStream& out, const ast::CallExpression* e
         });
 }
 
-bool ASTPrinter::EmitFunctionCall(utils::StringStream& out,
+bool ASTPrinter::EmitFunctionCall(StringStream& out,
                                   const sem::Call* call,
                                   const sem::Function* func) {
     auto* expr = call->Declaration();
@@ -1159,7 +1158,7 @@ bool ASTPrinter::EmitFunctionCall(utils::StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitBuiltinCall(utils::StringStream& out,
+bool ASTPrinter::EmitBuiltinCall(StringStream& out,
                                  const sem::Call* call,
                                  const sem::Builtin* builtin) {
     const auto type = builtin->Type();
@@ -1247,7 +1246,7 @@ bool ASTPrinter::EmitBuiltinCall(utils::StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitValueConversion(utils::StringStream& out,
+bool ASTPrinter::EmitValueConversion(StringStream& out,
                                      const sem::Call* call,
                                      const sem::ValueConversion* conv) {
     if (!EmitType(out, conv->Target(), builtin::AddressSpace::kUndefined,
@@ -1264,7 +1263,7 @@ bool ASTPrinter::EmitValueConversion(utils::StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitValueConstructor(utils::StringStream& out,
+bool ASTPrinter::EmitValueConstructor(StringStream& out,
                                       const sem::Call* call,
                                       const sem::ValueConstructor* ctor) {
     auto* type = call->Type();
@@ -1328,7 +1327,7 @@ bool ASTPrinter::EmitValueConstructor(utils::StringStream& out,
 }
 
 bool ASTPrinter::EmitUniformBufferAccess(
-    utils::StringStream& out,
+    StringStream& out,
     const ast::CallExpression* expr,
     const ast::transform::DecomposeMemoryAccess::Intrinsic* intrinsic) {
     auto const buffer = intrinsic->Buffer()->identifier->symbol.Name();
@@ -1400,7 +1399,7 @@ bool ASTPrinter::EmitUniformBufferAccess(
                 out << ")";
                 return result;
             };
-            auto load_u32_to = [&](utils::StringStream& target) {
+            auto load_u32_to = [&](StringStream& target) {
                 target << buffer;
                 if (scalar_offset_constant) {
                     target << "[" << (scalar_offset_index / 4) << "]."
@@ -1413,7 +1412,7 @@ bool ASTPrinter::EmitUniformBufferAccess(
             };
             auto load_u32 = [&] { return load_u32_to(out); };
             // Has a minimum alignment of 8 bytes, so is either .xy or .zw
-            auto load_vec2_u32_to = [&](utils::StringStream& target) {
+            auto load_vec2_u32_to = [&](StringStream& target) {
                 if (scalar_offset_constant) {
                     target << buffer << "[" << (scalar_offset_index / 4) << "]"
                            << ((scalar_offset_index & 2) == 0 ? ".xy" : ".zw");
@@ -1616,7 +1615,7 @@ bool ASTPrinter::EmitUniformBufferAccess(
 }
 
 bool ASTPrinter::EmitStorageBufferAccess(
-    utils::StringStream& out,
+    StringStream& out,
     const ast::CallExpression* expr,
     const ast::transform::DecomposeMemoryAccess::Intrinsic* intrinsic) {
     auto const buffer = intrinsic->Buffer()->identifier->symbol.Name();
@@ -1985,7 +1984,7 @@ bool ASTPrinter::EmitStorageAtomicIntrinsic(
     return false;
 }
 
-bool ASTPrinter::EmitWorkgroupAtomicCall(utils::StringStream& out,
+bool ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
                                          const ast::CallExpression* expr,
                                          const sem::Builtin* builtin) {
     std::string result = UniqueIdentifier("atomic_result");
@@ -2160,7 +2159,7 @@ bool ASTPrinter::EmitWorkgroupAtomicCall(utils::StringStream& out,
     return false;
 }
 
-bool ASTPrinter::EmitSelectCall(utils::StringStream& out, const ast::CallExpression* expr) {
+bool ASTPrinter::EmitSelectCall(StringStream& out, const ast::CallExpression* expr) {
     auto* expr_false = expr->args[0];
     auto* expr_true = expr->args[1];
     auto* expr_cond = expr->args[2];
@@ -2184,7 +2183,7 @@ bool ASTPrinter::EmitSelectCall(utils::StringStream& out, const ast::CallExpress
     return true;
 }
 
-bool ASTPrinter::EmitModfCall(utils::StringStream& out,
+bool ASTPrinter::EmitModfCall(StringStream& out,
                               const ast::CallExpression* expr,
                               const sem::Builtin* builtin) {
     return CallBuiltinHelper(
@@ -2217,7 +2216,7 @@ bool ASTPrinter::EmitModfCall(utils::StringStream& out,
         });
 }
 
-bool ASTPrinter::EmitFrexpCall(utils::StringStream& out,
+bool ASTPrinter::EmitFrexpCall(StringStream& out,
                                const ast::CallExpression* expr,
                                const sem::Builtin* builtin) {
     return CallBuiltinHelper(
@@ -2258,7 +2257,7 @@ bool ASTPrinter::EmitFrexpCall(utils::StringStream& out,
         });
 }
 
-bool ASTPrinter::EmitDegreesCall(utils::StringStream& out,
+bool ASTPrinter::EmitDegreesCall(StringStream& out,
                                  const ast::CallExpression* expr,
                                  const sem::Builtin* builtin) {
     return CallBuiltinHelper(out, expr, builtin,
@@ -2269,7 +2268,7 @@ bool ASTPrinter::EmitDegreesCall(utils::StringStream& out,
                              });
 }
 
-bool ASTPrinter::EmitRadiansCall(utils::StringStream& out,
+bool ASTPrinter::EmitRadiansCall(StringStream& out,
                                  const ast::CallExpression* expr,
                                  const sem::Builtin* builtin) {
     return CallBuiltinHelper(out, expr, builtin,
@@ -2283,9 +2282,7 @@ bool ASTPrinter::EmitRadiansCall(utils::StringStream& out,
 // The HLSL `sign` method always returns an `int` result (scalar or vector). In WGSL the result is
 // expected to be the same type as the argument. This injects a cast to the expected WGSL result
 // type after the call to `sign`.
-bool ASTPrinter::EmitSignCall(utils::StringStream& out,
-                              const sem::Call* call,
-                              const sem::Builtin*) {
+bool ASTPrinter::EmitSignCall(StringStream& out, const sem::Call* call, const sem::Builtin*) {
     auto* arg = call->Arguments()[0];
     if (!EmitType(out, arg->Type(), builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite,
                   "")) {
@@ -2299,7 +2296,7 @@ bool ASTPrinter::EmitSignCall(utils::StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitQuantizeToF16Call(utils::StringStream& out,
+bool ASTPrinter::EmitQuantizeToF16Call(StringStream& out,
                                        const ast::CallExpression* expr,
                                        const sem::Builtin* builtin) {
     // Cast to f16 and back
@@ -2316,7 +2313,7 @@ bool ASTPrinter::EmitQuantizeToF16Call(utils::StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitTruncCall(utils::StringStream& out,
+bool ASTPrinter::EmitTruncCall(StringStream& out,
                                const ast::CallExpression* expr,
                                const sem::Builtin* builtin) {
     // HLSL's trunc is broken for very large/small float values.
@@ -2330,7 +2327,7 @@ bool ASTPrinter::EmitTruncCall(utils::StringStream& out,
         });
 }
 
-bool ASTPrinter::EmitDataPackingCall(utils::StringStream& out,
+bool ASTPrinter::EmitDataPackingCall(StringStream& out,
                                      const ast::CallExpression* expr,
                                      const sem::Builtin* builtin) {
     return CallBuiltinHelper(
@@ -2393,7 +2390,7 @@ bool ASTPrinter::EmitDataPackingCall(utils::StringStream& out,
         });
 }
 
-bool ASTPrinter::EmitDataUnpackingCall(utils::StringStream& out,
+bool ASTPrinter::EmitDataUnpackingCall(StringStream& out,
                                        const ast::CallExpression* expr,
                                        const sem::Builtin* builtin) {
     return CallBuiltinHelper(
@@ -2460,7 +2457,7 @@ bool ASTPrinter::EmitDataUnpackingCall(utils::StringStream& out,
         });
 }
 
-bool ASTPrinter::EmitDP4aCall(utils::StringStream& out,
+bool ASTPrinter::EmitDP4aCall(StringStream& out,
                               const ast::CallExpression* expr,
                               const sem::Builtin* builtin) {
     // TODO(crbug.com/tint/1497): support the polyfill version of DP4a functions.
@@ -2488,7 +2485,7 @@ bool ASTPrinter::EmitDP4aCall(utils::StringStream& out,
         });
 }
 
-bool ASTPrinter::EmitBarrierCall(utils::StringStream& out, const sem::Builtin* builtin) {
+bool ASTPrinter::EmitBarrierCall(StringStream& out, const sem::Builtin* builtin) {
     // TODO(crbug.com/tint/661): Combine sequential barriers to a single
     // instruction.
     if (builtin->Type() == builtin::Function::kWorkgroupBarrier) {
@@ -2503,7 +2500,7 @@ bool ASTPrinter::EmitBarrierCall(utils::StringStream& out, const sem::Builtin* b
     return true;
 }
 
-bool ASTPrinter::EmitTextureCall(utils::StringStream& out,
+bool ASTPrinter::EmitTextureCall(StringStream& out,
                                  const sem::Call* call,
                                  const sem::Builtin* builtin) {
     using Usage = sem::ParameterUsage;
@@ -2989,7 +2986,7 @@ bool ASTPrinter::EmitCase(const ast::SwitchStatement* s, size_t case_idx) {
         return false;
     }
 
-    if (!tint::utils::IsAnyOf<ast::BreakStatement>(stmt->body->Last())) {
+    if (!tint::IsAnyOf<ast::BreakStatement>(stmt->body->Last())) {
         Line() << "break;";
     }
 
@@ -3011,7 +3008,7 @@ bool ASTPrinter::EmitDiscard(const ast::DiscardStatement*) {
     return true;
 }
 
-bool ASTPrinter::EmitExpression(utils::StringStream& out, const ast::Expression* expr) {
+bool ASTPrinter::EmitExpression(StringStream& out, const ast::Expression* expr) {
     if (auto* sem = builder_.Sem().GetVal(expr)) {
         if (auto* constant = sem->ConstantValue()) {
             bool is_variable_initializer = false;
@@ -3040,7 +3037,7 @@ bool ASTPrinter::EmitExpression(utils::StringStream& out, const ast::Expression*
         });
 }
 
-bool ASTPrinter::EmitIdentifier(utils::StringStream& out, const ast::IdentifierExpression* expr) {
+bool ASTPrinter::EmitIdentifier(StringStream& out, const ast::IdentifierExpression* expr) {
     out << expr->identifier->symbol.Name();
     return true;
 }
@@ -3066,7 +3063,7 @@ bool ASTPrinter::EmitIf(const ast::IfStatement* stmt) {
                 return false;
             }
         } else {
-            if (!EmitStatementsWithIndent(utils::Vector{stmt->else_statement})) {
+            if (!EmitStatementsWithIndent(Vector{stmt->else_statement})) {
                 return false;
             }
         }
@@ -3232,7 +3229,7 @@ bool ASTPrinter::EmitGlobalVariable(const ast::Variable* global) {
                 case builtin::AddressSpace::kPushConstant:
                     diagnostics_.add_error(
                         diag::System::Writer,
-                        "unhandled address space " + utils::ToString(sem->AddressSpace()));
+                        "unhandled address space " + tint::ToString(sem->AddressSpace()));
                     return false;
                 default: {
                     TINT_ICE(Writer, diagnostics_)
@@ -3520,7 +3517,7 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
     return true;
 }
 
-bool ASTPrinter::EmitConstant(utils::StringStream& out,
+bool ASTPrinter::EmitConstant(StringStream& out,
                               const constant::Value* constant,
                               bool is_variable_initializer) {
     return Switch(
@@ -3640,7 +3637,7 @@ bool ASTPrinter::EmitConstant(utils::StringStream& out,
                 return true;
             }
 
-            auto emit_member_values = [&](utils::StringStream& o) {
+            auto emit_member_values = [&](StringStream& o) {
                 o << "{";
                 for (size_t i = 0; i < s->Members().Length(); i++) {
                     if (i > 0) {
@@ -3681,7 +3678,7 @@ bool ASTPrinter::EmitConstant(utils::StringStream& out,
         });
 }
 
-bool ASTPrinter::EmitLiteral(utils::StringStream& out, const ast::LiteralExpression* lit) {
+bool ASTPrinter::EmitLiteral(StringStream& out, const ast::LiteralExpression* lit) {
     return Switch(
         lit,
         [&](const ast::BoolLiteralExpression* l) {
@@ -3717,7 +3714,7 @@ bool ASTPrinter::EmitLiteral(utils::StringStream& out, const ast::LiteralExpress
         });
 }
 
-bool ASTPrinter::EmitValue(utils::StringStream& out, const type::Type* type, int value) {
+bool ASTPrinter::EmitValue(StringStream& out, const type::Type* type, int value) {
     return Switch(
         type,
         [&](const type::Bool*) {
@@ -3791,7 +3788,7 @@ bool ASTPrinter::EmitValue(utils::StringStream& out, const type::Type* type, int
         });
 }
 
-bool ASTPrinter::EmitZeroValue(utils::StringStream& out, const type::Type* type) {
+bool ASTPrinter::EmitZeroValue(StringStream& out, const type::Type* type) {
     return EmitValue(out, type, 0);
 }
 
@@ -3840,7 +3837,7 @@ bool ASTPrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
     }
 
     TextBuffer cond_pre;
-    utils::StringStream cond_buf;
+    StringStream cond_buf;
     if (auto* cond = stmt->condition) {
         TINT_SCOPED_ASSIGNMENT(current_buffer_, &cond_pre);
         if (!EmitExpression(cond_buf, cond)) {
@@ -3912,7 +3909,7 @@ bool ASTPrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
                 out << cond_buf.str() << "; ";
 
                 if (!cont_buf.lines.empty()) {
-                    out << utils::TrimSuffix(cont_buf.lines[0].content, ";");
+                    out << tint::TrimSuffix(cont_buf.lines[0].content, ";");
                 }
             }
             out << " {";
@@ -3932,7 +3929,7 @@ bool ASTPrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
 
 bool ASTPrinter::EmitWhile(const ast::WhileStatement* stmt) {
     TextBuffer cond_pre;
-    utils::StringStream cond_buf;
+    StringStream cond_buf;
     {
         auto* cond = stmt->condition;
         TINT_SCOPED_ASSIGNMENT(current_buffer_, &cond_pre);
@@ -3980,8 +3977,7 @@ bool ASTPrinter::EmitWhile(const ast::WhileStatement* stmt) {
     return true;
 }
 
-bool ASTPrinter::EmitMemberAccessor(utils::StringStream& out,
-                                    const ast::MemberAccessorExpression* expr) {
+bool ASTPrinter::EmitMemberAccessor(StringStream& out, const ast::MemberAccessorExpression* expr) {
     if (!EmitExpression(out, expr->object)) {
         return false;
     }
@@ -4153,7 +4149,7 @@ bool ASTPrinter::EmitSwitch(const ast::SwitchStatement* stmt) {
     return true;
 }
 
-bool ASTPrinter::EmitType(utils::StringStream& out,
+bool ASTPrinter::EmitType(StringStream& out,
                           const type::Type* type,
                           builtin::AddressSpace address_space,
                           builtin::Access access,
@@ -4379,7 +4375,7 @@ bool ASTPrinter::EmitType(utils::StringStream& out,
         });
 }
 
-bool ASTPrinter::EmitTypeAndName(utils::StringStream& out,
+bool ASTPrinter::EmitTypeAndName(StringStream& out,
                                  const type::Type* type,
                                  builtin::AddressSpace address_space,
                                  builtin::Access access,
@@ -4470,7 +4466,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const type::Struct* str) {
     return true;
 }
 
-bool ASTPrinter::EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpression* expr) {
+bool ASTPrinter::EmitUnaryOp(StringStream& out, const ast::UnaryOpExpression* expr) {
     switch (expr->op) {
         case ast::UnaryOp::kIndirection:
         case ast::UnaryOp::kAddressOf:
@@ -4541,12 +4537,12 @@ bool ASTPrinter::EmitLet(const ast::Let* let) {
 }
 
 template <typename F>
-bool ASTPrinter::CallBuiltinHelper(utils::StringStream& out,
+bool ASTPrinter::CallBuiltinHelper(StringStream& out,
                                    const ast::CallExpression* call,
                                    const sem::Builtin* builtin,
                                    F&& build) {
     // Generate the helper function if it hasn't been created already
-    auto fn = utils::GetOrCreate(builtins_, builtin, [&]() -> std::string {
+    auto fn = tint::GetOrCreate(builtins_, builtin, [&]() -> std::string {
         TextBuffer b;
         TINT_DEFER(helpers_.Append(b));
 

@@ -53,7 +53,7 @@ struct BuiltinPolyfillSpirv::State {
     /// Process the module.
     void Process() {
         // Find the builtins that need replacing.
-        utils::Vector<CoreBuiltinCall*, 4> worklist;
+        Vector<CoreBuiltinCall*, 4> worklist;
         for (auto* inst : ir->instructions.Objects()) {
             if (!inst->Alive()) {
                 continue;
@@ -184,9 +184,9 @@ struct BuiltinPolyfillSpirv::State {
         auto* const_idx = access->Indices()[0]->As<Constant>();
 
         // Replace the builtin call with a call to the spirv.array_length intrinsic.
-        auto* call = b.Call(
-            builtin->Result()->Type(), IntrinsicCall::Kind::kSpirvArrayLength,
-            utils::Vector{access->Object(), Literal(u32(const_idx->Value()->ValueAs<uint32_t>()))});
+        auto* call =
+            b.Call(builtin->Result()->Type(), IntrinsicCall::Kind::kSpirvArrayLength,
+                   Vector{access->Object(), Literal(u32(const_idx->Value()->ValueAs<uint32_t>()))});
         call->InsertBefore(builtin);
         return call->Result();
     }
@@ -244,7 +244,7 @@ struct BuiltinPolyfillSpirv::State {
 
                 // Construct the atomicCompareExchange result structure.
                 call = b.Construct(type::CreateAtomicCompareExchangeResult(ty, ir->symbols, int_ty),
-                                   utils::Vector{original, compare->Result()});
+                                   Vector{original, compare->Result()});
                 break;
             }
             case builtin::Function::kAtomicExchange:
@@ -323,7 +323,7 @@ struct BuiltinPolyfillSpirv::State {
         }
 
         // Replace the builtin call with a call to the spirv.dot intrinsic.
-        auto args = utils::Vector<Value*, 4>(builtin->Args());
+        auto args = Vector<Value*, 4>(builtin->Args());
         auto* call =
             b.Call(builtin->Result()->Type(), IntrinsicCall::Kind::kSpirvDot, std::move(args));
         call->InsertBefore(builtin);
@@ -335,7 +335,7 @@ struct BuiltinPolyfillSpirv::State {
     /// @returns the replacement value
     Value* Select(CoreBuiltinCall* builtin) {
         // Argument order is different in SPIR-V: (condition, true_operand, false_operand).
-        utils::Vector<Value*, 4> args = {
+        Vector<Value*, 4> args = {
             builtin->Args()[2],
             builtin->Args()[1],
             builtin->Args()[0],
@@ -346,7 +346,7 @@ struct BuiltinPolyfillSpirv::State {
         // TODO(jrprice): We don't need to do this if we're targeting SPIR-V 1.4 or newer.
         auto* vec = builtin->Result()->Type()->As<type::Vector>();
         if (vec && args[0]->Type()->Is<type::Scalar>()) {
-            utils::Vector<Value*, 4> elements;
+            Vector<Value*, 4> elements;
             elements.Resize(vec->Width(), args[0]);
 
             auto* construct = b.Construct(ty.vec(ty.bool_(), vec->Width()), std::move(elements));
@@ -383,7 +383,7 @@ struct BuiltinPolyfillSpirv::State {
     /// @param insertion_point the insertion point for new instructions
     /// @param requires_float_lod true if the lod needs to be a floating point value
     void AppendImageOperands(ImageOperands& operands,
-                             utils::Vector<Value*, 8>& args,
+                             Vector<Value*, 8>& args,
                              Instruction* insertion_point,
                              bool requires_float_lod) {
         // Add a placeholder argument for the image operand mask, which we will fill in when we have
@@ -443,7 +443,7 @@ struct BuiltinPolyfillSpirv::State {
         // Construct a new coordinate vector.
         auto num_coords = vec->Width();
         auto* coord_ty = ty.vec(element_ty, num_coords + 1);
-        auto* construct = b.Construct(coord_ty, utils::Vector{coords, array_idx});
+        auto* construct = b.Construct(coord_ty, Vector{coords, array_idx});
         construct->InsertBefore(insertion_point);
         return construct->Result();
     }
@@ -466,7 +466,7 @@ struct BuiltinPolyfillSpirv::State {
         // Use OpSampledImage to create an OpTypeSampledImage object.
         auto* sampled_image =
             b.Call(ty.Get<SampledImage>(texture_ty), IntrinsicCall::Kind::kSpirvSampledImage,
-                   utils::Vector{texture, sampler});
+                   Vector{texture, sampler});
         sampled_image->InsertBefore(builtin);
 
         // Append the array index to the coordinates if provided.
@@ -518,7 +518,7 @@ struct BuiltinPolyfillSpirv::State {
         // Start building the argument list for the intrinsic.
         // The first two operands are always the sampled image and then the coordinates, followed by
         // the depth reference if used.
-        utils::Vector<Value*, 8> intrinsic_args;
+        Vector<Value*, 8> intrinsic_args;
         intrinsic_args.Push(sampled_image->Result());
         intrinsic_args.Push(coords);
         if (depth) {
@@ -572,7 +572,7 @@ struct BuiltinPolyfillSpirv::State {
         // Use OpSampledImage to create an OpTypeSampledImage object.
         auto* sampled_image =
             b.Call(ty.Get<SampledImage>(texture_ty), IntrinsicCall::Kind::kSpirvSampledImage,
-                   utils::Vector{texture, sampler});
+                   Vector{texture, sampler});
         sampled_image->InsertBefore(builtin);
 
         // Append the array index to the coordinates if provided.
@@ -602,7 +602,7 @@ struct BuiltinPolyfillSpirv::State {
         // Start building the argument list for the intrinsic.
         // The first two operands are always the sampled image and then the coordinates, followed by
         // either the depth reference or the component.
-        utils::Vector<Value*, 8> intrinsic_args;
+        Vector<Value*, 8> intrinsic_args;
         intrinsic_args.Push(sampled_image->Result());
         intrinsic_args.Push(coords);
         if (depth) {
@@ -643,7 +643,7 @@ struct BuiltinPolyfillSpirv::State {
 
         // Start building the argument list for the intrinsic.
         // The first two operands are always the texture and then the coordinates.
-        utils::Vector<Value*, 8> intrinsic_args;
+        Vector<Value*, 8> intrinsic_args;
         intrinsic_args.Push(texture);
         intrinsic_args.Push(coords);
 
@@ -702,7 +702,7 @@ struct BuiltinPolyfillSpirv::State {
 
         // Start building the argument list for the intrinsic.
         // The first two operands are always the texture and then the coordinates.
-        utils::Vector<Value*, 8> intrinsic_args;
+        Vector<Value*, 8> intrinsic_args;
         intrinsic_args.Push(texture);
         intrinsic_args.Push(coords);
         intrinsic_args.Push(texel);
@@ -730,7 +730,7 @@ struct BuiltinPolyfillSpirv::State {
         auto* texture = next_arg();
         auto* texture_ty = texture->Type()->As<type::Texture>();
 
-        utils::Vector<Value*, 8> intrinsic_args;
+        Vector<Value*, 8> intrinsic_args;
         intrinsic_args.Push(texture);
 
         // Determine which SPIR-V intrinsic to use, and add the Lod argument if needed.
@@ -778,7 +778,7 @@ struct BuiltinPolyfillSpirv::State {
         auto* texture = builtin->Args()[0];
         auto* texture_ty = texture->Type()->As<type::Texture>();
 
-        utils::Vector<Value*, 2> intrinsic_args;
+        Vector<Value*, 2> intrinsic_args;
         intrinsic_args.Push(texture);
 
         // Determine which SPIR-V intrinsic to use, and add the Lod argument if needed.
@@ -812,8 +812,7 @@ BuiltinPolyfillSpirv::LiteralOperand::~LiteralOperand() = default;
 
 BuiltinPolyfillSpirv::SampledImage::SampledImage(const type::Type* image)
     : Base(static_cast<size_t>(
-               utils::Hash(utils::TypeInfo::Of<BuiltinPolyfillSpirv::SampledImage>().full_hashcode,
-                           image)),
+               Hash(tint::TypeInfo::Of<BuiltinPolyfillSpirv::SampledImage>().full_hashcode, image)),
            type::Flags{}),
       image_(image) {}
 

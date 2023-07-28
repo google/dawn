@@ -85,7 +85,7 @@ struct ShaderIO::State {
     /// The type manager.
     type::Manager& ty{ir->Types()};
     /// The set of struct members that need to have their IO attributes stripped.
-    utils::Hashset<const type::StructMember*, 8> members_to_strip;
+    Hashset<const type::StructMember*, 8> members_to_strip;
 
     /// The entry point currently being processed.
     Function* func = nullptr;
@@ -202,12 +202,12 @@ struct ShaderIO::State {
     /// Build the argument list to call the original entry point function.
     /// @param builder the IR builder for new instructions
     /// @returns the argument list
-    utils::Vector<Value*, 4> BuildInnerCallArgs(Builder& builder) {
+    Vector<Value*, 4> BuildInnerCallArgs(Builder& builder) {
         uint32_t input_idx = 0;
-        utils::Vector<Value*, 4> args;
+        Vector<Value*, 4> args;
         for (auto* param : func->Params()) {
             if (auto* str = param->Type()->As<type::Struct>()) {
-                utils::Vector<Value*, 4> construct_args;
+                Vector<Value*, 4> construct_args;
                 for (uint32_t i = 0; i < str->Members().Length(); i++) {
                     construct_args.Push(backend->GetInput(builder, input_idx++));
                 }

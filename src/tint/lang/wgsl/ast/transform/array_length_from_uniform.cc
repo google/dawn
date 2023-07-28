@@ -68,7 +68,7 @@ struct ArrayLengthFromUniform::State {
             b.Diagnostics().add_error(
                 diag::System::Transform,
                 "missing transform data for " +
-                    std::string(utils::TypeInfo::Of<ArrayLengthFromUniform>().name));
+                    std::string(tint::TypeInfo::Of<ArrayLengthFromUniform>().name));
             return Program(std::move(b));
         }
 
@@ -103,7 +103,7 @@ struct ArrayLengthFromUniform::State {
                 // We do this because UBOs require an element stride that is 16-byte
                 // aligned.
                 auto* buffer_size_struct = b.Structure(
-                    b.Sym(), utils::Vector{
+                    b.Sym(), tint::Vector{
                                  b.Member(kBufferSizeMemberName,
                                           b.ty.array(b.ty.vec4(b.ty.u32()),
                                                      u32((max_buffer_size_index / 4) + 1))),

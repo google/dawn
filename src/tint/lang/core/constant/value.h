@@ -26,7 +26,7 @@
 namespace tint::constant {
 
 /// Value is the interface to a compile-time evaluated expression value.
-class Value : public utils::Castable<Value, Node> {
+class Value : public Castable<Value, Node> {
   public:
     /// Constructor
     Value();

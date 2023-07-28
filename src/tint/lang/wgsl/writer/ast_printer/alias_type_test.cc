@@ -33,7 +33,7 @@ TEST_F(WgslASTPrinterTest, EmitAlias_F32) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitTypeDecl_Struct) {
-    auto* s = Structure("A", utils::Vector{
+    auto* s = Structure("A", Vector{
                                  Member("a", ty.f32()),
                                  Member("b", ty.i32()),
                              });
@@ -55,7 +55,7 @@ alias B = A;
 }
 
 TEST_F(WgslASTPrinterTest, EmitAlias_ToStruct) {
-    auto* s = Structure("A", utils::Vector{
+    auto* s = Structure("A", Vector{
                                  Member("a", ty.f32()),
                                  Member("b", ty.i32()),
                              });

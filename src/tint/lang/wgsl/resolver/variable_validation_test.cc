@@ -309,10 +309,10 @@ TEST_F(ResolverVariableValidationTest, InferredPtrStorageAccessMismatch) {
     // fn f() {
     //   let p : pointer<storage, i32, read_write> = &s.inner.arr[2i];
     // }
-    auto* inner = Structure("Inner", utils::Vector{
+    auto* inner = Structure("Inner", Vector{
                                          Member("arr", ty.array<i32, 4>()),
                                      });
-    auto* buf = Structure("S", utils::Vector{
+    auto* buf = Structure("S", Vector{
                                    Member("inner", ty.Of(inner)),
                                });
     auto* var =
@@ -339,7 +339,7 @@ TEST_F(ResolverVariableValidationTest, NonConstructibleType_Atomic) {
 }
 
 TEST_F(ResolverVariableValidationTest, NonConstructibleType_RuntimeArray) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member(Source{{12, 34}}, "m", ty.array<i32>()),
                              });
     auto* v = Var(Source{{56, 78}}, "v", ty.Of(s));
@@ -353,7 +353,7 @@ TEST_F(ResolverVariableValidationTest, NonConstructibleType_RuntimeArray) {
 }
 
 TEST_F(ResolverVariableValidationTest, NonConstructibleType_Struct_WithAtomic) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("m", ty.atomic(ty.i32())),
                              });
     auto* v = Var("v", ty.Of(s));

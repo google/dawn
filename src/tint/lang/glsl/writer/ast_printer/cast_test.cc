@@ -31,7 +31,7 @@ TEST_F(GlslASTPrinterTest_Cast, EmitExpression_Cast_Scalar) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, cast);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "1.0f");
@@ -43,7 +43,7 @@ TEST_F(GlslASTPrinterTest_Cast, EmitExpression_Cast_Vector) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, cast);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "vec3(1.0f, 2.0f, 3.0f)");

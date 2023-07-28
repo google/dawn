@@ -26,7 +26,7 @@ namespace {
 using ResolverStructLayoutTest = ResolverTest;
 
 TEST_F(ResolverStructLayoutTest, Scalars) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.f32()),
                                  Member("b", ty.u32()),
                                  Member("c", ty.i32()),
@@ -57,7 +57,7 @@ TEST_F(ResolverStructLayoutTest, Scalars) {
 TEST_F(ResolverStructLayoutTest, ScalarsWithF16) {
     Enable(builtin::Extension::kF16);
 
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.f32()),
                                  Member("b", ty.f16()),
                                  Member("c", ty.u32()),
@@ -109,7 +109,7 @@ TEST_F(ResolverStructLayoutTest, Alias) {
     auto* alias_a = Alias("a", ty.f32());
     auto* alias_b = Alias("b", ty.f32());
 
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.Of(alias_a)),
                                  Member("b", ty.Of(alias_b)),
                              });
@@ -136,7 +136,7 @@ TEST_F(ResolverStructLayoutTest, Alias) {
 TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayStaticSize) {
     Enable(builtin::Extension::kF16);
 
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.array<i32, 3>()),
                                  Member("b", ty.array<f32, 5>()),
                                  Member("c", ty.array<f16, 7>()),
@@ -176,11 +176,11 @@ TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayStaticSize) {
 TEST_F(ResolverStructLayoutTest, ExplicitStrideArrayStaticSize) {
     Enable(builtin::Extension::kF16);
 
-    auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.array<i32, 3>(utils::Vector{Stride(8)})),
-                                 Member("b", ty.array<f32, 5>(utils::Vector{Stride(16)})),
-                                 Member("c", ty.array<f16, 7>(utils::Vector{Stride(4)})),
-                                 Member("d", ty.array<f32, 1>(utils::Vector{Stride(32)})),
+    auto* s = Structure("S", Vector{
+                                 Member("a", ty.array<i32, 3>(Vector{Stride(8)})),
+                                 Member("b", ty.array<f32, 5>(Vector{Stride(16)})),
+                                 Member("c", ty.array<f16, 7>(Vector{Stride(4)})),
+                                 Member("d", ty.array<f32, 1>(Vector{Stride(32)})),
                              });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -214,7 +214,7 @@ TEST_F(ResolverStructLayoutTest, ExplicitStrideArrayStaticSize) {
 }
 
 TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayRuntimeSized) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("c", ty.array<f32>()),
                              });
 
@@ -235,8 +235,8 @@ TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayRuntimeSized) {
 }
 
 TEST_F(ResolverStructLayoutTest, ExplicitStrideArrayRuntimeSized) {
-    auto* s = Structure("S", utils::Vector{
-                                 Member("c", ty.array<f32>(utils::Vector{Stride(32)})),
+    auto* s = Structure("S", Vector{
+                                 Member("c", ty.array<f32>(Vector{Stride(32)})),
                              });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -256,9 +256,9 @@ TEST_F(ResolverStructLayoutTest, ExplicitStrideArrayRuntimeSized) {
 }
 
 TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayOfExplicitStrideArray) {
-    auto inner = ty.array<i32, 2>(utils::Vector{Stride(16)});  // size: 32
-    auto outer = ty.array(inner, 12_u);                        // size: 12 * 32
-    auto* s = Structure("S", utils::Vector{
+    auto inner = ty.array<i32, 2>(Vector{Stride(16)});  // size: 32
+    auto outer = ty.array(inner, 12_u);                 // size: 12 * 32
+    auto* s = Structure("S", Vector{
                                  Member("c", outer),
                              });
 
@@ -279,13 +279,13 @@ TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayOfExplicitStrideArray) {
 }
 
 TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayOfStructure) {
-    auto* inner = Structure("Inner", utils::Vector{
+    auto* inner = Structure("Inner", Vector{
                                          Member("a", ty.vec2<i32>()),
                                          Member("b", ty.vec3<i32>()),
                                          Member("c", ty.vec4<i32>()),
                                      });        // size: 48
     auto outer = ty.array(ty.Of(inner), 12_u);  // size: 12 * 48
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("c", outer),
                              });
 
@@ -306,7 +306,7 @@ TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayOfStructure) {
 }
 
 TEST_F(ResolverStructLayoutTest, Vector) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.vec2<i32>()),
                                  Member("b", ty.vec3<i32>()),
                                  Member("c", ty.vec4<i32>()),
@@ -337,7 +337,7 @@ TEST_F(ResolverStructLayoutTest, Vector) {
 TEST_F(ResolverStructLayoutTest, Matrix) {
     Enable(builtin::Extension::kF16);
 
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a_1", ty.mat2x2<f32>()),
                                  Member("a_2", ty.mat2x2<f16>()),
                                  Member("b_1", ty.mat2x3<f32>()),
@@ -427,10 +427,10 @@ TEST_F(ResolverStructLayoutTest, Matrix) {
 }
 
 TEST_F(ResolverStructLayoutTest, NestedStruct) {
-    auto* inner = Structure("Inner", utils::Vector{
+    auto* inner = Structure("Inner", Vector{
                                          Member("a", ty.mat3x3<f32>()),
                                      });
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
                                  Member("b", ty.Of(inner)),
                                  Member("c", ty.i32()),
@@ -459,16 +459,16 @@ TEST_F(ResolverStructLayoutTest, NestedStruct) {
 }
 
 TEST_F(ResolverStructLayoutTest, SizeAttributes) {
-    auto* inner = Structure("Inner", utils::Vector{
-                                         Member("a", ty.f32(), utils::Vector{MemberSize(8_a)}),
-                                         Member("b", ty.f32(), utils::Vector{MemberSize(16_a)}),
-                                         Member("c", ty.f32(), utils::Vector{MemberSize(8_a)}),
+    auto* inner = Structure("Inner", Vector{
+                                         Member("a", ty.f32(), Vector{MemberSize(8_a)}),
+                                         Member("b", ty.f32(), Vector{MemberSize(16_a)}),
+                                         Member("c", ty.f32(), Vector{MemberSize(8_a)}),
                                      });
-    auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.f32(), utils::Vector{MemberSize(4_a)}),
-                                 Member("b", ty.u32(), utils::Vector{MemberSize(8_a)}),
+    auto* s = Structure("S", Vector{
+                                 Member("a", ty.f32(), Vector{MemberSize(4_a)}),
+                                 Member("b", ty.u32(), Vector{MemberSize(8_a)}),
                                  Member("c", ty.Of(inner)),
-                                 Member("d", ty.i32(), utils::Vector{MemberSize(32_a)}),
+                                 Member("d", ty.i32(), Vector{MemberSize(32_a)}),
                              });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -497,16 +497,16 @@ TEST_F(ResolverStructLayoutTest, SizeAttributes) {
 }
 
 TEST_F(ResolverStructLayoutTest, AlignAttributes) {
-    auto* inner = Structure("Inner", utils::Vector{
-                                         Member("a", ty.f32(), utils::Vector{MemberAlign(8_i)}),
-                                         Member("b", ty.f32(), utils::Vector{MemberAlign(16_i)}),
-                                         Member("c", ty.f32(), utils::Vector{MemberAlign(4_i)}),
+    auto* inner = Structure("Inner", Vector{
+                                         Member("a", ty.f32(), Vector{MemberAlign(8_i)}),
+                                         Member("b", ty.f32(), Vector{MemberAlign(16_i)}),
+                                         Member("c", ty.f32(), Vector{MemberAlign(4_i)}),
                                      });
-    auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.f32(), utils::Vector{MemberAlign(4_i)}),
-                                 Member("b", ty.u32(), utils::Vector{MemberAlign(8_i)}),
+    auto* s = Structure("S", Vector{
+                                 Member("a", ty.f32(), Vector{MemberAlign(4_i)}),
+                                 Member("b", ty.u32(), Vector{MemberAlign(8_i)}),
                                  Member("c", ty.Of(inner)),
-                                 Member("d", ty.i32(), utils::Vector{MemberAlign(32_i)}),
+                                 Member("d", ty.i32(), Vector{MemberAlign(32_i)}),
                              });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -535,8 +535,8 @@ TEST_F(ResolverStructLayoutTest, AlignAttributes) {
 }
 
 TEST_F(ResolverStructLayoutTest, StructWithLotsOfPadding) {
-    auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.i32(), utils::Vector{MemberAlign(1024_i)}),
+    auto* s = Structure("S", Vector{
+                                 Member("a", ty.i32(), Vector{MemberAlign(1024_i)}),
                              });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -556,17 +556,17 @@ TEST_F(ResolverStructLayoutTest, StructWithLotsOfPadding) {
 }
 
 TEST_F(ResolverStructLayoutTest, OffsetAttributes) {
-    auto* inner = Structure("Inner", utils::Vector{
-                                         Member("a", ty.f32(), utils::Vector{MemberOffset(8_i)}),
-                                         Member("b", ty.f32(), utils::Vector{MemberOffset(16_i)}),
-                                         Member("c", ty.f32(), utils::Vector{MemberOffset(32_i)}),
+    auto* inner = Structure("Inner", Vector{
+                                         Member("a", ty.f32(), Vector{MemberOffset(8_i)}),
+                                         Member("b", ty.f32(), Vector{MemberOffset(16_i)}),
+                                         Member("c", ty.f32(), Vector{MemberOffset(32_i)}),
                                      });
-    auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.f32(), utils::Vector{MemberOffset(4_i)}),
-                                 Member("b", ty.u32(), utils::Vector{MemberOffset(8_i)}),
-                                 Member("c", ty.Of(inner), utils::Vector{MemberOffset(32_i)}),
+    auto* s = Structure("S", Vector{
+                                 Member("a", ty.f32(), Vector{MemberOffset(4_i)}),
+                                 Member("b", ty.u32(), Vector{MemberOffset(8_i)}),
+                                 Member("c", ty.Of(inner), Vector{MemberOffset(32_i)}),
                                  Member("d", ty.i32()),
-                                 Member("e", ty.i32(), utils::Vector{MemberOffset(128_i)}),
+                                 Member("e", ty.i32(), Vector{MemberOffset(128_i)}),
                              });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();

@@ -33,7 +33,7 @@ bool IsValidDepthDimension(TextureDimension dim) {
 }  // namespace
 
 DepthMultisampledTexture::DepthMultisampledTexture(TextureDimension dim)
-    : Base(utils::Hash(utils::TypeInfo::Of<DepthMultisampledTexture>().full_hashcode, dim), dim) {
+    : Base(Hash(tint::TypeInfo::Of<DepthMultisampledTexture>().full_hashcode, dim), dim) {
     TINT_ASSERT(Type, IsValidDepthDimension(dim));
 }
 
@@ -47,7 +47,7 @@ bool DepthMultisampledTexture::Equals(const UniqueNode& other) const {
 }
 
 std::string DepthMultisampledTexture::FriendlyName() const {
-    utils::StringStream out;
+    StringStream out;
     out << "texture_depth_multisampled_" << dim();
     return out.str();
 }

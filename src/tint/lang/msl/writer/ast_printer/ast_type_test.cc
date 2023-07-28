@@ -33,7 +33,7 @@ using ::testing::HasSubstr;
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-void FormatMSLField(utils::StringStream& out,
+void FormatMSLField(StringStream& out,
                     const char* addr,
                     const char* type,
                     size_t array_count,
@@ -95,7 +95,7 @@ TEST_F(MslASTPrinterTest, EmitType_Array) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type))) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "tint_array<bool, 4>");
 }
@@ -107,7 +107,7 @@ TEST_F(MslASTPrinterTest, EmitType_ArrayOfArray) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type))) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "tint_array<tint_array<bool, 4>, 5>");
 }
@@ -120,7 +120,7 @@ TEST_F(MslASTPrinterTest, EmitType_ArrayOfArrayOfArray) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type))) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "tint_array<tint_array<tint_array<bool, 4>, 5>, 6>");
 }
@@ -131,7 +131,7 @@ TEST_F(MslASTPrinterTest, EmitType_Array_WithoutName) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type))) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "tint_array<bool, 4>");
 }
@@ -142,7 +142,7 @@ TEST_F(MslASTPrinterTest, EmitType_RuntimeArray) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type))) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "tint_array<bool, 1>");
 }
@@ -152,7 +152,7 @@ TEST_F(MslASTPrinterTest, EmitType_Bool) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, bool_)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "bool");
 }
@@ -162,7 +162,7 @@ TEST_F(MslASTPrinterTest, EmitType_F32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, f32)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float");
 }
@@ -172,7 +172,7 @@ TEST_F(MslASTPrinterTest, EmitType_F16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, f16)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "half");
 }
@@ -182,7 +182,7 @@ TEST_F(MslASTPrinterTest, EmitType_I32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, i32)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "int");
 }
@@ -194,7 +194,7 @@ TEST_F(MslASTPrinterTest, EmitType_Matrix_F32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, mat2x3)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float2x3");
 }
@@ -206,7 +206,7 @@ TEST_F(MslASTPrinterTest, EmitType_Matrix_F16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, mat2x3)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "half2x3");
 }
@@ -218,33 +218,33 @@ TEST_F(MslASTPrinterTest, EmitType_Pointer) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, p)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "threadgroup float*");
 }
 
 TEST_F(MslASTPrinterTest, EmitType_Struct) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(s))) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "S");
 }
 
 TEST_F(MslASTPrinterTest, EmitType_StructDecl) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
 
     ASTPrinter& gen = Build();
 
-    utils::TextGenerator::TextBuffer buf;
+    tint::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(s)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {
@@ -255,35 +255,35 @@ TEST_F(MslASTPrinterTest, EmitType_StructDecl) {
 }
 
 TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_NonComposites) {
-    auto* s = Structure(
-        "S", utils::Vector{
-                 Member("a", ty.i32(), utils::Vector{MemberSize(32_a)}),
-                 Member("b", ty.f32(), utils::Vector{MemberAlign(128_i), MemberSize(128_a)}),
-                 Member("c", ty.vec2<f32>()),
-                 Member("d", ty.u32()),
-                 Member("e", ty.vec3<f32>()),
-                 Member("f", ty.u32()),
-                 Member("g", ty.vec4<f32>()),
-                 Member("h", ty.u32()),
-                 Member("i", ty.mat2x2<f32>()),
-                 Member("j", ty.u32()),
-                 Member("k", ty.mat2x3<f32>()),
-                 Member("l", ty.u32()),
-                 Member("m", ty.mat2x4<f32>()),
-                 Member("n", ty.u32()),
-                 Member("o", ty.mat3x2<f32>()),
-                 Member("p", ty.u32()),
-                 Member("q", ty.mat3x3<f32>()),
-                 Member("r", ty.u32()),
-                 Member("s", ty.mat3x4<f32>()),
-                 Member("t", ty.u32()),
-                 Member("u", ty.mat4x2<f32>()),
-                 Member("v", ty.u32()),
-                 Member("w", ty.mat4x3<f32>()),
-                 Member("x", ty.u32()),
-                 Member("y", ty.mat4x4<f32>()),
-                 Member("z", ty.f32()),
-             });
+    auto* s =
+        Structure("S", Vector{
+                           Member("a", ty.i32(), Vector{MemberSize(32_a)}),
+                           Member("b", ty.f32(), Vector{MemberAlign(128_i), MemberSize(128_a)}),
+                           Member("c", ty.vec2<f32>()),
+                           Member("d", ty.u32()),
+                           Member("e", ty.vec3<f32>()),
+                           Member("f", ty.u32()),
+                           Member("g", ty.vec4<f32>()),
+                           Member("h", ty.u32()),
+                           Member("i", ty.mat2x2<f32>()),
+                           Member("j", ty.u32()),
+                           Member("k", ty.mat2x3<f32>()),
+                           Member("l", ty.u32()),
+                           Member("m", ty.mat2x4<f32>()),
+                           Member("n", ty.u32()),
+                           Member("o", ty.mat3x2<f32>()),
+                           Member("p", ty.u32()),
+                           Member("q", ty.mat3x3<f32>()),
+                           Member("r", ty.u32()),
+                           Member("s", ty.mat3x4<f32>()),
+                           Member("t", ty.u32()),
+                           Member("u", ty.mat4x2<f32>()),
+                           Member("v", ty.u32()),
+                           Member("w", ty.mat4x3<f32>()),
+                           Member("x", ty.u32()),
+                           Member("y", ty.mat4x4<f32>()),
+                           Member("z", ty.f32()),
+                       });
 
     ast::Type type = GlobalVar("G", ty.Of(s), builtin::AddressSpace::kStorage,
                                builtin::Access::kRead, Binding(0_a), Group(0_a))
@@ -291,7 +291,7 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_NonComposites) {
 
     ASTPrinter& gen = Build();
 
-    utils::TextGenerator::TextBuffer buf;
+    tint::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(type)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
 
@@ -339,7 +339,7 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_NonComposites) {
     FIELD(0x0304, int8_t, 124, tint_pad_12)
 
     // Check that the generated string is as expected.
-    utils::StringStream expect;
+    StringStream expect;
     expect << "struct S {\n";
 #define FIELD(ADDR, TYPE, ARRAY_COUNT, NAME) \
     FormatMSLField(expect, #ADDR, #TYPE, ARRAY_COUNT, #NAME);
@@ -373,20 +373,18 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_NonComposites) {
 
 TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_Structures) {
     // inner_x: size(1024), align(512)
-    auto* inner_x =
-        Structure("inner_x", utils::Vector{
-                                 Member("a", ty.i32()),
-                                 Member("b", ty.f32(), utils::Vector{MemberAlign(512_i)}),
-                             });
+    auto* inner_x = Structure("inner_x", Vector{
+                                             Member("a", ty.i32()),
+                                             Member("b", ty.f32(), Vector{MemberAlign(512_i)}),
+                                         });
 
     // inner_y: size(516), align(4)
-    auto* inner_y =
-        Structure("inner_y", utils::Vector{
-                                 Member("a", ty.i32(), utils::Vector{MemberSize(512_a)}),
-                                 Member("b", ty.f32()),
-                             });
+    auto* inner_y = Structure("inner_y", Vector{
+                                             Member("a", ty.i32(), Vector{MemberSize(512_a)}),
+                                             Member("b", ty.f32()),
+                                         });
 
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
                                  Member("b", ty.Of(inner_x)),
                                  Member("c", ty.f32()),
@@ -400,7 +398,7 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_Structures) {
 
     ASTPrinter& gen = Build();
 
-    utils::TextGenerator::TextBuffer buf;
+    tint::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(type)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
 
@@ -416,7 +414,7 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_Structures) {
     FIELD(0x080c, int8_t, 500, tint_pad_1)
 
     // Check that the generated string is as expected.
-    utils::StringStream expect;
+    StringStream expect;
     expect << "struct S {\n";
 #define FIELD(ADDR, TYPE, ARRAY_COUNT, NAME) \
     FormatMSLField(expect, #ADDR, #TYPE, ARRAY_COUNT, #NAME);
@@ -463,9 +461,9 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_Structures) {
 
 TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_ArrayDefaultStride) {
     // inner: size(1024), align(512)
-    auto* inner = Structure("inner", utils::Vector{
+    auto* inner = Structure("inner", Vector{
                                          Member("a", ty.i32()),
-                                         Member("b", ty.f32(), utils::Vector{MemberAlign(512_i)}),
+                                         Member("b", ty.f32(), Vector{MemberAlign(512_i)}),
                                      });
 
     // array_x: size(28), align(4)
@@ -477,7 +475,7 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_ArrayDefaultStride) {
     // array_z: size(4), align(4)
     auto array_z = ty.array<f32>();
 
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
                                  Member("b", array_x),
                                  Member("c", ty.f32()),
@@ -492,7 +490,7 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_ArrayDefaultStride) {
 
     ASTPrinter& gen = Build();
 
-    utils::TextGenerator::TextBuffer buf;
+    tint::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(type)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
 
@@ -509,7 +507,7 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_ArrayDefaultStride) {
     FIELD(0x1208, int8_t, 504, tint_pad_1)
 
     // Check that the generated string is as expected.
-    utils::StringStream expect;
+    StringStream expect;
     expect << "struct S {\n";
 #define FIELD(ADDR, TYPE, ARRAY_COUNT, NAME) \
     FormatMSLField(expect, #ADDR, #TYPE, ARRAY_COUNT, #NAME);
@@ -564,7 +562,7 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
     // array: size(64), align(16)
     auto array = ty.array<vec3<f32>, 4>();
 
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
                                  Member("b", array),
                                  Member("c", ty.i32()),
@@ -576,7 +574,7 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
 
     ASTPrinter& gen = Build();
 
-    utils::TextGenerator::TextBuffer buf;
+    tint::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(type)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
 
@@ -590,7 +588,7 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
     FIELD(0x0054, int8_t, 12, tint_pad_1)
 
     // Check that the generated string is as expected.
-    utils::StringStream expect;
+    StringStream expect;
     expect << "struct S {\n";
 #define FIELD(ADDR, TYPE, ARRAY_COUNT, NAME) \
     FormatMSLField(expect, #ADDR, #TYPE, ARRAY_COUNT, #NAME);
@@ -601,36 +599,36 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
 }
 
 TEST_F(MslASTPrinterTest, AttemptTintPadSymbolCollision) {
-    auto* s = Structure("S", utils::Vector{
-                                 // uses symbols tint_pad_[0..9] and tint_pad_[20..35]
-                                 Member("tint_pad_2", ty.i32(), utils::Vector{MemberSize(32_a)}),
-                                 Member("tint_pad_20", ty.f32(),
-                                        utils::Vector{MemberAlign(128_i), MemberSize(128_u)}),
-                                 Member("tint_pad_33", ty.vec2<f32>()),
-                                 Member("tint_pad_1", ty.u32()),
-                                 Member("tint_pad_3", ty.vec3<f32>()),
-                                 Member("tint_pad_7", ty.u32()),
-                                 Member("tint_pad_25", ty.vec4<f32>()),
-                                 Member("tint_pad_5", ty.u32()),
-                                 Member("tint_pad_27", ty.mat2x2<f32>()),
-                                 Member("tint_pad_24", ty.u32()),
-                                 Member("tint_pad_23", ty.mat2x3<f32>()),
-                                 Member("tint_pad", ty.u32()),
-                                 Member("tint_pad_8", ty.mat2x4<f32>()),
-                                 Member("tint_pad_26", ty.u32()),
-                                 Member("tint_pad_29", ty.mat3x2<f32>()),
-                                 Member("tint_pad_6", ty.u32()),
-                                 Member("tint_pad_22", ty.mat3x3<f32>()),
-                                 Member("tint_pad_32", ty.u32()),
-                                 Member("tint_pad_34", ty.mat3x4<f32>()),
-                                 Member("tint_pad_35", ty.u32()),
-                                 Member("tint_pad_30", ty.mat4x2<f32>()),
-                                 Member("tint_pad_9", ty.u32()),
-                                 Member("tint_pad_31", ty.mat4x3<f32>()),
-                                 Member("tint_pad_28", ty.u32()),
-                                 Member("tint_pad_4", ty.mat4x4<f32>()),
-                                 Member("tint_pad_21", ty.f32()),
-                             });
+    auto* s = Structure(
+        "S", Vector{
+                 // uses symbols tint_pad_[0..9] and tint_pad_[20..35]
+                 Member("tint_pad_2", ty.i32(), Vector{MemberSize(32_a)}),
+                 Member("tint_pad_20", ty.f32(), Vector{MemberAlign(128_i), MemberSize(128_u)}),
+                 Member("tint_pad_33", ty.vec2<f32>()),
+                 Member("tint_pad_1", ty.u32()),
+                 Member("tint_pad_3", ty.vec3<f32>()),
+                 Member("tint_pad_7", ty.u32()),
+                 Member("tint_pad_25", ty.vec4<f32>()),
+                 Member("tint_pad_5", ty.u32()),
+                 Member("tint_pad_27", ty.mat2x2<f32>()),
+                 Member("tint_pad_24", ty.u32()),
+                 Member("tint_pad_23", ty.mat2x3<f32>()),
+                 Member("tint_pad", ty.u32()),
+                 Member("tint_pad_8", ty.mat2x4<f32>()),
+                 Member("tint_pad_26", ty.u32()),
+                 Member("tint_pad_29", ty.mat3x2<f32>()),
+                 Member("tint_pad_6", ty.u32()),
+                 Member("tint_pad_22", ty.mat3x3<f32>()),
+                 Member("tint_pad_32", ty.u32()),
+                 Member("tint_pad_34", ty.mat3x4<f32>()),
+                 Member("tint_pad_35", ty.u32()),
+                 Member("tint_pad_30", ty.mat4x2<f32>()),
+                 Member("tint_pad_9", ty.u32()),
+                 Member("tint_pad_31", ty.mat4x3<f32>()),
+                 Member("tint_pad_28", ty.u32()),
+                 Member("tint_pad_4", ty.mat4x4<f32>()),
+                 Member("tint_pad_21", ty.f32()),
+             });
 
     ast::Type type = GlobalVar("G", ty.Of(s), builtin::AddressSpace::kStorage,
                                builtin::Access::kRead, Binding(0_a), Group(0_a))
@@ -638,7 +636,7 @@ TEST_F(MslASTPrinterTest, AttemptTintPadSymbolCollision) {
 
     ASTPrinter& gen = Build();
 
-    utils::TextGenerator::TextBuffer buf;
+    tint::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(type)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {
@@ -686,7 +684,7 @@ TEST_F(MslASTPrinterTest, AttemptTintPadSymbolCollision) {
 }
 
 TEST_F(MslASTPrinterTest, EmitType_Struct_WithAttribute) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
@@ -697,7 +695,7 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_WithAttribute) {
 
     ASTPrinter& gen = Build();
 
-    utils::TextGenerator::TextBuffer buf;
+    tint::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(type)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {
@@ -712,7 +710,7 @@ TEST_F(MslASTPrinterTest, EmitType_U32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, u32)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "uint");
 }
@@ -723,7 +721,7 @@ TEST_F(MslASTPrinterTest, EmitType_Vector) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, vec3)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float3");
 }
@@ -733,7 +731,7 @@ TEST_F(MslASTPrinterTest, EmitType_Void) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, void_)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "void");
 }
@@ -743,7 +741,7 @@ TEST_F(MslASTPrinterTest, EmitType_Sampler) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, sampler)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "sampler");
 }
@@ -753,7 +751,7 @@ TEST_F(MslASTPrinterTest, EmitType_SamplerComparison) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, sampler)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "sampler");
 }
@@ -763,7 +761,7 @@ struct MslDepthTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, MslDepthTextureData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.dim;
     out << str.str();
     return out;
@@ -776,7 +774,7 @@ TEST_P(MslDepthTexturesTest, Emit) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, &s)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -797,7 +795,7 @@ TEST_F(MslDepthMultisampledTexturesTest, Emit) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, &s)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "depth2d_ms<float, access::read>");
 }
@@ -807,7 +805,7 @@ struct MslTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, MslTextureData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.dim;
     out << str.str();
     return out;
@@ -821,7 +819,7 @@ TEST_P(MslSampledtexturesTest, Emit) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, s)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }
@@ -843,7 +841,7 @@ TEST_F(MslASTPrinterTest, Emit_TypeMultisampledTexture) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, ms)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "texture2d_ms<uint, access::read>");
 }
@@ -853,7 +851,7 @@ struct MslStorageTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, MslStorageTextureData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.dim;
     return out << str.str();
 }
@@ -867,7 +865,7 @@ TEST_P(MslStorageTexturesTest, Emit) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(type))) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }

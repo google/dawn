@@ -56,7 +56,7 @@ TEST_F(GlslASTPrinterTest_Case, Emit_Case_BreaksByDefault) {
 TEST_F(GlslASTPrinterTest_Case, Emit_Case_MultipleSelectors) {
     auto* s = Switch(1_i,
                      Case(
-                         utils::Vector{
+                         Vector{
                              CaseSelector(5_i),
                              CaseSelector(6_i),
                          },

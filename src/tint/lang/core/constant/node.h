@@ -20,7 +20,7 @@
 namespace tint::constant {
 
 /// Node is the base class for all constant nodes
-class Node : public utils::Castable<Node> {
+class Node : public Castable<Node> {
   public:
     /// Constructor
     Node();

@@ -66,7 +66,7 @@ void ClassifyTemplateArguments(std::vector<Token>& tokens) {
         Token* token;         // A pointer to the opening '<' token
         uint64_t expr_depth;  // The value of 'expr_depth' for the opening '<'
     };
-    utils::Vector<StackEntry, 16> stack;
+    Vector<StackEntry, 16> stack;
 
     for (size_t i = 0; i < count - 1; i++) {
         switch (tokens[i].type()) {

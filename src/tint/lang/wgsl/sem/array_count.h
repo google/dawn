@@ -29,8 +29,7 @@ namespace tint::sem {
 /// override N : i32;
 /// type arr = array<i32, N>
 /// ```
-class NamedOverrideArrayCount final
-    : public utils::Castable<NamedOverrideArrayCount, type::ArrayCount> {
+class NamedOverrideArrayCount final : public Castable<NamedOverrideArrayCount, type::ArrayCount> {
   public:
     /// Constructor
     /// @param var the `override` variable
@@ -59,7 +58,7 @@ class NamedOverrideArrayCount final
 /// type arr = array<i32, N*2>
 /// ```
 class UnnamedOverrideArrayCount final
-    : public utils::Castable<UnnamedOverrideArrayCount, type::ArrayCount> {
+    : public Castable<UnnamedOverrideArrayCount, type::ArrayCount> {
   public:
     /// Constructor
     /// @param e the override expression

@@ -58,7 +58,7 @@ ir::Loop* Builder::Loop() {
     return Append(ir.instructions.Create<ir::Loop>(Block(), MultiInBlock(), MultiInBlock()));
 }
 
-Block* Builder::Case(ir::Switch* s, utils::VectorRef<Switch::CaseSelector> selectors) {
+Block* Builder::Case(ir::Switch* s, VectorRef<Switch::CaseSelector> selectors) {
     auto* block = Block();
     s->Cases().Push(Switch::Case{std::move(selectors), block});
     block->SetParent(s);
@@ -66,7 +66,7 @@ Block* Builder::Case(ir::Switch* s, utils::VectorRef<Switch::CaseSelector> selec
 }
 
 Block* Builder::Case(ir::Switch* s, std::initializer_list<Switch::CaseSelector> selectors) {
-    return Case(s, utils::Vector<Switch::CaseSelector, 4>(selectors));
+    return Case(s, Vector<Switch::CaseSelector, 4>(selectors));
 }
 
 ir::Discard* Builder::Discard() {

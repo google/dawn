@@ -33,7 +33,7 @@ TEST_F(GlslASTPrinterTest_Bitcast, EmitExpression_Bitcast_Float) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, bitcast);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "intBitsToFloat(a)");
@@ -46,7 +46,7 @@ TEST_F(GlslASTPrinterTest_Bitcast, EmitExpression_Bitcast_Int) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, bitcast);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "int(a)");
@@ -59,7 +59,7 @@ TEST_F(GlslASTPrinterTest_Bitcast, EmitExpression_Bitcast_Uint) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, bitcast);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "uint(a)");

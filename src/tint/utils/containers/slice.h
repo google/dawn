@@ -23,7 +23,7 @@
 #include "src/tint/utils/rtti/castable.h"
 #include "src/tint/utils/traits/traits.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// A type used to indicate an empty array.
 struct EmptyType {};
@@ -44,7 +44,7 @@ namespace detail {
 template <typename TO, typename FROM>
 static constexpr bool ConstRemoved = std::is_const_v<FROM> && !std::is_const_v<TO>;
 
-/// Private implementation of tint::utils::CanReinterpretSlice.
+/// Private implementation of tint::CanReinterpretSlice.
 /// Specialized for the case of TO equal to FROM, which is the common case, and avoids inspection of
 /// the base classes, which can be troublesome if the slice is of an incomplete type.
 template <ReinterpretMode MODE, typename TO, typename FROM>
@@ -54,7 +54,7 @@ struct CanReinterpretSlice {
     using FROM_EL = std::remove_pointer_t<std::decay_t<FROM>>;
 
   public:
-    /// @see utils::CanReinterpretSlice
+    /// @see tint::CanReinterpretSlice
     static constexpr bool value =
         // const can only be applied, not removed
         !ConstRemoved<TO, FROM> &&
@@ -74,8 +74,8 @@ struct CanReinterpretSlice {
           // or
           //   derives from TO
           (std::is_same_v<std::remove_const_t<FROM_EL>, std::remove_const_t<TO_EL>> ||
-           (IsCastable<FROM_EL, TO_EL> && (MODE == ReinterpretMode::kUnsafe ||
-                                           utils::traits::IsTypeOrDerived<FROM_EL, TO_EL>)))));
+           (IsCastable<FROM_EL, TO_EL> &&
+            (MODE == ReinterpretMode::kUnsafe || tint::traits::IsTypeOrDerived<FROM_EL, TO_EL>)))));
 };
 
 /// Specialization of 'CanReinterpretSlice' for when TO and FROM are equal types.
@@ -96,7 +96,7 @@ struct CanReinterpretSlice<MODE, T, T> {
 ///     the same type as, or is an ancestor of the pointee type of `FROM`.
 template <ReinterpretMode MODE, typename TO, typename FROM>
 static constexpr bool CanReinterpretSlice =
-    utils::detail::CanReinterpretSlice<MODE, TO, FROM>::value;
+    tint::detail::CanReinterpretSlice<MODE, TO, FROM>::value;
 
 /// A slice represents a contigious array of elements of type T.
 template <typename T>
@@ -253,6 +253,6 @@ struct Slice {
 template <typename T, size_t N>
 Slice(T (&elements)[N]) -> Slice<T>;
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_CONTAINERS_SLICE_H_

@@ -23,8 +23,8 @@ namespace tint::ast {
 BlockStatement::BlockStatement(GenerationID pid,
                                NodeID nid,
                                const Source& src,
-                               utils::VectorRef<const Statement*> stmts,
-                               utils::VectorRef<const Attribute*> attrs)
+                               VectorRef<const Statement*> stmts,
+                               VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src), statements(std::move(stmts)), attributes(attrs) {
     for (auto* stmt : statements) {
         TINT_ASSERT(AST, stmt);

@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 TEST(CRC32Test, Compiletime) {
@@ -32,4 +32,4 @@ TEST(CRC32Test, Runtime) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

@@ -103,14 +103,12 @@ struct DependencyEdgeCmp {
         return lhs.from == rhs.from && lhs.to == rhs.to;
     }
     /// Hashing operator
-    inline std::size_t operator()(const DependencyEdge& d) const {
-        return utils::Hash(d.from, d.to);
-    }
+    inline std::size_t operator()(const DependencyEdge& d) const { return Hash(d.from, d.to); }
 };
 
 /// A map of DependencyEdge to DependencyInfo
 using DependencyEdges =
-    utils::Hashmap<DependencyEdge, DependencyInfo, 64, DependencyEdgeCmp, DependencyEdgeCmp>;
+    Hashmap<DependencyEdge, DependencyInfo, 64, DependencyEdgeCmp, DependencyEdgeCmp>;
 
 /// Global describes a module-scope variable, type or function.
 struct Global {
@@ -119,11 +117,11 @@ struct Global {
     /// The declaration ast::Node
     const ast::Node* node;
     /// A list of dependencies that this global depends on
-    utils::Vector<Global*, 8> deps;
+    Vector<Global*, 8> deps;
 };
 
 /// A map of global name to Global
-using GlobalMap = utils::Hashmap<Symbol, Global*, 16>;
+using GlobalMap = Hashmap<Symbol, Global*, 16>;
 
 /// Raises an ICE that a global ast::Node type was not handled by this system.
 void UnhandledNode(diag::List& diagnostics, const ast::Node* node) {
@@ -242,7 +240,7 @@ class DependencyScanner {
 
     /// Traverses the statements, performing symbol resolution and determining
     /// global dependencies.
-    void TraverseStatements(utils::VectorRef<const ast::Statement*> stmts) {
+    void TraverseStatements(VectorRef<const ast::Statement*> stmts) {
         for (auto* s : stmts) {
             TraverseStatement(s);
         }
@@ -343,7 +341,7 @@ class DependencyScanner {
             return;
         }
 
-        utils::Vector<const ast::Expression*, 8> pending{root_expr};
+        Vector<const ast::Expression*, 8> pending{root_expr};
         while (!pending.IsEmpty()) {
             ast::TraverseExpressions(pending.Pop(), diagnostics_, [&](const ast::Expression* expr) {
                 Switch(
@@ -365,7 +363,7 @@ class DependencyScanner {
 
     /// Traverses the attribute list, performing symbol resolution and
     /// determining global dependencies.
-    void TraverseAttributes(utils::VectorRef<const ast::Attribute*> attrs) {
+    void TraverseAttributes(VectorRef<const ast::Attribute*> attrs) {
         for (auto* attr : attrs) {
             TraverseAttribute(attr);
         }
@@ -579,7 +577,7 @@ class DependencyScanner {
         graph_.resolved_identifiers.Add(from, ResolvedIdentifier(resolved));
     }
 
-    using VariableMap = utils::Hashmap<Symbol, const ast::Variable*, 32>;
+    using VariableMap = Hashmap<Symbol, const ast::Variable*, 32>;
     const GlobalMap& globals_;
     diag::List& diagnostics_;
     DependencyGraph& graph_;
@@ -588,7 +586,7 @@ class DependencyScanner {
     ScopeStack<Symbol, const ast::Node*> scope_stack_;
     Global* current_global_ = nullptr;
 
-    utils::Hashmap<Symbol, BuiltinInfo, 64> builtin_info_map;
+    Hashmap<Symbol, BuiltinInfo, 64> builtin_info_map;
 };
 
 /// The global dependency analysis system
@@ -709,7 +707,7 @@ struct DependencyAnalysis {
             return;
         }
 
-        utils::Vector<Entry, 16> stack{Entry{root, 0}};
+        Vector<Entry, 16> stack{Entry{root, 0}};
         while (true) {
             auto& entry = stack.Back();
             // Have we exhausted the dependencies of entry.global?
@@ -755,7 +753,7 @@ struct DependencyAnalysis {
                 // Skip directives here, as they are already added.
                 continue;
             }
-            utils::UniqueVector<const Global*, 8> stack;
+            UniqueVector<const Global*, 8> stack;
             TraverseDependencies(
                 global,
                 [&](const Global* g) {  // Enter
@@ -805,8 +803,8 @@ struct DependencyAnalysis {
     /// @param root is the global that starts the cyclic dependency, which must be
     /// found in `stack`.
     /// @param stack is the global dependency stack that contains a loop.
-    void CyclicDependencyFound(const Global* root, utils::VectorRef<const Global*> stack) {
-        utils::StringStream msg;
+    void CyclicDependencyFound(const Global* root, VectorRef<const Global*> stack) {
+        StringStream msg;
         msg << "cyclic dependency found: ";
         constexpr size_t kLoopNotStarted = ~0u;
         size_t loop_start = kLoopNotStarted;
@@ -862,7 +860,7 @@ struct DependencyAnalysis {
     DependencyGraph& graph_;
 
     /// Allocator of Globals
-    utils::BlockAllocator<Global> allocator_;
+    BlockAllocator<Global> allocator_;
 
     /// Global map, keyed by name. Populated by GatherGlobals().
     GlobalMap globals_;
@@ -871,10 +869,10 @@ struct DependencyAnalysis {
     DependencyEdges dependency_edges_;
 
     /// Globals in declaration order. Populated by GatherGlobals().
-    utils::Vector<Global*, 64> declaration_order_;
+    Vector<Global*, 64> declaration_order_;
 
     /// Globals in sorted dependency order. Populated by SortGlobals().
-    utils::UniqueVector<const ast::Node*, 64> sorted_;
+    UniqueVector<const ast::Node*, 64> sorted_;
 };
 
 }  // namespace
@@ -922,28 +920,28 @@ std::string ResolvedIdentifier::String(diag::List& diagnostics) const {
             });
     }
     if (auto builtin_fn = BuiltinFunction(); builtin_fn != builtin::Function::kNone) {
-        return "builtin function '" + utils::ToString(builtin_fn) + "'";
+        return "builtin function '" + tint::ToString(builtin_fn) + "'";
     }
     if (auto builtin_ty = BuiltinType(); builtin_ty != builtin::Builtin::kUndefined) {
-        return "builtin type '" + utils::ToString(builtin_ty) + "'";
+        return "builtin type '" + tint::ToString(builtin_ty) + "'";
     }
     if (auto builtin_val = BuiltinValue(); builtin_val != builtin::BuiltinValue::kUndefined) {
-        return "builtin value '" + utils::ToString(builtin_val) + "'";
+        return "builtin value '" + tint::ToString(builtin_val) + "'";
     }
     if (auto access = Access(); access != builtin::Access::kUndefined) {
-        return "access '" + utils::ToString(access) + "'";
+        return "access '" + tint::ToString(access) + "'";
     }
     if (auto addr = AddressSpace(); addr != builtin::AddressSpace::kUndefined) {
-        return "address space '" + utils::ToString(addr) + "'";
+        return "address space '" + tint::ToString(addr) + "'";
     }
     if (auto type = InterpolationType(); type != builtin::InterpolationType::kUndefined) {
-        return "interpolation type '" + utils::ToString(type) + "'";
+        return "interpolation type '" + tint::ToString(type) + "'";
     }
     if (auto smpl = InterpolationSampling(); smpl != builtin::InterpolationSampling::kUndefined) {
-        return "interpolation sampling '" + utils::ToString(smpl) + "'";
+        return "interpolation sampling '" + tint::ToString(smpl) + "'";
     }
     if (auto fmt = TexelFormat(); fmt != builtin::TexelFormat::kUndefined) {
-        return "texel format '" + utils::ToString(fmt) + "'";
+        return "texel format '" + tint::ToString(fmt) + "'";
     }
     if (auto* unresolved = Unresolved()) {
         return "unresolved identifier '" + unresolved->name + "'";

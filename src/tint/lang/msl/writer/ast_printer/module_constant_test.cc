@@ -25,7 +25,7 @@ using MslASTPrinterTest = TestHelper;
 
 TEST_F(MslASTPrinterTest, Emit_GlobalConst_AInt) {
     auto* var = GlobalConst("G", Expr(1_a));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
+    Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
 
     ASTPrinter& gen = Build();
 
@@ -43,7 +43,7 @@ void f() {
 
 TEST_F(MslASTPrinterTest, Emit_GlobalConst_AFloat) {
     auto* var = GlobalConst("G", Expr(1._a));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
+    Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
 
     ASTPrinter& gen = Build();
 
@@ -61,7 +61,7 @@ void f() {
 
 TEST_F(MslASTPrinterTest, Emit_GlobalConst_i32) {
     auto* var = GlobalConst("G", Expr(1_i));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
+    Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
 
     ASTPrinter& gen = Build();
 
@@ -79,7 +79,7 @@ void f() {
 
 TEST_F(MslASTPrinterTest, Emit_GlobalConst_u32) {
     auto* var = GlobalConst("G", Expr(1_u));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
+    Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
 
     ASTPrinter& gen = Build();
 
@@ -97,7 +97,7 @@ void f() {
 
 TEST_F(MslASTPrinterTest, Emit_GlobalConst_f32) {
     auto* var = GlobalConst("G", Expr(1_f));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
+    Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
 
     ASTPrinter& gen = Build();
 
@@ -117,7 +117,7 @@ TEST_F(MslASTPrinterTest, Emit_GlobalConst_f16) {
     Enable(builtin::Extension::kF16);
 
     auto* var = GlobalConst("G", Expr(1_h));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
+    Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
 
     ASTPrinter& gen = Build();
 
@@ -135,7 +135,7 @@ void f() {
 
 TEST_F(MslASTPrinterTest, Emit_GlobalConst_vec3_AInt) {
     auto* var = GlobalConst("G", Call<vec3<Infer>>(1_a, 2_a, 3_a));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
+    Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
 
     ASTPrinter& gen = Build();
 
@@ -153,7 +153,7 @@ void f() {
 
 TEST_F(MslASTPrinterTest, Emit_GlobalConst_vec3_AFloat) {
     auto* var = GlobalConst("G", Call<vec3<Infer>>(1._a, 2._a, 3._a));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
+    Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
 
     ASTPrinter& gen = Build();
 
@@ -171,7 +171,7 @@ void f() {
 
 TEST_F(MslASTPrinterTest, Emit_GlobalConst_vec3_f32) {
     auto* var = GlobalConst("G", Call<vec3<f32>>(1_f, 2_f, 3_f));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
+    Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
 
     ASTPrinter& gen = Build();
 
@@ -191,7 +191,7 @@ TEST_F(MslASTPrinterTest, Emit_GlobalConst_vec3_f16) {
     Enable(builtin::Extension::kF16);
 
     auto* var = GlobalConst("G", Call<vec3<f16>>(1_h, 2_h, 3_h));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
+    Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
 
     ASTPrinter& gen = Build();
 
@@ -209,7 +209,7 @@ void f() {
 
 TEST_F(MslASTPrinterTest, Emit_GlobalConst_mat2x3_AFloat) {
     auto* var = GlobalConst("G", Call<mat2x3<Infer>>(1._a, 2._a, 3._a, 4._a, 5._a, 6._a));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
+    Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
 
     ASTPrinter& gen = Build();
 
@@ -227,7 +227,7 @@ void f() {
 
 TEST_F(MslASTPrinterTest, Emit_GlobalConst_mat2x3_f32) {
     auto* var = GlobalConst("G", Call<mat2x3<f32>>(1_f, 2_f, 3_f, 4_f, 5_f, 6_f));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
+    Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
 
     ASTPrinter& gen = Build();
 
@@ -247,7 +247,7 @@ TEST_F(MslASTPrinterTest, Emit_GlobalConst_mat2x3_f16) {
     Enable(builtin::Extension::kF16);
 
     auto* var = GlobalConst("G", Call<mat2x3<f16>>(1_h, 2_h, 3_h, 4_h, 5_h, 6_h));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
+    Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
 
     ASTPrinter& gen = Build();
 
@@ -265,7 +265,7 @@ void f() {
 
 TEST_F(MslASTPrinterTest, Emit_GlobalConst_arr_f32) {
     auto* var = GlobalConst("G", Call(ty.array<f32, 3>(), 1_f, 2_f, 3_f));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
+    Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
 
     ASTPrinter& gen = Build();
 
@@ -298,7 +298,7 @@ TEST_F(MslASTPrinterTest, Emit_GlobalConst_arr_vec2_bool) {
     auto* var = GlobalConst("G", Call<array<vec2<bool>, 3>>(Call<vec2<bool>>(true, false),  //
                                                             Call<vec2<bool>>(false, true),  //
                                                             Call<vec2<bool>>(true, true)));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(Let("l", Expr(var)))});
+    Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
 
     ASTPrinter& gen = Build();
 

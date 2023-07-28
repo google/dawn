@@ -59,7 +59,7 @@ TEST_F(IR_SwizzleTest, Fail_EmptyIndices) {
             Module mod;
             Builder b{mod};
             auto* var = b.Var(mod.Types().ptr<function, i32>());
-            b.Swizzle(mod.Types().i32(), var, utils::Empty);
+            b.Swizzle(mod.Types().i32(), var, tint::Empty);
         },
         "");
 }

@@ -30,7 +30,7 @@ namespace tint::ast {
 ///   const max_f32 : f32 = 0x1.fffffep+127;    // f32 typed constant
 /// ```
 /// @see https://www.w3.org/TR/WGSL/#creation-time-consts
-class Const final : public utils::Castable<Const, Variable> {
+class Const final : public Castable<Const, Variable> {
   public:
     /// Create a 'const' creation-time value variable.
     /// @param pid the identifier of the program that owns this node
@@ -46,7 +46,7 @@ class Const final : public utils::Castable<Const, Variable> {
           const Identifier* name,
           Type type,
           const Expression* initializer,
-          utils::VectorRef<const Attribute*> attributes);
+          VectorRef<const Attribute*> attributes);
 
     /// Destructor
     ~Const() override;

@@ -44,7 +44,7 @@ T* FindSingleInstruction(ir::Module& mod) {
     }
     if (count > 1) {
         ADD_FAILURE() << "FindSingleInstruction() found " << count << " nodes of type "
-                      << utils::TypeInfo::Of<T>().name;
+                      << tint::TypeInfo::Of<T>().name;
     }
     return found;
 }
@@ -54,7 +54,7 @@ using namespace tint::number_suffixes;  // NOLINT
 using IR_FromProgramTest = helpers::IRProgramTest;
 
 TEST_F(IR_FromProgramTest, Func) {
-    Func("f", utils::Empty, ty.void_(), utils::Empty);
+    Func("f", tint::Empty, ty.void_(), tint::Empty);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -75,7 +75,7 @@ TEST_F(IR_FromProgramTest, Func) {
 }
 
 TEST_F(IR_FromProgramTest, Func_WithParam) {
-    Func("f", utils::Vector{Param("a", ty.u32())}, ty.u32(), utils::Vector{Return("a")});
+    Func("f", Vector{Param("a", ty.u32())}, ty.u32(), Vector{Return("a")});
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -96,8 +96,8 @@ TEST_F(IR_FromProgramTest, Func_WithParam) {
 }
 
 TEST_F(IR_FromProgramTest, Func_WithMultipleParam) {
-    Func("f", utils::Vector{Param("a", ty.u32()), Param("b", ty.i32()), Param("c", ty.bool_())},
-         ty.void_(), utils::Empty);
+    Func("f", Vector{Param("a", ty.u32()), Param("b", ty.i32()), Param("c", ty.bool_())},
+         ty.void_(), tint::Empty);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -118,8 +118,7 @@ TEST_F(IR_FromProgramTest, Func_WithMultipleParam) {
 }
 
 TEST_F(IR_FromProgramTest, EntryPoint) {
-    Func("f", utils::Empty, ty.void_(), utils::Empty,
-         utils::Vector{Stage(ast::PipelineStage::kFragment)});
+    Func("f", tint::Empty, ty.void_(), tint::Empty, Vector{Stage(ast::PipelineStage::kFragment)});
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -821,9 +820,9 @@ TEST_F(IR_FromProgramTest, For_NoInitCondOrContinuing) {
 }
 
 TEST_F(IR_FromProgramTest, Switch) {
-    auto* ast_switch = Switch(
-        1_i, utils::Vector{Case(utils::Vector{CaseSelector(0_i)}, Block()),
-                           Case(utils::Vector{CaseSelector(1_i)}, Block()), DefaultCase(Block())});
+    auto* ast_switch =
+        Switch(1_i, Vector{Case(Vector{CaseSelector(0_i)}, Block()),
+                           Case(Vector{CaseSelector(1_i)}, Block()), DefaultCase(Block())});
 
     WrapInFunction(ast_switch);
 
@@ -874,8 +873,7 @@ TEST_F(IR_FromProgramTest, Switch) {
 TEST_F(IR_FromProgramTest, Switch_MultiSelector) {
     auto* ast_switch = Switch(
         1_i,
-        utils::Vector{Case(
-            utils::Vector{CaseSelector(0_i), CaseSelector(1_i), DefaultCaseSelector()}, Block())});
+        Vector{Case(Vector{CaseSelector(0_i), CaseSelector(1_i), DefaultCaseSelector()}, Block())});
 
     WrapInFunction(ast_switch);
 
@@ -915,7 +913,7 @@ TEST_F(IR_FromProgramTest, Switch_MultiSelector) {
 }
 
 TEST_F(IR_FromProgramTest, Switch_OnlyDefault) {
-    auto* ast_switch = Switch(1_i, utils::Vector{DefaultCase(Block())});
+    auto* ast_switch = Switch(1_i, Vector{DefaultCase(Block())});
     WrapInFunction(ast_switch);
 
     auto res = Build();
@@ -946,9 +944,9 @@ TEST_F(IR_FromProgramTest, Switch_OnlyDefault) {
 }
 
 TEST_F(IR_FromProgramTest, Switch_WithBreak) {
-    auto* ast_switch = Switch(1_i, utils::Vector{Case(utils::Vector{CaseSelector(0_i)},
-                                                      Block(Break(), If(true, Block(Return())))),
-                                                 DefaultCase(Block())});
+    auto* ast_switch = Switch(
+        1_i, Vector{Case(Vector{CaseSelector(0_i)}, Block(Break(), If(true, Block(Return())))),
+                    DefaultCase(Block())});
     WrapInFunction(ast_switch);
 
     auto res = Build();
@@ -989,9 +987,8 @@ TEST_F(IR_FromProgramTest, Switch_WithBreak) {
 }
 
 TEST_F(IR_FromProgramTest, Switch_AllReturn) {
-    auto* ast_switch =
-        Switch(1_i, utils::Vector{Case(utils::Vector{CaseSelector(0_i)}, Block(Return())),
-                                  DefaultCase(Block(Return()))});
+    auto* ast_switch = Switch(1_i, Vector{Case(Vector{CaseSelector(0_i)}, Block(Return())),
+                                          DefaultCase(Block(Return()))});
     auto* ast_if = If(true, Block(Return()));
     WrapInFunction(ast_switch, ast_if);
 
@@ -1032,7 +1029,7 @@ TEST_F(IR_FromProgramTest, Switch_AllReturn) {
 }
 
 TEST_F(IR_FromProgramTest, Emit_Phony) {
-    Func("b", utils::Empty, ty.i32(), Return(1_i));
+    Func("b", tint::Empty, ty.i32(), Return(1_i));
     WrapInFunction(Ignore(Call("b")));
 
     auto m = Build();
@@ -1054,12 +1051,11 @@ TEST_F(IR_FromProgramTest, Emit_Phony) {
 }
 
 TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Invariant) {
-    Func(
-        "f",
-        utils::Vector{Param("a", ty.vec4<f32>(),
-                            utils::Vector{Invariant(), Builtin(builtin::BuiltinValue::kPosition)})},
-        ty.vec4<f32>(), utils::Vector{Return("a")},
-        utils::Vector{Stage(ast::PipelineStage::kFragment)}, utils::Vector{Location(1_i)});
+    Func("f",
+         Vector{Param("a", ty.vec4<f32>(),
+                      Vector{Invariant(), Builtin(builtin::BuiltinValue::kPosition)})},
+         ty.vec4<f32>(), Vector{Return("a")}, Vector{Stage(ast::PipelineStage::kFragment)},
+         Vector{Location(1_i)});
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
@@ -1074,9 +1070,8 @@ TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Invariant) {
 }
 
 TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location) {
-    Func("f", utils::Vector{Param("a", ty.f32(), utils::Vector{Location(2_i)})}, ty.f32(),
-         utils::Vector{Return("a")}, utils::Vector{Stage(ast::PipelineStage::kFragment)},
-         utils::Vector{Location(1_i)});
+    Func("f", Vector{Param("a", ty.f32(), Vector{Location(2_i)})}, ty.f32(), Vector{Return("a")},
+         Vector{Stage(ast::PipelineStage::kFragment)}, Vector{Location(1_i)});
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -1092,12 +1087,12 @@ TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location) {
 
 TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location_WithInterpolation_LinearCentroid) {
     Func("f",
-         utils::Vector{Param(
-             "a", ty.f32(),
-             utils::Vector{Location(2_i), Interpolate(builtin::InterpolationType::kLinear,
-                                                      builtin::InterpolationSampling::kCentroid)})},
-         ty.f32(), utils::Vector{Return("a")}, utils::Vector{Stage(ast::PipelineStage::kFragment)},
-         utils::Vector{Location(1_i)});
+         Vector{
+             Param("a", ty.f32(),
+                   Vector{Location(2_i), Interpolate(builtin::InterpolationType::kLinear,
+                                                     builtin::InterpolationSampling::kCentroid)})},
+         ty.f32(), Vector{Return("a")}, Vector{Stage(ast::PipelineStage::kFragment)},
+         Vector{Location(1_i)});
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -1114,11 +1109,10 @@ TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location_WithInterpolati
 
 TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location_WithInterpolation_Flat) {
     Func("f",
-         utils::Vector{
-             Param("a", ty.f32(),
-                   utils::Vector{Location(2_i), Interpolate(builtin::InterpolationType::kFlat)})},
-         ty.f32(), utils::Vector{Return("a")}, utils::Vector{Stage(ast::PipelineStage::kFragment)},
-         utils::Vector{Location(1_i)});
+         Vector{Param("a", ty.f32(),
+                      Vector{Location(2_i), Interpolate(builtin::InterpolationType::kFlat)})},
+         ty.f32(), Vector{Return("a")}, Vector{Stage(ast::PipelineStage::kFragment)},
+         Vector{Location(1_i)});
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");

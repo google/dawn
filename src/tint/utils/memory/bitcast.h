@@ -19,7 +19,7 @@
 #include <cstring>
 #include <type_traits>
 
-namespace tint::utils {
+namespace tint {
 
 /// Bitcast performs a cast of `from` to the `TO` type using a memcpy.
 /// This unsafe cast avoids triggering Clang's Control Flow Integrity checks.
@@ -48,6 +48,6 @@ inline TO Bitcast(FROM&& from) {
     return to;
 }
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_MEMORY_BITCAST_H_

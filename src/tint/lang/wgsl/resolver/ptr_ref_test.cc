@@ -66,7 +66,7 @@ TEST_F(ResolverPtrRefTest, AddressOfThenDeref) {
 TEST_F(ResolverPtrRefTest, DefaultPtrAddressSpace) {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
-    auto* buf = Structure("S", utils::Vector{Member("m", ty.i32())});
+    auto* buf = Structure("S", Vector{Member("m", ty.i32())});
     auto* function = Var("f", ty.i32());
     auto* private_ = GlobalVar("p", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* workgroup = GlobalVar("w", ty.i32(), builtin::AddressSpace::kWorkgroup);

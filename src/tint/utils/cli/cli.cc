@@ -22,12 +22,12 @@
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/text/string.h"
 
-namespace tint::utils::cli {
+namespace tint::cli {
 
 Option::~Option() = default;
 
 void OptionSet::ShowHelp(std::ostream& s_out) {
-    utils::Vector<const Option*, 32> sorted_options;
+    Vector<const Option*, 32> sorted_options;
     for (auto* opt : options.Objects()) {
         sorted_options.Push(opt);
     }
@@ -37,7 +37,7 @@ void OptionSet::ShowHelp(std::ostream& s_out) {
         std::string left;
         std::string right;
     };
-    utils::Vector<CmdInfo, 64> cmd_infos;
+    Vector<CmdInfo, 64> cmd_infos;
 
     for (auto* opt : sorted_options) {
         {
@@ -71,7 +71,7 @@ void OptionSet::ShowHelp(std::ostream& s_out) {
     // Measure
     size_t left_width = 0;
     for (auto& cmd_info : cmd_infos) {
-        for (auto line : utils::Split(cmd_info.left, "\n")) {
+        for (auto line : tint::Split(cmd_info.left, "\n")) {
             if (line.length() < kMaxRightOffset) {
                 left_width = std::max(left_width, line.length());
             }
@@ -88,8 +88,8 @@ void OptionSet::ShowHelp(std::ostream& s_out) {
     };
 
     for (auto& cmd_info : cmd_infos) {
-        auto left_lines = utils::Split(cmd_info.left, "\n");
-        auto right_lines = utils::Split(cmd_info.right, "\n");
+        auto left_lines = tint::Split(cmd_info.left, "\n");
+        auto right_lines = tint::Split(cmd_info.right, "\n");
 
         size_t num_lines = std::max(left_lines.Length(), right_lines.Length());
         for (size_t i = 0; i < num_lines; i++) {
@@ -119,9 +119,9 @@ void OptionSet::ShowHelp(std::ostream& s_out) {
 }
 
 Result<OptionSet::Unconsumed> OptionSet::Parse(std::ostream& s_err,
-                                               utils::VectorRef<std::string_view> arguments_raw) {
+                                               VectorRef<std::string_view> arguments_raw) {
     // Build a map of name to option, and set defaults
-    utils::Hashmap<std::string, Option*, 32> options_by_name;
+    Hashmap<std::string, Option*, 32> options_by_name;
     for (auto* opt : options.Objects()) {
         opt->SetDefault();
         for (auto name : {opt->Name(), opt->Alias(), opt->ShortName()}) {
@@ -145,7 +145,7 @@ Result<OptionSet::Unconsumed> OptionSet::Parse(std::ostream& s_err,
         arguments.push_back(arg);
     }
 
-    utils::Hashset<Option*, 8> options_parsed;
+    Hashset<Option*, 8> options_parsed;
 
     Unconsumed unconsumed;
     while (!arguments.empty()) {
@@ -166,8 +166,8 @@ Result<OptionSet::Unconsumed> OptionSet::Parse(std::ostream& s_err,
             auto names = options_by_name.Keys();
             auto alternatives =
                 Transform(names, [&](const std::string& s) { return std::string_view(s); });
-            utils::StringStream ss;
-            utils::SuggestAlternativeOptions opts;
+            StringStream ss;
+            tint::SuggestAlternativeOptions opts;
             opts.prefix = "--";
             opts.list_possible_values = false;
             SuggestAlternatives(arg, alternatives.Slice(), ss, opts);
@@ -179,4 +179,4 @@ Result<OptionSet::Unconsumed> OptionSet::Parse(std::ostream& s_err,
     return unconsumed;
 }
 
-}  // namespace tint::utils::cli
+}  // namespace tint::cli

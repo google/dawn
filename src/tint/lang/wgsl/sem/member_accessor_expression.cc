@@ -60,7 +60,7 @@ Swizzle::Swizzle(const ast::MemberAccessorExpression* declaration,
                  const Statement* statement,
                  const constant::Value* constant,
                  const ValueExpression* object,
-                 utils::VectorRef<uint32_t> indices,
+                 VectorRef<uint32_t> indices,
                  bool has_side_effects,
                  const Variable* root_ident /* = nullptr */)
     : Base(declaration,

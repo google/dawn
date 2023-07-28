@@ -41,7 +41,7 @@ TEST_F(SpirvASTPrinterTest, Return_WithValue) {
     auto* val = Call<vec3<f32>>(1_f, 1_f, 3_f);
 
     auto* ret = Return(val);
-    Func("test", utils::Empty, ty.vec3<f32>(), utils::Vector{ret}, utils::Empty);
+    Func("test", tint::Empty, ty.vec3<f32>(), Vector{ret}, tint::Empty);
 
     Builder& b = Build();
 
@@ -64,7 +64,7 @@ TEST_F(SpirvASTPrinterTest, Return_WithValue_GeneratesLoad) {
     auto* var = Var("param", ty.f32());
 
     auto* ret = Return(var);
-    Func("test", utils::Empty, ty.f32(), utils::Vector{Decl(var), ret}, utils::Empty);
+    Func("test", tint::Empty, ty.f32(), Vector{Decl(var), ret}, tint::Empty);
 
     Builder& b = Build();
 

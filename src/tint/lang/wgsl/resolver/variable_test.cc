@@ -44,7 +44,7 @@ TEST_F(ResolverVariableTest, LocalVar_NoInitializer) {
 
     Enable(builtin::Extension::kF16);
 
-    auto* S = Structure("S", utils::Vector{Member("i", ty.i32())});
+    auto* S = Structure("S", Vector{Member("i", ty.i32())});
     auto* A = Alias("A", ty.Of(S));
 
     auto* i = Var("i", ty.i32());
@@ -55,8 +55,8 @@ TEST_F(ResolverVariableTest, LocalVar_NoInitializer) {
     auto* s = Var("s", ty.Of(S));
     auto* a = Var("a", ty.Of(A));
 
-    Func("F", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("F", tint::Empty, ty.void_(),
+         Vector{
              Decl(i),
              Decl(u),
              Decl(f),
@@ -109,7 +109,7 @@ TEST_F(ResolverVariableTest, LocalVar_WithInitializer) {
 
     Enable(builtin::Extension::kF16);
 
-    auto* S = Structure("S", utils::Vector{Member("i", ty.i32())});
+    auto* S = Structure("S", Vector{Member("i", ty.i32())});
     auto* A = Alias("A", ty.Of(S));
 
     auto* i_c = Expr(1_i);
@@ -128,8 +128,8 @@ TEST_F(ResolverVariableTest, LocalVar_WithInitializer) {
     auto* s = Var("s", ty.Of(S), s_c);
     auto* a = Var("a", ty.Of(A), a_c);
 
-    Func("F", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("F", tint::Empty, ty.void_(),
+         Vector{
              Decl(i),
              Decl(u),
              Decl(f),
@@ -183,7 +183,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsAlias) {
 
     auto* t = Alias("a", ty.i32());
     auto* v = Var("a", Expr(false));
-    Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(v)});
+    Func("F", tint::Empty, ty.void_(), Vector{Decl(v)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -202,9 +202,9 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsStruct) {
     //   var a = true;
     // }
 
-    auto* t = Structure("a", utils::Vector{Member("m", ty.i32())});
+    auto* t = Structure("a", Vector{Member("m", ty.i32())});
     auto* v = Var("a", Expr(false));
-    Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(v)});
+    Func("F", tint::Empty, ty.void_(), Vector{Decl(v)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -220,7 +220,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsFunction) {
     // }
 
     auto* v = Var("a", Expr(false));
-    auto* f = Func("a", utils::Empty, ty.void_(), utils::Vector{Decl(v)});
+    auto* f = Func("a", tint::Empty, ty.void_(), Vector{Decl(v)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -241,7 +241,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsGlobalVar) {
 
     auto* g = GlobalVar("a", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* v = Var("a", Expr("a"));
-    Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(v)});
+    Func("F", tint::Empty, ty.void_(), Vector{Decl(v)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -265,7 +265,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsGlobalConst) {
 
     auto* g = GlobalConst("a", ty.i32(), Expr(1_i));
     auto* v = Var("a", Expr("a"));
-    Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(v)});
+    Func("F", tint::Empty, ty.void_(), Vector{Decl(v)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -289,7 +289,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsLocalVar) {
 
     auto* x = Var("a", ty.i32(), Expr(1_i));
     auto* y = Var("a", Expr("a"));
-    Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(x), Block(Decl(y))});
+    Func("F", tint::Empty, ty.void_(), Vector{Decl(x), Block(Decl(y))});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -316,7 +316,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsLocalConst) {
 
     auto* c = Const("a", ty.i32(), Expr(1_i));
     auto* v = Var("a", Expr("a"));
-    Func("X", utils::Empty, ty.void_(), utils::Vector{Decl(c), Block(Decl(v))});
+    Func("X", tint::Empty, ty.void_(), Vector{Decl(c), Block(Decl(v))});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -342,7 +342,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsLocalLet) {
 
     auto* l = Let("a", ty.i32(), Expr(1_i));
     auto* v = Var("a", Expr("a"));
-    Func("X", utils::Empty, ty.void_(), utils::Vector{Decl(l), Block(Decl(v))});
+    Func("X", tint::Empty, ty.void_(), Vector{Decl(l), Block(Decl(v))});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -367,7 +367,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsParam) {
 
     auto* p = Param("a", ty.i32());
     auto* v = Var("a", Expr("a"));
-    Func("X", utils::Vector{p}, ty.void_(), utils::Vector{Block(Decl(v))});
+    Func("X", Vector{p}, ty.void_(), Vector{Block(Decl(v))});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -402,7 +402,7 @@ TEST_F(ResolverVariableTest, LocalLet) {
 
     Enable(builtin::Extension::kF16);
 
-    auto* S = Structure("S", utils::Vector{Member("i", ty.i32())});
+    auto* S = Structure("S", Vector{Member("i", ty.i32())});
     auto* A = Alias("A", ty.Of(S));
     auto* v = Var("v", ty.i32());
 
@@ -424,8 +424,8 @@ TEST_F(ResolverVariableTest, LocalLet) {
     auto* a = Let("a", ty.Of(A), a_c);
     auto* p = Let("p", ty.ptr<function, i32>(), p_c);
 
-    Func("F", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("F", tint::Empty, ty.void_(),
+         Vector{
              Decl(v),
              Decl(i),
              Decl(u),
@@ -471,8 +471,8 @@ TEST_F(ResolverVariableTest, LocalLet_InheritsAccessFromOriginatingVariable) {
     // fn f() {
     //   let p = &s.inner.arr[3];
     // }
-    auto* inner = Structure("Inner", utils::Vector{Member("arr", ty.array<i32, 4>())});
-    auto* buf = Structure("S", utils::Vector{Member("inner", ty.Of(inner))});
+    auto* inner = Structure("Inner", Vector{Member("arr", ty.array<i32, 4>())});
+    auto* buf = Structure("S", Vector{Member("inner", ty.Of(inner))});
     auto* storage = GlobalVar("s", ty.Of(buf), builtin::AddressSpace::kStorage,
                               builtin::Access::kReadWrite, Binding(0_a), Group(0_a));
 
@@ -499,7 +499,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsAlias) {
 
     auto* t = Alias("a", ty.i32());
     auto* l = Let("a", Expr(false));
-    Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(l)});
+    Func("F", tint::Empty, ty.void_(), Vector{Decl(l)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -518,9 +518,9 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsStruct) {
     //   let a = false;
     // }
 
-    auto* t = Structure("a", utils::Vector{Member("m", ty.i32())});
+    auto* t = Structure("a", Vector{Member("m", ty.i32())});
     auto* l = Let("a", Expr(false));
-    Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(l)});
+    Func("F", tint::Empty, ty.void_(), Vector{Decl(l)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -536,7 +536,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsFunction) {
     // }
 
     auto* l = Let("a", Expr(false));
-    auto* fb = Func("a", utils::Empty, ty.void_(), utils::Vector{Decl(l)});
+    auto* fb = Func("a", tint::Empty, ty.void_(), Vector{Decl(l)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -557,7 +557,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsGlobalVar) {
 
     auto* g = GlobalVar("a", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* l = Let("a", Expr("a"));
-    Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(l)});
+    Func("F", tint::Empty, ty.void_(), Vector{Decl(l)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -581,7 +581,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsGlobalConst) {
 
     auto* g = GlobalConst("a", ty.i32(), Expr(1_i));
     auto* l = Let("a", Expr("a"));
-    Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(l)});
+    Func("F", tint::Empty, ty.void_(), Vector{Decl(l)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -605,7 +605,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsLocalVar) {
 
     auto* v = Var("a", ty.i32(), Expr(1_i));
     auto* l = Let("a", Expr("a"));
-    Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(v), Block(Decl(l))});
+    Func("F", tint::Empty, ty.void_(), Vector{Decl(v), Block(Decl(l))});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -632,7 +632,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsLocalConst) {
 
     auto* x = Const("a", ty.i32(), Expr(1_i));
     auto* y = Let("a", Expr("a"));
-    Func("X", utils::Empty, ty.void_(), utils::Vector{Decl(x), Block(Decl(y))});
+    Func("X", tint::Empty, ty.void_(), Vector{Decl(x), Block(Decl(y))});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -658,7 +658,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsLocalLet) {
 
     auto* x = Let("a", ty.i32(), Expr(1_i));
     auto* y = Let("a", Expr("a"));
-    Func("X", utils::Empty, ty.void_(), utils::Vector{Decl(x), Block(Decl(y))});
+    Func("X", tint::Empty, ty.void_(), Vector{Decl(x), Block(Decl(y))});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -683,7 +683,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsParam) {
 
     auto* p = Param("a", ty.i32());
     auto* l = Let("a", Expr("a"));
-    Func("X", utils::Vector{p}, ty.void_(), utils::Vector{Block(Decl(l))});
+    Func("X", Vector{p}, ty.void_(), Vector{Block(Decl(l))});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -711,7 +711,7 @@ TEST_F(ResolverVariableTest, LocalConst_ShadowsAlias) {
 
     auto* t = Alias("a", ty.i32());
     auto* c = Const("a", Expr(false));
-    Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(c)});
+    Func("F", tint::Empty, ty.void_(), Vector{Decl(c)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -730,9 +730,9 @@ TEST_F(ResolverVariableTest, LocalConst_ShadowsStruct) {
     //   const a = false;
     // }
 
-    auto* t = Structure("a", utils::Vector{Member("m", ty.i32())});
+    auto* t = Structure("a", Vector{Member("m", ty.i32())});
     auto* c = Const("a", Expr(false));
-    Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(c)});
+    Func("F", tint::Empty, ty.void_(), Vector{Decl(c)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -748,7 +748,7 @@ TEST_F(ResolverVariableTest, LocalConst_ShadowsFunction) {
     // }
 
     auto* c = Const("a", Expr(false));
-    auto* fb = Func("a", utils::Empty, ty.void_(), utils::Vector{Decl(c)});
+    auto* fb = Func("a", tint::Empty, ty.void_(), Vector{Decl(c)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -769,7 +769,7 @@ TEST_F(ResolverVariableTest, LocalConst_ShadowsGlobalVar) {
 
     auto* g = GlobalVar("a", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* c = Const("a", Expr(1_i));
-    Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(c)});
+    Func("F", tint::Empty, ty.void_(), Vector{Decl(c)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -788,7 +788,7 @@ TEST_F(ResolverVariableTest, LocalConst_ShadowsGlobalConst) {
 
     auto* g = GlobalConst("a", ty.i32(), Expr(1_i));
     auto* c = Const("a", Expr("a"));
-    Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(c)});
+    Func("F", tint::Empty, ty.void_(), Vector{Decl(c)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -812,7 +812,7 @@ TEST_F(ResolverVariableTest, LocalConst_ShadowsLocalVar) {
 
     auto* v = Var("a", ty.i32(), Expr(1_i));
     auto* c = Const("a", Expr(1_i));
-    Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(v), Block(Decl(c))});
+    Func("F", tint::Empty, ty.void_(), Vector{Decl(v), Block(Decl(c))});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -834,7 +834,7 @@ TEST_F(ResolverVariableTest, LocalConst_ShadowsLocalConst) {
 
     auto* x = Const("a", ty.i32(), Expr(1_i));
     auto* y = Const("a", Expr("a"));
-    Func("X", utils::Empty, ty.void_(), utils::Vector{Decl(x), Block(Decl(y))});
+    Func("X", tint::Empty, ty.void_(), Vector{Decl(x), Block(Decl(y))});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -860,7 +860,7 @@ TEST_F(ResolverVariableTest, LocalConst_ShadowsLocalLet) {
 
     auto* l = Let("a", ty.i32(), Expr(1_i));
     auto* c = Const("a", Expr(1_i));
-    Func("X", utils::Empty, ty.void_(), utils::Vector{Decl(l), Block(Decl(c))});
+    Func("X", tint::Empty, ty.void_(), Vector{Decl(l), Block(Decl(c))});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -881,7 +881,7 @@ TEST_F(ResolverVariableTest, LocalConst_ShadowsParam) {
 
     auto* p = Param("a", ty.i32());
     auto* c = Const("a", Expr(1_i));
-    Func("X", utils::Vector{p}, ty.void_(), utils::Vector{Block(Decl(c))});
+    Func("X", Vector{p}, ty.void_(), Vector{Block(Decl(c))});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -894,7 +894,7 @@ TEST_F(ResolverVariableTest, LocalConst_ShadowsParam) {
 }
 
 TEST_F(ResolverVariableTest, LocalConst_ExplicitType_Decls) {
-    Structure("S", utils::Vector{Member("m", ty.u32())});
+    Structure("S", Vector{Member("m", ty.u32())});
 
     auto* c_i32 = Const("a", ty.i32(), Expr(0_i));
     auto* c_u32 = Const("b", ty.u32(), Expr(0_u));
@@ -938,7 +938,7 @@ TEST_F(ResolverVariableTest, LocalConst_ExplicitType_Decls) {
 }
 
 TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
-    Structure("S", utils::Vector{Member("m", ty.u32())});
+    Structure("S", Vector{Member("m", ty.u32())});
 
     auto* c_i32 = Const("a", Expr(0_i));
     auto* c_u32 = Const("b", Expr(0_u));
@@ -1037,7 +1037,7 @@ TEST_F(ResolverVariableTest, LocalConst_ConstEval) {
 TEST_F(ResolverVariableTest, GlobalVar_AddressSpace) {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
-    auto* buf = Structure("S", utils::Vector{Member("m", ty.i32())});
+    auto* buf = Structure("S", Vector{Member("m", ty.i32())});
     auto* private_ = GlobalVar("p", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* workgroup = GlobalVar("w", ty.i32(), builtin::AddressSpace::kWorkgroup);
     auto* uniform =
@@ -1065,7 +1065,7 @@ TEST_F(ResolverVariableTest, GlobalVar_AddressSpace) {
 TEST_F(ResolverVariableTest, GlobalVar_ExplicitAddressSpace) {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
-    auto* buf = Structure("S", utils::Vector{Member("m", ty.i32())});
+    auto* buf = Structure("S", Vector{Member("m", ty.i32())});
     auto* storage = GlobalVar("sb", ty.Of(buf), builtin::AddressSpace::kStorage,
                               builtin::Access::kReadWrite, Binding(1_a), Group(0_a));
 
@@ -1204,7 +1204,7 @@ TEST_F(ResolverVariableTest, Param_ShadowsFunction) {
     // }
 
     auto* p = Param("a", ty.bool_());
-    auto* f = Func("a", utils::Vector{p}, ty.void_(), utils::Empty);
+    auto* f = Func("a", Vector{p}, ty.void_(), tint::Empty);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1225,7 +1225,7 @@ TEST_F(ResolverVariableTest, Param_ShadowsGlobalVar) {
 
     auto* g = GlobalVar("a", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* p = Param("a", ty.bool_());
-    Func("F", utils::Vector{p}, ty.void_(), utils::Empty);
+    Func("F", Vector{p}, ty.void_(), tint::Empty);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1246,7 +1246,7 @@ TEST_F(ResolverVariableTest, Param_ShadowsGlobalConst) {
 
     auto* g = GlobalConst("a", ty.i32(), Expr(1_i));
     auto* p = Param("a", ty.bool_());
-    Func("F", utils::Vector{p}, ty.void_(), utils::Empty);
+    Func("F", Vector{p}, ty.void_(), tint::Empty);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1267,7 +1267,7 @@ TEST_F(ResolverVariableTest, Param_ShadowsAlias) {
 
     auto* a = Alias("a", ty.i32());
     auto* p = Param("a", ty("a"));
-    Func("F", utils::Vector{p}, ty.void_(), utils::Empty);
+    Func("F", Vector{p}, ty.void_(), tint::Empty);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1292,8 +1292,8 @@ TEST_F(ResolverVariableTest, GlobalVar_UseTemplatedIdent) {
     // }
 
     GlobalVar(Source{{56, 78}}, "a", ty.i32(), builtin::AddressSpace::kPrivate);
-    Func("F", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("F", tint::Empty, ty.void_(),
+         Vector{
              Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
          });
 
@@ -1310,8 +1310,8 @@ TEST_F(ResolverVariableTest, GlobalConst_UseTemplatedIdent) {
     // }
 
     GlobalConst(Source{{56, 78}}, "a", Expr(1_i));
-    Func("F", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("F", tint::Empty, ty.void_(),
+         Vector{
              Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
          });
 
@@ -1328,8 +1328,8 @@ TEST_F(ResolverVariableTest, GlobalOverride_UseTemplatedIdent) {
     // }
 
     Override(Source{{56, 78}}, "a", Expr(1_i));
-    Func("F", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("F", tint::Empty, ty.void_(),
+         Vector{
              Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
          });
 
@@ -1343,8 +1343,8 @@ TEST_F(ResolverVariableTest, Param_UseTemplatedIdent) {
     //   let l = a<i32>;
     // }
 
-    Func("F", utils::Vector{Param(Source{{56, 78}}, "a", ty.i32())}, ty.void_(),
-         utils::Vector{
+    Func("F", Vector{Param(Source{{56, 78}}, "a", ty.i32())}, ty.void_(),
+         Vector{
              Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
          });
 
@@ -1359,8 +1359,8 @@ TEST_F(ResolverVariableTest, LocalVar_UseTemplatedIdent) {
     //   let l = a<i32>;
     // }
 
-    Func("F", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("F", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var(Source{{56, 78}}, "a", ty.i32())),
              Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
          });
@@ -1376,8 +1376,8 @@ TEST_F(ResolverVariableTest, Let_UseTemplatedIdent) {
     //   let l = a<i32>;
     // }
 
-    Func("F", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("F", tint::Empty, ty.void_(),
+         Vector{
              Decl(Let(Source{{56, 78}}, "a", Expr(1_i))),
              Decl(Let("l", Expr(Ident(Source{{12, 34}}, "a", "i32")))),
          });

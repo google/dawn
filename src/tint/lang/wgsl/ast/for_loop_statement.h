@@ -22,7 +22,7 @@ namespace tint::ast {
 class Expression;
 
 /// A for loop statement
-class ForLoopStatement final : public utils::Castable<ForLoopStatement, Statement> {
+class ForLoopStatement final : public Castable<ForLoopStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
@@ -40,7 +40,7 @@ class ForLoopStatement final : public utils::Castable<ForLoopStatement, Statemen
                      const Expression* condition,
                      const Statement* continuing,
                      const BlockStatement* body,
-                     utils::VectorRef<const ast::Attribute*> attributes);
+                     VectorRef<const ast::Attribute*> attributes);
 
     /// Destructor
     ~ForLoopStatement() override;
@@ -64,7 +64,7 @@ class ForLoopStatement final : public utils::Castable<ForLoopStatement, Statemen
     const BlockStatement* const body;
 
     /// The attribute list
-    const utils::Vector<const Attribute*, 1> attributes;
+    const tint::Vector<const Attribute*, 1> attributes;
 };
 
 }  // namespace tint::ast

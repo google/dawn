@@ -24,7 +24,7 @@
 #include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/containers/vector.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// UniqueVector is an ordered container that only contains unique items.
 /// Attempting to add a duplicate is a no-op.
@@ -144,6 +144,6 @@ struct UniqueVector {
     Hashset<T, N, HASH, EQUAL> set;
 };
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_CONTAINERS_UNIQUE_VECTOR_H_

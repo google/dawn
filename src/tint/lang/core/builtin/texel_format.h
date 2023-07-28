@@ -52,7 +52,7 @@ enum class TexelFormat {
 /// @param out the stream to write to
 /// @param value the TexelFormat
 /// @returns `out` so calls can be chained
-utils::StringStream& operator<<(utils::StringStream& out, TexelFormat value);
+StringStream& operator<<(StringStream& out, TexelFormat value);
 
 /// ParseTexelFormat parses a TexelFormat from a string.
 /// @param str the string to parse

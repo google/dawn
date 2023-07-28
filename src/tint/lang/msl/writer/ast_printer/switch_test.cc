@@ -30,7 +30,7 @@ TEST_F(MslASTPrinterTest, Emit_Switch) {
     auto* case_body = Block(create<ast::BreakStatement>());
     auto* case_stmt = Case(CaseSelector(5_i), case_body);
 
-    utils::Vector body{case_stmt, def};
+    Vector body{case_stmt, def};
     auto* s = Switch(cond, body);
     WrapInFunction(cond, s);
     ASTPrinter& gen = Build();
@@ -53,7 +53,7 @@ TEST_F(MslASTPrinterTest, Emit_Switch_MixedDefault) {
     auto* cond = Var("cond", ty.i32());
 
     auto* def_body = Block(create<ast::BreakStatement>());
-    auto* def = Case(utils::Vector{CaseSelector(5_i), DefaultCaseSelector()}, def_body);
+    auto* def = Case(Vector{CaseSelector(5_i), DefaultCaseSelector()}, def_body);
 
     auto* s = Switch(cond, def);
     WrapInFunction(cond, s);

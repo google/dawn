@@ -29,7 +29,7 @@ TEST_F(WgslASTPrinterTest, EmitVariable) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitVariable(out, v);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(var<private> a : f32;)");
@@ -40,33 +40,33 @@ TEST_F(WgslASTPrinterTest, EmitVariable_AddressSpace) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitVariable(out, v);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(var<private> a : f32;)");
 }
 
 TEST_F(WgslASTPrinterTest, EmitVariable_Access_Read) {
-    auto* s = Structure("S", utils::Vector{Member("a", ty.i32())});
+    auto* s = Structure("S", Vector{Member("a", ty.i32())});
     auto* v = GlobalVar("a", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead,
                         Binding(0_a), Group(0_a));
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitVariable(out, v);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(@binding(0) @group(0) var<storage, read> a : S;)");
 }
 
 TEST_F(WgslASTPrinterTest, EmitVariable_Access_ReadWrite) {
-    auto* s = Structure("S", utils::Vector{Member("a", ty.i32())});
+    auto* s = Structure("S", Vector{Member("a", ty.i32())});
     auto* v = GlobalVar("a", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
                         Binding(0_a), Group(0_a));
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitVariable(out, v);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(@binding(0) @group(0) var<storage, read_write> a : S;)");
@@ -77,7 +77,7 @@ TEST_F(WgslASTPrinterTest, EmitVariable_Decorated) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitVariable(out, v);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(@group(1) @binding(2) var a : sampler;)");
@@ -88,7 +88,7 @@ TEST_F(WgslASTPrinterTest, EmitVariable_Initializer) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitVariable(out, v);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(var<private> a : f32 = 1.0f;)");
@@ -100,7 +100,7 @@ TEST_F(WgslASTPrinterTest, EmitVariable_Let_Explicit) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitVariable(out, v);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(let a : f32 = 1.0f;)");
@@ -112,7 +112,7 @@ TEST_F(WgslASTPrinterTest, EmitVariable_Let_Inferred) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitVariable(out, v);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(let a = 1.0f;)");
@@ -124,7 +124,7 @@ TEST_F(WgslASTPrinterTest, EmitVariable_Const_Explicit) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitVariable(out, v);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(const a : f32 = 1.0f;)");
@@ -136,7 +136,7 @@ TEST_F(WgslASTPrinterTest, EmitVariable_Const_Inferred) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitVariable(out, v);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), R"(const a = 1.0f;)");

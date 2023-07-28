@@ -26,7 +26,7 @@ class Loop;
 namespace tint::ir {
 
 /// A next iteration instruction.
-class NextIteration : public utils::Castable<NextIteration, Terminator> {
+class NextIteration : public Castable<NextIteration, Terminator> {
   public:
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
@@ -34,7 +34,7 @@ class NextIteration : public utils::Castable<NextIteration, Terminator> {
     /// Constructor
     /// @param loop the loop being iterated
     /// @param args the arguments for the MultiInBlock
-    explicit NextIteration(ir::Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
+    explicit NextIteration(ir::Loop* loop, VectorRef<Value*> args = tint::Empty);
     ~NextIteration() override;
 
     /// @returns the loop being iterated

@@ -36,7 +36,7 @@ TEST_F(WgslASTPrinterTest, EmitType_Alias) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "alias");
@@ -47,19 +47,18 @@ TEST_F(WgslASTPrinterTest, EmitType_Array) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "array<bool, 4u>");
 }
 
 TEST_F(WgslASTPrinterTest, EmitType_Array_Attribute) {
-    auto type =
-        Alias("make_type_reachable", ty.array(ty.bool_(), 4_u, utils::Vector{Stride(16)}))->type;
+    auto type = Alias("make_type_reachable", ty.array(ty.bool_(), 4_u, Vector{Stride(16)}))->type;
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "@stride(16) array<bool, 4u>");
@@ -70,7 +69,7 @@ TEST_F(WgslASTPrinterTest, EmitType_RuntimeArray) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "array<bool>");
@@ -81,7 +80,7 @@ TEST_F(WgslASTPrinterTest, EmitType_Bool) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "bool");
@@ -92,7 +91,7 @@ TEST_F(WgslASTPrinterTest, EmitType_F32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "f32");
@@ -105,7 +104,7 @@ TEST_F(WgslASTPrinterTest, EmitType_F16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "f16");
@@ -116,7 +115,7 @@ TEST_F(WgslASTPrinterTest, EmitType_I32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "i32");
@@ -127,7 +126,7 @@ TEST_F(WgslASTPrinterTest, EmitType_Matrix_F32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "mat2x3<f32>");
@@ -140,7 +139,7 @@ TEST_F(WgslASTPrinterTest, EmitType_Matrix_F16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "mat2x3<f16>");
@@ -151,7 +150,7 @@ TEST_F(WgslASTPrinterTest, EmitType_Pointer) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "ptr<workgroup, f32>");
@@ -162,14 +161,14 @@ TEST_F(WgslASTPrinterTest, EmitType_PointerAccessMode) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "ptr<storage, f32, read_write>");
 }
 
 TEST_F(WgslASTPrinterTest, EmitType_Struct) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
@@ -177,16 +176,16 @@ TEST_F(WgslASTPrinterTest, EmitType_Struct) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "S");
 }
 
 TEST_F(WgslASTPrinterTest, EmitType_StructOffsetDecl) {
-    auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.i32(), utils::Vector{MemberOffset(8_a)}),
-                                 Member("b", ty.f32(), utils::Vector{MemberOffset(16_a)}),
+    auto* s = Structure("S", Vector{
+                                 Member("a", ty.i32(), Vector{MemberOffset(8_a)}),
+                                 Member("b", ty.f32(), Vector{MemberOffset(16_a)}),
                              });
 
     ASTPrinter& gen = Build();
@@ -207,11 +206,10 @@ TEST_F(WgslASTPrinterTest, EmitType_StructOffsetDecl) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitType_StructOffsetDecl_WithSymbolCollisions) {
-    auto* s =
-        Structure("S", utils::Vector{
-                           Member("tint_0_padding", ty.i32(), utils::Vector{MemberOffset(8_a)}),
-                           Member("tint_2_padding", ty.f32(), utils::Vector{MemberOffset(16_a)}),
-                       });
+    auto* s = Structure("S", Vector{
+                                 Member("tint_0_padding", ty.i32(), Vector{MemberOffset(8_a)}),
+                                 Member("tint_2_padding", ty.f32(), Vector{MemberOffset(16_a)}),
+                             });
 
     ASTPrinter& gen = Build();
 
@@ -231,9 +229,9 @@ TEST_F(WgslASTPrinterTest, EmitType_StructOffsetDecl_WithSymbolCollisions) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitType_StructAlignDecl) {
-    auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.i32(), utils::Vector{MemberAlign(8_a)}),
-                                 Member("b", ty.f32(), utils::Vector{MemberAlign(16_a)}),
+    auto* s = Structure("S", Vector{
+                                 Member("a", ty.i32(), Vector{MemberAlign(8_a)}),
+                                 Member("b", ty.f32(), Vector{MemberAlign(16_a)}),
                              });
 
     ASTPrinter& gen = Build();
@@ -250,9 +248,9 @@ TEST_F(WgslASTPrinterTest, EmitType_StructAlignDecl) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitType_StructSizeDecl) {
-    auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.i32(), utils::Vector{MemberSize(16_a)}),
-                                 Member("b", ty.f32(), utils::Vector{MemberSize(32_a)}),
+    auto* s = Structure("S", Vector{
+                                 Member("a", ty.i32(), Vector{MemberSize(16_a)}),
+                                 Member("b", ty.f32(), Vector{MemberSize(32_a)}),
                              });
 
     ASTPrinter& gen = Build();
@@ -269,9 +267,9 @@ TEST_F(WgslASTPrinterTest, EmitType_StructSizeDecl) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitType_Struct_WithAttribute) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
-                                 Member("b", ty.f32(), utils::Vector{MemberAlign(8_a)}),
+                                 Member("b", ty.f32(), Vector{MemberAlign(8_a)}),
                              });
 
     ASTPrinter& gen = Build();
@@ -288,9 +286,9 @@ TEST_F(WgslASTPrinterTest, EmitType_Struct_WithAttribute) {
 
 TEST_F(WgslASTPrinterTest, EmitType_Struct_WithEntryPointAttributes) {
     auto* s = Structure(
-        "S", utils::Vector{
-                 Member("a", ty.u32(), utils::Vector{Builtin(builtin::BuiltinValue::kVertexIndex)}),
-                 Member("b", ty.f32(), utils::Vector{Location(2_a)}),
+        "S", Vector{
+                 Member("a", ty.u32(), Vector{Builtin(builtin::BuiltinValue::kVertexIndex)}),
+                 Member("b", ty.f32(), Vector{Location(2_a)}),
              });
 
     ASTPrinter& gen = Build();
@@ -311,7 +309,7 @@ TEST_F(WgslASTPrinterTest, EmitType_U32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "u32");
@@ -322,7 +320,7 @@ TEST_F(WgslASTPrinterTest, EmitType_Vector_F32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "vec3<f32>");
@@ -335,7 +333,7 @@ TEST_F(WgslASTPrinterTest, EmitType_Vector_F16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "vec3<f16>");
@@ -358,7 +356,7 @@ TEST_P(WgslGenerator_DepthTextureTest, EmitType_DepthTexture) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), param.name);
@@ -380,7 +378,7 @@ TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_F32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), std::string(param.name) + "<f32>");
@@ -394,7 +392,7 @@ TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_I32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), std::string(param.name) + "<i32>");
@@ -408,7 +406,7 @@ TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_U32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), std::string(param.name) + "<u32>");
@@ -432,7 +430,7 @@ TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_F32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), std::string(param.name) + "<f32>");
@@ -446,7 +444,7 @@ TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_I32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), std::string(param.name) + "<i32>");
@@ -460,7 +458,7 @@ TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_U32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), std::string(param.name) + "<u32>");
@@ -489,7 +487,7 @@ TEST_P(WgslGenerator_StorageTextureTest, EmitType_StorageTexture) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), param.name);
@@ -521,7 +519,7 @@ TEST_P(WgslGenerator_ImageFormatTest, EmitType_StorageTexture_ImageFormat) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitImageFormat(out, param.fmt);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), param.name);
@@ -553,7 +551,7 @@ TEST_F(WgslASTPrinterTest, EmitType_Sampler) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "sampler");
@@ -565,7 +563,7 @@ TEST_F(WgslASTPrinterTest, EmitType_SamplerComparison) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, type);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "sampler_comparison");

@@ -20,7 +20,7 @@
 
 namespace tint::sem {
 
-using PipelineStageSet = utils::EnumSet<ast::PipelineStage>;
+using PipelineStageSet = tint::EnumSet<ast::PipelineStage>;
 
 }  // namespace tint::sem
 

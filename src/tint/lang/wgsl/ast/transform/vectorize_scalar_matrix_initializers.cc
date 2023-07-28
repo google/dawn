@@ -91,9 +91,9 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* s
         // Constructs a matrix using vector columns, with the elements constructed using the
         // 'element(uint32_t c, uint32_t r)' callback.
         auto build_mat = [&](auto&& element) {
-            utils::Vector<const Expression*, 4> columns;
+            tint::Vector<const Expression*, 4> columns;
             for (uint32_t c = 0; c < mat_type->columns(); c++) {
-                utils::Vector<const Expression*, 4> row_values;
+                tint::Vector<const Expression*, 4> row_values;
                 for (uint32_t r = 0; r < mat_type->rows(); r++) {
                     row_values.Push(element(c, r));
                 }
@@ -109,16 +109,16 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* s
             // Generate a helper function for constructing the matrix.
             // This is done to ensure that the single argument value is only evaluated once, and
             // with the correct expression evaluation order.
-            auto fn = utils::GetOrCreate(scalar_inits, mat_type, [&] {
+            auto fn = tint::GetOrCreate(scalar_inits, mat_type, [&] {
                 auto name = b.Symbols().New("build_mat" + std::to_string(mat_type->columns()) +
                                             "x" + std::to_string(mat_type->rows()));
                 b.Func(name,
-                       utils::Vector{
+                       tint::Vector{
                            // Single scalar parameter
                            b.Param("value", CreateASTTypeFor(ctx, mat_type->type())),
                        },
                        CreateASTTypeFor(ctx, mat_type),
-                       utils::Vector{
+                       tint::Vector{
                            b.Return(build_mat([&](uint32_t, uint32_t) {  //
                                return b.Expr("value");
                            })),

@@ -38,7 +38,7 @@ class IdentifierExpression;
 namespace tint::ast {
 
 /// A Function statement.
-class Function final : public utils::Castable<Function, Node> {
+class Function final : public Castable<Function, Node> {
   public:
     /// Create a function
     /// @param pid the identifier of the program that owns this node
@@ -54,11 +54,11 @@ class Function final : public utils::Castable<Function, Node> {
              NodeID nid,
              const Source& source,
              const Identifier* name,
-             utils::VectorRef<const Parameter*> params,
+             VectorRef<const Parameter*> params,
              Type return_type,
              const BlockStatement* body,
-             utils::VectorRef<const Attribute*> attributes,
-             utils::VectorRef<const Attribute*> return_type_attributes);
+             VectorRef<const Attribute*> attributes,
+             VectorRef<const Attribute*> return_type_attributes);
 
     /// Destructor
     ~Function() override;
@@ -79,7 +79,7 @@ class Function final : public utils::Castable<Function, Node> {
     const Identifier* const name;
 
     /// The function params
-    const utils::Vector<const Parameter*, 8> params;
+    const tint::Vector<const Parameter*, 8> params;
 
     /// The function return type
     const Type return_type;
@@ -88,14 +88,14 @@ class Function final : public utils::Castable<Function, Node> {
     const BlockStatement* const body;
 
     /// The attributes attached to this function
-    const utils::Vector<const Attribute*, 2> attributes;
+    const tint::Vector<const Attribute*, 2> attributes;
 
     /// The attributes attached to the function return type.
-    const utils::Vector<const Attribute*, 2> return_type_attributes;
+    const tint::Vector<const Attribute*, 2> return_type_attributes;
 };
 
 /// A list of functions
-class FunctionList : public utils::Vector<const Function*, 8> {
+class FunctionList : public tint::Vector<const Function*, 8> {
   public:
     /// Appends f to the end of the list
     /// @param f the function to append to this list

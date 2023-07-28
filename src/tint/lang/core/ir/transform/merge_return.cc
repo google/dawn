@@ -56,7 +56,7 @@ struct MergeReturn::State {
     Return* fn_return = nullptr;
 
     /// A set of control instructions that transitively hold a return instruction
-    utils::Hashset<ControlInstruction*, 8> holds_return_;
+    Hashset<ControlInstruction*, 8> holds_return_;
 
     /// Constructor
     /// @param mod the module
@@ -157,7 +157,7 @@ struct MergeReturn::State {
                 if (holds_return_.Contains(ctrl)) {
                     // Control instruction transitively holds a return.
                     ctrl->ForeachBlock([&](Block* ctrl_block) { ProcessBlock(ctrl_block); });
-                    if (next && next != fn_return && !utils::IsAnyOf<Exit, Unreachable>(next)) {
+                    if (next && next != fn_return && !tint::IsAnyOf<Exit, Unreachable>(next)) {
                         inner_if = CreateIfContinueExecution(ctrl);
                     }
                 }
@@ -177,7 +177,7 @@ struct MergeReturn::State {
                         // Inner-most 'if' has a 'exit_if' that returns values.
                         // These need propagating through the if stack.
                         inner_if->SetResults(
-                            utils::Transform<8>(exit_if->Args(), new_value_with_type));
+                            tint::Transform<8>(exit_if->Args(), new_value_with_type));
                     }
                 }
             } else {
@@ -190,9 +190,9 @@ struct MergeReturn::State {
             for (auto* i = inner_if; i; i = tint::As<If>(i->Block()->Parent())) {
                 if (!i->Block()->HasTerminator()) {
                     // Append the exit instruction to the block holding the 'if'.
-                    utils::Vector<InstructionResult*, 8> exit_args = i->Results();
+                    Vector<InstructionResult*, 8> exit_args = i->Results();
                     if (!i->HasResults()) {
-                        i->SetResults(utils::Transform(exit_args, new_value_with_type));
+                        i->SetResults(tint::Transform(exit_args, new_value_with_type));
                     }
                     auto* exit = b.Exit(i->Block()->Parent(), std::move(exit_args));
                     i->Block()->Append(exit);
@@ -255,7 +255,7 @@ struct MergeReturn::State {
         // If the outermost control instruction is expecting exit values, then return them as
         // 'undef' values.
         auto* ctrl = block->Parent();
-        utils::Vector<Value*, 8> exit_args;
+        Vector<Value*, 8> exit_args;
         exit_args.Resize(ctrl->Results().Length());
 
         // Replace the return instruction with an exit instruction.

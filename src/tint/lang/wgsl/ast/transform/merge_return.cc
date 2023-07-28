@@ -117,7 +117,7 @@ class State {
                 ProcessStatement(l->body);
             },
             [&](const ReturnStatement* r) {
-                utils::Vector<const Statement*, 3> stmts;
+                tint::Vector<const Statement*, 3> stmts;
                 // Set the return flag to signal that we have hit a return.
                 stmts.Push(b.Assign(b.Expr(flag), true));
                 if (r->value) {
@@ -148,7 +148,7 @@ class State {
         // We may introduce conditionals around statements that follow a statement with the
         // `Return` behavior, so build a stack of statement lists that represent the new
         // (potentially nested) conditional blocks.
-        utils::Vector<utils::Vector<const Statement*, 8>, 8> new_stmts({{}});
+        tint::Vector<tint::Vector<const Statement*, 8>, 8> new_stmts({{}});
 
         // Insert variables for the return flag and return value at the top of the function.
         if (block == function->body) {
@@ -178,7 +178,7 @@ class State {
                         // break. Otherwise check the return flag.
                         if (HasBehavior(ctx.src, s, sem::Behavior::kNext)) {
                             new_stmts.Back().Push(
-                                b.If(b.Expr(flag), b.Block(utils::Vector{b.Break()})));
+                                b.If(b.Expr(flag), b.Block(tint::Vector{b.Break()})));
                         } else {
                             new_stmts.Back().Push(b.Break());
                         }

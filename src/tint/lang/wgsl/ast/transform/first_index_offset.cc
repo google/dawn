@@ -125,7 +125,7 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
 
     if (has_vertex_index || has_instance_index) {
         // Add uniform buffer members and calculate byte offsets
-        utils::Vector<const StructMember*, 8> members;
+        tint::Vector<const StructMember*, 8> members;
         members.Push(b.Member(kFirstVertexName, b.ty.u32()));
         members.Push(b.Member(kFirstInstanceName, b.ty.u32()));
         auto* struct_ = b.Structure(b.Sym(), std::move(members));
@@ -133,7 +133,7 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
         // Create a global to hold the uniform buffer
         Symbol buffer_name = b.Sym();
         b.GlobalVar(buffer_name, b.ty.Of(struct_), builtin::AddressSpace::kUniform,
-                    utils::Vector{
+                    tint::Vector{
                         b.Binding(AInt(ub_binding)),
                         b.Group(AInt(ub_group)),
                     });

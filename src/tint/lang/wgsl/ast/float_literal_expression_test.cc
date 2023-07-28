@@ -44,7 +44,7 @@ TEST_F(FloatLiteralExpressionTest, SuffixH) {
 
 TEST_F(FloatLiteralExpressionTest, SuffixStringStream) {
     auto to_str = [](FloatLiteralExpression::Suffix suffix) {
-        utils::StringStream ss;
+        StringStream ss;
         ss << suffix;
         return ss.str();
     };

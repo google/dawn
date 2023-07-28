@@ -47,16 +47,16 @@ bool read_blankspace(std::string_view str, size_t i, bool* is_blankspace, size_t
     // See https://www.w3.org/TR/WGSL/#blankspace
 
     auto* utf8 = reinterpret_cast<const uint8_t*>(&str[i]);
-    auto [cp, n] = utils::utf8::Decode(utf8, str.size() - i);
+    auto [cp, n] = tint::utf8::Decode(utf8, str.size() - i);
 
     if (n == 0) {
         return false;
     }
 
-    static const auto kSpace = utils::CodePoint(0x0020);  // space
-    static const auto kHTab = utils::CodePoint(0x0009);   // horizontal tab
-    static const auto kL2R = utils::CodePoint(0x200E);    // left-to-right mark
-    static const auto kR2L = utils::CodePoint(0x200F);    // right-to-left mark
+    static const auto kSpace = tint::CodePoint(0x0020);  // space
+    static const auto kHTab = tint::CodePoint(0x0009);   // horizontal tab
+    static const auto kL2R = tint::CodePoint(0x200E);    // left-to-right mark
+    static const auto kR2L = tint::CodePoint(0x200F);    // right-to-left mark
 
     if (cp == kSpace || cp == kHTab || cp == kL2R || cp == kR2L) {
         *is_blankspace = true;
@@ -414,9 +414,9 @@ std::optional<Token> Lexer::try_float() {
         end_ptr = &at(length() - 1) + 1;
     }
 
-    auto ret = utils::ParseDouble(std::string_view(&at(start), end - start));
+    auto ret = tint::ParseDouble(std::string_view(&at(start), end - start));
     double value = ret ? ret.Get() : 0.0;
-    bool overflow = !ret && ret.Failure() == utils::ParseNumberError::kResultOutOfRange;
+    bool overflow = !ret && ret.Failure() == tint::ParseNumberError::kResultOutOfRange;
 
     // If the value didn't fit in a double, check for underflow as that is 0.0 in WGSL and not an
     // error.
@@ -968,12 +968,12 @@ std::optional<Token> Lexer::try_ident() {
     // Must begin with an XID_Source unicode character, or underscore
     {
         auto* utf8 = reinterpret_cast<const uint8_t*>(&at(pos()));
-        auto [code_point, n] = utils::utf8::Decode(utf8, length() - pos());
+        auto [code_point, n] = tint::utf8::Decode(utf8, length() - pos());
         if (n == 0) {
             advance();  // Skip the bad byte.
             return Token{Token::Type::kError, source, "invalid UTF-8"};
         }
-        if (code_point != utils::CodePoint('_') && !code_point.IsXIDStart()) {
+        if (code_point != tint::CodePoint('_') && !code_point.IsXIDStart()) {
             return {};
         }
         // Consume start codepoint
@@ -983,7 +983,7 @@ std::optional<Token> Lexer::try_ident() {
     while (!is_eol()) {
         // Must continue with an XID_Continue unicode character
         auto* utf8 = reinterpret_cast<const uint8_t*>(&at(pos()));
-        auto [code_point, n] = utils::utf8::Decode(utf8, line().size() - pos());
+        auto [code_point, n] = tint::utf8::Decode(utf8, line().size() - pos());
         if (n == 0) {
             advance();  // Skip the bad byte.
             return Token{Token::Type::kError, source, "invalid UTF-8"};

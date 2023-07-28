@@ -29,8 +29,8 @@ using HlslASTPrinterTest_WorkgroupVar = TestHelper;
 TEST_F(HlslASTPrinterTest_WorkgroupVar, Basic) {
     GlobalVar("wg", ty.f32(), builtin::AddressSpace::kWorkgroup);
 
-    Func("main", utils::Empty, ty.void_(), utils::Vector{Assign("wg", 1.2_f)},
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(), Vector{Assign("wg", 1.2_f)},
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -45,8 +45,8 @@ TEST_F(HlslASTPrinterTest_WorkgroupVar, Aliased) {
 
     GlobalVar("wg", ty.Of(alias), builtin::AddressSpace::kWorkgroup);
 
-    Func("main", utils::Empty, ty.void_(), utils::Vector{Assign("wg", 1.2_f)},
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(), Vector{Assign("wg", 1.2_f)},
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });

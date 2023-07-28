@@ -50,9 +50,9 @@ struct StateImpl : ShaderIO::BackendState {
     /// The global variable for output locations.
     Var* location_output_var = nullptr;
     /// The member indices for inputs.
-    utils::Vector<uint32_t, 4> input_indices;
+    Vector<uint32_t, 4> input_indices;
     /// The member indices for outputs.
-    utils::Vector<uint32_t, 4> output_indices;
+    Vector<uint32_t, 4> output_indices;
 
     /// Constructor
     /// @copydoc ShaderIO::BackendState::BackendState
@@ -71,16 +71,16 @@ struct StateImpl : ShaderIO::BackendState {
     /// @param name_suffix the suffix to add to struct and variable names
     void MakeStructs(Var*& builtin_var,
                      Var*& location_var,
-                     utils::Vector<uint32_t, 4>* indices,
-                     utils::Vector<type::Manager::StructMemberDesc, 4>& entries,
+                     Vector<uint32_t, 4>* indices,
+                     Vector<type::Manager::StructMemberDesc, 4>& entries,
                      builtin::AddressSpace addrspace,
                      builtin::Access access,
                      const char* name_suffix) {
         // Build separate lists of builtin and location entries and record their new indices.
         uint32_t next_builtin_idx = 0;
         uint32_t next_location_idx = 0;
-        utils::Vector<type::Manager::StructMemberDesc, 4> builtin_members;
-        utils::Vector<type::Manager::StructMemberDesc, 4> location_members;
+        Vector<type::Manager::StructMemberDesc, 4> builtin_members;
+        Vector<type::Manager::StructMemberDesc, 4> location_members;
         for (auto io : entries) {
             if (io.attributes.builtin) {
                 // SampleMask must be an array for Vulkan.
@@ -113,10 +113,10 @@ struct StateImpl : ShaderIO::BackendState {
     }
 
     /// @copydoc ShaderIO::BackendState::FinalizeInputs
-    utils::Vector<FunctionParam*, 4> FinalizeInputs() override {
+    Vector<FunctionParam*, 4> FinalizeInputs() override {
         MakeStructs(builtin_input_var, location_input_var, &input_indices, inputs,
                     builtin::AddressSpace::kIn, builtin::Access::kRead, "Inputs");
-        return utils::Empty;
+        return tint::Empty;
     }
 
     /// @copydoc ShaderIO::BackendState::FinalizeOutputs

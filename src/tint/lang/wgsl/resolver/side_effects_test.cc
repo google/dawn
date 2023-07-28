@@ -36,8 +36,8 @@ struct SideEffectsTest : ResolverTest {
         auto global = Sym();
         GlobalVar(global, ty.Of<T>(), builtin::AddressSpace::kPrivate);
         auto local = Sym();
-        Func(name, utils::Empty, ty.Of<T>(),
-             utils::Vector{
+        Func(name, tint::Empty, ty.Of<T>(),
+             Vector{
                  Decl(Var(local, ty.Of<T>())),
                  Assign(global, local),
                  Return(global),
@@ -49,8 +49,8 @@ struct SideEffectsTest : ResolverTest {
         auto global = Sym();
         GlobalVar(global, make_type(), builtin::AddressSpace::kPrivate);
         auto local = Sym();
-        Func(name, utils::Empty, make_type(),
-             utils::Vector{
+        Func(name, tint::Empty, make_type(),
+             Vector{
                  Decl(Var(local, make_type())),
                  Assign(global, local),
                  Return(global),
@@ -94,8 +94,8 @@ TEST_F(SideEffectsTest, VariableUser) {
 TEST_F(SideEffectsTest, Call_Builtin_NoSE) {
     GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate);
     auto* expr = Call("dpdx", "a");
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Ignore(expr)},
-         utils::Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
+    Func("f", tint::Empty, ty.void_(), Vector{Ignore(expr)},
+         Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* sem = Sem().Get(expr);
@@ -107,8 +107,8 @@ TEST_F(SideEffectsTest, Call_Builtin_NoSE) {
 TEST_F(SideEffectsTest, Call_Builtin_NoSE_WithSEArg) {
     MakeSideEffectFunc<f32>("se");
     auto* expr = Call("dpdx", Call("se"));
-    Func("f", utils::Empty, ty.void_(), utils::Vector{Ignore(expr)},
-         utils::Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
+    Func("f", tint::Empty, ty.void_(), Vector{Ignore(expr)},
+         Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* sem = Sem().Get(expr);
@@ -132,13 +132,13 @@ TEST_F(SideEffectsTest, Call_Builtin_SE) {
 namespace builtin_tests {
 struct Case {
     const char* name;
-    utils::Vector<const char*, 3> args;
+    Vector<const char*, 3> args;
     bool has_side_effects;
     bool returns_value;
     ast::PipelineStage pipeline_stage;
 };
 static Case C(const char* name,
-              utils::VectorRef<const char*> args,
+              VectorRef<const char*> args,
               bool has_side_effects,
               bool returns_value,
               ast::PipelineStage stage = ast::PipelineStage::kFragment) {
@@ -205,20 +205,20 @@ TEST_P(SideEffectsBuiltinTest, Test) {
                   Binding(AInt(next_binding++)));
     }
 
-    utils::Vector<const ast::Statement*, 4> stmts;
+    Vector<const ast::Statement*, 4> stmts;
     stmts.Push(Decl(Let("pstorage_arr", AddressOf("storage_arr"))));
     if (c.pipeline_stage == ast::PipelineStage::kCompute) {
         stmts.Push(Decl(Let("pworkgroup_arr", AddressOf("workgroup_arr"))));
     }
     stmts.Push(Decl(Let("pa", AddressOf("a"))));
 
-    utils::Vector<const ast::Expression*, 5> args;
+    Vector<const ast::Expression*, 5> args;
     for (auto& a : c.args) {
         args.Push(Expr(a));
     }
     auto* expr = Call(c.name, args);
 
-    utils::Vector<const ast::Attribute*, 2> attrs;
+    Vector<const ast::Attribute*, 2> attrs;
     attrs.Push(create<ast::StageAttribute>(c.pipeline_stage));
     if (c.pipeline_stage == ast::PipelineStage::kCompute) {
         attrs.Push(WorkgroupSize(Expr(1_u)));
@@ -230,7 +230,7 @@ TEST_P(SideEffectsBuiltinTest, Test) {
         stmts.Push(CallStmt(expr));
     }
 
-    Func("func", utils::Empty, ty.void_(), stmts, attrs);
+    Func("func", tint::Empty, ty.void_(), stmts, attrs);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* sem = Sem().Get(expr);
@@ -243,135 +243,135 @@ INSTANTIATE_TEST_SUITE_P(
     SideEffectsBuiltinTest,
     testing::ValuesIn(std::vector<Case>{
         // No side-effect builts
-        C("abs", utils::Vector{"f"}, false, true),                                               //
-        C("acos", utils::Vector{"f"}, false, true),                                              //
-        C("acosh", utils::Vector{"f"}, false, true),                                             //
-        C("all", utils::Vector{"vb"}, false, true),                                              //
-        C("any", utils::Vector{"vb"}, false, true),                                              //
-        C("arrayLength", utils::Vector{"pstorage_arr"}, false, true),                            //
-        C("asin", utils::Vector{"f"}, false, true),                                              //
-        C("asinh", utils::Vector{"f"}, false, true),                                             //
-        C("atan", utils::Vector{"f"}, false, true),                                              //
-        C("atan2", utils::Vector{"f", "f"}, false, true),                                        //
-        C("atanh", utils::Vector{"f"}, false, true),                                             //
-        C("atomicLoad", utils::Vector{"pa"}, false, true),                                       //
-        C("ceil", utils::Vector{"f"}, false, true),                                              //
-        C("clamp", utils::Vector{"f", "f", "f"}, false, true),                                   //
-        C("cos", utils::Vector{"f"}, false, true),                                               //
-        C("cosh", utils::Vector{"f"}, false, true),                                              //
-        C("countLeadingZeros", utils::Vector{"i"}, false, true),                                 //
-        C("countOneBits", utils::Vector{"i"}, false, true),                                      //
-        C("countTrailingZeros", utils::Vector{"i"}, false, true),                                //
-        C("cross", utils::Vector{"vf", "vf"}, false, true),                                      //
-        C("degrees", utils::Vector{"f"}, false, true),                                           //
-        C("determinant", utils::Vector{"m"}, false, true),                                       //
-        C("distance", utils::Vector{"f", "f"}, false, true),                                     //
-        C("dot", utils::Vector{"vf", "vf"}, false, true),                                        //
-        C("dot4I8Packed", utils::Vector{"u", "u"}, false, true),                                 //
-        C("dot4U8Packed", utils::Vector{"u", "u"}, false, true),                                 //
-        C("exp", utils::Vector{"f"}, false, true),                                               //
-        C("exp2", utils::Vector{"f"}, false, true),                                              //
-        C("extractBits", utils::Vector{"i", "u", "u"}, false, true),                             //
-        C("faceForward", utils::Vector{"vf", "vf", "vf"}, false, true),                          //
-        C("firstLeadingBit", utils::Vector{"u"}, false, true),                                   //
-        C("firstTrailingBit", utils::Vector{"u"}, false, true),                                  //
-        C("floor", utils::Vector{"f"}, false, true),                                             //
-        C("fma", utils::Vector{"f", "f", "f"}, false, true),                                     //
-        C("fract", utils::Vector{"vf"}, false, true),                                            //
-        C("frexp", utils::Vector{"f"}, false, true),                                             //
-        C("insertBits", utils::Vector{"i", "i", "u", "u"}, false, true),                         //
-        C("inverseSqrt", utils::Vector{"f"}, false, true),                                       //
-        C("ldexp", utils::Vector{"f", "i"}, false, true),                                        //
-        C("length", utils::Vector{"vf"}, false, true),                                           //
-        C("log", utils::Vector{"f"}, false, true),                                               //
-        C("log2", utils::Vector{"f"}, false, true),                                              //
-        C("max", utils::Vector{"f", "f"}, false, true),                                          //
-        C("min", utils::Vector{"f", "f"}, false, true),                                          //
-        C("mix", utils::Vector{"f", "f", "f"}, false, true),                                     //
-        C("modf", utils::Vector{"f"}, false, true),                                              //
-        C("normalize", utils::Vector{"vf"}, false, true),                                        //
-        C("pack2x16float", utils::Vector{"vf2"}, false, true),                                   //
-        C("pack2x16snorm", utils::Vector{"vf2"}, false, true),                                   //
-        C("pack2x16unorm", utils::Vector{"vf2"}, false, true),                                   //
-        C("pack4x8snorm", utils::Vector{"vf4"}, false, true),                                    //
-        C("pack4x8unorm", utils::Vector{"vf4"}, false, true),                                    //
-        C("pow", utils::Vector{"f", "f"}, false, true),                                          //
-        C("radians", utils::Vector{"f"}, false, true),                                           //
-        C("reflect", utils::Vector{"vf", "vf"}, false, true),                                    //
-        C("refract", utils::Vector{"vf", "vf", "f"}, false, true),                               //
-        C("reverseBits", utils::Vector{"u"}, false, true),                                       //
-        C("round", utils::Vector{"f"}, false, true),                                             //
-        C("select", utils::Vector{"f", "f", "b"}, false, true),                                  //
-        C("sign", utils::Vector{"f"}, false, true),                                              //
-        C("sin", utils::Vector{"f"}, false, true),                                               //
-        C("sinh", utils::Vector{"f"}, false, true),                                              //
-        C("smoothstep", utils::Vector{"f", "f", "f"}, false, true),                              //
-        C("sqrt", utils::Vector{"f"}, false, true),                                              //
-        C("step", utils::Vector{"f", "f"}, false, true),                                         //
-        C("tan", utils::Vector{"f"}, false, true),                                               //
-        C("tanh", utils::Vector{"f"}, false, true),                                              //
-        C("textureDimensions", utils::Vector{"t2d"}, false, true),                               //
-        C("textureGather", utils::Vector{"tdepth2d", "s2d", "vf2"}, false, true),                //
-        C("textureGatherCompare", utils::Vector{"tdepth2d", "scomp", "vf2", "f"}, false, true),  //
-        C("textureLoad", utils::Vector{"t2d", "vi2", "i"}, false, true),                         //
-        C("textureNumLayers", utils::Vector{"t2d_arr"}, false, true),                            //
-        C("textureNumLevels", utils::Vector{"t2d"}, false, true),                                //
-        C("textureNumSamples", utils::Vector{"t2d_multi"}, false, true),                         //
+        C("abs", Vector{"f"}, false, true),                                               //
+        C("acos", Vector{"f"}, false, true),                                              //
+        C("acosh", Vector{"f"}, false, true),                                             //
+        C("all", Vector{"vb"}, false, true),                                              //
+        C("any", Vector{"vb"}, false, true),                                              //
+        C("arrayLength", Vector{"pstorage_arr"}, false, true),                            //
+        C("asin", Vector{"f"}, false, true),                                              //
+        C("asinh", Vector{"f"}, false, true),                                             //
+        C("atan", Vector{"f"}, false, true),                                              //
+        C("atan2", Vector{"f", "f"}, false, true),                                        //
+        C("atanh", Vector{"f"}, false, true),                                             //
+        C("atomicLoad", Vector{"pa"}, false, true),                                       //
+        C("ceil", Vector{"f"}, false, true),                                              //
+        C("clamp", Vector{"f", "f", "f"}, false, true),                                   //
+        C("cos", Vector{"f"}, false, true),                                               //
+        C("cosh", Vector{"f"}, false, true),                                              //
+        C("countLeadingZeros", Vector{"i"}, false, true),                                 //
+        C("countOneBits", Vector{"i"}, false, true),                                      //
+        C("countTrailingZeros", Vector{"i"}, false, true),                                //
+        C("cross", Vector{"vf", "vf"}, false, true),                                      //
+        C("degrees", Vector{"f"}, false, true),                                           //
+        C("determinant", Vector{"m"}, false, true),                                       //
+        C("distance", Vector{"f", "f"}, false, true),                                     //
+        C("dot", Vector{"vf", "vf"}, false, true),                                        //
+        C("dot4I8Packed", Vector{"u", "u"}, false, true),                                 //
+        C("dot4U8Packed", Vector{"u", "u"}, false, true),                                 //
+        C("exp", Vector{"f"}, false, true),                                               //
+        C("exp2", Vector{"f"}, false, true),                                              //
+        C("extractBits", Vector{"i", "u", "u"}, false, true),                             //
+        C("faceForward", Vector{"vf", "vf", "vf"}, false, true),                          //
+        C("firstLeadingBit", Vector{"u"}, false, true),                                   //
+        C("firstTrailingBit", Vector{"u"}, false, true),                                  //
+        C("floor", Vector{"f"}, false, true),                                             //
+        C("fma", Vector{"f", "f", "f"}, false, true),                                     //
+        C("fract", Vector{"vf"}, false, true),                                            //
+        C("frexp", Vector{"f"}, false, true),                                             //
+        C("insertBits", Vector{"i", "i", "u", "u"}, false, true),                         //
+        C("inverseSqrt", Vector{"f"}, false, true),                                       //
+        C("ldexp", Vector{"f", "i"}, false, true),                                        //
+        C("length", Vector{"vf"}, false, true),                                           //
+        C("log", Vector{"f"}, false, true),                                               //
+        C("log2", Vector{"f"}, false, true),                                              //
+        C("max", Vector{"f", "f"}, false, true),                                          //
+        C("min", Vector{"f", "f"}, false, true),                                          //
+        C("mix", Vector{"f", "f", "f"}, false, true),                                     //
+        C("modf", Vector{"f"}, false, true),                                              //
+        C("normalize", Vector{"vf"}, false, true),                                        //
+        C("pack2x16float", Vector{"vf2"}, false, true),                                   //
+        C("pack2x16snorm", Vector{"vf2"}, false, true),                                   //
+        C("pack2x16unorm", Vector{"vf2"}, false, true),                                   //
+        C("pack4x8snorm", Vector{"vf4"}, false, true),                                    //
+        C("pack4x8unorm", Vector{"vf4"}, false, true),                                    //
+        C("pow", Vector{"f", "f"}, false, true),                                          //
+        C("radians", Vector{"f"}, false, true),                                           //
+        C("reflect", Vector{"vf", "vf"}, false, true),                                    //
+        C("refract", Vector{"vf", "vf", "f"}, false, true),                               //
+        C("reverseBits", Vector{"u"}, false, true),                                       //
+        C("round", Vector{"f"}, false, true),                                             //
+        C("select", Vector{"f", "f", "b"}, false, true),                                  //
+        C("sign", Vector{"f"}, false, true),                                              //
+        C("sin", Vector{"f"}, false, true),                                               //
+        C("sinh", Vector{"f"}, false, true),                                              //
+        C("smoothstep", Vector{"f", "f", "f"}, false, true),                              //
+        C("sqrt", Vector{"f"}, false, true),                                              //
+        C("step", Vector{"f", "f"}, false, true),                                         //
+        C("tan", Vector{"f"}, false, true),                                               //
+        C("tanh", Vector{"f"}, false, true),                                              //
+        C("textureDimensions", Vector{"t2d"}, false, true),                               //
+        C("textureGather", Vector{"tdepth2d", "s2d", "vf2"}, false, true),                //
+        C("textureGatherCompare", Vector{"tdepth2d", "scomp", "vf2", "f"}, false, true),  //
+        C("textureLoad", Vector{"t2d", "vi2", "i"}, false, true),                         //
+        C("textureNumLayers", Vector{"t2d_arr"}, false, true),                            //
+        C("textureNumLevels", Vector{"t2d"}, false, true),                                //
+        C("textureNumSamples", Vector{"t2d_multi"}, false, true),                         //
         C("textureSampleCompareLevel",
-          utils::Vector{"tdepth2d", "scomp", "vf2", "f"},
+          Vector{"tdepth2d", "scomp", "vf2", "f"},
           false,
-          true),                                                                                 //
-        C("textureSampleGrad", utils::Vector{"t2d", "s2d", "vf2", "vf2", "vf2"}, false, true),   //
-        C("textureSampleLevel", utils::Vector{"t2d", "s2d", "vf2", "f"}, false, true),           //
-        C("transpose", utils::Vector{"m"}, false, true),                                         //
-        C("trunc", utils::Vector{"f"}, false, true),                                             //
-        C("unpack2x16float", utils::Vector{"u"}, false, true),                                   //
-        C("unpack2x16snorm", utils::Vector{"u"}, false, true),                                   //
-        C("unpack2x16unorm", utils::Vector{"u"}, false, true),                                   //
-        C("unpack4x8snorm", utils::Vector{"u"}, false, true),                                    //
-        C("unpack4x8unorm", utils::Vector{"u"}, false, true),                                    //
-        C("storageBarrier", utils::Empty, false, false, ast::PipelineStage::kCompute),           //
-        C("workgroupBarrier", utils::Empty, false, false, ast::PipelineStage::kCompute),         //
-        C("textureSample", utils::Vector{"t2d", "s2d", "vf2"}, false, true),                     //
-        C("textureSampleBias", utils::Vector{"t2d", "s2d", "vf2", "f"}, false, true),            //
-        C("textureSampleCompare", utils::Vector{"tdepth2d", "scomp", "vf2", "f"}, false, true),  //
-        C("dpdx", utils::Vector{"f"}, false, true),                                              //
-        C("dpdxCoarse", utils::Vector{"f"}, false, true),                                        //
-        C("dpdxFine", utils::Vector{"f"}, false, true),                                          //
-        C("dpdy", utils::Vector{"f"}, false, true),                                              //
-        C("dpdyCoarse", utils::Vector{"f"}, false, true),                                        //
-        C("dpdyFine", utils::Vector{"f"}, false, true),                                          //
-        C("fwidth", utils::Vector{"f"}, false, true),                                            //
-        C("fwidthCoarse", utils::Vector{"f"}, false, true),                                      //
-        C("fwidthFine", utils::Vector{"f"}, false, true),                                        //
+          true),                                                                          //
+        C("textureSampleGrad", Vector{"t2d", "s2d", "vf2", "vf2", "vf2"}, false, true),   //
+        C("textureSampleLevel", Vector{"t2d", "s2d", "vf2", "f"}, false, true),           //
+        C("transpose", Vector{"m"}, false, true),                                         //
+        C("trunc", Vector{"f"}, false, true),                                             //
+        C("unpack2x16float", Vector{"u"}, false, true),                                   //
+        C("unpack2x16snorm", Vector{"u"}, false, true),                                   //
+        C("unpack2x16unorm", Vector{"u"}, false, true),                                   //
+        C("unpack4x8snorm", Vector{"u"}, false, true),                                    //
+        C("unpack4x8unorm", Vector{"u"}, false, true),                                    //
+        C("storageBarrier", tint::Empty, false, false, ast::PipelineStage::kCompute),     //
+        C("workgroupBarrier", tint::Empty, false, false, ast::PipelineStage::kCompute),   //
+        C("textureSample", Vector{"t2d", "s2d", "vf2"}, false, true),                     //
+        C("textureSampleBias", Vector{"t2d", "s2d", "vf2", "f"}, false, true),            //
+        C("textureSampleCompare", Vector{"tdepth2d", "scomp", "vf2", "f"}, false, true),  //
+        C("dpdx", Vector{"f"}, false, true),                                              //
+        C("dpdxCoarse", Vector{"f"}, false, true),                                        //
+        C("dpdxFine", Vector{"f"}, false, true),                                          //
+        C("dpdy", Vector{"f"}, false, true),                                              //
+        C("dpdyCoarse", Vector{"f"}, false, true),                                        //
+        C("dpdyFine", Vector{"f"}, false, true),                                          //
+        C("fwidth", Vector{"f"}, false, true),                                            //
+        C("fwidthCoarse", Vector{"f"}, false, true),                                      //
+        C("fwidthFine", Vector{"f"}, false, true),                                        //
 
         // Side-effect builtins
-        C("atomicAdd", utils::Vector{"pa", "i"}, true, true),                       //
-        C("atomicAnd", utils::Vector{"pa", "i"}, true, true),                       //
-        C("atomicCompareExchangeWeak", utils::Vector{"pa", "i", "i"}, true, true),  //
-        C("atomicExchange", utils::Vector{"pa", "i"}, true, true),                  //
-        C("atomicMax", utils::Vector{"pa", "i"}, true, true),                       //
-        C("atomicMin", utils::Vector{"pa", "i"}, true, true),                       //
-        C("atomicOr", utils::Vector{"pa", "i"}, true, true),                        //
-        C("atomicStore", utils::Vector{"pa", "i"}, true, false),                    //
-        C("atomicSub", utils::Vector{"pa", "i"}, true, true),                       //
-        C("atomicXor", utils::Vector{"pa", "i"}, true, true),                       //
-        C("textureStore", utils::Vector{"tstorage2d", "vi2", "vf4"}, true, false),  //
+        C("atomicAdd", Vector{"pa", "i"}, true, true),                       //
+        C("atomicAnd", Vector{"pa", "i"}, true, true),                       //
+        C("atomicCompareExchangeWeak", Vector{"pa", "i", "i"}, true, true),  //
+        C("atomicExchange", Vector{"pa", "i"}, true, true),                  //
+        C("atomicMax", Vector{"pa", "i"}, true, true),                       //
+        C("atomicMin", Vector{"pa", "i"}, true, true),                       //
+        C("atomicOr", Vector{"pa", "i"}, true, true),                        //
+        C("atomicStore", Vector{"pa", "i"}, true, false),                    //
+        C("atomicSub", Vector{"pa", "i"}, true, true),                       //
+        C("atomicXor", Vector{"pa", "i"}, true, true),                       //
+        C("textureStore", Vector{"tstorage2d", "vi2", "vf4"}, true, false),  //
         C("workgroupUniformLoad",
-          utils::Vector{"pworkgroup_arr"},
+          Vector{"pworkgroup_arr"},
           true,
           true,
           ast::PipelineStage::kCompute),  //
 
         // Unimplemented builtins
-        // C("quantizeToF16", utils::Vector{"f"}, false), //
-        // C("saturate", utils::Vector{"f"}, false), //
+        // C("quantizeToF16", Vector{"f"}, false), //
+        // C("saturate", Vector{"f"}, false), //
     }));
 
 }  // namespace builtin_tests
 
 TEST_F(SideEffectsTest, Call_Function) {
-    Func("f", utils::Empty, ty.i32(), utils::Vector{Return(1_i)});
+    Func("f", tint::Empty, ty.i32(), Vector{Return(1_i)});
     auto* expr = Call("f");
     WrapInFunction(expr);
 
@@ -431,7 +431,7 @@ TEST_F(SideEffectsTest, Call_TypeInitializer_SE) {
 }
 
 TEST_F(SideEffectsTest, MemberAccessor_Struct_NoSE) {
-    auto* s = Structure("S", utils::Vector{Member("m", ty.i32())});
+    auto* s = Structure("S", Vector{Member("m", ty.i32())});
     auto* var = Decl(Var("a", ty.Of(s)));
     auto* expr = MemberAccessor("a", "m");
     WrapInFunction(var, expr);
@@ -443,7 +443,7 @@ TEST_F(SideEffectsTest, MemberAccessor_Struct_NoSE) {
 }
 
 TEST_F(SideEffectsTest, MemberAccessor_Struct_SE) {
-    auto* s = Structure("S", utils::Vector{Member("m", ty.i32())});
+    auto* s = Structure("S", Vector{Member("m", ty.i32())});
     MakeSideEffectFunc("se", [&] { return ty.Of(s); });
     auto* expr = MemberAccessor(Call("se"), "m");
     WrapInFunction(expr);

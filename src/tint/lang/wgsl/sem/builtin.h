@@ -27,7 +27,7 @@
 namespace tint::sem {
 
 /// Builtin holds the semantic information for a builtin function.
-class Builtin final : public utils::Castable<Builtin, CallTarget> {
+class Builtin final : public Castable<Builtin, CallTarget> {
   public:
     /// Constructor
     /// @param type the builtin type
@@ -39,7 +39,7 @@ class Builtin final : public utils::Castable<Builtin, CallTarget> {
     /// @param must_use true if the builtin was annotated with `@must_use`
     Builtin(builtin::Function type,
             const type::Type* return_type,
-            utils::VectorRef<Parameter*> parameters,
+            VectorRef<Parameter*> parameters,
             EvaluationStage eval_stage,
             PipelineStageSet supported_stages,
             bool is_deprecated,
@@ -123,8 +123,8 @@ class hash<tint::sem::Builtin> {
     /// @param i the Builtin to create a hash for
     /// @return the hash value
     inline std::size_t operator()(const tint::sem::Builtin& i) const {
-        return tint::utils::Hash(i.Type(), i.SupportedStages(), i.ReturnType(), i.Parameters(),
-                                 i.IsDeprecated());
+        return Hash(i.Type(), i.SupportedStages(), i.ReturnType(), i.Parameters(),
+                    i.IsDeprecated());
     }
 };
 

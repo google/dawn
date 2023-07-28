@@ -512,7 +512,7 @@ void SyntaxTreePrinter::EmitVariable(const ast::Variable* v) {
     Line() << "]";
 }
 
-void SyntaxTreePrinter::EmitAttributes(utils::VectorRef<const ast::Attribute*> attrs) {
+void SyntaxTreePrinter::EmitAttributes(VectorRef<const ast::Attribute*> attrs) {
     for (auto* attr : attrs) {
         Switch(
             attr,  //
@@ -810,13 +810,13 @@ void SyntaxTreePrinter::EmitStatement(const ast::Statement* stmt) {
         });
 }
 
-void SyntaxTreePrinter::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) {
+void SyntaxTreePrinter::EmitStatements(VectorRef<const ast::Statement*> stmts) {
     for (auto* s : stmts) {
         EmitStatement(s);
     }
 }
 
-void SyntaxTreePrinter::EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts) {
+void SyntaxTreePrinter::EmitStatementsWithIndent(VectorRef<const ast::Statement*> stmts) {
     ScopedIndent si(this);
     EmitStatements(stmts);
 }
@@ -1020,14 +1020,14 @@ void SyntaxTreePrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
                 case 0:  // No initializer
                     break;
                 case 1:  // Single line initializer statement
-                    Line() << utils::TrimSuffix(init_buf.lines[0].content, ";");
+                    Line() << tint::TrimSuffix(init_buf.lines[0].content, ";");
                     break;
                 default:  // Block initializer statement
                     for (size_t i = 1; i < init_buf.lines.size(); i++) {
                         // Indent all by the first line
                         init_buf.lines[i].indent += current_buffer_->current_indent;
                     }
-                    Line() << utils::TrimSuffix(init_buf.String(), "\n");
+                    Line() << tint::TrimSuffix(init_buf.String(), "\n");
                     break;
             }
         }
@@ -1048,14 +1048,14 @@ void SyntaxTreePrinter::EmitForLoop(const ast::ForLoopStatement* stmt) {
                 case 0:  // No continuing
                     break;
                 case 1:  // Single line continuing statement
-                    Line() << utils::TrimSuffix(cont_buf.lines[0].content, ";");
+                    Line() << tint::TrimSuffix(cont_buf.lines[0].content, ";");
                     break;
                 default:  // Block continuing statement
                     for (size_t i = 1; i < cont_buf.lines.size(); i++) {
                         // Indent all by the first line
                         cont_buf.lines[i].indent += current_buffer_->current_indent;
                     }
-                    Line() << utils::TrimSuffix(cont_buf.String(), "\n");
+                    Line() << tint::TrimSuffix(cont_buf.String(), "\n");
                     break;
             }
         }

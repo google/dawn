@@ -169,7 +169,7 @@ TEST(FloatToBitPreservingStringTest, NaN) {
     // NaN bit (0) to quiet NaN (1). As NaN floating point numbers can be silently modified by the
     // architecture, and the signalling bit is architecture defined, this test may fail on other
     // architectures.
-    auto nan = utils::Bitcast<float>(0x7fc0beef);
+    auto nan = tint::Bitcast<float>(0x7fc0beef);
     EXPECT_EQ(FloatToBitPreservingString(nan), "0x1.817ddep+128");
     EXPECT_EQ(FloatToBitPreservingString(-nan), "-0x1.817ddep+128");
 }
@@ -326,7 +326,7 @@ TEST(DoubleToBitPreservingStringTest, Infinity) {
 }
 
 TEST(DoubleToBitPreservingStringTest, NaN) {
-    auto nan = utils::Bitcast<double>(0x7ff8cafef00dbeefull);
+    auto nan = tint::Bitcast<double>(0x7ff8cafef00dbeefull);
     EXPECT_EQ(DoubleToBitPreservingString(static_cast<double>(nan)), "0x1.8cafef00dbeefp+1024");
     EXPECT_EQ(DoubleToBitPreservingString(static_cast<double>(-nan)), "-0x1.8cafef00dbeefp+1024");
 }

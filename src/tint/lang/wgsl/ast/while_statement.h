@@ -22,7 +22,7 @@ namespace tint::ast {
 class Expression;
 
 /// A while loop statement
-class WhileStatement final : public utils::Castable<WhileStatement, Statement> {
+class WhileStatement final : public Castable<WhileStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
@@ -36,7 +36,7 @@ class WhileStatement final : public utils::Castable<WhileStatement, Statement> {
                    const Source& source,
                    const Expression* condition,
                    const BlockStatement* body,
-                   utils::VectorRef<const ast::Attribute*> attributes);
+                   VectorRef<const ast::Attribute*> attributes);
 
     /// Destructor
     ~WhileStatement() override;
@@ -54,7 +54,7 @@ class WhileStatement final : public utils::Castable<WhileStatement, Statement> {
     const BlockStatement* const body;
 
     /// The attribute list
-    const utils::Vector<const Attribute*, 1> attributes;
+    const tint::Vector<const Attribute*, 1> attributes;
 };
 
 }  // namespace tint::ast

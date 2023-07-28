@@ -28,7 +28,7 @@ using ::testing::HasSubstr;
 using SpvParserCFGTest = SpirvASTParserTest;
 
 std::string Dump(const std::vector<uint32_t>& v) {
-    utils::StringStream o;
+    tint::StringStream o;
     o << "{";
     for (auto a : v) {
         o << a << " ";
@@ -2599,7 +2599,7 @@ TEST_F(SpvParserCFGTest, VerifyHeaderContinueMergeOrder_HeaderDoesNotStrictlyDom
     fe.RegisterMerges();
     EXPECT_FALSE(fe.VerifyHeaderContinueMergeOrder());
 
-    utils::StringStream result;
+    tint::StringStream result;
     result << *fe.GetBlockInfo(50) << std::endl << *fe.GetBlockInfo(20) << std::endl;
     EXPECT_THAT(p->error(), Eq("Header 50 does not strictly dominate its merge block 20"))
         << result.str() << Dump(fe.block_order());
@@ -2635,7 +2635,7 @@ TEST_F(SpvParserCFGTest,
     fe.ComputeBlockOrderAndPositions();
     fe.RegisterMerges();
     EXPECT_FALSE(fe.VerifyHeaderContinueMergeOrder());
-    utils::StringStream str;
+    tint::StringStream str;
     str << *fe.GetBlockInfo(50) << std::endl << *fe.GetBlockInfo(20) << std::endl;
     EXPECT_THAT(p->error(), Eq("Loop header 50 does not dominate its continue target 20"))
         << str.str() << Dump(fe.block_order());
@@ -2754,7 +2754,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_FunctionIsOnlyIfSelectionAnd
     const auto& constructs = fe.constructs();
     EXPECT_EQ(constructs.Length(), 2u);
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
@@ -2805,7 +2805,7 @@ TEST_F(SpvParserCFGTest,
     const auto& constructs = fe.constructs();
     EXPECT_EQ(constructs.Length(), 2u);
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
@@ -2854,7 +2854,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_SwitchSelection) {
     const auto& constructs = fe.constructs();
     EXPECT_EQ(constructs.Length(), 2u);
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
@@ -2896,7 +2896,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_SingleBlockLoop) {
     const auto& constructs = fe.constructs();
     EXPECT_EQ(constructs.Length(), 2u);
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     // A single-block loop consists *only* of a continue target with one block in
@@ -2947,7 +2947,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_MultiBlockLoop_HeaderIsNotCo
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
@@ -3000,7 +3000,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_MultiBlockLoop_HeaderIsConti
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
@@ -3051,7 +3051,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_MergeBlockIsAlsoSingleBlockL
     const auto& constructs = fe.constructs();
     EXPECT_EQ(constructs.Length(), 3u);
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     // A single-block loop consists *only* of a continue target with one block in
@@ -3104,7 +3104,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_MergeBlockIsAlsoMultiBlockLo
     const auto& constructs = fe.constructs();
     EXPECT_EQ(constructs.Length(), 4u);
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
@@ -3168,7 +3168,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_If_If) {
     const auto& constructs = fe.constructs();
     EXPECT_EQ(constructs.Length(), 4u);
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
@@ -3233,7 +3233,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_Switch_If) {
     const auto& constructs = fe.constructs();
     EXPECT_EQ(constructs.Length(), 4u);
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     // The ordering among siblings depends on the computed block order.
@@ -3288,7 +3288,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_If_Switch) {
     const auto& constructs = fe.constructs();
     EXPECT_EQ(constructs.Length(), 3u);
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
@@ -3347,7 +3347,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_Loop_Loop) {
     const auto& constructs = fe.constructs();
     EXPECT_EQ(constructs.Length(), 4u);
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
@@ -3407,7 +3407,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_Loop_If) {
     const auto& constructs = fe.constructs();
     EXPECT_EQ(constructs.Length(), 4u);
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
@@ -3463,7 +3463,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_LoopContinue_If) {
     const auto& constructs = fe.constructs();
     EXPECT_EQ(constructs.Length(), 4u);
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
@@ -3511,7 +3511,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_If_SingleBlockLoop) {
     const auto& constructs = fe.constructs();
     EXPECT_EQ(constructs.Length(), 3u);
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
@@ -3564,7 +3564,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_If_MultiBlockLoop) {
     const auto& constructs = fe.constructs();
     EXPECT_EQ(constructs.Length(), 4u);
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
@@ -3619,7 +3619,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_LoopInterallyDiverge) {
     const auto& constructs = fe.constructs();
     EXPECT_EQ(constructs.Length(), 4u);
 
-    utils::StringStream str;
+    tint::StringStream str;
     str << constructs;
 
     ASSERT_THAT(ToString(constructs), Eq(R"(ConstructList{

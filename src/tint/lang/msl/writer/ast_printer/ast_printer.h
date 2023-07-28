@@ -81,7 +81,7 @@ struct SanitizedResult {
 SanitizedResult Sanitize(const Program* program, const Options& options);
 
 /// Implementation class for MSL generator
-class ASTPrinter : public utils::TextGenerator {
+class ASTPrinter : public tint::TextGenerator {
   public:
     /// Constructor
     /// @param program the program to generate
@@ -108,7 +108,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param out the output of the expression stream
     /// @param expr the expression to emit
     /// @returns true if the index accessor was emitted
-    bool EmitIndexAccessor(utils::StringStream& out, const ast::IndexAccessorExpression* expr);
+    bool EmitIndexAccessor(StringStream& out, const ast::IndexAccessorExpression* expr);
     /// Handles an assignment statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully
@@ -117,12 +117,12 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param out the output of the expression stream
     /// @param expr the binary expression
     /// @returns true if the expression was emitted, false otherwise
-    bool EmitBinary(utils::StringStream& out, const ast::BinaryExpression* expr);
+    bool EmitBinary(StringStream& out, const ast::BinaryExpression* expr);
     /// Handles generating a bitcast expression
     /// @param out the output of the expression stream
     /// @param expr the bitcast expression
     /// @returns true if the bitcast was emitted
-    bool EmitBitcast(utils::StringStream& out, const ast::BitcastExpression* expr);
+    bool EmitBitcast(StringStream& out, const ast::BitcastExpression* expr);
     /// Handles a block statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully
@@ -139,21 +139,19 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @returns true if the call expression is emitted
-    bool EmitCall(utils::StringStream& out, const ast::CallExpression* expr);
+    bool EmitCall(StringStream& out, const ast::CallExpression* expr);
     /// Handles generating a builtin call expression
     /// @param out the output of the expression stream
     /// @param call the call expression
     /// @param builtin the builtin being called
     /// @returns true if the call expression is emitted
-    bool EmitBuiltinCall(utils::StringStream& out,
-                         const sem::Call* call,
-                         const sem::Builtin* builtin);
+    bool EmitBuiltinCall(StringStream& out, const sem::Call* call, const sem::Builtin* builtin);
     /// Handles generating a value conversion expression
     /// @param out the output of the expression stream
     /// @param call the call expression
     /// @param conv the value conversion
     /// @returns true if the expression is emitted
-    bool EmitTypeConversion(utils::StringStream& out,
+    bool EmitTypeConversion(StringStream& out,
                             const sem::Call* call,
                             const sem::ValueConversion* conv);
     /// Handles generating a value constructor
@@ -161,7 +159,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param call the call expression
     /// @param ctor the value constructor
     /// @returns true if the initializer is emitted
-    bool EmitTypeInitializer(utils::StringStream& out,
+    bool EmitTypeInitializer(StringStream& out,
                              const sem::Call* call,
                              const sem::ValueConstructor* ctor);
     /// Handles generating a function call
@@ -169,16 +167,14 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param call the call expression
     /// @param func the target function
     /// @returns true if the call is emitted
-    bool EmitFunctionCall(utils::StringStream& out,
-                          const sem::Call* call,
-                          const sem::Function* func);
+    bool EmitFunctionCall(StringStream& out, const sem::Call* call, const sem::Function* func);
     /// Handles generating a call to an atomic function (`atomicAdd`,
     /// `atomicMax`, etc)
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @param builtin the semantic information for the atomic builtin
     /// @returns true if the call expression is emitted
-    bool EmitAtomicCall(utils::StringStream& out,
+    bool EmitAtomicCall(StringStream& out,
                         const ast::CallExpression* expr,
                         const sem::Builtin* builtin);
     /// Handles generating a call to a texture function (`textureSample`,
@@ -187,15 +183,13 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param call the call expression
     /// @param builtin the semantic information for the texture builtin
     /// @returns true if the call expression is emitted
-    bool EmitTextureCall(utils::StringStream& out,
-                         const sem::Call* call,
-                         const sem::Builtin* builtin);
+    bool EmitTextureCall(StringStream& out, const sem::Call* call, const sem::Builtin* builtin);
     /// Handles generating a call to the `dot()` builtin
     /// @param out the output of the expression stream
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
-    bool EmitDotCall(utils::StringStream& out,
+    bool EmitDotCall(StringStream& out,
                      const ast::CallExpression* expr,
                      const sem::Builtin* builtin);
     /// Handles generating a call to the `modf()` builtin
@@ -203,7 +197,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
-    bool EmitModfCall(utils::StringStream& out,
+    bool EmitModfCall(StringStream& out,
                       const ast::CallExpression* expr,
                       const sem::Builtin* builtin);
     /// Handles generating a call to the `frexp()` builtin
@@ -211,7 +205,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
-    bool EmitFrexpCall(utils::StringStream& out,
+    bool EmitFrexpCall(StringStream& out,
                        const ast::CallExpression* expr,
                        const sem::Builtin* builtin);
     /// Handles generating a call to the `degrees()` builtin
@@ -219,7 +213,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
-    bool EmitDegreesCall(utils::StringStream& out,
+    bool EmitDegreesCall(StringStream& out,
                          const ast::CallExpression* expr,
                          const sem::Builtin* builtin);
     /// Handles generating a call to the `radians()` builtin
@@ -227,7 +221,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param expr the call expression
     /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
-    bool EmitRadiansCall(utils::StringStream& out,
+    bool EmitRadiansCall(StringStream& out,
                          const ast::CallExpression* expr,
                          const sem::Builtin* builtin);
     /// Handles a case statement
@@ -250,7 +244,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param out the output of the expression stream
     /// @param expr the expression
     /// @returns true if the expression was emitted
-    bool EmitExpression(utils::StringStream& out, const ast::Expression* expr);
+    bool EmitExpression(StringStream& out, const ast::Expression* expr);
     /// Handles generating a function
     /// @param func the function to generate
     /// @returns true if the function was emitted
@@ -259,7 +253,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param out the output of the expression stream
     /// @param expr the identifier expression
     /// @returns true if the identifier was emitted
-    bool EmitIdentifier(utils::StringStream& out, const ast::IdentifierExpression* expr);
+    bool EmitIdentifier(StringStream& out, const ast::IdentifierExpression* expr);
     /// Handles an if statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was successfully emitted
@@ -268,12 +262,12 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param out the output stream
     /// @param constant the constant value to emit
     /// @returns true if the constant value was successfully emitted
-    bool EmitConstant(utils::StringStream& out, const constant::Value* constant);
+    bool EmitConstant(StringStream& out, const constant::Value* constant);
     /// Handles a literal
     /// @param out the output of the expression stream
     /// @param lit the literal to emit
     /// @returns true if the literal was successfully emitted
-    bool EmitLiteral(utils::StringStream& out, const ast::LiteralExpression* lit);
+    bool EmitLiteral(StringStream& out, const ast::LiteralExpression* lit);
     /// Handles a loop statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted
@@ -290,7 +284,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param out the output of the expression stream
     /// @param expr the member accessor expression
     /// @returns true if the member accessor was emitted
-    bool EmitMemberAccessor(utils::StringStream& out, const ast::MemberAccessorExpression* expr);
+    bool EmitMemberAccessor(StringStream& out, const ast::MemberAccessorExpression* expr);
     /// Handles return statements
     /// @param stmt the statement to emit
     /// @returns true if the statement was successfully emitted
@@ -298,7 +292,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// Handles emitting a pipeline stage name
     /// @param out the output of the expression stream
     /// @param stage the stage to emit
-    void EmitStage(utils::StringStream& out, ast::PipelineStage stage);
+    void EmitStage(StringStream& out, ast::PipelineStage stage);
     /// Handles statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted
@@ -306,11 +300,11 @@ class ASTPrinter : public utils::TextGenerator {
     /// Emits a list of statements
     /// @param stmts the statement list
     /// @returns true if the statements were emitted successfully
-    bool EmitStatements(utils::VectorRef<const ast::Statement*> stmts);
+    bool EmitStatements(VectorRef<const ast::Statement*> stmts);
     /// Emits a list of statements with an indentation
     /// @param stmts the statement list
     /// @returns true if the statements were emitted successfully
-    bool EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts);
+    bool EmitStatementsWithIndent(VectorRef<const ast::Statement*> stmts);
     /// Handles generating a switch statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted
@@ -319,18 +313,18 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param out the output of the type stream
     /// @param type the type to generate
     /// @returns true if the type is emitted
-    bool EmitType(utils::StringStream& out, const type::Type* type);
+    bool EmitType(StringStream& out, const type::Type* type);
     /// Handles generating type and name
     /// @param out the output stream
     /// @param type the type to generate
     /// @param name the name to emit
     /// @returns true if the type is emitted
-    bool EmitTypeAndName(utils::StringStream& out, const type::Type* type, const std::string& name);
+    bool EmitTypeAndName(StringStream& out, const type::Type* type, const std::string& name);
     /// Handles generating a address space
     /// @param out the output of the type stream
     /// @param sc the address space to generate
     /// @returns true if the address space is emitted
-    bool EmitAddressSpace(utils::StringStream& out, builtin::AddressSpace sc);
+    bool EmitAddressSpace(StringStream& out, builtin::AddressSpace sc);
     /// Handles generating a struct declaration. If the structure has already been emitted, then
     /// this function will simply return `true` without emitting anything.
     /// @param buffer the text buffer that the type declaration will be written to
@@ -341,7 +335,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param out the output of the expression stream
     /// @param expr the expression to emit
     /// @returns true if the expression was emitted
-    bool EmitUnaryOp(utils::StringStream& out, const ast::UnaryOpExpression* expr);
+    bool EmitUnaryOp(StringStream& out, const ast::UnaryOpExpression* expr);
     /// Handles generating a 'var' declaration
     /// @param var the variable to generate
     /// @returns true if the variable was emitted
@@ -354,7 +348,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// @param out the output of the expression stream
     /// @param type the type to emit the value for
     /// @returns true if the zero value was successfully emitted.
-    bool EmitZeroValue(utils::StringStream& out, const type::Type* type);
+    bool EmitZeroValue(StringStream& out, const type::Type* type);
 
     /// Handles generating a builtin name
     /// @param builtin the semantic info for the builtin
@@ -376,7 +370,7 @@ class ASTPrinter : public utils::TextGenerator {
     ///          `params` is the name of all the generated function parameters
     /// @returns true if the call expression is emitted
     template <typename F>
-    bool CallBuiltinHelper(utils::StringStream& out,
+    bool CallBuiltinHelper(StringStream& out,
                            const ast::CallExpression* call,
                            const sem::Builtin* builtin,
                            F&& build);
@@ -385,7 +379,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// first call.
     const std::string& ArrayType();
 
-    /// @copydoc utils::TextWrtiter::UniqueIdentifier
+    /// @copydoc tint::TextWrtiter::UniqueIdentifier
     std::string UniqueIdentifier(const std::string& prefix = "") override;
 
     /// Alias for builder_.TypeOf(ptr)
@@ -403,7 +397,7 @@ class ASTPrinter : public utils::TextGenerator {
     /// Name of atomicCompareExchangeWeak() helper for the given pointer storage
     /// class and struct return type
     using ACEWKeyType =
-        utils::UnorderedKeyWrapper<std::tuple<builtin::AddressSpace, const type::Struct*>>;
+        tint::UnorderedKeyWrapper<std::tuple<builtin::AddressSpace, const type::Struct*>>;
     std::unordered_map<ACEWKeyType, std::string> atomicCompareExchangeWeak_;
 
     /// Unique name of the 'TINT_INVARIANT' preprocessor define.

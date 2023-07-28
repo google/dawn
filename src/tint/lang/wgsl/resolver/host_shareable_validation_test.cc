@@ -26,8 +26,7 @@ using namespace tint::number_suffixes;  // NOLINT
 using ResolverHostShareableValidationTest = ResolverTest;
 
 TEST_F(ResolverHostShareableValidationTest, BoolMember) {
-    auto* s =
-        Structure("S", utils::Vector{Member(Source{{56, 78}}, "x", ty.bool_(Source{{12, 34}}))});
+    auto* s = Structure("S", Vector{Member(Source{{56, 78}}, "x", ty.bool_(Source{{12, 34}}))});
 
     GlobalVar(Source{{90, 12}}, "g", ty.Of(s), builtin::AddressSpace::kStorage,
               builtin::Access::kRead, Binding(0_a), Group(0_a));
@@ -42,8 +41,8 @@ TEST_F(ResolverHostShareableValidationTest, BoolMember) {
 }
 
 TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
-    auto* s = Structure(
-        "S", utils::Vector{Member(Source{{56, 78}}, "x", ty.vec3<bool>(Source{{12, 34}}))});
+    auto* s =
+        Structure("S", Vector{Member(Source{{56, 78}}, "x", ty.vec3<bool>(Source{{12, 34}}))});
 
     GlobalVar(Source{{90, 12}}, "g", ty.Of(s), builtin::AddressSpace::kStorage,
               builtin::Access::kRead, Binding(0_a), Group(0_a));
@@ -59,8 +58,7 @@ TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
 
 TEST_F(ResolverHostShareableValidationTest, Aliases) {
     Alias("a1", ty.bool_());
-    auto* s =
-        Structure("S", utils::Vector{Member(Source{{56, 78}}, "x", ty(Source{{12, 34}}, "a1"))});
+    auto* s = Structure("S", Vector{Member(Source{{56, 78}}, "x", ty(Source{{12, 34}}, "a1"))});
     auto* a2 = Alias("a2", ty.Of(s));
     GlobalVar(Source{{90, 12}}, "g", ty.Of(a2), builtin::AddressSpace::kStorage,
               builtin::Access::kRead, Binding(0_a), Group(0_a));
@@ -75,11 +73,11 @@ TEST_F(ResolverHostShareableValidationTest, Aliases) {
 }
 
 TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
-    auto* i1 = Structure("I1", utils::Vector{Member(Source{{1, 2}}, "x", ty.bool_())});
-    auto* i2 = Structure("I2", utils::Vector{Member(Source{{3, 4}}, "y", ty.Of(i1))});
-    auto* i3 = Structure("I3", utils::Vector{Member(Source{{5, 6}}, "z", ty.Of(i2))});
+    auto* i1 = Structure("I1", Vector{Member(Source{{1, 2}}, "x", ty.bool_())});
+    auto* i2 = Structure("I2", Vector{Member(Source{{3, 4}}, "y", ty.Of(i1))});
+    auto* i3 = Structure("I3", Vector{Member(Source{{5, 6}}, "z", ty.Of(i2))});
 
-    auto* s = Structure("S", utils::Vector{Member(Source{{7, 8}}, "m", ty.Of(i3))});
+    auto* s = Structure("S", Vector{Member(Source{{7, 8}}, "m", ty.Of(i3))});
 
     GlobalVar(Source{{9, 10}}, "g", ty.Of(s), builtin::AddressSpace::kStorage,
               builtin::Access::kRead, Binding(0_a), Group(0_a));
@@ -99,26 +97,26 @@ TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
 TEST_F(ResolverHostShareableValidationTest, NoError) {
     Enable(builtin::Extension::kF16);
 
-    auto* i1 = Structure("I1", utils::Vector{
+    auto* i1 = Structure("I1", Vector{
                                    Member(Source{{1, 1}}, "w1", ty.f32()),
                                    Member(Source{{2, 1}}, "x1", ty.f32()),
                                    Member(Source{{3, 1}}, "y1", ty.vec3<f32>()),
                                    Member(Source{{4, 1}}, "z1", ty.array<i32, 4>()),
                                });
     auto* a1 = Alias("a1", ty.Of(i1));
-    auto* i2 = Structure("I2", utils::Vector{
+    auto* i2 = Structure("I2", Vector{
                                    Member(Source{{5, 1}}, "x2", ty.mat2x2<f32>()),
                                    Member(Source{{6, 1}}, "w2", ty.mat3x4<f32>()),
                                    Member(Source{{7, 1}}, "z2", ty.Of(i1)),
                                });
     auto* a2 = Alias("a2", ty.Of(i2));
-    auto* i3 = Structure("I3", utils::Vector{
+    auto* i3 = Structure("I3", Vector{
                                    Member(Source{{4, 1}}, "x3", ty.Of(a1)),
                                    Member(Source{{5, 1}}, "y3", ty.Of(i2)),
                                    Member(Source{{6, 1}}, "z3", ty.Of(a2)),
                                });
 
-    auto* s = Structure("S", utils::Vector{Member(Source{{7, 8}}, "m", ty.Of(i3))});
+    auto* s = Structure("S", Vector{Member(Source{{7, 8}}, "m", ty.Of(i3))});
 
     GlobalVar(Source{{9, 10}}, "g", ty.Of(s), builtin::AddressSpace::kStorage,
               builtin::Access::kRead, Binding(0_a), Group(0_a));

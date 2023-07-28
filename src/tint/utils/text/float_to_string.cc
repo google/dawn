@@ -52,7 +52,7 @@ struct Traits<double> {
 
 template <typename F>
 std::string ToString(F f) {
-    utils::StringStream s;
+    StringStream s;
     s << f;
     return s.str();
 }

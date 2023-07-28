@@ -39,7 +39,7 @@ enum class CoreDiagnosticRule {
 /// @param out the stream to write to
 /// @param value the CoreDiagnosticRule
 /// @returns `out` so calls can be chained
-utils::StringStream& operator<<(utils::StringStream& out, CoreDiagnosticRule value);
+StringStream& operator<<(StringStream& out, CoreDiagnosticRule value);
 
 /// ParseCoreDiagnosticRule parses a CoreDiagnosticRule from a string.
 /// @param str the string to parse
@@ -59,7 +59,7 @@ enum class ChromiumDiagnosticRule {
 /// @param out the stream to write to
 /// @param value the ChromiumDiagnosticRule
 /// @returns `out` so calls can be chained
-utils::StringStream& operator<<(utils::StringStream& out, ChromiumDiagnosticRule value);
+StringStream& operator<<(StringStream& out, ChromiumDiagnosticRule value);
 
 /// ParseChromiumDiagnosticRule parses a ChromiumDiagnosticRule from a string.
 /// @param str the string to parse

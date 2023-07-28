@@ -20,7 +20,7 @@
 
 #include "src/tint/utils/macros/concat.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// Helper class that temporarily assigns a value to a variable for the lifetime
 /// of the ScopedAssignment object. Once the ScopedAssignment is destructed, the
@@ -49,14 +49,14 @@ class ScopedAssignment {
     T old_value_;
 };
 
-}  // namespace tint::utils
+}  // namespace tint
 
 /// TINT_SCOPED_ASSIGNMENT(var, val) assigns `val` to `var`, and automatically
 /// restores the original value of `var` when exiting the current lexical scope.
-#define TINT_SCOPED_ASSIGNMENT(var, val)                                                 \
-    ::tint::utils::ScopedAssignment<std::remove_reference_t<decltype(var)>> TINT_CONCAT( \
-        tint_scoped_assignment_, __COUNTER__) {                                          \
-        var, val                                                                         \
+#define TINT_SCOPED_ASSIGNMENT(var, val)                                          \
+    ::tint::ScopedAssignment<std::remove_reference_t<decltype(var)>> TINT_CONCAT( \
+        tint_scoped_assignment_, __COUNTER__) {                                   \
+        var, val                                                                  \
     }
 
 #endif  // SRC_TINT_UTILS_MACROS_SCOPED_ASSIGNMENT_H_

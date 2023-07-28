@@ -26,7 +26,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Atomic);
 namespace tint::type {
 
 Atomic::Atomic(const type::Type* subtype)
-    : Base(utils::Hash(utils::TypeInfo::Of<Atomic>().full_hashcode, subtype),
+    : Base(Hash(tint::TypeInfo::Of<Atomic>().full_hashcode, subtype),
            type::Flags{
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,
@@ -43,7 +43,7 @@ bool Atomic::Equals(const type::UniqueNode& other) const {
 }
 
 std::string Atomic::FriendlyName() const {
-    utils::StringStream out;
+    StringStream out;
     out << "atomic<" << subtype_->FriendlyName() << ">";
     return out.str();
 }

@@ -18,7 +18,7 @@
 #include <stdint.h>
 #include <cstddef>
 
-namespace tint::utils {
+namespace tint {
 
 constexpr uint32_t kCRC32LUT[] = {
     0,          0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
@@ -76,6 +76,6 @@ inline uint32_t CRC32(const void* ptr, size_t size) {
     return crc ^ 0xffffffff;
 }
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_MATH_CRC32_H_

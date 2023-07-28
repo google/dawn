@@ -539,8 +539,8 @@ const i : vec2<i32> = vec2<i32>(!);
 TEST_F(ParserImplErrorTest, GlobalDeclConstExprMaxDepth) {
     uint32_t kMaxDepth = 128;
 
-    utils::StringStream src;
-    utils::StringStream mkr;
+    StringStream src;
+    StringStream mkr;
     src << "const i : i32 = ";
     mkr << "                ";
     for (size_t i = 0; i < kMaxDepth + 8; i++) {
@@ -556,7 +556,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclConstExprMaxDepth) {
         src << ")";
     }
     src << ";";
-    utils::StringStream err;
+    StringStream err;
     err << "test.wgsl:1:529 error: maximum parser recursive depth reached\n"
         << src.str() << "\n"
         << mkr.str() << "\n";

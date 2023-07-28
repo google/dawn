@@ -26,7 +26,7 @@ class If;
 namespace tint::ir {
 
 /// A exit if instruction.
-class ExitIf : public utils::Castable<ExitIf, Exit> {
+class ExitIf : public Castable<ExitIf, Exit> {
   public:
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
@@ -34,7 +34,7 @@ class ExitIf : public utils::Castable<ExitIf, Exit> {
     /// Constructor
     /// @param i the if being exited
     /// @param args the target MultiInBlock arguments
-    explicit ExitIf(ir::If* i, utils::VectorRef<Value*> args = utils::Empty);
+    explicit ExitIf(ir::If* i, VectorRef<Value*> args = tint::Empty);
     ~ExitIf() override;
 
     /// Re-associates the exit with the given if instruction

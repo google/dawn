@@ -28,17 +28,14 @@ namespace tint::ast {
 ///   // Enable an extension named "f16"
 ///   enable f16;
 /// ```
-class Enable final : public utils::Castable<Enable, Node> {
+class Enable final : public Castable<Enable, Node> {
   public:
     /// Create a extension
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param exts the extensions being enabled by this directive
-    Enable(GenerationID pid,
-           NodeID nid,
-           const Source& src,
-           utils::VectorRef<const Extension*> exts);
+    Enable(GenerationID pid, NodeID nid, const Source& src, VectorRef<const Extension*> exts);
 
     /// Destructor
     ~Enable() override;
@@ -53,7 +50,7 @@ class Enable final : public utils::Castable<Enable, Node> {
     const Enable* Clone(CloneContext* ctx) const override;
 
     /// The extensions being enabled by this directive
-    const utils::Vector<const Extension*, 4> extensions;
+    const tint::Vector<const Extension*, 4> extensions;
 };
 
 }  // namespace tint::ast

@@ -26,8 +26,8 @@ namespace tint::writer {
 bool CheckSupportedExtensions(std::string_view writer_name,
                               const ast::Module& module,
                               diag::List& diags,
-                              utils::VectorRef<builtin::Extension> supported) {
-    utils::Hashset<builtin::Extension, 32> set;
+                              VectorRef<builtin::Extension> supported) {
+    Hashset<builtin::Extension, 32> set;
     for (auto ext : supported) {
         set.Add(ext);
     }
@@ -37,7 +37,7 @@ bool CheckSupportedExtensions(std::string_view writer_name,
             if (!set.Contains(ext->name)) {
                 diags.add_error(diag::System::Writer,
                                 std::string(writer_name) + " backend does not support extension '" +
-                                    utils::ToString(ext->name) + "'",
+                                    tint::ToString(ext->name) + "'",
                                 ext->source);
                 return false;
             }

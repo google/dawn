@@ -39,7 +39,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Array) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, "ary"))
         << gen.Diagnostics();
@@ -52,7 +52,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_ArrayOfArray) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, "ary"))
         << gen.Diagnostics();
@@ -65,7 +65,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_ArrayOfArrayOfArray) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, "ary"))
         << gen.Diagnostics();
@@ -78,7 +78,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Array_WithoutName) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
         << gen.Diagnostics();
@@ -90,7 +90,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Bool) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, bool_, builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
         << gen.Diagnostics();
@@ -102,7 +102,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_F16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(
         gen.EmitType(out, f16, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
         << gen.Diagnostics();
@@ -114,7 +114,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_F32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(
         gen.EmitType(out, f32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
         << gen.Diagnostics();
@@ -126,7 +126,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_I32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(
         gen.EmitType(out, i32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
         << gen.Diagnostics();
@@ -140,7 +140,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Matrix_F16) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, mat2x3, builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
         << gen.Diagnostics();
@@ -154,7 +154,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Matrix_F32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, mat2x3, builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
         << gen.Diagnostics();
@@ -162,7 +162,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Matrix_F32) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_StructDecl) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
@@ -170,7 +170,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_StructDecl) {
 
     ASTPrinter& gen = Build();
 
-    utils::TextGenerator::TextBuffer buf;
+    tint::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(s)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {
@@ -181,7 +181,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_StructDecl) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
@@ -195,7 +195,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_Struct) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
@@ -204,7 +204,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Struct) {
     ASTPrinter& gen = Build();
 
     auto* str = program->TypeOf(s)->As<type::Struct>();
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(
         gen.EmitType(out, str, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
         << gen.Diagnostics();
@@ -212,7 +212,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Struct) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_Struct_NameCollision) {
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("double", ty.i32()),
                                  Member("float", ty.f32()),
                              });
@@ -229,15 +229,15 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Struct_NameCollision) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_Struct_WithOffsetAttributes) {
-    auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.i32(), utils::Vector{MemberOffset(0_a)}),
-                                 Member("b", ty.f32(), utils::Vector{MemberOffset(8_a)}),
+    auto* s = Structure("S", Vector{
+                                 Member("a", ty.i32(), Vector{MemberOffset(0_a)}),
+                                 Member("b", ty.f32(), Vector{MemberOffset(8_a)}),
                              });
     GlobalVar("g", ty.Of(s), builtin::AddressSpace::kPrivate);
 
     ASTPrinter& gen = Build();
 
-    utils::TextGenerator::TextBuffer buf;
+    tint::TextGenerator::TextBuffer buf;
     auto* str = program->TypeOf(s)->As<type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {
@@ -252,7 +252,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_U32) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(
         gen.EmitType(out, u32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
         << gen.Diagnostics();
@@ -265,7 +265,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Vector) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(
         gen.EmitType(out, vec3, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
         << gen.Diagnostics();
@@ -277,7 +277,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Void) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, void_, builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
         << gen.Diagnostics();
@@ -289,7 +289,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitSampler) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, sampler, builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
         << gen.Diagnostics();
@@ -301,7 +301,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitSamplerComparison) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitType(out, sampler, builtin::AddressSpace::kUndefined,
                              builtin::Access::kReadWrite, ""))
         << gen.Diagnostics();
@@ -313,7 +313,7 @@ struct HlslDepthTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, HlslDepthTextureData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.dim;
     out << str.str();
     return out;
@@ -326,11 +326,11 @@ TEST_P(HlslDepthTexturesTest, Emit) {
 
     GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("v", Call("textureDimensions", "tex"))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -357,11 +357,11 @@ TEST_F(HlslDepthMultisampledTexturesTest, Emit) {
 
     GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("v", Call("textureDimensions", "tex"))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -378,7 +378,7 @@ struct HlslSampledTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, HlslSampledTextureData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.dim;
     out << str.str();
     return out;
@@ -403,11 +403,11 @@ TEST_P(HlslSampledTexturesTest, Emit) {
 
     GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("v", Call("textureDimensions", "tex"))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -516,7 +516,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitMultisampledTexture) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(
         gen.EmitType(out, s, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
         << gen.Diagnostics();
@@ -529,7 +529,7 @@ struct HlslStorageTextureData {
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, HlslStorageTextureData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.dim;
     out << str.str();
     return out;
@@ -541,16 +541,16 @@ TEST_P(HlslStorageTexturesTest, Emit) {
     auto t = ty.storage_texture(params.dim, params.imgfmt, builtin::Access::kWrite);
 
     GlobalVar("tex", t,
-              utils::Vector{
+              Vector{
                   Group(2_a),
                   Binding(1_a),
               });
 
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              Decl(Var("v", Call("textureDimensions", "tex"))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 

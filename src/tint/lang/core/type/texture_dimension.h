@@ -40,7 +40,7 @@ enum class TextureDimension {
 /// @param out the stream to write to
 /// @param dim the type::TextureDimension
 /// @return the stream so calls can be chained
-utils::StringStream& operator<<(utils::StringStream& out, type::TextureDimension dim);
+StringStream& operator<<(StringStream& out, type::TextureDimension dim);
 
 }  // namespace tint::type
 

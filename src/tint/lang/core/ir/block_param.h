@@ -21,7 +21,7 @@
 namespace tint::ir {
 
 /// An instruction in the IR.
-class BlockParam : public utils::Castable<BlockParam, Value> {
+class BlockParam : public Castable<BlockParam, Value> {
   public:
     /// Constructor
     /// @param type the type of the var

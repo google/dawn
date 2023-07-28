@@ -28,7 +28,7 @@ struct Case {
     struct Failure {
         builder::CreatePtrs create_ptrs;
     };
-    utils::Result<Success, Failure> expected;
+    tint::Result<Success, Failure> expected;
 };
 
 static std::ostream& operator<<(std::ostream& o, const Case& c) {
@@ -93,12 +93,12 @@ TEST_P(ResolverConstEvalBitcastTest, Test) {
     }
 }
 
-const u32 nan_as_u32 = utils::Bitcast<u32>(std::numeric_limits<float>::quiet_NaN());
-const i32 nan_as_i32 = utils::Bitcast<i32>(std::numeric_limits<float>::quiet_NaN());
-const u32 inf_as_u32 = utils::Bitcast<u32>(std::numeric_limits<float>::infinity());
-const i32 inf_as_i32 = utils::Bitcast<i32>(std::numeric_limits<float>::infinity());
-const u32 neg_inf_as_u32 = utils::Bitcast<u32>(-std::numeric_limits<float>::infinity());
-const i32 neg_inf_as_i32 = utils::Bitcast<i32>(-std::numeric_limits<float>::infinity());
+const u32 nan_as_u32 = tint::Bitcast<u32>(std::numeric_limits<float>::quiet_NaN());
+const i32 nan_as_i32 = tint::Bitcast<i32>(std::numeric_limits<float>::quiet_NaN());
+const u32 inf_as_u32 = tint::Bitcast<u32>(std::numeric_limits<float>::infinity());
+const i32 inf_as_i32 = tint::Bitcast<i32>(std::numeric_limits<float>::infinity());
+const u32 neg_inf_as_u32 = tint::Bitcast<u32>(-std::numeric_limits<float>::infinity());
+const i32 neg_inf_as_i32 = tint::Bitcast<i32>(-std::numeric_limits<float>::infinity());
 
 INSTANTIATE_TEST_SUITE_P(Bitcast,
                          ResolverConstEvalBitcastTest,

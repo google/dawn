@@ -129,7 +129,7 @@ struct SimplifyPointers::State {
     /// @returns the new program or SkipTransform if the transform is not required
     ApplyResult Run() {
         // A map of saved expressions to their saved variable name
-        utils::Hashmap<const Expression*, Symbol, 8> saved_vars;
+        Hashmap<const Expression*, Symbol, 8> saved_vars;
 
         bool needs_transform = false;
         for (auto* ty : ctx.src->Types()) {
@@ -160,7 +160,7 @@ struct SimplifyPointers::State {
 
                     // Scan the initializer expression for array index expressions that need
                     // to be hoist to temporary "saved" variables.
-                    utils::Vector<const VariableDeclStatement*, 8> saved;
+                    tint::Vector<const VariableDeclStatement*, 8> saved;
                     CollectSavedArrayIndices(
                         var->Declaration()->initializer, [&](const Expression* idx_expr) {
                             // We have a sub-expression that needs to be saved.

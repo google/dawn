@@ -23,7 +23,7 @@ namespace tint::ast::transform {
 /// indexed to a temporary `var` local before performing the index. This
 /// transform is used by the SPIR-V writer as there is no SPIR-V instruction
 /// that can dynamically index a non-pointer composite.
-class VarForDynamicIndex final : public utils::Castable<VarForDynamicIndex, Transform> {
+class VarForDynamicIndex final : public Castable<VarForDynamicIndex, Transform> {
   public:
     /// Constructor
     VarForDynamicIndex();

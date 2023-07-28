@@ -28,7 +28,7 @@ struct BinaryData {
     std::string name;
 };
 inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
-    utils::StringStream str;
+    StringStream str;
     str << data.op;
     out << str.str();
     return out;

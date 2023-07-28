@@ -31,7 +31,7 @@ TEST_F(ResolverAssignmentValidationTest, ReadOnlyBuffer) {
     // struct S { m : i32 };
     // @group(0) @binding(0)
     // var<storage,read> a : S;
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("m", ty.i32()),
                              });
     GlobalVar(Source{{12, 34}}, "a", ty.Of(s), builtin::AddressSpace::kStorage,
@@ -255,8 +255,8 @@ TEST_F(ResolverAssignmentValidationTest, AssignToConst_Fail) {
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignToParam_Fail) {
-    Func("foo", utils::Vector{Param(Source{{56, 78}}, "arg", ty.i32())}, ty.void_(),
-         utils::Vector{
+    Func("foo", Vector{Param(Source{{56, 78}}, "arg", ty.i32())}, ty.void_(),
+         Vector{
              Assign(Expr(Source{{12, 34}}, "arg"), Expr(1_i)),
              Return(),
          });
@@ -274,7 +274,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToLetMember_Fail) {
     //  let a : S;
     //  a.i = 2i
     // }
-    Structure("S", utils::Vector{Member("i", ty.i32())});
+    Structure("S", Vector{Member("i", ty.i32())});
     WrapInFunction(Let(Source{{98, 76}}, "a", ty("S"), Call("S")),  //
                    Assign(MemberAccessor(Source{{12, 34}}, Expr(Source{{56, 78}}, "a"), "i"), 2_i));
 
@@ -308,7 +308,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Atomic) {
     // @group(0) @binding(0) var<storage, read_write> v : S;
     // v.a = v.a;
 
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.atomic(ty.i32())),
                              });
     GlobalVar(Source{{12, 34}}, "v", ty.Of(s), builtin::AddressSpace::kStorage,
@@ -325,7 +325,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_RuntimeArray) {
     // @group(0) @binding(0) var<storage, read_write> v : S;
     // v.a = v.a;
 
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("a", ty.array(ty.f32())),
                              });
     GlobalVar(Source{{12, 34}}, "v", ty.Of(s), builtin::AddressSpace::kStorage,
@@ -345,7 +345,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_NonConstructibleStruct_Fa
     // fn f() {
     //   _ = s;
     // }
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("arr", ty.array<i32>()),
                              });
     GlobalVar("s", ty.Of(s), builtin::AddressSpace::kStorage, Group(0_a), Binding(0_a));
@@ -367,7 +367,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_DynamicArray_Fail) {
     // fn f() {
     //   _ = s.arr;
     // }
-    auto* s = Structure("S", utils::Vector{
+    auto* s = Structure("S", Vector{
                                  Member("arr", ty.array<i32>()),
                              });
     GlobalVar("s", ty.Of(s), builtin::AddressSpace::kStorage, Group(0_a), Binding(0_a));
@@ -413,11 +413,11 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {
     //   _ = wg;
     //   _ = wg[3i];
     // }
-    auto* S = Structure("S", utils::Vector{
+    auto* S = Structure("S", Vector{
                                  Member("i", ty.i32()),
                                  Member("arr", ty.array<i32>()),
                              });
-    auto* U = Structure("U", utils::Vector{
+    auto* U = Structure("U", Vector{
                                  Member("i", ty.i32()),
                              });
     GlobalVar("tex", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Group(0_a),

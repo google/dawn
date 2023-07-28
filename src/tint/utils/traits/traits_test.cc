@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint::utils::traits {
+namespace tint::traits {
 
 namespace {
 
@@ -246,4 +246,4 @@ static_assert(std::is_same_v<const char*, CharArrayToCharPtr<const char[2]>>);
 static_assert(std::is_same_v<int, CharArrayToCharPtr<int>>);
 static_assert(std::is_same_v<int[2], CharArrayToCharPtr<int[2]>>);
 
-}  // namespace tint::utils::traits
+}  // namespace tint::traits

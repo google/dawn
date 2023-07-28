@@ -19,18 +19,18 @@
 
 #include "gtest/gtest.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
-struct Animal : public tint::utils::Castable<Animal> {};
-struct Amphibian : public tint::utils::Castable<Amphibian, Animal> {};
-struct Mammal : public tint::utils::Castable<Mammal, Animal> {};
-struct Reptile : public tint::utils::Castable<Reptile, Animal> {};
-struct Frog : public tint::utils::Castable<Frog, Amphibian> {};
-struct Bear : public tint::utils::Castable<Bear, Mammal> {};
-struct Lizard : public tint::utils::Castable<Lizard, Reptile> {};
-struct Gecko : public tint::utils::Castable<Gecko, Lizard> {};
-struct Iguana : public tint::utils::Castable<Iguana, Lizard> {};
+struct Animal : public Castable<Animal> {};
+struct Amphibian : public Castable<Amphibian, Animal> {};
+struct Mammal : public Castable<Mammal, Animal> {};
+struct Reptile : public Castable<Reptile, Animal> {};
+struct Frog : public Castable<Frog, Amphibian> {};
+struct Bear : public Castable<Bear, Mammal> {};
+struct Lizard : public Castable<Lizard, Reptile> {};
+struct Gecko : public Castable<Gecko, Lizard> {};
+struct Iguana : public Castable<Iguana, Lizard> {};
 
 TEST(CastableBase, Is) {
     std::unique_ptr<CastableBase> frog = std::make_unique<Frog>();
@@ -291,4 +291,4 @@ TINT_INSTANTIATE_TYPEINFO(Bear);
 TINT_INSTANTIATE_TYPEINFO(Lizard);
 TINT_INSTANTIATE_TYPEINFO(Gecko);
 
-}  // namespace tint::utils
+}  // namespace tint

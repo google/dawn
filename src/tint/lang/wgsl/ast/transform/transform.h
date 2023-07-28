@@ -49,7 +49,7 @@ class Output {
 };
 
 /// Interface for Program transforms
-class Transform : public utils::Castable<Transform> {
+class Transform : public Castable<Transform> {
   public:
     /// Constructor
     Transform();

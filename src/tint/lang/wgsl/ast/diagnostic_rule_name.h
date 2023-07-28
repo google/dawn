@@ -27,7 +27,7 @@ class Identifier;
 namespace tint::ast {
 
 /// A diagnostic rule name used for diagnostic directives and attributes.
-class DiagnosticRuleName final : public utils::Castable<DiagnosticRuleName, Node> {
+class DiagnosticRuleName final : public Castable<DiagnosticRuleName, Node> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

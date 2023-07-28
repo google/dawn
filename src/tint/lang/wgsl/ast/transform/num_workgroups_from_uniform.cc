@@ -54,7 +54,7 @@ struct Accessor {
     }
     /// Hash function
     struct Hasher {
-        size_t operator()(const Accessor& a) const { return utils::Hash(a.param, a.member); }
+        size_t operator()(const Accessor& a) const { return Hash(a.param, a.member); }
     };
 };
 
@@ -130,7 +130,7 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
     auto get_ubo = [&] {
         if (!num_workgroups_ubo) {
             auto* num_workgroups_struct =
-                b.Structure(b.Sym(), utils::Vector{
+                b.Structure(b.Sym(), tint::Vector{
                                          b.Member(kNumWorkgroupsMemberName, b.ty.vec3(b.ty.u32())),
                                      });
 

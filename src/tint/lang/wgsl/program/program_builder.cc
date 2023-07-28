@@ -128,9 +128,9 @@ const ast::Statement* ProgramBuilder::WrapInStatement(const ast::Statement* stmt
     return stmt;
 }
 
-const ast::Function* ProgramBuilder::WrapInFunction(utils::VectorRef<const ast::Statement*> stmts) {
+const ast::Function* ProgramBuilder::WrapInFunction(VectorRef<const ast::Statement*> stmts) {
     return Func("test_function", {}, ty.void_(), std::move(stmts),
-                utils::Vector{
+                Vector{
                     create<ast::StageAttribute>(ast::PipelineStage::kCompute),
                     WorkgroupSize(1_i, 1_i, 1_i),
                 });

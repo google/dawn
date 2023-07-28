@@ -93,11 +93,11 @@ class SymbolTable {
     // The value to be associated to the next registered symbol table entry.
     uint32_t next_symbol_ = 1;
 
-    utils::Hashmap<std::string_view, Symbol, 0> name_to_symbol_;
-    utils::Hashmap<std::string, size_t, 0> last_prefix_to_index_;
+    Hashmap<std::string_view, Symbol, 0> name_to_symbol_;
+    Hashmap<std::string, size_t, 0> last_prefix_to_index_;
     tint::GenerationID generation_id_;
 
-    utils::BumpAllocator name_allocator_;
+    tint::BumpAllocator name_allocator_;
 };
 
 /// @param symbol_table the SymbolTable

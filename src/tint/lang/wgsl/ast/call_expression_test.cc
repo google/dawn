@@ -22,7 +22,7 @@ using CallExpressionTest = TestHelper;
 
 TEST_F(CallExpressionTest, CreationIdentifier) {
     auto* func = Expr("func");
-    utils::Vector params{
+    tint::Vector params{
         Expr("param1"),
         Expr("param2"),
     };
@@ -48,7 +48,7 @@ TEST_F(CallExpressionTest, CreationIdentifier_WithSource) {
 
 TEST_F(CallExpressionTest, CreationType) {
     auto* type = Expr(ty.f32());
-    utils::Vector params{
+    tint::Vector params{
         Expr("param1"),
         Expr("param2"),
     };
@@ -91,7 +91,7 @@ TEST_F(CallExpressionTest, Assert_Null_Param) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.Call(b.Ident("func"), utils::Vector{
+            b.Call(b.Ident("func"), tint::Vector{
                                         b.Expr("param1"),
                                         nullptr,
                                         b.Expr("param2"),

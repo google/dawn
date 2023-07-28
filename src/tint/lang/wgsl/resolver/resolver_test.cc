@@ -225,7 +225,7 @@ TEST_F(ResolverTest, Stmt_Return) {
     auto* cond = Expr(2_i);
 
     auto* ret = Return(cond);
-    Func("test", utils::Empty, ty.i32(), utils::Vector{ret}, utils::Empty);
+    Func("test", tint::Empty, ty.i32(), Vector{ret}, tint::Empty);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -262,8 +262,8 @@ TEST_F(ResolverTest, Stmt_Switch) {
 }
 
 TEST_F(ResolverTest, Stmt_Call) {
-    Func("my_func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("my_func", tint::Empty, ty.void_(),
+         Vector{
              Return(),
          });
 
@@ -349,7 +349,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
     auto* bar_f32_init = bar_f32->initializer;
     auto* bar_f32_decl = Decl(bar_f32);
 
-    Func("func", utils::Empty, ty.void_(), utils::Vector{inner, foo_f32_decl, bar_f32_decl});
+    Func("func", tint::Empty, ty.void_(), Vector{inner, foo_f32_decl, bar_f32_decl});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ASSERT_NE(TypeOf(foo_i32_init), nullptr);
@@ -364,8 +364,8 @@ TEST_F(ResolverTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
     EXPECT_EQ(StmtOf(bar_i32_init), bar_i32_decl);
     EXPECT_EQ(StmtOf(foo_f32_init), foo_f32_decl);
     EXPECT_EQ(StmtOf(bar_f32_init), bar_f32_decl);
-    EXPECT_TRUE(CheckVarUsers(foo_i32, utils::Vector{bar_i32->initializer}));
-    EXPECT_TRUE(CheckVarUsers(foo_f32, utils::Vector{bar_f32->initializer}));
+    EXPECT_TRUE(CheckVarUsers(foo_i32, Vector{bar_i32->initializer}));
+    EXPECT_TRUE(CheckVarUsers(foo_f32, Vector{bar_f32->initializer}));
     ASSERT_NE(VarOf(bar_i32->initializer), nullptr);
     EXPECT_EQ(VarOf(bar_i32->initializer)->Declaration(), foo_i32);
     ASSERT_NE(VarOf(bar_f32->initializer), nullptr);
@@ -385,7 +385,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
     auto* fn_i32 = Var("foo", ty.i32(), Expr(2_i));
     auto* fn_i32_init = fn_i32->initializer;
     auto* fn_i32_decl = Decl(fn_i32);
-    Func("func_i32", utils::Empty, ty.void_(), utils::Vector{fn_i32_decl});
+    Func("func_i32", tint::Empty, ty.void_(), Vector{fn_i32_decl});
 
     // Declare f32 "foo" at module scope
     auto* mod_f32 = Var("foo", ty.f32(), builtin::AddressSpace::kPrivate, Expr(2_f));
@@ -396,7 +396,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
     auto* fn_f32 = Var("bar", ty.f32(), Expr("foo"));
     auto* fn_f32_init = fn_f32->initializer;
     auto* fn_f32_decl = Decl(fn_f32);
-    Func("func_f32", utils::Empty, ty.void_(), utils::Vector{fn_f32_decl});
+    Func("func_f32", tint::Empty, ty.void_(), Vector{fn_f32_decl});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ASSERT_NE(TypeOf(mod_init), nullptr);
@@ -408,8 +408,8 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
     EXPECT_EQ(StmtOf(fn_i32_init), fn_i32_decl);
     EXPECT_EQ(StmtOf(mod_init), nullptr);
     EXPECT_EQ(StmtOf(fn_f32_init), fn_f32_decl);
-    EXPECT_TRUE(CheckVarUsers(fn_i32, utils::Empty));
-    EXPECT_TRUE(CheckVarUsers(mod_f32, utils::Vector{fn_f32->initializer}));
+    EXPECT_TRUE(CheckVarUsers(fn_i32, tint::Empty));
+    EXPECT_TRUE(CheckVarUsers(mod_f32, Vector{fn_f32->initializer}));
     ASSERT_NE(VarOf(fn_f32->initializer), nullptr);
     EXPECT_EQ(VarOf(fn_f32->initializer)->Declaration(), mod_f32);
 }
@@ -574,7 +574,7 @@ TEST_F(ResolverTest, Expr_Bitcast) {
 }
 
 TEST_F(ResolverTest, Expr_Call) {
-    Func("my_func", utils::Empty, ty.f32(), utils::Vector{Return(0_f)});
+    Func("my_func", tint::Empty, ty.f32(), Vector{Return(0_f)});
 
     auto* call = Call("my_func");
     WrapInFunction(call);
@@ -586,7 +586,7 @@ TEST_F(ResolverTest, Expr_Call) {
 }
 
 TEST_F(ResolverTest, Expr_Call_InBinaryOp) {
-    Func("func", utils::Empty, ty.f32(), utils::Vector{Return(0_f)});
+    Func("func", tint::Empty, ty.f32(), Vector{Return(0_f)});
 
     auto* expr = Add(Call("func"), Call("func"));
     WrapInFunction(expr);
@@ -598,8 +598,8 @@ TEST_F(ResolverTest, Expr_Call_InBinaryOp) {
 }
 
 TEST_F(ResolverTest, Expr_Call_WithParams) {
-    Func("my_func", utils::Vector{Param(Sym(), ty.f32())}, ty.f32(),
-         utils::Vector{
+    Func("my_func", Vector{Param(Sym(), ty.f32())}, ty.f32(),
+         Vector{
              Return(1.2_f),
          });
 
@@ -692,7 +692,7 @@ TEST_F(ResolverTest, Expr_Identifier_GlobalVariable) {
 
     ASSERT_NE(TypeOf(ident), nullptr);
     EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
-    EXPECT_TRUE(CheckVarUsers(my_var, utils::Vector{ident}));
+    EXPECT_TRUE(CheckVarUsers(my_var, Vector{ident}));
     ASSERT_NE(VarOf(ident), nullptr);
     EXPECT_EQ(VarOf(ident)->Declaration(), my_var);
 }
@@ -707,7 +707,7 @@ TEST_F(ResolverTest, Expr_Identifier_GlobalConst) {
 
     ASSERT_NE(TypeOf(ident), nullptr);
     EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
-    EXPECT_TRUE(CheckVarUsers(my_var, utils::Vector{ident}));
+    EXPECT_TRUE(CheckVarUsers(my_var, Vector{ident}));
     ASSERT_NE(VarOf(ident), nullptr);
     EXPECT_EQ(VarOf(ident)->Declaration(), my_var);
 }
@@ -717,8 +717,8 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable_Const) {
     auto* var = Let("my_var", ty.f32(), Call<f32>());
     auto* decl = Decl(Var("b", ty.f32(), my_var_a));
 
-    Func("my_func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("my_func", tint::Empty, ty.void_(),
+         Vector{
              Decl(var),
              decl,
          });
@@ -728,7 +728,7 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable_Const) {
     ASSERT_NE(TypeOf(my_var_a), nullptr);
     EXPECT_TRUE(TypeOf(my_var_a)->Is<type::F32>());
     EXPECT_EQ(StmtOf(my_var_a), decl);
-    EXPECT_TRUE(CheckVarUsers(var, utils::Vector{my_var_a}));
+    EXPECT_TRUE(CheckVarUsers(var, Vector{my_var_a}));
     ASSERT_NE(VarOf(my_var_a), nullptr);
     EXPECT_EQ(VarOf(my_var_a)->Declaration(), var);
 }
@@ -740,8 +740,8 @@ TEST_F(ResolverTest, IndexAccessor_Dynamic_Ref_F32) {
     auto* a = Var("a", ty.array<bool, 10>(), Call<array<bool, 10>>());
     auto* idx = Var("idx", ty.f32(), Call<f32>());
     auto* f = Var("f", ty.f32(), IndexAccessor("a", Expr(Source{{12, 34}}, idx)));
-    Func("my_func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("my_func", tint::Empty, ty.void_(),
+         Vector{
              Decl(a),
              Decl(idx),
              Decl(f),
@@ -758,8 +758,8 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable) {
 
     auto* var = Var("my_var", ty.f32());
 
-    Func("my_func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("my_func", tint::Empty, ty.void_(),
+         Vector{
              Decl(var),
              assign,
          });
@@ -773,7 +773,7 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable) {
     ASSERT_NE(TypeOf(my_var_b), nullptr);
     EXPECT_TRUE(TypeOf(my_var_b)->Is<type::F32>());
     EXPECT_EQ(StmtOf(my_var_b), assign);
-    EXPECT_TRUE(CheckVarUsers(var, utils::Vector{my_var_a, my_var_b}));
+    EXPECT_TRUE(CheckVarUsers(var, Vector{my_var_a, my_var_b}));
     ASSERT_NE(VarOf(my_var_a), nullptr);
     EXPECT_EQ(VarOf(my_var_a)->Declaration(), var);
     ASSERT_NE(VarOf(my_var_b), nullptr);
@@ -786,8 +786,8 @@ TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {
     auto* v_decl = Decl(Var("v", ty.f32()));
     auto* p_decl = Decl(Let("p", ty.ptr<function, f32>(), AddressOf(v)));
     auto* assign = Assign(Deref(p), 1.23_f);
-    Func("my_func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("my_func", tint::Empty, ty.void_(),
+         Vector{
              v_decl,
              p_decl,
              assign,
@@ -806,8 +806,8 @@ TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {
 }
 
 TEST_F(ResolverTest, Expr_Call_Function) {
-    Func("my_func", utils::Empty, ty.f32(),
-         utils::Vector{
+    Func("my_func", tint::Empty, ty.f32(),
+         Vector{
              Return(0_f),
          });
 
@@ -833,12 +833,12 @@ TEST_F(ResolverTest, Function_Parameters) {
     auto* param_c = Param("c", ty.u32());
 
     auto* func = Func("my_func",
-                      utils::Vector{
+                      Vector{
                           param_a,
                           param_b,
                           param_c,
                       },
-                      ty.void_(), utils::Empty);
+                      ty.void_(), tint::Empty);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -855,26 +855,25 @@ TEST_F(ResolverTest, Function_Parameters) {
 }
 
 TEST_F(ResolverTest, Function_Parameters_Locations) {
-    auto* param_a = Param("a", ty.f32(), utils::Vector{Location(3_a)});
-    auto* param_b =
-        Param("b", ty.u32(), utils::Vector{Builtin(builtin::BuiltinValue::kVertexIndex)});
-    auto* param_c = Param("c", ty.u32(), utils::Vector{Location(1_a)});
+    auto* param_a = Param("a", ty.f32(), Vector{Location(3_a)});
+    auto* param_b = Param("b", ty.u32(), Vector{Builtin(builtin::BuiltinValue::kVertexIndex)});
+    auto* param_c = Param("c", ty.u32(), Vector{Location(1_a)});
 
     GlobalVar("my_vec", ty.vec4<f32>(), builtin::AddressSpace::kPrivate);
     auto* func = Func("my_func",
-                      utils::Vector{
+                      Vector{
                           param_a,
                           param_b,
                           param_c,
                       },
                       ty.vec4<f32>(),
-                      utils::Vector{
+                      Vector{
                           Return("my_vec"),
                       },
-                      utils::Vector{
+                      Vector{
                           Stage(ast::PipelineStage::kVertex),
                       },
-                      utils::Vector{
+                      Vector{
                           Builtin(builtin::BuiltinValue::kPosition),
                       });
 
@@ -889,9 +888,9 @@ TEST_F(ResolverTest, Function_Parameters_Locations) {
 }
 
 TEST_F(ResolverTest, Function_GlobalVariable_Location) {
-    auto* var = GlobalVar(
-        "my_vec", ty.vec4<f32>(), builtin::AddressSpace::kIn,
-        utils::Vector{Location(3_a), Disable(ast::DisabledValidation::kIgnoreAddressSpace)});
+    auto* var =
+        GlobalVar("my_vec", ty.vec4<f32>(), builtin::AddressSpace::kIn,
+                  Vector{Location(3_a), Disable(ast::DisabledValidation::kIgnoreAddressSpace)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -901,15 +900,15 @@ TEST_F(ResolverTest, Function_GlobalVariable_Location) {
 }
 
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
-    auto* s = Structure("S", utils::Vector{Member("m", ty.u32())});
+    auto* s = Structure("S", Vector{Member("m", ty.u32())});
 
     auto* sb_var = GlobalVar("sb_var", ty.Of(s), builtin::AddressSpace::kStorage,
                              builtin::Access::kReadWrite, Binding(0_a), Group(0_a));
     auto* wg_var = GlobalVar("wg_var", ty.f32(), builtin::AddressSpace::kWorkgroup);
     auto* priv_var = GlobalVar("priv_var", ty.f32(), builtin::AddressSpace::kPrivate);
 
-    auto* func = Func("my_func", utils::Empty, ty.void_(),
-                      utils::Vector{
+    auto* func = Func("my_func", tint::Empty, ty.void_(),
+                      Vector{
                           Assign("wg_var", "wg_var"),
                           Assign("sb_var", "sb_var"),
                           Assign("priv_var", "priv_var"),
@@ -930,14 +929,14 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
 }
 
 TEST_F(ResolverTest, Function_ReturnType_Location) {
-    auto* func = Func("my_func", utils::Empty, ty.f32(),
-                      utils::Vector{
+    auto* func = Func("my_func", tint::Empty, ty.f32(),
+                      Vector{
                           Return(1_f),
                       },
-                      utils::Vector{
+                      Vector{
                           Stage(ast::PipelineStage::kFragment),
                       },
-                      utils::Vector{
+                      Vector{
                           Location(2_a),
                       });
 
@@ -950,14 +949,14 @@ TEST_F(ResolverTest, Function_ReturnType_Location) {
 
 TEST_F(ResolverTest, Function_ReturnType_NoLocation) {
     GlobalVar("my_vec", ty.vec4<f32>(), builtin::AddressSpace::kPrivate);
-    auto* func = Func("my_func", utils::Empty, ty.vec4<f32>(),
-                      utils::Vector{
+    auto* func = Func("my_func", tint::Empty, ty.vec4<f32>(),
+                      Vector{
                           Return("my_vec"),
                       },
-                      utils::Vector{
+                      Vector{
                           Stage(ast::PipelineStage::kVertex),
                       },
-                      utils::Vector{
+                      Vector{
                           Builtin(builtin::BuiltinValue::kPosition),
                       });
 
@@ -969,22 +968,22 @@ TEST_F(ResolverTest, Function_ReturnType_NoLocation) {
 }
 
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
-    auto* s = Structure("S", utils::Vector{Member("m", ty.u32())});
+    auto* s = Structure("S", Vector{Member("m", ty.u32())});
 
     auto* sb_var = GlobalVar("sb_var", ty.Of(s), builtin::AddressSpace::kStorage,
                              builtin::Access::kReadWrite, Binding(0_a), Group(0_a));
     auto* wg_var = GlobalVar("wg_var", ty.f32(), builtin::AddressSpace::kWorkgroup);
     auto* priv_var = GlobalVar("priv_var", ty.f32(), builtin::AddressSpace::kPrivate);
 
-    Func("my_func", utils::Empty, ty.f32(),
-         utils::Vector{Assign("wg_var", "wg_var"), Assign("sb_var", "sb_var"),
-                       Assign("priv_var", "priv_var"), Return(0_f)});
+    Func("my_func", tint::Empty, ty.f32(),
+         Vector{Assign("wg_var", "wg_var"), Assign("sb_var", "sb_var"),
+                Assign("priv_var", "priv_var"), Return(0_f)});
 
-    auto* func2 = Func("func", utils::Empty, ty.void_(),
-                       utils::Vector{
+    auto* func2 = Func("func", tint::Empty, ty.void_(),
+                       Vector{
                            WrapInStatement(Call("my_func")),
                        },
-                       utils::Empty);
+                       tint::Empty);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1000,8 +999,8 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
 }
 
 TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
-    auto* func = Func("my_func", utils::Empty, ty.void_(),
-                      utils::Vector{
+    auto* func = Func("my_func", tint::Empty, ty.void_(),
+                      Vector{
                           Decl(Var("var", ty.f32())),
                           Assign("var", 1_f),
                       });
@@ -1016,8 +1015,8 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
 }
 
 TEST_F(ResolverTest, Function_NotRegisterFunctionConstant) {
-    auto* func = Func("my_func", utils::Empty, ty.void_(),
-                      utils::Vector{
+    auto* func = Func("my_func", tint::Empty, ty.void_(),
+                      Vector{
                           Decl(Let("var", ty.f32(), Call<f32>())),
                       });
 
@@ -1031,7 +1030,7 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionConstant) {
 }
 
 TEST_F(ResolverTest, Function_NotRegisterFunctionParams) {
-    auto* func = Func("my_func", utils::Vector{Param("var", ty.f32())}, ty.void_(), utils::Empty);
+    auto* func = Func("my_func", Vector{Param("var", ty.f32())}, ty.void_(), tint::Empty);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* func_sem = Sem().Get(func);
@@ -1042,12 +1041,12 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionParams) {
 }
 
 TEST_F(ResolverTest, Function_CallSites) {
-    auto* foo = Func("foo", utils::Empty, ty.void_(), utils::Empty);
+    auto* foo = Func("foo", tint::Empty, ty.void_(), tint::Empty);
 
     auto* call_1 = Call("foo");
     auto* call_2 = Call("foo");
-    auto* bar = Func("bar", utils::Empty, ty.void_(),
-                     utils::Vector{
+    auto* bar = Func("bar", tint::Empty, ty.void_(),
+                     Vector{
                          CallStmt(call_1),
                          CallStmt(call_2),
                      });
@@ -1068,7 +1067,7 @@ TEST_F(ResolverTest, Function_CallSites) {
 TEST_F(ResolverTest, Function_WorkgroupSize_NotSet) {
     // @compute @workgroup_size(1)
     // fn main() {}
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty);
+    auto* func = Func("main", tint::Empty, ty.void_(), tint::Empty);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1083,8 +1082,8 @@ TEST_F(ResolverTest, Function_WorkgroupSize_NotSet) {
 TEST_F(ResolverTest, Function_WorkgroupSize_Literals) {
     // @compute @workgroup_size(8, 2, 3)
     // fn main() {}
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
-                      utils::Vector{
+    auto* func = Func("main", tint::Empty, ty.void_(), tint::Empty,
+                      Vector{
                           Stage(ast::PipelineStage::kCompute),
                           WorkgroupSize(8_i, 2_i, 3_i),
                       });
@@ -1108,8 +1107,8 @@ TEST_F(ResolverTest, Function_WorkgroupSize_ViaConst) {
     GlobalConst("width", ty.i32(), Expr(16_i));
     GlobalConst("height", ty.i32(), Expr(8_i));
     GlobalConst("depth", ty.i32(), Expr(2_i));
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
-                      utils::Vector{
+    auto* func = Func("main", tint::Empty, ty.void_(), tint::Empty,
+                      Vector{
                           Stage(ast::PipelineStage::kCompute),
                           WorkgroupSize("width", "height", "depth"),
                       });
@@ -1131,8 +1130,8 @@ TEST_F(ResolverTest, Function_WorkgroupSize_ViaConst_NestedInitializer) {
     // fn main() {}
     GlobalConst("width", ty.i32(), Call<i32>(Call<i32>(Call<i32>(8_i))));
     GlobalConst("height", ty.i32(), Call<i32>(Call<i32>(Call<i32>(4_i))));
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
-                      utils::Vector{
+    auto* func = Func("main", tint::Empty, ty.void_(), tint::Empty,
+                      Vector{
                           Stage(ast::PipelineStage::kCompute),
                           WorkgroupSize("width", "height"),
                       });
@@ -1156,8 +1155,8 @@ TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts) {
     Override("width", ty.i32(), Expr(16_i), Id(0_a));
     Override("height", ty.i32(), Expr(8_i), Id(1_a));
     Override("depth", ty.i32(), Expr(2_i), Id(2_a));
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
-                      utils::Vector{
+    auto* func = Func("main", tint::Empty, ty.void_(), tint::Empty,
+                      Vector{
                           Stage(ast::PipelineStage::kCompute),
                           WorkgroupSize("width", "height", "depth"),
                       });
@@ -1181,8 +1180,8 @@ TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts_NoInit) {
     Override("width", ty.i32(), Id(0_a));
     Override("height", ty.i32(), Id(1_a));
     Override("depth", ty.i32(), Id(2_a));
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
-                      utils::Vector{
+    auto* func = Func("main", tint::Empty, ty.void_(), tint::Empty,
+                      Vector{
                           Stage(ast::PipelineStage::kCompute),
                           WorkgroupSize("width", "height", "depth"),
                       });
@@ -1204,8 +1203,8 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
     // fn main() {}
     Override("height", ty.i32(), Expr(2_i), Id(0_a));
     GlobalConst("depth", ty.i32(), Expr(3_i));
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
-                      utils::Vector{
+    auto* func = Func("main", tint::Empty, ty.void_(), tint::Empty,
+                      Vector{
                           Stage(ast::PipelineStage::kCompute),
                           WorkgroupSize(8_i, "height", "depth"),
                       });
@@ -1230,8 +1229,8 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Type) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
-    auto* st = Structure(
-        "S", utils::Vector{Member("first_member", ty.i32()), Member("second_member", ty.f32())});
+    auto* st =
+        Structure("S", Vector{Member("first_member", ty.i32()), Member("second_member", ty.f32())});
     GlobalVar("my_struct", ty.Of(st), builtin::AddressSpace::kPrivate);
 
     auto* mem = MemberAccessor("my_struct", "second_member");
@@ -1250,8 +1249,8 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
-    auto* st = Structure(
-        "S", utils::Vector{Member("first_member", ty.i32()), Member("second_member", ty.f32())});
+    auto* st =
+        Structure("S", Vector{Member("first_member", ty.i32()), Member("second_member", ty.f32())});
     auto* alias = Alias("alias", ty.Of(st));
     GlobalVar("my_struct", ty.Of(alias), builtin::AddressSpace::kPrivate);
 
@@ -1319,8 +1318,8 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
     // }
     //
 
-    auto* stB = Structure("B", utils::Vector{Member("foo", ty.vec4<f32>())});
-    auto* stA = Structure("A", utils::Vector{Member("mem", ty.array(ty.Of(stB), 3_i))});
+    auto* stB = Structure("B", Vector{Member("foo", ty.vec4<f32>())});
+    auto* stA = Structure("A", Vector{Member("mem", ty.array(ty.Of(stB), 3_i))});
     GlobalVar("c", ty.Of(stA), builtin::AddressSpace::kPrivate);
 
     auto* mem =
@@ -1337,8 +1336,8 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_InBinaryOp) {
-    auto* st = Structure(
-        "S", utils::Vector{Member("first_member", ty.f32()), Member("second_member", ty.f32())});
+    auto* st =
+        Structure("S", Vector{Member("first_member", ty.f32()), Member("second_member", ty.f32())});
     GlobalVar("my_struct", ty.Of(st), builtin::AddressSpace::kPrivate);
 
     auto* expr = Add(MemberAccessor("my_struct", "first_member"),
@@ -1638,7 +1637,7 @@ TEST_P(Expr_Binary_Test_Valid, All) {
     ast::Type rhs_type = params.create_rhs_type(*this);
     auto* result_type = params.create_result_type(*this);
 
-    utils::StringStream ss;
+    StringStream ss;
     ss << FriendlyName(lhs_type) << " " << params.op << " " << FriendlyName(rhs_type);
     SCOPED_TRACE(ss.str());
 
@@ -1670,7 +1669,7 @@ TEST_P(Expr_Binary_Test_WithAlias_Valid, All) {
     ast::Type lhs_type = create_lhs_type(*this);
     ast::Type rhs_type = create_rhs_type(*this);
 
-    utils::StringStream ss;
+    StringStream ss;
     ss << FriendlyName(lhs_type) << " " << params.op << " " << FriendlyName(rhs_type);
 
     ss << ", After aliasing: " << FriendlyName(lhs_type) << " " << params.op << " "
@@ -1719,7 +1718,7 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
     ast::Type lhs_type = lhs_create_type_func(*this);
     ast::Type rhs_type = rhs_create_type_func(*this);
 
-    utils::StringStream ss;
+    StringStream ss;
     ss << FriendlyName(lhs_type) << " " << op << " " << FriendlyName(rhs_type);
     SCOPED_TRACE(ss.str());
 
@@ -1861,7 +1860,7 @@ TEST_F(ResolverTest, AddressSpace_SetsIfMissing) {
     auto* var = Var("var", ty.i32());
 
     auto* stmt = Decl(var);
-    Func("func", utils::Empty, ty.void_(), utils::Vector{stmt});
+    Func("func", tint::Empty, ty.void_(), Vector{stmt});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1889,7 +1888,7 @@ TEST_F(ResolverTest, AddressSpace_SetForTexture) {
 TEST_F(ResolverTest, AddressSpace_DoesNotSetOnConst) {
     auto* var = Let("var", ty.i32(), Call<i32>());
     auto* stmt = Decl(var);
-    Func("func", utils::Empty, ty.void_(), utils::Vector{stmt});
+    Func("func", tint::Empty, ty.void_(), Vector{stmt});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1899,7 +1898,7 @@ TEST_F(ResolverTest, AddressSpace_DoesNotSetOnConst) {
 TEST_F(ResolverTest, Access_SetForStorageBuffer) {
     // struct S { x : i32 };
     // var<storage> g : S;
-    auto* s = Structure("S", utils::Vector{Member(Source{{12, 34}}, "x", ty.i32())});
+    auto* s = Structure("S", Vector{Member(Source{{12, 34}}, "x", ty.i32())});
     auto* var = GlobalVar(Source{{56, 78}}, "g", ty.Of(s), builtin::AddressSpace::kStorage,
                           Binding(0_a), Group(0_a));
 
@@ -1939,37 +1938,37 @@ TEST_F(ResolverTest, Function_EntryPoints_StageAttribute) {
     GlobalVar("call_b", ty.f32(), builtin::AddressSpace::kPrivate);
     GlobalVar("call_c", ty.f32(), builtin::AddressSpace::kPrivate);
 
-    auto* func_b = Func("b", utils::Empty, ty.f32(),
-                        utils::Vector{
+    auto* func_b = Func("b", tint::Empty, ty.f32(),
+                        Vector{
                             Return(0_f),
                         });
-    auto* func_c = Func("c", utils::Empty, ty.f32(),
-                        utils::Vector{
+    auto* func_c = Func("c", tint::Empty, ty.f32(),
+                        Vector{
                             Assign("second", Call("b")),
                             Return(0_f),
                         });
 
-    auto* func_a = Func("a", utils::Empty, ty.f32(),
-                        utils::Vector{
+    auto* func_a = Func("a", tint::Empty, ty.f32(),
+                        Vector{
                             Assign("first", Call("c")),
                             Return(0_f),
                         });
 
-    auto* ep_1 = Func("ep_1", utils::Empty, ty.void_(),
-                      utils::Vector{
+    auto* ep_1 = Func("ep_1", tint::Empty, ty.void_(),
+                      Vector{
                           Assign("call_a", Call("a")),
                           Assign("call_b", Call("b")),
                       },
-                      utils::Vector{
+                      Vector{
                           Stage(ast::PipelineStage::kCompute),
                           WorkgroupSize(1_i),
                       });
 
-    auto* ep_2 = Func("ep_2", utils::Empty, ty.void_(),
-                      utils::Vector{
+    auto* ep_2 = Func("ep_2", tint::Empty, ty.void_(),
+                      Vector{
                           Assign("call_c", Call("c")),
                       },
-                      utils::Vector{
+                      Vector{
                           Stage(ast::PipelineStage::kCompute),
                           WorkgroupSize(1_i),
                       });
@@ -2026,38 +2025,38 @@ TEST_F(ResolverTest, Function_EntryPoints_LinearTime) {
     auto fn_a = [](int level) { return "l" + std::to_string(level + 1) + "a"; };
     auto fn_b = [](int level) { return "l" + std::to_string(level + 1) + "b"; };
 
-    Func(fn_a(levels), utils::Empty, ty.void_(), utils::Empty);
-    Func(fn_b(levels), utils::Empty, ty.void_(), utils::Empty);
+    Func(fn_a(levels), tint::Empty, ty.void_(), tint::Empty);
+    Func(fn_b(levels), tint::Empty, ty.void_(), tint::Empty);
 
     for (int i = levels - 1; i >= 0; i--) {
-        Func(fn_a(i), utils::Empty, ty.void_(),
-             utils::Vector{
+        Func(fn_a(i), tint::Empty, ty.void_(),
+             Vector{
                  CallStmt(Call(fn_a(i + 1))),
                  CallStmt(Call(fn_b(i + 1))),
              },
-             utils::Empty);
-        Func(fn_b(i), utils::Empty, ty.void_(),
-             utils::Vector{
+             tint::Empty);
+        Func(fn_b(i), tint::Empty, ty.void_(),
+             Vector{
                  CallStmt(Call(fn_a(i + 1))),
                  CallStmt(Call(fn_b(i + 1))),
              },
-             utils::Empty);
+             tint::Empty);
     }
 
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              CallStmt(Call(fn_a(0))),
              CallStmt(Call(fn_b(0))),
          },
-         utils::Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+         Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 // Test for crbug.com/tint/728
 TEST_F(ResolverTest, ASTNodesAreReached) {
-    Structure("A", utils::Vector{Member("x", ty.array<f32, 4>(utils::Vector{Stride(4)}))});
-    Structure("B", utils::Vector{Member("x", ty.array<f32, 4>(utils::Vector{Stride(4)}))});
+    Structure("A", Vector{Member("x", ty.array<f32, 4>(Vector{Stride(4)}))});
+    Structure("B", Vector{Member("x", ty.array<f32, 4>(Vector{Stride(4)}))});
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
@@ -2121,8 +2120,8 @@ TEST_F(ResolverTest, TextureSampler_TextureSample) {
 
     auto* call = Call("textureSample", "t", "s", Call<vec2<f32>>(1_f, 2_f));
     const ast::Function* f =
-        Func("test_function", utils::Empty, ty.void_(), utils::Vector{Assign(Phony(), call)},
-             utils::Vector{Stage(ast::PipelineStage::kFragment)});
+        Func("test_function", tint::Empty, ty.void_(), Vector{Assign(Phony(), call)},
+             Vector{Stage(ast::PipelineStage::kFragment)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -2140,11 +2139,11 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleInFunction) {
 
     auto* inner_call = Assign(Phony(), Call("textureSample", "t", "s", Call<vec2<f32>>(1_f, 2_f)));
     const ast::Function* inner_func =
-        Func("inner_func", utils::Empty, ty.void_(), utils::Vector{inner_call});
+        Func("inner_func", tint::Empty, ty.void_(), Vector{inner_call});
     auto* outer_call = CallStmt(Call("inner_func"));
     const ast::Function* outer_func =
-        Func("outer_func", utils::Empty, ty.void_(), utils::Vector{outer_call},
-             utils::Vector{Stage(ast::PipelineStage::kFragment)});
+        Func("outer_func", tint::Empty, ty.void_(), Vector{outer_call},
+             Vector{Stage(ast::PipelineStage::kFragment)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -2167,16 +2166,16 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondSameVariables) {
     auto* inner_call_1 =
         Assign(Phony(), Call("textureSample", "t", "s", Call<vec2<f32>>(1_f, 2_f)));
     const ast::Function* inner_func_1 =
-        Func("inner_func_1", utils::Empty, ty.void_(), utils::Vector{inner_call_1});
+        Func("inner_func_1", tint::Empty, ty.void_(), Vector{inner_call_1});
     auto* inner_call_2 =
         Assign(Phony(), Call("textureSample", "t", "s", Call<vec2<f32>>(3_f, 4_f)));
     const ast::Function* inner_func_2 =
-        Func("inner_func_2", utils::Empty, ty.void_(), utils::Vector{inner_call_2});
+        Func("inner_func_2", tint::Empty, ty.void_(), Vector{inner_call_2});
     auto* outer_call_1 = CallStmt(Call("inner_func_1"));
     auto* outer_call_2 = CallStmt(Call("inner_func_2"));
     const ast::Function* outer_func =
-        Func("outer_func", utils::Empty, ty.void_(), utils::Vector{outer_call_1, outer_call_2},
-             utils::Vector{Stage(ast::PipelineStage::kFragment)});
+        Func("outer_func", tint::Empty, ty.void_(), Vector{outer_call_1, outer_call_2},
+             Vector{Stage(ast::PipelineStage::kFragment)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -2206,16 +2205,16 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondDifferentVariabl
     auto* inner_call_1 =
         Assign(Phony(), Call("textureSample", "t1", "s", Call<vec2<f32>>(1_f, 2_f)));
     const ast::Function* inner_func_1 =
-        Func("inner_func_1", utils::Empty, ty.void_(), utils::Vector{inner_call_1});
+        Func("inner_func_1", tint::Empty, ty.void_(), Vector{inner_call_1});
     auto* inner_call_2 =
         Assign(Phony(), Call("textureSample", "t2", "s", Call<vec2<f32>>(3_f, 4_f)));
     const ast::Function* inner_func_2 =
-        Func("inner_func_2", utils::Empty, ty.void_(), utils::Vector{inner_call_2});
+        Func("inner_func_2", tint::Empty, ty.void_(), Vector{inner_call_2});
     auto* outer_call_1 = CallStmt(Call("inner_func_1"));
     auto* outer_call_2 = CallStmt(Call("inner_func_2"));
     const ast::Function* outer_func =
-        Func("outer_func", utils::Empty, ty.void_(), utils::Vector{outer_call_1, outer_call_2},
-             utils::Vector{Stage(ast::PipelineStage::kFragment)});
+        Func("outer_func", tint::Empty, ty.void_(), Vector{outer_call_1, outer_call_2},
+             Vector{Stage(ast::PipelineStage::kFragment)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -2271,25 +2270,25 @@ TEST_F(ResolverTest, TextureSampler_Bug1715) {  // crbug.com/tint/1715
               Binding(1_a));
     GlobalVar("c", ty.vec2<f32>(), builtin::AddressSpace::kUniform, Group(0_a), Binding(2_a));
 
-    Func("main", utils::Empty, ty.vec4<f32>(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.vec4<f32>(),
+         Vector{
              Return(Call("helper", AddressOf("s"), AddressOf("t"))),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         utils::Vector{
+         Vector{
              Location(0_u),
          });
 
     Func("helper",
-         utils::Vector{
+         Vector{
              Param("sl", ty.ptr<function>(ty.sampler(type::SamplerKind::kSampler))),
              Param("tl",
                    ty.ptr<function>(ty.sampled_texture(type::TextureDimension::k2d, ty.f32()))),
          },
          ty.vec4<f32>(),
-         utils::Vector{
+         Vector{
              Return(Call("textureSampleLevel", Deref("tl"), Deref("sl"), "c", 0.0_a)),
          });
 
@@ -2298,18 +2297,18 @@ TEST_F(ResolverTest, TextureSampler_Bug1715) {  // crbug.com/tint/1715
 }
 
 TEST_F(ResolverTest, ModuleDependencyOrderedDeclarations) {
-    auto* f0 = Func("f0", utils::Empty, ty.void_(), utils::Empty);
+    auto* f0 = Func("f0", tint::Empty, ty.void_(), tint::Empty);
     auto* v0 = GlobalVar("v0", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* a0 = Alias("a0", ty.i32());
-    auto* s0 = Structure("s0", utils::Vector{Member("m", ty.i32())});
-    auto* f1 = Func("f1", utils::Empty, ty.void_(), utils::Empty);
+    auto* s0 = Structure("s0", Vector{Member("m", ty.i32())});
+    auto* f1 = Func("f1", tint::Empty, ty.void_(), tint::Empty);
     auto* v1 = GlobalVar("v1", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* a1 = Alias("a1", ty.i32());
-    auto* s1 = Structure("s1", utils::Vector{Member("m", ty.i32())});
-    auto* f2 = Func("f2", utils::Empty, ty.void_(), utils::Empty);
+    auto* s1 = Structure("s1", Vector{Member("m", ty.i32())});
+    auto* f2 = Func("f2", tint::Empty, ty.void_(), tint::Empty);
     auto* v2 = GlobalVar("v2", ty.i32(), builtin::AddressSpace::kPrivate);
     auto* a2 = Alias("a2", ty.i32());
-    auto* s2 = Structure("s2", utils::Vector{Member("m", ty.i32())});
+    auto* s2 = Structure("s2", Vector{Member("m", ty.i32())});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -2391,7 +2390,7 @@ TEST_F(ResolverTest, ScopeDepth_IfElseChain) {
 const size_t kMaxNumStructMembers = 16383;
 
 TEST_F(ResolverTest, MaxNumStructMembers_Valid) {
-    utils::Vector<const ast::StructMember*, 0> members;
+    Vector<const ast::StructMember*, 0> members;
     members.Reserve(kMaxNumStructMembers);
     for (size_t i = 0; i < kMaxNumStructMembers; ++i) {
         members.Push(Member("m" + std::to_string(i), ty.i32()));
@@ -2401,7 +2400,7 @@ TEST_F(ResolverTest, MaxNumStructMembers_Valid) {
 }
 
 TEST_F(ResolverTest, MaxNumStructMembers_Invalid) {
-    utils::Vector<const ast::StructMember*, 0> members;
+    Vector<const ast::StructMember*, 0> members;
     members.Reserve(kMaxNumStructMembers + 1);
     for (size_t i = 0; i < kMaxNumStructMembers + 1; ++i) {
         members.Push(Member("m" + std::to_string(i), ty.i32()));
@@ -2412,7 +2411,7 @@ TEST_F(ResolverTest, MaxNumStructMembers_Invalid) {
 }
 
 TEST_F(ResolverTest, MaxNumStructMembers_WithIgnoreStructMemberLimit_Valid) {
-    utils::Vector<const ast::StructMember*, 0> members;
+    Vector<const ast::StructMember*, 0> members;
     members.Reserve(kMaxNumStructMembers);
     for (size_t i = 0; i < kMaxNumStructMembers; ++i) {
         members.Push(Member("m" + std::to_string(i), ty.i32()));
@@ -2424,73 +2423,73 @@ TEST_F(ResolverTest, MaxNumStructMembers_WithIgnoreStructMemberLimit_Valid) {
     }
 
     Structure("S", std::move(members),
-              utils::Vector{Disable(ast::DisabledValidation::kIgnoreStructMemberLimit)});
+              Vector{Disable(ast::DisabledValidation::kIgnoreStructMemberLimit)});
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 size_t kMaxNestDepthOfCompositeType = 255;
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_Structs_Valid) {
-    auto* s = Structure("S", utils::Vector{Member("m", ty.i32())});
+    auto* s = Structure("S", Vector{Member("m", ty.i32())});
     size_t depth = 1;  // Depth of struct
     size_t iterations = kMaxNestDepthOfCompositeType - depth;
     for (size_t i = 0; i < iterations; ++i) {
-        s = Structure("S" + std::to_string(i), utils::Vector{Member("m", ty.Of(s))});
+        s = Structure("S" + std::to_string(i), Vector{Member("m", ty.Of(s))});
     }
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_Structs_Invalid) {
-    auto* s = Structure("S", utils::Vector{Member("m", ty.i32())});
+    auto* s = Structure("S", Vector{Member("m", ty.i32())});
     size_t depth = 1;  // Depth of struct
     size_t iterations = kMaxNestDepthOfCompositeType - depth + 1;
     for (size_t i = 0; i < iterations; ++i) {
         auto source = i == iterations - 1 ? Source{{12, 34}} : Source{{0, i}};
-        s = Structure(source, "S" + std::to_string(i), utils::Vector{Member("m", ty.Of(s))});
+        s = Structure(source, "S" + std::to_string(i), Vector{Member("m", ty.Of(s))});
     }
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: struct 'S254' has nesting depth of 256, maximum is 255");
 }
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_StructsWithVector_Valid) {
-    auto* s = Structure("S", utils::Vector{Member("m", ty.vec3<i32>())});
+    auto* s = Structure("S", Vector{Member("m", ty.vec3<i32>())});
     size_t depth = 2;  // Despth of struct + vector
     size_t iterations = kMaxNestDepthOfCompositeType - depth;
     for (size_t i = 0; i < iterations; ++i) {
-        s = Structure("S" + std::to_string(i), utils::Vector{Member("m", ty.Of(s))});
+        s = Structure("S" + std::to_string(i), Vector{Member("m", ty.Of(s))});
     }
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_StructsWithVector_Invalid) {
-    auto* s = Structure("S", utils::Vector{Member("m", ty.vec3<i32>())});
+    auto* s = Structure("S", Vector{Member("m", ty.vec3<i32>())});
     size_t depth = 2;  // Despth of struct + vector
     size_t iterations = kMaxNestDepthOfCompositeType - depth + 1;
     for (size_t i = 0; i < iterations; ++i) {
         auto source = i == iterations - 1 ? Source{{12, 34}} : Source{{0, i}};
-        s = Structure(source, "S" + std::to_string(i), utils::Vector{Member("m", ty.Of(s))});
+        s = Structure(source, "S" + std::to_string(i), Vector{Member("m", ty.Of(s))});
     }
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: struct 'S253' has nesting depth of 256, maximum is 255");
 }
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_StructsWithMatrix_Valid) {
-    auto* s = Structure("S", utils::Vector{Member("m", ty.mat3x3<f32>())});
+    auto* s = Structure("S", Vector{Member("m", ty.mat3x3<f32>())});
     size_t depth = 3;  // Depth of struct + matrix
     size_t iterations = kMaxNestDepthOfCompositeType - depth;
     for (size_t i = 0; i < iterations; ++i) {
-        s = Structure("S" + std::to_string(i), utils::Vector{Member("m", ty.Of(s))});
+        s = Structure("S" + std::to_string(i), Vector{Member("m", ty.Of(s))});
     }
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_StructsWithMatrix_Invalid) {
-    auto* s = Structure("S", utils::Vector{Member("m", ty.mat3x3<f32>())});
+    auto* s = Structure("S", Vector{Member("m", ty.mat3x3<f32>())});
     size_t depth = 3;  // Depth of struct + matrix
     size_t iterations = kMaxNestDepthOfCompositeType - depth + 1;
     for (size_t i = 0; i < iterations; ++i) {
         auto source = i == iterations - 1 ? Source{{12, 34}} : Source{{0, i}};
-        s = Structure(source, "S" + std::to_string(i), utils::Vector{Member("m", ty.Of(s))});
+        s = Structure(source, "S" + std::to_string(i), Vector{Member("m", ty.Of(s))});
     }
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: struct 'S252' has nesting depth of 256, maximum is 255");
@@ -2570,30 +2569,30 @@ TEST_F(ResolverTest, MaxNestDepthOfCompositeType_ArraysOfMatrix_Invalid) {
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_StructsOfArray_Valid) {
     auto a = ty.array(ty.mat3x3<f32>(), 10_u);
-    auto* s = Structure("S", utils::Vector{Member("m", a)});
+    auto* s = Structure("S", Vector{Member("m", a)});
     size_t depth = 4;  // Depth of struct + array + matrix
     size_t iterations = kMaxNestDepthOfCompositeType - depth;
     for (size_t i = 0; i < iterations; ++i) {
-        s = Structure("S" + std::to_string(i), utils::Vector{Member("m", ty.Of(s))});
+        s = Structure("S" + std::to_string(i), Vector{Member("m", ty.Of(s))});
     }
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_StructsOfArray_Invalid) {
     auto a = ty.array(ty.mat3x3<f32>(), 10_u);
-    auto* s = Structure("S", utils::Vector{Member("m", a)});
+    auto* s = Structure("S", Vector{Member("m", a)});
     size_t depth = 4;  // Depth of struct + array + matrix
     size_t iterations = kMaxNestDepthOfCompositeType - depth + 1;
     for (size_t i = 0; i < iterations; ++i) {
         auto source = i == iterations - 1 ? Source{{12, 34}} : Source{{0, i}};
-        s = Structure(source, "S" + std::to_string(i), utils::Vector{Member("m", ty.Of(s))});
+        s = Structure(source, "S" + std::to_string(i), Vector{Member("m", ty.Of(s))});
     }
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: struct 'S251' has nesting depth of 256, maximum is 255");
 }
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_ArraysOfStruct_Valid) {
-    auto* s = Structure("S", utils::Vector{Member("m", ty.mat3x3<f32>())});
+    auto* s = Structure("S", Vector{Member("m", ty.mat3x3<f32>())});
     auto a = ty.array(ty.Of(s), 10_u);
     size_t depth = 4;  // Depth of array + struct + matrix
     size_t iterations = kMaxNestDepthOfCompositeType - depth;
@@ -2605,7 +2604,7 @@ TEST_F(ResolverTest, MaxNestDepthOfCompositeType_ArraysOfStruct_Valid) {
 }
 
 TEST_F(ResolverTest, MaxNestDepthOfCompositeType_ArraysOfStruct_Invalid) {
-    auto* s = Structure("S", utils::Vector{Member("m", ty.mat3x3<f32>())});
+    auto* s = Structure("S", Vector{Member("m", ty.mat3x3<f32>())});
     auto a = ty.array(ty.Of(s), 10_u);
     size_t depth = 4;  // Depth of array + struct + matrix
     size_t iterations = kMaxNestDepthOfCompositeType - depth + 1;

@@ -66,7 +66,7 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
     CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     using HelperFunctionKey =
-        utils::UnorderedKeyWrapper<std::tuple<const type::Matrix*, const type::Matrix*>>;
+        tint::UnorderedKeyWrapper<std::tuple<const type::Matrix*, const type::Matrix*>>;
 
     std::unordered_map<HelperFunctionKey, Symbol> matrix_convs;
 
@@ -102,7 +102,7 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
         }
 
         auto build_vectorized_conversion_expression = [&](auto&& src_expression_builder) {
-            utils::Vector<const Expression*, 4> columns;
+            tint::Vector<const Expression*, 4> columns;
             for (uint32_t c = 0; c < dst_type->columns(); c++) {
                 auto* src_matrix_expr = src_expression_builder();
                 auto* src_column_expr = b.IndexAccessor(src_matrix_expr, b.Expr(tint::AInt(c)));
@@ -120,24 +120,23 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
             });
         } else {
             // If has side effects, use a helper function.
-            auto fn =
-                utils::GetOrCreate(matrix_convs, HelperFunctionKey{{src_type, dst_type}}, [&] {
-                    auto name = b.Symbols().New(
-                        "convert_mat" + std::to_string(src_type->columns()) + "x" +
-                        std::to_string(src_type->rows()) + "_" + src_type->type()->FriendlyName() +
-                        "_" + dst_type->type()->FriendlyName());
-                    b.Func(name,
-                           utils::Vector{
-                               b.Param("value", CreateASTTypeFor(ctx, src_type)),
-                           },
-                           CreateASTTypeFor(ctx, dst_type),
-                           utils::Vector{
-                               b.Return(build_vectorized_conversion_expression([&] {  //
-                                   return b.Expr("value");
-                               })),
-                           });
-                    return name;
-                });
+            auto fn = tint::GetOrCreate(matrix_convs, HelperFunctionKey{{src_type, dst_type}}, [&] {
+                auto name = b.Symbols().New("convert_mat" + std::to_string(src_type->columns()) +
+                                            "x" + std::to_string(src_type->rows()) + "_" +
+                                            src_type->type()->FriendlyName() + "_" +
+                                            dst_type->type()->FriendlyName());
+                b.Func(name,
+                       tint::Vector{
+                           b.Param("value", CreateASTTypeFor(ctx, src_type)),
+                       },
+                       CreateASTTypeFor(ctx, dst_type),
+                       tint::Vector{
+                           b.Return(build_vectorized_conversion_expression([&] {  //
+                               return b.Expr("value");
+                           })),
+                       });
+                return name;
+            });
             return b.Call(fn, ctx.Clone(args[0]->Declaration()));
         }
     });

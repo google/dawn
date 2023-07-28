@@ -43,7 +43,7 @@ const char* to_str(Severity severity) {
 }
 
 std::string to_str(const Source::Location& location) {
-    utils::StringStream ss;
+    StringStream ss;
     if (location.line > 0) {
         ss << location.line;
         if (location.column > 0) {
@@ -77,7 +77,7 @@ struct Formatter::State {
         auto str = stream.str();
         if (str.length() > 0) {
             printer->write(str, style);
-            utils::StringStream reset;
+            StringStream reset;
             stream.swap(reset);
         }
     }
@@ -102,7 +102,7 @@ struct Formatter::State {
   private:
     Printer* printer;
     diag::Style style;
-    utils::StringStream stream;
+    StringStream stream;
 };
 
 Formatter::Formatter() {}

@@ -43,10 +43,10 @@ namespace tint::ast::transform {
 /// ```
 ///
 /// @see crbug.com/tint/1582
-class SubstituteOverride final : public utils::Castable<SubstituteOverride, Transform> {
+class SubstituteOverride final : public Castable<SubstituteOverride, Transform> {
   public:
     /// Configuration options for the transform
-    struct Config final : public utils::Castable<Config, Data> {
+    struct Config final : public Castable<Config, Data> {
         /// Constructor
         Config();
 

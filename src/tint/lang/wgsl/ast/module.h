@@ -29,7 +29,7 @@ class TypeDecl;
 
 /// Module holds the top-level AST types, functions and global variables used by
 /// a Program.
-class Module final : public utils::Castable<Module, Node> {
+class Module final : public Castable<Module, Node> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
@@ -43,10 +43,7 @@ class Module final : public utils::Castable<Module, Node> {
     /// @param src the source of this node
     /// @param global_decls the list of global types, functions, and variables, in
     /// the order they were declared in the source program
-    Module(GenerationID pid,
-           NodeID nid,
-           const Source& src,
-           utils::VectorRef<const Node*> global_decls);
+    Module(GenerationID pid, NodeID nid, const Source& src, VectorRef<const Node*> global_decls);
 
     /// Destructor
     ~Module() override;
@@ -80,9 +77,9 @@ class Module final : public utils::Castable<Module, Node> {
     auto& GlobalVariables() { return global_variables_; }
 
     /// @returns the global variable declarations of kind 'T' for the module
-    template <typename T, typename = utils::traits::EnableIfIsType<T, Variable>>
+    template <typename T, typename = tint::traits::EnableIfIsType<T, Variable>>
     auto Globals() const {
-        utils::Vector<const T*, 32> out;
+        tint::Vector<const T*, 32> out;
         out.Reserve(global_variables_.Length());
         for (auto* global : global_variables_) {
             if (auto* var = global->As<T>()) {
@@ -149,13 +146,13 @@ class Module final : public utils::Castable<Module, Node> {
     /// * #functions_
     void BinGlobalDeclaration(const tint::ast::Node* decl, diag::List& diags);
 
-    utils::Vector<const Node*, 64> global_declarations_;
-    utils::Vector<const TypeDecl*, 16> type_decls_;
+    tint::Vector<const Node*, 64> global_declarations_;
+    tint::Vector<const TypeDecl*, 16> type_decls_;
     FunctionList functions_;
-    utils::Vector<const Variable*, 32> global_variables_;
-    utils::Vector<const DiagnosticDirective*, 8> diagnostic_directives_;
-    utils::Vector<const Enable*, 8> enables_;
-    utils::Vector<const ConstAssert*, 8> const_asserts_;
+    tint::Vector<const Variable*, 32> global_variables_;
+    tint::Vector<const DiagnosticDirective*, 8> diagnostic_directives_;
+    tint::Vector<const Enable*, 8> enables_;
+    tint::Vector<const ConstAssert*, 8> const_asserts_;
 };
 
 }  // namespace tint::ast

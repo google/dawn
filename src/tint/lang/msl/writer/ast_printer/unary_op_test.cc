@@ -27,7 +27,7 @@ TEST_F(MslUnaryOpTest, AddressOf) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "&(expr)");
 }
@@ -39,7 +39,7 @@ TEST_F(MslUnaryOpTest, Complement) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "~(expr)");
 }
@@ -52,7 +52,7 @@ TEST_F(MslUnaryOpTest, Indirection) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "*(expr)");
 }
@@ -64,7 +64,7 @@ TEST_F(MslUnaryOpTest, Not) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "!(expr)");
 }
@@ -76,7 +76,7 @@ TEST_F(MslUnaryOpTest, Negation) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "tint_unary_minus(expr)");
 }
@@ -87,7 +87,7 @@ TEST_F(MslUnaryOpTest, IntMin) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, op)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(-2147483647 - 1)");
 }

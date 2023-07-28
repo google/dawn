@@ -147,7 +147,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 
 #if TINT_BUILD_WGSL_READER || TINT_BUILD_SPV_READER
     auto dump_input_data = [&](auto& content, const char* extension) {
-        size_t hash = utils::Hash(content);
+        size_t hash = Hash(content);
         auto filename = "fuzzer_input_" + std::to_string(hash) + extension;  //
         std::ofstream fout(filename, std::ios::binary);
         fout.write(reinterpret_cast<const char*>(data), static_cast<std::streamsize>(size));

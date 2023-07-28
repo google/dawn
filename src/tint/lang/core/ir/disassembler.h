@@ -115,7 +115,7 @@ class Disassembler {
         Source::Location begin_;
     };
 
-    utils::StringStream& Indent();
+    StringStream& Indent();
 
     size_t IdOf(Block* blk);
     std::string IdOf(Value* node);
@@ -133,7 +133,7 @@ class Disassembler {
     void EmitValueWithType(Instruction* val);
     void EmitValueWithType(Value* val);
     void EmitValue(Value* val);
-    void EmitValueList(utils::Slice<ir::Value* const> values);
+    void EmitValueList(tint::Slice<ir::Value* const> values);
     void EmitBinary(Binary* b);
     void EmitUnary(Unary* b);
     void EmitTerminator(Terminator* b);
@@ -147,23 +147,23 @@ class Disassembler {
     void EmitInstructionName(std::string_view name, Instruction* inst);
 
     Module& mod_;
-    utils::StringStream out_;
-    utils::Hashmap<Block*, size_t, 32> block_ids_;
-    utils::Hashmap<Value*, std::string, 32> value_ids_;
-    utils::Hashset<std::string, 32> ids_;
+    StringStream out_;
+    Hashmap<Block*, size_t, 32> block_ids_;
+    Hashmap<Value*, std::string, 32> value_ids_;
+    Hashset<std::string, 32> ids_;
     uint32_t indent_size_ = 0;
     bool in_function_ = false;
 
     uint32_t current_output_line_ = 1;
     uint32_t current_output_start_pos_ = 0;
 
-    utils::Hashmap<Block*, Source, 8> block_to_src_;
-    utils::Hashmap<Instruction*, Source, 8> instruction_to_src_;
-    utils::Hashmap<Usage, Source, 8, Usage::Hasher> operand_to_src_;
-    utils::Hashmap<Usage, Source, 8, Usage::Hasher> result_to_src_;
-    utils::Hashmap<If*, std::string, 8> if_names_;
-    utils::Hashmap<Loop*, std::string, 8> loop_names_;
-    utils::Hashmap<Switch*, std::string, 8> switch_names_;
+    Hashmap<Block*, Source, 8> block_to_src_;
+    Hashmap<Instruction*, Source, 8> instruction_to_src_;
+    Hashmap<Usage, Source, 8, Usage::Hasher> operand_to_src_;
+    Hashmap<Usage, Source, 8, Usage::Hasher> result_to_src_;
+    Hashmap<If*, std::string, 8> if_names_;
+    Hashmap<Loop*, std::string, 8> loop_names_;
+    Hashmap<Switch*, std::string, 8> switch_names_;
 };
 
 }  // namespace tint::ir

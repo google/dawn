@@ -30,8 +30,7 @@ namespace tint::sem {
 
 /// MemberAccessorExpression is the base class for all semantic information for a
 /// ast::MemberAccessorExpression node.
-class MemberAccessorExpression
-    : public utils::Castable<MemberAccessorExpression, AccessorExpression> {
+class MemberAccessorExpression : public Castable<MemberAccessorExpression, AccessorExpression> {
   public:
     /// Destructor
     ~MemberAccessorExpression() override;
@@ -59,8 +58,7 @@ class MemberAccessorExpression
 /// StructMemberAccess holds the semantic information for a
 /// ast::MemberAccessorExpression node that represents an access to a structure
 /// member.
-class StructMemberAccess final
-    : public utils::Castable<StructMemberAccess, MemberAccessorExpression> {
+class StructMemberAccess final : public Castable<StructMemberAccess, MemberAccessorExpression> {
   public:
     /// Constructor
     /// @param declaration the AST node
@@ -92,7 +90,7 @@ class StructMemberAccess final
 
 /// Swizzle holds the semantic information for a ast::MemberAccessorExpression
 /// node that represents a vector swizzle.
-class Swizzle final : public utils::Castable<Swizzle, MemberAccessorExpression> {
+class Swizzle final : public Castable<Swizzle, MemberAccessorExpression> {
   public:
     /// Constructor
     /// @param declaration the AST node
@@ -108,7 +106,7 @@ class Swizzle final : public utils::Castable<Swizzle, MemberAccessorExpression> 
             const Statement* statement,
             const constant::Value* constant,
             const ValueExpression* object,
-            utils::VectorRef<uint32_t> indices,
+            VectorRef<uint32_t> indices,
             bool has_side_effects,
             const Variable* root_ident = nullptr);
 
@@ -119,7 +117,7 @@ class Swizzle final : public utils::Castable<Swizzle, MemberAccessorExpression> 
     const auto& Indices() const { return indices_; }
 
   private:
-    utils::Vector<uint32_t, 4> const indices_;
+    tint::Vector<uint32_t, 4> const indices_;
 };
 
 }  // namespace tint::sem

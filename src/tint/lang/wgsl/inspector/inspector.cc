@@ -456,7 +456,7 @@ std::vector<ResourceBinding> Inspector::GetWriteOnlyStorageTextureResourceBindin
 
 std::vector<ResourceBinding> Inspector::GetTextureResourceBindings(
     const std::string& entry_point,
-    const tint::utils::TypeInfo* texture_type,
+    const tint::TypeInfo* texture_type,
     ResourceBinding::ResourceType resource_type) {
     auto* func = FindEntryPointByName(entry_point);
     if (!func) {
@@ -485,25 +485,24 @@ std::vector<ResourceBinding> Inspector::GetTextureResourceBindings(
 
 std::vector<ResourceBinding> Inspector::GetDepthTextureResourceBindings(
     const std::string& entry_point) {
-    return GetTextureResourceBindings(entry_point, &utils::TypeInfo::Of<type::DepthTexture>(),
+    return GetTextureResourceBindings(entry_point, &tint::TypeInfo::Of<type::DepthTexture>(),
                                       ResourceBinding::ResourceType::kDepthTexture);
 }
 
 std::vector<ResourceBinding> Inspector::GetDepthMultisampledTextureResourceBindings(
     const std::string& entry_point) {
     return GetTextureResourceBindings(entry_point,
-                                      &utils::TypeInfo::Of<type::DepthMultisampledTexture>(),
+                                      &tint::TypeInfo::Of<type::DepthMultisampledTexture>(),
                                       ResourceBinding::ResourceType::kDepthMultisampledTexture);
 }
 
 std::vector<ResourceBinding> Inspector::GetExternalTextureResourceBindings(
     const std::string& entry_point) {
-    return GetTextureResourceBindings(entry_point, &utils::TypeInfo::Of<type::ExternalTexture>(),
+    return GetTextureResourceBindings(entry_point, &tint::TypeInfo::Of<type::ExternalTexture>(),
                                       ResourceBinding::ResourceType::kExternalTexture);
 }
 
-utils::VectorRef<SamplerTexturePair> Inspector::GetSamplerTextureUses(
-    const std::string& entry_point) {
+VectorRef<SamplerTexturePair> Inspector::GetSamplerTextureUses(const std::string& entry_point) {
     auto* func = FindEntryPointByName(entry_point);
     if (!func) {
         return {};
@@ -556,7 +555,7 @@ uint32_t Inspector::GetWorkgroupStorageSize(const std::string& entry_point) {
             // turn specified as an upper bound for Vulkan layout sizing. Since D3D
             // and Metal are even less specific, we assume Vulkan behavior as a
             // good-enough approximation everywhere.
-            total_size += utils::RoundUp(align, size);
+            total_size += tint::RoundUp(align, size);
         }
     }
 
@@ -568,7 +567,7 @@ std::vector<std::string> Inspector::GetUsedExtensionNames() {
     std::vector<std::string> out;
     out.reserve(extensions.Length());
     for (auto ext : extensions) {
-        out.push_back(utils::ToString(ext));
+        out.push_back(tint::ToString(ext));
     }
     return out;
 }
@@ -581,7 +580,7 @@ std::vector<std::pair<std::string, Source>> Inspector::GetEnableDirectives() {
     for (auto* node : global_decls) {
         if (auto* enable = node->As<ast::Enable>()) {
             for (auto* ext : enable->extensions) {
-                result.push_back({utils::ToString(ext->name), ext->source});
+                result.push_back({tint::ToString(ext->name), ext->source});
             }
         }
     }
@@ -606,7 +605,7 @@ const ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
 
 void Inspector::AddEntryPointInOutVariables(std::string name,
                                             const type::Type* type,
-                                            utils::VectorRef<const ast::Attribute*> attributes,
+                                            VectorRef<const ast::Attribute*> attributes,
                                             std::optional<uint32_t> location,
                                             std::vector<StageVariable>& variables) const {
     // Skip builtins.
@@ -645,7 +644,7 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
 
 bool Inspector::ContainsBuiltin(builtin::BuiltinValue builtin,
                                 const type::Type* type,
-                                utils::VectorRef<const ast::Attribute*> attributes) const {
+                                VectorRef<const ast::Attribute*> attributes) const {
     auto* unwrapped_type = type->UnwrapRef();
 
     if (auto* struct_ty = unwrapped_type->As<sem::Struct>()) {
@@ -785,8 +784,8 @@ void Inspector::GenerateSamplerTargets() {
         return;
     }
 
-    sampler_targets_ = std::make_unique<
-        std::unordered_map<std::string, utils::UniqueVector<SamplerTexturePair, 4>>>();
+    sampler_targets_ =
+        std::make_unique<std::unordered_map<std::string, UniqueVector<SamplerTexturePair, 4>>>();
 
     auto& sem = program_->Sem();
 
@@ -849,7 +848,7 @@ void Inspector::GenerateSamplerTargets() {
 
 std::tuple<InterpolationType, InterpolationSampling> Inspector::CalculateInterpolationData(
     const type::Type* type,
-    utils::VectorRef<const ast::Attribute*> attributes) const {
+    VectorRef<const ast::Attribute*> attributes) const {
     auto* interpolation_attribute = ast::GetAttribute<ast::InterpolateAttribute>(attributes);
     if (type->is_integer_scalar_or_vector()) {
         return {InterpolationType::kFlat, InterpolationSampling::kNone};
@@ -923,7 +922,7 @@ void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> ex
 
     std::array<const sem::GlobalVariable*, N> globals{};
     std::array<const sem::Parameter*, N> parameters{};
-    utils::UniqueVector<const ast::CallExpression*, 8> callsites;
+    UniqueVector<const ast::CallExpression*, 8> callsites;
 
     for (size_t i = 0; i < N; i++) {
         const sem::Variable* root_ident = sem.GetVal(exprs[i])->RootIdentifier();

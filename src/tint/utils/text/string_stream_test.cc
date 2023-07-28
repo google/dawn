@@ -20,7 +20,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 using StringStreamTest = testing::Test;
@@ -108,4 +108,4 @@ TEST_F(StringStreamTest, Precision) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

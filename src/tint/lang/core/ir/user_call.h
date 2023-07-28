@@ -22,7 +22,7 @@
 namespace tint::ir {
 
 /// A user call instruction in the IR.
-class UserCall : public utils::Castable<UserCall, Call> {
+class UserCall : public Castable<UserCall, Call> {
   public:
     /// The offset in Operands() for the function being called
     static constexpr size_t kFunctionOperandOffset = 0;
@@ -34,11 +34,11 @@ class UserCall : public utils::Castable<UserCall, Call> {
     /// @param result the result value
     /// @param func the function being called
     /// @param args the function arguments
-    UserCall(InstructionResult* result, Function* func, utils::VectorRef<Value*> args);
+    UserCall(InstructionResult* result, Function* func, VectorRef<Value*> args);
     ~UserCall() override;
 
     /// @returns the call arguments
-    utils::Slice<Value*> Args() override { return operands_.Slice().Offset(kArgsOperandOffset); }
+    tint::Slice<Value*> Args() override { return operands_.Slice().Offset(kArgsOperandOffset); }
 
     /// @returns the called function name
     Function* Func() { return operands_[kFunctionOperandOffset]->As<ir::Function>(); }

@@ -34,8 +34,8 @@ void ExpandImplicitSplats::Run(ir::Module* ir) const {
 
     // Find the instructions that use implicit splats and either modify them in place or record them
     // to be replaced in a second pass.
-    utils::Vector<Binary*, 4> binary_worklist;
-    utils::Vector<CoreBuiltinCall*, 4> builtin_worklist;
+    Vector<Binary*, 4> binary_worklist;
+    Vector<CoreBuiltinCall*, 4> builtin_worklist;
     for (auto* inst : ir->instructions.Objects()) {
         if (!inst->Alive()) {
             continue;
@@ -78,7 +78,7 @@ void ExpandImplicitSplats::Run(ir::Module* ir) const {
     auto expand_operand = [&](Instruction* inst, size_t operand_idx) {
         auto* vec = inst->Result()->Type()->As<type::Vector>();
 
-        utils::Vector<Value*, 4> args;
+        Vector<Value*, 4> args;
         args.Resize(vec->Width(), inst->Operands()[operand_idx]);
 
         auto* construct = b.Construct(vec, std::move(args));

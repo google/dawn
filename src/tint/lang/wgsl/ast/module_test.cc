@@ -61,8 +61,8 @@ TEST_F(ModuleTest, Assert_DifferentGenerationID_Function) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.AST().AddFunction(b2.create<Function>(b2.Ident("func"), utils::Empty, b2.ty.f32(),
-                                                     b2.Block(), utils::Empty, utils::Empty));
+            b1.AST().AddFunction(b2.create<Function>(b2.Ident("func"), tint::Empty, b2.ty.f32(),
+                                                     b2.Block(), tint::Empty, tint::Empty));
         },
         "internal compiler error");
 }
@@ -138,17 +138,17 @@ TEST_F(ModuleTest, Directives) {
 
     this->SetResolveOnBuild(false);
     Program program(std::move(*this));
-    EXPECT_THAT(program.AST().GlobalDeclarations(), ::testing::ContainerEq(utils::Vector{
+    EXPECT_THAT(program.AST().GlobalDeclarations(), ::testing::ContainerEq(tint::Vector{
                                                         enable_1,
                                                         diagnostic_1,
                                                         enable_2,
                                                         diagnostic_2,
                                                     }));
-    EXPECT_THAT(program.AST().Enables(), ::testing::ContainerEq(utils::Vector{
+    EXPECT_THAT(program.AST().Enables(), ::testing::ContainerEq(tint::Vector{
                                              enable_1,
                                              enable_2,
                                          }));
-    EXPECT_THAT(program.AST().DiagnosticDirectives(), ::testing::ContainerEq(utils::Vector{
+    EXPECT_THAT(program.AST().DiagnosticDirectives(), ::testing::ContainerEq(tint::Vector{
                                                           diagnostic_1,
                                                           diagnostic_2,
                                                       }));

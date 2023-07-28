@@ -885,8 +885,8 @@ bool ASTParser::RegisterEntryPoints() {
         TINT_ASSERT(Reader, !inner_implementation_name.empty());
         TINT_ASSERT(Reader, ep_name != inner_implementation_name);
 
-        utils::UniqueVector<uint32_t, 8> inputs;
-        utils::UniqueVector<uint32_t, 8> outputs;
+        UniqueVector<uint32_t, 8> inputs;
+        UniqueVector<uint32_t, 8> outputs;
         for (unsigned iarg = 3; iarg < entry_point.NumInOperands(); iarg++) {
             const uint32_t var_id = entry_point.GetSingleWordInOperand(iarg);
             if (const auto* var_inst = def_use_mgr_->GetDef(var_id)) {
@@ -903,9 +903,9 @@ bool ASTParser::RegisterEntryPoints() {
             }
         }
         // Save the lists, in ID-sorted order.
-        utils::Vector<uint32_t, 8> sorted_inputs(inputs);
+        tint::Vector<uint32_t, 8> sorted_inputs(inputs);
         std::sort(sorted_inputs.begin(), sorted_inputs.end());
-        utils::Vector<uint32_t, 8> sorted_outputs(outputs);
+        tint::Vector<uint32_t, 8> sorted_outputs(outputs);
         std::sort(sorted_outputs.begin(), sorted_outputs.end());
 
         const auto ast_stage = enum_converter_.ToPipelineStage(stage);
@@ -1073,7 +1073,7 @@ const Type* ASTParser::ConvertType(uint32_t type_id,
     }
 
     // Compute members
-    utils::Vector<const ast::StructMember*, 8> ast_members;
+    tint::Vector<const ast::StructMember*, 8> ast_members;
     const auto members = struct_ty->element_types();
     if (members.empty()) {
         Fail() << "WGSL does not support empty structures. can't convert type: "
@@ -1173,7 +1173,7 @@ const Type* ASTParser::ConvertType(uint32_t type_id,
     // Now make the struct.
     auto sym = builder_.Symbols().Register(name);
     auto* ast_struct =
-        create<ast::Struct>(Source{}, builder_.Ident(sym), std::move(ast_members), utils::Empty);
+        create<ast::Struct>(Source{}, builder_.Ident(sym), std::move(ast_members), tint::Empty);
     if (num_non_writable_members == members.size()) {
         read_only_struct_types_.insert(ast_struct->name->symbol);
     }
@@ -1616,7 +1616,7 @@ const ast::Var* ASTParser::MakeVar(uint32_t id,
 
 const ast::Let* ASTParser::MakeLet(uint32_t id, const ast::Expression* initializer) {
     auto sym = builder_.Symbols().Register(namer_.Name(id));
-    return builder_.Let(Source{}, sym, initializer, utils::Empty);
+    return builder_.Let(Source{}, sym, initializer, tint::Empty);
 }
 
 const ast::Override* ASTParser::MakeOverride(uint32_t id,
@@ -1858,7 +1858,7 @@ TypedExpression ASTParser::MakeConstantExpression(uint32_t id) {
         auto z = MakeConstantExpression(workgroup_size_builtin_.z_id);
         auto* ast_type = ty_.Vector(x.type, 3);
         return {ast_type, builder_.Call(Source{}, ast_type->Build(builder_),
-                                        utils::Vector{x.expr, y.expr, z.expr})};
+                                        tint::Vector{x.expr, y.expr, z.expr})};
     } else if (id == workgroup_size_builtin_.x_id) {
         return MakeConstantExpressionForScalarSpirvConstant(
             Source{}, ConvertType(workgroup_size_builtin_.component_type_id),

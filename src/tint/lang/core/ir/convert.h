@@ -22,7 +22,7 @@
 namespace tint::ir {
 
 /// A value conversion instruction in the IR.
-class Convert : public utils::Castable<Convert, Call> {
+class Convert : public Castable<Convert, Call> {
   public:
     /// The offset in Operands() for the value
     static constexpr size_t kValueOperandOffset = 0;

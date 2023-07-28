@@ -20,9 +20,9 @@
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 
 // Forward declarations
-namespace tint::utils {
+namespace tint {
 class CastableBase;
-}  // namespace tint::utils
+}  // namespace tint
 namespace tint::ast {
 class AccessorExpression;
 class BinaryExpression;
@@ -78,7 +78,7 @@ namespace tint::sem {
 struct TypeMappings {
     //! @cond Doxygen_Suppress
     BuiltinEnumExpression<builtin::BuiltinValue>* operator()(ast::BuiltinAttribute*);
-    utils::CastableBase* operator()(ast::Node*);
+    CastableBase* operator()(ast::Node*);
     Expression* operator()(ast::Expression*);
     ForLoopStatement* operator()(ast::ForLoopStatement*);
     Function* operator()(ast::Function*);

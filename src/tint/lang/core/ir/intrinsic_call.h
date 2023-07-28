@@ -21,7 +21,7 @@
 namespace tint::ir {
 
 /// A backend intrinsic call instruction in the IR.
-class IntrinsicCall : public utils::Castable<IntrinsicCall, Call> {
+class IntrinsicCall : public Castable<IntrinsicCall, Call> {
   public:
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
@@ -67,9 +67,7 @@ class IntrinsicCall : public utils::Castable<IntrinsicCall, Call> {
     /// @param result the result value
     /// @param kind the intrinsic kind
     /// @param args the intrinsic call arguments
-    IntrinsicCall(InstructionResult* result,
-                  enum Kind kind,
-                  utils::VectorRef<Value*> args = utils::Empty);
+    IntrinsicCall(InstructionResult* result, enum Kind kind, VectorRef<Value*> args = tint::Empty);
     ~IntrinsicCall() override;
 
     /// @returns the builtin function
@@ -83,7 +81,7 @@ class IntrinsicCall : public utils::Castable<IntrinsicCall, Call> {
 };
 
 /// Emits the name of the intrinsic type.
-utils::StringStream& operator<<(utils::StringStream& out, enum IntrinsicCall::Kind kind);
+StringStream& operator<<(StringStream& out, enum IntrinsicCall::Kind kind);
 
 }  // namespace tint::ir
 

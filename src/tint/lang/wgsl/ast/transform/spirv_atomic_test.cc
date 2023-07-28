@@ -44,99 +44,99 @@ class SpirvAtomicTest : public TransformTest {
         };
         for (auto& a : two_params) {
             b.Func(std::string{"stub_"} + builtin::str(a) + "_u32",
-                   utils::Vector{
+                   tint::Vector{
                        b.Param("p0", b.ty.u32()),
                        b.Param("p1", b.ty.u32()),
                    },
                    b.ty.u32(),
-                   utils::Vector{
+                   tint::Vector{
                        b.Return(0_u),
                    },
-                   utils::Vector{
+                   tint::Vector{
                        b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(), a),
                    });
             b.Func(std::string{"stub_"} + builtin::str(a) + "_i32",
-                   utils::Vector{
+                   tint::Vector{
                        b.Param("p0", b.ty.i32()),
                        b.Param("p1", b.ty.i32()),
                    },
                    b.ty.i32(),
-                   utils::Vector{
+                   tint::Vector{
                        b.Return(0_i),
                    },
-                   utils::Vector{
+                   tint::Vector{
                        b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(), a),
                    });
         }
 
         b.Func("stub_atomicLoad_u32",
-               utils::Vector{
+               tint::Vector{
                    b.Param("p0", b.ty.u32()),
                },
                b.ty.u32(),
-               utils::Vector{
+               tint::Vector{
                    b.Return(0_u),
                },
-               utils::Vector{
+               tint::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
                                                           builtin::Function::kAtomicLoad),
                });
         b.Func("stub_atomicLoad_i32",
-               utils::Vector{
+               tint::Vector{
                    b.Param("p0", b.ty.i32()),
                },
                b.ty.i32(),
-               utils::Vector{
+               tint::Vector{
                    b.Return(0_i),
                },
-               utils::Vector{
+               tint::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
                                                           builtin::Function::kAtomicLoad),
                });
 
         b.Func("stub_atomicStore_u32",
-               utils::Vector{
+               tint::Vector{
                    b.Param("p0", b.ty.u32()),
                    b.Param("p1", b.ty.u32()),
                },
-               b.ty.void_(), utils::Empty,
-               utils::Vector{
+               b.ty.void_(), tint::Empty,
+               tint::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
                                                           builtin::Function::kAtomicStore),
                });
         b.Func("stub_atomicStore_i32",
-               utils::Vector{
+               tint::Vector{
                    b.Param("p0", b.ty.i32()),
                    b.Param("p1", b.ty.i32()),
                },
-               b.ty.void_(), utils::Empty,
-               utils::Vector{
+               b.ty.void_(), tint::Empty,
+               tint::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
                                                           builtin::Function::kAtomicStore),
                });
 
         b.Func("stub_atomic_compare_exchange_weak_u32",
-               utils::Vector{
+               tint::Vector{
                    b.Param("p0", b.ty.u32()),
                    b.Param("p1", b.ty.u32()),
                    b.Param("p2", b.ty.u32()),
                },
                b.ty.u32(),
-               utils::Vector{
+               tint::Vector{
                    b.Return(0_u),
                },
-               utils::Vector{
+               tint::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(
                        b.ID(), b.AllocateNodeID(), builtin::Function::kAtomicCompareExchangeWeak),
                });
         b.Func("stub_atomic_compare_exchange_weak_i32",
-               utils::Vector{b.Param("p0", b.ty.i32()), b.Param("p1", b.ty.i32()),
-                             b.Param("p2", b.ty.i32())},
+               tint::Vector{b.Param("p0", b.ty.i32()), b.Param("p1", b.ty.i32()),
+                            b.Param("p2", b.ty.i32())},
                b.ty.i32(),
-               utils::Vector{
+               tint::Vector{
                    b.Return(0_i),
                },
-               utils::Vector{
+               tint::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(
                        b.ID(), b.AllocateNodeID(), builtin::Function::kAtomicCompareExchangeWeak),
                });

@@ -37,14 +37,14 @@ WGPUCompilationMessageType tintSeverityToMessageType(tint::diag::Severity severi
 }  // anonymous namespace
 
 ResultOrError<uint64_t> CountUTF16CodeUnitsFromUTF8String(const std::string_view& utf8String) {
-    if (tint::utils::utf8::IsASCII(utf8String)) {
+    if (tint::utf8::IsASCII(utf8String)) {
         return utf8String.size();
     }
 
     uint64_t numberOfUTF16CodeUnits = 0;
     std::string_view remaining = utf8String;
     while (!remaining.empty()) {
-        auto [codePoint, utf8CharacterByteLength] = tint::utils::utf8::Decode(remaining);
+        auto [codePoint, utf8CharacterByteLength] = tint::utf8::Decode(remaining);
         // Directly return as something wrong has happened during the UTF-8 decoding.
         if (utf8CharacterByteLength == 0) {
             return DAWN_INTERNAL_ERROR("Fail to decode the unicode string");

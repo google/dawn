@@ -26,7 +26,7 @@ class Loop;
 namespace tint::ir {
 
 /// A continue instruction.
-class Continue : public utils::Castable<Continue, Terminator> {
+class Continue : public Castable<Continue, Terminator> {
   public:
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
@@ -34,7 +34,7 @@ class Continue : public utils::Castable<Continue, Terminator> {
     /// Constructor
     /// @param loop the loop owning the continue block
     /// @param args the arguments for the MultiInBlock
-    explicit Continue(ir::Loop* loop, utils::VectorRef<Value*> args = utils::Empty);
+    explicit Continue(ir::Loop* loop, VectorRef<Value*> args = tint::Empty);
     ~Continue() override;
 
     /// @returns the loop owning the continue block

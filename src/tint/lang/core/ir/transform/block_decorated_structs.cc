@@ -39,7 +39,7 @@ void BlockDecoratedStructs::Run(Module* ir) const {
     }
 
     // Loop over module-scope declarations, looking for storage or uniform buffers.
-    utils::Vector<Var*, 8> buffer_variables;
+    Vector<Var*, 8> buffer_variables;
     for (auto inst : *ir->root_block) {
         auto* var = inst->As<Var>();
         if (!var) {
@@ -58,7 +58,7 @@ void BlockDecoratedStructs::Run(Module* ir) const {
         auto* store_ty = ptr->StoreType();
 
         bool wrapped = false;
-        utils::Vector<const type::StructMember*, 4> members;
+        Vector<const type::StructMember*, 4> members;
 
         // Build the member list for the block-decorated structure.
         if (auto* str = store_ty->As<type::Struct>(); str && !str->HasFixedFootprint()) {
@@ -86,7 +86,7 @@ void BlockDecoratedStructs::Run(Module* ir) const {
             /* name */ ir->symbols.New(),
             /* members */ members,
             /* align */ store_ty->Align(),
-            /* size */ utils::RoundUp(store_ty->Align(), store_ty->Size()),
+            /* size */ tint::RoundUp(store_ty->Align(), store_ty->Size()),
             /* size_no_padding */ store_ty->Size());
         block_struct->SetStructFlag(type::StructFlag::kBlock);
 

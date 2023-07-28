@@ -128,7 +128,7 @@ struct BlockInfo {
     /// switch?
     bool default_is_merge = false;
     /// The list of switch values that cause a branch to this block.
-    std::optional<utils::Vector<uint64_t, 4>> case_values;
+    std::optional<tint::Vector<uint64_t, 4>> case_values;
 
     /// The following fields record relationships among blocks in a selection
     /// construct for an OpBranchConditional instruction.
@@ -161,7 +161,7 @@ struct BlockInfo {
     /// The result IDs that this block is responsible for declaring as a
     /// hoisted variable.
     /// @see DefInfo#requires_hoisted_var_def
-    utils::Vector<uint32_t, 4> hoisted_ids;
+    tint::Vector<uint32_t, 4> hoisted_ids;
 
     /// A PhiAssignment represents the assignment of a value to the state
     /// variable associated with an OpPhi in a successor block.
@@ -173,17 +173,17 @@ struct BlockInfo {
     };
     /// If this basic block branches to a visited basic block containing phis,
     /// then this is the list of writes to the variables associated those phis.
-    utils::Vector<PhiAssignment, 4> phi_assignments;
+    tint::Vector<PhiAssignment, 4> phi_assignments;
     /// The IDs of OpPhi instructions which require their associated state
     /// variable to be declared in this basic block.
-    utils::Vector<uint32_t, 4> phis_needing_state_vars;
+    tint::Vector<uint32_t, 4> phis_needing_state_vars;
 };
 
 /// Writes the BlockInfo to the stream
 /// @param o the stream
 /// @param bi the BlockInfo
 /// @returns the stream so calls can be chained
-inline utils::StringStream& operator<<(utils::StringStream& o, const BlockInfo& bi) {
+inline StringStream& operator<<(StringStream& o, const BlockInfo& bi) {
     o << "BlockInfo{"
       << " id: " << bi.id << " pos: " << bi.pos << " merge_for_header: " << bi.merge_for_header
       << " continue_for_header: " << bi.continue_for_header
@@ -358,7 +358,7 @@ struct DefInfo {
 /// @param o the stream
 /// @param di the DefInfo
 /// @returns the stream so calls can be chained
-inline utils::StringStream& operator<<(utils::StringStream& o, const DefInfo& di) {
+inline StringStream& operator<<(StringStream& o, const DefInfo& di) {
     o << "DefInfo{"
       << " inst.result_id: " << di.inst.result_id();
     if (di.local.has_value()) {
@@ -407,7 +407,7 @@ inline utils::StringStream& operator<<(utils::StringStream& o, const DefInfo& di
 /// become immutable. The builders may hold mutable state while the
 /// StatementBlock is being constructed, which becomes an immutable node on
 /// StatementBlock::Finalize().
-class StatementBuilder : public utils::Castable<StatementBuilder, ast::Statement> {
+class StatementBuilder : public Castable<StatementBuilder, ast::Statement> {
   public:
     /// Constructor
     StatementBuilder() : Base(GenerationID(), ast::NodeID(), Source{}) {}
@@ -422,10 +422,10 @@ class StatementBuilder : public utils::Castable<StatementBuilder, ast::Statement
 
 /// A FunctionEmitter emits a SPIR-V function onto a Tint AST module.
 class FunctionEmitter {
-    using StructMemberList = utils::Vector<const ast::StructMember*, 8>;
-    using ExpressionList = utils::Vector<const ast::Expression*, 8>;
-    using ParameterList = utils::Vector<const ast::Parameter*, 8>;
-    using StatementList = utils::Vector<const ast::Statement*, 8>;
+    using StructMemberList = tint::Vector<const ast::StructMember*, 8>;
+    using ExpressionList = tint::Vector<const ast::Expression*, 8>;
+    using ParameterList = tint::Vector<const ast::Parameter*, 8>;
+    using StatementList = tint::Vector<const ast::Statement*, 8>;
 
   public:
     /// Creates a FunctionEmitter, and prepares to write to the AST module
@@ -493,7 +493,7 @@ class FunctionEmitter {
     /// @returns false if emission failed
     bool EmitPipelineInput(std::string var_name,
                            const Type* var_type,
-                           utils::Vector<int, 8> index_prefix,
+                           tint::Vector<int, 8> index_prefix,
                            const Type* tip_type,
                            const Type* forced_param_type,
                            Attributes& attributes,
@@ -519,7 +519,7 @@ class FunctionEmitter {
     /// @returns false if emission failed
     bool EmitPipelineOutput(std::string var_name,
                             const Type* var_type,
-                            utils::Vector<int, 8> index_prefix,
+                            tint::Vector<int, 8> index_prefix,
                             const Type* tip_type,
                             const Type* forced_member_type,
                             Attributes& attributes,
@@ -1316,7 +1316,7 @@ class FunctionEmitter {
     // for the entire function.  This stack is never empty.
     // The `construct` member for the 0th element is only valid during the
     // lifetime of the EmitFunctionBodyStatements method.
-    utils::Vector<StatementBlock, 8> statements_stack_;
+    tint::Vector<StatementBlock, 8> statements_stack_;
 
     // The map of IDs that have already had an identifier name generated for it,
     // to their Type.

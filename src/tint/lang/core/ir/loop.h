@@ -54,7 +54,7 @@ namespace tint::ir {
 ///                     out
 ///
 /// ```
-class Loop : public utils::Castable<Loop, ControlInstruction> {
+class Loop : public Castable<Loop, ControlInstruction> {
   public:
     /// Constructor
     /// @param i the initializer block

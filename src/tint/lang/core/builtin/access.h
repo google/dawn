@@ -38,7 +38,7 @@ enum class Access {
 /// @param out the stream to write to
 /// @param value the Access
 /// @returns `out` so calls can be chained
-utils::StringStream& operator<<(utils::StringStream& out, Access value);
+StringStream& operator<<(StringStream& out, Access value);
 
 /// ParseAccess parses a Access from a string.
 /// @param str the string to parse

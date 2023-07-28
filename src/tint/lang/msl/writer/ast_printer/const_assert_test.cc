@@ -35,7 +35,7 @@ using namespace metal;
 }
 
 TEST_F(MslASTPrinterTest, Emit_FunctionConstAssert) {
-    Func("f", utils::Empty, ty.void_(), utils::Vector{ConstAssert(true)});
+    Func("f", tint::Empty, ty.void_(), Vector{ConstAssert(true)});
 
     ASTPrinter& gen = Build();
 

@@ -23,11 +23,11 @@ namespace tint::resolver {
 namespace {
 
 struct Case {
-    Case(utils::VectorRef<Value> in_args, utils::VectorRef<Value> expected_values)
+    Case(VectorRef<Value> in_args, VectorRef<Value> expected_values)
         : args(std::move(in_args)),
           expected(Success{std::move(expected_values), CheckConstantFlags{}}) {}
 
-    Case(utils::VectorRef<Value> in_args, std::string expected_err)
+    Case(VectorRef<Value> in_args, std::string expected_err)
         : args(std::move(in_args)), expected(Failure{std::move(expected_err)}) {}
 
     /// Expected value may be positive or negative
@@ -49,15 +49,15 @@ struct Case {
     }
 
     struct Success {
-        utils::Vector<Value, 2> values;
+        Vector<Value, 2> values;
         CheckConstantFlags flags;
     };
     struct Failure {
         std::string error;
     };
 
-    utils::Vector<Value, 8> args;
-    utils::Result<Success, Failure> expected;
+    Vector<Value, 8> args;
+    tint::Result<Success, Failure> expected;
 };
 
 static std::ostream& operator<<(std::ostream& o, const Case& c) {
@@ -92,33 +92,33 @@ using ScalarTypes = std::variant<AInt, AFloat, u32, i32, f32, f16>;
 
 /// Creates a Case with Values for args and result
 static Case C(std::initializer_list<Value> args, Value result) {
-    return Case{utils::Vector<Value, 8>{args}, utils::Vector<Value, 2>{std::move(result)}};
+    return Case{Vector<Value, 8>{args}, Vector<Value, 2>{std::move(result)}};
 }
 
 /// Creates a Case with Values for args and result
 static Case C(std::initializer_list<Value> args, std::initializer_list<Value> results) {
-    return Case{utils::Vector<Value, 8>{args}, utils::Vector<Value, 2>{results}};
+    return Case{Vector<Value, 8>{args}, Vector<Value, 2>{results}};
 }
 
 /// Convenience overload that creates a Case with just scalars
 static Case C(std::initializer_list<ScalarTypes> sargs, ScalarTypes sresult) {
-    utils::Vector<Value, 8> args;
+    Vector<Value, 8> args;
     for (auto& sa : sargs) {
         std::visit([&](auto&& v) { return args.Push(Val(v)); }, sa);
     }
     Value result = Val(0_a);
     std::visit([&](auto&& v) { result = Val(v); }, sresult);
-    return Case{std::move(args), utils::Vector<Value, 2>{std::move(result)}};
+    return Case{std::move(args), Vector<Value, 2>{std::move(result)}};
 }
 
 /// Creates a Case with Values for args and result
 static Case C(std::initializer_list<ScalarTypes> sargs,
               std::initializer_list<ScalarTypes> sresults) {
-    utils::Vector<Value, 8> args;
+    Vector<Value, 8> args;
     for (auto& sa : sargs) {
         std::visit([&](auto&& v) { return args.Push(Val(v)); }, sa);
     }
-    utils::Vector<Value, 2> results;
+    Vector<Value, 2> results;
     for (auto& sa : sresults) {
         std::visit([&](auto&& v) { return results.Push(Val(v)); }, sa);
     }
@@ -127,12 +127,12 @@ static Case C(std::initializer_list<ScalarTypes> sargs,
 
 /// Creates a Case with Values for args and expected error
 static Case E(std::initializer_list<Value> args, std::string err) {
-    return Case{utils::Vector<Value, 8>{args}, std::move(err)};
+    return Case{Vector<Value, 8>{args}, std::move(err)};
 }
 
 /// Convenience overload that creates an expected-error Case with just scalars
 static Case E(std::initializer_list<ScalarTypes> sargs, std::string err) {
-    utils::Vector<Value, 8> args;
+    Vector<Value, 8> args;
     for (auto& sa : sargs) {
         std::visit([&](auto&& v) { return args.Push(Val(v)); }, sa);
     }
@@ -147,7 +147,7 @@ TEST_P(ResolverConstEvalBuiltinTest, Test) {
     auto builtin = std::get<0>(GetParam());
     auto& c = std::get<1>(GetParam());
 
-    utils::Vector<const ast::Expression*, 8> args;
+    Vector<const ast::Expression*, 8> args;
     for (auto& a : c.args) {
         args.Push(a.Expr(*this));
     }
@@ -488,7 +488,7 @@ INSTANTIATE_TEST_SUITE_P(  //
 template <typename T>
 std::vector<Case> ClampCases() {
     auto error_msg = [&](T low, T high) {
-        utils::StringStream ss;
+        StringStream ss;
         ss << "12:34 error: clamp called with 'low' (" << low << ") greater than 'high' (" << high
            << ")";
         return ss.str();

@@ -16,7 +16,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 #ifdef _WIN32
@@ -87,4 +87,4 @@ TEST(CommandTest, False) {
 #endif
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

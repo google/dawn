@@ -48,7 +48,7 @@ Transform::ApplyResult ForLoopToLoop::Apply(const Program* src, const DataMap&, 
     CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     ctx.ReplaceAll([&](const ForLoopStatement* for_loop) -> const Statement* {
-        utils::Vector<const Statement*, 8> stmts;
+        tint::Vector<const Statement*, 8> stmts;
         if (auto* cond = for_loop->condition) {
             // !condition
             auto* not_cond = b.Not(ctx.Clone(cond));

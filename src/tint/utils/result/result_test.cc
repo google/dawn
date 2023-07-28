@@ -18,7 +18,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 TEST(ResultTest, SuccessInt) {
@@ -64,4 +64,4 @@ TEST(ResultTest, ValueCast) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

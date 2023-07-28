@@ -36,7 +36,7 @@ namespace tint::writer {
 bool CheckSupportedExtensions(std::string_view writer_name,
                               const ast::Module& module,
                               diag::List& diags,
-                              utils::VectorRef<builtin::Extension> supported);
+                              VectorRef<builtin::Extension> supported);
 
 }  // namespace tint::writer
 

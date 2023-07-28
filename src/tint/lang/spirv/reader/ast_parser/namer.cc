@@ -223,7 +223,7 @@ std::string Namer::FindUnusedDerivedName(const std::string& base_name) {
     std::string derived_name;
     uint32_t& i = next_unusued_derived_name_id_[base_name];
     while (i != 0xffffffff) {
-        utils::StringStream new_name_stream;
+        StringStream new_name_stream;
         new_name_stream << base_name;
         if (i > 0) {
             new_name_stream << "_" << i;
@@ -309,7 +309,7 @@ void Namer::ResolveMemberNamesForStruct(uint32_t struct_id, uint32_t num_members
         uint32_t i = 1;
         std::string new_name;
         do {
-            utils::StringStream new_name_stream;
+            StringStream new_name_stream;
             new_name_stream << suggestion << "_" << i;
             new_name = new_name_stream.str();
             ++i;
@@ -335,7 +335,7 @@ void Namer::ResolveMemberNamesForStruct(uint32_t struct_id, uint32_t num_members
     uint32_t index = 0;
     for (auto& name : name_vector) {
         if (name.empty()) {
-            utils::StringStream suggestion;
+            StringStream suggestion;
             suggestion << "field" << index;
             // Again, modify the name-vector in-place.
             name = disambiguate_name(suggestion.str());

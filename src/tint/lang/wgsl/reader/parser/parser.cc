@@ -192,9 +192,9 @@ Parser::FunctionHeader::FunctionHeader(const FunctionHeader&) = default;
 
 Parser::FunctionHeader::FunctionHeader(Source src,
                                        const ast::Identifier* n,
-                                       utils::VectorRef<const ast::Parameter*> p,
+                                       VectorRef<const ast::Parameter*> p,
                                        ast::Type ret_ty,
-                                       utils::VectorRef<const ast::Attribute*> ret_attrs)
+                                       VectorRef<const ast::Attribute*> ret_attrs)
     : source(src),
       name(n),
       params(std::move(p)),
@@ -213,7 +213,7 @@ Parser::Failure::Errored Parser::add_error(const Source& source,
                                            std::string_view err,
                                            std::string_view use) {
     if (silence_diags_ == 0) {
-        utils::StringStream msg;
+        StringStream msg;
         msg << err;
         if (!use.empty()) {
             msg << " for " << use;
@@ -415,7 +415,7 @@ Maybe<Void> Parser::enable_directive() {
             return add_error(peek().source(), "enable directives don't take parenthesis");
         }
 
-        utils::Vector<const ast::Extension*, 4> extensions;
+        Vector<const ast::Extension*, 4> extensions;
         while (continue_parsing()) {
             Source ext_src = peek().source();
             auto ext =
@@ -908,7 +908,7 @@ Expect<ENUM> Parser::expect_enum(std::string_view name,
     }
 
     /// Create a sensible error message
-    utils::StringStream err;
+    StringStream err;
     err << "expected " << name;
 
     if (!use.empty()) {
@@ -916,7 +916,7 @@ Expect<ENUM> Parser::expect_enum(std::string_view name,
     }
     err << "\n";
 
-    utils::SuggestAlternatives(t.to_str(), strings, err);
+    tint::SuggestAlternatives(t.to_str(), strings, err);
 
     synchronized_ = false;
     return add_error(t.source(), err.str());
@@ -1506,7 +1506,7 @@ Maybe<const ast::VariableDeclStatement*> Parser::variable_statement() {
                                           decl->address_space,         // address space
                                           decl->access,                // access control
                                           initializer,                 // initializer
-                                          utils::Empty);               // attributes
+                                          tint::Empty);                // attributes
 
     return create<ast::VariableDeclStatement>(var->source, var);
 }
@@ -2023,7 +2023,7 @@ Maybe<const ast::BlockStatement*> Parser::continuing_compound_statement() {
 //   : CONTINUING continuing_compound_statement
 Maybe<const ast::BlockStatement*> Parser::continuing_statement() {
     if (!match(Token::Type::kContinuing)) {
-        return create<ast::BlockStatement>(Source{}, utils::Empty, utils::Empty);
+        return create<ast::BlockStatement>(Source{}, tint::Empty, tint::Empty);
     }
 
     return continuing_compound_statement();
@@ -2757,7 +2757,7 @@ Maybe<const ast::Expression*> Parser::lhs_expression() {
         Source source;
         ast::UnaryOp op;
     };
-    utils::Vector<LHSData, 4> ops;
+    Vector<LHSData, 4> ops;
     while (true) {
         auto& t = peek();
         if (!t.Is(Token::Type::kAndAnd) && !t.Is(Token::Type::kAnd) && !t.Is(Token::Type::kStar)) {
@@ -2790,7 +2790,7 @@ Maybe<const ast::Expression*> Parser::lhs_expression() {
 
     const ast::Expression* ret = expr.value;
     // Consume the ops in reverse order so we have the correct AST ordering.
-    for (auto& info : utils::Reverse(ops)) {
+    for (auto& info : tint::Reverse(ops)) {
         ret = create<ast::UnaryOpExpression>(info.source, info.op, ret);
     }
     return ret;
@@ -3003,7 +3003,7 @@ Maybe<const ast::Attribute*> Parser::attribute() {
             break;
     }
 
-    utils::Vector<const ast::Expression*, 2> args;
+    Vector<const ast::Expression*, 2> args;
 
     // Handle no parameter items which should have no parens
     if (min == 0) {
@@ -3086,7 +3086,7 @@ Maybe<const ast::Attribute*> Parser::attribute() {
     }
 }
 
-Expect<Void> Parser::expect_attributes_consumed(utils::VectorRef<const ast::Attribute*> in) {
+Expect<Void> Parser::expect_attributes_consumed(VectorRef<const ast::Attribute*> in) {
     if (in.IsEmpty()) {
         return kSuccess;
     }
@@ -3242,7 +3242,7 @@ bool Parser::expect(std::string_view use, Token::Type tok) {
         return false;
     }
 
-    utils::StringStream err;
+    StringStream err;
     if (tok == Token::Type::kTemplateArgsLeft && t.type() == Token::Type::kLessThan) {
         err << "missing closing '>'";
     } else {

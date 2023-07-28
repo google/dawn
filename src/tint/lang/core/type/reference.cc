@@ -27,10 +27,7 @@ namespace tint::type {
 Reference::Reference(builtin::AddressSpace address_space,
                      const Type* subtype,
                      builtin::Access access)
-    : Base(utils::Hash(utils::TypeInfo::Of<Reference>().full_hashcode,
-                       address_space,
-                       subtype,
-                       access),
+    : Base(Hash(tint::TypeInfo::Of<Reference>().full_hashcode, address_space, subtype, access),
            type::Flags{}),
       subtype_(subtype),
       address_space_(address_space),
@@ -48,7 +45,7 @@ bool Reference::Equals(const UniqueNode& other) const {
 }
 
 std::string Reference::FriendlyName() const {
-    utils::StringStream out;
+    StringStream out;
     out << "ref<";
     if (address_space_ != builtin::AddressSpace::kUndefined) {
         out << address_space_ << ", ";

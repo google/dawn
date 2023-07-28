@@ -40,7 +40,7 @@ TEST_P(WGSLParserClassifyTemplateArgsTest, Classify) {
     Lexer l(&file);
     auto tokens = l.Lex();
     ClassifyTemplateArguments(tokens);
-    auto types = utils::Transform(tokens, [&](const Token& t) { return t.type(); });
+    auto types = tint::Transform(tokens, [&](const Token& t) { return t.type(); });
     EXPECT_THAT(types, testing::ContainerEq(params.tokens));
 }
 

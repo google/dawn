@@ -48,7 +48,7 @@ struct SamplerTexturePair {
 /// @param o the stream to write to
 /// @param stp the SamplerTexturePair
 /// @return the stream so calls can be chained
-inline utils::StringStream& operator<<(utils::StringStream& o, const SamplerTexturePair& stp) {
+inline StringStream& operator<<(StringStream& o, const SamplerTexturePair& stp) {
     return o << "[sampler: " << stp.sampler_binding_point
              << ", texture: " << stp.sampler_binding_point << "]";
 }
@@ -66,7 +66,7 @@ class hash<tint::sem::SamplerTexturePair> {
     /// @param stp the texture pair to create a hash for
     /// @return the hash value
     inline std::size_t operator()(const tint::sem::SamplerTexturePair& stp) const {
-        return tint::utils::Hash(stp.sampler_binding_point, stp.texture_binding_point);
+        return Hash(stp.sampler_binding_point, stp.texture_binding_point);
     }
 };
 

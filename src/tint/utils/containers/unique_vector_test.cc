@@ -20,7 +20,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 TEST(UniqueVectorTest, Empty) {
@@ -175,7 +175,7 @@ TEST(UniqueVectorTest, AsVector) {
     unique_vec.Add(1);
     unique_vec.Add(2);
 
-    utils::VectorRef<int> ref = unique_vec;
+    VectorRef<int> ref = unique_vec;
     EXPECT_EQ(ref.Length(), 3u);
     EXPECT_EQ(unique_vec.IsEmpty(), false);
     int i = 0;
@@ -233,4 +233,4 @@ TEST(UniqueVectorTest, Data) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

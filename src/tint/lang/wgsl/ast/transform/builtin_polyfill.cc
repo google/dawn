@@ -150,11 +150,11 @@ struct BuiltinPolyfill::State {
     /// The source clone context
     const sem::Info& sem = src->Sem();
     /// Polyfill functions for binary operators.
-    utils::Hashmap<BinaryOpSignature, Symbol, 8> binary_op_polyfills;
+    Hashmap<BinaryOpSignature, Symbol, 8> binary_op_polyfills;
     /// Polyfill builtins.
-    utils::Hashmap<const sem::Builtin*, Symbol, 8> builtin_polyfills;
+    Hashmap<const sem::Builtin*, Symbol, 8> builtin_polyfills;
     /// Polyfill f32 conversion to i32 or u32 (or vectors of)
-    utils::Hashmap<const type::Type*, Symbol, 2> f32_conv_polyfills;
+    Hashmap<const type::Type*, Symbol, 2> f32_conv_polyfills;
     // Tracks whether the chromium_experimental_full_ptr_parameters extension has been enabled.
     bool has_full_ptr_params = false;
     /// True if the transform has made changes (i.e. the program needs cloning)
@@ -179,7 +179,7 @@ struct BuiltinPolyfill::State {
             return b.Call(T(ty), expr);
         };
 
-        utils::Vector<const Statement*, 4> body;
+        tint::Vector<const Statement*, 4> body;
         switch (cfg.builtins.acosh) {
             case Level::kFull:
                 // return log(x + sqrt(x*x - 1));
@@ -198,7 +198,7 @@ struct BuiltinPolyfill::State {
                 return {};
         }
 
-        b.Func(name, utils::Vector{b.Param("x", T(ty))}, T(ty), body);
+        b.Func(name, tint::Vector{b.Param("x", T(ty))}, T(ty), body);
 
         return name;
     }
@@ -210,8 +210,8 @@ struct BuiltinPolyfill::State {
         auto name = b.Symbols().New("tint_sinh");
 
         // return log(x + sqrt(x*x + 1));
-        b.Func(name, utils::Vector{b.Param("x", T(ty))}, T(ty),
-               utils::Vector{
+        b.Func(name, tint::Vector{b.Param("x", T(ty))}, T(ty),
+               tint::Vector{
                    b.Return(b.Call("log", b.Add("x", b.Call("sqrt", b.Add(b.Mul("x", "x"), 1_a))))),
                });
 
@@ -233,7 +233,7 @@ struct BuiltinPolyfill::State {
             return b.Call(T(ty), expr);
         };
 
-        utils::Vector<const Statement*, 1> body;
+        tint::Vector<const Statement*, 1> body;
         switch (cfg.builtins.atanh) {
             case Level::kFull:
                 // return log((1+x) / (1-x)) * 0.5
@@ -251,7 +251,7 @@ struct BuiltinPolyfill::State {
                 return {};
         }
 
-        b.Func(name, utils::Vector{b.Param("x", T(ty))}, T(ty), body);
+        b.Func(name, tint::Vector{b.Param("x", T(ty))}, T(ty), body);
 
         return name;
     }
@@ -264,13 +264,13 @@ struct BuiltinPolyfill::State {
         auto name = b.Symbols().New("tint_clamp");
 
         b.Func(name,
-               utils::Vector{
+               tint::Vector{
                    b.Param("e", T(ty)),
                    b.Param("low", T(ty)),
                    b.Param("high", T(ty)),
                },
                T(ty),
-               utils::Vector{
+               tint::Vector{
                    // return min(max(e, low), high);
                    b.Return(b.Call("min", b.Call("max", "e", "low"), "high")),
                });
@@ -296,11 +296,11 @@ struct BuiltinPolyfill::State {
         };
         b.Func(
             name,
-            utils::Vector{
+            tint::Vector{
                 b.Param("v", T(ty)),
             },
             T(ty),
-            utils::Vector{
+            tint::Vector{
                 // var x = U(v);
                 b.Decl(b.Var("x", b.Call(U(), b.Expr("v")))),
                 // let b16 = select(0, 16, x <= 0x0000ffff);
@@ -360,11 +360,11 @@ struct BuiltinPolyfill::State {
         };
         b.Func(
             name,
-            utils::Vector{
+            tint::Vector{
                 b.Param("v", T(ty)),
             },
             T(ty),
-            utils::Vector{
+            tint::Vector{
                 // var x = U(v);
                 b.Decl(b.Var("x", b.Call(U(), b.Expr("v")))),
                 // let b16 = select(16, 0, bool(x & 0x0000ffff));
@@ -410,7 +410,7 @@ struct BuiltinPolyfill::State {
             return b.Call(b.ty.vec<u32>(width), value);
         };
 
-        utils::Vector<const Statement*, 8> body{
+        tint::Vector<const Statement*, 8> body{
             b.Decl(b.Let("s", b.Call("min", "offset", u32(W)))),
             b.Decl(b.Let("e", b.Call("min", u32(W), b.Add("s", "count")))),
         };
@@ -442,7 +442,7 @@ struct BuiltinPolyfill::State {
         }
 
         b.Func(name,
-               utils::Vector{
+               tint::Vector{
                    b.Param("v", T(ty)),
                    b.Param("offset", b.ty.u32()),
                    b.Param("count", b.ty.u32()),
@@ -489,11 +489,11 @@ struct BuiltinPolyfill::State {
 
         b.Func(
             name,
-            utils::Vector{
+            tint::Vector{
                 b.Param("v", T(ty)),
             },
             T(ty),
-            utils::Vector{
+            tint::Vector{
                 // var x = v;                          (unsigned)
                 // var x = select(U(v), ~U(v), v < 0); (signed)
                 b.Decl(b.Var("x", x)),
@@ -549,11 +549,11 @@ struct BuiltinPolyfill::State {
         };
         b.Func(
             name,
-            utils::Vector{
+            tint::Vector{
                 b.Param("v", T(ty)),
             },
             T(ty),
-            utils::Vector{
+            tint::Vector{
                 // var x = U(v);
                 b.Decl(b.Var("x", b.Call(U(), b.Expr("v")))),
                 // let b16 = select(16, 0, bool(x & 0x0000ffff));
@@ -639,7 +639,7 @@ struct BuiltinPolyfill::State {
         //          return ((select(T(), n << offset, offset < 32u) & mask) | (v & ~(mask)));
         //      }
 
-        utils::Vector<const Statement*, 8> body;
+        tint::Vector<const Statement*, 8> body;
 
         switch (cfg.builtins.insert_bits) {
             case Level::kFull:
@@ -680,7 +680,7 @@ struct BuiltinPolyfill::State {
         }
 
         b.Func(name,
-               utils::Vector{
+               tint::Vector{
                    b.Param("v", T(ty)),
                    b.Param("n", T(ty)),
                    b.Param("offset", b.ty.u32()),
@@ -704,12 +704,12 @@ struct BuiltinPolyfill::State {
         //      }
         // Using -2.0 instead of 2.0 in factor to prevent the optimization that cause wrong result.
         // See https://crbug.com/tint/1798 for more details.
-        auto body = utils::Vector{
+        auto body = tint::Vector{
             b.Decl(b.Let("factor", b.Mul(-2.0_a, b.Call("dot", "e1", "e2")))),
             b.Return(b.Add("e1", b.Mul("factor", "e2"))),
         };
         b.Func(name,
-               utils::Vector{
+               tint::Vector{
                    b.Param("e1", T(ty)),
                    b.Param("e2", T(ty)),
                },
@@ -723,11 +723,11 @@ struct BuiltinPolyfill::State {
     /// @return the polyfill function name
     Symbol saturate(const type::Type* ty) {
         auto name = b.Symbols().New("tint_saturate");
-        auto body = utils::Vector{
+        auto body = tint::Vector{
             b.Return(b.Call("clamp", "v", b.Call(T(ty), 0_a), b.Call(T(ty), 1_a))),
         };
         b.Func(name,
-               utils::Vector{
+               tint::Vector{
                    b.Param("v", T(ty)),
                },
                T(ty), body);
@@ -750,11 +750,11 @@ struct BuiltinPolyfill::State {
 
         auto name = b.Symbols().New("tint_sign");
         b.Func(name,
-               utils::Vector{
+               tint::Vector{
                    b.Param("v", T(ty)),
                },
                T(ty),
-               utils::Vector{
+               tint::Vector{
                    b.Return(b.Call("select", pos_or_neg_one, zero(), b.Equal("v", zero()))),
                });
 
@@ -766,7 +766,7 @@ struct BuiltinPolyfill::State {
     /// @return the polyfill function name
     Symbol textureSampleBaseClampToEdge_2d_f32() {
         auto name = b.Symbols().New("tint_textureSampleBaseClampToEdge");
-        auto body = utils::Vector{
+        auto body = tint::Vector{
             b.Decl(b.Let("dims", b.Call(b.ty.vec2<f32>(), b.Call("textureDimensions", "t", 0_a)))),
             b.Decl(b.Let("half_texel", b.Div(b.Call<vec2<f32>>(0.5_a), "dims"))),
             b.Decl(
@@ -774,7 +774,7 @@ struct BuiltinPolyfill::State {
             b.Return(b.Call("textureSampleLevel", "t", "s", "clamped", 0_a)),
         };
         b.Func(name,
-               utils::Vector{
+               tint::Vector{
                    b.Param("t", b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32())),
                    b.Param("s", b.ty.sampler(type::SamplerKind::kSampler)),
                    b.Param("coord", b.ty.vec2<f32>()),
@@ -789,16 +789,16 @@ struct BuiltinPolyfill::State {
     /// @return the polyfill function name
     Symbol quantizeToF16(const type::Vector* vec) {
         auto name = b.Symbols().New("tint_quantizeToF16");
-        utils::Vector<const Expression*, 4> args;
+        tint::Vector<const Expression*, 4> args;
         for (uint32_t i = 0; i < vec->Width(); i++) {
             args.Push(b.Call("quantizeToF16", b.IndexAccessor("v", u32(i))));
         }
         b.Func(name,
-               utils::Vector{
+               tint::Vector{
                    b.Param("v", T(vec)),
                },
                T(vec),
-               utils::Vector{
+               tint::Vector{
                    b.Return(b.Call(T(vec), std::move(args))),
                });
         return name;
@@ -814,11 +814,11 @@ struct BuiltinPolyfill::State {
         }
         auto name = b.Symbols().New("tint_workgroupUniformLoad");
         b.Func(name,
-               utils::Vector{
+               tint::Vector{
                    b.Param("p", b.ty.ptr<workgroup>(T(type))),
                },
                T(type),
-               utils::Vector{
+               tint::Vector{
                    b.CallStmt(b.Call("workgroupBarrier")),
                    b.Decl(b.Let("result", b.Deref("p"))),
                    b.CallStmt(b.Call("workgroupBarrier")),
@@ -868,8 +868,8 @@ struct BuiltinPolyfill::State {
                                    b.LessThan("v", ScalarOrVector(width, limits.high_condition)));
 
         auto name = b.Symbols().New(is_signed ? "tint_ftoi" : "tint_ftou");
-        b.Func(name, utils::Vector{b.Param("v", T(source))}, T(target),
-               utils::Vector{b.Return(select_high)});
+        b.Func(name, tint::Vector{b.Param("v", T(source))}, T(target),
+               tint::Vector{b.Return(select_high)});
         return name;
     }
 
@@ -913,7 +913,7 @@ struct BuiltinPolyfill::State {
             const char* lhs = "lhs";
             const char* rhs = "rhs";
 
-            utils::Vector<const Statement*, 4> body;
+            tint::Vector<const Statement*, 4> body;
 
             if (lhs_width < width) {
                 // lhs is scalar, rhs is vector. Convert lhs to vector.
@@ -974,7 +974,7 @@ struct BuiltinPolyfill::State {
             }
 
             b.Func(name,
-                   utils::Vector{
+                   tint::Vector{
                        b.Param("lhs", T(lhs_ty)),
                        b.Param("rhs", T(rhs_ty)),
                    },
@@ -1004,7 +1004,7 @@ struct BuiltinPolyfill::State {
             const char* lhs = "lhs";
             const char* rhs = "rhs";
 
-            utils::Vector<const Statement*, 4> body;
+            tint::Vector<const Statement*, 4> body;
 
             if (lhs_width < width) {
                 // lhs is scalar, rhs is vector. Convert lhs to vector.
@@ -1024,7 +1024,7 @@ struct BuiltinPolyfill::State {
             body.Push(b.Return(precise_mod));
 
             b.Func(name,
-                   utils::Vector{
+                   tint::Vector{
                        b.Param("lhs", T(lhs_ty)),
                        b.Param("rhs", T(rhs_ty)),
                    },
@@ -1204,7 +1204,7 @@ struct BuiltinPolyfill::State {
                                     size_t value_idx = static_cast<size_t>(
                                         sig.IndexOf(sem::ParameterUsage::kValue));
                                     ctx.Replace(expr, [this, expr, value_idx] {
-                                        utils::Vector<const Expression*, 3> args;
+                                        tint::Vector<const Expression*, 3> args;
                                         for (auto* arg : expr->args) {
                                             arg = ctx.Clone(arg);
                                             if (args.Length() == value_idx) {  // value
@@ -1213,7 +1213,7 @@ struct BuiltinPolyfill::State {
                                             args.Push(arg);
                                         }
                                         return ctx.dst->Call(
-                                            utils::ToString(builtin::Function::kTextureStore),
+                                            tint::ToString(builtin::Function::kTextureStore),
                                             std::move(args));
                                     });
                                     made_changes = true;
@@ -1248,8 +1248,7 @@ struct BuiltinPolyfill::State {
                     auto* src_ty = conv->Source();
                     if (tint::Is<type::F32>(src_ty->Elements(src_ty).type)) {
                         auto* dst_ty = conv->Target();
-                        if (tint::utils::IsAnyOf<type::I32, type::U32>(
-                                dst_ty->Elements(dst_ty).type)) {
+                        if (tint::IsAnyOf<type::I32, type::U32>(dst_ty->Elements(dst_ty).type)) {
                             return f32_conv_polyfills.GetOrCreate(dst_ty, [&] {  //
                                 return ConvF32ToIU32(src_ty, dst_ty);
                             });

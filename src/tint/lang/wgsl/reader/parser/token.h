@@ -359,7 +359,7 @@ class Token {
     std::variant<int64_t, double, std::string, std::string_view> value_;
 };
 
-inline utils::StringStream& operator<<(utils::StringStream& out, Token::Type type) {
+inline StringStream& operator<<(StringStream& out, Token::Type type) {
     out << Token::TypeToName(type);
     return out;
 }

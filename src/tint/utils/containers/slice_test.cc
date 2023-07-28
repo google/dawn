@@ -16,7 +16,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 class C0 : public Castable<C0> {};
@@ -182,4 +182,4 @@ TEST(TintSliceTest, Truncate_PastEnd) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

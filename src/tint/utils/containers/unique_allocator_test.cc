@@ -18,7 +18,7 @@
 
 #include "gtest/gtest.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 TEST(UniqueAllocator, Int) {
@@ -49,4 +49,4 @@ TEST(UniqueAllocator, String) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

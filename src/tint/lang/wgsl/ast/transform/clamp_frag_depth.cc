@@ -82,15 +82,15 @@ struct ClampFragDepth::State {
         b.Enable(builtin::Extension::kChromiumExperimentalPushConstant);
 
         b.Structure(b.Symbols().New("FragDepthClampArgs"),
-                    utils::Vector{b.Member("min", b.ty.f32()), b.Member("max", b.ty.f32())});
+                    tint::Vector{b.Member("min", b.ty.f32()), b.Member("max", b.ty.f32())});
 
         auto args_sym = b.Symbols().New("frag_depth_clamp_args");
         b.GlobalVar(args_sym, b.ty("FragDepthClampArgs"), builtin::AddressSpace::kPushConstant);
 
         auto base_fn_sym = b.Symbols().New("clamp_frag_depth");
-        b.Func(base_fn_sym, utils::Vector{b.Param("v", b.ty.f32())}, b.ty.f32(),
-               utils::Vector{b.Return(b.Call("clamp", "v", b.MemberAccessor(args_sym, "min"),
-                                             b.MemberAccessor(args_sym, "max")))});
+        b.Func(base_fn_sym, tint::Vector{b.Param("v", b.ty.f32())}, b.ty.f32(),
+               tint::Vector{b.Return(b.Call("clamp", "v", b.MemberAccessor(args_sym, "min"),
+                                            b.MemberAccessor(args_sym, "max")))});
 
         // If true, the currently cloned function returns frag depth directly as a scalar
         bool returns_frag_depth_as_value = false;
@@ -101,7 +101,7 @@ struct ClampFragDepth::State {
 
         // Map of io struct to helper function to return the structure with the depth clamping
         // applied.
-        utils::Hashmap<const Struct*, Symbol, 4u> io_structs_clamp_helpers;
+        Hashmap<const Struct*, Symbol, 4u> io_structs_clamp_helpers;
 
         // Register a callback that will be called for each visted AST function.
         // This call wraps the cloning of the function's statements, and will assign to
@@ -129,7 +129,7 @@ struct ClampFragDepth::State {
                     auto fn_sym =
                         b.Symbols().New("clamp_frag_depth_" + struct_ty->name->symbol.Name());
 
-                    utils::Vector<const Expression*, 8u> initializer_args;
+                    tint::Vector<const Expression*, 8u> initializer_args;
                     for (auto* member : struct_ty->members) {
                         const Expression* arg =
                             b.MemberAccessor("s", ctx.Clone(member->name->symbol));
@@ -138,8 +138,8 @@ struct ClampFragDepth::State {
                         }
                         initializer_args.Push(arg);
                     }
-                    utils::Vector params{b.Param("s", ctx.Clone(return_ty))};
-                    utils::Vector body{
+                    tint::Vector params{b.Param("s", ctx.Clone(return_ty))};
+                    tint::Vector body{
                         b.Return(b.Call(ctx.Clone(return_ty), std::move(initializer_args))),
                     };
                     b.Func(fn_sym, params, ctx.Clone(return_ty), body);
@@ -183,7 +183,7 @@ struct ClampFragDepth::State {
     }
     /// @param attrs the attributes to examine
     /// @returns true if @p attrs contains a `@builtin(frag_depth)` attribute
-    bool ContainsFragDepth(utils::VectorRef<const Attribute*> attrs) {
+    bool ContainsFragDepth(VectorRef<const Attribute*> attrs) {
         for (auto* attribute : attrs) {
             if (auto* builtin_attr = attribute->As<BuiltinAttribute>()) {
                 auto builtin = sem.Get(builtin_attr)->Value();

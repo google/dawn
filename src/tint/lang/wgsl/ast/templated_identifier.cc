@@ -26,8 +26,8 @@ TemplatedIdentifier::TemplatedIdentifier(GenerationID pid,
                                          NodeID nid,
                                          const Source& src,
                                          const Symbol& sym,
-                                         utils::VectorRef<const Expression*> args,
-                                         utils::VectorRef<const Attribute*> attrs)
+                                         VectorRef<const Expression*> args,
+                                         VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src, sym), arguments(std::move(args)), attributes(std::move(attrs)) {
     TINT_ASSERT(AST, !arguments.IsEmpty());  // Should have been an Identifier if this fires.
     for (auto* arg : arguments) {

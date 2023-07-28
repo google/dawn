@@ -20,7 +20,7 @@
 namespace tint::ir {
 
 /// An unreachable instruction in the IR.
-class Unreachable : public utils::Castable<Unreachable, Terminator> {
+class Unreachable : public Castable<Unreachable, Terminator> {
   public:
     ~Unreachable() override;
 

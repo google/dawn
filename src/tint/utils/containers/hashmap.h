@@ -24,7 +24,7 @@
 #include "src/tint/utils/debug/debug.h"
 #include "src/tint/utils/math/hash.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// An unordered map that uses a robin-hood hashing algorithm.
 template <typename KEY,
@@ -285,6 +285,6 @@ struct Hasher<Hashmap<K, V, N, HASH, EQUAL>> {
     }
 };
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_CONTAINERS_HASHMAP_H_

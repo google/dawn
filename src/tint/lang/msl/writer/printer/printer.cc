@@ -91,7 +91,7 @@ bool Printer::Generate() {
 }
 
 std::string Printer::Result() const {
-    utils::StringStream ss;
+    StringStream ss;
     ss << preamble_buffer_.String() << std::endl << main_buffer_.String();
     return ss.str();
 }
@@ -132,7 +132,7 @@ const std::string& Printer::ArrayTemplateName() {
     return array_template_name_;
 }
 
-void Printer::EmitAddressSpace(utils::StringStream& out, builtin::AddressSpace sc) {
+void Printer::EmitAddressSpace(StringStream& out, builtin::AddressSpace sc) {
     switch (sc) {
         case builtin::AddressSpace::kFunction:
         case builtin::AddressSpace::kPrivate:
@@ -154,7 +154,7 @@ void Printer::EmitAddressSpace(utils::StringStream& out, builtin::AddressSpace s
     }
 }
 
-void Printer::EmitType(utils::StringStream& out, const type::Type* ty) {
+void Printer::EmitType(StringStream& out, const type::Type* ty) {
     tint::Switch(
         ty,                                         //
         [&](const type::Bool*) { out << "bool"; },  //
@@ -179,7 +179,7 @@ void Printer::EmitType(utils::StringStream& out, const type::Type* ty) {
         [&](Default) { UNHANDLED_CASE(ty); });
 }
 
-void Printer::EmitPointerType(utils::StringStream& out, const type::Pointer* ptr) {
+void Printer::EmitPointerType(StringStream& out, const type::Pointer* ptr) {
     if (ptr->Access() == builtin::Access::kRead) {
         out << "const ";
     }
@@ -189,7 +189,7 @@ void Printer::EmitPointerType(utils::StringStream& out, const type::Pointer* ptr
     out << "*";
 }
 
-void Printer::EmitAtomicType(utils::StringStream& out, const type::Atomic* atomic) {
+void Printer::EmitAtomicType(StringStream& out, const type::Atomic* atomic) {
     if (atomic->Type()->Is<type::I32>()) {
         out << "atomic_int";
         return;
@@ -201,7 +201,7 @@ void Printer::EmitAtomicType(utils::StringStream& out, const type::Atomic* atomi
     TINT_ICE(Writer, diagnostics_) << "unhandled atomic type " << atomic->Type()->FriendlyName();
 }
 
-void Printer::EmitArrayType(utils::StringStream& out, const type::Array* arr) {
+void Printer::EmitArrayType(StringStream& out, const type::Array* arr) {
     out << ArrayTemplateName() << "<";
     EmitType(out, arr->ElemType());
     out << ", ";
@@ -218,7 +218,7 @@ void Printer::EmitArrayType(utils::StringStream& out, const type::Array* arr) {
     out << ">";
 }
 
-void Printer::EmitVectorType(utils::StringStream& out, const type::Vector* vec) {
+void Printer::EmitVectorType(StringStream& out, const type::Vector* vec) {
     if (vec->Packed()) {
         out << "packed_";
     }
@@ -226,12 +226,12 @@ void Printer::EmitVectorType(utils::StringStream& out, const type::Vector* vec) 
     out << vec->Width();
 }
 
-void Printer::EmitMatrixType(utils::StringStream& out, const type::Matrix* mat) {
+void Printer::EmitMatrixType(StringStream& out, const type::Matrix* mat) {
     EmitType(out, mat->type());
     out << mat->columns() << "x" << mat->rows();
 }
 
-void Printer::EmitTextureType(utils::StringStream& out, const type::Texture* tex) {
+void Printer::EmitTextureType(StringStream& out, const type::Texture* tex) {
     if (TINT_UNLIKELY(tex->Is<type::ExternalTexture>())) {
         TINT_ICE(Writer, diagnostics_) << "Multiplanar external texture transform was not run.";
         return;
@@ -318,7 +318,7 @@ void Printer::EmitStructType(const type::Struct* str) {
     bool is_host_shareable = str->IsHostShareable();
 
     // Emits a `/* 0xnnnn */` byte offset comment for a struct member.
-    auto add_byte_offset_comment = [&](utils::StringStream& out, uint32_t offset) {
+    auto add_byte_offset_comment = [&](StringStream& out, uint32_t offset) {
         std::ios_base::fmtflags saved_flag_state(out.flags());
         out << "/* 0x" << std::hex << std::setfill('0') << std::setw(4) << offset << " */ ";
         out.flags(saved_flag_state);
@@ -438,11 +438,11 @@ void Printer::EmitStructType(const type::Struct* str) {
     preamble_buffer_.Append(str_buf);
 }
 
-void Printer::EmitConstant(utils::StringStream& out, ir::Constant* c) {
+void Printer::EmitConstant(StringStream& out, ir::Constant* c) {
     EmitConstant(out, c->Value());
 }
 
-void Printer::EmitConstant(utils::StringStream& out, const constant::Value* c) {
+void Printer::EmitConstant(StringStream& out, const constant::Value* c) {
     auto emit_values = [&](uint32_t count) {
         for (size_t i = 0; i < count; i++) {
             if (i > 0) {

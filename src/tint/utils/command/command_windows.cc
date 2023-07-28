@@ -22,7 +22,7 @@
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::utils {
+namespace tint {
 
 namespace {
 
@@ -197,7 +197,7 @@ Command::Output Command::Exec(std::initializer_list<std::string> arguments) cons
     si.hStdError = stderr_pipe.write;
     si.hStdInput = stdin_pipe.read;
 
-    utils::StringStream args;
+    StringStream args;
     args << path_;
     for (auto& arg : arguments) {
         if (!arg.empty()) {
@@ -269,4 +269,4 @@ Command::Output Command::Exec(std::initializer_list<std::string> arguments) cons
     return output;
 }
 
-}  // namespace tint::utils
+}  // namespace tint

@@ -202,13 +202,13 @@ class Resolver {
     template <size_t N>
     sem::Call* FunctionCall(const ast::CallExpression*,
                             sem::Function* target,
-                            utils::Vector<const sem::ValueExpression*, N>& args,
+                            Vector<const sem::ValueExpression*, N>& args,
                             sem::Behaviors arg_behaviors);
     sem::Expression* Identifier(const ast::IdentifierExpression*);
     template <size_t N>
     sem::Call* BuiltinCall(const ast::CallExpression*,
                            builtin::Function,
-                           utils::Vector<const sem::ValueExpression*, N>& args);
+                           Vector<const sem::ValueExpression*, N>& args);
     sem::ValueExpression* Literal(const ast::LiteralExpression*);
     sem::ValueExpression* MemberAccessor(const ast::MemberAccessorExpression*);
     sem::ValueExpression* UnaryOp(const ast::UnaryOpExpression*);
@@ -247,7 +247,7 @@ class Resolver {
     ///   reference type.
     /// @returns true on success, false on failure.
     template <size_t N>
-    bool MaybeMaterializeAndLoadArguments(utils::Vector<const sem::ValueExpression*, N>& args,
+    bool MaybeMaterializeAndLoadArguments(Vector<const sem::ValueExpression*, N>& args,
                                           const sem::CallTarget* target);
 
     /// @returns true if an argument of an abstract numeric type, passed to a parameter of type
@@ -260,10 +260,10 @@ class Resolver {
 
     /// Transforms `args` to a vector of constants, and converts each constant to the call target's
     /// parameter type.
-    /// @returns the vector of constants, `utils::Failure` on failure.
+    /// @returns the vector of constants, `tint::Failure` on failure.
     template <size_t N>
-    utils::Result<utils::Vector<const constant::Value*, N>> ConvertArguments(
-        const utils::Vector<const sem::ValueExpression*, N>& args,
+    tint::Result<Vector<const constant::Value*, N>> ConvertArguments(
+        const Vector<const sem::ValueExpression*, N>& args,
         const sem::CallTarget* target);
 
     /// @param ty the type that may hold abstract numeric types
@@ -299,14 +299,14 @@ class Resolver {
     sem::Statement* Statement(const ast::Statement*);
     sem::SwitchStatement* SwitchStatement(const ast::SwitchStatement* s);
     sem::Statement* VariableDeclStatement(const ast::VariableDeclStatement*);
-    bool Statements(utils::VectorRef<const ast::Statement*>);
+    bool Statements(VectorRef<const ast::Statement*>);
 
     // CollectTextureSamplerPairs() collects all the texture/sampler pairs from the target function
     // / builtin, and records these on the current function by calling AddTextureSamplerPair().
     void CollectTextureSamplerPairs(sem::Function* func,
-                                    utils::VectorRef<const sem::ValueExpression*> args) const;
+                                    VectorRef<const sem::ValueExpression*> args) const;
     void CollectTextureSamplerPairs(const sem::Builtin* builtin,
-                                    utils::VectorRef<const sem::ValueExpression*> args) const;
+                                    VectorRef<const sem::ValueExpression*> args) const;
 
     /// Resolves the WorkgroupSize for the given function, assigning it to
     /// current_function_
@@ -314,27 +314,27 @@ class Resolver {
 
     /// Resolves the `@builtin` attribute @p attr
     /// @returns the builtin value on success
-    utils::Result<tint::builtin::BuiltinValue> BuiltinAttribute(const ast::BuiltinAttribute* attr);
+    tint::Result<tint::builtin::BuiltinValue> BuiltinAttribute(const ast::BuiltinAttribute* attr);
 
     /// Resolves the `@location` attribute @p attr
     /// @returns the location value on success.
-    utils::Result<uint32_t> LocationAttribute(const ast::LocationAttribute* attr);
+    tint::Result<uint32_t> LocationAttribute(const ast::LocationAttribute* attr);
 
     /// Resolves the `@index` attribute @p attr
     /// @returns the index value on success.
-    utils::Result<uint32_t> IndexAttribute(const ast::IndexAttribute* attr);
+    tint::Result<uint32_t> IndexAttribute(const ast::IndexAttribute* attr);
 
     /// Resolves the `@binding` attribute @p attr
     /// @returns the binding value on success.
-    utils::Result<uint32_t> BindingAttribute(const ast::BindingAttribute* attr);
+    tint::Result<uint32_t> BindingAttribute(const ast::BindingAttribute* attr);
 
     /// Resolves the `@group` attribute @p attr
     /// @returns the group value on success.
-    utils::Result<uint32_t> GroupAttribute(const ast::GroupAttribute* attr);
+    tint::Result<uint32_t> GroupAttribute(const ast::GroupAttribute* attr);
 
     /// Resolves the `@workgroup_size` attribute @p attr
     /// @returns the workgroup size on success.
-    utils::Result<sem::WorkgroupSize> WorkgroupAttribute(const ast::WorkgroupAttribute* attr);
+    tint::Result<sem::WorkgroupSize> WorkgroupAttribute(const ast::WorkgroupAttribute* attr);
 
     /// Resolves the `@diagnostic` attribute @p attr
     /// @returns true on success, false on failure
@@ -358,7 +358,7 @@ class Resolver {
 
     /// Resolves the `@interpolate` attribute @p attr
     /// @returns true on success, false on failure
-    utils::Result<builtin::Interpolation> InterpolateAttribute(
+    tint::Result<builtin::Interpolation> InterpolateAttribute(
         const ast::InterpolateAttribute* attr);
 
     /// Resolves the internal attribute @p attr
@@ -387,7 +387,7 @@ class Resolver {
     /// @param el_ty the element type of the array.
     /// @param explicit_stride assigned the specified stride of the array in bytes.
     /// @returns true on success, false on failure
-    bool ArrayAttributes(utils::VectorRef<const ast::Attribute*> attributes,
+    bool ArrayAttributes(VectorRef<const ast::Attribute*> attributes,
                          const type::Type* el_ty,
                          uint32_t& explicit_stride);
 
@@ -558,13 +558,13 @@ class Resolver {
     // ArrayConstructorSig represents a unique array constructor signature.
     // It is a tuple of the array type, number of arguments provided and earliest evaluation stage.
     using ArrayConstructorSig =
-        utils::UnorderedKeyWrapper<std::tuple<const type::Array*, size_t, sem::EvaluationStage>>;
+        tint::UnorderedKeyWrapper<std::tuple<const type::Array*, size_t, sem::EvaluationStage>>;
 
     // StructConstructorSig represents a unique structure constructor signature.
     // It is a tuple of the structure type, number of arguments provided and earliest evaluation
     // stage.
     using StructConstructorSig =
-        utils::UnorderedKeyWrapper<std::tuple<const type::Struct*, size_t, sem::EvaluationStage>>;
+        tint::UnorderedKeyWrapper<std::tuple<const type::Struct*, size_t, sem::EvaluationStage>>;
 
     /// ExprEvalStageConstraint describes a constraint on when expressions can be evaluated.
     struct ExprEvalStageConstraint {
@@ -596,7 +596,7 @@ class Resolver {
         /// The usage of the identifier.
         const char* usage = "identifier";
         /// Suggested strings if the identifier failed to resolve
-        utils::Slice<char const* const> suggestions = utils::Empty;
+        tint::Slice<char const* const> suggestions = tint::Empty;
     };
 
     ProgramBuilder* const builder_;
@@ -607,25 +607,24 @@ class Resolver {
     SemHelper sem_;
     Validator validator_;
     builtin::Extensions enabled_extensions_;
-    utils::Vector<sem::Function*, 8> entry_points_;
-    utils::Hashmap<const type::Type*, const Source*, 8> atomic_composite_info_;
-    utils::Bitset<0> marked_;
+    Vector<sem::Function*, 8> entry_points_;
+    Hashmap<const type::Type*, const Source*, 8> atomic_composite_info_;
+    tint::Bitset<0> marked_;
     ExprEvalStageConstraint expr_eval_stage_constraint_;
     std::unordered_map<const sem::Function*, AliasAnalysisInfo> alias_analysis_infos_;
-    utils::Hashmap<OverrideId, const sem::Variable*, 8> override_ids_;
-    utils::Hashmap<ArrayConstructorSig, sem::CallTarget*, 8> array_ctors_;
-    utils::Hashmap<StructConstructorSig, sem::CallTarget*, 8> struct_ctors_;
+    Hashmap<OverrideId, const sem::Variable*, 8> override_ids_;
+    Hashmap<ArrayConstructorSig, sem::CallTarget*, 8> array_ctors_;
+    Hashmap<StructConstructorSig, sem::CallTarget*, 8> struct_ctors_;
     sem::Function* current_function_ = nullptr;
     sem::Statement* current_statement_ = nullptr;
     sem::CompoundStatement* current_compound_statement_ = nullptr;
     uint32_t current_scoping_depth_ = 0;
-    utils::UniqueVector<const sem::GlobalVariable*, 4>* resolved_overrides_ = nullptr;
-    utils::Hashset<TypeAndAddressSpace, 8> valid_type_storage_layouts_;
-    utils::Hashmap<const ast::Expression*, const ast::BinaryExpression*, 8>
-        logical_binary_lhs_to_parent_;
-    utils::Hashset<const ast::Expression*, 8> skip_const_eval_;
+    UniqueVector<const sem::GlobalVariable*, 4>* resolved_overrides_ = nullptr;
+    Hashset<TypeAndAddressSpace, 8> valid_type_storage_layouts_;
+    Hashmap<const ast::Expression*, const ast::BinaryExpression*, 8> logical_binary_lhs_to_parent_;
+    Hashset<const ast::Expression*, 8> skip_const_eval_;
     IdentifierResolveHint identifier_resolve_hint_;
-    utils::Hashmap<const type::Type*, size_t, 8> nest_depth_;
+    Hashmap<const type::Type*, size_t, 8> nest_depth_;
 };
 
 }  // namespace tint::resolver

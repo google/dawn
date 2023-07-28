@@ -93,7 +93,7 @@ class IntrinsicTable {
     /// @param source the source of the builtin call
     /// @return the semantic builtin if found, otherwise nullptr
     virtual Builtin Lookup(builtin::Function type,
-                           utils::VectorRef<const type::Type*> args,
+                           VectorRef<const type::Type*> args,
                            sem::EvaluationStage earliest_eval_stage,
                            const Source& source) = 0;
 
@@ -152,7 +152,7 @@ class IntrinsicTable {
     /// @return a sem::ValueConstructor, sem::ValueConversion or nullptr if nothing matched
     virtual CtorOrConv Lookup(CtorConvIntrinsic type,
                               const type::Type* template_arg,
-                              utils::VectorRef<const type::Type*> args,
+                              VectorRef<const type::Type*> args,
                               sem::EvaluationStage earliest_eval_stage,
                               const Source& source) = 0;
 };

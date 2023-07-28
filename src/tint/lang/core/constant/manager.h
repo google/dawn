@@ -36,7 +36,7 @@ namespace tint::constant {
 class Manager final {
   public:
     /// Iterator is the type returned by begin() and end()
-    using TypeIterator = utils::BlockAllocator<Value>::ConstIterator;
+    using TypeIterator = BlockAllocator<Value>::ConstIterator;
 
     /// Constructor
     Manager();
@@ -90,7 +90,7 @@ class Manager final {
     /// @param elements the composite elements
     /// @returns the value pointer
     const constant::Value* Composite(const type::Type* type,
-                                     utils::VectorRef<const constant::Value*> elements);
+                                     VectorRef<const constant::Value*> elements);
 
     /// Constructs a splat constant.
     /// @param type the splat type
@@ -131,7 +131,7 @@ class Manager final {
     type::Manager types;
 
   private:
-    /// A specialization of utils::Hasher for constant::Value
+    /// A specialization of Hasher for constant::Value
     struct Hasher {
         /// @param value the value to hash
         /// @returns a hash of the value
@@ -149,7 +149,7 @@ class Manager final {
     };
 
     /// Unique types owned by the manager
-    utils::UniqueAllocator<Value, Hasher, Equal> values_;
+    UniqueAllocator<Value, Hasher, Equal> values_;
 };
 
 }  // namespace tint::constant

@@ -64,7 +64,7 @@ const ast::CallExpression* GenerateCall(builtin::Function builtin,
                                         CallParamType type,
                                         ProgramBuilder* builder) {
     std::string name;
-    utils::StringStream str;
+    StringStream str;
     str << name << builtin;
     switch (builtin) {
         case builtin::Function::kAcos:
@@ -212,11 +212,11 @@ TEST_P(HlslBuiltinTest, Emit) {
 
     auto* call = GenerateCall(param.builtin, param.type, this);
     ASSERT_NE(nullptr, call) << "Unhandled builtin";
-    Func("func", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("func", tint::Empty, ty.void_(),
+         Vector{
              Assign(Phony(), call),
          },
-         utils::Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
+         Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
     ASTPrinter& gen = Build();
 
@@ -349,7 +349,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Builtin_Call) {
     ASTPrinter& gen = Build();
 
     gen.IncrementIndent();
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "dot(param1, param2)");
 }
@@ -362,7 +362,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Select_Scalar) {
     ASTPrinter& gen = Build();
 
     gen.IncrementIndent();
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(true ? b : a)");
 }
@@ -375,7 +375,7 @@ TEST_F(HlslASTPrinterTest_Builtin, Select_Vector) {
     ASTPrinter& gen = Build();
 
     gen.IncrementIndent();
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "(bool2(true, false) ? b : a)");
 }
@@ -1399,11 +1399,11 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, StorageBarrier) {
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              CallStmt(Call("storageBarrier")),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -1420,11 +1420,11 @@ void main() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, WorkgroupBarrier) {
-    Func("main", utils::Empty, ty.void_(),
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(),
+         Vector{
              CallStmt(Call("workgroupBarrier")),
          },
-         utils::Vector{
+         Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });

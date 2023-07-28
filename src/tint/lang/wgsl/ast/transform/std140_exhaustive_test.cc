@@ -82,11 +82,11 @@ struct MatrixCase {
                 result += seperator;
             }
             std::string string_for_current_column =
-                utils::ReplaceAll(tmpl, "${col_id_for_tmpl}", std::to_string(c));
+                tint::ReplaceAll(tmpl, "${col_id_for_tmpl}", std::to_string(c));
             result += string_for_current_column;
         }
         result += seperator;
-        std::string string_for_last_column = utils::ReplaceAll(
+        std::string string_for_last_column = tint::ReplaceAll(
             tmpl_for_last_column, "${col_id_for_tmpl}", std::to_string(columns - 1));
         result += string_for_last_column;
         return result;
@@ -122,13 +122,13 @@ struct MatrixCase {
         std::string str,
         std::initializer_list<std::pair<std::string, std::string>> replacement_pairs = {}) const {
         for (auto& replace : replacement_pairs) {
-            str = utils::ReplaceAll(str, replace.first, replace.second);
+            str = tint::ReplaceAll(str, replace.first, replace.second);
         }
-        str = utils::ReplaceAll(str, "${mat}", Mat());
-        str = utils::ReplaceAll(str, "${shape}", Shape());
-        str = utils::ReplaceAll(str, "${elem_type}", ElementType());
-        str = utils::ReplaceAll(str, "${col_vector_type}", ColumnVector());
-        str = utils::ReplaceAll(str, "${swizzle}", ColumnVectorSwizzle());
+        str = tint::ReplaceAll(str, "${mat}", Mat());
+        str = tint::ReplaceAll(str, "${shape}", Shape());
+        str = tint::ReplaceAll(str, "${elem_type}", ElementType());
+        str = tint::ReplaceAll(str, "${col_vector_type}", ColumnVector());
+        str = tint::ReplaceAll(str, "${swizzle}", ColumnVectorSwizzle());
         return str;
     }
 };
@@ -490,8 +490,8 @@ fn f() {
     }
 
     for (uint32_t col = 0; col < matrix.columns; col++) {
-        std::string src = utils::ReplaceAll(tmpl_src, "${cloumn_index}", std::to_string(col));
-        std::string expect = utils::ReplaceAll(tmpl_expect, "${cloumn_index}", std::to_string(col));
+        std::string src = tint::ReplaceAll(tmpl_src, "${cloumn_index}", std::to_string(col));
+        std::string expect = tint::ReplaceAll(tmpl_expect, "${cloumn_index}", std::to_string(col));
 
         auto got = Run<Std140>(src);
 
@@ -600,8 +600,8 @@ fn f() {
     }
 
     for (uint32_t col = 0; col < matrix.columns; col++) {
-        std::string src = utils::ReplaceAll(tmpl_src, "${cloumn_index}", std::to_string(col));
-        std::string expect = utils::ReplaceAll(tmpl_expect, "${cloumn_index}", std::to_string(col));
+        std::string src = tint::ReplaceAll(tmpl_src, "${cloumn_index}", std::to_string(col));
+        std::string expect = tint::ReplaceAll(tmpl_expect, "${cloumn_index}", std::to_string(col));
 
         auto got = Run<Std140>(src);
 
@@ -711,11 +711,10 @@ fn f() {
 
     for (uint32_t col = 0; col < matrix.columns; col++) {
         for (uint32_t row = 0; row < matrix.rows; row++) {
-            std::string src = utils::ReplaceAll(tmpl_src, "${col_index}", std::to_string(col));
-            src = utils::ReplaceAll(src, "${row_index}", std::to_string(row));
-            std::string expect =
-                utils::ReplaceAll(tmpl_expect, "${col_index}", std::to_string(col));
-            expect = utils::ReplaceAll(expect, "${row_index}", std::to_string(row));
+            std::string src = tint::ReplaceAll(tmpl_src, "${col_index}", std::to_string(col));
+            src = tint::ReplaceAll(src, "${row_index}", std::to_string(row));
+            std::string expect = tint::ReplaceAll(tmpl_expect, "${col_index}", std::to_string(col));
+            expect = tint::ReplaceAll(expect, "${row_index}", std::to_string(row));
 
             auto got = Run<Std140>(src);
 
@@ -785,8 +784,8 @@ fn f() {
     }
 
     for (uint32_t row = 0; row < matrix.rows; row++) {
-        std::string src = utils::ReplaceAll(tmpl_src, "${row_index}", std::to_string(row));
-        std::string expect = utils::ReplaceAll(tmpl_expect, "${row_index}", std::to_string(row));
+        std::string src = tint::ReplaceAll(tmpl_src, "${row_index}", std::to_string(row));
+        std::string expect = tint::ReplaceAll(tmpl_expect, "${row_index}", std::to_string(row));
 
         auto got = Run<Std140>(src);
 
@@ -832,8 +831,8 @@ fn f() {
     }
 
     for (uint32_t col = 0; col < matrix.columns; col++) {
-        std::string src = utils::ReplaceAll(tmpl_src, "${col_index}", std::to_string(col));
-        std::string expect = utils::ReplaceAll(tmpl_expect, "${col_index}", std::to_string(col));
+        std::string src = tint::ReplaceAll(tmpl_src, "${col_index}", std::to_string(col));
+        std::string expect = tint::ReplaceAll(tmpl_expect, "${col_index}", std::to_string(col));
 
         auto got = Run<Std140>(src);
 
@@ -1103,8 +1102,8 @@ fn f() {
     }
 
     for (uint32_t col = 0; col < matrix.columns; col++) {
-        std::string src = utils::ReplaceAll(tmpl_src, "${col_index}", std::to_string(col));
-        std::string expect = utils::ReplaceAll(tmpl_expect, "${col_index}", std::to_string(col));
+        std::string src = tint::ReplaceAll(tmpl_src, "${col_index}", std::to_string(col));
+        std::string expect = tint::ReplaceAll(tmpl_expect, "${col_index}", std::to_string(col));
 
         auto got = Run<Std140>(src);
 
@@ -1232,11 +1231,10 @@ fn f() {
 
     for (uint32_t col = 0; col < matrix.columns; col++) {
         for (uint32_t row = 0; row < matrix.rows; row++) {
-            std::string src = utils::ReplaceAll(tmpl_src, "${col_index}", std::to_string(col));
-            src = utils::ReplaceAll(src, "${row_index}", std::to_string(row));
-            std::string expect =
-                utils::ReplaceAll(tmpl_expect, "${col_index}", std::to_string(col));
-            expect = utils::ReplaceAll(expect, "${row_index}", std::to_string(row));
+            std::string src = tint::ReplaceAll(tmpl_src, "${col_index}", std::to_string(col));
+            src = tint::ReplaceAll(src, "${row_index}", std::to_string(row));
+            std::string expect = tint::ReplaceAll(tmpl_expect, "${col_index}", std::to_string(col));
+            expect = tint::ReplaceAll(expect, "${row_index}", std::to_string(row));
 
             auto got = Run<Std140>(src);
 
@@ -1314,8 +1312,8 @@ fn f() {
     }
 
     for (uint32_t row = 0; row < matrix.rows; row++) {
-        std::string src = utils::ReplaceAll(tmpl_src, "${row_index}", std::to_string(row));
-        std::string expect = utils::ReplaceAll(tmpl_expect, "${row_index}", std::to_string(row));
+        std::string src = tint::ReplaceAll(tmpl_src, "${row_index}", std::to_string(row));
+        std::string expect = tint::ReplaceAll(tmpl_expect, "${row_index}", std::to_string(row));
 
         auto got = Run<Std140>(src);
 
@@ -1369,8 +1367,8 @@ fn f() {
     }
 
     for (uint32_t col = 0; col < matrix.columns; col++) {
-        std::string src = utils::ReplaceAll(tmpl_src, "${col_index}", std::to_string(col));
-        std::string expect = utils::ReplaceAll(tmpl_expect, "${col_index}", std::to_string(col));
+        std::string src = tint::ReplaceAll(tmpl_src, "${col_index}", std::to_string(col));
+        std::string expect = tint::ReplaceAll(tmpl_expect, "${col_index}", std::to_string(col));
 
         auto got = Run<Std140>(src);
 
@@ -1572,10 +1570,9 @@ fn f() {
     }
 
     for (uint32_t array_index = 0; array_index < 3; array_index++) {
-        std::string src =
-            utils::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
+        std::string src = tint::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
         std::string expect =
-            utils::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
+            tint::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
 
         auto got = Run<Std140>(src);
 
@@ -1698,10 +1695,9 @@ fn f() {
     }
 
     for (uint32_t array_index = 0; array_index < 3; array_index++) {
-        std::string src =
-            utils::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
+        std::string src = tint::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
         std::string expect =
-            utils::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
+            tint::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
 
         auto got = Run<Std140>(src);
 
@@ -1821,11 +1817,11 @@ fn f() {
     for (uint32_t array_index = 0; array_index < 3; array_index++) {
         for (uint32_t col = 0; col < matrix.columns; col++) {
             std::string src =
-                utils::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
-            src = utils::ReplaceAll(src, "${cloumn_index}", std::to_string(col));
+                tint::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
+            src = tint::ReplaceAll(src, "${cloumn_index}", std::to_string(col));
             std::string expect =
-                utils::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
-            expect = utils::ReplaceAll(expect, "${cloumn_index}", std::to_string(col));
+                tint::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
+            expect = tint::ReplaceAll(expect, "${cloumn_index}", std::to_string(col));
 
             auto got = Run<Std140>(src);
 
@@ -1886,8 +1882,8 @@ fn f() {
     }
 
     for (uint32_t col = 0; col < matrix.columns; col++) {
-        std::string src = utils::ReplaceAll(tmpl_src, "${cloumn_index}", std::to_string(col));
-        std::string expect = utils::ReplaceAll(tmpl_expect, "${cloumn_index}", std::to_string(col));
+        std::string src = tint::ReplaceAll(tmpl_src, "${cloumn_index}", std::to_string(col));
+        std::string expect = tint::ReplaceAll(tmpl_expect, "${cloumn_index}", std::to_string(col));
 
         auto got = Run<Std140>(src);
 
@@ -1969,10 +1965,9 @@ fn f() {
     }
 
     for (uint32_t array_index = 0; array_index < 3; array_index++) {
-        std::string src =
-            utils::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
+        std::string src = tint::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
         std::string expect =
-            utils::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
+            tint::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
 
         auto got = Run<Std140>(src);
 
@@ -2957,10 +2952,9 @@ fn f() {
     }
 
     for (uint32_t array_index = 0; array_index < 3; array_index++) {
-        std::string src =
-            utils::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
+        std::string src = tint::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
         std::string expect =
-            utils::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
+            tint::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
 
         auto got = Run<Std140>(src);
 
@@ -3064,11 +3058,11 @@ fn f() {
     for (uint32_t array_index = 0; array_index < 3; array_index++) {
         for (uint32_t col = 0; col < matrix.columns; col++) {
             std::string src =
-                utils::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
-            src = utils::ReplaceAll(src, "${cloumn_index}", std::to_string(col));
+                tint::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
+            src = tint::ReplaceAll(src, "${cloumn_index}", std::to_string(col));
             std::string expect =
-                utils::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
-            expect = utils::ReplaceAll(expect, "${cloumn_index}", std::to_string(col));
+                tint::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
+            expect = tint::ReplaceAll(expect, "${cloumn_index}", std::to_string(col));
 
             auto got = Run<Std140>(src);
 
@@ -3121,8 +3115,8 @@ fn f() {
     }
 
     for (uint32_t col = 0; col < matrix.columns; col++) {
-        std::string src = utils::ReplaceAll(tmpl_src, "${cloumn_index}", std::to_string(col));
-        std::string expect = utils::ReplaceAll(tmpl_expect, "${cloumn_index}", std::to_string(col));
+        std::string src = tint::ReplaceAll(tmpl_src, "${cloumn_index}", std::to_string(col));
+        std::string expect = tint::ReplaceAll(tmpl_expect, "${cloumn_index}", std::to_string(col));
 
         auto got = Run<Std140>(src);
 
@@ -3196,10 +3190,9 @@ fn f() {
     }
 
     for (uint32_t array_index = 0; array_index < 3; array_index++) {
-        std::string src =
-            utils::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
+        std::string src = tint::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
         std::string expect =
-            utils::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
+            tint::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
 
         auto got = Run<Std140>(src);
 
@@ -3482,10 +3475,9 @@ fn f() {
     }
 
     for (uint32_t array_index = 0; array_index < 3; array_index++) {
-        std::string src =
-            utils::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
+        std::string src = tint::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
         std::string expect =
-            utils::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
+            tint::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
 
         auto got = Run<Std140>(src);
 
@@ -3613,11 +3605,11 @@ fn f() {
     for (uint32_t array_index = 0; array_index < 3; array_index++) {
         for (uint32_t col = 0; col < matrix.columns; col++) {
             std::string src =
-                utils::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
-            src = utils::ReplaceAll(src, "${cloumn_index}", std::to_string(col));
+                tint::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
+            src = tint::ReplaceAll(src, "${cloumn_index}", std::to_string(col));
             std::string expect =
-                utils::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
-            expect = utils::ReplaceAll(expect, "${cloumn_index}", std::to_string(col));
+                tint::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
+            expect = tint::ReplaceAll(expect, "${cloumn_index}", std::to_string(col));
 
             auto got = Run<Std140>(src);
 
@@ -3683,8 +3675,8 @@ fn f() {
     }
 
     for (uint32_t col = 0; col < matrix.columns; col++) {
-        std::string src = utils::ReplaceAll(tmpl_src, "${cloumn_index}", std::to_string(col));
-        std::string expect = utils::ReplaceAll(tmpl_expect, "${cloumn_index}", std::to_string(col));
+        std::string src = tint::ReplaceAll(tmpl_src, "${cloumn_index}", std::to_string(col));
+        std::string expect = tint::ReplaceAll(tmpl_expect, "${cloumn_index}", std::to_string(col));
 
         auto got = Run<Std140>(src);
 
@@ -3771,10 +3763,9 @@ fn f() {
     }
 
     for (uint32_t array_index = 0; array_index < 3; array_index++) {
-        std::string src =
-            utils::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
+        std::string src = tint::ReplaceAll(tmpl_src, "${array_index}", std::to_string(array_index));
         std::string expect =
-            utils::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
+            tint::ReplaceAll(tmpl_expect, "${array_index}", std::to_string(array_index));
 
         auto got = Run<Std140>(src);
 
@@ -3987,10 +3978,9 @@ fn f() {
     }
 
     for (uint32_t outer = 0; outer < 4; outer++) {
-        std::string src =
-            utils::ReplaceAll(tmpl_src, "${outer_array_index}", std::to_string(outer));
+        std::string src = tint::ReplaceAll(tmpl_src, "${outer_array_index}", std::to_string(outer));
         std::string expect =
-            utils::ReplaceAll(tmpl_expect, "${outer_array_index}", std::to_string(outer));
+            tint::ReplaceAll(tmpl_expect, "${outer_array_index}", std::to_string(outer));
 
         auto got = Run<Std140>(src);
 
@@ -4109,11 +4099,11 @@ fn f() {
     for (uint32_t outer = 0; outer < 4; outer++) {
         for (uint32_t inner = 0; inner < 3; inner++) {
             std::string src =
-                utils::ReplaceAll(tmpl_src, "${outer_array_index}", std::to_string(outer));
-            src = utils::ReplaceAll(src, "${inner_array_index}", std::to_string(inner));
+                tint::ReplaceAll(tmpl_src, "${outer_array_index}", std::to_string(outer));
+            src = tint::ReplaceAll(src, "${inner_array_index}", std::to_string(inner));
             std::string expect =
-                utils::ReplaceAll(tmpl_expect, "${outer_array_index}", std::to_string(outer));
-            expect = utils::ReplaceAll(expect, "${inner_array_index}", std::to_string(inner));
+                tint::ReplaceAll(tmpl_expect, "${outer_array_index}", std::to_string(outer));
+            expect = tint::ReplaceAll(expect, "${inner_array_index}", std::to_string(inner));
 
             auto got = Run<Std140>(src);
 
@@ -4173,10 +4163,9 @@ fn f() {
     }
 
     for (uint32_t outer = 0; outer < 4; outer++) {
-        std::string src =
-            utils::ReplaceAll(tmpl_src, "${outer_array_index}", std::to_string(outer));
+        std::string src = tint::ReplaceAll(tmpl_src, "${outer_array_index}", std::to_string(outer));
         std::string expect =
-            utils::ReplaceAll(tmpl_expect, "${outer_array_index}", std::to_string(outer));
+            tint::ReplaceAll(tmpl_expect, "${outer_array_index}", std::to_string(outer));
 
         auto got = Run<Std140>(src);
 
@@ -4234,10 +4223,9 @@ fn f() {
     }
 
     for (uint32_t inner = 0; inner < 3; inner++) {
-        std::string src =
-            utils::ReplaceAll(tmpl_src, "${inner_array_index}", std::to_string(inner));
+        std::string src = tint::ReplaceAll(tmpl_src, "${inner_array_index}", std::to_string(inner));
         std::string expect =
-            utils::ReplaceAll(tmpl_expect, "${inner_array_index}", std::to_string(inner));
+            tint::ReplaceAll(tmpl_expect, "${inner_array_index}", std::to_string(inner));
 
         auto got = Run<Std140>(src);
 
@@ -4346,13 +4334,13 @@ fn f() {
         for (uint32_t inner = 0; inner < 3; inner++) {
             for (uint32_t col = 0; col < matrix.columns; col++) {
                 std::string src =
-                    utils::ReplaceAll(tmpl_src, "${outer_array_index}", std::to_string(outer));
-                src = utils::ReplaceAll(src, "${inner_array_index}", std::to_string(inner));
-                src = utils::ReplaceAll(src, "${column_index}", std::to_string(col));
+                    tint::ReplaceAll(tmpl_src, "${outer_array_index}", std::to_string(outer));
+                src = tint::ReplaceAll(src, "${inner_array_index}", std::to_string(inner));
+                src = tint::ReplaceAll(src, "${column_index}", std::to_string(col));
                 std::string expect =
-                    utils::ReplaceAll(tmpl_expect, "${outer_array_index}", std::to_string(outer));
-                expect = utils::ReplaceAll(expect, "${inner_array_index}", std::to_string(inner));
-                expect = utils::ReplaceAll(expect, "${column_index}", std::to_string(col));
+                    tint::ReplaceAll(tmpl_expect, "${outer_array_index}", std::to_string(outer));
+                expect = tint::ReplaceAll(expect, "${inner_array_index}", std::to_string(inner));
+                expect = tint::ReplaceAll(expect, "${column_index}", std::to_string(col));
 
                 auto got = Run<Std140>(src);
 
@@ -4433,11 +4421,11 @@ fn f() {
     for (uint32_t outer = 0; outer < 4; outer++) {
         for (uint32_t inner = 0; inner < 3; inner++) {
             std::string src =
-                utils::ReplaceAll(tmpl_src, "${outer_array_index}", std::to_string(outer));
-            src = utils::ReplaceAll(src, "${inner_array_index}", std::to_string(inner));
+                tint::ReplaceAll(tmpl_src, "${outer_array_index}", std::to_string(outer));
+            src = tint::ReplaceAll(src, "${inner_array_index}", std::to_string(inner));
             std::string expect =
-                utils::ReplaceAll(tmpl_expect, "${outer_array_index}", std::to_string(outer));
-            expect = utils::ReplaceAll(expect, "${inner_array_index}", std::to_string(inner));
+                tint::ReplaceAll(tmpl_expect, "${outer_array_index}", std::to_string(outer));
+            expect = tint::ReplaceAll(expect, "${inner_array_index}", std::to_string(inner));
 
             auto got = Run<Std140>(src);
 
@@ -4494,11 +4482,11 @@ fn f() {
     for (uint32_t outer = 0; outer < 4; outer++) {
         for (uint32_t col = 0; col < matrix.columns; col++) {
             std::string src =
-                utils::ReplaceAll(tmpl_src, "${outer_array_index}", std::to_string(outer));
-            src = utils::ReplaceAll(src, "${column_index}", std::to_string(col));
+                tint::ReplaceAll(tmpl_src, "${outer_array_index}", std::to_string(outer));
+            src = tint::ReplaceAll(src, "${column_index}", std::to_string(col));
             std::string expect =
-                utils::ReplaceAll(tmpl_expect, "${outer_array_index}", std::to_string(outer));
-            expect = utils::ReplaceAll(expect, "${column_index}", std::to_string(col));
+                tint::ReplaceAll(tmpl_expect, "${outer_array_index}", std::to_string(outer));
+            expect = tint::ReplaceAll(expect, "${column_index}", std::to_string(col));
 
             auto got = Run<Std140>(src);
 
@@ -4578,10 +4566,9 @@ fn f() {
     }
 
     for (uint32_t outer = 0; outer < 4; outer++) {
-        std::string src =
-            utils::ReplaceAll(tmpl_src, "${outer_array_index}", std::to_string(outer));
+        std::string src = tint::ReplaceAll(tmpl_src, "${outer_array_index}", std::to_string(outer));
         std::string expect =
-            utils::ReplaceAll(tmpl_expect, "${outer_array_index}", std::to_string(outer));
+            tint::ReplaceAll(tmpl_expect, "${outer_array_index}", std::to_string(outer));
 
         auto got = Run<Std140>(src);
 
@@ -4636,11 +4623,11 @@ fn f() {
     for (uint32_t inner = 0; inner < 3; inner++) {
         for (uint32_t col = 0; col < matrix.columns; col++) {
             std::string src =
-                utils::ReplaceAll(tmpl_src, "${inner_array_index}", std::to_string(inner));
-            src = utils::ReplaceAll(src, "${column_index}", std::to_string(col));
+                tint::ReplaceAll(tmpl_src, "${inner_array_index}", std::to_string(inner));
+            src = tint::ReplaceAll(src, "${column_index}", std::to_string(col));
             std::string expect =
-                utils::ReplaceAll(tmpl_expect, "${inner_array_index}", std::to_string(inner));
-            expect = utils::ReplaceAll(expect, "${column_index}", std::to_string(col));
+                tint::ReplaceAll(tmpl_expect, "${inner_array_index}", std::to_string(inner));
+            expect = tint::ReplaceAll(expect, "${column_index}", std::to_string(col));
 
             auto got = Run<Std140>(src);
 
@@ -4720,10 +4707,9 @@ fn f() {
     }
 
     for (uint32_t inner = 0; inner < 3; inner++) {
-        std::string src =
-            utils::ReplaceAll(tmpl_src, "${inner_array_index}", std::to_string(inner));
+        std::string src = tint::ReplaceAll(tmpl_src, "${inner_array_index}", std::to_string(inner));
         std::string expect =
-            utils::ReplaceAll(tmpl_expect, "${inner_array_index}", std::to_string(inner));
+            tint::ReplaceAll(tmpl_expect, "${inner_array_index}", std::to_string(inner));
 
         auto got = Run<Std140>(src);
 
@@ -4778,8 +4764,8 @@ fn f() {
     }
 
     for (uint32_t col = 0; col < matrix.columns; col++) {
-        std::string src = utils::ReplaceAll(tmpl_src, "${column_index}", std::to_string(col));
-        std::string expect = utils::ReplaceAll(tmpl_expect, "${column_index}", std::to_string(col));
+        std::string src = tint::ReplaceAll(tmpl_src, "${column_index}", std::to_string(col));
+        std::string expect = tint::ReplaceAll(tmpl_expect, "${column_index}", std::to_string(col));
 
         auto got = Run<Std140>(src);
 

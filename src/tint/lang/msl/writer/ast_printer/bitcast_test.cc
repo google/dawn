@@ -29,7 +29,7 @@ TEST_F(MslASTPrinterTest, EmitExpression_Bitcast) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitExpression(out, bitcast)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "as_type<float>(a)");
 }

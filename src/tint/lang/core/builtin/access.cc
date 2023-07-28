@@ -40,7 +40,7 @@ Access ParseAccess(std::string_view str) {
     return Access::kUndefined;
 }
 
-utils::StringStream& operator<<(utils::StringStream& out, Access value) {
+StringStream& operator<<(StringStream& out, Access value) {
     switch (value) {
         case Access::kUndefined:
             return out << "undefined";

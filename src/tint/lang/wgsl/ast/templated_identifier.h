@@ -26,7 +26,7 @@ class Expression;
 namespace tint::ast {
 
 /// A templated identifier expression
-class TemplatedIdentifier final : public utils::Castable<TemplatedIdentifier, Identifier> {
+class TemplatedIdentifier final : public Castable<TemplatedIdentifier, Identifier> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
@@ -39,8 +39,8 @@ class TemplatedIdentifier final : public utils::Castable<TemplatedIdentifier, Id
                         NodeID nid,
                         const Source& src,
                         const Symbol& sym,
-                        utils::VectorRef<const Expression*> args,
-                        utils::VectorRef<const Attribute*> attrs);
+                        VectorRef<const Expression*> args,
+                        VectorRef<const Attribute*> attrs);
 
     /// Destructor
     ~TemplatedIdentifier() override;
@@ -51,10 +51,10 @@ class TemplatedIdentifier final : public utils::Castable<TemplatedIdentifier, Id
     const TemplatedIdentifier* Clone(CloneContext* ctx) const override;
 
     /// The templated arguments
-    const utils::Vector<const Expression*, 3> arguments;
+    const tint::Vector<const Expression*, 3> arguments;
 
     /// Attributes on the identifier
-    const utils::Vector<const Attribute*, 0> attributes;
+    const tint::Vector<const Attribute*, 0> attributes;
 };
 
 }  // namespace tint::ast

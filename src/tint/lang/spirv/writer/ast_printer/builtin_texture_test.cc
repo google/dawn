@@ -3720,8 +3720,8 @@ TEST_P(BuiltinTextureTest, Call) {
     auto* call = Call(param.function, param.args(this));
     auto* stmt = param.returns_value ? static_cast<const ast::Statement*>(Assign(Phony(), call))
                                      : static_cast<const ast::Statement*>(CallStmt(call));
-    Func("func", utils::Empty, ty.void_(), utils::Vector{stmt},
-         utils::Vector{
+    Func("func", tint::Empty, ty.void_(), Vector{stmt},
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -3750,8 +3750,8 @@ TEST_P(BuiltinTextureTest, ValidateSPIRV) {
     auto* stmt = param.returns_value ? static_cast<const ast::Statement*>(Assign(Phony(), call))
                                      : static_cast<const ast::Statement*>(CallStmt(call));
 
-    Func("main", utils::Empty, ty.void_(), utils::Vector{stmt},
-         utils::Vector{
+    Func("main", tint::Empty, ty.void_(), Vector{stmt},
+         Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -3781,8 +3781,8 @@ TEST_P(BuiltinTextureTest, DISABLED_OutsideFunction_IsError) {
                              ? static_cast<const ast::Statement*>(pb.Assign(pb.Phony(), call))
                              : static_cast<const ast::Statement*>(pb.CallStmt(call));
 
-            pb.Func("func", utils::Empty, pb.ty.void_(), utils::Vector{stmt},
-                    utils::Vector{
+            pb.Func("func", tint::Empty, pb.ty.void_(), Vector{stmt},
+                    Vector{
                         pb.Stage(ast::PipelineStage::kFragment),
                     });
 

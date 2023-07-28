@@ -87,7 +87,7 @@ inline ast::Type ty_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
 template <typename BASE>
 class GlslASTPrinterTest_MemberAccessorBase : public BASE {
   public:
-    void SetupStorageBuffer(utils::VectorRef<const ast::StructMember*> members) {
+    void SetupStorageBuffer(VectorRef<const ast::StructMember*> members) {
         ProgramBuilder& b = *this;
 
         auto* s = b.Structure("Data", members);
@@ -96,10 +96,10 @@ class GlslASTPrinterTest_MemberAccessorBase : public BASE {
                     builtin::Access::kReadWrite, b.Group(1_a), b.Binding(0_a));
     }
 
-    void SetupFunction(utils::VectorRef<const ast::Statement*> statements) {
+    void SetupFunction(VectorRef<const ast::Statement*> statements) {
         ProgramBuilder& b = *this;
-        b.Func("main", utils::Empty, b.ty.void_(), statements,
-               utils::Vector<const ast::Attribute*, 1>{
+        b.Func("main", tint::Empty, b.ty.void_(), statements,
+               Vector<const ast::Attribute*, 1>{
                    b.Stage(ast::PipelineStage::kFragment),
                });
     }
@@ -112,7 +112,7 @@ using GlslASTPrinterTest_MemberAccessorWithParam =
     GlslASTPrinterTest_MemberAccessorBase<TestParamHelper<T>>;
 
 TEST_F(GlslASTPrinterTest_MemberAccessor, EmitExpression_MemberAccessor) {
-    auto* s = Structure("Data", utils::Vector{Member("mem", ty.f32())});
+    auto* s = Structure("Data", Vector{Member("mem", ty.f32())});
     GlobalVar("str", ty.Of(s), builtin::AddressSpace::kPrivate);
 
     auto* expr = MemberAccessor("str", "mem");
@@ -160,12 +160,12 @@ TEST_P(GlslASTPrinterTest_MemberAccessor_StorageBufferLoad, Test) {
 
     auto p = GetParam();
 
-    SetupStorageBuffer(utils::Vector{
+    SetupStorageBuffer(Vector{
         Member("a", ty.i32()),
         Member("b", p.member_type(ty)),
     });
 
-    SetupFunction(utils::Vector{
+    SetupFunction(Vector{
         Decl(Var("x", MemberAccessor("data", "b"))),
     });
 
@@ -211,12 +211,12 @@ TEST_P(GlslASTPrinterTest_MemberAccessor_StorageBufferStore, Test) {
 
     auto p = GetParam();
 
-    SetupStorageBuffer(utils::Vector{
+    SetupStorageBuffer(Vector{
         Member("a", ty.i32()),
         Member("b", p.member_type(ty)),
     });
 
-    SetupFunction(utils::Vector{
+    SetupFunction(Vector{
         Decl(Var("value", p.member_type(ty), Call(p.member_type(ty)))),
         Assign(MemberAccessor("data", "b"), Expr("value")),
     });
@@ -269,12 +269,12 @@ TEST_F(GlslASTPrinterTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
     // var<storage> data : Data;
     // data.a = mat2x3<f32>();
 
-    SetupStorageBuffer(utils::Vector{
+    SetupStorageBuffer(Vector{
         Member("a", ty.i32()),
         Member("b", ty.mat2x3<f32>()),
     });
 
-    SetupFunction(utils::Vector{
+    SetupFunction(Vector{
         Assign(MemberAccessor("data", "b"), Call<mat2x3<f32>>()),
     });
 
@@ -323,12 +323,12 @@ TEST_F(GlslASTPrinterTest_MemberAccessor, StorageBuffer_Load_Matrix_Single_Eleme
     // var<storage> data : Data;
     // data.a[2i][1i];
 
-    SetupStorageBuffer(utils::Vector{
+    SetupStorageBuffer(Vector{
         Member("z", ty.f32()),
         Member("a", ty.mat4x3<f32>()),
     });
 
-    SetupFunction(utils::Vector{
+    SetupFunction(Vector{
         Decl(Var("x", IndexAccessor(IndexAccessor(MemberAccessor("data", "a"), 2_i), 1_i))),
     });
 
@@ -371,12 +371,12 @@ TEST_F(GlslASTPrinterTest_MemberAccessor,
     // var<storage> data : Data;
     // data.a[2];
 
-    SetupStorageBuffer(utils::Vector{
+    SetupStorageBuffer(Vector{
         Member("z", ty.f32()),
         Member("a", ty.array<i32, 5>()),
     });
 
-    SetupFunction(utils::Vector{
+    SetupFunction(Vector{
         Decl(Var("x", IndexAccessor(MemberAccessor("data", "a"), 2_i))),
     });
 
@@ -416,12 +416,12 @@ TEST_F(GlslASTPrinterTest_MemberAccessor,
     // var<storage> data : Data;
     // data.a[(2i + 4i) - 3i];
 
-    SetupStorageBuffer(utils::Vector{
+    SetupStorageBuffer(Vector{
         Member("z", ty.f32()),
         Member("a", ty.array<i32, 5>()),
     });
 
-    SetupFunction(utils::Vector{
+    SetupFunction(Vector{
         Decl(Var("a", Expr(2_i))),
         Decl(Var("b", Expr(4_i))),
         Decl(Var("c", Expr(3_i))),
@@ -466,12 +466,12 @@ TEST_F(GlslASTPrinterTest_MemberAccessor, StorageBuffer_Store_ToArray) {
     // var<storage> data : Data;
     // data.a[2i] = 2i;
 
-    SetupStorageBuffer(utils::Vector{
+    SetupStorageBuffer(Vector{
         Member("z", ty.f32()),
         Member("a", ty.array<i32, 5>()),
     });
 
-    SetupFunction(utils::Vector{
+    SetupFunction(Vector{
         Assign(IndexAccessor(MemberAccessor("data", "a"), 2_i), 2_i),
     });
 
@@ -515,16 +515,16 @@ TEST_F(GlslASTPrinterTest_MemberAccessor, StorageBuffer_Load_MultiLevel) {
     // var<storage> data : Pre;
     // data.c[2i].b
 
-    auto* inner = Structure("Inner", utils::Vector{
+    auto* inner = Structure("Inner", Vector{
                                          Member("a", ty.vec3<f32>()),
                                          Member("b", ty.vec3<f32>()),
                                      });
 
-    SetupStorageBuffer(utils::Vector{
+    SetupStorageBuffer(Vector{
         Member("c", ty.array(ty.Of(inner), 4_u)),
     });
 
-    SetupFunction(utils::Vector{
+    SetupFunction(Vector{
         Decl(Var("x", MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2_i), "b"))),
     });
 
@@ -574,16 +574,16 @@ TEST_F(GlslASTPrinterTest_MemberAccessor, StorageBuffer_Load_MultiLevel_Swizzle)
     // var<storage> data : Pre;
     // data.c[2i].b.xy
 
-    auto* inner = Structure("Inner", utils::Vector{
+    auto* inner = Structure("Inner", Vector{
                                          Member("a", ty.vec3<f32>()),
                                          Member("b", ty.vec3<f32>()),
                                      });
 
-    SetupStorageBuffer(utils::Vector{
+    SetupStorageBuffer(Vector{
         Member("c", ty.array(ty.Of(inner), 4_u)),
     });
 
-    SetupFunction(utils::Vector{
+    SetupFunction(Vector{
         Decl(Var("x",
                  MemberAccessor(
                      MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2_i), "b"), "xy"))),
@@ -636,16 +636,16 @@ TEST_F(GlslASTPrinterTest_MemberAccessor,
     // var<storage> data : Pre;
     // data.c[2i].b.g
 
-    auto* inner = Structure("Inner", utils::Vector{
+    auto* inner = Structure("Inner", Vector{
                                          Member("a", ty.vec3<f32>()),
                                          Member("b", ty.vec3<f32>()),
                                      });
 
-    SetupStorageBuffer(utils::Vector{
+    SetupStorageBuffer(Vector{
         Member("c", ty.array(ty.Of(inner), 4_u)),
     });
 
-    SetupFunction(utils::Vector{
+    SetupFunction(Vector{
         Decl(Var("x",
                  MemberAccessor(
                      MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2_i), "b"), "g"))),
@@ -697,16 +697,16 @@ TEST_F(GlslASTPrinterTest_MemberAccessor, StorageBuffer_Load_MultiLevel_Index) {
     // var<storage> data : Pre;
     // data.c[2i].b[1i]
 
-    auto* inner = Structure("Inner", utils::Vector{
+    auto* inner = Structure("Inner", Vector{
                                          Member("a", ty.vec3<f32>()),
                                          Member("b", ty.vec3<f32>()),
                                      });
 
-    SetupStorageBuffer(utils::Vector{
+    SetupStorageBuffer(Vector{
         Member("c", ty.array(ty.Of(inner), 4_u)),
     });
 
-    SetupFunction(utils::Vector{
+    SetupFunction(Vector{
         Decl(Var("x",
                  IndexAccessor(MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2_i), "b"),
                                1_i))),
@@ -758,16 +758,16 @@ TEST_F(GlslASTPrinterTest_MemberAccessor, StorageBuffer_Store_MultiLevel) {
     // var<storage> data : Pre;
     // data.c[2i].b = vec3<f32>(1.f, 2.f, 3.f);
 
-    auto* inner = Structure("Inner", utils::Vector{
+    auto* inner = Structure("Inner", Vector{
                                          Member("a", ty.vec3<f32>()),
                                          Member("b", ty.vec3<f32>()),
                                      });
 
-    SetupStorageBuffer(utils::Vector{
+    SetupStorageBuffer(Vector{
         Member("c", ty.array(ty.Of(inner), 4_u)),
     });
 
-    SetupFunction(utils::Vector{
+    SetupFunction(Vector{
         Assign(MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2_i), "b"),
                Call<vec3<f32>>(1_f, 2_f, 3_f)),
     });
@@ -818,16 +818,16 @@ TEST_F(GlslASTPrinterTest_MemberAccessor, StorageBuffer_Store_Swizzle_SingleLett
     // var<storage> data : Pre;
     // data.c[2i].b.y = 1.f;
 
-    auto* inner = Structure("Inner", utils::Vector{
+    auto* inner = Structure("Inner", Vector{
                                          Member("a", ty.vec3<i32>()),
                                          Member("b", ty.vec3<f32>()),
                                      });
 
-    SetupStorageBuffer(utils::Vector{
+    SetupStorageBuffer(Vector{
         Member("c", ty.array(ty.Of(inner), 4_u)),
     });
 
-    SetupFunction(utils::Vector{
+    SetupFunction(Vector{
         Assign(MemberAccessor(MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2_i), "b"),
                               "y"),
                Expr(1_f)),

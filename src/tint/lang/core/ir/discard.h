@@ -22,7 +22,7 @@
 namespace tint::ir {
 
 /// A discard instruction in the IR.
-class Discard : public utils::Castable<Discard, Call> {
+class Discard : public Castable<Discard, Call> {
   public:
     /// Constructor
     Discard();

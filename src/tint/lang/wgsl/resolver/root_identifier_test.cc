@@ -130,7 +130,7 @@ TEST_F(ResolverRootIdentifierTest, FunctionLet) {
 TEST_F(ResolverRootIdentifierTest, Parameter) {
     auto* a = Param("a", ty.f32());
     auto* expr = Expr(a);
-    Func("foo", utils::Vector{a}, ty.void_(), utils::Vector{WrapInStatement(expr)});
+    Func("foo", Vector{a}, ty.void_(), Vector{WrapInStatement(expr)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -147,8 +147,7 @@ TEST_F(ResolverRootIdentifierTest, PointerParameter) {
     auto* expr_param = Expr(param);
     auto* let = Let("b", expr_param);
     auto* expr_let = Expr("b");
-    Func("foo", utils::Vector{param}, ty.void_(),
-         utils::Vector{WrapInStatement(let), WrapInStatement(expr_let)});
+    Func("foo", Vector{param}, ty.void_(), Vector{WrapInStatement(let), WrapInStatement(expr_let)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -216,7 +215,7 @@ TEST_F(ResolverRootIdentifierTest, ThroughMemberAccessor) {
     // {
     //   a.f
     // }
-    auto* S = Structure("S", utils::Vector{Member("f", ty.f32())});
+    auto* S = Structure("S", Vector{Member("f", ty.f32())});
     auto* a = GlobalVar("a", ty.Of(S), builtin::AddressSpace::kPrivate);
     auto* expr = MemberAccessor(a, "f");
     WrapInFunction(expr);

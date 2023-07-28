@@ -33,8 +33,8 @@ namespace tint::ast::transform {
 
 namespace {
 
-void CreatePadding(utils::Vector<const StructMember*, 8>* new_members,
-                   utils::Hashset<const StructMember*, 8>* padding_members,
+void CreatePadding(tint::Vector<const StructMember*, 8>* new_members,
+                   Hashset<const StructMember*, 8>* padding_members,
                    ProgramBuilder* b,
                    uint32_t bytes) {
     const size_t count = bytes / 4u;
@@ -60,7 +60,7 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
     auto& sem = src->Sem();
 
     std::unordered_map<const Struct*, const Struct*> replaced_structs;
-    utils::Hashset<const StructMember*, 8> padding_members;
+    Hashset<const StructMember*, 8> padding_members;
 
     ctx.ReplaceAll([&](const Struct* ast_str) -> const Struct* {
         auto* str = sem.Get(ast_str);
@@ -69,7 +69,7 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
         }
         uint32_t offset = 0;
         bool has_runtime_sized_array = false;
-        utils::Vector<const StructMember*, 8> new_members;
+        tint::Vector<const StructMember*, 8> new_members;
         for (auto* mem : str->Members()) {
             auto name = mem->Name().Name();
 
@@ -86,7 +86,7 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
             uint32_t size = ty->Size();
             if (ty->Is<type::Struct>() && str->UsedAs(builtin::AddressSpace::kUniform)) {
                 // std140 structs should be padded out to 16 bytes.
-                size = utils::RoundUp(16u, size);
+                size = tint::RoundUp(16u, size);
             } else if (auto* array_ty = ty->As<type::Array>()) {
                 if (array_ty->Count()->Is<type::RuntimeArrayCount>()) {
                     has_runtime_sized_array = true;
@@ -98,15 +98,15 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
         // Add any required padding after the last member, if it's not a runtime-sized array.
         uint32_t struct_size = str->Size();
         if (str->UsedAs(builtin::AddressSpace::kUniform)) {
-            struct_size = utils::RoundUp(16u, struct_size);
+            struct_size = tint::RoundUp(16u, struct_size);
         }
         if (offset < struct_size && !has_runtime_sized_array) {
             CreatePadding(&new_members, &padding_members, ctx.dst, struct_size - offset);
         }
 
-        utils::Vector<const Attribute*, 1> struct_attribs;
+        tint::Vector<const Attribute*, 1> struct_attribs;
         if (!padding_members.IsEmpty()) {
-            struct_attribs = utils::Vector{b.Disable(DisabledValidation::kIgnoreStructMemberLimit)};
+            struct_attribs = tint::Vector{b.Disable(DisabledValidation::kIgnoreStructMemberLimit)};
         }
 
         auto* new_struct = b.create<Struct>(ctx.Clone(ast_str->name), std::move(new_members),
@@ -138,7 +138,7 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
             return nullptr;
         }
 
-        utils::Vector<const Expression*, 8> new_args;
+        tint::Vector<const Expression*, 8> new_args;
 
         auto* arg = ast_call->args.begin();
         for (auto* member : new_struct->members) {

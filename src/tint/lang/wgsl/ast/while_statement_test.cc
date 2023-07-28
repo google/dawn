@@ -47,7 +47,7 @@ TEST_F(WhileStatementTest, Creation_WithAttributes) {
     auto* attr2 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "bar");
     auto* cond = create<BinaryExpression>(BinaryOp::kLessThan, Expr("i"), Expr(5_u));
     auto* body = Block(Return());
-    auto* l = While(cond, body, utils::Vector{attr1, attr2});
+    auto* l = While(cond, body, tint::Vector{attr1, attr2});
 
     EXPECT_THAT(l->attributes, testing::ElementsAre(attr1, attr2));
 }

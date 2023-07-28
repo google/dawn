@@ -83,7 +83,7 @@ TEST_F(MslASTPrinterTest, MslImportData_SingleParamTest_IntScalar) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), R"(abs(1))");
 }
@@ -94,7 +94,7 @@ TEST_F(MslASTPrinterTest, MslImportData_SingleParamTest_ScalarLength) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), R"(fabs(2.0f))");
 }
@@ -108,7 +108,7 @@ TEST_P(MslImportData_DualParam_ScalarTest, Float) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.msl_name) + "(1.0f, 2.0f)");
 }
@@ -126,7 +126,7 @@ TEST_F(MslASTPrinterTest, MslImportData_DualParam_ScalarDistance) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), R"(fabs(2.0f - 3.0f))");
 }
@@ -140,7 +140,7 @@ TEST_P(MslImportData_DualParam_VectorTest, Float) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.msl_name) +
                              R"((float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f)))");
@@ -165,7 +165,7 @@ TEST_P(MslImportData_DualParam_Int_Test, IntScalar) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.msl_name) + "(1, 2)");
 }
@@ -182,7 +182,7 @@ TEST_P(MslImportData_TripleParam_ScalarTest, Float) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.msl_name) + "(1.0f, 2.0f, 3.0f)");
 }
@@ -203,7 +203,7 @@ TEST_P(MslImportData_TripleParam_VectorTest, Float) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(
         out.str(),
@@ -226,7 +226,7 @@ TEST_P(MslImportData_TripleParam_Int_Test, IntScalar) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string(param.msl_name) + "(1, 2, 3)");
 }
@@ -244,7 +244,7 @@ TEST_F(MslASTPrinterTest, MslImportData_Determinant) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), std::string("determinant(var)"));
 }
@@ -257,7 +257,7 @@ TEST_F(MslASTPrinterTest, MslImportData_QuantizeToF16_Scalar) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float(half(v))");
 }
@@ -270,7 +270,7 @@ TEST_F(MslASTPrinterTest, MslImportData_QuantizeToF16_Vector) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float3(half3(v))");
 }

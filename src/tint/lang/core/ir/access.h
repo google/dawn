@@ -21,7 +21,7 @@
 namespace tint::ir {
 
 /// An access instruction in the IR.
-class Access : public utils::Castable<Access, OperandInstruction<3, 1>> {
+class Access : public Castable<Access, OperandInstruction<3, 1>> {
   public:
     /// The offset in Operands() for the object being accessed
     static constexpr size_t kObjectOperandOffset = 0;
@@ -33,7 +33,7 @@ class Access : public utils::Castable<Access, OperandInstruction<3, 1>> {
     /// @param result the result value
     /// @param object the accessor object
     /// @param indices the indices to access
-    Access(InstructionResult* result, Value* object, utils::VectorRef<Value*> indices);
+    Access(InstructionResult* result, Value* object, VectorRef<Value*> indices);
     ~Access() override;
 
     /// @returns the object used for the access
@@ -44,7 +44,7 @@ class Access : public utils::Castable<Access, OperandInstruction<3, 1>> {
     void AddIndex(Value* idx) { AddOperand(operands_.Length(), idx); }
 
     /// @returns the accessor indices
-    utils::Slice<Value*> Indices() { return operands_.Slice().Offset(kIndicesOperandOffset); }
+    tint::Slice<Value*> Indices() { return operands_.Slice().Offset(kIndicesOperandOffset); }
 
     /// @returns the friendly name for the instruction
     std::string_view FriendlyName() override { return "access"; }

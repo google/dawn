@@ -23,7 +23,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::constant::Composite);
 namespace tint::constant {
 
 Composite::Composite(const type::Type* t,
-                     utils::VectorRef<const constant::Value*> els,
+                     VectorRef<const constant::Value*> els,
                      bool all_0,
                      bool any_0)
     : type(t), elements(std::move(els)), all_zero(all_0), any_zero(any_0), hash(CalcHash()) {
@@ -34,7 +34,7 @@ Composite::~Composite() = default;
 
 const Composite* Composite::Clone(CloneContext& ctx) const {
     auto* ty = type->Clone(ctx.type_ctx);
-    utils::Vector<const constant::Value*, 4> els;
+    Vector<const constant::Value*, 4> els;
     for (const auto* el : elements) {
         els.Push(el->Clone(ctx));
     }

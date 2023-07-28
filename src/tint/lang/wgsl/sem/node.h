@@ -20,7 +20,7 @@
 namespace tint::sem {
 
 /// Node is the base class for all semantic nodes
-class Node : public utils::Castable<Node> {
+class Node : public Castable<Node> {
   public:
     /// Constructor
     Node();

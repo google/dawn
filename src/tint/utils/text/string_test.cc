@@ -19,13 +19,13 @@
 
 #include "src/tint/utils/containers/transform.h"  // Used by ToStringList()
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 // Workaround for https://github.com/google/googletest/issues/3081
 // Remove when using C++20
 template <size_t N>
-utils::Vector<std::string, N> ToStringList(const utils::Vector<std::string_view, N>& views) {
+Vector<std::string, N> ToStringList(const Vector<std::string_view, N>& views) {
     return Transform(views, [](std::string_view view) { return std::string(view); });
 }
 
@@ -82,20 +82,20 @@ TEST(StringTest, Distance) {
 TEST(StringTest, SuggestAlternatives) {
     {
         const char* alternatives[] = {"hello world", "Hello World"};
-        utils::StringStream ss;
+        StringStream ss;
         SuggestAlternatives("hello wordl", alternatives, ss);
         EXPECT_EQ(ss.str(), R"(Did you mean 'hello world'?
 Possible values: 'hello world', 'Hello World')");
     }
     {
         const char* alternatives[] = {"foobar", "something else"};
-        utils::StringStream ss;
+        StringStream ss;
         SuggestAlternatives("hello world", alternatives, ss);
         EXPECT_EQ(ss.str(), R"(Possible values: 'foobar', 'something else')");
     }
     {
         const char* alternatives[] = {"hello world", "Hello World"};
-        utils::StringStream ss;
+        StringStream ss;
         SuggestAlternativeOptions opts;
         opts.prefix = "$";
         SuggestAlternatives("hello wordl", alternatives, ss, opts);
@@ -104,7 +104,7 @@ Possible values: '$hello world', '$Hello World')");
     }
     {
         const char* alternatives[] = {"hello world", "Hello World"};
-        utils::StringStream ss;
+        StringStream ss;
         SuggestAlternativeOptions opts;
         opts.list_possible_values = false;
         SuggestAlternatives("hello world", alternatives, ss, opts);
@@ -196,11 +196,11 @@ TEST(StringTest, Split) {
 }
 
 TEST(StringTest, Join) {
-    EXPECT_EQ(Join(utils::Vector<int, 1>{}, ","), "");
-    EXPECT_EQ(Join(utils::Vector{1, 2, 3}, ","), "1,2,3");
-    EXPECT_EQ(Join(utils::Vector{"cat"}, ","), "cat");
-    EXPECT_EQ(Join(utils::Vector{"cat", "dog"}, ","), "cat,dog");
+    EXPECT_EQ(Join(Vector<int, 1>{}, ","), "");
+    EXPECT_EQ(Join(Vector{1, 2, 3}, ","), "1,2,3");
+    EXPECT_EQ(Join(Vector{"cat"}, ","), "cat");
+    EXPECT_EQ(Join(Vector{"cat", "dog"}, ","), "cat,dog");
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

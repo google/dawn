@@ -196,7 +196,7 @@ class Source {
 /// @param out the stream to write to
 /// @param loc the location to write
 /// @returns out so calls can be chained
-inline utils::StringStream& operator<<(utils::StringStream& out, const Source::Location& loc) {
+inline StringStream& operator<<(StringStream& out, const Source::Location& loc) {
     out << loc.line << ":" << loc.column;
     return out;
 }
@@ -205,7 +205,7 @@ inline utils::StringStream& operator<<(utils::StringStream& out, const Source::L
 /// @param out the stream to write to
 /// @param range the range to write
 /// @returns out so calls can be chained
-inline utils::StringStream& operator<<(utils::StringStream& out, const Source::Range& range) {
+inline StringStream& operator<<(StringStream& out, const Source::Range& range) {
     out << "[" << range.begin << ", " << range.end << "]";
     return out;
 }
@@ -214,14 +214,13 @@ inline utils::StringStream& operator<<(utils::StringStream& out, const Source::R
 /// @param out the stream to write to
 /// @param source the source to write
 /// @returns out so calls can be chained
-utils::StringStream& operator<<(utils::StringStream& out, const Source& source);
+StringStream& operator<<(StringStream& out, const Source& source);
 
 /// Writes the Source::FileContent to the stream.
 /// @param out the stream to write to
 /// @param content the file content to write
 /// @returns out so calls can be chained
-inline utils::StringStream& operator<<(utils::StringStream& out,
-                                       const Source::FileContent& content) {
+inline StringStream& operator<<(StringStream& out, const Source::FileContent& content) {
     out << content.data;
     return out;
 }

@@ -21,14 +21,14 @@ using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
 TEST_F(ResolverConstEvalTest, StructMemberAccess) {
-    Structure("Inner", utils::Vector{
+    Structure("Inner", Vector{
                            Member("i1", ty.i32()),
                            Member("i2", ty.u32()),
                            Member("i3", ty.f32()),
                            Member("i4", ty.bool_()),
                        });
 
-    Structure("Outer", utils::Vector{
+    Structure("Outer", Vector{
                            Member("o1", ty("Inner")),
                            Member("o2", ty("Inner")),
                        });
@@ -264,13 +264,13 @@ TEST_P(ResolverConstEvalArrayAccessTest, Test) {
     auto* expr = param.input.Expr(*this);
     auto* a = Const("a", expr);
 
-    utils::Vector<const ast::IndexAccessorExpression*, 4> index_accessors;
+    Vector<const ast::IndexAccessorExpression*, 4> index_accessors;
     for (size_t i = 0; i < param.input.args.Length(); ++i) {
         auto* index = IndexAccessor("a", Expr(i32(i)));
         index_accessors.Push(index);
     }
 
-    utils::Vector<const ast::Statement*, 5> stmts;
+    Vector<const ast::Statement*, 5> stmts;
     stmts.Push(WrapInStatement(a));
     for (auto* ia : index_accessors) {
         stmts.Push(WrapInStatement(ia));
@@ -339,13 +339,13 @@ TEST_P(ResolverConstEvalVectorAccessTest, Test) {
     auto* expr = param.input.Expr(*this);
     auto* a = Const("a", expr);
 
-    utils::Vector<const ast::IndexAccessorExpression*, 4> index_accessors;
+    Vector<const ast::IndexAccessorExpression*, 4> index_accessors;
     for (size_t i = 0; i < param.input.args.Length(); ++i) {
         auto* index = IndexAccessor("a", Expr(i32(i)));
         index_accessors.Push(index);
     }
 
-    utils::Vector<const ast::Statement*, 5> stmts;
+    Vector<const ast::Statement*, 5> stmts;
     stmts.Push(WrapInStatement(a));
     for (auto* ia : index_accessors) {
         stmts.Push(WrapInStatement(ia));

@@ -22,7 +22,7 @@
 namespace tint::type {
 
 /// A unsigned int 32 type.
-class U32 final : public utils::Castable<U32, NumericScalar> {
+class U32 final : public Castable<U32, NumericScalar> {
   public:
     /// Constructor
     U32();

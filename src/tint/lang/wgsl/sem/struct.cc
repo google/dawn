@@ -23,7 +23,7 @@ namespace tint::sem {
 
 Struct::Struct(const ast::Struct* declaration,
                Symbol name,
-               utils::VectorRef<const StructMember*> members,
+               VectorRef<const StructMember*> members,
                uint32_t align,
                uint32_t size,
                uint32_t size_no_padding)

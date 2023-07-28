@@ -26,7 +26,7 @@ namespace tint::ir::transform {
 
 /// ShaderIO is a transform that modifies an entry point function's parameters and return value to
 /// prepare them for backend codegen.
-class ShaderIO : public utils::Castable<ShaderIO, Transform> {
+class ShaderIO : public Castable<ShaderIO, Transform> {
   public:
     /// Constructor
     ShaderIO();
@@ -68,7 +68,7 @@ class ShaderIO : public utils::Castable<ShaderIO, Transform> {
 
         /// Finalize the shader inputs and create any state needed for the new entry point function.
         /// @returns the list of function parameters for the new entry point
-        virtual utils::Vector<FunctionParam*, 4> FinalizeInputs() = 0;
+        virtual Vector<FunctionParam*, 4> FinalizeInputs() = 0;
 
         /// Finalize the shader outputs and create state needed for the new entry point function.
         /// @returns the return value for the new entry point
@@ -100,10 +100,10 @@ class ShaderIO : public utils::Castable<ShaderIO, Transform> {
         Function* func = nullptr;
 
         /// The list of shader inputs.
-        utils::Vector<type::Manager::StructMemberDesc, 4> inputs;
+        Vector<type::Manager::StructMemberDesc, 4> inputs;
 
         /// The list of shader outputs.
-        utils::Vector<type::Manager::StructMemberDesc, 4> outputs;
+        Vector<type::Manager::StructMemberDesc, 4> outputs;
     };
 
   protected:

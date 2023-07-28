@@ -200,7 +200,7 @@ TEST_F(ResolverLoadTest, FunctionArg) {
     // fn f(x : f32) {}
     // var ref = 1f;
     // f(ref);
-    Func("f", utils::Vector{Param("x", ty.f32())}, ty.void_(), utils::Empty);
+    Func("f", Vector{Param("x", ty.f32())}, ty.void_(), tint::Empty);
     auto* ident = Expr("ref");
     WrapInFunction(Var("ref", Expr(1_f)),  //
                    CallStmt(Call("f", ident)));
@@ -221,16 +221,15 @@ TEST_F(ResolverLoadTest, FunctionArg_Handles) {
     // }
     // f(t, s);
     GlobalVar("t", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
-              utils::Vector{Group(0_a), Binding(0_a)});
-    GlobalVar("s", ty.sampler(type::SamplerKind::kSampler),
-              utils::Vector{Group(0_a), Binding(1_a)});
+              Vector{Group(0_a), Binding(0_a)});
+    GlobalVar("s", ty.sampler(type::SamplerKind::kSampler), Vector{Group(0_a), Binding(1_a)});
     Func("f",
-         utils::Vector{
+         Vector{
              Param("tp", ty.sampled_texture(type::TextureDimension::k2d, ty.f32())),
              Param("sp", ty.sampler(type::SamplerKind::kSampler)),
          },
          ty.vec4<f32>(),
-         utils::Vector{
+         Vector{
              Return(Call("textureSampleLevel", "tp", "sp", Call<vec2<f32>>(), 0_a)),
          });
     auto* t_ident = Expr("t");
@@ -259,8 +258,8 @@ TEST_F(ResolverLoadTest, FunctionReturn) {
     // var ref = 1f;
     // return ref;
     auto* ident = Expr("ref");
-    Func("f", utils::Empty, ty.f32(),
-         utils::Vector{
+    Func("f", tint::Empty, ty.f32(),
+         Vector{
              Decl(Var("ref", Expr(1_f))),
              Return(ident),
          });

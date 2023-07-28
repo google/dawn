@@ -26,7 +26,7 @@ namespace tint::constant {
 ///
 /// Splat is used for zero-initializers, 'splat' initializers, or initializers where each element is
 /// identical. Splat may be of a vector, matrix, array or structure type.
-class Splat : public utils::Castable<Splat, Value> {
+class Splat : public Castable<Splat, Value> {
   public:
     /// Constructor
     /// @param t the splat type
@@ -52,7 +52,7 @@ class Splat : public utils::Castable<Splat, Value> {
     bool AnyZero() const override { return el->AnyZero(); }
 
     /// @returns the hash for the splat
-    size_t Hash() const override { return utils::Hash(type, el->Hash(), count); }
+    size_t Hash() const override { return tint::Hash(type, el->Hash(), count); }
 
     /// Clones the constant into the provided context
     /// @param ctx the clone context

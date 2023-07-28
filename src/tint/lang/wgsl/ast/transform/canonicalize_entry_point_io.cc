@@ -101,7 +101,7 @@ struct CanonicalizeEntryPointIO::State {
         /// The type of the output value.
         Type type;
         /// The shader IO attributes.
-        utils::Vector<const Attribute*, 8> attributes;
+        tint::Vector<const Attribute*, 8> attributes;
         /// The value itself.
         const Expression* value;
         /// The output location.
@@ -120,24 +120,24 @@ struct CanonicalizeEntryPointIO::State {
     const sem::Function* func_sem;
 
     /// The new entry point wrapper function's parameters.
-    utils::Vector<const Parameter*, 8> wrapper_ep_parameters;
+    tint::Vector<const Parameter*, 8> wrapper_ep_parameters;
 
     /// The members of the wrapper function's struct parameter.
-    utils::Vector<MemberInfo, 8> wrapper_struct_param_members;
+    tint::Vector<MemberInfo, 8> wrapper_struct_param_members;
     /// The name of the wrapper function's struct parameter.
     Symbol wrapper_struct_param_name;
     /// The parameters that will be passed to the original function.
-    utils::Vector<const Expression*, 8> inner_call_parameters;
+    tint::Vector<const Expression*, 8> inner_call_parameters;
     /// The members of the wrapper function's struct return type.
-    utils::Vector<MemberInfo, 8> wrapper_struct_output_members;
+    tint::Vector<MemberInfo, 8> wrapper_struct_output_members;
     /// The wrapper function output values.
-    utils::Vector<OutputValue, 8> wrapper_output_values;
+    tint::Vector<OutputValue, 8> wrapper_output_values;
     /// The body of the wrapper function.
-    utils::Vector<const Statement*, 8> wrapper_body;
+    tint::Vector<const Statement*, 8> wrapper_body;
     /// Input names used by the entrypoint
     std::unordered_set<std::string> input_names;
     /// A map of cloned attribute to builtin value
-    utils::Hashmap<const BuiltinAttribute*, builtin::BuiltinValue, 16> builtin_attrs;
+    Hashmap<const BuiltinAttribute*, builtin::BuiltinValue, 16> builtin_attrs;
 
     /// Constructor
     /// @param context the clone context
@@ -153,7 +153,7 @@ struct CanonicalizeEntryPointIO::State {
     /// @param in the attribute to clone
     /// @param out the output Attributes
     template <size_t N>
-    void CloneAttribute(const Attribute* in, utils::Vector<const Attribute*, N>& out) {
+    void CloneAttribute(const Attribute* in, tint::Vector<const Attribute*, N>& out) {
         auto* cloned = ctx.Clone(in);
         out.Push(cloned);
         if (auto* builtin = in->As<BuiltinAttribute>()) {
@@ -166,8 +166,8 @@ struct CanonicalizeEntryPointIO::State {
     /// @param do_interpolate whether to clone InterpolateAttribute
     /// @return the cloned attributes
     template <size_t N>
-    auto CloneShaderIOAttributes(const utils::Vector<const Attribute*, N> in, bool do_interpolate) {
-        utils::Vector<const Attribute*, N> out;
+    auto CloneShaderIOAttributes(const tint::Vector<const Attribute*, N> in, bool do_interpolate) {
+        tint::Vector<const Attribute*, N> out;
         for (auto* attr : in) {
             if (IsShaderIOAttribute(attr) &&
                 (do_interpolate || !attr->template Is<InterpolateAttribute>())) {
@@ -199,7 +199,7 @@ struct CanonicalizeEntryPointIO::State {
     /// @param attrs the input attribute list
     /// @returns the builtin value if any of the attributes in @p attrs is a builtin attribute,
     /// otherwise builtin::BuiltinValue::kUndefined
-    builtin::BuiltinValue BuiltinOf(utils::VectorRef<const Attribute*> attrs) {
+    builtin::BuiltinValue BuiltinOf(VectorRef<const Attribute*> attrs) {
         if (auto* builtin = GetAttribute<BuiltinAttribute>(attrs)) {
             return BuiltinOf(builtin);
         }
@@ -224,7 +224,7 @@ struct CanonicalizeEntryPointIO::State {
     const Expression* AddInput(std::string name,
                                const type::Type* type,
                                std::optional<uint32_t> location,
-                               utils::Vector<const Attribute*, 8> attrs) {
+                               tint::Vector<const Attribute*, 8> attrs) {
         auto ast_type = CreateASTTypeFor(ctx, type);
 
         auto builtin_attr = BuiltinOf(attrs);
@@ -299,7 +299,7 @@ struct CanonicalizeEntryPointIO::State {
                    const type::Type* type,
                    std::optional<uint32_t> location,
                    std::optional<uint32_t> index,
-                   utils::Vector<const Attribute*, 8> attrs,
+                   tint::Vector<const Attribute*, 8> attrs,
                    const Expression* value) {
         auto builtin_attr = BuiltinOf(attrs);
         // Vulkan requires that integer user-defined vertex outputs are always decorated with
@@ -344,7 +344,7 @@ struct CanonicalizeEntryPointIO::State {
         bool do_interpolate = func_ast->PipelineStage() != PipelineStage::kVertex;
         // Remove the shader IO attributes from the inner function parameter, and attach them to the
         // new object instead.
-        utils::Vector<const Attribute*, 8> attributes;
+        tint::Vector<const Attribute*, 8> attributes;
         for (auto* attr : param->Declaration()->attributes) {
             if (IsShaderIOAttribute(attr)) {
                 ctx.Remove(param->Declaration()->attributes, attr);
@@ -372,7 +372,7 @@ struct CanonicalizeEntryPointIO::State {
 
         // Recreate struct members in the outer entry point and build an initializer
         // list to pass them through to the inner function.
-        utils::Vector<const Expression*, 8> inner_struct_values;
+        tint::Vector<const Expression*, 8> inner_struct_values;
         for (auto* member : str->Members()) {
             if (TINT_UNLIKELY(member->Type()->Is<type::Struct>())) {
                 TINT_ICE(Transform, ctx.dst->Diagnostics()) << "nested IO struct";
@@ -502,7 +502,7 @@ struct CanonicalizeEntryPointIO::State {
         std::sort(wrapper_struct_param_members.begin(), wrapper_struct_param_members.end(),
                   [&](auto& a, auto& b) { return StructMemberComparator(a, b); });
 
-        utils::Vector<const StructMember*, 8> members;
+        tint::Vector<const StructMember*, 8> members;
         for (auto& mem : wrapper_struct_param_members) {
             members.Push(mem.member);
         }
@@ -510,7 +510,7 @@ struct CanonicalizeEntryPointIO::State {
         // Create the new struct type.
         auto struct_name = ctx.dst->Sym();
         auto* in_struct =
-            ctx.dst->create<Struct>(ctx.dst->Ident(struct_name), std::move(members), utils::Empty);
+            ctx.dst->create<Struct>(ctx.dst->Ident(struct_name), std::move(members), tint::Empty);
         ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func_ast, in_struct);
 
         // Create a new function parameter using this struct type.
@@ -521,7 +521,7 @@ struct CanonicalizeEntryPointIO::State {
     /// Create and return the wrapper function's struct result object.
     /// @returns the struct type
     Struct* CreateOutputStruct() {
-        utils::Vector<const Statement*, 8> assignments;
+        tint::Vector<const Statement*, 8> assignments;
 
         auto wrapper_result = ctx.dst->Symbols().New("wrapper_result");
 
@@ -548,14 +548,14 @@ struct CanonicalizeEntryPointIO::State {
         std::sort(wrapper_struct_output_members.begin(), wrapper_struct_output_members.end(),
                   [&](auto& a, auto& b) { return StructMemberComparator(a, b); });
 
-        utils::Vector<const StructMember*, 8> members;
+        tint::Vector<const StructMember*, 8> members;
         for (auto& mem : wrapper_struct_output_members) {
             members.Push(mem.member);
         }
 
         // Create the new struct type.
         auto* out_struct = ctx.dst->create<Struct>(ctx.dst->Ident(ctx.dst->Sym()),
-                                                   std::move(members), utils::Empty);
+                                                   std::move(members), tint::Empty);
         ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func_ast, out_struct);
 
         // Create the output struct object, assign its members, and return it.
@@ -609,10 +609,9 @@ struct CanonicalizeEntryPointIO::State {
         // Clone everything, dropping the function and return type attributes.
         // The parameter attributes will have already been stripped during
         // processing.
-        auto* inner_function =
-            ctx.dst->create<Function>(ctx.dst->Ident(inner_name), ctx.Clone(func_ast->params),
-                                      ctx.Clone(func_ast->return_type), ctx.Clone(func_ast->body),
-                                      utils::Empty, utils::Empty);
+        auto* inner_function = ctx.dst->create<Function>(
+            ctx.dst->Ident(inner_name), ctx.Clone(func_ast->params),
+            ctx.Clone(func_ast->return_type), ctx.Clone(func_ast->body), tint::Empty, tint::Empty);
         ctx.Replace(func_ast, inner_function);
 
         // Call the function.
@@ -719,7 +718,7 @@ struct CanonicalizeEntryPointIO::State {
 
         auto* wrapper_func = ctx.dst->create<Function>(
             ctx.dst->Ident(name), wrapper_ep_parameters, ctx.dst->ty(wrapper_ret_type()),
-            ctx.dst->Block(wrapper_body), ctx.Clone(func_ast->attributes), utils::Empty);
+            ctx.dst->Block(wrapper_body), ctx.Clone(func_ast->attributes), tint::Empty);
         ctx.InsertAfter(ctx.src->AST().GlobalDeclarations(), func_ast, wrapper_func);
     }
 

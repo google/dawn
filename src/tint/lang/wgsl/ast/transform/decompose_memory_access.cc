@@ -62,7 +62,7 @@ bool ShouldRun(const Program* program) {
 
 /// Offset is a simple Expression builder interface, used to build byte
 /// offsets for storage and uniform buffer accesses.
-struct Offset : utils::Castable<Offset> {
+struct Offset : Castable<Offset> {
     /// @returns builds and returns the Expression in `ctx.dst`
     virtual const Expression* Build(CloneContext& ctx) const = 0;
 };
@@ -86,7 +86,7 @@ struct OffsetExpr : Offset {
 
 /// OffsetLiteral is an implementation of Offset that constructs a u32 literal
 /// value.
-struct OffsetLiteral final : utils::Castable<OffsetLiteral, Offset> {
+struct OffsetLiteral final : Castable<OffsetLiteral, Offset> {
     uint32_t const literal = 0;
 
     explicit OffsetLiteral(uint32_t lit) : literal(lit) {}
@@ -117,7 +117,7 @@ struct LoadStoreKey {
     }
     struct Hasher {
         inline std::size_t operator()(const LoadStoreKey& u) const {
-            return utils::Hash(u.el_ty, u.buffer);
+            return Hash(u.el_ty, u.buffer);
         }
     };
 };
@@ -132,7 +132,7 @@ struct AtomicKey {
     }
     struct Hasher {
         inline std::size_t operator()(const AtomicKey& u) const {
-            return utils::Hash(u.el_ty, u.op, u.buffer);
+            return Hash(u.el_ty, u.op, u.buffer);
         }
     };
 };
@@ -342,7 +342,7 @@ struct DecomposeMemoryAccess::State {
     /// List of storage or uniform buffer writes
     std::vector<Store> stores;
     /// Allocations for offsets
-    utils::BlockAllocator<Offset> offsets_;
+    BlockAllocator<Offset> offsets_;
 
     /// Constructor
     /// @param context the CloneContext
@@ -465,15 +465,15 @@ struct DecomposeMemoryAccess::State {
     Symbol LoadFunc(const type::Type* el_ty,
                     builtin::AddressSpace address_space,
                     const Symbol& buffer) {
-        return utils::GetOrCreate(load_funcs, LoadStoreKey{el_ty, buffer}, [&] {
-            utils::Vector params{b.Param("offset", b.ty.u32())};
+        return tint::GetOrCreate(load_funcs, LoadStoreKey{el_ty, buffer}, [&] {
+            tint::Vector params{b.Param("offset", b.ty.u32())};
 
             auto name = b.Symbols().New(buffer.Name() + "_load");
 
             if (auto* intrinsic = IntrinsicLoadFor(ctx.dst, el_ty, address_space, buffer)) {
                 auto el_ast_ty = CreateASTTypeFor(ctx, el_ty);
                 b.Func(name, params, el_ast_ty, nullptr,
-                       utils::Vector{
+                       tint::Vector{
                            intrinsic,
                            b.Disable(DisabledValidation::kFunctionHasNoBody),
                        });
@@ -508,13 +508,13 @@ struct DecomposeMemoryAccess::State {
                     b.For(for_init, for_cond, for_cont, b.Block(b.Assign(arr_el, el_val)));
 
                 b.Func(name, params, CreateASTTypeFor(ctx, arr_ty),
-                       utils::Vector{
+                       tint::Vector{
                            b.Decl(arr),
                            for_loop,
                            b.Return(arr),
                        });
             } else {
-                utils::Vector<const Expression*, 8> values;
+                tint::Vector<const Expression*, 8> values;
                 if (auto* mat_ty = el_ty->As<type::Matrix>()) {
                     auto* vec_ty = mat_ty->ColumnType();
                     Symbol load = LoadFunc(vec_ty, address_space, buffer);
@@ -530,7 +530,7 @@ struct DecomposeMemoryAccess::State {
                     }
                 }
                 b.Func(name, params, CreateASTTypeFor(ctx, el_ty),
-                       utils::Vector{
+                       tint::Vector{
                            b.Return(b.Call(CreateASTTypeFor(ctx, el_ty), values)),
                        });
             }
@@ -545,8 +545,8 @@ struct DecomposeMemoryAccess::State {
     /// @param buffer the symbol of the storage buffer variable, owned by the target ProgramBuilder.
     /// @return the name of the function that performs the store
     Symbol StoreFunc(const type::Type* el_ty, const Symbol& buffer) {
-        return utils::GetOrCreate(store_funcs, LoadStoreKey{el_ty, buffer}, [&] {
-            utils::Vector params{
+        return tint::GetOrCreate(store_funcs, LoadStoreKey{el_ty, buffer}, [&] {
+            tint::Vector params{
                 b.Param("offset", b.ty.u32()),
                 b.Param("value", CreateASTTypeFor(ctx, el_ty)),
             };
@@ -555,12 +555,12 @@ struct DecomposeMemoryAccess::State {
 
             if (auto* intrinsic = IntrinsicStoreFor(ctx.dst, el_ty, buffer)) {
                 b.Func(name, params, b.ty.void_(), nullptr,
-                       utils::Vector{
+                       tint::Vector{
                            intrinsic,
                            b.Disable(DisabledValidation::kFunctionHasNoBody),
                        });
             } else {
-                auto body = Switch<utils::Vector<const Statement*, 8>>(
+                auto body = Switch<tint::Vector<const Statement*, 8>>(
                     el_ty,  //
                     [&](const type::Array* arr_ty) {
                         // fn store_func(buffer : buf_ty, offset : u32, value : el_ty) {
@@ -593,12 +593,12 @@ struct DecomposeMemoryAccess::State {
                         auto* store_stmt = b.CallStmt(b.Call(store, el_offset, arr_el));
                         auto* for_loop = b.For(for_init, for_cond, for_cont, b.Block(store_stmt));
 
-                        return utils::Vector{b.Decl(array), for_loop};
+                        return tint::Vector{b.Decl(array), for_loop};
                     },
                     [&](const type::Matrix* mat_ty) {
                         auto* vec_ty = mat_ty->ColumnType();
                         Symbol store = StoreFunc(vec_ty, buffer);
-                        utils::Vector<const Statement*, 4> stmts;
+                        tint::Vector<const Statement*, 4> stmts;
                         for (uint32_t i = 0; i < mat_ty->columns(); i++) {
                             auto* offset = b.Add("offset", u32(i * mat_ty->ColumnStride()));
                             auto* element = b.IndexAccessor("value", u32(i));
@@ -608,7 +608,7 @@ struct DecomposeMemoryAccess::State {
                         return stmts;
                     },
                     [&](const type::Struct* str) {
-                        utils::Vector<const Statement*, 8> stmts;
+                        tint::Vector<const Statement*, 8> stmts;
                         for (auto* member : str->Members()) {
                             auto* offset = b.Add("offset", u32(member->Offset()));
                             auto* element = b.MemberAccessor("value", ctx.Clone(member->Name()));
@@ -637,10 +637,10 @@ struct DecomposeMemoryAccess::State {
                       const sem::Builtin* intrinsic,
                       const Symbol& buffer) {
         auto op = intrinsic->Type();
-        return utils::GetOrCreate(atomic_funcs, AtomicKey{el_ty, op, buffer}, [&] {
+        return tint::GetOrCreate(atomic_funcs, AtomicKey{el_ty, op, buffer}, [&] {
             // The first parameter to all WGSL atomics is the expression to the
             // atomic. This is replaced with two parameters: the buffer and offset.
-            utils::Vector params{b.Param("offset", b.ty.u32())};
+            tint::Vector params{b.Param("offset", b.ty.u32())};
 
             // Other parameters are copied as-is:
             for (size_t i = 1; i < intrinsic->Parameters().Length(); i++) {
@@ -660,7 +660,7 @@ struct DecomposeMemoryAccess::State {
 
             auto name = b.Symbols().New(buffer.Name() + intrinsic->str());
             b.Func(name, std::move(params), ret_ty, nullptr,
-                   utils::Vector{
+                   tint::Vector{
                        atomic,
                        b.Disable(DisabledValidation::kFunctionHasNoBody),
                    });
@@ -675,10 +675,10 @@ DecomposeMemoryAccess::Intrinsic::Intrinsic(GenerationID pid,
                                             DataType ty,
                                             builtin::AddressSpace as,
                                             const IdentifierExpression* buf)
-    : Base(pid, nid, utils::Vector{buf}), op(o), type(ty), address_space(as) {}
+    : Base(pid, nid, tint::Vector{buf}), op(o), type(ty), address_space(as) {}
 DecomposeMemoryAccess::Intrinsic::~Intrinsic() = default;
 std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
-    utils::StringStream ss;
+    StringStream ss;
     switch (op) {
         case Op::kLoad:
             ss << "intrinsic_load_";
@@ -934,7 +934,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
                             auto buffer = ctx.Clone(access.var->Declaration()->name->symbol);
                             Symbol func = state.AtomicFunc(el_ty, builtin, buffer);
 
-                            utils::Vector<const Expression*, 8> args{offset};
+                            tint::Vector<const Expression*, 8> args{offset};
                             for (size_t i = 1; i < call_expr->args.Length(); i++) {
                                 auto* arg = call_expr->args[i];
                                 args.Push(ctx.Clone(arg));

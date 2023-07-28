@@ -21,7 +21,7 @@
 namespace tint::ir {
 
 /// Constant in the IR.
-class Constant : public utils::Castable<Constant, Value> {
+class Constant : public Castable<Constant, Value> {
   public:
     /// Constructor
     /// @param val the value stored in the constant

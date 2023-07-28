@@ -38,7 +38,7 @@ TEST_F(WgslASTPrinterTest, Emit_Return) {
 
 TEST_F(WgslASTPrinterTest, Emit_ReturnWithValue) {
     auto* r = Return(123_i);
-    Func("f", utils::Empty, ty.i32(), utils::Vector{r});
+    Func("f", tint::Empty, ty.i32(), Vector{r});
 
     ASTPrinter& gen = Build();
 

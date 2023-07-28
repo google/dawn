@@ -54,61 +54,55 @@ namespace tint::spirv::reader {
 
 namespace {
 struct PointerHasher {
-    size_t operator()(const Pointer& t) const {
-        return utils::Hash(t.address_space, t.type, t.access);
-    }
+    size_t operator()(const Pointer& t) const { return Hash(t.address_space, t.type, t.access); }
 };
 
 struct ReferenceHasher {
-    size_t operator()(const Reference& t) const {
-        return utils::Hash(t.address_space, t.type, t.access);
-    }
+    size_t operator()(const Reference& t) const { return Hash(t.address_space, t.type, t.access); }
 };
 
 struct VectorHasher {
-    size_t operator()(const Vector& t) const { return utils::Hash(t.type, t.size); }
+    size_t operator()(const Vector& t) const { return Hash(t.type, t.size); }
 };
 
 struct MatrixHasher {
-    size_t operator()(const Matrix& t) const { return utils::Hash(t.type, t.columns, t.rows); }
+    size_t operator()(const Matrix& t) const { return Hash(t.type, t.columns, t.rows); }
 };
 
 struct ArrayHasher {
-    size_t operator()(const Array& t) const { return utils::Hash(t.type, t.size, t.stride); }
+    size_t operator()(const Array& t) const { return Hash(t.type, t.size, t.stride); }
 };
 
 struct AliasHasher {
-    size_t operator()(const Alias& t) const { return utils::Hash(t.name); }
+    size_t operator()(const Alias& t) const { return Hash(t.name); }
 };
 
 struct StructHasher {
-    size_t operator()(const Struct& t) const { return utils::Hash(t.name); }
+    size_t operator()(const Struct& t) const { return Hash(t.name); }
 };
 
 struct SamplerHasher {
-    size_t operator()(const Sampler& s) const { return utils::Hash(s.kind); }
+    size_t operator()(const Sampler& s) const { return Hash(s.kind); }
 };
 
 struct DepthTextureHasher {
-    size_t operator()(const DepthTexture& t) const { return utils::Hash(t.dims); }
+    size_t operator()(const DepthTexture& t) const { return Hash(t.dims); }
 };
 
 struct DepthMultisampledTextureHasher {
-    size_t operator()(const DepthMultisampledTexture& t) const { return utils::Hash(t.dims); }
+    size_t operator()(const DepthMultisampledTexture& t) const { return Hash(t.dims); }
 };
 
 struct MultisampledTextureHasher {
-    size_t operator()(const MultisampledTexture& t) const { return utils::Hash(t.dims, t.type); }
+    size_t operator()(const MultisampledTexture& t) const { return Hash(t.dims, t.type); }
 };
 
 struct SampledTextureHasher {
-    size_t operator()(const SampledTexture& t) const { return utils::Hash(t.dims, t.type); }
+    size_t operator()(const SampledTexture& t) const { return Hash(t.dims, t.type); }
 };
 
 struct StorageTextureHasher {
-    size_t operator()(const StorageTexture& t) const {
-        return utils::Hash(t.dims, t.format, t.access);
-    }
+    size_t operator()(const StorageTexture& t) const { return Hash(t.dims, t.format, t.access); }
 };
 }  // namespace
 
@@ -231,13 +225,13 @@ Array::Array(const Array&) = default;
 ast::Type Array::Build(ProgramBuilder& b) const {
     if (size > 0) {
         if (stride > 0) {
-            return b.ty.array(type->Build(b), u32(size), utils::Vector{b.Stride(stride)});
+            return b.ty.array(type->Build(b), u32(size), tint::Vector{b.Stride(stride)});
         } else {
             return b.ty.array(type->Build(b), u32(size));
         }
     } else {
         if (stride > 0) {
-            return b.ty.array(type->Build(b), utils::Vector{b.Stride(stride)});
+            return b.ty.array(type->Build(b), tint::Vector{b.Stride(stride)});
         } else {
             return b.ty.array(type->Build(b));
         }
@@ -313,7 +307,7 @@ ast::Type Struct::Build(ProgramBuilder& b) const {
 /// The PIMPL state of the Types object.
 struct TypeManager::State {
     /// The allocator of primitive types
-    utils::BlockAllocator<Type> allocator_;
+    BlockAllocator<Type> allocator_;
     /// The lazily-created Void type
     reader::Void const* void_ = nullptr;
     /// The lazily-created Bool type
@@ -325,33 +319,32 @@ struct TypeManager::State {
     /// The lazily-created I32 type
     reader::I32 const* i32_ = nullptr;
     /// Unique Pointer instances
-    utils::UniqueAllocator<reader::Pointer, PointerHasher> pointers_;
+    UniqueAllocator<reader::Pointer, PointerHasher> pointers_;
     /// Unique Reference instances
-    utils::UniqueAllocator<reader::Reference, ReferenceHasher> references_;
+    UniqueAllocator<reader::Reference, ReferenceHasher> references_;
     /// Unique Vector instances
-    utils::UniqueAllocator<reader::Vector, VectorHasher> vectors_;
+    UniqueAllocator<reader::Vector, VectorHasher> vectors_;
     /// Unique Matrix instances
-    utils::UniqueAllocator<reader::Matrix, MatrixHasher> matrices_;
+    UniqueAllocator<reader::Matrix, MatrixHasher> matrices_;
     /// Unique Array instances
-    utils::UniqueAllocator<reader::Array, ArrayHasher> arrays_;
+    UniqueAllocator<reader::Array, ArrayHasher> arrays_;
     /// Unique Alias instances
-    utils::UniqueAllocator<reader::Alias, AliasHasher> aliases_;
+    UniqueAllocator<reader::Alias, AliasHasher> aliases_;
     /// Unique Struct instances
-    utils::UniqueAllocator<reader::Struct, StructHasher> structs_;
+    UniqueAllocator<reader::Struct, StructHasher> structs_;
     /// Unique Sampler instances
-    utils::UniqueAllocator<reader::Sampler, SamplerHasher> samplers_;
+    UniqueAllocator<reader::Sampler, SamplerHasher> samplers_;
     /// Unique DepthTexture instances
-    utils::UniqueAllocator<reader::DepthTexture, DepthTextureHasher> depth_textures_;
+    UniqueAllocator<reader::DepthTexture, DepthTextureHasher> depth_textures_;
     /// Unique DepthMultisampledTexture instances
-    utils::UniqueAllocator<reader::DepthMultisampledTexture, DepthMultisampledTextureHasher>
+    UniqueAllocator<reader::DepthMultisampledTexture, DepthMultisampledTextureHasher>
         depth_multisampled_textures_;
     /// Unique MultisampledTexture instances
-    utils::UniqueAllocator<reader::MultisampledTexture, MultisampledTextureHasher>
-        multisampled_textures_;
+    UniqueAllocator<reader::MultisampledTexture, MultisampledTextureHasher> multisampled_textures_;
     /// Unique SampledTexture instances
-    utils::UniqueAllocator<reader::SampledTexture, SampledTextureHasher> sampled_textures_;
+    UniqueAllocator<reader::SampledTexture, SampledTextureHasher> sampled_textures_;
     /// Unique StorageTexture instances
-    utils::UniqueAllocator<reader::StorageTexture, StorageTextureHasher> storage_textures_;
+    UniqueAllocator<reader::StorageTexture, StorageTextureHasher> storage_textures_;
 };
 
 const Type* Type::UnwrapPtr() const {
@@ -571,31 +564,31 @@ std::string I32::String() const {
 }
 
 std::string Pointer::String() const {
-    utils::StringStream ss;
-    ss << "ptr<" << utils::ToString(address_space) << ", " << type->String() + ">";
+    StringStream ss;
+    ss << "ptr<" << tint::ToString(address_space) << ", " << type->String() + ">";
     return ss.str();
 }
 
 std::string Reference::String() const {
-    utils::StringStream ss;
-    ss << "ref<" + utils::ToString(address_space) << ", " << type->String() << ">";
+    StringStream ss;
+    ss << "ref<" + tint::ToString(address_space) << ", " << type->String() << ">";
     return ss.str();
 }
 
 std::string Vector::String() const {
-    utils::StringStream ss;
+    StringStream ss;
     ss << "vec" << size << "<" << type->String() << ">";
     return ss.str();
 }
 
 std::string Matrix::String() const {
-    utils::StringStream ss;
+    StringStream ss;
     ss << "mat" << columns << "x" << rows << "<" << type->String() << ">";
     return ss.str();
 }
 
 std::string Array::String() const {
-    utils::StringStream ss;
+    StringStream ss;
     ss << "array<" << type->String() << ", " << size << ", " << stride << ">";
     return ss.str();
 }
@@ -611,31 +604,31 @@ std::string Sampler::String() const {
 }
 
 std::string DepthTexture::String() const {
-    utils::StringStream ss;
+    StringStream ss;
     ss << "depth_" << dims;
     return ss.str();
 }
 
 std::string DepthMultisampledTexture::String() const {
-    utils::StringStream ss;
+    StringStream ss;
     ss << "depth_multisampled_" << dims;
     return ss.str();
 }
 
 std::string MultisampledTexture::String() const {
-    utils::StringStream ss;
+    StringStream ss;
     ss << "texture_multisampled_" << dims << "<" << type << ">";
     return ss.str();
 }
 
 std::string SampledTexture::String() const {
-    utils::StringStream ss;
+    StringStream ss;
     ss << "texture_" << dims << "<" << type << ">";
     return ss.str();
 }
 
 std::string StorageTexture::String() const {
-    utils::StringStream ss;
+    StringStream ss;
     ss << "texture_storage_" << dims << "<" << format << ", " << access << ">";
     return ss.str();
 }

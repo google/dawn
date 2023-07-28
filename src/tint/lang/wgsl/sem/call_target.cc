@@ -26,7 +26,7 @@ namespace tint::sem {
 CallTarget::CallTarget(EvaluationStage stage, bool must_use) : stage_(stage), must_use_(must_use) {}
 
 CallTarget::CallTarget(const type::Type* return_type,
-                       utils::VectorRef<Parameter*> parameters,
+                       VectorRef<Parameter*> parameters,
                        EvaluationStage stage,
                        bool must_use)
     : stage_(stage), must_use_(must_use) {
@@ -43,7 +43,7 @@ CallTarget::~CallTarget() = default;
 CallTargetSignature::CallTargetSignature() = default;
 
 CallTargetSignature::CallTargetSignature(const type::Type* ret_ty,
-                                         utils::VectorRef<const sem::Parameter*> params)
+                                         VectorRef<const sem::Parameter*> params)
     : return_type(ret_ty), parameters(std::move(params)) {}
 CallTargetSignature::CallTargetSignature(const CallTargetSignature&) = default;
 CallTargetSignature::~CallTargetSignature() = default;
@@ -77,11 +77,11 @@ namespace std {
 
 std::size_t hash<tint::sem::CallTargetSignature>::operator()(
     const tint::sem::CallTargetSignature& sig) const {
-    size_t hash = tint::utils::Hash(sig.parameters.Length());
+    size_t hash = tint::Hash(sig.parameters.Length());
     for (auto* p : sig.parameters) {
-        hash = tint::utils::HashCombine(hash, p->Type(), p->Usage());
+        hash = HashCombine(hash, p->Type(), p->Usage());
     }
-    return tint::utils::Hash(hash, sig.return_type);
+    return Hash(hash, sig.return_type);
 }
 
 }  // namespace std

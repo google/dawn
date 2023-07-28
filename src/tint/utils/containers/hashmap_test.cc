@@ -22,7 +22,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint::utils {
+namespace tint {
 namespace {
 
 constexpr std::array kPrimes{
@@ -534,4 +534,4 @@ TEST(Hashmap, HashDifferentSize) {
 }
 
 }  // namespace
-}  // namespace tint::utils
+}  // namespace tint

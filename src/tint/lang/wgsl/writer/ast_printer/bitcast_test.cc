@@ -30,7 +30,7 @@ TEST_F(WgslASTPrinterTest, EmitExpression_Bitcast) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitExpression(out, bitcast);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "bitcast<f32>(1i)");

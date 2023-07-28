@@ -21,7 +21,7 @@
 #include "src/tint/utils/debug/debug.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// Empty structure that can be used as the SUCCESS_TYPE for a Result.
 struct SuccessType {};
@@ -163,10 +163,10 @@ struct [[nodiscard]] Result {
 /// @param res the result
 /// @return the stream so calls can be chained
 template <typename SUCCESS, typename FAILURE>
-inline utils::StringStream& operator<<(utils::StringStream& out, Result<SUCCESS, FAILURE> res) {
+inline StringStream& operator<<(StringStream& out, Result<SUCCESS, FAILURE> res) {
     return res ? (out << "success: " << res.Get()) : (out << "failure: " << res.Failure());
 }
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_RESULT_RESULT_H_

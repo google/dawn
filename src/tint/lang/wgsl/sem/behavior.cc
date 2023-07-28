@@ -16,7 +16,7 @@
 
 namespace tint::sem {
 
-utils::StringStream& operator<<(utils::StringStream& out, Behavior behavior) {
+StringStream& operator<<(StringStream& out, Behavior behavior) {
     switch (behavior) {
         case Behavior::kReturn:
             return out << "Return";

@@ -40,7 +40,7 @@ enum class InterpolationType {
 /// @param out the stream to write to
 /// @param value the InterpolationType
 /// @returns `out` so calls can be chained
-utils::StringStream& operator<<(utils::StringStream& out, InterpolationType value);
+StringStream& operator<<(StringStream& out, InterpolationType value);
 
 /// ParseInterpolationType parses a InterpolationType from a string.
 /// @param str the string to parse

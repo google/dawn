@@ -186,7 +186,7 @@ bool ReturnsVoid(ValidTextureOverload texture_overload);
 /// Describes a texture builtin overload
 struct TextureOverloadCase {
     /// Args is a list of Expression used as arguments to the texture overload case.
-    using Args = utils::Vector<const Expression*, 8>;
+    using Args = tint::Vector<const Expression*, 8>;
 
     /// Constructor for textureSample...() functions
     TextureOverloadCase(ValidTextureOverload,

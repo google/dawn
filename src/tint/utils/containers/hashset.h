@@ -26,7 +26,7 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/debug/debug.h"
 
-namespace tint::utils {
+namespace tint {
 
 /// An unordered set that uses a robin-hood hashing algorithm.
 template <typename KEY, size_t N, typename HASH = Hasher<KEY>, typename EQUAL = std::equal_to<KEY>>
@@ -58,8 +58,8 @@ class Hashset : public HashmapBase<KEY, void, N, HASH, EQUAL> {
     /// @returns the set entries of the map as a vector
     /// @note the order of the returned vector is non-deterministic between compilers.
     template <size_t N2 = N>
-    utils::Vector<KEY, N2> Vector() const {
-        utils::Vector<KEY, N2> out;
+    tint::Vector<KEY, N2> Vector() const {
+        tint::Vector<KEY, N2> out;
         out.Reserve(this->Count());
         for (auto& value : *this) {
             out.Push(value);
@@ -92,6 +92,6 @@ class Hashset : public HashmapBase<KEY, void, N, HASH, EQUAL> {
     }
 };
 
-}  // namespace tint::utils
+}  // namespace tint
 
 #endif  // SRC_TINT_UTILS_CONTAINERS_HASHSET_H_

@@ -40,7 +40,7 @@ TEST_F(VariableTest, Creation) {
 
 TEST_F(VariableTest, CreationWithSource) {
     auto* v = Var(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}}, "i",
-                  ty.f32(), builtin::AddressSpace::kPrivate, utils::Empty);
+                  ty.f32(), builtin::AddressSpace::kPrivate, tint::Empty);
 
     CheckIdentifier(v->name, "i");
     CheckIdentifier(v->declared_address_space, "private");
@@ -53,7 +53,7 @@ TEST_F(VariableTest, CreationWithSource) {
 
 TEST_F(VariableTest, CreationEmpty) {
     auto* v = Var(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 7}}}, "a_var",
-                  ty.i32(), builtin::AddressSpace::kWorkgroup, utils::Empty);
+                  ty.i32(), builtin::AddressSpace::kWorkgroup, tint::Empty);
 
     CheckIdentifier(v->name, "a_var");
     CheckIdentifier(v->declared_address_space, "workgroup");
@@ -114,7 +114,7 @@ TEST_F(VariableTest, HasBindingPoint_BothProvided) {
 }
 
 TEST_F(VariableTest, HasBindingPoint_NeitherProvided) {
-    auto* var = Var("my_var", ty.i32(), builtin::AddressSpace::kFunction, utils::Empty);
+    auto* var = Var("my_var", ty.i32(), builtin::AddressSpace::kFunction, tint::Empty);
     EXPECT_FALSE(var->HasBindingPoint());
 }
 

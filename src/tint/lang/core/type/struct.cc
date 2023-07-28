@@ -30,7 +30,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::StructMember);
 namespace tint::type {
 namespace {
 
-type::Flags FlagsFrom(utils::VectorRef<const StructMember*> members) {
+type::Flags FlagsFrom(VectorRef<const StructMember*> members) {
     type::Flags flags{
         Flag::kConstructable,
         Flag::kCreationFixedFootprint,
@@ -53,11 +53,11 @@ type::Flags FlagsFrom(utils::VectorRef<const StructMember*> members) {
 }  // namespace
 
 Struct::Struct(Symbol name,
-               utils::VectorRef<const StructMember*> members,
+               VectorRef<const StructMember*> members,
                uint32_t align,
                uint32_t size,
                uint32_t size_no_padding)
-    : Base(utils::Hash(utils::TypeInfo::Of<Struct>().full_hashcode, name), FlagsFrom(members)),
+    : Base(Hash(tint::TypeInfo::Of<Struct>().full_hashcode, name), FlagsFrom(members)),
       name_(name),
       members_(std::move(members)),
       align_(align),
@@ -95,7 +95,7 @@ std::string Struct::FriendlyName() const {
 }
 
 std::string Struct::Layout() const {
-    utils::StringStream ss;
+    StringStream ss;
 
     auto member_name_of = [&](const StructMember* sm) { return sm->Name().Name(); };
 
@@ -172,7 +172,7 @@ const Type* Struct::Element(uint32_t index) const {
 Struct* Struct::Clone(CloneContext& ctx) const {
     auto sym = ctx.dst.st->Register(name_.Name());
 
-    utils::Vector<const StructMember*, 4> members;
+    tint::Vector<const StructMember*, 4> members;
     for (const auto& mem : members_) {
         members.Push(mem->Clone(ctx));
     }

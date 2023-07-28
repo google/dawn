@@ -43,7 +43,7 @@ TEST_P(GlslImportData_SingleParamTest, FloatScalar) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitCall(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1.0f)");
@@ -83,7 +83,7 @@ TEST_P(GlslImportData_SingleIntParamTest, IntScalar) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitCall(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1)");
@@ -101,7 +101,7 @@ TEST_P(GlslImportData_SingleVectorParamTest, FloatVector) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitCall(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(
@@ -145,7 +145,7 @@ TEST_P(GlslImportData_DualParam_ScalarTest, Float) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitCall(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1.0f, 2.0f)");
@@ -168,7 +168,7 @@ TEST_P(GlslImportData_DualParam_VectorTest, Float) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitCall(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(),
@@ -194,7 +194,7 @@ TEST_P(GlslImportData_DualParam_Int_Test, IntScalar) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitCall(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1, 2)");
@@ -213,7 +213,7 @@ TEST_P(GlslImportData_TripleParam_ScalarTest, Float) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitCall(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1.0f, 2.0f, 3.0f)");
@@ -234,7 +234,7 @@ TEST_P(GlslImportData_TripleParam_VectorTest, Float) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitCall(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(),
@@ -256,7 +256,7 @@ TEST_P(GlslImportData_TripleParam_Int_Test, IntScalar) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitCall(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), std::string(param.glsl_name) + "(1, 2, 3)");
@@ -273,7 +273,7 @@ TEST_F(GlslASTPrinterTest_Import, GlslImportData_Determinant) {
 
     ASTPrinter& gen = Build();
 
-    utils::StringStream out;
+    StringStream out;
     gen.EmitCall(out, expr);
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), std::string("determinant(var)"));

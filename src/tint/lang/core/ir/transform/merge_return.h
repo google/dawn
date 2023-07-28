@@ -21,7 +21,7 @@ namespace tint::ir::transform {
 
 /// MergeReturn is a transform merges multiple return statements in a function into a single return
 /// at the end of the function.
-class MergeReturn final : public utils::Castable<MergeReturn, Transform> {
+class MergeReturn final : public Castable<MergeReturn, Transform> {
   public:
     /// Constructor
     MergeReturn();

@@ -20,7 +20,7 @@
 namespace tint::ast {
 
 /// A loop statement
-class LoopStatement final : public utils::Castable<LoopStatement, Statement> {
+class LoopStatement final : public Castable<LoopStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
@@ -34,7 +34,7 @@ class LoopStatement final : public utils::Castable<LoopStatement, Statement> {
                   const Source& source,
                   const BlockStatement* body,
                   const BlockStatement* continuing,
-                  utils::VectorRef<const ast::Attribute*> attributes);
+                  VectorRef<const ast::Attribute*> attributes);
     /// Destructor
     ~LoopStatement() override;
 
@@ -51,7 +51,7 @@ class LoopStatement final : public utils::Castable<LoopStatement, Statement> {
     const BlockStatement* const continuing;
 
     /// The attribute list
-    const utils::Vector<const Attribute*, 1> attributes;
+    const tint::Vector<const Attribute*, 1> attributes;
 };
 
 }  // namespace tint::ast

@@ -28,7 +28,7 @@ namespace tint::ast::transform {
 /// @note Depends on the following transforms to have been run first:
 /// * SimplifyPointers
 class LocalizeStructArrayAssignment final
-    : public utils::Castable<LocalizeStructArrayAssignment, Transform> {
+    : public Castable<LocalizeStructArrayAssignment, Transform> {
   public:
     /// Constructor
     LocalizeStructArrayAssignment();
