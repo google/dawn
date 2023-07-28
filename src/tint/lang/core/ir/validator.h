@@ -37,13 +37,10 @@ class Var;
 
 namespace tint::ir {
 
-/// Signifies the validation completed successfully
-struct Success {};
-
 /// Validates that a given IR module is correctly formed
 /// @param mod the module to validate
 /// @returns true on success, an error result otherwise
-utils::Result<Success, diag::List> Validate(Module& mod);
+utils::Result<utils::SuccessType, diag::List> Validate(Module& mod);
 
 /// The core IR validator.
 class Validator {
@@ -58,7 +55,7 @@ class Validator {
     /// Runs the validator over the module provided during construction
     /// @returns the results of validation, either a success result object or the diagnostics of
     /// validation failures.
-    utils::Result<Success, diag::List> IsValid();
+    utils::Result<utils::SuccessType, diag::List> IsValid();
 
   protected:
     /// @param inst the instruction

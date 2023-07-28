@@ -71,7 +71,7 @@ void Validator::DisassembleIfNeeded() {
     mod_.disassembly_file = std::make_unique<Source::File>("", dis_.Disassemble());
 }
 
-utils::Result<Success, diag::List> Validator::IsValid() {
+utils::Result<utils::SuccessType, diag::List> Validator::IsValid() {
     CheckRootBlock(mod_.root_block);
 
     for (auto* func : mod_.functions) {
@@ -84,7 +84,7 @@ utils::Result<Success, diag::List> Validator::IsValid() {
                               "# Disassembly\n" + mod_.disassembly_file->content.data, {});
         return std::move(diagnostics_);
     }
-    return Success{};
+    return utils::Success;
 }
 
 std::string Validator::InstError(Instruction* inst, std::string err) {
@@ -621,7 +621,7 @@ const type::Type* Validator::GetVectorPtrElementType(Instruction* inst, size_t i
     return nullptr;
 }
 
-utils::Result<Success, diag::List> Validate(Module& mod) {
+utils::Result<utils::SuccessType, diag::List> Validate(Module& mod) {
     Validator v(mod);
     return v.IsValid();
 }

@@ -23,6 +23,12 @@
 
 namespace tint::utils {
 
+/// Empty structure that can be used as the SUCCESS_TYPE for a Result.
+struct SuccessType {};
+
+/// An instance of SuccessType that can be used as a generic success value for a Result.
+static constexpr const SuccessType Success;
+
 /// Empty structure used as the default FAILURE_TYPE for a Result.
 struct FailureType {};
 
