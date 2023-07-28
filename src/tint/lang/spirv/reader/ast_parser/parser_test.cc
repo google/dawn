@@ -26,9 +26,9 @@ using ParserTest = testing::Test;
 TEST_F(ParserTest, DataEmpty) {
     std::vector<uint32_t> data;
     auto program = Parse(data);
-    auto errs = diag::Formatter().format(program.Diagnostics());
+    auto errs = program.Diagnostics().str();
     ASSERT_FALSE(program.IsValid()) << errs;
-    EXPECT_EQ(errs, "error: line:0: Invalid SPIR-V magic number.\n");
+    EXPECT_EQ(errs, "error: line:0: Invalid SPIR-V magic number.");
 }
 
 constexpr auto kShaderWithNonUniformDerivative = R"(
@@ -63,7 +63,7 @@ TEST_F(ParserTest, AllowNonUniformDerivatives_False) {
     Options options;
     options.allow_non_uniform_derivatives = false;
     auto program = Parse(spv, options);
-    auto errs = diag::Formatter().format(program.Diagnostics());
+    auto errs = program.Diagnostics().str();
     EXPECT_FALSE(program.IsValid()) << errs;
     EXPECT_THAT(errs, ::testing::HasSubstr("'dpdx' must only be called from uniform control flow"));
 }
@@ -73,7 +73,7 @@ TEST_F(ParserTest, AllowNonUniformDerivatives_True) {
     Options options;
     options.allow_non_uniform_derivatives = true;
     auto program = Parse(spv, options);
-    auto errs = diag::Formatter().format(program.Diagnostics());
+    auto errs = program.Diagnostics().str();
     EXPECT_TRUE(program.IsValid()) << errs;
     EXPECT_EQ(program.Diagnostics().count(), 0u) << errs;
 }

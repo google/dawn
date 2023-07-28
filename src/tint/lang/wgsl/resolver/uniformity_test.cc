@@ -37,9 +37,7 @@ class UniformityAnalysisTestBase {
     /// @param program the program
     /// @param should_pass true if `builder` program should pass the analysis, otherwise false
     void RunTest(Program&& program, bool should_pass) {
-        diag::Formatter::Style style;
-        style.print_newline_at_end = false;
-        error_ = diag::Formatter(style).format(program.Diagnostics());
+        error_ = program.Diagnostics().str();
 
         bool valid = program.IsValid();
         if (should_pass) {

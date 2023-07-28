@@ -41,8 +41,7 @@ class TestHelperBase : public BASE, public ProgramBuilder {
             return *gen_;
         }
         program = std::make_unique<Program>(std::move(*this));
-        diag::Formatter formatter;
-        [&] { ASSERT_TRUE(program->IsValid()) << formatter.format(program->Diagnostics()); }();
+        [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
         gen_ = std::make_unique<ASTPrinter>(program.get());
         return *gen_;
     }

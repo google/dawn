@@ -31,12 +31,7 @@ class ResolverConstEvalRuntimeSemanticsTest : public ResolverConstEvalTest {
     ConstEval const_eval;
 
     /// @returns the contents of the diagnostics list as a string
-    std::string error() {
-        diag::Formatter::Style style{};
-        style.print_newline_at_end = false;
-        diag::Formatter formatter{style};
-        return formatter.format(Diagnostics());
-    }
+    std::string error() { return Diagnostics().str(); }
 };
 
 TEST_F(ResolverConstEvalRuntimeSemanticsTest, Add_AInt_Overflow) {

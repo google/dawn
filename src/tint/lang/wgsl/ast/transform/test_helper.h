@@ -32,11 +32,8 @@ namespace tint::ast::transform {
 /// @returns the output program as a WGSL string, or an error string if the
 /// program is not valid.
 inline std::string str(const Program& program) {
-    diag::Formatter::Style style;
-    style.print_newline_at_end = false;
-
     if (!program.IsValid()) {
-        return diag::Formatter(style).format(program.Diagnostics());
+        return program.Diagnostics().str();
     }
 
     wgsl::writer::Options options;

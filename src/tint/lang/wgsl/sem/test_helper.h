@@ -29,10 +29,8 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     /// Builds and returns the program. Must only be called once per test
     /// @return the built program
     Program Build() {
-        diag::Formatter formatter;
         [&] {
-            ASSERT_TRUE(IsValid()) << "Builder program is not valid\n"
-                                   << formatter.format(Diagnostics());
+            ASSERT_TRUE(IsValid()) << "Builder program is not valid\n" << Diagnostics().str();
         }();
         return Program(std::move(*this));
     }
