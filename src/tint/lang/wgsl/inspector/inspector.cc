@@ -65,7 +65,7 @@ namespace {
 
 void AppendResourceBindings(std::vector<ResourceBinding>* dest,
                             const std::vector<ResourceBinding>& orig) {
-    TINT_ASSERT(Inspector, dest);
+    TINT_ASSERT(dest);
     if (!dest) {
         return;
     }
@@ -77,7 +77,7 @@ void AppendResourceBindings(std::vector<ResourceBinding>* dest,
 std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(
     const type::Type* type) {
     // entry point in/out variables must of numeric scalar or vector types.
-    TINT_ASSERT(Inspector, type->is_numeric_scalar_or_vector());
+    TINT_ASSERT(type->is_numeric_scalar_or_vector());
 
     ComponentType componentType = Switch(
         type->DeepestElement(),  //
@@ -86,8 +86,7 @@ std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(
         [&](const type::I32*) { return ComponentType::kI32; },
         [&](const type::U32*) { return ComponentType::kU32; },
         [&](Default) {
-            tint::diag::List diagnostics;
-            TINT_UNREACHABLE(Inspector, diagnostics) << "unhandled component type";
+            TINT_UNREACHABLE() << "unhandled component type";
             return ComponentType::kUnknown;
         });
 
@@ -107,8 +106,7 @@ std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(
                 break;
             }
             default: {
-                tint::diag::List diagnostics;
-                TINT_UNREACHABLE(Inspector, diagnostics) << "unhandled composition type";
+                TINT_UNREACHABLE() << "unhandled composition type";
                 compositionType = CompositionType::kUnknown;
                 break;
             }
@@ -128,8 +126,8 @@ Inspector::~Inspector() = default;
 
 EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
     EntryPoint entry_point;
-    TINT_ASSERT(Inspector, func != nullptr);
-    TINT_ASSERT(Inspector, func->IsEntryPoint());
+    TINT_ASSERT(func != nullptr);
+    TINT_ASSERT(func->IsEntryPoint());
 
     auto* sem = program_->Sem().Get(func);
 
@@ -156,8 +154,8 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
             break;
         }
         default: {
-            TINT_UNREACHABLE(Inspector, diagnostics_)
-                << "invalid pipeline stage for entry point '" << entry_point.name << "'";
+            TINT_UNREACHABLE() << "invalid pipeline stage for entry point '" << entry_point.name
+                               << "'";
             break;
         }
     }
@@ -200,7 +198,7 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
             override.name = name;
             override.id = global->OverrideId();
             auto* type = var->Type();
-            TINT_ASSERT(Inspector, type->Is<type::Scalar>());
+            TINT_ASSERT(type->Is<type::Scalar>());
             if (type->is_bool_scalar_or_vector()) {
                 override.type = Override::Type::kBool;
             } else if (type->is_float_scalar()) {
@@ -214,7 +212,7 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
             } else if (type->is_unsigned_integer_scalar()) {
                 override.type = Override::Type::kUint32;
             } else {
-                TINT_UNREACHABLE(Inspector, diagnostics_);
+                TINT_UNREACHABLE();
             }
 
             override.is_initialized = global->Declaration()->initializer;
@@ -632,7 +630,7 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
     std::tie(stage_variable.component_type, stage_variable.composition_type) =
         CalculateComponentAndComposition(type);
 
-    TINT_ASSERT(Inspector, location.has_value());
+    TINT_ASSERT(location.has_value());
     stage_variable.has_location_attribute = true;
     stage_variable.location_attribute = location.value();
 
@@ -913,8 +911,7 @@ std::tuple<InterpolationType, InterpolationSampling> Inspector::CalculateInterpo
 template <size_t N, typename F>
 void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> exprs, F&& callback) {
     if (TINT_UNLIKELY(!program_->IsValid())) {
-        TINT_ICE(Inspector, diagnostics_)
-            << "attempting to get originating resources in invalid program";
+        TINT_ICE() << "attempting to get originating resources in invalid program";
         return;
     }
 
@@ -940,9 +937,8 @@ void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> ex
             }
             parameters[i] = param;
         } else {
-            TINT_ICE(Inspector, diagnostics_)
-                << "cannot resolve originating resource with expression type "
-                << exprs[i]->TypeInfo().name;
+            TINT_ICE() << "cannot resolve originating resource with expression type "
+                       << exprs[i]->TypeInfo().name;
             return;
         }
     }

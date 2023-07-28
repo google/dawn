@@ -28,14 +28,14 @@ StructMember::StructMember(GenerationID pid,
                            VectorRef<const Attribute*> attrs)
 
     : Base(pid, nid, src), name(n), type(ty), attributes(std::move(attrs)) {
-    TINT_ASSERT(AST, name);
+    TINT_ASSERT(name);
     if (name) {
-        TINT_ASSERT(AST, !name->Is<TemplatedIdentifier>());
+        TINT_ASSERT(!name->Is<TemplatedIdentifier>());
     }
-    TINT_ASSERT(AST, type);
+    TINT_ASSERT(type);
     for (auto* attr : attributes) {
-        TINT_ASSERT(AST, attr);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
+        TINT_ASSERT(attr);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(attr, generation_id);
     }
 }
 

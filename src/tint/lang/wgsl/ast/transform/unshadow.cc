@@ -74,8 +74,7 @@ struct Unshadow::State {
                     return b.Param(source, symbol, type, attributes);
                 },
                 [&](Default) {
-                    TINT_ICE(Transform, b.Diagnostics())
-                        << "unexpected variable type: " << decl->TypeInfo().name;
+                    TINT_ICE() << "unexpected variable type: " << decl->TypeInfo().name;
                     return nullptr;
                 });
         };

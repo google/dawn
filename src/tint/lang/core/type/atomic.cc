@@ -16,8 +16,8 @@
 
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/reference.h"
-#include "src/tint/utils/debug/debug.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -32,7 +32,7 @@ Atomic::Atomic(const type::Type* subtype)
                Flag::kFixedFootprint,
            }),
       subtype_(subtype) {
-    TINT_ASSERT(AST, !subtype->Is<Reference>());
+    TINT_ASSERT(!subtype->Is<Reference>());
 }
 
 bool Atomic::Equals(const type::UniqueNode& other) const {

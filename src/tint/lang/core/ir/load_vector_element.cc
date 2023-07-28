@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "src/tint/lang/core/ir/load_vector_element.h"
-#include "src/tint/utils/debug/debug.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::LoadVectorElement);
 

@@ -48,10 +48,9 @@ class SemHelper {
         using T = sem::Info::GetResultType<SEM, AST>;
         auto* sem = builder_->Sem().Get(ast);
         if (TINT_UNLIKELY(!sem)) {
-            TINT_ICE(Resolver, builder_->Diagnostics())
-                << "AST node '" << ast->TypeInfo().name << "' had no semantic info\n"
-                << "At: " << ast->source << "\n"
-                << "Pointer: " << ast;
+            TINT_ICE() << "AST node '" << ast->TypeInfo().name << "' had no semantic info\n"
+                       << "At: " << ast->source << "\n"
+                       << "Pointer: " << ast;
         }
         return const_cast<T*>(As<T>(sem));
     }

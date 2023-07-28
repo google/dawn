@@ -1268,7 +1268,7 @@ TEST_F(CloneContextTest, GenerationIDs_Clone_ObjectNotOwnedBySrc) {
             Allocator allocator;
             ctx.Clone(allocator.Create<ProgramNode>(GenerationID::New(), dst.ID()));
         },
-        R"(internal compiler error: TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, src, object))");
+        R"(internal compiler error: TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src, object))");
 }
 
 TEST_F(CloneContextTest, GenerationIDs_Clone_ObjectNotOwnedByDst) {
@@ -1280,7 +1280,7 @@ TEST_F(CloneContextTest, GenerationIDs_Clone_ObjectNotOwnedByDst) {
             Allocator allocator;
             ctx.Clone(allocator.Create<ProgramNode>(src.ID(), GenerationID::New()));
         },
-        R"(internal compiler error: TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Clone, dst, out))");
+        R"(internal compiler error: TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(dst, out))");
 }
 
 }  // namespace

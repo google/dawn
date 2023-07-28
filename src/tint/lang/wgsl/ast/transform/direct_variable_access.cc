@@ -1103,7 +1103,7 @@ struct DirectVariableAccess::State {
                 continue;
             }
 
-            TINT_ICE(Transform, b.Diagnostics()) << "unhandled variant for access chain";
+            TINT_ICE() << "unhandled variant for access chain";
             break;
         }
         return ss.str();
@@ -1151,7 +1151,7 @@ struct DirectVariableAccess::State {
             return b.MemberAccessor(expr, ctx.Clone(*member));
         }
 
-        TINT_ICE(Transform, b.Diagnostics()) << "unhandled variant type for access chain";
+        TINT_ICE() << "unhandled variant type for access chain";
         return nullptr;
     }
 

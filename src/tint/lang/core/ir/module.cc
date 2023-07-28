@@ -16,6 +16,8 @@
 
 #include <limits>
 
+#include "src/tint/utils/ice/ice.h"
+
 namespace tint::ir {
 
 Module::Module() = default;
@@ -27,7 +29,7 @@ Module::~Module() = default;
 Module& Module::operator=(Module&&) = default;
 
 Symbol Module::NameOf(Instruction* inst) {
-    TINT_ASSERT(IR, inst->HasResults() && !inst->HasMultiResults());
+    TINT_ASSERT(inst->HasResults() && !inst->HasMultiResults());
     return NameOf(inst->Result());
 }
 
@@ -36,17 +38,17 @@ Symbol Module::NameOf(Value* value) {
 }
 
 void Module::SetName(Instruction* inst, std::string_view name) {
-    TINT_ASSERT(IR, inst->HasResults() && !inst->HasMultiResults());
+    TINT_ASSERT(inst->HasResults() && !inst->HasMultiResults());
     return SetName(inst->Result(), name);
 }
 
 void Module::SetName(Value* value, std::string_view name) {
-    TINT_ASSERT(IR, !name.empty());
+    TINT_ASSERT(!name.empty());
     value_to_name_.Replace(value, symbols.Register(name));
 }
 
 void Module::SetName(Value* value, Symbol name) {
-    TINT_ASSERT(IR, name.IsValid());
+    TINT_ASSERT(name.IsValid());
     value_to_name_.Replace(value, name);
 }
 

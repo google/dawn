@@ -12,28 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 
 #include "gtest/gtest-spi.h"
 
 namespace tint {
 namespace {
 
-TEST(DebugTest, Unreachable) {
-    EXPECT_FATAL_FAILURE(
-        {
-            diag::List diagnostics;
-            TINT_UNREACHABLE(Test, diagnostics);
-        },
-        "internal compiler error");
+TEST(ICETest_AssertTrue_Test, Unreachable) {
+    EXPECT_FATAL_FAILURE({ TINT_UNREACHABLE(); }, "internal compiler error");
 }
 
-TEST(DebugTest, AssertTrue) {
-    TINT_ASSERT(Test, true);
+TEST(ICETest_AssertTrue_Test, AssertTrue) {
+    TINT_ASSERT(true);
 }
 
-TEST(DebugTest, AssertFalse) {
-    EXPECT_FATAL_FAILURE({ TINT_ASSERT(Test, false); }, "internal compiler error");
+TEST(ICETest_AssertTrue_Test, AssertFalse) {
+    EXPECT_FATAL_FAILURE({ TINT_ASSERT(false); }, "internal compiler error");
 }
 
 }  // namespace

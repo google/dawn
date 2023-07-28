@@ -25,8 +25,8 @@ IdentifierExpression::IdentifierExpression(GenerationID pid,
                                            const Source& src,
                                            const Identifier* ident)
     : Base(pid, nid, src), identifier(ident) {
-    TINT_ASSERT(AST, identifier != nullptr);
-    TINT_ASSERT_GENERATION_IDS_EQUAL(AST, identifier, generation_id);
+    TINT_ASSERT(identifier != nullptr);
+    TINT_ASSERT_GENERATION_IDS_EQUAL(identifier, generation_id);
 }
 
 IdentifierExpression::~IdentifierExpression() = default;

@@ -19,6 +19,7 @@
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/reference.h"
+#include "src/tint/utils/ice/ice.h"
 
 namespace tint::ir {
 
@@ -107,10 +108,10 @@ ir::Unreachable* Builder::Unreachable() {
 
 const type::Type* Builder::VectorPtrElementType(const type::Type* type) {
     auto* vec_ptr_ty = type->As<type::Pointer>();
-    TINT_ASSERT(IR, vec_ptr_ty);
+    TINT_ASSERT(vec_ptr_ty);
     if (TINT_LIKELY(vec_ptr_ty)) {
         auto* vec_ty = vec_ptr_ty->StoreType()->As<type::Vector>();
-        TINT_ASSERT(IR, vec_ty);
+        TINT_ASSERT(vec_ty);
         if (TINT_LIKELY(vec_ty)) {
             return vec_ty->type();
         }

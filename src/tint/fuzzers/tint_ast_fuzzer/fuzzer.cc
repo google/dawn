@@ -114,9 +114,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
         fuzzer.Run(data, size);
         if (fuzzer.HasErrors()) {
-            std::cout << "Fuzzing " << target.name << " produced an error" << std::endl;
-            auto printer = tint::diag::Printer::create(stderr, true);
-            tint::diag::Formatter{}.format(fuzzer.Diagnostics(), printer.get());
+            std::cout << "Fuzzing " << target.name << " produced an error" << std::endl
+                      << fuzzer.Diagnostics().str() << std::endl;
         }
     }
 

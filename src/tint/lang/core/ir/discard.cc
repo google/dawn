@@ -14,7 +14,6 @@
 
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/type/void.h"
-#include "src/tint/utils/debug/debug.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Discard);
 

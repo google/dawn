@@ -21,6 +21,7 @@
 #include "src/tint/lang/core/ir/location.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/rtti/castable.h"
 
 namespace tint::ir {
@@ -65,7 +66,7 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     /// Sets the builtin information. Note, it is currently an error if the builtin is already set.
     /// @param val the builtin to set
     void SetBuiltin(FunctionParam::Builtin val) {
-        TINT_ASSERT(IR, !builtin_.has_value());
+        TINT_ASSERT(!builtin_.has_value());
         builtin_ = val;
     }
     /// @returns the builtin set for the parameter

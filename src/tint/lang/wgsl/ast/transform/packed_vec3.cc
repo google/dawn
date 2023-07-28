@@ -96,7 +96,7 @@ struct PackedVec3::State {
     /// @returns the new AST type
     Type MakePackedVec3(const type::Type* ty) {
         auto* vec = ty->As<type::Vector>();
-        TINT_ASSERT(Transform, vec != nullptr && vec->Width() == 3);
+        TINT_ASSERT(vec != nullptr && vec->Width() == 3);
         return b.ty(builtin::Builtin::kPackedVec3, CreateASTTypeFor(ctx, vec->type()));
     }
 
@@ -152,8 +152,7 @@ struct PackedVec3::State {
                     } else if (auto count = arr->ConstantCount()) {
                         return b.ty.array(new_type, u32(count.value()), std::move(attrs));
                     } else {
-                        TINT_ICE(Transform, b.Diagnostics())
-                            << type::Array::kErrExpectedConstantCount;
+                        TINT_ICE() << type::Array::kErrExpectedConstantCount;
                         return {};
                     }
                 }
@@ -247,7 +246,7 @@ struct PackedVec3::State {
         Switch(
             ty,
             [&](const type::Array* arr) {
-                TINT_ASSERT(Transform, arr->ConstantCount());
+                TINT_ASSERT(arr->ConstantCount());
                 copy_array_elements(arr->ConstantCount().value(), arr->ElemType());
             },
             [&](const type::Matrix* mat) {
@@ -461,7 +460,7 @@ struct PackedVec3::State {
 
         // Apply all of the pending unpack operations that we have collected.
         for (auto* expr : to_unpack_sorted) {
-            TINT_ASSERT(Transform, ContainsVec3(expr->Type()));
+            TINT_ASSERT(ContainsVec3(expr->Type()));
             auto* packed = ctx.Clone(expr->Declaration());
             const Expression* unpacked = nullptr;
             if (IsVec3(expr->Type())) {
@@ -476,13 +475,13 @@ struct PackedVec3::State {
                 // Use a helper function to unpack an array or matrix.
                 unpacked = UnpackComposite(packed, expr->Type());
             }
-            TINT_ASSERT(Transform, unpacked != nullptr);
+            TINT_ASSERT(unpacked != nullptr);
             ctx.Replace(expr->Declaration(), unpacked);
         }
 
         // Apply all of the pending pack operations that we have collected.
         for (auto* expr : to_pack_sorted) {
-            TINT_ASSERT(Transform, ContainsVec3(expr->Type()));
+            TINT_ASSERT(ContainsVec3(expr->Type()));
             auto* unpacked = ctx.Clone(expr->Declaration());
             const Expression* packed = nullptr;
             if (IsVec3(expr->Type())) {
@@ -492,7 +491,7 @@ struct PackedVec3::State {
                 // Use a helper function to pack an array or matrix.
                 packed = PackComposite(unpacked, expr->Type());
             }
-            TINT_ASSERT(Transform, packed != nullptr);
+            TINT_ASSERT(packed != nullptr);
             ctx.Replace(expr->Declaration(), packed);
         }
 

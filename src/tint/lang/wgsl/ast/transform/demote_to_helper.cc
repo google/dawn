@@ -134,7 +134,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                         // Skip these.
                         return;
                     default:
-                        TINT_UNREACHABLE(Transform, b.Diagnostics())
+                        TINT_UNREACHABLE()
                             << "write to unhandled address space: " << ref->AddressSpace();
                 }
 

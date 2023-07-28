@@ -91,7 +91,7 @@ void SyntaxTreePrinter::Generate() {
             [&](const ast::Function* func) { EmitFunction(func); },
             [&](const ast::Variable* var) { EmitVariable(var); },
             [&](const ast::ConstAssert* ca) { EmitConstAssert(ca); },
-            [&](Default) { TINT_UNREACHABLE(Writer, diagnostics_); });
+            [&](Default) { TINT_UNREACHABLE(); });
 
         if (decl != program_->AST().GlobalDeclarations().Back()) {
             Line();
@@ -485,9 +485,7 @@ void SyntaxTreePrinter::EmitVariable(const ast::Variable* v) {
             [&](const ast::Let*) { Line() << "Let []"; },
             [&](const ast::Override*) { Line() << "Override []"; },
             [&](const ast::Const*) { Line() << "Const []"; },
-            [&](Default) {
-                TINT_ICE(Writer, diagnostics_) << "unhandled variable type " << v->TypeInfo().name;
-            });
+            [&](Default) { TINT_ICE() << "unhandled variable type " << v->TypeInfo().name; });
 
         Line() << "name: " << v->name->symbol.Name();
 
@@ -637,8 +635,7 @@ void SyntaxTreePrinter::EmitAttributes(VectorRef<const ast::Attribute*> attrs) {
                 Line() << "InternalAttribute [" << internal->InternalName() << "]";
             },
             [&](Default) {
-                TINT_ICE(Writer, diagnostics_)
-                    << "Unsupported attribute '" << attr->TypeInfo().name << "'";
+                TINT_ICE() << "Unsupported attribute '" << attr->TypeInfo().name << "'";
             });
     }
 }

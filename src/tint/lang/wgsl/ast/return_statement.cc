@@ -28,7 +28,7 @@ ReturnStatement::ReturnStatement(GenerationID pid,
                                  const Source& src,
                                  const Expression* val)
     : Base(pid, nid, src), value(val) {
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, value, generation_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(value, generation_id);
 }
 
 ReturnStatement::~ReturnStatement() = default;

@@ -22,7 +22,7 @@
 #include <utility>
 
 #include "src/tint/utils/containers/vector.h"
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/math/hash.h"
 
 #define TINT_ASSERT_ITERATORS_NOT_INVALIDATED
@@ -194,8 +194,8 @@ class HashmapBase {
         /// @returns the value pointed to by this iterator
         EntryRef<IS_CONST> operator->() const {
 #ifdef TINT_ASSERT_ITERATORS_NOT_INVALIDATED
-            TINT_ASSERT(Utils, map.Generation() == initial_generation &&
-                                   "iterator invalidated by container modification");
+            TINT_ASSERT(map.Generation() == initial_generation &&
+                        "iterator invalidated by container modification");
 #endif
             return *this;
         }
@@ -203,8 +203,8 @@ class HashmapBase {
         /// @returns a reference to the value at the iterator
         EntryRef<IS_CONST> operator*() const {
 #ifdef TINT_ASSERT_ITERATORS_NOT_INVALIDATED
-            TINT_ASSERT(Utils, map.Generation() == initial_generation &&
-                                   "iterator invalidated by container modification");
+            TINT_ASSERT(map.Generation() == initial_generation &&
+                        "iterator invalidated by container modification");
 #endif
             auto& ref = current->entry.value();
             if constexpr (ValueIsVoid) {
@@ -218,8 +218,8 @@ class HashmapBase {
         /// @returns this iterator
         IteratorT& operator++() {
 #ifdef TINT_ASSERT_ITERATORS_NOT_INVALIDATED
-            TINT_ASSERT(Utils, map.Generation() == initial_generation &&
-                                   "iterator invalidated by container modification");
+            TINT_ASSERT(map.Generation() == initial_generation &&
+                        "iterator invalidated by container modification");
 #endif
             if (current == end) {
                 return *this;
@@ -234,8 +234,8 @@ class HashmapBase {
         /// @returns true if this iterator is equal to other
         bool operator==(const IteratorT& other) const {
 #ifdef TINT_ASSERT_ITERATORS_NOT_INVALIDATED
-            TINT_ASSERT(Utils, map.Generation() == initial_generation &&
-                                   "iterator invalidated by container modification");
+            TINT_ASSERT(map.Generation() == initial_generation &&
+                        "iterator invalidated by container modification");
 #endif
             return current == other.current;
         }
@@ -245,8 +245,8 @@ class HashmapBase {
         /// @returns true if this iterator is not equal to other
         bool operator!=(const IteratorT& other) const {
 #ifdef TINT_ASSERT_ITERATORS_NOT_INVALIDATED
-            TINT_ASSERT(Utils, map.Generation() == initial_generation &&
-                                   "iterator invalidated by container modification");
+            TINT_ASSERT(map.Generation() == initial_generation &&
+                        "iterator invalidated by container modification");
 #endif
             return current != other.current;
         }
@@ -436,11 +436,11 @@ class HashmapBase {
             if (slot.entry.has_value()) {
                 num_alive++;
                 auto const [index, hash] = Hash(KeyOf(*slot.entry));
-                TINT_ASSERT(Utils, hash == slot.hash);
-                TINT_ASSERT(Utils, slot_idx == Wrap(index + slot.distance));
+                TINT_ASSERT(hash == slot.hash);
+                TINT_ASSERT(slot_idx == Wrap(index + slot.distance));
             }
         }
-        TINT_ASSERT(Utils, num_alive == count_);
+        TINT_ASSERT(num_alive == count_);
     }
 
   protected:
@@ -530,8 +530,7 @@ class HashmapBase {
             index = (index == count - 1) ? 0 : index + 1;
         }
 
-        tint::diag::List diags;
-        TINT_ICE(Utils, diags) << "HashmapBase::Put() looped entire map without finding a slot";
+        TINT_ICE() << "HashmapBase::Put() looped entire map without finding a slot";
         return PutResult{};
     }
 
@@ -581,8 +580,7 @@ class HashmapBase {
             index = (index == count - 1) ? 0 : index + 1;
         }
 
-        tint::diag::List diags;
-        TINT_ICE(Utils, diags) << "HashmapBase::IndexOf() looped entire map without finding a slot";
+        TINT_ICE() << "HashmapBase::IndexOf() looped entire map without finding a slot";
         return {/* found */ false, /* index */ 0};
     }
 

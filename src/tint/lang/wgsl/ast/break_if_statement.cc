@@ -25,8 +25,8 @@ BreakIfStatement::BreakIfStatement(GenerationID pid,
                                    const Source& src,
                                    const Expression* cond)
     : Base(pid, nid, src), condition(cond) {
-    TINT_ASSERT(AST, condition);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, condition, generation_id);
+    TINT_ASSERT(condition);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(condition, generation_id);
 }
 
 BreakIfStatement::~BreakIfStatement() = default;

@@ -13,13 +13,14 @@
 // limitations under the License.
 
 #include "src/tint/lang/core/ir/constant.h"
+#include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Constant);
 
 namespace tint::ir {
 
 Constant::Constant(const constant::Value* val) : value_(val) {
-    TINT_ASSERT(IR, value_);
+    TINT_ASSERT(value_);
 }
 
 Constant::~Constant() = default;

@@ -297,7 +297,7 @@ bool ASTPrinter::Generate() {
             },
             [&](Default) {
                 // These are pushed into the entry point by sanitizer transforms.
-                TINT_ICE(Writer, diagnostics_) << "unhandled type: " << decl->TypeInfo().name;
+                TINT_ICE() << "unhandled type: " << decl->TypeInfo().name;
                 return false;
             });
         if (!ok) {
@@ -614,7 +614,7 @@ bool ASTPrinter::EmitCall(StringStream& out, const ast::CallExpression* expr) {
         [&](const sem::ValueConversion* conv) { return EmitTypeConversion(out, call, conv); },
         [&](const sem::ValueConstructor* ctor) { return EmitTypeInitializer(out, call, ctor); },
         [&](Default) {
-            TINT_ICE(Writer, diagnostics_) << "unhandled call target: " << target->TypeInfo().name;
+            TINT_ICE() << "unhandled call target: " << target->TypeInfo().name;
             return false;
         });
 }
@@ -946,7 +946,7 @@ bool ASTPrinter::EmitAtomicCall(StringStream& out,
             break;
     }
 
-    TINT_UNREACHABLE(Writer, diagnostics_) << "unsupported atomic builtin: " << builtin->Type();
+    TINT_UNREACHABLE() << "unsupported atomic builtin: " << builtin->Type();
     return false;
 }
 
@@ -967,7 +967,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
 
     auto* texture = arg(Usage::kTexture)->Declaration();
     if (TINT_UNLIKELY(!texture)) {
-        TINT_ICE(Writer, diagnostics_) << "missing texture arg";
+        TINT_ICE() << "missing texture arg";
         return false;
     }
 
@@ -1104,8 +1104,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             out << ".write(";
             break;
         default:
-            TINT_UNREACHABLE(Writer, diagnostics_)
-                << "Unhandled texture builtin '" << builtin->str() << "'";
+            TINT_UNREACHABLE() << "Unhandled texture builtin '" << builtin->str() << "'";
             return false;
     }
 
@@ -1138,7 +1137,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                         out << "uint3(";
                         break;
                     default:
-                        TINT_ICE(Writer, diagnostics_) << "unhandled texture dimensionality";
+                        TINT_ICE() << "unhandled texture dimensionality";
                         break;
                 }
             }
@@ -1252,7 +1251,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                 out << "component::w";
                 break;
             default:
-                TINT_ICE(Writer, diagnostics_) << "invalid textureGather component: " << c;
+                TINT_ICE() << "invalid textureGather component: " << c;
                 break;
         }
     }
@@ -1882,15 +1881,14 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
     const uint32_t kInvalidBindingIndex = std::numeric_limits<uint32_t>::max();
     auto get_binding_index = [&](const ast::Parameter* param) -> uint32_t {
         if (TINT_UNLIKELY(!param->HasBindingPoint())) {
-            TINT_ICE(Writer, diagnostics_)
-                << "missing binding attributes for entry point parameter";
+            TINT_ICE() << "missing binding attributes for entry point parameter";
             return kInvalidBindingIndex;
         }
         auto* param_sem = builder_.Sem().Get<sem::Parameter>(param);
         auto bp = param_sem->BindingPoint();
         if (TINT_UNLIKELY(bp->group != 0)) {
-            TINT_ICE(Writer, diagnostics_) << "encountered non-zero resource group index (use "
-                                              "BindingRemapper to fix)";
+            TINT_ICE() << "encountered non-zero resource group index (use "
+                          "BindingRemapper to fix)";
             return kInvalidBindingIndex;
         }
         return bp->binding;
@@ -1965,8 +1963,7 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
                         default:
                             break;
                     }
-                    TINT_ICE(Writer, diagnostics_)
-                        << "invalid pointer address space for entry point parameter";
+                    TINT_ICE() << "invalid pointer address space for entry point parameter";
                     return false;
                 },
                 [&](Default) {
@@ -1989,7 +1986,7 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
                         out << " [[" << name << "]]";
                     }
                     if (TINT_UNLIKELY(!builtin_found)) {
-                        TINT_ICE(Writer, diagnostics_) << "Unsupported entry point parameter";
+                        TINT_ICE() << "Unsupported entry point parameter";
                         return false;
                     }
                     return true;
@@ -2294,8 +2291,7 @@ bool ASTPrinter::EmitMemberAccessor(StringStream& out, const ast::MemberAccessor
             return true;
         },
         [&](Default) {
-            TINT_ICE(Writer, diagnostics_)
-                << "unknown member access type: " << sem->TypeInfo().name;
+            TINT_ICE() << "unknown member access type: " << sem->TypeInfo().name;
             return false;
         });
 }
@@ -2381,8 +2377,7 @@ bool ASTPrinter::EmitStatement(const ast::Statement* stmt) {
                     return true;  // Constants are embedded at their use
                 },
                 [&](Default) {  //
-                    TINT_ICE(Writer, diagnostics_)
-                        << "unknown statement type: " << stmt->TypeInfo().name;
+                    TINT_ICE() << "unknown statement type: " << stmt->TypeInfo().name;
                     return false;
                 });
         },
@@ -2446,8 +2441,7 @@ bool ASTPrinter::EmitType(StringStream& out, const type::Type* type) {
                 out << "atomic_uint";
                 return true;
             }
-            TINT_ICE(Writer, diagnostics_)
-                << "unhandled atomic type " << atomic->Type()->FriendlyName();
+            TINT_ICE() << "unhandled atomic type " << atomic->Type()->FriendlyName();
             return false;
         },
         [&](const type::Array* arr) {
@@ -2520,8 +2514,7 @@ bool ASTPrinter::EmitType(StringStream& out, const type::Type* type) {
         },
         [&](const type::Texture* tex) {
             if (TINT_UNLIKELY(tex->Is<type::ExternalTexture>())) {
-                TINT_ICE(Writer, diagnostics_)
-                    << "Multiplanar external texture transform was not run.";
+                TINT_ICE() << "Multiplanar external texture transform was not run.";
                 return false;
             }
 
@@ -2660,7 +2653,7 @@ bool ASTPrinter::EmitAddressSpace(StringStream& out, builtin::AddressSpace sc) {
         default:
             break;
     }
-    TINT_ICE(Writer, diagnostics_) << "unhandled address space: " << sc;
+    TINT_ICE() << "unhandled address space: " << sc;
     return false;
 }
 
@@ -2703,8 +2696,8 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const type::Struct* str) {
         if (is_host_shareable) {
             if (TINT_UNLIKELY(wgsl_offset < msl_offset)) {
                 // Unimplementable layout
-                TINT_ICE(Writer, diagnostics_) << "Structure member WGSL offset (" << wgsl_offset
-                                               << ") is behind MSL offset (" << msl_offset << ")";
+                TINT_ICE() << "Structure member WGSL offset (" << wgsl_offset
+                           << ") is behind MSL offset (" << msl_offset << ")";
                 return false;
             }
 
@@ -2739,7 +2732,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const type::Struct* str) {
         if (auto location = attributes.location) {
             auto& pipeline_stage_uses = str->PipelineStageUses();
             if (TINT_UNLIKELY(pipeline_stage_uses.size() != 1)) {
-                TINT_ICE(Writer, diagnostics_) << "invalid entry point IO struct uses";
+                TINT_ICE() << "invalid entry point IO struct uses";
                 return false;
             }
 
@@ -2758,7 +2751,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const type::Struct* str) {
                     out << " [[color(" + std::to_string(location.value()) + ")]]";
                 }
             } else {
-                TINT_ICE(Writer, diagnostics_) << "invalid use of location decoration";
+                TINT_ICE() << "invalid use of location decoration";
                 return false;
             }
         }
@@ -2783,8 +2776,8 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const type::Struct* str) {
             // Calculate new MSL offset
             auto size_align = MslPackedTypeSizeAndAlign(diagnostics_, ty);
             if (TINT_UNLIKELY(msl_offset % size_align.align)) {
-                TINT_ICE(Writer, diagnostics_)
-                    << "Misaligned MSL structure member " << ty->FriendlyName() << " " << mem_name;
+                TINT_ICE() << "Misaligned MSL structure member " << ty->FriendlyName() << " "
+                           << mem_name;
                 return false;
             }
             msl_offset += size_align.size;
@@ -2891,7 +2884,7 @@ bool ASTPrinter::EmitVar(const ast::Var* var) {
             out << "threadgroup ";
             break;
         default:
-            TINT_ICE(Writer, diagnostics_) << "unhandled variable address space";
+            TINT_ICE() << "unhandled variable address space";
             return false;
     }
 
@@ -2936,7 +2929,7 @@ bool ASTPrinter::EmitLet(const ast::Let* let) {
             out << "threadgroup ";
             break;
         default:
-            TINT_ICE(Writer, diagnostics_) << "unhandled variable address space";
+            TINT_ICE() << "unhandled variable address space";
             return false;
     }
 

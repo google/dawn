@@ -14,15 +14,14 @@
 
 #include "src/tint/lang/wgsl/ast/transform/utils/get_insertion_point.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
-#include "src/tint/utils/debug/debug.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/rtti/switch.h"
 
 namespace tint::ast::transform::utils {
 
 InsertionPoint GetInsertionPoint(CloneContext& ctx, const Statement* stmt) {
     auto& sem = ctx.src->Sem();
-    auto& diag = ctx.dst->Diagnostics();
     using RetType = std::pair<const sem::BlockStatement*, const Statement*>;
 
     if (auto* sem_stmt = sem.Get(stmt)) {
@@ -46,8 +45,8 @@ InsertionPoint GetInsertionPoint(CloneContext& ctx, const Statement* stmt) {
                 return {};
             },
             [&](Default) -> RetType {
-                TINT_ICE(Transform, diag) << "expected parent of statement to be "
-                                             "either a block or for loop";
+                TINT_ICE() << "expected parent of statement to be "
+                              "either a block or for loop";
                 return {};
             });
     }

@@ -32,17 +32,17 @@ IfStatement::IfStatement(GenerationID pid,
       body(b),
       else_statement(else_stmt),
       attributes(std::move(attrs)) {
-    TINT_ASSERT(AST, condition);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, condition, generation_id);
-    TINT_ASSERT(AST, body);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, body, generation_id);
+    TINT_ASSERT(condition);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(condition, generation_id);
+    TINT_ASSERT(body);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(body, generation_id);
     if (else_statement) {
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, else_statement, generation_id);
-        TINT_ASSERT(AST, (else_statement->IsAnyOf<IfStatement, BlockStatement>()));
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(else_statement, generation_id);
+        TINT_ASSERT((else_statement->IsAnyOf<IfStatement, BlockStatement>()));
     }
     for (auto* attr : attributes) {
-        TINT_ASSERT(AST, attr);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
+        TINT_ASSERT(attr);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(attr, generation_id);
     }
 }
 

@@ -40,7 +40,6 @@ namespace detail {
 void AssertGenerationIDsEqual(GenerationID a,
                               GenerationID b,
                               bool if_valid,
-                              diag::System system,
                               const char* msg,
                               const char* file,
                               size_t line) {
@@ -50,8 +49,7 @@ void AssertGenerationIDsEqual(GenerationID a,
     if (if_valid && (!a || !b)) {
         return;  //  a or b were not valid
     }
-    diag::List diagnostics;
-    tint::InternalCompilerError(file, line, system, diagnostics) << msg;
+    tint::InternalCompilerError(file, line) << msg;
 }
 
 }  // namespace detail

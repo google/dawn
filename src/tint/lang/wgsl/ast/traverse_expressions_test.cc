@@ -31,20 +31,18 @@ TEST_F(TraverseExpressionsTest, DescendIndexAccessor) {
     auto* root = IndexAccessor(i[0], i[1]);
     {
         std::vector<const Expression*> l2r;
-        TraverseExpressions<TraverseOrder::LeftToRight>(root, Diagnostics(),
-                                                        [&](const Expression* expr) {
-                                                            l2r.push_back(expr);
-                                                            return TraverseAction::Descend;
-                                                        });
+        TraverseExpressions<TraverseOrder::LeftToRight>(root, [&](const Expression* expr) {
+            l2r.push_back(expr);
+            return TraverseAction::Descend;
+        });
         EXPECT_THAT(l2r, ElementsAre(root, i[0], e[0], e[1], i[1], e[2], e[3]));
     }
     {
         std::vector<const Expression*> r2l;
-        TraverseExpressions<TraverseOrder::RightToLeft>(root, Diagnostics(),
-                                                        [&](const Expression* expr) {
-                                                            r2l.push_back(expr);
-                                                            return TraverseAction::Descend;
-                                                        });
+        TraverseExpressions<TraverseOrder::RightToLeft>(root, [&](const Expression* expr) {
+            r2l.push_back(expr);
+            return TraverseAction::Descend;
+        });
         EXPECT_THAT(r2l, ElementsAre(root, i[1], e[3], e[2], i[0], e[1], e[0]));
     }
 }
@@ -55,20 +53,18 @@ TEST_F(TraverseExpressionsTest, DescendBinaryExpression) {
     auto* root = Mul(i[0], i[1]);
     {
         std::vector<const Expression*> l2r;
-        TraverseExpressions<TraverseOrder::LeftToRight>(root, Diagnostics(),
-                                                        [&](const Expression* expr) {
-                                                            l2r.push_back(expr);
-                                                            return TraverseAction::Descend;
-                                                        });
+        TraverseExpressions<TraverseOrder::LeftToRight>(root, [&](const Expression* expr) {
+            l2r.push_back(expr);
+            return TraverseAction::Descend;
+        });
         EXPECT_THAT(l2r, ElementsAre(root, i[0], e[0], e[1], i[1], e[2], e[3]));
     }
     {
         std::vector<const Expression*> r2l;
-        TraverseExpressions<TraverseOrder::RightToLeft>(root, Diagnostics(),
-                                                        [&](const Expression* expr) {
-                                                            r2l.push_back(expr);
-                                                            return TraverseAction::Descend;
-                                                        });
+        TraverseExpressions<TraverseOrder::RightToLeft>(root, [&](const Expression* expr) {
+            r2l.push_back(expr);
+            return TraverseAction::Descend;
+        });
         EXPECT_THAT(r2l, ElementsAre(root, i[1], e[3], e[2], i[0], e[1], e[0]));
     }
 }
@@ -82,7 +78,7 @@ TEST_F(TraverseExpressionsTest, Depth) {
     size_t depths[] = {0, 1, 2, 2, 1, 2, 2};
     {
         TraverseExpressions<TraverseOrder::LeftToRight>(  //
-            root, Diagnostics(), [&](const Expression* expr, size_t depth) {
+            root, [&](const Expression* expr, size_t depth) {
                 (void)expr;
                 EXPECT_THAT(depth, depths[j++]);
                 return TraverseAction::Descend;
@@ -97,21 +93,19 @@ TEST_F(TraverseExpressionsTest, DescendBitcastExpression) {
     auto* b2 = Bitcast<i32>(b1);
     auto* root = Bitcast<i32>(b2);
     {
-        tint::Vector<const Expression*, 8> l2r;
-        TraverseExpressions<TraverseOrder::LeftToRight>(root, Diagnostics(),
-                                                        [&](const Expression* expr) {
-                                                            l2r.Push(expr);
-                                                            return TraverseAction::Descend;
-                                                        });
+        Vector<const Expression*, 8> l2r;
+        TraverseExpressions<TraverseOrder::LeftToRight>(root, [&](const Expression* expr) {
+            l2r.Push(expr);
+            return TraverseAction::Descend;
+        });
         EXPECT_THAT(l2r, ElementsAre(root, b2, b1, b0, e));
     }
     {
-        tint::Vector<const Expression*, 8> r2l;
-        TraverseExpressions<TraverseOrder::RightToLeft>(root, Diagnostics(),
-                                                        [&](const Expression* expr) {
-                                                            r2l.Push(expr);
-                                                            return TraverseAction::Descend;
-                                                        });
+        Vector<const Expression*, 8> r2l;
+        TraverseExpressions<TraverseOrder::RightToLeft>(root, [&](const Expression* expr) {
+            r2l.Push(expr);
+            return TraverseAction::Descend;
+        });
         EXPECT_THAT(r2l, ElementsAre(root, b2, b1, b0, e));
     }
 }
@@ -121,21 +115,19 @@ TEST_F(TraverseExpressionsTest, DescendCallExpression) {
     tint::Vector c{Call("a", e[0], e[1]), Call("b", e[2], e[3])};
     auto* root = Call("c", c[0], c[1]);
     {
-        tint::Vector<const Expression*, 8> l2r;
-        TraverseExpressions<TraverseOrder::LeftToRight>(root, Diagnostics(),
-                                                        [&](const Expression* expr) {
-                                                            l2r.Push(expr);
-                                                            return TraverseAction::Descend;
-                                                        });
+        Vector<const Expression*, 8> l2r;
+        TraverseExpressions<TraverseOrder::LeftToRight>(root, [&](const Expression* expr) {
+            l2r.Push(expr);
+            return TraverseAction::Descend;
+        });
         EXPECT_THAT(l2r, ElementsAre(root, c[0], e[0], e[1], c[1], e[2], e[3]));
     }
     {
-        tint::Vector<const Expression*, 8> r2l;
-        TraverseExpressions<TraverseOrder::RightToLeft>(root, Diagnostics(),
-                                                        [&](const Expression* expr) {
-                                                            r2l.Push(expr);
-                                                            return TraverseAction::Descend;
-                                                        });
+        Vector<const Expression*, 8> r2l;
+        TraverseExpressions<TraverseOrder::RightToLeft>(root, [&](const Expression* expr) {
+            r2l.Push(expr);
+            return TraverseAction::Descend;
+        });
         EXPECT_THAT(r2l, ElementsAre(root, c[1], e[3], e[2], c[0], e[1], e[0]));
     }
 }
@@ -146,20 +138,18 @@ TEST_F(TraverseExpressionsTest, DescendMemberAccessorExpression) {
     auto* root = MemberAccessor(m, "b");
     {
         std::vector<const Expression*> l2r;
-        TraverseExpressions<TraverseOrder::LeftToRight>(root, Diagnostics(),
-                                                        [&](const Expression* expr) {
-                                                            l2r.push_back(expr);
-                                                            return TraverseAction::Descend;
-                                                        });
+        TraverseExpressions<TraverseOrder::LeftToRight>(root, [&](const Expression* expr) {
+            l2r.push_back(expr);
+            return TraverseAction::Descend;
+        });
         EXPECT_THAT(l2r, ElementsAre(root, m, e));
     }
     {
         std::vector<const Expression*> r2l;
-        TraverseExpressions<TraverseOrder::RightToLeft>(root, Diagnostics(),
-                                                        [&](const Expression* expr) {
-                                                            r2l.push_back(expr);
-                                                            return TraverseAction::Descend;
-                                                        });
+        TraverseExpressions<TraverseOrder::RightToLeft>(root, [&](const Expression* expr) {
+            r2l.push_back(expr);
+            return TraverseAction::Descend;
+        });
         EXPECT_THAT(r2l, ElementsAre(root, m, e));
     }
 }
@@ -174,20 +164,18 @@ TEST_F(TraverseExpressionsTest, DescendMemberIndexExpression) {
     auto* root = IndexAccessor(c, f);
     {
         std::vector<const Expression*> l2r;
-        TraverseExpressions<TraverseOrder::LeftToRight>(root, Diagnostics(),
-                                                        [&](const Expression* expr) {
-                                                            l2r.push_back(expr);
-                                                            return TraverseAction::Descend;
-                                                        });
+        TraverseExpressions<TraverseOrder::LeftToRight>(root, [&](const Expression* expr) {
+            l2r.push_back(expr);
+            return TraverseAction::Descend;
+        });
         EXPECT_THAT(l2r, ElementsAre(root, c, a, b, f, d, e));
     }
     {
         std::vector<const Expression*> r2l;
-        TraverseExpressions<TraverseOrder::RightToLeft>(root, Diagnostics(),
-                                                        [&](const Expression* expr) {
-                                                            r2l.push_back(expr);
-                                                            return TraverseAction::Descend;
-                                                        });
+        TraverseExpressions<TraverseOrder::RightToLeft>(root, [&](const Expression* expr) {
+            r2l.push_back(expr);
+            return TraverseAction::Descend;
+        });
         EXPECT_THAT(r2l, ElementsAre(root, f, e, d, c, b, a));
     }
 }
@@ -200,20 +188,18 @@ TEST_F(TraverseExpressionsTest, DescendUnaryExpression) {
     auto* root = Deref(u2);
     {
         std::vector<const Expression*> l2r;
-        TraverseExpressions<TraverseOrder::LeftToRight>(root, Diagnostics(),
-                                                        [&](const Expression* expr) {
-                                                            l2r.push_back(expr);
-                                                            return TraverseAction::Descend;
-                                                        });
+        TraverseExpressions<TraverseOrder::LeftToRight>(root, [&](const Expression* expr) {
+            l2r.push_back(expr);
+            return TraverseAction::Descend;
+        });
         EXPECT_THAT(l2r, ElementsAre(root, u2, u1, u0, e));
     }
     {
         std::vector<const Expression*> r2l;
-        TraverseExpressions<TraverseOrder::RightToLeft>(root, Diagnostics(),
-                                                        [&](const Expression* expr) {
-                                                            r2l.push_back(expr);
-                                                            return TraverseAction::Descend;
-                                                        });
+        TraverseExpressions<TraverseOrder::RightToLeft>(root, [&](const Expression* expr) {
+            r2l.push_back(expr);
+            return TraverseAction::Descend;
+        });
         EXPECT_THAT(r2l, ElementsAre(root, u2, u1, u0, e));
     }
 }
@@ -223,11 +209,10 @@ TEST_F(TraverseExpressionsTest, Skip) {
     std::vector<const Expression*> i = {IndexAccessor(e[0], e[1]), IndexAccessor(e[2], e[3])};
     auto* root = IndexAccessor(i[0], i[1]);
     std::vector<const Expression*> order;
-    TraverseExpressions<TraverseOrder::LeftToRight>(
-        root, Diagnostics(), [&](const Expression* expr) {
-            order.push_back(expr);
-            return expr == i[0] ? TraverseAction::Skip : TraverseAction::Descend;
-        });
+    TraverseExpressions<TraverseOrder::LeftToRight>(root, [&](const Expression* expr) {
+        order.push_back(expr);
+        return expr == i[0] ? TraverseAction::Skip : TraverseAction::Descend;
+    });
     EXPECT_THAT(order, ElementsAre(root, i[0], i[1], e[2], e[3]));
 }
 
@@ -236,11 +221,10 @@ TEST_F(TraverseExpressionsTest, Stop) {
     std::vector<const Expression*> i = {IndexAccessor(e[0], e[1]), IndexAccessor(e[2], e[3])};
     auto* root = IndexAccessor(i[0], i[1]);
     std::vector<const Expression*> order;
-    TraverseExpressions<TraverseOrder::LeftToRight>(
-        root, Diagnostics(), [&](const Expression* expr) {
-            order.push_back(expr);
-            return expr == i[0] ? TraverseAction::Stop : TraverseAction::Descend;
-        });
+    TraverseExpressions<TraverseOrder::LeftToRight>(root, [&](const Expression* expr) {
+        order.push_back(expr);
+        return expr == i[0] ? TraverseAction::Stop : TraverseAction::Descend;
+    });
     EXPECT_THAT(order, ElementsAre(root, i[0]));
 }
 

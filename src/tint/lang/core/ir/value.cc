@@ -16,6 +16,7 @@
 
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/instruction.h"
+#include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Value);
 
@@ -26,8 +27,8 @@ Value::Value() = default;
 Value::~Value() = default;
 
 void Value::Destroy() {
-    TINT_ASSERT(IR, Alive());
-    TINT_ASSERT(IR, Usages().Count() == 0);
+    TINT_ASSERT(Alive());
+    TINT_ASSERT(Usages().Count() == 0);
     flags_.Add(Flag::kDead);
 }
 

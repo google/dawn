@@ -14,7 +14,7 @@
 
 #include "src/tint/utils/text/symbol_table.h"
 
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 
 namespace tint {
 
@@ -27,7 +27,7 @@ SymbolTable::~SymbolTable() = default;
 SymbolTable& SymbolTable::operator=(SymbolTable&&) = default;
 
 Symbol SymbolTable::Register(std::string_view name) {
-    TINT_ASSERT(Symbol, !name.empty());
+    TINT_ASSERT(!name.empty());
 
     auto it = name_to_symbol_.Find(name);
     if (it) {

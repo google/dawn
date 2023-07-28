@@ -29,14 +29,14 @@ WhileStatement::WhileStatement(GenerationID pid,
                                const BlockStatement* b,
                                VectorRef<const ast::Attribute*> attrs)
     : Base(pid, nid, src), condition(cond), body(b), attributes(std::move(attrs)) {
-    TINT_ASSERT(AST, cond);
-    TINT_ASSERT(AST, body);
+    TINT_ASSERT(cond);
+    TINT_ASSERT(body);
 
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, condition, generation_id);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, body, generation_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(condition, generation_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(body, generation_id);
     for (auto* attr : attributes) {
-        TINT_ASSERT(AST, attr);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
+        TINT_ASSERT(attr);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(attr, generation_id);
     }
 }
 

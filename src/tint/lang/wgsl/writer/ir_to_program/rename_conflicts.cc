@@ -261,9 +261,7 @@ struct RenameConflicts::State {
             [&](ir::Value* value) { ir->SetName(value, new_name); },
             [&](type::Struct* str) { str->SetName(new_name); },
             [&](Default) {
-                diag::List diags;
-                TINT_ICE(Transform, diags)
-                    << "unhandled type for renaming: " << thing->TypeInfo().name;
+                TINT_ICE() << "unhandled type for renaming: " << thing->TypeInfo().name;
             });
     }
 

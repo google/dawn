@@ -140,7 +140,7 @@ class State {
                 TINT_SCOPED_ASSIGNMENT(is_in_loop_or_switch, true);
                 ProcessStatement(w->body);
             },
-            [&](Default) { TINT_ICE(Transform, b.Diagnostics()) << "unhandled statement type"; });
+            [&](Default) { TINT_ICE() << "unhandled statement type"; });
     }
 
     void ProcessBlock(const BlockStatement* block) {

@@ -27,7 +27,7 @@ Composite::Composite(const type::Type* t,
                      bool all_0,
                      bool any_0)
     : type(t), elements(std::move(els)), all_zero(all_0), any_zero(any_0), hash(CalcHash()) {
-    TINT_ASSERT(Constant, !elements.IsEmpty());
+    TINT_ASSERT(!elements.IsEmpty());
 }
 
 Composite::~Composite() = default;

@@ -538,6 +538,9 @@ class Resolver {
     /// @param use the thing that the attribute was applied to
     void ErrorInvalidAttribute(const ast::Attribute* attr, std::string_view use);
 
+    /// Adds the given internal compiler error message to the diagnostics
+    void AddICE(const std::string& msg, const Source& source) const;
+
     /// Adds the given error message to the diagnostics
     void AddError(const std::string& msg, const Source& source) const;
 

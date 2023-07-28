@@ -27,7 +27,7 @@ DiagnosticControl::DiagnosticControl() = default;
 DiagnosticControl::DiagnosticControl(builtin::DiagnosticSeverity sev,
                                      const DiagnosticRuleName* rule)
     : severity(sev), rule_name(rule) {
-    TINT_ASSERT(AST, rule != nullptr);
+    TINT_ASSERT(rule != nullptr);
 }
 
 DiagnosticControl::DiagnosticControl(DiagnosticControl&&) = default;

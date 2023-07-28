@@ -437,8 +437,7 @@ struct Std140::State {
                         // * Override-expression counts can only be applied to workgroup arrays, and
                         //   this method only handles types transitively used as uniform buffers.
                         // * Runtime-sized arrays cannot be used in uniform buffers.
-                        TINT_ICE(Transform, b.Diagnostics())
-                            << "unexpected non-constant array count";
+                        TINT_ICE() << "unexpected non-constant array count";
                         count = 1;
                     }
                     return b.ty.array(std140, b.Expr(u32(count.value())), std::move(attrs));
@@ -523,9 +522,8 @@ struct Std140::State {
                         expr = user->Variable()->Initializer();
                         return Action::kContinue;
                     }
-                    TINT_ICE(Transform, b.Diagnostics())
-                        << "unexpected variable found walking access chain: "
-                        << user->Variable()->Declaration()->name->symbol.Name();
+                    TINT_ICE() << "unexpected variable found walking access chain: "
+                               << user->Variable()->Declaration()->name->symbol.Name();
                     return Action::kError;
                 },
                 [&](const sem::StructMemberAccess* a) {
@@ -580,18 +578,16 @@ struct Std140::State {
                                               expr = sem.GetVal(u->expr);
                                               return Action::kContinue;
                                           default:
-                                              TINT_ICE(Transform, b.Diagnostics())
-                                                  << "unhandled unary op for access chain: "
-                                                  << u->op;
+                                              TINT_ICE() << "unhandled unary op for access chain: "
+                                                         << u->op;
                                               return Action::kError;
                                       }
                                   });
                 },
                 [&](Default) {
-                    TINT_ICE(Transform, b.Diagnostics())
-                        << "unhandled expression type for access chain\n"
-                        << "AST: " << expr->Declaration()->TypeInfo().name << "\n"
-                        << "SEM: " << expr->TypeInfo().name;
+                    TINT_ICE() << "unhandled expression type for access chain\n"
+                               << "AST: " << expr->Declaration()->TypeInfo().name << "\n"
+                               << "SEM: " << expr->TypeInfo().name;
                     return Action::kError;
                 });
 
@@ -636,7 +632,7 @@ struct Std140::State {
                     // * Override-expression counts can only be applied to workgroup arrays, and
                     //   this method only handles types transitively used as uniform buffers.
                     // * Runtime-sized arrays cannot be used in uniform buffers.
-                    TINT_ICE(Transform, b.Diagnostics()) << "unexpected non-constant array count";
+                    TINT_ICE() << "unexpected non-constant array count";
                     count = 1;
                 }
                 return "arr" + std::to_string(count.value()) + "_" + ConvertSuffix(arr->ElemType());
@@ -648,8 +644,7 @@ struct Std140::State {
             [&](const type::F32*) { return "f32"; },  //
             [&](const type::F16*) { return "f16"; },
             [&](Default) {
-                TINT_ICE(Transform, b.Diagnostics())
-                    << "unhandled type for conversion name: " << ty->FriendlyName();
+                TINT_ICE() << "unhandled type for conversion name: " << ty->FriendlyName();
                 return "";
             });
     }
@@ -724,7 +719,7 @@ struct Std140::State {
                         });
                         stmts.Push(b.Return(b.Call(mat_ty, std::move(mat_args))));
                     } else {
-                        TINT_ICE(Transform, b.Diagnostics())
+                        TINT_ICE()
                             << "failed to find std140 matrix info for: " << ty->FriendlyName();
                     }
                 },  //
@@ -742,8 +737,7 @@ struct Std140::State {
                         // * Override-expression counts can only be applied to workgroup arrays, and
                         //   this method only handles types transitively used as uniform buffers.
                         // * Runtime-sized arrays cannot be used in uniform buffers.
-                        TINT_ICE(Transform, b.Diagnostics())
-                            << "unexpected non-constant array count";
+                        TINT_ICE() << "unexpected non-constant array count";
                         count = 1;
                     }
                     stmts.Push(b.Decl(var));
@@ -754,8 +748,7 @@ struct Std140::State {
                     stmts.Push(b.Return(var));
                 },
                 [&](Default) {
-                    TINT_ICE(Transform, b.Diagnostics())
-                        << "unhandled type for conversion: " << ty->FriendlyName();
+                    TINT_ICE() << "unhandled type for conversion: " << ty->FriendlyName();
                 });
 
             // Generate the function
@@ -1100,8 +1093,7 @@ struct Std140::State {
                     return {expr, vec->type(), name};
                 },  //
                 [&](Default) -> ExprTypeName {
-                    TINT_ICE(Transform, b.Diagnostics())
-                        << "unhandled type for access chain: " << ty->FriendlyName();
+                    TINT_ICE() << "unhandled type for access chain: " << ty->FriendlyName();
                     return {};
                 });
         }
@@ -1121,8 +1113,7 @@ struct Std140::State {
                     return {expr, swizzle_ty, rhs};
                 },  //
                 [&](Default) -> ExprTypeName {
-                    TINT_ICE(Transform, b.Diagnostics())
-                        << "unhandled type for access chain: " << ty->FriendlyName();
+                    TINT_ICE() << "unhandled type for access chain: " << ty->FriendlyName();
                     return {};
                 });
         }
@@ -1150,8 +1141,7 @@ struct Std140::State {
                 return {expr, vec->type(), std::to_string(idx)};
             },  //
             [&](Default) -> ExprTypeName {
-                TINT_ICE(Transform, b.Diagnostics())
-                    << "unhandled type for access chain: " << ty->FriendlyName();
+                TINT_ICE() << "unhandled type for access chain: " << ty->FriendlyName();
                 return {};
             });
     }

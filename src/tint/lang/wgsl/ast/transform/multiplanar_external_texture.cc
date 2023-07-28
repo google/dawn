@@ -353,7 +353,7 @@ struct MultiplanarExternalTexture::State {
                 plane_1_call = b.Call("textureLoad", "plane1", "coord1", 0_a);
                 break;
             default:
-                TINT_ICE(Transform, b.Diagnostics()) << "unhandled builtin: " << call_type;
+                TINT_ICE() << "unhandled builtin: " << call_type;
         }
 
         // var color: vec3<f32>;
@@ -402,10 +402,9 @@ struct MultiplanarExternalTexture::State {
         const Expression* plane_0_binding_param = ctx.Clone(expr->args[0]);
 
         if (TINT_UNLIKELY(expr->args.Length() != 3)) {
-            TINT_ICE(Transform, b.Diagnostics())
-                << "expected textureSampleBaseClampToEdge call with a "
-                   "texture_external to have 3 parameters, found "
-                << expr->args.Length() << " parameters";
+            TINT_ICE() << "expected textureSampleBaseClampToEdge call with a "
+                          "texture_external to have 3 parameters, found "
+                       << expr->args.Length() << " parameters";
         }
 
         // TextureSampleExternal calls the gammaCorrection function, so ensure it
@@ -447,7 +446,7 @@ struct MultiplanarExternalTexture::State {
     /// @returns a call expression to textureLoadExternal
     const CallExpression* createTextureLoad(const sem::Call* call, NewBindingSymbols syms) {
         if (TINT_UNLIKELY(call->Arguments().Length() != 2)) {
-            TINT_ICE(Transform, b.Diagnostics())
+            TINT_ICE()
                 << "expected textureLoad call with a texture_external to have 2 arguments, found "
                 << call->Arguments().Length() << " arguments";
         }

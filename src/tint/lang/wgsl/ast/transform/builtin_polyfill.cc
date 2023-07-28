@@ -193,8 +193,7 @@ struct BuiltinPolyfill::State {
                 break;
             }
             default:
-                TINT_ICE(Transform, b.Diagnostics())
-                    << "unhandled polyfill level: " << static_cast<int>(cfg.builtins.acosh);
+                TINT_ICE() << "unhandled polyfill level: " << static_cast<int>(cfg.builtins.acosh);
                 return {};
         }
 
@@ -246,8 +245,7 @@ struct BuiltinPolyfill::State {
                                           b.GreaterThanEqual("x", V(1.0_a)))));
                 break;
             default:
-                TINT_ICE(Transform, b.Diagnostics())
-                    << "unhandled polyfill level: " << static_cast<int>(cfg.builtins.acosh);
+                TINT_ICE() << "unhandled polyfill level: " << static_cast<int>(cfg.builtins.acosh);
                 return {};
         }
 
@@ -436,8 +434,8 @@ struct BuiltinPolyfill::State {
                 body.Push(b.Return(b.Call("extractBits", "v", "s", b.Sub("e", "s"))));
                 break;
             default:
-                TINT_ICE(Transform, b.Diagnostics())
-                    << "unhandled polyfill level: " << static_cast<int>(cfg.builtins.extract_bits);
+                TINT_ICE() << "unhandled polyfill level: "
+                           << static_cast<int>(cfg.builtins.extract_bits);
                 return {};
         }
 
@@ -592,7 +590,7 @@ struct BuiltinPolyfill::State {
 
         // Currently in WGSL parameters of insertBits must be i32, u32, vecN<i32> or vecN<u32>
         if (TINT_UNLIKELY(((!ty->DeepestElement()->IsAnyOf<type::I32, type::U32>())))) {
-            TINT_ICE(Transform, b.Diagnostics())
+            TINT_ICE()
                 << "insertBits polyfill only support i32, u32, and vector of i32 or u32, got "
                 << ty->FriendlyName();
             return {};
@@ -674,8 +672,8 @@ struct BuiltinPolyfill::State {
                 body.Push(b.Return(b.Call("insertBits", "v", "n", "s", b.Sub("e", "s"))));
                 break;
             default:
-                TINT_ICE(Transform, b.Diagnostics())
-                    << "unhandled polyfill level: " << static_cast<int>(cfg.builtins.insert_bits);
+                TINT_ICE() << "unhandled polyfill level: "
+                           << static_cast<int>(cfg.builtins.insert_bits);
                 return {};
         }
 

@@ -834,7 +834,7 @@ FunctionEmitter::StatementBlock::StatementBlock(StatementBlock&& other) = defaul
 FunctionEmitter::StatementBlock::~StatementBlock() = default;
 
 void FunctionEmitter::StatementBlock::Finalize(ProgramBuilder* pb) {
-    TINT_ASSERT(Reader, !finalized_ /* Finalize() must only be called once */);
+    TINT_ASSERT(!finalized_ /* Finalize() must only be called once */);
 
     for (size_t i = 0; i < statements_.Length(); i++) {
         if (auto* sb = statements_[i]->As<StatementBuilder>()) {
@@ -850,7 +850,7 @@ void FunctionEmitter::StatementBlock::Finalize(ProgramBuilder* pb) {
 }
 
 void FunctionEmitter::StatementBlock::Add(const ast::Statement* statement) {
-    TINT_ASSERT(Reader, !finalized_ /* Add() must not be called after Finalize() */);
+    TINT_ASSERT(!finalized_ /* Add() must not be called after Finalize() */);
     statements_.Push(statement);
 }
 
@@ -861,8 +861,8 @@ void FunctionEmitter::PushNewStatementBlock(const Construct* construct,
 }
 
 void FunctionEmitter::PushGuard(const std::string& guard_name, uint32_t end_id) {
-    TINT_ASSERT(Reader, !statements_stack_.IsEmpty());
-    TINT_ASSERT(Reader, !guard_name.empty());
+    TINT_ASSERT(!statements_stack_.IsEmpty());
+    TINT_ASSERT(!guard_name.empty());
     // Guard control flow by the guard variable.  Introduce a new
     // if-selection with a then-clause ending at the same block
     // as the statement block at the top of the stack.
@@ -877,7 +877,7 @@ void FunctionEmitter::PushGuard(const std::string& guard_name, uint32_t end_id) 
 }
 
 void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
-    TINT_ASSERT(Reader, !statements_stack_.IsEmpty());
+    TINT_ASSERT(!statements_stack_.IsEmpty());
     const auto& top = statements_stack_.Back();
 
     auto* cond = MakeTrue(Source{});
@@ -889,14 +889,14 @@ void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
 }
 
 FunctionEmitter::StatementList FunctionEmitter::ast_body() {
-    TINT_ASSERT(Reader, !statements_stack_.IsEmpty());
+    TINT_ASSERT(!statements_stack_.IsEmpty());
     auto& entry = statements_stack_[0];
     entry.Finalize(&builder_);
     return entry.GetStatements();
 }
 
 const ast::Statement* FunctionEmitter::AddStatement(const ast::Statement* statement) {
-    TINT_ASSERT(Reader, !statements_stack_.IsEmpty());
+    TINT_ASSERT(!statements_stack_.IsEmpty());
     if (statement != nullptr) {
         statements_stack_.Back().Add(statement);
     }
@@ -904,9 +904,9 @@ const ast::Statement* FunctionEmitter::AddStatement(const ast::Statement* statem
 }
 
 const ast::Statement* FunctionEmitter::LastStatement() {
-    TINT_ASSERT(Reader, !statements_stack_.IsEmpty());
+    TINT_ASSERT(!statements_stack_.IsEmpty());
     auto& statement_list = statements_stack_.Back().GetStatements();
-    TINT_ASSERT(Reader, !statement_list.IsEmpty());
+    TINT_ASSERT(!statement_list.IsEmpty());
     return statement_list.Back();
 }
 
@@ -928,7 +928,7 @@ bool FunctionEmitter::Emit() {
 
     bool make_body_function = true;
     if (ep_info_) {
-        TINT_ASSERT(Reader, !ep_info_->inner_name.empty());
+        TINT_ASSERT(!ep_info_->inner_name.empty());
         if (ep_info_->owns_inner_implementation) {
             // This is an entry point, and we want to emit it as a wrapper around
             // an implementation function.
@@ -958,7 +958,7 @@ bool FunctionEmitter::Emit() {
 }
 
 const ast::BlockStatement* FunctionEmitter::MakeFunctionBody() {
-    TINT_ASSERT(Reader, statements_stack_.Length() == 1);
+    TINT_ASSERT(statements_stack_.Length() == 1);
 
     if (!EmitBody()) {
         return nullptr;
@@ -1250,8 +1250,8 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
     // have already been created.
     for (uint32_t var_id : ep_info_->inputs) {
         const auto* var = def_use_mgr_->GetDef(var_id);
-        TINT_ASSERT(Reader, var != nullptr);
-        TINT_ASSERT(Reader, opcode(var) == spv::Op::OpVariable);
+        TINT_ASSERT(var != nullptr);
+        TINT_ASSERT(opcode(var) == spv::Op::OpVariable);
         auto* store_type = GetVariableStoreType(*var);
         auto* forced_param_type = store_type;
         Attributes param_attrs;
@@ -1275,7 +1275,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
             // In Vulkan SPIR-V, the sample mask is an array. In WGSL it's a scalar.
             // Use the first element only.
             auto* sample_mask_array_type = store_type->UnwrapRef()->UnwrapAlias()->As<Array>();
-            TINT_ASSERT(Reader, sample_mask_array_type);
+            TINT_ASSERT(sample_mask_array_type);
             ok = EmitPipelineInput(var_name, store_type, {0}, sample_mask_array_type->type,
                                    forced_param_type, param_attrs, decl.params, stmts);
         } else {
@@ -1323,8 +1323,8 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
 
             } else {
                 const auto* var = def_use_mgr_->GetDef(var_id);
-                TINT_ASSERT(Reader, var != nullptr);
-                TINT_ASSERT(Reader, opcode(var) == spv::Op::OpVariable);
+                TINT_ASSERT(var != nullptr);
+                TINT_ASSERT(opcode(var) == spv::Op::OpVariable);
                 const Type* store_type = GetVariableStoreType(*var);
                 const Type* forced_member_type = store_type;
                 Attributes out_attrs;
@@ -1345,7 +1345,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
                     // scalar. Use the first element only.
                     auto* sample_mask_array_type =
                         store_type->UnwrapRef()->UnwrapAlias()->As<Array>();
-                    TINT_ASSERT(Reader, sample_mask_array_type);
+                    TINT_ASSERT(sample_mask_array_type);
                     ok = EmitPipelineOutput(var_name, store_type, {0}, sample_mask_array_type->type,
                                             forced_member_type, out_attrs, return_members,
                                             return_exprs);
@@ -1421,7 +1421,7 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
     function_.ForEachParam([this, &ast_params](const spvtools::opt::Instruction* param) {
         // Valid SPIR-V requires function call parameters to be non-null
         // instructions.
-        TINT_ASSERT(Reader, param != nullptr);
+        TINT_ASSERT(param != nullptr);
         const Type* const type = IsHandleObj(*param)
                                      ? parser_impl_.GetHandleTypeForSpirvHandle(*param)
                                      : parser_impl_.ConvertType(param->type_id());
@@ -1449,9 +1449,9 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
 }
 
 bool FunctionEmitter::IsHandleObj(const spvtools::opt::Instruction& obj) {
-    TINT_ASSERT(Reader, obj.type_id() != 0u);
+    TINT_ASSERT(obj.type_id() != 0u);
     auto* spirv_type = type_mgr_->GetType(obj.type_id());
-    TINT_ASSERT(Reader, spirv_type);
+    TINT_ASSERT(spirv_type);
     return spirv_type->AsImage() || spirv_type->AsSampler() ||
            (spirv_type->AsPointer() &&
             (static_cast<spv::StorageClass>(spirv_type->AsPointer()->storage_class()) ==
@@ -1765,7 +1765,7 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
     //      block. Also mark the the most recent continue target for which we
     //      haven't reached the backedge block.
 
-    TINT_ASSERT(Reader, block_order_.size() > 0);
+    TINT_ASSERT(block_order_.size() > 0);
     constructs_.Clear();
     const auto entry_id = block_order_[0];
 
@@ -1785,8 +1785,8 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
         // A loop construct is added right after its associated continue construct.
         // In that case, adjust the parent up.
         if (k == Construct::kLoop) {
-            TINT_ASSERT(Reader, parent);
-            TINT_ASSERT(Reader, parent->kind == Construct::kContinue);
+            TINT_ASSERT(parent);
+            TINT_ASSERT(parent->kind == Construct::kContinue);
             scope_end_pos = parent->end_pos;
             parent = parent->parent;
         }
@@ -1804,9 +1804,9 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
 
     for (uint32_t i = 0; i < block_order_.size(); ++i) {
         const auto block_id = block_order_[i];
-        TINT_ASSERT(Reader, block_id > 0);
+        TINT_ASSERT(block_id > 0);
         auto* block_info = GetBlockInfo(block_id);
-        TINT_ASSERT(Reader, block_info);
+        TINT_ASSERT(block_info);
 
         if (enclosing.IsEmpty()) {
             return Fail() << "internal error: too many merge blocks before block " << block_id;
@@ -1875,7 +1875,7 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
             }
         }
 
-        TINT_ASSERT(Reader, top);
+        TINT_ASSERT(top);
         block_info->construct = top;
     }
 
@@ -2076,9 +2076,9 @@ bool FunctionEmitter::ClassifyCFGEdges() {
     //    NEC(S) is the parent of NEC(T).
 
     for (const auto src : block_order_) {
-        TINT_ASSERT(Reader, src > 0);
+        TINT_ASSERT(src > 0);
         auto* src_info = GetBlockInfo(src);
-        TINT_ASSERT(Reader, src_info);
+        TINT_ASSERT(src_info);
         const auto src_pos = src_info->pos;
         const auto& src_construct = *(src_info->construct);
 
@@ -2115,7 +2115,7 @@ bool FunctionEmitter::ClassifyCFGEdges() {
         for (const auto dest : successors) {
             const auto* dest_info = GetBlockInfo(dest);
             // We've already checked terminators are valid.
-            TINT_ASSERT(Reader, dest_info);
+            TINT_ASSERT(dest_info);
             const auto dest_pos = dest_info->pos;
 
             // Insert the edge kind entry and keep a handle to update
@@ -2139,7 +2139,7 @@ bool FunctionEmitter::ClassifyCFGEdges() {
                                   << src_construct.begin_id << " (violates post-dominance rule)";
                 }
                 const auto* ct_info = GetBlockInfo(continue_construct->begin_id);
-                TINT_ASSERT(Reader, ct_info);
+                TINT_ASSERT(ct_info);
                 if (ct_info->header_for_continue != dest) {
                     return Fail() << "Invalid backedge (" << src << "->" << dest
                                   << "): does not branch to the corresponding loop header, "
@@ -2422,7 +2422,7 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
             // The first clause might be a then-clause or an else-clause.
             const auto second_head = std::max(true_head_pos, false_head_pos);
             const auto end_first_clause_pos = second_head - 1;
-            TINT_ASSERT(Reader, end_first_clause_pos < block_order_.size());
+            TINT_ASSERT(end_first_clause_pos < block_order_.size());
             const auto end_first_clause = block_order_[end_first_clause_pos];
             uint32_t premerge_id = 0;
             uint32_t if_break_id = 0;
@@ -2542,7 +2542,7 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
         case SkipReason::kSinkPointerIntoUse: {
             // Replace the pointer with its source reference expression.
             auto source_expr = GetDefInfo(id)->sink_pointer_source_expr;
-            TINT_ASSERT(Reader, source_expr.type->Is<Reference>());
+            TINT_ASSERT(source_expr.type->Is<Reference>());
             return source_expr;
         }
         case SkipReason::kPointSizeBuiltinValue: {
@@ -2631,15 +2631,15 @@ bool FunctionEmitter::EmitFunctionBodyStatements() {
 
     // Upon entry, the statement stack has one entry representing the whole
     // function.
-    TINT_ASSERT(Reader, !constructs_.IsEmpty());
+    TINT_ASSERT(!constructs_.IsEmpty());
     Construct* function_construct = constructs_[0].get();
-    TINT_ASSERT(Reader, function_construct != nullptr);
-    TINT_ASSERT(Reader, function_construct->kind == Construct::kFunction);
+    TINT_ASSERT(function_construct != nullptr);
+    TINT_ASSERT(function_construct->kind == Construct::kFunction);
     // Make the first entry valid by filling in the construct field, which
     // had not been computed at the time the entry was first created.
     // TODO(dneto): refactor how the first construct is created vs.
     // this statements stack entry is populated.
-    TINT_ASSERT(Reader, statements_stack_.Length() == 1);
+    TINT_ASSERT(statements_stack_.Length() == 1);
     statements_stack_[0].SetConstruct(function_construct);
 
     for (auto block_id : block_order()) {
@@ -2833,8 +2833,8 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
 bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
     // The block is the if-header block.  So its construct is the if construct.
     auto* construct = block_info.construct;
-    TINT_ASSERT(Reader, construct->kind == Construct::kIfSelection);
-    TINT_ASSERT(Reader, construct->begin_id == block_info.id);
+    TINT_ASSERT(construct->kind == Construct::kIfSelection);
+    TINT_ASSERT(construct->begin_id == block_info.id);
 
     const uint32_t true_head = block_info.true_head;
     const uint32_t false_head = block_info.false_head;
@@ -2968,8 +2968,8 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
 bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
     // The block is the if-header block.  So its construct is the if construct.
     auto* construct = block_info.construct;
-    TINT_ASSERT(Reader, construct->kind == Construct::kSwitchSelection);
-    TINT_ASSERT(Reader, construct->begin_id == block_info.id);
+    TINT_ASSERT(construct->kind == Construct::kSwitchSelection);
+    TINT_ASSERT(construct->begin_id == block_info.id);
     const auto* branch = block_info.basic_block->terminator();
 
     const auto selector_id = branch->GetSingleWordInOperand(0);
@@ -3016,7 +3016,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
             clause_heads[w] = clause_heads[r];
         }
         // We know it's not empty because it always has at least a default clause.
-        TINT_ASSERT(Reader, !clause_heads.IsEmpty());
+        TINT_ASSERT(!clause_heads.IsEmpty());
         clause_heads.Resize(w + 1);
     }
 
@@ -3054,7 +3054,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
             // Generate a default selector
             selectors.Push(create<ast::CaseSelector>(Source{}));
         }
-        TINT_ASSERT(Reader, !selectors.IsEmpty());
+        TINT_ASSERT(!selectors.IsEmpty());
 
         // Where does this clause end?
         const auto end_id =
@@ -3178,8 +3178,8 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
                 block_info.construct && block_info.construct->kind == Construct::Kind::kContinue) {
                 auto* header = GetBlockInfo(block_info.construct->begin_id);
 
-                TINT_ASSERT(Reader, header->construct &&
-                                        header->construct->kind == Construct::Kind::kContinue);
+                TINT_ASSERT(header->construct &&
+                            header->construct->kind == Construct::Kind::kContinue);
                 if (!header->is_continue_entire_loop) {
                     needs_break_if = true;
                 }
@@ -3249,9 +3249,9 @@ const ast::Statement* FunctionEmitter::MakeBranchDetailed(const BlockInfo& src_i
         case EdgeKind::kSwitchBreak: {
             // Don't bother with a break at the end of a case/default clause.
             const auto header = dest_info.header_for_merge;
-            TINT_ASSERT(Reader, header != 0);
+            TINT_ASSERT(header != 0);
             const auto* exiting_construct = GetBlockInfo(header)->construct;
-            TINT_ASSERT(Reader, exiting_construct->kind == Construct::kSwitchSelection);
+            TINT_ASSERT(exiting_construct->kind == Construct::kSwitchSelection);
             const auto candidate_next_case_pos = src_info.pos + 1;
             // Leaving the last block from the last case?
             if (candidate_next_case_pos == dest_info.pos) {
@@ -3349,7 +3349,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     // Emit declarations of hoisted variables, in index order.
     for (auto id : sorted_by_index(block_info.hoisted_ids)) {
         const auto* def_inst = def_use_mgr_->GetDef(id);
-        TINT_ASSERT(Reader, def_inst);
+        TINT_ASSERT(def_inst);
         // Compute the store type.  Pointers are not storable, so there is
         // no need to remap pointer properties.
         auto* store_type = parser_impl_.ConvertType(def_inst->type_id());
@@ -3514,7 +3514,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
         if (combinatorial_expr.expr != nullptr) {
             // If the expression is combinatorial, then it's not a direct access
             // of a builtin variable.
-            TINT_ASSERT(Reader, def_info->local.has_value());
+            TINT_ASSERT(def_info->local.has_value());
             if (def_info->requires_hoisted_var_def || def_info->requires_named_let_def ||
                 def_info->local->num_uses != 1) {
                 // Generate a const definition or an assignment to a hoisted definition
@@ -3595,7 +3595,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
                     if (auto* arr = lhs.type->As<Array>()) {
                         lhs.type = arr->type;
                     }
-                    TINT_ASSERT(Reader, lhs.type);
+                    TINT_ASSERT(lhs.type);
                     break;
                 default:
                     break;
@@ -3994,7 +3994,7 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
         switch (ext_opcode) {
             case GLSLstd450Determinant: {
                 auto m = MakeOperand(inst, 2);
-                TINT_ASSERT(Reader, m.type->Is<Matrix>());
+                TINT_ASSERT(m.type->Is<Matrix>());
                 return {ty_.F32(), builder_.Call("determinant", m.expr)};
             }
 
@@ -4012,9 +4012,9 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
                 auto normal = MakeOperand(inst, 2);
                 auto incident = MakeOperand(inst, 3);
                 auto nref = MakeOperand(inst, 4);
-                TINT_ASSERT(Reader, normal.type->Is<F32>());
-                TINT_ASSERT(Reader, incident.type->Is<F32>());
-                TINT_ASSERT(Reader, nref.type->Is<F32>());
+                TINT_ASSERT(normal.type->Is<F32>());
+                TINT_ASSERT(incident.type->Is<F32>());
+                TINT_ASSERT(nref.type->Is<F32>());
                 return {
                     ty_.F32(),
                     builder_.Call(
@@ -4034,8 +4034,8 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
                 // Compute  Incident - 2 * Normal * Normal * Incident
                 auto incident = MakeOperand(inst, 2);
                 auto normal = MakeOperand(inst, 3);
-                TINT_ASSERT(Reader, incident.type->Is<F32>());
-                TINT_ASSERT(Reader, normal.type->Is<F32>());
+                TINT_ASSERT(incident.type->Is<F32>());
+                TINT_ASSERT(normal.type->Is<F32>());
                 return {
                     ty_.F32(),
                     builder_.Sub(
@@ -4051,9 +4051,9 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
                 auto incident = MakeOperand(inst, 2);
                 auto normal = MakeOperand(inst, 3);
                 auto eta = MakeOperand(inst, 4);
-                TINT_ASSERT(Reader, incident.type->Is<F32>());
-                TINT_ASSERT(Reader, normal.type->Is<F32>());
-                TINT_ASSERT(Reader, eta.type->Is<F32>());
+                TINT_ASSERT(incident.type->Is<F32>());
+                TINT_ASSERT(normal.type->Is<F32>());
+                TINT_ASSERT(eta.type->Is<F32>());
                 if (!success()) {
                     return {};
                 }
@@ -4111,8 +4111,8 @@ TypedExpression FunctionEmitter::EmitGlslStd450MatrixInverse(
     const spvtools::opt::Instruction& inst) {
     auto mat = MakeOperand(inst, 2);
     auto* mat_ty = mat.type->As<Matrix>();
-    TINT_ASSERT(Reader, mat_ty);
-    TINT_ASSERT(Reader, mat_ty->columns == mat_ty->rows);
+    TINT_ASSERT(mat_ty);
+    TINT_ASSERT(mat_ty->columns == mat_ty->rows);
     auto& pb = builder_;
 
     auto idx = [&](size_t row, size_t col) {
@@ -4530,7 +4530,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(const spvtools::opt::Instructio
         }
         const auto pointer_type_id = type_mgr_->FindPointerToType(pointee_type_id, address_space);
         auto* type = parser_impl_.ConvertType(pointer_type_id, PtrAs::Ref);
-        TINT_ASSERT(Reader, type && type->Is<Reference>());
+        TINT_ASSERT(type && type->Is<Reference>());
         current_expr = TypedExpression{type, next_expr};
     }
 
@@ -4712,7 +4712,7 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(const spvtools::opt::Instruct
     // Helper to get the name for the component index `i`.
     auto component_name = [](uint32_t i) {
         constexpr const char* names[] = {"x", "y", "z", "w"};
-        TINT_ASSERT(Reader, i < 4);
+        TINT_ASSERT(i < 4);
         return names[i];
     };
 
@@ -4732,7 +4732,7 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(const spvtools::opt::Instruct
         } else if (index < vec0_len + vec1_len) {
             vec_id = vec1_id;
             index -= vec0_len;
-            TINT_ASSERT(Reader, index < kMaxVectorLen);
+            TINT_ASSERT(index < kMaxVectorLen);
         } else if (index == 0xFFFFFFFF) {
             // By rule, this maps to OpUndef. Instead, take the first component of the first vector.
             vec_id = vec0_id;
@@ -4905,7 +4905,7 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
             default:
                 break;
         }
-        TINT_ASSERT(Reader, false && "expected a memory object declaration");
+        TINT_UNREACHABLE() << "expected a memory object declaration";
         return {};
     };
 
@@ -4929,7 +4929,7 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
         return info->pointer;
     }
     const auto* inst = def_use_mgr_->GetDef(id);
-    TINT_ASSERT(Reader, inst);
+    TINT_ASSERT(inst);
     return get_from_root_identifier(*inst);
 }
 
@@ -5151,7 +5151,7 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
 
 const Construct* FunctionEmitter::GetEnclosingScope(uint32_t first_pos, uint32_t last_pos) const {
     const auto* enclosing_construct = GetBlockInfo(block_order_[first_pos])->construct;
-    TINT_ASSERT(Reader, enclosing_construct != nullptr);
+    TINT_ASSERT(enclosing_construct != nullptr);
     // Constructs are strictly nesting, so follow parent pointers
     while (enclosing_construct && !enclosing_construct->ScopeContainsPos(last_pos)) {
         // The scope of a continue construct is enclosed in its associated loop
@@ -5161,7 +5161,7 @@ const Construct* FunctionEmitter::GetEnclosingScope(uint32_t first_pos, uint32_t
         enclosing_construct = sibling_loop ? sibling_loop : enclosing_construct->parent;
     }
     // At worst, we go all the way out to the function construct.
-    TINT_ASSERT(Reader, enclosing_construct != nullptr);
+    TINT_ASSERT(enclosing_construct != nullptr);
     return enclosing_construct;
 }
 
@@ -5420,7 +5420,7 @@ const Texture* FunctionEmitter::GetImageType(const spvtools::opt::Instruction& i
         Fail();
         return {};
     }
-    TINT_ASSERT(Reader, type != nullptr);
+    TINT_ASSERT(type != nullptr);
     if (auto* result = type->UnwrapAll()->As<Texture>()) {
         return result;
     }
@@ -6095,9 +6095,9 @@ const ast::Expression* FunctionEmitter::ConvertTexelForStorage(
 
     // The texel type is always a 4-element vector.
     const uint32_t dest_count = 4u;
-    TINT_ASSERT(Reader, dest_type->Is<Vector>() && dest_type->As<Vector>()->size == dest_count);
-    TINT_ASSERT(Reader, dest_type->IsFloatVector() || dest_type->IsUnsignedIntegerVector() ||
-                            dest_type->IsSignedIntegerVector());
+    TINT_ASSERT(dest_type->Is<Vector>() && dest_type->As<Vector>()->size == dest_count);
+    TINT_ASSERT(dest_type->IsFloatVector() || dest_type->IsUnsignedIntegerVector() ||
+                dest_type->IsSignedIntegerVector());
 
     if (src_type == dest_type) {
         return texel.expr;
@@ -6115,7 +6115,7 @@ const ast::Expression* FunctionEmitter::ConvertTexelForStorage(
     }
 
     const auto required_count = parser_impl_.GetChannelCountForFormat(format);
-    TINT_ASSERT(Reader, 0 < required_count && required_count <= 4);
+    TINT_ASSERT(0 < required_count && required_count <= 4);
 
     const uint32_t src_count = src_type->IsScalar() ? 1 : src_type->As<Vector>()->size;
     if (src_count < required_count) {

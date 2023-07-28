@@ -28,12 +28,12 @@ CaseStatement::CaseStatement(GenerationID pid,
                              VectorRef<const CaseSelector*> s,
                              const BlockStatement* b)
     : Base(pid, nid, src), selectors(std::move(s)), body(b) {
-    TINT_ASSERT(AST, body);
-    TINT_ASSERT(AST, !selectors.IsEmpty());
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, body, generation_id);
+    TINT_ASSERT(body);
+    TINT_ASSERT(!selectors.IsEmpty());
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(body, generation_id);
     for (auto* selector : selectors) {
-        TINT_ASSERT(AST, selector);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, selector, generation_id);
+        TINT_ASSERT(selector);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(selector, generation_id);
     }
 }
 

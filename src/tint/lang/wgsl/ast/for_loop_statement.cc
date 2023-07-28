@@ -36,15 +36,15 @@ ForLoopStatement::ForLoopStatement(GenerationID pid,
       continuing(cont),
       body(b),
       attributes(std::move(attrs)) {
-    TINT_ASSERT(AST, body);
+    TINT_ASSERT(body);
 
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, initializer, generation_id);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, condition, generation_id);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, continuing, generation_id);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, body, generation_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(initializer, generation_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(condition, generation_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(continuing, generation_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(body, generation_id);
     for (auto* attr : attributes) {
-        TINT_ASSERT(AST, attr);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
+        TINT_ASSERT(attr);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(attr, generation_id);
     }
 }
 

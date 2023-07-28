@@ -328,9 +328,6 @@ int main(int argc, const char** argv) {
         return 0;
     }
 
-    auto diag_printer = tint::diag::Printer::create(stderr, true);
-    tint::diag::Formatter diag_formatter;
-
     std::unique_ptr<tint::Program> program;
     std::unique_ptr<tint::Source::File> source_file;
 

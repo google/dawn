@@ -34,19 +34,19 @@ SwitchStatement::SwitchStatement(GenerationID pid,
       body(std::move(b)),
       attributes(std::move(stmt_attrs)),
       body_attributes(std::move(body_attrs)) {
-    TINT_ASSERT(AST, condition);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, condition, generation_id);
+    TINT_ASSERT(condition);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(condition, generation_id);
     for (auto* stmt : body) {
-        TINT_ASSERT(AST, stmt);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, stmt, generation_id);
+        TINT_ASSERT(stmt);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(stmt, generation_id);
     }
     for (auto* attr : attributes) {
-        TINT_ASSERT(AST, attr);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
+        TINT_ASSERT(attr);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(attr, generation_id);
     }
     for (auto* attr : body_attributes) {
-        TINT_ASSERT(AST, attr);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
+        TINT_ASSERT(attr);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(attr, generation_id);
     }
 }
 

@@ -18,7 +18,7 @@
 #include <utility>
 #include <variant>
 
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/text/string_stream.h"
 
 namespace tint {
@@ -152,7 +152,7 @@ struct [[nodiscard]] Result {
     }
 
   private:
-    void Validate() const { TINT_ASSERT(Utils, !std::holds_alternative<std::monostate>(value)); }
+    void Validate() const { TINT_ASSERT(!std::holds_alternative<std::monostate>(value)); }
 
     /// The result. Either a success of failure value.
     std::variant<std::monostate, SUCCESS_TYPE, FAILURE_TYPE> value;

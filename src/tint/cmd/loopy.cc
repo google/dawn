@@ -318,9 +318,6 @@ int main(int argc, const char** argv) {
         options.format = Format::kSpirv;
     }
 
-    auto diag_printer = tint::diag::Printer::create(stderr, true);
-    tint::diag::Formatter diag_formatter;
-
     std::unique_ptr<tint::Program> program;
     std::unique_ptr<tint::Source::File> source_file;
 

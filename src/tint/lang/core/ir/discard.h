@@ -16,7 +16,7 @@
 #define SRC_TINT_LANG_CORE_IR_DISCARD_H_
 
 #include "src/tint/lang/core/ir/call.h"
-#include "src/tint/utils/debug/debug.h"
+
 #include "src/tint/utils/rtti/castable.h"
 
 namespace tint::ir {

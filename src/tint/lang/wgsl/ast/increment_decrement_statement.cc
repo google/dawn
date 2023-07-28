@@ -26,7 +26,7 @@ IncrementDecrementStatement::IncrementDecrementStatement(GenerationID pid,
                                                          const Expression* l,
                                                          bool inc)
     : Base(pid, nid, src), lhs(l), increment(inc) {
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, lhs, generation_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(lhs, generation_id);
 }
 
 IncrementDecrementStatement::~IncrementDecrementStatement() = default;

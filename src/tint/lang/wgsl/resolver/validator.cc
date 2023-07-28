@@ -127,22 +127,19 @@ std::string AttrToStr(const ast::Attribute* attr) {
 }
 
 template <typename CALLBACK>
-void TraverseCallChain(diag::List& diagnostics,
-                       const sem::Function* from,
-                       const sem::Function* to,
-                       CALLBACK&& callback) {
+void TraverseCallChain(const sem::Function* from, const sem::Function* to, CALLBACK&& callback) {
     for (auto* f : from->TransitivelyCalledFunctions()) {
         if (f == to) {
             callback(f);
             return;
         }
         if (f->TransitivelyCalledFunctions().Contains(to)) {
-            TraverseCallChain(diagnostics, f, to, callback);
+            TraverseCallChain(f, to, callback);
             callback(f);
             return;
         }
     }
-    TINT_ICE(Resolver, diagnostics) << "TraverseCallChain() 'from' does not transitively call 'to'";
+    TINT_ICE() << "TraverseCallChain() 'from' does not transitively call 'to'";
 }
 
 }  // namespace
@@ -571,9 +568,8 @@ bool Validator::LocalVariable(const sem::Variable* local) const {
         [&](const ast::Let*) { return Let(local); },  //
         [&](const ast::Const*) { return true; },      //
         [&](Default) {
-            TINT_ICE(Resolver, diagnostics_)
-                << "Validator::Variable() called with a unknown variable type: "
-                << decl->TypeInfo().name;
+            TINT_ICE() << "Validator::Variable() called with a unknown variable type: "
+                       << decl->TypeInfo().name;
             return false;
         });
 }
@@ -611,9 +607,8 @@ bool Validator::GlobalVariable(
         [&](const ast::Override*) { return Override(global, override_ids); },
         [&](const ast::Const*) { return Const(global); },
         [&](Default) {
-            TINT_ICE(Resolver, diagnostics_)
-                << "Validator::GlobalVariable() called with a unknown variable type: "
-                << decl->TypeInfo().name;
+            TINT_ICE() << "Validator::GlobalVariable() called with a unknown variable type: "
+                       << decl->TypeInfo().name;
             return false;
         });
 
@@ -1018,8 +1013,7 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
             }
         } else if (TINT_UNLIKELY(IsValidationEnabled(
                        decl->attributes, ast::DisabledValidation::kFunctionHasNoBody))) {
-            TINT_ICE(Resolver, diagnostics_)
-                << "Function " << decl->name->symbol.Name() << " has no body";
+            TINT_ICE() << "Function " << decl->name->symbol.Name() << " has no body";
         }
     }
 
@@ -1034,8 +1028,7 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
     if (TINT_UNLIKELY(func->Behaviors() != sem::Behaviors{} &&
                       func->Behaviors() != sem::Behavior::kNext)) {
         auto name = decl->name->symbol.Name();
-        TINT_ICE(Resolver, diagnostics_)
-            << "function '" << name << "' behaviors are: " << func->Behaviors();
+        TINT_ICE() << "function '" << name << "' behaviors are: " << func->Behaviors();
     }
 
     return true;
@@ -1110,7 +1103,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                 bool is_input = param_or_ret == ParamOrRetType::kParameter;
 
                 if (TINT_UNLIKELY(!location.has_value())) {
-                    TINT_ICE(Resolver, diagnostics_) << "Location has no value";
+                    TINT_ICE() << "Location has no value";
                     return false;
                 }
 
@@ -1663,10 +1656,10 @@ bool Validator::WorkgroupUniformLoad(const sem::Call* call) const {
         return false;
     }
 
-    TINT_ASSERT(Resolver, call->Arguments().Length() > 0);
+    TINT_ASSERT(call->Arguments().Length() > 0);
     auto* arg = call->Arguments()[0];
     auto* ptr = arg->Type()->As<type::Pointer>();
-    TINT_ASSERT(Resolver, ptr != nullptr);
+    TINT_ASSERT(ptr != nullptr);
     auto* ty = ptr->StoreType();
 
     if (ty->Is<type::Atomic>() || atomic_composite_info_.Contains(ty)) {
@@ -1763,7 +1756,7 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
             auto* root = call->Arguments()[i]->RootIdentifier();
             auto* root_ptr_ty = root->Type()->As<type::Pointer>();
             auto* root_ref_ty = root->Type()->As<type::Reference>();
-            TINT_ASSERT(Resolver, root_ptr_ty || root_ref_ty);
+            TINT_ASSERT(root_ptr_ty || root_ref_ty);
             const type::Type* root_store_type;
             if (root_ptr_ty) {
                 root_store_type = root_ptr_ty->StoreType();
@@ -1865,7 +1858,7 @@ bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
     }
 
     if (TINT_UNLIKELY(!c->Is<type::ConstantArrayCount>())) {
-        TINT_ICE(Resolver, diagnostics_) << "Invalid ArrayCount found";
+        TINT_ICE() << "Invalid ArrayCount found";
         return false;
     }
 
@@ -1899,7 +1892,7 @@ bool Validator::Matrix(const type::Type* el_ty, const Source& source) const {
 bool Validator::PipelineStages(VectorRef<sem::Function*> entry_points) const {
     auto backtrace = [&](const sem::Function* func, const sem::Function* entry_point) {
         if (func != entry_point) {
-            TraverseCallChain(diagnostics_, entry_point, func, [&](const sem::Function* f) {
+            TraverseCallChain(entry_point, func, [&](const sem::Function* f) {
                 AddNote("called by function '" + f->Declaration()->name->symbol.Name() + "'",
                         f->Declaration()->source);
             });
@@ -2017,7 +2010,7 @@ bool Validator::PushConstants(VectorRef<sem::Function*> entry_points) const {
                 AddNote("first 'push_constant' variable declaration is here",
                         var->Declaration()->source);
                 if (func != ep) {
-                    TraverseCallChain(diagnostics_, ep, func, [&](const sem::Function* f) {
+                    TraverseCallChain(ep, func, [&](const sem::Function* f) {
                         AddNote(
                             "called by function '" + f->Declaration()->name->symbol.Name() + "'",
                             f->Declaration()->source);
@@ -2029,12 +2022,11 @@ bool Validator::PushConstants(VectorRef<sem::Function*> entry_points) const {
                 AddNote("second 'push_constant' variable declaration is here",
                         push_constant_var->Declaration()->source);
                 if (push_constant_func != ep) {
-                    TraverseCallChain(diagnostics_, ep, push_constant_func,
-                                      [&](const sem::Function* f) {
-                                          AddNote("called by function '" +
-                                                      f->Declaration()->name->symbol.Name() + "'",
-                                                  f->Declaration()->source);
-                                      });
+                    TraverseCallChain(ep, push_constant_func, [&](const sem::Function* f) {
+                        AddNote(
+                            "called by function '" + f->Declaration()->name->symbol.Name() + "'",
+                            f->Declaration()->source);
+                    });
                     AddNote(
                         "called by entry point '" + ep->Declaration()->name->symbol.Name() + "'",
                         ep->Declaration()->source);
@@ -2145,7 +2137,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                 },
                 [&](const ast::LocationAttribute* location) {
                     location_attribute = location;
-                    TINT_ASSERT(Resolver, member->Attributes().location.has_value());
+                    TINT_ASSERT(member->Attributes().location.has_value());
                     if (!LocationAttribute(location, member->Type(), stage,
                                            member->Declaration()->source)) {
                         return false;
@@ -2394,7 +2386,7 @@ bool Validator::Assignment(const ast::Statement* a, const type::Type* rhs_ty) co
         lhs = compound->lhs;
         rhs = compound->rhs;
     } else {
-        TINT_ICE(Resolver, diagnostics_) << "invalid assignment statement";
+        TINT_ICE() << "invalid assignment statement";
         return false;
     }
 

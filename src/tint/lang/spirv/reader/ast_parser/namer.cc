@@ -18,7 +18,7 @@
 #include <unordered_set>
 
 #include "src/tint/lang/core/builtin/function.h"
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/text/string_stream.h"
 
 namespace tint::spirv::reader {
@@ -234,14 +234,14 @@ std::string Namer::FindUnusedDerivedName(const std::string& base_name) {
         }
         i++;
     }
-    TINT_ASSERT(Reader, false /* FindUnusedDerivedName() overflowed u32 */);
+    TINT_UNREACHABLE() << "FindUnusedDerivedName() overflowed u32";
     return "<u32 overflow>";
 }
 
 std::string Namer::MakeDerivedName(const std::string& base_name) {
     auto result = FindUnusedDerivedName(base_name);
     const bool registered = RegisterWithoutId(result);
-    TINT_ASSERT(Reader, registered);
+    TINT_ASSERT(registered);
     return result;
 }
 

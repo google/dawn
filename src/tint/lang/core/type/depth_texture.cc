@@ -16,8 +16,8 @@
 
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
-#include "src/tint/utils/debug/debug.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -34,8 +34,8 @@ bool IsValidDepthDimension(TextureDimension dim) {
 }  // namespace
 
 DepthTexture::DepthTexture(TextureDimension dim)
-    : Base(Hash(tint::TypeInfo::Of<DepthTexture>().full_hashcode, dim), dim) {
-    TINT_ASSERT(Type, IsValidDepthDimension(dim));
+    : Base(Hash(TypeInfo::Of<DepthTexture>().full_hashcode, dim), dim) {
+    TINT_ASSERT(IsValidDepthDimension(dim));
 }
 
 DepthTexture::~DepthTexture() = default;

@@ -27,12 +27,12 @@ BlockStatement::BlockStatement(GenerationID pid,
                                VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src), statements(std::move(stmts)), attributes(attrs) {
     for (auto* stmt : statements) {
-        TINT_ASSERT(AST, stmt);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, stmt, generation_id);
+        TINT_ASSERT(stmt);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(stmt, generation_id);
     }
     for (auto* attr : attributes) {
-        TINT_ASSERT(AST, attr);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
+        TINT_ASSERT(attr);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(attr, generation_id);
     }
 }
 

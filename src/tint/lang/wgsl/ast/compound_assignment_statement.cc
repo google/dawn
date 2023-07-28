@@ -27,10 +27,10 @@ CompoundAssignmentStatement::CompoundAssignmentStatement(GenerationID pid,
                                                          const Expression* r,
                                                          BinaryOp o)
     : Base(pid, nid, src), lhs(l), rhs(r), op(o) {
-    TINT_ASSERT(AST, lhs);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, lhs, generation_id);
-    TINT_ASSERT(AST, rhs);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, rhs, generation_id);
+    TINT_ASSERT(lhs);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(lhs, generation_id);
+    TINT_ASSERT(rhs);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(rhs, generation_id);
 }
 
 CompoundAssignmentStatement::~CompoundAssignmentStatement() = default;

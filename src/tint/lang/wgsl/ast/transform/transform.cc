@@ -59,8 +59,7 @@ void Transform::RemoveStatement(CloneContext& ctx, const Statement* stmt) {
         ctx.Replace(stmt, static_cast<Expression*>(nullptr));
         return;
     }
-    TINT_ICE(Transform, ctx.dst->Diagnostics())
-        << "unable to remove statement from parent of type " << sem->TypeInfo().name;
+    TINT_ICE() << "unable to remove statement from parent of type " << sem->TypeInfo().name;
 }
 
 Type Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
@@ -89,7 +88,7 @@ Type Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
     if (auto* v = ty->As<type::Vector>()) {
         auto el = CreateASTTypeFor(ctx, v->type());
         if (v->Packed()) {
-            TINT_ASSERT(Transform, v->Width() == 3u);
+            TINT_ASSERT(v->Width() == 3u);
             return ctx.dst->ty(builtin::Builtin::kPackedVec3, el);
         } else {
             return ctx.dst->ty.vec(el, v->Width());
@@ -127,7 +126,7 @@ Type Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
         }
         auto count = a->ConstantCount();
         if (TINT_UNLIKELY(!count)) {
-            TINT_ICE(Transform, ctx.dst->Diagnostics()) << type::Array::kErrExpectedConstantCount;
+            TINT_ICE() << type::Array::kErrExpectedConstantCount;
             return ctx.dst->ty.array(el, u32(1), std::move(attrs));
         }
         return ctx.dst->ty.array(el, u32(count.value()), std::move(attrs));
@@ -171,8 +170,7 @@ Type Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
                           : builtin::Access::kUndefined;
         return ctx.dst->ty.ptr(address_space, CreateASTTypeFor(ctx, p->StoreType()), access);
     }
-    TINT_UNREACHABLE(Transform, ctx.dst->Diagnostics())
-        << "Unhandled type: " << ty->TypeInfo().name;
+    TINT_UNREACHABLE() << "Unhandled type: " << ty->TypeInfo().name;
     return Type{};
 }
 

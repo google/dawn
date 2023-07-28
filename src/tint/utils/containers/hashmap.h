@@ -21,7 +21,7 @@
 
 #include "src/tint/utils/containers/hashmap_base.h"
 #include "src/tint/utils/containers/vector.h"
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/math/hash.h"
 
 namespace tint {
@@ -74,7 +74,7 @@ class Hashmap : public HashmapBase<KEY, VALUE, N, HASH, EQUAL> {
         /// trigger a TINT_ASSERT, or invalid pointer dereference.
         T* operator->() const {
             auto* hashmap_reference_lookup = Get();
-            TINT_ASSERT(Utils, hashmap_reference_lookup != nullptr);
+            TINT_ASSERT(hashmap_reference_lookup != nullptr);
             return hashmap_reference_lookup;
         }
 

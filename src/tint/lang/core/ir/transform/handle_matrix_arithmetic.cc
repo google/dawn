@@ -19,6 +19,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/type/matrix.h"
+#include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::HandleMatrixArithmetic);
 
@@ -41,7 +42,7 @@ void HandleMatrixArithmetic::Run(ir::Module* ir) const {
             continue;
         }
         if (auto* binary = inst->As<Binary>()) {
-            TINT_ASSERT(Transform, binary->Operands().Length() == 2);
+            TINT_ASSERT(binary->Operands().Length() == 2);
             if (binary->LHS()->Type()->Is<type::Matrix>() ||
                 binary->RHS()->Type()->Is<type::Matrix>()) {
                 binary_worklist.Push(binary);
@@ -113,7 +114,7 @@ void HandleMatrixArithmetic::Run(ir::Module* ir) const {
                 break;
 
             default:
-                TINT_ASSERT(Transform, false && "unhandled matrix arithmetic instruction");
+                TINT_UNREACHABLE() << "unhandled matrix arithmetic instruction";
                 break;
         }
     }

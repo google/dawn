@@ -140,7 +140,7 @@ struct Node {
     /// Add an edge to the `to` node.
     /// @param to the destination node
     void AddEdge(Node* to) {
-        TINT_ASSERT(Resolver, to != nullptr);
+        TINT_ASSERT(to != nullptr);
         edges.Add(to);
     }
 };
@@ -273,7 +273,7 @@ struct FunctionInfo {
             case builtin::DiagnosticSeverity::kInfo:
                 return required_to_be_uniform_info;
             default:
-                TINT_ASSERT(Resolver, false && "unhandled severity");
+                TINT_UNREACHABLE() << "unhandled severity";
                 return nullptr;
         }
     }
@@ -1053,7 +1053,7 @@ class UniformityGraph {
                     current_function_->value_return->AddEdge(v);
                     cf_ret = cf1;
                 } else {
-                    TINT_ASSERT(Resolver, cf != nullptr);
+                    TINT_ASSERT(cf != nullptr);
                     cf_ret = cf;
                 }
 
@@ -1161,8 +1161,7 @@ class UniformityGraph {
             },
 
             [&](Default) {
-                TINT_ICE(Resolver, diagnostics_)
-                    << "unknown statement type: " << std::string(stmt->TypeInfo().name);
+                TINT_ICE() << "unknown statement type: " << std::string(stmt->TypeInfo().name);
                 return nullptr;
             });
     }
@@ -1190,7 +1189,7 @@ class UniformityGraph {
 
         auto* node = CreateNode({NameFor(ident), "_ident_expr"}, ident);
         auto* sem_ident = sem_.GetVal(ident);
-        TINT_ASSERT(Resolver, sem_ident);
+        TINT_ASSERT(sem_ident);
         auto* var_user = sem_ident->Unwrap()->As<sem::VariableUser>();
         auto* sem = var_user->Variable();
         return Switch(
@@ -1294,8 +1293,8 @@ class UniformityGraph {
             },
 
             [&](Default) {
-                TINT_ICE(Resolver, diagnostics_)
-                    << "unknown identifier expression type: " << std::string(sem->TypeInfo().name);
+                TINT_ICE() << "unknown identifier expression type: "
+                           << std::string(sem->TypeInfo().name);
                 return std::pair<Node*, Node*>(nullptr, nullptr);
             });
     }
@@ -1367,8 +1366,7 @@ class UniformityGraph {
             },
 
             [&](Default) {
-                TINT_ICE(Resolver, diagnostics_)
-                    << "unknown expression type: " << std::string(expr->TypeInfo().name);
+                TINT_ICE() << "unknown expression type: " << std::string(expr->TypeInfo().name);
                 return std::pair<Node*, Node*>(nullptr, nullptr);
             });
     }
@@ -1377,7 +1375,7 @@ class UniformityGraph {
     /// @returns true if `u` is an indirection unary expression that ultimately dereferences a
     /// partial pointer, false otherwise.
     bool IsDerefOfPartialPointer(const ast::UnaryOpExpression* u) {
-        TINT_ASSERT(Resolver, u->op == ast::UnaryOp::kIndirection);
+        TINT_ASSERT(u->op == ast::UnaryOp::kIndirection);
 
         // To determine if we're dereferencing a partial pointer, unwrap *&
         // chains; if the final expression is an identifier, see if it's a
@@ -1389,7 +1387,7 @@ class UniformityGraph {
                 return true;
             }
         } else {
-            TINT_ASSERT(Resolver, e->Is<ast::AccessorExpression>());
+            TINT_ASSERT(e->Is<ast::AccessorExpression>());
             return true;
         }
         return false;
@@ -1436,9 +1434,8 @@ class UniformityGraph {
 
                     return LValue{cf, value, local};
                 } else {
-                    TINT_ICE(Resolver, diagnostics_)
-                        << "unknown lvalue identifier expression type: "
-                        << std::string(sem->Variable()->TypeInfo().name);
+                    TINT_ICE() << "unknown lvalue identifier expression type: "
+                               << std::string(sem->Variable()->TypeInfo().name);
                     return LValue{};
                 }
             },
@@ -1476,8 +1473,8 @@ class UniformityGraph {
             },
 
             [&](Default) {
-                TINT_ICE(Resolver, diagnostics_)
-                    << "unknown lvalue expression type: " << std::string(expr->TypeInfo().name);
+                TINT_ICE() << "unknown lvalue expression type: "
+                           << std::string(expr->TypeInfo().name);
                 return LValue{};
             });
     }
@@ -1577,7 +1574,7 @@ class UniformityGraph {
                 // We must have already analyzed the user-defined function since we process
                 // functions in dependency order.
                 auto info = functions_.Find(func->Declaration());
-                TINT_ASSERT(Resolver, info != nullptr);
+                TINT_ASSERT(info != nullptr);
                 callsite_tag = info->callsite_tag;
                 function_tag = info->function_tag;
                 func_info = info;
@@ -1590,9 +1587,7 @@ class UniformityGraph {
                 callsite_tag = {CallSiteTag::CallSiteNoRestriction};
                 function_tag = NoRestriction;
             },
-            [&](Default) {
-                TINT_ICE(Resolver, diagnostics_) << "unhandled function call target: " << name;
-            });
+            [&](Default) { TINT_ICE() << "unhandled function call target: " << name; });
 
         cf_after->AddEdge(call_node);
 
@@ -1662,7 +1657,7 @@ class UniformityGraph {
 
                     // Update the current stored value for this pointer argument.
                     auto* root_ident = sem_arg->RootIdentifier();
-                    TINT_ASSERT(Resolver, root_ident);
+                    TINT_ASSERT(root_ident);
                     current_function_->variables.Set(root_ident, ptr_result);
                 }
             } else {
@@ -1746,9 +1741,9 @@ class UniformityGraph {
                     return FindBuiltinThatRequiresUniformity(child_call, severity);
                 }
             }
-            TINT_ASSERT(Resolver, false && "unable to find child call with uniformity requirement");
+            TINT_UNREACHABLE() << "unable to find child call with uniformity requirement";
         } else {
-            TINT_ASSERT(Resolver, false && "unexpected call expression type");
+            TINT_UNREACHABLE() << "unexpected call expression type";
         }
         return nullptr;
     }
@@ -1766,7 +1761,7 @@ class UniformityGraph {
 
         // Get the source of the non-uniform value.
         auto* non_uniform_source = may_be_non_uniform->visited_from;
-        TINT_ASSERT(Resolver, non_uniform_source);
+        TINT_ASSERT(non_uniform_source);
 
         // Show where the non-uniform value results in non-uniform control flow.
         auto* control_flow = TraceBackAlongPathUntil(
@@ -1789,7 +1784,7 @@ class UniformityGraph {
     /// Add a diagnostic note to show the origin of a non-uniform value.
     /// @param non_uniform_source the node that represents a non-uniform value
     void ShowSourceOfNonUniformity(Node* non_uniform_source) {
-        TINT_ASSERT(Resolver, non_uniform_source);
+        TINT_ASSERT(non_uniform_source);
 
         auto var_type = [&](const sem::Variable* var) {
             switch (var->AddressSpace()) {
@@ -1874,7 +1869,7 @@ class UniformityGraph {
                         break;
                     }
                     default: {
-                        TINT_ICE(Resolver, diagnostics_) << "unhandled source of non-uniformity";
+                        TINT_ICE() << "unhandled source of non-uniformity";
                         break;
                     }
                 }
@@ -1883,9 +1878,7 @@ class UniformityGraph {
                 diagnostics_.add_note(diag::System::Resolver,
                                       "result of expression may be non-uniform", e->source);
             },
-            [&](Default) {
-                TINT_ICE(Resolver, diagnostics_) << "unhandled source of non-uniformity";
-            });
+            [&](Default) { TINT_ICE() << "unhandled source of non-uniformity"; });
     }
 
     /// Generate a diagnostic message for a uniformity issue.
@@ -1908,7 +1901,7 @@ class UniformityGraph {
         // Traverse the graph to generate a path from RequiredToBeUniform to the source node.
         function.ResetVisited();
         Traverse(function.RequiredToBeUniform(severity));
-        TINT_ASSERT(Resolver, source_node->visited_from);
+        TINT_ASSERT(source_node->visited_from);
 
         // Find a node that is required to be uniform that has a path to the source node.
         auto* cause = TraceBackAlongPathUntil(source_node, [&](Node* node) {
@@ -1917,7 +1910,7 @@ class UniformityGraph {
 
         // The node will always have a corresponding call expression.
         auto* call = cause->ast->As<ast::CallExpression>();
-        TINT_ASSERT(Resolver, call);
+        TINT_ASSERT(call);
         auto* target = SemCall(call)->Target();
         auto func_name = NameFor(call->target);
 

@@ -88,8 +88,8 @@ std::string SemHelper::Describe(const sem::Expression* expr) const {
             return "texel format '" + tint::ToString(fmt->Value()) + "'";
         },
         [&](Default) -> std::string {
-            TINT_ICE(Resolver, builder_->Diagnostics())
-                << "unhandled sem::Expression type: " << (expr ? expr->TypeInfo().name : "<null>");
+            TINT_ICE() << "unhandled sem::Expression type: "
+                       << (expr ? expr->TypeInfo().name : "<null>");
             return "<unknown>";
         });
 }

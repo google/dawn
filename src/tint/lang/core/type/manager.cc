@@ -143,7 +143,7 @@ const type::Array* Manager::array(const type::Type* elem_ty,
     if (stride == 0) {
         stride = implicit_stride;
     }
-    TINT_ASSERT(Type, stride >= implicit_stride);
+    TINT_ASSERT(stride >= implicit_stride);
 
     return Get<type::Array>(/* element type */ elem_ty,
                             /* element count */ Get<ConstantArrayCount>(count),

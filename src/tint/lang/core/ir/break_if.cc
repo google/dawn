@@ -19,13 +19,14 @@
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
+#include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::BreakIf);
 
 namespace tint::ir {
 
 BreakIf::BreakIf(Value* condition, ir::Loop* loop, VectorRef<Value*> args) : loop_(loop) {
-    TINT_ASSERT(IR, loop_);
+    TINT_ASSERT(loop_);
 
     AddOperand(BreakIf::kConditionOperandOffset, condition);
     AddOperands(BreakIf::kArgsOperandOffset, std::move(args));

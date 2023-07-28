@@ -163,9 +163,8 @@ class ResolvedIdentifier {
         return !(*this == other);
     }
 
-    /// @param diagnostics diagnostics used to report ICEs
     /// @return a description of the resolved symbol
-    std::string String(diag::List& diagnostics) const;
+    std::string String() const;
 
   private:
     std::variant<UnresolvedIdentifier,

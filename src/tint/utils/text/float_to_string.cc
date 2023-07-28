@@ -20,7 +20,7 @@
 #include <iomanip>
 #include <limits>
 
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/text/string_stream.h"
 
 namespace tint::writer {
@@ -122,7 +122,7 @@ std::string ToBitPreservingString(F f) {
                 }
             } else {
                 // Subnormal, and not zero.
-                TINT_ASSERT(Writer, mantissa != 0);
+                TINT_ASSERT(mantissa != 0);
                 const auto kTopBit = static_cast<uint_t>(1u) << T::kMantissaBits;
 
                 // Shift left until we get 1.x

@@ -18,7 +18,7 @@
 #include <limits>
 
 #include "src/tint/utils/containers/map.h"
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 
 namespace tint {
 
@@ -27,7 +27,7 @@ TextGenerator::TextGenerator() = default;
 TextGenerator::~TextGenerator() = default;
 
 std::string TextGenerator::UniqueIdentifier(const std::string& /* = "" */) {
-    TINT_UNIMPLEMENTED(Utils, diagnostics_) << "UniqueIdentifier() not overridden";
+    TINT_UNIMPLEMENTED() << "UniqueIdentifier() not overridden";
     return "<error>";
 }
 
@@ -70,10 +70,9 @@ void TextGenerator::TextBuffer::Append(const std::string& line) {
 
 void TextGenerator::TextBuffer::Insert(const std::string& line, size_t before, uint32_t indent) {
     if (TINT_UNLIKELY(before >= lines.size())) {
-        diag::List d;
-        TINT_ICE(Writer, d) << "TextBuffer::Insert() called with before >= lines.size()\n"
-                            << "  before:" << before << "\n"
-                            << "  lines.size(): " << lines.size();
+        TINT_ICE() << "TextBuffer::Insert() called with before >= lines.size()\n"
+                   << "  before:" << before << "\n"
+                   << "  lines.size(): " << lines.size();
         return;
     }
     using DT = decltype(lines)::difference_type;
@@ -89,10 +88,9 @@ void TextGenerator::TextBuffer::Append(const TextBuffer& tb) {
 
 void TextGenerator::TextBuffer::Insert(const TextBuffer& tb, size_t before, uint32_t indent) {
     if (TINT_UNLIKELY(before >= lines.size())) {
-        diag::List d;
-        TINT_ICE(Writer, d) << "TextBuffer::Insert() called with before >= lines.size()\n"
-                            << "  before:" << before << "\n"
-                            << "  lines.size(): " << lines.size();
+        TINT_ICE() << "TextBuffer::Insert() called with before >= lines.size()\n"
+                   << "  before:" << before << "\n"
+                   << "  lines.size(): " << lines.size();
         return;
     }
     size_t idx = 0;

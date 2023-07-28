@@ -15,7 +15,7 @@
 #include "src/tint/lang/core/ir/instruction.h"
 
 #include "src/tint/lang/core/ir/block.h"
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Instruction);
 
@@ -26,7 +26,7 @@ Instruction::Instruction() = default;
 Instruction::~Instruction() = default;
 
 void Instruction::Destroy() {
-    TINT_ASSERT(IR, Alive());
+    TINT_ASSERT(Alive());
     if (Block()) {
         Remove();
     }
@@ -38,25 +38,25 @@ void Instruction::Destroy() {
 }
 
 void Instruction::InsertBefore(Instruction* before) {
-    TINT_ASSERT_OR_RETURN(IR, before);
-    TINT_ASSERT_OR_RETURN(IR, before->Block() != nullptr);
+    TINT_ASSERT_OR_RETURN(before);
+    TINT_ASSERT_OR_RETURN(before->Block() != nullptr);
     before->Block()->InsertBefore(before, this);
 }
 
 void Instruction::InsertAfter(Instruction* after) {
-    TINT_ASSERT_OR_RETURN(IR, after);
-    TINT_ASSERT_OR_RETURN(IR, after->Block() != nullptr);
+    TINT_ASSERT_OR_RETURN(after);
+    TINT_ASSERT_OR_RETURN(after->Block() != nullptr);
     after->Block()->InsertAfter(after, this);
 }
 
 void Instruction::ReplaceWith(Instruction* replacement) {
-    TINT_ASSERT_OR_RETURN(IR, replacement);
-    TINT_ASSERT_OR_RETURN(IR, Block() != nullptr);
+    TINT_ASSERT_OR_RETURN(replacement);
+    TINT_ASSERT_OR_RETURN(Block() != nullptr);
     Block()->Replace(this, replacement);
 }
 
 void Instruction::Remove() {
-    TINT_ASSERT_OR_RETURN(IR, Block() != nullptr);
+    TINT_ASSERT_OR_RETURN(Block() != nullptr);
     Block()->Remove(this);
 }
 

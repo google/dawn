@@ -16,7 +16,7 @@
 
 #include <utility>
 
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Swizzle);
 
@@ -24,14 +24,14 @@ namespace tint::ir {
 
 Swizzle::Swizzle(InstructionResult* result, Value* object, VectorRef<uint32_t> indices)
     : indices_(std::move(indices)) {
-    TINT_ASSERT(IR, !indices.IsEmpty());
-    TINT_ASSERT(IR, indices.Length() <= 4);
+    TINT_ASSERT(!indices.IsEmpty());
+    TINT_ASSERT(indices.Length() <= 4);
 
     AddOperand(Swizzle::kObjectOperandOffset, object);
     AddResult(result);
 
     for (auto idx : indices_) {
-        TINT_ASSERT(IR, idx < 4);
+        TINT_ASSERT(idx < 4);
     }
 }
 

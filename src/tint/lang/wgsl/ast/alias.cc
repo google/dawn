@@ -22,7 +22,7 @@ namespace tint::ast {
 
 Alias::Alias(GenerationID pid, NodeID nid, const Source& src, const Identifier* n, Type subtype)
     : Base(pid, nid, src, n), type(subtype) {
-    TINT_ASSERT(AST, type);
+    TINT_ASSERT(type);
 }
 
 Alias::~Alias() = default;

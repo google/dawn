@@ -13,17 +13,12 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
-#include "src/tint/lang/wgsl/program/program.h"
 #include "tint/tint.h"
-
-#if TINT_BUILD_SPV_READER
-#include "src/tint/lang/spirv/reader/ast_parser/test_helper.h"
-#endif
 
 namespace {
 
-void TintInternalCompilerErrorReporter(const tint::diag::List& diagnostics) {
-    FAIL() << diagnostics.str();
+void TintInternalCompilerErrorReporter(const tint::InternalCompilerError& err) {
+    FAIL() << err.Error();
 }
 
 struct Flags {
@@ -57,12 +52,6 @@ int main(int argc, char** argv) {
     if (!flags.parse(argc, argv)) {
         return -1;
     }
-
-#if TINT_BUILD_SPV_READER
-    if (flags.spirv_reader_dump_converted) {
-        tint::spirv::reader::test::DumpSuccessfullyConvertedSpirv();
-    }
-#endif  // TINT_BUILD_SPV_READER
 
     tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
 

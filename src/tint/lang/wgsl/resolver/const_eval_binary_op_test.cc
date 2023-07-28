@@ -2425,8 +2425,6 @@ const result = )");
     auto program = wgsl::reader::Parse(file.get());
 
     if (should_pass) {
-        diag::Formatter::Style style;
-        style.print_newline_at_end = false;
         auto error = program.Diagnostics().str();
 
         EXPECT_TRUE(program.IsValid()) << error;

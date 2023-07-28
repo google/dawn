@@ -22,9 +22,8 @@
 #include "src/tint/lang/wgsl/writer/ir_to_program/ir_to_program.h"
 #include "src/tint/lang/wgsl/writer/writer.h"
 
-[[noreturn]] void TintInternalCompilerErrorReporter(const tint::diag::List& diagnostics) {
-    auto printer = tint::diag::Printer::create(stderr, true);
-    tint::diag::Formatter{}.format(diagnostics, printer.get());
+[[noreturn]] void TintInternalCompilerErrorReporter(const tint::InternalCompilerError& err) {
+    std::cerr << err.Error() << std::endl;
     __builtin_trap();
 }
 

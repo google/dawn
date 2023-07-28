@@ -18,7 +18,7 @@
 #include <stdint.h>
 #include <utility>
 
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/text/string_stream.h"
 
 namespace tint {
@@ -88,7 +88,6 @@ namespace detail {
 void AssertGenerationIDsEqual(GenerationID a,
                               GenerationID b,
                               bool if_valid,
-                              diag::System system,
                               const char* msg,
                               const char* file,
                               size_t line);
@@ -102,15 +101,14 @@ void AssertGenerationIDsEqual(GenerationID a,
 /// that the generation identifiers for A and B are equal, if both A and B have
 /// valid generation identifiers.
 #if TINT_CHECK_FOR_CROSS_GENERATION_LEAKS
-#define TINT_ASSERT_GENERATION_IDS_EQUAL(system, a, b)                           \
-    tint::detail::AssertGenerationIDsEqual(                                      \
-        GenerationIDOf(a), GenerationIDOf(b), false, tint::diag::System::system, \
-        "TINT_ASSERT_GENERATION_IDS_EQUAL(" #system "," #a ", " #b ")", __FILE__, __LINE__)
-#define TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(system, a, b)                             \
-    tint::detail::AssertGenerationIDsEqual(                                                 \
-        GenerationIDOf(a), GenerationIDOf(b), true, tint::diag::System::system,             \
-        "TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(" #system ", " #a ", " #b ")", __FILE__, \
-        __LINE__)
+#define TINT_ASSERT_GENERATION_IDS_EQUAL(a, b)                                                 \
+    tint::detail::AssertGenerationIDsEqual(GenerationIDOf(a), GenerationIDOf(b), false,        \
+                                           "TINT_ASSERT_GENERATION_IDS_EQUAL(" #a ", " #b ")", \
+                                           __FILE__, __LINE__)
+#define TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(a, b) \
+    tint::detail::AssertGenerationIDsEqual(             \
+        GenerationIDOf(a), GenerationIDOf(b), true,     \
+        "TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(" #a ", " #b ")", __FILE__, __LINE__)
 #else
 #define TINT_ASSERT_GENERATION_IDS_EQUAL(a, b) \
     do {                                       \

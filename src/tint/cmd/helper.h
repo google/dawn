@@ -33,8 +33,7 @@ struct ProgramInfo {
 };
 
 /// Reporter callback for internal tint errors
-/// @param diagnostics the diagnostics to emit
-[[noreturn]] void TintInternalCompilerErrorReporter(const tint::diag::List& diagnostics);
+[[noreturn]] void TintInternalCompilerErrorReporter(const InternalCompilerError& err);
 
 /// PrintWGSL writes the WGSL of the program to the provided ostream, if the
 /// WGSL writer is enabled, otherwise it does nothing.

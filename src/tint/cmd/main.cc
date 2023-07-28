@@ -41,6 +41,8 @@
 #include "src/tint/utils/cli/cli.h"
 #include "src/tint/utils/command/command.h"
 #include "src/tint/utils/containers/transform.h"
+#include "src/tint/utils/diagnostic/formatter.h"
+#include "src/tint/utils/diagnostic/printer.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
@@ -809,7 +811,7 @@ EShLanguage pipeline_stage_to_esh_language(tint::ast::PipelineStage stage) {
         case tint::ast::PipelineStage::kCompute:
             return EShLangCompute;
         default:
-            TINT_ASSERT(AST, false);
+            TINT_UNREACHABLE();
             return EShLangVertex;
     }
 }
@@ -1004,9 +1006,6 @@ int main(int argc, const char** argv) {
         options.format = Format::kSpvAsm;
     }
 
-    auto diag_printer = tint::diag::Printer::create(stderr, true);
-    tint::diag::Formatter diag_formatter;
-
     std::unique_ptr<tint::Program> program;
     std::unique_ptr<tint::Source::File> source_file;
 
@@ -1139,7 +1138,7 @@ int main(int argc, const char** argv) {
     auto out = transform_manager.Run(program.get(), std::move(transform_inputs), outputs);
     if (!out.IsValid()) {
         tint::cmd::PrintWGSL(std::cerr, out);
-        diag_formatter.format(out.Diagnostics(), diag_printer.get());
+        std::cerr << out.Diagnostics().str() << std::endl;
         return 1;
     }
 

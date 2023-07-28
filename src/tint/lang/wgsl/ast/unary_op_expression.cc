@@ -26,8 +26,8 @@ UnaryOpExpression::UnaryOpExpression(GenerationID pid,
                                      UnaryOp o,
                                      const Expression* e)
     : Base(pid, nid, src), op(o), expr(e) {
-    TINT_ASSERT(AST, expr);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, expr, generation_id);
+    TINT_ASSERT(expr);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(expr, generation_id);
 }
 
 UnaryOpExpression::~UnaryOpExpression() = default;

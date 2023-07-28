@@ -134,8 +134,7 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* s
             });
         }
 
-        TINT_ICE(Transform, b.Diagnostics())
-            << "matrix initializer has unexpected number of arguments";
+        TINT_ICE() << "matrix initializer has unexpected number of arguments";
         return nullptr;
     });
 

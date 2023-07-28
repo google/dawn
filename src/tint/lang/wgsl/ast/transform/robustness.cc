@@ -261,9 +261,8 @@ struct Robustness::State {
                 return nullptr;
             },
             [&](Default) -> const Expression* {
-                TINT_ICE(Transform, b.Diagnostics())
-                    << "unhandled object type in robustness of array index: "
-                    << obj_type->UnwrapRef()->FriendlyName();
+                TINT_ICE() << "unhandled object type in robustness of array index: "
+                           << obj_type->UnwrapRef()->FriendlyName();
                 return nullptr;
             });
     }
@@ -641,7 +640,7 @@ struct Robustness::State {
             default:
                 break;
         }
-        TINT_UNREACHABLE(Transform, b.Diagnostics()) << "unhandled address space" << address_space;
+        TINT_UNREACHABLE() << "unhandled address space" << address_space;
         return Action::kDefault;
     }
 

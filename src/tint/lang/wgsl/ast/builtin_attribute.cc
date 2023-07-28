@@ -27,7 +27,7 @@ BuiltinAttribute::BuiltinAttribute(GenerationID pid,
                                    const Source& src,
                                    const Expression* b)
     : Base(pid, nid, src), builtin(b) {
-    TINT_ASSERT_GENERATION_IDS_EQUAL(AST, b, generation_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL(b, generation_id);
 }
 
 BuiltinAttribute::~BuiltinAttribute() = default;

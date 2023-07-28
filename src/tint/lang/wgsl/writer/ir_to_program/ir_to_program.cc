@@ -74,9 +74,9 @@
 #include "src/tint/utils/rtti/switch.h"
 
 // Helper for calling TINT_UNIMPLEMENTED() from a Switch(object_ptr) default case.
-#define UNHANDLED_CASE(object_ptr)          \
-    TINT_UNIMPLEMENTED(IR, b.Diagnostics()) \
-        << "unhandled case in Switch(): " << (object_ptr ? object_ptr->TypeInfo().name : "<null>")
+#define UNHANDLED_CASE(object_ptr)                         \
+    TINT_UNIMPLEMENTED() << "unhandled case in Switch(): " \
+                         << (object_ptr ? object_ptr->TypeInfo().name : "<null>")
 
 // Helper for incrementing nesting_depth_ and then decrementing nesting_depth_ at the end
 // of the scope that holds the call.
@@ -495,8 +495,7 @@ class State {
 
         // Return has arguments - this is the return value.
         if (ret->Args().Length() != 1) {
-            TINT_ICE(IR, b.Diagnostics())
-                << "expected 1 value for return, got " << ret->Args().Length();
+            TINT_ICE() << "expected 1 value for return, got " << ret->Args().Length();
             return;
         }
 
@@ -641,13 +640,12 @@ class State {
                 [&](const type::Struct* s) {
                     if (auto* c = index->As<ir::Constant>()) {
                         auto i = c->Value()->ValueAs<uint32_t>();
-                        TINT_ASSERT_OR_RETURN(IR, i < s->Members().Length());
+                        TINT_ASSERT_OR_RETURN(i < s->Members().Length());
                         auto* member = s->Members()[i];
                         obj_ty = member->Type();
                         expr = b.MemberAccessor(expr, member->Name().NameView());
                     } else {
-                        TINT_ICE(IR, b.Diagnostics())
-                            << "invalid index for struct type: " << index->TypeInfo().name;
+                        TINT_ICE() << "invalid index for struct type: " << index->TypeInfo().name;
                     }
                 },
                 [&](Default) { UNHANDLED_CASE(obj_ty); });
@@ -660,7 +658,7 @@ class State {
         Vector<char, 4> components;
         for (uint32_t i : s->Indices()) {
             if (TINT_UNLIKELY(i >= 4)) {
-                TINT_ICE(IR, b.Diagnostics()) << "invalid swizzle index: " << i;
+                TINT_ICE() << "invalid swizzle index: " << i;
                 return;
             }
             components.Push("xyzw"[i]);
@@ -748,9 +746,8 @@ class State {
             [&](Default) -> ExprAndPtrKind {
                 auto lookup = bindings_.Find(value);
                 if (TINT_UNLIKELY(!lookup)) {
-                    TINT_ICE(IR, b.Diagnostics())
-                        << "Expr(" << (value ? value->TypeInfo().name : "null")
-                        << ") value has no expression";
+                    TINT_ICE() << "Expr(" << (value ? value->TypeInfo().name : "null")
+                               << ") value has no expression";
                     return {};
                 }
                 return std::visit(
@@ -769,10 +766,10 @@ class State {
                         }
 
                         if constexpr (std::is_same_v<T, ConsumedValue>) {
-                            TINT_ICE(IR, b.Diagnostics()) << "Expr(" << value->TypeInfo().name
-                                                          << ") called twice on the same value";
+                            TINT_ICE() << "Expr(" << value->TypeInfo().name
+                                       << ") called twice on the same value";
                         } else {
-                            TINT_ICE(IR, b.Diagnostics())
+                            TINT_ICE()
                                 << "Expr(" << value->TypeInfo().name << ") has unhandled value";
                         }
                         return {};
@@ -868,7 +865,7 @@ class State {
             [&](const type::Vector* v) {
                 auto el = Type(v->type());
                 if (v->Packed()) {
-                    TINT_ASSERT(IR, v->Width() == 3u);
+                    TINT_ASSERT(v->Width() == 3u);
                     return b.ty(builtin::Builtin::kPackedVec3, el);
                 } else {
                     return b.ty.vec(el, v->Width());
@@ -885,7 +882,7 @@ class State {
                 }
                 auto count = a->ConstantCount();
                 if (TINT_UNLIKELY(!count)) {
-                    TINT_ICE(IR, b.Diagnostics()) << type::Array::kErrExpectedConstantCount;
+                    TINT_ICE() << type::Array::kErrExpectedConstantCount;
                     return b.ty.array(el, u32(1), std::move(attrs));
                 }
                 return b.ty.array(el, u32(count.value()), std::move(attrs));
@@ -920,7 +917,7 @@ class State {
                 return b.ty.ptr(address_space, el, access);
             },
             [&](const type::Reference*) {
-                TINT_ICE(IR, b.Diagnostics()) << "reference types should never appear in the IR";
+                TINT_ICE() << "reference types should never appear in the IR";
                 return b.ty.i32();
             },
             [&](Default) {
@@ -1002,7 +999,7 @@ class State {
     /// Associates the IR value @p value with the AST expression @p expr.
     /// @p ptr_kind defines how pointer values are represented by @p expr.
     void Bind(ir::Value* value, const ast::Expression* expr, PtrKind ptr_kind = PtrKind::kRef) {
-        TINT_ASSERT(IR, value);
+        TINT_ASSERT(value);
         if (can_inline_.Remove(value)) {
             // Value will be inlined at its place of usage.
             if (TINT_LIKELY(bindings_.Add(value, InlinedValue{expr, ptr_kind}))) {
@@ -1026,20 +1023,18 @@ class State {
             return;
         }
 
-        TINT_ICE(IR, b.Diagnostics())
-            << "Bind(" << value->TypeInfo().name << ") called twice for same value";
+        TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
     }
 
     /// Associates the IR value @p value with the AST 'var', 'let' or parameter with the name @p
     /// name.
     /// @p ptr_kind defines how pointer values are represented by @p expr.
     void Bind(ir::Value* value, Symbol name, PtrKind ptr_kind) {
-        TINT_ASSERT(IR, value);
+        TINT_ASSERT(value);
 
         bool added = bindings_.Add(value, VariableValue{name, ptr_kind});
         if (TINT_UNLIKELY(!added)) {
-            TINT_ICE(IR, b.Diagnostics())
-                << "Bind(" << value->TypeInfo().name << ") called twice for same value";
+            TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
         }
     }
 

@@ -58,25 +58,24 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
                     made_changes = true;
 
                     std::vector<const Expression*> side_effects;
-                    if (!TraverseExpressions(
-                            stmt->rhs, b.Diagnostics(), [&](const CallExpression* expr) {
-                                // CallExpression may map to a function or builtin call
-                                // (both may have side-effects), or a value constructor or value
-                                // conversion (both do not have side effects).
-                                auto* call = sem.Get<sem::Call>(expr);
-                                if (!call) {
-                                    // Semantic node must be a Materialize, in which case the
-                                    // expression was creation-time (compile time), so could not
-                                    // have side effects. Just skip.
-                                    return TraverseAction::Skip;
-                                }
-                                if (call->Target()->IsAnyOf<sem::Function, sem::Builtin>() &&
-                                    call->HasSideEffects()) {
-                                    side_effects.push_back(expr);
-                                    return TraverseAction::Skip;
-                                }
-                                return TraverseAction::Descend;
-                            })) {
+                    if (!TraverseExpressions(stmt->rhs, [&](const CallExpression* expr) {
+                            // CallExpression may map to a function or builtin call
+                            // (both may have side-effects), or a value constructor or value
+                            // conversion (both do not have side effects).
+                            auto* call = sem.Get<sem::Call>(expr);
+                            if (!call) {
+                                // Semantic node must be a Materialize, in which case the
+                                // expression was creation-time (compile time), so could not
+                                // have side effects. Just skip.
+                                return TraverseAction::Skip;
+                            }
+                            if (call->Target()->IsAnyOf<sem::Function, sem::Builtin>() &&
+                                call->HasSideEffects()) {
+                                side_effects.push_back(expr);
+                                return TraverseAction::Skip;
+                            }
+                            return TraverseAction::Descend;
+                        })) {
                         return;
                     }
 

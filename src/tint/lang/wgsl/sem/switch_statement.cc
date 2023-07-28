@@ -27,8 +27,8 @@ SwitchStatement::SwitchStatement(const ast::SwitchStatement* declaration,
                                  const CompoundStatement* parent,
                                  const sem::Function* function)
     : Base(declaration, parent, function) {
-    TINT_ASSERT(Semantic, parent);
-    TINT_ASSERT(Semantic, function);
+    TINT_ASSERT(parent);
+    TINT_ASSERT(function);
 }
 
 SwitchStatement::~SwitchStatement() = default;
@@ -41,8 +41,8 @@ CaseStatement::CaseStatement(const ast::CaseStatement* declaration,
                              const CompoundStatement* parent,
                              const sem::Function* function)
     : Base(declaration, parent, function) {
-    TINT_ASSERT(Semantic, parent);
-    TINT_ASSERT(Semantic, function);
+    TINT_ASSERT(parent);
+    TINT_ASSERT(function);
 }
 CaseStatement::~CaseStatement() = default;
 

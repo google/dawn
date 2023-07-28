@@ -150,7 +150,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                     auto* arg = call_expr->args[0];
                     auto* address_of = arg->As<UnaryOpExpression>();
                     if (TINT_UNLIKELY(!address_of || address_of->op != UnaryOp::kAddressOf)) {
-                        TINT_ICE(Transform, b.Diagnostics())
+                        TINT_ICE()
                             << "arrayLength() expected address-of, got " << arg->TypeInfo().name;
                     }
                     auto* storage_buffer_expr = address_of->expr;
@@ -159,9 +159,8 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                     }
                     auto* storage_buffer_sem = sem.Get<sem::VariableUser>(storage_buffer_expr);
                     if (TINT_UNLIKELY(!storage_buffer_sem)) {
-                        TINT_ICE(Transform, b.Diagnostics())
-                            << "expected form of arrayLength argument to be &array_var or "
-                               "&struct_var.array_member";
+                        TINT_ICE() << "expected form of arrayLength argument to be &array_var or "
+                                      "&struct_var.array_member";
                         break;
                     }
                     auto* storage_buffer_var = storage_buffer_sem->Variable();
@@ -210,9 +209,8 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                                 [&](const type::Array* arr) { return arr; });
 
                             if (TINT_UNLIKELY(!array_type)) {
-                                TINT_ICE(Transform, b.Diagnostics())
-                                    << "expected form of arrayLength argument to be "
-                                       "&array_var or &struct_var.array_member";
+                                TINT_ICE() << "expected form of arrayLength argument to be "
+                                              "&array_var or &struct_var.array_member";
                                 return name;
                             }
 

@@ -136,7 +136,7 @@ bool Resolver::Resolve() {
     bool result = ResolveInternal();
 
     if (TINT_UNLIKELY(!result && !diagnostics_.contains_errors())) {
-        TINT_ICE(Resolver, diagnostics_) << "resolving failed, but no error was raised";
+        AddICE("resolving failed, but no error was raised", {});
         return false;
     }
 
@@ -179,8 +179,7 @@ bool Resolver::ResolveInternal() {
                 [&](const ast::Variable* var) { return GlobalVariable(var); },
                 [&](const ast::ConstAssert* ca) { return ConstAssert(ca); },
                 [&](Default) {
-                    TINT_UNREACHABLE(Resolver, diagnostics_)
-                        << "unhandled global declaration: " << decl->TypeInfo().name;
+                    TINT_UNREACHABLE() << "unhandled global declaration: " << decl->TypeInfo().name;
                     return false;
                 })) {
             return false;
@@ -208,10 +207,10 @@ bool Resolver::ResolveInternal() {
     bool result = true;
     for (auto* node : builder_->ASTNodes().Objects()) {
         if (TINT_UNLIKELY(!marked_[node->node_id.value])) {
-            TINT_ICE(Resolver, diagnostics_)
-                << "AST node '" << node->TypeInfo().name << "' was not reached by the resolver\n"
-                << "At: " << node->source << "\n"
+            StringStream err;
+            err << "AST node '" << node->TypeInfo().name << "' was not reached by the resolver\n"
                 << "Pointer: " << node;
+            AddICE(err.str(), node->source);
             result = false;
         }
     }
@@ -229,9 +228,10 @@ sem::Variable* Resolver::Variable(const ast::Variable* v, bool is_global) {
         [&](const ast::Override* override) { return Override(override); },
         [&](const ast::Const* const_) { return Const(const_, is_global); },
         [&](Default) {
-            TINT_ICE(Resolver, diagnostics_)
-                << "Resolver::GlobalVariable() called with a unknown variable type: "
+            StringStream err;
+            err << "Resolver::GlobalVariable() called with a unknown variable type: "
                 << v->TypeInfo().name;
+            AddICE(err.str(), v->source);
             return nullptr;
         });
 }
@@ -876,10 +876,10 @@ void Resolver::SetShadows() {
     for (auto it : dependencies_.shadows) {
         CastableBase* b = sem_.Get(it.value);
         if (TINT_UNLIKELY(!b)) {
-            TINT_ICE(Resolver, diagnostics_)
-                << "AST node '" << it.value->TypeInfo().name << "' had no semantic info\n"
-                << "At: " << it.value->source << "\n"
+            StringStream err;
+            err << "AST node '" << it.value->TypeInfo().name << "' had no semantic info\n"
                 << "Pointer: " << it.value;
+            AddICE(err.str(), it.value->source);
         }
 
         Switch(
@@ -1145,8 +1145,9 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     if (decl->body) {
         Mark(decl->body);
         if (TINT_UNLIKELY(current_compound_statement_)) {
-            TINT_ICE(Resolver, diagnostics_)
-                << "Resolver::Function() called with a current compound statement";
+            StringStream err;
+            err << "Resolver::Function() called with a current compound statement";
+            AddICE(err.str(), decl->body->source);
             return nullptr;
         }
         auto* body = StatementScope(decl->body, builder_->create<sem::FunctionBlockStatement>(func),
@@ -1467,7 +1468,7 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
     constexpr size_t kMaxExpressionDepth = 512U;
     bool failed = false;
     if (!ast::TraverseExpressions<ast::TraverseOrder::RightToLeft>(
-            root, diagnostics_, [&](const ast::Expression* expr, size_t depth) {
+            root, [&](const ast::Expression* expr, size_t depth) {
                 if (depth > kMaxExpressionDepth) {
                     AddError(
                         "reached max expression depth of " + std::to_string(kMaxExpressionDepth),
@@ -1487,6 +1488,7 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
                 sorted.Push(expr);
                 return ast::TraverseAction::Descend;
             })) {
+        AddError("TraverseExpressions failed", root->source);
         return nullptr;
     }
 
@@ -1513,8 +1515,9 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
                                                               /* has_side_effects */ false);
             },
             [&](Default) {
-                TINT_ICE(Resolver, diagnostics_)
-                    << "unhandled expression type: " << expr->TypeInfo().name;
+                StringStream err;
+                err << "unhandled expression type: " << expr->TypeInfo().name;
+                AddICE(err.str(), expr->source);
                 return nullptr;
             });
         if (!sem_expr) {
@@ -1546,11 +1549,12 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
                     ((*binary)->IsLogicalOr() && lhs_is_true)) {
                     // Mark entire expression tree to not const-evaluate
                     auto r = ast::TraverseExpressions(  //
-                        (*binary)->rhs, diagnostics_, [&](const ast::Expression* e) {
+                        (*binary)->rhs, [&](const ast::Expression* e) {
                             skip_const_eval_.Add(e);
                             return ast::TraverseAction::Descend;
                         });
                     if (!r) {
+                        AddError("TraverseExpressions failed", root->source);
                         return nullptr;
                     }
                 }
@@ -1558,7 +1562,7 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
         }
     }
 
-    TINT_ICE(Resolver, diagnostics_) << "Expression() did not find root node";
+    AddICE("Expression() did not find root node", root->source);
     return nullptr;
 }
 
@@ -1837,9 +1841,10 @@ const sem::ValueExpression* Resolver::Materialize(const sem::ValueExpression* ex
     if (!skip_const_eval_.Contains(decl)) {
         auto expr_val = expr->ConstantValue();
         if (TINT_UNLIKELY(!expr_val)) {
-            TINT_ICE(Resolver, diagnostics_)
-                << decl->source << "Materialize(" << decl->TypeInfo().name
+            StringStream err;
+            err << decl->source << "Materialize(" << decl->TypeInfo().name
                 << ") called on expression with no constant value";
+            AddICE(err.str(), expr->Declaration()->source);
             return nullptr;
         }
 
@@ -1850,9 +1855,10 @@ const sem::ValueExpression* Resolver::Materialize(const sem::ValueExpression* ex
         }
         materialized_val = val.Get();
         if (TINT_UNLIKELY(!materialized_val)) {
-            TINT_ICE(Resolver, diagnostics_)
-                << decl->source << "ConvertValue(" << expr_val->Type()->FriendlyName() << " -> "
+            StringStream err;
+            err << decl->source << "ConvertValue(" << expr_val->Type()->FriendlyName() << " -> "
                 << concrete_ty->FriendlyName() << ") returned invalid value";
+            AddICE(err.str(), expr->Declaration()->source);
             return nullptr;
         }
     }
@@ -2126,7 +2132,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             [&](const type::Bool*) { return ctor_or_conv(CtorConvIntrinsic::kBool, nullptr); },
             [&](const type::Vector* v) {
                 if (v->Packed()) {
-                    TINT_ASSERT(Resolver, v->Width() == 3u);
+                    TINT_ASSERT(v->Width() == 3u);
                     return ctor_or_conv(CtorConvIntrinsic::kPackedVec3, v->type());
                 }
                 return ctor_or_conv(VectorCtorConvIntrinsic(v->Width()), v->type());
@@ -2225,8 +2231,9 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     auto call = [&]() -> sem::Call* {
         auto resolved = dependencies_.resolved_identifiers.Get(ident);
         if (!resolved) {
-            TINT_ICE(Resolver, diagnostics_)
-                << "identifier '" << ident->symbol.Name() << "' was not resolved";
+            StringStream err;
+            err << "identifier '" << ident->symbol.Name() << "' was not resolved";
+            AddICE(err.str(), ident->source);
             return nullptr;
         }
 
@@ -2882,7 +2889,9 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
     }
 
     auto name = ident->symbol.Name();
-    TINT_ICE(Resolver, diagnostics_) << ident->source << " unhandled builtin type '" << name << "'";
+    StringStream err;
+    err << " unhandled builtin type '" << name << "'";
+    AddICE(err.str(), ident->source);
     return nullptr;
 }
 
@@ -2905,7 +2914,10 @@ void Resolver::CollectTextureSamplerPairs(const sem::Builtin* builtin,
     const auto& signature = builtin->Signature();
     int texture_index = signature.IndexOf(sem::ParameterUsage::kTexture);
     if (TINT_UNLIKELY(texture_index == -1)) {
-        TINT_ICE(Resolver, diagnostics_) << "texture builtin without texture parameter";
+        StringStream err;
+        err << "texture builtin without texture parameter";
+        AddICE(err.str(), {});
+        return;
     }
     if (auto* user =
             args[static_cast<size_t>(texture_index)]->UnwrapLoad()->As<sem::VariableUser>()) {
@@ -3013,8 +3025,7 @@ sem::ValueExpression* Resolver::Literal(const ast::LiteralExpression* literal) {
                 case ast::IntLiteralExpression::Suffix::kU:
                     return builder_->create<type::U32>();
             }
-            TINT_UNREACHABLE(Resolver, diagnostics_)
-                << "Unhandled integer literal suffix: " << i->suffix;
+            TINT_UNREACHABLE() << "Unhandled integer literal suffix: " << i->suffix;
             return nullptr;
         },
         [&](const ast::FloatLiteralExpression* f) -> type::Type* {
@@ -3028,14 +3039,12 @@ sem::ValueExpression* Resolver::Literal(const ast::LiteralExpression* literal) {
                                ? builder_->create<type::F16>()
                                : nullptr;
             }
-            TINT_UNREACHABLE(Resolver, diagnostics_)
-                << "Unhandled float literal suffix: " << f->suffix;
+            TINT_UNREACHABLE() << "Unhandled float literal suffix: " << f->suffix;
             return nullptr;
         },
         [&](const ast::BoolLiteralExpression*) { return builder_->create<type::Bool>(); },
         [&](Default) {
-            TINT_UNREACHABLE(Resolver, diagnostics_)
-                << "Unhandled literal type: " << literal->TypeInfo().name;
+            TINT_UNREACHABLE() << "Unhandled literal type: " << literal->TypeInfo().name;
             return nullptr;
         });
 
@@ -3066,8 +3075,9 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
 
     auto resolved = dependencies_.resolved_identifiers.Get(ident);
     if (!resolved) {
-        TINT_ICE(Resolver, diagnostics_)
-            << "identifier '" << ident->symbol.Name() << "' was not resolved";
+        StringStream err;
+        err << "identifier '" << ident->symbol.Name() << "' was not resolved";
+        AddICE(err.str(), expr->source);
         return nullptr;
     }
 
@@ -3253,8 +3263,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
         return nullptr;
     }
 
-    TINT_UNREACHABLE(Resolver, diagnostics_)
-        << "unhandled resolved identifier: " << resolved->String(diagnostics_);
+    TINT_UNREACHABLE() << "unhandled resolved identifier: " << resolved->String();
     return nullptr;
 }
 
@@ -3853,7 +3862,7 @@ type::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
     } else if (auto* str = named_type->As<ast::Struct>()) {
         result = Structure(str);
     } else {
-        TINT_UNREACHABLE(Resolver, diagnostics_) << "Unhandled TypeDecl";
+        TINT_UNREACHABLE() << "Unhandled TypeDecl";
     }
 
     if (!result) {
@@ -4271,7 +4280,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         return nullptr;
     }
     if (TINT_UNLIKELY(struct_align > std::numeric_limits<uint32_t>::max())) {
-        TINT_ICE(Resolver, diagnostics_) << "calculated struct stride exceeds uint32";
+        AddICE("calculated struct stride exceeds uint32", str->source);
         return nullptr;
     }
 
@@ -4749,7 +4758,7 @@ SEM* Resolver::StatementScope(const ast::Statement* ast, SEM* sem, F&& callback)
 
 bool Resolver::Mark(const ast::Node* node) {
     if (TINT_UNLIKELY(node == nullptr)) {
-        TINT_ICE(Resolver, diagnostics_) << "Resolver::Mark() called with nullptr";
+        AddICE("Resolver::Mark() called with nullptr", {});
         return false;
     }
     auto marked_bit_ref = marked_[node->node_id.value];
@@ -4757,10 +4766,11 @@ bool Resolver::Mark(const ast::Node* node) {
         marked_bit_ref = true;
         return true;
     }
-    TINT_ICE(Resolver, diagnostics_) << "AST node '" << node->TypeInfo().name
-                                     << "' was encountered twice in the same AST of a Program\n"
-                                     << "At: " << node->source << "\n"
-                                     << "Pointer: " << node;
+    StringStream err;
+    err << "AST node '" << node->TypeInfo().name
+        << "' was encountered twice in the same AST of a Program\n"
+        << "Pointer: " << node;
+    AddICE(err.str(), node->source);
     return false;
 }
 
@@ -4789,12 +4799,26 @@ bool Resolver::CheckNotTemplated(const char* use, const ast::Identifier* ident) 
 void Resolver::ErrorMismatchedResolvedIdentifier(const Source& source,
                                                  const ResolvedIdentifier& resolved,
                                                  std::string_view wanted) {
-    AddError("cannot use " + resolved.String(diagnostics_) + " as " + std::string(wanted), source);
+    AddError("cannot use " + resolved.String() + " as " + std::string(wanted), source);
     sem_.NoteDeclarationSource(resolved.Node());
 }
 
 void Resolver::ErrorInvalidAttribute(const ast::Attribute* attr, std::string_view use) {
     AddError("@" + attr->Name() + " is not valid for " + std::string(use), attr->source);
+}
+
+void Resolver::AddICE(const std::string& msg, const Source& source) const {
+    if (source.file) {
+        TINT_ICE() << source << ": " << msg;
+    } else {
+        TINT_ICE() << msg;
+    }
+    diag::Diagnostic err{};
+    err.severity = diag::Severity::InternalCompilerError;
+    err.system = diag::System::Resolver;
+    err.source = source;
+    err.message = msg;
+    diagnostics_.add(std::move(err));
 }
 
 void Resolver::AddError(const std::string& msg, const Source& source) const {

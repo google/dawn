@@ -96,8 +96,8 @@ bool Value::Equal(const constant::Value* b) const {
         [&](Default) {
             auto va = InternalValue();
             auto vb = b->InternalValue();
-            TINT_ASSERT(Resolver, !std::holds_alternative<std::monostate>(va));
-            TINT_ASSERT(Resolver, !std::holds_alternative<std::monostate>(vb));
+            TINT_ASSERT(!std::holds_alternative<std::monostate>(va));
+            TINT_ASSERT(!std::holds_alternative<std::monostate>(vb));
             return va == vb;
         });
 }

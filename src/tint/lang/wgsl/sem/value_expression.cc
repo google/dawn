@@ -37,10 +37,10 @@ ValueExpression::ValueExpression(const ast::Expression* declaration,
       stage_(stage),
       constant_(std::move(constant)),
       has_side_effects_(has_side_effects) {
-    TINT_ASSERT(Semantic, type_);
-    TINT_ASSERT(Semantic, (constant != nullptr) == (stage == EvaluationStage::kConstant));
+    TINT_ASSERT(type_);
+    TINT_ASSERT((constant != nullptr) == (stage == EvaluationStage::kConstant));
     if (constant != nullptr) {
-        TINT_ASSERT(Semantic, type_ == constant->Type());
+        TINT_ASSERT(type_ == constant->Type());
     }
 }
 

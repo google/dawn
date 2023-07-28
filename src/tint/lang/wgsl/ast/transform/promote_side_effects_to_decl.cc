@@ -166,7 +166,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
                 return false;
             },
             [&](Default) {
-                TINT_ICE(Transform, b.Diagnostics()) << "Unhandled expression type";
+                TINT_ICE() << "Unhandled expression type";
                 return false;
             });
     }
@@ -328,7 +328,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
                 return false;
             },
             [&](Default) {
-                TINT_ICE(Transform, b.Diagnostics()) << "Unhandled expression type";
+                TINT_ICE() << "Unhandled expression type";
                 return false;
             });
     }
@@ -511,8 +511,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 return clone_maybe_hoisted(phony);  // Leaf expression, just clone as is
             },
             [&](Default) {
-                TINT_ICE(AST, b.Diagnostics())
-                    << "unhandled expression type: " << expr->TypeInfo().name;
+                TINT_ICE() << "unhandled expression type: " << expr->TypeInfo().name;
                 return nullptr;
             });
     }

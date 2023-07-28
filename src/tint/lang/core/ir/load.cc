@@ -15,7 +15,7 @@
 #include "src/tint/lang/core/ir/load.h"
 
 #include "src/tint/lang/core/type/pointer.h"
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Load);
 
@@ -24,8 +24,8 @@ namespace tint::ir {
 Load::Load(InstructionResult* result, Value* from) {
     flags_.Add(Flag::kSequenced);
 
-    TINT_ASSERT(IR, from->Type()->Is<type::Pointer>());
-    TINT_ASSERT(IR, from && from->Type()->UnwrapPtr() == result->Type());
+    TINT_ASSERT(from->Type()->Is<type::Pointer>());
+    TINT_ASSERT(from && from->Type()->UnwrapPtr() == result->Type());
 
     AddOperand(Load::kFromOperandOffset, from);
     AddResult(result);

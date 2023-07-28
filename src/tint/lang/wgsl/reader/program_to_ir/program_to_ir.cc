@@ -192,8 +192,8 @@ class Impl {
     bool NeedTerminator() { return current_block_ && !current_block_->HasTerminator(); }
 
     void SetTerminator(ir::Terminator* terminator) {
-        TINT_ASSERT(IR, current_block_);
-        TINT_ASSERT(IR, !current_block_->HasTerminator());
+        TINT_ASSERT(current_block_);
+        TINT_ASSERT(!current_block_->HasTerminator());
 
         current_block_->Append(terminator);
         current_block_ = nullptr;
@@ -276,7 +276,7 @@ class Impl {
 
     void EmitFunction(const ast::Function* ast_func) {
         // The flow stack should have been emptied when the previous function finished building.
-        TINT_ASSERT(IR, control_stack_.IsEmpty());
+        TINT_ASSERT(control_stack_.IsEmpty());
 
         const auto* sem = program_->Sem().Get(ast_func);
 
@@ -303,7 +303,7 @@ class Impl {
                     break;
                 }
                 default: {
-                    TINT_ICE(IR, diagnostics_) << "Invalid pipeline stage";
+                    TINT_ICE() << "Invalid pipeline stage";
                     return;
                 }
             }
@@ -337,13 +337,12 @@ class Impl {
                                         ir::Function::ReturnBuiltin::kSampleMask);
                                     break;
                                 default:
-                                    TINT_ICE(IR, diagnostics_)
-                                        << "Unknown builtin value in return attributes "
-                                        << ident_sem->Value();
+                                    TINT_ICE() << "Unknown builtin value in return attributes "
+                                               << ident_sem->Value();
                                     return;
                             }
                         } else {
-                            TINT_ICE(IR, diagnostics_) << "Builtin attribute sem invalid";
+                            TINT_ICE() << "Builtin attribute sem invalid";
                             return;
                         }
                     });
@@ -415,13 +414,12 @@ class Impl {
                                     param->SetBuiltin(ir::FunctionParam::Builtin::kSampleMask);
                                     break;
                                 default:
-                                    TINT_ICE(IR, diagnostics_)
-                                        << "Unknown builtin value in parameter attributes "
-                                        << ident_sem->Value();
+                                    TINT_ICE() << "Unknown builtin value in parameter attributes "
+                                               << ident_sem->Value();
                                     return;
                             }
                         } else {
-                            TINT_ICE(IR, diagnostics_) << "Builtin attribute sem invalid";
+                            TINT_ICE() << "Builtin attribute sem invalid";
                             return;
                         }
                     });
@@ -452,7 +450,7 @@ class Impl {
             }
         }
 
-        TINT_ASSERT(IR, control_stack_.IsEmpty());
+        TINT_ASSERT(control_stack_.IsEmpty());
         current_block_ = nullptr;
         current_function_ = nullptr;
     }
@@ -781,25 +779,25 @@ class Impl {
 
     void EmitBreak(const ast::BreakStatement*) {
         auto* current_control = FindEnclosingControl(ControlFlags::kNone);
-        TINT_ASSERT(IR, current_control);
+        TINT_ASSERT(current_control);
 
         if (auto* c = current_control->As<ir::Loop>()) {
             SetTerminator(builder_.ExitLoop(c));
         } else if (auto* s = current_control->As<ir::Switch>()) {
             SetTerminator(builder_.ExitSwitch(s));
         } else {
-            TINT_UNREACHABLE(IR, diagnostics_);
+            TINT_UNREACHABLE();
         }
     }
 
     void EmitContinue(const ast::ContinueStatement*) {
         auto* current_control = FindEnclosingControl(ControlFlags::kExcludeSwitch);
-        TINT_ASSERT(IR, current_control);
+        TINT_ASSERT(current_control);
 
         if (auto* c = current_control->As<ir::Loop>()) {
             SetTerminator(builder_.Continue(c));
         } else {
-            TINT_UNREACHABLE(IR, diagnostics_);
+            TINT_UNREACHABLE();
         }
     }
 
@@ -881,7 +879,7 @@ class Impl {
                 if (auto** val = std::get_if<ir::Value*>(&res)) {
                     return *val;
                 }
-                TINT_ICE(IR, impl.diagnostics_) << "expression did not resolve to a value";
+                TINT_ICE() << "expression did not resolve to a value";
                 return nullptr;
             }
 
@@ -913,7 +911,7 @@ class Impl {
 
                 auto* obj = GetValue(expr->object);
                 if (!obj) {
-                    TINT_ASSERT(IR, false && "no object result");
+                    TINT_UNREACHABLE() << "no object result";
                     return;
                 }
 
@@ -933,7 +931,7 @@ class Impl {
                             if (auto* cv = v->Clone(impl.clone_ctx_)) {
                                 return impl.builder_.Constant(cv);
                             }
-                            TINT_ASSERT(IR, false && "constant clone failed");
+                            TINT_UNREACHABLE() << "constant clone failed";
                             return nullptr;
                         }
                         return GetValue(idx->Index()->Declaration());
@@ -954,8 +952,7 @@ class Impl {
                         return nullptr;
                     },
                     [&](Default) {
-                        TINT_ICE(Writer, impl.diagnostics_)
-                            << "invalid accessor: " + std::string(sem->TypeInfo().name);
+                        TINT_ICE() << "invalid accessor: " + std::string(sem->TypeInfo().name);
                         return nullptr;
                     });
 
@@ -1089,7 +1086,7 @@ class Impl {
                 } else if (sem->Target()->Is<sem::ValueConversion>()) {
                     inst = impl.builder_.Convert(ty, args[0]);
                 } else if (expr->target->identifier->Is<ast::TemplatedIdentifier>()) {
-                    TINT_UNIMPLEMENTED(IR, impl.diagnostics_) << "missing templated ident support";
+                    TINT_UNIMPLEMENTED() << "missing templated ident support";
                     return;
                 } else {
                     // Not a builtin and not a templated call, so this is a user function.
@@ -1200,7 +1197,7 @@ class Impl {
                 auto res = GetValue(b);
                 auto* src = res->As<ir::InstructionResult>()->Source();
                 auto* if_ = src->As<ir::If>();
-                TINT_ASSERT_OR_RETURN(IR, if_);
+                TINT_ASSERT_OR_RETURN(if_);
                 auto rhs = GetValue(b->rhs);
                 if (!rhs) {
                     return;
@@ -1271,7 +1268,7 @@ class Impl {
         if (auto** val = std::get_if<ir::Value*>(&res)) {
             return *val;
         }
-        TINT_ICE(IR, diagnostics_) << "expression did not resolve to a value";
+        TINT_ICE() << "expression did not resolve to a value";
         return nullptr;
     }
 
@@ -1388,13 +1385,13 @@ class Impl {
                 return builder_.Modulo(ty, lhs, rhs);
             case ast::BinaryOp::kLogicalAnd:
             case ast::BinaryOp::kLogicalOr:
-                TINT_ICE(IR, diagnostics_) << "short circuit op should have already been handled";
+                TINT_ICE() << "short circuit op should have already been handled";
                 return nullptr;
             case ast::BinaryOp::kNone:
-                TINT_ICE(IR, diagnostics_) << "missing binary operand type";
+                TINT_ICE() << "missing binary operand type";
                 return nullptr;
         }
-        TINT_UNREACHABLE(IR, diagnostics_);
+        TINT_UNREACHABLE();
         return nullptr;
     }
 };

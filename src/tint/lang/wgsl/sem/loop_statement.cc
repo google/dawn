@@ -26,8 +26,8 @@ LoopStatement::LoopStatement(const ast::LoopStatement* declaration,
                              const CompoundStatement* parent,
                              const sem::Function* function)
     : Base(declaration, parent, function) {
-    TINT_ASSERT(Semantic, parent);
-    TINT_ASSERT(Semantic, function);
+    TINT_ASSERT(parent);
+    TINT_ASSERT(function);
 }
 
 LoopStatement::~LoopStatement() = default;
@@ -36,8 +36,8 @@ LoopContinuingBlockStatement::LoopContinuingBlockStatement(const ast::BlockState
                                                            const CompoundStatement* parent,
                                                            const sem::Function* function)
     : Base(declaration, parent, function) {
-    TINT_ASSERT(Semantic, parent);
-    TINT_ASSERT(Semantic, function);
+    TINT_ASSERT(parent);
+    TINT_ASSERT(function);
 }
 LoopContinuingBlockStatement::~LoopContinuingBlockStatement() = default;
 

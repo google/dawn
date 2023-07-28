@@ -18,6 +18,7 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::DemoteToHelper);
 
@@ -140,7 +141,7 @@ struct DemoteToHelper::State {
             // Move the original instruction into the if-true block.
             auto* result = ifelse->True()->Append(inst);
 
-            TINT_ASSERT(Transform, !inst->HasMultiResults());
+            TINT_ASSERT(!inst->HasMultiResults());
             if (inst->HasResults() && !inst->Result()->Type()->Is<type::Void>()) {
                 // The original instruction had a result, so return it from the if instruction.
                 ifelse->SetResults(Vector{b.InstructionResult(inst->Result()->Type())});

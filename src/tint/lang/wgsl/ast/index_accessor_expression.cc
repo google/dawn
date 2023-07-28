@@ -26,8 +26,8 @@ IndexAccessorExpression::IndexAccessorExpression(GenerationID pid,
                                                  const Expression* obj,
                                                  const Expression* idx)
     : Base(pid, nid, src, obj), index(idx) {
-    TINT_ASSERT(AST, idx);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, idx, generation_id);
+    TINT_ASSERT(idx);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(idx, generation_id);
 }
 
 IndexAccessorExpression::~IndexAccessorExpression() = default;

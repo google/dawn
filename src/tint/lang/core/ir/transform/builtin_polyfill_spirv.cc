@@ -26,6 +26,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture.h"
+#include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::BuiltinPolyfillSpirv);
 TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::BuiltinPolyfillSpirv::LiteralOperand);
@@ -147,7 +148,7 @@ struct BuiltinPolyfillSpirv::State {
                 default:
                     break;
             }
-            TINT_ASSERT_OR_RETURN(Transform, replacement);
+            TINT_ASSERT_OR_RETURN(replacement);
 
             // Replace the old builtin result with the new value.
             if (auto name = ir->NameOf(builtin->Result())) {
@@ -174,13 +175,13 @@ struct BuiltinPolyfillSpirv::State {
         while (auto* let = tint::As<Let>(ptr->Source())) {
             ptr = let->Value()->As<InstructionResult>();
         }
-        TINT_ASSERT_OR_RETURN_VALUE(Transform, ptr, nullptr);
+        TINT_ASSERT_OR_RETURN_VALUE(ptr, nullptr);
 
         auto* access = ptr->Source()->As<Access>();
-        TINT_ASSERT_OR_RETURN_VALUE(Transform, access, nullptr);
-        TINT_ASSERT_OR_RETURN_VALUE(Transform, access->Indices().Length() == 1u, nullptr);
-        TINT_ASSERT_OR_RETURN_VALUE(
-            Transform, access->Object()->Type()->UnwrapPtr()->Is<type::Struct>(), nullptr);
+        TINT_ASSERT_OR_RETURN_VALUE(access, nullptr);
+        TINT_ASSERT_OR_RETURN_VALUE(access->Indices().Length() == 1u, nullptr);
+        TINT_ASSERT_OR_RETURN_VALUE(access->Object()->Type()->UnwrapPtr()->Is<type::Struct>(),
+                                    nullptr);
         auto* const_idx = access->Indices()[0]->As<Constant>();
 
         // Replace the builtin call with a call to the spirv.array_length intrinsic.
@@ -205,7 +206,7 @@ struct BuiltinPolyfillSpirv::State {
                 case builtin::AddressSpace::kStorage:
                     return b.Constant(u32(SpvScopeDevice));
                 default:
-                    TINT_ASSERT(Transform, false && "unhandled atomic address space");
+                    TINT_UNREACHABLE() << "unhandled atomic address space";
                     return nullptr;
             }
         }();

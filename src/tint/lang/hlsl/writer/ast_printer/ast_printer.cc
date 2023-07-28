@@ -76,7 +76,7 @@
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/containers/map.h"
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
@@ -394,8 +394,7 @@ bool ASTPrinter::Generate() {
                 return EmitFunction(func);
             },
             [&](Default) {
-                TINT_ICE(Writer, diagnostics_)
-                    << "unhandled module-scope declaration: " << decl->TypeInfo().name;
+                TINT_ICE() << "unhandled module-scope declaration: " << decl->TypeInfo().name;
                 return false;
             });
 
@@ -451,8 +450,7 @@ bool ASTPrinter::EmitDynamicVectorAssignment(const ast::AssignmentStatement* stm
                     out << "vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;";
                     break;
                 default:
-                    TINT_UNREACHABLE(Writer, diagnostics_)
-                        << "invalid vector size " << vec->Width();
+                    TINT_UNREACHABLE() << "invalid vector size " << vec->Width();
                     break;
             }
         }
@@ -612,8 +610,7 @@ bool ASTPrinter::EmitDynamicMatrixScalarAssignment(const ast::AssignmentStatemen
                                     auto* vec = TypeOf(lhs_row_access->object)
                                                     ->UnwrapRef()
                                                     ->As<type::Vector>();
-                                    TINT_UNREACHABLE(Writer, diagnostics_)
-                                        << "invalid vector size " << vec->Width();
+                                    TINT_UNREACHABLE() << "invalid vector size " << vec->Width();
                                     break;
                                 }
                             }
@@ -694,8 +691,8 @@ bool ASTPrinter::EmitBitcast(StringStream& out, const ast::BitcastExpression* ex
                 // Source type must be vec2<f16> or vec4<f16>, since type f16 and vec3<f16> can only
                 // have identity bitcast.
                 auto* src_vec = src_type->As<type::Vector>();
-                TINT_ASSERT(Writer, src_vec);
-                TINT_ASSERT(Writer, ((src_vec->Width() == 2u) || (src_vec->Width() == 4u)));
+                TINT_ASSERT(src_vec);
+                TINT_ASSERT(((src_vec->Width() == 2u) || (src_vec->Width() == 4u)));
 
                 // Bitcast f16 types to others by converting the given f16 value to f32 and call
                 // f32tof16 to get the bits. This should be safe, because the convertion is precise
@@ -759,14 +756,13 @@ bool ASTPrinter::EmitBitcast(StringStream& out, const ast::BitcastExpression* ex
             } else {
                 // Destination type must be vec2<f16> or vec4<f16>.
                 auto* dst_vec = dst_type->As<type::Vector>();
-                TINT_ASSERT(Writer,
-                            (dst_vec && ((dst_vec->Width() == 2u) || (dst_vec->Width() == 4u)) &&
+                TINT_ASSERT((dst_vec && ((dst_vec->Width() == 2u) || (dst_vec->Width() == 4u)) &&
                              dst_el_type->Is<type::F16>()));
                 // Source type must be f32/i32/u32 or vec2<f32/i32/u32>.
                 auto* src_vec = src_type->As<type::Vector>();
-                TINT_ASSERT(Writer, (src_type->IsAnyOf<type::I32, type::U32, type::F32>() ||
-                                     (src_vec && src_vec->Width() == 2u &&
-                                      src_el_type->IsAnyOf<type::I32, type::U32, type::F32>())));
+                TINT_ASSERT((src_type->IsAnyOf<type::I32, type::U32, type::F32>() ||
+                             (src_vec && src_vec->Width() == 2u &&
+                              src_el_type->IsAnyOf<type::I32, type::U32, type::F32>())));
                 std::string src_type_suffix = (src_vec ? "2" : "");
 
                 // Bitcast other types to f16 types by reinterpreting their bits as f16 using
@@ -854,7 +850,7 @@ bool ASTPrinter::EmitBitcast(StringStream& out, const ast::BitcastExpression* ex
     }
 
     // Otherwise, bitcasting between non-f16 types.
-    TINT_ASSERT(Writer, (!src_el_type->Is<type::F16>() && !dst_el_type->Is<type::F16>()));
+    TINT_ASSERT((!src_el_type->Is<type::F16>() && !dst_el_type->Is<type::F16>()));
     out << "as";
     if (!EmitType(out, dst_el_type, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite,
                   "")) {
@@ -989,7 +985,7 @@ bool ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr
         case ast::BinaryOp::kLogicalAnd:
         case ast::BinaryOp::kLogicalOr: {
             // These are both handled above.
-            TINT_UNREACHABLE(Writer, diagnostics_);
+            TINT_UNREACHABLE();
             return false;
         }
         case ast::BinaryOp::kEqual:
@@ -1097,7 +1093,7 @@ bool ASTPrinter::EmitCall(StringStream& out, const ast::CallExpression* expr) {
         [&](const sem::ValueConversion* conv) { return EmitValueConversion(out, call, conv); },
         [&](const sem::ValueConstructor* ctor) { return EmitValueConstructor(out, call, ctor); },
         [&](Default) {
-            TINT_ICE(Writer, diagnostics_) << "unhandled call target: " << target->TypeInfo().name;
+            TINT_ICE() << "unhandled call target: " << target->TypeInfo().name;
             return false;
         });
 }
@@ -1133,9 +1129,8 @@ bool ASTPrinter::EmitFunctionCall(StringStream& out,
                 }
                 break;
             default:
-                TINT_UNREACHABLE(Writer, diagnostics_)
-                    << "unsupported DecomposeMemoryAccess::Intrinsic address space:"
-                    << intrinsic->address_space;
+                TINT_UNREACHABLE() << "unsupported DecomposeMemoryAccess::Intrinsic address space:"
+                                   << intrinsic->address_space;
                 return false;
         }
     }
@@ -1278,7 +1273,7 @@ bool ASTPrinter::EmitValueConstructor(StringStream& out,
     // It could also be conversions between f16 and f32 matrix when f16 is properly supported.
     if (type->Is<type::Matrix>() && call->Arguments().Length() == 1) {
         if (!ctor->Parameters()[0]->Type()->UnwrapRef()->is_float_matrix()) {
-            TINT_UNREACHABLE(Writer, diagnostics_)
+            TINT_UNREACHABLE()
                 << "found a single-parameter matrix initializer that is not identity initializer";
             return false;
         }
@@ -1348,7 +1343,7 @@ bool ASTPrinter::EmitUniformBufferAccess(
     bool scalar_offset_constant = false;
 
     if (auto* val = builder_.Sem().GetVal(offset)->ConstantValue()) {
-        TINT_ASSERT(Writer, val->Type()->Is<type::U32>());
+        TINT_ASSERT(val->Type()->Is<type::U32>());
         scalar_offset_bytes = static_cast<uint32_t>(val->ValueAs<AInt>());
         scalar_offset_index = scalar_offset_bytes / 4;  // bytes -> scalar index
         scalar_offset_constant = true;
@@ -1601,16 +1596,15 @@ bool ASTPrinter::EmitUniformBufferAccess(
                 case DataType::kVec4F16:
                     return load_vec4_f16();
             }
-            TINT_UNREACHABLE(Writer, diagnostics_)
-                << "unsupported DecomposeMemoryAccess::Intrinsic::DataType: "
-                << static_cast<int>(intrinsic->type);
+            TINT_UNREACHABLE() << "unsupported DecomposeMemoryAccess::Intrinsic::DataType: "
+                               << static_cast<int>(intrinsic->type);
             return false;
         }
         default:
             break;
     }
-    TINT_UNREACHABLE(Writer, diagnostics_)
-        << "unsupported DecomposeMemoryAccess::Intrinsic::Op: " << static_cast<int>(intrinsic->op);
+    TINT_UNREACHABLE() << "unsupported DecomposeMemoryAccess::Intrinsic::Op: "
+                       << static_cast<int>(intrinsic->op);
     return false;
 }
 
@@ -1688,9 +1682,8 @@ bool ASTPrinter::EmitStorageBufferAccess(
                 case DataType::kVec4F16:
                     return templated_load("vector<float16_t, 4> ");
             }
-            TINT_UNREACHABLE(Writer, diagnostics_)
-                << "unsupported DecomposeMemoryAccess::Intrinsic::DataType: "
-                << static_cast<int>(intrinsic->type);
+            TINT_UNREACHABLE() << "unsupported DecomposeMemoryAccess::Intrinsic::DataType: "
+                               << static_cast<int>(intrinsic->type);
             return false;
         }
 
@@ -1760,9 +1753,8 @@ bool ASTPrinter::EmitStorageBufferAccess(
                 case DataType::kVec4F16:
                     return templated_store("vector<float16_t, 4> ");
             }
-            TINT_UNREACHABLE(Writer, diagnostics_)
-                << "unsupported DecomposeMemoryAccess::Intrinsic::DataType: "
-                << static_cast<int>(intrinsic->type);
+            TINT_UNREACHABLE() << "unsupported DecomposeMemoryAccess::Intrinsic::DataType: "
+                               << static_cast<int>(intrinsic->type);
             return false;
         }
         default:
@@ -1771,8 +1763,8 @@ bool ASTPrinter::EmitStorageBufferAccess(
             break;
     }
 
-    TINT_UNREACHABLE(Writer, diagnostics_)
-        << "unsupported DecomposeMemoryAccess::Intrinsic::Op: " << static_cast<int>(intrinsic->op);
+    TINT_UNREACHABLE() << "unsupported DecomposeMemoryAccess::Intrinsic::Op: "
+                       << static_cast<int>(intrinsic->op);
     return false;
 }
 
@@ -1978,9 +1970,8 @@ bool ASTPrinter::EmitStorageAtomicIntrinsic(
             break;
     }
 
-    TINT_UNREACHABLE(Writer, diagnostics_)
-        << "unsupported atomic DecomposeMemoryAccess::Intrinsic::Op: "
-        << static_cast<int>(intrinsic->op);
+    TINT_UNREACHABLE() << "unsupported atomic DecomposeMemoryAccess::Intrinsic::Op: "
+                       << static_cast<int>(intrinsic->op);
     return false;
 }
 
@@ -2155,7 +2146,7 @@ bool ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
             break;
     }
 
-    TINT_UNREACHABLE(Writer, diagnostics_) << "unsupported atomic builtin: " << builtin->Type();
+    TINT_UNREACHABLE() << "unsupported atomic builtin: " << builtin->Type();
     return false;
 }
 
@@ -2493,8 +2484,7 @@ bool ASTPrinter::EmitBarrierCall(StringStream& out, const sem::Builtin* builtin)
     } else if (builtin->Type() == builtin::Function::kStorageBarrier) {
         out << "DeviceMemoryBarrierWithGroupSync()";
     } else {
-        TINT_UNREACHABLE(Writer, diagnostics_)
-            << "unexpected barrier builtin type " << builtin::str(builtin->Type());
+        TINT_UNREACHABLE() << "unexpected barrier builtin type " << builtin::str(builtin->Type());
         return false;
     }
     return true;
@@ -2517,7 +2507,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
 
     auto* texture = arg(Usage::kTexture);
     if (TINT_UNLIKELY(!texture)) {
-        TINT_ICE(Writer, diagnostics_) << "missing texture argument";
+        TINT_ICE() << "missing texture argument";
         return false;
     }
 
@@ -2538,7 +2528,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                 case builtin::Function::kTextureDimensions:
                     switch (texture_type->dim()) {
                         case type::TextureDimension::kNone:
-                            TINT_ICE(Writer, diagnostics_) << "texture dimension is kNone";
+                            TINT_ICE() << "texture dimension is kNone";
                             return false;
                         case type::TextureDimension::k1d:
                             num_dimensions = 1;
@@ -2566,7 +2556,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                 case builtin::Function::kTextureNumLayers:
                     switch (texture_type->dim()) {
                         default:
-                            TINT_ICE(Writer, diagnostics_) << "texture dimension is not arrayed";
+                            TINT_ICE() << "texture dimension is not arrayed";
                             return false;
                         case type::TextureDimension::k2dArray:
                             num_dimensions = is_ms ? 4 : 3;
@@ -2581,8 +2571,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                 case builtin::Function::kTextureNumLevels:
                     switch (texture_type->dim()) {
                         default:
-                            TINT_ICE(Writer, diagnostics_)
-                                << "texture dimension does not support mips";
+                            TINT_ICE() << "texture dimension does not support mips";
                             return false;
                         case type::TextureDimension::k1d:
                             num_dimensions = 2;
@@ -2604,8 +2593,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                 case builtin::Function::kTextureNumSamples:
                     switch (texture_type->dim()) {
                         default:
-                            TINT_ICE(Writer, diagnostics_)
-                                << "texture dimension does not support multisampling";
+                            TINT_ICE() << "texture dimension does not support multisampling";
                             return false;
                         case type::TextureDimension::k2d:
                             num_dimensions = 3;
@@ -2618,7 +2606,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                     }
                     break;
                 default:
-                    TINT_ICE(Writer, diagnostics_) << "unexpected builtin";
+                    TINT_ICE() << "unexpected builtin";
                     return false;
             }
 
@@ -2640,8 +2628,8 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             }
 
             if (TINT_UNLIKELY(num_dimensions > 4)) {
-                TINT_ICE(Writer, diagnostics_) << "Texture query builtin temporary vector has "
-                                               << num_dimensions << " dimensions";
+                TINT_ICE() << "Texture query builtin temporary vector has " << num_dimensions
+                           << " dimensions";
                 return false;
             }
 
@@ -2674,8 +2662,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                 } else {
                     static constexpr char xyzw[] = {'x', 'y', 'z', 'w'};
                     if (TINT_UNLIKELY(num_dimensions < 0 || num_dimensions > 4)) {
-                        TINT_ICE(Writer, diagnostics_)
-                            << "vector dimensions are " << num_dimensions;
+                        TINT_ICE() << "vector dimensions are " << num_dimensions;
                         return false;
                     }
                     for (int i = 0; i < num_dimensions; i++) {
@@ -2781,7 +2768,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
 
     auto* param_coords = arg(Usage::kCoords);
     if (TINT_UNLIKELY(!param_coords)) {
-        TINT_ICE(Writer, diagnostics_) << "missing coords argument";
+        TINT_ICE() << "missing coords argument";
         return false;
     }
 
@@ -2864,9 +2851,9 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             }
         }
         if (TINT_UNLIKELY(wgsl_ret_width > hlsl_ret_width)) {
-            TINT_ICE(Writer, diagnostics_)
-                << "WGSL return width (" << wgsl_ret_width << ") is wider than HLSL return width ("
-                << hlsl_ret_width << ") for " << builtin->Type();
+            TINT_ICE() << "WGSL return width (" << wgsl_ret_width
+                       << ") is wider than HLSL return width (" << hlsl_ret_width << ") for "
+                       << builtin->Type();
             return false;
         }
     }
@@ -3184,7 +3171,7 @@ bool ASTPrinter::EmitFunctionBodyWithDiscard(const ast::Function* func) {
     // there is always an (unused) return statement.
 
     auto* sem = builder_.Sem().Get(func);
-    TINT_ASSERT(Writer, sem->DiscardStatement() && !sem->ReturnType()->Is<type::Void>());
+    TINT_ASSERT(sem->DiscardStatement() && !sem->ReturnType()->Is<type::Void>());
 
     ScopedIndent si(this);
     Line() << "if (true) {";
@@ -3232,8 +3219,7 @@ bool ASTPrinter::EmitGlobalVariable(const ast::Variable* global) {
                         "unhandled address space " + tint::ToString(sem->AddressSpace()));
                     return false;
                 default: {
-                    TINT_ICE(Writer, diagnostics_)
-                        << "unhandled address space " << sem->AddressSpace();
+                    TINT_ICE() << "unhandled address space " << sem->AddressSpace();
                     return false;
                 }
             }
@@ -3249,8 +3235,7 @@ bool ASTPrinter::EmitGlobalVariable(const ast::Variable* global) {
             return true;  // Constants are embedded at their use
         },
         [&](Default) {
-            TINT_ICE(Writer, diagnostics_)
-                << "unhandled global variable type " << global->TypeInfo().name;
+            TINT_ICE() << "unhandled global variable type " << global->TypeInfo().name;
 
             return false;
         });
@@ -3480,7 +3465,7 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
             if (TINT_UNLIKELY(!type->Is<type::Struct>())) {
                 // ICE likely indicates that the CanonicalizeEntryPointIO transform was
                 // not run, or a builtin parameter was added after it was run.
-                TINT_ICE(Writer, diagnostics_) << "Unsupported non-struct entry point parameter";
+                TINT_ICE() << "Unsupported non-struct entry point parameter";
             }
 
             if (!first) {
@@ -3997,8 +3982,7 @@ bool ASTPrinter::EmitMemberAccessor(StringStream& out, const ast::MemberAccessor
             return true;
         },
         [&](Default) {
-            TINT_ICE(Writer, diagnostics_)
-                << "unknown member access type: " << sem->TypeInfo().name;
+            TINT_ICE() << "unknown member access type: " << sem->TypeInfo().name;
             return false;
         });
 }
@@ -4073,8 +4057,7 @@ bool ASTPrinter::EmitStatement(const ast::Statement* stmt) {
                     return true;  // Constants are embedded at their use
                 },
                 [&](Default) {  //
-                    TINT_ICE(Writer, diagnostics_)
-                        << "unknown variable type: " << v->variable->TypeInfo().name;
+                    TINT_ICE() << "unknown variable type: " << v->variable->TypeInfo().name;
                     return false;
                 });
         },
@@ -4089,7 +4072,7 @@ bool ASTPrinter::EmitStatement(const ast::Statement* stmt) {
 }
 
 bool ASTPrinter::EmitDefaultOnlySwitch(const ast::SwitchStatement* stmt) {
-    TINT_ASSERT(Writer, stmt->body.Length() == 1 && stmt->body[0]->ContainsDefault());
+    TINT_ASSERT(stmt->body.Length() == 1 && stmt->body[0]->ContainsDefault());
 
     // FXC fails to compile a switch with just a default case, ignoring the
     // default case body. We work around this here by emitting the default case
@@ -4184,7 +4167,7 @@ bool ASTPrinter::EmitType(StringStream& out,
             std::vector<uint32_t> sizes;
             while (auto* arr = base_type->As<type::Array>()) {
                 if (TINT_UNLIKELY(arr->Count()->Is<type::RuntimeArrayCount>())) {
-                    TINT_ICE(Writer, diagnostics_)
+                    TINT_ICE()
                         << "runtime arrays may only exist in storage buffers, which should have "
                            "been transformed into a ByteAddressBuffer";
                     return false;
@@ -4253,8 +4236,8 @@ bool ASTPrinter::EmitType(StringStream& out,
             return true;
         },
         [&](const type::Pointer*) {
-            TINT_ICE(Writer, diagnostics_) << "Attempting to emit pointer type. These should have "
-                                              "been removed with the SimplifyPointers transform";
+            TINT_ICE() << "Attempting to emit pointer type. These should have "
+                          "been removed with the SimplifyPointers transform";
             return false;
         },
         [&](const type::Sampler* sampler) {
@@ -4271,8 +4254,7 @@ bool ASTPrinter::EmitType(StringStream& out,
         },
         [&](const type::Texture* tex) {
             if (TINT_UNLIKELY(tex->Is<type::ExternalTexture>())) {
-                TINT_ICE(Writer, diagnostics_)
-                    << "Multiplanar external texture transform was not run.";
+                TINT_ICE() << "Multiplanar external texture transform was not run.";
                 return false;
             }
 
@@ -4306,16 +4288,15 @@ bool ASTPrinter::EmitType(StringStream& out,
                     out << "CubeArray";
                     break;
                 default:
-                    TINT_UNREACHABLE(Writer, diagnostics_)
-                        << "unexpected TextureDimension " << tex->dim();
+                    TINT_UNREACHABLE() << "unexpected TextureDimension " << tex->dim();
                     return false;
             }
 
             if (storage) {
                 auto* component = image_format_to_rwtexture_type(storage->texel_format());
                 if (TINT_UNLIKELY(!component)) {
-                    TINT_ICE(Writer, diagnostics_) << "Unsupported StorageTexture TexelFormat: "
-                                                   << static_cast<int>(storage->texel_format());
+                    TINT_ICE() << "Unsupported StorageTexture TexelFormat: "
+                               << static_cast<int>(storage->texel_format());
                     return false;
                 }
                 out << "<" << component << ">";
@@ -4331,7 +4312,7 @@ bool ASTPrinter::EmitType(StringStream& out,
                 } else if (TINT_LIKELY(subtype->Is<type::U32>())) {
                     out << "uint4";
                 } else {
-                    TINT_ICE(Writer, diagnostics_) << "Unsupported multisampled texture type";
+                    TINT_ICE() << "Unsupported multisampled texture type";
                     return false;
                 }
                 out << ">";
@@ -4410,7 +4391,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const type::Struct* str) {
             if (auto location = attributes.location) {
                 auto& pipeline_stage_uses = str->PipelineStageUses();
                 if (TINT_UNLIKELY(pipeline_stage_uses.size() != 1)) {
-                    TINT_ICE(Writer, diagnostics_) << "invalid entry point IO struct uses";
+                    TINT_ICE() << "invalid entry point IO struct uses";
                 }
                 if (pipeline_stage_uses.count(type::PipelineStageUsage::kVertexInput)) {
                     post += " : TEXCOORD" + std::to_string(location.value());
@@ -4427,7 +4408,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const type::Struct* str) {
                     }
 
                 } else {
-                    TINT_ICE(Writer, diagnostics_) << "invalid use of location attribute";
+                    TINT_ICE() << "invalid use of location attribute";
                 }
             }
             if (auto builtin = attributes.builtin) {

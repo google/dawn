@@ -16,8 +16,8 @@
 
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
-#include "src/tint/utils/debug/debug.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -26,8 +26,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::SampledTexture);
 namespace tint::type {
 
 SampledTexture::SampledTexture(TextureDimension dim, const Type* type)
-    : Base(Hash(tint::TypeInfo::Of<SampledTexture>().full_hashcode, dim, type), dim), type_(type) {
-    TINT_ASSERT(Type, type_);
+    : Base(Hash(TypeInfo::Of<SampledTexture>().full_hashcode, dim, type), dim), type_(type) {
+    TINT_ASSERT(type_);
 }
 
 SampledTexture::~SampledTexture() = default;

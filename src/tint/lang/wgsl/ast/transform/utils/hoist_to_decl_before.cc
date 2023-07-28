@@ -45,7 +45,7 @@ struct HoistToDeclBefore::State {
         switch (kind) {
             case VariableKind::kLet: {
                 auto* ty = ctx.src->Sem().GetVal(expr)->Type();
-                TINT_ASSERT(Transform, !ty->HoldsAbstract());
+                TINT_ASSERT(!ty->HoldsAbstract());
                 auto builder = [this, expr, name, ty] {
                     return b.Decl(b.Let(name, Transform::CreateASTTypeFor(ctx, ty),
                                         ctx.CloneWithoutTransform(expr)));
@@ -58,7 +58,7 @@ struct HoistToDeclBefore::State {
 
             case VariableKind::kVar: {
                 auto* ty = ctx.src->Sem().GetVal(expr)->Type();
-                TINT_ASSERT(Transform, !ty->HoldsAbstract());
+                TINT_ASSERT(!ty->HoldsAbstract());
                 auto builder = [this, expr, name, ty] {
                     return b.Decl(b.Var(name, Transform::CreateASTTypeFor(ctx, ty),
                                         ctx.CloneWithoutTransform(expr)));
@@ -397,12 +397,11 @@ struct HoistToDeclBefore::State {
                 return true;
             }
 
-            TINT_ICE(Transform, b.Diagnostics()) << "unhandled use of expression in for-loop";
+            TINT_ICE() << "unhandled use of expression in for-loop";
             return false;
         }
 
-        TINT_ICE(Transform, b.Diagnostics())
-            << "unhandled expression parent statement type: " << parent->TypeInfo().name;
+        TINT_ICE() << "unhandled expression parent statement type: " << parent->TypeInfo().name;
         return false;
     }
 };

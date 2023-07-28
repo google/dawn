@@ -56,8 +56,6 @@ endfunction()
 
 ## Tint diagnostic utilities. Used by libtint and tint_utils_io.
 add_library(tint_diagnostic_utils
-  utils/debug/debug.cc
-  utils/debug/debug.h
   utils/diagnostic/diagnostic.cc
   utils/diagnostic/diagnostic.h
   utils/diagnostic/formatter.cc
@@ -68,6 +66,8 @@ add_library(tint_diagnostic_utils
   utils/diagnostic/source.h
   utils/debug/debugger.cc
   utils/debug/debugger.h
+  utils/ice/ice.cc
+  utils/ice/ice.h
   utils/text/unicode.cc
   utils/text/unicode.h
 )
@@ -1139,12 +1139,12 @@ if(TINT_BUILD_TESTS)
     utils/containers/unique_allocator_test.cc
     utils/containers/unique_vector_test.cc
     utils/containers/vector_test.cc
-    utils/debug/debug_test.cc
     utils/diagnostic/diagnostic_test.cc
     utils/diagnostic/formatter_test.cc
     utils/diagnostic/printer_test.cc
     utils/diagnostic/source_test.cc
     utils/file/tmpfile_test.cc
+    utils/ice/ice_test.cc
     utils/macros/defer_test.cc
     utils/macros/scoped_assignment_test.cc
     utils/math/crc32_test.cc

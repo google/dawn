@@ -29,8 +29,7 @@ ExpressionSize::ExpressionSize(const Program& program) {
             continue;
         }
         size_t expr_size = 0;
-        diag::List empty;
-        ast::TraverseExpressions(expr_ast_node, empty, [&](const ast::Expression* expression) {
+        ast::TraverseExpressions(expr_ast_node, [&](const ast::Expression* expression) {
             if (expression == expr_ast_node) {
                 expr_size++;
                 return ast::TraverseAction::Descend;

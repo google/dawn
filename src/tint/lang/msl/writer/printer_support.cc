@@ -26,7 +26,7 @@
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/float_to_string.h"
 
@@ -134,8 +134,7 @@ SizeAndAlign MslPackedTypeSizeAndAlign(diag::List diagnostics, const type::Type*
                     return SizeAndAlign{num_els * el_size_align.size, num_els * el_size_align.size};
                 }
             }
-            TINT_UNREACHABLE(Writer, diagnostics)
-                << "Unhandled vector element type " << el_ty->TypeInfo().name;
+            TINT_UNREACHABLE() << "Unhandled vector element type " << el_ty->TypeInfo().name;
             return SizeAndAlign{};
         },
 
@@ -178,14 +177,13 @@ SizeAndAlign MslPackedTypeSizeAndAlign(diag::List diagnostics, const type::Type*
                 }
             }
 
-            TINT_UNREACHABLE(Writer, diagnostics)
-                << "Unhandled matrix element type " << el_ty->TypeInfo().name;
+            TINT_UNREACHABLE() << "Unhandled matrix element type " << el_ty->TypeInfo().name;
             return SizeAndAlign{};
         },
 
         [&](const type::Array* arr) {
             if (TINT_UNLIKELY(!arr->IsStrideImplicit())) {
-                TINT_ICE(Writer, diagnostics)
+                TINT_ICE()
                     << "arrays with explicit strides should not exist past the SPIR-V reader";
                 return SizeAndAlign{};
             }
@@ -211,7 +209,7 @@ SizeAndAlign MslPackedTypeSizeAndAlign(diag::List diagnostics, const type::Type*
         },
 
         [&](Default) {
-            TINT_UNREACHABLE(Writer, diagnostics) << "Unhandled type " << ty->TypeInfo().name;
+            TINT_UNREACHABLE() << "Unhandled type " << ty->TypeInfo().name;
             return SizeAndAlign{};
         });
 }

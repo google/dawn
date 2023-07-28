@@ -17,12 +17,13 @@
 TINT_INSTANTIATE_TYPEINFO(tint::ir::If);
 
 #include "src/tint/lang/core/ir/multi_in_block.h"
+#include "src/tint/utils/ice/ice.h"
 
 namespace tint::ir {
 
 If::If(Value* cond, ir::Block* t, ir::Block* f) : true_(t), false_(f) {
-    TINT_ASSERT(IR, true_);
-    TINT_ASSERT(IR, false_);
+    TINT_ASSERT(true_);
+    TINT_ASSERT(false_);
 
     AddOperand(If::kConditionOperandOffset, cond);
 

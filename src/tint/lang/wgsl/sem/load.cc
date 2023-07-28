@@ -15,7 +15,7 @@
 #include "src/tint/lang/wgsl/sem/load.h"
 
 #include "src/tint/lang/core/type/reference.h"
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Load);
 
@@ -29,7 +29,7 @@ Load::Load(const ValueExpression* ref, const Statement* statement)
            /* has_side_effects */ ref->HasSideEffects(),
            /* root_ident */ ref->RootIdentifier()),
       reference_(ref) {
-    TINT_ASSERT(Semantic, ref->Type()->Is<type::Reference>());
+    TINT_ASSERT(ref->Type()->Is<type::Reference>());
 }
 
 Load::~Load() = default;

@@ -55,15 +55,14 @@ enum class TraverseOrder {
 /// from `root`, calling `callback` for each of the visited expressions that
 /// match the predicate parameter type, in pre-ordering (root first).
 /// @param root the root expression node
-/// @param diags the diagnostics used for error messages
 /// @param callback the callback function. Must be of the signature:
 ///        `TraverseAction(const T* expr)` or `TraverseAction(const T* expr, size_t depth)` where T
 ///        is an Expression type.
 /// @return true on success, false on error
 template <TraverseOrder ORDER = TraverseOrder::LeftToRight, typename CALLBACK>
-bool TraverseExpressions(const Expression* root, diag::List& diags, CALLBACK&& callback) {
-    using EXPR_TYPE = std::remove_pointer_t<tint::traits::ParameterType<CALLBACK, 0>>;
-    constexpr static bool kHasDepthArg = tint::traits::SignatureOfT<CALLBACK>::parameter_count == 2;
+bool TraverseExpressions(const Expression* root, CALLBACK&& callback) {
+    using EXPR_TYPE = std::remove_pointer_t<traits::ParameterType<CALLBACK, 0>>;
+    constexpr static bool kHasDepthArg = traits::SignatureOfT<CALLBACK>::parameter_count == 2;
 
     struct Pending {
         const Expression* expr;
@@ -147,8 +146,8 @@ bool TraverseExpressions(const Expression* root, diag::List& diags, CALLBACK&& c
                                                PhonyExpression>()))) {
                     return true;  // Leaf expression
                 }
-                TINT_ICE(AST, diags)
-                    << "unhandled expression type: " << (expr ? expr->TypeInfo().name : "<null>");
+                TINT_ICE() << "unhandled expression type: "
+                           << (expr ? expr->TypeInfo().name : "<null>");
                 return false;
             });
         if (!ok) {

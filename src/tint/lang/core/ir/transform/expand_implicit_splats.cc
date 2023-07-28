@@ -123,7 +123,7 @@ void ExpandImplicitSplats::Run(ir::Module* ir) const {
                 expand_operand(builtin, CoreBuiltinCall::kArgsOperandOffset + 2);
                 break;
             default:
-                TINT_ASSERT(Transform, false && "unhandled builtin call");
+                TINT_UNREACHABLE() << "unhandled builtin call";
                 break;
         }
     }

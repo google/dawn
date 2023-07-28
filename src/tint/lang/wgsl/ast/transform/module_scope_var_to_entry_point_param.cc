@@ -205,8 +205,7 @@ struct ModuleScopeVarToEntryPointParam::State {
                 break;
             }
             default: {
-                TINT_ICE(Transform, ctx.dst->Diagnostics())
-                    << "unhandled module-scope address space (" << sc << ")";
+                TINT_ICE() << "unhandled module-scope address space (" << sc << ")";
                 break;
             }
         }
@@ -241,8 +240,7 @@ struct ModuleScopeVarToEntryPointParam::State {
                 break;
             }
             default: {
-                TINT_ICE(Transform, ctx.dst->Diagnostics())
-                    << "unhandled module-scope address space (" << sc << ")";
+                TINT_ICE() << "unhandled module-scope address space (" << sc << ")";
             }
         }
 

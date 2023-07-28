@@ -26,10 +26,10 @@ AssignmentStatement::AssignmentStatement(GenerationID pid,
                                          const Expression* l,
                                          const Expression* r)
     : Base(pid, nid, src), lhs(l), rhs(r) {
-    TINT_ASSERT(AST, lhs);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, lhs, generation_id);
-    TINT_ASSERT(AST, rhs);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, rhs, generation_id);
+    TINT_ASSERT(lhs);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(lhs, generation_id);
+    TINT_ASSERT(rhs);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(rhs, generation_id);
 }
 
 AssignmentStatement::~AssignmentStatement() = default;

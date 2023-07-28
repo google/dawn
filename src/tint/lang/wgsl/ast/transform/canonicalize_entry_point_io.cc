@@ -191,8 +191,7 @@ struct CanonicalizeEntryPointIO::State {
             // Obtain the builtin value from the semantic info.
             return ctx.src->Sem().Get(attr)->Value();
         }
-        TINT_ICE(Resolver, ctx.dst->Diagnostics())
-            << "could not obtain builtin value from attribute";
+        TINT_ICE() << "could not obtain builtin value from attribute";
         return builtin::BuiltinValue::kUndefined;
     }
 
@@ -375,7 +374,7 @@ struct CanonicalizeEntryPointIO::State {
         tint::Vector<const Expression*, 8> inner_struct_values;
         for (auto* member : str->Members()) {
             if (TINT_UNLIKELY(member->Type()->Is<type::Struct>())) {
-                TINT_ICE(Transform, ctx.dst->Diagnostics()) << "nested IO struct";
+                TINT_ICE() << "nested IO struct";
                 continue;
             }
 
@@ -404,7 +403,7 @@ struct CanonicalizeEntryPointIO::State {
         if (auto* str = inner_ret_type->As<sem::Struct>()) {
             for (auto* member : str->Members()) {
                 if (TINT_UNLIKELY(member->Type()->Is<type::Struct>())) {
-                    TINT_ICE(Transform, ctx.dst->Diagnostics()) << "nested IO struct";
+                    TINT_ICE() << "nested IO struct";
                     continue;
                 }
 

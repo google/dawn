@@ -18,7 +18,7 @@
 
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/text/symbol_table.h"
@@ -68,7 +68,7 @@ Array::Array(const Type* element,
       size_(size),
       stride_(stride),
       implicit_stride_(implicit_stride) {
-    TINT_ASSERT(Type, element_);
+    TINT_ASSERT(element_);
 }
 
 bool Array::Equals(const UniqueNode& other) const {

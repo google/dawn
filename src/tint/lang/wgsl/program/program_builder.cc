@@ -20,7 +20,7 @@
 #include "src/tint/lang/wgsl/sem/type_expression.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/rtti/switch.h"
 
@@ -92,8 +92,7 @@ void ProgramBuilder::MarkAsMoved() {
 
 void ProgramBuilder::AssertNotMoved() const {
     if (TINT_UNLIKELY(moved_)) {
-        TINT_ICE(ProgramBuilder, const_cast<ProgramBuilder*>(this)->diagnostics_)
-            << "Attempting to use ProgramBuilder after it has been moved";
+        TINT_ICE() << "Attempting to use ProgramBuilder after it has been moved";
     }
 }
 

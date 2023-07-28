@@ -97,10 +97,10 @@ const tint::Cloneable* CloneContext::CloneCloneable(const Cloneable* object) {
     return object->Clone(this);
 }
 
-void CloneContext::CheckedCastFailure(const Cloneable* got, const tint::TypeInfo& expected) {
-    TINT_ICE(Clone, Diagnostics()) << "Cloned object was not of the expected type\n"
-                                   << "got:      " << got->TypeInfo().name << "\n"
-                                   << "expected: " << expected.name;
+void CloneContext::CheckedCastFailure(const Cloneable* got, const TypeInfo& expected) {
+    TINT_ICE() << "Cloned object was not of the expected type\n"
+               << "got:      " << got->TypeInfo().name << "\n"
+               << "expected: " << expected.name;
 }
 
 diag::List& CloneContext::Diagnostics() const {

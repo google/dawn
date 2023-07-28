@@ -32,9 +32,8 @@
 
 static constexpr size_t kNumThreads = 8;
 
-[[noreturn]] void TintInternalCompilerErrorReporter(const tint::diag::List& diagnostics) {
-    auto printer = tint::diag::Printer::create(stderr, true);
-    tint::diag::Formatter{}.format(diagnostics, printer.get());
+[[noreturn]] void TintInternalCompilerErrorReporter(const tint::InternalCompilerError& err) {
+    std::cerr << err.Error() << std::endl;
     __builtin_trap();
 }
 

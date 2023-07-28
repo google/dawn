@@ -22,6 +22,8 @@
 #include "spirv-tools/libspirv.hpp"
 #endif
 
+#include "src/tint/utils/diagnostic/formatter.h"
+#include "src/tint/utils/diagnostic/printer.h"
 #include "src/tint/utils/text/string.h"
 
 namespace tint::cmd {
@@ -68,10 +70,10 @@ void PrintBindings(tint::inspector::Inspector& inspector, const std::string& ep_
 
 }  // namespace
 
-[[noreturn]] void TintInternalCompilerErrorReporter(const tint::diag::List& diagnostics) {
-    auto printer = tint::diag::Printer::create(stderr, true);
-    tint::diag::Formatter{}.format(diagnostics, printer.get());
-    tint::diag::Style bold_red{tint::diag::Color::kRed, true};
+[[noreturn]] void TintInternalCompilerErrorReporter(const InternalCompilerError& err) {
+    auto printer = diag::Printer::create(stderr, true);
+    diag::Style bold_red{diag::Color::kRed, true};
+    printer->write(err.Error(), bold_red);
     constexpr const char* please_file_bug = R"(
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *

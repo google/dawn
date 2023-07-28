@@ -73,7 +73,7 @@ builtin::DiagnosticSeverity Info::DiagnosticSeverity(const ast::Node* ast_node,
 
     // Query the diagnostic severity from the semantic node that corresponds to the AST node.
     auto* sem = Get(ast_node);
-    TINT_ASSERT(Resolver, sem != nullptr);
+    TINT_ASSERT(sem != nullptr);
     auto severity = Switch(
         sem,  //
         [&](const sem::ValueExpression* expr) { return check_stmt(expr->Stmt()); },
@@ -83,7 +83,7 @@ builtin::DiagnosticSeverity Info::DiagnosticSeverity(const ast::Node* ast_node,
             // Use the global severity set on the module.
             return check(module_);
         });
-    TINT_ASSERT(Resolver, severity != builtin::DiagnosticSeverity::kUndefined);
+    TINT_ASSERT(severity != builtin::DiagnosticSeverity::kUndefined);
     return severity;
 }
 

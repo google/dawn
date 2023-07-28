@@ -26,6 +26,7 @@
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/diagnostic/source.h"
 #include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/memory/block_allocator.h"
 #include "src/tint/utils/result/result.h"

@@ -19,6 +19,7 @@
 
 #include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/instruction_result.h"
+#include "src/tint/utils/ice/ice.h"
 
 namespace tint::ir {
 
@@ -41,7 +42,7 @@ class OperandInstruction : public Castable<OperandInstruction<N, R>, Instruction
     /// @param index the operand index
     /// @param value the value to use
     void SetOperand(size_t index, ir::Value* value) override {
-        TINT_ASSERT(IR, index < operands_.Length());
+        TINT_ASSERT(index < operands_.Length());
         if (operands_[index]) {
             operands_[index]->RemoveUsage({this, index});
         }
@@ -101,7 +102,7 @@ class OperandInstruction : public Castable<OperandInstruction<N, R>, Instruction
     /// @param idx the index the operand should be at
     /// @param value the operand value to append
     void AddOperand(size_t idx, ir::Value* value) {
-        TINT_ASSERT(IR, idx == operands_.Length());
+        TINT_ASSERT(idx == operands_.Length());
 
         if (value) {
             value->AddUsage({this, static_cast<uint32_t>(operands_.Length())});

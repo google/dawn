@@ -156,9 +156,8 @@ struct ArrayLengthFromUniform::State {
             } else if (auto* arr = storage_buffer_type->As<type::Array>()) {
                 array_type = arr;
             } else {
-                TINT_ICE(Transform, b.Diagnostics())
-                    << "expected form of arrayLength argument to be &array_var or "
-                       "&struct_var.array_member";
+                TINT_ICE() << "expected form of arrayLength argument to be &array_var or "
+                              "&struct_var.array_member";
                 return;
             }
             auto* array_length = b.Div(total_size, u32(array_type->Stride()));
@@ -224,9 +223,8 @@ struct ArrayLengthFromUniform::State {
             //   arrayLength(&array_var)
             auto* param = call_expr->args[0]->As<UnaryOpExpression>();
             if (TINT_UNLIKELY(!param || param->op != UnaryOp::kAddressOf)) {
-                TINT_ICE(Transform, b.Diagnostics())
-                    << "expected form of arrayLength argument to be &array_var or "
-                       "&struct_var.array_member";
+                TINT_ICE() << "expected form of arrayLength argument to be &array_var or "
+                              "&struct_var.array_member";
                 break;
             }
             auto* storage_buffer_expr = param->expr;
@@ -235,16 +233,15 @@ struct ArrayLengthFromUniform::State {
             }
             auto* storage_buffer_sem = sem.Get<sem::VariableUser>(storage_buffer_expr);
             if (TINT_UNLIKELY(!storage_buffer_sem)) {
-                TINT_ICE(Transform, b.Diagnostics())
-                    << "expected form of arrayLength argument to be &array_var or "
-                       "&struct_var.array_member";
+                TINT_ICE() << "expected form of arrayLength argument to be &array_var or "
+                              "&struct_var.array_member";
                 break;
             }
 
             // Get the index to use for the buffer size array.
             auto* var = tint::As<sem::GlobalVariable>(storage_buffer_sem->Variable());
             if (TINT_UNLIKELY(!var)) {
-                TINT_ICE(Transform, b.Diagnostics()) << "storage buffer is not a global variable";
+                TINT_ICE() << "storage buffer is not a global variable";
                 break;
             }
             functor(call_expr, storage_buffer_sem, var);

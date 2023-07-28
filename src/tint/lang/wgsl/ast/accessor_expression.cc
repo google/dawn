@@ -25,8 +25,8 @@ AccessorExpression::AccessorExpression(GenerationID pid,
                                        const Source& src,
                                        const Expression* obj)
     : Base(pid, nid, src), object(obj) {
-    TINT_ASSERT(AST, object);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, object, generation_id);
+    TINT_ASSERT(object);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(object, generation_id);
 }
 
 AccessorExpression::~AccessorExpression() = default;

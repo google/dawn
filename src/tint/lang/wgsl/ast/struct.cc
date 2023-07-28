@@ -30,12 +30,12 @@ Struct::Struct(GenerationID pid,
                VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src, n), members(std::move(m)), attributes(std::move(attrs)) {
     for (auto* mem : members) {
-        TINT_ASSERT(AST, mem);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, mem, generation_id);
+        TINT_ASSERT(mem);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(mem, generation_id);
     }
     for (auto* attr : attributes) {
-        TINT_ASSERT(AST, attr);
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
+        TINT_ASSERT(attr);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(attr, generation_id);
     }
 }
 

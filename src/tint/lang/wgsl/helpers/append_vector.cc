@@ -58,8 +58,7 @@ const sem::ValueExpression* Zero(ProgramBuilder& b,
     } else if (ty->Is<type::Bool>()) {
         expr = b.Expr(false);
     } else {
-        TINT_UNREACHABLE(Writer, b.Diagnostics())
-            << "unsupported vector element type: " << ty->TypeInfo().name;
+        TINT_UNREACHABLE() << "unsupported vector element type: " << ty->TypeInfo().name;
         return nullptr;
     }
     auto* sem = b.create<sem::ValueExpression>(expr, ty, sem::EvaluationStage::kRuntime, stmt,
@@ -94,8 +93,8 @@ const sem::Call* AppendVector(ProgramBuilder* b,
         [&](const type::F32*) { return b->ty.f32(); },
         [&](const type::Bool*) { return b->ty.bool_(); },
         [&](Default) {
-            TINT_UNREACHABLE(Writer, b->Diagnostics())
-                << "unsupported vector element type: " << packed_el_sem_ty->TypeInfo().name;
+            TINT_UNREACHABLE() << "unsupported vector element type: "
+                               << packed_el_sem_ty->TypeInfo().name;
             return ast::Type{};
         });
 

@@ -38,22 +38,22 @@ Function::Function(GenerationID pid,
       body(b),
       attributes(std::move(attrs)),
       return_type_attributes(std::move(return_type_attrs)) {
-    TINT_ASSERT(AST, name);
+    TINT_ASSERT(name);
     if (name) {
-        TINT_ASSERT(AST, !name->Is<TemplatedIdentifier>());
+        TINT_ASSERT(!name->Is<TemplatedIdentifier>());
     }
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, name, generation_id);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, return_ty, generation_id);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, body, generation_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(name, generation_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(return_ty, generation_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(body, generation_id);
     for (auto* param : params) {
-        TINT_ASSERT(AST, tint::Is<Parameter>(param));
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, param, generation_id);
+        TINT_ASSERT(tint::Is<Parameter>(param));
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(param, generation_id);
     }
     for (auto* attr : attributes) {
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(attr, generation_id);
     }
     for (auto* attr : return_type_attributes) {
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, attr, generation_id);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(attr, generation_id);
     }
 }
 

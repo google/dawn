@@ -22,8 +22,8 @@ namespace tint::ast {
 
 Identifier::Identifier(GenerationID pid, NodeID nid, const Source& src, Symbol sym)
     : Base(pid, nid, src), symbol(sym) {
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, symbol, generation_id);
-    TINT_ASSERT(AST, symbol.IsValid());
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(symbol, generation_id);
+    TINT_ASSERT(symbol.IsValid());
 }
 
 Identifier::~Identifier() = default;

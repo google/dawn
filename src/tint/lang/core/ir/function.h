@@ -23,6 +23,7 @@
 #include "src/tint/lang/core/ir/location.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/lang/core/type/type.h"
+#include "src/tint/utils/ice/ice.h"
 
 // Forward declarations
 namespace tint::ir {
@@ -91,7 +92,7 @@ class Function : public Castable<Function, Value> {
     /// Sets the return attributes
     /// @param builtin the builtin to set
     void SetReturnBuiltin(ReturnBuiltin builtin) {
-        TINT_ASSERT(IR, !return_.builtin.has_value());
+        TINT_ASSERT(!return_.builtin.has_value());
         return_.builtin = builtin;
     }
     /// @returns the return builtin attribute
@@ -130,7 +131,7 @@ class Function : public Castable<Function, Value> {
     /// Sets the root block for the function
     /// @param target the root block
     void SetBlock(Block* target) {
-        TINT_ASSERT(IR, target != nullptr);
+        TINT_ASSERT(target != nullptr);
         block_ = target;
     }
     /// @returns the function root block

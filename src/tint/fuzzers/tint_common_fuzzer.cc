@@ -37,6 +37,7 @@
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/diagnostic/formatter.h"
+#include "src/tint/utils/diagnostic/printer.h"
 #include "src/tint/utils/math/hash.h"
 #include "tint/binding_point.h"
 
@@ -59,21 +60,22 @@ namespace {
         __builtin_trap();                                          \
     } while (false)
 
-[[noreturn]] void TintInternalCompilerErrorReporter(const tint::diag::List& diagnostics) {
-    FATAL_ERROR(diagnostics, "");
+[[noreturn]] void TintInternalCompilerErrorReporter(const InternalCompilerError& err) {
+    std::cerr << err.Error() << std::endl;
+    __builtin_trap();
 }
 
 // Wrapping in a macro, so it can be a one-liner in the code, but not
 // introduce another level in the stack trace. This will help with de-duping
 // ClusterFuzz issues.
-#define CHECK_INSPECTOR(program, inspector)                                                    \
-    do {                                                                                       \
-        if ((inspector).has_error()) {                                                         \
-            if (!enforce_validity) {                                                           \
-                return;                                                                        \
-            }                                                                                  \
-            FATAL_ERROR((program)->Diagnostics(), "Inspector failed: " + (inspector).error()); \
-        }                                                                                      \
+#define CHECK_INSPECTOR(program, inspector)                                                  \
+    do {                                                                                     \
+        if ((inspector).has_error()) {                                                       \
+            if (!enforce_validity) {                                                         \
+                return;                                                                      \
+            }                                                                                \
+            FATAL_ERROR(program->Diagnostics(), "Inspector failed: " + (inspector).error()); \
+        }                                                                                    \
     } while (false)
 
 // Wrapping in a macro to make code more readable and help with issue de-duping.

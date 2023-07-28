@@ -426,7 +426,7 @@ struct VertexPulling::State {
                             value = b.MemberAccessor(fetch, "xyz");
                             break;
                         default:
-                            TINT_UNREACHABLE(Transform, b.Diagnostics()) << var_dt.width;
+                            TINT_UNREACHABLE() << var_dt.width;
                             return nullptr;
                     }
                 } else if (var_dt.width > fmt_dt.width) {
@@ -668,7 +668,7 @@ struct VertexPulling::State {
                                          b.Call("unpack2x16float", load_next_u32()));
         }
 
-        TINT_UNREACHABLE(Transform, b.Diagnostics()) << "format " << static_cast<int>(format);
+        TINT_UNREACHABLE();
         return nullptr;
     }
 
@@ -721,8 +721,7 @@ struct VertexPulling::State {
             default:
                 break;
         }
-        TINT_UNREACHABLE(Transform, b.Diagnostics())
-            << "invalid format for LoadPrimitive" << static_cast<int>(format);
+        TINT_UNREACHABLE() << "invalid format for LoadPrimitive" << static_cast<int>(format);
         return nullptr;
     }
 
@@ -772,14 +771,14 @@ struct VertexPulling::State {
             info.type = sem->Type();
 
             if (TINT_UNLIKELY(!sem->Location().has_value())) {
-                TINT_ICE(Transform, b.Diagnostics()) << "Location missing value";
+                TINT_ICE() << "Location missing value";
                 return;
             }
             location_info[sem->Location().value()] = info;
         } else {
             auto* builtin_attr = GetAttribute<BuiltinAttribute>(param->attributes);
             if (TINT_UNLIKELY(!builtin_attr)) {
-                TINT_ICE(Transform, b.Diagnostics()) << "Invalid entry point parameter";
+                TINT_ICE() << "Invalid entry point parameter";
                 return;
             }
             auto builtin = src->Sem().Get(builtin_attr)->Value();
@@ -827,13 +826,13 @@ struct VertexPulling::State {
                 auto* sem = src->Sem().Get(member);
                 info.type = sem->Type();
 
-                TINT_ASSERT(Transform, sem->Attributes().location.has_value());
+                TINT_ASSERT(sem->Attributes().location.has_value());
                 location_info[sem->Attributes().location.value()] = info;
                 has_locations = true;
             } else {
                 auto* builtin_attr = GetAttribute<BuiltinAttribute>(member->attributes);
                 if (TINT_UNLIKELY(!builtin_attr)) {
-                    TINT_ICE(Transform, b.Diagnostics()) << "Invalid entry point parameter";
+                    TINT_ICE() << "Invalid entry point parameter";
                     return;
                 }
                 auto builtin = src->Sem().Get(builtin_attr)->Value();

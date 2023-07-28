@@ -290,15 +290,13 @@ bool Parser::peek_is(Token::Type tok, size_t idx) {
 
 void Parser::split_token(Token::Type lhs, Token::Type rhs) {
     if (TINT_UNLIKELY(next_token_idx_ == 0)) {
-        TINT_ICE(Reader, builder_.Diagnostics())
-            << "attempt to update placeholder at beginning of tokens";
+        TINT_ICE() << "attempt to update placeholder at beginning of tokens";
     }
     if (TINT_UNLIKELY(next_token_idx_ >= tokens_.size())) {
-        TINT_ICE(Reader, builder_.Diagnostics())
-            << "attempt to update placeholder past end of tokens";
+        TINT_ICE() << "attempt to update placeholder past end of tokens";
     }
     if (TINT_UNLIKELY(!tokens_[next_token_idx_].IsPlaceholder())) {
-        TINT_ICE(Reader, builder_.Diagnostics()) << "attempt to update non-placeholder token";
+        TINT_ICE() << "attempt to update non-placeholder token";
     }
     tokens_[next_token_idx_ - 1].SetType(lhs);
     tokens_[next_token_idx_].SetType(rhs);
@@ -3389,7 +3387,7 @@ T Parser::sync(Token::Type tok, F&& body) {
     --parse_depth_;
 
     if (TINT_UNLIKELY(sync_tokens_.back() != tok)) {
-        TINT_ICE(Reader, builder_.Diagnostics()) << "sync_tokens is out of sync";
+        TINT_ICE() << "sync_tokens is out of sync";
     }
     sync_tokens_.pop_back();
 

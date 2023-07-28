@@ -29,11 +29,11 @@ Variable::Variable(GenerationID pid,
                    const Expression* init,
                    VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src), name(n), type(ty), initializer(init), attributes(std::move(attrs)) {
-    TINT_ASSERT(AST, name);
+    TINT_ASSERT(name);
     if (name) {
-        TINT_ASSERT(AST, !name->Is<TemplatedIdentifier>());
+        TINT_ASSERT(!name->Is<TemplatedIdentifier>());
     }
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, initializer, generation_id);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(initializer, generation_id);
 }
 
 Variable::~Variable() = default;

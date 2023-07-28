@@ -615,7 +615,7 @@ class ProgramBuilder {
                 case 4:
                     return vec4(source, type);
             }
-            TINT_ICE(ProgramBuilder, builder->Diagnostics()) << "invalid vector width " << n;
+            TINT_ICE() << "invalid vector width " << n;
             return ast::Type{};
         }
 
@@ -716,7 +716,7 @@ class ProgramBuilder {
                 case 4:
                     return vec4<T>(source);
             }
-            TINT_ICE(ProgramBuilder, builder->Diagnostics()) << "invalid vector width " << n;
+            TINT_ICE() << "invalid vector width " << n;
             return ast::Type{};
         }
 
@@ -756,8 +756,7 @@ class ProgramBuilder {
                 auto i = (columns - 2) * 3 + (rows - 2);
                 return (*this)(source, names[i], type);
             }
-            TINT_ICE(ProgramBuilder, builder->Diagnostics())
-                << "invalid matrix dimensions " << columns << "x" << rows;
+            TINT_ICE() << "invalid matrix dimensions " << columns << "x" << rows;
             return ast::Type{};
         }
 
@@ -976,8 +975,7 @@ class ProgramBuilder {
                 case 8:
                     return mat4x4<T>(source);
                 default:
-                    TINT_ICE(ProgramBuilder, builder->Diagnostics())
-                        << "invalid matrix dimensions " << columns << "x" << rows;
+                    TINT_ICE() << "invalid matrix dimensions " << columns << "x" << rows;
                     return ast::Type{};
             }
         }
@@ -1235,7 +1233,7 @@ class ProgramBuilder {
                 case type::SamplerKind::kComparisonSampler:
                     return (*this)(source, "sampler_comparison");
             }
-            TINT_ICE(ProgramBuilder, builder->Diagnostics()) << "invalid sampler kind " << kind;
+            TINT_ICE() << "invalid sampler kind " << kind;
             return ast::Type{};
         }
 
@@ -1261,8 +1259,7 @@ class ProgramBuilder {
                 default:
                     break;
             }
-            TINT_ICE(ProgramBuilder, builder->Diagnostics())
-                << "invalid depth_texture dimensions: " << dims;
+            TINT_ICE() << "invalid depth_texture dimensions: " << dims;
             return ast::Type{};
         }
 
@@ -1280,8 +1277,7 @@ class ProgramBuilder {
             if (dims == type::TextureDimension::k2d) {
                 return (*this)(source, "texture_depth_multisampled_2d");
             }
-            TINT_ICE(ProgramBuilder, builder->Diagnostics())
-                << "invalid depth_multisampled_texture dimensions: " << dims;
+            TINT_ICE() << "invalid depth_multisampled_texture dimensions: " << dims;
             return ast::Type{};
         }
 
@@ -1315,8 +1311,7 @@ class ProgramBuilder {
                 default:
                     break;
             }
-            TINT_ICE(ProgramBuilder, builder->Diagnostics())
-                << "invalid sampled_texture dimensions: " << dims;
+            TINT_ICE() << "invalid sampled_texture dimensions: " << dims;
             return ast::Type{};
         }
 
@@ -1337,8 +1332,7 @@ class ProgramBuilder {
             if (dims == type::TextureDimension::k2d) {
                 return (*this)(source, "texture_multisampled_2d", subtype);
             }
-            TINT_ICE(ProgramBuilder, builder->Diagnostics())
-                << "invalid multisampled_texture dimensions: " << dims;
+            TINT_ICE() << "invalid multisampled_texture dimensions: " << dims;
             return ast::Type{};
         }
 
@@ -1373,8 +1367,7 @@ class ProgramBuilder {
                 default:
                     break;
             }
-            TINT_ICE(ProgramBuilder, builder->Diagnostics())
-                << "invalid storage_texture  dimensions: " << dims;
+            TINT_ICE() << "invalid storage_texture  dimensions: " << dims;
             return ast::Type{};
         }
 

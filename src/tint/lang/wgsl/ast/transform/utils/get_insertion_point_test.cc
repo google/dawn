@@ -18,7 +18,7 @@
 #include "src/tint/lang/wgsl/ast/transform/test_helper.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/get_insertion_point.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -41,8 +41,7 @@ TEST_F(GetInsertionPointTest, Block) {
     ProgramBuilder cloned_b;
     CloneContext ctx(&cloned_b, &original);
 
-    // Can insert in block containing the variable, above or below the input
-    // statement.
+    // Can insert in block containing the variable, above or below the input statement.
     auto ip = utils::GetInsertionPoint(ctx, var);
     ASSERT_EQ(ip.first->Declaration(), block);
     ASSERT_EQ(ip.second, var);
@@ -85,8 +84,7 @@ TEST_F(GetInsertionPointTest, ForLoopCont_Invalid) {
     ProgramBuilder cloned_b;
     CloneContext ctx(&cloned_b, &original);
 
-    // Can't insert before/after for loop continue statement (would ned to be
-    // converted to loop).
+    // Can't insert before/after for loop continue statement (would ned to be converted to loop).
     auto ip = utils::GetInsertionPoint(ctx, var);
     ASSERT_EQ(ip.first, nullptr);
     ASSERT_EQ(ip.second, nullptr);

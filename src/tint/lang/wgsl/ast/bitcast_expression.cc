@@ -26,9 +26,9 @@ BitcastExpression::BitcastExpression(GenerationID pid,
                                      Type t,
                                      const Expression* e)
     : Base(pid, nid, src), type(t), expr(e) {
-    TINT_ASSERT(AST, type);
-    TINT_ASSERT(AST, expr);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, expr, generation_id);
+    TINT_ASSERT(type);
+    TINT_ASSERT(expr);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(expr, generation_id);
 }
 
 BitcastExpression::~BitcastExpression() = default;

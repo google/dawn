@@ -54,7 +54,7 @@ struct ClampFragDepth::State {
             if (auto* var = global->As<Var>()) {
                 auto* v = src->Sem().Get(var);
                 if (TINT_UNLIKELY(v->AddressSpace() == builtin::AddressSpace::kPushConstant)) {
-                    TINT_ICE(Transform, b.Diagnostics())
+                    TINT_ICE()
                         << "ClampFragDepth doesn't know how to handle module that already use push "
                            "constants";
                     return Program(std::move(b));

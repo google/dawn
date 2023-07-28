@@ -155,8 +155,7 @@ TEST_F(ResolverValidationTest, Expr_ErrUnknownExprType) {
             b.WrapInFunction(b.create<FakeExpr>());
             Resolver(&b).Resolve();
         },
-        "internal compiler error: unhandled expression type: "
-        "tint::resolver::FakeExpr");
+        "internal compiler error: unhandled expression type: tint::resolver::FakeExpr");
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariable_Fail) {

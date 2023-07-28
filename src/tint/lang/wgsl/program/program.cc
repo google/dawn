@@ -132,7 +132,7 @@ const type::Type* Program::TypeOf(const ast::TypeDecl* type_decl) const {
 }
 
 void Program::AssertNotMoved() const {
-    TINT_ASSERT(Program, !moved_);
+    TINT_ASSERT(!moved_);
 }
 
 }  // namespace tint

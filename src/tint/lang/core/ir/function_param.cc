@@ -14,12 +14,14 @@
 
 #include "src/tint/lang/core/ir/function_param.h"
 
+#include "src/tint/utils/ice/ice.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::ir::FunctionParam);
 
 namespace tint::ir {
 
 FunctionParam::FunctionParam(const type::Type* ty) : type_(ty) {
-    TINT_ASSERT(IR, ty != nullptr);
+    TINT_ASSERT(ty != nullptr);
 }
 
 FunctionParam::~FunctionParam() = default;

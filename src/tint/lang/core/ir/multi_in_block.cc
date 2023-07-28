@@ -15,6 +15,7 @@
 #include "src/tint/lang/core/ir/multi_in_block.h"
 
 #include "src/tint/utils/containers/predicates.h"
+#include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::MultiInBlock);
 
@@ -33,7 +34,7 @@ void MultiInBlock::SetParams(std::initializer_list<BlockParam*> params) {
 }
 
 void MultiInBlock::AddInboundSiblingBranch(ir::Terminator* node) {
-    TINT_ASSERT(IR, node != nullptr);
+    TINT_ASSERT(node != nullptr);
 
     if (node) {
         inbound_sibling_branches_.Push(node);

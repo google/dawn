@@ -16,8 +16,8 @@
 
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/reference.h"
-#include "src/tint/utils/debug/debug.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -31,8 +31,8 @@ Pointer::Pointer(builtin::AddressSpace address_space, const Type* subtype, built
       subtype_(subtype),
       address_space_(address_space),
       access_(access) {
-    TINT_ASSERT(Type, !subtype->Is<Reference>());
-    TINT_ASSERT(Type, access != builtin::Access::kUndefined);
+    TINT_ASSERT(!subtype->Is<Reference>());
+    TINT_ASSERT(access != builtin::Access::kUndefined);
 }
 
 bool Pointer::Equals(const UniqueNode& other) const {

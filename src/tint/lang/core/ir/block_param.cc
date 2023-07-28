@@ -13,13 +13,14 @@
 // limitations under the License.
 
 #include "src/tint/lang/core/ir/block_param.h"
+#include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::BlockParam);
 
 namespace tint::ir {
 
 BlockParam::BlockParam(const type::Type* ty) : type_(ty) {
-    TINT_ASSERT(IR, type_ != nullptr);
+    TINT_ASSERT(type_ != nullptr);
 }
 
 BlockParam::~BlockParam() = default;

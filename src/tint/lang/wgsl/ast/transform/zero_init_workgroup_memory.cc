@@ -359,8 +359,7 @@ struct ZeroInitWorkgroupMemory::State {
             return BuildZeroingStatements(arr->ElemType(), get_el);
         }
 
-        TINT_UNREACHABLE(Transform, b.Diagnostics())
-            << "could not zero workgroup type: " << ty->FriendlyName();
+        TINT_UNREACHABLE() << "could not zero workgroup type: " << ty->FriendlyName();
         return false;
     }
 

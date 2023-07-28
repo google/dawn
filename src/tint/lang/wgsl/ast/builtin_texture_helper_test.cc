@@ -151,7 +151,7 @@ Type TextureOverloadCase::BuildResultVectorComponentType(ProgramBuilder* b) cons
             return b->ty.i32();
     }
 
-    TINT_UNREACHABLE(AST, b->Diagnostics());
+    TINT_UNREACHABLE();
     return {};
 }
 
@@ -185,7 +185,7 @@ const Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b) con
         }
     }
 
-    TINT_UNREACHABLE(AST, b->Diagnostics());
+    TINT_UNREACHABLE();
     return nullptr;
 }
 

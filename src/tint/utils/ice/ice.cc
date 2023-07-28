@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 
 #include <memory>
+#include <string>
 
 #include "src/tint/utils/debug/debugger.h"
 
@@ -29,22 +30,19 @@ void SetInternalCompilerErrorReporter(InternalCompilerErrorReporter* reporter) {
     ice_reporter = reporter;
 }
 
-InternalCompilerError::InternalCompilerError(const char* file,
-                                             size_t line,
-                                             diag::System system,
-                                             diag::List& diagnostics)
-    : file_(file), line_(line), system_(system), diagnostics_(diagnostics) {}
+InternalCompilerError::InternalCompilerError(const char* file, size_t line)
+    : file_(file), line_(line) {}
 
 InternalCompilerError::~InternalCompilerError() {
-    auto file = std::make_shared<Source::File>(file_, "");
-    Source source{Source::Range{{line_}}, file.get()};
-    diagnostics_.add_ice(system_, msg_.str(), source, std::move(file));
-
     if (ice_reporter) {
-        ice_reporter(diagnostics_);
+        ice_reporter(*this);
     }
-
     debugger::Break();
+}
+
+std::string InternalCompilerError::Error() const {
+    return std::string(File()) + +":" + std::to_string(Line()) +
+           " internal compiler error: " + Message();
 }
 
 }  // namespace tint

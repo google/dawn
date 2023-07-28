@@ -14,12 +14,14 @@
 
 #include "src/tint/lang/core/ir/switch.h"
 
+#include "src/tint/utils/ice/ice.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Switch);
 
 namespace tint::ir {
 
 Switch::Switch(Value* cond) {
-    TINT_ASSERT(IR, cond);
+    TINT_ASSERT(cond);
 
     AddOperand(Switch::kConditionOperandOffset, cond);
 }

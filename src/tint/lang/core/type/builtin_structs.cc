@@ -81,12 +81,12 @@ Struct* CreateModfResult(Manager& types, SymbolTable& symbols, const Type* ty) {
                     return abstract;
                 },
                 [&](Default) {
-                    TINT_ASSERT(Builtin, false && "unhandled modf type");
+                    TINT_UNREACHABLE() << "unhandled modf type";
                     return nullptr;
                 });
         },
         [&](Default) {
-            TINT_ASSERT(Builtin, false && "unhandled modf type");
+            TINT_UNREACHABLE() << "unhandled modf type";
             return nullptr;
         });
 }
@@ -147,12 +147,12 @@ Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* ty) 
                     return abstract;
                 },
                 [&](Default) {
-                    TINT_ASSERT(Builtin, false && "unhandled frexp type");
+                    TINT_UNREACHABLE() << "unhandled frexp type";
                     return nullptr;
                 });
         },
         [&](Default) {
-            TINT_ASSERT(Builtin, false && "unhandled frexp type");
+            TINT_UNREACHABLE() << "unhandled frexp type";
             return nullptr;
         });
 }
@@ -170,7 +170,7 @@ Struct* CreateAtomicCompareExchangeResult(Manager& types, SymbolTable& symbols, 
         [&](const I32*) { return build(builtin::Builtin::kAtomicCompareExchangeResultI32); },
         [&](const U32*) { return build(builtin::Builtin::kAtomicCompareExchangeResultU32); },
         [&](Default) {
-            TINT_ASSERT(Builtin, false && "unhandled atomic_compare_exchange type");
+            TINT_UNREACHABLE() << "unhandled atomic_compare_exchange type";
             return nullptr;
         });
 }

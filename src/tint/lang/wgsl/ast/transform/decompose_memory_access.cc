@@ -288,9 +288,8 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ProgramBuilder* builder,
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicCompareExchangeWeak;
             break;
         default:
-            TINT_ICE(Transform, builder->Diagnostics())
-                << "invalid IntrinsicType for DecomposeMemoryAccess::Intrinsic: "
-                << ty->TypeInfo().name;
+            TINT_ICE() << "invalid IntrinsicType for DecomposeMemoryAccess::Intrinsic: "
+                       << ty->TypeInfo().name;
             break;
     }
 
@@ -433,7 +432,7 @@ struct DecomposeMemoryAccess::State {
     /// @param expr the expression that performs the access
     /// @param access the access
     void AddAccess(const Expression* expr, const BufferAccess& access) {
-        TINT_ASSERT(Transform, access.type);
+        TINT_ASSERT(access.type);
         accesses.emplace(expr, access);
         expression_order.emplace_back(expr);
     }
@@ -495,7 +494,7 @@ struct DecomposeMemoryAccess::State {
                     // * Override-expression counts can only be applied to workgroup arrays, and
                     //   this method only handles storage and uniform.
                     // * Runtime-sized arrays are not loadable.
-                    TINT_ICE(Transform, b.Diagnostics()) << "unexpected non-constant array count";
+                    TINT_ICE() << "unexpected non-constant array count";
                     arr_cnt = 1;
                 }
                 auto* for_cond = b.create<BinaryExpression>(BinaryOp::kLessThan, b.Expr(i),
@@ -581,8 +580,7 @@ struct DecomposeMemoryAccess::State {
                             // * Override-expression counts can only be applied to workgroup
                             //   arrays, and this method only handles storage and uniform.
                             // * Runtime-sized arrays are not storable.
-                            TINT_ICE(Transform, b.Diagnostics())
-                                << "unexpected non-constant array count";
+                            TINT_ICE() << "unexpected non-constant array count";
                             arr_cnt = 1;
                         }
                         auto* for_cond = b.create<BinaryExpression>(BinaryOp::kLessThan, b.Expr(i),
@@ -651,9 +649,8 @@ struct DecomposeMemoryAccess::State {
 
             auto* atomic = IntrinsicAtomicFor(ctx.dst, op, el_ty, buffer);
             if (TINT_UNLIKELY(!atomic)) {
-                TINT_ICE(Transform, b.Diagnostics())
-                    << "IntrinsicAtomicFor() returned nullptr for op " << op << " and type "
-                    << el_ty->TypeInfo().name;
+                TINT_ICE() << "IntrinsicAtomicFor() returned nullptr for op " << op << " and type "
+                           << el_ty->TypeInfo().name;
             }
 
             Type ret_ty = CreateASTTypeFor(ctx, intrinsic->ReturnType());

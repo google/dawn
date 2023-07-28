@@ -174,7 +174,7 @@ struct PreservePadding::State {
                 });
             },
             [&](Default) {
-                TINT_ICE(Transform, b.Diagnostics()) << "unhandled type with padding";
+                TINT_ICE() << "unhandled type with padding";
                 return nullptr;
             });
     }

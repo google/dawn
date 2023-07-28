@@ -52,6 +52,7 @@
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/type.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string.h"
@@ -89,12 +90,12 @@ void Disassembler::EmitLine() {
 }
 
 size_t Disassembler::IdOf(Block* node) {
-    TINT_ASSERT(IR, node);
+    TINT_ASSERT(node);
     return block_ids_.GetOrCreate(node, [&] { return block_ids_.Count(); });
 }
 
 std::string Disassembler::IdOf(Value* value) {
-    TINT_ASSERT(IR, value);
+    TINT_ASSERT(value);
     return value_ids_.GetOrCreate(value, [&] {
         if (auto sym = mod_.NameOf(value)) {
             if (ids_.Add(sym.Name())) {

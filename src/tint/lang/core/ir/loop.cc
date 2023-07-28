@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/multi_in_block.h"
+#include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Loop);
 
@@ -24,9 +25,9 @@ namespace tint::ir {
 
 Loop::Loop(ir::Block* i, ir::MultiInBlock* b, ir::MultiInBlock* c)
     : initializer_(i), body_(b), continuing_(c) {
-    TINT_ASSERT(IR, initializer_);
-    TINT_ASSERT(IR, body_);
-    TINT_ASSERT(IR, continuing_);
+    TINT_ASSERT(initializer_);
+    TINT_ASSERT(body_);
+    TINT_ASSERT(continuing_);
 
     if (initializer_) {
         initializer_->SetParent(this);

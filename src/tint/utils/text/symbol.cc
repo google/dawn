@@ -34,17 +34,17 @@ Symbol& Symbol::operator=(const Symbol& o) = default;
 Symbol& Symbol::operator=(Symbol&& o) = default;
 
 bool Symbol::operator==(const Symbol& other) const {
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Symbol, generation_id_, other.generation_id_);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(generation_id_, other.generation_id_);
     return val_ == other.val_;
 }
 
 bool Symbol::operator!=(const Symbol& other) const {
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Symbol, generation_id_, other.generation_id_);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(generation_id_, other.generation_id_);
     return val_ != other.val_;
 }
 
 bool Symbol::operator<(const Symbol& other) const {
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(Symbol, generation_id_, other.generation_id_);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(generation_id_, other.generation_id_);
     return val_ < other.val_;
 }
 

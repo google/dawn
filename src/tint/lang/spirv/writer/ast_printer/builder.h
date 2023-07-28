@@ -116,8 +116,7 @@ class Builder {
     /// @param operands the variable operands
     void push_function_var(const OperandList& operands) {
         if (TINT_UNLIKELY(!current_function_)) {
-            TINT_ICE(Writer, builder_.Diagnostics())
-                << "push_function_var() called without a function";
+            TINT_ICE() << "push_function_var() called without a function";
         }
         current_function_.push_var(operands);
     }

@@ -104,7 +104,7 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
                 // visit leaf-expressions first, this means the content of const_chains only
                 // contains the outer-most constant expressions.
                 auto* expr = sem->Declaration();
-                bool ok = TraverseExpressions(expr, b.Diagnostics(), [&](const Expression* child) {
+                bool ok = TraverseExpressions(expr, [&](const Expression* child) {
                     const_chains.Remove(child);
                     return child == expr ? TraverseAction::Descend : TraverseAction::Skip;
                 });

@@ -18,6 +18,7 @@
 
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
+#include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::NextIteration);
 
@@ -25,7 +26,7 @@ namespace tint::ir {
 
 NextIteration::NextIteration(ir::Loop* loop, VectorRef<Value*> args /* = tint::Empty */)
     : loop_(loop) {
-    TINT_ASSERT(IR, loop_);
+    TINT_ASSERT(loop_);
 
     AddOperands(NextIteration::kArgsOperandOffset, std::move(args));
 

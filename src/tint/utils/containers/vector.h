@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "src/tint/utils/containers/slice.h"
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/memory/bitcast.h"
 #include "src/tint/utils/text/string_stream.h"
@@ -216,7 +216,7 @@ class Vector {
     /// @param i the element index. Must be less than `len`.
     /// @returns a reference to the i'th element.
     T& operator[](size_t i) {
-        TINT_ASSERT(Utils, i < Length());
+        TINT_ASSERT(i < Length());
         return impl_.slice[i];
     }
 
@@ -224,7 +224,7 @@ class Vector {
     /// @param i the element index. Must be less than `len`.
     /// @returns a reference to the i'th element.
     const T& operator[](size_t i) const {
-        TINT_ASSERT(Utils, i < Length());
+        TINT_ASSERT(i < Length());
         return impl_.slice[i];
     }
 
@@ -325,7 +325,7 @@ class Vector {
     /// Removes and returns the last element from the vector.
     /// @returns the popped element
     T Pop() {
-        TINT_ASSERT(Utils, !IsEmpty());
+        TINT_ASSERT(!IsEmpty());
         auto& el = impl_.slice.data[--impl_.slice.len];
         auto val = std::move(el);
         el.~T();
@@ -337,7 +337,7 @@ class Vector {
     /// @param element the element to insert
     template <typename EL>
     void Insert(size_t before, EL&& element) {
-        TINT_ASSERT(Utils, before <= Length());
+        TINT_ASSERT(before <= Length());
         size_t n = Length();
         Resize(Length() + 1);
         // Shuffle
@@ -354,8 +354,8 @@ class Vector {
     /// @param start the index of the first element to remove
     /// @param count the number of elements to remove
     void Erase(size_t start, size_t count = 1) {
-        TINT_ASSERT(Utils, start < Length());
-        TINT_ASSERT(Utils, (start + count) <= Length());
+        TINT_ASSERT(start < Length());
+        TINT_ASSERT((start + count) <= Length());
         // Shuffle
         for (size_t i = start + count; i < impl_.slice.len; i++) {
             auto& src = impl_.slice.data[i];

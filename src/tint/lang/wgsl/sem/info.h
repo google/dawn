@@ -25,7 +25,7 @@
 #include "src/tint/lang/wgsl/sem/node.h"
 #include "src/tint/lang/wgsl/sem/type_mappings.h"
 #include "src/tint/utils/containers/unique_vector.h"
-#include "src/tint/utils/debug/debug.h"
+#include "src/tint/utils/ice/ice.h"
 
 // Forward declarations
 namespace tint::sem {
@@ -104,7 +104,7 @@ class Info {
     void Add(const AST* ast_node, const SemanticNodeTypeFor<AST>* sem_node) {
         Reserve(ast_node->node_id);
         // Check there's no semantic info already existing for the AST node
-        TINT_ASSERT(Semantic, nodes_[ast_node->node_id.value] == nullptr);
+        TINT_ASSERT(nodes_[ast_node->node_id.value] == nullptr);
         nodes_[ast_node->node_id.value] = sem_node;
     }
 

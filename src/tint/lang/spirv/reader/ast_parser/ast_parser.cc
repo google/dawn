@@ -882,8 +882,8 @@ bool ASTParser::RegisterEntryPoints() {
             // Reuse the inner implementation owned by the first entry point.
             inner_implementation_name = where->second[0].inner_name;
         }
-        TINT_ASSERT(Reader, !inner_implementation_name.empty());
-        TINT_ASSERT(Reader, ep_name != inner_implementation_name);
+        TINT_ASSERT(!inner_implementation_name.empty());
+        TINT_ASSERT(ep_name != inner_implementation_name);
 
         UniqueVector<uint32_t, 8> inputs;
         UniqueVector<uint32_t, 8> outputs;
@@ -1490,7 +1490,7 @@ bool ASTParser::EmitModuleScopeVariables() {
                               << var.type_id();
             }
         }
-        TINT_ASSERT(Reader, ast_store_type != nullptr);
+        TINT_ASSERT(ast_store_type != nullptr);
 
         const ast::Expression* ast_initializer = nullptr;
         if (var.NumInOperands() > 1) {
@@ -1771,7 +1771,7 @@ bool ASTParser::ConvertPipelineDecorations(const Type* store_type,
     builtin::InterpolationSampling sampling = builtin::InterpolationSampling::kUndefined;
 
     for (const auto& deco : decorations) {
-        TINT_ASSERT(Reader, deco.size() > 0);
+        TINT_ASSERT(deco.size() > 0);
         switch (static_cast<spv::Decoration>(deco[0])) {
             case spv::Decoration::Location:
                 if (deco.size() != 2) {

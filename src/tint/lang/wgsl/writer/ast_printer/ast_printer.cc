@@ -109,7 +109,7 @@ void ASTPrinter::Generate() {
             [&](const ast::Function* func) { return EmitFunction(func); },
             [&](const ast::Variable* var) { return EmitVariable(Line(), var); },
             [&](const ast::ConstAssert* ca) { return EmitConstAssert(ca); },
-            [&](Default) { TINT_UNREACHABLE(Writer, diagnostics_); });
+            [&](Default) { TINT_UNREACHABLE(); });
         if (decl != program_->AST().GlobalDeclarations().Back()) {
             Line();
         }
@@ -420,9 +420,7 @@ void ASTPrinter::EmitVariable(StringStream& out, const ast::Variable* v) {
         },
         [&](const ast::Let*) { out << "let"; }, [&](const ast::Override*) { out << "override"; },
         [&](const ast::Const*) { out << "const"; },
-        [&](Default) {
-            TINT_ICE(Writer, diagnostics_) << "unhandled variable type " << v->TypeInfo().name;
-        });
+        [&](Default) { TINT_ICE() << "unhandled variable type " << v->TypeInfo().name; });
 
     out << " " << v->name->symbol.Name();
 
@@ -526,8 +524,7 @@ void ASTPrinter::EmitAttributes(StringStream& out, VectorRef<const ast::Attribut
                 out << "internal(" << internal->InternalName() << ")";
             },
             [&](Default) {
-                TINT_ICE(Writer, diagnostics_)
-                    << "Unsupported attribute '" << attr->TypeInfo().name << "'";
+                TINT_ICE() << "Unsupported attribute '" << attr->TypeInfo().name << "'";
             });
     }
 }

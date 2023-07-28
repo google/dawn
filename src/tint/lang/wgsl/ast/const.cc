@@ -30,7 +30,7 @@ Const::Const(GenerationID pid,
              const Expression* init,
              VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src, n, ty, init, std::move(attrs)) {
-    TINT_ASSERT(AST, init != nullptr);
+    TINT_ASSERT(init != nullptr);
 }
 
 Const::~Const() = default;

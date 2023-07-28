@@ -56,11 +56,11 @@ struct FoldTrivialLets::State {
 
         // Helper that folds pending let declarations into `expr` if possible.
         auto fold_lets = [&](const Expression* expr) {
-            TraverseExpressions(expr, b.Diagnostics(), [&](const IdentifierExpression* ident) {
+            TraverseExpressions(expr, [&](const IdentifierExpression* ident) {
                 if (auto* user = sem.Get<sem::VariableUser>(ident)) {
                     auto itr = pending_lets.Find(user->Variable());
                     if (itr) {
-                        TINT_ASSERT(Transform, itr->remaining_uses > 0);
+                        TINT_ASSERT(itr->remaining_uses > 0);
 
                         // We found a reference to a pending let, so replace it with the inlined
                         // initializer expression.

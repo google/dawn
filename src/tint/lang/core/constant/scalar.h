@@ -43,7 +43,7 @@ class Scalar : public Castable<Scalar<T>, ScalarBase> {
     /// @param v the scalar value
     Scalar(const type::Type* t, T v) : type(t), value(v) {
         if constexpr (IsFloatingPoint<T>) {
-            TINT_ASSERT(Constant, std::isfinite(v.value));
+            TINT_ASSERT(std::isfinite(v.value));
         }
     }
     ~Scalar() override = default;

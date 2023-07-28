@@ -86,10 +86,9 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
         // This transform is run after CanonicalizeEntryPointIO transform,
         // So it is guaranteed that entry point inputs are already grouped in a struct.
         if (TINT_UNLIKELY(!str)) {
-            TINT_ICE(Transform, ctx.dst->Diagnostics())
-                << "Entrypoint function return type is non-struct.\n"
-                << "TruncateInterstageVariables transform needs to run after "
-                   "CanonicalizeEntryPointIO transform.";
+            TINT_ICE() << "Entrypoint function return type is non-struct.\n"
+                       << "TruncateInterstageVariables transform needs to run after "
+                          "CanonicalizeEntryPointIO transform.";
             continue;
         }
 

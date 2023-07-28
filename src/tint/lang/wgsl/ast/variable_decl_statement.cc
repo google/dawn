@@ -25,8 +25,8 @@ VariableDeclStatement::VariableDeclStatement(GenerationID pid,
                                              const Source& src,
                                              const Variable* var)
     : Base(pid, nid, src), variable(var) {
-    TINT_ASSERT(AST, variable);
-    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(AST, variable, generation_id);
+    TINT_ASSERT(variable);
+    TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(variable, generation_id);
 }
 
 VariableDeclStatement::~VariableDeclStatement() = default;

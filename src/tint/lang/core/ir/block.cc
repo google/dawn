@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/lang/core/ir/block.h"
+#include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ir::Block);
 
@@ -23,8 +24,8 @@ Block::Block() : Base() {}
 Block::~Block() = default;
 
 Instruction* Block::Prepend(Instruction* inst) {
-    TINT_ASSERT_OR_RETURN_VALUE(IR, inst, inst);
-    TINT_ASSERT_OR_RETURN_VALUE(IR, inst->Block() == nullptr, inst);
+    TINT_ASSERT_OR_RETURN_VALUE(inst, inst);
+    TINT_ASSERT_OR_RETURN_VALUE(inst->Block() == nullptr, inst);
 
     inst->SetBlock(this);
     instructions_.count += 1;
@@ -42,8 +43,8 @@ Instruction* Block::Prepend(Instruction* inst) {
 }
 
 Instruction* Block::Append(Instruction* inst) {
-    TINT_ASSERT_OR_RETURN_VALUE(IR, inst, inst);
-    TINT_ASSERT_OR_RETURN_VALUE(IR, inst->Block() == nullptr, inst);
+    TINT_ASSERT_OR_RETURN_VALUE(inst, inst);
+    TINT_ASSERT_OR_RETURN_VALUE(inst->Block() == nullptr, inst);
 
     inst->SetBlock(this);
     instructions_.count += 1;
@@ -61,10 +62,10 @@ Instruction* Block::Append(Instruction* inst) {
 }
 
 void Block::InsertBefore(Instruction* before, Instruction* inst) {
-    TINT_ASSERT_OR_RETURN(IR, before);
-    TINT_ASSERT_OR_RETURN(IR, inst);
-    TINT_ASSERT_OR_RETURN(IR, before->Block() == this);
-    TINT_ASSERT_OR_RETURN(IR, inst->Block() == nullptr);
+    TINT_ASSERT_OR_RETURN(before);
+    TINT_ASSERT_OR_RETURN(inst);
+    TINT_ASSERT_OR_RETURN(before->Block() == this);
+    TINT_ASSERT_OR_RETURN(inst->Block() == nullptr);
 
     inst->SetBlock(this);
     instructions_.count += 1;
@@ -83,10 +84,10 @@ void Block::InsertBefore(Instruction* before, Instruction* inst) {
 }
 
 void Block::InsertAfter(Instruction* after, Instruction* inst) {
-    TINT_ASSERT_OR_RETURN(IR, after);
-    TINT_ASSERT_OR_RETURN(IR, inst);
-    TINT_ASSERT_OR_RETURN(IR, after->Block() == this);
-    TINT_ASSERT_OR_RETURN(IR, inst->Block() == nullptr);
+    TINT_ASSERT_OR_RETURN(after);
+    TINT_ASSERT_OR_RETURN(inst);
+    TINT_ASSERT_OR_RETURN(after->Block() == this);
+    TINT_ASSERT_OR_RETURN(inst->Block() == nullptr);
 
     inst->SetBlock(this);
     instructions_.count += 1;
@@ -104,10 +105,10 @@ void Block::InsertAfter(Instruction* after, Instruction* inst) {
 }
 
 void Block::Replace(Instruction* target, Instruction* inst) {
-    TINT_ASSERT_OR_RETURN(IR, target);
-    TINT_ASSERT_OR_RETURN(IR, inst);
-    TINT_ASSERT_OR_RETURN(IR, target->Block() == this);
-    TINT_ASSERT_OR_RETURN(IR, inst->Block() == nullptr);
+    TINT_ASSERT_OR_RETURN(target);
+    TINT_ASSERT_OR_RETURN(inst);
+    TINT_ASSERT_OR_RETURN(target->Block() == this);
+    TINT_ASSERT_OR_RETURN(inst->Block() == nullptr);
 
     inst->SetBlock(this);
     target->SetBlock(nullptr);
@@ -134,8 +135,8 @@ void Block::Replace(Instruction* target, Instruction* inst) {
 }
 
 void Block::Remove(Instruction* inst) {
-    TINT_ASSERT_OR_RETURN(IR, inst);
-    TINT_ASSERT_OR_RETURN(IR, inst->Block() == this);
+    TINT_ASSERT_OR_RETURN(inst);
+    TINT_ASSERT_OR_RETURN(inst->Block() == this);
 
     inst->SetBlock(nullptr);
     instructions_.count -= 1;

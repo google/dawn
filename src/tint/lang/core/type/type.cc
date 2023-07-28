@@ -37,7 +37,7 @@ namespace tint::type {
 
 Type::Type(size_t hash, type::Flags flags) : Base(hash), flags_(flags) {
     if (IsConstructible()) {
-        TINT_ASSERT(Type, HasCreationFixedFootprint());
+        TINT_ASSERT(HasCreationFixedFootprint());
     }
 }
 

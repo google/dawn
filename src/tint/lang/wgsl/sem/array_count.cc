@@ -38,7 +38,7 @@ std::string NamedOverrideArrayCount::FriendlyName() const {
 }
 
 type::ArrayCount* NamedOverrideArrayCount::Clone(type::CloneContext&) const {
-    TINT_ASSERT(Type, false && "Named override array count clone not available");
+    TINT_UNREACHABLE() << "Named override array count clone not available";
     return nullptr;
 }
 
@@ -59,7 +59,7 @@ std::string UnnamedOverrideArrayCount::FriendlyName() const {
 }
 
 type::ArrayCount* UnnamedOverrideArrayCount::Clone(type::CloneContext&) const {
-    TINT_ASSERT(Type, false && "Unnamed override array count clone not available");
+    TINT_UNREACHABLE() << "Unnamed override array count clone not available";
     return nullptr;
 }
 

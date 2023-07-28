@@ -28,17 +28,11 @@ namespace {
 
 thread_local DeviceBase* tlDevice = nullptr;
 
-void TintICEReporter(const tint::diag::List& diagnostics) {
+void TintICEReporter(const tint::InternalCompilerError& err) {
     if (tlDevice) {
-        tlDevice->HandleError(DAWN_INTERNAL_ERROR(diagnostics.str()));
+        tlDevice->HandleError(DAWN_INTERNAL_ERROR(err.Error()));
 #if DAWN_ENABLE_ASSERTS
-        for (const tint::diag::Diagnostic& diag : diagnostics) {
-            if (diag.severity >= tint::diag::Severity::InternalCompilerError) {
-                HandleAssertionFailure(
-                    diag.source.file ? diag.source.file->path.c_str() : "<unknown>", "",
-                    diag.source.range.begin.line, diag.message.c_str());
-            }
-        }
+        HandleAssertionFailure(err.File(), "", err.Line(), err.Message().c_str());
 #endif
     }
 }

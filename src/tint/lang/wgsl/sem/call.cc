@@ -32,8 +32,7 @@ Call::Call(const ast::CallExpression* declaration,
       target_(target),
       arguments_(std::move(arguments)) {
     // Check that the stage is no earlier than the target supports
-    TINT_ASSERT(Semantic,
-                (target->Stage() <= stage) || (stage == sem::EvaluationStage::kNotEvaluated));
+    TINT_ASSERT((target->Stage() <= stage) || (stage == sem::EvaluationStage::kNotEvaluated));
 }
 
 Call::~Call() = default;

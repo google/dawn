@@ -34,7 +34,7 @@ CallTarget::CallTarget(const type::Type* return_type,
     for (auto* param : parameters) {
         AddParameter(param);
     }
-    TINT_ASSERT(Semantic, return_type);
+    TINT_ASSERT(return_type);
 }
 
 CallTarget::CallTarget(const CallTarget&) = default;
