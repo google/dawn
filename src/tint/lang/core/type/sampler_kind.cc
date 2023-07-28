@@ -16,16 +16,14 @@
 
 namespace tint::type {
 
-StringStream& operator<<(StringStream& out, SamplerKind kind) {
+std::string_view ToString(SamplerKind kind) {
     switch (kind) {
         case SamplerKind::kSampler:
-            out << "sampler";
-            break;
+            return "sampler";
         case SamplerKind::kComparisonSampler:
-            out << "comparison_sampler";
-            break;
+            return "comparison_sampler";
     }
-    return out;
+    return "<unknown>";
 }
 
 }  // namespace tint::type

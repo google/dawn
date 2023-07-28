@@ -16,26 +16,18 @@
 
 namespace tint::ast {
 
-StringStream& operator<<(StringStream& out, PipelineStage stage) {
+std::string_view ToString(PipelineStage stage) {
     switch (stage) {
-        case PipelineStage::kNone: {
-            out << "none";
-            break;
-        }
-        case PipelineStage::kVertex: {
-            out << "vertex";
-            break;
-        }
-        case PipelineStage::kFragment: {
-            out << "fragment";
-            break;
-        }
-        case PipelineStage::kCompute: {
-            out << "compute";
-            break;
-        }
+        case PipelineStage::kNone:
+            return "none";
+        case PipelineStage::kVertex:
+            return "vertex";
+        case PipelineStage::kFragment:
+            return "fragment";
+        case PipelineStage::kCompute:
+            return "compute";
     }
-    return out;
+    return "<unknown>";
 }
 
 }  // namespace tint::ast

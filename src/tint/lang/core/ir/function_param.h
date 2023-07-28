@@ -106,7 +106,17 @@ class FunctionParam : public Castable<FunctionParam, Value> {
     bool invariant_ = false;
 };
 
-StringStream& operator<<(StringStream& out, enum FunctionParam::Builtin value);
+/// @param value the enum value
+/// @returns the string for the given enum value
+std::string_view ToString(enum FunctionParam::Builtin value);
+
+/// @param out the stream to write to
+/// @param value the FunctionParam::Builtin
+/// @returns @p out so calls can be chained
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, enum FunctionParam::Builtin value) {
+    return out << ToString(value);
+}
 
 }  // namespace tint::ir
 

@@ -37,14 +37,14 @@ const FloatLiteralExpression* FloatLiteralExpression::Clone(CloneContext* ctx) c
     return ctx->dst->create<FloatLiteralExpression>(src, value, suffix);
 }
 
-StringStream& operator<<(StringStream& out, FloatLiteralExpression::Suffix suffix) {
+std::string_view ToString(FloatLiteralExpression::Suffix suffix) {
     switch (suffix) {
         default:
-            return out;
+            return "";
         case FloatLiteralExpression::Suffix::kF:
-            return out << "f";
+            return "f";
         case FloatLiteralExpression::Suffix::kH:
-            return out << "h";
+            return "h";
     }
 }
 

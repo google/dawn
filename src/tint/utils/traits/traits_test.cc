@@ -14,11 +14,16 @@
 
 #include "src/tint/utils/traits/traits.h"
 
+#include <ostream>
+
 #include "gtest/gtest.h"
 
 namespace tint::traits {
 
 namespace {
+
+static_assert(traits::IsOStream<std::ostream>);
+static_assert(traits::IsOStream<std::stringstream>);
 
 static_assert(std::is_same_v<PtrElTy<int*>, int>);
 static_assert(std::is_same_v<PtrElTy<int const*>, int>);

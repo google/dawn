@@ -319,204 +319,204 @@ Builtin ParseBuiltin(std::string_view str) {
     return Builtin::kUndefined;
 }
 
-StringStream& operator<<(StringStream& out, Builtin value) {
+std::string_view ToString(Builtin value) {
     switch (value) {
         case Builtin::kUndefined:
-            return out << "undefined";
+            return "undefined";
         case Builtin::kAtomicCompareExchangeResultI32:
-            return out << "__atomic_compare_exchange_result_i32";
+            return "__atomic_compare_exchange_result_i32";
         case Builtin::kAtomicCompareExchangeResultU32:
-            return out << "__atomic_compare_exchange_result_u32";
+            return "__atomic_compare_exchange_result_u32";
         case Builtin::kFrexpResultAbstract:
-            return out << "__frexp_result_abstract";
+            return "__frexp_result_abstract";
         case Builtin::kFrexpResultF16:
-            return out << "__frexp_result_f16";
+            return "__frexp_result_f16";
         case Builtin::kFrexpResultF32:
-            return out << "__frexp_result_f32";
+            return "__frexp_result_f32";
         case Builtin::kFrexpResultVec2Abstract:
-            return out << "__frexp_result_vec2_abstract";
+            return "__frexp_result_vec2_abstract";
         case Builtin::kFrexpResultVec2F16:
-            return out << "__frexp_result_vec2_f16";
+            return "__frexp_result_vec2_f16";
         case Builtin::kFrexpResultVec2F32:
-            return out << "__frexp_result_vec2_f32";
+            return "__frexp_result_vec2_f32";
         case Builtin::kFrexpResultVec3Abstract:
-            return out << "__frexp_result_vec3_abstract";
+            return "__frexp_result_vec3_abstract";
         case Builtin::kFrexpResultVec3F16:
-            return out << "__frexp_result_vec3_f16";
+            return "__frexp_result_vec3_f16";
         case Builtin::kFrexpResultVec3F32:
-            return out << "__frexp_result_vec3_f32";
+            return "__frexp_result_vec3_f32";
         case Builtin::kFrexpResultVec4Abstract:
-            return out << "__frexp_result_vec4_abstract";
+            return "__frexp_result_vec4_abstract";
         case Builtin::kFrexpResultVec4F16:
-            return out << "__frexp_result_vec4_f16";
+            return "__frexp_result_vec4_f16";
         case Builtin::kFrexpResultVec4F32:
-            return out << "__frexp_result_vec4_f32";
+            return "__frexp_result_vec4_f32";
         case Builtin::kModfResultAbstract:
-            return out << "__modf_result_abstract";
+            return "__modf_result_abstract";
         case Builtin::kModfResultF16:
-            return out << "__modf_result_f16";
+            return "__modf_result_f16";
         case Builtin::kModfResultF32:
-            return out << "__modf_result_f32";
+            return "__modf_result_f32";
         case Builtin::kModfResultVec2Abstract:
-            return out << "__modf_result_vec2_abstract";
+            return "__modf_result_vec2_abstract";
         case Builtin::kModfResultVec2F16:
-            return out << "__modf_result_vec2_f16";
+            return "__modf_result_vec2_f16";
         case Builtin::kModfResultVec2F32:
-            return out << "__modf_result_vec2_f32";
+            return "__modf_result_vec2_f32";
         case Builtin::kModfResultVec3Abstract:
-            return out << "__modf_result_vec3_abstract";
+            return "__modf_result_vec3_abstract";
         case Builtin::kModfResultVec3F16:
-            return out << "__modf_result_vec3_f16";
+            return "__modf_result_vec3_f16";
         case Builtin::kModfResultVec3F32:
-            return out << "__modf_result_vec3_f32";
+            return "__modf_result_vec3_f32";
         case Builtin::kModfResultVec4Abstract:
-            return out << "__modf_result_vec4_abstract";
+            return "__modf_result_vec4_abstract";
         case Builtin::kModfResultVec4F16:
-            return out << "__modf_result_vec4_f16";
+            return "__modf_result_vec4_f16";
         case Builtin::kModfResultVec4F32:
-            return out << "__modf_result_vec4_f32";
+            return "__modf_result_vec4_f32";
         case Builtin::kPackedVec3:
-            return out << "__packed_vec3";
+            return "__packed_vec3";
         case Builtin::kArray:
-            return out << "array";
+            return "array";
         case Builtin::kAtomic:
-            return out << "atomic";
+            return "atomic";
         case Builtin::kBool:
-            return out << "bool";
+            return "bool";
         case Builtin::kF16:
-            return out << "f16";
+            return "f16";
         case Builtin::kF32:
-            return out << "f32";
+            return "f32";
         case Builtin::kI32:
-            return out << "i32";
+            return "i32";
         case Builtin::kMat2X2:
-            return out << "mat2x2";
+            return "mat2x2";
         case Builtin::kMat2X2F:
-            return out << "mat2x2f";
+            return "mat2x2f";
         case Builtin::kMat2X2H:
-            return out << "mat2x2h";
+            return "mat2x2h";
         case Builtin::kMat2X3:
-            return out << "mat2x3";
+            return "mat2x3";
         case Builtin::kMat2X3F:
-            return out << "mat2x3f";
+            return "mat2x3f";
         case Builtin::kMat2X3H:
-            return out << "mat2x3h";
+            return "mat2x3h";
         case Builtin::kMat2X4:
-            return out << "mat2x4";
+            return "mat2x4";
         case Builtin::kMat2X4F:
-            return out << "mat2x4f";
+            return "mat2x4f";
         case Builtin::kMat2X4H:
-            return out << "mat2x4h";
+            return "mat2x4h";
         case Builtin::kMat3X2:
-            return out << "mat3x2";
+            return "mat3x2";
         case Builtin::kMat3X2F:
-            return out << "mat3x2f";
+            return "mat3x2f";
         case Builtin::kMat3X2H:
-            return out << "mat3x2h";
+            return "mat3x2h";
         case Builtin::kMat3X3:
-            return out << "mat3x3";
+            return "mat3x3";
         case Builtin::kMat3X3F:
-            return out << "mat3x3f";
+            return "mat3x3f";
         case Builtin::kMat3X3H:
-            return out << "mat3x3h";
+            return "mat3x3h";
         case Builtin::kMat3X4:
-            return out << "mat3x4";
+            return "mat3x4";
         case Builtin::kMat3X4F:
-            return out << "mat3x4f";
+            return "mat3x4f";
         case Builtin::kMat3X4H:
-            return out << "mat3x4h";
+            return "mat3x4h";
         case Builtin::kMat4X2:
-            return out << "mat4x2";
+            return "mat4x2";
         case Builtin::kMat4X2F:
-            return out << "mat4x2f";
+            return "mat4x2f";
         case Builtin::kMat4X2H:
-            return out << "mat4x2h";
+            return "mat4x2h";
         case Builtin::kMat4X3:
-            return out << "mat4x3";
+            return "mat4x3";
         case Builtin::kMat4X3F:
-            return out << "mat4x3f";
+            return "mat4x3f";
         case Builtin::kMat4X3H:
-            return out << "mat4x3h";
+            return "mat4x3h";
         case Builtin::kMat4X4:
-            return out << "mat4x4";
+            return "mat4x4";
         case Builtin::kMat4X4F:
-            return out << "mat4x4f";
+            return "mat4x4f";
         case Builtin::kMat4X4H:
-            return out << "mat4x4h";
+            return "mat4x4h";
         case Builtin::kPtr:
-            return out << "ptr";
+            return "ptr";
         case Builtin::kSampler:
-            return out << "sampler";
+            return "sampler";
         case Builtin::kSamplerComparison:
-            return out << "sampler_comparison";
+            return "sampler_comparison";
         case Builtin::kTexture1D:
-            return out << "texture_1d";
+            return "texture_1d";
         case Builtin::kTexture2D:
-            return out << "texture_2d";
+            return "texture_2d";
         case Builtin::kTexture2DArray:
-            return out << "texture_2d_array";
+            return "texture_2d_array";
         case Builtin::kTexture3D:
-            return out << "texture_3d";
+            return "texture_3d";
         case Builtin::kTextureCube:
-            return out << "texture_cube";
+            return "texture_cube";
         case Builtin::kTextureCubeArray:
-            return out << "texture_cube_array";
+            return "texture_cube_array";
         case Builtin::kTextureDepth2D:
-            return out << "texture_depth_2d";
+            return "texture_depth_2d";
         case Builtin::kTextureDepth2DArray:
-            return out << "texture_depth_2d_array";
+            return "texture_depth_2d_array";
         case Builtin::kTextureDepthCube:
-            return out << "texture_depth_cube";
+            return "texture_depth_cube";
         case Builtin::kTextureDepthCubeArray:
-            return out << "texture_depth_cube_array";
+            return "texture_depth_cube_array";
         case Builtin::kTextureDepthMultisampled2D:
-            return out << "texture_depth_multisampled_2d";
+            return "texture_depth_multisampled_2d";
         case Builtin::kTextureExternal:
-            return out << "texture_external";
+            return "texture_external";
         case Builtin::kTextureMultisampled2D:
-            return out << "texture_multisampled_2d";
+            return "texture_multisampled_2d";
         case Builtin::kTextureStorage1D:
-            return out << "texture_storage_1d";
+            return "texture_storage_1d";
         case Builtin::kTextureStorage2D:
-            return out << "texture_storage_2d";
+            return "texture_storage_2d";
         case Builtin::kTextureStorage2DArray:
-            return out << "texture_storage_2d_array";
+            return "texture_storage_2d_array";
         case Builtin::kTextureStorage3D:
-            return out << "texture_storage_3d";
+            return "texture_storage_3d";
         case Builtin::kU32:
-            return out << "u32";
+            return "u32";
         case Builtin::kVec2:
-            return out << "vec2";
+            return "vec2";
         case Builtin::kVec2F:
-            return out << "vec2f";
+            return "vec2f";
         case Builtin::kVec2H:
-            return out << "vec2h";
+            return "vec2h";
         case Builtin::kVec2I:
-            return out << "vec2i";
+            return "vec2i";
         case Builtin::kVec2U:
-            return out << "vec2u";
+            return "vec2u";
         case Builtin::kVec3:
-            return out << "vec3";
+            return "vec3";
         case Builtin::kVec3F:
-            return out << "vec3f";
+            return "vec3f";
         case Builtin::kVec3H:
-            return out << "vec3h";
+            return "vec3h";
         case Builtin::kVec3I:
-            return out << "vec3i";
+            return "vec3i";
         case Builtin::kVec3U:
-            return out << "vec3u";
+            return "vec3u";
         case Builtin::kVec4:
-            return out << "vec4";
+            return "vec4";
         case Builtin::kVec4F:
-            return out << "vec4f";
+            return "vec4f";
         case Builtin::kVec4H:
-            return out << "vec4h";
+            return "vec4h";
         case Builtin::kVec4I:
-            return out << "vec4i";
+            return "vec4i";
         case Builtin::kVec4U:
-            return out << "vec4u";
+            return "vec4u";
     }
-    return out << "<unknown>";
+    return "<unknown>";
 }
 
 }  // namespace tint::builtin

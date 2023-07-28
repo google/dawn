@@ -28,106 +28,74 @@ IntrinsicCall::IntrinsicCall(InstructionResult* result, enum Kind kind, VectorRe
 
 IntrinsicCall::~IntrinsicCall() = default;
 
-StringStream& operator<<(StringStream& out, enum IntrinsicCall::Kind kind) {
+std::string_view ToString(enum IntrinsicCall::Kind kind) {
     switch (kind) {
         case IntrinsicCall::Kind::kSpirvArrayLength:
-            out << "spirv.array_length";
-            break;
+            return "spirv.array_length";
         case IntrinsicCall::Kind::kSpirvAtomicIAdd:
-            out << "spirv.atomic_iadd";
-            break;
+            return "spirv.atomic_iadd";
         case IntrinsicCall::Kind::kSpirvAtomicISub:
-            out << "spirv.atomic_isub";
-            break;
+            return "spirv.atomic_isub";
         case IntrinsicCall::Kind::kSpirvAtomicAnd:
-            out << "spirv.atomic_and";
-            break;
+            return "spirv.atomic_and";
         case IntrinsicCall::Kind::kSpirvAtomicCompareExchange:
-            out << "spirv.atomic_compare_exchange";
-            break;
+            return "spirv.atomic_compare_exchange";
         case IntrinsicCall::Kind::kSpirvAtomicExchange:
-            out << "spirv.atomic_exchange";
-            break;
+            return "spirv.atomic_exchange";
         case IntrinsicCall::Kind::kSpirvAtomicLoad:
-            out << "spirv.atomic_load";
-            break;
+            return "spirv.atomic_load";
         case IntrinsicCall::Kind::kSpirvAtomicOr:
-            out << "spirv.atomic_or";
-            break;
+            return "spirv.atomic_or";
         case IntrinsicCall::Kind::kSpirvAtomicSMax:
-            out << "spirv.atomic_smax";
-            break;
+            return "spirv.atomic_smax";
         case IntrinsicCall::Kind::kSpirvAtomicSMin:
-            out << "spirv.atomic_smin";
-            break;
+            return "spirv.atomic_smin";
         case IntrinsicCall::Kind::kSpirvAtomicStore:
-            out << "spirv.atomic_store";
-            break;
+            return "spirv.atomic_store";
         case IntrinsicCall::Kind::kSpirvAtomicUMax:
-            out << "spirv.atomic_umax";
-            break;
+            return "spirv.atomic_umax";
         case IntrinsicCall::Kind::kSpirvAtomicUMin:
-            out << "spirv.atomic_umin";
-            break;
+            return "spirv.atomic_umin";
         case IntrinsicCall::Kind::kSpirvAtomicXor:
-            out << "spirv.atomic_xor";
-            break;
+            return "spirv.atomic_xor";
         case IntrinsicCall::Kind::kSpirvDot:
-            out << "spirv.dot";
-            break;
+            return "spirv.dot";
         case IntrinsicCall::Kind::kSpirvImageFetch:
-            out << "spirv.image_fetch";
-            break;
+            return "spirv.image_fetch";
         case IntrinsicCall::Kind::kSpirvImageGather:
-            out << "spirv.image_gather";
-            break;
+            return "spirv.image_gather";
         case IntrinsicCall::Kind::kSpirvImageDrefGather:
-            out << "spirv.image_dref_gather";
-            break;
+            return "spirv.image_dref_gather";
         case IntrinsicCall::Kind::kSpirvImageQuerySize:
-            out << "spirv.image_query_size";
-            break;
+            return "spirv.image_query_size";
         case IntrinsicCall::Kind::kSpirvImageQuerySizeLod:
-            out << "spirv.image_query_size_lod";
-            break;
+            return "spirv.image_query_size_lod";
         case IntrinsicCall::Kind::kSpirvImageSampleImplicitLod:
-            out << "spirv.image_sample_implicit_lod";
-            break;
+            return "spirv.image_sample_implicit_lod";
         case IntrinsicCall::Kind::kSpirvImageSampleExplicitLod:
-            out << "spirv.image_sample_explicit_lod";
-            break;
+            return "spirv.image_sample_explicit_lod";
         case IntrinsicCall::Kind::kSpirvImageSampleDrefImplicitLod:
-            out << "spirv.image_sample_dref_implicit_lod";
-            break;
+            return "spirv.image_sample_dref_implicit_lod";
         case IntrinsicCall::Kind::kSpirvImageSampleDrefExplicitLod:
-            out << "spirv.image_sample_dref_implicit_lod";
-            break;
+            return "spirv.image_sample_dref_implicit_lod";
         case IntrinsicCall::Kind::kSpirvImageWrite:
-            out << "spirv.image_write";
-            break;
+            return "spirv.image_write";
         case IntrinsicCall::Kind::kSpirvMatrixTimesMatrix:
-            out << "spirv.matrix_times_matrix";
-            break;
+            return "spirv.matrix_times_matrix";
         case IntrinsicCall::Kind::kSpirvMatrixTimesScalar:
-            out << "spirv.matrix_times_scalar";
-            break;
+            return "spirv.matrix_times_scalar";
         case IntrinsicCall::Kind::kSpirvMatrixTimesVector:
-            out << "spirv.matrix_times_vector";
-            break;
+            return "spirv.matrix_times_vector";
         case IntrinsicCall::Kind::kSpirvSampledImage:
-            out << "spirv.sampled_image";
-            break;
+            return "spirv.sampled_image";
         case IntrinsicCall::Kind::kSpirvSelect:
-            out << "spirv.select";
-            break;
+            return "spirv.select";
         case IntrinsicCall::Kind::kSpirvVectorTimesScalar:
-            out << "spirv.vector_times_scalar";
-            break;
+            return "spirv.vector_times_scalar";
         case IntrinsicCall::Kind::kSpirvVectorTimesMatrix:
-            out << "spirv.vector_times_matrix";
-            break;
+            return "spirv.vector_times_matrix";
     }
-    return out;
+    return "<unknown>";
 }
 
 }  // namespace tint::ir

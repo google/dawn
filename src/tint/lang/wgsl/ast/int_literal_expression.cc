@@ -35,14 +35,14 @@ const IntLiteralExpression* IntLiteralExpression::Clone(CloneContext* ctx) const
     return ctx->dst->create<IntLiteralExpression>(src, value, suffix);
 }
 
-StringStream& operator<<(StringStream& out, IntLiteralExpression::Suffix suffix) {
+std::string_view ToString(IntLiteralExpression::Suffix suffix) {
     switch (suffix) {
         default:
-            return out;
+            return "";
         case IntLiteralExpression::Suffix::kI:
-            return out << "i";
+            return "i";
         case IntLiteralExpression::Suffix::kU:
-            return out << "u";
+            return "u";
     }
 }
 

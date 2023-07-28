@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/traits/traits.h"
 
 namespace tint {
 
@@ -196,7 +197,8 @@ class Source {
 /// @param out the stream to write to
 /// @param loc the location to write
 /// @returns out so calls can be chained
-inline StringStream& operator<<(StringStream& out, const Source::Location& loc) {
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, const Source::Location& loc) {
     out << loc.line << ":" << loc.column;
     return out;
 }
@@ -205,7 +207,8 @@ inline StringStream& operator<<(StringStream& out, const Source::Location& loc) 
 /// @param out the stream to write to
 /// @param range the range to write
 /// @returns out so calls can be chained
-inline StringStream& operator<<(StringStream& out, const Source::Range& range) {
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, const Source::Range& range) {
     out << "[" << range.begin << ", " << range.end << "]";
     return out;
 }
@@ -220,7 +223,8 @@ StringStream& operator<<(StringStream& out, const Source& source);
 /// @param out the stream to write to
 /// @param content the file content to write
 /// @returns out so calls can be chained
-inline StringStream& operator<<(StringStream& out, const Source::FileContent& content) {
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, const Source::FileContent& content) {
     out << content.data;
     return out;
 }

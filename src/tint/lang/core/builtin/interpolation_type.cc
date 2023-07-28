@@ -42,18 +42,18 @@ InterpolationType ParseInterpolationType(std::string_view str) {
     return InterpolationType::kUndefined;
 }
 
-StringStream& operator<<(StringStream& out, InterpolationType value) {
+std::string_view ToString(InterpolationType value) {
     switch (value) {
         case InterpolationType::kUndefined:
-            return out << "undefined";
+            return "undefined";
         case InterpolationType::kFlat:
-            return out << "flat";
+            return "flat";
         case InterpolationType::kLinear:
-            return out << "linear";
+            return "linear";
         case InterpolationType::kPerspective:
-            return out << "perspective";
+            return "perspective";
     }
-    return out << "<unknown>";
+    return "<unknown>";
 }
 
 }  // namespace tint::builtin

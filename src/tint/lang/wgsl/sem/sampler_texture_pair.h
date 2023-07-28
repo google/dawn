@@ -48,7 +48,8 @@ struct SamplerTexturePair {
 /// @param o the stream to write to
 /// @param stp the SamplerTexturePair
 /// @return the stream so calls can be chained
-inline StringStream& operator<<(StringStream& o, const SamplerTexturePair& stp) {
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& o, const SamplerTexturePair& stp) {
     return o << "[sampler: " << stp.sampler_binding_point
              << ", texture: " << stp.sampler_binding_point << "]";
 }

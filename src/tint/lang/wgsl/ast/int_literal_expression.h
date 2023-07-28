@@ -55,11 +55,18 @@ class IntLiteralExpression final : public Castable<IntLiteralExpression, Literal
     const Suffix suffix;
 };
 
+/// @param suffix the enum value
+/// @returns the string for the given enum value
+std::string_view ToString(IntLiteralExpression::Suffix suffix);
+
 /// Writes the integer literal suffix to the stream.
 /// @param out the stream to write to
 /// @param suffix the suffix to write
 /// @returns out so calls can be chained
-StringStream& operator<<(StringStream& out, IntLiteralExpression::Suffix suffix);
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, IntLiteralExpression::Suffix suffix) {
+    return out << ToString(suffix);
+}
 
 }  // namespace tint::ast
 

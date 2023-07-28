@@ -79,44 +79,44 @@ Attribute ParseAttribute(std::string_view str) {
     return Attribute::kUndefined;
 }
 
-StringStream& operator<<(StringStream& out, Attribute value) {
+std::string_view ToString(Attribute value) {
     switch (value) {
         case Attribute::kUndefined:
-            return out << "undefined";
+            return "undefined";
         case Attribute::kAlign:
-            return out << "align";
+            return "align";
         case Attribute::kBinding:
-            return out << "binding";
+            return "binding";
         case Attribute::kBuiltin:
-            return out << "builtin";
+            return "builtin";
         case Attribute::kCompute:
-            return out << "compute";
+            return "compute";
         case Attribute::kDiagnostic:
-            return out << "diagnostic";
+            return "diagnostic";
         case Attribute::kFragment:
-            return out << "fragment";
+            return "fragment";
         case Attribute::kGroup:
-            return out << "group";
+            return "group";
         case Attribute::kId:
-            return out << "id";
+            return "id";
         case Attribute::kIndex:
-            return out << "index";
+            return "index";
         case Attribute::kInterpolate:
-            return out << "interpolate";
+            return "interpolate";
         case Attribute::kInvariant:
-            return out << "invariant";
+            return "invariant";
         case Attribute::kLocation:
-            return out << "location";
+            return "location";
         case Attribute::kMustUse:
-            return out << "must_use";
+            return "must_use";
         case Attribute::kSize:
-            return out << "size";
+            return "size";
         case Attribute::kVertex:
-            return out << "vertex";
+            return "vertex";
         case Attribute::kWorkgroupSize:
-            return out << "workgroup_size";
+            return "workgroup_size";
     }
-    return out << "<unknown>";
+    return "<unknown>";
 }
 
 }  // namespace tint::builtin

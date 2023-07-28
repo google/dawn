@@ -18,6 +18,7 @@
 #include <string>
 
 #include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/traits/traits.h"
 
 namespace tint::spirv::reader {
 
@@ -128,7 +129,8 @@ class Usage {
 /// @param out the stream
 /// @param u the Usage
 /// @returns the stream so calls can be chained
-inline StringStream& operator<<(StringStream& out, const Usage& u) {
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, const Usage& u) {
     return u.operator<<(out);
 }
 

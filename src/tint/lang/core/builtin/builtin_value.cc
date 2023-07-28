@@ -70,38 +70,38 @@ BuiltinValue ParseBuiltinValue(std::string_view str) {
     return BuiltinValue::kUndefined;
 }
 
-StringStream& operator<<(StringStream& out, BuiltinValue value) {
+std::string_view ToString(BuiltinValue value) {
     switch (value) {
         case BuiltinValue::kUndefined:
-            return out << "undefined";
+            return "undefined";
         case BuiltinValue::kPointSize:
-            return out << "__point_size";
+            return "__point_size";
         case BuiltinValue::kFragDepth:
-            return out << "frag_depth";
+            return "frag_depth";
         case BuiltinValue::kFrontFacing:
-            return out << "front_facing";
+            return "front_facing";
         case BuiltinValue::kGlobalInvocationId:
-            return out << "global_invocation_id";
+            return "global_invocation_id";
         case BuiltinValue::kInstanceIndex:
-            return out << "instance_index";
+            return "instance_index";
         case BuiltinValue::kLocalInvocationId:
-            return out << "local_invocation_id";
+            return "local_invocation_id";
         case BuiltinValue::kLocalInvocationIndex:
-            return out << "local_invocation_index";
+            return "local_invocation_index";
         case BuiltinValue::kNumWorkgroups:
-            return out << "num_workgroups";
+            return "num_workgroups";
         case BuiltinValue::kPosition:
-            return out << "position";
+            return "position";
         case BuiltinValue::kSampleIndex:
-            return out << "sample_index";
+            return "sample_index";
         case BuiltinValue::kSampleMask:
-            return out << "sample_mask";
+            return "sample_mask";
         case BuiltinValue::kVertexIndex:
-            return out << "vertex_index";
+            return "vertex_index";
         case BuiltinValue::kWorkgroupId:
-            return out << "workgroup_id";
+            return "workgroup_id";
     }
-    return out << "<unknown>";
+    return "<unknown>";
 }
 
 }  // namespace tint::builtin

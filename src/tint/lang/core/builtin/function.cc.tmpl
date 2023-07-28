@@ -36,11 +36,6 @@ const char* str(Function i) {
     return "<unknown>";
 }
 
-StringStream& operator<<(StringStream& out, Function i) {
-    out << str(i);
-    return out;
-}
-
 bool IsCoarseDerivativeBuiltin(Function f) {
     return f == Function::kDpdxCoarse || f == Function::kDpdyCoarse ||
            f == Function::kFwidthCoarse;

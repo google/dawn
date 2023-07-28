@@ -20,7 +20,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/traits/traits.h"
 
 namespace tint {
 
@@ -227,8 +227,8 @@ struct EnumSet {
 /// @param out the stream to write to
 /// @param set the EnumSet to write
 /// @returns out so calls can be chained
-template <typename ENUM>
-inline StringStream& operator<<(StringStream& out, EnumSet<ENUM> set) {
+template <typename STREAM, typename ENUM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, EnumSet<ENUM> set) {
     out << "{";
     bool first = true;
     for (auto e : set) {

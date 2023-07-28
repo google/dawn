@@ -25,7 +25,7 @@
 
 #include <string>
 
-#include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/traits/traits.h"
 
 // \cond DO_NOT_DOCUMENT
 namespace tint::builtin {
@@ -161,7 +161,10 @@ const char* str(Function i);
 
 /// Emits the name of the builtin function type. The spelling, including case,
 /// matches the name in the WGSL spec.
-StringStream& operator<<(StringStream& out, Function i);
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& o, Function i) {
+    return o << str(i);
+}
 
 /// All builtin functions
 constexpr Function kFunctions[] = {

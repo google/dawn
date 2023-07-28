@@ -50,16 +50,6 @@ constexpr uint32_t kMinF32BiasedExpForF16SubnormalNumber = 103;
 
 }  // namespace
 
-StringStream& operator<<(StringStream& out, ConversionFailure failure) {
-    switch (failure) {
-        case ConversionFailure::kExceedsPositiveLimit:
-            return out << "value exceeds positive limit for type";
-        case ConversionFailure::kExceedsNegativeLimit:
-            return out << "value exceeds negative limit for type";
-    }
-    return out << "<unknown>";
-}
-
 f16::type f16::Quantize(f16::type value) {
     if (value > kHighestValue) {
         return std::numeric_limits<f16::type>::infinity();

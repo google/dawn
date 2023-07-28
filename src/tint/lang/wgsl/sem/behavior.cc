@@ -16,18 +16,18 @@
 
 namespace tint::sem {
 
-StringStream& operator<<(StringStream& out, Behavior behavior) {
+std::string_view ToString(Behavior behavior) {
     switch (behavior) {
         case Behavior::kReturn:
-            return out << "Return";
+            return "Return";
         case Behavior::kBreak:
-            return out << "Break";
+            return "Break";
         case Behavior::kContinue:
-            return out << "Continue";
+            return "Continue";
         case Behavior::kNext:
-            return out << "Next";
+            return "Next";
     }
-    return out << "<unknown>";
+    return "<unknown>";
 }
 
 }  // namespace tint::sem

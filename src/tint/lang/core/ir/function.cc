@@ -42,30 +42,30 @@ void Function::SetParams(std::initializer_list<FunctionParam*> params) {
     TINT_ASSERT(!params_.Any(IsNull));
 }
 
-StringStream& operator<<(StringStream& out, Function::PipelineStage value) {
+std::string_view ToString(Function::PipelineStage value) {
     switch (value) {
         case Function::PipelineStage::kVertex:
-            return out << "vertex";
+            return "vertex";
         case Function::PipelineStage::kFragment:
-            return out << "fragment";
+            return "fragment";
         case Function::PipelineStage::kCompute:
-            return out << "compute";
+            return "compute";
         default:
             break;
     }
-    return out << "<unknown>";
+    return "<unknown>";
 }
 
-StringStream& operator<<(StringStream& out, enum Function::ReturnBuiltin value) {
+std::string_view ToString(enum Function::ReturnBuiltin value) {
     switch (value) {
         case Function::ReturnBuiltin::kFragDepth:
-            return out << "frag_depth";
+            return "frag_depth";
         case Function::ReturnBuiltin::kSampleMask:
-            return out << "sample_mask";
+            return "sample_mask";
         case Function::ReturnBuiltin::kPosition:
-            return out << "position";
+            return "position";
     }
-    return out << "<unknown>";
+    return "<unknown>";
 }
 
 }  // namespace tint::ir

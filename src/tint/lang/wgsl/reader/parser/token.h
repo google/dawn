@@ -359,7 +359,8 @@ class Token {
     std::variant<int64_t, double, std::string, std::string_view> value_;
 };
 
-inline StringStream& operator<<(StringStream& out, Token::Type type) {
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, Token::Type type) {
     out << Token::TypeToName(type);
     return out;
 }

@@ -16,30 +16,20 @@
 
 namespace tint::ast {
 
-StringStream& operator<<(StringStream& out, UnaryOp mod) {
+std::string_view ToString(UnaryOp mod) {
     switch (mod) {
-        case UnaryOp::kAddressOf: {
-            out << "address-of";
-            break;
-        }
-        case UnaryOp::kComplement: {
-            out << "complement";
-            break;
-        }
-        case UnaryOp::kIndirection: {
-            out << "indirection";
-            break;
-        }
-        case UnaryOp::kNegation: {
-            out << "negation";
-            break;
-        }
-        case UnaryOp::kNot: {
-            out << "not";
-            break;
-        }
+        case UnaryOp::kAddressOf:
+            return "address-of";
+        case UnaryOp::kComplement:
+            return "complement";
+        case UnaryOp::kIndirection:
+            return "indirection";
+        case UnaryOp::kNegation:
+            return "negation";
+        case UnaryOp::kNot:
+            return "not";
     }
-    return out;
+    return "<unknown>";
 }
 
 }  // namespace tint::ast

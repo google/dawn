@@ -43,18 +43,18 @@ InterpolationSampling ParseInterpolationSampling(std::string_view str) {
     return InterpolationSampling::kUndefined;
 }
 
-StringStream& operator<<(StringStream& out, InterpolationSampling value) {
+std::string_view ToString(InterpolationSampling value) {
     switch (value) {
         case InterpolationSampling::kUndefined:
-            return out << "undefined";
+            return "undefined";
         case InterpolationSampling::kCenter:
-            return out << "center";
+            return "center";
         case InterpolationSampling::kCentroid:
-            return out << "centroid";
+            return "centroid";
         case InterpolationSampling::kSample:
-            return out << "sample";
+            return "sample";
     }
-    return out << "<unknown>";
+    return "<unknown>";
 }
 
 }  // namespace tint::builtin

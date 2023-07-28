@@ -24,7 +24,7 @@
 
 #include <string>
 
-#include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/traits/traits.h"
 
 namespace tint::builtin {
 
@@ -38,14 +38,14 @@ CoreDiagnosticRule ParseCoreDiagnosticRule(std::string_view str) {
     return CoreDiagnosticRule::kUndefined;
 }
 
-StringStream& operator<<(StringStream& out, CoreDiagnosticRule value) {
+std::string_view ToString(CoreDiagnosticRule value) {
     switch (value) {
         case CoreDiagnosticRule::kUndefined:
-            return out << "undefined";
+            return "undefined";
         case CoreDiagnosticRule::kDerivativeUniformity:
-            return out << "derivative_uniformity";
+            return "derivative_uniformity";
     }
-    return out << "<unknown>";
+    return "<unknown>";
 }
 
 /// ParseChromiumDiagnosticRule parses a ChromiumDiagnosticRule from a string.
@@ -59,14 +59,14 @@ ChromiumDiagnosticRule ParseChromiumDiagnosticRule(std::string_view str) {
     return ChromiumDiagnosticRule::kUndefined;
 }
 
-StringStream& operator<<(StringStream& out, ChromiumDiagnosticRule value) {
+std::string_view ToString(ChromiumDiagnosticRule value) {
     switch (value) {
         case ChromiumDiagnosticRule::kUndefined:
-            return out << "undefined";
+            return "undefined";
         case ChromiumDiagnosticRule::kUnreachableCode:
-            return out << "unreachable_code";
+            return "unreachable_code";
     }
-    return out << "<unknown>";
+    return "<unknown>";
 }
 
 }  // namespace tint::builtin

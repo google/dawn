@@ -178,8 +178,8 @@ struct Number : NumberBase<Number<T>> {
 /// @param out the stream to write to
 /// @param num the Number
 /// @return the stream so calls can be chained
-template <typename T>
-inline StringStream& operator<<(StringStream& out, Number<T> num) {
+template <typename STREAM, typename T, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, Number<T> num) {
     return out << num.value;
 }
 
@@ -324,7 +324,16 @@ enum class ConversionFailure {
 /// @param out the stream to write to
 /// @param failure the ConversionFailure
 /// @return the stream so calls can be chained
-StringStream& operator<<(StringStream& out, ConversionFailure failure);
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, ConversionFailure failure) {
+    switch (failure) {
+        case ConversionFailure::kExceedsPositiveLimit:
+            return out << "value exceeds positive limit for type";
+        case ConversionFailure::kExceedsNegativeLimit:
+            return out << "value exceeds negative limit for type";
+    }
+    return out << "<unknown>";
+}
 
 /// Converts a number from one type to another, checking that the value fits in the target type.
 /// @param num the value to convert

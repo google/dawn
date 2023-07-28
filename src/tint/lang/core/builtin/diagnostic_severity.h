@@ -28,7 +28,7 @@
 
 #include "src/tint/lang/core/builtin/diagnostic_rule.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
-#include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/traits/traits.h"
 
 namespace tint::builtin {
 
@@ -41,10 +41,17 @@ enum class DiagnosticSeverity {
     kWarning,
 };
 
+/// @param value the enum value
+/// @returns the string for the given enum value
+std::string_view ToString(DiagnosticSeverity value);
+
 /// @param out the stream to write to
 /// @param value the DiagnosticSeverity
-/// @returns `out` so calls can be chained
-StringStream& operator<<(StringStream& out, DiagnosticSeverity value);
+/// @returns @p out so calls can be chained
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, DiagnosticSeverity value) {
+    return out << ToString(value);
+}
 
 /// ParseDiagnosticSeverity parses a DiagnosticSeverity from a string.
 /// @param str the string to parse

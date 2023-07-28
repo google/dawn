@@ -16,6 +16,7 @@
 #define SRC_TINT_LANG_WGSL_AST_UNARY_OP_H_
 
 #include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/traits/traits.h"
 
 namespace tint::ast {
 
@@ -28,10 +29,17 @@ enum class UnaryOp {
     kNot,          // !EXPR
 };
 
+/// @param mod the enum value
+/// @returns the string for the given enum value
+std::string_view ToString(UnaryOp mod);
+
 /// @param out the stream to write to
 /// @param mod the UnaryOp
 /// @return the stream so calls can be chained
-StringStream& operator<<(StringStream& out, UnaryOp mod);
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, UnaryOp mod) {
+    return out << ToString(mod);
+}
 
 }  // namespace tint::ast
 

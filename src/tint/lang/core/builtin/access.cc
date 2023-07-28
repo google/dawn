@@ -40,18 +40,18 @@ Access ParseAccess(std::string_view str) {
     return Access::kUndefined;
 }
 
-StringStream& operator<<(StringStream& out, Access value) {
+std::string_view ToString(Access value) {
     switch (value) {
         case Access::kUndefined:
-            return out << "undefined";
+            return "undefined";
         case Access::kRead:
-            return out << "read";
+            return "read";
         case Access::kReadWrite:
-            return out << "read_write";
+            return "read_write";
         case Access::kWrite:
-            return out << "write";
+            return "write";
     }
-    return out << "<unknown>";
+    return "<unknown>";
 }
 
 }  // namespace tint::builtin

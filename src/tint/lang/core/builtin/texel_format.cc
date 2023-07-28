@@ -82,46 +82,46 @@ TexelFormat ParseTexelFormat(std::string_view str) {
     return TexelFormat::kUndefined;
 }
 
-StringStream& operator<<(StringStream& out, TexelFormat value) {
+std::string_view ToString(TexelFormat value) {
     switch (value) {
         case TexelFormat::kUndefined:
-            return out << "undefined";
+            return "undefined";
         case TexelFormat::kBgra8Unorm:
-            return out << "bgra8unorm";
+            return "bgra8unorm";
         case TexelFormat::kR32Float:
-            return out << "r32float";
+            return "r32float";
         case TexelFormat::kR32Sint:
-            return out << "r32sint";
+            return "r32sint";
         case TexelFormat::kR32Uint:
-            return out << "r32uint";
+            return "r32uint";
         case TexelFormat::kRg32Float:
-            return out << "rg32float";
+            return "rg32float";
         case TexelFormat::kRg32Sint:
-            return out << "rg32sint";
+            return "rg32sint";
         case TexelFormat::kRg32Uint:
-            return out << "rg32uint";
+            return "rg32uint";
         case TexelFormat::kRgba16Float:
-            return out << "rgba16float";
+            return "rgba16float";
         case TexelFormat::kRgba16Sint:
-            return out << "rgba16sint";
+            return "rgba16sint";
         case TexelFormat::kRgba16Uint:
-            return out << "rgba16uint";
+            return "rgba16uint";
         case TexelFormat::kRgba32Float:
-            return out << "rgba32float";
+            return "rgba32float";
         case TexelFormat::kRgba32Sint:
-            return out << "rgba32sint";
+            return "rgba32sint";
         case TexelFormat::kRgba32Uint:
-            return out << "rgba32uint";
+            return "rgba32uint";
         case TexelFormat::kRgba8Sint:
-            return out << "rgba8sint";
+            return "rgba8sint";
         case TexelFormat::kRgba8Snorm:
-            return out << "rgba8snorm";
+            return "rgba8snorm";
         case TexelFormat::kRgba8Uint:
-            return out << "rgba8uint";
+            return "rgba8uint";
         case TexelFormat::kRgba8Unorm:
-            return out << "rgba8unorm";
+            return "rgba8unorm";
     }
-    return out << "<unknown>";
+    return "<unknown>";
 }
 
 }  // namespace tint::builtin

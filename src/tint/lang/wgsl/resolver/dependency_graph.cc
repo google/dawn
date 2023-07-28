@@ -666,7 +666,7 @@ struct DependencyAnalysis {
             [&](const ast::ConstAssert*) { return "const_assert"; },  //
             [&](Default) {
                 UnhandledNode(node);
-                return "<error>";
+                return "<unknown>";
             });
     }
 

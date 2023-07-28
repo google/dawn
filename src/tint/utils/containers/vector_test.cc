@@ -21,7 +21,6 @@
 
 #include "src/tint/utils/containers/predicates.h"
 #include "src/tint/utils/memory/bitcast.h"
-#include "src/tint/utils/text/string_stream.h"
 
 namespace tint {
 namespace {

@@ -55,30 +55,30 @@ AddressSpace ParseAddressSpace(std::string_view str) {
     return AddressSpace::kUndefined;
 }
 
-StringStream& operator<<(StringStream& out, AddressSpace value) {
+std::string_view ToString(AddressSpace value) {
     switch (value) {
         case AddressSpace::kUndefined:
-            return out << "undefined";
+            return "undefined";
         case AddressSpace::kIn:
-            return out << "__in";
+            return "__in";
         case AddressSpace::kOut:
-            return out << "__out";
+            return "__out";
         case AddressSpace::kFunction:
-            return out << "function";
+            return "function";
         case AddressSpace::kHandle:
-            return out << "handle";
+            return "handle";
         case AddressSpace::kPrivate:
-            return out << "private";
+            return "private";
         case AddressSpace::kPushConstant:
-            return out << "push_constant";
+            return "push_constant";
         case AddressSpace::kStorage:
-            return out << "storage";
+            return "storage";
         case AddressSpace::kUniform:
-            return out << "uniform";
+            return "uniform";
         case AddressSpace::kWorkgroup:
-            return out << "workgroup";
+            return "workgroup";
     }
-    return out << "<unknown>";
+    return "<unknown>";
 }
 
 }  // namespace tint::builtin

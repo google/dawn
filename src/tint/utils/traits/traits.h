@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_UTILS_TRAITS_TRAITS_H_
 #define SRC_TINT_UTILS_TRAITS_TRAITS_H_
 
+#include <ostream>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -100,10 +101,9 @@ template <typename T, typename BASE>
 static constexpr bool IsTypeOrDerived =
     std::is_base_of<BASE, Decay<T>>::value || std::is_same<BASE, Decay<T>>::value;
 
-/// If `CONDITION` is true then EnableIf resolves to type T, otherwise an
-/// invalid type.
+/// If `CONDITION` is true then EnableIf resolves to type T, otherwise an invalid type.
 template <bool CONDITION, typename T = void>
-using EnableIf = typename std::enable_if<CONDITION, T>::type;
+using EnableIf = std::enable_if_t<CONDITION, T>;
 
 /// If `T` is of type `BASE`, or derives from `BASE`, then EnableIfIsType
 /// resolves to type `T`, otherwise an invalid type.
@@ -208,6 +208,36 @@ struct CharArrayToCharPtrImpl<const char[N]> {
 /// otherwise T.
 template <typename T>
 using CharArrayToCharPtr = typename traits::detail::CharArrayToCharPtrImpl<T>::type;
+
+namespace detail {
+/// Helper for determining whether the type T can be used as a stream writer
+template <typename T, typename ENABLE = void>
+struct IsOStream : std::false_type {};
+
+/// Specialization for types that declare a `static constexpr bool IsStreamWriter` member
+template <typename T>
+struct IsOStream<T, std::void_t<decltype(T::IsStreamWriter)>> {
+    /// Equal to T::IsStreamWriter
+    static constexpr bool value = T::IsStreamWriter;
+};
+
+/// Specialization for std::ostream
+template <typename T>
+struct IsOStream<T, std::enable_if_t<std::is_same_v<T, std::ostream>>> : std::true_type {};
+
+/// Specialization for std::stringstream
+template <typename T>
+struct IsOStream<T, std::enable_if_t<std::is_same_v<T, std::stringstream>>> : std::true_type {};
+
+}  // namespace detail
+
+/// Is true if the class T can be treated as an output stream
+template <typename T>
+static constexpr bool IsOStream = detail::IsOStream<T>::value;
+
+/// If `CONDITION` is true then EnableIfIsOStream resolves to type T, otherwise an invalid type.
+template <typename T = void>
+using EnableIfIsOStream = EnableIf<IsOStream<T>, T>;
 
 }  // namespace tint::traits
 

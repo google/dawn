@@ -52,26 +52,26 @@ Extension ParseExtension(std::string_view str) {
     return Extension::kUndefined;
 }
 
-StringStream& operator<<(StringStream& out, Extension value) {
+std::string_view ToString(Extension value) {
     switch (value) {
         case Extension::kUndefined:
-            return out << "undefined";
+            return "undefined";
         case Extension::kChromiumDisableUniformityAnalysis:
-            return out << "chromium_disable_uniformity_analysis";
+            return "chromium_disable_uniformity_analysis";
         case Extension::kChromiumExperimentalDp4A:
-            return out << "chromium_experimental_dp4a";
+            return "chromium_experimental_dp4a";
         case Extension::kChromiumExperimentalFullPtrParameters:
-            return out << "chromium_experimental_full_ptr_parameters";
+            return "chromium_experimental_full_ptr_parameters";
         case Extension::kChromiumExperimentalPushConstant:
-            return out << "chromium_experimental_push_constant";
+            return "chromium_experimental_push_constant";
         case Extension::kChromiumInternalDualSourceBlending:
-            return out << "chromium_internal_dual_source_blending";
+            return "chromium_internal_dual_source_blending";
         case Extension::kChromiumInternalRelaxedUniformLayout:
-            return out << "chromium_internal_relaxed_uniform_layout";
+            return "chromium_internal_relaxed_uniform_layout";
         case Extension::kF16:
-            return out << "f16";
+            return "f16";
     }
-    return out << "<unknown>";
+    return "<unknown>";
 }
 
 }  // namespace tint::builtin

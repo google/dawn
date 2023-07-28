@@ -58,20 +58,20 @@ DiagnosticSeverity ParseDiagnosticSeverity(std::string_view str) {
     return DiagnosticSeverity::kUndefined;
 }
 
-StringStream& operator<<(StringStream& out, DiagnosticSeverity value) {
+std::string_view ToString(DiagnosticSeverity value) {
     switch (value) {
         case DiagnosticSeverity::kUndefined:
-            return out << "undefined";
+            return "undefined";
         case DiagnosticSeverity::kError:
-            return out << "error";
+            return "error";
         case DiagnosticSeverity::kInfo:
-            return out << "info";
+            return "info";
         case DiagnosticSeverity::kOff:
-            return out << "off";
+            return "off";
         case DiagnosticSeverity::kWarning:
-            return out << "warning";
+            return "warning";
     }
-    return out << "<unknown>";
+    return "<unknown>";
 }
 
 }  // namespace tint::builtin

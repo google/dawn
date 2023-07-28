@@ -24,6 +24,7 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/math/hash.h"
+#include "src/tint/utils/traits/traits.h"
 
 #define TINT_ASSERT_ITERATORS_NOT_INVALIDATED
 
@@ -97,8 +98,11 @@ struct KeyValueRef {
 /// @param out the stream to write to
 /// @param key_value the KeyValue to write
 /// @returns out so calls can be chained
-template <typename KEY, typename VALUE>
-StringStream& operator<<(StringStream& out, const KeyValue<KEY, VALUE>& key_value) {
+template <typename STREAM,
+          typename KEY,
+          typename VALUE,
+          typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, const KeyValue<KEY, VALUE>& key_value) {
     return out << "[" << key_value.key << ": " << key_value.value << "]";
 }
 

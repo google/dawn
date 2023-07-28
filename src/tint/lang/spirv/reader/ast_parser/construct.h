@@ -184,7 +184,8 @@ inline std::string ToStringBrief(const Construct* c) {
 /// @param o the stream
 /// @param c the structured construct
 /// @returns the stream
-inline StringStream& operator<<(StringStream& o, const Construct& c) {
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& o, const Construct& c) {
     o << "Construct{ " << ToString(c.kind) << " [" << c.begin_pos << "," << c.end_pos << ")"
       << " begin_id:" << c.begin_id << " end_id:" << c.end_id << " depth:" << c.depth;
 
@@ -215,7 +216,8 @@ inline StringStream& operator<<(StringStream& o, const Construct& c) {
 /// @param o the stream
 /// @param c the structured construct
 /// @returns the stream
-inline StringStream& operator<<(StringStream& o, const std::unique_ptr<Construct>& c) {
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& o, const std::unique_ptr<Construct>& c) {
     return o << *(c.get());
 }
 
@@ -246,7 +248,8 @@ inline std::string ToString(const std::unique_ptr<Construct>& c) {
 /// @param o the stream
 /// @param cl the construct list
 /// @returns the stream
-inline StringStream& operator<<(StringStream& o, const ConstructList& cl) {
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& o, const ConstructList& cl) {
     o << "ConstructList{\n";
     for (const auto& c : cl) {
         o << "  " << c << "\n";

@@ -16,16 +16,24 @@
 #define SRC_TINT_LANG_WGSL_AST_PIPELINE_STAGE_H_
 
 #include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/traits/traits.h"
 
 namespace tint::ast {
 
 /// The pipeline stage
 enum class PipelineStage { kNone = -1, kVertex, kFragment, kCompute };
 
+/// @param stage the enum value
+/// @returns the string for the given enum value
+std::string_view ToString(PipelineStage stage);
+
 /// @param out the stream to write to
 /// @param stage the PipelineStage
 /// @return the stream so calls can be chained
-StringStream& operator<<(StringStream& out, PipelineStage stage);
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, PipelineStage stage) {
+    return out << ToString(stage);
+}
 
 }  // namespace tint::ast
 

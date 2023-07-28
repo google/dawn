@@ -47,7 +47,8 @@ enum TestElementType {
     kF32,
     kF16,
 };
-inline StringStream& operator<<(StringStream& out, TestElementType type) {
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, TestElementType type) {
     switch (type) {
         case kBool:
             out << "bool";

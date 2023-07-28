@@ -16,31 +16,24 @@
 
 namespace tint::type {
 
-StringStream& operator<<(StringStream& out, type::TextureDimension dim) {
+std::string_view ToString(type::TextureDimension dim) {
     switch (dim) {
         case type::TextureDimension::kNone:
-            out << "None";
-            break;
+            return "None";
         case type::TextureDimension::k1d:
-            out << "1d";
-            break;
+            return "1d";
         case type::TextureDimension::k2d:
-            out << "2d";
-            break;
+            return "2d";
         case type::TextureDimension::k2dArray:
-            out << "2d_array";
-            break;
+            return "2d_array";
         case type::TextureDimension::k3d:
-            out << "3d";
-            break;
+            return "3d";
         case type::TextureDimension::kCube:
-            out << "cube";
-            break;
+            return "cube";
         case type::TextureDimension::kCubeArray:
-            out << "cube_array";
-            break;
+            return "cube_array";
     }
-    return out;
+    return "<unknown>";
 }
 
 }  // namespace tint::type

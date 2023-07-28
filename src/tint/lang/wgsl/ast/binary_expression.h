@@ -300,7 +300,8 @@ constexpr const char* Operator(BinaryOp op) {
 /// @param out the stream to write to
 /// @param op the BinaryOp
 /// @return the stream so calls can be chained
-inline StringStream& operator<<(StringStream& out, BinaryOp op) {
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, BinaryOp op) {
     out << FriendlyName(op);
     return out;
 }

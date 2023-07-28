@@ -20,6 +20,7 @@
 
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/traits/traits.h"
 
 namespace tint {
 
@@ -75,7 +76,8 @@ inline GenerationID GenerationIDOf(GenerationID id) {
 /// @param out the stream to write to
 /// @param id the generation identifier to write
 /// @returns out so calls can be chained
-inline StringStream& operator<<(StringStream& out, GenerationID id) {
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, GenerationID id) {
     out << "Generation<" << id.Value() << ">";
     return out;
 }

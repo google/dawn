@@ -23,7 +23,7 @@
 #ifndef SRC_TINT_LANG_CORE_BUILTIN_ATTRIBUTE_H_
 #define SRC_TINT_LANG_CORE_BUILTIN_ATTRIBUTE_H_
 
-#include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/traits/traits.h"
 
 /// \cond DO_NOT_DOCUMENT
 /// There is a bug in doxygen where this enum conflicts with the ast::Attribute
@@ -51,10 +51,17 @@ enum class Attribute {
     kWorkgroupSize,
 };
 
+/// @param value the enum value
+/// @returns the string for the given enum value
+std::string_view ToString(Attribute value);
+
 /// @param out the stream to write to
 /// @param value the Attribute
-/// @returns `out` so calls can be chained
-StringStream& operator<<(StringStream& out, Attribute value);
+/// @returns @p out so calls can be chained
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, Attribute value) {
+    return out << ToString(value);
+}
 
 /// ParseAttribute parses a Attribute from a string.
 /// @param str the string to parse

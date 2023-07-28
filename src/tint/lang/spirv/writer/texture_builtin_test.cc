@@ -62,7 +62,8 @@ struct TextureBuiltinTestCase {
     Vector<const char*, 2> instructions;
 };
 
-inline StringStream& operator<<(StringStream& out, TextureType type) {
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, TextureType type) {
     switch (type) {
         case kSampledTexture:
             out << "SampleTexture";
