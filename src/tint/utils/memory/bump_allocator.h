@@ -24,11 +24,11 @@
 
 namespace tint {
 
-constexpr size_t kBlockSize = 64 * 1024;
-
 /// A allocator for chunks of memory. The memory is owned by the BumpAllocator. When the
 /// BumpAllocator is freed all of the allocated memory is freed.
 class BumpAllocator {
+    static constexpr size_t kBlockSize = 64 * 1024;
+
     /// Block is linked list of memory blocks.
     /// Blocks are allocated out of heap memory.
     struct Block {

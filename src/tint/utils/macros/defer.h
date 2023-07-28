@@ -45,6 +45,7 @@ class Defer {
 
 /// Constructor
 /// @param f the function to call when the Defer is destructed
+/// @return the defer object
 template <typename F>
 inline Defer<F> MakeDefer(F&& f) {
     return Defer<F>(std::forward<F>(f));

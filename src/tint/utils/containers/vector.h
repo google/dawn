@@ -803,6 +803,8 @@ class VectorRef {
 };
 
 /// Helper for converting a Vector to a std::vector.
+/// @param vector the input vector
+/// @return the converted vector
 /// @note This helper exists to help code migration. Avoid if possible.
 template <typename T, size_t N>
 std::vector<T> ToStdVector(const Vector<T, N>& vector) {
@@ -815,6 +817,8 @@ std::vector<T> ToStdVector(const Vector<T, N>& vector) {
 }
 
 /// Helper for converting a std::vector to a Vector.
+/// @param vector the input vector
+/// @return the converted vector
 /// @note This helper exists to help code migration. Avoid if possible.
 template <typename T, size_t N = 0>
 Vector<T, N> ToVector(const std::vector<T>& vector) {

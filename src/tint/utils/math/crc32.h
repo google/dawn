@@ -20,6 +20,7 @@
 
 namespace tint {
 
+/// CRC32 immutable lookup table data.
 constexpr uint32_t kCRC32LUT[] = {
     0,          0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
     0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988, 0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91,
@@ -54,6 +55,7 @@ constexpr uint32_t kCRC32LUT[] = {
     0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693, 0x54de5729, 0x23d967bf,
     0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d};
 
+/// @param s the null-terminated string
 /// @returns the CRC32 of the string @p s.
 /// @note this function can be used to calculate the CRC32 of a string literal
 /// at compile time.
@@ -66,6 +68,8 @@ constexpr uint32_t CRC32(const char* s) {
     return crc ^ 0xffffffff;
 }
 
+/// @param ptr a pointer to the start of the data
+/// @param size the number of bytes of the data
 /// @returns the CRC32 of the data at @p ptr of size @p size.
 inline uint32_t CRC32(const void* ptr, size_t size) {
     auto* p = static_cast<const uint8_t*>(ptr);

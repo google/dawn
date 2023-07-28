@@ -79,6 +79,7 @@ Result<int8_t, ParseNumberError> ParseInt8(std::string_view str);
 /// @returns the string @p str parsed as a uint8_t
 Result<uint8_t, ParseNumberError> ParseUint8(std::string_view str);
 
+/// Disables the false-positive unreachable-code compiler warnings
 TINT_BEGIN_DISABLE_WARNING(UNREACHABLE_CODE);
 
 /// @param str the string
@@ -124,6 +125,7 @@ inline Result<T, ParseNumberError> ParseNumber(std::string_view str) {
     return ParseNumberError::kUnparsable;
 }
 
+/// Re-enables the unreachable-code compiler warnings
 TINT_END_DISABLE_WARNING(UNREACHABLE_CODE);
 
 }  // namespace tint

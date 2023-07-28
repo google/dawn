@@ -24,6 +24,8 @@
 #include "src/tint/utils/traits/traits.h"
 
 namespace tint {
+//! @cond Doxygen_Suppress
+// Doxygen gets confused by Transform()'s SFINAE
 
 /// Transform performs an element-wise transformation of a vector.
 /// @param in the input vector.
@@ -172,4 +174,5 @@ auto TransformN(const std::vector<IN>& in, size_t n, TRANSFORMER&& transform)
 
 }  // namespace tint
 
+//! @endcond
 #endif  // SRC_TINT_UTILS_CONTAINERS_TRANSFORM_H_

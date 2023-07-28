@@ -190,6 +190,7 @@ struct Hasher<std::string> {
     }
 };
 
+/// @param args the arguments to hash
 /// @returns a hash of the variadic list of arguments.
 ///          The returned hash is dependent on the order of the arguments.
 template <typename... ARGS>
@@ -205,6 +206,8 @@ size_t Hash(const ARGS&... args) {
     }
 }
 
+/// @param hash the hash value to combine with
+/// @param values the values to hash
 /// @returns a hash of the variadic list of arguments.
 ///          The returned hash is dependent on the order of the arguments.
 template <typename... ARGS>

@@ -52,6 +52,8 @@ auto end(ReverseIterable<T> r_it) {
 /// for (auto v : tint::Reverse(vec)) {
 /// }
 /// ```
+/// @param iterable the object to iterate
+/// @returns the reverse iterable object
 template <typename T>
 detail::ReverseIterable<T> Reverse(T&& iterable) {
     return {iterable};

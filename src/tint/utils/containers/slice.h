@@ -250,6 +250,7 @@ struct Slice {
 };
 
 /// Deduction guide for Slice from c-array
+/// @param elements the input elements
 template <typename T, size_t N>
 Slice(T (&elements)[N]) -> Slice<T>;
 

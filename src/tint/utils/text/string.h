@@ -159,12 +159,12 @@ std::string_view Trim(std::string_view str, PREDICATE&& pred) {
 
 /// @param c the character to test
 /// @returns true if @p c is one of the following:
-/// * space (' ')
-/// * form feed ('\f')
-/// * line feed ('\n')
-/// * carriage return ('\r')
-/// * horizontal tab ('\t')
-/// * vertical tab ('\v')
+/// * space
+/// * form feed
+/// * line feed
+/// * carriage return
+/// * horizontal tab
+/// * vertical tab
 inline bool IsSpace(char c) {
     return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';
 }
@@ -192,6 +192,7 @@ inline Vector<std::string_view, 8> Split(std::string_view str, std::string_view 
     return out;
 }
 
+/// @param str the string to quote
 /// @returns @p str quoted with <code>'</code>
 inline std::string Quote(std::string_view str) {
     return "'" + std::string(str) + "'";

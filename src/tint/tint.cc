@@ -16,6 +16,7 @@
 
 namespace tint {
 
+/// Initialize initializes the Tint library. Call before using the Tint API.
 void Initialize() {
 #if TINT_BUILD_WGSL_WRITER
     // Register the Program printer. This is used for debugging purposes.
@@ -29,6 +30,7 @@ void Initialize() {
 #endif
 }
 
+/// Shutdown uninitializes the Tint library. Call after using the Tint API.
 void Shutdown() {
     // Currently no-op, but may release tint resources in the future.
 }
