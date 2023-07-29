@@ -24,6 +24,7 @@
 #include "src/tint/lang/wgsl/ast/struct.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
@@ -58,7 +59,7 @@ struct ClampFragDepth::State {
                     TINT_ICE()
                         << "ClampFragDepth doesn't know how to handle module that already use push "
                            "constants";
-                    return Program(std::move(b));
+                    return resolver::Resolve(b);
                 }
             }
         }
@@ -167,7 +168,7 @@ struct ClampFragDepth::State {
         });
 
         ctx.Clone();
-        return Program(std::move(b));
+        return resolver::Resolve(b);
     }
 
   private:

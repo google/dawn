@@ -20,6 +20,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/writer/ast_printer/ast_printer.h"
 
 namespace tint::wgsl::writer {
@@ -33,14 +34,19 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     ~TestHelperBase() override = default;
 
     /// Builds and returns a ASTPrinter from the program.
+    /// @param resolve if true, the program will be resolved before returning
     /// @note The generator is only built once. Multiple calls to Build() will
     /// return the same ASTPrinter without rebuilding.
     /// @return the built generator
-    ASTPrinter& Build() {
+    ASTPrinter& Build(bool resolve = true) {
         if (gen_) {
             return *gen_;
         }
-        program = std::make_unique<Program>(std::move(*this));
+        if (resolve) {
+            program = std::make_unique<Program>(resolver::Resolve(*this));
+        } else {
+            program = std::make_unique<Program>(std::move(*this));
+        }
         [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
         gen_ = std::make_unique<ASTPrinter>(program.get());
         return *gen_;

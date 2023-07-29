@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2023 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/reader/reader.h"
+#ifndef SRC_TINT_LANG_WGSL_RESOLVER_RESOLVE_H_
+#define SRC_TINT_LANG_WGSL_RESOLVER_RESOLVE_H_
 
-#include <utility>
+namespace tint {
+class Program;
+class ProgramBuilder;
+}  // namespace tint
 
-#include "src/tint/lang/wgsl/reader/parser/parser.h"
-#include "src/tint/lang/wgsl/resolver/resolve.h"
+namespace tint::resolver {
 
-namespace tint::wgsl::reader {
+/// Performs semantic analysis and validation on the program builder @p builder
+/// @returns the resolved Program. Program.Diagnostics() may contain validation errors.
+Program Resolve(ProgramBuilder& builder);
 
-Program Parse(Source::File const* file) {
-    Parser parser(file);
-    parser.Parse();
-    return resolver::Resolve(parser.builder());
-}
+}  // namespace tint::resolver
 
-}  // namespace tint::wgsl::reader
+#endif  // SRC_TINT_LANG_WGSL_RESOLVER_RESOLVE_H_

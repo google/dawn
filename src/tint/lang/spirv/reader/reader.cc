@@ -26,6 +26,7 @@
 #include "src/tint/lang/wgsl/ast/transform/spirv_atomic.h"
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 
 namespace tint::spirv::reader {
 
@@ -48,12 +49,11 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
 
     // The SPIR-V parser can construct disjoint AST nodes, which is invalid for
     // the Resolver. Clone the Program to clean these up.
-    builder.SetResolveOnBuild(false);
     Program program_with_disjoint_ast(std::move(builder));
 
     ProgramBuilder output;
     program::CloneContext(&output, &program_with_disjoint_ast, false).Clone();
-    auto program = Program(std::move(output));
+    auto program = Program(resolver::Resolve(output));
     if (!program.IsValid()) {
         return program;
     }

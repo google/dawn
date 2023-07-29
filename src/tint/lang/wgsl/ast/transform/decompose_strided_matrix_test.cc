@@ -24,6 +24,7 @@
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 
 namespace tint::ast::transform {
 namespace {
@@ -108,7 +109,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -162,7 +163,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -216,7 +217,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -274,7 +275,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -329,7 +330,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -389,7 +390,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -444,7 +445,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -523,7 +524,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -577,7 +578,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -633,7 +634,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedMatrix>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }

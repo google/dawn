@@ -299,6 +299,7 @@ libtint_source_set("libtint_program_src") {
     "lang/wgsl/resolver/intrinsic_table.cc",
     "lang/wgsl/resolver/intrinsic_table.h",
     "lang/wgsl/resolver/intrinsic_table.inl",
+    "lang/wgsl/resolver/resolve.cc",
     "lang/wgsl/resolver/resolver.cc",
     "lang/wgsl/resolver/sem_helper.cc",
     "lang/wgsl/resolver/sem_helper.h",

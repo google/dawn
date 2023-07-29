@@ -23,6 +23,7 @@
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/macros/compiler.h"
@@ -247,7 +248,7 @@ struct VertexPulling::State {
                     b.Diagnostics().add_error(
                         diag::System::Transform,
                         "VertexPulling found more than one vertex entry point");
-                    return Program(std::move(b));
+                    return resolver::Resolve(b);
                 }
                 func = fn;
             }
@@ -255,14 +256,14 @@ struct VertexPulling::State {
         if (func == nullptr) {
             b.Diagnostics().add_error(diag::System::Transform,
                                       "Vertex stage entry point not found");
-            return Program(std::move(b));
+            return resolver::Resolve(b);
         }
 
         AddVertexStorageBuffers();
         Process(func);
 
         ctx.Clone();
-        return Program(std::move(b));
+        return resolver::Resolve(b);
     }
 
   private:

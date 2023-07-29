@@ -19,6 +19,7 @@
 
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/hashset.h"
@@ -99,7 +100,7 @@ Transform::ApplyResult AddBlockAttribute::Apply(const Program* src,
     }
 
     ctx.Clone();
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 AddBlockAttribute::BlockAttribute::BlockAttribute(GenerationID pid, NodeID nid)

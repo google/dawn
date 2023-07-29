@@ -137,9 +137,9 @@ class ASTParser {
     /// @returns true if the parse was successful, false otherwise.
     bool Parse();
 
-    /// @returns the program. The program builder in the parser will be reset
-    /// after this.
-    tint::Program Program();
+    /// @param resolve if true then the program will be resolved before returning
+    /// @returns the program. The program builder in the parser will be reset after this.
+    tint::Program Program(bool resolve = true);
 
     /// @returns a reference to the internal builder, without building the
     /// program. To be used only for testing.

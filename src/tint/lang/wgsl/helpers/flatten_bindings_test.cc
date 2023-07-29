@@ -19,6 +19,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 
 namespace tint::writer {
@@ -30,7 +31,7 @@ class FlattenBindingsTest : public ::testing::Test {};
 
 TEST_F(FlattenBindingsTest, NoBindings) {
     ProgramBuilder b;
-    Program program(std::move(b));
+    Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
     auto flattened = tint::writer::FlattenBindings(&program);
@@ -43,7 +44,7 @@ TEST_F(FlattenBindingsTest, AlreadyFlat) {
     b.GlobalVar("b", b.ty.i32(), builtin::AddressSpace::kUniform, b.Group(0_a), b.Binding(1_a));
     b.GlobalVar("c", b.ty.i32(), builtin::AddressSpace::kUniform, b.Group(0_a), b.Binding(2_a));
 
-    Program program(std::move(b));
+    Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
     auto flattened = tint::writer::FlattenBindings(&program);
@@ -57,7 +58,7 @@ TEST_F(FlattenBindingsTest, NotFlat_SingleNamespace) {
     b.GlobalVar("c", b.ty.i32(), builtin::AddressSpace::kUniform, b.Group(2_a), b.Binding(2_a));
     b.WrapInFunction(b.Expr("a"), b.Expr("b"), b.Expr("c"));
 
-    Program program(std::move(b));
+    Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
     auto flattened = tint::writer::FlattenBindings(&program);
@@ -120,7 +121,7 @@ TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
                      b.Assign(b.Phony(), "texture4"), b.Assign(b.Phony(), "texture5"),
                      b.Assign(b.Phony(), "texture6"));
 
-    Program program(std::move(b));
+    Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
     auto flattened = tint::writer::FlattenBindings(&program);

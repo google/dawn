@@ -19,6 +19,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 
 namespace tint::sem {
 
@@ -32,7 +33,7 @@ class TestHelperBase : public BASE, public ProgramBuilder {
         [&] {
             ASSERT_TRUE(IsValid()) << "Builder program is not valid\n" << Diagnostics().str();
         }();
-        return Program(std::move(*this));
+        return resolver::Resolve(*this);
     }
 };
 using TestHelper = TestHelperBase<testing::Test>;

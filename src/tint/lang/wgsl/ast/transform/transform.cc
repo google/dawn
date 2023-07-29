@@ -24,6 +24,7 @@
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
@@ -45,7 +46,7 @@ Output Transform::Run(const Program* src, const DataMap& data /* = {} */) const 
         ProgramBuilder b;
         program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
         ctx.Clone();
-        output.program = Program(std::move(b));
+        output.program = resolver::Resolve(b);
     }
     return output;
 }

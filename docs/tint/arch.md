@@ -68,9 +68,10 @@ There are a large number of helper methods for simplifying the creation of the
 AST nodes. A `ProgramBuilder` can only be used once, and must be discarded after
 the `Program` is constructed.
 
-A `Program` is built from the `ProgramBuilder` by `std::move()`ing the
-`ProgramBuilder` to a new `Program` object. When built, resolution is performed
-so the produced `Program` will contain all the needed semantic information.
+A `Program` is built from the `ProgramBuilder` via a call to
+`resolver::Resolve()`, which will perform validation and semantic analysis.
+The returned program will contain the semantic information which can be obtained
+by calling `Program::Sem()`.
 
 At any time before building the `Program`, `ProgramBuilder::IsValid()` may be
 called to ensure that no error diagnostics have been raised during the

@@ -3786,7 +3786,7 @@ TEST_P(BuiltinTextureTest, DISABLED_OutsideFunction_IsError) {
                         pb.Stage(ast::PipelineStage::kFragment),
                     });
 
-            auto program = std::make_unique<Program>(std::move(pb));
+            auto program = std::make_unique<Program>(resolver::Resolve(pb));
             auto b = std::make_unique<Builder>(program.get());
 
             b->GenerateGlobalVariable(texture);

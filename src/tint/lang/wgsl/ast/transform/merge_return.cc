@@ -18,6 +18,7 @@
 
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
@@ -236,7 +237,7 @@ Transform::ApplyResult MergeReturn::Apply(const Program* src, const DataMap&, Da
     }
 
     ctx.Clone();
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 }  // namespace tint::ast::transform

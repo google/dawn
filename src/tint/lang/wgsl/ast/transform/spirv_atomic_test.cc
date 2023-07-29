@@ -21,6 +21,7 @@
 
 #include "src/tint/lang/wgsl/ast/transform/test_helper.h"
 #include "src/tint/lang/wgsl/reader/parser/parser.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -144,7 +145,7 @@ class SpirvAtomicTest : public TransformTest {
         // Keep this pointer alive after Transform() returns
         files_.emplace_back(std::move(file));
 
-        return TransformTest::Run<SpirvAtomic>(Program(std::move(b)));
+        return TransformTest::Run<SpirvAtomic>(resolver::Resolve(b));
     }
 
   private:

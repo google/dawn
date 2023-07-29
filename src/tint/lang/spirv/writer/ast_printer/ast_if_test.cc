@@ -60,7 +60,7 @@ TEST_F(SpirvASTPrinterTest, If_Empty_OutsideFunction_IsError) {
             auto* expr = pb.If(true, block);
             pb.WrapInFunction(expr);
 
-            auto program = std::make_unique<Program>(std::move(pb));
+            auto program = std::make_unique<Program>(resolver::Resolve(pb));
             auto b = std::make_unique<Builder>(program.get());
 
             b->GenerateIfStatement(expr);

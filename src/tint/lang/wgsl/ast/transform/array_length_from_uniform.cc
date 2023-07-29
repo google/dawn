@@ -21,6 +21,7 @@
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
@@ -70,7 +71,7 @@ struct ArrayLengthFromUniform::State {
                 diag::System::Transform,
                 "missing transform data for " +
                     std::string(tint::TypeInfo::Of<ArrayLengthFromUniform>().name));
-            return Program(std::move(b));
+            return resolver::Resolve(b);
         }
 
         if (!ShouldRun(ctx.src)) {
@@ -169,7 +170,7 @@ struct ArrayLengthFromUniform::State {
         outputs.Add<Result>(used_size_indices);
 
         ctx.Clone();
-        return Program(std::move(b));
+        return resolver::Resolve(b);
     }
 
   private:

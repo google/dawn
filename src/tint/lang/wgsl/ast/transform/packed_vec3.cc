@@ -25,6 +25,7 @@
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/array_count.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/load.h"
@@ -497,7 +498,7 @@ struct PackedVec3::State {
         }
 
         ctx.Clone();
-        return Program(std::move(b));
+        return resolver::Resolve(b);
     }
 
   private:

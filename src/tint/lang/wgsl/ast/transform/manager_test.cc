@@ -20,6 +20,7 @@
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 
 namespace tint::ast::transform {
 namespace {
@@ -38,14 +39,14 @@ class AST_AddFunction final : public ast::transform::Transform {
         program::CloneContext ctx{&b, src};
         b.Func(b.Sym("ast_func"), {}, b.ty.void_(), {});
         ctx.Clone();
-        return Program(std::move(b));
+        return resolver::Resolve(b);
     }
 };
 
 Program MakeAST() {
     ProgramBuilder b;
     b.Func(b.Sym("main"), {}, b.ty.void_(), {});
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 // Test that an AST program is always cloned, even if all transforms are skipped.

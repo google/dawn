@@ -26,6 +26,7 @@
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
@@ -83,7 +84,7 @@ Transform::ApplyResult SimplifySideEffectStatements::Apply(const Program* src,
     }
 
     ctx.Clone();
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 // Decomposes side-effecting expressions to ensure order of evaluation. This
@@ -660,7 +661,7 @@ Transform::ApplyResult DecomposeSideEffects::Apply(const Program* src,
     decompose_state.Run();
 
     ctx.Clone();
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 }  // namespace

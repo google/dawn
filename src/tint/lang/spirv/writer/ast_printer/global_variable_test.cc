@@ -513,7 +513,7 @@ TEST_F(SpirvASTPrinterTest, GlobalVar_WorkgroupWithZeroInit) {
                                        });
     auto* var_struct = GlobalVar("c", ty.Of(type_struct), builtin::AddressSpace::kWorkgroup);
 
-    program = std::make_unique<Program>(std::move(*this));
+    program = std::make_unique<Program>(resolver::Resolve(*this));
 
     constexpr bool kZeroInitializeWorkgroupMemory = true;
     std::unique_ptr<Builder> b =

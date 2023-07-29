@@ -26,6 +26,7 @@
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/utils/text/string_stream.h"
 
 namespace tint::wgsl::helpers {
@@ -40,9 +41,7 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
     /// Build the module, cleaning up the program before returning.
     /// @returns the generated module
     tint::Result<ir::Module, std::string> Build() {
-        SetResolveOnBuild(true);
-
-        Program program{std::move(*this)};
+        Program program{resolver::Resolve(*this)};
         if (!program.IsValid()) {
             return program.Diagnostics().str();
         }

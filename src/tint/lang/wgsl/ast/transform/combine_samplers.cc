@@ -21,6 +21,7 @@
 
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 
@@ -326,7 +327,7 @@ struct CombineSamplers::State {
         });
 
         ctx.Clone();
-        return Program(std::move(b));
+        return resolver::Resolve(b);
     }
 };
 
@@ -342,7 +343,7 @@ Transform::ApplyResult CombineSamplers::Apply(const Program* src,
         ProgramBuilder b;
         b.Diagnostics().add_error(diag::System::Transform,
                                   "missing transform data for " + std::string(TypeInfo().name));
-        return Program(std::move(b));
+        return resolver::Resolve(b);
     }
 
     return State(src, binding_info).Run();

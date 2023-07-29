@@ -21,6 +21,7 @@
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
@@ -110,7 +111,7 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
                     return child == expr ? TraverseAction::Descend : TraverseAction::Skip;
                 });
                 if (!ok) {
-                    return Program(std::move(b));
+                    return resolver::Resolve(b);
                 }
                 const_chains.Add(expr);
             } else if (should_hoist(sem)) {
@@ -144,12 +145,12 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
     for (auto* expr : to_hoist) {
         if (!hoist_to_decl_before.Add(expr, expr->Declaration(),
                                       HoistToDeclBefore::VariableKind::kLet)) {
-            return Program(std::move(b));
+            return resolver::Resolve(b);
         }
     }
 
     ctx.Clone();
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 }  // namespace tint::ast::transform

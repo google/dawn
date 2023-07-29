@@ -18,6 +18,7 @@
 
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/module.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DisableUniformityAnalysis);
@@ -41,7 +42,7 @@ Transform::ApplyResult DisableUniformityAnalysis::Apply(const Program* src,
     b.Enable(builtin::Extension::kChromiumDisableUniformityAnalysis);
 
     ctx.Clone();
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 }  // namespace tint::ast::transform

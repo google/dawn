@@ -25,6 +25,7 @@
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -836,7 +837,7 @@ Transform::ApplyResult CanonicalizeEntryPointIO::Apply(const Program* src,
     if (cfg == nullptr) {
         b.Diagnostics().add_error(diag::System::Transform,
                                   "missing transform data for " + std::string(TypeInfo().name));
-        return Program(std::move(b));
+        return resolver::Resolve(b);
     }
 
     // Remove entry point IO attributes from struct declarations.
@@ -863,7 +864,7 @@ Transform::ApplyResult CanonicalizeEntryPointIO::Apply(const Program* src,
     }
 
     ctx.Clone();
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 CanonicalizeEntryPointIO::Config::Config(ShaderStyle style,

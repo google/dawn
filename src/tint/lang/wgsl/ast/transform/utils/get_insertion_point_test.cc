@@ -19,6 +19,7 @@
 #include "src/tint/lang/wgsl/ast/transform/utils/get_insertion_point.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/utils/ice/ice.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -38,7 +39,7 @@ TEST_F(GetInsertionPointTest, Block) {
     auto* block = b.Block(var);
     b.Func("f", tint::Empty, b.ty.void_(), Vector{block});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -60,7 +61,7 @@ TEST_F(GetInsertionPointTest, ForLoopInit) {
     auto* func_block = b.Block(fl);
     b.Func("f", tint::Empty, b.ty.void_(), Vector{func_block});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -81,7 +82,7 @@ TEST_F(GetInsertionPointTest, ForLoopCont_Invalid) {
     auto* s = b.For({}, b.Expr(true), var, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 

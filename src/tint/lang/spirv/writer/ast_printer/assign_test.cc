@@ -64,7 +64,7 @@ TEST_F(SpirvASTPrinterTest, Assign_Var_OutsideFunction_IsError) {
 
             pb.WrapInFunction(assign);
 
-            auto program = std::make_unique<Program>(std::move(pb));
+            auto program = std::make_unique<Program>(resolver::Resolve(pb));
             auto b = std::make_unique<Builder>(program.get());
 
             b->GenerateGlobalVariable(v);

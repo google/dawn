@@ -23,6 +23,7 @@
 #include "src/tint/lang/wgsl/ast/transform/canonicalize_entry_point_io.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/utils/math/hash.h"
 
@@ -74,7 +75,7 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
     if (cfg == nullptr) {
         b.Diagnostics().add_error(diag::System::Transform,
                                   "missing transform data for " + std::string(TypeInfo().name));
-        return Program(std::move(b));
+        return resolver::Resolve(b);
     }
 
     if (!ShouldRun(src)) {
@@ -183,7 +184,7 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
     }
 
     ctx.Clone();
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 NumWorkgroupsFromUniform::Config::Config(std::optional<BindingPoint> ubo_bp)

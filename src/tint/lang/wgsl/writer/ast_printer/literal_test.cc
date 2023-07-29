@@ -114,8 +114,7 @@ using WgslGenerator_F32LiteralTest = TestParamHelper<F32Data>;
 TEST_P(WgslGenerator_F32LiteralTest, Emit) {
     auto* v = Expr(GetParam().value);
 
-    SetResolveOnBuild(false);
-    ASTPrinter& gen = Build();
+    ASTPrinter& gen = Build(/* resolve */ false);
 
     StringStream out;
     gen.EmitLiteral(out, v);
@@ -163,8 +162,7 @@ TEST_P(WgslGenerator_F16LiteralTest, Emit) {
 
     auto* v = Expr(GetParam().value);
 
-    SetResolveOnBuild(false);
-    ASTPrinter& gen = Build();
+    ASTPrinter& gen = Build(/* resolve */ false);
 
     StringStream out;
     gen.EmitLiteral(out, v);

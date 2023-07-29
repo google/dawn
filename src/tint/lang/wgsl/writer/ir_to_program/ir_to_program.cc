@@ -63,6 +63,7 @@
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/writer/ir_to_program/rename_conflicts.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/predicates.h"
@@ -96,7 +97,7 @@ class State {
         if (auto res = ir::Validate(mod); !res) {
             // IR module failed validation.
             b.Diagnostics() = res.Failure();
-            return Program{std::move(b)};
+            return Program{resolver::Resolve(b)};
         }
 
         RenameConflicts{}.Run(&mod);
@@ -108,7 +109,7 @@ class State {
         for (auto* fn : mod.functions) {
             Fn(fn);
         }
-        return Program{std::move(b)};
+        return Program{resolver::Resolve(b)};
     }
 
   private:

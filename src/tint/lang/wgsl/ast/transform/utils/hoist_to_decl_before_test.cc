@@ -19,6 +19,7 @@
 #include "src/tint/lang/wgsl/ast/transform/utils/hoist_to_decl_before.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/if_statement.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
@@ -39,7 +40,7 @@ TEST_F(HoistToDeclBeforeTest, VarInit) {
     auto* var = b.Decl(b.Var("a", expr));
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -48,7 +49,7 @@ TEST_F(HoistToDeclBeforeTest, VarInit) {
     hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kLet);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn f() {
@@ -70,7 +71,7 @@ TEST_F(HoistToDeclBeforeTest, ForLoopInit) {
     auto* s = b.For(b.Decl(b.Var("a", expr)), b.Expr(true), nullptr, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -79,7 +80,7 @@ TEST_F(HoistToDeclBeforeTest, ForLoopInit) {
     hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kVar);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn f() {
@@ -112,7 +113,7 @@ TEST_F(HoistToDeclBeforeTest, ForLoopCond) {
     auto* s = b.For(nullptr, expr, nullptr, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var, s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -121,7 +122,7 @@ TEST_F(HoistToDeclBeforeTest, ForLoopCond) {
     hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kConst);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn f() {
@@ -150,7 +151,7 @@ TEST_F(HoistToDeclBeforeTest, ForLoopCont) {
     auto* s = b.For(nullptr, b.Expr(true), b.Decl(b.Var("a", expr)), b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -159,7 +160,7 @@ TEST_F(HoistToDeclBeforeTest, ForLoopCont) {
     hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kLet);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn f() {
@@ -193,7 +194,7 @@ TEST_F(HoistToDeclBeforeTest, WhileCond) {
     auto* s = b.While(expr, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var, s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -202,7 +203,7 @@ TEST_F(HoistToDeclBeforeTest, WhileCond) {
     hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kVar);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn f() {
@@ -237,7 +238,7 @@ TEST_F(HoistToDeclBeforeTest, ElseIf) {
                                b.Else(b.Block()))));
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var, s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -246,7 +247,7 @@ TEST_F(HoistToDeclBeforeTest, ElseIf) {
     hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kConst);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn f() {
@@ -275,7 +276,7 @@ TEST_F(HoistToDeclBeforeTest, Array1D) {
     auto* var2 = b.Decl(b.Var("b", expr));
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var1, var2});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -284,7 +285,7 @@ TEST_F(HoistToDeclBeforeTest, Array1D) {
     hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kLet);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn f() {
@@ -309,7 +310,7 @@ TEST_F(HoistToDeclBeforeTest, Array2D) {
     auto* var2 = b.Decl(b.Var("b", expr));
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var1, var2});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -318,7 +319,7 @@ TEST_F(HoistToDeclBeforeTest, Array2D) {
     hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kVar);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn f() {
@@ -343,7 +344,7 @@ TEST_F(HoistToDeclBeforeTest, Prepare_ForLoopCond) {
     auto* s = b.For(nullptr, expr, nullptr, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var, s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -352,7 +353,7 @@ TEST_F(HoistToDeclBeforeTest, Prepare_ForLoopCond) {
     hoistToDeclBefore.Prepare(sem_expr);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn f() {
@@ -380,7 +381,7 @@ TEST_F(HoistToDeclBeforeTest, Prepare_ForLoopCont) {
     auto* s = b.For(nullptr, b.Expr(true), b.Decl(b.Var("a", expr)), b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -389,7 +390,7 @@ TEST_F(HoistToDeclBeforeTest, Prepare_ForLoopCont) {
     hoistToDeclBefore.Prepare(sem_expr);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn f() {
@@ -426,7 +427,7 @@ TEST_F(HoistToDeclBeforeTest, Prepare_ElseIf) {
                                b.Else(b.Block()))));
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var, s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -435,7 +436,7 @@ TEST_F(HoistToDeclBeforeTest, Prepare_ElseIf) {
     hoistToDeclBefore.Prepare(sem_expr);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn f() {
@@ -463,7 +464,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_Block) {
     auto* var = b.Decl(b.Var("a", b.Expr(1_i)));
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -473,7 +474,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_Block) {
     hoistToDeclBefore.InsertBefore(before_stmt, new_stmt);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn foo() {
@@ -499,7 +500,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_Block_Function) {
     auto* var = b.Decl(b.Var("a", b.Expr(1_i)));
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -509,7 +510,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_Block_Function) {
                                    [&] { return ctx.dst->CallStmt(ctx.dst->Call("foo")); });
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn foo() {
@@ -537,7 +538,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopInit) {
     auto* s = b.For(var, b.Expr(true), nullptr, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -547,7 +548,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopInit) {
     hoistToDeclBefore.InsertBefore(before_stmt, new_stmt);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn foo() {
@@ -584,7 +585,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopInit_Function) {
     auto* s = b.For(var, b.Expr(true), nullptr, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -594,7 +595,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopInit_Function) {
                                    [&] { return ctx.dst->CallStmt(ctx.dst->Call("foo")); });
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn foo() {
@@ -633,7 +634,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopCont) {
     auto* s = b.For(nullptr, b.Expr(true), cont, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var, s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -643,7 +644,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopCont) {
     hoistToDeclBefore.InsertBefore(before_stmt, new_stmt);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn foo() {
@@ -684,7 +685,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopCont_Function) {
     auto* s = b.For(nullptr, b.Expr(true), cont, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var, s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -694,7 +695,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopCont_Function) {
                                    [&] { return ctx.dst->CallStmt(ctx.dst->Call("foo")); });
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn foo() {
@@ -738,7 +739,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ElseIf) {
                    b.Else(elseif));
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var, s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -748,7 +749,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ElseIf) {
     hoistToDeclBefore.InsertBefore(before_stmt, new_stmt);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn foo() {
@@ -787,7 +788,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ElseIf_Function) {
                    b.Else(elseif));
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var, s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -797,7 +798,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ElseIf_Function) {
                                    [&] { return ctx.dst->CallStmt(ctx.dst->Call("foo")); });
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn foo() {
@@ -827,7 +828,7 @@ TEST_F(HoistToDeclBeforeTest, AbstractArray_ToLet) {
     auto* var = b.Decl(b.Var("a", b.ty.array(b.ty.f32(), 1_a), expr));
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -836,7 +837,7 @@ TEST_F(HoistToDeclBeforeTest, AbstractArray_ToLet) {
     hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kLet);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn f() {
@@ -857,7 +858,7 @@ TEST_F(HoistToDeclBeforeTest, AbstractArray_ToVar) {
     auto* var = b.Decl(b.Var("a", b.ty.array(b.ty.f32(), 1_a), expr));
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -866,7 +867,7 @@ TEST_F(HoistToDeclBeforeTest, AbstractArray_ToVar) {
     hoistToDeclBefore.Add(sem_expr, expr, HoistToDeclBefore::VariableKind::kVar);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn f() {
@@ -889,7 +890,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_Block) {
     auto* var = b.Decl(b.Var("a", b.Expr(1_i)));
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -899,7 +900,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_Block) {
     hoistToDeclBefore.Replace(target_stmt, new_stmt);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn foo() {
@@ -924,7 +925,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_Block_Function) {
     auto* var = b.Decl(b.Var("a", b.Expr(1_i)));
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -933,7 +934,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_Block_Function) {
     hoistToDeclBefore.Replace(target_stmt, [&] { return ctx.dst->CallStmt(ctx.dst->Call("foo")); });
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn foo() {
@@ -960,7 +961,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_ForLoopInit) {
     auto* s = b.For(var, b.Expr(true), nullptr, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -970,7 +971,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_ForLoopInit) {
     hoistToDeclBefore.Replace(target_stmt, new_stmt);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn foo() {
@@ -1006,7 +1007,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_ForLoopInit_Function) {
     auto* s = b.For(var, b.Expr(true), nullptr, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -1015,7 +1016,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_ForLoopInit_Function) {
     hoistToDeclBefore.Replace(target_stmt, [&] { return ctx.dst->CallStmt(ctx.dst->Call("foo")); });
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn foo() {
@@ -1053,7 +1054,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_ForLoopCont) {
     auto* s = b.For(nullptr, b.Expr(true), cont, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var, s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -1063,7 +1064,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_ForLoopCont) {
     hoistToDeclBefore.Replace(target_stmt, new_stmt);
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn foo() {
@@ -1103,7 +1104,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_ForLoopCont_Function) {
     auto* s = b.For(nullptr, b.Expr(true), cont, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var, s});
 
-    Program original(std::move(b));
+    Program original(resolver::Resolve(b));
     ProgramBuilder cloned_b;
     program::CloneContext ctx(&cloned_b, &original);
 
@@ -1112,7 +1113,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_ForLoopCont_Function) {
     hoistToDeclBefore.Replace(target_stmt, [&] { return ctx.dst->CallStmt(ctx.dst->Call("foo")); });
 
     ctx.Clone();
-    Program cloned(std::move(cloned_b));
+    Program cloned(resolver::Resolve(cloned_b));
 
     auto* expect = R"(
 fn foo() {

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/inspector/test_inspector_builder.h"
+#include "src/tint/lang/wgsl/inspector/inspector_builder_test.h"
 
 #include <memory>
 #include <string>
@@ -21,7 +21,6 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "src/tint/lang/wgsl/resolver/resolve.h"
 
 namespace tint::inspector {
 

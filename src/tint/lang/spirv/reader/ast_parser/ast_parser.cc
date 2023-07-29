@@ -30,6 +30,7 @@
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/interpolate_attribute.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/utils/containers/unique_vector.h"
 #include "src/tint/utils/rtti/switch.h"
 
@@ -330,10 +331,14 @@ bool ASTParser::Parse() {
     return success_;
 }
 
-Program ASTParser::Program() {
+Program ASTParser::Program(bool resolve) {
     // TODO(dneto): Should we clear out spv_binary_ here, to reduce
     // memory usage?
-    return tint::Program(std::move(builder_));
+    if (resolve) {
+        return tint::resolver::Resolve(builder_);
+    } else {
+        return tint::Program(std::move(builder_));
+    }
 }
 
 const Type* ASTParser::ConvertType(uint32_t type_id, PtrAs ptr_as) {

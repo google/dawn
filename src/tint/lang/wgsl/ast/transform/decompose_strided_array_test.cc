@@ -23,6 +23,7 @@
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -33,7 +34,7 @@ using DecomposeStridedArrayTest = TransformTest;
 
 TEST_F(DecomposeStridedArrayTest, ShouldRunEmptyModule) {
     ProgramBuilder b;
-    EXPECT_FALSE(ShouldRun<DecomposeStridedArray>(Program(std::move(b))));
+    EXPECT_FALSE(ShouldRun<DecomposeStridedArray>(resolver::Resolve(b)));
 }
 
 TEST_F(DecomposeStridedArrayTest, ShouldRunNonStridedArray) {
@@ -41,7 +42,7 @@ TEST_F(DecomposeStridedArrayTest, ShouldRunNonStridedArray) {
 
     ProgramBuilder b;
     b.GlobalVar("arr", b.ty.array<f32, 4u>(), builtin::AddressSpace::kPrivate);
-    EXPECT_FALSE(ShouldRun<DecomposeStridedArray>(Program(std::move(b))));
+    EXPECT_FALSE(ShouldRun<DecomposeStridedArray>(resolver::Resolve(b)));
 }
 
 TEST_F(DecomposeStridedArrayTest, ShouldRunDefaultStridedArray) {
@@ -53,7 +54,7 @@ TEST_F(DecomposeStridedArrayTest, ShouldRunDefaultStridedArray) {
                     b.Stride(4),
                 }),
                 builtin::AddressSpace::kPrivate);
-    EXPECT_TRUE(ShouldRun<DecomposeStridedArray>(Program(std::move(b))));
+    EXPECT_TRUE(ShouldRun<DecomposeStridedArray>(resolver::Resolve(b)));
 }
 
 TEST_F(DecomposeStridedArrayTest, ShouldRunExplicitStridedArray) {
@@ -65,7 +66,7 @@ TEST_F(DecomposeStridedArrayTest, ShouldRunExplicitStridedArray) {
                     b.Stride(16),
                 }),
                 builtin::AddressSpace::kPrivate);
-    EXPECT_TRUE(ShouldRun<DecomposeStridedArray>(Program(std::move(b))));
+    EXPECT_TRUE(ShouldRun<DecomposeStridedArray>(resolver::Resolve(b)));
 }
 
 TEST_F(DecomposeStridedArrayTest, Empty) {
@@ -116,7 +117,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -165,7 +166,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -219,7 +220,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -273,7 +274,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -327,7 +328,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -376,7 +377,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -436,7 +437,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -493,7 +494,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -558,7 +559,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -622,7 +623,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }
@@ -734,7 +735,7 @@ fn f() {
 }
 )";
 
-    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(Program(std::move(b)));
+    auto got = Run<Unshadow, SimplifyPointers, DecomposeStridedArray>(resolver::Resolve(b));
 
     EXPECT_EQ(expect, str(got));
 }

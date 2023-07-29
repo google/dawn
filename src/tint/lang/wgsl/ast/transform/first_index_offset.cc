@@ -21,6 +21,7 @@
 #include "src/tint/lang/core/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
@@ -165,7 +166,7 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
     outputs.Add<Data>(has_vertex_index, has_instance_index);
 
     ctx.Clone();
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 }  // namespace tint::ast::transform

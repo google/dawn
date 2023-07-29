@@ -22,6 +22,7 @@
 #include "src/tint/lang/wgsl/ast/parameter.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/module.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
@@ -154,7 +155,7 @@ Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, Dat
     });
 
     ctx.Clone();
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 }  // namespace tint::ast::transform

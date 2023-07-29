@@ -19,6 +19,7 @@
 
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/reader/reader.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/resolver/uniformity.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -65,7 +66,7 @@ class UniformityAnalysisTestBase {
     /// @param builder the program builder
     /// @param should_pass true if `builder` program should pass the analysis, otherwise false
     void RunTest(ProgramBuilder&& builder, bool should_pass) {
-        auto program = Program(std::move(builder));
+        auto program = resolver::Resolve(builder);
         return RunTest(std::move(program), should_pass);
     }
 

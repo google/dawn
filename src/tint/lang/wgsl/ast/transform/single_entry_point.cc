@@ -19,6 +19,7 @@
 
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/rtti/switch.h"
@@ -42,7 +43,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
     if (cfg == nullptr) {
         b.Diagnostics().add_error(diag::System::Transform,
                                   "missing transform data for " + std::string(TypeInfo().name));
-        return Program(std::move(b));
+        return resolver::Resolve(b);
     }
 
     // Find the target entry point.
@@ -59,7 +60,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
     if (entry_point == nullptr) {
         b.Diagnostics().add_error(diag::System::Transform,
                                   "entry point '" + cfg->entry_point_name + "' not found");
-        return Program(std::move(b));
+        return resolver::Resolve(b);
     }
 
     auto& sem = src->Sem();
@@ -125,7 +126,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
     // Clone the entry point.
     b.AST().AddFunction(ctx.Clone(entry_point));
 
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 SingleEntryPoint::Config::Config(std::string entry_point) : entry_point_name(entry_point) {}

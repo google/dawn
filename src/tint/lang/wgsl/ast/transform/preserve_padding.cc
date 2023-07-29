@@ -20,6 +20,7 @@
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/containers/vector.h"
@@ -89,7 +90,7 @@ struct PreservePadding::State {
         });
 
         ctx.Clone();
-        return Program(std::move(b));
+        return resolver::Resolve(b);
     }
 
     /// Create a statement that will perform the assignment `lhs = rhs`, creating and using helper

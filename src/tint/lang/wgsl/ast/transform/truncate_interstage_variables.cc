@@ -20,6 +20,7 @@
 
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
@@ -59,7 +60,7 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
             diag::System::Transform,
             "missing transform data for " +
                 std::string(tint::TypeInfo::Of<TruncateInterstageVariables>().name));
-        return Program(std::move(b));
+        return resolver::Resolve(b);
     }
 
     auto& sem = ctx.src->Sem();
@@ -179,7 +180,7 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
     }
 
     ctx.Clone();
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 TruncateInterstageVariables::Config::Config() = default;

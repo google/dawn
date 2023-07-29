@@ -134,14 +134,6 @@ class ProgramBuilder : public ast::Builder {
         return sem_;
     }
 
-    /// Controls whether the Resolver will be run on the program when it is built.
-    /// @param enable the new flag value (defaults to true)
-    void SetResolveOnBuild(bool enable) { resolve_on_build_ = enable; }
-
-    /// @return true if the Resolver will be run on the program when it is
-    /// built.
-    bool ResolveOnBuild() const { return resolve_on_build_; }
-
     /// Overlay Builder::create() overloads
     using Builder::create;
 
@@ -205,9 +197,6 @@ class ProgramBuilder : public ast::Builder {
   private:
     SemNodeAllocator sem_nodes_;
     sem::Info sem_;
-
-    /// Set by SetResolveOnBuild(). If set, the Resolver will be run on the program when built.
-    bool resolve_on_build_ = true;
 };
 
 /// @param builder the ProgramBuilder

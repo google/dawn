@@ -23,6 +23,7 @@
 #include "spirv-tools/libspirv.hpp"
 #include "src/tint/lang/spirv/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/spirv/writer/binary_writer.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 
 namespace tint::spirv::writer {
 
@@ -55,7 +56,7 @@ class TestHelperBase : public ProgramBuilder, public BASE {
         [&] {
             ASSERT_TRUE(IsValid()) << "Builder program is not valid\n" << Diagnostics().str();
         }();
-        program = std::make_unique<Program>(std::move(*this));
+        program = std::make_unique<Program>(resolver::Resolve(*this));
         [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
         spirv_builder = std::make_unique<Builder>(program.get());
         return *spirv_builder;
@@ -74,7 +75,7 @@ class TestHelperBase : public ProgramBuilder, public BASE {
         [&] {
             ASSERT_TRUE(IsValid()) << "Builder program is not valid\n" << Diagnostics().str();
         }();
-        program = std::make_unique<Program>(std::move(*this));
+        program = std::make_unique<Program>(resolver::Resolve(*this));
         [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
         auto result = Sanitize(program.get(), options);
         [&] { ASSERT_TRUE(result.program.IsValid()) << result.program.Diagnostics().str(); }();

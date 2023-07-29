@@ -36,7 +36,7 @@ TEST_F(SpirvASTPrinterTest, IdentifierExpression_GlobalConst) {
             auto* expr = pb.Expr("c");
             pb.WrapInFunction(expr);
 
-            auto program = std::make_unique<Program>(std::move(pb));
+            auto program = std::make_unique<Program>(resolver::Resolve(pb));
             auto b = std::make_unique<Builder>(program.get());
 
             b->GenerateGlobalVariable(v);

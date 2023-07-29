@@ -519,6 +519,8 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/resolver/intrinsic_table.cc
   lang/wgsl/resolver/intrinsic_table.h
   lang/wgsl/resolver/intrinsic_table.inl
+  lang/wgsl/resolver/resolve.cc
+  lang/wgsl/resolver/resolve.h
   lang/wgsl/resolver/resolver.cc
   lang/wgsl/resolver/resolver.h
   lang/wgsl/resolver/sem_helper.cc

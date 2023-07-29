@@ -23,6 +23,7 @@
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
@@ -255,7 +256,7 @@ struct DirectVariableAccess::State {
         CloneState state;
         clone_state = &state;
         ctx.Clone();
-        return Program(std::move(b));
+        return resolver::Resolve(b);
     }
 
   private:

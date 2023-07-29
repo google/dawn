@@ -164,7 +164,7 @@ TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_WorkgroupSize_OverridableCo
                                      pb.WorkgroupSize("width", "height", "depth"),
                                      pb.Stage(ast::PipelineStage::kCompute),
                                  });
-            auto program = std::make_unique<Program>(std::move(pb));
+            auto program = std::make_unique<Program>(resolver::Resolve(pb));
             auto b = std::make_unique<Builder>(program.get());
 
             b->GenerateExecutionModes(func, 3);
@@ -185,7 +185,7 @@ TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndCon
                                      pb.Stage(ast::PipelineStage::kCompute),
                                  });
 
-            auto program = std::make_unique<Program>(std::move(pb));
+            auto program = std::make_unique<Program>(resolver::Resolve(pb));
             auto b = std::make_unique<Builder>(program.get());
 
             b->GenerateExecutionModes(func, 3);

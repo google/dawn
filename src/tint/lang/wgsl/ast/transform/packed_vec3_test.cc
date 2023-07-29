@@ -22,6 +22,7 @@
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/transform/test_helper.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/text/string.h"
@@ -4171,7 +4172,7 @@ TEST_F(PackedVec3Test, StructMember_ExistingMemberAttributes_ExplicitOffset) {
                      });
     b.GlobalVar("P", builtin::AddressSpace::kStorage, b.ty("S"),
                 tint::Vector{b.Group(AInt(0)), b.Binding(AInt(0))});
-    Program src(std::move(b));
+    Program src(resolver::Resolve(b));
 
     auto* expect =
         R"(

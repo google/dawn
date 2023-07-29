@@ -24,6 +24,7 @@
 #include "src/tint/lang/glsl/writer/version.h"
 #include "src/tint/lang/glsl/writer/writer.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 
 namespace tint::glsl::writer {
 
@@ -54,7 +55,7 @@ class TestHelperBase : public BODY, public ProgramBuilder {
         [&] {
             ASSERT_TRUE(IsValid()) << "Builder program is not valid\n" << Diagnostics().str();
         }();
-        program = std::make_unique<Program>(std::move(*this));
+        program = std::make_unique<Program>(resolver::Resolve(*this));
         [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
         gen_ = std::make_unique<ASTPrinter>(program.get(), version);
         return *gen_;
@@ -75,7 +76,7 @@ class TestHelperBase : public BODY, public ProgramBuilder {
         [&] {
             ASSERT_TRUE(IsValid()) << "Builder program is not valid\n" << Diagnostics().str();
         }();
-        program = std::make_unique<Program>(std::move(*this));
+        program = std::make_unique<Program>(resolver::Resolve(*this));
         [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
 
         auto sanitized_result = Sanitize(program.get(), options, /* entry_point */ "");

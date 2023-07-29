@@ -26,6 +26,7 @@
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/reader/parser/detail.h"
 #include "src/tint/lang/wgsl/reader/parser/token.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/utils/diagnostic/formatter.h"
 
 namespace tint::ast {
@@ -319,7 +320,7 @@ class Parser {
 
     /// @returns the Program. The program builder in the parser will be reset
     /// after this.
-    Program program() { return Program(std::move(builder_)); }
+    Program program() { return resolver::Resolve(builder_); }
 
     /// @returns the program builder.
     ProgramBuilder& builder() { return builder_; }

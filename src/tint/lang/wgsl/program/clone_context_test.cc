@@ -19,6 +19,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 
 namespace tint::program {
 namespace {
@@ -104,7 +105,7 @@ TEST_F(ProgramCloneContextNodeTest, Clone) {
         auto* c = b;  // Aliased
         original_root = alloc.Create<Node>(builder.Symbols().New("root"), a, b, c);
     }
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     //                          root
     //        ╭──────────────────┼──────────────────╮
@@ -162,7 +163,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithReplaceAll_Node) {
         auto* c = b;  // Aliased
         original_root = alloc.Create<Node>(builder.Symbols().New("root"), a, b, c);
     }
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     //                          root
     //        ╭──────────────────┼──────────────────╮
@@ -255,7 +256,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithReplaceAll_Symbols) {
         auto* c = b;  // Aliased
         original_root = alloc.Create<Node>(builder.Symbols().New("root"), a, b, c);
     }
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     //                          root
     //        ╭──────────────────┼──────────────────╮
@@ -288,7 +289,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithoutTransform) {
 
     ProgramBuilder builder;
     auto* original_node = a.Create<Node>(builder.Symbols().New("root"));
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     CloneContext ctx(&cloned, &original);
@@ -309,7 +310,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithReplacePointer) {
     original_root->a = a.Create<Node>(builder.Symbols().New("a"));
     original_root->b = a.Create<Node>(builder.Symbols().New("b"));
     original_root->c = a.Create<Node>(builder.Symbols().New("c"));
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     //                          root
     //        ╭──────────────────┼──────────────────╮
@@ -341,7 +342,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithRepeatedImmediateReplacePointer) {
     original_root->a = a.Create<Node>(builder.Symbols().New("a"));
     original_root->b = a.Create<Node>(builder.Symbols().New("b"));
     original_root->c = a.Create<Node>(builder.Symbols().New("c"));
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
 
@@ -380,7 +381,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithReplaceFunction) {
     original_root->a = a.Create<Node>(builder.Symbols().New("a"));
     original_root->b = a.Create<Node>(builder.Symbols().New("b"));
     original_root->c = a.Create<Node>(builder.Symbols().New("c"));
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     //                          root
     //        ╭──────────────────┼──────────────────╮
@@ -412,7 +413,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithRepeatedImmediateReplaceFunction) {
     original_root->a = a.Create<Node>(builder.Symbols().New("a"));
     original_root->b = a.Create<Node>(builder.Symbols().New("b"));
     original_root->c = a.Create<Node>(builder.Symbols().New("c"));
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
 
@@ -453,7 +454,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithRemove) {
         a.Create<Node>(builder.Symbols().Register("b")),
         a.Create<Node>(builder.Symbols().Register("c")),
     };
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     auto* cloned_root = CloneContext(&cloned, &original)
@@ -480,7 +481,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertFront) {
         a.Create<Node>(builder.Symbols().Register("b")),
         a.Create<Node>(builder.Symbols().Register("c")),
     };
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     auto* insertion = a.Create<Node>(cloned.Symbols().New("insertion"));
@@ -512,7 +513,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertFrontFunction) {
         a.Create<Node>(builder.Symbols().Register("b")),
         a.Create<Node>(builder.Symbols().Register("c")),
     };
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
 
@@ -541,7 +542,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertFront_Empty) {
     ProgramBuilder builder;
     auto* original_root = a.Create<Node>(builder.Symbols().Register("root"));
     original_root->vec.Clear();
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     auto* insertion = a.Create<Node>(cloned.Symbols().New("insertion"));
@@ -562,7 +563,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertFront_Empty_Function) {
     ProgramBuilder builder;
     auto* original_root = a.Create<Node>(builder.Symbols().Register("root"));
     original_root->vec.Clear();
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
 
@@ -588,7 +589,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertBack) {
         a.Create<Node>(builder.Symbols().Register("b")),
         a.Create<Node>(builder.Symbols().Register("c")),
     };
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     auto* insertion = a.Create<Node>(cloned.Symbols().New("insertion"));
@@ -616,7 +617,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertBack_Function) {
         a.Create<Node>(builder.Symbols().Register("b")),
         a.Create<Node>(builder.Symbols().Register("c")),
     };
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
 
@@ -641,7 +642,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertBack_Empty) {
     ProgramBuilder builder;
     auto* original_root = a.Create<Node>(builder.Symbols().Register("root"));
     original_root->vec.Clear();
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     auto* insertion = a.Create<Node>(cloned.Symbols().New("insertion"));
@@ -662,7 +663,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertBack_Empty_Function) {
     ProgramBuilder builder;
     auto* original_root = a.Create<Node>(builder.Symbols().Register("root"));
     original_root->vec.Clear();
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
 
@@ -684,7 +685,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertFrontAndBack_Empty) {
     ProgramBuilder builder;
     auto* original_root = a.Create<Node>(builder.Symbols().Register("root"));
     original_root->vec.Clear();
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     auto* insertion_back = a.Create<Node>(cloned.Symbols().New("insertion_back"));
@@ -708,7 +709,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertFrontAndBack_Empty_Function) 
     ProgramBuilder builder;
     auto* original_root = a.Create<Node>(builder.Symbols().Register("root"));
     original_root->vec.Clear();
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
 
@@ -737,7 +738,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertBefore) {
         a.Create<Node>(builder.Symbols().Register("b")),
         a.Create<Node>(builder.Symbols().Register("c")),
     };
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     auto* insertion = a.Create<Node>(cloned.Symbols().New("insertion"));
@@ -765,7 +766,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertBefore_Function) {
         a.Create<Node>(builder.Symbols().Register("b")),
         a.Create<Node>(builder.Symbols().Register("c")),
     };
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
 
@@ -794,7 +795,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertAfter) {
         a.Create<Node>(builder.Symbols().Register("b")),
         a.Create<Node>(builder.Symbols().Register("c")),
     };
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     auto* insertion = a.Create<Node>(cloned.Symbols().New("insertion"));
@@ -822,7 +823,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertAfter_Function) {
         a.Create<Node>(builder.Symbols().Register("b")),
         a.Create<Node>(builder.Symbols().Register("c")),
     };
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
 
@@ -852,7 +853,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertAfterInVectorNodeClone) {
         a.Create<Node>(builder.Symbols().Register("c")),
     };
 
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     CloneContext ctx(&cloned, &original);
@@ -884,7 +885,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertAfterInVectorNodeClone_Functi
         a.Create<Node>(builder.Symbols().Register("c")),
     };
 
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     CloneContext ctx(&cloned, &original);
@@ -916,7 +917,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertBackInVectorNodeClone) {
         a.Create<Node>(builder.Symbols().Register("c")),
     };
 
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     CloneContext ctx(&cloned, &original);
@@ -948,7 +949,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertBackInVectorNodeClone_Functio
         a.Create<Node>(builder.Symbols().Register("c")),
     };
 
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     CloneContext ctx(&cloned, &original);
@@ -979,7 +980,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertBeforeAndAfterRemoved) {
         a.Create<Node>(builder.Symbols().Register("b")),
         a.Create<Node>(builder.Symbols().Register("c")),
     };
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     auto* insertion_before = a.Create<Node>(cloned.Symbols().New("insertion_before"));
@@ -1011,7 +1012,7 @@ TEST_F(ProgramCloneContextNodeTest, CloneWithInsertBeforeAndAfterRemoved_Functio
         a.Create<Node>(builder.Symbols().Register("b")),
         a.Create<Node>(builder.Symbols().Register("c")),
     };
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
 
@@ -1104,7 +1105,7 @@ TEST_F(ProgramCloneContextTest, CloneNewUnnamedSymbols) {
     EXPECT_EQ(old_b.Name(), "tint_symbol_1");
     EXPECT_EQ(old_c.Name(), "tint_symbol_2");
 
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     CloneContext ctx(&cloned, &original, false);
@@ -1132,7 +1133,7 @@ TEST_F(ProgramCloneContextTest, CloneNewSymbols) {
     EXPECT_EQ(old_b.Name(), "b");
     EXPECT_EQ(old_c.Name(), "c");
 
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     CloneContext ctx(&cloned, &original, false);
@@ -1160,7 +1161,7 @@ TEST_F(ProgramCloneContextTest, CloneNewSymbols_AfterCloneSymbols) {
     EXPECT_EQ(old_b.Name(), "b");
     EXPECT_EQ(old_c.Name(), "c");
 
-    Program original(std::move(builder));
+    Program original(resolver::Resolve(builder));
 
     ProgramBuilder cloned;
     CloneContext ctx(&cloned, &original);

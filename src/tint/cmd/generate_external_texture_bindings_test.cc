@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/cmd/generate_external_texture_bindings.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "tint/binding_point.h"
 
 namespace tint::cmd {
@@ -31,7 +32,7 @@ class GenerateExternalTextureBindingsTest : public ::testing::Test {};
 TEST_F(GenerateExternalTextureBindingsTest, None) {
     ProgramBuilder b;
 
-    tint::Program program(std::move(b));
+    tint::Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid());
     auto bindings = GenerateExternalTextureBindings(&program);
     ASSERT_TRUE(bindings.empty());
@@ -41,7 +42,7 @@ TEST_F(GenerateExternalTextureBindingsTest, One) {
     ProgramBuilder b;
     b.GlobalVar("v0", b.ty.external_texture(), b.Group(0_a), b.Binding(0_a));
 
-    tint::Program program(std::move(b));
+    tint::Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid());
     auto bindings = GenerateExternalTextureBindings(&program);
     ASSERT_EQ(bindings.size(), 1u);
@@ -58,7 +59,7 @@ TEST_F(GenerateExternalTextureBindingsTest, Two_SameGroup) {
     b.GlobalVar("v0", b.ty.external_texture(), b.Group(0_a), b.Binding(0_a));
     b.GlobalVar("v1", b.ty.external_texture(), b.Group(0_a), b.Binding(1_a));
 
-    tint::Program program(std::move(b));
+    tint::Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid());
     auto bindings = GenerateExternalTextureBindings(&program);
     ASSERT_EQ(bindings.size(), 2u);
@@ -81,7 +82,7 @@ TEST_F(GenerateExternalTextureBindingsTest, Two_DifferentGroup) {
     b.GlobalVar("v0", b.ty.external_texture(), b.Group(0_a), b.Binding(0_a));
     b.GlobalVar("v1", b.ty.external_texture(), b.Group(1_a), b.Binding(0_a));
 
-    tint::Program program(std::move(b));
+    tint::Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid());
     auto bindings = GenerateExternalTextureBindings(&program);
     ASSERT_EQ(bindings.size(), 2u);
@@ -107,7 +108,7 @@ TEST_F(GenerateExternalTextureBindingsTest, Two_WithOtherBindingsInSameGroup) {
     b.GlobalVar("v3", b.ty.external_texture(), b.Group(0_a), b.Binding(3_a));
     b.GlobalVar("v4", b.ty.i32(), b.Group(0_a), b.Binding(4_a), kUniform);
 
-    tint::Program program(std::move(b));
+    tint::Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
     auto bindings = GenerateExternalTextureBindings(&program);
     ASSERT_EQ(bindings.size(), 2u);

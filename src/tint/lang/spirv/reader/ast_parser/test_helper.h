@@ -77,7 +77,7 @@ class ASTParserWrapperForTest {
 
     /// @returns the program. The program builder in the parser will be reset
     /// after this.
-    Program program() { return impl_.Program(); }
+    Program program() { return impl_.Program(resolve_); }
 
     /// @returns the namer object
     Namer& namer() { return impl_.namer(); }
@@ -248,6 +248,9 @@ class ASTParserWrapperForTest {
         return impl_.GetSourceForResultIdForTest(id);
     }
 
+    /// @param resolve if true, the resolver should be run on the program when its build
+    void SetResolveOnBuild(bool resolve) { resolve_ = resolve; }
+
   private:
     ASTParser impl_;
     /// When true, indicates the input SPIR-V module should not be emitted.
@@ -255,6 +258,7 @@ class ASTParserWrapperForTest {
     /// reason.
     bool skip_dumping_spirv_ = false;
     static bool dump_successfully_converted_spirv_;
+    bool resolve_ = true;
 };
 
 // Sets global state to force dumping of the assembly text of succesfully
@@ -294,10 +298,9 @@ class SpirvASTParserTestBase : public T {
     /// @returns a parser for the given binary
     std::unique_ptr<test::ASTParserWrapperForTest> parser(const std::vector<uint32_t>& input) {
         auto parser = std::make_unique<test::ASTParserWrapperForTest>(input);
-
         // Don't run the Resolver when building the program.
         // We're not interested in type information with these tests.
-        parser->builder().SetResolveOnBuild(false);
+        parser->SetResolveOnBuild(false);
         return parser;
     }
 };

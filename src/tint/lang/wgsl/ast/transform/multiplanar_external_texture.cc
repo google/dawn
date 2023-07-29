@@ -21,6 +21,7 @@
 #include "src/tint/lang/wgsl/ast/function.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
@@ -515,7 +516,7 @@ Transform::ApplyResult MultiplanarExternalTexture::Apply(const Program* src,
     if (!new_binding_points) {
         b.Diagnostics().add_error(diag::System::Transform, "missing new binding point data for " +
                                                                std::string(TypeInfo().name));
-        return Program(std::move(b));
+        return resolver::Resolve(b);
     }
 
     State state(ctx, new_binding_points);
@@ -523,7 +524,7 @@ Transform::ApplyResult MultiplanarExternalTexture::Apply(const Program* src,
     state.Process();
 
     ctx.Clone();
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 }  // namespace tint::ast::transform

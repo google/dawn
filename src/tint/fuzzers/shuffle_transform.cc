@@ -19,6 +19,7 @@
 
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 
 namespace tint::fuzzers {
 
@@ -38,7 +39,7 @@ ast::transform::Transform::ApplyResult ShuffleTransform::Apply(const Program* sr
     }
 
     ctx.Clone();
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 }  // namespace tint::fuzzers

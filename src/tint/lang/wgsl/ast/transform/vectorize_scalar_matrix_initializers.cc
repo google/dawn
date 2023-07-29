@@ -20,6 +20,7 @@
 #include "src/tint/lang/core/type/abstract_numeric.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
@@ -140,7 +141,7 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* s
     });
 
     ctx.Clone();
-    return Program(std::move(b));
+    return resolver::Resolve(b);
 }
 
 }  // namespace tint::ast::transform

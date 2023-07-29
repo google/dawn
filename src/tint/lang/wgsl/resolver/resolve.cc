@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2023 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/reader/reader.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 
 #include <utility>
 
-#include "src/tint/lang/wgsl/reader/parser/parser.h"
-#include "src/tint/lang/wgsl/resolver/resolve.h"
+#include "src/tint/lang/wgsl/resolver/resolver.h"
 
-namespace tint::wgsl::reader {
+namespace tint::resolver {
 
-Program Parse(Source::File const* file) {
-    Parser parser(file);
-    parser.Parse();
-    return resolver::Resolve(parser.builder());
+Program Resolve(ProgramBuilder& builder) {
+    Resolver resolver(&builder);
+    resolver.Resolve();
+    return Program(std::move(builder));
 }
 
-}  // namespace tint::wgsl::reader
+}  // namespace tint::resolver
