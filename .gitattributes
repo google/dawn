@@ -10,6 +10,7 @@
 *.h         eol=lf
 *.cpp       eol=lf
 *.cc        eol=lf
+*.mm        eol=lf
 *.py        eol=lf
 *.go        eol=lf
 *.tmpl      eol=lf
