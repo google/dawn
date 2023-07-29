@@ -242,31 +242,11 @@ struct State {
                 // Create a loop that copies and converts each element of the array.
                 auto* el_ty = source->Type()->Elements().type;
                 auto* new_arr = b.Var(ty.ptr(function, arr));
-                auto* loop = b.Loop();
-                auto* idx = b.BlockParam("idx", ty.u32());
-                auto* count = b.Constant(u32(arr->ConstantCount().value()));
-                loop->Body()->SetParams({idx});
-                b.Append(loop->Initializer(), [&] {  //
-                    b.NextIteration(loop, b.Constant(0_u));
-                });
-                b.Append(loop->Body(), [&] {
-                    // Loop until idx == count.
-                    auto* breakif = b.If(b.Equal(ty.bool_(), idx, count));
-                    b.Append(breakif->True(), [&] {  //
-                        b.ExitLoop(loop);
-                    });
-
+                b.LoopRange(ty, 0_u, u32(arr->ConstantCount().value()), 1_u, [&](Value* idx) {
                     // Convert arr[idx] and store to new_arr[idx];
                     auto* to = b.Access(ty.ptr(function, arr->ElemType()), new_arr, idx);
                     auto* from = b.Access(el_ty, source, idx)->Result();
                     b.Store(to, Convert(from, arr->ElemType()));
-
-                    b.Continue(loop);
-                });
-                b.Append(loop->Continuing(), [&] {
-                    // Increment idx.
-                    auto* inc = b.Add(ty.u32(), idx, b.Constant(1_u));
-                    b.NextIteration(loop, inc);
                 });
                 return b.Load(new_arr)->Result();
             },

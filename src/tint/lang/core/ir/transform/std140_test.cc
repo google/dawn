@@ -596,7 +596,7 @@ Outer_std140 = struct @align(8), @block {
         next_iteration %b5 0u
       }
       %b5 = block (%idx:u32) {  # body
-        %10:bool = eq %idx:u32, 4u
+        %10:bool = gte %idx:u32, 4u
         if %10 [t: %b7] {  # if_1
           %b7 = block {  # true
             exit_loop  # loop_1
@@ -937,7 +937,7 @@ Outer_std140 = struct @align(8), @block {
         next_iteration %b4 0u
       }
       %b4 = block (%idx:u32) {  # body
-        %16:bool = eq %idx:u32, 4u
+        %16:bool = gte %idx:u32, 4u
         if %16 [t: %b6] {  # if_1
           %b6 = block {  # true
             exit_loop  # loop_1
@@ -1112,7 +1112,7 @@ Outer_std140 = struct @align(8), @block {
         next_iteration %b4 0u
       }
       %b4 = block (%idx:u32) {  # body
-        %16:bool = eq %idx:u32, 4u
+        %16:bool = gte %idx:u32, 4u
         if %16 [t: %b6] {  # if_1
           %b6 = block {  # true
             exit_loop  # loop_1
@@ -1286,7 +1286,7 @@ Outer_std140 = struct @align(8), @block {
         next_iteration %b4 0u
       }
       %b4 = block (%idx:u32) {  # body
-        %19:bool = eq %idx:u32, 4u
+        %19:bool = gte %idx:u32, 4u
         if %19 [t: %b6] {  # if_1
           %b6 = block {  # true
             exit_loop  # loop_1

@@ -851,6 +851,43 @@ class Builder {
         return ir.values.Create<ir::InstructionResult>(type);
     }
 
+    /// Create a ranged loop with a callback to build the loop body.
+    /// @param ty the type manager to use for new types
+    /// @param start the first loop index
+    /// @param end one past the last loop index
+    /// @param step the loop index step amount
+    /// @param cb the callback to call for the loop body
+    template <typename START, typename END, typename STEP, typename FUNCTION>
+    void LoopRange(type::Manager& ty, START&& start, END&& end, STEP&& step, FUNCTION&& cb) {
+        auto* start_value = Value(std::forward<START>(start));
+        auto* end_value = Value(std::forward<END>(end));
+        auto* step_value = Value(std::forward<STEP>(step));
+
+        auto* loop = Loop();
+        auto* idx = BlockParam("idx", start_value->Type());
+        loop->Body()->SetParams({idx});
+        Append(loop->Initializer(), [&] {
+            // Start the loop with `idx = start`.
+            NextIteration(loop, start_value);
+        });
+        Append(loop->Body(), [&] {
+            // Loop until `idx == end`.
+            auto* breakif = If(GreaterThanEqual(ty.bool_(), idx, end_value));
+            Append(breakif->True(), [&] {  //
+                ExitLoop(loop);
+            });
+
+            cb(idx);
+
+            Continue(loop);
+        });
+        Append(loop->Continuing(), [&] {
+            // Update the index with `idx += step` and go to the next iteration.
+            auto* new_idx = Add(idx->Type(), idx, step_value);
+            NextIteration(loop, new_idx);
+        });
+    }
+
     /// The IR module.
     Module& ir;
 
