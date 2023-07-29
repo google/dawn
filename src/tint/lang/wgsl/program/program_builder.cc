@@ -28,43 +28,21 @@ using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint {
 
-ProgramBuilder::VarOptions::~VarOptions() = default;
-ProgramBuilder::LetOptions::~LetOptions() = default;
-ProgramBuilder::ConstOptions::~ConstOptions() = default;
-ProgramBuilder::OverrideOptions::~OverrideOptions() = default;
-
-ProgramBuilder::ProgramBuilder()
-    : id_(GenerationID::New()),
-      ast_(ast_nodes_.Create<ast::Module>(id_, AllocateNodeID(), Source{})) {}
+ProgramBuilder::ProgramBuilder() = default;
 
 ProgramBuilder::ProgramBuilder(ProgramBuilder&& rhs)
-    : constants(std::move(rhs.constants)),
-      id_(std::move(rhs.id_)),
-      last_ast_node_id_(std::move(rhs.last_ast_node_id_)),
-      ast_nodes_(std::move(rhs.ast_nodes_)),
+    : Builder(std::move(rhs)),
+      constants(std::move(rhs.constants)),
       sem_nodes_(std::move(rhs.sem_nodes_)),
-      ast_(std::move(rhs.ast_)),
-      sem_(std::move(rhs.sem_)),
-      symbols_(std::move(rhs.symbols_)),
-      diagnostics_(std::move(rhs.diagnostics_)) {
-    rhs.MarkAsMoved();
-}
+      sem_(std::move(rhs.sem_)) {}
 
 ProgramBuilder::~ProgramBuilder() = default;
 
 ProgramBuilder& ProgramBuilder::operator=(ProgramBuilder&& rhs) {
-    rhs.MarkAsMoved();
-    AssertNotMoved();
-    id_ = std::move(rhs.id_);
-    last_ast_node_id_ = std::move(rhs.last_ast_node_id_);
+    *static_cast<Builder*>(this) = std::move(rhs);
     constants = std::move(rhs.constants);
-    ast_nodes_ = std::move(rhs.ast_nodes_);
     sem_nodes_ = std::move(rhs.sem_nodes_);
-    ast_ = std::move(rhs.ast_);
     sem_ = std::move(rhs.sem_);
-    symbols_ = std::move(rhs.symbols_);
-    diagnostics_ = std::move(rhs.diagnostics_);
-
     return *this;
 }
 
@@ -79,15 +57,6 @@ ProgramBuilder ProgramBuilder::Wrap(const Program* program) {
     builder.symbols_.Wrap(program->Symbols());
     builder.diagnostics_ = program->Diagnostics();
     return builder;
-}
-
-bool ProgramBuilder::IsValid() const {
-    return !diagnostics_.contains_errors();
-}
-
-void ProgramBuilder::MarkAsMoved() {
-    AssertNotMoved();
-    moved_ = true;
 }
 
 void ProgramBuilder::AssertNotMoved() const {
@@ -110,29 +79,6 @@ const type::Type* ProgramBuilder::TypeOf(const ast::Variable* var) const {
 
 const type::Type* ProgramBuilder::TypeOf(const ast::TypeDecl* type_decl) const {
     return Sem().Get(type_decl);
-}
-
-ProgramBuilder::TypesBuilder::TypesBuilder(ProgramBuilder* pb) : builder(pb) {}
-
-const ast::Statement* ProgramBuilder::WrapInStatement(const ast::Expression* expr) {
-    // Create a temporary variable of inferred type from expr.
-    return Decl(Let(symbols_.New(), expr));
-}
-
-const ast::VariableDeclStatement* ProgramBuilder::WrapInStatement(const ast::Variable* v) {
-    return create<ast::VariableDeclStatement>(v);
-}
-
-const ast::Statement* ProgramBuilder::WrapInStatement(const ast::Statement* stmt) {
-    return stmt;
-}
-
-const ast::Function* ProgramBuilder::WrapInFunction(VectorRef<const ast::Statement*> stmts) {
-    return Func("test_function", {}, ty.void_(), std::move(stmts),
-                Vector{
-                    create<ast::StageAttribute>(ast::PipelineStage::kCompute),
-                    WorkgroupSize(1_i, 1_i, 1_i),
-                });
 }
 
 }  // namespace tint

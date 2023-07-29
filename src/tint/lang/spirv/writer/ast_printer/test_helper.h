@@ -30,6 +30,9 @@ namespace tint::spirv::writer {
 template <typename BASE>
 class TestHelperBase : public ProgramBuilder, public BASE {
   public:
+    /// Builder is an alias to the spirv::writer::Builder (as opposed to the ast::Builder)
+    using Builder = writer::Builder;
+
     TestHelperBase() = default;
     ~TestHelperBase() override = default;
 

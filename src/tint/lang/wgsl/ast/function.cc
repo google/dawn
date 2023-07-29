@@ -15,6 +15,7 @@
 #include "src/tint/lang/wgsl/ast/function.h"
 
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
+#include "src/tint/lang/wgsl/ast/type.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 

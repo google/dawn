@@ -15,10 +15,10 @@
 #include "src/tint/lang/wgsl/ast/type.h"
 #include "src/tint/lang/wgsl/ast/identifier_expression.h"
 
-namespace tint {
+namespace tint::ast {
 
 GenerationID GenerationIDOf(ast::Type type) {
     return GenerationIDOf(type.expr);
 }
 
-}  // namespace tint
+}  // namespace tint::ast

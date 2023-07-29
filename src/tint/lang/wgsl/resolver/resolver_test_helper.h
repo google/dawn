@@ -43,7 +43,7 @@ class TestHelper : public ProgramBuilder {
     TestHelper();
 
     /// Destructor
-    ~TestHelper() override;
+    ~TestHelper();
 
     /// @return a pointer to the Resolver
     Resolver* r() const { return resolver_.get(); }
@@ -406,7 +406,7 @@ struct DataType<builtin::fluent_types::vec<N, T>> {
     /// @param b the ProgramBuilder
     /// @return a new AST vector type
     static inline ast::Type AST(ProgramBuilder& b) {
-        if (IsInferOrAbstract<T>) {
+        if (ast::IsInferOrAbstract<T>) {
             return b.ty.vec<builtin::fluent_types::Infer, N>();
         } else {
             return b.ty.vec(DataType<T>::AST(b), N);
@@ -458,7 +458,7 @@ struct DataType<builtin::fluent_types::mat<N, M, T>> {
     /// @param b the ProgramBuilder
     /// @return a new AST matrix type
     static inline ast::Type AST(ProgramBuilder& b) {
-        if (IsInferOrAbstract<T>) {
+        if (ast::IsInferOrAbstract<T>) {
             return b.ty.mat<builtin::fluent_types::Infer, N, M>();
         } else {
             return b.ty.mat(DataType<T>::AST(b), N, M);

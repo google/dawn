@@ -189,6 +189,8 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/ast/break_if_statement.h
   lang/wgsl/ast/break_statement.cc
   lang/wgsl/ast/break_statement.h
+  lang/wgsl/ast/builder.cc
+  lang/wgsl/ast/builder.h
   lang/wgsl/ast/builtin_attribute.cc
   lang/wgsl/ast/builtin_attribute.h
   lang/wgsl/ast/call_expression.cc

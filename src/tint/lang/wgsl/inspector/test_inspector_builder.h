@@ -40,7 +40,7 @@ namespace tint::inspector {
 class InspectorBuilder : public ProgramBuilder {
   public:
     InspectorBuilder();
-    ~InspectorBuilder() override;
+    ~InspectorBuilder();
 
     /// Generates an empty function
     /// @param name name of the function created
