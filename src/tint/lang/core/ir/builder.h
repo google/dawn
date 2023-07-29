@@ -776,6 +776,12 @@ class Builder {
     /// @returns the value
     ir::BlockParam* BlockParam(const type::Type* type);
 
+    /// Creates a new `BlockParam` with a name.
+    /// @param name the parameter name
+    /// @param type the parameter type
+    /// @returns the value
+    ir::BlockParam* BlockParam(std::string_view name, const type::Type* type);
+
     /// Creates a new `FunctionParam`
     /// @param type the parameter type
     /// @returns the value

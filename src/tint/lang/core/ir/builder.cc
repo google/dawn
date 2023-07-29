@@ -88,6 +88,12 @@ ir::BlockParam* Builder::BlockParam(const type::Type* type) {
     return ir.values.Create<ir::BlockParam>(type);
 }
 
+ir::BlockParam* Builder::BlockParam(std::string_view name, const type::Type* type) {
+    auto* param = ir.values.Create<ir::BlockParam>(type);
+    ir.SetName(param, name);
+    return param;
+}
+
 ir::FunctionParam* Builder::FunctionParam(const type::Type* type) {
     return ir.values.Create<ir::FunctionParam>(type);
 }

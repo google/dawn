@@ -50,6 +50,7 @@
 #include "src/tint/lang/core/ir/transform/handle_matrix_arithmetic.h"
 #include "src/tint/lang/core/ir/transform/merge_return.h"
 #include "src/tint/lang/core/ir/transform/shader_io_spirv.h"
+#include "src/tint/lang/core/ir/transform/std140.h"
 #include "src/tint/lang/core/ir/transform/var_for_dynamic_index.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
@@ -97,6 +98,7 @@ void Sanitize(ir::Module* module) {
     ir::transform::HandleMatrixArithmetic{}.Run(module);
     ir::transform::MergeReturn{}.Run(module);
     ir::transform::ShaderIOSpirv{}.Run(module);
+    ir::transform::Std140{}.Run(module);
     ir::transform::VarForDynamicIndex{}.Run(module);
 }
 

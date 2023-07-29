@@ -32,6 +32,13 @@ void Value::Destroy() {
     flags_.Add(Flag::kDead);
 }
 
+void Value::ForEachUse(std::function<void(Usage use)> func) {
+    auto uses = uses_;
+    for (auto& use : uses) {
+        func(use);
+    }
+}
+
 void Value::ReplaceAllUsesWith(std::function<Value*(Usage use)> replacer) {
     while (!uses_.IsEmpty()) {
         auto& use = *uses_.begin();

@@ -519,6 +519,8 @@ if (tint_build_ir) {
         "lang/core/ir/transform/merge_return.h",
         "lang/core/ir/transform/shader_io_spirv.cc",
         "lang/core/ir/transform/shader_io_spirv.h",
+        "lang/core/ir/transform/std140.cc",
+        "lang/core/ir/transform/std140.h",
         "lang/core/ir/transform/var_for_dynamic_index.cc",
         "lang/core/ir/transform/var_for_dynamic_index.h",
       ]
@@ -1896,6 +1898,7 @@ if (tint_build_unittests) {
           "lang/core/ir/transform/handle_matrix_arithmetic_test.cc",
           "lang/core/ir/transform/merge_return_test.cc",
           "lang/core/ir/transform/shader_io_spirv_test.cc",
+          "lang/core/ir/transform/std140_test.cc",
           "lang/core/ir/transform/var_for_dynamic_index_test.cc",
         ]
       }

@@ -676,6 +676,8 @@ if(${TINT_BUILD_SPV_WRITER})
       lang/core/ir/transform/merge_return.h
       lang/core/ir/transform/shader_io_spirv.cc
       lang/core/ir/transform/shader_io_spirv.h
+      lang/core/ir/transform/std140.cc
+      lang/core/ir/transform/std140.h
       lang/core/ir/transform/var_for_dynamic_index.cc
       lang/core/ir/transform/var_for_dynamic_index.h
       lang/spirv/writer/printer/printer.cc
@@ -1373,6 +1375,7 @@ if(TINT_BUILD_TESTS)
         lang/core/ir/transform/expand_implicit_splats_test.cc
         lang/core/ir/transform/merge_return_test.cc
         lang/core/ir/transform/shader_io_spirv_test.cc
+        lang/core/ir/transform/std140_test.cc
         lang/core/ir/transform/var_for_dynamic_index_test.cc
         lang/spirv/writer/access_test.cc
         lang/spirv/writer/atomic_builtin_test.cc
