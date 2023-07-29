@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "src/tint/lang/wgsl/ast/transform/utils/get_insertion_point.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
+#include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/ice/ice.h"
@@ -20,7 +22,7 @@
 
 namespace tint::ast::transform::utils {
 
-InsertionPoint GetInsertionPoint(CloneContext& ctx, const Statement* stmt) {
+InsertionPoint GetInsertionPoint(program::CloneContext& ctx, const Statement* stmt) {
     auto& sem = ctx.src->Sem();
     using RetType = std::pair<const sem::BlockStatement*, const Statement*>;
 

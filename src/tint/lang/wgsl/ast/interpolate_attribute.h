@@ -49,7 +49,7 @@ class InterpolateAttribute final : public Castable<InterpolateAttribute, Attribu
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const InterpolateAttribute* Clone(CloneContext* ctx) const override;
+    const InterpolateAttribute* Clone(CloneContext& ctx) const override;
 
     /// The interpolation type
     const Expression* const type;

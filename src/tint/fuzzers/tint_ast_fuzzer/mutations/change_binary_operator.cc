@@ -355,7 +355,7 @@ bool MutationChangeBinaryOperator::IsApplicable(const Program& program,
 }
 
 void MutationChangeBinaryOperator::Apply(const NodeIdMap& node_id_map,
-                                         CloneContext* clone_context,
+                                         program::CloneContext& clone_context,
                                          NodeIdMap* new_node_id_map) const {
     // Get the node whose operator is to be replaced.
     const auto* binary_expr_node =
@@ -365,94 +365,84 @@ void MutationChangeBinaryOperator::Apply(const NodeIdMap& node_id_map,
     const ast::BinaryExpression* cloned_replacement;
     switch (static_cast<ast::BinaryOp>(message_.new_operator())) {
         case ast::BinaryOp::kAnd:
-            cloned_replacement =
-                clone_context->dst->And(clone_context->Clone(binary_expr_node->lhs),
-                                        clone_context->Clone(binary_expr_node->rhs));
+            cloned_replacement = clone_context.dst->And(clone_context.Clone(binary_expr_node->lhs),
+                                                        clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kOr:
-            cloned_replacement =
-                clone_context->dst->Or(clone_context->Clone(binary_expr_node->lhs),
-                                       clone_context->Clone(binary_expr_node->rhs));
+            cloned_replacement = clone_context.dst->Or(clone_context.Clone(binary_expr_node->lhs),
+                                                       clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kXor:
-            cloned_replacement =
-                clone_context->dst->Xor(clone_context->Clone(binary_expr_node->lhs),
-                                        clone_context->Clone(binary_expr_node->rhs));
+            cloned_replacement = clone_context.dst->Xor(clone_context.Clone(binary_expr_node->lhs),
+                                                        clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kLogicalAnd:
             cloned_replacement =
-                clone_context->dst->LogicalAnd(clone_context->Clone(binary_expr_node->lhs),
-                                               clone_context->Clone(binary_expr_node->rhs));
+                clone_context.dst->LogicalAnd(clone_context.Clone(binary_expr_node->lhs),
+                                              clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kLogicalOr:
             cloned_replacement =
-                clone_context->dst->LogicalOr(clone_context->Clone(binary_expr_node->lhs),
-                                              clone_context->Clone(binary_expr_node->rhs));
+                clone_context.dst->LogicalOr(clone_context.Clone(binary_expr_node->lhs),
+                                             clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kEqual:
             cloned_replacement =
-                clone_context->dst->Equal(clone_context->Clone(binary_expr_node->lhs),
-                                          clone_context->Clone(binary_expr_node->rhs));
+                clone_context.dst->Equal(clone_context.Clone(binary_expr_node->lhs),
+                                         clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kNotEqual:
             cloned_replacement =
-                clone_context->dst->NotEqual(clone_context->Clone(binary_expr_node->lhs),
-                                             clone_context->Clone(binary_expr_node->rhs));
+                clone_context.dst->NotEqual(clone_context.Clone(binary_expr_node->lhs),
+                                            clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kLessThan:
             cloned_replacement =
-                clone_context->dst->LessThan(clone_context->Clone(binary_expr_node->lhs),
-                                             clone_context->Clone(binary_expr_node->rhs));
+                clone_context.dst->LessThan(clone_context.Clone(binary_expr_node->lhs),
+                                            clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kGreaterThan:
             cloned_replacement =
-                clone_context->dst->GreaterThan(clone_context->Clone(binary_expr_node->lhs),
-                                                clone_context->Clone(binary_expr_node->rhs));
+                clone_context.dst->GreaterThan(clone_context.Clone(binary_expr_node->lhs),
+                                               clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kLessThanEqual:
             cloned_replacement =
-                clone_context->dst->LessThanEqual(clone_context->Clone(binary_expr_node->lhs),
-                                                  clone_context->Clone(binary_expr_node->rhs));
+                clone_context.dst->LessThanEqual(clone_context.Clone(binary_expr_node->lhs),
+                                                 clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kGreaterThanEqual:
             cloned_replacement =
-                clone_context->dst->GreaterThanEqual(clone_context->Clone(binary_expr_node->lhs),
-                                                     clone_context->Clone(binary_expr_node->rhs));
+                clone_context.dst->GreaterThanEqual(clone_context.Clone(binary_expr_node->lhs),
+                                                    clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kShiftLeft:
-            cloned_replacement =
-                clone_context->dst->Shl(clone_context->Clone(binary_expr_node->lhs),
-                                        clone_context->Clone(binary_expr_node->rhs));
+            cloned_replacement = clone_context.dst->Shl(clone_context.Clone(binary_expr_node->lhs),
+                                                        clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kShiftRight:
-            cloned_replacement =
-                clone_context->dst->Shr(clone_context->Clone(binary_expr_node->lhs),
-                                        clone_context->Clone(binary_expr_node->rhs));
+            cloned_replacement = clone_context.dst->Shr(clone_context.Clone(binary_expr_node->lhs),
+                                                        clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kAdd:
-            cloned_replacement =
-                clone_context->dst->Add(clone_context->Clone(binary_expr_node->lhs),
-                                        clone_context->Clone(binary_expr_node->rhs));
+            cloned_replacement = clone_context.dst->Add(clone_context.Clone(binary_expr_node->lhs),
+                                                        clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kSubtract:
-            cloned_replacement =
-                clone_context->dst->Sub(clone_context->Clone(binary_expr_node->lhs),
-                                        clone_context->Clone(binary_expr_node->rhs));
+            cloned_replacement = clone_context.dst->Sub(clone_context.Clone(binary_expr_node->lhs),
+                                                        clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kMultiply:
-            cloned_replacement =
-                clone_context->dst->Mul(clone_context->Clone(binary_expr_node->lhs),
-                                        clone_context->Clone(binary_expr_node->rhs));
+            cloned_replacement = clone_context.dst->Mul(clone_context.Clone(binary_expr_node->lhs),
+                                                        clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kDivide:
-            cloned_replacement =
-                clone_context->dst->Div(clone_context->Clone(binary_expr_node->lhs),
-                                        clone_context->Clone(binary_expr_node->rhs));
+            cloned_replacement = clone_context.dst->Div(clone_context.Clone(binary_expr_node->lhs),
+                                                        clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kModulo:
-            cloned_replacement =
-                clone_context->dst->Mod(clone_context->Clone(binary_expr_node->lhs),
-                                        clone_context->Clone(binary_expr_node->rhs));
+            cloned_replacement = clone_context.dst->Mod(clone_context.Clone(binary_expr_node->lhs),
+                                                        clone_context.Clone(binary_expr_node->rhs));
             break;
         case ast::BinaryOp::kNone:
             cloned_replacement = nullptr;
@@ -460,7 +450,7 @@ void MutationChangeBinaryOperator::Apply(const NodeIdMap& node_id_map,
     }
     // Set things up so that the original binary expression will be replaced with
     // its clone, and update the id mapping.
-    clone_context->Replace(binary_expr_node, cloned_replacement);
+    clone_context.Replace(binary_expr_node, cloned_replacement);
     new_node_id_map->Add(cloned_replacement, message_.binary_expr_id());
 }
 

@@ -73,7 +73,7 @@ class DisableValidationAttribute final
     /// Performs a deep clone of this object using the CloneContext `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned object
-    const DisableValidationAttribute* Clone(CloneContext* ctx) const override;
+    const DisableValidationAttribute* Clone(CloneContext& ctx) const override;
 
     /// The validation that this attribute disables
     const DisabledValidation validation;

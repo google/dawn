@@ -51,7 +51,7 @@ class StructMember final : public Castable<StructMember, Node> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const StructMember* Clone(CloneContext* ctx) const override;
+    const StructMember* Clone(CloneContext& ctx) const override;
 
     /// The member name
     const Identifier* const name;

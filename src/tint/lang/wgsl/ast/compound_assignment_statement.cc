@@ -14,7 +14,8 @@
 
 #include "src/tint/lang/wgsl/ast/compound_assignment_statement.h"
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::CompoundAssignmentStatement);
 
@@ -35,12 +36,12 @@ CompoundAssignmentStatement::CompoundAssignmentStatement(GenerationID pid,
 
 CompoundAssignmentStatement::~CompoundAssignmentStatement() = default;
 
-const CompoundAssignmentStatement* CompoundAssignmentStatement::Clone(CloneContext* ctx) const {
+const CompoundAssignmentStatement* CompoundAssignmentStatement::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto* l = ctx->Clone(lhs);
-    auto* r = ctx->Clone(rhs);
-    return ctx->dst->create<CompoundAssignmentStatement>(src, l, r, op);
+    auto src = ctx.Clone(source);
+    auto* l = ctx.Clone(lhs);
+    auto* r = ctx.Clone(rhs);
+    return ctx.dst->create<CompoundAssignmentStatement>(src, l, r, op);
 }
 
 }  // namespace tint::ast

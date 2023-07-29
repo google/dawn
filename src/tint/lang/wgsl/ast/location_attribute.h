@@ -40,7 +40,7 @@ class LocationAttribute final : public Castable<LocationAttribute, Attribute> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const LocationAttribute* Clone(CloneContext* ctx) const override;
+    const LocationAttribute* Clone(CloneContext& ctx) const override;
 
     /// The location expression
     const Expression* const expr;

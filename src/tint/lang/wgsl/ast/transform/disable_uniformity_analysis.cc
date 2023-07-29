@@ -16,6 +16,7 @@
 
 #include <utility>
 
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/module.h"
 
@@ -36,7 +37,7 @@ Transform::ApplyResult DisableUniformityAnalysis::Apply(const Program* src,
     }
 
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
     b.Enable(builtin::Extension::kChromiumDisableUniformityAnalysis);
 
     ctx.Clone();

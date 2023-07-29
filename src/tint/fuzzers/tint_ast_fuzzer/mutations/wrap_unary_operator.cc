@@ -74,16 +74,16 @@ bool MutationWrapUnaryOperator::IsApplicable(const tint::Program& program,
 }
 
 void MutationWrapUnaryOperator::Apply(const NodeIdMap& node_id_map,
-                                      tint::CloneContext* clone_context,
+                                      tint::program::CloneContext& clone_context,
                                       NodeIdMap* new_node_id_map) const {
     auto* expression_node =
         tint::As<ast::Expression>(node_id_map.GetNode(message_.expression_id()));
 
-    auto* replacement_expression_node = clone_context->dst->create<ast::UnaryOpExpression>(
+    auto* replacement_expression_node = clone_context.dst->create<ast::UnaryOpExpression>(
         static_cast<ast::UnaryOp>(message_.unary_op_wrapper()),
-        clone_context->Clone(expression_node));
+        clone_context.Clone(expression_node));
 
-    clone_context->Replace(expression_node, replacement_expression_node);
+    clone_context.Replace(expression_node, replacement_expression_node);
 
     new_node_id_map->Add(replacement_expression_node, message_.fresh_id());
 }

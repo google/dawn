@@ -21,6 +21,7 @@
 
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/lang/wgsl/sem/call.h"
@@ -146,7 +147,7 @@ struct BuiltinPolyfill::State {
     /// The destination program builder
     ProgramBuilder b;
     /// The clone context
-    CloneContext ctx{&b, src};
+    program::CloneContext ctx{&b, src};
     /// The source clone context
     const sem::Info& sem = src->Sem();
     /// Polyfill functions for binary operators.

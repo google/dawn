@@ -21,6 +21,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/wgsl/ast/builder.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/hashset.h"
 #include "src/tint/utils/containers/vector.h"
@@ -34,42 +35,13 @@
 #include "src/tint/utils/traits/traits.h"
 
 // Forward declarations
-namespace tint {
-class CloneContext;
-class Program;
-class ProgramBuilder;
-}  // namespace tint
 namespace tint::ast {
 class FunctionList;
 class Node;
 struct Type;
 }  // namespace tint::ast
 
-namespace tint {
-
-GenerationID GenerationIDOf(const Program*);
-GenerationID GenerationIDOf(const ProgramBuilder*);
-
-/// Cloneable is the base class for all objects that can be cloned
-class Cloneable : public Castable<Cloneable> {
-  public:
-    /// Constructor
-    Cloneable();
-    /// Move constructor
-    Cloneable(Cloneable&&);
-    /// Destructor
-    ~Cloneable() override;
-
-    /// Performs a deep clone of this object using the CloneContext `ctx`.
-    /// @param ctx the clone context
-    /// @return the newly cloned object
-    virtual const Cloneable* Clone(CloneContext* ctx) const = 0;
-};
-
-/// @returns an invalid GenerationID
-inline GenerationID GenerationIDOf(const Cloneable*) {
-    return GenerationID();
-}
+namespace tint::ast {
 
 /// CloneContext holds the state used while cloning AST nodes.
 class CloneContext {
@@ -85,35 +57,28 @@ class CloneContext {
     using SymbolTransform = std::function<Symbol(Symbol)>;
 
     /// Constructor for cloning objects from `from` into `to`.
-    /// @param to the target ProgramBuilder to clone into
-    /// @param from the source Program to clone from
-    /// @param auto_clone_symbols clone all symbols in `from` before returning
-    CloneContext(ProgramBuilder* to, Program const* from, bool auto_clone_symbols = true);
-
-    /// Constructor for cloning objects from and to the ProgramBuilder `builder`.
-    /// @param builder the ProgramBuilder
-    explicit CloneContext(ProgramBuilder* builder);
+    /// @param to the target Builder to clone into
+    /// @param from the generation ID of the source program being cloned
+    CloneContext(Builder* to, GenerationID from);
 
     /// Destructor
     ~CloneContext();
 
-    /// Clones the Node or type::Type `a` into the ProgramBuilder #dst if `a` is
-    /// not null. If `a` is null, then Clone() returns null.
+    /// Clones the Node or type::Type @p object into the Builder #dst if @p object is not null. If
+    /// @p object is null, then Clone() returns null.
     ///
-    /// Clone() may use a function registered with ReplaceAll() to create a
-    /// transformed version of the object. See ReplaceAll() for more information.
+    /// Clone() may use a function registered with ReplaceAll() to create a transformed version of
+    /// the object. See ReplaceAll() for more information.
     ///
-    /// If the CloneContext is cloning from a Program to a ProgramBuilder, then
-    /// the Node or type::Type `a` must be owned by the Program #src.
+    /// If the CloneContext is cloning from a Program to a Builder, then the Node or type::Type @p
+    /// object must be owned by the source program.
     ///
-    /// @param object the type deriving from Cloneable to clone
+    /// @param object the type deriving from Node to clone
     /// @return the cloned node
     template <typename T>
     const T* Clone(const T* object) {
-        if (src) {
-            TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src, object);
-        }
-        if (auto* cloned = CloneCloneable(object)) {
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src_id, object);
+        if (auto* cloned = CloneNode(object)) {
             auto* out = CheckedCast<T>(cloned);
             TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(dst, out);
             return out;
@@ -121,16 +86,16 @@ class CloneContext {
         return nullptr;
     }
 
-    /// Clones the Node or type::Type `a` into the ProgramBuilder #dst if `a` is
-    /// not null. If `a` is null, then Clone() returns null.
+    /// Clones the Node or type::Type @p object into the Builder #dst if @p object is not null. If
+    /// @p object is null, then Clone() returns null.
     ///
-    /// Unlike Clone(), this method does not invoke or use any transformations
-    /// registered by ReplaceAll().
+    /// Unlike Clone(), this method does not invoke or use any transformations registered by
+    /// ReplaceAll().
     ///
-    /// If the CloneContext is cloning from a Program to a ProgramBuilder, then
-    /// the Node or type::Type `a` must be owned by the Program #src.
+    /// If the CloneContext is cloning from a Program to a Builder, then the Node or type::Type @p
+    /// object must be owned by the source program.
     ///
-    /// @param a the type deriving from Cloneable to clone
+    /// @param a the type deriving from Node to clone
     /// @return the cloned node
     template <typename T>
     const T* CloneWithoutTransform(const T* a) {
@@ -138,14 +103,12 @@ class CloneContext {
         if (a == nullptr) {
             return nullptr;
         }
-        if (src) {
-            TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src, a);
-        }
-        auto* c = a->Clone(this);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src_id, a);
+        auto* c = a->Clone(*this);
         return CheckedCast<T>(c);
     }
 
-    /// Clones the ast::Type `ty` into the ProgramBuilder #dst
+    /// Clones the ast::Type `ty` into the Builder #dst
     /// @param ty the AST type.
     /// @return the cloned node
     ast::Type Clone(const ast::Type& ty);
@@ -160,16 +123,16 @@ class CloneContext {
 
     /// Clones the Symbol `s` into #dst
     ///
-    /// The Symbol `s` must be owned by the Program #src.
+    /// The Symbol `s` must be owned by the source program.
     ///
     /// @param s the Symbol to clone
     /// @return the cloned source
     Symbol Clone(Symbol s);
 
-    /// Clones each of the elements of the vector `v` into the ProgramBuilder
+    /// Clones each of the elements of the vector `v` into the Builder
     /// #dst.
     ///
-    /// All the elements of the vector `v` must be owned by the Program #src.
+    /// All the elements of the vector `v` must be owned by the source program.
     ///
     /// @param v the vector to clone
     /// @return the cloned vector
@@ -183,11 +146,11 @@ class CloneContext {
         return out;
     }
 
-    /// Clones each of the elements of the vector `v` using the ProgramBuilder
+    /// Clones each of the elements of the vector `v` using the Builder
     /// #dst, inserting any additional elements into the list that were registered
     /// with calls to InsertBefore().
     ///
-    /// All the elements of the vector `v` must be owned by the Program #src.
+    /// All the elements of the vector `v` must be owned by the source program.
     ///
     /// @param v the vector to clone
     /// @return the cloned vector
@@ -202,7 +165,7 @@ class CloneContext {
     /// inserting any additional elements into the list that were registered with
     /// calls to InsertBefore().
     ///
-    /// All the elements of the vector `from` must be owned by the Program #src.
+    /// All the elements of the vector `from` must be owned by the source program.
     ///
     /// @param from the vector to clone
     /// @param to the cloned result
@@ -259,24 +222,24 @@ class CloneContext {
         }
     }
 
-    /// Clones each of the elements of the vector `v` into the ProgramBuilder
+    /// Clones each of the elements of the vector `v` into the Builder
     /// #dst.
     ///
-    /// All the elements of the vector `v` must be owned by the Program #src.
+    /// All the elements of the vector `v` must be owned by the source program.
     ///
     /// @param v the vector to clone
     /// @return the cloned vector
     ast::FunctionList Clone(const ast::FunctionList& v);
 
     /// ReplaceAll() registers `replacer` to be called whenever the Clone() method
-    /// is called with a Cloneable type that matches (or derives from) the type of
+    /// is called with a Node type that matches (or derives from) the type of
     /// the single parameter of `replacer`.
-    /// The returned Cloneable of `replacer` will be used as the replacement for
-    /// all references to the object that's being cloned. This returned Cloneable
+    /// The returned Node of `replacer` will be used as the replacement for
+    /// all references to the object that's being cloned. This returned Node
     /// must be owned by the Program #dst.
     ///
     /// `replacer` must be function-like with the signature: `T* (T*)`
-    ///  where `T` is a type deriving from Cloneable.
+    ///  where `T` is a type deriving from Node.
     ///
     /// If `replacer` returns a nullptr then Clone() will call `T::Clone()` to
     /// clone the object.
@@ -287,9 +250,9 @@ class CloneContext {
     ///   // Replace all ast::UintLiteralExpressions with the number 42
     ///   CloneCtx ctx(&out, in);
     ///   ctx.ReplaceAll([&] (ast::UintLiteralExpression* l) {
-    ///       return ctx->dst->create<ast::UintLiteralExpression>(
-    ///           ctx->Clone(l->source),
-    ///           ctx->Clone(l->type),
+    ///       return ctx.dst->create<ast::UintLiteralExpression>(
+    ///           ctx.Clone(l->source),
+    ///           ctx.Clone(l->type),
     ///           42);
     ///     });
     ///   ctx.Clone();
@@ -302,11 +265,11 @@ class CloneContext {
     /// references of the original object. A type mismatch will result in an
     /// assertion in debug builds, and undefined behavior in release builds.
     /// @param replacer a function or function-like object with the signature
-    ///        `T* (T*)`, where `T` derives from Cloneable
+    ///        `T* (T*)`, where `T` derives from Node
     /// @returns this CloneContext so calls can be chained
     template <typename F>
-    tint::traits::EnableIf<ParamTypeIsPtrOf<F, Cloneable>, CloneContext>& ReplaceAll(F&& replacer) {
-        using TPtr = tint::traits::ParameterType<F, 0>;
+    traits::EnableIf<ParamTypeIsPtrOf<F, ast::Node>, CloneContext>& ReplaceAll(F&& replacer) {
+        using TPtr = traits::ParameterType<F, 0>;
         using T = typename std::remove_pointer<TPtr>::type;
         for (auto& transform : transforms_) {
             bool already_registered = transform.typeinfo->Is(&tint::TypeInfo::Of<T>()) ||
@@ -320,8 +283,8 @@ class CloneContext {
             }
         }
         CloneableTransform transform;
-        transform.typeinfo = &tint::TypeInfo::Of<T>();
-        transform.function = [=](const Cloneable* in) { return replacer(in->As<T>()); };
+        transform.typeinfo = &TypeInfo::Of<T>();
+        transform.function = [=](const ast::Node* in) { return replacer(in->As<T>()); };
         transforms_.Push(std::move(transform));
         return *this;
     }
@@ -345,11 +308,11 @@ class CloneContext {
         return *this;
     }
 
-    /// Replace replaces all occurrences of `what` in #src with the pointer `with`
+    /// Replace replaces all occurrences of `what` in the source program with the pointer `with`
     /// in #dst when calling Clone().
     /// [DEPRECATED]: This function cannot handle nested replacements. Use the
     /// overload of Replace() that take a function for the `WITH` argument.
-    /// @param what a pointer to the object in #src that will be replaced with
+    /// @param what a pointer to the object in the source program that will be replaced with
     /// `with`
     /// @param with a pointer to the replacement object owned by #dst that will be
     /// used as a replacement for `what`
@@ -357,21 +320,19 @@ class CloneContext {
     /// references of the original object. A type mismatch will result in an
     /// assertion in debug builds, and undefined behavior in release builds.
     /// @returns this CloneContext so calls can be chained
-    template <typename WHAT,
-              typename WITH,
-              typename = tint::traits::EnableIfIsType<WITH, Cloneable>>
+    template <typename WHAT, typename WITH, typename = traits::EnableIfIsType<WITH, ast::Node>>
     CloneContext& Replace(const WHAT* what, const WITH* with) {
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src, what);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src_id, what);
         TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(dst, with);
-        replacements_.Replace(what, [with]() -> const Cloneable* { return with; });
+        replacements_.Replace(what, [with]() -> const ast::Node* { return with; });
         return *this;
     }
 
-    /// Replace replaces all occurrences of `what` in #src with the result of the
+    /// Replace replaces all occurrences of `what` in the source program with the result of the
     /// function `with` in #dst when calling Clone(). `with` will be called each
     /// time `what` is cloned by this context. If `what` is not cloned, then
     /// `with` may never be called.
-    /// @param what a pointer to the object in #src that will be replaced with
+    /// @param what a pointer to the object in the source program that will be replaced with
     /// `with`
     /// @param with a function that takes no arguments and returns a pointer to
     /// the replacement object owned by #dst. The returned pointer will be used as
@@ -382,19 +343,19 @@ class CloneContext {
     /// @returns this CloneContext so calls can be chained
     template <typename WHAT, typename WITH, typename = std::invoke_result_t<WITH>>
     CloneContext& Replace(const WHAT* what, WITH&& with) {
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src, what);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src_id, what);
         replacements_.Replace(what, with);
         return *this;
     }
 
     /// Removes @p object from the cloned copy of @p vector.
-    /// @param vector the vector in #src
-    /// @param object a pointer to the object in #src that will be omitted from
+    /// @param vector the vector in the source program
+    /// @param object a pointer to the object in the source program that will be omitted from
     /// the cloned vector.
     /// @returns this CloneContext so calls can be chained
     template <typename T, size_t N, typename OBJECT>
     CloneContext& Remove(const Vector<T, N>& vector, OBJECT* object) {
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src, object);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src_id, object);
         if (TINT_UNLIKELY((std::find(vector.begin(), vector.end(), object) == vector.end()))) {
             TINT_ICE() << "CloneContext::Remove() vector does not contain object";
             return *this;
@@ -405,7 +366,7 @@ class CloneContext {
     }
 
     /// Inserts @p object before any other objects of @p vector, when the vector is cloned.
-    /// @param vector the vector in #src
+    /// @param vector the vector in the source program
     /// @param object a pointer to the object in #dst that will be inserted at the
     /// front of the vector
     /// @returns this CloneContext so calls can be chained
@@ -417,7 +378,7 @@ class CloneContext {
 
     /// Inserts a lazily built object before any other objects of @p vector, when the vector is
     /// cloned.
-    /// @param vector the vector in #src
+    /// @param vector the vector in the source program
     /// @param builder a builder of the object that will be inserted at the front of the vector.
     /// @returns this CloneContext so calls can be chained
     template <typename T, size_t N, typename BUILDER>
@@ -427,7 +388,7 @@ class CloneContext {
     }
 
     /// Inserts @p object after any other objects of @p vector, when the vector is cloned.
-    /// @param vector the vector in #src
+    /// @param vector the vector in the source program
     /// @param object a pointer to the object in #dst that will be inserted at the
     /// end of the vector
     /// @returns this CloneContext so calls can be chained
@@ -439,7 +400,7 @@ class CloneContext {
 
     /// Inserts a lazily built object after any other objects of @p vector, when the vector is
     /// cloned.
-    /// @param vector the vector in #src
+    /// @param vector the vector in the source program
     /// @param builder the builder of the object in #dst that will be inserted at the end of the
     /// vector.
     /// @returns this CloneContext so calls can be chained
@@ -450,8 +411,8 @@ class CloneContext {
     }
 
     /// Inserts @p object before @p before whenever @p vector is cloned.
-    /// @param vector the vector in #src
-    /// @param before a pointer to the object in #src
+    /// @param vector the vector in the source program
+    /// @param before a pointer to the object in the source program
     /// @param object a pointer to the object in #dst that will be inserted before
     /// any occurrence of the clone of @p before
     /// @returns this CloneContext so calls can be chained
@@ -459,7 +420,7 @@ class CloneContext {
     CloneContext& InsertBefore(const tint::Vector<T, N>& vector,
                                const BEFORE* before,
                                const OBJECT* object) {
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src, before);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src_id, before);
         TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(dst, object);
         if (TINT_UNLIKELY((std::find(vector.begin(), vector.end(), before) == vector.end()))) {
             TINT_ICE() << "CloneContext::InsertBefore() vector does not contain before";
@@ -472,8 +433,8 @@ class CloneContext {
     }
 
     /// Inserts a lazily created object before @p before whenever @p vector is cloned.
-    /// @param vector the vector in #src
-    /// @param before a pointer to the object in #src
+    /// @param vector the vector in the source program
+    /// @param before a pointer to the object in the source program
     /// @param builder the builder of the object in #dst that will be inserted before any occurrence
     /// of the clone of @p before
     /// @returns this CloneContext so calls can be chained
@@ -491,8 +452,8 @@ class CloneContext {
     }
 
     /// Inserts @p object after @p after whenever @p vector is cloned.
-    /// @param vector the vector in #src
-    /// @param after a pointer to the object in #src
+    /// @param vector the vector in the source program
+    /// @param after a pointer to the object in the source program
     /// @param object a pointer to the object in #dst that will be inserted after
     /// any occurrence of the clone of @p after
     /// @returns this CloneContext so calls can be chained
@@ -500,7 +461,7 @@ class CloneContext {
     CloneContext& InsertAfter(const tint::Vector<T, N>& vector,
                               const AFTER* after,
                               const OBJECT* object) {
-        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src, after);
+        TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(src_id, after);
         TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(dst, object);
         if (TINT_UNLIKELY((std::find(vector.begin(), vector.end(), after) == vector.end()))) {
             TINT_ICE() << "CloneContext::InsertAfter() vector does not contain after";
@@ -513,8 +474,8 @@ class CloneContext {
     }
 
     /// Inserts a lazily created object after @p after whenever @p vector is cloned.
-    /// @param vector the vector in #src
-    /// @param after a pointer to the object in #src
+    /// @param vector the vector in the source program
+    /// @param after a pointer to the object in the source program
     /// @param builder the builder of the object in #dst that will be inserted after any occurrence
     /// of the clone of @p after
     /// @returns this CloneContext so calls can be chained
@@ -531,16 +492,11 @@ class CloneContext {
         return *this;
     }
 
-    /// Clone performs the clone of the Program's AST nodes, types and symbols
-    /// from #src to #dst. Semantic nodes are not cloned, as these will be rebuilt
-    /// when the ProgramBuilder #dst builds its Program.
-    void Clone();
+    /// The target Builder to clone into.
+    Builder* const dst;
 
-    /// The target ProgramBuilder to clone into.
-    ProgramBuilder* const dst;
-
-    /// The source Program to clone from.
-    Program const* const src;
+    /// The source Program generation identifier.
+    GenerationID const src_id;
 
   private:
     struct CloneableTransform {
@@ -552,34 +508,34 @@ class CloneContext {
         /// Destructor
         ~CloneableTransform();
 
-        // tint::TypeInfo of the Cloneable that the transform operates on
-        const tint::TypeInfo* typeinfo;
-        std::function<const Cloneable*(const Cloneable*)> function;
+        // TypeInfo of the Node that the transform operates on
+        const TypeInfo* typeinfo;
+        std::function<const ast::Node*(const ast::Node*)> function;
     };
 
-    /// A vector of const Cloneable*
-    using CloneableBuilderList = tint::Vector<std::function<const Cloneable*()>, 4>;
+    /// A vector of const ast::Node*
+    using NodeBuilderList = Vector<std::function<const ast::Node*()>, 4>;
 
     /// Transformations to be applied to a list (vector)
     struct ListTransforms {
-        /// A map of object in #src to omit when cloned into #dst.
-        Hashset<const Cloneable*, 4> remove_;
+        /// A map of object in the source program to omit when cloned into #dst.
+        Hashset<const ast::Node*, 4> remove_;
 
         /// A list of objects in #dst to insert before any others when the vector is cloned.
-        CloneableBuilderList insert_front_;
+        NodeBuilderList insert_front_;
 
         /// A list of objects in #dst to insert after all others when the vector is cloned.
-        CloneableBuilderList insert_back_;
+        NodeBuilderList insert_back_;
 
-        /// A map of object in #src to the list of cloned objects in #dst.
-        /// Clone(const tint::Vector<T*>& v) will use this to insert the map-value
+        /// A map of object in the source program to the list of cloned objects in #dst.
+        /// Clone(const Vector<T*>& v) will use this to insert the map-value
         /// list into the target vector before cloning and inserting the map-key.
-        Hashmap<const Cloneable*, CloneableBuilderList, 4> insert_before_;
+        Hashmap<const ast::Node*, NodeBuilderList, 4> insert_before_;
 
-        /// A map of object in #src to the list of cloned objects in #dst.
-        /// Clone(const tint::Vector<T*>& v) will use this to insert the map-value
+        /// A map of object in the source program to the list of cloned objects in #dst.
+        /// Clone(const Vector<T*>& v) will use this to insert the map-value
         /// list into the target vector after cloning and inserting the map-key.
-        Hashmap<const Cloneable*, CloneableBuilderList, 4> insert_after_;
+        Hashmap<const ast::Node*, NodeBuilderList, 4> insert_after_;
     };
 
     CloneContext(const CloneContext&) = delete;
@@ -600,25 +556,25 @@ class CloneContext {
         return nullptr;
     }
 
-    /// Clones a Cloneable object, using any replacements or transforms that have
+    /// Clones a Node object, using any replacements or transforms that have
     /// been configured.
-    const Cloneable* CloneCloneable(const Cloneable* object);
+    const ast::Node* CloneNode(const ast::Node* object);
 
     /// Adds an error diagnostic to Diagnostics() that the cloned object was not
     /// of the expected type.
-    void CheckedCastFailure(const Cloneable* got, const tint::TypeInfo& expected);
+    void CheckedCastFailure(const ast::Node* got, const TypeInfo& expected);
 
     /// @returns the diagnostic list of #dst
     diag::List& Diagnostics() const;
 
-    /// A map of object in #src to functions that create their replacement in #dst
-    Hashmap<const Cloneable*, std::function<const Cloneable*()>, 8> replacements_;
+    /// A map of object in the source program to functions that create their replacement in #dst
+    Hashmap<const ast::Node*, std::function<const ast::Node*()>, 8> replacements_;
 
-    /// A map of symbol in #src to their cloned equivalent in #dst
+    /// A map of symbol in the source program to their cloned equivalent in #dst
     Hashmap<Symbol, Symbol, 32> cloned_symbols_;
 
-    /// Cloneable transform functions registered with ReplaceAll()
-    tint::Vector<CloneableTransform, 8> transforms_;
+    /// Node transform functions registered with ReplaceAll()
+    Vector<CloneableTransform, 8> transforms_;
 
     /// Transformations to apply to vectors
     Hashmap<const void*, ListTransforms, 4> list_transforms_;
@@ -627,6 +583,6 @@ class CloneContext {
     SymbolTransform symbol_transform_;
 };
 
-}  // namespace tint
+}  // namespace tint::ast
 
 #endif  // SRC_TINT_LANG_WGSL_AST_CLONE_CONTEXT_H_

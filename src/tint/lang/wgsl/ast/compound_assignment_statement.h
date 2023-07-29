@@ -45,7 +45,7 @@ class CompoundAssignmentStatement final : public Castable<CompoundAssignmentStat
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const CompoundAssignmentStatement* Clone(CloneContext* ctx) const override;
+    const CompoundAssignmentStatement* Clone(CloneContext& ctx) const override;
 
     /// left side expression
     const Expression* const lhs;

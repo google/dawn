@@ -14,10 +14,11 @@
 
 #include "src/tint/lang/wgsl/ast/function.h"
 
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/type.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
-#include "src/tint/lang/wgsl/program/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Function);
 
@@ -67,16 +68,16 @@ PipelineStage Function::PipelineStage() const {
     return PipelineStage::kNone;
 }
 
-const Function* Function::Clone(CloneContext* ctx) const {
+const Function* Function::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto n = ctx->Clone(name);
-    auto p = ctx->Clone(params);
-    auto ret = ctx->Clone(return_type);
-    auto* b = ctx->Clone(body);
-    auto attrs = ctx->Clone(attributes);
-    auto ret_attrs = ctx->Clone(return_type_attributes);
-    return ctx->dst->create<Function>(src, n, p, ret, b, attrs, ret_attrs);
+    auto src = ctx.Clone(source);
+    auto n = ctx.Clone(name);
+    auto p = ctx.Clone(params);
+    auto ret = ctx.Clone(return_type);
+    auto* b = ctx.Clone(body);
+    auto attrs = ctx.Clone(attributes);
+    auto ret_attrs = ctx.Clone(return_type_attributes);
+    return ctx.dst->create<Function>(src, n, p, ret, b, attrs, ret_attrs);
 }
 
 const Function* FunctionList::Find(Symbol sym) const {

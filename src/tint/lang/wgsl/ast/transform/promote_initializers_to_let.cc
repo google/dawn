@@ -19,6 +19,7 @@
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/hoist_to_decl_before.h"
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
@@ -37,7 +38,7 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
                                                        const DataMap&,
                                                        DataMap&) const {
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     // Returns true if the expression should be hoisted to a new let statement before the
     // expression's statement.

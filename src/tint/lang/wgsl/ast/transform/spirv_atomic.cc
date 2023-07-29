@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/function.h"
@@ -52,7 +53,7 @@ struct SpirvAtomic::State {
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
     std::unordered_map<const type::Struct*, ForkedStruct> forked_structs;
     std::unordered_set<const sem::Variable*> atomic_variables;
     UniqueVector<const sem::ValueExpression*, 8> atomic_expressions;
@@ -300,9 +301,9 @@ std::string SpirvAtomic::Stub::InternalName() const {
     return "@internal(spirv-atomic " + std::string(builtin::str(builtin)) + ")";
 }
 
-const SpirvAtomic::Stub* SpirvAtomic::Stub::Clone(CloneContext* ctx) const {
-    return ctx->dst->ASTNodes().Create<SpirvAtomic::Stub>(ctx->dst->ID(),
-                                                          ctx->dst->AllocateNodeID(), builtin);
+const SpirvAtomic::Stub* SpirvAtomic::Stub::Clone(ast::CloneContext& ctx) const {
+    return ctx.dst->ASTNodes().Create<SpirvAtomic::Stub>(ctx.dst->ID(), ctx.dst->AllocateNodeID(),
+                                                         builtin);
 }
 
 Transform::ApplyResult SpirvAtomic::Apply(const Program* src, const DataMap&, DataMap&) const {

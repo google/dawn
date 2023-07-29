@@ -37,7 +37,7 @@ class CallStatement final : public Castable<CallStatement, Statement> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const CallStatement* Clone(CloneContext* ctx) const override;
+    const CallStatement* Clone(CloneContext& ctx) const override;
 
     /// The call expression
     const CallExpression* const expr;

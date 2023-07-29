@@ -35,7 +35,7 @@ class DiscardStatement final : public Castable<DiscardStatement, Statement> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const DiscardStatement* Clone(CloneContext* ctx) const override;
+    const DiscardStatement* Clone(CloneContext& ctx) const override;
 };
 
 }  // namespace tint::ast

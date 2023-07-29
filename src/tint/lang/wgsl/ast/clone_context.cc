@@ -16,45 +16,22 @@
 
 #include <string>
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
 #include "src/tint/utils/containers/map.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::Cloneable);
+namespace tint::ast {
 
-namespace tint {
-
-Cloneable::Cloneable() = default;
-Cloneable::Cloneable(Cloneable&&) = default;
-Cloneable::~Cloneable() = default;
-
-CloneContext::CloneContext(ProgramBuilder* to, Program const* from, bool auto_clone_symbols)
-    : dst(to), src(from) {
-    if (auto_clone_symbols) {
-        // Almost all transforms will want to clone all symbols before doing any
-        // work, to avoid any newly created symbols clashing with existing symbols
-        // in the source program and causing them to be renamed.
-        from->Symbols().Foreach([&](Symbol s) { Clone(s); });
-    }
-}
-
-CloneContext::CloneContext(ProgramBuilder* builder) : CloneContext(builder, nullptr, false) {}
+CloneContext::CloneContext(ast::Builder* to, GenerationID from) : dst(to), src_id(from) {}
 
 CloneContext::~CloneContext() = default;
 
 Symbol CloneContext::Clone(Symbol s) {
-    if (!src) {
-        return s;  // In-place clone
-    }
     return cloned_symbols_.GetOrCreate(s, [&]() -> Symbol {
         if (symbol_transform_) {
             return symbol_transform_(s);
         }
         return dst->Symbols().New(s.Name());
     });
-}
-
-void CloneContext::Clone() {
-    dst->AST().Copy(this, &src->AST());
 }
 
 ast::FunctionList CloneContext::Clone(const ast::FunctionList& v) {
@@ -70,22 +47,22 @@ ast::Type CloneContext::Clone(const ast::Type& ty) {
     return {Clone(ty.expr)};
 }
 
-const tint::Cloneable* CloneContext::CloneCloneable(const Cloneable* object) {
+const ast::Node* CloneContext::CloneNode(const ast::Node* node) {
     // If the input is nullptr, there's nothing to clone - just return nullptr.
-    if (object == nullptr) {
+    if (node == nullptr) {
         return nullptr;
     }
 
-    // Was Replace() called for this object?
-    if (auto fn = replacements_.Find(object)) {
+    // Was Replace() called for this node?
+    if (auto fn = replacements_.Find(node)) {
         return (*fn)();
     }
 
     // Attempt to clone using the registered replacer functions.
-    auto& typeinfo = object->TypeInfo();
+    auto& typeinfo = node->TypeInfo();
     for (auto& transform : transforms_) {
         if (typeinfo.Is(transform.typeinfo)) {
-            if (auto* transformed = transform.function(object)) {
+            if (auto* transformed = transform.function(node)) {
                 return transformed;
             }
             break;
@@ -94,10 +71,10 @@ const tint::Cloneable* CloneContext::CloneCloneable(const Cloneable* object) {
 
     // No transform for this type, or the transform returned nullptr.
     // Clone with T::Clone().
-    return object->Clone(this);
+    return node->Clone(*this);
 }
 
-void CloneContext::CheckedCastFailure(const Cloneable* got, const TypeInfo& expected) {
+void CloneContext::CheckedCastFailure(const ast::Node* got, const TypeInfo& expected) {
     TINT_ICE() << "Cloned object was not of the expected type\n"
                << "got:      " << got->TypeInfo().name << "\n"
                << "expected: " << expected.name;
@@ -111,4 +88,4 @@ CloneContext::CloneableTransform::CloneableTransform() = default;
 CloneContext::CloneableTransform::CloneableTransform(const CloneableTransform&) = default;
 CloneContext::CloneableTransform::~CloneableTransform() = default;
 
-}  // namespace tint
+}  // namespace tint::ast

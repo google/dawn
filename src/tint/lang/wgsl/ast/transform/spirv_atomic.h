@@ -21,11 +21,6 @@
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-// Forward declarations
-namespace tint {
-class CloneContext;
-}  // namespace tint
-
 namespace tint::ast::transform {
 
 /// SpirvAtomic is a transform that replaces calls to stub functions created by the SPIR-V reader
@@ -54,10 +49,10 @@ class SpirvAtomic final : public Castable<SpirvAtomic, Transform> {
         /// displayed as `@internal(<name>)`
         std::string InternalName() const override;
 
-        /// Performs a deep clone of this object using the CloneContext `ctx`.
+        /// Performs a deep clone of this object using the program::CloneContext `ctx`.
         /// @param ctx the clone context
         /// @return the newly cloned object
-        const Stub* Clone(CloneContext* ctx) const override;
+        const Stub* Clone(ast::CloneContext& ctx) const override;
 
         /// The type of the intrinsic
         const builtin::Function builtin;

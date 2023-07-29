@@ -59,7 +59,7 @@ class MutationWrapUnaryOperator : public Mutation {
     ///
     /// @copydetails Mutation::Apply
     void Apply(const NodeIdMap& node_id_map,
-               tint::CloneContext* clone_context,
+               tint::program::CloneContext& clone_context,
                NodeIdMap* new_node_id_map) const override;
 
     protobufs::Mutation ToMessage() const override;

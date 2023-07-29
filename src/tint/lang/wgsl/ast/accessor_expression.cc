@@ -14,8 +14,6 @@
 
 #include "src/tint/lang/wgsl/ast/accessor_expression.h"
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
-
 TINT_INSTANTIATE_TYPEINFO(tint::ast::AccessorExpression);
 
 namespace tint::ast {

@@ -23,6 +23,7 @@
 #include "src/tint/lang/core/builtin/builtin_value.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
@@ -53,10 +54,10 @@ using StatementList = tint::Vector<const Statement*, 8>;
 /// PIMPL state for the transform
 struct ZeroInitWorkgroupMemory::State {
     /// The clone context
-    CloneContext& ctx;
+    program::CloneContext& ctx;
 
     /// An alias to *ctx.dst
-    ProgramBuilder& b = *ctx.dst;
+    ast::Builder& b = *ctx.dst;
 
     /// The constant size of the workgroup. If 0, then #workgroup_size_expr should
     /// be used instead.
@@ -124,8 +125,8 @@ struct ZeroInitWorkgroupMemory::State {
     std::unordered_map<ArrayIndex, Symbol, ArrayIndex::Hasher> array_index_names;
 
     /// Constructor
-    /// @param c the CloneContext used for the transform
-    explicit State(CloneContext& c) : ctx(c) {}
+    /// @param c the program::CloneContext used for the transform
+    explicit State(program::CloneContext& c) : ctx(c) {}
 
     /// Run inserts the workgroup memory zero-initialization logic at the top of
     /// the given function
@@ -465,7 +466,7 @@ Transform::ApplyResult ZeroInitWorkgroupMemory::Apply(const Program* src,
     }
 
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     for (auto* fn : src->AST().Functions()) {
         if (fn->PipelineStage() == PipelineStage::kCompute) {

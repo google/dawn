@@ -14,7 +14,8 @@
 
 #include "src/tint/lang/wgsl/ast/identifier.h"
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Identifier);
 
@@ -28,11 +29,11 @@ Identifier::Identifier(GenerationID pid, NodeID nid, const Source& src, Symbol s
 
 Identifier::~Identifier() = default;
 
-const Identifier* Identifier::Clone(CloneContext* ctx) const {
+const Identifier* Identifier::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto sym = ctx->Clone(symbol);
-    return ctx->dst->create<Identifier>(src, sym);
+    auto src = ctx.Clone(source);
+    auto sym = ctx.Clone(symbol);
+    return ctx.dst->create<Identifier>(src, sym);
 }
 
 }  // namespace tint::ast

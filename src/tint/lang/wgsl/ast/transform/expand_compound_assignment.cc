@@ -19,6 +19,7 @@
 #include "src/tint/lang/wgsl/ast/compound_assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/increment_decrement_statement.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/hoist_to_decl_before.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
@@ -48,7 +49,8 @@ bool ShouldRun(const Program* program) {
 struct ExpandCompoundAssignment::State {
     /// Constructor
     /// @param context the clone context
-    explicit State(CloneContext& context) : ctx(context), b(*ctx.dst), hoist_to_decl_before(ctx) {}
+    explicit State(program::CloneContext& context)
+        : ctx(context), b(*ctx.dst), hoist_to_decl_before(ctx) {}
 
     /// Replace `stmt` with a regular assignment statement of the form:
     ///     lhs = lhs op rhs
@@ -147,10 +149,10 @@ struct ExpandCompoundAssignment::State {
 
   private:
     /// The clone context.
-    CloneContext& ctx;
+    program::CloneContext& ctx;
 
-    /// The program builder.
-    ProgramBuilder& b;
+    /// The AST builder.
+    ast::Builder& b;
 
     /// The HoistToDeclBefore helper instance.
     HoistToDeclBefore hoist_to_decl_before;
@@ -168,7 +170,7 @@ Transform::ApplyResult ExpandCompoundAssignment::Apply(const Program* src,
     }
 
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
     State state(ctx);
     for (auto* node : src->ASTNodes().Objects()) {
         if (auto* assign = node->As<CompoundAssignmentStatement>()) {

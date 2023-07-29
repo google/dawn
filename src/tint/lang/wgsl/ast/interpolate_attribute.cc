@@ -16,7 +16,8 @@
 
 #include <string>
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::InterpolateAttribute);
 
@@ -35,12 +36,12 @@ std::string InterpolateAttribute::Name() const {
     return "interpolate";
 }
 
-const InterpolateAttribute* InterpolateAttribute::Clone(CloneContext* ctx) const {
+const InterpolateAttribute* InterpolateAttribute::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto* ty = ctx->Clone(type);
-    auto* smpl = ctx->Clone(sampling);
-    return ctx->dst->create<InterpolateAttribute>(src, ty, smpl);
+    auto src = ctx.Clone(source);
+    auto* ty = ctx.Clone(type);
+    auto* smpl = ctx.Clone(sampling);
+    return ctx.dst->create<InterpolateAttribute>(src, ty, smpl);
 }
 
 }  // namespace tint::ast

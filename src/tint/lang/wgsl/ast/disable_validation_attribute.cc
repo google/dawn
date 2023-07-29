@@ -13,8 +13,8 @@
 // limitations under the License.
 
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
 #include "src/tint/lang/wgsl/ast/clone_context.h"
-#include "src/tint/lang/wgsl/program/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::DisableValidationAttribute);
 
@@ -51,9 +51,9 @@ std::string DisableValidationAttribute::InternalName() const {
     return "<invalid>";
 }
 
-const DisableValidationAttribute* DisableValidationAttribute::Clone(CloneContext* ctx) const {
-    return ctx->dst->ASTNodes().Create<DisableValidationAttribute>(
-        ctx->dst->ID(), ctx->dst->AllocateNodeID(), validation);
+const DisableValidationAttribute* DisableValidationAttribute::Clone(CloneContext& ctx) const {
+    return ctx.dst->ASTNodes().Create<DisableValidationAttribute>(
+        ctx.dst->ID(), ctx.dst->AllocateNodeID(), validation);
 }
 
 }  // namespace tint::ast

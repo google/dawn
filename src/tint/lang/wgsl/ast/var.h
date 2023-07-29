@@ -71,7 +71,7 @@ class Var final : public Castable<Var, Variable> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const Var* Clone(CloneContext* ctx) const override;
+    const Var* Clone(CloneContext& ctx) const override;
 
     /// The declared address space
     const Expression* const declared_address_space = nullptr;

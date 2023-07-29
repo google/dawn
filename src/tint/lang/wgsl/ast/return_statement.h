@@ -43,7 +43,7 @@ class ReturnStatement final : public Castable<ReturnStatement, Statement> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const ReturnStatement* Clone(CloneContext* ctx) const override;
+    const ReturnStatement* Clone(CloneContext& ctx) const override;
 
     /// The value returned. May be null.
     const Expression* const value;

@@ -16,7 +16,8 @@
 
 #include <string>
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BindingAttribute);
 
@@ -34,11 +35,11 @@ std::string BindingAttribute::Name() const {
     return "binding";
 }
 
-const BindingAttribute* BindingAttribute::Clone(CloneContext* ctx) const {
+const BindingAttribute* BindingAttribute::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto* expr_ = ctx->Clone(expr);
-    return ctx->dst->create<BindingAttribute>(src, expr_);
+    auto src = ctx.Clone(source);
+    auto* expr_ = ctx.Clone(expr);
+    return ctx.dst->create<BindingAttribute>(src, expr_);
 }
 
 }  // namespace tint::ast

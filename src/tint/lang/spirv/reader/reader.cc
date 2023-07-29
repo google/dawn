@@ -25,6 +25,7 @@
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
 #include "src/tint/lang/wgsl/ast/transform/spirv_atomic.h"
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 
 namespace tint::spirv::reader {
 
@@ -51,7 +52,7 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
     Program program_with_disjoint_ast(std::move(builder));
 
     ProgramBuilder output;
-    CloneContext(&output, &program_with_disjoint_ast, false).Clone();
+    program::CloneContext(&output, &program_with_disjoint_ast, false).Clone();
     auto program = Program(std::move(output));
     if (!program.IsValid()) {
         return program;

@@ -17,6 +17,7 @@
 #include <random>
 #include <utility>
 
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 
 namespace tint::fuzzers {
@@ -27,7 +28,7 @@ ast::transform::Transform::ApplyResult ShuffleTransform::Apply(const Program* sr
                                                                const ast::transform::DataMap&,
                                                                ast::transform::DataMap&) const {
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     auto decls = src->AST().GlobalDeclarations();
     auto rng = std::mt19937_64{seed_};

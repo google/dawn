@@ -36,7 +36,7 @@ class PhonyExpression final : public Castable<PhonyExpression, Expression> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const PhonyExpression* Clone(CloneContext* ctx) const override;
+    const PhonyExpression* Clone(CloneContext& ctx) const override;
 };
 
 }  // namespace tint::ast

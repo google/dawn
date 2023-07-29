@@ -16,6 +16,7 @@
 #define SRC_TINT_LANG_WGSL_AST_TEMPLATED_IDENTIFIER_H_
 
 #include "src/tint/lang/wgsl/ast/identifier.h"
+#include "src/tint/utils/containers/vector.h"
 
 // Forward declarations
 namespace tint::ast {
@@ -48,7 +49,7 @@ class TemplatedIdentifier final : public Castable<TemplatedIdentifier, Identifie
     /// Clones this node and all transitive child nodes using the `CloneContext` `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const TemplatedIdentifier* Clone(CloneContext* ctx) const override;
+    const TemplatedIdentifier* Clone(CloneContext& ctx) const override;
 
     /// The templated arguments
     const tint::Vector<const Expression*, 3> arguments;

@@ -16,6 +16,7 @@
 #define SRC_TINT_LANG_WGSL_AST_CALL_EXPRESSION_H_
 
 #include "src/tint/lang/wgsl/ast/expression.h"
+#include "src/tint/utils/containers/vector.h"
 
 // Forward declarations
 namespace tint::ast {
@@ -50,7 +51,7 @@ class CallExpression final : public Castable<CallExpression, Expression> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const CallExpression* Clone(CloneContext* ctx) const override;
+    const CallExpression* Clone(CloneContext& ctx) const override;
 
     /// The target function or type
     const IdentifierExpression* target;

@@ -65,7 +65,7 @@ bool MutationChangeUnaryOperator::IsApplicable(const tint::Program& program,
 }
 
 void MutationChangeUnaryOperator::Apply(const NodeIdMap& node_id_map,
-                                        tint::CloneContext* clone_context,
+                                        tint::program::CloneContext& clone_context,
                                         NodeIdMap* new_node_id_map) const {
     const auto* unary_expr_node =
         tint::As<ast::UnaryOpExpression>(node_id_map.GetNode(message_.unary_expr_id()));
@@ -74,11 +74,11 @@ void MutationChangeUnaryOperator::Apply(const NodeIdMap& node_id_map,
     switch (static_cast<ast::UnaryOp>(message_.new_operator())) {
         case ast::UnaryOp::kComplement:
             cloned_replacement =
-                clone_context->dst->Complement(clone_context->Clone(unary_expr_node->expr));
+                clone_context.dst->Complement(clone_context.Clone(unary_expr_node->expr));
             break;
         case ast::UnaryOp::kNegation:
             cloned_replacement =
-                clone_context->dst->Negation(clone_context->Clone(unary_expr_node->expr));
+                clone_context.dst->Negation(clone_context.Clone(unary_expr_node->expr));
             break;
         default:
             cloned_replacement = nullptr;
@@ -86,7 +86,7 @@ void MutationChangeUnaryOperator::Apply(const NodeIdMap& node_id_map,
     }
     // Set things up so that the original unary expression will be replaced with
     // its clone, and update the id mapping.
-    clone_context->Replace(unary_expr_node, cloned_replacement);
+    clone_context.Replace(unary_expr_node, cloned_replacement);
     new_node_id_map->Add(cloned_replacement, message_.unary_expr_id());
 }
 

@@ -16,6 +16,7 @@
 
 #include <utility>
 
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 #include "src/tint/lang/wgsl/sem/type_expression.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
@@ -106,7 +107,7 @@ Program Program::Clone() const {
 ProgramBuilder Program::CloneAsBuilder() const {
     AssertNotMoved();
     ProgramBuilder out;
-    CloneContext(&out, this).Clone();
+    program::CloneContext(&out, this).Clone();
     return out;
 }
 

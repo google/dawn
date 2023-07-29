@@ -48,7 +48,7 @@ class IfStatement final : public Castable<IfStatement, Statement> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const IfStatement* Clone(CloneContext* ctx) const override;
+    const IfStatement* Clone(CloneContext& ctx) const override;
 
     /// The if condition or nullptr if none set
     const Expression* const condition;

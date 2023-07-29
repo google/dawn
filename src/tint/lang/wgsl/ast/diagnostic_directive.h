@@ -44,7 +44,7 @@ class DiagnosticDirective final : public Castable<DiagnosticDirective, Node> {
     /// Clones this node and all transitive child nodes using the `CloneContext` `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const DiagnosticDirective* Clone(CloneContext* ctx) const override;
+    const DiagnosticDirective* Clone(CloneContext& ctx) const override;
 
     /// The diagnostic control.
     const DiagnosticControl control;

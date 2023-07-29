@@ -42,7 +42,7 @@ class AssignmentStatement final : public Castable<AssignmentStatement, Statement
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const AssignmentStatement* Clone(CloneContext* ctx) const override;
+    const AssignmentStatement* Clone(CloneContext& ctx) const override;
 
     /// left side expression
     const Expression* const lhs;

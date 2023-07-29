@@ -14,7 +14,8 @@
 
 #include "src/tint/lang/wgsl/ast/continue_statement.h"
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::ContinueStatement);
 
@@ -25,10 +26,10 @@ ContinueStatement::ContinueStatement(GenerationID pid, NodeID nid, const Source&
 
 ContinueStatement::~ContinueStatement() = default;
 
-const ContinueStatement* ContinueStatement::Clone(CloneContext* ctx) const {
+const ContinueStatement* ContinueStatement::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    return ctx->dst->create<ContinueStatement>(src);
+    auto src = ctx.Clone(source);
+    return ctx.dst->create<ContinueStatement>(src);
 }
 
 }  // namespace tint::ast

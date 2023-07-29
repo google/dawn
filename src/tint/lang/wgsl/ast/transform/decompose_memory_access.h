@@ -20,11 +20,6 @@
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-// Forward declarations
-namespace tint {
-class CloneContext;
-}  // namespace tint
-
 namespace tint::ast::transform {
 
 /// DecomposeMemoryAccess is a transform used to replace storage and uniform buffer accesses with a
@@ -94,10 +89,10 @@ class DecomposeMemoryAccess final : public Castable<DecomposeMemoryAccess, Trans
         /// displayed as `@internal(<name>)`
         std::string InternalName() const override;
 
-        /// Performs a deep clone of this object using the CloneContext `ctx`.
+        /// Performs a deep clone of this object using the program::CloneContext `ctx`.
         /// @param ctx the clone context
         /// @return the newly cloned object
-        const Intrinsic* Clone(CloneContext* ctx) const override;
+        const Intrinsic* Clone(CloneContext& ctx) const override;
 
         /// @return true if op is atomic
         bool IsAtomic() const;

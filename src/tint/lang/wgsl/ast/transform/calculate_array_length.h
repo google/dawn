@@ -20,11 +20,6 @@
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-// Forward declarations
-namespace tint {
-class CloneContext;
-}  // namespace tint
-
 namespace tint::ast::transform {
 
 /// CalculateArrayLength is a transform used to replace calls to arrayLength()
@@ -48,10 +43,10 @@ class CalculateArrayLength final : public Castable<CalculateArrayLength, Transfo
         /// @return "buffer_size"
         std::string InternalName() const override;
 
-        /// Performs a deep clone of this object using the CloneContext `ctx`.
+        /// Performs a deep clone of this object using the program::CloneContext `ctx`.
         /// @param ctx the clone context
         /// @return the newly cloned object
-        const BufferSizeIntrinsic* Clone(CloneContext* ctx) const override;
+        const BufferSizeIntrinsic* Clone(CloneContext& ctx) const override;
     };
 
     /// Constructor

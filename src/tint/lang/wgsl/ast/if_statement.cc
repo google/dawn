@@ -14,7 +14,8 @@
 
 #include "src/tint/lang/wgsl/ast/if_statement.h"
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::IfStatement);
 
@@ -48,14 +49,14 @@ IfStatement::IfStatement(GenerationID pid,
 
 IfStatement::~IfStatement() = default;
 
-const IfStatement* IfStatement::Clone(CloneContext* ctx) const {
+const IfStatement* IfStatement::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto* cond = ctx->Clone(condition);
-    auto* b = ctx->Clone(body);
-    auto* el = ctx->Clone(else_statement);
-    auto attrs = ctx->Clone(attributes);
-    return ctx->dst->create<IfStatement>(src, cond, b, el, std::move(attrs));
+    auto src = ctx.Clone(source);
+    auto* cond = ctx.Clone(condition);
+    auto* b = ctx.Clone(body);
+    auto* el = ctx.Clone(else_statement);
+    auto attrs = ctx.Clone(attributes);
+    return ctx.dst->create<IfStatement>(src, cond, b, el, std::move(attrs));
 }
 
 }  // namespace tint::ast

@@ -17,7 +17,8 @@
 #include <utility>
 
 #include "src/tint/lang/core/type/reference.h"
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
 #include "src/tint/lang/wgsl/sem/if_statement.h"
@@ -33,7 +34,7 @@ namespace tint::ast::transform {
 struct HoistToDeclBefore::State {
     /// Constructor
     /// @param ctx_in the clone context
-    explicit State(CloneContext& ctx_in) : ctx(ctx_in), b(*ctx_in.dst) {}
+    explicit State(program::CloneContext& ctx_in) : ctx(ctx_in), b(*ctx_in.dst) {}
 
     /// @copydoc HoistToDeclBefore::Add()
     bool Add(const sem::ValueExpression* before_expr,
@@ -120,8 +121,8 @@ struct HoistToDeclBefore::State {
     }
 
   private:
-    CloneContext& ctx;
-    ProgramBuilder& b;
+    program::CloneContext& ctx;
+    ast::Builder& b;
 
     /// Holds information about a for-loop that needs to be decomposed into a
     /// loop, so that declaration statements can be inserted before the
@@ -406,7 +407,8 @@ struct HoistToDeclBefore::State {
     }
 };
 
-HoistToDeclBefore::HoistToDeclBefore(CloneContext& ctx) : state_(std::make_unique<State>(ctx)) {}
+HoistToDeclBefore::HoistToDeclBefore(program::CloneContext& ctx)
+    : state_(std::make_unique<State>(ctx)) {}
 
 HoistToDeclBefore::~HoistToDeclBefore() {}
 

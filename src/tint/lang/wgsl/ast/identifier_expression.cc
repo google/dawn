@@ -14,7 +14,8 @@
 
 #include "src/tint/lang/wgsl/ast/identifier_expression.h"
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::IdentifierExpression);
 
@@ -31,11 +32,11 @@ IdentifierExpression::IdentifierExpression(GenerationID pid,
 
 IdentifierExpression::~IdentifierExpression() = default;
 
-const IdentifierExpression* IdentifierExpression::Clone(CloneContext* ctx) const {
+const IdentifierExpression* IdentifierExpression::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto ident = ctx->Clone(identifier);
-    return ctx->dst->create<IdentifierExpression>(src, ident);
+    auto src = ctx.Clone(source);
+    auto ident = ctx.Clone(identifier);
+    return ctx.dst->create<IdentifierExpression>(src, ident);
 }
 
 }  // namespace tint::ast

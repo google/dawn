@@ -41,7 +41,7 @@ class StrideAttribute final : public Castable<StrideAttribute, Attribute> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const StrideAttribute* Clone(CloneContext* ctx) const override;
+    const StrideAttribute* Clone(CloneContext& ctx) const override;
 
     /// The stride value
     const uint32_t stride;

@@ -26,9 +26,6 @@
 #include "src/tint/utils/text/symbol_table.h"
 
 // Forward Declarations
-namespace tint {
-class CloneContext;
-}  // namespace tint
 namespace tint::ast {
 class Module;
 }  // namespace tint::ast

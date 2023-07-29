@@ -17,7 +17,8 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::DiagnosticAttribute);
 
@@ -35,12 +36,12 @@ std::string DiagnosticAttribute::Name() const {
     return "diagnostic";
 }
 
-const DiagnosticAttribute* DiagnosticAttribute::Clone(CloneContext* ctx) const {
+const DiagnosticAttribute* DiagnosticAttribute::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto rule = ctx->Clone(control.rule_name);
+    auto src = ctx.Clone(source);
+    auto rule = ctx.Clone(control.rule_name);
     DiagnosticControl dc(control.severity, rule);
-    return ctx->dst->create<DiagnosticAttribute>(src, std::move(dc));
+    return ctx.dst->create<DiagnosticAttribute>(src, std::move(dc));
 }
 
 }  // namespace tint::ast

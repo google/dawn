@@ -20,11 +20,13 @@
 #include <vector>
 
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/module.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
+#include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/text/string.h"
 
@@ -70,11 +72,11 @@ bool ContainsMatrix(const type::Type* type) {
 /// PIMPL state for the transform
 struct ModuleScopeVarToEntryPointParam::State {
     /// The clone context.
-    CloneContext& ctx;
+    program::CloneContext& ctx;
 
     /// Constructor
     /// @param context the clone context
-    explicit State(CloneContext& context) : ctx(context) {}
+    explicit State(program::CloneContext& context) : ctx(context) {}
 
     /// Clone any struct types that are contained in `ty` (including `ty` itself),
     /// and add it to the global declarations now, so that they precede new global
@@ -593,7 +595,7 @@ Transform::ApplyResult ModuleScopeVarToEntryPointParam::Apply(const Program* src
     }
 
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
     State state{ctx};
     state.Process();
 

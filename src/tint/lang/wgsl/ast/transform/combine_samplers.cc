@@ -19,6 +19,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
@@ -53,7 +54,7 @@ struct CombineSamplers::State {
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
 
     /// The binding info
     const BindingInfo* binding_info;

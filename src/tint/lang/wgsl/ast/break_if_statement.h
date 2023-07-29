@@ -38,7 +38,7 @@ class BreakIfStatement final : public Castable<BreakIfStatement, Statement> {
     /// Clones this node and all transitive child nodes using the `CloneContext` `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const BreakIfStatement* Clone(CloneContext* ctx) const override;
+    const BreakIfStatement* Clone(CloneContext& ctx) const override;
 
     /// The if condition or nullptr if none set
     const Expression* const condition;

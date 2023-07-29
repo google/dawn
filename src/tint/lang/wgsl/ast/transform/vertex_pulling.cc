@@ -21,6 +21,7 @@
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/containers/map.h"
@@ -288,7 +289,7 @@ struct VertexPulling::State {
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
     std::unordered_map<uint32_t, LocationInfo> location_info;
     std::function<const Expression*()> vertex_index_expr = nullptr;
     std::function<const Expression*()> instance_index_expr = nullptr;

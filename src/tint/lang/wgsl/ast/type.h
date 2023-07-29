@@ -39,10 +39,14 @@ struct Type {
     operator const IdentifierExpression*() const { return expr; }
 };
 
+}  // namespace tint::ast
+
+namespace tint {
+
 /// @param type an AST type
 /// @returns the GenerationID of the given AST type.
 GenerationID GenerationIDOf(ast::Type type);
 
-}  // namespace tint::ast
+}  // namespace tint
 
 #endif  // SRC_TINT_LANG_WGSL_AST_TYPE_H_

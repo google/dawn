@@ -14,7 +14,8 @@
 
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BinaryExpression);
 
@@ -36,12 +37,12 @@ BinaryExpression::BinaryExpression(GenerationID pid,
 
 BinaryExpression::~BinaryExpression() = default;
 
-const BinaryExpression* BinaryExpression::Clone(CloneContext* ctx) const {
+const BinaryExpression* BinaryExpression::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto* l = ctx->Clone(lhs);
-    auto* r = ctx->Clone(rhs);
-    return ctx->dst->create<BinaryExpression>(src, op, l, r);
+    auto src = ctx.Clone(source);
+    auto* l = ctx.Clone(lhs);
+    auto* r = ctx.Clone(rhs);
+    return ctx.dst->create<BinaryExpression>(src, op, l, r);
 }
 
 }  // namespace tint::ast

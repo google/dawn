@@ -14,7 +14,8 @@
 
 #include "src/tint/lang/wgsl/ast/struct_member.h"
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMember);
 
@@ -41,13 +42,13 @@ StructMember::StructMember(GenerationID pid,
 
 StructMember::~StructMember() = default;
 
-const StructMember* StructMember::Clone(CloneContext* ctx) const {
+const StructMember* StructMember::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto n = ctx->Clone(name);
-    auto ty = ctx->Clone(type);
-    auto attrs = ctx->Clone(attributes);
-    return ctx->dst->create<StructMember>(src, n, ty, std::move(attrs));
+    auto src = ctx.Clone(source);
+    auto n = ctx.Clone(name);
+    auto ty = ctx.Clone(type);
+    auto attrs = ctx.Clone(attributes);
+    return ctx.dst->create<StructMember>(src, n, ty, std::move(attrs));
 }
 
 }  // namespace tint::ast

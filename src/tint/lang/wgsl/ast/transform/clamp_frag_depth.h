@@ -17,11 +17,6 @@
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-// Forward declarations
-namespace tint {
-class CloneContext;
-}  // namespace tint
-
 namespace tint::ast::transform {
 
 /// Add clamping of the `@builtin(frag_depth)` output of fragment shaders using two push constants

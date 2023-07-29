@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/transform/utils/hoist_to_decl_before.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::VarForDynamicIndex);
@@ -31,7 +32,7 @@ Transform::ApplyResult VarForDynamicIndex::Apply(const Program* src,
                                                  const DataMap&,
                                                  DataMap&) const {
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     HoistToDeclBefore hoist_to_decl_before(ctx);
 

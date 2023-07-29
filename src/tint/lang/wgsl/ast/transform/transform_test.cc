@@ -14,9 +14,9 @@
 
 #include <string>
 
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 #include "src/tint/lang/wgsl/ast/test_helper.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 
 #include "gtest/gtest.h"
@@ -36,7 +36,7 @@ struct CreateASTTypeForTest : public testing::Test, public Transform {
         ProgramBuilder sem_type_builder;
         auto* sem_type = create_sem_type(sem_type_builder);
         Program program(std::move(sem_type_builder));
-        CloneContext ctx(&ast_type_builder, &program, false);
+        program::CloneContext ctx(&ast_type_builder, &program, false);
         return CreateASTTypeFor(ctx, sem_type);
     }
 
@@ -110,7 +110,7 @@ TEST_F(CreateASTTypeForTest, AliasedArrayWithComplexOverrideLength) {
 
     auto* arr_ty = program.Sem().Get(alias);
 
-    CloneContext ctx(&ast_type_builder, &program, false);
+    program::CloneContext ctx(&ast_type_builder, &program, false);
     auto ast_ty = CreateASTTypeFor(ctx, arr_ty);
     CheckIdentifier(ast_ty, "A");
 }

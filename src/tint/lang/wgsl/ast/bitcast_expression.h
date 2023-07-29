@@ -42,7 +42,7 @@ class BitcastExpression final : public Castable<BitcastExpression, Expression> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const BitcastExpression* Clone(CloneContext* ctx) const override;
+    const BitcastExpression* Clone(CloneContext& ctx) const override;
 
     /// the target cast type
     const Type type;

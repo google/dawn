@@ -45,7 +45,7 @@ class WhileStatement final : public Castable<WhileStatement, Statement> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const WhileStatement* Clone(CloneContext* ctx) const override;
+    const WhileStatement* Clone(CloneContext& ctx) const override;
 
     /// The condition expression
     const Expression* const condition;

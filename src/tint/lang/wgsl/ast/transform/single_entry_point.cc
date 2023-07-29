@@ -17,6 +17,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
@@ -35,7 +36,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
                                                const DataMap& inputs,
                                                DataMap&) const {
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     auto* cfg = inputs.Get<Config>();
     if (cfg == nullptr) {

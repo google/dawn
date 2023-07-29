@@ -287,7 +287,7 @@ libtint_source_set("libtint_clone_context_hdrs") {
 
 libtint_source_set("libtint_program_src") {
   sources = [
-    "lang/wgsl/ast/clone_context.cc",
+    "lang/wgsl/program/clone_context.cc",
     "lang/wgsl/program/program.cc",
     "lang/wgsl/program/program_builder.cc",
     "lang/wgsl/resolver/const_eval.cc",
@@ -637,6 +637,7 @@ libtint_source_set("libtint_ast_src") {
     "lang/wgsl/ast/call_statement.cc",
     "lang/wgsl/ast/case_selector.cc",
     "lang/wgsl/ast/case_statement.cc",
+    "lang/wgsl/ast/clone_context.cc",
     "lang/wgsl/ast/compound_assignment_statement.cc",
     "lang/wgsl/ast/const.cc",
     "lang/wgsl/ast/const_assert.cc",
@@ -1588,6 +1589,7 @@ if (tint_build_unittests) {
       "lang/wgsl/ast/call_statement_test.cc",
       "lang/wgsl/ast/case_selector_test.cc",
       "lang/wgsl/ast/case_statement_test.cc",
+      "lang/wgsl/ast/clone_context_test.cc",
       "lang/wgsl/ast/compound_assignment_statement_test.cc",
       "lang/wgsl/ast/const_assert_test.cc",
       "lang/wgsl/ast/continue_statement_test.cc",
@@ -2439,7 +2441,7 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_core_src") {
     sources = [
-      "lang/wgsl/ast/clone_context_test.cc",
+      "lang/wgsl/program/clone_context_test.cc",
       "lang/wgsl/program/program_builder_test.cc",
       "lang/wgsl/program/program_test.cc",
     ]

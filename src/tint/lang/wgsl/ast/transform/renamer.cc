@@ -17,6 +17,7 @@
 #include <memory>
 #include <utility>
 
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/call.h"
@@ -1370,7 +1371,7 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
     Hashmap<Symbol, Symbol, 32> remappings;
 
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ false};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ false};
 
     ctx.ReplaceAll([&](const Identifier* ident) -> const Identifier* {
         const auto symbol = ident->symbol;

@@ -21,6 +21,7 @@
 #include "src/tint/lang/wgsl/ast/continue_statement.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/get_insertion_point.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
@@ -97,7 +98,7 @@ struct RemoveContinueInSwitch::State {
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
     /// Alias to src->sem
     const sem::Info& sem = src->Sem();
 

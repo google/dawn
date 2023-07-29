@@ -27,6 +27,7 @@
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/ast/unary_op.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
@@ -64,7 +65,7 @@ bool ShouldRun(const Program* program) {
 /// offsets for storage and uniform buffer accesses.
 struct Offset : Castable<Offset> {
     /// @returns builds and returns the Expression in `ctx.dst`
-    virtual const Expression* Build(CloneContext& ctx) const = 0;
+    virtual const Expression* Build(program::CloneContext& ctx) const = 0;
 };
 
 /// OffsetExpr is an implementation of Offset that clones and casts the given
@@ -74,7 +75,7 @@ struct OffsetExpr : Offset {
 
     explicit OffsetExpr(const Expression* e) : expr(e) {}
 
-    const Expression* Build(CloneContext& ctx) const override {
+    const Expression* Build(program::CloneContext& ctx) const override {
         auto* type = ctx.src->Sem().GetVal(expr)->Type()->UnwrapRef();
         auto* res = ctx.Clone(expr);
         if (!type->Is<type::U32>()) {
@@ -91,7 +92,7 @@ struct OffsetLiteral final : Castable<OffsetLiteral, Offset> {
 
     explicit OffsetLiteral(uint32_t lit) : literal(lit) {}
 
-    const Expression* Build(CloneContext& ctx) const override {
+    const Expression* Build(program::CloneContext& ctx) const override {
         return ctx.dst->Expr(u32(literal));
     }
 };
@@ -103,7 +104,7 @@ struct OffsetBinOp : Offset {
     Offset const* lhs = nullptr;
     Offset const* rhs = nullptr;
 
-    const Expression* Build(CloneContext& ctx) const override {
+    const Expression* Build(program::CloneContext& ctx) const override {
         return ctx.dst->create<BinaryExpression>(op, lhs->Build(ctx), rhs->Build(ctx));
     }
 };
@@ -219,7 +220,7 @@ bool IntrinsicDataTypeFor(const type::Type* ty, DecomposeMemoryAccess::Intrinsic
 
 /// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied to a stub function to
 /// load the type @p ty from the uniform or storage buffer with name @p buffer.
-DecomposeMemoryAccess::Intrinsic* IntrinsicLoadFor(ProgramBuilder* builder,
+DecomposeMemoryAccess::Intrinsic* IntrinsicLoadFor(ast::Builder* builder,
                                                    const type::Type* ty,
                                                    builtin::AddressSpace address_space,
                                                    const Symbol& buffer) {
@@ -234,7 +235,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicLoadFor(ProgramBuilder* builder,
 
 /// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied to a stub function to
 /// store the type @p ty to the storage buffer with name @p buffer.
-DecomposeMemoryAccess::Intrinsic* IntrinsicStoreFor(ProgramBuilder* builder,
+DecomposeMemoryAccess::Intrinsic* IntrinsicStoreFor(ast::Builder* builder,
                                                     const type::Type* ty,
                                                     const Symbol& buffer) {
     DecomposeMemoryAccess::Intrinsic::DataType type;
@@ -248,7 +249,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicStoreFor(ProgramBuilder* builder,
 
 /// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied to a stub function for
 /// the atomic op and the type @p ty.
-DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ProgramBuilder* builder,
+DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ast::Builder* builder,
                                                      builtin::Function ity,
                                                      const type::Type* ty,
                                                      const Symbol& buffer) {
@@ -321,9 +322,9 @@ struct Store {
 /// PIMPL state for the transform
 struct DecomposeMemoryAccess::State {
     /// The clone context
-    CloneContext& ctx;
+    program::CloneContext& ctx;
     /// Alias to `*ctx.dst`
-    ProgramBuilder& b;
+    ast::Builder& b;
     /// Map of AST expression to storage or uniform buffer access
     /// This map has entries added when encountered, and removed when outer
     /// expressions chain the access.
@@ -344,8 +345,8 @@ struct DecomposeMemoryAccess::State {
     BlockAllocator<Offset> offsets_;
 
     /// Constructor
-    /// @param context the CloneContext
-    explicit State(CloneContext& context) : ctx(context), b(*ctx.dst) {}
+    /// @param context the program::CloneContext
+    explicit State(program::CloneContext& context) : ctx(context), b(*ctx.dst) {}
 
     /// @param offset the offset value to wrap in an Offset
     /// @returns an Offset for the given literal value
@@ -772,10 +773,10 @@ std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
 }
 
 const DecomposeMemoryAccess::Intrinsic* DecomposeMemoryAccess::Intrinsic::Clone(
-    CloneContext* ctx) const {
-    auto buf = ctx->Clone(Buffer());
-    return ctx->dst->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
-        ctx->dst->ID(), ctx->dst->AllocateNodeID(), op, type, address_space, buf);
+    ast::CloneContext& ctx) const {
+    auto buf = ctx.Clone(Buffer());
+    return ctx.dst->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
+        ctx.dst->ID(), ctx.dst->AllocateNodeID(), op, type, address_space, buf);
 }
 
 bool DecomposeMemoryAccess::Intrinsic::IsAtomic() const {
@@ -798,7 +799,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
 
     auto& sem = src->Sem();
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
     State state(ctx);
 
     // Scan the AST nodes for storage and uniform buffer accesses. Complex

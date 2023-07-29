@@ -14,7 +14,8 @@
 
 #include "src/tint/lang/wgsl/ast/break_if_statement.h"
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BreakIfStatement);
 
@@ -31,11 +32,11 @@ BreakIfStatement::BreakIfStatement(GenerationID pid,
 
 BreakIfStatement::~BreakIfStatement() = default;
 
-const BreakIfStatement* BreakIfStatement::Clone(CloneContext* ctx) const {
+const BreakIfStatement* BreakIfStatement::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto* cond = ctx->Clone(condition);
-    return ctx->dst->create<BreakIfStatement>(src, cond);
+    auto src = ctx.Clone(source);
+    auto* cond = ctx.Clone(condition);
+    return ctx.dst->create<BreakIfStatement>(src, cond);
 }
 
 }  // namespace tint::ast

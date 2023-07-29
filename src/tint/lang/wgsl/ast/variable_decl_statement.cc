@@ -14,7 +14,8 @@
 
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::VariableDeclStatement);
 
@@ -31,11 +32,11 @@ VariableDeclStatement::VariableDeclStatement(GenerationID pid,
 
 VariableDeclStatement::~VariableDeclStatement() = default;
 
-const VariableDeclStatement* VariableDeclStatement::Clone(CloneContext* ctx) const {
+const VariableDeclStatement* VariableDeclStatement::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto* var = ctx->Clone(variable);
-    return ctx->dst->create<VariableDeclStatement>(src, var);
+    auto src = ctx.Clone(source);
+    auto* var = ctx.Clone(variable);
+    return ctx.dst->create<VariableDeclStatement>(src, var);
 }
 
 }  // namespace tint::ast

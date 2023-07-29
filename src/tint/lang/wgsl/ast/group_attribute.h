@@ -40,7 +40,7 @@ class GroupAttribute final : public Castable<GroupAttribute, Attribute> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const GroupAttribute* Clone(CloneContext* ctx) const override;
+    const GroupAttribute* Clone(CloneContext& ctx) const override;
 
     /// The group expression
     const Expression* const expr;

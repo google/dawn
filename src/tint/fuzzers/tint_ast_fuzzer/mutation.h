@@ -21,7 +21,7 @@
 #include "src/tint/fuzzers/tint_ast_fuzzer/node_id_map.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/protobufs/tint_ast_fuzzer.h"
 
-#include "src/tint/lang/wgsl/ast/clone_context.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program.h"
 
 namespace tint::fuzzers::ast_fuzzer {
@@ -50,7 +50,7 @@ class Mutation {
     /// @brief Applies this mutation to the `clone_context`.
     ///
     /// Precondition: `IsApplicable` must return `true` when invoked on the same
-    /// `node_id_map` and `clone_context->src` instance of `tint::Program`. A new
+    /// `node_id_map` and `clone_context.src` instance of `tint::Program`. A new
     /// `tint::Program` that arises in `clone_context` must be valid.
     ///
     /// @param node_id_map - the map from `tint::ast::` nodes to their ids.
@@ -60,7 +60,7 @@ class Mutation {
     ///     cloned program. This argument cannot be a `nullptr` nor can it point
     ///     to the same object as `node_id_map`.
     virtual void Apply(const NodeIdMap& node_id_map,
-                       tint::CloneContext* clone_context,
+                       tint::program::CloneContext& clone_context,
                        NodeIdMap* new_node_id_map) const = 0;
 
     /// @return a protobuf message for this mutation.

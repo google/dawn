@@ -21,6 +21,11 @@
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/utils/rtti/castable.h"
 
+// Forward declarations
+namespace tint::program {
+class CloneContext;
+}
+
 namespace tint::ast::transform {
 
 /// The return type of Run()
@@ -83,7 +88,7 @@ class Transform : public Castable<Transform> {
     /// @param ctx the clone context
     /// @param ty the semantic type to reconstruct
     /// @returns an Type that when resolved, will produce the semantic type `ty`.
-    static Type CreateASTTypeFor(CloneContext& ctx, const type::Type* ty);
+    static Type CreateASTTypeFor(program::CloneContext& ctx, const type::Type* ty);
 
   protected:
     /// Removes the statement `stmt` from the transformed program.
@@ -91,7 +96,7 @@ class Transform : public Castable<Transform> {
     /// continuing of for-loops.
     /// @param ctx the clone context
     /// @param stmt the statement to remove when the program is cloned
-    static void RemoveStatement(CloneContext& ctx, const Statement* stmt);
+    static void RemoveStatement(program::CloneContext& ctx, const Statement* stmt);
 };
 
 }  // namespace tint::ast::transform

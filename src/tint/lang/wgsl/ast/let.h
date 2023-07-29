@@ -55,7 +55,7 @@ class Let final : public Castable<Let, Variable> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const Let* Clone(CloneContext* ctx) const override;
+    const Let* Clone(CloneContext& ctx) const override;
 };
 
 }  // namespace tint::ast

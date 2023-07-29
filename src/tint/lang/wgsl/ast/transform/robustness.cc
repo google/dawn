@@ -20,6 +20,7 @@
 
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/hoist_to_decl_before.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"
@@ -208,7 +209,7 @@ struct Robustness::State {
     /// The target program builder
     ProgramBuilder b{};
     /// The clone context
-    CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
     /// Helper for hoisting declarations
     HoistToDeclBefore hoist{ctx};
     /// Alias to the source program's semantic info

@@ -19,6 +19,7 @@
 
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/function.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
@@ -50,10 +51,10 @@ struct NewBindingSymbols {
 /// PIMPL state for the transform
 struct MultiplanarExternalTexture::State {
     /// The clone context.
-    CloneContext& ctx;
+    program::CloneContext& ctx;
 
-    /// ProgramBuilder for the context
-    ProgramBuilder& b;
+    /// Alias to `*ctx.dst`
+    ast::Builder& b;
 
     /// Destination binding locations for the expanded texture_external provided
     /// as input into the transform.
@@ -85,7 +86,7 @@ struct MultiplanarExternalTexture::State {
     /// @param context the clone
     /// @param newBindingPoints the input destination binding locations for the
     /// expanded texture_external
-    State(CloneContext& context, const NewBindingPoints* newBindingPoints)
+    State(program::CloneContext& context, const NewBindingPoints* newBindingPoints)
         : ctx(context), b(*context.dst), new_binding_points(newBindingPoints) {}
 
     /// Processes the module
@@ -510,7 +511,7 @@ Transform::ApplyResult MultiplanarExternalTexture::Apply(const Program* src,
     }
 
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
     if (!new_binding_points) {
         b.Diagnostics().add_error(diag::System::Transform, "missing new binding point data for " +
                                                                std::string(TypeInfo().name));

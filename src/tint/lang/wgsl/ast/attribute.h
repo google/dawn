@@ -16,9 +16,9 @@
 #define SRC_TINT_LANG_WGSL_AST_ATTRIBUTE_H_
 
 #include <string>
-#include <vector>
 
 #include "src/tint/lang/wgsl/ast/node.h"
+#include "src/tint/utils/containers/vector.h"
 
 namespace tint::ast {
 

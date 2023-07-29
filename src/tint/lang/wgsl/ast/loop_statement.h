@@ -42,7 +42,7 @@ class LoopStatement final : public Castable<LoopStatement, Statement> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const LoopStatement* Clone(CloneContext* ctx) const override;
+    const LoopStatement* Clone(CloneContext& ctx) const override;
 
     /// The loop body
     const BlockStatement* const body;

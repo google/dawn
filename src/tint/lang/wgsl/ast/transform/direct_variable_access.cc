@@ -21,6 +21,7 @@
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/hoist_to_decl_before.h"
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
@@ -254,7 +255,7 @@ struct DirectVariableAccess::State {
         CloneState state;
         clone_state = &state;
         ctx.Clone();
-        return Program(std::move(*ctx.dst));
+        return Program(std::move(b));
     }
 
   private:
@@ -379,7 +380,7 @@ struct DirectVariableAccess::State {
     /// The program builder
     ProgramBuilder b;
     /// The clone context
-    CloneContext ctx;
+    program::CloneContext ctx;
     /// The transform options
     const Options& opts;
     /// Alias to the semantic info in ctx.src
@@ -414,7 +415,7 @@ struct DirectVariableAccess::State {
     };
 
     /// The clone state.
-    /// Only valid during the lifetime of the CloneContext::Clone().
+    /// Only valid during the lifetime of the program::CloneContext::Clone().
     CloneState* clone_state = nullptr;
 
     /// AppendAccessChain creates or extends an existing AccessChain for the given expression,

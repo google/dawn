@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/utils/containers/hashmap.h"
@@ -32,7 +33,7 @@ struct FoldTrivialLets::State {
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
     /// The semantic info.
     const sem::Info& sem = {ctx.src->Sem()};
 

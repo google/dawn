@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/type/abstract_numeric.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
@@ -63,7 +64,7 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
     }
 
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     using HelperFunctionKey =
         tint::UnorderedKeyWrapper<std::tuple<const type::Matrix*, const type::Matrix*>>;

@@ -22,6 +22,7 @@
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/sampler.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
@@ -42,14 +43,14 @@ Output Transform::Run(const Program* src, const DataMap& data /* = {} */) const 
         output.program = std::move(program.value());
     } else {
         ProgramBuilder b;
-        CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+        program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
         ctx.Clone();
         output.program = Program(std::move(b));
     }
     return output;
 }
 
-void Transform::RemoveStatement(CloneContext& ctx, const Statement* stmt) {
+void Transform::RemoveStatement(program::CloneContext& ctx, const Statement* stmt) {
     auto* sem = ctx.src->Sem().Get(stmt);
     if (auto* block = tint::As<sem::BlockStatement>(sem->Parent())) {
         ctx.Remove(block->Declaration()->statements, stmt);
@@ -62,7 +63,7 @@ void Transform::RemoveStatement(CloneContext& ctx, const Statement* stmt) {
     TINT_ICE() << "unable to remove statement from parent of type " << sem->TypeInfo().name;
 }
 
-Type Transform::CreateASTTypeFor(CloneContext& ctx, const type::Type* ty) {
+Type Transform::CreateASTTypeFor(program::CloneContext& ctx, const type::Type* ty) {
     if (ty->Is<type::Void>()) {
         return Type{};
     }

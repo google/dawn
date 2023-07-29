@@ -21,6 +21,7 @@
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/call.h"
@@ -77,9 +78,9 @@ std::string CalculateArrayLength::BufferSizeIntrinsic::InternalName() const {
 }
 
 const CalculateArrayLength::BufferSizeIntrinsic* CalculateArrayLength::BufferSizeIntrinsic::Clone(
-    CloneContext* ctx) const {
-    return ctx->dst->ASTNodes().Create<CalculateArrayLength::BufferSizeIntrinsic>(
-        ctx->dst->ID(), ctx->dst->AllocateNodeID());
+    ast::CloneContext& ctx) const {
+    return ctx.dst->ASTNodes().Create<CalculateArrayLength::BufferSizeIntrinsic>(
+        ctx.dst->ID(), ctx.dst->AllocateNodeID());
 }
 
 CalculateArrayLength::CalculateArrayLength() = default;
@@ -93,7 +94,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
     }
 
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
     auto& sem = src->Sem();
 
     // get_buffer_size_intrinsic() emits the function decorated with

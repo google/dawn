@@ -16,7 +16,8 @@
 
 #include <utility>
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::CallExpression);
 
@@ -38,12 +39,12 @@ CallExpression::CallExpression(GenerationID pid,
 
 CallExpression::~CallExpression() = default;
 
-const CallExpression* CallExpression::Clone(CloneContext* ctx) const {
+const CallExpression* CallExpression::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto p = ctx->Clone(args);
-    auto t = ctx->Clone(target);
-    return ctx->dst->create<CallExpression>(src, t, std::move(p));
+    auto src = ctx.Clone(source);
+    auto p = ctx.Clone(args);
+    auto t = ctx.Clone(target);
+    return ctx.dst->create<CallExpression>(src, t, std::move(p));
 }
 
 }  // namespace tint::ast

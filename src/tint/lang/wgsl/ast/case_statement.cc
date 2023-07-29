@@ -16,7 +16,8 @@
 
 #include <utility>
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::CaseStatement);
 
@@ -48,12 +49,12 @@ bool CaseStatement::ContainsDefault() const {
     return false;
 }
 
-const CaseStatement* CaseStatement::Clone(CloneContext* ctx) const {
+const CaseStatement* CaseStatement::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto sel = ctx->Clone(selectors);
-    auto* b = ctx->Clone(body);
-    return ctx->dst->create<CaseStatement>(src, std::move(sel), b);
+    auto src = ctx.Clone(source);
+    auto sel = ctx.Clone(selectors);
+    auto* b = ctx.Clone(body);
+    return ctx.dst->create<CaseStatement>(src, std::move(sel), b);
 }
 
 }  // namespace tint::ast

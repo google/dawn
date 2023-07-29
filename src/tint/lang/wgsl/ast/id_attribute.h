@@ -40,7 +40,7 @@ class IdAttribute final : public Castable<IdAttribute, Attribute> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const IdAttribute* Clone(CloneContext* ctx) const override;
+    const IdAttribute* Clone(CloneContext& ctx) const override;
 
     /// The id expression
     const Expression* const expr;

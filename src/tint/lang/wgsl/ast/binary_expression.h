@@ -113,7 +113,7 @@ class BinaryExpression final : public Castable<BinaryExpression, Expression> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const BinaryExpression* Clone(CloneContext* ctx) const override;
+    const BinaryExpression* Clone(CloneContext& ctx) const override;
 
     /// the binary op type
     const BinaryOp op;

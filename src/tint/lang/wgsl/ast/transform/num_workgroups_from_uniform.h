@@ -20,11 +20,6 @@
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 #include "tint/binding_point.h"
 
-// Forward declarations
-namespace tint {
-class CloneContext;
-}  // namespace tint
-
 namespace tint::ast::transform {
 
 /// NumWorkgroupsFromUniform is a transform that implements the `num_workgroups`

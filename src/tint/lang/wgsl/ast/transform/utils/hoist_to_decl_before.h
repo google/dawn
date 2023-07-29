@@ -30,7 +30,7 @@ class HoistToDeclBefore {
   public:
     /// Constructor
     /// @param ctx the clone context
-    explicit HoistToDeclBefore(CloneContext& ctx);
+    explicit HoistToDeclBefore(program::CloneContext& ctx);
 
     /// Destructor
     ~HoistToDeclBefore();

@@ -58,7 +58,7 @@ class Override final : public Castable<Override, Variable> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const Override* Clone(CloneContext* ctx) const override;
+    const Override* Clone(CloneContext& ctx) const override;
 };
 
 }  // namespace tint::ast

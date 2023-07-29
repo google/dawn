@@ -21,6 +21,7 @@
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
@@ -155,7 +156,7 @@ struct LocalizeStructArrayAssignment::State {
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
 
     /// Returns true if `expr` contains an index accessor expression to a
     /// structure member of array type.

@@ -14,8 +14,8 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
-#include "src/tint/lang/wgsl/ast/clone_context.h"
 #include "src/tint/lang/wgsl/ast/test_helper.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 
 namespace tint::ast {
 namespace {
@@ -100,7 +100,7 @@ TEST_F(ModuleTest, CloneOrder) {
     // declarations. We want to test that these are added just before the
     // declaration that triggered the ReplaceAll().
     ProgramBuilder cloned;
-    CloneContext ctx(&cloned, &p);
+    program::CloneContext ctx(&cloned, &p);
     ctx.ReplaceAll([&](const Function*) -> const Function* {
         ctx.dst->Alias("inserted_before_F", cloned.ty.u32());
         return nullptr;

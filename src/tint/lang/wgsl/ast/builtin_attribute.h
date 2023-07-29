@@ -44,7 +44,7 @@ class BuiltinAttribute final : public Castable<BuiltinAttribute, Attribute> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const BuiltinAttribute* Clone(CloneContext* ctx) const override;
+    const BuiltinAttribute* Clone(CloneContext& ctx) const override;
 
     /// The builtin value
     const Expression* const builtin;

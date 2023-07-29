@@ -44,7 +44,7 @@ class StructMemberSizeAttribute final : public Castable<StructMemberSizeAttribut
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const StructMemberSizeAttribute* Clone(CloneContext* ctx) const override;
+    const StructMemberSizeAttribute* Clone(CloneContext& ctx) const override;
 
     /// The size expression
     const Expression* const expr;

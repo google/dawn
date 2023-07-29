@@ -40,7 +40,7 @@ class Extension final : public Castable<Extension, Node> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const Extension* Clone(CloneContext* ctx) const override;
+    const Extension* Clone(CloneContext& ctx) const override;
 
     /// The extension name
     const builtin::Extension name;

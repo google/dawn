@@ -44,7 +44,7 @@ class CaseStatement final : public Castable<CaseStatement, Statement> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const CaseStatement* Clone(CloneContext* ctx) const override;
+    const CaseStatement* Clone(CloneContext& ctx) const override;
 
     /// @returns true if this item contains a default selector
     bool ContainsDefault() const;

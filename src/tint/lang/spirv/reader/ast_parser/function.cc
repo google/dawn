@@ -778,7 +778,7 @@ DefInfo::Local::Local(const Local& other) = default;
 
 DefInfo::Local::~Local() = default;
 
-ast::Node* StatementBuilder::Clone(CloneContext*) const {
+ast::Node* StatementBuilder::Clone(ast::CloneContext&) const {
     return nullptr;
 }
 

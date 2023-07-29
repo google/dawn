@@ -14,7 +14,8 @@
 
 #include "src/tint/lang/wgsl/ast/increment_decrement_statement.h"
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::IncrementDecrementStatement);
 
@@ -31,11 +32,11 @@ IncrementDecrementStatement::IncrementDecrementStatement(GenerationID pid,
 
 IncrementDecrementStatement::~IncrementDecrementStatement() = default;
 
-const IncrementDecrementStatement* IncrementDecrementStatement::Clone(CloneContext* ctx) const {
+const IncrementDecrementStatement* IncrementDecrementStatement::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto* l = ctx->Clone(lhs);
-    return ctx->dst->create<IncrementDecrementStatement>(src, l, increment);
+    auto src = ctx.Clone(source);
+    auto* l = ctx.Clone(lhs);
+    return ctx.dst->create<IncrementDecrementStatement>(src, l, increment);
 }
 
 }  // namespace tint::ast

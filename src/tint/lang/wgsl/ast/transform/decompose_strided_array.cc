@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
@@ -60,7 +61,7 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
     }
 
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
     const auto& sem = src->Sem();
 
     static constexpr const char* kMemberName = "el";

@@ -17,6 +17,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/transform/test_helper.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/get_insertion_point.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/utils/ice/ice.h"
 
@@ -39,7 +40,7 @@ TEST_F(GetInsertionPointTest, Block) {
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
-    CloneContext ctx(&cloned_b, &original);
+    program::CloneContext ctx(&cloned_b, &original);
 
     // Can insert in block containing the variable, above or below the input statement.
     auto ip = utils::GetInsertionPoint(ctx, var);
@@ -61,7 +62,7 @@ TEST_F(GetInsertionPointTest, ForLoopInit) {
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
-    CloneContext ctx(&cloned_b, &original);
+    program::CloneContext ctx(&cloned_b, &original);
 
     // Can insert in block containing for-loop above the for-loop itself.
     auto ip = utils::GetInsertionPoint(ctx, var);
@@ -82,7 +83,7 @@ TEST_F(GetInsertionPointTest, ForLoopCont_Invalid) {
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
-    CloneContext ctx(&cloned_b, &original);
+    program::CloneContext ctx(&cloned_b, &original);
 
     // Can't insert before/after for loop continue statement (would ned to be converted to loop).
     auto ip = utils::GetInsertionPoint(ctx, var);

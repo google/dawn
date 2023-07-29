@@ -14,7 +14,8 @@
 
 #include "src/tint/lang/wgsl/ast/index_accessor_expression.h"
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::IndexAccessorExpression);
 
@@ -32,12 +33,12 @@ IndexAccessorExpression::IndexAccessorExpression(GenerationID pid,
 
 IndexAccessorExpression::~IndexAccessorExpression() = default;
 
-const IndexAccessorExpression* IndexAccessorExpression::Clone(CloneContext* ctx) const {
+const IndexAccessorExpression* IndexAccessorExpression::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto* obj = ctx->Clone(object);
-    auto* idx = ctx->Clone(index);
-    return ctx->dst->create<IndexAccessorExpression>(src, obj, idx);
+    auto src = ctx.Clone(source);
+    auto* obj = ctx.Clone(object);
+    auto* idx = ctx.Clone(index);
+    return ctx.dst->create<IndexAccessorExpression>(src, obj, idx);
 }
 
 }  // namespace tint::ast

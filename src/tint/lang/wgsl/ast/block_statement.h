@@ -18,6 +18,8 @@
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/statement.h"
+#include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/diagnostic/source.h"
 
 // Forward declarations
 namespace tint::ast {
@@ -54,7 +56,7 @@ class BlockStatement final : public Castable<BlockStatement, Statement> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const BlockStatement* Clone(CloneContext* ctx) const override;
+    const BlockStatement* Clone(CloneContext& ctx) const override;
 
     /// the statement list
     const tint::Vector<const Statement*, 8> statements;

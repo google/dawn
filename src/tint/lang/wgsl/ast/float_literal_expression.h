@@ -47,7 +47,7 @@ class FloatLiteralExpression final : public Castable<FloatLiteralExpression, Lit
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const FloatLiteralExpression* Clone(CloneContext* ctx) const override;
+    const FloatLiteralExpression* Clone(CloneContext& ctx) const override;
 
     /// The literal value
     const double value;

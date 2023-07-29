@@ -16,6 +16,7 @@
 
 #include <utility>
 
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
@@ -72,10 +73,10 @@ namespace {
 class State {
   private:
     /// The clone context.
-    CloneContext& ctx;
+    program::CloneContext& ctx;
 
-    /// The program builder.
-    ProgramBuilder& b;
+    /// Alias to `*ctx.dst`
+    ast::Builder& b;
 
     /// The function.
     const Function* function;
@@ -92,7 +93,7 @@ class State {
   public:
     /// Constructor
     /// @param context the clone context
-    State(CloneContext& context, const Function* func)
+    State(program::CloneContext& context, const Function* func)
         : ctx(context), b(*ctx.dst), function(func) {}
 
     /// Process a statement (recursively).
@@ -216,7 +217,7 @@ class State {
 
 Transform::ApplyResult MergeReturn::Apply(const Program* src, const DataMap&, DataMap&) const {
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     bool made_changes = false;
 

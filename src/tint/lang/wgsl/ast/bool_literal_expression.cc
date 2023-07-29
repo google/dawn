@@ -14,7 +14,8 @@
 
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BoolLiteralExpression);
 
@@ -28,10 +29,10 @@ BoolLiteralExpression::BoolLiteralExpression(GenerationID pid,
 
 BoolLiteralExpression::~BoolLiteralExpression() = default;
 
-const BoolLiteralExpression* BoolLiteralExpression::Clone(CloneContext* ctx) const {
+const BoolLiteralExpression* BoolLiteralExpression::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    return ctx->dst->create<BoolLiteralExpression>(src, value);
+    auto src = ctx.Clone(source);
+    return ctx.dst->create<BoolLiteralExpression>(src, value);
 }
 
 }  // namespace tint::ast

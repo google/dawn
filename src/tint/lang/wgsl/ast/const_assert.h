@@ -36,7 +36,7 @@ class ConstAssert final : public Castable<ConstAssert, Statement> {
     /// Clones this node and all transitive child nodes using the `CloneContext` `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const ConstAssert* Clone(CloneContext* ctx) const override;
+    const ConstAssert* Clone(CloneContext& ctx) const override;
 
     /// The assertion condition
     const Expression* const condition;

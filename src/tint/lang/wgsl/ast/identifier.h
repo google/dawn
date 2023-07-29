@@ -16,6 +16,7 @@
 #define SRC_TINT_LANG_WGSL_AST_IDENTIFIER_H_
 
 #include "src/tint/lang/wgsl/ast/node.h"
+#include "src/tint/utils/text/symbol.h"
 
 namespace tint::ast {
 
@@ -36,7 +37,7 @@ class Identifier : public Castable<Identifier, Node> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const Identifier* Clone(CloneContext* ctx) const override;
+    const Identifier* Clone(CloneContext& ctx) const override;
 
     /// The symbol for the identifier
     const Symbol symbol;

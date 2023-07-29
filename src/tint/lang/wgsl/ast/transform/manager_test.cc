@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 
 namespace tint::ast::transform {
@@ -34,7 +35,7 @@ class AST_NoOp final : public ast::transform::Transform {
 class AST_AddFunction final : public ast::transform::Transform {
     ApplyResult Apply(const Program* src, const DataMap&, DataMap&) const override {
         ProgramBuilder b;
-        CloneContext ctx{&b, src};
+        program::CloneContext ctx{&b, src};
         b.Func(b.Sym("ast_func"), {}, b.ty.void_(), {});
         ctx.Clone();
         return Program(std::move(b));

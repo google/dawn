@@ -66,31 +66,31 @@ bool MutationDeleteStatement::IsApplicable(const tint::Program& program,
 }
 
 void MutationDeleteStatement::Apply(const NodeIdMap& node_id_map,
-                                    tint::CloneContext* clone_context,
+                                    tint::program::CloneContext& clone_context,
                                     NodeIdMap* /* unused */) const {
     const auto* statement_node =
         tint::As<ast::Statement>(node_id_map.GetNode(message_.statement_id()));
     const auto* statement_sem_node =
-        tint::As<sem::Statement>(clone_context->src->Sem().Get(statement_node));
+        tint::As<sem::Statement>(clone_context.src->Sem().Get(statement_node));
     const auto* sem_parent = statement_sem_node->Parent();
 
     if (tint::Is<sem::IfStatement>(sem_parent) &&
         tint::As<ast::IfStatement>(sem_parent->Declaration())->else_statement == statement_node) {
         // Remove the "else" part of an if statement.
-        clone_context->Replace(statement_node, static_cast<const ast::Statement*>(nullptr));
+        clone_context.Replace(statement_node, static_cast<const ast::Statement*>(nullptr));
     } else if (tint::Is<sem::ForLoopStatement>(sem_parent) &&
                tint::As<ast::ForLoopStatement>(sem_parent->Declaration())->initializer ==
                    statement_node) {
         // Remove the initializer of a for loop.
-        clone_context->Replace(statement_node, static_cast<const ast::Statement*>(nullptr));
+        clone_context.Replace(statement_node, static_cast<const ast::Statement*>(nullptr));
     } else if (tint::Is<sem::ForLoopStatement>(sem_parent) &&
                tint::As<ast::ForLoopStatement>(sem_parent->Declaration())->continuing ==
                    statement_node) {
         // Remove the "continuing" statement of a for loop.
-        clone_context->Replace(statement_node, static_cast<const ast::Statement*>(nullptr));
+        clone_context.Replace(statement_node, static_cast<const ast::Statement*>(nullptr));
     } else if (tint::Is<sem::LoopContinuingBlockStatement>(statement_sem_node)) {
         // Remove the "continuing" block of a loop.
-        clone_context->Replace(statement_node, static_cast<const ast::Statement*>(nullptr));
+        clone_context.Replace(statement_node, static_cast<const ast::Statement*>(nullptr));
     } else if (tint::Is<ast::CaseStatement>(statement_node)) {
         // Remove a case statement from its enclosing switch statement.
         const auto& case_statement_list =
@@ -98,7 +98,7 @@ void MutationDeleteStatement::Apply(const NodeIdMap& node_id_map,
         assert(std::find(case_statement_list->begin(), case_statement_list->end(),
                          statement_node) != case_statement_list->end() &&
                "Statement not found.");
-        clone_context->Remove(*case_statement_list, statement_node);
+        clone_context.Remove(*case_statement_list, statement_node);
     } else if (tint::Is<ast::BlockStatement>(statement_node)) {
         // Remove a block statement from the block that encloses it. A special case is required for
         // this, since a sem::Block has itself as its associated sem::Block, so it is necessary to
@@ -108,7 +108,7 @@ void MutationDeleteStatement::Apply(const NodeIdMap& node_id_map,
         assert(std::find(statement_list.begin(), statement_list.end(), statement_node) !=
                    statement_list.end() &&
                "Statement not found.");
-        clone_context->Remove(statement_list, statement_node);
+        clone_context.Remove(statement_list, statement_node);
     } else {
         // Remove a non-block statement from the block that encloses it.
         const auto& statement_list =
@@ -116,7 +116,7 @@ void MutationDeleteStatement::Apply(const NodeIdMap& node_id_map,
         assert(std::find(statement_list.begin(), statement_list.end(), statement_node) !=
                    statement_list.end() &&
                "Statement not found.");
-        clone_context->Remove(statement_list, statement_node);
+        clone_context.Remove(statement_list, statement_node);
     }
 }
 

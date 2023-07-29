@@ -57,7 +57,7 @@ class Parameter final : public Castable<Parameter, Variable> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const Parameter* Clone(CloneContext* ctx) const override;
+    const Parameter* Clone(CloneContext& ctx) const override;
 };
 
 }  // namespace tint::ast

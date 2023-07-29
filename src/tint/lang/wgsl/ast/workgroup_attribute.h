@@ -56,7 +56,7 @@ class WorkgroupAttribute final : public Castable<WorkgroupAttribute, Attribute> 
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const WorkgroupAttribute* Clone(CloneContext* ctx) const override;
+    const WorkgroupAttribute* Clone(CloneContext& ctx) const override;
 
     /// The workgroup x dimension.
     const Expression* const x;

@@ -24,6 +24,7 @@
 #include "src/tint/lang/wgsl/ast/binding_attribute.h"
 #include "src/tint/lang/wgsl/ast/expression.h"
 #include "src/tint/lang/wgsl/ast/group_attribute.h"
+#include "src/tint/lang/wgsl/ast/node.h"
 #include "src/tint/lang/wgsl/ast/type.h"
 
 // Forward declarations

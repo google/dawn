@@ -17,8 +17,13 @@
 
 #include <utility>
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
+
+// Forward declarations
+namespace tint::program {
+class CloneContext;
+}
 
 namespace tint::ast::transform::utils {
 
@@ -32,7 +37,7 @@ using InsertionPoint = std::pair<const sem::BlockStatement*, const Statement*>;
 /// @param ctx the clone context
 /// @param stmt the statement to insert before or after
 /// @return the insertion point
-InsertionPoint GetInsertionPoint(CloneContext& ctx, const Statement* stmt);
+InsertionPoint GetInsertionPoint(program::CloneContext& ctx, const Statement* stmt);
 
 }  // namespace tint::ast::transform::utils
 

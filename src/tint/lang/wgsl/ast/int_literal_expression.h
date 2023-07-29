@@ -46,7 +46,7 @@ class IntLiteralExpression final : public Castable<IntLiteralExpression, Literal
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const IntLiteralExpression* Clone(CloneContext* ctx) const override;
+    const IntLiteralExpression* Clone(CloneContext& ctx) const override;
 
     /// The literal value
     const int64_t value;

@@ -14,7 +14,8 @@
 
 #include "src/tint/lang/wgsl/ast/block_statement.h"
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::BlockStatement);
 
@@ -38,12 +39,12 @@ BlockStatement::BlockStatement(GenerationID pid,
 
 BlockStatement::~BlockStatement() = default;
 
-const BlockStatement* BlockStatement::Clone(CloneContext* ctx) const {
+const BlockStatement* BlockStatement::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto stmts = ctx->Clone(statements);
-    auto attrs = ctx->Clone(attributes);
-    return ctx->dst->create<BlockStatement>(src, std::move(stmts), std::move(attrs));
+    auto src = ctx.Clone(source);
+    auto stmts = ctx.Clone(statements);
+    auto attrs = ctx.Clone(attributes);
+    return ctx.dst->create<BlockStatement>(src, std::move(stmts), std::move(attrs));
 }
 
 }  // namespace tint::ast

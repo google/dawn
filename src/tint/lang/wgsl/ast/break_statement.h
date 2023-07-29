@@ -35,7 +35,7 @@ class BreakStatement final : public Castable<BreakStatement, Statement> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const BreakStatement* Clone(CloneContext* ctx) const override;
+    const BreakStatement* Clone(CloneContext& ctx) const override;
 };
 
 }  // namespace tint::ast

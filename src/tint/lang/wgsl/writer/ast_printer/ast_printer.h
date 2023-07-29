@@ -22,6 +22,9 @@
 #include "src/tint/utils/text/text_generator.h"
 
 // Forward declarations
+namespace tint {
+class Program;
+}
 namespace tint::ast {
 class AssignmentStatement;
 class Attribute;

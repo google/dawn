@@ -419,7 +419,7 @@ class StatementBuilder : public Castable<StatementBuilder, ast::Statement> {
     virtual const ast::Statement* Build(ProgramBuilder* builder) const = 0;
 
   private:
-    Node* Clone(CloneContext*) const override;
+    Node* Clone(ast::CloneContext&) const override;
 };
 
 /// A FunctionEmitter emits a SPIR-V function onto a Tint AST module.

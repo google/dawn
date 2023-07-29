@@ -16,7 +16,8 @@
 
 #include <utility>
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::LoopStatement);
 
@@ -40,13 +41,13 @@ LoopStatement::LoopStatement(GenerationID pid,
 
 LoopStatement::~LoopStatement() = default;
 
-const LoopStatement* LoopStatement::Clone(CloneContext* ctx) const {
+const LoopStatement* LoopStatement::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto* b = ctx->Clone(body);
-    auto* cont = ctx->Clone(continuing);
-    auto attrs = ctx->Clone(attributes);
-    return ctx->dst->create<LoopStatement>(src, b, cont, std::move(attrs));
+    auto src = ctx.Clone(source);
+    auto* b = ctx.Clone(body);
+    auto* cont = ctx.Clone(continuing);
+    auto attrs = ctx.Clone(attributes);
+    return ctx.dst->create<LoopStatement>(src, b, cont, std::move(attrs));
 }
 
 }  // namespace tint::ast

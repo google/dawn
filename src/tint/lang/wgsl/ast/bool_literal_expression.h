@@ -36,7 +36,7 @@ class BoolLiteralExpression final : public Castable<BoolLiteralExpression, Liter
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const BoolLiteralExpression* Clone(CloneContext* ctx) const override;
+    const BoolLiteralExpression* Clone(CloneContext& ctx) const override;
 
     /// The boolean literal value
     const bool value;

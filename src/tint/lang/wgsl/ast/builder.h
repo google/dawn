@@ -88,6 +88,7 @@
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/stride_attribute.h"
+#include "src/tint/lang/wgsl/ast/struct.h"
 #include "src/tint/lang/wgsl/ast/struct_member_align_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_offset_attribute.h"
 #include "src/tint/lang/wgsl/ast/struct_member_size_attribute.h"
@@ -99,7 +100,6 @@
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/while_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
-#include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/text/string.h"
 
@@ -108,10 +108,8 @@
 #endif
 
 // Forward declarations
-namespace tint {
-class CloneContext;
-}  // namespace tint
 namespace tint::ast {
+class CloneContext;
 class VariableDeclStatement;
 }  // namespace tint::ast
 
@@ -3534,12 +3532,6 @@ struct Builder::TypesBuilder::CToAST<tint::builtin::fluent_types::ptr<ADDRESS, T
 };
 //! @endcond
 
-/// @param builder the Builder
-/// @returns the GenerationID of the Builder
-inline GenerationID GenerationIDOf(const Builder* builder) {
-    return builder->ID();
-}
-
 // Primary template for metafunction that evaluates to true iff T can be wrapped in a statement.
 template <typename T, typename /*  = void */>
 struct CanWrapInStatement : std::false_type {};
@@ -3552,5 +3544,15 @@ struct CanWrapInStatement<
     : std::true_type {};
 
 }  // namespace tint::ast
+
+namespace tint {
+
+/// @param builder the Builder
+/// @returns the GenerationID of the ast::Builder
+inline GenerationID GenerationIDOf(const ast::Builder* builder) {
+    return builder->ID();
+}
+
+}  // namespace tint
 
 #endif  // SRC_TINT_LANG_WGSL_AST_BUILDER_H_

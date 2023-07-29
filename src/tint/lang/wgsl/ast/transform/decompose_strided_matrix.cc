@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
@@ -38,7 +39,7 @@ struct MatrixInfo {
     const type::Matrix* matrix = nullptr;
 
     /// @returns the identifier of an array that holds an vector column for each row of the matrix.
-    Type array(ProgramBuilder* b) const {
+    Type array(ast::Builder* b) const {
         return b->ty.array(b->ty.vec<f32>(matrix->rows()), u32(matrix->columns()),
                            tint::Vector{
                                b->Stride(stride),
@@ -65,7 +66,7 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
                                                      const DataMap&,
                                                      DataMap&) const {
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     // Scan the program for all storage and uniform structure matrix members with
     // a custom stride attribute. Replace these matrices with an equivalent array,

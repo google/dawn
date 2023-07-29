@@ -43,7 +43,7 @@ class MemberAccessorExpression final
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const MemberAccessorExpression* Clone(CloneContext* ctx) const override;
+    const MemberAccessorExpression* Clone(CloneContext& ctx) const override;
 
     /// The member expression
     const Identifier* const member;

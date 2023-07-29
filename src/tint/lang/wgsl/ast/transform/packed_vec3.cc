@@ -23,6 +23,7 @@
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/array_count.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
@@ -505,7 +506,7 @@ struct PackedVec3::State {
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
     /// Alias to the semantic info in ctx.src
     const sem::Info& sem = ctx.src->Sem();
 };

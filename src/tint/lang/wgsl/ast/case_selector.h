@@ -41,7 +41,7 @@ class CaseSelector final : public Castable<CaseSelector, Node> {
     /// Clones this node and all transitive child nodes using the `CloneContext` `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const CaseSelector* Clone(CloneContext* ctx) const override;
+    const CaseSelector* Clone(CloneContext& ctx) const override;
 
     /// The selector, nullptr for a default selector
     const Expression* const expr = nullptr;

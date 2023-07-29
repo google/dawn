@@ -19,6 +19,7 @@
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 
 namespace tint::ast::test {
 namespace {

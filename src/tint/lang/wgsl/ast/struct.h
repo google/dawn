@@ -49,7 +49,7 @@ class Struct final : public Castable<Struct, TypeDecl> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const Struct* Clone(CloneContext* ctx) const override;
+    const Struct* Clone(CloneContext& ctx) const override;
 
     /// The members
     const tint::Vector<const StructMember*, 8> members;

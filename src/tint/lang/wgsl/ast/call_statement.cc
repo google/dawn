@@ -14,7 +14,8 @@
 
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::CallStatement);
 
@@ -31,11 +32,11 @@ CallStatement::CallStatement(GenerationID pid,
 
 CallStatement::~CallStatement() = default;
 
-const CallStatement* CallStatement::Clone(CloneContext* ctx) const {
+const CallStatement* CallStatement::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto* call = ctx->Clone(expr);
-    return ctx->dst->create<CallStatement>(src, call);
+    auto src = ctx.Clone(source);
+    auto* call = ctx.Clone(expr);
+    return ctx.dst->create<CallStatement>(src, call);
 }
 
 }  // namespace tint::ast

@@ -40,7 +40,7 @@ class BindingAttribute final : public Castable<BindingAttribute, Attribute> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const BindingAttribute* Clone(CloneContext* ctx) const override;
+    const BindingAttribute* Clone(CloneContext& ctx) const override;
 
     /// the binding expression
     const Expression* const expr;

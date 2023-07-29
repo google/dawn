@@ -46,7 +46,7 @@ class SwitchStatement final : public Castable<SwitchStatement, Statement> {
     /// `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned node
-    const SwitchStatement* Clone(CloneContext* ctx) const override;
+    const SwitchStatement* Clone(CloneContext& ctx) const override;
 
     /// The switch condition or nullptr if none set
     const Expression* const condition;

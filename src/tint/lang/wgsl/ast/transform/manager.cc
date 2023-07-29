@@ -14,6 +14,7 @@
 
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 
 /// If set to 1 then the transform::Manager will dump the WGSL of the program
@@ -74,7 +75,7 @@ Program Manager::Run(const Program* program, const DataMap& inputs, DataMap& out
 
     if (!output) {
         ProgramBuilder b;
-        CloneContext ctx{&b, program, /* auto_clone_symbols */ true};
+        program::CloneContext ctx{&b, program, /* auto_clone_symbols */ true};
         ctx.Clone();
         output = Program(std::move(b));
     }

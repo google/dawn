@@ -24,6 +24,8 @@
 #include "src/tint/lang/wgsl/ast/transform/utils/get_insertion_point.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/hoist_to_decl_before.h"
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
@@ -41,11 +43,11 @@ namespace {
 // Base state class for common members
 class StateBase {
   protected:
-    CloneContext& ctx;
-    ProgramBuilder& b;
+    program::CloneContext& ctx;
+    ast::Builder& b;
     const sem::Info& sem;
 
-    explicit StateBase(CloneContext& ctx_in)
+    explicit StateBase(program::CloneContext& ctx_in)
         : ctx(ctx_in), b(*ctx_in.dst), sem(ctx_in.src->Sem()) {}
 };
 
@@ -60,7 +62,7 @@ Transform::ApplyResult SimplifySideEffectStatements::Apply(const Program* src,
                                                            const DataMap&,
                                                            DataMap&) const {
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     bool made_changes = false;
 
@@ -344,7 +346,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
     }
 
   public:
-    explicit CollectHoistsState(CloneContext& ctx_in) : StateBase(ctx_in) {}
+    explicit CollectHoistsState(program::CloneContext& ctx_in) : StateBase(ctx_in) {}
 
     ToHoistSet Run() {
         // Traverse all statements, recursively processing their expression tree(s)
@@ -615,7 +617,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
     }
 
   public:
-    explicit DecomposeState(CloneContext& ctx_in, ToHoistSet to_hoist_in)
+    explicit DecomposeState(program::CloneContext& ctx_in, ToHoistSet to_hoist_in)
         : StateBase(ctx_in), to_hoist(std::move(to_hoist_in)) {}
 
     void Run() {
@@ -647,7 +649,7 @@ Transform::ApplyResult DecomposeSideEffects::Apply(const Program* src,
                                                    const DataMap&,
                                                    DataMap&) const {
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     // First collect side-effecting expressions to hoist
     CollectHoistsState collect_hoists_state{ctx};

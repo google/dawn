@@ -443,6 +443,8 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/inspector/resource_binding.h
   lang/wgsl/inspector/scalar.cc
   lang/wgsl/inspector/scalar.h
+  lang/wgsl/program/clone_context.cc
+  lang/wgsl/program/clone_context.h
   lang/wgsl/program/program.cc
   lang/wgsl/program/program.h
   lang/wgsl/program/program_builder.cc
@@ -960,7 +962,6 @@ endif()
 ################################################################################
 if(TINT_BUILD_TESTS)
   list(APPEND TINT_TEST_SRCS
-    lang/wgsl/ast/clone_context_test.cc
     lang/core/builtin/number_test.cc
     lang/core/constant/composite_test.cc
     lang/core/constant/manager_test.cc
@@ -1006,6 +1007,7 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/ast/call_statement_test.cc
     lang/wgsl/ast/case_selector_test.cc
     lang/wgsl/ast/case_statement_test.cc
+    lang/wgsl/ast/clone_context_test.cc
     lang/wgsl/ast/compound_assignment_statement_test.cc
     lang/wgsl/ast/const_assert_test.cc
     lang/wgsl/ast/continue_statement_test.cc
@@ -1056,6 +1058,7 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/helpers/append_vector_test.cc
     lang/wgsl/helpers/check_supported_extensions_test.cc
     lang/wgsl/helpers/flatten_bindings_test.cc
+    lang/wgsl/program/clone_context_test.cc
     lang/wgsl/program/program_builder_test.cc
     lang/wgsl/program/program_test.cc
     lang/wgsl/sem/builtin_test.cc

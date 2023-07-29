@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/type/reference.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/utils/containers/map.h"
@@ -227,7 +228,7 @@ struct PreservePadding::State {
     /// The program builder
     ProgramBuilder b;
     /// The clone context
-    CloneContext ctx;
+    program::CloneContext ctx;
     /// Alias to the semantic info in ctx.src
     const sem::Info& sem = ctx.src->Sem();
     /// Alias to the symbols in ctx.src

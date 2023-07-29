@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
@@ -67,7 +68,7 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
     }
 
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     // Get the uniform buffer binding point
     uint32_t ub_binding = binding_;

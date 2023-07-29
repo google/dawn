@@ -17,6 +17,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/containers/hashmap.h"
@@ -35,7 +36,7 @@ Transform::ApplyResult AddBlockAttribute::Apply(const Program* src,
                                                 const DataMap&,
                                                 DataMap&) const {
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     auto& sem = src->Sem();
 
@@ -109,9 +110,9 @@ std::string AddBlockAttribute::BlockAttribute::InternalName() const {
 }
 
 const AddBlockAttribute::BlockAttribute* AddBlockAttribute::BlockAttribute::Clone(
-    CloneContext* ctx) const {
-    return ctx->dst->ASTNodes().Create<AddBlockAttribute::BlockAttribute>(
-        ctx->dst->ID(), ctx->dst->AllocateNodeID());
+    ast::CloneContext& ctx) const {
+    return ctx.dst->ASTNodes().Create<AddBlockAttribute::BlockAttribute>(ctx.dst->ID(),
+                                                                         ctx.dst->AllocateNodeID());
 }
 
 }  // namespace tint::ast::transform

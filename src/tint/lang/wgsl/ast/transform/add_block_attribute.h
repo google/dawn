@@ -44,7 +44,7 @@ class AddBlockAttribute final : public Castable<AddBlockAttribute, Transform> {
         /// Performs a deep clone of this object using the CloneContext `ctx`.
         /// @param ctx the clone context
         /// @return the newly cloned object
-        const BlockAttribute* Clone(CloneContext* ctx) const override;
+        const BlockAttribute* Clone(CloneContext& ctx) const override;
     };
 
     /// Constructor

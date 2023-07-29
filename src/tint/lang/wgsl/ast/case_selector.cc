@@ -16,7 +16,8 @@
 
 #include <utility>
 
-#include "src/tint/lang/wgsl/program/program_builder.h"
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::CaseSelector);
 
@@ -27,11 +28,11 @@ CaseSelector::CaseSelector(GenerationID pid, NodeID nid, const Source& src, cons
 
 CaseSelector::~CaseSelector() = default;
 
-const CaseSelector* CaseSelector::Clone(CloneContext* ctx) const {
+const CaseSelector* CaseSelector::Clone(CloneContext& ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
-    auto src = ctx->Clone(source);
-    auto ex = ctx->Clone(expr);
-    return ctx->dst->create<CaseSelector>(src, ex);
+    auto src = ctx.Clone(source);
+    auto ex = ctx.Clone(expr);
+    return ctx.dst->create<CaseSelector>(src, ex);
 }
 
 }  // namespace tint::ast

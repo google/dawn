@@ -20,6 +20,7 @@
 
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/ast/transform/utils/hoist_to_decl_before.h"
+#include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/call.h"
@@ -78,7 +79,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
     }
 
     ProgramBuilder b;
-    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
     // Create a module-scope flag that indicates whether the current invocation has been discarded.
     auto flag = b.Symbols().New("tint_discarded");

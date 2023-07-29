@@ -16,8 +16,9 @@
 
 #include <utility>
 
+#include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/ast/clone_context.h"
 #include "src/tint/lang/wgsl/ast/type_decl.h"
-#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/utils/rtti/switch.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Module);
@@ -124,14 +125,14 @@ void Module::AddFunction(const Function* func) {
     global_declarations_.Push(func);
 }
 
-const Module* Module::Clone(CloneContext* ctx) const {
-    auto* out = ctx->dst->create<Module>();
+const Module* Module::Clone(CloneContext& ctx) const {
+    auto* out = ctx.dst->create<Module>();
     out->Copy(ctx, this);
     return out;
 }
 
-void Module::Copy(CloneContext* ctx, const Module* src) {
-    ctx->Clone(global_declarations_, src->global_declarations_);
+void Module::Copy(CloneContext& ctx, const Module* src) {
+    ctx.Clone(global_declarations_, src->global_declarations_);
 
     // During the clone, declarations may have been placed into the module.
     // Clear everything out, as we're about to re-bin the declarations.
