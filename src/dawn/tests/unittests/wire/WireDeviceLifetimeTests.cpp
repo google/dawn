@@ -38,6 +38,8 @@ class WireDeviceLifetimeTests : public testing::Test {
   protected:
     void SetUp() override {
         wgpu::RequestAdapterOptions options = {};
+        options.backendType = wgpu::BackendType::Null;
+
         instance.RequestAdapter(
             &options,
             [](WGPURequestAdapterStatus status, WGPUAdapter cAdapter, const char*, void* userdata) {
