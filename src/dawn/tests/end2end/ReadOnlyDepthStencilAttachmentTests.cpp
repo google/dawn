@@ -297,9 +297,6 @@ class ReadOnlyStencilAttachmentTests : public ReadOnlyDepthStencilAttachmentTest
 };
 
 TEST_P(ReadOnlyStencilAttachmentTests, SampleFromAttachment) {
-    // TODO(dawn:1827): sampling from stencil attachment fails on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
-
     wgpu::Texture colorTexture =
         CreateTexture(wgpu::TextureFormat::RGBA8Unorm,
                       wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);

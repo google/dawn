@@ -1059,6 +1059,81 @@ ResultOrError<ExecutionSerial> Texture::EndAccess() {
     return GetDevice()->GetLastSubmittedCommandSerial();
 }
 
+ResultOrError<ComPtr<ID3D11ShaderResourceView>> Texture::GetStencilSRV(
+    CommandRecordingContext* commandContext,
+    const TextureView* view) {
+    ASSERT(GetFormat().HasStencil());
+
+    if (!mTextureForStencilSampling.Get()) {
+        // Create an interim texture of R8Uint format.
+        TextureDescriptor desc = {};
+        desc.label = "InterimStencilTexture";
+        desc.dimension = GetDimension();
+        desc.size = GetSize();
+        desc.format = wgpu::TextureFormat::R8Uint;
+        desc.mipLevelCount = GetNumMipLevels();
+        desc.sampleCount = GetSampleCount();
+        desc.usage = wgpu::TextureUsage::TextureBinding;
+
+        DAWN_TRY_ASSIGN(mTextureForStencilSampling,
+                        CreateInternal(ToBackend(GetDevice()), &desc, Kind::Interim));
+    }
+
+    // Sync the stencil data of this texture to the interim stencil-view texture.
+    // TODO(dawn:1705): Improve to only sync as few as possible.
+    const auto range = view->GetSubresourceRange();
+    const TexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(range.aspects).block;
+    Extent3D size = GetMipLevelSubresourceVirtualSize(range.baseMipLevel);
+    uint32_t bytesPerRow = blockInfo.byteSize * size.width;
+    uint32_t rowsPerImage = size.height;
+    uint64_t byteLength;
+    DAWN_TRY_ASSIGN(byteLength,
+                    ComputeRequiredBytesInCopy(blockInfo, size, bytesPerRow, rowsPerImage));
+
+    std::vector<uint8_t> stagingData(byteLength);
+    for (uint32_t layer = range.baseArrayLayer; layer < range.baseArrayLayer + range.layerCount;
+         ++layer) {
+        for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
+             ++level) {
+            size = GetMipLevelSubresourceVirtualSize(level);
+            bytesPerRow = blockInfo.byteSize * size.width;
+            rowsPerImage = size.height;
+            auto singleRange = SubresourceRange::MakeSingle(range.aspects, layer, level);
+
+            Texture::ReadCallback callback = [&](const uint8_t* data, uint64_t offset,
+                                                 uint64_t length) -> MaybeError {
+                std::memcpy(static_cast<uint8_t*>(stagingData.data()) + offset, data, length);
+                return {};
+            };
+
+            // TODO(dawn:1705): Work out a way of GPU-GPU copy, rather than the CPU-GPU round trip.
+            commandContext->GetDevice()->EmitWarningOnce(
+                "Sampling the stencil component is rather slow now.");
+            DAWN_TRY(Read(commandContext, singleRange, {0, 0, 0}, size, bytesPerRow, rowsPerImage,
+                          callback));
+
+            DAWN_TRY(mTextureForStencilSampling->WriteInternal(commandContext, singleRange,
+                                                               {0, 0, 0}, size, stagingData.data(),
+                                                               bytesPerRow, rowsPerImage));
+        }
+    }
+
+    Ref<TextureViewBase> textureView;
+    TextureViewDescriptor viewDesc = {};
+    viewDesc.label = "InterimStencilTextureView";
+    viewDesc.format = wgpu::TextureFormat::R8Uint;
+    viewDesc.dimension = view->GetDimension();
+    viewDesc.baseArrayLayer = view->GetBaseArrayLayer();
+    viewDesc.arrayLayerCount = view->GetLayerCount();
+    viewDesc.baseMipLevel = view->GetBaseMipLevel();
+    viewDesc.mipLevelCount = view->GetLevelCount();
+    DAWN_TRY_ASSIGN(textureView, mTextureForStencilSampling->CreateView(&viewDesc));
+
+    ComPtr<ID3D11ShaderResourceView> srv;
+    DAWN_TRY_ASSIGN(srv, ToBackend(textureView)->CreateD3D11ShaderResourceView());
+    return srv;
+}
+
 // static
 Ref<TextureView> TextureView::Create(TextureBase* texture,
                                      const TextureViewDescriptor* descriptor) {
@@ -1100,8 +1175,7 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> TextureView::CreateD3D11ShaderRe
                         break;
                     case Aspect::Stencil:
                         srvDesc.Format = DXGI_FORMAT_X24_TYPELESS_G8_UINT;
-                        // TODO(dawn:1827) Support sampling the stencil component.
-                        return DAWN_UNIMPLEMENTED_ERROR("Sampling the stencil component.");
+                        break;
                     default:
                         UNREACHABLE();
                         break;
@@ -1124,8 +1198,7 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> TextureView::CreateD3D11ShaderRe
                         break;
                     case Aspect::Stencil:
                         srvDesc.Format = DXGI_FORMAT_X32_TYPELESS_G8X24_UINT;
-                        // TODO(dawn:1827) Support sampling the stencil component.
-                        return DAWN_UNIMPLEMENTED_ERROR("Sampling the stencil component.");
+                        break;
                     default:
                         UNREACHABLE();
                         break;

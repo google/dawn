@@ -313,8 +313,6 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                 inputViewDesc.aspect = wgpu::TextureAspect::DepthOnly;
                 break;
             case TestAspectAndSamplerType::StencilAsUint:
-                // TODO(dawn:1827): Suport SRV component mapping for stencil on D3D11.
-                DAWN_SUPPRESS_TEST_IF(IsD3D11());
                 inputViewDesc.aspect = wgpu::TextureAspect::StencilOnly;
                 break;
         }
@@ -372,8 +370,6 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                 inputViewDesc.aspect = wgpu::TextureAspect::DepthOnly;
                 break;
             case TestAspectAndSamplerType::StencilAsUint:
-                // TODO(dawn:1827): Suport SRV component mapping for stencil on D3D11.
-                DAWN_SUPPRESS_TEST_IF(IsD3D11());
                 inputViewDesc.aspect = wgpu::TextureAspect::StencilOnly;
                 break;
         }
@@ -748,9 +744,6 @@ TEST_P(DepthStencilSamplingTest, SampleExtraComponents) {
 TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
     // In compat, you can't have different views of the same texture in the same draw command.
     DAWN_TEST_UNSUPPORTED_IF(IsCompatibilityMode());
-
-    // TODO(dawn:1827): Suport SRV component mapping for stencil on D3D11.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11());
 
     wgpu::TextureFormat format = GetParam().mTextureFormat;
 
