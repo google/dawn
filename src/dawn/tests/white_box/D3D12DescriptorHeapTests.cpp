@@ -324,7 +324,7 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingAndMultipleSubmits) {
     EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), kNumOfSwitches);
 
     // Ensure switched-over heaps can be recycled by advancing the GPU.
-    mD3DDevice->AssumeCommandsCompleteForTesting();
+    mD3DDevice->AssumeCommandsComplete();
 
     // Switch-over |kNumOfSwitches| again reusing the same heaps.
     for (uint32_t i = 0; i < kNumOfSwitches; i++) {
@@ -413,7 +413,7 @@ TEST_P(D3D12DescriptorHeapTests, GrowAndPoolHeapsInPendingAndMultipleSubmits) {
     EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), kNumOfPooledHeaps);
 
     // Ensure switched-over heaps can be recycled by advancing the GPU.
-    mD3DDevice->AssumeCommandsCompleteForTesting();
+    mD3DDevice->AssumeCommandsComplete();
 
     // Switch-over the pool-allocated heaps.
     for (uint32_t i = 0; i < kNumOfPooledHeaps; i++) {

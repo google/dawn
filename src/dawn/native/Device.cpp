@@ -479,7 +479,7 @@ void DeviceBase::Destroy() {
             UNREACHABLE();
             break;
     }
-    ASSERT(mCompletedSerial == mLastSubmittedSerial);
+    ASSERT(GetCompletedCommandSerial() == GetLastSubmittedCommandSerial());
 
     if (mState != State::BeingCreated) {
         // The GPU timeline is finished.
@@ -757,26 +757,8 @@ dawn::platform::Platform* DeviceBase::GetPlatform() const {
     return GetPhysicalDevice()->GetInstance()->GetPlatform();
 }
 
-ExecutionSerial DeviceBase::GetCompletedCommandSerial() const {
-    return mCompletedSerial;
-}
-
-ExecutionSerial DeviceBase::GetLastSubmittedCommandSerial() const {
-    return mLastSubmittedSerial;
-}
-
 InternalPipelineStore* DeviceBase::GetInternalPipelineStore() {
     return mInternalPipelineStore.get();
-}
-
-void DeviceBase::IncrementLastSubmittedCommandSerial() {
-    mLastSubmittedSerial++;
-}
-
-void DeviceBase::AssumeCommandsComplete() {
-    // Bump serials so any pending callbacks can be fired.
-    mLastSubmittedSerial++;
-    mCompletedSerial = mLastSubmittedSerial;
 }
 
 bool DeviceBase::HasPendingTasks() {
@@ -788,26 +770,6 @@ bool DeviceBase::IsDeviceIdle() {
         return false;
     }
     return !HasScheduledCommands();
-}
-
-ExecutionSerial DeviceBase::GetPendingCommandSerial() const {
-    return mLastSubmittedSerial + ExecutionSerial(1);
-}
-
-MaybeError DeviceBase::CheckPassedSerials() {
-    ExecutionSerial completedSerial;
-    DAWN_TRY_ASSIGN(completedSerial, CheckAndUpdateCompletedSerials());
-
-    ASSERT(completedSerial <= mLastSubmittedSerial);
-    // completedSerial should not be less than mCompletedSerial unless it is 0.
-    // It can be 0 when there's no fences to check.
-    ASSERT(completedSerial >= mCompletedSerial || completedSerial == ExecutionSerial(0));
-
-    if (completedSerial > mCompletedSerial) {
-        mCompletedSerial = completedSerial;
-    }
-
-    return {};
 }
 
 ResultOrError<const Format*> DeviceBase::GetInternalFormat(wgpu::TextureFormat format) const {
@@ -1362,8 +1324,8 @@ MaybeError DeviceBase::Tick() {
     // TODO(crbug.com/dawn/833): decouple TickImpl from updating the serial so that we can
     // tick the dynamic uploader before the backend resource allocators. This would allow
     // reclaiming resources one tick earlier.
-    mDynamicUploader->Deallocate(mCompletedSerial);
-    mQueue->Tick(mCompletedSerial);
+    mDynamicUploader->Deallocate(GetCompletedCommandSerial());
+    mQueue->Tick(GetCompletedCommandSerial());
 
     return {};
 }
@@ -2012,30 +1974,6 @@ uint64_t DeviceBase::GetBufferCopyOffsetAlignmentForDepthStencil() const {
     // For depth-stencil texture, buffer offset must be a multiple of 4, which is required
     // by WebGPU and Vulkan SPEC.
     return 4u;
-}
-
-bool DeviceBase::HasScheduledCommands() const {
-    return mLastSubmittedSerial > mCompletedSerial || HasPendingCommands();
-}
-
-void DeviceBase::AssumeCommandsCompleteForTesting() {
-    AssumeCommandsComplete();
-}
-
-// All prevously submitted works at the moment will supposedly complete at this serial.
-// Internally the serial is computed according to whether frontend and backend have pending
-// commands. There are 4 cases of combination:
-//   1) Frontend(No), Backend(No)
-//   2) Frontend(No), Backend(Yes)
-//   3) Frontend(Yes), Backend(No)
-//   4) Frontend(Yes), Backend(Yes)
-// For case 1, we don't need the serial to track the task as we can ack it right now.
-// For case 2 and 4, there will be at least an eventual submission, so we can use
-// 'GetPendingCommandSerial' as the serial.
-// For case 3, we can't use 'GetPendingCommandSerial' as it won't be submitted surely. Instead we
-// use 'GetLastSubmittedCommandSerial', which must be fired eventually.
-ExecutionSerial DeviceBase::GetScheduledWorkDoneSerial() const {
-    return HasPendingCommands() ? GetPendingCommandSerial() : GetLastSubmittedCommandSerial();
 }
 
 MaybeError DeviceBase::CopyFromStagingToBuffer(BufferBase* source,

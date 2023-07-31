@@ -261,6 +261,8 @@ source_set("sources") {
     "ErrorInjector.h",
     "ErrorScope.cpp",
     "ErrorScope.h",
+    "ExecutionQueue.cpp",
+    "ExecutionQueue.h",
     "ExternalTexture.cpp",
     "ExternalTexture.h",
     "Features.cpp",
