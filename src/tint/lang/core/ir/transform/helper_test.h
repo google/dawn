@@ -54,9 +54,11 @@ class TransformTestBase : public BASE {
 
     /// Transforms the module, using @p transform.
     /// @param transform_func the transform to run
-    void Run(std::function<Result<SuccessType, std::string>(Module*)> transform_func) {
+    /// @param args the arguments to the transform function
+    template <typename TRANSFORM, typename... ARGS>
+    void Run(TRANSFORM&& transform_func, ARGS&&... args) {
         // Run the transform.
-        auto result = transform_func(&mod);
+        auto result = transform_func(&mod, args...);
         EXPECT_TRUE(result) << result.Failure();
         if (!result) {
             return;

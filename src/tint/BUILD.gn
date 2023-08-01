@@ -493,6 +493,8 @@ if (tint_build_ir) {
     sources = [
       "lang/core/ir/transform/add_empty_entry_point.cc",
       "lang/core/ir/transform/add_empty_entry_point.h",
+      "lang/core/ir/transform/binding_remapper.cc",
+      "lang/core/ir/transform/binding_remapper.h",
       "lang/core/ir/transform/block_decorated_structs.cc",
       "lang/core/ir/transform/block_decorated_structs.h",
       "lang/core/ir/transform/demote_to_helper.cc",
@@ -1885,6 +1887,7 @@ if (tint_build_unittests) {
     tint_unittests_source_set("tint_unittests_ir_transform_src") {
       sources = [
         "lang/core/ir/transform/add_empty_entry_point_test.cc",
+        "lang/core/ir/transform/binding_remapper_test.cc",
         "lang/core/ir/transform/block_decorated_structs_test.cc",
         "lang/core/ir/transform/demote_to_helper_test.cc",
         "lang/core/ir/transform/helper_test.h",

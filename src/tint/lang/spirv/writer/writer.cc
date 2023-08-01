@@ -19,6 +19,7 @@
 
 #include "src/tint/lang/spirv/writer/ast_printer/ast_printer.h"
 #if TINT_BUILD_IR
+#include "src/tint/lang/core/ir/transform/binding_remapper.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"             // nogncheck
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"  // nogncheck
 #endif                                                              // TINT_BUILD_IR
@@ -46,8 +47,15 @@ Result<Output, std::string> Generate(const Program* program, const Options& opti
             return "IR converter: " + converted.Failure();
         }
 
-        // Generate the SPIR-V code.
         auto ir = converted.Move();
+
+        // Apply transforms as required by writer options.
+        auto remapper = ir::transform::BindingRemapper(&ir, options.binding_remapper_options);
+        if (!remapper) {
+            return remapper.Failure();
+        }
+
+        // Generate the SPIR-V code.
         auto impl = std::make_unique<Printer>(&ir, zero_initialize_workgroup_memory);
         auto spirv = impl->Generate();
         if (!spirv) {
