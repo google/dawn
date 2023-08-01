@@ -99,16 +99,17 @@ class SpirvWriterTestHelperBase : public BASE {
     /// @param writer the writer to use for SPIR-V generation
     /// @returns true if generation and validation succeeded
     bool Generate(Printer& writer) {
-        if (!writer.Generate()) {
-            err_ = writer.Diagnostics().str();
+        auto spirv = writer.Generate();
+        if (!spirv) {
+            err_ = spirv.Failure();
             return false;
         }
 
-        output_ = Disassemble(writer.Result(), SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES |
-                                                   SPV_BINARY_TO_TEXT_OPTION_INDENT |
-                                                   SPV_BINARY_TO_TEXT_OPTION_COMMENT);
+        output_ = Disassemble(spirv.Get(), SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES |
+                                               SPV_BINARY_TO_TEXT_OPTION_INDENT |
+                                               SPV_BINARY_TO_TEXT_OPTION_COMMENT);
 
-        if (!Validate(writer.Result())) {
+        if (!Validate(spirv.Get())) {
             return false;
         }
 

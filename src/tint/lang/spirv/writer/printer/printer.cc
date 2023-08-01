@@ -167,11 +167,10 @@ const type::Type* DedupType(const type::Type* ty, type::Manager& types) {
 Printer::Printer(ir::Module* module, bool zero_init_workgroup_mem)
     : ir_(module), zero_init_workgroup_memory_(zero_init_workgroup_mem) {}
 
-bool Printer::Generate() {
+Result<std::vector<uint32_t>, std::string> Printer::Generate() {
     auto valid = ir::Validate(*ir_);
     if (!valid) {
-        diagnostics_ = valid.Failure();
-        return false;
+        return valid.Failure().str();
     }
 
     // Run the IR transformations to prepare for SPIR-V emission.
@@ -195,15 +194,11 @@ bool Printer::Generate() {
         EmitFunction(func);
     }
 
-    if (diagnostics_.contains_errors()) {
-        return false;
-    }
-
     // Serialize the module into binary SPIR-V.
-    writer_.WriteHeader(module_.IdBound(), kWriterVersion);
-    writer_.WriteModule(&module_);
-
-    return true;
+    BinaryWriter writer;
+    writer.WriteHeader(module_.IdBound(), kWriterVersion);
+    writer.WriteModule(&module_);
+    return std::move(writer.Result());
 }
 
 uint32_t Printer::Builtin(builtin::BuiltinValue builtin, builtin::AddressSpace addrspace) {

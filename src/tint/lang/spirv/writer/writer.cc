@@ -49,10 +49,11 @@ Result<Output, std::string> Generate(const Program* program, const Options& opti
         // Generate the SPIR-V code.
         auto ir = converted.Move();
         auto impl = std::make_unique<Printer>(&ir, zero_initialize_workgroup_memory);
-        if (!impl->Generate()) {
-            return impl->Diagnostics().str();
+        auto spirv = impl->Generate();
+        if (!spirv) {
+            return std::move(spirv.Failure());
         }
-        output.spirv = std::move(impl->Result());
+        output.spirv = std::move(spirv.Get());
     } else  // NOLINT(readability/braces)
 #endif
     {

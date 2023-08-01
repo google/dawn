@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_PRINTER_PRINTER_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_PRINTER_PRINTER_H_
 
+#include <string>
 #include <vector>
 
 #include "src/tint/lang/core/builtin/address_space.h"
@@ -28,6 +29,7 @@
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/result/result.h"
 #include "src/tint/utils/symbol/symbol.h"
 
 // Forward declarations
@@ -80,17 +82,11 @@ class Printer {
     ///                                   storage class with OpConstantNull
     Printer(ir::Module* module, bool zero_init_workgroup_memory);
 
-    /// @returns true on successful generation; false otherwise
-    bool Generate();
+    /// @returns the generated SPIR-V binary on success, or an error string on failure
+    tint::Result<std::vector<uint32_t>, std::string> Generate();
 
     /// @returns the module that this writer has produced
     writer::Module& Module() { return module_; }
-
-    /// @returns the generated SPIR-V binary data
-    const std::vector<uint32_t>& Result() const { return writer_.Result(); }
-
-    /// @returns the list of diagnostics raised by the writer
-    diag::List Diagnostics() const { return diagnostics_; }
 
     /// Get the result ID of the constant `constant`, emitting its instruction if necessary.
     /// @param constant the constant to get the ID for
@@ -272,7 +268,6 @@ class Printer {
     ir::Module* ir_;
     writer::Module module_;
     BinaryWriter writer_;
-    diag::List diagnostics_;
 
     /// A function type used for an OpTypeFunction declaration.
     struct FunctionType {
