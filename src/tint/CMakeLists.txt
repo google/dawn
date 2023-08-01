@@ -344,6 +344,10 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/ast/transform/fold_trivial_lets.h
   lang/wgsl/ast/transform/for_loop_to_loop.cc
   lang/wgsl/ast/transform/for_loop_to_loop.h
+  lang/wgsl/ast/transform/get_insertion_point.cc
+  lang/wgsl/ast/transform/get_insertion_point.h
+  lang/wgsl/ast/transform/hoist_to_decl_before.cc
+  lang/wgsl/ast/transform/hoist_to_decl_before.h
   lang/wgsl/ast/transform/localize_struct_array_assignment.cc
   lang/wgsl/ast/transform/localize_struct_array_assignment.h
   lang/wgsl/ast/transform/manager.cc
@@ -394,10 +398,6 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/ast/transform/truncate_interstage_variables.h
   lang/wgsl/ast/transform/unshadow.cc
   lang/wgsl/ast/transform/unshadow.h
-  lang/wgsl/ast/transform/utils/get_insertion_point.cc
-  lang/wgsl/ast/transform/utils/get_insertion_point.h
-  lang/wgsl/ast/transform/utils/hoist_to_decl_before.cc
-  lang/wgsl/ast/transform/utils/hoist_to_decl_before.h
   lang/wgsl/ast/transform/var_for_dynamic_index.cc
   lang/wgsl/ast/transform/var_for_dynamic_index.h
   lang/wgsl/ast/transform/vectorize_matrix_conversions.cc
@@ -1458,14 +1458,14 @@ if(TINT_BUILD_TESTS)
   if(${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
     list(APPEND TINT_TEST_SRCS
       lang/wgsl/ast/module_clone_test.cc
-      lang/wgsl/ast/transform/add_empty_entry_point_test.cc
       lang/wgsl/ast/transform/add_block_attribute_test.cc
+      lang/wgsl/ast/transform/add_empty_entry_point_test.cc
       lang/wgsl/ast/transform/array_length_from_uniform_test.cc
       lang/wgsl/ast/transform/binding_remapper_test.cc
       lang/wgsl/ast/transform/builtin_polyfill_test.cc
       lang/wgsl/ast/transform/calculate_array_length_test.cc
-      lang/wgsl/ast/transform/clamp_frag_depth_test.cc
       lang/wgsl/ast/transform/canonicalize_entry_point_io_test.cc
+      lang/wgsl/ast/transform/clamp_frag_depth_test.cc
       lang/wgsl/ast/transform/combine_samplers_test.cc
       lang/wgsl/ast/transform/decompose_memory_access_test.cc
       lang/wgsl/ast/transform/decompose_strided_array_test.cc
@@ -1474,10 +1474,12 @@ if(TINT_BUILD_TESTS)
       lang/wgsl/ast/transform/direct_variable_access_test.cc
       lang/wgsl/ast/transform/disable_uniformity_analysis_test.cc
       lang/wgsl/ast/transform/expand_compound_assignment_test.cc
+      lang/wgsl/ast/transform/expand_compound_assignment_test.cc
       lang/wgsl/ast/transform/first_index_offset_test.cc
       lang/wgsl/ast/transform/fold_trivial_lets_test.cc
       lang/wgsl/ast/transform/for_loop_to_loop_test.cc
-      lang/wgsl/ast/transform/expand_compound_assignment_test.cc
+      lang/wgsl/ast/transform/get_insertion_point_test.cc
+      lang/wgsl/ast/transform/hoist_to_decl_before_test.cc
       lang/wgsl/ast/transform/localize_struct_array_assignment_test.cc
       lang/wgsl/ast/transform/merge_return_test.cc
       lang/wgsl/ast/transform/module_scope_var_to_entry_point_param_test.cc
@@ -1511,8 +1513,6 @@ if(TINT_BUILD_TESTS)
       lang/wgsl/ast/transform/vertex_pulling_test.cc
       lang/wgsl/ast/transform/while_to_loop_test.cc
       lang/wgsl/ast/transform/zero_init_workgroup_memory_test.cc
-      lang/wgsl/ast/transform/utils/get_insertion_point_test.cc
-      lang/wgsl/ast/transform/utils/hoist_to_decl_before_test.cc
     )
   endif()
 

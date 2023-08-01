@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_UTILS_HOIST_TO_DECL_BEFORE_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_UTILS_HOIST_TO_DECL_BEFORE_H_
+#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_HOIST_TO_DECL_BEFORE_H_
+#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_HOIST_TO_DECL_BEFORE_H_
 
 #include <functional>
 #include <memory>
@@ -104,4 +104,4 @@ class HoistToDeclBefore {
 
 }  // namespace tint::ast::transform
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_UTILS_HOIST_TO_DECL_BEFORE_H_
+#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_HOIST_TO_DECL_BEFORE_H_

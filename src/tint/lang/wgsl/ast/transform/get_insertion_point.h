@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_UTILS_GET_INSERTION_POINT_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_UTILS_GET_INSERTION_POINT_H_
+#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_GET_INSERTION_POINT_H_
+#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_GET_INSERTION_POINT_H_
 
 #include <utility>
 
@@ -41,4 +41,4 @@ InsertionPoint GetInsertionPoint(program::CloneContext& ctx, const Statement* st
 
 }  // namespace tint::ast::transform::utils
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_UTILS_GET_INSERTION_POINT_H_
+#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_GET_INSERTION_POINT_H_
