@@ -15,25 +15,22 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_MERGE_RETURN_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_MERGE_RETURN_H_
 
-#include "src/tint/lang/core/ir/transform/transform.h"
+#include <string>
+
+#include "src/tint/utils/result/result.h"
+
+// Forward declarations.
+namespace tint::ir {
+class Module;
+}
 
 namespace tint::ir::transform {
 
 /// MergeReturn is a transform merges multiple return statements in a function into a single return
 /// at the end of the function.
-class MergeReturn final : public Castable<MergeReturn, Transform> {
-  public:
-    /// Constructor
-    MergeReturn();
-    /// Destructor
-    ~MergeReturn() override;
-
-    /// @copydoc Transform::Run
-    void Run(ir::Module* module) const override;
-
-  private:
-    struct State;
-};
+/// @param module the module to transform
+/// @returns an error string on failure
+Result<SuccessType, std::string> MergeReturn(Module* module);
 
 }  // namespace tint::ir::transform
 

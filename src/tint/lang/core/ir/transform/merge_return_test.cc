@@ -45,7 +45,7 @@ TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInRootBlock) {
 
     auto* expect = src;
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -85,7 +85,7 @@ TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInMergeBlock) {
 
     auto* expect = src;
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -142,7 +142,7 @@ TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInNestedMergeBlock) {
 
     auto* expect = src;
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -193,7 +193,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -246,7 +246,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_ReturnsCreatedInDifferentOrder)
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -309,7 +309,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -373,7 +373,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue_MergeHasBasicBlockArg
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -437,7 +437,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue_MergeHasUndefBasicBlo
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -489,7 +489,7 @@ TEST_F(IR_MergeReturnTest, IfElse_BothSidesReturn) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -563,7 +563,7 @@ TEST_F(IR_MergeReturnTest, IfElse_ThenStatements) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -639,7 +639,7 @@ TEST_F(IR_MergeReturnTest, IfElse_ThenStatements_ReturnsCreatedInDifferentOrder)
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -785,7 +785,7 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -906,7 +906,7 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested_TrivialMerge) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -1054,7 +1054,7 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested_WithBasicBlockArguments) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -1098,7 +1098,7 @@ TEST_F(IR_MergeReturnTest, Loop_UnconditionalReturnInBody) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -1212,7 +1212,7 @@ TEST_F(IR_MergeReturnTest, Loop_ConditionalReturnInBody) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -1317,7 +1317,7 @@ TEST_F(IR_MergeReturnTest, Loop_ConditionalReturnInBody_UnreachableMerge) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -1431,7 +1431,7 @@ TEST_F(IR_MergeReturnTest, DISABLED_Loop_WithBasicBlockArgumentsOnMerge) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -1495,7 +1495,7 @@ TEST_F(IR_MergeReturnTest, Switch_UnconditionalReturnInCase) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -1604,7 +1604,7 @@ TEST_F(IR_MergeReturnTest, Switch_ConditionalReturnInBody) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -1687,7 +1687,7 @@ TEST_F(IR_MergeReturnTest, Switch_WithBasicBlockArgumentsOnMerge) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -1749,7 +1749,7 @@ TEST_F(IR_MergeReturnTest, LoopIfReturnThenContinue) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }
@@ -1822,7 +1822,7 @@ TEST_F(IR_MergeReturnTest, NestedIfsWithReturns) {
 }
 )";
 
-    Run<MergeReturn>();
+    Run(MergeReturn);
 
     EXPECT_EQ(expect, str());
 }

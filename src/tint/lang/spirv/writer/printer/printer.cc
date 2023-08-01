@@ -111,8 +111,8 @@ Result<SuccessType, std::string> Sanitize(ir::Module* module) {
     ir::transform::DemoteToHelper{}.Run(module);
     ir::transform::ExpandImplicitSplats{}.Run(module);
     ir::transform::HandleMatrixArithmetic{}.Run(module);
-    ir::transform::MergeReturn{}.Run(module);
 
+    RUN_TRANSFORM(MergeReturn);
     RUN_TRANSFORM(ShaderIOSpirv);
     RUN_TRANSFORM(Std140);
     RUN_TRANSFORM(VarForDynamicIndex);

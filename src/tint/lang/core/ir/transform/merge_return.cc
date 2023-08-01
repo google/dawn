@@ -18,23 +18,20 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/containers/reverse.h"
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/rtti/switch.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::MergeReturn);
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::ir::transform {
 
-MergeReturn::MergeReturn() = default;
-
-MergeReturn::~MergeReturn() = default;
+namespace {
 
 /// PIMPL state for the transform, for a single function.
-struct MergeReturn::State {
+struct State {
     /// The IR module.
     Module* ir = nullptr;
 
@@ -287,11 +284,20 @@ struct MergeReturn::State {
     }
 };
 
-void MergeReturn::Run(Module* ir) const {
+}  // namespace
+
+Result<SuccessType, std::string> MergeReturn(Module* ir) {
+    auto result = ValidateAndDumpIfNeeded(*ir, "MergeReturn transform");
+    if (!result) {
+        return result;
+    }
+
     // Process each function.
     for (auto* fn : ir->functions) {
         State{ir}.Process(fn);
     }
+
+    return Success;
 }
 
 }  // namespace tint::ir::transform
