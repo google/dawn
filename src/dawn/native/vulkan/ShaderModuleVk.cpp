@@ -215,7 +215,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetEntryPoint(programmableStage.entryPoint.c_str()).bindings;
 
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-        const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
+        const BindGroupLayout* bgl =
+            ToBackend(layout->GetBindGroupLayout(group)->GetInternalBindGroupLayout());
         const auto& groupBindingInfo = moduleBindingInfo[group];
         for (const auto& [binding, _] : groupBindingInfo) {
             BindingIndex bindingIndex = bgl->GetBindingIndex(binding);

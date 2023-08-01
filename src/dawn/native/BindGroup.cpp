@@ -286,7 +286,7 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
         descriptor->entryCount, static_cast<uint32_t>(descriptor->layout->GetBindingCount()),
         descriptor->layout, descriptor->layout->EntriesToString());
 
-    const BindGroupLayoutBase::BindingMap& bindingMap = descriptor->layout->GetBindingMap();
+    const BindGroupLayoutInternalBase::BindingMap& bindingMap = descriptor->layout->GetBindingMap();
     ASSERT(bindingMap.size() <= kMaxBindingsPerPipelineLayout);
 
     ityp::bitset<BindingIndex, kMaxBindingsPerPipelineLayout> bindingsSet;

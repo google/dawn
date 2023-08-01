@@ -91,7 +91,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE SamplerHeapCacheEntry::GetBaseDescriptor() const {
 ResultOrError<Ref<SamplerHeapCacheEntry>> SamplerHeapCache::GetOrCreate(
     const BindGroup* group,
     StagingDescriptorAllocator* samplerAllocator) {
-    const BindGroupLayout* bgl = ToBackend(group->GetLayout());
+    const BindGroupLayout* bgl = ToBackend(group->GetLayout()->GetInternalBindGroupLayout());
 
     // If a previously created bindgroup used the same samplers, the backing sampler heap
     // allocation can be reused. The packed list of samplers acts as the key to lookup the

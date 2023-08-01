@@ -24,6 +24,8 @@
 namespace dawn {
 namespace {
 
+using testing::Not;
+
 // Helper for describing bindings throughout the tests
 struct BindingDescriptor {
     uint32_t group;

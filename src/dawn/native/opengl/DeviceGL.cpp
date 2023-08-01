@@ -201,10 +201,9 @@ ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(
     DAWN_TRY(ValidateGLBindGroupDescriptor(descriptor));
     return BindGroup::Create(this, descriptor);
 }
-ResultOrError<Ref<BindGroupLayoutBase>> Device::CreateBindGroupLayoutImpl(
-    const BindGroupLayoutDescriptor* descriptor,
-    PipelineCompatibilityToken pipelineCompatibilityToken) {
-    return AcquireRef(new BindGroupLayout(this, descriptor, pipelineCompatibilityToken));
+ResultOrError<Ref<BindGroupLayoutInternalBase>> Device::CreateBindGroupLayoutImpl(
+    const BindGroupLayoutDescriptor* descriptor) {
+    return AcquireRef(new BindGroupLayout(this, descriptor));
 }
 ResultOrError<Ref<BufferBase>> Device::CreateBufferImpl(const BufferDescriptor* descriptor) {
     return AcquireRef(new Buffer(this, descriptor));

@@ -30,7 +30,8 @@ namespace dawn::native::d3d12 {
 // static
 ResultOrError<Ref<BindGroup>> BindGroup::Create(Device* device,
                                                 const BindGroupDescriptor* descriptor) {
-    return ToBackend(descriptor->layout)->AllocateBindGroup(device, descriptor);
+    return ToBackend(descriptor->layout->GetInternalBindGroupLayout())
+        ->AllocateBindGroup(device, descriptor);
 }
 
 BindGroup::BindGroup(Device* device,
@@ -38,7 +39,7 @@ BindGroup::BindGroup(Device* device,
                      uint32_t viewSizeIncrement,
                      const CPUDescriptorHeapAllocation& viewAllocation)
     : BindGroupBase(this, device, descriptor) {
-    BindGroupLayout* bgl = ToBackend(GetLayout());
+    BindGroupLayout* bgl = ToBackend(GetLayout()->GetInternalBindGroupLayout());
 
     mCPUViewAllocation = viewAllocation;
 
@@ -207,12 +208,13 @@ BindGroup::~BindGroup() = default;
 
 void BindGroup::DestroyImpl() {
     BindGroupBase::DestroyImpl();
-    ToBackend(GetLayout())->DeallocateBindGroup(this, &mCPUViewAllocation);
+    ToBackend(GetLayout()->GetInternalBindGroupLayout())
+        ->DeallocateBindGroup(this, &mCPUViewAllocation);
     ASSERT(!mCPUViewAllocation.IsValid());
 }
 
 bool BindGroup::PopulateViews(ShaderVisibleDescriptorAllocator* viewAllocator) {
-    const BindGroupLayout* bgl = ToBackend(GetLayout());
+    const BindGroupLayout* bgl = ToBackend(GetLayout()->GetInternalBindGroupLayout());
 
     const uint32_t descriptorCount = bgl->GetCbvUavSrvDescriptorCount();
     if (descriptorCount == 0 || viewAllocator->IsAllocationStillValid(mGPUViewAllocation)) {

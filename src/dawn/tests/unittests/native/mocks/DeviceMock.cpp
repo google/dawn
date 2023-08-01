@@ -43,11 +43,9 @@ DeviceMock::DeviceMock() {
                 return AcquireRef(new NiceMock<BindGroupMock>(this, descriptor));
             }));
     ON_CALL(*this, CreateBindGroupLayoutImpl)
-        .WillByDefault(WithArgs<0, 1>([this](const BindGroupLayoutDescriptor* descriptor,
-                                             PipelineCompatibilityToken pipelineCompatibilityToken)
-                                          -> ResultOrError<Ref<BindGroupLayoutBase>> {
-            return AcquireRef(
-                new NiceMock<BindGroupLayoutMock>(this, descriptor, pipelineCompatibilityToken));
+        .WillByDefault(WithArgs<0>([this](const BindGroupLayoutDescriptor* descriptor)
+                                       -> ResultOrError<Ref<BindGroupLayoutInternalBase>> {
+            return AcquireRef(new NiceMock<BindGroupLayoutMock>(this, descriptor));
         }));
     ON_CALL(*this, CreateBufferImpl)
         .WillByDefault(WithArgs<0>(
@@ -123,10 +121,6 @@ dawn::platform::Platform* DeviceMock::GetPlatform() const {
 
 QueueMock* DeviceMock::GetQueueMock() {
     return reinterpret_cast<QueueMock*>(GetQueue());
-}
-
-BindGroupLayoutMock* DeviceMock::GetEmptyBindGroupLayoutMock() {
-    return reinterpret_cast<BindGroupLayoutMock*>(GetEmptyBindGroupLayout());
 }
 
 }  // namespace dawn::native

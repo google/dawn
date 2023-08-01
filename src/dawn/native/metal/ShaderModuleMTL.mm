@@ -123,7 +123,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     arrayLengthFromUniform.ubo_binding = {0, kBufferLengthBufferSlot};
 
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-        const BindGroupLayoutBase::BindingMap& bindingMap =
+        const BindGroupLayoutInternalBase::BindingMap& bindingMap =
             layout->GetBindGroupLayout(group)->GetBindingMap();
         for (const auto [bindingNumber, bindingIndex] : bindingMap) {
             const BindingInfo& bindingInfo =

@@ -29,6 +29,7 @@ enum class ObjectType : uint32_t;
 class AdapterBase;
 class BindGroupBase;
 class BindGroupLayoutBase;
+class BindGroupLayoutInternalBase;
 class BufferBase;
 class ComputePipelineBase;
 class CommandBufferBase;

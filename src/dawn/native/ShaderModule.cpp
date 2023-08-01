@@ -369,7 +369,7 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
                                                           SingleShaderStage entryPointStage,
                                                           BindingNumber bindingNumber,
                                                           const ShaderBindingInfo& shaderInfo) {
-    const BindGroupLayoutBase::BindingMap& layoutBindings = layout->GetBindingMap();
+    const BindGroupLayoutInternalBase::BindingMap& layoutBindings = layout->GetBindingMap();
 
     // An external texture binding found in the shader will later be expanded into multiple
     // bindings at compile time. This expansion will have already happened in the bgl - so

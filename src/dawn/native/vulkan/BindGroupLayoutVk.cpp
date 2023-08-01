@@ -81,10 +81,8 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
 // static
 ResultOrError<Ref<BindGroupLayout>> BindGroupLayout::Create(
     Device* device,
-    const BindGroupLayoutDescriptor* descriptor,
-    PipelineCompatibilityToken pipelineCompatibilityToken) {
-    Ref<BindGroupLayout> bgl =
-        AcquireRef(new BindGroupLayout(device, descriptor, pipelineCompatibilityToken));
+    const BindGroupLayoutDescriptor* descriptor) {
+    Ref<BindGroupLayout> bgl = AcquireRef(new BindGroupLayout(device, descriptor));
     DAWN_TRY(bgl->Initialize());
     return bgl;
 }
@@ -144,16 +142,14 @@ MaybeError BindGroupLayout::Initialize() {
     return {};
 }
 
-BindGroupLayout::BindGroupLayout(DeviceBase* device,
-                                 const BindGroupLayoutDescriptor* descriptor,
-                                 PipelineCompatibilityToken pipelineCompatibilityToken)
-    : BindGroupLayoutBase(device, descriptor, pipelineCompatibilityToken),
+BindGroupLayout::BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor)
+    : BindGroupLayoutInternalBase(device, descriptor),
       mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {}
 
 BindGroupLayout::~BindGroupLayout() = default;
 
 void BindGroupLayout::DestroyImpl() {
-    BindGroupLayoutBase::DestroyImpl();
+    BindGroupLayoutInternalBase::DestroyImpl();
 
     Device* device = ToBackend(GetDevice());
 

@@ -37,11 +37,9 @@ class StagingDescriptorAllocator;
 static constexpr uint32_t kRegisterSpacePlaceholder =
     D3D12_DRIVER_RESERVED_REGISTER_SPACE_VALUES_START;
 
-class BindGroupLayout final : public BindGroupLayoutBase {
+class BindGroupLayout final : public BindGroupLayoutInternalBase {
   public:
-    static Ref<BindGroupLayout> Create(Device* device,
-                                       const BindGroupLayoutDescriptor* descriptor,
-                                       PipelineCompatibilityToken pipelineCompatibilityToken);
+    static Ref<BindGroupLayout> Create(Device* device, const BindGroupLayoutDescriptor* descriptor);
 
     ResultOrError<Ref<BindGroup>> AllocateBindGroup(Device* device,
                                                     const BindGroupDescriptor* descriptor);
@@ -63,9 +61,7 @@ class BindGroupLayout final : public BindGroupLayoutBase {
     const std::vector<D3D12_DESCRIPTOR_RANGE1>& GetSamplerDescriptorRanges() const;
 
   private:
-    BindGroupLayout(Device* device,
-                    const BindGroupLayoutDescriptor* descriptor,
-                    PipelineCompatibilityToken pipelineCompatibilityToken);
+    BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor);
     ~BindGroupLayout() override = default;
 
     // Contains the offset into the descriptor heap for the given resource view. Samplers and

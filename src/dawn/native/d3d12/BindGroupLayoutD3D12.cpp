@@ -57,17 +57,13 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
 }  // anonymous namespace
 
 // static
-Ref<BindGroupLayout> BindGroupLayout::Create(
-    Device* device,
-    const BindGroupLayoutDescriptor* descriptor,
-    PipelineCompatibilityToken pipelineCompatibilityToken) {
-    return AcquireRef(new BindGroupLayout(device, descriptor, pipelineCompatibilityToken));
+Ref<BindGroupLayout> BindGroupLayout::Create(Device* device,
+                                             const BindGroupLayoutDescriptor* descriptor) {
+    return AcquireRef(new BindGroupLayout(device, descriptor));
 }
 
-BindGroupLayout::BindGroupLayout(Device* device,
-                                 const BindGroupLayoutDescriptor* descriptor,
-                                 PipelineCompatibilityToken pipelineCompatibilityToken)
-    : BindGroupLayoutBase(device, descriptor, pipelineCompatibilityToken),
+BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor)
+    : BindGroupLayoutInternalBase(device, descriptor),
       mDescriptorHeapOffsets(GetBindingCount()),
       mShaderRegisters(GetBindingCount()),
       mCbvUavSrvDescriptorCount(0),

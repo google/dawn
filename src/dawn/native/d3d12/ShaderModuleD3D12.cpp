@@ -131,7 +131,8 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
 
     const BindingInfoArray& moduleBindingInfo = entryPoint.bindings;
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-        const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
+        const BindGroupLayout* bgl =
+            ToBackend(layout->GetBindGroupLayout(group)->GetInternalBindGroupLayout());
         const auto& moduleGroupBindingInfo = moduleBindingInfo[group];
 
         // d3d12::BindGroupLayout packs the bindings per HLSL register-space. We modify

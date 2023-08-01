@@ -19,17 +19,13 @@
 namespace dawn::native::metal {
 
 // static
-Ref<BindGroupLayout> BindGroupLayout::Create(
-    DeviceBase* device,
-    const BindGroupLayoutDescriptor* descriptor,
-    PipelineCompatibilityToken pipelineCompatibilityToken) {
-    return AcquireRef(new BindGroupLayout(device, descriptor, pipelineCompatibilityToken));
+Ref<BindGroupLayout> BindGroupLayout::Create(DeviceBase* device,
+                                             const BindGroupLayoutDescriptor* descriptor) {
+    return AcquireRef(new BindGroupLayout(device, descriptor));
 }
 
-BindGroupLayout::BindGroupLayout(DeviceBase* device,
-                                 const BindGroupLayoutDescriptor* descriptor,
-                                 PipelineCompatibilityToken pipelineCompatibilityToken)
-    : BindGroupLayoutBase(device, descriptor, pipelineCompatibilityToken),
+BindGroupLayout::BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor)
+    : BindGroupLayoutInternalBase(device, descriptor),
       mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {}
 
 BindGroupLayout::~BindGroupLayout() = default;

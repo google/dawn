@@ -379,7 +379,7 @@ size_t PipelineLayoutBase::ComputeContentHash() {
     recorder.Record(mMask);
 
     for (BindGroupIndex group : IterateBitSet(mMask)) {
-        recorder.Record(GetBindGroupLayout(group)->GetContentHash());
+        recorder.Record(GetBindGroupLayout(group)->GetInternalBindGroupLayout()->GetContentHash());
     }
 
     return recorder.GetContentHash();

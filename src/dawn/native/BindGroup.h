@@ -87,7 +87,7 @@ class BindGroupBase : public ApiObjectBase {
     void DeleteThis() override;
 
     Ref<BindGroupLayoutBase> mLayout;
-    BindGroupLayoutBase::BindingDataPointers mBindingData;
+    BindGroupLayoutInternalBase::BindingDataPointers mBindingData;
 
     // TODO(dawn:1293): Store external textures in
     // BindGroupLayoutBase::BindingDataPointers::bindings

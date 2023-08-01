@@ -23,20 +23,16 @@ namespace dawn::native::d3d11 {
 
 class Device;
 
-class BindGroupLayout final : public BindGroupLayoutBase {
+class BindGroupLayout final : public BindGroupLayoutInternalBase {
   public:
-    static ResultOrError<Ref<BindGroupLayout>> Create(
-        Device* device,
-        const BindGroupLayoutDescriptor* descriptor,
-        PipelineCompatibilityToken pipelineCompatibilityToken);
+    static ResultOrError<Ref<BindGroupLayout>> Create(Device* device,
+                                                      const BindGroupLayoutDescriptor* descriptor);
 
     Ref<BindGroup> AllocateBindGroup(Device* device, const BindGroupDescriptor* descriptor);
     void DeallocateBindGroup(BindGroup* bindGroup);
 
   private:
-    BindGroupLayout(Device* device,
-                    const BindGroupLayoutDescriptor* descriptor,
-                    PipelineCompatibilityToken pipelineCompatibilityToken);
+    BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor);
     ~BindGroupLayout() override = default;
 
     SlabAllocator<BindGroup> mBindGroupAllocator;

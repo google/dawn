@@ -19,6 +19,7 @@
 #include <string>
 
 #include "dawn/common/Log.h"
+#include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"
 #include "gmock/gmock.h"
@@ -88,6 +89,20 @@
         mLastWarningCount = warningsAfter;                                                         \
     } while (0)
 #define EXPECT_DEPRECATION_WARNING(statement) EXPECT_DEPRECATION_WARNINGS(statement, 1)
+
+// Gmock matcher helpers that may be used throughout other tests.
+
+// BindGroupLayouts can either be cache equivalent meaning that they may have different
+// compatibility tokens but same internal layout, or fully equivalent meaning that they have the
+// same token and internal layout. Note that being fully equivalent implies that they are cache
+// equivalent.
+MATCHER_P(BindGroupLayoutCacheEq, other, "") {
+    return dawn::native::FromAPI(arg.Get())->GetInternalBindGroupLayout() ==
+           dawn::native::FromAPI(other.Get())->GetInternalBindGroupLayout();
+}
+MATCHER_P(BindGroupLayoutEq, other, "") {
+    return dawn::native::FromAPI(arg.Get())->IsLayoutEqual(dawn::native::FromAPI(other.Get()));
+}
 
 namespace dawn::utils {
 class WireHelper;

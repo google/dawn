@@ -157,7 +157,8 @@ MaybeError PipelineLayout::Initialize() {
 
     size_t rangesCount = 0;
     for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
-        const BindGroupLayout* bindGroupLayout = ToBackend(GetBindGroupLayout(group));
+        const BindGroupLayout* bindGroupLayout =
+            ToBackend(GetBindGroupLayout(group)->GetInternalBindGroupLayout());
         rangesCount += bindGroupLayout->GetCbvUavSrvDescriptorRanges().size() +
                        bindGroupLayout->GetSamplerDescriptorRanges().size();
     }
@@ -168,7 +169,8 @@ MaybeError PipelineLayout::Initialize() {
     uint32_t rangeIndex = 0;
 
     for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
-        const BindGroupLayout* bindGroupLayout = ToBackend(GetBindGroupLayout(group));
+        const BindGroupLayout* bindGroupLayout =
+            ToBackend(GetBindGroupLayout(group)->GetInternalBindGroupLayout());
 
         // Set the root descriptor table parameter and copy ranges. Ranges are offset by the
         // bind group index Returns whether or not the parameter was set. A root parameter is

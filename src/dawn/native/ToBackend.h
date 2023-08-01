@@ -34,7 +34,7 @@ struct ToBackendTraits<BindGroupBase, BackendTraits> {
 };
 
 template <typename BackendTraits>
-struct ToBackendTraits<BindGroupLayoutBase, BackendTraits> {
+struct ToBackendTraits<BindGroupLayoutInternalBase, BackendTraits> {
     using BackendType = typename BackendTraits::BindGroupLayoutType;
 };
 

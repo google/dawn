@@ -458,15 +458,13 @@ bool CheckBufferBindingsFirst(ityp::span<BindingIndex, const BindingInfo> bindin
 
 }  // namespace
 
-// BindGroupLayoutBase
+// BindGroupLayoutInternalBase
 
-BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
-                                         const BindGroupLayoutDescriptor* descriptor,
-                                         PipelineCompatibilityToken pipelineCompatibilityToken,
-                                         ApiObjectBase::UntrackedByDeviceTag tag)
-    : ApiObjectBase(device, descriptor->label),
-      mPipelineCompatibilityToken(pipelineCompatibilityToken),
-      mUnexpandedBindingCount(descriptor->entryCount) {
+BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
+    DeviceBase* device,
+    const BindGroupLayoutDescriptor* descriptor,
+    ApiObjectBase::UntrackedByDeviceTag tag)
+    : ApiObjectBase(device, descriptor->label), mUnexpandedBindingCount(descriptor->entryCount) {
     std::vector<BindGroupLayoutEntry> sortedBindings = ExtractAndExpandBglEntries(
         descriptor, &mBindingCounts, &mExternalTextureBindingExpansionMap);
 
@@ -490,52 +488,52 @@ BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
     ASSERT(mBindingInfo.size() <= kMaxBindingsPerPipelineLayoutTyped);
 }
 
-BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
-                                         const BindGroupLayoutDescriptor* descriptor,
-                                         PipelineCompatibilityToken pipelineCompatibilityToken)
-    : BindGroupLayoutBase(device, descriptor, pipelineCompatibilityToken, kUntrackedByDevice) {
+BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
+    DeviceBase* device,
+    const BindGroupLayoutDescriptor* descriptor)
+    : BindGroupLayoutInternalBase(device, descriptor, kUntrackedByDevice) {
     GetObjectTrackingList()->Track(this);
 }
 
-BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
-                                         ObjectBase::ErrorTag tag,
-                                         const char* label)
+BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(DeviceBase* device,
+                                                         ObjectBase::ErrorTag tag,
+                                                         const char* label)
     : ApiObjectBase(device, tag, label) {}
 
-BindGroupLayoutBase::~BindGroupLayoutBase() = default;
+BindGroupLayoutInternalBase::~BindGroupLayoutInternalBase() = default;
 
-void BindGroupLayoutBase::DestroyImpl() {
+void BindGroupLayoutInternalBase::DestroyImpl() {
     Uncache();
 }
 
-// static
-BindGroupLayoutBase* BindGroupLayoutBase::MakeError(DeviceBase* device, const char* label) {
-    return new BindGroupLayoutBase(device, ObjectBase::kError, label);
-}
-
-ObjectType BindGroupLayoutBase::GetType() const {
+ObjectType BindGroupLayoutInternalBase::GetType() const {
     return ObjectType::BindGroupLayout;
 }
 
-const BindGroupLayoutBase::BindingMap& BindGroupLayoutBase::GetBindingMap() const {
+const BindingInfo& BindGroupLayoutInternalBase::GetBindingInfo(BindingIndex bindingIndex) const {
+    ASSERT(!IsError());
+    ASSERT(bindingIndex < mBindingInfo.size());
+    return mBindingInfo[bindingIndex];
+}
+
+const BindGroupLayoutInternalBase::BindingMap& BindGroupLayoutInternalBase::GetBindingMap() const {
     ASSERT(!IsError());
     return mBindingMap;
 }
 
-bool BindGroupLayoutBase::HasBinding(BindingNumber bindingNumber) const {
+bool BindGroupLayoutInternalBase::HasBinding(BindingNumber bindingNumber) const {
     return mBindingMap.count(bindingNumber) != 0;
 }
 
-BindingIndex BindGroupLayoutBase::GetBindingIndex(BindingNumber bindingNumber) const {
+BindingIndex BindGroupLayoutInternalBase::GetBindingIndex(BindingNumber bindingNumber) const {
     ASSERT(!IsError());
     const auto& it = mBindingMap.find(bindingNumber);
     ASSERT(it != mBindingMap.end());
     return it->second;
 }
 
-size_t BindGroupLayoutBase::ComputeContentHash() {
+size_t BindGroupLayoutInternalBase::ComputeContentHash() {
     ObjectContentHasher recorder;
-    recorder.Record(mPipelineCompatibilityToken);
 
     // std::map is sorted by key, so two BGLs constructed in different orders
     // will still record the same.
@@ -553,53 +551,49 @@ size_t BindGroupLayoutBase::ComputeContentHash() {
     return recorder.GetContentHash();
 }
 
-bool BindGroupLayoutBase::EqualityFunc::operator()(const BindGroupLayoutBase* a,
-                                                   const BindGroupLayoutBase* b) const {
+bool BindGroupLayoutInternalBase::EqualityFunc::operator()(
+    const BindGroupLayoutInternalBase* a,
+    const BindGroupLayoutInternalBase* b) const {
     return a->IsLayoutEqual(b);
 }
 
-BindingIndex BindGroupLayoutBase::GetBindingCount() const {
+BindingIndex BindGroupLayoutInternalBase::GetBindingCount() const {
     return mBindingInfo.size();
 }
 
-BindingIndex BindGroupLayoutBase::GetBufferCount() const {
+BindingIndex BindGroupLayoutInternalBase::GetBufferCount() const {
     return BindingIndex(mBindingCounts.bufferCount);
 }
 
-BindingIndex BindGroupLayoutBase::GetDynamicBufferCount() const {
+BindingIndex BindGroupLayoutInternalBase::GetDynamicBufferCount() const {
     // This is a binding index because dynamic buffers are packed at the front of the binding
     // info.
     return static_cast<BindingIndex>(mBindingCounts.dynamicStorageBufferCount +
                                      mBindingCounts.dynamicUniformBufferCount);
 }
 
-uint32_t BindGroupLayoutBase::GetUnverifiedBufferCount() const {
+uint32_t BindGroupLayoutInternalBase::GetUnverifiedBufferCount() const {
     return mBindingCounts.unverifiedBufferCount;
 }
 
-uint32_t BindGroupLayoutBase::GetExternalTextureBindingCount() const {
+uint32_t BindGroupLayoutInternalBase::GetExternalTextureBindingCount() const {
     return mExternalTextureBindingExpansionMap.size();
 }
 
-const BindingCounts& BindGroupLayoutBase::GetBindingCountInfo() const {
+const BindingCounts& BindGroupLayoutInternalBase::GetBindingCountInfo() const {
     return mBindingCounts;
 }
 
 const ExternalTextureBindingExpansionMap&
-BindGroupLayoutBase::GetExternalTextureBindingExpansionMap() const {
+BindGroupLayoutInternalBase::GetExternalTextureBindingExpansionMap() const {
     return mExternalTextureBindingExpansionMap;
 }
 
-uint32_t BindGroupLayoutBase::GetUnexpandedBindingCount() const {
+uint32_t BindGroupLayoutInternalBase::GetUnexpandedBindingCount() const {
     return mUnexpandedBindingCount;
 }
 
-bool BindGroupLayoutBase::IsLayoutEqual(const BindGroupLayoutBase* other,
-                                        bool excludePipelineCompatibiltyToken) const {
-    if (!excludePipelineCompatibiltyToken &&
-        GetPipelineCompatibilityToken() != other->GetPipelineCompatibilityToken()) {
-        return false;
-    }
+bool BindGroupLayoutInternalBase::IsLayoutEqual(const BindGroupLayoutInternalBase* other) const {
     if (GetBindingCount() != other->GetBindingCount()) {
         return false;
     }
@@ -611,11 +605,7 @@ bool BindGroupLayoutBase::IsLayoutEqual(const BindGroupLayoutBase* other,
     return mBindingMap == other->mBindingMap;
 }
 
-PipelineCompatibilityToken BindGroupLayoutBase::GetPipelineCompatibilityToken() const {
-    return mPipelineCompatibilityToken;
-}
-
-size_t BindGroupLayoutBase::GetBindingDataSize() const {
+size_t BindGroupLayoutInternalBase::GetBindingDataSize() const {
     // | ------ buffer-specific ----------| ------------ object pointers -------------|
     // | --- offsets + sizes -------------| --------------- Ref<ObjectBase> ----------|
     // Followed by:
@@ -629,8 +619,8 @@ size_t BindGroupLayoutBase::GetBindingDataSize() const {
     return bufferSizeArrayStart + mBindingCounts.unverifiedBufferCount * sizeof(uint64_t);
 }
 
-BindGroupLayoutBase::BindingDataPointers BindGroupLayoutBase::ComputeBindingDataPointers(
-    void* dataStart) const {
+BindGroupLayoutInternalBase::BindingDataPointers
+BindGroupLayoutInternalBase::ComputeBindingDataPointers(void* dataStart) const {
     BufferBindingData* bufferData = reinterpret_cast<BufferBindingData*>(dataStart);
     auto bindings = reinterpret_cast<Ref<ObjectBase>*>(bufferData + mBindingCounts.bufferCount);
     uint64_t* unverifiedBufferSizes = AlignPtr(
@@ -645,7 +635,7 @@ BindGroupLayoutBase::BindingDataPointers BindGroupLayoutBase::ComputeBindingData
             {unverifiedBufferSizes, mBindingCounts.unverifiedBufferCount}};
 }
 
-bool BindGroupLayoutBase::IsStorageBufferBinding(BindingIndex bindingIndex) const {
+bool BindGroupLayoutInternalBase::IsStorageBufferBinding(BindingIndex bindingIndex) const {
     ASSERT(bindingIndex < GetBufferCount());
     switch (GetBindingInfo(bindingIndex).buffer.type) {
         case wgpu::BufferBindingType::Uniform:
@@ -660,10 +650,10 @@ bool BindGroupLayoutBase::IsStorageBufferBinding(BindingIndex bindingIndex) cons
     UNREACHABLE();
 }
 
-std::string BindGroupLayoutBase::EntriesToString() const {
+std::string BindGroupLayoutInternalBase::EntriesToString() const {
     std::string entries = "[";
     std::string sep = "";
-    const BindGroupLayoutBase::BindingMap& bindingMap = GetBindingMap();
+    const BindGroupLayoutInternalBase::BindingMap& bindingMap = GetBindingMap();
     for (const auto [bindingNumber, bindingIndex] : bindingMap) {
         const BindingInfo& bindingInfo = GetBindingInfo(bindingIndex);
         entries += absl::StrFormat("%s%s", sep, bindingInfo);
@@ -672,5 +662,44 @@ std::string BindGroupLayoutBase::EntriesToString() const {
     entries += "]";
     return entries;
 }
+
+BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
+                                         const char* label,
+                                         Ref<BindGroupLayoutInternalBase> internal,
+                                         PipelineCompatibilityToken pipelineCompatibilityToken)
+    : ApiObjectBase(device, label),
+      mInternalLayout(internal),
+      mPipelineCompatibilityToken(pipelineCompatibilityToken) {
+    GetObjectTrackingList()->Track(this);
+}
+
+BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
+                                         ObjectBase::ErrorTag tag,
+                                         const char* label)
+    : ApiObjectBase(device, tag, label) {}
+
+ObjectType BindGroupLayoutBase::GetType() const {
+    return ObjectType::BindGroupLayout;
+}
+
+// static
+BindGroupLayoutBase* BindGroupLayoutBase::MakeError(DeviceBase* device, const char* label) {
+    return new BindGroupLayoutBase(device, ObjectBase::kError, label);
+}
+
+BindGroupLayoutInternalBase* BindGroupLayoutBase::GetInternalBindGroupLayout() const {
+    return mInternalLayout.Get();
+}
+
+bool BindGroupLayoutBase::IsLayoutEqual(const BindGroupLayoutBase* other,
+                                        bool excludePipelineCompatibiltyToken) const {
+    if (!excludePipelineCompatibiltyToken &&
+        GetPipelineCompatibilityToken() != other->GetPipelineCompatibilityToken()) {
+        return false;
+    }
+    return GetInternalBindGroupLayout() == other->GetInternalBindGroupLayout();
+}
+
+void BindGroupLayoutBase::DestroyImpl() {}
 
 }  // namespace dawn::native

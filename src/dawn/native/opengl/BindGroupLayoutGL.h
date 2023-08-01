@@ -23,11 +23,9 @@ namespace dawn::native::opengl {
 
 class Device;
 
-class BindGroupLayout final : public BindGroupLayoutBase {
+class BindGroupLayout final : public BindGroupLayoutInternalBase {
   public:
-    BindGroupLayout(DeviceBase* device,
-                    const BindGroupLayoutDescriptor* descriptor,
-                    PipelineCompatibilityToken pipelineCompatibilityToken);
+    BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor);
 
     Ref<BindGroup> AllocateBindGroup(Device* device, const BindGroupDescriptor* descriptor);
     void DeallocateBindGroup(BindGroup* bindGroup);

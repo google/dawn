@@ -22,6 +22,8 @@
 namespace dawn {
 namespace {
 
+using testing::Not;
+
 // These tests works assuming Dawn Native's object deduplication. Comparing the pointer is
 // exploiting an implementation detail of Dawn Native.
 class ObjectCachingTest : public ValidationTest {
@@ -40,8 +42,8 @@ TEST_F(ObjectCachingTest, BindGroupLayoutDeduplication) {
     wgpu::BindGroupLayout otherBgl = utils::MakeBindGroupLayout(
         device, {{1, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform}});
 
-    EXPECT_NE(bgl.Get(), otherBgl.Get());
-    EXPECT_EQ(bgl.Get(), sameBgl.Get());
+    EXPECT_THAT(bgl, Not(BindGroupLayoutEq(otherBgl)));
+    EXPECT_THAT(bgl, BindGroupLayoutEq(sameBgl));
 }
 
 // Test that two similar bind group layouts won't refer to the same one if they differ by dynamic.
@@ -53,8 +55,8 @@ TEST_F(ObjectCachingTest, BindGroupLayoutDynamic) {
     wgpu::BindGroupLayout otherBgl = utils::MakeBindGroupLayout(
         device, {{1, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform, false}});
 
-    EXPECT_NE(bgl.Get(), otherBgl.Get());
-    EXPECT_EQ(bgl.Get(), sameBgl.Get());
+    EXPECT_THAT(bgl, Not(BindGroupLayoutEq(otherBgl)));
+    EXPECT_THAT(bgl, BindGroupLayoutEq(sameBgl));
 }
 
 // Test that two similar bind group layouts won't refer to the same one if they differ by min size.
@@ -66,8 +68,8 @@ TEST_F(ObjectCachingTest, BindGroupLayoutMinBufferSize) {
     wgpu::BindGroupLayout otherBgl = utils::MakeBindGroupLayout(
         device, {{1, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Uniform, false, 4}});
 
-    EXPECT_NE(bgl.Get(), otherBgl.Get());
-    EXPECT_EQ(bgl.Get(), sameBgl.Get());
+    EXPECT_THAT(bgl, Not(BindGroupLayoutEq(otherBgl)));
+    EXPECT_THAT(bgl, BindGroupLayoutEq(sameBgl));
 }
 
 // Test that two similar bind group layouts won't refer to the same one if they differ by
@@ -80,8 +82,8 @@ TEST_F(ObjectCachingTest, BindGroupLayoutTextureComponentType) {
     wgpu::BindGroupLayout otherBgl = utils::MakeBindGroupLayout(
         device, {{1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Uint}});
 
-    EXPECT_NE(bgl.Get(), otherBgl.Get());
-    EXPECT_EQ(bgl.Get(), sameBgl.Get());
+    EXPECT_THAT(bgl, Not(BindGroupLayoutEq(otherBgl)));
+    EXPECT_THAT(bgl, BindGroupLayoutEq(sameBgl));
 }
 
 // Test that two similar bind group layouts won't refer to the same one if they differ by
@@ -95,8 +97,8 @@ TEST_F(ObjectCachingTest, BindGroupLayoutViewDimension) {
         device, {{1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float,
                   wgpu::TextureViewDimension::e2DArray}});
 
-    EXPECT_NE(bgl.Get(), otherBgl.Get());
-    EXPECT_EQ(bgl.Get(), sameBgl.Get());
+    EXPECT_THAT(bgl, Not(BindGroupLayoutEq(otherBgl)));
+    EXPECT_THAT(bgl, BindGroupLayoutEq(sameBgl));
 }
 
 // Test that PipelineLayouts are correctly deduplicated.

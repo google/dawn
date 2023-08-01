@@ -294,9 +294,6 @@ DAWN_NATIVE_EXPORT const char* GetObjectLabelForTesting(void* objectHandle);
 
 DAWN_NATIVE_EXPORT uint64_t GetAllocatedSizeForTesting(WGPUBuffer buffer);
 
-DAWN_NATIVE_EXPORT bool BindGroupLayoutBindingsEqualForTesting(WGPUBindGroupLayout a,
-                                                               WGPUBindGroupLayout b);
-
 }  // namespace dawn::native
 
 // Alias the DawnInstanceDescriptor up to wgpu.

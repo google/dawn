@@ -31,7 +31,8 @@ namespace dawn::native::vulkan {
 // static
 ResultOrError<Ref<BindGroup>> BindGroup::Create(Device* device,
                                                 const BindGroupDescriptor* descriptor) {
-    return ToBackend(descriptor->layout)->AllocateBindGroup(device, descriptor);
+    return ToBackend(descriptor->layout->GetInternalBindGroupLayout())
+        ->AllocateBindGroup(device, descriptor);
 }
 
 BindGroup::BindGroup(Device* device,
@@ -152,7 +153,8 @@ BindGroup::~BindGroup() = default;
 
 void BindGroup::DestroyImpl() {
     BindGroupBase::DestroyImpl();
-    ToBackend(GetLayout())->DeallocateBindGroup(this, &mDescriptorSetAllocation);
+    ToBackend(GetLayout()->GetInternalBindGroupLayout())
+        ->DeallocateBindGroup(this, &mDescriptorSetAllocation);
 }
 
 VkDescriptorSet BindGroup::GetHandle() const {

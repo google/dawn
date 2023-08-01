@@ -50,31 +50,22 @@ MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
 // Bindings are specified as a |BindingNumber| in the BindGroupLayoutDescriptor.
 // These numbers may be arbitrary and sparse. Internally, Dawn packs these numbers
 // into a packed range of |BindingIndex| integers.
-class BindGroupLayoutBase : public ApiObjectBase,
-                            public CachedObject,
-                            public ContentLessObjectCacheable<BindGroupLayoutBase> {
+class BindGroupLayoutInternalBase : public ApiObjectBase,
+                                    public CachedObject,
+                                    public ContentLessObjectCacheable<BindGroupLayoutInternalBase> {
   public:
-    BindGroupLayoutBase(DeviceBase* device,
-                        const BindGroupLayoutDescriptor* descriptor,
-                        PipelineCompatibilityToken pipelineCompatibilityToken,
-                        ApiObjectBase::UntrackedByDeviceTag tag);
-    BindGroupLayoutBase(DeviceBase* device,
-                        const BindGroupLayoutDescriptor* descriptor,
-                        PipelineCompatibilityToken pipelineCompatibilityToken);
-    ~BindGroupLayoutBase() override;
-
-    static BindGroupLayoutBase* MakeError(DeviceBase* device, const char* label = nullptr);
+    BindGroupLayoutInternalBase(DeviceBase* device,
+                                const BindGroupLayoutDescriptor* descriptor,
+                                ApiObjectBase::UntrackedByDeviceTag tag);
+    BindGroupLayoutInternalBase(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor);
+    ~BindGroupLayoutInternalBase() override;
 
     ObjectType GetType() const override;
 
     // A map from the BindingNumber to its packed BindingIndex.
     using BindingMap = std::map<BindingNumber, BindingIndex>;
 
-    const BindingInfo& GetBindingInfo(BindingIndex bindingIndex) const {
-        ASSERT(!IsError());
-        ASSERT(bindingIndex < mBindingInfo.size());
-        return mBindingInfo[bindingIndex];
-    }
+    const BindingInfo& GetBindingInfo(BindingIndex bindingIndex) const;
     const BindingMap& GetBindingMap() const;
     bool HasBinding(BindingNumber bindingNumber) const;
     BindingIndex GetBindingIndex(BindingNumber bindingNumber) const;
@@ -83,7 +74,8 @@ class BindGroupLayoutBase : public ApiObjectBase,
     size_t ComputeContentHash() override;
 
     struct EqualityFunc {
-        bool operator()(const BindGroupLayoutBase* a, const BindGroupLayoutBase* b) const;
+        bool operator()(const BindGroupLayoutInternalBase* a,
+                        const BindGroupLayoutInternalBase* b) const;
     };
 
     BindingIndex GetBindingCount() const;
@@ -104,11 +96,8 @@ class BindGroupLayoutBase : public ApiObjectBase,
 
     uint32_t GetUnexpandedBindingCount() const;
 
-    // Tests that the BindingInfo of two bind groups are equal,
-    // ignoring their compatibility groups.
-    bool IsLayoutEqual(const BindGroupLayoutBase* other,
-                       bool excludePipelineCompatibiltyToken = false) const;
-    PipelineCompatibilityToken GetPipelineCompatibilityToken() const;
+    // Tests that the BindingInfo of two bind groups are equal.
+    bool IsLayoutEqual(const BindGroupLayoutInternalBase* other) const;
 
     struct BufferBindingData {
         uint64_t offset;
@@ -149,7 +138,7 @@ class BindGroupLayoutBase : public ApiObjectBase,
     }
 
   private:
-    BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
+    BindGroupLayoutInternalBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
 
     BindingCounts mBindingCounts = {};
     ityp::vector<BindingIndex, BindingInfo> mBindingInfo;
@@ -159,10 +148,85 @@ class BindGroupLayoutBase : public ApiObjectBase,
 
     ExternalTextureBindingExpansionMap mExternalTextureBindingExpansionMap;
 
+    uint32_t mUnexpandedBindingCount;
+};
+
+// Wrapper passthrough frontend object that is essentially just a Ref to a backing
+// BindGroupLayoutInternalBase and a pipeline compatibility token.
+// TODO(lokokung) Could maybe make this a final class if we update the mock objects.
+class BindGroupLayoutBase : public ApiObjectBase {
+  public:
+    BindGroupLayoutBase(DeviceBase* device,
+                        const char* label,
+                        Ref<BindGroupLayoutInternalBase> internal,
+                        PipelineCompatibilityToken pipelineCompatibilityToken);
+
+    static BindGroupLayoutBase* MakeError(DeviceBase* device, const char* label = nullptr);
+
+    ObjectType GetType() const override;
+
+    // Proxy functions that just call their respective counterparts in the internal layout.
+    const BindingInfo& GetBindingInfo(BindingIndex bindingIndex) const {
+        return mInternalLayout->GetBindingInfo(bindingIndex);
+    }
+    const BindGroupLayoutInternalBase::BindingMap& GetBindingMap() const {
+        return mInternalLayout->GetBindingMap();
+    }
+    bool HasBinding(BindingNumber bindingNumber) const {
+        return mInternalLayout->HasBinding(bindingNumber);
+    }
+    BindingIndex GetBindingIndex(BindingNumber bindingNumber) const {
+        return mInternalLayout->GetBindingIndex(bindingNumber);
+    }
+    BindingIndex GetBindingCount() const { return mInternalLayout->GetBindingCount(); }
+    BindingIndex GetBufferCount() const { return mInternalLayout->GetBufferCount(); }
+    BindingIndex GetDynamicBufferCount() const { return mInternalLayout->GetDynamicBufferCount(); }
+    uint32_t GetUnverifiedBufferCount() const {
+        return mInternalLayout->GetUnverifiedBufferCount();
+    }
+    const BindingCounts& GetBindingCountInfo() const {
+        return mInternalLayout->GetBindingCountInfo();
+    }
+    uint32_t GetExternalTextureBindingCount() const {
+        return mInternalLayout->GetExternalTextureBindingCount();
+    }
+    const ExternalTextureBindingExpansionMap& GetExternalTextureBindingExpansionMap() const {
+        return mInternalLayout->GetExternalTextureBindingExpansionMap();
+    }
+    uint32_t GetUnexpandedBindingCount() const {
+        return mInternalLayout->GetUnexpandedBindingCount();
+    }
+    size_t GetBindingDataSize() const { return mInternalLayout->GetBindingDataSize(); }
+    static constexpr size_t GetBindingDataAlignment() {
+        return BindGroupLayoutInternalBase::GetBindingDataAlignment();
+    }
+    BindGroupLayoutInternalBase::BindingDataPointers ComputeBindingDataPointers(
+        void* dataStart) const {
+        return mInternalLayout->ComputeBindingDataPointers(dataStart);
+    }
+    bool IsStorageBufferBinding(BindingIndex bindingIndex) const {
+        return mInternalLayout->IsStorageBufferBinding(bindingIndex);
+    }
+    std::string EntriesToString() const { return mInternalLayout->EntriesToString(); }
+
+    // Non-proxy functions that are specific to the realized frontend object.
+    BindGroupLayoutInternalBase* GetInternalBindGroupLayout() const;
+    bool IsLayoutEqual(const BindGroupLayoutBase* other,
+                       bool excludePipelineCompatibiltyToken = false) const;
+    PipelineCompatibilityToken GetPipelineCompatibilityToken() const {
+        return mPipelineCompatibilityToken;
+    }
+
+  protected:
+    void DestroyImpl() override;
+
+  private:
+    BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* label);
+
+    const Ref<BindGroupLayoutInternalBase> mInternalLayout;
+
     // Non-0 if this BindGroupLayout was created as part of a default PipelineLayout.
     const PipelineCompatibilityToken mPipelineCompatibilityToken = PipelineCompatibilityToken(0);
-
-    uint32_t mUnexpandedBindingCount;
 };
 
 }  // namespace dawn::native

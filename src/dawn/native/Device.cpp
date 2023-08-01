@@ -63,7 +63,7 @@ namespace dawn::native {
 
 struct DeviceBase::Caches {
     ContentLessObjectCache<AttachmentState> attachmentStates;
-    ContentLessObjectCache<BindGroupLayoutBase> bindGroupLayouts;
+    ContentLessObjectCache<BindGroupLayoutInternalBase> bindGroupLayouts;
     ContentLessObjectCache<ComputePipelineBase> computePipelines;
     ContentLessObjectCache<PipelineLayoutBase> pipelineLayouts;
     ContentLessObjectCache<RenderPipelineBase> renderPipelines;
@@ -799,20 +799,22 @@ const Format& DeviceBase::GetValidInternalFormat(FormatIndex index) const {
 ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::GetOrCreateBindGroupLayout(
     const BindGroupLayoutDescriptor* descriptor,
     PipelineCompatibilityToken pipelineCompatibilityToken) {
-    BindGroupLayoutBase blueprint(this, descriptor, pipelineCompatibilityToken,
-                                  ApiObjectBase::kUntrackedByDevice);
+    BindGroupLayoutInternalBase blueprint(this, descriptor, ApiObjectBase::kUntrackedByDevice);
 
     const size_t blueprintHash = blueprint.ComputeContentHash();
     blueprint.SetContentHash(blueprintHash);
 
-    return GetOrCreate(
-        mCaches->bindGroupLayouts, &blueprint, [&]() -> ResultOrError<Ref<BindGroupLayoutBase>> {
-            Ref<BindGroupLayoutBase> result;
-            DAWN_TRY_ASSIGN(result,
-                            CreateBindGroupLayoutImpl(descriptor, pipelineCompatibilityToken));
-            result->SetContentHash(blueprintHash);
-            return result;
-        });
+    Ref<BindGroupLayoutInternalBase> internal;
+    DAWN_TRY_ASSIGN(internal, GetOrCreate(mCaches->bindGroupLayouts, &blueprint,
+                                          [&]() -> ResultOrError<Ref<BindGroupLayoutInternalBase>> {
+                                              Ref<BindGroupLayoutInternalBase> result;
+                                              DAWN_TRY_ASSIGN(
+                                                  result, CreateBindGroupLayoutImpl(descriptor));
+                                              result->SetContentHash(blueprintHash);
+                                              return result;
+                                          }));
+    return AcquireRef(
+        new BindGroupLayoutBase(this, descriptor->label, internal, pipelineCompatibilityToken));
 }
 
 // Private function used at initialization

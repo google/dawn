@@ -89,7 +89,7 @@ class DestroyObjectTests : public DawnMockTest {
 
 TEST_F(DestroyObjectTests, BindGroupNativeExplicit) {
     BindGroupDescriptor desc = {};
-    desc.layout = mDeviceMock->GetEmptyBindGroupLayoutMock();
+    desc.layout = mDeviceMock->GetEmptyBindGroupLayout();
     desc.entryCount = 0;
     desc.entries = nullptr;
 
@@ -105,7 +105,7 @@ TEST_F(DestroyObjectTests, BindGroupNativeExplicit) {
 // will also complain if there is a memory leak.
 TEST_F(DestroyObjectTests, BindGroupImplicit) {
     BindGroupDescriptor desc = {};
-    desc.layout = mDeviceMock->GetEmptyBindGroupLayoutMock();
+    desc.layout = mDeviceMock->GetEmptyBindGroupLayout();
     desc.entryCount = 0;
     desc.entries = nullptr;
 
@@ -447,7 +447,7 @@ TEST_F(DestroyObjectTests, ExternalTextureImplicit) {
 TEST_F(DestroyObjectTests, PipelineLayoutNativeExplicit) {
     PipelineLayoutDescriptor desc = {};
     std::vector<BindGroupLayoutBase*> bindGroupLayouts;
-    bindGroupLayouts.push_back(mDeviceMock->GetEmptyBindGroupLayoutMock());
+    bindGroupLayouts.push_back(mDeviceMock->GetEmptyBindGroupLayout());
     desc.bindGroupLayoutCount = bindGroupLayouts.size();
     desc.bindGroupLayouts = bindGroupLayouts.data();
 
@@ -465,7 +465,7 @@ TEST_F(DestroyObjectTests, PipelineLayoutNativeExplicit) {
 TEST_F(DestroyObjectTests, PipelineLayoutImplicit) {
     PipelineLayoutDescriptor desc = {};
     std::vector<BindGroupLayoutBase*> bindGroupLayouts;
-    bindGroupLayouts.push_back(mDeviceMock->GetEmptyBindGroupLayoutMock());
+    bindGroupLayouts.push_back(mDeviceMock->GetEmptyBindGroupLayout());
     desc.bindGroupLayoutCount = bindGroupLayouts.size();
     desc.bindGroupLayouts = bindGroupLayouts.data();
 
@@ -779,7 +779,7 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
     wgpu::BindGroup bindGroup;
     {
         BindGroupDescriptor desc = {};
-        desc.layout = mDeviceMock->GetEmptyBindGroupLayoutMock();
+        desc.layout = mDeviceMock->GetEmptyBindGroupLayout();
         desc.entryCount = 0;
         desc.entries = nullptr;
 
@@ -884,7 +884,7 @@ TEST_F(DestroyObjectTests, DestroyObjectsApiExplicit) {
     {
         PipelineLayoutDescriptor desc = {};
         std::vector<BindGroupLayoutBase*> bindGroupLayouts;
-        bindGroupLayouts.push_back(mDeviceMock->GetEmptyBindGroupLayoutMock());
+        bindGroupLayouts.push_back(mDeviceMock->GetEmptyBindGroupLayout());
         desc.bindGroupLayoutCount = bindGroupLayouts.size();
         desc.bindGroupLayouts = bindGroupLayouts.data();
 

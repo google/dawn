@@ -44,7 +44,6 @@ class DeviceMock : public DeviceBase {
 
     // Mock specific functionality.
     QueueMock* GetQueueMock();
-    BindGroupLayoutMock* GetEmptyBindGroupLayoutMock();
 
     MOCK_METHOD(ResultOrError<Ref<CommandBufferBase>>,
                 CreateCommandBuffer,
@@ -70,9 +69,9 @@ class DeviceMock : public DeviceBase {
                 CreateBindGroupImpl,
                 (const BindGroupDescriptor*),
                 (override));
-    MOCK_METHOD(ResultOrError<Ref<BindGroupLayoutBase>>,
+    MOCK_METHOD(ResultOrError<Ref<BindGroupLayoutInternalBase>>,
                 CreateBindGroupLayoutImpl,
-                (const BindGroupLayoutDescriptor*, PipelineCompatibilityToken),
+                (const BindGroupLayoutDescriptor*),
                 (override));
     MOCK_METHOD(ResultOrError<Ref<BufferBase>>,
                 CreateBufferImpl,

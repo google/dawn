@@ -47,16 +47,12 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo);
 // the pools are reused when no longer used. Minimizing the number of descriptor pool allocation
 // is important because creating them can incur GPU memory allocation which is usually an
 // expensive syscall.
-class BindGroupLayout final : public BindGroupLayoutBase {
+class BindGroupLayout final : public BindGroupLayoutInternalBase {
   public:
-    static ResultOrError<Ref<BindGroupLayout>> Create(
-        Device* device,
-        const BindGroupLayoutDescriptor* descriptor,
-        PipelineCompatibilityToken pipelineCompatibilityToken);
+    static ResultOrError<Ref<BindGroupLayout>> Create(Device* device,
+                                                      const BindGroupLayoutDescriptor* descriptor);
 
-    BindGroupLayout(DeviceBase* device,
-                    const BindGroupLayoutDescriptor* descriptor,
-                    PipelineCompatibilityToken pipelineCompatibilityToken);
+    BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor);
 
     VkDescriptorSetLayout GetHandle() const;
 

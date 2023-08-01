@@ -22,12 +22,9 @@
 
 namespace dawn::native {
 
-class BindGroupLayoutMock : public BindGroupLayoutBase {
+class BindGroupLayoutMock : public BindGroupLayoutInternalBase {
   public:
-    BindGroupLayoutMock(
-        DeviceMock* device,
-        const BindGroupLayoutDescriptor* descriptor,
-        PipelineCompatibilityToken pipelineCompatibilityToken = PipelineCompatibilityToken(0));
+    BindGroupLayoutMock(DeviceMock* device, const BindGroupLayoutDescriptor* descriptor);
     ~BindGroupLayoutMock() override;
 
     MOCK_METHOD(void, DestroyImpl, (), (override));
