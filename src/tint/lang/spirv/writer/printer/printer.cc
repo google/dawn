@@ -105,8 +105,7 @@ Result<SuccessType, std::string> Sanitize(ir::Module* module) {
         }                                          \
     } while (false)
 
-    ir::transform::AddEmptyEntryPoint{}.Run(module);
-
+    RUN_TRANSFORM(AddEmptyEntryPoint);
     RUN_TRANSFORM(BlockDecoratedStructs);
     RUN_TRANSFORM(BuiltinPolyfillSpirv);
     RUN_TRANSFORM(DemoteToHelper);

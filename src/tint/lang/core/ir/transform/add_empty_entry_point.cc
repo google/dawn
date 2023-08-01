@@ -18,16 +18,13 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::AddEmptyEntryPoint);
+#include "src/tint/lang/core/ir/validator.h"
 
 namespace tint::ir::transform {
 
-AddEmptyEntryPoint::AddEmptyEntryPoint() = default;
+namespace {
 
-AddEmptyEntryPoint::~AddEmptyEntryPoint() = default;
-
-void AddEmptyEntryPoint::Run(ir::Module* ir) const {
+void Run(ir::Module* ir) {
     for (auto* func : ir->functions) {
         if (func->Stage() != Function::PipelineStage::kUndefined) {
             return;
@@ -38,6 +35,19 @@ void AddEmptyEntryPoint::Run(ir::Module* ir) const {
     auto* ep = builder.Function("unused_entry_point", ir->Types().void_(),
                                 Function::PipelineStage::kCompute, std::array{1u, 1u, 1u});
     ep->Block()->Append(builder.Return(ep));
+}
+
+}  // namespace
+
+Result<SuccessType, std::string> AddEmptyEntryPoint(Module* ir) {
+    auto result = ValidateAndDumpIfNeeded(*ir, "AddEmptyEntryPoint transform");
+    if (!result) {
+        return result;
+    }
+
+    Run(ir);
+
+    return Success;
 }
 
 }  // namespace tint::ir::transform
