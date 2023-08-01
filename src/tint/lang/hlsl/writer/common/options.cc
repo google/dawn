@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/hlsl/writer/options.h"
+#include "src/tint/lang/hlsl/writer/common/options.h"
 
 namespace tint::hlsl::writer {
 

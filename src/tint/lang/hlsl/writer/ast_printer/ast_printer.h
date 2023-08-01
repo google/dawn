@@ -22,8 +22,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/builtin/builtin_value.h"
-#include "src/tint/lang/hlsl/writer/options.h"
-#include "src/tint/lang/hlsl/writer/result.h"
+#include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/lang/wgsl/ast/transform/decompose_memory_access.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/utils/containers/scope_stack.h"

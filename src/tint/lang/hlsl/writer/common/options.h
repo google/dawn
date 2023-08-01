@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_HLSL_WRITER_OPTIONS_H_
-#define SRC_TINT_LANG_HLSL_WRITER_OPTIONS_H_
+#ifndef SRC_TINT_LANG_HLSL_WRITER_COMMON_OPTIONS_H_
+#define SRC_TINT_LANG_HLSL_WRITER_COMMON_OPTIONS_H_
 
 #include <bitset>
 #include <optional>
@@ -81,4 +81,4 @@ struct Options {
 
 }  // namespace tint::hlsl::writer
 
-#endif  // SRC_TINT_LANG_HLSL_WRITER_OPTIONS_H_
+#endif  // SRC_TINT_LANG_HLSL_WRITER_COMMON_OPTIONS_H_

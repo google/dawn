@@ -752,8 +752,8 @@ endif()
 
 if(${TINT_BUILD_HLSL_WRITER})
   list(APPEND TINT_LIB_SRCS
-    lang/hlsl/writer/options.cc
-    lang/hlsl/writer/options.h
+    lang/hlsl/writer/common/options.cc
+    lang/hlsl/writer/common/options.h
     lang/hlsl/writer/result.cc
     lang/hlsl/writer/result.h
     lang/hlsl/writer/writer.cc

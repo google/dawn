@@ -1184,8 +1184,8 @@ libtint_source_set("libtint_hlsl_writer_src") {
   sources = [
     "lang/hlsl/writer/ast_printer/ast_printer.cc",
     "lang/hlsl/writer/ast_printer/ast_printer.h",
-    "lang/hlsl/writer/options.cc",
-    "lang/hlsl/writer/options.h",
+    "lang/hlsl/writer/common/options.cc",
+    "lang/hlsl/writer/common/options.h",
     "lang/hlsl/writer/result.cc",
     "lang/hlsl/writer/result.h",
     "lang/hlsl/writer/writer.cc",
