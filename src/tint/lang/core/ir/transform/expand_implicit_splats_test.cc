@@ -45,7 +45,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, NoModify_Construct_VectorIdentity) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -70,7 +70,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, NoModify_Construct_MixedScalarVector) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -94,7 +94,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, NoModify_Construct_AllScalars) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -128,7 +128,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, Construct_Splat_Vec2i) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -162,7 +162,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, Construct_Splat_Vec3u) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -196,7 +196,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, Construct_Splat_Vec4f) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -232,7 +232,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryAdd_VectorScalar_Vec4f) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -268,7 +268,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryAdd_ScalarVector_Vec4f) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -304,7 +304,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinarySubtract_VectorScalar_Vec4f) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -340,7 +340,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinarySubtract_ScalarVector_Vec4f) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -376,7 +376,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryDivide_VectorScalar_Vec4f) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -412,7 +412,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryDivide_ScalarVector_Vec4f) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -448,7 +448,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryModulo_VectorScalar_Vec4f) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -484,7 +484,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryModulo_ScalarVector_Vec4f) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -519,7 +519,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_VectorScalar_Vec4f) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -554,7 +554,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_ScalarVector_Vec4f) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -590,7 +590,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_VectorScalar_Vec4i) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -626,7 +626,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_ScalarVector_Vec4i) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }
@@ -663,7 +663,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, Mix_VectorOperands_ScalarFactor) {
 }
 )";
 
-    Run<ExpandImplicitSplats>();
+    Run(ExpandImplicitSplats);
 
     EXPECT_EQ(expect, str());
 }

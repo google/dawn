@@ -18,18 +18,15 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::ExpandImplicitSplats);
+#include "src/tint/lang/core/ir/validator.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::ir::transform {
 
-ExpandImplicitSplats::ExpandImplicitSplats() = default;
+namespace {
 
-ExpandImplicitSplats::~ExpandImplicitSplats() = default;
-
-void ExpandImplicitSplats::Run(ir::Module* ir) const {
+void Run(ir::Module* ir) {
     ir::Builder b(*ir);
 
     // Find the instructions that use implicit splats and either modify them in place or record them
@@ -127,6 +124,19 @@ void ExpandImplicitSplats::Run(ir::Module* ir) const {
                 break;
         }
     }
+}
+
+}  // namespace
+
+Result<SuccessType, std::string> ExpandImplicitSplats(Module* ir) {
+    auto result = ValidateAndDumpIfNeeded(*ir, "ExpandImplicitSplats transform");
+    if (!result) {
+        return result;
+    }
+
+    Run(ir);
+
+    return Success;
 }
 
 }  // namespace tint::ir::transform
