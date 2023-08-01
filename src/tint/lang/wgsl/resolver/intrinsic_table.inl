@@ -14064,6 +14064,18 @@ constexpr OverloadInfo kOverloads[] = {
   },
   {
     /* [471] */
+    /* num parameters */ 0,
+    /* num template types */ 0,
+    /* num template numbers */ 0,
+    /* template types */ &kTemplateTypes[37],
+    /* template numbers */ &kTemplateNumbers[10],
+    /* parameters */ &kParameters[1014],
+    /* return matcher indices */ &kMatcherIndices[156],
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kMustUse),
+    /* const eval */ nullptr,
+  },
+  {
+    /* [472] */
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 0,
@@ -14075,7 +14087,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* const eval */ &ConstEval::Identity,
   },
   {
-    /* [472] */
+    /* [473] */
     /* num parameters */ 2,
     /* num template types */ 0,
     /* num template numbers */ 0,
@@ -14087,7 +14099,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* const eval */ &ConstEval::OpLogicalAnd,
   },
   {
-    /* [473] */
+    /* [474] */
     /* num parameters */ 2,
     /* num template types */ 0,
     /* num template numbers */ 0,
@@ -14099,7 +14111,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* const eval */ &ConstEval::OpLogicalOr,
   },
   {
-    /* [474] */
+    /* [475] */
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 0,
@@ -14985,9 +14997,15 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [113] */
-    /* fn _tint_materialize<T>(T) -> T */
+    /* fn subgroupBallot() -> vec4<u32> */
     /* num overloads */ 1,
     /* overloads */ &kOverloads[471],
+  },
+  {
+    /* [114] */
+    /* fn _tint_materialize<T>(T) -> T */
+    /* num overloads */ 1,
+    /* overloads */ &kOverloads[472],
   },
 };
 
@@ -15100,13 +15118,13 @@ constexpr IntrinsicInfo kBinaryOperators[] = {
     /* [8] */
     /* op &&(bool, bool) -> bool */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[472],
+    /* overloads */ &kOverloads[473],
   },
   {
     /* [9] */
     /* op ||(bool, bool) -> bool */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[473],
+    /* overloads */ &kOverloads[474],
   },
   {
     /* [10] */
@@ -15381,7 +15399,7 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
     /* [17] */
     /* conv packedVec3<T : concrete_scalar>(vec3<T>) -> packedVec3<T> */
     /* num overloads */ 1,
-    /* overloads */ &kOverloads[474],
+    /* overloads */ &kOverloads[475],
   },
 };
 

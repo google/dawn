@@ -92,6 +92,10 @@ class Builtin final : public Castable<Builtin, CallTarget> {
     /// chromium_experimental_DP4a)
     bool IsDP4a() const;
 
+    /// @returns true if builtin is a subgroup builtin (defined in the extension
+    /// chromium_experimental_subgroups)
+    bool IsSubgroup() const;
+
     /// @returns true if intrinsic may have side-effects (i.e. writes to at least
     /// one of its inputs)
     bool HasSideEffects() const;

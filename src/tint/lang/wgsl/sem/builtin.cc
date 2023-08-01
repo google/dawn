@@ -84,6 +84,10 @@ bool Builtin::IsDP4a() const {
     return IsDP4aBuiltin(type_);
 }
 
+bool Builtin::IsSubgroup() const {
+    return IsSubgroupBuiltin(type_);
+}
+
 bool Builtin::HasSideEffects() const {
     return builtin::HasSideEffects(type_);
 }
@@ -91,6 +95,9 @@ bool Builtin::HasSideEffects() const {
 builtin::Extension Builtin::RequiredExtension() const {
     if (IsDP4a()) {
         return builtin::Extension::kChromiumExperimentalDp4A;
+    }
+    if (IsSubgroup()) {
+        return builtin::Extension::kChromiumExperimentalSubgroups;
     }
     return builtin::Extension::kUndefined;
 }

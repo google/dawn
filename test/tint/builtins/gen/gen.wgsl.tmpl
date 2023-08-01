@@ -200,6 +200,11 @@ fn compute_main() {
 enable chromium_experimental_dp4a;
 {{    end -}}
 
+{{- /* Check and emit chromium_experimental_subgroups */ -}}
+{{-   if (eq "subgroupBallot" $builtin_name)}}
+enable chromium_experimental_subgroups;
+{{    end -}}
+
 {{- /* Check and emit f16 */ -}}
 {{-   if OverloadUsesF16 $overload}}
 enable f16;

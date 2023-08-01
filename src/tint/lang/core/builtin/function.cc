@@ -364,6 +364,9 @@ Function ParseFunction(std::string_view name) {
     if (name == "atomicCompareExchangeWeak") {
         return Function::kAtomicCompareExchangeWeak;
     }
+    if (name == "subgroupBallot") {
+        return Function::kSubgroupBallot;
+    }
     if (name == "_tint_materialize") {
         return Function::kTintMaterialize;
     }
@@ -600,6 +603,8 @@ const char* str(Function i) {
             return "atomicExchange";
         case Function::kAtomicCompareExchangeWeak:
             return "atomicCompareExchangeWeak";
+        case Function::kSubgroupBallot:
+            return "subgroupBallot";
         case Function::kTintMaterialize:
             return "_tint_materialize";
     }
@@ -664,6 +669,10 @@ bool IsAtomicBuiltin(Function f) {
 
 bool IsDP4aBuiltin(Function f) {
     return f == Function::kDot4I8Packed || f == Function::kDot4U8Packed;
+}
+
+bool IsSubgroupBuiltin(Function f) {
+    return f == Function::kSubgroupBallot;
 }
 
 bool HasSideEffects(Function f) {

@@ -654,5 +654,31 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInStruct) {
         R"(error: workgroupUniformLoad must not be called with an argument that contains an atomic type)");
 }
 
+TEST_F(ResolverBuiltinValidationTest, SubgroupBallotWithoutExtension) {
+    // fn func { return subgroupBallot(); }
+    Func("func", tint::Empty, ty.vec4<u32>(),
+         Vector{
+             Return(Call(Source{Source::Location{12, 34}}, "subgroupBallot")),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: cannot call built-in function 'subgroupBallot' without extension chromium_experimental_subgroups)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, SubgroupBallotWithExtension) {
+    // enable chromium_experimental_subgroups;
+    // fn func { return subgroupBallot(); }
+    Enable(builtin::Extension::kChromiumExperimentalSubgroups);
+
+    Func("func", tint::Empty, ty.vec4<u32>(),
+         Vector{
+             Return(Call(Source{Source::Location{12, 34}}, "subgroupBallot")),
+         });
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
 }  // namespace
 }  // namespace tint::resolver

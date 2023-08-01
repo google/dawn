@@ -883,6 +883,8 @@ fn textureStore<C: iu32>(texture: texture_storage_3d<u32_texel_format, write>, c
 @stage("fragment", "compute") fn atomicExchange<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
 @stage("fragment", "compute") fn atomicCompareExchangeWeak<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T, T) -> __atomic_compare_exchange_result<T>
 
+@must_use @stage("compute") fn subgroupBallot() -> vec4<u32>
+
 ////////////////////////////////////////////////////////////////////////////////
 // Value constructors                                                         //
 ////////////////////////////////////////////////////////////////////////////////

@@ -146,6 +146,7 @@ enum class Function {
     kAtomicXor,
     kAtomicExchange,
     kAtomicCompareExchangeWeak,
+    kSubgroupBallot,
     kTintMaterialize,
 };
 
@@ -281,6 +282,7 @@ constexpr Function kFunctions[] = {
     Function::kAtomicXor,
     Function::kAtomicExchange,
     Function::kAtomicCompareExchangeWeak,
+    Function::kSubgroupBallot,
     Function::kTintMaterialize,
 };
 
@@ -399,6 +401,7 @@ constexpr const char* kFunctionStrings[] = {
     "atomicXor",
     "atomicExchange",
     "atomicCompareExchangeWeak",
+    "subgroupBallot",
     "_tint_materialize",
 };
 
@@ -451,6 +454,11 @@ bool IsAtomicBuiltin(Function f);
 /// @param f the builtin type
 /// @returns true if the given `f` is a DP4a builtin
 bool IsDP4aBuiltin(Function f);
+
+/// Determines if the given `f` is a subgroup builtin.
+/// @param f the builtin type
+/// @returns true if the given `f` is a subgroup builtin
+bool IsSubgroupBuiltin(Function f);
 
 /// Determines if the given `f` may have side-effects (i.e. writes to at least one of its inputs)
 /// @returns true if intrinsic may have side-effects

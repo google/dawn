@@ -102,6 +102,10 @@ bool IsDP4aBuiltin(Function f) {
     return f == Function::kDot4I8Packed || f == Function::kDot4U8Packed;
 }
 
+bool IsSubgroupBuiltin(Function f) {
+    return f == Function::kSubgroupBallot;
+}
+
 bool HasSideEffects(Function f) {
     switch (f) {
         case Function::kAtomicAdd:
