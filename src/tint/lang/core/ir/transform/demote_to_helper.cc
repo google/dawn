@@ -18,21 +18,18 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/ice/ice.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::DemoteToHelper);
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::ir::transform {
 
-DemoteToHelper::DemoteToHelper() = default;
-
-DemoteToHelper::~DemoteToHelper() = default;
+namespace {
 
 /// PIMPL state for the transform.
-struct DemoteToHelper::State {
+struct State {
     /// The IR module.
     Module* ir = nullptr;
 
@@ -202,8 +199,17 @@ struct DemoteToHelper::State {
     }
 };
 
-void DemoteToHelper::Run(Module* ir) const {
+}  // namespace
+
+Result<SuccessType, std::string> DemoteToHelper(Module* ir) {
+    auto result = ValidateAndDumpIfNeeded(*ir, "DemoteToHelper transform");
+    if (!result) {
+        return result;
+    }
+
     State{ir}.Process();
+
+    return Success;
 }
 
 }  // namespace tint::ir::transform

@@ -108,8 +108,8 @@ Result<SuccessType, std::string> Sanitize(ir::Module* module) {
     ir::transform::AddEmptyEntryPoint{}.Run(module);
     ir::transform::BlockDecoratedStructs{}.Run(module);
     ir::transform::BuiltinPolyfillSpirv{}.Run(module);
-    ir::transform::DemoteToHelper{}.Run(module);
 
+    RUN_TRANSFORM(DemoteToHelper);
     RUN_TRANSFORM(ExpandImplicitSplats);
     RUN_TRANSFORM(HandleMatrixArithmetic);
     RUN_TRANSFORM(MergeReturn);

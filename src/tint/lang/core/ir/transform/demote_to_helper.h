@@ -15,7 +15,14 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_DEMOTE_TO_HELPER_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_DEMOTE_TO_HELPER_H_
 
-#include "src/tint/lang/core/ir/transform/transform.h"
+#include <string>
+
+#include "src/tint/utils/result/result.h"
+
+// Forward declarations.
+namespace tint::ir {
+class Module;
+}
 
 namespace tint::ir::transform {
 
@@ -25,19 +32,9 @@ namespace tint::ir::transform {
 /// program to ensure that discarding the fragment does not affect uniformity with respect to
 /// derivative operations. We do this by setting a global flag and masking all writes to storage
 /// buffers and textures.
-class DemoteToHelper final : public Castable<DemoteToHelper, Transform> {
-  public:
-    /// Constructor
-    DemoteToHelper();
-    /// Destructor
-    ~DemoteToHelper() override;
-
-    /// @copydoc Transform::Run
-    void Run(ir::Module* module) const override;
-
-  private:
-    struct State;
-};
+/// @param module the module to transform
+/// @returns an error string on failure
+Result<SuccessType, std::string> DemoteToHelper(Module* module);
 
 }  // namespace tint::ir::transform
 
