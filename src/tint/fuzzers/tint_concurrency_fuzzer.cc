@@ -88,7 +88,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
 #if TINT_BUILD_SPV_WRITER
                 case Writer::kSPIRV: {
-                    tint::spirv::writer::Generate(&program, {});
+                    tint::spirv::writer::Generate(&program, {}).Move();
                     break;
                 }
 #endif  // TINT_BUILD_SPV_WRITER

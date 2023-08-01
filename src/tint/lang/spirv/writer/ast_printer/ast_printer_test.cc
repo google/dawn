@@ -26,7 +26,8 @@ TEST_F(SpirvASTPrinterTest, InvalidProgram) {
     auto program = std::make_unique<Program>(resolver::Resolve(*this));
     ASSERT_FALSE(program->IsValid());
     auto result = Generate(program.get(), Options{});
-    EXPECT_EQ(result.error, "input program is not valid");
+    EXPECT_FALSE(result);
+    EXPECT_EQ(result.Failure(), "input program is not valid");
 }
 
 TEST_F(SpirvASTPrinterTest, UnsupportedExtension) {
@@ -34,7 +35,8 @@ TEST_F(SpirvASTPrinterTest, UnsupportedExtension) {
 
     auto program = std::make_unique<Program>(resolver::Resolve(*this));
     auto result = Generate(program.get(), Options{});
-    EXPECT_EQ(result.error,
+    EXPECT_FALSE(result);
+    EXPECT_EQ(result.Failure(),
               R"(12:34 error: SPIR-V backend does not support extension 'undefined')");
 }
 

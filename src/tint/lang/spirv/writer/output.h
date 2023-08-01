@@ -12,30 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_SPIRV_WRITER_COMMON_RESULT_H_
-#define SRC_TINT_LANG_SPIRV_WRITER_COMMON_RESULT_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_OUTPUT_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_OUTPUT_H_
 
 #include <string>
 #include <vector>
 
 namespace tint::spirv::writer {
 
-/// The result produced when generating SPIR-V.
-struct Result {
+/// The output produced when generating SPIR-V.
+struct Output {
     /// Constructor
-    Result();
+    Output();
 
     /// Destructor
-    ~Result();
+    ~Output();
 
     /// Copy constructor
-    Result(const Result&);
-
-    /// True if generation was successful.
-    bool success = false;
-
-    /// The errors generated during code generation, if any.
-    std::string error;
+    Output(const Output&);
 
     /// The generated SPIR-V.
     std::vector<uint32_t> spirv;
@@ -43,4 +37,4 @@ struct Result {
 
 }  // namespace tint::spirv::writer
 
-#endif  // SRC_TINT_LANG_SPIRV_WRITER_COMMON_RESULT_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_OUTPUT_H_

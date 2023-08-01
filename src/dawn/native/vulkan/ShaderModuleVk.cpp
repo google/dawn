@@ -347,11 +347,11 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::spirv::writer::Generate()");
             auto tintResult = tint::spirv::writer::Generate(&program, options);
-            DAWN_INVALID_IF(!tintResult.success, "An error occured while generating SPIR-V: %s.",
-                            tintResult.error);
+            DAWN_INVALID_IF(!tintResult, "An error occured while generating SPIR-V: %s.",
+                            tintResult.Failure());
 
             CompiledSpirv result;
-            result.spirv = std::move(tintResult.spirv);
+            result.spirv = std::move(tintResult.Get().spirv);
             result.remappedEntryPoint = remappedEntryPoint;
             return result;
         },

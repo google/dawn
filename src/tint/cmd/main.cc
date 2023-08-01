@@ -513,23 +513,23 @@ bool GenerateSpirv(const tint::Program* program, const Options& options) {
     gen_options.use_tint_ir = options.use_ir;
 #endif
     auto result = tint::spirv::writer::Generate(program, gen_options);
-    if (!result.success) {
+    if (!result) {
         tint::cmd::PrintWGSL(std::cerr, *program);
-        std::cerr << "Failed to generate: " << result.error << std::endl;
+        std::cerr << "Failed to generate: " << result.Failure() << std::endl;
         return false;
     }
 
     if (options.format == Format::kSpvAsm) {
-        if (!WriteFile(options.output_file, "w", Disassemble(result.spirv))) {
+        if (!WriteFile(options.output_file, "w", Disassemble(result.Get().spirv))) {
             return false;
         }
     } else {
-        if (!WriteFile(options.output_file, "wb", result.spirv)) {
+        if (!WriteFile(options.output_file, "wb", result.Get().spirv)) {
             return false;
         }
     }
 
-    const auto hash = tint::CRC32(result.spirv.data(), result.spirv.size());
+    const auto hash = tint::CRC32(result.Get().spirv.data(), result.Get().spirv.size());
     if (options.print_hash) {
         PrintHash(hash);
     }
@@ -541,7 +541,7 @@ bool GenerateSpirv(const tint::Program* program, const Options& options) {
             [](spv_message_level_t, const char*, const spv_position_t& pos, const char* msg) {
                 std::cerr << (pos.line + 1) << ":" << (pos.column + 1) << ": " << msg << std::endl;
             });
-        if (!tools.Validate(result.spirv.data(), result.spirv.size(),
+        if (!tools.Validate(result.Get().spirv.data(), result.Get().spirv.size(),
                             spvtools::ValidatorOptions())) {
             return false;
         }

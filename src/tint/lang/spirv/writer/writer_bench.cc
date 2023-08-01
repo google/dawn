@@ -28,8 +28,8 @@ void RunBenchmark(benchmark::State& state, std::string input_name, Options optio
     auto& program = std::get<bench::ProgramAndFile>(res).program;
     for (auto _ : state) {
         auto res = Generate(&program, options);
-        if (!res.error.empty()) {
-            state.SkipWithError(res.error.c_str());
+        if (!res) {
+            state.SkipWithError(res.Failure());
         }
     }
 }
