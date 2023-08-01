@@ -47,7 +47,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_ArrayValue) {
 }
 )";
 
-    Run<VarForDynamicIndex>();
+    Run(VarForDynamicIndex);
 
     EXPECT_EQ(expect, str());
 }
@@ -70,7 +70,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_MatrixValue) {
 }
 )";
 
-    Run<VarForDynamicIndex>();
+    Run(VarForDynamicIndex);
 
     EXPECT_EQ(expect, str());
 }
@@ -96,7 +96,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_ArrayPointer) {
 }
 )";
 
-    Run<VarForDynamicIndex>();
+    Run(VarForDynamicIndex);
 
     EXPECT_EQ(expect, str());
 }
@@ -122,7 +122,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_MatrixPointer) {
 }
 )";
 
-    Run<VarForDynamicIndex>();
+    Run(VarForDynamicIndex);
 
     EXPECT_EQ(expect, str());
 }
@@ -146,7 +146,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_VectorValue) {
 }
 )";
 
-    Run<VarForDynamicIndex>();
+    Run(VarForDynamicIndex);
 
     EXPECT_EQ(expect, str());
 }
@@ -172,7 +172,7 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_ArrayValue) {
 }
 )";
 
-    Run<VarForDynamicIndex>();
+    Run(VarForDynamicIndex);
 
     EXPECT_EQ(expect, str());
 }
@@ -198,7 +198,7 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_MatrixValue) {
 }
 )";
 
-    Run<VarForDynamicIndex>();
+    Run(VarForDynamicIndex);
 
     EXPECT_EQ(expect, str());
 }
@@ -224,7 +224,7 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_VectorValue) {
 }
 )";
 
-    Run<VarForDynamicIndex>();
+    Run(VarForDynamicIndex);
 
     EXPECT_EQ(expect, str());
 }
@@ -250,7 +250,7 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain) {
 }
 )";
 
-    Run<VarForDynamicIndex>();
+    Run(VarForDynamicIndex);
 
     EXPECT_EQ(expect, str());
 }
@@ -277,7 +277,7 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices) {
 }
 )";
 
-    Run<VarForDynamicIndex>();
+    Run(VarForDynamicIndex);
 
     EXPECT_EQ(expect, str());
 }
@@ -304,7 +304,7 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Interleaved) {
 }
 )";
 
-    Run<VarForDynamicIndex>();
+    Run(VarForDynamicIndex);
 
     EXPECT_EQ(expect, str());
 }
@@ -343,7 +343,7 @@ MyStruct = struct @align(16) {
 }
 )";
 
-    Run<VarForDynamicIndex>();
+    Run(VarForDynamicIndex);
 
     EXPECT_EQ(expect, str());
 }
@@ -377,7 +377,7 @@ TEST_F(IR_VarForDynamicIndexTest, MultipleAccessesFromSameSource) {
 }
 )";
 
-    Run<VarForDynamicIndex>();
+    Run(VarForDynamicIndex);
 
     EXPECT_EQ(expect, str());
 }
@@ -412,7 +412,7 @@ TEST_F(IR_VarForDynamicIndexTest, MultipleAccessesFromSameSource_SkipConstantInd
 }
 )";
 
-    Run<VarForDynamicIndex>();
+    Run(VarForDynamicIndex);
 
     EXPECT_EQ(expect, str());
 }

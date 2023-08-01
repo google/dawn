@@ -18,13 +18,12 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/utils/containers/hashmap.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::VarForDynamicIndex);
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -110,13 +109,7 @@ std::optional<AccessToReplace> ShouldReplace(Access* access) {
     return result;
 }
 
-}  // namespace
-
-VarForDynamicIndex::VarForDynamicIndex() = default;
-
-VarForDynamicIndex::~VarForDynamicIndex() = default;
-
-void VarForDynamicIndex::Run(ir::Module* ir) const {
+void Run(ir::Module* ir) {
     ir::Builder builder(*ir);
 
     // Find the access instructions that need replacing.
@@ -191,6 +184,19 @@ void VarForDynamicIndex::Run(ir::Module* ir) const {
         access->Result()->ReplaceAllUsesWith(load->Result());
         access->ReplaceWith(load);
     }
+}
+
+}  // namespace
+
+Result<SuccessType, std::string> VarForDynamicIndex(Module* ir) {
+    auto result = ValidateAndDumpIfNeeded(*ir, "VarForDynamicIndex transform");
+    if (!result) {
+        return result;
+    }
+
+    Run(ir);
+
+    return Success;
 }
 
 }  // namespace tint::ir::transform

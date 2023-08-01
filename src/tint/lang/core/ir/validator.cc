@@ -58,6 +58,12 @@
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 
+/// If set to 1 then the Tint will dump the IR when validating.
+#define TINT_DUMP_IR_WHEN_VALIDATING 0
+#if TINT_DUMP_IR_WHEN_VALIDATING
+#include <iostream>
+#endif
+
 namespace tint::ir {
 
 Validator::Validator(Module& mod) : mod_(mod) {}
@@ -624,6 +630,29 @@ const type::Type* Validator::GetVectorPtrElementType(Instruction* inst, size_t i
 Result<SuccessType, diag::List> Validate(Module& mod) {
     Validator v(mod);
     return v.IsValid();
+}
+
+Result<SuccessType, std::string> ValidateAndDumpIfNeeded([[maybe_unused]] Module& ir,
+                                                         [[maybe_unused]] const char* msg) {
+#ifndef NDEBUG
+    auto result = Validate(ir);
+    if (!result) {
+        diag::List errors;
+        StringStream ss;
+        ss << "validating input to " << msg << " failed" << std::endl << result.Failure().str();
+        return ss.str();
+    }
+#endif
+
+#if TINT_DUMP_IR_WHEN_VALIDATING
+    Disassembler disasm(ir);
+    std::cout << "=========================================================" << std::endl;
+    std::cout << "== IR dump before " << msg << ":" << std::endl;
+    std::cout << "=========================================================" << std::endl;
+    std::cout << disasm.Disassemble();
+#endif
+
+    return Success;
 }
 
 }  // namespace tint::ir

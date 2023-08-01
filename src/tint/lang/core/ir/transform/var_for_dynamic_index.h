@@ -15,7 +15,14 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_VAR_FOR_DYNAMIC_INDEX_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_VAR_FOR_DYNAMIC_INDEX_H_
 
-#include "src/tint/lang/core/ir/transform/transform.h"
+#include <string>
+
+#include "src/tint/utils/result/result.h"
+
+// Forward declarations.
+namespace tint::ir {
+class Module;
+}
 
 namespace tint::ir::transform {
 
@@ -23,16 +30,9 @@ namespace tint::ir::transform {
 /// indexed to a temporary local `var` before performing the index. This transform is used by the
 /// SPIR-V writer as there is no SPIR-V instruction that can dynamically index a non-pointer
 /// composite.
-class VarForDynamicIndex final : public Castable<VarForDynamicIndex, Transform> {
-  public:
-    /// Constructor
-    VarForDynamicIndex();
-    /// Destructor
-    ~VarForDynamicIndex() override;
-
-    /// @copydoc Transform::Run
-    void Run(ir::Module* module) const override;
-};
+/// @param module the module to transform
+/// @returns an error string on failure
+Result<SuccessType, std::string> VarForDynamicIndex(Module* module);
 
 }  // namespace tint::ir::transform
 

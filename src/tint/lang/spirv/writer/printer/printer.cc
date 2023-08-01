@@ -89,7 +89,15 @@ using namespace tint::number_suffixes;  // NOLINT
 
 constexpr uint32_t kWriterVersion = 1;
 
-void Sanitize(ir::Module* module) {
+Result<SuccessType, std::string> Sanitize(ir::Module* module) {
+#define RUN_TRANSFORM(name)                        \
+    do {                                           \
+        auto result = ir::transform::name(module); \
+        if (!result) {                             \
+            return result;                         \
+        }                                          \
+    } while (false)
+
     ir::transform::AddEmptyEntryPoint{}.Run(module);
     ir::transform::BlockDecoratedStructs{}.Run(module);
     ir::transform::BuiltinPolyfillSpirv{}.Run(module);
@@ -99,7 +107,10 @@ void Sanitize(ir::Module* module) {
     ir::transform::MergeReturn{}.Run(module);
     ir::transform::ShaderIOSpirv{}.Run(module);
     ir::transform::Std140{}.Run(module);
-    ir::transform::VarForDynamicIndex{}.Run(module);
+
+    RUN_TRANSFORM(VarForDynamicIndex);
+
+    return Success;
 }
 
 SpvStorageClass StorageClass(builtin::AddressSpace addrspace) {
@@ -168,13 +179,16 @@ Printer::Printer(ir::Module* module, bool zero_init_workgroup_mem)
     : ir_(module), zero_init_workgroup_memory_(zero_init_workgroup_mem) {}
 
 Result<std::vector<uint32_t>, std::string> Printer::Generate() {
-    auto valid = ir::Validate(*ir_);
-    if (!valid) {
-        return valid.Failure().str();
+    // Run the IR transformations to prepare for SPIR-V emission.
+    auto sanitize = Sanitize(ir_);
+    if (!sanitize) {
+        return std::move(sanitize.Failure());
     }
 
-    // Run the IR transformations to prepare for SPIR-V emission.
-    Sanitize(ir_);
+    auto valid = ir::ValidateAndDumpIfNeeded(*ir_, "SPIR-V writer");
+    if (!valid) {
+        return std::move(valid.Failure());
+    }
 
     // TODO(crbug.com/tint/1906): Check supported extensions.
 
