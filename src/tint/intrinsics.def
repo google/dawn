@@ -37,6 +37,8 @@ enum builtin_value {
   num_workgroups
   sample_index
   sample_mask
+  subgroup_invocation_id
+  subgroup_size
   __point_size
 }
 

@@ -4005,6 +4005,12 @@ SpvBuiltIn Builder::ConvertBuiltin(builtin::BuiltinValue builtin, builtin::Addre
             return SpvBuiltInSampleId;
         case builtin::BuiltinValue::kSampleMask:
             return SpvBuiltInSampleMask;
+        case builtin::BuiltinValue::kSubgroupInvocationId:
+            module_.PushCapability(SpvCapabilityGroupNonUniform);
+            return SpvBuiltInSubgroupLocalInvocationId;
+        case builtin::BuiltinValue::kSubgroupSize:
+            module_.PushCapability(SpvCapabilityGroupNonUniform);
+            return SpvBuiltInSubgroupSize;
         case builtin::BuiltinValue::kUndefined:
             break;
     }

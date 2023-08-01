@@ -61,6 +61,12 @@ BuiltinValue ParseBuiltinValue(std::string_view str) {
     if (str == "sample_mask") {
         return BuiltinValue::kSampleMask;
     }
+    if (str == "subgroup_invocation_id") {
+        return BuiltinValue::kSubgroupInvocationId;
+    }
+    if (str == "subgroup_size") {
+        return BuiltinValue::kSubgroupSize;
+    }
     if (str == "vertex_index") {
         return BuiltinValue::kVertexIndex;
     }
@@ -96,6 +102,10 @@ std::string_view ToString(BuiltinValue value) {
             return "sample_index";
         case BuiltinValue::kSampleMask:
             return "sample_mask";
+        case BuiltinValue::kSubgroupInvocationId:
+            return "subgroup_invocation_id";
+        case BuiltinValue::kSubgroupSize:
+            return "subgroup_size";
         case BuiltinValue::kVertexIndex:
             return "vertex_index";
         case BuiltinValue::kWorkgroupId:

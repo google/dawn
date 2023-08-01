@@ -46,7 +46,7 @@ TEST_F(ResolverUnresolvedIdentifierSuggestions, BuiltinValue) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:34 error: unresolved builtin value 'positon'
 12:34 note: Did you mean 'position'?
-Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id')");
+Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'subgroup_invocation_id', 'subgroup_size', 'vertex_index', 'workgroup_id')");
 }
 
 TEST_F(ResolverUnresolvedIdentifierSuggestions, TexelFormat) {

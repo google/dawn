@@ -232,6 +232,12 @@ uint32_t Printer::Builtin(builtin::BuiltinValue builtin, builtin::AddressSpace a
             return SpvBuiltInSampleId;
         case builtin::BuiltinValue::kSampleMask:
             return SpvBuiltInSampleMask;
+        case builtin::BuiltinValue::kSubgroupInvocationId:
+            module_.PushCapability(SpvCapabilityGroupNonUniform);
+            return SpvBuiltInSubgroupLocalInvocationId;
+        case builtin::BuiltinValue::kSubgroupSize:
+            module_.PushCapability(SpvCapabilityGroupNonUniform);
+            return SpvBuiltInSubgroupSize;
         case builtin::BuiltinValue::kVertexIndex:
             return SpvBuiltInVertexIndex;
         case builtin::BuiltinValue::kWorkgroupId:
