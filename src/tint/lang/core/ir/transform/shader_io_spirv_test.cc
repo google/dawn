@@ -45,7 +45,7 @@ TEST_F(IR_ShaderIOTest, NoInputsOrOutputs) {
 
     auto* expect = src;
 
-    Run<ShaderIOSpirv>();
+    Run(ShaderIOSpirv);
 
     EXPECT_EQ(expect, str());
 }
@@ -135,7 +135,7 @@ foo_LocationInputsStruct = struct @align(4), @block {
 }
 )";
 
-    Run<ShaderIOSpirv>();
+    Run(ShaderIOSpirv);
 
     EXPECT_EQ(expect, str());
 }
@@ -271,7 +271,7 @@ foo_LocationInputsStruct = struct @align(4), @block {
 }
 )";
 
-    Run<ShaderIOSpirv>();
+    Run(ShaderIOSpirv);
 
     EXPECT_EQ(expect, str());
 }
@@ -388,7 +388,7 @@ foo_LocationInputsStruct = struct @align(4), @block {
 }
 )";
 
-    Run<ShaderIOSpirv>();
+    Run(ShaderIOSpirv);
 
     EXPECT_EQ(expect, str());
 }
@@ -438,7 +438,7 @@ foo_BuiltinOutputsStruct = struct @align(16), @block {
 }
 )";
 
-    Run<ShaderIOSpirv>();
+    Run(ShaderIOSpirv);
 
     EXPECT_EQ(expect, str());
 }
@@ -487,7 +487,7 @@ foo_LocationOutputsStruct = struct @align(16), @block {
 }
 )";
 
-    Run<ShaderIOSpirv>();
+    Run(ShaderIOSpirv);
 
     EXPECT_EQ(expect, str());
 }
@@ -587,7 +587,7 @@ foo_LocationOutputsStruct = struct @align(4), @block {
 }
 )";
 
-    Run<ShaderIOSpirv>();
+    Run(ShaderIOSpirv);
 
     EXPECT_EQ(expect, str());
 }
@@ -736,7 +736,7 @@ frag_LocationOutputsStruct = struct @align(16), @block {
 }
 )";
 
-    Run<ShaderIOSpirv>();
+    Run(ShaderIOSpirv);
 
     EXPECT_EQ(expect, str());
 }
@@ -825,7 +825,7 @@ vert_LocationOutputsStruct = struct @align(16), @block {
 }
 )";
 
-    Run<ShaderIOSpirv>();
+    Run(ShaderIOSpirv);
 
     EXPECT_EQ(expect, str());
 }
@@ -918,7 +918,7 @@ foo_LocationOutputsStruct = struct @align(4), @block {
 }
 )";
 
-    Run<ShaderIOSpirv>();
+    Run(ShaderIOSpirv);
 
     EXPECT_EQ(expect, str());
 }

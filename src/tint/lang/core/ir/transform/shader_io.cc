@@ -21,8 +21,6 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/type/struct.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::ShaderIO);
-
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
@@ -70,14 +68,8 @@ builtin::BuiltinValue ReturnBuiltin(enum Function::ReturnBuiltin builtin) {
     return builtin::BuiltinValue::kUndefined;
 }
 
-}  // namespace
-
-ShaderIO::ShaderIO() = default;
-
-ShaderIO::~ShaderIO() = default;
-
-/// PIMPL state for the transform, for a single entry point function.
-struct ShaderIO::State {
+/// PIMPL state for the transform.
+struct State {
     /// The IR module.
     Module* ir = nullptr;
     /// The IR builder.
@@ -91,7 +83,7 @@ struct ShaderIO::State {
     Function* func = nullptr;
 
     /// The backend state object for the current entry point.
-    std::unique_ptr<ShaderIO::BackendState> backend;
+    std::unique_ptr<ShaderIOBackendState> backend;
 
     /// Constructor
     /// @param mod the module
@@ -100,7 +92,7 @@ struct ShaderIO::State {
     /// Process an entry point.
     /// @param f the original entry point function
     /// @param bs the backend state object
-    void Process(Function* f, std::unique_ptr<ShaderIO::BackendState> bs) {
+    void Process(Function* f, std::unique_ptr<ShaderIOBackendState> bs) {
         TINT_SCOPED_ASSIGNMENT(func, f);
         backend = std::move(bs);
         TINT_DEFER(backend = nullptr);
@@ -245,9 +237,11 @@ struct ShaderIO::State {
     }
 };
 
-void ShaderIO::Run(Module* ir) const {
-    ShaderIO::State state(ir);
-    for (auto* func : ir->functions) {
+}  // namespace
+
+void RunShaderIOBase(Module* module, std::function<MakeBackendStateFunc> make_backend_state) {
+    State state(module);
+    for (auto* func : module->functions) {
         // Only process entry points.
         if (func->Stage() == Function::PipelineStage::kUndefined) {
             continue;
@@ -258,11 +252,11 @@ void ShaderIO::Run(Module* ir) const {
             continue;
         }
 
-        state.Process(func, MakeBackendState(ir, func));
+        state.Process(func, make_backend_state(module, func));
     }
     state.Finalize();
 }
 
-ShaderIO::BackendState::~BackendState() = default;
+ShaderIOBackendState::~ShaderIOBackendState() = default;
 
 }  // namespace tint::ir::transform

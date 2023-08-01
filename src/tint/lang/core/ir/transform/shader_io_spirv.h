@@ -15,24 +15,22 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_SHADER_IO_SPIRV_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_SHADER_IO_SPIRV_H_
 
-#include "src/tint/lang/core/ir/transform/shader_io.h"
+#include <string>
 
-#include <memory>
+#include "src/tint/utils/result/result.h"
+
+// Forward declarations.
+namespace tint::ir {
+class Module;
+}
 
 namespace tint::ir::transform {
 
-/// ShaderIOSpirv is the subclass of the ShaderIO transform used for the SPIR-V backend.
-class ShaderIOSpirv final : public Castable<ShaderIOSpirv, ShaderIO> {
-  public:
-    /// Constructor
-    ShaderIOSpirv();
-    /// Destructor
-    ~ShaderIOSpirv() override;
-
-    /// @copydoc ShaderIO::MakeBackendState
-    std::unique_ptr<ShaderIO::BackendState> MakeBackendState(Module* mod,
-                                                             Function* func) const override;
-};
+/// ShaderIOSpirv is a transform that modifies each entry point function's parameters and return
+/// value to prepare them for SPIR-V codegen.
+/// @param module the module to transform
+/// @returns an error string on failure
+Result<SuccessType, std::string> ShaderIOSpirv(Module* module);
 
 }  // namespace tint::ir::transform
 

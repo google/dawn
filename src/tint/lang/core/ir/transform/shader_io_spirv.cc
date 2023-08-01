@@ -19,19 +19,15 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/transform/shader_io.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/struct.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::ShaderIOSpirv);
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::ir::transform {
-
-ShaderIOSpirv::ShaderIOSpirv() = default;
-
-ShaderIOSpirv::~ShaderIOSpirv() = default;
 
 namespace {
 
@@ -40,7 +36,7 @@ namespace {
 /// output, and declare global variables for them. The wrapper entry point then loads from and
 /// stores to these variables.
 /// We also modify the type of the SampleMask builtin to be an array, as required by Vulkan.
-struct StateImpl : ShaderIO::BackendState {
+struct StateImpl : ShaderIOBackendState {
     /// The global variable for input builtins.
     Var* builtin_input_var = nullptr;
     /// The global variable for input locations.
@@ -55,8 +51,8 @@ struct StateImpl : ShaderIO::BackendState {
     Vector<uint32_t, 4> output_indices;
 
     /// Constructor
-    /// @copydoc ShaderIO::BackendState::BackendState
-    using ShaderIO::BackendState::BackendState;
+    /// @copydoc ShaderIO::ShaderIOBackendState::ShaderIOBackendState
+    using ShaderIOBackendState::ShaderIOBackendState;
     /// Destructor
     ~StateImpl() override {}
 
@@ -164,9 +160,16 @@ struct StateImpl : ShaderIO::BackendState {
 };
 }  // namespace
 
-std::unique_ptr<ShaderIO::BackendState> ShaderIOSpirv::MakeBackendState(Module* mod,
-                                                                        Function* func) const {
-    return std::make_unique<StateImpl>(mod, func);
+Result<SuccessType, std::string> ShaderIOSpirv(Module* ir) {
+    auto result = ValidateAndDumpIfNeeded(*ir, "ShaderIOSpirv transform");
+    if (!result) {
+        return result;
+    }
+
+    RunShaderIOBase(
+        ir, [](Module* mod, Function* func) { return std::make_unique<StateImpl>(mod, func); });
+
+    return Success;
 }
 
 }  // namespace tint::ir::transform

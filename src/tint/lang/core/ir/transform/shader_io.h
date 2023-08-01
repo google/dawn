@@ -19,103 +19,86 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/builder.h"
-#include "src/tint/lang/core/ir/transform/transform.h"
 #include "src/tint/lang/core/type/manager.h"
 
 namespace tint::ir::transform {
 
-/// ShaderIO is a transform that modifies an entry point function's parameters and return value to
-/// prepare them for backend codegen.
-class ShaderIO : public Castable<ShaderIO, Transform> {
-  public:
+/// Abstract base class for the state needed to handle IO for a particular backend target.
+struct ShaderIOBackendState {
     /// Constructor
-    ShaderIO();
+    /// @param mod the IR module
+    /// @param f the entry point function
+    ShaderIOBackendState(Module* mod, Function* f) : ir(mod), func(f) {}
+
     /// Destructor
-    ~ShaderIO() override;
+    virtual ~ShaderIOBackendState();
 
-    /// @copydoc Transform::Run
-    void Run(ir::Module* module) const override;
+    /// Add an input.
+    /// @param name the name of the input
+    /// @param type the type of the input
+    /// @param attributes the IO attributes
+    virtual void AddInput(Symbol name,
+                          const type::Type* type,
+                          type::StructMemberAttributes attributes) {
+        inputs.Push({name, type, std::move(attributes)});
+    }
 
-    /// Abstract base class for the state needed to handle IO for a particular backend target.
-    struct BackendState {
-        /// Constructor
-        /// @param mod the IR module
-        /// @param f the entry point function
-        BackendState(Module* mod, Function* f) : ir(mod), func(f) {}
+    /// Add an output.
+    /// @param name the name of the output
+    /// @param type the type of the output
+    /// @param attributes the IO attributes
+    virtual void AddOutput(Symbol name,
+                           const type::Type* type,
+                           type::StructMemberAttributes attributes) {
+        outputs.Push({name, type, std::move(attributes)});
+    }
 
-        /// Destructor
-        virtual ~BackendState();
+    /// Finalize the shader inputs and create any state needed for the new entry point function.
+    /// @returns the list of function parameters for the new entry point
+    virtual Vector<FunctionParam*, 4> FinalizeInputs() = 0;
 
-        /// Add an input.
-        /// @param name the name of the input
-        /// @param type the type of the input
-        /// @param attributes the IO attributes
-        virtual void AddInput(Symbol name,
-                              const type::Type* type,
-                              type::StructMemberAttributes attributes) {
-            inputs.Push({name, type, std::move(attributes)});
-        }
+    /// Finalize the shader outputs and create state needed for the new entry point function.
+    /// @returns the return value for the new entry point
+    virtual Value* FinalizeOutputs() = 0;
 
-        /// Add an output.
-        /// @param name the name of the output
-        /// @param type the type of the output
-        /// @param attributes the IO attributes
-        virtual void AddOutput(Symbol name,
-                               const type::Type* type,
-                               type::StructMemberAttributes attributes) {
-            outputs.Push({name, type, std::move(attributes)});
-        }
+    /// Get the value of the input at index @p idx
+    /// @param builder the IR builder for new instructions
+    /// @param idx the index of the input
+    /// @returns the value of the input
+    virtual Value* GetInput(Builder& builder, uint32_t idx) = 0;
 
-        /// Finalize the shader inputs and create any state needed for the new entry point function.
-        /// @returns the list of function parameters for the new entry point
-        virtual Vector<FunctionParam*, 4> FinalizeInputs() = 0;
-
-        /// Finalize the shader outputs and create state needed for the new entry point function.
-        /// @returns the return value for the new entry point
-        virtual Value* FinalizeOutputs() = 0;
-
-        /// Get the value of the input at index @p idx
-        /// @param builder the IR builder for new instructions
-        /// @param idx the index of the input
-        /// @returns the value of the input
-        virtual Value* GetInput(Builder& builder, uint32_t idx) = 0;
-
-        /// Set the value of the output at index @p idx
-        /// @param builder the IR builder for new instructions
-        /// @param idx the index of the output
-        /// @param value the value to set
-        virtual void SetOutput(Builder& builder, uint32_t idx, Value* value) = 0;
-
-      protected:
-        /// The IR module.
-        Module* ir = nullptr;
-
-        /// The IR builder.
-        Builder b{*ir};
-
-        /// The type manager.
-        type::Manager& ty{ir->Types()};
-
-        /// The original entry point function.
-        Function* func = nullptr;
-
-        /// The list of shader inputs.
-        Vector<type::Manager::StructMemberDesc, 4> inputs;
-
-        /// The list of shader outputs.
-        Vector<type::Manager::StructMemberDesc, 4> outputs;
-    };
+    /// Set the value of the output at index @p idx
+    /// @param builder the IR builder for new instructions
+    /// @param idx the index of the output
+    /// @param value the value to set
+    virtual void SetOutput(Builder& builder, uint32_t idx, Value* value) = 0;
 
   protected:
-    struct State;
+    /// The IR module.
+    Module* ir = nullptr;
 
-    /// Create a backend state object.
-    /// @param mod the IR module
-    /// @param func the entry point function
-    /// @returns the backend state object
-    virtual std::unique_ptr<ShaderIO::BackendState> MakeBackendState(Module* mod,
-                                                                     Function* func) const = 0;
+    /// The IR builder.
+    Builder b{*ir};
+
+    /// The type manager.
+    type::Manager& ty{ir->Types()};
+
+    /// The original entry point function.
+    Function* func = nullptr;
+
+    /// The list of shader inputs.
+    Vector<type::Manager::StructMemberDesc, 4> inputs;
+
+    /// The list of shader outputs.
+    Vector<type::Manager::StructMemberDesc, 4> outputs;
 };
+
+/// The signature for a function that creates a backend state object.
+using MakeBackendStateFunc = std::unique_ptr<ShaderIOBackendState>(Module*, Function*);
+
+/// @param module the module to transform
+/// @param make_backend_state a function that creates a backend state object
+void RunShaderIOBase(Module* module, std::function<MakeBackendStateFunc> make_backend_state);
 
 }  // namespace tint::ir::transform
 
