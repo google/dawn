@@ -978,10 +978,10 @@ libtint_source_set("libtint_writer_src") {
     "lang/wgsl/helpers/check_supported_extensions.h",
     "lang/wgsl/helpers/flatten_bindings.cc",
     "lang/wgsl/helpers/flatten_bindings.h",
+    "utils/generator/text_generator.cc",
+    "utils/generator/text_generator.h",
     "utils/strconv/float_to_string.cc",
     "utils/strconv/float_to_string.h",
-    "utils/text/text_generator.cc",
-    "utils/text/text_generator.h",
   ]
 
   deps = [

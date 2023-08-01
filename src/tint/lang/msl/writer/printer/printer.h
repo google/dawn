@@ -21,8 +21,8 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/generator/text_generator.h"
 #include "src/tint/utils/text/string_stream.h"
-#include "src/tint/utils/text/text_generator.h"
 
 namespace tint::msl::writer {
 

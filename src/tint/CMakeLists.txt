@@ -572,8 +572,8 @@ list(APPEND TINT_LIB_SRCS
   utils/symbol/symbol.h
   utils/symbol/symbol_table.cc
   utils/symbol/symbol_table.h
-  utils/text/text_generator.cc
-  utils/text/text_generator.h
+  utils/generator/text_generator.cc
+  utils/generator/text_generator.h
   utils/traits/traits.h
 )
 
