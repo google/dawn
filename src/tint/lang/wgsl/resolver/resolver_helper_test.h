@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_RESOLVER_RESOLVER_TEST_HELPER_H_
-#define SRC_TINT_LANG_WGSL_RESOLVER_RESOLVER_TEST_HELPER_H_
+#ifndef SRC_TINT_LANG_WGSL_RESOLVER_RESOLVER_HELPER_TEST_H_
+#define SRC_TINT_LANG_WGSL_RESOLVER_RESOLVER_HELPER_TEST_H_
 
 #include <functional>
 #include <memory>
@@ -862,4 +862,4 @@ Value Mat(const T (&c0)[R], const T (&c1)[R], const T (&c2)[R], const T (&c3)[R]
 }  // namespace builder
 }  // namespace tint::resolver
 
-#endif  // SRC_TINT_LANG_WGSL_RESOLVER_RESOLVER_TEST_HELPER_H_
+#endif  // SRC_TINT_LANG_WGSL_RESOLVER_RESOLVER_HELPER_TEST_H_

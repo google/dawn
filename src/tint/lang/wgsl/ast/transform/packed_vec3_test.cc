@@ -20,7 +20,7 @@
 
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/wgsl/ast/module.h"
-#include "src/tint/lang/wgsl/ast/transform/test_helper.h"
+#include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/struct.h"

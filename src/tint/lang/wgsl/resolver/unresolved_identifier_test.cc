@@ -14,7 +14,7 @@
 
 #include "gmock/gmock.h"
 
-#include "src/tint/lang/wgsl/resolver/resolver_test_helper.h"
+#include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

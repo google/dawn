@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2021 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/reader/parser/test_helper.h"
+#include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 
-namespace tint::wgsl::reader {
+#include <memory>
 
-WGSLParserTest::WGSLParserTest() = default;
+namespace tint::resolver {
 
-WGSLParserTest::~WGSLParserTest() = default;
+TestHelper::TestHelper() : resolver_(std::make_unique<Resolver>(this)) {}
 
-}  // namespace tint::wgsl::reader
+TestHelper::~TestHelper() = default;
+
+}  // namespace tint::resolver

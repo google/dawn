@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/lang/core/type/builtin_structs.h"
-#include "src/tint/lang/spirv/writer/common/test_helper.h"
+#include "src/tint/lang/spirv/writer/common/helper_test.h"
 
 #include "src/tint/lang/core/builtin/function.h"
 

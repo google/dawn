@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/lang/wgsl/sem/variable.h"
-#include "src/tint/lang/wgsl/writer/ast_printer/test_helper.h"
+#include "src/tint/lang/wgsl/writer/ast_printer/helper_test.h"
 
 #include "gmock/gmock.h"
 

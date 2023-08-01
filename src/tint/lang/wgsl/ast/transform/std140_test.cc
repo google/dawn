@@ -18,7 +18,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/wgsl/ast/transform/test_helper.h"
+#include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/utils/text/string.h"
 
 // This file contains the should-run tests and a trival empty module test for Std140 transform.

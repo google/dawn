@@ -17,7 +17,7 @@
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/resolver/resolver.h"
-#include "src/tint/lang/wgsl/resolver/resolver_test_helper.h"
+#include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/utils/text/string_stream.h"
 
 #include "gmock/gmock.h"

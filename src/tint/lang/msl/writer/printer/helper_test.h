@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_MSL_WRITER_PRINTER_TEST_HELPER_H_
-#define SRC_TINT_LANG_MSL_WRITER_PRINTER_TEST_HELPER_H_
+#ifndef SRC_TINT_LANG_MSL_WRITER_PRINTER_HELPER_TEST_H_
+#define SRC_TINT_LANG_MSL_WRITER_PRINTER_HELPER_TEST_H_
 
 #include <iostream>
 #include <string>
@@ -66,4 +66,4 @@ using MslPrinterTestWithParam = MslPrinterTestHelperBase<testing::TestWithParam<
 
 }  // namespace tint::msl::writer
 
-#endif  // SRC_TINT_LANG_MSL_WRITER_PRINTER_TEST_HELPER_H_
+#endif  // SRC_TINT_LANG_MSL_WRITER_PRINTER_HELPER_TEST_H_

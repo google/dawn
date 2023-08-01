@@ -14,7 +14,7 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
-#include "src/tint/lang/wgsl/ast/test_helper.h"
+#include "src/tint/lang/wgsl/ast/helper_test.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 

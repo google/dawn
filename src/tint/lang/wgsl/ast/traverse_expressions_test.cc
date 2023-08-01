@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
 #include "gmock/gmock.h"
-#include "src/tint/lang/wgsl/ast/test_helper.h"
+#include "src/tint/lang/wgsl/ast/helper_test.h"
 
 using ::testing::ElementsAre;
 

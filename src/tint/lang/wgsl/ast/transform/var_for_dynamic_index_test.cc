@@ -15,7 +15,7 @@
 #include "src/tint/lang/wgsl/ast/transform/var_for_dynamic_index.h"
 #include "src/tint/lang/wgsl/ast/transform/for_loop_to_loop.h"
 
-#include "src/tint/lang/wgsl/ast/transform/test_helper.h"
+#include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
 namespace tint::ast::transform {
 namespace {

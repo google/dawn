@@ -15,7 +15,7 @@
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 
 #include "gtest/gtest.h"
-#include "src/tint/lang/wgsl/resolver/resolver_test_helper.h"
+#include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
 #include "src/tint/lang/wgsl/sem/if_statement.h"
 #include "src/tint/lang/wgsl/sem/switch_statement.h"

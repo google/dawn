@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_TEST_HELPER_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_TEST_HELPER_H_
+#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_HELPER_TEST_H_
+#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_HELPER_TEST_H_
 
 #include <memory>
 #include <string>
@@ -162,4 +162,4 @@ using TransformTestWithParam = TransformTestBase<testing::TestWithParam<T>>;
 
 }  // namespace tint::ast::transform
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_TEST_HELPER_H_
+#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_HELPER_TEST_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_SPIRV_READER_AST_PARSER_TEST_HELPER_H_
-#define SRC_TINT_LANG_SPIRV_READER_AST_PARSER_TEST_HELPER_H_
+#ifndef SRC_TINT_LANG_SPIRV_READER_AST_PARSER_HELPER_TEST_H_
+#define SRC_TINT_LANG_SPIRV_READER_AST_PARSER_HELPER_TEST_H_
 
 #include <memory>
 #include <string>
@@ -311,4 +311,4 @@ using SpirvASTParserTest = SpirvASTParserTestBase<::testing::Test>;
 
 }  // namespace tint::spirv::reader
 
-#endif  // SRC_TINT_LANG_SPIRV_READER_AST_PARSER_TEST_HELPER_H_
+#endif  // SRC_TINT_LANG_SPIRV_READER_AST_PARSER_HELPER_TEST_H_

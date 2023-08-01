@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/core/ir/block.h"
 #include "gtest/gtest-spi.h"
-#include "src/tint/lang/core/ir/ir_test_helper.h"
+#include "src/tint/lang/core/ir/ir_helper_test.h"
 
 namespace tint::ir {
 namespace {

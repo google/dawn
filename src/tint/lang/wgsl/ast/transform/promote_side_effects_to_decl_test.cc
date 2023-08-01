@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/wgsl/ast/transform/promote_side_effects_to_decl.h"
 
-#include "src/tint/lang/wgsl/ast/transform/test_helper.h"
+#include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
 namespace tint::ast::transform {
 namespace {

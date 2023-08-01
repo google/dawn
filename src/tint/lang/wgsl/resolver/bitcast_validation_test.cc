@@ -16,7 +16,7 @@
 
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/resolver/resolver.h"
-#include "src/tint/lang/wgsl/resolver/resolver_test_helper.h"
+#include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 
 #include "gmock/gmock.h"
 

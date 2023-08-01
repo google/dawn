@@ -1,4 +1,4 @@
-// Copyright 2022 The Tint Authors.
+// Copyright 2020 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_CORE_TYPE_TEST_HELPER_H_
-#define SRC_TINT_LANG_CORE_TYPE_TEST_HELPER_H_
+#ifndef SRC_TINT_LANG_WGSL_SEM_HELPER_TEST_H_
+#define SRC_TINT_LANG_WGSL_SEM_HELPER_TEST_H_
 
 #include <utility>
 
@@ -21,7 +21,7 @@
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 
-namespace tint::type {
+namespace tint::sem {
 
 /// Helper class for testing
 template <typename BASE>
@@ -41,18 +41,6 @@ using TestHelper = TestHelperBase<testing::Test>;
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
-}  // namespace tint::type
+}  // namespace tint::sem
 
-/// Helper macro for testing that a type was as expected
-#define EXPECT_TYPE(GOT, EXPECT)                                                                \
-    do {                                                                                        \
-        const type::Type* got = GOT;                                                            \
-        const type::Type* expect = EXPECT;                                                      \
-        if (got != expect) {                                                                    \
-            ADD_FAILURE() << #GOT " != " #EXPECT "\n"                                           \
-                          << "  " #GOT ": " << (got ? got->FriendlyName() : "<null>") << "\n"   \
-                          << "  " #EXPECT ": " << (expect ? expect->FriendlyName() : "<null>"); \
-        }                                                                                       \
-    } while (false)
-
-#endif  // SRC_TINT_LANG_CORE_TYPE_TEST_HELPER_H_
+#endif  // SRC_TINT_LANG_WGSL_SEM_HELPER_TEST_H_

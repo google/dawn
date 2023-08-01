@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_WRITER_AST_PRINTER_TEST_HELPER_H_
-#define SRC_TINT_LANG_WGSL_WRITER_AST_PRINTER_TEST_HELPER_H_
+#ifndef SRC_TINT_LANG_WGSL_WRITER_AST_PRINTER_HELPER_TEST_H_
+#define SRC_TINT_LANG_WGSL_WRITER_AST_PRINTER_HELPER_TEST_H_
 
 #include <memory>
 #include <utility>
@@ -65,4 +65,4 @@ using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
 }  // namespace tint::wgsl::writer
 
-#endif  // SRC_TINT_LANG_WGSL_WRITER_AST_PRINTER_TEST_HELPER_H_
+#endif  // SRC_TINT_LANG_WGSL_WRITER_AST_PRINTER_HELPER_TEST_H_

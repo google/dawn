@@ -17,7 +17,7 @@
 #include <memory>
 #include <utility>
 
-#include "src/tint/lang/wgsl/ast/transform/test_helper.h"
+#include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/utils/text/string.h"
 
 namespace tint::ast::transform {

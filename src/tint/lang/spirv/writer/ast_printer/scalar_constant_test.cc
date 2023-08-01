@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/lang/spirv/writer/ast_printer/scalar_constant.h"
-#include "src/tint/lang/spirv/writer/ast_printer/test_helper.h"
+#include "src/tint/lang/spirv/writer/ast_printer/helper_test.h"
 
 namespace tint::spirv::writer {
 namespace {

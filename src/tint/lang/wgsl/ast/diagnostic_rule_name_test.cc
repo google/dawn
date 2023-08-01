@@ -16,7 +16,7 @@
 
 #include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/diagnostic_rule_name.h"
-#include "src/tint/lang/wgsl/ast/test_helper.h"
+#include "src/tint/lang/wgsl/ast/helper_test.h"
 
 namespace tint::ast {
 namespace {

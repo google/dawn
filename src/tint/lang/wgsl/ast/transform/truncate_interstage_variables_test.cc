@@ -16,7 +16,7 @@
 #include "src/tint/lang/wgsl/ast/transform/canonicalize_entry_point_io.h"
 
 #include "gmock/gmock.h"
-#include "src/tint/lang/wgsl/ast/transform/test_helper.h"
+#include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
 namespace tint::ast::transform {
 namespace {

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_INSPECTOR_TEST_INSPECTOR_RUNNER_H_
-#define SRC_TINT_LANG_WGSL_INSPECTOR_TEST_INSPECTOR_RUNNER_H_
+#ifndef SRC_TINT_LANG_WGSL_INSPECTOR_INSPECTOR_RUNNER_TEST_H_
+#define SRC_TINT_LANG_WGSL_INSPECTOR_INSPECTOR_RUNNER_TEST_H_
 
 #include <memory>
 #include <string>
@@ -46,4 +46,4 @@ class InspectorRunner {
 
 }  // namespace tint::inspector
 
-#endif  // SRC_TINT_LANG_WGSL_INSPECTOR_TEST_INSPECTOR_RUNNER_H_
+#endif  // SRC_TINT_LANG_WGSL_INSPECTOR_INSPECTOR_RUNNER_TEST_H_

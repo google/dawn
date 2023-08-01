@@ -15,7 +15,7 @@
 #include "src/tint/lang/wgsl/ast/break_statement.h"
 #include "src/tint/lang/wgsl/ast/continue_statement.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
-#include "src/tint/lang/wgsl/resolver/resolver_test_helper.h"
+#include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 
-#include "src/tint/lang/wgsl/sem/test_helper.h"
+#include "src/tint/lang/wgsl/sem/helper_test.h"
 
 #include "src/tint/lang/wgsl/sem/materialize.h"
 

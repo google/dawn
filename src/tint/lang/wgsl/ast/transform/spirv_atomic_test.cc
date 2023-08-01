@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/wgsl/ast/transform/test_helper.h"
+#include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/lang/wgsl/reader/parser/parser.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 

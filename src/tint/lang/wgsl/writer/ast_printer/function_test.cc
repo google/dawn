@@ -16,7 +16,7 @@
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
-#include "src/tint/lang/wgsl/writer/ast_printer/test_helper.h"
+#include "src/tint/lang/wgsl/writer/ast_printer/helper_test.h"
 
 #include "gmock/gmock.h"
 

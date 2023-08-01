@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "gmock/gmock.h"
-#include "src/tint/lang/msl/writer/ast_printer/test_helper.h"
+#include "src/tint/lang/msl/writer/ast_printer/helper_test.h"
 
 namespace tint::msl::writer {
 namespace {

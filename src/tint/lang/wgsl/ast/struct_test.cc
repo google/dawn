@@ -15,7 +15,7 @@
 #include "src/tint/lang/wgsl/ast/struct.h"
 #include "gtest/gtest-spi.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
-#include "src/tint/lang/wgsl/ast/test_helper.h"
+#include "src/tint/lang/wgsl/ast/helper_test.h"
 #include "src/tint/lang/wgsl/ast/transform/add_block_attribute.h"
 
 namespace tint::ast {

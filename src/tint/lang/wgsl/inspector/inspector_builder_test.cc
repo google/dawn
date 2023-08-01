@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "src/tint/lang/wgsl/resolver/resolve.h"
 
 namespace tint::inspector {
 

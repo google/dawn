@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_SPIRV_WRITER_COMMON_TEST_HELPER_H_
-#define SRC_TINT_LANG_SPIRV_WRITER_COMMON_TEST_HELPER_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_COMMON_HELPER_TEST_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_COMMON_HELPER_TEST_H_
 
 #include <string>
 #include <utility>
@@ -243,4 +243,4 @@ using SpirvWriterTestWithParam = SpirvWriterTestHelperBase<testing::TestWithPara
 
 }  // namespace tint::spirv::writer
 
-#endif  // SRC_TINT_LANG_SPIRV_WRITER_COMMON_TEST_HELPER_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_COMMON_HELPER_TEST_H_

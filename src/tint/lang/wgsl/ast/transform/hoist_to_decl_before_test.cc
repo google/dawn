@@ -15,8 +15,8 @@
 #include <utility>
 
 #include "gtest/gtest-spi.h"
+#include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/lang/wgsl/ast/transform/hoist_to_decl_before.h"
-#include "src/tint/lang/wgsl/ast/transform/test_helper.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"

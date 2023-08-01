@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/builtin/address_space.h"
-#include "src/tint/lang/core/type/test_helper.h"
+#include "src/tint/lang/core/type/helper_test.h"
 
 namespace tint::type {
 namespace {

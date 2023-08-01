@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
-#include "src/tint/lang/wgsl/reader/parser/test_helper.h"
+#include "src/tint/lang/wgsl/reader/parser/helper_test.h"
 
 namespace tint::wgsl::reader {
 namespace {

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_CORE_CONSTANT_TEST_HELPER_H_
-#define SRC_TINT_LANG_CORE_CONSTANT_TEST_HELPER_H_
+#ifndef SRC_TINT_LANG_CORE_CONSTANT_HELPER_TEST_H_
+#define SRC_TINT_LANG_CORE_CONSTANT_HELPER_TEST_H_
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
@@ -33,4 +33,4 @@ using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
 }  // namespace tint::constant
 
-#endif  // SRC_TINT_LANG_CORE_CONSTANT_TEST_HELPER_H_
+#endif  // SRC_TINT_LANG_CORE_CONSTANT_HELPER_TEST_H_

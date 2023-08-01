@@ -15,7 +15,7 @@
 #include "src/tint/lang/core/ir/exit_if.h"
 
 #include "gmock/gmock.h"
-#include "src/tint/lang/core/ir/ir_test_helper.h"
+#include "src/tint/lang/core/ir/ir_helper_test.h"
 
 namespace tint::ir {
 namespace {

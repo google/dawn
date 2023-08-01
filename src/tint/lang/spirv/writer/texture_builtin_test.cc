@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/spirv/writer/common/test_helper.h"
-
 #include "src/tint/lang/core/builtin/function.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
+#include "src/tint/lang/spirv/writer/common/helper_test.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/wgsl/ast/transform/clamp_frag_depth.h"
 
-#include "src/tint/lang/wgsl/ast/transform/test_helper.h"
+#include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
 namespace tint::ast::transform {
 namespace {

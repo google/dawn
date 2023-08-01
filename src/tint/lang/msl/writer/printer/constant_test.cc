@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/matrix.h"
-#include "src/tint/lang/msl/writer/printer/test_helper.h"
+#include "src/tint/lang/msl/writer/printer/helper_test.h"
 #include "src/tint/utils/text/string.h"
 
 namespace tint::msl::writer {

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest-spi.h"
-#include "src/tint/lang/wgsl/ast/test_helper.h"
+#include "src/tint/lang/wgsl/ast/helper_test.h"
 
 namespace tint::ast {
 namespace {

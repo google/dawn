@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/inspector/test_inspector_runner.h"
+#include "src/tint/lang/wgsl/inspector/inspector_runner_test.h"
 
 namespace tint::inspector {
 

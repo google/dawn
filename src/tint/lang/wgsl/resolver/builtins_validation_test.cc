@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/core/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
-#include "src/tint/lang/wgsl/resolver/resolver_test_helper.h"
+#include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/utils/text/string_stream.h"
 
 namespace tint::resolver {

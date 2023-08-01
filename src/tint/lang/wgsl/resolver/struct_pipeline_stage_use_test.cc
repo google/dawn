@@ -17,7 +17,7 @@
 #include "gmock/gmock.h"
 #include "src/tint/lang/core/builtin/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
-#include "src/tint/lang/wgsl/resolver/resolver_test_helper.h"
+#include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 
 namespace tint::resolver {

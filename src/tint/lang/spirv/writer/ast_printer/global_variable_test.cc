@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/lang/core/type/texture_dimension.h"
-#include "src/tint/lang/spirv/writer/ast_printer/test_helper.h"
+#include "src/tint/lang/spirv/writer/ast_printer/helper_test.h"
 #include "src/tint/lang/spirv/writer/common/spv_dump.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"

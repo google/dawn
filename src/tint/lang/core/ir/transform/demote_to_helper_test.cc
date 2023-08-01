@@ -16,7 +16,7 @@
 
 #include <utility>
 
-#include "src/tint/lang/core/ir/transform/test_helper.h"
+#include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/storage_texture.h"

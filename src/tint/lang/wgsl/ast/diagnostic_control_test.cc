@@ -17,7 +17,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/builtin/diagnostic_severity.h"
 #include "src/tint/lang/wgsl/ast/diagnostic_control.h"
-#include "src/tint/lang/wgsl/ast/test_helper.h"
+#include "src/tint/lang/wgsl/ast/helper_test.h"
 
 namespace tint::ast {
 namespace {

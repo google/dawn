@@ -1,4 +1,4 @@
-// Copyright 2021 The Tint Authors.
+// Copyright 2020 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,25 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_GLSL_WRITER_AST_PRINTER_TEST_HELPER_H_
-#define SRC_TINT_LANG_GLSL_WRITER_AST_PRINTER_TEST_HELPER_H_
+#ifndef SRC_TINT_LANG_MSL_WRITER_AST_PRINTER_HELPER_TEST_H_
+#define SRC_TINT_LANG_MSL_WRITER_AST_PRINTER_HELPER_TEST_H_
 
 #include <memory>
 #include <string>
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/tint/lang/glsl/writer/ast_printer/ast_printer.h"
-#include "src/tint/lang/glsl/writer/common/version.h"
-#include "src/tint/lang/glsl/writer/writer.h"
-#include "src/tint/lang/wgsl/ast/transform/manager.h"
+#include "src/tint/lang/msl/writer/ast_printer/ast_printer.h"
+#include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 
-namespace tint::glsl::writer {
+namespace tint::msl::writer {
 
 /// Helper class for testing
-template <typename BODY>
-class TestHelperBase : public BODY, public ProgramBuilder {
+template <typename BASE>
+class TestHelperBase : public BASE, public ProgramBuilder {
   public:
     TestHelperBase() = default;
     ~TestHelperBase() override = default;
@@ -43,12 +41,11 @@ class TestHelperBase : public BODY, public ProgramBuilder {
         return opts;
     }
 
-    /// Builds the program and returns a ASTPrinter from the program.
+    /// Builds and returns a ASTPrinter from the program.
     /// @note The generator is only built once. Multiple calls to Build() will
     /// return the same ASTPrinter without rebuilding.
-    /// @param version the GLSL version
     /// @return the built generator
-    ASTPrinter& Build(Version version = Version()) {
+    ASTPrinter& Build() {
         if (gen_) {
             return *gen_;
         }
@@ -57,19 +54,17 @@ class TestHelperBase : public BODY, public ProgramBuilder {
         }();
         program = std::make_unique<Program>(resolver::Resolve(*this));
         [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
-        gen_ = std::make_unique<ASTPrinter>(program.get(), version);
+        gen_ = std::make_unique<ASTPrinter>(program.get());
         return *gen_;
     }
 
-    /// Builds the program, runs the program through the transform::Glsl sanitizer
+    /// Builds the program, runs the program through the transform::Msl sanitizer
     /// and returns a ASTPrinter from the sanitized program.
+    /// @param options The MSL generator options.
     /// @note The generator is only built once. Multiple calls to Build() will
     /// return the same ASTPrinter without rebuilding.
-    /// @param version the GLSL version
-    /// @param options the GLSL backend options
     /// @return the built generator
-    ASTPrinter& SanitizeAndBuild(Version version = Version(),
-                                 const Options& options = DefaultOptions()) {
+    ASTPrinter& SanitizeAndBuild(const Options& options = DefaultOptions()) {
         if (gen_) {
             return *gen_;
         }
@@ -79,14 +74,10 @@ class TestHelperBase : public BODY, public ProgramBuilder {
         program = std::make_unique<Program>(resolver::Resolve(*this));
         [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
 
-        auto sanitized_result = Sanitize(program.get(), options, /* entry_point */ "");
-        [&] {
-            ASSERT_TRUE(sanitized_result.program.IsValid())
-                << sanitized_result.program.Diagnostics().str();
-        }();
-
-        *program = std::move(sanitized_result.program);
-        gen_ = std::make_unique<ASTPrinter>(program.get(), version);
+        auto result = Sanitize(program.get(), options);
+        [&] { ASSERT_TRUE(result.program.IsValid()) << result.program.Diagnostics().str(); }();
+        *program = std::move(result.program);
+        gen_ = std::make_unique<ASTPrinter>(program.get());
         return *gen_;
     }
 
@@ -101,6 +92,6 @@ using TestHelper = TestHelperBase<testing::Test>;
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
-}  // namespace tint::glsl::writer
+}  // namespace tint::msl::writer
 
-#endif  // SRC_TINT_LANG_GLSL_WRITER_AST_PRINTER_TEST_HELPER_H_
+#endif  // SRC_TINT_LANG_MSL_WRITER_AST_PRINTER_HELPER_TEST_H_

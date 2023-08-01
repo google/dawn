@@ -18,8 +18,8 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
-#include "src/tint/lang/wgsl/ast/transform/test_helper.h"
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"

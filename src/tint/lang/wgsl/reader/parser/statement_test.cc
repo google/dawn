@@ -15,7 +15,7 @@
 #include "src/tint/lang/wgsl/ast/break_statement.h"
 #include "src/tint/lang/wgsl/ast/continue_statement.h"
 #include "src/tint/lang/wgsl/ast/discard_statement.h"
-#include "src/tint/lang/wgsl/reader/parser/test_helper.h"
+#include "src/tint/lang/wgsl/reader/parser/helper_test.h"
 
 namespace tint::wgsl::reader {
 namespace {

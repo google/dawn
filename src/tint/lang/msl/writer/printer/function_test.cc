@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/msl/writer/printer/test_helper.h"
+#include "src/tint/lang/msl/writer/printer/helper_test.h"
 
 namespace tint::msl::writer {
 namespace {

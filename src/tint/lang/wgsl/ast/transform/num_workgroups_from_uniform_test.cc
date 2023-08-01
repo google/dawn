@@ -17,7 +17,7 @@
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/transform/canonicalize_entry_point_io.h"
-#include "src/tint/lang/wgsl/ast/transform/test_helper.h"
+#include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 
 namespace tint::ast::transform {

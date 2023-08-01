@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TEST_HELPER_H_
-#define SRC_TINT_LANG_WGSL_AST_TEST_HELPER_H_
+#ifndef SRC_TINT_LANG_WGSL_AST_HELPER_TEST_H_
+#define SRC_TINT_LANG_WGSL_AST_HELPER_TEST_H_
 
 #include <tuple>
 #include <utility>
@@ -167,4 +167,4 @@ void CheckIdentifier(const Expression* expr, const TemplatedIdentifierMatcher<AR
 
 }  // namespace tint::ast
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TEST_HELPER_H_
+#endif  // SRC_TINT_LANG_WGSL_AST_HELPER_TEST_H_

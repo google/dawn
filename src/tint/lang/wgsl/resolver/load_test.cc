@@ -17,8 +17,8 @@
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/resolver/resolver.h"
-#include "src/tint/lang/wgsl/resolver/resolver_test_helper.h"
-#include "src/tint/lang/wgsl/sem/test_helper.h"
+#include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
+#include "src/tint/lang/wgsl/sem/helper_test.h"
 
 namespace tint::resolver {
 namespace {

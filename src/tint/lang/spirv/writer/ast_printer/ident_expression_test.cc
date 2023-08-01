@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest-spi.h"
-#include "src/tint/lang/spirv/writer/ast_printer/test_helper.h"
+#include "src/tint/lang/spirv/writer/ast_printer/helper_test.h"
 #include "src/tint/lang/spirv/writer/common/spv_dump.h"
 
 namespace tint::spirv::writer {

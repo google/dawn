@@ -19,7 +19,7 @@
 #include "src/tint/lang/core/builtin/extension.h"
 #include "src/tint/lang/core/builtin/texel_format.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
-#include "src/tint/lang/wgsl/resolver/resolver_test_helper.h"
+#include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"

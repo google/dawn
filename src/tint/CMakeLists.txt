@@ -1023,6 +1023,8 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/ast/for_loop_statement_test.cc
     lang/wgsl/ast/function_test.cc
     lang/wgsl/ast/group_attribute_test.cc
+    lang/wgsl/ast/helper_test.h
+    lang/wgsl/ast/helper_test.cc
     lang/wgsl/ast/id_attribute_test.cc
     lang/wgsl/ast/identifier_expression_test.cc
     lang/wgsl/ast/identifier_test.cc
@@ -1047,8 +1049,6 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/ast/struct_test.cc
     lang/wgsl/ast/switch_statement_test.cc
     lang/wgsl/ast/templated_identifier_test.cc
-    lang/wgsl/ast/test_helper.h
-    lang/wgsl/ast/test_helper_test.cc
     lang/wgsl/ast/transform/manager_test.cc
     lang/wgsl/ast/transform/transform_test.cc
     lang/wgsl/ast/traverse_expressions_test.cc
@@ -1117,9 +1117,9 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/resolver/ptr_ref_test.cc
     lang/wgsl/resolver/ptr_ref_validation_test.cc
     lang/wgsl/resolver/resolver_behavior_test.cc
+    lang/wgsl/resolver/resolver_helper_test.cc
+    lang/wgsl/resolver/resolver_helper_test.h
     lang/wgsl/resolver/resolver_test.cc
-    lang/wgsl/resolver/resolver_test_helper.cc
-    lang/wgsl/resolver/resolver_test_helper.h
     lang/wgsl/resolver/root_identifier_test.cc
     lang/wgsl/resolver/side_effects_test.cc
     lang/wgsl/resolver/struct_address_space_use_test.cc
@@ -1193,11 +1193,11 @@ if(TINT_BUILD_TESTS)
   # Inspector tests depend on WGSL reader
   if(${TINT_BUILD_WGSL_READER})
     list(APPEND TINT_TEST_SRCS
+      lang/wgsl/inspector/inspector_builder_test.cc
+      lang/wgsl/inspector/inspector_builder_test.h
+      lang/wgsl/inspector/inspector_runner_test.cc
+      lang/wgsl/inspector/inspector_runner_test.h
       lang/wgsl/inspector/inspector_test.cc
-      lang/wgsl/inspector/test_inspector_builder.cc
-      lang/wgsl/inspector/test_inspector_builder.h
-      lang/wgsl/inspector/test_inspector_runner.cc
-      lang/wgsl/inspector/test_inspector_runner.h
     )
   endif()
 
@@ -1225,6 +1225,8 @@ if(TINT_BUILD_TESTS)
       lang/spirv/reader/ast_parser/function_var_test.cc
       lang/spirv/reader/ast_parser/get_decorations_test.cc
       lang/spirv/reader/ast_parser/handle_test.cc
+      lang/spirv/reader/ast_parser/helper_test.cc
+      lang/spirv/reader/ast_parser/helper_test.h
       lang/spirv/reader/ast_parser/import_test.cc
       lang/spirv/reader/ast_parser/module_var_test.cc
       lang/spirv/reader/ast_parser/named_types_test.cc
@@ -1232,8 +1234,6 @@ if(TINT_BUILD_TESTS)
       lang/spirv/reader/ast_parser/parser_test.cc
       lang/spirv/reader/ast_parser/spirv_tools_helpers_test.cc
       lang/spirv/reader/ast_parser/spirv_tools_helpers_test.h
-      lang/spirv/reader/ast_parser/test_helper.cc
-      lang/spirv/reader/ast_parser/test_helper.h
       lang/spirv/reader/ast_parser/type_test.cc
       lang/spirv/reader/ast_parser/usage_test.cc
       lang/spirv/reader/ast_parser/user_name_test.cc
@@ -1277,6 +1277,8 @@ if(TINT_BUILD_TESTS)
       lang/wgsl/reader/parser/global_constant_decl_test.cc
       lang/wgsl/reader/parser/global_decl_test.cc
       lang/wgsl/reader/parser/global_variable_decl_test.cc
+      lang/wgsl/reader/parser/helper_test.cc
+      lang/wgsl/reader/parser/helper_test.h
       lang/wgsl/reader/parser/if_stmt_test.cc
       lang/wgsl/reader/parser/increment_decrement_stmt_test.cc
       lang/wgsl/reader/parser/lexer_test.cc
@@ -1303,8 +1305,6 @@ if(TINT_BUILD_TESTS)
       lang/wgsl/reader/parser/struct_member_test.cc
       lang/wgsl/reader/parser/switch_body_test.cc
       lang/wgsl/reader/parser/switch_stmt_test.cc
-      lang/wgsl/reader/parser/test_helper.cc
-      lang/wgsl/reader/parser/test_helper.h
       lang/wgsl/reader/parser/token_test.cc
       lang/wgsl/reader/parser/type_alias_test.cc
       lang/wgsl/reader/parser/type_decl_test.cc
@@ -1361,11 +1361,11 @@ if(TINT_BUILD_TESTS)
       lang/spirv/writer/ast_printer/function_attribute_test.cc
       lang/spirv/writer/ast_printer/function_variable_test.cc
       lang/spirv/writer/ast_printer/global_variable_test.cc
+      lang/spirv/writer/ast_printer/helper_test.h
       lang/spirv/writer/ast_printer/ident_expression_test.cc
       lang/spirv/writer/ast_printer/literal_test.cc
       lang/spirv/writer/ast_printer/return_test.cc
       lang/spirv/writer/ast_printer/scalar_constant_test.cc
-      lang/spirv/writer/ast_printer/test_helper.h
       lang/spirv/writer/ast_printer/unary_op_expression_test.cc
       lang/spirv/writer/common/binary_writer_test.cc
       lang/spirv/writer/common/instruction_test.cc
@@ -1389,7 +1389,7 @@ if(TINT_BUILD_TESTS)
         lang/spirv/writer/binary_test.cc
         lang/spirv/writer/bitcast_test.cc
         lang/spirv/writer/builtin_test.cc
-        lang/spirv/writer/common/test_helper.h
+        lang/spirv/writer/common/helper_test.h
         lang/spirv/writer/constant_test.cc
         lang/spirv/writer/construct_test.cc
         lang/spirv/writer/convert_test.cc
@@ -1430,6 +1430,7 @@ if(TINT_BUILD_TESTS)
       lang/wgsl/writer/ast_printer/enable_test.cc
       lang/wgsl/writer/ast_printer/function_test.cc
       lang/wgsl/writer/ast_printer/global_decl_test.cc
+      lang/wgsl/writer/ast_printer/helper_test.h
       lang/wgsl/writer/ast_printer/identifier_test.cc
       lang/wgsl/writer/ast_printer/if_test.cc
       lang/wgsl/writer/ast_printer/loop_test.cc
@@ -1441,7 +1442,6 @@ if(TINT_BUILD_TESTS)
       lang/wgsl/writer/ast_printer/unary_op_test.cc
       lang/wgsl/writer/ast_printer/variable_decl_statement_test.cc
       lang/wgsl/writer/ast_printer/variable_test.cc
-      lang/wgsl/writer/ast_printer/test_helper.h
     )
 
     if (${TINT_BUILD_IR})
@@ -1479,6 +1479,7 @@ if(TINT_BUILD_TESTS)
       lang/wgsl/ast/transform/fold_trivial_lets_test.cc
       lang/wgsl/ast/transform/for_loop_to_loop_test.cc
       lang/wgsl/ast/transform/get_insertion_point_test.cc
+      lang/wgsl/ast/transform/helper_test.h
       lang/wgsl/ast/transform/hoist_to_decl_before_test.cc
       lang/wgsl/ast/transform/localize_struct_array_assignment_test.cc
       lang/wgsl/ast/transform/merge_return_test.cc
@@ -1503,7 +1504,6 @@ if(TINT_BUILD_TESTS)
       lang/wgsl/ast/transform/std140_f32_test.cc
       lang/wgsl/ast/transform/std140_test.cc
       lang/wgsl/ast/transform/substitute_override_test.cc
-      lang/wgsl/ast/transform/test_helper.h
       lang/wgsl/ast/transform/texture_1d_to_2d_test.cc
       lang/wgsl/ast/transform/truncate_interstage_variables_test.cc
       lang/wgsl/ast/transform/unshadow_test.cc
@@ -1536,6 +1536,7 @@ if(TINT_BUILD_TESTS)
       lang/msl/writer/ast_printer/constructor_test.cc
       lang/msl/writer/ast_printer/continue_test.cc
       lang/msl/writer/ast_printer/discard_test.cc
+      lang/msl/writer/ast_printer/helper_test.h
       lang/msl/writer/ast_printer/identifier_test.cc
       lang/msl/writer/ast_printer/if_test.cc
       lang/msl/writer/ast_printer/import_test.cc
@@ -1545,7 +1546,6 @@ if(TINT_BUILD_TESTS)
       lang/msl/writer/ast_printer/return_test.cc
       lang/msl/writer/ast_printer/sanitizer_test.cc
       lang/msl/writer/ast_printer/switch_test.cc
-      lang/msl/writer/ast_printer/test_helper.h
       lang/msl/writer/ast_printer/unary_op_test.cc
       lang/msl/writer/ast_printer/variable_decl_statement_test.cc
       lang/msl/writer/common/printer_support_test.cc
@@ -1555,8 +1555,8 @@ if(TINT_BUILD_TESTS)
       list(APPEND TINT_TEST_SRCS
         lang/msl/writer/printer/constant_test.cc
         lang/msl/writer/printer/function_test.cc
+        lang/msl/writer/printer/helper_test.h
         lang/msl/writer/printer/type_test.cc
-        lang/msl/writer/printer/test_helper.h
       )
     endif()
   endif()
@@ -1579,6 +1579,7 @@ if(TINT_BUILD_TESTS)
       lang/glsl/writer/ast_printer/continue_test.cc
       lang/glsl/writer/ast_printer/discard_test.cc
       lang/glsl/writer/ast_printer/function_test.cc
+      lang/glsl/writer/ast_printer/helper_test.h
       lang/glsl/writer/ast_printer/identifier_test.cc
       lang/glsl/writer/ast_printer/if_test.cc
       lang/glsl/writer/ast_printer/import_test.cc
@@ -1594,7 +1595,6 @@ if(TINT_BUILD_TESTS)
       lang/glsl/writer/ast_printer/uniform_buffer_test.cc
       lang/glsl/writer/ast_printer/variable_decl_statement_test.cc
       lang/glsl/writer/ast_printer/workgroup_var_test.cc
-      lang/glsl/writer/ast_printer/test_helper.h
     )
   endif()
 
@@ -1617,6 +1617,7 @@ if(TINT_BUILD_TESTS)
       lang/hlsl/writer/ast_printer/continue_test.cc
       lang/hlsl/writer/ast_printer/discard_test.cc
       lang/hlsl/writer/ast_printer/function_test.cc
+      lang/hlsl/writer/ast_printer/helper_test.h
       lang/hlsl/writer/ast_printer/identifier_test.cc
       lang/hlsl/writer/ast_printer/if_test.cc
       lang/hlsl/writer/ast_printer/import_test.cc
@@ -1630,7 +1631,6 @@ if(TINT_BUILD_TESTS)
       lang/hlsl/writer/ast_printer/unary_op_test.cc
       lang/hlsl/writer/ast_printer/variable_decl_statement_test.cc
       lang/hlsl/writer/ast_printer/workgroup_var_test.cc
-      lang/hlsl/writer/ast_printer/test_helper.h
     )
   endif()
 

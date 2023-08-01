@@ -14,8 +14,8 @@
 
 #include "src/tint/lang/core/constant/composite.h"
 
+#include "src/tint/lang/core/constant/helper_test.h"
 #include "src/tint/lang/core/constant/scalar.h"
-#include "src/tint/lang/core/constant/test_helper.h"
 
 namespace tint::constant {
 namespace {

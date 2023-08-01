@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_CORE_IR_IR_TEST_HELPER_H_
-#define SRC_TINT_LANG_CORE_IR_IR_TEST_HELPER_H_
+#ifndef SRC_TINT_LANG_CORE_IR_IR_HELPER_TEST_H_
+#define SRC_TINT_LANG_CORE_IR_IR_HELPER_TEST_H_
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/builder.h"
@@ -43,4 +43,4 @@ using IRTestParamHelper = IRTestHelperBase<testing::TestWithParam<T>>;
 
 }  // namespace tint::ir
 
-#endif  // SRC_TINT_LANG_CORE_IR_IR_TEST_HELPER_H_
+#endif  // SRC_TINT_LANG_CORE_IR_IR_HELPER_TEST_H_

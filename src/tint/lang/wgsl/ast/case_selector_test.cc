@@ -15,7 +15,7 @@
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 
 #include "gtest/gtest-spi.h"
-#include "src/tint/lang/wgsl/ast/test_helper.h"
+#include "src/tint/lang/wgsl/ast/helper_test.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
