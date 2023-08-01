@@ -94,13 +94,20 @@ class State {
     explicit State(ir::Module& m) : mod(m) {}
 
     Program Run() {
+        // Run transforms need to sanitize for WGSL.
+        {
+            auto result = RenameConflicts(&mod);
+            if (!result) {
+                b.Diagnostics().add_error(diag::System::Transform, result.Failure());
+                return Program(std::move(b));
+            }
+        }
+
         if (auto res = ir::Validate(mod); !res) {
             // IR module failed validation.
             b.Diagnostics() = res.Failure();
             return Program{resolver::Resolve(b)};
         }
-
-        RenameConflicts{}.Run(&mod);
 
         if (mod.root_block) {
             RootBlock(mod.root_block);

@@ -22,6 +22,7 @@
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/scalar.h"
@@ -35,12 +36,12 @@
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::wgsl::writer::RenameConflicts);
-
 namespace tint::wgsl::writer {
 
+namespace {
+
 /// PIMPL state for the transform, for a single function.
-struct RenameConflicts::State {
+struct State {
     /// Constructor
     /// @param i the IR module
     explicit State(ir::Module* i) : ir(i) {}
@@ -272,11 +273,17 @@ struct RenameConflicts::State {
     }
 };
 
-RenameConflicts::RenameConflicts() = default;
-RenameConflicts::~RenameConflicts() = default;
+}  // namespace
 
-void RenameConflicts::Run(ir::Module* ir) const {
+Result<SuccessType, std::string> RenameConflicts(ir::Module* ir) {
+    auto result = ValidateAndDumpIfNeeded(*ir, "RenameConflicts transform");
+    if (!result) {
+        return result;
+    }
+
     State{ir}.Process();
+
+    return Success;
 }
 
 }  // namespace tint::wgsl::writer

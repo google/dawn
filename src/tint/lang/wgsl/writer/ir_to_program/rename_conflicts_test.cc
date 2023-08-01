@@ -42,7 +42,8 @@ class IRToProgramRenameConflictsTest : public testing::Test {
         }
 
         // Run the transforms.
-        RenameConflicts{}.Run(&mod);
+        auto result = RenameConflicts(&mod);
+        EXPECT_TRUE(result) << result.Failure();
 
         // Validate the output IR.
         auto res = ir::Validate(mod);
