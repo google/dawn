@@ -100,7 +100,7 @@
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/while_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
-#include "src/tint/utils/generation_id.h"
+#include "src/tint/utils/id/generation_id.h"
 #include "src/tint/utils/text/string.h"
 
 #ifdef CURRENTLY_IN_TINT_PUBLIC_HEADER

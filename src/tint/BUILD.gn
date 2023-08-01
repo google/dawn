@@ -203,8 +203,8 @@ template("libtint_source_set") {
 libtint_source_set("libtint_symbols_src") {
   sources = [
     "utils/containers/scope_stack.h",
-    "utils/generation_id.cc",
-    "utils/generation_id.h",
+    "utils/id/generation_id.cc",
+    "utils/id/generation_id.h",
     "utils/reflection/reflection.h",
     "utils/symbol/symbol.cc",
     "utils/symbol/symbol.h",

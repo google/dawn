@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_UTILS_GENERATION_ID_H_
-#define SRC_TINT_UTILS_GENERATION_ID_H_
+#ifndef SRC_TINT_UTILS_ID_GENERATION_ID_H_
+#define SRC_TINT_UTILS_ID_GENERATION_ID_H_
 
 #include <stdint.h>
 #include <utility>
@@ -122,4 +122,4 @@ void AssertGenerationIDsEqual(GenerationID a,
 
 }  // namespace tint
 
-#endif  // SRC_TINT_UTILS_GENERATION_ID_H_
+#endif  // SRC_TINT_UTILS_ID_GENERATION_ID_H_

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/utils/generation_id.h"
+#include "src/tint/utils/id/generation_id.h"
 
 #include <atomic>
 

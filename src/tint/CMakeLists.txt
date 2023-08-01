@@ -544,8 +544,8 @@ list(APPEND TINT_LIB_SRCS
   utils/containers/unique_allocator.h
   utils/containers/unique_vector.h
   utils/containers/vector.h
-  utils/generation_id.cc
-  utils/generation_id.h
+  utils/id/generation_id.cc
+  utils/id/generation_id.h
   utils/macros/compiler.h
   utils/macros/concat.h
   utils/macros/foreach.h
