@@ -18,20 +18,17 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/struct.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::Std140);
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
 namespace tint::ir::transform {
 
-Std140::Std140() = default;
-
-Std140::~Std140() = default;
+namespace {
 
 /// PIMPL state for the transform.
 struct State {
@@ -329,8 +326,17 @@ struct State {
     }
 };
 
-void Std140::Run(Module* ir) const {
+}  // namespace
+
+Result<SuccessType, std::string> Std140(Module* ir) {
+    auto result = ValidateAndDumpIfNeeded(*ir, "Std140 transform");
+    if (!result) {
+        return result;
+    }
+
     State{ir}.Process();
+
+    return Success;
 }
 
 }  // namespace tint::ir::transform

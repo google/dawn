@@ -106,8 +106,8 @@ Result<SuccessType, std::string> Sanitize(ir::Module* module) {
     ir::transform::HandleMatrixArithmetic{}.Run(module);
     ir::transform::MergeReturn{}.Run(module);
     ir::transform::ShaderIOSpirv{}.Run(module);
-    ir::transform::Std140{}.Run(module);
 
+    RUN_TRANSFORM(Std140);
     RUN_TRANSFORM(VarForDynamicIndex);
 
     return Success;

@@ -42,7 +42,7 @@ TEST_F(IR_Std140Test, NoRootBlock) {
 }
 )";
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -86,7 +86,7 @@ MyStruct = struct @align(16), @block {
 
     auto* expect = src;
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -130,7 +130,7 @@ MyStruct = struct @align(16), @block {
 
     auto* expect = src;
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -174,7 +174,7 @@ MyStruct = struct @align(16), @block {
 
     auto* expect = src;
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -219,7 +219,7 @@ MyStruct = struct @align(8), @block {
 
     auto* expect = src;
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -290,7 +290,7 @@ MyStruct_std140 = struct @align(8), @block {
 }
 )";
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -362,7 +362,7 @@ MyStruct_std140 = struct @align(8), @block {
 }
 )";
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -435,7 +435,7 @@ MyStruct_std140 = struct @align(8), @block {
 }
 )";
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -509,7 +509,7 @@ MyStruct_std140 = struct @align(8), @block {
 }
 )";
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -630,7 +630,7 @@ Outer_std140 = struct @align(8), @block {
 }
 )";
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -721,7 +721,7 @@ Outer_std140 = struct @align(8), @block {
 }
 )";
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -810,7 +810,7 @@ Outer_std140 = struct @align(16), @block {
 }
 )";
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -980,7 +980,7 @@ Outer_std140 = struct @align(8), @block {
 }
 )";
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -1155,7 +1155,7 @@ Outer_std140 = struct @align(8), @block {
 }
 )";
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -1329,7 +1329,7 @@ Outer_std140 = struct @align(8), @block {
 }
 )";
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -1435,7 +1435,7 @@ MyStruct_std140 = struct @align(128), @block {
 }
 )";
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }
@@ -1583,7 +1583,7 @@ MyStruct_std140 = struct @align(8), @block {
 }
 )";
 
-    Run<Std140>();
+    Run(Std140);
 
     EXPECT_EQ(expect, str());
 }

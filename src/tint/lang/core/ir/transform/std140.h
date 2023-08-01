@@ -15,22 +15,22 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_STD140_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_STD140_H_
 
-#include "src/tint/lang/core/ir/transform/transform.h"
+#include <string>
+
+#include "src/tint/utils/result/result.h"
+
+// Forward declarations.
+namespace tint::ir {
+class Module;
+}
 
 namespace tint::ir::transform {
 
 /// Std140 is a transform that rewrites matrix types in the uniform address space to conform to
 /// GLSL's std140 layout rules.
-class Std140 final : public Castable<Std140, Transform> {
-  public:
-    /// Constructor
-    Std140();
-    /// Destructor
-    ~Std140() override;
-
-    /// @copydoc Transform::Run
-    void Run(ir::Module* module) const override;
-};
+/// @param module the module to transform
+/// @returns an error string on failure
+Result<SuccessType, std::string> Std140(Module* module);
 
 }  // namespace tint::ir::transform
 
