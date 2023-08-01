@@ -1130,8 +1130,7 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithAlphaToCo
 // Test multisampled rendering with depth test works correctly with alphaToCoverage.
 TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndAlphaToCoverage) {
     // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
-    // TODO(dawn:1550) Fails on ARM-based Android devices.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid());
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 
     constexpr bool kTestDepth = true;
     constexpr uint32_t kSampleMask = 0xFFFFFFFF;

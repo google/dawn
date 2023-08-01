@@ -1257,7 +1257,7 @@ ResultOrError<std::function<void()>> CommandEncoder::ApplyRenderPassWorkarounds(
 
                         // Begin and end an empty render pass to force the resolve.
                         Ref<RenderPassEncoder> encoder = this->BeginRenderPass(&resolvePass);
-                        encoder->APIEnd();
+                        encoder->End();
                     }
 
                     // If there were any other callbacks in the workaround stack, call the next one.
