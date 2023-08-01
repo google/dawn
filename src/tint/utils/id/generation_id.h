@@ -96,10 +96,10 @@ void AssertGenerationIDsEqual(GenerationID a,
 
 }  // namespace detail
 
-/// TINT_ASSERT_GENERATION_IDS_EQUAL(SYSTEM, A, B) is a macro that asserts that the
+/// TINT_ASSERT_GENERATION_IDS_EQUAL(A, B) is a macro that asserts that the
 /// generation identifiers for A and B are equal.
 ///
-/// TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(SYSTEM, A, B) is a macro that asserts
+/// TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(A, B) is a macro that asserts
 /// that the generation identifiers for A and B are equal, if both A and B have
 /// valid generation identifiers.
 #if TINT_CHECK_FOR_CROSS_GENERATION_LEAKS

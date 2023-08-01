@@ -20,8 +20,12 @@
 
 #include "gtest/gtest.h"
 
-namespace tint {
+#include "src/tint/utils/traits/traits.h"
+
+namespace tint::utils {
 namespace {
+
+static_assert(traits::IsOStream<StringStream>);
 
 using StringStreamTest = testing::Test;
 
@@ -108,4 +112,4 @@ TEST_F(StringStreamTest, Precision) {
 }
 
 }  // namespace
-}  // namespace tint
+}  // namespace tint::utils

@@ -20,7 +20,6 @@
 #include <utility>
 
 #include "src/tint/utils/macros/compiler.h"
-#include "src/tint/utils/text/string_stream.h"
 
 namespace tint {
 
@@ -64,7 +63,7 @@ class InternalCompilerError {
   private:
     char const* const file_;
     const size_t line_;
-    StringStream msg_;
+    std::stringstream msg_;
 };
 
 /// Function type used for registering an internal compiler error reporter

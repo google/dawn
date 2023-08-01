@@ -24,7 +24,6 @@
 #include <variant>
 #include <vector>
 
-#include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/math/crc32.h"
 
 namespace tint {
@@ -104,34 +103,6 @@ struct Hasher<std::vector<T>> {
     /// @returns a hash of the vector
     size_t operator()(const std::vector<T>& vector) const {
         auto hash = Hash(vector.size());
-        for (auto& el : vector) {
-            hash = HashCombine(hash, el);
-        }
-        return hash;
-    }
-};
-
-/// Hasher specialization for Vector
-template <typename T, size_t N>
-struct Hasher<Vector<T, N>> {
-    /// @param vector the Vector to hash
-    /// @returns a hash of the Vector
-    size_t operator()(const Vector<T, N>& vector) const {
-        auto hash = Hash(vector.Length());
-        for (auto& el : vector) {
-            hash = HashCombine(hash, el);
-        }
-        return hash;
-    }
-};
-
-/// Hasher specialization for VectorRef
-template <typename T>
-struct Hasher<VectorRef<T>> {
-    /// @param vector the VectorRef reference to hash
-    /// @returns a hash of the Vector
-    size_t operator()(const VectorRef<T>& vector) const {
-        auto hash = Hash(vector.Length());
         for (auto& el : vector) {
             hash = HashCombine(hash, el);
         }

@@ -37,8 +37,10 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/msl/writer/common/printer_support.h"
+#include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/text/string.h"
 
 namespace tint::msl::writer {
 namespace {
@@ -510,6 +512,15 @@ void Printer::EmitConstant(StringStream& out, const constant::Value* c) {
             }
         },
         [&](Default) { UNHANDLED_CASE(c->Type()); });
+}
+
+std::string Printer::StructName(const type::Struct* s) {
+    auto name = s->Name().Name();
+    if (HasPrefix(name, "__")) {
+        name = tint::GetOrCreate(builtin_struct_names_, s,
+                                 [&] { return UniqueIdentifier(name.substr(2)); });
+    }
+    return name;
 }
 
 std::string Printer::UniqueIdentifier(const std::string& prefix /* = "" */) {

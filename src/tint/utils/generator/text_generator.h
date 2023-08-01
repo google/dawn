@@ -20,7 +20,6 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/core/type/struct.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -131,19 +130,6 @@ class TextGenerator {
     /// the end of `buffer`.
     static LineWriter Line(TextBuffer* buffer) { return LineWriter(buffer); }
 
-    /// @return a new, unique identifier with the given prefix.
-    /// @param prefix optional prefix to apply to the generated identifier. If
-    /// empty "tint_symbol" will be used.
-    /// TODO(crbug.com/tint/1992): The printers should not be creating new symbols. This should be
-    /// done as part of the IR-raise process. Remove once all writers have been moved to IR.
-    virtual std::string UniqueIdentifier(const std::string& prefix = "");
-
-    /// @param s the structure
-    /// @returns the name of the structure, taking special care of builtin structures that start
-    /// with double underscores. If the structure is a builtin, then the returned name will be a
-    /// unique name without the leading underscores.
-    std::string StructName(const type::Struct* s);
-
     /// @returns the result data
     virtual std::string Result() const { return main_buffer_.String(); }
 
@@ -197,10 +183,6 @@ class TextGenerator {
 
     /// The primary text buffer that the generator will emit
     TextBuffer main_buffer_;
-
-  private:
-    /// Map of builtin structure to unique generated name
-    std::unordered_map<const type::Struct*, std::string> builtin_struct_names_;
 };
 
 }  // namespace tint

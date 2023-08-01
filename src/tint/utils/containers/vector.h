@@ -26,6 +26,7 @@
 #include "src/tint/utils/containers/slice.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/macros/compiler.h"
+#include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/memory/bitcast.h"
 
 /// Forward declarations
@@ -862,6 +863,34 @@ auto& operator<<(STREAM& o, VectorRef<T> vec) {
     o << "]";
     return o;
 }
+
+/// Hasher specialization for Vector
+template <typename T, size_t N>
+struct Hasher<Vector<T, N>> {
+    /// @param vector the Vector to hash
+    /// @returns a hash of the Vector
+    size_t operator()(const Vector<T, N>& vector) const {
+        auto hash = Hash(vector.Length());
+        for (auto& el : vector) {
+            hash = HashCombine(hash, el);
+        }
+        return hash;
+    }
+};
+
+/// Hasher specialization for VectorRef
+template <typename T>
+struct Hasher<VectorRef<T>> {
+    /// @param vector the VectorRef reference to hash
+    /// @returns a hash of the Vector
+    size_t operator()(const VectorRef<T>& vector) const {
+        auto hash = Hash(vector.Length());
+        for (auto& el : vector) {
+            hash = HashCombine(hash, el);
+        }
+        return hash;
+    }
+};
 
 namespace detail {
 

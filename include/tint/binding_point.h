@@ -22,6 +22,7 @@
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/reflection/reflection.h"
 #include "src/tint/utils/text/string_stream.h"
+#include "src/tint/utils/traits/traits.h"
 
 namespace tint {
 

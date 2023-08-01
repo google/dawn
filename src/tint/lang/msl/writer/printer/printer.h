@@ -16,6 +16,7 @@
 #define SRC_TINT_LANG_MSL_WRITER_PRINTER_PRINTER_H_
 
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "src/tint/lang/core/ir/module.h"
@@ -100,8 +101,19 @@ class Printer : public tint::TextGenerator {
     std::string array_template_name_;
 
   private:
-    /// @copydoc tint::TextWrtiter::UniqueIdentifier
-    std::string UniqueIdentifier(const std::string& prefix = "") override;
+    /// @param s the structure
+    /// @returns the name of the structure, taking special care of builtin structures that start
+    /// with double underscores. If the structure is a builtin, then the returned name will be a
+    /// unique name without the leading underscores.
+    std::string StructName(const type::Struct* s);
+
+    /// @return a new, unique identifier with the given prefix.
+    /// @param prefix optional prefix to apply to the generated identifier. If empty "tint_symbol"
+    /// will be used.
+    std::string UniqueIdentifier(const std::string& prefix = "");
+
+    /// Map of builtin structure to unique generated name
+    std::unordered_map<const type::Struct*, std::string> builtin_struct_names_;
 
     ir::Module* const ir_;
 

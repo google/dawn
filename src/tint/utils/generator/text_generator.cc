@@ -26,20 +26,6 @@ TextGenerator::TextGenerator() = default;
 
 TextGenerator::~TextGenerator() = default;
 
-std::string TextGenerator::UniqueIdentifier(const std::string& /* = "" */) {
-    TINT_UNIMPLEMENTED() << "UniqueIdentifier() not overridden";
-    return "<error>";
-}
-
-std::string TextGenerator::StructName(const type::Struct* s) {
-    auto name = s->Name().Name();
-    if (name.size() > 1 && name[0] == '_' && name[1] == '_') {
-        name = tint::GetOrCreate(builtin_struct_names_, s,
-                                 [&] { return UniqueIdentifier(name.substr(2)); });
-    }
-    return name;
-}
-
 TextGenerator::LineWriter::LineWriter(TextBuffer* buf) : buffer(buf) {}
 
 TextGenerator::LineWriter::LineWriter(LineWriter&& other) {

@@ -14,6 +14,8 @@
 
 #include "src/tint/utils/diagnostic/printer.h"
 
+#include <string>
+
 namespace tint::diag {
 
 Printer::~Printer() = default;

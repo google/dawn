@@ -18,6 +18,7 @@
 #include <string_view>
 #include <utility>
 
+#include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/text/unicode.h"
 
 namespace tint {
@@ -121,7 +122,9 @@ Source::FileContent::~FileContent() = default;
 
 Source::File::~File() = default;
 
-StringStream& operator<<(StringStream& out, const Source& source) {
+std::string ToString(const Source& source) {
+    StringStream out;
+
     auto rng = source.range;
 
     if (source.file) {
@@ -171,7 +174,7 @@ StringStream& operator<<(StringStream& out, const Source& source) {
             }
         }
     }
-    return out;
+    return out.str();
 }
 
 }  // namespace tint

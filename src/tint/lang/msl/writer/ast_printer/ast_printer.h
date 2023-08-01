@@ -378,8 +378,16 @@ class ASTPrinter : public tint::TextGenerator {
     /// first call.
     const std::string& ArrayType();
 
-    /// @copydoc tint::TextWrtiter::UniqueIdentifier
-    std::string UniqueIdentifier(const std::string& prefix = "") override;
+    /// @param s the structure
+    /// @returns the name of the structure, taking special care of builtin structures that start
+    /// with double underscores. If the structure is a builtin, then the returned name will be a
+    /// unique name without the leading underscores.
+    std::string StructName(const type::Struct* s);
+
+    /// @return a new, unique identifier with the given prefix.
+    /// @param prefix optional prefix to apply to the generated identifier. If empty "tint_symbol"
+    /// will be used.
+    std::string UniqueIdentifier(const std::string& prefix = "");
 
     /// Alias for builder_.TypeOf(ptr)
     template <typename T>
@@ -390,6 +398,9 @@ class ASTPrinter : public tint::TextGenerator {
     ProgramBuilder builder_;
 
     TextBuffer helpers_;  // Helper functions emitted at the top of the output
+
+    /// Map of builtin structure to unique generated name
+    std::unordered_map<const type::Struct*, std::string> builtin_struct_names_;
 
     std::function<bool()> emit_continuing_;
 

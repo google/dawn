@@ -4589,6 +4589,15 @@ bool ASTPrinter::CallBuiltinHelper(StringStream& out,
     return true;
 }
 
+std::string ASTPrinter::StructName(const type::Struct* s) {
+    auto name = s->Name().Name();
+    if (HasPrefix(name, "__")) {
+        name = tint::GetOrCreate(builtin_struct_names_, s,
+                                 [&] { return UniqueIdentifier(name.substr(2)); });
+    }
+    return name;
+}
+
 std::string ASTPrinter::UniqueIdentifier(const std::string& prefix /* = "" */) {
     return builder_.Symbols().New(prefix).Name();
 }
