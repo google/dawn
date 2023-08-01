@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_LANG_MSL_WRITER_WRITER_H_
 #define SRC_TINT_LANG_MSL_WRITER_WRITER_H_
 
-#include "src/tint/lang/msl/writer/options.h"
+#include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/lang/msl/writer/result.h"
 
 // Forward declarations

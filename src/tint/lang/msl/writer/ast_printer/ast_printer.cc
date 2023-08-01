@@ -41,7 +41,7 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
-#include "src/tint/lang/msl/writer/printer_support.h"
+#include "src/tint/lang/msl/writer/common/printer_support.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"

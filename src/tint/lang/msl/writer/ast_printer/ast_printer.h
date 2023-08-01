@@ -22,8 +22,7 @@
 #include <vector>
 
 #include "src/tint/lang/core/builtin/builtin_value.h"
-#include "src/tint/lang/msl/writer/options.h"
-#include "src/tint/lang/msl/writer/result.h"
+#include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"

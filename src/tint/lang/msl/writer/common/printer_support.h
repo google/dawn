@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_MSL_WRITER_PRINTER_SUPPORT_H_
-#define SRC_TINT_LANG_MSL_WRITER_PRINTER_SUPPORT_H_
+#ifndef SRC_TINT_LANG_MSL_WRITER_COMMON_PRINTER_SUPPORT_H_
+#define SRC_TINT_LANG_MSL_WRITER_COMMON_PRINTER_SUPPORT_H_
 
 #include <cstdint>
 #include <string>
@@ -67,4 +67,4 @@ void PrintI32(StringStream& out, int32_t value);
 
 }  // namespace tint::msl::writer
 
-#endif  // SRC_TINT_LANG_MSL_WRITER_PRINTER_SUPPORT_H_
+#endif  // SRC_TINT_LANG_MSL_WRITER_COMMON_PRINTER_SUPPORT_H_

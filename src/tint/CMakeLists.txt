@@ -716,10 +716,10 @@ endif()
 
 if(${TINT_BUILD_MSL_WRITER})
   list(APPEND TINT_LIB_SRCS
-    lang/msl/writer/options.cc
-    lang/msl/writer/options.h
-    lang/msl/writer/printer_support.cc
-    lang/msl/writer/printer_support.h
+    lang/msl/writer/common/options.cc
+    lang/msl/writer/common/options.h
+    lang/msl/writer/common/printer_support.cc
+    lang/msl/writer/common/printer_support.h
     lang/msl/writer/result.cc
     lang/msl/writer/result.h
     lang/msl/writer/writer.cc
@@ -1548,7 +1548,7 @@ if(TINT_BUILD_TESTS)
       lang/msl/writer/ast_printer/test_helper.h
       lang/msl/writer/ast_printer/unary_op_test.cc
       lang/msl/writer/ast_printer/variable_decl_statement_test.cc
-      lang/msl/writer/printer_support_test.cc
+      lang/msl/writer/common/printer_support_test.cc
     )
 
     if(${TINT_BUILD_IR})
