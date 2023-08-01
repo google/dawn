@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/utils/text/float_to_string.h"
+#include "src/tint/utils/strconv/float_to_string.h"
 
 #include <cmath>
 #include <cstring>

@@ -28,7 +28,7 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/rtti/switch.h"
-#include "src/tint/utils/text/float_to_string.h"
+#include "src/tint/utils/strconv/float_to_string.h"
 
 namespace tint::msl::writer {
 

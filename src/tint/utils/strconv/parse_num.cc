@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/utils/text/parse_num.h"
+#include "src/tint/utils/strconv/parse_num.h"
 
 #include <charconv>
 

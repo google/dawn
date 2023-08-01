@@ -73,7 +73,7 @@
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/rtti/switch.h"
-#include "src/tint/utils/text/float_to_string.h"
+#include "src/tint/utils/strconv/float_to_string.h"
 #include "src/tint/utils/text/string.h"
 
 namespace tint::wgsl::writer {

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_UTILS_TEXT_PARSE_NUM_H_
-#define SRC_TINT_UTILS_TEXT_PARSE_NUM_H_
+#ifndef SRC_TINT_UTILS_STRCONV_PARSE_NUM_H_
+#define SRC_TINT_UTILS_STRCONV_PARSE_NUM_H_
 
 #include <optional>
 #include <string>
@@ -130,4 +130,4 @@ TINT_END_DISABLE_WARNING(UNREACHABLE_CODE);
 
 }  // namespace tint
 
-#endif  // SRC_TINT_UTILS_TEXT_PARSE_NUM_H_
+#endif  // SRC_TINT_UTILS_STRCONV_PARSE_NUM_H_

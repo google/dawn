@@ -560,10 +560,10 @@ list(APPEND TINT_LIB_SRCS
   utils/rtti/castable.cc
   utils/rtti/castable.h
   utils/rtti/switch.h
-  utils/text/float_to_string.cc
-  utils/text/float_to_string.h
-  utils/text/parse_num.cc
-  utils/text/parse_num.h
+  utils/strconv/float_to_string.cc
+  utils/strconv/float_to_string.h
+  utils/strconv/parse_num.cc
+  utils/strconv/parse_num.h
   utils/text/string.cc
   utils/text/string.h
   utils/text/string_stream.cc
@@ -1166,7 +1166,7 @@ if(TINT_BUILD_TESTS)
     utils/result/result_test.cc
     utils/rtti/castable_test.cc
     utils/rtti/switch_test.cc
-    utils/text/float_to_string_test.cc
+    utils/strconv/float_to_string_test.cc
     utils/text/string_stream_test.cc
     utils/text/string_test.cc
     utils/symbol/symbol_table_test.cc

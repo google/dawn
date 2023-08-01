@@ -27,7 +27,7 @@
 
 #include "src/tint/lang/core/builtin/number.h"
 #include "src/tint/utils/ice/ice.h"
-#include "src/tint/utils/text/parse_num.h"
+#include "src/tint/utils/strconv/parse_num.h"
 #include "src/tint/utils/text/unicode.h"
 
 namespace tint::wgsl::reader {

@@ -255,8 +255,8 @@ libtint_source_set("libtint_utils_src") {
     "utils/rtti/castable.cc",
     "utils/rtti/castable.h",
     "utils/rtti/switch.h",
-    "utils/text/parse_num.cc",
-    "utils/text/parse_num.h",
+    "utils/strconv/parse_num.cc",
+    "utils/strconv/parse_num.h",
     "utils/text/string.cc",
     "utils/text/string.h",
     "utils/text/string_stream.cc",
@@ -978,8 +978,8 @@ libtint_source_set("libtint_writer_src") {
     "lang/wgsl/helpers/check_supported_extensions.h",
     "lang/wgsl/helpers/flatten_bindings.cc",
     "lang/wgsl/helpers/flatten_bindings.h",
-    "utils/text/float_to_string.cc",
-    "utils/text/float_to_string.h",
+    "utils/strconv/float_to_string.cc",
+    "utils/strconv/float_to_string.h",
     "utils/text/text_generator.cc",
     "utils/text/text_generator.h",
   ]
@@ -1952,7 +1952,7 @@ if (tint_build_unittests) {
       "lang/wgsl/helpers/append_vector_test.cc",
       "lang/wgsl/helpers/check_supported_extensions_test.cc",
       "lang/wgsl/helpers/flatten_bindings_test.cc",
-      "utils/text/float_to_string_test.cc",
+      "utils/strconv/float_to_string_test.cc",
     ]
     deps = [
       ":libtint_unittests_ast_helper",

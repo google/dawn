@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_UTILS_TEXT_FLOAT_TO_STRING_H_
-#define SRC_TINT_UTILS_TEXT_FLOAT_TO_STRING_H_
+#ifndef SRC_TINT_UTILS_STRCONV_FLOAT_TO_STRING_H_
+#define SRC_TINT_UTILS_STRCONV_FLOAT_TO_STRING_H_
 
 #include <string>
 
@@ -47,4 +47,4 @@ std::string DoubleToBitPreservingString(double f);
 
 }  // namespace tint::writer
 
-#endif  // SRC_TINT_UTILS_TEXT_FLOAT_TO_STRING_H_
+#endif  // SRC_TINT_UTILS_STRCONV_FLOAT_TO_STRING_H_
