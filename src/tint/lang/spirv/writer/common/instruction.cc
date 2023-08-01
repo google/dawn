@@ -1,4 +1,4 @@
-// Copyright 2023 The Tint Authors.
+// Copyright 2020 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,35 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_SPIRV_WRITER_RESULT_H_
-#define SRC_TINT_LANG_SPIRV_WRITER_RESULT_H_
+#include "src/tint/lang/spirv/writer/common/instruction.h"
 
-#include <string>
-#include <vector>
+#include <utility>
 
 namespace tint::spirv::writer {
 
-/// The result produced when generating SPIR-V.
-struct Result {
-    /// Constructor
-    Result();
+Instruction::Instruction(spv::Op op, OperandList operands)
+    : op_(op), operands_(std::move(operands)) {}
 
-    /// Destructor
-    ~Result();
+Instruction::Instruction(const Instruction&) = default;
 
-    /// Copy constructor
-    Result(const Result&);
+Instruction& Instruction::operator=(const Instruction&) = default;
 
-    /// True if generation was successful.
-    bool success = false;
+Instruction::~Instruction() = default;
 
-    /// The errors generated during code generation, if any.
-    std::string error;
-
-    /// The generated SPIR-V.
-    std::vector<uint32_t> spirv;
-};
+uint32_t Instruction::word_length() const {
+    uint32_t size = 1;  // Initial 1 for the op and size
+    for (const auto& op : operands_) {
+        size += OperandLength(op);
+    }
+    return size;
+}
 
 }  // namespace tint::spirv::writer
-
-#endif  // SRC_TINT_LANG_SPIRV_WRITER_RESULT_H_

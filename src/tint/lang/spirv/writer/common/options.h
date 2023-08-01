@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_SPIRV_WRITER_OPTIONS_H_
-#define SRC_TINT_LANG_SPIRV_WRITER_OPTIONS_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPTIONS_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPTIONS_H_
 
 #include "src/tint/utils/reflection/reflection.h"
 #include "tint/binding_remapper_options.h"
@@ -69,4 +69,4 @@ struct Options {
 
 }  // namespace tint::spirv::writer
 
-#endif  // SRC_TINT_LANG_SPIRV_WRITER_OPTIONS_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPTIONS_H_

@@ -21,7 +21,7 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/spirv/writer/ast_printer/builder.h"
 #include "src/tint/lang/spirv/writer/ast_printer/test_helper.h"
-#include "src/tint/lang/spirv/writer/spv_dump.h"
+#include "src/tint/lang/spirv/writer/common/spv_dump.h"
 #include "src/tint/lang/wgsl/ast/builtin_attribute.h"
 #include "src/tint/lang/wgsl/ast/location_attribute.h"
 #include "src/tint/lang/wgsl/ast/return_statement.h"

@@ -24,7 +24,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/void.h"
-#include "src/tint/lang/spirv/writer/test_helper.h"
+#include "src/tint/lang/spirv/writer/common/test_helper.h"
 
 namespace tint::spirv::writer {
 namespace {

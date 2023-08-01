@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_SPIRV_WRITER_BINARY_WRITER_H_
-#define SRC_TINT_LANG_SPIRV_WRITER_BINARY_WRITER_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_COMMON_BINARY_WRITER_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_COMMON_BINARY_WRITER_H_
 
 #include <vector>
 
-#include "src/tint/lang/spirv/writer/module.h"
+#include "src/tint/lang/spirv/writer/common/module.h"
 
 namespace tint::spirv::writer {
 
@@ -57,4 +57,4 @@ class BinaryWriter {
 
 }  // namespace tint::spirv::writer
 
-#endif  // SRC_TINT_LANG_SPIRV_WRITER_BINARY_WRITER_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_COMMON_BINARY_WRITER_H_

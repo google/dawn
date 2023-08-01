@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_SPIRV_WRITER_INSTRUCTION_H_
-#define SRC_TINT_LANG_SPIRV_WRITER_INSTRUCTION_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_COMMON_INSTRUCTION_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_COMMON_INSTRUCTION_H_
 
 #include <vector>
 
 #include "spirv/unified1/spirv.hpp11"
-#include "src/tint/lang/spirv/writer/operand.h"
+#include "src/tint/lang/spirv/writer/common/operand.h"
 
 namespace tint::spirv::writer {
 
@@ -57,4 +57,4 @@ using InstructionList = std::vector<Instruction>;
 
 }  // namespace tint::spirv::writer
 
-#endif  // SRC_TINT_LANG_SPIRV_WRITER_INSTRUCTION_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_COMMON_INSTRUCTION_H_

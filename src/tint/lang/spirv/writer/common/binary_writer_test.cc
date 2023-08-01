@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/spirv/writer/binary_writer.h"
+#include "src/tint/lang/spirv/writer/common/binary_writer.h"
 #include "gtest/gtest.h"
 
 namespace tint::spirv::writer {

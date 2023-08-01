@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_SPIRV_WRITER_MODULE_H_
-#define SRC_TINT_LANG_SPIRV_WRITER_MODULE_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_COMMON_MODULE_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_COMMON_MODULE_H_
 
 #include <cstdint>
 #include <functional>
 #include <unordered_set>
 #include <vector>
 
-#include "src/tint/lang/spirv/writer/function.h"
-#include "src/tint/lang/spirv/writer/instruction.h"
+#include "src/tint/lang/spirv/writer/common/function.h"
+#include "src/tint/lang/spirv/writer/common/instruction.h"
 
 namespace tint::spirv::writer {
 
@@ -158,4 +158,4 @@ class Module {
 
 }  // namespace tint::spirv::writer
 
-#endif  // SRC_TINT_LANG_SPIRV_WRITER_MODULE_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_COMMON_MODULE_H_

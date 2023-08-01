@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/spirv/writer/operand.h"
+#include "src/tint/lang/spirv/writer/common/operand.h"
 
 namespace tint::spirv::writer {
 

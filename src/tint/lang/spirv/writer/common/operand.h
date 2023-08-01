@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_SPIRV_WRITER_OPERAND_H_
-#define SRC_TINT_LANG_SPIRV_WRITER_OPERAND_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPERAND_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPERAND_H_
 
 #include <cstring>
 #include <string>
@@ -43,4 +43,4 @@ using OperandListKey = tint::UnorderedKeyWrapper<OperandList>;
 
 }  // namespace tint::spirv::writer
 
-#endif  // SRC_TINT_LANG_SPIRV_WRITER_OPERAND_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_COMMON_OPERAND_H_

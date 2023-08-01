@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/spirv/writer/spv_dump.h"
+#include "src/tint/lang/spirv/writer/common/spv_dump.h"
 
 #include "spirv-tools/libspirv.hpp"
-#include "src/tint/lang/spirv/writer/binary_writer.h"
+#include "src/tint/lang/spirv/writer/common/binary_writer.h"
 
 namespace tint::spirv::writer {
 
