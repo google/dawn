@@ -41,7 +41,7 @@ TEST_F(IR_BlockDecoratedStructsTest, NoRootBlock) {
 }
 )";
 
-    Run<BlockDecoratedStructs>();
+    Run(BlockDecoratedStructs);
 
     EXPECT_EQ(expect, str());
 }
@@ -75,7 +75,7 @@ tint_symbol_1 = struct @align(4), @block {
 }
 )";
 
-    Run<BlockDecoratedStructs>();
+    Run(BlockDecoratedStructs);
 
     EXPECT_EQ(expect, str());
 }
@@ -107,7 +107,7 @@ tint_symbol_1 = struct @align(4), @block {
 }
 )";
 
-    Run<BlockDecoratedStructs>();
+    Run(BlockDecoratedStructs);
 
     EXPECT_EQ(expect, str());
 }
@@ -139,7 +139,7 @@ tint_symbol_1 = struct @align(4), @block {
 }
 )";
 
-    Run<BlockDecoratedStructs>();
+    Run(BlockDecoratedStructs);
 
     EXPECT_EQ(expect, str());
 }
@@ -176,7 +176,7 @@ tint_symbol_1 = struct @align(4), @block {
 }
 )";
 
-    Run<BlockDecoratedStructs>();
+    Run(BlockDecoratedStructs);
 
     EXPECT_EQ(expect, str());
 }
@@ -230,7 +230,7 @@ tint_symbol = struct @align(4), @block {
 }
 )";
 
-    Run<BlockDecoratedStructs>();
+    Run(BlockDecoratedStructs);
 
     EXPECT_EQ(expect, str());
 }
@@ -276,7 +276,7 @@ tint_symbol_1 = struct @align(4), @block {
 }
 )";
 
-    Run<BlockDecoratedStructs>();
+    Run(BlockDecoratedStructs);
 
     EXPECT_EQ(expect, str());
 }
@@ -332,7 +332,7 @@ tint_symbol_5 = struct @align(4), @block {
 }
 )";
 
-    Run<BlockDecoratedStructs>();
+    Run(BlockDecoratedStructs);
 
     EXPECT_EQ(expect, str());
 }

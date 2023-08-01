@@ -18,20 +18,17 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/struct.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::BlockDecoratedStructs);
 
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::ir::transform {
 
-BlockDecoratedStructs::BlockDecoratedStructs() = default;
+namespace {
 
-BlockDecoratedStructs::~BlockDecoratedStructs() = default;
-
-void BlockDecoratedStructs::Run(Module* ir) const {
+void Run(Module* ir) {
     Builder builder(*ir);
 
     if (!ir->root_block) {
@@ -110,6 +107,19 @@ void BlockDecoratedStructs::Run(Module* ir) const {
             return new_var->Result();
         });
     }
+}
+
+}  // namespace
+
+Result<SuccessType, std::string> BlockDecoratedStructs(Module* ir) {
+    auto result = ValidateAndDumpIfNeeded(*ir, "BlockDecoratedStructs transform");
+    if (!result) {
+        return result;
+    }
+
+    Run(ir);
+
+    return Success;
 }
 
 }  // namespace tint::ir::transform
