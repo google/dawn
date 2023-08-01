@@ -15,22 +15,22 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_HANDLE_MATRIX_ARITHMETIC_H_
 #define SRC_TINT_LANG_CORE_IR_TRANSFORM_HANDLE_MATRIX_ARITHMETIC_H_
 
-#include "src/tint/lang/core/ir/transform/transform.h"
+#include <string>
+
+#include "src/tint/utils/result/result.h"
+
+// Forward declarations.
+namespace tint::ir {
+class Module;
+}
 
 namespace tint::ir::transform {
 
 /// HandleMatrixArithmetic is a transform that converts arithmetic instruction that use matrix into
 /// SPIR-V intrinsics or polyfills.
-class HandleMatrixArithmetic final : public Castable<HandleMatrixArithmetic, Transform> {
-  public:
-    /// Constructor
-    HandleMatrixArithmetic();
-    /// Destructor
-    ~HandleMatrixArithmetic() override;
-
-    /// @copydoc Transform::Run
-    void Run(ir::Module* module) const override;
-};
+/// @param module the module to transform
+/// @returns an error string on failure
+Result<SuccessType, std::string> HandleMatrixArithmetic(Module* module);
 
 }  // namespace tint::ir::transform
 

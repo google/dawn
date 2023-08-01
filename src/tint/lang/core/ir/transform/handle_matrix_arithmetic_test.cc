@@ -63,7 +63,7 @@ TEST_F(IR_HandleMatrixArithmeticTest, Add_Mat2x3f) {
 }
 )";
 
-    Run<HandleMatrixArithmetic>();
+    Run(HandleMatrixArithmetic);
 
     EXPECT_EQ(expect, str());
 }
@@ -110,7 +110,7 @@ TEST_F(IR_HandleMatrixArithmeticTest, Add_Mat4x2h) {
 }
 )";
 
-    Run<HandleMatrixArithmetic>();
+    Run(HandleMatrixArithmetic);
 
     EXPECT_EQ(expect, str());
 }
@@ -154,7 +154,7 @@ TEST_F(IR_HandleMatrixArithmeticTest, Subtract_Mat3x2f) {
 }
 )";
 
-    Run<HandleMatrixArithmetic>();
+    Run(HandleMatrixArithmetic);
 
     EXPECT_EQ(expect, str());
 }
@@ -195,7 +195,7 @@ TEST_F(IR_HandleMatrixArithmeticTest, Subtract_Mat2x4h) {
 }
 )";
 
-    Run<HandleMatrixArithmetic>();
+    Run(HandleMatrixArithmetic);
 
     EXPECT_EQ(expect, str());
 }
@@ -230,7 +230,7 @@ TEST_F(IR_HandleMatrixArithmeticTest, Mul_Mat2x3f_Scalar) {
 }
 )";
 
-    Run<HandleMatrixArithmetic>();
+    Run(HandleMatrixArithmetic);
 
     EXPECT_EQ(expect, str());
 }
@@ -265,7 +265,7 @@ TEST_F(IR_HandleMatrixArithmeticTest, Mul_Mat3x4f_Vector) {
 }
 )";
 
-    Run<HandleMatrixArithmetic>();
+    Run(HandleMatrixArithmetic);
 
     EXPECT_EQ(expect, str());
 }
@@ -300,7 +300,7 @@ TEST_F(IR_HandleMatrixArithmeticTest, Mul_Mat4x2f_Mat2x4) {
 }
 )";
 
-    Run<HandleMatrixArithmetic>();
+    Run(HandleMatrixArithmetic);
 
     EXPECT_EQ(expect, str());
 }
@@ -335,7 +335,7 @@ TEST_F(IR_HandleMatrixArithmeticTest, Mul_Scalar_Mat3x2h) {
 }
 )";
 
-    Run<HandleMatrixArithmetic>();
+    Run(HandleMatrixArithmetic);
 
     EXPECT_EQ(expect, str());
 }
@@ -370,7 +370,7 @@ TEST_F(IR_HandleMatrixArithmeticTest, Mul_Vector_Mat3x4f) {
 }
 )";
 
-    Run<HandleMatrixArithmetic>();
+    Run(HandleMatrixArithmetic);
 
     EXPECT_EQ(expect, str());
 }
@@ -405,7 +405,7 @@ TEST_F(IR_HandleMatrixArithmeticTest, Mul_Mat3x3f_Mat3x3) {
 }
 )";
 
-    Run<HandleMatrixArithmetic>();
+    Run(HandleMatrixArithmetic);
 
     EXPECT_EQ(expect, str());
 }
@@ -443,7 +443,7 @@ TEST_F(IR_HandleMatrixArithmeticTest, Convert_Mat2x3_F32_to_F16) {
 }
 )";
 
-    Run<HandleMatrixArithmetic>();
+    Run(HandleMatrixArithmetic);
 
     EXPECT_EQ(expect, str());
 }
@@ -485,7 +485,7 @@ TEST_F(IR_HandleMatrixArithmeticTest, Convert_Mat4x4_F32_to_F16) {
 }
 )";
 
-    Run<HandleMatrixArithmetic>();
+    Run(HandleMatrixArithmetic);
 
     EXPECT_EQ(expect, str());
 }
@@ -527,7 +527,7 @@ TEST_F(IR_HandleMatrixArithmeticTest, Convert_Mat4x3_F16_to_F32) {
 }
 )";
 
-    Run<HandleMatrixArithmetic>();
+    Run(HandleMatrixArithmetic);
 
     EXPECT_EQ(expect, str());
 }
@@ -565,7 +565,7 @@ TEST_F(IR_HandleMatrixArithmeticTest, Convert_Mat2x2_F16_to_F32) {
 }
 )";
 
-    Run<HandleMatrixArithmetic>();
+    Run(HandleMatrixArithmetic);
 
     EXPECT_EQ(expect, str());
 }

@@ -18,20 +18,17 @@
 
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/utils/ice/ice.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::HandleMatrixArithmetic);
 
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::ir::transform {
 
-HandleMatrixArithmetic::HandleMatrixArithmetic() = default;
+namespace {
 
-HandleMatrixArithmetic::~HandleMatrixArithmetic() = default;
-
-void HandleMatrixArithmetic::Run(ir::Module* ir) const {
+void Run(ir::Module* ir) {
     ir::Builder b(*ir);
 
     // Find the instructions that need to be modified.
@@ -144,6 +141,19 @@ void HandleMatrixArithmetic::Run(ir::Module* ir) const {
         convert->ReplaceWith(construct);
         convert->Destroy();
     }
+}
+
+}  // namespace
+
+Result<SuccessType, std::string> HandleMatrixArithmetic(Module* ir) {
+    auto result = ValidateAndDumpIfNeeded(*ir, "HandleMatrixArithmetic transform");
+    if (!result) {
+        return result;
+    }
+
+    Run(ir);
+
+    return Success;
 }
 
 }  // namespace tint::ir::transform
