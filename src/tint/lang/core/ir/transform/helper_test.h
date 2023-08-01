@@ -23,7 +23,6 @@
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/disassembler.h"
-#include "src/tint/lang/core/ir/transform/transform.h"
 #include "src/tint/lang/core/ir/validator.h"
 
 namespace tint::ir::transform {
@@ -32,26 +31,6 @@ namespace tint::ir::transform {
 template <typename BASE>
 class TransformTestBase : public BASE {
   public:
-    /// Transforms the module, using the transforms `TRANSFORMS`.
-    template <typename... TRANSFORMS>
-    void Run() {
-        // Validate the input IR.
-        {
-            auto res = ir::Validate(mod);
-            EXPECT_TRUE(res) << res.Failure().str();
-            if (!res) {
-                return;
-            }
-        }
-
-        // Run the transforms.
-        (TRANSFORMS().Run(&mod), ...);
-
-        // Validate the output IR.
-        auto res = ir::Validate(mod);
-        EXPECT_TRUE(res) << res.Failure().str();
-    }
-
     /// Transforms the module, using @p transform.
     /// @param transform_func the transform to run
     /// @param args the arguments to the transform function

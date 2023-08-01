@@ -1343,8 +1343,6 @@ if (tint_build_ir) {
       "lang/core/ir/terminate_invocation.h",
       "lang/core/ir/terminator.cc",
       "lang/core/ir/terminator.h",
-      "lang/core/ir/transform/transform.cc",
-      "lang/core/ir/transform/transform.h",
       "lang/core/ir/unary.cc",
       "lang/core/ir/unary.h",
       "lang/core/ir/unreachable.cc",

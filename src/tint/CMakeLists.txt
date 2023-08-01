@@ -880,8 +880,6 @@ if(${TINT_BUILD_IR})
     lang/core/ir/transform/demote_to_helper.h
     lang/core/ir/transform/shader_io.cc
     lang/core/ir/transform/shader_io.h
-    lang/core/ir/transform/transform.cc
-    lang/core/ir/transform/transform.h
   )
 endif()
 
