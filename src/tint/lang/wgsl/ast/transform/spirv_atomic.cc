@@ -222,7 +222,7 @@ struct SpirvAtomic::State {
             },
             [&](const type::Reference* ref) { return AtomicTypeFor(ref->StoreType()); },
             [&](Default) {
-                TINT_ICE();
+                TINT_ICE() << "unhandled type: " << ty->FriendlyName();
                 return Type{};
             });
     }

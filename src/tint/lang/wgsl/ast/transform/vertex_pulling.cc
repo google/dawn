@@ -670,7 +670,7 @@ struct VertexPulling::State {
                                          b.Call("unpack2x16float", load_next_u32()));
         }
 
-        TINT_UNREACHABLE();
+        TINT_UNREACHABLE() << "format " << static_cast<int>(format);
         return nullptr;
     }
 

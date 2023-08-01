@@ -200,7 +200,7 @@ void Printer::EmitAtomicType(StringStream& out, const type::Atomic* atomic) {
         out << "atomic_uint";
         return;
     }
-    TINT_ICE();
+    TINT_ICE() << "unhandled atomic type " << atomic->Type()->FriendlyName();
 }
 
 void Printer::EmitArrayType(StringStream& out, const type::Array* arr) {
