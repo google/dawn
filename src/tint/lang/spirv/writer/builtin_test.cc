@@ -1204,6 +1204,19 @@ TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier) {
     EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_264");
 }
 
+TEST_F(SpirvWriterTest, Builtin_SubgroupBallot) {
+    auto* func = b.Function("foo", ty.vec4<u32>());
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<u32>(), builtin::Function::kSubgroupBallot);
+        mod.SetName(result, "result");
+        b.Return(func, result);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpCapability GroupNonUniformBallot");
+    EXPECT_INST("%result = OpGroupNonUniformBallot %v4uint %uint_3 %true");
+}
+
 TEST_F(SpirvWriterTest, Builtin_ArrayLength) {
     auto* var = b.Var("var", ty.ptr(storage, ty.runtime_array(ty.i32())));
     var->SetBindingPoint(0, 0);

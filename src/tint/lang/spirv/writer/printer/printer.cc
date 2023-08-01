@@ -1359,6 +1359,12 @@ void Printer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
                 Constant(ir_->constant_values.Get(u32(spv::MemorySemanticsMask::UniformMemory |
                                                       spv::MemorySemanticsMask::AcquireRelease))));
             break;
+        case builtin::Function::kSubgroupBallot:
+            module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
+            op = spv::Op::OpGroupNonUniformBallot;
+            operands.push_back(Constant(ir_->constant_values.Get(u32(spv::Scope::Subgroup))));
+            operands.push_back(Constant(ir_->constant_values.Get(true)));
+            break;
         case builtin::Function::kTan:
             glsl_ext_inst(GLSLstd450Tan);
             break;

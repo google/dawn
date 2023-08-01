@@ -1,21 +1,49 @@
-SKIP: FAILED
-
-
-enable chromium_experimental_subgroups;
-
-fn subgroupBallot_7e6d0e() {
-  var res : vec4<u32> = subgroupBallot();
-  prevent_dce = res;
-}
-
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<u32>;
-
-@compute @workgroup_size(1)
-fn compute_main() {
-  subgroupBallot_7e6d0e();
-}
-
-Failed to generate: builtins/gen/var/subgroupBallot/7e6d0e.wgsl:24:8 error: SPIR-V backend does not support extension 'chromium_experimental_subgroups'
-enable chromium_experimental_subgroups;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 24
+; Schema: 0
+               OpCapability Shader
+               OpCapability GroupNonUniformBallot
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %prevent_dce_block "prevent_dce_block"
+               OpMemberName %prevent_dce_block 0 "inner"
+               OpName %prevent_dce "prevent_dce"
+               OpName %subgroupBallot_7e6d0e "subgroupBallot_7e6d0e"
+               OpName %res "res"
+               OpName %compute_main "compute_main"
+               OpDecorate %prevent_dce_block Block
+               OpMemberDecorate %prevent_dce_block 0 Offset 0
+               OpDecorate %prevent_dce DescriptorSet 2
+               OpDecorate %prevent_dce Binding 0
+       %uint = OpTypeInt 32 0
+     %v4uint = OpTypeVector %uint 4
+%prevent_dce_block = OpTypeStruct %v4uint
+%_ptr_StorageBuffer_prevent_dce_block = OpTypePointer StorageBuffer %prevent_dce_block
+%prevent_dce = OpVariable %_ptr_StorageBuffer_prevent_dce_block StorageBuffer
+       %void = OpTypeVoid
+          %6 = OpTypeFunction %void
+     %uint_3 = OpConstant %uint 3
+       %bool = OpTypeBool
+       %true = OpConstantTrue %bool
+%_ptr_Function_v4uint = OpTypePointer Function %v4uint
+         %16 = OpConstantNull %v4uint
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_v4uint = OpTypePointer StorageBuffer %v4uint
+%subgroupBallot_7e6d0e = OpFunction %void None %6
+          %9 = OpLabel
+        %res = OpVariable %_ptr_Function_v4uint Function %16
+         %10 = OpGroupNonUniformBallot %v4uint %uint_3 %true
+               OpStore %res %10
+         %19 = OpAccessChain %_ptr_StorageBuffer_v4uint %prevent_dce %uint_0
+         %20 = OpLoad %v4uint %res
+               OpStore %19 %20
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %6
+         %22 = OpLabel
+         %23 = OpFunctionCall %void %subgroupBallot_7e6d0e
+               OpReturn
+               OpFunctionEnd

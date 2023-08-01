@@ -260,6 +260,7 @@ bool Builder::Build() {
                 builtin::Extension::kChromiumExperimentalDp4A,
                 builtin::Extension::kChromiumExperimentalFullPtrParameters,
                 builtin::Extension::kChromiumExperimentalPushConstant,
+                builtin::Extension::kChromiumExperimentalSubgroups,
                 builtin::Extension::kF16,
                 builtin::Extension::kChromiumInternalDualSourceBlending,
             })) {
@@ -2528,6 +2529,17 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
                                      Operand(second_param_id),
                                      Operand(static_cast<uint32_t>(
                                          spv::PackedVectorFormat::PackedVectorFormat4x8BitKHR))})) {
+                return 0;
+            }
+            return result_id;
+        }
+        case builtin::Function::kSubgroupBallot: {
+            module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
+            if (!push_function_inst(
+                    spv::Op::OpGroupNonUniformBallot,
+                    {Operand(result_type_id), result,
+                     Operand(GenerateConstantIfNeeded(ScalarConstant::U32(SpvScopeSubgroup))),
+                     Operand(GenerateConstantIfNeeded(ScalarConstant::Bool(true)))})) {
                 return 0;
             }
             return result_id;
