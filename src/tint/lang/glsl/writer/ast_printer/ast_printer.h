@@ -22,7 +22,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/builtin/builtin_value.h"
-#include "src/tint/lang/glsl/writer/version.h"
+#include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/math/hash.h"

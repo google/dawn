@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_GLSL_WRITER_VERSION_H_
-#define SRC_TINT_LANG_GLSL_WRITER_VERSION_H_
+#ifndef SRC_TINT_LANG_GLSL_WRITER_COMMON_VERSION_H_
+#define SRC_TINT_LANG_GLSL_WRITER_COMMON_VERSION_H_
 
 #include <cstdint>
 
@@ -55,4 +55,4 @@ struct Version {
 
 }  // namespace tint::glsl::writer
 
-#endif  // SRC_TINT_LANG_GLSL_WRITER_VERSION_H_
+#endif  // SRC_TINT_LANG_GLSL_WRITER_COMMON_VERSION_H_

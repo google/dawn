@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_GLSL_WRITER_OPTIONS_H_
-#define SRC_TINT_LANG_GLSL_WRITER_OPTIONS_H_
+#ifndef SRC_TINT_LANG_GLSL_WRITER_COMMON_OPTIONS_H_
+#define SRC_TINT_LANG_GLSL_WRITER_COMMON_OPTIONS_H_
 
 #include <string>
 #include <unordered_map>
 
 #include "src/tint/lang/core/builtin/access.h"
-#include "src/tint/lang/glsl/writer/version.h"
+#include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/lang/wgsl/sem/sampler_texture_pair.h"
 #include "tint/external_texture_options.h"
 
@@ -79,4 +79,4 @@ struct Options {
 
 }  // namespace tint::glsl::writer
 
-#endif  // SRC_TINT_LANG_GLSL_WRITER_OPTIONS_H_
+#endif  // SRC_TINT_LANG_GLSL_WRITER_COMMON_OPTIONS_H_

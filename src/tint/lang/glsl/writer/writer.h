@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/lang/glsl/writer/options.h"
+#include "src/tint/lang/glsl/writer/common/options.h"
 #include "src/tint/lang/glsl/writer/result.h"
 
 // Forward declarations

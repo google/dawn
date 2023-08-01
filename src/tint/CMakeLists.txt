@@ -740,13 +740,13 @@ if(${TINT_BUILD_GLSL_WRITER})
   list(APPEND TINT_LIB_SRCS
     lang/glsl/writer/ast_printer/ast_printer.cc
     lang/glsl/writer/ast_printer/ast_printer.h
-    lang/glsl/writer/writer.cc
-    lang/glsl/writer/writer.h
-    lang/glsl/writer/options.cc
-    lang/glsl/writer/options.h
+    lang/glsl/writer/common/options.cc
+    lang/glsl/writer/common/options.h
+    lang/glsl/writer/common/version.h
     lang/glsl/writer/result.cc
     lang/glsl/writer/result.h
-    lang/glsl/writer/version.h
+    lang/glsl/writer/writer.cc
+    lang/glsl/writer/writer.h
   )
 endif()
 
