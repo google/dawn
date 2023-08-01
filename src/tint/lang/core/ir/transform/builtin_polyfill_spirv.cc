@@ -19,6 +19,7 @@
 #include "spirv/unified1/spirv.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
+#include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
@@ -28,20 +29,17 @@
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::BuiltinPolyfillSpirv);
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::BuiltinPolyfillSpirv::LiteralOperand);
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::BuiltinPolyfillSpirv::SampledImage);
+TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::LiteralOperand);
+TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::SampledImage);
 
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::ir::transform {
 
-BuiltinPolyfillSpirv::BuiltinPolyfillSpirv() = default;
-
-BuiltinPolyfillSpirv::~BuiltinPolyfillSpirv() = default;
+namespace {
 
 /// PIMPL state for the transform.
-struct BuiltinPolyfillSpirv::State {
+struct State {
     /// The IR module.
     Module* ir = nullptr;
 
@@ -803,24 +801,31 @@ struct BuiltinPolyfillSpirv::State {
     }
 };
 
-void BuiltinPolyfillSpirv::Run(ir::Module* ir) const {
+}  // namespace
+
+Result<SuccessType, std::string> BuiltinPolyfillSpirv(Module* ir) {
+    auto result = ValidateAndDumpIfNeeded(*ir, "BuiltinPolyfillSpirv transform");
+    if (!result) {
+        return result;
+    }
+
     State{ir}.Process();
+
+    return Success;
 }
 
-BuiltinPolyfillSpirv::LiteralOperand::LiteralOperand(const constant::Value* value) : Base(value) {}
+LiteralOperand::LiteralOperand(const constant::Value* value) : Base(value) {}
 
-BuiltinPolyfillSpirv::LiteralOperand::~LiteralOperand() = default;
+LiteralOperand::~LiteralOperand() = default;
 
-BuiltinPolyfillSpirv::SampledImage::SampledImage(const type::Type* image)
-    : Base(static_cast<size_t>(
-               Hash(tint::TypeInfo::Of<BuiltinPolyfillSpirv::SampledImage>().full_hashcode, image)),
+SampledImage::SampledImage(const type::Type* image)
+    : Base(static_cast<size_t>(Hash(tint::TypeInfo::Of<SampledImage>().full_hashcode, image)),
            type::Flags{}),
       image_(image) {}
 
-BuiltinPolyfillSpirv::SampledImage* BuiltinPolyfillSpirv::SampledImage::Clone(
-    type::CloneContext& ctx) const {
+SampledImage* SampledImage::Clone(type::CloneContext& ctx) const {
     auto* image = image_->Clone(ctx);
-    return ctx.dst.mgr->Get<BuiltinPolyfillSpirv::SampledImage>(image);
+    return ctx.dst.mgr->Get<SampledImage>(image);
 }
 
 }  // namespace tint::ir::transform

@@ -107,8 +107,8 @@ Result<SuccessType, std::string> Sanitize(ir::Module* module) {
 
     ir::transform::AddEmptyEntryPoint{}.Run(module);
     ir::transform::BlockDecoratedStructs{}.Run(module);
-    ir::transform::BuiltinPolyfillSpirv{}.Run(module);
 
+    RUN_TRANSFORM(BuiltinPolyfillSpirv);
     RUN_TRANSFORM(DemoteToHelper);
     RUN_TRANSFORM(ExpandImplicitSplats);
     RUN_TRANSFORM(HandleMatrixArithmetic);
@@ -169,10 +169,10 @@ const type::Type* DedupType(const type::Type* ty, type::Manager& types) {
         },
 
         // Dedup a SampledImage if its underlying image will be deduped.
-        [&](const ir::transform::BuiltinPolyfillSpirv::SampledImage* si) -> const type::Type* {
+        [&](const ir::transform::SampledImage* si) -> const type::Type* {
             auto* img = DedupType(si->Image(), types);
             if (img != si->Image()) {
-                return types.Get<ir::transform::BuiltinPolyfillSpirv::SampledImage>(img);
+                return types.Get<ir::transform::SampledImage>(img);
             }
             return si;
         },
@@ -271,7 +271,7 @@ uint32_t Printer::Builtin(builtin::BuiltinValue builtin, builtin::AddressSpace a
 
 uint32_t Printer::Constant(ir::Constant* constant) {
     // If it is a literal operand, just return the value.
-    if (auto* literal = constant->As<ir::transform::BuiltinPolyfillSpirv::LiteralOperand>()) {
+    if (auto* literal = constant->As<ir::transform::LiteralOperand>()) {
         return literal->Value()->ValueAs<uint32_t>();
     }
 
@@ -412,7 +412,7 @@ uint32_t Printer::Type(const type::Type* ty, builtin::AddressSpace addrspace /* 
             [&](const type::Struct* str) { EmitStructType(id, str, addrspace); },
             [&](const type::Texture* tex) { EmitTextureType(id, tex); },
             [&](const type::Sampler*) { module_.PushType(spv::Op::OpTypeSampler, {id}); },
-            [&](const ir::transform::BuiltinPolyfillSpirv::SampledImage* s) {
+            [&](const ir::transform::SampledImage* s) {
                 module_.PushType(spv::Op::OpTypeSampledImage, {id, Type(s->Image())});
             },
             [&](Default) { TINT_ICE() << "unhandled type: " << ty->FriendlyName(); });
