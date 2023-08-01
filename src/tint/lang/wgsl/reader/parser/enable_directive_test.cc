@@ -164,7 +164,7 @@ TEST_F(EnableDirectiveTest, InvalidIdentifier) {
     // Error when unknown extension found
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), R"(1:8: expected extension
-Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_dp4a', 'chromium_experimental_full_ptr_parameters', 'chromium_experimental_push_constant', 'chromium_internal_dual_source_blending', 'chromium_internal_relaxed_uniform_layout', 'f16')");
+Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_dp4a', 'chromium_experimental_full_ptr_parameters', 'chromium_experimental_push_constant', 'chromium_experimental_subgroups', 'chromium_internal_dual_source_blending', 'chromium_internal_relaxed_uniform_layout', 'f16')");
     auto program = p->program();
     auto& ast = program.AST();
     EXPECT_EQ(ast.Enables().Length(), 0u);
@@ -178,7 +178,7 @@ TEST_F(EnableDirectiveTest, InvalidIdentifierSuggest) {
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), R"(1:8: expected extension
 Did you mean 'f16'?
-Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_dp4a', 'chromium_experimental_full_ptr_parameters', 'chromium_experimental_push_constant', 'chromium_internal_dual_source_blending', 'chromium_internal_relaxed_uniform_layout', 'f16')");
+Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_dp4a', 'chromium_experimental_full_ptr_parameters', 'chromium_experimental_push_constant', 'chromium_experimental_subgroups', 'chromium_internal_dual_source_blending', 'chromium_internal_relaxed_uniform_layout', 'f16')");
     auto program = p->program();
     auto& ast = program.AST();
     EXPECT_EQ(ast.Enables().Length(), 0u);
@@ -226,7 +226,7 @@ TEST_F(EnableDirectiveTest, InvalidTokens) {
         p->translation_unit();
         EXPECT_TRUE(p->has_error());
         EXPECT_EQ(p->error(), R"(1:8: expected extension
-Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_dp4a', 'chromium_experimental_full_ptr_parameters', 'chromium_experimental_push_constant', 'chromium_internal_dual_source_blending', 'chromium_internal_relaxed_uniform_layout', 'f16')");
+Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_dp4a', 'chromium_experimental_full_ptr_parameters', 'chromium_experimental_push_constant', 'chromium_experimental_subgroups', 'chromium_internal_dual_source_blending', 'chromium_internal_relaxed_uniform_layout', 'f16')");
         auto program = p->program();
         auto& ast = program.AST();
         EXPECT_EQ(ast.Enables().Length(), 0u);
@@ -237,7 +237,7 @@ Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_
         p->translation_unit();
         EXPECT_TRUE(p->has_error());
         EXPECT_EQ(p->error(), R"(1:8: expected extension
-Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_dp4a', 'chromium_experimental_full_ptr_parameters', 'chromium_experimental_push_constant', 'chromium_internal_dual_source_blending', 'chromium_internal_relaxed_uniform_layout', 'f16')");
+Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_dp4a', 'chromium_experimental_full_ptr_parameters', 'chromium_experimental_push_constant', 'chromium_experimental_subgroups', 'chromium_internal_dual_source_blending', 'chromium_internal_relaxed_uniform_layout', 'f16')");
         auto program = p->program();
         auto& ast = program.AST();
         EXPECT_EQ(ast.Enables().Length(), 0u);
@@ -249,7 +249,7 @@ Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_
         EXPECT_TRUE(p->has_error());
         EXPECT_EQ(p->error(), R"(1:8: expected extension
 Did you mean 'f16'?
-Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_dp4a', 'chromium_experimental_full_ptr_parameters', 'chromium_experimental_push_constant', 'chromium_internal_dual_source_blending', 'chromium_internal_relaxed_uniform_layout', 'f16')");
+Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_dp4a', 'chromium_experimental_full_ptr_parameters', 'chromium_experimental_push_constant', 'chromium_experimental_subgroups', 'chromium_internal_dual_source_blending', 'chromium_internal_relaxed_uniform_layout', 'f16')");
         auto program = p->program();
         auto& ast = program.AST();
         EXPECT_EQ(ast.Enables().Length(), 0u);
