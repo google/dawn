@@ -206,10 +206,10 @@ libtint_source_set("libtint_symbols_src") {
     "utils/generation_id.cc",
     "utils/generation_id.h",
     "utils/reflection/reflection.h",
-    "utils/text/symbol.cc",
-    "utils/text/symbol.h",
-    "utils/text/symbol_table.cc",
-    "utils/text/symbol_table.h",
+    "utils/symbol/symbol.cc",
+    "utils/symbol/symbol.h",
+    "utils/symbol/symbol_table.cc",
+    "utils/symbol/symbol_table.h",
   ]
   deps = [ ":libtint_utils_src" ]
 }
@@ -2434,8 +2434,8 @@ if (tint_build_unittests) {
     sources = [
       "utils/containers/scope_stack_test.cc",
       "utils/reflection/reflection_test.cc",
-      "utils/text/symbol_table_test.cc",
-      "utils/text/symbol_test.cc",
+      "utils/symbol/symbol_table_test.cc",
+      "utils/symbol/symbol_test.cc",
     ]
     deps = [ ":libtint_symbols_src" ]
   }

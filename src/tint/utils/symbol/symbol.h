@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_UTILS_TEXT_SYMBOL_H_
-#define SRC_TINT_UTILS_TEXT_SYMBOL_H_
+#ifndef SRC_TINT_UTILS_SYMBOL_SYMBOL_H_
+#define SRC_TINT_UTILS_SYMBOL_SYMBOL_H_
 
 #include <string>
 
@@ -120,4 +120,4 @@ class hash<tint::Symbol> {
 
 }  // namespace std
 
-#endif  // SRC_TINT_UTILS_TEXT_SYMBOL_H_
+#endif  // SRC_TINT_UTILS_SYMBOL_SYMBOL_H_

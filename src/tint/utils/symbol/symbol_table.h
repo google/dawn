@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_UTILS_TEXT_SYMBOL_TABLE_H_
-#define SRC_TINT_UTILS_TEXT_SYMBOL_TABLE_H_
+#ifndef SRC_TINT_UTILS_SYMBOL_SYMBOL_TABLE_H_
+#define SRC_TINT_UTILS_SYMBOL_SYMBOL_TABLE_H_
 
 #include <string>
 
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/memory/bump_allocator.h"
-#include "src/tint/utils/text/symbol.h"
+#include "src/tint/utils/symbol/symbol.h"
 
 namespace tint {
 
@@ -108,4 +108,4 @@ inline GenerationID GenerationIDOf(const SymbolTable& symbol_table) {
 
 }  // namespace tint
 
-#endif  // SRC_TINT_UTILS_TEXT_SYMBOL_TABLE_H_
+#endif  // SRC_TINT_UTILS_SYMBOL_SYMBOL_TABLE_H_

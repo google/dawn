@@ -568,10 +568,10 @@ list(APPEND TINT_LIB_SRCS
   utils/text/string.h
   utils/text/string_stream.cc
   utils/text/string_stream.h
-  utils/text/symbol.cc
-  utils/text/symbol.h
-  utils/text/symbol_table.cc
-  utils/text/symbol_table.h
+  utils/symbol/symbol.cc
+  utils/symbol/symbol.h
+  utils/symbol/symbol_table.cc
+  utils/symbol/symbol_table.h
   utils/text/text_generator.cc
   utils/text/text_generator.h
   utils/traits/traits.h
@@ -1169,8 +1169,8 @@ if(TINT_BUILD_TESTS)
     utils/text/float_to_string_test.cc
     utils/text/string_stream_test.cc
     utils/text/string_test.cc
-    utils/text/symbol_table_test.cc
-    utils/text/symbol_test.cc
+    utils/symbol/symbol_table_test.cc
+    utils/symbol/symbol_test.cc
     utils/text/unicode_test.cc
     utils/traits/traits_test.cc
   )

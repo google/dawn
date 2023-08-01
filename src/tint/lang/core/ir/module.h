@@ -30,7 +30,7 @@
 #include "src/tint/utils/generation_id.h"
 #include "src/tint/utils/memory/block_allocator.h"
 #include "src/tint/utils/result/result.h"
-#include "src/tint/utils/text/symbol_table.h"
+#include "src/tint/utils/symbol/symbol_table.h"
 
 namespace tint::ir {
 

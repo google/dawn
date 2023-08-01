@@ -25,7 +25,7 @@
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/utils/containers/unique_vector.h"
 #include "src/tint/utils/containers/vector.h"
-#include "src/tint/utils/text/symbol.h"
+#include "src/tint/utils/symbol/symbol.h"
 
 // Forward declarations
 namespace tint::ast {

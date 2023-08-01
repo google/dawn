@@ -28,7 +28,7 @@
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
-#include "src/tint/utils/text/symbol.h"
+#include "src/tint/utils/symbol/symbol.h"
 
 // Forward declarations
 namespace tint::ir {

@@ -19,7 +19,7 @@
 #include "src/tint/lang/wgsl/sem/behavior.h"
 #include "src/tint/lang/wgsl/sem/node.h"
 #include "src/tint/utils/containers/hashmap.h"
-#include "src/tint/utils/text/symbol.h"
+#include "src/tint/utils/symbol/symbol.h"
 
 // Forward declarations
 namespace tint::ast {

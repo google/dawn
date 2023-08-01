@@ -29,8 +29,8 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/utils/rtti/switch.h"
+#include "src/tint/utils/symbol/symbol_table.h"
 #include "src/tint/utils/text/string.h"
-#include "src/tint/utils/text/symbol_table.h"
 
 namespace tint::type {
 

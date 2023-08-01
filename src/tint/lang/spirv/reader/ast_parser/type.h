@@ -27,7 +27,7 @@
 #include "src/tint/lang/wgsl/ast/type.h"
 #include "src/tint/utils/memory/block_allocator.h"
 #include "src/tint/utils/rtti/castable.h"
-#include "src/tint/utils/text/symbol.h"
+#include "src/tint/utils/symbol/symbol.h"
 
 // Forward declarations
 namespace tint {

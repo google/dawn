@@ -23,7 +23,7 @@
 #include "src/tint/lang/wgsl/ast/function.h"
 #include "src/tint/lang/wgsl/sem/info.h"
 #include "src/tint/utils/generation_id.h"
-#include "src/tint/utils/text/symbol_table.h"
+#include "src/tint/utils/symbol/symbol_table.h"
 
 // Forward Declarations
 namespace tint::ast {

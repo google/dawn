@@ -28,7 +28,7 @@
 #include "src/tint/lang/core/type/unique_node.h"
 #include "src/tint/utils/containers/unique_allocator.h"
 #include "src/tint/utils/math/hash.h"
-#include "src/tint/utils/text/symbol.h"
+#include "src/tint/utils/symbol/symbol.h"
 
 // Forward declarations
 namespace tint::type {

@@ -16,7 +16,7 @@
 #define SRC_TINT_LANG_WGSL_AST_IDENTIFIER_H_
 
 #include "src/tint/lang/wgsl/ast/node.h"
-#include "src/tint/utils/text/symbol.h"
+#include "src/tint/utils/symbol/symbol.h"
 
 namespace tint::ast {
 
