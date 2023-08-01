@@ -20,6 +20,8 @@
 #include "dawn/common/DynamicLib.h"
 #include "dawn/native/BackendConnection.h"
 
+using EGLDisplay = void*;
+
 namespace dawn::native::opengl {
 
 class PhysicalDevice;
@@ -34,7 +36,8 @@ class Backend : public BackendConnection {
 
   private:
     std::vector<Ref<PhysicalDeviceBase>> DiscoverPhysicalDevicesWithProcs(
-        void* (*getProc)(const char*));
+        void* (*getProc)(const char*),
+        EGLDisplay display);
 
     Ref<PhysicalDevice> mPhysicalDevice = nullptr;
     void* (*mGetProc)(const char*);

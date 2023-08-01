@@ -22,15 +22,8 @@
 namespace dawn::native::opengl {
 
 ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions& egl,
-                                                              EGLenum api) {
-    EGLDisplay display = egl.GetCurrentDisplay();
-
-    if (display == EGL_NO_DISPLAY) {
-        display = egl.GetDisplay(EGL_DEFAULT_DISPLAY);
-    }
-
-    DAWN_INVALID_IF(display == EGL_NO_DISPLAY, "eglGetDisplay");
-
+                                                              EGLenum api,
+                                                              EGLDisplay display) {
     EGLint renderableType = api == EGL_OPENGL_ES_API ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_BIT;
 
     EGLint major, minor;

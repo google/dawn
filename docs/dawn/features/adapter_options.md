@@ -23,7 +23,7 @@ If no options are passed to EnumerateAdapters, then it is as if the default `Req
 
 ### `RequestAdapterOptionsGetGLProc`
 
-When discovering adapters on the GL backend, Dawn uses the provided `RequestAdapterOptionsGetGLProc::getProc` method to load GL procs. This extension struct does nothing on other backends.
+When discovering adapters on the GLES backend, Dawn uses the provided `RequestAdapterOptionsGetGLProc::getProc` method to load GL procs. `RequestAdapterOptionsGetGLProc::display` indicates the EGLDisplay on which to create an adapter. If `display` is `EGL_NO_DISPLAY`, the current display will be used. This extension struct does nothing on other backends.
 
 ### `RequestAdapterOptionsLUID`
 
