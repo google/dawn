@@ -32,6 +32,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/spirv/writer/common/spv_dump.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"
+#include "src/tint/lang/spirv/writer/raise/raise.h"
 
 namespace tint::spirv::writer {
 
@@ -99,6 +100,12 @@ class SpirvWriterTestHelperBase : public BASE {
     /// @param writer the writer to use for SPIR-V generation
     /// @returns true if generation and validation succeeded
     bool Generate(Printer& writer) {
+        auto raised = Raise(&mod);
+        if (!raised) {
+            err_ = raised.Failure();
+            return false;
+        }
+
         auto spirv = writer.Generate();
         if (!spirv) {
             err_ = spirv.Failure();

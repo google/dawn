@@ -49,10 +49,6 @@
 #include "src/tint/lang/core/ir/swizzle.h"
 #include "src/tint/lang/core/ir/terminate_invocation.h"
 #include "src/tint/lang/core/ir/terminator.h"
-#include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
-#include "src/tint/lang/core/ir/transform/block_decorated_structs.h"
-#include "src/tint/lang/core/ir/transform/demote_to_helper.h"
-#include "src/tint/lang/core/ir/transform/std140.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -80,11 +76,6 @@
 #include "src/tint/lang/spirv/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/spirv/writer/common/module.h"
 #include "src/tint/lang/spirv/writer/raise/builtin_polyfill.h"
-#include "src/tint/lang/spirv/writer/raise/expand_implicit_splats.h"
-#include "src/tint/lang/spirv/writer/raise/handle_matrix_arithmetic.h"
-#include "src/tint/lang/spirv/writer/raise/merge_return.h"
-#include "src/tint/lang/spirv/writer/raise/shader_io.h"
-#include "src/tint/lang/spirv/writer/raise/var_for_dynamic_index.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 
@@ -95,29 +86,6 @@ namespace {
 using namespace tint::number_suffixes;  // NOLINT
 
 constexpr uint32_t kWriterVersion = 1;
-
-Result<SuccessType, std::string> Sanitize(ir::Module* module) {
-#define RUN_TRANSFORM(name)                        \
-    do {                                           \
-        auto result = ir::transform::name(module); \
-        if (!result) {                             \
-            return result;                         \
-        }                                          \
-    } while (false)
-
-    RUN_TRANSFORM(AddEmptyEntryPoint);
-    RUN_TRANSFORM(BlockDecoratedStructs);
-    RUN_TRANSFORM(BuiltinPolyfill);
-    RUN_TRANSFORM(DemoteToHelper);
-    RUN_TRANSFORM(ExpandImplicitSplats);
-    RUN_TRANSFORM(HandleMatrixArithmetic);
-    RUN_TRANSFORM(MergeReturn);
-    RUN_TRANSFORM(ShaderIO);
-    RUN_TRANSFORM(Std140);
-    RUN_TRANSFORM(VarForDynamicIndex);
-
-    return Success;
-}
 
 SpvStorageClass StorageClass(builtin::AddressSpace addrspace) {
     switch (addrspace) {
@@ -185,12 +153,6 @@ Printer::Printer(ir::Module* module, bool zero_init_workgroup_mem)
     : ir_(module), zero_init_workgroup_memory_(zero_init_workgroup_mem) {}
 
 Result<std::vector<uint32_t>, std::string> Printer::Generate() {
-    // Run the IR transformations to prepare for SPIR-V emission.
-    auto sanitize = Sanitize(ir_);
-    if (!sanitize) {
-        return std::move(sanitize.Failure());
-    }
-
     auto valid = ir::ValidateAndDumpIfNeeded(*ir_, "SPIR-V writer");
     if (!valid) {
         return std::move(valid.Failure());

@@ -682,6 +682,8 @@ if(${TINT_BUILD_SPV_WRITER})
       lang/spirv/writer/raise/handle_matrix_arithmetic.h
       lang/spirv/writer/raise/merge_return.cc
       lang/spirv/writer/raise/merge_return.h
+      lang/spirv/writer/raise/raise.cc
+      lang/spirv/writer/raise/raise.h
       lang/spirv/writer/raise/shader_io.cc
       lang/spirv/writer/raise/shader_io.h
       lang/spirv/writer/raise/var_for_dynamic_index.cc

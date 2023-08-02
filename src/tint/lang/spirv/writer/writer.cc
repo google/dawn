@@ -21,6 +21,7 @@
 #if TINT_BUILD_IR
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"             // nogncheck
+#include "src/tint/lang/spirv/writer/raise/raise.h"                 // nogncheck
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"  // nogncheck
 #endif                                                              // TINT_BUILD_IR
 
@@ -53,6 +54,12 @@ Result<Output, std::string> Generate(const Program* program, const Options& opti
         auto remapper = ir::transform::BindingRemapper(&ir, options.binding_remapper_options);
         if (!remapper) {
             return remapper.Failure();
+        }
+
+        // Raise the IR to the SPIR-V dialect.
+        auto raised = Raise(&ir);
+        if (!raised) {
+            return std::move(raised.Failure());
         }
 
         // Generate the SPIR-V code.
