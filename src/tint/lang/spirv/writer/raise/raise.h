@@ -24,13 +24,13 @@ namespace tint::ir {
 class Module;
 }
 
-namespace tint::spirv::writer {
+namespace tint::spirv::writer::raise {
 
 /// Raise a core IR module to the SPIR-V dialect of the IR.
 /// @param module the core IR module to raise to SPIR-V dialect
 /// @returns success or an error string
 Result<SuccessType, std::string> Raise(ir::Module* module);
 
-}  // namespace tint::spirv::writer
+}  // namespace tint::spirv::writer::raise
 
 #endif  // SRC_TINT_LANG_SPIRV_WRITER_RAISE_RAISE_H_

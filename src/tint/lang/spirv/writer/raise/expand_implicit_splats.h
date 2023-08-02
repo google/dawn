@@ -24,14 +24,14 @@ namespace tint::ir {
 class Module;
 }
 
-namespace tint::ir::transform {
+namespace tint::spirv::writer::raise {
 
 /// ExpandImplicitSplats is a transform that expands implicit vector splat operands in construct
 /// instructions and binary instructions where not supported by SPIR-V.
 /// @param module the module to transform
 /// @returns an error string on failure
-Result<SuccessType, std::string> ExpandImplicitSplats(Module* module);
+Result<SuccessType, std::string> ExpandImplicitSplats(ir::Module* module);
 
-}  // namespace tint::ir::transform
+}  // namespace tint::spirv::writer::raise
 
 #endif  // SRC_TINT_LANG_SPIRV_WRITER_RAISE_EXPAND_IMPLICIT_SPLATS_H_

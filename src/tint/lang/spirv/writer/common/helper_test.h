@@ -100,7 +100,7 @@ class SpirvWriterTestHelperBase : public BASE {
     /// @param writer the writer to use for SPIR-V generation
     /// @returns true if generation and validation succeeded
     bool Generate(Printer& writer) {
-        auto raised = Raise(&mod);
+        auto raised = raise::Raise(&mod);
         if (!raised) {
             err_ = raised.Failure();
             return false;

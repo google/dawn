@@ -24,14 +24,14 @@ namespace tint::ir {
 class Module;
 }
 
-namespace tint::ir::transform {
+namespace tint::spirv::writer::raise {
 
 /// HandleMatrixArithmetic is a transform that converts arithmetic instruction that use matrix into
 /// SPIR-V intrinsics or polyfills.
 /// @param module the module to transform
 /// @returns an error string on failure
-Result<SuccessType, std::string> HandleMatrixArithmetic(Module* module);
+Result<SuccessType, std::string> HandleMatrixArithmetic(ir::Module* module);
 
-}  // namespace tint::ir::transform
+}  // namespace tint::spirv::writer::raise
 
 #endif  // SRC_TINT_LANG_SPIRV_WRITER_RAISE_HANDLE_MATRIX_ARITHMETIC_H_

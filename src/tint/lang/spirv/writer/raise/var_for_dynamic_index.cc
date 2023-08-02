@@ -27,13 +27,13 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::ir::transform {
+namespace tint::spirv::writer::raise {
 
 namespace {
 // An access that needs replacing.
 struct AccessToReplace {
     // The access instruction.
-    Access* access = nullptr;
+    ir::Access* access = nullptr;
     // The index of the first dynamic index.
     size_t first_dynamic_index = 0;
     // The object type that corresponds to the source of the first dynamic index.
@@ -46,9 +46,9 @@ struct AccessToReplace {
 // dynamically indexed.
 struct PartialAccess {
     // The base object.
-    Value* base = nullptr;
+    ir::Value* base = nullptr;
     // The list of constant indices to get from the base to the source object.
-    Vector<Value*, 4> indices;
+    Vector<ir::Value*, 4> indices;
 
     // A specialization of Hasher for PartialAccess.
     struct Hasher {
@@ -73,12 +73,12 @@ void WalkAccessChain(ir::Access* access, CALLBACK&& callback) {
         if (callback(i, indices[i], ty) == Action::kStop) {
             break;
         }
-        auto* const_idx = indices[i]->As<Constant>();
+        auto* const_idx = indices[i]->As<ir::Constant>();
         ty = const_idx ? ty->Element(const_idx->Value()->ValueAs<u32>()) : ty->Elements().type;
     }
 }
 
-std::optional<AccessToReplace> ShouldReplace(Access* access) {
+std::optional<AccessToReplace> ShouldReplace(ir::Access* access) {
     if (access->Result()->Type()->Is<type::Pointer>()) {
         // No need to modify accesses into pointer types.
         return {};
@@ -99,7 +99,7 @@ std::optional<AccessToReplace> ShouldReplace(Access* access) {
         }
 
         // Check if this is the first dynamic index.
-        if (!result && !index->Is<Constant>()) {
+        if (!result && !index->Is<ir::Constant>()) {
             result = AccessToReplace{access, i, ty};
         }
 
@@ -115,7 +115,7 @@ void Run(ir::Module* ir) {
     // Find the access instructions that need replacing.
     Vector<AccessToReplace, 4> worklist;
     for (auto* inst : ir->instructions.Objects()) {
-        if (auto* access = inst->As<Access>()) {
+        if (auto* access = inst->As<ir::Access>()) {
             if (auto to_replace = ShouldReplace(access)) {
                 worklist.Push(to_replace.value());
             }
@@ -123,8 +123,8 @@ void Run(ir::Module* ir) {
     }
 
     // Replace each access instruction that we recorded.
-    Hashmap<Value*, Value*, 4> object_to_local;
-    Hashmap<PartialAccess, Value*, 4, PartialAccess::Hasher> source_object_to_value;
+    Hashmap<ir::Value*, ir::Value*, 4> object_to_local;
+    Hashmap<PartialAccess, ir::Value*, 4, PartialAccess::Hasher> source_object_to_value;
     for (const auto& to_replace : worklist) {
         auto* access = to_replace.access;
         auto* source_object = access->Object();
@@ -153,9 +153,9 @@ void Run(ir::Module* ir) {
         });
 
         // Create a new access instruction using the local variable as the source.
-        Vector<Value*, 4> indices{access->Indices().Offset(to_replace.first_dynamic_index)};
+        Vector<ir::Value*, 4> indices{access->Indices().Offset(to_replace.first_dynamic_index)};
         const type::Type* access_type = access->Result()->Type();
-        Value* vector_index = nullptr;
+        ir::Value* vector_index = nullptr;
         if (to_replace.vector_access_type) {
             // The old access indexed the element of a vector.
             // Its not valid to obtain the address of an element of a vector, so we need to access
@@ -188,7 +188,7 @@ void Run(ir::Module* ir) {
 
 }  // namespace
 
-Result<SuccessType, std::string> VarForDynamicIndex(Module* ir) {
+Result<SuccessType, std::string> VarForDynamicIndex(ir::Module* ir) {
     auto result = ValidateAndDumpIfNeeded(*ir, "VarForDynamicIndex transform");
     if (!result) {
         return result;
@@ -199,4 +199,4 @@ Result<SuccessType, std::string> VarForDynamicIndex(Module* ir) {
     return Success;
 }
 
-}  // namespace tint::ir::transform
+}  // namespace tint::spirv::writer::raise

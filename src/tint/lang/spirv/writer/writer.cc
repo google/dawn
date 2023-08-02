@@ -57,7 +57,7 @@ Result<Output, std::string> Generate(const Program* program, const Options& opti
         }
 
         // Raise the IR to the SPIR-V dialect.
-        auto raised = Raise(&ir);
+        auto raised = raise::Raise(&ir);
         if (!raised) {
             return std::move(raised.Failure());
         }

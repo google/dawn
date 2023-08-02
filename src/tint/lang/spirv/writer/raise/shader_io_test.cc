@@ -18,17 +18,17 @@
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/spirv/writer/raise/shader_io.h"
 
-namespace tint::ir::transform {
+namespace tint::spirv::writer::raise {
 namespace {
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-using IR_ShaderIOTest = TransformTest;
+using SpirvWriter_ShaderIOTest = ir::transform::TransformTest;
 
-TEST_F(IR_ShaderIOTest, NoInputsOrOutputs) {
+TEST_F(SpirvWriter_ShaderIOTest, NoInputsOrOutputs) {
     auto* ep = b.Function("foo", ty.void_());
-    ep->SetStage(Function::PipelineStage::kCompute);
+    ep->SetStage(ir::Function::PipelineStage::kCompute);
 
     b.Append(ep->Block(), [&] {  //
         b.Return(ep);
@@ -50,12 +50,12 @@ TEST_F(IR_ShaderIOTest, NoInputsOrOutputs) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ShaderIOTest, Parameters_NonStruct_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, Parameters_NonStruct_Spirv) {
     auto* ep = b.Function("foo", ty.void_());
     auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
-    front_facing->SetBuiltin(FunctionParam::Builtin::kFrontFacing);
+    front_facing->SetBuiltin(ir::FunctionParam::Builtin::kFrontFacing);
     auto* position = b.FunctionParam("position", ty.vec4<f32>());
-    position->SetBuiltin(FunctionParam::Builtin::kPosition);
+    position->SetBuiltin(ir::FunctionParam::Builtin::kPosition);
     position->SetInvariant(true);
     auto* color1 = b.FunctionParam("color1", ty.f32());
     color1->SetLocation(0, {});
@@ -64,7 +64,7 @@ TEST_F(IR_ShaderIOTest, Parameters_NonStruct_Spirv) {
                                                   builtin::InterpolationSampling::kSample});
 
     ep->SetParams({front_facing, position, color1, color2});
-    ep->SetStage(Function::PipelineStage::kFragment);
+    ep->SetStage(ir::Function::PipelineStage::kFragment);
 
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
@@ -140,7 +140,7 @@ foo_LocationInputsStruct = struct @align(4), @block {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ShaderIOTest, Parameters_Struct_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, Parameters_Struct_Spirv) {
     auto* str_ty =
         ty.Struct(mod.symbols.New("Inputs"),
                   {
@@ -174,7 +174,7 @@ TEST_F(IR_ShaderIOTest, Parameters_Struct_Spirv) {
     auto* ep = b.Function("foo", ty.void_());
     auto* str_param = b.FunctionParam("inputs", str_ty);
     ep->SetParams({str_param});
-    ep->SetStage(Function::PipelineStage::kFragment);
+    ep->SetStage(ir::Function::PipelineStage::kFragment);
 
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(b.Access(ty.bool_(), str_param, 0_i));
@@ -276,7 +276,7 @@ foo_LocationInputsStruct = struct @align(4), @block {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ShaderIOTest, Parameters_Mixed_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, Parameters_Mixed_Spirv) {
     auto* str_ty = ty.Struct(mod.symbols.New("Inputs"),
                              {
                                  {
@@ -293,14 +293,14 @@ TEST_F(IR_ShaderIOTest, Parameters_Mixed_Spirv) {
 
     auto* ep = b.Function("foo", ty.void_());
     auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
-    front_facing->SetBuiltin(FunctionParam::Builtin::kFrontFacing);
+    front_facing->SetBuiltin(ir::FunctionParam::Builtin::kFrontFacing);
     auto* str_param = b.FunctionParam("inputs", str_ty);
     auto* color2 = b.FunctionParam("color2", ty.f32());
     color2->SetLocation(1, builtin::Interpolation{builtin::InterpolationType::kLinear,
                                                   builtin::InterpolationSampling::kSample});
 
     ep->SetParams({front_facing, str_param, color2});
-    ep->SetStage(Function::PipelineStage::kFragment);
+    ep->SetStage(ir::Function::PipelineStage::kFragment);
 
     b.Append(ep->Block(), [&] {
         auto* ifelse = b.If(front_facing);
@@ -393,11 +393,11 @@ foo_LocationInputsStruct = struct @align(4), @block {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ShaderIOTest, ReturnValue_NonStructBuiltin_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructBuiltin_Spirv) {
     auto* ep = b.Function("foo", ty.vec4<f32>());
-    ep->SetReturnBuiltin(Function::ReturnBuiltin::kPosition);
+    ep->SetReturnBuiltin(ir::Function::ReturnBuiltin::kPosition);
     ep->SetReturnInvariant(true);
-    ep->SetStage(Function::PipelineStage::kVertex);
+    ep->SetStage(ir::Function::PipelineStage::kVertex);
 
     b.Append(ep->Block(), [&] {  //
         b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
@@ -443,10 +443,10 @@ foo_BuiltinOutputsStruct = struct @align(16), @block {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ShaderIOTest, ReturnValue_NonStructLocation_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructLocation_Spirv) {
     auto* ep = b.Function("foo", ty.vec4<f32>());
     ep->SetReturnLocation(1u, {});
-    ep->SetStage(Function::PipelineStage::kFragment);
+    ep->SetStage(ir::Function::PipelineStage::kFragment);
 
     b.Append(ep->Block(), [&] {  //
         b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
@@ -492,7 +492,7 @@ foo_LocationOutputsStruct = struct @align(16), @block {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ShaderIOTest, ReturnValue_Struct_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_Struct_Spirv) {
     auto* str_ty =
         ty.Struct(mod.symbols.New("Outputs"),
                   {
@@ -519,7 +519,7 @@ TEST_F(IR_ShaderIOTest, ReturnValue_Struct_Spirv) {
                   });
 
     auto* ep = b.Function("foo", str_ty);
-    ep->SetStage(Function::PipelineStage::kVertex);
+    ep->SetStage(ir::Function::PipelineStage::kVertex);
 
     b.Append(ep->Block(), [&] {  //
         b.Return(ep, b.Construct(str_ty, b.Construct(ty.vec4<f32>(), 0_f), 0.25_f, 0.75_f));
@@ -592,7 +592,7 @@ foo_LocationOutputsStruct = struct @align(4), @block {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ShaderIOTest, Struct_SharedByVertexAndFragment_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedByVertexAndFragment_Spirv) {
     auto* vec4f = ty.vec4<f32>();
     auto* str_ty = ty.Struct(mod.symbols.New("Interface"),
                              {
@@ -611,7 +611,7 @@ TEST_F(IR_ShaderIOTest, Struct_SharedByVertexAndFragment_Spirv) {
     // Vertex shader.
     {
         auto* ep = b.Function("vert", str_ty);
-        ep->SetStage(Function::PipelineStage::kVertex);
+        ep->SetStage(ir::Function::PipelineStage::kVertex);
 
         b.Append(ep->Block(), [&] {  //
             auto* position = b.Construct(vec4f, 0_f);
@@ -624,7 +624,7 @@ TEST_F(IR_ShaderIOTest, Struct_SharedByVertexAndFragment_Spirv) {
     {
         auto* ep = b.Function("frag", vec4f);
         auto* inputs = b.FunctionParam("inputs", str_ty);
-        ep->SetStage(Function::PipelineStage::kFragment);
+        ep->SetStage(ir::Function::PipelineStage::kFragment);
         ep->SetParams({inputs});
 
         b.Append(ep->Block(), [&] {  //
@@ -741,7 +741,7 @@ frag_LocationOutputsStruct = struct @align(16), @block {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ShaderIOTest, Struct_SharedWithBuffer_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedWithBuffer_Spirv) {
     auto* vec4f = ty.vec4<f32>();
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
@@ -760,7 +760,7 @@ TEST_F(IR_ShaderIOTest, Struct_SharedWithBuffer_Spirv) {
     auto* buffer = b.RootBlock()->Append(b.Var(ty.ptr(storage, str_ty, read)));
 
     auto* ep = b.Function("vert", str_ty);
-    ep->SetStage(Function::PipelineStage::kVertex);
+    ep->SetStage(ir::Function::PipelineStage::kVertex);
 
     b.Append(ep->Block(), [&] {  //
         b.Return(ep, b.Load(buffer));
@@ -831,7 +831,7 @@ vert_LocationOutputsStruct = struct @align(16), @block {
 }
 
 // Test that we change the type of the sample mask builtin to an array for SPIR-V.
-TEST_F(IR_ShaderIOTest, SampleMask_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, SampleMask_Spirv) {
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
                                  {
@@ -847,10 +847,10 @@ TEST_F(IR_ShaderIOTest, SampleMask_Spirv) {
                              });
 
     auto* mask_in = b.FunctionParam("mask_in", ty.u32());
-    mask_in->SetBuiltin(FunctionParam::Builtin::kSampleMask);
+    mask_in->SetBuiltin(ir::FunctionParam::Builtin::kSampleMask);
 
     auto* ep = b.Function("foo", str_ty);
-    ep->SetStage(Function::PipelineStage::kFragment);
+    ep->SetStage(ir::Function::PipelineStage::kFragment);
     ep->SetParams({mask_in});
 
     b.Append(ep->Block(), [&] {  //
@@ -924,4 +924,4 @@ foo_LocationOutputsStruct = struct @align(4), @block {
 }
 
 }  // namespace
-}  // namespace tint::ir::transform
+}  // namespace tint::spirv::writer::raise

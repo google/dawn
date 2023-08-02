@@ -24,14 +24,14 @@ namespace tint::ir {
 class Module;
 }
 
-namespace tint::ir::transform {
+namespace tint::spirv::writer::raise {
 
 /// MergeReturn is a transform merges multiple return statements in a function into a single return
 /// at the end of the function.
 /// @param module the module to transform
 /// @returns an error string on failure
-Result<SuccessType, std::string> MergeReturn(Module* module);
+Result<SuccessType, std::string> MergeReturn(ir::Module* module);
 
-}  // namespace tint::ir::transform
+}  // namespace tint::spirv::writer::raise
 
 #endif  // SRC_TINT_LANG_SPIRV_WRITER_RAISE_MERGE_RETURN_H_

@@ -21,15 +21,15 @@
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/struct.h"
 
-namespace tint::ir::transform {
+namespace tint::spirv::writer::raise {
 namespace {
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-using IR_VarForDynamicIndexTest = TransformTest;
+using SpirvWriter_VarForDynamicIndexTest = ir::transform::TransformTest;
 
-TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_ArrayValue) {
+TEST_F(SpirvWriter_VarForDynamicIndexTest, NoModify_ConstantIndex_ArrayValue) {
     auto* arr = b.FunctionParam(ty.array<i32, 4u>());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({arr});
@@ -52,7 +52,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_ArrayValue) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_MatrixValue) {
+TEST_F(SpirvWriter_VarForDynamicIndexTest, NoModify_ConstantIndex_MatrixValue) {
     auto* mat = b.FunctionParam(ty.mat2x2<f32>());
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({mat});
@@ -75,7 +75,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_ConstantIndex_MatrixValue) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_ArrayPointer) {
+TEST_F(SpirvWriter_VarForDynamicIndexTest, NoModify_DynamicIndex_ArrayPointer) {
     auto* arr = b.FunctionParam(ty.ptr<function, array<i32, 4u>>());
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
@@ -101,7 +101,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_ArrayPointer) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_MatrixPointer) {
+TEST_F(SpirvWriter_VarForDynamicIndexTest, NoModify_DynamicIndex_MatrixPointer) {
     auto* mat = b.FunctionParam(ty.ptr<function, mat2x2<f32>>());
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.f32());
@@ -127,7 +127,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_MatrixPointer) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_VectorValue) {
+TEST_F(SpirvWriter_VarForDynamicIndexTest, NoModify_DynamicIndex_VectorValue) {
     auto* vec = b.FunctionParam(ty.vec4<f32>());
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.f32());
@@ -151,7 +151,7 @@ TEST_F(IR_VarForDynamicIndexTest, NoModify_DynamicIndex_VectorValue) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_ArrayValue) {
+TEST_F(SpirvWriter_VarForDynamicIndexTest, DynamicIndex_ArrayValue) {
     auto* arr = b.FunctionParam(ty.array<i32, 4u>());
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
@@ -177,7 +177,7 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_ArrayValue) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_MatrixValue) {
+TEST_F(SpirvWriter_VarForDynamicIndexTest, DynamicIndex_MatrixValue) {
     auto* mat = b.FunctionParam(ty.mat2x2<f32>());
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.vec2<f32>());
@@ -203,7 +203,7 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_MatrixValue) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_VectorValue) {
+TEST_F(SpirvWriter_VarForDynamicIndexTest, DynamicIndex_VectorValue) {
     auto* mat = b.FunctionParam(ty.mat2x2<f32>());
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.f32());
@@ -229,7 +229,7 @@ TEST_F(IR_VarForDynamicIndexTest, DynamicIndex_VectorValue) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_VarForDynamicIndexTest, AccessChain) {
+TEST_F(SpirvWriter_VarForDynamicIndexTest, AccessChain) {
     auto* arr = b.FunctionParam(ty.array(ty.array(ty.array<i32, 4u>(), 4u), 4u));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
@@ -255,7 +255,7 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices) {
+TEST_F(SpirvWriter_VarForDynamicIndexTest, AccessChain_SkipConstantIndices) {
     auto* arr = b.FunctionParam(ty.array(ty.array(ty.array<i32, 4u>(), 4u), 4u));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
@@ -282,7 +282,7 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Interleaved) {
+TEST_F(SpirvWriter_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Interleaved) {
     auto* arr = b.FunctionParam(ty.array(ty.array(ty.array(ty.array<i32, 4u>(), 4u), 4u), 4u));
     auto* idx = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
@@ -309,7 +309,7 @@ TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Interleaved) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Struct) {
+TEST_F(SpirvWriter_VarForDynamicIndexTest, AccessChain_SkipConstantIndices_Struct) {
     auto* str_ty = ty.Struct(mod.symbols.Register("MyStruct"),
                              {
                                  {mod.symbols.Register("arr1"), ty.array<f32, 1024>()},
@@ -348,7 +348,7 @@ MyStruct = struct @align(16) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_VarForDynamicIndexTest, MultipleAccessesFromSameSource) {
+TEST_F(SpirvWriter_VarForDynamicIndexTest, MultipleAccessesFromSameSource) {
     auto* arr = b.FunctionParam(ty.array<i32, 4u>());
     auto* idx_a = b.FunctionParam(ty.i32());
     auto* idx_b = b.FunctionParam(ty.i32());
@@ -382,7 +382,7 @@ TEST_F(IR_VarForDynamicIndexTest, MultipleAccessesFromSameSource) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_VarForDynamicIndexTest, MultipleAccessesFromSameSource_SkipConstantIndices) {
+TEST_F(SpirvWriter_VarForDynamicIndexTest, MultipleAccessesFromSameSource_SkipConstantIndices) {
     auto* arr = b.FunctionParam(ty.array(ty.array(ty.array<i32, 4u>(), 4u), 4u));
     auto* idx_a = b.FunctionParam(ty.i32());
     auto* idx_b = b.FunctionParam(ty.i32());
@@ -418,4 +418,4 @@ TEST_F(IR_VarForDynamicIndexTest, MultipleAccessesFromSameSource_SkipConstantInd
 }
 
 }  // namespace
-}  // namespace tint::ir::transform
+}  // namespace tint::spirv::writer::raise

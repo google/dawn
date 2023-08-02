@@ -27,29 +27,29 @@
 #include "src/tint/lang/spirv/writer/raise/shader_io.h"
 #include "src/tint/lang/spirv/writer/raise/var_for_dynamic_index.h"
 
-namespace tint::spirv::writer {
+namespace tint::spirv::writer::raise {
 
 Result<SuccessType, std::string> Raise(ir::Module* module) {
-#define RUN_TRANSFORM(name)                        \
-    do {                                           \
-        auto result = ir::transform::name(module); \
-        if (!result) {                             \
-            return result;                         \
-        }                                          \
+#define RUN_TRANSFORM(name)         \
+    do {                            \
+        auto result = name(module); \
+        if (!result) {              \
+            return result;          \
+        }                           \
     } while (false)
 
-    RUN_TRANSFORM(AddEmptyEntryPoint);
-    RUN_TRANSFORM(BlockDecoratedStructs);
+    RUN_TRANSFORM(ir::transform::AddEmptyEntryPoint);
+    RUN_TRANSFORM(ir::transform::BlockDecoratedStructs);
     RUN_TRANSFORM(BuiltinPolyfill);
-    RUN_TRANSFORM(DemoteToHelper);
+    RUN_TRANSFORM(ir::transform::DemoteToHelper);
     RUN_TRANSFORM(ExpandImplicitSplats);
     RUN_TRANSFORM(HandleMatrixArithmetic);
     RUN_TRANSFORM(MergeReturn);
     RUN_TRANSFORM(ShaderIO);
-    RUN_TRANSFORM(Std140);
+    RUN_TRANSFORM(ir::transform::Std140);
     RUN_TRANSFORM(VarForDynamicIndex);
 
     return Success;
 }
 
-}  // namespace tint::spirv::writer
+}  // namespace tint::spirv::writer::raise

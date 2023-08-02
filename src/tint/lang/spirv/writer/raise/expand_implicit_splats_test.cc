@@ -18,15 +18,15 @@
 
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 
-namespace tint::ir::transform {
+namespace tint::spirv::writer::raise {
 namespace {
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-using IR_ExpandImplicitSplatsTest = TransformTest;
+using SpirvWriter_ExpandImplicitSplatsTest = ir::transform::TransformTest;
 
-TEST_F(IR_ExpandImplicitSplatsTest, NoModify_Construct_VectorIdentity) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, NoModify_Construct_VectorIdentity) {
     auto* vector = b.FunctionParam("vector", ty.vec2<i32>());
     auto* func = b.Function("foo", ty.vec2<i32>());
     func->SetParams({vector});
@@ -50,7 +50,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, NoModify_Construct_VectorIdentity) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, NoModify_Construct_MixedScalarVector) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, NoModify_Construct_MixedScalarVector) {
     auto* scalar = b.FunctionParam("scalar", ty.i32());
     auto* vector = b.FunctionParam("vector", ty.vec2<i32>());
     auto* func = b.Function("foo", ty.vec3<i32>());
@@ -75,7 +75,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, NoModify_Construct_MixedScalarVector) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, NoModify_Construct_AllScalars) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, NoModify_Construct_AllScalars) {
     auto* scalar = b.FunctionParam("scalar", ty.i32());
     auto* func = b.Function("foo", ty.vec3<i32>());
     func->SetParams({scalar});
@@ -99,7 +99,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, NoModify_Construct_AllScalars) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, Construct_Splat_Vec2i) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, Construct_Splat_Vec2i) {
     auto* scalar = b.FunctionParam("scalar", ty.i32());
     auto* func = b.Function("foo", ty.vec2<i32>());
     func->SetParams({scalar});
@@ -133,7 +133,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, Construct_Splat_Vec2i) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, Construct_Splat_Vec3u) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, Construct_Splat_Vec3u) {
     auto* scalar = b.FunctionParam("scalar", ty.u32());
     auto* func = b.Function("foo", ty.vec3<u32>());
     func->SetParams({scalar});
@@ -167,7 +167,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, Construct_Splat_Vec3u) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, Construct_Splat_Vec4f) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, Construct_Splat_Vec4f) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({scalar});
@@ -201,7 +201,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, Construct_Splat_Vec4f) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, BinaryAdd_VectorScalar_Vec4f) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryAdd_VectorScalar_Vec4f) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -237,7 +237,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryAdd_VectorScalar_Vec4f) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, BinaryAdd_ScalarVector_Vec4f) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryAdd_ScalarVector_Vec4f) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -273,7 +273,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryAdd_ScalarVector_Vec4f) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, BinarySubtract_VectorScalar_Vec4f) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinarySubtract_VectorScalar_Vec4f) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -309,7 +309,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinarySubtract_VectorScalar_Vec4f) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, BinarySubtract_ScalarVector_Vec4f) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinarySubtract_ScalarVector_Vec4f) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -345,7 +345,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinarySubtract_ScalarVector_Vec4f) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, BinaryDivide_VectorScalar_Vec4f) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryDivide_VectorScalar_Vec4f) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -381,7 +381,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryDivide_VectorScalar_Vec4f) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, BinaryDivide_ScalarVector_Vec4f) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryDivide_ScalarVector_Vec4f) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -417,7 +417,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryDivide_ScalarVector_Vec4f) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, BinaryModulo_VectorScalar_Vec4f) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryModulo_VectorScalar_Vec4f) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -453,7 +453,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryModulo_VectorScalar_Vec4f) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, BinaryModulo_ScalarVector_Vec4f) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryModulo_ScalarVector_Vec4f) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -489,7 +489,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryModulo_ScalarVector_Vec4f) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_VectorScalar_Vec4f) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryMultiply_VectorScalar_Vec4f) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -524,7 +524,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_VectorScalar_Vec4f) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_ScalarVector_Vec4f) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryMultiply_ScalarVector_Vec4f) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
     auto* vector = b.FunctionParam("vector", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -559,7 +559,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_ScalarVector_Vec4f) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_VectorScalar_Vec4i) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryMultiply_VectorScalar_Vec4i) {
     auto* scalar = b.FunctionParam("scalar", ty.i32());
     auto* vector = b.FunctionParam("vector", ty.vec4<i32>());
     auto* func = b.Function("foo", ty.vec4<i32>());
@@ -595,7 +595,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_VectorScalar_Vec4i) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_ScalarVector_Vec4i) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, BinaryMultiply_ScalarVector_Vec4i) {
     auto* scalar = b.FunctionParam("scalar", ty.i32());
     auto* vector = b.FunctionParam("vector", ty.vec4<i32>());
     auto* func = b.Function("foo", ty.vec4<i32>());
@@ -631,7 +631,7 @@ TEST_F(IR_ExpandImplicitSplatsTest, BinaryMultiply_ScalarVector_Vec4i) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_ExpandImplicitSplatsTest, Mix_VectorOperands_ScalarFactor) {
+TEST_F(SpirvWriter_ExpandImplicitSplatsTest, Mix_VectorOperands_ScalarFactor) {
     auto* arg1 = b.FunctionParam("arg1", ty.vec4<f32>());
     auto* arg2 = b.FunctionParam("arg2", ty.vec4<f32>());
     auto* factor = b.FunctionParam("factor", ty.f32());
@@ -669,4 +669,4 @@ TEST_F(IR_ExpandImplicitSplatsTest, Mix_VectorOperands_ScalarFactor) {
 }
 
 }  // namespace
-}  // namespace tint::ir::transform
+}  // namespace tint::spirv::writer::raise

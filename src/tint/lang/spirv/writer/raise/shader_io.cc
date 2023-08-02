@@ -27,7 +27,7 @@
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-namespace tint::ir::transform {
+namespace tint::spirv::writer::raise {
 
 namespace {
 
@@ -36,15 +36,15 @@ namespace {
 /// output, and declare global variables for them. The wrapper entry point then loads from and
 /// stores to these variables.
 /// We also modify the type of the SampleMask builtin to be an array, as required by Vulkan.
-struct StateImpl : ShaderIOBackendState {
+struct StateImpl : ir::transform::ShaderIOBackendState {
     /// The global variable for input builtins.
-    Var* builtin_input_var = nullptr;
+    ir::Var* builtin_input_var = nullptr;
     /// The global variable for input locations.
-    Var* location_input_var = nullptr;
+    ir::Var* location_input_var = nullptr;
     /// The global variable for output builtins.
-    Var* builtin_output_var = nullptr;
+    ir::Var* builtin_output_var = nullptr;
     /// The global variable for output locations.
-    Var* location_output_var = nullptr;
+    ir::Var* location_output_var = nullptr;
     /// The member indices for inputs.
     Vector<uint32_t, 4> input_indices;
     /// The member indices for outputs.
@@ -65,8 +65,8 @@ struct StateImpl : ShaderIOBackendState {
     /// @param addrspace the address to use for the global variables
     /// @param access the access mode to use for the global variables
     /// @param name_suffix the suffix to add to struct and variable names
-    void MakeStructs(Var*& builtin_var,
-                     Var*& location_var,
+    void MakeStructs(ir::Var*& builtin_var,
+                     ir::Var*& location_var,
                      Vector<uint32_t, 4>* indices,
                      Vector<type::Manager::StructMemberDesc, 4>& entries,
                      builtin::AddressSpace addrspace,
@@ -109,24 +109,24 @@ struct StateImpl : ShaderIOBackendState {
     }
 
     /// @copydoc ShaderIO::BackendState::FinalizeInputs
-    Vector<FunctionParam*, 4> FinalizeInputs() override {
+    Vector<ir::FunctionParam*, 4> FinalizeInputs() override {
         MakeStructs(builtin_input_var, location_input_var, &input_indices, inputs,
                     builtin::AddressSpace::kIn, builtin::Access::kRead, "Inputs");
         return tint::Empty;
     }
 
     /// @copydoc ShaderIO::BackendState::FinalizeOutputs
-    Value* FinalizeOutputs() override {
+    ir::Value* FinalizeOutputs() override {
         MakeStructs(builtin_output_var, location_output_var, &output_indices, outputs,
                     builtin::AddressSpace::kOut, builtin::Access::kWrite, "Outputs");
         return nullptr;
     }
 
     /// @copydoc ShaderIO::BackendState::GetInput
-    Value* GetInput(Builder& builder, uint32_t idx) override {
+    ir::Value* GetInput(ir::Builder& builder, uint32_t idx) override {
         // Load the input from the global variable declared earlier.
         auto* ptr = ty.ptr(builtin::AddressSpace::kIn, inputs[idx].type, builtin::Access::kRead);
-        Access* from = nullptr;
+        ir::Access* from = nullptr;
         if (inputs[idx].attributes.builtin) {
             if (inputs[idx].attributes.builtin.value() == builtin::BuiltinValue::kSampleMask) {
                 // SampleMask becomes an array for SPIR-V, so load from the first element.
@@ -141,10 +141,10 @@ struct StateImpl : ShaderIOBackendState {
     }
 
     /// @copydoc ShaderIO::BackendState::SetOutput
-    void SetOutput(Builder& builder, uint32_t idx, Value* value) override {
+    void SetOutput(ir::Builder& builder, uint32_t idx, ir::Value* value) override {
         // Store the output to the global variable declared earlier.
         auto* ptr = ty.ptr(builtin::AddressSpace::kOut, outputs[idx].type, builtin::Access::kWrite);
-        Access* to = nullptr;
+        ir::Access* to = nullptr;
         if (outputs[idx].attributes.builtin) {
             if (outputs[idx].attributes.builtin.value() == builtin::BuiltinValue::kSampleMask) {
                 // SampleMask becomes an array for SPIR-V, so store to the first element.
@@ -160,16 +160,17 @@ struct StateImpl : ShaderIOBackendState {
 };
 }  // namespace
 
-Result<SuccessType, std::string> ShaderIO(Module* ir) {
+Result<SuccessType, std::string> ShaderIO(ir::Module* ir) {
     auto result = ValidateAndDumpIfNeeded(*ir, "ShaderIO transform");
     if (!result) {
         return result;
     }
 
-    RunShaderIOBase(
-        ir, [](Module* mod, Function* func) { return std::make_unique<StateImpl>(mod, func); });
+    ir::transform::RunShaderIOBase(ir, [](ir::Module* mod, ir::Function* func) {
+        return std::make_unique<StateImpl>(mod, func);
+    });
 
     return Success;
 }
 
-}  // namespace tint::ir::transform
+}  // namespace tint::spirv::writer::raise

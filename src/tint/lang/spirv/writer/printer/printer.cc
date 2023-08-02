@@ -136,10 +136,10 @@ const type::Type* DedupType(const type::Type* ty, type::Manager& types) {
         },
 
         // Dedup a SampledImage if its underlying image will be deduped.
-        [&](const ir::transform::SampledImage* si) -> const type::Type* {
+        [&](const raise::SampledImage* si) -> const type::Type* {
             auto* img = DedupType(si->Image(), types);
             if (img != si->Image()) {
-                return types.Get<ir::transform::SampledImage>(img);
+                return types.Get<raise::SampledImage>(img);
             }
             return si;
         },
@@ -232,7 +232,7 @@ uint32_t Printer::Builtin(builtin::BuiltinValue builtin, builtin::AddressSpace a
 
 uint32_t Printer::Constant(ir::Constant* constant) {
     // If it is a literal operand, just return the value.
-    if (auto* literal = constant->As<ir::transform::LiteralOperand>()) {
+    if (auto* literal = constant->As<raise::LiteralOperand>()) {
         return literal->Value()->ValueAs<uint32_t>();
     }
 
@@ -373,7 +373,7 @@ uint32_t Printer::Type(const type::Type* ty, builtin::AddressSpace addrspace /* 
             [&](const type::Struct* str) { EmitStructType(id, str, addrspace); },
             [&](const type::Texture* tex) { EmitTextureType(id, tex); },
             [&](const type::Sampler*) { module_.PushType(spv::Op::OpTypeSampler, {id}); },
-            [&](const ir::transform::SampledImage* s) {
+            [&](const raise::SampledImage* s) {
                 module_.PushType(spv::Op::OpTypeSampledImage, {id, Type(s->Image())});
             },
             [&](Default) { TINT_ICE() << "unhandled type: " << ty->FriendlyName(); });

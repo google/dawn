@@ -29,22 +29,22 @@
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::LiteralOperand);
-TINT_INSTANTIATE_TYPEINFO(tint::ir::transform::SampledImage);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::raise::LiteralOperand);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::raise::SampledImage);
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::ir::transform {
+namespace tint::spirv::writer::raise {
 
 namespace {
 
 /// PIMPL state for the transform.
 struct State {
     /// The IR module.
-    Module* ir = nullptr;
+    ir::Module* ir = nullptr;
 
     /// The IR builder.
-    Builder b{*ir};
+    ir::Builder b{*ir};
 
     /// The type manager.
     type::Manager& ty{ir->Types()};
@@ -52,12 +52,12 @@ struct State {
     /// Process the module.
     void Process() {
         // Find the builtins that need replacing.
-        Vector<CoreBuiltinCall*, 4> worklist;
+        Vector<ir::CoreBuiltinCall*, 4> worklist;
         for (auto* inst : ir->instructions.Objects()) {
             if (!inst->Alive()) {
                 continue;
             }
-            if (auto* builtin = inst->As<CoreBuiltinCall>()) {
+            if (auto* builtin = inst->As<ir::CoreBuiltinCall>()) {
                 switch (builtin->Func()) {
                     case builtin::Function::kArrayLength:
                     case builtin::Function::kAtomicAdd:
@@ -95,7 +95,7 @@ struct State {
 
         // Replace the builtins that we found.
         for (auto* builtin : worklist) {
-            Value* replacement = nullptr;
+            ir::Value* replacement = nullptr;
             switch (builtin->Func()) {
                 case builtin::Function::kArrayLength:
                     replacement = ArrayLength(builtin);
@@ -167,24 +167,24 @@ struct State {
     /// Handle an `arrayLength()` builtin.
     /// @param builtin the builtin call instruction
     /// @returns the replacement value
-    Value* ArrayLength(CoreBuiltinCall* builtin) {
+    ir::Value* ArrayLength(ir::CoreBuiltinCall* builtin) {
         // Strip away any let instructions to get to the original struct member access instruction.
-        auto* ptr = builtin->Args()[0]->As<InstructionResult>();
-        while (auto* let = tint::As<Let>(ptr->Source())) {
-            ptr = let->Value()->As<InstructionResult>();
+        auto* ptr = builtin->Args()[0]->As<ir::InstructionResult>();
+        while (auto* let = tint::As<ir::Let>(ptr->Source())) {
+            ptr = let->Value()->As<ir::InstructionResult>();
         }
         TINT_ASSERT_OR_RETURN_VALUE(ptr, nullptr);
 
-        auto* access = ptr->Source()->As<Access>();
+        auto* access = ptr->Source()->As<ir::Access>();
         TINT_ASSERT_OR_RETURN_VALUE(access, nullptr);
         TINT_ASSERT_OR_RETURN_VALUE(access->Indices().Length() == 1u, nullptr);
         TINT_ASSERT_OR_RETURN_VALUE(access->Object()->Type()->UnwrapPtr()->Is<type::Struct>(),
                                     nullptr);
-        auto* const_idx = access->Indices()[0]->As<Constant>();
+        auto* const_idx = access->Indices()[0]->As<ir::Constant>();
 
         // Replace the builtin call with a call to the spirv.array_length intrinsic.
         auto* call =
-            b.Call(builtin->Result()->Type(), IntrinsicCall::Kind::kSpirvArrayLength,
+            b.Call(builtin->Result()->Type(), ir::IntrinsicCall::Kind::kSpirvArrayLength,
                    Vector{access->Object(), Literal(u32(const_idx->Value()->ValueAs<uint32_t>()))});
         call->InsertBefore(builtin);
         return call->Result();
@@ -193,11 +193,11 @@ struct State {
     /// Handle an atomic*() builtin.
     /// @param builtin the builtin call instruction
     /// @returns the replacement value
-    Value* Atomic(CoreBuiltinCall* builtin) {
+    ir::Value* Atomic(ir::CoreBuiltinCall* builtin) {
         auto* result_ty = builtin->Result()->Type();
 
         auto* pointer = builtin->Args()[0];
-        auto* memory = [&]() -> Value* {
+        auto* memory = [&]() -> ir::Value* {
             switch (pointer->Type()->As<type::Pointer>()->AddressSpace()) {
                 case builtin::AddressSpace::kWorkgroup:
                     return b.Constant(u32(SpvScopeWorkgroup));
@@ -211,15 +211,15 @@ struct State {
         auto* memory_semantics = b.Constant(u32(SpvMemorySemanticsMaskNone));
 
         // Helper to build the intrinsic call with the common operands.
-        auto build = [&](const type::Type* type, enum IntrinsicCall::Kind intrinsic) {
+        auto build = [&](const type::Type* type, enum ir::IntrinsicCall::Kind intrinsic) {
             return b.Call(type, intrinsic, pointer, memory, memory_semantics);
         };
 
         // Create the replacement call instruction.
-        Call* call = nullptr;
+        ir::Call* call = nullptr;
         switch (builtin->Func()) {
             case builtin::Function::kAtomicAdd:
-                call = build(result_ty, IntrinsicCall::Kind::kSpirvAtomicIAdd);
+                call = build(result_ty, ir::IntrinsicCall::Kind::kSpirvAtomicIAdd);
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case builtin::Function::kAtomicAnd:
@@ -296,11 +296,11 @@ struct State {
     /// Handle a `dot()` builtin.
     /// @param builtin the builtin call instruction
     /// @returns the replacement value
-    Value* Dot(CoreBuiltinCall* builtin) {
+    ir::Value* Dot(ir::CoreBuiltinCall* builtin) {
         // OpDot only supports floating point operands, so we need to polyfill the integer case.
         // TODO(crbug.com/tint/1267): If SPV_KHR_integer_dot_product is supported, use that instead.
         if (builtin->Result()->Type()->is_integer_scalar()) {
-            Instruction* sum = nullptr;
+            ir::Instruction* sum = nullptr;
 
             auto* v1 = builtin->Args()[0];
             auto* v2 = builtin->Args()[1];
@@ -322,9 +322,9 @@ struct State {
         }
 
         // Replace the builtin call with a call to the spirv.dot intrinsic.
-        auto args = Vector<Value*, 4>(builtin->Args());
+        auto args = Vector<ir::Value*, 4>(builtin->Args());
         auto* call =
-            b.Call(builtin->Result()->Type(), IntrinsicCall::Kind::kSpirvDot, std::move(args));
+            b.Call(builtin->Result()->Type(), ir::IntrinsicCall::Kind::kSpirvDot, std::move(args));
         call->InsertBefore(builtin);
         return call->Result();
     }
@@ -332,9 +332,9 @@ struct State {
     /// Handle a `select()` builtin.
     /// @param builtin the builtin call instruction
     /// @returns the replacement value
-    Value* Select(CoreBuiltinCall* builtin) {
+    ir::Value* Select(ir::CoreBuiltinCall* builtin) {
         // Argument order is different in SPIR-V: (condition, true_operand, false_operand).
-        Vector<Value*, 4> args = {
+        Vector<ir::Value*, 4> args = {
             builtin->Args()[2],
             builtin->Args()[1],
             builtin->Args()[0],
@@ -345,7 +345,7 @@ struct State {
         // TODO(jrprice): We don't need to do this if we're targeting SPIR-V 1.4 or newer.
         auto* vec = builtin->Result()->Type()->As<type::Vector>();
         if (vec && args[0]->Type()->Is<type::Scalar>()) {
-            Vector<Value*, 4> elements;
+            Vector<ir::Value*, 4> elements;
             elements.Resize(vec->Width(), args[0]);
 
             auto* construct = b.Construct(ty.vec(ty.bool_(), vec->Width()), std::move(elements));
@@ -354,8 +354,8 @@ struct State {
         }
 
         // Replace the builtin call with a call to the spirv.select intrinsic.
-        auto* call =
-            b.Call(builtin->Result()->Type(), IntrinsicCall::Kind::kSpirvSelect, std::move(args));
+        auto* call = b.Call(builtin->Result()->Type(), ir::IntrinsicCall::Kind::kSpirvSelect,
+                            std::move(args));
         call->InsertBefore(builtin);
         return call->Result();
     }
@@ -363,17 +363,17 @@ struct State {
     /// ImageOperands represents the optional image operands for an image instruction.
     struct ImageOperands {
         /// Bias
-        Value* bias = nullptr;
+        ir::Value* bias = nullptr;
         /// Lod
-        Value* lod = nullptr;
+        ir::Value* lod = nullptr;
         /// Grad (dx)
-        Value* ddx = nullptr;
+        ir::Value* ddx = nullptr;
         /// Grad (dy)
-        Value* ddy = nullptr;
+        ir::Value* ddy = nullptr;
         /// ConstOffset
-        Value* offset = nullptr;
+        ir::Value* offset = nullptr;
         /// Sample
-        Value* sample = nullptr;
+        ir::Value* sample = nullptr;
     };
 
     /// Append optional image operands to an image intrinsic argument list.
@@ -382,8 +382,8 @@ struct State {
     /// @param insertion_point the insertion point for new instructions
     /// @param requires_float_lod true if the lod needs to be a floating point value
     void AppendImageOperands(ImageOperands& operands,
-                             Vector<Value*, 8>& args,
-                             Instruction* insertion_point,
+                             Vector<ir::Value*, 8>& args,
+                             ir::Instruction* insertion_point,
                              bool requires_float_lod) {
         // Add a placeholder argument for the image operand mask, which we will fill in when we have
         // processed the image operands.
@@ -428,7 +428,9 @@ struct State {
     /// @param array_idx the array index
     /// @param insertion_point the insertion point for new instructions
     /// @returns the modified coordinate vector
-    Value* AppendArrayIndex(Value* coords, Value* array_idx, Instruction* insertion_point) {
+    ir::Value* AppendArrayIndex(ir::Value* coords,
+                                ir::Value* array_idx,
+                                ir::Instruction* insertion_point) {
         auto* vec = coords->Type()->As<type::Vector>();
         auto* element_ty = vec->type();
 
@@ -450,7 +452,7 @@ struct State {
     /// Handle a textureSample*() builtin.
     /// @param builtin the builtin call instruction
     /// @returns the replacement value
-    Value* TextureSample(CoreBuiltinCall* builtin) {
+    ir::Value* TextureSample(ir::CoreBuiltinCall* builtin) {
         // Helper to get the next argument from the call, or nullptr if there are no more arguments.
         uint32_t arg_idx = 0;
         auto next_arg = [&]() {
@@ -464,7 +466,7 @@ struct State {
 
         // Use OpSampledImage to create an OpTypeSampledImage object.
         auto* sampled_image =
-            b.Call(ty.Get<SampledImage>(texture_ty), IntrinsicCall::Kind::kSpirvSampledImage,
+            b.Call(ty.Get<SampledImage>(texture_ty), ir::IntrinsicCall::Kind::kSpirvSampledImage,
                    Vector{texture, sampler});
         sampled_image->InsertBefore(builtin);
 
@@ -475,38 +477,38 @@ struct State {
         }
 
         // Determine which SPIR-V intrinsic to use and which optional image operands are needed.
-        enum IntrinsicCall::Kind intrinsic;
-        Value* depth = nullptr;
+        enum ir::IntrinsicCall::Kind intrinsic;
+        ir::Value* depth = nullptr;
         ImageOperands operands;
         switch (builtin->Func()) {
             case builtin::Function::kTextureSample:
-                intrinsic = IntrinsicCall::Kind::kSpirvImageSampleImplicitLod;
+                intrinsic = ir::IntrinsicCall::Kind::kSpirvImageSampleImplicitLod;
                 operands.offset = next_arg();
                 break;
             case builtin::Function::kTextureSampleBias:
-                intrinsic = IntrinsicCall::Kind::kSpirvImageSampleImplicitLod;
+                intrinsic = ir::IntrinsicCall::Kind::kSpirvImageSampleImplicitLod;
                 operands.bias = next_arg();
                 operands.offset = next_arg();
                 break;
             case builtin::Function::kTextureSampleCompare:
-                intrinsic = IntrinsicCall::Kind::kSpirvImageSampleDrefImplicitLod;
+                intrinsic = ir::IntrinsicCall::Kind::kSpirvImageSampleDrefImplicitLod;
                 depth = next_arg();
                 operands.offset = next_arg();
                 break;
             case builtin::Function::kTextureSampleCompareLevel:
-                intrinsic = IntrinsicCall::Kind::kSpirvImageSampleDrefExplicitLod;
+                intrinsic = ir::IntrinsicCall::Kind::kSpirvImageSampleDrefExplicitLod;
                 depth = next_arg();
                 operands.lod = b.Constant(0_f);
                 operands.offset = next_arg();
                 break;
             case builtin::Function::kTextureSampleGrad:
-                intrinsic = IntrinsicCall::Kind::kSpirvImageSampleExplicitLod;
+                intrinsic = ir::IntrinsicCall::Kind::kSpirvImageSampleExplicitLod;
                 operands.ddx = next_arg();
                 operands.ddy = next_arg();
                 operands.offset = next_arg();
                 break;
             case builtin::Function::kTextureSampleLevel:
-                intrinsic = IntrinsicCall::Kind::kSpirvImageSampleExplicitLod;
+                intrinsic = ir::IntrinsicCall::Kind::kSpirvImageSampleExplicitLod;
                 operands.lod = next_arg();
                 operands.offset = next_arg();
                 break;
@@ -517,7 +519,7 @@ struct State {
         // Start building the argument list for the intrinsic.
         // The first two operands are always the sampled image and then the coordinates, followed by
         // the depth reference if used.
-        Vector<Value*, 8> intrinsic_args;
+        Vector<ir::Value*, 8> intrinsic_args;
         intrinsic_args.Push(sampled_image->Result());
         intrinsic_args.Push(coords);
         if (depth) {
@@ -549,7 +551,7 @@ struct State {
     /// Handle a textureGather*() builtin.
     /// @param builtin the builtin call instruction
     /// @returns the replacement value
-    Value* TextureGather(CoreBuiltinCall* builtin) {
+    ir::Value* TextureGather(ir::CoreBuiltinCall* builtin) {
         // Helper to get the next argument from the call, or nullptr if there are no more arguments.
         uint32_t arg_idx = 0;
         auto next_arg = [&]() {
@@ -570,7 +572,7 @@ struct State {
 
         // Use OpSampledImage to create an OpTypeSampledImage object.
         auto* sampled_image =
-            b.Call(ty.Get<SampledImage>(texture_ty), IntrinsicCall::Kind::kSpirvSampledImage,
+            b.Call(ty.Get<SampledImage>(texture_ty), ir::IntrinsicCall::Kind::kSpirvSampledImage,
                    Vector{texture, sampler});
         sampled_image->InsertBefore(builtin);
 
@@ -581,16 +583,16 @@ struct State {
         }
 
         // Determine which SPIR-V intrinsic to use and which optional image operands are needed.
-        enum IntrinsicCall::Kind intrinsic;
-        Value* depth = nullptr;
+        enum ir::IntrinsicCall::Kind intrinsic;
+        ir::Value* depth = nullptr;
         ImageOperands operands;
         switch (builtin->Func()) {
             case builtin::Function::kTextureGather:
-                intrinsic = IntrinsicCall::Kind::kSpirvImageGather;
+                intrinsic = ir::IntrinsicCall::Kind::kSpirvImageGather;
                 operands.offset = next_arg();
                 break;
             case builtin::Function::kTextureGatherCompare:
-                intrinsic = IntrinsicCall::Kind::kSpirvImageDrefGather;
+                intrinsic = ir::IntrinsicCall::Kind::kSpirvImageDrefGather;
                 depth = next_arg();
                 operands.offset = next_arg();
                 break;
@@ -601,7 +603,7 @@ struct State {
         // Start building the argument list for the intrinsic.
         // The first two operands are always the sampled image and then the coordinates, followed by
         // either the depth reference or the component.
-        Vector<Value*, 8> intrinsic_args;
+        Vector<ir::Value*, 8> intrinsic_args;
         intrinsic_args.Push(sampled_image->Result());
         intrinsic_args.Push(coords);
         if (depth) {
@@ -623,7 +625,7 @@ struct State {
     /// Handle a textureLoad() builtin.
     /// @param builtin the builtin call instruction
     /// @returns the replacement value
-    Value* TextureLoad(CoreBuiltinCall* builtin) {
+    ir::Value* TextureLoad(ir::CoreBuiltinCall* builtin) {
         // Helper to get the next argument from the call, or nullptr if there are no more arguments.
         uint32_t arg_idx = 0;
         auto next_arg = [&]() {
@@ -642,7 +644,7 @@ struct State {
 
         // Start building the argument list for the intrinsic.
         // The first two operands are always the texture and then the coordinates.
-        Vector<Value*, 8> intrinsic_args;
+        Vector<ir::Value*, 8> intrinsic_args;
         intrinsic_args.Push(texture);
         intrinsic_args.Push(coords);
 
@@ -663,7 +665,7 @@ struct State {
             result_ty = ty.vec4(result_ty);
         }
         auto* texture_call =
-            b.Call(result_ty, IntrinsicCall::Kind::kSpirvImageFetch, std::move(intrinsic_args));
+            b.Call(result_ty, ir::IntrinsicCall::Kind::kSpirvImageFetch, std::move(intrinsic_args));
         texture_call->InsertBefore(builtin);
         auto* result = texture_call->Result();
 
@@ -680,7 +682,7 @@ struct State {
     /// Handle a textureStore() builtin.
     /// @param builtin the builtin call instruction
     /// @returns the replacement value
-    Value* TextureStore(CoreBuiltinCall* builtin) {
+    ir::Value* TextureStore(ir::CoreBuiltinCall* builtin) {
         // Helper to get the next argument from the call, or nullptr if there are no more arguments.
         uint32_t arg_idx = 0;
         auto next_arg = [&]() {
@@ -701,7 +703,7 @@ struct State {
 
         // Start building the argument list for the intrinsic.
         // The first two operands are always the texture and then the coordinates.
-        Vector<Value*, 8> intrinsic_args;
+        Vector<ir::Value*, 8> intrinsic_args;
         intrinsic_args.Push(texture);
         intrinsic_args.Push(coords);
         intrinsic_args.Push(texel);
@@ -710,8 +712,8 @@ struct State {
         AppendImageOperands(operands, intrinsic_args, builtin, /* requires_float_lod */ false);
 
         // Call the intrinsic.
-        auto* texture_call =
-            b.Call(ty.void_(), IntrinsicCall::Kind::kSpirvImageWrite, std::move(intrinsic_args));
+        auto* texture_call = b.Call(ty.void_(), ir::IntrinsicCall::Kind::kSpirvImageWrite,
+                                    std::move(intrinsic_args));
         texture_call->InsertBefore(builtin);
         return texture_call->Result();
     }
@@ -719,7 +721,7 @@ struct State {
     /// Handle a textureDimensions() builtin.
     /// @param builtin the builtin call instruction
     /// @returns the replacement value
-    Value* TextureDimensions(CoreBuiltinCall* builtin) {
+    ir::Value* TextureDimensions(ir::CoreBuiltinCall* builtin) {
         // Helper to get the next argument from the call, or nullptr if there are no more arguments.
         uint32_t arg_idx = 0;
         auto next_arg = [&]() {
@@ -729,16 +731,16 @@ struct State {
         auto* texture = next_arg();
         auto* texture_ty = texture->Type()->As<type::Texture>();
 
-        Vector<Value*, 8> intrinsic_args;
+        Vector<ir::Value*, 8> intrinsic_args;
         intrinsic_args.Push(texture);
 
         // Determine which SPIR-V intrinsic to use, and add the Lod argument if needed.
-        enum IntrinsicCall::Kind intrinsic;
+        enum ir::IntrinsicCall::Kind intrinsic;
         if (texture_ty->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture,
                                 type::StorageTexture>()) {
-            intrinsic = IntrinsicCall::Kind::kSpirvImageQuerySize;
+            intrinsic = ir::IntrinsicCall::Kind::kSpirvImageQuerySize;
         } else {
-            intrinsic = IntrinsicCall::Kind::kSpirvImageQuerySizeLod;
+            intrinsic = ir::IntrinsicCall::Kind::kSpirvImageQuerySizeLod;
             if (auto* lod = next_arg()) {
                 intrinsic_args.Push(lod);
             } else {
@@ -773,20 +775,20 @@ struct State {
     /// Handle a textureNumLayers() builtin.
     /// @param builtin the builtin call instruction
     /// @returns the replacement value
-    Value* TextureNumLayers(CoreBuiltinCall* builtin) {
+    ir::Value* TextureNumLayers(ir::CoreBuiltinCall* builtin) {
         auto* texture = builtin->Args()[0];
         auto* texture_ty = texture->Type()->As<type::Texture>();
 
-        Vector<Value*, 2> intrinsic_args;
+        Vector<ir::Value*, 2> intrinsic_args;
         intrinsic_args.Push(texture);
 
         // Determine which SPIR-V intrinsic to use, and add the Lod argument if needed.
-        enum IntrinsicCall::Kind intrinsic;
+        enum ir::IntrinsicCall::Kind intrinsic;
         if (texture_ty->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture,
                                 type::StorageTexture>()) {
-            intrinsic = IntrinsicCall::Kind::kSpirvImageQuerySize;
+            intrinsic = ir::IntrinsicCall::Kind::kSpirvImageQuerySize;
         } else {
-            intrinsic = IntrinsicCall::Kind::kSpirvImageQuerySizeLod;
+            intrinsic = ir::IntrinsicCall::Kind::kSpirvImageQuerySizeLod;
             intrinsic_args.Push(b.Constant(0_u));
         }
 
@@ -803,7 +805,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType, std::string> BuiltinPolyfill(Module* ir) {
+Result<SuccessType, std::string> BuiltinPolyfill(ir::Module* ir) {
     auto result = ValidateAndDumpIfNeeded(*ir, "BuiltinPolyfill transform");
     if (!result) {
         return result;
@@ -828,4 +830,4 @@ SampledImage* SampledImage::Clone(type::CloneContext& ctx) const {
     return ctx.dst.mgr->Get<SampledImage>(image);
 }
 
-}  // namespace tint::ir::transform
+}  // namespace tint::spirv::writer::raise

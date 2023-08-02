@@ -25,15 +25,15 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 
-namespace tint::ir::transform {
+namespace tint::spirv::writer::raise {
 namespace {
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-using IR_BuiltinPolyfillTest = TransformTest;
+using SpirvWriter_BuiltinPolyfillTest = ir::transform::TransformTest;
 
-TEST_F(IR_BuiltinPolyfillTest, ArrayLength) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, ArrayLength) {
     auto* arr = ty.runtime_array(ty.i32());
     auto* str_ty = ty.Struct(mod.symbols.New("Buffer"), {
                                                             {mod.symbols.New("a"), ty.i32()},
@@ -97,7 +97,7 @@ Buffer = struct @align(4) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, ArrayLength_ViaLet_BeforeAccess) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, ArrayLength_ViaLet_BeforeAccess) {
     auto* arr = ty.runtime_array(ty.i32());
     auto* str_ty = ty.Struct(mod.symbols.New("Buffer"), {
                                                             {mod.symbols.New("a"), ty.i32()},
@@ -167,7 +167,7 @@ Buffer = struct @align(4) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, ArrayLength_ViaLet_AfterAccess) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, ArrayLength_ViaLet_AfterAccess) {
     auto* arr = ty.runtime_array(ty.i32());
     auto* str_ty = ty.Struct(mod.symbols.New("Buffer"), {
                                                             {mod.symbols.New("a"), ty.i32()},
@@ -237,7 +237,7 @@ Buffer = struct @align(4) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, AtomicAdd_Storage) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicAdd_Storage) {
     auto* var = b.Var(ty.ptr(storage, ty.atomic(ty.i32())));
     var->SetBindingPoint(0, 0);
     b.RootBlock()->Append(var);
@@ -283,7 +283,7 @@ TEST_F(IR_BuiltinPolyfillTest, AtomicAdd_Storage) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, AtomicAdd_Workgroup) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicAdd_Workgroup) {
     auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -327,7 +327,7 @@ TEST_F(IR_BuiltinPolyfillTest, AtomicAdd_Workgroup) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, AtomicAnd) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicAnd) {
     auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -371,7 +371,7 @@ TEST_F(IR_BuiltinPolyfillTest, AtomicAnd) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, AtomicCompareExchangeWeak) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicCompareExchangeWeak) {
     auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* cmp = b.FunctionParam("cmp", ty.i32());
@@ -432,7 +432,7 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, AtomicExchange) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicExchange) {
     auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -476,7 +476,7 @@ TEST_F(IR_BuiltinPolyfillTest, AtomicExchange) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, AtomicLoad) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicLoad) {
     auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* func = b.Function("foo", ty.i32());
@@ -518,7 +518,7 @@ TEST_F(IR_BuiltinPolyfillTest, AtomicLoad) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, AtomicMax_I32) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMax_I32) {
     auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -562,7 +562,7 @@ TEST_F(IR_BuiltinPolyfillTest, AtomicMax_I32) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, AtomicMax_U32) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMax_U32) {
     auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.u32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.u32());
@@ -606,7 +606,7 @@ TEST_F(IR_BuiltinPolyfillTest, AtomicMax_U32) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, AtomicMin_I32) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMin_I32) {
     auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -650,7 +650,7 @@ TEST_F(IR_BuiltinPolyfillTest, AtomicMin_I32) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, AtomicMin_U32) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicMin_U32) {
     auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.u32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.u32());
@@ -694,7 +694,7 @@ TEST_F(IR_BuiltinPolyfillTest, AtomicMin_U32) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, AtomicOr) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicOr) {
     auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -738,7 +738,7 @@ TEST_F(IR_BuiltinPolyfillTest, AtomicOr) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, AtomicStore) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicStore) {
     auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -782,7 +782,7 @@ TEST_F(IR_BuiltinPolyfillTest, AtomicStore) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, AtomicSub) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicSub) {
     auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -826,7 +826,7 @@ TEST_F(IR_BuiltinPolyfillTest, AtomicSub) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, AtomicXor) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicXor) {
     auto* var = b.RootBlock()->Append(b.Var(ty.ptr(workgroup, ty.atomic(ty.i32()))));
 
     auto* arg1 = b.FunctionParam("arg1", ty.i32());
@@ -870,7 +870,7 @@ TEST_F(IR_BuiltinPolyfillTest, AtomicXor) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, Dot_Vec4f) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, Dot_Vec4f) {
     auto* arg1 = b.FunctionParam("arg1", ty.vec4<f32>());
     auto* arg2 = b.FunctionParam("arg2", ty.vec4<f32>());
     auto* func = b.Function("foo", ty.f32());
@@ -905,7 +905,7 @@ TEST_F(IR_BuiltinPolyfillTest, Dot_Vec4f) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, Dot_Vec2i) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, Dot_Vec2i) {
     auto* arg1 = b.FunctionParam("arg1", ty.vec2<i32>());
     auto* arg2 = b.FunctionParam("arg2", ty.vec2<i32>());
     auto* func = b.Function("foo", ty.i32());
@@ -946,7 +946,7 @@ TEST_F(IR_BuiltinPolyfillTest, Dot_Vec2i) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, Dot_Vec4u) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, Dot_Vec4u) {
     auto* arg1 = b.FunctionParam("arg1", ty.vec4<u32>());
     auto* arg2 = b.FunctionParam("arg2", ty.vec4<u32>());
     auto* func = b.Function("foo", ty.u32());
@@ -995,7 +995,7 @@ TEST_F(IR_BuiltinPolyfillTest, Dot_Vec4u) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, Select_ScalarCondition_ScalarOperands) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, Select_ScalarCondition_ScalarOperands) {
     auto* argf = b.FunctionParam("argf", ty.i32());
     auto* argt = b.FunctionParam("argt", ty.i32());
     auto* cond = b.FunctionParam("cond", ty.bool_());
@@ -1031,7 +1031,7 @@ TEST_F(IR_BuiltinPolyfillTest, Select_ScalarCondition_ScalarOperands) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, Select_VectorCondition_VectorOperands) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, Select_VectorCondition_VectorOperands) {
     auto* argf = b.FunctionParam("argf", ty.vec4<i32>());
     auto* argt = b.FunctionParam("argt", ty.vec4<i32>());
     auto* cond = b.FunctionParam("cond", ty.vec4<bool>());
@@ -1067,7 +1067,7 @@ TEST_F(IR_BuiltinPolyfillTest, Select_VectorCondition_VectorOperands) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, Select_ScalarCondition_VectorOperands) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, Select_ScalarCondition_VectorOperands) {
     auto* argf = b.FunctionParam("argf", ty.vec4<i32>());
     auto* argt = b.FunctionParam("argt", ty.vec4<i32>());
     auto* cond = b.FunctionParam("cond", ty.bool_());
@@ -1104,7 +1104,7 @@ TEST_F(IR_BuiltinPolyfillTest, Select_ScalarCondition_VectorOperands) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureLoad_2D) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_2D) {
     auto* t =
         b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
@@ -1141,7 +1141,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureLoad_2D) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureLoad_2DArray) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_2DArray) {
     auto* t = b.FunctionParam(
         "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
@@ -1181,7 +1181,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureLoad_2DArray) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureLoad_2DArray_IndexDifferentType) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_2DArray_IndexDifferentType) {
     auto* t = b.FunctionParam(
         "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
@@ -1222,7 +1222,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureLoad_2DArray_IndexDifferentType) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureLoad_Multisampled2D) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_Multisampled2D) {
     auto* t = b.FunctionParam(
         "t", ty.Get<type::MultisampledTexture>(type::TextureDimension::k2d, ty.f32()));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
@@ -1260,7 +1260,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureLoad_Multisampled2D) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureLoad_Depth2D) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_Depth2D) {
     auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
     auto* lod = b.FunctionParam("lod", ty.i32());
@@ -1297,7 +1297,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureLoad_Depth2D) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSample_1D) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_1D) {
     auto* t =
         b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k1d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -1335,7 +1335,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSample_1D) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSample_2D) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_2D) {
     auto* t =
         b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -1373,7 +1373,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSample_2D) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSample_2D_Offset) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_2D_Offset) {
     auto* t =
         b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -1413,7 +1413,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSample_2D_Offset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSample_2DArray_Offset) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_2DArray_Offset) {
     auto* t = b.FunctionParam(
         "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -1456,7 +1456,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSample_2DArray_Offset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSampleBias_2D) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2D) {
     auto* t =
         b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -1496,7 +1496,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleBias_2D) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSampleBias_2D_Offset) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2D_Offset) {
     auto* t =
         b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -1537,7 +1537,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleBias_2D_Offset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSampleBias_2DArray_Offset) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2DArray_Offset) {
     auto* t = b.FunctionParam(
         "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -1581,7 +1581,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleBias_2DArray_Offset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSampleCompare_2D) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D) {
     auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
@@ -1620,7 +1620,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleCompare_2D) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSampleCompare_2D_Offset) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D_Offset) {
     auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
@@ -1660,7 +1660,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleCompare_2D_Offset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSampleCompare_2DArray_Offset) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2DArray_Offset) {
     auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2dArray));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
@@ -1703,7 +1703,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleCompare_2DArray_Offset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSampleCompareLevel_2D) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D) {
     auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
@@ -1742,7 +1742,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleCompareLevel_2D) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSampleCompareLevel_2D_Offset) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D_Offset) {
     auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
@@ -1782,7 +1782,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleCompareLevel_2D_Offset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSampleCompareLevel_2DArray_Offset) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2DArray_Offset) {
     auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2dArray));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
@@ -1825,7 +1825,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleCompareLevel_2DArray_Offset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSampleGrad_2D) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2D) {
     auto* t =
         b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -1866,7 +1866,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleGrad_2D) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSampleGrad_2D_Offset) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2D_Offset) {
     auto* t =
         b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -1908,7 +1908,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleGrad_2D_Offset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSampleGrad_2DArray_Offset) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2DArray_Offset) {
     auto* t = b.FunctionParam(
         "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -1954,7 +1954,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleGrad_2DArray_Offset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSampleLevel_2D) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleLevel_2D) {
     auto* t =
         b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -1994,7 +1994,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleLevel_2D) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSampleLevel_2D_Offset) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleLevel_2D_Offset) {
     auto* t =
         b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -2035,7 +2035,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleLevel_2D_Offset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureSampleLevel_2DArray_Offset) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleLevel_2DArray_Offset) {
     auto* t = b.FunctionParam(
         "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -2079,7 +2079,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleLevel_2DArray_Offset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureGather_2D) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2D) {
     auto* t =
         b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -2119,7 +2119,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureGather_2D) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureGather_2D_Offset) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2D_Offset) {
     auto* t =
         b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -2160,7 +2160,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureGather_2D_Offset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureGather_2DArray_Offset) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2DArray_Offset) {
     auto* t = b.FunctionParam(
         "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
@@ -2204,7 +2204,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureGather_2DArray_Offset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureGather_Depth2D) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_Depth2D) {
     auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
@@ -2241,7 +2241,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureGather_Depth2D) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureGatherCompare_Depth2D) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D) {
     auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
@@ -2280,7 +2280,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureGatherCompare_Depth2D) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureGatherCompare_Depth2D_Offset) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D_Offset) {
     auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
@@ -2320,7 +2320,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureGatherCompare_Depth2D_Offset) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureGatherCompare_Depth2DArray) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2DArray) {
     auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2dArray));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
@@ -2362,7 +2362,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureGatherCompare_Depth2DArray) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureStore_2D) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2D) {
     auto format = builtin::TexelFormat::kR32Float;
     auto* t = b.FunctionParam("t", ty.Get<type::StorageTexture>(
                                        type::TextureDimension::k2d, format, builtin::Access::kWrite,
@@ -2401,7 +2401,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureStore_2D) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureStore_2DArray) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2DArray) {
     auto format = builtin::TexelFormat::kR32Float;
     auto* t =
         b.FunctionParam("t", ty.Get<type::StorageTexture>(
@@ -2443,7 +2443,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureStore_2DArray) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureStore_2DArray_IndexDifferentType) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2DArray_IndexDifferentType) {
     auto format = builtin::TexelFormat::kR32Float;
     auto* t =
         b.FunctionParam("t", ty.Get<type::StorageTexture>(
@@ -2486,7 +2486,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureStore_2DArray_IndexDifferentType) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureDimensions_2D_ImplicitLod) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_2D_ImplicitLod) {
     auto* t =
         b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
     auto* func = b.Function("foo", ty.vec2<u32>());
@@ -2521,7 +2521,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureDimensions_2D_ImplicitLod) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureDimensions_2D_ExplicitLod) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_2D_ExplicitLod) {
     auto* t =
         b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
     auto* lod = b.FunctionParam("lod", ty.i32());
@@ -2557,7 +2557,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureDimensions_2D_ExplicitLod) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureDimensions_2DArray) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_2DArray) {
     auto* t = b.FunctionParam(
         "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
     auto* func = b.Function("foo", ty.vec2<u32>());
@@ -2593,7 +2593,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureDimensions_2DArray) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureDimensions_Multisampled) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_Multisampled) {
     auto* t = b.FunctionParam(
         "t", ty.Get<type::MultisampledTexture>(type::TextureDimension::k2d, ty.f32()));
     auto* func = b.Function("foo", ty.vec2<u32>());
@@ -2628,7 +2628,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureDimensions_Multisampled) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureNumLayers_2DArray) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_2DArray) {
     auto* t = b.FunctionParam(
         "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
     auto* func = b.Function("foo", ty.u32());
@@ -2664,7 +2664,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureNumLayers_2DArray) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureNumLayers_CubeArray) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_CubeArray) {
     auto* t = b.FunctionParam(
         "t", ty.Get<type::SampledTexture>(type::TextureDimension::kCubeArray, ty.f32()));
     auto* func = b.Function("foo", ty.u32());
@@ -2700,7 +2700,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureNumLayers_CubeArray) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureNumLayers_Depth2DArray) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_Depth2DArray) {
     auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2dArray));
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({t});
@@ -2735,7 +2735,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureNumLayers_Depth2DArray) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureNumLayers_DepthCubeArray) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_DepthCubeArray) {
     auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::kCubeArray));
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({t});
@@ -2770,7 +2770,7 @@ TEST_F(IR_BuiltinPolyfillTest, TextureNumLayers_DepthCubeArray) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_BuiltinPolyfillTest, TextureNumLayers_Storage2DArray) {
+TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_Storage2DArray) {
     auto format = builtin::TexelFormat::kR32Float;
     auto* t = b.FunctionParam("t", ty.Get<type::StorageTexture>(
                                        type::TextureDimension::k2d, format, builtin::Access::kWrite,
@@ -2809,4 +2809,4 @@ TEST_F(IR_BuiltinPolyfillTest, TextureNumLayers_Storage2DArray) {
 }
 
 }  // namespace
-}  // namespace tint::ir::transform
+}  // namespace tint::spirv::writer::raise

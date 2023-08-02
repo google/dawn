@@ -27,13 +27,13 @@ class Module;
 class Texture;
 }  // namespace tint::ir
 
-namespace tint::ir::transform {
+namespace tint::spirv::writer::raise {
 
 /// BuiltinPolyfill is a transform that replaces calls to builtins with polyfills and calls to
 /// SPIR-V backend intrinsic functions.
 /// @param module the module to transform
 /// @returns an error string on failure
-Result<SuccessType, std::string> BuiltinPolyfill(Module* module);
+Result<SuccessType, std::string> BuiltinPolyfill(ir::Module* module);
 
 /// LiteralOperand is a type of constant value that is intended to be emitted as a literal in
 /// the SPIR-V instruction stream.
@@ -73,6 +73,6 @@ class SampledImage final : public Castable<SampledImage, type::Type> {
     const type::Type* image_;
 };
 
-}  // namespace tint::ir::transform
+}  // namespace tint::spirv::writer::raise
 
 #endif  // SRC_TINT_LANG_SPIRV_WRITER_RAISE_BUILTIN_POLYFILL_H_

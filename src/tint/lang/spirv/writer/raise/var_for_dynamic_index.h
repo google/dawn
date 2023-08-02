@@ -24,7 +24,7 @@ namespace tint::ir {
 class Module;
 }
 
-namespace tint::ir::transform {
+namespace tint::spirv::writer::raise {
 
 /// VarForDynamicIndex is a transform that copies array and matrix values that are dynamically
 /// indexed to a temporary local `var` before performing the index. This transform is used by the
@@ -32,8 +32,8 @@ namespace tint::ir::transform {
 /// composite.
 /// @param module the module to transform
 /// @returns an error string on failure
-Result<SuccessType, std::string> VarForDynamicIndex(Module* module);
+Result<SuccessType, std::string> VarForDynamicIndex(ir::Module* module);
 
-}  // namespace tint::ir::transform
+}  // namespace tint::spirv::writer::raise
 
 #endif  // SRC_TINT_LANG_SPIRV_WRITER_RAISE_VAR_FOR_DYNAMIC_INDEX_H_

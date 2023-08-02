@@ -18,15 +18,15 @@
 
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 
-namespace tint::ir::transform {
+namespace tint::spirv::writer::raise {
 namespace {
 
 using namespace tint::builtin::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;        // NOLINT
 
-using IR_MergeReturnTest = TransformTest;
+using SpirvWriter_MergeReturnTest = ir::transform::TransformTest;
 
-TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInRootBlock) {
+TEST_F(SpirvWriter_MergeReturnTest, NoModify_SingleReturnInRootBlock) {
     auto* in = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({in});
@@ -50,7 +50,7 @@ TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInRootBlock) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInMergeBlock) {
+TEST_F(SpirvWriter_MergeReturnTest, NoModify_SingleReturnInMergeBlock) {
     auto* in = b.FunctionParam(ty.i32());
     auto* cond = b.FunctionParam(ty.bool_());
     auto* func = b.Function("foo", ty.i32());
@@ -90,7 +90,7 @@ TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInMergeBlock) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInNestedMergeBlock) {
+TEST_F(SpirvWriter_MergeReturnTest, NoModify_SingleReturnInNestedMergeBlock) {
     auto* in = b.FunctionParam(ty.i32());
     auto* cond = b.FunctionParam(ty.bool_());
     auto* func = b.Function("foo", ty.i32());
@@ -98,7 +98,7 @@ TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInNestedMergeBlock) {
 
     b.Append(func->Block(), [&] {
         auto* swtch = b.Switch(in);
-        b.Append(b.Case(swtch, {Switch::CaseSelector{}}), [&] { b.ExitSwitch(swtch); });
+        b.Append(b.Case(swtch, {ir::Switch::CaseSelector{}}), [&] { b.ExitSwitch(swtch); });
 
         auto* l = b.Loop();
         b.Append(l->Body(), [&] { b.ExitLoop(l); });
@@ -147,7 +147,7 @@ TEST_F(IR_MergeReturnTest, NoModify_SingleReturnInNestedMergeBlock) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns) {
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_OneSideReturns) {
     auto* cond = b.FunctionParam(ty.bool_());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({cond});
@@ -200,7 +200,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns) {
 
 // This is the same as the above tests, but we create the return instructions in a different order
 // to make sure that creation order doesn't matter.
-TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_ReturnsCreatedInDifferentOrder) {
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_OneSideReturns_ReturnsCreatedInDifferentOrder) {
     auto* cond = b.FunctionParam(ty.bool_());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({cond});
@@ -251,7 +251,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_ReturnsCreatedInDifferentOrder)
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue) {
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_OneSideReturns_WithValue) {
     auto* cond = b.FunctionParam(ty.bool_());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({cond});
@@ -314,7 +314,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue_MergeHasBasicBlockArguments) {
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_OneSideReturns_WithValue_MergeHasBasicBlockArguments) {
     auto* cond = b.FunctionParam(ty.bool_());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({cond});
@@ -378,7 +378,8 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue_MergeHasBasicBlockArg
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue_MergeHasUndefBasicBlockArguments) {
+TEST_F(SpirvWriter_MergeReturnTest,
+       IfElse_OneSideReturns_WithValue_MergeHasUndefBasicBlockArguments) {
     auto* cond = b.FunctionParam(ty.bool_());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({cond});
@@ -442,7 +443,7 @@ TEST_F(IR_MergeReturnTest, IfElse_OneSideReturns_WithValue_MergeHasUndefBasicBlo
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, IfElse_BothSidesReturn) {
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_BothSidesReturn) {
     auto* cond = b.FunctionParam(ty.bool_());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({cond});
@@ -494,7 +495,7 @@ TEST_F(IR_MergeReturnTest, IfElse_BothSidesReturn) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, IfElse_ThenStatements) {
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_ThenStatements) {
     auto* global = b.Var(ty.ptr<private_, i32>());
     b.RootBlock()->Append(global);
 
@@ -570,7 +571,7 @@ TEST_F(IR_MergeReturnTest, IfElse_ThenStatements) {
 
 // This is the same as the above tests, but we create the return instructions in a different order
 // to make sure that creation order doesn't matter.
-TEST_F(IR_MergeReturnTest, IfElse_ThenStatements_ReturnsCreatedInDifferentOrder) {
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_ThenStatements_ReturnsCreatedInDifferentOrder) {
     auto* global = b.Var(ty.ptr<private_, i32>());
     b.RootBlock()->Append(global);
 
@@ -644,7 +645,7 @@ TEST_F(IR_MergeReturnTest, IfElse_ThenStatements_ReturnsCreatedInDifferentOrder)
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, IfElse_Nested) {
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested) {
     auto* global = b.Var(ty.ptr<private_, i32>());
     b.RootBlock()->Append(global);
 
@@ -790,7 +791,7 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, IfElse_Nested_TrivialMerge) {
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested_TrivialMerge) {
     auto* global = b.Var(ty.ptr<private_, i32>());
     b.RootBlock()->Append(global);
 
@@ -911,7 +912,7 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested_TrivialMerge) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, IfElse_Nested_WithBasicBlockArguments) {
+TEST_F(SpirvWriter_MergeReturnTest, IfElse_Nested_WithBasicBlockArguments) {
     auto* global = b.Var(ty.ptr<private_, i32>());
     b.RootBlock()->Append(global);
 
@@ -1059,7 +1060,7 @@ TEST_F(IR_MergeReturnTest, IfElse_Nested_WithBasicBlockArguments) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, Loop_UnconditionalReturnInBody) {
+TEST_F(SpirvWriter_MergeReturnTest, Loop_UnconditionalReturnInBody) {
     auto* func = b.Function("foo", ty.i32());
 
     b.Append(func->Block(), [&] {
@@ -1103,7 +1104,7 @@ TEST_F(IR_MergeReturnTest, Loop_UnconditionalReturnInBody) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, Loop_ConditionalReturnInBody) {
+TEST_F(SpirvWriter_MergeReturnTest, Loop_ConditionalReturnInBody) {
     auto* global = b.Var(ty.ptr<private_, i32>());
     b.RootBlock()->Append(global);
 
@@ -1217,7 +1218,7 @@ TEST_F(IR_MergeReturnTest, Loop_ConditionalReturnInBody) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, Loop_ConditionalReturnInBody_UnreachableMerge) {
+TEST_F(SpirvWriter_MergeReturnTest, Loop_ConditionalReturnInBody_UnreachableMerge) {
     auto* global = b.Var(ty.ptr<private_, i32>());
     b.RootBlock()->Append(global);
 
@@ -1322,7 +1323,7 @@ TEST_F(IR_MergeReturnTest, Loop_ConditionalReturnInBody_UnreachableMerge) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, DISABLED_Loop_WithBasicBlockArgumentsOnMerge) {
+TEST_F(SpirvWriter_MergeReturnTest, DISABLED_Loop_WithBasicBlockArgumentsOnMerge) {
     auto* global = b.Var(ty.ptr<private_, i32>());
     b.RootBlock()->Append(global);
 
@@ -1436,16 +1437,16 @@ TEST_F(IR_MergeReturnTest, DISABLED_Loop_WithBasicBlockArgumentsOnMerge) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, Switch_UnconditionalReturnInCase) {
+TEST_F(SpirvWriter_MergeReturnTest, Switch_UnconditionalReturnInCase) {
     auto* cond = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({cond});
 
     b.Append(func->Block(), [&] {
         auto* sw = b.Switch(cond);
-        b.Append(b.Case(sw, {Switch::CaseSelector{b.Constant(1_i)}}),
+        b.Append(b.Case(sw, {ir::Switch::CaseSelector{b.Constant(1_i)}}),
                  [&] { b.Return(func, 42_i); });
-        b.Append(b.Case(sw, {Switch::CaseSelector{}}), [&] { b.ExitSwitch(sw); });
+        b.Append(b.Case(sw, {ir::Switch::CaseSelector{}}), [&] { b.ExitSwitch(sw); });
 
         b.Return(func, 0_i);
     });
@@ -1500,7 +1501,7 @@ TEST_F(IR_MergeReturnTest, Switch_UnconditionalReturnInCase) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, Switch_ConditionalReturnInBody) {
+TEST_F(SpirvWriter_MergeReturnTest, Switch_ConditionalReturnInBody) {
     auto* global = b.Var(ty.ptr<private_, i32>());
     b.RootBlock()->Append(global);
 
@@ -1510,7 +1511,7 @@ TEST_F(IR_MergeReturnTest, Switch_ConditionalReturnInBody) {
 
     b.Append(func->Block(), [&] {
         auto* sw = b.Switch(cond);
-        b.Append(b.Case(sw, {Switch::CaseSelector{b.Constant(1_i)}}), [&] {
+        b.Append(b.Case(sw, {ir::Switch::CaseSelector{b.Constant(1_i)}}), [&] {
             auto* ifcond = b.Equal(ty.bool_(), cond, 1_i);
             auto* ifelse = b.If(ifcond);
             b.Append(ifelse->True(), [&] { b.Return(func, 42_i); });
@@ -1520,7 +1521,7 @@ TEST_F(IR_MergeReturnTest, Switch_ConditionalReturnInBody) {
             b.ExitSwitch(sw);
         });
 
-        b.Append(b.Case(sw, {Switch::CaseSelector{}}), [&] { b.ExitSwitch(sw); });
+        b.Append(b.Case(sw, {ir::Switch::CaseSelector{}}), [&] { b.ExitSwitch(sw); });
 
         b.Return(func, 0_i);
     });
@@ -1609,7 +1610,7 @@ TEST_F(IR_MergeReturnTest, Switch_ConditionalReturnInBody) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, Switch_WithBasicBlockArgumentsOnMerge) {
+TEST_F(SpirvWriter_MergeReturnTest, Switch_WithBasicBlockArgumentsOnMerge) {
     auto* cond = b.FunctionParam(ty.i32());
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({cond});
@@ -1617,13 +1618,13 @@ TEST_F(IR_MergeReturnTest, Switch_WithBasicBlockArgumentsOnMerge) {
     b.Append(func->Block(), [&] {
         auto* sw = b.Switch(cond);
         sw->SetResults(b.InstructionResult(ty.i32()));  // NOLINT: false detection of std::tuple
-        b.Append(b.Case(sw, {Switch::CaseSelector{b.Constant(1_i)}}),
+        b.Append(b.Case(sw, {ir::Switch::CaseSelector{b.Constant(1_i)}}),
                  [&] { b.Return(func, 42_i); });
-        b.Append(b.Case(sw, {Switch::CaseSelector{b.Constant(2_i)}}),
+        b.Append(b.Case(sw, {ir::Switch::CaseSelector{b.Constant(2_i)}}),
                  [&] { b.Return(func, 99_i); });
-        b.Append(b.Case(sw, {Switch::CaseSelector{b.Constant(3_i)}}),
+        b.Append(b.Case(sw, {ir::Switch::CaseSelector{b.Constant(3_i)}}),
                  [&] { b.ExitSwitch(sw, 1_i); });
-        b.Append(b.Case(sw, {Switch::CaseSelector{}}), [&] { b.ExitSwitch(sw, 0_i); });
+        b.Append(b.Case(sw, {ir::Switch::CaseSelector{}}), [&] { b.ExitSwitch(sw, 0_i); });
 
         b.Return(func, sw->Result(0));
     });
@@ -1692,7 +1693,7 @@ TEST_F(IR_MergeReturnTest, Switch_WithBasicBlockArgumentsOnMerge) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, LoopIfReturnThenContinue) {
+TEST_F(SpirvWriter_MergeReturnTest, LoopIfReturnThenContinue) {
     auto* func = b.Function("foo", ty.void_());
 
     b.Append(func->Block(), [&] {
@@ -1754,7 +1755,7 @@ TEST_F(IR_MergeReturnTest, LoopIfReturnThenContinue) {
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(IR_MergeReturnTest, NestedIfsWithReturns) {
+TEST_F(SpirvWriter_MergeReturnTest, NestedIfsWithReturns) {
     auto* func = b.Function("foo", ty.i32());
 
     b.Append(func->Block(), [&] {
@@ -1828,4 +1829,4 @@ TEST_F(IR_MergeReturnTest, NestedIfsWithReturns) {
 }
 
 }  // namespace
-}  // namespace tint::ir::transform
+}  // namespace tint::spirv::writer::raise
