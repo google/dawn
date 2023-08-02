@@ -29,6 +29,20 @@ constexpr auto kMetalHeader = R"(#include <metal_stdlib>
 using namespace metal;
 )";
 
+constexpr auto kMetalArray = R"(template<typename T, size_t N>
+struct tint_array {
+  const constant T& operator[](size_t i) const constant { return elements[i]; }
+  device T& operator[](size_t i) device { return elements[i]; }
+  const device T& operator[](size_t i) const device { return elements[i]; }
+  thread T& operator[](size_t i) thread { return elements[i]; }
+  const thread T& operator[](size_t i) const thread { return elements[i]; }
+  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+  T elements[N];
+};
+
+)";
+
 /// Base helper class for testing the MSL generator implementation.
 template <typename BASE>
 class MslPrinterTestHelperBase : public BASE {
@@ -44,6 +58,8 @@ class MslPrinterTestHelperBase : public BASE {
 
     /// @returns the metal header string
     std::string MetalHeader() const { return kMetalHeader; }
+    /// @return the metal array string
+    std::string MetalArray() const { return kMetalArray; }
 
   protected:
     /// The MSL generator.

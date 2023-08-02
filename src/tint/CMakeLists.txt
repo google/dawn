@@ -1556,6 +1556,7 @@ if(TINT_BUILD_TESTS)
         lang/msl/writer/printer/function_test.cc
         lang/msl/writer/printer/helper_test.h
         lang/msl/writer/printer/if_test.cc
+        lang/msl/writer/printer/let_test.cc
         lang/msl/writer/printer/return_test.cc
         lang/msl/writer/printer/type_test.cc
       )

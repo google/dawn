@@ -29,6 +29,7 @@
 namespace tint::ir {
 class ExitIf;
 class If;
+class Let;
 class Return;
 class Unreachable;
 }  // namespace tint::ir
@@ -66,6 +67,10 @@ class Printer : public tint::TextGenerator {
     /// Emit an exit-if instruction
     /// @param e the exit-if instruction
     void EmitExitIf(ir::ExitIf* e);
+
+    /// Emit a let instruction
+    /// @param l the let instruction
+    void EmitLet(ir::Let* l);
 
     /// Emit a return instruction
     /// @param r the return instruction
