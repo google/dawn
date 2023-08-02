@@ -1875,6 +1875,7 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
     auto* func_sem = builder_.Sem().Get(func);
 
     auto func_name = func->name->symbol.Name();
+    workgroup_allocations_.insert({func_name, {}});
 
     // Returns the binding index of a variable, requiring that the group
     // attribute have a value of zero.

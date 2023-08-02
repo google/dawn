@@ -26,52 +26,50 @@
 
 namespace tint::msl::writer {
 
-Result Generate(const Program* program, const Options& options) {
-    Result result;
+Result<Output, std::string> Generate(const Program* program, const Options& options) {
     if (!program->IsValid()) {
-        result.error = "input program is not valid";
-        return result;
+        return std::string("input program is not valid");
     }
 
+    Output output;
 #if TINT_BUILD_IR
     if (options.use_tint_ir) {
         // Convert the AST program to an IR module.
         auto converted = wgsl::reader::ProgramToIR(program);
         if (!converted) {
-            result.error = "IR converter: " + converted.Failure();
-            return result;
+            return std::string("IR converter: " + converted.Failure());
         }
 
         // Generate the MSL code.
         auto ir = converted.Move();
         auto impl = std::make_unique<Printer>(&ir);
-        result.success = impl->Generate();
-        result.error = impl->Diagnostics().str();
-        result.msl = impl->Result();
+        if (!impl->Generate()) {
+            return impl->Diagnostics().str();
+        }
+        output.msl = impl->Result();
     } else  // NOLINT(readability/braces)
 #endif
     {
         // Sanitize the program.
         auto sanitized_result = Sanitize(program, options);
         if (!sanitized_result.program.IsValid()) {
-            result.success = false;
-            result.error = sanitized_result.program.Diagnostics().str();
-            return result;
+            return sanitized_result.program.Diagnostics().str();
         }
-        result.needs_storage_buffer_sizes = sanitized_result.needs_storage_buffer_sizes;
-        result.used_array_length_from_uniform_indices =
+        output.needs_storage_buffer_sizes = sanitized_result.needs_storage_buffer_sizes;
+        output.used_array_length_from_uniform_indices =
             std::move(sanitized_result.used_array_length_from_uniform_indices);
 
         // Generate the MSL code.
         auto impl = std::make_unique<ASTPrinter>(&sanitized_result.program);
-        result.success = impl->Generate();
-        result.error = impl->Diagnostics().str();
-        result.msl = impl->Result();
-        result.has_invariant_attribute = impl->HasInvariant();
-        result.workgroup_allocations = impl->DynamicWorkgroupAllocations();
+        if (!impl->Generate()) {
+            return impl->Diagnostics().str();
+        }
+        output.msl = impl->Result();
+        output.has_invariant_attribute = impl->HasInvariant();
+        output.workgroup_allocations = impl->DynamicWorkgroupAllocations();
     }
 
-    return result;
+    return output;
 }
 
 }  // namespace tint::msl::writer

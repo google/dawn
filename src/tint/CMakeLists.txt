@@ -720,8 +720,8 @@ if(${TINT_BUILD_MSL_WRITER})
     lang/msl/writer/common/options.h
     lang/msl/writer/common/printer_support.cc
     lang/msl/writer/common/printer_support.h
-    lang/msl/writer/result.cc
-    lang/msl/writer/result.h
+    lang/msl/writer/output.cc
+    lang/msl/writer/output.h
     lang/msl/writer/writer.cc
     lang/msl/writer/writer.h
     lang/msl/writer/ast_printer/ast_printer.cc

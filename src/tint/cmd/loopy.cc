@@ -224,9 +224,9 @@ bool GenerateMsl(const tint::Program* program) {
     gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 1},
                                                                           1);
     auto result = tint::msl::writer::Generate(input_program, gen_options);
-    if (!result.success) {
+    if (!result) {
         tint::cmd::PrintWGSL(std::cerr, *program);
-        std::cerr << "Failed to generate: " << result.error << std::endl;
+        std::cerr << "Failed to generate: " << result.Failure() << std::endl;
         return false;
     }
 

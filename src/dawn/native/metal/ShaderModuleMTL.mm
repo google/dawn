@@ -281,26 +281,27 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::msl::writer::Generate");
             auto result = tint::msl::writer::Generate(&program, options);
-            DAWN_INVALID_IF(!result.success, "An error occured while generating MSL: %s.",
-                            result.error);
+            DAWN_INVALID_IF(!result, "An error occured while generating MSL: %s.",
+                            result.Failure());
 
             // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall
             // category. -Wunused-variable in particular comes up a lot in generated code, and some
             // (old?) Metal drivers accidentally treat it as a MTLLibraryErrorCompileError instead
             // of a warning.
-            result.msl = R"(
+            auto msl = std::move(result->msl);
+            msl = R"(
                 #ifdef __clang__
                 #pragma clang diagnostic ignored "-Wall"
                 #endif
-            )" + result.msl;
+            )" + msl;
 
             auto workgroupAllocations =
-                std::move(result.workgroup_allocations[remappedEntryPointName]);
+                std::move(result->workgroup_allocations.at(remappedEntryPointName));
             return MslCompilation{{
-                std::move(result.msl),
+                std::move(msl),
                 std::move(remappedEntryPointName),
-                result.needs_storage_buffer_sizes,
-                result.has_invariant_attribute,
+                result->needs_storage_buffer_sizes,
+                result->has_invariant_attribute,
                 std::move(workgroupAllocations),
                 localSize,
             }};

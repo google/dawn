@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/msl/writer/result.h"
+#include "src/tint/lang/msl/writer/output.h"
 
 namespace tint::msl::writer {
 
-Result::Result() = default;
+Output::Output() = default;
 
-Result::~Result() = default;
+Output::~Output() = default;
 
-Result::Result(const Result&) = default;
+Output::Output(const Output&) = default;
 
 }  // namespace tint::msl::writer

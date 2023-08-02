@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_MSL_WRITER_RESULT_H_
-#define SRC_TINT_LANG_MSL_WRITER_RESULT_H_
+#ifndef SRC_TINT_LANG_MSL_WRITER_OUTPUT_H_
+#define SRC_TINT_LANG_MSL_WRITER_OUTPUT_H_
 
 #include <string>
 #include <unordered_map>
@@ -22,22 +22,16 @@
 
 namespace tint::msl::writer {
 
-/// The result produced when generating MSL.
-struct Result {
+/// The output produced when generating MSL.
+struct Output {
     /// Constructor
-    Result();
+    Output();
 
     /// Destructor
-    ~Result();
+    ~Output();
 
     /// Copy constructor
-    Result(const Result&);
-
-    /// True if generation was successful.
-    bool success = false;
-
-    /// The errors generated during code generation, if any.
-    std::string error;
+    Output(const Output&);
 
     /// The generated MSL.
     std::string msl = "";
@@ -60,4 +54,4 @@ struct Result {
 
 }  // namespace tint::msl::writer
 
-#endif  // SRC_TINT_LANG_MSL_WRITER_RESULT_H_
+#endif  // SRC_TINT_LANG_MSL_WRITER_OUTPUT_H_

@@ -327,7 +327,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
                 input_program = &*flattened;
             }
 
-            msl::writer::Generate(input_program, options_msl_);
+            (void)msl::writer::Generate(input_program, options_msl_);
 #endif  // TINT_BUILD_MSL_WRITER
             break;
         }

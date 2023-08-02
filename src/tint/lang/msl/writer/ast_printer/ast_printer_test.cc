@@ -29,7 +29,8 @@ TEST_F(MslASTPrinterTest, InvalidProgram) {
     auto program = std::make_unique<Program>(resolver::Resolve(*this));
     ASSERT_FALSE(program->IsValid());
     auto result = Generate(program.get(), Options{});
-    EXPECT_EQ(result.error, "input program is not valid");
+    EXPECT_FALSE(result);
+    EXPECT_EQ(result.Failure(), "input program is not valid");
 }
 
 TEST_F(MslASTPrinterTest, UnsupportedExtension) {
@@ -166,8 +167,8 @@ kernel void comp_main(threadgroup tint_symbol_3* tint_symbol_2 [[threadgroup(0)]
 
     auto allocations = gen.DynamicWorkgroupAllocations();
     ASSERT_TRUE(allocations.count("comp_main"));
-    ASSERT_EQ(allocations["comp_main"].size(), 1u);
-    EXPECT_EQ(allocations["comp_main"][0], 2u * 2u * sizeof(float));
+    ASSERT_EQ(allocations.at("comp_main").size(), 1u);
+    EXPECT_EQ(allocations.at("comp_main")[0], 2u * 2u * sizeof(float));
 }
 
 TEST_F(MslASTPrinterTest, WorkgroupMatrixInArray) {
@@ -220,8 +221,8 @@ kernel void comp_main(threadgroup tint_symbol_3* tint_symbol_2 [[threadgroup(0)]
 
     auto allocations = gen.DynamicWorkgroupAllocations();
     ASSERT_TRUE(allocations.count("comp_main"));
-    ASSERT_EQ(allocations["comp_main"].size(), 1u);
-    EXPECT_EQ(allocations["comp_main"][0], 4u * 2u * 2u * sizeof(float));
+    ASSERT_EQ(allocations.at("comp_main").size(), 1u);
+    EXPECT_EQ(allocations.at("comp_main")[0], 4u * 2u * 2u * sizeof(float));
 }
 
 TEST_F(MslASTPrinterTest, WorkgroupMatrixInStruct) {
@@ -277,8 +278,8 @@ kernel void comp_main(threadgroup tint_symbol_4* tint_symbol_3 [[threadgroup(0)]
 
     auto allocations = gen.DynamicWorkgroupAllocations();
     ASSERT_TRUE(allocations.count("comp_main"));
-    ASSERT_EQ(allocations["comp_main"].size(), 1u);
-    EXPECT_EQ(allocations["comp_main"][0], (2 * 2 * sizeof(float)) + (4u * 4u * sizeof(float)));
+    ASSERT_EQ(allocations.at("comp_main").size(), 1u);
+    EXPECT_EQ(allocations.at("comp_main")[0], (2 * 2 * sizeof(float)) + (4u * 4u * sizeof(float)));
 }
 
 TEST_F(MslASTPrinterTest, WorkgroupMatrix_Multiples) {
@@ -421,13 +422,13 @@ kernel void main4_no_usages() {
     ASSERT_TRUE(allocations.count("main1"));
     ASSERT_TRUE(allocations.count("main2"));
     ASSERT_TRUE(allocations.count("main3"));
-    EXPECT_EQ(allocations.count("main4_no_usages"), 0u);
-    ASSERT_EQ(allocations["main1"].size(), 1u);
-    EXPECT_EQ(allocations["main1"][0], 20u * sizeof(float));
-    ASSERT_EQ(allocations["main2"].size(), 1u);
-    EXPECT_EQ(allocations["main2"][0], 32u * sizeof(float));
-    ASSERT_EQ(allocations["main3"].size(), 1u);
-    EXPECT_EQ(allocations["main3"][0], 40u * sizeof(float));
+    ASSERT_EQ(allocations.at("main1").size(), 1u);
+    EXPECT_EQ(allocations.at("main1")[0], 20u * sizeof(float));
+    ASSERT_EQ(allocations.at("main2").size(), 1u);
+    EXPECT_EQ(allocations.at("main2")[0], 32u * sizeof(float));
+    ASSERT_EQ(allocations.at("main3").size(), 1u);
+    EXPECT_EQ(allocations.at("main3")[0], 40u * sizeof(float));
+    EXPECT_EQ(allocations.at("main4_no_usages").size(), 0u);
 }
 
 }  // namespace
