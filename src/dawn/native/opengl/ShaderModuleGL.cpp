@@ -268,11 +268,11 @@ ResultOrError<GLuint> ShaderModule::CompileShader(const OpenGLFunctions& gl,
             tintOptions.allow_collisions = true;
 
             auto result = tint::glsl::writer::Generate(&program, tintOptions, r.entryPointName);
-            DAWN_INVALID_IF(!result.success, "An error occured while generating GLSL: %s.",
-                            result.error);
+            DAWN_INVALID_IF(!result, "An error occured while generating GLSL: %s.",
+                            result.Failure());
 
             return GLSLCompilation{
-                {std::move(result.glsl), needsPlaceholderSampler, std::move(combinedSamplerInfo)}};
+                {std::move(result->glsl), needsPlaceholderSampler, std::move(combinedSamplerInfo)}};
         },
         "OpenGL.CompileShaderToGLSL");
 

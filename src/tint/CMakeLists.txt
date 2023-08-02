@@ -743,8 +743,8 @@ if(${TINT_BUILD_GLSL_WRITER})
     lang/glsl/writer/common/options.cc
     lang/glsl/writer/common/options.h
     lang/glsl/writer/common/version.h
-    lang/glsl/writer/result.cc
-    lang/glsl/writer/result.h
+    lang/glsl/writer/output.cc
+    lang/glsl/writer/output.h
     lang/glsl/writer/writer.cc
     lang/glsl/writer/writer.h
   )

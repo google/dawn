@@ -74,7 +74,8 @@ class ASTPrinter : public tint::TextGenerator {
     ~ASTPrinter() override;
 
     /// Generates the GLSL shader
-    void Generate();
+    /// @returns true on successful generation, false otherwise
+    bool Generate();
 
     /// Record an extension directive within the generator
     /// @param ext the extension to record

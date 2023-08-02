@@ -270,9 +270,9 @@ bool GenerateGlsl(const tint::Program* program) {
     gen_options.external_texture_options.bindings_map =
         tint::cmd::GenerateExternalTextureBindings(program);
     auto result = tint::glsl::writer::Generate(program, gen_options, "");
-    if (!result.success) {
+    if (result) {
         tint::cmd::PrintWGSL(std::cerr, *program);
-        std::cerr << "Failed to generate: " << result.error << std::endl;
+        std::cerr << "Failed to generate: " << result.Failure() << std::endl;
         return false;
     }
 

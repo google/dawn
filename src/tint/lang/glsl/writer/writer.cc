@@ -22,37 +22,37 @@
 
 namespace tint::glsl::writer {
 
-Result Generate(const Program* program, const Options& options, const std::string& entry_point) {
-    Result result;
+Result<Output, std::string> Generate(const Program* program,
+                                     const Options& options,
+                                     const std::string& entry_point) {
     if (!program->IsValid()) {
-        result.error = "input program is not valid";
-        return result;
+        return std::string("input program is not valid");
     }
 
     // Sanitize the program.
     auto sanitized_result = Sanitize(program, options, entry_point);
     if (!sanitized_result.program.IsValid()) {
-        result.success = false;
-        result.error = sanitized_result.program.Diagnostics().str();
-        return result;
+        return sanitized_result.program.Diagnostics().str();
     }
 
     // Generate the GLSL code.
     auto impl = std::make_unique<ASTPrinter>(&sanitized_result.program, options.version);
-    impl->Generate();
-    result.success = impl->Diagnostics().empty();
-    result.error = impl->Diagnostics().str();
-    result.glsl = impl->Result();
+    if (!impl->Generate()) {
+        return impl->Diagnostics().str();
+    }
+
+    Output output;
+    output.glsl = impl->Result();
 
     // Collect the list of entry points in the sanitized program.
     for (auto* func : sanitized_result.program.AST().Functions()) {
         if (func->IsEntryPoint()) {
             auto name = func->name->symbol.Name();
-            result.entry_points.push_back({name, func->PipelineStage()});
+            output.entry_points.push_back({name, func->PipelineStage()});
         }
     }
 
-    return result;
+    return output;
 }
 
 }  // namespace tint::glsl::writer

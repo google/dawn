@@ -260,7 +260,7 @@ ASTPrinter::ASTPrinter(const Program* program, const Version& version)
 
 ASTPrinter::~ASTPrinter() = default;
 
-void ASTPrinter::Generate() {
+bool ASTPrinter::Generate() {
     {
         auto out = Line();
         out << "#version " << version_.major_version << version_.minor_version << "0";
@@ -337,6 +337,8 @@ void ASTPrinter::Generate() {
         current_buffer_->Insert(helpers_, helpers_insertion_point, indent);
         helpers_insertion_point += helpers_.lines.size();
     }
+
+    return !diagnostics_.contains_errors();
 }
 
 void ASTPrinter::RecordExtension(const ast::Enable* enable) {

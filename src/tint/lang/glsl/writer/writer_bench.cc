@@ -38,8 +38,8 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
     for (auto _ : state) {
         for (auto& ep : entry_points) {
             auto res = Generate(&program, {}, ep);
-            if (!res.error.empty()) {
-                state.SkipWithError(res.error.c_str());
+            if (!res) {
+                state.SkipWithError(res.Failure().c_str());
             }
         }
     }

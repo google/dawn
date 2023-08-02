@@ -833,27 +833,27 @@ bool GenerateGlsl(const tint::Program* program, const Options& options) {
         gen_options.external_texture_options.bindings_map =
             tint::cmd::GenerateExternalTextureBindings(prg);
         auto result = tint::glsl::writer::Generate(prg, gen_options, entry_point_name);
-        if (!result.success) {
+        if (!result) {
             tint::cmd::PrintWGSL(std::cerr, *prg);
-            std::cerr << "Failed to generate: " << result.error << std::endl;
+            std::cerr << "Failed to generate: " << result.Failure() << std::endl;
             return false;
         }
 
-        if (!WriteFile(options.output_file, "w", result.glsl)) {
+        if (!WriteFile(options.output_file, "w", result->glsl)) {
             return false;
         }
 
-        const auto hash = tint::CRC32(result.glsl.c_str());
+        const auto hash = tint::CRC32(result->glsl.c_str());
         if (options.print_hash) {
             PrintHash(hash);
         }
 
         if (options.validate && options.skip_hash.count(hash) == 0) {
-            for (auto entry_pt : result.entry_points) {
+            for (auto entry_pt : result->entry_points) {
                 EShLanguage lang = pipeline_stage_to_esh_language(entry_pt.second);
                 glslang::TShader shader(lang);
-                const char* strings[1] = {result.glsl.c_str()};
-                int lengths[1] = {static_cast<int>(result.glsl.length())};
+                const char* strings[1] = {result->glsl.c_str()};
+                int lengths[1] = {static_cast<int>(result->glsl.length())};
                 shader.setStringsWithLengths(strings, lengths, 1);
                 shader.setEntryPoint("main");
                 bool glslang_result = shader.parse(GetDefaultResources(), 310, EEsProfile, false,

@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/glsl/writer/result.h"
+#include "src/tint/lang/glsl/writer/output.h"
 
 namespace tint::glsl::writer {
 
-Result::Result() = default;
+Output::Output() = default;
 
-Result::~Result() = default;
+Output::~Output() = default;
 
-Result::Result(const Result&) = default;
+Output::Output(const Output&) = default;
 
 }  // namespace tint::glsl::writer
