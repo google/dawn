@@ -61,7 +61,7 @@ TEST(ContentLessObjectCacheTest, Empty) {
 TEST(ContentLessObjectCacheTest, NonEmpty) {
     ContentLessObjectCache<CacheableT> cache;
     Ref<CacheableT> object = AcquireRef(new CacheableT(1, [&](CacheableT* x) { cache.Erase(x); }));
-    EXPECT_TRUE(cache.Insert(object).second);
+    EXPECT_TRUE(cache.Insert(object.Get()).second);
     EXPECT_FALSE(cache.Empty());
 }
 

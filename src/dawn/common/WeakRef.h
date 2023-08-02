@@ -23,6 +23,23 @@
 namespace dawn {
 
 template <typename T>
+class WeakRef;
+
+template <
+    typename T,
+    typename = typename std::enable_if<std::is_base_of_v<detail::WeakRefSupportBase, T>>::type>
+WeakRef<T> GetWeakRef(T* obj) {
+    return WeakRef<T>(obj);
+}
+
+template <
+    typename T,
+    typename = typename std::enable_if<std::is_base_of_v<detail::WeakRefSupportBase, T>>::type>
+WeakRef<T> GetWeakRef(const Ref<T>& obj) {
+    return GetWeakRef(obj.Get());
+}
+
+template <typename T>
 class WeakRef {
   public:
     WeakRef() {}
@@ -71,6 +88,9 @@ class WeakRef {
         }
         return nullptr;
     }
+
+    friend WeakRef GetWeakRef<>(T* obj);
+    friend WeakRef GetWeakRef<>(const Ref<T>& obj);
 
   private:
     // Friend is needed so that we can access the data ref in conversions.

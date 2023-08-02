@@ -52,7 +52,7 @@ class WeakRefDerivedB : public WeakRefBaseB {};
 // When the original refcounted object is destroyed, all WeakRefs are no longer able to Promote.
 TEST(WeakRefTests, BasicPromote) {
     Ref<WeakRefBaseA> base = AcquireRef(new WeakRefBaseA());
-    WeakRef<WeakRefBaseA> weak = base.GetWeakRef();
+    WeakRef<WeakRefBaseA> weak = GetWeakRef(base);
     EXPECT_EQ(weak.Promote().Get(), base.Get());
 
     base = nullptr;
@@ -63,9 +63,9 @@ TEST(WeakRefTests, BasicPromote) {
 // longer able to Promote.
 TEST(WeakRefTests, DerivedPromote) {
     Ref<WeakRefDerivedA> base = AcquireRef(new WeakRefDerivedA());
-    WeakRef<WeakRefDerivedA> weak1 = base.GetWeakRef();
+    WeakRef<WeakRefDerivedA> weak1 = GetWeakRef(base);
     WeakRef<WeakRefBaseA> weak2 = weak1;
-    WeakRef<WeakRefBaseA> weak3 = base.GetWeakRef();
+    WeakRef<WeakRefBaseA> weak3 = GetWeakRef(base);
     EXPECT_EQ(weak1.Promote().Get(), base.Get());
     EXPECT_EQ(weak2.Promote().Get(), base.Get());
     EXPECT_EQ(weak3.Promote().Get(), base.Get());
@@ -85,7 +85,7 @@ TEST(WeakRefTests, DeletingAndPromoting) {
     }));
 
     auto f = [&] {
-        WeakRef<WeakRefBaseA> weak = base.GetWeakRef();
+        WeakRef<WeakRefBaseA> weak = GetWeakRef(base);
         semA.Release();
         semB.Acquire();
         EXPECT_EQ(weak.Promote().Get(), nullptr);
@@ -152,8 +152,8 @@ TEST(WeakRefTests, CrossTypesAssignments) {
 
 // Helper detection utilty to verify whether GetWeakRef is enabled.
 template <typename T>
-using can_get_weakref_t = decltype(std::declval<Ref<T>>().GetWeakRef());
-TEST(WeakRefTests, GetWeakRef) {
+using can_get_weakref_t = decltype(GetWeakRef(std::declval<T*>()));
+TEST(WeakRefTests, GetWeakRefFromPtr) {
     // The GetWeakRef function is only available on types that extend WeakRefSupport.
     static_assert(std::experimental::is_detected_v<can_get_weakref_t, WeakRefBaseA>,
                   "GetWeakRef is enabled on classes that directly extend WeakRefSupport.");
@@ -161,6 +161,20 @@ TEST(WeakRefTests, GetWeakRef) {
                   "GetWeakRef is enabled on classes that indirectly extend WeakRefSupport.");
 
     static_assert(!std::experimental::is_detected_v<can_get_weakref_t, RefCountedT>,
+                  "GetWeakRef is disabled on classes that do not extend WeakRefSupport.");
+}
+
+// Helper detection utilty to verify whether GetWeakRef is enabled.
+template <typename T>
+using can_get_weakref_from_ref_t = decltype(GetWeakRef(std::declval<Ref<T>>()));
+TEST(WeakRefTests, GetWeakRefFromRef) {
+    // The GetWeakRef function is only available on types that extend WeakRefSupport.
+    static_assert(std::experimental::is_detected_v<can_get_weakref_from_ref_t, WeakRefBaseA>,
+                  "GetWeakRef is enabled on classes that directly extend WeakRefSupport.");
+    static_assert(std::experimental::is_detected_v<can_get_weakref_from_ref_t, WeakRefDerivedA>,
+                  "GetWeakRef is enabled on classes that indirectly extend WeakRefSupport.");
+
+    static_assert(!std::experimental::is_detected_v<can_get_weakref_from_ref_t, RefCountedT>,
                   "GetWeakRef is disabled on classes that do not extend WeakRefSupport.");
 }
 

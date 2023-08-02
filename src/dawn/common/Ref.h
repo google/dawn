@@ -43,13 +43,6 @@ template <typename T>
 class Ref : public RefBase<T*, detail::RefCountedTraits<T>> {
   public:
     using RefBase<T*, detail::RefCountedTraits<T>>::RefBase;
-
-    template <
-        typename U = T,
-        typename = typename std::enable_if<std::is_base_of_v<detail::WeakRefSupportBase, U>>::type>
-    WeakRef<T> GetWeakRef() {
-        return WeakRef<T>(this->Get());
-    }
 };
 
 }  // namespace dawn

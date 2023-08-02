@@ -156,10 +156,10 @@ class ContentLessObjectCache {
     // Inserts the object into the cache returning a pair where the first is a Ref to the
     // inserted or existing object, and the second is a bool that is true if we inserted
     // `object` and false otherwise.
-    std::pair<Ref<RefCountedT>, bool> Insert(Ref<RefCountedT> obj) {
+    std::pair<Ref<RefCountedT>, bool> Insert(RefCountedT* obj) {
         std::lock_guard<std::mutex> lock(mMutex);
         detail::WeakRefAndHash<RefCountedT> weakref =
-            std::make_pair(obj.GetWeakRef(), typename RefCountedT::HashFunc()(obj.Get()));
+            std::make_pair(GetWeakRef(obj), typename RefCountedT::HashFunc()(obj));
         auto [it, inserted] = mCache.insert(weakref);
         if (inserted) {
             obj->mCache = this;
