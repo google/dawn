@@ -192,6 +192,8 @@ source_set("sources") {
     "BindGroup.h",
     "BindGroupLayout.cpp",
     "BindGroupLayout.h",
+    "BindGroupLayoutInternal.cpp",
+    "BindGroupLayoutInternal.h",
     "BindGroupTracker.h",
     "BindingInfo.cpp",
     "BindingInfo.h",

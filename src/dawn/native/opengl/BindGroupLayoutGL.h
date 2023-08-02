@@ -16,7 +16,7 @@
 #define SRC_DAWN_NATIVE_OPENGL_BINDGROUPLAYOUTGL_H_
 
 #include "dawn/common/SlabAllocator.h"
-#include "dawn/native/BindGroupLayout.h"
+#include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/opengl/BindGroupGL.h"
 
 namespace dawn::native::opengl {

@@ -16,7 +16,7 @@
 #define SRC_DAWN_NATIVE_D3D11_BINDGROUPLAYOUTD3D11_H_
 
 #include "dawn/common/SlabAllocator.h"
-#include "dawn/native/BindGroupLayout.h"
+#include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/d3d11/BindGroupD3D11.h"
 
 namespace dawn::native::d3d11 {

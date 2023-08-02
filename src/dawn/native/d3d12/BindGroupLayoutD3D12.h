@@ -17,10 +17,9 @@
 
 #include <vector>
 
-#include "dawn/native/BindGroupLayout.h"
-
 #include "dawn/common/SlabAllocator.h"
 #include "dawn/common/ityp_stack_vec.h"
+#include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/d3d12/BindGroupD3D12.h"
 #include "dawn/native/d3d12/d3d12_platform.h"
 

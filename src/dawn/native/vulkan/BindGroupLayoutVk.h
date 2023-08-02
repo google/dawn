@@ -17,10 +17,9 @@
 
 #include <vector>
 
-#include "dawn/native/BindGroupLayout.h"
-
 #include "dawn/common/SlabAllocator.h"
 #include "dawn/common/vulkan_platform.h"
+#include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/vulkan/BindGroupVk.h"
 
 namespace dawn::native {
