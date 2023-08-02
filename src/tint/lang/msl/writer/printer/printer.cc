@@ -14,6 +14,8 @@
 
 #include "src/tint/lang/msl/writer/printer/printer.h"
 
+#include <utility>
+
 #include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/ir/constant.h"
@@ -173,31 +175,22 @@ void Printer::EmitBlockInstructions(ir::Block* block) {
 }
 
 void Printer::EmitIf(ir::If* if_) {
-    // TODO(dsinclair): Detect if this is a short-circuit and rebuild || and &&.
-
     // Emit any nodes that need to be used as PHI nodes
     for (auto* phi : if_->Results()) {
         if (!ir_->NameOf(phi).IsValid()) {
             ir_->SetName(phi, ir_->symbols.New());
         }
 
+        auto name = ir_->NameOf(phi);
+
         auto out = Line();
         EmitType(out, phi->Type());
-        out << " " << ir_->NameOf(phi).Name() << ";";
+        out << " " << name.Name() << ";";
+
+        Bind(phi, name);
     }
 
-    {
-        auto out = Line();
-        out << "if (";
-
-        // TODO(dsinclair): This should emit the expression instead of just assuming it's a constant
-        if (!if_->Condition()->Is<ir::Constant>()) {
-            TINT_ICE() << "if only handles constants";
-            return;
-        }
-        EmitConstant(out, if_->Condition()->As<ir::Constant>());
-        out << ") {";
-    }
+    Line() << "if (" << Expr(if_->Condition()) << ") {";
 
     {
         ScopedIndent si(current_buffer_);
@@ -221,15 +214,7 @@ void Printer::EmitExitIf(ir::ExitIf* e) {
         auto* phi = results[i];
         auto* val = args[i];
 
-        if (!val->Is<ir::Constant>()) {
-            TINT_ICE() << "exit-if only handles constants";
-            return;
-        }
-
-        auto out = Line();
-        out << ir_->NameOf(phi).Name() << " = "; /* << Expr(val); */
-        EmitConstant(out, val->As<ir::Constant>());
-        out << ";";
+        Line() << ir_->NameOf(phi).Name() << " = " << Expr(val) << ";";
     }
 }
 
@@ -241,18 +226,9 @@ void Printer::EmitReturn(ir::Return* r) {
     }
 
     auto out = Line();
-
     out << "return";
     if (!r->Args().IsEmpty()) {
-        // TODO(dsinclair): This should emit the expression instead of just assuming it's a constant
-        // value
-        if (!r->Args().Front()->Is<ir::Constant>()) {
-            TINT_ICE() << "return only handles constants";
-            return;
-        }
-
-        out << " ";  // << Expr(out, r->Args().Front());
-        EmitConstant(out, r->Args().Front()->As<ir::Constant>());
+        out << " " << Expr(r->Args().Front());
     }
     out << ";";
 }
@@ -652,6 +628,117 @@ std::string Printer::StructName(const type::Struct* s) {
 
 std::string Printer::UniqueIdentifier(const std::string& prefix /* = "" */) {
     return ir_->symbols.New(prefix).Name();
+}
+
+TINT_BEGIN_DISABLE_WARNING(UNREACHABLE_CODE);
+
+std::string Printer::Expr(ir::Value* value, PtrKind want_ptr_kind) {
+    using ExprAndPtrKind = std::pair<std::string, PtrKind>;
+
+    auto [expr, got_ptr_kind] = tint::Switch(
+        value,
+        [&](ir::Constant* c) -> ExprAndPtrKind {
+            StringStream str;
+            EmitConstant(str, c);
+            return {str.str(), PtrKind::kRef};
+        },
+        [&](Default) -> ExprAndPtrKind {
+            auto lookup = bindings_.Find(value);
+            if (TINT_UNLIKELY(!lookup)) {
+                TINT_ICE() << "Expr(" << (value ? value->TypeInfo().name : "null")
+                           << ") value has no expression";
+                return {};
+            }
+
+            return std::visit(
+                [&](auto&& got) -> ExprAndPtrKind {
+                    using T = std::decay_t<decltype(got)>;
+
+                    if constexpr (std::is_same_v<T, VariableValue>) {
+                        return {got.name.Name(), got.ptr_kind};
+                    }
+
+                    if constexpr (std::is_same_v<T, InlinedValue>) {
+                        // Single use (inlined) expression.
+                        // Mark the bindings_ map entry as consumed.
+                        *lookup = ConsumedValue{};
+                        return {got.expr, got.ptr_kind};
+                    }
+
+                    if constexpr (std::is_same_v<T, ConsumedValue>) {
+                        TINT_ICE() << "Expr(" << value->TypeInfo().name
+                                   << ") called twice on the same value";
+                    } else {
+                        TINT_ICE() << "Expr(" << value->TypeInfo().name << ") has unhandled value";
+                    }
+                    return {};
+                },
+                *lookup);
+        });
+    if (expr.empty()) {
+        return "<error>";
+    }
+
+    if (value->Type()->Is<type::Pointer>()) {
+        return ToPtrKind(expr, got_ptr_kind, want_ptr_kind);
+    }
+
+    return expr;
+}
+
+TINT_END_DISABLE_WARNING(UNREACHABLE_CODE);
+
+std::string Printer::ToPtrKind(const std::string& in, PtrKind got, PtrKind want) {
+    if (want == PtrKind::kRef && got == PtrKind::kPtr) {
+        return "*(" + in + ")";
+    }
+    if (want == PtrKind::kPtr && got == PtrKind::kRef) {
+        return "&(" + in + ")";
+    }
+    return in;
+}
+
+void Printer::Bind(ir::Value* value, const std::string& expr, PtrKind ptr_kind) {
+    TINT_ASSERT(value);
+
+    if (false /*can_inline_.Remove(value)*/) {
+        // Value will be inlined at its place of usage.
+        if (TINT_LIKELY(bindings_.Add(value, InlinedValue{expr, ptr_kind}))) {
+            return;
+        }
+    } else {
+        auto mod_name = ir_->NameOf(value);
+        if (value->Usages().IsEmpty() && !mod_name.IsValid()) {
+            // Drop phonies.
+        } else {
+            if (mod_name.Name().empty()) {
+                mod_name = ir_->symbols.New("v");
+            }
+
+            auto out = Line();
+            EmitType(out, value->Type());
+            out << " const " << mod_name.Name() << " = ";
+            if (value->Type()->Is<type::Pointer>()) {
+                out << ToPtrKind(expr, ptr_kind, PtrKind::kPtr);
+            } else {
+                out << expr;
+            }
+
+            Bind(value, mod_name, PtrKind::kPtr);
+        }
+        return;
+    }
+
+    TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
+}
+
+void Printer::Bind(ir::Value* value, Symbol name, PtrKind ptr_kind) {
+    TINT_ASSERT(value);
+
+    bool added = bindings_.Add(value, VariableValue{name, ptr_kind});
+    if (TINT_UNLIKELY(!added)) {
+        TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
+    }
 }
 
 }  // namespace tint::msl::writer

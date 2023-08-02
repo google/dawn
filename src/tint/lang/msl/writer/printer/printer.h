@@ -158,6 +158,58 @@ class Printer : public tint::TextGenerator {
     ir::Function* current_function_ = nullptr;
     /// The current block being emitted
     ir::Block* current_block_ = nullptr;
+
+    /// The representation for an IR pointer type
+    enum class PtrKind {
+        kPtr,  // IR pointer is represented in a pointer
+        kRef,  // IR pointer is represented in a reference
+    };
+
+    /// The structure for a value held by a 'let', 'var' or parameter.
+    struct VariableValue {
+        Symbol name;  // Name of the variable
+        PtrKind ptr_kind = PtrKind::kRef;
+    };
+
+    /// The structure for an inlined value
+    struct InlinedValue {
+        std::string expr;
+        PtrKind ptr_kind = PtrKind::kRef;
+    };
+
+    /// Empty struct used as a sentinel value to indicate that an string expression has been
+    /// consumed by its single place of usage. Attempting to use this value a second time should
+    /// result in an ICE.
+    struct ConsumedValue {};
+
+    using ValueBinding = std::variant<VariableValue, InlinedValue, ConsumedValue>;
+
+    /// IR values to their representation
+    Hashmap<ir::Value*, ValueBinding, 32> bindings_;
+
+    /// Returns the expression for the given value
+    /// @param value the value to lookup
+    /// @param want_ptr_kind the pointer information for the return
+    /// @returns the string expression
+    std::string Expr(ir::Value* value, PtrKind want_ptr_kind = PtrKind::kRef);
+
+    /// Returns the given expression converted to the given pointer kind
+    /// @param in the input expression
+    /// @param got the pointer kind we have
+    /// @param want the pointer kind we want
+    std::string ToPtrKind(const std::string& in, PtrKind got, PtrKind want);
+
+    /// Associates an IR value with a result expression
+    /// @param value the IR value
+    /// @param expr the result expression
+    /// @param ptr_kind defines how pointer values are represented by the expression
+    void Bind(ir::Value* value, const std::string& expr, PtrKind ptr_kind = PtrKind::kRef);
+
+    /// Associates an IR value the 'var', 'let' or parameter of the given name
+    /// @param value the IR value
+    /// @param name the name for the value
+    /// @param ptr_kind defines how pointer values are represented by @p expr.
+    void Bind(ir::Value* value, Symbol name, PtrKind ptr_kind = PtrKind::kRef);
 };
 
 }  // namespace tint::msl::writer
