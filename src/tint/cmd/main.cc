@@ -692,17 +692,17 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
         tint::cmd::GenerateExternalTextureBindings(program);
     gen_options.root_constant_binding_point = options.hlsl_root_constant_binding_point;
     auto result = tint::hlsl::writer::Generate(program, gen_options);
-    if (!result.success) {
+    if (!result) {
         tint::cmd::PrintWGSL(std::cerr, *program);
-        std::cerr << "Failed to generate: " << result.error << std::endl;
+        std::cerr << "Failed to generate: " << result.Failure() << std::endl;
         return false;
     }
 
-    if (!WriteFile(options.output_file, "w", result.hlsl)) {
+    if (!WriteFile(options.output_file, "w", result->hlsl)) {
         return false;
     }
 
-    const auto hash = tint::CRC32(result.hlsl.c_str());
+    const auto hash = tint::CRC32(result->hlsl.c_str());
     if (options.print_hash) {
         PrintHash(hash);
     }
@@ -731,7 +731,7 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
                 }
 
                 dxc_res = tint::hlsl::validate::UsingDXC(
-                    dxc.Path(), result.hlsl, result.entry_points, dxc_require_16bit_types);
+                    dxc.Path(), result->hlsl, result->entry_points, dxc_require_16bit_types);
             } else if (must_validate_dxc) {
                 // DXC was explicitly requested. Error if it could not be found.
                 dxc_res.failed = true;
@@ -751,7 +751,7 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
             if (fxc.Found()) {
                 fxc_found = true;
                 fxc_res =
-                    tint::hlsl::validate::UsingFXC(fxc.Path(), result.hlsl, result.entry_points);
+                    tint::hlsl::validate::UsingFXC(fxc.Path(), result->hlsl, result->entry_points);
             } else if (must_validate_fxc) {
                 // FXC was explicitly requested. Error if it could not be found.
                 fxc_res.failed = true;

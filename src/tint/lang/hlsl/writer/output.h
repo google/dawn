@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_HLSL_WRITER_RESULT_H_
-#define SRC_TINT_LANG_HLSL_WRITER_RESULT_H_
+#ifndef SRC_TINT_LANG_HLSL_WRITER_OUTPUT_H_
+#define SRC_TINT_LANG_HLSL_WRITER_OUTPUT_H_
 
-#include <optional>
 #include <string>
 #include <unordered_set>
 #include <utility>
@@ -25,22 +24,16 @@
 
 namespace tint::hlsl::writer {
 
-/// The result produced when generating HLSL.
-struct Result {
+/// The output produced when generating HLSL.
+struct Output {
     /// Constructor
-    Result();
+    Output();
 
     /// Destructor
-    ~Result();
+    ~Output();
 
     /// Copy constructor
-    Result(const Result&);
-
-    /// True if generation was successful.
-    bool success = false;
-
-    /// The errors generated during code generation, if any.
-    std::string error;
+    Output(const Output&);
 
     /// The generated HLSL.
     std::string hlsl = "";
@@ -55,4 +48,4 @@ struct Result {
 
 }  // namespace tint::hlsl::writer
 
-#endif  // SRC_TINT_LANG_HLSL_WRITER_RESULT_H_
+#endif  // SRC_TINT_LANG_HLSL_WRITER_OUTPUT_H_

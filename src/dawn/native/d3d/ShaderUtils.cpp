@@ -244,11 +244,11 @@ MaybeError TranslateToHLSL(d3d::HlslCompilationRequest r,
 
     TRACE_EVENT0(tracePlatform.UnsafeGetValue(), General, "tint::hlsl::writer::Generate");
     auto result = tint::hlsl::writer::Generate(&transformedProgram, options);
-    DAWN_INVALID_IF(!result.success, "An error occured while generating HLSL: %s", result.error);
+    DAWN_INVALID_IF(!result, "An error occured while generating HLSL: %s", result.Failure());
 
     compiledShader->usesVertexIndex = usesVertexIndex;
     compiledShader->usesInstanceIndex = usesInstanceIndex;
-    compiledShader->hlslSource = std::move(result.hlsl);
+    compiledShader->hlslSource = std::move(result->hlsl);
     return {};
 }
 

@@ -27,7 +27,8 @@ TEST_F(HlslASTPrinterTest, InvalidProgram) {
     auto program = std::make_unique<Program>(resolver::Resolve(*this));
     ASSERT_FALSE(program->IsValid());
     auto result = Generate(program.get(), Options{});
-    EXPECT_EQ(result.error, "input program is not valid");
+    EXPECT_FALSE(result);
+    EXPECT_EQ(result.Failure(), "input program is not valid");
 }
 
 TEST_F(HlslASTPrinterTest, UnsupportedExtension) {

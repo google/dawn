@@ -15,8 +15,11 @@
 #ifndef SRC_TINT_LANG_HLSL_WRITER_WRITER_H_
 #define SRC_TINT_LANG_HLSL_WRITER_WRITER_H_
 
+#include <string>
+
 #include "src/tint/lang/hlsl/writer/common/options.h"
-#include "src/tint/lang/hlsl/writer/result.h"
+#include "src/tint/lang/hlsl/writer/output.h"
+#include "src/tint/utils/result/result.h"
 
 // Forward declarations
 namespace tint {
@@ -26,12 +29,11 @@ class Program;
 namespace tint::hlsl::writer {
 
 /// Generate HLSL for a program, according to a set of configuration options.
-/// The result will contain the HLSL, as well as success status and diagnostic
-/// information.
+/// The result will contain the HLSL and supplementary information, or an error string.
 /// @param program the program to translate to HLSL
 /// @param options the configuration options to use when generating HLSL
-/// @returns the resulting HLSL and supplementary information
-Result Generate(const Program* program, const Options& options);
+/// @returns the resulting HLSL and supplementary information, or an error string
+Result<Output, std::string> Generate(const Program* program, const Options& options);
 
 }  // namespace tint::hlsl::writer
 

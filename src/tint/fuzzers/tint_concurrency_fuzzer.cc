@@ -95,7 +95,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
 #if TINT_BUILD_HLSL_WRITER
                 case Writer::kHLSL: {
-                    tint::hlsl::writer::Generate(&program, {});
+                    (void)tint::hlsl::writer::Generate(&program, {});
                     break;
                 }
 #endif  // TINT_BUILD_HLSL_WRITER
