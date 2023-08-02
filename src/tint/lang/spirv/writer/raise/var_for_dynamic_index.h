@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_EXPAND_IMPLICIT_SPLATS_H_
-#define SRC_TINT_LANG_CORE_IR_TRANSFORM_EXPAND_IMPLICIT_SPLATS_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_RAISE_VAR_FOR_DYNAMIC_INDEX_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_RAISE_VAR_FOR_DYNAMIC_INDEX_H_
 
 #include <string>
 
@@ -26,12 +26,14 @@ class Module;
 
 namespace tint::ir::transform {
 
-/// ExpandImplicitSplats is a transform that expands implicit vector splat operands in construct
-/// instructions and binary instructions where not supported by SPIR-V.
+/// VarForDynamicIndex is a transform that copies array and matrix values that are dynamically
+/// indexed to a temporary local `var` before performing the index. This transform is used by the
+/// SPIR-V writer as there is no SPIR-V instruction that can dynamically index a non-pointer
+/// composite.
 /// @param module the module to transform
 /// @returns an error string on failure
-Result<SuccessType, std::string> ExpandImplicitSplats(Module* module);
+Result<SuccessType, std::string> VarForDynamicIndex(Module* module);
 
 }  // namespace tint::ir::transform
 
-#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_EXPAND_IMPLICIT_SPLATS_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_RAISE_VAR_FOR_DYNAMIC_INDEX_H_

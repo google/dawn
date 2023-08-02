@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/core/ir/transform/expand_implicit_splats.h"
+#include "src/tint/lang/spirv/writer/raise/expand_implicit_splats.h"
 
 #include <utility>
 

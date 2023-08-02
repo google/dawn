@@ -51,14 +51,8 @@
 #include "src/tint/lang/core/ir/terminator.h"
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 #include "src/tint/lang/core/ir/transform/block_decorated_structs.h"
-#include "src/tint/lang/core/ir/transform/builtin_polyfill_spirv.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
-#include "src/tint/lang/core/ir/transform/expand_implicit_splats.h"
-#include "src/tint/lang/core/ir/transform/handle_matrix_arithmetic.h"
-#include "src/tint/lang/core/ir/transform/merge_return.h"
-#include "src/tint/lang/core/ir/transform/shader_io_spirv.h"
 #include "src/tint/lang/core/ir/transform/std140.h"
-#include "src/tint/lang/core/ir/transform/var_for_dynamic_index.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/user_call.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -85,6 +79,12 @@
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/spirv/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/spirv/writer/common/module.h"
+#include "src/tint/lang/spirv/writer/raise/builtin_polyfill.h"
+#include "src/tint/lang/spirv/writer/raise/expand_implicit_splats.h"
+#include "src/tint/lang/spirv/writer/raise/handle_matrix_arithmetic.h"
+#include "src/tint/lang/spirv/writer/raise/merge_return.h"
+#include "src/tint/lang/spirv/writer/raise/shader_io.h"
+#include "src/tint/lang/spirv/writer/raise/var_for_dynamic_index.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 
@@ -107,12 +107,12 @@ Result<SuccessType, std::string> Sanitize(ir::Module* module) {
 
     RUN_TRANSFORM(AddEmptyEntryPoint);
     RUN_TRANSFORM(BlockDecoratedStructs);
-    RUN_TRANSFORM(BuiltinPolyfillSpirv);
+    RUN_TRANSFORM(BuiltinPolyfill);
     RUN_TRANSFORM(DemoteToHelper);
     RUN_TRANSFORM(ExpandImplicitSplats);
     RUN_TRANSFORM(HandleMatrixArithmetic);
     RUN_TRANSFORM(MergeReturn);
-    RUN_TRANSFORM(ShaderIOSpirv);
+    RUN_TRANSFORM(ShaderIO);
     RUN_TRANSFORM(Std140);
     RUN_TRANSFORM(VarForDynamicIndex);
 

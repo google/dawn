@@ -501,6 +501,8 @@ if (tint_build_ir) {
       "lang/core/ir/transform/demote_to_helper.h",
       "lang/core/ir/transform/shader_io.cc",
       "lang/core/ir/transform/shader_io.h",
+      "lang/core/ir/transform/std140.cc",
+      "lang/core/ir/transform/std140.h",
     ]
     deps = [
       ":libtint_builtins_src",
@@ -509,25 +511,6 @@ if (tint_build_ir) {
       ":libtint_type_src",
       ":libtint_utils_src",
     ]
-
-    if (tint_build_spv_writer) {
-      sources += [
-        "lang/core/ir/transform/builtin_polyfill_spirv.cc",
-        "lang/core/ir/transform/builtin_polyfill_spirv.h",
-        "lang/core/ir/transform/expand_implicit_splats.cc",
-        "lang/core/ir/transform/expand_implicit_splats.h",
-        "lang/core/ir/transform/handle_matrix_arithmetic.cc",
-        "lang/core/ir/transform/handle_matrix_arithmetic.h",
-        "lang/core/ir/transform/merge_return.cc",
-        "lang/core/ir/transform/merge_return.h",
-        "lang/core/ir/transform/shader_io_spirv.cc",
-        "lang/core/ir/transform/shader_io_spirv.h",
-        "lang/core/ir/transform/std140.cc",
-        "lang/core/ir/transform/std140.h",
-        "lang/core/ir/transform/var_for_dynamic_index.cc",
-        "lang/core/ir/transform/var_for_dynamic_index.h",
-      ]
-    }
   }
 }
 
@@ -1038,6 +1021,18 @@ libtint_source_set("libtint_spv_writer_src") {
     sources += [
       "lang/spirv/writer/printer/printer.cc",
       "lang/spirv/writer/printer/printer.h",
+      "lang/spirv/writer/raise/builtin_polyfill.cc",
+      "lang/spirv/writer/raise/builtin_polyfill.h",
+      "lang/spirv/writer/raise/expand_implicit_splats.cc",
+      "lang/spirv/writer/raise/expand_implicit_splats.h",
+      "lang/spirv/writer/raise/handle_matrix_arithmetic.cc",
+      "lang/spirv/writer/raise/handle_matrix_arithmetic.h",
+      "lang/spirv/writer/raise/merge_return.cc",
+      "lang/spirv/writer/raise/merge_return.h",
+      "lang/spirv/writer/raise/shader_io.cc",
+      "lang/spirv/writer/raise/shader_io.h",
+      "lang/spirv/writer/raise/var_for_dynamic_index.cc",
+      "lang/spirv/writer/raise/var_for_dynamic_index.h",
     ]
     deps += [
       ":libtint_ir_src",
@@ -1889,24 +1884,13 @@ if (tint_build_unittests) {
         "lang/core/ir/transform/block_decorated_structs_test.cc",
         "lang/core/ir/transform/demote_to_helper_test.cc",
         "lang/core/ir/transform/helper_test.h",
+        "lang/core/ir/transform/std140_test.cc",
       ]
 
       deps = [
         ":libtint_ir_src",
         ":libtint_ir_transform_src",
       ]
-
-      if (tint_build_spv_writer) {
-        sources += [
-          "lang/core/ir/transform/builtin_polyfill_spirv_test.cc",
-          "lang/core/ir/transform/expand_implicit_splats_test.cc",
-          "lang/core/ir/transform/handle_matrix_arithmetic_test.cc",
-          "lang/core/ir/transform/merge_return_test.cc",
-          "lang/core/ir/transform/shader_io_spirv_test.cc",
-          "lang/core/ir/transform/std140_test.cc",
-          "lang/core/ir/transform/var_for_dynamic_index_test.cc",
-        ]
-      }
     }
   }
 
@@ -2079,6 +2063,12 @@ if (tint_build_unittests) {
         "lang/spirv/writer/if_test.cc",
         "lang/spirv/writer/let_test.cc",
         "lang/spirv/writer/loop_test.cc",
+        "lang/spirv/writer/raise/builtin_polyfill_test.cc",
+        "lang/spirv/writer/raise/expand_implicit_splats_test.cc",
+        "lang/spirv/writer/raise/handle_matrix_arithmetic_test.cc",
+        "lang/spirv/writer/raise/merge_return_test.cc",
+        "lang/spirv/writer/raise/shader_io_test.cc",
+        "lang/spirv/writer/raise/var_for_dynamic_index_test.cc",
         "lang/spirv/writer/switch_test.cc",
         "lang/spirv/writer/swizzle_test.cc",
         "lang/spirv/writer/texture_builtin_test.cc",
@@ -2087,7 +2077,10 @@ if (tint_build_unittests) {
         "lang/spirv/writer/var_test.cc",
         "lang/spirv/writer/writer_test.cc",
       ]
-      deps += [ ":libtint_ir_src" ]
+      deps += [
+        ":libtint_ir_src",
+        ":tint_unittests_ir_transform_src",
+      ]
     }
   }
 

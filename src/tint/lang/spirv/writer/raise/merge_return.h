@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TRANSFORM_HANDLE_MATRIX_ARITHMETIC_H_
-#define SRC_TINT_LANG_CORE_IR_TRANSFORM_HANDLE_MATRIX_ARITHMETIC_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_RAISE_MERGE_RETURN_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_RAISE_MERGE_RETURN_H_
 
 #include <string>
 
@@ -26,12 +26,12 @@ class Module;
 
 namespace tint::ir::transform {
 
-/// HandleMatrixArithmetic is a transform that converts arithmetic instruction that use matrix into
-/// SPIR-V intrinsics or polyfills.
+/// MergeReturn is a transform merges multiple return statements in a function into a single return
+/// at the end of the function.
 /// @param module the module to transform
 /// @returns an error string on failure
-Result<SuccessType, std::string> HandleMatrixArithmetic(Module* module);
+Result<SuccessType, std::string> MergeReturn(Module* module);
 
 }  // namespace tint::ir::transform
 
-#endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_HANDLE_MATRIX_ARITHMETIC_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_RAISE_MERGE_RETURN_H_

@@ -672,22 +672,20 @@ if(${TINT_BUILD_SPV_WRITER})
 
   if(${TINT_BUILD_IR})
     list(APPEND TINT_LIB_SRCS
-      lang/core/ir/transform/builtin_polyfill_spirv.cc
-      lang/core/ir/transform/builtin_polyfill_spirv.h
-      lang/core/ir/transform/expand_implicit_splats.cc
-      lang/core/ir/transform/expand_implicit_splats.h
-      lang/core/ir/transform/handle_matrix_arithmetic.cc
-      lang/core/ir/transform/handle_matrix_arithmetic.h
-      lang/core/ir/transform/merge_return.cc
-      lang/core/ir/transform/merge_return.h
-      lang/core/ir/transform/shader_io_spirv.cc
-      lang/core/ir/transform/shader_io_spirv.h
-      lang/core/ir/transform/std140.cc
-      lang/core/ir/transform/std140.h
-      lang/core/ir/transform/var_for_dynamic_index.cc
-      lang/core/ir/transform/var_for_dynamic_index.h
       lang/spirv/writer/printer/printer.cc
       lang/spirv/writer/printer/printer.h
+      lang/spirv/writer/raise/builtin_polyfill.cc
+      lang/spirv/writer/raise/builtin_polyfill.h
+      lang/spirv/writer/raise/expand_implicit_splats.cc
+      lang/spirv/writer/raise/expand_implicit_splats.h
+      lang/spirv/writer/raise/handle_matrix_arithmetic.cc
+      lang/spirv/writer/raise/handle_matrix_arithmetic.h
+      lang/spirv/writer/raise/merge_return.cc
+      lang/spirv/writer/raise/merge_return.h
+      lang/spirv/writer/raise/shader_io.cc
+      lang/spirv/writer/raise/shader_io.h
+      lang/spirv/writer/raise/var_for_dynamic_index.cc
+      lang/spirv/writer/raise/var_for_dynamic_index.h
     )
   endif()
 endif()
@@ -880,6 +878,8 @@ if(${TINT_BUILD_IR})
     lang/core/ir/transform/demote_to_helper.h
     lang/core/ir/transform/shader_io.cc
     lang/core/ir/transform/shader_io.h
+    lang/core/ir/transform/std140.cc
+    lang/core/ir/transform/std140.h
   )
 endif()
 
@@ -1377,13 +1377,6 @@ if(TINT_BUILD_TESTS)
 
     if(${TINT_BUILD_IR})
       list(APPEND TINT_TEST_SRCS
-        lang/core/ir/transform/builtin_polyfill_spirv_test.cc
-        lang/core/ir/transform/expand_implicit_splats_test.cc
-        lang/core/ir/transform/handle_matrix_arithmetic_test.cc
-        lang/core/ir/transform/merge_return_test.cc
-        lang/core/ir/transform/shader_io_spirv_test.cc
-        lang/core/ir/transform/std140_test.cc
-        lang/core/ir/transform/var_for_dynamic_index_test.cc
         lang/spirv/writer/access_test.cc
         lang/spirv/writer/atomic_builtin_test.cc
         lang/spirv/writer/binary_test.cc
@@ -1398,6 +1391,12 @@ if(TINT_BUILD_TESTS)
         lang/spirv/writer/if_test.cc
         lang/spirv/writer/let_test.cc
         lang/spirv/writer/loop_test.cc
+        lang/spirv/writer/raise/builtin_polyfill_test.cc
+        lang/spirv/writer/raise/expand_implicit_splats_test.cc
+        lang/spirv/writer/raise/handle_matrix_arithmetic_test.cc
+        lang/spirv/writer/raise/merge_return_test.cc
+        lang/spirv/writer/raise/shader_io_test.cc
+        lang/spirv/writer/raise/var_for_dynamic_index_test.cc
         lang/spirv/writer/switch_test.cc
         lang/spirv/writer/swizzle_test.cc
         lang/spirv/writer/texture_builtin_test.cc
@@ -1676,6 +1675,7 @@ if(TINT_BUILD_TESTS)
       lang/core/ir/transform/binding_remapper_test.cc
       lang/core/ir/transform/block_decorated_structs_test.cc
       lang/core/ir/transform/demote_to_helper_test.cc
+      lang/core/ir/transform/std140_test.cc
       lang/core/ir/unary_test.cc
       lang/core/ir/user_call_test.cc
       lang/core/ir/validator_test.cc
