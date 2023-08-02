@@ -19,12 +19,12 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::msl::writer {
 namespace {
 
-// TODO(dsinclair): Requires if emission in MSL generator
-TEST_F(MslPrinterTest, DISABLED_Return) {
+TEST_F(MslPrinterTest, Return) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* if_ = b.If(true);
         b.Append(if_->True(), [&] { b.Return(func); });
+        b.Return(func);
     });
 
     ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();

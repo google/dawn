@@ -27,7 +27,10 @@
 
 // Forward declarations
 namespace tint::ir {
+class ExitIf;
+class If;
 class Return;
+class Unreachable;
 }  // namespace tint::ir
 
 namespace tint::msl::writer {
@@ -57,9 +60,18 @@ class Printer : public tint::TextGenerator {
     /// @param block the block with the instructions to emit
     void EmitBlockInstructions(ir::Block* block);
 
+    /// Emit an if instruction
+    /// @param if_ the if instruction
+    void EmitIf(ir::If* if_);
+    /// Emit an exit-if instruction
+    /// @param e the exit-if instruction
+    void EmitExitIf(ir::ExitIf* e);
+
     /// Emit a return instruction
     /// @param r the return instruction
     void EmitReturn(ir::Return* r);
+    /// Emit an unreachable instruction
+    void EmitUnreachable();
 
     /// Emit a type
     /// @param out the stream to emit too

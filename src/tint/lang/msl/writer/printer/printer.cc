@@ -17,8 +17,11 @@
 #include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/ir/constant.h"
+#include "src/tint/lang/core/ir/exit_if.h"
+#include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/return.h"
+#include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
@@ -149,10 +152,6 @@ void Printer::EmitFunction(ir::Function* func) {
 }
 
 void Printer::EmitBlock(ir::Block* block) {
-    if (block->As<ir::MultiInBlock>()) {
-        // TODO(dsinclair): Emit variables to used by the PHIs.
-    }
-
     // TODO(dsinclair): Handle inline things
     // MarkInlinable(block);
 
@@ -164,9 +163,73 @@ void Printer::EmitBlockInstructions(ir::Block* block) {
 
     for (auto* inst : *block) {
         Switch(
-            inst,                                   //
-            [&](ir::Return* r) { EmitReturn(r); },  //
+            inst,                                          //
+            [&](ir::ExitIf* e) { EmitExitIf(e); },         //
+            [&](ir::If* if_) { EmitIf(if_); },             //
+            [&](ir::Return* r) { EmitReturn(r); },         //
+            [&](ir::Unreachable*) { EmitUnreachable(); },  //
             [&](Default) { TINT_ICE() << "unimplemented instruction: " << inst->TypeInfo().name; });
+    }
+}
+
+void Printer::EmitIf(ir::If* if_) {
+    // TODO(dsinclair): Detect if this is a short-circuit and rebuild || and &&.
+
+    // Emit any nodes that need to be used as PHI nodes
+    for (auto* phi : if_->Results()) {
+        if (!ir_->NameOf(phi).IsValid()) {
+            ir_->SetName(phi, ir_->symbols.New());
+        }
+
+        auto out = Line();
+        EmitType(out, phi->Type());
+        out << " " << ir_->NameOf(phi).Name() << ";";
+    }
+
+    {
+        auto out = Line();
+        out << "if (";
+
+        // TODO(dsinclair): This should emit the expression instead of just assuming it's a constant
+        if (!if_->Condition()->Is<ir::Constant>()) {
+            TINT_ICE() << "if only handles constants";
+            return;
+        }
+        EmitConstant(out, if_->Condition()->As<ir::Constant>());
+        out << ") {";
+    }
+
+    {
+        ScopedIndent si(current_buffer_);
+        EmitBlockInstructions(if_->True());
+    }
+
+    if (if_->False() && !if_->False()->IsEmpty()) {
+        Line() << "} else {";
+
+        ScopedIndent si(current_buffer_);
+        EmitBlockInstructions(if_->False());
+    }
+
+    Line() << "}";
+}
+
+void Printer::EmitExitIf(ir::ExitIf* e) {
+    auto results = e->If()->Results();
+    auto args = e->Args();
+    for (size_t i = 0; i < e->Args().Length(); ++i) {
+        auto* phi = results[i];
+        auto* val = args[i];
+
+        if (!val->Is<ir::Constant>()) {
+            TINT_ICE() << "exit-if only handles constants";
+            return;
+        }
+
+        auto out = Line();
+        out << ir_->NameOf(phi).Name() << " = "; /* << Expr(val); */
+        EmitConstant(out, val->As<ir::Constant>());
+        out << ";";
     }
 }
 
@@ -192,6 +255,10 @@ void Printer::EmitReturn(ir::Return* r) {
         EmitConstant(out, r->Args().Front()->As<ir::Constant>());
     }
     out << ";";
+}
+
+void Printer::EmitUnreachable() {
+    Line() << "/* unreachable */";
 }
 
 void Printer::EmitAddressSpace(StringStream& out, builtin::AddressSpace sc) {
