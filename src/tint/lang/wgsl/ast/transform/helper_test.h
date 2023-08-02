@@ -38,11 +38,11 @@ inline std::string str(const Program& program) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    if (!result.success) {
-        return "WGSL writer failed:\n" + result.error;
+    if (!result) {
+        return "WGSL writer failed:\n" + result.Failure();
     }
 
-    auto res = result.wgsl;
+    auto res = result->wgsl;
     if (res.empty()) {
         return res;
     }

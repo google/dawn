@@ -189,8 +189,8 @@ bool GenerateWgsl(const tint::Program* program) {
 #if TINT_BUILD_WGSL_WRITER
     tint::wgsl::writer::Options gen_options;
     auto result = tint::wgsl::writer::Generate(program, gen_options);
-    if (!result.success) {
-        std::cerr << "Failed to generate: " << result.error << std::endl;
+    if (!result) {
+        std::cerr << "Failed to generate: " << result.Failure() << std::endl;
         return false;
     }
 
@@ -291,17 +291,8 @@ int main(int argc, const char** argv) {
     std::vector<std::string> args(argv, argv + argc);
     Options options;
 
+    tint::Initialize();
     tint::SetInternalCompilerErrorReporter(&tint::cmd::TintInternalCompilerErrorReporter);
-
-#if TINT_BUILD_WGSL_WRITER
-    tint::Program::printer = [](const tint::Program* program) {
-        auto result = tint::wgsl::writer::Generate(program, {});
-        if (!result.error.empty()) {
-            return "error: " + result.error;
-        }
-        return result.wgsl;
-    };
-#endif  // TINT_BUILD_WGSL_WRITER
 
     if (!ParseArgs(args, &options)) {
         std::cerr << "Failed to parse arguments." << std::endl;

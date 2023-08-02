@@ -40,14 +40,14 @@ IRToProgramTest::Result IRToProgramTest::Run() {
     }
 
     auto output = wgsl::writer::Generate(&output_program, {});
-    if (!output.success) {
+    if (!output) {
         std::stringstream ss;
-        ss << "wgsl::Generate() errored: " << output.error;
+        ss << "wgsl::Generate() errored: " << output.Failure();
         result.err = ss.str();
         return result;
     }
 
-    result.wgsl = std::string(tint::TrimSpace(output.wgsl));
+    result.wgsl = std::string(tint::TrimSpace(output->wgsl));
     if (!result.wgsl.empty()) {
         result.wgsl = "\n" + result.wgsl + "\n";
     }

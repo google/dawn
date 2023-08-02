@@ -696,8 +696,8 @@ if(${TINT_BUILD_WGSL_WRITER})
   list(APPEND TINT_LIB_SRCS
     lang/wgsl/writer/options.cc
     lang/wgsl/writer/options.h
-    lang/wgsl/writer/result.cc
-    lang/wgsl/writer/result.h
+    lang/wgsl/writer/output.cc
+    lang/wgsl/writer/output.h
     lang/wgsl/writer/writer.cc
     lang/wgsl/writer/writer.h
     lang/wgsl/writer/ast_printer/ast_printer.cc

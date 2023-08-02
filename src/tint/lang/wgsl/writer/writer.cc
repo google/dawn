@@ -26,35 +26,34 @@
 
 namespace tint::wgsl::writer {
 
-Result Generate(const Program* program, const Options& options) {
+Result<Output, std::string> Generate(const Program* program, const Options& options) {
     (void)options;
 
-    Result result;
     if (!program->IsValid()) {
-        result.error = "input program is not valid";
-        return result;
+        return std::string("input program is not valid");
     }
 
+    Output output;
 #if TINT_BUILD_SYNTAX_TREE_WRITER
     if (options.use_syntax_tree_writer) {
         // Generate the WGSL code.
         auto impl = std::make_unique<SyntaxTreePrinter>(program);
-        impl->Generate();
-        result.success = impl->Diagnostics().empty();
-        result.error = impl->Diagnostics().str();
-        result.wgsl = impl->Result();
+        if (!impl->Generate()) {
+            return impl->Diagnostics().str();
+        }
+        output.wgsl = impl->Result();
     } else  // NOLINT(readability/braces)
 #endif
     {
         // Generate the WGSL code.
         auto impl = std::make_unique<ASTPrinter>(program);
-        impl->Generate();
-        result.success = impl->Diagnostics().empty();
-        result.error = impl->Diagnostics().str();
-        result.wgsl = impl->Result();
+        if (!impl->Generate()) {
+            return impl->Diagnostics().str();
+        }
+        output.wgsl = impl->Result();
     }
 
-    return result;
+    return output;
 }
 
 }  // namespace tint::wgsl::writer

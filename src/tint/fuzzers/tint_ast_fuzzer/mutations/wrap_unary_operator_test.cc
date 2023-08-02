@@ -56,7 +56,7 @@ TEST(WrapUnaryOperatorTest, Applicable1) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    ASSERT_TRUE(result.success) << result.error;
+    ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn main() {
   var a = 5;
@@ -65,7 +65,7 @@ TEST(WrapUnaryOperatorTest, Applicable1) {
   }
 }
 )";
-    ASSERT_EQ(expected_shader, result.wgsl);
+    ASSERT_EQ(expected_shader, result->wgsl);
 }
 
 TEST(WrapUnaryOperatorTest, Applicable2) {
@@ -97,13 +97,13 @@ TEST(WrapUnaryOperatorTest, Applicable2) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    ASSERT_TRUE(result.success) << result.error;
+    ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn main() {
   let a = !(vec3<bool>(true, false, true));
 }
 )";
-    ASSERT_EQ(expected_shader, result.wgsl);
+    ASSERT_EQ(expected_shader, result->wgsl);
 }
 
 TEST(WrapUnaryOperatorTest, Applicable3) {
@@ -135,14 +135,14 @@ TEST(WrapUnaryOperatorTest, Applicable3) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    ASSERT_TRUE(result.success) << result.error;
+    ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn main() {
   var a : u32;
   a = ~(6u);
 }
 )";
-    ASSERT_EQ(expected_shader, result.wgsl);
+    ASSERT_EQ(expected_shader, result->wgsl);
 }
 
 TEST(WrapUnaryOperatorTest, Applicable4) {
@@ -177,14 +177,14 @@ TEST(WrapUnaryOperatorTest, Applicable4) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    ASSERT_TRUE(result.success) << result.error;
+    ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn main() -> vec2<bool> {
   var a = (~(vec2<u32>(1u, 2u)) == vec2<u32>(1u, 2u));
   return a;
 }
 )";
-    ASSERT_EQ(expected_shader, result.wgsl);
+    ASSERT_EQ(expected_shader, result->wgsl);
 }
 
 TEST(WrapUnaryOperatorTest, Applicable5) {
@@ -218,13 +218,13 @@ TEST(WrapUnaryOperatorTest, Applicable5) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    ASSERT_TRUE(result.success) << result.error;
+    ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn main() {
   let a : f32 = -(-(1.0));
 }
 )";
-    ASSERT_EQ(expected_shader, result.wgsl);
+    ASSERT_EQ(expected_shader, result->wgsl);
 }
 
 TEST(WrapUnaryOperatorTest, Applicable6) {
@@ -257,13 +257,13 @@ TEST(WrapUnaryOperatorTest, Applicable6) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    ASSERT_TRUE(result.success) << result.error;
+    ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn main() {
   var a : vec4<f32> = -(vec4<f32>(-(1.0), -(1.0), -(1.0), -(1.0)));
 }
 )";
-    ASSERT_EQ(expected_shader, result.wgsl);
+    ASSERT_EQ(expected_shader, result->wgsl);
 }
 
 TEST(WrapUnaryOperatorTest, Applicable7) {
@@ -300,7 +300,7 @@ TEST(WrapUnaryOperatorTest, Applicable7) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    ASSERT_TRUE(result.success) << result.error;
+    ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn main() {
   var a = 1;
@@ -309,7 +309,7 @@ TEST(WrapUnaryOperatorTest, Applicable7) {
   }
 }
 )";
-    ASSERT_EQ(expected_shader, result.wgsl);
+    ASSERT_EQ(expected_shader, result->wgsl);
 }
 
 TEST(WrapUnaryOperatorTest, Applicable8) {
@@ -342,13 +342,13 @@ TEST(WrapUnaryOperatorTest, Applicable8) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    ASSERT_TRUE(result.success) << result.error;
+    ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn main() {
   var a : vec4<i32> = ~(vec4<i32>(1, 0, -(1), 0));
 }
 )";
-    ASSERT_EQ(expected_shader, result.wgsl);
+    ASSERT_EQ(expected_shader, result->wgsl);
 }
 
 TEST(WrapUnaryOperatorTest, NotApplicable1) {

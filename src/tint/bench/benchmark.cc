@@ -106,10 +106,10 @@ std::variant<tint::Source::File, Error> LoadInputFile(std::string name) {
                 return Error{program.Diagnostics().str()};
             }
             auto result = tint::wgsl::writer::Generate(&program, {});
-            if (!result.success) {
-                return Error{result.error};
+            if (!result) {
+                return Error{result.Failure()};
             }
-            return tint::Source::File(path, result.wgsl);
+            return tint::Source::File(path, result->wgsl);
         }
         return std::get<Error>(spirv);
     }

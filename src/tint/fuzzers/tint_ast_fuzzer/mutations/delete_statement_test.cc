@@ -59,9 +59,9 @@ void CheckStatementDeletionWorks(
     wgsl::writer::Options options;
     auto transformed_result = wgsl::writer::Generate(&program, options);
     auto expected_result = wgsl::writer::Generate(&expected_program, options);
-    ASSERT_TRUE(transformed_result.success) << transformed_result.error;
-    ASSERT_TRUE(expected_result.success) << expected_result.error;
-    ASSERT_EQ(expected_result.wgsl, transformed_result.wgsl);
+    ASSERT_TRUE(transformed_result) << transformed_result.Failure();
+    ASSERT_TRUE(expected_result) << expected_result.Failure();
+    ASSERT_EQ(expected_result->wgsl, transformed_result->wgsl);
 }
 
 void CheckStatementDeletionNotAllowed(

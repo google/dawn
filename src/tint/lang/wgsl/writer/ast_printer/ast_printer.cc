@@ -82,7 +82,7 @@ ASTPrinter::ASTPrinter(const Program* program) : program_(program) {}
 
 ASTPrinter::~ASTPrinter() = default;
 
-void ASTPrinter::Generate() {
+bool ASTPrinter::Generate() {
     // Generate directives before any other global declarations.
     bool has_directives = false;
     for (auto enable : program_->AST().Enables()) {
@@ -114,6 +114,8 @@ void ASTPrinter::Generate() {
             Line();
         }
     }
+
+    return !diagnostics_.contains_errors();
 }
 
 void ASTPrinter::EmitDiagnosticControl(StringStream& out,

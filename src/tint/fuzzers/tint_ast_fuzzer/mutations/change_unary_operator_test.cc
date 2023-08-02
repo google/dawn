@@ -159,14 +159,14 @@ TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable1) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    ASSERT_TRUE(result.success) << result.error;
+    ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn main() {
   let a : i32 = 5;
   let comp_a = -(a);
 }
 )";
-    ASSERT_EQ(expected_shader, result.wgsl);
+    ASSERT_EQ(expected_shader, result->wgsl);
 }
 
 TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable2) {
@@ -200,14 +200,14 @@ TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable2) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    ASSERT_TRUE(result.success) << result.error;
+    ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn main() {
   let b : vec3<i32> = vec3<i32>(1, 3, -(1));
   var comp_b : vec3<i32> = -(b);
 }
 )";
-    ASSERT_EQ(expected_shader, result.wgsl);
+    ASSERT_EQ(expected_shader, result->wgsl);
 }
 
 TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable3) {
@@ -243,14 +243,14 @@ TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable3) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    ASSERT_TRUE(result.success) << result.error;
+    ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn main() {
   var a = -(5);
   var neg_a = ~(a);
 }
 )";
-    ASSERT_EQ(expected_shader, result.wgsl);
+    ASSERT_EQ(expected_shader, result->wgsl);
 }
 
 TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable4) {
@@ -285,14 +285,14 @@ TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable4) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    ASSERT_TRUE(result.success) << result.error;
+    ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn main() {
   var b : vec3<i32> = vec3<i32>(1, 3, -(1));
   let neg_b : vec3<i32> = ~(b);
 }
 )";
-    ASSERT_EQ(expected_shader, result.wgsl);
+    ASSERT_EQ(expected_shader, result->wgsl);
 }
 
 }  // namespace

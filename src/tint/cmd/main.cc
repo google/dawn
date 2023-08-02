@@ -565,23 +565,23 @@ bool GenerateWgsl(const tint::Program* program, const Options& options) {
     // TODO(jrprice): Provide a way for the user to set non-default options.
     tint::wgsl::writer::Options gen_options;
     auto result = tint::wgsl::writer::Generate(program, gen_options);
-    if (!result.success) {
-        std::cerr << "Failed to generate: " << result.error << std::endl;
+    if (!result) {
+        std::cerr << "Failed to generate: " << result.Failure() << std::endl;
         return false;
     }
 
-    if (!WriteFile(options.output_file, "w", result.wgsl)) {
+    if (!WriteFile(options.output_file, "w", result->wgsl)) {
         return false;
     }
 
-    const auto hash = tint::CRC32(result.wgsl.data(), result.wgsl.size());
+    const auto hash = tint::CRC32(result->wgsl.data(), result->wgsl.size());
     if (options.print_hash) {
         PrintHash(hash);
     }
 
     if (options.validate && options.skip_hash.count(hash) == 0) {
         // Attempt to re-parse the output program with Tint's WGSL reader.
-        auto source = std::make_unique<tint::Source::File>(options.input_filename, result.wgsl);
+        auto source = std::make_unique<tint::Source::File>(options.input_filename, result->wgsl);
         auto reparsed_program = tint::wgsl::reader::Parse(source.get());
         if (!reparsed_program.IsValid()) {
             auto diag_printer = tint::diag::Printer::create(stderr, true);
@@ -903,17 +903,8 @@ int main(int argc, const char** argv) {
 
     Options options;
 
+    tint::Initialize();
     tint::SetInternalCompilerErrorReporter(&tint::cmd::TintInternalCompilerErrorReporter);
-
-#if TINT_BUILD_WGSL_WRITER
-    tint::Program::printer = [](const tint::Program* program) {
-        auto result = tint::wgsl::writer::Generate(program, {});
-        if (!result.error.empty()) {
-            return "error: " + result.error;
-        }
-        return result.wgsl;
-    };
-#endif  // TINT_BUILD_WGSL_WRITER
 
     struct TransformFactory {
         const char* name;
@@ -1030,8 +1021,8 @@ int main(int argc, const char** argv) {
         tint::wgsl::writer::Options gen_options;
         gen_options.use_syntax_tree_writer = true;
         auto result = tint::wgsl::writer::Generate(program.get(), gen_options);
-        if (!result.success) {
-            std::cerr << "Failed to dump AST: " << result.error << std::endl;
+        if (!result) {
+            std::cerr << "Failed to dump AST: " << result.Failure() << std::endl;
         } else {
             std::cout << result.wgsl << std::endl;
         }

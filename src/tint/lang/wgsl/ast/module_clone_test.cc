@@ -157,8 +157,8 @@ const declaration_order_check_4 : i32 = 1;
     std::string src_wgsl;
     {
         auto result = wgsl::writer::Generate(&src, options);
-        ASSERT_TRUE(result.success) << result.error;
-        src_wgsl = result.wgsl;
+        ASSERT_TRUE(result) << result.Failure();
+        src_wgsl = result->wgsl;
 
         // Move the src program to a temporary that'll be dropped, so that the src
         // program is released before we attempt to print the dst program. This
@@ -170,8 +170,8 @@ const declaration_order_check_4 : i32 = 1;
 
     // Print the dst module, check it matches the original source
     auto result = wgsl::writer::Generate(&dst, options);
-    ASSERT_TRUE(result.success);
-    auto dst_wgsl = result.wgsl;
+    ASSERT_TRUE(result);
+    auto dst_wgsl = result->wgsl;
     ASSERT_EQ(src_wgsl, dst_wgsl);
 }
 

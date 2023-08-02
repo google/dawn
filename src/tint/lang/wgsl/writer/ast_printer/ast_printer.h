@@ -81,7 +81,8 @@ class ASTPrinter : public tint::TextGenerator {
     ~ASTPrinter() override;
 
     /// Generates the result data
-    void Generate();
+    /// @returns true on successful generation, false otherwise
+    bool Generate();
 
     /// Handles generating a diagnostic control
     /// @param out the output stream

@@ -144,13 +144,13 @@ TEST(ChangeBinaryOperatorTest, Applicable_Simple) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    ASSERT_TRUE(result.success) << result.error;
+    ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn main() {
   let a : i32 = (1 - 2);
 }
 )";
-    ASSERT_EQ(expected_shader, result.wgsl);
+    ASSERT_EQ(expected_shader, result->wgsl);
 }
 
 void CheckMutations(const std::string& lhs_type,
@@ -221,9 +221,9 @@ void CheckMutations(const std::string& lhs_type,
 
             wgsl::writer::Options options;
             auto result = wgsl::writer::Generate(&program, options);
-            ASSERT_TRUE(result.success) << result.error;
+            ASSERT_TRUE(result) << result.Failure();
 
-            ASSERT_EQ(expected_shader.str(), result.wgsl);
+            ASSERT_EQ(expected_shader.str(), result->wgsl);
         }
     }
 }

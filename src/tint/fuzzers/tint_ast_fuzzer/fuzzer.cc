@@ -66,13 +66,13 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
     }
 
     auto result = wgsl::writer::Generate(&program, wgsl::writer::Options());
-    if (!result.success) {
+    if (!result) {
         std::cout << "Can't generate WGSL for a valid tint::Program:" << std::endl
-                  << result.error << std::endl;
+                  << result.Failure() << std::endl;
         return 0;
     }
 
-    if (result.wgsl.size() > max_size) {
+    if (result->wgsl.size() > max_size) {
         return 0;
     }
 
@@ -81,8 +81,8 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
     // cause all sorts of strange bugs. Thus, unless `data` below is used as a raw
     // C string, the \0 symbol should be ignored.
     std::memcpy(  // NOLINT - clang-tidy warns about lack of null termination.
-        data, result.wgsl.data(), result.wgsl.size());
-    return result.wgsl.size();
+        data, result->wgsl.data(), result->wgsl.size());
+    return result->wgsl.size();
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {

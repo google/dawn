@@ -54,10 +54,10 @@ class IRToProgramRoundtripTest : public helpers::IRProgramTest {
         ASSERT_TRUE(output_program.IsValid()) << output_program.Diagnostics().str();
 
         auto output = wgsl::writer::Generate(&output_program, {});
-        ASSERT_TRUE(output.success) << output.error;
+        ASSERT_TRUE(output) << output.Failure();
 
         auto expected = expected_wgsl.empty() ? input : tint::TrimSpace(expected_wgsl);
-        auto got = tint::TrimSpace(output.wgsl);
+        auto got = tint::TrimSpace(output->wgsl);
         EXPECT_EQ(expected, got) << "IR:" << std::endl << disassembly;
     }
 

@@ -22,10 +22,10 @@ void Initialize() {
     // Register the Program printer. This is used for debugging purposes.
     tint::Program::printer = [](const tint::Program* program) {
         auto result = wgsl::writer::Generate(program, {});
-        if (!result.error.empty()) {
-            return "error: " + result.error;
+        if (!result) {
+            return "error: " + result.Failure();
         }
-        return result.wgsl;
+        return result->wgsl;
     };
 #endif
 }

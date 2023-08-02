@@ -128,17 +128,8 @@ CommonFuzzer::CommonFuzzer(InputFormat input, OutputFormat output)
 CommonFuzzer::~CommonFuzzer() = default;
 
 int CommonFuzzer::Run(const uint8_t* data, size_t size) {
+    tint::Initialize();
     tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
-
-#if TINT_BUILD_WGSL_WRITER
-    tint::Program::printer = [](const tint::Program* program) {
-        auto result = tint::wgsl::writer::Generate(program, {});
-        if (!result.error.empty()) {
-            return "error: " + result.error;
-        }
-        return result.wgsl;
-    };
-#endif  // TINT_BUILD_WGSL_WRITER
 
     Program program;
 
@@ -292,7 +283,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     switch (output_) {
         case OutputFormat::kWGSL: {
 #if TINT_BUILD_WGSL_WRITER
-            wgsl::writer::Generate(&program, options_wgsl_);
+            (void)wgsl::writer::Generate(&program, options_wgsl_);
 #endif  // TINT_BUILD_WGSL_WRITER
             break;
         }

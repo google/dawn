@@ -960,9 +960,9 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
 
         tint::wgsl::writer::Options options;
         auto result = tint::wgsl::writer::Generate(&program, options);
-        DAWN_INVALID_IF(!result.success, "Tint WGSL failure: Generator: %s", result.error);
+        DAWN_INVALID_IF(!result, "Tint WGSL failure: Generator: %s", result.Failure());
 
-        newWgslCode = std::move(result.wgsl);
+        newWgslCode = std::move(result->wgsl);
         newWgslDesc.code = newWgslCode.c_str();
 
         spirvDesc = nullptr;

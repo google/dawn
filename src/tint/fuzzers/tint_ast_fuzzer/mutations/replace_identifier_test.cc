@@ -488,7 +488,7 @@ fn f() {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    ASSERT_TRUE(result.success) << result.error;
+    ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn f() {
   var b : vec2<u32>;
@@ -496,7 +496,7 @@ fn f() {
   (*(&(b)))[1] = 3u;
 }
 )";
-    ASSERT_EQ(expected_shader, result.wgsl);
+    ASSERT_EQ(expected_shader, result->wgsl);
 }
 
 TEST(ReplaceIdentifierTest, Applicable2) {
@@ -532,7 +532,7 @@ fn f(b: ptr<function, vec2<u32>>) {
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(&program, options);
-    ASSERT_TRUE(result.success) << result.error;
+    ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn f(b : ptr<function, vec2<u32>>) {
   var a = vec2<u32>(34u, 45u);
@@ -540,7 +540,7 @@ fn f(b: ptr<function, vec2<u32>>) {
   (*(b))[1] = 3u;
 }
 )";
-    ASSERT_EQ(expected_shader, result.wgsl);
+    ASSERT_EQ(expected_shader, result->wgsl);
 }
 
 TEST(ReplaceIdentifierTest, NotApplicable12) {

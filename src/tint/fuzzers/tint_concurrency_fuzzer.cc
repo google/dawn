@@ -81,7 +81,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
             switch (static_cast<Writer>(thread_idx % static_cast<size_t>(Writer::kCount))) {
 #if TINT_BUILD_WGSL_WRITER
                 case Writer::kWGSL: {
-                    tint::wgsl::writer::Generate(&program, {});
+                    (void)tint::wgsl::writer::Generate(&program, {});
                     break;
                 }
 #endif  // TINT_BUILD_WGSL_WRITER

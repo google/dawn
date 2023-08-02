@@ -15,8 +15,11 @@
 #ifndef SRC_TINT_LANG_WGSL_WRITER_WRITER_H_
 #define SRC_TINT_LANG_WGSL_WRITER_WRITER_H_
 
+#include <string>
+
 #include "src/tint/lang/wgsl/writer/options.h"
-#include "src/tint/lang/wgsl/writer/result.h"
+#include "src/tint/lang/wgsl/writer/output.h"
+#include "src/tint/utils/result/result.h"
 
 // Forward declarations
 namespace tint {
@@ -26,12 +29,11 @@ class Program;
 namespace tint::wgsl::writer {
 
 /// Generate WGSL for a program, according to a set of configuration options.
-/// The result will contain the WGSL, as well as success status and diagnostic
-/// information.
+/// The result will contain the WGSL, or an error string.
 /// @param program the program to translate to WGSL
 /// @param options the configuration options to use when generating WGSL
-/// @returns the resulting WGSL and supplementary information
-Result Generate(const Program* program, const Options& options);
+/// @returns the resulting WGSL, or an error string
+Result<Output, std::string> Generate(const Program* program, const Options& options);
 
 }  // namespace tint::wgsl::writer
 
