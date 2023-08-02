@@ -11,4 +11,5 @@ jiawei.shao@intel.com
 per-file dawn.json=file://src/dawn/OWNERS
 
 per-file DEPS=*
+per-file .gitignore=*
 per-file README.md=file://docs/OWNERS
