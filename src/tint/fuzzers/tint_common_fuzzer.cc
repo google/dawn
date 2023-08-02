@@ -299,11 +299,13 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
         case OutputFormat::kSpv: {
 #if TINT_BUILD_SPV_WRITER
             auto result = spirv::writer::Generate(&program, options_spirv_);
-            generated_spirv_ = std::move(result.Get().spirv);
+            if (result) {
+                generated_spirv_ = std::move(result->spirv);
 
-            if (!SPIRVToolsValidationCheck(program, generated_spirv_)) {
-                VALIDITY_ERROR(program.Diagnostics(),
-                               "Fuzzing detected invalid spirv being emitted by Tint");
+                if (!SPIRVToolsValidationCheck(program, generated_spirv_)) {
+                    VALIDITY_ERROR(program.Diagnostics(),
+                                   "Fuzzing detected invalid spirv being emitted by Tint");
+                }
             }
 
 #endif  // TINT_BUILD_SPV_WRITER
