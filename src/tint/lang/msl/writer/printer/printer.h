@@ -25,6 +25,11 @@
 #include "src/tint/utils/generator/text_generator.h"
 #include "src/tint/utils/text/string_stream.h"
 
+// Forward declarations
+namespace tint::ir {
+class Return;
+}  // namespace tint::ir
+
 namespace tint::msl::writer {
 
 /// Implementation class for the MSL generator
@@ -44,6 +49,17 @@ class Printer : public tint::TextGenerator {
     /// Emit the function
     /// @param func the function to emit
     void EmitFunction(ir::Function* func);
+
+    /// Emit a block
+    /// @param block the block to emit
+    void EmitBlock(ir::Block* block);
+    /// Emit the instructions in a block
+    /// @param block the block with the instructions to emit
+    void EmitBlockInstructions(ir::Block* block);
+
+    /// Emit a return instruction
+    /// @param r the return instruction
+    void EmitReturn(ir::Return* r);
 
     /// Emit a type
     /// @param out the stream to emit too
@@ -125,6 +141,11 @@ class Printer : public tint::TextGenerator {
     std::string invariant_define_name_;
 
     std::unordered_set<const type::Struct*> emitted_structs_;
+
+    /// The current function being emitted
+    ir::Function* current_function_ = nullptr;
+    /// The current block being emitted
+    ir::Block* current_block_ = nullptr;
 };
 
 }  // namespace tint::msl::writer

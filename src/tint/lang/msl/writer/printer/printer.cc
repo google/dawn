@@ -17,6 +17,8 @@
 #include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/ir/constant.h"
+#include "src/tint/lang/core/ir/multi_in_block.h"
+#include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
@@ -71,7 +73,6 @@ bool Printer::Generate() {
     {
         TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
         Line() << "#include <metal_stdlib>";
-        Line();
         Line() << "using namespace metal;";
     }
 
@@ -96,15 +97,6 @@ std::string Printer::Result() const {
     StringStream ss;
     ss << preamble_buffer_.String() << std::endl << main_buffer_.String();
     return ss.str();
-}
-
-void Printer::EmitFunction(ir::Function* func) {
-    {
-        auto out = Line();
-        EmitType(out, func->ReturnType());
-        out << " " << ir_->NameOf(func).Name() << "() {";
-    }
-    Line() << "}";
 }
 
 const std::string& Printer::ArrayTemplateName() {
@@ -132,6 +124,74 @@ const std::string& Printer::ArrayTemplateName() {
     Line();
 
     return array_template_name_;
+}
+
+void Printer::EmitFunction(ir::Function* func) {
+    TINT_SCOPED_ASSIGNMENT(current_function_, func);
+
+    {
+        auto out = Line();
+
+        // TODO(dsinclair): Emit function stage if any
+        // TODO(dsinclair): Handle return type attributes
+
+        EmitType(out, func->ReturnType());
+        out << " " << ir_->NameOf(func).Name() << "() {";
+
+        // TODO(dsinclair): Emit Function parameters
+    }
+    {
+        ScopedIndent si(current_buffer_);
+        EmitBlock(func->Block());
+    }
+
+    Line() << "}";
+}
+
+void Printer::EmitBlock(ir::Block* block) {
+    if (block->As<ir::MultiInBlock>()) {
+        // TODO(dsinclair): Emit variables to used by the PHIs.
+    }
+
+    // TODO(dsinclair): Handle inline things
+    // MarkInlinable(block);
+
+    EmitBlockInstructions(block);
+}
+
+void Printer::EmitBlockInstructions(ir::Block* block) {
+    TINT_SCOPED_ASSIGNMENT(current_block_, block);
+
+    for (auto* inst : *block) {
+        Switch(
+            inst,                                   //
+            [&](ir::Return* r) { EmitReturn(r); },  //
+            [&](Default) { TINT_ICE() << "unimplemented instruction: " << inst->TypeInfo().name; });
+    }
+}
+
+void Printer::EmitReturn(ir::Return* r) {
+    // If this return has no arguments and the current block is for the function which is being
+    // returned, skip the return.
+    if (current_block_ == current_function_->Block() && r->Args().IsEmpty()) {
+        return;
+    }
+
+    auto out = Line();
+
+    out << "return";
+    if (!r->Args().IsEmpty()) {
+        // TODO(dsinclair): This should emit the expression instead of just assuming it's a constant
+        // value
+        if (!r->Args().Front()->Is<ir::Constant>()) {
+            TINT_ICE() << "return only handles constants";
+            return;
+        }
+
+        out << " ";  // << Expr(out, r->Args().Front());
+        EmitConstant(out, r->Args().Front()->As<ir::Constant>());
+    }
+    out << ";";
 }
 
 void Printer::EmitAddressSpace(StringStream& out, builtin::AddressSpace sc) {

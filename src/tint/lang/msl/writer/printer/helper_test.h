@@ -18,12 +18,16 @@
 #include <iostream>
 #include <string>
 
-#include "gtest/gtest.h"
+#include "gmock/gmock.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/msl/writer/printer/printer.h"
 
 namespace tint::msl::writer {
+
+constexpr auto kMetalHeader = R"(#include <metal_stdlib>
+using namespace metal;
+)";
 
 /// Base helper class for testing the MSL generator implementation.
 template <typename BASE>
@@ -37,6 +41,9 @@ class MslPrinterTestHelperBase : public BASE {
     ir::Builder b{mod};
     /// The type manager.
     type::Manager& ty{mod.Types()};
+
+    /// @returns the metal header string
+    std::string MetalHeader() const { return kMetalHeader; }
 
   protected:
     /// The MSL generator.
