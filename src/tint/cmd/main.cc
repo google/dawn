@@ -1024,7 +1024,7 @@ int main(int argc, const char** argv) {
         if (!result) {
             std::cerr << "Failed to dump AST: " << result.Failure() << std::endl;
         } else {
-            std::cout << result.wgsl << std::endl;
+            std::cout << result->wgsl << std::endl;
         }
     }
 #endif  // TINT_BUILD_SYNTAX_TREE_WRITER

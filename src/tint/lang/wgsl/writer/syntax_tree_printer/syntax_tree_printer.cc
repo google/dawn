@@ -80,7 +80,7 @@ SyntaxTreePrinter::SyntaxTreePrinter(const Program* program) : program_(program)
 
 SyntaxTreePrinter::~SyntaxTreePrinter() = default;
 
-void SyntaxTreePrinter::Generate() {
+bool SyntaxTreePrinter::Generate() {
     // Generate global declarations in the order they appear in the module.
     for (auto* decl : program_->AST().GlobalDeclarations()) {
         Switch(
@@ -97,6 +97,8 @@ void SyntaxTreePrinter::Generate() {
             Line();
         }
     }
+
+    return true;
 }
 
 void SyntaxTreePrinter::EmitDiagnosticControl(const ast::DiagnosticControl& diagnostic) {
