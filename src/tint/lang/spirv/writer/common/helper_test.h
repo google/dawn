@@ -36,6 +36,8 @@
 
 namespace tint::spirv::writer {
 
+using namespace tint::number_suffixes;  // NOLINT
+
 // Helper macro to check whether the SPIR-V output contains an instruction, dumping the full output
 // if the instruction was not present.
 #define EXPECT_INST(inst) ASSERT_THAT(output_, testing::HasSubstr(inst)) << output_
@@ -215,30 +217,15 @@ class SpirvWriterTestHelperBase : public BASE {
     ir::Constant* MakeVectorValue(TestElementType type) {
         switch (type) {
             case kBool:
-                return b.Constant(mod.constant_values.Composite(
-                    MakeVectorType(type),
-                    Vector<const constant::Value*, 2>{mod.constant_values.Get(true),
-                                                      mod.constant_values.Get(false)}));
+                return b.Composite(MakeVectorType(type), true, false);
             case kI32:
-                return b.Constant(mod.constant_values.Composite(
-                    MakeVectorType(type),
-                    Vector<const constant::Value*, 2>{mod.constant_values.Get(i32(42)),
-                                                      mod.constant_values.Get(i32(-10))}));
+                return b.Composite(MakeVectorType(type), 42_i, -10_i);
             case kU32:
-                return b.Constant(mod.constant_values.Composite(
-                    MakeVectorType(type),
-                    Vector<const constant::Value*, 2>{mod.constant_values.Get(u32(42)),
-                                                      mod.constant_values.Get(u32(10))}));
+                return b.Composite(MakeVectorType(type), 42_u, 10_u);
             case kF32:
-                return b.Constant(mod.constant_values.Composite(
-                    MakeVectorType(type),
-                    Vector<const constant::Value*, 2>{mod.constant_values.Get(f32(42)),
-                                                      mod.constant_values.Get(f32(-0.5))}));
+                return b.Composite(MakeVectorType(type), 42_f, -0.5_f);
             case kF16:
-                return b.Constant(mod.constant_values.Composite(
-                    MakeVectorType(type),
-                    Vector<const constant::Value*, 2>{mod.constant_values.Get(f16(42)),
-                                                      mod.constant_values.Get(f16(-0.5))}));
+                return b.Composite(MakeVectorType(type), 42_h, -0.5_h);
         }
         return nullptr;
     }

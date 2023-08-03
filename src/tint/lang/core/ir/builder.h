@@ -280,6 +280,17 @@ class Builder {
     }
 
     /// Creates a new ir::Constant
+    /// @param ty the splat type
+    /// @param value the splat value
+    /// @param size the number of items
+    /// @returns the new constant
+    template <typename ARG>
+    ir::Constant* Splat(const type::Type* ty, ARG&& value, size_t size) {
+        return Constant(
+            ir.constant_values.Splat(ty, ConstantValue(std::forward<ARG>(value)), size));
+    }
+
+    /// Creates a new ir::Constant
     /// @param ty the constant type
     /// @param values the composite values
     /// @returns the new constant
@@ -567,9 +578,7 @@ class Builder {
     template <typename VAL>
     ir::Binary* Not(const type::Type* type, VAL&& val) {
         if (auto* vec = type->As<type::Vector>()) {
-            return Equal(type, std::forward<VAL>(val),
-                         Constant(ir.constant_values.Splat(vec, ir.constant_values.Get(false),
-                                                           vec->Width())));
+            return Equal(type, std::forward<VAL>(val), Splat(vec, false, vec->Width()));
         } else {
             return Equal(type, std::forward<VAL>(val), Constant(false));
         }

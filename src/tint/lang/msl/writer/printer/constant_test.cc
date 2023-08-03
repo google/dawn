@@ -65,56 +65,45 @@ TEST_F(MslPrinterTest, Constant_F16) {
 }
 
 TEST_F(MslPrinterTest, Constant_Vector_Splat) {
-    auto* c = b.Constant(mod.constant_values.Splat(ty.vec3<f32>(), b.Constant(1.5_f)->Value(), 3));
+    auto* c = b.Splat(ty.vec3<f32>(), 1.5_f, 3);
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
     EXPECT_EQ(tint::TrimSpace(generator_.Result()), std::string("float3(1.5f)"));
 }
 
 TEST_F(MslPrinterTest, Constant_Vector_Composite) {
-    auto* c = b.Constant(mod.constant_values.Composite(
-        ty.vec3<f32>(), Vector{b.Constant(1.5_f)->Value(), b.Constant(1.0_f)->Value(),
-                               b.Constant(1.5_f)->Value()}));
+    auto* c = b.Composite(ty.vec3<f32>(), 1.5_f, 1.0_f, 1.5_f);
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
     EXPECT_EQ(tint::TrimSpace(generator_.Result()), std::string("float3(1.5f, 1.0f, 1.5f)"));
 }
 
 TEST_F(MslPrinterTest, Constant_Vector_Composite_AnyZero) {
-    auto* c = b.Constant(mod.constant_values.Composite(
-        ty.vec3<f32>(), Vector{b.Constant(1.0_f)->Value(), b.Constant(0.0_f)->Value(),
-                               b.Constant(1.5_f)->Value()}));
+    auto* c = b.Composite(ty.vec3<f32>(), 1.0_f, 0.0_f, 1.5_f);
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
     EXPECT_EQ(tint::TrimSpace(generator_.Result()), std::string("float3(1.0f, 0.0f, 1.5f)"));
 }
 
 TEST_F(MslPrinterTest, Constant_Vector_Composite_AllZero) {
-    auto* c = b.Constant(mod.constant_values.Composite(
-        ty.vec3<f32>(), Vector{b.Constant(0.0_f)->Value(), b.Constant(0.0_f)->Value(),
-                               b.Constant(0.0_f)->Value()}));
+    auto* c = b.Composite(ty.vec3<f32>(), 0.0_f, 0.0_f, 0.0_f);
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
     EXPECT_EQ(tint::TrimSpace(generator_.Result()), std::string("float3(0.0f)"));
 }
 
 TEST_F(MslPrinterTest, Constant_Matrix_Splat) {
-    auto* c =
-        b.Constant(mod.constant_values.Splat(ty.mat3x2<f32>(), b.Constant(1.5_f)->Value(), 3));
+    auto* c = b.Splat(ty.mat3x2<f32>(), 1.5_f, 3);
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
     EXPECT_EQ(tint::TrimSpace(generator_.Result()), std::string("float3x2(1.5f, 1.5f, 1.5f)"));
 }
 
 TEST_F(MslPrinterTest, Constant_Matrix_Composite) {
-    auto* c = b.Constant(mod.constant_values.Composite(
-        ty.mat3x2<f32>(),
-        Vector{mod.constant_values.Composite(
-                   ty.vec2<f32>(), Vector{b.Constant(1.5_f)->Value(), b.Constant(1.0_f)->Value()}),
-               mod.constant_values.Composite(
-                   ty.vec2<f32>(), Vector{b.Constant(1.5_f)->Value(), b.Constant(2.0_f)->Value()}),
-               mod.constant_values.Composite(ty.vec2<f32>(), Vector{b.Constant(2.5_f)->Value(),
-                                                                    b.Constant(3.5_f)->Value()})}));
+    auto* c = b.Composite(ty.mat3x2<f32>(),                           //
+                          b.Composite(ty.vec2<f32>(), 1.5_f, 1.0_f),  //
+                          b.Composite(ty.vec2<f32>(), 1.5_f, 2.0_f),  //
+                          b.Composite(ty.vec2<f32>(), 2.5_f, 3.5_f));
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
     EXPECT_EQ(tint::TrimSpace(generator_.Result()),
@@ -122,12 +111,9 @@ TEST_F(MslPrinterTest, Constant_Matrix_Composite) {
 }
 
 TEST_F(MslPrinterTest, Constant_Matrix_Composite_AnyZero) {
-    auto* c = b.Constant(mod.constant_values.Composite(
-        ty.mat2x2<f32>(),
-        Vector{mod.constant_values.Composite(
-                   ty.vec2<f32>(), Vector{b.Constant(1.0_f)->Value(), b.Constant(0.0_f)->Value()}),
-               mod.constant_values.Composite(ty.vec2<f32>(), Vector{b.Constant(1.5_f)->Value(),
-                                                                    b.Constant(2.5_f)->Value()})}));
+    auto* c = b.Composite(ty.mat2x2<f32>(),                           //
+                          b.Composite(ty.vec2<f32>(), 1.0_f, 0.0_f),  //
+                          b.Composite(ty.vec2<f32>(), 1.5_f, 2.5_f));
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
     EXPECT_EQ(tint::TrimSpace(generator_.Result()),
@@ -135,14 +121,10 @@ TEST_F(MslPrinterTest, Constant_Matrix_Composite_AnyZero) {
 }
 
 TEST_F(MslPrinterTest, Constant_Matrix_Composite_AllZero) {
-    auto* c = b.Constant(mod.constant_values.Composite(
-        ty.mat3x2<f32>(),
-        Vector{mod.constant_values.Composite(
-                   ty.vec2<f32>(), Vector{b.Constant(0.0_f)->Value(), b.Constant(0.0_f)->Value()}),
-               mod.constant_values.Composite(
-                   ty.vec2<f32>(), Vector{b.Constant(0.0_f)->Value(), b.Constant(0.0_f)->Value()}),
-               mod.constant_values.Composite(ty.vec2<f32>(), Vector{b.Constant(0.0_f)->Value(),
-                                                                    b.Constant(0.0_f)->Value()})}));
+    auto* c = b.Composite(ty.mat3x2<f32>(),                           //
+                          b.Composite(ty.vec2<f32>(), 0.0_f, 0.0_f),  //
+                          b.Composite(ty.vec2<f32>(), 0.0_f, 0.0_f),  //
+                          b.Composite(ty.vec2<f32>(), 0.0_f, 0.0_f));
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
     EXPECT_EQ(tint::TrimSpace(generator_.Result()),
@@ -150,88 +132,34 @@ TEST_F(MslPrinterTest, Constant_Matrix_Composite_AllZero) {
 }
 
 TEST_F(MslPrinterTest, Constant_Array_Splat) {
-    auto* c =
-        b.Constant(mod.constant_values.Splat(ty.array<f32, 3>(), b.Constant(1.5_f)->Value(), 3));
+    auto* c = b.Splat(ty.array<f32, 3>(), 1.5_f, 3);
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(tint::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
-
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), MetalArray() + R"(
 tint_array<float, 3>{1.5f, 1.5f, 1.5f})");
 }
 
 TEST_F(MslPrinterTest, Constant_Array_Composite) {
-    auto* c = b.Constant(mod.constant_values.Composite(
-        ty.array<f32, 3>(), Vector{b.Constant(1.5_f)->Value(), b.Constant(1.0_f)->Value(),
-                                   b.Constant(2.0_f)->Value()}));
+    auto* c = b.Composite(ty.array<f32, 3>(), 1.5_f, 1.0_f, 2.0_f);
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(tint::TrimSpace(generator_.Result()), std::string(R"(template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
-
-tint_array<float, 3>{1.5f, 1.0f, 2.0f})"));
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), MetalArray() + R"(
+tint_array<float, 3>{1.5f, 1.0f, 2.0f})");
 }
 
 TEST_F(MslPrinterTest, Constant_Array_Composite_AnyZero) {
-    auto* c = b.Constant(mod.constant_values.Composite(
-        ty.array<f32, 2>(), Vector{b.Constant(1.0_f)->Value(), b.Constant(0.0_f)->Value()}));
+    auto* c = b.Composite(ty.array<f32, 2>(), 1.0_f, 0.0_f);
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(tint::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
-
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), MetalArray() + R"(
 tint_array<float, 2>{1.0f, 0.0f})");
 }
 
 TEST_F(MslPrinterTest, Constant_Array_Composite_AllZero) {
-    auto* c = b.Constant(mod.constant_values.Composite(
-        ty.array<f32, 3>(), Vector{b.Constant(0.0_f)->Value(), b.Constant(0.0_f)->Value(),
-                                   b.Constant(0.0_f)->Value()}));
+    auto* c = b.Composite(ty.array<f32, 3>(), 0.0_f, 0.0_f, 0.0_f);
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(tint::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
-
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), MetalArray() + R"(
 tint_array<float, 3>{})");
 }
 
@@ -240,7 +168,7 @@ TEST_F(MslPrinterTest, Constant_Struct_Splat) {
                                                   {mod.symbols.Register("a"), ty.f32()},
                                                   {mod.symbols.Register("b"), ty.f32()},
                                               });
-    auto* c = b.Constant(mod.constant_values.Splat(s, b.Constant(1.5_f)->Value(), 2));
+    auto* c = b.Splat(s, 1.5_f, 2);
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
     EXPECT_EQ(tint::TrimSpace(generator_.Result()), std::string(R"(struct S {
@@ -256,8 +184,7 @@ TEST_F(MslPrinterTest, Constant_Struct_Composite) {
                                                   {mod.symbols.Register("a"), ty.f32()},
                                                   {mod.symbols.Register("b"), ty.f32()},
                                               });
-    auto* c = b.Constant(mod.constant_values.Composite(
-        s, Vector{b.Constant(1.5_f)->Value(), b.Constant(1.0_f)->Value()}));
+    auto* c = b.Composite(s, 1.5_f, 1.0_f);
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
     EXPECT_EQ(tint::TrimSpace(generator_.Result()), std::string(R"(struct S {
@@ -273,8 +200,7 @@ TEST_F(MslPrinterTest, Constant_Struct_Composite_AnyZero) {
                                                   {mod.symbols.Register("a"), ty.f32()},
                                                   {mod.symbols.Register("b"), ty.f32()},
                                               });
-    auto* c = b.Constant(mod.constant_values.Composite(
-        s, Vector{b.Constant(1.0_f)->Value(), b.Constant(0.0_f)->Value()}));
+    auto* c = b.Composite(s, 1.0_f, 0.0_f);
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
     EXPECT_EQ(tint::TrimSpace(generator_.Result()), std::string(R"(struct S {
@@ -290,8 +216,7 @@ TEST_F(MslPrinterTest, Constant_Struct_Composite_AllZero) {
                                                   {mod.symbols.Register("a"), ty.f32()},
                                                   {mod.symbols.Register("b"), ty.f32()},
                                               });
-    auto* c = b.Constant(mod.constant_values.Composite(
-        s, Vector{b.Constant(0.0_f)->Value(), b.Constant(0.0_f)->Value()}));
+    auto* c = b.Composite(s, 0.0_f, 0.0_f);
     generator_.EmitConstant(generator_.Line(), c);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
     EXPECT_EQ(tint::TrimSpace(generator_.Result()), std::string(R"(struct S {

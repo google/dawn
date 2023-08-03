@@ -161,7 +161,7 @@ struct State {
     /// @param value the literal value
     /// @returns the literal operand
     LiteralOperand* Literal(u32 value) {
-        return ir->values.Create<LiteralOperand>(ir->constant_values.Get(value));
+        return ir->values.Create<LiteralOperand>(b.ConstantValue(value));
     }
 
     /// Handle an `arrayLength()` builtin.
