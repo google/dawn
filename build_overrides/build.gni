@@ -25,6 +25,9 @@ declare_args() {
   ignore_elf32_limitations = false
 }
 
+# Enables assertions on safety checks in libc++.
+enable_safe_libcxx = true
+
 # Use C++17 instead of C++20 in MSVC builds
 # TODO(crbug.com/dawn/1881): Fix upstream DXC build on MSVC with C++20 enabled,
 # then remove this flag.
