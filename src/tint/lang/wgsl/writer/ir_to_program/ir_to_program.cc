@@ -767,10 +767,11 @@ class State {
                         }
 
                         if constexpr (std::is_same_v<T, InlinedValue>) {
+                            auto result = ExprAndPtrKind{got.expr, got.ptr_kind};
                             // Single use (inlined) expression.
                             // Mark the bindings_ map entry as consumed.
                             *lookup = ConsumedValue{};
-                            return {got.expr, got.ptr_kind};
+                            return result;
                         }
 
                         if constexpr (std::is_same_v<T, ConsumedValue>) {
