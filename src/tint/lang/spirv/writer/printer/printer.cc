@@ -150,7 +150,7 @@ const type::Type* DedupType(const type::Type* ty, type::Manager& types) {
 }  // namespace
 
 Printer::Printer(ir::Module* module, bool zero_init_workgroup_mem)
-    : ir_(module), zero_init_workgroup_memory_(zero_init_workgroup_mem) {}
+    : ir_(module), b_(*module), zero_init_workgroup_memory_(zero_init_workgroup_mem) {}
 
 Result<std::vector<uint32_t>, std::string> Printer::Generate() {
     auto valid = ir::ValidateAndDumpIfNeeded(*ir_, "SPIR-V writer");
@@ -355,7 +355,7 @@ uint32_t Printer::Type(const type::Type* ty, builtin::AddressSpace addrspace /* 
             },
             [&](const type::Array* arr) {
                 if (arr->ConstantCount()) {
-                    auto* count = ir_->constant_values.Get(u32(arr->ConstantCount().value()));
+                    auto* count = b_.ConstantValue(u32(arr->ConstantCount().value()));
                     module_.PushType(spv::Op::OpTypeArray,
                                      {id, Type(arr->ElemType()), Constant(count)});
                 } else {
@@ -1341,11 +1341,11 @@ void Printer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case builtin::Function::kStorageBarrier:
             op = spv::Op::OpControlBarrier;
             operands.clear();
-            operands.push_back(Constant(ir_->constant_values.Get(u32(spv::Scope::Workgroup))));
-            operands.push_back(Constant(ir_->constant_values.Get(u32(spv::Scope::Workgroup))));
+            operands.push_back(Constant(b_.ConstantValue(u32(spv::Scope::Workgroup))));
+            operands.push_back(Constant(b_.ConstantValue(u32(spv::Scope::Workgroup))));
             operands.push_back(
-                Constant(ir_->constant_values.Get(u32(spv::MemorySemanticsMask::UniformMemory |
-                                                      spv::MemorySemanticsMask::AcquireRelease))));
+                Constant(b_.ConstantValue(u32(spv::MemorySemanticsMask::UniformMemory |
+                                              spv::MemorySemanticsMask::AcquireRelease))));
             break;
         case builtin::Function::kSubgroupBallot:
             module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
@@ -1391,11 +1391,11 @@ void Printer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case builtin::Function::kWorkgroupBarrier:
             op = spv::Op::OpControlBarrier;
             operands.clear();
-            operands.push_back(Constant(ir_->constant_values.Get(u32(spv::Scope::Workgroup))));
-            operands.push_back(Constant(ir_->constant_values.Get(u32(spv::Scope::Workgroup))));
+            operands.push_back(Constant(b_.ConstantValue(u32(spv::Scope::Workgroup))));
+            operands.push_back(Constant(b_.ConstantValue(u32(spv::Scope::Workgroup))));
             operands.push_back(
-                Constant(ir_->constant_values.Get(u32(spv::MemorySemanticsMask::WorkgroupMemory |
-                                                      spv::MemorySemanticsMask::AcquireRelease))));
+                Constant(b_.ConstantValue(u32(spv::MemorySemanticsMask::WorkgroupMemory |
+                                              spv::MemorySemanticsMask::AcquireRelease))));
             break;
         default:
             TINT_ICE() << "unimplemented builtin function: " << builtin->Func();
@@ -1471,37 +1471,37 @@ void Printer::EmitConvert(ir::Convert* convert) {
         operands.push_back(ConstantNull(arg_ty));
     } else if (arg_ty->is_bool_scalar_or_vector()) {
         // Select between constant one and zero, splatting them to vectors if necessary.
-        const constant::Value* one = nullptr;
-        const constant::Value* zero = nullptr;
+        ir::Constant* one = nullptr;
+        ir::Constant* zero = nullptr;
         Switch(
             res_ty->DeepestElement(),  //
             [&](const type::F32*) {
-                one = ir_->constant_values.Get(1_f);
-                zero = ir_->constant_values.Get(0_f);
+                one = b_.Constant(1_f);
+                zero = b_.Constant(0_f);
             },
             [&](const type::F16*) {
-                one = ir_->constant_values.Get(1_h);
-                zero = ir_->constant_values.Get(0_h);
+                one = b_.Constant(1_h);
+                zero = b_.Constant(0_h);
             },
             [&](const type::I32*) {
-                one = ir_->constant_values.Get(1_i);
-                zero = ir_->constant_values.Get(0_i);
+                one = b_.Constant(1_i);
+                zero = b_.Constant(0_i);
             },
             [&](const type::U32*) {
-                one = ir_->constant_values.Get(1_u);
-                zero = ir_->constant_values.Get(0_u);
+                one = b_.Constant(1_u);
+                zero = b_.Constant(0_u);
             });
         TINT_ASSERT_OR_RETURN(one && zero);
 
         if (auto* vec = res_ty->As<type::Vector>()) {
             // Splat the scalars into vectors.
-            one = ir_->constant_values.Splat(vec, one, vec->Width());
-            zero = ir_->constant_values.Splat(vec, zero, vec->Width());
+            one = b_.Splat(vec, one, vec->Width());
+            zero = b_.Splat(vec, zero, vec->Width());
         }
 
         op = spv::Op::OpSelect;
-        operands.push_back(Constant(one));
-        operands.push_back(Constant(zero));
+        operands.push_back(Constant(b_.ConstantValue(one)));
+        operands.push_back(Constant(b_.ConstantValue(zero)));
     } else {
         TINT_ICE() << "unhandled convert instruction";
     }

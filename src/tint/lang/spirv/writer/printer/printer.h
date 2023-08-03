@@ -22,6 +22,7 @@
 #include "src/tint/lang/core/builtin/builtin_value.h"
 #include "src/tint/lang/core/builtin/texel_format.h"
 #include "src/tint/lang/core/constant/value.h"
+#include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/spirv/writer/common/binary_writer.h"
 #include "src/tint/lang/spirv/writer/common/function.h"
@@ -266,6 +267,7 @@ class Printer {
     void EmitExitPhis(ir::ControlInstruction* inst);
 
     ir::Module* ir_;
+    ir::Builder b_;
     writer::Module module_;
     BinaryWriter writer_;
 
