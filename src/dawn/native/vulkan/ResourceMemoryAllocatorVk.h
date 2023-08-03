@@ -34,7 +34,8 @@ class Device;
 enum class MemoryKind {
     LazilyAllocated,
     Linear,
-    LinearMappable,
+    LinearReadMappable,
+    LinearWriteMappable,
     Opaque,
 };
 

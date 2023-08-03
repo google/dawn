@@ -203,8 +203,10 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     device->fn.GetBufferMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
 
     MemoryKind requestKind = MemoryKind::Linear;
-    if (GetUsage() & kMappableBufferUsages) {
-        requestKind = MemoryKind::LinearMappable;
+    if (GetUsage() & wgpu::BufferUsage::MapRead) {
+        requestKind = MemoryKind::LinearReadMappable;
+    } else if (GetUsage() & wgpu::BufferUsage::MapWrite) {
+        requestKind = MemoryKind::LinearWriteMappable;
     }
     DAWN_TRY_ASSIGN(mMemoryAllocation,
                     device->GetResourceMemoryAllocator()->Allocate(requirements, requestKind));
