@@ -30,8 +30,10 @@ namespace tint::ir {
 class ExitIf;
 class If;
 class Let;
+class Load;
 class Return;
 class Unreachable;
+class Var;
 }  // namespace tint::ir
 
 namespace tint::msl::writer {
@@ -71,6 +73,12 @@ class Printer : public tint::TextGenerator {
     /// Emit a let instruction
     /// @param l the let instruction
     void EmitLet(ir::Let* l);
+    /// Emit a var instruction
+    /// @param v the var instruction
+    void EmitVar(ir::Var* v);
+    /// Emit a load instruction
+    /// @param l the load instruction
+    void EmitLoad(ir::Load* l);
 
     /// Emit a return instruction
     /// @param r the return instruction
@@ -125,6 +133,11 @@ class Printer : public tint::TextGenerator {
     /// @param out the stream to write the constant too
     /// @param c the constant to emit
     void EmitConstant(StringStream& out, const constant::Value* c);
+
+    /// Emits the zero value for the given type
+    /// @param out the stream to emit too
+    /// @param ty the type
+    void EmitZeroValue(StringStream& out, const type::Type* ty);
 
     /// @returns the name of the templated `tint_array` helper type, generating it if needed
     const std::string& ArrayTemplateName();

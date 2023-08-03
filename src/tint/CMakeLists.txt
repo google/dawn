@@ -1561,6 +1561,7 @@ if(TINT_BUILD_TESTS)
         lang/msl/writer/printer/let_test.cc
         lang/msl/writer/printer/return_test.cc
         lang/msl/writer/printer/type_test.cc
+        lang/msl/writer/printer/var_test.cc
       )
     endif()
   endif()

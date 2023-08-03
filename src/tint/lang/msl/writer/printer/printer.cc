@@ -22,10 +22,12 @@
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/let.h"
+#include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/return.h"
 #include "src/tint/lang/core/ir/unreachable.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/bool.h"
@@ -84,7 +86,7 @@ bool Printer::Generate() {
 
     // Emit module-scope declarations.
     if (ir_->root_block) {
-        // EmitRootBlock(ir_->root_block);
+        EmitBlockInstructions(ir_->root_block);
     }
 
     // Emit functions.
@@ -170,10 +172,57 @@ void Printer::EmitBlockInstructions(ir::Block* block) {
             [&](ir::ExitIf* e) { EmitExitIf(e); },         //
             [&](ir::If* if_) { EmitIf(if_); },             //
             [&](ir::Let* l) { EmitLet(l); },               //
+            [&](ir::Load* l) { EmitLoad(l); },             //
             [&](ir::Return* r) { EmitReturn(r); },         //
             [&](ir::Unreachable*) { EmitUnreachable(); },  //
+            [&](ir::Var* v) { EmitVar(v); },               //
             [&](Default) { TINT_ICE() << "unimplemented instruction: " << inst->TypeInfo().name; });
     }
+}
+
+void Printer::EmitLoad(ir::Load* l) {
+    // Force loads to be bound as inlines
+    bindings_.Add(l->Result(), InlinedValue{Expr(l->From()), PtrKind::kRef});
+}
+
+void Printer::EmitVar(ir::Var* v) {
+    auto out = Line();
+
+    auto* ptr = v->Result()->Type()->As<type::Pointer>();
+    TINT_ASSERT_OR_RETURN(ptr);
+
+    auto space = ptr->AddressSpace();
+    switch (space) {
+        case builtin::AddressSpace::kFunction:
+        case builtin::AddressSpace::kHandle:
+            break;
+        case builtin::AddressSpace::kPrivate:
+            out << "thread ";
+            break;
+        case builtin::AddressSpace::kWorkgroup:
+            out << "threadgroup ";
+            break;
+        default:
+            TINT_ICE() << "unhandled variable address space";
+            return;
+    }
+
+    auto name = ir_->NameOf(v);
+
+    EmitType(out, ptr->UnwrapPtr());
+    out << " " << name.Name();
+
+    if (v->Initializer()) {
+        out << " = " << Expr(v->Initializer());
+    } else if (space == builtin::AddressSpace::kPrivate ||
+               space == builtin::AddressSpace::kFunction ||
+               space == builtin::AddressSpace::kUndefined) {
+        out << " = ";
+        EmitZeroValue(out, ptr->UnwrapPtr());
+    }
+    out << ";";
+
+    Bind(v->Result(), name, PtrKind::kRef);
 }
 
 void Printer::EmitLet(ir::Let* l) {
@@ -225,8 +274,8 @@ void Printer::EmitExitIf(ir::ExitIf* e) {
 }
 
 void Printer::EmitReturn(ir::Return* r) {
-    // If this return has no arguments and the current block is for the function which is being
-    // returned, skip the return.
+    // If this return has no arguments and the current block is for the function which is
+    // being returned, skip the return.
     if (current_block_ == current_function_->Block() && r->Args().IsEmpty()) {
         return;
     }
@@ -419,10 +468,10 @@ void Printer::EmitStructType(const type::Struct* str) {
         return;
     }
 
-    // This does not append directly to the preamble because a struct may require other structs, or
-    // the array template, to get emitted before it. So, the struct emits into a temporary text
-    // buffer, then anything it depends on will emit to the preamble first, and then it copies the
-    // text buffer into the preamble.
+    // This does not append directly to the preamble because a struct may require other
+    // structs, or the array template, to get emitted before it. So, the struct emits into a
+    // temporary text buffer, then anything it depends on will emit to the preamble first,
+    // and then it copies the text buffer into the preamble.
     TextBuffer str_buf;
     Line(&str_buf) << "struct " << StructName(str) << " {";
 
@@ -623,6 +672,25 @@ void Printer::EmitConstant(StringStream& out, const constant::Value* c) {
         [&](Default) { UNHANDLED_CASE(c->Type()); });
 }
 
+void Printer::EmitZeroValue(StringStream& out, const type::Type* ty) {
+    Switch(
+        ty, [&](const type::Bool*) { out << "false"; },                     //
+        [&](const type::F16*) { out << "0.0h"; },                           //
+        [&](const type::F32*) { out << "0.0f"; },                           //
+        [&](const type::I32*) { out << "0"; },                              //
+        [&](const type::U32*) { out << "0u"; },                             //
+        [&](const type::Vector* vec) { EmitZeroValue(out, vec->type()); },  //
+        [&](const type::Matrix* mat) {
+            EmitType(out, mat);
+
+            ScopedParen sp(out);
+            EmitZeroValue(out, mat->type());
+        },
+        [&](const type::Array*) { out << "{}"; },   //
+        [&](const type::Struct*) { out << "{}"; },  //
+        [&](Default) { TINT_ICE() << "Invalid type for zero emission: " << ty->FriendlyName(); });
+}
+
 std::string Printer::StructName(const type::Struct* s) {
     auto name = s->Name().Name();
     if (HasPrefix(name, "__")) {
@@ -665,10 +733,12 @@ std::string Printer::Expr(ir::Value* value, PtrKind want_ptr_kind) {
                     }
 
                     if constexpr (std::is_same_v<T, InlinedValue>) {
+                        auto result = ExprAndPtrKind{got.expr, got.ptr_kind};
+
                         // Single use (inlined) expression.
                         // Mark the bindings_ map entry as consumed.
                         *lookup = ConsumedValue{};
-                        return {got.expr, got.ptr_kind};
+                        return result;
                     }
 
                     if constexpr (std::is_same_v<T, ConsumedValue>) {

@@ -179,7 +179,7 @@ void foo() {
 )");
 }
 
-TEST_F(MslPrinterTest, LetArrVec2BoolEmit_VariableDeclStatement_Const_arr_vec2_bool) {
+TEST_F(MslPrinterTest, LetArrVec2Bool) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         b.Let("l", b.Composite(ty.array<vec2<bool>, 3>(),  //
