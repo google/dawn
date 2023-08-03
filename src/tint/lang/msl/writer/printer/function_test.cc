@@ -21,11 +21,8 @@ TEST_F(MslPrinterTest, Function_Empty) {
     auto* func = b.Function("foo", ty.void_());
     func->Block()->Append(b.Return(func));
 
-    ASSERT_TRUE(IRIsValid()) << Error();
-    generator_.EmitFunction(func);
-
-    ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), R"(
+    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
+    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
 void foo() {
 }
 )");

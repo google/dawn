@@ -34,76 +34,28 @@ using namespace tint::number_suffixes;        // NOLINT
 TEST_F(MslPrinterTest, EmitType_Array) {
     generator_.EmitType(generator_.Line(), ty.array<bool, 4>());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(tint::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
-
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), MetalArray() + R"(
 tint_array<bool, 4>)");
 }
 
 TEST_F(MslPrinterTest, EmitType_ArrayOfArray) {
     generator_.EmitType(generator_.Line(), ty.array(ty.array<bool, 4>(), 5));
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(tint::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
-
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), MetalArray() + R"(
 tint_array<tint_array<bool, 4>, 5>)");
 }
 
 TEST_F(MslPrinterTest, EmitType_ArrayOfArrayOfArray) {
     generator_.EmitType(generator_.Line(), ty.array(ty.array(ty.array<bool, 4>(), 5), 6));
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(tint::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
-
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), MetalArray() + R"(
 tint_array<tint_array<tint_array<bool, 4>, 5>, 6>)");
 }
 
 TEST_F(MslPrinterTest, EmitType_RuntimeArray) {
     generator_.EmitType(generator_.Line(), ty.array<bool, 0>());
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_EQ(tint::TrimSpace(generator_.Result()), R"(template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
-
+    EXPECT_EQ(tint::TrimSpace(generator_.Result()), MetalArray() + R"(
 tint_array<bool, 1>)");
 }
 
@@ -406,21 +358,7 @@ TEST_F(MslPrinterTest, EmitType_Struct_Layout_NonComposites) {
 
     // Check that the generated string is as expected.
     StringStream expect;
-    expect << R"(template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
-)";
-
-    expect << "struct S {\n";
+    expect << MetalArray() << "struct S {\n";
 #define FIELD(ADDR, TYPE, ARRAY_COUNT, NAME) \
     FormatMSLField(expect, #ADDR, #TYPE, ARRAY_COUNT, #NAME);
     ALL_FIELDS()
@@ -486,19 +424,7 @@ TEST_F(MslPrinterTest, EmitType_Struct_Layout_Structures) {
 
     // Check that the generated string is as expected.
     StringStream expect;
-    expect << R"(template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
-struct inner_x {
+    expect << MetalArray() + R"(struct inner_x {
   int a;
   float b;
 };
@@ -594,19 +520,7 @@ TEST_F(MslPrinterTest, EmitType_Struct_Layout_ArrayDefaultStride) {
     // Check that the generated string is as expected.
     StringStream expect;
 
-    expect << R"(template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
-struct inner {
+    expect << MetalArray() + R"(struct inner {
   int a;
   float b;
 };
@@ -688,21 +602,7 @@ TEST_F(MslPrinterTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
     // Check that the generated string is as expected.
     StringStream expect;
 
-    expect << R"(template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
-)";
-
-    expect << "struct S {\n";
+    expect << MetalArray() << "struct S {\n";
 #define FIELD(ADDR, TYPE, ARRAY_COUNT, NAME) \
     FormatMSLField(expect, #ADDR, #TYPE, ARRAY_COUNT, #NAME);
     ALL_FIELDS()
@@ -746,19 +646,7 @@ TEST_F(MslPrinterTest, AttemptTintPadSymbolCollision) {
     auto* s = MkStruct(mod, ty, "S", data);
     s->AddUsage(builtin::AddressSpace::kStorage);
 
-    auto expect = R"(template<typename T, size_t N>
-struct tint_array {
-  const constant T& operator[](size_t i) const constant { return elements[i]; }
-  device T& operator[](size_t i) device { return elements[i]; }
-  const device T& operator[](size_t i) const device { return elements[i]; }
-  thread T& operator[](size_t i) thread { return elements[i]; }
-  const thread T& operator[](size_t i) const thread { return elements[i]; }
-  threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
-  const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
-  T elements[N];
-};
-
-struct S {
+    auto expect = MetalArray() + R"(struct S {
   /* 0x0000 */ int tint_pad_2;
   /* 0x0004 */ tint_array<int8_t, 124> tint_pad_10;
   /* 0x0080 */ float tint_pad_20;
@@ -804,7 +692,7 @@ S)";
 
     generator_.EmitType(generator_.Line(), s);
     ASSERT_TRUE(generator_.Diagnostics().empty()) << generator_.Diagnostics().str();
-    EXPECT_STREQ(std::string(tint::TrimSpace(generator_.Result())).c_str(), expect);
+    EXPECT_EQ(std::string(tint::TrimSpace(generator_.Result())).c_str(), expect);
 }
 
 TEST_F(MslPrinterTest, EmitType_Sampler) {

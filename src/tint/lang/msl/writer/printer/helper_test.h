@@ -70,16 +70,6 @@ class MslPrinterTestHelperBase : public BASE {
 
     /// @returns the error string from the validation
     std::string Error() const { return err_; }
-
-    /// @returns true if the IR module is valid
-    bool IRIsValid() {
-        auto res = ir::Validate(mod);
-        if (!res) {
-            err_ = res.Failure().str();
-            return false;
-        }
-        return true;
-    }
 };
 
 using MslPrinterTest = MslPrinterTestHelperBase<testing::Test>;
