@@ -1554,6 +1554,7 @@ if(TINT_BUILD_TESTS)
 
     if(${TINT_BUILD_IR})
       list(APPEND TINT_TEST_SRCS
+        lang/msl/writer/printer/binary_test.cc
         lang/msl/writer/printer/constant_test.cc
         lang/msl/writer/printer/function_test.cc
         lang/msl/writer/printer/helper_test.h

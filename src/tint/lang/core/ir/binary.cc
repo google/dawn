@@ -26,4 +26,42 @@ Binary::Binary(InstructionResult* result, enum Kind kind, Value* lhs, Value* rhs
 
 Binary::~Binary() = default;
 
+std::string_view ToString(enum Binary::Kind kind) {
+    switch (kind) {
+        case Binary::Kind::kAdd:
+            return "add";
+        case Binary::Kind::kSubtract:
+            return "subtract";
+        case Binary::Kind::kMultiply:
+            return "multiply";
+        case Binary::Kind::kDivide:
+            return "divide";
+        case Binary::Kind::kModulo:
+            return "modulo";
+        case Binary::Kind::kAnd:
+            return "and";
+        case Binary::Kind::kOr:
+            return "or";
+        case Binary::Kind::kXor:
+            return "xor";
+        case Binary::Kind::kEqual:
+            return "equal";
+        case Binary::Kind::kNotEqual:
+            return "not equal";
+        case Binary::Kind::kLessThan:
+            return "less than";
+        case Binary::Kind::kGreaterThan:
+            return "greater than";
+        case Binary::Kind::kLessThanEqual:
+            return "less than equal";
+        case Binary::Kind::kGreaterThanEqual:
+            return "greater than equal";
+        case Binary::Kind::kShiftLeft:
+            return "shift left";
+        case Binary::Kind::kShiftRight:
+            return "shift right";
+    }
+    return "<unknown>";
+}
+
 }  // namespace tint::ir

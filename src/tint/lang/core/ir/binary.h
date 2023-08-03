@@ -76,6 +76,16 @@ class Binary : public Castable<Binary, OperandInstruction<2, 1>> {
     enum Kind kind_;
 };
 
+/// @param kind the enum value
+/// @returns the string for the given enum value
+std::string_view ToString(enum Binary::Kind kind);
+
+/// Emits the name of the intrinsic type.
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, enum Binary::Kind kind) {
+    return out << ToString(kind);
+}
+
 }  // namespace tint::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_BINARY_H_

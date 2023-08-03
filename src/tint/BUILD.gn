@@ -2321,6 +2321,7 @@ if (tint_build_unittests) {
 
     if (tint_build_ir) {
       sources += [
+        "lang/msl/writer/printer/binary_test.cc",
         "lang/msl/writer/printer/constant_test.cc",
         "lang/msl/writer/printer/function_test.cc",
         "lang/msl/writer/printer/helper_test.h",

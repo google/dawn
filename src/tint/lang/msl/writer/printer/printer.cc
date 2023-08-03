@@ -18,6 +18,7 @@
 
 #include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/splat.h"
+#include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/exit_if.h"
 #include "src/tint/lang/core/ir/if.h"
@@ -157,8 +158,7 @@ void Printer::EmitFunction(ir::Function* func) {
 }
 
 void Printer::EmitBlock(ir::Block* block) {
-    // TODO(dsinclair): Handle inline things
-    // MarkInlinable(block);
+    MarkInlinable(block);
 
     EmitBlockInstructions(block);
 }
@@ -169,6 +169,7 @@ void Printer::EmitBlockInstructions(ir::Block* block) {
     for (auto* inst : *block) {
         Switch(
             inst,                                          //
+            [&](ir::Binary* b) { EmitBinary(b); },         //
             [&](ir::ExitIf* e) { EmitExitIf(e); },         //
             [&](ir::If* if_) { EmitIf(if_); },             //
             [&](ir::Let* l) { EmitLet(l); },               //
@@ -178,6 +179,60 @@ void Printer::EmitBlockInstructions(ir::Block* block) {
             [&](ir::Var* v) { EmitVar(v); },               //
             [&](Default) { TINT_ICE() << "unimplemented instruction: " << inst->TypeInfo().name; });
     }
+}
+
+void Printer::EmitBinary(ir::Binary* b) {
+    if (b->Kind() == ir::Binary::Kind::kEqual) {
+        auto* rhs = b->RHS()->As<ir::Constant>();
+        if (rhs && rhs->Type()->Is<type::Bool>() && rhs->Value()->ValueAs<bool>() == false) {
+            // expr == false
+            Bind(b->Result(), "!(" + Expr(b->LHS()) + ")");
+            return;
+        }
+    }
+
+    auto kind = [&] {
+        switch (b->Kind()) {
+            case ir::Binary::Kind::kAdd:
+                return "+";
+            case ir::Binary::Kind::kSubtract:
+                return "-";
+            case ir::Binary::Kind::kMultiply:
+                return "*";
+            case ir::Binary::Kind::kDivide:
+                return "/";
+            case ir::Binary::Kind::kModulo:
+                return "%";
+            case ir::Binary::Kind::kAnd:
+                return "&";
+            case ir::Binary::Kind::kOr:
+                return "|";
+            case ir::Binary::Kind::kXor:
+                return "^";
+            case ir::Binary::Kind::kEqual:
+                return "==";
+            case ir::Binary::Kind::kNotEqual:
+                return "!=";
+            case ir::Binary::Kind::kLessThan:
+                return "<";
+            case ir::Binary::Kind::kGreaterThan:
+                return ">";
+            case ir::Binary::Kind::kLessThanEqual:
+                return "<=";
+            case ir::Binary::Kind::kGreaterThanEqual:
+                return ">=";
+            case ir::Binary::Kind::kShiftLeft:
+                return "<<";
+            case ir::Binary::Kind::kShiftRight:
+                return ">>";
+        }
+        return "<error>";
+    };
+
+    StringStream str;
+    str << "(" << Expr(b->LHS()) << " " << kind() << " " + Expr(b->RHS()) << ")";
+
+    Bind(b->Result(), str.str());
 }
 
 void Printer::EmitLoad(ir::Load* l) {
@@ -777,7 +832,7 @@ std::string Printer::ToPtrKind(const std::string& in, PtrKind got, PtrKind want)
 void Printer::Bind(ir::Value* value, const std::string& expr, PtrKind ptr_kind) {
     TINT_ASSERT(value);
 
-    if (false /*can_inline_.Remove(value)*/) {
+    if (can_inline_.Remove(value)) {
         // Value will be inlined at its place of usage.
         if (TINT_LIKELY(bindings_.Add(value, InlinedValue{expr, ptr_kind}))) {
             return;
@@ -815,6 +870,37 @@ void Printer::Bind(ir::Value* value, Symbol name, PtrKind ptr_kind) {
     bool added = bindings_.Add(value, VariableValue{name, ptr_kind});
     if (TINT_UNLIKELY(!added)) {
         TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
+    }
+}
+
+void Printer::MarkInlinable(ir::Block* block) {
+    // An ordered list of possibly-inlinable values returned by sequenced instructions that have
+    // not yet been marked-for or ruled-out-for inlining.
+    UniqueVector<ir::Value*, 32> pending_resolution;
+
+    // Walk the instructions of the block starting with the first.
+    for (auto* inst : *block) {
+        // Is the instruction sequenced?
+        bool sequenced = inst->Sequenced();
+
+        if (inst->Results().Length() != 1) {
+            continue;
+        }
+
+        // Instruction has a single result value.
+        // Check to see if the result of this instruction is a candidate for inlining.
+        auto* result = inst->Result();
+        // Only values with a single usage can be inlined.
+        // Named values are not inlined, as we want to emit the name for a let.
+        if (result->Usages().Count() == 1 && !ir_->NameOf(result).IsValid()) {
+            if (sequenced) {
+                // The value comes from a sequenced instruction.  Don't inline.
+            } else {
+                // The value comes from an unsequenced instruction. Just inline.
+                can_inline_.Add(result);
+            }
+            continue;
+        }
     }
 }
 
