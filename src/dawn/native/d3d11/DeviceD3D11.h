@@ -75,6 +75,7 @@ class Device final : public d3d::Device {
     float GetTimestampPeriodInNS() const override;
     bool MayRequireDuplicationOfIndirectParameters() const override;
     uint64_t GetBufferCopyOffsetAlignmentForDepthStencil() const override;
+    bool IsResolveTextureBlitWithDrawSupported() const override;
     void SetLabelImpl() override;
 
     ResultOrError<Ref<d3d::Fence>> CreateFence(

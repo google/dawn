@@ -474,6 +474,10 @@ uint64_t Device::GetBufferCopyOffsetAlignmentForDepthStencil() const {
     return DeviceBase::GetBufferCopyOffsetAlignmentForDepthStencil();
 }
 
+bool Device::IsResolveTextureBlitWithDrawSupported() const {
+    return true;
+}
+
 Ref<TextureBase> Device::CreateD3DExternalTexture(const TextureDescriptor* descriptor,
                                                   ComPtr<IUnknown> d3dTexture,
                                                   std::vector<Ref<d3d::Fence>> waitFences,

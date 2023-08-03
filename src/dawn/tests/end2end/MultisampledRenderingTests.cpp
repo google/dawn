@@ -1531,6 +1531,7 @@ DAWN_INSTANTIATE_TEST(MultisampledRenderingWithTransientAttachmentTest,
                                     "emulate_store_and_msaa_resolve"}));
 
 DAWN_INSTANTIATE_TEST(MultisampledRenderToSingleSampledTest,
+                      D3D11Backend(),
                       D3D12Backend(),
                       D3D12Backend({}, {"use_d3d12_resource_heap_tier2"}),
                       D3D12Backend({}, {"use_d3d12_render_pass"}),
