@@ -117,6 +117,7 @@ os = struct(
 
 reclient = struct(
     instance = struct(
+        DEFAULT_TRUSTED = "rbe-chromium-trusted",
         DEFAULT_UNTRUSTED = "rbe-chromium-untrusted",
     ),
     jobs = struct(
@@ -206,7 +207,7 @@ def get_default_dimensions(os):
 
     return dimensions
 
-def get_default_properties(os, clang, debug, cpu, fuzzer, reclient_jobs):
+def get_default_properties(os, clang, debug, cpu, fuzzer, reclient_instance, reclient_jobs):
     """Get the properties for a builder that don't depend on being CI vs Try
 
     Args:
@@ -242,7 +243,7 @@ def get_default_properties(os, clang, debug, cpu, fuzzer, reclient_jobs):
         properties["$build/goma"] = goma_props
 
         reclient_props = {
-            "instance": reclient.instance.DEFAULT_UNTRUSTED,
+            "instance": reclient_instance,
             "jobs": reclient_jobs,
             "metrics_project": "chromium-reclient-metrics",
             "scandeps_server": True
@@ -264,7 +265,9 @@ def add_ci_builder(name, os, clang, debug, cpu, fuzzer):
     """
     dimensions_ci = get_default_dimensions(os)
     dimensions_ci["pool"] = "luci.flex.ci"
-    properties_ci = get_default_properties(os, clang, debug, cpu, fuzzer, reclient.jobs.HIGH_JOBS_FOR_CI)
+    properties_ci = get_default_properties(os, clang, debug, cpu, fuzzer,
+                                           reclient.instance.DEFAULT_TRUSTED,
+                                           reclient.jobs.HIGH_JOBS_FOR_CI)
     schedule_ci = None
     if fuzzer:
         schedule_ci = "0 0 0 * * * *"
@@ -296,7 +299,9 @@ def add_try_builder(name, os, clang, debug, cpu, fuzzer):
     """
     dimensions_try = get_default_dimensions(os)
     dimensions_try["pool"] = "luci.flex.try"
-    properties_try = get_default_properties(os, clang, debug, cpu, fuzzer, reclient.jobs.LOW_JOBS_FOR_CQ)
+    properties_try = get_default_properties(os, clang, debug, cpu, fuzzer,
+                                            reclient.instance.DEFAULT_UNTRUSTED,
+                                            reclient.jobs.LOW_JOBS_FOR_CQ)
     properties_try["$depot_tools/bot_update"] = {
         "apply_patch_on_gclient": True,
     }
