@@ -2775,7 +2775,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const type::Struct* str) {
 
         if (is_host_shareable) {
             // Calculate new MSL offset
-            auto size_align = MslPackedTypeSizeAndAlign(diagnostics_, ty);
+            auto size_align = MslPackedTypeSizeAndAlign(ty);
             if (TINT_UNLIKELY(msl_offset % size_align.align)) {
                 TINT_ICE() << "Misaligned MSL structure member " << ty->FriendlyName() << " "
                            << mem_name;

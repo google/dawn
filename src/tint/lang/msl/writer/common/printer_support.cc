@@ -98,7 +98,7 @@ std::string InterpolationToAttribute(builtin::InterpolationType type,
     return attr;
 }
 
-SizeAndAlign MslPackedTypeSizeAndAlign(diag::List diagnostics, const type::Type* ty) {
+SizeAndAlign MslPackedTypeSizeAndAlign(const type::Type* ty) {
     return tint::Switch(
         ty,
 
@@ -120,7 +120,7 @@ SizeAndAlign MslPackedTypeSizeAndAlign(diag::List diagnostics, const type::Type*
         [&](const type::Vector* vec) {
             auto num_els = vec->Width();
             auto* el_ty = vec->type();
-            SizeAndAlign el_size_align = MslPackedTypeSizeAndAlign(diagnostics, el_ty);
+            SizeAndAlign el_size_align = MslPackedTypeSizeAndAlign(el_ty);
             if (el_ty->IsAnyOf<type::U32, type::I32, type::F32, type::F16>()) {
                 // Use a packed_vec type for 3-element vectors only.
                 if (num_els == 3) {
@@ -193,7 +193,7 @@ SizeAndAlign MslPackedTypeSizeAndAlign(diag::List diagnostics, const type::Type*
             if (auto count = arr->ConstantCount()) {
                 return SizeAndAlign{arr->Stride() * count.value(), arr->Align()};
             }
-            diagnostics.add_error(diag::System::Writer, type::Array::kErrExpectedConstantCount);
+            TINT_ICE() << type::Array::kErrExpectedConstantCount;
             return SizeAndAlign{};
         },
 
@@ -204,9 +204,7 @@ SizeAndAlign MslPackedTypeSizeAndAlign(diag::List diagnostics, const type::Type*
             return SizeAndAlign{str->Size(), str->Align()};
         },
 
-        [&](const type::Atomic* atomic) {
-            return MslPackedTypeSizeAndAlign(diagnostics, atomic->Type());
-        },
+        [&](const type::Atomic* atomic) { return MslPackedTypeSizeAndAlign(atomic->Type()); },
 
         [&](Default) {
             TINT_UNREACHABLE() << "Unhandled type " << ty->TypeInfo().name;

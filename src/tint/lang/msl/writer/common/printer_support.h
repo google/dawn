@@ -21,7 +21,7 @@
 #include "src/tint/lang/core/builtin/builtin_value.h"
 #include "src/tint/lang/core/builtin/interpolation.h"
 #include "src/tint/lang/core/type/type.h"
-#include "src/tint/utils/diagnostic/diagnostic.h"
+#include "src/tint/utils/text/string_stream.h"
 
 namespace tint::msl::writer {
 
@@ -33,10 +33,9 @@ struct SizeAndAlign {
     uint32_t align;
 };
 
-/// @param diagnostics the diagnostics list
 /// @param ty the type to generate size and align for
 /// @returns the MSL packed type size and alignment in bytes for the given type.
-SizeAndAlign MslPackedTypeSizeAndAlign(diag::List diagnostics, const type::Type* ty);
+SizeAndAlign MslPackedTypeSizeAndAlign(const type::Type* ty);
 
 /// Converts a builtin to an attribute name
 /// @param builtin the builtin to convert

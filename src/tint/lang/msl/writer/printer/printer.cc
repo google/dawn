@@ -425,7 +425,7 @@ void Printer::EmitArrayType(StringStream& out, const type::Array* arr) {
     } else {
         auto count = arr->ConstantCount();
         if (!count) {
-            diagnostics_.add_error(diag::System::Writer, type::Array::kErrExpectedConstantCount);
+            TINT_ICE() << type::Array::kErrExpectedConstantCount;
             return;
         }
         out << count.value();
@@ -478,7 +478,7 @@ void Printer::EmitTextureType(StringStream& out, const type::Texture* tex) {
             out << "cube_array";
             break;
         default:
-            diagnostics_.add_error(diag::System::Writer, "Invalid texture dimensions");
+            TINT_ICE() << "invalid texture dimensions";
             return;
     }
     if (tex->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture>()) {
@@ -501,8 +501,7 @@ void Printer::EmitTextureType(StringStream& out, const type::Texture* tex) {
             } else if (storage->access() == builtin::Access::kWrite) {
                 out << "access::write";
             } else {
-                diagnostics_.add_error(diag::System::Writer,
-                                       "Invalid access control for storage texture");
+                TINT_ICE() << "invalid access control for storage texture";
                 return;
             }
         },
@@ -514,7 +513,7 @@ void Printer::EmitTextureType(StringStream& out, const type::Texture* tex) {
             EmitType(out, sampled->type());
             out << ", access::sample";
         },
-        [&](Default) { diagnostics_.add_error(diag::System::Writer, "invalid texture type"); });
+        [&](Default) { TINT_ICE() << "invalid texture type"; });
 }
 
 void Printer::EmitStructType(const type::Struct* str) {
@@ -586,7 +585,7 @@ void Printer::EmitStructType(const type::Struct* str) {
         if (auto builtin = attributes.builtin) {
             auto name = BuiltinToAttribute(builtin.value());
             if (name.empty()) {
-                diagnostics_.add_error(diag::System::Writer, "unknown builtin");
+                TINT_ICE() << "unknown builtin";
                 return;
             }
             out << " [[" << name << "]]";
@@ -617,7 +616,7 @@ void Printer::EmitStructType(const type::Struct* str) {
         if (auto interpolation = attributes.interpolation) {
             auto name = InterpolationToAttribute(interpolation->type, interpolation->sampling);
             if (name.empty()) {
-                diagnostics_.add_error(diag::System::Writer, "unknown interpolation attribute");
+                TINT_ICE() << "unknown interpolation attribute";
                 return;
             }
             out << " [[" << name << "]]";
@@ -632,7 +631,7 @@ void Printer::EmitStructType(const type::Struct* str) {
 
         if (is_host_shareable) {
             // Calculate new MSL offset
-            auto size_align = MslPackedTypeSizeAndAlign(diagnostics_, ty);
+            auto size_align = MslPackedTypeSizeAndAlign(ty);
             if (TINT_UNLIKELY(msl_offset % size_align.align)) {
                 TINT_ICE() << "Misaligned MSL structure member " << mem_name << " : "
                            << ty->FriendlyName() << " offset: " << msl_offset
@@ -700,8 +699,7 @@ void Printer::EmitConstant(StringStream& out, const constant::Value* c) {
 
             auto count = a->ConstantCount();
             if (!count) {
-                diagnostics_.add_error(diag::System::Writer,
-                                       type::Array::kErrExpectedConstantCount);
+                TINT_ICE() << type::Array::kErrExpectedConstantCount;
                 return;
             }
             emit_values(*count);
