@@ -1876,5 +1876,37 @@ TEST_F(SpvParserFunctionVarTest, DISABLED_EmitStatement_Hoist_UsedAsPtrArg) {
     EXPECT_EQ(got, expected) << got;
 }
 
+TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_UnreachableLoopMerge) {
+    // A phi in an unreachable block may have no operands.
+    auto assembly = Preamble() + R"(
+%100 = OpFunction %void None %voidfn
+
+ %10 = OpLabel
+       OpBranch %99
+
+ %99 = OpLabel
+       OpLoopMerge %101 %99 None
+       OpBranch %99
+
+%101 = OpLabel
+%102 = OpPhi %uint
+       OpUnreachable
+
+OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+    auto ast_body = fe.ast_body();
+    auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(loop {
+}
+return;
+)";
+    EXPECT_EQ(expect, got);
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader

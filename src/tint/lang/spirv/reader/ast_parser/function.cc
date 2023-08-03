@@ -5052,10 +5052,13 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
                     }
                 }
 
-                // Schedule the declaration of the state variable.
-                const auto* enclosing_construct =
-                    GetEnclosingScope(phi_local_def.first_use_pos, phi_local_def.last_use_pos);
-                GetBlockInfo(enclosing_construct->begin_id)->phis_needing_state_vars.Push(phi_id);
+                if (phi_local_def.first_use_pos < std::numeric_limits<uint32_t>::max()) {
+                    // Schedule the declaration of the state variable.
+                    const auto* enclosing_construct =
+                        GetEnclosingScope(phi_local_def.first_use_pos, phi_local_def.last_use_pos);
+                    GetBlockInfo(enclosing_construct->begin_id)
+                        ->phis_needing_state_vars.Push(phi_id);
+                }
             } else {
                 inst.ForEachInId([block_info, &record_value_use](const uint32_t* id_ptr) {
                     record_value_use(*id_ptr, block_info);
