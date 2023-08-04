@@ -381,7 +381,7 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
         // key in the ExternalTextureBindingExpansions map.
         ExternalTextureBindingExpansionMap expansions =
             layout->GetExternalTextureBindingExpansionMap();
-        std::map<BindingNumber, dawn_native::ExternalTextureBindingExpansion>::iterator it =
+        std::map<BindingNumber, dawn::native::ExternalTextureBindingExpansion>::iterator it =
             expansions.find(bindingNumber);
         // TODO(dawn:563): Provide info about the binding types.
         DAWN_INVALID_IF(it == expansions.end(),

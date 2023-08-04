@@ -454,7 +454,7 @@ BindGroupBase::BindGroupBase(DeviceBase* device,
                 externalTextureBindingEntry->externalTexture->GetParamsBuffer();
             mBindingData.bufferData[paramsBindingIndex].offset = 0;
             mBindingData.bufferData[paramsBindingIndex].size =
-                sizeof(dawn_native::ExternalTextureParams);
+                sizeof(dawn::native::ExternalTextureParams);
 
             continue;
         }

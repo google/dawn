@@ -223,7 +223,7 @@ std::vector<BindGroupLayoutEntry> ExtractAndExpandBglEntries(
                     kUnimplementedSamplersPerExternalTexture;
             }
 
-            dawn_native::ExternalTextureBindingExpansion bindingExpansion;
+            dawn::native::ExternalTextureBindingExpansion bindingExpansion;
 
             BindGroupLayoutEntry plane0Entry =
                 CreateSampledTextureBindingForExternalTexture(entry.binding, entry.visibility);

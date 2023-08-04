@@ -302,7 +302,4 @@ namespace wgpu {
 using dawn::native::DawnInstanceDescriptor;
 }  // namespace wgpu
 
-// TODO(dawn:824): Remove once the deprecation period is passed.
-namespace dawn_native = dawn::native;
-
 #endif  // INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_
