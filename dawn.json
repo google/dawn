@@ -1460,7 +1460,8 @@
             {"value": 1009, "name": "transient attachments", "tags": ["dawn"]},
             {"value": 1010, "name": "MSAA render to single sampled", "tags": ["dawn"]},
             {"value": 1011, "name": "dual source blending", "tags": ["dawn"]},
-            {"value": 1012, "name": "D3D11 multithread protected", "tags": ["dawn", "native"]}
+            {"value": 1012, "name": "D3D11 multithread protected", "tags": ["dawn", "native"]},
+            {"value": 1013, "name": "ANGLE texture sharing", "tags": ["dawn", "native"]}
         ]
     },
     "filter mode": {

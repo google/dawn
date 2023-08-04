@@ -41,6 +41,7 @@ class Backend : public BackendConnection {
 
     Ref<PhysicalDevice> mPhysicalDevice = nullptr;
     void* (*mGetProc)(const char*);
+    EGLDisplay mDisplay;
     DynamicLib mLibEGL;
 };
 

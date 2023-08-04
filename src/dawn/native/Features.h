@@ -52,6 +52,7 @@ enum class Feature {
     MSAARenderToSingleSampled,
     DualSourceBlending,
     D3D11MultithreadProtected,
+    ANGLETextureSharing,
 
     EnumCount,
     InvalidEnum = EnumCount,

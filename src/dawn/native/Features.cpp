@@ -132,6 +132,13 @@ static constexpr FeatureEnumAndInfoList kFeatureNameAndInfoList = {{
      {"d3d11-multithread-protected",
       "Enable ID3D11Multithread protection for interop with external users of the D3D11 device.",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=1927", FeatureInfo::FeatureState::Stable}},
+    {Feature::ANGLETextureSharing,
+     {"angle-texture-sharing",
+      "Enable ANGLE texture sharing to allow the OpenGL ES backend to share textures by external "
+      "OpenGL texture ID.",
+      "https://chromium.googlesource.com/angle/angle/+/refs/heads/main/extensions/"
+      "EGL_ANGLE_display_texture_share_group.txt",
+      FeatureInfo::FeatureState::Stable}},
 }};
 
 Feature FromAPIFeature(wgpu::FeatureName feature) {
@@ -188,6 +195,8 @@ Feature FromAPIFeature(wgpu::FeatureName feature) {
             return Feature::DualSourceBlending;
         case wgpu::FeatureName::D3D11MultithreadProtected:
             return Feature::D3D11MultithreadProtected;
+        case wgpu::FeatureName::ANGLETextureSharing:
+            return Feature::ANGLETextureSharing;
     }
     return Feature::InvalidEnum;
 }
@@ -240,6 +249,8 @@ wgpu::FeatureName ToAPIFeature(Feature feature) {
             return wgpu::FeatureName::DualSourceBlending;
         case Feature::D3D11MultithreadProtected:
             return wgpu::FeatureName::D3D11MultithreadProtected;
+        case Feature::ANGLETextureSharing:
+            return wgpu::FeatureName::ANGLETextureSharing;
         case Feature::EnumCount:
             break;
     }

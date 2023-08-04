@@ -14,17 +14,9 @@
 
 #include "dawn/native/opengl/BackendGL.h"
 
-#include <EGL/egl.h>
-
-#include <memory>
-#include <utility>
-
-#include "dawn/common/SystemUtils.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/OpenGLBackend.h"
-#include "dawn/native/opengl/ContextEGL.h"
-#include "dawn/native/opengl/EGLFunctions.h"
 #include "dawn/native/opengl/PhysicalDeviceGL.h"
 
 namespace dawn::native::opengl {
@@ -78,32 +70,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevices(
         }
     }
 
-    EGLFunctions egl;
-    egl.Init(getProc);
-
-    EGLenum api = GetType() == wgpu::BackendType::OpenGLES ? EGL_OPENGL_ES_API : EGL_OPENGL_API;
-
-    if (display == EGL_NO_DISPLAY) {
-        display = egl.GetCurrentDisplay();
-    }
-
-    if (display == EGL_NO_DISPLAY) {
-        display = egl.GetDisplay(EGL_DEFAULT_DISPLAY);
-    }
-
-    std::unique_ptr<ContextEGL> context;
-    if (GetInstance()->ConsumedErrorAndWarnOnce(ContextEGL::Create(egl, api, display), &context)) {
-        return {};
-    }
-
-    EGLContext prevDrawSurface = egl.GetCurrentSurface(EGL_DRAW);
-    EGLContext prevReadSurface = egl.GetCurrentSurface(EGL_READ);
-    EGLContext prevContext = egl.GetCurrentContext();
-
-    context->MakeCurrent();
-    auto physicalDevices = DiscoverPhysicalDevicesWithProcs(getProc, display);
-    egl.MakeCurrent(display, prevDrawSurface, prevReadSurface, prevContext);
-    return physicalDevices;
+    return DiscoverPhysicalDevicesWithProcs(getProc, display);
 }
 
 std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevicesWithProcs(
@@ -111,7 +78,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevicesWithProcs(
     EGLDisplay display) {
     // TODO(cwallez@chromium.org): For now only create a single OpenGL physicalDevice because don't
     // know how to handle MakeCurrent.
-    if (mPhysicalDevice != nullptr && mGetProc != getProc) {
+    if (mPhysicalDevice != nullptr && (mGetProc != getProc || mDisplay != display)) {
         GetInstance()->ConsumedErrorAndWarnOnce(
             DAWN_VALIDATION_ERROR("The OpenGL backend can only create a single physicalDevice."));
         return {};
@@ -123,6 +90,7 @@ std::vector<Ref<PhysicalDeviceBase>> Backend::DiscoverPhysicalDevicesWithProcs(
             return {};
         }
         mGetProc = getProc;
+        mDisplay = display;
     }
     return {mPhysicalDevice};
 }

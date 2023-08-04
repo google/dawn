@@ -15,15 +15,21 @@
 #include "dawn/native/opengl/ContextEGL.h"
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "dawn/native/opengl/UtilsEGL.h"
+
+#ifndef EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE
+#define EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE 0x33AF
+#endif
 
 namespace dawn::native::opengl {
 
 ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions& egl,
                                                               EGLenum api,
-                                                              EGLDisplay display) {
+                                                              EGLDisplay display,
+                                                              bool useANGLETextureSharing) {
     EGLint renderableType = api == EGL_OPENGL_ES_API ? EGL_OPENGL_ES3_BIT : EGL_OPENGL_BIT;
 
     EGLint major, minor;
@@ -60,17 +66,25 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions
         return DAWN_INTERNAL_ERROR("EGL_EXT_create_context_robustness must be supported");
     }
 
-    EGLint attrib_list[] = {
+    // Use ANGLE texture sharing iff the extension is available.
+    useANGLETextureSharing &=
+        strstr(extensions, "EGL_ANGLE_display_texture_share_group") != nullptr;
+
+    std::vector<EGLint> attrib_list{
         EGL_CONTEXT_MAJOR_VERSION,
         major,
         EGL_CONTEXT_MINOR_VERSION,
         minor,
         EGL_CONTEXT_OPENGL_ROBUST_ACCESS,  // Core in EGL 1.5
         EGL_TRUE,
-        EGL_NONE,
     };
+    if (useANGLETextureSharing) {
+        attrib_list.push_back(EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE);
+        attrib_list.push_back(EGL_TRUE);
+    }
+    attrib_list.push_back(EGL_NONE);
 
-    EGLContext context = egl.CreateContext(display, config, EGL_NO_CONTEXT, attrib_list);
+    EGLContext context = egl.CreateContext(display, config, EGL_NO_CONTEXT, attrib_list.data());
     DAWN_TRY(CheckEGL(egl, context != EGL_NO_CONTEXT, "eglCreateContext"));
 
     return std::unique_ptr<ContextEGL>(new ContextEGL(egl, display, context));

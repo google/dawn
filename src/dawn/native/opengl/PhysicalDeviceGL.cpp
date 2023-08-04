@@ -59,10 +59,34 @@ ResultOrError<Ref<PhysicalDevice>> PhysicalDevice::Create(InstanceBase* instance
                                                           wgpu::BackendType backendType,
                                                           void* (*getProc)(const char*),
                                                           EGLDisplay display) {
+    EGLFunctions egl;
+    egl.Init(getProc);
+
+    EGLenum api = backendType == wgpu::BackendType::OpenGLES ? EGL_OPENGL_ES_API : EGL_OPENGL_API;
+
+    if (display == EGL_NO_DISPLAY) {
+        display = egl.GetCurrentDisplay();
+    }
+
+    if (display == EGL_NO_DISPLAY) {
+        display = egl.GetDisplay(EGL_DEFAULT_DISPLAY);
+    }
+
+    std::unique_ptr<ContextEGL> context;
+    DAWN_TRY_ASSIGN(context, ContextEGL::Create(egl, api, display, false));
+
+    EGLContext prevDrawSurface = egl.GetCurrentSurface(EGL_DRAW);
+    EGLContext prevReadSurface = egl.GetCurrentSurface(EGL_READ);
+    EGLContext prevContext = egl.GetCurrentContext();
+
+    context->MakeCurrent();
+
     Ref<PhysicalDevice> physicalDevice =
         AcquireRef(new PhysicalDevice(instance, backendType, display));
     DAWN_TRY(physicalDevice->InitializeGLFunctions(getProc));
     DAWN_TRY(physicalDevice->Initialize());
+
+    egl.MakeCurrent(display, prevDrawSurface, prevReadSurface, prevContext);
     return physicalDevice;
 }
 
@@ -145,6 +169,9 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
             supportsBPTC) {
             EnableFeature(dawn::native::Feature::TextureCompressionBC);
         }
+    }
+    if (mName.find("ANGLE") != std::string::npos) {
+        EnableFeature(dawn::native::Feature::ANGLETextureSharing);
     }
 
     // Non-zero baseInstance requires at least desktop OpenGL 4.2, and it is not supported in
@@ -316,7 +343,15 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* ada
     EGLenum api =
         GetBackendType() == wgpu::BackendType::OpenGL ? EGL_OPENGL_API : EGL_OPENGL_ES_API;
     std::unique_ptr<Device::Context> context;
-    DAWN_TRY_ASSIGN(context, ContextEGL::Create(mEGLFunctions, api, mDisplay));
+    bool useANGLETextureSharing = false;
+    for (size_t i = 0; i < descriptor->requiredFeaturesCount; ++i) {
+        if (descriptor->requiredFeatures[i] == wgpu::FeatureName::ANGLETextureSharing) {
+            useANGLETextureSharing = true;
+        }
+    }
+
+    DAWN_TRY_ASSIGN(context,
+                    ContextEGL::Create(mEGLFunctions, api, mDisplay, useANGLETextureSharing));
     return Device::Create(adapter, descriptor, mFunctions, std::move(context), deviceToggles);
 }
 

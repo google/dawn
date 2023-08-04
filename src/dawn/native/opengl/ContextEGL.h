@@ -28,7 +28,8 @@ class ContextEGL : public Device::Context {
   public:
     static ResultOrError<std::unique_ptr<ContextEGL>> Create(const EGLFunctions& functions,
                                                              EGLenum api,
-                                                             EGLDisplay display);
+                                                             EGLDisplay display,
+                                                             bool useANGLETextureSharing);
     void MakeCurrent() override;
     ~ContextEGL() override;
 
