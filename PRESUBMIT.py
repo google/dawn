@@ -150,6 +150,8 @@ def _CheckNoStaleGen(input_api, output_api):
 
 def _DoCommonChecks(input_api, output_api):
     results = []
+    results.extend(
+        input_api.canned_checks.CheckForCommitObjects(input_api, output_api))
     results.extend(_CheckNoStaleGen(input_api, output_api))
     results.extend(
         input_api.canned_checks.CheckChangedLUCIConfigs(input_api, output_api))
