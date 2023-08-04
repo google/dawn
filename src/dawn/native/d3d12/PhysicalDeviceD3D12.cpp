@@ -513,6 +513,14 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     deviceToggles->Default(Toggle::D3D12Use64KBAlignedMSAATexture,
                            GetDeviceInfo().use64KBAlignedMSAATexture);
 
+    // By default use D3D12_HEAP_FLAG_CREATE_NOT_ZEROED when possible, otherwise we should never
+    // enable this toggle.
+    if (!GetDeviceInfo().supportsHeapFlagCreateNotZeroed) {
+        deviceToggles->ForceSet(Toggle::D3D12CreateNotZeroedHeap, false);
+    }
+    deviceToggles->Default(Toggle::D3D12CreateNotZeroedHeap,
+                           GetDeviceInfo().supportsHeapFlagCreateNotZeroed);
+
     uint32_t deviceId = GetDeviceId();
     uint32_t vendorId = GetVendorId();
 

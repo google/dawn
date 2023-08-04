@@ -445,6 +445,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "separate render pass per resolve target. "
       "This workaround is enabled by default on ARM Mali drivers.",
       "https://crbug.com/dawn/1550", ToggleStage::Device}},
+    {Toggle::D3D12CreateNotZeroedHeap,
+     {"d3d12_create_not_zeroed_heap",
+      "Create D3D12 heap with D3D12_HEAP_FLAG_CREATE_NOT_ZEROED when it is supported. It is safe "
+      "because in Dawn we always clear the resources manually when needed.",
+      "https://crbug.com/dawn/484", ToggleStage::Device}},
     {Toggle::NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,
      {"no_workaround_sample_mask_becomes_zero_for_all_but_last_color_target",
       "MacOS 12.0+ Intel has a bug where the sample mask is only applied for the last color "

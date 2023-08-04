@@ -327,10 +327,16 @@ ResourceAllocatorManager::ResourceAllocatorManager(Device* device) : mDevice(dev
                             ? mDevice->GetDeviceInfo().resourceHeapTier
                             : 1;
 
+    D3D12_HEAP_FLAGS createNotZeroedHeapFlag =
+        mDevice->IsToggleEnabled(Toggle::D3D12CreateNotZeroedHeap)
+            ? D3D12_HEAP_FLAG_CREATE_NOT_ZEROED
+            : D3D12_HEAP_FLAG_NONE;
+
     for (uint32_t i = 0; i < ResourceHeapKind::EnumCount; i++) {
         const ResourceHeapKind resourceHeapKind = static_cast<ResourceHeapKind>(i);
+        D3D12_HEAP_FLAGS heapFlags = GetD3D12HeapFlags(resourceHeapKind) | createNotZeroedHeapFlag;
         mHeapAllocators[i] = std::make_unique<HeapAllocator>(
-            mDevice, GetD3D12HeapType(resourceHeapKind), GetD3D12HeapFlags(resourceHeapKind),
+            mDevice, GetD3D12HeapType(resourceHeapKind), heapFlags,
             GetMemorySegment(device, GetD3D12HeapType(resourceHeapKind)));
         mPooledHeapAllocators[i] =
             std::make_unique<PooledResourceMemoryAllocator>(mHeapAllocators[i].get());
