@@ -112,6 +112,17 @@ class DAWN_NATIVE_EXPORT ExternalImageDXGI {
     std::unique_ptr<ExternalImageDXGIImpl> mImpl;
 };
 
+// May be chained on SharedTextureMemoryDescriptor
+struct DAWN_NATIVE_EXPORT SharedTextureMemoryID3D11Texture2DDescriptor : wgpu::ChainedStruct {
+    SharedTextureMemoryID3D11Texture2DDescriptor() {
+        sType = static_cast<wgpu::SType>(WGPUSType_SharedTextureMemoryD3D11Texture2DDescriptor);
+    }
+
+    // This ID3D11Texture2D object must be created from the same ID3D11Device used in the
+    // WGPUDevice.
+    Microsoft::WRL::ComPtr<IUnknown> texture;
+};
+
 }  // namespace dawn::native::d3d
 
 #endif  // INCLUDE_DAWN_NATIVE_D3DBACKEND_H_

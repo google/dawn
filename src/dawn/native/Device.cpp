@@ -48,6 +48,8 @@
 #include "dawn/native/RenderBundleEncoder.h"
 #include "dawn/native/RenderPipeline.h"
 #include "dawn/native/Sampler.h"
+#include "dawn/native/SharedFence.h"
+#include "dawn/native/SharedTextureMemory.h"
 #include "dawn/native/Surface.h"
 #include "dawn/native/SwapChain.h"
 #include "dawn/native/Texture.h"
@@ -1355,6 +1357,35 @@ ExternalTextureBase* DeviceBase::APICreateExternalTexture(
     }
 
     return result.Detach();
+}
+
+SharedTextureMemoryBase* DeviceBase::APIImportSharedTextureMemory(
+    const SharedTextureMemoryDescriptor* descriptor) {
+    Ref<SharedTextureMemoryBase> result = nullptr;
+    if (ConsumedError(ImportSharedTextureMemoryImpl(descriptor), &result,
+                      "calling %s.ImportSharedTextureMemory(%s).", this, descriptor)) {
+        return SharedTextureMemoryBase::MakeError(this, descriptor);
+    }
+    return result.Detach();
+}
+
+ResultOrError<Ref<SharedTextureMemoryBase>> DeviceBase::ImportSharedTextureMemoryImpl(
+    const SharedTextureMemoryDescriptor* descriptor) {
+    return DAWN_UNIMPLEMENTED_ERROR("Not implemented");
+}
+
+SharedFenceBase* DeviceBase::APIImportSharedFence(const SharedFenceDescriptor* descriptor) {
+    Ref<SharedFenceBase> result = nullptr;
+    if (ConsumedError(ImportSharedFenceImpl(descriptor), &result,
+                      "calling %s.ImportSharedFence(%s).", this, descriptor)) {
+        return SharedFenceBase::MakeError(this, descriptor);
+    }
+    return result.Detach();
+}
+
+ResultOrError<Ref<SharedFenceBase>> DeviceBase::ImportSharedFenceImpl(
+    const SharedFenceDescriptor* descriptor) {
+    return DAWN_UNIMPLEMENTED_ERROR("Not implemented");
 }
 
 void DeviceBase::ApplyFeatures(const DeviceDescriptor* deviceDescriptor) {

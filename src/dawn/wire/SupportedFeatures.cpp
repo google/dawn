@@ -27,6 +27,20 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_ImplicitDeviceSynchronization:
         case WGPUFeatureName_SurfaceCapabilities:
         case WGPUFeatureName_D3D11MultithreadProtected:
+        case WGPUFeatureName_SharedTextureMemoryVkDedicatedAllocation:
+        case WGPUFeatureName_SharedTextureMemoryAHardwareBuffer:
+        case WGPUFeatureName_SharedTextureMemoryDmaBuf:
+        case WGPUFeatureName_SharedTextureMemoryOpaqueFD:
+        case WGPUFeatureName_SharedTextureMemoryZirconHandle:
+        case WGPUFeatureName_SharedTextureMemoryDXGISharedHandle:
+        case WGPUFeatureName_SharedTextureMemoryD3D11Texture2D:
+        case WGPUFeatureName_SharedTextureMemoryIOSurface:
+        case WGPUFeatureName_SharedTextureMemoryEGLImage:
+        case WGPUFeatureName_SharedFenceVkSemaphoreOpaqueFD:
+        case WGPUFeatureName_SharedFenceVkSemaphoreSyncFD:
+        case WGPUFeatureName_SharedFenceVkSemaphoreZirconHandle:
+        case WGPUFeatureName_SharedFenceDXGISharedHandle:
+        case WGPUFeatureName_SharedFenceMTLSharedEvent:
             return false;
         case WGPUFeatureName_Depth32FloatStencil8:
         case WGPUFeatureName_TimestampQuery:

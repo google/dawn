@@ -1118,6 +1118,22 @@
                 ]
             },
             {
+                "name": "import shared texture memory",
+                "returns": "shared texture memory",
+                "tags": ["dawn", "native"],
+                "args": [
+                    {"name": "descriptor", "type": "shared texture memory descriptor", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "import shared fence",
+                "returns": "shared fence",
+                "tags": ["dawn", "native"],
+                "args": [
+                    {"name": "descriptor", "type": "shared fence descriptor", "annotation": "const*"}
+                ]
+            },
+            {
                 "name": "create error texture",
                 "returns": "texture",
                 "tags": ["dawn"],
@@ -1433,6 +1449,335 @@
             {"name": "rotation", "type": "external texture rotation", "default": "rotate 0 degrees"}
         ]
     },
+    "shared texture memory": {
+        "category": "object",
+        "tags": ["dawn", "native"],
+        "methods": [
+            {
+                "name": "set label",
+                "returns": "void",
+                "args": [
+                    {"name": "label", "type": "char", "annotation": "const*", "length": "strlen"}
+                ]
+            },
+            {
+                "name": "get properties",
+                "returns": "void",
+                "args": [
+                    {"name": "properties", "type": "shared texture memory properties", "annotation": "*"}
+                ]
+            },
+            {
+                "name": "create texture",
+                "returns": "texture",
+                "args": [
+                    {"name": "descriptor", "type": "texture descriptor", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "begin access",
+                "args": [
+                    {"name": "texture", "type": "texture"},
+                    {"name": "descriptor", "type": "shared texture memory begin access descriptor", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "end access",
+                "args": [
+                    {"name": "texture", "type": "texture"},
+                    {"name": "descriptor", "type": "shared texture memory end access state", "annotation": "*"}
+                ]
+            }
+        ]
+    },
+    "shared texture memory properties": {
+        "category": "structure",
+        "extensible": "out",
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "usage", "type": "texture usage"},
+            {"name": "size", "type": "extent 3D"},
+            {"name": "format", "type": "texture format"}
+        ]
+    },
+    "shared texture memory descriptor": {
+        "category": "structure",
+        "extensible": "in",
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
+        ]
+    },
+    "shared texture memory vk image descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared texture memory descriptor"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "vk format", "type": "int32_t"},
+            {"name": "vk usage flags", "type": "int32_t"},
+            {"name": "vk extent 3D", "type": "extent 3D"}
+        ]
+    },
+    "shared texture memory vk dedicated allocation descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared texture memory descriptor"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "dedicated allocation", "type": "bool"}
+        ]
+    },
+    "shared texture memory a hardware buffer descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared texture memory descriptor"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "handle", "type": "void *"}
+        ]
+    },
+    "shared texture memory dma buf descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared texture memory descriptor"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "memory FD", "type": "int"},
+            {"name": "allocation size", "type": "uint64_t"},
+            {"name": "drm modifier", "type": "uint64_t"},
+            {"name": "plane count", "type": "size_t"},
+            {"name": "plane offsets", "type": "uint64_t", "annotation": "const*", "length": "plane count"},
+            {"name": "plane strides", "type": "uint32_t", "annotation": "const*", "length": "plane count"}
+        ]
+    },
+    "shared texture memory opaque FD descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared texture memory descriptor"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "memory FD", "type": "int"},
+            {"name": "allocation size", "type": "uint64_t"}
+        ]
+    },
+    "shared texture memory zircon handle descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared texture memory descriptor"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "memory FD", "type": "uint32_t"},
+            {"name": "allocation size", "type": "uint64_t"}
+        ]
+    },
+    "shared texture memory DXGI shared handle descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared texture memory descriptor"],
+        "tags": ["dawn", "native"],
+        "_comment": "TODO(crbug.com/dawn/1745): improve type safety",
+        "members": [
+            {"name": "handle", "type": "void *"}
+        ]
+    },
+    "shared texture memory IO surface descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared texture memory descriptor"],
+        "tags": ["dawn", "native"],
+        "_comment": "TODO(crbug.com/dawn/1745): improve type safety",
+        "members": [
+            {"name": "io surface", "type": "void *"}
+        ]
+    },
+    "shared texture memory EGL image descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared texture memory descriptor"],
+        "tags": ["dawn", "native"],
+        "_comment": "TODO(crbug.com/dawn/1745): improve type safety",
+        "members": [
+            {"name": "image", "type": "void *"}
+        ]
+    },
+    "shared texture memory begin access descriptor": {
+        "category": "structure",
+        "extensible": "in",
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "initialized", "type": "bool"},
+            {"name": "fence count", "type": "size_t"},
+            {"name": "fences", "type": "shared fence", "annotation": "const*", "length": "fence count"},
+            {"name": "signaled values", "type": "uint64_t", "annotation": "const*", "length": "fence count"}
+        ]
+    },
+    "shared texture memory end access state": {
+        "category": "structure",
+        "extensible": "out",
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "initialized", "type": "bool"},
+            {"name": "fence count", "type": "size_t"},
+            {"name": "fences", "type": "shared fence", "annotation": "const*", "length": "fence count"},
+            {"name": "signaled values", "type": "uint64_t", "annotation": "const*", "length": "fence count"}
+        ]
+    },
+    "shared texture memory vk image layout begin state": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared texture memory begin access descriptor"],
+        "tags": ["dawn", "native"],
+        "_comment": "TODO(crbug.com/dawn/1745): improve type safety",
+        "members": [
+            {"name": "old layout", "type": "int32_t"},
+            {"name": "new layout", "type": "int32_t"}
+        ]
+    },
+    "shared texture memory vk image layout end state": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["shared texture memory end access state"],
+        "tags": ["dawn", "native"],
+        "_comment": "TODO(crbug.com/dawn/1745): improve type safety",
+        "members": [
+            {"name": "old layout", "type": "int32_t"},
+            {"name": "new layout", "type": "int32_t"}
+        ]
+    },
+    "shared fence": {
+        "category": "object",
+        "tags": ["dawn", "native"],
+        "methods": [
+            {
+                "name": "export info",
+                "returns": "void",
+                "args": [
+                    {"name": "info", "type": "shared fence export info", "annotation": "*"}
+                ]
+            }
+        ]
+    },
+    "shared fence descriptor": {
+        "category": "structure",
+        "extensible": "in",
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true}
+        ]
+    },
+    "shared fence vk semaphore opaque FD descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared fence descriptor"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "handle", "type": "int"}
+        ]
+    },
+    "shared fence vk semaphore sync FD descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared fence descriptor"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "handle", "type": "int"}
+        ]
+    },
+    "shared fence vk semaphore zircon handle descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared fence descriptor"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "handle", "type": "uint32_t"}
+        ]
+    },
+    "shared fence DXGI shared handle descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared fence descriptor"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "handle", "type": "void *"}
+        ]
+    },
+    "shared fence MTL shared event descriptor": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["shared fence descriptor"],
+        "tags": ["dawn", "native"],
+        "_comment": "TODO(crbug.com/dawn/1745): improve type safety",
+        "members": [
+            {"name": "shared event", "type": "void *"}
+        ]
+    },
+    "shared fence type": {
+        "category": "enum",
+        "tags": ["dawn", "native"],
+        "values": [
+            {"value": 0, "name": "undefined", "valid": false},
+            {"value": 1, "name": "vk semaphore opaque FD"},
+            {"value": 2, "name": "vk semaphore sync FD"},
+            {"value": 3, "name": "vk semaphore zircon handle"},
+            {"value": 4, "name": "DXGI shared handle"},
+            {"value": 5, "name": "MTL shared event"}
+        ]
+    },
+    "shared fence export info": {
+        "category": "structure",
+        "extensible": "out",
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "type", "type": "shared fence type"}
+        ]
+    },
+    "shared fence vk semaphore opaque FD export info": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["shared fence export info"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "handle", "type": "int"}
+        ]
+    },
+    "shared fence vk semaphore sync FD export info": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["shared fence export info"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "handle", "type": "int"}
+        ]
+    },
+    "shared fence vk semaphore zircon handle export info": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["shared fence export info"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "handle", "type": "uint32_t"}
+        ]
+    },
+    "shared fence DXGI shared handle export info": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["shared fence export info"],
+        "tags": ["dawn", "native"],
+        "members": [
+            {"name": "handle", "type": "void *"}
+        ]
+    },
+    "shared fence MTL shared event export info": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["shared fence export info"],
+        "tags": ["dawn", "native"],
+        "_comment": "TODO(crbug.com/dawn/1745): improve type safety",
+        "members": [
+            {"name": "shared event", "type": "void *"}
+        ]
+    },
     "feature name": {
         "category": "enum",
         "values": [
@@ -1461,7 +1806,22 @@
             {"value": 1010, "name": "MSAA render to single sampled", "tags": ["dawn"]},
             {"value": 1011, "name": "dual source blending", "tags": ["dawn"]},
             {"value": 1012, "name": "D3D11 multithread protected", "tags": ["dawn", "native"]},
-            {"value": 1013, "name": "ANGLE texture sharing", "tags": ["dawn", "native"]}
+            {"value": 1013, "name": "ANGLE texture sharing", "tags": ["dawn", "native"]},
+
+            {"value": 1100, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
+            {"value": 1101, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},
+            {"value": 1102, "name": "shared texture memory dma buf", "tags": ["dawn", "native"]},
+            {"value": 1103, "name": "shared texture memory opaque FD", "tags": ["dawn", "native"]},
+            {"value": 1104, "name": "shared texture memory zircon handle", "tags": ["dawn", "native"]},
+            {"value": 1105, "name": "shared texture memory DXGI shared handle", "tags": ["dawn", "native"]},
+            {"value": 1106, "name": "shared texture memory D3D11 texture 2D", "tags": ["dawn", "native"]},
+            {"value": 1107, "name": "shared texture memory IO surface", "tags": ["dawn", "native"]},
+            {"value": 1108, "name": "shared texture memory EGL image", "tags": ["dawn", "native"]},
+            {"value": 1200, "name": "shared fence vk semaphore opaque FD", "tags": ["dawn", "native"]},
+            {"value": 1201, "name": "shared fence vk semaphore sync FD", "tags": ["dawn", "native"]},
+            {"value": 1202, "name": "shared fence vk semaphore zircon handle", "tags": ["dawn", "native"]},
+            {"value": 1203, "name": "shared fence DXGI shared handle", "tags": ["dawn", "native"]},
+            {"value": 1204, "name": "shared fence MTL shared event", "tags": ["dawn", "native"]}
         ]
     },
     "filter mode": {
@@ -2230,7 +2590,7 @@
 
     "request device callback": {
         "category": "function pointer",
-        "_TODO": "crbug.com/1234617: Revisit optional status of device once requestDevice can return lost devices",
+        "_comment": "crbug.com/1234617: Revisit optional status of device once requestDevice can return lost devices",
         "args": [
             {"name": "status", "type": "request device status"},
             {"name": "device", "type": "device", "optional": true},
@@ -2643,7 +3003,32 @@
             {"value": 1010, "name": "request adapter options LUID", "tags": ["dawn", "native"]},
             {"value": 1011, "name": "request adapter options get GL proc", "tags": ["dawn", "native"]},
             {"value": 1012, "name": "dawn multisample state render to single sampled", "tags": ["dawn"]},
-            {"value": 1013, "name": "dawn render pass color attachment render to single sampled", "tags": ["dawn"]}
+            {"value": 1013, "name": "dawn render pass color attachment render to single sampled", "tags": ["dawn"]},
+
+            {"value": 1100, "name": "shared texture memory vk image descriptor", "tags": ["dawn", "native"]},
+            {"value": 1101, "name": "shared texture memory vk dedicated allocation descriptor", "tags": ["dawn", "native"]},
+            {"value": 1102, "name": "shared texture memory a hardware buffer descriptor", "tags": ["dawn", "native"]},
+            {"value": 1103, "name": "shared texture memory dma buf descriptor", "tags": ["dawn", "native"]},
+            {"value": 1104, "name": "shared texture memory opaque FD descriptor", "tags": ["dawn", "native"]},
+            {"value": 1105, "name": "shared texture memory zircon handle descriptor", "tags": ["dawn", "native"]},
+            {"value": 1106, "name": "shared texture memory DXGI shared handle descriptor", "tags": ["dawn", "native"]},
+            {"value": 1107, "name": "shared texture memory D3D11 texture 2D descriptor", "tags": ["dawn", "native"]},
+            {"value": 1108, "name": "shared texture memory IO surface descriptor", "tags": ["dawn", "native"]},
+            {"value": 1109, "name": "shared texture memory EGL image descriptor", "tags": ["dawn", "native"]},
+            {"value": 1200, "name": "shared texture memory initialized begin state", "tags": ["dawn", "native"]},
+            {"value": 1201, "name": "shared texture memory initialized end state", "tags": ["dawn", "native"]},
+            {"value": 1202, "name": "shared texture memory vk image layout begin state", "tags": ["dawn", "native"]},
+            {"value": 1203, "name": "shared texture memory vk image layout end state", "tags": ["dawn", "native"]},
+            {"value": 1204, "name": "shared fence vk semaphore opaque FD descriptor", "tags": ["dawn", "native"]},
+            {"value": 1205, "name": "shared fence vk semaphore opaque FD export info", "tags": ["dawn", "native"]},
+            {"value": 1206, "name": "shared fence vk semaphore sync FD descriptor", "tags": ["dawn", "native"]},
+            {"value": 1207, "name": "shared fence vk semaphore sync FD export info", "tags": ["dawn", "native"]},
+            {"value": 1208, "name": "shared fence vk semaphore zircon handle descriptor", "tags": ["dawn", "native"]},
+            {"value": 1209, "name": "shared fence vk semaphore zircon handle export info", "tags": ["dawn", "native"]},
+            {"value": 1210, "name": "shared fence DXGI shared handle descriptor", "tags": ["dawn", "native"]},
+            {"value": 1211, "name": "shared fence DXGI shared handle export info", "tags": ["dawn", "native"]},
+            {"value": 1212, "name": "shared fence MTL shared event descriptor", "tags": ["dawn", "native"]},
+            {"value": 1213, "name": "shared fence MTL shared event export info", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {
@@ -2993,6 +3378,9 @@
         "category": "native"
     },
     "void const *": {
+        "category": "native"
+    },
+    "int": {
         "category": "native"
     },
     "int32_t": {
