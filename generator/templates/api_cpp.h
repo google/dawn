@@ -27,6 +27,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 
 namespace {{metadata.namespace}} {
 
@@ -66,6 +67,26 @@ namespace {{metadata.namespace}} {
     {% for type in by_category["structure"] %}
         struct {{as_cppType(type.name)}};
     {% endfor %}
+
+
+    // Special class for booleans in order to allow implicit conversions.
+    {% set BoolCppType = as_cppType(types["bool"].name) %}
+    {% set BoolCType = as_cType(types["bool"].name) %}
+    class {{BoolCppType}} {
+      public:
+        constexpr {{BoolCppType}}() = default;
+        // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
+        constexpr {{BoolCppType}}(bool value) : mValue(static_cast<{{BoolCType}}>(value)) {}
+        // NOLINTNEXTLINE(runtime/explicit) allow implicit construction
+        {{BoolCppType}}({{BoolCType}} value): mValue(value) {}
+
+        constexpr operator bool() const { return static_cast<bool>(mValue); }
+
+      private:
+        friend struct std::hash<{{BoolCppType}}>;
+        // Default to false.
+        {{BoolCType}} mValue = static_cast<{{BoolCType}}>(false);
+    };
 
     {% for typeDef in by_category["typedef"] %}
         // {{as_cppType(typeDef.name)}} is deprecated.
@@ -261,5 +282,16 @@ namespace dawn {
 
     {% endfor %}
 } // namespace dawn
+
+namespace std {
+// Custom boolean class needs corresponding hash function so that it appears as a transparent bool.
+template <>
+struct hash<{{metadata.namespace}}::{{BoolCppType}}> {
+  public:
+    size_t operator()(const {{metadata.namespace}}::{{BoolCppType}} &v) const {
+        return hash<bool>()(v);
+    }
+};
+}  // namespace std
 
 #endif // {{API}}_CPP_H_

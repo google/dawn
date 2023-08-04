@@ -699,7 +699,8 @@ def as_varName(*names):
 
 
 def as_cType(c_prefix, name):
-    if name.native:
+    # Special case for 'bool' because it has a typedef for compatibility.
+    if name.native and name.get() != 'bool':
         return name.concatcase()
     else:
         return c_prefix + name.CamelCase()
@@ -713,7 +714,8 @@ def as_cReturnType(c_prefix, typ):
 
 
 def as_cppType(name):
-    if name.native:
+    # Special case for 'bool' because it has a typedef for compatibility.
+    if name.native and name.get() != 'bool':
         return name.concatcase()
     else:
         return name.CamelCase()
@@ -798,7 +800,7 @@ def as_MethodSuffix(type_name, method_name):
 def as_frontendType(metadata, typ):
     if typ.category == 'object':
         return typ.name.CamelCase() + 'Base*'
-    elif typ.category in ['bitmask', 'enum']:
+    elif typ.category in ['bitmask', 'enum'] or typ.name.get() == 'bool':
         return metadata.namespace + '::' + typ.name.CamelCase()
     elif typ.category == 'structure':
         return as_cppType(typ.name)

@@ -24,17 +24,17 @@
 
 namespace {{native_namespace}} {
 
-//
-// Streaming readers for wgpu structures.
-//
+//*
+//* Streaming readers for wgpu structures.
+//*
 {% macro render_reader(member) %}
     {%- set name = member.name.camelCase() -%}
     DAWN_TRY(StreamOut(source, &t->{{name}}));
 {% endmacro %}
 
-//
-// Streaming writers for wgpu structures.
-//
+//*
+//* Streaming writers for wgpu structures.
+//*
 {% macro render_writer(member) %}
     {%- set name = member.name.camelCase() -%}
     {% if member.length == None %}
@@ -82,6 +82,13 @@ namespace {{native_namespace}} {
         }
     {% endif %}
 {% endmacro %}
+
+// Custom stream operator for special bool type.
+{% set BoolCppType = metadata.namespace + "::" + as_cppType(types["bool"].name) %}
+template <>
+void stream::Stream<{{BoolCppType}}>::Write(stream::Sink* sink, const {{BoolCppType}}& t) {
+    StreamIn(sink, static_cast<bool>(t));
+}
 
 {% call render_streaming_impl("adapter properties", true, false) %}
 {% endcall %}

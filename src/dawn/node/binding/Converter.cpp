@@ -1765,4 +1765,9 @@ bool Converter::Convert(wgpu::PipelineLayout& out, const interop::GPUAutoLayoutM
     return true;
 }
 
+bool Converter::Convert(wgpu::Bool& out, const bool& in) {
+    out = in;
+    return true;
+}
+
 }  // namespace wgpu::binding

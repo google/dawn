@@ -52,7 +52,7 @@ namespace {{native_namespace}} {
         {% for member in type.members %}
             {% set memberName = member.name.camelCase() %}
             static_assert(offsetof({{CppType}}, {{memberName}}) == offsetof({{CType}}, {{memberName}}),
-                    "offsetof mismatch for {{CppType}}::{{memberName}}");
+                         "offsetof mismatch for {{CppType}}::{{memberName}}");
         {% endfor %}
 
         bool {{CppType}}::operator==(const {{as_cppType(type.name)}}& rhs) const {
