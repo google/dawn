@@ -317,6 +317,23 @@ crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCan
 crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,uploadToWebGL:format="rgba8unorm";alphaMode="premultiplied";webgl="webgl2";upload="texSubImage2D" [ Failure ]
 
 ################################################################################
+# Failures due to incorrect test expectations.
+# Test fails due to rounding differences between unorm8 and float16.
+################################################################################
+crbug.com/1469914 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="opaque";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
+crbug.com/1469914 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
+crbug.com/1469914 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="opaque";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
+crbug.com/1469914 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
+crbug.com/1469914 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="opaque";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
+crbug.com/1469914 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
+crbug.com/1469914 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="opaque";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
+crbug.com/1469914 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
+crbug.com/1469914 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="opaque";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
+crbug.com/1469914 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
+crbug.com/1469914 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="opaque";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
+crbug.com/1469914 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
+
+################################################################################
 # Failures due to rgba8unorm not being supported for canvas on macOS.
 # Could be made more precise.
 ################################################################################
