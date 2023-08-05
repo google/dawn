@@ -233,14 +233,6 @@ crbug.com/tint/1801 [ nvidia-0x2184 target-cpu-32 ] webgpu:shader,execution,shad
 ################################################################################
 # Untriaged canvas issues, potentially colorspace related.
 ################################################################################
-crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="premultiplied";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="premultiplied";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="premultiplied";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="premultiplied";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="premultiplied";colorSpace="srgb";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="premultiplied";colorSpace="srgb";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="premultiplied";colorSpace="srgb";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="premultiplied";colorSpace="srgb";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
 crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";snapshotType="convertToBlob" [ Failure ]
 crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";snapshotType="convertToBlob" [ Failure ]
 crbug.com/dawn/0000 [ ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:offscreenCanvas,snapshot:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";snapshotType="imageBitmap" [ Failure ]
@@ -580,42 +572,10 @@ crbug.com/dawn/1899 [ qualcomm ] webgpu:api,operation,command_buffer,queries,occ
 ################################################################################
 # Temporary failures while fixing crbug.com/1469851
 ################################################################################
-crbug.com/1469851 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="bgra8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba8unorm";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="onscreen";canvas2DType="offscreen" [ Failure ]
-crbug.com/1469851 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="onscreen" [ Failure ]
-crbug.com/1469851 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:format="rgba16float";alphaMode="opaque";colorSpace="display-p3";webgpuCanvasType="offscreen";canvas2DType="offscreen" [ Failure ]
+
+crbug.com/1469851 [ win ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:* [ Failure ]
+crbug.com/1469851 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:* [ Failure ]
+crbug.com/1469851 [ android ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:drawTo2DCanvas:* [ Failure ]
 
 ################################################################################
 # Atomics tests fail with workgroupSize=2 on Android Arm (Pixel 6)
