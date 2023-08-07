@@ -287,6 +287,9 @@ libtint_source_set("libtint_clone_context_hdrs") {
 
 libtint_source_set("libtint_program_src") {
   sources = [
+    "lang/core/intrinsic/table.cc",
+    "lang/core/intrinsic/table.h",
+    "lang/core/intrinsic/table.inl",
     "lang/wgsl/program/clone_context.cc",
     "lang/wgsl/program/program.cc",
     "lang/wgsl/program/program_builder.cc",
@@ -296,9 +299,6 @@ libtint_source_set("libtint_program_src") {
     "lang/wgsl/resolver/ctor_conv_intrinsic.h",
     "lang/wgsl/resolver/dependency_graph.cc",
     "lang/wgsl/resolver/dependency_graph.h",
-    "lang/wgsl/resolver/intrinsic_table.cc",
-    "lang/wgsl/resolver/intrinsic_table.h",
-    "lang/wgsl/resolver/intrinsic_table.inl",
     "lang/wgsl/resolver/resolve.cc",
     "lang/wgsl/resolver/resolver.cc",
     "lang/wgsl/resolver/sem_helper.cc",
@@ -1686,6 +1686,7 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_resolver_src") {
     sources = [
+      "lang/core/intrinsic/table_test.cc",
       "lang/wgsl/resolver/address_space_layout_validation_test.cc",
       "lang/wgsl/resolver/address_space_validation_test.cc",
       "lang/wgsl/resolver/alias_analysis_test.cc",
@@ -1727,7 +1728,6 @@ if (tint_build_unittests) {
       "lang/wgsl/resolver/host_shareable_validation_test.cc",
       "lang/wgsl/resolver/increment_decrement_validation_test.cc",
       "lang/wgsl/resolver/inferred_type_test.cc",
-      "lang/wgsl/resolver/intrinsic_table_test.cc",
       "lang/wgsl/resolver/is_host_shareable_test.cc",
       "lang/wgsl/resolver/is_storeable_test.cc",
       "lang/wgsl/resolver/load_test.cc",

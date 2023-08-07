@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_RESOLVER_INTRINSIC_TABLE_H_
-#define SRC_TINT_LANG_WGSL_RESOLVER_INTRINSIC_TABLE_H_
+#ifndef SRC_TINT_LANG_CORE_INTRINSIC_TABLE_H_
+#define SRC_TINT_LANG_CORE_INTRINSIC_TABLE_H_
 
 #include <memory>
 #include <string>
@@ -30,24 +30,24 @@ namespace tint {
 class ProgramBuilder;
 }  // namespace tint
 
-namespace tint::resolver {
+namespace tint::core::intrinsic {
 
-/// IntrinsicTable is a lookup table of all the WGSL builtin functions and intrinsic operators
-class IntrinsicTable {
+/// Table is a lookup table of all the WGSL builtin functions and intrinsic operators
+class Table {
   public:
     /// @param builder the program builder
-    /// @return a pointer to a newly created IntrinsicTable
-    static std::unique_ptr<IntrinsicTable> Create(ProgramBuilder& builder);
+    /// @return a pointer to a newly created Table
+    static std::unique_ptr<Table> Create(ProgramBuilder& builder);
 
     /// Destructor
-    virtual ~IntrinsicTable();
+    virtual ~Table();
 
     /// Builtin describes a resolved builtin function
     struct Builtin {
         /// The semantic info for the builtin
         const sem::Builtin* sem = nullptr;
         /// The constant evaluation function
-        ConstEval::Function const_eval_fn = nullptr;
+        resolver::ConstEval::Function const_eval_fn = nullptr;
     };
 
     /// UnaryOperator describes a resolved unary operator
@@ -57,7 +57,7 @@ class IntrinsicTable {
         /// The type of the parameter of the unary operator
         const type::Type* parameter = nullptr;
         /// The constant evaluation function
-        ConstEval::Function const_eval_fn = nullptr;
+        resolver::ConstEval::Function const_eval_fn = nullptr;
     };
 
     /// BinaryOperator describes a resolved binary operator
@@ -69,7 +69,7 @@ class IntrinsicTable {
         /// The type of RHS parameter of the binary operator
         const type::Type* rhs = nullptr;
         /// The constant evaluation function
-        ConstEval::Function const_eval_fn = nullptr;
+        resolver::ConstEval::Function const_eval_fn = nullptr;
     };
 
     /// CtorOrConv describes a resolved value constructor or conversion
@@ -77,7 +77,7 @@ class IntrinsicTable {
         /// The result type of the value constructor or conversion
         const sem::CallTarget* target = nullptr;
         /// The constant evaluation function
-        ConstEval::Function const_eval_fn = nullptr;
+        resolver::ConstEval::Function const_eval_fn = nullptr;
     };
 
     /// Lookup looks for the builtin overload with the given signature, raising an error diagnostic
@@ -150,13 +150,13 @@ class IntrinsicTable {
     ///        after shader creation time (sem::EvaluationStage::kConstant).
     /// @param source the source of the call
     /// @return a sem::ValueConstructor, sem::ValueConversion or nullptr if nothing matched
-    virtual CtorOrConv Lookup(CtorConvIntrinsic type,
+    virtual CtorOrConv Lookup(resolver::CtorConvIntrinsic type,
                               const type::Type* template_arg,
                               VectorRef<const type::Type*> args,
                               sem::EvaluationStage earliest_eval_stage,
                               const Source& source) = 0;
 };
 
-}  // namespace tint::resolver
+}  // namespace tint::core::intrinsic
 
-#endif  // SRC_TINT_LANG_WGSL_RESOLVER_INTRINSIC_TABLE_H_
+#endif  // SRC_TINT_LANG_CORE_INTRINSIC_TABLE_H_

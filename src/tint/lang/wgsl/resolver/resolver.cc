@@ -109,7 +109,7 @@ Resolver::Resolver(ProgramBuilder* builder)
     : builder_(builder),
       diagnostics_(builder->Diagnostics()),
       const_eval_(*builder),
-      intrinsic_table_(IntrinsicTable::Create(*builder)),
+      intrinsic_table_(core::intrinsic::Table::Create(*builder)),
       sem_(builder),
       validator_(builder,
                  sem_,
@@ -2339,7 +2339,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         arg_stage = sem::EarliestStage(arg_stage, arg->Stage());
     }
 
-    IntrinsicTable::Builtin builtin;
+    core::intrinsic::Table::Builtin builtin;
     {
         auto arg_tys = tint::Transform(args, [](auto* arg) { return arg->Type(); });
         builtin = intrinsic_table_->Lookup(builtin_type, arg_tys, arg_stage, expr->source);

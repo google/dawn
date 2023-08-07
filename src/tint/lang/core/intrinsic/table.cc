@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/resolver/intrinsic_table.h"
+#include "src/tint/lang/core/intrinsic/table.h"
 
 #include <algorithm>
 #include <limits>
@@ -43,7 +43,7 @@
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::resolver {
+namespace tint::core::intrinsic {
 namespace {
 
 // Forward declarations
@@ -894,7 +894,7 @@ struct OverloadInfo {
     /// The flags for the overload
     OverloadFlags flags;
     /// The function used to evaluate the overload at shader-creation time.
-    ConstEval::Function const const_eval_fn;
+    resolver::ConstEval::Function const const_eval_fn;
 };
 
 /// IntrinsicInfo describes a builtin function or operator overload
@@ -905,7 +905,7 @@ struct IntrinsicInfo {
     OverloadInfo const* const overloads;
 };
 
-#include "intrinsic_table.inl"
+#include "table.inl"
 
 /// IntrinsicPrototype describes a fully matched intrinsic.
 struct IntrinsicPrototype {
@@ -951,8 +951,8 @@ bool operator==(const IntrinsicPrototype& a, const IntrinsicPrototype& b) {
     return true;
 }
 
-/// Impl is the private implementation of the IntrinsicTable interface.
-class Impl : public IntrinsicTable {
+/// Impl is the private implementation of the Table interface.
+class Impl : public Table {
   public:
     explicit Impl(ProgramBuilder& builder);
 
@@ -973,7 +973,7 @@ class Impl : public IntrinsicTable {
                           const Source& source,
                           bool is_compound) override;
 
-    CtorOrConv Lookup(CtorConvIntrinsic type,
+    CtorOrConv Lookup(resolver::CtorConvIntrinsic type,
                       const type::Type* template_arg,
                       VectorRef<const type::Type*> args,
                       sem::EvaluationStage earliest_eval_stage,
@@ -1178,10 +1178,10 @@ Impl::Builtin Impl::Lookup(builtin::Function builtin_type,
     return Builtin{sem, match.overload->const_eval_fn};
 }
 
-IntrinsicTable::UnaryOperator Impl::Lookup(ast::UnaryOp op,
-                                           const type::Type* arg,
-                                           sem::EvaluationStage earliest_eval_stage,
-                                           const Source& source) {
+Table::UnaryOperator Impl::Lookup(ast::UnaryOp op,
+                                  const type::Type* arg,
+                                  sem::EvaluationStage earliest_eval_stage,
+                                  const Source& source) {
     auto [intrinsic_index, intrinsic_name] = [&]() -> std::pair<size_t, const char*> {
         switch (op) {
             case ast::UnaryOp::kComplement:
@@ -1224,12 +1224,12 @@ IntrinsicTable::UnaryOperator Impl::Lookup(ast::UnaryOp op,
     };
 }
 
-IntrinsicTable::BinaryOperator Impl::Lookup(ast::BinaryOp op,
-                                            const type::Type* lhs,
-                                            const type::Type* rhs,
-                                            sem::EvaluationStage earliest_eval_stage,
-                                            const Source& source,
-                                            bool is_compound) {
+Table::BinaryOperator Impl::Lookup(ast::BinaryOp op,
+                                   const type::Type* lhs,
+                                   const type::Type* rhs,
+                                   sem::EvaluationStage earliest_eval_stage,
+                                   const Source& source,
+                                   bool is_compound) {
     auto [intrinsic_index, intrinsic_name] = [&]() -> std::pair<size_t, const char*> {
         switch (op) {
             case ast::BinaryOp::kAnd:
@@ -1303,11 +1303,11 @@ IntrinsicTable::BinaryOperator Impl::Lookup(ast::BinaryOp op,
     };
 }
 
-IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
-                                        const type::Type* template_arg,
-                                        VectorRef<const type::Type*> args,
-                                        sem::EvaluationStage earliest_eval_stage,
-                                        const Source& source) {
+Table::CtorOrConv Impl::Lookup(resolver::CtorConvIntrinsic type,
+                               const type::Type* template_arg,
+                               VectorRef<const type::Type*> args,
+                               sem::EvaluationStage earliest_eval_stage,
+                               const Source& source) {
     auto name = str(type);
 
     // Generates an error when no overloads match the provided arguments
@@ -1768,13 +1768,13 @@ void Impl::ErrAmbiguousOverload(const char* intrinsic_name,
 
 }  // namespace
 
-std::unique_ptr<IntrinsicTable> IntrinsicTable::Create(ProgramBuilder& builder) {
+std::unique_ptr<Table> Table::Create(ProgramBuilder& builder) {
     return std::make_unique<Impl>(builder);
 }
 
-IntrinsicTable::~IntrinsicTable() = default;
+Table::~Table() = default;
 
-}  // namespace tint::resolver
+}  // namespace tint::core::intrinsic
 
 /// TypeInfo for the Any type declared in the anonymous namespace above
-TINT_INSTANTIATE_TYPEINFO(tint::resolver::Any);
+TINT_INSTANTIATE_TYPEINFO(tint::core::intrinsic::Any);

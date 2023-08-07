@@ -516,9 +516,9 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/resolver/const_eval.h
   lang/wgsl/resolver/dependency_graph.cc
   lang/wgsl/resolver/dependency_graph.h
-  lang/wgsl/resolver/intrinsic_table.cc
-  lang/wgsl/resolver/intrinsic_table.h
-  lang/wgsl/resolver/intrinsic_table.inl
+  lang/core/intrinsic/table.cc
+  lang/core/intrinsic/table.h
+  lang/core/intrinsic/table.inl
   lang/wgsl/resolver/resolve.cc
   lang/wgsl/resolver/resolve.h
   lang/wgsl/resolver/resolver.cc
@@ -1110,7 +1110,7 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/resolver/host_shareable_validation_test.cc
     lang/wgsl/resolver/increment_decrement_validation_test.cc
     lang/wgsl/resolver/inferred_type_test.cc
-    lang/wgsl/resolver/intrinsic_table_test.cc
+    lang/core/intrinsic/table_test.cc
     lang/wgsl/resolver/is_host_shareable_test.cc
     lang/wgsl/resolver/is_storeable_test.cc
     lang/wgsl/resolver/load_test.cc

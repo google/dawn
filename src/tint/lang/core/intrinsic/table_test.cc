@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/resolver/intrinsic_table.h"
+#include "src/tint/lang/core/intrinsic/table.h"
 
 #include <utility>
 
@@ -32,7 +32,7 @@
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
 
-namespace tint::resolver {
+namespace tint::core::intrinsic {
 namespace {
 
 using ::testing::HasSubstr;
@@ -49,7 +49,7 @@ using u32V = vec3<u32>;
 
 class IntrinsicTableTest : public testing::Test, public ProgramBuilder {
   public:
-    std::unique_ptr<IntrinsicTable> table = IntrinsicTable::Create(*this);
+    std::unique_ptr<Table> table = Table::Create(*this);
 };
 
 TEST_F(IntrinsicTableTest, MatchF32) {
@@ -802,7 +802,7 @@ TEST_F(IntrinsicTableTest, MismatchCompoundOp) {
 TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicit) {
     auto* i32 = create<type::I32>();
     auto* vec3_i32 = create<type::Vector>(i32, 3u);
-    auto result = table->Lookup(CtorConvIntrinsic::kVec3, nullptr, Vector{i32, i32, i32},
+    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, nullptr, Vector{i32, i32, i32},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->ReturnType(), vec3_i32);
@@ -817,7 +817,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicit) {
 TEST_F(IntrinsicTableTest, MatchTypeInitializerExplicit) {
     auto* i32 = create<type::I32>();
     auto* vec3_i32 = create<type::Vector>(i32, 3u);
-    auto result = table->Lookup(CtorConvIntrinsic::kVec3, i32, Vector{i32, i32, i32},
+    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, i32, Vector{i32, i32, i32},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->ReturnType(), vec3_i32);
@@ -832,7 +832,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerExplicit) {
 TEST_F(IntrinsicTableTest, MismatchTypeInitializerImplicit) {
     auto* i32 = create<type::I32>();
     auto* f32 = create<type::F32>();
-    auto result = table->Lookup(CtorConvIntrinsic::kVec3, nullptr, Vector{i32, f32, i32},
+    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, nullptr, Vector{i32, f32, i32},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_EQ(result.target, nullptr);
     EXPECT_EQ(Diagnostics().str(),
@@ -859,7 +859,7 @@ TEST_F(IntrinsicTableTest, MismatchTypeInitializerImplicit) {
 TEST_F(IntrinsicTableTest, MismatchTypeInitializerExplicit) {
     auto* i32 = create<type::I32>();
     auto* f32 = create<type::F32>();
-    auto result = table->Lookup(CtorConvIntrinsic::kVec3, i32, Vector{i32, f32, i32},
+    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, i32, Vector{i32, f32, i32},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_EQ(result.target, nullptr);
     EXPECT_EQ(Diagnostics().str(),
@@ -886,7 +886,7 @@ TEST_F(IntrinsicTableTest, MismatchTypeInitializerExplicit) {
 TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitVecFromVecAbstract) {
     auto* ai = create<type::AbstractInt>();
     auto* vec3_ai = create<type::Vector>(ai, 3u);
-    auto result = table->Lookup(CtorConvIntrinsic::kVec3, nullptr, Vector{vec3_ai},
+    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, nullptr, Vector{vec3_ai},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->ReturnType(), vec3_ai);
@@ -901,8 +901,9 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitMatFromVec) {
     auto* vec2_ai = create<type::Vector>(create<type::AbstractInt>(), 2u);
     auto* vec2_af = create<type::Vector>(af, 2u);
     auto* mat2x2_af = create<type::Matrix>(vec2_af, 2u);
-    auto result = table->Lookup(CtorConvIntrinsic::kMat2x2, nullptr, Vector{vec2_ai, vec2_ai},
-                                sem::EvaluationStage::kConstant, Source{{12, 34}});
+    auto result =
+        table->Lookup(resolver::CtorConvIntrinsic::kMat2x2, nullptr, Vector{vec2_ai, vec2_ai},
+                      sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_TYPE(result.target->ReturnType(), mat2x2_af);
     EXPECT_TRUE(result.target->Is<sem::ValueConstructor>());
@@ -915,7 +916,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitMatFromVec) {
 TEST_F(IntrinsicTableTest, MatchTypeInitializer_ConstantEval) {
     auto* ai = create<type::AbstractInt>();
     auto* vec3_ai = create<type::Vector>(ai, 3u);
-    auto result = table->Lookup(CtorConvIntrinsic::kVec3, nullptr, Vector{ai, ai, ai},
+    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, nullptr, Vector{ai, ai, ai},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->Stage(), sem::EvaluationStage::kConstant);
@@ -930,7 +931,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializer_ConstantEval) {
 
 TEST_F(IntrinsicTableTest, MatchTypeInitializer_RuntimeEval) {
     auto* ai = create<type::AbstractInt>();
-    auto result = table->Lookup(CtorConvIntrinsic::kVec3, nullptr, Vector{ai, ai, ai},
+    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, nullptr, Vector{ai, ai, ai},
                                 sem::EvaluationStage::kRuntime, Source{{12, 34}});
     auto* i32 = create<type::I32>();
     auto* vec3_i32 = create<type::Vector>(i32, 3u);
@@ -950,7 +951,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion) {
     auto* vec3_i32 = create<type::Vector>(i32, 3u);
     auto* f32 = create<type::F32>();
     auto* vec3_f32 = create<type::Vector>(f32, 3u);
-    auto result = table->Lookup(CtorConvIntrinsic::kVec3, i32, Vector{vec3_f32},
+    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, i32, Vector{vec3_f32},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->ReturnType(), vec3_i32);
@@ -963,7 +964,7 @@ TEST_F(IntrinsicTableTest, MismatchTypeConversion) {
     auto* arr =
         create<type::Array>(create<type::U32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
     auto* f32 = create<type::F32>();
-    auto result = table->Lookup(CtorConvIntrinsic::kVec3, f32, Vector{arr},
+    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, f32, Vector{arr},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_EQ(result.target, nullptr);
     EXPECT_EQ(Diagnostics().str(),
@@ -993,7 +994,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion_ConstantEval) {
     auto* vec3_ai = create<type::Vector>(ai, 3u);
     auto* f32 = create<type::F32>();
     auto* vec3_f32 = create<type::Vector>(f32, 3u);
-    auto result = table->Lookup(CtorConvIntrinsic::kVec3, af, Vector{vec3_ai},
+    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, af, Vector{vec3_ai},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->Stage(), sem::EvaluationStage::kConstant);
@@ -1010,7 +1011,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion_RuntimeEval) {
     auto* vec3_ai = create<type::Vector>(ai, 3u);
     auto* vec3_f32 = create<type::Vector>(create<type::F32>(), 3u);
     auto* vec3_i32 = create<type::Vector>(create<type::I32>(), 3u);
-    auto result = table->Lookup(CtorConvIntrinsic::kVec3, af, Vector{vec3_ai},
+    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, af, Vector{vec3_ai},
                                 sem::EvaluationStage::kRuntime, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->Stage(), sem::EvaluationStage::kConstant);
@@ -1037,7 +1038,7 @@ TEST_F(IntrinsicTableTest, OverloadResolution) {
     // The first should win overload resolution.
     auto* ai = create<type::AbstractInt>();
     auto* i32 = create<type::I32>();
-    auto result = table->Lookup(CtorConvIntrinsic::kI32, nullptr, Vector{ai},
+    auto result = table->Lookup(resolver::CtorConvIntrinsic::kI32, nullptr, Vector{ai},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->ReturnType(), i32);
@@ -1057,24 +1058,24 @@ struct Case {
               typename ARG_RHS>
     static Case Create(bool match = true) {
         return {
-            match,                              //
-            builder::DataType<RESULT>::Sem,     //
-            builder::DataType<PARAM_LHS>::Sem,  //
-            builder::DataType<PARAM_RHS>::Sem,  //
-            builder::DataType<ARG_LHS>::Sem,    //
-            builder::DataType<ARG_RHS>::Sem,    //
+            match,                                        //
+            resolver::builder::DataType<RESULT>::Sem,     //
+            resolver::builder::DataType<PARAM_LHS>::Sem,  //
+            resolver::builder::DataType<PARAM_RHS>::Sem,  //
+            resolver::builder::DataType<ARG_LHS>::Sem,    //
+            resolver::builder::DataType<ARG_RHS>::Sem,    //
         };
     }
     bool expected_match;
-    builder::sem_type_func_ptr expected_result;
-    builder::sem_type_func_ptr expected_param_lhs;
-    builder::sem_type_func_ptr expected_param_rhs;
-    builder::sem_type_func_ptr arg_lhs;
-    builder::sem_type_func_ptr arg_rhs;
+    resolver::builder::sem_type_func_ptr expected_result;
+    resolver::builder::sem_type_func_ptr expected_param_lhs;
+    resolver::builder::sem_type_func_ptr expected_param_rhs;
+    resolver::builder::sem_type_func_ptr arg_lhs;
+    resolver::builder::sem_type_func_ptr arg_rhs;
 };
 
-struct IntrinsicTableAbstractBinaryTest : public ResolverTestWithParam<Case> {
-    std::unique_ptr<IntrinsicTable> table = IntrinsicTable::Create(*this);
+struct IntrinsicTableAbstractBinaryTest : public resolver::ResolverTestWithParam<Case> {
+    std::unique_ptr<Table> table = Table::Create(*this);
 };
 
 TEST_P(IntrinsicTableAbstractBinaryTest, MatchAdd) {
@@ -1236,27 +1237,27 @@ struct Case {
     static Case Create(bool match = true) {
         return {
             match,
-            builder::DataType<RESULT>::Sem,   //
-            builder::DataType<PARAM_A>::Sem,  //
-            builder::DataType<PARAM_B>::Sem,  //
-            builder::DataType<PARAM_C>::Sem,  //
-            builder::DataType<ARG_A>::Sem,    //
-            builder::DataType<ARG_B>::Sem,    //
-            builder::DataType<ARG_C>::Sem,    //
+            resolver::builder::DataType<RESULT>::Sem,   //
+            resolver::builder::DataType<PARAM_A>::Sem,  //
+            resolver::builder::DataType<PARAM_B>::Sem,  //
+            resolver::builder::DataType<PARAM_C>::Sem,  //
+            resolver::builder::DataType<ARG_A>::Sem,    //
+            resolver::builder::DataType<ARG_B>::Sem,    //
+            resolver::builder::DataType<ARG_C>::Sem,    //
         };
     }
     bool expected_match;
-    builder::sem_type_func_ptr expected_result;
-    builder::sem_type_func_ptr expected_param_a;
-    builder::sem_type_func_ptr expected_param_b;
-    builder::sem_type_func_ptr expected_param_c;
-    builder::sem_type_func_ptr arg_a;
-    builder::sem_type_func_ptr arg_b;
-    builder::sem_type_func_ptr arg_c;
+    resolver::builder::sem_type_func_ptr expected_result;
+    resolver::builder::sem_type_func_ptr expected_param_a;
+    resolver::builder::sem_type_func_ptr expected_param_b;
+    resolver::builder::sem_type_func_ptr expected_param_c;
+    resolver::builder::sem_type_func_ptr arg_a;
+    resolver::builder::sem_type_func_ptr arg_b;
+    resolver::builder::sem_type_func_ptr arg_c;
 };
 
-struct IntrinsicTableAbstractTernaryTest : public ResolverTestWithParam<Case> {
-    std::unique_ptr<IntrinsicTable> table = IntrinsicTable::Create(*this);
+struct IntrinsicTableAbstractTernaryTest : public resolver::ResolverTestWithParam<Case> {
+    std::unique_ptr<Table> table = Table::Create(*this);
 };
 
 TEST_P(IntrinsicTableAbstractTernaryTest, MatchClamp) {
@@ -1490,4 +1491,4 @@ Case::Create<u32V,     u32V,     u32V,     u32V,     u32V,     u32V,     AIntV>(
 }  // namespace AbstractTernaryTests
 
 }  // namespace
-}  // namespace tint::resolver
+}  // namespace tint::core::intrinsic

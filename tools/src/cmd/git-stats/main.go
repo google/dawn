@@ -61,7 +61,7 @@ func shouldConsiderLinesOfFile(path string) bool {
 		"Doxyfile",
 		"package-lock.json",
 		"src/tint/builtin_table.inl",
-		"src/tint/lang/wgsl/resolver/intrinsic_table.inl",
+		"src/tint/lang/core/intrinsic/table.inl",
 		"test/tint/",
 		"third_party/gn/webgpu-cts/test_list.txt",
 		"third_party/khronos/",
