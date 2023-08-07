@@ -1481,7 +1481,7 @@ INSTANTIATE_TEST_SUITE_P(BuiltinTypes,
                                          "vec4i",
                                          "vec4u"));
 
-TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, Struct_UseWithTemplateArgs) {
+TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, Struct_Type) {
     // struct S {
     //   i: i32;
     // };
@@ -1494,6 +1494,43 @@ TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, Struct_UseWithTemplateArgs) 
     EXPECT_EQ(r()->error(),
               R"(12:34 error: type 'S' does not take template arguments
 56:78 note: struct 'S' declared here)");
+}
+
+TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, Struct_Ctor) {
+    // struct S { a : i32 }
+    // var<private> v = S<true>();
+
+    Structure("S", Vector{Member("a", ty.i32())});
+    GlobalVar("v", core::AddressSpace::kPrivate, Call(ty(Source{{12, 34}}, "S", true)));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: type 'S' does not take template arguments
+note: struct 'S' declared here)");
+}
+
+TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, AliasedArray_Type) {
+    // alias A = array<i32, 4u>
+    // var<private> v : A<true>;
+
+    Alias("A", ty.array<i32, 4>());
+    GlobalVar("v", core::AddressSpace::kPrivate, ty(Source{{12, 34}}, "A", true));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: type 'A' does not take template arguments
+note: alias 'A' declared here)");
+}
+
+TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, AliasedArray_Ctor) {
+    // alias A = array<i32, 4u>
+    // var<private> v = A<true>();
+
+    Alias("A", ty.array<i32, 4>());
+    GlobalVar("v", core::AddressSpace::kPrivate, Call(ty(Source{{12, 34}}, "A", true)));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: type 'A' does not take template arguments
+note: alias 'A' declared here)");
 }
 
 }  // namespace TypeDoesNotTakeTemplateArgs

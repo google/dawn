@@ -2239,7 +2239,13 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         if (auto* ast_node = resolved->Node()) {
             return Switch(
                 sem_.Get(ast_node),  //
-                [&](type::Type* t) { return ty_init_or_conv(t); },
+                [&](type::Type* t) -> tint::sem::Call* {
+                    // User declared types cannot be templated.
+                    if (!TINT_LIKELY(CheckNotTemplated("type", ident))) {
+                        return nullptr;
+                    }
+                    return ty_init_or_conv(t);
+                },
                 [&](sem::Function* f) -> sem::Call* {
                     if (!TINT_LIKELY(CheckNotTemplated("function", ident))) {
                         return nullptr;
@@ -3168,6 +3174,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                 return user;
             },
             [&](const type::Type* ty) -> sem::TypeExpression* {
+                // User declared types cannot be templated.
                 if (!TINT_LIKELY(CheckNotTemplated("type", ident))) {
                     return nullptr;
                 }
