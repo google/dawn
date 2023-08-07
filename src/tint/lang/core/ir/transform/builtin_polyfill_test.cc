@@ -174,6 +174,427 @@ TEST_F(IR_BuiltinPolyfillTest, Saturate_Vec4F16) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_BuiltinPolyfillTest, CountLeadingZeros_NoPolyfill) {
+    Build(core::Function::kCountLeadingZeros, ty.u32(), Vector{ty.u32()});
+    auto* src = R"(
+%foo = func(%arg:u32):u32 -> %b1 {
+  %b1 = block {
+    %result:u32 = countLeadingZeros %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = src;
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.count_leading_zeros = false;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, CountLeadingZeros_U32) {
+    Build(core::Function::kCountLeadingZeros, ty.u32(), Vector{ty.u32()});
+    auto* src = R"(
+%foo = func(%arg:u32):u32 -> %b1 {
+  %b1 = block {
+    %result:u32 = countLeadingZeros %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:u32):u32 -> %b1 {
+  %b1 = block {
+    %3:bool = lte %arg, 65535u
+    %4:u32 = select 0u, 16u, %3
+    %5:u32 = shiftl %arg, %4
+    %6:bool = lte %5, 16777215u
+    %7:u32 = select 0u, 8u, %6
+    %8:u32 = shiftl %5, %7
+    %9:bool = lte %8, 268435455u
+    %10:u32 = select 0u, 4u, %9
+    %11:u32 = shiftl %8, %10
+    %12:bool = lte %11, 1073741823u
+    %13:u32 = select 0u, 2u, %12
+    %14:u32 = shiftl %11, %13
+    %15:bool = lte %14, 2147483647u
+    %16:u32 = select 0u, 1u, %15
+    %17:bool = eq %14, 0u
+    %18:u32 = select 0u, 1u, %17
+    %19:u32 = or %16, %18
+    %20:u32 = or %13, %19
+    %21:u32 = or %10, %20
+    %22:u32 = or %7, %21
+    %23:u32 = or %4, %22
+    %result:u32 = add %23, %18
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.count_leading_zeros = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, CountLeadingZeros_I32) {
+    Build(core::Function::kCountLeadingZeros, ty.i32(), Vector{ty.i32()});
+    auto* src = R"(
+%foo = func(%arg:i32):i32 -> %b1 {
+  %b1 = block {
+    %result:i32 = countLeadingZeros %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:i32):i32 -> %b1 {
+  %b1 = block {
+    %3:u32 = bitcast %arg
+    %4:bool = lte %3, 65535u
+    %5:u32 = select 0u, 16u, %4
+    %6:u32 = shiftl %3, %5
+    %7:bool = lte %6, 16777215u
+    %8:u32 = select 0u, 8u, %7
+    %9:u32 = shiftl %6, %8
+    %10:bool = lte %9, 268435455u
+    %11:u32 = select 0u, 4u, %10
+    %12:u32 = shiftl %9, %11
+    %13:bool = lte %12, 1073741823u
+    %14:u32 = select 0u, 2u, %13
+    %15:u32 = shiftl %12, %14
+    %16:bool = lte %15, 2147483647u
+    %17:u32 = select 0u, 1u, %16
+    %18:bool = eq %15, 0u
+    %19:u32 = select 0u, 1u, %18
+    %20:u32 = or %17, %19
+    %21:u32 = or %14, %20
+    %22:u32 = or %11, %21
+    %23:u32 = or %8, %22
+    %24:u32 = or %5, %23
+    %25:u32 = add %24, %19
+    %result:i32 = bitcast %25
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.count_leading_zeros = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, CountLeadingZeros_Vec2U32) {
+    Build(core::Function::kCountLeadingZeros, ty.vec2<u32>(), Vector{ty.vec2<u32>()});
+    auto* src = R"(
+%foo = func(%arg:vec2<u32>):vec2<u32> -> %b1 {
+  %b1 = block {
+    %result:vec2<u32> = countLeadingZeros %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:vec2<u32>):vec2<u32> -> %b1 {
+  %b1 = block {
+    %3:vec2<bool> = lte %arg, vec2<u32>(65535u)
+    %4:vec2<u32> = select vec2<u32>(0u), vec2<u32>(16u), %3
+    %5:vec2<u32> = shiftl %arg, %4
+    %6:vec2<bool> = lte %5, vec2<u32>(16777215u)
+    %7:vec2<u32> = select vec2<u32>(0u), vec2<u32>(8u), %6
+    %8:vec2<u32> = shiftl %5, %7
+    %9:vec2<bool> = lte %8, vec2<u32>(268435455u)
+    %10:vec2<u32> = select vec2<u32>(0u), vec2<u32>(4u), %9
+    %11:vec2<u32> = shiftl %8, %10
+    %12:vec2<bool> = lte %11, vec2<u32>(1073741823u)
+    %13:vec2<u32> = select vec2<u32>(0u), vec2<u32>(2u), %12
+    %14:vec2<u32> = shiftl %11, %13
+    %15:vec2<bool> = lte %14, vec2<u32>(2147483647u)
+    %16:vec2<u32> = select vec2<u32>(0u), vec2<u32>(1u), %15
+    %17:vec2<bool> = eq %14, vec2<u32>(0u)
+    %18:vec2<u32> = select vec2<u32>(0u), vec2<u32>(1u), %17
+    %19:vec2<u32> = or %16, %18
+    %20:vec2<u32> = or %13, %19
+    %21:vec2<u32> = or %10, %20
+    %22:vec2<u32> = or %7, %21
+    %23:vec2<u32> = or %4, %22
+    %result:vec2<u32> = add %23, %18
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.count_leading_zeros = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, CountLeadingZeros_Vec4I32) {
+    Build(core::Function::kCountLeadingZeros, ty.vec4<i32>(), Vector{ty.vec4<i32>()});
+    auto* src = R"(
+%foo = func(%arg:vec4<i32>):vec4<i32> -> %b1 {
+  %b1 = block {
+    %result:vec4<i32> = countLeadingZeros %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:vec4<i32>):vec4<i32> -> %b1 {
+  %b1 = block {
+    %3:vec4<u32> = bitcast %arg
+    %4:vec4<bool> = lte %3, vec4<u32>(65535u)
+    %5:vec4<u32> = select vec4<u32>(0u), vec4<u32>(16u), %4
+    %6:vec4<u32> = shiftl %3, %5
+    %7:vec4<bool> = lte %6, vec4<u32>(16777215u)
+    %8:vec4<u32> = select vec4<u32>(0u), vec4<u32>(8u), %7
+    %9:vec4<u32> = shiftl %6, %8
+    %10:vec4<bool> = lte %9, vec4<u32>(268435455u)
+    %11:vec4<u32> = select vec4<u32>(0u), vec4<u32>(4u), %10
+    %12:vec4<u32> = shiftl %9, %11
+    %13:vec4<bool> = lte %12, vec4<u32>(1073741823u)
+    %14:vec4<u32> = select vec4<u32>(0u), vec4<u32>(2u), %13
+    %15:vec4<u32> = shiftl %12, %14
+    %16:vec4<bool> = lte %15, vec4<u32>(2147483647u)
+    %17:vec4<u32> = select vec4<u32>(0u), vec4<u32>(1u), %16
+    %18:vec4<bool> = eq %15, vec4<u32>(0u)
+    %19:vec4<u32> = select vec4<u32>(0u), vec4<u32>(1u), %18
+    %20:vec4<u32> = or %17, %19
+    %21:vec4<u32> = or %14, %20
+    %22:vec4<u32> = or %11, %21
+    %23:vec4<u32> = or %8, %22
+    %24:vec4<u32> = or %5, %23
+    %25:vec4<u32> = add %24, %19
+    %result:vec4<i32> = bitcast %25
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.count_leading_zeros = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, CountTrailingZeros_NoPolyfill) {
+    Build(core::Function::kCountTrailingZeros, ty.u32(), Vector{ty.u32()});
+    auto* src = R"(
+%foo = func(%arg:u32):u32 -> %b1 {
+  %b1 = block {
+    %result:u32 = countTrailingZeros %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = src;
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.count_trailing_zeros = false;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, CountTrailingZeros_U32) {
+    Build(core::Function::kCountTrailingZeros, ty.u32(), Vector{ty.u32()});
+    auto* src = R"(
+%foo = func(%arg:u32):u32 -> %b1 {
+  %b1 = block {
+    %result:u32 = countTrailingZeros %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:u32):u32 -> %b1 {
+  %b1 = block {
+    %3:u32 = and %arg, 65535u
+    %4:bool = eq %3, 0u
+    %5:u32 = select 0u, 16u, %4
+    %6:u32 = shiftr %arg, %5
+    %7:u32 = and %6, 255u
+    %8:bool = eq %7, 0u
+    %9:u32 = select 0u, 8u, %8
+    %10:u32 = shiftr %6, %9
+    %11:u32 = and %10, 15u
+    %12:bool = eq %11, 0u
+    %13:u32 = select 0u, 4u, %12
+    %14:u32 = shiftr %10, %13
+    %15:u32 = and %14, 3u
+    %16:bool = eq %15, 0u
+    %17:u32 = select 0u, 2u, %16
+    %18:u32 = shiftr %14, %17
+    %19:u32 = and %18, 1u
+    %20:bool = eq %19, 0u
+    %21:u32 = select 0u, 1u, %20
+    %22:bool = eq %18, 0u
+    %23:u32 = select 0u, 1u, %22
+    %24:u32 = or %17, %21
+    %25:u32 = or %13, %24
+    %26:u32 = or %9, %25
+    %27:u32 = or %5, %26
+    %result:u32 = add %27, %23
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.count_trailing_zeros = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, CountTrailingZeros_I32) {
+    Build(core::Function::kCountTrailingZeros, ty.i32(), Vector{ty.i32()});
+    auto* src = R"(
+%foo = func(%arg:i32):i32 -> %b1 {
+  %b1 = block {
+    %result:i32 = countTrailingZeros %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:i32):i32 -> %b1 {
+  %b1 = block {
+    %3:u32 = bitcast %arg
+    %4:u32 = and %3, 65535u
+    %5:bool = eq %4, 0u
+    %6:u32 = select 0u, 16u, %5
+    %7:u32 = shiftr %3, %6
+    %8:u32 = and %7, 255u
+    %9:bool = eq %8, 0u
+    %10:u32 = select 0u, 8u, %9
+    %11:u32 = shiftr %7, %10
+    %12:u32 = and %11, 15u
+    %13:bool = eq %12, 0u
+    %14:u32 = select 0u, 4u, %13
+    %15:u32 = shiftr %11, %14
+    %16:u32 = and %15, 3u
+    %17:bool = eq %16, 0u
+    %18:u32 = select 0u, 2u, %17
+    %19:u32 = shiftr %15, %18
+    %20:u32 = and %19, 1u
+    %21:bool = eq %20, 0u
+    %22:u32 = select 0u, 1u, %21
+    %23:bool = eq %19, 0u
+    %24:u32 = select 0u, 1u, %23
+    %25:u32 = or %18, %22
+    %26:u32 = or %14, %25
+    %27:u32 = or %10, %26
+    %28:u32 = or %6, %27
+    %29:u32 = add %28, %24
+    %result:i32 = bitcast %29
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.count_trailing_zeros = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, CountTrailingZeros_Vec2U32) {
+    Build(core::Function::kCountTrailingZeros, ty.vec2<u32>(), Vector{ty.vec2<u32>()});
+    auto* src = R"(
+%foo = func(%arg:vec2<u32>):vec2<u32> -> %b1 {
+  %b1 = block {
+    %result:vec2<u32> = countTrailingZeros %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:vec2<u32>):vec2<u32> -> %b1 {
+  %b1 = block {
+    %3:vec2<u32> = and %arg, vec2<u32>(65535u)
+    %4:vec2<bool> = eq %3, vec2<u32>(0u)
+    %5:vec2<u32> = select vec2<u32>(0u), vec2<u32>(16u), %4
+    %6:vec2<u32> = shiftr %arg, %5
+    %7:vec2<u32> = and %6, vec2<u32>(255u)
+    %8:vec2<bool> = eq %7, vec2<u32>(0u)
+    %9:vec2<u32> = select vec2<u32>(0u), vec2<u32>(8u), %8
+    %10:vec2<u32> = shiftr %6, %9
+    %11:vec2<u32> = and %10, vec2<u32>(15u)
+    %12:vec2<bool> = eq %11, vec2<u32>(0u)
+    %13:vec2<u32> = select vec2<u32>(0u), vec2<u32>(4u), %12
+    %14:vec2<u32> = shiftr %10, %13
+    %15:vec2<u32> = and %14, vec2<u32>(3u)
+    %16:vec2<bool> = eq %15, vec2<u32>(0u)
+    %17:vec2<u32> = select vec2<u32>(0u), vec2<u32>(2u), %16
+    %18:vec2<u32> = shiftr %14, %17
+    %19:vec2<u32> = and %18, vec2<u32>(1u)
+    %20:vec2<bool> = eq %19, vec2<u32>(0u)
+    %21:vec2<u32> = select vec2<u32>(0u), vec2<u32>(1u), %20
+    %22:vec2<bool> = eq %18, vec2<u32>(0u)
+    %23:vec2<u32> = select vec2<u32>(0u), vec2<u32>(1u), %22
+    %24:vec2<u32> = or %17, %21
+    %25:vec2<u32> = or %13, %24
+    %26:vec2<u32> = or %9, %25
+    %27:vec2<u32> = or %5, %26
+    %result:vec2<u32> = add %27, %23
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.count_trailing_zeros = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, CountTrailingZeros_Vec4I32) {
+    Build(core::Function::kCountTrailingZeros, ty.vec4<i32>(), Vector{ty.vec4<i32>()});
+    auto* src = R"(
+%foo = func(%arg:vec4<i32>):vec4<i32> -> %b1 {
+  %b1 = block {
+    %result:vec4<i32> = countTrailingZeros %arg
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:vec4<i32>):vec4<i32> -> %b1 {
+  %b1 = block {
+    %result:vec4<i32> = countTrailingZeros %arg
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.first_trailing_bit = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_BuiltinPolyfillTest, FirstLeadingBit_NoPolyfill) {
     Build(core::Function::kFirstLeadingBit, ty.u32(), Vector{ty.u32()});
     auto* src = R"(

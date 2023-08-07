@@ -54,6 +54,16 @@ struct State {
             }
             if (auto* builtin = inst->As<ir::CoreBuiltinCall>()) {
                 switch (builtin->Func()) {
+                    case core::Function::kCountLeadingZeros:
+                        if (config.count_leading_zeros) {
+                            worklist.Push(builtin);
+                        }
+                        break;
+                    case core::Function::kCountTrailingZeros:
+                        if (config.count_trailing_zeros) {
+                            worklist.Push(builtin);
+                        }
+                        break;
                     case core::Function::kFirstLeadingBit:
                         if (config.first_leading_bit) {
                             worklist.Push(builtin);
@@ -79,6 +89,12 @@ struct State {
         for (auto* builtin : worklist) {
             ir::Value* replacement = nullptr;
             switch (builtin->Func()) {
+                case core::Function::kCountLeadingZeros:
+                    replacement = CountLeadingZeros(builtin);
+                    break;
+                case core::Function::kCountTrailingZeros:
+                    replacement = CountTrailingZeros(builtin);
+                    break;
                 case core::Function::kFirstLeadingBit:
                     replacement = FirstLeadingBit(builtin);
                     break;
@@ -124,6 +140,131 @@ struct State {
             return b.Splat(MatchWidth(element->Type(), match), element, vec->Width());
         }
         return element;
+    }
+
+    /// Polyfill a `countLeadingZeros()` builtin call.
+    /// @param call the builtin call instruction
+    /// @returns the replacement value
+    ir::Value* CountLeadingZeros(ir::CoreBuiltinCall* call) {
+        auto* input = call->Args()[0];
+        auto* result_ty = input->Type();
+        auto* uint_ty = MatchWidth(ty.u32(), result_ty);
+        auto* bool_ty = MatchWidth(ty.bool_(), result_ty);
+
+        // Make an u32 constant with the same component count as result_ty.
+        auto V = [&](uint32_t u) { return MatchWidth(b.Constant(u32(u)), result_ty); };
+
+        Value* result = nullptr;
+        b.InsertBefore(call, [&] {
+            // %x = %input;
+            // if (%x is signed) {
+            //   %x = bitcast<u32>(%x)
+            // }
+            // %b16 = select(0, 16, %x <= 0x0000ffff);
+            // %x <<= %b16;
+            // %b8  = select(0, 8, %x <= 0x00ffffff);
+            // %x <<= %b8;
+            // %b4  = select(0, 4, %x <= 0x0fffffff);
+            // %x <<= %b4;
+            // %b2  = select(0, 2, %x <= 0x3fffffff);
+            // %x <<= %b2;
+            // %b1  = select(0, 1, %x <= 0x7fffffff);
+            // %b0  = select(0, 1, %x == 0);
+            // %result = (%b16 | %b8 | %b4 | %b2 | %b1) + %b0;
+
+            auto* x = input;
+            if (result_ty->is_signed_integer_scalar_or_vector()) {
+                x = b.Bitcast(uint_ty, x)->Result();
+            }
+            auto* b16 = b.Call(uint_ty, core::Function::kSelect, V(0), V(16),
+                               b.LessThanEqual(bool_ty, x, V(0x0000ffff)));
+            x = b.ShiftLeft(uint_ty, x, b16)->Result();
+            auto* b8 = b.Call(uint_ty, core::Function::kSelect, V(0), V(8),
+                              b.LessThanEqual(bool_ty, x, V(0x00ffffff)));
+            x = b.ShiftLeft(uint_ty, x, b8)->Result();
+            auto* b4 = b.Call(uint_ty, core::Function::kSelect, V(0), V(4),
+                              b.LessThanEqual(bool_ty, x, V(0x0fffffff)));
+            x = b.ShiftLeft(uint_ty, x, b4)->Result();
+            auto* b2 = b.Call(uint_ty, core::Function::kSelect, V(0), V(2),
+                              b.LessThanEqual(bool_ty, x, V(0x3fffffff)));
+            x = b.ShiftLeft(uint_ty, x, b2)->Result();
+            auto* b1 = b.Call(uint_ty, core::Function::kSelect, V(0), V(1),
+                              b.LessThanEqual(bool_ty, x, V(0x7fffffff)));
+            auto* b0 =
+                b.Call(uint_ty, core::Function::kSelect, V(0), V(1), b.Equal(bool_ty, x, V(0)));
+            result = b.Add(uint_ty,
+                           b.Or(uint_ty, b16,
+                                b.Or(uint_ty, b8,
+                                     b.Or(uint_ty, b4, b.Or(uint_ty, b2, b.Or(uint_ty, b1, b0))))),
+                           b0)
+                         ->Result();
+            if (result_ty->is_signed_integer_scalar_or_vector()) {
+                result = b.Bitcast(result_ty, result)->Result();
+            }
+        });
+        return result;
+    }
+
+    /// Polyfill a `countTrailingZeros()` builtin call.
+    /// @param call the builtin call instruction
+    /// @returns the replacement value
+    ir::Value* CountTrailingZeros(ir::CoreBuiltinCall* call) {
+        auto* input = call->Args()[0];
+        auto* result_ty = input->Type();
+        auto* uint_ty = MatchWidth(ty.u32(), result_ty);
+        auto* bool_ty = MatchWidth(ty.bool_(), result_ty);
+
+        // Make an u32 constant with the same component count as result_ty.
+        auto V = [&](uint32_t u) { return MatchWidth(b.Constant(u32(u)), result_ty); };
+
+        Value* result = nullptr;
+        b.InsertBefore(call, [&] {
+            // %x = %input;
+            // if (%x is signed) {
+            //   %x = bitcast<u32>(%x)
+            // }
+            // %b16 = select(0, 16, (%x & 0x0000ffff) == 0);
+            // %x >>= %b16;
+            // %b8  = select(0, 8,  (%x & 0x000000ff) == 0);
+            // %x >>= %b8;
+            // %b4  = select(0, 4,  (%x & 0x0000000f) == 0);
+            // %x >>= %b4;
+            // %b2  = select(0, 2,  (%x & 0x00000003) == 0);
+            // %x >>= %b2;
+            // %b1  = select(0, 1,  (%x & 0x00000001) == 0);
+            // %b0  = select(0, 1,  (%x & 0x00000001) == 0);
+            // %result = (%b16 | %b8 | %b4 | %b2 | %b1) + %b0;
+
+            auto* x = input;
+            if (result_ty->is_signed_integer_scalar_or_vector()) {
+                x = b.Bitcast(uint_ty, x)->Result();
+            }
+            auto* b16 = b.Call(uint_ty, core::Function::kSelect, V(0), V(16),
+                               b.Equal(bool_ty, b.And(uint_ty, x, V(0x0000ffff)), V(0)));
+            x = b.ShiftRight(uint_ty, x, b16)->Result();
+            auto* b8 = b.Call(uint_ty, core::Function::kSelect, V(0), V(8),
+                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x000000ff)), V(0)));
+            x = b.ShiftRight(uint_ty, x, b8)->Result();
+            auto* b4 = b.Call(uint_ty, core::Function::kSelect, V(0), V(4),
+                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x0000000f)), V(0)));
+            x = b.ShiftRight(uint_ty, x, b4)->Result();
+            auto* b2 = b.Call(uint_ty, core::Function::kSelect, V(0), V(2),
+                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x00000003)), V(0)));
+            x = b.ShiftRight(uint_ty, x, b2)->Result();
+            auto* b1 = b.Call(uint_ty, core::Function::kSelect, V(0), V(1),
+                              b.Equal(bool_ty, b.And(uint_ty, x, V(0x00000001)), V(0)));
+            auto* b0 =
+                b.Call(uint_ty, core::Function::kSelect, V(0), V(1), b.Equal(bool_ty, x, V(0)));
+            result = b.Add(uint_ty,
+                           b.Or(uint_ty, b16,
+                                b.Or(uint_ty, b8, b.Or(uint_ty, b4, b.Or(uint_ty, b2, b1)))),
+                           b0)
+                         ->Result();
+            if (result_ty->is_signed_integer_scalar_or_vector()) {
+                result = b.Bitcast(result_ty, result)->Result();
+            }
+        });
+        return result;
     }
 
     /// Polyfill a `firstLeadingBit()` builtin call.

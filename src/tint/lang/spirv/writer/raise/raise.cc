@@ -40,6 +40,8 @@ Result<SuccessType, std::string> Raise(ir::Module* module) {
     } while (false)
 
     ir::transform::BuiltinPolyfillConfig core_polyfills;
+    core_polyfills.count_leading_zeros = true;
+    core_polyfills.count_trailing_zeros = true;
     core_polyfills.first_leading_bit = true;
     core_polyfills.first_trailing_bit = true;
     core_polyfills.saturate = true;
