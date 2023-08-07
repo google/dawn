@@ -355,6 +355,8 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
             (*compileOptions).preserveInvariance = true;
         }
     }
+    (*compileOptions).fastMathEnabled = true;
+
     auto mtlDevice = ToBackend(GetDevice())->GetMTLDevice();
     NSError* error = nullptr;
 

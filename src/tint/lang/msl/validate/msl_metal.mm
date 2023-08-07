@@ -39,6 +39,7 @@ Result UsingMetalAPI(const std::string& src) {
     NSString* source = [NSString stringWithCString:src.c_str() encoding:NSUTF8StringEncoding];
 
     MTLCompileOptions* compileOptions = [MTLCompileOptions new];
+    compileOptions.fastMathEnabled = true;
     compileOptions.languageVersion = MTLLanguageVersion1_2;
 
     id<MTLLibrary> library = [device newLibraryWithSource:source
