@@ -8,6 +8,7 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 
 #ifndef SRC_TINT_LANG_CORE_BUILTIN_DIAGNOSTIC_SEVERITY_H_
@@ -23,7 +24,7 @@ See:
 namespace tint::builtin {
 
 /// The diagnostic severity control.
-{{ Eval "DeclareEnum" (Sem.Enum "diagnostic_severity") }}
+{{ Eval "DeclareEnum" ($I.Sem.Enum "diagnostic_severity") }}
 
 /// Convert a DiagnosticSeverity to the corresponding diag::Severity.
 diag::Severity ToSeverity(DiagnosticSeverity sc);

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// gen parses the <tint>/src/tint/intrinsics.def file, then scans the
-// project directory for '<file>.tmpl' files, to produce source code files.
+// gen scans the the project directory for '<file>.tmpl' files, producing code
+// from those template files.
 package main
 
 import (
@@ -42,8 +42,6 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/sem"
 )
 
-const defProjectRelPath = "src/tint/intrinsics.def"
-
 func main() {
 	if err := run(); err != nil {
 		fmt.Println(err)
@@ -58,9 +56,6 @@ gen generates the templated code for the Tint compiler
 gen accepts a list of file paths to the templates to generate. If no templates
 are explicitly specified, then gen scans the '<dawn>/src/tint' and
 '<dawn>/test/tint' directories for '<file>.tmpl' files.
-
-If the templates use the 'IntrinsicTable' function then gen will parse and
-resolve the <tint>/src/tint/intrinsics.def file.
 
 usage:
   gen [flags] [template files]
@@ -228,28 +223,26 @@ func run() error {
 	return nil
 }
 
-// Cache for objects that are expensive to build, and can be reused between templates.
-type genCache struct {
-	cached struct {
-		sem            *sem.Sem            // lazily built by sem()
-		intrinsicTable *gen.IntrinsicTable // lazily built by intrinsicTable()
-		permuter       *gen.Permuter       // lazily built by permute()
-	}
+type intrinsicCache struct {
+	path           string
+	cachedSem      *sem.Sem            // lazily built by sem()
+	cachedTable    *gen.IntrinsicTable // lazily built by intrinsicTable()
+	cachedPermuter *gen.Permuter       // lazily built by permute()
 }
 
-// sem lazily parses and resolves the intrinsic.def file, returning the semantic info.
-func (g *genCache) sem() (*sem.Sem, error) {
-	if g.cached.sem == nil {
-		// Load the builtins definition file
-		defPath := filepath.Join(fileutils.DawnRoot(), defProjectRelPath)
+// Sem lazily parses and resolves the intrinsic.def file, returning the semantic info.
+func (i *intrinsicCache) Sem() (*sem.Sem, error) {
+	if i.cachedSem == nil {
+		// Load the intrinsic definition file
+		defPath := filepath.Join(fileutils.DawnRoot(), i.path)
 
-		defSource, err := ioutil.ReadFile(defPath)
+		defSource, err := os.ReadFile(defPath)
 		if err != nil {
 			return nil, err
 		}
 
 		// Parse the definition file to produce an AST
-		ast, err := parser.Parse(string(defSource), defProjectRelPath)
+		ast, err := parser.Parse(string(defSource), i.path)
 		if err != nil {
 			return nil, err
 		}
@@ -260,41 +253,58 @@ func (g *genCache) sem() (*sem.Sem, error) {
 			return nil, err
 		}
 
-		g.cached.sem = sem
+		i.cachedSem = sem
 	}
-	return g.cached.sem, nil
+	return i.cachedSem, nil
 }
 
-// intrinsicTable lazily calls and returns the result of buildIntrinsicTable(),
+// Table lazily calls and returns the result of BuildIntrinsicTable(),
 // caching the result for repeated calls.
-func (g *genCache) intrinsicTable() (*gen.IntrinsicTable, error) {
-	if g.cached.intrinsicTable == nil {
-		sem, err := g.sem()
+func (i *intrinsicCache) Table() (*gen.IntrinsicTable, error) {
+	if i.cachedTable == nil {
+		sem, err := i.Sem()
 		if err != nil {
 			return nil, err
 		}
-		g.cached.intrinsicTable, err = gen.BuildIntrinsicTable(sem)
+		i.cachedTable, err = gen.BuildIntrinsicTable(sem)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return g.cached.intrinsicTable, nil
+	return i.cachedTable, nil
 }
 
-// permute lazily calls buildPermuter(), caching the result for repeated
-// calls, then passes the argument to Permutator.Permute()
-func (g *genCache) permute(overload *sem.Overload) ([]gen.Permutation, error) {
-	if g.cached.permuter == nil {
-		sem, err := g.sem()
+// Permute lazily calls NewPermuter(), caching the result for repeated calls,
+// then passes the argument to Permutator.Permute()
+func (i *intrinsicCache) Permute(overload *sem.Overload) ([]gen.Permutation, error) {
+	if i.cachedPermuter == nil {
+		sem, err := i.Sem()
 		if err != nil {
 			return nil, err
 		}
-		g.cached.permuter, err = gen.NewPermuter(sem)
+		i.cachedPermuter, err = gen.NewPermuter(sem)
 		if err != nil {
 			return nil, err
 		}
 	}
-	return g.cached.permuter.Permute(overload)
+	return i.cachedPermuter.Permute(overload)
+}
+
+// Cache for objects that are expensive to build, and can be reused between templates.
+type genCache struct {
+	intrinsicsCache container.Map[string, *intrinsicCache]
+}
+
+func (g *genCache) intrinsics(path string) *intrinsicCache {
+	if g.intrinsicsCache == nil {
+		g.intrinsicsCache = container.NewMap[string, *intrinsicCache]()
+	}
+	i := g.intrinsicsCache[path]
+	if i == nil {
+		i = &intrinsicCache{path: path}
+		g.intrinsicsCache[path] = i
+	}
+	return i
 }
 
 var copyrightRegex = regexp.MustCompile(`// Copyright (\d+) The`)
@@ -364,9 +374,7 @@ func generate(tmpl string, cache *genCache, w io.Writer, writeFile WriteFile) er
 		"OverloadUsesF16":       gen.OverloadUsesF16,
 		"IsFirstIn":             isFirstIn,
 		"IsLastIn":              isLastIn,
-		"Sem":                   g.cache.sem,
-		"IntrinsicTable":        g.cache.intrinsicTable,
-		"Permute":               g.cache.permute,
+		"LoadIntrinsics":        func(path string) *intrinsicCache { return g.cache.intrinsics(path) },
 		"WriteFile":             func(relPath, content string) (string, error) { return "", g.writeFile(relPath, content) },
 	}
 	return template.Run(tmpl, w, funcs)

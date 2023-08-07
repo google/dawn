@@ -8,6 +8,7 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 
 #include <string>
@@ -21,7 +22,7 @@ namespace {
 
 namespace diagnostic_severity_tests {
 
-{{ Eval "TestParsePrintEnum" (Sem.Enum "diagnostic_severity")}}
+{{ Eval "TestParsePrintEnum" ($I.Sem.Enum "diagnostic_severity")}}
 
 }  // namespace diagnostic_severity_tests
 

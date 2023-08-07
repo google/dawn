@@ -8,6 +8,7 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 
 #include <array>
@@ -18,7 +19,7 @@ See:
 namespace tint::builtin {
 namespace {
 
-{{ Eval "BenchmarkParseEnum" (Sem.Enum "interpolation_sampling")}}
+{{ Eval "BenchmarkParseEnum" ($I.Sem.Enum "interpolation_sampling")}}
 
 }  // namespace
 }  // namespace tint::builtin

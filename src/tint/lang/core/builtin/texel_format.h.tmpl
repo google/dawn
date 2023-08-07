@@ -8,8 +8,9 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
-{{- $enum := (Sem.Enum "texel_format") -}}
+{{- $enum := ($I.Sem.Enum "texel_format") -}}
 
 #ifndef SRC_TINT_LANG_CORE_BUILTIN_TEXEL_FORMAT_H_
 #define SRC_TINT_LANG_CORE_BUILTIN_TEXEL_FORMAT_H_

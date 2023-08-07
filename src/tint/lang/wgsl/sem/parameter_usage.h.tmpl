@@ -11,6 +11,8 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+
 #ifndef SRC_TINT_LANG_WGSL_SEM_PARAMETER_USAGE_H_
 #define SRC_TINT_LANG_WGSL_SEM_PARAMETER_USAGE_H_
 
@@ -20,7 +22,7 @@ namespace tint::sem {
 /// overload position
 enum class ParameterUsage {
     kNone = -1,
-{{- range Sem.UniqueParameterNames  }}
+{{- range $I.Sem.UniqueParameterNames  }}
     k{{PascalCase .}},
 {{- end  }}
 };

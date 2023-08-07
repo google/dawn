@@ -8,6 +8,7 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 
 #include "src/tint/lang/core/builtin/interpolation_type.h"
@@ -22,7 +23,7 @@ namespace {
 
 namespace interpolation_type_tests {
 
-{{ Eval "TestParsePrintEnum" (Sem.Enum "interpolation_type")}}
+{{ Eval "TestParsePrintEnum" ($I.Sem.Enum "interpolation_type")}}
 
 }  // namespace interpolation_type_tests
 

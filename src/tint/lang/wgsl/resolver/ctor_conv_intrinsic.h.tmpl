@@ -11,6 +11,8 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+
 #ifndef SRC_TINT_LANG_WGSL_RESOLVER_CTOR_CONV_INTRINSIC_H_
 #define SRC_TINT_LANG_WGSL_RESOLVER_CTOR_CONV_INTRINSIC_H_
 
@@ -22,7 +24,7 @@ namespace tint::resolver {
 /// declared in the intrinsic table.
 enum class CtorConvIntrinsic {
     kNone = -1,
-{{- range Sem.ConstructorsAndConverters }}
+{{- range $I.Sem.ConstructorsAndConverters }}
     k{{Title .Name}},
 {{- end }}
 };

@@ -11,6 +11,8 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+
 #include "src/tint/lang/wgsl/resolver/ctor_conv_intrinsic.h"
 
 namespace tint::resolver {
@@ -19,7 +21,7 @@ const char* str(CtorConvIntrinsic i) {
     switch (i) {
         case CtorConvIntrinsic::kNone:
             return "<none>";
-{{- range Sem.ConstructorsAndConverters  }}
+{{- range $I.Sem.ConstructorsAndConverters  }}
         case CtorConvIntrinsic::k{{Title .Name}}:
             return "{{.Name}}";
 {{- end  }}

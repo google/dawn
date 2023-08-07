@@ -12,9 +12,11 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+
 // clang-format off
 
-{{  with Sem -}}
+{{  with $I.Sem -}}
 {{    range .Types -}}
 {{      template "Type" . }}
 {{    end -}}
@@ -26,8 +28,8 @@ See:
 {{    end -}}
 {{- end -}}
 
-{{- with IntrinsicTable -}}
-{{- template "Matchers" . }}
+{{- with $I.Table -}}
+{{- template "Matchers" $I }}
 
 constexpr MatcherIndex kMatcherIndices[] = {
 {{- range $i, $idx := .MatcherIndices }}
@@ -341,27 +343,27 @@ class Matchers {
  private:
 {{- $t_names := Map -}}
 {{- $n_names := Map -}}
-{{- range Iterate Sem.MaxTemplateTypes -}}
+{{- range Iterate $.Sem.MaxTemplateTypes -}}
 {{-   $name := printf "template_type_%v" . -}}
 {{-   $t_names.Put . $name }}
   TemplateTypeMatcher {{$name}}_{ {{- . -}} };
 {{- end }}
-{{- range Iterate Sem.MaxTemplateNumbers -}}
+{{- range Iterate $.Sem.MaxTemplateNumbers -}}
 {{-   $name := printf "template_number_%v" . -}}
 {{-   $n_names.Put . $name }}
   TemplateNumberMatcher {{$name}}_{ {{- . -}} };
 {{- end }}
-{{- range Sem.Types -}}
+{{- range $.Sem.Types -}}
 {{-   $name := PascalCase .Name -}}
 {{-   $t_names.Put . $name }}
   {{$name}} {{$name}}_;
 {{- end }}
-{{- range Sem.TypeMatchers -}}
+{{- range $.Sem.TypeMatchers -}}
 {{-   $name := PascalCase .Name -}}
 {{-   $t_names.Put . $name }}
   {{$name}} {{$name}}_;
 {{- end }}
-{{- range Sem.EnumMatchers -}}
+{{- range $.Sem.EnumMatchers -}}
 {{-   $name := PascalCase .Name -}}
 {{-   $n_names.Put . $name }}
   {{$name}} {{$name}}_;
@@ -374,8 +376,8 @@ class Matchers {
   ~Matchers();
 
   /// The template types, types, and type matchers
-  TypeMatcher const* const type[{{len .TMatchers}}] = {
-{{- range $i, $m := .TMatchers }}
+  TypeMatcher const* const type[{{len $.Table.TMatchers}}] = {
+{{- range $i, $m := $.Table.TMatchers }}
     /* [{{$i}}] */
 {{-   if $m }} &{{$t_names.Get $m}}_,
 {{-   else  }} &{{$t_names.Get $i}}_,
@@ -384,8 +386,8 @@ class Matchers {
   };
 
   /// The template numbers, and number matchers
-  NumberMatcher const* const number[{{len .NMatchers}}] = {
-{{- range $i, $m := .NMatchers }}
+  NumberMatcher const* const number[{{len $.Table.NMatchers}}] = {
+{{- range $i, $m := $.Table.NMatchers }}
     /* [{{$i}}] */
 {{-   if $m }} &{{$n_names.Get $m}}_,
 {{-   else  }} &{{$n_names.Get $i}}_,

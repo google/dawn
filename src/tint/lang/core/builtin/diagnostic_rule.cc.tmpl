@@ -8,6 +8,7 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 
 #include "src/tint/lang/core/builtin/diagnostic_rule.h"
@@ -18,12 +19,12 @@ See:
 
 namespace tint::builtin {
 
-{{ Eval "ParseEnum" (Sem.Enum "core_diagnostic_rule")}}
+{{ Eval "ParseEnum" ($I.Sem.Enum "core_diagnostic_rule")}}
 
-{{ Eval "EnumOStream" (Sem.Enum "core_diagnostic_rule")}}
+{{ Eval "EnumOStream" ($I.Sem.Enum "core_diagnostic_rule")}}
 
-{{ Eval "ParseEnum" (Sem.Enum "chromium_diagnostic_rule")}}
+{{ Eval "ParseEnum" ($I.Sem.Enum "chromium_diagnostic_rule")}}
 
-{{ Eval "EnumOStream" (Sem.Enum "chromium_diagnostic_rule")}}
+{{ Eval "EnumOStream" ($I.Sem.Enum "chromium_diagnostic_rule")}}
 
 }  // namespace tint::builtin

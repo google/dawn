@@ -11,12 +11,13 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 #include "src/tint/lang/core/builtin/function.h"
 
 namespace tint::builtin {
 
 Function ParseFunction(std::string_view name) {
-{{- range Sem.Builtins  }}
+{{- range $I.Sem.Builtins  }}
     if (name == "{{.Name}}") {
         return Function::k{{PascalCase .Name}};
     }
@@ -28,7 +29,7 @@ const char* str(Function i) {
     switch (i) {
         case Function::kNone:
             return "<none>";
-{{- range Sem.Builtins  }}
+{{- range $I.Sem.Builtins  }}
         case Function::k{{PascalCase .Name}}:
             return "{{.Name}}";
 {{- end  }}

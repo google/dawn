@@ -9,11 +9,13 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+
 {{- /* For each permutation of each overload of each function... */ -}}
-{{- range Sem.Builtins -}}
+{{- range $I.Sem.Builtins -}}
 {{    if not (HasPrefix .Name "_") }}
 {{-     range .Overloads  -}}
-{{-       range Permute . -}}
+{{-       range $I.Permute . -}}
 {{- /*      Generate a ./literal/<function>/<permuataion-hash>.wgsl file using
             the Permutation macro defined below                             */ -}}
 {{-         $file := printf "./literal/%v/%v.wgsl" .Intrinsic.Name .Hash -}}

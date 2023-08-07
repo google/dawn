@@ -11,8 +11,9 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
-{{- $enum := (Sem.Enum "builtin_type") -}}
+{{- $enum := ($I.Sem.Enum "builtin_type") -}}
 {{- Eval "OverrideEnumName" "Enum" $enum "Name" "Builtin" -}}
 
 #include "src/tint/lang/core/builtin/builtin.h"

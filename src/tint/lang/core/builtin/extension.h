@@ -29,7 +29,7 @@
 namespace tint::builtin {
 
 /// An enumerator of WGSL extensions
-/// @see src/tint/intrinsics.def for extension descriptions
+/// @see src/tint/lang/wgsl/intrinsics.def for extension descriptions
 enum class Extension {
     kUndefined,
     kChromiumDisableUniformityAnalysis,

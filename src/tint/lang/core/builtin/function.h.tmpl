@@ -11,6 +11,8 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+
 #ifndef SRC_TINT_LANG_CORE_BUILTIN_FUNCTION_H_
 #define SRC_TINT_LANG_CORE_BUILTIN_FUNCTION_H_
 
@@ -24,7 +26,7 @@ namespace tint::builtin {
 /// Enumerator of all builtin functions
 enum class Function {
     kNone = -1,
-{{- range Sem.Builtins }}
+{{- range $I.Sem.Builtins }}
     k{{PascalCase .Name}},
 {{- end }}
 };
@@ -48,14 +50,14 @@ auto& operator<<(STREAM& o, Function i) {
 
 /// All builtin functions
 constexpr Function kFunctions[] = {
-{{- range Sem.Builtins }}
+{{- range $I.Sem.Builtins }}
     Function::k{{PascalCase .Name}},
 {{- end }}
 };
 
 /// All builtin function names
 constexpr const char* kFunctionStrings[] = {
-{{- range Sem.Builtins }}
+{{- range $I.Sem.Builtins }}
     "{{.Name}}",
 {{- end }}
 };

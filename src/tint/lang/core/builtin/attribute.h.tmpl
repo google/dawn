@@ -11,8 +11,9 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
-{{- $enum := (Sem.Enum "attribute") -}}
+{{- $enum := ($I.Sem.Enum "attribute") -}}
 
 #ifndef SRC_TINT_LANG_CORE_BUILTIN_ATTRIBUTE_H_
 #define SRC_TINT_LANG_CORE_BUILTIN_ATTRIBUTE_H_

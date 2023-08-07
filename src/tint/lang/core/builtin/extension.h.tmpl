@@ -8,8 +8,9 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
-{{- $enum := (Sem.Enum "extension") -}}
+{{- $enum := ($I.Sem.Enum "extension") -}}
 
 #ifndef SRC_TINT_LANG_CORE_BUILTIN_EXTENSION_H_
 #define SRC_TINT_LANG_CORE_BUILTIN_EXTENSION_H_
@@ -20,7 +21,7 @@ See:
 namespace tint::builtin {
 
 /// An enumerator of WGSL extensions
-/// @see src/tint/intrinsics.def for extension descriptions
+/// @see src/tint/lang/wgsl/intrinsics.def for extension descriptions
 {{ Eval "DeclareEnum" $enum}}
 
 // A unique vector of extensions

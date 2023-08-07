@@ -11,6 +11,8 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+
 #include "src/tint/lang/wgsl/sem/parameter_usage.h"
 
 namespace tint::sem {
@@ -19,7 +21,7 @@ const char* str(ParameterUsage usage) {
     switch (usage) {
         case ParameterUsage::kNone:
             return "none";
-{{- range Sem.UniqueParameterNames  }}
+{{- range $I.Sem.UniqueParameterNames  }}
         case ParameterUsage::k{{PascalCase .}}:
             return "{{.}}";
 {{- end  }}

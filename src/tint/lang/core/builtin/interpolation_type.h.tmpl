@@ -8,6 +8,7 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 
 #ifndef SRC_TINT_LANG_CORE_BUILTIN_INTERPOLATION_TYPE_H_
@@ -20,7 +21,7 @@ See:
 namespace tint::builtin {
 
 /// The interpolation type.
-{{ Eval "DeclareEnum" (Sem.Enum "interpolation_type") }}
+{{ Eval "DeclareEnum" ($I.Sem.Enum "interpolation_type") }}
 
 }  // namespace tint::builtin
 

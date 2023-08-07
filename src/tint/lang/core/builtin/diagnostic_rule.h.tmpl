@@ -8,6 +8,7 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 
 #ifndef SRC_TINT_LANG_CORE_BUILTIN_DIAGNOSTIC_RULE_H_
@@ -21,10 +22,10 @@ See:
 namespace tint::builtin {
 
 /// WGSL core diagnostic rules.
-{{ Eval "DeclareEnum" (Sem.Enum "core_diagnostic_rule") }}
+{{ Eval "DeclareEnum" ($I.Sem.Enum "core_diagnostic_rule") }}
 
 /// Chromium-specific diagnostic rules.
-{{ Eval "DeclareEnum" (Sem.Enum "chromium_diagnostic_rule") }}
+{{ Eval "DeclareEnum" ($I.Sem.Enum "chromium_diagnostic_rule") }}
 
 /// All diagnostic rules understood by Tint.
 using DiagnosticRule = std::variant<CoreDiagnosticRule, ChromiumDiagnosticRule>;

@@ -8,6 +8,7 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 
 #include <string>
@@ -21,13 +22,13 @@ namespace {
 
 namespace core_diagnostic_rule_tests {
 
-{{ Eval "TestParsePrintEnum" (Sem.Enum "core_diagnostic_rule")}}
+{{ Eval "TestParsePrintEnum" ($I.Sem.Enum "core_diagnostic_rule")}}
 
 }  // namespace core_diagnostic_rule_tests
 
 namespace chromium_diagnostic_rule_tests {
 
-{{ Eval "TestParsePrintEnum" (Sem.Enum "chromium_diagnostic_rule")}}
+{{ Eval "TestParsePrintEnum" ($I.Sem.Enum "chromium_diagnostic_rule")}}
 
 }  // namespace chromium_diagnostic_rule_tests
 
