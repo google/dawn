@@ -1,3 +1,5 @@
+enable chromium_experimental_subgroups;
+
 @group(0) @binding(0) var<storage, read_write> output : array<u32>;
 
 struct ComputeInputs {

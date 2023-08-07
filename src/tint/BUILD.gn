@@ -1748,6 +1748,7 @@ if (tint_build_unittests) {
       "lang/wgsl/resolver/struct_address_space_use_test.cc",
       "lang/wgsl/resolver/struct_layout_test.cc",
       "lang/wgsl/resolver/struct_pipeline_stage_use_test.cc",
+      "lang/wgsl/resolver/subgroups_extension_test.cc",
       "lang/wgsl/resolver/type_validation_test.cc",
       "lang/wgsl/resolver/uniformity_test.cc",
       "lang/wgsl/resolver/unresolved_identifier_test.cc",

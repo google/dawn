@@ -921,6 +921,28 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
+        case core::BuiltinValue::kSubgroupInvocationId:
+        case core::BuiltinValue::kSubgroupSize:
+            if (!enabled_extensions_.Contains(core::Extension::kChromiumExperimentalSubgroups)) {
+                StringStream err;
+                err << "use of @builtin(" << builtin
+                    << ") attribute requires enabling extension 'chromium_experimental_subgroups'";
+                AddError(err.str(), attr->source);
+                return false;
+            }
+            if (!type->Is<type::U32>()) {
+                StringStream err;
+                err << "store type of @builtin(" << builtin << ") must be 'u32'";
+                AddError(err.str(), attr->source);
+                return false;
+            }
+            if (stage != ast::PipelineStage::kNone && stage != ast::PipelineStage::kCompute) {
+                StringStream err;
+                err << "@builtin(" << builtin << ") is only valid as a compute shader input";
+                AddError(err.str(), attr->source);
+                return false;
+            }
+            break;
         default:
             break;
     }
