@@ -1870,5 +1870,39 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              }),
                          PrintCase);
 
+////////////////////////////////////////////////////////////////
+//// textureSampleBaseClampToEdge
+////////////////////////////////////////////////////////////////
+
+TEST_F(SpirvWriterTest, TextureSampleBaseClampToEdge_2d_f32) {
+    auto* texture_ty = ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32());
+
+    Vector<ir::FunctionParam*, 4> args;
+    args.Push(b.FunctionParam("texture", texture_ty));
+    args.Push(b.FunctionParam("sampler", ty.sampler()));
+    args.Push(b.FunctionParam("coords", ty.vec2<f32>()));
+
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams(args);
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f32>(), core::Function::kTextureSampleBaseClampToEdge, args);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%18 = OpConstantComposite %v2float %float_0_5 %float_0_5");
+    EXPECT_INST("%21 = OpConstantComposite %v2float %float_1 %float_1");
+    EXPECT_INST(R"(
+         %12 = OpImageQuerySizeLod %v2uint %texture %uint_0
+         %16 = OpConvertUToF %v2float %12
+         %17 = OpFDiv %v2float %18 %16
+         %20 = OpFSub %v2float %21 %17
+         %23 = OpExtInst %v2float %24 NClamp %coords %17 %20
+         %25 = OpSampledImage %26 %texture %sampler
+     %result = OpImageSampleExplicitLod %v4float %25 %23 Lod %float_0
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

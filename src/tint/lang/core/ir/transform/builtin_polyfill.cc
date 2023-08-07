@@ -19,6 +19,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;     // NOLINT
@@ -79,6 +80,15 @@ struct State {
                             worklist.Push(builtin);
                         }
                         break;
+                    case core::Function::kTextureSampleBaseClampToEdge:
+                        if (config.texture_sample_base_clamp_to_edge_2d_f32) {
+                            auto* tex = builtin->Args()[0]->Type()->As<type::SampledTexture>();
+                            if (tex && tex->dim() == type::TextureDimension::k2d &&
+                                tex->type()->Is<type::F32>()) {
+                                worklist.Push(builtin);
+                            }
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -103,6 +113,9 @@ struct State {
                     break;
                 case core::Function::kSaturate:
                     replacement = Saturate(builtin);
+                    break;
+                case core::Function::kTextureSampleBaseClampToEdge:
+                    replacement = TextureSampleBaseClampToEdge_2d_f32(builtin);
                     break;
                 default:
                     break;
@@ -409,6 +422,34 @@ struct State {
         auto* clamp = b.Call(type, core::Function::kClamp, Vector{call->Args()[0], zero, one});
         clamp->InsertBefore(call);
         return clamp->Result();
+    }
+
+    /// Polyfill a `textureSampleBaseClampToEdge()` builtin call for 2D F32 textures.
+    /// @param call the builtin call instruction
+    /// @returns the replacement value
+    ir::Value* TextureSampleBaseClampToEdge_2d_f32(ir::CoreBuiltinCall* call) {
+        // Replace `textureSampleBaseClampToEdge(%texture, %sample, %coords)` with:
+        //   %dims       = vec2f(textureDimensions(%texture));
+        //   %half_texel = vec2f(0.5) / dims;
+        //   %clamped    = clamp(%coord, %half_texel, 1.0 - %half_texel);
+        //   %result     = textureSampleLevel(%texture, %sampler, %clamped, 0);
+        ir::Value* result = nullptr;
+        auto* texture = call->Args()[0];
+        auto* sampler = call->Args()[1];
+        auto* coords = call->Args()[2];
+        b.InsertBefore(call, [&] {
+            auto* vec2f = ty.vec2<f32>();
+            auto* dims = b.Call(ty.vec2<u32>(), core::Function::kTextureDimensions, texture);
+            auto* fdims = b.Convert(vec2f, dims);
+            auto* half_texel = b.Divide(vec2f, b.Splat(vec2f, 0.5_f, 2), fdims);
+            auto* one_minus_half_texel = b.Subtract(vec2f, b.Splat(vec2f, 1_f, 2), half_texel);
+            auto* clamped =
+                b.Call(vec2f, core::Function::kClamp, coords, half_texel, one_minus_half_texel);
+            result = b.Call(ty.vec4<f32>(), core::Function::kTextureSampleLevel, texture, sampler,
+                            clamped, 0_f)
+                         ->Result();
+        });
+        return result;
     }
 };
 

@@ -138,6 +138,7 @@ using vec4 = vec<4, T>;
 // Address space aliases
 ////////////////////////////////////////////////////////////////////////////////
 static constexpr core::AddressSpace function = core::AddressSpace::kFunction;
+static constexpr core::AddressSpace handle = core::AddressSpace::kHandle;
 static constexpr core::AddressSpace private_ = core::AddressSpace::kPrivate;
 static constexpr core::AddressSpace push_constant = core::AddressSpace::kPushConstant;
 static constexpr core::AddressSpace storage = core::AddressSpace::kStorage;

@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/transform/helper_test.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
 
 namespace tint::ir::transform {
 namespace {
@@ -1053,6 +1054,62 @@ TEST_F(IR_BuiltinPolyfillTest, FirstTrailingBit_Vec4I32) {
 
     BuiltinPolyfillConfig config;
     config.first_trailing_bit = true;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, TextureSampleBaseClampToEdge_2d_f32_NoPolyfill) {
+    auto* texture_ty = ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32());
+    Build(core::Function::kTextureSampleBaseClampToEdge, ty.vec4<f32>(),
+          Vector{texture_ty, ty.sampler(), ty.vec2<f32>()});
+    auto* src = R"(
+%foo = func(%arg:texture_2d<f32>, %arg_1:sampler, %arg_2:vec2<f32>):vec4<f32> -> %b1 {  # %arg_1: 'arg', %arg_2: 'arg'
+  %b1 = block {
+    %result:vec4<f32> = textureSampleBaseClampToEdge %arg, %arg_1, %arg_2
+    ret %result
+  }
+}
+)";
+    auto* expect = src;
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.texture_sample_base_clamp_to_edge_2d_f32 = false;
+    Run(BuiltinPolyfill, config);
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(IR_BuiltinPolyfillTest, TextureSampleBaseClampToEdge_2d_f32) {
+    auto* texture_ty = ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32());
+    Build(core::Function::kTextureSampleBaseClampToEdge, ty.vec4<f32>(),
+          Vector{texture_ty, ty.sampler(), ty.vec2<f32>()});
+    auto* src = R"(
+%foo = func(%arg:texture_2d<f32>, %arg_1:sampler, %arg_2:vec2<f32>):vec4<f32> -> %b1 {  # %arg_1: 'arg', %arg_2: 'arg'
+  %b1 = block {
+    %result:vec4<f32> = textureSampleBaseClampToEdge %arg, %arg_1, %arg_2
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+%foo = func(%arg:texture_2d<f32>, %arg_1:sampler, %arg_2:vec2<f32>):vec4<f32> -> %b1 {  # %arg_1: 'arg', %arg_2: 'arg'
+  %b1 = block {
+    %5:vec2<u32> = textureDimensions %arg
+    %6:vec2<f32> = convert %5
+    %7:vec2<f32> = div vec2<f32>(0.5f), %6
+    %8:vec2<f32> = sub vec2<f32>(1.0f), %7
+    %9:vec2<f32> = clamp %arg_2, %7, %8
+    %result:vec4<f32> = textureSampleLevel %arg, %arg_1, %9, 0.0f
+    ret %result
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    BuiltinPolyfillConfig config;
+    config.texture_sample_base_clamp_to_edge_2d_f32 = true;
     Run(BuiltinPolyfill, config);
     EXPECT_EQ(expect, str());
 }

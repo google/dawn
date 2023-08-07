@@ -45,6 +45,7 @@ Result<SuccessType, std::string> Raise(ir::Module* module) {
     core_polyfills.first_leading_bit = true;
     core_polyfills.first_trailing_bit = true;
     core_polyfills.saturate = true;
+    core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
     RUN_TRANSFORM(ir::transform::BuiltinPolyfill, module, core_polyfills);
 
     RUN_TRANSFORM(ir::transform::AddEmptyEntryPoint, module);

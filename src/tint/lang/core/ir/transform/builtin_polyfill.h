@@ -38,6 +38,8 @@ struct BuiltinPolyfillConfig {
     bool first_trailing_bit = false;
     /// Should `saturate()` be polyfilled?
     bool saturate = false;
+    /// Should `textureSampleBaseClampToEdge()` be polyfilled for texture_2d<f32> textures?
+    bool texture_sample_base_clamp_to_edge_2d_f32 = false;
 };
 
 /// BuiltinPolyfill is a transform that replaces calls to builtin functions and uses of other core
