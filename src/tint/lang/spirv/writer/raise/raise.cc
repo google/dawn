@@ -18,6 +18,7 @@
 
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 #include "src/tint/lang/core/ir/transform/block_decorated_structs.h"
+#include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/std140.h"
 #include "src/tint/lang/spirv/writer/raise/builtin_polyfill.h"
@@ -30,24 +31,28 @@
 namespace tint::spirv::writer::raise {
 
 Result<SuccessType, std::string> Raise(ir::Module* module) {
-#define RUN_TRANSFORM(name)         \
-    do {                            \
-        auto result = name(module); \
-        if (!result) {              \
-            return result;          \
-        }                           \
+#define RUN_TRANSFORM(name, ...)         \
+    do {                                 \
+        auto result = name(__VA_ARGS__); \
+        if (!result) {                   \
+            return result;               \
+        }                                \
     } while (false)
 
-    RUN_TRANSFORM(ir::transform::AddEmptyEntryPoint);
-    RUN_TRANSFORM(ir::transform::BlockDecoratedStructs);
-    RUN_TRANSFORM(BuiltinPolyfill);
-    RUN_TRANSFORM(ir::transform::DemoteToHelper);
-    RUN_TRANSFORM(ExpandImplicitSplats);
-    RUN_TRANSFORM(HandleMatrixArithmetic);
-    RUN_TRANSFORM(MergeReturn);
-    RUN_TRANSFORM(ShaderIO);
-    RUN_TRANSFORM(ir::transform::Std140);
-    RUN_TRANSFORM(VarForDynamicIndex);
+    ir::transform::BuiltinPolyfillConfig core_polyfills;
+    core_polyfills.saturate = true;
+    RUN_TRANSFORM(ir::transform::BuiltinPolyfill, module, core_polyfills);
+
+    RUN_TRANSFORM(ir::transform::AddEmptyEntryPoint, module);
+    RUN_TRANSFORM(ir::transform::BlockDecoratedStructs, module);
+    RUN_TRANSFORM(BuiltinPolyfill, module);
+    RUN_TRANSFORM(ir::transform::DemoteToHelper, module);
+    RUN_TRANSFORM(ExpandImplicitSplats, module);
+    RUN_TRANSFORM(HandleMatrixArithmetic, module);
+    RUN_TRANSFORM(MergeReturn, module);
+    RUN_TRANSFORM(ShaderIO, module);
+    RUN_TRANSFORM(ir::transform::Std140, module);
+    RUN_TRANSFORM(VarForDynamicIndex, module);
 
     return Success;
 }

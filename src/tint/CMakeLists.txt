@@ -876,6 +876,8 @@ if(${TINT_BUILD_IR})
     lang/core/ir/transform/binding_remapper.h
     lang/core/ir/transform/block_decorated_structs.cc
     lang/core/ir/transform/block_decorated_structs.h
+    lang/core/ir/transform/builtin_polyfill.cc
+    lang/core/ir/transform/builtin_polyfill.h
     lang/core/ir/transform/demote_to_helper.cc
     lang/core/ir/transform/demote_to_helper.h
     lang/core/ir/transform/shader_io.cc
@@ -1679,6 +1681,7 @@ if(TINT_BUILD_TESTS)
       lang/core/ir/transform/add_empty_entry_point_test.cc
       lang/core/ir/transform/binding_remapper_test.cc
       lang/core/ir/transform/block_decorated_structs_test.cc
+      lang/core/ir/transform/builtin_polyfill_test.cc
       lang/core/ir/transform/demote_to_helper_test.cc
       lang/core/ir/transform/std140_test.cc
       lang/core/ir/unary_test.cc

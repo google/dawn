@@ -598,6 +598,38 @@ TEST_F(SpirvWriterTest, Builtin_Unpack4X8Unorm) {
     EXPECT_INST("%result = OpExtInst %v4float %9 UnpackUnorm4x8 %arg");
 }
 
+TEST_F(SpirvWriterTest, Builtin_Saturate_F32) {
+    auto* arg = b.FunctionParam("arg", ty.f32());
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({arg});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.f32(), builtin::Function::kSaturate, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%result = OpExtInst %float %7 NClamp %arg %float_0 %float_1");
+}
+
+TEST_F(SpirvWriterTest, Builtin_Saturate_Vec4h) {
+    auto* arg = b.FunctionParam("arg", ty.vec4<f16>());
+    auto* func = b.Function("foo", ty.vec4<f16>());
+    func->SetParams({arg});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f16>(), builtin::Function::kSaturate, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(
+        "%9 = OpConstantComposite %v4half %half_0x0p_0 %half_0x0p_0 %half_0x0p_0 %half_0x0p_0");
+    EXPECT_INST(
+        "%11 = OpConstantComposite %v4half %half_0x1p_0 %half_0x1p_0 %half_0x1p_0 %half_0x1p_0");
+    EXPECT_INST("%result = OpExtInst %v4half %8 NClamp %arg %9 %11");
+}
+
 // Tests for builtins with the signature: T = func(T, T)
 using Builtin_2arg = SpirvWriterTestWithParam<BuiltinTestCase>;
 TEST_P(Builtin_2arg, Scalar) {
