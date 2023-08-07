@@ -103,7 +103,7 @@ class Function : public Castable<Function, Value> {
     /// Sets the return location
     /// @param loc the location to set
     /// @param interp the interpolation
-    void SetReturnLocation(uint32_t loc, std::optional<builtin::Interpolation> interp) {
+    void SetReturnLocation(uint32_t loc, std::optional<core::Interpolation> interp) {
         return_.location = {loc, interp};
     }
     /// @returns the return location

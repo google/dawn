@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
@@ -40,7 +40,7 @@ bool ShouldRun(const Program* program) {
     for (auto* global : program->AST().GlobalVariables()) {
         if (auto* var = global->As<Var>()) {
             auto* v = program->Sem().Get(var);
-            if (v->AddressSpace() == builtin::AddressSpace::kWorkgroup) {
+            if (v->AddressSpace() == core::AddressSpace::kWorkgroup) {
                 return true;
             }
         }
@@ -141,7 +141,7 @@ struct ZeroInitWorkgroupMemory::State {
         // workgroup storage variables used by `fn`. This will populate #statements.
         auto* func = sem.Get(fn);
         for (auto* var : func->TransitivelyReferencedGlobals()) {
-            if (var->AddressSpace() == builtin::AddressSpace::kWorkgroup) {
+            if (var->AddressSpace() == core::AddressSpace::kWorkgroup) {
                 auto get_expr = [&](uint32_t num_values) {
                     auto var_name = ctx.Clone(var->Declaration()->name->symbol);
                     return Expression{b.Expr(var_name), num_values, ArrayIndices{}};
@@ -162,7 +162,7 @@ struct ZeroInitWorkgroupMemory::State {
         for (auto* param : fn->params) {
             if (auto* builtin_attr = GetAttribute<BuiltinAttribute>(param->attributes)) {
                 auto builtin = sem.Get(builtin_attr)->Value();
-                if (builtin == builtin::BuiltinValue::kLocalInvocationIndex) {
+                if (builtin == core::BuiltinValue::kLocalInvocationIndex) {
                     local_index = [=] { return b.Expr(ctx.Clone(param->name->symbol)); };
                     break;
                 }
@@ -170,8 +170,7 @@ struct ZeroInitWorkgroupMemory::State {
 
             if (auto* str = sem.Get(param)->Type()->As<type::Struct>()) {
                 for (auto* member : str->Members()) {
-                    if (member->Attributes().builtin ==
-                        builtin::BuiltinValue::kLocalInvocationIndex) {
+                    if (member->Attributes().builtin == core::BuiltinValue::kLocalInvocationIndex) {
                         local_index = [=] {
                             auto* param_expr = b.Expr(ctx.Clone(param->name->symbol));
                             auto member_name = ctx.Clone(member->Name());
@@ -185,7 +184,7 @@ struct ZeroInitWorkgroupMemory::State {
         if (!local_index) {
             // No existing local index parameter. Append one to the entry point.
             auto param_name = b.Symbols().New("local_invocation_index");
-            auto* local_invocation_index = b.Builtin(builtin::BuiltinValue::kLocalInvocationIndex);
+            auto* local_invocation_index = b.Builtin(core::BuiltinValue::kLocalInvocationIndex);
             auto* param = b.Param(param_name, b.ty.u32(), tint::Vector{local_invocation_index});
             ctx.InsertBack(fn->params, param);
             local_index = [=] { return b.Expr(param->name->symbol); };

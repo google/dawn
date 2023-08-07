@@ -22,8 +22,8 @@
 namespace tint::spirv::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using SpirvASTPrinterTest = TestHelper;
 
@@ -61,7 +61,7 @@ TEST_P(Attribute_StageTest, Emit) {
     Vector<const ast::Statement*, 2> body;
     if (params.stage == ast::PipelineStage::kVertex) {
         ret_type = ty.vec4<f32>();
-        ret_type_attrs.Push(Builtin(builtin::BuiltinValue::kPosition));
+        ret_type_attrs.Push(Builtin(core::BuiltinValue::kPosition));
         body.Push(Return(Call<vec4<f32>>()));
     }
 
@@ -237,7 +237,7 @@ TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_FragDepth) {
              Stage(ast::PipelineStage::kFragment),
          },
          Vector{
-             Builtin(builtin::BuiltinValue::kFragDepth),
+             Builtin(core::BuiltinValue::kFragDepth),
          });
 
     Builder& b = SanitizeAndBuild();

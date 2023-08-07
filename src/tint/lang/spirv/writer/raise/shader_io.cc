@@ -24,8 +24,8 @@
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/struct.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 namespace tint::spirv::writer::raise {
 
@@ -69,8 +69,8 @@ struct StateImpl : ir::transform::ShaderIOBackendState {
                      ir::Var*& location_var,
                      Vector<uint32_t, 4>* indices,
                      Vector<type::Manager::StructMemberDesc, 4>& entries,
-                     builtin::AddressSpace addrspace,
-                     builtin::Access access,
+                     core::AddressSpace addrspace,
+                     core::Access access,
                      const char* name_suffix) {
         // Build separate lists of builtin and location entries and record their new indices.
         uint32_t next_builtin_idx = 0;
@@ -80,7 +80,7 @@ struct StateImpl : ir::transform::ShaderIOBackendState {
         for (auto io : entries) {
             if (io.attributes.builtin) {
                 // SampleMask must be an array for Vulkan.
-                if (io.attributes.builtin.value() == builtin::BuiltinValue::kSampleMask) {
+                if (io.attributes.builtin.value() == core::BuiltinValue::kSampleMask) {
                     io.type = ty.array<u32, 1>();
                 }
                 builtin_members.Push(io);
@@ -111,24 +111,24 @@ struct StateImpl : ir::transform::ShaderIOBackendState {
     /// @copydoc ShaderIO::BackendState::FinalizeInputs
     Vector<ir::FunctionParam*, 4> FinalizeInputs() override {
         MakeStructs(builtin_input_var, location_input_var, &input_indices, inputs,
-                    builtin::AddressSpace::kIn, builtin::Access::kRead, "Inputs");
+                    core::AddressSpace::kIn, core::Access::kRead, "Inputs");
         return tint::Empty;
     }
 
     /// @copydoc ShaderIO::BackendState::FinalizeOutputs
     ir::Value* FinalizeOutputs() override {
         MakeStructs(builtin_output_var, location_output_var, &output_indices, outputs,
-                    builtin::AddressSpace::kOut, builtin::Access::kWrite, "Outputs");
+                    core::AddressSpace::kOut, core::Access::kWrite, "Outputs");
         return nullptr;
     }
 
     /// @copydoc ShaderIO::BackendState::GetInput
     ir::Value* GetInput(ir::Builder& builder, uint32_t idx) override {
         // Load the input from the global variable declared earlier.
-        auto* ptr = ty.ptr(builtin::AddressSpace::kIn, inputs[idx].type, builtin::Access::kRead);
+        auto* ptr = ty.ptr(core::AddressSpace::kIn, inputs[idx].type, core::Access::kRead);
         ir::Access* from = nullptr;
         if (inputs[idx].attributes.builtin) {
-            if (inputs[idx].attributes.builtin.value() == builtin::BuiltinValue::kSampleMask) {
+            if (inputs[idx].attributes.builtin.value() == core::BuiltinValue::kSampleMask) {
                 // SampleMask becomes an array for SPIR-V, so load from the first element.
                 from = builder.Access(ptr, builtin_input_var, u32(input_indices[idx]), 0_u);
             } else {
@@ -143,10 +143,10 @@ struct StateImpl : ir::transform::ShaderIOBackendState {
     /// @copydoc ShaderIO::BackendState::SetOutput
     void SetOutput(ir::Builder& builder, uint32_t idx, ir::Value* value) override {
         // Store the output to the global variable declared earlier.
-        auto* ptr = ty.ptr(builtin::AddressSpace::kOut, outputs[idx].type, builtin::Access::kWrite);
+        auto* ptr = ty.ptr(core::AddressSpace::kOut, outputs[idx].type, core::Access::kWrite);
         ir::Access* to = nullptr;
         if (outputs[idx].attributes.builtin) {
-            if (outputs[idx].attributes.builtin.value() == builtin::BuiltinValue::kSampleMask) {
+            if (outputs[idx].attributes.builtin.value() == core::BuiltinValue::kSampleMask) {
                 // SampleMask becomes an array for SPIR-V, so store to the first element.
                 to = builder.Access(ptr, builtin_output_var, u32(output_indices[idx]), 0_u);
             } else {

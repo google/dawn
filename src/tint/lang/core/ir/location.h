@@ -17,7 +17,7 @@
 
 #include <optional>
 
-#include "src/tint/lang/core/builtin/interpolation.h"
+#include "src/tint/lang/core/interpolation.h"
 
 namespace tint::ir {
 
@@ -26,7 +26,7 @@ struct Location {
     /// The location value
     uint32_t value = 0;
     /// The interpolation settings
-    std::optional<builtin::Interpolation> interpolation;
+    std::optional<core::Interpolation> interpolation;
 };
 
 }  // namespace tint::ir

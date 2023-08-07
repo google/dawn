@@ -24,8 +24,8 @@
 namespace tint::ir::transform {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using IR_DemoteToHelperTest = TransformTest;
 
@@ -509,11 +509,11 @@ TEST_F(IR_DemoteToHelperTest, WriteToInvocationPrivateAddressSpace) {
 }
 
 TEST_F(IR_DemoteToHelperTest, TextureStore) {
-    auto format = builtin::TexelFormat::kR32Float;
+    auto format = core::TexelFormat::kR32Float;
     auto* texture =
-        b.Var("texture", ty.ptr(builtin::AddressSpace::kHandle,
+        b.Var("texture", ty.ptr(core::AddressSpace::kHandle,
                                 ty.Get<type::StorageTexture>(
-                                    type::TextureDimension::k2d, format, builtin::Access::kWrite,
+                                    type::TextureDimension::k2d, format, core::Access::kWrite,
                                     type::StorageTexture::SubtypeFor(format, ty))));
     texture->SetBindingPoint(0, 0);
     b.RootBlock()->Append(texture);
@@ -531,7 +531,7 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
             b.Discard();
             b.ExitIf(ifelse);
         });
-        b.Call(ty.void_(), builtin::Function::kTextureStore, texture, coord, 0.5_f);
+        b.Call(ty.void_(), core::Function::kTextureStore, texture, coord, 0.5_f);
         b.Return(ep, 0.5_f);
     });
 
@@ -609,7 +609,7 @@ TEST_F(IR_DemoteToHelperTest, AtomicStore) {
             b.Discard();
             b.ExitIf(ifelse);
         });
-        b.Call(ty.void_(), builtin::Function::kAtomicStore, buffer, 42_i);
+        b.Call(ty.void_(), core::Function::kAtomicStore, buffer, 42_i);
         b.Return(ep, 0.5_f);
     });
 
@@ -687,7 +687,7 @@ TEST_F(IR_DemoteToHelperTest, AtomicAdd) {
             b.Discard();
             b.ExitIf(ifelse);
         });
-        auto* old = b.Call(ty.i32(), builtin::Function::kAtomicAdd, buffer, 42_i);
+        auto* old = b.Call(ty.i32(), core::Function::kAtomicAdd, buffer, 42_i);
         b.Add(ty.i32(), old, 1_i);
         b.Return(ep, 0.5_f);
     });
@@ -770,7 +770,7 @@ TEST_F(IR_DemoteToHelperTest, AtomicCompareExchange) {
             b.ExitIf(ifelse);
         });
         auto* result = b.Call(type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32()),
-                              builtin::Function::kAtomicCompareExchangeWeak, buffer, 0_i, 42_i);
+                              core::Function::kAtomicCompareExchangeWeak, buffer, 0_i, 42_i);
         b.Add(ty.i32(), b.Access(ty.i32(), result, 0_i), 1_i);
         b.Return(ep, 0.5_f);
     });

@@ -52,8 +52,8 @@ TEST_F(ForLoopStatementTest, Creation_Null_InitCondCont) {
 }
 
 TEST_F(ForLoopStatementTest, Creation_WithAttributes) {
-    auto* attr1 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "foo");
-    auto* attr2 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "bar");
+    auto* attr1 = DiagnosticAttribute(core::DiagnosticSeverity::kOff, "foo");
+    auto* attr2 = DiagnosticAttribute(core::DiagnosticSeverity::kOff, "bar");
     auto* body = Block(Return());
     auto* l = For(nullptr, nullptr, nullptr, body, tint::Vector{attr1, attr2});
 

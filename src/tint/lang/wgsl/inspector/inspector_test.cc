@@ -51,8 +51,8 @@ class InspectorGetEntryPointComponentAndCompositionTest
     : public InspectorBuilder,
       public testing::TestWithParam<InspectorGetEntryPointComponentAndCompositionTestParams> {};
 struct InspectorGetEntryPointInterpolateTestParams {
-    builtin::InterpolationType in_type;
-    builtin::InterpolationSampling in_sampling;
+    core::InterpolationType in_type;
+    core::InterpolationSampling in_sampling;
     inspector::InterpolationType out_type;
     inspector::InterpolationSampling out_sampling;
 };
@@ -112,7 +112,7 @@ class InspectorGetDepthMultisampledTextureResourceBindingsTest : public Inspecto
                                                                  public testing::Test {};
 
 typedef std::tuple<type::TextureDimension, ResourceBinding::TextureDimension> DimensionParams;
-typedef std::tuple<builtin::TexelFormat, ResourceBinding::TexelFormat, ResourceBinding::SampledKind>
+typedef std::tuple<core::TexelFormat, ResourceBinding::TexelFormat, ResourceBinding::SampledKind>
     TexelFormatParams;
 typedef std::tuple<DimensionParams, TexelFormatParams> GetStorageTextureTestParams;
 class InspectorGetStorageTextureResourceBindingsTestWithParam
@@ -289,7 +289,7 @@ TEST_P(InspectorGetEntryPointComponentAndCompositionTest, Test) {
     std::function<ast::Type()> tint_type = GetTypeFunction(component, composition);
 
     if (component == ComponentType::kF16) {
-        Enable(builtin::Extension::kF16);
+        Enable(core::Extension::kF16);
     }
 
     auto* in_var = Param("in_var", tint_type(),
@@ -464,7 +464,7 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
 TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
     auto* in_var0 = Param("in_var0", ty.u32(),
                           Vector{
-                              Builtin(builtin::BuiltinValue::kSampleIndex),
+                              Builtin(core::BuiltinValue::kSampleIndex),
                           });
     auto* in_var1 = Param("in_var1", ty.f32(),
                           Vector{
@@ -478,7 +478,7 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
              Stage(ast::PipelineStage::kFragment),
          },
          Vector{
-             Builtin(builtin::BuiltinValue::kFragDepth),
+             Builtin(core::BuiltinValue::kFragDepth),
          });
     Inspector& inspector = Build();
 
@@ -743,7 +743,7 @@ TEST_F(InspectorGetEntryPointTest, OverrideReferencedIndirectly) {
 
 TEST_F(InspectorGetEntryPointTest, OverrideReferencedIndirectly_ViaPrivateInitializer) {
     Override("foo", ty.f32());
-    GlobalVar("bar", builtin::AddressSpace::kPrivate, ty.f32(), Mul(2_a, "foo"));
+    GlobalVar("bar", core::AddressSpace::kPrivate, ty.f32(), Mul(2_a, "foo"));
     MakePlainGlobalReferenceBodyFunction("ep_func", "bar", ty.f32(),
                                          Vector{
                                              Stage(ast::PipelineStage::kCompute),
@@ -834,7 +834,7 @@ TEST_F(InspectorGetEntryPointTest, OverrideReferencedByAttributeIndirectly) {
 
 TEST_F(InspectorGetEntryPointTest, OverrideReferencedByArraySize) {
     Override("size", ty.u32());
-    GlobalVar("v", builtin::AddressSpace::kWorkgroup, ty.array(ty.f32(), "size"));
+    GlobalVar("v", core::AddressSpace::kWorkgroup, ty.array(ty.f32(), "size"));
     Func("ep", tint::Empty, ty.void_(),
          Vector{
              Assign(Phony(), IndexAccessor("v", 0_a)),
@@ -857,7 +857,7 @@ TEST_F(InspectorGetEntryPointTest, OverrideReferencedByArraySize) {
 TEST_F(InspectorGetEntryPointTest, OverrideReferencedByArraySizeIndirectly) {
     Override("foo", ty.u32());
     Override("bar", ty.u32(), Mul(2_a, "foo"));
-    GlobalVar("v", builtin::AddressSpace::kWorkgroup, ty.array(ty.f32(), Mul(2_a, Expr("bar"))));
+    GlobalVar("v", core::AddressSpace::kWorkgroup, ty.array(ty.f32(), Mul(2_a, Expr("bar"))));
     Func("ep", tint::Empty, ty.void_(),
          Vector{
              Assign(Phony(), IndexAccessor("v", 0_a)),
@@ -885,7 +885,7 @@ TEST_F(InspectorGetEntryPointTest, OverrideReferencedByArraySizeViaAlias) {
     Alias("MyArray", ty.array(ty.f32(), Mul(2_a, Expr("bar"))));
     Override("zoo", ty.u32());
     Alias("MyArrayUnused", ty.array(ty.f32(), Mul(2_a, Expr("zoo"))));
-    GlobalVar("v", builtin::AddressSpace::kWorkgroup, ty("MyArray"));
+    GlobalVar("v", core::AddressSpace::kWorkgroup, ty("MyArray"));
     Func("ep", tint::Empty, ty.void_(),
          Vector{
              Assign(Phony(), IndexAccessor("v", 0_a)),
@@ -908,7 +908,7 @@ TEST_F(InspectorGetEntryPointTest, OverrideReferencedByArraySizeViaAlias) {
 }
 
 TEST_F(InspectorGetEntryPointTest, OverrideTypes) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     Override("bool_var", ty.bool_());
     Override("float_var", ty.f32());
@@ -1056,7 +1056,7 @@ TEST_F(InspectorGetEntryPointTest, BuiltinNotReferenced) {
 TEST_F(InspectorGetEntryPointTest, InputSampleMaskSimpleReferenced) {
     auto* in_var = Param("in_var", ty.u32(),
                          Vector{
-                             Builtin(builtin::BuiltinValue::kSampleMask),
+                             Builtin(core::BuiltinValue::kSampleMask),
                          });
     Func("ep_func", Vector{in_var}, ty.void_(),
          Vector{
@@ -1076,7 +1076,7 @@ TEST_F(InspectorGetEntryPointTest, InputSampleMaskSimpleReferenced) {
 
 TEST_F(InspectorGetEntryPointTest, InputSampleMaskStructReferenced) {
     Vector members{
-        Member("inner_position", ty.u32(), Vector{Builtin(builtin::BuiltinValue::kSampleMask)}),
+        Member("inner_position", ty.u32(), Vector{Builtin(core::BuiltinValue::kSampleMask)}),
     };
 
     Structure("in_struct", members);
@@ -1104,7 +1104,7 @@ TEST_F(InspectorGetEntryPointTest, InputSampleMaskStructReferenced) {
 TEST_F(InspectorGetEntryPointTest, OutputSampleMaskSimpleReferenced) {
     Func("ep_func",
          Vector{
-             Param("in_var", ty.u32(), Vector{Builtin(builtin::BuiltinValue::kSampleMask)}),
+             Param("in_var", ty.u32(), Vector{Builtin(core::BuiltinValue::kSampleMask)}),
          },
          ty.u32(),
          Vector{
@@ -1114,7 +1114,7 @@ TEST_F(InspectorGetEntryPointTest, OutputSampleMaskSimpleReferenced) {
              Stage(ast::PipelineStage::kFragment),
          },
          Vector{
-             Builtin(builtin::BuiltinValue::kSampleMask),
+             Builtin(core::BuiltinValue::kSampleMask),
          });
 
     Inspector& inspector = Build();
@@ -1128,7 +1128,7 @@ TEST_F(InspectorGetEntryPointTest, OutputSampleMaskSimpleReferenced) {
 TEST_F(InspectorGetEntryPointTest, OutputSampleMaskStructReferenced) {
     Structure("out_struct", Vector{
                                 Member("inner_sample_mask", ty.u32(),
-                                       Vector{Builtin(builtin::BuiltinValue::kSampleMask)}),
+                                       Vector{Builtin(core::BuiltinValue::kSampleMask)}),
                             });
 
     Func("ep_func", tint::Empty, ty("out_struct"),
@@ -1151,7 +1151,7 @@ TEST_F(InspectorGetEntryPointTest, OutputSampleMaskStructReferenced) {
 TEST_F(InspectorGetEntryPointTest, InputPositionSimpleReferenced) {
     Func("ep_func",
          Vector{
-             Param("in_var", ty.vec4<f32>(), Vector{Builtin(builtin::BuiltinValue::kPosition)}),
+             Param("in_var", ty.vec4<f32>(), Vector{Builtin(core::BuiltinValue::kPosition)}),
          },
          ty.void_(),
          Vector{
@@ -1172,7 +1172,7 @@ TEST_F(InspectorGetEntryPointTest, InputPositionSimpleReferenced) {
 TEST_F(InspectorGetEntryPointTest, InputPositionStructReferenced) {
     Structure("in_struct", Vector{
                                Member("inner_position", ty.vec4<f32>(),
-                                      Vector{Builtin(builtin::BuiltinValue::kPosition)}),
+                                      Vector{Builtin(core::BuiltinValue::kPosition)}),
                            });
 
     Func("ep_func",
@@ -1198,7 +1198,7 @@ TEST_F(InspectorGetEntryPointTest, InputPositionStructReferenced) {
 TEST_F(InspectorGetEntryPointTest, FrontFacingSimpleReferenced) {
     Func("ep_func",
          Vector{
-             Param("in_var", ty.bool_(), Vector{Builtin(builtin::BuiltinValue::kFrontFacing)}),
+             Param("in_var", ty.bool_(), Vector{Builtin(core::BuiltinValue::kFrontFacing)}),
          },
          ty.void_(),
          Vector{
@@ -1219,7 +1219,7 @@ TEST_F(InspectorGetEntryPointTest, FrontFacingSimpleReferenced) {
 TEST_F(InspectorGetEntryPointTest, FrontFacingStructReferenced) {
     Structure("in_struct", Vector{
                                Member("inner_position", ty.bool_(),
-                                      Vector{Builtin(builtin::BuiltinValue::kFrontFacing)}),
+                                      Vector{Builtin(core::BuiltinValue::kFrontFacing)}),
                            });
 
     Func("ep_func",
@@ -1245,7 +1245,7 @@ TEST_F(InspectorGetEntryPointTest, FrontFacingStructReferenced) {
 TEST_F(InspectorGetEntryPointTest, SampleIndexSimpleReferenced) {
     Func("ep_func",
          Vector{
-             Param("in_var", ty.u32(), Vector{Builtin(builtin::BuiltinValue::kSampleIndex)}),
+             Param("in_var", ty.u32(), Vector{Builtin(core::BuiltinValue::kSampleIndex)}),
          },
          ty.void_(),
          Vector{
@@ -1266,7 +1266,7 @@ TEST_F(InspectorGetEntryPointTest, SampleIndexSimpleReferenced) {
 TEST_F(InspectorGetEntryPointTest, SampleIndexStructReferenced) {
     Structure("in_struct", Vector{
                                Member("inner_position", ty.u32(),
-                                      Vector{Builtin(builtin::BuiltinValue::kSampleIndex)}),
+                                      Vector{Builtin(core::BuiltinValue::kSampleIndex)}),
                            });
 
     Func("ep_func",
@@ -1290,16 +1290,15 @@ TEST_F(InspectorGetEntryPointTest, SampleIndexStructReferenced) {
 }
 
 TEST_F(InspectorGetEntryPointTest, NumWorkgroupsSimpleReferenced) {
-    Func(
-        "ep_func",
-        Vector{
-            Param("in_var", ty.vec3<u32>(), Vector{Builtin(builtin::BuiltinValue::kNumWorkgroups)}),
-        },
-        ty.void_(),
-        Vector{
-            Return(),
-        },
-        Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)}, tint::Empty);
+    Func("ep_func",
+         Vector{
+             Param("in_var", ty.vec3<u32>(), Vector{Builtin(core::BuiltinValue::kNumWorkgroups)}),
+         },
+         ty.void_(),
+         Vector{
+             Return(),
+         },
+         Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)}, tint::Empty);
 
     Inspector& inspector = Build();
 
@@ -1312,7 +1311,7 @@ TEST_F(InspectorGetEntryPointTest, NumWorkgroupsSimpleReferenced) {
 TEST_F(InspectorGetEntryPointTest, NumWorkgroupsStructReferenced) {
     Structure("in_struct", Vector{
                                Member("inner_position", ty.vec3<u32>(),
-                                      Vector{Builtin(builtin::BuiltinValue::kNumWorkgroups)}),
+                                      Vector{Builtin(core::BuiltinValue::kNumWorkgroups)}),
                            });
 
     Func("ep_func",
@@ -1342,7 +1341,7 @@ TEST_F(InspectorGetEntryPointTest, FragDepthSimpleReferenced) {
              Stage(ast::PipelineStage::kFragment),
          },
          Vector{
-             Builtin(builtin::BuiltinValue::kFragDepth),
+             Builtin(core::BuiltinValue::kFragDepth),
          });
 
     Inspector& inspector = Build();
@@ -1356,7 +1355,7 @@ TEST_F(InspectorGetEntryPointTest, FragDepthSimpleReferenced) {
 TEST_F(InspectorGetEntryPointTest, FragDepthStructReferenced) {
     Structure("out_struct", Vector{
                                 Member("inner_frag_depth", ty.f32(),
-                                       Vector{Builtin(builtin::BuiltinValue::kFragDepth)}),
+                                       Vector{Builtin(core::BuiltinValue::kFragDepth)}),
                             });
 
     Func("ep_func", tint::Empty, ty("out_struct"),
@@ -1438,31 +1437,31 @@ INSTANTIATE_TEST_SUITE_P(
     InspectorGetEntryPointInterpolateTest,
     testing::Values(
         InspectorGetEntryPointInterpolateTestParams{
-            builtin::InterpolationType::kPerspective, builtin::InterpolationSampling::kCenter,
+            core::InterpolationType::kPerspective, core::InterpolationSampling::kCenter,
             InterpolationType::kPerspective, InterpolationSampling::kCenter},
         InspectorGetEntryPointInterpolateTestParams{
-            builtin::InterpolationType::kPerspective, builtin::InterpolationSampling::kCentroid,
+            core::InterpolationType::kPerspective, core::InterpolationSampling::kCentroid,
             InterpolationType::kPerspective, InterpolationSampling::kCentroid},
         InspectorGetEntryPointInterpolateTestParams{
-            builtin::InterpolationType::kPerspective, builtin::InterpolationSampling::kSample,
+            core::InterpolationType::kPerspective, core::InterpolationSampling::kSample,
             InterpolationType::kPerspective, InterpolationSampling::kSample},
         InspectorGetEntryPointInterpolateTestParams{
-            builtin::InterpolationType::kPerspective, builtin::InterpolationSampling::kUndefined,
+            core::InterpolationType::kPerspective, core::InterpolationSampling::kUndefined,
             InterpolationType::kPerspective, InterpolationSampling::kCenter},
         InspectorGetEntryPointInterpolateTestParams{
-            builtin::InterpolationType::kLinear, builtin::InterpolationSampling::kCenter,
+            core::InterpolationType::kLinear, core::InterpolationSampling::kCenter,
             InterpolationType::kLinear, InterpolationSampling::kCenter},
         InspectorGetEntryPointInterpolateTestParams{
-            builtin::InterpolationType::kLinear, builtin::InterpolationSampling::kCentroid,
+            core::InterpolationType::kLinear, core::InterpolationSampling::kCentroid,
             InterpolationType::kLinear, InterpolationSampling::kCentroid},
         InspectorGetEntryPointInterpolateTestParams{
-            builtin::InterpolationType::kLinear, builtin::InterpolationSampling::kSample,
+            core::InterpolationType::kLinear, core::InterpolationSampling::kSample,
             InterpolationType::kLinear, InterpolationSampling::kSample},
         InspectorGetEntryPointInterpolateTestParams{
-            builtin::InterpolationType::kLinear, builtin::InterpolationSampling::kUndefined,
+            core::InterpolationType::kLinear, core::InterpolationSampling::kUndefined,
             InterpolationType::kLinear, InterpolationSampling::kCenter},
         InspectorGetEntryPointInterpolateTestParams{
-            builtin::InterpolationType::kFlat, builtin::InterpolationSampling::kUndefined,
+            core::InterpolationType::kFlat, core::InterpolationSampling::kUndefined,
             InterpolationType::kFlat, InterpolationSampling::kNone}));
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, Bool) {
@@ -1612,7 +1611,7 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, F32) {
 }
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, F16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     Override("a", ty.f16(), Id(1_a));
     Override("b", ty.f16(), Expr(0_h), Id(20_a));
@@ -1697,8 +1696,8 @@ TEST_F(InspectorGetStorageSizeTest, Empty) {
 
 TEST_F(InspectorGetStorageSizeTest, Simple_NonStruct) {
     AddUniformBuffer("ub_var", ty.i32(), 0, 0);
-    AddStorageBuffer("sb_var", ty.i32(), builtin::Access::kReadWrite, 1, 0);
-    AddStorageBuffer("rosb_var", ty.i32(), builtin::Access::kRead, 1, 1);
+    AddStorageBuffer("sb_var", ty.i32(), core::Access::kReadWrite, 1, 0);
+    AddStorageBuffer("rosb_var", ty.i32(), core::Access::kRead, 1, 1);
     Func("ep_func", tint::Empty, ty.void_(),
          Vector{
              Decl(Let("ub", Expr("ub_var"))),
@@ -1729,7 +1728,7 @@ TEST_F(InspectorGetStorageSizeTest, Simple_Struct) {
     auto sb = MakeStorageBufferTypes("sb_type", Vector{
                                                     ty.i32(),
                                                 });
-    AddStorageBuffer("sb_var", sb(), builtin::Access::kReadWrite, 1, 0);
+    AddStorageBuffer("sb_var", sb(), core::Access::kReadWrite, 1, 0);
     MakeStructVariableReferenceBodyFunction("sb_func", "sb_var",
                                             Vector{
                                                 MemberInfo{0, ty.i32()},
@@ -1738,7 +1737,7 @@ TEST_F(InspectorGetStorageSizeTest, Simple_Struct) {
     auto ro_sb = MakeStorageBufferTypes("rosb_type", Vector{
                                                          ty.i32(),
                                                      });
-    AddStorageBuffer("rosb_var", ro_sb(), builtin::Access::kRead, 1, 1);
+    AddStorageBuffer("rosb_var", ro_sb(), core::Access::kRead, 1, 1);
     MakeStructVariableReferenceBodyFunction("rosb_func", "rosb_var",
                                             Vector{
                                                 MemberInfo{0, ty.i32()},
@@ -1816,7 +1815,7 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
     auto sb = MakeStorageBufferTypes("sb_type", Vector{
                                                     ty.i32(),
                                                 });
-    AddStorageBuffer("sb_var", sb(), builtin::Access::kReadWrite, 1, 0);
+    AddStorageBuffer("sb_var", sb(), core::Access::kReadWrite, 1, 0);
     MakeStructVariableReferenceBodyFunction("sb_func", "sb_var",
                                             Vector{
                                                 MemberInfo{0, ty.i32()},
@@ -1825,7 +1824,7 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
     auto ro_sb = MakeStorageBufferTypes("rosb_type", Vector{
                                                          ty.i32(),
                                                      });
-    AddStorageBuffer("rosb_var", ro_sb(), builtin::Access::kRead, 1, 1);
+    AddStorageBuffer("rosb_var", ro_sb(), core::Access::kRead, 1, 1);
     MakeStructVariableReferenceBodyFunction("rosb_func", "rosb_var",
                                             Vector{
                                                 MemberInfo{0, ty.i32()},
@@ -1854,7 +1853,7 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
          });
 
     auto st_type =
-        MakeStorageTextureTypes(type::TextureDimension::k2d, builtin::TexelFormat::kR32Uint);
+        MakeStorageTextureTypes(type::TextureDimension::k2d, core::TexelFormat::kR32Uint);
     AddStorageTexture("st_var", st_type, 4, 0);
     MakeStorageTextureBodyFunction("st_func", "st_var", ty.vec2<u32>(), tint::Empty);
 
@@ -2182,7 +2181,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_NonStruct) {
-    AddStorageBuffer("foo_sb", ty.i32(), builtin::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_sb", ty.i32(), core::Access::kReadWrite, 0, 0);
     MakePlainGlobalReferenceBodyFunction("sb_func", "foo_sb", ty.i32(), tint::Empty);
 
     MakeCallerBodyFunction("ep_func", Vector{std::string("sb_func")},
@@ -2207,7 +2206,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_Struct) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", Vector{
                                                                   ty.i32(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), core::Access::kReadWrite, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             Vector{
@@ -2238,7 +2237,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
                                                                   ty.u32(),
                                                                   ty.f32(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), core::Access::kReadWrite, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             Vector{
@@ -2271,9 +2270,9 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
                                                                 ty.u32(),
                                                                 ty.f32(),
                                                             });
-    AddStorageBuffer("sb_foo", sb_struct_type(), builtin::Access::kReadWrite, 0, 0);
-    AddStorageBuffer("sb_bar", sb_struct_type(), builtin::Access::kReadWrite, 0, 1);
-    AddStorageBuffer("sb_baz", sb_struct_type(), builtin::Access::kReadWrite, 2, 0);
+    AddStorageBuffer("sb_foo", sb_struct_type(), core::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("sb_bar", sb_struct_type(), core::Access::kReadWrite, 0, 1);
+    AddStorageBuffer("sb_baz", sb_struct_type(), core::Access::kReadWrite, 2, 0);
 
     auto AddReferenceFunc = [this](const std::string& func_name, const std::string& var_name) {
         MakeStructVariableReferenceBodyFunction(func_name, var_name,
@@ -2330,7 +2329,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
                                                                   ty.i32(),
                                                                   ty.array<u32, 4>(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), core::Access::kReadWrite, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             Vector{
@@ -2360,7 +2359,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
                                                                   ty.i32(),
                                                                   ty.array<u32>(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), core::Access::kReadWrite, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             Vector{
@@ -2389,7 +2388,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", Vector{
                                                                   ty.vec3<f32>(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), core::Access::kReadWrite, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             Vector{
@@ -2415,7 +2414,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, NonStructVec3) {
-    AddStorageBuffer("foo_ub", ty.vec3<f32>(), builtin::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_ub", ty.vec3<f32>(), core::Access::kReadWrite, 0, 0);
     MakePlainGlobalReferenceBodyFunction("ub_func", "foo_ub", ty.vec3<f32>(), tint::Empty);
 
     MakeCallerBodyFunction("ep_func", Vector{std::string("ub_func")},
@@ -2440,7 +2439,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", Vector{
                                                                   ty.i32(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kRead, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), core::Access::kRead, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             Vector{
@@ -2463,7 +2462,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", Vector{
                                                                   ty.i32(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kRead, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), core::Access::kRead, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             Vector{
@@ -2494,9 +2493,9 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, MultipleStorageBuf
                                                                 ty.u32(),
                                                                 ty.f32(),
                                                             });
-    AddStorageBuffer("sb_foo", sb_struct_type(), builtin::Access::kRead, 0, 0);
-    AddStorageBuffer("sb_bar", sb_struct_type(), builtin::Access::kRead, 0, 1);
-    AddStorageBuffer("sb_baz", sb_struct_type(), builtin::Access::kRead, 2, 0);
+    AddStorageBuffer("sb_foo", sb_struct_type(), core::Access::kRead, 0, 0);
+    AddStorageBuffer("sb_bar", sb_struct_type(), core::Access::kRead, 0, 1);
+    AddStorageBuffer("sb_baz", sb_struct_type(), core::Access::kRead, 2, 0);
 
     auto AddReferenceFunc = [this](const std::string& func_name, const std::string& var_name) {
         MakeStructVariableReferenceBodyFunction(func_name, var_name,
@@ -2553,7 +2552,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
                                                                   ty.i32(),
                                                                   ty.array<u32, 4>(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kRead, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), core::Access::kRead, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             Vector{
@@ -2583,7 +2582,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingRuntimeA
                                                                   ty.i32(),
                                                                   ty.array<u32>(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kRead, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), core::Access::kRead, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             Vector{
@@ -2612,7 +2611,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
     auto foo_struct_type = MakeStorageBufferTypes("foo_type", Vector{
                                                                   ty.i32(),
                                                               });
-    AddStorageBuffer("foo_sb", foo_struct_type(), builtin::Access::kReadWrite, 0, 0);
+    AddStorageBuffer("foo_sb", foo_struct_type(), core::Access::kReadWrite, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                             Vector{
@@ -3014,7 +3013,7 @@ TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
     ResourceBinding::TextureDimension expected_dim;
     std::tie(dim, expected_dim) = dim_params;
 
-    builtin::TexelFormat format;
+    core::TexelFormat format;
     ResourceBinding::TexelFormat expected_format;
     ResourceBinding::SampledKind expected_kind;
     std::tie(format, expected_format, expected_kind) = format_params;
@@ -3070,52 +3069,52 @@ INSTANTIATE_TEST_SUITE_P(
                                                      ResourceBinding::TextureDimension::k2dArray),
                                      std::make_tuple(type::TextureDimension::k3d,
                                                      ResourceBinding::TextureDimension::k3d)),
-                     testing::Values(std::make_tuple(builtin::TexelFormat::kR32Float,
+                     testing::Values(std::make_tuple(core::TexelFormat::kR32Float,
                                                      ResourceBinding::TexelFormat::kR32Float,
                                                      ResourceBinding::SampledKind::kFloat),
-                                     std::make_tuple(builtin::TexelFormat::kR32Sint,
+                                     std::make_tuple(core::TexelFormat::kR32Sint,
                                                      ResourceBinding::TexelFormat::kR32Sint,
                                                      ResourceBinding::SampledKind::kSInt),
-                                     std::make_tuple(builtin::TexelFormat::kR32Uint,
+                                     std::make_tuple(core::TexelFormat::kR32Uint,
                                                      ResourceBinding::TexelFormat::kR32Uint,
                                                      ResourceBinding::SampledKind::kUInt),
-                                     std::make_tuple(builtin::TexelFormat::kRg32Float,
+                                     std::make_tuple(core::TexelFormat::kRg32Float,
                                                      ResourceBinding::TexelFormat::kRg32Float,
                                                      ResourceBinding::SampledKind::kFloat),
-                                     std::make_tuple(builtin::TexelFormat::kRg32Sint,
+                                     std::make_tuple(core::TexelFormat::kRg32Sint,
                                                      ResourceBinding::TexelFormat::kRg32Sint,
                                                      ResourceBinding::SampledKind::kSInt),
-                                     std::make_tuple(builtin::TexelFormat::kRg32Uint,
+                                     std::make_tuple(core::TexelFormat::kRg32Uint,
                                                      ResourceBinding::TexelFormat::kRg32Uint,
                                                      ResourceBinding::SampledKind::kUInt),
-                                     std::make_tuple(builtin::TexelFormat::kRgba16Float,
+                                     std::make_tuple(core::TexelFormat::kRgba16Float,
                                                      ResourceBinding::TexelFormat::kRgba16Float,
                                                      ResourceBinding::SampledKind::kFloat),
-                                     std::make_tuple(builtin::TexelFormat::kRgba16Sint,
+                                     std::make_tuple(core::TexelFormat::kRgba16Sint,
                                                      ResourceBinding::TexelFormat::kRgba16Sint,
                                                      ResourceBinding::SampledKind::kSInt),
-                                     std::make_tuple(builtin::TexelFormat::kRgba16Uint,
+                                     std::make_tuple(core::TexelFormat::kRgba16Uint,
                                                      ResourceBinding::TexelFormat::kRgba16Uint,
                                                      ResourceBinding::SampledKind::kUInt),
-                                     std::make_tuple(builtin::TexelFormat::kRgba32Float,
+                                     std::make_tuple(core::TexelFormat::kRgba32Float,
                                                      ResourceBinding::TexelFormat::kRgba32Float,
                                                      ResourceBinding::SampledKind::kFloat),
-                                     std::make_tuple(builtin::TexelFormat::kRgba32Sint,
+                                     std::make_tuple(core::TexelFormat::kRgba32Sint,
                                                      ResourceBinding::TexelFormat::kRgba32Sint,
                                                      ResourceBinding::SampledKind::kSInt),
-                                     std::make_tuple(builtin::TexelFormat::kRgba32Uint,
+                                     std::make_tuple(core::TexelFormat::kRgba32Uint,
                                                      ResourceBinding::TexelFormat::kRgba32Uint,
                                                      ResourceBinding::SampledKind::kUInt),
-                                     std::make_tuple(builtin::TexelFormat::kRgba8Sint,
+                                     std::make_tuple(core::TexelFormat::kRgba8Sint,
                                                      ResourceBinding::TexelFormat::kRgba8Sint,
                                                      ResourceBinding::SampledKind::kSInt),
-                                     std::make_tuple(builtin::TexelFormat::kRgba8Snorm,
+                                     std::make_tuple(core::TexelFormat::kRgba8Snorm,
                                                      ResourceBinding::TexelFormat::kRgba8Snorm,
                                                      ResourceBinding::SampledKind::kFloat),
-                                     std::make_tuple(builtin::TexelFormat::kRgba8Uint,
+                                     std::make_tuple(core::TexelFormat::kRgba8Uint,
                                                      ResourceBinding::TexelFormat::kRgba8Uint,
                                                      ResourceBinding::SampledKind::kUInt),
-                                     std::make_tuple(builtin::TexelFormat::kRgba8Unorm,
+                                     std::make_tuple(core::TexelFormat::kRgba8Unorm,
                                                      ResourceBinding::TexelFormat::kRgba8Unorm,
                                                      ResourceBinding::SampledKind::kFloat))));
 

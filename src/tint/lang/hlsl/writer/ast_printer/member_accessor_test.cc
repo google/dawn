@@ -21,8 +21,8 @@ using ::testing::HasSubstr;
 namespace tint::hlsl::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using create_type_func_ptr = ast::Type (*)(const ProgramBuilder::TypesBuilder& ty);
 
@@ -94,16 +94,16 @@ class HlslASTPrinterTest_MemberAccessorBase : public BASE {
         ProgramBuilder& b = *this;
         auto* s = b.Structure("Data", members);
 
-        b.GlobalVar("data", b.ty.Of(s), builtin::AddressSpace::kStorage,
-                    builtin::Access::kReadWrite, b.Group(1_a), b.Binding(0_a));
+        b.GlobalVar("data", b.ty.Of(s), core::AddressSpace::kStorage, core::Access::kReadWrite,
+                    b.Group(1_a), b.Binding(0_a));
     }
 
     void SetupUniformBuffer(VectorRef<const ast::StructMember*> members) {
         ProgramBuilder& b = *this;
         auto* s = b.Structure("Data", members);
 
-        b.GlobalVar("data", b.ty.Of(s), builtin::AddressSpace::kUniform,
-                    builtin::Access::kUndefined, b.Group(1_a), b.Binding(1_a));
+        b.GlobalVar("data", b.ty.Of(s), core::AddressSpace::kUniform, core::Access::kUndefined,
+                    b.Group(1_a), b.Binding(1_a));
     }
 
     void SetupFunction(VectorRef<const ast::Statement*> statements) {
@@ -123,7 +123,7 @@ using HlslASTPrinterTest_MemberAccessorWithParam =
 
 TEST_F(HlslASTPrinterTest_MemberAccessor, EmitExpression_MemberAccessor) {
     auto* s = Structure("Data", Vector{Member("mem", ty.f32())});
-    GlobalVar("str", ty.Of(s), builtin::AddressSpace::kPrivate);
+    GlobalVar("str", ty.Of(s), core::AddressSpace::kPrivate);
 
     auto* expr = MemberAccessor("str", "mem");
     WrapInFunction(Var("expr", ty.f32(), expr));
@@ -166,7 +166,7 @@ TEST_P(HlslASTPrinterTest_MemberAccessor_StorageBufferLoad_ConstantOffset, Test)
 
     auto p = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     SetupStorageBuffer(Vector{
         Member("a", ty.i32()),
@@ -301,7 +301,7 @@ TEST_P(HlslASTPrinterTest_MemberAccessor_StorageBufferLoad_DynamicOffset, Test) 
 
     auto p = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* inner = Structure("Inner", Vector{
                                          Member("a", ty.i32()),
@@ -440,7 +440,7 @@ TEST_P(HlslASTPrinterTest_MemberAccessor_UniformBufferLoad_ConstantOffset, Test)
 
     auto p = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     SetupUniformBuffer(Vector{
         Member("a", ty.i32()),
@@ -708,7 +708,7 @@ TEST_P(HlslASTPrinterTest_MemberAccessor_UniformBufferLoad_DynamicOffset, Test) 
 
     auto p = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* inner = Structure("Inner", Vector{
                                          Member("a", ty.i32()),
@@ -990,7 +990,7 @@ TEST_P(HlslASTPrinterTest_MemberAccessor_StorageBufferStore, Test) {
 
     auto p = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     SetupStorageBuffer(Vector{
         Member("a", ty.i32()),
@@ -1195,7 +1195,7 @@ TEST_F(HlslASTPrinterTest_MemberAccessor, StorageBuffer_Load_Matrix_F16_Single_E
     // var<storage> data : Data;
     // data.a[2i][1i];
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     SetupStorageBuffer(Vector{
         Member("z", ty.f16()),
@@ -1261,7 +1261,7 @@ TEST_F(HlslASTPrinterTest_MemberAccessor, UniformBuffer_Load_Matrix_F16_Single_E
     // var<uniform> data : Data;
     // data.a[2i][1i];
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     SetupUniformBuffer(Vector{
         Member("z", ty.f16()),

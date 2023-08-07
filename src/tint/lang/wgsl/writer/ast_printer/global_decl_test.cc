@@ -31,7 +31,7 @@ TEST_F(WgslASTPrinterTest, Emit_GlobalDeclAfterFunction) {
     auto* func_var = Var("a", ty.f32());
     WrapInFunction(func_var);
 
-    GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.f32(), core::AddressSpace::kPrivate);
 
     ASTPrinter& gen = Build();
 
@@ -48,7 +48,7 @@ TEST_F(WgslASTPrinterTest, Emit_GlobalDeclAfterFunction) {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_GlobalsInterleaved) {
-    GlobalVar("a0", ty.f32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("a0", ty.f32(), core::AddressSpace::kPrivate);
 
     auto* s0 = Structure("S0", Vector{
                                    Member("a", ty.i32()),
@@ -60,7 +60,7 @@ TEST_F(WgslASTPrinterTest, Emit_GlobalsInterleaved) {
          },
          tint::Empty);
 
-    GlobalVar("a1", ty.f32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("a1", ty.f32(), core::AddressSpace::kPrivate);
 
     auto* s1 = Structure("S1", Vector{
                                    Member("a", ty.i32()),

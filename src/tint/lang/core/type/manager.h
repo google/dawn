@@ -17,10 +17,10 @@
 
 #include <utility>
 
-#include "src/tint/lang/core/builtin/access.h"
-#include "src/tint/lang/core/builtin/address_space.h"
-#include "src/tint/lang/core/builtin/fluent_types.h"
-#include "src/tint/lang/core/builtin/number.h"
+#include "src/tint/lang/core/access.h"
+#include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/struct.h"
@@ -108,13 +108,13 @@ class Manager final {
             return Get<type::F16>(std::forward<ARGS>(args)...);
         } else if constexpr (std::is_same_v<T, bool>) {
             return Get<type::Bool>(std::forward<ARGS>(args)...);
-        } else if constexpr (builtin::fluent_types::IsVector<T>) {
+        } else if constexpr (core::fluent_types::IsVector<T>) {
             return vec<typename T::type, T::width>(std::forward<ARGS>(args)...);
-        } else if constexpr (builtin::fluent_types::IsMatrix<T>) {
+        } else if constexpr (core::fluent_types::IsMatrix<T>) {
             return mat<T::columns, T::rows, typename T::type>(std::forward<ARGS>(args)...);
-        } else if constexpr (builtin::fluent_types::IsPointer<T>) {
+        } else if constexpr (core::fluent_types::IsPointer<T>) {
             return ptr<T::address, typename T::type, T::access>(std::forward<ARGS>(args)...);
-        } else if constexpr (builtin::fluent_types::IsArray<T>) {
+        } else if constexpr (core::fluent_types::IsArray<T>) {
             return array<typename T::type, T::length>(std::forward<ARGS>(args)...);
         } else if constexpr (tint::traits::IsTypeOrDerived<T, Type>) {
             return types_.Get<T>(std::forward<ARGS>(args)...);
@@ -383,17 +383,15 @@ class Manager final {
     /// @param subtype the pointer subtype
     /// @param access the access settings
     /// @returns the pointer type
-    const type::Pointer* ptr(builtin::AddressSpace address_space,
+    const type::Pointer* ptr(core::AddressSpace address_space,
                              const type::Type* subtype,
-                             builtin::Access access = builtin::Access::kReadWrite);
+                             core::Access access = core::Access::kReadWrite);
 
     /// @tparam SPACE the address space
     /// @tparam T the storage type
     /// @tparam ACCESS the access mode
     /// @returns the pointer type with the templated address space, storage type and access.
-    template <builtin::AddressSpace SPACE,
-              typename T,
-              builtin::Access ACCESS = builtin::Access::kReadWrite>
+    template <core::AddressSpace SPACE, typename T, core::Access ACCESS = core::Access::kReadWrite>
     const type::Pointer* ptr() {
         return ptr(SPACE, Get<T>(), ACCESS);
     }
@@ -402,7 +400,7 @@ class Manager final {
     /// @tparam SPACE the address space
     /// @tparam ACCESS the access mode
     /// @returns the pointer type with the templated address space, storage type and access.
-    template <builtin::AddressSpace SPACE, builtin::Access ACCESS = builtin::Access::kReadWrite>
+    template <core::AddressSpace SPACE, core::Access ACCESS = core::Access::kReadWrite>
     const type::Pointer* ptr(const type::Type* subtype) {
         return ptr(SPACE, subtype, ACCESS);
     }

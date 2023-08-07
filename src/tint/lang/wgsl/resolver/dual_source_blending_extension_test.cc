@@ -40,7 +40,7 @@ TEST_F(DualSourceBlendingExtensionTest, UseIndexAttribWithoutExtensionError) {
 class DualSourceBlendingExtensionTests : public ResolverTest {
   public:
     DualSourceBlendingExtensionTests() {
-        Enable(builtin::Extension::kChromiumInternalDualSourceBlending);
+        Enable(core::Extension::kChromiumInternalDualSourceBlending);
     }
 };
 
@@ -127,7 +127,7 @@ TEST_F(DualSourceBlendingExtensionTests, GlobalVariableIndexAttribute) {
     GlobalVar(
         "var", ty.vec4<f32>(),
         Vector{Location(0_a), Index(0_a), Disable(ast::DisabledValidation::kIgnoreAddressSpace)},
-        builtin::AddressSpace::kOut);
+        core::AddressSpace::kOut);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }

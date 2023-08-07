@@ -66,9 +66,9 @@ class Variable;
 class WhileStatement;
 }  // namespace tint::ast
 
-namespace tint::builtin {
+namespace tint::core {
 enum class TexelFormat;
-}  // namespace tint::builtin
+}  // namespace tint::core
 
 namespace tint::wgsl::writer {
 
@@ -204,7 +204,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// Handles emitting an image format
     /// @param out the output stream
     /// @param fmt the format to generate
-    void EmitImageFormat(StringStream& out, const builtin::TexelFormat fmt);
+    void EmitImageFormat(StringStream& out, const core::TexelFormat fmt);
     /// Handles a unary op expression
     /// @param out the output stream
     /// @param expr the expression to emit

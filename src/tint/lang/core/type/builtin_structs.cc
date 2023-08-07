@@ -18,7 +18,7 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/lang/core/builtin/builtin.h"
+#include "src/tint/lang/core/builtin.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/bool.h"
@@ -35,34 +35,34 @@
 namespace tint::type {
 
 constexpr std::array kModfVecF32Names{
-    builtin::Builtin::kModfResultVec2F32,
-    builtin::Builtin::kModfResultVec3F32,
-    builtin::Builtin::kModfResultVec4F32,
+    core::Builtin::kModfResultVec2F32,
+    core::Builtin::kModfResultVec3F32,
+    core::Builtin::kModfResultVec4F32,
 };
 constexpr std::array kModfVecF16Names{
-    builtin::Builtin::kModfResultVec2F16,
-    builtin::Builtin::kModfResultVec3F16,
-    builtin::Builtin::kModfResultVec4F16,
+    core::Builtin::kModfResultVec2F16,
+    core::Builtin::kModfResultVec3F16,
+    core::Builtin::kModfResultVec4F16,
 };
 constexpr std::array kModfVecAbstractNames{
-    builtin::Builtin::kModfResultVec2Abstract,
-    builtin::Builtin::kModfResultVec3Abstract,
-    builtin::Builtin::kModfResultVec4Abstract,
+    core::Builtin::kModfResultVec2Abstract,
+    core::Builtin::kModfResultVec3Abstract,
+    core::Builtin::kModfResultVec4Abstract,
 };
 Struct* CreateModfResult(Manager& types, SymbolTable& symbols, const Type* ty) {
-    auto build = [&](builtin::Builtin name, const Type* t) {
+    auto build = [&](core::Builtin name, const Type* t) {
         return types.Struct(symbols.Register(tint::ToString(name)),
                             {{symbols.Register("fract"), t}, {symbols.Register("whole"), t}});
     };
     return Switch(
         ty,  //
-        [&](const F32*) { return build(builtin::Builtin::kModfResultF32, ty); },
-        [&](const F16*) { return build(builtin::Builtin::kModfResultF16, ty); },
+        [&](const F32*) { return build(core::Builtin::kModfResultF32, ty); },
+        [&](const F16*) { return build(core::Builtin::kModfResultF16, ty); },
         [&](const AbstractFloat*) {
-            auto* abstract = build(builtin::Builtin::kModfResultAbstract, ty);
+            auto* abstract = build(core::Builtin::kModfResultAbstract, ty);
             abstract->SetConcreteTypes(tint::Vector{
-                build(builtin::Builtin::kModfResultF32, types.f32()),
-                build(builtin::Builtin::kModfResultF16, types.f16()),
+                build(core::Builtin::kModfResultF32, types.f32()),
+                build(core::Builtin::kModfResultF16, types.f16()),
             });
             return abstract;
         },
@@ -92,35 +92,35 @@ Struct* CreateModfResult(Manager& types, SymbolTable& symbols, const Type* ty) {
 }
 
 constexpr std::array kFrexpVecF32Names{
-    builtin::Builtin::kFrexpResultVec2F32,
-    builtin::Builtin::kFrexpResultVec3F32,
-    builtin::Builtin::kFrexpResultVec4F32,
+    core::Builtin::kFrexpResultVec2F32,
+    core::Builtin::kFrexpResultVec3F32,
+    core::Builtin::kFrexpResultVec4F32,
 };
 constexpr std::array kFrexpVecF16Names{
-    builtin::Builtin::kFrexpResultVec2F16,
-    builtin::Builtin::kFrexpResultVec3F16,
-    builtin::Builtin::kFrexpResultVec4F16,
+    core::Builtin::kFrexpResultVec2F16,
+    core::Builtin::kFrexpResultVec3F16,
+    core::Builtin::kFrexpResultVec4F16,
 };
 constexpr std::array kFrexpVecAbstractNames{
-    builtin::Builtin::kFrexpResultVec2Abstract,
-    builtin::Builtin::kFrexpResultVec3Abstract,
-    builtin::Builtin::kFrexpResultVec4Abstract,
+    core::Builtin::kFrexpResultVec2Abstract,
+    core::Builtin::kFrexpResultVec3Abstract,
+    core::Builtin::kFrexpResultVec4Abstract,
 };
 Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* ty) {
-    auto build = [&](builtin::Builtin name, const Type* fract_ty, const Type* exp_ty) {
+    auto build = [&](core::Builtin name, const Type* fract_ty, const Type* exp_ty) {
         return types.Struct(
             symbols.Register(tint::ToString(name)),
             {{symbols.Register("fract"), fract_ty}, {symbols.Register("exp"), exp_ty}});
     };
     return Switch(
         ty,  //
-        [&](const F32*) { return build(builtin::Builtin::kFrexpResultF32, ty, types.i32()); },
-        [&](const F16*) { return build(builtin::Builtin::kFrexpResultF16, ty, types.i32()); },
+        [&](const F32*) { return build(core::Builtin::kFrexpResultF32, ty, types.i32()); },
+        [&](const F16*) { return build(core::Builtin::kFrexpResultF16, ty, types.i32()); },
         [&](const AbstractFloat*) {
-            auto* abstract = build(builtin::Builtin::kFrexpResultAbstract, ty, types.AInt());
+            auto* abstract = build(core::Builtin::kFrexpResultAbstract, ty, types.AInt());
             abstract->SetConcreteTypes(tint::Vector{
-                build(builtin::Builtin::kFrexpResultF32, types.f32(), types.i32()),
-                build(builtin::Builtin::kFrexpResultF16, types.f16(), types.i32()),
+                build(core::Builtin::kFrexpResultF32, types.f32(), types.i32()),
+                build(core::Builtin::kFrexpResultF16, types.f16(), types.i32()),
             });
             return abstract;
         },
@@ -158,7 +158,7 @@ Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* ty) 
 }
 
 Struct* CreateAtomicCompareExchangeResult(Manager& types, SymbolTable& symbols, const Type* ty) {
-    auto build = [&](builtin::Builtin name) {
+    auto build = [&](core::Builtin name) {
         return types.Struct(symbols.Register(tint::ToString(name)),
                             {
                                 {symbols.Register("old_value"), ty},
@@ -167,8 +167,8 @@ Struct* CreateAtomicCompareExchangeResult(Manager& types, SymbolTable& symbols, 
     };
     return Switch(
         ty,  //
-        [&](const I32*) { return build(builtin::Builtin::kAtomicCompareExchangeResultI32); },
-        [&](const U32*) { return build(builtin::Builtin::kAtomicCompareExchangeResultU32); },
+        [&](const I32*) { return build(core::Builtin::kAtomicCompareExchangeResultI32); },
+        [&](const U32*) { return build(core::Builtin::kAtomicCompareExchangeResultU32); },
         [&](Default) {
             TINT_UNREACHABLE() << "unhandled atomic_compare_exchange type";
             return nullptr;

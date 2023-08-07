@@ -1053,7 +1053,7 @@ TEST_F(IR_FromProgramTest, Emit_Phony) {
 TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Invariant) {
     Func("f",
          Vector{Param("a", ty.vec4<f32>(),
-                      Vector{Invariant(), Builtin(builtin::BuiltinValue::kPosition)})},
+                      Vector{Invariant(), Builtin(core::BuiltinValue::kPosition)})},
          ty.vec4<f32>(), Vector{Return("a")}, Vector{Stage(ast::PipelineStage::kFragment)},
          Vector{Location(1_i)});
     auto m = Build();
@@ -1087,10 +1087,9 @@ TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location) {
 
 TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location_WithInterpolation_LinearCentroid) {
     Func("f",
-         Vector{
-             Param("a", ty.f32(),
-                   Vector{Location(2_i), Interpolate(builtin::InterpolationType::kLinear,
-                                                     builtin::InterpolationSampling::kCentroid)})},
+         Vector{Param("a", ty.f32(),
+                      Vector{Location(2_i), Interpolate(core::InterpolationType::kLinear,
+                                                        core::InterpolationSampling::kCentroid)})},
          ty.f32(), Vector{Return("a")}, Vector{Stage(ast::PipelineStage::kFragment)},
          Vector{Location(1_i)});
 
@@ -1110,7 +1109,7 @@ TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location_WithInterpolati
 TEST_F(IR_FromProgramTest, Func_WithParam_WithAttribute_Location_WithInterpolation_Flat) {
     Func("f",
          Vector{Param("a", ty.f32(),
-                      Vector{Location(2_i), Interpolate(builtin::InterpolationType::kFlat)})},
+                      Vector{Location(2_i), Interpolate(core::InterpolationType::kFlat)})},
          ty.f32(), Vector{Return("a")}, Vector{Stage(ast::PipelineStage::kFragment)},
          Vector{Location(1_i)});
 

@@ -28,8 +28,8 @@ using ResolverHostShareableValidationTest = ResolverTest;
 TEST_F(ResolverHostShareableValidationTest, BoolMember) {
     auto* s = Structure("S", Vector{Member(Source{{56, 78}}, "x", ty.bool_(Source{{12, 34}}))});
 
-    GlobalVar(Source{{90, 12}}, "g", ty.Of(s), builtin::AddressSpace::kStorage,
-              builtin::Access::kRead, Binding(0_a), Group(0_a));
+    GlobalVar(Source{{90, 12}}, "g", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead,
+              Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -44,8 +44,8 @@ TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
     auto* s =
         Structure("S", Vector{Member(Source{{56, 78}}, "x", ty.vec3<bool>(Source{{12, 34}}))});
 
-    GlobalVar(Source{{90, 12}}, "g", ty.Of(s), builtin::AddressSpace::kStorage,
-              builtin::Access::kRead, Binding(0_a), Group(0_a));
+    GlobalVar(Source{{90, 12}}, "g", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead,
+              Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -60,8 +60,8 @@ TEST_F(ResolverHostShareableValidationTest, Aliases) {
     Alias("a1", ty.bool_());
     auto* s = Structure("S", Vector{Member(Source{{56, 78}}, "x", ty(Source{{12, 34}}, "a1"))});
     auto* a2 = Alias("a2", ty.Of(s));
-    GlobalVar(Source{{90, 12}}, "g", ty.Of(a2), builtin::AddressSpace::kStorage,
-              builtin::Access::kRead, Binding(0_a), Group(0_a));
+    GlobalVar(Source{{90, 12}}, "g", ty.Of(a2), core::AddressSpace::kStorage, core::Access::kRead,
+              Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -79,8 +79,8 @@ TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
 
     auto* s = Structure("S", Vector{Member(Source{{7, 8}}, "m", ty.Of(i3))});
 
-    GlobalVar(Source{{9, 10}}, "g", ty.Of(s), builtin::AddressSpace::kStorage,
-              builtin::Access::kRead, Binding(0_a), Group(0_a));
+    GlobalVar(Source{{9, 10}}, "g", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead,
+              Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -95,7 +95,7 @@ TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
 }
 
 TEST_F(ResolverHostShareableValidationTest, NoError) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* i1 = Structure("I1", Vector{
                                    Member(Source{{1, 1}}, "w1", ty.f32()),
@@ -118,8 +118,8 @@ TEST_F(ResolverHostShareableValidationTest, NoError) {
 
     auto* s = Structure("S", Vector{Member(Source{{7, 8}}, "m", ty.Of(i3))});
 
-    GlobalVar(Source{{9, 10}}, "g", ty.Of(s), builtin::AddressSpace::kStorage,
-              builtin::Access::kRead, Binding(0_a), Group(0_a));
+    GlobalVar(Source{{9, 10}}, "g", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead,
+              Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }

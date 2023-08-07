@@ -76,8 +76,8 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
     for (auto* node : src->ASTNodes().Objects()) {
         if (auto* str = node->As<Struct>()) {
             auto* str_ty = src->Sem().Get(str);
-            if (!str_ty->UsedAs(builtin::AddressSpace::kUniform) &&
-                !str_ty->UsedAs(builtin::AddressSpace::kStorage)) {
+            if (!str_ty->UsedAs(core::AddressSpace::kUniform) &&
+                !str_ty->UsedAs(core::AddressSpace::kStorage)) {
                 continue;
             }
             for (auto* member : str_ty->Members()) {

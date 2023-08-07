@@ -21,7 +21,7 @@
 #include <unordered_set>
 #include <utility>
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/utils/containers/scope_stack.h"
@@ -350,8 +350,8 @@ class ASTPrinter : public tint::TextGenerator {
     /// then the boolean is set to true.
     void EmitType(StringStream& out,
                   const type::Type* type,
-                  builtin::AddressSpace address_space,
-                  builtin::Access access,
+                  core::AddressSpace address_space,
+                  core::Access access,
                   const std::string& name,
                   bool* name_printed = nullptr);
     /// Handles generating type and name
@@ -362,8 +362,8 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param name the name to emit
     void EmitTypeAndName(StringStream& out,
                          const type::Type* type,
-                         builtin::AddressSpace address_space,
-                         builtin::Access access,
+                         core::AddressSpace address_space,
+                         core::Access access,
                          const std::string& name);
     /// Handles generating a structure declaration. If the structure has already been emitted, then
     /// this function will simply return `true` without emitting anything.
@@ -399,11 +399,11 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param builtin the builtin to convert
     /// @param stage pipeline stage in which this builtin is used
     /// @returns the string name of the builtin or blank on error
-    const char* builtin_to_string(builtin::BuiltinValue builtin, ast::PipelineStage stage);
+    const char* builtin_to_string(core::BuiltinValue builtin, ast::PipelineStage stage);
     /// Converts a builtin to a type::Type appropriate for GLSL.
     /// @param builtin the builtin to convert
     /// @returns the appropriate semantic type or null on error.
-    type::Type* builtin_type(builtin::BuiltinValue builtin);
+    type::Type* builtin_type(core::BuiltinValue builtin);
 
   private:
     enum class VarType { kIn, kOut };

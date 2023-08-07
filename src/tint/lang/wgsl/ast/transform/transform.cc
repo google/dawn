@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <string>
 
-#include "src/tint/lang/core/builtin/builtin.h"
+#include "src/tint/lang/core/builtin.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/reference.h"
@@ -91,7 +91,7 @@ Type Transform::CreateASTTypeFor(program::CloneContext& ctx, const type::Type* t
         auto el = CreateASTTypeFor(ctx, v->type());
         if (v->Packed()) {
             TINT_ASSERT(v->Width() == 3u);
-            return ctx.dst->ty(builtin::Builtin::kPackedVec3, el);
+            return ctx.dst->ty(core::Builtin::kPackedVec3, el);
         } else {
             return ctx.dst->ty.vec(el, v->Width());
         }
@@ -167,9 +167,8 @@ Type Transform::CreateASTTypeFor(program::CloneContext& ctx, const type::Type* t
         // Note: type::Pointer always has an inferred access, but WGSL only allows an explicit
         // access in the 'storage' address space.
         auto address_space = p->AddressSpace();
-        auto access = address_space == builtin::AddressSpace::kStorage
-                          ? p->Access()
-                          : builtin::Access::kUndefined;
+        auto access =
+            address_space == core::AddressSpace::kStorage ? p->Access() : core::Access::kUndefined;
         return ctx.dst->ty.ptr(address_space, CreateASTTypeFor(ctx, p->StoreType()), access);
     }
     TINT_UNREACHABLE() << "Unhandled type: " << ty->TypeInfo().name;

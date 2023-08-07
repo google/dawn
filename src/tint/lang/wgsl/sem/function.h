@@ -266,12 +266,12 @@ class Function final : public Castable<Function, CallTarget> {
     /// Modifies the severity of a specific diagnostic rule for this function.
     /// @param rule the diagnostic rule
     /// @param severity the new diagnostic severity
-    void SetDiagnosticSeverity(builtin::DiagnosticRule rule, builtin::DiagnosticSeverity severity) {
+    void SetDiagnosticSeverity(core::DiagnosticRule rule, core::DiagnosticSeverity severity) {
         diagnostic_severities_[rule] = severity;
     }
 
     /// @returns the diagnostic severity modifications applied to this function
-    const builtin::DiagnosticRuleSeverities& DiagnosticSeverities() const {
+    const core::DiagnosticRuleSeverities& DiagnosticSeverities() const {
         return diagnostic_severities_;
     }
 
@@ -295,7 +295,7 @@ class Function final : public Castable<Function, CallTarget> {
     std::vector<const Function*> ancestor_entry_points_;
     const Statement* discard_stmt_ = nullptr;
     sem::Behaviors behaviors_{sem::Behavior::kNext};
-    builtin::DiagnosticRuleSeverities diagnostic_severities_;
+    core::DiagnosticRuleSeverities diagnostic_severities_;
 
     std::optional<uint32_t> return_location_;
     std::optional<uint32_t> return_index_;

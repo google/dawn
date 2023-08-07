@@ -21,51 +21,51 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/type/struct.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 namespace tint::ir::transform {
 
 namespace {
 
-builtin::BuiltinValue FunctionParamBuiltin(enum FunctionParam::Builtin builtin) {
+core::BuiltinValue FunctionParamBuiltin(enum FunctionParam::Builtin builtin) {
     switch (builtin) {
         case FunctionParam::Builtin::kVertexIndex:
-            return builtin::BuiltinValue::kVertexIndex;
+            return core::BuiltinValue::kVertexIndex;
         case FunctionParam::Builtin::kInstanceIndex:
-            return builtin::BuiltinValue::kInstanceIndex;
+            return core::BuiltinValue::kInstanceIndex;
         case FunctionParam::Builtin::kPosition:
-            return builtin::BuiltinValue::kPosition;
+            return core::BuiltinValue::kPosition;
         case FunctionParam::Builtin::kFrontFacing:
-            return builtin::BuiltinValue::kFrontFacing;
+            return core::BuiltinValue::kFrontFacing;
         case FunctionParam::Builtin::kLocalInvocationId:
-            return builtin::BuiltinValue::kLocalInvocationId;
+            return core::BuiltinValue::kLocalInvocationId;
         case FunctionParam::Builtin::kLocalInvocationIndex:
-            return builtin::BuiltinValue::kLocalInvocationIndex;
+            return core::BuiltinValue::kLocalInvocationIndex;
         case FunctionParam::Builtin::kGlobalInvocationId:
-            return builtin::BuiltinValue::kGlobalInvocationId;
+            return core::BuiltinValue::kGlobalInvocationId;
         case FunctionParam::Builtin::kWorkgroupId:
-            return builtin::BuiltinValue::kWorkgroupId;
+            return core::BuiltinValue::kWorkgroupId;
         case FunctionParam::Builtin::kNumWorkgroups:
-            return builtin::BuiltinValue::kNumWorkgroups;
+            return core::BuiltinValue::kNumWorkgroups;
         case FunctionParam::Builtin::kSampleIndex:
-            return builtin::BuiltinValue::kSampleIndex;
+            return core::BuiltinValue::kSampleIndex;
         case FunctionParam::Builtin::kSampleMask:
-            return builtin::BuiltinValue::kSampleMask;
+            return core::BuiltinValue::kSampleMask;
     }
-    return builtin::BuiltinValue::kUndefined;
+    return core::BuiltinValue::kUndefined;
 }
 
-builtin::BuiltinValue ReturnBuiltin(enum Function::ReturnBuiltin builtin) {
+core::BuiltinValue ReturnBuiltin(enum Function::ReturnBuiltin builtin) {
     switch (builtin) {
         case Function::ReturnBuiltin::kPosition:
-            return builtin::BuiltinValue::kPosition;
+            return core::BuiltinValue::kPosition;
         case Function::ReturnBuiltin::kFragDepth:
-            return builtin::BuiltinValue::kFragDepth;
+            return core::BuiltinValue::kFragDepth;
         case Function::ReturnBuiltin::kSampleMask:
-            return builtin::BuiltinValue::kSampleMask;
+            return core::BuiltinValue::kSampleMask;
     }
-    return builtin::BuiltinValue::kUndefined;
+    return core::BuiltinValue::kUndefined;
 }
 
 /// PIMPL state for the transform.

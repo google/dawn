@@ -25,7 +25,7 @@ namespace {
 using WgslASTPrinterTest = TestHelper;
 
 TEST_F(WgslASTPrinterTest, EmitVariable) {
-    auto* v = GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate);
+    auto* v = GlobalVar("a", ty.f32(), core::AddressSpace::kPrivate);
 
     ASTPrinter& gen = Build();
 
@@ -36,7 +36,7 @@ TEST_F(WgslASTPrinterTest, EmitVariable) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitVariable_AddressSpace) {
-    auto* v = GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate);
+    auto* v = GlobalVar("a", ty.f32(), core::AddressSpace::kPrivate);
 
     ASTPrinter& gen = Build();
 
@@ -48,7 +48,7 @@ TEST_F(WgslASTPrinterTest, EmitVariable_AddressSpace) {
 
 TEST_F(WgslASTPrinterTest, EmitVariable_Access_Read) {
     auto* s = Structure("S", Vector{Member("a", ty.i32())});
-    auto* v = GlobalVar("a", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead,
+    auto* v = GlobalVar("a", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead,
                         Binding(0_a), Group(0_a));
 
     ASTPrinter& gen = Build();
@@ -61,7 +61,7 @@ TEST_F(WgslASTPrinterTest, EmitVariable_Access_Read) {
 
 TEST_F(WgslASTPrinterTest, EmitVariable_Access_ReadWrite) {
     auto* s = Structure("S", Vector{Member("a", ty.i32())});
-    auto* v = GlobalVar("a", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    auto* v = GlobalVar("a", ty.Of(s), core::AddressSpace::kStorage, core::Access::kReadWrite,
                         Binding(0_a), Group(0_a));
 
     ASTPrinter& gen = Build();
@@ -84,7 +84,7 @@ TEST_F(WgslASTPrinterTest, EmitVariable_Decorated) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitVariable_Initializer) {
-    auto* v = GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate, Expr(1_f));
+    auto* v = GlobalVar("a", ty.f32(), core::AddressSpace::kPrivate, Expr(1_f));
 
     ASTPrinter& gen = Build();
 

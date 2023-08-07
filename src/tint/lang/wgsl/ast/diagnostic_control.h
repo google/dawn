@@ -18,7 +18,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "src/tint/lang/core/builtin/diagnostic_severity.h"
+#include "src/tint/lang/core/diagnostic_severity.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations
@@ -37,13 +37,13 @@ struct DiagnosticControl {
     /// Constructor
     /// @param sev the diagnostic severity
     /// @param rule the diagnostic rule name
-    DiagnosticControl(builtin::DiagnosticSeverity sev, const DiagnosticRuleName* rule);
+    DiagnosticControl(core::DiagnosticSeverity sev, const DiagnosticRuleName* rule);
 
     /// Move constructor
     DiagnosticControl(DiagnosticControl&&);
 
     /// The diagnostic severity control.
-    builtin::DiagnosticSeverity severity = builtin::DiagnosticSeverity::kUndefined;
+    core::DiagnosticSeverity severity = core::DiagnosticSeverity::kUndefined;
 
     /// The diagnostic rule name.
     const DiagnosticRuleName* rule_name = nullptr;

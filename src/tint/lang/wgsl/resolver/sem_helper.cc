@@ -69,22 +69,22 @@ std::string SemHelper::Describe(const sem::Expression* expr) const {
             auto name = fn->name->symbol.Name();
             return "function '" + name + "'";
         },
-        [&](const sem::BuiltinEnumExpression<builtin::Access>* access) {
+        [&](const sem::BuiltinEnumExpression<core::Access>* access) {
             return "access '" + tint::ToString(access->Value()) + "'";
         },
-        [&](const sem::BuiltinEnumExpression<builtin::AddressSpace>* addr) {
+        [&](const sem::BuiltinEnumExpression<core::AddressSpace>* addr) {
             return "address space '" + tint::ToString(addr->Value()) + "'";
         },
-        [&](const sem::BuiltinEnumExpression<builtin::BuiltinValue>* builtin) {
+        [&](const sem::BuiltinEnumExpression<core::BuiltinValue>* builtin) {
             return "builtin value '" + tint::ToString(builtin->Value()) + "'";
         },
-        [&](const sem::BuiltinEnumExpression<builtin::InterpolationSampling>* fmt) {
+        [&](const sem::BuiltinEnumExpression<core::InterpolationSampling>* fmt) {
             return "interpolation sampling '" + tint::ToString(fmt->Value()) + "'";
         },
-        [&](const sem::BuiltinEnumExpression<builtin::InterpolationType>* fmt) {
+        [&](const sem::BuiltinEnumExpression<core::InterpolationType>* fmt) {
             return "interpolation type '" + tint::ToString(fmt->Value()) + "'";
         },
-        [&](const sem::BuiltinEnumExpression<builtin::TexelFormat>* fmt) {
+        [&](const sem::BuiltinEnumExpression<core::TexelFormat>* fmt) {
             return "texel format '" + tint::ToString(fmt->Value()) + "'";
         },
         [&](Default) -> std::string {

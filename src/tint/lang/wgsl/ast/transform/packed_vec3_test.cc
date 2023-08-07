@@ -4170,7 +4170,7 @@ TEST_F(PackedVec3Test, StructMember_ExistingMemberAttributes_ExplicitOffset) {
                          b.Member("arr", b.ty.array(b.ty.vec3<f32>(), b.Expr(AInt(4))),
                                   tint::Vector{b.MemberOffset(AInt(128))}),
                      });
-    b.GlobalVar("P", builtin::AddressSpace::kStorage, b.ty("S"),
+    b.GlobalVar("P", core::AddressSpace::kStorage, b.ty("S"),
                 tint::Vector{b.Group(AInt(0)), b.Binding(AInt(0))});
     Program src(resolver::Resolve(b));
 

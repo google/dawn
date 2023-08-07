@@ -21,17 +21,17 @@ using namespace tint::number_suffixes;  // NOLINT
 using DiagnosticAttributeTest = TestHelper;
 
 TEST_F(DiagnosticAttributeTest, Name) {
-    auto* d = DiagnosticAttribute(builtin::DiagnosticSeverity::kWarning, "foo");
+    auto* d = DiagnosticAttribute(core::DiagnosticSeverity::kWarning, "foo");
     EXPECT_EQ(d->Name(), "diagnostic");
-    EXPECT_EQ(d->control.severity, builtin::DiagnosticSeverity::kWarning);
+    EXPECT_EQ(d->control.severity, core::DiagnosticSeverity::kWarning);
     EXPECT_EQ(d->control.rule_name->category, nullptr);
     CheckIdentifier(d->control.rule_name->name, "foo");
 }
 
 TEST_F(DiagnosticAttributeTest, CategoryAndName) {
-    auto* d = DiagnosticAttribute(builtin::DiagnosticSeverity::kWarning, "foo", "bar");
+    auto* d = DiagnosticAttribute(core::DiagnosticSeverity::kWarning, "foo", "bar");
     EXPECT_EQ(d->Name(), "diagnostic");
-    EXPECT_EQ(d->control.severity, builtin::DiagnosticSeverity::kWarning);
+    EXPECT_EQ(d->control.severity, core::DiagnosticSeverity::kWarning);
     CheckIdentifier(d->control.rule_name->category, "foo");
     CheckIdentifier(d->control.rule_name->name, "bar");
 }

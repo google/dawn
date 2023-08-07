@@ -17,8 +17,8 @@
 namespace tint::resolver {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 TEST_F(ResolverConstEvalTest, StructMemberAccess) {
     Structure("Inner", Vector{
@@ -258,7 +258,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 
 using ResolverConstEvalArrayAccessTest = ResolverTestWithParam<Case>;
 TEST_P(ResolverConstEvalArrayAccessTest, Test) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto& param = GetParam();
     auto* expr = param.input.Expr(*this);
@@ -333,7 +333,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 
 using ResolverConstEvalVectorAccessTest = ResolverTestWithParam<Case>;
 TEST_P(ResolverConstEvalVectorAccessTest, Test) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto& param = GetParam();
     auto* expr = param.input.Expr(*this);

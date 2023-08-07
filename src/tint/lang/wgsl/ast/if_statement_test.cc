@@ -33,8 +33,8 @@ TEST_F(IfStatementTest, Creation) {
 }
 
 TEST_F(IfStatementTest, Creation_WithAttributes) {
-    auto* attr1 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "foo");
-    auto* attr2 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "bar");
+    auto* attr1 = DiagnosticAttribute(core::DiagnosticSeverity::kOff, "foo");
+    auto* attr2 = DiagnosticAttribute(core::DiagnosticSeverity::kOff, "bar");
     auto* cond = Expr("cond");
     auto* stmt = If(cond, Block(), ElseStmt(), tint::Vector{attr1, attr2});
 

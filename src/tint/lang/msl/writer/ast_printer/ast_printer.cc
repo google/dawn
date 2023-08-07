@@ -240,12 +240,12 @@ bool ASTPrinter::Generate() {
     if (!tint::writer::CheckSupportedExtensions(
             "MSL", builder_.AST(), diagnostics_,
             Vector{
-                builtin::Extension::kChromiumDisableUniformityAnalysis,
-                builtin::Extension::kChromiumExperimentalFullPtrParameters,
-                builtin::Extension::kChromiumExperimentalPushConstant,
-                builtin::Extension::kChromiumInternalRelaxedUniformLayout,
-                builtin::Extension::kF16,
-                builtin::Extension::kChromiumInternalDualSourceBlending,
+                core::Extension::kChromiumDisableUniformityAnalysis,
+                core::Extension::kChromiumExperimentalFullPtrParameters,
+                core::Extension::kChromiumExperimentalPushConstant,
+                core::Extension::kChromiumInternalRelaxedUniformLayout,
+                core::Extension::kF16,
+                core::Extension::kChromiumInternalDualSourceBlending,
             })) {
         return false;
     }
@@ -654,20 +654,20 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
     auto name = generate_builtin_name(builtin);
 
     switch (builtin->Type()) {
-        case builtin::Function::kDot:
+        case core::Function::kDot:
             return EmitDotCall(out, expr, builtin);
-        case builtin::Function::kModf:
+        case core::Function::kModf:
             return EmitModfCall(out, expr, builtin);
-        case builtin::Function::kFrexp:
+        case core::Function::kFrexp:
             return EmitFrexpCall(out, expr, builtin);
-        case builtin::Function::kDegrees:
+        case core::Function::kDegrees:
             return EmitDegreesCall(out, expr, builtin);
-        case builtin::Function::kRadians:
+        case core::Function::kRadians:
             return EmitRadiansCall(out, expr, builtin);
 
-        case builtin::Function::kPack2X16Float:
-        case builtin::Function::kUnpack2X16Float: {
-            if (builtin->Type() == builtin::Function::kPack2X16Float) {
+        case core::Function::kPack2X16Float:
+        case core::Function::kUnpack2X16Float: {
+            if (builtin->Type() == core::Function::kPack2X16Float) {
                 out << "as_type<uint>(half2(";
             } else {
                 out << "float2(as_type<half2>(";
@@ -678,7 +678,7 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
             out << "))";
             return true;
         }
-        case builtin::Function::kQuantizeToF16: {
+        case core::Function::kQuantizeToF16: {
             std::string width = "";
             if (auto* vec = builtin->ReturnType()->As<type::Vector>()) {
                 width = std::to_string(vec->Width());
@@ -692,16 +692,16 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
         }
         // TODO(crbug.com/tint/661): Combine sequential barriers to a single
         // instruction.
-        case builtin::Function::kStorageBarrier: {
+        case core::Function::kStorageBarrier: {
             out << "threadgroup_barrier(mem_flags::mem_device)";
             return true;
         }
-        case builtin::Function::kWorkgroupBarrier: {
+        case core::Function::kWorkgroupBarrier: {
             out << "threadgroup_barrier(mem_flags::mem_threadgroup)";
             return true;
         }
 
-        case builtin::Function::kLength: {
+        case core::Function::kLength: {
             auto* sem = builder_.Sem().GetVal(expr->args[0]);
             if (sem->Type()->UnwrapRef()->Is<type::Scalar>()) {
                 // Emulate scalar overload using fabs(x).
@@ -710,7 +710,7 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
             break;
         }
 
-        case builtin::Function::kDistance: {
+        case core::Function::kDistance: {
             auto* sem = builder_.Sem().GetVal(expr->args[0]);
             if (sem->Type()->UnwrapRef()->Is<type::Scalar>()) {
                 // Emulate scalar overload using fabs(x - y);
@@ -850,37 +850,37 @@ bool ASTPrinter::EmitAtomicCall(StringStream& out,
     };
 
     switch (builtin->Type()) {
-        case builtin::Function::kAtomicLoad:
+        case core::Function::kAtomicLoad:
             return call("atomic_load_explicit", true);
 
-        case builtin::Function::kAtomicStore:
+        case core::Function::kAtomicStore:
             return call("atomic_store_explicit", true);
 
-        case builtin::Function::kAtomicAdd:
+        case core::Function::kAtomicAdd:
             return call("atomic_fetch_add_explicit", true);
 
-        case builtin::Function::kAtomicSub:
+        case core::Function::kAtomicSub:
             return call("atomic_fetch_sub_explicit", true);
 
-        case builtin::Function::kAtomicMax:
+        case core::Function::kAtomicMax:
             return call("atomic_fetch_max_explicit", true);
 
-        case builtin::Function::kAtomicMin:
+        case core::Function::kAtomicMin:
             return call("atomic_fetch_min_explicit", true);
 
-        case builtin::Function::kAtomicAnd:
+        case core::Function::kAtomicAnd:
             return call("atomic_fetch_and_explicit", true);
 
-        case builtin::Function::kAtomicOr:
+        case core::Function::kAtomicOr:
             return call("atomic_fetch_or_explicit", true);
 
-        case builtin::Function::kAtomicXor:
+        case core::Function::kAtomicXor:
             return call("atomic_fetch_xor_explicit", true);
 
-        case builtin::Function::kAtomicExchange:
+        case core::Function::kAtomicExchange:
             return call("atomic_exchange_explicit", true);
 
-        case builtin::Function::kAtomicCompareExchangeWeak: {
+        case core::Function::kAtomicCompareExchangeWeak: {
             auto* ptr_ty = TypeOf(expr->args[0])->UnwrapRef()->As<type::Pointer>();
             auto sc = ptr_ty->AddressSpace();
             auto* str = builtin->ReturnType()->As<type::Struct>();
@@ -995,7 +995,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
     bool level_is_constant_zero = texture_type->dim() == type::TextureDimension::k1d;
 
     switch (builtin->Type()) {
-        case builtin::Function::kTextureDimensions: {
+        case core::Function::kTextureDimensions: {
             std::vector<const char*> dims;
             switch (texture_type->dim()) {
                 case type::TextureDimension::kNone:
@@ -1048,21 +1048,21 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             }
             return true;
         }
-        case builtin::Function::kTextureNumLayers: {
+        case core::Function::kTextureNumLayers: {
             if (!texture_expr()) {
                 return false;
             }
             out << ".get_array_size()";
             return true;
         }
-        case builtin::Function::kTextureNumLevels: {
+        case core::Function::kTextureNumLevels: {
             if (!texture_expr()) {
                 return false;
             }
             out << ".get_num_mip_levels()";
             return true;
         }
-        case builtin::Function::kTextureNumSamples: {
+        case core::Function::kTextureNumSamples: {
             if (!texture_expr()) {
                 return false;
             }
@@ -1080,27 +1080,27 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
     bool lod_param_is_named = true;
 
     switch (builtin->Type()) {
-        case builtin::Function::kTextureSample:
-        case builtin::Function::kTextureSampleBias:
-        case builtin::Function::kTextureSampleLevel:
-        case builtin::Function::kTextureSampleGrad:
+        case core::Function::kTextureSample:
+        case core::Function::kTextureSampleBias:
+        case core::Function::kTextureSampleLevel:
+        case core::Function::kTextureSampleGrad:
             out << ".sample(";
             break;
-        case builtin::Function::kTextureSampleCompare:
-        case builtin::Function::kTextureSampleCompareLevel:
+        case core::Function::kTextureSampleCompare:
+        case core::Function::kTextureSampleCompareLevel:
             out << ".sample_compare(";
             break;
-        case builtin::Function::kTextureGather:
+        case core::Function::kTextureGather:
             out << ".gather(";
             break;
-        case builtin::Function::kTextureGatherCompare:
+        case core::Function::kTextureGatherCompare:
             out << ".gather_compare(";
             break;
-        case builtin::Function::kTextureLoad:
+        case core::Function::kTextureLoad:
             out << ".read(";
             lod_param_is_named = false;
             break;
-        case builtin::Function::kTextureStore:
+        case core::Function::kTextureStore:
             out << ".write(";
             break;
         default:
@@ -1176,7 +1176,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             out << ")";
         }
     }
-    if (builtin->Type() == builtin::Function::kTextureSampleCompareLevel) {
+    if (builtin->Type() == core::Function::kTextureSampleCompareLevel) {
         maybe_write_comma();
         out << "level(0)";
     }
@@ -1383,143 +1383,143 @@ bool ASTPrinter::EmitRadiansCall(StringStream& out,
 std::string ASTPrinter::generate_builtin_name(const sem::Builtin* builtin) {
     std::string out = "";
     switch (builtin->Type()) {
-        case builtin::Function::kAcos:
-        case builtin::Function::kAcosh:
-        case builtin::Function::kAll:
-        case builtin::Function::kAny:
-        case builtin::Function::kAsin:
-        case builtin::Function::kAsinh:
-        case builtin::Function::kAtanh:
-        case builtin::Function::kAtan:
-        case builtin::Function::kAtan2:
-        case builtin::Function::kCeil:
-        case builtin::Function::kCos:
-        case builtin::Function::kCosh:
-        case builtin::Function::kCross:
-        case builtin::Function::kDeterminant:
-        case builtin::Function::kDistance:
-        case builtin::Function::kDot:
-        case builtin::Function::kExp:
-        case builtin::Function::kExp2:
-        case builtin::Function::kFloor:
-        case builtin::Function::kFma:
-        case builtin::Function::kFract:
-        case builtin::Function::kFrexp:
-        case builtin::Function::kLength:
-        case builtin::Function::kLdexp:
-        case builtin::Function::kLog:
-        case builtin::Function::kLog2:
-        case builtin::Function::kMix:
-        case builtin::Function::kModf:
-        case builtin::Function::kNormalize:
-        case builtin::Function::kPow:
-        case builtin::Function::kReflect:
-        case builtin::Function::kRefract:
-        case builtin::Function::kSaturate:
-        case builtin::Function::kSelect:
-        case builtin::Function::kSin:
-        case builtin::Function::kSinh:
-        case builtin::Function::kSqrt:
-        case builtin::Function::kStep:
-        case builtin::Function::kTan:
-        case builtin::Function::kTanh:
-        case builtin::Function::kTranspose:
-        case builtin::Function::kTrunc:
-        case builtin::Function::kSign:
-        case builtin::Function::kClamp:
+        case core::Function::kAcos:
+        case core::Function::kAcosh:
+        case core::Function::kAll:
+        case core::Function::kAny:
+        case core::Function::kAsin:
+        case core::Function::kAsinh:
+        case core::Function::kAtanh:
+        case core::Function::kAtan:
+        case core::Function::kAtan2:
+        case core::Function::kCeil:
+        case core::Function::kCos:
+        case core::Function::kCosh:
+        case core::Function::kCross:
+        case core::Function::kDeterminant:
+        case core::Function::kDistance:
+        case core::Function::kDot:
+        case core::Function::kExp:
+        case core::Function::kExp2:
+        case core::Function::kFloor:
+        case core::Function::kFma:
+        case core::Function::kFract:
+        case core::Function::kFrexp:
+        case core::Function::kLength:
+        case core::Function::kLdexp:
+        case core::Function::kLog:
+        case core::Function::kLog2:
+        case core::Function::kMix:
+        case core::Function::kModf:
+        case core::Function::kNormalize:
+        case core::Function::kPow:
+        case core::Function::kReflect:
+        case core::Function::kRefract:
+        case core::Function::kSaturate:
+        case core::Function::kSelect:
+        case core::Function::kSin:
+        case core::Function::kSinh:
+        case core::Function::kSqrt:
+        case core::Function::kStep:
+        case core::Function::kTan:
+        case core::Function::kTanh:
+        case core::Function::kTranspose:
+        case core::Function::kTrunc:
+        case core::Function::kSign:
+        case core::Function::kClamp:
             out += builtin->str();
             break;
-        case builtin::Function::kAbs:
+        case core::Function::kAbs:
             if (builtin->ReturnType()->is_float_scalar_or_vector()) {
                 out += "fabs";
             } else {
                 out += "abs";
             }
             break;
-        case builtin::Function::kCountLeadingZeros:
+        case core::Function::kCountLeadingZeros:
             out += "clz";
             break;
-        case builtin::Function::kCountOneBits:
+        case core::Function::kCountOneBits:
             out += "popcount";
             break;
-        case builtin::Function::kCountTrailingZeros:
+        case core::Function::kCountTrailingZeros:
             out += "ctz";
             break;
-        case builtin::Function::kDpdx:
-        case builtin::Function::kDpdxCoarse:
-        case builtin::Function::kDpdxFine:
+        case core::Function::kDpdx:
+        case core::Function::kDpdxCoarse:
+        case core::Function::kDpdxFine:
             out += "dfdx";
             break;
-        case builtin::Function::kDpdy:
-        case builtin::Function::kDpdyCoarse:
-        case builtin::Function::kDpdyFine:
+        case core::Function::kDpdy:
+        case core::Function::kDpdyCoarse:
+        case core::Function::kDpdyFine:
             out += "dfdy";
             break;
-        case builtin::Function::kExtractBits:
+        case core::Function::kExtractBits:
             out += "extract_bits";
             break;
-        case builtin::Function::kInsertBits:
+        case core::Function::kInsertBits:
             out += "insert_bits";
             break;
-        case builtin::Function::kFwidth:
-        case builtin::Function::kFwidthCoarse:
-        case builtin::Function::kFwidthFine:
+        case core::Function::kFwidth:
+        case core::Function::kFwidthCoarse:
+        case core::Function::kFwidthFine:
             out += "fwidth";
             break;
-        case builtin::Function::kMax:
+        case core::Function::kMax:
             if (builtin->ReturnType()->is_float_scalar_or_vector()) {
                 out += "fmax";
             } else {
                 out += "max";
             }
             break;
-        case builtin::Function::kMin:
+        case core::Function::kMin:
             if (builtin->ReturnType()->is_float_scalar_or_vector()) {
                 out += "fmin";
             } else {
                 out += "min";
             }
             break;
-        case builtin::Function::kFaceForward:
+        case core::Function::kFaceForward:
             out += "faceforward";
             break;
-        case builtin::Function::kPack4X8Snorm:
+        case core::Function::kPack4X8Snorm:
             out += "pack_float_to_snorm4x8";
             break;
-        case builtin::Function::kPack4X8Unorm:
+        case core::Function::kPack4X8Unorm:
             out += "pack_float_to_unorm4x8";
             break;
-        case builtin::Function::kPack2X16Snorm:
+        case core::Function::kPack2X16Snorm:
             out += "pack_float_to_snorm2x16";
             break;
-        case builtin::Function::kPack2X16Unorm:
+        case core::Function::kPack2X16Unorm:
             out += "pack_float_to_unorm2x16";
             break;
-        case builtin::Function::kReverseBits:
+        case core::Function::kReverseBits:
             out += "reverse_bits";
             break;
-        case builtin::Function::kRound:
+        case core::Function::kRound:
             out += "rint";
             break;
-        case builtin::Function::kSmoothstep:
+        case core::Function::kSmoothstep:
             out += "smoothstep";
             break;
-        case builtin::Function::kInverseSqrt:
+        case core::Function::kInverseSqrt:
             out += "rsqrt";
             break;
-        case builtin::Function::kUnpack4X8Snorm:
+        case core::Function::kUnpack4X8Snorm:
             out += "unpack_snorm4x8_to_float";
             break;
-        case builtin::Function::kUnpack4X8Unorm:
+        case core::Function::kUnpack4X8Unorm:
             out += "unpack_unorm4x8_to_float";
             break;
-        case builtin::Function::kUnpack2X16Snorm:
+        case core::Function::kUnpack2X16Snorm:
             out += "unpack_snorm2x16_to_float";
             break;
-        case builtin::Function::kUnpack2X16Unorm:
+        case core::Function::kUnpack2X16Unorm:
             out += "unpack_unorm2x16_to_float";
             break;
-        case builtin::Function::kArrayLength:
+        case core::Function::kArrayLength:
             diagnostics_.add_error(
                 diag::System::Writer,
                 "Unable to translate builtin: " + std::string(builtin->str()) +
@@ -1944,15 +1944,15 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
                 },
                 [&](const type::Pointer* ptr) {
                     switch (ptr->AddressSpace()) {
-                        case builtin::AddressSpace::kWorkgroup: {
+                        case core::AddressSpace::kWorkgroup: {
                             auto& allocations = workgroup_allocations_[func_name];
                             out << " [[threadgroup(" << allocations.size() << ")]]";
                             allocations.push_back(ptr->StoreType()->Size());
                             return true;
                         }
 
-                        case builtin::AddressSpace::kStorage:
-                        case builtin::AddressSpace::kUniform: {
+                        case core::AddressSpace::kStorage:
+                        case core::AddressSpace::kUniform: {
                             uint32_t binding = get_binding_index(param);
                             if (binding == kInvalidBindingIndex) {
                                 return false;
@@ -2490,7 +2490,7 @@ bool ASTPrinter::EmitType(StringStream& out, const type::Type* type) {
             return true;
         },
         [&](const type::Pointer* ptr) {
-            if (ptr->Access() == builtin::Access::kRead) {
+            if (ptr->Access() == core::Access::kRead) {
                 out << "const ";
             }
             if (!EmitAddressSpace(out, ptr->AddressSpace())) {
@@ -2570,9 +2570,9 @@ bool ASTPrinter::EmitType(StringStream& out, const type::Type* type) {
                     }
 
                     std::string access_str;
-                    if (storage->access() == builtin::Access::kRead) {
+                    if (storage->access() == core::Access::kRead) {
                         out << ", access::read";
-                    } else if (storage->access() == builtin::Access::kWrite) {
+                    } else if (storage->access() == core::Access::kWrite) {
                         out << ", access::write";
                     } else {
                         diagnostics_.add_error(diag::System::Writer,
@@ -2635,20 +2635,20 @@ bool ASTPrinter::EmitTypeAndName(StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitAddressSpace(StringStream& out, builtin::AddressSpace sc) {
+bool ASTPrinter::EmitAddressSpace(StringStream& out, core::AddressSpace sc) {
     switch (sc) {
-        case builtin::AddressSpace::kFunction:
-        case builtin::AddressSpace::kPrivate:
-        case builtin::AddressSpace::kHandle:
+        case core::AddressSpace::kFunction:
+        case core::AddressSpace::kPrivate:
+        case core::AddressSpace::kHandle:
             out << "thread";
             return true;
-        case builtin::AddressSpace::kWorkgroup:
+        case core::AddressSpace::kWorkgroup:
             out << "threadgroup";
             return true;
-        case builtin::AddressSpace::kStorage:
+        case core::AddressSpace::kStorage:
             out << "device";
             return true;
-        case builtin::AddressSpace::kUniform:
+        case core::AddressSpace::kUniform:
             out << "constant";
             return true;
         default:
@@ -2875,13 +2875,13 @@ bool ASTPrinter::EmitVar(const ast::Var* var) {
     auto out = Line();
 
     switch (sem->AddressSpace()) {
-        case builtin::AddressSpace::kFunction:
-        case builtin::AddressSpace::kHandle:
+        case core::AddressSpace::kFunction:
+        case core::AddressSpace::kHandle:
             break;
-        case builtin::AddressSpace::kPrivate:
+        case core::AddressSpace::kPrivate:
             out << "thread ";
             break;
-        case builtin::AddressSpace::kWorkgroup:
+        case core::AddressSpace::kWorkgroup:
             out << "threadgroup ";
             break;
         default:
@@ -2899,9 +2899,9 @@ bool ASTPrinter::EmitVar(const ast::Var* var) {
         if (!EmitExpression(out, var->initializer)) {
             return false;
         }
-    } else if (sem->AddressSpace() == builtin::AddressSpace::kPrivate ||
-               sem->AddressSpace() == builtin::AddressSpace::kFunction ||
-               sem->AddressSpace() == builtin::AddressSpace::kUndefined) {
+    } else if (sem->AddressSpace() == core::AddressSpace::kPrivate ||
+               sem->AddressSpace() == core::AddressSpace::kFunction ||
+               sem->AddressSpace() == core::AddressSpace::kUndefined) {
         out << " = ";
         if (!EmitZeroValue(out, type)) {
             return false;
@@ -2919,14 +2919,14 @@ bool ASTPrinter::EmitLet(const ast::Let* let) {
     auto out = Line();
 
     switch (sem->AddressSpace()) {
-        case builtin::AddressSpace::kFunction:
-        case builtin::AddressSpace::kHandle:
-        case builtin::AddressSpace::kUndefined:
+        case core::AddressSpace::kFunction:
+        case core::AddressSpace::kHandle:
+        case core::AddressSpace::kUndefined:
             break;
-        case builtin::AddressSpace::kPrivate:
+        case core::AddressSpace::kPrivate:
             out << "thread ";
             break;
-        case builtin::AddressSpace::kWorkgroup:
+        case core::AddressSpace::kWorkgroup:
             out << "threadgroup ";
             break;
         default:
@@ -2958,7 +2958,7 @@ bool ASTPrinter::CallBuiltinHelper(StringStream& out,
         TextBuffer b;
         TINT_DEFER(helpers_.Append(b));
 
-        auto fn_name = UniqueIdentifier(std::string("tint_") + builtin::str(builtin->Type()));
+        auto fn_name = UniqueIdentifier(std::string("tint_") + core::str(builtin->Type()));
         std::vector<std::string> parameter_names;
         {
             auto decl = Line(&b);

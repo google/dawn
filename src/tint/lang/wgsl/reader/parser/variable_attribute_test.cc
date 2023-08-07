@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 #include "src/tint/lang/wgsl/reader/parser/helper_test.h"
 
@@ -217,7 +217,7 @@ TEST_F(WGSLParserTest, Attribute_Location_MissingInvalid) {
     EXPECT_EQ(p->error(), "1:10: expected expression for location");
 }
 
-class BuiltinTest : public WGSLParserTestWithParam<builtin::BuiltinValue> {};
+class BuiltinTest : public WGSLParserTestWithParam<core::BuiltinValue> {};
 
 TEST_P(BuiltinTest, Attribute_Builtin) {
     auto str = tint::ToString(GetParam());
@@ -253,18 +253,18 @@ TEST_P(BuiltinTest, Attribute_Builtin_TrailingComma) {
 }
 INSTANTIATE_TEST_SUITE_P(WGSLParserTest,
                          BuiltinTest,
-                         testing::Values(builtin::BuiltinValue::kPosition,
-                                         builtin::BuiltinValue::kVertexIndex,
-                                         builtin::BuiltinValue::kInstanceIndex,
-                                         builtin::BuiltinValue::kFrontFacing,
-                                         builtin::BuiltinValue::kFragDepth,
-                                         builtin::BuiltinValue::kLocalInvocationId,
-                                         builtin::BuiltinValue::kLocalInvocationIndex,
-                                         builtin::BuiltinValue::kGlobalInvocationId,
-                                         builtin::BuiltinValue::kWorkgroupId,
-                                         builtin::BuiltinValue::kNumWorkgroups,
-                                         builtin::BuiltinValue::kSampleIndex,
-                                         builtin::BuiltinValue::kSampleMask));
+                         testing::Values(core::BuiltinValue::kPosition,
+                                         core::BuiltinValue::kVertexIndex,
+                                         core::BuiltinValue::kInstanceIndex,
+                                         core::BuiltinValue::kFrontFacing,
+                                         core::BuiltinValue::kFragDepth,
+                                         core::BuiltinValue::kLocalInvocationId,
+                                         core::BuiltinValue::kLocalInvocationIndex,
+                                         core::BuiltinValue::kGlobalInvocationId,
+                                         core::BuiltinValue::kWorkgroupId,
+                                         core::BuiltinValue::kNumWorkgroups,
+                                         core::BuiltinValue::kSampleIndex,
+                                         core::BuiltinValue::kSampleMask));
 
 TEST_F(WGSLParserTest, Attribute_Builtin_MissingLeftParen) {
     auto p = parser("builtin position)");

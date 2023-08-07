@@ -172,7 +172,7 @@ Type::~Type() = default;
 
 Texture::~Texture() = default;
 
-Pointer::Pointer(builtin::AddressSpace s, const Type* t, builtin::Access a)
+Pointer::Pointer(core::AddressSpace s, const Type* t, core::Access a)
     : address_space(s), type(t), access(a) {}
 Pointer::Pointer(const Pointer&) = default;
 
@@ -186,7 +186,7 @@ ast::Type Pointer::Build(ProgramBuilder& b) const {
     return b.ty.ptr(address_space, type->Build(b), access);
 }
 
-Reference::Reference(builtin::AddressSpace s, const Type* t, builtin::Access a)
+Reference::Reference(core::AddressSpace s, const Type* t, core::Access a)
     : address_space(s), type(t), access(a) {}
 Reference::Reference(const Reference&) = default;
 
@@ -277,7 +277,7 @@ ast::Type SampledTexture::Build(ProgramBuilder& b) const {
     return b.ty.sampled_texture(dims, type->Build(b));
 }
 
-StorageTexture::StorageTexture(type::TextureDimension d, builtin::TexelFormat f, builtin::Access a)
+StorageTexture::StorageTexture(type::TextureDimension d, core::TexelFormat f, core::Access a)
     : Base(d), format(f), access(a) {}
 StorageTexture::StorageTexture(const StorageTexture&) = default;
 
@@ -480,15 +480,15 @@ const Type* TypeManager::AsUnsigned(const Type* ty) {
         });
 }
 
-const reader::Pointer* TypeManager::Pointer(builtin::AddressSpace address_space,
+const reader::Pointer* TypeManager::Pointer(core::AddressSpace address_space,
                                             const Type* el,
-                                            builtin::Access access) {
+                                            core::Access access) {
     return state->pointers_.Get(address_space, el, access);
 }
 
-const reader::Reference* TypeManager::Reference(builtin::AddressSpace address_space,
+const reader::Reference* TypeManager::Reference(core::AddressSpace address_space,
                                                 const Type* el,
-                                                builtin::Access access) {
+                                                core::Access access) {
     return state->references_.Get(address_space, el, access);
 }
 
@@ -536,8 +536,8 @@ const reader::SampledTexture* TypeManager::SampledTexture(type::TextureDimension
 }
 
 const reader::StorageTexture* TypeManager::StorageTexture(type::TextureDimension dims,
-                                                          builtin::TexelFormat fmt,
-                                                          builtin::Access access) {
+                                                          core::TexelFormat fmt,
+                                                          core::Access access) {
     return state->storage_textures_.Get(dims, fmt, access);
 }
 

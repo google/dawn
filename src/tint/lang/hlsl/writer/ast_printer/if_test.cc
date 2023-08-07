@@ -20,7 +20,7 @@ namespace {
 using HlslASTPrinterTest_If = TestHelper;
 
 TEST_F(HlslASTPrinterTest_If, Emit_If) {
-    GlobalVar("cond", ty.bool_(), builtin::AddressSpace::kPrivate);
+    GlobalVar("cond", ty.bool_(), core::AddressSpace::kPrivate);
 
     auto* cond = Expr("cond");
     auto* body = Block(Return());
@@ -38,8 +38,8 @@ TEST_F(HlslASTPrinterTest_If, Emit_If) {
 }
 
 TEST_F(HlslASTPrinterTest_If, Emit_IfWithElseIf) {
-    GlobalVar("cond", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("else_cond", ty.bool_(), builtin::AddressSpace::kPrivate);
+    GlobalVar("cond", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("else_cond", ty.bool_(), core::AddressSpace::kPrivate);
 
     auto* else_cond = Expr("else_cond");
     auto* else_body = Block(Return());
@@ -65,7 +65,7 @@ TEST_F(HlslASTPrinterTest_If, Emit_IfWithElseIf) {
 }
 
 TEST_F(HlslASTPrinterTest_If, Emit_IfWithElse) {
-    GlobalVar("cond", ty.bool_(), builtin::AddressSpace::kPrivate);
+    GlobalVar("cond", ty.bool_(), core::AddressSpace::kPrivate);
 
     auto* else_body = Block(Return());
 
@@ -88,8 +88,8 @@ TEST_F(HlslASTPrinterTest_If, Emit_IfWithElse) {
 }
 
 TEST_F(HlslASTPrinterTest_If, Emit_IfWithMultiple) {
-    GlobalVar("cond", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("else_cond", ty.bool_(), builtin::AddressSpace::kPrivate);
+    GlobalVar("cond", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("else_cond", ty.bool_(), core::AddressSpace::kPrivate);
 
     auto* else_cond = Expr("else_cond");
 

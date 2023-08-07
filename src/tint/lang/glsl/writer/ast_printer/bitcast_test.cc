@@ -18,8 +18,8 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 namespace tint::glsl::writer {
 namespace {
@@ -66,7 +66,7 @@ TEST_F(GlslASTPrinterTest_Bitcast, EmitExpression_Bitcast_Uint) {
 }
 
 TEST_F(GlslASTPrinterTest_Bitcast, EmitExpression_Bitcast_F16_Vec2) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* a = Let("a", Call<vec2<f16>>(1_h, 2_h));
     auto* b = Let("b", Bitcast<i32>(Expr("a")));
@@ -124,7 +124,7 @@ void test_function() {
 }
 
 TEST_F(GlslASTPrinterTest_Bitcast, EmitExpression_Bitcast_F16_Vec4) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* a = Let("a", Call<vec4<f16>>(1_h, 2_h, 3_h, 4_h));
     auto* b = Let("b", Bitcast<vec2<i32>>(Expr("a")));

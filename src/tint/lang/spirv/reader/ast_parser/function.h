@@ -334,10 +334,10 @@ struct DefInfo {
         /// buffer expressed in the old style (with Uniform address space)
         /// that needs to be remapped to StorageBuffer address space.
         /// This is kInvalid for non-pointers.
-        builtin::AddressSpace address_space = builtin::AddressSpace::kUndefined;
+        core::AddressSpace address_space = core::AddressSpace::kUndefined;
 
         /// The declared access mode.
-        builtin::Access access = builtin::Access::kUndefined;
+        core::Access access = core::Access::kUndefined;
     };
 
     /// The expression to use when sinking pointers into their use.
@@ -372,7 +372,7 @@ auto& operator<<(STREAM& o, const DefInfo& di) {
     }
     o << " requires_named_let_def: " << (di.requires_named_let_def ? "true" : "false")
       << " requires_hoisted_var_def: " << (di.requires_hoisted_var_def ? "true" : "false");
-    if (di.pointer.address_space != builtin::AddressSpace::kUndefined) {
+    if (di.pointer.address_space != core::AddressSpace::kUndefined) {
         o << " sc:" << int(di.pointer.address_space);
     }
     switch (di.skip) {

@@ -22,8 +22,8 @@ namespace tint::resolver {
 namespace {
 
 using ::testing::HasSubstr;
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using ResolverCompoundAssignmentValidationTest = ResolverTest;
 
@@ -51,7 +51,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, CompatibleTypesAssignThroughPoi
     // var a : i32;
     // let b : ptr<function,i32> = &a;
     // *b += 2;
-    auto* var_a = Var("a", ty.i32(), builtin::AddressSpace::kFunction, Expr(2_i));
+    auto* var_a = Var("a", ty.i32(), core::AddressSpace::kFunction, Expr(2_i));
     auto* var_b = Let("b", ty.ptr<function, i32>(), AddressOf(Expr("a")));
     WrapInFunction(var_a, var_b,
                    CompoundAssign(Source{{12, 34}}, Deref("b"), 2_i, ast::BinaryOp::kAdd));
@@ -237,8 +237,8 @@ TEST_F(ResolverCompoundAssignmentValidationTest, ReadOnlyBuffer) {
     // {
     //   a += 1i;
     // }
-    GlobalVar(Source{{12, 34}}, "a", ty.i32(), builtin::AddressSpace::kStorage,
-              builtin::Access::kRead, Group(0_a), Binding(0_a));
+    GlobalVar(Source{{12, 34}}, "a", ty.i32(), core::AddressSpace::kStorage, core::Access::kRead,
+              Group(0_a), Binding(0_a));
     WrapInFunction(CompoundAssign(Source{{56, 78}}, "a", 1_i, ast::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());
@@ -269,7 +269,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, LhsLiteral) {
 TEST_F(ResolverCompoundAssignmentValidationTest, LhsAtomic) {
     // var<workgroup> a : atomic<i32>;
     // a += a;
-    GlobalVar(Source{{12, 34}}, "a", ty.atomic(ty.i32()), builtin::AddressSpace::kWorkgroup);
+    GlobalVar(Source{{12, 34}}, "a", ty.atomic(ty.i32()), core::AddressSpace::kWorkgroup);
     WrapInFunction(CompoundAssign(Source{{56, 78}}, "a", "a", ast::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());

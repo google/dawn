@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
@@ -136,7 +136,7 @@ TEST_F(WgslASTPrinterTest, Emit_Function_EntryPoint_Parameters) {
     auto vec4 = ty.vec4<f32>();
     auto* coord = Param("coord", vec4,
                         Vector{
-                            Builtin(builtin::BuiltinValue::kPosition),
+                            Builtin(core::BuiltinValue::kPosition),
                         });
     auto* loc1 = Param("loc1", ty.f32(),
                        Vector{
@@ -203,7 +203,7 @@ TEST_F(WgslASTPrinterTest, Emit_Function_Multiple_EntryPoint_With_Same_ModuleVar
                                     Member("d", ty.f32()),
                                 });
 
-    GlobalVar("data", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    GlobalVar("data", ty.Of(s), core::AddressSpace::kStorage, core::Access::kReadWrite,
               Binding(0_a), Group(0_a));
 
     {

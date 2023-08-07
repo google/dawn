@@ -176,8 +176,8 @@ TEST_P(MslPrinterBinaryTest_SignedOverflowDefinedBehaviour_Chained, DISABLED_Emi
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr<builtin::AddressSpace::kFunction, i32>());
-        auto* right = b.Var("right", ty.ptr<builtin::AddressSpace::kFunction, i32>());
+        auto* left = b.Var("left", ty.ptr<core::AddressSpace::kFunction, i32>());
+        auto* right = b.Var("right", ty.ptr<core::AddressSpace::kFunction, i32>());
 
         auto* expr1 = b.Binary(params.op, ty.i32(), left, right);
         auto* expr2 = b.Binary(params.op, ty.i32(), expr1, right);
@@ -216,8 +216,8 @@ TEST_P(MslPrinterBinaryTest_ShiftSignedOverflowDefinedBehaviour_Chained, DISABLE
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr<builtin::AddressSpace::kFunction, i32>());
-        auto* right = b.Var("right", ty.ptr<builtin::AddressSpace::kFunction, u32>());
+        auto* left = b.Var("left", ty.ptr<core::AddressSpace::kFunction, i32>());
+        auto* right = b.Var("right", ty.ptr<core::AddressSpace::kFunction, u32>());
 
         auto* expr1 = b.Binary(params.op, ty.i32(), left, right);
         auto* expr2 = b.Binary(params.op, ty.i32(), expr1, right);
@@ -246,8 +246,8 @@ INSTANTIATE_TEST_SUITE_P(MslPrinterTest,
 TEST_F(MslPrinterTest, DISABLED_BinaryModF32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr<builtin::AddressSpace::kFunction, f32>());
-        auto* right = b.Var("right", ty.ptr<builtin::AddressSpace::kFunction, f32>());
+        auto* left = b.Var("left", ty.ptr<core::AddressSpace::kFunction, f32>());
+        auto* right = b.Var("right", ty.ptr<core::AddressSpace::kFunction, f32>());
 
         auto* expr1 = b.Binary(ir::Binary::Kind::kModulo, ty.f32(), left, right);
 
@@ -269,8 +269,8 @@ TEST_F(MslPrinterTest, DISABLED_BinaryModF16) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr<builtin::AddressSpace::kFunction, f16>());
-        auto* right = b.Var("right", ty.ptr<builtin::AddressSpace::kFunction, f16>());
+        auto* left = b.Var("left", ty.ptr<core::AddressSpace::kFunction, f16>());
+        auto* right = b.Var("right", ty.ptr<core::AddressSpace::kFunction, f16>());
 
         auto* expr1 = b.Binary(ir::Binary::Kind::kModulo, ty.f16(), left, right);
 
@@ -290,8 +290,8 @@ void foo() {
 TEST_F(MslPrinterTest, DISABLED_BinaryModVec3F32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr(builtin::AddressSpace::kFunction, ty.vec3<f32>()));
-        auto* right = b.Var("right", ty.ptr(builtin::AddressSpace::kFunction, ty.vec3<f32>()));
+        auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
+        auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f32>()));
 
         auto* expr1 = b.Binary(ir::Binary::Kind::kModulo, ty.vec3<f32>(), left, right);
 
@@ -313,8 +313,8 @@ TEST_F(MslPrinterTest, DISABLED_BinaryModVec3F16) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr(builtin::AddressSpace::kFunction, ty.vec3<f16>()));
-        auto* right = b.Var("right", ty.ptr(builtin::AddressSpace::kFunction, ty.vec3<f16>()));
+        auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f16>()));
+        auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.vec3<f16>()));
 
         auto* expr1 = b.Binary(ir::Binary::Kind::kModulo, ty.vec3<f16>(), left, right);
 
@@ -334,8 +334,8 @@ void foo() {
 TEST_F(MslPrinterTest, DISABLED_BinaryBoolAnd) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr(builtin::AddressSpace::kFunction, ty.bool_()));
-        auto* right = b.Var("right", ty.ptr(builtin::AddressSpace::kFunction, ty.bool_()));
+        auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.bool_()));
+        auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.bool_()));
 
         auto* expr1 = b.Binary(ir::Binary::Kind::kAdd, ty.bool_(), left, right);
 
@@ -355,8 +355,8 @@ void foo() {
 TEST_F(MslPrinterTest, DISABLED_BinaryBoolOr) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* left = b.Var("left", ty.ptr(builtin::AddressSpace::kFunction, ty.bool_()));
-        auto* right = b.Var("right", ty.ptr(builtin::AddressSpace::kFunction, ty.bool_()));
+        auto* left = b.Var("left", ty.ptr(core::AddressSpace::kFunction, ty.bool_()));
+        auto* right = b.Var("right", ty.ptr(core::AddressSpace::kFunction, ty.bool_()));
 
         auto* expr1 = b.Binary(ir::Binary::Kind::kOr, ty.bool_(), left, right);
 

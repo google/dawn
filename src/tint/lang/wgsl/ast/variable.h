@@ -18,8 +18,8 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/core/builtin/access.h"
-#include "src/tint/lang/core/builtin/address_space.h"
+#include "src/tint/lang/core/access.h"
+#include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"
 #include "src/tint/lang/wgsl/ast/binding_attribute.h"
 #include "src/tint/lang/wgsl/ast/expression.h"

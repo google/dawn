@@ -26,8 +26,8 @@
 namespace tint::resolver {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 // Helpers and typedefs
 template <typename T>
@@ -70,7 +70,7 @@ TEST_F(ResolverTypeValidationTest, GlobalOverrideNoInitializer_Pass) {
 
 TEST_F(ResolverTypeValidationTest, GlobalVariableWithAddressSpace_Pass) {
     // var<private> global_var: f32;
-    GlobalVar(Source{{12, 34}}, "global_var", ty.f32(), builtin::AddressSpace::kPrivate);
+    GlobalVar(Source{{12, 34}}, "global_var", ty.f32(), core::AddressSpace::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -86,10 +86,9 @@ TEST_F(ResolverTypeValidationTest, GlobalVariableUnique_Pass) {
     // var global_var0 : f32 = 0.1;
     // var global_var1 : i32 = 0;
 
-    GlobalVar("global_var0", ty.f32(), builtin::AddressSpace::kPrivate, Expr(0.1_f));
+    GlobalVar("global_var0", ty.f32(), core::AddressSpace::kPrivate, Expr(0.1_f));
 
-    GlobalVar(Source{{12, 34}}, "global_var1", ty.f32(), builtin::AddressSpace::kPrivate,
-              Expr(1_f));
+    GlobalVar(Source{{12, 34}}, "global_var1", ty.f32(), core::AddressSpace::kPrivate, Expr(1_f));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -105,7 +104,7 @@ TEST_F(ResolverTypeValidationTest, GlobalVariableFunctionVariableNotUnique_Pass)
              Decl(Var("a", ty.f32(), Expr(2_f))),
          });
 
-    GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate, Expr(2.1_f));
+    GlobalVar("a", ty.f32(), core::AddressSpace::kPrivate, Expr(2.1_f));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -169,22 +168,19 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierDifferentFunctions_Pass) 
 
 TEST_F(ResolverTypeValidationTest, ArraySize_AIntLiteral_Pass) {
     // var<private> a : array<f32, 4>;
-    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4_a)),
-              builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4_a)), core::AddressSpace::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLiteral_Pass) {
     // var<private> a : array<f32, 4u>;
-    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4_u)),
-              builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4_u)), core::AddressSpace::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Pass) {
     // var<private> a : array<f32, 4i>;
-    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4_i)),
-              builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4_i)), core::AddressSpace::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
@@ -193,7 +189,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedConst_Pass) {
     // var<private> a : array<f32, size>;
     GlobalConst("size", Expr(4_u));
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
@@ -202,38 +198,34 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedConst_Pass) {
     // var<private> a : array<f32, size>;
     GlobalConst("size", Expr(4_i));
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_AIntLiteral_Zero) {
     // var<private> a : array<f32, 0>;
-    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_a)),
-              builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_a)), core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array count (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLiteral_Zero) {
     // var<private> a : array<f32, 0u>;
-    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_u)),
-              builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_u)), core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array count (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Zero) {
     // var<private> a : array<f32, 0i>;
-    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_i)),
-              builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_i)), core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array count (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Negative) {
     // var<private> a : array<f32, -10i>;
-    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, -10_i)),
-              builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, -10_i)), core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array count (-10) must be greater than 0");
 }
@@ -243,7 +235,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedConst_Zero) {
     // var<private> a : array<f32, size>;
     GlobalConst("size", Expr(0_u));
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array count (0) must be greater than 0");
 }
@@ -253,7 +245,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedConst_Zero) {
     // var<private> a : array<f32, size>;
     GlobalConst("size", Expr(0_i));
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array count (0) must be greater than 0");
 }
@@ -263,15 +255,14 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedConst_Negative) {
     // var<private> a : array<f32, size>;
     GlobalConst("size", Expr(-10_i));
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array count (-10) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_FloatLiteral) {
     // var<private> a : array<f32, 10.0>;
-    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 10_f)),
-              builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 10_f)), core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
@@ -282,7 +273,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FloatLiteral) {
 TEST_F(ResolverTypeValidationTest, ArraySize_IVecLiteral) {
     // var<private> a : array<f32, vec2<i32>(10, 10)>;
     GlobalVar("a", ty.array(ty.f32(), Call(Source{{12, 34}}, ty.vec2<i32>(), 10_i, 10_i)),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
@@ -295,7 +286,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FloatConst) {
     // var<private> a : array<f32, size>;
     GlobalConst("size", Expr(10_f));
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
@@ -308,7 +299,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_IVecConst) {
     // var<private> a : array<f32, size>;
     GlobalConst("size", Call<vec2<i32>>(100_i, 100_i));
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
@@ -319,14 +310,14 @@ TEST_F(ResolverTypeValidationTest, ArraySize_IVecConst) {
 TEST_F(ResolverTypeValidationTest, ArraySize_UnderElementCountLimit) {
     // var<private> a : array<f32, 65535>;
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 65535_a)),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_OverElementCountLimit) {
     // var<private> a : array<f32, 65536>;
     GlobalVar(Source{{56, 78}}, "a", ty.array(Source{{12, 34}}, ty.f32(), Expr(65536_a)),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:34 error: array count (65536) must be less than 65536
 56:78 note: while instantiating 'var' a)");
@@ -335,7 +326,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_OverElementCountLimit) {
 TEST_F(ResolverTypeValidationTest, ArraySize_StorageBufferLargeArray) {
     // var<storage> a : array<f32, 65536>;
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 65536_a)),
-              builtin::AddressSpace::kStorage, Vector{Binding(0_u), Group(0_u)});
+              core::AddressSpace::kStorage, Vector{Binding(0_u), Group(0_u)});
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
@@ -346,7 +337,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NestedStorageBufferLargeArray) {
     // var<storage> a : S;
     Structure("S",
               Vector{Member(Source{{12, 34}}, "a", ty.array(Source{{12, 20}}, ty.f32(), 65536_a))});
-    GlobalVar("a", ty(Source{{12, 30}}, "S"), builtin::AddressSpace::kStorage,
+    GlobalVar("a", ty(Source{{12, 30}}, "S"), core::AddressSpace::kStorage,
               Vector{Binding(0_u), Group(0_u)});
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -358,7 +349,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
     // var<private> a : array<S, 65535>;
     Structure("S", Vector{Member(Source{{12, 34}}, "a", ty.f32(), Vector{MemberOffset(800000_a)})});
     GlobalVar("a", ty.array(ty(Source{{12, 30}}, "S"), Expr(Source{{12, 34}}, 65535_a)),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array byte size (0xc34f7cafc) must not exceed 0xffffffff bytes");
@@ -367,7 +358,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
 TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ExplicitStride) {
     // var<private> a : @stride(8000000) array<f32, 65535>;
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 65535_a), Vector{Stride(8000000)}),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array byte size (0x7a1185ee00) must not exceed 0xffffffff bytes");
@@ -377,7 +368,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_PrivateVar) {
     // override size = 10i;
     // var<private> a : array<f32, size>;
     Override("size", Expr(10_i));
-    GlobalVar("a", ty.array(Source{{12, 34}}, ty.f32(), "size"), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.array(Source{{12, 34}}, ty.f32(), "size"), core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array with an 'override' element count can only be used as the store "
@@ -389,7 +380,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_InArray) {
     // var<workgroup> a : array<array<f32, size>, 4>;
     Override("size", Expr(10_i));
     GlobalVar("a", ty.array(ty.array(Source{{12, 34}}, ty.f32(), "size"), 4_a),
-              builtin::AddressSpace::kWorkgroup);
+              core::AddressSpace::kWorkgroup);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array with an 'override' element count can only be used as the store "
@@ -448,7 +439,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_FunctionVar_Implicit)
     //   var a = w;
     // }
     Override("size", Expr(10_i));
-    GlobalVar("w", ty.array(ty.f32(), "size"), builtin::AddressSpace::kWorkgroup);
+    GlobalVar("w", ty.array(ty.f32(), "size"), core::AddressSpace::kWorkgroup);
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(Var("a", Expr(Source{{12, 34}}, "w"))),
@@ -466,7 +457,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_FunctionLet_Implicit)
     //   let a = w;
     // }
     Override("size", Expr(10_i));
-    GlobalVar("w", ty.array(ty.f32(), "size"), builtin::AddressSpace::kWorkgroup);
+    GlobalVar("w", ty.array(ty.f32(), "size"), core::AddressSpace::kWorkgroup);
     Func("f", tint::Empty, ty.void_(),
          Vector{
              Decl(Let("a", Expr(Source{{12, 34}}, "w"))),
@@ -485,8 +476,8 @@ TEST_F(ResolverTypeValidationTest, ArraySize_UnnamedOverride_Equivalence) {
     //   a = b;
     // }
     Override("size", Expr(10_i));
-    GlobalVar("a", ty.array(ty.f32(), Add("size", 1_i)), builtin::AddressSpace::kWorkgroup);
-    GlobalVar("b", ty.array(ty.f32(), Add("size", 1_i)), builtin::AddressSpace::kWorkgroup);
+    GlobalVar("a", ty.array(ty.f32(), Add("size", 1_i)), core::AddressSpace::kWorkgroup);
+    GlobalVar("b", ty.array(ty.f32(), Add("size", 1_i)), core::AddressSpace::kWorkgroup);
     WrapInFunction(Assign(Source{{12, 34}}, "a", "b"));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -520,16 +511,16 @@ TEST_F(ResolverTypeValidationTest, ArraySize_Workgroup_Overridable) {
     // var<workgroup> a : array<f32, size>;
     Override("size", Expr(10_i));
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")),
-              builtin::AddressSpace::kWorkgroup);
+              core::AddressSpace::kWorkgroup);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_ModuleVar) {
     // var<private> size : i32 = 10i;
     // var<private> a : array<f32, size>;
-    GlobalVar("size", ty.i32(), Expr(10_i), builtin::AddressSpace::kPrivate);
+    GlobalVar("size", ty.i32(), Expr(10_i), core::AddressSpace::kPrivate);
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(12:34 error: var 'size' cannot be referenced at module-scope
@@ -686,7 +677,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInStructInArray) {
     // var<private> a : array<Foo, 4>;
 
     Structure("Foo", Vector{Member("rt", ty.array<f32>())});
-    GlobalVar("v", ty.array(ty(Source{{12, 34}}, "Foo"), 4_u), builtin::AddressSpace::kPrivate);
+    GlobalVar("v", ty.array(ty(Source{{12, 34}}, "Foo"), 4_u), core::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
@@ -732,7 +723,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsNotLast_Fail) {
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayAsGlobalVariable) {
     GlobalVar(Source{{56, 78}}, "g", ty.array(Source{{12, 34}}, ty.i32()),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -780,7 +771,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
 TEST_F(ResolverTypeValidationTest, PtrToRuntimeArrayAsPointerParameter_Fail) {
     // fn func(a : ptr<workgroup, array<u32>>) {}
 
-    auto* param = Param("a", ty.ptr(Source{{56, 78}}, builtin::AddressSpace::kWorkgroup,
+    auto* param = Param("a", ty.ptr(Source{{56, 78}}, core::AddressSpace::kWorkgroup,
                                     ty.array(Source{{12, 34}}, ty.i32())));
 
     Func("func", Vector{param}, ty.void_(),
@@ -846,7 +837,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
 
 TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
     auto tex_ty = ty.sampled_texture(Source{{12, 34}}, type::TextureDimension::k2d, ty.f32());
-    GlobalVar("arr", ty.array(tex_ty, 4_i), builtin::AddressSpace::kPrivate);
+    GlobalVar("arr", ty.array(tex_ty, 4_i), core::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -855,7 +846,7 @@ TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
 
 TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableTypeWithStride) {
     auto ptr_ty = ty.ptr<uniform, u32>(Source{{12, 34}});
-    GlobalVar("arr", ty.array(ptr_ty, 4_i, Vector{Stride(16)}), builtin::AddressSpace::kPrivate);
+    GlobalVar("arr", ty.array(ptr_ty, 4_i, Vector{Stride(16)}), core::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -986,7 +977,7 @@ static constexpr TypeParams type_cases[] = {
 using SampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
 TEST_P(SampledTextureTypeTest, All) {
     auto& params = GetParam();
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
     GlobalVar(
         "a",
         ty.sampled_texture(Source{{12, 34}}, type::TextureDimension::k2d, params.type_func(*this)),
@@ -1006,7 +997,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
 using MultisampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
 TEST_P(MultisampledTextureTypeTest, All) {
     auto& params = GetParam();
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
     GlobalVar("a",
               ty.multisampled_texture(Source{{12, 34}}, type::TextureDimension::k2d,
                                       params.type_func(*this)),
@@ -1046,8 +1037,8 @@ TEST_P(StorageTextureDimensionTest, All) {
     // var a : texture_storage_*<r32uint, write>;
     auto& params = GetParam();
 
-    auto st = ty(Source{{12, 34}}, params.name, tint::ToString(builtin::TexelFormat::kR32Uint),
-                 tint::ToString(builtin::Access::kWrite));
+    auto st = ty(Source{{12, 34}}, params.name, tint::ToString(core::TexelFormat::kR32Uint),
+                 tint::ToString(core::Access::kWrite));
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
@@ -1063,28 +1054,27 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          testing::ValuesIn(Dimension_cases));
 
 struct FormatParams {
-    builtin::TexelFormat format;
+    core::TexelFormat format;
     bool is_valid;
 };
 
-static constexpr FormatParams format_cases[] = {
-    FormatParams{builtin::TexelFormat::kBgra8Unorm, true},
-    FormatParams{builtin::TexelFormat::kR32Float, true},
-    FormatParams{builtin::TexelFormat::kR32Sint, true},
-    FormatParams{builtin::TexelFormat::kR32Uint, true},
-    FormatParams{builtin::TexelFormat::kRg32Float, true},
-    FormatParams{builtin::TexelFormat::kRg32Sint, true},
-    FormatParams{builtin::TexelFormat::kRg32Uint, true},
-    FormatParams{builtin::TexelFormat::kRgba16Float, true},
-    FormatParams{builtin::TexelFormat::kRgba16Sint, true},
-    FormatParams{builtin::TexelFormat::kRgba16Uint, true},
-    FormatParams{builtin::TexelFormat::kRgba32Float, true},
-    FormatParams{builtin::TexelFormat::kRgba32Sint, true},
-    FormatParams{builtin::TexelFormat::kRgba32Uint, true},
-    FormatParams{builtin::TexelFormat::kRgba8Sint, true},
-    FormatParams{builtin::TexelFormat::kRgba8Snorm, true},
-    FormatParams{builtin::TexelFormat::kRgba8Uint, true},
-    FormatParams{builtin::TexelFormat::kRgba8Unorm, true}};
+static constexpr FormatParams format_cases[] = {FormatParams{core::TexelFormat::kBgra8Unorm, true},
+                                                FormatParams{core::TexelFormat::kR32Float, true},
+                                                FormatParams{core::TexelFormat::kR32Sint, true},
+                                                FormatParams{core::TexelFormat::kR32Uint, true},
+                                                FormatParams{core::TexelFormat::kRg32Float, true},
+                                                FormatParams{core::TexelFormat::kRg32Sint, true},
+                                                FormatParams{core::TexelFormat::kRg32Uint, true},
+                                                FormatParams{core::TexelFormat::kRgba16Float, true},
+                                                FormatParams{core::TexelFormat::kRgba16Sint, true},
+                                                FormatParams{core::TexelFormat::kRgba16Uint, true},
+                                                FormatParams{core::TexelFormat::kRgba32Float, true},
+                                                FormatParams{core::TexelFormat::kRgba32Sint, true},
+                                                FormatParams{core::TexelFormat::kRgba32Uint, true},
+                                                FormatParams{core::TexelFormat::kRgba8Sint, true},
+                                                FormatParams{core::TexelFormat::kRgba8Snorm, true},
+                                                FormatParams{core::TexelFormat::kRgba8Uint, true},
+                                                FormatParams{core::TexelFormat::kRgba8Unorm, true}};
 
 using StorageTextureFormatTest = ResolverTestWithParam<FormatParams>;
 TEST_P(StorageTextureFormatTest, All) {
@@ -1099,19 +1089,19 @@ TEST_P(StorageTextureFormatTest, All) {
     // var d : texture_storage_3d<*, write>;
 
     auto st_a = ty.storage_texture(Source{{12, 34}}, type::TextureDimension::k1d, params.format,
-                                   builtin::Access::kWrite);
+                                   core::Access::kWrite);
     GlobalVar("a", st_a, Group(0_a), Binding(0_a));
 
     ast::Type st_b =
-        ty.storage_texture(type::TextureDimension::k2d, params.format, builtin::Access::kWrite);
+        ty.storage_texture(type::TextureDimension::k2d, params.format, core::Access::kWrite);
     GlobalVar("b", st_b, Group(0_a), Binding(1_a));
 
-    ast::Type st_c = ty.storage_texture(type::TextureDimension::k2dArray, params.format,
-                                        builtin::Access::kWrite);
+    ast::Type st_c =
+        ty.storage_texture(type::TextureDimension::k2dArray, params.format, core::Access::kWrite);
     GlobalVar("c", st_c, Group(0_a), Binding(2_a));
 
     ast::Type st_d =
-        ty.storage_texture(type::TextureDimension::k3d, params.format, builtin::Access::kWrite);
+        ty.storage_texture(type::TextureDimension::k3d, params.format, core::Access::kWrite);
     GlobalVar("d", st_d, Group(0_a), Binding(3_a));
 
     if (params.is_valid) {
@@ -1158,7 +1148,7 @@ TEST_F(StorageTextureAccessTest, RWAccess_Fail) {
     // var a : texture_storage_1d<r32uint, read_write>;
 
     auto st = ty.storage_texture(Source{{12, 34}}, type::TextureDimension::k1d,
-                                 builtin::TexelFormat::kR32Uint, builtin::Access::kReadWrite);
+                                 core::TexelFormat::kR32Uint, core::Access::kReadWrite);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
@@ -1172,7 +1162,7 @@ TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
     // var a : texture_storage_1d<r32uint, read>;
 
     auto st = ty.storage_texture(Source{{12, 34}}, type::TextureDimension::k1d,
-                                 builtin::TexelFormat::kR32Uint, builtin::Access::kRead);
+                                 core::TexelFormat::kR32Uint, core::Access::kRead);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
@@ -1185,8 +1175,8 @@ TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
     // @group(0) @binding(0)
     // var a : texture_storage_1d<r32uint, write>;
 
-    auto st = ty.storage_texture(type::TextureDimension::k1d, builtin::TexelFormat::kR32Uint,
-                                 builtin::Access::kWrite);
+    auto st = ty.storage_texture(type::TextureDimension::k1d, core::TexelFormat::kR32Uint,
+                                 core::Access::kWrite);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
@@ -1213,11 +1203,11 @@ TEST_P(ValidMatrixTypes, Okay) {
     // var a : matNxM<EL_TY>;
     auto& params = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     ast::Type el_ty = params.elem_ty(*this);
 
-    GlobalVar("a", ty.mat(el_ty, params.columns, params.rows), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.mat(el_ty, params.columns, params.rows), core::AddressSpace::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
@@ -1253,12 +1243,12 @@ TEST_P(InvalidMatrixElementTypes, InvalidElementType) {
     // var a : matNxM<EL_TY>;
     auto& params = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     ast::Type el_ty = params.elem_ty(*this);
 
     GlobalVar("a", ty.mat(Source{{12, 34}}, el_ty, params.columns, params.rows),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: matrix element type must be 'f32' or 'f16'");
 }
@@ -1298,9 +1288,9 @@ TEST_P(ValidVectorTypes, Okay) {
     // var a : vecN<EL_TY>;
     auto& params = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
-    GlobalVar("a", ty.vec(params.elem_ty(*this), params.width), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.vec(params.elem_ty(*this), params.width), core::AddressSpace::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
@@ -1332,10 +1322,10 @@ TEST_P(InvalidVectorElementTypes, InvalidElementType) {
     // var a : vecN<EL_TY>;
     auto& params = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     GlobalVar("a", ty.vec(Source{{12, 34}}, params.elem_ty(*this), params.width),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: vector element type must be 'bool', 'f32', 'f16', 'i32' or 'u32'");
@@ -1370,7 +1360,7 @@ TEST_P(BuiltinTypeAliasTest, CheckEquivalent) {
     // explicit = aliased;
     auto& params = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     WrapInFunction(Decl(Var("aliased", ty(params.alias))),
                    Decl(Var("explicit", params.type(*this))),  //
@@ -1382,7 +1372,7 @@ TEST_P(BuiltinTypeAliasTest, Construct) {
     // var v : vecN<T> = vecTN();
     auto& params = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     WrapInFunction(Decl(Var("v", params.type(*this), Call(params.alias))));
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1430,8 +1420,8 @@ TEST_P(ResolverUntemplatedTypeUsedWithTemplateArgs, Builtin_UseWithTemplateArgs)
     // enable f16;
     // var<private> v : f32<true>;
 
-    Enable(builtin::Extension::kF16);
-    GlobalVar("v", builtin::AddressSpace::kPrivate, ty(Source{{12, 34}}, GetParam(), true));
+    Enable(core::Extension::kF16);
+    GlobalVar("v", core::AddressSpace::kPrivate, ty(Source{{12, 34}}, GetParam(), true));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: type '" + std::string(GetParam()) +
@@ -1443,9 +1433,9 @@ TEST_P(ResolverUntemplatedTypeUsedWithTemplateArgs, BuiltinAlias_UseWithTemplate
     // alias A = f32;
     // var<private> v : A<true>;
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
     Alias(Source{{56, 78}}, "A", ty(GetParam()));
-    GlobalVar("v", builtin::AddressSpace::kPrivate, ty(Source{{12, 34}}, "A", true));
+    GlobalVar("v", core::AddressSpace::kPrivate, ty(Source{{12, 34}}, "A", true));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1498,7 +1488,7 @@ TEST_F(ResolverUntemplatedTypeUsedWithTemplateArgs, Struct_UseWithTemplateArgs) 
     // var<private> v : S<true>;
 
     Structure(Source{{56, 78}}, "S", Vector{Member("i", ty.i32())});
-    GlobalVar("v", builtin::AddressSpace::kPrivate, ty(Source{{12, 34}}, "S", true));
+    GlobalVar("v", core::AddressSpace::kPrivate, ty(Source{{12, 34}}, "S", true));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

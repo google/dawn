@@ -17,7 +17,7 @@
 #include <functional>
 #include <utility>
 
-#include "src/tint/lang/core/builtin/function.h"
+#include "src/tint/lang/core/function.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
@@ -108,7 +108,7 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program* src,
             if (auto* access = sem->UnwrapMaterialize()->As<sem::IndexAccessorExpression>()) {
                 if (access->Object()->UnwrapMaterialize()->Type()->HoldsAbstract() &&
                     access->Index()->Stage() == sem::EvaluationStage::kOverride) {
-                    auto* obj = b.Call(builtin::str(builtin::Function::kTintMaterialize),
+                    auto* obj = b.Call(core::str(core::Function::kTintMaterialize),
                                        ctx.Clone(expr->object));
                     return b.IndexAccessor(obj, ctx.Clone(expr->index));
                 }

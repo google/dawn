@@ -161,8 +161,8 @@ class Info {
     /// @param ast_node the AST node
     /// @param rule the diagnostic rule
     /// @returns the severity of the rule for that AST node
-    builtin::DiagnosticSeverity DiagnosticSeverity(const ast::Node* ast_node,
-                                                   builtin::DiagnosticRule rule) const;
+    core::DiagnosticSeverity DiagnosticSeverity(const ast::Node* ast_node,
+                                                core::DiagnosticRule rule) const;
 
   private:
     // AST node index to semantic node

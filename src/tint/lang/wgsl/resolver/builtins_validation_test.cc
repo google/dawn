@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/utils/text/string_stream.h"
@@ -20,8 +20,8 @@
 namespace tint::resolver {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 template <typename T>
 using DataType = builder::DataType<T>;
@@ -29,86 +29,78 @@ class ResolverBuiltinsValidationTest : public resolver::TestHelper, public testi
 namespace StageTest {
 struct Params {
     builder::ast_type_func_ptr type;
-    builtin::BuiltinValue builtin;
+    core::BuiltinValue builtin;
     ast::PipelineStage stage;
     bool is_valid;
 };
 
 template <typename T>
-constexpr Params ParamsFor(builtin::BuiltinValue builtin, ast::PipelineStage stage, bool is_valid) {
+constexpr Params ParamsFor(core::BuiltinValue builtin, ast::PipelineStage stage, bool is_valid) {
     return Params{DataType<T>::AST, builtin, stage, is_valid};
 }
 static constexpr Params cases[] = {
-    ParamsFor<vec4<f32>>(builtin::BuiltinValue::kPosition, ast::PipelineStage::kVertex, false),
-    ParamsFor<vec4<f32>>(builtin::BuiltinValue::kPosition, ast::PipelineStage::kFragment, true),
-    ParamsFor<vec4<f32>>(builtin::BuiltinValue::kPosition, ast::PipelineStage::kCompute, false),
+    ParamsFor<vec4<f32>>(core::BuiltinValue::kPosition, ast::PipelineStage::kVertex, false),
+    ParamsFor<vec4<f32>>(core::BuiltinValue::kPosition, ast::PipelineStage::kFragment, true),
+    ParamsFor<vec4<f32>>(core::BuiltinValue::kPosition, ast::PipelineStage::kCompute, false),
 
-    ParamsFor<u32>(builtin::BuiltinValue::kVertexIndex, ast::PipelineStage::kVertex, true),
-    ParamsFor<u32>(builtin::BuiltinValue::kVertexIndex, ast::PipelineStage::kFragment, false),
-    ParamsFor<u32>(builtin::BuiltinValue::kVertexIndex, ast::PipelineStage::kCompute, false),
+    ParamsFor<u32>(core::BuiltinValue::kVertexIndex, ast::PipelineStage::kVertex, true),
+    ParamsFor<u32>(core::BuiltinValue::kVertexIndex, ast::PipelineStage::kFragment, false),
+    ParamsFor<u32>(core::BuiltinValue::kVertexIndex, ast::PipelineStage::kCompute, false),
 
-    ParamsFor<u32>(builtin::BuiltinValue::kInstanceIndex, ast::PipelineStage::kVertex, true),
-    ParamsFor<u32>(builtin::BuiltinValue::kInstanceIndex, ast::PipelineStage::kFragment, false),
-    ParamsFor<u32>(builtin::BuiltinValue::kInstanceIndex, ast::PipelineStage::kCompute, false),
+    ParamsFor<u32>(core::BuiltinValue::kInstanceIndex, ast::PipelineStage::kVertex, true),
+    ParamsFor<u32>(core::BuiltinValue::kInstanceIndex, ast::PipelineStage::kFragment, false),
+    ParamsFor<u32>(core::BuiltinValue::kInstanceIndex, ast::PipelineStage::kCompute, false),
 
-    ParamsFor<bool>(builtin::BuiltinValue::kFrontFacing, ast::PipelineStage::kVertex, false),
-    ParamsFor<bool>(builtin::BuiltinValue::kFrontFacing, ast::PipelineStage::kFragment, true),
-    ParamsFor<bool>(builtin::BuiltinValue::kFrontFacing, ast::PipelineStage::kCompute, false),
+    ParamsFor<bool>(core::BuiltinValue::kFrontFacing, ast::PipelineStage::kVertex, false),
+    ParamsFor<bool>(core::BuiltinValue::kFrontFacing, ast::PipelineStage::kFragment, true),
+    ParamsFor<bool>(core::BuiltinValue::kFrontFacing, ast::PipelineStage::kCompute, false),
 
-    ParamsFor<vec3<u32>>(builtin::BuiltinValue::kLocalInvocationId,
+    ParamsFor<vec3<u32>>(core::BuiltinValue::kLocalInvocationId,
                          ast::PipelineStage::kVertex,
                          false),
-    ParamsFor<vec3<u32>>(builtin::BuiltinValue::kLocalInvocationId,
+    ParamsFor<vec3<u32>>(core::BuiltinValue::kLocalInvocationId,
                          ast::PipelineStage::kFragment,
                          false),
-    ParamsFor<vec3<u32>>(builtin::BuiltinValue::kLocalInvocationId,
+    ParamsFor<vec3<u32>>(core::BuiltinValue::kLocalInvocationId,
                          ast::PipelineStage::kCompute,
                          true),
 
-    ParamsFor<u32>(builtin::BuiltinValue::kLocalInvocationIndex,
-                   ast::PipelineStage::kVertex,
-                   false),
-    ParamsFor<u32>(builtin::BuiltinValue::kLocalInvocationIndex,
-                   ast::PipelineStage::kFragment,
-                   false),
-    ParamsFor<u32>(builtin::BuiltinValue::kLocalInvocationIndex,
-                   ast::PipelineStage::kCompute,
-                   true),
+    ParamsFor<u32>(core::BuiltinValue::kLocalInvocationIndex, ast::PipelineStage::kVertex, false),
+    ParamsFor<u32>(core::BuiltinValue::kLocalInvocationIndex, ast::PipelineStage::kFragment, false),
+    ParamsFor<u32>(core::BuiltinValue::kLocalInvocationIndex, ast::PipelineStage::kCompute, true),
 
-    ParamsFor<vec3<u32>>(builtin::BuiltinValue::kGlobalInvocationId,
+    ParamsFor<vec3<u32>>(core::BuiltinValue::kGlobalInvocationId,
                          ast::PipelineStage::kVertex,
                          false),
-    ParamsFor<vec3<u32>>(builtin::BuiltinValue::kGlobalInvocationId,
+    ParamsFor<vec3<u32>>(core::BuiltinValue::kGlobalInvocationId,
                          ast::PipelineStage::kFragment,
                          false),
-    ParamsFor<vec3<u32>>(builtin::BuiltinValue::kGlobalInvocationId,
+    ParamsFor<vec3<u32>>(core::BuiltinValue::kGlobalInvocationId,
                          ast::PipelineStage::kCompute,
                          true),
 
-    ParamsFor<vec3<u32>>(builtin::BuiltinValue::kWorkgroupId, ast::PipelineStage::kVertex, false),
-    ParamsFor<vec3<u32>>(builtin::BuiltinValue::kWorkgroupId, ast::PipelineStage::kFragment, false),
-    ParamsFor<vec3<u32>>(builtin::BuiltinValue::kWorkgroupId, ast::PipelineStage::kCompute, true),
+    ParamsFor<vec3<u32>>(core::BuiltinValue::kWorkgroupId, ast::PipelineStage::kVertex, false),
+    ParamsFor<vec3<u32>>(core::BuiltinValue::kWorkgroupId, ast::PipelineStage::kFragment, false),
+    ParamsFor<vec3<u32>>(core::BuiltinValue::kWorkgroupId, ast::PipelineStage::kCompute, true),
 
-    ParamsFor<vec3<u32>>(builtin::BuiltinValue::kNumWorkgroups, ast::PipelineStage::kVertex, false),
-    ParamsFor<vec3<u32>>(builtin::BuiltinValue::kNumWorkgroups,
-                         ast::PipelineStage::kFragment,
-                         false),
-    ParamsFor<vec3<u32>>(builtin::BuiltinValue::kNumWorkgroups, ast::PipelineStage::kCompute, true),
+    ParamsFor<vec3<u32>>(core::BuiltinValue::kNumWorkgroups, ast::PipelineStage::kVertex, false),
+    ParamsFor<vec3<u32>>(core::BuiltinValue::kNumWorkgroups, ast::PipelineStage::kFragment, false),
+    ParamsFor<vec3<u32>>(core::BuiltinValue::kNumWorkgroups, ast::PipelineStage::kCompute, true),
 
-    ParamsFor<u32>(builtin::BuiltinValue::kSampleIndex, ast::PipelineStage::kVertex, false),
-    ParamsFor<u32>(builtin::BuiltinValue::kSampleIndex, ast::PipelineStage::kFragment, true),
-    ParamsFor<u32>(builtin::BuiltinValue::kSampleIndex, ast::PipelineStage::kCompute, false),
+    ParamsFor<u32>(core::BuiltinValue::kSampleIndex, ast::PipelineStage::kVertex, false),
+    ParamsFor<u32>(core::BuiltinValue::kSampleIndex, ast::PipelineStage::kFragment, true),
+    ParamsFor<u32>(core::BuiltinValue::kSampleIndex, ast::PipelineStage::kCompute, false),
 
-    ParamsFor<u32>(builtin::BuiltinValue::kSampleMask, ast::PipelineStage::kVertex, false),
-    ParamsFor<u32>(builtin::BuiltinValue::kSampleMask, ast::PipelineStage::kFragment, true),
-    ParamsFor<u32>(builtin::BuiltinValue::kSampleMask, ast::PipelineStage::kCompute, false),
+    ParamsFor<u32>(core::BuiltinValue::kSampleMask, ast::PipelineStage::kVertex, false),
+    ParamsFor<u32>(core::BuiltinValue::kSampleMask, ast::PipelineStage::kFragment, true),
+    ParamsFor<u32>(core::BuiltinValue::kSampleMask, ast::PipelineStage::kCompute, false),
 };
 
 using ResolverBuiltinsStageTest = ResolverTestWithParam<Params>;
 TEST_P(ResolverBuiltinsStageTest, All_input) {
     const Params& params = GetParam();
 
-    auto* p = GlobalVar("p", ty.vec4<f32>(), builtin::AddressSpace::kPrivate);
+    auto* p = GlobalVar("p", ty.vec4<f32>(), core::AddressSpace::kPrivate);
     auto* input =
         Param("input", params.type(*this), Vector{Builtin(Source{{12, 34}}, params.builtin)});
     switch (params.stage) {
@@ -116,7 +108,7 @@ TEST_P(ResolverBuiltinsStageTest, All_input) {
             Func("main", Vector{input}, ty.vec4<f32>(), Vector{Return(p)},
                  Vector{Stage(ast::PipelineStage::kVertex)},
                  Vector{
-                     Builtin(Source{{12, 34}}, builtin::BuiltinValue::kPosition),
+                     Builtin(Source{{12, 34}}, core::BuiltinValue::kPosition),
                  });
             break;
         case ast::PipelineStage::kFragment:
@@ -160,7 +152,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInput_Fail) {
          Vector{
              Param("fd", ty.f32(),
                    Vector{
-                       Builtin(Source{{12, 34}}, builtin::BuiltinValue::kFragDepth),
+                       Builtin(Source{{12, 34}}, core::BuiltinValue::kFragDepth),
                    }),
          },
          ty.f32(),
@@ -190,7 +182,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Fail) {
                         Vector{
                             Member("frag_depth", ty.f32(),
                                    Vector{
-                                       Builtin(Source{{12, 34}}, builtin::BuiltinValue::kFragDepth),
+                                       Builtin(Source{{12, 34}}, core::BuiltinValue::kFragDepth),
                                    }),
                         });
 
@@ -225,7 +217,7 @@ TEST_F(ResolverBuiltinsValidationTest, StructBuiltinInsideEntryPoint_Ignored) {
     Structure("S", Vector{
                        Member("idx", ty.u32(),
                               Vector{
-                                  Builtin(builtin::BuiltinValue::kVertexIndex),
+                                  Builtin(core::BuiltinValue::kVertexIndex),
                               }),
                    });
 
@@ -249,7 +241,7 @@ TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_Struct_Fail) {
                         Vector{
                             Member("position", ty.vec4<u32>(),
                                    Vector{
-                                       Builtin(Source{{12, 34}}, builtin::BuiltinValue::kPosition),
+                                       Builtin(Source{{12, 34}}, core::BuiltinValue::kPosition),
                                    }),
                         });
     Func("fragShader",
@@ -280,7 +272,7 @@ TEST_F(ResolverBuiltinsValidationTest, PositionNotF32_ReturnType_Fail) {
          },
          Vector{Stage(ast::PipelineStage::kVertex)},
          Vector{
-             Builtin(Source{{12, 34}}, builtin::BuiltinValue::kPosition),
+             Builtin(Source{{12, 34}}, core::BuiltinValue::kPosition),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -298,7 +290,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthNotF32_Struct_Fail) {
                         Vector{
                             Member("frag_depth", ty.i32(),
                                    Vector{
-                                       Builtin(Source{{12, 34}}, builtin::BuiltinValue::kFragDepth),
+                                       Builtin(Source{{12, 34}}, core::BuiltinValue::kFragDepth),
                                    }),
                         });
     Func("fragShader", Vector{Param("arg", ty.Of(s))}, ty.f32(),
@@ -323,13 +315,13 @@ TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_Struct_Fail) {
     // @fragment
     // fn fragShader(is_front: MyInputs) -> @location(0) f32 { return 1.0; }
 
-    auto* s = Structure(
-        "MyInputs", Vector{
-                        Member("m", ty.f32(),
-                               Vector{
-                                   Builtin(Source{{12, 34}}, builtin::BuiltinValue::kSampleMask),
-                               }),
-                    });
+    auto* s = Structure("MyInputs",
+                        Vector{
+                            Member("m", ty.f32(),
+                                   Vector{
+                                       Builtin(Source{{12, 34}}, core::BuiltinValue::kSampleMask),
+                                   }),
+                        });
     Func("fragShader", Vector{Param("arg", ty.Of(s))}, ty.f32(),
          Vector{
              Return(1_f),
@@ -353,7 +345,7 @@ TEST_F(ResolverBuiltinsValidationTest, SampleMaskNotU32_ReturnType_Fail) {
              Stage(ast::PipelineStage::kFragment),
          },
          Vector{
-             Builtin(Source{{12, 34}}, builtin::BuiltinValue::kSampleMask),
+             Builtin(Source{{12, 34}}, core::BuiltinValue::kSampleMask),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -369,7 +361,7 @@ TEST_F(ResolverBuiltinsValidationTest, SampleMaskIsNotU32_Fail) {
          Vector{
              Param("arg", ty.bool_(),
                    Vector{
-                       Builtin(Source{{12, 34}}, builtin::BuiltinValue::kSampleMask),
+                       Builtin(Source{{12, 34}}, core::BuiltinValue::kSampleMask),
                    }),
          },
          ty.f32(),
@@ -393,13 +385,13 @@ TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Struct_Fail) {
     // @fragment
     // fn fragShader(is_front: MyInputs) -> @location(0) f32 { return 1.0; }
 
-    auto* s = Structure(
-        "MyInputs", Vector{
-                        Member("m", ty.f32(),
-                               Vector{
-                                   Builtin(Source{{12, 34}}, builtin::BuiltinValue::kSampleIndex),
-                               }),
-                    });
+    auto* s = Structure("MyInputs",
+                        Vector{
+                            Member("m", ty.f32(),
+                                   Vector{
+                                       Builtin(Source{{12, 34}}, core::BuiltinValue::kSampleIndex),
+                                   }),
+                        });
     Func("fragShader", Vector{Param("arg", ty.Of(s))}, ty.f32(),
          Vector{
              Return(1_f),
@@ -424,7 +416,7 @@ TEST_F(ResolverBuiltinsValidationTest, SampleIndexIsNotU32_Fail) {
          Vector{
              Param("arg", ty.bool_(),
                    Vector{
-                       Builtin(Source{{12, 34}}, builtin::BuiltinValue::kSampleIndex),
+                       Builtin(Source{{12, 34}}, core::BuiltinValue::kSampleIndex),
                    }),
          },
          ty.f32(),
@@ -450,7 +442,7 @@ TEST_F(ResolverBuiltinsValidationTest, PositionIsNotF32_Fail) {
          Vector{
              Param("p", ty.vec3<f32>(),
                    Vector{
-                       Builtin(Source{{12, 34}}, builtin::BuiltinValue::kPosition),
+                       Builtin(Source{{12, 34}}, core::BuiltinValue::kPosition),
                    }),
          },
          ty.f32(),
@@ -480,7 +472,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsNotF32_Fail) {
              Stage(ast::PipelineStage::kFragment),
          },
          Vector{
-             Builtin(Source{{12, 34}}, builtin::BuiltinValue::kFragDepth),
+             Builtin(Source{{12, 34}}, core::BuiltinValue::kFragDepth),
          });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(frag_depth) must be 'f32'");
@@ -494,18 +486,18 @@ TEST_F(ResolverBuiltinsValidationTest, VertexIndexIsNotU32_Fail) {
     // ) -> @builtin(kPosition) vec4<f32> { return vec4<f32>(); }
     auto* p = Param("p", ty.vec4<f32>(),
                     Vector{
-                        Builtin(builtin::BuiltinValue::kPosition),
+                        Builtin(core::BuiltinValue::kPosition),
                     });
     auto* vi = Param("vi", ty.f32(),
                      Vector{
-                         Builtin(Source{{12, 34}}, builtin::BuiltinValue::kVertexIndex),
+                         Builtin(Source{{12, 34}}, core::BuiltinValue::kVertexIndex),
                      });
     Func("main", Vector{vi, p}, ty.vec4<f32>(), Vector{Return(Expr("p"))},
          Vector{
              Stage(ast::PipelineStage::kVertex),
          },
          Vector{
-             Builtin(builtin::BuiltinValue::kPosition),
+             Builtin(core::BuiltinValue::kPosition),
          });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(vertex_index) must be 'u32'");
@@ -519,18 +511,18 @@ TEST_F(ResolverBuiltinsValidationTest, InstanceIndexIsNotU32) {
     // ) -> @builtin(kPosition) vec4<f32> { return vec4<f32>(); }
     auto* p = Param("p", ty.vec4<f32>(),
                     Vector{
-                        Builtin(builtin::BuiltinValue::kPosition),
+                        Builtin(core::BuiltinValue::kPosition),
                     });
     auto* ii = Param("ii", ty.f32(),
                      Vector{
-                         Builtin(Source{{12, 34}}, builtin::BuiltinValue::kInstanceIndex),
+                         Builtin(Source{{12, 34}}, core::BuiltinValue::kInstanceIndex),
                      });
     Func("main", Vector{ii, p}, ty.vec4<f32>(), Vector{Return(Expr("p"))},
          Vector{
              Stage(ast::PipelineStage::kVertex),
          },
          Vector{
-             Builtin(builtin::BuiltinValue::kPosition),
+             Builtin(core::BuiltinValue::kPosition),
          });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: store type of @builtin(instance_index) must be 'u32'");
@@ -546,19 +538,19 @@ TEST_F(ResolverBuiltinsValidationTest, FragmentBuiltin_Pass) {
     // ) -> @builtin(frag_depth) f32 { var fd: f32; return fd; }
     auto* p = Param("p", ty.vec4<f32>(),
                     Vector{
-                        Builtin(builtin::BuiltinValue::kPosition),
+                        Builtin(core::BuiltinValue::kPosition),
                     });
     auto* ff = Param("ff", ty.bool_(),
                      Vector{
-                         Builtin(builtin::BuiltinValue::kFrontFacing),
+                         Builtin(core::BuiltinValue::kFrontFacing),
                      });
     auto* si = Param("si", ty.u32(),
                      Vector{
-                         Builtin(builtin::BuiltinValue::kSampleIndex),
+                         Builtin(core::BuiltinValue::kSampleIndex),
                      });
     auto* sm = Param("sm", ty.u32(),
                      Vector{
-                         Builtin(builtin::BuiltinValue::kSampleMask),
+                         Builtin(core::BuiltinValue::kSampleMask),
                      });
     auto* var_fd = Var("fd", ty.f32());
     Func("fs_main", Vector{p, ff, si, sm}, ty.f32(),
@@ -570,7 +562,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragmentBuiltin_Pass) {
              Stage(ast::PipelineStage::kFragment),
          },
          Vector{
-             Builtin(builtin::BuiltinValue::kFragDepth),
+             Builtin(core::BuiltinValue::kFragDepth),
          });
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -583,12 +575,12 @@ TEST_F(ResolverBuiltinsValidationTest, VertexBuiltin_Pass) {
     // ) -> @builtin(position) vec4<f32> { var p :vec4<f32>; return p; }
     auto* vi = Param("vi", ty.u32(),
                      Vector{
-                         Builtin(Source{{12, 34}}, builtin::BuiltinValue::kVertexIndex),
+                         Builtin(Source{{12, 34}}, core::BuiltinValue::kVertexIndex),
                      });
 
     auto* ii = Param("ii", ty.u32(),
                      Vector{
-                         Builtin(Source{{12, 34}}, builtin::BuiltinValue::kInstanceIndex),
+                         Builtin(Source{{12, 34}}, core::BuiltinValue::kInstanceIndex),
                      });
     auto* p = Var("p", ty.vec4<f32>());
     Func("main", Vector{vi, ii}, ty.vec4<f32>(),
@@ -598,7 +590,7 @@ TEST_F(ResolverBuiltinsValidationTest, VertexBuiltin_Pass) {
          },
          Vector{Stage(ast::PipelineStage::kVertex)},
          Vector{
-             Builtin(builtin::BuiltinValue::kPosition),
+             Builtin(core::BuiltinValue::kPosition),
          });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -616,23 +608,23 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_Pass) {
 
     auto* li_id = Param("li_id", ty.vec3<u32>(),
                         Vector{
-                            Builtin(builtin::BuiltinValue::kLocalInvocationId),
+                            Builtin(core::BuiltinValue::kLocalInvocationId),
                         });
     auto* li_index = Param("li_index", ty.u32(),
                            Vector{
-                               Builtin(builtin::BuiltinValue::kLocalInvocationIndex),
+                               Builtin(core::BuiltinValue::kLocalInvocationIndex),
                            });
     auto* gi = Param("gi", ty.vec3<u32>(),
                      Vector{
-                         Builtin(builtin::BuiltinValue::kGlobalInvocationId),
+                         Builtin(core::BuiltinValue::kGlobalInvocationId),
                      });
     auto* wi = Param("wi", ty.vec3<u32>(),
                      Vector{
-                         Builtin(builtin::BuiltinValue::kWorkgroupId),
+                         Builtin(core::BuiltinValue::kWorkgroupId),
                      });
     auto* nwgs = Param("nwgs", ty.vec3<u32>(),
                        Vector{
-                           Builtin(builtin::BuiltinValue::kNumWorkgroups),
+                           Builtin(core::BuiltinValue::kNumWorkgroups),
                        });
 
     Func("main", Vector{li_id, li_index, gi, wi, nwgs}, ty.void_(), tint::Empty,
@@ -645,7 +637,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_Pass) {
 TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_WorkGroupIdNotVec3U32) {
     auto* wi = Param("wi", ty.f32(),
                      Vector{
-                         Builtin(Source{{12, 34}}, builtin::BuiltinValue::kWorkgroupId),
+                         Builtin(Source{{12, 34}}, core::BuiltinValue::kWorkgroupId),
                      });
     Func("main", Vector{wi}, ty.void_(), tint::Empty,
          Vector{Stage(ast::PipelineStage::kCompute),
@@ -660,7 +652,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_WorkGroupIdNotVec3U32) {
 TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_NumWorkgroupsNotVec3U32) {
     auto* nwgs = Param("nwgs", ty.f32(),
                        Vector{
-                           Builtin(Source{{12, 34}}, builtin::BuiltinValue::kNumWorkgroups),
+                           Builtin(Source{{12, 34}}, core::BuiltinValue::kNumWorkgroups),
                        });
     Func("main", Vector{nwgs}, ty.void_(), tint::Empty,
          Vector{Stage(ast::PipelineStage::kCompute),
@@ -675,7 +667,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_NumWorkgroupsNotVec3U32) {
 TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_GlobalInvocationNotVec3U32) {
     auto* gi = Param("gi", ty.vec3<i32>(),
                      Vector{
-                         Builtin(Source{{12, 34}}, builtin::BuiltinValue::kGlobalInvocationId),
+                         Builtin(Source{{12, 34}}, core::BuiltinValue::kGlobalInvocationId),
                      });
     Func("main", Vector{gi}, ty.void_(), tint::Empty,
          Vector{Stage(ast::PipelineStage::kCompute),
@@ -688,11 +680,10 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_GlobalInvocationNotVec3U32
 }
 
 TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_LocalInvocationIndexNotU32) {
-    auto* li_index =
-        Param("li_index", ty.vec3<u32>(),
-              Vector{
-                  Builtin(Source{{12, 34}}, builtin::BuiltinValue::kLocalInvocationIndex),
-              });
+    auto* li_index = Param("li_index", ty.vec3<u32>(),
+                           Vector{
+                               Builtin(Source{{12, 34}}, core::BuiltinValue::kLocalInvocationIndex),
+                           });
     Func("main", Vector{li_index}, ty.void_(), tint::Empty,
          Vector{Stage(ast::PipelineStage::kCompute),
                 WorkgroupSize(Expr(Source{Source::Location{12, 34}}, 2_i))});
@@ -706,7 +697,7 @@ TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_LocalInvocationIndexNotU32
 TEST_F(ResolverBuiltinsValidationTest, ComputeBuiltin_LocalInvocationNotVec3U32) {
     auto* li_id = Param("li_id", ty.vec2<u32>(),
                         Vector{
-                            Builtin(Source{{12, 34}}, builtin::BuiltinValue::kLocalInvocationId),
+                            Builtin(Source{{12, 34}}, core::BuiltinValue::kLocalInvocationId),
                         });
     Func("main", Vector{li_id}, ty.void_(), tint::Empty,
          Vector{Stage(ast::PipelineStage::kCompute),
@@ -731,19 +722,19 @@ TEST_F(ResolverBuiltinsValidationTest, FragmentBuiltinStruct_Pass) {
     auto* s = Structure("MyInputs", Vector{
                                         Member("position", ty.vec4<f32>(),
                                                Vector{
-                                                   Builtin(builtin::BuiltinValue::kPosition),
+                                                   Builtin(core::BuiltinValue::kPosition),
                                                }),
                                         Member("front_facing", ty.bool_(),
                                                Vector{
-                                                   Builtin(builtin::BuiltinValue::kFrontFacing),
+                                                   Builtin(core::BuiltinValue::kFrontFacing),
                                                }),
                                         Member("sample_index", ty.u32(),
                                                Vector{
-                                                   Builtin(builtin::BuiltinValue::kSampleIndex),
+                                                   Builtin(core::BuiltinValue::kSampleIndex),
                                                }),
                                         Member("sample_mask", ty.u32(),
                                                Vector{
-                                                   Builtin(builtin::BuiltinValue::kSampleMask),
+                                                   Builtin(core::BuiltinValue::kSampleMask),
                                                }),
                                     });
     Func("fragShader", Vector{Param("arg", ty.Of(s))}, ty.f32(),
@@ -767,7 +758,7 @@ TEST_F(ResolverBuiltinsValidationTest, FrontFacingParamIsNotBool_Fail) {
 
     auto* is_front = Param("is_front", ty.i32(),
                            Vector{
-                               Builtin(Source{{12, 34}}, builtin::BuiltinValue::kFrontFacing),
+                               Builtin(Source{{12, 34}}, core::BuiltinValue::kFrontFacing),
                            });
     Func("fs_main", Vector{is_front}, ty.f32(),
          Vector{
@@ -791,13 +782,13 @@ TEST_F(ResolverBuiltinsValidationTest, FrontFacingMemberIsNotBool_Fail) {
     // @fragment
     // fn fragShader(is_front: MyInputs) -> @location(0) f32 { return 1.0; }
 
-    auto* s = Structure(
-        "MyInputs", Vector{
-                        Member("pos", ty.f32(),
-                               Vector{
-                                   Builtin(Source{{12, 34}}, builtin::BuiltinValue::kFrontFacing),
-                               }),
-                    });
+    auto* s = Structure("MyInputs",
+                        Vector{
+                            Member("pos", ty.f32(),
+                                   Vector{
+                                       Builtin(Source{{12, 34}}, core::BuiltinValue::kFrontFacing),
+                                   }),
+                        });
     Func("fragShader", Vector{Param("is_front", ty.Of(s))}, ty.f32(),
          Vector{
              Return(1_f),
@@ -822,7 +813,7 @@ TEST_F(ResolverBuiltinsValidationTest, StructMemberAttributeMapsToSemBuiltinEnum
     // @fragment
     // fn f(s : S) {}
 
-    auto* builtin = Builtin(builtin::BuiltinValue::kFrontFacing);
+    auto* builtin = Builtin(core::BuiltinValue::kFrontFacing);
     auto* s = Structure("S", Vector{
                                  Member("f", ty.bool_(), Vector{builtin}),
                              });
@@ -834,7 +825,7 @@ TEST_F(ResolverBuiltinsValidationTest, StructMemberAttributeMapsToSemBuiltinEnum
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* builtin_expr = Sem().Get(builtin);
     ASSERT_NE(builtin_expr, nullptr);
-    EXPECT_EQ(builtin_expr->Value(), builtin::BuiltinValue::kFrontFacing);
+    EXPECT_EQ(builtin_expr->Value(), core::BuiltinValue::kFrontFacing);
 }
 
 // TODO(crbug.com/tint/1846): This isn't a validation test, but this sits next to other @builtin
@@ -843,7 +834,7 @@ TEST_F(ResolverBuiltinsValidationTest, ParamAttributeMapsToSemBuiltinEnum) {
     // @fragment
     // fn f(@builtin(front_facing) b : bool) {}
 
-    auto* builtin = Builtin(builtin::BuiltinValue::kFrontFacing);
+    auto* builtin = Builtin(core::BuiltinValue::kFrontFacing);
     Func("f", Vector{Param("b", ty.bool_(), Vector{builtin})}, ty.void_(), tint::Empty,
          Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -852,7 +843,7 @@ TEST_F(ResolverBuiltinsValidationTest, ParamAttributeMapsToSemBuiltinEnum) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* builtin_expr = Sem().Get(builtin);
     ASSERT_NE(builtin_expr, nullptr);
-    EXPECT_EQ(builtin_expr->Value(), builtin::BuiltinValue::kFrontFacing);
+    EXPECT_EQ(builtin_expr->Value(), core::BuiltinValue::kFrontFacing);
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Length_Float_Scalar) {

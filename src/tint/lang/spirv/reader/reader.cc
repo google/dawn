@@ -44,7 +44,7 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
     if (options.allow_non_uniform_derivatives) {
         // Suppress errors regarding non-uniform derivative operations if requested, by adding a
         // diagnostic directive to the module.
-        builder.DiagnosticDirective(builtin::DiagnosticSeverity::kOff, "derivative_uniformity");
+        builder.DiagnosticDirective(core::DiagnosticSeverity::kOff, "derivative_uniformity");
     }
 
     // The SPIR-V parser can construct disjoint AST nodes, which is invalid for

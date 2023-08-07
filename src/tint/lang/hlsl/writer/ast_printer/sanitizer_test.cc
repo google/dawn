@@ -20,14 +20,14 @@
 namespace tint::hlsl::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using HlslSanitizerTest = TestHelper;
 
 TEST_F(HlslSanitizerTest, Call_ArrayLength) {
     auto* s = Structure("my_struct", Vector{Member(0, "a", ty.array<f32>())});
-    GlobalVar("b", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead, Binding(1_a),
               Group(2_a));
 
     Func("a_func", tint::Empty, ty.void_(),
@@ -61,7 +61,7 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
                                          Member(0, "z", ty.f32()),
                                          Member(4, "a", ty.array<f32>()),
                                      });
-    GlobalVar("b", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead, Binding(1_a),
               Group(2_a));
 
     Func("a_func", tint::Empty, ty.void_(),
@@ -93,7 +93,7 @@ void a_func() {
 
 TEST_F(HlslSanitizerTest, Call_ArrayLength_ViaLets) {
     auto* s = Structure("my_struct", Vector{Member(0, "a", ty.array<f32>())});
-    GlobalVar("b", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead, Binding(1_a),
               Group(2_a));
 
     auto* p = Let("p", AddressOf("b"));
@@ -130,9 +130,9 @@ void a_func() {
 
 TEST_F(HlslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
     auto* s = Structure("my_struct", Vector{Member(0, "a", ty.array<f32>())});
-    GlobalVar("b", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead, Binding(1_a),
               Group(2_a));
-    GlobalVar("c", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(2_a),
+    GlobalVar("c", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead, Binding(2_a),
               Group(2_a));
 
     Func("a_func", tint::Empty, ty.void_(),

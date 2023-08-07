@@ -22,7 +22,7 @@ namespace {
 using WgslASTPrinterTest = TestHelper;
 
 TEST_F(WgslASTPrinterTest, Emit_DiagnosticDirective) {
-    DiagnosticDirective(builtin::DiagnosticSeverity::kError, "chromium", "unreachable_code");
+    DiagnosticDirective(core::DiagnosticSeverity::kError, "chromium", "unreachable_code");
 
     ASTPrinter& gen = Build();
     gen.Generate();
@@ -34,7 +34,7 @@ TEST_F(WgslASTPrinterTest, Emit_DiagnosticDirective) {
 
 TEST_F(WgslASTPrinterTest, Emit_DiagnosticAttribute) {
     auto* attr =
-        DiagnosticAttribute(builtin::DiagnosticSeverity::kError, "chromium", "unreachable_code");
+        DiagnosticAttribute(core::DiagnosticSeverity::kError, "chromium", "unreachable_code");
     Func("foo", {}, ty.void_(), {}, Vector{attr});
 
     ASTPrinter& gen = Build();

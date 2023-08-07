@@ -29,8 +29,8 @@
 namespace tint::ast::transform {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using DecomposeStridedMatrixTest = TransformTest;
 
@@ -79,7 +79,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix) {
                                           b.Disable(DisabledValidation::kIgnoreStrideAttribute),
                                       }),
                          });
-    b.GlobalVar("s", b.ty.Of(S), builtin::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
+    b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
     b.Func("f", tint::Empty, b.ty.void_(),
            tint::Vector{
                b.Decl(b.Let("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
@@ -136,7 +136,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformColumn) {
                                           b.Disable(DisabledValidation::kIgnoreStrideAttribute),
                                       }),
                          });
-    b.GlobalVar("s", b.ty.Of(S), builtin::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
+    b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
     b.Func(
         "f", tint::Empty, b.ty.void_(),
         tint::Vector{
@@ -190,7 +190,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix_DefaultStride) {
                                           b.Disable(DisabledValidation::kIgnoreStrideAttribute),
                                       }),
                          });
-    b.GlobalVar("s", b.ty.Of(S), builtin::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
+    b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
     b.Func("f", tint::Empty, b.ty.void_(),
            tint::Vector{
                b.Decl(b.Let("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
@@ -244,7 +244,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageMatrix) {
                                           b.Disable(DisabledValidation::kIgnoreStrideAttribute),
                                       }),
                          });
-    b.GlobalVar("s", b.ty.Of(S), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kStorage, core::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
     b.Func("f", tint::Empty, b.ty.void_(),
            tint::Vector{
@@ -302,7 +302,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageColumn) {
                                           b.Disable(DisabledValidation::kIgnoreStrideAttribute),
                                       }),
                          });
-    b.GlobalVar("s", b.ty.Of(S), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kStorage, core::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
     b.Func(
         "f", tint::Empty, b.ty.void_(),
@@ -357,7 +357,7 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
                                           b.Disable(DisabledValidation::kIgnoreStrideAttribute),
                                       }),
                          });
-    b.GlobalVar("s", b.ty.Of(S), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kStorage, core::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
     b.Func(
         "f", tint::Empty, b.ty.void_(),
@@ -417,7 +417,7 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
                                           b.Disable(DisabledValidation::kIgnoreStrideAttribute),
                                       }),
                          });
-    b.GlobalVar("s", b.ty.Of(S), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kStorage, core::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
     b.Func(
         "f", tint::Empty, b.ty.void_(),
@@ -478,7 +478,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
                                           b.Disable(DisabledValidation::kIgnoreStrideAttribute),
                                       }),
                          });
-    b.GlobalVar("s", b.ty.Of(S), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kStorage, core::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
     b.Func("f", tint::Empty, b.ty.void_(),
            tint::Vector{
@@ -551,7 +551,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadPrivateMatrix) {
                                           b.Disable(DisabledValidation::kIgnoreStrideAttribute),
                                       }),
                          });
-    b.GlobalVar("s", b.ty.Of(S), builtin::AddressSpace::kPrivate);
+    b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kPrivate);
     b.Func("f", tint::Empty, b.ty.void_(),
            tint::Vector{
                b.Decl(b.Let("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
@@ -605,7 +605,7 @@ TEST_F(DecomposeStridedMatrixTest, WritePrivateMatrix) {
                                           b.Disable(DisabledValidation::kIgnoreStrideAttribute),
                                       }),
                          });
-    b.GlobalVar("s", b.ty.Of(S), builtin::AddressSpace::kPrivate);
+    b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kPrivate);
     b.Func(
         "f", tint::Empty, b.ty.void_(),
         tint::Vector{

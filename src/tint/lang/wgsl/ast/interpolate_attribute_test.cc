@@ -25,8 +25,7 @@ namespace {
 using InterpolateAttributeTest = TestHelper;
 
 TEST_F(InterpolateAttributeTest, Creation) {
-    auto* d =
-        Interpolate(builtin::InterpolationType::kLinear, builtin::InterpolationSampling::kCenter);
+    auto* d = Interpolate(core::InterpolationType::kLinear, core::InterpolationSampling::kCenter);
     CheckIdentifier(d->type, "linear");
     CheckIdentifier(d->sampling, "center");
 }

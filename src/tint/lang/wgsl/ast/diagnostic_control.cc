@@ -16,7 +16,7 @@
 
 #include <string>
 
-#include "src/tint/lang/core/builtin/diagnostic_severity.h"
+#include "src/tint/lang/core/diagnostic_severity.h"
 #include "src/tint/lang/wgsl/ast/identifier.h"
 #include "src/tint/lang/wgsl/ast/templated_identifier.h"
 
@@ -24,8 +24,7 @@ namespace tint::ast {
 
 DiagnosticControl::DiagnosticControl() = default;
 
-DiagnosticControl::DiagnosticControl(builtin::DiagnosticSeverity sev,
-                                     const DiagnosticRuleName* rule)
+DiagnosticControl::DiagnosticControl(core::DiagnosticSeverity sev, const DiagnosticRuleName* rule)
     : severity(sev), rule_name(rule) {
     TINT_ASSERT(rule != nullptr);
 }

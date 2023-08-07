@@ -23,8 +23,8 @@ namespace tint::hlsl::writer {
 namespace {
 
 using ::testing::HasSubstr;
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using HlslASTPrinterTest_Builtin = TestHelper;
 
@@ -36,7 +36,7 @@ enum class CallParamType {
 };
 
 struct BuiltinData {
-    builtin::Function builtin;
+    core::Function builtin;
     CallParamType type;
     const char* hlsl_name;
 };
@@ -60,84 +60,84 @@ inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
     return out;
 }
 
-const ast::CallExpression* GenerateCall(builtin::Function builtin,
+const ast::CallExpression* GenerateCall(core::Function builtin,
                                         CallParamType type,
                                         ProgramBuilder* builder) {
     std::string name;
     StringStream str;
     str << name << builtin;
     switch (builtin) {
-        case builtin::Function::kAcos:
-        case builtin::Function::kAsin:
-        case builtin::Function::kAtan:
-        case builtin::Function::kCeil:
-        case builtin::Function::kCos:
-        case builtin::Function::kCosh:
-        case builtin::Function::kDpdx:
-        case builtin::Function::kDpdxCoarse:
-        case builtin::Function::kDpdxFine:
-        case builtin::Function::kDpdy:
-        case builtin::Function::kDpdyCoarse:
-        case builtin::Function::kDpdyFine:
-        case builtin::Function::kExp:
-        case builtin::Function::kExp2:
-        case builtin::Function::kFloor:
-        case builtin::Function::kFract:
-        case builtin::Function::kFwidth:
-        case builtin::Function::kFwidthCoarse:
-        case builtin::Function::kFwidthFine:
-        case builtin::Function::kInverseSqrt:
-        case builtin::Function::kLength:
-        case builtin::Function::kLog:
-        case builtin::Function::kLog2:
-        case builtin::Function::kNormalize:
-        case builtin::Function::kRound:
-        case builtin::Function::kSin:
-        case builtin::Function::kSinh:
-        case builtin::Function::kSqrt:
-        case builtin::Function::kTan:
-        case builtin::Function::kTanh:
+        case core::Function::kAcos:
+        case core::Function::kAsin:
+        case core::Function::kAtan:
+        case core::Function::kCeil:
+        case core::Function::kCos:
+        case core::Function::kCosh:
+        case core::Function::kDpdx:
+        case core::Function::kDpdxCoarse:
+        case core::Function::kDpdxFine:
+        case core::Function::kDpdy:
+        case core::Function::kDpdyCoarse:
+        case core::Function::kDpdyFine:
+        case core::Function::kExp:
+        case core::Function::kExp2:
+        case core::Function::kFloor:
+        case core::Function::kFract:
+        case core::Function::kFwidth:
+        case core::Function::kFwidthCoarse:
+        case core::Function::kFwidthFine:
+        case core::Function::kInverseSqrt:
+        case core::Function::kLength:
+        case core::Function::kLog:
+        case core::Function::kLog2:
+        case core::Function::kNormalize:
+        case core::Function::kRound:
+        case core::Function::kSin:
+        case core::Function::kSinh:
+        case core::Function::kSqrt:
+        case core::Function::kTan:
+        case core::Function::kTanh:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2");
             } else {
                 return builder->Call(str.str(), "f2");
             }
-        case builtin::Function::kLdexp:
+        case core::Function::kLdexp:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2", "i2");
             } else {
                 return builder->Call(str.str(), "f2", "i2");
             }
-        case builtin::Function::kAtan2:
-        case builtin::Function::kDot:
-        case builtin::Function::kDistance:
-        case builtin::Function::kPow:
-        case builtin::Function::kReflect:
-        case builtin::Function::kStep:
+        case core::Function::kAtan2:
+        case core::Function::kDot:
+        case core::Function::kDistance:
+        case core::Function::kPow:
+        case core::Function::kReflect:
+        case core::Function::kStep:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2", "h2");
             } else {
                 return builder->Call(str.str(), "f2", "f2");
             }
-        case builtin::Function::kCross:
+        case core::Function::kCross:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h3", "h3");
             } else {
                 return builder->Call(str.str(), "f3", "f3");
             }
-        case builtin::Function::kFma:
-        case builtin::Function::kMix:
-        case builtin::Function::kFaceForward:
-        case builtin::Function::kSmoothstep:
+        case core::Function::kFma:
+        case core::Function::kMix:
+        case core::Function::kFaceForward:
+        case core::Function::kSmoothstep:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2", "h2", "h2");
             } else {
                 return builder->Call(str.str(), "f2", "f2", "f2");
             }
-        case builtin::Function::kAll:
-        case builtin::Function::kAny:
+        case core::Function::kAll:
+        case core::Function::kAny:
             return builder->Call(str.str(), "b2");
-        case builtin::Function::kAbs:
+        case core::Function::kAbs:
             if (type == CallParamType::kF32) {
                 return builder->Call(str.str(), "f2");
             } else if (type == CallParamType::kF16) {
@@ -145,11 +145,11 @@ const ast::CallExpression* GenerateCall(builtin::Function builtin,
             } else {
                 return builder->Call(str.str(), "u2");
             }
-        case builtin::Function::kCountOneBits:
-        case builtin::Function::kReverseBits:
+        case core::Function::kCountOneBits:
+        case core::Function::kReverseBits:
             return builder->Call(str.str(), "u2");
-        case builtin::Function::kMax:
-        case builtin::Function::kMin:
+        case core::Function::kMax:
+        case core::Function::kMin:
             if (type == CallParamType::kF32) {
                 return builder->Call(str.str(), "f2", "f2");
             } else if (type == CallParamType::kF16) {
@@ -157,7 +157,7 @@ const ast::CallExpression* GenerateCall(builtin::Function builtin,
             } else {
                 return builder->Call(str.str(), "u2", "u2");
             }
-        case builtin::Function::kClamp:
+        case core::Function::kClamp:
             if (type == CallParamType::kF32) {
                 return builder->Call(str.str(), "f2", "f2", "f2");
             } else if (type == CallParamType::kF16) {
@@ -165,19 +165,19 @@ const ast::CallExpression* GenerateCall(builtin::Function builtin,
             } else {
                 return builder->Call(str.str(), "u2", "u2", "u2");
             }
-        case builtin::Function::kSelect:
+        case core::Function::kSelect:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2", "h2", "b2");
             } else {
                 return builder->Call(str.str(), "f2", "f2", "b2");
             }
-        case builtin::Function::kDeterminant:
+        case core::Function::kDeterminant:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "hm2x2");
             } else {
                 return builder->Call(str.str(), "m2x2");
             }
-        case builtin::Function::kTranspose:
+        case core::Function::kTranspose:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "hm3x2");
             } else {
@@ -194,21 +194,21 @@ TEST_P(HlslBuiltinTest, Emit) {
     auto param = GetParam();
 
     if (param.type == CallParamType::kF16) {
-        Enable(builtin::Extension::kF16);
+        Enable(core::Extension::kF16);
 
-        GlobalVar("h2", ty.vec2<f16>(), builtin::AddressSpace::kPrivate);
-        GlobalVar("h3", ty.vec3<f16>(), builtin::AddressSpace::kPrivate);
-        GlobalVar("hm2x2", ty.mat2x2<f16>(), builtin::AddressSpace::kPrivate);
-        GlobalVar("hm3x2", ty.mat3x2<f16>(), builtin::AddressSpace::kPrivate);
+        GlobalVar("h2", ty.vec2<f16>(), core::AddressSpace::kPrivate);
+        GlobalVar("h3", ty.vec3<f16>(), core::AddressSpace::kPrivate);
+        GlobalVar("hm2x2", ty.mat2x2<f16>(), core::AddressSpace::kPrivate);
+        GlobalVar("hm3x2", ty.mat3x2<f16>(), core::AddressSpace::kPrivate);
     }
 
-    GlobalVar("f2", ty.vec2<f32>(), builtin::AddressSpace::kPrivate);
-    GlobalVar("f3", ty.vec3<f32>(), builtin::AddressSpace::kPrivate);
-    GlobalVar("u2", ty.vec2<u32>(), builtin::AddressSpace::kPrivate);
-    GlobalVar("i2", ty.vec2<i32>(), builtin::AddressSpace::kPrivate);
-    GlobalVar("b2", ty.vec2<bool>(), builtin::AddressSpace::kPrivate);
-    GlobalVar("m2x2", ty.mat2x2<f32>(), builtin::AddressSpace::kPrivate);
-    GlobalVar("m3x2", ty.mat3x2<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("f2", ty.vec2<f32>(), core::AddressSpace::kPrivate);
+    GlobalVar("f3", ty.vec3<f32>(), core::AddressSpace::kPrivate);
+    GlobalVar("u2", ty.vec2<u32>(), core::AddressSpace::kPrivate);
+    GlobalVar("i2", ty.vec2<i32>(), core::AddressSpace::kPrivate);
+    GlobalVar("b2", ty.vec2<bool>(), core::AddressSpace::kPrivate);
+    GlobalVar("m2x2", ty.mat2x2<f32>(), core::AddressSpace::kPrivate);
+    GlobalVar("m3x2", ty.mat3x2<f32>(), core::AddressSpace::kPrivate);
 
     auto* call = GenerateCall(param.builtin, param.type, this);
     ASSERT_NE(nullptr, call) << "Unhandled builtin";
@@ -233,116 +233,111 @@ INSTANTIATE_TEST_SUITE_P(
     HlslASTPrinterTest_Builtin,
     HlslBuiltinTest,
     testing::Values(/* Logical built-in */
-                    BuiltinData{builtin::Function::kAll, CallParamType::kBool, "all"},
-                    BuiltinData{builtin::Function::kAny, CallParamType::kBool, "any"},
+                    BuiltinData{core::Function::kAll, CallParamType::kBool, "all"},
+                    BuiltinData{core::Function::kAny, CallParamType::kBool, "any"},
                     /* Float built-in */
-                    BuiltinData{builtin::Function::kAbs, CallParamType::kF32, "abs"},
-                    BuiltinData{builtin::Function::kAbs, CallParamType::kF16, "abs"},
-                    BuiltinData{builtin::Function::kAcos, CallParamType::kF32, "acos"},
-                    BuiltinData{builtin::Function::kAcos, CallParamType::kF16, "acos"},
-                    BuiltinData{builtin::Function::kAsin, CallParamType::kF32, "asin"},
-                    BuiltinData{builtin::Function::kAsin, CallParamType::kF16, "asin"},
-                    BuiltinData{builtin::Function::kAtan, CallParamType::kF32, "atan"},
-                    BuiltinData{builtin::Function::kAtan, CallParamType::kF16, "atan"},
-                    BuiltinData{builtin::Function::kAtan2, CallParamType::kF32, "atan2"},
-                    BuiltinData{builtin::Function::kAtan2, CallParamType::kF16, "atan2"},
-                    BuiltinData{builtin::Function::kCeil, CallParamType::kF32, "ceil"},
-                    BuiltinData{builtin::Function::kCeil, CallParamType::kF16, "ceil"},
-                    BuiltinData{builtin::Function::kClamp, CallParamType::kF32, "clamp"},
-                    BuiltinData{builtin::Function::kClamp, CallParamType::kF16, "clamp"},
-                    BuiltinData{builtin::Function::kCos, CallParamType::kF32, "cos"},
-                    BuiltinData{builtin::Function::kCos, CallParamType::kF16, "cos"},
-                    BuiltinData{builtin::Function::kCosh, CallParamType::kF32, "cosh"},
-                    BuiltinData{builtin::Function::kCosh, CallParamType::kF16, "cosh"},
-                    BuiltinData{builtin::Function::kCross, CallParamType::kF32, "cross"},
-                    BuiltinData{builtin::Function::kCross, CallParamType::kF16, "cross"},
-                    BuiltinData{builtin::Function::kDistance, CallParamType::kF32, "distance"},
-                    BuiltinData{builtin::Function::kDistance, CallParamType::kF16, "distance"},
-                    BuiltinData{builtin::Function::kExp, CallParamType::kF32, "exp"},
-                    BuiltinData{builtin::Function::kExp, CallParamType::kF16, "exp"},
-                    BuiltinData{builtin::Function::kExp2, CallParamType::kF32, "exp2"},
-                    BuiltinData{builtin::Function::kExp2, CallParamType::kF16, "exp2"},
-                    BuiltinData{builtin::Function::kFaceForward, CallParamType::kF32,
-                                "faceforward"},
-                    BuiltinData{builtin::Function::kFaceForward, CallParamType::kF16,
-                                "faceforward"},
-                    BuiltinData{builtin::Function::kFloor, CallParamType::kF32, "floor"},
-                    BuiltinData{builtin::Function::kFloor, CallParamType::kF16, "floor"},
-                    BuiltinData{builtin::Function::kFma, CallParamType::kF32, "mad"},
-                    BuiltinData{builtin::Function::kFma, CallParamType::kF16, "mad"},
-                    BuiltinData{builtin::Function::kFract, CallParamType::kF32, "frac"},
-                    BuiltinData{builtin::Function::kFract, CallParamType::kF16, "frac"},
-                    BuiltinData{builtin::Function::kInverseSqrt, CallParamType::kF32, "rsqrt"},
-                    BuiltinData{builtin::Function::kInverseSqrt, CallParamType::kF16, "rsqrt"},
-                    BuiltinData{builtin::Function::kLdexp, CallParamType::kF32, "ldexp"},
-                    BuiltinData{builtin::Function::kLdexp, CallParamType::kF16, "ldexp"},
-                    BuiltinData{builtin::Function::kLength, CallParamType::kF32, "length"},
-                    BuiltinData{builtin::Function::kLength, CallParamType::kF16, "length"},
-                    BuiltinData{builtin::Function::kLog, CallParamType::kF32, "log"},
-                    BuiltinData{builtin::Function::kLog, CallParamType::kF16, "log"},
-                    BuiltinData{builtin::Function::kLog2, CallParamType::kF32, "log2"},
-                    BuiltinData{builtin::Function::kLog2, CallParamType::kF16, "log2"},
-                    BuiltinData{builtin::Function::kMax, CallParamType::kF32, "max"},
-                    BuiltinData{builtin::Function::kMax, CallParamType::kF16, "max"},
-                    BuiltinData{builtin::Function::kMin, CallParamType::kF32, "min"},
-                    BuiltinData{builtin::Function::kMin, CallParamType::kF16, "min"},
-                    BuiltinData{builtin::Function::kMix, CallParamType::kF32, "lerp"},
-                    BuiltinData{builtin::Function::kMix, CallParamType::kF16, "lerp"},
-                    BuiltinData{builtin::Function::kNormalize, CallParamType::kF32, "normalize"},
-                    BuiltinData{builtin::Function::kNormalize, CallParamType::kF16, "normalize"},
-                    BuiltinData{builtin::Function::kPow, CallParamType::kF32, "pow"},
-                    BuiltinData{builtin::Function::kPow, CallParamType::kF16, "pow"},
-                    BuiltinData{builtin::Function::kReflect, CallParamType::kF32, "reflect"},
-                    BuiltinData{builtin::Function::kReflect, CallParamType::kF16, "reflect"},
-                    BuiltinData{builtin::Function::kSin, CallParamType::kF32, "sin"},
-                    BuiltinData{builtin::Function::kSin, CallParamType::kF16, "sin"},
-                    BuiltinData{builtin::Function::kSinh, CallParamType::kF32, "sinh"},
-                    BuiltinData{builtin::Function::kSinh, CallParamType::kF16, "sinh"},
-                    BuiltinData{builtin::Function::kSmoothstep, CallParamType::kF32, "smoothstep"},
-                    BuiltinData{builtin::Function::kSmoothstep, CallParamType::kF16, "smoothstep"},
-                    BuiltinData{builtin::Function::kSqrt, CallParamType::kF32, "sqrt"},
-                    BuiltinData{builtin::Function::kSqrt, CallParamType::kF16, "sqrt"},
-                    BuiltinData{builtin::Function::kStep, CallParamType::kF32, "step"},
-                    BuiltinData{builtin::Function::kStep, CallParamType::kF16, "step"},
-                    BuiltinData{builtin::Function::kTan, CallParamType::kF32, "tan"},
-                    BuiltinData{builtin::Function::kTan, CallParamType::kF16, "tan"},
-                    BuiltinData{builtin::Function::kTanh, CallParamType::kF32, "tanh"},
-                    BuiltinData{builtin::Function::kTanh, CallParamType::kF16, "tanh"},
+                    BuiltinData{core::Function::kAbs, CallParamType::kF32, "abs"},
+                    BuiltinData{core::Function::kAbs, CallParamType::kF16, "abs"},
+                    BuiltinData{core::Function::kAcos, CallParamType::kF32, "acos"},
+                    BuiltinData{core::Function::kAcos, CallParamType::kF16, "acos"},
+                    BuiltinData{core::Function::kAsin, CallParamType::kF32, "asin"},
+                    BuiltinData{core::Function::kAsin, CallParamType::kF16, "asin"},
+                    BuiltinData{core::Function::kAtan, CallParamType::kF32, "atan"},
+                    BuiltinData{core::Function::kAtan, CallParamType::kF16, "atan"},
+                    BuiltinData{core::Function::kAtan2, CallParamType::kF32, "atan2"},
+                    BuiltinData{core::Function::kAtan2, CallParamType::kF16, "atan2"},
+                    BuiltinData{core::Function::kCeil, CallParamType::kF32, "ceil"},
+                    BuiltinData{core::Function::kCeil, CallParamType::kF16, "ceil"},
+                    BuiltinData{core::Function::kClamp, CallParamType::kF32, "clamp"},
+                    BuiltinData{core::Function::kClamp, CallParamType::kF16, "clamp"},
+                    BuiltinData{core::Function::kCos, CallParamType::kF32, "cos"},
+                    BuiltinData{core::Function::kCos, CallParamType::kF16, "cos"},
+                    BuiltinData{core::Function::kCosh, CallParamType::kF32, "cosh"},
+                    BuiltinData{core::Function::kCosh, CallParamType::kF16, "cosh"},
+                    BuiltinData{core::Function::kCross, CallParamType::kF32, "cross"},
+                    BuiltinData{core::Function::kCross, CallParamType::kF16, "cross"},
+                    BuiltinData{core::Function::kDistance, CallParamType::kF32, "distance"},
+                    BuiltinData{core::Function::kDistance, CallParamType::kF16, "distance"},
+                    BuiltinData{core::Function::kExp, CallParamType::kF32, "exp"},
+                    BuiltinData{core::Function::kExp, CallParamType::kF16, "exp"},
+                    BuiltinData{core::Function::kExp2, CallParamType::kF32, "exp2"},
+                    BuiltinData{core::Function::kExp2, CallParamType::kF16, "exp2"},
+                    BuiltinData{core::Function::kFaceForward, CallParamType::kF32, "faceforward"},
+                    BuiltinData{core::Function::kFaceForward, CallParamType::kF16, "faceforward"},
+                    BuiltinData{core::Function::kFloor, CallParamType::kF32, "floor"},
+                    BuiltinData{core::Function::kFloor, CallParamType::kF16, "floor"},
+                    BuiltinData{core::Function::kFma, CallParamType::kF32, "mad"},
+                    BuiltinData{core::Function::kFma, CallParamType::kF16, "mad"},
+                    BuiltinData{core::Function::kFract, CallParamType::kF32, "frac"},
+                    BuiltinData{core::Function::kFract, CallParamType::kF16, "frac"},
+                    BuiltinData{core::Function::kInverseSqrt, CallParamType::kF32, "rsqrt"},
+                    BuiltinData{core::Function::kInverseSqrt, CallParamType::kF16, "rsqrt"},
+                    BuiltinData{core::Function::kLdexp, CallParamType::kF32, "ldexp"},
+                    BuiltinData{core::Function::kLdexp, CallParamType::kF16, "ldexp"},
+                    BuiltinData{core::Function::kLength, CallParamType::kF32, "length"},
+                    BuiltinData{core::Function::kLength, CallParamType::kF16, "length"},
+                    BuiltinData{core::Function::kLog, CallParamType::kF32, "log"},
+                    BuiltinData{core::Function::kLog, CallParamType::kF16, "log"},
+                    BuiltinData{core::Function::kLog2, CallParamType::kF32, "log2"},
+                    BuiltinData{core::Function::kLog2, CallParamType::kF16, "log2"},
+                    BuiltinData{core::Function::kMax, CallParamType::kF32, "max"},
+                    BuiltinData{core::Function::kMax, CallParamType::kF16, "max"},
+                    BuiltinData{core::Function::kMin, CallParamType::kF32, "min"},
+                    BuiltinData{core::Function::kMin, CallParamType::kF16, "min"},
+                    BuiltinData{core::Function::kMix, CallParamType::kF32, "lerp"},
+                    BuiltinData{core::Function::kMix, CallParamType::kF16, "lerp"},
+                    BuiltinData{core::Function::kNormalize, CallParamType::kF32, "normalize"},
+                    BuiltinData{core::Function::kNormalize, CallParamType::kF16, "normalize"},
+                    BuiltinData{core::Function::kPow, CallParamType::kF32, "pow"},
+                    BuiltinData{core::Function::kPow, CallParamType::kF16, "pow"},
+                    BuiltinData{core::Function::kReflect, CallParamType::kF32, "reflect"},
+                    BuiltinData{core::Function::kReflect, CallParamType::kF16, "reflect"},
+                    BuiltinData{core::Function::kSin, CallParamType::kF32, "sin"},
+                    BuiltinData{core::Function::kSin, CallParamType::kF16, "sin"},
+                    BuiltinData{core::Function::kSinh, CallParamType::kF32, "sinh"},
+                    BuiltinData{core::Function::kSinh, CallParamType::kF16, "sinh"},
+                    BuiltinData{core::Function::kSmoothstep, CallParamType::kF32, "smoothstep"},
+                    BuiltinData{core::Function::kSmoothstep, CallParamType::kF16, "smoothstep"},
+                    BuiltinData{core::Function::kSqrt, CallParamType::kF32, "sqrt"},
+                    BuiltinData{core::Function::kSqrt, CallParamType::kF16, "sqrt"},
+                    BuiltinData{core::Function::kStep, CallParamType::kF32, "step"},
+                    BuiltinData{core::Function::kStep, CallParamType::kF16, "step"},
+                    BuiltinData{core::Function::kTan, CallParamType::kF32, "tan"},
+                    BuiltinData{core::Function::kTan, CallParamType::kF16, "tan"},
+                    BuiltinData{core::Function::kTanh, CallParamType::kF32, "tanh"},
+                    BuiltinData{core::Function::kTanh, CallParamType::kF16, "tanh"},
                     /* Integer built-in */
-                    BuiltinData{builtin::Function::kAbs, CallParamType::kU32, "abs"},
-                    BuiltinData{builtin::Function::kClamp, CallParamType::kU32, "clamp"},
-                    BuiltinData{builtin::Function::kCountOneBits, CallParamType::kU32, "countbits"},
-                    BuiltinData{builtin::Function::kMax, CallParamType::kU32, "max"},
-                    BuiltinData{builtin::Function::kMin, CallParamType::kU32, "min"},
-                    BuiltinData{builtin::Function::kReverseBits, CallParamType::kU32,
-                                "reversebits"},
-                    BuiltinData{builtin::Function::kRound, CallParamType::kU32, "round"},
+                    BuiltinData{core::Function::kAbs, CallParamType::kU32, "abs"},
+                    BuiltinData{core::Function::kClamp, CallParamType::kU32, "clamp"},
+                    BuiltinData{core::Function::kCountOneBits, CallParamType::kU32, "countbits"},
+                    BuiltinData{core::Function::kMax, CallParamType::kU32, "max"},
+                    BuiltinData{core::Function::kMin, CallParamType::kU32, "min"},
+                    BuiltinData{core::Function::kReverseBits, CallParamType::kU32, "reversebits"},
+                    BuiltinData{core::Function::kRound, CallParamType::kU32, "round"},
                     /* Matrix built-in */
-                    BuiltinData{builtin::Function::kDeterminant, CallParamType::kF32,
-                                "determinant"},
-                    BuiltinData{builtin::Function::kDeterminant, CallParamType::kF16,
-                                "determinant"},
-                    BuiltinData{builtin::Function::kTranspose, CallParamType::kF32, "transpose"},
-                    BuiltinData{builtin::Function::kTranspose, CallParamType::kF16, "transpose"},
+                    BuiltinData{core::Function::kDeterminant, CallParamType::kF32, "determinant"},
+                    BuiltinData{core::Function::kDeterminant, CallParamType::kF16, "determinant"},
+                    BuiltinData{core::Function::kTranspose, CallParamType::kF32, "transpose"},
+                    BuiltinData{core::Function::kTranspose, CallParamType::kF16, "transpose"},
                     /* Vector built-in */
-                    BuiltinData{builtin::Function::kDot, CallParamType::kF32, "dot"},
-                    BuiltinData{builtin::Function::kDot, CallParamType::kF16, "dot"},
+                    BuiltinData{core::Function::kDot, CallParamType::kF32, "dot"},
+                    BuiltinData{core::Function::kDot, CallParamType::kF16, "dot"},
                     /* Derivate built-in */
-                    BuiltinData{builtin::Function::kDpdx, CallParamType::kF32, "ddx"},
-                    BuiltinData{builtin::Function::kDpdxCoarse, CallParamType::kF32, "ddx_coarse"},
-                    BuiltinData{builtin::Function::kDpdxFine, CallParamType::kF32, "ddx_fine"},
-                    BuiltinData{builtin::Function::kDpdy, CallParamType::kF32, "ddy"},
-                    BuiltinData{builtin::Function::kDpdyCoarse, CallParamType::kF32, "ddy_coarse"},
-                    BuiltinData{builtin::Function::kDpdyFine, CallParamType::kF32, "ddy_fine"},
-                    BuiltinData{builtin::Function::kFwidth, CallParamType::kF32, "fwidth"},
-                    BuiltinData{builtin::Function::kFwidthCoarse, CallParamType::kF32, "fwidth"},
-                    BuiltinData{builtin::Function::kFwidthFine, CallParamType::kF32, "fwidth"}));
+                    BuiltinData{core::Function::kDpdx, CallParamType::kF32, "ddx"},
+                    BuiltinData{core::Function::kDpdxCoarse, CallParamType::kF32, "ddx_coarse"},
+                    BuiltinData{core::Function::kDpdxFine, CallParamType::kF32, "ddx_fine"},
+                    BuiltinData{core::Function::kDpdy, CallParamType::kF32, "ddy"},
+                    BuiltinData{core::Function::kDpdyCoarse, CallParamType::kF32, "ddy_coarse"},
+                    BuiltinData{core::Function::kDpdyFine, CallParamType::kF32, "ddy_fine"},
+                    BuiltinData{core::Function::kFwidth, CallParamType::kF32, "fwidth"},
+                    BuiltinData{core::Function::kFwidthCoarse, CallParamType::kF32, "fwidth"},
+                    BuiltinData{core::Function::kFwidthFine, CallParamType::kF32, "fwidth"}));
 
 TEST_F(HlslASTPrinterTest_Builtin, Builtin_Call) {
     auto* call = Call("dot", "param1", "param2");
 
-    GlobalVar("param1", ty.vec3<f32>(), builtin::AddressSpace::kPrivate);
-    GlobalVar("param2", ty.vec3<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("param1", ty.vec3<f32>(), core::AddressSpace::kPrivate);
+    GlobalVar("param2", ty.vec3<f32>(), core::AddressSpace::kPrivate);
 
     WrapInFunction(Decl(Var("r", call)));
 
@@ -355,8 +350,8 @@ TEST_F(HlslASTPrinterTest_Builtin, Builtin_Call) {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Select_Scalar) {
-    GlobalVar("a", Expr(1_f), builtin::AddressSpace::kPrivate);
-    GlobalVar("b", Expr(2_f), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", Expr(1_f), core::AddressSpace::kPrivate);
+    GlobalVar("b", Expr(2_f), core::AddressSpace::kPrivate);
     auto* call = Call("select", "a", "b", true);
     WrapInFunction(Decl(Var("r", call)));
     ASTPrinter& gen = Build();
@@ -368,8 +363,8 @@ TEST_F(HlslASTPrinterTest_Builtin, Select_Scalar) {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Select_Vector) {
-    GlobalVar("a", Call<vec2<i32>>(1_i, 2_i), builtin::AddressSpace::kPrivate);
-    GlobalVar("b", Call<vec2<i32>>(3_i, 4_i), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", Call<vec2<i32>>(1_i, 2_i), core::AddressSpace::kPrivate);
+    GlobalVar("b", Call<vec2<i32>>(3_i, 4_i), core::AddressSpace::kPrivate);
     auto* call = Call("select", "a", "b", Call<vec2<bool>>(true, false));
     WrapInFunction(Decl(Var("r", call)));
     ASTPrinter& gen = Build();
@@ -407,7 +402,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Runtime_Modf_Scalar_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     WrapInFunction(Decl(Let("f", Expr(1.5_h))),  //
                    Decl(Let("v", Call("modf", "f"))));
@@ -461,7 +456,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Runtime_Modf_Vector_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     WrapInFunction(Decl(Let("f", Call<vec3<f16>>(1.5_h, 2.5_h, 3.5_h))),  //
                    Decl(Let("v", Call("modf", "f"))));
@@ -507,7 +502,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Const_Modf_Scalar_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     WrapInFunction(Decl(Let("v", Call("modf", 1.5_h))));
 
@@ -545,7 +540,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Const_Modf_Vector_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     WrapInFunction(Decl(Let("v", Call("modf", Call<vec3<f16>>(1.5_h, 2.5_h, 3.5_h)))));
 
@@ -618,7 +613,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Runtime_Frexp_Scalar_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     WrapInFunction(Var("f", Expr(1_h)),  //
                    Var("v", Call("frexp", "f")));
@@ -674,7 +669,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Runtime_Frexp_Vector_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     WrapInFunction(Var("f", Call<vec3<f16>>()),  //
                    Var("v", Call("frexp", "f")));
@@ -721,7 +716,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Const_Frexp_Scalar_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     WrapInFunction(Decl(Let("v", Call("frexp", 1_h))));
 
@@ -759,7 +754,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Const_Frexp_Vector_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     WrapInFunction(Decl(Let("v", Call("frexp", Call<vec3<f16>>()))));
 
@@ -847,7 +842,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Degrees_Scalar_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* val = Var("val", ty.f16());
     auto* call = Call("degrees", val);
@@ -870,7 +865,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Degrees_Vector_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* val = Var("val", ty.vec3<f16>());
     auto* call = Call("degrees", val);
@@ -935,7 +930,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Radians_Scalar_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* val = Var("val", ty.f16());
     auto* call = Call("radians", val);
@@ -958,7 +953,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Radians_Vector_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* val = Var("val", ty.vec3<f16>());
     auto* call = Call("radians", val);
@@ -1049,7 +1044,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Sign_Scalar_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* val = Var("val", ty.f16());
     auto* call = Call("sign", val);
@@ -1068,7 +1063,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Sign_Vector_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* val = Var("val", ty.vec3<f16>());
     auto* call = Call("sign", val);
@@ -1129,7 +1124,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Trunc_Scalar_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* val = Var("val", ty.f16());
     auto* call = Call("trunc", val);
@@ -1152,7 +1147,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Trunc_Vector_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* val = Var("val", ty.vec3<f16>());
     auto* call = Call("trunc", val);
@@ -1176,7 +1171,7 @@ void test_function() {
 
 TEST_F(HlslASTPrinterTest_Builtin, Pack4x8Snorm) {
     auto* call = Call("pack4x8snorm", "p1");
-    GlobalVar("p1", ty.vec4<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("p1", ty.vec4<f32>(), core::AddressSpace::kPrivate);
     WrapInFunction(Decl(Var("r", call)));
     ASTPrinter& gen = Build();
 
@@ -1198,7 +1193,7 @@ void test_function() {
 
 TEST_F(HlslASTPrinterTest_Builtin, Pack4x8Unorm) {
     auto* call = Call("pack4x8unorm", "p1");
-    GlobalVar("p1", ty.vec4<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("p1", ty.vec4<f32>(), core::AddressSpace::kPrivate);
     WrapInFunction(Decl(Var("r", call)));
     ASTPrinter& gen = Build();
 
@@ -1220,7 +1215,7 @@ void test_function() {
 
 TEST_F(HlslASTPrinterTest_Builtin, Pack2x16Snorm) {
     auto* call = Call("pack2x16snorm", "p1");
-    GlobalVar("p1", ty.vec2<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("p1", ty.vec2<f32>(), core::AddressSpace::kPrivate);
     WrapInFunction(Decl(Var("r", call)));
     ASTPrinter& gen = Build();
 
@@ -1242,7 +1237,7 @@ void test_function() {
 
 TEST_F(HlslASTPrinterTest_Builtin, Pack2x16Unorm) {
     auto* call = Call("pack2x16unorm", "p1");
-    GlobalVar("p1", ty.vec2<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("p1", ty.vec2<f32>(), core::AddressSpace::kPrivate);
     WrapInFunction(Decl(Var("r", call)));
     ASTPrinter& gen = Build();
 
@@ -1264,7 +1259,7 @@ void test_function() {
 
 TEST_F(HlslASTPrinterTest_Builtin, Pack2x16Float) {
     auto* call = Call("pack2x16float", "p1");
-    GlobalVar("p1", ty.vec2<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("p1", ty.vec2<f32>(), core::AddressSpace::kPrivate);
     WrapInFunction(Decl(Var("r", call)));
     ASTPrinter& gen = Build();
 
@@ -1286,7 +1281,7 @@ void test_function() {
 
 TEST_F(HlslASTPrinterTest_Builtin, Unpack4x8Snorm) {
     auto* call = Call("unpack4x8snorm", "p1");
-    GlobalVar("p1", ty.u32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("p1", ty.u32(), core::AddressSpace::kPrivate);
     WrapInFunction(Decl(Var("r", call)));
     ASTPrinter& gen = Build();
 
@@ -1309,7 +1304,7 @@ void test_function() {
 
 TEST_F(HlslASTPrinterTest_Builtin, Unpack4x8Unorm) {
     auto* call = Call("unpack4x8unorm", "p1");
-    GlobalVar("p1", ty.u32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("p1", ty.u32(), core::AddressSpace::kPrivate);
     WrapInFunction(Decl(Var("r", call)));
     ASTPrinter& gen = Build();
 
@@ -1332,7 +1327,7 @@ void test_function() {
 
 TEST_F(HlslASTPrinterTest_Builtin, Unpack2x16Snorm) {
     auto* call = Call("unpack2x16snorm", "p1");
-    GlobalVar("p1", ty.u32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("p1", ty.u32(), core::AddressSpace::kPrivate);
     WrapInFunction(Decl(Var("r", call)));
     ASTPrinter& gen = Build();
 
@@ -1355,7 +1350,7 @@ void test_function() {
 
 TEST_F(HlslASTPrinterTest_Builtin, Unpack2x16Unorm) {
     auto* call = Call("unpack2x16unorm", "p1");
-    GlobalVar("p1", ty.u32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("p1", ty.u32(), core::AddressSpace::kPrivate);
     WrapInFunction(Decl(Var("r", call)));
     ASTPrinter& gen = Build();
 
@@ -1378,7 +1373,7 @@ void test_function() {
 
 TEST_F(HlslASTPrinterTest_Builtin, Unpack2x16Float) {
     auto* call = Call("unpack2x16float", "p1");
-    GlobalVar("p1", ty.u32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("p1", ty.u32(), core::AddressSpace::kPrivate);
     WrapInFunction(Decl(Var("r", call)));
     ASTPrinter& gen = Build();
 
@@ -1441,7 +1436,7 @@ void main() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Dot4I8Packed) {
-    Enable(builtin::Extension::kChromiumExperimentalDp4A);
+    Enable(core::Extension::kChromiumExperimentalDp4A);
 
     auto* val1 = Var("val1", ty.u32());
     auto* val2 = Var("val2", ty.u32());
@@ -1467,7 +1462,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Builtin, Dot4U8Packed) {
-    Enable(builtin::Extension::kChromiumExperimentalDp4A);
+    Enable(core::Extension::kChromiumExperimentalDp4A);
 
     auto* val1 = Var("val1", ty.u32());
     auto* val2 = Var("val2", ty.u32());

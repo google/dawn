@@ -23,8 +23,8 @@
 #include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/rtti/switch.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 namespace tint::spirv::writer::raise {
 

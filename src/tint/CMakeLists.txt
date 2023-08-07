@@ -82,9 +82,9 @@ list(APPEND TINT_LIB_SRCS
   ../../include/tint/tint.h
   lang/wgsl/ast/clone_context.cc
   lang/wgsl/ast/clone_context.h
-  lang/core/builtin/fluent_types.h
-  lang/core/builtin/number.cc
-  lang/core/builtin/number.h
+  lang/core/fluent_types.h
+  lang/core/number.cc
+  lang/core/number.h
   lang/core/constant/clone_context.h
   lang/core/constant/composite.cc
   lang/core/constant/composite.h
@@ -577,18 +577,18 @@ list(APPEND TINT_LIB_SRCS
   utils/traits/traits.h
 )
 
-tint_generated(lang/core/builtin/access BENCH TEST)
-tint_generated(lang/core/builtin/address_space BENCH TEST)
-tint_generated(lang/core/builtin/attribute BENCH TEST)
-tint_generated(lang/core/builtin/builtin BENCH TEST)
-tint_generated(lang/core/builtin/builtin_value BENCH TEST)
-tint_generated(lang/core/builtin/diagnostic_rule BENCH TEST)
-tint_generated(lang/core/builtin/diagnostic_severity BENCH TEST)
-tint_generated(lang/core/builtin/extension BENCH TEST)
-tint_generated(lang/core/builtin/function)
-tint_generated(lang/core/builtin/interpolation_sampling BENCH TEST)
-tint_generated(lang/core/builtin/interpolation_type BENCH TEST)
-tint_generated(lang/core/builtin/texel_format BENCH TEST)
+tint_generated(lang/core/access BENCH TEST)
+tint_generated(lang/core/address_space BENCH TEST)
+tint_generated(lang/core/attribute BENCH TEST)
+tint_generated(lang/core/builtin BENCH TEST)
+tint_generated(lang/core/builtin_value BENCH TEST)
+tint_generated(lang/core/diagnostic_rule BENCH TEST)
+tint_generated(lang/core/diagnostic_severity BENCH TEST)
+tint_generated(lang/core/extension BENCH TEST)
+tint_generated(lang/core/function)
+tint_generated(lang/core/interpolation_sampling BENCH TEST)
+tint_generated(lang/core/interpolation_type BENCH TEST)
+tint_generated(lang/core/texel_format BENCH TEST)
 
 tint_generated(lang/wgsl/resolver/ctor_conv_intrinsic)
 tint_generated(lang/wgsl/sem/parameter_usage)
@@ -966,7 +966,7 @@ endif()
 ################################################################################
 if(TINT_BUILD_TESTS)
   list(APPEND TINT_TEST_SRCS
-    lang/core/builtin/number_test.cc
+    lang/core/number_test.cc
     lang/core/constant/composite_test.cc
     lang/core/constant/manager_test.cc
     lang/core/constant/scalar_test.cc

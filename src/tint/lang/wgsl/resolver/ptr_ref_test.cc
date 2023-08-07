@@ -39,7 +39,7 @@ TEST_F(ResolverPtrRefTest, AddressOf) {
 
     ASSERT_TRUE(TypeOf(expr)->Is<type::Pointer>());
     EXPECT_TRUE(TypeOf(expr)->As<type::Pointer>()->StoreType()->Is<type::I32>());
-    EXPECT_EQ(TypeOf(expr)->As<type::Pointer>()->AddressSpace(), builtin::AddressSpace::kFunction);
+    EXPECT_EQ(TypeOf(expr)->As<type::Pointer>()->AddressSpace(), core::AddressSpace::kFunction);
 }
 
 TEST_F(ResolverPtrRefTest, AddressOfThenDeref) {
@@ -68,23 +68,23 @@ TEST_F(ResolverPtrRefTest, DefaultPtrAddressSpace) {
 
     auto* buf = Structure("S", Vector{Member("m", ty.i32())});
     auto* function = Var("f", ty.i32());
-    auto* private_ = GlobalVar("p", ty.i32(), builtin::AddressSpace::kPrivate);
-    auto* workgroup = GlobalVar("w", ty.i32(), builtin::AddressSpace::kWorkgroup);
+    auto* private_ = GlobalVar("p", ty.i32(), core::AddressSpace::kPrivate);
+    auto* workgroup = GlobalVar("w", ty.i32(), core::AddressSpace::kWorkgroup);
     auto* uniform =
-        GlobalVar("ub", ty.Of(buf), builtin::AddressSpace::kUniform, Binding(0_a), Group(0_a));
+        GlobalVar("ub", ty.Of(buf), core::AddressSpace::kUniform, Binding(0_a), Group(0_a));
     auto* storage =
-        GlobalVar("sb", ty.Of(buf), builtin::AddressSpace::kStorage, Binding(1_a), Group(0_a));
+        GlobalVar("sb", ty.Of(buf), core::AddressSpace::kStorage, Binding(1_a), Group(0_a));
 
     auto* function_ptr =
-        Let("f_ptr", ty.ptr(builtin::AddressSpace::kFunction, ty.i32()), AddressOf(function));
+        Let("f_ptr", ty.ptr(core::AddressSpace::kFunction, ty.i32()), AddressOf(function));
     auto* private_ptr =
-        Let("p_ptr", ty.ptr(builtin::AddressSpace::kPrivate, ty.i32()), AddressOf(private_));
+        Let("p_ptr", ty.ptr(core::AddressSpace::kPrivate, ty.i32()), AddressOf(private_));
     auto* workgroup_ptr =
-        Let("w_ptr", ty.ptr(builtin::AddressSpace::kWorkgroup, ty.i32()), AddressOf(workgroup));
+        Let("w_ptr", ty.ptr(core::AddressSpace::kWorkgroup, ty.i32()), AddressOf(workgroup));
     auto* uniform_ptr =
-        Let("ub_ptr", ty.ptr(builtin::AddressSpace::kUniform, ty.Of(buf)), AddressOf(uniform));
+        Let("ub_ptr", ty.ptr(core::AddressSpace::kUniform, ty.Of(buf)), AddressOf(uniform));
     auto* storage_ptr =
-        Let("sb_ptr", ty.ptr(builtin::AddressSpace::kStorage, ty.Of(buf)), AddressOf(storage));
+        Let("sb_ptr", ty.ptr(core::AddressSpace::kStorage, ty.Of(buf)), AddressOf(storage));
 
     WrapInFunction(function, function_ptr, private_ptr, workgroup_ptr, uniform_ptr, storage_ptr);
 
@@ -101,11 +101,11 @@ TEST_F(ResolverPtrRefTest, DefaultPtrAddressSpace) {
     ASSERT_TRUE(TypeOf(storage_ptr)->Is<type::Pointer>())
         << "storage_ptr is " << TypeOf(storage_ptr)->TypeInfo().name;
 
-    EXPECT_EQ(TypeOf(function_ptr)->As<type::Pointer>()->Access(), builtin::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(private_ptr)->As<type::Pointer>()->Access(), builtin::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(workgroup_ptr)->As<type::Pointer>()->Access(), builtin::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(uniform_ptr)->As<type::Pointer>()->Access(), builtin::Access::kRead);
-    EXPECT_EQ(TypeOf(storage_ptr)->As<type::Pointer>()->Access(), builtin::Access::kRead);
+    EXPECT_EQ(TypeOf(function_ptr)->As<type::Pointer>()->Access(), core::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(private_ptr)->As<type::Pointer>()->Access(), core::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(workgroup_ptr)->As<type::Pointer>()->Access(), core::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(uniform_ptr)->As<type::Pointer>()->Access(), core::Access::kRead);
+    EXPECT_EQ(TypeOf(storage_ptr)->As<type::Pointer>()->Access(), core::Access::kRead);
 }
 
 }  // namespace

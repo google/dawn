@@ -20,8 +20,8 @@
 namespace tint::glsl::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using GlslASTPrinterTest_Import = TestHelper;
 
@@ -266,7 +266,7 @@ INSTANTIATE_TEST_SUITE_P(GlslASTPrinterTest_Import,
                          testing::Values(GlslImportData{"clamp", "clamp"}));
 
 TEST_F(GlslASTPrinterTest_Import, GlslImportData_Determinant) {
-    GlobalVar("var", ty.mat3x3<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat3x3<f32>(), core::AddressSpace::kPrivate);
 
     auto* expr = Call("determinant", "var");
     WrapInFunction(expr);

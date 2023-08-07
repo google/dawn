@@ -18,8 +18,8 @@
 #include <cstdint>
 #include <string>
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
-#include "src/tint/lang/core/builtin/interpolation.h"
+#include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/interpolation.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -40,14 +40,14 @@ SizeAndAlign MslPackedTypeSizeAndAlign(const type::Type* ty);
 /// Converts a builtin to an attribute name
 /// @param builtin the builtin to convert
 /// @returns the string name of the builtin or blank on error
-std::string BuiltinToAttribute(builtin::BuiltinValue builtin);
+std::string BuiltinToAttribute(core::BuiltinValue builtin);
 
 /// Converts interpolation attributes to an MSL attribute
 /// @param type the interpolation type
 /// @param sampling the interpolation sampling
 /// @returns the string name of the attribute or blank on error
-std::string InterpolationToAttribute(builtin::InterpolationType type,
-                                     builtin::InterpolationSampling sampling);
+std::string InterpolationToAttribute(core::InterpolationType type,
+                                     core::InterpolationSampling sampling);
 
 /// Prints a float32 to the output stream
 /// @param out the stream to write too

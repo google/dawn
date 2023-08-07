@@ -32,33 +32,33 @@
 
 namespace tint::msl::writer {
 
-std::string BuiltinToAttribute(builtin::BuiltinValue builtin) {
+std::string BuiltinToAttribute(core::BuiltinValue builtin) {
     switch (builtin) {
-        case builtin::BuiltinValue::kPosition:
+        case core::BuiltinValue::kPosition:
             return "position";
-        case builtin::BuiltinValue::kVertexIndex:
+        case core::BuiltinValue::kVertexIndex:
             return "vertex_id";
-        case builtin::BuiltinValue::kInstanceIndex:
+        case core::BuiltinValue::kInstanceIndex:
             return "instance_id";
-        case builtin::BuiltinValue::kFrontFacing:
+        case core::BuiltinValue::kFrontFacing:
             return "front_facing";
-        case builtin::BuiltinValue::kFragDepth:
+        case core::BuiltinValue::kFragDepth:
             return "depth(any)";
-        case builtin::BuiltinValue::kLocalInvocationId:
+        case core::BuiltinValue::kLocalInvocationId:
             return "thread_position_in_threadgroup";
-        case builtin::BuiltinValue::kLocalInvocationIndex:
+        case core::BuiltinValue::kLocalInvocationIndex:
             return "thread_index_in_threadgroup";
-        case builtin::BuiltinValue::kGlobalInvocationId:
+        case core::BuiltinValue::kGlobalInvocationId:
             return "thread_position_in_grid";
-        case builtin::BuiltinValue::kWorkgroupId:
+        case core::BuiltinValue::kWorkgroupId:
             return "threadgroup_position_in_grid";
-        case builtin::BuiltinValue::kNumWorkgroups:
+        case core::BuiltinValue::kNumWorkgroups:
             return "threadgroups_per_grid";
-        case builtin::BuiltinValue::kSampleIndex:
+        case core::BuiltinValue::kSampleIndex:
             return "sample_id";
-        case builtin::BuiltinValue::kSampleMask:
+        case core::BuiltinValue::kSampleMask:
             return "sample_mask";
-        case builtin::BuiltinValue::kPointSize:
+        case core::BuiltinValue::kPointSize:
             return "point_size";
         default:
             break;
@@ -66,33 +66,33 @@ std::string BuiltinToAttribute(builtin::BuiltinValue builtin) {
     return "";
 }
 
-std::string InterpolationToAttribute(builtin::InterpolationType type,
-                                     builtin::InterpolationSampling sampling) {
+std::string InterpolationToAttribute(core::InterpolationType type,
+                                     core::InterpolationSampling sampling) {
     std::string attr;
     switch (sampling) {
-        case builtin::InterpolationSampling::kCenter:
+        case core::InterpolationSampling::kCenter:
             attr = "center_";
             break;
-        case builtin::InterpolationSampling::kCentroid:
+        case core::InterpolationSampling::kCentroid:
             attr = "centroid_";
             break;
-        case builtin::InterpolationSampling::kSample:
+        case core::InterpolationSampling::kSample:
             attr = "sample_";
             break;
-        case builtin::InterpolationSampling::kUndefined:
+        case core::InterpolationSampling::kUndefined:
             break;
     }
     switch (type) {
-        case builtin::InterpolationType::kPerspective:
+        case core::InterpolationType::kPerspective:
             attr += "perspective";
             break;
-        case builtin::InterpolationType::kLinear:
+        case core::InterpolationType::kLinear:
             attr += "no_perspective";
             break;
-        case builtin::InterpolationType::kFlat:
+        case core::InterpolationType::kFlat:
             attr += "flat";
             break;
-        case builtin::InterpolationType::kUndefined:
+        case core::InterpolationType::kUndefined:
             break;
     }
     return attr;

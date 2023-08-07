@@ -19,8 +19,8 @@
 namespace tint::spirv::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 TEST_F(SpirvWriterTest, FunctionVar_NoInit) {
     auto* func = b.Function("foo", ty.void_());
@@ -292,8 +292,7 @@ TEST_F(SpirvWriterTest, PushConstantVar_Load) {
 }
 
 TEST_F(SpirvWriterTest, SamplerVar) {
-    auto* v =
-        b.Var("v", ty.ptr(builtin::AddressSpace::kHandle, ty.sampler(), builtin::Access::kRead));
+    auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle, ty.sampler(), core::Access::kRead));
     v->SetBindingPoint(0, 0);
     b.RootBlock()->Append(v);
 
@@ -310,8 +309,7 @@ TEST_F(SpirvWriterTest, SamplerVar) {
 }
 
 TEST_F(SpirvWriterTest, SamplerVar_Load) {
-    auto* v =
-        b.Var("v", ty.ptr(builtin::AddressSpace::kHandle, ty.sampler(), builtin::Access::kRead));
+    auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle, ty.sampler(), core::Access::kRead));
     v->SetBindingPoint(0, 0);
     b.RootBlock()->Append(v);
 
@@ -327,9 +325,9 @@ TEST_F(SpirvWriterTest, SamplerVar_Load) {
 }
 
 TEST_F(SpirvWriterTest, TextureVar) {
-    auto* v = b.Var("v", ty.ptr(builtin::AddressSpace::kHandle,
+    auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
                                 ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()),
-                                builtin::Access::kRead));
+                                core::Access::kRead));
     v->SetBindingPoint(0, 0);
     b.RootBlock()->Append(v);
 
@@ -346,9 +344,9 @@ TEST_F(SpirvWriterTest, TextureVar) {
 }
 
 TEST_F(SpirvWriterTest, TextureVar_Load) {
-    auto* v = b.Var("v", ty.ptr(builtin::AddressSpace::kHandle,
+    auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
                                 ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()),
-                                builtin::Access::kRead));
+                                core::Access::kRead));
     v->SetBindingPoint(0, 0);
     b.RootBlock()->Append(v);
 

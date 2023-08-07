@@ -24,7 +24,7 @@ using WgslASTPrinterTest = TestHelper;
 
 TEST_F(WgslASTPrinterTest, EmitExpression_MemberAccessor) {
     auto* s = Structure("Data", Vector{Member("mem", ty.f32())});
-    GlobalVar("str", ty.Of(s), builtin::AddressSpace::kPrivate);
+    GlobalVar("str", ty.Of(s), core::AddressSpace::kPrivate);
 
     auto* expr = MemberAccessor("str", "mem");
     WrapInFunction(expr);
@@ -39,7 +39,7 @@ TEST_F(WgslASTPrinterTest, EmitExpression_MemberAccessor) {
 
 TEST_F(WgslASTPrinterTest, EmitExpression_MemberAccessor_OfDref) {
     auto* s = Structure("Data", Vector{Member("mem", ty.f32())});
-    GlobalVar("str", ty.Of(s), builtin::AddressSpace::kPrivate);
+    GlobalVar("str", ty.Of(s), core::AddressSpace::kPrivate);
 
     auto* p = Let("p", AddressOf("str"));
     auto* expr = MemberAccessor(Deref("p"), "mem");

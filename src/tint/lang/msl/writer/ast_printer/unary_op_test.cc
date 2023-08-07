@@ -21,7 +21,7 @@ namespace {
 using MslUnaryOpTest = TestHelper;
 
 TEST_F(MslUnaryOpTest, AddressOf) {
-    GlobalVar("expr", ty.f32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("expr", ty.f32(), core::AddressSpace::kPrivate);
     auto* op = create<ast::UnaryOpExpression>(ast::UnaryOp::kAddressOf, Expr("expr"));
     WrapInFunction(op);
 
@@ -33,7 +33,7 @@ TEST_F(MslUnaryOpTest, AddressOf) {
 }
 
 TEST_F(MslUnaryOpTest, Complement) {
-    GlobalVar("expr", ty.i32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("expr", ty.i32(), core::AddressSpace::kPrivate);
     auto* op = create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Expr("expr"));
     WrapInFunction(op);
 
@@ -45,7 +45,7 @@ TEST_F(MslUnaryOpTest, Complement) {
 }
 
 TEST_F(MslUnaryOpTest, Indirection) {
-    GlobalVar("G", ty.f32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("G", ty.f32(), core::AddressSpace::kPrivate);
     auto* p = Let("expr", create<ast::UnaryOpExpression>(ast::UnaryOp::kAddressOf, Expr("G")));
     auto* op = create<ast::UnaryOpExpression>(ast::UnaryOp::kIndirection, Expr("expr"));
     WrapInFunction(p, op);
@@ -58,7 +58,7 @@ TEST_F(MslUnaryOpTest, Indirection) {
 }
 
 TEST_F(MslUnaryOpTest, Not) {
-    GlobalVar("expr", ty.bool_(), builtin::AddressSpace::kPrivate);
+    GlobalVar("expr", ty.bool_(), core::AddressSpace::kPrivate);
     auto* op = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr("expr"));
     WrapInFunction(op);
 
@@ -70,7 +70,7 @@ TEST_F(MslUnaryOpTest, Not) {
 }
 
 TEST_F(MslUnaryOpTest, Negation) {
-    GlobalVar("expr", ty.i32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("expr", ty.i32(), core::AddressSpace::kPrivate);
     auto* op = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr("expr"));
     WrapInFunction(op);
 

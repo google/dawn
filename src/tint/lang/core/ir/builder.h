@@ -615,7 +615,7 @@ class Builder {
     /// @param args the call arguments
     /// @returns the instruction
     template <typename... ARGS>
-    ir::CoreBuiltinCall* Call(const type::Type* type, builtin::Function func, ARGS&&... args) {
+    ir::CoreBuiltinCall* Call(const type::Type* type, core::Function func, ARGS&&... args) {
         return Append(ir.instructions.Create<ir::CoreBuiltinCall>(
             InstructionResult(type), func, Values(std::forward<ARGS>(args)...)));
     }

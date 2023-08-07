@@ -53,8 +53,8 @@ namespace {
 bool ShouldRun(const Program* program) {
     for (auto* decl : program->AST().GlobalDeclarations()) {
         if (auto* var = program->Sem().Get<sem::Variable>(decl)) {
-            if (var->AddressSpace() == builtin::AddressSpace::kStorage ||
-                var->AddressSpace() == builtin::AddressSpace::kUniform) {
+            if (var->AddressSpace() == core::AddressSpace::kStorage ||
+                var->AddressSpace() == core::AddressSpace::kUniform) {
                 return true;
             }
         }
@@ -127,7 +127,7 @@ struct LoadStoreKey {
 /// AtomicKey is the unordered map key to an atomic intrinsic.
 struct AtomicKey {
     type::Type const* el_ty = nullptr;  // element type
-    builtin::Function const op;         // atomic op
+    core::Function const op;            // atomic op
     Symbol const buffer;                // buffer name
     bool operator==(const AtomicKey& rhs) const {
         return el_ty == rhs.el_ty && op == rhs.op && buffer == rhs.buffer;
@@ -223,7 +223,7 @@ bool IntrinsicDataTypeFor(const type::Type* ty, DecomposeMemoryAccess::Intrinsic
 /// load the type @p ty from the uniform or storage buffer with name @p buffer.
 DecomposeMemoryAccess::Intrinsic* IntrinsicLoadFor(ast::Builder* builder,
                                                    const type::Type* ty,
-                                                   builtin::AddressSpace address_space,
+                                                   core::AddressSpace address_space,
                                                    const Symbol& buffer) {
     DecomposeMemoryAccess::Intrinsic::DataType type;
     if (!IntrinsicDataTypeFor(ty, type)) {
@@ -245,48 +245,48 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicStoreFor(ast::Builder* builder,
     }
     return builder->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
         builder->ID(), builder->AllocateNodeID(), DecomposeMemoryAccess::Intrinsic::Op::kStore,
-        type, builtin::AddressSpace::kStorage, builder->Expr(buffer));
+        type, core::AddressSpace::kStorage, builder->Expr(buffer));
 }
 
 /// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied to a stub function for
 /// the atomic op and the type @p ty.
 DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ast::Builder* builder,
-                                                     builtin::Function ity,
+                                                     core::Function ity,
                                                      const type::Type* ty,
                                                      const Symbol& buffer) {
     auto op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicLoad;
     switch (ity) {
-        case builtin::Function::kAtomicLoad:
+        case core::Function::kAtomicLoad:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicLoad;
             break;
-        case builtin::Function::kAtomicStore:
+        case core::Function::kAtomicStore:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicStore;
             break;
-        case builtin::Function::kAtomicAdd:
+        case core::Function::kAtomicAdd:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicAdd;
             break;
-        case builtin::Function::kAtomicSub:
+        case core::Function::kAtomicSub:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicSub;
             break;
-        case builtin::Function::kAtomicMax:
+        case core::Function::kAtomicMax:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicMax;
             break;
-        case builtin::Function::kAtomicMin:
+        case core::Function::kAtomicMin:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicMin;
             break;
-        case builtin::Function::kAtomicAnd:
+        case core::Function::kAtomicAnd:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicAnd;
             break;
-        case builtin::Function::kAtomicOr:
+        case core::Function::kAtomicOr:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicOr;
             break;
-        case builtin::Function::kAtomicXor:
+        case core::Function::kAtomicXor:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicXor;
             break;
-        case builtin::Function::kAtomicExchange:
+        case core::Function::kAtomicExchange:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicExchange;
             break;
-        case builtin::Function::kAtomicCompareExchangeWeak:
+        case core::Function::kAtomicCompareExchangeWeak:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicCompareExchangeWeak;
             break;
         default:
@@ -300,7 +300,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ast::Builder* builder,
         return nullptr;
     }
     return builder->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
-        builder->ID(), builder->AllocateNodeID(), op, type, builtin::AddressSpace::kStorage,
+        builder->ID(), builder->AllocateNodeID(), op, type, core::AddressSpace::kStorage,
         builder->Expr(buffer));
 }
 
@@ -464,7 +464,7 @@ struct DecomposeMemoryAccess::State {
     /// ProgramBuilder.
     /// @return the name of the function that performs the load
     Symbol LoadFunc(const type::Type* el_ty,
-                    builtin::AddressSpace address_space,
+                    core::AddressSpace address_space,
                     const Symbol& buffer) {
         return tint::GetOrCreate(load_funcs, LoadStoreKey{el_ty, buffer}, [&] {
             tint::Vector params{b.Param("offset", b.ty.u32())};
@@ -672,7 +672,7 @@ DecomposeMemoryAccess::Intrinsic::Intrinsic(GenerationID pid,
                                             NodeID nid,
                                             Op o,
                                             DataType ty,
-                                            builtin::AddressSpace as,
+                                            core::AddressSpace as,
                                             const IdentifierExpression* buf)
     : Base(pid, nid, tint::Vector{buf}), op(o), type(ty), address_space(as) {}
 DecomposeMemoryAccess::Intrinsic::~Intrinsic() = default;
@@ -817,8 +817,8 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
             if (auto* sem_ident = sem.GetVal(ident)) {
                 if (auto* user = sem_ident->UnwrapLoad()->As<sem::VariableUser>()) {
                     if (auto* global = user->Variable()->As<sem::GlobalVariable>()) {
-                        if (global->AddressSpace() == builtin::AddressSpace::kStorage ||
-                            global->AddressSpace() == builtin::AddressSpace::kUniform) {
+                        if (global->AddressSpace() == core::AddressSpace::kStorage ||
+                            global->AddressSpace() == core::AddressSpace::kUniform) {
                             // Variable to a storage or uniform buffer
                             state.AddAccess(ident, {
                                                        global,
@@ -918,7 +918,7 @@ Transform::ApplyResult DecomposeMemoryAccess::Apply(const Program* src,
         if (auto* call_expr = node->As<CallExpression>()) {
             auto* call = sem.Get(call_expr)->UnwrapMaterialize()->As<sem::Call>();
             if (auto* builtin = call->Target()->As<sem::Builtin>()) {
-                if (builtin->Type() == builtin::Function::kArrayLength) {
+                if (builtin->Type() == core::Function::kArrayLength) {
                     // arrayLength(X)
                     // Don't convert X into a load, this builtin actually requires the real pointer.
                     state.TakeAccess(call_expr->args[0]);

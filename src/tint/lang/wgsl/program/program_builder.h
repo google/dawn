@@ -21,12 +21,12 @@
 
 #include "tint/override_id.h"
 
-#include "src/tint/lang/core/builtin/extension.h"
-#include "src/tint/lang/core/builtin/fluent_types.h"
-#include "src/tint/lang/core/builtin/interpolation_sampling.h"
-#include "src/tint/lang/core/builtin/interpolation_type.h"
-#include "src/tint/lang/core/builtin/number.h"
 #include "src/tint/lang/core/constant/manager.h"
+#include "src/tint/lang/core/extension.h"
+#include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/core/interpolation_sampling.h"
+#include "src/tint/lang/core/interpolation_type.h"
+#include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/depth_texture.h"

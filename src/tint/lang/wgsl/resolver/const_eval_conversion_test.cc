@@ -19,8 +19,8 @@
 namespace tint::resolver {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 enum class Kind {
     kScalar,
@@ -284,7 +284,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f32) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_f16_to_i32) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<i32>>(Call<vec3<f16>>(1.1_h, 2.2_h, 3.3_h));
     WrapInFunction(expr);
@@ -315,7 +315,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_f16_to_i32) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(Call<vec3<u32>>(10_u, 20_u, 30_u));
     WrapInFunction(expr);
@@ -404,7 +404,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(Source{{12, 34}}, Call<vec3<f32>>(1e10_f, 0_f, 0_f));
     WrapInFunction(expr);
@@ -414,7 +414,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Small_f32_to_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(Call<vec3<f32>>(1e-20_f, -2e-30_f, 3e-40_f));
     WrapInFunction(expr);
@@ -452,7 +452,7 @@ TEST_F(ResolverConstEvalTest, StructAbstractSplat_to_StructDifferentTypes) {
     //   const c = modf(4.0);
     //   var v = c;
     // }
-    auto* expr_c = Call(builtin::Function::kModf, 0_a);
+    auto* expr_c = Call(core::Function::kModf, 0_a);
     auto* materialized = Expr("c");
     WrapInFunction(Decl(Const("c", expr_c)), Decl(Var("v", materialized)));
 

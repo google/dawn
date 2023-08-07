@@ -27,10 +27,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Builtin);
 namespace tint::sem {
 
 const char* Builtin::str() const {
-    return builtin::str(type_);
+    return core::str(type_);
 }
 
-Builtin::Builtin(builtin::Function type,
+Builtin::Builtin(core::Function type,
                  const type::Type* return_type,
                  VectorRef<Parameter*> parameters,
                  EvaluationStage eval_stage,
@@ -89,17 +89,17 @@ bool Builtin::IsSubgroup() const {
 }
 
 bool Builtin::HasSideEffects() const {
-    return builtin::HasSideEffects(type_);
+    return core::HasSideEffects(type_);
 }
 
-builtin::Extension Builtin::RequiredExtension() const {
+core::Extension Builtin::RequiredExtension() const {
     if (IsDP4a()) {
-        return builtin::Extension::kChromiumExperimentalDp4A;
+        return core::Extension::kChromiumExperimentalDp4A;
     }
     if (IsSubgroup()) {
-        return builtin::Extension::kChromiumExperimentalSubgroups;
+        return core::Extension::kChromiumExperimentalSubgroups;
     }
-    return builtin::Extension::kUndefined;
+    return core::Extension::kUndefined;
 }
 
 }  // namespace tint::sem

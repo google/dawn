@@ -21,7 +21,7 @@ namespace {
 using HlslASTPrinterTest_Identifier = TestHelper;
 
 TEST_F(HlslASTPrinterTest_Identifier, EmitIdentifierExpression) {
-    GlobalVar("foo", ty.i32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("foo", ty.i32(), core::AddressSpace::kPrivate);
 
     auto* i = Expr("foo");
     WrapInFunction(i);

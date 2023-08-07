@@ -248,13 +248,13 @@ void Printer::EmitVar(ir::Var* v) {
 
     auto space = ptr->AddressSpace();
     switch (space) {
-        case builtin::AddressSpace::kFunction:
-        case builtin::AddressSpace::kHandle:
+        case core::AddressSpace::kFunction:
+        case core::AddressSpace::kHandle:
             break;
-        case builtin::AddressSpace::kPrivate:
+        case core::AddressSpace::kPrivate:
             out << "thread ";
             break;
-        case builtin::AddressSpace::kWorkgroup:
+        case core::AddressSpace::kWorkgroup:
             out << "threadgroup ";
             break;
         default:
@@ -269,9 +269,8 @@ void Printer::EmitVar(ir::Var* v) {
 
     if (v->Initializer()) {
         out << " = " << Expr(v->Initializer());
-    } else if (space == builtin::AddressSpace::kPrivate ||
-               space == builtin::AddressSpace::kFunction ||
-               space == builtin::AddressSpace::kUndefined) {
+    } else if (space == core::AddressSpace::kPrivate || space == core::AddressSpace::kFunction ||
+               space == core::AddressSpace::kUndefined) {
         out << " = ";
         EmitZeroValue(out, ptr->UnwrapPtr());
     }
@@ -347,20 +346,20 @@ void Printer::EmitUnreachable() {
     Line() << "/* unreachable */";
 }
 
-void Printer::EmitAddressSpace(StringStream& out, builtin::AddressSpace sc) {
+void Printer::EmitAddressSpace(StringStream& out, core::AddressSpace sc) {
     switch (sc) {
-        case builtin::AddressSpace::kFunction:
-        case builtin::AddressSpace::kPrivate:
-        case builtin::AddressSpace::kHandle:
+        case core::AddressSpace::kFunction:
+        case core::AddressSpace::kPrivate:
+        case core::AddressSpace::kHandle:
             out << "thread";
             break;
-        case builtin::AddressSpace::kWorkgroup:
+        case core::AddressSpace::kWorkgroup:
             out << "threadgroup";
             break;
-        case builtin::AddressSpace::kStorage:
+        case core::AddressSpace::kStorage:
             out << "device";
             break;
-        case builtin::AddressSpace::kUniform:
+        case core::AddressSpace::kUniform:
             out << "constant";
             break;
         default:
@@ -395,7 +394,7 @@ void Printer::EmitType(StringStream& out, const type::Type* ty) {
 }
 
 void Printer::EmitPointerType(StringStream& out, const type::Pointer* ptr) {
-    if (ptr->Access() == builtin::Access::kRead) {
+    if (ptr->Access() == core::Access::kRead) {
         out << "const ";
     }
     EmitAddressSpace(out, ptr->AddressSpace());
@@ -496,9 +495,9 @@ void Printer::EmitTextureType(StringStream& out, const type::Texture* tex) {
             out << ", ";
 
             std::string access_str;
-            if (storage->access() == builtin::Access::kRead) {
+            if (storage->access() == core::Access::kRead) {
                 out << "access::read";
-            } else if (storage->access() == builtin::Access::kWrite) {
+            } else if (storage->access() == core::Access::kWrite) {
                 out << "access::write";
             } else {
                 TINT_ICE() << "invalid access control for storage texture";

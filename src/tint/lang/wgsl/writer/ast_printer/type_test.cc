@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
@@ -25,8 +25,8 @@
 namespace tint::wgsl::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using WgslASTPrinterTest = TestHelper;
 
@@ -98,7 +98,7 @@ TEST_F(WgslASTPrinterTest, EmitType_F32) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitType_F16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto type = Alias("make_type_reachable", ty.f16())->type;
 
@@ -133,7 +133,7 @@ TEST_F(WgslASTPrinterTest, EmitType_Matrix_F32) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitType_Matrix_F16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto type = Alias("make_type_reachable", ty.mat2x3<f16>())->type;
 
@@ -285,11 +285,11 @@ TEST_F(WgslASTPrinterTest, EmitType_Struct_WithAttribute) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitType_Struct_WithEntryPointAttributes) {
-    auto* s = Structure(
-        "S", Vector{
-                 Member("a", ty.u32(), Vector{Builtin(builtin::BuiltinValue::kVertexIndex)}),
-                 Member("b", ty.f32(), Vector{Location(2_a)}),
-             });
+    auto* s =
+        Structure("S", Vector{
+                           Member("a", ty.u32(), Vector{Builtin(core::BuiltinValue::kVertexIndex)}),
+                           Member("b", ty.f32(), Vector{Location(2_a)}),
+                       });
 
     ASTPrinter& gen = Build();
 
@@ -327,7 +327,7 @@ TEST_F(WgslASTPrinterTest, EmitType_Vector_F32) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitType_Vector_F16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto type = Alias("make_type_reachable", ty.vec3<f16>())->type;
 
@@ -469,9 +469,9 @@ INSTANTIATE_TEST_SUITE_P(WgslASTPrinterTest,
                                                      "texture_multisampled_2d"}));
 
 struct StorageTextureData {
-    builtin::TexelFormat fmt;
+    core::TexelFormat fmt;
     type::TextureDimension dim;
-    builtin::Access access;
+    core::Access access;
     const char* name;
 };
 inline std::ostream& operator<<(std::ostream& out, StorageTextureData data) {
@@ -496,17 +496,17 @@ INSTANTIATE_TEST_SUITE_P(
     WgslASTPrinterTest,
     WgslGenerator_StorageTextureTest,
     testing::Values(
-        StorageTextureData{builtin::TexelFormat::kRgba8Sint, type::TextureDimension::k1d,
-                           builtin::Access::kWrite, "texture_storage_1d<rgba8sint, write>"},
-        StorageTextureData{builtin::TexelFormat::kRgba8Sint, type::TextureDimension::k2d,
-                           builtin::Access::kWrite, "texture_storage_2d<rgba8sint, write>"},
-        StorageTextureData{builtin::TexelFormat::kRgba8Sint, type::TextureDimension::k2dArray,
-                           builtin::Access::kWrite, "texture_storage_2d_array<rgba8sint, write>"},
-        StorageTextureData{builtin::TexelFormat::kRgba8Sint, type::TextureDimension::k3d,
-                           builtin::Access::kWrite, "texture_storage_3d<rgba8sint, write>"}));
+        StorageTextureData{core::TexelFormat::kRgba8Sint, type::TextureDimension::k1d,
+                           core::Access::kWrite, "texture_storage_1d<rgba8sint, write>"},
+        StorageTextureData{core::TexelFormat::kRgba8Sint, type::TextureDimension::k2d,
+                           core::Access::kWrite, "texture_storage_2d<rgba8sint, write>"},
+        StorageTextureData{core::TexelFormat::kRgba8Sint, type::TextureDimension::k2dArray,
+                           core::Access::kWrite, "texture_storage_2d_array<rgba8sint, write>"},
+        StorageTextureData{core::TexelFormat::kRgba8Sint, type::TextureDimension::k3d,
+                           core::Access::kWrite, "texture_storage_3d<rgba8sint, write>"}));
 
 struct ImageFormatData {
-    builtin::TexelFormat fmt;
+    core::TexelFormat fmt;
     const char* name;
 };
 inline std::ostream& operator<<(std::ostream& out, ImageFormatData data) {
@@ -528,22 +528,22 @@ TEST_P(WgslGenerator_ImageFormatTest, EmitType_StorageTexture_ImageFormat) {
 INSTANTIATE_TEST_SUITE_P(
     WgslASTPrinterTest,
     WgslGenerator_ImageFormatTest,
-    testing::Values(ImageFormatData{builtin::TexelFormat::kR32Uint, "r32uint"},
-                    ImageFormatData{builtin::TexelFormat::kR32Sint, "r32sint"},
-                    ImageFormatData{builtin::TexelFormat::kR32Float, "r32float"},
-                    ImageFormatData{builtin::TexelFormat::kRgba8Unorm, "rgba8unorm"},
-                    ImageFormatData{builtin::TexelFormat::kRgba8Snorm, "rgba8snorm"},
-                    ImageFormatData{builtin::TexelFormat::kRgba8Uint, "rgba8uint"},
-                    ImageFormatData{builtin::TexelFormat::kRgba8Sint, "rgba8sint"},
-                    ImageFormatData{builtin::TexelFormat::kRg32Uint, "rg32uint"},
-                    ImageFormatData{builtin::TexelFormat::kRg32Sint, "rg32sint"},
-                    ImageFormatData{builtin::TexelFormat::kRg32Float, "rg32float"},
-                    ImageFormatData{builtin::TexelFormat::kRgba16Uint, "rgba16uint"},
-                    ImageFormatData{builtin::TexelFormat::kRgba16Sint, "rgba16sint"},
-                    ImageFormatData{builtin::TexelFormat::kRgba16Float, "rgba16float"},
-                    ImageFormatData{builtin::TexelFormat::kRgba32Uint, "rgba32uint"},
-                    ImageFormatData{builtin::TexelFormat::kRgba32Sint, "rgba32sint"},
-                    ImageFormatData{builtin::TexelFormat::kRgba32Float, "rgba32float"}));
+    testing::Values(ImageFormatData{core::TexelFormat::kR32Uint, "r32uint"},
+                    ImageFormatData{core::TexelFormat::kR32Sint, "r32sint"},
+                    ImageFormatData{core::TexelFormat::kR32Float, "r32float"},
+                    ImageFormatData{core::TexelFormat::kRgba8Unorm, "rgba8unorm"},
+                    ImageFormatData{core::TexelFormat::kRgba8Snorm, "rgba8snorm"},
+                    ImageFormatData{core::TexelFormat::kRgba8Uint, "rgba8uint"},
+                    ImageFormatData{core::TexelFormat::kRgba8Sint, "rgba8sint"},
+                    ImageFormatData{core::TexelFormat::kRg32Uint, "rg32uint"},
+                    ImageFormatData{core::TexelFormat::kRg32Sint, "rg32sint"},
+                    ImageFormatData{core::TexelFormat::kRg32Float, "rg32float"},
+                    ImageFormatData{core::TexelFormat::kRgba16Uint, "rgba16uint"},
+                    ImageFormatData{core::TexelFormat::kRgba16Sint, "rgba16sint"},
+                    ImageFormatData{core::TexelFormat::kRgba16Float, "rgba16float"},
+                    ImageFormatData{core::TexelFormat::kRgba32Uint, "rgba32uint"},
+                    ImageFormatData{core::TexelFormat::kRgba32Sint, "rgba32sint"},
+                    ImageFormatData{core::TexelFormat::kRgba32Float, "rgba32float"}));
 
 TEST_F(WgslASTPrinterTest, EmitType_Sampler) {
     auto sampler = ty.sampler(type::SamplerKind::kSampler);

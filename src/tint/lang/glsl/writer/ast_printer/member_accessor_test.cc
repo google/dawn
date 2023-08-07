@@ -21,8 +21,8 @@ namespace tint::glsl::writer {
 namespace {
 
 using ::testing::HasSubstr;
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using create_type_func_ptr = ast::Type (*)(const ProgramBuilder::TypesBuilder& ty);
 
@@ -92,8 +92,8 @@ class GlslASTPrinterTest_MemberAccessorBase : public BASE {
 
         auto* s = b.Structure("Data", members);
 
-        b.GlobalVar("data", b.ty.Of(s), builtin::AddressSpace::kStorage,
-                    builtin::Access::kReadWrite, b.Group(1_a), b.Binding(0_a));
+        b.GlobalVar("data", b.ty.Of(s), core::AddressSpace::kStorage, core::Access::kReadWrite,
+                    b.Group(1_a), b.Binding(0_a));
     }
 
     void SetupFunction(VectorRef<const ast::Statement*> statements) {
@@ -113,7 +113,7 @@ using GlslASTPrinterTest_MemberAccessorWithParam =
 
 TEST_F(GlslASTPrinterTest_MemberAccessor, EmitExpression_MemberAccessor) {
     auto* s = Structure("Data", Vector{Member("mem", ty.f32())});
-    GlobalVar("str", ty.Of(s), builtin::AddressSpace::kPrivate);
+    GlobalVar("str", ty.Of(s), core::AddressSpace::kPrivate);
 
     auto* expr = MemberAccessor("str", "mem");
     WrapInFunction(Var("expr", ty.f32(), expr));

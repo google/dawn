@@ -17,7 +17,7 @@
 
 #include <unordered_map>
 
-#include "src/tint/lang/core/builtin/access.h"
+#include "src/tint/lang/core/access.h"
 #include "tint/binding_point.h"
 
 namespace tint {
@@ -28,7 +28,7 @@ struct BindingRemapperOptions {
     using BindingPoints = std::unordered_map<BindingPoint, BindingPoint>;
 
     /// AccessControls is a map of old binding point to new access control
-    using AccessControls = std::unordered_map<BindingPoint, builtin::Access>;
+    using AccessControls = std::unordered_map<BindingPoint, core::Access>;
 
     /// A map of old binding point to new binding point
     BindingPoints binding_points;

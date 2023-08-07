@@ -46,8 +46,8 @@ using ::testing::HasSubstr;
 namespace tint::resolver {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using ExpressionList = Vector<const ast::Expression*, 8>;
 
@@ -55,7 +55,7 @@ using ResolverBuiltinTest = ResolverTest;
 
 struct BuiltinData {
     const char* name;
-    builtin::Function builtin;
+    core::Function builtin;
 };
 
 inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
@@ -81,7 +81,7 @@ using ResolverBuiltinTest_BoolMethod = ResolverTestWithParam<std::string>;
 TEST_P(ResolverBuiltinTest_BoolMethod, Scalar) {
     auto name = GetParam();
 
-    GlobalVar("my_var", ty.bool_(), builtin::AddressSpace::kPrivate);
+    GlobalVar("my_var", ty.bool_(), core::AddressSpace::kPrivate);
 
     auto* expr = Call(name, "my_var");
     WrapInFunction(expr);
@@ -94,7 +94,7 @@ TEST_P(ResolverBuiltinTest_BoolMethod, Scalar) {
 TEST_P(ResolverBuiltinTest_BoolMethod, Vector) {
     auto name = GetParam();
 
-    GlobalVar("my_var", ty.vec3<bool>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("my_var", ty.vec3<bool>(), core::AddressSpace::kPrivate);
 
     auto* expr = Call(name, "my_var");
     WrapInFunction(expr);
@@ -109,9 +109,9 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          testing::Values("any", "all"));
 
 TEST_F(ResolverBuiltinTest, Select) {
-    GlobalVar("my_var", ty.vec3<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("my_var", ty.vec3<f32>(), core::AddressSpace::kPrivate);
 
-    GlobalVar("bool_var", ty.vec3<bool>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("bool_var", ty.vec3<bool>(), core::AddressSpace::kPrivate);
 
     auto* expr = Call("select", "my_var", "my_var", "bool_var");
     WrapInFunction(expr);
@@ -216,8 +216,8 @@ using ResolverBuiltinArrayTest = ResolverTest;
 TEST_F(ResolverBuiltinArrayTest, ArrayLength_Vector) {
     auto ary = ty.array<i32>();
     auto* str = Structure("S", Vector{Member("x", ary)});
-    GlobalVar("a", ty.Of(str), builtin::AddressSpace::kStorage, builtin::Access::kRead,
-              Binding(0_a), Group(0_a));
+    GlobalVar("a", ty.Of(str), core::AddressSpace::kStorage, core::Access::kRead, Binding(0_a),
+              Group(0_a));
 
     auto* call = Call("arrayLength", AddressOf(MemberAccessor("a", "x")));
     WrapInFunction(call);
@@ -229,7 +229,7 @@ TEST_F(ResolverBuiltinArrayTest, ArrayLength_Vector) {
 }
 
 TEST_F(ResolverBuiltinArrayTest, ArrayLength_Error_ArraySized) {
-    GlobalVar("arr", ty.array<i32, 4>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("arr", ty.array<i32, 4>(), core::AddressSpace::kPrivate);
     auto* call = Call("arrayLength", AddressOf("arr"));
     WrapInFunction(call);
 
@@ -253,7 +253,7 @@ namespace float_builtin_tests {
 struct BuiltinDataWithParamNum {
     uint32_t args_number;
     const char* name;
-    builtin::Function builtin;
+    core::Function builtin;
 };
 
 inline std::ostream& operator<<(std::ostream& out, BuiltinDataWithParamNum data) {
@@ -472,7 +472,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Vector_f32) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Scalar_f16) {
     auto param = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto val = 0.5_h;
     if (param.name == std::string("acosh")) {
@@ -500,7 +500,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Scalar_f16) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Vector_f16) {
     auto param = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto val = param.name == std::string("acosh") ? Call<vec3<f16>>(1.0_h, 2.0_h, 3.0_h)
                                                   : Call<vec3<f16>>(0.5_h, 0.5_h, 0.8_h);
@@ -529,7 +529,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Vector_f16) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, TwoParams_Scalar_f16) {
     auto param = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call(param.name, 1_h, 1_h);
     WrapInFunction(call);
@@ -552,7 +552,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, TwoParams_Scalar_f16) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, TwoParams_Vector_f16) {
     auto param = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call(param.name, Call<vec3<f16>>(1_h, 1_h, 3_h), Call<vec3<f16>>(1_h, 1_h, 3_h));
     WrapInFunction(call);
@@ -578,7 +578,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, TwoParams_Vector_f16) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, ThreeParams_Scalar_f16) {
     auto param = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call(param.name, 0_h, 1_h, 2_h);
     WrapInFunction(call);
@@ -601,7 +601,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, ThreeParams_Scalar_f16) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, ThreeParams_Vector_f16) {
     auto param = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call(param.name, Call<vec3<f16>>(0_h, 0_h, 0_h), Call<vec3<f16>>(1_h, 1_h, 1_h),
                       Call<vec3<f16>>(2_h, 2_h, 2_h));
@@ -629,7 +629,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, ThreeParams_Vector_f16) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Scalar_f16) {
     auto param = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call(param.name, 1_h, 1_h, 1_h, 1_h);
     WrapInFunction(call);
@@ -652,7 +652,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Scalar_f16) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Vector_f16) {
     auto param = GetParam();
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call(param.name, Call<vec3<f16>>(1_h, 1_h, 3_h), Call<vec3<f16>>(1_h, 1_h, 3_h),
                       Call<vec3<f16>>(1_h, 1_h, 3_h), Call<vec3<f16>>(1_h, 1_h, 3_h));
@@ -680,55 +680,55 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Vector_f16) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_FloatBuiltin_IdenticalType,
-    testing::Values(BuiltinDataWithParamNum{1, "abs", builtin::Function::kAbs},
-                    BuiltinDataWithParamNum{1, "acos", builtin::Function::kAcos},
-                    BuiltinDataWithParamNum{1, "acosh", builtin::Function::kAcos},
-                    BuiltinDataWithParamNum{1, "asin", builtin::Function::kAsin},
-                    BuiltinDataWithParamNum{1, "asinh", builtin::Function::kAsin},
-                    BuiltinDataWithParamNum{1, "atan", builtin::Function::kAtan},
-                    BuiltinDataWithParamNum{1, "atanh", builtin::Function::kAtan},
-                    BuiltinDataWithParamNum{2, "atan2", builtin::Function::kAtan2},
-                    BuiltinDataWithParamNum{1, "ceil", builtin::Function::kCeil},
-                    BuiltinDataWithParamNum{3, "clamp", builtin::Function::kClamp},
-                    BuiltinDataWithParamNum{1, "cos", builtin::Function::kCos},
-                    BuiltinDataWithParamNum{1, "cosh", builtin::Function::kCosh},
+    testing::Values(BuiltinDataWithParamNum{1, "abs", core::Function::kAbs},
+                    BuiltinDataWithParamNum{1, "acos", core::Function::kAcos},
+                    BuiltinDataWithParamNum{1, "acosh", core::Function::kAcos},
+                    BuiltinDataWithParamNum{1, "asin", core::Function::kAsin},
+                    BuiltinDataWithParamNum{1, "asinh", core::Function::kAsin},
+                    BuiltinDataWithParamNum{1, "atan", core::Function::kAtan},
+                    BuiltinDataWithParamNum{1, "atanh", core::Function::kAtan},
+                    BuiltinDataWithParamNum{2, "atan2", core::Function::kAtan2},
+                    BuiltinDataWithParamNum{1, "ceil", core::Function::kCeil},
+                    BuiltinDataWithParamNum{3, "clamp", core::Function::kClamp},
+                    BuiltinDataWithParamNum{1, "cos", core::Function::kCos},
+                    BuiltinDataWithParamNum{1, "cosh", core::Function::kCosh},
                     // cross: (vec3<T>, vec3<T>) -> vec3<T>
-                    BuiltinDataWithParamNum{1, "degrees", builtin::Function::kDegrees},
+                    BuiltinDataWithParamNum{1, "degrees", core::Function::kDegrees},
                     // distance: (T, T) -> T, (vecN<T>, vecN<T>) -> T
-                    BuiltinDataWithParamNum{1, "exp", builtin::Function::kExp},
-                    BuiltinDataWithParamNum{1, "exp2", builtin::Function::kExp2},
+                    BuiltinDataWithParamNum{1, "exp", core::Function::kExp},
+                    BuiltinDataWithParamNum{1, "exp2", core::Function::kExp2},
                     // faceForward: (vecN<T>, vecN<T>, vecN<T>) -> vecN<T>
-                    BuiltinDataWithParamNum{1, "floor", builtin::Function::kFloor},
-                    BuiltinDataWithParamNum{3, "fma", builtin::Function::kFma},
-                    BuiltinDataWithParamNum{1, "fract", builtin::Function::kFract},
+                    BuiltinDataWithParamNum{1, "floor", core::Function::kFloor},
+                    BuiltinDataWithParamNum{3, "fma", core::Function::kFma},
+                    BuiltinDataWithParamNum{1, "fract", core::Function::kFract},
                     // frexp
-                    BuiltinDataWithParamNum{1, "inverseSqrt", builtin::Function::kInverseSqrt},
+                    BuiltinDataWithParamNum{1, "inverseSqrt", core::Function::kInverseSqrt},
                     // ldexp: (T, i32) -> T, (vecN<T>, vecN<i32>) -> vecN<T>
                     // length: (vecN<T>) -> T
-                    BuiltinDataWithParamNum{1, "log", builtin::Function::kLog},
-                    BuiltinDataWithParamNum{1, "log2", builtin::Function::kLog2},
-                    BuiltinDataWithParamNum{2, "max", builtin::Function::kMax},
-                    BuiltinDataWithParamNum{2, "min", builtin::Function::kMin},
+                    BuiltinDataWithParamNum{1, "log", core::Function::kLog},
+                    BuiltinDataWithParamNum{1, "log2", core::Function::kLog2},
+                    BuiltinDataWithParamNum{2, "max", core::Function::kMax},
+                    BuiltinDataWithParamNum{2, "min", core::Function::kMin},
                     // Note that `mix(vecN<f32>, vecN<f32>, f32) -> vecN<f32>` is not tested here.
-                    BuiltinDataWithParamNum{3, "mix", builtin::Function::kMix},
+                    BuiltinDataWithParamNum{3, "mix", core::Function::kMix},
                     // modf
                     // normalize: (vecN<T>) -> vecN<T>
-                    BuiltinDataWithParamNum{2, "pow", builtin::Function::kPow},
+                    BuiltinDataWithParamNum{2, "pow", core::Function::kPow},
                     // quantizeToF16 is not implemented yet.
-                    BuiltinDataWithParamNum{1, "radians", builtin::Function::kRadians},
+                    BuiltinDataWithParamNum{1, "radians", core::Function::kRadians},
                     // reflect: (vecN<T>, vecN<T>) -> vecN<T>
                     // refract: (vecN<T>, vecN<T>, T) -> vecN<T>
-                    BuiltinDataWithParamNum{1, "round", builtin::Function::kRound},
+                    BuiltinDataWithParamNum{1, "round", core::Function::kRound},
                     // saturate not implemented yet.
-                    BuiltinDataWithParamNum{1, "sign", builtin::Function::kSign},
-                    BuiltinDataWithParamNum{1, "sin", builtin::Function::kSin},
-                    BuiltinDataWithParamNum{1, "sinh", builtin::Function::kSinh},
-                    BuiltinDataWithParamNum{3, "smoothstep", builtin::Function::kSmoothstep},
-                    BuiltinDataWithParamNum{1, "sqrt", builtin::Function::kSqrt},
-                    BuiltinDataWithParamNum{2, "step", builtin::Function::kStep},
-                    BuiltinDataWithParamNum{1, "tan", builtin::Function::kTan},
-                    BuiltinDataWithParamNum{1, "tanh", builtin::Function::kTanh},
-                    BuiltinDataWithParamNum{1, "trunc", builtin::Function::kTrunc}));
+                    BuiltinDataWithParamNum{1, "sign", core::Function::kSign},
+                    BuiltinDataWithParamNum{1, "sin", core::Function::kSin},
+                    BuiltinDataWithParamNum{1, "sinh", core::Function::kSinh},
+                    BuiltinDataWithParamNum{3, "smoothstep", core::Function::kSmoothstep},
+                    BuiltinDataWithParamNum{1, "sqrt", core::Function::kSqrt},
+                    BuiltinDataWithParamNum{2, "step", core::Function::kStep},
+                    BuiltinDataWithParamNum{1, "tan", core::Function::kTan},
+                    BuiltinDataWithParamNum{1, "tanh", core::Function::kTanh},
+                    BuiltinDataWithParamNum{1, "trunc", core::Function::kTrunc}));
 
 using ResolverBuiltinFloatTest = ResolverTest;
 
@@ -746,7 +746,7 @@ TEST_F(ResolverBuiltinFloatTest, Cross_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Cross_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call("cross", Call<vec3<f16>>(1_h, 2_h, 3_h), Call<vec3<f16>>(1_h, 2_h, 3_h));
     WrapInFunction(call);
@@ -843,7 +843,7 @@ TEST_F(ResolverBuiltinFloatTest, Distance_Scalar_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Distance_Scalar_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call("distance", 1_h, 1_h);
     WrapInFunction(call);
@@ -865,7 +865,7 @@ TEST_F(ResolverBuiltinFloatTest, Distance_Vector_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Distance_Vector_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call("distance", Call<vec3<f16>>(1_h, 1_h, 3_h), Call<vec3<f16>>(1_h, 1_h, 3_h));
     WrapInFunction(call);
@@ -951,7 +951,7 @@ TEST_F(ResolverBuiltinFloatTest, FrexpScalar_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, FrexpScalar_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call("frexp", 1_h);
     WrapInFunction(call);
@@ -1015,7 +1015,7 @@ TEST_F(ResolverBuiltinFloatTest, FrexpVector_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, FrexpVector_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call("frexp", Call<vec3<f16>>());
     WrapInFunction(call);
@@ -1050,7 +1050,7 @@ TEST_F(ResolverBuiltinFloatTest, FrexpVector_f16) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Frexp_Error_FirstParamInt) {
-    GlobalVar("v", ty.i32(), builtin::AddressSpace::kWorkgroup);
+    GlobalVar("v", ty.i32(), core::AddressSpace::kWorkgroup);
     auto* call = Call("frexp", 1_i, AddressOf("v"));
     WrapInFunction(call);
 
@@ -1077,7 +1077,7 @@ TEST_F(ResolverBuiltinFloatTest, Length_Scalar_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Length_Scalar_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call("length", 1_h);
     WrapInFunction(call);
@@ -1099,7 +1099,7 @@ TEST_F(ResolverBuiltinFloatTest, Length_FloatVector_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Length_FloatVector_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call("length", Call<vec3<f16>>(1_h, 1_h, 3_h));
     WrapInFunction(call);
@@ -1154,7 +1154,7 @@ TEST_F(ResolverBuiltinFloatTest, Mix_VectorScalar_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Mix_VectorScalar_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call("mix", Call<vec3<f16>>(1_h, 1_h, 1_h), Call<vec3<f16>>(1_h, 1_h, 1_h), 4_h);
     WrapInFunction(call);
@@ -1200,7 +1200,7 @@ TEST_F(ResolverBuiltinFloatTest, ModfScalar_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, ModfScalar_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call("modf", 1_h);
     WrapInFunction(call);
@@ -1264,7 +1264,7 @@ TEST_F(ResolverBuiltinFloatTest, ModfVector_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, ModfVector_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call("modf", Call<vec3<f16>>());
     WrapInFunction(call);
@@ -1299,7 +1299,7 @@ TEST_F(ResolverBuiltinFloatTest, ModfVector_f16) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Modf_Error_FirstParamInt) {
-    GlobalVar("whole", ty.f32(), builtin::AddressSpace::kWorkgroup);
+    GlobalVar("whole", ty.f32(), core::AddressSpace::kWorkgroup);
     auto* call = Call("modf", 1_i, AddressOf("whole"));
     WrapInFunction(call);
 
@@ -1315,7 +1315,7 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_FirstParamInt) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Modf_Error_SecondParamIntPtr) {
-    GlobalVar("whole", ty.i32(), builtin::AddressSpace::kWorkgroup);
+    GlobalVar("whole", ty.i32(), core::AddressSpace::kWorkgroup);
     auto* call = Call("modf", 1_f, AddressOf("whole"));
     WrapInFunction(call);
 
@@ -1345,7 +1345,7 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_SecondParamNotAPointer) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Modf_Error_VectorSizesDontMatch) {
-    GlobalVar("whole", ty.vec4<f32>(), builtin::AddressSpace::kWorkgroup);
+    GlobalVar("whole", ty.vec4<f32>(), core::AddressSpace::kWorkgroup);
     auto* call = Call("modf", Call<vec2<f32>>(1_f, 2_f), AddressOf("whole"));
     WrapInFunction(call);
 
@@ -1374,7 +1374,7 @@ TEST_F(ResolverBuiltinFloatTest, Normalize_Vector_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Normalize_Vector_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* call = Call("normalize", Call<vec3<f16>>(1_h, 1_h, 3_h));
     WrapInFunction(call);
@@ -1410,7 +1410,7 @@ namespace integer_builtin_tests {
 struct BuiltinDataWithParamNum {
     uint32_t args_number;
     const char* name;
-    builtin::Function builtin;
+    core::Function builtin;
 };
 
 inline std::ostream& operator<<(std::ostream& out, BuiltinDataWithParamNum data) {
@@ -1806,18 +1806,18 @@ INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_IntegerBuiltin_IdenticalType,
     testing::Values(
-        BuiltinDataWithParamNum{1, "abs", builtin::Function::kAbs},
-        BuiltinDataWithParamNum{3, "clamp", builtin::Function::kClamp},
-        BuiltinDataWithParamNum{1, "countLeadingZeros", builtin::Function::kCountLeadingZeros},
-        BuiltinDataWithParamNum{1, "countOneBits", builtin::Function::kCountOneBits},
-        BuiltinDataWithParamNum{1, "countTrailingZeros", builtin::Function::kCountTrailingZeros},
+        BuiltinDataWithParamNum{1, "abs", core::Function::kAbs},
+        BuiltinDataWithParamNum{3, "clamp", core::Function::kClamp},
+        BuiltinDataWithParamNum{1, "countLeadingZeros", core::Function::kCountLeadingZeros},
+        BuiltinDataWithParamNum{1, "countOneBits", core::Function::kCountOneBits},
+        BuiltinDataWithParamNum{1, "countTrailingZeros", core::Function::kCountTrailingZeros},
         // extractBits: (T, u32, u32) -> T
-        BuiltinDataWithParamNum{1, "firstLeadingBit", builtin::Function::kFirstLeadingBit},
-        BuiltinDataWithParamNum{1, "firstTrailingBit", builtin::Function::kFirstTrailingBit},
+        BuiltinDataWithParamNum{1, "firstLeadingBit", core::Function::kFirstLeadingBit},
+        BuiltinDataWithParamNum{1, "firstTrailingBit", core::Function::kFirstTrailingBit},
         // insertBits: (T, T, u32, u32) -> T
-        BuiltinDataWithParamNum{2, "max", builtin::Function::kMax},
-        BuiltinDataWithParamNum{2, "min", builtin::Function::kMin},
-        BuiltinDataWithParamNum{1, "reverseBits", builtin::Function::kReverseBits}));
+        BuiltinDataWithParamNum{2, "max", core::Function::kMax},
+        BuiltinDataWithParamNum{2, "min", core::Function::kMin},
+        BuiltinDataWithParamNum{1, "reverseBits", core::Function::kReverseBits}));
 
 }  // namespace integer_builtin_tests
 
@@ -1825,7 +1825,7 @@ INSTANTIATE_TEST_SUITE_P(
 namespace matrix_builtin_tests {
 
 TEST_F(ResolverBuiltinTest, Determinant_2x2_f32) {
-    GlobalVar("var", ty.mat2x2<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat2x2<f32>(), core::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1837,9 +1837,9 @@ TEST_F(ResolverBuiltinTest, Determinant_2x2_f32) {
 }
 
 TEST_F(ResolverBuiltinTest, Determinant_2x2_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
-    GlobalVar("var", ty.mat2x2<f16>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat2x2<f16>(), core::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1851,7 +1851,7 @@ TEST_F(ResolverBuiltinTest, Determinant_2x2_f16) {
 }
 
 TEST_F(ResolverBuiltinTest, Determinant_3x3_f32) {
-    GlobalVar("var", ty.mat3x3<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat3x3<f32>(), core::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1863,9 +1863,9 @@ TEST_F(ResolverBuiltinTest, Determinant_3x3_f32) {
 }
 
 TEST_F(ResolverBuiltinTest, Determinant_3x3_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
-    GlobalVar("var", ty.mat3x3<f16>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat3x3<f16>(), core::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1877,7 +1877,7 @@ TEST_F(ResolverBuiltinTest, Determinant_3x3_f16) {
 }
 
 TEST_F(ResolverBuiltinTest, Determinant_4x4_f32) {
-    GlobalVar("var", ty.mat4x4<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat4x4<f32>(), core::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1889,9 +1889,9 @@ TEST_F(ResolverBuiltinTest, Determinant_4x4_f32) {
 }
 
 TEST_F(ResolverBuiltinTest, Determinant_4x4_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
-    GlobalVar("var", ty.mat4x4<f16>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat4x4<f16>(), core::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1903,7 +1903,7 @@ TEST_F(ResolverBuiltinTest, Determinant_4x4_f16) {
 }
 
 TEST_F(ResolverBuiltinTest, Determinant_NotSquare) {
-    GlobalVar("var", ty.mat2x3<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat2x3<f32>(), core::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1918,7 +1918,7 @@ TEST_F(ResolverBuiltinTest, Determinant_NotSquare) {
 }
 
 TEST_F(ResolverBuiltinTest, Determinant_NotMatrix) {
-    GlobalVar("var", ty.f32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("var", ty.f32(), core::AddressSpace::kPrivate);
 
     auto* call = Call("determinant", "var");
     WrapInFunction(call);
@@ -1938,7 +1938,7 @@ TEST_F(ResolverBuiltinTest, Determinant_NotMatrix) {
 namespace vector_builtin_tests {
 
 TEST_F(ResolverBuiltinTest, Dot_Vec2_f32) {
-    GlobalVar("my_var", ty.vec2<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("my_var", ty.vec2<f32>(), core::AddressSpace::kPrivate);
 
     auto* expr = Call("dot", "my_var", "my_var");
     WrapInFunction(expr);
@@ -1950,9 +1950,9 @@ TEST_F(ResolverBuiltinTest, Dot_Vec2_f32) {
 }
 
 TEST_F(ResolverBuiltinTest, Dot_Vec2_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
-    GlobalVar("my_var", ty.vec2<f16>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("my_var", ty.vec2<f16>(), core::AddressSpace::kPrivate);
 
     auto* expr = Call("dot", "my_var", "my_var");
     WrapInFunction(expr);
@@ -1964,7 +1964,7 @@ TEST_F(ResolverBuiltinTest, Dot_Vec2_f16) {
 }
 
 TEST_F(ResolverBuiltinTest, Dot_Vec3_i32) {
-    GlobalVar("my_var", ty.vec3<i32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("my_var", ty.vec3<i32>(), core::AddressSpace::kPrivate);
 
     auto* expr = Call("dot", "my_var", "my_var");
     WrapInFunction(expr);
@@ -1976,7 +1976,7 @@ TEST_F(ResolverBuiltinTest, Dot_Vec3_i32) {
 }
 
 TEST_F(ResolverBuiltinTest, Dot_Vec4_u32) {
-    GlobalVar("my_var", ty.vec4<u32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("my_var", ty.vec4<u32>(), core::AddressSpace::kPrivate);
 
     auto* expr = Call("dot", "my_var", "my_var");
     WrapInFunction(expr);
@@ -2011,7 +2011,7 @@ using ResolverBuiltinDerivativeTest = ResolverTestWithParam<std::string>;
 TEST_P(ResolverBuiltinDerivativeTest, Scalar) {
     auto name = GetParam();
 
-    GlobalVar("ident", ty.f32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("ident", ty.f32(), core::AddressSpace::kPrivate);
 
     auto* expr = Call(name, "ident");
     Func("func", tint::Empty, ty.void_(), Vector{Ignore(expr)},
@@ -2025,7 +2025,7 @@ TEST_P(ResolverBuiltinDerivativeTest, Scalar) {
 
 TEST_P(ResolverBuiltinDerivativeTest, Vector) {
     auto name = GetParam();
-    GlobalVar("ident", ty.vec4<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("ident", ty.vec4<f32>(), core::AddressSpace::kPrivate);
 
     auto* expr = Call(name, "ident");
     Func("func", tint::Empty, ty.void_(), Vector{Ignore(expr)},
@@ -2086,7 +2086,7 @@ auto& operator<<(STREAM& out, Texture data) {
 struct TextureTestParams {
     type::TextureDimension dim;
     Texture type = Texture::kF32;
-    builtin::TexelFormat format = builtin::TexelFormat::kR32Float;
+    core::TexelFormat format = core::TexelFormat::kR32Float;
 };
 inline std::ostream& operator<<(std::ostream& out, TextureTestParams data) {
     StringStream str;
@@ -2128,7 +2128,7 @@ class ResolverBuiltinTest_TextureOperation : public ResolverTestWithParam<Textur
         if (tint::HasPrefix(type_name, "texture") || tint::HasPrefix(type_name, "sampler")) {
             GlobalVar(name, type, Binding(0_a), Group(0_a));
         } else {
-            GlobalVar(name, type, builtin::AddressSpace::kPrivate);
+            GlobalVar(name, type, core::AddressSpace::kPrivate);
         }
 
         call_params->Push(Expr(name));
@@ -2556,8 +2556,8 @@ using ResolverBuiltinTest_DataPacking = ResolverTestWithParam<BuiltinData>;
 TEST_P(ResolverBuiltinTest_DataPacking, InferType) {
     auto param = GetParam();
 
-    bool pack4 = param.builtin == builtin::Function::kPack4X8Snorm ||
-                 param.builtin == builtin::Function::kPack4X8Unorm;
+    bool pack4 = param.builtin == core::Function::kPack4X8Snorm ||
+                 param.builtin == core::Function::kPack4X8Unorm;
 
     auto* call = pack4 ? Call(param.name, Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f))
                        : Call(param.name, Call<vec2<f32>>(1_f, 2_f));
@@ -2571,8 +2571,8 @@ TEST_P(ResolverBuiltinTest_DataPacking, InferType) {
 TEST_P(ResolverBuiltinTest_DataPacking, Error_IncorrectParamType) {
     auto param = GetParam();
 
-    bool pack4 = param.builtin == builtin::Function::kPack4X8Snorm ||
-                 param.builtin == builtin::Function::kPack4X8Unorm;
+    bool pack4 = param.builtin == core::Function::kPack4X8Snorm ||
+                 param.builtin == core::Function::kPack4X8Unorm;
 
     auto* call = pack4 ? Call(param.name, Call<vec4<i32>>(1_i, 2_i, 3_i, 4_i))
                        : Call(param.name, Call<vec2<i32>>(1_i, 2_i));
@@ -2597,8 +2597,8 @@ TEST_P(ResolverBuiltinTest_DataPacking, Error_NoParams) {
 TEST_P(ResolverBuiltinTest_DataPacking, Error_TooManyParams) {
     auto param = GetParam();
 
-    bool pack4 = param.builtin == builtin::Function::kPack4X8Snorm ||
-                 param.builtin == builtin::Function::kPack4X8Unorm;
+    bool pack4 = param.builtin == core::Function::kPack4X8Snorm ||
+                 param.builtin == core::Function::kPack4X8Unorm;
 
     auto* call = pack4 ? Call(param.name, Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f), 1_f)
                        : Call(param.name, Call<vec2<f32>>(1_f, 2_f), 1_f);
@@ -2612,11 +2612,11 @@ TEST_P(ResolverBuiltinTest_DataPacking, Error_TooManyParams) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_DataPacking,
-    testing::Values(BuiltinData{"pack4x8snorm", builtin::Function::kPack4X8Snorm},
-                    BuiltinData{"pack4x8unorm", builtin::Function::kPack4X8Unorm},
-                    BuiltinData{"pack2x16snorm", builtin::Function::kPack2X16Snorm},
-                    BuiltinData{"pack2x16unorm", builtin::Function::kPack2X16Unorm},
-                    BuiltinData{"pack2x16float", builtin::Function::kPack2X16Float}));
+    testing::Values(BuiltinData{"pack4x8snorm", core::Function::kPack4X8Snorm},
+                    BuiltinData{"pack4x8unorm", core::Function::kPack4X8Unorm},
+                    BuiltinData{"pack2x16snorm", core::Function::kPack2X16Snorm},
+                    BuiltinData{"pack2x16unorm", core::Function::kPack2X16Unorm},
+                    BuiltinData{"pack2x16float", core::Function::kPack2X16Float}));
 
 }  // namespace data_packing_builtin_tests
 
@@ -2627,8 +2627,8 @@ using ResolverBuiltinTest_DataUnpacking = ResolverTestWithParam<BuiltinData>;
 TEST_P(ResolverBuiltinTest_DataUnpacking, InferType) {
     auto param = GetParam();
 
-    bool pack4 = param.builtin == builtin::Function::kUnpack4X8Snorm ||
-                 param.builtin == builtin::Function::kUnpack4X8Unorm;
+    bool pack4 = param.builtin == core::Function::kUnpack4X8Snorm ||
+                 param.builtin == core::Function::kUnpack4X8Unorm;
 
     auto* call = Call(param.name, 1_u);
     WrapInFunction(call);
@@ -2646,11 +2646,11 @@ TEST_P(ResolverBuiltinTest_DataUnpacking, InferType) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_DataUnpacking,
-    testing::Values(BuiltinData{"unpack4x8snorm", builtin::Function::kUnpack4X8Snorm},
-                    BuiltinData{"unpack4x8unorm", builtin::Function::kUnpack4X8Unorm},
-                    BuiltinData{"unpack2x16snorm", builtin::Function::kUnpack2X16Snorm},
-                    BuiltinData{"unpack2x16unorm", builtin::Function::kUnpack2X16Unorm},
-                    BuiltinData{"unpack2x16float", builtin::Function::kUnpack2X16Float}));
+    testing::Values(BuiltinData{"unpack4x8snorm", core::Function::kUnpack4X8Snorm},
+                    BuiltinData{"unpack4x8unorm", core::Function::kUnpack4X8Unorm},
+                    BuiltinData{"unpack2x16snorm", core::Function::kUnpack2X16Snorm},
+                    BuiltinData{"unpack2x16unorm", core::Function::kUnpack2X16Unorm},
+                    BuiltinData{"unpack2x16float", core::Function::kUnpack2X16Float}));
 
 }  // namespace data_unpacking_builtin_tests
 
@@ -2683,8 +2683,8 @@ TEST_P(ResolverBuiltinTest_Barrier, Error_TooManyParams) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_Barrier,
-    testing::Values(BuiltinData{"storageBarrier", builtin::Function::kStorageBarrier},
-                    BuiltinData{"workgroupBarrier", builtin::Function::kWorkgroupBarrier}));
+    testing::Values(BuiltinData{"storageBarrier", core::Function::kStorageBarrier},
+                    BuiltinData{"workgroupBarrier", core::Function::kWorkgroupBarrier}));
 
 }  // namespace synchronization_builtin_tests
 

@@ -29,8 +29,8 @@ TEST(SpirvASTParserTypeTest, SameArgumentsGivesSamePointer) {
     EXPECT_EQ(ty.U32(), ty.U32());
     EXPECT_EQ(ty.F32(), ty.F32());
     EXPECT_EQ(ty.I32(), ty.I32());
-    EXPECT_EQ(ty.Pointer(builtin::AddressSpace::kUndefined, ty.I32()),
-              ty.Pointer(builtin::AddressSpace::kUndefined, ty.I32()));
+    EXPECT_EQ(ty.Pointer(core::AddressSpace::kUndefined, ty.I32()),
+              ty.Pointer(core::AddressSpace::kUndefined, ty.I32()));
     EXPECT_EQ(ty.Vector(ty.I32(), 3), ty.Vector(ty.I32(), 3));
     EXPECT_EQ(ty.Matrix(ty.I32(), 3, 2), ty.Matrix(ty.I32(), 3, 2));
     EXPECT_EQ(ty.Array(ty.I32(), 3, 2), ty.Array(ty.I32(), 3, 2));
@@ -43,10 +43,10 @@ TEST(SpirvASTParserTypeTest, SameArgumentsGivesSamePointer) {
               ty.MultisampledTexture(type::TextureDimension::k2d, ty.I32()));
     EXPECT_EQ(ty.SampledTexture(type::TextureDimension::k2d, ty.I32()),
               ty.SampledTexture(type::TextureDimension::k2d, ty.I32()));
-    EXPECT_EQ(ty.StorageTexture(type::TextureDimension::k2d, builtin::TexelFormat::kR32Uint,
-                                builtin::Access::kRead),
-              ty.StorageTexture(type::TextureDimension::k2d, builtin::TexelFormat::kR32Uint,
-                                builtin::Access::kRead));
+    EXPECT_EQ(ty.StorageTexture(type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+                                core::Access::kRead),
+              ty.StorageTexture(type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+                                core::Access::kRead));
 }
 
 TEST(SpirvASTParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
@@ -54,10 +54,10 @@ TEST(SpirvASTParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
     Symbol sym_b(Symbol(2, {}, "2"));
 
     TypeManager ty;
-    EXPECT_NE(ty.Pointer(builtin::AddressSpace::kUndefined, ty.I32()),
-              ty.Pointer(builtin::AddressSpace::kUndefined, ty.U32()));
-    EXPECT_NE(ty.Pointer(builtin::AddressSpace::kUndefined, ty.I32()),
-              ty.Pointer(builtin::AddressSpace::kIn, ty.I32()));
+    EXPECT_NE(ty.Pointer(core::AddressSpace::kUndefined, ty.I32()),
+              ty.Pointer(core::AddressSpace::kUndefined, ty.U32()));
+    EXPECT_NE(ty.Pointer(core::AddressSpace::kUndefined, ty.I32()),
+              ty.Pointer(core::AddressSpace::kIn, ty.I32()));
     EXPECT_NE(ty.Vector(ty.I32(), 3), ty.Vector(ty.U32(), 3));
     EXPECT_NE(ty.Vector(ty.I32(), 3), ty.Vector(ty.I32(), 2));
     EXPECT_NE(ty.Matrix(ty.I32(), 3, 2), ty.Matrix(ty.U32(), 3, 2));
@@ -80,18 +80,18 @@ TEST(SpirvASTParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
               ty.SampledTexture(type::TextureDimension::k3d, ty.I32()));
     EXPECT_NE(ty.SampledTexture(type::TextureDimension::k2d, ty.I32()),
               ty.SampledTexture(type::TextureDimension::k2d, ty.U32()));
-    EXPECT_NE(ty.StorageTexture(type::TextureDimension::k2d, builtin::TexelFormat::kR32Uint,
-                                builtin::Access::kRead),
-              ty.StorageTexture(type::TextureDimension::k3d, builtin::TexelFormat::kR32Uint,
-                                builtin::Access::kRead));
-    EXPECT_NE(ty.StorageTexture(type::TextureDimension::k2d, builtin::TexelFormat::kR32Uint,
-                                builtin::Access::kRead),
-              ty.StorageTexture(type::TextureDimension::k2d, builtin::TexelFormat::kR32Sint,
-                                builtin::Access::kRead));
-    EXPECT_NE(ty.StorageTexture(type::TextureDimension::k2d, builtin::TexelFormat::kR32Uint,
-                                builtin::Access::kRead),
-              ty.StorageTexture(type::TextureDimension::k2d, builtin::TexelFormat::kR32Uint,
-                                builtin::Access::kWrite));
+    EXPECT_NE(ty.StorageTexture(type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+                                core::Access::kRead),
+              ty.StorageTexture(type::TextureDimension::k3d, core::TexelFormat::kR32Uint,
+                                core::Access::kRead));
+    EXPECT_NE(ty.StorageTexture(type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+                                core::Access::kRead),
+              ty.StorageTexture(type::TextureDimension::k2d, core::TexelFormat::kR32Sint,
+                                core::Access::kRead));
+    EXPECT_NE(ty.StorageTexture(type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+                                core::Access::kRead),
+              ty.StorageTexture(type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+                                core::Access::kWrite));
 }
 
 }  // namespace

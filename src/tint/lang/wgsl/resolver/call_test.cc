@@ -21,8 +21,8 @@
 namespace tint::resolver {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 template <typename T, int ID = 0>
 using alias = builder::alias<T, ID>;
@@ -64,7 +64,7 @@ static constexpr Params all_param_types[] = {
 };
 
 TEST_F(ResolverCallTest, Valid) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     Vector<const ast::Parameter*, 4> params;
     Vector<const ast::Expression*, 4> args;

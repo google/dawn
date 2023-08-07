@@ -122,8 +122,8 @@ Transform::ApplyResult BindingRemapper::Apply(const Program* src,
             // Replace any access controls.
             auto ac_it = remappings->access_controls.find(from);
             if (ac_it != remappings->access_controls.end()) {
-                builtin::Access access = ac_it->second;
-                if (access == builtin::Access::kUndefined) {
+                core::Access access = ac_it->second;
+                if (access == core::Access::kUndefined) {
                     b.Diagnostics().add_error(diag::System::Transform,
                                               "invalid access mode (" +
                                                   std::to_string(static_cast<uint32_t>(access)) +
@@ -131,7 +131,7 @@ Transform::ApplyResult BindingRemapper::Apply(const Program* src,
                     return resolver::Resolve(b);
                 }
                 auto* sem = src->Sem().Get(var);
-                if (sem->AddressSpace() != builtin::AddressSpace::kStorage) {
+                if (sem->AddressSpace() != core::AddressSpace::kStorage) {
                     b.Diagnostics().add_error(
                         diag::System::Transform,
                         "cannot apply access control to variable with address space " +

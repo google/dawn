@@ -19,8 +19,8 @@
 namespace tint::hlsl::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using ::testing::HasSubstr;
 
@@ -156,7 +156,7 @@ TEST_F(HlslASTPrinterTest_VariableDecl, Emit_VariableDeclStatement_Const_f32) {
 }
 
 TEST_F(HlslASTPrinterTest_VariableDecl, Emit_VariableDeclStatement_Const_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* C = Const("C", Expr(1_h));
     Func("f", tint::Empty, ty.void_(),
@@ -230,7 +230,7 @@ TEST_F(HlslASTPrinterTest_VariableDecl, Emit_VariableDeclStatement_Const_vec3_f3
 }
 
 TEST_F(HlslASTPrinterTest_VariableDecl, Emit_VariableDeclStatement_Const_vec3_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* C = Const("C", Call<vec3<f16>>(1_h, 2_h, 3_h));
     Func("f", tint::Empty, ty.void_(),
@@ -286,7 +286,7 @@ TEST_F(HlslASTPrinterTest_VariableDecl, Emit_VariableDeclStatement_Const_mat2x3_
 }
 
 TEST_F(HlslASTPrinterTest_VariableDecl, Emit_VariableDeclStatement_Const_mat2x3_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* C = Const("C", Call<mat2x3<f16>>(1_h, 2_h, 3_h, 4_h, 5_h, 6_h));
     Func("f", tint::Empty, ty.void_(),
@@ -358,7 +358,7 @@ TEST_F(HlslASTPrinterTest_VariableDecl, Emit_VariableDeclStatement_Array) {
 }
 
 TEST_F(HlslASTPrinterTest_VariableDecl, Emit_VariableDeclStatement_Private) {
-    GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.f32(), core::AddressSpace::kPrivate);
 
     WrapInFunction(Expr("a"));
 
@@ -384,7 +384,7 @@ TEST_F(HlslASTPrinterTest_VariableDecl, Emit_VariableDeclStatement_Initializer_Z
 }
 
 TEST_F(HlslASTPrinterTest_VariableDecl, Emit_VariableDeclStatement_Initializer_ZeroVec_F16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* var = Var("a", ty.vec3<f16>(), Call<vec3<f16>>());
 
@@ -413,7 +413,7 @@ TEST_F(HlslASTPrinterTest_VariableDecl, Emit_VariableDeclStatement_Initializer_Z
 }
 
 TEST_F(HlslASTPrinterTest_VariableDecl, Emit_VariableDeclStatement_Initializer_ZeroMat_F16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* var = Var("a", ty.mat2x3<f16>(), Call<mat2x3<f16>>());
 

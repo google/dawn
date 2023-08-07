@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_LANG_WGSL_SEM_MODULE_H_
 #define SRC_TINT_LANG_WGSL_SEM_MODULE_H_
 
-#include "src/tint/lang/core/builtin/extension.h"
+#include "src/tint/lang/core/extension.h"
 #include "src/tint/lang/wgsl/ast/diagnostic_control.h"
 #include "src/tint/lang/wgsl/sem/node.h"
 #include "src/tint/utils/containers/vector.h"
@@ -34,7 +34,7 @@ class Module final : public Castable<Module, Node> {
     /// Constructor
     /// @param dep_ordered_decls the dependency-ordered module-scope declarations
     /// @param extensions the list of enabled extensions in the module
-    Module(VectorRef<const ast::Node*> dep_ordered_decls, builtin::Extensions extensions);
+    Module(VectorRef<const ast::Node*> dep_ordered_decls, core::Extensions extensions);
 
     /// Destructor
     ~Module() override;
@@ -43,24 +43,24 @@ class Module final : public Castable<Module, Node> {
     VectorRef<const ast::Node*> DependencyOrderedDeclarations() const { return dep_ordered_decls_; }
 
     /// @returns the list of enabled extensions in the module
-    const builtin::Extensions& Extensions() const { return extensions_; }
+    const core::Extensions& Extensions() const { return extensions_; }
 
     /// Modifies the severity of a specific diagnostic rule for this module.
     /// @param rule the diagnostic rule
     /// @param severity the new diagnostic severity
-    void SetDiagnosticSeverity(builtin::DiagnosticRule rule, builtin::DiagnosticSeverity severity) {
+    void SetDiagnosticSeverity(core::DiagnosticRule rule, core::DiagnosticSeverity severity) {
         diagnostic_severities_[rule] = severity;
     }
 
     /// @returns the diagnostic severity modifications applied to this module
-    const builtin::DiagnosticRuleSeverities& DiagnosticSeverities() const {
+    const core::DiagnosticRuleSeverities& DiagnosticSeverities() const {
         return diagnostic_severities_;
     }
 
   private:
     const tint::Vector<const ast::Node*, 64> dep_ordered_decls_;
-    builtin::Extensions extensions_;
-    builtin::DiagnosticRuleSeverities diagnostic_severities_;
+    core::Extensions extensions_;
+    core::DiagnosticRuleSeverities diagnostic_severities_;
 };
 
 }  // namespace tint::sem

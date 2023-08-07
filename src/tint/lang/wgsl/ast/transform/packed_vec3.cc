@@ -18,7 +18,7 @@
 #include <string>
 #include <utility>
 
-#include "src/tint/lang/core/builtin/builtin.h"
+#include "src/tint/lang/core/builtin.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/vector.h"
@@ -99,7 +99,7 @@ struct PackedVec3::State {
     Type MakePackedVec3(const type::Type* ty) {
         auto* vec = ty->As<type::Vector>();
         TINT_ASSERT(vec != nullptr && vec->Width() == 3);
-        return b.ty(builtin::Builtin::kPackedVec3, CreateASTTypeFor(ctx, vec->type()));
+        return b.ty(core::Builtin::kPackedVec3, CreateASTTypeFor(ctx, vec->type()));
     }
 
     /// Recursively rewrite a type using `__packed_vec3`, if needed.
@@ -339,7 +339,7 @@ struct PackedVec3::State {
         // if the transform is necessary.
         for (auto* decl : src->AST().GlobalVariables()) {
             auto* var = sem.Get<sem::GlobalVariable>(decl);
-            if (var && builtin::IsHostShareable(var->AddressSpace()) &&
+            if (var && core::IsHostShareable(var->AddressSpace()) &&
                 ContainsVec3(var->Type()->UnwrapRef())) {
                 return true;
             }
@@ -361,7 +361,7 @@ struct PackedVec3::State {
         // bytes from the start of a structure to the start of the next member.
         // Disable these validation rules using an internal extension, as MSL does not have these
         // restrictions.
-        b.Enable(builtin::Extension::kChromiumInternalRelaxedUniformLayout);
+        b.Enable(core::Extension::kChromiumInternalRelaxedUniformLayout);
 
         // Track expressions that need to be packed or unpacked.
         Hashset<const sem::ValueExpression*, 8> to_pack;
@@ -376,12 +376,12 @@ struct PackedVec3::State {
                 [&](const sem::TypeExpression* type) {
                     // Rewrite pointers to types that contain vec3s.
                     auto* ptr = type->Type()->As<type::Pointer>();
-                    if (ptr && builtin::IsHostShareable(ptr->AddressSpace())) {
+                    if (ptr && core::IsHostShareable(ptr->AddressSpace())) {
                         auto new_store_type = RewriteType(ptr->StoreType());
                         if (new_store_type) {
-                            auto access = ptr->AddressSpace() == builtin::AddressSpace::kStorage
+                            auto access = ptr->AddressSpace() == core::AddressSpace::kStorage
                                               ? ptr->Access()
-                                              : builtin::Access::kUndefined;
+                                              : core::Access::kUndefined;
                             auto new_ptr_type =
                                 b.ty.ptr(ptr->AddressSpace(), new_store_type, access);
                             ctx.Replace(node, new_ptr_type.expr);
@@ -389,7 +389,7 @@ struct PackedVec3::State {
                     }
                 },
                 [&](const sem::Variable* var) {
-                    if (!builtin::IsHostShareable(var->AddressSpace())) {
+                    if (!core::IsHostShareable(var->AddressSpace())) {
                         return;
                     }
 
@@ -405,7 +405,7 @@ struct PackedVec3::State {
                         auto* lhs = sem.GetVal(assign->lhs);
                         auto* rhs = sem.GetVal(assign->rhs);
                         if (!ContainsVec3(rhs->Type()) ||
-                            !builtin::IsHostShareable(
+                            !core::IsHostShareable(
                                 lhs->Type()->As<type::Reference>()->AddressSpace())) {
                             // Skip assignments to address spaces that are not host-shareable, or
                             // that do not contain vec3 types.
@@ -433,7 +433,7 @@ struct PackedVec3::State {
                 [&](const sem::Load* load) {
                     // Unpack loads of types that contain vec3s in host-shareable address spaces.
                     if (ContainsVec3(load->Type()) &&
-                        builtin::IsHostShareable(load->ReferenceType()->AddressSpace())) {
+                        core::IsHostShareable(load->ReferenceType()->AddressSpace())) {
                         to_unpack.Add(load);
                     }
                 },
@@ -443,7 +443,7 @@ struct PackedVec3::State {
                     // struct.
                     if (auto* ref = accessor->Type()->As<type::Reference>()) {
                         if (IsVec3(ref->StoreType()) &&
-                            builtin::IsHostShareable(ref->AddressSpace())) {
+                            core::IsHostShareable(ref->AddressSpace())) {
                             ctx.Replace(node, b.MemberAccessor(ctx.Clone(accessor->Declaration()),
                                                                kStructMemberName));
                         }

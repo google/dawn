@@ -22,8 +22,8 @@
 namespace tint::resolver {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using ResolverBuiltinValidationTest = ResolverTest;
 
@@ -134,7 +134,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConstUsedAsVariab
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsVariable) {
     auto* mix =
-        GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), builtin::AddressSpace::kPrivate);
+        GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), core::AddressSpace::kPrivate);
     auto* use = Expr("mix");
     WrapInFunction(Decl(Var("v", use)));
 
@@ -420,7 +420,7 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalVar) {
     overload.BuildSamplerVariable(this);
 
     // Build the module-scope var 'G' with the offset value
-    GlobalVar("G", expr({}, *this), builtin::AddressSpace::kPrivate);
+    GlobalVar("G", expr({}, *this), core::AddressSpace::kPrivate);
 
     auto args = overload.args(this);
     auto*& arg_to_replace = (param.position == Position::kFirst) ? args.Front() : args.Back();
@@ -537,7 +537,7 @@ using ResolverDP4aExtensionValidationTest = ResolverTest;
 TEST_F(ResolverDP4aExtensionValidationTest, Dot4I8PackedWithExtension) {
     // enable chromium_experimental_dp4a;
     // fn func { return dot4I8Packed(1u, 2u); }
-    Enable(builtin::Extension::kChromiumExperimentalDp4A);
+    Enable(core::Extension::kChromiumExperimentalDp4A);
 
     Func("func", tint::Empty, ty.i32(),
          Vector{
@@ -565,7 +565,7 @@ TEST_F(ResolverDP4aExtensionValidationTest, Dot4I8PackedWithoutExtension) {
 TEST_F(ResolverDP4aExtensionValidationTest, Dot4U8PackedWithExtension) {
     // enable chromium_experimental_dp4a;
     // fn func { return dot4U8Packed(1u, 2u); }
-    Enable(builtin::Extension::kChromiumExperimentalDp4A);
+    Enable(core::Extension::kChromiumExperimentalDp4A);
 
     Func("func", tint::Empty, ty.u32(),
          Vector{
@@ -595,7 +595,7 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_WrongAddressSpace) {
     // fn foo() {
     //   workgroupUniformLoad(&v);
     // }
-    GlobalVar("v", ty.i32(), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    GlobalVar("v", ty.i32(), core::AddressSpace::kStorage, core::Access::kReadWrite,
               Vector{Group(0_a), Binding(0_a)});
     WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf(Source{{12, 34}}, "v"))));
 
@@ -613,7 +613,7 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_Atomic) {
     // fn foo() {
     //   workgroupUniformLoad(&v);
     // }
-    GlobalVar("v", ty.atomic<i32>(), builtin::AddressSpace::kWorkgroup);
+    GlobalVar("v", ty.atomic<i32>(), core::AddressSpace::kWorkgroup);
     WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf(Source{{12, 34}}, "v"))));
 
     EXPECT_FALSE(r()->Resolve());
@@ -627,7 +627,7 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInArray) {
     // fn foo() {
     //   workgroupUniformLoad(&v);
     // }
-    GlobalVar("v", ty.array(ty.atomic<i32>(), 4_a), builtin::AddressSpace::kWorkgroup);
+    GlobalVar("v", ty.array(ty.atomic<i32>(), 4_a), core::AddressSpace::kWorkgroup);
     WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf(Source{{12, 34}}, "v"))));
 
     EXPECT_FALSE(r()->Resolve());
@@ -645,7 +645,7 @@ TEST_F(ResolverBuiltinValidationTest, WorkgroupUniformLoad_AtomicInStruct) {
     // }
     Structure("Inner", Vector{Member("a", ty.array(ty.atomic<i32>(), 4_a))});
     Structure("S", Vector{Member("i", ty("Inner"))});
-    GlobalVar(Source{{12, 34}}, "v", ty.array(ty("S"), 4_a), builtin::AddressSpace::kWorkgroup);
+    GlobalVar(Source{{12, 34}}, "v", ty.array(ty("S"), 4_a), core::AddressSpace::kWorkgroup);
     WrapInFunction(CallStmt(Call("workgroupUniformLoad", AddressOf("v"))));
 
     EXPECT_FALSE(r()->Resolve());
@@ -670,7 +670,7 @@ TEST_F(ResolverBuiltinValidationTest, SubgroupBallotWithoutExtension) {
 TEST_F(ResolverBuiltinValidationTest, SubgroupBallotWithExtension) {
     // enable chromium_experimental_subgroups;
     // fn func { return subgroupBallot(); }
-    Enable(builtin::Extension::kChromiumExperimentalSubgroups);
+    Enable(core::Extension::kChromiumExperimentalSubgroups);
 
     Func("func", tint::Empty, ty.vec4<u32>(),
          Vector{

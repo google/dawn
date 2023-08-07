@@ -202,7 +202,7 @@ void Disassembler::EmitLocation(Location loc) {
     if (loc.interpolation.has_value()) {
         out_ << ", @interpolate(";
         out_ << loc.interpolation->type;
-        if (loc.interpolation->sampling != builtin::InterpolationSampling::kUndefined) {
+        if (loc.interpolation->sampling != core::InterpolationSampling::kUndefined) {
             out_ << ", ";
             out_ << loc.interpolation->sampling;
         }
@@ -450,7 +450,7 @@ void Disassembler::EmitInstruction(Instruction* inst) {
         [&](CoreBuiltinCall* b) {
             EmitValueWithType(b);
             out_ << " = ";
-            EmitInstructionName(builtin::str(b->Func()), b);
+            EmitInstructionName(core::str(b->Func()), b);
             out_ << " ";
             EmitOperandList(b);
         },
@@ -910,7 +910,7 @@ void Disassembler::EmitStructDecl(const type::Struct* str) {
         if (member->Attributes().interpolation.has_value()) {
             auto& interp = member->Attributes().interpolation.value();
             out_ << ", @interpolate(" << interp.type;
-            if (interp.sampling != builtin::InterpolationSampling::kUndefined) {
+            if (interp.sampling != core::InterpolationSampling::kUndefined) {
                 out_ << ", " << interp.sampling;
             }
             out_ << ")";

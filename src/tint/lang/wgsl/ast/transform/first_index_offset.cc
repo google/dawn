@@ -18,7 +18,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
@@ -92,13 +92,13 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
         if (auto* var = node->As<Variable>()) {
             for (auto* attr : var->attributes) {
                 if (auto* builtin_attr = attr->As<BuiltinAttribute>()) {
-                    builtin::BuiltinValue builtin = src->Sem().Get(builtin_attr)->Value();
-                    if (builtin == builtin::BuiltinValue::kVertexIndex) {
+                    core::BuiltinValue builtin = src->Sem().Get(builtin_attr)->Value();
+                    if (builtin == core::BuiltinValue::kVertexIndex) {
                         auto* sem_var = ctx.src->Sem().Get(var);
                         builtin_vars.emplace(sem_var, kFirstVertexName);
                         has_vertex_index = true;
                     }
-                    if (builtin == builtin::BuiltinValue::kInstanceIndex) {
+                    if (builtin == core::BuiltinValue::kInstanceIndex) {
                         auto* sem_var = ctx.src->Sem().Get(var);
                         builtin_vars.emplace(sem_var, kFirstInstanceName);
                         has_instance_index = true;
@@ -109,13 +109,13 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
         if (auto* member = node->As<StructMember>()) {
             for (auto* attr : member->attributes) {
                 if (auto* builtin_attr = attr->As<BuiltinAttribute>()) {
-                    builtin::BuiltinValue builtin = src->Sem().Get(builtin_attr)->Value();
-                    if (builtin == builtin::BuiltinValue::kVertexIndex) {
+                    core::BuiltinValue builtin = src->Sem().Get(builtin_attr)->Value();
+                    if (builtin == core::BuiltinValue::kVertexIndex) {
                         auto* sem_mem = ctx.src->Sem().Get(member);
                         builtin_members.emplace(sem_mem, kFirstVertexName);
                         has_vertex_index = true;
                     }
-                    if (builtin == builtin::BuiltinValue::kInstanceIndex) {
+                    if (builtin == core::BuiltinValue::kInstanceIndex) {
                         auto* sem_mem = ctx.src->Sem().Get(member);
                         builtin_members.emplace(sem_mem, kFirstInstanceName);
                         has_instance_index = true;
@@ -134,7 +134,7 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
 
         // Create a global to hold the uniform buffer
         Symbol buffer_name = b.Sym();
-        b.GlobalVar(buffer_name, b.ty.Of(struct_), builtin::AddressSpace::kUniform,
+        b.GlobalVar(buffer_name, b.ty.Of(struct_), core::AddressSpace::kUniform,
                     tint::Vector{
                         b.Binding(AInt(ub_binding)),
                         b.Group(AInt(ub_group)),

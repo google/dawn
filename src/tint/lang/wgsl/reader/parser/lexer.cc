@@ -25,7 +25,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "src/tint/lang/core/builtin/number.h"
+#include "src/tint/lang/core/number.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/strconv/parse_num.h"
 #include "src/tint/utils/text/unicode.h"

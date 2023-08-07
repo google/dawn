@@ -22,8 +22,8 @@
 namespace tint::resolver {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 struct ResolverPtrRefValidationTest : public resolver::TestHelper, public testing::Test {};
 
@@ -144,8 +144,8 @@ TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
     // }
     auto* inner = Structure("Inner", Vector{Member("arr", ty.array<i32, 4>())});
     auto* buf = Structure("S", Vector{Member("inner", ty.Of(inner))});
-    auto* var = GlobalVar("s", ty.Of(buf), builtin::AddressSpace::kStorage,
-                          builtin::Access::kReadWrite, Binding(0_a), Group(0_a));
+    auto* var = GlobalVar("s", ty.Of(buf), core::AddressSpace::kStorage, core::Access::kReadWrite,
+                          Binding(0_a), Group(0_a));
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(var, "inner"), "arr"), 2_i);
     auto* ptr = Let(Source{{12, 34}}, "p", ty.ptr<storage, i32>(), AddressOf(expr));

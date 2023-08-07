@@ -21,8 +21,8 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/ice/ice.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 namespace tint::ir::transform {
 
@@ -170,13 +170,13 @@ struct State {
                 [&](Store* store) {
                     // Conditionalize stores to host-visible address spaces.
                     auto* ptr = store->To()->Type()->As<type::Pointer>();
-                    if (ptr && ptr->AddressSpace() == builtin::AddressSpace::kStorage) {
+                    if (ptr && ptr->AddressSpace() == core::AddressSpace::kStorage) {
                         conditionalize(store);
                     }
                 },
                 [&](CoreBuiltinCall* builtin) {
                     // Conditionalize calls to builtins that have side effects.
-                    if (builtin::HasSideEffects(builtin->Func())) {
+                    if (core::HasSideEffects(builtin->Func())) {
                         conditionalize(builtin);
                     }
                 },

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/core/builtin/number.h"
+#include "src/tint/lang/core/number.h"
 #include "src/tint/lang/glsl/writer/ast_printer/helper_test.h"
 
 #include "gmock/gmock.h"
@@ -38,8 +38,8 @@ void TestAlign(ProgramBuilder* ctx) {
                        ctx->Member("dewey", ctx->ty.f32(), Vector{ctx->MemberAlign(256_i)}),
                        ctx->Member("louie", ctx->ty.f32(), Vector{ctx->MemberAlign(256_i)}),
                    });
-    ctx->GlobalVar("nephews", ctx->ty.Of(nephews), builtin::AddressSpace::kStorage,
-                   ctx->Binding(0_a), ctx->Group(0_a));
+    ctx->GlobalVar("nephews", ctx->ty.Of(nephews), core::AddressSpace::kStorage, ctx->Binding(0_a),
+                   ctx->Group(0_a));
 }
 
 TEST_F(GlslASTPrinterTest_StorageBuffer, Align) {

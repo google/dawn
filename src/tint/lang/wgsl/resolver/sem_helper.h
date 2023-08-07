@@ -17,9 +17,9 @@
 
 #include <string>
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
-#include "src/tint/lang/core/builtin/interpolation_sampling.h"
-#include "src/tint/lang/core/builtin/interpolation_type.h"
+#include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/interpolation_sampling.h"
+#include "src/tint/lang/core/interpolation_type.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/dependency_graph.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
@@ -107,11 +107,11 @@ class SemHelper {
 
     /// @param expr the semantic node
     /// @returns nullptr if @p expr is nullptr, or @p expr cast to
-    /// sem::BuiltinEnumExpression<builtin::AddressSpace> if the cast is successful, otherwise an
+    /// sem::BuiltinEnumExpression<core::AddressSpace> if the cast is successful, otherwise an
     /// error diagnostic is raised.
-    sem::BuiltinEnumExpression<builtin::AddressSpace>* AsAddressSpace(sem::Expression* expr) const {
+    sem::BuiltinEnumExpression<core::AddressSpace>* AsAddressSpace(sem::Expression* expr) const {
         if (TINT_LIKELY(expr)) {
-            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::AddressSpace>>();
+            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::AddressSpace>>();
             if (TINT_LIKELY(enum_expr)) {
                 return enum_expr;
             }
@@ -122,11 +122,11 @@ class SemHelper {
 
     /// @param expr the semantic node
     /// @returns nullptr if @p expr is nullptr, or @p expr cast to
-    /// sem::BuiltinEnumExpression<builtin::BuiltinValue> if the cast is successful, otherwise an
+    /// sem::BuiltinEnumExpression<core::BuiltinValue> if the cast is successful, otherwise an
     /// error diagnostic is raised.
-    sem::BuiltinEnumExpression<builtin::BuiltinValue>* AsBuiltinValue(sem::Expression* expr) const {
+    sem::BuiltinEnumExpression<core::BuiltinValue>* AsBuiltinValue(sem::Expression* expr) const {
         if (TINT_LIKELY(expr)) {
-            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::BuiltinValue>>();
+            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::BuiltinValue>>();
             if (TINT_LIKELY(enum_expr)) {
                 return enum_expr;
             }
@@ -139,9 +139,9 @@ class SemHelper {
     /// @returns nullptr if @p expr is nullptr, or @p expr cast to
     /// sem::BuiltinEnumExpression<type::TexelFormat> if the cast is successful, otherwise an error
     /// diagnostic is raised.
-    sem::BuiltinEnumExpression<builtin::TexelFormat>* AsTexelFormat(sem::Expression* expr) const {
+    sem::BuiltinEnumExpression<core::TexelFormat>* AsTexelFormat(sem::Expression* expr) const {
         if (TINT_LIKELY(expr)) {
-            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::TexelFormat>>();
+            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::TexelFormat>>();
             if (TINT_LIKELY(enum_expr)) {
                 return enum_expr;
             }
@@ -152,11 +152,11 @@ class SemHelper {
 
     /// @param expr the semantic node
     /// @returns nullptr if @p expr is nullptr, or @p expr cast to
-    /// sem::BuiltinEnumExpression<builtin::Access> if the cast is successful, otherwise an error
+    /// sem::BuiltinEnumExpression<core::Access> if the cast is successful, otherwise an error
     /// diagnostic is raised.
-    sem::BuiltinEnumExpression<builtin::Access>* AsAccess(sem::Expression* expr) const {
+    sem::BuiltinEnumExpression<core::Access>* AsAccess(sem::Expression* expr) const {
         if (TINT_LIKELY(expr)) {
-            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::Access>>();
+            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::Access>>();
             if (TINT_LIKELY(enum_expr)) {
                 return enum_expr;
             }
@@ -167,13 +167,12 @@ class SemHelper {
 
     /// @param expr the semantic node
     /// @returns nullptr if @p expr is nullptr, or @p expr cast to
-    /// sem::BuiltinEnumExpression<builtin::InterpolationSampling> if the cast is successful,
+    /// sem::BuiltinEnumExpression<core::InterpolationSampling> if the cast is successful,
     /// otherwise an error diagnostic is raised.
-    sem::BuiltinEnumExpression<builtin::InterpolationSampling>* AsInterpolationSampling(
+    sem::BuiltinEnumExpression<core::InterpolationSampling>* AsInterpolationSampling(
         sem::Expression* expr) const {
         if (TINT_LIKELY(expr)) {
-            auto* enum_expr =
-                expr->As<sem::BuiltinEnumExpression<builtin::InterpolationSampling>>();
+            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::InterpolationSampling>>();
             if (TINT_LIKELY(enum_expr)) {
                 return enum_expr;
             }
@@ -184,12 +183,12 @@ class SemHelper {
 
     /// @param expr the semantic node
     /// @returns nullptr if @p expr is nullptr, or @p expr cast to
-    /// sem::BuiltinEnumExpression<builtin::InterpolationType> if the cast is successful, otherwise
+    /// sem::BuiltinEnumExpression<core::InterpolationType> if the cast is successful, otherwise
     /// an error diagnostic is raised.
-    sem::BuiltinEnumExpression<builtin::InterpolationType>* AsInterpolationType(
+    sem::BuiltinEnumExpression<core::InterpolationType>* AsInterpolationType(
         sem::Expression* expr) const {
         if (TINT_LIKELY(expr)) {
-            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::InterpolationType>>();
+            auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::InterpolationType>>();
             if (TINT_LIKELY(enum_expr)) {
                 return enum_expr;
             }

@@ -132,7 +132,7 @@ class TransformBuilder {
                 uint8_t old_binding;
                 uint8_t new_group;
                 uint8_t new_binding;
-                builtin::Access new_access;
+                core::Access new_access;
             };
 
             std::vector<Config> configs = tb->builder()->vector<Config>();

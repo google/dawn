@@ -46,7 +46,7 @@ TEST_F(ProgramTest, IDsAreUnique) {
 }
 
 TEST_F(ProgramTest, Assert_GlobalVariable) {
-    GlobalVar("var", ty.f32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("var", ty.f32(), core::AddressSpace::kPrivate);
 
     Program program(std::move(*this));
     EXPECT_TRUE(program.IsValid());

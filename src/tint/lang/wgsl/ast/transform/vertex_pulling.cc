@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <utility>
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
@@ -36,8 +36,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::VertexPulling::Config);
 
 namespace tint::ast::transform {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 namespace {
 
@@ -327,9 +327,8 @@ struct VertexPulling::State {
                                         });
         for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
             // The decorated variable with struct type
-            b.GlobalVar(GetVertexBufferName(i), b.ty.Of(struct_type),
-                        builtin::AddressSpace::kStorage, builtin::Access::kRead, b.Binding(AInt(i)),
-                        b.Group(AInt(cfg.pulling_group)));
+            b.GlobalVar(GetVertexBufferName(i), b.ty.Of(struct_type), core::AddressSpace::kStorage,
+                        core::Access::kRead, b.Binding(AInt(i)), b.Group(AInt(cfg.pulling_group)));
         }
     }
 
@@ -785,11 +784,11 @@ struct VertexPulling::State {
             }
             auto builtin = src->Sem().Get(builtin_attr)->Value();
             // Check for existing vertex_index and instance_index builtins.
-            if (builtin == builtin::BuiltinValue::kVertexIndex) {
+            if (builtin == core::BuiltinValue::kVertexIndex) {
                 vertex_index_expr = [this, param] {
                     return b.Expr(ctx.Clone(param->name->symbol));
                 };
-            } else if (builtin == builtin::BuiltinValue::kInstanceIndex) {
+            } else if (builtin == core::BuiltinValue::kInstanceIndex) {
                 instance_index_expr = [this, param] {
                     return b.Expr(ctx.Clone(param->name->symbol));
                 };
@@ -839,9 +838,9 @@ struct VertexPulling::State {
                 }
                 auto builtin = src->Sem().Get(builtin_attr)->Value();
                 // Check for existing vertex_index and instance_index builtins.
-                if (builtin == builtin::BuiltinValue::kVertexIndex) {
+                if (builtin == core::BuiltinValue::kVertexIndex) {
                     vertex_index_expr = member_expr;
-                } else if (builtin == builtin::BuiltinValue::kInstanceIndex) {
+                } else if (builtin == core::BuiltinValue::kInstanceIndex) {
                     instance_index_expr = member_expr;
                 }
                 members_to_clone.Push(member);
@@ -907,7 +906,7 @@ struct VertexPulling::State {
                     auto name = b.Symbols().New("tint_pulling_vertex_index");
                     new_function_parameters.Push(
                         b.Param(name, b.ty.u32(),
-                                tint::Vector{b.Builtin(builtin::BuiltinValue::kVertexIndex)}));
+                                tint::Vector{b.Builtin(core::BuiltinValue::kVertexIndex)}));
                     vertex_index_expr = [this, name] { return b.Expr(name); };
                     break;
                 }
@@ -919,7 +918,7 @@ struct VertexPulling::State {
                     auto name = b.Symbols().New("tint_pulling_instance_index");
                     new_function_parameters.Push(
                         b.Param(name, b.ty.u32(),
-                                tint::Vector{b.Builtin(builtin::BuiltinValue::kInstanceIndex)}));
+                                tint::Vector{b.Builtin(core::BuiltinValue::kInstanceIndex)}));
                     instance_index_expr = [this, name] { return b.Expr(name); };
                     break;
                 }

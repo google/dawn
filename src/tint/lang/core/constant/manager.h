@@ -17,8 +17,8 @@
 
 #include <utility>
 
-#include "src/tint/lang/core/builtin/number.h"
 #include "src/tint/lang/core/constant/value.h"
+#include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/utils/containers/unique_allocator.h"
 #include "src/tint/utils/math/hash.h"

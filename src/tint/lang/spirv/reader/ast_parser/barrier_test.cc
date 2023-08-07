@@ -73,7 +73,7 @@ TEST_F(SpirvASTParserTest, WorkgroupBarrier) {
     ASSERT_NE(sem_call, nullptr);
     auto* builtin = sem_call->Target()->As<sem::Builtin>();
     ASSERT_NE(builtin, nullptr);
-    EXPECT_EQ(builtin->Type(), builtin::Function::kWorkgroupBarrier);
+    EXPECT_EQ(builtin->Type(), core::Function::kWorkgroupBarrier);
 }
 
 TEST_F(SpirvASTParserTest, StorageBarrier) {
@@ -106,7 +106,7 @@ TEST_F(SpirvASTParserTest, StorageBarrier) {
     ASSERT_NE(sem_call, nullptr);
     auto* builtin = sem_call->Target()->As<sem::Builtin>();
     ASSERT_NE(builtin, nullptr);
-    EXPECT_EQ(builtin->Type(), builtin::Function::kStorageBarrier);
+    EXPECT_EQ(builtin->Type(), core::Function::kStorageBarrier);
 }
 
 TEST_F(SpirvASTParserTest, ErrBarrierInvalidExecution) {

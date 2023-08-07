@@ -42,7 +42,7 @@ class Enable final : public Castable<Enable, Node> {
 
     /// @param ext the extension to search for
     /// @returns true if this Enable lists the given extension
-    bool HasExtension(builtin::Extension ext) const;
+    bool HasExtension(core::Extension ext) const;
 
     /// Clones this node and all transitive child nodes using the `CloneContext` `ctx`.
     /// @param ctx the clone context

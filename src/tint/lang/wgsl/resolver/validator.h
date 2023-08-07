@@ -74,7 +74,7 @@ struct TypeAndAddressSpace {
     /// The type
     const type::Type* type;
     /// The address space
-    builtin::AddressSpace address_space;
+    core::AddressSpace address_space;
 
     /// Equality operator
     /// @param other the other TypeAndAddressSpace to compare this TypeAndAddressSpace to
@@ -85,7 +85,7 @@ struct TypeAndAddressSpace {
 };
 
 /// DiagnosticFilterStack is a scoped stack of diagnostic filters.
-using DiagnosticFilterStack = ScopeStack<builtin::DiagnosticRule, builtin::DiagnosticSeverity>;
+using DiagnosticFilterStack = ScopeStack<core::DiagnosticRule, core::DiagnosticSeverity>;
 
 /// Validation logic for various ast nodes. The validations in general should
 /// be shallow and depend on the resolver to call on children. The validations
@@ -101,7 +101,7 @@ class Validator {
     /// @param valid_type_storage_layouts a set of validated type layouts by address space
     Validator(ProgramBuilder* builder,
               SemHelper& helper,
-              const builtin::Extensions& enabled_extensions,
+              const core::Extensions& enabled_extensions,
               const Hashmap<const type::Type*, const Source*, 8>& atomic_composite_info,
               Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts);
     ~Validator();
@@ -126,7 +126,7 @@ class Validator {
     /// @param msg the diagnostic message
     /// @param source the diagnostic source
     /// @returns false if the diagnostic is an error for the given trigger rule
-    bool AddDiagnostic(builtin::DiagnosticRule rule,
+    bool AddDiagnostic(core::DiagnosticRule rule,
                        const std::string& msg,
                        const Source& source) const;
 
@@ -485,7 +485,7 @@ class Validator {
     /// @param sc the address space
     /// @param source the source of the type
     /// @returns true on success, false otherwise
-    bool AddressSpaceLayout(const type::Type* type, builtin::AddressSpace sc, Source source) const;
+    bool AddressSpaceLayout(const type::Type* type, core::AddressSpace sc, Source source) const;
 
     /// @returns true if the attribute list contains a
     /// ast::DisableValidationAttribute with the validation mode equal to
@@ -539,15 +539,15 @@ class Validator {
     /// @param source the source for the error
     /// @returns true on success, false if an error was raised.
     bool CheckTypeAccessAddressSpace(const type::Type* store_ty,
-                                     builtin::Access access,
-                                     builtin::AddressSpace address_space,
+                                     core::Access access,
+                                     core::AddressSpace address_space,
                                      VectorRef<const tint::ast::Attribute*> attributes,
                                      const Source& source) const;
     SymbolTable& symbols_;
     diag::List& diagnostics_;
     SemHelper& sem_;
     DiagnosticFilterStack diagnostic_filters_;
-    const builtin::Extensions& enabled_extensions_;
+    const core::Extensions& enabled_extensions_;
     const Hashmap<const type::Type*, const Source*, 8>& atomic_composite_info_;
     Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts_;
 };

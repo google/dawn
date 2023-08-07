@@ -16,7 +16,7 @@
 
 #include <algorithm>
 
-#include "src/tint/lang/core/builtin/texel_format.h"
+#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/wgsl/ast/accessor_expression.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
@@ -317,9 +317,9 @@ void ASTPrinter::EmitFunction(const ast::Function* func) {
     }
 }
 
-void ASTPrinter::EmitImageFormat(StringStream& out, const builtin::TexelFormat fmt) {
+void ASTPrinter::EmitImageFormat(StringStream& out, const core::TexelFormat fmt) {
     switch (fmt) {
-        case builtin::TexelFormat::kUndefined:
+        case core::TexelFormat::kUndefined:
             diagnostics_.add_error(diag::System::Writer, "unknown image format");
             break;
         default:

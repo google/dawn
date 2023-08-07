@@ -37,14 +37,13 @@ class SpirvAtomicTest : public TransformTest {
 
         auto& b = parser.builder();
 
-        builtin::Function two_params[] = {
-            builtin::Function::kAtomicExchange, builtin::Function::kAtomicAdd,
-            builtin::Function::kAtomicSub,      builtin::Function::kAtomicMin,
-            builtin::Function::kAtomicMax,      builtin::Function::kAtomicAnd,
-            builtin::Function::kAtomicOr,       builtin::Function::kAtomicXor,
+        core::Function two_params[] = {
+            core::Function::kAtomicExchange, core::Function::kAtomicAdd, core::Function::kAtomicSub,
+            core::Function::kAtomicMin,      core::Function::kAtomicMax, core::Function::kAtomicAnd,
+            core::Function::kAtomicOr,       core::Function::kAtomicXor,
         };
         for (auto& a : two_params) {
-            b.Func(std::string{"stub_"} + builtin::str(a) + "_u32",
+            b.Func(std::string{"stub_"} + core::str(a) + "_u32",
                    tint::Vector{
                        b.Param("p0", b.ty.u32()),
                        b.Param("p1", b.ty.u32()),
@@ -56,7 +55,7 @@ class SpirvAtomicTest : public TransformTest {
                    tint::Vector{
                        b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(), a),
                    });
-            b.Func(std::string{"stub_"} + builtin::str(a) + "_i32",
+            b.Func(std::string{"stub_"} + core::str(a) + "_i32",
                    tint::Vector{
                        b.Param("p0", b.ty.i32()),
                        b.Param("p1", b.ty.i32()),
@@ -80,7 +79,7 @@ class SpirvAtomicTest : public TransformTest {
                },
                tint::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
-                                                          builtin::Function::kAtomicLoad),
+                                                          core::Function::kAtomicLoad),
                });
         b.Func("stub_atomicLoad_i32",
                tint::Vector{
@@ -92,7 +91,7 @@ class SpirvAtomicTest : public TransformTest {
                },
                tint::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
-                                                          builtin::Function::kAtomicLoad),
+                                                          core::Function::kAtomicLoad),
                });
 
         b.Func("stub_atomicStore_u32",
@@ -103,7 +102,7 @@ class SpirvAtomicTest : public TransformTest {
                b.ty.void_(), tint::Empty,
                tint::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
-                                                          builtin::Function::kAtomicStore),
+                                                          core::Function::kAtomicStore),
                });
         b.Func("stub_atomicStore_i32",
                tint::Vector{
@@ -113,7 +112,7 @@ class SpirvAtomicTest : public TransformTest {
                b.ty.void_(), tint::Empty,
                tint::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
-                                                          builtin::Function::kAtomicStore),
+                                                          core::Function::kAtomicStore),
                });
 
         b.Func("stub_atomic_compare_exchange_weak_u32",
@@ -128,7 +127,7 @@ class SpirvAtomicTest : public TransformTest {
                },
                tint::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(
-                       b.ID(), b.AllocateNodeID(), builtin::Function::kAtomicCompareExchangeWeak),
+                       b.ID(), b.AllocateNodeID(), core::Function::kAtomicCompareExchangeWeak),
                });
         b.Func("stub_atomic_compare_exchange_weak_i32",
                tint::Vector{b.Param("p0", b.ty.i32()), b.Param("p1", b.ty.i32()),
@@ -139,7 +138,7 @@ class SpirvAtomicTest : public TransformTest {
                },
                tint::Vector{
                    b.ASTNodes().Create<SpirvAtomic::Stub>(
-                       b.ID(), b.AllocateNodeID(), builtin::Function::kAtomicCompareExchangeWeak),
+                       b.ID(), b.AllocateNodeID(), core::Function::kAtomicCompareExchangeWeak),
                });
 
         // Keep this pointer alive after Transform() returns

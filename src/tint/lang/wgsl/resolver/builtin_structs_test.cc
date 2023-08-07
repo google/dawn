@@ -25,13 +25,13 @@ namespace {
 ////////////////////////////////////////////////////////////////////////////////
 // access
 ////////////////////////////////////////////////////////////////////////////////
-using ResolverBuiltinStructs = ResolverTestWithParam<builtin::Builtin>;
+using ResolverBuiltinStructs = ResolverTestWithParam<core::Builtin>;
 
 TEST_P(ResolverBuiltinStructs, Resolve) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     // var<private> p : NAME;
-    auto* var = GlobalVar("p", ty(GetParam()), builtin::AddressSpace::kPrivate);
+    auto* var = GlobalVar("p", ty(GetParam()), core::AddressSpace::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* str = As<type::Struct>(TypeOf(var)->UnwrapRef());
@@ -42,32 +42,32 @@ TEST_P(ResolverBuiltinStructs, Resolve) {
 
 INSTANTIATE_TEST_SUITE_P(,
                          ResolverBuiltinStructs,
-                         testing::Values(builtin::Builtin::kAtomicCompareExchangeResultI32,
-                                         builtin::Builtin::kAtomicCompareExchangeResultU32,
-                                         builtin::Builtin::kFrexpResultAbstract,
-                                         builtin::Builtin::kFrexpResultF16,
-                                         builtin::Builtin::kFrexpResultF32,
-                                         builtin::Builtin::kFrexpResultVec2Abstract,
-                                         builtin::Builtin::kFrexpResultVec2F16,
-                                         builtin::Builtin::kFrexpResultVec2F32,
-                                         builtin::Builtin::kFrexpResultVec3Abstract,
-                                         builtin::Builtin::kFrexpResultVec3F16,
-                                         builtin::Builtin::kFrexpResultVec3F32,
-                                         builtin::Builtin::kFrexpResultVec4Abstract,
-                                         builtin::Builtin::kFrexpResultVec4F16,
-                                         builtin::Builtin::kFrexpResultVec4F32,
-                                         builtin::Builtin::kModfResultAbstract,
-                                         builtin::Builtin::kModfResultF16,
-                                         builtin::Builtin::kModfResultF32,
-                                         builtin::Builtin::kModfResultVec2Abstract,
-                                         builtin::Builtin::kModfResultVec2F16,
-                                         builtin::Builtin::kModfResultVec2F32,
-                                         builtin::Builtin::kModfResultVec3Abstract,
-                                         builtin::Builtin::kModfResultVec3F16,
-                                         builtin::Builtin::kModfResultVec3F32,
-                                         builtin::Builtin::kModfResultVec4Abstract,
-                                         builtin::Builtin::kModfResultVec4F16,
-                                         builtin::Builtin::kModfResultVec4F32));
+                         testing::Values(core::Builtin::kAtomicCompareExchangeResultI32,
+                                         core::Builtin::kAtomicCompareExchangeResultU32,
+                                         core::Builtin::kFrexpResultAbstract,
+                                         core::Builtin::kFrexpResultF16,
+                                         core::Builtin::kFrexpResultF32,
+                                         core::Builtin::kFrexpResultVec2Abstract,
+                                         core::Builtin::kFrexpResultVec2F16,
+                                         core::Builtin::kFrexpResultVec2F32,
+                                         core::Builtin::kFrexpResultVec3Abstract,
+                                         core::Builtin::kFrexpResultVec3F16,
+                                         core::Builtin::kFrexpResultVec3F32,
+                                         core::Builtin::kFrexpResultVec4Abstract,
+                                         core::Builtin::kFrexpResultVec4F16,
+                                         core::Builtin::kFrexpResultVec4F32,
+                                         core::Builtin::kModfResultAbstract,
+                                         core::Builtin::kModfResultF16,
+                                         core::Builtin::kModfResultF32,
+                                         core::Builtin::kModfResultVec2Abstract,
+                                         core::Builtin::kModfResultVec2F16,
+                                         core::Builtin::kModfResultVec2F32,
+                                         core::Builtin::kModfResultVec3Abstract,
+                                         core::Builtin::kModfResultVec3F16,
+                                         core::Builtin::kModfResultVec3F32,
+                                         core::Builtin::kModfResultVec4Abstract,
+                                         core::Builtin::kModfResultVec4F16,
+                                         core::Builtin::kModfResultVec4F32));
 
 }  // namespace
 }  // namespace tint::resolver

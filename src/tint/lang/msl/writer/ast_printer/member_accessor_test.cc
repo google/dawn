@@ -22,7 +22,7 @@ using MslASTPrinterTest = TestHelper;
 
 TEST_F(MslASTPrinterTest, EmitExpression_MemberAccessor) {
     GlobalVar("str", ty.Of(Structure("my_str", Vector{Member("mem", ty.f32())})),
-              builtin::AddressSpace::kPrivate);
+              core::AddressSpace::kPrivate);
     auto* expr = MemberAccessor("str", "mem");
     WrapInFunction(expr);
 
@@ -34,7 +34,7 @@ TEST_F(MslASTPrinterTest, EmitExpression_MemberAccessor) {
 }
 
 TEST_F(MslASTPrinterTest, EmitExpression_MemberAccessor_Swizzle_xyz) {
-    GlobalVar("my_vec", ty.vec4<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("my_vec", ty.vec4<f32>(), core::AddressSpace::kPrivate);
 
     auto* expr = MemberAccessor("my_vec", "xyz");
     WrapInFunction(expr);
@@ -46,7 +46,7 @@ TEST_F(MslASTPrinterTest, EmitExpression_MemberAccessor_Swizzle_xyz) {
 }
 
 TEST_F(MslASTPrinterTest, EmitExpression_MemberAccessor_Swizzle_gbr) {
-    GlobalVar("my_vec", ty.vec4<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("my_vec", ty.vec4<f32>(), core::AddressSpace::kPrivate);
 
     auto* expr = MemberAccessor("my_vec", "gbr");
     WrapInFunction(expr);

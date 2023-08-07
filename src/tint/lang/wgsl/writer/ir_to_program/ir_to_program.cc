@@ -18,7 +18,7 @@
 #include <tuple>
 #include <utility>
 
-#include "src/tint/lang/core/builtin/builtin.h"
+#include "src/tint/lang/core/builtin.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
@@ -174,7 +174,7 @@ class State {
     Hashset<ir::Value*, 64> can_inline_;
 
     /// Set of enable directives emitted.
-    Hashset<builtin::Extension, 4> enables_;
+    Hashset<core::Extension, 4> enables_;
 
     /// Map of struct to output program name.
     Hashmap<const type::Struct*, Symbol, 8> structs_;
@@ -528,13 +528,13 @@ class State {
             init = Expr(var->Initializer());
         }
         switch (ptr->AddressSpace()) {
-            case builtin::AddressSpace::kFunction:
+            case core::AddressSpace::kFunction:
                 Append(b.Decl(b.Var(name, ty, init, std::move(attrs))));
                 return;
-            case builtin::AddressSpace::kStorage:
+            case core::AddressSpace::kStorage:
                 b.GlobalVar(name, ty, init, ptr->Access(), ptr->AddressSpace(), std::move(attrs));
                 return;
-            case builtin::AddressSpace::kHandle:
+            case core::AddressSpace::kHandle:
                 b.GlobalVar(name, ty, init, std::move(attrs));
                 return;
             default:
@@ -579,8 +579,8 @@ class State {
             [&](ir::CoreBuiltinCall* c) {
                 if (!disabled_derivative_uniformity_ && RequiresDerivativeUniformity(c->Func())) {
                     // TODO(crbug.com/tint/1985): Be smarter about disabling derivative uniformity.
-                    b.DiagnosticDirective(builtin::DiagnosticSeverity::kOff,
-                                          builtin::CoreDiagnosticRule::kDerivativeUniformity);
+                    b.DiagnosticDirective(core::DiagnosticSeverity::kOff,
+                                          core::CoreDiagnosticRule::kDerivativeUniformity);
                     disabled_derivative_uniformity_ = true;
                 }
 
@@ -823,7 +823,7 @@ class State {
             [&](const type::U32*) { return b.Expr(c->ValueAs<u32>()); },
             [&](const type::F32*) { return b.Expr(c->ValueAs<f32>()); },
             [&](const type::F16*) {
-                Enable(builtin::Extension::kF16);
+                Enable(core::Extension::kF16);
                 return b.Expr(c->ValueAs<f16>());
             },
             [&](const type::Bool*) { return b.Expr(c->ValueAs<bool>()); },
@@ -837,7 +837,7 @@ class State {
             });
     }
 
-    void Enable(builtin::Extension ext) {
+    void Enable(core::Extension ext) {
         if (enables_.Add(ext)) {
             b.Enable(ext);
         }
@@ -863,7 +863,7 @@ class State {
             [&](const type::I32*) { return b.ty.i32(); },    //
             [&](const type::U32*) { return b.ty.u32(); },    //
             [&](const type::F16*) {
-                Enable(builtin::Extension::kF16);
+                Enable(core::Extension::kF16);
                 return b.ty.f16();
             },
             [&](const type::F32*) { return b.ty.f32(); },  //
@@ -875,7 +875,7 @@ class State {
                 auto el = Type(v->type());
                 if (v->Packed()) {
                     TINT_ASSERT(v->Width() == 3u);
-                    return b.ty(builtin::Builtin::kPackedVec3, el);
+                    return b.ty(core::Builtin::kPackedVec3, el);
                 } else {
                     return b.ty.vec(el, v->Width());
                 }
@@ -920,9 +920,9 @@ class State {
                 // explicit access in the 'storage' address space.
                 auto el = Type(p->StoreType());
                 auto address_space = p->AddressSpace();
-                auto access = address_space == builtin::AddressSpace::kStorage
+                auto access = address_space == core::AddressSpace::kStorage
                                   ? p->Access()
-                                  : builtin::Access::kUndefined;
+                                  : core::Access::kUndefined;
                 return b.ty.ptr(address_space, el, access);
             },
             [&](const type::Reference*) {
@@ -951,7 +951,7 @@ class State {
                     ast_attrs.Push(b.Location(u32(*location)));
                 }
                 if (auto index = ir_attrs.index) {
-                    Enable(builtin::Extension::kChromiumInternalDualSourceBlending);
+                    Enable(core::Extension::kChromiumInternalDualSourceBlending);
                     ast_attrs.Push(b.Index(u32(*index)));
                 }
                 if (auto builtin = ir_attrs.builtin) {
@@ -1136,20 +1136,20 @@ class State {
         return b.IndexAccessor(expr, Expr(index));
     }
 
-    bool RequiresDerivativeUniformity(builtin::Function fn) {
+    bool RequiresDerivativeUniformity(core::Function fn) {
         switch (fn) {
-            case builtin::Function::kDpdxCoarse:
-            case builtin::Function::kDpdyCoarse:
-            case builtin::Function::kFwidthCoarse:
-            case builtin::Function::kDpdxFine:
-            case builtin::Function::kDpdyFine:
-            case builtin::Function::kFwidthFine:
-            case builtin::Function::kDpdx:
-            case builtin::Function::kDpdy:
-            case builtin::Function::kFwidth:
-            case builtin::Function::kTextureSample:
-            case builtin::Function::kTextureSampleBias:
-            case builtin::Function::kTextureSampleCompare:
+            case core::Function::kDpdxCoarse:
+            case core::Function::kDpdyCoarse:
+            case core::Function::kFwidthCoarse:
+            case core::Function::kDpdxFine:
+            case core::Function::kDpdyFine:
+            case core::Function::kFwidthFine:
+            case core::Function::kDpdx:
+            case core::Function::kDpdy:
+            case core::Function::kFwidth:
+            case core::Function::kTextureSample:
+            case core::Function::kTextureSampleBias:
+            case core::Function::kTextureSampleCompare:
                 return true;
             default:
                 return false;

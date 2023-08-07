@@ -54,7 +54,7 @@ TEST_F(SpirvASTPrinterTest, Loop_WithoutContinuing) {
     //   break;
     // }
 
-    auto* var = GlobalVar("v", ty.i32(), builtin::AddressSpace::kPrivate);
+    auto* var = GlobalVar("v", ty.i32(), core::AddressSpace::kPrivate);
     auto* body = Block(Assign("v", 2_i),  //
                        Break());
 
@@ -96,7 +96,7 @@ TEST_F(SpirvASTPrinterTest, Loop_WithContinuing) {
     //   }
     // }
 
-    auto* var = GlobalVar("v", ty.i32(), builtin::AddressSpace::kPrivate);
+    auto* var = GlobalVar("v", ty.i32(), core::AddressSpace::kPrivate);
     auto* body = Block(Assign("v", 2_i),  //
                        Break());
     auto* continuing = Block(Assign("v", 3_i));

@@ -19,8 +19,8 @@
 namespace tint::spirv::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using SpirvASTPrinterTest = TestHelper;
 
@@ -46,7 +46,7 @@ TEST_F(SpirvASTPrinterTest, IdentifierExpression_GlobalConst) {
 }
 
 TEST_F(SpirvASTPrinterTest, IdentifierExpression_GlobalVar) {
-    auto* v = GlobalVar("var", ty.f32(), builtin::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.f32(), core::AddressSpace::kPrivate);
 
     auto* expr = Expr("var");
     WrapInFunction(expr);
@@ -90,7 +90,7 @@ TEST_F(SpirvASTPrinterTest, IdentifierExpression_FunctionConst) {
 }
 
 TEST_F(SpirvASTPrinterTest, IdentifierExpression_FunctionVar) {
-    auto* v = Var("var", ty.f32(), builtin::AddressSpace::kFunction);
+    auto* v = Var("var", ty.f32(), core::AddressSpace::kFunction);
     auto* expr = Expr("var");
     WrapInFunction(v, expr);
 
@@ -114,7 +114,7 @@ TEST_F(SpirvASTPrinterTest, IdentifierExpression_FunctionVar) {
 }
 
 TEST_F(SpirvASTPrinterTest, IdentifierExpression_Load) {
-    auto* var = GlobalVar("var", ty.i32(), builtin::AddressSpace::kPrivate);
+    auto* var = GlobalVar("var", ty.i32(), core::AddressSpace::kPrivate);
     auto* expr = Add("var", "var");
     WrapInFunction(expr);
 

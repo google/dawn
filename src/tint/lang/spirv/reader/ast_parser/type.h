@@ -19,9 +19,9 @@
 #include <string>
 #include <vector>
 
-#include "src/tint/lang/core/builtin/access.h"
-#include "src/tint/lang/core/builtin/address_space.h"
-#include "src/tint/lang/core/builtin/texel_format.h"
+#include "src/tint/lang/core/access.h"
+#include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/sampler_kind.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/type.h"
@@ -162,7 +162,7 @@ struct Pointer final : public Castable<Pointer, Type> {
     /// @param sc the pointer address space
     /// @param ty the store type
     /// @param access the declared access mode
-    Pointer(builtin::AddressSpace sc, const Type* ty, builtin::Access access);
+    Pointer(core::AddressSpace sc, const Type* ty, core::Access access);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -178,11 +178,11 @@ struct Pointer final : public Castable<Pointer, Type> {
 #endif  // NDEBUG
 
     /// the pointer address space
-    builtin::AddressSpace const address_space;
+    core::AddressSpace const address_space;
     /// the store type
     Type const* const type;
     /// the pointer declared access mode
-    builtin::Access const access;
+    core::Access const access;
 };
 
 /// `ref<SC, T, AM>` type
@@ -193,7 +193,7 @@ struct Reference final : public Castable<Reference, Type> {
     /// @param sc the reference address space
     /// @param ty the referenced type
     /// @param access the reference declared access mode
-    Reference(builtin::AddressSpace sc, const Type* ty, builtin::Access access);
+    Reference(core::AddressSpace sc, const Type* ty, core::Access access);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -209,11 +209,11 @@ struct Reference final : public Castable<Reference, Type> {
 #endif  // NDEBUG
 
     /// the pointer address space
-    builtin::AddressSpace const address_space;
+    core::AddressSpace const address_space;
     /// the store type
     Type const* const type;
     /// the pointer declared access mode
-    builtin::Access const access;
+    core::Access const access;
 };
 
 /// `vecN<T>` type
@@ -434,7 +434,7 @@ struct StorageTexture final : public Castable<StorageTexture, Texture> {
     /// @param d the texture dimensions
     /// @param f the storage image format
     /// @param a the access control
-    StorageTexture(type::TextureDimension d, builtin::TexelFormat f, builtin::Access a);
+    StorageTexture(type::TextureDimension d, core::TexelFormat f, core::Access a);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -450,10 +450,10 @@ struct StorageTexture final : public Castable<StorageTexture, Texture> {
 #endif  // NDEBUG
 
     /// the storage image format
-    builtin::TexelFormat const format;
+    core::TexelFormat const format;
 
     /// the access control
-    builtin::Access const access;
+    core::Access const access;
 };
 
 /// Base class for named types
@@ -548,17 +548,17 @@ class TypeManager {
     /// @param access the declared access mode
     /// @return a Pointer type. Repeated calls with the same arguments will return
     /// the same pointer.
-    const reader::Pointer* Pointer(builtin::AddressSpace address_space,
+    const reader::Pointer* Pointer(core::AddressSpace address_space,
                                    const Type* ty,
-                                   builtin::Access access = builtin::Access::kUndefined);
+                                   core::Access access = core::Access::kUndefined);
     /// @param address_space the reference address space
     /// @param ty the referenced type
     /// @param access the declared access mode
     /// @return a Reference type. Repeated calls with the same arguments will
     /// return the same pointer.
-    const reader::Reference* Reference(builtin::AddressSpace address_space,
+    const reader::Reference* Reference(core::AddressSpace address_space,
                                        const Type* ty,
-                                       builtin::Access access = builtin::Access::kUndefined);
+                                       core::Access access = core::Access::kUndefined);
     /// @param ty the element type
     /// @param sz the number of elements in the vector
     /// @return a Vector type. Repeated calls with the same arguments will return
@@ -615,8 +615,8 @@ class TypeManager {
     /// @return a StorageTexture type. Repeated calls with the same arguments will
     /// return the same pointer.
     const reader::StorageTexture* StorageTexture(type::TextureDimension d,
-                                                 builtin::TexelFormat f,
-                                                 builtin::Access a);
+                                                 core::TexelFormat f,
+                                                 core::Access a);
 
   private:
     struct State;

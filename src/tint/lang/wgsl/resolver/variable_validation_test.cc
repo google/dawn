@@ -20,8 +20,8 @@
 namespace tint::resolver {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 struct ResolverVariableValidationTest : public resolver::TestHelper, public testing::Test {};
 
@@ -82,8 +82,8 @@ TEST_F(ResolverVariableValidationTest, GlobalVarWithInitializerNoAddressSpace) {
 TEST_F(ResolverVariableValidationTest, GlobalVarUsedAtModuleScope) {
     // var<private> a : i32;
     // var<private> b : i32 = a;
-    GlobalVar(Source{{12, 34}}, "a", ty.i32(), builtin::AddressSpace::kPrivate);
-    GlobalVar("b", ty.i32(), builtin::AddressSpace::kPrivate, Expr(Source{{56, 78}}, "a"));
+    GlobalVar(Source{{12, 34}}, "a", ty.i32(), core::AddressSpace::kPrivate);
+    GlobalVar("b", ty.i32(), core::AddressSpace::kPrivate, Expr(Source{{56, 78}}, "a"));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(56:78 error: var 'a' cannot be referenced at module-scope
@@ -133,7 +133,7 @@ TEST_F(ResolverVariableValidationTest, VarTypeNotConstructible) {
     // var i : i32;
     // var p : pointer<function, i32> = &v;
     auto* i = Var("i", ty.i32());
-    auto* p = Var("a", ty.ptr<function, i32>(Source{{56, 78}}), builtin::AddressSpace::kUndefined,
+    auto* p = Var("a", ty.ptr<function, i32>(Source{{56, 78}}), core::AddressSpace::kUndefined,
                   AddressOf(Source{{12, 34}}, "i"));
     WrapInFunction(i, p);
 
@@ -226,7 +226,7 @@ TEST_F(ResolverVariableValidationTest, VarInitializerWrongTypeViaAlias) {
 TEST_F(ResolverVariableValidationTest, LetOfPtrConstructedWithRef) {
     // var a : f32;
     // let b : ptr<function,f32> = a;
-    const auto priv = builtin::AddressSpace::kFunction;
+    const auto priv = core::AddressSpace::kFunction;
     auto* var_a = Var("a", ty.f32(), priv);
     auto* var_b = Let(Source{{12, 34}}, "b", ty.ptr<f32>(priv), Expr("a"));
     WrapInFunction(var_a, var_b);
@@ -257,7 +257,7 @@ TEST_F(ResolverVariableValidationTest, GlobalVarRedeclaredAsLocal) {
     //   return 0;
     // }
 
-    GlobalVar("v", ty.f32(), builtin::AddressSpace::kPrivate, Expr(2.1_f));
+    GlobalVar("v", ty.f32(), core::AddressSpace::kPrivate, Expr(2.1_f));
 
     WrapInFunction(Var(Source{{12, 34}}, "v", ty.f32(), Expr(2_f)));
 
@@ -315,8 +315,7 @@ TEST_F(ResolverVariableValidationTest, InferredPtrStorageAccessMismatch) {
     auto* buf = Structure("S", Vector{
                                    Member("inner", ty.Of(inner)),
                                });
-    auto* var =
-        GlobalVar("s", ty.Of(buf), builtin::AddressSpace::kStorage, Binding(0_a), Group(0_a));
+    auto* var = GlobalVar("s", ty.Of(buf), core::AddressSpace::kStorage, Binding(0_a), Group(0_a));
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(var, "inner"), "arr"), 2_i);
     auto* ptr = Let(Source{{12, 34}}, "p", ty.ptr<storage, i32, read_write>(), AddressOf(expr));
@@ -378,7 +377,7 @@ TEST_F(ResolverVariableValidationTest, NonConstructibleType_InferredType) {
 
 TEST_F(ResolverVariableValidationTest, InvalidAddressSpaceForInitializer) {
     // var<workgroup> v : f32 = 1.23;
-    GlobalVar(Source{{12, 34}}, "v", ty.f32(), builtin::AddressSpace::kWorkgroup, Expr(1.23_f));
+    GlobalVar(Source{{12, 34}}, "v", ty.f32(), core::AddressSpace::kWorkgroup, Expr(1.23_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -507,8 +506,8 @@ TEST_F(ResolverVariableValidationTest, ConstInitWithOverrideExpr) {
 TEST_F(ResolverVariableValidationTest, GlobalVariable_PushConstantWithInitializer) {
     // enable chromium_experimental_push_constant;
     // var<push_constant> a : u32 = 0u;
-    Enable(builtin::Extension::kChromiumExperimentalPushConstant);
-    GlobalVar(Source{{1u, 2u}}, "a", ty.u32(), builtin::AddressSpace::kPushConstant,
+    Enable(core::Extension::kChromiumExperimentalPushConstant);
+    GlobalVar(Source{{1u, 2u}}, "a", ty.u32(), core::AddressSpace::kPushConstant,
               Expr(Source{{3u, 4u}}, u32(0)));
 
     ASSERT_FALSE(r()->Resolve());

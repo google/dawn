@@ -17,10 +17,10 @@
 #include <limits>
 #include <utility>
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
-#include "src/tint/lang/core/builtin/extension.h"
-#include "src/tint/lang/core/builtin/interpolation_sampling.h"
-#include "src/tint/lang/core/builtin/interpolation_type.h"
+#include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/extension.h"
+#include "src/tint/lang/core/interpolation_sampling.h"
+#include "src/tint/lang/core/interpolation_type.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
@@ -166,15 +166,15 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
                                     entry_point.input_variables);
 
         entry_point.input_position_used |= ContainsBuiltin(
-            builtin::BuiltinValue::kPosition, param->Type(), param->Declaration()->attributes);
+            core::BuiltinValue::kPosition, param->Type(), param->Declaration()->attributes);
         entry_point.front_facing_used |= ContainsBuiltin(
-            builtin::BuiltinValue::kFrontFacing, param->Type(), param->Declaration()->attributes);
+            core::BuiltinValue::kFrontFacing, param->Type(), param->Declaration()->attributes);
         entry_point.sample_index_used |= ContainsBuiltin(
-            builtin::BuiltinValue::kSampleIndex, param->Type(), param->Declaration()->attributes);
+            core::BuiltinValue::kSampleIndex, param->Type(), param->Declaration()->attributes);
         entry_point.input_sample_mask_used |= ContainsBuiltin(
-            builtin::BuiltinValue::kSampleMask, param->Type(), param->Declaration()->attributes);
+            core::BuiltinValue::kSampleMask, param->Type(), param->Declaration()->attributes);
         entry_point.num_workgroups_used |= ContainsBuiltin(
-            builtin::BuiltinValue::kNumWorkgroups, param->Type(), param->Declaration()->attributes);
+            core::BuiltinValue::kNumWorkgroups, param->Type(), param->Declaration()->attributes);
     }
 
     if (!sem->ReturnType()->Is<type::Void>()) {
@@ -182,9 +182,9 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
                                     sem->ReturnLocation(), entry_point.output_variables);
 
         entry_point.output_sample_mask_used = ContainsBuiltin(
-            builtin::BuiltinValue::kSampleMask, sem->ReturnType(), func->return_type_attributes);
+            core::BuiltinValue::kSampleMask, sem->ReturnType(), func->return_type_attributes);
         entry_point.frag_depth_used = ContainsBuiltin(
-            builtin::BuiltinValue::kFragDepth, sem->ReturnType(), func->return_type_attributes);
+            core::BuiltinValue::kFragDepth, sem->ReturnType(), func->return_type_attributes);
     }
 
     for (auto* var : sem->TransitivelyReferencedGlobals()) {
@@ -544,7 +544,7 @@ uint32_t Inspector::GetWorkgroupStorageSize(const std::string& entry_point) {
     uint32_t total_size = 0;
     auto* func_sem = program_->Sem().Get(func);
     for (const sem::Variable* var : func_sem->TransitivelyReferencedGlobals()) {
-        if (var->AddressSpace() == builtin::AddressSpace::kWorkgroup) {
+        if (var->AddressSpace() == core::AddressSpace::kWorkgroup) {
             auto* ty = var->Type()->UnwrapRef();
             uint32_t align = ty->Align();
             uint32_t size = ty->Size();
@@ -640,7 +640,7 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
     variables.push_back(stage_variable);
 }
 
-bool Inspector::ContainsBuiltin(builtin::BuiltinValue builtin,
+bool Inspector::ContainsBuiltin(core::BuiltinValue builtin,
                                 const type::Type* type,
                                 VectorRef<const ast::Attribute*> attributes) const {
     auto* unwrapped_type = type->UnwrapRef();
@@ -677,7 +677,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
         auto* var = rsv.first;
         auto binding_info = rsv.second;
 
-        if (read_only != (var->Access() == builtin::Access::kRead)) {
+        if (read_only != (var->Access() == core::Access::kRead)) {
             continue;
         }
 
@@ -858,49 +858,49 @@ std::tuple<InterpolationType, InterpolationSampling> Inspector::CalculateInterpo
 
     auto& sem = program_->Sem();
 
-    auto ast_interpolation_type = sem.Get<sem::BuiltinEnumExpression<builtin::InterpolationType>>(
-                                         interpolation_attribute->type)
-                                      ->Value();
+    auto ast_interpolation_type =
+        sem.Get<sem::BuiltinEnumExpression<core::InterpolationType>>(interpolation_attribute->type)
+            ->Value();
 
-    auto ast_sampling_type = builtin::InterpolationSampling::kUndefined;
+    auto ast_sampling_type = core::InterpolationSampling::kUndefined;
     if (interpolation_attribute->sampling) {
-        ast_sampling_type = sem.Get<sem::BuiltinEnumExpression<builtin::InterpolationSampling>>(
+        ast_sampling_type = sem.Get<sem::BuiltinEnumExpression<core::InterpolationSampling>>(
                                    interpolation_attribute->sampling)
                                 ->Value();
     }
 
-    if (ast_interpolation_type != builtin::InterpolationType::kFlat &&
-        ast_sampling_type == builtin::InterpolationSampling::kUndefined) {
-        ast_sampling_type = builtin::InterpolationSampling::kCenter;
+    if (ast_interpolation_type != core::InterpolationType::kFlat &&
+        ast_sampling_type == core::InterpolationSampling::kUndefined) {
+        ast_sampling_type = core::InterpolationSampling::kCenter;
     }
 
     auto interpolation_type = InterpolationType::kUnknown;
     switch (ast_interpolation_type) {
-        case builtin::InterpolationType::kPerspective:
+        case core::InterpolationType::kPerspective:
             interpolation_type = InterpolationType::kPerspective;
             break;
-        case builtin::InterpolationType::kLinear:
+        case core::InterpolationType::kLinear:
             interpolation_type = InterpolationType::kLinear;
             break;
-        case builtin::InterpolationType::kFlat:
+        case core::InterpolationType::kFlat:
             interpolation_type = InterpolationType::kFlat;
             break;
-        case builtin::InterpolationType::kUndefined:
+        case core::InterpolationType::kUndefined:
             break;
     }
 
     auto sampling_type = InterpolationSampling::kUnknown;
     switch (ast_sampling_type) {
-        case builtin::InterpolationSampling::kUndefined:
+        case core::InterpolationSampling::kUndefined:
             sampling_type = InterpolationSampling::kNone;
             break;
-        case builtin::InterpolationSampling::kCenter:
+        case core::InterpolationSampling::kCenter:
             sampling_type = InterpolationSampling::kCenter;
             break;
-        case builtin::InterpolationSampling::kCentroid:
+        case core::InterpolationSampling::kCentroid:
             sampling_type = InterpolationSampling::kCentroid;
             break;
-        case builtin::InterpolationSampling::kSample:
+        case core::InterpolationSampling::kSample:
             sampling_type = InterpolationSampling::kSample;
             break;
     }

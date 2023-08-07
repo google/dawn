@@ -25,8 +25,8 @@
 namespace tint::wgsl::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 class IRToProgramRenameConflictsTest : public testing::Test {
   public:
@@ -1018,7 +1018,7 @@ TEST_F(IRToProgramRenameConflictsTest, NoModify_BuiltinFn_ShadowedBy_RootBlockVa
 
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {  //
-        auto* res = b.Call(ty.i32(), builtin::Function::kMax, 1_i, 2_i)->Result();
+        auto* res = b.Call(ty.i32(), core::Function::kMax, 1_i, 2_i)->Result();
         b.Return(fn, res);
     });
 
@@ -1051,7 +1051,7 @@ TEST_F(IRToProgramRenameConflictsTest, Conflict_BuiltinFn_ShadowedBy_RootBlockVa
 
     auto* fn = b.Function("f", ty.i32());
     b.Append(fn->Block(), [&] {  //
-        auto* res = b.Call(ty.i32(), builtin::Function::kMax, 1_i, 2_i)->Result();
+        auto* res = b.Call(ty.i32(), core::Function::kMax, 1_i, 2_i)->Result();
         b.Return(fn, res);
     });
 

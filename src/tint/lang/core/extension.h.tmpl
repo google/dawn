@@ -1,0 +1,32 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/src/cmd/gen to generate extension.h
+
+See:
+* tools/src/cmd/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+{{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
+{{- $enum := ($I.Sem.Enum "extension") -}}
+
+#ifndef SRC_TINT_LANG_CORE_EXTENSION_H_
+#define SRC_TINT_LANG_CORE_EXTENSION_H_
+
+#include "src/tint/utils/traits/traits.h"
+#include "src/tint/utils/containers/unique_vector.h"
+
+namespace tint::core {
+
+/// An enumerator of WGSL extensions
+/// @see src/tint/lang/wgsl/intrinsics.def for extension descriptions
+{{ Eval "DeclareEnum" $enum}}
+
+// A unique vector of extensions
+using Extensions = UniqueVector<Extension, 4>;
+
+}  // namespace tint::core
+
+#endif  // SRC_TINT_LANG_CORE_EXTENSION_H_

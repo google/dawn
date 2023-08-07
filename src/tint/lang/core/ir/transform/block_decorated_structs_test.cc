@@ -24,8 +24,8 @@
 namespace tint::ir::transform {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using IR_BlockDecoratedStructsTest = TransformTest;
 
@@ -188,7 +188,7 @@ TEST_F(IR_BlockDecoratedStructsTest, RuntimeArray_InStruct) {
                                                    {mod.symbols.New("arr"), ty.array<i32>()},
                                                });
 
-    auto* buffer = b.Var(ty.ptr(storage, structure, builtin::Access::kReadWrite));
+    auto* buffer = b.Var(ty.ptr(storage, structure, core::Access::kReadWrite));
     buffer->SetBindingPoint(0, 0);
     b.RootBlock()->Append(buffer);
 
@@ -241,7 +241,7 @@ TEST_F(IR_BlockDecoratedStructsTest, StructUsedElsewhere) {
                                                                  {mod.symbols.New("b"), ty.i32()},
                                                              });
 
-    auto* buffer = b.Var(ty.ptr(storage, structure, builtin::Access::kReadWrite));
+    auto* buffer = b.Var(ty.ptr(storage, structure, core::Access::kReadWrite));
     buffer->SetBindingPoint(0, 0);
     b.RootBlock()->Append(buffer);
 

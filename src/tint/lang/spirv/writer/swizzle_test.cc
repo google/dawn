@@ -17,8 +17,8 @@
 namespace tint::spirv::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 TEST_F(SpirvWriterTest, Swizzle_TwoElements) {
     auto* vec = b.FunctionParam("vec", ty.vec4<i32>());

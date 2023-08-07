@@ -15,8 +15,8 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "src/tint/lang/core/builtin/address_space.h"
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/spirv/writer/ast_printer/builder.h"
@@ -32,8 +32,8 @@
 namespace tint::spirv::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using SpirvASTPrinterTest = TestHelper;
 
@@ -45,7 +45,7 @@ TEST_F(SpirvASTPrinterTest, EntryPoint_Parameters) {
     // }
     auto* coord = Param("coord", ty.vec4<f32>(),
                         Vector{
-                            Builtin(builtin::BuiltinValue::kPosition),
+                            Builtin(core::BuiltinValue::kPosition),
                         });
     auto* loc1 = Param("loc1", ty.f32(),
                        Vector{
@@ -209,12 +209,12 @@ TEST_F(SpirvASTPrinterTest, EntryPoint_SharedStruct) {
     //   return inputs.value;
     // }
 
-    auto* interface = Structure(
-        "Interface",
-        Vector{
-            Member("value", ty.f32(), Vector{Location(1_u)}),
-            Member("pos", ty.vec4<f32>(), Vector{Builtin(builtin::BuiltinValue::kPosition)}),
-        });
+    auto* interface =
+        Structure("Interface",
+                  Vector{
+                      Member("value", ty.f32(), Vector{Location(1_u)}),
+                      Member("pos", ty.vec4<f32>(), Vector{Builtin(core::BuiltinValue::kPosition)}),
+                  });
 
     auto* vert_retval = Call(ty.Of(interface), 42_f, Call<vec4<f32>>());
     Func("vert_main", tint::Empty, ty.Of(interface), Vector{Return(vert_retval)},
@@ -229,7 +229,7 @@ TEST_F(SpirvASTPrinterTest, EntryPoint_SharedStruct) {
          },
          Vector{Stage(ast::PipelineStage::kFragment)},
          Vector{
-             Builtin(builtin::BuiltinValue::kFragDepth),
+             Builtin(core::BuiltinValue::kFragDepth),
          });
 
     Builder& b = SanitizeAndBuild();
@@ -322,8 +322,7 @@ OpFunctionEnd
 
 TEST_F(SpirvASTPrinterTest, SampleIndex_SampleRateShadingCapability) {
     Func("main",
-         Vector{
-             Param("sample_index", ty.u32(), Vector{Builtin(builtin::BuiltinValue::kSampleIndex)})},
+         Vector{Param("sample_index", ty.u32(), Vector{Builtin(core::BuiltinValue::kSampleIndex)})},
          ty.void_(), tint::Empty,
          Vector{
              Stage(ast::PipelineStage::kFragment),

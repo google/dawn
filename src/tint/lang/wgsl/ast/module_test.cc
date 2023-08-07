@@ -73,7 +73,7 @@ TEST_F(ModuleTest, Assert_DifferentGenerationID_GlobalVariable) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.AST().AddGlobalVariable(b2.Var("var", b2.ty.i32(), builtin::AddressSpace::kPrivate));
+            b1.AST().AddGlobalVariable(b2.Var("var", b2.ty.i32(), core::AddressSpace::kPrivate));
         },
         "internal compiler error");
 }
@@ -93,7 +93,7 @@ TEST_F(ModuleTest, CloneOrder) {
         ProgramBuilder b;
         b.Func("F", {}, b.ty.void_(), {});
         b.Alias("A", b.ty.u32());
-        b.GlobalVar("V", b.ty.i32(), builtin::AddressSpace::kPrivate);
+        b.GlobalVar("V", b.ty.i32(), core::AddressSpace::kPrivate);
         return resolver::Resolve(b);
     }();
 
@@ -132,10 +132,10 @@ TEST_F(ModuleTest, CloneOrder) {
 }
 
 TEST_F(ModuleTest, Directives) {
-    auto* enable_1 = Enable(builtin::Extension::kF16);
-    auto* diagnostic_1 = DiagnosticDirective(builtin::DiagnosticSeverity::kWarning, "foo");
-    auto* enable_2 = Enable(builtin::Extension::kChromiumExperimentalFullPtrParameters);
-    auto* diagnostic_2 = DiagnosticDirective(builtin::DiagnosticSeverity::kOff, "bar");
+    auto* enable_1 = Enable(core::Extension::kF16);
+    auto* diagnostic_1 = DiagnosticDirective(core::DiagnosticSeverity::kWarning, "foo");
+    auto* enable_2 = Enable(core::Extension::kChromiumExperimentalFullPtrParameters);
+    auto* diagnostic_2 = DiagnosticDirective(core::DiagnosticSeverity::kOff, "bar");
 
     Program program(std::move(*this));
     EXPECT_THAT(program.AST().GlobalDeclarations(), ::testing::ContainerEq(tint::Vector{

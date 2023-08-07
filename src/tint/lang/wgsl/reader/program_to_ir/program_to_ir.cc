@@ -256,22 +256,22 @@ class Impl {
         return ResultType{std::move(mod)};
     }
 
-    builtin::Interpolation ExtractInterpolation(const ast::InterpolateAttribute* interp) {
+    core::Interpolation ExtractInterpolation(const ast::InterpolateAttribute* interp) {
         auto type = program_->Sem()
                         .Get(interp->type)
-                        ->As<sem::BuiltinEnumExpression<builtin::InterpolationType>>();
-        builtin::InterpolationType interpolation_type = type->Value();
+                        ->As<sem::BuiltinEnumExpression<core::InterpolationType>>();
+        core::InterpolationType interpolation_type = type->Value();
 
-        builtin::InterpolationSampling interpolation_sampling =
-            builtin::InterpolationSampling::kUndefined;
+        core::InterpolationSampling interpolation_sampling =
+            core::InterpolationSampling::kUndefined;
         if (interp->sampling) {
             auto sampling = program_->Sem()
                                 .Get(interp->sampling)
-                                ->As<sem::BuiltinEnumExpression<builtin::InterpolationSampling>>();
+                                ->As<sem::BuiltinEnumExpression<core::InterpolationSampling>>();
             interpolation_sampling = sampling->Value();
         }
 
-        return builtin::Interpolation{interpolation_type, interpolation_sampling};
+        return core::Interpolation{interpolation_type, interpolation_sampling};
     }
 
     void EmitFunction(const ast::Function* ast_func) {
@@ -310,7 +310,7 @@ class Impl {
 
             // Note, interpolated is only valid when paired with Location, so it will only be set
             // when the location is set.
-            std::optional<builtin::Interpolation> interpolation;
+            std::optional<core::Interpolation> interpolation;
             for (auto* attr : ast_func->return_type_attributes) {
                 tint::Switch(
                     attr,  //
@@ -322,17 +322,17 @@ class Impl {
                         if (auto* ident_sem =
                                 program_->Sem()
                                     .Get(b)
-                                    ->As<sem::BuiltinEnumExpression<builtin::BuiltinValue>>()) {
+                                    ->As<sem::BuiltinEnumExpression<core::BuiltinValue>>()) {
                             switch (ident_sem->Value()) {
-                                case builtin::BuiltinValue::kPosition:
+                                case core::BuiltinValue::kPosition:
                                     ir_func->SetReturnBuiltin(
                                         ir::Function::ReturnBuiltin::kPosition);
                                     break;
-                                case builtin::BuiltinValue::kFragDepth:
+                                case core::BuiltinValue::kFragDepth:
                                     ir_func->SetReturnBuiltin(
                                         ir::Function::ReturnBuiltin::kFragDepth);
                                     break;
-                                case builtin::BuiltinValue::kSampleMask:
+                                case core::BuiltinValue::kSampleMask:
                                     ir_func->SetReturnBuiltin(
                                         ir::Function::ReturnBuiltin::kSampleMask);
                                     break;
@@ -363,7 +363,7 @@ class Impl {
 
             // Note, interpolated is only valid when paired with Location, so it will only be set
             // when the location is set.
-            std::optional<builtin::Interpolation> interpolation;
+            std::optional<core::Interpolation> interpolation;
             for (auto* attr : p->attributes) {
                 tint::Switch(
                     attr,  //
@@ -375,42 +375,42 @@ class Impl {
                         if (auto* ident_sem =
                                 program_->Sem()
                                     .Get(b)
-                                    ->As<sem::BuiltinEnumExpression<builtin::BuiltinValue>>()) {
+                                    ->As<sem::BuiltinEnumExpression<core::BuiltinValue>>()) {
                             switch (ident_sem->Value()) {
-                                case builtin::BuiltinValue::kVertexIndex:
+                                case core::BuiltinValue::kVertexIndex:
                                     param->SetBuiltin(ir::FunctionParam::Builtin::kVertexIndex);
                                     break;
-                                case builtin::BuiltinValue::kInstanceIndex:
+                                case core::BuiltinValue::kInstanceIndex:
                                     param->SetBuiltin(ir::FunctionParam::Builtin::kInstanceIndex);
                                     break;
-                                case builtin::BuiltinValue::kPosition:
+                                case core::BuiltinValue::kPosition:
                                     param->SetBuiltin(ir::FunctionParam::Builtin::kPosition);
                                     break;
-                                case builtin::BuiltinValue::kFrontFacing:
+                                case core::BuiltinValue::kFrontFacing:
                                     param->SetBuiltin(ir::FunctionParam::Builtin::kFrontFacing);
                                     break;
-                                case builtin::BuiltinValue::kLocalInvocationId:
+                                case core::BuiltinValue::kLocalInvocationId:
                                     param->SetBuiltin(
                                         ir::FunctionParam::Builtin::kLocalInvocationId);
                                     break;
-                                case builtin::BuiltinValue::kLocalInvocationIndex:
+                                case core::BuiltinValue::kLocalInvocationIndex:
                                     param->SetBuiltin(
                                         ir::FunctionParam::Builtin::kLocalInvocationIndex);
                                     break;
-                                case builtin::BuiltinValue::kGlobalInvocationId:
+                                case core::BuiltinValue::kGlobalInvocationId:
                                     param->SetBuiltin(
                                         ir::FunctionParam::Builtin::kGlobalInvocationId);
                                     break;
-                                case builtin::BuiltinValue::kWorkgroupId:
+                                case core::BuiltinValue::kWorkgroupId:
                                     param->SetBuiltin(ir::FunctionParam::Builtin::kWorkgroupId);
                                     break;
-                                case builtin::BuiltinValue::kNumWorkgroups:
+                                case core::BuiltinValue::kNumWorkgroups:
                                     param->SetBuiltin(ir::FunctionParam::Builtin::kNumWorkgroups);
                                     break;
-                                case builtin::BuiltinValue::kSampleIndex:
+                                case core::BuiltinValue::kSampleIndex:
                                     param->SetBuiltin(ir::FunctionParam::Builtin::kSampleIndex);
                                     break;
-                                case builtin::BuiltinValue::kSampleMask:
+                                case core::BuiltinValue::kSampleMask:
                                     param->SetBuiltin(ir::FunctionParam::Builtin::kSampleMask);
                                     break;
                                 default:

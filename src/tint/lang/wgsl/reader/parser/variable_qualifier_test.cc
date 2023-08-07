@@ -20,8 +20,8 @@ namespace {
 
 struct VariableStorageData {
     const char* input;
-    builtin::AddressSpace address_space;
-    builtin::Access access;
+    core::AddressSpace address_space;
+    core::Access access;
 };
 inline std::ostream& operator<<(std::ostream& out, VariableStorageData data) {
     out << std::string(data.input);
@@ -38,12 +38,12 @@ TEST_P(VariableQualifierTest, ParsesAddressSpace) {
     EXPECT_FALSE(p->has_error());
     EXPECT_FALSE(sc.errored);
     EXPECT_TRUE(sc.matched);
-    if (params.address_space != builtin::AddressSpace::kUndefined) {
+    if (params.address_space != core::AddressSpace::kUndefined) {
         ast::CheckIdentifier(sc->address_space, tint::ToString(params.address_space));
     } else {
         EXPECT_EQ(sc->address_space, nullptr);
     }
-    if (params.access != builtin::Access::kUndefined) {
+    if (params.access != core::Access::kUndefined) {
         ast::CheckIdentifier(sc->access, tint::ToString(params.access));
     } else {
         EXPECT_EQ(sc->access, nullptr);
@@ -55,22 +55,16 @@ TEST_P(VariableQualifierTest, ParsesAddressSpace) {
 INSTANTIATE_TEST_SUITE_P(
     WGSLParserTest,
     VariableQualifierTest,
-    testing::Values(VariableStorageData{"uniform", builtin::AddressSpace::kUniform,
-                                        builtin::Access::kUndefined},
-                    VariableStorageData{"workgroup", builtin::AddressSpace::kWorkgroup,
-                                        builtin::Access::kUndefined},
-                    VariableStorageData{"storage", builtin::AddressSpace::kStorage,
-                                        builtin::Access::kUndefined},
-                    VariableStorageData{"private", builtin::AddressSpace::kPrivate,
-                                        builtin::Access::kUndefined},
-                    VariableStorageData{"function", builtin::AddressSpace::kFunction,
-                                        builtin::Access::kUndefined},
-                    VariableStorageData{"storage, read", builtin::AddressSpace::kStorage,
-                                        builtin::Access::kRead},
-                    VariableStorageData{"storage, write", builtin::AddressSpace::kStorage,
-                                        builtin::Access::kWrite},
-                    VariableStorageData{"storage, read_write", builtin::AddressSpace::kStorage,
-                                        builtin::Access::kReadWrite}));
+    testing::Values(
+        VariableStorageData{"uniform", core::AddressSpace::kUniform, core::Access::kUndefined},
+        VariableStorageData{"workgroup", core::AddressSpace::kWorkgroup, core::Access::kUndefined},
+        VariableStorageData{"storage", core::AddressSpace::kStorage, core::Access::kUndefined},
+        VariableStorageData{"private", core::AddressSpace::kPrivate, core::Access::kUndefined},
+        VariableStorageData{"function", core::AddressSpace::kFunction, core::Access::kUndefined},
+        VariableStorageData{"storage, read", core::AddressSpace::kStorage, core::Access::kRead},
+        VariableStorageData{"storage, write", core::AddressSpace::kStorage, core::Access::kWrite},
+        VariableStorageData{"storage, read_write", core::AddressSpace::kStorage,
+                            core::Access::kReadWrite}));
 
 TEST_F(WGSLParserTest, VariableQualifier_Empty) {
     auto p = parser("var<> name");

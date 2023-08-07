@@ -19,8 +19,8 @@
 namespace tint::msl::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using MslASTPrinterTest = TestHelper;
 
@@ -236,7 +236,7 @@ INSTANTIATE_TEST_SUITE_P(MslASTPrinterTest,
                                          MslImportData{"clamp", "clamp"}));
 
 TEST_F(MslASTPrinterTest, MslImportData_Determinant) {
-    GlobalVar("var", ty.mat3x3<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("var", ty.mat3x3<f32>(), core::AddressSpace::kPrivate);
 
     auto* expr = Call("determinant", "var");
 
@@ -250,7 +250,7 @@ TEST_F(MslASTPrinterTest, MslImportData_Determinant) {
 }
 
 TEST_F(MslASTPrinterTest, MslImportData_QuantizeToF16_Scalar) {
-    GlobalVar("v", Expr(2_f), builtin::AddressSpace::kPrivate);
+    GlobalVar("v", Expr(2_f), core::AddressSpace::kPrivate);
 
     auto* expr = Call("quantizeToF16", "v");
     WrapInFunction(expr);
@@ -263,7 +263,7 @@ TEST_F(MslASTPrinterTest, MslImportData_QuantizeToF16_Scalar) {
 }
 
 TEST_F(MslASTPrinterTest, MslImportData_QuantizeToF16_Vector) {
-    GlobalVar("v", Call<vec3<f32>>(2_f), builtin::AddressSpace::kPrivate);
+    GlobalVar("v", Call<vec3<f32>>(2_f), core::AddressSpace::kPrivate);
 
     auto* expr = Call("quantizeToF16", "v");
     WrapInFunction(expr);

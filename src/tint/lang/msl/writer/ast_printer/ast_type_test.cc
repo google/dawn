@@ -30,8 +30,8 @@ namespace tint::msl::writer {
 namespace {
 
 using ::testing::HasSubstr;
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 void FormatMSLField(StringStream& out,
                     const char* addr,
@@ -91,7 +91,7 @@ using MslASTPrinterTest = TestHelper;
 
 TEST_F(MslASTPrinterTest, EmitType_Array) {
     auto arr = ty.array<bool, 4>();
-    ast::Type type = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
+    ast::Type type = GlobalVar("G", arr, core::AddressSpace::kPrivate)->type;
 
     ASTPrinter& gen = Build();
 
@@ -103,7 +103,7 @@ TEST_F(MslASTPrinterTest, EmitType_Array) {
 TEST_F(MslASTPrinterTest, EmitType_ArrayOfArray) {
     auto a = ty.array<bool, 4>();
     auto b = ty.array(a, 5_u);
-    ast::Type type = GlobalVar("G", b, builtin::AddressSpace::kPrivate)->type;
+    ast::Type type = GlobalVar("G", b, core::AddressSpace::kPrivate)->type;
 
     ASTPrinter& gen = Build();
 
@@ -116,7 +116,7 @@ TEST_F(MslASTPrinterTest, EmitType_ArrayOfArrayOfArray) {
     auto a = ty.array<bool, 4>();
     auto b = ty.array(a, 5_u);
     auto c = ty.array(b, 6_u);
-    ast::Type type = GlobalVar("G", c, builtin::AddressSpace::kPrivate)->type;
+    ast::Type type = GlobalVar("G", c, core::AddressSpace::kPrivate)->type;
 
     ASTPrinter& gen = Build();
 
@@ -127,7 +127,7 @@ TEST_F(MslASTPrinterTest, EmitType_ArrayOfArrayOfArray) {
 
 TEST_F(MslASTPrinterTest, EmitType_Array_WithoutName) {
     auto arr = ty.array<bool, 4>();
-    ast::Type type = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
+    ast::Type type = GlobalVar("G", arr, core::AddressSpace::kPrivate)->type;
 
     ASTPrinter& gen = Build();
 
@@ -138,7 +138,7 @@ TEST_F(MslASTPrinterTest, EmitType_Array_WithoutName) {
 
 TEST_F(MslASTPrinterTest, EmitType_RuntimeArray) {
     auto arr = ty.array<bool, 1>();
-    ast::Type type = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
+    ast::Type type = GlobalVar("G", arr, core::AddressSpace::kPrivate)->type;
 
     ASTPrinter& gen = Build();
 
@@ -213,8 +213,7 @@ TEST_F(MslASTPrinterTest, EmitType_Matrix_F16) {
 
 TEST_F(MslASTPrinterTest, EmitType_Pointer) {
     auto* f32 = create<type::F32>();
-    auto* p =
-        create<type::Pointer>(builtin::AddressSpace::kWorkgroup, f32, builtin::Access::kReadWrite);
+    auto* p = create<type::Pointer>(core::AddressSpace::kWorkgroup, f32, core::Access::kReadWrite);
 
     ASTPrinter& gen = Build();
 
@@ -285,8 +284,8 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_NonComposites) {
                            Member("z", ty.f32()),
                        });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), builtin::AddressSpace::kStorage,
-                               builtin::Access::kRead, Binding(0_a), Group(0_a))
+    ast::Type type = GlobalVar("G", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead,
+                               Binding(0_a), Group(0_a))
                          ->type;
 
     ASTPrinter& gen = Build();
@@ -392,8 +391,8 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_Structures) {
                                  Member("e", ty.f32()),
                              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), builtin::AddressSpace::kStorage,
-                               builtin::Access::kRead, Binding(0_a), Group(0_a))
+    ast::Type type = GlobalVar("G", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead,
+                               Binding(0_a), Group(0_a))
                          ->type;
 
     ASTPrinter& gen = Build();
@@ -484,8 +483,8 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_ArrayDefaultStride) {
                                  Member("f", array_z),
                              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), builtin::AddressSpace::kStorage,
-                               builtin::Access::kRead, Binding(0_a), Group(0_a))
+    ast::Type type = GlobalVar("G", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead,
+                               Binding(0_a), Group(0_a))
                          ->type;
 
     ASTPrinter& gen = Build();
@@ -568,8 +567,8 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
                                  Member("c", ty.i32()),
                              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), builtin::AddressSpace::kStorage,
-                               builtin::Access::kRead, Binding(0_a), Group(0_a))
+    ast::Type type = GlobalVar("G", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead,
+                               Binding(0_a), Group(0_a))
                          ->type;
 
     ASTPrinter& gen = Build();
@@ -630,8 +629,8 @@ TEST_F(MslASTPrinterTest, AttemptTintPadSymbolCollision) {
                  Member("tint_pad_21", ty.f32()),
              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), builtin::AddressSpace::kStorage,
-                               builtin::Access::kRead, Binding(0_a), Group(0_a))
+    ast::Type type = GlobalVar("G", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead,
+                               Binding(0_a), Group(0_a))
                          ->type;
 
     ASTPrinter& gen = Build();
@@ -689,8 +688,8 @@ TEST_F(MslASTPrinterTest, EmitType_Struct_WithAttribute) {
                                  Member("b", ty.f32()),
                              });
 
-    ast::Type type = GlobalVar("G", ty.Of(s), builtin::AddressSpace::kStorage,
-                               builtin::Access::kRead, Binding(0_a), Group(0_a))
+    ast::Type type = GlobalVar("G", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead,
+                               Binding(0_a), Group(0_a))
                          ->type;
 
     ASTPrinter& gen = Build();
@@ -859,8 +858,7 @@ using MslStorageTexturesTest = TestParamHelper<MslStorageTextureData>;
 TEST_P(MslStorageTexturesTest, Emit) {
     auto params = GetParam();
 
-    auto s =
-        ty.storage_texture(params.dim, builtin::TexelFormat::kR32Float, builtin::Access::kWrite);
+    auto s = ty.storage_texture(params.dim, core::TexelFormat::kR32Float, core::Access::kWrite);
     ast::Type type = GlobalVar("test_var", s, Binding(0_a), Group(0_a))->type;
 
     ASTPrinter& gen = Build();

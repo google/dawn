@@ -26,7 +26,7 @@ namespace {
 using GlslASTPrinterTest_Expression = TestHelper;
 
 TEST_F(GlslASTPrinterTest_Expression, IndexAccessor) {
-    GlobalVar("ary", ty.array<i32, 10>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("ary", ty.array<i32, 10>(), core::AddressSpace::kPrivate);
     auto* expr = IndexAccessor("ary", 5_i);
     WrapInFunction(expr);
 

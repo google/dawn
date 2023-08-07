@@ -25,7 +25,7 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-constexpr auto kUniform = builtin::AddressSpace::kUniform;
+constexpr auto kUniform = core::AddressSpace::kUniform;
 
 class GenerateExternalTextureBindingsTest : public ::testing::Test {};
 

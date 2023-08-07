@@ -23,8 +23,8 @@
 #include "src/tint/lang/core/type/matrix.h"
 #include "src/tint/lang/core/type/struct.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 namespace tint::ir::transform {
 
@@ -67,7 +67,7 @@ struct State {
                 continue;
             }
             auto* ptr = var->Result()->Type()->As<type::Pointer>();
-            if (!ptr || ptr->AddressSpace() != builtin::AddressSpace::kUniform) {
+            if (!ptr || ptr->AddressSpace() != core::AddressSpace::kUniform) {
                 continue;
             }
             if (RewriteType(ptr->StoreType()) != ptr->StoreType()) {

@@ -62,10 +62,10 @@ void my_func() {
 TEST_F(GlslASTPrinterTest, GenerateSampleIndexES) {
     GlobalVar("gl_SampleID", ty.i32(),
               Vector{
-                  Builtin(builtin::BuiltinValue::kSampleIndex),
+                  Builtin(core::BuiltinValue::kSampleIndex),
                   Disable(ast::DisabledValidation::kIgnoreAddressSpace),
               },
-              builtin::AddressSpace::kIn);
+              core::AddressSpace::kIn);
     Func("my_func", tint::Empty, ty.i32(),
          Vector{
              Return(Expr("gl_SampleID")),
@@ -87,10 +87,10 @@ int my_func() {
 TEST_F(GlslASTPrinterTest, GenerateSampleIndexDesktop) {
     GlobalVar("gl_SampleID", ty.i32(),
               Vector{
-                  Builtin(builtin::BuiltinValue::kSampleIndex),
+                  Builtin(core::BuiltinValue::kSampleIndex),
                   Disable(ast::DisabledValidation::kIgnoreAddressSpace),
               },
-              builtin::AddressSpace::kIn);
+              core::AddressSpace::kIn);
     Func("my_func", tint::Empty, ty.i32(),
          Vector{
              Return(Expr("gl_SampleID")),

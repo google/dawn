@@ -128,7 +128,7 @@ class Printer : public tint::TextGenerator {
     /// Handles generating a address space
     /// @param out the output of the type stream
     /// @param sc the address space to generate
-    void EmitAddressSpace(StringStream& out, builtin::AddressSpace sc);
+    void EmitAddressSpace(StringStream& out, core::AddressSpace sc);
 
     /// Handles ir::Constant values
     /// @param out the stream to write the constant too

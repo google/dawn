@@ -23,7 +23,7 @@ namespace {
 using HlslASTPrinterTest_Expression = TestHelper;
 
 TEST_F(HlslASTPrinterTest_Expression, IndexAccessor) {
-    GlobalVar("ary", ty.array<i32, 10>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("ary", ty.array<i32, 10>(), core::AddressSpace::kPrivate);
     auto* expr = IndexAccessor("ary", 5_i);
     WrapInFunction(expr);
 

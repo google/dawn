@@ -21,13 +21,13 @@
 namespace tint::spirv::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using SpirvASTPrinterTest = TestHelper;
 
 TEST_F(SpirvASTPrinterTest, GlobalVar_WithAddressSpace) {
-    auto* v = GlobalVar("var", ty.f32(), builtin::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.f32(), core::AddressSpace::kPrivate);
 
     Builder& b = Build();
 
@@ -44,7 +44,7 @@ TEST_F(SpirvASTPrinterTest, GlobalVar_WithAddressSpace) {
 TEST_F(SpirvASTPrinterTest, GlobalVar_WithInitializer) {
     auto* init = Call<vec3<f32>>(1_f, 1_f, 3_f);
 
-    auto* v = GlobalVar("var", ty.vec3<f32>(), builtin::AddressSpace::kPrivate, init);
+    auto* v = GlobalVar("var", ty.vec3<f32>(), core::AddressSpace::kPrivate, init);
 
     Builder& b = Build();
 
@@ -68,7 +68,7 @@ TEST_F(SpirvASTPrinterTest, GlobalConst) {
     // var v = c;
 
     auto* c = GlobalConst("c", Expr(42_a));
-    GlobalVar("v", builtin::AddressSpace::kPrivate, Expr(c));
+    GlobalVar("v", core::AddressSpace::kPrivate, Expr(c));
 
     Builder& b = SanitizeAndBuild();
 
@@ -93,7 +93,7 @@ TEST_F(SpirvASTPrinterTest, GlobalConst_Vec_Initializer) {
     // var v = c;
 
     auto* c = GlobalConst("c", Call<vec3<f32>>(1_f, 2_f, 3_f));
-    GlobalVar("v", builtin::AddressSpace::kPrivate, Expr(c));
+    GlobalVar("v", core::AddressSpace::kPrivate, Expr(c));
 
     Builder& b = SanitizeAndBuild();
 
@@ -120,10 +120,10 @@ TEST_F(SpirvASTPrinterTest, GlobalConst_Vec_Initializer) {
 TEST_F(SpirvASTPrinterTest, GlobalConst_Vec_F16_Initializer) {
     // const c = vec3<f16>(1h, 2h, 3h);
     // var v = c;
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* c = GlobalConst("c", Call<vec3<f16>>(1_h, 2_h, 3_h));
-    GlobalVar("v", builtin::AddressSpace::kPrivate, Expr(c));
+    GlobalVar("v", core::AddressSpace::kPrivate, Expr(c));
 
     Builder& b = SanitizeAndBuild();
 
@@ -152,7 +152,7 @@ TEST_F(SpirvASTPrinterTest, GlobalConst_Vec_AInt_Initializer) {
     // var v = c;
 
     auto* c = GlobalConst("c", Call<vec3<Infer>>(1_a, 2_a, 3_a));
-    GlobalVar("v", builtin::AddressSpace::kPrivate, Expr(c));
+    GlobalVar("v", core::AddressSpace::kPrivate, Expr(c));
 
     Builder& b = SanitizeAndBuild();
 
@@ -181,7 +181,7 @@ TEST_F(SpirvASTPrinterTest, GlobalConst_Vec_AFloat_Initializer) {
     // var v = c;
 
     auto* c = GlobalConst("c", Call<vec3<Infer>>(1._a, 2._a, 3._a));
-    GlobalVar("v", builtin::AddressSpace::kPrivate, Expr(c));
+    GlobalVar("v", core::AddressSpace::kPrivate, Expr(c));
 
     Builder& b = SanitizeAndBuild();
 
@@ -210,7 +210,7 @@ TEST_F(SpirvASTPrinterTest, GlobalConst_Nested_Vec_Initializer) {
     // var v = c;
 
     auto* c = GlobalConst("c", Call<vec3<f32>>(Call<vec2<f32>>(1_f, 2_f), 3_f));
-    GlobalVar("v", builtin::AddressSpace::kPrivate, Expr(c));
+    GlobalVar("v", core::AddressSpace::kPrivate, Expr(c));
 
     Builder& b = SanitizeAndBuild();
 
@@ -252,8 +252,8 @@ OpDecorate %1 DescriptorSet 3
 }
 
 struct BuiltinData {
-    builtin::BuiltinValue builtin;
-    builtin::AddressSpace storage;
+    core::BuiltinValue builtin;
+    core::AddressSpace storage;
     SpvBuiltIn result;
 };
 inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
@@ -273,39 +273,34 @@ TEST_P(BuiltinDataTest, Convert) {
 INSTANTIATE_TEST_SUITE_P(
     SpirvASTPrinterTest_Type,
     BuiltinDataTest,
-    testing::Values(BuiltinData{builtin::BuiltinValue::kUndefined,
-                                builtin::AddressSpace::kUndefined, SpvBuiltInMax},
-                    BuiltinData{builtin::BuiltinValue::kPosition, builtin::AddressSpace::kIn,
-                                SpvBuiltInFragCoord},
-                    BuiltinData{builtin::BuiltinValue::kPosition, builtin::AddressSpace::kOut,
-                                SpvBuiltInPosition},
-                    BuiltinData{
-                        builtin::BuiltinValue::kVertexIndex,
-                        builtin::AddressSpace::kIn,
-                        SpvBuiltInVertexIndex,
-                    },
-                    BuiltinData{builtin::BuiltinValue::kInstanceIndex, builtin::AddressSpace::kIn,
-                                SpvBuiltInInstanceIndex},
-                    BuiltinData{builtin::BuiltinValue::kFrontFacing, builtin::AddressSpace::kIn,
-                                SpvBuiltInFrontFacing},
-                    BuiltinData{builtin::BuiltinValue::kFragDepth, builtin::AddressSpace::kOut,
-                                SpvBuiltInFragDepth},
-                    BuiltinData{builtin::BuiltinValue::kLocalInvocationId,
-                                builtin::AddressSpace::kIn, SpvBuiltInLocalInvocationId},
-                    BuiltinData{builtin::BuiltinValue::kLocalInvocationIndex,
-                                builtin::AddressSpace::kIn, SpvBuiltInLocalInvocationIndex},
-                    BuiltinData{builtin::BuiltinValue::kGlobalInvocationId,
-                                builtin::AddressSpace::kIn, SpvBuiltInGlobalInvocationId},
-                    BuiltinData{builtin::BuiltinValue::kWorkgroupId, builtin::AddressSpace::kIn,
-                                SpvBuiltInWorkgroupId},
-                    BuiltinData{builtin::BuiltinValue::kNumWorkgroups, builtin::AddressSpace::kIn,
-                                SpvBuiltInNumWorkgroups},
-                    BuiltinData{builtin::BuiltinValue::kSampleIndex, builtin::AddressSpace::kIn,
-                                SpvBuiltInSampleId},
-                    BuiltinData{builtin::BuiltinValue::kSampleMask, builtin::AddressSpace::kIn,
-                                SpvBuiltInSampleMask},
-                    BuiltinData{builtin::BuiltinValue::kSampleMask, builtin::AddressSpace::kOut,
-                                SpvBuiltInSampleMask}));
+    testing::Values(
+        BuiltinData{core::BuiltinValue::kUndefined, core::AddressSpace::kUndefined, SpvBuiltInMax},
+        BuiltinData{core::BuiltinValue::kPosition, core::AddressSpace::kIn, SpvBuiltInFragCoord},
+        BuiltinData{core::BuiltinValue::kPosition, core::AddressSpace::kOut, SpvBuiltInPosition},
+        BuiltinData{
+            core::BuiltinValue::kVertexIndex,
+            core::AddressSpace::kIn,
+            SpvBuiltInVertexIndex,
+        },
+        BuiltinData{core::BuiltinValue::kInstanceIndex, core::AddressSpace::kIn,
+                    SpvBuiltInInstanceIndex},
+        BuiltinData{core::BuiltinValue::kFrontFacing, core::AddressSpace::kIn,
+                    SpvBuiltInFrontFacing},
+        BuiltinData{core::BuiltinValue::kFragDepth, core::AddressSpace::kOut, SpvBuiltInFragDepth},
+        BuiltinData{core::BuiltinValue::kLocalInvocationId, core::AddressSpace::kIn,
+                    SpvBuiltInLocalInvocationId},
+        BuiltinData{core::BuiltinValue::kLocalInvocationIndex, core::AddressSpace::kIn,
+                    SpvBuiltInLocalInvocationIndex},
+        BuiltinData{core::BuiltinValue::kGlobalInvocationId, core::AddressSpace::kIn,
+                    SpvBuiltInGlobalInvocationId},
+        BuiltinData{core::BuiltinValue::kWorkgroupId, core::AddressSpace::kIn,
+                    SpvBuiltInWorkgroupId},
+        BuiltinData{core::BuiltinValue::kNumWorkgroups, core::AddressSpace::kIn,
+                    SpvBuiltInNumWorkgroups},
+        BuiltinData{core::BuiltinValue::kSampleIndex, core::AddressSpace::kIn, SpvBuiltInSampleId},
+        BuiltinData{core::BuiltinValue::kSampleMask, core::AddressSpace::kIn, SpvBuiltInSampleMask},
+        BuiltinData{core::BuiltinValue::kSampleMask, core::AddressSpace::kOut,
+                    SpvBuiltInSampleMask}));
 
 TEST_F(SpirvASTPrinterTest, GlobalVar_DeclReadOnly) {
     // struct A {
@@ -318,7 +313,7 @@ TEST_F(SpirvASTPrinterTest, GlobalVar_DeclReadOnly) {
                                  Member("b", ty.i32()),
                              });
 
-    GlobalVar("b", ty.Of(A), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(0_a),
+    GlobalVar("b", ty.Of(A), core::AddressSpace::kStorage, core::Access::kRead, Binding(0_a),
               Group(0_a));
 
     Builder& b = SanitizeAndBuild();
@@ -360,7 +355,7 @@ TEST_F(SpirvASTPrinterTest, GlobalVar_TypeAliasDeclReadOnly) {
 
     auto* A = Structure("A", Vector{Member("a", ty.i32())});
     auto* B = Alias("B", ty.Of(A));
-    GlobalVar("b", ty.Of(B), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(0_a),
+    GlobalVar("b", ty.Of(B), core::AddressSpace::kStorage, core::Access::kRead, Binding(0_a),
               Group(0_a));
 
     Builder& b = SanitizeAndBuild();
@@ -400,7 +395,7 @@ TEST_F(SpirvASTPrinterTest, GlobalVar_TypeAliasAssignReadOnly) {
 
     auto* A = Structure("A", Vector{Member("a", ty.i32())});
     auto* B = Alias("B", ty.Of(A));
-    GlobalVar("b", ty.Of(B), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(0_a),
+    GlobalVar("b", ty.Of(B), core::AddressSpace::kStorage, core::Access::kRead, Binding(0_a),
               Group(0_a));
 
     Builder& b = SanitizeAndBuild();
@@ -439,10 +434,10 @@ TEST_F(SpirvASTPrinterTest, GlobalVar_TwoVarDeclReadOnly) {
     // var<storage, read_write> c : A
 
     auto* A = Structure("A", Vector{Member("a", ty.i32())});
-    GlobalVar("b", ty.Of(A), builtin::AddressSpace::kStorage, builtin::Access::kRead, Group(0_a),
+    GlobalVar("b", ty.Of(A), core::AddressSpace::kStorage, core::Access::kRead, Group(0_a),
               Binding(0_a));
-    GlobalVar("c", ty.Of(A), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
-              Group(1_a), Binding(0_a));
+    GlobalVar("c", ty.Of(A), core::AddressSpace::kStorage, core::Access::kReadWrite, Group(1_a),
+              Binding(0_a));
 
     Builder& b = SanitizeAndBuild();
 
@@ -480,8 +475,8 @@ OpName %9 "unused_entry_point"
 TEST_F(SpirvASTPrinterTest, GlobalVar_TextureStorageWriteOnly) {
     // var<uniform_constant> a : texture_storage_2d<r32uint, write>;
 
-    auto type = ty.storage_texture(type::TextureDimension::k2d, builtin::TexelFormat::kR32Uint,
-                                   builtin::Access::kWrite);
+    auto type = ty.storage_texture(type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+                                   core::Access::kWrite);
 
     auto* var_a = GlobalVar("a", type, Binding(0_a), Group(0_a));
 
@@ -502,16 +497,16 @@ OpDecorate %1 DescriptorSet 0
 
 TEST_F(SpirvASTPrinterTest, GlobalVar_WorkgroupWithZeroInit) {
     auto type_scalar = ty.i32();
-    auto* var_scalar = GlobalVar("a", type_scalar, builtin::AddressSpace::kWorkgroup);
+    auto* var_scalar = GlobalVar("a", type_scalar, core::AddressSpace::kWorkgroup);
 
     auto type_array = ty.array<f32, 16>();
-    auto* var_array = GlobalVar("b", type_array, builtin::AddressSpace::kWorkgroup);
+    auto* var_array = GlobalVar("b", type_array, core::AddressSpace::kWorkgroup);
 
     auto* type_struct = Structure("C", Vector{
                                            Member("a", ty.i32()),
                                            Member("b", ty.i32()),
                                        });
-    auto* var_struct = GlobalVar("c", ty.Of(type_struct), builtin::AddressSpace::kWorkgroup);
+    auto* var_struct = GlobalVar("c", ty.Of(type_struct), core::AddressSpace::kWorkgroup);
 
     program = std::make_unique<Program>(resolver::Resolve(*this));
 

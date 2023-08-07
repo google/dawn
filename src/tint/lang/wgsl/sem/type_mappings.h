@@ -46,7 +46,7 @@ class Variable;
 class WhileStatement;
 class UnaryOpExpression;
 }  // namespace tint::ast
-namespace tint::builtin {
+namespace tint::core {
 enum class BuiltinValue;
 }
 namespace tint::sem {
@@ -77,7 +77,7 @@ namespace tint::sem {
 /// rules will be used to infer the return type based on the argument type.
 struct TypeMappings {
     //! @cond Doxygen_Suppress
-    BuiltinEnumExpression<builtin::BuiltinValue>* operator()(ast::BuiltinAttribute*);
+    BuiltinEnumExpression<core::BuiltinValue>* operator()(ast::BuiltinAttribute*);
     CastableBase* operator()(ast::Node*);
     Expression* operator()(ast::Expression*);
     ForLoopStatement* operator()(ast::ForLoopStatement*);

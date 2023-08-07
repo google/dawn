@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/lang/core/builtin/function.h"
+#include "src/tint/lang/core/function.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
@@ -41,7 +41,7 @@ class SpirvAtomic final : public Castable<SpirvAtomic, Transform> {
         /// @param pid the identifier of the program that owns this node
         /// @param nid the unique node identifier
         /// @param builtin the atomic builtin this stub represents
-        Stub(GenerationID pid, NodeID nid, builtin::Function builtin);
+        Stub(GenerationID pid, NodeID nid, core::Function builtin);
         /// Destructor
         ~Stub() override;
 
@@ -55,7 +55,7 @@ class SpirvAtomic final : public Castable<SpirvAtomic, Transform> {
         const Stub* Clone(ast::CloneContext& ctx) const override;
 
         /// The type of the intrinsic
-        const builtin::Function builtin;
+        const core::Function builtin;
     };
 
     /// @copydoc Transform::Apply

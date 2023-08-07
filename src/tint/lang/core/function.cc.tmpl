@@ -1,0 +1,131 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/src/cmd/gen to generate function.cc
+
+To update the generated file, run:
+    ./tools/run gen
+
+See:
+* tools/src/cmd/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+#include "src/tint/lang/core/function.h"
+
+namespace tint::core {
+
+Function ParseFunction(std::string_view name) {
+{{- range $I.Sem.Builtins  }}
+    if (name == "{{.Name}}") {
+        return Function::k{{PascalCase .Name}};
+    }
+{{- end  }}
+    return Function::kNone;
+}
+
+const char* str(Function i) {
+    switch (i) {
+        case Function::kNone:
+            return "<none>";
+{{- range $I.Sem.Builtins  }}
+        case Function::k{{PascalCase .Name}}:
+            return "{{.Name}}";
+{{- end  }}
+    }
+    return "<unknown>";
+}
+
+bool IsCoarseDerivativeBuiltin(Function f) {
+    return f == Function::kDpdxCoarse || f == Function::kDpdyCoarse ||
+           f == Function::kFwidthCoarse;
+}
+
+bool IsFineDerivativeBuiltin(Function f) {
+    return f == Function::kDpdxFine || f == Function::kDpdyFine ||
+           f == Function::kFwidthFine;
+}
+
+bool IsDerivativeBuiltin(Function f) {
+    return f == Function::kDpdx || f == Function::kDpdy ||
+           f == Function::kFwidth || IsCoarseDerivativeBuiltin(f) ||
+           IsFineDerivativeBuiltin(f);
+}
+
+bool IsTextureBuiltin(Function f) {
+    return IsImageQueryBuiltin(f) ||                                 //
+           f == Function::kTextureGather ||                 //
+           f == Function::kTextureGatherCompare ||          //
+           f == Function::kTextureLoad ||                   //
+           f == Function::kTextureSample ||                 //
+           f == Function::kTextureSampleBaseClampToEdge ||  //
+           f == Function::kTextureSampleBias ||             //
+           f == Function::kTextureSampleCompare ||          //
+           f == Function::kTextureSampleCompareLevel ||     //
+           f == Function::kTextureSampleGrad ||             //
+           f == Function::kTextureSampleLevel ||            //
+           f == Function::kTextureStore;
+}
+
+bool IsImageQueryBuiltin(Function f) {
+    return f == Function::kTextureDimensions ||
+           f == Function::kTextureNumLayers || f == Function::kTextureNumLevels ||
+           f == Function::kTextureNumSamples;
+}
+
+bool IsDataPackingBuiltin(Function f) {
+    return f == Function::kPack4X8Snorm || f == Function::kPack4X8Unorm ||
+           f == Function::kPack2X16Snorm || f == Function::kPack2X16Unorm ||
+           f == Function::kPack2X16Float;
+}
+
+bool IsDataUnpackingBuiltin(Function f) {
+    return f == Function::kUnpack4X8Snorm || f == Function::kUnpack4X8Unorm ||
+           f == Function::kUnpack2X16Snorm || f == Function::kUnpack2X16Unorm ||
+           f == Function::kUnpack2X16Float;
+}
+
+bool IsBarrierBuiltin(Function f) {
+    return f == Function::kWorkgroupBarrier || f == Function::kStorageBarrier;
+}
+
+bool IsAtomicBuiltin(Function f) {
+    return f == Function::kAtomicLoad || f == Function::kAtomicStore ||
+           f == Function::kAtomicAdd || f == Function::kAtomicSub ||
+           f == Function::kAtomicMax || f == Function::kAtomicMin ||
+           f == Function::kAtomicAnd || f == Function::kAtomicOr ||
+           f == Function::kAtomicXor || f == Function::kAtomicExchange ||
+           f == Function::kAtomicCompareExchangeWeak;
+}
+
+bool IsDP4aBuiltin(Function f) {
+    return f == Function::kDot4I8Packed || f == Function::kDot4U8Packed;
+}
+
+bool IsSubgroupBuiltin(Function f) {
+    return f == Function::kSubgroupBallot;
+}
+
+bool HasSideEffects(Function f) {
+    switch (f) {
+        case Function::kAtomicAdd:
+        case Function::kAtomicAnd:
+        case Function::kAtomicCompareExchangeWeak:
+        case Function::kAtomicExchange:
+        case Function::kAtomicMax:
+        case Function::kAtomicMin:
+        case Function::kAtomicOr:
+        case Function::kAtomicStore:
+        case Function::kAtomicSub:
+        case Function::kAtomicXor:
+        case Function::kTextureStore:
+        case Function::kWorkgroupUniformLoad:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
+}  // namespace tint::core

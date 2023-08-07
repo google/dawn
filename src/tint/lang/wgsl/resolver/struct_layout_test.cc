@@ -55,7 +55,7 @@ TEST_F(ResolverStructLayoutTest, Scalars) {
 }
 
 TEST_F(ResolverStructLayoutTest, ScalarsWithF16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* s = Structure("S", Vector{
                                  Member("a", ty.f32()),
@@ -134,7 +134,7 @@ TEST_F(ResolverStructLayoutTest, Alias) {
 }
 
 TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayStaticSize) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* s = Structure("S", Vector{
                                  Member("a", ty.array<i32, 3>()),
@@ -174,7 +174,7 @@ TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayStaticSize) {
 }
 
 TEST_F(ResolverStructLayoutTest, ExplicitStrideArrayStaticSize) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* s = Structure("S", Vector{
                                  Member("a", ty.array<i32, 3>(Vector{Stride(8)})),
@@ -335,7 +335,7 @@ TEST_F(ResolverStructLayoutTest, Vector) {
 }
 
 TEST_F(ResolverStructLayoutTest, Matrix) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* s = Structure("S", Vector{
                                  Member("a_1", ty.mat2x2<f32>()),

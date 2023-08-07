@@ -28,7 +28,7 @@ using MslSanitizerTest = TestHelper;
 
 TEST_F(MslSanitizerTest, Call_ArrayLength) {
     auto* s = Structure("my_struct", Vector{Member(0, "a", ty.array<f32>())});
-    GlobalVar("b", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead, Binding(1_a),
               Group(2_a));
 
     Func("a_func", tint::Empty, ty.void_(),
@@ -85,7 +85,7 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
                                          Member(0, "z", ty.f32()),
                                          Member(4, "a", ty.array<f32>()),
                                      });
-    GlobalVar("b", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead, Binding(1_a),
               Group(2_a));
 
     Func("a_func", tint::Empty, ty.void_(),
@@ -141,7 +141,7 @@ fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(30)]]) {
 
 TEST_F(MslSanitizerTest, Call_ArrayLength_ViaLets) {
     auto* s = Structure("my_struct", Vector{Member(0, "a", ty.array<f32>())});
-    GlobalVar("b", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead, Binding(1_a),
               Group(2_a));
 
     auto* p = Let("p", AddressOf("b"));
@@ -201,9 +201,9 @@ fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(30)]]) {
 
 TEST_F(MslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
     auto* s = Structure("my_struct", Vector{Member(0, "a", ty.array<f32>())});
-    GlobalVar("b", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead, Binding(1_a),
               Group(0_a));
-    GlobalVar("c", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(2_a),
+    GlobalVar("c", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead, Binding(2_a),
               Group(0_a));
 
     Func("a_func", tint::Empty, ty.void_(),
@@ -260,9 +260,9 @@ fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(29)]]) {
 
 TEST_F(MslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniformMissingBinding) {
     auto* s = Structure("my_struct", Vector{Member(0, "a", ty.array<f32>())});
-    GlobalVar("b", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(1_a),
+    GlobalVar("b", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead, Binding(1_a),
               Group(0_a));
-    GlobalVar("c", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead, Binding(2_a),
+    GlobalVar("c", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead, Binding(2_a),
               Group(0_a));
 
     Func("a_func", tint::Empty, ty.void_(),

@@ -724,7 +724,7 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
                 auto enable_list = program->AST().Enables();
                 bool dxc_require_16bit_types = false;
                 for (auto* enable : enable_list) {
-                    if (enable->HasExtension(tint::builtin::Extension::kF16)) {
+                    if (enable->HasExtension(tint::core::Extension::kF16)) {
                         dxc_require_16bit_types = true;
                         break;
                     }

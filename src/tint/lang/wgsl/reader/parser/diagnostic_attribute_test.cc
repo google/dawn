@@ -27,7 +27,7 @@ TEST_F(WGSLParserTest, DiagnosticAttribute_Name) {
     EXPECT_TRUE(a.matched);
     auto* d = a.value->As<ast::DiagnosticAttribute>();
     ASSERT_NE(d, nullptr);
-    EXPECT_EQ(d->control.severity, builtin::DiagnosticSeverity::kOff);
+    EXPECT_EQ(d->control.severity, core::DiagnosticSeverity::kOff);
     auto* r = d->control.rule_name;
     ASSERT_NE(r, nullptr);
     EXPECT_EQ(r->category, nullptr);
@@ -41,7 +41,7 @@ TEST_F(WGSLParserTest, DiagnosticAttribute_CategoryName) {
     EXPECT_TRUE(a.matched);
     auto* d = a.value->As<ast::DiagnosticAttribute>();
     ASSERT_NE(d, nullptr);
-    EXPECT_EQ(d->control.severity, builtin::DiagnosticSeverity::kOff);
+    EXPECT_EQ(d->control.severity, core::DiagnosticSeverity::kOff);
     auto* r = d->control.rule_name;
     ASSERT_NE(r, nullptr);
     ast::CheckIdentifier(r->category, "foo");

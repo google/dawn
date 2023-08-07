@@ -14,11 +14,11 @@
 
 #include "src/tint/lang/spirv/writer/common/helper_test.h"
 
-#include "src/tint/lang/core/builtin/function.h"
+#include "src/tint/lang/core/function.h"
 #include "src/tint/lang/core/type/builtin_structs.h"
 
-using namespace tint::number_suffixes;        // NOLINT
-using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::spirv::writer {
 namespace {
@@ -28,7 +28,7 @@ struct BuiltinTestCase {
     /// The element type to test.
     TestElementType type;
     /// The builtin function.
-    enum builtin::Function function;
+    enum core::Function function;
     /// The expected SPIR-V instruction string.
     std::string spirv_inst;
 };
@@ -62,83 +62,83 @@ TEST_P(Builtin_1arg, Vector) {
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
     Builtin_1arg,
-    testing::Values(BuiltinTestCase{kI32, builtin::Function::kAbs, "SAbs"},
-                    BuiltinTestCase{kF32, builtin::Function::kAbs, "FAbs"},
-                    BuiltinTestCase{kF16, builtin::Function::kAbs, "FAbs"},
-                    BuiltinTestCase{kF32, builtin::Function::kAcos, "Acos"},
-                    BuiltinTestCase{kF16, builtin::Function::kAcos, "Acos"},
-                    BuiltinTestCase{kF32, builtin::Function::kAsinh, "Asinh"},
-                    BuiltinTestCase{kF16, builtin::Function::kAsinh, "Asinh"},
-                    BuiltinTestCase{kF32, builtin::Function::kAcos, "Acos"},
-                    BuiltinTestCase{kF16, builtin::Function::kAcos, "Acos"},
-                    BuiltinTestCase{kF32, builtin::Function::kAsinh, "Asinh"},
-                    BuiltinTestCase{kF16, builtin::Function::kAsinh, "Asinh"},
-                    BuiltinTestCase{kF32, builtin::Function::kAtan, "Atan"},
-                    BuiltinTestCase{kF16, builtin::Function::kAtan, "Atan"},
-                    BuiltinTestCase{kF32, builtin::Function::kAtanh, "Atanh"},
-                    BuiltinTestCase{kF16, builtin::Function::kAtanh, "Atanh"},
-                    BuiltinTestCase{kF32, builtin::Function::kCeil, "Ceil"},
-                    BuiltinTestCase{kF16, builtin::Function::kCeil, "Ceil"},
-                    BuiltinTestCase{kF32, builtin::Function::kCos, "Cos"},
-                    BuiltinTestCase{kF16, builtin::Function::kCos, "Cos"},
-                    BuiltinTestCase{kI32, builtin::Function::kCountOneBits, "OpBitCount"},
-                    BuiltinTestCase{kU32, builtin::Function::kCountOneBits, "OpBitCount"},
-                    BuiltinTestCase{kF32, builtin::Function::kDpdx, "OpDPdx"},
-                    BuiltinTestCase{kF32, builtin::Function::kDpdxCoarse, "OpDPdxCoarse"},
-                    BuiltinTestCase{kF32, builtin::Function::kDpdxFine, "OpDPdxFine"},
-                    BuiltinTestCase{kF32, builtin::Function::kDpdy, "OpDPdy"},
-                    BuiltinTestCase{kF32, builtin::Function::kDpdyCoarse, "OpDPdyCoarse"},
-                    BuiltinTestCase{kF32, builtin::Function::kDpdyFine, "OpDPdyFine"},
-                    BuiltinTestCase{kF32, builtin::Function::kDegrees, "Degrees"},
-                    BuiltinTestCase{kF16, builtin::Function::kDegrees, "Degrees"},
-                    BuiltinTestCase{kF32, builtin::Function::kExp, "Exp"},
-                    BuiltinTestCase{kF16, builtin::Function::kExp, "Exp"},
-                    BuiltinTestCase{kF32, builtin::Function::kExp2, "Exp2"},
-                    BuiltinTestCase{kF16, builtin::Function::kExp2, "Exp2"},
-                    BuiltinTestCase{kF32, builtin::Function::kFloor, "Floor"},
-                    BuiltinTestCase{kF16, builtin::Function::kFloor, "Floor"},
-                    BuiltinTestCase{kF32, builtin::Function::kFract, "Fract"},
-                    BuiltinTestCase{kF16, builtin::Function::kFract, "Fract"},
-                    BuiltinTestCase{kF32, builtin::Function::kFwidth, "OpFwidth"},
-                    BuiltinTestCase{kF32, builtin::Function::kFwidthCoarse, "OpFwidthCoarse"},
-                    BuiltinTestCase{kF32, builtin::Function::kFwidthFine, "OpFwidthFine"},
-                    BuiltinTestCase{kF32, builtin::Function::kInverseSqrt, "InverseSqrt"},
-                    BuiltinTestCase{kF16, builtin::Function::kInverseSqrt, "InverseSqrt"},
-                    BuiltinTestCase{kF32, builtin::Function::kLog, "Log"},
-                    BuiltinTestCase{kF16, builtin::Function::kLog, "Log"},
-                    BuiltinTestCase{kF32, builtin::Function::kLog2, "Log2"},
-                    BuiltinTestCase{kF16, builtin::Function::kLog2, "Log2"},
-                    BuiltinTestCase{kF32, builtin::Function::kQuantizeToF16, "OpQuantizeToF16"},
-                    BuiltinTestCase{kF32, builtin::Function::kRadians, "Radians"},
-                    BuiltinTestCase{kF16, builtin::Function::kRadians, "Radians"},
-                    BuiltinTestCase{kI32, builtin::Function::kReverseBits, "OpBitReverse"},
-                    BuiltinTestCase{kU32, builtin::Function::kReverseBits, "OpBitReverse"},
-                    BuiltinTestCase{kF32, builtin::Function::kRound, "RoundEven"},
-                    BuiltinTestCase{kF16, builtin::Function::kRound, "RoundEven"},
-                    BuiltinTestCase{kF32, builtin::Function::kSign, "FSign"},
-                    BuiltinTestCase{kF16, builtin::Function::kSign, "FSign"},
-                    BuiltinTestCase{kI32, builtin::Function::kSign, "SSign"},
-                    BuiltinTestCase{kF32, builtin::Function::kSin, "Sin"},
-                    BuiltinTestCase{kF16, builtin::Function::kSin, "Sin"},
-                    BuiltinTestCase{kF32, builtin::Function::kSqrt, "Sqrt"},
-                    BuiltinTestCase{kF16, builtin::Function::kSqrt, "Sqrt"},
-                    BuiltinTestCase{kF32, builtin::Function::kTan, "Tan"},
-                    BuiltinTestCase{kF16, builtin::Function::kTan, "Tan"},
-                    BuiltinTestCase{kF32, builtin::Function::kTrunc, "Trunc"},
-                    BuiltinTestCase{kF16, builtin::Function::kTrunc, "Trunc"},
-                    BuiltinTestCase{kF32, builtin::Function::kCosh, "Cosh"},
-                    BuiltinTestCase{kF16, builtin::Function::kCosh, "Cosh"},
-                    BuiltinTestCase{kF32, builtin::Function::kSinh, "Sinh"},
-                    BuiltinTestCase{kF16, builtin::Function::kSinh, "Sinh"},
-                    BuiltinTestCase{kF32, builtin::Function::kTanh, "Tanh"},
-                    BuiltinTestCase{kF16, builtin::Function::kTanh, "Tanh"}));
+    testing::Values(BuiltinTestCase{kI32, core::Function::kAbs, "SAbs"},
+                    BuiltinTestCase{kF32, core::Function::kAbs, "FAbs"},
+                    BuiltinTestCase{kF16, core::Function::kAbs, "FAbs"},
+                    BuiltinTestCase{kF32, core::Function::kAcos, "Acos"},
+                    BuiltinTestCase{kF16, core::Function::kAcos, "Acos"},
+                    BuiltinTestCase{kF32, core::Function::kAsinh, "Asinh"},
+                    BuiltinTestCase{kF16, core::Function::kAsinh, "Asinh"},
+                    BuiltinTestCase{kF32, core::Function::kAcos, "Acos"},
+                    BuiltinTestCase{kF16, core::Function::kAcos, "Acos"},
+                    BuiltinTestCase{kF32, core::Function::kAsinh, "Asinh"},
+                    BuiltinTestCase{kF16, core::Function::kAsinh, "Asinh"},
+                    BuiltinTestCase{kF32, core::Function::kAtan, "Atan"},
+                    BuiltinTestCase{kF16, core::Function::kAtan, "Atan"},
+                    BuiltinTestCase{kF32, core::Function::kAtanh, "Atanh"},
+                    BuiltinTestCase{kF16, core::Function::kAtanh, "Atanh"},
+                    BuiltinTestCase{kF32, core::Function::kCeil, "Ceil"},
+                    BuiltinTestCase{kF16, core::Function::kCeil, "Ceil"},
+                    BuiltinTestCase{kF32, core::Function::kCos, "Cos"},
+                    BuiltinTestCase{kF16, core::Function::kCos, "Cos"},
+                    BuiltinTestCase{kI32, core::Function::kCountOneBits, "OpBitCount"},
+                    BuiltinTestCase{kU32, core::Function::kCountOneBits, "OpBitCount"},
+                    BuiltinTestCase{kF32, core::Function::kDpdx, "OpDPdx"},
+                    BuiltinTestCase{kF32, core::Function::kDpdxCoarse, "OpDPdxCoarse"},
+                    BuiltinTestCase{kF32, core::Function::kDpdxFine, "OpDPdxFine"},
+                    BuiltinTestCase{kF32, core::Function::kDpdy, "OpDPdy"},
+                    BuiltinTestCase{kF32, core::Function::kDpdyCoarse, "OpDPdyCoarse"},
+                    BuiltinTestCase{kF32, core::Function::kDpdyFine, "OpDPdyFine"},
+                    BuiltinTestCase{kF32, core::Function::kDegrees, "Degrees"},
+                    BuiltinTestCase{kF16, core::Function::kDegrees, "Degrees"},
+                    BuiltinTestCase{kF32, core::Function::kExp, "Exp"},
+                    BuiltinTestCase{kF16, core::Function::kExp, "Exp"},
+                    BuiltinTestCase{kF32, core::Function::kExp2, "Exp2"},
+                    BuiltinTestCase{kF16, core::Function::kExp2, "Exp2"},
+                    BuiltinTestCase{kF32, core::Function::kFloor, "Floor"},
+                    BuiltinTestCase{kF16, core::Function::kFloor, "Floor"},
+                    BuiltinTestCase{kF32, core::Function::kFract, "Fract"},
+                    BuiltinTestCase{kF16, core::Function::kFract, "Fract"},
+                    BuiltinTestCase{kF32, core::Function::kFwidth, "OpFwidth"},
+                    BuiltinTestCase{kF32, core::Function::kFwidthCoarse, "OpFwidthCoarse"},
+                    BuiltinTestCase{kF32, core::Function::kFwidthFine, "OpFwidthFine"},
+                    BuiltinTestCase{kF32, core::Function::kInverseSqrt, "InverseSqrt"},
+                    BuiltinTestCase{kF16, core::Function::kInverseSqrt, "InverseSqrt"},
+                    BuiltinTestCase{kF32, core::Function::kLog, "Log"},
+                    BuiltinTestCase{kF16, core::Function::kLog, "Log"},
+                    BuiltinTestCase{kF32, core::Function::kLog2, "Log2"},
+                    BuiltinTestCase{kF16, core::Function::kLog2, "Log2"},
+                    BuiltinTestCase{kF32, core::Function::kQuantizeToF16, "OpQuantizeToF16"},
+                    BuiltinTestCase{kF32, core::Function::kRadians, "Radians"},
+                    BuiltinTestCase{kF16, core::Function::kRadians, "Radians"},
+                    BuiltinTestCase{kI32, core::Function::kReverseBits, "OpBitReverse"},
+                    BuiltinTestCase{kU32, core::Function::kReverseBits, "OpBitReverse"},
+                    BuiltinTestCase{kF32, core::Function::kRound, "RoundEven"},
+                    BuiltinTestCase{kF16, core::Function::kRound, "RoundEven"},
+                    BuiltinTestCase{kF32, core::Function::kSign, "FSign"},
+                    BuiltinTestCase{kF16, core::Function::kSign, "FSign"},
+                    BuiltinTestCase{kI32, core::Function::kSign, "SSign"},
+                    BuiltinTestCase{kF32, core::Function::kSin, "Sin"},
+                    BuiltinTestCase{kF16, core::Function::kSin, "Sin"},
+                    BuiltinTestCase{kF32, core::Function::kSqrt, "Sqrt"},
+                    BuiltinTestCase{kF16, core::Function::kSqrt, "Sqrt"},
+                    BuiltinTestCase{kF32, core::Function::kTan, "Tan"},
+                    BuiltinTestCase{kF16, core::Function::kTan, "Tan"},
+                    BuiltinTestCase{kF32, core::Function::kTrunc, "Trunc"},
+                    BuiltinTestCase{kF16, core::Function::kTrunc, "Trunc"},
+                    BuiltinTestCase{kF32, core::Function::kCosh, "Cosh"},
+                    BuiltinTestCase{kF16, core::Function::kCosh, "Cosh"},
+                    BuiltinTestCase{kF32, core::Function::kSinh, "Sinh"},
+                    BuiltinTestCase{kF16, core::Function::kSinh, "Sinh"},
+                    BuiltinTestCase{kF32, core::Function::kTanh, "Tanh"},
+                    BuiltinTestCase{kF16, core::Function::kTanh, "Tanh"}));
 
 // Test that abs of an unsigned value just folds away.
 TEST_F(SpirvWriterTest, Builtin_Abs_u32) {
     auto* func = b.Function("foo", MakeScalarType(kU32));
     b.Append(func->Block(), [&] {
         auto* arg = MakeScalarValue(kU32);
-        auto* result = b.Call(MakeScalarType(kU32), builtin::Function::kAbs, arg);
+        auto* result = b.Call(MakeScalarType(kU32), core::Function::kAbs, arg);
         b.Return(func, result);
         mod.SetName(arg, "arg");
     });
@@ -156,7 +156,7 @@ TEST_F(SpirvWriterTest, Builtin_Abs_vec2u) {
     auto* func = b.Function("foo", MakeVectorType(kU32));
     b.Append(func->Block(), [&] {
         auto* arg = MakeVectorValue(kU32);
-        auto* result = b.Call(MakeVectorType(kU32), builtin::Function::kAbs, arg);
+        auto* result = b.Call(MakeVectorType(kU32), core::Function::kAbs, arg);
         b.Return(func, result);
         mod.SetName(arg, "arg");
     });
@@ -176,7 +176,7 @@ TEST_F(SpirvWriterTest, Builtin_All_Scalar) {
     auto* func = b.Function("foo", ty.bool_());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.bool_(), builtin::Function::kAll, arg);
+        auto* result = b.Call(ty.bool_(), core::Function::kAll, arg);
         b.Return(func, result);
     });
 
@@ -189,7 +189,7 @@ TEST_F(SpirvWriterTest, Builtin_All_Vector) {
     auto* func = b.Function("foo", ty.bool_());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.bool_(), builtin::Function::kAll, arg);
+        auto* result = b.Call(ty.bool_(), core::Function::kAll, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -204,7 +204,7 @@ TEST_F(SpirvWriterTest, Builtin_Any_Scalar) {
     auto* func = b.Function("foo", ty.bool_());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.bool_(), builtin::Function::kAny, arg);
+        auto* result = b.Call(ty.bool_(), core::Function::kAny, arg);
         b.Return(func, result);
     });
 
@@ -217,7 +217,7 @@ TEST_F(SpirvWriterTest, Builtin_Any_Vector) {
     auto* func = b.Function("foo", ty.bool_());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.bool_(), builtin::Function::kAny, arg);
+        auto* result = b.Call(ty.bool_(), core::Function::kAny, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -231,7 +231,7 @@ TEST_F(SpirvWriterTest, Builtin_Determinant_Mat4x4f) {
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.f32(), builtin::Function::kDeterminant, arg);
+        auto* result = b.Call(ty.f32(), core::Function::kDeterminant, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -245,7 +245,7 @@ TEST_F(SpirvWriterTest, Builtin_Determinant_Mat3x3h) {
     auto* func = b.Function("foo", ty.f16());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.f16(), builtin::Function::kDeterminant, arg);
+        auto* result = b.Call(ty.f16(), core::Function::kDeterminant, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -260,7 +260,7 @@ TEST_F(SpirvWriterTest, Builtin_Frexp_F32) {
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(str, builtin::Function::kFrexp, arg);
+        auto* result = b.Call(str, core::Function::kFrexp, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -275,7 +275,7 @@ TEST_F(SpirvWriterTest, Builtin_Frexp_F16) {
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(str, builtin::Function::kFrexp, arg);
+        auto* result = b.Call(str, core::Function::kFrexp, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -290,7 +290,7 @@ TEST_F(SpirvWriterTest, Builtin_Frexp_Vec2f) {
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(str, builtin::Function::kFrexp, arg);
+        auto* result = b.Call(str, core::Function::kFrexp, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -305,7 +305,7 @@ TEST_F(SpirvWriterTest, Builtin_Frexp_Vec3h) {
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(str, builtin::Function::kFrexp, arg);
+        auto* result = b.Call(str, core::Function::kFrexp, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -319,7 +319,7 @@ TEST_F(SpirvWriterTest, Builtin_Length_vec4f) {
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.f32(), builtin::Function::kLength, arg);
+        auto* result = b.Call(ty.f32(), core::Function::kLength, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -334,7 +334,7 @@ TEST_F(SpirvWriterTest, Builtin_Modf_F32) {
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(str, builtin::Function::kModf, arg);
+        auto* result = b.Call(str, core::Function::kModf, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -349,7 +349,7 @@ TEST_F(SpirvWriterTest, Builtin_Modf_F16) {
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(str, builtin::Function::kModf, arg);
+        auto* result = b.Call(str, core::Function::kModf, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -364,7 +364,7 @@ TEST_F(SpirvWriterTest, Builtin_Modf_Vec2f) {
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(str, builtin::Function::kModf, arg);
+        auto* result = b.Call(str, core::Function::kModf, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -379,7 +379,7 @@ TEST_F(SpirvWriterTest, Builtin_Modf_Vec3h) {
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(str, builtin::Function::kModf, arg);
+        auto* result = b.Call(str, core::Function::kModf, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -393,7 +393,7 @@ TEST_F(SpirvWriterTest, Builtin_Normalize_vec4f) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kNormalize, arg);
+        auto* result = b.Call(ty.vec4<f32>(), core::Function::kNormalize, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -407,7 +407,7 @@ TEST_F(SpirvWriterTest, Builtin_Transpose_Mat2x3f) {
     auto* func = b.Function("foo", ty.mat3x2<f32>());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.mat3x2<f32>(), builtin::Function::kTranspose, arg);
+        auto* result = b.Call(ty.mat3x2<f32>(), core::Function::kTranspose, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -421,7 +421,7 @@ TEST_F(SpirvWriterTest, Builtin_Transpose_Mat4x4f) {
     auto* func = b.Function("foo", ty.mat4x4<f32>());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.mat4x4<f32>(), builtin::Function::kTranspose, arg);
+        auto* result = b.Call(ty.mat4x4<f32>(), core::Function::kTranspose, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -435,7 +435,7 @@ TEST_F(SpirvWriterTest, Builtin_Transpose_Mat4x3h) {
     auto* func = b.Function("foo", ty.mat3x4<f16>());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.mat3x4<f16>(), builtin::Function::kTranspose, arg);
+        auto* result = b.Call(ty.mat3x4<f16>(), core::Function::kTranspose, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -449,7 +449,7 @@ TEST_F(SpirvWriterTest, Builtin_Transpose_Mat2x2h) {
     auto* func = b.Function("foo", ty.mat2x2<f16>());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.mat2x2<f16>(), builtin::Function::kTranspose, arg);
+        auto* result = b.Call(ty.mat2x2<f16>(), core::Function::kTranspose, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -463,7 +463,7 @@ TEST_F(SpirvWriterTest, Builtin_Pack2X16Float) {
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.u32(), builtin::Function::kPack2X16Float, arg);
+        auto* result = b.Call(ty.u32(), core::Function::kPack2X16Float, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -477,7 +477,7 @@ TEST_F(SpirvWriterTest, Builtin_Pack2X16Snorm) {
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.u32(), builtin::Function::kPack2X16Snorm, arg);
+        auto* result = b.Call(ty.u32(), core::Function::kPack2X16Snorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -491,7 +491,7 @@ TEST_F(SpirvWriterTest, Builtin_Pack2X16Unorm) {
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.u32(), builtin::Function::kPack2X16Unorm, arg);
+        auto* result = b.Call(ty.u32(), core::Function::kPack2X16Unorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -505,7 +505,7 @@ TEST_F(SpirvWriterTest, Builtin_Pack4X8Snorm) {
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.u32(), builtin::Function::kPack4X8Snorm, arg);
+        auto* result = b.Call(ty.u32(), core::Function::kPack4X8Snorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -519,7 +519,7 @@ TEST_F(SpirvWriterTest, Builtin_Pack4X8Unorm) {
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.u32(), builtin::Function::kPack4X8Unorm, arg);
+        auto* result = b.Call(ty.u32(), core::Function::kPack4X8Unorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -533,7 +533,7 @@ TEST_F(SpirvWriterTest, Builtin_Unpack2X16Float) {
     auto* func = b.Function("foo", ty.vec2<f32>());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec2<f32>(), builtin::Function::kUnpack2X16Float, arg);
+        auto* result = b.Call(ty.vec2<f32>(), core::Function::kUnpack2X16Float, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -547,7 +547,7 @@ TEST_F(SpirvWriterTest, Builtin_Unpack2X16Snorm) {
     auto* func = b.Function("foo", ty.vec2<f32>());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec2<f32>(), builtin::Function::kUnpack2X16Snorm, arg);
+        auto* result = b.Call(ty.vec2<f32>(), core::Function::kUnpack2X16Snorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -561,7 +561,7 @@ TEST_F(SpirvWriterTest, Builtin_Unpack2X16Unorm) {
     auto* func = b.Function("foo", ty.vec2<f32>());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec2<f32>(), builtin::Function::kUnpack2X16Unorm, arg);
+        auto* result = b.Call(ty.vec2<f32>(), core::Function::kUnpack2X16Unorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -575,7 +575,7 @@ TEST_F(SpirvWriterTest, Builtin_Unpack4X8Snorm) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kUnpack4X8Snorm, arg);
+        auto* result = b.Call(ty.vec4<f32>(), core::Function::kUnpack4X8Snorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -589,7 +589,7 @@ TEST_F(SpirvWriterTest, Builtin_Unpack4X8Unorm) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kUnpack4X8Unorm, arg);
+        auto* result = b.Call(ty.vec4<f32>(), core::Function::kUnpack4X8Unorm, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -628,17 +628,17 @@ TEST_P(Builtin_2arg, Vector) {
 }
 INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          Builtin_2arg,
-                         testing::Values(BuiltinTestCase{kF32, builtin::Function::kAtan2, "Atan2"},
-                                         BuiltinTestCase{kF32, builtin::Function::kMax, "FMax"},
-                                         BuiltinTestCase{kI32, builtin::Function::kMax, "SMax"},
-                                         BuiltinTestCase{kU32, builtin::Function::kMax, "UMax"},
-                                         BuiltinTestCase{kF32, builtin::Function::kMin, "FMin"},
-                                         BuiltinTestCase{kI32, builtin::Function::kMin, "SMin"},
-                                         BuiltinTestCase{kU32, builtin::Function::kMin, "UMin"},
-                                         BuiltinTestCase{kF32, builtin::Function::kPow, "Pow"},
-                                         BuiltinTestCase{kF16, builtin::Function::kPow, "Pow"},
-                                         BuiltinTestCase{kF32, builtin::Function::kStep, "Step"},
-                                         BuiltinTestCase{kF16, builtin::Function::kStep, "Step"}));
+                         testing::Values(BuiltinTestCase{kF32, core::Function::kAtan2, "Atan2"},
+                                         BuiltinTestCase{kF32, core::Function::kMax, "FMax"},
+                                         BuiltinTestCase{kI32, core::Function::kMax, "SMax"},
+                                         BuiltinTestCase{kU32, core::Function::kMax, "UMax"},
+                                         BuiltinTestCase{kF32, core::Function::kMin, "FMin"},
+                                         BuiltinTestCase{kI32, core::Function::kMin, "SMin"},
+                                         BuiltinTestCase{kU32, core::Function::kMin, "UMin"},
+                                         BuiltinTestCase{kF32, core::Function::kPow, "Pow"},
+                                         BuiltinTestCase{kF16, core::Function::kPow, "Pow"},
+                                         BuiltinTestCase{kF32, core::Function::kStep, "Step"},
+                                         BuiltinTestCase{kF16, core::Function::kStep, "Step"}));
 
 TEST_F(SpirvWriterTest, Builtin_Cross_vec3f) {
     auto* arg1 = b.FunctionParam("arg1", ty.vec3<f32>());
@@ -646,7 +646,7 @@ TEST_F(SpirvWriterTest, Builtin_Cross_vec3f) {
     auto* func = b.Function("foo", ty.vec3<f32>());
     func->SetParams({arg1, arg2});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec3<f32>(), builtin::Function::kCross, arg1, arg2);
+        auto* result = b.Call(ty.vec3<f32>(), core::Function::kCross, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -661,7 +661,7 @@ TEST_F(SpirvWriterTest, Builtin_Distance_vec2f) {
     auto* func = b.Function("foo", MakeScalarType(kF32));
     func->SetParams({arg1, arg2});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(MakeScalarType(kF32), builtin::Function::kDistance, arg1, arg2);
+        auto* result = b.Call(MakeScalarType(kF32), core::Function::kDistance, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -676,7 +676,7 @@ TEST_F(SpirvWriterTest, Builtin_Distance_vec3h) {
     auto* func = b.Function("foo", MakeScalarType(kF16));
     func->SetParams({arg1, arg2});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(MakeScalarType(kF16), builtin::Function::kDistance, arg1, arg2);
+        auto* result = b.Call(MakeScalarType(kF16), core::Function::kDistance, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -691,7 +691,7 @@ TEST_F(SpirvWriterTest, Builtin_Dot_vec4f) {
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({arg1, arg2});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.f32(), builtin::Function::kDot, arg1, arg2);
+        auto* result = b.Call(ty.f32(), core::Function::kDot, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -706,7 +706,7 @@ TEST_F(SpirvWriterTest, Builtin_Dot_vec2i) {
     auto* func = b.Function("foo", ty.i32());
     func->SetParams({arg1, arg2});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.i32(), builtin::Function::kDot, arg1, arg2);
+        auto* result = b.Call(ty.i32(), core::Function::kDot, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -729,7 +729,7 @@ TEST_F(SpirvWriterTest, Builtin_Dot_vec4u) {
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({arg1, arg2});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.u32(), builtin::Function::kDot, arg1, arg2);
+        auto* result = b.Call(ty.u32(), core::Function::kDot, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -760,7 +760,7 @@ TEST_F(SpirvWriterTest, Builtin_Ldexp_F32) {
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({arg1, arg2});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.f32(), builtin::Function::kLdexp, arg1, arg2);
+        auto* result = b.Call(ty.f32(), core::Function::kLdexp, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -775,7 +775,7 @@ TEST_F(SpirvWriterTest, Builtin_Ldexp_F16) {
     auto* func = b.Function("foo", ty.f16());
     func->SetParams({arg1, arg2});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.f16(), builtin::Function::kLdexp, arg1, arg2);
+        auto* result = b.Call(ty.f16(), core::Function::kLdexp, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -790,7 +790,7 @@ TEST_F(SpirvWriterTest, Builtin_Ldexp_Vec2_F32) {
     auto* func = b.Function("foo", ty.vec2<f32>());
     func->SetParams({arg1, arg2});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec2<f32>(), builtin::Function::kLdexp, arg1, arg2);
+        auto* result = b.Call(ty.vec2<f32>(), core::Function::kLdexp, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -805,7 +805,7 @@ TEST_F(SpirvWriterTest, Builtin_Ldexp_Vec3_F16) {
     auto* func = b.Function("foo", ty.vec3<f16>());
     func->SetParams({arg1, arg2});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec3<f16>(), builtin::Function::kLdexp, arg1, arg2);
+        auto* result = b.Call(ty.vec3<f16>(), core::Function::kLdexp, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -820,7 +820,7 @@ TEST_F(SpirvWriterTest, Builtin_Reflect_F32) {
     auto* func = b.Function("foo", ty.vec3<f32>());
     func->SetParams({arg1, arg2});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec3<f32>(), builtin::Function::kReflect, arg1, arg2);
+        auto* result = b.Call(ty.vec3<f32>(), core::Function::kReflect, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -835,7 +835,7 @@ TEST_F(SpirvWriterTest, Builtin_Reflect_F16) {
     auto* func = b.Function("foo", ty.vec4<f16>());
     func->SetParams({arg1, arg2});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f16>(), builtin::Function::kReflect, arg1, arg2);
+        auto* result = b.Call(ty.vec4<f16>(), core::Function::kReflect, arg1, arg2);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -875,15 +875,15 @@ TEST_P(Builtin_3arg, Vector) {
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
     Builtin_3arg,
-    testing::Values(BuiltinTestCase{kF32, builtin::Function::kClamp, "NClamp"},
-                    BuiltinTestCase{kI32, builtin::Function::kClamp, "SClamp"},
-                    BuiltinTestCase{kU32, builtin::Function::kClamp, "UClamp"},
-                    BuiltinTestCase{kF32, builtin::Function::kFma, "Fma"},
-                    BuiltinTestCase{kF16, builtin::Function::kFma, "Fma"},
-                    BuiltinTestCase{kF32, builtin::Function::kMix, "Mix"},
-                    BuiltinTestCase{kF16, builtin::Function::kMix, "Mix"},
-                    BuiltinTestCase{kF32, builtin::Function::kSmoothstep, "SmoothStep"},
-                    BuiltinTestCase{kF16, builtin::Function::kSmoothstep, "SmoothStep"}));
+    testing::Values(BuiltinTestCase{kF32, core::Function::kClamp, "NClamp"},
+                    BuiltinTestCase{kI32, core::Function::kClamp, "SClamp"},
+                    BuiltinTestCase{kU32, core::Function::kClamp, "UClamp"},
+                    BuiltinTestCase{kF32, core::Function::kFma, "Fma"},
+                    BuiltinTestCase{kF16, core::Function::kFma, "Fma"},
+                    BuiltinTestCase{kF32, core::Function::kMix, "Mix"},
+                    BuiltinTestCase{kF16, core::Function::kMix, "Mix"},
+                    BuiltinTestCase{kF32, core::Function::kSmoothstep, "SmoothStep"},
+                    BuiltinTestCase{kF16, core::Function::kSmoothstep, "SmoothStep"}));
 
 TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_I32) {
     auto* arg = b.FunctionParam("arg", ty.i32());
@@ -893,7 +893,7 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_I32) {
     func->SetParams({arg, offset, count});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.i32(), builtin::Function::kExtractBits, arg, offset, count);
+        auto* result = b.Call(ty.i32(), core::Function::kExtractBits, arg, offset, count);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -910,7 +910,7 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Scalar_U32) {
     func->SetParams({arg, offset, count});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.u32(), builtin::Function::kExtractBits, arg, offset, count);
+        auto* result = b.Call(ty.u32(), core::Function::kExtractBits, arg, offset, count);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -927,7 +927,7 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Vector_I32) {
     func->SetParams({arg, offset, count});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<i32>(), builtin::Function::kExtractBits, arg, offset, count);
+        auto* result = b.Call(ty.vec4<i32>(), core::Function::kExtractBits, arg, offset, count);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -944,7 +944,7 @@ TEST_F(SpirvWriterTest, Builtin_ExtractBits_Vector_U32) {
     func->SetParams({arg, offset, count});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec2<u32>(), builtin::Function::kExtractBits, arg, offset, count);
+        auto* result = b.Call(ty.vec2<u32>(), core::Function::kExtractBits, arg, offset, count);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -962,8 +962,7 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Scalar_I32) {
     func->SetParams({arg, newbits, offset, count});
 
     b.Append(func->Block(), [&] {
-        auto* result =
-            b.Call(ty.i32(), builtin::Function::kInsertBits, arg, newbits, offset, count);
+        auto* result = b.Call(ty.i32(), core::Function::kInsertBits, arg, newbits, offset, count);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -981,8 +980,7 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Scalar_U32) {
     func->SetParams({arg, newbits, offset, count});
 
     b.Append(func->Block(), [&] {
-        auto* result =
-            b.Call(ty.u32(), builtin::Function::kInsertBits, arg, newbits, offset, count);
+        auto* result = b.Call(ty.u32(), core::Function::kInsertBits, arg, newbits, offset, count);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -1001,7 +999,7 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Vector_I32) {
 
     b.Append(func->Block(), [&] {
         auto* result =
-            b.Call(ty.vec4<i32>(), builtin::Function::kInsertBits, arg, newbits, offset, count);
+            b.Call(ty.vec4<i32>(), core::Function::kInsertBits, arg, newbits, offset, count);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -1020,7 +1018,7 @@ TEST_F(SpirvWriterTest, Builtin_InsertBits_Vector_U32) {
 
     b.Append(func->Block(), [&] {
         auto* result =
-            b.Call(ty.vec2<u32>(), builtin::Function::kInsertBits, arg, newbits, offset, count);
+            b.Call(ty.vec2<u32>(), core::Function::kInsertBits, arg, newbits, offset, count);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -1036,7 +1034,7 @@ TEST_F(SpirvWriterTest, Builtin_FaceForward_F32) {
     auto* func = b.Function("foo", ty.vec3<f32>());
     func->SetParams({arg1, arg2, arg3});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec3<f32>(), builtin::Function::kFaceForward, arg1, arg2, arg3);
+        auto* result = b.Call(ty.vec3<f32>(), core::Function::kFaceForward, arg1, arg2, arg3);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -1052,7 +1050,7 @@ TEST_F(SpirvWriterTest, Builtin_FaceForward_F16) {
     auto* func = b.Function("foo", ty.vec4<f16>());
     func->SetParams({arg1, arg2, arg3});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f16>(), builtin::Function::kFaceForward, arg1, arg2, arg3);
+        auto* result = b.Call(ty.vec4<f16>(), core::Function::kFaceForward, arg1, arg2, arg3);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -1069,7 +1067,7 @@ TEST_F(SpirvWriterTest, Builtin_Mix_VectorOperands_ScalarFactor) {
     func->SetParams({arg1, arg2, factor});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kMix, arg1, arg2, factor);
+        auto* result = b.Call(ty.vec4<f32>(), core::Function::kMix, arg1, arg2, factor);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -1087,7 +1085,7 @@ TEST_F(SpirvWriterTest, Builtin_Mix_VectorOperands_VectorFactor) {
     func->SetParams({arg1, arg2, factor});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kMix, arg1, arg2, factor);
+        auto* result = b.Call(ty.vec4<f32>(), core::Function::kMix, arg1, arg2, factor);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -1104,7 +1102,7 @@ TEST_F(SpirvWriterTest, Builtin_Refract_F32) {
     func->SetParams({arg1, arg2, i});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f32>(), builtin::Function::kRefract, arg1, arg2, i);
+        auto* result = b.Call(ty.vec4<f32>(), core::Function::kRefract, arg1, arg2, i);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -1121,7 +1119,7 @@ TEST_F(SpirvWriterTest, Builtin_Refract_F16) {
     func->SetParams({arg1, arg2, i});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f16>(), builtin::Function::kRefract, arg1, arg2, i);
+        auto* result = b.Call(ty.vec4<f16>(), core::Function::kRefract, arg1, arg2, i);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -1138,7 +1136,7 @@ TEST_F(SpirvWriterTest, Builtin_Select_ScalarCondition_ScalarOperands) {
     func->SetParams({argf, argt, cond});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.i32(), builtin::Function::kSelect, argf, argt, cond);
+        auto* result = b.Call(ty.i32(), core::Function::kSelect, argf, argt, cond);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -1155,7 +1153,7 @@ TEST_F(SpirvWriterTest, Builtin_Select_VectorCondition_VectorOperands) {
     func->SetParams({argf, argt, cond});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<i32>(), builtin::Function::kSelect, argf, argt, cond);
+        auto* result = b.Call(ty.vec4<i32>(), core::Function::kSelect, argf, argt, cond);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -1172,7 +1170,7 @@ TEST_F(SpirvWriterTest, Builtin_Select_ScalarCondition_VectorOperands) {
     func->SetParams({argf, argt, cond});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<i32>(), builtin::Function::kSelect, argf, argt, cond);
+        auto* result = b.Call(ty.vec4<i32>(), core::Function::kSelect, argf, argt, cond);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -1185,7 +1183,7 @@ TEST_F(SpirvWriterTest, Builtin_Select_ScalarCondition_VectorOperands) {
 TEST_F(SpirvWriterTest, Builtin_StorageBarrier) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Call(ty.void_(), builtin::Function::kStorageBarrier);
+        b.Call(ty.void_(), core::Function::kStorageBarrier);
         b.Return(func);
     });
 
@@ -1196,7 +1194,7 @@ TEST_F(SpirvWriterTest, Builtin_StorageBarrier) {
 TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Call(ty.void_(), builtin::Function::kWorkgroupBarrier);
+        b.Call(ty.void_(), core::Function::kWorkgroupBarrier);
         b.Return(func);
     });
 
@@ -1207,7 +1205,7 @@ TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier) {
 TEST_F(SpirvWriterTest, Builtin_SubgroupBallot) {
     auto* func = b.Function("foo", ty.vec4<u32>());
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<u32>(), builtin::Function::kSubgroupBallot);
+        auto* result = b.Call(ty.vec4<u32>(), core::Function::kSubgroupBallot);
         mod.SetName(result, "result");
         b.Return(func, result);
     });
@@ -1225,7 +1223,7 @@ TEST_F(SpirvWriterTest, Builtin_ArrayLength) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* ptr = b.Let("ptr", var);
-        auto* result = b.Call(ty.u32(), builtin::Function::kArrayLength, ptr);
+        auto* result = b.Call(ty.u32(), core::Function::kArrayLength, ptr);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -1249,7 +1247,7 @@ TEST_F(SpirvWriterTest, Builtin_ArrayLength_WithStruct) {
     auto* func = b.Function("foo", ty.u32());
     b.Append(func->Block(), [&] {
         auto* ptr = b.Let("ptr", b.Access(ty.ptr(storage, arr), var, 2_u));
-        auto* result = b.Call(ty.u32(), builtin::Function::kArrayLength, ptr);
+        auto* result = b.Call(ty.u32(), core::Function::kArrayLength, ptr);
         b.Return(func, result);
         mod.SetName(result, "result");
     });

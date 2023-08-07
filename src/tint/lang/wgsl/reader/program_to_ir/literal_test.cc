@@ -45,7 +45,7 @@ using ProgramToIRLiteralTest = helpers::IRProgramTest;
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_True) {
     auto* expr = Expr(true);
-    GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate, expr);
+    GlobalVar("a", ty.bool_(), core::AddressSpace::kPrivate, expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -59,7 +59,7 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_True) {
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_False) {
     auto* expr = Expr(false);
-    GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate, expr);
+    GlobalVar("a", ty.bool_(), core::AddressSpace::kPrivate, expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -72,10 +72,10 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_False) {
 }
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_Deduped) {
-    GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate, Expr(true));
-    GlobalVar("b", ty.bool_(), builtin::AddressSpace::kPrivate, Expr(false));
-    GlobalVar("c", ty.bool_(), builtin::AddressSpace::kPrivate, Expr(true));
-    GlobalVar("d", ty.bool_(), builtin::AddressSpace::kPrivate, Expr(false));
+    GlobalVar("a", ty.bool_(), core::AddressSpace::kPrivate, Expr(true));
+    GlobalVar("b", ty.bool_(), core::AddressSpace::kPrivate, Expr(false));
+    GlobalVar("c", ty.bool_(), core::AddressSpace::kPrivate, Expr(true));
+    GlobalVar("d", ty.bool_(), core::AddressSpace::kPrivate, Expr(false));
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -103,7 +103,7 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_Deduped) {
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_F32) {
     auto* expr = Expr(1.2_f);
-    GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate, expr);
+    GlobalVar("a", ty.f32(), core::AddressSpace::kPrivate, expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -116,9 +116,9 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_F32) {
 }
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_F32_Deduped) {
-    GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate, Expr(1.2_f));
-    GlobalVar("b", ty.f32(), builtin::AddressSpace::kPrivate, Expr(1.25_f));
-    GlobalVar("c", ty.f32(), builtin::AddressSpace::kPrivate, Expr(1.2_f));
+    GlobalVar("a", ty.f32(), core::AddressSpace::kPrivate, Expr(1.2_f));
+    GlobalVar("b", ty.f32(), core::AddressSpace::kPrivate, Expr(1.25_f));
+    GlobalVar("c", ty.f32(), core::AddressSpace::kPrivate, Expr(1.2_f));
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -140,9 +140,9 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_F32_Deduped) {
 }
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_F16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
     auto* expr = Expr(1.2_h);
-    GlobalVar("a", ty.f16(), builtin::AddressSpace::kPrivate, expr);
+    GlobalVar("a", ty.f16(), core::AddressSpace::kPrivate, expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -155,10 +155,10 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_F16) {
 }
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_F16_Deduped) {
-    Enable(builtin::Extension::kF16);
-    GlobalVar("a", ty.f16(), builtin::AddressSpace::kPrivate, Expr(1.2_h));
-    GlobalVar("b", ty.f16(), builtin::AddressSpace::kPrivate, Expr(1.25_h));
-    GlobalVar("c", ty.f16(), builtin::AddressSpace::kPrivate, Expr(1.2_h));
+    Enable(core::Extension::kF16);
+    GlobalVar("a", ty.f16(), core::AddressSpace::kPrivate, Expr(1.2_h));
+    GlobalVar("b", ty.f16(), core::AddressSpace::kPrivate, Expr(1.25_h));
+    GlobalVar("c", ty.f16(), core::AddressSpace::kPrivate, Expr(1.2_h));
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -181,7 +181,7 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_F16_Deduped) {
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_I32) {
     auto* expr = Expr(-2_i);
-    GlobalVar("a", ty.i32(), builtin::AddressSpace::kPrivate, expr);
+    GlobalVar("a", ty.i32(), core::AddressSpace::kPrivate, expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -194,9 +194,9 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_I32) {
 }
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_I32_Deduped) {
-    GlobalVar("a", ty.i32(), builtin::AddressSpace::kPrivate, Expr(-2_i));
-    GlobalVar("b", ty.i32(), builtin::AddressSpace::kPrivate, Expr(2_i));
-    GlobalVar("c", ty.i32(), builtin::AddressSpace::kPrivate, Expr(-2_i));
+    GlobalVar("a", ty.i32(), core::AddressSpace::kPrivate, Expr(-2_i));
+    GlobalVar("b", ty.i32(), core::AddressSpace::kPrivate, Expr(2_i));
+    GlobalVar("c", ty.i32(), core::AddressSpace::kPrivate, Expr(-2_i));
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -219,7 +219,7 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_I32_Deduped) {
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_U32) {
     auto* expr = Expr(2_u);
-    GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate, expr);
+    GlobalVar("a", ty.u32(), core::AddressSpace::kPrivate, expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -232,9 +232,9 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_U32) {
 }
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_U32_Deduped) {
-    GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate, Expr(2_u));
-    GlobalVar("b", ty.u32(), builtin::AddressSpace::kPrivate, Expr(3_u));
-    GlobalVar("c", ty.u32(), builtin::AddressSpace::kPrivate, Expr(2_u));
+    GlobalVar("a", ty.u32(), core::AddressSpace::kPrivate, Expr(2_u));
+    GlobalVar("b", ty.u32(), core::AddressSpace::kPrivate, Expr(3_u));
+    GlobalVar("c", ty.u32(), core::AddressSpace::kPrivate, Expr(2_u));
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");

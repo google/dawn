@@ -27,8 +27,7 @@ using namespace tint::number_suffixes;  // NOLINT
 struct ResolverAtomicTest : public resolver::TestHelper, public testing::Test {};
 
 TEST_F(ResolverAtomicTest, GlobalWorkgroupI32) {
-    auto* g =
-        GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.i32()), builtin::AddressSpace::kWorkgroup);
+    auto* g = GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.i32()), core::AddressSpace::kWorkgroup);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ASSERT_TRUE(TypeOf(g)->Is<type::Reference>());
@@ -38,8 +37,7 @@ TEST_F(ResolverAtomicTest, GlobalWorkgroupI32) {
 }
 
 TEST_F(ResolverAtomicTest, GlobalWorkgroupU32) {
-    auto* g =
-        GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.u32()), builtin::AddressSpace::kWorkgroup);
+    auto* g = GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.u32()), core::AddressSpace::kWorkgroup);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ASSERT_TRUE(TypeOf(g)->Is<type::Reference>());
@@ -50,7 +48,7 @@ TEST_F(ResolverAtomicTest, GlobalWorkgroupU32) {
 
 TEST_F(ResolverAtomicTest, GlobalStorageStruct) {
     auto* s = Structure("s", Vector{Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
-    auto* g = GlobalVar("g", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    auto* g = GlobalVar("g", ty.Of(s), core::AddressSpace::kStorage, core::Access::kReadWrite,
                         Binding(0_a), Group(0_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

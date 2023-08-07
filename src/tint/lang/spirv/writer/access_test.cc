@@ -17,8 +17,8 @@
 namespace tint::spirv::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 TEST_F(SpirvWriterTest, Access_Array_Value_ConstantIndex) {
     auto* arr_val = b.FunctionParam("arr", ty.array(ty.i32(), 4));

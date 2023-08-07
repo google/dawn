@@ -21,7 +21,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
@@ -323,7 +323,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param out the output of the type stream
     /// @param sc the address space to generate
     /// @returns true if the address space is emitted
-    bool EmitAddressSpace(StringStream& out, builtin::AddressSpace sc);
+    bool EmitAddressSpace(StringStream& out, core::AddressSpace sc);
     /// Handles generating a struct declaration. If the structure has already been emitted, then
     /// this function will simply return `true` without emitting anything.
     /// @param buffer the text buffer that the type declaration will be written to
@@ -407,7 +407,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// Name of atomicCompareExchangeWeak() helper for the given pointer storage
     /// class and struct return type
     using ACEWKeyType =
-        tint::UnorderedKeyWrapper<std::tuple<builtin::AddressSpace, const type::Struct*>>;
+        tint::UnorderedKeyWrapper<std::tuple<core::AddressSpace, const type::Struct*>>;
     std::unordered_map<ACEWKeyType, std::string> atomicCompareExchangeWeak_;
 
     /// Unique name of the 'TINT_INVARIANT' preprocessor define.

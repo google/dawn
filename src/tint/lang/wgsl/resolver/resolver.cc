@@ -20,7 +20,7 @@
 #include <limits>
 #include <utility>
 
-#include "src/tint/lang/core/builtin/builtin.h"
+#include "src/tint/lang/core/builtin.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
@@ -89,12 +89,12 @@
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::Access>);
-TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::AddressSpace>);
-TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::BuiltinValue>);
-TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::InterpolationSampling>);
-TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::InterpolationType>);
-TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::builtin::TexelFormat>);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::core::Access>);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::core::AddressSpace>);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::core::BuiltinValue>);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::core::InterpolationSampling>);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::core::InterpolationType>);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::core::TexelFormat>);
 
 namespace tint::resolver {
 namespace {
@@ -142,7 +142,7 @@ bool Resolver::Resolve() {
 
     // Check before std::move()'ing enabled_extensions_
     const bool disable_uniformity_analysis =
-        enabled_extensions_.Contains(builtin::Extension::kChromiumDisableUniformityAnalysis);
+        enabled_extensions_.Contains(core::Extension::kChromiumDisableUniformityAnalysis);
 
     // Create the semantic module.
     auto* mod = builder_->create<sem::Module>(std::move(dependencies_.ordered_globals),
@@ -280,8 +280,8 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
         return nullptr;
     }
 
-    if (!ApplyAddressSpaceUsageToType(builtin::AddressSpace::kUndefined,
-                                      const_cast<type::Type*>(ty), v->source)) {
+    if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, const_cast<type::Type*>(ty),
+                                      v->source)) {
         AddNote("while instantiating 'let' " + v->name->symbol.Name(), v->source);
         return nullptr;
     }
@@ -289,13 +289,13 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
     sem::Variable* sem = nullptr;
     if (is_global) {
         sem = builder_->create<sem::GlobalVariable>(
-            v, ty, sem::EvaluationStage::kRuntime, builtin::AddressSpace::kUndefined,
-            builtin::Access::kUndefined,
+            v, ty, sem::EvaluationStage::kRuntime, core::AddressSpace::kUndefined,
+            core::Access::kUndefined,
             /* constant_value */ nullptr, std::nullopt, std::nullopt);
     } else {
         sem = builder_->create<sem::LocalVariable>(v, ty, sem::EvaluationStage::kRuntime,
-                                                   builtin::AddressSpace::kUndefined,
-                                                   builtin::Access::kUndefined, current_statement_,
+                                                   core::AddressSpace::kUndefined,
+                                                   core::Access::kUndefined, current_statement_,
                                                    /* constant_value */ nullptr);
     }
 
@@ -342,15 +342,15 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         return nullptr;
     }
 
-    if (!ApplyAddressSpaceUsageToType(builtin::AddressSpace::kUndefined,
-                                      const_cast<type::Type*>(ty), v->source)) {
+    if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, const_cast<type::Type*>(ty),
+                                      v->source)) {
         AddNote("while instantiating 'override' " + v->name->symbol.Name(), v->source);
         return nullptr;
     }
 
     auto* sem = builder_->create<sem::GlobalVariable>(
-        v, ty, sem::EvaluationStage::kOverride, builtin::AddressSpace::kUndefined,
-        builtin::Access::kUndefined,
+        v, ty, sem::EvaluationStage::kOverride, core::AddressSpace::kUndefined,
+        core::Access::kUndefined,
         /* constant_value */ nullptr, std::nullopt, std::nullopt);
     sem->SetInitializer(rhs);
 
@@ -461,8 +461,8 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
         return nullptr;
     }
 
-    if (!ApplyAddressSpaceUsageToType(builtin::AddressSpace::kUndefined,
-                                      const_cast<type::Type*>(ty), c->source)) {
+    if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, const_cast<type::Type*>(ty),
+                                      c->source)) {
         AddNote("while instantiating 'const' " + c->name->symbol.Name(), c->source);
         return nullptr;
     }
@@ -470,11 +470,11 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
     const auto value = rhs->ConstantValue();
     auto* sem = is_global
                     ? static_cast<sem::Variable*>(builder_->create<sem::GlobalVariable>(
-                          c, ty, sem::EvaluationStage::kConstant, builtin::AddressSpace::kUndefined,
-                          builtin::Access::kUndefined, value, std::nullopt, std::nullopt))
+                          c, ty, sem::EvaluationStage::kConstant, core::AddressSpace::kUndefined,
+                          core::Access::kUndefined, value, std::nullopt, std::nullopt))
                     : static_cast<sem::Variable*>(builder_->create<sem::LocalVariable>(
-                          c, ty, sem::EvaluationStage::kConstant, builtin::AddressSpace::kUndefined,
-                          builtin::Access::kUndefined, current_statement_, value));
+                          c, ty, sem::EvaluationStage::kConstant, core::AddressSpace::kUndefined,
+                          core::Access::kUndefined, current_statement_, value));
 
     sem->SetInitializer(rhs);
     builder_->Sem().Add(c, sem);
@@ -517,7 +517,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         return nullptr;
     }
 
-    auto address_space = builtin::AddressSpace::kUndefined;
+    auto address_space = core::AddressSpace::kUndefined;
     if (var->declared_address_space) {
         auto expr = AddressSpaceExpression(var->declared_address_space);
         if (!expr) {
@@ -527,24 +527,24 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
     } else {
         // No declared address space. Infer from usage / type.
         if (!is_global) {
-            address_space = builtin::AddressSpace::kFunction;
+            address_space = core::AddressSpace::kFunction;
         } else if (storage_ty->UnwrapRef()->is_handle()) {
             // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
             // If the store type is a texture type or a sampler type, then the
             // variable declaration must not have a address space attribute. The
             // address space will always be handle.
-            address_space = builtin::AddressSpace::kHandle;
+            address_space = core::AddressSpace::kHandle;
         }
     }
 
-    if (!is_global && address_space != builtin::AddressSpace::kFunction &&
+    if (!is_global && address_space != core::AddressSpace::kFunction &&
         validator_.IsValidationEnabled(var->attributes,
                                        ast::DisabledValidation::kIgnoreAddressSpace)) {
         AddError("function-scope 'var' declaration must use 'function' address space", var->source);
         return nullptr;
     }
 
-    auto access = builtin::Access::kUndefined;
+    auto access = core::Access::kUndefined;
     if (var->declared_access) {
         auto expr = AccessExpression(var->declared_access);
         if (!expr) {
@@ -569,8 +569,8 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
 
     sem::Variable* sem = nullptr;
     if (is_global) {
-        bool has_io_address_space = address_space == builtin::AddressSpace::kIn ||
-                                    address_space == builtin::AddressSpace::kOut;
+        bool has_io_address_space =
+            address_space == core::AddressSpace::kIn || address_space == core::AddressSpace::kOut;
 
         std::optional<uint32_t> group, binding, location, index;
         for (auto* attribute : var->attributes) {
@@ -778,7 +778,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
         return nullptr;
     }
 
-    if (!ApplyAddressSpaceUsageToType(builtin::AddressSpace::kUndefined, ty, param->type->source)) {
+    if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, ty, param->type->source)) {
         add_note();
         return nullptr;
     }
@@ -799,7 +799,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
     }
 
     auto* sem = builder_->create<sem::Parameter>(
-        param, index, ty, builtin::AddressSpace::kUndefined, builtin::Access::kUndefined,
+        param, index, ty, core::AddressSpace::kUndefined, core::Access::kUndefined,
         sem::ParameterUsage::kNone, binding_point, location);
     builder_->Sem().Add(param, sem);
 
@@ -810,17 +810,17 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
     return sem;
 }
 
-builtin::Access Resolver::DefaultAccessForAddressSpace(builtin::AddressSpace address_space) {
+core::Access Resolver::DefaultAccessForAddressSpace(core::AddressSpace address_space) {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
     switch (address_space) {
-        case builtin::AddressSpace::kStorage:
-        case builtin::AddressSpace::kUniform:
-        case builtin::AddressSpace::kHandle:
-            return builtin::Access::kRead;
+        case core::AddressSpace::kStorage:
+        case core::AddressSpace::kUniform:
+        case core::AddressSpace::kHandle:
+            return core::Access::kRead;
         default:
             break;
     }
-    return builtin::Access::kReadWrite;
+    return core::Access::kReadWrite;
 }
 
 bool Resolver::AllocateOverridableConstantIds() {
@@ -1115,7 +1115,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     }
 
     if (auto* str = return_type->As<type::Struct>()) {
-        if (!ApplyAddressSpaceUsageToType(builtin::AddressSpace::kUndefined, str, decl->source)) {
+        if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, str, decl->source)) {
             AddNote("while instantiating return type for " + decl->name->symbol.Name(),
                     decl->source);
             return nullptr;
@@ -1588,40 +1588,39 @@ type::Type* Resolver::Type(const ast::Expression* ast) {
     return const_cast<type::Type*>(type_expr->Type());
 }
 
-sem::BuiltinEnumExpression<builtin::AddressSpace>* Resolver::AddressSpaceExpression(
+sem::BuiltinEnumExpression<core::AddressSpace>* Resolver::AddressSpaceExpression(
     const ast::Expression* expr) {
-    identifier_resolve_hint_ = {expr, "address space", builtin::kAddressSpaceStrings};
+    identifier_resolve_hint_ = {expr, "address space", core::kAddressSpaceStrings};
     return sem_.AsAddressSpace(Expression(expr));
 }
 
-sem::BuiltinEnumExpression<builtin::BuiltinValue>* Resolver::BuiltinValueExpression(
+sem::BuiltinEnumExpression<core::BuiltinValue>* Resolver::BuiltinValueExpression(
     const ast::Expression* expr) {
-    identifier_resolve_hint_ = {expr, "builtin value", builtin::kBuiltinValueStrings};
+    identifier_resolve_hint_ = {expr, "builtin value", core::kBuiltinValueStrings};
     return sem_.AsBuiltinValue(Expression(expr));
 }
 
-sem::BuiltinEnumExpression<builtin::TexelFormat>* Resolver::TexelFormatExpression(
+sem::BuiltinEnumExpression<core::TexelFormat>* Resolver::TexelFormatExpression(
     const ast::Expression* expr) {
-    identifier_resolve_hint_ = {expr, "texel format", builtin::kTexelFormatStrings};
+    identifier_resolve_hint_ = {expr, "texel format", core::kTexelFormatStrings};
     return sem_.AsTexelFormat(Expression(expr));
 }
 
-sem::BuiltinEnumExpression<builtin::Access>* Resolver::AccessExpression(
-    const ast::Expression* expr) {
-    identifier_resolve_hint_ = {expr, "access", builtin::kAccessStrings};
+sem::BuiltinEnumExpression<core::Access>* Resolver::AccessExpression(const ast::Expression* expr) {
+    identifier_resolve_hint_ = {expr, "access", core::kAccessStrings};
     return sem_.AsAccess(Expression(expr));
 }
 
-sem::BuiltinEnumExpression<builtin::InterpolationSampling>* Resolver::InterpolationSampling(
+sem::BuiltinEnumExpression<core::InterpolationSampling>* Resolver::InterpolationSampling(
     const ast::Expression* expr) {
     identifier_resolve_hint_ = {expr, "interpolation sampling",
-                                builtin::kInterpolationSamplingStrings};
+                                core::kInterpolationSamplingStrings};
     return sem_.AsInterpolationSampling(Expression(expr));
 }
 
-sem::BuiltinEnumExpression<builtin::InterpolationType>* Resolver::InterpolationType(
+sem::BuiltinEnumExpression<core::InterpolationType>* Resolver::InterpolationType(
     const ast::Expression* expr) {
-    identifier_resolve_hint_ = {expr, "interpolation type", builtin::kInterpolationTypeStrings};
+    identifier_resolve_hint_ = {expr, "interpolation type", core::kInterpolationTypeStrings};
     return sem_.AsInterpolationType(Expression(expr));
 }
 
@@ -2146,11 +2145,11 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                     [&]() -> sem::ValueConstructor* {
                         auto params = tint::Transform(args, [&](auto, size_t i) {
                             return builder_->create<sem::Parameter>(
-                                nullptr,                            // declaration
-                                static_cast<uint32_t>(i),           // index
-                                arr->ElemType(),                    // type
-                                builtin::AddressSpace::kUndefined,  // address_space
-                                builtin::Access::kUndefined);
+                                nullptr,                         // declaration
+                                static_cast<uint32_t>(i),        // index
+                                arr->ElemType(),                 // type
+                                core::AddressSpace::kUndefined,  // address_space
+                                core::Access::kUndefined);
                         });
                         return builder_->create<sem::ValueConstructor>(arr, std::move(params),
                                                                        args_stage);
@@ -2175,11 +2174,11 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                         params.Resize(std::min(args.Length(), str->Members().Length()));
                         for (size_t i = 0, n = params.Length(); i < n; i++) {
                             params[i] = builder_->create<sem::Parameter>(
-                                nullptr,                            // declaration
-                                static_cast<uint32_t>(i),           // index
-                                str->Members()[i]->Type(),          // type
-                                builtin::AddressSpace::kUndefined,  // address_space
-                                builtin::Access::kUndefined);       // access
+                                nullptr,                         // declaration
+                                static_cast<uint32_t>(i),        // index
+                                str->Members()[i]->Type(),       // type
+                                core::AddressSpace::kUndefined,  // address_space
+                                core::Access::kUndefined);       // access
                         }
                         return builder_->create<sem::ValueConstructor>(str, std::move(params),
                                                                        args_stage);
@@ -2257,43 +2256,43 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 });
         }
 
-        if (auto f = resolved->BuiltinFunction(); f != builtin::Function::kNone) {
+        if (auto f = resolved->BuiltinFunction(); f != core::Function::kNone) {
             if (!TINT_LIKELY(CheckNotTemplated("builtin", ident))) {
                 return nullptr;
             }
             return BuiltinCall(expr, f, args);
         }
 
-        if (auto b = resolved->BuiltinType(); b != builtin::Builtin::kUndefined) {
+        if (auto b = resolved->BuiltinType(); b != core::Builtin::kUndefined) {
             if (!ident->Is<ast::TemplatedIdentifier>()) {
                 // No template arguments provided.
                 // Check to see if this is an inferred-element-type call.
                 switch (b) {
-                    case builtin::Builtin::kArray:
+                    case core::Builtin::kArray:
                         return inferred_array();
-                    case builtin::Builtin::kVec2:
+                    case core::Builtin::kVec2:
                         return ctor_or_conv(CtorConvIntrinsic::kVec2, nullptr);
-                    case builtin::Builtin::kVec3:
+                    case core::Builtin::kVec3:
                         return ctor_or_conv(CtorConvIntrinsic::kVec3, nullptr);
-                    case builtin::Builtin::kVec4:
+                    case core::Builtin::kVec4:
                         return ctor_or_conv(CtorConvIntrinsic::kVec4, nullptr);
-                    case builtin::Builtin::kMat2X2:
+                    case core::Builtin::kMat2X2:
                         return ctor_or_conv(CtorConvIntrinsic::kMat2x2, nullptr);
-                    case builtin::Builtin::kMat2X3:
+                    case core::Builtin::kMat2X3:
                         return ctor_or_conv(CtorConvIntrinsic::kMat2x3, nullptr);
-                    case builtin::Builtin::kMat2X4:
+                    case core::Builtin::kMat2X4:
                         return ctor_or_conv(CtorConvIntrinsic::kMat2x4, nullptr);
-                    case builtin::Builtin::kMat3X2:
+                    case core::Builtin::kMat3X2:
                         return ctor_or_conv(CtorConvIntrinsic::kMat3x2, nullptr);
-                    case builtin::Builtin::kMat3X3:
+                    case core::Builtin::kMat3X3:
                         return ctor_or_conv(CtorConvIntrinsic::kMat3x3, nullptr);
-                    case builtin::Builtin::kMat3X4:
+                    case core::Builtin::kMat3X4:
                         return ctor_or_conv(CtorConvIntrinsic::kMat3x4, nullptr);
-                    case builtin::Builtin::kMat4X2:
+                    case core::Builtin::kMat4X2:
                         return ctor_or_conv(CtorConvIntrinsic::kMat4x2, nullptr);
-                    case builtin::Builtin::kMat4X3:
+                    case core::Builtin::kMat4X3:
                         return ctor_or_conv(CtorConvIntrinsic::kMat4x3, nullptr);
-                    case builtin::Builtin::kMat4X4:
+                    case core::Builtin::kMat4X4:
                         return ctor_or_conv(CtorConvIntrinsic::kMat4x4, nullptr);
                     default:
                         break;
@@ -2332,7 +2331,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
 template <size_t N>
 sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
-                                 builtin::Function builtin_type,
+                                 core::Function builtin_type,
                                  Vector<const sem::ValueExpression*, N>& args) {
     auto arg_stage = sem::EvaluationStage::kConstant;
     for (auto* arg : args) {
@@ -2348,7 +2347,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         }
     }
 
-    if (builtin_type == builtin::Function::kTintMaterialize) {
+    if (builtin_type == core::Function::kTintMaterialize) {
         args[0] = Materialize(args[0]);
         if (!args[0]) {
             return nullptr;
@@ -2407,7 +2406,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         CollectTextureSamplerPairs(builtin.sem, call->Arguments());
     }
 
-    if (builtin_type == builtin::Function::kWorkgroupUniformLoad) {
+    if (builtin_type == core::Function::kWorkgroupUniformLoad) {
         if (!validator_.WorkgroupUniformLoad(call)) {
             return nullptr;
         }
@@ -2420,7 +2419,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     return call;
 }
 
-type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identifier* ident) {
+type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifier* ident) {
     auto& b = *builder_;
 
     auto check_no_tmpl_args = [&](type::Type* ty) -> type::Type* {
@@ -2684,207 +2683,207 @@ type::Type* Resolver::BuiltinType(builtin::Builtin builtin_ty, const ast::Identi
     };
 
     switch (builtin_ty) {
-        case builtin::Builtin::kBool:
+        case core::Builtin::kBool:
             return check_no_tmpl_args(b.create<type::Bool>());
-        case builtin::Builtin::kI32:
+        case core::Builtin::kI32:
             return check_no_tmpl_args(i32());
-        case builtin::Builtin::kU32:
+        case core::Builtin::kU32:
             return check_no_tmpl_args(u32());
-        case builtin::Builtin::kF16:
+        case core::Builtin::kF16:
             return check_no_tmpl_args(f16());
-        case builtin::Builtin::kF32:
+        case core::Builtin::kF32:
             return check_no_tmpl_args(b.create<type::F32>());
-        case builtin::Builtin::kVec2:
+        case core::Builtin::kVec2:
             return vec_t(2);
-        case builtin::Builtin::kVec3:
+        case core::Builtin::kVec3:
             return vec_t(3);
-        case builtin::Builtin::kVec4:
+        case core::Builtin::kVec4:
             return vec_t(4);
-        case builtin::Builtin::kMat2X2:
+        case core::Builtin::kMat2X2:
             return mat_t(2, 2);
-        case builtin::Builtin::kMat2X3:
+        case core::Builtin::kMat2X3:
             return mat_t(2, 3);
-        case builtin::Builtin::kMat2X4:
+        case core::Builtin::kMat2X4:
             return mat_t(2, 4);
-        case builtin::Builtin::kMat3X2:
+        case core::Builtin::kMat3X2:
             return mat_t(3, 2);
-        case builtin::Builtin::kMat3X3:
+        case core::Builtin::kMat3X3:
             return mat_t(3, 3);
-        case builtin::Builtin::kMat3X4:
+        case core::Builtin::kMat3X4:
             return mat_t(3, 4);
-        case builtin::Builtin::kMat4X2:
+        case core::Builtin::kMat4X2:
             return mat_t(4, 2);
-        case builtin::Builtin::kMat4X3:
+        case core::Builtin::kMat4X3:
             return mat_t(4, 3);
-        case builtin::Builtin::kMat4X4:
+        case core::Builtin::kMat4X4:
             return mat_t(4, 4);
-        case builtin::Builtin::kMat2X2F:
+        case core::Builtin::kMat2X2F:
             return check_no_tmpl_args(mat(f32(), 2u, 2u));
-        case builtin::Builtin::kMat2X3F:
+        case core::Builtin::kMat2X3F:
             return check_no_tmpl_args(mat(f32(), 2u, 3u));
-        case builtin::Builtin::kMat2X4F:
+        case core::Builtin::kMat2X4F:
             return check_no_tmpl_args(mat(f32(), 2u, 4u));
-        case builtin::Builtin::kMat3X2F:
+        case core::Builtin::kMat3X2F:
             return check_no_tmpl_args(mat(f32(), 3u, 2u));
-        case builtin::Builtin::kMat3X3F:
+        case core::Builtin::kMat3X3F:
             return check_no_tmpl_args(mat(f32(), 3u, 3u));
-        case builtin::Builtin::kMat3X4F:
+        case core::Builtin::kMat3X4F:
             return check_no_tmpl_args(mat(f32(), 3u, 4u));
-        case builtin::Builtin::kMat4X2F:
+        case core::Builtin::kMat4X2F:
             return check_no_tmpl_args(mat(f32(), 4u, 2u));
-        case builtin::Builtin::kMat4X3F:
+        case core::Builtin::kMat4X3F:
             return check_no_tmpl_args(mat(f32(), 4u, 3u));
-        case builtin::Builtin::kMat4X4F:
+        case core::Builtin::kMat4X4F:
             return check_no_tmpl_args(mat(f32(), 4u, 4u));
-        case builtin::Builtin::kMat2X2H:
+        case core::Builtin::kMat2X2H:
             return check_no_tmpl_args(mat(f16(), 2u, 2u));
-        case builtin::Builtin::kMat2X3H:
+        case core::Builtin::kMat2X3H:
             return check_no_tmpl_args(mat(f16(), 2u, 3u));
-        case builtin::Builtin::kMat2X4H:
+        case core::Builtin::kMat2X4H:
             return check_no_tmpl_args(mat(f16(), 2u, 4u));
-        case builtin::Builtin::kMat3X2H:
+        case core::Builtin::kMat3X2H:
             return check_no_tmpl_args(mat(f16(), 3u, 2u));
-        case builtin::Builtin::kMat3X3H:
+        case core::Builtin::kMat3X3H:
             return check_no_tmpl_args(mat(f16(), 3u, 3u));
-        case builtin::Builtin::kMat3X4H:
+        case core::Builtin::kMat3X4H:
             return check_no_tmpl_args(mat(f16(), 3u, 4u));
-        case builtin::Builtin::kMat4X2H:
+        case core::Builtin::kMat4X2H:
             return check_no_tmpl_args(mat(f16(), 4u, 2u));
-        case builtin::Builtin::kMat4X3H:
+        case core::Builtin::kMat4X3H:
             return check_no_tmpl_args(mat(f16(), 4u, 3u));
-        case builtin::Builtin::kMat4X4H:
+        case core::Builtin::kMat4X4H:
             return check_no_tmpl_args(mat(f16(), 4u, 4u));
-        case builtin::Builtin::kVec2F:
+        case core::Builtin::kVec2F:
             return check_no_tmpl_args(vec(f32(), 2u));
-        case builtin::Builtin::kVec3F:
+        case core::Builtin::kVec3F:
             return check_no_tmpl_args(vec(f32(), 3u));
-        case builtin::Builtin::kVec4F:
+        case core::Builtin::kVec4F:
             return check_no_tmpl_args(vec(f32(), 4u));
-        case builtin::Builtin::kVec2H:
+        case core::Builtin::kVec2H:
             return check_no_tmpl_args(vec(f16(), 2u));
-        case builtin::Builtin::kVec3H:
+        case core::Builtin::kVec3H:
             return check_no_tmpl_args(vec(f16(), 3u));
-        case builtin::Builtin::kVec4H:
+        case core::Builtin::kVec4H:
             return check_no_tmpl_args(vec(f16(), 4u));
-        case builtin::Builtin::kVec2I:
+        case core::Builtin::kVec2I:
             return check_no_tmpl_args(vec(i32(), 2u));
-        case builtin::Builtin::kVec3I:
+        case core::Builtin::kVec3I:
             return check_no_tmpl_args(vec(i32(), 3u));
-        case builtin::Builtin::kVec4I:
+        case core::Builtin::kVec4I:
             return check_no_tmpl_args(vec(i32(), 4u));
-        case builtin::Builtin::kVec2U:
+        case core::Builtin::kVec2U:
             return check_no_tmpl_args(vec(u32(), 2u));
-        case builtin::Builtin::kVec3U:
+        case core::Builtin::kVec3U:
             return check_no_tmpl_args(vec(u32(), 3u));
-        case builtin::Builtin::kVec4U:
+        case core::Builtin::kVec4U:
             return check_no_tmpl_args(vec(u32(), 4u));
-        case builtin::Builtin::kArray:
+        case core::Builtin::kArray:
             return array();
-        case builtin::Builtin::kAtomic:
+        case core::Builtin::kAtomic:
             return atomic();
-        case builtin::Builtin::kPtr:
+        case core::Builtin::kPtr:
             return ptr();
-        case builtin::Builtin::kSampler:
+        case core::Builtin::kSampler:
             return check_no_tmpl_args(builder_->create<type::Sampler>(type::SamplerKind::kSampler));
-        case builtin::Builtin::kSamplerComparison:
+        case core::Builtin::kSamplerComparison:
             return check_no_tmpl_args(
                 builder_->create<type::Sampler>(type::SamplerKind::kComparisonSampler));
-        case builtin::Builtin::kTexture1D:
+        case core::Builtin::kTexture1D:
             return sampled_texture(type::TextureDimension::k1d);
-        case builtin::Builtin::kTexture2D:
+        case core::Builtin::kTexture2D:
             return sampled_texture(type::TextureDimension::k2d);
-        case builtin::Builtin::kTexture2DArray:
+        case core::Builtin::kTexture2DArray:
             return sampled_texture(type::TextureDimension::k2dArray);
-        case builtin::Builtin::kTexture3D:
+        case core::Builtin::kTexture3D:
             return sampled_texture(type::TextureDimension::k3d);
-        case builtin::Builtin::kTextureCube:
+        case core::Builtin::kTextureCube:
             return sampled_texture(type::TextureDimension::kCube);
-        case builtin::Builtin::kTextureCubeArray:
+        case core::Builtin::kTextureCubeArray:
             return sampled_texture(type::TextureDimension::kCubeArray);
-        case builtin::Builtin::kTextureDepth2D:
+        case core::Builtin::kTextureDepth2D:
             return check_no_tmpl_args(
                 builder_->create<type::DepthTexture>(type::TextureDimension::k2d));
-        case builtin::Builtin::kTextureDepth2DArray:
+        case core::Builtin::kTextureDepth2DArray:
             return check_no_tmpl_args(
                 builder_->create<type::DepthTexture>(type::TextureDimension::k2dArray));
-        case builtin::Builtin::kTextureDepthCube:
+        case core::Builtin::kTextureDepthCube:
             return check_no_tmpl_args(
                 builder_->create<type::DepthTexture>(type::TextureDimension::kCube));
-        case builtin::Builtin::kTextureDepthCubeArray:
+        case core::Builtin::kTextureDepthCubeArray:
             return check_no_tmpl_args(
                 builder_->create<type::DepthTexture>(type::TextureDimension::kCubeArray));
-        case builtin::Builtin::kTextureDepthMultisampled2D:
+        case core::Builtin::kTextureDepthMultisampled2D:
             return check_no_tmpl_args(
                 builder_->create<type::DepthMultisampledTexture>(type::TextureDimension::k2d));
-        case builtin::Builtin::kTextureExternal:
+        case core::Builtin::kTextureExternal:
             return check_no_tmpl_args(builder_->create<type::ExternalTexture>());
-        case builtin::Builtin::kTextureMultisampled2D:
+        case core::Builtin::kTextureMultisampled2D:
             return multisampled_texture(type::TextureDimension::k2d);
-        case builtin::Builtin::kTextureStorage1D:
+        case core::Builtin::kTextureStorage1D:
             return storage_texture(type::TextureDimension::k1d);
-        case builtin::Builtin::kTextureStorage2D:
+        case core::Builtin::kTextureStorage2D:
             return storage_texture(type::TextureDimension::k2d);
-        case builtin::Builtin::kTextureStorage2DArray:
+        case core::Builtin::kTextureStorage2DArray:
             return storage_texture(type::TextureDimension::k2dArray);
-        case builtin::Builtin::kTextureStorage3D:
+        case core::Builtin::kTextureStorage3D:
             return storage_texture(type::TextureDimension::k3d);
-        case builtin::Builtin::kPackedVec3:
+        case core::Builtin::kPackedVec3:
             return packed_vec3_t();
-        case builtin::Builtin::kAtomicCompareExchangeResultI32:
+        case core::Builtin::kAtomicCompareExchangeResultI32:
             return type::CreateAtomicCompareExchangeResult(builder_->Types(), builder_->Symbols(),
                                                            i32());
-        case builtin::Builtin::kAtomicCompareExchangeResultU32:
+        case core::Builtin::kAtomicCompareExchangeResultU32:
             return type::CreateAtomicCompareExchangeResult(builder_->Types(), builder_->Symbols(),
                                                            u32());
-        case builtin::Builtin::kFrexpResultAbstract:
+        case core::Builtin::kFrexpResultAbstract:
             return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), af());
-        case builtin::Builtin::kFrexpResultF16:
+        case core::Builtin::kFrexpResultF16:
             return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), f16());
-        case builtin::Builtin::kFrexpResultF32:
+        case core::Builtin::kFrexpResultF32:
             return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), f32());
-        case builtin::Builtin::kFrexpResultVec2Abstract:
+        case core::Builtin::kFrexpResultVec2Abstract:
             return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(af(), 2));
-        case builtin::Builtin::kFrexpResultVec2F16:
+        case core::Builtin::kFrexpResultVec2F16:
             return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f16(), 2));
-        case builtin::Builtin::kFrexpResultVec2F32:
+        case core::Builtin::kFrexpResultVec2F32:
             return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f32(), 2));
-        case builtin::Builtin::kFrexpResultVec3Abstract:
+        case core::Builtin::kFrexpResultVec3Abstract:
             return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(af(), 3));
-        case builtin::Builtin::kFrexpResultVec3F16:
+        case core::Builtin::kFrexpResultVec3F16:
             return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f16(), 3));
-        case builtin::Builtin::kFrexpResultVec3F32:
+        case core::Builtin::kFrexpResultVec3F32:
             return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f32(), 3));
-        case builtin::Builtin::kFrexpResultVec4Abstract:
+        case core::Builtin::kFrexpResultVec4Abstract:
             return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(af(), 4));
-        case builtin::Builtin::kFrexpResultVec4F16:
+        case core::Builtin::kFrexpResultVec4F16:
             return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f16(), 4));
-        case builtin::Builtin::kFrexpResultVec4F32:
+        case core::Builtin::kFrexpResultVec4F32:
             return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f32(), 4));
-        case builtin::Builtin::kModfResultAbstract:
+        case core::Builtin::kModfResultAbstract:
             return type::CreateModfResult(builder_->Types(), builder_->Symbols(), af());
-        case builtin::Builtin::kModfResultF16:
+        case core::Builtin::kModfResultF16:
             return type::CreateModfResult(builder_->Types(), builder_->Symbols(), f16());
-        case builtin::Builtin::kModfResultF32:
+        case core::Builtin::kModfResultF32:
             return type::CreateModfResult(builder_->Types(), builder_->Symbols(), f32());
-        case builtin::Builtin::kModfResultVec2Abstract:
+        case core::Builtin::kModfResultVec2Abstract:
             return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(af(), 2));
-        case builtin::Builtin::kModfResultVec2F16:
+        case core::Builtin::kModfResultVec2F16:
             return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f16(), 2));
-        case builtin::Builtin::kModfResultVec2F32:
+        case core::Builtin::kModfResultVec2F32:
             return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f32(), 2));
-        case builtin::Builtin::kModfResultVec3Abstract:
+        case core::Builtin::kModfResultVec3Abstract:
             return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(af(), 3));
-        case builtin::Builtin::kModfResultVec3F16:
+        case core::Builtin::kModfResultVec3F16:
             return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f16(), 3));
-        case builtin::Builtin::kModfResultVec3F32:
+        case core::Builtin::kModfResultVec3F32:
             return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f32(), 3));
-        case builtin::Builtin::kModfResultVec4Abstract:
+        case core::Builtin::kModfResultVec4Abstract:
             return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(af(), 4));
-        case builtin::Builtin::kModfResultVec4F16:
+        case core::Builtin::kModfResultVec4F16:
             return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f16(), 4));
-        case builtin::Builtin::kModfResultVec4F32:
+        case core::Builtin::kModfResultVec4F32:
             return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f32(), 4));
-        case builtin::Builtin::kUndefined:
+        case core::Builtin::kUndefined:
             break;
     }
 
@@ -3182,7 +3181,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
             });
     }
 
-    if (auto builtin_ty = resolved->BuiltinType(); builtin_ty != builtin::Builtin::kUndefined) {
+    if (auto builtin_ty = resolved->BuiltinType(); builtin_ty != core::Builtin::kUndefined) {
         auto* ty = BuiltinType(builtin_ty, ident);
         if (!ty) {
             return nullptr;
@@ -3190,51 +3189,51 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
         return builder_->create<sem::TypeExpression>(expr, current_statement_, ty);
     }
 
-    if (resolved->BuiltinFunction() != builtin::Function::kNone) {
+    if (resolved->BuiltinFunction() != core::Function::kNone) {
         AddError("missing '(' for builtin function call", expr->source.End());
         return nullptr;
     }
 
-    if (auto access = resolved->Access(); access != builtin::Access::kUndefined) {
+    if (auto access = resolved->Access(); access != core::Access::kUndefined) {
         return CheckNotTemplated("access", ident)
-                   ? builder_->create<sem::BuiltinEnumExpression<builtin::Access>>(
+                   ? builder_->create<sem::BuiltinEnumExpression<core::Access>>(
                          expr, current_statement_, access)
                    : nullptr;
     }
 
-    if (auto addr = resolved->AddressSpace(); addr != builtin::AddressSpace::kUndefined) {
+    if (auto addr = resolved->AddressSpace(); addr != core::AddressSpace::kUndefined) {
         return CheckNotTemplated("address space", ident)
-                   ? builder_->create<sem::BuiltinEnumExpression<builtin::AddressSpace>>(
+                   ? builder_->create<sem::BuiltinEnumExpression<core::AddressSpace>>(
                          expr, current_statement_, addr)
                    : nullptr;
     }
 
-    if (auto builtin = resolved->BuiltinValue(); builtin != builtin::BuiltinValue::kUndefined) {
+    if (auto builtin = resolved->BuiltinValue(); builtin != core::BuiltinValue::kUndefined) {
         return CheckNotTemplated("builtin value", ident)
-                   ? builder_->create<sem::BuiltinEnumExpression<builtin::BuiltinValue>>(
+                   ? builder_->create<sem::BuiltinEnumExpression<core::BuiltinValue>>(
                          expr, current_statement_, builtin)
                    : nullptr;
     }
 
     if (auto i_smpl = resolved->InterpolationSampling();
-        i_smpl != builtin::InterpolationSampling::kUndefined) {
+        i_smpl != core::InterpolationSampling::kUndefined) {
         return CheckNotTemplated("interpolation sampling", ident)
-                   ? builder_->create<sem::BuiltinEnumExpression<builtin::InterpolationSampling>>(
+                   ? builder_->create<sem::BuiltinEnumExpression<core::InterpolationSampling>>(
                          expr, current_statement_, i_smpl)
                    : nullptr;
     }
 
     if (auto i_type = resolved->InterpolationType();
-        i_type != builtin::InterpolationType::kUndefined) {
+        i_type != core::InterpolationType::kUndefined) {
         return CheckNotTemplated("interpolation type", ident)
-                   ? builder_->create<sem::BuiltinEnumExpression<builtin::InterpolationType>>(
+                   ? builder_->create<sem::BuiltinEnumExpression<core::InterpolationType>>(
                          expr, current_statement_, i_type)
                    : nullptr;
     }
 
-    if (auto fmt = resolved->TexelFormat(); fmt != builtin::TexelFormat::kUndefined) {
+    if (auto fmt = resolved->TexelFormat(); fmt != core::TexelFormat::kUndefined) {
         return CheckNotTemplated("texel format", ident)
-                   ? builder_->create<sem::BuiltinEnumExpression<builtin::TexelFormat>>(
+                   ? builder_->create<sem::BuiltinEnumExpression<core::TexelFormat>>(
                          expr, current_statement_, fmt)
                    : nullptr;
     }
@@ -3751,13 +3750,13 @@ tint::Result<sem::WorkgroupSize> Resolver::WorkgroupAttribute(const ast::Workgro
     return ws;
 }
 
-tint::Result<tint::builtin::BuiltinValue> Resolver::BuiltinAttribute(
+tint::Result<tint::core::BuiltinValue> Resolver::BuiltinAttribute(
     const ast::BuiltinAttribute* attr) {
     auto* builtin_expr = BuiltinValueExpression(attr->builtin);
     if (!builtin_expr) {
         return tint::Failure;
     }
-    // Apply the resolved tint::sem::BuiltinEnumExpression<tint::builtin::BuiltinValue> to the
+    // Apply the resolved tint::sem::BuiltinEnumExpression<tint::core::BuiltinValue> to the
     // attribute.
     builder_->Sem().Add(attr, builtin_expr);
     return builtin_expr->Value();
@@ -3783,9 +3782,9 @@ bool Resolver::StrideAttribute(const ast::StrideAttribute*) {
     return true;
 }
 
-tint::Result<builtin::Interpolation> Resolver::InterpolateAttribute(
+tint::Result<core::Interpolation> Resolver::InterpolateAttribute(
     const ast::InterpolateAttribute* attr) {
-    builtin::Interpolation out;
+    core::Interpolation out;
     auto* type = InterpolationType(attr->type);
     if (!type) {
         return tint::Failure;
@@ -3818,28 +3817,28 @@ bool Resolver::DiagnosticControl(const ast::DiagnosticControl& control) {
     if (control.rule_name->category) {
         Mark(control.rule_name->category);
         if (control.rule_name->category->symbol.Name() == "chromium") {
-            auto rule = builtin::ParseChromiumDiagnosticRule(name);
-            if (rule != builtin::ChromiumDiagnosticRule::kUndefined) {
+            auto rule = core::ParseChromiumDiagnosticRule(name);
+            if (rule != core::ChromiumDiagnosticRule::kUndefined) {
                 validator_.DiagnosticFilters().Set(rule, control.severity);
             } else {
                 StringStream ss;
                 ss << "unrecognized diagnostic rule 'chromium." << name << "'\n";
                 tint::SuggestAlternativeOptions opts;
                 opts.prefix = "chromium.";
-                tint::SuggestAlternatives(name, builtin::kChromiumDiagnosticRuleStrings, ss, opts);
+                tint::SuggestAlternatives(name, core::kChromiumDiagnosticRuleStrings, ss, opts);
                 AddWarning(ss.str(), control.rule_name->source);
             }
         }
         return true;
     }
 
-    auto rule = builtin::ParseCoreDiagnosticRule(name);
-    if (rule != builtin::CoreDiagnosticRule::kUndefined) {
+    auto rule = core::ParseCoreDiagnosticRule(name);
+    if (rule != core::CoreDiagnosticRule::kUndefined) {
         validator_.DiagnosticFilters().Set(rule, control.severity);
     } else {
         StringStream ss;
         ss << "unrecognized diagnostic rule '" << name << "'\n";
-        tint::SuggestAlternatives(name, builtin::kCoreDiagnosticRuleStrings, ss);
+        tint::SuggestAlternatives(name, core::kCoreDiagnosticRuleStrings, ss);
         AddWarning(ss.str(), control.rule_name->source);
     }
     return true;
@@ -4623,7 +4622,7 @@ sem::Statement* Resolver::IncrementDecrementStatement(
     });
 }
 
-bool Resolver::ApplyAddressSpaceUsageToType(builtin::AddressSpace address_space,
+bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
                                             type::Type* ty,
                                             const Source& usage) {
     ty = const_cast<type::Type*>(ty->UnwrapRef());
@@ -4651,7 +4650,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(builtin::AddressSpace address_space,
     }
 
     if (auto* arr = ty->As<type::Array>()) {
-        if (address_space != builtin::AddressSpace::kStorage) {
+        if (address_space != core::AddressSpace::kStorage) {
             if (arr->Count()->Is<type::RuntimeArrayCount>()) {
                 AddError("runtime-sized arrays can only be used in the <storage> address space",
                          usage);
@@ -4670,7 +4669,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(builtin::AddressSpace address_space,
                                             usage);
     }
 
-    if (builtin::IsHostShareable(address_space) && !validator_.IsHostShareable(ty)) {
+    if (core::IsHostShareable(address_space) && !validator_.IsHostShareable(ty)) {
         StringStream err;
         err << "Type '" << sem_.TypeNameOf(ty) << "' cannot be used in address space '"
             << address_space << "' as it is non-host-shareable";

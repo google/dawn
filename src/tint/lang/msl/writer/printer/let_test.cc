@@ -17,8 +17,8 @@
 namespace tint::msl::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 TEST_F(MslPrinterTest, LetU32) {
     auto* func = b.Function("foo", ty.void_());

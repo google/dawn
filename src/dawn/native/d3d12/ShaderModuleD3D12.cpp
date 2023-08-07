@@ -160,7 +160,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
                   bgl->GetBindingInfo(bindingIndex).buffer.type == kInternalStorageBufferBinding));
             if (forceStorageBufferAsUAV) {
                 bindingRemapper.access_controls.emplace(srcBindingPoint,
-                                                        tint::builtin::Access::kReadWrite);
+                                                        tint::core::Access::kReadWrite);
             }
 
             // On D3D12 backend all storage buffers without Dynamic Buffer Offset will always be

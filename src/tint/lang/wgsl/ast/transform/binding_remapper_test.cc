@@ -52,7 +52,7 @@ TEST_F(BindingRemapperTest, ShouldRunAccessControlRemappings) {
     DataMap data;
     data.Add<BindingRemapper::Remappings>(BindingRemapper::BindingPoints{},
                                           BindingRemapper::AccessControls{
-                                              {{2, 1}, builtin::Access::kWrite},
+                                              {{2, 1}, core::Access::kWrite},
                                           });
 
     EXPECT_TRUE(ShouldRun<BindingRemapper>(src, data));
@@ -162,9 +162,9 @@ fn f() {
     data.Add<BindingRemapper::Remappings>(
         BindingRemapper::BindingPoints{},
         BindingRemapper::AccessControls{
-            {{2, 1}, builtin::Access::kReadWrite},  // Modify access control
+            {{2, 1}, core::Access::kReadWrite},  // Modify access control
             // Keep @group(3) @binding(2) as is
-            {{4, 3}, builtin::Access::kRead},  // Add access control
+            {{4, 3}, core::Access::kRead},  // Add access control
         });
     auto got = Run<BindingRemapper>(src, data);
 
@@ -207,8 +207,8 @@ fn f() {
             {{3, 2}, {6, 7}},
         },
         BindingRemapper::AccessControls{
-            {{2, 1}, builtin::Access::kReadWrite},
-            {{3, 2}, builtin::Access::kReadWrite},
+            {{2, 1}, core::Access::kReadWrite},
+            {{3, 2}, core::Access::kReadWrite},
         });
     auto got = Run<BindingRemapper>(src, data);
 

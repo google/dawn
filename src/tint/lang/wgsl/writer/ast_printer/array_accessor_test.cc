@@ -25,7 +25,7 @@ namespace {
 using WgslASTPrinterTest = TestHelper;
 
 TEST_F(WgslASTPrinterTest, IndexAccessor) {
-    GlobalVar("ary", ty.array<i32, 10>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("ary", ty.array<i32, 10>(), core::AddressSpace::kPrivate);
     auto* expr = IndexAccessor("ary", 5_i);
     WrapInFunction(expr);
 
@@ -38,7 +38,7 @@ TEST_F(WgslASTPrinterTest, IndexAccessor) {
 }
 
 TEST_F(WgslASTPrinterTest, IndexAccessor_OfDref) {
-    GlobalVar("ary", ty.array<i32, 10>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("ary", ty.array<i32, 10>(), core::AddressSpace::kPrivate);
 
     auto* p = Let("p", AddressOf("ary"));
     auto* expr = IndexAccessor(Deref("p"), 5_i);

@@ -15,7 +15,7 @@
 #include <string>
 
 #include "gtest/gtest-spi.h"
-#include "src/tint/lang/core/builtin/diagnostic_severity.h"
+#include "src/tint/lang/core/diagnostic_severity.h"
 #include "src/tint/lang/wgsl/ast/diagnostic_control.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 
@@ -28,7 +28,7 @@ TEST_F(DiagnosticControlTest, Assert_RuleNotNull) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            DiagnosticControl control(builtin::DiagnosticSeverity::kWarning, nullptr);
+            DiagnosticControl control(core::DiagnosticSeverity::kWarning, nullptr);
         },
         "internal compiler error");
 }

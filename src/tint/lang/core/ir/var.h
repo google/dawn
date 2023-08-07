@@ -15,8 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_VAR_H_
 #define SRC_TINT_LANG_CORE_IR_VAR_H_
 
-#include "src/tint/lang/core/builtin/access.h"
-#include "src/tint/lang/core/builtin/address_space.h"
+#include "src/tint/lang/core/access.h"
+#include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/ir/binding_point.h"
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/lang/core/type/pointer.h"

@@ -26,7 +26,7 @@ using namespace tint::number_suffixes;  // NOLINT
 using ProgramToIRBuiltinTest = helpers::IRProgramTest;
 
 TEST_F(ProgramToIRBuiltinTest, EmitExpression_Builtin) {
-    auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_f));
+    auto i = GlobalVar("i", core::AddressSpace::kPrivate, Expr(1_f));
     auto* expr = Call("asin", i);
     WrapInFunction(expr);
 

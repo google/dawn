@@ -17,8 +17,8 @@
 #include <algorithm>
 #include <array>
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
-#include "src/tint/lang/core/builtin/function.h"
+#include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/function.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
@@ -453,42 +453,42 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
 }
 
 // Returns the WGSL standard library function builtin for the
-// given instruction, or builtin::Function::kNone
-builtin::Function GetBuiltin(spv::Op opcode) {
+// given instruction, or core::Function::kNone
+core::Function GetBuiltin(spv::Op opcode) {
     switch (opcode) {
         case spv::Op::OpBitCount:
-            return builtin::Function::kCountOneBits;
+            return core::Function::kCountOneBits;
         case spv::Op::OpBitFieldInsert:
-            return builtin::Function::kInsertBits;
+            return core::Function::kInsertBits;
         case spv::Op::OpBitFieldSExtract:
         case spv::Op::OpBitFieldUExtract:
-            return builtin::Function::kExtractBits;
+            return core::Function::kExtractBits;
         case spv::Op::OpBitReverse:
-            return builtin::Function::kReverseBits;
+            return core::Function::kReverseBits;
         case spv::Op::OpDot:
-            return builtin::Function::kDot;
+            return core::Function::kDot;
         case spv::Op::OpDPdx:
-            return builtin::Function::kDpdx;
+            return core::Function::kDpdx;
         case spv::Op::OpDPdy:
-            return builtin::Function::kDpdy;
+            return core::Function::kDpdy;
         case spv::Op::OpFwidth:
-            return builtin::Function::kFwidth;
+            return core::Function::kFwidth;
         case spv::Op::OpDPdxFine:
-            return builtin::Function::kDpdxFine;
+            return core::Function::kDpdxFine;
         case spv::Op::OpDPdyFine:
-            return builtin::Function::kDpdyFine;
+            return core::Function::kDpdyFine;
         case spv::Op::OpFwidthFine:
-            return builtin::Function::kFwidthFine;
+            return core::Function::kFwidthFine;
         case spv::Op::OpDPdxCoarse:
-            return builtin::Function::kDpdxCoarse;
+            return core::Function::kDpdxCoarse;
         case spv::Op::OpDPdyCoarse:
-            return builtin::Function::kDpdyCoarse;
+            return core::Function::kDpdyCoarse;
         case spv::Op::OpFwidthCoarse:
-            return builtin::Function::kFwidthCoarse;
+            return core::Function::kFwidthCoarse;
         default:
             break;
     }
-    return builtin::Function::kNone;
+    return core::Function::kNone;
 }
 
 // @param opcode a SPIR-V opcode
@@ -1317,7 +1317,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
                 return_members.Push(
                     builder_.Member(var_name, param_type->Build(builder_),
                                     tint::Vector{
-                                        builder_.Builtin(source, builtin::BuiltinValue::kPosition),
+                                        builder_.Builtin(source, core::BuiltinValue::kPosition),
                                     }));
                 return_exprs.Push(builder_.Expr(var_name));
 
@@ -2506,12 +2506,12 @@ bool FunctionEmitter::EmitFunctionVariables() {
                 return false;
             }
         }
-        auto* var = parser_impl_.MakeVar(inst.result_id(), builtin::AddressSpace::kUndefined,
-                                         builtin::Access::kUndefined, var_store_type, initializer,
+        auto* var = parser_impl_.MakeVar(inst.result_id(), core::AddressSpace::kUndefined,
+                                         core::Access::kUndefined, var_store_type, initializer,
                                          Attributes{});
         auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
         AddStatement(var_decl_stmt);
-        auto* var_type = ty_.Reference(builtin::AddressSpace::kUndefined, var_store_type);
+        auto* var_type = ty_.Reference(core::AddressSpace::kUndefined, var_store_type);
         identifier_types_.emplace(inst.result_id(), var_type);
     }
     return success();
@@ -3355,9 +3355,9 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
         auto* store_type = parser_impl_.ConvertType(def_inst->type_id());
         AddStatement(create<ast::VariableDeclStatement>(
             Source{},
-            parser_impl_.MakeVar(id, builtin::AddressSpace::kUndefined, builtin::Access::kUndefined,
+            parser_impl_.MakeVar(id, core::AddressSpace::kUndefined, core::Access::kUndefined,
                                  store_type, nullptr, Attributes{})));
-        auto* type = ty_.Reference(builtin::AddressSpace::kUndefined, store_type);
+        auto* type = ty_.Reference(core::AddressSpace::kUndefined, store_type);
         identifier_types_.emplace(id, type);
     }
 
@@ -3817,11 +3817,11 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     }
 
     const auto builtin = GetBuiltin(op);
-    if (builtin != builtin::Function::kNone) {
+    if (builtin != core::Function::kNone) {
         switch (builtin) {
-            case builtin::Function::kExtractBits:
+            case core::Function::kExtractBits:
                 return MakeExtractBitsCall(inst);
-            case builtin::Function::kInsertBits:
+            case core::Function::kInsertBits:
                 return MakeInsertBitsCall(inst);
             default:
                 return MakeBuiltinCall(inst);
@@ -4886,8 +4886,7 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
                 }
                 // Local variables are always Function storage class, with default
                 // access mode.
-                return DefInfo::Pointer{builtin::AddressSpace::kFunction,
-                                        builtin::Access::kUndefined};
+                return DefInfo::Pointer{core::AddressSpace::kFunction, core::Access::kUndefined};
             }
             case spv::Op::OpFunctionParameter: {
                 const auto* type = As<Pointer>(parser_impl_.ConvertType(inst.type_id()));
@@ -4900,7 +4899,7 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
                 // parameters.  In that case we need to do a global analysis to
                 // determine what the formal argument parameter type should be,
                 // whether it has read_only or read_write access mode.
-                return DefInfo::Pointer{type->address_space, builtin::Access::kUndefined};
+                return DefInfo::Pointer{type->address_space, core::Access::kUndefined};
             }
             default:
                 break;
@@ -5130,7 +5129,7 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
             // Avoid moving combinatorial values across constructs.  This is a
             // simple heuristic to avoid changing the cost of an operation
             // by moving it into or out of a loop, for example.
-            if ((def_info->pointer.address_space == builtin::AddressSpace::kUndefined) &&
+            if ((def_info->pointer.address_space == core::AddressSpace::kUndefined) &&
                 local_def.used_in_another_construct) {
                 should_hoist_to_let = true;
             }
@@ -5315,7 +5314,7 @@ bool FunctionEmitter::EmitControlBarrier(const spvtools::opt::Instruction& inst)
 
 TypedExpression FunctionEmitter::MakeBuiltinCall(const spvtools::opt::Instruction& inst) {
     const auto builtin = GetBuiltin(opcode(inst));
-    auto* name = builtin::str(builtin);
+    auto* name = core::str(builtin);
     auto* ident = create<ast::Identifier>(Source{}, builder_.Symbols().Register(name));
 
     ExpressionList params;
@@ -5339,7 +5338,7 @@ TypedExpression FunctionEmitter::MakeBuiltinCall(const spvtools::opt::Instructio
 
 TypedExpression FunctionEmitter::MakeExtractBitsCall(const spvtools::opt::Instruction& inst) {
     const auto builtin = GetBuiltin(opcode(inst));
-    auto* name = builtin::str(builtin);
+    auto* name = core::str(builtin);
     auto* ident = create<ast::Identifier>(Source{}, builder_.Symbols().Register(name));
     auto e = MakeOperand(inst, 0);
     auto offset = ToU32(MakeOperand(inst, 1));
@@ -5356,7 +5355,7 @@ TypedExpression FunctionEmitter::MakeExtractBitsCall(const spvtools::opt::Instru
 
 TypedExpression FunctionEmitter::MakeInsertBitsCall(const spvtools::opt::Instruction& inst) {
     const auto builtin = GetBuiltin(opcode(inst));
-    auto* name = builtin::str(builtin);
+    auto* name = core::str(builtin);
     auto* ident = create<ast::Identifier>(Source{}, builder_.Symbols().Register(name));
     auto e = MakeOperand(inst, 0);
     auto newbits = MakeOperand(inst, 1);
@@ -5842,7 +5841,7 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
 }
 
 bool FunctionEmitter::EmitAtomicOp(const spvtools::opt::Instruction& inst) {
-    auto emit_atomic = [&](builtin::Function builtin, std::initializer_list<TypedExpression> args) {
+    auto emit_atomic = [&](core::Function builtin, std::initializer_list<TypedExpression> args) {
         // Split args into params and expressions
         ParameterList params;
         params.Reserve(args.size());
@@ -5864,7 +5863,7 @@ bool FunctionEmitter::EmitAtomicOp(const spvtools::opt::Instruction& inst) {
 
         // Emit stub, will be removed by transform::SpirvAtomic
         auto* stub = builder_.Func(
-            Source{}, builder_.Symbols().New(std::string("stub_") + builtin::str(builtin)),
+            Source{}, builder_.Symbols().New(std::string("stub_") + core::str(builtin)),
             std::move(params), ret_type,
             /* body */ nullptr,
             tint::Vector{
@@ -5901,39 +5900,38 @@ bool FunctionEmitter::EmitAtomicOp(const spvtools::opt::Instruction& inst) {
 
     switch (opcode(inst)) {
         case spv::Op::OpAtomicLoad:
-            return emit_atomic(builtin::Function::kAtomicLoad, {oper(/*ptr*/ 0)});
+            return emit_atomic(core::Function::kAtomicLoad, {oper(/*ptr*/ 0)});
         case spv::Op::OpAtomicStore:
-            return emit_atomic(builtin::Function::kAtomicStore,
-                               {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::Function::kAtomicStore, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicExchange:
-            return emit_atomic(builtin::Function::kAtomicExchange,
+            return emit_atomic(core::Function::kAtomicExchange,
                                {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicCompareExchange:
         case spv::Op::OpAtomicCompareExchangeWeak:
-            return emit_atomic(builtin::Function::kAtomicCompareExchangeWeak,
+            return emit_atomic(core::Function::kAtomicCompareExchangeWeak,
                                {oper(/*ptr*/ 0), /*value*/ oper(5), /*comparator*/ oper(4)});
         case spv::Op::OpAtomicIIncrement:
-            return emit_atomic(builtin::Function::kAtomicAdd, {oper(/*ptr*/ 0), lit(1)});
+            return emit_atomic(core::Function::kAtomicAdd, {oper(/*ptr*/ 0), lit(1)});
         case spv::Op::OpAtomicIDecrement:
-            return emit_atomic(builtin::Function::kAtomicSub, {oper(/*ptr*/ 0), lit(1)});
+            return emit_atomic(core::Function::kAtomicSub, {oper(/*ptr*/ 0), lit(1)});
         case spv::Op::OpAtomicIAdd:
-            return emit_atomic(builtin::Function::kAtomicAdd, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::Function::kAtomicAdd, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicISub:
-            return emit_atomic(builtin::Function::kAtomicSub, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::Function::kAtomicSub, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicSMin:
-            return emit_atomic(builtin::Function::kAtomicMin, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::Function::kAtomicMin, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicUMin:
-            return emit_atomic(builtin::Function::kAtomicMin, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::Function::kAtomicMin, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicSMax:
-            return emit_atomic(builtin::Function::kAtomicMax, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::Function::kAtomicMax, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicUMax:
-            return emit_atomic(builtin::Function::kAtomicMax, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::Function::kAtomicMax, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicAnd:
-            return emit_atomic(builtin::Function::kAtomicAnd, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::Function::kAtomicAnd, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicOr:
-            return emit_atomic(builtin::Function::kAtomicOr, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::Function::kAtomicOr, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicXor:
-            return emit_atomic(builtin::Function::kAtomicXor, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::Function::kAtomicXor, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicFlagTestAndSet:
         case spv::Op::OpAtomicFlagClear:
         case spv::Op::OpAtomicFMinEXT:
@@ -6285,7 +6283,7 @@ bool FunctionEmitter::MakeVectorInsertDynamic(const spvtools::opt::Instruction& 
         // API in parser_impl_.
         var_name = namer_.MakeDerivedName(original_value_name);
 
-        auto* temp_var = builder_.Var(var_name, builtin::AddressSpace::kUndefined, src_vector.expr);
+        auto* temp_var = builder_.Var(var_name, core::AddressSpace::kUndefined, src_vector.expr);
 
         AddStatement(builder_.Decl({}, temp_var));
     }
@@ -6354,8 +6352,7 @@ bool FunctionEmitter::MakeCompositeInsert(const spvtools::opt::Instruction& inst
         // It doesn't correspond to a SPIR-V ID, so we don't use the ordinary
         // API in parser_impl_.
         var_name = namer_.MakeDerivedName(original_value_name);
-        auto* temp_var =
-            builder_.Var(var_name, builtin::AddressSpace::kUndefined, src_composite.expr);
+        auto* temp_var = builder_.Var(var_name, core::AddressSpace::kUndefined, src_composite.expr);
         AddStatement(builder_.Decl({}, temp_var));
     }
 

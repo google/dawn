@@ -92,7 +92,7 @@ class Table {
     ///        after shader creation time (sem::EvaluationStage::kConstant).
     /// @param source the source of the builtin call
     /// @return the semantic builtin if found, otherwise nullptr
-    virtual Builtin Lookup(builtin::Function type,
+    virtual Builtin Lookup(core::Function type,
                            VectorRef<const type::Type*> args,
                            sem::EvaluationStage earliest_eval_stage,
                            const Source& source) = 0;

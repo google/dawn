@@ -140,7 +140,7 @@ struct Texture1DTo2D::State {
                 return nullptr;
             }
 
-            if (builtin->Type() == builtin::Function::kTextureDimensions) {
+            if (builtin->Type() == core::Function::kTextureDimensions) {
                 // If this textureDimensions() call is in a CallStatement, we can leave it
                 // unmodified since the return value will be dropped on the floor anyway.
                 if (call->Stmt()->Declaration()->Is<CallStatement>()) {

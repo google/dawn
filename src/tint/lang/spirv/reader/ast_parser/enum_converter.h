@@ -17,8 +17,8 @@
 
 #include "spirv/unified1/spirv.h"
 #include "spirv/unified1/spirv.hpp11"
-#include "src/tint/lang/core/builtin/address_space.h"
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/spirv/reader/ast_parser/fail_stream.h"
@@ -45,13 +45,13 @@ class EnumConverter {
     /// On failure, logs an error and returns kNone
     /// @param sc the SPIR-V storage class
     /// @returns a Tint AST address space
-    builtin::AddressSpace ToAddressSpace(const spv::StorageClass sc);
+    core::AddressSpace ToAddressSpace(const spv::StorageClass sc);
 
     /// Converts a SPIR-V Builtin value a Tint Builtin.
     /// On failure, logs an error and returns kNone
     /// @param b the SPIR-V builtin
     /// @returns a Tint AST builtin
-    builtin::BuiltinValue ToBuiltin(spv::BuiltIn b);
+    core::BuiltinValue ToBuiltin(spv::BuiltIn b);
 
     /// Converts a possibly arrayed SPIR-V Dim to a Tint texture dimension.
     /// On failure, logs an error and returns kNone
@@ -73,13 +73,13 @@ class EnumConverter {
     /// On failure, logs an error and returns kNone
     /// @param fmt the SPIR-V format
     /// @returns a Tint AST format
-    builtin::TexelFormat ToTexelFormat(spv::ImageFormat fmt);
+    core::TexelFormat ToTexelFormat(spv::ImageFormat fmt);
 
     /// Converts a SPIR-V Image Format to a TexelFormat
     /// On failure, logs an error and returns kNone
     /// @param fmt the SPIR-V format
     /// @returns a Tint AST format
-    builtin::TexelFormat ToTexelFormat(SpvImageFormat fmt) {
+    core::TexelFormat ToTexelFormat(SpvImageFormat fmt) {
         return ToTexelFormat(static_cast<spv::ImageFormat>(fmt));
     }
 

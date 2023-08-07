@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/core/builtin/access.h"
-#include "src/tint/lang/core/builtin/address_space.h"
-#include "src/tint/lang/core/builtin/builtin_value.h"
-#include "src/tint/lang/core/builtin/interpolation_sampling.h"
-#include "src/tint/lang/core/builtin/interpolation_type.h"
-#include "src/tint/lang/core/builtin/texel_format.h"
+#include "src/tint/lang/core/access.h"
+#include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/interpolation_sampling.h"
+#include "src/tint/lang/core/interpolation_type.h"
+#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 
@@ -45,7 +45,7 @@ TEST_P(ResolverAccessUsedWithTemplateArgs, Test) {
 
 INSTANTIATE_TEST_SUITE_P(,
                          ResolverAccessUsedWithTemplateArgs,
-                         testing::ValuesIn(builtin::kAccessStrings));
+                         testing::ValuesIn(core::kAccessStrings));
 
 ////////////////////////////////////////////////////////////////////////////////
 // address space
@@ -55,7 +55,7 @@ using ResolverAddressSpaceUsedWithTemplateArgs = ResolverTestWithParam<const cha
 TEST_P(ResolverAddressSpaceUsedWithTemplateArgs, Test) {
     // fn f(p : ptr<ADDRESS_SPACE<T>, f32) {}
 
-    Enable(builtin::Extension::kChromiumExperimentalFullPtrParameters);
+    Enable(core::Extension::kChromiumExperimentalFullPtrParameters);
     auto* tmpl = Ident(Source{{12, 34}}, GetParam(), "T");
     Func("f", Vector{Param("p", ty("ptr", tmpl, ty.f32()))}, ty.void_(), tint::Empty);
     EXPECT_FALSE(r()->Resolve());
@@ -65,7 +65,7 @@ TEST_P(ResolverAddressSpaceUsedWithTemplateArgs, Test) {
 
 INSTANTIATE_TEST_SUITE_P(,
                          ResolverAddressSpaceUsedWithTemplateArgs,
-                         testing::ValuesIn(builtin::kAddressSpaceStrings));
+                         testing::ValuesIn(core::kAddressSpaceStrings));
 
 ////////////////////////////////////////////////////////////////////////////////
 // builtin value
@@ -84,7 +84,7 @@ TEST_P(ResolverBuiltinValueUsedWithTemplateArgs, Test) {
 
 INSTANTIATE_TEST_SUITE_P(,
                          ResolverBuiltinValueUsedWithTemplateArgs,
-                         testing::ValuesIn(builtin::kBuiltinValueStrings));
+                         testing::ValuesIn(core::kBuiltinValueStrings));
 
 ////////////////////////////////////////////////////////////////////////////////
 // interpolation sampling
@@ -99,7 +99,7 @@ TEST_P(ResolverInterpolationSamplingUsedWithTemplateArgs, Test) {
          Vector{Param("p", ty.vec4<f32>(),
                       Vector{
                           Location(0_a),
-                          Interpolate(builtin::InterpolationType::kLinear, tmpl),
+                          Interpolate(core::InterpolationType::kLinear, tmpl),
                       })},
          ty.void_(), tint::Empty,
          Vector{
@@ -112,7 +112,7 @@ TEST_P(ResolverInterpolationSamplingUsedWithTemplateArgs, Test) {
 
 INSTANTIATE_TEST_SUITE_P(,
                          ResolverInterpolationSamplingUsedWithTemplateArgs,
-                         testing::ValuesIn(builtin::kInterpolationSamplingStrings));
+                         testing::ValuesIn(core::kInterpolationSamplingStrings));
 
 ////////////////////////////////////////////////////////////////////////////////
 // interpolation type
@@ -127,7 +127,7 @@ TEST_P(ResolverInterpolationTypeUsedWithTemplateArgs, Test) {
          Vector{Param("p", ty.vec4<f32>(),
                       Vector{
                           Location(0_a),
-                          Interpolate(tmpl, builtin::InterpolationSampling::kCenter),
+                          Interpolate(tmpl, core::InterpolationSampling::kCenter),
                       })},
          ty.void_(), tint::Empty,
          Vector{
@@ -140,7 +140,7 @@ TEST_P(ResolverInterpolationTypeUsedWithTemplateArgs, Test) {
 
 INSTANTIATE_TEST_SUITE_P(,
                          ResolverInterpolationTypeUsedWithTemplateArgs,
-                         testing::ValuesIn(builtin::kInterpolationTypeStrings));
+                         testing::ValuesIn(core::kInterpolationTypeStrings));
 
 ////////////////////////////////////////////////////////////////////////////////
 // texel format
@@ -158,7 +158,7 @@ TEST_P(ResolverTexelFormatUsedWithTemplateArgs, Test) {
 
 INSTANTIATE_TEST_SUITE_P(,
                          ResolverTexelFormatUsedWithTemplateArgs,
-                         testing::ValuesIn(builtin::kTexelFormatStrings));
+                         testing::ValuesIn(core::kTexelFormatStrings));
 
 }  // namespace
 }  // namespace tint::resolver

@@ -18,12 +18,12 @@
 #include <string>
 #include <vector>
 
-#include "src/tint/lang/core/builtin/address_space.h"
-#include "src/tint/lang/core/builtin/builtin_value.h"
-#include "src/tint/lang/core/builtin/texel_format.h"
+#include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/constant.h"
+#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/spirv/writer/common/binary_writer.h"
 #include "src/tint/lang/spirv/writer/common/function.h"
 #include "src/tint/lang/spirv/writer/common/module.h"
@@ -99,7 +99,7 @@ class Printer {
     /// @param addrspace the optional address space that this type is being used for
     /// @returns the result ID of the type
     uint32_t Type(const type::Type* ty,
-                  builtin::AddressSpace addrspace = builtin::AddressSpace::kUndefined);
+                  core::AddressSpace addrspace = core::AddressSpace::kUndefined);
 
   private:
     /// Convert a builtin to the corresponding SPIR-V enum value, taking into account the target
@@ -107,12 +107,12 @@ class Printer {
     /// @param builtin the builtin to convert
     /// @param addrspace the address space the builtin is being used in
     /// @returns the enum value of the corresponding SPIR-V builtin
-    uint32_t Builtin(builtin::BuiltinValue builtin, builtin::AddressSpace addrspace);
+    uint32_t Builtin(core::BuiltinValue builtin, core::AddressSpace addrspace);
 
     /// Convert a texel format to the corresponding SPIR-V enum value, adding required capabilities.
     /// @param format the format to convert
     /// @returns the enum value of the corresponding SPIR-V texel format
-    uint32_t TexelFormat(const builtin::TexelFormat format);
+    uint32_t TexelFormat(const core::TexelFormat format);
 
     /// Get the result ID of the constant `constant`, emitting its instruction if necessary.
     /// @param constant the constant to get the ID for
@@ -150,7 +150,7 @@ class Printer {
     /// @param str the struct type to emit
     void EmitStructType(uint32_t id,
                         const type::Struct* str,
-                        builtin::AddressSpace addrspace = builtin::AddressSpace::kUndefined);
+                        core::AddressSpace addrspace = core::AddressSpace::kUndefined);
 
     /// Emit a texture type.
     /// @param id the result ID to use

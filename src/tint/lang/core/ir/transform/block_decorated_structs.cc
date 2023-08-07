@@ -43,7 +43,7 @@ void Run(Module* ir) {
             continue;
         }
         auto* ptr = var->Result()->Type()->As<type::Pointer>();
-        if (!ptr || !builtin::IsHostShareable(ptr->AddressSpace())) {
+        if (!ptr || !core::IsHostShareable(ptr->AddressSpace())) {
             continue;
         }
         buffer_variables.Push(var);

@@ -28,7 +28,7 @@ namespace {
 using GlslASTPrinterTest_WorkgroupVar = TestHelper;
 
 TEST_F(GlslASTPrinterTest_WorkgroupVar, Basic) {
-    GlobalVar("wg", ty.f32(), builtin::AddressSpace::kWorkgroup);
+    GlobalVar("wg", ty.f32(), core::AddressSpace::kWorkgroup);
 
     Func("main", tint::Empty, ty.void_(), Vector{Assign("wg", 1.2_f)},
          Vector{
@@ -44,7 +44,7 @@ TEST_F(GlslASTPrinterTest_WorkgroupVar, Basic) {
 TEST_F(GlslASTPrinterTest_WorkgroupVar, Aliased) {
     auto* alias = Alias("F32", ty.f32());
 
-    GlobalVar("wg", ty.Of(alias), builtin::AddressSpace::kWorkgroup);
+    GlobalVar("wg", ty.Of(alias), core::AddressSpace::kWorkgroup);
 
     Func("main", tint::Empty, ty.void_(), Vector{Assign("wg", 1.2_f)},
          Vector{

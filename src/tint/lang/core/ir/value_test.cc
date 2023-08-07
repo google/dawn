@@ -16,8 +16,8 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
-using namespace tint::number_suffixes;        // NOLINT
-using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::ir {
 namespace {

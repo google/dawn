@@ -77,7 +77,7 @@ TEST_F(ResolverUnresolvedIdentifierSuggestions, InterpolationSampling) {
     Structure("s", Vector{
                        Member("m", ty.vec4<f32>(),
                               Vector{
-                                  Interpolate(builtin::InterpolationType::kLinear,
+                                  Interpolate(core::InterpolationType::kLinear,
                                               Expr(Source{{12, 34}}, "centre")),
                               }),
                    });

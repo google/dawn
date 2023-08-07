@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/dependency_graph.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
@@ -78,7 +78,7 @@ struct CallSiteTag {
         CallSiteRequiredToBeUniform,
         CallSiteNoRestriction,
     } tag;
-    builtin::DiagnosticSeverity severity = builtin::DiagnosticSeverity::kUndefined;
+    core::DiagnosticSeverity severity = core::DiagnosticSeverity::kUndefined;
 };
 
 /// FunctionTag describes a functions effects on uniformity.
@@ -94,7 +94,7 @@ struct ParameterTag {
         ParameterContentsRequiredToBeUniform,
         ParameterNoRestriction,
     } tag;
-    builtin::DiagnosticSeverity severity = builtin::DiagnosticSeverity::kUndefined;
+    core::DiagnosticSeverity severity = core::DiagnosticSeverity::kUndefined;
 };
 
 /// Node represents a node in the graph of control flow and value nodes within the analysis of a
@@ -264,13 +264,13 @@ struct FunctionInfo {
     };
 
     /// @returns the RequiredToBeUniform node that corresponds to `severity`
-    Node* RequiredToBeUniform(builtin::DiagnosticSeverity severity) {
+    Node* RequiredToBeUniform(core::DiagnosticSeverity severity) {
         switch (severity) {
-            case builtin::DiagnosticSeverity::kError:
+            case core::DiagnosticSeverity::kError:
                 return required_to_be_uniform_error;
-            case builtin::DiagnosticSeverity::kWarning:
+            case core::DiagnosticSeverity::kWarning:
                 return required_to_be_uniform_warning;
-            case builtin::DiagnosticSeverity::kInfo:
+            case core::DiagnosticSeverity::kInfo:
                 return required_to_be_uniform_info;
             default:
                 TINT_UNREACHABLE() << "unhandled severity";
@@ -460,7 +460,7 @@ class UniformityGraph {
         // Look at which nodes are reachable from "RequiredToBeUniform".
         {
             UniqueVector<Node*, 4> reachable;
-            auto traverse = [&](builtin::DiagnosticSeverity severity) {
+            auto traverse = [&](core::DiagnosticSeverity severity) {
                 Traverse(current_function_->RequiredToBeUniform(severity), &reachable);
                 if (reachable.Contains(current_function_->may_be_non_uniform)) {
                     MakeError(*current_function_, current_function_->may_be_non_uniform, severity);
@@ -483,11 +483,11 @@ class UniformityGraph {
                 }
                 return true;
             };
-            if (!traverse(builtin::DiagnosticSeverity::kError)) {
+            if (!traverse(core::DiagnosticSeverity::kError)) {
                 return false;
             } else {
-                if (traverse(builtin::DiagnosticSeverity::kWarning)) {
-                    traverse(builtin::DiagnosticSeverity::kInfo);
+                if (traverse(core::DiagnosticSeverity::kWarning)) {
+                    traverse(core::DiagnosticSeverity::kInfo);
                 }
             }
         }
@@ -1179,8 +1179,8 @@ class UniformityGraph {
             // Only the num_workgroups and workgroup_id builtins are uniform.
             if (auto* builtin_attr = ast::GetAttribute<ast::BuiltinAttribute>(obj->attributes)) {
                 auto builtin = builder_->Sem().Get(builtin_attr)->Value();
-                if (builtin == builtin::BuiltinValue::kNumWorkgroups ||
-                    builtin == builtin::BuiltinValue::kWorkgroupId) {
+                if (builtin == core::BuiltinValue::kNumWorkgroups ||
+                    builtin == core::BuiltinValue::kWorkgroupId) {
                     return false;
                 }
             }
@@ -1242,7 +1242,7 @@ class UniformityGraph {
             [&](const sem::GlobalVariable* global) {
                 // Loads from global read-write variables may be non-uniform.
                 if (global->Declaration()->Is<ast::Var>() &&
-                    global->Access() != builtin::Access::kRead && load_rule) {
+                    global->Access() != core::Access::kRead && load_rule) {
                     node->AddEdge(current_function_->may_be_non_uniform);
                 } else {
                     node->AddEdge(cf);
@@ -1259,7 +1259,7 @@ class UniformityGraph {
                         // We are loading from the pointer, so add an edge to its contents.
                         auto* root = var_user->RootIdentifier();
                         if (root->Is<sem::GlobalVariable>()) {
-                            if (root->Access() != builtin::Access::kRead) {
+                            if (root->Access() != core::Access::kRead) {
                                 // The contents of a mutable global variable is always non-uniform.
                                 node->AddEdge(current_function_->may_be_non_uniform);
                             }
@@ -1513,7 +1513,7 @@ class UniformityGraph {
 
                 auto* root = sem_arg->RootIdentifier();
                 if (root->Is<sem::GlobalVariable>()) {
-                    if (root->Access() != builtin::Access::kRead) {
+                    if (root->Access() != core::Access::kRead) {
                         // The contents of a mutable global variable is always non-uniform.
                         arg_contents->AddEdge(current_function_->may_be_non_uniform);
                     }
@@ -1537,8 +1537,8 @@ class UniformityGraph {
         result->type = Node::kFunctionCallReturnValue;
         Node* cf_after = CreateNode({"CF_after_", name}, call);
 
-        auto default_severity = kUniformityFailuresAsError ? builtin::DiagnosticSeverity::kError
-                                                           : builtin::DiagnosticSeverity::kWarning;
+        auto default_severity = kUniformityFailuresAsError ? core::DiagnosticSeverity::kError
+                                                           : core::DiagnosticSeverity::kWarning;
 
         // Get tags for the callee.
         CallSiteTag callsite_tag = {CallSiteTag::CallSiteNoRestriction};
@@ -1552,16 +1552,16 @@ class UniformityGraph {
                 // some texture sampling builtins, and atomics.
                 if (builtin->IsBarrier()) {
                     callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, default_severity};
-                } else if (builtin->Type() == builtin::Function::kWorkgroupUniformLoad) {
+                } else if (builtin->Type() == core::Function::kWorkgroupUniformLoad) {
                     callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, default_severity};
                 } else if (builtin->IsDerivative() ||
-                           builtin->Type() == builtin::Function::kTextureSample ||
-                           builtin->Type() == builtin::Function::kTextureSampleBias ||
-                           builtin->Type() == builtin::Function::kTextureSampleCompare) {
+                           builtin->Type() == core::Function::kTextureSample ||
+                           builtin->Type() == core::Function::kTextureSampleBias ||
+                           builtin->Type() == core::Function::kTextureSampleCompare) {
                     // Get the severity of derivative uniformity violations in this context.
                     auto severity = sem_.DiagnosticSeverity(
-                        call, builtin::CoreDiagnosticRule::kDerivativeUniformity);
-                    if (severity != builtin::DiagnosticSeverity::kOff) {
+                        call, core::CoreDiagnosticRule::kDerivativeUniformity);
+                    if (severity != core::DiagnosticSeverity::kOff) {
                         callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, severity};
                     }
                     function_tag = ReturnValueMayBeNonUniform;
@@ -1662,7 +1662,7 @@ class UniformityGraph {
                 }
             } else {
                 auto* builtin = sem->Target()->As<sem::Builtin>();
-                if (builtin && builtin->Type() == builtin::Function::kWorkgroupUniformLoad) {
+                if (builtin && builtin->Type() == core::Function::kWorkgroupUniformLoad) {
                     // The workgroupUniformLoad builtin requires its parameter to be uniform.
                     current_function_->RequiredToBeUniform(default_severity)->AddEdge(args[i]);
                 } else {
@@ -1726,7 +1726,7 @@ class UniformityGraph {
     /// order to find a call to a builtin function that requires uniformity with the given severity.
     const ast::CallExpression* FindBuiltinThatRequiresUniformity(
         const ast::CallExpression* call,
-        builtin::DiagnosticSeverity severity) {
+        core::DiagnosticSeverity severity) {
         auto* target = SemCall(call)->Target();
         if (target->Is<sem::Builtin>()) {
             // This is a call to a builtin, so we must be done.
@@ -1788,11 +1788,11 @@ class UniformityGraph {
 
         auto var_type = [&](const sem::Variable* var) {
             switch (var->AddressSpace()) {
-                case builtin::AddressSpace::kStorage:
+                case core::AddressSpace::kStorage:
                     return "read_write storage buffer ";
-                case builtin::AddressSpace::kWorkgroup:
+                case core::AddressSpace::kWorkgroup:
                     return "workgroup storage variable ";
-                case builtin::AddressSpace::kPrivate:
+                case core::AddressSpace::kPrivate:
                     return "module-scope private variable ";
                 default:
                     return "";
@@ -1885,13 +1885,11 @@ class UniformityGraph {
     /// @param function the function that the diagnostic is being produced for
     /// @param source_node the node that has caused a uniformity issue in `function`
     /// @param severity the severity of the diagnostic
-    void MakeError(FunctionInfo& function,
-                   Node* source_node,
-                   builtin::DiagnosticSeverity severity) {
+    void MakeError(FunctionInfo& function, Node* source_node, core::DiagnosticSeverity severity) {
         // Helper to produce a diagnostic message, as a note or with the global failure severity.
         auto report = [&](Source source, std::string msg, bool note) {
             diag::Diagnostic error{};
-            error.severity = note ? diag::Severity::Note : builtin::ToSeverity(severity);
+            error.severity = note ? diag::Severity::Note : core::ToSeverity(severity);
             error.system = diag::System::Resolver;
             error.source = source;
             error.message = msg;

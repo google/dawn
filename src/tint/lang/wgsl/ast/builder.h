@@ -21,12 +21,12 @@
 
 #include "tint/override_id.h"
 
-#include "src/tint/lang/core/builtin/extension.h"
-#include "src/tint/lang/core/builtin/fluent_types.h"
-#include "src/tint/lang/core/builtin/interpolation_sampling.h"
-#include "src/tint/lang/core/builtin/interpolation_type.h"
-#include "src/tint/lang/core/builtin/number.h"
 #include "src/tint/lang/core/constant/manager.h"
+#include "src/tint/lang/core/extension.h"
+#include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/core/interpolation_sampling.h"
+#include "src/tint/lang/core/interpolation_type.h"
+#include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/depth_texture.h"
@@ -118,7 +118,7 @@ namespace tint::ast {
 /// Evaluates to true if T is a Infer, AInt or AFloat.
 template <typename T>
 static constexpr const bool IsInferOrAbstract =
-    std::is_same_v<std::decay_t<T>, builtin::fluent_types::Infer> || IsAbstract<std::decay_t<T>>;
+    std::is_same_v<std::decay_t<T>, core::fluent_types::Infer> || IsAbstract<std::decay_t<T>>;
 
 // Forward declare metafunction that evaluates to true iff T can be wrapped in a statement.
 template <typename T, typename = void>
@@ -205,13 +205,13 @@ class Builder {
 
       private:
         void Set(Builder&, ast::Type t) { type = t; }
-        void Set(Builder& b, builtin::AddressSpace addr_space) {
-            if (addr_space != builtin::AddressSpace::kUndefined) {
+        void Set(Builder& b, core::AddressSpace addr_space) {
+            if (addr_space != core::AddressSpace::kUndefined) {
                 address_space = b.Expr(addr_space);
             }
         }
-        void Set(Builder& b, builtin::Access ac) {
-            if (ac != builtin::Access::kUndefined) {
+        void Set(Builder& b, core::Access ac) {
+            if (ac != core::Access::kUndefined) {
                 access = b.Expr(ac);
             }
         }
@@ -1024,10 +1024,10 @@ class Builder {
         /// @param address_space the address space of the pointer
         /// @param type the type of the pointer
         /// @param access the optional access control of the pointer
-        /// @return the pointer to `type` with the given builtin::AddressSpace
-        ast::Type ptr(builtin::AddressSpace address_space,
+        /// @return the pointer to `type` with the given core::AddressSpace
+        ast::Type ptr(core::AddressSpace address_space,
                       ast::Type type,
-                      builtin::Access access = builtin::Access::kUndefined) const {
+                      core::Access access = core::Access::kUndefined) const {
             return ptr(builder->source_, address_space, type, access);
         }
 
@@ -1035,12 +1035,12 @@ class Builder {
         /// @param address_space the address space of the pointer
         /// @param type the type of the pointer
         /// @param access the optional access control of the pointer
-        /// @return the pointer to `type` with the given builtin::AddressSpace
+        /// @return the pointer to `type` with the given core::AddressSpace
         ast::Type ptr(const Source& source,
-                      builtin::AddressSpace address_space,
+                      core::AddressSpace address_space,
                       ast::Type type,
-                      builtin::Access access = builtin::Access::kUndefined) const {
-            if (access != builtin::Access::kUndefined) {
+                      core::Access access = core::Access::kUndefined) const {
+            if (access != core::Access::kUndefined) {
                 return (*this)(source, "ptr", address_space, type, access);
             } else {
                 return (*this)(source, "ptr", address_space, type);
@@ -1049,47 +1049,45 @@ class Builder {
 
         /// @param address_space the address space of the pointer
         /// @param access the optional access control of the pointer
-        /// @return the pointer to type `T` with the given builtin::AddressSpace.
+        /// @return the pointer to type `T` with the given core::AddressSpace.
         template <typename T>
-        ast::Type ptr(builtin::AddressSpace address_space,
-                      builtin::Access access = builtin::Access::kUndefined) const {
+        ast::Type ptr(core::AddressSpace address_space,
+                      core::Access access = core::Access::kUndefined) const {
             return ptr<T>(builder->source_, address_space, access);
         }
 
         /// @param source the Source of the node
-        /// @return the pointer to type `T` with the builtin::AddressSpace `ADDRESS` and access
+        /// @return the pointer to type `T` with the core::AddressSpace `ADDRESS` and access
         /// control `ACCESS`.
-        template <builtin::AddressSpace ADDRESS,
+        template <core::AddressSpace ADDRESS,
                   typename T,
-                  builtin::Access ACCESS = builtin::Access::kUndefined>
+                  core::Access ACCESS = core::Access::kUndefined>
         ast::Type ptr(const Source& source) const {
             return ptr<T>(source, ADDRESS, ACCESS);
         }
 
         /// @param type the type of the pointer
-        /// @return the pointer to the given type with the builtin::AddressSpace `ADDRESS` and
+        /// @return the pointer to the given type with the core::AddressSpace `ADDRESS` and
         /// access control `ACCESS`.
-        template <builtin::AddressSpace ADDRESS,
-                  builtin::Access ACCESS = builtin::Access::kUndefined>
+        template <core::AddressSpace ADDRESS, core::Access ACCESS = core::Access::kUndefined>
         ast::Type ptr(ast::Type type) const {
             return ptr(builder->source_, ADDRESS, type, ACCESS);
         }
 
         /// @param source the Source of the node
         /// @param type the type of the pointer
-        /// @return the pointer to the given type with the builtin::AddressSpace `ADDRESS` and
+        /// @return the pointer to the given type with the core::AddressSpace `ADDRESS` and
         /// access control `ACCESS`.
-        template <builtin::AddressSpace ADDRESS,
-                  builtin::Access ACCESS = builtin::Access::kUndefined>
+        template <core::AddressSpace ADDRESS, core::Access ACCESS = core::Access::kUndefined>
         ast::Type ptr(const Source& source, ast::Type type) const {
             return ptr(source, ADDRESS, type, ACCESS);
         }
 
-        /// @return the pointer to type `T` with the builtin::AddressSpace `ADDRESS` and access
+        /// @return the pointer to type `T` with the core::AddressSpace `ADDRESS` and access
         /// control `ACCESS`.
-        template <builtin::AddressSpace ADDRESS,
+        template <core::AddressSpace ADDRESS,
                   typename T,
-                  builtin::Access ACCESS = builtin::Access::kUndefined>
+                  core::Access ACCESS = core::Access::kUndefined>
         ast::Type ptr() const {
             return ptr<T>(builder->source_, ADDRESS, ACCESS);
         }
@@ -1097,13 +1095,13 @@ class Builder {
         /// @param source the Source of the node
         /// @param address_space the address space of the pointer
         /// @param access the optional access control of the pointer
-        /// @return the pointer to type `T` the builtin::AddressSpace `ADDRESS` and access control
+        /// @return the pointer to type `T` the core::AddressSpace `ADDRESS` and access control
         /// `ACCESS`.
         template <typename T>
         ast::Type ptr(const Source& source,
-                      builtin::AddressSpace address_space,
-                      builtin::Access access = builtin::Access::kUndefined) const {
-            if (access != builtin::Access::kUndefined) {
+                      core::AddressSpace address_space,
+                      core::Access access = core::Access::kUndefined) const {
+            if (access != core::Access::kUndefined) {
                 return (*this)(source, "ptr", address_space, Of<T>(), access);
             } else {
                 return (*this)(source, "ptr", address_space, Of<T>());
@@ -1249,8 +1247,8 @@ class Builder {
         /// @param access the access control of the texture
         /// @returns the storage texture
         ast::Type storage_texture(type::TextureDimension dims,
-                                  builtin::TexelFormat format,
-                                  builtin::Access access) const {
+                                  core::TexelFormat format,
+                                  core::Access access) const {
             return storage_texture(builder->source_, dims, format, access);
         }
 
@@ -1261,8 +1259,8 @@ class Builder {
         /// @returns the storage texture
         ast::Type storage_texture(const Source& source,
                                   type::TextureDimension dims,
-                                  builtin::TexelFormat format,
-                                  builtin::Access access) const {
+                                  core::TexelFormat format,
+                                  core::Access access) const {
             switch (dims) {
                 case type::TextureDimension::k1d:
                     return (*this)(source, "texture_storage_1d", format, access);
@@ -1586,7 +1584,7 @@ class Builder {
     /// Adds the extension to the list of enable directives at the top of the module.
     /// @param extension the extension to enable
     /// @return an `ast::Enable` enabling the given extension.
-    const ast::Enable* Enable(builtin::Extension extension) {
+    const ast::Enable* Enable(core::Extension extension) {
         auto* ext = create<ast::Extension>(extension);
         auto* enable = create<ast::Enable>(Vector{ext});
         AST().AddEnable(enable);
@@ -1597,7 +1595,7 @@ class Builder {
     /// @param source the enable source
     /// @param extension the extension to enable
     /// @return an `ast::Enable` enabling the given extension.
-    const ast::Enable* Enable(const Source& source, builtin::Extension extension) {
+    const ast::Enable* Enable(const Source& source, core::Extension extension) {
         auto* ext = create<ast::Extension>(source, extension);
         auto* enable = create<ast::Enable>(source, Vector{ext});
         AST().AddEnable(enable);
@@ -1608,8 +1606,8 @@ class Builder {
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
     ///   * ast::Type              - specifies the variable's type
-    ///   * builtin::AddressSpace  - specifies the variable's address space
-    ///   * builtin::Access        - specifies the variable's access control
+    ///   * core::AddressSpace  - specifies the variable's address space
+    ///   * core::Access        - specifies the variable's access control
     ///   * ast::Expression*       - specifies the variable's initializer expression
     ///   * ast::Attribute*        - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
@@ -1625,8 +1623,8 @@ class Builder {
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
     ///   * ast::Type              - specifies the variable's type
-    ///   * builtin::AddressSpace  - specifies the variable's address space
-    ///   * builtin::Access        - specifies the variable's access control
+    ///   * core::AddressSpace  - specifies the variable's address space
+    ///   * core::Access        - specifies the variable's access control
     ///   * ast::Expression*       - specifies the variable's initializer expression
     ///   * ast::Attribute*        - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
@@ -1727,8 +1725,8 @@ class Builder {
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
     ///   * ast::Type           - specifies the variable's type
-    ///   * builtin::AddressSpace   - specifies the variable address space
-    ///   * builtin::Access         - specifies the variable's access control
+    ///   * core::AddressSpace   - specifies the variable address space
+    ///   * core::Access         - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
@@ -1744,8 +1742,8 @@ class Builder {
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
     ///   * ast::Type           - specifies the variable's type
-    ///   * builtin::AddressSpace   - specifies the variable address space
-    ///   * builtin::Access         - specifies the variable's access control
+    ///   * core::AddressSpace   - specifies the variable address space
+    ///   * core::Access         - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*    - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
@@ -3080,8 +3078,8 @@ class Builder {
     const ast::InterpolateAttribute* Interpolate(const Source& source,
                                                  TYPE&& type,
                                                  SAMPLING&& sampling) {
-        if constexpr (std::is_same_v<std::decay_t<SAMPLING>, builtin::InterpolationSampling>) {
-            if (sampling == builtin::InterpolationSampling::kUndefined) {
+        if constexpr (std::is_same_v<std::decay_t<SAMPLING>, core::InterpolationSampling>) {
+            if (sampling == core::InterpolationSampling::kUndefined) {
                 return create<ast::InterpolateAttribute>(source, Expr(std::forward<TYPE>(type)),
                                                          nullptr);
             }
@@ -3094,14 +3092,12 @@ class Builder {
     /// @param source the source information
     /// @returns the interpolate attribute pointer
     const ast::InterpolateAttribute* Flat(const Source& source) {
-        return Interpolate(source, builtin::InterpolationType::kFlat);
+        return Interpolate(source, core::InterpolationType::kFlat);
     }
 
     /// Creates an ast::InterpolateAttribute using flat interpolation
     /// @returns the interpolate attribute pointer
-    const ast::InterpolateAttribute* Flat() {
-        return Interpolate(builtin::InterpolationType::kFlat);
-    }
+    const ast::InterpolateAttribute* Flat() { return Interpolate(core::InterpolationType::kFlat); }
 
     /// Creates an ast::InvariantAttribute
     /// @param source the source information
@@ -3350,7 +3346,7 @@ class Builder {
     /// @returns the diagnostic attribute pointer
     template <typename... RULE_ARGS>
     const ast::DiagnosticAttribute* DiagnosticAttribute(const Source& source,
-                                                        builtin::DiagnosticSeverity severity,
+                                                        core::DiagnosticSeverity severity,
                                                         RULE_ARGS&&... rule_args) {
         return create<ast::DiagnosticAttribute>(
             source, ast::DiagnosticControl(
@@ -3362,7 +3358,7 @@ class Builder {
     /// @param rule_args the arguments used to construct the rule name
     /// @returns the diagnostic attribute pointer
     template <typename... RULE_ARGS>
-    const ast::DiagnosticAttribute* DiagnosticAttribute(builtin::DiagnosticSeverity severity,
+    const ast::DiagnosticAttribute* DiagnosticAttribute(core::DiagnosticSeverity severity,
                                                         RULE_ARGS&&... rule_args) {
         return create<ast::DiagnosticAttribute>(
             source_, ast::DiagnosticControl(
@@ -3376,7 +3372,7 @@ class Builder {
     /// @returns the diagnostic directive pointer
     template <typename... RULE_ARGS>
     const ast::DiagnosticDirective* DiagnosticDirective(const Source& source,
-                                                        builtin::DiagnosticSeverity severity,
+                                                        core::DiagnosticSeverity severity,
                                                         RULE_ARGS&&... rule_args) {
         auto* rule = DiagnosticRuleName(std::forward<RULE_ARGS>(rule_args)...);
         auto* directive =
@@ -3390,7 +3386,7 @@ class Builder {
     /// @param rule_args the arguments used to construct the rule name
     /// @returns the diagnostic directive pointer
     template <typename... RULE_ARGS>
-    const ast::DiagnosticDirective* DiagnosticDirective(builtin::DiagnosticSeverity severity,
+    const ast::DiagnosticDirective* DiagnosticDirective(core::DiagnosticSeverity severity,
                                                         RULE_ARGS&&... rule_args) {
         auto* rule = DiagnosticRuleName(std::forward<RULE_ARGS>(rule_args)...);
         auto* directive =
@@ -3511,23 +3507,23 @@ struct Builder::TypesBuilder::CToAST<bool> {
     static ast::Type get(const Builder::TypesBuilder* t) { return t->bool_(); }
 };
 template <typename T, uint32_t N>
-struct Builder::TypesBuilder::CToAST<tint::builtin::fluent_types::array<T, N>> {
+struct Builder::TypesBuilder::CToAST<tint::core::fluent_types::array<T, N>> {
     static ast::Type get(const Builder::TypesBuilder* t) { return t->array<T, N>(); }
 };
 template <typename T>
-struct Builder::TypesBuilder::CToAST<tint::builtin::fluent_types::atomic<T>> {
+struct Builder::TypesBuilder::CToAST<tint::core::fluent_types::atomic<T>> {
     static ast::Type get(const Builder::TypesBuilder* t) { return t->atomic<T>(); }
 };
 template <uint32_t C, uint32_t R, typename T>
-struct Builder::TypesBuilder::CToAST<tint::builtin::fluent_types::mat<C, R, T>> {
+struct Builder::TypesBuilder::CToAST<tint::core::fluent_types::mat<C, R, T>> {
     static ast::Type get(const Builder::TypesBuilder* t) { return t->mat<T>(C, R); }
 };
 template <uint32_t N, typename T>
-struct Builder::TypesBuilder::CToAST<tint::builtin::fluent_types::vec<N, T>> {
+struct Builder::TypesBuilder::CToAST<tint::core::fluent_types::vec<N, T>> {
     static ast::Type get(const Builder::TypesBuilder* t) { return t->vec<T, N>(); }
 };
-template <builtin::AddressSpace ADDRESS, typename T, builtin::Access ACCESS>
-struct Builder::TypesBuilder::CToAST<tint::builtin::fluent_types::ptr<ADDRESS, T, ACCESS>> {
+template <core::AddressSpace ADDRESS, typename T, core::Access ACCESS>
+struct Builder::TypesBuilder::CToAST<tint::core::fluent_types::ptr<ADDRESS, T, ACCESS>> {
     static ast::Type get(const Builder::TypesBuilder* t) { return t->ptr<ADDRESS, T, ACCESS>(); }
 };
 //! @endcond

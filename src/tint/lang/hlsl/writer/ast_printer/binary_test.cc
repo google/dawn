@@ -20,8 +20,8 @@
 namespace tint::hlsl::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using HlslASTPrinterTest_Binary = TestHelper;
 
@@ -54,8 +54,8 @@ TEST_P(HlslBinaryTest, Emit_f32) {
         return;
     }
 
-    GlobalVar("left", ty.f32(), builtin::AddressSpace::kPrivate);
-    GlobalVar("right", ty.f32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("left", ty.f32(), core::AddressSpace::kPrivate);
+    GlobalVar("right", ty.f32(), core::AddressSpace::kPrivate);
 
     auto* left = Expr("left");
     auto* right = Expr("right");
@@ -84,10 +84,10 @@ TEST_P(HlslBinaryTest, Emit_f16) {
         return;
     }
 
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
-    GlobalVar("left", ty.f16(), builtin::AddressSpace::kPrivate);
-    GlobalVar("right", ty.f16(), builtin::AddressSpace::kPrivate);
+    GlobalVar("left", ty.f16(), core::AddressSpace::kPrivate);
+    GlobalVar("right", ty.f16(), core::AddressSpace::kPrivate);
 
     auto* left = Expr("left");
     auto* right = Expr("right");
@@ -109,8 +109,8 @@ TEST_P(HlslBinaryTest, Emit_u32) {
         return;
     }
 
-    GlobalVar("left", ty.u32(), builtin::AddressSpace::kPrivate);
-    GlobalVar("right", ty.u32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("left", ty.u32(), core::AddressSpace::kPrivate);
+    GlobalVar("right", ty.u32(), core::AddressSpace::kPrivate);
 
     auto* left = Expr("left");
     auto* right = Expr("right");
@@ -137,8 +137,8 @@ TEST_P(HlslBinaryTest, Emit_i32) {
         return;
     }
 
-    GlobalVar("left", ty.i32(), builtin::AddressSpace::kPrivate);
-    GlobalVar("right", ty.i32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("left", ty.i32(), core::AddressSpace::kPrivate);
+    GlobalVar("right", ty.i32(), core::AddressSpace::kPrivate);
 
     auto* left = Expr("left");
     auto* right = Expr("right");
@@ -192,7 +192,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_VectorScalar_f32) {
 }
 
 TEST_F(HlslASTPrinterTest_Binary, Multiply_VectorScalar_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* lhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
     auto* rhs = Expr(1_h);
@@ -224,7 +224,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_ScalarVector_f32) {
 }
 
 TEST_F(HlslASTPrinterTest_Binary, Multiply_ScalarVector_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* lhs = Expr(1_h);
     auto* rhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
@@ -241,7 +241,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_ScalarVector_f16) {
 }
 
 TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixScalar_f32) {
-    GlobalVar("mat", ty.mat3x3<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("mat", ty.mat3x3<f32>(), core::AddressSpace::kPrivate);
     auto* lhs = Expr("mat");
     auto* rhs = Expr(1_f);
 
@@ -256,9 +256,9 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixScalar_f32) {
 }
 
 TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixScalar_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
-    GlobalVar("mat", ty.mat3x3<f16>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("mat", ty.mat3x3<f16>(), core::AddressSpace::kPrivate);
     auto* lhs = Expr("mat");
     auto* rhs = Expr(1_h);
 
@@ -273,7 +273,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixScalar_f16) {
 }
 
 TEST_F(HlslASTPrinterTest_Binary, Multiply_ScalarMatrix_f32) {
-    GlobalVar("mat", ty.mat3x3<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("mat", ty.mat3x3<f32>(), core::AddressSpace::kPrivate);
     auto* lhs = Expr(1_f);
     auto* rhs = Expr("mat");
 
@@ -288,9 +288,9 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_ScalarMatrix_f32) {
 }
 
 TEST_F(HlslASTPrinterTest_Binary, Multiply_ScalarMatrix_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
-    GlobalVar("mat", ty.mat3x3<f16>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("mat", ty.mat3x3<f16>(), core::AddressSpace::kPrivate);
     auto* lhs = Expr(1_h);
     auto* rhs = Expr("mat");
 
@@ -305,7 +305,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_ScalarMatrix_f16) {
 }
 
 TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixVector_f32) {
-    GlobalVar("mat", ty.mat3x3<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("mat", ty.mat3x3<f32>(), core::AddressSpace::kPrivate);
     auto* lhs = Expr("mat");
     auto* rhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
 
@@ -320,9 +320,9 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixVector_f32) {
 }
 
 TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixVector_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
-    GlobalVar("mat", ty.mat3x3<f16>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("mat", ty.mat3x3<f16>(), core::AddressSpace::kPrivate);
     auto* lhs = Expr("mat");
     auto* rhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
 
@@ -337,7 +337,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixVector_f16) {
 }
 
 TEST_F(HlslASTPrinterTest_Binary, Multiply_VectorMatrix_f32) {
-    GlobalVar("mat", ty.mat3x3<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("mat", ty.mat3x3<f32>(), core::AddressSpace::kPrivate);
     auto* lhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
     auto* rhs = Expr("mat");
 
@@ -352,9 +352,9 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_VectorMatrix_f32) {
 }
 
 TEST_F(HlslASTPrinterTest_Binary, Multiply_VectorMatrix_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
-    GlobalVar("mat", ty.mat3x3<f16>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("mat", ty.mat3x3<f16>(), core::AddressSpace::kPrivate);
     auto* lhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
     auto* rhs = Expr("mat");
 
@@ -369,8 +369,8 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_VectorMatrix_f16) {
 }
 
 TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixMatrix_f32) {
-    GlobalVar("lhs", ty.mat3x3<f32>(), builtin::AddressSpace::kPrivate);
-    GlobalVar("rhs", ty.mat3x3<f32>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("lhs", ty.mat3x3<f32>(), core::AddressSpace::kPrivate);
+    GlobalVar("rhs", ty.mat3x3<f32>(), core::AddressSpace::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
@@ -383,10 +383,10 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixMatrix_f32) {
 }
 
 TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixMatrix_f16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
-    GlobalVar("lhs", ty.mat3x3<f16>(), builtin::AddressSpace::kPrivate);
-    GlobalVar("rhs", ty.mat3x3<f16>(), builtin::AddressSpace::kPrivate);
+    GlobalVar("lhs", ty.mat3x3<f16>(), core::AddressSpace::kPrivate);
+    GlobalVar("rhs", ty.mat3x3<f16>(), core::AddressSpace::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
@@ -399,8 +399,8 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixMatrix_f16) {
 }
 
 TEST_F(HlslASTPrinterTest_Binary, Logical_And) {
-    GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("b", ty.bool_(), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("b", ty.bool_(), core::AddressSpace::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b"));
     WrapInFunction(expr);
@@ -419,10 +419,10 @@ if (tint_tmp) {
 
 TEST_F(HlslASTPrinterTest_Binary, Logical_Multi) {
     // (a && b) || (c || d)
-    GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("b", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("c", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("d", ty.bool_(), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("b", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("c", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("d", ty.bool_(), core::AddressSpace::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(
         ast::BinaryOp::kLogicalOr,
@@ -451,8 +451,8 @@ if (!tint_tmp) {
 }
 
 TEST_F(HlslASTPrinterTest_Binary, Logical_Or) {
-    GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("b", ty.bool_(), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("b", ty.bool_(), core::AddressSpace::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("a"), Expr("b"));
     WrapInFunction(expr);
@@ -478,9 +478,9 @@ TEST_F(HlslASTPrinterTest_Binary, If_WithLogical) {
     //   return 3i;
     // }
 
-    GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("b", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("c", ty.bool_(), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("b", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("c", ty.bool_(), core::AddressSpace::kPrivate);
 
     auto* expr =
         If(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
@@ -515,9 +515,9 @@ if ((tint_tmp)) {
 TEST_F(HlslASTPrinterTest_Binary, Return_WithLogical) {
     // return (a && b) || c;
 
-    GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("b", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("c", ty.bool_(), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("b", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("c", ty.bool_(), core::AddressSpace::kPrivate);
 
     auto* expr = Return(create<ast::BinaryExpression>(
         ast::BinaryOp::kLogicalOr,
@@ -543,10 +543,10 @@ return (tint_tmp);
 TEST_F(HlslASTPrinterTest_Binary, Assign_WithLogical) {
     // a = (b || c) && d;
 
-    GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("b", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("c", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("d", ty.bool_(), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("b", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("c", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("d", ty.bool_(), core::AddressSpace::kPrivate);
 
     auto* expr =
         Assign(Expr("a"),
@@ -574,12 +574,12 @@ a = (tint_tmp);
 TEST_F(HlslASTPrinterTest_Binary, Decl_WithLogical) {
     // var a : bool = (b && c) || d;
 
-    GlobalVar("b", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("c", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("d", ty.bool_(), builtin::AddressSpace::kPrivate);
+    GlobalVar("b", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("c", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("d", ty.bool_(), core::AddressSpace::kPrivate);
 
     auto* var =
-        Var("a", ty.bool_(), builtin::AddressSpace::kUndefined,
+        Var("a", ty.bool_(), core::AddressSpace::kUndefined,
             create<ast::BinaryExpression>(
                 ast::BinaryOp::kLogicalOr,
                 create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("b"), Expr("c")),
@@ -613,10 +613,10 @@ TEST_F(HlslASTPrinterTest_Binary, Call_WithLogical) {
              Param(Sym(), ty.bool_()),
          },
          ty.void_(), tint::Empty, tint::Empty);
-    GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("b", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("c", ty.bool_(), builtin::AddressSpace::kPrivate);
-    GlobalVar("d", ty.bool_(), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("b", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("c", ty.bool_(), core::AddressSpace::kPrivate);
+    GlobalVar("d", ty.bool_(), core::AddressSpace::kPrivate);
 
     Vector params{
         create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),

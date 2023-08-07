@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::resolver {
 namespace {
@@ -80,8 +80,8 @@ TEST_F(ResolverIsStorableTest, Matrix) {
 }
 
 TEST_F(ResolverIsStorableTest, Pointer) {
-    auto* ptr = create<type::Pointer>(builtin::AddressSpace::kPrivate, create<type::I32>(),
-                                      builtin::Access::kReadWrite);
+    auto* ptr = create<type::Pointer>(core::AddressSpace::kPrivate, create<type::I32>(),
+                                      core::Access::kReadWrite);
     EXPECT_FALSE(r()->IsStorable(ptr));
 }
 

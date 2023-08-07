@@ -15,7 +15,7 @@
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 
 #include "gmock/gmock.h"
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
@@ -24,8 +24,8 @@ namespace tint::resolver {
 namespace {
 
 using ::testing::UnorderedElementsAre;
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using ResolverPipelineStageUseTest = ResolverTest;
 
@@ -68,7 +68,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderParam) {
 
     Func("main", Vector{Param("param", ty.Of(s))}, ty.vec4<f32>(),
          Vector{Return(Call<vec4<f32>>())}, Vector{Stage(ast::PipelineStage::kVertex)},
-         Vector{Builtin(builtin::BuiltinValue::kPosition)});
+         Vector{Builtin(core::BuiltinValue::kPosition)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -79,8 +79,8 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderParam) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderReturnType) {
-    auto* s = Structure("S", Vector{Member("a", ty.vec4<f32>(),
-                                           Vector{Builtin(builtin::BuiltinValue::kPosition)})});
+    auto* s = Structure(
+        "S", Vector{Member("a", ty.vec4<f32>(), Vector{Builtin(core::BuiltinValue::kPosition)})});
 
     Func("main", tint::Empty, ty.Of(s), Vector{Return(Call(ty.Of(s)))},
          Vector{Stage(ast::PipelineStage::kVertex)});
@@ -123,8 +123,8 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderReturnType) {
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsComputeShaderParam) {
     auto* s = Structure(
-        "S", Vector{Member("a", ty.u32(),
-                           Vector{Builtin(builtin::BuiltinValue::kLocalInvocationIndex)})});
+        "S",
+        Vector{Member("a", ty.u32(), Vector{Builtin(core::BuiltinValue::kLocalInvocationIndex)})});
 
     Func("main", Vector{Param("param", ty.Of(s))}, ty.void_(), tint::Empty,
          Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
@@ -138,8 +138,8 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsComputeShaderParam) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedMultipleStages) {
-    auto* s = Structure("S", Vector{Member("a", ty.vec4<f32>(),
-                                           Vector{Builtin(builtin::BuiltinValue::kPosition)})});
+    auto* s = Structure(
+        "S", Vector{Member("a", ty.vec4<f32>(), Vector{Builtin(core::BuiltinValue::kPosition)})});
 
     Func("vert_main", tint::Empty, ty.Of(s), Vector{Return(Call(ty.Of(s)))},
          Vector{Stage(ast::PipelineStage::kVertex)});

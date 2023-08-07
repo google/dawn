@@ -22,7 +22,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/tint/lang/core/builtin/access.h"
+#include "src/tint/lang/core/access.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/reader/parser/detail.h"
 #include "src/tint/lang/wgsl/reader/parser/token.h"
@@ -644,7 +644,7 @@ class Parser {
     Expect<const ast::Attribute*> expect_attribute();
     /// Parses a severity_control_name grammar element.
     /// @return the parsed severity control name.
-    Expect<builtin::DiagnosticSeverity> expect_severity_control_name();
+    Expect<core::DiagnosticSeverity> expect_severity_control_name();
     /// Parses a diagnostic_control grammar element.
     /// @return the parsed diagnostic control.
     Expect<ast::DiagnosticControl> expect_diagnostic_control();

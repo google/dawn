@@ -24,7 +24,7 @@ namespace {
 using WgslASTPrinterTest = TestHelper;
 
 TEST_F(WgslASTPrinterTest, Emit_Switch) {
-    GlobalVar("cond", ty.i32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("cond", ty.i32(), core::AddressSpace::kPrivate);
 
     auto* def_body = Block(create<ast::BreakStatement>());
     auto* def = Case(DefaultCaseSelector(), def_body);
@@ -59,7 +59,7 @@ TEST_F(WgslASTPrinterTest, Emit_Switch) {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_Switch_MixedDefault) {
-    GlobalVar("cond", ty.i32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("cond", ty.i32(), core::AddressSpace::kPrivate);
 
     auto* def_body = Block(create<ast::BreakStatement>());
     auto* def = Case(Vector{CaseSelector(5_i), DefaultCaseSelector()}, def_body);

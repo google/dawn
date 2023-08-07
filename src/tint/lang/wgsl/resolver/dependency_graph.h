@@ -18,13 +18,13 @@
 #include <string>
 #include <vector>
 
-#include "src/tint/lang/core/builtin/access.h"
-#include "src/tint/lang/core/builtin/builtin.h"
-#include "src/tint/lang/core/builtin/builtin_value.h"
-#include "src/tint/lang/core/builtin/function.h"
-#include "src/tint/lang/core/builtin/interpolation_sampling.h"
-#include "src/tint/lang/core/builtin/interpolation_type.h"
-#include "src/tint/lang/core/builtin/texel_format.h"
+#include "src/tint/lang/core/access.h"
+#include "src/tint/lang/core/builtin.h"
+#include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/function.h"
+#include "src/tint/lang/core/interpolation_sampling.h"
+#include "src/tint/lang/core/interpolation_type.h"
+#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
@@ -43,14 +43,14 @@ struct UnresolvedIdentifier {
 /// - const ast::TypeDecl*  (as const ast::Node*)
 /// - const ast::Variable*  (as const ast::Node*)
 /// - const ast::Function*  (as const ast::Node*)
-/// - builtin::Function
-/// - builtin::Access
-/// - builtin::AddressSpace
-/// - builtin::Builtin
-/// - builtin::BuiltinValue
-/// - builtin::InterpolationSampling
-/// - builtin::InterpolationType
-/// - builtin::TexelFormat
+/// - core::Function
+/// - core::Access
+/// - core::AddressSpace
+/// - core::Builtin
+/// - core::BuiltinValue
+/// - core::InterpolationSampling
+/// - core::InterpolationType
+/// - core::TexelFormat
 class ResolvedIdentifier {
   public:
     /// Constructor
@@ -74,76 +74,76 @@ class ResolvedIdentifier {
         return nullptr;
     }
 
-    /// @return the builtin function if the ResolvedIdentifier holds builtin::Function, otherwise
-    /// builtin::Function::kNone
-    builtin::Function BuiltinFunction() const {
-        if (auto n = std::get_if<builtin::Function>(&value_)) {
+    /// @return the builtin function if the ResolvedIdentifier holds core::Function, otherwise
+    /// core::Function::kNone
+    core::Function BuiltinFunction() const {
+        if (auto n = std::get_if<core::Function>(&value_)) {
             return *n;
         }
-        return builtin::Function::kNone;
+        return core::Function::kNone;
     }
 
-    /// @return the access if the ResolvedIdentifier holds builtin::Access, otherwise
-    /// builtin::Access::kUndefined
-    builtin::Access Access() const {
-        if (auto n = std::get_if<builtin::Access>(&value_)) {
+    /// @return the access if the ResolvedIdentifier holds core::Access, otherwise
+    /// core::Access::kUndefined
+    core::Access Access() const {
+        if (auto n = std::get_if<core::Access>(&value_)) {
             return *n;
         }
-        return builtin::Access::kUndefined;
+        return core::Access::kUndefined;
     }
 
-    /// @return the address space if the ResolvedIdentifier holds builtin::AddressSpace, otherwise
-    /// builtin::AddressSpace::kUndefined
-    builtin::AddressSpace AddressSpace() const {
-        if (auto n = std::get_if<builtin::AddressSpace>(&value_)) {
+    /// @return the address space if the ResolvedIdentifier holds core::AddressSpace, otherwise
+    /// core::AddressSpace::kUndefined
+    core::AddressSpace AddressSpace() const {
+        if (auto n = std::get_if<core::AddressSpace>(&value_)) {
             return *n;
         }
-        return builtin::AddressSpace::kUndefined;
+        return core::AddressSpace::kUndefined;
     }
 
-    /// @return the builtin type if the ResolvedIdentifier holds builtin::Builtin, otherwise
-    /// builtin::Builtin::kUndefined
-    builtin::Builtin BuiltinType() const {
-        if (auto n = std::get_if<builtin::Builtin>(&value_)) {
+    /// @return the builtin type if the ResolvedIdentifier holds core::Builtin, otherwise
+    /// core::Builtin::kUndefined
+    core::Builtin BuiltinType() const {
+        if (auto n = std::get_if<core::Builtin>(&value_)) {
             return *n;
         }
-        return builtin::Builtin::kUndefined;
+        return core::Builtin::kUndefined;
     }
 
-    /// @return the builtin value if the ResolvedIdentifier holds builtin::BuiltinValue, otherwise
-    /// builtin::BuiltinValue::kUndefined
-    builtin::BuiltinValue BuiltinValue() const {
-        if (auto n = std::get_if<builtin::BuiltinValue>(&value_)) {
+    /// @return the builtin value if the ResolvedIdentifier holds core::BuiltinValue, otherwise
+    /// core::BuiltinValue::kUndefined
+    core::BuiltinValue BuiltinValue() const {
+        if (auto n = std::get_if<core::BuiltinValue>(&value_)) {
             return *n;
         }
-        return builtin::BuiltinValue::kUndefined;
+        return core::BuiltinValue::kUndefined;
     }
 
     /// @return the texel format if the ResolvedIdentifier holds type::InterpolationSampling,
     /// otherwise type::InterpolationSampling::kUndefined
-    builtin::InterpolationSampling InterpolationSampling() const {
-        if (auto n = std::get_if<builtin::InterpolationSampling>(&value_)) {
+    core::InterpolationSampling InterpolationSampling() const {
+        if (auto n = std::get_if<core::InterpolationSampling>(&value_)) {
             return *n;
         }
-        return builtin::InterpolationSampling::kUndefined;
+        return core::InterpolationSampling::kUndefined;
     }
 
     /// @return the texel format if the ResolvedIdentifier holds type::InterpolationType,
     /// otherwise type::InterpolationType::kUndefined
-    builtin::InterpolationType InterpolationType() const {
-        if (auto n = std::get_if<builtin::InterpolationType>(&value_)) {
+    core::InterpolationType InterpolationType() const {
+        if (auto n = std::get_if<core::InterpolationType>(&value_)) {
             return *n;
         }
-        return builtin::InterpolationType::kUndefined;
+        return core::InterpolationType::kUndefined;
     }
 
     /// @return the texel format if the ResolvedIdentifier holds type::TexelFormat, otherwise
     /// type::TexelFormat::kUndefined
-    builtin::TexelFormat TexelFormat() const {
-        if (auto n = std::get_if<builtin::TexelFormat>(&value_)) {
+    core::TexelFormat TexelFormat() const {
+        if (auto n = std::get_if<core::TexelFormat>(&value_)) {
             return *n;
         }
-        return builtin::TexelFormat::kUndefined;
+        return core::TexelFormat::kUndefined;
     }
 
     /// @param value the value to compare the ResolvedIdentifier to
@@ -169,14 +169,14 @@ class ResolvedIdentifier {
   private:
     std::variant<UnresolvedIdentifier,
                  const ast::Node*,
-                 builtin::Function,
-                 builtin::Access,
-                 builtin::AddressSpace,
-                 builtin::Builtin,
-                 builtin::BuiltinValue,
-                 builtin::InterpolationSampling,
-                 builtin::InterpolationType,
-                 builtin::TexelFormat>
+                 core::Function,
+                 core::Access,
+                 core::AddressSpace,
+                 core::Builtin,
+                 core::BuiltinValue,
+                 core::InterpolationSampling,
+                 core::InterpolationType,
+                 core::TexelFormat>
         value_;
 };
 

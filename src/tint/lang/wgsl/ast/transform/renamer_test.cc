@@ -19,8 +19,8 @@
 #include <vector>
 
 #include "gmock/gmock.h"
-#include "src/tint/lang/core/builtin/builtin.h"
-#include "src/tint/lang/core/builtin/texel_format.h"
+#include "src/tint/lang/core/builtin.h"
+#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/utils/text/string.h"
 
@@ -1712,7 +1712,7 @@ std::string ExpandBuiltinType(std::string_view name) {
 
 std::vector<const char*> ConstructableTypes() {
     std::vector<const char*> out;
-    for (auto* ty : builtin::kBuiltinStrings) {
+    for (auto* ty : core::kBuiltinStrings) {
         std::string_view type(ty);
         if (type != "ptr" && type != "atomic" && !tint::HasPrefix(type, "sampler") &&
             !tint::HasPrefix(type, "texture") && !tint::HasPrefix(type, "__")) {
@@ -1924,20 +1924,20 @@ INSTANTIATE_TEST_SUITE_P(RenamerBuiltinTypeTest,
 /// @return WGSL builtin identifier keywords
 std::vector<const char*> Identifiers() {
     std::vector<const char*> out;
-    for (auto* ident : builtin::kBuiltinStrings) {
+    for (auto* ident : core::kBuiltinStrings) {
         if (!tint::HasPrefix(ident, "__")) {
             out.push_back(ident);
         }
     }
-    for (auto* ident : builtin::kAddressSpaceStrings) {
+    for (auto* ident : core::kAddressSpaceStrings) {
         if (!tint::HasPrefix(ident, "_")) {
             out.push_back(ident);
         }
     }
-    for (auto* ident : builtin::kTexelFormatStrings) {
+    for (auto* ident : core::kTexelFormatStrings) {
         out.push_back(ident);
     }
-    for (auto* ident : builtin::kAccessStrings) {
+    for (auto* ident : core::kAccessStrings) {
         out.push_back(ident);
     }
     return out;

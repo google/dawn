@@ -84,7 +84,7 @@ TEST_F(ResolverConstAssertTest, Local_Const_Fail) {
 }
 
 TEST_F(ResolverConstAssertTest, Local_NonConst) {
-    GlobalVar("V", ty.bool_(), Expr(true), builtin::AddressSpace::kPrivate);
+    GlobalVar("V", ty.bool_(), Expr(true), core::AddressSpace::kPrivate);
     WrapInFunction(ConstAssert(Expr(Source{{12, 34}}, "V")));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

@@ -73,7 +73,7 @@ TEST_F(SpirvASTPrinterTest, If_WithStatements) {
     //   v = 2;
     // }
 
-    auto* var = GlobalVar("v", ty.i32(), builtin::AddressSpace::kPrivate);
+    auto* var = GlobalVar("v", ty.i32(), core::AddressSpace::kPrivate);
     auto* body = Block(Assign("v", 2_i));
     auto* expr = If(true, body);
     WrapInFunction(expr);
@@ -109,7 +109,7 @@ TEST_F(SpirvASTPrinterTest, If_WithElse) {
     //   v = 3i;
     // }
 
-    auto* var = GlobalVar("v", ty.i32(), builtin::AddressSpace::kPrivate);
+    auto* var = GlobalVar("v", ty.i32(), core::AddressSpace::kPrivate);
     auto* body = Block(Assign("v", 2_i));
     auto* else_body = Block(Assign("v", 3_i));
 
@@ -151,7 +151,7 @@ TEST_F(SpirvASTPrinterTest, If_WithElseIf) {
     //   v = 3i;
     // }
 
-    auto* var = GlobalVar("v", ty.i32(), builtin::AddressSpace::kPrivate);
+    auto* var = GlobalVar("v", ty.i32(), core::AddressSpace::kPrivate);
     auto* body = Block(Assign("v", 2_i));
     auto* else_body = Block(Assign("v", 3_i));
 
@@ -202,7 +202,7 @@ TEST_F(SpirvASTPrinterTest, If_WithMultiple) {
     //   v = 5i;
     // }
 
-    auto* var = GlobalVar("v", ty.i32(), builtin::AddressSpace::kPrivate);
+    auto* var = GlobalVar("v", ty.i32(), core::AddressSpace::kPrivate);
     auto* body = Block(Assign("v", 2_i));
     auto* elseif_1_body = Block(Assign("v", 3_i));
     auto* elseif_2_body = Block(Assign("v", 4_i));
@@ -567,7 +567,7 @@ TEST_F(SpirvASTPrinterTest, If_WithLoad_Bug327) {
     // if (a) {
     // }
 
-    auto* var = GlobalVar("a", ty.bool_(), builtin::AddressSpace::kPrivate);
+    auto* var = GlobalVar("a", ty.bool_(), core::AddressSpace::kPrivate);
     auto* fn = Func("f", tint::Empty, ty.void_(),
                     Vector{
                         If("a", Block()),

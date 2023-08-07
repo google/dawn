@@ -71,43 +71,43 @@ ResourceBinding::SampledKind BaseTypeToSampledKind(const type::Type* base_type) 
 }
 
 ResourceBinding::TexelFormat TypeTexelFormatToResourceBindingTexelFormat(
-    const builtin::TexelFormat& image_format) {
+    const core::TexelFormat& image_format) {
     switch (image_format) {
-        case builtin::TexelFormat::kBgra8Unorm:
+        case core::TexelFormat::kBgra8Unorm:
             return ResourceBinding::TexelFormat::kBgra8Unorm;
-        case builtin::TexelFormat::kR32Uint:
+        case core::TexelFormat::kR32Uint:
             return ResourceBinding::TexelFormat::kR32Uint;
-        case builtin::TexelFormat::kR32Sint:
+        case core::TexelFormat::kR32Sint:
             return ResourceBinding::TexelFormat::kR32Sint;
-        case builtin::TexelFormat::kR32Float:
+        case core::TexelFormat::kR32Float:
             return ResourceBinding::TexelFormat::kR32Float;
-        case builtin::TexelFormat::kRgba8Unorm:
+        case core::TexelFormat::kRgba8Unorm:
             return ResourceBinding::TexelFormat::kRgba8Unorm;
-        case builtin::TexelFormat::kRgba8Snorm:
+        case core::TexelFormat::kRgba8Snorm:
             return ResourceBinding::TexelFormat::kRgba8Snorm;
-        case builtin::TexelFormat::kRgba8Uint:
+        case core::TexelFormat::kRgba8Uint:
             return ResourceBinding::TexelFormat::kRgba8Uint;
-        case builtin::TexelFormat::kRgba8Sint:
+        case core::TexelFormat::kRgba8Sint:
             return ResourceBinding::TexelFormat::kRgba8Sint;
-        case builtin::TexelFormat::kRg32Uint:
+        case core::TexelFormat::kRg32Uint:
             return ResourceBinding::TexelFormat::kRg32Uint;
-        case builtin::TexelFormat::kRg32Sint:
+        case core::TexelFormat::kRg32Sint:
             return ResourceBinding::TexelFormat::kRg32Sint;
-        case builtin::TexelFormat::kRg32Float:
+        case core::TexelFormat::kRg32Float:
             return ResourceBinding::TexelFormat::kRg32Float;
-        case builtin::TexelFormat::kRgba16Uint:
+        case core::TexelFormat::kRgba16Uint:
             return ResourceBinding::TexelFormat::kRgba16Uint;
-        case builtin::TexelFormat::kRgba16Sint:
+        case core::TexelFormat::kRgba16Sint:
             return ResourceBinding::TexelFormat::kRgba16Sint;
-        case builtin::TexelFormat::kRgba16Float:
+        case core::TexelFormat::kRgba16Float:
             return ResourceBinding::TexelFormat::kRgba16Float;
-        case builtin::TexelFormat::kRgba32Uint:
+        case core::TexelFormat::kRgba32Uint:
             return ResourceBinding::TexelFormat::kRgba32Uint;
-        case builtin::TexelFormat::kRgba32Sint:
+        case core::TexelFormat::kRgba32Sint:
             return ResourceBinding::TexelFormat::kRgba32Sint;
-        case builtin::TexelFormat::kRgba32Float:
+        case core::TexelFormat::kRgba32Float:
             return ResourceBinding::TexelFormat::kRgba32Float;
-        case builtin::TexelFormat::kUndefined:
+        case core::TexelFormat::kUndefined:
             return ResourceBinding::TexelFormat::kNone;
     }
     return ResourceBinding::TexelFormat::kNone;

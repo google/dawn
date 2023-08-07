@@ -20,13 +20,13 @@
 namespace tint::spirv::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using SpirvASTPrinterTest = TestHelper;
 
 TEST_F(SpirvASTPrinterTest, Assign_Var) {
-    auto* v = GlobalVar("var", ty.f32(), builtin::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.f32(), core::AddressSpace::kPrivate);
 
     auto* assign = Assign("var", 1_f);
 
@@ -58,7 +58,7 @@ TEST_F(SpirvASTPrinterTest, Assign_Var_OutsideFunction_IsError) {
         {
             ProgramBuilder pb;
 
-            auto* v = pb.GlobalVar("var", pb.ty.f32(), builtin::AddressSpace::kPrivate);
+            auto* v = pb.GlobalVar("var", pb.ty.f32(), core::AddressSpace::kPrivate);
 
             auto* assign = pb.Assign("var", pb.Expr(1_f));
 
@@ -74,7 +74,7 @@ TEST_F(SpirvASTPrinterTest, Assign_Var_OutsideFunction_IsError) {
 }
 
 TEST_F(SpirvASTPrinterTest, Assign_Var_ZeroInitializer) {
-    auto* v = GlobalVar("var", ty.vec3<f32>(), builtin::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.vec3<f32>(), core::AddressSpace::kPrivate);
 
     auto* val = Call<vec3<f32>>();
     auto* assign = Assign("var", val);
@@ -105,7 +105,7 @@ TEST_F(SpirvASTPrinterTest, Assign_Var_ZeroInitializer) {
 TEST_F(SpirvASTPrinterTest, Assign_Var_Complex_InitializerNestedVector) {
     auto* init = Call<vec3<f32>>(Call<vec2<f32>>(1_f, 2_f), 3_f);
 
-    auto* v = GlobalVar("var", ty.vec3<f32>(), builtin::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.vec3<f32>(), core::AddressSpace::kPrivate);
 
     auto* assign = Assign("var", init);
 
@@ -138,7 +138,7 @@ TEST_F(SpirvASTPrinterTest, Assign_Var_Complex_InitializerNestedVector) {
 TEST_F(SpirvASTPrinterTest, Assign_Var_Complex_Initializer) {
     auto* init = Call<vec3<f32>>(1_f, 2_f, 3_f);
 
-    auto* v = GlobalVar("var", ty.vec3<f32>(), builtin::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.vec3<f32>(), core::AddressSpace::kPrivate);
 
     auto* assign = Assign("var", init);
 
@@ -213,7 +213,7 @@ OpStore %9 %10
 }
 
 TEST_F(SpirvASTPrinterTest, Assign_Vector) {
-    auto* v = GlobalVar("var", ty.vec3<f32>(), builtin::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.vec3<f32>(), core::AddressSpace::kPrivate);
 
     auto* val = Call<vec3<f32>>(1_f, 1_f, 3_f);
     auto* assign = Assign("var", val);
@@ -247,7 +247,7 @@ TEST_F(SpirvASTPrinterTest, Assign_Vector) {
 TEST_F(SpirvASTPrinterTest, Assign_Vector_MemberByName) {
     // var.y = 1
 
-    auto* v = GlobalVar("var", ty.vec3<f32>(), builtin::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.vec3<f32>(), core::AddressSpace::kPrivate);
 
     auto* assign = Assign(MemberAccessor("var", "y"), Expr(1_f));
 
@@ -282,7 +282,7 @@ OpStore %9 %10
 TEST_F(SpirvASTPrinterTest, Assign_Vector_MemberByIndex) {
     // var[1] = 1
 
-    auto* v = GlobalVar("var", ty.vec3<f32>(), builtin::AddressSpace::kPrivate);
+    auto* v = GlobalVar("var", ty.vec3<f32>(), core::AddressSpace::kPrivate);
 
     auto* assign = Assign(IndexAccessor("var", 1_i), Expr(1_f));
 

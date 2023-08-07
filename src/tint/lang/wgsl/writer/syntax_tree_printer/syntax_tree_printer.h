@@ -63,9 +63,9 @@ class UnaryOpExpression;
 class Variable;
 class WhileStatement;
 }  // namespace tint::ast
-namespace tint::builtin {
+namespace tint::core {
 enum class TexelFormat;
-}  // namespace tint::builtin
+}  // namespace tint::core
 
 namespace tint::wgsl::writer {
 
@@ -188,7 +188,7 @@ class SyntaxTreePrinter : public tint::TextGenerator {
     void EmitStructType(const ast::Struct* str);
     /// Handles emitting an image format
     /// @param fmt the format to generate
-    void EmitImageFormat(const builtin::TexelFormat fmt);
+    void EmitImageFormat(const core::TexelFormat fmt);
     /// Handles a unary op expression
     /// @param expr the expression to emit
     void EmitUnaryOp(const ast::UnaryOpExpression* expr);

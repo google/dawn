@@ -329,7 +329,7 @@ TEST_F(SpirvWriterTest, Type_DepthMultisampledTexture_DedupWithMultisampledTextu
 )");
 }
 
-using Format = builtin::TexelFormat;
+using Format = core::TexelFormat;
 struct StorageTextureCase {
     std::string result;
     Dim dim;
@@ -339,14 +339,14 @@ using Type_StorageTexture = SpirvWriterTestWithParam<StorageTextureCase>;
 TEST_P(Type_StorageTexture, Emit) {
     auto params = GetParam();
     writer_.Type(
-        ty.Get<type::StorageTexture>(params.dim, params.format, builtin::Access::kWrite,
+        ty.Get<type::StorageTexture>(params.dim, params.format, core::Access::kWrite,
                                      type::StorageTexture::SubtypeFor(params.format, mod.Types())));
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(params.result);
-    if (params.format == builtin::TexelFormat::kRg32Uint ||
-        params.format == builtin::TexelFormat::kRg32Sint ||
-        params.format == builtin::TexelFormat::kRg32Float) {
+    if (params.format == core::TexelFormat::kRg32Uint ||
+        params.format == core::TexelFormat::kRg32Sint ||
+        params.format == core::TexelFormat::kRg32Float) {
         EXPECT_INST("OpCapability StorageImageExtendedFormats");
     }
 }

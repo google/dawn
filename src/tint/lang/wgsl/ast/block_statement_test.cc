@@ -45,8 +45,8 @@ TEST_F(BlockStatementTest, Creation_WithAttributes) {
     auto* d = create<DiscardStatement>();
     auto* ptr = d;
 
-    auto* attr1 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "foo");
-    auto* attr2 = DiagnosticAttribute(builtin::DiagnosticSeverity::kOff, "bar");
+    auto* attr1 = DiagnosticAttribute(core::DiagnosticSeverity::kOff, "foo");
+    auto* attr2 = DiagnosticAttribute(core::DiagnosticSeverity::kOff, "bar");
     auto* b = create<BlockStatement>(tint::Vector{d}, tint::Vector{attr1, attr2});
 
     ASSERT_EQ(b->statements.Length(), 1u);

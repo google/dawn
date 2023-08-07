@@ -178,7 +178,7 @@ class InspectorBuilder : public ProgramBuilder {
     /// @param binding the binding number to use for the storage buffer
     void AddStorageBuffer(const std::string& name,
                           ast::Type type,
-                          builtin::Access access,
+                          core::Access access,
                           uint32_t group,
                           uint32_t binding);
 
@@ -286,7 +286,7 @@ class InspectorBuilder : public ProgramBuilder {
     /// @param dim the texture dimension of the storage texture
     /// @param format the texel format of the storage texture
     /// @returns the storage texture type
-    ast::Type MakeStorageTextureTypes(type::TextureDimension dim, builtin::TexelFormat format);
+    ast::Type MakeStorageTextureTypes(type::TextureDimension dim, core::TexelFormat format);
 
     /// Adds a storage texture variable to the program
     /// @param name the name of the variable

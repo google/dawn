@@ -23,8 +23,8 @@ using ::testing::HasSubstr;
 namespace tint::glsl::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using GlslASTPrinterTest_Function = TestHelper;
 
@@ -166,8 +166,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_WithInOut_Builtins
     // fn frag_main(@position(0) coord : vec4<f32>) -> @frag_depth f32 {
     //   return coord.x;
     // }
-    auto* coord_in =
-        Param("coord", ty.vec4<f32>(), Vector{Builtin(builtin::BuiltinValue::kPosition)});
+    auto* coord_in = Param("coord", ty.vec4<f32>(), Vector{Builtin(core::BuiltinValue::kPosition)});
     Func("frag_main",
          Vector{
              coord_in,
@@ -180,7 +179,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_WithInOut_Builtins
              Stage(ast::PipelineStage::kFragment),
          },
          Vector{
-             Builtin(builtin::BuiltinValue::kFragDepth),
+             Builtin(core::BuiltinValue::kFragDepth),
          });
 
     ASTPrinter& gen = SanitizeAndBuild();
@@ -215,13 +214,13 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_SharedStruct_Diffe
     //   const g = inputs.col2;
     //   const p = inputs.pos;
     // }
-    auto* interface_struct = Structure(
-        "Interface",
-        Vector{
-            Member("pos", ty.vec4<f32>(), Vector{Builtin(builtin::BuiltinValue::kPosition)}),
-            Member("col1", ty.f32(), Vector{Location(1_a)}),
-            Member("col2", ty.f32(), Vector{Location(2_a)}),
-        });
+    auto* interface_struct =
+        Structure("Interface",
+                  Vector{
+                      Member("pos", ty.vec4<f32>(), Vector{Builtin(core::BuiltinValue::kPosition)}),
+                      Member("col1", ty.f32(), Vector{Location(1_a)}),
+                      Member("col2", ty.f32(), Vector{Location(2_a)}),
+                  });
 
     Func("vert_main", tint::Empty, ty.Of(interface_struct),
          Vector{Return(Call(ty.Of(interface_struct), Call<vec4<f32>>(), 0.5_f, 0.25_f))},
@@ -297,7 +296,7 @@ TEST_F(GlslASTPrinterTest_Function,
   // }
   auto* vertex_output_struct = Structure(
       "VertexOutput",
-      {Member("pos", ty.vec4<f32>(), {Builtin(builtin::BuiltinValue::kPosition)})});
+      {Member("pos", ty.vec4<f32>(), {Builtin(core::BuiltinValue::kPosition)})});
 
   Func("foo", Vector{Param("x", ty.f32())}, ty.Of(vertex_output_struct),
        {Return(Call(ty.Of(vertex_output_struct),
@@ -352,7 +351,7 @@ tint_symbol_2 vert_main2() {
 TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_With_Uniform) {
     auto* ubo_ty = Structure("UBO", Vector{Member("coord", ty.vec4<f32>())});
     auto* ubo =
-        GlobalVar("ubo", ty.Of(ubo_ty), builtin::AddressSpace::kUniform, Binding(0_a), Group(1_a));
+        GlobalVar("ubo", ty.Of(ubo_ty), core::AddressSpace::kUniform, Binding(0_a), Group(1_a));
 
     Func("sub_func",
          Vector{
@@ -402,7 +401,7 @@ void frag_main() {
 TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_With_UniformStruct) {
     auto* s = Structure("Uniforms", Vector{Member("coord", ty.vec4<f32>())});
 
-    GlobalVar("uniforms", ty.Of(s), builtin::AddressSpace::kUniform, Binding(0_a), Group(1_a));
+    GlobalVar("uniforms", ty.Of(s), core::AddressSpace::kUniform, Binding(0_a), Group(1_a));
 
     auto* var = Var("v", ty.f32(), MemberAccessor(MemberAccessor("uniforms", "coord"), "x"));
 
@@ -442,7 +441,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_With_RW_StorageBuf
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    GlobalVar("coord", ty.Of(s), core::AddressSpace::kStorage, core::Access::kReadWrite,
               Binding(0_a), Group(1_a));
 
     auto* var = Var("v", ty.f32(), MemberAccessor("coord", "b"));
@@ -489,8 +488,8 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_With_RO_StorageBuf
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead,
-              Binding(0_a), Group(1_a));
+    GlobalVar("coord", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead, Binding(0_a),
+              Group(1_a));
 
     auto* var = Var("v", ty.f32(), MemberAccessor("coord", "b"));
 
@@ -537,7 +536,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_With_WO_StorageBuf
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    GlobalVar("coord", ty.Of(s), core::AddressSpace::kStorage, core::Access::kReadWrite,
               Binding(0_a), Group(1_a));
 
     Func("frag_main", tint::Empty, ty.void_(),
@@ -582,7 +581,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_EntryPoint_With_StorageBuffer
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    GlobalVar("coord", ty.Of(s), core::AddressSpace::kStorage, core::Access::kReadWrite,
               Binding(0_a), Group(1_a));
 
     Func("frag_main", tint::Empty, ty.void_(),
@@ -623,7 +622,7 @@ void main() {
 
 TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_Called_By_EntryPoint_With_Uniform) {
     auto* s = Structure("S", Vector{Member("x", ty.f32())});
-    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kUniform, Binding(0_a), Group(1_a));
+    GlobalVar("coord", ty.Of(s), core::AddressSpace::kUniform, Binding(0_a), Group(1_a));
 
     Func("sub_func", Vector{Param("param", ty.f32())}, ty.f32(),
          Vector{
@@ -668,7 +667,7 @@ void frag_main() {
 
 TEST_F(GlslASTPrinterTest_Function, Emit_Attribute_Called_By_EntryPoint_With_StorageBuffer) {
     auto* s = Structure("S", Vector{Member("x", ty.f32())});
-    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    GlobalVar("coord", ty.Of(s), core::AddressSpace::kStorage, core::Access::kReadWrite,
               Binding(0_a), Group(1_a));
 
     Func("sub_func", Vector{Param("param", ty.f32())}, ty.f32(),
@@ -881,7 +880,7 @@ TEST_F(GlslASTPrinterTest_Function, Emit_Multiple_EntryPoint_With_Same_ModuleVar
 
     auto* s = Structure("Data", Vector{Member("d", ty.f32())});
 
-    GlobalVar("data", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    GlobalVar("data", ty.Of(s), core::AddressSpace::kStorage, core::Access::kReadWrite,
               Binding(0_a), Group(0_a));
 
     {

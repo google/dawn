@@ -32,8 +32,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::MultiplanarExternalTexture::NewB
 namespace tint::ast::transform {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 bool ShouldRun(const Program* program) {
     auto ext = program->Types().Find<type::ExternalTexture>();
@@ -141,7 +141,7 @@ struct MultiplanarExternalTexture::State {
             b.GlobalVar(syms.plane_1, b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32()),
                         b.Group(AInt(bps.plane_1.group)), b.Binding(AInt(bps.plane_1.binding)));
             syms.params = b.Symbols().New("ext_tex_params");
-            b.GlobalVar(syms.params, b.ty("ExternalTextureParams"), builtin::AddressSpace::kUniform,
+            b.GlobalVar(syms.params, b.ty("ExternalTextureParams"), core::AddressSpace::kUniform,
                         b.Group(AInt(bps.params.group)), b.Binding(AInt(bps.params.binding)));
 
             // Replace the original texture_external binding with a texture_2d<f32> binding.
@@ -193,7 +193,7 @@ struct MultiplanarExternalTexture::State {
 
             if (builtin && !builtin->Parameters().IsEmpty() &&
                 builtin->Parameters()[0]->Type()->Is<type::ExternalTexture>() &&
-                builtin->Type() != builtin::Function::kTextureDimensions) {
+                builtin->Type() != core::Function::kTextureDimensions) {
                 if (auto* var_user =
                         sem.GetVal(expr->args[0])->UnwrapLoad()->As<sem::VariableUser>()) {
                     auto it = new_binding_symbols.find(var_user->Variable());
@@ -207,9 +207,9 @@ struct MultiplanarExternalTexture::State {
                     auto& syms = it->second;
 
                     switch (builtin->Type()) {
-                        case builtin::Function::kTextureLoad:
+                        case core::Function::kTextureLoad:
                             return createTextureLoad(call, syms);
-                        case builtin::Function::kTextureSampleBaseClampToEdge:
+                        case core::Function::kTextureSampleBaseClampToEdge:
                             return createTextureSampleBaseClampToEdge(expr, syms);
                         default:
                             break;
@@ -308,13 +308,13 @@ struct MultiplanarExternalTexture::State {
     /// builtin function.
     /// @param call_type determines which function body to generate
     /// @returns a statement list that makes of the body of the chosen function
-    auto buildTextureBuiltinBody(builtin::Function call_type) {
+    auto buildTextureBuiltinBody(core::Function call_type) {
         tint::Vector<const Statement*, 16> stmts;
         const CallExpression* single_plane_call = nullptr;
         const CallExpression* plane_0_call = nullptr;
         const CallExpression* plane_1_call = nullptr;
         switch (call_type) {
-            case builtin::Function::kTextureSampleBaseClampToEdge:
+            case core::Function::kTextureSampleBaseClampToEdge:
                 stmts.Push(b.Decl(b.Let(
                     "modifiedCoords", b.Mul(b.MemberAccessor("params", "coordTransformationMatrix"),
                                             b.Call<vec3<f32>>("coord", 1_a)))));
@@ -344,7 +344,7 @@ struct MultiplanarExternalTexture::State {
                 // textureSampleLevel(plane1, smp, plane1_clamped, 0.0);
                 plane_1_call = b.Call("textureSampleLevel", "plane1", "smp", "plane1_clamped", 0_a);
                 break;
-            case builtin::Function::kTextureLoad:
+            case core::Function::kTextureLoad:
                 // textureLoad(plane0, coord, 0);
                 single_plane_call = b.Call("textureLoad", "plane0", "coord", 0_a);
                 // textureLoad(plane0, coord, 0);
@@ -430,7 +430,7 @@ struct MultiplanarExternalTexture::State {
                        b.Param("params", b.ty(params_struct_sym)),
                    },
                    b.ty.vec4(b.ty.f32()),
-                   buildTextureBuiltinBody(builtin::Function::kTextureSampleBaseClampToEdge));
+                   buildTextureBuiltinBody(core::Function::kTextureSampleBaseClampToEdge));
         }
 
         return b.Call(texture_sample_external_sym, tint::Vector{
@@ -477,7 +477,7 @@ struct MultiplanarExternalTexture::State {
                        b.Param("params", b.ty(params_struct_sym)),
                    },
                    b.ty.vec4(b.ty.f32()),  //
-                   buildTextureBuiltinBody(builtin::Function::kTextureLoad));
+                   buildTextureBuiltinBody(core::Function::kTextureLoad));
 
             return name;
         });

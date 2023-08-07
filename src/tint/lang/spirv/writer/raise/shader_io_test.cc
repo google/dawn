@@ -21,8 +21,8 @@
 namespace tint::spirv::writer::raise {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using SpirvWriter_ShaderIOTest = ir::transform::TransformTest;
 
@@ -60,8 +60,8 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_NonStruct_Spirv) {
     auto* color1 = b.FunctionParam("color1", ty.f32());
     color1->SetLocation(0, {});
     auto* color2 = b.FunctionParam("color2", ty.f32());
-    color2->SetLocation(1, builtin::Interpolation{builtin::InterpolationType::kLinear,
-                                                  builtin::InterpolationSampling::kSample});
+    color2->SetLocation(1, core::Interpolation{core::InterpolationType::kLinear,
+                                               core::InterpolationSampling::kSample});
 
     ep->SetParams({front_facing, position, color1, color2});
     ep->SetStage(ir::Function::PipelineStage::kFragment);
@@ -141,35 +141,34 @@ foo_LocationInputsStruct = struct @align(4), @block {
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, Parameters_Struct_Spirv) {
-    auto* str_ty =
-        ty.Struct(mod.symbols.New("Inputs"),
-                  {
-                      {
-                          mod.symbols.New("front_facing"),
-                          ty.bool_(),
-                          {{}, {}, builtin::BuiltinValue::kFrontFacing, {}, false},
-                      },
-                      {
-                          mod.symbols.New("position"),
-                          ty.vec4<f32>(),
-                          {{}, {}, builtin::BuiltinValue::kPosition, {}, true},
-                      },
-                      {
-                          mod.symbols.New("color1"),
-                          ty.f32(),
-                          {0u, {}, {}, {}, false},
-                      },
-                      {
-                          mod.symbols.New("color2"),
-                          ty.f32(),
-                          {1u,
-                           {},
-                           {},
-                           builtin::Interpolation{builtin::InterpolationType::kLinear,
-                                                  builtin::InterpolationSampling::kSample},
-                           false},
-                      },
-                  });
+    auto* str_ty = ty.Struct(mod.symbols.New("Inputs"),
+                             {
+                                 {
+                                     mod.symbols.New("front_facing"),
+                                     ty.bool_(),
+                                     {{}, {}, core::BuiltinValue::kFrontFacing, {}, false},
+                                 },
+                                 {
+                                     mod.symbols.New("position"),
+                                     ty.vec4<f32>(),
+                                     {{}, {}, core::BuiltinValue::kPosition, {}, true},
+                                 },
+                                 {
+                                     mod.symbols.New("color1"),
+                                     ty.f32(),
+                                     {0u, {}, {}, {}, false},
+                                 },
+                                 {
+                                     mod.symbols.New("color2"),
+                                     ty.f32(),
+                                     {1u,
+                                      {},
+                                      {},
+                                      core::Interpolation{core::InterpolationType::kLinear,
+                                                          core::InterpolationSampling::kSample},
+                                      false},
+                                 },
+                             });
 
     auto* ep = b.Function("foo", ty.void_());
     auto* str_param = b.FunctionParam("inputs", str_ty);
@@ -282,7 +281,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Mixed_Spirv) {
                                  {
                                      mod.symbols.New("position"),
                                      ty.vec4<f32>(),
-                                     {{}, {}, builtin::BuiltinValue::kPosition, {}, true},
+                                     {{}, {}, core::BuiltinValue::kPosition, {}, true},
                                  },
                                  {
                                      mod.symbols.New("color1"),
@@ -296,8 +295,8 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_Mixed_Spirv) {
     front_facing->SetBuiltin(ir::FunctionParam::Builtin::kFrontFacing);
     auto* str_param = b.FunctionParam("inputs", str_ty);
     auto* color2 = b.FunctionParam("color2", ty.f32());
-    color2->SetLocation(1, builtin::Interpolation{builtin::InterpolationType::kLinear,
-                                                  builtin::InterpolationSampling::kSample});
+    color2->SetLocation(1, core::Interpolation{core::InterpolationType::kLinear,
+                                               core::InterpolationSampling::kSample});
 
     ep->SetParams({front_facing, str_param, color2});
     ep->SetStage(ir::Function::PipelineStage::kFragment);
@@ -493,30 +492,29 @@ foo_LocationOutputsStruct = struct @align(16), @block {
 }
 
 TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_Struct_Spirv) {
-    auto* str_ty =
-        ty.Struct(mod.symbols.New("Outputs"),
-                  {
-                      {
-                          mod.symbols.New("position"),
-                          ty.vec4<f32>(),
-                          {{}, {}, builtin::BuiltinValue::kPosition, {}, true},
-                      },
-                      {
-                          mod.symbols.New("color1"),
-                          ty.f32(),
-                          {0u, {}, {}, {}, false},
-                      },
-                      {
-                          mod.symbols.New("color2"),
-                          ty.f32(),
-                          {1u,
-                           {},
-                           {},
-                           builtin::Interpolation{builtin::InterpolationType::kLinear,
-                                                  builtin::InterpolationSampling::kSample},
-                           false},
-                      },
-                  });
+    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
+                             {
+                                 {
+                                     mod.symbols.New("position"),
+                                     ty.vec4<f32>(),
+                                     {{}, {}, core::BuiltinValue::kPosition, {}, true},
+                                 },
+                                 {
+                                     mod.symbols.New("color1"),
+                                     ty.f32(),
+                                     {0u, {}, {}, {}, false},
+                                 },
+                                 {
+                                     mod.symbols.New("color2"),
+                                     ty.f32(),
+                                     {1u,
+                                      {},
+                                      {},
+                                      core::Interpolation{core::InterpolationType::kLinear,
+                                                          core::InterpolationSampling::kSample},
+                                      false},
+                                 },
+                             });
 
     auto* ep = b.Function("foo", str_ty);
     ep->SetStage(ir::Function::PipelineStage::kVertex);
@@ -599,7 +597,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedByVertexAndFragment_Spirv) {
                                  {
                                      mod.symbols.New("position"),
                                      vec4f,
-                                     {{}, {}, builtin::BuiltinValue::kPosition, {}, false},
+                                     {{}, {}, core::BuiltinValue::kPosition, {}, false},
                                  },
                                  {
                                      mod.symbols.New("color"),
@@ -748,7 +746,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedWithBuffer_Spirv) {
                                  {
                                      mod.symbols.New("position"),
                                      vec4f,
-                                     {{}, {}, builtin::BuiltinValue::kPosition, {}, false},
+                                     {{}, {}, core::BuiltinValue::kPosition, {}, false},
                                  },
                                  {
                                      mod.symbols.New("color"),
@@ -842,7 +840,7 @@ TEST_F(SpirvWriter_ShaderIOTest, SampleMask_Spirv) {
                                  {
                                      mod.symbols.New("mask"),
                                      ty.u32(),
-                                     {{}, {}, builtin::BuiltinValue::kSampleMask, {}, false},
+                                     {{}, {}, core::BuiltinValue::kSampleMask, {}, false},
                                  },
                              });
 

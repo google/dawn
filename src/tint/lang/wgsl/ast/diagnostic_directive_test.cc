@@ -22,25 +22,25 @@ namespace {
 using DiagnosticDirectiveTest = TestHelper;
 
 TEST_F(DiagnosticDirectiveTest, Name) {
-    auto* d = DiagnosticDirective(Source{{{10, 5}, {10, 15}}},
-                                  builtin::DiagnosticSeverity::kWarning, "foo");
+    auto* d =
+        DiagnosticDirective(Source{{{10, 5}, {10, 15}}}, core::DiagnosticSeverity::kWarning, "foo");
     EXPECT_EQ(d->source.range.begin.line, 10u);
     EXPECT_EQ(d->source.range.begin.column, 5u);
     EXPECT_EQ(d->source.range.end.line, 10u);
     EXPECT_EQ(d->source.range.end.column, 15u);
-    EXPECT_EQ(d->control.severity, builtin::DiagnosticSeverity::kWarning);
+    EXPECT_EQ(d->control.severity, core::DiagnosticSeverity::kWarning);
     EXPECT_EQ(d->control.rule_name->category, nullptr);
     CheckIdentifier(d->control.rule_name->name, "foo");
 }
 
 TEST_F(DiagnosticDirectiveTest, CategoryAndName) {
-    auto* d = DiagnosticDirective(Source{{{10, 5}, {10, 15}}},
-                                  builtin::DiagnosticSeverity::kWarning, "foo", "bar");
+    auto* d = DiagnosticDirective(Source{{{10, 5}, {10, 15}}}, core::DiagnosticSeverity::kWarning,
+                                  "foo", "bar");
     EXPECT_EQ(d->source.range.begin.line, 10u);
     EXPECT_EQ(d->source.range.begin.column, 5u);
     EXPECT_EQ(d->source.range.end.line, 10u);
     EXPECT_EQ(d->source.range.end.column, 15u);
-    EXPECT_EQ(d->control.severity, builtin::DiagnosticSeverity::kWarning);
+    EXPECT_EQ(d->control.severity, core::DiagnosticSeverity::kWarning);
     CheckIdentifier(d->control.rule_name->category, "foo");
     CheckIdentifier(d->control.rule_name->name, "bar");
 }

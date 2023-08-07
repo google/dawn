@@ -39,8 +39,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Robustness::Config);
 
 namespace tint::ast::transform {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 /// PIMPL state for the transform
 struct Robustness::State {
@@ -246,7 +246,7 @@ struct Robustness::State {
                     // Must clamp, even if the index is constant.
 
                     auto* arr_ptr = b.AddressOf(ctx.Clone(expr->Object()->Declaration()));
-                    return b.Sub(b.Call(builtin::Function::kArrayLength, arr_ptr), 1_u);
+                    return b.Sub(b.Call(core::Function::kArrayLength, arr_ptr), 1_u);
                 }
                 if (auto count = arr->ConstantCount()) {
                     if (expr->Index()->ConstantValue()) {
@@ -352,7 +352,7 @@ struct Robustness::State {
 
         auto* expr_sem = expr->Unwrap()->As<sem::IndexAccessorExpression>();
         auto idx = CastToU32(expr_sem->Index());
-        auto* clamped_idx = b.Call(builtin::Function::kMin, idx, max);
+        auto* clamped_idx = b.Call(core::Function::kMin, idx, max);
         ctx.Replace(expr->Declaration()->index, clamped_idx);
     }
 
@@ -367,14 +367,14 @@ struct Robustness::State {
         }
 
         if (predicate) {
-            if (builtin->Type() == builtin::Function::kWorkgroupUniformLoad) {
+            if (builtin->Type() == core::Function::kWorkgroupUniformLoad) {
                 // https://www.w3.org/TR/WGSL/#workgroupUniformLoad-builtin:
                 //  "Executes a control barrier synchronization function that affects memory and
                 //   atomic operations in the workgroup address space."
                 // Because the call acts like a control barrier, we need to make sure that we still
                 // trigger a workgroup barrier if the predicate fails.
                 PredicateCall(call, predicate,
-                              b.Block(b.CallStmt(b.Call(builtin::Function::kWorkgroupBarrier))));
+                              b.Block(b.CallStmt(b.Call(core::Function::kWorkgroupBarrier))));
             } else {
                 PredicateCall(call, predicate);
             }
@@ -417,7 +417,7 @@ struct Robustness::State {
                 // let num_levels = textureNumLevels(texture-arg);
                 num_levels = b.Symbols().New("num_levels");
                 hoist.InsertBefore(
-                    stmt, b.Decl(b.Let(num_levels, b.Call(builtin::Function::kTextureNumLevels,
+                    stmt, b.Decl(b.Let(num_levels, b.Call(core::Function::kTextureNumLevels,
                                                           ctx.Clone(texture_arg)))));
 
                 // predicate: level_idx < num_levels
@@ -442,12 +442,12 @@ struct Robustness::State {
                 // predicate: all(coords < textureDimensions(texture))
                 auto* dimensions =
                     level_idx.IsValid()
-                        ? b.Call(builtin::Function::kTextureDimensions, ctx.Clone(texture_arg),
-                                 b.Call(builtin::Function::kMin, b.Expr(level_idx),
+                        ? b.Call(core::Function::kTextureDimensions, ctx.Clone(texture_arg),
+                                 b.Call(core::Function::kMin, b.Expr(level_idx),
                                         b.Sub(num_levels, 1_a)))
-                        : b.Call(builtin::Function::kTextureDimensions, ctx.Clone(texture_arg));
+                        : b.Call(core::Function::kTextureDimensions, ctx.Clone(texture_arg));
                 predicate =
-                    And(predicate, b.Call(builtin::Function::kAll, b.LessThan(coords, dimensions)));
+                    And(predicate, b.Call(core::Function::kAll, b.LessThan(coords, dimensions)));
 
                 // Replace the level argument with `coord`
                 ctx.Replace(arg, b.Expr(coords));
@@ -457,7 +457,7 @@ struct Robustness::State {
         if (array_arg_idx >= 0) {
             // let array_idx = u32(array-arg)
             auto* arg = expr->args[static_cast<size_t>(array_arg_idx)];
-            auto* num_layers = b.Call(builtin::Function::kTextureNumLayers, ctx.Clone(texture_arg));
+            auto* num_layers = b.Call(core::Function::kTextureNumLayers, ctx.Clone(texture_arg));
             auto array_idx = b.Symbols().New("array_idx");
             hoist.InsertBefore(stmt, b.Decl(b.Let(array_idx, CastToUnsigned(ctx.Clone(arg), 1u))));
 
@@ -502,10 +502,10 @@ struct Robustness::State {
                 const auto* arg = expr->args[static_cast<size_t>(level_arg_idx)];
                 level_idx = b.Symbols().New("level_idx");
                 const auto* num_levels =
-                    b.Call(builtin::Function::kTextureNumLevels, ctx.Clone(texture_arg));
+                    b.Call(core::Function::kTextureNumLevels, ctx.Clone(texture_arg));
                 const auto* max = b.Sub(num_levels, 1_a);
                 hoist.InsertBefore(
-                    stmt, b.Decl(b.Let(level_idx, b.Call(builtin::Function::kMin,
+                    stmt, b.Decl(b.Let(level_idx, b.Call(core::Function::kMin,
                                                          b.Call<u32>(ctx.Clone(arg)), max))));
                 ctx.Replace(arg, b.Expr(level_idx));
             }
@@ -519,19 +519,19 @@ struct Robustness::State {
                 const auto width = WidthOf(param->Type());
                 const auto* dimensions =
                     level_idx.IsValid()
-                        ? b.Call(builtin::Function::kTextureDimensions, ctx.Clone(texture_arg),
+                        ? b.Call(core::Function::kTextureDimensions, ctx.Clone(texture_arg),
                                  level_idx)
-                        : b.Call(builtin::Function::kTextureDimensions, ctx.Clone(texture_arg));
+                        : b.Call(core::Function::kTextureDimensions, ctx.Clone(texture_arg));
 
                 // dimensions is u32 or vecN<u32>
                 const auto* unsigned_max = b.Sub(dimensions, ScalarOrVec(b.Expr(1_a), width));
                 if (param->Type()->is_signed_integer_scalar_or_vector()) {
                     const auto* zero = ScalarOrVec(b.Expr(0_a), width);
                     const auto* signed_max = CastToSigned(unsigned_max, width);
-                    ctx.Replace(
-                        arg, b.Call(builtin::Function::kClamp, ctx.Clone(arg), zero, signed_max));
+                    ctx.Replace(arg,
+                                b.Call(core::Function::kClamp, ctx.Clone(arg), zero, signed_max));
                 } else {
-                    ctx.Replace(arg, b.Call(builtin::Function::kMin, ctx.Clone(arg), unsigned_max));
+                    ctx.Replace(arg, b.Call(core::Function::kMin, ctx.Clone(arg), unsigned_max));
                 }
             }
         }
@@ -540,15 +540,14 @@ struct Robustness::State {
         if (array_arg_idx >= 0) {
             auto* param = builtin->Parameters()[static_cast<size_t>(array_arg_idx)];
             auto* arg = expr->args[static_cast<size_t>(array_arg_idx)];
-            auto* num_layers = b.Call(builtin::Function::kTextureNumLayers, ctx.Clone(texture_arg));
+            auto* num_layers = b.Call(core::Function::kTextureNumLayers, ctx.Clone(texture_arg));
 
             const auto* unsigned_max = b.Sub(num_layers, 1_a);
             if (param->Type()->is_signed_integer_scalar()) {
                 const auto* signed_max = CastToSigned(unsigned_max, 1u);
-                ctx.Replace(arg,
-                            b.Call(builtin::Function::kClamp, ctx.Clone(arg), 0_a, signed_max));
+                ctx.Replace(arg, b.Call(core::Function::kClamp, ctx.Clone(arg), 0_a, signed_max));
             } else {
-                ctx.Replace(arg, b.Call(builtin::Function::kMin, ctx.Clone(arg), unsigned_max));
+                ctx.Replace(arg, b.Call(core::Function::kMin, ctx.Clone(arg), unsigned_max));
             }
         }
     }
@@ -556,10 +555,9 @@ struct Robustness::State {
     /// @param type builtin type
     /// @returns true if the given builtin is a texture function that requires predication or
     /// clamping of arguments.
-    bool TextureBuiltinNeedsRobustness(builtin::Function type) {
-        return type == builtin::Function::kTextureLoad ||
-               type == builtin::Function::kTextureStore ||
-               type == builtin::Function::kTextureDimensions;
+    bool TextureBuiltinNeedsRobustness(core::Function type) {
+        return type == core::Function::kTextureLoad || type == core::Function::kTextureStore ||
+               type == core::Function::kTextureDimensions;
     }
 
     /// @returns a bitwise and of the two expressions, or the other expression if one is null.
@@ -623,21 +621,21 @@ struct Robustness::State {
 
     /// @returns the robustness action to perform for an OOB access in the address space @p
     /// address_space
-    Action ActionFor(builtin::AddressSpace address_space) {
+    Action ActionFor(core::AddressSpace address_space) {
         switch (address_space) {
-            case builtin::AddressSpace::kFunction:
+            case core::AddressSpace::kFunction:
                 return cfg.function_action;
-            case builtin::AddressSpace::kHandle:
+            case core::AddressSpace::kHandle:
                 return cfg.texture_action;
-            case builtin::AddressSpace::kPrivate:
+            case core::AddressSpace::kPrivate:
                 return cfg.private_action;
-            case builtin::AddressSpace::kPushConstant:
+            case core::AddressSpace::kPushConstant:
                 return cfg.push_constant_action;
-            case builtin::AddressSpace::kStorage:
+            case core::AddressSpace::kStorage:
                 return cfg.storage_action;
-            case builtin::AddressSpace::kUniform:
+            case core::AddressSpace::kUniform:
                 return cfg.uniform_action;
-            case builtin::AddressSpace::kWorkgroup:
+            case core::AddressSpace::kWorkgroup:
                 return cfg.workgroup_action;
             default:
                 break;

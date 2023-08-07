@@ -42,7 +42,7 @@ Case C(T input, U expected) {
 using ResolverConstEvalUnaryOpTest = ResolverTestWithParam<std::tuple<ast::UnaryOp, Case>>;
 
 TEST_P(ResolverConstEvalUnaryOpTest, Test) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto op = std::get<0>(GetParam());
     auto& c = std::get<1>(GetParam());

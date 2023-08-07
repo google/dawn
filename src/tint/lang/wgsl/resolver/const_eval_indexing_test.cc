@@ -17,8 +17,8 @@
 namespace tint::resolver {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 TEST_F(ResolverConstEvalTest, Vec3_Index) {
     auto* expr = IndexAccessor(Call<vec3<i32>>(1_i, 2_i, 3_i), 2_i);
@@ -68,7 +68,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 
 using ResolverConstEvalSwizzleTest = ResolverTestWithParam<Case>;
 TEST_P(ResolverConstEvalSwizzleTest, Test) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
     auto& param = GetParam();
     auto* expr = MemberAccessor(param.input.Expr(*this), param.swizzle);
     auto* a = Const("a", expr);
@@ -278,7 +278,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index_OOB_Low) {
 
 TEST_F(ResolverConstEvalTest, RuntimeArray_vec3_f32_Index_OOB_Low) {
     auto* sb = GlobalVar("sb", ty.array<vec3<f32>>(), Group(0_a), Binding(0_a),
-                         builtin::AddressSpace::kStorage);
+                         core::AddressSpace::kStorage);
     auto* expr = IndexAccessor(sb, Expr(Source{{12, 34}}, -2_i));
     WrapInFunction(expr);
 

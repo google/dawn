@@ -22,7 +22,7 @@ namespace {
 using WgslASTPrinterTest = TestHelper;
 
 TEST_F(WgslASTPrinterTest, Emit_Enable) {
-    auto* enable = Enable(builtin::Extension::kF16);
+    auto* enable = Enable(core::Extension::kF16);
 
     ASTPrinter& gen = Build();
 

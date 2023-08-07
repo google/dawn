@@ -23,7 +23,7 @@ namespace {
 using WgslASTPrinterTest = TestHelper;
 
 TEST_F(WgslASTPrinterTest, EmitIdentifierExpression_Single) {
-    GlobalVar("glsl", ty.f32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("glsl", ty.f32(), core::AddressSpace::kPrivate);
     auto* i = Expr("glsl");
     WrapInFunction(i);
 

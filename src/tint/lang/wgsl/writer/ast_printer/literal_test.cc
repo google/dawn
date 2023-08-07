@@ -158,7 +158,7 @@ INSTANTIATE_TEST_SUITE_P(Infinity,
 using WgslGenerator_F16LiteralTest = TestParamHelper<F16Data>;
 
 TEST_P(WgslGenerator_F16LiteralTest, Emit) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* v = Expr(GetParam().value);
 

@@ -19,7 +19,7 @@ namespace tint::msl::writer {
 namespace {
 
 struct MslBuiltinData {
-    builtin::BuiltinValue builtin;
+    core::BuiltinValue builtin;
     const char* attribute_name;
 };
 inline std::ostream& operator<<(std::ostream& out, MslBuiltinData data) {
@@ -39,19 +39,19 @@ INSTANTIATE_TEST_SUITE_P(
     MslPrinterTest,
     MslBuiltinConversionTest,
     testing::Values(
-        MslBuiltinData{builtin::BuiltinValue::kPosition, "position"},
-        MslBuiltinData{builtin::BuiltinValue::kVertexIndex, "vertex_id"},
-        MslBuiltinData{builtin::BuiltinValue::kInstanceIndex, "instance_id"},
-        MslBuiltinData{builtin::BuiltinValue::kFrontFacing, "front_facing"},
-        MslBuiltinData{builtin::BuiltinValue::kFragDepth, "depth(any)"},
-        MslBuiltinData{builtin::BuiltinValue::kLocalInvocationId, "thread_position_in_threadgroup"},
-        MslBuiltinData{builtin::BuiltinValue::kLocalInvocationIndex, "thread_index_in_threadgroup"},
-        MslBuiltinData{builtin::BuiltinValue::kGlobalInvocationId, "thread_position_in_grid"},
-        MslBuiltinData{builtin::BuiltinValue::kWorkgroupId, "threadgroup_position_in_grid"},
-        MslBuiltinData{builtin::BuiltinValue::kNumWorkgroups, "threadgroups_per_grid"},
-        MslBuiltinData{builtin::BuiltinValue::kSampleIndex, "sample_id"},
-        MslBuiltinData{builtin::BuiltinValue::kSampleMask, "sample_mask"},
-        MslBuiltinData{builtin::BuiltinValue::kPointSize, "point_size"}));
+        MslBuiltinData{core::BuiltinValue::kPosition, "position"},
+        MslBuiltinData{core::BuiltinValue::kVertexIndex, "vertex_id"},
+        MslBuiltinData{core::BuiltinValue::kInstanceIndex, "instance_id"},
+        MslBuiltinData{core::BuiltinValue::kFrontFacing, "front_facing"},
+        MslBuiltinData{core::BuiltinValue::kFragDepth, "depth(any)"},
+        MslBuiltinData{core::BuiltinValue::kLocalInvocationId, "thread_position_in_threadgroup"},
+        MslBuiltinData{core::BuiltinValue::kLocalInvocationIndex, "thread_index_in_threadgroup"},
+        MslBuiltinData{core::BuiltinValue::kGlobalInvocationId, "thread_position_in_grid"},
+        MslBuiltinData{core::BuiltinValue::kWorkgroupId, "threadgroup_position_in_grid"},
+        MslBuiltinData{core::BuiltinValue::kNumWorkgroups, "threadgroups_per_grid"},
+        MslBuiltinData{core::BuiltinValue::kSampleIndex, "sample_id"},
+        MslBuiltinData{core::BuiltinValue::kSampleMask, "sample_mask"},
+        MslBuiltinData{core::BuiltinValue::kPointSize, "point_size"}));
 
 }  // namespace
 }  // namespace tint::msl::writer

@@ -44,7 +44,7 @@ struct TypeTest : public TestHelper {
     const Matrix* mat4x3_f16 = create<Matrix>(vec3_f16, 4u);
     const Matrix* mat4x3_af = create<Matrix>(vec3_af, 4u);
     const Reference* ref_u32 =
-        create<Reference>(builtin::AddressSpace::kPrivate, u32, builtin::Access::kReadWrite);
+        create<Reference>(core::AddressSpace::kPrivate, u32, core::Access::kReadWrite);
     const Struct* str_f32 = create<Struct>(Sym("str_f32"),
                                            tint::Vector{
                                                create<StructMember>(

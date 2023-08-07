@@ -26,7 +26,7 @@ using namespace tint::number_suffixes;  // NOLINT
 using ProgramToIRStoreTest = helpers::IRProgramTest;
 
 TEST_F(ProgramToIRStoreTest, EmitStatement_Assign) {
-    GlobalVar("a", ty.u32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.u32(), core::AddressSpace::kPrivate);
 
     auto* expr = Assign("a", 4_u);
     WrapInFunction(expr);

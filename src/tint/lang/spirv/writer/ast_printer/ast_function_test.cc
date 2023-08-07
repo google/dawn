@@ -61,7 +61,7 @@ OpFunctionEnd
 }
 
 TEST_F(SpirvASTPrinterTest, Function_Terminator_ReturnValue) {
-    GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("a", ty.f32(), core::AddressSpace::kPrivate);
 
     Func("a_func", tint::Empty, ty.f32(), Vector{Return("a")}, tint::Empty);
 
@@ -198,7 +198,7 @@ TEST_F(SpirvASTPrinterTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
     auto* s = Structure("Data", Vector{Member("d", ty.f32())});
 
-    GlobalVar("data", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
+    GlobalVar("data", ty.Of(s), core::AddressSpace::kStorage, core::Access::kReadWrite,
               Binding(0_a), Group(0_a));
 
     {

@@ -17,13 +17,13 @@
 namespace tint::msl::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 TEST_F(MslPrinterTest, VarF32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr<builtin::AddressSpace::kFunction, f32>());
+        b.Var("a", ty.ptr<core::AddressSpace::kFunction, f32>());
         b.Return(func);
     });
 
@@ -38,7 +38,7 @@ void foo() {
 TEST_F(MslPrinterTest, VarI32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* v = b.Var("a", ty.ptr<builtin::AddressSpace::kFunction, i32>());
+        auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, i32>());
         v->SetInitializer(b.Constant(1_i));
         b.Return(func);
     });
@@ -54,7 +54,7 @@ void foo() {
 TEST_F(MslPrinterTest, VarU32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* v = b.Var("a", ty.ptr<builtin::AddressSpace::kFunction, u32>());
+        auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, u32>());
         v->SetInitializer(b.Constant(1_u));
         b.Return(func);
     });
@@ -70,7 +70,7 @@ void foo() {
 TEST_F(MslPrinterTest, VarArrayF32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr<builtin::AddressSpace::kFunction, array<f32, 5>>());
+        b.Var("a", ty.ptr<core::AddressSpace::kFunction, array<f32, 5>>());
         b.Return(func);
     });
 
@@ -88,7 +88,7 @@ TEST_F(MslPrinterTest, VarStruct) {
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr(builtin::AddressSpace::kFunction, s));
+        b.Var("a", ty.ptr(core::AddressSpace::kFunction, s));
         b.Return(func);
     });
 
@@ -107,7 +107,7 @@ void foo() {
 TEST_F(MslPrinterTest, VarVecF32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr<builtin::AddressSpace::kFunction, vec2<f32>>());
+        b.Var("a", ty.ptr<core::AddressSpace::kFunction, vec2<f32>>());
         b.Return(func);
     });
 
@@ -123,7 +123,7 @@ TEST_F(MslPrinterTest, VarVecF16) {
     // Enable f16?
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr<builtin::AddressSpace::kFunction, vec2<f16>>());
+        b.Var("a", ty.ptr<core::AddressSpace::kFunction, vec2<f16>>());
         b.Return(func);
     });
 
@@ -138,7 +138,7 @@ void foo() {
 TEST_F(MslPrinterTest, VarMatF32) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr<builtin::AddressSpace::kFunction, mat3x2<f32>>());
+        b.Var("a", ty.ptr<core::AddressSpace::kFunction, mat3x2<f32>>());
         b.Return(func);
     });
 
@@ -154,7 +154,7 @@ TEST_F(MslPrinterTest, VarMatF16) {
     // Enable f16?
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        b.Var("a", ty.ptr<builtin::AddressSpace::kFunction, mat3x2<f16>>());
+        b.Var("a", ty.ptr<core::AddressSpace::kFunction, mat3x2<f16>>());
         b.Return(func);
     });
 
@@ -169,7 +169,7 @@ void foo() {
 TEST_F(MslPrinterTest, VarVecF32SplatZero) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* v = b.Var("a", ty.ptr<builtin::AddressSpace::kFunction, vec3<f32>>());
+        auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, vec3<f32>>());
         v->SetInitializer(b.Splat(ty.vec3<f32>(), 0_f, 3));
         b.Return(func);
     });
@@ -186,7 +186,7 @@ TEST_F(MslPrinterTest, VarVecF16SplatZero) {
     // Enable f16
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* v = b.Var("a", ty.ptr<builtin::AddressSpace::kFunction, vec3<f16>>());
+        auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, vec3<f16>>());
         v->SetInitializer(b.Splat(ty.vec3<f16>(), 0_h, 3));
         b.Return(func);
     });
@@ -202,7 +202,7 @@ void foo() {
 TEST_F(MslPrinterTest, VarMatF32SplatZero) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* v = b.Var("a", ty.ptr<builtin::AddressSpace::kFunction, mat2x3<f32>>());
+        auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, mat2x3<f32>>());
         v->SetInitializer(b.Composite(ty.mat2x3<f32>(), b.Splat(ty.vec3<f32>(), 0_f, 3),
                                       b.Splat(ty.vec3<f32>(), 0_f, 3)));
         b.Return(func);
@@ -220,7 +220,7 @@ TEST_F(MslPrinterTest, VarMatF16SplatZero) {
     // Enable f16?
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
-        auto* v = b.Var("a", ty.ptr<builtin::AddressSpace::kFunction, mat2x3<f16>>());
+        auto* v = b.Var("a", ty.ptr<core::AddressSpace::kFunction, mat2x3<f16>>());
         v->SetInitializer(b.Composite(ty.mat2x3<f16>(), b.Splat(ty.vec3<f16>(), 0_h, 3),
                                       b.Splat(ty.vec3<f16>(), 0_h, 3)));
         b.Return(func);
@@ -237,13 +237,12 @@ void foo() {
 // TODO(dsinclair): Requires ModuleScopeVarToEntryPointParam transform
 TEST_F(MslPrinterTest, DISABLED_VarGlobalPrivate) {
     ir::Var* v = nullptr;
-    b.Append(b.RootBlock(),
-             [&] { v = b.Var("v", ty.ptr<builtin::AddressSpace::kPrivate, f32>()); });
+    b.Append(b.RootBlock(), [&] { v = b.Var("v", ty.ptr<core::AddressSpace::kPrivate, f32>()); });
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* ld = b.Load(v->Result());
-        auto* a = b.Var("a", ty.ptr<builtin::AddressSpace::kFunction, f32>());
+        auto* a = b.Var("a", ty.ptr<core::AddressSpace::kFunction, f32>());
         a->SetInitializer(ld->Result());
         b.Return(func);
     });
@@ -264,13 +263,12 @@ void foo() {
 
 TEST_F(MslPrinterTest, VarGlobalWorkgroup) {
     ir::Var* v = nullptr;
-    b.Append(b.RootBlock(),
-             [&] { v = b.Var("v", ty.ptr<builtin::AddressSpace::kWorkgroup, f32>()); });
+    b.Append(b.RootBlock(), [&] { v = b.Var("v", ty.ptr<core::AddressSpace::kWorkgroup, f32>()); });
 
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
         auto* ld = b.Load(v->Result());
-        auto* a = b.Var("a", ty.ptr<builtin::AddressSpace::kFunction, f32>());
+        auto* a = b.Var("a", ty.ptr<core::AddressSpace::kFunction, f32>());
         a->SetInitializer(ld->Result());
         b.Return(func);
     });

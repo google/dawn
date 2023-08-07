@@ -25,7 +25,7 @@
 
 #include "tint/override_id.h"
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/inspector/entry_point.h"
 #include "src/tint/lang/wgsl/inspector/resource_binding.h"
 #include "src/tint/lang/wgsl/inspector/scalar.h"
@@ -182,7 +182,7 @@ class Inspector {
     /// Recursively determine if the type contains builtin.
     /// If `type` is a struct, recurse into members to check for the attribute.
     /// Otherwise, check `attributes` for the attribute.
-    bool ContainsBuiltin(builtin::BuiltinValue builtin,
+    bool ContainsBuiltin(core::BuiltinValue builtin,
                          const type::Type* type,
                          VectorRef<const ast::Attribute*> attributes) const;
 

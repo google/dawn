@@ -87,25 +87,25 @@ using namespace tint::number_suffixes;  // NOLINT
 
 constexpr uint32_t kWriterVersion = 1;
 
-SpvStorageClass StorageClass(builtin::AddressSpace addrspace) {
+SpvStorageClass StorageClass(core::AddressSpace addrspace) {
     switch (addrspace) {
-        case builtin::AddressSpace::kHandle:
+        case core::AddressSpace::kHandle:
             return SpvStorageClassUniformConstant;
-        case builtin::AddressSpace::kFunction:
+        case core::AddressSpace::kFunction:
             return SpvStorageClassFunction;
-        case builtin::AddressSpace::kIn:
+        case core::AddressSpace::kIn:
             return SpvStorageClassInput;
-        case builtin::AddressSpace::kPrivate:
+        case core::AddressSpace::kPrivate:
             return SpvStorageClassPrivate;
-        case builtin::AddressSpace::kPushConstant:
+        case core::AddressSpace::kPushConstant:
             return SpvStorageClassPushConstant;
-        case builtin::AddressSpace::kOut:
+        case core::AddressSpace::kOut:
             return SpvStorageClassOutput;
-        case builtin::AddressSpace::kStorage:
+        case core::AddressSpace::kStorage:
             return SpvStorageClassStorageBuffer;
-        case builtin::AddressSpace::kUniform:
+        case core::AddressSpace::kUniform:
             return SpvStorageClassUniform;
-        case builtin::AddressSpace::kWorkgroup:
+        case core::AddressSpace::kWorkgroup:
             return SpvStorageClassWorkgroup;
         default:
             return SpvStorageClassMax;
@@ -183,48 +183,48 @@ Result<std::vector<uint32_t>, std::string> Printer::Generate() {
     return std::move(writer.Result());
 }
 
-uint32_t Printer::Builtin(builtin::BuiltinValue builtin, builtin::AddressSpace addrspace) {
+uint32_t Printer::Builtin(core::BuiltinValue builtin, core::AddressSpace addrspace) {
     switch (builtin) {
-        case builtin::BuiltinValue::kPointSize:
+        case core::BuiltinValue::kPointSize:
             return SpvBuiltInPointSize;
-        case builtin::BuiltinValue::kFragDepth:
+        case core::BuiltinValue::kFragDepth:
             return SpvBuiltInFragDepth;
-        case builtin::BuiltinValue::kFrontFacing:
+        case core::BuiltinValue::kFrontFacing:
             return SpvBuiltInFrontFacing;
-        case builtin::BuiltinValue::kGlobalInvocationId:
+        case core::BuiltinValue::kGlobalInvocationId:
             return SpvBuiltInGlobalInvocationId;
-        case builtin::BuiltinValue::kInstanceIndex:
+        case core::BuiltinValue::kInstanceIndex:
             return SpvBuiltInInstanceIndex;
-        case builtin::BuiltinValue::kLocalInvocationId:
+        case core::BuiltinValue::kLocalInvocationId:
             return SpvBuiltInLocalInvocationId;
-        case builtin::BuiltinValue::kLocalInvocationIndex:
+        case core::BuiltinValue::kLocalInvocationIndex:
             return SpvBuiltInLocalInvocationIndex;
-        case builtin::BuiltinValue::kNumWorkgroups:
+        case core::BuiltinValue::kNumWorkgroups:
             return SpvBuiltInNumWorkgroups;
-        case builtin::BuiltinValue::kPosition:
-            if (addrspace == builtin::AddressSpace::kOut) {
+        case core::BuiltinValue::kPosition:
+            if (addrspace == core::AddressSpace::kOut) {
                 // Vertex output.
                 return SpvBuiltInPosition;
             } else {
                 // Fragment input.
                 return SpvBuiltInFragCoord;
             }
-        case builtin::BuiltinValue::kSampleIndex:
+        case core::BuiltinValue::kSampleIndex:
             module_.PushCapability(SpvCapabilitySampleRateShading);
             return SpvBuiltInSampleId;
-        case builtin::BuiltinValue::kSampleMask:
+        case core::BuiltinValue::kSampleMask:
             return SpvBuiltInSampleMask;
-        case builtin::BuiltinValue::kSubgroupInvocationId:
+        case core::BuiltinValue::kSubgroupInvocationId:
             module_.PushCapability(SpvCapabilityGroupNonUniform);
             return SpvBuiltInSubgroupLocalInvocationId;
-        case builtin::BuiltinValue::kSubgroupSize:
+        case core::BuiltinValue::kSubgroupSize:
             module_.PushCapability(SpvCapabilityGroupNonUniform);
             return SpvBuiltInSubgroupSize;
-        case builtin::BuiltinValue::kVertexIndex:
+        case core::BuiltinValue::kVertexIndex:
             return SpvBuiltInVertexIndex;
-        case builtin::BuiltinValue::kWorkgroupId:
+        case core::BuiltinValue::kWorkgroupId:
             return SpvBuiltInWorkgroupId;
-        case builtin::BuiltinValue::kUndefined:
+        case core::BuiltinValue::kUndefined:
             return SpvBuiltInMax;
     }
     return SpvBuiltInMax;
@@ -322,7 +322,7 @@ uint32_t Printer::Undef(const type::Type* type) {
     });
 }
 
-uint32_t Printer::Type(const type::Type* ty, builtin::AddressSpace addrspace /* = kUndefined */) {
+uint32_t Printer::Type(const type::Type* ty, core::AddressSpace addrspace /* = kUndefined */) {
     ty = DedupType(ty, ir_->Types());
     return types_.GetOrCreate(ty, [&] {
         auto id = module_.NextId();
@@ -398,7 +398,7 @@ uint32_t Printer::Label(ir::Block* block) {
 
 void Printer::EmitStructType(uint32_t id,
                              const type::Struct* str,
-                             builtin::AddressSpace addrspace /* = kUndefined */) {
+                             core::AddressSpace addrspace /* = kUndefined */) {
     // Helper to return `type` or a potentially nested array element type within `type` as a matrix
     // type, or nullptr if no such matrix type is present.
     auto get_nested_matrix_type = [&](const type::Type* type) {
@@ -425,34 +425,34 @@ void Printer::EmitStructType(uint32_t id,
                 {operands[0], member->Index(), U32Operand(SpvDecorationLocation), *attrs.location});
             if (attrs.interpolation) {
                 switch (attrs.interpolation->type) {
-                    case builtin::InterpolationType::kLinear:
+                    case core::InterpolationType::kLinear:
                         module_.PushAnnot(
                             spv::Op::OpMemberDecorate,
                             {operands[0], member->Index(), U32Operand(SpvDecorationNoPerspective)});
                         break;
-                    case builtin::InterpolationType::kFlat:
+                    case core::InterpolationType::kFlat:
                         module_.PushAnnot(
                             spv::Op::OpMemberDecorate,
                             {operands[0], member->Index(), U32Operand(SpvDecorationFlat)});
                         break;
-                    case builtin::InterpolationType::kPerspective:
-                    case builtin::InterpolationType::kUndefined:
+                    case core::InterpolationType::kPerspective:
+                    case core::InterpolationType::kUndefined:
                         break;
                 }
                 switch (attrs.interpolation->sampling) {
-                    case builtin::InterpolationSampling::kCentroid:
+                    case core::InterpolationSampling::kCentroid:
                         module_.PushAnnot(
                             spv::Op::OpMemberDecorate,
                             {operands[0], member->Index(), U32Operand(SpvDecorationCentroid)});
                         break;
-                    case builtin::InterpolationSampling::kSample:
+                    case core::InterpolationSampling::kSample:
                         module_.PushCapability(SpvCapabilitySampleRateShading);
                         module_.PushAnnot(
                             spv::Op::OpMemberDecorate,
                             {operands[0], member->Index(), U32Operand(SpvDecorationSample)});
                         break;
-                    case builtin::InterpolationSampling::kCenter:
-                    case builtin::InterpolationSampling::kUndefined:
+                    case core::InterpolationSampling::kCenter:
+                    case core::InterpolationSampling::kUndefined:
                         break;
                 }
             }
@@ -659,8 +659,8 @@ void Printer::EmitEntryPoint(ir::Function* func, uint32_t id) {
             }
 
             auto* ptr = var->Result()->Type()->As<type::Pointer>();
-            if (!(ptr->AddressSpace() == builtin::AddressSpace::kIn ||
-                  ptr->AddressSpace() == builtin::AddressSpace::kOut)) {
+            if (!(ptr->AddressSpace() == core::AddressSpace::kIn ||
+                  ptr->AddressSpace() == core::AddressSpace::kOut)) {
                 continue;
             }
 
@@ -684,7 +684,7 @@ void Printer::EmitEntryPoint(ir::Function* func, uint32_t id) {
             // Add the `DepthReplacing` execution mode if `frag_depth` is used.
             if (auto* str = ptr->StoreType()->As<type::Struct>()) {
                 for (auto* member : str->Members()) {
-                    if (member->Attributes().builtin == builtin::BuiltinValue::kFragDepth) {
+                    if (member->Attributes().builtin == core::BuiltinValue::kFragDepth) {
                         module_.PushExecutionMode(spv::Op::OpExecutionMode,
                                                   {id, U32Operand(SpvExecutionModeDepthReplacing)});
                     }
@@ -1076,14 +1076,13 @@ void Printer::EmitBitcast(ir::Bitcast* bitcast) {
 void Printer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
     auto* result_ty = builtin->Result()->Type();
 
-    if (builtin->Func() == builtin::Function::kAbs &&
+    if (builtin->Func() == core::Function::kAbs &&
         result_ty->is_unsigned_integer_scalar_or_vector()) {
         // abs() is a no-op for unsigned integers.
         values_.Add(builtin->Result(), Value(builtin->Args()[0]));
         return;
     }
-    if ((builtin->Func() == builtin::Function::kAll ||
-         builtin->Func() == builtin::Function::kAny) &&
+    if ((builtin->Func() == core::Function::kAll || builtin->Func() == core::Function::kAny) &&
         builtin->Args()[0]->Type()->Is<type::Bool>()) {
         // all() and any() are passthroughs for scalar arguments.
         values_.Add(builtin->Result(), Value(builtin->Args()[0]));
@@ -1110,41 +1109,41 @@ void Printer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
 
     // Determine the opcode.
     switch (builtin->Func()) {
-        case builtin::Function::kAbs:
+        case core::Function::kAbs:
             if (result_ty->is_float_scalar_or_vector()) {
                 glsl_ext_inst(GLSLstd450FAbs);
             } else if (result_ty->is_signed_integer_scalar_or_vector()) {
                 glsl_ext_inst(GLSLstd450SAbs);
             }
             break;
-        case builtin::Function::kAll:
+        case core::Function::kAll:
             op = spv::Op::OpAll;
             break;
-        case builtin::Function::kAny:
+        case core::Function::kAny:
             op = spv::Op::OpAny;
             break;
-        case builtin::Function::kAcos:
+        case core::Function::kAcos:
             glsl_ext_inst(GLSLstd450Acos);
             break;
-        case builtin::Function::kAcosh:
+        case core::Function::kAcosh:
             glsl_ext_inst(GLSLstd450Acosh);
             break;
-        case builtin::Function::kAsin:
+        case core::Function::kAsin:
             glsl_ext_inst(GLSLstd450Asin);
             break;
-        case builtin::Function::kAsinh:
+        case core::Function::kAsinh:
             glsl_ext_inst(GLSLstd450Asinh);
             break;
-        case builtin::Function::kAtan:
+        case core::Function::kAtan:
             glsl_ext_inst(GLSLstd450Atan);
             break;
-        case builtin::Function::kAtan2:
+        case core::Function::kAtan2:
             glsl_ext_inst(GLSLstd450Atan2);
             break;
-        case builtin::Function::kAtanh:
+        case core::Function::kAtanh:
             glsl_ext_inst(GLSLstd450Atanh);
             break;
-        case builtin::Function::kClamp:
+        case core::Function::kClamp:
             if (result_ty->is_float_scalar_or_vector()) {
                 glsl_ext_inst(GLSLstd450NClamp);
             } else if (result_ty->is_unsigned_integer_scalar_or_vector()) {
@@ -1153,107 +1152,107 @@ void Printer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
                 glsl_ext_inst(GLSLstd450SClamp);
             }
             break;
-        case builtin::Function::kCeil:
+        case core::Function::kCeil:
             glsl_ext_inst(GLSLstd450Ceil);
             break;
-        case builtin::Function::kCos:
+        case core::Function::kCos:
             glsl_ext_inst(GLSLstd450Cos);
             break;
-        case builtin::Function::kCosh:
+        case core::Function::kCosh:
             glsl_ext_inst(GLSLstd450Cosh);
             break;
-        case builtin::Function::kCountOneBits:
+        case core::Function::kCountOneBits:
             op = spv::Op::OpBitCount;
             break;
-        case builtin::Function::kCross:
+        case core::Function::kCross:
             glsl_ext_inst(GLSLstd450Cross);
             break;
-        case builtin::Function::kDegrees:
+        case core::Function::kDegrees:
             glsl_ext_inst(GLSLstd450Degrees);
             break;
-        case builtin::Function::kDeterminant:
+        case core::Function::kDeterminant:
             glsl_ext_inst(GLSLstd450Determinant);
             break;
-        case builtin::Function::kDistance:
+        case core::Function::kDistance:
             glsl_ext_inst(GLSLstd450Distance);
             break;
-        case builtin::Function::kDpdx:
+        case core::Function::kDpdx:
             op = spv::Op::OpDPdx;
             break;
-        case builtin::Function::kDpdxCoarse:
+        case core::Function::kDpdxCoarse:
             module_.PushCapability(SpvCapabilityDerivativeControl);
             op = spv::Op::OpDPdxCoarse;
             break;
-        case builtin::Function::kDpdxFine:
+        case core::Function::kDpdxFine:
             module_.PushCapability(SpvCapabilityDerivativeControl);
             op = spv::Op::OpDPdxFine;
             break;
-        case builtin::Function::kDpdy:
+        case core::Function::kDpdy:
             op = spv::Op::OpDPdy;
             break;
-        case builtin::Function::kDpdyCoarse:
+        case core::Function::kDpdyCoarse:
             module_.PushCapability(SpvCapabilityDerivativeControl);
             op = spv::Op::OpDPdyCoarse;
             break;
-        case builtin::Function::kDpdyFine:
+        case core::Function::kDpdyFine:
             module_.PushCapability(SpvCapabilityDerivativeControl);
             op = spv::Op::OpDPdyFine;
             break;
-        case builtin::Function::kExp:
+        case core::Function::kExp:
             glsl_ext_inst(GLSLstd450Exp);
             break;
-        case builtin::Function::kExp2:
+        case core::Function::kExp2:
             glsl_ext_inst(GLSLstd450Exp2);
             break;
-        case builtin::Function::kExtractBits:
+        case core::Function::kExtractBits:
             op = result_ty->is_signed_integer_scalar_or_vector() ? spv::Op::OpBitFieldSExtract
                                                                  : spv::Op::OpBitFieldUExtract;
             break;
-        case builtin::Function::kFaceForward:
+        case core::Function::kFaceForward:
             glsl_ext_inst(GLSLstd450FaceForward);
             break;
-        case builtin::Function::kFloor:
+        case core::Function::kFloor:
             glsl_ext_inst(GLSLstd450Floor);
             break;
-        case builtin::Function::kFma:
+        case core::Function::kFma:
             glsl_ext_inst(GLSLstd450Fma);
             break;
-        case builtin::Function::kFract:
+        case core::Function::kFract:
             glsl_ext_inst(GLSLstd450Fract);
             break;
-        case builtin::Function::kFrexp:
+        case core::Function::kFrexp:
             glsl_ext_inst(GLSLstd450FrexpStruct);
             break;
-        case builtin::Function::kFwidth:
+        case core::Function::kFwidth:
             op = spv::Op::OpFwidth;
             break;
-        case builtin::Function::kFwidthCoarse:
+        case core::Function::kFwidthCoarse:
             module_.PushCapability(SpvCapabilityDerivativeControl);
             op = spv::Op::OpFwidthCoarse;
             break;
-        case builtin::Function::kFwidthFine:
+        case core::Function::kFwidthFine:
             module_.PushCapability(SpvCapabilityDerivativeControl);
             op = spv::Op::OpFwidthFine;
             break;
-        case builtin::Function::kInsertBits:
+        case core::Function::kInsertBits:
             op = spv::Op::OpBitFieldInsert;
             break;
-        case builtin::Function::kInverseSqrt:
+        case core::Function::kInverseSqrt:
             glsl_ext_inst(GLSLstd450InverseSqrt);
             break;
-        case builtin::Function::kLdexp:
+        case core::Function::kLdexp:
             glsl_ext_inst(GLSLstd450Ldexp);
             break;
-        case builtin::Function::kLength:
+        case core::Function::kLength:
             glsl_ext_inst(GLSLstd450Length);
             break;
-        case builtin::Function::kLog:
+        case core::Function::kLog:
             glsl_ext_inst(GLSLstd450Log);
             break;
-        case builtin::Function::kLog2:
+        case core::Function::kLog2:
             glsl_ext_inst(GLSLstd450Log2);
             break;
-        case builtin::Function::kMax:
+        case core::Function::kMax:
             if (result_ty->is_float_scalar_or_vector()) {
                 glsl_ext_inst(GLSLstd450FMax);
             } else if (result_ty->is_signed_integer_scalar_or_vector()) {
@@ -1262,7 +1261,7 @@ void Printer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
                 glsl_ext_inst(GLSLstd450UMax);
             }
             break;
-        case builtin::Function::kMin:
+        case core::Function::kMin:
             if (result_ty->is_float_scalar_or_vector()) {
                 glsl_ext_inst(GLSLstd450FMin);
             } else if (result_ty->is_signed_integer_scalar_or_vector()) {
@@ -1271,74 +1270,74 @@ void Printer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
                 glsl_ext_inst(GLSLstd450UMin);
             }
             break;
-        case builtin::Function::kMix:
+        case core::Function::kMix:
             glsl_ext_inst(GLSLstd450FMix);
             break;
-        case builtin::Function::kModf:
+        case core::Function::kModf:
             glsl_ext_inst(GLSLstd450ModfStruct);
             break;
-        case builtin::Function::kNormalize:
+        case core::Function::kNormalize:
             glsl_ext_inst(GLSLstd450Normalize);
             break;
-        case builtin::Function::kPack2X16Float:
+        case core::Function::kPack2X16Float:
             glsl_ext_inst(GLSLstd450PackHalf2x16);
             break;
-        case builtin::Function::kPack2X16Snorm:
+        case core::Function::kPack2X16Snorm:
             glsl_ext_inst(GLSLstd450PackSnorm2x16);
             break;
-        case builtin::Function::kPack2X16Unorm:
+        case core::Function::kPack2X16Unorm:
             glsl_ext_inst(GLSLstd450PackUnorm2x16);
             break;
-        case builtin::Function::kPack4X8Snorm:
+        case core::Function::kPack4X8Snorm:
             glsl_ext_inst(GLSLstd450PackSnorm4x8);
             break;
-        case builtin::Function::kPack4X8Unorm:
+        case core::Function::kPack4X8Unorm:
             glsl_ext_inst(GLSLstd450PackUnorm4x8);
             break;
-        case builtin::Function::kPow:
+        case core::Function::kPow:
             glsl_ext_inst(GLSLstd450Pow);
             break;
-        case builtin::Function::kQuantizeToF16:
+        case core::Function::kQuantizeToF16:
             op = spv::Op::OpQuantizeToF16;
             break;
-        case builtin::Function::kRadians:
+        case core::Function::kRadians:
             glsl_ext_inst(GLSLstd450Radians);
             break;
-        case builtin::Function::kReflect:
+        case core::Function::kReflect:
             glsl_ext_inst(GLSLstd450Reflect);
             break;
-        case builtin::Function::kRefract:
+        case core::Function::kRefract:
             glsl_ext_inst(GLSLstd450Refract);
             break;
-        case builtin::Function::kReverseBits:
+        case core::Function::kReverseBits:
             op = spv::Op::OpBitReverse;
             break;
-        case builtin::Function::kRound:
+        case core::Function::kRound:
             glsl_ext_inst(GLSLstd450RoundEven);
             break;
-        case builtin::Function::kSign:
+        case core::Function::kSign:
             if (result_ty->is_float_scalar_or_vector()) {
                 glsl_ext_inst(GLSLstd450FSign);
             } else if (result_ty->is_signed_integer_scalar_or_vector()) {
                 glsl_ext_inst(GLSLstd450SSign);
             }
             break;
-        case builtin::Function::kSin:
+        case core::Function::kSin:
             glsl_ext_inst(GLSLstd450Sin);
             break;
-        case builtin::Function::kSinh:
+        case core::Function::kSinh:
             glsl_ext_inst(GLSLstd450Sinh);
             break;
-        case builtin::Function::kSmoothstep:
+        case core::Function::kSmoothstep:
             glsl_ext_inst(GLSLstd450SmoothStep);
             break;
-        case builtin::Function::kSqrt:
+        case core::Function::kSqrt:
             glsl_ext_inst(GLSLstd450Sqrt);
             break;
-        case builtin::Function::kStep:
+        case core::Function::kStep:
             glsl_ext_inst(GLSLstd450Step);
             break;
-        case builtin::Function::kStorageBarrier:
+        case core::Function::kStorageBarrier:
             op = spv::Op::OpControlBarrier;
             operands.clear();
             operands.push_back(Constant(b_.ConstantValue(u32(spv::Scope::Workgroup))));
@@ -1347,48 +1346,48 @@ void Printer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
                 Constant(b_.ConstantValue(u32(spv::MemorySemanticsMask::UniformMemory |
                                               spv::MemorySemanticsMask::AcquireRelease))));
             break;
-        case builtin::Function::kSubgroupBallot:
+        case core::Function::kSubgroupBallot:
             module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
             op = spv::Op::OpGroupNonUniformBallot;
             operands.push_back(Constant(ir_->constant_values.Get(u32(spv::Scope::Subgroup))));
             operands.push_back(Constant(ir_->constant_values.Get(true)));
             break;
-        case builtin::Function::kTan:
+        case core::Function::kTan:
             glsl_ext_inst(GLSLstd450Tan);
             break;
-        case builtin::Function::kTanh:
+        case core::Function::kTanh:
             glsl_ext_inst(GLSLstd450Tanh);
             break;
-        case builtin::Function::kTextureNumLevels:
+        case core::Function::kTextureNumLevels:
             module_.PushCapability(SpvCapabilityImageQuery);
             op = spv::Op::OpImageQueryLevels;
             break;
-        case builtin::Function::kTextureNumSamples:
+        case core::Function::kTextureNumSamples:
             module_.PushCapability(SpvCapabilityImageQuery);
             op = spv::Op::OpImageQuerySamples;
             break;
-        case builtin::Function::kTranspose:
+        case core::Function::kTranspose:
             op = spv::Op::OpTranspose;
             break;
-        case builtin::Function::kTrunc:
+        case core::Function::kTrunc:
             glsl_ext_inst(GLSLstd450Trunc);
             break;
-        case builtin::Function::kUnpack2X16Float:
+        case core::Function::kUnpack2X16Float:
             glsl_ext_inst(GLSLstd450UnpackHalf2x16);
             break;
-        case builtin::Function::kUnpack2X16Snorm:
+        case core::Function::kUnpack2X16Snorm:
             glsl_ext_inst(GLSLstd450UnpackSnorm2x16);
             break;
-        case builtin::Function::kUnpack2X16Unorm:
+        case core::Function::kUnpack2X16Unorm:
             glsl_ext_inst(GLSLstd450UnpackUnorm2x16);
             break;
-        case builtin::Function::kUnpack4X8Snorm:
+        case core::Function::kUnpack4X8Snorm:
             glsl_ext_inst(GLSLstd450UnpackSnorm4x8);
             break;
-        case builtin::Function::kUnpack4X8Unorm:
+        case core::Function::kUnpack4X8Unorm:
             glsl_ext_inst(GLSLstd450UnpackUnorm4x8);
             break;
-        case builtin::Function::kWorkgroupBarrier:
+        case core::Function::kWorkgroupBarrier:
             op = spv::Op::OpControlBarrier;
             operands.clear();
             operands.push_back(Constant(b_.ConstantValue(u32(spv::Scope::Workgroup))));
@@ -1793,7 +1792,7 @@ void Printer::EmitVar(ir::Var* var) {
     auto ty = Type(ptr);
 
     switch (ptr->AddressSpace()) {
-        case builtin::AddressSpace::kFunction: {
+        case core::AddressSpace::kFunction: {
             TINT_ASSERT(current_function_);
             current_function_.push_var({ty, id, U32Operand(SpvStorageClassFunction)});
             if (var->Initializer()) {
@@ -1801,12 +1800,12 @@ void Printer::EmitVar(ir::Var* var) {
             }
             break;
         }
-        case builtin::AddressSpace::kIn: {
+        case core::AddressSpace::kIn: {
             TINT_ASSERT(!current_function_);
             module_.PushType(spv::Op::OpVariable, {ty, id, U32Operand(SpvStorageClassInput)});
             break;
         }
-        case builtin::AddressSpace::kPrivate: {
+        case core::AddressSpace::kPrivate: {
             TINT_ASSERT(!current_function_);
             OperandList operands = {ty, id, U32Operand(SpvStorageClassPrivate)};
             if (var->Initializer()) {
@@ -1816,20 +1815,20 @@ void Printer::EmitVar(ir::Var* var) {
             module_.PushType(spv::Op::OpVariable, operands);
             break;
         }
-        case builtin::AddressSpace::kPushConstant: {
+        case core::AddressSpace::kPushConstant: {
             TINT_ASSERT(!current_function_);
             module_.PushType(spv::Op::OpVariable,
                              {ty, id, U32Operand(SpvStorageClassPushConstant)});
             break;
         }
-        case builtin::AddressSpace::kOut: {
+        case core::AddressSpace::kOut: {
             TINT_ASSERT(!current_function_);
             module_.PushType(spv::Op::OpVariable, {ty, id, U32Operand(SpvStorageClassOutput)});
             break;
         }
-        case builtin::AddressSpace::kHandle:
-        case builtin::AddressSpace::kStorage:
-        case builtin::AddressSpace::kUniform: {
+        case core::AddressSpace::kHandle:
+        case core::AddressSpace::kStorage:
+        case core::AddressSpace::kUniform: {
             TINT_ASSERT(!current_function_);
             module_.PushType(spv::Op::OpVariable,
                              {ty, id, U32Operand(StorageClass(ptr->AddressSpace()))});
@@ -1840,7 +1839,7 @@ void Printer::EmitVar(ir::Var* var) {
                               {id, U32Operand(SpvDecorationBinding), bp.binding});
             break;
         }
-        case builtin::AddressSpace::kWorkgroup: {
+        case core::AddressSpace::kWorkgroup: {
             TINT_ASSERT(!current_function_);
             OperandList operands = {ty, id, U32Operand(SpvStorageClassWorkgroup)};
             if (zero_init_workgroup_memory_) {
@@ -1899,47 +1898,47 @@ void Printer::EmitExitPhis(ir::ControlInstruction* inst) {
     }
 }
 
-uint32_t Printer::TexelFormat(const builtin::TexelFormat format) {
+uint32_t Printer::TexelFormat(const core::TexelFormat format) {
     switch (format) {
-        case builtin::TexelFormat::kBgra8Unorm:
+        case core::TexelFormat::kBgra8Unorm:
             TINT_ICE() << "bgra8unorm should have been polyfilled to rgba8unorm";
             return SpvImageFormatUnknown;
-        case builtin::TexelFormat::kR32Uint:
+        case core::TexelFormat::kR32Uint:
             return SpvImageFormatR32ui;
-        case builtin::TexelFormat::kR32Sint:
+        case core::TexelFormat::kR32Sint:
             return SpvImageFormatR32i;
-        case builtin::TexelFormat::kR32Float:
+        case core::TexelFormat::kR32Float:
             return SpvImageFormatR32f;
-        case builtin::TexelFormat::kRgba8Unorm:
+        case core::TexelFormat::kRgba8Unorm:
             return SpvImageFormatRgba8;
-        case builtin::TexelFormat::kRgba8Snorm:
+        case core::TexelFormat::kRgba8Snorm:
             return SpvImageFormatRgba8Snorm;
-        case builtin::TexelFormat::kRgba8Uint:
+        case core::TexelFormat::kRgba8Uint:
             return SpvImageFormatRgba8ui;
-        case builtin::TexelFormat::kRgba8Sint:
+        case core::TexelFormat::kRgba8Sint:
             return SpvImageFormatRgba8i;
-        case builtin::TexelFormat::kRg32Uint:
+        case core::TexelFormat::kRg32Uint:
             module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
             return SpvImageFormatRg32ui;
-        case builtin::TexelFormat::kRg32Sint:
+        case core::TexelFormat::kRg32Sint:
             module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
             return SpvImageFormatRg32i;
-        case builtin::TexelFormat::kRg32Float:
+        case core::TexelFormat::kRg32Float:
             module_.PushCapability(SpvCapabilityStorageImageExtendedFormats);
             return SpvImageFormatRg32f;
-        case builtin::TexelFormat::kRgba16Uint:
+        case core::TexelFormat::kRgba16Uint:
             return SpvImageFormatRgba16ui;
-        case builtin::TexelFormat::kRgba16Sint:
+        case core::TexelFormat::kRgba16Sint:
             return SpvImageFormatRgba16i;
-        case builtin::TexelFormat::kRgba16Float:
+        case core::TexelFormat::kRgba16Float:
             return SpvImageFormatRgba16f;
-        case builtin::TexelFormat::kRgba32Uint:
+        case core::TexelFormat::kRgba32Uint:
             return SpvImageFormatRgba32ui;
-        case builtin::TexelFormat::kRgba32Sint:
+        case core::TexelFormat::kRgba32Sint:
             return SpvImageFormatRgba32i;
-        case builtin::TexelFormat::kRgba32Float:
+        case core::TexelFormat::kRgba32Float:
             return SpvImageFormatRgba32f;
-        case builtin::TexelFormat::kUndefined:
+        case core::TexelFormat::kUndefined:
             return SpvImageFormatUnknown;
     }
     return SpvImageFormatUnknown;

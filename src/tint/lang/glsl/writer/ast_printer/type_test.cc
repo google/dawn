@@ -36,52 +36,52 @@ using GlslASTPrinterTest_Type = TestHelper;
 
 TEST_F(GlslASTPrinterTest_Type, EmitType_Array) {
     auto arr = ty.array<bool, 4>();
-    ast::Type ty = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
+    ast::Type ty = GlobalVar("G", arr, core::AddressSpace::kPrivate)->type;
 
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
-                 builtin::Access::kReadWrite, "ary");
+    gen.EmitType(out, program->TypeOf(ty), core::AddressSpace::kUndefined, core::Access::kReadWrite,
+                 "ary");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "bool ary[4]");
 }
 
 TEST_F(GlslASTPrinterTest_Type, EmitType_ArrayOfArray) {
     auto arr = ty.array(ty.array<bool, 4>(), 5_u);
-    ast::Type ty = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
+    ast::Type ty = GlobalVar("G", arr, core::AddressSpace::kPrivate)->type;
 
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
-                 builtin::Access::kReadWrite, "ary");
+    gen.EmitType(out, program->TypeOf(ty), core::AddressSpace::kUndefined, core::Access::kReadWrite,
+                 "ary");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "bool ary[5][4]");
 }
 
 TEST_F(GlslASTPrinterTest_Type, EmitType_ArrayOfArrayOfArray) {
     auto arr = ty.array(ty.array(ty.array<bool, 4>(), 5_u), 6_u);
-    ast::Type ty = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
+    ast::Type ty = GlobalVar("G", arr, core::AddressSpace::kPrivate)->type;
 
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
-                 builtin::Access::kReadWrite, "ary");
+    gen.EmitType(out, program->TypeOf(ty), core::AddressSpace::kUndefined, core::Access::kReadWrite,
+                 "ary");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "bool ary[6][5][4]");
 }
 
 TEST_F(GlslASTPrinterTest_Type, EmitType_Array_WithoutName) {
     auto arr = ty.array<bool, 4>();
-    ast::Type ty = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
+    ast::Type ty = GlobalVar("G", arr, core::AddressSpace::kPrivate)->type;
 
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
-                 builtin::Access::kReadWrite, "");
+    gen.EmitType(out, program->TypeOf(ty), core::AddressSpace::kUndefined, core::Access::kReadWrite,
+                 "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "bool[4]");
 }
@@ -92,7 +92,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Bool) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, bool_, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+    gen.EmitType(out, bool_, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "bool");
 }
@@ -103,20 +103,20 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_F32) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, f32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+    gen.EmitType(out, f32, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "float");
 }
 
 TEST_F(GlslASTPrinterTest_Type, EmitType_F16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* f16 = create<type::F16>();
 
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, f16, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+    gen.EmitType(out, f16, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "float16_t");
 }
@@ -127,7 +127,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_I32) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, i32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+    gen.EmitType(out, i32, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "int");
 }
@@ -140,13 +140,13 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Matrix_F32) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, mat2x3, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+    gen.EmitType(out, mat2x3, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "mat2x3");
 }
 
 TEST_F(GlslASTPrinterTest_Type, EmitType_Matrix_F16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* f16 = create<type::F16>();
     auto* vec3 = create<type::Vector>(f16, 3u);
@@ -155,7 +155,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Matrix_F16) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, mat2x3, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+    gen.EmitType(out, mat2x3, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "f16mat2x3");
 }
@@ -165,7 +165,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_StructDecl) {
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
-    GlobalVar("g", ty.Of(s), builtin::AddressSpace::kPrivate);
+    GlobalVar("g", ty.Of(s), core::AddressSpace::kPrivate);
 
     ASTPrinter& gen = Build();
 
@@ -186,13 +186,13 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Struct) {
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
-    GlobalVar("g", ty.Of(s), builtin::AddressSpace::kPrivate);
+    GlobalVar("g", ty.Of(s), core::AddressSpace::kPrivate);
 
     ASTPrinter& gen = Build();
 
     auto* str = program->TypeOf(s)->As<type::Struct>();
     StringStream out;
-    gen.EmitType(out, str, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+    gen.EmitType(out, str, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "S");
 }
@@ -202,7 +202,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Struct_NameCollision) {
                                  Member("double", ty.i32()),
                                  Member("float", ty.f32()),
                              });
-    GlobalVar("g", ty.Of(s), builtin::AddressSpace::kPrivate);
+    GlobalVar("g", ty.Of(s), core::AddressSpace::kPrivate);
 
     ASTPrinter& gen = SanitizeAndBuild();
     gen.Generate();
@@ -219,7 +219,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Struct_WithOffsetAttributes) {
                                  Member("a", ty.i32(), Vector{MemberOffset(0_a)}),
                                  Member("b", ty.f32(), Vector{MemberOffset(8_a)}),
                              });
-    GlobalVar("g", ty.Of(s), builtin::AddressSpace::kPrivate);
+    GlobalVar("g", ty.Of(s), core::AddressSpace::kPrivate);
 
     ASTPrinter& gen = Build();
 
@@ -241,7 +241,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_U32) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, u32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+    gen.EmitType(out, u32, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "uint");
 }
@@ -253,13 +253,13 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Vector_F32) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, vec3, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+    gen.EmitType(out, vec3, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "vec3");
 }
 
 TEST_F(GlslASTPrinterTest_Type, EmitType_Vector_F16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* f16 = create<type::F16>();
     auto* vec3 = create<type::Vector>(f16, 3u);
@@ -267,7 +267,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Vector_F16) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, vec3, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+    gen.EmitType(out, vec3, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "f16vec3");
 }
@@ -278,7 +278,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Void) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, void_, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+    gen.EmitType(out, void_, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "void");
 }
@@ -289,7 +289,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitSampler) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, sampler, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+    gen.EmitType(out, sampler, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
 }
 
@@ -299,7 +299,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitSamplerComparison) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, sampler, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+    gen.EmitType(out, sampler, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
 }
 
@@ -510,14 +510,14 @@ TEST_F(GlslASTPrinterTest_Type, EmitMultisampledTexture) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    gen.EmitType(out, s, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, "");
+    gen.EmitType(out, s, core::AddressSpace::kUndefined, core::Access::kReadWrite, "");
     EXPECT_THAT(gen.Diagnostics(), testing::IsEmpty());
     EXPECT_EQ(out.str(), "highp sampler2DMS");
 }
 
 struct GlslStorageTextureData {
     type::TextureDimension dim;
-    builtin::TexelFormat imgfmt;
+    core::TexelFormat imgfmt;
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, GlslStorageTextureData data) {
@@ -529,7 +529,7 @@ using GlslStorageTexturesTest = TestParamHelper<GlslStorageTextureData>;
 TEST_P(GlslStorageTexturesTest, Emit) {
     auto params = GetParam();
 
-    auto t = ty.storage_texture(params.dim, params.imgfmt, builtin::Access::kWrite);
+    auto t = ty.storage_texture(params.dim, params.imgfmt, core::Access::kWrite);
 
     GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
@@ -550,31 +550,31 @@ INSTANTIATE_TEST_SUITE_P(
     GlslASTPrinterTest_Type,
     GlslStorageTexturesTest,
     testing::Values(GlslStorageTextureData{type::TextureDimension::k1d,
-                                           builtin::TexelFormat::kRgba8Unorm, "image1D tex;"},
+                                           core::TexelFormat::kRgba8Unorm, "image1D tex;"},
                     GlslStorageTextureData{type::TextureDimension::k2d,
-                                           builtin::TexelFormat::kRgba16Float, "image2D tex;"},
+                                           core::TexelFormat::kRgba16Float, "image2D tex;"},
                     GlslStorageTextureData{type::TextureDimension::k2dArray,
-                                           builtin::TexelFormat::kR32Float, "image2DArray tex;"},
+                                           core::TexelFormat::kR32Float, "image2DArray tex;"},
                     GlslStorageTextureData{type::TextureDimension::k3d,
-                                           builtin::TexelFormat::kRg32Float, "image3D tex;"},
+                                           core::TexelFormat::kRg32Float, "image3D tex;"},
                     GlslStorageTextureData{type::TextureDimension::k1d,
-                                           builtin::TexelFormat::kRgba32Float, "image1D tex;"},
+                                           core::TexelFormat::kRgba32Float, "image1D tex;"},
                     GlslStorageTextureData{type::TextureDimension::k2d,
-                                           builtin::TexelFormat::kRgba16Uint, "image2D tex;"},
+                                           core::TexelFormat::kRgba16Uint, "image2D tex;"},
                     GlslStorageTextureData{type::TextureDimension::k2dArray,
-                                           builtin::TexelFormat::kR32Uint, "image2DArray tex;"},
+                                           core::TexelFormat::kR32Uint, "image2DArray tex;"},
                     GlslStorageTextureData{type::TextureDimension::k3d,
-                                           builtin::TexelFormat::kRg32Uint, "image3D tex;"},
+                                           core::TexelFormat::kRg32Uint, "image3D tex;"},
                     GlslStorageTextureData{type::TextureDimension::k1d,
-                                           builtin::TexelFormat::kRgba32Uint, "image1D tex;"},
+                                           core::TexelFormat::kRgba32Uint, "image1D tex;"},
                     GlslStorageTextureData{type::TextureDimension::k2d,
-                                           builtin::TexelFormat::kRgba16Sint, "image2D tex;"},
+                                           core::TexelFormat::kRgba16Sint, "image2D tex;"},
                     GlslStorageTextureData{type::TextureDimension::k2dArray,
-                                           builtin::TexelFormat::kR32Sint, "image2DArray tex;"},
+                                           core::TexelFormat::kR32Sint, "image2DArray tex;"},
                     GlslStorageTextureData{type::TextureDimension::k3d,
-                                           builtin::TexelFormat::kRg32Sint, "image3D tex;"},
+                                           core::TexelFormat::kRg32Sint, "image3D tex;"},
                     GlslStorageTextureData{type::TextureDimension::k1d,
-                                           builtin::TexelFormat::kRgba32Sint, "image1D tex;"}));
+                                           core::TexelFormat::kRgba32Sint, "image1D tex;"}));
 
 }  // namespace
 }  // namespace tint::glsl::writer

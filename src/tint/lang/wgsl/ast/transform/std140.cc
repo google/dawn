@@ -147,7 +147,7 @@ struct Std140::State {
         // Scan structures for members that need forking
         for (auto* ty : src->Types()) {
             if (auto* str = ty->As<type::Struct>()) {
-                if (str->UsedAs(builtin::AddressSpace::kUniform)) {
+                if (str->UsedAs(core::AddressSpace::kUniform)) {
                     for (auto* member : str->Members()) {
                         if (needs_fork(member->Type())) {
                             return true;
@@ -160,7 +160,7 @@ struct Std140::State {
         // Scan uniform variables that have types that need forking
         for (auto* decl : src->AST().GlobalVariables()) {
             auto* global = src->Sem().Get(decl);
-            if (global->AddressSpace() == builtin::AddressSpace::kUniform) {
+            if (global->AddressSpace() == core::AddressSpace::kUniform) {
                 if (needs_fork(global->Type()->UnwrapRef())) {
                     return true;
                 }
@@ -282,7 +282,7 @@ struct Std140::State {
         for (auto* global : src->Sem().Module()->DependencyOrderedDeclarations()) {
             // Check to see if this is a structure used by a uniform buffer...
             auto* str = sem.Get<sem::Struct>(global);
-            if (str && str->UsedAs(builtin::AddressSpace::kUniform)) {
+            if (str && str->UsedAs(core::AddressSpace::kUniform)) {
                 // Should this uniform buffer be forked for std140 usage?
                 bool fork_std140 = false;
                 tint::Vector<const StructMember*, 8> members;
@@ -352,7 +352,7 @@ struct Std140::State {
         for (auto* global : src->AST().GlobalVariables()) {
             if (auto* var = global->As<Var>()) {
                 auto* v = sem.Get(var);
-                if (v->AddressSpace() == builtin::AddressSpace::kUniform) {
+                if (v->AddressSpace() == core::AddressSpace::kUniform) {
                     if (auto std140_ty = Std140Type(v->Type()->UnwrapRef())) {
                         ctx.Replace(global->type.expr, b.Expr(std140_ty));
                         std140_uniforms.Add(v);

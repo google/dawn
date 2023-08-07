@@ -35,52 +35,52 @@ using HlslASTPrinterTest_Type = TestHelper;
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_Array) {
     auto arr = ty.array<bool, 4>();
-    ast::Type ty = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
+    ast::Type ty = GlobalVar("G", arr, core::AddressSpace::kPrivate)->type;
 
     ASTPrinter& gen = Build();
 
     StringStream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
-                             builtin::Access::kReadWrite, "ary"))
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), core::AddressSpace::kUndefined,
+                             core::Access::kReadWrite, "ary"))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "bool ary[4]");
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_ArrayOfArray) {
     auto arr = ty.array(ty.array<bool, 4>(), 5_u);
-    ast::Type ty = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
+    ast::Type ty = GlobalVar("G", arr, core::AddressSpace::kPrivate)->type;
 
     ASTPrinter& gen = Build();
 
     StringStream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
-                             builtin::Access::kReadWrite, "ary"))
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), core::AddressSpace::kUndefined,
+                             core::Access::kReadWrite, "ary"))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "bool ary[5][4]");
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_ArrayOfArrayOfArray) {
     auto arr = ty.array(ty.array(ty.array<bool, 4>(), 5_u), 6_u);
-    ast::Type ty = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
+    ast::Type ty = GlobalVar("G", arr, core::AddressSpace::kPrivate)->type;
 
     ASTPrinter& gen = Build();
 
     StringStream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
-                             builtin::Access::kReadWrite, "ary"))
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), core::AddressSpace::kUndefined,
+                             core::Access::kReadWrite, "ary"))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "bool ary[6][5][4]");
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_Array_WithoutName) {
     auto arr = ty.array<bool, 4>();
-    ast::Type ty = GlobalVar("G", arr, builtin::AddressSpace::kPrivate)->type;
+    ast::Type ty = GlobalVar("G", arr, core::AddressSpace::kPrivate)->type;
 
     ASTPrinter& gen = Build();
 
     StringStream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), builtin::AddressSpace::kUndefined,
-                             builtin::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(ty), core::AddressSpace::kUndefined,
+                             core::Access::kReadWrite, ""))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "bool[4]");
 }
@@ -91,8 +91,8 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Bool) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    ASSERT_TRUE(gen.EmitType(out, bool_, builtin::AddressSpace::kUndefined,
-                             builtin::Access::kReadWrite, ""))
+    ASSERT_TRUE(
+        gen.EmitType(out, bool_, core::AddressSpace::kUndefined, core::Access::kReadWrite, ""))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "bool");
 }
@@ -104,7 +104,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_F16) {
 
     StringStream out;
     ASSERT_TRUE(
-        gen.EmitType(out, f16, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+        gen.EmitType(out, f16, core::AddressSpace::kUndefined, core::Access::kReadWrite, ""))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float16_t");
 }
@@ -116,7 +116,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_F32) {
 
     StringStream out;
     ASSERT_TRUE(
-        gen.EmitType(out, f32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+        gen.EmitType(out, f32, core::AddressSpace::kUndefined, core::Access::kReadWrite, ""))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float");
 }
@@ -128,7 +128,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_I32) {
 
     StringStream out;
     ASSERT_TRUE(
-        gen.EmitType(out, i32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+        gen.EmitType(out, i32, core::AddressSpace::kUndefined, core::Access::kReadWrite, ""))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "int");
 }
@@ -141,8 +141,8 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Matrix_F16) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    ASSERT_TRUE(gen.EmitType(out, mat2x3, builtin::AddressSpace::kUndefined,
-                             builtin::Access::kReadWrite, ""))
+    ASSERT_TRUE(
+        gen.EmitType(out, mat2x3, core::AddressSpace::kUndefined, core::Access::kReadWrite, ""))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "matrix<float16_t, 2, 3>");
 }
@@ -155,8 +155,8 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Matrix_F32) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    ASSERT_TRUE(gen.EmitType(out, mat2x3, builtin::AddressSpace::kUndefined,
-                             builtin::Access::kReadWrite, ""))
+    ASSERT_TRUE(
+        gen.EmitType(out, mat2x3, core::AddressSpace::kUndefined, core::Access::kReadWrite, ""))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float2x3");
 }
@@ -166,7 +166,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_StructDecl) {
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
-    GlobalVar("g", ty.Of(s), builtin::AddressSpace::kPrivate);
+    GlobalVar("g", ty.Of(s), core::AddressSpace::kPrivate);
 
     ASTPrinter& gen = Build();
 
@@ -185,8 +185,8 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
-    GlobalVar("g", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
-              Binding(0_a), Group(0_a));
+    GlobalVar("g", ty.Of(s), core::AddressSpace::kStorage, core::Access::kReadWrite, Binding(0_a),
+              Group(0_a));
 
     ASTPrinter& gen = Build();
 
@@ -199,14 +199,14 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Struct) {
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
-    GlobalVar("g", ty.Of(s), builtin::AddressSpace::kPrivate);
+    GlobalVar("g", ty.Of(s), core::AddressSpace::kPrivate);
 
     ASTPrinter& gen = Build();
 
     auto* str = program->TypeOf(s)->As<type::Struct>();
     StringStream out;
     ASSERT_TRUE(
-        gen.EmitType(out, str, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+        gen.EmitType(out, str, core::AddressSpace::kUndefined, core::Access::kReadWrite, ""))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "S");
 }
@@ -216,7 +216,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Struct_NameCollision) {
                                  Member("double", ty.i32()),
                                  Member("float", ty.f32()),
                              });
-    GlobalVar("g", ty.Of(s), builtin::AddressSpace::kPrivate);
+    GlobalVar("g", ty.Of(s), core::AddressSpace::kPrivate);
 
     ASTPrinter& gen = SanitizeAndBuild();
 
@@ -233,7 +233,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Struct_WithOffsetAttributes) {
                                  Member("a", ty.i32(), Vector{MemberOffset(0_a)}),
                                  Member("b", ty.f32(), Vector{MemberOffset(8_a)}),
                              });
-    GlobalVar("g", ty.Of(s), builtin::AddressSpace::kPrivate);
+    GlobalVar("g", ty.Of(s), core::AddressSpace::kPrivate);
 
     ASTPrinter& gen = Build();
 
@@ -254,7 +254,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_U32) {
 
     StringStream out;
     ASSERT_TRUE(
-        gen.EmitType(out, u32, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+        gen.EmitType(out, u32, core::AddressSpace::kUndefined, core::Access::kReadWrite, ""))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "uint");
 }
@@ -267,7 +267,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Vector) {
 
     StringStream out;
     ASSERT_TRUE(
-        gen.EmitType(out, vec3, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+        gen.EmitType(out, vec3, core::AddressSpace::kUndefined, core::Access::kReadWrite, ""))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "float3");
 }
@@ -278,8 +278,8 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Void) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    ASSERT_TRUE(gen.EmitType(out, void_, builtin::AddressSpace::kUndefined,
-                             builtin::Access::kReadWrite, ""))
+    ASSERT_TRUE(
+        gen.EmitType(out, void_, core::AddressSpace::kUndefined, core::Access::kReadWrite, ""))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "void");
 }
@@ -290,8 +290,8 @@ TEST_F(HlslASTPrinterTest_Type, EmitSampler) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    ASSERT_TRUE(gen.EmitType(out, sampler, builtin::AddressSpace::kUndefined,
-                             builtin::Access::kReadWrite, ""))
+    ASSERT_TRUE(
+        gen.EmitType(out, sampler, core::AddressSpace::kUndefined, core::Access::kReadWrite, ""))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "SamplerState");
 }
@@ -302,8 +302,8 @@ TEST_F(HlslASTPrinterTest_Type, EmitSamplerComparison) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    ASSERT_TRUE(gen.EmitType(out, sampler, builtin::AddressSpace::kUndefined,
-                             builtin::Access::kReadWrite, ""))
+    ASSERT_TRUE(
+        gen.EmitType(out, sampler, core::AddressSpace::kUndefined, core::Access::kReadWrite, ""))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "SamplerComparisonState");
 }
@@ -517,15 +517,14 @@ TEST_F(HlslASTPrinterTest_Type, EmitMultisampledTexture) {
     ASTPrinter& gen = Build();
 
     StringStream out;
-    ASSERT_TRUE(
-        gen.EmitType(out, s, builtin::AddressSpace::kUndefined, builtin::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, s, core::AddressSpace::kUndefined, core::Access::kReadWrite, ""))
         << gen.Diagnostics();
     EXPECT_EQ(out.str(), "Texture2DMS<float4>");
 }
 
 struct HlslStorageTextureData {
     type::TextureDimension dim;
-    builtin::TexelFormat imgfmt;
+    core::TexelFormat imgfmt;
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, HlslStorageTextureData data) {
@@ -538,7 +537,7 @@ using HlslStorageTexturesTest = TestParamHelper<HlslStorageTextureData>;
 TEST_P(HlslStorageTexturesTest, Emit) {
     auto params = GetParam();
 
-    auto t = ty.storage_texture(params.dim, params.imgfmt, builtin::Access::kWrite);
+    auto t = ty.storage_texture(params.dim, params.imgfmt, core::Access::kWrite);
 
     GlobalVar("tex", t,
               Vector{
@@ -563,31 +562,31 @@ INSTANTIATE_TEST_SUITE_P(
     HlslASTPrinterTest_Type,
     HlslStorageTexturesTest,
     testing::Values(
-        HlslStorageTextureData{type::TextureDimension::k1d, builtin::TexelFormat::kRgba8Unorm,
+        HlslStorageTextureData{type::TextureDimension::k1d, core::TexelFormat::kRgba8Unorm,
                                "RWTexture1D<float4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k2d, builtin::TexelFormat::kRgba16Float,
+        HlslStorageTextureData{type::TextureDimension::k2d, core::TexelFormat::kRgba16Float,
                                "RWTexture2D<float4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k2dArray, builtin::TexelFormat::kR32Float,
+        HlslStorageTextureData{type::TextureDimension::k2dArray, core::TexelFormat::kR32Float,
                                "RWTexture2DArray<float4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k3d, builtin::TexelFormat::kRg32Float,
+        HlslStorageTextureData{type::TextureDimension::k3d, core::TexelFormat::kRg32Float,
                                "RWTexture3D<float4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k1d, builtin::TexelFormat::kRgba32Float,
+        HlslStorageTextureData{type::TextureDimension::k1d, core::TexelFormat::kRgba32Float,
                                "RWTexture1D<float4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k2d, builtin::TexelFormat::kRgba16Uint,
+        HlslStorageTextureData{type::TextureDimension::k2d, core::TexelFormat::kRgba16Uint,
                                "RWTexture2D<uint4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k2dArray, builtin::TexelFormat::kR32Uint,
+        HlslStorageTextureData{type::TextureDimension::k2dArray, core::TexelFormat::kR32Uint,
                                "RWTexture2DArray<uint4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k3d, builtin::TexelFormat::kRg32Uint,
+        HlslStorageTextureData{type::TextureDimension::k3d, core::TexelFormat::kRg32Uint,
                                "RWTexture3D<uint4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k1d, builtin::TexelFormat::kRgba32Uint,
+        HlslStorageTextureData{type::TextureDimension::k1d, core::TexelFormat::kRgba32Uint,
                                "RWTexture1D<uint4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k2d, builtin::TexelFormat::kRgba16Sint,
+        HlslStorageTextureData{type::TextureDimension::k2d, core::TexelFormat::kRgba16Sint,
                                "RWTexture2D<int4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k2dArray, builtin::TexelFormat::kR32Sint,
+        HlslStorageTextureData{type::TextureDimension::k2dArray, core::TexelFormat::kR32Sint,
                                "RWTexture2DArray<int4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k3d, builtin::TexelFormat::kRg32Sint,
+        HlslStorageTextureData{type::TextureDimension::k3d, core::TexelFormat::kRg32Sint,
                                "RWTexture3D<int4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k1d, builtin::TexelFormat::kRgba32Sint,
+        HlslStorageTextureData{type::TextureDimension::k1d, core::TexelFormat::kRgba32Sint,
                                "RWTexture1D<int4> tex : register(u1, space2);"}));
 
 }  // namespace

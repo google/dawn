@@ -14,7 +14,7 @@
 
 #include "gtest/gtest-spi.h"
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 
@@ -26,7 +26,7 @@ namespace {
 using VariableTest = TestHelper;
 
 TEST_F(VariableTest, Creation) {
-    auto* v = Var("my_var", ty.i32(), builtin::AddressSpace::kFunction);
+    auto* v = Var("my_var", ty.i32(), core::AddressSpace::kFunction);
 
     CheckIdentifier(v->name, "my_var");
     CheckIdentifier(v->declared_address_space, "function");
@@ -40,7 +40,7 @@ TEST_F(VariableTest, Creation) {
 
 TEST_F(VariableTest, CreationWithSource) {
     auto* v = Var(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}}, "i",
-                  ty.f32(), builtin::AddressSpace::kPrivate, tint::Empty);
+                  ty.f32(), core::AddressSpace::kPrivate, tint::Empty);
 
     CheckIdentifier(v->name, "i");
     CheckIdentifier(v->declared_address_space, "private");
@@ -53,7 +53,7 @@ TEST_F(VariableTest, CreationWithSource) {
 
 TEST_F(VariableTest, CreationEmpty) {
     auto* v = Var(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 7}}}, "a_var",
-                  ty.i32(), builtin::AddressSpace::kWorkgroup, tint::Empty);
+                  ty.i32(), core::AddressSpace::kWorkgroup, tint::Empty);
 
     CheckIdentifier(v->name, "a_var");
     CheckIdentifier(v->declared_address_space, "workgroup");
@@ -94,8 +94,8 @@ TEST_F(VariableTest, Assert_DifferentGenerationID_Initializer) {
 }
 
 TEST_F(VariableTest, WithAttributes) {
-    auto* var = Var("my_var", ty.i32(), builtin::AddressSpace::kFunction, Location(1_u),
-                    Builtin(builtin::BuiltinValue::kPosition), Id(1200_u));
+    auto* var = Var("my_var", ty.i32(), core::AddressSpace::kFunction, Location(1_u),
+                    Builtin(core::BuiltinValue::kPosition), Id(1200_u));
 
     auto& attributes = var->attributes;
     EXPECT_TRUE(ast::HasAttribute<LocationAttribute>(attributes));
@@ -109,22 +109,22 @@ TEST_F(VariableTest, WithAttributes) {
 }
 
 TEST_F(VariableTest, HasBindingPoint_BothProvided) {
-    auto* var = Var("my_var", ty.i32(), builtin::AddressSpace::kFunction, Binding(2_a), Group(1_a));
+    auto* var = Var("my_var", ty.i32(), core::AddressSpace::kFunction, Binding(2_a), Group(1_a));
     EXPECT_TRUE(var->HasBindingPoint());
 }
 
 TEST_F(VariableTest, HasBindingPoint_NeitherProvided) {
-    auto* var = Var("my_var", ty.i32(), builtin::AddressSpace::kFunction, tint::Empty);
+    auto* var = Var("my_var", ty.i32(), core::AddressSpace::kFunction, tint::Empty);
     EXPECT_FALSE(var->HasBindingPoint());
 }
 
 TEST_F(VariableTest, HasBindingPoint_MissingGroupAttribute) {
-    auto* var = Var("my_var", ty.i32(), builtin::AddressSpace::kFunction, Binding(2_a));
+    auto* var = Var("my_var", ty.i32(), core::AddressSpace::kFunction, Binding(2_a));
     EXPECT_FALSE(var->HasBindingPoint());
 }
 
 TEST_F(VariableTest, HasBindingPoint_MissingBindingAttribute) {
-    auto* var = Var("my_var", ty.i32(), builtin::AddressSpace::kFunction, Group(1_a));
+    auto* var = Var("my_var", ty.i32(), core::AddressSpace::kFunction, Group(1_a));
     EXPECT_FALSE(var->HasBindingPoint());
 }
 

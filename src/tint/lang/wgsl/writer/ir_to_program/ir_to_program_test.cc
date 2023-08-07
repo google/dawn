@@ -23,8 +23,8 @@
 
 namespace tint::wgsl::writer {
 
-using namespace tint::number_suffixes;        // NOLINT
-using namespace tint::builtin::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
 
 IRToProgramTest::Result IRToProgramTest::Run() {
     Result result;

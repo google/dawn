@@ -26,7 +26,7 @@ using IR_CoreBuiltinCallTest = IRTestHelper;
 TEST_F(IR_CoreBuiltinCallTest, Usage) {
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
-    auto* builtin = b.Call(mod.Types().f32(), builtin::Function::kAbs, arg1, arg2);
+    auto* builtin = b.Call(mod.Types().f32(), core::Function::kAbs, arg1, arg2);
 
     EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{builtin, 0u}));
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{builtin, 1u}));
@@ -35,7 +35,7 @@ TEST_F(IR_CoreBuiltinCallTest, Usage) {
 TEST_F(IR_CoreBuiltinCallTest, Result) {
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
-    auto* builtin = b.Call(mod.Types().f32(), builtin::Function::kAbs, arg1, arg2);
+    auto* builtin = b.Call(mod.Types().f32(), core::Function::kAbs, arg1, arg2);
 
     EXPECT_TRUE(builtin->HasResults());
     EXPECT_FALSE(builtin->HasMultiResults());
@@ -48,7 +48,7 @@ TEST_F(IR_CoreBuiltinCallTest, Fail_NullType) {
         {
             Module mod;
             Builder b{mod};
-            b.Call(nullptr, builtin::Function::kAbs);
+            b.Call(nullptr, core::Function::kAbs);
         },
         "");
 }
@@ -58,7 +58,7 @@ TEST_F(IR_CoreBuiltinCallTest, Fail_NoneFunction) {
         {
             Module mod;
             Builder b{mod};
-            b.Call(mod.Types().f32(), builtin::Function::kNone);
+            b.Call(mod.Types().f32(), core::Function::kNone);
         },
         "");
 }
@@ -68,7 +68,7 @@ TEST_F(IR_CoreBuiltinCallTest, Fail_TintMaterializeFunction) {
         {
             Module mod;
             Builder b{mod};
-            b.Call(mod.Types().f32(), builtin::Function::kTintMaterialize);
+            b.Call(mod.Types().f32(), core::Function::kTintMaterialize);
         },
         "");
 }

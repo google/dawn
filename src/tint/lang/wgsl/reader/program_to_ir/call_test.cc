@@ -21,8 +21,8 @@
 namespace tint::wgsl::reader {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using ProgramToIRCallTest = helpers::IRProgramTest;
 
@@ -92,7 +92,7 @@ TEST_F(ProgramToIRCallTest, EmitStatement_UserFunction) {
 }
 
 TEST_F(ProgramToIRCallTest, EmitExpression_Convert) {
-    auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_i));
+    auto i = GlobalVar("i", core::AddressSpace::kPrivate, Expr(1_i));
     auto* expr = Call<f32>(i);
     WrapInFunction(expr);
 
@@ -115,7 +115,7 @@ TEST_F(ProgramToIRCallTest, EmitExpression_Convert) {
 
 TEST_F(ProgramToIRCallTest, EmitExpression_ConstructEmpty) {
     auto* expr = Call<vec3<f32>>();
-    GlobalVar("i", builtin::AddressSpace::kPrivate, expr);
+    GlobalVar("i", core::AddressSpace::kPrivate, expr);
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -128,7 +128,7 @@ TEST_F(ProgramToIRCallTest, EmitExpression_ConstructEmpty) {
 }
 
 TEST_F(ProgramToIRCallTest, EmitExpression_Construct) {
-    auto i = GlobalVar("i", builtin::AddressSpace::kPrivate, Expr(1_f));
+    auto i = GlobalVar("i", core::AddressSpace::kPrivate, Expr(1_f));
     auto* expr = Call<vec3<f32>>(2_f, 3_f, i);
     WrapInFunction(expr);
 

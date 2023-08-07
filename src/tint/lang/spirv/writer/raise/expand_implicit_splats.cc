@@ -60,7 +60,7 @@ void Run(ir::Module* ir) {
         } else if (auto* builtin = inst->As<ir::CoreBuiltinCall>()) {
             // A mix builtin call that mixes vector and scalar operands needs to have the scalar
             // operand replaced with an explicit vector constructor.
-            if (builtin->Func() == builtin::Function::kMix) {
+            if (builtin->Func() == core::Function::kMix) {
                 if (builtin->Result()->Type()->Is<type::Vector>()) {
                     if (builtin->Args()[2]->Type()->Is<type::Scalar>()) {
                         builtin_worklist.Push(builtin);
@@ -115,7 +115,7 @@ void Run(ir::Module* ir) {
     // Replace scalar arguments to builtin calls that produce vectors.
     for (auto* builtin : builtin_worklist) {
         switch (builtin->Func()) {
-            case builtin::Function::kMix:
+            case core::Function::kMix:
                 // Expand the scalar argument into an explicitly constructed vector.
                 expand_operand(builtin, ir::CoreBuiltinCall::kArgsOperandOffset + 2);
                 break;

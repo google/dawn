@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/wgsl/ast/builtin_texture_helper_test.h"
 
-#include "src/tint/lang/core/builtin/texel_format.h"
+#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
@@ -24,8 +24,8 @@
 namespace tint::ast::test {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 StringStream& operator<<(StringStream& out, const TextureKind& kind) {
     switch (kind) {
@@ -101,8 +101,8 @@ TextureOverloadCase::TextureOverloadCase(ValidTextureOverload o,
       returns_value(ret_val) {}
 TextureOverloadCase::TextureOverloadCase(ValidTextureOverload o,
                                          const char* d,
-                                         tint::builtin::Access acc,
-                                         tint::builtin::TexelFormat fmt,
+                                         tint::core::Access acc,
+                                         tint::core::TexelFormat fmt,
                                          type::TextureDimension dims,
                                          TextureDataType datatype,
                                          const char* f,
@@ -440,8 +440,8 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
         {
             ValidTextureOverload::kDimensionsStorageWO1d,
             "textureDimensions(t : texture_storage_1d<rgba32float>) -> u32",
-            tint::builtin::Access::kWrite,
-            tint::builtin::TexelFormat::kRgba32Float,
+            tint::core::Access::kWrite,
+            tint::core::TexelFormat::kRgba32Float,
             type::TextureDimension::k1d,
             TextureDataType::kF32,
             "textureDimensions",
@@ -451,8 +451,8 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
         {
             ValidTextureOverload::kDimensionsStorageWO2d,
             "textureDimensions(t : texture_storage_2d<rgba32float>) -> vec2<u32>",
-            tint::builtin::Access::kWrite,
-            tint::builtin::TexelFormat::kRgba32Float,
+            tint::core::Access::kWrite,
+            tint::core::TexelFormat::kRgba32Float,
             type::TextureDimension::k2d,
             TextureDataType::kF32,
             "textureDimensions",
@@ -462,8 +462,8 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
         {
             ValidTextureOverload::kDimensionsStorageWO2dArray,
             "textureDimensions(t : texture_storage_2d_array<rgba32float>) -> vec2<u32>",
-            tint::builtin::Access::kWrite,
-            tint::builtin::TexelFormat::kRgba32Float,
+            tint::core::Access::kWrite,
+            tint::core::TexelFormat::kRgba32Float,
             type::TextureDimension::k2dArray,
             TextureDataType::kF32,
             "textureDimensions",
@@ -473,8 +473,8 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
         {
             ValidTextureOverload::kDimensionsStorageWO3d,
             "textureDimensions(t : texture_storage_3d<rgba32float>) -> vec3<u32>",
-            tint::builtin::Access::kWrite,
-            tint::builtin::TexelFormat::kRgba32Float,
+            tint::core::Access::kWrite,
+            tint::core::TexelFormat::kRgba32Float,
             type::TextureDimension::k3d,
             TextureDataType::kF32,
             "textureDimensions",
@@ -889,8 +889,8 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
         {
             ValidTextureOverload::kNumLayersStorageWO2dArray,
             "textureNumLayers(t : texture_storage_2d_array<rgba32float>) -> u32",
-            tint::builtin::Access::kWrite,
-            tint::builtin::TexelFormat::kRgba32Float,
+            tint::core::Access::kWrite,
+            tint::core::TexelFormat::kRgba32Float,
             type::TextureDimension::k2dArray,
             TextureDataType::kF32,
             "textureNumLayers",
@@ -2476,8 +2476,8 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             "textureStore(t      : texture_storage_1d<rgba32float>,\n"
             "             coords : i32,\n"
             "             value  : vec4<T>)",
-            tint::builtin::Access::kWrite,
-            tint::builtin::TexelFormat::kRgba32Float,
+            tint::core::Access::kWrite,
+            tint::core::TexelFormat::kRgba32Float,
             type::TextureDimension::k1d,
             TextureDataType::kF32,
             "textureStore",
@@ -2493,8 +2493,8 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             "textureStore(t      : texture_storage_2d<rgba32float>,\n"
             "             coords : vec2<i32>,\n"
             "             value  : vec4<T>)",
-            tint::builtin::Access::kWrite,
-            tint::builtin::TexelFormat::kRgba32Float,
+            tint::core::Access::kWrite,
+            tint::core::TexelFormat::kRgba32Float,
             type::TextureDimension::k2d,
             TextureDataType::kF32,
             "textureStore",
@@ -2511,8 +2511,8 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             "             coords      : vec2<u32>,\n"
             "             array_index : u32,\n"
             "             value       : vec4<T>)",
-            tint::builtin::Access::kWrite,
-            tint::builtin::TexelFormat::kRgba32Float,
+            tint::core::Access::kWrite,
+            tint::core::TexelFormat::kRgba32Float,
             type::TextureDimension::k2dArray,
             TextureDataType::kF32,
             "textureStore",
@@ -2529,8 +2529,8 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             "textureStore(t      : texture_storage_3d<rgba32float>,\n"
             "             coords : vec3<u32>,\n"
             "             value  : vec4<T>)",
-            tint::builtin::Access::kWrite,
-            tint::builtin::TexelFormat::kRgba32Float,
+            tint::core::Access::kWrite,
+            tint::core::TexelFormat::kRgba32Float,
             type::TextureDimension::k3d,
             TextureDataType::kF32,
             "textureStore",

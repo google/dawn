@@ -29,8 +29,8 @@
 namespace tint::resolver {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 class UniformityAnalysisTestBase {
   protected:
@@ -5320,7 +5320,7 @@ TEST_F(UniformityAnalysisTest, MaximumNumberOfPointerParameters) {
     //     workgroupBarrier();
     //   }
     // }
-    b.GlobalVar("non_uniform_global", ty.i32(), builtin::AddressSpace::kPrivate);
+    b.GlobalVar("non_uniform_global", ty.i32(), core::AddressSpace::kPrivate);
     Vector<const ast::Statement*, 8> main_body;
     Vector<const ast::Expression*, 8> args;
     for (int i = 0; i < 255; i++) {
@@ -8254,7 +8254,7 @@ TEST_F(UniformityAnalysisTest, StressGraphTraversalDepth) {
     //     workgroupBarrier();
     //   }
     // }
-    b.GlobalVar("v0", ty.i32(), builtin::AddressSpace::kPrivate, b.Expr(0_i));
+    b.GlobalVar("v0", ty.i32(), core::AddressSpace::kPrivate, b.Expr(0_i));
     Vector<const ast::Statement*, 8> foo_body;
     std::string v_last = "v0";
     for (int i = 1; i < 100000; i++) {
@@ -8278,16 +8278,16 @@ note: reading from module-scope private variable 'v0' may result in a non-unifor
 
 class UniformityAnalysisDiagnosticFilterTest
     : public UniformityAnalysisTestBase,
-      public ::testing::TestWithParam<builtin::DiagnosticSeverity> {
+      public ::testing::TestWithParam<core::DiagnosticSeverity> {
   protected:
     // TODO(jrprice): Remove this in favour of tint::ToString() when we change "note" to "info".
-    const char* ToStr(builtin::DiagnosticSeverity severity) {
+    const char* ToStr(core::DiagnosticSeverity severity) {
         switch (severity) {
-            case builtin::DiagnosticSeverity::kError:
+            case core::DiagnosticSeverity::kError:
                 return "error";
-            case builtin::DiagnosticSeverity::kWarning:
+            case core::DiagnosticSeverity::kWarning:
                 return "warning";
-            case builtin::DiagnosticSeverity::kInfo:
+            case core::DiagnosticSeverity::kInfo:
                 return "note";
             default:
                 return "<undefined>";
@@ -8311,9 +8311,9 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
 
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8339,8 +8339,8 @@ TEST_P(UniformityAnalysisDiagnosticFilterTest, AttributeOnFunction) {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8365,8 +8365,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8388,8 +8388,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8411,8 +8411,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8434,8 +8434,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8460,8 +8460,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8483,8 +8483,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8509,8 +8509,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8536,8 +8536,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8563,8 +8563,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8590,8 +8590,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8617,8 +8617,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8644,8 +8644,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8671,8 +8671,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8695,8 +8695,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8723,8 +8723,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8751,8 +8751,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8774,8 +8774,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8800,8 +8800,8 @@ fn foo() {
 }
 )";
 
-    RunTest(ss.str(), param != builtin::DiagnosticSeverity::kError);
-    if (param == builtin::DiagnosticSeverity::kOff) {
+    RunTest(ss.str(), param != core::DiagnosticSeverity::kError);
+    if (param == core::DiagnosticSeverity::kOff) {
         EXPECT_TRUE(error_.empty());
     } else {
         StringStream err;
@@ -8812,10 +8812,10 @@ fn foo() {
 
 INSTANTIATE_TEST_SUITE_P(UniformityAnalysisTest,
                          UniformityAnalysisDiagnosticFilterTest,
-                         ::testing::Values(builtin::DiagnosticSeverity::kError,
-                                           builtin::DiagnosticSeverity::kWarning,
-                                           builtin::DiagnosticSeverity::kInfo,
-                                           builtin::DiagnosticSeverity::kOff));
+                         ::testing::Values(core::DiagnosticSeverity::kError,
+                                           core::DiagnosticSeverity::kWarning,
+                                           core::DiagnosticSeverity::kInfo,
+                                           core::DiagnosticSeverity::kOff));
 
 TEST_F(UniformityAnalysisDiagnosticFilterTest, AttributeOnFunction_CalledByAnotherFunction) {
     std::string src = R"(

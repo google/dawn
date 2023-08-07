@@ -334,9 +334,9 @@ class TemplateNumberMatcher : public NumberMatcher {
 // TODO(bclayton): See if we can move more of this hand-rolled code to the
 // template
 ////////////////////////////////////////////////////////////////////////////////
-using TexelFormat = builtin::TexelFormat;
-using Access = builtin::Access;
-using AddressSpace = builtin::AddressSpace;
+using TexelFormat = core::TexelFormat;
+using Access = core::Access;
+using AddressSpace = core::AddressSpace;
 using ParameterUsage = sem::ParameterUsage;
 using PipelineStage = ast::PipelineStage;
 
@@ -586,8 +586,8 @@ bool match_ptr(MatchState&, const type::Type* ty, Number& S, const type::Type*& 
 }
 
 const type::Pointer* build_ptr(MatchState& state, Number S, const type::Type* T, Number& A) {
-    return state.builder.create<type::Pointer>(static_cast<builtin::AddressSpace>(S.Value()), T,
-                                               static_cast<builtin::Access>(A.Value()));
+    return state.builder.create<type::Pointer>(static_cast<core::AddressSpace>(S.Value()), T,
+                                               static_cast<core::Access>(A.Value()));
 }
 
 bool match_atomic(MatchState&, const type::Type* ty, const type::Type*& T) {
@@ -956,7 +956,7 @@ class Impl : public Table {
   public:
     explicit Impl(ProgramBuilder& builder);
 
-    Builtin Lookup(builtin::Function builtin_type,
+    Builtin Lookup(core::Function builtin_type,
                    VectorRef<const type::Type*> args,
                    sem::EvaluationStage earliest_eval_stage,
                    const Source& source) override;
@@ -1122,11 +1122,11 @@ std::string TemplateNumberMatcher::String(MatchState* state) const {
 
 Impl::Impl(ProgramBuilder& b) : builder(b) {}
 
-Impl::Builtin Impl::Lookup(builtin::Function builtin_type,
+Impl::Builtin Impl::Lookup(core::Function builtin_type,
                            VectorRef<const type::Type*> args,
                            sem::EvaluationStage earliest_eval_stage,
                            const Source& source) {
-    const char* intrinsic_name = builtin::str(builtin_type);
+    const char* intrinsic_name = core::str(builtin_type);
 
     // Generates an error when no overloads match the provided arguments
     auto on_no_match = [&](VectorRef<Candidate> candidates) {
@@ -1155,7 +1155,7 @@ Impl::Builtin Impl::Lookup(builtin::Function builtin_type,
         for (auto& p : match.parameters) {
             params.Push(builder.create<sem::Parameter>(
                 nullptr, static_cast<uint32_t>(params.Length()), p.type,
-                builtin::AddressSpace::kUndefined, builtin::Access::kUndefined, p.usage));
+                core::AddressSpace::kUndefined, core::Access::kUndefined, p.usage));
         }
         sem::PipelineStageSet supported_stages;
         auto& overload = *match.overload;
@@ -1358,7 +1358,7 @@ Table::CtorOrConv Impl::Lookup(resolver::CtorConvIntrinsic type,
         for (auto& p : match.parameters) {
             params.Push(builder.create<sem::Parameter>(
                 nullptr, static_cast<uint32_t>(params.Length()), p.type,
-                builtin::AddressSpace::kUndefined, builtin::Access::kUndefined, p.usage));
+                core::AddressSpace::kUndefined, core::Access::kUndefined, p.usage));
         }
         auto eval_stage = match.overload->const_eval_fn ? sem::EvaluationStage::kConstant
                                                         : sem::EvaluationStage::kRuntime;
@@ -1372,8 +1372,8 @@ Table::CtorOrConv Impl::Lookup(resolver::CtorConvIntrinsic type,
     // Conversion.
     auto* target = converters.GetOrCreate(match, [&] {
         auto param = builder.create<sem::Parameter>(
-            nullptr, 0u, match.parameters[0].type, builtin::AddressSpace::kUndefined,
-            builtin::Access::kUndefined, match.parameters[0].usage);
+            nullptr, 0u, match.parameters[0].type, core::AddressSpace::kUndefined,
+            core::Access::kUndefined, match.parameters[0].usage);
         auto eval_stage = match.overload->const_eval_fn ? sem::EvaluationStage::kConstant
                                                         : sem::EvaluationStage::kRuntime;
         return builder.create<sem::ValueConversion>(match.return_type, param, eval_stage);

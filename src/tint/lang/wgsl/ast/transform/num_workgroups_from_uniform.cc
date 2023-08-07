@@ -19,7 +19,7 @@
 #include <unordered_set>
 #include <utility>
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/transform/canonicalize_entry_point_io.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
@@ -36,7 +36,7 @@ namespace {
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
         if (auto* attr = node->As<BuiltinAttribute>()) {
-            if (program->Sem().Get(attr)->Value() == builtin::BuiltinValue::kNumWorkgroups) {
+            if (program->Sem().Get(attr)->Value() == core::BuiltinValue::kNumWorkgroups) {
                 return true;
             }
         }
@@ -101,7 +101,7 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
             }
 
             for (auto* member : str->Members()) {
-                if (member->Attributes().builtin != builtin::BuiltinValue::kNumWorkgroups) {
+                if (member->Attributes().builtin != core::BuiltinValue::kNumWorkgroups) {
                     continue;
                 }
 
@@ -158,9 +158,9 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
                 binding = 0;
             }
 
-            num_workgroups_ubo = b.GlobalVar(b.Sym(), b.ty.Of(num_workgroups_struct),
-                                             builtin::AddressSpace::kUniform, b.Group(AInt(group)),
-                                             b.Binding(AInt(binding)));
+            num_workgroups_ubo =
+                b.GlobalVar(b.Sym(), b.ty.Of(num_workgroups_struct), core::AddressSpace::kUniform,
+                            b.Group(AInt(group)), b.Binding(AInt(binding)));
         }
         return num_workgroups_ubo;
     };

@@ -80,7 +80,7 @@ class DecomposeMemoryAccess final : public Castable<DecomposeMemoryAccess, Trans
                   NodeID nid,
                   Op o,
                   DataType type,
-                  builtin::AddressSpace address_space,
+                  core::AddressSpace address_space,
                   const IdentifierExpression* buffer);
         /// Destructor
         ~Intrinsic() override;
@@ -107,7 +107,7 @@ class DecomposeMemoryAccess final : public Castable<DecomposeMemoryAccess, Trans
         const DataType type;
 
         /// The address space of the buffer this intrinsic operates on
-        const builtin::AddressSpace address_space;
+        const core::AddressSpace address_space;
     };
 
     /// Constructor

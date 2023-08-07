@@ -19,8 +19,8 @@
 namespace tint::msl::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using MslASTPrinterTest = TestHelper;
 
@@ -136,8 +136,7 @@ TEST_F(MslASTPrinterTest, Emit_Attribute_EntryPoint_WithInOut_Builtins) {
     // fn frag_main(@position(0) coord : vec4<f32>) -> @frag_depth f32 {
     //   return coord.x;
     // }
-    auto* coord_in =
-        Param("coord", ty.vec4<f32>(), Vector{Builtin(builtin::BuiltinValue::kPosition)});
+    auto* coord_in = Param("coord", ty.vec4<f32>(), Vector{Builtin(core::BuiltinValue::kPosition)});
     Func("frag_main", Vector{coord_in}, ty.f32(),
          Vector{
              Return(MemberAccessor("coord", "x")),
@@ -146,7 +145,7 @@ TEST_F(MslASTPrinterTest, Emit_Attribute_EntryPoint_WithInOut_Builtins) {
              Stage(ast::PipelineStage::kFragment),
          },
          Vector{
-             Builtin(builtin::BuiltinValue::kFragDepth),
+             Builtin(core::BuiltinValue::kFragDepth),
          });
 
     ASTPrinter& gen = SanitizeAndBuild();
@@ -186,13 +185,13 @@ TEST_F(MslASTPrinterTest, Emit_Attribute_EntryPoint_SharedStruct_DifferentStages
     //   const r = colors.col1;
     //   const g = colors.col2;
     // }
-    auto* interface_struct = Structure(
-        "Interface",
-        Vector{
-            Member("col1", ty.f32(), Vector{Location(1_a)}),
-            Member("col2", ty.f32(), Vector{Location(2_a)}),
-            Member("pos", ty.vec4<f32>(), Vector{Builtin(builtin::BuiltinValue::kPosition)}),
-        });
+    auto* interface_struct =
+        Structure("Interface",
+                  Vector{
+                      Member("col1", ty.f32(), Vector{Location(1_a)}),
+                      Member("col2", ty.f32(), Vector{Location(2_a)}),
+                      Member("pos", ty.vec4<f32>(), Vector{Builtin(core::BuiltinValue::kPosition)}),
+                  });
 
     Func("vert_main", tint::Empty, ty.Of(interface_struct),
          Vector{Return(Call(ty.Of(interface_struct), 0.5_f, 0.25_f, Call<vec4<f32>>()))},
@@ -269,11 +268,11 @@ TEST_F(MslASTPrinterTest, Emit_Attribute_EntryPoint_SharedStruct_HelperFunction)
     // fn vert_main2() -> VertexOutput {
     //   return foo(0.25);
     // }
-    auto* vertex_output_struct = Structure(
-        "VertexOutput",
-        Vector{
-            Member("pos", ty.vec4<f32>(), Vector{Builtin(builtin::BuiltinValue::kPosition)}),
-        });
+    auto* vertex_output_struct =
+        Structure("VertexOutput",
+                  Vector{
+                      Member("pos", ty.vec4<f32>(), Vector{Builtin(core::BuiltinValue::kPosition)}),
+                  });
 
     Func("foo", Vector{Param("x", ty.f32())}, ty.Of(vertex_output_struct),
          Vector{
@@ -341,8 +340,8 @@ TEST_F(MslASTPrinterTest, Emit_FunctionAttribute_EntryPoint_With_RW_StorageBuffe
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
-              Group(0_a), Binding(0_a));
+    GlobalVar("coord", ty.Of(s), core::AddressSpace::kStorage, core::Access::kReadWrite, Group(0_a),
+              Binding(0_a));
 
     auto* var = Var("v", ty.f32(), MemberAccessor("coord", "b"));
 
@@ -380,8 +379,8 @@ TEST_F(MslASTPrinterTest, Emit_FunctionAttribute_EntryPoint_With_RO_StorageBuffe
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead,
-              Group(0_a), Binding(0_a));
+    GlobalVar("coord", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead, Group(0_a),
+              Binding(0_a));
 
     auto* var = Var("v", ty.f32(), MemberAccessor("coord", "b"));
 
@@ -416,7 +415,7 @@ fragment void frag_main(const device Data* tint_symbol [[buffer(0)]]) {
 TEST_F(MslASTPrinterTest, Emit_Attribute_Called_By_EntryPoint_With_Uniform) {
     auto* ubo_ty = Structure("UBO", Vector{Member("coord", ty.vec4<f32>())});
     auto* ubo =
-        GlobalVar("ubo", ty.Of(ubo_ty), builtin::AddressSpace::kUniform, Group(0_a), Binding(0_a));
+        GlobalVar("ubo", ty.Of(ubo_ty), core::AddressSpace::kUniform, Group(0_a), Binding(0_a));
 
     Func("sub_func",
          Vector{
@@ -466,8 +465,8 @@ TEST_F(MslASTPrinterTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RW_St
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
-              Group(0_a), Binding(0_a));
+    GlobalVar("coord", ty.Of(s), core::AddressSpace::kStorage, core::Access::kReadWrite, Group(0_a),
+              Binding(0_a));
 
     Func("sub_func",
          Vector{
@@ -518,8 +517,8 @@ TEST_F(MslASTPrinterTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RO_St
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kRead,
-              Group(0_a), Binding(0_a));
+    GlobalVar("coord", ty.Of(s), core::AddressSpace::kStorage, core::Access::kRead, Group(0_a),
+              Binding(0_a));
 
     Func("sub_func",
          Vector{
@@ -656,8 +655,8 @@ TEST_F(MslASTPrinterTest, Emit_Function_Multiple_EntryPoint_With_Same_ModuleVar)
 
     auto* s = Structure("Data", Vector{Member("d", ty.f32())});
 
-    GlobalVar("data", ty.Of(s), builtin::AddressSpace::kStorage, builtin::Access::kReadWrite,
-              Group(0_a), Binding(0_a));
+    GlobalVar("data", ty.Of(s), core::AddressSpace::kStorage, core::Access::kReadWrite, Group(0_a),
+              Binding(0_a));
 
     {
         auto* var = Var("v", ty.f32(), MemberAccessor("data", "d"));

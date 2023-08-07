@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/lang/core/type/reference.h"
-#include "src/tint/lang/core/builtin/address_space.h"
+#include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/type/helper_test.h"
 
 namespace tint::type {
@@ -22,20 +22,19 @@ namespace {
 using ReferenceTest = TestHelper;
 
 TEST_F(ReferenceTest, Creation) {
-    auto* a = create<Reference>(builtin::AddressSpace::kStorage, create<I32>(),
-                                builtin::Access::kReadWrite);
-    auto* b = create<Reference>(builtin::AddressSpace::kStorage, create<I32>(),
-                                builtin::Access::kReadWrite);
-    auto* c = create<Reference>(builtin::AddressSpace::kStorage, create<F32>(),
-                                builtin::Access::kReadWrite);
-    auto* d = create<Reference>(builtin::AddressSpace::kPrivate, create<I32>(),
-                                builtin::Access::kReadWrite);
-    auto* e =
-        create<Reference>(builtin::AddressSpace::kStorage, create<I32>(), builtin::Access::kRead);
+    auto* a =
+        create<Reference>(core::AddressSpace::kStorage, create<I32>(), core::Access::kReadWrite);
+    auto* b =
+        create<Reference>(core::AddressSpace::kStorage, create<I32>(), core::Access::kReadWrite);
+    auto* c =
+        create<Reference>(core::AddressSpace::kStorage, create<F32>(), core::Access::kReadWrite);
+    auto* d =
+        create<Reference>(core::AddressSpace::kPrivate, create<I32>(), core::Access::kReadWrite);
+    auto* e = create<Reference>(core::AddressSpace::kStorage, create<I32>(), core::Access::kRead);
 
     EXPECT_TRUE(a->StoreType()->Is<I32>());
-    EXPECT_EQ(a->AddressSpace(), builtin::AddressSpace::kStorage);
-    EXPECT_EQ(a->Access(), builtin::Access::kReadWrite);
+    EXPECT_EQ(a->AddressSpace(), core::AddressSpace::kStorage);
+    EXPECT_EQ(a->Access(), core::Access::kReadWrite);
 
     EXPECT_EQ(a, b);
     EXPECT_NE(a, c);
@@ -44,25 +43,24 @@ TEST_F(ReferenceTest, Creation) {
 }
 
 TEST_F(ReferenceTest, Hash) {
-    auto* a = create<Reference>(builtin::AddressSpace::kStorage, create<I32>(),
-                                builtin::Access::kReadWrite);
-    auto* b = create<Reference>(builtin::AddressSpace::kStorage, create<I32>(),
-                                builtin::Access::kReadWrite);
+    auto* a =
+        create<Reference>(core::AddressSpace::kStorage, create<I32>(), core::Access::kReadWrite);
+    auto* b =
+        create<Reference>(core::AddressSpace::kStorage, create<I32>(), core::Access::kReadWrite);
 
     EXPECT_EQ(a->unique_hash, b->unique_hash);
 }
 
 TEST_F(ReferenceTest, Equals) {
-    auto* a = create<Reference>(builtin::AddressSpace::kStorage, create<I32>(),
-                                builtin::Access::kReadWrite);
-    auto* b = create<Reference>(builtin::AddressSpace::kStorage, create<I32>(),
-                                builtin::Access::kReadWrite);
-    auto* c = create<Reference>(builtin::AddressSpace::kStorage, create<F32>(),
-                                builtin::Access::kReadWrite);
-    auto* d = create<Reference>(builtin::AddressSpace::kPrivate, create<I32>(),
-                                builtin::Access::kReadWrite);
-    auto* e =
-        create<Reference>(builtin::AddressSpace::kStorage, create<I32>(), builtin::Access::kRead);
+    auto* a =
+        create<Reference>(core::AddressSpace::kStorage, create<I32>(), core::Access::kReadWrite);
+    auto* b =
+        create<Reference>(core::AddressSpace::kStorage, create<I32>(), core::Access::kReadWrite);
+    auto* c =
+        create<Reference>(core::AddressSpace::kStorage, create<F32>(), core::Access::kReadWrite);
+    auto* d =
+        create<Reference>(core::AddressSpace::kPrivate, create<I32>(), core::Access::kReadWrite);
+    auto* e = create<Reference>(core::AddressSpace::kStorage, create<I32>(), core::Access::kRead);
 
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(*c));
@@ -72,28 +70,26 @@ TEST_F(ReferenceTest, Equals) {
 }
 
 TEST_F(ReferenceTest, FriendlyName) {
-    auto* r =
-        create<Reference>(builtin::AddressSpace::kUndefined, create<I32>(), builtin::Access::kRead);
+    auto* r = create<Reference>(core::AddressSpace::kUndefined, create<I32>(), core::Access::kRead);
     EXPECT_EQ(r->FriendlyName(), "ref<i32, read>");
 }
 
 TEST_F(ReferenceTest, FriendlyNameWithAddressSpace) {
-    auto* r =
-        create<Reference>(builtin::AddressSpace::kWorkgroup, create<I32>(), builtin::Access::kRead);
+    auto* r = create<Reference>(core::AddressSpace::kWorkgroup, create<I32>(), core::Access::kRead);
     EXPECT_EQ(r->FriendlyName(), "ref<workgroup, i32, read>");
 }
 
 TEST_F(ReferenceTest, Clone) {
-    auto* a = create<Reference>(builtin::AddressSpace::kStorage, create<I32>(),
-                                builtin::Access::kReadWrite);
+    auto* a =
+        create<Reference>(core::AddressSpace::kStorage, create<I32>(), core::Access::kReadWrite);
 
     type::Manager mgr;
     type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* ref = a->Clone(ctx);
     EXPECT_TRUE(ref->StoreType()->Is<I32>());
-    EXPECT_EQ(ref->AddressSpace(), builtin::AddressSpace::kStorage);
-    EXPECT_EQ(ref->Access(), builtin::Access::kReadWrite);
+    EXPECT_EQ(ref->AddressSpace(), core::AddressSpace::kStorage);
+    EXPECT_EQ(ref->Access(), core::Access::kReadWrite);
 }
 
 }  // namespace

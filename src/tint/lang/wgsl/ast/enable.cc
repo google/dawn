@@ -26,7 +26,7 @@ Enable::Enable(GenerationID pid, NodeID nid, const Source& src, VectorRef<const 
 
 Enable::~Enable() = default;
 
-bool Enable::HasExtension(builtin::Extension ext) const {
+bool Enable::HasExtension(core::Extension ext) const {
     for (auto* e : extensions) {
         if (e->name == ext) {
             return true;

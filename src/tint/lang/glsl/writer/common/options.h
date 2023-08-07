@@ -18,7 +18,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "src/tint/lang/core/builtin/access.h"
+#include "src/tint/lang/core/access.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/lang/wgsl/sem/sampler_texture_pair.h"
 #include "tint/external_texture_options.h"
@@ -51,7 +51,7 @@ struct Options {
 
     /// A map of old binding point to new access control for the BindingRemapper
     /// transform
-    std::unordered_map<BindingPoint, builtin::Access> access_controls;
+    std::unordered_map<BindingPoint, core::Access> access_controls;
 
     /// Set to `true` to disable software robustness that prevents out-of-bounds accesses.
     bool disable_robustness = false;

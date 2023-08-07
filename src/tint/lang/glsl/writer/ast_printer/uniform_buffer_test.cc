@@ -27,7 +27,7 @@ using GlslASTPrinterTest_UniformBuffer = TestHelper;
 
 TEST_F(GlslASTPrinterTest_UniformBuffer, Simple) {
     auto* simple = Structure("Simple", Vector{Member("member", ty.f32())});
-    GlobalVar("simple", ty.Of(simple), builtin::AddressSpace::kUniform, Group(0_a), Binding(0_a));
+    GlobalVar("simple", ty.Of(simple), core::AddressSpace::kUniform, Group(0_a), Binding(0_a));
 
     ASTPrinter& gen = Build();
     gen.Generate();
@@ -47,7 +47,7 @@ layout(binding = 0, std140) uniform Simple_ubo {
 
 TEST_F(GlslASTPrinterTest_UniformBuffer, Simple_Desktop) {
     auto* simple = Structure("Simple", Vector{Member("member", ty.f32())});
-    GlobalVar("simple", ty.Of(simple), builtin::AddressSpace::kUniform, Group(0_a), Binding(0_a));
+    GlobalVar("simple", ty.Of(simple), core::AddressSpace::kUniform, Group(0_a), Binding(0_a));
 
     ASTPrinter& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
     gen.Generate();

@@ -1,0 +1,37 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/src/cmd/gen to generate diagnostic_control.h
+
+See:
+* tools/src/cmd/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+{{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
+
+#ifndef SRC_TINT_LANG_CORE_DIAGNOSTIC_SEVERITY_H_
+#define SRC_TINT_LANG_CORE_DIAGNOSTIC_SEVERITY_H_
+
+#include <string>
+#include <unordered_map>
+
+#include "src/tint/utils/traits/traits.h"
+#include "src/tint/lang/core/diagnostic_rule.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
+
+namespace tint::core {
+
+/// The diagnostic severity control.
+{{ Eval "DeclareEnum" ($I.Sem.Enum "diagnostic_severity") }}
+
+/// Convert a DiagnosticSeverity to the corresponding diag::Severity.
+diag::Severity ToSeverity(DiagnosticSeverity sc);
+
+/// DiagnosticRuleSeverities is a map from diagnostic rule to diagnostic severity.
+using DiagnosticRuleSeverities = std::unordered_map<DiagnosticRule, DiagnosticSeverity>;
+
+}  // namespace tint::core
+
+#endif  // SRC_TINT_LANG_CORE_DIAGNOSTIC_SEVERITY_H_

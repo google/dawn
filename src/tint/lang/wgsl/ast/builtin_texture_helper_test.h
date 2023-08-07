@@ -17,8 +17,8 @@
 
 #include <vector>
 
-#include "src/tint/lang/core/builtin/access.h"
-#include "src/tint/lang/core/builtin/texel_format.h"
+#include "src/tint/lang/core/access.h"
+#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/builder.h"
@@ -210,8 +210,8 @@ struct TextureOverloadCase {
     /// Constructor for textureLoad() with storage textures
     TextureOverloadCase(ValidTextureOverload,
                         const char*,
-                        tint::builtin::Access,
-                        tint::builtin::TexelFormat,
+                        tint::core::Access,
+                        tint::core::TexelFormat,
                         type::TextureDimension,
                         TextureDataType,
                         const char*,
@@ -250,10 +250,10 @@ struct TextureOverloadCase {
     type::SamplerKind const sampler_kind = type::SamplerKind::kSampler;
     /// The access control for the storage texture
     /// Used only when texture_kind is kStorage
-    tint::builtin::Access const access = tint::builtin::Access::kReadWrite;
+    tint::core::Access const access = tint::core::Access::kReadWrite;
     /// The image format for the storage texture
     /// Used only when texture_kind is kStorage
-    tint::builtin::TexelFormat const texel_format = tint::builtin::TexelFormat::kUndefined;
+    tint::core::TexelFormat const texel_format = tint::core::TexelFormat::kUndefined;
     /// The dimensions of the texture parameter
     type::TextureDimension const texture_dimension;
     /// The data type of the texture parameter

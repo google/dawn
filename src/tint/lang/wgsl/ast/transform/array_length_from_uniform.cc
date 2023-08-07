@@ -39,7 +39,7 @@ bool ShouldRun(const Program* program) {
     for (auto* fn : program->AST().Functions()) {
         if (auto* sem_fn = program->Sem().Get(fn)) {
             for (auto* builtin : sem_fn->DirectlyCalledBuiltins()) {
-                if (builtin->Type() == builtin::Function::kArrayLength) {
+                if (builtin->Type() == core::Function::kArrayLength) {
                     return true;
                 }
             }
@@ -110,10 +110,10 @@ struct ArrayLengthFromUniform::State {
                                           b.ty.array(b.ty.vec4(b.ty.u32()),
                                                      u32((max_buffer_size_index / 4) + 1))),
                              });
-                buffer_size_ubo = b.GlobalVar(b.Sym(), b.ty.Of(buffer_size_struct),
-                                              builtin::AddressSpace::kUniform,
-                                              b.Group(AInt(cfg->ubo_binding.group)),
-                                              b.Binding(AInt(cfg->ubo_binding.binding)));
+                buffer_size_ubo =
+                    b.GlobalVar(b.Sym(), b.ty.Of(buffer_size_struct), core::AddressSpace::kUniform,
+                                b.Group(AInt(cfg->ubo_binding.group)),
+                                b.Binding(AInt(cfg->ubo_binding.binding)));
             }
             return buffer_size_ubo;
         };
@@ -205,7 +205,7 @@ struct ArrayLengthFromUniform::State {
 
             auto* call = sem.Get(call_expr)->UnwrapMaterialize()->As<sem::Call>();
             auto* builtin = call->Target()->As<sem::Builtin>();
-            if (!builtin || builtin->Type() != builtin::Function::kArrayLength) {
+            if (!builtin || builtin->Type() != core::Function::kArrayLength) {
                 continue;
             }
 

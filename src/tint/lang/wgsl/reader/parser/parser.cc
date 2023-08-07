@@ -16,7 +16,7 @@
 
 #include <limits>
 
-#include "src/tint/lang/core/builtin/attribute.h"
+#include "src/tint/lang/core/attribute.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
@@ -416,8 +416,7 @@ Maybe<Void> Parser::enable_directive() {
         Vector<const ast::Extension*, 4> extensions;
         while (continue_parsing()) {
             Source ext_src = peek().source();
-            auto ext =
-                expect_enum("extension", builtin::ParseExtension, builtin::kExtensionStrings);
+            auto ext = expect_enum("extension", core::ParseExtension, core::kExtensionStrings);
             if (ext.errored) {
                 return Failure::kErrored;
             }
@@ -2975,7 +2974,7 @@ Maybe<const ast::Attribute*> Parser::attribute() {
         return create<ast::DiagnosticAttribute>(t.source(), std::move(control.value));
     }
 
-    auto attr = expect_enum("attribute", builtin::ParseAttribute, builtin::kAttributeStrings);
+    auto attr = expect_enum("attribute", core::ParseAttribute, core::kAttributeStrings);
     if (attr.errored) {
         return Failure::kErrored;
     }
@@ -2983,18 +2982,18 @@ Maybe<const ast::Attribute*> Parser::attribute() {
     uint32_t min = 1;
     uint32_t max = 1;
     switch (attr.value) {
-        case builtin::Attribute::kCompute:
-        case builtin::Attribute::kFragment:
-        case builtin::Attribute::kInvariant:
-        case builtin::Attribute::kMustUse:
-        case builtin::Attribute::kVertex:
+        case core::Attribute::kCompute:
+        case core::Attribute::kFragment:
+        case core::Attribute::kInvariant:
+        case core::Attribute::kMustUse:
+        case core::Attribute::kVertex:
             min = 0;
             max = 0;
             break;
-        case builtin::Attribute::kInterpolate:
+        case core::Attribute::kInterpolate:
             max = 2;
             break;
-        case builtin::Attribute::kWorkgroupSize:
+        case core::Attribute::kWorkgroupSize:
             max = 3;
             break;
         default:
@@ -3046,36 +3045,36 @@ Maybe<const ast::Attribute*> Parser::attribute() {
     }
 
     switch (attr.value) {
-        case builtin::Attribute::kAlign:
+        case core::Attribute::kAlign:
             return create<ast::StructMemberAlignAttribute>(t.source(), args[0]);
-        case builtin::Attribute::kBinding:
+        case core::Attribute::kBinding:
             return create<ast::BindingAttribute>(t.source(), args[0]);
-        case builtin::Attribute::kBuiltin:
+        case core::Attribute::kBuiltin:
             return create<ast::BuiltinAttribute>(t.source(), args[0]);
-        case builtin::Attribute::kCompute:
+        case core::Attribute::kCompute:
             return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kCompute);
-        case builtin::Attribute::kFragment:
+        case core::Attribute::kFragment:
             return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kFragment);
-        case builtin::Attribute::kGroup:
+        case core::Attribute::kGroup:
             return create<ast::GroupAttribute>(t.source(), args[0]);
-        case builtin::Attribute::kId:
+        case core::Attribute::kId:
             return create<ast::IdAttribute>(t.source(), args[0]);
-        case builtin::Attribute::kIndex:
+        case core::Attribute::kIndex:
             return create<ast::IndexAttribute>(t.source(), args[0]);
-        case builtin::Attribute::kInterpolate:
+        case core::Attribute::kInterpolate:
             return create<ast::InterpolateAttribute>(t.source(), args[0],
                                                      args.Length() == 2 ? args[1] : nullptr);
-        case builtin::Attribute::kInvariant:
+        case core::Attribute::kInvariant:
             return create<ast::InvariantAttribute>(t.source());
-        case builtin::Attribute::kLocation:
+        case core::Attribute::kLocation:
             return builder_.Location(t.source(), args[0]);
-        case builtin::Attribute::kMustUse:
+        case core::Attribute::kMustUse:
             return create<ast::MustUseAttribute>(t.source());
-        case builtin::Attribute::kSize:
+        case core::Attribute::kSize:
             return builder_.MemberSize(t.source(), args[0]);
-        case builtin::Attribute::kVertex:
+        case core::Attribute::kVertex:
             return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kVertex);
-        case builtin::Attribute::kWorkgroupSize:
+        case core::Attribute::kWorkgroupSize:
             return create<ast::WorkgroupAttribute>(t.source(), args[0],
                                                    args.Length() > 1 ? args[1] : nullptr,
                                                    args.Length() > 2 ? args[2] : nullptr);
@@ -3143,9 +3142,9 @@ Expect<Void> Parser::expect_not_templated_ident_expr(const ast::Expression* expr
 //   | 'warning'
 //   | 'info'
 //   | 'off'
-Expect<builtin::DiagnosticSeverity> Parser::expect_severity_control_name() {
-    return expect_enum("severity control", builtin::ParseDiagnosticSeverity,
-                       builtin::kDiagnosticSeverityStrings);
+Expect<core::DiagnosticSeverity> Parser::expect_severity_control_name() {
+    return expect_enum("severity control", core::ParseDiagnosticSeverity,
+                       core::kDiagnosticSeverityStrings);
 }
 
 // diagnostic_control

@@ -30,8 +30,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::PreservePadding);
 
 namespace tint::ast::transform {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 PreservePadding::PreservePadding() = default;
 
@@ -57,8 +57,7 @@ struct PreservePadding::State {
                         // Ignore phony assignment.
                         return;
                     }
-                    if (ty->As<type::Reference>()->AddressSpace() !=
-                        builtin::AddressSpace::kStorage) {
+                    if (ty->As<type::Reference>()->AddressSpace() != core::AddressSpace::kStorage) {
                         // We only care about assignments that write to variables in the storage
                         // address space, as nothing else is host-visible.
                         return;
@@ -71,7 +70,7 @@ struct PreservePadding::State {
                 [&](const Enable* enable) {
                     // Check if the full pointer parameters extension is already enabled.
                     if (enable->HasExtension(
-                            builtin::Extension::kChromiumExperimentalFullPtrParameters)) {
+                            core::Extension::kChromiumExperimentalFullPtrParameters)) {
                         ext_enabled = true;
                     }
                 });
@@ -220,7 +219,7 @@ struct PreservePadding::State {
     /// Enable the full pointer parameters extension, if we have not already done so.
     void EnableExtension() {
         if (!ext_enabled) {
-            b.Enable(builtin::Extension::kChromiumExperimentalFullPtrParameters);
+            b.Enable(core::Extension::kChromiumExperimentalFullPtrParameters);
             ext_enabled = true;
         }
     }

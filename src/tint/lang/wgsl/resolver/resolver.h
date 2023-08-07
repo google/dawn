@@ -141,42 +141,42 @@ class Resolver {
     type::Type* Type(const ast::Expression* ast);
 
     /// @returns the call of Expression() cast to a
-    /// sem::BuiltinEnumExpression<builtin::AddressSpace>. If the sem::Expression is not a
-    /// sem::BuiltinEnumExpression<builtin::AddressSpace>, then an error diagnostic is raised and
+    /// sem::BuiltinEnumExpression<core::AddressSpace>. If the sem::Expression is not a
+    /// sem::BuiltinEnumExpression<core::AddressSpace>, then an error diagnostic is raised and
     /// nullptr is returned.
-    sem::BuiltinEnumExpression<builtin::AddressSpace>* AddressSpaceExpression(
+    sem::BuiltinEnumExpression<core::AddressSpace>* AddressSpaceExpression(
         const ast::Expression* expr);
 
     /// @returns the call of Expression() cast to a
-    /// sem::BuiltinEnumExpression<builtin::BuiltinValue>. If the sem::Expression is not a
-    /// sem::BuiltinEnumExpression<builtin::BuiltinValue>, then an error diagnostic is raised and
+    /// sem::BuiltinEnumExpression<core::BuiltinValue>. If the sem::Expression is not a
+    /// sem::BuiltinEnumExpression<core::BuiltinValue>, then an error diagnostic is raised and
     /// nullptr is returned.
-    sem::BuiltinEnumExpression<builtin::BuiltinValue>* BuiltinValueExpression(
+    sem::BuiltinEnumExpression<core::BuiltinValue>* BuiltinValueExpression(
         const ast::Expression* expr);
 
     /// @returns the call of Expression() cast to a sem::BuiltinEnumExpression<type::TexelFormat>.
     /// If the sem::Expression is not a sem::BuiltinEnumExpression<type::TexelFormat>, then an error
     /// diagnostic is raised and nullptr is returned.
-    sem::BuiltinEnumExpression<builtin::TexelFormat>* TexelFormatExpression(
+    sem::BuiltinEnumExpression<core::TexelFormat>* TexelFormatExpression(
         const ast::Expression* expr);
 
-    /// @returns the call of Expression() cast to a sem::BuiltinEnumExpression<builtin::Access>*.
-    /// If the sem::Expression is not a sem::BuiltinEnumExpression<builtin::Access>*, then an error
+    /// @returns the call of Expression() cast to a sem::BuiltinEnumExpression<core::Access>*.
+    /// If the sem::Expression is not a sem::BuiltinEnumExpression<core::Access>*, then an error
     /// diagnostic is raised and nullptr is returned.
-    sem::BuiltinEnumExpression<builtin::Access>* AccessExpression(const ast::Expression* expr);
+    sem::BuiltinEnumExpression<core::Access>* AccessExpression(const ast::Expression* expr);
 
     /// @returns the call of Expression() cast to a
-    /// sem::BuiltinEnumExpression<builtin::InterpolationSampling>*. If the sem::Expression is not a
-    /// sem::BuiltinEnumExpression<builtin::InterpolationSampling>*, then an error diagnostic is
+    /// sem::BuiltinEnumExpression<core::InterpolationSampling>*. If the sem::Expression is not a
+    /// sem::BuiltinEnumExpression<core::InterpolationSampling>*, then an error diagnostic is
     /// raised and nullptr is returned.
-    sem::BuiltinEnumExpression<builtin::InterpolationSampling>* InterpolationSampling(
+    sem::BuiltinEnumExpression<core::InterpolationSampling>* InterpolationSampling(
         const ast::Expression* expr);
 
     /// @returns the call of Expression() cast to a
-    /// sem::BuiltinEnumExpression<builtin::InterpolationType>*. If the sem::Expression is not a
-    /// sem::BuiltinEnumExpression<builtin::InterpolationType>*, then an error diagnostic is raised
+    /// sem::BuiltinEnumExpression<core::InterpolationType>*. If the sem::Expression is not a
+    /// sem::BuiltinEnumExpression<core::InterpolationType>*, then an error diagnostic is raised
     /// and nullptr is returned.
-    sem::BuiltinEnumExpression<builtin::InterpolationType>* InterpolationType(
+    sem::BuiltinEnumExpression<core::InterpolationType>* InterpolationType(
         const ast::Expression* expr);
 
     /// Expression traverses the graph of expressions starting at `expr`, building a post-ordered
@@ -207,7 +207,7 @@ class Resolver {
     sem::Expression* Identifier(const ast::IdentifierExpression*);
     template <size_t N>
     sem::Call* BuiltinCall(const ast::CallExpression*,
-                           builtin::Function,
+                           core::Function,
                            Vector<const sem::ValueExpression*, N>& args);
     sem::ValueExpression* Literal(const ast::LiteralExpression*);
     sem::ValueExpression* MemberAccessor(const ast::MemberAccessorExpression*);
@@ -314,7 +314,7 @@ class Resolver {
 
     /// Resolves the `@builtin` attribute @p attr
     /// @returns the builtin value on success
-    tint::Result<tint::builtin::BuiltinValue> BuiltinAttribute(const ast::BuiltinAttribute* attr);
+    tint::Result<tint::core::BuiltinValue> BuiltinAttribute(const ast::BuiltinAttribute* attr);
 
     /// Resolves the `@location` attribute @p attr
     /// @returns the location value on success.
@@ -358,8 +358,7 @@ class Resolver {
 
     /// Resolves the `@interpolate` attribute @p attr
     /// @returns true on success, false on failure
-    tint::Result<builtin::Interpolation> InterpolateAttribute(
-        const ast::InterpolateAttribute* attr);
+    tint::Result<core::Interpolation> InterpolateAttribute(const ast::InterpolateAttribute* attr);
 
     /// Resolves the internal attribute @p attr
     /// @returns true on success, false on failure
@@ -479,13 +478,11 @@ class Resolver {
     /// given type and address space. Used for generating sensible error
     /// messages.
     /// @returns true on success, false on error
-    bool ApplyAddressSpaceUsageToType(builtin::AddressSpace sc,
-                                      type::Type* ty,
-                                      const Source& usage);
+    bool ApplyAddressSpaceUsageToType(core::AddressSpace sc, type::Type* ty, const Source& usage);
 
     /// @param address_space the address space
     /// @returns the default access control for the given address space
-    builtin::Access DefaultAccessForAddressSpace(builtin::AddressSpace address_space);
+    core::Access DefaultAccessForAddressSpace(core::AddressSpace address_space);
 
     /// Allocate constant IDs for pipeline-overridable constants.
     /// @returns true on success, false on error
@@ -552,7 +549,7 @@ class Resolver {
 
     /// @returns the type::Type for the builtin type @p builtin_ty with the identifier @p ident
     /// @note: Will raise an ICE if @p symbol is not a builtin type.
-    type::Type* BuiltinType(builtin::Builtin builtin_ty, const ast::Identifier* ident);
+    type::Type* BuiltinType(core::Builtin builtin_ty, const ast::Identifier* ident);
 
     /// @returns the nesting depth of @ty as defined in
     /// https://gpuweb.github.io/gpuweb/wgsl/#composite-types
@@ -609,7 +606,7 @@ class Resolver {
     DependencyGraph dependencies_;
     SemHelper sem_;
     Validator validator_;
-    builtin::Extensions enabled_extensions_;
+    core::Extensions enabled_extensions_;
     Vector<sem::Function*, 8> entry_points_;
     Hashmap<const type::Type*, const Source*, 8> atomic_composite_info_;
     tint::Bitset<0> marked_;

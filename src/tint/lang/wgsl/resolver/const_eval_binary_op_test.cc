@@ -17,8 +17,8 @@
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/utils/result/result.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 using ::testing::HasSubstr;
 
 namespace tint::resolver {
@@ -84,7 +84,7 @@ std::ostream& operator<<(std::ostream& o, const ErrorCase& c) {
 
 using ResolverConstEvalBinaryOpTest = ResolverTestWithParam<std::tuple<ast::BinaryOp, Case>>;
 TEST_P(ResolverConstEvalBinaryOpTest, Test) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
     auto op = std::get<0>(GetParam());
     auto& c = std::get<1>(GetParam());
 

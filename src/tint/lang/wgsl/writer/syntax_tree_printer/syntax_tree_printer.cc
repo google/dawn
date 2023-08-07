@@ -16,7 +16,7 @@
 
 #include <algorithm>
 
-#include "src/tint/lang/core/builtin/texel_format.h"
+#include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/wgsl/ast/accessor_expression.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
@@ -393,8 +393,8 @@ void SyntaxTreePrinter::EmitFunction(const ast::Function* func) {
     Line() << "]";
 }
 
-void SyntaxTreePrinter::EmitImageFormat(const builtin::TexelFormat fmt) {
-    Line() << "builtin::TexelFormat [" << fmt << "]";
+void SyntaxTreePrinter::EmitImageFormat(const core::TexelFormat fmt) {
+    Line() << "core::TexelFormat [" << fmt << "]";
 }
 
 void SyntaxTreePrinter::EmitStructType(const ast::Struct* str) {

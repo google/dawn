@@ -16,7 +16,7 @@
 
 #include <utility>
 
-#include "src/tint/lang/core/builtin/builtin_value.h"
+#include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/attribute.h"
 #include "src/tint/lang/wgsl/ast/builtin_attribute.h"
 #include "src/tint/lang/wgsl/ast/function.h"
@@ -55,7 +55,7 @@ struct ClampFragDepth::State {
         for (auto* global : src->AST().GlobalVariables()) {
             if (auto* var = global->As<Var>()) {
                 auto* v = src->Sem().Get(var);
-                if (TINT_UNLIKELY(v->AddressSpace() == builtin::AddressSpace::kPushConstant)) {
+                if (TINT_UNLIKELY(v->AddressSpace() == core::AddressSpace::kPushConstant)) {
                     TINT_ICE()
                         << "ClampFragDepth doesn't know how to handle module that already use push "
                            "constants";
@@ -81,13 +81,13 @@ struct ClampFragDepth::State {
         //   fn clamp_frag_depth(v : f32) -> f32 {
         //       return clamp(v, frag_depth_clamp_args.min, frag_depth_clamp_args.max);
         //   }
-        b.Enable(builtin::Extension::kChromiumExperimentalPushConstant);
+        b.Enable(core::Extension::kChromiumExperimentalPushConstant);
 
         b.Structure(b.Symbols().New("FragDepthClampArgs"),
                     tint::Vector{b.Member("min", b.ty.f32()), b.Member("max", b.ty.f32())});
 
         auto args_sym = b.Symbols().New("frag_depth_clamp_args");
-        b.GlobalVar(args_sym, b.ty("FragDepthClampArgs"), builtin::AddressSpace::kPushConstant);
+        b.GlobalVar(args_sym, b.ty("FragDepthClampArgs"), core::AddressSpace::kPushConstant);
 
         auto base_fn_sym = b.Symbols().New("clamp_frag_depth");
         b.Func(base_fn_sym, tint::Vector{b.Param("v", b.ty.f32())}, b.ty.f32(),
@@ -189,7 +189,7 @@ struct ClampFragDepth::State {
         for (auto* attribute : attrs) {
             if (auto* builtin_attr = attribute->As<BuiltinAttribute>()) {
                 auto builtin = sem.Get(builtin_attr)->Value();
-                if (builtin == builtin::BuiltinValue::kFragDepth) {
+                if (builtin == core::BuiltinValue::kFragDepth) {
                     return true;
                 }
             }

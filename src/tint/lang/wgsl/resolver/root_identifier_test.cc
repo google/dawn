@@ -22,13 +22,13 @@
 namespace tint::resolver {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 class ResolverRootIdentifierTest : public ResolverTest {};
 
 TEST_F(ResolverRootIdentifierTest, GlobalPrivateVar) {
-    auto* a = GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate);
+    auto* a = GlobalVar("a", ty.f32(), core::AddressSpace::kPrivate);
     auto* expr = Expr(a);
     WrapInFunction(expr);
 
@@ -39,7 +39,7 @@ TEST_F(ResolverRootIdentifierTest, GlobalPrivateVar) {
 }
 
 TEST_F(ResolverRootIdentifierTest, GlobalWorkgroupVar) {
-    auto* a = GlobalVar("a", ty.f32(), builtin::AddressSpace::kWorkgroup);
+    auto* a = GlobalVar("a", ty.f32(), core::AddressSpace::kWorkgroup);
     auto* expr = Expr(a);
     WrapInFunction(expr);
 
@@ -50,7 +50,7 @@ TEST_F(ResolverRootIdentifierTest, GlobalWorkgroupVar) {
 }
 
 TEST_F(ResolverRootIdentifierTest, GlobalStorageVar) {
-    auto* a = GlobalVar("a", ty.f32(), builtin::AddressSpace::kStorage, Group(0_a), Binding(0_a));
+    auto* a = GlobalVar("a", ty.f32(), core::AddressSpace::kStorage, Group(0_a), Binding(0_a));
     auto* expr = Expr(a);
     WrapInFunction(expr);
 
@@ -61,7 +61,7 @@ TEST_F(ResolverRootIdentifierTest, GlobalStorageVar) {
 }
 
 TEST_F(ResolverRootIdentifierTest, GlobalUniformVar) {
-    auto* a = GlobalVar("a", ty.f32(), builtin::AddressSpace::kUniform, Group(0_a), Binding(0_a));
+    auto* a = GlobalVar("a", ty.f32(), core::AddressSpace::kUniform, Group(0_a), Binding(0_a));
     auto* expr = Expr(a);
     WrapInFunction(expr);
 
@@ -73,7 +73,7 @@ TEST_F(ResolverRootIdentifierTest, GlobalUniformVar) {
 
 TEST_F(ResolverRootIdentifierTest, GlobalTextureVar) {
     auto* a = GlobalVar("a", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
-                        builtin::AddressSpace::kUndefined, Group(0_a), Binding(0_a));
+                        core::AddressSpace::kUndefined, Group(0_a), Binding(0_a));
     auto* expr = Expr(a);
     WrapInFunction(Call("textureDimensions", expr));
 
@@ -199,7 +199,7 @@ TEST_F(ResolverRootIdentifierTest, ThroughIndexAccessor) {
     // {
     //   a[2i]
     // }
-    auto* a = GlobalVar("a", ty.array<f32, 4>(), builtin::AddressSpace::kPrivate);
+    auto* a = GlobalVar("a", ty.array<f32, 4>(), core::AddressSpace::kPrivate);
     auto* expr = IndexAccessor(a, 2_i);
     WrapInFunction(expr);
 
@@ -216,7 +216,7 @@ TEST_F(ResolverRootIdentifierTest, ThroughMemberAccessor) {
     //   a.f
     // }
     auto* S = Structure("S", Vector{Member("f", ty.f32())});
-    auto* a = GlobalVar("a", ty.Of(S), builtin::AddressSpace::kPrivate);
+    auto* a = GlobalVar("a", ty.Of(S), core::AddressSpace::kPrivate);
     auto* expr = MemberAccessor(a, "f");
     WrapInFunction(expr);
 
@@ -232,7 +232,7 @@ TEST_F(ResolverRootIdentifierTest, ThroughPointers) {
     //   let a_ptr1 = &*&a;
     //   let a_ptr2 = &*a_ptr1;
     // }
-    auto* a = GlobalVar("a", ty.f32(), builtin::AddressSpace::kPrivate);
+    auto* a = GlobalVar("a", ty.f32(), core::AddressSpace::kPrivate);
     auto* address_of_1 = AddressOf(a);
     auto* deref_1 = Deref(address_of_1);
     auto* address_of_2 = AddressOf(deref_1);

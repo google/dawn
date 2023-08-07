@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <unordered_set>
 
-#include "src/tint/lang/core/builtin/function.h"
+#include "src/tint/lang/core/function.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/text/string_stream.h"
 
@@ -176,7 +176,7 @@ Namer::Namer(const FailStream& fail_stream) : fail_stream_(fail_stream) {
     for (const auto* reserved : kWGSLReservedWords) {
         name_to_id_[std::string(reserved)] = 0;
     }
-    for (const auto* builtin_function : builtin::kFunctionStrings) {
+    for (const auto* builtin_function : core::kFunctionStrings) {
         name_to_id_[std::string(builtin_function)] = 0;
     }
 }

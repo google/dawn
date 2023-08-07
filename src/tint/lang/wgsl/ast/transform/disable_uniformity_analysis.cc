@@ -33,13 +33,13 @@ Transform::ApplyResult DisableUniformityAnalysis::Apply(const Program* src,
                                                         const DataMap&,
                                                         DataMap&) const {
     if (src->Sem().Module()->Extensions().Contains(
-            builtin::Extension::kChromiumDisableUniformityAnalysis)) {
+            core::Extension::kChromiumDisableUniformityAnalysis)) {
         return SkipTransform;
     }
 
     ProgramBuilder b;
     program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
-    b.Enable(builtin::Extension::kChromiumDisableUniformityAnalysis);
+    b.Enable(core::Extension::kChromiumDisableUniformityAnalysis);
 
     ctx.Clone();
     return resolver::Resolve(b);

@@ -23,8 +23,8 @@
 namespace tint::resolver {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 struct Type {
     template <typename T, std::enable_if_t<IsVector<T>, bool> = true>
@@ -108,7 +108,7 @@ TEST_P(ResolverBitcastValidationTestPass, Test) {
     auto dst = std::get<1>(GetParam());
 
     if (src.used_f16 || dst.used_f16) {
-        Enable(builtin::Extension::kF16);
+        Enable(core::Extension::kF16);
     }
 
     auto* cast = Bitcast(dst.ast(*this), src.expr(*this, 0));
@@ -151,7 +151,7 @@ TEST_P(ResolverBitcastValidationTestInvalidSrcTy, Test) {
     auto dst = std::get<1>(GetParam());
 
     if (src.used_f16 || dst.used_f16) {
-        Enable(builtin::Extension::kF16);
+        Enable(core::Extension::kF16);
     }
 
     auto* cast = Bitcast(dst.ast(*this), Expr(Source{{12, 34}}, "src"));
@@ -196,7 +196,7 @@ TEST_P(ResolverBitcastValidationTestInvalidDstTy, Test) {
     auto dst = std::get<1>(GetParam());
 
     if (src.used_f16 || dst.used_f16) {
-        Enable(builtin::Extension::kF16);
+        Enable(core::Extension::kF16);
     }
 
     // Use an alias so we can put a Source on the bitcast type
@@ -242,7 +242,7 @@ TEST_P(ResolverBitcastValidationTestIncompatible, Test) {
     auto dst = std::get<1>(GetParam());
 
     if (src.used_f16 || dst.used_f16) {
-        Enable(builtin::Extension::kF16);
+        Enable(core::Extension::kF16);
     }
 
     WrapInFunction(Bitcast(Source{{12, 34}}, dst.ast(*this), src.expr(*this, 0)));
@@ -379,7 +379,7 @@ INSTANTIATE_TEST_SUITE_P(128BitsTo96Bits,
 ////////////////////////////////////////////////////////////////////////////////
 using ResolverBitcastValidationTestInvalidConst = tint::resolver::ResolverTest;
 TEST_F(ResolverBitcastValidationTestInvalidConst, ConstBitcastToF16NaN) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     // Lower 16 bits of const u32 0x7e10 is NaN in f16.
     auto* a = Const("a", Expr(u32(0x00007e10)));
@@ -393,7 +393,7 @@ TEST_F(ResolverBitcastValidationTestInvalidConst, ConstBitcastToF16NaN) {
 }
 
 TEST_F(ResolverBitcastValidationTestInvalidConst, ConstBitcastToF16Inf) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     // 0xfc00 is -Inf in f16.
     auto* a = Const("a", Call<vec2<u32>>(u32(0x00007010), u32(0xfc008000)));
@@ -417,7 +417,7 @@ TEST_F(ResolverBitcastValidationTestInvalidConst, ConstBitcastToF32NaN) {
 }
 
 TEST_F(ResolverBitcastValidationTestInvalidConst, ConstBitcastToF32Inf) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     // 0x7f800000 is Inf in f32.
     auto* a = Const("a", Call<vec3<u32>>(u32(0xA0008000), u32(0x7f800000), u32(0x40000000)));

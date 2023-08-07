@@ -164,7 +164,7 @@ TEST_F(SpirvASTPrinterTest, Literal_F32_Dedup) {
 }
 
 TEST_F(SpirvASTPrinterTest, Literal_F16) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* i = create<ast::FloatLiteralExpression>(23.245, ast::FloatLiteralExpression::Suffix::kH);
     WrapInFunction(i);
@@ -181,7 +181,7 @@ TEST_F(SpirvASTPrinterTest, Literal_F16) {
 }
 
 TEST_F(SpirvASTPrinterTest, Literal_F16_Dedup) {
-    Enable(builtin::Extension::kF16);
+    Enable(core::Extension::kF16);
 
     auto* i1 = create<ast::FloatLiteralExpression>(23.245, ast::FloatLiteralExpression::Suffix::kH);
     auto* i2 = create<ast::FloatLiteralExpression>(23.245, ast::FloatLiteralExpression::Suffix::kH);

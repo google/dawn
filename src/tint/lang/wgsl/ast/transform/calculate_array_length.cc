@@ -40,14 +40,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CalculateArrayLength::BufferSize
 namespace tint::ast::transform {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 bool ShouldRun(const Program* program) {
     for (auto* fn : program->AST().Functions()) {
         if (auto* sem_fn = program->Sem().Get(fn)) {
             for (auto* builtin : sem_fn->DirectlyCalledBuiltins()) {
-                if (builtin->Type() == builtin::Function::kArrayLength) {
+                if (builtin->Type() == core::Function::kArrayLength) {
                     return true;
                 }
             }
@@ -130,7 +130,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
         if (auto* call_expr = node->As<CallExpression>()) {
             auto* call = sem.Get(call_expr)->UnwrapMaterialize()->As<sem::Call>();
             if (auto* builtin = call->Target()->As<sem::Builtin>()) {
-                if (builtin->Type() == builtin::Function::kArrayLength) {
+                if (builtin->Type() == core::Function::kArrayLength) {
                     // We're dealing with an arrayLength() call
 
                     if (auto* call_stmt = call->Stmt()->Declaration()->As<CallStatement>()) {

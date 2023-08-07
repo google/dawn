@@ -22,8 +22,8 @@ namespace {
 using GlslASTPrinterTest_Assign = TestHelper;
 
 TEST_F(GlslASTPrinterTest_Assign, Emit_Assign) {
-    GlobalVar("lhs", ty.i32(), builtin::AddressSpace::kPrivate);
-    GlobalVar("rhs", ty.i32(), builtin::AddressSpace::kPrivate);
+    GlobalVar("lhs", ty.i32(), core::AddressSpace::kPrivate);
+    GlobalVar("rhs", ty.i32(), core::AddressSpace::kPrivate);
     auto* assign = Assign("lhs", "rhs");
     WrapInFunction(assign);
 

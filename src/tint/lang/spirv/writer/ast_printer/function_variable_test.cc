@@ -18,13 +18,13 @@
 namespace tint::spirv::writer {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 using SpirvASTPrinterTest = TestHelper;
 
 TEST_F(SpirvASTPrinterTest, FunctionVar_NoAddressSpace) {
-    auto* v = Var("var", ty.f32(), builtin::AddressSpace::kFunction);
+    auto* v = Var("var", ty.f32(), core::AddressSpace::kFunction);
     WrapInFunction(v);
 
     Builder& b = Build();
@@ -46,7 +46,7 @@ TEST_F(SpirvASTPrinterTest, FunctionVar_NoAddressSpace) {
 
 TEST_F(SpirvASTPrinterTest, FunctionVar_WithConstantInitializer) {
     auto* init = Call<vec3<f32>>(1_f, 1_f, 3_f);
-    auto* v = Var("var", ty.vec3<f32>(), builtin::AddressSpace::kFunction, init);
+    auto* v = Var("var", ty.vec3<f32>(), core::AddressSpace::kFunction, init);
     WrapInFunction(v);
 
     Builder& b = Build();

@@ -22,8 +22,8 @@ namespace {
 using WgslASTPrinterTest = TestHelper;
 
 TEST_F(WgslASTPrinterTest, Emit_Assign) {
-    auto* lhs = GlobalVar("lhs", ty.i32(), builtin::AddressSpace::kPrivate);
-    auto* rhs = GlobalVar("rhs", ty.i32(), builtin::AddressSpace::kPrivate);
+    auto* lhs = GlobalVar("lhs", ty.i32(), core::AddressSpace::kPrivate);
+    auto* rhs = GlobalVar("rhs", ty.i32(), core::AddressSpace::kPrivate);
     auto* assign = Assign(lhs, rhs);
     WrapInFunction(assign);
 

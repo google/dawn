@@ -151,9 +151,9 @@ TEST_P(ResolverExpressionKindTest, Test) {
             sym = Sym("write");
             check_expr = [](const sem::Expression* expr) {
                 ASSERT_NE(expr, nullptr);
-                auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::Access>>();
+                auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::Access>>();
                 ASSERT_NE(enum_expr, nullptr);
-                EXPECT_EQ(enum_expr->Value(), builtin::Access::kWrite);
+                EXPECT_EQ(enum_expr->Value(), core::Access::kWrite);
             };
             break;
         }
@@ -161,9 +161,9 @@ TEST_P(ResolverExpressionKindTest, Test) {
             sym = Sym("workgroup");
             check_expr = [](const sem::Expression* expr) {
                 ASSERT_NE(expr, nullptr);
-                auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::AddressSpace>>();
+                auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::AddressSpace>>();
                 ASSERT_NE(enum_expr, nullptr);
-                EXPECT_EQ(enum_expr->Value(), builtin::AddressSpace::kWorkgroup);
+                EXPECT_EQ(enum_expr->Value(), core::AddressSpace::kWorkgroup);
             };
             break;
         }
@@ -186,9 +186,9 @@ TEST_P(ResolverExpressionKindTest, Test) {
             sym = Sym("position");
             check_expr = [](const sem::Expression* expr) {
                 ASSERT_NE(expr, nullptr);
-                auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::BuiltinValue>>();
+                auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::BuiltinValue>>();
                 ASSERT_NE(enum_expr, nullptr);
-                EXPECT_EQ(enum_expr->Value(), builtin::BuiltinValue::kPosition);
+                EXPECT_EQ(enum_expr->Value(), core::BuiltinValue::kPosition);
             };
             break;
         }
@@ -208,9 +208,9 @@ TEST_P(ResolverExpressionKindTest, Test) {
             check_expr = [](const sem::Expression* expr) {
                 ASSERT_NE(expr, nullptr);
                 auto* enum_expr =
-                    expr->As<sem::BuiltinEnumExpression<builtin::InterpolationSampling>>();
+                    expr->As<sem::BuiltinEnumExpression<core::InterpolationSampling>>();
                 ASSERT_NE(enum_expr, nullptr);
-                EXPECT_EQ(enum_expr->Value(), builtin::InterpolationSampling::kCenter);
+                EXPECT_EQ(enum_expr->Value(), core::InterpolationSampling::kCenter);
             };
             break;
         }
@@ -218,10 +218,9 @@ TEST_P(ResolverExpressionKindTest, Test) {
             sym = Sym("linear");
             check_expr = [](const sem::Expression* expr) {
                 ASSERT_NE(expr, nullptr);
-                auto* enum_expr =
-                    expr->As<sem::BuiltinEnumExpression<builtin::InterpolationType>>();
+                auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::InterpolationType>>();
                 ASSERT_NE(enum_expr, nullptr);
-                EXPECT_EQ(enum_expr->Value(), builtin::InterpolationType::kLinear);
+                EXPECT_EQ(enum_expr->Value(), core::InterpolationType::kLinear);
             };
             break;
         }
@@ -254,9 +253,9 @@ TEST_P(ResolverExpressionKindTest, Test) {
             sym = Sym("rgba8unorm");
             check_expr = [](const sem::Expression* expr) {
                 ASSERT_NE(expr, nullptr);
-                auto* enum_expr = expr->As<sem::BuiltinEnumExpression<builtin::TexelFormat>>();
+                auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::TexelFormat>>();
                 ASSERT_NE(enum_expr, nullptr);
-                EXPECT_EQ(enum_expr->Value(), builtin::TexelFormat::kRgba8Unorm);
+                EXPECT_EQ(enum_expr->Value(), core::TexelFormat::kRgba8Unorm);
             };
             break;
         }
@@ -290,7 +289,7 @@ TEST_P(ResolverExpressionKindTest, Test) {
             GlobalVar("v", ty("texture_storage_2d", "rgba8unorm", expr), Group(0_u), Binding(0_u));
             break;
         case Use::kAddressSpace:
-            Enable(builtin::Extension::kChromiumExperimentalFullPtrParameters);
+            Enable(core::Extension::kChromiumExperimentalFullPtrParameters);
             Func(Symbols().New(), Vector{Param("p", ty("ptr", expr, ty.f32()))}, ty.void_(),
                  tint::Empty);
             break;
@@ -314,7 +313,7 @@ TEST_P(ResolverExpressionKindTest, Test) {
             fn_params.Push(Param("p", ty.vec4<f32>(),
                                  Vector{
                                      Location(0_a),
-                                     Interpolate(builtin::InterpolationType::kLinear, expr),
+                                     Interpolate(core::InterpolationType::kLinear, expr),
                                  }));
             fn_attrs.Push(Stage(ast::PipelineStage::kFragment));
             break;
@@ -323,7 +322,7 @@ TEST_P(ResolverExpressionKindTest, Test) {
             fn_params.Push(Param("p", ty.vec4<f32>(),
                                  Vector{
                                      Location(0_a),
-                                     Interpolate(expr, builtin::InterpolationSampling::kCenter),
+                                     Interpolate(expr, core::InterpolationSampling::kCenter),
                                  }));
             fn_attrs.Push(Stage(ast::PipelineStage::kFragment));
             break;
