@@ -1904,5 +1904,32 @@ TEST_F(SpirvWriterTest, TextureSampleBaseClampToEdge_2d_f32) {
 )");
 }
 
+////////////////////////////////////////////////////////////////
+//// Storage textures with bgra8unorm texel formats
+////////////////////////////////////////////////////////////////
+
+TEST_F(SpirvWriterTest, Bgra8Unorm_textureStore) {
+    auto format = core::TexelFormat::kBgra8Unorm;
+    auto* texture_ty =
+        ty.Get<type::StorageTexture>(type::TextureDimension::k2d, format, core::Access::kWrite,
+                                     type::StorageTexture::SubtypeFor(format, ty));
+
+    auto* texture = b.FunctionParam("texture", texture_ty);
+    auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+    auto* value = b.FunctionParam("value", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({texture, coords, value});
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::Function::kTextureStore, texture, coords, value);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+         %13 = OpVectorShuffle %v4float %value %value 2 1 0 3
+               OpImageWrite %texture %coords %13 None
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

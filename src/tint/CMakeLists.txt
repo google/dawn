@@ -872,6 +872,8 @@ if(${TINT_BUILD_IR})
     lang/core/ir/var.h
     lang/core/ir/transform/add_empty_entry_point.cc
     lang/core/ir/transform/add_empty_entry_point.h
+    lang/core/ir/transform/bgra8unorm_polyfill.cc
+    lang/core/ir/transform/bgra8unorm_polyfill.h
     lang/core/ir/transform/binding_remapper.cc
     lang/core/ir/transform/binding_remapper.h
     lang/core/ir/transform/block_decorated_structs.cc
@@ -1679,6 +1681,7 @@ if(TINT_BUILD_TESTS)
       lang/core/ir/switch_test.cc
       lang/core/ir/swizzle_test.cc
       lang/core/ir/transform/add_empty_entry_point_test.cc
+      lang/core/ir/transform/bgra8unorm_polyfill_test.cc
       lang/core/ir/transform/binding_remapper_test.cc
       lang/core/ir/transform/block_decorated_structs_test.cc
       lang/core/ir/transform/builtin_polyfill_test.cc

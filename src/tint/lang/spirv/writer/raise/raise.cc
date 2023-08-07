@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
+#include "src/tint/lang/core/ir/transform/bgra8unorm_polyfill.h"
 #include "src/tint/lang/core/ir/transform/block_decorated_structs.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
@@ -49,6 +50,7 @@ Result<SuccessType, std::string> Raise(ir::Module* module) {
     RUN_TRANSFORM(ir::transform::BuiltinPolyfill, module, core_polyfills);
 
     RUN_TRANSFORM(ir::transform::AddEmptyEntryPoint, module);
+    RUN_TRANSFORM(ir::transform::Bgra8UnormPolyfill, module);
     RUN_TRANSFORM(ir::transform::BlockDecoratedStructs, module);
     RUN_TRANSFORM(BuiltinPolyfill, module);
     RUN_TRANSFORM(ir::transform::DemoteToHelper, module);
