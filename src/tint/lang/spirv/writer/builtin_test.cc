@@ -603,7 +603,7 @@ TEST_F(SpirvWriterTest, Builtin_Saturate_F32) {
     auto* func = b.Function("foo", ty.f32());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.f32(), builtin::Function::kSaturate, arg);
+        auto* result = b.Call(ty.f32(), core::Function::kSaturate, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -617,7 +617,7 @@ TEST_F(SpirvWriterTest, Builtin_Saturate_Vec4h) {
     auto* func = b.Function("foo", ty.vec4<f16>());
     func->SetParams({arg});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f16>(), builtin::Function::kSaturate, arg);
+        auto* result = b.Call(ty.vec4<f16>(), core::Function::kSaturate, arg);
         b.Return(func, result);
         mod.SetName(result, "result");
     });

@@ -20,8 +20,8 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 namespace tint::ir::transform {
 
@@ -54,7 +54,7 @@ struct State {
             }
             if (auto* builtin = inst->As<ir::CoreBuiltinCall>()) {
                 switch (builtin->Func()) {
-                    case builtin::Function::kSaturate:
+                    case core::Function::kSaturate:
                         if (config.saturate) {
                             worklist.Push(builtin);
                         }
@@ -69,7 +69,7 @@ struct State {
         for (auto* builtin : worklist) {
             ir::Value* replacement = nullptr;
             switch (builtin->Func()) {
-                case builtin::Function::kSaturate:
+                case core::Function::kSaturate:
                     replacement = Saturate(builtin);
                     break;
                 default:
@@ -106,7 +106,7 @@ struct State {
             zero = b.Splat(vec, zero, vec->Width());
             one = b.Splat(vec, one, vec->Width());
         }
-        auto* clamp = b.Call(type, builtin::Function::kClamp, Vector{call->Args()[0], zero, one});
+        auto* clamp = b.Call(type, core::Function::kClamp, Vector{call->Args()[0], zero, one});
         clamp->InsertBefore(call);
         return clamp->Result();
     }

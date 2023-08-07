@@ -21,8 +21,8 @@
 namespace tint::ir::transform {
 namespace {
 
-using namespace tint::builtin::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;        // NOLINT
+using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::number_suffixes;     // NOLINT
 
 class IR_BuiltinPolyfillTest : public TransformTest {
   protected:
@@ -30,7 +30,7 @@ class IR_BuiltinPolyfillTest : public TransformTest {
     /// @param builtin the builtin to call
     /// @param result_ty the result type of the builtin call
     /// @param arg_types the arguments types for the builtin call
-    void Build(builtin::Function builtin,
+    void Build(core::Function builtin,
                const type::Type* result_ty,
                VectorRef<const type::Type*> arg_types) {
         Vector<FunctionParam*, 4> args;
@@ -48,7 +48,7 @@ class IR_BuiltinPolyfillTest : public TransformTest {
 };
 
 TEST_F(IR_BuiltinPolyfillTest, Saturate_NoPolyfill) {
-    Build(builtin::Function::kSaturate, ty.f32(), Vector{ty.f32()});
+    Build(core::Function::kSaturate, ty.f32(), Vector{ty.f32()});
     auto* src = R"(
 %foo = func(%arg:f32):f32 -> %b1 {
   %b1 = block {
@@ -68,7 +68,7 @@ TEST_F(IR_BuiltinPolyfillTest, Saturate_NoPolyfill) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Saturate_F32) {
-    Build(builtin::Function::kSaturate, ty.f32(), Vector{ty.f32()});
+    Build(core::Function::kSaturate, ty.f32(), Vector{ty.f32()});
     auto* src = R"(
 %foo = func(%arg:f32):f32 -> %b1 {
   %b1 = block {
@@ -95,7 +95,7 @@ TEST_F(IR_BuiltinPolyfillTest, Saturate_F32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Saturate_F16) {
-    Build(builtin::Function::kSaturate, ty.f16(), Vector{ty.f16()});
+    Build(core::Function::kSaturate, ty.f16(), Vector{ty.f16()});
     auto* src = R"(
 %foo = func(%arg:f16):f16 -> %b1 {
   %b1 = block {
@@ -121,7 +121,7 @@ TEST_F(IR_BuiltinPolyfillTest, Saturate_F16) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Saturate_Vec2F32) {
-    Build(builtin::Function::kSaturate, ty.vec2<f32>(), Vector{ty.vec2<f32>()});
+    Build(core::Function::kSaturate, ty.vec2<f32>(), Vector{ty.vec2<f32>()});
     auto* src = R"(
 %foo = func(%arg:vec2<f32>):vec2<f32> -> %b1 {
   %b1 = block {
@@ -148,7 +148,7 @@ TEST_F(IR_BuiltinPolyfillTest, Saturate_Vec2F32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, Saturate_Vec4F16) {
-    Build(builtin::Function::kSaturate, ty.vec4<f16>(), Vector{ty.vec4<f16>()});
+    Build(core::Function::kSaturate, ty.vec4<f16>(), Vector{ty.vec4<f16>()});
     auto* src = R"(
 %foo = func(%arg:vec4<f16>):vec4<f16> -> %b1 {
   %b1 = block {
