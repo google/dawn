@@ -28,6 +28,10 @@ namespace tint::ir::transform {
 
 /// The set of polyfills that should be applied.
 struct BuiltinPolyfillConfig {
+    /// Should `firstLeadingBit()` be polyfilled?
+    bool first_leading_bit = false;
+    /// Should `firstTrailingBit()` be polyfilled?
+    bool first_trailing_bit = false;
     /// Should `saturate()` be polyfilled?
     bool saturate = false;
 };

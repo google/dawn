@@ -598,6 +598,275 @@ TEST_F(SpirvWriterTest, Builtin_Unpack4X8Unorm) {
     EXPECT_INST("%result = OpExtInst %v4float %9 UnpackUnorm4x8 %arg");
 }
 
+TEST_F(SpirvWriterTest, Builtin_FirstLeadingBit_U32) {
+    auto* arg = b.FunctionParam("arg", ty.u32());
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({arg});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), core::Function::kFirstLeadingBit, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %6 = OpBitwiseAnd %uint %arg %uint_4294901760
+          %8 = OpIEqual %bool %6 %uint_0
+         %11 = OpSelect %uint %8 %uint_0 %uint_16
+         %13 = OpShiftRightLogical %uint %arg %11
+         %14 = OpBitwiseAnd %uint %13 %uint_65280
+         %16 = OpIEqual %bool %14 %uint_0
+         %17 = OpSelect %uint %16 %uint_0 %uint_8
+         %19 = OpShiftRightLogical %uint %13 %17
+         %20 = OpBitwiseAnd %uint %19 %uint_240
+         %22 = OpIEqual %bool %20 %uint_0
+         %23 = OpSelect %uint %22 %uint_0 %uint_4
+         %25 = OpShiftRightLogical %uint %19 %23
+         %26 = OpBitwiseAnd %uint %25 %uint_12
+         %28 = OpIEqual %bool %26 %uint_0
+         %29 = OpSelect %uint %28 %uint_0 %uint_2
+         %31 = OpShiftRightLogical %uint %25 %29
+         %32 = OpBitwiseAnd %uint %31 %uint_2
+         %33 = OpIEqual %bool %32 %uint_0
+         %34 = OpSelect %uint %33 %uint_0 %uint_1
+         %36 = OpBitwiseOr %uint %29 %34
+         %37 = OpBitwiseOr %uint %23 %36
+         %38 = OpBitwiseOr %uint %17 %37
+         %39 = OpBitwiseOr %uint %11 %38
+         %40 = OpIEqual %bool %31 %uint_0
+     %result = OpSelect %uint %40 %uint_4294967295 %39
+)");
+}
+
+TEST_F(SpirvWriterTest, Builtin_FirstLeadingBit_I32) {
+    auto* arg = b.FunctionParam("arg", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), core::Function::kFirstLeadingBit, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %7 = OpBitcast %uint %arg
+          %8 = OpNot %uint %7
+          %9 = OpULessThan %bool %7 %uint_2147483648
+         %12 = OpSelect %uint %9 %7 %8
+         %13 = OpBitwiseAnd %uint %12 %uint_4294901760
+         %15 = OpIEqual %bool %13 %uint_0
+         %17 = OpSelect %uint %15 %uint_0 %uint_16
+         %19 = OpShiftRightLogical %uint %12 %17
+         %20 = OpBitwiseAnd %uint %19 %uint_65280
+         %22 = OpIEqual %bool %20 %uint_0
+         %23 = OpSelect %uint %22 %uint_0 %uint_8
+         %25 = OpShiftRightLogical %uint %19 %23
+         %26 = OpBitwiseAnd %uint %25 %uint_240
+         %28 = OpIEqual %bool %26 %uint_0
+         %29 = OpSelect %uint %28 %uint_0 %uint_4
+         %31 = OpShiftRightLogical %uint %25 %29
+         %32 = OpBitwiseAnd %uint %31 %uint_12
+         %34 = OpIEqual %bool %32 %uint_0
+         %35 = OpSelect %uint %34 %uint_0 %uint_2
+         %37 = OpShiftRightLogical %uint %31 %35
+         %38 = OpBitwiseAnd %uint %37 %uint_2
+         %39 = OpIEqual %bool %38 %uint_0
+         %40 = OpSelect %uint %39 %uint_0 %uint_1
+         %42 = OpBitwiseOr %uint %35 %40
+         %43 = OpBitwiseOr %uint %29 %42
+         %44 = OpBitwiseOr %uint %23 %43
+         %45 = OpBitwiseOr %uint %17 %44
+         %46 = OpIEqual %bool %37 %uint_0
+         %47 = OpSelect %uint %46 %uint_4294967295 %45
+     %result = OpBitcast %int %47
+)");
+}
+
+TEST_F(SpirvWriterTest, Builtin_FirstLeadingBit_Vec2U32) {
+    auto* arg = b.FunctionParam("arg", ty.vec2<u32>());
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({arg});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.vec2<u32>(), core::Function::kFirstLeadingBit, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%8 = OpConstantComposite %v2uint %uint_4294901760 %uint_4294901760");
+    EXPECT_INST("%11 = OpConstantComposite %v2uint %uint_0 %uint_0");
+    EXPECT_INST("%16 = OpConstantComposite %v2uint %uint_16 %uint_16");
+    EXPECT_INST("%20 = OpConstantComposite %v2uint %uint_65280 %uint_65280");
+    EXPECT_INST("%24 = OpConstantComposite %v2uint %uint_8 %uint_8");
+    EXPECT_INST("%28 = OpConstantComposite %v2uint %uint_240 %uint_240");
+    EXPECT_INST("%32 = OpConstantComposite %v2uint %uint_4 %uint_4");
+    EXPECT_INST("%36 = OpConstantComposite %v2uint %uint_12 %uint_12");
+    EXPECT_INST("%40 = OpConstantComposite %v2uint %uint_2 %uint_2");
+    EXPECT_INST("%46 = OpConstantComposite %v2uint %uint_1 %uint_1");
+    EXPECT_INST("%54 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295");
+    EXPECT_INST(R"(
+          %7 = OpBitwiseAnd %v2uint %arg %8
+         %10 = OpIEqual %v2bool %7 %11
+         %15 = OpSelect %v2uint %10 %11 %16
+         %18 = OpShiftRightLogical %v2uint %arg %15
+         %19 = OpBitwiseAnd %v2uint %18 %20
+         %22 = OpIEqual %v2bool %19 %11
+         %23 = OpSelect %v2uint %22 %11 %24
+         %26 = OpShiftRightLogical %v2uint %18 %23
+         %27 = OpBitwiseAnd %v2uint %26 %28
+         %30 = OpIEqual %v2bool %27 %11
+         %31 = OpSelect %v2uint %30 %11 %32
+         %34 = OpShiftRightLogical %v2uint %26 %31
+         %35 = OpBitwiseAnd %v2uint %34 %36
+         %38 = OpIEqual %v2bool %35 %11
+         %39 = OpSelect %v2uint %38 %11 %40
+         %42 = OpShiftRightLogical %v2uint %34 %39
+         %43 = OpBitwiseAnd %v2uint %42 %40
+         %44 = OpIEqual %v2bool %43 %11
+         %45 = OpSelect %v2uint %44 %11 %46
+         %48 = OpBitwiseOr %v2uint %39 %45
+         %49 = OpBitwiseOr %v2uint %31 %48
+         %50 = OpBitwiseOr %v2uint %23 %49
+         %51 = OpBitwiseOr %v2uint %15 %50
+         %52 = OpIEqual %v2bool %42 %11
+     %result = OpSelect %v2uint %52 %54 %51
+)");
+}
+
+TEST_F(SpirvWriterTest, Builtin_FirstTrailingBit_U32) {
+    auto* arg = b.FunctionParam("arg", ty.u32());
+    auto* func = b.Function("foo", ty.u32());
+    func->SetParams({arg});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), core::Function::kFirstTrailingBit, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %6 = OpBitwiseAnd %uint %arg %uint_65535
+          %8 = OpIEqual %bool %6 %uint_0
+         %11 = OpSelect %uint %8 %uint_16 %uint_0
+         %13 = OpShiftRightLogical %uint %arg %11
+         %14 = OpBitwiseAnd %uint %13 %uint_255
+         %16 = OpIEqual %bool %14 %uint_0
+         %17 = OpSelect %uint %16 %uint_8 %uint_0
+         %19 = OpShiftRightLogical %uint %13 %17
+         %20 = OpBitwiseAnd %uint %19 %uint_15
+         %22 = OpIEqual %bool %20 %uint_0
+         %23 = OpSelect %uint %22 %uint_4 %uint_0
+         %25 = OpShiftRightLogical %uint %19 %23
+         %26 = OpBitwiseAnd %uint %25 %uint_3
+         %28 = OpIEqual %bool %26 %uint_0
+         %29 = OpSelect %uint %28 %uint_2 %uint_0
+         %31 = OpShiftRightLogical %uint %25 %29
+         %32 = OpBitwiseAnd %uint %31 %uint_1
+         %34 = OpIEqual %bool %32 %uint_0
+         %35 = OpSelect %uint %34 %uint_1 %uint_0
+         %36 = OpBitwiseOr %uint %29 %35
+         %37 = OpBitwiseOr %uint %23 %36
+         %38 = OpBitwiseOr %uint %17 %37
+         %39 = OpBitwiseOr %uint %11 %38
+         %40 = OpIEqual %bool %31 %uint_0
+     %result = OpSelect %uint %40 %uint_4294967295 %39
+)");
+}
+
+TEST_F(SpirvWriterTest, Builtin_FirstTrailingBit_I32) {
+    auto* arg = b.FunctionParam("arg", ty.i32());
+    auto* func = b.Function("foo", ty.i32());
+    func->SetParams({arg});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), core::Function::kFirstTrailingBit, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %7 = OpBitcast %uint %arg
+          %8 = OpBitwiseAnd %uint %7 %uint_65535
+         %10 = OpIEqual %bool %8 %uint_0
+         %13 = OpSelect %uint %10 %uint_16 %uint_0
+         %15 = OpShiftRightLogical %uint %7 %13
+         %16 = OpBitwiseAnd %uint %15 %uint_255
+         %18 = OpIEqual %bool %16 %uint_0
+         %19 = OpSelect %uint %18 %uint_8 %uint_0
+         %21 = OpShiftRightLogical %uint %15 %19
+         %22 = OpBitwiseAnd %uint %21 %uint_15
+         %24 = OpIEqual %bool %22 %uint_0
+         %25 = OpSelect %uint %24 %uint_4 %uint_0
+         %27 = OpShiftRightLogical %uint %21 %25
+         %28 = OpBitwiseAnd %uint %27 %uint_3
+         %30 = OpIEqual %bool %28 %uint_0
+         %31 = OpSelect %uint %30 %uint_2 %uint_0
+         %33 = OpShiftRightLogical %uint %27 %31
+         %34 = OpBitwiseAnd %uint %33 %uint_1
+         %36 = OpIEqual %bool %34 %uint_0
+         %37 = OpSelect %uint %36 %uint_1 %uint_0
+         %38 = OpBitwiseOr %uint %31 %37
+         %39 = OpBitwiseOr %uint %25 %38
+         %40 = OpBitwiseOr %uint %19 %39
+         %41 = OpBitwiseOr %uint %13 %40
+         %42 = OpIEqual %bool %33 %uint_0
+         %43 = OpSelect %uint %42 %uint_4294967295 %41
+     %result = OpBitcast %int %43
+)");
+}
+
+TEST_F(SpirvWriterTest, Builtin_FirstTrailingBit_Vec2U32) {
+    auto* arg = b.FunctionParam("arg", ty.vec2<u32>());
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({arg});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.vec2<u32>(), core::Function::kFirstTrailingBit, arg);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("%8 = OpConstantComposite %v2uint %uint_65535 %uint_65535");
+    EXPECT_INST("%11 = OpConstantComposite %v2uint %uint_0 %uint_0");
+    EXPECT_INST("%16 = OpConstantComposite %v2uint %uint_16 %uint_16");
+    EXPECT_INST("%20 = OpConstantComposite %v2uint %uint_255 %uint_255");
+    EXPECT_INST("%24 = OpConstantComposite %v2uint %uint_8 %uint_8");
+    EXPECT_INST("%28 = OpConstantComposite %v2uint %uint_15 %uint_15");
+    EXPECT_INST("%32 = OpConstantComposite %v2uint %uint_4 %uint_4");
+    EXPECT_INST("%36 = OpConstantComposite %v2uint %uint_3 %uint_3");
+    EXPECT_INST("%40 = OpConstantComposite %v2uint %uint_2 %uint_2");
+    EXPECT_INST("%44 = OpConstantComposite %v2uint %uint_1 %uint_1");
+    EXPECT_INST("%54 = OpConstantComposite %v2uint %uint_4294967295 %uint_4294967295");
+    EXPECT_INST(R"(
+          %7 = OpBitwiseAnd %v2uint %arg %8
+         %10 = OpIEqual %v2bool %7 %11
+         %15 = OpSelect %v2uint %10 %16 %11
+         %18 = OpShiftRightLogical %v2uint %arg %15
+         %19 = OpBitwiseAnd %v2uint %18 %20
+         %22 = OpIEqual %v2bool %19 %11
+         %23 = OpSelect %v2uint %22 %24 %11
+         %26 = OpShiftRightLogical %v2uint %18 %23
+         %27 = OpBitwiseAnd %v2uint %26 %28
+         %30 = OpIEqual %v2bool %27 %11
+         %31 = OpSelect %v2uint %30 %32 %11
+         %34 = OpShiftRightLogical %v2uint %26 %31
+         %35 = OpBitwiseAnd %v2uint %34 %36
+         %38 = OpIEqual %v2bool %35 %11
+         %39 = OpSelect %v2uint %38 %40 %11
+         %42 = OpShiftRightLogical %v2uint %34 %39
+         %43 = OpBitwiseAnd %v2uint %42 %44
+         %46 = OpIEqual %v2bool %43 %11
+         %47 = OpSelect %v2uint %46 %44 %11
+         %48 = OpBitwiseOr %v2uint %39 %47
+         %49 = OpBitwiseOr %v2uint %31 %48
+         %50 = OpBitwiseOr %v2uint %23 %49
+         %51 = OpBitwiseOr %v2uint %15 %50
+         %52 = OpIEqual %v2bool %42 %11
+     %result = OpSelect %v2uint %52 %54 %51
+)");
+}
+
 TEST_F(SpirvWriterTest, Builtin_Saturate_F32) {
     auto* arg = b.FunctionParam("arg", ty.f32());
     auto* func = b.Function("foo", ty.f32());
