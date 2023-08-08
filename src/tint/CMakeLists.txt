@@ -592,7 +592,7 @@ tint_generated(lang/core/interpolation_sampling BENCH TEST)
 tint_generated(lang/core/interpolation_type BENCH TEST)
 tint_generated(lang/core/texel_format BENCH TEST)
 
-tint_generated(lang/wgsl/resolver/ctor_conv_intrinsic)
+tint_generated(lang/core/intrinsic/ctor_conv)
 tint_generated(lang/wgsl/sem/parameter_usage)
 
 if(UNIX)

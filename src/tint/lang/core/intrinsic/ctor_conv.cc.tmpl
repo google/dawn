@@ -13,16 +13,16 @@ See:
 
 {{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 
-#include "src/tint/lang/wgsl/resolver/ctor_conv_intrinsic.h"
+#include "src/tint/lang/core/intrinsic/ctor_conv.h"
 
-namespace tint::resolver {
+namespace tint::core::intrinsic {
 
-const char* str(CtorConvIntrinsic i) {
+const char* str(CtorConv i) {
     switch (i) {
-        case CtorConvIntrinsic::kNone:
+        case CtorConv::kNone:
             return "<none>";
 {{- range $I.Sem.ConstructorsAndConverters  }}
-        case CtorConvIntrinsic::k{{Title .Name}}:
+        case CtorConv::k{{Title .Name}}:
             return "{{.Name}}";
 {{- end  }}
     }

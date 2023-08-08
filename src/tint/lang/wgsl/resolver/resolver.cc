@@ -100,6 +100,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinEnumExpression<tint::core::TexelForm
 namespace tint::resolver {
 namespace {
 
+using CtorConvIntrinsic = core::intrinsic::CtorConv;
+
 constexpr int64_t kMaxArrayElementCount = 65536;
 constexpr uint32_t kMaxStatementDepth = 127;
 constexpr size_t kMaxNestDepthOfCompositeType = 255;
@@ -2138,10 +2140,11 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                     TINT_ASSERT(v->Width() == 3u);
                     return ctor_or_conv(CtorConvIntrinsic::kPackedVec3, v->type());
                 }
-                return ctor_or_conv(VectorCtorConvIntrinsic(v->Width()), v->type());
+                return ctor_or_conv(core::intrinsic::VectorCtorConv(v->Width()), v->type());
             },
             [&](const type::Matrix* m) {
-                return ctor_or_conv(MatrixCtorConvIntrinsic(m->columns(), m->rows()), m->type());
+                return ctor_or_conv(core::intrinsic::MatrixCtorConv(m->columns(), m->rows()),
+                                    m->type());
             },
             [&](const type::Array* arr) -> sem::Call* {
                 auto* call_target = array_ctors_.GetOrCreate(

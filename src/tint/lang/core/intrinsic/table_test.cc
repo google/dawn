@@ -801,7 +801,7 @@ TEST_F(IntrinsicTableTest, MismatchCompoundOp) {
 TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicit) {
     auto* i32 = create<type::I32>();
     auto* vec3_i32 = create<type::Vector>(i32, 3u);
-    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, nullptr, Vector{i32, i32, i32},
+    auto result = table->Lookup(CtorConv::kVec3, nullptr, Vector{i32, i32, i32},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->ReturnType(), vec3_i32);
@@ -816,7 +816,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicit) {
 TEST_F(IntrinsicTableTest, MatchTypeInitializerExplicit) {
     auto* i32 = create<type::I32>();
     auto* vec3_i32 = create<type::Vector>(i32, 3u);
-    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, i32, Vector{i32, i32, i32},
+    auto result = table->Lookup(CtorConv::kVec3, i32, Vector{i32, i32, i32},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->ReturnType(), vec3_i32);
@@ -831,7 +831,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerExplicit) {
 TEST_F(IntrinsicTableTest, MismatchTypeInitializerImplicit) {
     auto* i32 = create<type::I32>();
     auto* f32 = create<type::F32>();
-    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, nullptr, Vector{i32, f32, i32},
+    auto result = table->Lookup(CtorConv::kVec3, nullptr, Vector{i32, f32, i32},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_EQ(result.target, nullptr);
     EXPECT_EQ(Diagnostics().str(),
@@ -858,7 +858,7 @@ TEST_F(IntrinsicTableTest, MismatchTypeInitializerImplicit) {
 TEST_F(IntrinsicTableTest, MismatchTypeInitializerExplicit) {
     auto* i32 = create<type::I32>();
     auto* f32 = create<type::F32>();
-    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, i32, Vector{i32, f32, i32},
+    auto result = table->Lookup(CtorConv::kVec3, i32, Vector{i32, f32, i32},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_EQ(result.target, nullptr);
     EXPECT_EQ(Diagnostics().str(),
@@ -885,7 +885,7 @@ TEST_F(IntrinsicTableTest, MismatchTypeInitializerExplicit) {
 TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitVecFromVecAbstract) {
     auto* ai = create<type::AbstractInt>();
     auto* vec3_ai = create<type::Vector>(ai, 3u);
-    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, nullptr, Vector{vec3_ai},
+    auto result = table->Lookup(CtorConv::kVec3, nullptr, Vector{vec3_ai},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->ReturnType(), vec3_ai);
@@ -900,9 +900,8 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitMatFromVec) {
     auto* vec2_ai = create<type::Vector>(create<type::AbstractInt>(), 2u);
     auto* vec2_af = create<type::Vector>(af, 2u);
     auto* mat2x2_af = create<type::Matrix>(vec2_af, 2u);
-    auto result =
-        table->Lookup(resolver::CtorConvIntrinsic::kMat2x2, nullptr, Vector{vec2_ai, vec2_ai},
-                      sem::EvaluationStage::kConstant, Source{{12, 34}});
+    auto result = table->Lookup(CtorConv::kMat2x2, nullptr, Vector{vec2_ai, vec2_ai},
+                                sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_TYPE(result.target->ReturnType(), mat2x2_af);
     EXPECT_TRUE(result.target->Is<sem::ValueConstructor>());
@@ -915,7 +914,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitMatFromVec) {
 TEST_F(IntrinsicTableTest, MatchTypeInitializer_ConstantEval) {
     auto* ai = create<type::AbstractInt>();
     auto* vec3_ai = create<type::Vector>(ai, 3u);
-    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, nullptr, Vector{ai, ai, ai},
+    auto result = table->Lookup(CtorConv::kVec3, nullptr, Vector{ai, ai, ai},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->Stage(), sem::EvaluationStage::kConstant);
@@ -930,7 +929,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializer_ConstantEval) {
 
 TEST_F(IntrinsicTableTest, MatchTypeInitializer_RuntimeEval) {
     auto* ai = create<type::AbstractInt>();
-    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, nullptr, Vector{ai, ai, ai},
+    auto result = table->Lookup(CtorConv::kVec3, nullptr, Vector{ai, ai, ai},
                                 sem::EvaluationStage::kRuntime, Source{{12, 34}});
     auto* i32 = create<type::I32>();
     auto* vec3_i32 = create<type::Vector>(i32, 3u);
@@ -950,7 +949,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion) {
     auto* vec3_i32 = create<type::Vector>(i32, 3u);
     auto* f32 = create<type::F32>();
     auto* vec3_f32 = create<type::Vector>(f32, 3u);
-    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, i32, Vector{vec3_f32},
+    auto result = table->Lookup(CtorConv::kVec3, i32, Vector{vec3_f32},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->ReturnType(), vec3_i32);
@@ -963,8 +962,8 @@ TEST_F(IntrinsicTableTest, MismatchTypeConversion) {
     auto* arr =
         create<type::Array>(create<type::U32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
     auto* f32 = create<type::F32>();
-    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, f32, Vector{arr},
-                                sem::EvaluationStage::kConstant, Source{{12, 34}});
+    auto result = table->Lookup(CtorConv::kVec3, f32, Vector{arr}, sem::EvaluationStage::kConstant,
+                                Source{{12, 34}});
     ASSERT_EQ(result.target, nullptr);
     EXPECT_EQ(Diagnostics().str(),
               R"(12:34 error: no matching constructor for vec3<f32>(array<u32>)
@@ -993,7 +992,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion_ConstantEval) {
     auto* vec3_ai = create<type::Vector>(ai, 3u);
     auto* f32 = create<type::F32>();
     auto* vec3_f32 = create<type::Vector>(f32, 3u);
-    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, af, Vector{vec3_ai},
+    auto result = table->Lookup(CtorConv::kVec3, af, Vector{vec3_ai},
                                 sem::EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->Stage(), sem::EvaluationStage::kConstant);
@@ -1010,7 +1009,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion_RuntimeEval) {
     auto* vec3_ai = create<type::Vector>(ai, 3u);
     auto* vec3_f32 = create<type::Vector>(create<type::F32>(), 3u);
     auto* vec3_i32 = create<type::Vector>(create<type::I32>(), 3u);
-    auto result = table->Lookup(resolver::CtorConvIntrinsic::kVec3, af, Vector{vec3_ai},
+    auto result = table->Lookup(CtorConv::kVec3, af, Vector{vec3_ai},
                                 sem::EvaluationStage::kRuntime, Source{{12, 34}});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->Stage(), sem::EvaluationStage::kConstant);
@@ -1037,7 +1036,7 @@ TEST_F(IntrinsicTableTest, OverloadResolution) {
     // The first should win overload resolution.
     auto* ai = create<type::AbstractInt>();
     auto* i32 = create<type::I32>();
-    auto result = table->Lookup(resolver::CtorConvIntrinsic::kI32, nullptr, Vector{ai},
+    auto result = table->Lookup(CtorConv::kI32, nullptr, Vector{ai},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.target, nullptr);
     EXPECT_EQ(result.target->ReturnType(), i32);

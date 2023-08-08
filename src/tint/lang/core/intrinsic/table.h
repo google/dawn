@@ -19,9 +19,9 @@
 #include <string>
 
 #include "src/tint/lang/core/constant/eval.h"
+#include "src/tint/lang/core/intrinsic/ctor_conv.h"
 #include "src/tint/lang/core/unary_op.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
-#include "src/tint/lang/wgsl/resolver/ctor_conv_intrinsic.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/utils/containers/vector.h"
 
@@ -137,8 +137,7 @@ class Table {
                                   const Source& source,
                                   bool is_compound) = 0;
 
-    /// Lookup looks for the value constructor or conversion overload for the given
-    /// CtorConvIntrinsic.
+    /// Lookup looks for the value constructor or conversion overload for the given CtorConv.
     /// @param type the type being constructed or converted
     /// @param template_arg the optional template argument
     /// @param args the argument types passed to the constructor / conversion call
@@ -150,7 +149,7 @@ class Table {
     ///        after shader creation time (sem::EvaluationStage::kConstant).
     /// @param source the source of the call
     /// @return a sem::ValueConstructor, sem::ValueConversion or nullptr if nothing matched
-    virtual CtorOrConv Lookup(resolver::CtorConvIntrinsic type,
+    virtual CtorOrConv Lookup(CtorConv type,
                               const type::Type* template_arg,
                               VectorRef<const type::Type*> args,
                               sem::EvaluationStage earliest_eval_stage,
