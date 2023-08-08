@@ -90,7 +90,11 @@ void PrintWGSL(std::ostream& out, const tint::Program& program) {
 #if TINT_BUILD_WGSL_WRITER
     tint::wgsl::writer::Options options;
     auto result = tint::wgsl::writer::Generate(&program, options);
-    out << std::endl << result->wgsl << std::endl;
+    if (result) {
+        out << std::endl << result->wgsl << std::endl;
+    } else {
+        out << result.Failure() << std::endl;
+    }
 #else
     (void)out;
     (void)program;
