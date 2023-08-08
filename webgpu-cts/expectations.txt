@@ -1743,3 +1743,4 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x3e9b ventura webgpu-ada
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x3e9b ventura webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:canvasType="offscreen";dstColorFormat="rgba8unorm-srgb";dstAlphaMode="premultiplied";srcDoFlipYDuringCopy=true [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:* [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:* [ Failure ]
+crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 win10 release ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="flipY";srcDoFlipYDuringCopy=false;dstPremultiplied=true [ Failure ]
