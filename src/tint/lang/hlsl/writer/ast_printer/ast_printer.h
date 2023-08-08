@@ -282,6 +282,14 @@ class ASTPrinter : public tint::TextGenerator {
     bool EmitDP4aCall(StringStream& out,
                       const ast::CallExpression* expr,
                       const sem::Builtin* builtin);
+    /// Handles generating a call to subgroup builtins.
+    /// @param out the output of the expression stream
+    /// @param expr the call expression
+    /// @param builtin the semantic information for the builtin
+    /// @returns true if the call expression is emitted
+    bool EmitSubgroupCall(StringStream& out,
+                          const ast::CallExpression* expr,
+                          const sem::Builtin* builtin);
     /// Handles a case statement
     /// @param s the switch statement
     /// @param case_idx the index of the switch case in the switch statement
