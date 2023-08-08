@@ -1130,21 +1130,21 @@ uint32_t Builder::GenerateUnaryOpExpression(const ast::UnaryOpExpression* expr) 
 
     spv::Op op = spv::Op::OpNop;
     switch (expr->op) {
-        case ast::UnaryOp::kComplement:
+        case core::UnaryOp::kComplement:
             op = spv::Op::OpNot;
             break;
-        case ast::UnaryOp::kNegation:
+        case core::UnaryOp::kNegation:
             if (TypeOf(expr)->is_float_scalar_or_vector()) {
                 op = spv::Op::OpFNegate;
             } else {
                 op = spv::Op::OpSNegate;
             }
             break;
-        case ast::UnaryOp::kNot:
+        case core::UnaryOp::kNot:
             op = spv::Op::OpLogicalNot;
             break;
-        case ast::UnaryOp::kAddressOf:
-        case ast::UnaryOp::kIndirection:
+        case core::UnaryOp::kAddressOf:
+        case core::UnaryOp::kIndirection:
             // Address-of converts a reference to a pointer, and dereference converts
             // a pointer to a reference. These are the same thing in SPIR-V, so this
             // is a no-op.
@@ -2315,7 +2315,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             break;
         case core::Function::kArrayLength: {
             auto* address_of = call->Arguments()[0]->Declaration()->As<ast::UnaryOpExpression>();
-            if (!address_of || address_of->op != ast::UnaryOp::kAddressOf) {
+            if (!address_of || address_of->op != core::UnaryOp::kAddressOf) {
                 TINT_ICE() << "arrayLength() expected pointer to member access, got " +
                                   std::string(address_of->TypeInfo().name);
                 return 0;

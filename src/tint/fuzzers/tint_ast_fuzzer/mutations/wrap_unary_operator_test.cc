@@ -50,7 +50,7 @@ TEST(WrapUnaryOperatorTest, Applicable1) {
 
     ASSERT_TRUE(MaybeApplyMutation(
         program,
-        MutationWrapUnaryOperator(expression_id, node_id_map.TakeFreshId(), ast::UnaryOp::kNot),
+        MutationWrapUnaryOperator(expression_id, node_id_map.TakeFreshId(), core::UnaryOp::kNot),
         node_id_map, &program, &node_id_map, nullptr));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
@@ -91,7 +91,7 @@ TEST(WrapUnaryOperatorTest, Applicable2) {
 
     ASSERT_TRUE(MaybeApplyMutation(
         program,
-        MutationWrapUnaryOperator(expression_id, node_id_map.TakeFreshId(), ast::UnaryOp::kNot),
+        MutationWrapUnaryOperator(expression_id, node_id_map.TakeFreshId(), core::UnaryOp::kNot),
         node_id_map, &program, &node_id_map, nullptr));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
@@ -129,7 +129,7 @@ TEST(WrapUnaryOperatorTest, Applicable3) {
     ASSERT_TRUE(
         MaybeApplyMutation(program,
                            MutationWrapUnaryOperator(expression_id, node_id_map.TakeFreshId(),
-                                                     ast::UnaryOp::kComplement),
+                                                     core::UnaryOp::kComplement),
                            node_id_map, &program, &node_id_map, nullptr));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
@@ -171,7 +171,7 @@ TEST(WrapUnaryOperatorTest, Applicable4) {
     ASSERT_TRUE(
         MaybeApplyMutation(program,
                            MutationWrapUnaryOperator(expression_id, node_id_map.TakeFreshId(),
-                                                     ast::UnaryOp::kComplement),
+                                                     core::UnaryOp::kComplement),
                            node_id_map, &program, &node_id_map, nullptr));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
@@ -212,7 +212,7 @@ TEST(WrapUnaryOperatorTest, Applicable5) {
     ASSERT_TRUE(
         MaybeApplyMutation(program,
                            MutationWrapUnaryOperator(expression_id, node_id_map.TakeFreshId(),
-                                                     ast::UnaryOp::kNegation),
+                                                     core::UnaryOp::kNegation),
                            node_id_map, &program, &node_id_map, nullptr));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
@@ -251,7 +251,7 @@ TEST(WrapUnaryOperatorTest, Applicable6) {
     ASSERT_TRUE(
         MaybeApplyMutation(program,
                            MutationWrapUnaryOperator(expression_id, node_id_map.TakeFreshId(),
-                                                     ast::UnaryOp::kNegation),
+                                                     core::UnaryOp::kNegation),
                            node_id_map, &program, &node_id_map, nullptr));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
@@ -294,7 +294,7 @@ TEST(WrapUnaryOperatorTest, Applicable7) {
     ASSERT_TRUE(
         MaybeApplyMutation(program,
                            MutationWrapUnaryOperator(expression_id, node_id_map.TakeFreshId(),
-                                                     ast::UnaryOp::kNegation),
+                                                     core::UnaryOp::kNegation),
                            node_id_map, &program, &node_id_map, nullptr));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
@@ -336,7 +336,7 @@ TEST(WrapUnaryOperatorTest, Applicable8) {
     ASSERT_TRUE(
         MaybeApplyMutation(program,
                            MutationWrapUnaryOperator(expression_id, node_id_map.TakeFreshId(),
-                                                     ast::UnaryOp::kComplement),
+                                                     core::UnaryOp::kComplement),
                            node_id_map, &program, &node_id_map, nullptr));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
@@ -376,7 +376,7 @@ TEST(WrapUnaryOperatorTest, NotApplicable1) {
     ASSERT_FALSE(
         MaybeApplyMutation(program,
                            MutationWrapUnaryOperator(expression_id, node_id_map.TakeFreshId(),
-                                                     ast::UnaryOp::kNegation),
+                                                     core::UnaryOp::kNegation),
                            node_id_map, &program, &node_id_map, nullptr));
 }
 
@@ -404,7 +404,7 @@ TEST(WrapUnaryOperatorTest, NotApplicable2) {
     // Not cannot be applied to integer types.
     ASSERT_FALSE(MaybeApplyMutation(
         program,
-        MutationWrapUnaryOperator(expression_id, node_id_map.TakeFreshId(), ast::UnaryOp::kNot),
+        MutationWrapUnaryOperator(expression_id, node_id_map.TakeFreshId(), core::UnaryOp::kNot),
         node_id_map, &program, &node_id_map, nullptr));
 }
 
@@ -433,7 +433,7 @@ TEST(WrapUnaryOperatorTest, NotApplicable3) {
     ASSERT_FALSE(
         MaybeApplyMutation(program,
                            MutationWrapUnaryOperator(expression_id, node_id_map.TakeFreshId(),
-                                                     ast::UnaryOp::kNegation),
+                                                     core::UnaryOp::kNegation),
                            node_id_map, &program, &node_id_map, nullptr));
 }
 
@@ -462,7 +462,7 @@ TEST(WrapUnaryOperatorTest, NotApplicable4) {
     ASSERT_FALSE(
         MaybeApplyMutation(program,
                            MutationWrapUnaryOperator(expression_id, node_id_map.TakeFreshId(),
-                                                     ast::UnaryOp::kComplement),
+                                                     core::UnaryOp::kComplement),
                            node_id_map, &program, &node_id_map, nullptr));
 }
 
@@ -489,7 +489,7 @@ TEST(WrapUnaryOperatorTest, NotApplicable5) {
 
     // Id for the replacement expression is not fresh.
     ASSERT_FALSE(MaybeApplyMutation(
-        program, MutationWrapUnaryOperator(expression_id, expression_id, ast::UnaryOp::kNegation),
+        program, MutationWrapUnaryOperator(expression_id, expression_id, core::UnaryOp::kNegation),
         node_id_map, &program, &node_id_map, nullptr));
 }
 
@@ -513,10 +513,11 @@ TEST(WrapUnaryOperatorTest, NotApplicable6) {
     ASSERT_NE(statement_id, 0);
 
     // The id provided for the expression is not a valid expression type.
-    ASSERT_FALSE(MaybeApplyMutation(
-        program,
-        MutationWrapUnaryOperator(statement_id, node_id_map.TakeFreshId(), ast::UnaryOp::kNegation),
-        node_id_map, &program, &node_id_map, nullptr));
+    ASSERT_FALSE(
+        MaybeApplyMutation(program,
+                           MutationWrapUnaryOperator(statement_id, node_id_map.TakeFreshId(),
+                                                     core::UnaryOp::kNegation),
+                           node_id_map, &program, &node_id_map, nullptr));
 }
 
 TEST(WrapUnaryOperatorTest, NotApplicable_CallStmt) {
@@ -544,7 +545,7 @@ TEST(WrapUnaryOperatorTest, NotApplicable_CallStmt) {
 
     // The id provided for the expression is not a valid expression type.
     ASSERT_FALSE(MaybeApplyMutation(
-        program, MutationWrapUnaryOperator(expr_id, node_id_map.TakeFreshId(), ast::UnaryOp::kNot),
+        program, MutationWrapUnaryOperator(expr_id, node_id_map.TakeFreshId(), core::UnaryOp::kNot),
         node_id_map, &program, &node_id_map, nullptr));
 }
 

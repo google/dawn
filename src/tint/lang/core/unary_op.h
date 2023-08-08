@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2023 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_UNARY_OP_H_
-#define SRC_TINT_LANG_WGSL_AST_UNARY_OP_H_
+#ifndef SRC_TINT_LANG_CORE_UNARY_OP_H_
+#define SRC_TINT_LANG_CORE_UNARY_OP_H_
 
 #include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/traits/traits.h"
 
-namespace tint::ast {
+namespace tint::core {
 
 /// The unary op
 enum class UnaryOp {
@@ -29,18 +29,18 @@ enum class UnaryOp {
     kNot,          // !EXPR
 };
 
-/// @param mod the enum value
+/// @param value the enum value
 /// @returns the string for the given enum value
-std::string_view ToString(UnaryOp mod);
+std::string_view ToString(UnaryOp value);
 
 /// @param out the stream to write to
-/// @param mod the UnaryOp
+/// @param value the UnaryOp
 /// @return the stream so calls can be chained
 template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
-auto& operator<<(STREAM& out, UnaryOp mod) {
-    return out << ToString(mod);
+auto& operator<<(STREAM& out, UnaryOp value) {
+    return out << ToString(value);
 }
 
-}  // namespace tint::ast
+}  // namespace tint::core
 
-#endif  // SRC_TINT_LANG_WGSL_AST_UNARY_OP_H_
+#endif  // SRC_TINT_LANG_CORE_UNARY_OP_H_

@@ -694,7 +694,7 @@ TEST_F(IntrinsicTableTest, SameOverloadReturnsSameBuiltinPointer) {
 TEST_F(IntrinsicTableTest, MatchUnaryOp) {
     auto* i32 = create<type::I32>();
     auto* vec3_i32 = create<type::Vector>(i32, 3u);
-    auto result = table->Lookup(ast::UnaryOp::kNegation, vec3_i32, sem::EvaluationStage::kConstant,
+    auto result = table->Lookup(core::UnaryOp::kNegation, vec3_i32, sem::EvaluationStage::kConstant,
                                 Source{{12, 34}});
     EXPECT_EQ(result.result, vec3_i32);
     EXPECT_EQ(Diagnostics().str(), "");
@@ -702,7 +702,7 @@ TEST_F(IntrinsicTableTest, MatchUnaryOp) {
 
 TEST_F(IntrinsicTableTest, MismatchUnaryOp) {
     auto* bool_ = create<type::Bool>();
-    auto result = table->Lookup(ast::UnaryOp::kNegation, bool_, sem::EvaluationStage::kConstant,
+    auto result = table->Lookup(core::UnaryOp::kNegation, bool_, sem::EvaluationStage::kConstant,
                                 Source{{12, 34}});
     ASSERT_EQ(result.result, nullptr);
     EXPECT_EQ(Diagnostics().str(), R"(12:34 error: no matching overload for operator - (bool)
@@ -715,7 +715,7 @@ TEST_F(IntrinsicTableTest, MismatchUnaryOp) {
 
 TEST_F(IntrinsicTableTest, MatchUnaryOp_Constant) {
     auto* ai = create<type::AbstractInt>();
-    auto result = table->Lookup(ast::UnaryOp::kNegation, ai, sem::EvaluationStage::kConstant,
+    auto result = table->Lookup(core::UnaryOp::kNegation, ai, sem::EvaluationStage::kConstant,
                                 Source{{12, 34}});
     EXPECT_EQ(result.result, ai);
     EXPECT_EQ(Diagnostics().str(), "");
@@ -723,7 +723,7 @@ TEST_F(IntrinsicTableTest, MatchUnaryOp_Constant) {
 
 TEST_F(IntrinsicTableTest, MatchUnaryOp_Runtime) {
     auto* ai = create<type::AbstractInt>();
-    auto result = table->Lookup(ast::UnaryOp::kNegation, ai, sem::EvaluationStage::kRuntime,
+    auto result = table->Lookup(core::UnaryOp::kNegation, ai, sem::EvaluationStage::kRuntime,
                                 Source{{12, 34}});
     EXPECT_NE(result.result, ai);
     EXPECT_TRUE(result.result->Is<type::I32>());

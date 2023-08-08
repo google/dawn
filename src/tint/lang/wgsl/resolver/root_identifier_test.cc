@@ -282,7 +282,7 @@ TEST_F(ResolverRootIdentifierTest, BinaryExpression) {
 
 TEST_F(ResolverRootIdentifierTest, UnaryExpression) {
     auto* a = Var("a", ty.f32());
-    auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(a));
+    auto* expr = create<ast::UnaryOpExpression>(core::UnaryOp::kNegation, Expr(a));
     WrapInFunction(a, expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

@@ -18,8 +18,8 @@
 #include <memory>
 #include <string>
 
+#include "src/tint/lang/core/unary_op.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
-#include "src/tint/lang/wgsl/ast/unary_op.h"
 #include "src/tint/lang/wgsl/resolver/const_eval.h"
 #include "src/tint/lang/wgsl/resolver/ctor_conv_intrinsic.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"
@@ -110,7 +110,7 @@ class Table {
     /// @param source the source of the operator call
     /// @return the operator call target signature. If the operator was not found
     ///         UnaryOperator::result will be nullptr.
-    virtual UnaryOperator Lookup(ast::UnaryOp op,
+    virtual UnaryOperator Lookup(core::UnaryOp op,
                                  const type::Type* arg,
                                  sem::EvaluationStage earliest_eval_stage,
                                  const Source& source) = 0;

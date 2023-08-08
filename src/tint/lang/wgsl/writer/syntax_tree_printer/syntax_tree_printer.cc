@@ -739,19 +739,19 @@ void SyntaxTreePrinter::EmitUnaryOp(const ast::UnaryOpExpression* expr) {
         {
             ScopedIndent op(this);
             switch (expr->op) {
-                case ast::UnaryOp::kAddressOf:
+                case core::UnaryOp::kAddressOf:
                     Line() << "&";
                     break;
-                case ast::UnaryOp::kComplement:
+                case core::UnaryOp::kComplement:
                     Line() << "~";
                     break;
-                case ast::UnaryOp::kIndirection:
+                case core::UnaryOp::kIndirection:
                     Line() << "*";
                     break;
-                case ast::UnaryOp::kNot:
+                case core::UnaryOp::kNot:
                     Line() << "!";
                     break;
-                case ast::UnaryOp::kNegation:
+                case core::UnaryOp::kNegation:
                     Line() << "-";
                     break;
             }

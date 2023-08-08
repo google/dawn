@@ -15,8 +15,8 @@
 #ifndef SRC_TINT_LANG_WGSL_AST_UNARY_OP_EXPRESSION_H_
 #define SRC_TINT_LANG_WGSL_AST_UNARY_OP_EXPRESSION_H_
 
+#include "src/tint/lang/core/unary_op.h"
 #include "src/tint/lang/wgsl/ast/expression.h"
-#include "src/tint/lang/wgsl/ast/unary_op.h"
 
 namespace tint::ast {
 
@@ -32,7 +32,7 @@ class UnaryOpExpression final : public Castable<UnaryOpExpression, Expression> {
     UnaryOpExpression(GenerationID pid,
                       NodeID nid,
                       const Source& source,
-                      UnaryOp op,
+                      core::UnaryOp op,
                       const Expression* expr);
 
     /// Destructor
@@ -45,7 +45,7 @@ class UnaryOpExpression final : public Castable<UnaryOpExpression, Expression> {
     const UnaryOpExpression* Clone(CloneContext& ctx) const override;
 
     /// The op
-    const UnaryOp op;
+    const core::UnaryOp op;
 
     /// The expression
     const Expression* const expr;

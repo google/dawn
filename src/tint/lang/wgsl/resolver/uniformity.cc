@@ -63,7 +63,7 @@ const ast::Expression* UnwrapIndirectAndAddressOfChain(const ast::UnaryOpExpress
     while (true) {
         auto* unary = e->As<ast::UnaryOpExpression>();
         if (unary &&
-            (unary->op == ast::UnaryOp::kIndirection || unary->op == ast::UnaryOp::kAddressOf)) {
+            (unary->op == core::UnaryOp::kIndirection || unary->op == core::UnaryOp::kAddressOf)) {
             e = unary->expr;
         } else {
             break;
@@ -1375,7 +1375,7 @@ class UniformityGraph {
     /// @returns true if `u` is an indirection unary expression that ultimately dereferences a
     /// partial pointer, false otherwise.
     bool IsDerefOfPartialPointer(const ast::UnaryOpExpression* u) {
-        TINT_ASSERT(u->op == ast::UnaryOp::kIndirection);
+        TINT_ASSERT(u->op == core::UnaryOp::kIndirection);
 
         // To determine if we're dereferencing a partial pointer, unwrap *&
         // chains; if the final expression is an identifier, see if it's a
@@ -1453,7 +1453,7 @@ class UniformityGraph {
             },
 
             [&](const ast::UnaryOpExpression* u) {
-                if (u->op == ast::UnaryOp::kIndirection) {
+                if (u->op == core::UnaryOp::kIndirection) {
                     // Cut the analysis short, since we only need to know the originating variable
                     // that is being written to.
                     auto* root_ident = sem_.Get(u)->RootIdentifier();

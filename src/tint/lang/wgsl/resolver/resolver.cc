@@ -3502,7 +3502,7 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
     auto stage = sem::EvaluationStage::kRuntime;
 
     switch (unary->op) {
-        case ast::UnaryOp::kAddressOf:
+        case core::UnaryOp::kAddressOf:
             if (auto* ref = expr_ty->As<type::Reference>()) {
                 if (ref->StoreType()->UnwrapRef()->is_handle()) {
                     AddError("cannot take the address of expression in handle address space",
@@ -3528,7 +3528,7 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
             }
             break;
 
-        case ast::UnaryOp::kIndirection:
+        case core::UnaryOp::kIndirection:
             if (auto* ptr = expr_ty->As<type::Pointer>()) {
                 ty = builder_->create<type::Reference>(ptr->AddressSpace(), ptr->StoreType(),
                                                        ptr->Access());

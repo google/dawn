@@ -19,7 +19,7 @@
 
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutation.h"
 
-#include "src/tint/lang/wgsl/ast/unary_op.h"
+#include "src/tint/lang/core/unary_op.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 
 namespace tint::fuzzers::ast_fuzzer {
@@ -35,10 +35,10 @@ class MutationWrapUnaryOperator : public Mutation {
     /// @param expression_id - the id of an expression.
     /// @param fresh_id - a fresh id for the created expression node with
     /// unary operator wrapper.
-    /// @param unary_op_wrapper - a `ast::UnaryOp` instance.
+    /// @param unary_op_wrapper - a `core::UnaryOp` instance.
     MutationWrapUnaryOperator(uint32_t expression_id,
                               uint32_t fresh_id,
-                              ast::UnaryOp unary_op_wrapper);
+                              core::UnaryOp unary_op_wrapper);
 
     /// @copybrief Mutation::IsApplicable
     ///
@@ -68,7 +68,7 @@ class MutationWrapUnaryOperator : public Mutation {
     /// expression.
     /// @param expr - an `ast::Expression` instance from node id map.
     /// @return a list of unary operators.
-    static std::vector<ast::UnaryOp> GetValidUnaryWrapper(const sem::ValueExpression& expr);
+    static std::vector<core::UnaryOp> GetValidUnaryWrapper(const sem::ValueExpression& expr);
 
   private:
     protobufs::MutationWrapUnaryOperator message_;

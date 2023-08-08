@@ -299,7 +299,7 @@ TEST_F(WGSLParserTest, Expression_NegatedNumber) {
 
     ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
     auto* b = e->As<ast::UnaryOpExpression>();
-    EXPECT_EQ(b->op, ast::UnaryOp::kNegation);
+    EXPECT_EQ(b->op, core::UnaryOp::kNegation);
 
     ASSERT_TRUE(b->expr->Is<ast::IntLiteralExpression>());
     EXPECT_EQ(b->expr->As<ast::IntLiteralExpression>()->value, 1);
@@ -327,7 +327,7 @@ TEST_F(WGSLParserTest, Expression_MinI32) {
 
     ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
     auto* b = e->As<ast::UnaryOpExpression>();
-    EXPECT_EQ(b->op, ast::UnaryOp::kNegation);
+    EXPECT_EQ(b->op, core::UnaryOp::kNegation);
 
     ASSERT_TRUE(b->expr->Is<ast::IntLiteralExpression>());
     EXPECT_EQ(b->expr->As<ast::IntLiteralExpression>()->value, 2147483648);
@@ -382,7 +382,7 @@ TEST_F(WGSLParserTest, Expression_MinF32) {
 
     ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
     auto* b = e->As<ast::UnaryOpExpression>();
-    EXPECT_EQ(b->op, ast::UnaryOp::kNegation);
+    EXPECT_EQ(b->op, core::UnaryOp::kNegation);
 
     ASSERT_TRUE(b->expr->Is<ast::FloatLiteralExpression>());
     EXPECT_EQ(b->expr->As<ast::FloatLiteralExpression>()->value,

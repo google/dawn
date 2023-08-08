@@ -164,17 +164,17 @@ inline spv::Op opcode(const spvtools::opt::Instruction* inst) {
 // @param opcode SPIR-V opcode
 // @param ast_unary_op return parameter
 // @returns true if it was a unary operation
-bool GetUnaryOp(spv::Op opcode, ast::UnaryOp* ast_unary_op) {
+bool GetUnaryOp(spv::Op opcode, core::UnaryOp* ast_unary_op) {
     switch (opcode) {
         case spv::Op::OpSNegate:
         case spv::Op::OpFNegate:
-            *ast_unary_op = ast::UnaryOp::kNegation;
+            *ast_unary_op = core::UnaryOp::kNegation;
             return true;
         case spv::Op::OpLogicalNot:
-            *ast_unary_op = ast::UnaryOp::kNot;
+            *ast_unary_op = core::UnaryOp::kNot;
             return true;
         case spv::Op::OpNot:
-            *ast_unary_op = ast::UnaryOp::kComplement;
+            *ast_unary_op = core::UnaryOp::kComplement;
             return true;
         default:
             break;
@@ -3201,7 +3201,7 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
                 } else {
                     AddStatement(create<ast::BreakIfStatement>(
                         Source{},
-                        create<ast::UnaryOpExpression>(Source{}, ast::UnaryOp::kNot, cond)));
+                        create<ast::UnaryOpExpression>(Source{}, core::UnaryOp::kNot, cond)));
                 }
                 return true;
 
@@ -3800,7 +3800,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
         return parser_impl_.RectifyForcedResultType(result, inst, arg0.type);
     }
 
-    auto unary_op = ast::UnaryOp::kNegation;
+    auto unary_op = core::UnaryOp::kNegation;
     if (GetUnaryOp(op, &unary_op)) {
         auto arg0 = MakeOperand(inst, 0);
         auto* unary_expr = create<ast::UnaryOpExpression>(Source{}, unary_op, arg0.expr);
@@ -3874,7 +3874,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
         auto* binary_expr =
             create<ast::BinaryExpression>(Source{}, *negated_op, arg0.expr, arg1.expr);
         auto* negated_expr =
-            create<ast::UnaryOpExpression>(Source{}, ast::UnaryOp::kNot, binary_expr);
+            create<ast::UnaryOpExpression>(Source{}, core::UnaryOp::kNot, binary_expr);
         return {ast_type, negated_expr};
     }
 
@@ -4019,7 +4019,7 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
                     builder_.Call(
                         Source{}, "select",
                         tint::Vector{
-                            create<ast::UnaryOpExpression>(Source{}, ast::UnaryOp::kNegation,
+                            create<ast::UnaryOpExpression>(Source{}, core::UnaryOp::kNegation,
                                                            normal.expr),
                             normal.expr,
                             create<ast::BinaryExpression>(
@@ -6382,7 +6382,7 @@ TypedExpression FunctionEmitter::AddressOf(TypedExpression expr) {
     }
     return {
         ty_.Pointer(ref->address_space, ref->type),
-        create<ast::UnaryOpExpression>(Source{}, ast::UnaryOp::kAddressOf, expr.expr),
+        create<ast::UnaryOpExpression>(Source{}, core::UnaryOp::kAddressOf, expr.expr),
     };
 }
 
@@ -6394,7 +6394,7 @@ TypedExpression FunctionEmitter::Dereference(TypedExpression expr) {
     }
     return {
         ptr->type,
-        create<ast::UnaryOpExpression>(Source{}, ast::UnaryOp::kIndirection, expr.expr),
+        create<ast::UnaryOpExpression>(Source{}, core::UnaryOp::kIndirection, expr.expr),
     };
 }
 

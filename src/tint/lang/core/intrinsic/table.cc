@@ -961,7 +961,7 @@ class Impl : public Table {
                    sem::EvaluationStage earliest_eval_stage,
                    const Source& source) override;
 
-    UnaryOperator Lookup(ast::UnaryOp op,
+    UnaryOperator Lookup(core::UnaryOp op,
                          const type::Type* arg,
                          sem::EvaluationStage earliest_eval_stage,
                          const Source& source) override;
@@ -1178,17 +1178,17 @@ Impl::Builtin Impl::Lookup(core::Function builtin_type,
     return Builtin{sem, match.overload->const_eval_fn};
 }
 
-Table::UnaryOperator Impl::Lookup(ast::UnaryOp op,
+Table::UnaryOperator Impl::Lookup(core::UnaryOp op,
                                   const type::Type* arg,
                                   sem::EvaluationStage earliest_eval_stage,
                                   const Source& source) {
     auto [intrinsic_index, intrinsic_name] = [&]() -> std::pair<size_t, const char*> {
         switch (op) {
-            case ast::UnaryOp::kComplement:
+            case core::UnaryOp::kComplement:
                 return {kUnaryOperatorComplement, "operator ~ "};
-            case ast::UnaryOp::kNegation:
+            case core::UnaryOp::kNegation:
                 return {kUnaryOperatorMinus, "operator - "};
-            case ast::UnaryOp::kNot:
+            case core::UnaryOp::kNot:
                 return {kUnaryOperatorNot, "operator ! "};
             default:
                 return {0, "<unknown>"};

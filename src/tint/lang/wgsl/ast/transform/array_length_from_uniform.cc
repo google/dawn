@@ -224,7 +224,7 @@ struct ArrayLengthFromUniform::State {
             //   arrayLength(&struct_var.array_member)
             //   arrayLength(&array_var)
             auto* param = call_expr->args[0]->As<UnaryOpExpression>();
-            if (TINT_UNLIKELY(!param || param->op != UnaryOp::kAddressOf)) {
+            if (TINT_UNLIKELY(!param || param->op != core::UnaryOp::kAddressOf)) {
                 TINT_ICE() << "expected form of arrayLength argument to be &array_var or "
                               "&struct_var.array_member";
                 break;

@@ -16,7 +16,7 @@
 #define SRC_TINT_FUZZERS_TINT_AST_FUZZER_MUTATIONS_CHANGE_UNARY_OPERATOR_H_
 
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutation.h"
-#include "src/tint/lang/wgsl/ast/unary_op.h"
+#include "src/tint/lang/core/unary_op.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 
 namespace tint::fuzzers::ast_fuzzer {
@@ -33,14 +33,14 @@ class MutationChangeUnaryOperator : public Mutation {
     /// to change its operator.
     /// @param new_operator - A new unary operator for the unary expression
     /// specified by `expression_id`.
-    MutationChangeUnaryOperator(uint32_t unary_expr_id, ast::UnaryOp new_operator);
+    MutationChangeUnaryOperator(uint32_t unary_expr_id, core::UnaryOp new_operator);
 
     /// @copybrief Mutation::IsApplicable
     ///
     /// The mutation is applicable if and only if:
     /// - `expression_id` is an id of an `ast::UnaryOpExpression`, that references
     ///   a valid unary expression.
-    /// - `new_unary_op` is a valid unary operator of type `ast::UnaryOp`
+    /// - `new_unary_op` is a valid unary operator of type `core::UnaryOp`
     ///   to the target expression.
     ///
     /// @copydetails Mutation::IsApplicable
@@ -62,7 +62,7 @@ class MutationChangeUnaryOperator : public Mutation {
     /// Toggles between the complement and negate unary operators.
     /// @param original_op - a complement or negation unary operator.
     /// @return the other operator.
-    static ast::UnaryOp ToggleOperator(const ast::UnaryOp& original_op);
+    static core::UnaryOp ToggleOperator(const core::UnaryOp& original_op);
 
   private:
     protobufs::MutationChangeUnaryOperator message_;

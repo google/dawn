@@ -1013,19 +1013,19 @@ class Impl {
                 auto* ty = sem->Type()->Clone(impl.clone_ctx_.type_ctx);
                 ir::Instruction* inst = nullptr;
                 switch (expr->op) {
-                    case ast::UnaryOp::kAddressOf:
-                    case ast::UnaryOp::kIndirection:
+                    case core::UnaryOp::kAddressOf:
+                    case core::UnaryOp::kIndirection:
                         // 'address-of' and 'indirection' just fold away and we propagate the
                         // pointer.
                         Bind(expr, val);
                         return;
-                    case ast::UnaryOp::kComplement:
+                    case core::UnaryOp::kComplement:
                         inst = impl.builder_.Complement(ty, val);
                         break;
-                    case ast::UnaryOp::kNegation:
+                    case core::UnaryOp::kNegation:
                         inst = impl.builder_.Negation(ty, val);
                         break;
-                    case ast::UnaryOp::kNot:
+                    case core::UnaryOp::kNot:
                         inst = impl.builder_.Not(ty, val);
                         break;
                 }

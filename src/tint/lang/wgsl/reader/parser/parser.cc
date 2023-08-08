@@ -2628,17 +2628,17 @@ Maybe<const ast::Expression*> Parser::unary_expression() {
         return Failure::kErrored;
     }
 
-    ast::UnaryOp op;
+    core::UnaryOp op;
     if (match(Token::Type::kMinus)) {
-        op = ast::UnaryOp::kNegation;
+        op = core::UnaryOp::kNegation;
     } else if (match(Token::Type::kBang)) {
-        op = ast::UnaryOp::kNot;
+        op = core::UnaryOp::kNot;
     } else if (match(Token::Type::kTilde)) {
-        op = ast::UnaryOp::kComplement;
+        op = core::UnaryOp::kComplement;
     } else if (match(Token::Type::kStar)) {
-        op = ast::UnaryOp::kIndirection;
+        op = core::UnaryOp::kIndirection;
     } else if (match(Token::Type::kAnd)) {
-        op = ast::UnaryOp::kAddressOf;
+        op = core::UnaryOp::kAddressOf;
     } else {
         return singular_expression();
     }
@@ -2752,7 +2752,7 @@ Maybe<const ast::Expression*> Parser::lhs_expression() {
     // fun.
     struct LHSData {
         Source source;
-        ast::UnaryOp op;
+        core::UnaryOp op;
     };
     Vector<LHSData, 4> ops;
     while (true) {
@@ -2765,11 +2765,11 @@ Maybe<const ast::Expression*> Parser::lhs_expression() {
         if (t.Is(Token::Type::kAndAnd)) {
             // The first `&` is consumed as part of the `&&`, so we only push one of the two `&`s.
             split_token(Token::Type::kAnd, Token::Type::kAnd);
-            ops.Push({t.source(), ast::UnaryOp::kAddressOf});
+            ops.Push({t.source(), core::UnaryOp::kAddressOf});
         } else if (t.Is(Token::Type::kAnd)) {
-            ops.Push({t.source(), ast::UnaryOp::kAddressOf});
+            ops.Push({t.source(), core::UnaryOp::kAddressOf});
         } else if (t.Is(Token::Type::kStar)) {
-            ops.Push({t.source(), ast::UnaryOp::kIndirection});
+            ops.Push({t.source(), core::UnaryOp::kIndirection});
         }
     }
     if (ops.IsEmpty()) {

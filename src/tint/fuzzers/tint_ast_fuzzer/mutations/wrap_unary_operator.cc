@@ -30,7 +30,7 @@ MutationWrapUnaryOperator::MutationWrapUnaryOperator(protobufs::MutationWrapUnar
 
 MutationWrapUnaryOperator::MutationWrapUnaryOperator(uint32_t expression_id,
                                                      uint32_t fresh_id,
-                                                     ast::UnaryOp unary_op_wrapper) {
+                                                     core::UnaryOp unary_op_wrapper) {
     message_.set_expression_id(expression_id);
     message_.set_fresh_id(fresh_id);
     message_.set_unary_op_wrapper(static_cast<uint32_t>(unary_op_wrapper));
@@ -60,9 +60,9 @@ bool MutationWrapUnaryOperator::IsApplicable(const tint::Program& program,
         return false;
     }
 
-    ast::UnaryOp unary_op_wrapper = static_cast<ast::UnaryOp>(message_.unary_op_wrapper());
+    core::UnaryOp unary_op_wrapper = static_cast<core::UnaryOp>(message_.unary_op_wrapper());
 
-    std::vector<ast::UnaryOp> valid_ops = GetValidUnaryWrapper(*expression_sem_node);
+    std::vector<core::UnaryOp> valid_ops = GetValidUnaryWrapper(*expression_sem_node);
 
     // There is no available unary operator or |unary_op_wrapper| is a
     // type that is not allowed for the given expression.
@@ -80,7 +80,7 @@ void MutationWrapUnaryOperator::Apply(const NodeIdMap& node_id_map,
         tint::As<ast::Expression>(node_id_map.GetNode(message_.expression_id()));
 
     auto* replacement_expression_node = clone_context.dst->create<ast::UnaryOpExpression>(
-        static_cast<ast::UnaryOp>(message_.unary_op_wrapper()),
+        static_cast<core::UnaryOp>(message_.unary_op_wrapper()),
         clone_context.Clone(expression_node));
 
     clone_context.Replace(expression_node, replacement_expression_node);
@@ -94,7 +94,7 @@ protobufs::Mutation MutationWrapUnaryOperator::ToMessage() const {
     return mutation;
 }
 
-std::vector<ast::UnaryOp> MutationWrapUnaryOperator::GetValidUnaryWrapper(
+std::vector<core::UnaryOp> MutationWrapUnaryOperator::GetValidUnaryWrapper(
     const sem::ValueExpression& expr) {
     if (auto* call_expr = expr.As<sem::Call>()) {
         if (auto* stmt = call_expr->Stmt()) {
@@ -108,20 +108,20 @@ std::vector<ast::UnaryOp> MutationWrapUnaryOperator::GetValidUnaryWrapper(
 
     const auto* expr_type = expr.Type();
     if (expr_type->is_bool_scalar_or_vector()) {
-        return {ast::UnaryOp::kNot};
+        return {core::UnaryOp::kNot};
     }
 
     if (expr_type->is_signed_integer_scalar_or_vector() ||
         expr_type->is_abstract_integer_scalar_or_vector()) {
-        return {ast::UnaryOp::kNegation, ast::UnaryOp::kComplement};
+        return {core::UnaryOp::kNegation, core::UnaryOp::kComplement};
     }
 
     if (expr_type->is_unsigned_integer_scalar_or_vector()) {
-        return {ast::UnaryOp::kComplement};
+        return {core::UnaryOp::kComplement};
     }
 
     if (expr_type->is_float_scalar_or_vector() || expr_type->is_abstract_float_scalar_or_vector()) {
-        return {ast::UnaryOp::kNegation};
+        return {core::UnaryOp::kNegation};
     }
 
     return {};

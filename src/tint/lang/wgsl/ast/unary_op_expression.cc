@@ -24,7 +24,7 @@ namespace tint::ast {
 UnaryOpExpression::UnaryOpExpression(GenerationID pid,
                                      NodeID nid,
                                      const Source& src,
-                                     UnaryOp o,
+                                     core::UnaryOp o,
                                      const Expression* e)
     : Base(pid, nid, src), op(o), expr(e) {
     TINT_ASSERT(expr);

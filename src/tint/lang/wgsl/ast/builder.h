@@ -1861,7 +1861,7 @@ class Builder {
     /// @return an ast::UnaryOpExpression that takes the address of `expr`
     template <typename EXPR>
     const ast::UnaryOpExpression* AddressOf(const Source& source, EXPR&& expr) {
-        return create<ast::UnaryOpExpression>(source, ast::UnaryOp::kAddressOf,
+        return create<ast::UnaryOpExpression>(source, core::UnaryOp::kAddressOf,
                                               Expr(std::forward<EXPR>(expr)));
     }
 
@@ -1869,7 +1869,7 @@ class Builder {
     /// @return an ast::UnaryOpExpression that takes the address of `expr`
     template <typename EXPR>
     const ast::UnaryOpExpression* AddressOf(EXPR&& expr) {
-        return create<ast::UnaryOpExpression>(ast::UnaryOp::kAddressOf,
+        return create<ast::UnaryOpExpression>(core::UnaryOp::kAddressOf,
                                               Expr(std::forward<EXPR>(expr)));
     }
 
@@ -1878,7 +1878,7 @@ class Builder {
     /// @return an ast::UnaryOpExpression that dereferences the pointer `expr`
     template <typename EXPR>
     const ast::UnaryOpExpression* Deref(const Source& source, EXPR&& expr) {
-        return create<ast::UnaryOpExpression>(source, ast::UnaryOp::kIndirection,
+        return create<ast::UnaryOpExpression>(source, core::UnaryOp::kIndirection,
                                               Expr(std::forward<EXPR>(expr)));
     }
 
@@ -1886,7 +1886,7 @@ class Builder {
     /// @return an ast::UnaryOpExpression that dereferences the pointer `expr`
     template <typename EXPR>
     const ast::UnaryOpExpression* Deref(EXPR&& expr) {
-        return create<ast::UnaryOpExpression>(ast::UnaryOp::kIndirection,
+        return create<ast::UnaryOpExpression>(core::UnaryOp::kIndirection,
                                               Expr(std::forward<EXPR>(expr)));
     }
 
@@ -1895,7 +1895,7 @@ class Builder {
     /// expression
     template <typename EXPR>
     const ast::UnaryOpExpression* Not(EXPR&& expr) {
-        return create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr(std::forward<EXPR>(expr)));
+        return create<ast::UnaryOpExpression>(core::UnaryOp::kNot, Expr(std::forward<EXPR>(expr)));
     }
 
     /// @param source the source information
@@ -1904,7 +1904,7 @@ class Builder {
     /// expression
     template <typename EXPR>
     const ast::UnaryOpExpression* Not(const Source& source, EXPR&& expr) {
-        return create<ast::UnaryOpExpression>(source, ast::UnaryOp::kNot,
+        return create<ast::UnaryOpExpression>(source, core::UnaryOp::kNot,
                                               Expr(std::forward<EXPR>(expr)));
     }
 
@@ -1913,7 +1913,7 @@ class Builder {
     /// input expression
     template <typename EXPR>
     const ast::UnaryOpExpression* Complement(EXPR&& expr) {
-        return create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement,
+        return create<ast::UnaryOpExpression>(core::UnaryOp::kComplement,
                                               Expr(std::forward<EXPR>(expr)));
     }
 
@@ -1922,7 +1922,7 @@ class Builder {
     /// input expression
     template <typename EXPR>
     const ast::UnaryOpExpression* Negation(EXPR&& expr) {
-        return create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation,
+        return create<ast::UnaryOpExpression>(core::UnaryOp::kNegation,
                                               Expr(std::forward<EXPR>(expr)));
     }
 

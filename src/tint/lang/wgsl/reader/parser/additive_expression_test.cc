@@ -82,7 +82,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_Parses_MinusMinus) {
 
     ASSERT_TRUE(rel->rhs->Is<ast::UnaryOpExpression>());
     auto* unary = rel->rhs->As<ast::UnaryOpExpression>();
-    EXPECT_EQ(ast::UnaryOp::kNegation, unary->op);
+    EXPECT_EQ(core::UnaryOp::kNegation, unary->op);
 
     ASSERT_TRUE(unary->expr->Is<ast::IdentifierExpression>());
     ident_expr = unary->expr->As<ast::IdentifierExpression>();

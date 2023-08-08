@@ -2810,21 +2810,21 @@ void ASTPrinter::EmitStructMembers(TextBuffer* b, const type::Struct* str) {
 
 void ASTPrinter::EmitUnaryOp(StringStream& out, const ast::UnaryOpExpression* expr) {
     switch (expr->op) {
-        case ast::UnaryOp::kIndirection:
-        case ast::UnaryOp::kAddressOf:
+        case core::UnaryOp::kIndirection:
+        case core::UnaryOp::kAddressOf:
             EmitExpression(out, expr->expr);
             return;
-        case ast::UnaryOp::kComplement:
+        case core::UnaryOp::kComplement:
             out << "~";
             break;
-        case ast::UnaryOp::kNot:
+        case core::UnaryOp::kNot:
             if (TypeOf(expr)->UnwrapRef()->Is<type::Scalar>()) {
                 out << "!";
             } else {
                 out << "not";
             }
             break;
-        case ast::UnaryOp::kNegation:
+        case core::UnaryOp::kNegation:
             out << "-";
             break;
     }

@@ -754,7 +754,8 @@ struct CanonicalizeEntryPointIO::State {
         if (cfg.shader_style == ShaderStyle::kGlsl &&
             func_ast->PipelineStage() == PipelineStage::kVertex) {
             auto* pos_y = GLPosition("y");
-            auto* negate_pos_y = b.create<UnaryOpExpression>(UnaryOp::kNegation, GLPosition("y"));
+            auto* negate_pos_y =
+                b.create<UnaryOpExpression>(core::UnaryOp::kNegation, GLPosition("y"));
             wrapper_body.Push(b.Assign(pos_y, negate_pos_y));
 
             auto* two_z = b.Mul(b.Expr(2_f), GLPosition("z"));

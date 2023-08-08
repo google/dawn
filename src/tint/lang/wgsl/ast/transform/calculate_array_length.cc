@@ -151,7 +151,7 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                     //   arrayLength(&array_var)
                     auto* arg = call_expr->args[0];
                     auto* address_of = arg->As<UnaryOpExpression>();
-                    if (TINT_UNLIKELY(!address_of || address_of->op != UnaryOp::kAddressOf)) {
+                    if (TINT_UNLIKELY(!address_of || address_of->op != core::UnaryOp::kAddressOf)) {
                         TINT_ICE()
                             << "arrayLength() expected address-of, got " << arg->TypeInfo().name;
                     }

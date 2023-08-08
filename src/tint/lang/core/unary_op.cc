@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2023 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,24 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/unary_op.h"
+#include "src/tint/lang/core/unary_op.h"
 
-namespace tint::ast {
+namespace tint::core {
 
-std::string_view ToString(UnaryOp mod) {
-    switch (mod) {
+std::string_view ToString(UnaryOp value) {
+    switch (value) {
         case UnaryOp::kAddressOf:
-            return "address-of";
+            return "&";
         case UnaryOp::kComplement:
-            return "complement";
+            return "~";
         case UnaryOp::kIndirection:
-            return "indirection";
+            return "*";
         case UnaryOp::kNegation:
-            return "negation";
+            return "-";
         case UnaryOp::kNot:
-            return "not";
+            return "!";
     }
     return "<unknown>";
 }
-
-}  // namespace tint::ast
+}  // namespace tint::core

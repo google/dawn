@@ -591,7 +591,6 @@ libtint_source_set("libtint_ast_hdrs") {
     "lang/wgsl/ast/traverse_expressions.h",
     "lang/wgsl/ast/type.h",
     "lang/wgsl/ast/type_decl.h",
-    "lang/wgsl/ast/unary_op.h",
     "lang/wgsl/ast/unary_op_expression.h",
     "lang/wgsl/ast/var.h",
     "lang/wgsl/ast/variable.h",
@@ -681,7 +680,6 @@ libtint_source_set("libtint_ast_src") {
     "lang/wgsl/ast/templated_identifier.cc",
     "lang/wgsl/ast/type.cc",
     "lang/wgsl/ast/type_decl.cc",
-    "lang/wgsl/ast/unary_op.cc",
     "lang/wgsl/ast/unary_op_expression.cc",
     "lang/wgsl/ast/var.cc",
     "lang/wgsl/ast/variable.cc",
@@ -813,6 +811,8 @@ libtint_source_set("libtint_builtins_src") {
     "lang/core/number.h",
     "lang/core/texel_format.cc",
     "lang/core/texel_format.h",
+    "lang/core/unary_op.cc",
+    "lang/core/unary_op.h",
   ]
   deps = [ ":libtint_utils_src" ]
 }

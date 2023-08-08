@@ -605,19 +605,19 @@ void ASTPrinter::EmitBinaryOp(StringStream& out, const core::BinaryOp op) {
 
 void ASTPrinter::EmitUnaryOp(StringStream& out, const ast::UnaryOpExpression* expr) {
     switch (expr->op) {
-        case ast::UnaryOp::kAddressOf:
+        case core::UnaryOp::kAddressOf:
             out << "&";
             break;
-        case ast::UnaryOp::kComplement:
+        case core::UnaryOp::kComplement:
             out << "~";
             break;
-        case ast::UnaryOp::kIndirection:
+        case core::UnaryOp::kIndirection:
             out << "*";
             break;
-        case ast::UnaryOp::kNot:
+        case core::UnaryOp::kNot:
             out << "!";
             break;
-        case ast::UnaryOp::kNegation:
+        case core::UnaryOp::kNegation:
             out << "-";
             break;
     }

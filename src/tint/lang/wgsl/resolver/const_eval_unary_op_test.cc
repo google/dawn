@@ -39,7 +39,7 @@ Case C(T input, U expected) {
     return Case{Val(input), Val(expected)};
 }
 
-using ResolverConstEvalUnaryOpTest = ResolverTestWithParam<std::tuple<ast::UnaryOp, Case>>;
+using ResolverConstEvalUnaryOpTest = ResolverTestWithParam<std::tuple<core::UnaryOp, Case>>;
 
 TEST_P(ResolverConstEvalUnaryOpTest, Test) {
     Enable(core::Extension::kF16);
@@ -77,7 +77,7 @@ TEST_P(ResolverConstEvalUnaryOpTest, Test) {
 }
 INSTANTIATE_TEST_SUITE_P(Complement,
                          ResolverConstEvalUnaryOpTest,
-                         testing::Combine(testing::Values(ast::UnaryOp::kComplement),
+                         testing::Combine(testing::Values(core::UnaryOp::kComplement),
                                           testing::ValuesIn({
                                               // AInt
                                               C(0_a, 0xffffffffffffffff_a),
@@ -102,7 +102,7 @@ INSTANTIATE_TEST_SUITE_P(Complement,
 
 INSTANTIATE_TEST_SUITE_P(Negation,
                          ResolverConstEvalUnaryOpTest,
-                         testing::Combine(testing::Values(ast::UnaryOp::kNegation),
+                         testing::Combine(testing::Values(core::UnaryOp::kNegation),
                                           testing::ValuesIn({
                                               // AInt
                                               C(0_a, -0_a),
@@ -164,7 +164,7 @@ TEST_F(ResolverConstEvalTest, UnaryNegateLowestAbstract) {
 
 INSTANTIATE_TEST_SUITE_P(Not,
                          ResolverConstEvalUnaryOpTest,
-                         testing::Combine(testing::Values(ast::UnaryOp::kNot),
+                         testing::Combine(testing::Values(core::UnaryOp::kNot),
                                           testing::ValuesIn({
                                               C(true, false),
                                               C(false, true),

@@ -4468,16 +4468,16 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const type::Struct* str) {
 
 bool ASTPrinter::EmitUnaryOp(StringStream& out, const ast::UnaryOpExpression* expr) {
     switch (expr->op) {
-        case ast::UnaryOp::kIndirection:
-        case ast::UnaryOp::kAddressOf:
+        case core::UnaryOp::kIndirection:
+        case core::UnaryOp::kAddressOf:
             return EmitExpression(out, expr->expr);
-        case ast::UnaryOp::kComplement:
+        case core::UnaryOp::kComplement:
             out << "~";
             break;
-        case ast::UnaryOp::kNot:
+        case core::UnaryOp::kNot:
             out << "!";
             break;
-        case ast::UnaryOp::kNegation:
+        case core::UnaryOp::kNegation:
             out << "-";
             break;
     }

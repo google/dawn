@@ -499,7 +499,8 @@ struct DirectVariableAccess::State {
                 if (auto* unary = e->Declaration()->As<UnaryOpExpression>()) {
                     // Unary op.
                     // If this is a '&' or '*', simply move the chain to the unary op expression.
-                    if (unary->op == UnaryOp::kAddressOf || unary->op == UnaryOp::kIndirection) {
+                    if (unary->op == core::UnaryOp::kAddressOf ||
+                        unary->op == core::UnaryOp::kIndirection) {
                         take_chain(sem.GetVal(unary->expr));
                     }
                 }

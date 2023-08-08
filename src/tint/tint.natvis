@@ -149,11 +149,11 @@
 	</Type>
 
 	<Type Name="tint::ast::UnaryOpExpression">
-		<DisplayString Condition="op==tint::ast::UnaryOp::kAddressOf">&amp;({*expr})</DisplayString>
-		<DisplayString Condition="op==tint::ast::UnaryOp::kComplement">~({*expr})</DisplayString>
-		<DisplayString Condition="op==tint::ast::UnaryOp::kIndirection">*({*expr})</DisplayString>
-		<DisplayString Condition="op==tint::ast::UnaryOp::kNegation">-({*expr})</DisplayString>
-		<DisplayString Condition="op==tint::ast::UnaryOp::kNot">!({*expr})</DisplayString>
+		<DisplayString Condition="op==tint::core::UnaryOp::kAddressOf">&amp;({*expr})</DisplayString>
+		<DisplayString Condition="op==tint::core::UnaryOp::kComplement">~({*expr})</DisplayString>
+		<DisplayString Condition="op==tint::core::UnaryOp::kIndirection">*({*expr})</DisplayString>
+		<DisplayString Condition="op==tint::core::UnaryOp::kNegation">-({*expr})</DisplayString>
+		<DisplayString Condition="op==tint::core::UnaryOp::kNot">!({*expr})</DisplayString>
 	</Type>
 
 	<Type Name="tint::ast::BinaryExpression">

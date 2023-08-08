@@ -315,7 +315,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
                 auto r = process(e->expr);
                 // Don't hoist address-of expressions.
                 // E.g. for "g(&b, a(0))", we hoist "a(0)" only.
-                if (e->op == UnaryOp::kAddressOf) {
+                if (e->op == core::UnaryOp::kAddressOf) {
                     return false;
                 }
                 return r;

@@ -377,7 +377,7 @@ struct ModuleScopeVarToEntryPointParam::State {
         // do this on the fly instead.
         for (auto* node : ctx.src->ASTNodes().Objects()) {
             auto* address_of = node->As<UnaryOpExpression>();
-            if (!address_of || address_of->op != UnaryOp::kAddressOf) {
+            if (!address_of || address_of->op != core::UnaryOp::kAddressOf) {
                 continue;
             }
             if (auto* ident = address_of->expr->As<IdentifierExpression>()) {

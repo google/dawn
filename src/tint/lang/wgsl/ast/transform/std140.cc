@@ -575,8 +575,8 @@ struct Std140::State {
                     return Switch(e->Declaration(),  //
                                   [&](const UnaryOpExpression* u) {
                                       switch (u->op) {
-                                          case UnaryOp::kAddressOf:
-                                          case UnaryOp::kIndirection:
+                                          case core::UnaryOp::kAddressOf:
+                                          case core::UnaryOp::kIndirection:
                                               expr = sem.GetVal(u->expr);
                                               return Action::kContinue;
                                           default:

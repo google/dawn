@@ -110,8 +110,8 @@ TEST_F(ResolverBehaviorTest, ExprIndex_Idx) {
 }
 
 TEST_F(ResolverBehaviorTest, ExprUnaryOp) {
-    auto* stmt = Decl(Var("lhs", ty.i32(),
-                          create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Call("Next"))));
+    auto* stmt = Decl(Var(
+        "lhs", ty.i32(), create<ast::UnaryOpExpression>(core::UnaryOp::kComplement, Call("Next"))));
 
     Func("F", tint::Empty, ty.void_(), Vector{stmt}, Vector{Stage(ast::PipelineStage::kFragment)});
 

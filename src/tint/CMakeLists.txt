@@ -169,6 +169,8 @@ list(APPEND TINT_LIB_SRCS
   lang/core/type/vector.h
   lang/core/type/void.cc
   lang/core/type/void.h
+  lang/core/unary_op.cc
+  lang/core/unary_op.h
   lang/wgsl/ast/accessor_expression.cc
   lang/wgsl/ast/accessor_expression.h
   lang/wgsl/ast/alias.cc
@@ -417,8 +419,6 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/ast/type.h
   lang/wgsl/ast/type_decl.cc
   lang/wgsl/ast/type_decl.h
-  lang/wgsl/ast/unary_op.cc
-  lang/wgsl/ast/unary_op.h
   lang/wgsl/ast/unary_op_expression.cc
   lang/wgsl/ast/unary_op_expression.h
   lang/wgsl/ast/var.cc

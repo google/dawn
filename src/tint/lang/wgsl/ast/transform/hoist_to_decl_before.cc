@@ -206,7 +206,7 @@ struct HoistToDeclBefore::State {
                     if (auto* cond = for_loop->condition) {
                         // !condition
                         auto* not_cond =
-                            b.create<UnaryOpExpression>(UnaryOp::kNot, ctx.Clone(cond));
+                            b.create<UnaryOpExpression>(core::UnaryOp::kNot, ctx.Clone(cond));
                         // { break; }
                         auto* break_body = b.Block(b.create<BreakStatement>());
                         // if (!condition) { break; }

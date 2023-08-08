@@ -102,11 +102,11 @@ struct SimplifyPointers::State {
         while (true) {
             if (auto* unary = op.expr->As<UnaryOpExpression>()) {
                 switch (unary->op) {
-                    case UnaryOp::kIndirection:
+                    case core::UnaryOp::kIndirection:
                         op.indirections++;
                         op.expr = unary->expr;
                         continue;
-                    case UnaryOp::kAddressOf:
+                    case core::UnaryOp::kAddressOf:
                         op.indirections--;
                         op.expr = unary->expr;
                         continue;
@@ -208,7 +208,7 @@ struct SimplifyPointers::State {
                     RemoveStatement(ctx, let);
                 },
                 [&](const UnaryOpExpression* op) {
-                    if (op->op == UnaryOp::kAddressOf) {
+                    if (op->op == core::UnaryOp::kAddressOf) {
                         // Transform can be skipped if no address-of operator is used, as there
                         // will be no pointers that can be inlined.
                         needs_transform = true;

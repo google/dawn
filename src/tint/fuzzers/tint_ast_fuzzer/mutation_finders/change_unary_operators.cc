@@ -51,8 +51,8 @@ MutationList MutationFinderChangeUnaryOperators::FindMutations(
         }
 
         // Only complement and negation operators can be swapped.
-        if (!(unary_expr->op == ast::UnaryOp::kComplement ||
-              unary_expr->op == ast::UnaryOp::kNegation)) {
+        if (!(unary_expr->op == core::UnaryOp::kComplement ||
+              unary_expr->op == core::UnaryOp::kNegation)) {
             continue;
         }
 

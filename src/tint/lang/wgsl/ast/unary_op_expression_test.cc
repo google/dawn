@@ -25,14 +25,15 @@ using UnaryOpExpressionTest = TestHelper;
 TEST_F(UnaryOpExpressionTest, Creation) {
     auto* ident = Expr("ident");
 
-    auto* u = create<UnaryOpExpression>(UnaryOp::kNot, ident);
-    EXPECT_EQ(u->op, UnaryOp::kNot);
+    auto* u = create<UnaryOpExpression>(core::UnaryOp::kNot, ident);
+    EXPECT_EQ(u->op, core::UnaryOp::kNot);
     EXPECT_EQ(u->expr, ident);
 }
 
 TEST_F(UnaryOpExpressionTest, Creation_WithSource) {
     auto* ident = Expr("ident");
-    auto* u = create<UnaryOpExpression>(Source{Source::Location{20, 2}}, UnaryOp::kNot, ident);
+    auto* u =
+        create<UnaryOpExpression>(Source{Source::Location{20, 2}}, core::UnaryOp::kNot, ident);
     auto src = u->source;
     EXPECT_EQ(src.range.begin.line, 20u);
     EXPECT_EQ(src.range.begin.column, 2u);
@@ -40,7 +41,7 @@ TEST_F(UnaryOpExpressionTest, Creation_WithSource) {
 
 TEST_F(UnaryOpExpressionTest, IsUnaryOp) {
     auto* ident = Expr("ident");
-    auto* u = create<UnaryOpExpression>(UnaryOp::kNot, ident);
+    auto* u = create<UnaryOpExpression>(core::UnaryOp::kNot, ident);
     EXPECT_TRUE(u->Is<UnaryOpExpression>());
 }
 
@@ -48,7 +49,7 @@ TEST_F(UnaryOpExpressionTest, Assert_Null_Expression) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<UnaryOpExpression>(UnaryOp::kNot, nullptr);
+            b.create<UnaryOpExpression>(core::UnaryOp::kNot, nullptr);
         },
         "internal compiler error");
 }
@@ -58,7 +59,7 @@ TEST_F(UnaryOpExpressionTest, Assert_DifferentGenerationID_Expression) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<UnaryOpExpression>(UnaryOp::kNot, b2.Expr(true));
+            b1.create<UnaryOpExpression>(core::UnaryOp::kNot, b2.Expr(true));
         },
         "internal compiler error");
 }

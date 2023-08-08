@@ -1823,13 +1823,13 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
 
 }  // namespace ExprBinaryTest
 
-using UnaryOpExpressionTest = ResolverTestWithParam<ast::UnaryOp>;
+using UnaryOpExpressionTest = ResolverTestWithParam<core::UnaryOp>;
 TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
     auto op = GetParam();
 
-    if (op == ast::UnaryOp::kNot) {
+    if (op == core::UnaryOp::kNot) {
         GlobalVar("ident", ty.vec4<bool>(), core::AddressSpace::kPrivate);
-    } else if (op == ast::UnaryOp::kNegation || op == ast::UnaryOp::kComplement) {
+    } else if (op == core::UnaryOp::kNegation || op == core::UnaryOp::kComplement) {
         GlobalVar("ident", ty.vec4<i32>(), core::AddressSpace::kPrivate);
     } else {
         GlobalVar("ident", ty.vec4<f32>(), core::AddressSpace::kPrivate);
@@ -1841,9 +1841,9 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
 
     ASSERT_NE(TypeOf(der), nullptr);
     ASSERT_TRUE(TypeOf(der)->Is<type::Vector>());
-    if (op == ast::UnaryOp::kNot) {
+    if (op == core::UnaryOp::kNot) {
         EXPECT_TRUE(TypeOf(der)->As<type::Vector>()->type()->Is<type::Bool>());
-    } else if (op == ast::UnaryOp::kNegation || op == ast::UnaryOp::kComplement) {
+    } else if (op == core::UnaryOp::kNegation || op == core::UnaryOp::kComplement) {
         EXPECT_TRUE(TypeOf(der)->As<type::Vector>()->type()->Is<type::I32>());
     } else {
         EXPECT_TRUE(TypeOf(der)->As<type::Vector>()->type()->Is<type::F32>());
@@ -1852,9 +1852,9 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          UnaryOpExpressionTest,
-                         testing::Values(ast::UnaryOp::kComplement,
-                                         ast::UnaryOp::kNegation,
-                                         ast::UnaryOp::kNot));
+                         testing::Values(core::UnaryOp::kComplement,
+                                         core::UnaryOp::kNegation,
+                                         core::UnaryOp::kNot));
 
 TEST_F(ResolverTest, AddressSpace_SetsIfMissing) {
     auto* var = Var("var", ty.i32());
@@ -2086,7 +2086,8 @@ TEST_F(ResolverTest, ASTNodeReachedTwice) {
 
 TEST_F(ResolverTest, UnaryOp_Not) {
     GlobalVar("ident", ty.vec4<f32>(), core::AddressSpace::kPrivate);
-    auto* der = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr(Source{{12, 34}}, "ident"));
+    auto* der =
+        create<ast::UnaryOpExpression>(core::UnaryOp::kNot, Expr(Source{{12, 34}}, "ident"));
     WrapInFunction(der);
 
     EXPECT_FALSE(r()->Resolve());
@@ -2096,7 +2097,7 @@ TEST_F(ResolverTest, UnaryOp_Not) {
 TEST_F(ResolverTest, UnaryOp_Complement) {
     GlobalVar("ident", ty.vec4<f32>(), core::AddressSpace::kPrivate);
     auto* der =
-        create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Expr(Source{{12, 34}}, "ident"));
+        create<ast::UnaryOpExpression>(core::UnaryOp::kComplement, Expr(Source{{12, 34}}, "ident"));
     WrapInFunction(der);
 
     EXPECT_FALSE(r()->Resolve());
@@ -2106,7 +2107,7 @@ TEST_F(ResolverTest, UnaryOp_Complement) {
 TEST_F(ResolverTest, UnaryOp_Negation) {
     GlobalVar("ident", ty.u32(), core::AddressSpace::kPrivate);
     auto* der =
-        create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(Source{{12, 34}}, "ident"));
+        create<ast::UnaryOpExpression>(core::UnaryOp::kNegation, Expr(Source{{12, 34}}, "ident"));
     WrapInFunction(der);
 
     EXPECT_FALSE(r()->Resolve());

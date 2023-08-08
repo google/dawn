@@ -46,7 +46,7 @@ TEST_F(WGSLParserTest, LHSExpression_And) {
     ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
     auto* u = e->As<ast::UnaryOpExpression>();
-    EXPECT_EQ(u->op, ast::UnaryOp::kAddressOf);
+    EXPECT_EQ(u->op, core::UnaryOp::kAddressOf);
     EXPECT_TRUE(u->expr->Is<ast::IdentifierExpression>());
 }
 
@@ -60,7 +60,7 @@ TEST_F(WGSLParserTest, LHSExpression_Star) {
     ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
     auto* u = e->As<ast::UnaryOpExpression>();
-    EXPECT_EQ(u->op, ast::UnaryOp::kIndirection);
+    EXPECT_EQ(u->op, core::UnaryOp::kIndirection);
     EXPECT_TRUE(u->expr->Is<ast::IdentifierExpression>());
 }
 
@@ -82,13 +82,13 @@ TEST_F(WGSLParserTest, LHSExpression_Multiple) {
     EXPECT_TRUE(e.matched);
     ASSERT_NE(e.value, nullptr);
 
-    std::vector<ast::UnaryOp> results = {
-        ast::UnaryOp::kIndirection, ast::UnaryOp::kAddressOf,   ast::UnaryOp::kIndirection,
-        ast::UnaryOp::kIndirection, ast::UnaryOp::kIndirection, ast::UnaryOp::kIndirection,
-        ast::UnaryOp::kIndirection, ast::UnaryOp::kIndirection, ast::UnaryOp::kIndirection,
-        ast::UnaryOp::kIndirection, ast::UnaryOp::kAddressOf,   ast::UnaryOp::kAddressOf,
-        ast::UnaryOp::kAddressOf,   ast::UnaryOp::kAddressOf,   ast::UnaryOp::kAddressOf,
-        ast::UnaryOp::kAddressOf,   ast::UnaryOp::kIndirection};
+    std::vector<core::UnaryOp> results = {
+        core::UnaryOp::kIndirection, core::UnaryOp::kAddressOf,   core::UnaryOp::kIndirection,
+        core::UnaryOp::kIndirection, core::UnaryOp::kIndirection, core::UnaryOp::kIndirection,
+        core::UnaryOp::kIndirection, core::UnaryOp::kIndirection, core::UnaryOp::kIndirection,
+        core::UnaryOp::kIndirection, core::UnaryOp::kAddressOf,   core::UnaryOp::kAddressOf,
+        core::UnaryOp::kAddressOf,   core::UnaryOp::kAddressOf,   core::UnaryOp::kAddressOf,
+        core::UnaryOp::kAddressOf,   core::UnaryOp::kIndirection};
 
     auto* expr = e.value;
     for (auto op : results) {
@@ -113,7 +113,7 @@ TEST_F(WGSLParserTest, LHSExpression_PostfixExpression_Array) {
     ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
     auto* u = e->As<ast::UnaryOpExpression>();
-    EXPECT_EQ(u->op, ast::UnaryOp::kIndirection);
+    EXPECT_EQ(u->op, core::UnaryOp::kIndirection);
 
     ASSERT_TRUE(u->expr->Is<ast::IndexAccessorExpression>());
 
@@ -138,7 +138,7 @@ TEST_F(WGSLParserTest, LHSExpression_PostfixExpression) {
     ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
     auto* u = e->As<ast::UnaryOpExpression>();
-    EXPECT_EQ(u->op, ast::UnaryOp::kIndirection);
+    EXPECT_EQ(u->op, core::UnaryOp::kIndirection);
 
     ASSERT_TRUE(u->expr->Is<ast::MemberAccessorExpression>());
 

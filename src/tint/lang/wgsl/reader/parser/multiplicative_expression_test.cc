@@ -56,7 +56,7 @@ TEST_F(WGSLParserTest, MultiplicativeExpression_Parses_Multiply_UnaryIndirect) {
 
     ASSERT_TRUE(rel->rhs->Is<ast::UnaryOpExpression>());
     auto* unary = rel->rhs->As<ast::UnaryOpExpression>();
-    EXPECT_EQ(ast::UnaryOp::kIndirection, unary->op);
+    EXPECT_EQ(core::UnaryOp::kIndirection, unary->op);
 
     ASSERT_TRUE(unary->expr->Is<ast::IdentifierExpression>());
     ident_expr = unary->expr->As<ast::IdentifierExpression>();
