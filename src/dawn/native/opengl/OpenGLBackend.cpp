@@ -31,11 +31,22 @@ PhysicalDeviceDiscoveryOptions::PhysicalDeviceDiscoveryOptions(WGPUBackendType t
 ExternalImageDescriptorEGLImage::ExternalImageDescriptorEGLImage()
     : ExternalImageDescriptor(ExternalImageType::EGLImage) {}
 
+ExternalImageDescriptorGLTexture::ExternalImageDescriptorGLTexture()
+    : ExternalImageDescriptor(ExternalImageType::GLTexture) {}
+
 WGPUTexture WrapExternalEGLImage(WGPUDevice device,
                                  const ExternalImageDescriptorEGLImage* descriptor) {
     Device* backendDevice = ToBackend(FromAPI(device));
     TextureBase* texture =
         backendDevice->CreateTextureWrappingEGLImage(descriptor, descriptor->image);
+    return ToAPI(texture);
+}
+
+WGPUTexture WrapExternalGLTexture(WGPUDevice device,
+                                  const ExternalImageDescriptorGLTexture* descriptor) {
+    Device* backendDevice = ToBackend(FromAPI(device));
+    TextureBase* texture =
+        backendDevice->CreateTextureWrappingGLTexture(descriptor, descriptor->texture);
     return ToAPI(texture);
 }
 

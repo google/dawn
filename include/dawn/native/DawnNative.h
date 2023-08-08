@@ -258,6 +258,7 @@ enum ExternalImageType {
     DXGISharedHandle,
     D3D11Texture,
     EGLImage,
+    GLTexture,
     AHardwareBuffer,
     Last = AHardwareBuffer,
 };

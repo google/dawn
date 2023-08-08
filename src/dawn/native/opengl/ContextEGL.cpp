@@ -66,10 +66,6 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions
         return DAWN_INTERNAL_ERROR("EGL_EXT_create_context_robustness must be supported");
     }
 
-    // Use ANGLE texture sharing iff the extension is available.
-    useANGLETextureSharing &=
-        strstr(extensions, "EGL_ANGLE_display_texture_share_group") != nullptr;
-
     std::vector<EGLint> attrib_list{
         EGL_CONTEXT_MAJOR_VERSION,
         major,
@@ -79,6 +75,10 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions
         EGL_TRUE,
     };
     if (useANGLETextureSharing) {
+        if (strstr(extensions, "EGL_ANGLE_display_texture_share_group") == nullptr) {
+            return DAWN_INTERNAL_ERROR(
+                "GL_ANGLE_display_texture_share_group must be supported to use GL texture sharing");
+        }
         attrib_list.push_back(EGL_DISPLAY_TEXTURE_SHARE_GROUP_ANGLE);
         attrib_list.push_back(EGL_TRUE);
     }

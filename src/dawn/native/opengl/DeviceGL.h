@@ -33,7 +33,7 @@
 #include "dawn/common/windows_with_undefs.h"
 #endif
 
-typedef void* EGLImage;
+using EGLImage = void*;
 
 namespace dawn::native::opengl {
 
@@ -57,9 +57,11 @@ class Device final : public DeviceBase {
 
     void SubmitFenceSync();
 
-    MaybeError ValidateEGLImageCanBeWrapped(const TextureDescriptor* descriptor, ::EGLImage image);
+    MaybeError ValidateTextureCanBeWrapped(const TextureDescriptor* descriptor);
     TextureBase* CreateTextureWrappingEGLImage(const ExternalImageDescriptor* descriptor,
                                                ::EGLImage image);
+    TextureBase* CreateTextureWrappingGLTexture(const ExternalImageDescriptor* descriptor,
+                                                GLuint texture);
 
     ResultOrError<Ref<CommandBufferBase>> CreateCommandBuffer(
         CommandEncoder* encoder,

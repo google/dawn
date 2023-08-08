@@ -17,6 +17,7 @@
 
 using EGLDisplay = void*;
 using EGLImage = void*;
+using GLuint = unsigned int;
 
 #include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp_chained_struct.h"
@@ -48,6 +49,16 @@ struct DAWN_NATIVE_EXPORT ExternalImageDescriptorEGLImage : ExternalImageDescrip
 
 DAWN_NATIVE_EXPORT WGPUTexture
 WrapExternalEGLImage(WGPUDevice device, const ExternalImageDescriptorEGLImage* descriptor);
+
+struct DAWN_NATIVE_EXPORT ExternalImageDescriptorGLTexture : ExternalImageDescriptor {
+  public:
+    ExternalImageDescriptorGLTexture();
+
+    GLuint texture;
+};
+
+DAWN_NATIVE_EXPORT WGPUTexture
+WrapExternalGLTexture(WGPUDevice device, const ExternalImageDescriptorGLTexture* descriptor);
 
 }  // namespace dawn::native::opengl
 

@@ -709,6 +709,7 @@ source_set("white_box_tests_sources") {
 
   if (dawn_enable_opengles) {
     sources += [ "white_box/EGLImageWrappingTests.cpp" ]
+    sources += [ "white_box/GLTextureWrappingTests.cpp" ]
     include_dirs = [ "//third_party/khronos" ]
   }
 
