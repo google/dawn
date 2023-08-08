@@ -725,9 +725,6 @@ void SyntaxTreePrinter::EmitBinaryOp(const core::BinaryOp op) {
         case core::BinaryOp::kModulo:
             Line() << "%";
             break;
-        default:
-            diagnostics_.add_error(diag::System::Writer, "missing binary operation type");
-            break;
     }
 }
 
