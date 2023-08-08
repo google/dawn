@@ -17,6 +17,7 @@
 
 #include <vector>
 
+#include "dawn/common/MutexProtected.h"
 #include "dawn/common/SlabAllocator.h"
 #include "dawn/common/ityp_stack_vec.h"
 #include "dawn/native/BindGroupLayoutInternal.h"
@@ -80,7 +81,7 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase {
     std::vector<D3D12_DESCRIPTOR_RANGE1> mCbvUavSrvDescriptorRanges;
     std::vector<D3D12_DESCRIPTOR_RANGE1> mSamplerDescriptorRanges;
 
-    SlabAllocator<BindGroup> mBindGroupAllocator;
+    MutexProtected<SlabAllocator<BindGroup>> mBindGroupAllocator;
 
     StagingDescriptorAllocator* mSamplerAllocator = nullptr;
     StagingDescriptorAllocator* mViewAllocator = nullptr;

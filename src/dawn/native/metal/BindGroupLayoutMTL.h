@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_METAL_BINDGROUPLAYOUTMTL_H_
 #define SRC_DAWN_NATIVE_METAL_BINDGROUPLAYOUTMTL_H_
 
+#include "dawn/common/MutexProtected.h"
 #include "dawn/common/SlabAllocator.h"
 #include "dawn/native/BindGroupLayoutInternal.h"
 
@@ -35,7 +36,7 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase {
     BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor);
     ~BindGroupLayout() override;
 
-    SlabAllocator<BindGroup> mBindGroupAllocator;
+    MutexProtected<SlabAllocator<BindGroup>> mBindGroupAllocator;
 };
 
 }  // namespace dawn::native::metal

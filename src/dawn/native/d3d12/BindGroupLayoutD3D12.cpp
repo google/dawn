@@ -164,7 +164,7 @@ ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
     }
 
     Ref<BindGroup> bindGroup = AcquireRef<BindGroup>(
-        mBindGroupAllocator.Allocate(device, descriptor, viewSizeIncrement, viewAllocation));
+        mBindGroupAllocator->Allocate(device, descriptor, viewSizeIncrement, viewAllocation));
 
     if (GetSamplerDescriptorCount() > 0) {
         Ref<SamplerHeapCacheEntry> samplerHeapCacheEntry;
@@ -182,7 +182,7 @@ void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup,
         mViewAllocator->Deallocate(viewAllocation);
     }
 
-    mBindGroupAllocator.Deallocate(bindGroup);
+    mBindGroupAllocator->Deallocate(bindGroup);
 }
 
 ityp::span<BindingIndex, const uint32_t> BindGroupLayout::GetDescriptorHeapOffsets() const {

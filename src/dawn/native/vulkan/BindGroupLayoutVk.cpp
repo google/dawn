@@ -176,13 +176,13 @@ ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
     DescriptorSetAllocation descriptorSetAllocation;
     DAWN_TRY_ASSIGN(descriptorSetAllocation, mDescriptorSetAllocator->Allocate());
 
-    return AcquireRef(mBindGroupAllocator.Allocate(device, descriptor, descriptorSetAllocation));
+    return AcquireRef(mBindGroupAllocator->Allocate(device, descriptor, descriptorSetAllocation));
 }
 
 void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup,
                                           DescriptorSetAllocation* descriptorSetAllocation) {
     mDescriptorSetAllocator->Deallocate(descriptorSetAllocation);
-    mBindGroupAllocator.Deallocate(bindGroup);
+    mBindGroupAllocator->Deallocate(bindGroup);
 }
 
 void BindGroupLayout::SetLabelImpl() {

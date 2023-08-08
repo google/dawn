@@ -22,11 +22,11 @@ BindGroupLayout::BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescri
 
 Ref<BindGroup> BindGroupLayout::AllocateBindGroup(Device* device,
                                                   const BindGroupDescriptor* descriptor) {
-    return AcquireRef(mBindGroupAllocator.Allocate(device, descriptor));
+    return AcquireRef(mBindGroupAllocator->Allocate(device, descriptor));
 }
 
 void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup) {
-    mBindGroupAllocator.Deallocate(bindGroup);
+    mBindGroupAllocator->Deallocate(bindGroup);
 }
 
 }  // namespace dawn::native::opengl

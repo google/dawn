@@ -170,8 +170,6 @@ void SlabAllocatorImpl::Slab::Splice() {
 }
 
 void* SlabAllocatorImpl::Allocate() {
-    std::lock_guard<std::mutex> lock(mMutex);
-
     if (mAvailableSlabs.next == nullptr) {
         GetNewSlab();
     }
@@ -197,7 +195,6 @@ void SlabAllocatorImpl::Deallocate(void* ptr) {
     Slab* slab = reinterpret_cast<Slab*>(static_cast<char*>(firstAllocation) - mSlabBlocksOffset);
     ASSERT(slab != nullptr);
 
-    std::lock_guard<std::mutex> lock(mMutex);
     bool slabWasFull = slab->blocksInUse == mBlocksPerSlab;
     ASSERT(slab->blocksInUse != 0);
     PushFront(slab, node);

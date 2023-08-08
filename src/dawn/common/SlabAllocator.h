@@ -16,7 +16,6 @@
 #define SRC_DAWN_COMMON_SLABALLOCATOR_H_
 
 #include <cstdint>
-#include <mutex>
 #include <type_traits>
 #include <utility>
 
@@ -159,7 +158,6 @@ class SlabAllocatorImpl {
         void Prepend(Slab* slab);
     };
 
-    std::mutex mMutex;
     SentinelSlab mAvailableSlabs;  // Available slabs to service allocations.
     SentinelSlab mFullSlabs;       // Full slabs. Stored here so we can skip checking them.
     SentinelSlab mRecycledSlabs;   // Recycled slabs. Not immediately added to |mAvailableSlabs| so
