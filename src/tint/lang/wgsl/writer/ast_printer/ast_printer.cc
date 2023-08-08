@@ -334,9 +334,9 @@ void ASTPrinter::EmitStructType(const ast::Struct* str) {
     }
     Line() << "struct " << str->name->symbol.Name() << " {";
 
-    Hashset<std::string_view, 8> member_names;
+    Hashset<std::string, 8> member_names;
     for (auto* mem : str->members) {
-        member_names.Add(mem->name->symbol.NameView());
+        member_names.Add(std::string(mem->name->symbol.NameView()));
     }
     size_t padding_idx = 0;
     auto new_padding_name = [&] {
