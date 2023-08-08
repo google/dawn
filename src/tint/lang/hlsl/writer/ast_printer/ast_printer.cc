@@ -1133,6 +1133,19 @@ bool ASTPrinter::EmitFunctionCall(StringStream& out,
         }
     }
 
+    if (auto* wave_intrinsic =
+            ast::GetAttribute<ast::transform::CanonicalizeEntryPointIO::HLSLWaveIntrinsic>(
+                func->Declaration()->attributes)) {
+        switch (wave_intrinsic->op) {
+            case ast::transform::CanonicalizeEntryPointIO::HLSLWaveIntrinsic::Op::kWaveGetLaneCount:
+                out << "WaveGetLaneCount()";
+                return true;
+            case ast::transform::CanonicalizeEntryPointIO::HLSLWaveIntrinsic::Op::kWaveGetLaneIndex:
+                out << "WaveGetLaneIndex()";
+                return true;
+        }
+    }
+
     out << func->Declaration()->name->symbol.Name() << "(";
 
     bool first = true;

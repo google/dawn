@@ -32,6 +32,7 @@ using namespace tint::number_suffixes;  // NOLINT
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CanonicalizeEntryPointIO);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CanonicalizeEntryPointIO::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CanonicalizeEntryPointIO::HLSLWaveIntrinsic);
 
 namespace tint::ast::transform {
 
@@ -142,6 +143,8 @@ struct CanonicalizeEntryPointIO::State {
     std::unordered_set<std::string> input_names;
     /// A map of cloned attribute to builtin value
     Hashmap<const BuiltinAttribute*, core::BuiltinValue, 16> builtin_attrs;
+    /// A map of builtin values to HLSL wave intrinsic functions.
+    Hashmap<core::BuiltinValue, Symbol, 2> wave_intrinsics;
 
     /// Constructor
     /// @param context the clone context
@@ -222,6 +225,44 @@ struct CanonicalizeEntryPointIO::State {
             wrapper_struct_param_name = b.Sym();
         }
         return wrapper_struct_param_name;
+    }
+
+    /// Call a wave intrinsic function for the subgroup builtin contained in @p attrs, if any.
+    /// @param attrs the attribute list that may contain a subgroup builtin
+    /// @returns an expression that calls a HLSL wave intrinsic, or nullptr
+    const ast::CallExpression* CallWaveIntrinsic(VectorRef<const Attribute*> attrs) {
+        if (cfg.shader_style != ShaderStyle::kHlsl) {
+            return nullptr;
+        }
+
+        // Helper to make a wave intrinsic.
+        auto make_intrinsic = [&](const char* name, HLSLWaveIntrinsic::Op op) {
+            auto symbol = b.Symbols().New(name);
+            b.Func(symbol, Empty, b.ty.u32(), nullptr,
+                   Vector{b.ASTNodes().Create<HLSLWaveIntrinsic>(b.ID(), b.AllocateNodeID(), op),
+                          b.Disable(DisabledValidation::kFunctionHasNoBody)});
+            return symbol;
+        };
+
+        // Get or create the intrinsic function.
+        auto builtin = BuiltinOf(attrs);
+        auto intrinsic = wave_intrinsics.GetOrCreate(builtin, [&] {
+            if (builtin == core::BuiltinValue::kSubgroupInvocationId) {
+                return make_intrinsic("__WaveGetLaneIndex",
+                                      HLSLWaveIntrinsic::Op::kWaveGetLaneIndex);
+            }
+            if (builtin == core::BuiltinValue::kSubgroupSize) {
+                return make_intrinsic("__WaveGetLaneCount",
+                                      HLSLWaveIntrinsic::Op::kWaveGetLaneCount);
+            }
+            return Symbol();
+        });
+        if (!intrinsic) {
+            return nullptr;
+        }
+
+        // Call the intrinsic function.
+        return b.Call(intrinsic);
     }
 
     /// Add a shader input to the entry point.
@@ -349,6 +390,14 @@ struct CanonicalizeEntryPointIO::State {
     /// that will be passed to the original function.
     /// @param param the original function parameter
     void ProcessNonStructParameter(const sem::Parameter* param) {
+        if (auto* wave_intrinsic_call = CallWaveIntrinsic(param->Declaration()->attributes)) {
+            inner_call_parameters.Push(wave_intrinsic_call);
+            for (auto* attr : param->Declaration()->attributes) {
+                ctx.Remove(param->Declaration()->attributes, attr);
+            }
+            return;
+        }
+
         // Do not add interpolation attributes on vertex input
         bool do_interpolate = func_ast->PipelineStage() != PipelineStage::kVertex;
         // Remove the shader IO attributes from the inner function parameter, and attach them to the
@@ -385,6 +434,11 @@ struct CanonicalizeEntryPointIO::State {
         for (auto* member : str->Members()) {
             if (TINT_UNLIKELY(member->Type()->Is<type::Struct>())) {
                 TINT_ICE() << "nested IO struct";
+                continue;
+            }
+
+            if (auto* wave_intrinsic_call = CallWaveIntrinsic(member->Declaration()->attributes)) {
+                inner_struct_values.Push(wave_intrinsic_call);
                 continue;
             }
 
@@ -876,5 +930,25 @@ CanonicalizeEntryPointIO::Config::Config(ShaderStyle style,
 
 CanonicalizeEntryPointIO::Config::Config(const Config&) = default;
 CanonicalizeEntryPointIO::Config::~Config() = default;
+
+CanonicalizeEntryPointIO::HLSLWaveIntrinsic::HLSLWaveIntrinsic(GenerationID pid, NodeID nid, Op o)
+    : Base(pid, nid, Empty), op(o) {}
+CanonicalizeEntryPointIO::HLSLWaveIntrinsic::~HLSLWaveIntrinsic() = default;
+std::string CanonicalizeEntryPointIO::HLSLWaveIntrinsic::InternalName() const {
+    StringStream ss;
+    switch (op) {
+        case Op::kWaveGetLaneCount:
+            return "intrinsic_wave_get_lane_count";
+        case Op::kWaveGetLaneIndex:
+            return "intrinsic_wave_get_lane_index";
+    }
+    return ss.str();
+}
+
+const CanonicalizeEntryPointIO::HLSLWaveIntrinsic*
+CanonicalizeEntryPointIO::HLSLWaveIntrinsic::Clone(ast::CloneContext& ctx) const {
+    return ctx.dst->ASTNodes().Create<CanonicalizeEntryPointIO::HLSLWaveIntrinsic>(
+        ctx.dst->ID(), ctx.dst->AllocateNodeID(), op);
+}
 
 }  // namespace tint::ast::transform

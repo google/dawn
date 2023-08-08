@@ -4171,5 +4171,88 @@ fn frag_main() -> tint_symbol {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(CanonicalizeEntryPointIOTest, SubgroupBuiltins_Hlsl) {
+    auto* src = R"(
+enable chromium_experimental_subgroups;
+
+@compute @workgroup_size(64)
+fn frag_main(@builtin(subgroup_invocation_id) id : u32,
+             @builtin(subgroup_size) size : u32) {
+  let x = size - id;
+}
+)";
+
+    auto* expect = R"(
+enable chromium_experimental_subgroups;
+
+@internal(intrinsic_wave_get_lane_index) @internal(disable_validation__function_has_no_body)
+fn __WaveGetLaneIndex() -> u32
+
+@internal(intrinsic_wave_get_lane_count) @internal(disable_validation__function_has_no_body)
+fn __WaveGetLaneCount() -> u32
+
+fn frag_main_inner(id : u32, size : u32) {
+  let x = (size - id);
+}
+
+@compute @workgroup_size(64)
+fn frag_main() {
+  frag_main_inner(__WaveGetLaneIndex(), __WaveGetLaneCount());
+}
+)";
+
+    DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, SubgroupBuiltinsStruct_Hlsl) {
+    auto* src = R"(
+enable chromium_experimental_subgroups;
+
+struct Inputs {
+  @builtin(subgroup_invocation_id) id : u32,
+  @builtin(subgroup_size) size : u32,
+}
+
+@compute @workgroup_size(64)
+fn frag_main(inputs : Inputs) {
+  let x = inputs.size - inputs.id;
+}
+)";
+
+    auto* expect = R"(
+enable chromium_experimental_subgroups;
+
+@internal(intrinsic_wave_get_lane_index) @internal(disable_validation__function_has_no_body)
+fn __WaveGetLaneIndex() -> u32
+
+@internal(intrinsic_wave_get_lane_count) @internal(disable_validation__function_has_no_body)
+fn __WaveGetLaneCount() -> u32
+
+struct Inputs {
+  id : u32,
+  size : u32,
+}
+
+fn frag_main_inner(inputs : Inputs) {
+  let x = (inputs.size - inputs.id);
+}
+
+@compute @workgroup_size(64)
+fn frag_main() {
+  frag_main_inner(Inputs(__WaveGetLaneIndex(), __WaveGetLaneCount()));
+}
+)";
+
+    DataMap data;
+    data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
+    auto got = Run<Unshadow, CanonicalizeEntryPointIO>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::ast::transform
