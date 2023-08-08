@@ -1375,6 +1375,7 @@ source_set("libtint") {
     ":libtint_ast_src",
     ":libtint_ast_transform_base_src",
     ":libtint_ast_transform_src",
+    ":libtint_builtins_src",
     ":libtint_constant_src",
     ":libtint_initializer_src",
     ":libtint_inspector_src",
