@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/resolver/const_eval_test.h"
+#include "src/tint/lang/core/constant/eval_test.h"
 
-namespace tint::resolver {
+namespace tint::constant::test {
 namespace {
 
 using namespace tint::core::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;     // NOLINT
 
-TEST_F(ResolverConstEvalTest, Scalar_AFloat) {
+TEST_F(ConstEvalTest, Scalar_AFloat) {
     auto* expr = Expr(99.0_a);
     auto* a = Const("a", expr);
     WrapInFunction(a);
@@ -36,7 +36,7 @@ TEST_F(ResolverConstEvalTest, Scalar_AFloat) {
     EXPECT_EQ(sem->ConstantValue()->ValueAs<AFloat>(), 99.0f);
 }
 
-TEST_F(ResolverConstEvalTest, Scalar_AInt) {
+TEST_F(ConstEvalTest, Scalar_AInt) {
     auto* expr = Expr(99_a);
     auto* a = Const("a", expr);
     WrapInFunction(a);
@@ -52,7 +52,7 @@ TEST_F(ResolverConstEvalTest, Scalar_AInt) {
     EXPECT_EQ(sem->ConstantValue()->ValueAs<AInt>(), 99);
 }
 
-TEST_F(ResolverConstEvalTest, Scalar_i32) {
+TEST_F(ConstEvalTest, Scalar_i32) {
     auto* expr = Expr(99_i);
     WrapInFunction(expr);
 
@@ -67,7 +67,7 @@ TEST_F(ResolverConstEvalTest, Scalar_i32) {
     EXPECT_EQ(sem->ConstantValue()->ValueAs<AInt>(), 99);
 }
 
-TEST_F(ResolverConstEvalTest, Scalar_u32) {
+TEST_F(ConstEvalTest, Scalar_u32) {
     auto* expr = Expr(99_u);
     WrapInFunction(expr);
 
@@ -82,7 +82,7 @@ TEST_F(ResolverConstEvalTest, Scalar_u32) {
     EXPECT_EQ(sem->ConstantValue()->ValueAs<AInt>(), 99u);
 }
 
-TEST_F(ResolverConstEvalTest, Scalar_f32) {
+TEST_F(ConstEvalTest, Scalar_f32) {
     auto* expr = Expr(9.9_f);
     WrapInFunction(expr);
 
@@ -97,7 +97,7 @@ TEST_F(ResolverConstEvalTest, Scalar_f32) {
     EXPECT_EQ(sem->ConstantValue()->ValueAs<AFloat>().value, 9.9f);
 }
 
-TEST_F(ResolverConstEvalTest, Scalar_f16) {
+TEST_F(ConstEvalTest, Scalar_f16) {
     Enable(core::Extension::kF16);
 
     auto* expr = Expr(9.9_h);
@@ -115,7 +115,7 @@ TEST_F(ResolverConstEvalTest, Scalar_f16) {
     EXPECT_EQ(sem->ConstantValue()->ValueAs<AFloat>(), 9.8984375f);
 }
 
-TEST_F(ResolverConstEvalTest, Scalar_bool) {
+TEST_F(ConstEvalTest, Scalar_bool) {
     auto* expr = Expr(true);
     WrapInFunction(expr);
 
@@ -138,8 +138,8 @@ template <typename T>
 Case C() {
     return Case{builder::DataType<T>::AST};
 }
-using ResolverConstEvalZeroInitTest = ResolverTestWithParam<Case>;
-TEST_P(ResolverConstEvalZeroInitTest, Test) {
+using ConstEvalZeroInitTest = ConstEvalTestWithParam<Case>;
+TEST_P(ConstEvalZeroInitTest, Test) {
     Enable(core::Extension::kF16);
     auto& param = GetParam();
     auto ty = param.type(*this);
@@ -183,7 +183,7 @@ TEST_P(ResolverConstEvalZeroInitTest, Test) {
     }
 }
 INSTANTIATE_TEST_SUITE_P(ZeroInit,
-                         ResolverConstEvalZeroInitTest,
+                         ConstEvalZeroInitTest,
                          testing::ValuesIn({
                              C<u32>(),
                              C<i32>(),
@@ -208,7 +208,7 @@ INSTANTIATE_TEST_SUITE_P(ZeroInit,
 
 }  // namespace ZeroInit
 
-TEST_F(ResolverConstEvalTest, Vec3_ZeroInit_i32) {
+TEST_F(ConstEvalTest, Vec3_ZeroInit_i32) {
     auto* expr = Call<vec3<i32>>();
     WrapInFunction(expr);
 
@@ -237,7 +237,7 @@ TEST_F(ResolverConstEvalTest, Vec3_ZeroInit_i32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), 0);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_ZeroInit_u32) {
+TEST_F(ConstEvalTest, Vec3_ZeroInit_u32) {
     auto* expr = Call<vec3<u32>>();
     WrapInFunction(expr);
 
@@ -266,7 +266,7 @@ TEST_F(ResolverConstEvalTest, Vec3_ZeroInit_u32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), 0u);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_ZeroInit_f32) {
+TEST_F(ConstEvalTest, Vec3_ZeroInit_f32) {
     auto* expr = Call<vec3<f32>>();
     WrapInFunction(expr);
 
@@ -295,7 +295,7 @@ TEST_F(ResolverConstEvalTest, Vec3_ZeroInit_f32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 0._a);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_ZeroInit_f16) {
+TEST_F(ConstEvalTest, Vec3_ZeroInit_f16) {
     Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>();
@@ -326,7 +326,7 @@ TEST_F(ResolverConstEvalTest, Vec3_ZeroInit_f16) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 0._a);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_ZeroInit_bool) {
+TEST_F(ConstEvalTest, Vec3_ZeroInit_bool) {
     auto* expr = Call<vec3<bool>>();
     WrapInFunction(expr);
 
@@ -355,7 +355,7 @@ TEST_F(ResolverConstEvalTest, Vec3_ZeroInit_bool) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<bool>(), false);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Splat_i32) {
+TEST_F(ConstEvalTest, Vec3_Splat_i32) {
     auto* expr = Call<vec3<i32>>(99_i);
     WrapInFunction(expr);
 
@@ -384,7 +384,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Splat_i32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), 99);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Splat_u32) {
+TEST_F(ConstEvalTest, Vec3_Splat_u32) {
     auto* expr = Call<vec3<u32>>(99_u);
     WrapInFunction(expr);
 
@@ -413,7 +413,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Splat_u32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), 99u);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Splat_f32) {
+TEST_F(ConstEvalTest, Vec3_Splat_f32) {
     auto* expr = Call<vec3<f32>>(9.9_f);
     WrapInFunction(expr);
 
@@ -442,7 +442,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Splat_f32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 9.9f);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Splat_f16) {
+TEST_F(ConstEvalTest, Vec3_Splat_f16) {
     Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(9.9_h);
@@ -474,7 +474,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Splat_f16) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 9.8984375f);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Splat_bool) {
+TEST_F(ConstEvalTest, Vec3_Splat_bool) {
     auto* expr = Call<vec3<bool>>(true);
     WrapInFunction(expr);
 
@@ -503,7 +503,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Splat_bool) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<bool>(), true);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_AInt) {
+TEST_F(ConstEvalTest, Vec3_FullConstruct_AInt) {
     auto* expr = Call<vec3<Infer>>(1_a, 2_a, 3_a);
     auto* a = Const("a", expr);
     WrapInFunction(a);
@@ -533,7 +533,7 @@ TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_AInt) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), 3);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_AFloat) {
+TEST_F(ConstEvalTest, Vec3_FullConstruct_AFloat) {
     auto* expr = Call<vec3<Infer>>(1.0_a, 2.0_a, 3.0_a);
     auto* a = Const("a", expr);
     WrapInFunction(a);
@@ -563,7 +563,7 @@ TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_AFloat) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 3.0f);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_i32) {
+TEST_F(ConstEvalTest, Vec3_FullConstruct_i32) {
     auto* expr = Call<vec3<i32>>(1_i, 2_i, 3_i);
     WrapInFunction(expr);
 
@@ -592,7 +592,7 @@ TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_i32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), 3);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_u32) {
+TEST_F(ConstEvalTest, Vec3_FullConstruct_u32) {
     auto* expr = Call<vec3<u32>>(1_u, 2_u, 3_u);
     WrapInFunction(expr);
 
@@ -621,7 +621,7 @@ TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_u32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), 3);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_f32) {
+TEST_F(ConstEvalTest, Vec3_FullConstruct_f32) {
     auto* expr = Call<vec3<f32>>(1_f, 2_f, 3_f);
     WrapInFunction(expr);
 
@@ -650,7 +650,7 @@ TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_f32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 3.f);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_f16) {
+TEST_F(ConstEvalTest, Vec3_FullConstruct_f16) {
     Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(1_h, 2_h, 3_h);
@@ -681,7 +681,7 @@ TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_f16) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 3.f);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_bool) {
+TEST_F(ConstEvalTest, Vec3_FullConstruct_bool) {
     auto* expr = Call<vec3<bool>>(true, false, true);
     WrapInFunction(expr);
 
@@ -710,7 +710,7 @@ TEST_F(ResolverConstEvalTest, Vec3_FullConstruct_bool) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<bool>(), true);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_i32) {
+TEST_F(ConstEvalTest, Vec3_MixConstruct_i32) {
     auto* expr = Call<vec3<i32>>(1_i, Call<vec2<i32>>(2_i, 3_i));
     WrapInFunction(expr);
 
@@ -739,7 +739,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_i32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), 3);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_u32) {
+TEST_F(ConstEvalTest, Vec3_MixConstruct_u32) {
     auto* expr = Call<vec3<u32>>(Call<vec2<u32>>(1_u, 2_u), 3_u);
     WrapInFunction(expr);
 
@@ -768,7 +768,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_u32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), 3);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f32) {
+TEST_F(ConstEvalTest, Vec3_MixConstruct_f32) {
     auto* expr = Call<vec3<f32>>(1_f, Call<vec2<f32>>(2_f, 3_f));
     WrapInFunction(expr);
 
@@ -797,7 +797,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 3.f);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f32_all_10) {
+TEST_F(ConstEvalTest, Vec3_MixConstruct_f32_all_10) {
     auto* expr = Call<vec3<f32>>(10_f, Call<vec2<f32>>(10_f, 10_f));
     WrapInFunction(expr);
 
@@ -826,7 +826,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f32_all_10) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<f32>(), 10_f);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f32_all_positive_0) {
+TEST_F(ConstEvalTest, Vec3_MixConstruct_f32_all_positive_0) {
     auto* expr = Call<vec3<f32>>(0_f, Call<vec2<f32>>(0_f, 0_f));
     WrapInFunction(expr);
 
@@ -855,7 +855,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f32_all_positive_0) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<f32>(), 0_f);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f32_all_negative_0) {
+TEST_F(ConstEvalTest, Vec3_MixConstruct_f32_all_negative_0) {
     auto* expr = Call<vec3<f32>>(Call<vec2<f32>>(-0_f, -0_f), -0_f);
     WrapInFunction(expr);
 
@@ -884,7 +884,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f32_all_negative_0) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<f32>(), -0_f);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f32_mixed_sign_0) {
+TEST_F(ConstEvalTest, Vec3_MixConstruct_f32_mixed_sign_0) {
     auto* expr = Call<vec3<f32>>(0_f, Call<vec2<f32>>(-0_f, 0_f));
     WrapInFunction(expr);
 
@@ -913,7 +913,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f32_mixed_sign_0) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<f32>(), 0_f);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16) {
+TEST_F(ConstEvalTest, Vec3_MixConstruct_f16) {
     Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(1_h, Call<vec2<f16>>(2_h, 3_h));
@@ -944,7 +944,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 3.f);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16_all_10) {
+TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_all_10) {
     Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(10_h, Call<vec2<f16>>(10_h, 10_h));
@@ -975,7 +975,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16_all_10) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<f16>(), 10_h);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16_all_positive_0) {
+TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_all_positive_0) {
     Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(0_h, Call<vec2<f16>>(0_h, 0_h));
@@ -1006,7 +1006,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16_all_positive_0) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<f16>(), 0_h);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16_all_negative_0) {
+TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_all_negative_0) {
     Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(Call<vec2<f16>>(-0_h, -0_h), -0_h);
@@ -1037,7 +1037,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16_all_negative_0) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<f16>(), -0_h);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16_mixed_sign_0) {
+TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_mixed_sign_0) {
     Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(0_h, Call<vec2<f16>>(-0_h, 0_h));
@@ -1068,7 +1068,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_f16_mixed_sign_0) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<f16>(), 0_h);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_bool) {
+TEST_F(ConstEvalTest, Vec3_MixConstruct_bool) {
     auto* expr = Call<vec3<bool>>(Call<vec2<bool>>(true, false), true);
     WrapInFunction(expr);
 
@@ -1097,7 +1097,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_bool) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<bool>(), true);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_all_true) {
+TEST_F(ConstEvalTest, Vec3_MixConstruct_all_true) {
     auto* expr = Call<vec3<bool>>(true, Call<vec2<bool>>(true, true));
     WrapInFunction(expr);
 
@@ -1126,7 +1126,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_all_true) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<bool>(), true);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_all_false) {
+TEST_F(ConstEvalTest, Vec3_MixConstruct_all_false) {
     auto* expr = Call<vec3<bool>>(false, Call<vec2<bool>>(false, false));
     WrapInFunction(expr);
 
@@ -1155,7 +1155,7 @@ TEST_F(ResolverConstEvalTest, Vec3_MixConstruct_all_false) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<bool>(), false);
 }
 
-TEST_F(ResolverConstEvalTest, Mat2x3_ZeroInit_f32) {
+TEST_F(ConstEvalTest, Mat2x3_ZeroInit_f32) {
     auto* expr = Call<mat2x3<f32>>();
     WrapInFunction(expr);
 
@@ -1197,7 +1197,7 @@ TEST_F(ResolverConstEvalTest, Mat2x3_ZeroInit_f32) {
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->ValueAs<f32>(), 0._f);
 }
 
-TEST_F(ResolverConstEvalTest, Mat2x3_ZeroInit_f16) {
+TEST_F(ConstEvalTest, Mat2x3_ZeroInit_f16) {
     Enable(core::Extension::kF16);
 
     auto* expr = Call<mat2x3<f16>>();
@@ -1241,7 +1241,7 @@ TEST_F(ResolverConstEvalTest, Mat2x3_ZeroInit_f16) {
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->ValueAs<f16>(), 0._h);
 }
 
-TEST_F(ResolverConstEvalTest, Mat3x2_Construct_Scalars_af) {
+TEST_F(ConstEvalTest, Mat3x2_Construct_Scalars_af) {
     auto* expr = Call<mat3x2<Infer>>(1.0_a, 2.0_a, 3.0_a, 4.0_a, 5.0_a, 6.0_a);
     WrapInFunction(expr);
 
@@ -1283,7 +1283,7 @@ TEST_F(ResolverConstEvalTest, Mat3x2_Construct_Scalars_af) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(1)->ValueAs<AFloat>(), 6._a);
 }
 
-TEST_F(ResolverConstEvalTest, Mat3x2_Construct_Columns_af) {
+TEST_F(ConstEvalTest, Mat3x2_Construct_Columns_af) {
     auto* expr = Call<mat<3, 2, Infer>>(  //
         Call<vec2<Infer>>(1.0_a, 2.0_a),  //
         Call<vec2<Infer>>(3.0_a, 4.0_a),  //
@@ -1328,7 +1328,7 @@ TEST_F(ResolverConstEvalTest, Mat3x2_Construct_Columns_af) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(1)->ValueAs<AFloat>(), 6._a);
 }
 
-TEST_F(ResolverConstEvalTest, Array_i32_Zero) {
+TEST_F(ConstEvalTest, Array_i32_Zero) {
     auto* expr = Call<array<i32, 4>>();
     WrapInFunction(expr);
 
@@ -1360,7 +1360,7 @@ TEST_F(ResolverConstEvalTest, Array_i32_Zero) {
     EXPECT_EQ(sem->ConstantValue()->Index(3)->ValueAs<i32>(), 0_i);
 }
 
-TEST_F(ResolverConstEvalTest, Array_f32_Zero) {
+TEST_F(ConstEvalTest, Array_f32_Zero) {
     auto* expr = Call<array<f32, 4>>();
     WrapInFunction(expr);
 
@@ -1392,7 +1392,7 @@ TEST_F(ResolverConstEvalTest, Array_f32_Zero) {
     EXPECT_EQ(sem->ConstantValue()->Index(3)->ValueAs<f32>(), 0_f);
 }
 
-TEST_F(ResolverConstEvalTest, Array_vec3_f32_Zero) {
+TEST_F(ConstEvalTest, Array_vec3_f32_Zero) {
     auto* expr = Call<array<vec3<f32>, 2>>();
     WrapInFunction(expr);
 
@@ -1432,7 +1432,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Zero) {
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->ValueAs<f32>(), 0_f);
 }
 
-TEST_F(ResolverConstEvalTest, Array_Struct_f32_Zero) {
+TEST_F(ConstEvalTest, Array_Struct_f32_Zero) {
     Structure("S", Vector{
                        Member("m1", ty.f32()),
                        Member("m2", ty.f32()),
@@ -1468,7 +1468,7 @@ TEST_F(ResolverConstEvalTest, Array_Struct_f32_Zero) {
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->ValueAs<f32>(), 0_f);
 }
 
-TEST_F(ResolverConstEvalTest, Array_i32_Elements) {
+TEST_F(ConstEvalTest, Array_i32_Elements) {
     auto* expr = Call<array<i32, 4>>(10_i, 20_i, 30_i, 40_i);
     WrapInFunction(expr);
 
@@ -1511,7 +1511,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
     return o << "input: " << c.input;
 }
 
-using ResolverConstEvalArrayInitTest = ResolverTestWithParam<Case>;
+using ResolverConstEvalArrayInitTest = ConstEvalTestWithParam<Case>;
 TEST_P(ResolverConstEvalArrayInitTest, Test) {
     Enable(core::Extension::kF16);
     auto& param = GetParam();
@@ -1553,7 +1553,7 @@ INSTANTIATE_TEST_SUITE_P(  //
                              ArrayInitCases<bool>())));
 }  // namespace ArrayInit
 
-TEST_F(ResolverConstEvalTest, ArrayInit_Nested_f32) {
+TEST_F(ConstEvalTest, ArrayInit_Nested_f32) {
     auto inner_ty = [&] { return ty.array<f32, 2>(); };
     auto outer_ty = ty.array(inner_ty(), Expr(3_i));
 
@@ -1592,7 +1592,7 @@ TEST_F(ResolverConstEvalTest, ArrayInit_Nested_f32) {
     EXPECT_EQ(arr->Index(2)->Index(1)->ValueAs<f32>(), 6.0f);
 }
 
-TEST_F(ResolverConstEvalTest, Array_f32_Elements) {
+TEST_F(ConstEvalTest, Array_f32_Elements) {
     auto* expr = Call<array<f32, 4>>(10_f, 20_f, 30_f, 40_f);
     WrapInFunction(expr);
 
@@ -1624,7 +1624,7 @@ TEST_F(ResolverConstEvalTest, Array_f32_Elements) {
     EXPECT_EQ(sem->ConstantValue()->Index(3)->ValueAs<f32>(), 40_f);
 }
 
-TEST_F(ResolverConstEvalTest, Array_vec3_f32_Elements) {
+TEST_F(ConstEvalTest, Array_vec3_f32_Elements) {
     auto* expr =
         Call<array<vec3<f32>, 2>>(Call<vec3<f32>>(1_f, 2_f, 3_f), Call<vec3<f32>>(4_f, 5_f, 6_f));
     WrapInFunction(expr);
@@ -1647,7 +1647,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Elements) {
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->ValueAs<f32>(), 6_f);
 }
 
-TEST_F(ResolverConstEvalTest, Array_Struct_f32_Elements) {
+TEST_F(ConstEvalTest, Array_Struct_f32_Elements) {
     Structure("S", Vector{
                        Member("m1", ty.f32()),
                        Member("m2", ty.f32()),
@@ -1685,7 +1685,7 @@ TEST_F(ResolverConstEvalTest, Array_Struct_f32_Elements) {
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->ValueAs<f32>(), 4_f);
 }
 
-TEST_F(ResolverConstEvalTest, Struct_ZeroInit) {
+TEST_F(ConstEvalTest, Struct_ZeroInit) {
     Enable(core::Extension::kF16);
     auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
@@ -1728,7 +1728,7 @@ TEST_F(ResolverConstEvalTest, Struct_ZeroInit) {
     }
 }
 
-TEST_F(ResolverConstEvalTest, Struct_Nested_ZeroInit) {
+TEST_F(ConstEvalTest, Struct_Nested_ZeroInit) {
     Enable(core::Extension::kF16);
     auto* inner = Structure("Inner", Vector{
                                          Member("a", ty.i32()),
@@ -1778,7 +1778,7 @@ TEST_F(ResolverConstEvalTest, Struct_Nested_ZeroInit) {
     }
 }
 
-TEST_F(ResolverConstEvalTest, Struct_I32s_ZeroInit) {
+TEST_F(ConstEvalTest, Struct_I32s_ZeroInit) {
     Structure("S", Vector{Member("m1", ty.i32()), Member("m2", ty.i32()), Member("m3", ty.i32())});
     auto* expr = Call("S");
     WrapInFunction(expr);
@@ -1811,7 +1811,7 @@ TEST_F(ResolverConstEvalTest, Struct_I32s_ZeroInit) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<i32>(), 0_i);
 }
 
-TEST_F(ResolverConstEvalTest, Struct_MixedScalars_ZeroInit) {
+TEST_F(ConstEvalTest, Struct_MixedScalars_ZeroInit) {
     Enable(core::Extension::kF16);
 
     Structure("S", Vector{
@@ -1862,7 +1862,7 @@ TEST_F(ResolverConstEvalTest, Struct_MixedScalars_ZeroInit) {
     EXPECT_EQ(sem->ConstantValue()->Index(4)->ValueAs<bool>(), false);
 }
 
-TEST_F(ResolverConstEvalTest, Struct_VectorF32s_ZeroInit) {
+TEST_F(ConstEvalTest, Struct_VectorF32s_ZeroInit) {
     Structure("S", Vector{
                        Member("m1", ty.vec3<f32>()),
                        Member("m2", ty.vec3<f32>()),
@@ -1911,7 +1911,7 @@ TEST_F(ResolverConstEvalTest, Struct_VectorF32s_ZeroInit) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(2)->ValueAs<f32>(), 0._f);
 }
 
-TEST_F(ResolverConstEvalTest, Struct_MixedVectors_ZeroInit) {
+TEST_F(ConstEvalTest, Struct_MixedVectors_ZeroInit) {
     Enable(core::Extension::kF16);
 
     Structure("S", Vector{
@@ -1981,7 +1981,7 @@ TEST_F(ResolverConstEvalTest, Struct_MixedVectors_ZeroInit) {
     EXPECT_EQ(sem->ConstantValue()->Index(4)->Index(1)->ValueAs<bool>(), false);
 }
 
-TEST_F(ResolverConstEvalTest, Struct_Struct_ZeroInit) {
+TEST_F(ConstEvalTest, Struct_Struct_ZeroInit) {
     Structure("Inner", Vector{
                            Member("m1", ty.i32()),
                            Member("m2", ty.u32()),
@@ -2022,7 +2022,7 @@ TEST_F(ResolverConstEvalTest, Struct_Struct_ZeroInit) {
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->ValueAs<f32>(), 0_f);
 }
 
-TEST_F(ResolverConstEvalTest, Struct_MixedScalars_Construct) {
+TEST_F(ConstEvalTest, Struct_MixedScalars_Construct) {
     Enable(core::Extension::kF16);
 
     Structure("S", Vector{
@@ -2073,7 +2073,7 @@ TEST_F(ResolverConstEvalTest, Struct_MixedScalars_Construct) {
     EXPECT_EQ(sem->ConstantValue()->Index(4)->ValueAs<bool>(), false);
 }
 
-TEST_F(ResolverConstEvalTest, Struct_MixedVectors_Construct) {
+TEST_F(ConstEvalTest, Struct_MixedVectors_Construct) {
     Enable(core::Extension::kF16);
 
     Structure("S", Vector{
@@ -2144,7 +2144,7 @@ TEST_F(ResolverConstEvalTest, Struct_MixedVectors_Construct) {
     EXPECT_EQ(sem->ConstantValue()->Index(4)->Index(1)->ValueAs<bool>(), false);
 }
 
-TEST_F(ResolverConstEvalTest, Struct_Struct_Construct) {
+TEST_F(ConstEvalTest, Struct_Struct_Construct) {
     Structure("Inner", Vector{
                            Member("m1", ty.i32()),
                            Member("m2", ty.u32()),
@@ -2186,7 +2186,7 @@ TEST_F(ResolverConstEvalTest, Struct_Struct_Construct) {
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->ValueAs<f32>(), 6_f);
 }
 
-TEST_F(ResolverConstEvalTest, Struct_Array_Construct) {
+TEST_F(ConstEvalTest, Struct_Array_Construct) {
     Structure("S", Vector{
                        Member("m1", ty.array<i32, 2>()),
                        Member("m2", ty.array<f32, 3>()),
@@ -2222,4 +2222,4 @@ TEST_F(ResolverConstEvalTest, Struct_Array_Construct) {
 }
 
 }  // namespace
-}  // namespace tint::resolver
+}  // namespace tint::constant::test

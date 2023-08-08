@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/resolver/const_eval_test.h"
+#include "src/tint/lang/core/constant/eval_test.h"
 
-namespace tint::resolver {
+namespace tint::constant::test {
 namespace {
 
 using namespace tint::core::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;     // NOLINT
 
-TEST_F(ResolverConstEvalTest, StructMemberAccess) {
+TEST_F(ConstEvalTest, StructMemberAccess) {
     Structure("Inner", Vector{
                            Member("i1", ty.i32()),
                            Member("i2", ty.u32()),
@@ -68,7 +68,7 @@ TEST_F(ResolverConstEvalTest, StructMemberAccess) {
     EXPECT_EQ(i2->ConstantValue()->ValueAs<u32>(), 2_u);
 }
 
-TEST_F(ResolverConstEvalTest, Matrix_AFloat_Construct_From_AInt_Vectors) {
+TEST_F(ConstEvalTest, Matrix_AFloat_Construct_From_AInt_Vectors) {
     auto* c = Const("a", Call<mat2x2<Infer>>(              //
                              Call<vec2<Infer>>(1_a, 2_a),  //
                              Call<vec2<Infer>>(3_a, 4_a)));
@@ -93,7 +93,7 @@ TEST_F(ResolverConstEvalTest, Matrix_AFloat_Construct_From_AInt_Vectors) {
     EXPECT_EQ(c1->Index(1)->ValueAs<AFloat>(), 4.0);
 }
 
-TEST_F(ResolverConstEvalTest, MatrixMemberAccess_AFloat) {
+TEST_F(ConstEvalTest, MatrixMemberAccess_AFloat) {
     auto* c = Const("a", Call<mat2x3<Infer>>(                         //
                              Call<vec3<Infer>>(1.0_a, 2.0_a, 3.0_a),  //
                              Call<vec3<Infer>>(4.0_a, 5.0_a, 6.0_a)));
@@ -169,7 +169,7 @@ TEST_F(ResolverConstEvalTest, MatrixMemberAccess_AFloat) {
     EXPECT_EQ(sem_e12->ConstantValue()->ValueAs<AFloat>(), 6.0);
 }
 
-TEST_F(ResolverConstEvalTest, MatrixMemberAccess_f32) {
+TEST_F(ConstEvalTest, MatrixMemberAccess_f32) {
     auto* c = Const("a", Call<mat2x3<Infer>>(                         //
                              Call<vec3<Infer>>(1.0_f, 2.0_f, 3.0_f),  //
                              Call<vec3<Infer>>(4.0_f, 5.0_f, 6.0_f)));
@@ -256,8 +256,8 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
     return o << "input: " << c.input;
 }
 
-using ResolverConstEvalArrayAccessTest = ResolverTestWithParam<Case>;
-TEST_P(ResolverConstEvalArrayAccessTest, Test) {
+using ConstEvalArrayAccessTest = ConstEvalTestWithParam<Case>;
+TEST_P(ConstEvalArrayAccessTest, Test) {
     Enable(core::Extension::kF16);
 
     auto& param = GetParam();
@@ -310,7 +310,7 @@ std::vector<Case> ArrayAccessCases() {
 }
 INSTANTIATE_TEST_SUITE_P(  //
     ArrayAccess,
-    ResolverConstEvalArrayAccessTest,
+    ConstEvalArrayAccessTest,
     testing::ValuesIn(Concat(ArrayAccessCases<AInt>(),    //
                              ArrayAccessCases<AFloat>(),  //
                              ArrayAccessCases<i32>(),     //
@@ -331,8 +331,8 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
     return o << "input: " << c.input;
 }
 
-using ResolverConstEvalVectorAccessTest = ResolverTestWithParam<Case>;
-TEST_P(ResolverConstEvalVectorAccessTest, Test) {
+using ConstEvalVectorAccessTest = ConstEvalTestWithParam<Case>;
+TEST_P(ConstEvalVectorAccessTest, Test) {
     Enable(core::Extension::kF16);
 
     auto& param = GetParam();
@@ -383,7 +383,7 @@ std::vector<Case> VectorAccessCases() {
 }
 INSTANTIATE_TEST_SUITE_P(  //
     VectorAccess,
-    ResolverConstEvalVectorAccessTest,
+    ConstEvalVectorAccessTest,
     testing::ValuesIn(Concat(VectorAccessCases<AInt>(),    //
                              VectorAccessCases<AFloat>(),  //
                              VectorAccessCases<i32>(),     //
@@ -394,4 +394,4 @@ INSTANTIATE_TEST_SUITE_P(  //
 }  // namespace VectorAccess
 
 }  // namespace
-}  // namespace tint::resolver
+}  // namespace tint::constant::test

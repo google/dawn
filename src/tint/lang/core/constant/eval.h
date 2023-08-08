@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_RESOLVER_CONST_EVAL_H_
-#define SRC_TINT_LANG_WGSL_RESOLVER_CONST_EVAL_H_
+#ifndef SRC_TINT_LANG_CORE_CONSTANT_EVAL_H_
+#define SRC_TINT_LANG_CORE_CONSTANT_EVAL_H_
 
 #include <stddef.h>
 #include <string>
@@ -25,102 +25,84 @@
 
 // Forward declarations
 namespace tint {
-class ProgramBuilder;
 class Source;
 }  // namespace tint
-namespace tint::ast {
-class LiteralExpression;
-}  // namespace tint::ast
+namespace tint::constant {
+class Manager;
+}  // namespace tint::constant
+namespace tint::diag {
+class List;
+}  // namespace tint::diag
 namespace tint::constant {
 class Value;
 }  // namespace tint::constant
-namespace tint::sem {
-class ValueExpression;
-}  // namespace tint::sem
-namespace tint::type {
-class StructMember;
-}  // namespace tint::type
 
-namespace tint::resolver {
+namespace tint::constant {
 
-/// ConstEval performs shader creation-time (const-expression) expression evaluation.
-/// Methods are called from the resolver, either directly or via member-function pointers indexed by
-/// the IntrinsicTable. All child-expression nodes are guaranteed to have been already resolved
-/// before calling a method to evaluate an expression's value.
-class ConstEval {
+/// Eval performs shader creation-time (const-expression) expression evaluation.
+class Eval {
   public:
-    /// The result type of a method that may raise a diagnostic error and the caller should abort
-    /// resolving. Can be one of three distinct values:
-    /// * A non-null constant::Value pointer. Returned when a expression resolves to a creation
-    /// time
-    ///   value.
-    /// * A null constant::Value pointer. Returned when a expression cannot resolve to a creation
-    /// time
-    ///   value, but is otherwise legal.
-    /// * `tint::Failure`. Returned when there was a resolver error. In this situation the method
-    ///   will have already reported a diagnostic error message, and the caller should abort
-    ///   resolving.
-    using Result = tint::Result<const constant::Value*>;
+    /// The result type of a method that may raise a diagnostic error, upon which the caller should
+    /// handle the error. Can be one of three distinct values:
+    /// * A non-null Value pointer. Returned when a expression resolves to a creation
+    ///   time value.
+    /// * A null Value pointer. Returned when a expression cannot resolve to a creation time value,
+    ///   but is otherwise legal.
+    /// * `tint::Failure`. Returned when there was an error. In this situation the method will have
+    ///   already reported a diagnostic error message, and the caller should abort resolving.
+    using Result = tint::Result<const Value*>;
 
     /// Typedef for a constant evaluation function
-    using Function = Result (ConstEval::*)(const type::Type* result_ty,
-                                           VectorRef<const constant::Value*>,
-                                           const Source&);
+    using Function = Result (Eval::*)(const type::Type* result_ty,
+                                      VectorRef<const Value*>,
+                                      const Source&);
 
     /// Constructor
-    /// @param b the program builder
+    /// @param manager the constant manager
+    /// @param diagnostics the diagnostic list, used to report errors and warnings
     /// @param use_runtime_semantics if `true`, use the behavior defined for runtime evaluation, and
     ///                              emit overflow and range errors as warnings instead of errors
-    explicit ConstEval(ProgramBuilder& b, bool use_runtime_semantics = false);
+    Eval(Manager& manager, diag::List& diagnostics, bool use_runtime_semantics = false);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Constant value evaluation methods, to be called directly from Resolver
+    // Constant value evaluation methods
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     /// @param ty the target type - must be an array or struct
     /// @param args the input arguments
     /// @return the constructed value, or null if the value cannot be calculated
-    Result ArrayOrStructCtor(const type::Type* ty, VectorRef<const constant::Value*> args);
+    Result ArrayOrStructCtor(const type::Type* ty, VectorRef<const Value*> args);
 
     /// @param ty the target type
     /// @param value the value being converted
     /// @param source the source location
     /// @return the bit-cast of the given expression to the given type, or null if the value cannot
     ///         be calculated
-    Result Bitcast(const type::Type* ty, const constant::Value* value, const Source& source);
+    Result Bitcast(const type::Type* ty, const Value* value, const Source& source);
 
-    /// @param ty the target type
-    /// @param obj the object being indexed
-    /// @param idx the index expression
+    /// @param obj the object being indexed. May be null, in which case Index() will still validate
+    /// the index is in bounds for the type.
+    /// @param obj_ty the type of the object being indexed.
+    /// @param idx the index value.
+    /// @param idx_source the source of the index expression
     /// @return the result of the index, or null if the value cannot be calculated
-    Result Index(const type::Type* ty,
-                 const sem::ValueExpression* obj,
-                 const sem::ValueExpression* idx);
-
-    /// @param ty the result type
-    /// @param lit the literal AST node
-    /// @return the constant value of the literal
-    Result Literal(const type::Type* ty, const ast::LiteralExpression* lit);
-
-    /// @param obj the object being accessed
-    /// @param member the member
-    /// @return the result of the member access, or null if the value cannot be calculated
-    Result MemberAccess(const sem::ValueExpression* obj, const type::StructMember* member);
+    Result Index(const Value* obj,
+                 const type::Type* obj_ty,
+                 const Value* idx,
+                 const Source& idx_source);
 
     /// @param ty the result type
     /// @param vector the vector being swizzled
     /// @param indices the swizzle indices
     /// @return the result of the swizzle, or null if the value cannot be calculated
-    Result Swizzle(const type::Type* ty,
-                   const sem::ValueExpression* vector,
-                   VectorRef<uint32_t> indices);
+    Result Swizzle(const type::Type* ty, const Value* vector, VectorRef<uint32_t> indices);
 
     /// Convert the `value` to `target_type`
     /// @param ty the result type
     /// @param value the value being converted
     /// @param source the source location
     /// @return the converted value, or null if the value cannot be calculated
-    Result Convert(const type::Type* ty, const constant::Value* value, const Source& source);
+    Result Convert(const type::Type* ty, const Value* value, const Source& source);
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // Constant value evaluation methods, to be indirectly called via the intrinsic table
@@ -131,68 +113,56 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the converted value, or null if the value cannot be calculated
-    Result Conv(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result Conv(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Zero value constructor
     /// @param ty the result type
     /// @param args the input arguments (no arguments provided)
     /// @param source the source location
     /// @return the constructed value, or null if the value cannot be calculated
-    Result Zero(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result Zero(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Identity value constructor
     /// @param ty the result type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the constructed value, or null if the value cannot be calculated
-    Result Identity(const type::Type* ty,
-                    VectorRef<const constant::Value*> args,
-                    const Source& source);
+    Result Identity(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Vector splat constructor
     /// @param ty the vector type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the constructed value, or null if the value cannot be calculated
-    Result VecSplat(const type::Type* ty,
-                    VectorRef<const constant::Value*> args,
-                    const Source& source);
+    Result VecSplat(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Vector constructor using scalars
     /// @param ty the vector type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the constructed value, or null if the value cannot be calculated
-    Result VecInitS(const type::Type* ty,
-                    VectorRef<const constant::Value*> args,
-                    const Source& source);
+    Result VecInitS(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Vector constructor using a mix of scalars and smaller vectors
     /// @param ty the vector type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the constructed value, or null if the value cannot be calculated
-    Result VecInitM(const type::Type* ty,
-                    VectorRef<const constant::Value*> args,
-                    const Source& source);
+    Result VecInitM(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Matrix constructor using scalar values
     /// @param ty the matrix type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the constructed value, or null if the value cannot be calculated
-    Result MatInitS(const type::Type* ty,
-                    VectorRef<const constant::Value*> args,
-                    const Source& source);
+    Result MatInitS(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Matrix constructor using column vectors
     /// @param ty the matrix type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the constructed value, or null if the value cannot be calculated
-    Result MatInitV(const type::Type* ty,
-                    VectorRef<const constant::Value*> args,
-                    const Source& source);
+    Result MatInitV(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     ////////////////////////////////////////////////////////////////////////////
     // Unary Operators
@@ -203,27 +173,21 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpComplement(const type::Type* ty,
-                        VectorRef<const constant::Value*> args,
-                        const Source& source);
+    Result OpComplement(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Unary minus operator '-'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpUnaryMinus(const type::Type* ty,
-                        VectorRef<const constant::Value*> args,
-                        const Source& source);
+    Result OpUnaryMinus(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Unary not operator '!'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpNot(const type::Type* ty,
-                 VectorRef<const constant::Value*> args,
-                 const Source& source);
+    Result OpNot(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     ////////////////////////////////////////////////////////////////////////////
     // Binary Operators
@@ -234,27 +198,21 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpPlus(const type::Type* ty,
-                  VectorRef<const constant::Value*> args,
-                  const Source& source);
+    Result OpPlus(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Minus operator '-'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpMinus(const type::Type* ty,
-                   VectorRef<const constant::Value*> args,
-                   const Source& source);
+    Result OpMinus(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Multiply operator '*' for the same type on the LHS and RHS
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpMultiply(const type::Type* ty,
-                      VectorRef<const constant::Value*> args,
-                      const Source& source);
+    Result OpMultiply(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Multiply operator '*' for matCxR<T> * vecC<T>
     /// @param ty the expression type
@@ -262,7 +220,7 @@ class ConstEval {
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
     Result OpMultiplyMatVec(const type::Type* ty,
-                            VectorRef<const constant::Value*> args,
+                            VectorRef<const Value*> args,
                             const Source& source);
 
     /// Multiply operator '*' for vecR<T> * matCxR<T>
@@ -271,7 +229,7 @@ class ConstEval {
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
     Result OpMultiplyVecMat(const type::Type* ty,
-                            VectorRef<const constant::Value*> args,
+                            VectorRef<const Value*> args,
                             const Source& source);
 
     /// Multiply operator '*' for matKxR<T> * matCxK<T>
@@ -280,7 +238,7 @@ class ConstEval {
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
     Result OpMultiplyMatMat(const type::Type* ty,
-                            VectorRef<const constant::Value*> args,
+                            VectorRef<const Value*> args,
                             const Source& source);
 
     /// Divide operator '/'
@@ -288,54 +246,42 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpDivide(const type::Type* ty,
-                    VectorRef<const constant::Value*> args,
-                    const Source& source);
+    Result OpDivide(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Modulo operator '%'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpModulo(const type::Type* ty,
-                    VectorRef<const constant::Value*> args,
-                    const Source& source);
+    Result OpModulo(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Equality operator '=='
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpEqual(const type::Type* ty,
-                   VectorRef<const constant::Value*> args,
-                   const Source& source);
+    Result OpEqual(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Inequality operator '!='
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpNotEqual(const type::Type* ty,
-                      VectorRef<const constant::Value*> args,
-                      const Source& source);
+    Result OpNotEqual(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Less than operator '<'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpLessThan(const type::Type* ty,
-                      VectorRef<const constant::Value*> args,
-                      const Source& source);
+    Result OpLessThan(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Greater than operator '>'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpGreaterThan(const type::Type* ty,
-                         VectorRef<const constant::Value*> args,
-                         const Source& source);
+    Result OpGreaterThan(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Less than or equal operator '<='
     /// @param ty the expression type
@@ -343,7 +289,7 @@ class ConstEval {
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
     Result OpLessThanEqual(const type::Type* ty,
-                           VectorRef<const constant::Value*> args,
+                           VectorRef<const Value*> args,
                            const Source& source);
 
     /// Greater than or equal operator '>='
@@ -352,7 +298,7 @@ class ConstEval {
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
     Result OpGreaterThanEqual(const type::Type* ty,
-                              VectorRef<const constant::Value*> args,
+                              VectorRef<const Value*> args,
                               const Source& source);
 
     /// Logical and operator '&&'
@@ -360,61 +306,49 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpLogicalAnd(const type::Type* ty,
-                        VectorRef<const constant::Value*> args,
-                        const Source& source);
+    Result OpLogicalAnd(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Logical or operator '||'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpLogicalOr(const type::Type* ty,
-                       VectorRef<const constant::Value*> args,
-                       const Source& source);
+    Result OpLogicalOr(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Bitwise and operator '&'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpAnd(const type::Type* ty,
-                 VectorRef<const constant::Value*> args,
-                 const Source& source);
+    Result OpAnd(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Bitwise or operator '|'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpOr(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result OpOr(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Bitwise xor operator '^'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpXor(const type::Type* ty,
-                 VectorRef<const constant::Value*> args,
-                 const Source& source);
+    Result OpXor(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Bitwise shift left operator '<<'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpShiftLeft(const type::Type* ty,
-                       VectorRef<const constant::Value*> args,
-                       const Source& source);
+    Result OpShiftLeft(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Bitwise shift right operator '<<'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpShiftRight(const type::Type* ty,
-                        VectorRef<const constant::Value*> args,
-                        const Source& source);
+    Result OpShiftRight(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     ////////////////////////////////////////////////////////////////////////////
     // Builtins
@@ -425,108 +359,98 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result abs(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result abs(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// acos builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result acos(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result acos(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// acosh builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result acosh(const type::Type* ty,
-                 VectorRef<const constant::Value*> args,
-                 const Source& source);
+    Result acosh(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// all builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result all(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result all(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// any builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result any(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result any(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// asin builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result asin(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result asin(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// asinh builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result asinh(const type::Type* ty,
-                 VectorRef<const constant::Value*> args,
-                 const Source& source);
+    Result asinh(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// atan builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result atan(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result atan(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// atanh builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result atanh(const type::Type* ty,
-                 VectorRef<const constant::Value*> args,
-                 const Source& source);
+    Result atanh(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// atan2 builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result atan2(const type::Type* ty,
-                 VectorRef<const constant::Value*> args,
-                 const Source& source);
+    Result atan2(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// ceil builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result ceil(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result ceil(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// clamp builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result clamp(const type::Type* ty,
-                 VectorRef<const constant::Value*> args,
-                 const Source& source);
+    Result clamp(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// cos builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result cos(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result cos(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// cosh builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result cosh(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result cosh(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// countLeadingZeros builtin
     /// @param ty the expression type
@@ -534,7 +458,7 @@ class ConstEval {
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
     Result countLeadingZeros(const type::Type* ty,
-                             VectorRef<const constant::Value*> args,
+                             VectorRef<const Value*> args,
                              const Source& source);
 
     /// countOneBits builtin
@@ -542,9 +466,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result countOneBits(const type::Type* ty,
-                        VectorRef<const constant::Value*> args,
-                        const Source& source);
+    Result countOneBits(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// countTrailingZeros builtin
     /// @param ty the expression type
@@ -552,7 +474,7 @@ class ConstEval {
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
     Result countTrailingZeros(const type::Type* ty,
-                              VectorRef<const constant::Value*> args,
+                              VectorRef<const Value*> args,
                               const Source& source);
 
     /// cross builtin
@@ -560,75 +482,63 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result cross(const type::Type* ty,
-                 VectorRef<const constant::Value*> args,
-                 const Source& source);
+    Result cross(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// degrees builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    Result degrees(const type::Type* ty,
-                   VectorRef<const constant::Value*> args,
-                   const Source& source);
+    Result degrees(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// determinant builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    Result determinant(const type::Type* ty,
-                       VectorRef<const constant::Value*> args,
-                       const Source& source);
+    Result determinant(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// distance builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    Result distance(const type::Type* ty,
-                    VectorRef<const constant::Value*> args,
-                    const Source& source);
+    Result distance(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// dot builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result dot(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result dot(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// exp builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result exp(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result exp(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// exp2 builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result exp2(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result exp2(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// extractBits builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result extractBits(const type::Type* ty,
-                       VectorRef<const constant::Value*> args,
-                       const Source& source);
+    Result extractBits(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// faceForward builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result faceForward(const type::Type* ty,
-                       VectorRef<const constant::Value*> args,
-                       const Source& source);
+    Result faceForward(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// firstLeadingBit builtin
     /// @param ty the expression type
@@ -636,7 +546,7 @@ class ConstEval {
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
     Result firstLeadingBit(const type::Type* ty,
-                           VectorRef<const constant::Value*> args,
+                           VectorRef<const Value*> args,
                            const Source& source);
 
     /// firstTrailingBit builtin
@@ -645,7 +555,7 @@ class ConstEval {
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
     Result firstTrailingBit(const type::Type* ty,
-                            VectorRef<const constant::Value*> args,
+                            VectorRef<const Value*> args,
                             const Source& source);
 
     /// floor builtin
@@ -653,91 +563,77 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result floor(const type::Type* ty,
-                 VectorRef<const constant::Value*> args,
-                 const Source& source);
+    Result floor(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// fma builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result fma(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result fma(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// fract builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result fract(const type::Type* ty,
-                 VectorRef<const constant::Value*> args,
-                 const Source& source);
+    Result fract(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// frexp builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result frexp(const type::Type* ty,
-                 VectorRef<const constant::Value*> args,
-                 const Source& source);
+    Result frexp(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// insertBits builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result insertBits(const type::Type* ty,
-                      VectorRef<const constant::Value*> args,
-                      const Source& source);
+    Result insertBits(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// inverseSqrt builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result inverseSqrt(const type::Type* ty,
-                       VectorRef<const constant::Value*> args,
-                       const Source& source);
+    Result inverseSqrt(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// ldexp builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result ldexp(const type::Type* ty,
-                 VectorRef<const constant::Value*> args,
-                 const Source& source);
+    Result ldexp(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// length builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result length(const type::Type* ty,
-                  VectorRef<const constant::Value*> args,
-                  const Source& source);
+    Result length(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// log builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result log(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result log(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// log2 builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result log2(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result log2(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// max builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result max(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result max(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// min builtin
     /// @param ty the expression type
@@ -745,7 +641,7 @@ class ConstEval {
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
     Result min(const type::Type* ty,  // NOLINT(build/include_what_you_use)  -- confused by min
-               VectorRef<const constant::Value*> args,
+               VectorRef<const Value*> args,
                const Source& source);
 
     /// mix builtin
@@ -753,223 +649,189 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result mix(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result mix(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// modf builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result modf(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result modf(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// normalize builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result normalize(const type::Type* ty,
-                     VectorRef<const constant::Value*> args,
-                     const Source& source);
+    Result normalize(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// pack2x16float builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result pack2x16float(const type::Type* ty,
-                         VectorRef<const constant::Value*> args,
-                         const Source& source);
+    Result pack2x16float(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// pack2x16snorm builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result pack2x16snorm(const type::Type* ty,
-                         VectorRef<const constant::Value*> args,
-                         const Source& source);
+    Result pack2x16snorm(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// pack2x16unorm builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result pack2x16unorm(const type::Type* ty,
-                         VectorRef<const constant::Value*> args,
-                         const Source& source);
+    Result pack2x16unorm(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// pack4x8snorm builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result pack4x8snorm(const type::Type* ty,
-                        VectorRef<const constant::Value*> args,
-                        const Source& source);
+    Result pack4x8snorm(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// pack4x8unorm builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result pack4x8unorm(const type::Type* ty,
-                        VectorRef<const constant::Value*> args,
-                        const Source& source);
+    Result pack4x8unorm(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// pow builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result pow(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result pow(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// radians builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    Result radians(const type::Type* ty,
-                   VectorRef<const constant::Value*> args,
-                   const Source& source);
+    Result radians(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// reflect builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    Result reflect(const type::Type* ty,
-                   VectorRef<const constant::Value*> args,
-                   const Source& source);
+    Result reflect(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// refract builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    Result refract(const type::Type* ty,
-                   VectorRef<const constant::Value*> args,
-                   const Source& source);
+    Result refract(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// reverseBits builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result reverseBits(const type::Type* ty,
-                       VectorRef<const constant::Value*> args,
-                       const Source& source);
+    Result reverseBits(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// round builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result round(const type::Type* ty,
-                 VectorRef<const constant::Value*> args,
-                 const Source& source);
+    Result round(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// saturate builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result saturate(const type::Type* ty,
-                    VectorRef<const constant::Value*> args,
-                    const Source& source);
+    Result saturate(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// select builtin with single bool third arg
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result select_bool(const type::Type* ty,
-                       VectorRef<const constant::Value*> args,
-                       const Source& source);
+    Result select_bool(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// select builtin with vector of bool third arg
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result select_boolvec(const type::Type* ty,
-                          VectorRef<const constant::Value*> args,
-                          const Source& source);
+    Result select_boolvec(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// sign builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result sign(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result sign(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// sin builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result sin(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result sin(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// sinh builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result sinh(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result sinh(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// smoothstep builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result smoothstep(const type::Type* ty,
-                      VectorRef<const constant::Value*> args,
-                      const Source& source);
+    Result smoothstep(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// step builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result step(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result step(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// sqrt builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result sqrt(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result sqrt(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// tan builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result tan(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result tan(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// tanh builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result tanh(const type::Type* ty, VectorRef<const constant::Value*> args, const Source& source);
+    Result tanh(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// transpose builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result transpose(const type::Type* ty,
-                     VectorRef<const constant::Value*> args,
-                     const Source& source);
+    Result transpose(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// trunc builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result trunc(const type::Type* ty,
-                 VectorRef<const constant::Value*> args,
-                 const Source& source);
+    Result trunc(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// unpack2x16float builtin
     /// @param ty the expression type
@@ -977,7 +839,7 @@ class ConstEval {
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
     Result unpack2x16float(const type::Type* ty,
-                           VectorRef<const constant::Value*> args,
+                           VectorRef<const Value*> args,
                            const Source& source);
 
     /// unpack2x16snorm builtin
@@ -986,7 +848,7 @@ class ConstEval {
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
     Result unpack2x16snorm(const type::Type* ty,
-                           VectorRef<const constant::Value*> args,
+                           VectorRef<const Value*> args,
                            const Source& source);
 
     /// unpack2x16unorm builtin
@@ -995,7 +857,7 @@ class ConstEval {
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
     Result unpack2x16unorm(const type::Type* ty,
-                           VectorRef<const constant::Value*> args,
+                           VectorRef<const Value*> args,
                            const Source& source);
 
     /// unpack4x8snorm builtin
@@ -1003,27 +865,21 @@ class ConstEval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result unpack4x8snorm(const type::Type* ty,
-                          VectorRef<const constant::Value*> args,
-                          const Source& source);
+    Result unpack4x8snorm(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// unpack4x8unorm builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result unpack4x8unorm(const type::Type* ty,
-                          VectorRef<const constant::Value*> args,
-                          const Source& source);
+    Result unpack4x8unorm(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// quantizeToF16 builtin
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result quantizeToF16(const type::Type* ty,
-                         VectorRef<const constant::Value*> args,
-                         const Source& source);
+    Result quantizeToF16(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
   private:
     /// Adds the given error message to the diagnostics
@@ -1041,10 +897,10 @@ class ConstEval {
     /// @param v the scalar value
     /// @return the constant value with the same type and value
     template <typename T>
-    ConstEval::Result CreateScalar(const Source& source, const type::Type* t, T v);
+    Eval::Result CreateScalar(const Source& source, const type::Type* t, T v);
 
     /// ZeroValue returns a Constant for the zero-value of the type `type`.
-    const constant::Value* ZeroValue(const type::Type* type);
+    const Value* ZeroValue(const type::Type* type);
 
     /// Adds two Number<T>s
     /// @param source the source location
@@ -1330,14 +1186,14 @@ class ConstEval {
     /// @param v1 the first vector
     /// @param v2 the second vector
     /// @returns the dot product
-    Result Dot(const Source& source, const constant::Value* v1, const constant::Value* v2);
+    Result Dot(const Source& source, const Value* v1, const Value* v2);
 
     /// Returns the length of c0
     /// @param source the source location
     /// @param ty the return type
     /// @param c0 the constant to calculate the length of
     /// @returns the length of c0
-    Result Length(const Source& source, const type::Type* ty, const constant::Value* c0);
+    Result Length(const Source& source, const type::Type* ty, const Value* c0);
 
     /// Returns the product of v1 and v2
     /// @param source the source location
@@ -1345,10 +1201,7 @@ class ConstEval {
     /// @param v1 lhs value
     /// @param v2 rhs value
     /// @returns the product of v1 and v2
-    Result Mul(const Source& source,
-               const type::Type* ty,
-               const constant::Value* v1,
-               const constant::Value* v2);
+    Result Mul(const Source& source, const type::Type* ty, const Value* v1, const Value* v2);
 
     /// Returns the difference between v2 and v1
     /// @param source the source location
@@ -1356,15 +1209,14 @@ class ConstEval {
     /// @param v1 lhs value
     /// @param v2 rhs value
     /// @returns the difference between v2 and v1
-    Result Sub(const Source& source,
-               const type::Type* ty,
-               const constant::Value* v1,
-               const constant::Value* v2);
+    Result Sub(const Source& source, const type::Type* ty, const Value* v1, const Value* v2);
 
-    ProgramBuilder& builder;
+  private:
+    Manager& mgr;
+    diag::List& diags;
     bool use_runtime_semantics_ = false;
 };
 
-}  // namespace tint::resolver
+}  // namespace tint::constant
 
-#endif  // SRC_TINT_LANG_WGSL_RESOLVER_CONST_EVAL_H_
+#endif  // SRC_TINT_LANG_CORE_CONSTANT_EVAL_H_

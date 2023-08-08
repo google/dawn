@@ -514,8 +514,8 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/sem/variable.cc
   lang/wgsl/sem/while_statement.cc
   lang/wgsl/sem/while_statement.h
-  lang/wgsl/resolver/const_eval.cc
-  lang/wgsl/resolver/const_eval.h
+  lang/core/constant/eval.cc
+  lang/core/constant/eval.h
   lang/wgsl/resolver/dependency_graph.cc
   lang/wgsl/resolver/dependency_graph.h
   lang/core/intrinsic/table.cc
@@ -1094,16 +1094,16 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/resolver/compound_assignment_validation_test.cc
     lang/wgsl/resolver/compound_statement_test.cc
     lang/wgsl/resolver/const_assert_test.cc
-    lang/wgsl/resolver/const_eval_binary_op_test.cc
-    lang/wgsl/resolver/const_eval_bitcast_test.cc
-    lang/wgsl/resolver/const_eval_builtin_test.cc
-    lang/wgsl/resolver/const_eval_construction_test.cc
-    lang/wgsl/resolver/const_eval_conversion_test.cc
-    lang/wgsl/resolver/const_eval_indexing_test.cc
-    lang/wgsl/resolver/const_eval_member_access_test.cc
-    lang/wgsl/resolver/const_eval_runtime_semantics_test.cc
-    lang/wgsl/resolver/const_eval_test.h
-    lang/wgsl/resolver/const_eval_unary_op_test.cc
+    lang/core/constant/eval_binary_op_test.cc
+    lang/core/constant/eval_bitcast_test.cc
+    lang/core/constant/eval_builtin_test.cc
+    lang/core/constant/eval_construction_test.cc
+    lang/core/constant/eval_conversion_test.cc
+    lang/core/constant/eval_indexing_test.cc
+    lang/core/constant/eval_member_access_test.cc
+    lang/core/constant/eval_runtime_semantics_test.cc
+    lang/core/constant/eval_test.h
+    lang/core/constant/eval_unary_op_test.cc
     lang/wgsl/resolver/control_block_validation_test.cc
     lang/wgsl/resolver/dependency_graph_test.cc
     lang/wgsl/resolver/diagnostic_control_test.cc

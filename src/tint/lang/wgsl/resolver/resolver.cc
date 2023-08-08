@@ -21,6 +21,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/builtin.h"
+#include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
@@ -108,7 +109,7 @@ constexpr size_t kMaxNestDepthOfCompositeType = 255;
 Resolver::Resolver(ProgramBuilder* builder)
     : builder_(builder),
       diagnostics_(builder->Diagnostics()),
-      const_eval_(*builder),
+      const_eval_(builder->constants, diagnostics_),
       intrinsic_table_(core::intrinsic::Table::Create(*builder)),
       sem_(builder),
       validator_(builder,
@@ -1971,10 +1972,13 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
     if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
         stage = sem::EvaluationStage::kNotEvaluated;
     } else {
-        if (auto r = const_eval_.Index(ty, obj, idx)) {
-            val = r.Get();
-        } else {
-            return nullptr;
+        if (auto* idx_val = idx->ConstantValue()) {
+            auto res = const_eval_.Index(obj->ConstantValue(), obj->Type(), idx_val,
+                                         idx->Declaration()->source);
+            if (!res) {
+                return nullptr;
+            }
+            val = res.Get();
         }
     }
     bool has_side_effects = idx->HasSideEffects() || obj->HasSideEffects();
@@ -3063,11 +3067,33 @@ sem::ValueExpression* Resolver::Literal(const ast::LiteralExpression* literal) {
         stage = sem::EvaluationStage::kNotEvaluated;
     }
     if (stage == sem::EvaluationStage::kConstant) {
-        if (auto r = const_eval_.Literal(ty, literal)) {
-            val = r.Get();
-        } else {
-            return nullptr;
-        }
+        val = Switch(
+            literal,
+            [&](const ast::BoolLiteralExpression* lit) {
+                return builder_->constants.Get(lit->value);
+            },
+            [&](const ast::IntLiteralExpression* lit) -> const constant::Value* {
+                switch (lit->suffix) {
+                    case ast::IntLiteralExpression::Suffix::kNone:
+                        return builder_->constants.Get(AInt(lit->value));
+                    case ast::IntLiteralExpression::Suffix::kI:
+                        return builder_->constants.Get(i32(lit->value));
+                    case ast::IntLiteralExpression::Suffix::kU:
+                        return builder_->constants.Get(u32(lit->value));
+                }
+                return nullptr;
+            },
+            [&](const ast::FloatLiteralExpression* lit) -> const constant::Value* {
+                switch (lit->suffix) {
+                    case ast::FloatLiteralExpression::Suffix::kNone:
+                        return builder_->constants.Get(AFloat(lit->value));
+                    case ast::FloatLiteralExpression::Suffix::kF:
+                        return builder_->constants.Get(f32(lit->value));
+                    case ast::FloatLiteralExpression::Suffix::kH:
+                        return builder_->constants.Get(f16(lit->value));
+                }
+                return nullptr;
+            });
     }
     return builder_->create<sem::ValueExpression>(literal, ty, stage, current_statement_,
                                                   std::move(val),
@@ -3316,13 +3342,12 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
                 ty = builder_->create<type::Reference>(ref->AddressSpace(), ty, ref->Access());
             }
 
-            auto val = const_eval_.MemberAccess(object, member);
-            if (!val) {
-                return nullptr;
+            const constant::Value* val = nullptr;
+            if (auto* obj_val = object->ConstantValue()) {
+                val = obj_val->Index(static_cast<size_t>(member->Index()));
             }
-            return builder_->create<sem::StructMemberAccess>(expr, ty, current_statement_,
-                                                             val.Get(), object, member,
-                                                             has_side_effects, root_ident);
+            return builder_->create<sem::StructMemberAccess>(
+                expr, ty, current_statement_, val, object, member, has_side_effects, root_ident);
         },
 
         [&](const type::Vector* vec) -> sem::ValueExpression* {
@@ -3392,11 +3417,15 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
                 // The load rule is invoked before the swizzle, if necessary.
                 obj_expr = Load(object);
             }
-            auto val = const_eval_.Swizzle(ty, object, swizzle);
-            if (!val) {
-                return nullptr;
+            const constant::Value* val = nullptr;
+            if (auto* obj_val = object->ConstantValue()) {
+                auto res = const_eval_.Swizzle(ty, obj_val, swizzle);
+                if (!res) {
+                    return nullptr;
+                }
+                val = res.Get();
             }
-            return builder_->create<sem::Swizzle>(expr, ty, current_statement_, val.Get(), obj_expr,
+            return builder_->create<sem::Swizzle>(expr, ty, current_statement_, val, obj_expr,
                                                   std::move(swizzle), has_side_effects, root_ident);
         },
 

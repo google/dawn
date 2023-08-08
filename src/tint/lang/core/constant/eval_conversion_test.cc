@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/lang/core/constant/eval_test.h"
 #include "src/tint/lang/core/constant/splat.h"
-#include "src/tint/lang/wgsl/resolver/const_eval_test.h"
 #include "src/tint/lang/wgsl/sem/materialize.h"
 
-namespace tint::resolver {
+namespace tint::constant::test {
 namespace {
 
 using namespace tint::core::fluent_types;  // NOLINT
@@ -64,9 +64,9 @@ Case Unrepresentable(FROM input) {
             /* unrepresentable */ true};
 }
 
-using ResolverConstEvalConvTest = ResolverTestWithParam<std::tuple<Kind, Case>>;
+using ConstEvalConvTest = ConstEvalTestWithParam<std::tuple<Kind, Case>>;
 
-TEST_P(ResolverConstEvalConvTest, Test) {
+TEST_P(ConstEvalConvTest, Test) {
     const auto& kind = std::get<0>(GetParam());
     const auto& input = std::get<1>(GetParam()).input;
     const auto& expected = std::get<1>(GetParam()).expected;
@@ -107,7 +107,7 @@ TEST_P(ResolverConstEvalConvTest, Test) {
     }
 }
 INSTANTIATE_TEST_SUITE_P(ScalarAndVector,
-                         ResolverConstEvalConvTest,
+                         ConstEvalConvTest,
                          testing::Combine(testing::Values(Kind::kScalar, Kind::kVector),
                                           testing::ValuesIn({
                                               // TODO(crbug.com/tint/1502): Add f16 tests
@@ -225,7 +225,7 @@ INSTANTIATE_TEST_SUITE_P(ScalarAndVector,
                                               Success(-1e40_a, true),
                                           })));
 
-TEST_F(ResolverConstEvalTest, Vec3_Convert_f32_to_i32) {
+TEST_F(ConstEvalTest, Vec3_Convert_f32_to_i32) {
     auto* expr = Call<vec3<i32>>(Call<vec3<f32>>(1.1_f, 2.2_f, 3.3_f));
     WrapInFunction(expr);
 
@@ -254,7 +254,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_f32_to_i32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), 3);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f32) {
+TEST_F(ConstEvalTest, Vec3_Convert_u32_to_f32) {
     auto* expr = Call<vec3<f32>>(Call<vec3<u32>>(10_u, 20_u, 30_u));
     WrapInFunction(expr);
 
@@ -283,7 +283,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 30.f);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Convert_f16_to_i32) {
+TEST_F(ConstEvalTest, Vec3_Convert_f16_to_i32) {
     Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<i32>>(Call<vec3<f16>>(1.1_h, 2.2_h, 3.3_h));
@@ -314,7 +314,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_f16_to_i32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), 3_i);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f16) {
+TEST_F(ConstEvalTest, Vec3_Convert_u32_to_f16) {
     Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(Call<vec3<u32>>(10_u, 20_u, 30_u));
@@ -345,7 +345,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_u32_to_f16) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 30.f);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_i32) {
+TEST_F(ConstEvalTest, Vec3_Convert_Large_f32_to_i32) {
     auto* expr = Call<vec3<i32>>(Call<vec3<f32>>(1e10_f, -1e20_f, 1e30_f));
     WrapInFunction(expr);
 
@@ -374,7 +374,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_i32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), i32::Highest());
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
+TEST_F(ConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
     auto* expr = Call<vec3<u32>>(Call<vec3<f32>>(1e10_f, -1e20_f, 1e30_f));
     WrapInFunction(expr);
 
@@ -403,7 +403,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AInt>(), u32::Highest());
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
+TEST_F(ConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
     Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(Source{{12, 34}}, Call<vec3<f32>>(1e10_f, 0_f, 0_f));
@@ -413,7 +413,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
     EXPECT_EQ(r()->error(), "12:34 error: value 10000000000.0 cannot be represented as 'f16'");
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Convert_Small_f32_to_f16) {
+TEST_F(ConstEvalTest, Vec3_Convert_Small_f32_to_f16) {
     Enable(core::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(Call<vec3<f32>>(1e-20_f, -2e-30_f, 3e-40_f));
@@ -447,7 +447,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Small_f32_to_f16) {
     EXPECT_FALSE(std::signbit(sem->ConstantValue()->Index(2)->ValueAs<AFloat>().value));
 }
 
-TEST_F(ResolverConstEvalTest, StructAbstractSplat_to_StructDifferentTypes) {
+TEST_F(ConstEvalTest, StructAbstractSplat_to_StructDifferentTypes) {
     // fn f() {
     //   const c = modf(4.0);
     //   var v = c;
@@ -493,4 +493,4 @@ TEST_F(ResolverConstEvalTest, StructAbstractSplat_to_StructDifferentTypes) {
 }
 
 }  // namespace
-}  // namespace tint::resolver
+}  // namespace tint::constant::test

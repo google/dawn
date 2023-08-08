@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/resolver/const_eval_test.h"
+#include "src/tint/lang/core/constant/eval_test.h"
 
-namespace tint::resolver {
+namespace tint::constant::test {
 namespace {
 
 using namespace tint::core::fluent_types;  // NOLINT
@@ -51,9 +51,9 @@ Case Failure(FROM input) {
     return Case{input, Case::Failure{builder::CreatePtrsFor<TO>()}};
 }
 
-using ResolverConstEvalBitcastTest = ResolverTestWithParam<Case>;
+using ConstEvalBitcastTest = ConstEvalTestWithParam<Case>;
 
-TEST_P(ResolverConstEvalBitcastTest, Test) {
+TEST_P(ConstEvalBitcastTest, Test) {
     const auto& input = GetParam().input;
     const auto& expected = GetParam().expected;
 
@@ -101,7 +101,7 @@ const u32 neg_inf_as_u32 = tint::Bitcast<u32>(-std::numeric_limits<float>::infin
 const i32 neg_inf_as_i32 = tint::Bitcast<i32>(-std::numeric_limits<float>::infinity());
 
 INSTANTIATE_TEST_SUITE_P(Bitcast,
-                         ResolverConstEvalBitcastTest,
+                         ConstEvalBitcastTest,
                          testing::ValuesIn({
                              // Bitcast to same (concrete) type, no change
                              Success(Val(0_u), Val(0_u)),                        //
@@ -191,4 +191,4 @@ INSTANTIATE_TEST_SUITE_P(Bitcast,
                          }));
 
 }  // namespace
-}  // namespace tint::resolver
+}  // namespace tint::constant::test

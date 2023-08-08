@@ -894,7 +894,7 @@ struct OverloadInfo {
     /// The flags for the overload
     OverloadFlags flags;
     /// The function used to evaluate the overload at shader-creation time.
-    resolver::ConstEval::Function const const_eval_fn;
+    constant::Eval::Function const const_eval_fn;
 };
 
 /// IntrinsicInfo describes a builtin function or operator overload

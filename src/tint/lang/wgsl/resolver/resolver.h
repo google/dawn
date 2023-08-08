@@ -23,10 +23,10 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/core/constant/eval.h"
 #include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
-#include "src/tint/lang/wgsl/resolver/const_eval.h"
 #include "src/tint/lang/wgsl/resolver/dependency_graph.h"
 #include "src/tint/lang/wgsl/resolver/sem_helper.h"
 #include "src/tint/lang/wgsl/resolver/validator.h"
@@ -601,7 +601,7 @@ class Resolver {
 
     ProgramBuilder* const builder_;
     diag::List& diagnostics_;
-    ConstEval const_eval_;
+    constant::Eval const_eval_;
     std::unique_ptr<core::intrinsic::Table> const intrinsic_table_;
     DependencyGraph dependencies_;
     SemHelper sem_;

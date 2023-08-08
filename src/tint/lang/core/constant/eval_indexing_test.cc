@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/resolver/const_eval_test.h"
+#include "src/tint/lang/core/constant/eval_test.h"
 
-namespace tint::resolver {
+namespace tint::constant::test {
 namespace {
 
 using namespace tint::core::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;     // NOLINT
 
-TEST_F(ResolverConstEvalTest, Vec3_Index) {
+TEST_F(ConstEvalTest, Vec3_Index) {
     auto* expr = IndexAccessor(Call<vec3<i32>>(1_i, 2_i, 3_i), 2_i);
     WrapInFunction(expr);
 
@@ -35,7 +35,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Index) {
     EXPECT_EQ(sem->ConstantValue()->ValueAs<i32>(), 3_i);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Index_OOB_High) {
+TEST_F(ConstEvalTest, Vec3_Index_OOB_High) {
     auto* expr = IndexAccessor(Call<vec3<i32>>(1_i, 2_i, 3_i), Expr(Source{{12, 34}}, 3_i));
     WrapInFunction(expr);
 
@@ -43,7 +43,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Index_OOB_High) {
     EXPECT_EQ(r()->error(), "12:34 error: index 3 out of bounds [0..2]");
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Index_OOB_Low) {
+TEST_F(ConstEvalTest, Vec3_Index_OOB_Low) {
     auto* expr = IndexAccessor(Call<vec3<i32>>(1_i, 2_i, 3_i), Expr(Source{{12, 34}}, -3_i));
     WrapInFunction(expr);
 
@@ -66,8 +66,8 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
     return o << "input: " << c.input << ", swizzle: " << c.swizzle << ", expected: " << c.expected;
 }
 
-using ResolverConstEvalSwizzleTest = ResolverTestWithParam<Case>;
-TEST_P(ResolverConstEvalSwizzleTest, Test) {
+using ConstEvalSwizzleTest = ConstEvalTestWithParam<Case>;
+TEST_P(ConstEvalSwizzleTest, Test) {
     Enable(core::Extension::kF16);
     auto& param = GetParam();
     auto* expr = MemberAccessor(param.input.Expr(*this), param.swizzle);
@@ -112,7 +112,7 @@ std::vector<Case> SwizzleCases() {
     };
 }
 INSTANTIATE_TEST_SUITE_P(Swizzle,
-                         ResolverConstEvalSwizzleTest,
+                         ConstEvalSwizzleTest,
                          testing::ValuesIn(Concat(SwizzleCases<AInt>(),    //
                                                   SwizzleCases<AFloat>(),  //
                                                   SwizzleCases<f32>(),     //
@@ -123,7 +123,7 @@ INSTANTIATE_TEST_SUITE_P(Swizzle,
                                                   )));
 }  // namespace Swizzle
 
-TEST_F(ResolverConstEvalTest, Vec3_Swizzle_Scalar) {
+TEST_F(ConstEvalTest, Vec3_Swizzle_Scalar) {
     auto* expr = MemberAccessor(Call<vec3<i32>>(1_i, 2_i, 3_i), "y");
     WrapInFunction(expr);
 
@@ -138,7 +138,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Swizzle_Scalar) {
     EXPECT_EQ(sem->ConstantValue()->ValueAs<i32>(), 2_i);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Swizzle_Vector) {
+TEST_F(ConstEvalTest, Vec3_Swizzle_Vector) {
     auto* expr = MemberAccessor(Call<vec3<i32>>(1_i, 2_i, 3_i), "zx");
     WrapInFunction(expr);
 
@@ -160,7 +160,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Swizzle_Vector) {
     EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<f32>(), 1._a);
 }
 
-TEST_F(ResolverConstEvalTest, Vec3_Swizzle_Chain) {
+TEST_F(ConstEvalTest, Vec3_Swizzle_Chain) {
     auto* expr =  // (1, 2, 3) -> (2, 3, 1) -> (3, 2) -> 2
         MemberAccessor(MemberAccessor(MemberAccessor(Call<vec3<i32>>(1_i, 2_i, 3_i), "gbr"), "yx"),
                        "y");
@@ -177,7 +177,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Swizzle_Chain) {
     EXPECT_EQ(sem->ConstantValue()->ValueAs<i32>(), 2_i);
 }
 
-TEST_F(ResolverConstEvalTest, Mat3x2_Index) {
+TEST_F(ConstEvalTest, Mat3x2_Index) {
     auto* expr =
         IndexAccessor(Call<mat3x2<f32>>(Call<vec2<f32>>(1._a, 2._a), Call<vec2<f32>>(3._a, 4._a),
                                         Call<vec2<f32>>(5._a, 6._a)),
@@ -202,7 +202,7 @@ TEST_F(ResolverConstEvalTest, Mat3x2_Index) {
     EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<f32>(), 6._a);
 }
 
-TEST_F(ResolverConstEvalTest, Mat3x2_Index_OOB_High) {
+TEST_F(ConstEvalTest, Mat3x2_Index_OOB_High) {
     auto* expr =
         IndexAccessor(Call<mat3x2<f32>>(Call<vec2<f32>>(1._a, 2._a), Call<vec2<f32>>(3._a, 4._a),
                                         Call<vec2<f32>>(5._a, 6._a)),
@@ -213,7 +213,7 @@ TEST_F(ResolverConstEvalTest, Mat3x2_Index_OOB_High) {
     EXPECT_EQ(r()->error(), "12:34 error: index 3 out of bounds [0..2]");
 }
 
-TEST_F(ResolverConstEvalTest, Mat3x2_Index_OOB_Low) {
+TEST_F(ConstEvalTest, Mat3x2_Index_OOB_Low) {
     auto* expr =
         IndexAccessor(Call<mat3x2<f32>>(Call<vec2<f32>>(1._a, 2._a), Call<vec2<f32>>(3._a, 4._a),
                                         Call<vec2<f32>>(5._a, 6._a)),
@@ -224,7 +224,7 @@ TEST_F(ResolverConstEvalTest, Mat3x2_Index_OOB_Low) {
     EXPECT_EQ(r()->error(), "12:34 error: index -3 out of bounds [0..2]");
 }
 
-TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index) {
+TEST_F(ConstEvalTest, Array_vec3_f32_Index) {
     auto* expr = IndexAccessor(Call<array<vec3<f32>, 2>>(           //
                                    Call<vec3<f32>>(1_f, 2_f, 3_f),  //
                                    Call<vec3<f32>>(4_f, 5_f, 6_f)),
@@ -254,7 +254,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index) {
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<f32>(), 6_f);
 }
 
-TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index_OOB_High) {
+TEST_F(ConstEvalTest, Array_vec3_f32_Index_OOB_High) {
     auto* expr = IndexAccessor(Call<array<vec3<f32>, 2>>(           //
                                    Call<vec3<f32>>(1_f, 2_f, 3_f),  //
                                    Call<vec3<f32>>(4_f, 5_f, 6_f)),
@@ -265,7 +265,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index_OOB_High) {
     EXPECT_EQ(r()->error(), "12:34 error: index 2 out of bounds [0..1]");
 }
 
-TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index_OOB_Low) {
+TEST_F(ConstEvalTest, Array_vec3_f32_Index_OOB_Low) {
     auto* expr = IndexAccessor(Call<array<vec3<f32>, 2>>(           //
                                    Call<vec3<f32>>(1_f, 2_f, 3_f),  //
                                    Call<vec3<f32>>(4_f, 5_f, 6_f)),
@@ -276,7 +276,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index_OOB_Low) {
     EXPECT_EQ(r()->error(), "12:34 error: index -2 out of bounds [0..1]");
 }
 
-TEST_F(ResolverConstEvalTest, RuntimeArray_vec3_f32_Index_OOB_Low) {
+TEST_F(ConstEvalTest, RuntimeArray_vec3_f32_Index_OOB_Low) {
     auto* sb = GlobalVar("sb", ty.array<vec3<f32>>(), Group(0_a), Binding(0_a),
                          core::AddressSpace::kStorage);
     auto* expr = IndexAccessor(sb, Expr(Source{{12, 34}}, -2_i));
@@ -286,7 +286,7 @@ TEST_F(ResolverConstEvalTest, RuntimeArray_vec3_f32_Index_OOB_Low) {
     EXPECT_EQ(r()->error(), "12:34 error: index -2 out of bounds");
 }
 
-TEST_F(ResolverConstEvalTest, ChainedIndex) {
+TEST_F(ConstEvalTest, ChainedIndex) {
     auto* arr_expr = Call<array<mat2x3<f32>, 2>>(           //
         Call<mat2x3<f32>>(Call<vec3<f32>>(1_f, 2_f, 3_f),   //
                           Call<vec3<f32>>(4_f, 5_f, 6_f)),  //
@@ -370,4 +370,4 @@ TEST_F(ResolverConstEvalTest, ChainedIndex) {
     }
 }
 }  // namespace
-}  // namespace tint::resolver
+}  // namespace tint::constant::test

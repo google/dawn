@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_RESOLVER_CONST_EVAL_TEST_H_
-#define SRC_TINT_LANG_WGSL_RESOLVER_CONST_EVAL_TEST_H_
+#ifndef SRC_TINT_LANG_CORE_CONSTANT_EVAL_TEST_H_
+#define SRC_TINT_LANG_CORE_CONSTANT_EVAL_TEST_H_
 
 #include <limits>
 #include <optional>
@@ -27,7 +27,17 @@
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::resolver {
+namespace tint::constant::test {
+
+// TODO(bclayton): Don't depend on resolver
+namespace builder = tint::resolver::builder;
+
+// TODO(bclayton): Don't depend on resolver
+using ConstEvalTest = resolver::ResolverTest;
+
+// TODO(bclayton): Don't depend on resolver
+template <typename T>
+using ConstEvalTestWithParam = resolver::ResolverTestWithParam<T>;
 
 template <typename T>
 inline const auto kPiOver2 = T(UnwrapNumber<T>(1.57079632679489661923));
@@ -333,8 +343,6 @@ struct BitValues {
     }
 };
 
-using ResolverConstEvalTest = ResolverTest;
+}  // namespace tint::constant::test
 
-}  // namespace tint::resolver
-
-#endif  // SRC_TINT_LANG_WGSL_RESOLVER_CONST_EVAL_TEST_H_
+#endif  // SRC_TINT_LANG_CORE_CONSTANT_EVAL_TEST_H_

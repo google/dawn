@@ -490,7 +490,7 @@ Matchers::~Matchers() = default;
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                           define "ConstEvalFn"                           -}}
 {{- /* ------------------------------------------------------------------ */ -}}
-  &resolver::ConstEval::
+  &constant::Eval::
 {{-   if eq .Kind "operator" -}}Op{{end -}}
   {{template "ExpandName" .ConstEvalFunction}}
 {{- end -}}

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/resolver/const_eval_test.h"
+#include "src/tint/lang/core/constant/eval_test.h"
 
 #include "src/tint/lang/wgsl/reader/reader.h"
 #include "src/tint/utils/result/result.h"
@@ -21,7 +21,7 @@ using namespace tint::core::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;     // NOLINT
 using ::testing::HasSubstr;
 
-namespace tint::resolver {
+namespace tint::constant::test {
 namespace {
 
 struct Case {
@@ -82,8 +82,8 @@ std::ostream& operator<<(std::ostream& o, const ErrorCase& c) {
     return o;
 }
 
-using ResolverConstEvalBinaryOpTest = ResolverTestWithParam<std::tuple<core::BinaryOp, Case>>;
-TEST_P(ResolverConstEvalBinaryOpTest, Test) {
+using ConstEvalBinaryOpTest = ConstEvalTestWithParam<std::tuple<core::BinaryOp, Case>>;
+TEST_P(ConstEvalBinaryOpTest, Test) {
     Enable(core::Extension::kF16);
     auto op = std::get<0>(GetParam());
     auto& c = std::get<1>(GetParam());
@@ -112,7 +112,7 @@ TEST_P(ResolverConstEvalBinaryOpTest, Test) {
 }
 
 INSTANTIATE_TEST_SUITE_P(MixedAbstractArgs,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(testing::Values(core::BinaryOp::kAdd),
                                           testing::ValuesIn(std::vector{
                                               // Mixed abstract type args
@@ -167,7 +167,7 @@ std::vector<Case> OpAddFloatCases() {
     };
 }
 INSTANTIATE_TEST_SUITE_P(Add,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(testing::Values(core::BinaryOp::kAdd),
                                           testing::ValuesIn(Concat(  //
                                               OpAddIntCases<AInt>(),
@@ -223,7 +223,7 @@ std::vector<Case> OpSubFloatCases() {
     };
 }
 INSTANTIATE_TEST_SUITE_P(Sub,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(testing::Values(core::BinaryOp::kSubtract),
                                           testing::ValuesIn(Concat(  //
                                               OpSubIntCases<AInt>(),
@@ -399,7 +399,7 @@ std::vector<Case> OpMulMatCases() {
 }
 
 INSTANTIATE_TEST_SUITE_P(Mul,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kMultiply),
                              testing::ValuesIn(Concat(  //
@@ -476,7 +476,7 @@ std::vector<Case> OpDivFloatCases() {
     return r;
 }
 INSTANTIATE_TEST_SUITE_P(Div,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kDivide),
                              testing::ValuesIn(Concat(  //
@@ -631,7 +631,7 @@ std::vector<Case> OpModCases() {
     return r;
 }
 INSTANTIATE_TEST_SUITE_P(Mod,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kModulo),
                              testing::ValuesIn(Concat(  //
@@ -655,7 +655,7 @@ std::vector<Case> OpEqualCases() {
     };
 }
 INSTANTIATE_TEST_SUITE_P(Equal,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kEqual),
                              testing::ValuesIn(Concat(  //
@@ -667,7 +667,7 @@ INSTANTIATE_TEST_SUITE_P(Equal,
                                  OpEqualCases<f16, true>(),
                                  OpEqualCases<bool, true>()))));
 INSTANTIATE_TEST_SUITE_P(NotEqual,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kNotEqual),
                              testing::ValuesIn(Concat(  //
@@ -693,7 +693,7 @@ std::vector<Case> OpLessThanCases() {
     };
 }
 INSTANTIATE_TEST_SUITE_P(LessThan,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kLessThan),
                              testing::ValuesIn(Concat(  //
@@ -704,7 +704,7 @@ INSTANTIATE_TEST_SUITE_P(LessThan,
                                  OpLessThanCases<f32, true>(),
                                  OpLessThanCases<f16, true>()))));
 INSTANTIATE_TEST_SUITE_P(GreaterThanEqual,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kGreaterThanEqual),
                              testing::ValuesIn(Concat(  //
@@ -729,7 +729,7 @@ std::vector<Case> OpGreaterThanCases() {
     };
 }
 INSTANTIATE_TEST_SUITE_P(GreaterThan,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kGreaterThan),
                              testing::ValuesIn(Concat(  //
@@ -740,7 +740,7 @@ INSTANTIATE_TEST_SUITE_P(GreaterThan,
                                  OpGreaterThanCases<f32, true>(),
                                  OpGreaterThanCases<f16, true>()))));
 INSTANTIATE_TEST_SUITE_P(LessThanEqual,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kLessThanEqual),
                              testing::ValuesIn(Concat(  //
@@ -757,9 +757,9 @@ struct AbstractFloatVectorCompareCase {
     bool expected_0;
     bool expected_1;
 };
-using ResolverConstEvalBinaryOpAbstractFloatVectorCompareTest =
-    ResolverTestWithParam<AbstractFloatVectorCompareCase>;
-TEST_P(ResolverConstEvalBinaryOpAbstractFloatVectorCompareTest, Test) {
+using ConstEvalBinaryOpAbstractFloatVectorCompareTest =
+    ConstEvalTestWithParam<AbstractFloatVectorCompareCase>;
+TEST_P(ConstEvalBinaryOpAbstractFloatVectorCompareTest, Test) {
     auto params = GetParam();
 
     auto* lhs_expr = Call(ty.vec2<AFloat>(), AFloat::Highest(), AFloat::Lowest());
@@ -776,7 +776,7 @@ TEST_P(ResolverConstEvalBinaryOpAbstractFloatVectorCompareTest, Test) {
 }
 INSTANTIATE_TEST_SUITE_P(
     HighestLowest,
-    ResolverConstEvalBinaryOpAbstractFloatVectorCompareTest,
+    ConstEvalBinaryOpAbstractFloatVectorCompareTest,
     testing::Values(AbstractFloatVectorCompareCase{core::BinaryOp::kEqual, false, false},
                     AbstractFloatVectorCompareCase{core::BinaryOp::kNotEqual, true, true},
                     AbstractFloatVectorCompareCase{core::BinaryOp::kLessThan, false, true},
@@ -794,7 +794,7 @@ static std::vector<Case> OpLogicalAndCases() {
     };
 }
 INSTANTIATE_TEST_SUITE_P(LogicalAnd,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kLogicalAnd),
                              testing::ValuesIn(OpLogicalAndCases())));
@@ -808,7 +808,7 @@ static std::vector<Case> OpLogicalOrCases() {
     };
 }
 INSTANTIATE_TEST_SUITE_P(LogicalOr,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kLogicalOr),
                              testing::ValuesIn(OpLogicalOrCases())));
@@ -856,7 +856,7 @@ std::vector<Case> OpAndIntCases() {
     };
 }
 INSTANTIATE_TEST_SUITE_P(And,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kAnd),
                              testing::ValuesIn(            //
@@ -908,7 +908,7 @@ std::vector<Case> OpOrIntCases() {
     };
 }
 INSTANTIATE_TEST_SUITE_P(Or,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kOr),
                              testing::ValuesIn(Concat(OpOrBoolCases(),
@@ -916,7 +916,7 @@ INSTANTIATE_TEST_SUITE_P(Or,
                                                       OpOrIntCases<i32>(),
                                                       OpOrIntCases<u32>()))));
 
-TEST_F(ResolverConstEvalTest, NotAndOrOfVecs) {
+TEST_F(ConstEvalTest, NotAndOrOfVecs) {
     auto v1 = Vec(true, true).Expr(*this);
     auto v2 = Vec(true, false).Expr(*this);
     auto v3 = Vec(false, true).Expr(*this);
@@ -972,7 +972,7 @@ std::vector<Case> XorCases() {
     };
 }
 INSTANTIATE_TEST_SUITE_P(Xor,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kXor),
                              testing::ValuesIn(Concat(XorCases<AInt>(),  //
@@ -1011,7 +1011,7 @@ std::vector<Case> ShiftLeftCases() {
 
     // Abstract 0 can be shifted by any u32 value (0 to 2^32), whereas concrete 0 (or any number)
     // can only by shifted by a value less than the number of bits of the lhs.
-    // (see ResolverConstEvalShiftLeftConcreteGeqBitWidthError for negative tests)
+    // (see ConstEvalShiftLeftConcreteGeqBitWidthError for negative tests)
     ConcatIntoIf<IsAbstract<T>>(  //
         r, std::vector<Case>{
                C(T{0}, ST{64}, T{0}),                              //
@@ -1087,28 +1087,28 @@ std::vector<Case> ShiftLeftCases() {
     return r;
 }
 INSTANTIATE_TEST_SUITE_P(ShiftLeft,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kShiftLeft),
                              testing::ValuesIn(Concat(ShiftLeftCases<AInt>(),  //
                                                       ShiftLeftCases<i32>(),   //
                                                       ShiftLeftCases<u32>()))));
 
-TEST_F(ResolverConstEvalTest, BinaryAbstractAddOverflow_AInt) {
+TEST_F(ConstEvalTest, BinaryAbstractAddOverflow_AInt) {
     GlobalConst("c", Add(Source{{1, 1}}, Expr(AInt::Highest()), 1_a));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "1:1 error: '9223372036854775807 + 1' cannot be represented as 'abstract-int'");
 }
 
-TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AInt) {
+TEST_F(ConstEvalTest, BinaryAbstractAddUnderflow_AInt) {
     GlobalConst("c", Add(Source{{1, 1}}, Expr(AInt::Lowest()), -1_a));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "1:1 error: '-9223372036854775808 + -1' cannot be represented as 'abstract-int'");
 }
 
-TEST_F(ResolverConstEvalTest, BinaryAbstractAddOverflow_AFloat) {
+TEST_F(ConstEvalTest, BinaryAbstractAddOverflow_AFloat) {
     GlobalConst("c", Add(Source{{1, 1}}, Expr(AFloat::Highest()), AFloat::Highest()));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1124,7 +1124,7 @@ TEST_F(ResolverConstEvalTest, BinaryAbstractAddOverflow_AFloat) {
               "represented as 'abstract-float'");
 }
 
-TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AFloat) {
+TEST_F(ConstEvalTest, BinaryAbstractAddUnderflow_AFloat) {
     GlobalConst("c", Add(Source{{1, 1}}, Expr(AFloat::Lowest()), AFloat::Lowest()));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1144,7 +1144,7 @@ TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AFloat) {
 // Mixed AInt and AFloat args to test implicit conversion to AFloat
 INSTANTIATE_TEST_SUITE_P(
     AbstractMixed,
-    ResolverConstEvalBinaryOpTest,
+    ConstEvalBinaryOpTest,
     testing::Combine(
         testing::Values(core::BinaryOp::kAdd),
         testing::Values(C(Val(1_a), Val(2.3_a), Val(3.3_a)),
@@ -1174,14 +1174,14 @@ INSTANTIATE_TEST_SUITE_P(
                         )));
 
 // AInt left shift negative value -> error
-TEST_F(ResolverConstEvalTest, BinaryAbstractShiftLeftByNegativeValue_Error) {
+TEST_F(ConstEvalTest, BinaryAbstractShiftLeftByNegativeValue_Error) {
     GlobalConst("c", Shl(Expr(1_a), Expr(Source{{1, 1}}, -1_a)));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "1:1 error: value -1 cannot be represented as 'u32'");
 }
 
 // AInt left shift by AInt or u32 always results in an AInt
-TEST_F(ResolverConstEvalTest, BinaryAbstractShiftLeftRemainsAbstract) {
+TEST_F(ConstEvalTest, BinaryAbstractShiftLeftRemainsAbstract) {
     auto* expr1 = Shl(Expr(1_a), Expr(1_u));
     GlobalConst("c1", expr1);
 
@@ -1201,8 +1201,8 @@ TEST_F(ResolverConstEvalTest, BinaryAbstractShiftLeftRemainsAbstract) {
 }
 
 // i32/u32 left shift by >= 32 -> error
-using ResolverConstEvalShiftLeftConcreteGeqBitWidthError = ResolverTestWithParam<ErrorCase>;
-TEST_P(ResolverConstEvalShiftLeftConcreteGeqBitWidthError, Test) {
+using ConstEvalShiftLeftConcreteGeqBitWidthError = ConstEvalTestWithParam<ErrorCase>;
+TEST_P(ConstEvalShiftLeftConcreteGeqBitWidthError, Test) {
     auto* lhs_expr = GetParam().lhs.Expr(*this);
     auto* rhs_expr = GetParam().rhs.Expr(*this);
     GlobalConst("c", Shl(Source{{1, 1}}, lhs_expr, rhs_expr));
@@ -1212,7 +1212,7 @@ TEST_P(ResolverConstEvalShiftLeftConcreteGeqBitWidthError, Test) {
         "1:1 error: shift left value must be less than the bit width of the lhs, which is 32");
 }
 INSTANTIATE_TEST_SUITE_P(Test,
-                         ResolverConstEvalShiftLeftConcreteGeqBitWidthError,
+                         ConstEvalShiftLeftConcreteGeqBitWidthError,
                          testing::Values(                                       //
                              ErrorCase{Val(0_u), Val(32_u)},                    //
                              ErrorCase{Val(0_u), Val(33_u)},                    //
@@ -1247,8 +1247,8 @@ INSTANTIATE_TEST_SUITE_P(Test,
                              ));
 
 // AInt left shift results in sign change error
-using ResolverConstEvalShiftLeftSignChangeError = ResolverTestWithParam<ErrorCase>;
-TEST_P(ResolverConstEvalShiftLeftSignChangeError, Test) {
+using ConstEvalShiftLeftSignChangeError = ConstEvalTestWithParam<ErrorCase>;
+TEST_P(ConstEvalShiftLeftSignChangeError, Test) {
     auto* lhs_expr = GetParam().lhs.Expr(*this);
     auto* rhs_expr = GetParam().rhs.Expr(*this);
     GlobalConst("c", Shl(Source{{1, 1}}, lhs_expr, rhs_expr));
@@ -1275,7 +1275,7 @@ std::vector<ErrorCase> ShiftLeftSignChangeErrorCases() {
     };
 }
 INSTANTIATE_TEST_SUITE_P(Test,
-                         ResolverConstEvalShiftLeftSignChangeError,
+                         ConstEvalShiftLeftSignChangeError,
                          testing::ValuesIn(Concat(  //
                              ShiftLeftSignChangeErrorCases<AInt>(),
                              ShiftLeftSignChangeErrorCases<i32>())));
@@ -1412,7 +1412,7 @@ std::vector<Case> ShiftRightCases() {
     return r;
 }
 INSTANTIATE_TEST_SUITE_P(ShiftRight,
-                         ResolverConstEvalBinaryOpTest,
+                         ConstEvalBinaryOpTest,
                          testing::Combine(  //
                              testing::Values(core::BinaryOp::kShiftRight),
                              testing::ValuesIn(Concat(ShiftRightCases<AInt>(),  //
@@ -1483,7 +1483,7 @@ static void ValidateOr(const sem::Info& sem, const ast::BinaryExpression* binary
 // NOTE: Cannot demonstrate short-circuiting an invalid unary op as const eval of unary does not
 // fail.
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Unary) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Error_Unary) {
     // const one = 1;
     // const result = (one == 0) && (!0);
     GlobalConst("one", Expr(1_a));
@@ -1500,7 +1500,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Unary) {
 )");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Unary) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Error_Unary) {
     // const one = 1;
     // const result = (one == 1) || (!0);
     GlobalConst("one", Expr(1_a));
@@ -1521,7 +1521,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Unary) {
 // Short-Circuit Binary
 ////////////////////////////////////////////////
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Invalid_Binary) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Invalid_Binary) {
     // const one = 1;
     // const result = (one == 0) && ((2 / 0) == 0);
     GlobalConst("one", Expr(1_a));
@@ -1534,7 +1534,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Invalid_Binary) {
     ValidateAnd(Sem(), binary);
 }
 
-TEST_F(ResolverConstEvalTest, NonShortCircuit_And_Invalid_Binary) {
+TEST_F(ConstEvalTest, NonShortCircuit_And_Invalid_Binary) {
     // const one = 1;
     // const result = (one == 1) && ((2 / 0) == 0);
     GlobalConst("one", Expr(1_a));
@@ -1547,7 +1547,7 @@ TEST_F(ResolverConstEvalTest, NonShortCircuit_And_Invalid_Binary) {
     EXPECT_EQ(r()->error(), "12:34 error: '2 / 0' cannot be represented as 'abstract-int'");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Binary) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Error_Binary) {
     // const one = 1;
     // const result = (one == 0) && (2 / 0);
     GlobalConst("one", Expr(1_a));
@@ -1565,7 +1565,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Binary) {
 )");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Invalid_Binary) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Invalid_Binary) {
     // const one = 1;
     // const result = (one == 1) || ((2 / 0) == 0);
     GlobalConst("one", Expr(1_a));
@@ -1578,7 +1578,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Invalid_Binary) {
     ValidateOr(Sem(), binary);
 }
 
-TEST_F(ResolverConstEvalTest, NonShortCircuit_Or_Invalid_Binary) {
+TEST_F(ConstEvalTest, NonShortCircuit_Or_Invalid_Binary) {
     // const one = 1;
     // const result = (one == 0) || ((2 / 0) == 0);
     GlobalConst("one", Expr(1_a));
@@ -1591,7 +1591,7 @@ TEST_F(ResolverConstEvalTest, NonShortCircuit_Or_Invalid_Binary) {
     EXPECT_EQ(r()->error(), "12:34 error: '2 / 0' cannot be represented as 'abstract-int'");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Binary) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Error_Binary) {
     // const one = 1;
     // const result = (one == 1) || (2 / 0);
     GlobalConst("one", Expr(1_a));
@@ -1613,7 +1613,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Binary) {
 // Short-Circuit Materialize
 ////////////////////////////////////////////////
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Invalid_Materialize) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Invalid_Materialize) {
     // const one = 1;
     // const result = (one == 0) && (1.7976931348623157e+308 == 0.0f);
     GlobalConst("one", Expr(1_a));
@@ -1626,7 +1626,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Invalid_Materialize) {
     ValidateAnd(Sem(), binary);
 }
 
-TEST_F(ResolverConstEvalTest, NonShortCircuit_And_Invalid_Materialize) {
+TEST_F(ConstEvalTest, NonShortCircuit_And_Invalid_Materialize) {
     // const one = 1;
     // const result = (one == 1) && (1.7976931348623157e+308 == 0.0f);
     GlobalConst("one", Expr(1_a));
@@ -1645,7 +1645,7 @@ TEST_F(ResolverConstEvalTest, NonShortCircuit_And_Invalid_Materialize) {
         "738177180919299881250404026184124858368.0 cannot be represented as 'f32'");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Materialize) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Error_Materialize) {
     // const one = 1;
     // const result = (one == 0) && (1.7976931348623157e+308 == 0i);
     GlobalConst("one", Expr(1_a));
@@ -1664,7 +1664,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Materialize) {
 )");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Invalid_Materialize) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Invalid_Materialize) {
     // const one = 1;
     // const result = (one == 1) || (1.7976931348623157e+308 == 0.0f);
     GlobalConst("one", Expr(1_a));
@@ -1677,7 +1677,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Invalid_Materialize) {
     ValidateOr(Sem(), binary);
 }
 
-TEST_F(ResolverConstEvalTest, NonShortCircuit_Or_Invalid_Materialize) {
+TEST_F(ConstEvalTest, NonShortCircuit_Or_Invalid_Materialize) {
     // const one = 1;
     // const result = (one == 0) || (1.7976931348623157e+308 == 0.0f);
     GlobalConst("one", Expr(1_a));
@@ -1696,7 +1696,7 @@ TEST_F(ResolverConstEvalTest, NonShortCircuit_Or_Invalid_Materialize) {
         "738177180919299881250404026184124858368.0 cannot be represented as 'f32'");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Materialize) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Error_Materialize) {
     // const one = 1;
     // const result = (one == 1) || (1.7976931348623157e+308 == 0i);
     GlobalConst("one", Expr(1_a));
@@ -1719,7 +1719,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Materialize) {
 // Short-Circuit Index
 ////////////////////////////////////////////////
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Invalid_Index) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Invalid_Index) {
     // const one = 1;
     // const a = array(1i, 2i, 3i);
     // const i = 4;
@@ -1736,7 +1736,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Invalid_Index) {
     ValidateAnd(Sem(), binary);
 }
 
-TEST_F(ResolverConstEvalTest, NonShortCircuit_And_Invalid_Index) {
+TEST_F(ConstEvalTest, NonShortCircuit_And_Invalid_Index) {
     // const one = 1;
     // const a = array(1i, 2i, 3i);
     // const i = 3;
@@ -1753,7 +1753,7 @@ TEST_F(ResolverConstEvalTest, NonShortCircuit_And_Invalid_Index) {
     EXPECT_EQ(r()->error(), "12:34 error: index 3 out of bounds [0..2]");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Index) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Error_Index) {
     // const one = 1;
     // const a = array(1i, 2i, 3i);
     // const i = 3;
@@ -1776,7 +1776,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Index) {
 )");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Invalid_Index) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Invalid_Index) {
     // const one = 1;
     // const a = array(1i, 2i, 3i);
     // const i = 4;
@@ -1793,7 +1793,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Invalid_Index) {
     ValidateOr(Sem(), binary);
 }
 
-TEST_F(ResolverConstEvalTest, NonShortCircuit_Or_Invalid_Index) {
+TEST_F(ConstEvalTest, NonShortCircuit_Or_Invalid_Index) {
     // const one = 1;
     // const a = array(1i, 2i, 3i);
     // const i = 3;
@@ -1810,7 +1810,7 @@ TEST_F(ResolverConstEvalTest, NonShortCircuit_Or_Invalid_Index) {
     EXPECT_EQ(r()->error(), "12:34 error: index 3 out of bounds [0..2]");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Index) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Error_Index) {
     // const one = 1;
     // const a = array(1i, 2i, 3i);
     // const i = 3;
@@ -1837,7 +1837,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Index) {
 // Short-Circuit Bitcast
 ////////////////////////////////////////////////
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Invalid_Bitcast) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Invalid_Bitcast) {
     // const one = 1;
     // const a = 0x7F800000;
     // const result = (one == 0) && (bitcast<f32>(a) == 0.0);
@@ -1852,7 +1852,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Invalid_Bitcast) {
     ValidateAnd(Sem(), binary);
 }
 
-TEST_F(ResolverConstEvalTest, NonShortCircuit_And_Invalid_Bitcast) {
+TEST_F(ConstEvalTest, NonShortCircuit_And_Invalid_Bitcast) {
     // const one = 1;
     // const a = 0x7F800000;
     // const result = (one == 1) && (bitcast<f32>(a) == 0.0);
@@ -1867,7 +1867,7 @@ TEST_F(ResolverConstEvalTest, NonShortCircuit_And_Invalid_Bitcast) {
     EXPECT_EQ(r()->error(), "12:34 error: value inf cannot be represented as 'f32'");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Bitcast) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Error_Bitcast) {
     // const one = 1;
     // const a = 0x7F800000;
     // const result = (one == 0) && (bitcast<f32>(a) == 0i);
@@ -1887,7 +1887,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Bitcast) {
 )");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Invalid_Bitcast) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Invalid_Bitcast) {
     // const one = 1;
     // const a = 0x7F800000;
     // const result = (one == 1) || (bitcast<f32>(a) == 0.0);
@@ -1902,7 +1902,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Invalid_Bitcast) {
     ValidateOr(Sem(), binary);
 }
 
-TEST_F(ResolverConstEvalTest, NonShortCircuit_Or_Invalid_Bitcast) {
+TEST_F(ConstEvalTest, NonShortCircuit_Or_Invalid_Bitcast) {
     // const one = 1;
     // const a = 0x7F800000;
     // const result = (one == 0) || (bitcast<f32>(a) == 0.0);
@@ -1917,7 +1917,7 @@ TEST_F(ResolverConstEvalTest, NonShortCircuit_Or_Invalid_Bitcast) {
     EXPECT_EQ(r()->error(), "12:34 error: value inf cannot be represented as 'f32'");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Bitcast) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Error_Bitcast) {
     // const one = 1;
     // const a = 0x7F800000;
     // const result = (one == 1) || (bitcast<f32>(a) == 0i);
@@ -1944,7 +1944,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Bitcast) {
 // NOTE: Cannot demonstrate short-circuiting an invalid init/convert as const eval of init/convert
 // always succeeds.
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Init) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Error_Init) {
     // const one = 1;
     // const result = (one == 0) && (vec2<f32>(1.0, true).x == 0.0);
     GlobalConst("one", Expr(1_a));
@@ -1973,7 +1973,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Init) {
 )");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Init) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Error_Init) {
     // const one = 1;
     // const result = (one == 1) || (vec2<f32>(1.0, true).x == 0.0);
     GlobalConst("one", Expr(1_a));
@@ -2009,7 +2009,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Init) {
 // NOTE: Cannot demonstrate short-circuiting an invalid array/struct init as const eval of
 // array/struct init always succeeds.
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_StructInit) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Error_StructInit) {
     // struct S {
     //     a : i32,
     //     b : f32,
@@ -2028,7 +2028,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_StructInit) {
               "expected 'f32', found 'bool'");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_StructInit) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Error_StructInit) {
     // struct S {
     //     a : i32,
     //     b : f32,
@@ -2047,7 +2047,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_StructInit) {
               "expected 'f32', found 'bool'");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_ArrayInit) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Error_ArrayInit) {
     // const one = 1;
     // const result = (one == 0) && array(4) == 0;
     GlobalConst("one", Expr(1_a));
@@ -2065,7 +2065,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_ArrayInit) {
 )");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_ArrayInit) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Error_ArrayInit) {
     // const one = 1;
     // const result = (one == 1) || array(4) == 0;
     GlobalConst("one", Expr(1_a));
@@ -2087,7 +2087,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_ArrayInit) {
 // Short-Circuit Builtin Call
 ////////////////////////////////////////////////
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Invalid_BuiltinCall) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Invalid_BuiltinCall) {
     // const one = 1;
     // return (one == 0) && (extractBits(1, 0, 99) == 0);
     GlobalConst("one", Expr(1_a));
@@ -2100,7 +2100,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Invalid_BuiltinCall) {
     ValidateAnd(Sem(), binary);
 }
 
-TEST_F(ResolverConstEvalTest, NonShortCircuit_And_Invalid_BuiltinCall) {
+TEST_F(ConstEvalTest, NonShortCircuit_And_Invalid_BuiltinCall) {
     // const one = 1;
     // return (one == 1) && (extractBits(1, 0, 99) == 0);
     GlobalConst("one", Expr(1_a));
@@ -2114,7 +2114,7 @@ TEST_F(ResolverConstEvalTest, NonShortCircuit_And_Invalid_BuiltinCall) {
               "12:34 error: 'offset + 'count' must be less than or equal to the bit width of 'e'");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_BuiltinCall) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Error_BuiltinCall) {
     // const one = 1;
     // return (one == 0) && (extractBits(1, 0, 99) == 0.0);
     GlobalConst("one", Expr(1_a));
@@ -2133,7 +2133,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_BuiltinCall) {
 )");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Invalid_BuiltinCall) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Invalid_BuiltinCall) {
     // const one = 1;
     // return (one == 1) || (extractBits(1, 0, 99) == 0);
     GlobalConst("one", Expr(1_a));
@@ -2146,7 +2146,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Invalid_BuiltinCall) {
     ValidateOr(Sem(), binary);
 }
 
-TEST_F(ResolverConstEvalTest, NonShortCircuit_Or_Invalid_BuiltinCall) {
+TEST_F(ConstEvalTest, NonShortCircuit_Or_Invalid_BuiltinCall) {
     // const one = 1;
     // return (one == 0) || (extractBits(1, 0, 99) == 0);
     GlobalConst("one", Expr(1_a));
@@ -2160,7 +2160,7 @@ TEST_F(ResolverConstEvalTest, NonShortCircuit_Or_Invalid_BuiltinCall) {
               "12:34 error: 'offset + 'count' must be less than or equal to the bit width of 'e'");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_BuiltinCall) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Error_BuiltinCall) {
     // const one = 1;
     // return (one == 1) || (extractBits(1, 0, 99) == 0.0);
     GlobalConst("one", Expr(1_a));
@@ -2187,7 +2187,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_BuiltinCall) {
 // fail.
 
 #if TINT_BUILD_WGSL_READER
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Literal) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Error_Literal) {
     // NOTE: This fails parsing rather than resolving, which is why we can't use the ProgramBuilder
     // for this test.
     auto src = R"(
@@ -2206,7 +2206,7 @@ const result = (one == 0) && (1111111111111111111111111111111i == 0);
 )");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Literal) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Error_Literal) {
     // NOTE: This fails parsing rather than resolving, which is why we can't use the ProgramBuilder
     // for this test.
     auto src = R"(
@@ -2233,7 +2233,7 @@ const result = (one == 1) || (1111111111111111111111111111111i == 0);
 // NOTE: Cannot demonstrate short-circuiting an invalid member access as const eval of member access
 // always succeeds.
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_MemberAccess) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Error_MemberAccess) {
     // struct S {
     //     a : i32,
     //     b : f32,
@@ -2252,7 +2252,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_MemberAccess) {
     EXPECT_EQ(r()->error(), "12:34 error: struct member c not found");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_MemberAccess) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Error_MemberAccess) {
     // struct S {
     //     a : i32,
     //     b : f32,
@@ -2275,7 +2275,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_MemberAccess) {
 // Short-Circuit with RHS Variable Access
 ////////////////////////////////////////////////
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_RHSConstDecl) {
+TEST_F(ConstEvalTest, ShortCircuit_And_RHSConstDecl) {
     // const FALSE = false;
     // const result = FALSE && FALSE;
     GlobalConst("FALSE", Expr(false));
@@ -2286,7 +2286,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_RHSConstDecl) {
     ValidateAnd(Sem(), binary);
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_RHSConstDecl) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_RHSConstDecl) {
     // const TRUE = true;
     // const result = TRUE || TRUE;
     GlobalConst("TRUE", Expr(true));
@@ -2297,7 +2297,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_RHSConstDecl) {
     ValidateOr(Sem(), binary);
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_RHSLetDecl) {
+TEST_F(ConstEvalTest, ShortCircuit_And_RHSLetDecl) {
     // fn f() {
     //   let b = false;
     //   let result = false && b;
@@ -2309,7 +2309,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_RHSLetDecl) {
     ValidateAnd(Sem(), binary);
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_RHSLetDecl) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_RHSLetDecl) {
     // fn f() {
     //   let b = false;
     //   let result = true || b;
@@ -2321,7 +2321,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_RHSLetDecl) {
     ValidateOr(Sem(), binary);
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_RHSVarDecl) {
+TEST_F(ConstEvalTest, ShortCircuit_And_RHSVarDecl) {
     // fn f() {
     //   var b = false;
     //   let result = false && b;
@@ -2335,7 +2335,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_RHSVarDecl) {
     EXPECT_EQ(Sem().GetVal(binary->rhs)->Stage(), sem::EvaluationStage::kRuntime);
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_RHSVarDecl) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_RHSVarDecl) {
     // fn f() {
     //   var b = false;
     //   let result = true || b;
@@ -2356,7 +2356,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_RHSVarDecl) {
 // NOTE: Cannot demonstrate short-circuiting an invalid swizzle as const eval of swizzle always
 // succeeds.
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Swizzle) {
+TEST_F(ConstEvalTest, ShortCircuit_And_Error_Swizzle) {
     // const one = 1;
     // const result = (one == 0) && (vec2(1, 2).z == 0);
     GlobalConst("one", Expr(1_a));
@@ -2369,7 +2369,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_Error_Swizzle) {
     EXPECT_EQ(r()->error(), "12:34 error: invalid vector swizzle member");
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Swizzle) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_Error_Swizzle) {
     // const one = 1;
     // const result = (one == 1) || (vec2(1, 2).z == 0);
     GlobalConst("one", Expr(1_a));
@@ -2386,7 +2386,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_Error_Swizzle) {
 // Short-Circuit Mixed Constant and Runtime
 ////////////////////////////////////////////////
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_And_MixedConstantAndRuntime) {
+TEST_F(ConstEvalTest, ShortCircuit_And_MixedConstantAndRuntime) {
     // var j : i32;
     // let result = false && j < (0 - 8);
     auto* j = Decl(Var("j", ty.i32()));
@@ -2397,7 +2397,7 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_And_MixedConstantAndRuntime) {
     ValidateAnd(Sem(), binary);
 }
 
-TEST_F(ResolverConstEvalTest, ShortCircuit_Or_MixedConstantAndRuntime) {
+TEST_F(ConstEvalTest, ShortCircuit_Or_MixedConstantAndRuntime) {
     // var j : i32;
     // let result = true || j < (0 - 8);
     auto* j = Decl(Var("j", ty.i32()));
@@ -2413,8 +2413,8 @@ TEST_F(ResolverConstEvalTest, ShortCircuit_Or_MixedConstantAndRuntime) {
 ////////////////////////////////////////////////
 
 #if TINT_BUILD_WGSL_READER
-using ResolverConstEvalTestShortCircuit = ResolverTestWithParam<std::tuple<const char*, bool>>;
-TEST_P(ResolverConstEvalTestShortCircuit, Test) {
+using ConstEvalTestShortCircuit = ConstEvalTestWithParam<std::tuple<const char*, bool>>;
+TEST_P(ConstEvalTestShortCircuit, Test) {
     const char* expr = std::get<0>(GetParam());
     bool should_pass = std::get<1>(GetParam());
 
@@ -2434,7 +2434,7 @@ const result = )");
     }
 }
 INSTANTIATE_TEST_SUITE_P(Nested,
-                         ResolverConstEvalTestShortCircuit,
+                         ConstEvalTestShortCircuit,
                          testing::ValuesIn(std::vector<std::tuple<const char*, bool>>{
                              // AND nested rhs
                              {"(one == 0) && ((one == 0) && ((2/0)==0))", true},
@@ -2482,4 +2482,4 @@ INSTANTIATE_TEST_SUITE_P(Nested,
 }  // namespace LogicalShortCircuit
 
 }  // namespace
-}  // namespace tint::resolver
+}  // namespace tint::constant::test

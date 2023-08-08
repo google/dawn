@@ -18,9 +18,9 @@
 #include <memory>
 #include <string>
 
+#include "src/tint/lang/core/constant/eval.h"
 #include "src/tint/lang/core/unary_op.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
-#include "src/tint/lang/wgsl/resolver/const_eval.h"
 #include "src/tint/lang/wgsl/resolver/ctor_conv_intrinsic.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/utils/containers/vector.h"
@@ -47,7 +47,7 @@ class Table {
         /// The semantic info for the builtin
         const sem::Builtin* sem = nullptr;
         /// The constant evaluation function
-        resolver::ConstEval::Function const_eval_fn = nullptr;
+        constant::Eval::Function const_eval_fn = nullptr;
     };
 
     /// UnaryOperator describes a resolved unary operator
@@ -57,7 +57,7 @@ class Table {
         /// The type of the parameter of the unary operator
         const type::Type* parameter = nullptr;
         /// The constant evaluation function
-        resolver::ConstEval::Function const_eval_fn = nullptr;
+        constant::Eval::Function const_eval_fn = nullptr;
     };
 
     /// BinaryOperator describes a resolved binary operator
@@ -69,7 +69,7 @@ class Table {
         /// The type of RHS parameter of the binary operator
         const type::Type* rhs = nullptr;
         /// The constant evaluation function
-        resolver::ConstEval::Function const_eval_fn = nullptr;
+        constant::Eval::Function const_eval_fn = nullptr;
     };
 
     /// CtorOrConv describes a resolved value constructor or conversion
@@ -77,7 +77,7 @@ class Table {
         /// The result type of the value constructor or conversion
         const sem::CallTarget* target = nullptr;
         /// The constant evaluation function
-        resolver::ConstEval::Function const_eval_fn = nullptr;
+        constant::Eval::Function const_eval_fn = nullptr;
     };
 
     /// Lookup looks for the builtin overload with the given signature, raising an error diagnostic

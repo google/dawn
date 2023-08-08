@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/resolver/const_eval_test.h"
+#include "src/tint/lang/core/constant/eval_test.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::resolver {
+namespace tint::constant::test {
 namespace {
 
 struct Case {
@@ -39,9 +39,9 @@ Case C(T input, U expected) {
     return Case{Val(input), Val(expected)};
 }
 
-using ResolverConstEvalUnaryOpTest = ResolverTestWithParam<std::tuple<core::UnaryOp, Case>>;
+using ConstEvalUnaryOpTest = ConstEvalTestWithParam<std::tuple<core::UnaryOp, Case>>;
 
-TEST_P(ResolverConstEvalUnaryOpTest, Test) {
+TEST_P(ConstEvalUnaryOpTest, Test) {
     Enable(core::Extension::kF16);
 
     auto op = std::get<0>(GetParam());
@@ -76,7 +76,7 @@ TEST_P(ResolverConstEvalUnaryOpTest, Test) {
     }
 }
 INSTANTIATE_TEST_SUITE_P(Complement,
-                         ResolverConstEvalUnaryOpTest,
+                         ConstEvalUnaryOpTest,
                          testing::Combine(testing::Values(core::UnaryOp::kComplement),
                                           testing::ValuesIn({
                                               // AInt
@@ -101,7 +101,7 @@ INSTANTIATE_TEST_SUITE_P(Complement,
                                           })));
 
 INSTANTIATE_TEST_SUITE_P(Negation,
-                         ResolverConstEvalUnaryOpTest,
+                         ConstEvalUnaryOpTest,
                          testing::Combine(testing::Values(core::UnaryOp::kNegation),
                                           testing::ValuesIn({
                                               // AInt
@@ -153,7 +153,7 @@ INSTANTIATE_TEST_SUITE_P(Negation,
 
 // Make sure UBSan doesn't trip on C++'s undefined behaviour of negating the smallest negative
 // number.
-TEST_F(ResolverConstEvalTest, UnaryNegateLowestAbstract) {
+TEST_F(ConstEvalTest, UnaryNegateLowestAbstract) {
     // const break_me = -(-9223372036854775808);
     auto* c = GlobalConst("break_me", Negation(Negation(Expr(9223372036854775808_a))));
     (void)c;
@@ -163,7 +163,7 @@ TEST_F(ResolverConstEvalTest, UnaryNegateLowestAbstract) {
 }
 
 INSTANTIATE_TEST_SUITE_P(Not,
-                         ResolverConstEvalUnaryOpTest,
+                         ConstEvalUnaryOpTest,
                          testing::Combine(testing::Values(core::UnaryOp::kNot),
                                           testing::ValuesIn({
                                               C(true, false),
@@ -175,4 +175,4 @@ INSTANTIATE_TEST_SUITE_P(Not,
                                           })));
 
 }  // namespace
-}  // namespace tint::resolver
+}  // namespace tint::constant::test
