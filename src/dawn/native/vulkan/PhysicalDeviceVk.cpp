@@ -470,11 +470,11 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     deviceToggles->Default(Toggle::UseTemporaryBufferInCompressedTextureToTextureCopy, true);
 
     if (IsAndroidQualcomm()) {
-        // dawn:1564: Clearing a depth/stencil buffer in a render pass and then sampling it in a
-        // compute pass in the same command buffer causes a crash on Qualcomm GPUs. To work around
-        // that bug, split the command buffer any time we can detect that situation.
-        deviceToggles->Default(
-            Toggle::VulkanSplitCommandBufferOnDepthStencilComputeSampleAfterRenderPass, true);
+        // dawn:1564, dawn:1897: Recording a compute pass after a render pass in the same command
+        // buffer frequently causes a crash on Qualcomm GPUs. To work around that bug, split the
+        // command buffer any time we are about to record a compute pass when a render pass has
+        // already been recorded.
+        deviceToggles->Default(Toggle::VulkanSplitCommandBufferOnComputePassAfterRenderPass, true);
 
         // dawn:1569: Qualcomm devices have a bug resolving into a non-zero level of an array
         // texture. Work around it by resolving into a single level texture and then copying into

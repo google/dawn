@@ -550,12 +550,6 @@ crbug.com/dawn/1896 [ android-r ] webgpu:api,operation,memory_sync,texture,same_
 crbug.com/dawn/1896 [ android-r ] webgpu:api,operation,memory_sync,texture,same_subresource:ww:boundary="command-buffer";first={"op":"attachment-store","in":"command-encoder"};second={"op":"storage","in":"compute-pass-encoder"} [ Failure ]
 
 ################################################################################
-# Dispatch/draw indirect causes device lost on Android Qualcomm (Pixel 4)
-################################################################################
-crbug.com/dawn/1897 [ android-r ] webgpu:api,operation,resource_init,buffer:indirect_buffer_for_dispatch_indirect: [ Failure ]
-crbug.com/dawn/1897 [ android-r ] webgpu:api,operation,resource_init,buffer:indirect_buffer_for_draw_indirect:* [ Failure ]
-
-################################################################################
 # Primitive restart with indexFormat=uint32 causes device lost on Android Arm (Pixel 6)
 ################################################################################
 crbug.com/dawn/1898 [ android-t ] webgpu:api,operation,vertex_state,index_format:primitive_restart:indexFormat="uint32";primitiveTopology="line-list" [ Failure ]

@@ -319,12 +319,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "This toggle is enabled by default on Metal backend where GPU counters cannot be stored to"
       "sampleBufferAttachments on empty blit encoder.",
       "https://crbug.com/dawn/1473", ToggleStage::Device}},
-    {Toggle::VulkanSplitCommandBufferOnDepthStencilComputeSampleAfterRenderPass,
-     {"vulkan_split_command_buffer_on_depth_stencil_compute_sample_after_render_pass",
-      "Splits any command buffer that samples a depth/stencil texture in a compute pass after that "
-      "texture was used as an attachment for a prior render pass. This toggle is enabled by "
-      "default on Qualcomm GPUs, which have been observed experiencing a driver crash in this "
-      "situation.",
+    {Toggle::VulkanSplitCommandBufferOnComputePassAfterRenderPass,
+     {"vulkan_split_command_buffer_on_compute_pass_after_render_pass",
+      "Splits any command buffer where a compute pass is recorded after a render pass. This "
+      "toggle is enabled by default on Qualcomm GPUs, which have been observed experiencing a "
+      "driver crash in this situation.",
       "https://crbug.com/dawn/1564", ToggleStage::Device}},
     {Toggle::DisableSubAllocationFor2DTextureWithCopyDstOrRenderAttachment,
      {"disable_sub_allocation_for_2d_texture_with_copy_dst_or_render_attachment",
