@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_LANG_MSL_WRITER_OUTPUT_H_
 #define SRC_TINT_LANG_MSL_WRITER_OUTPUT_H_
 
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
