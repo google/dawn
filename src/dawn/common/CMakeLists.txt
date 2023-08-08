@@ -56,6 +56,7 @@ target_sources(dawn_common PRIVATE
     "Math.h"
     "Mutex.cpp"
     "Mutex.h"
+    "MutexProtected.h"
     "NSRef.h"
     "NonCopyable.h"
     "Numeric.h"
