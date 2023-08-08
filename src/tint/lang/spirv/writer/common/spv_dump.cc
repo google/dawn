@@ -21,7 +21,7 @@ namespace tint::spirv::writer {
 
 std::string Disassemble(const std::vector<uint32_t>& data, uint32_t options /* = 0u */) {
     std::string spv_errors;
-    spv_target_env target_env = SPV_ENV_UNIVERSAL_1_0;
+    spv_target_env target_env = SPV_ENV_VULKAN_1_1;
 
     auto msg_consumer = [&spv_errors](spv_message_level_t level, const char*,
                                       const spv_position_t& position, const char* message) {
