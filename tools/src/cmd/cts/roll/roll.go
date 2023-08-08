@@ -53,6 +53,7 @@ func init() {
 
 const (
 	depsRelPath          = "DEPS"
+	gitLinkPath          = "third_party/webgpu-cts"
 	tsSourcesRelPath     = "third_party/gn/webgpu-cts/ts_sources.txt"
 	testListRelPath      = "third_party/gn/webgpu-cts/test_list.txt"
 	cacheListRelPath     = "third_party/gn/webgpu-cts/cache_list.txt"
@@ -313,6 +314,7 @@ func (r *roller) roll(ctx context.Context) error {
 	// Update the DEPS, expectations, and other generated files.
 	updateExpectationUpdateTimestamp(&ex)
 	generatedFiles[depsRelPath] = updatedDEPS
+	generatedFiles[gitLinkPath] = newCTSHash
 	generatedFiles[common.RelativeExpectationsPath] = ex.String()
 
 	msg := r.rollCommitMessage(oldCTSHash, newCTSHash, ctsLog, changeID)
