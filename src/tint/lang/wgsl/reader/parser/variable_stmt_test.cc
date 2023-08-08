@@ -164,7 +164,7 @@ TEST_F(WGSLParserTest, VariableStmt_Let_ComplexExpression) {
 
     ASSERT_TRUE(decl->variable->initializer->Is<ast::BinaryExpression>());
     auto* expr = decl->variable->initializer->As<ast::BinaryExpression>();
-    EXPECT_EQ(expr->op, ast::BinaryOp::kAdd);
+    EXPECT_EQ(expr->op, core::BinaryOp::kAdd);
 
     ASSERT_TRUE(expr->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = expr->lhs->As<ast::IdentifierExpression>();

@@ -280,7 +280,7 @@ TEST_F(WgslASTPrinterTest, Emit_WhileMultiCond) {
     // }
 
     auto* multi_stmt =
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
+        create<ast::BinaryExpression>(core::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
     auto* f = While(multi_stmt, Block(Return()));
     WrapInFunction(f);
 

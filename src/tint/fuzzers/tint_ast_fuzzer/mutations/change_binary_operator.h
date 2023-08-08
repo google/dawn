@@ -34,7 +34,7 @@ class MutationChangeBinaryOperator : public Mutation {
     /// @param binary_expr_id - the id of a binary expression.
     /// @param new_operator - a new binary operator to replace the one used in the
     /// expression.
-    MutationChangeBinaryOperator(uint32_t binary_expr_id, ast::BinaryOp new_operator);
+    MutationChangeBinaryOperator(uint32_t binary_expr_id, core::BinaryOp new_operator);
 
     /// @copybrief Mutation::IsApplicable
     ///
@@ -67,7 +67,7 @@ class MutationChangeBinaryOperator : public Mutation {
     /// @return `true` if and only if the replacement would be well-typed.
     static bool CanReplaceBinaryOperator(const Program& program,
                                          const ast::BinaryExpression& binary_expr,
-                                         ast::BinaryOp new_operator);
+                                         core::BinaryOp new_operator);
 
   private:
     protobufs::MutationChangeBinaryOperator message_;

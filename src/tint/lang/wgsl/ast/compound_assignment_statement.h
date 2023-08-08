@@ -36,7 +36,7 @@ class CompoundAssignmentStatement final : public Castable<CompoundAssignmentStat
                                 const Source& source,
                                 const Expression* lhs,
                                 const Expression* rhs,
-                                BinaryOp op);
+                                core::BinaryOp op);
 
     /// Destructor
     ~CompoundAssignmentStatement() override;
@@ -54,7 +54,7 @@ class CompoundAssignmentStatement final : public Castable<CompoundAssignmentStat
     const Expression* const rhs;
 
     /// the binary operator
-    const BinaryOp op;
+    const core::BinaryOp op;
 };
 
 }  // namespace tint::ast

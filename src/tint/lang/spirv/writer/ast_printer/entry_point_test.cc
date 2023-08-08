@@ -125,7 +125,7 @@ TEST_F(SpirvASTPrinterTest, EntryPoint_ReturnValue) {
                              Flat(),
                          });
     auto* cond =
-        create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThan, Expr("loc_in"), Expr(10_u));
+        create<ast::BinaryExpression>(core::BinaryOp::kGreaterThan, Expr("loc_in"), Expr(10_u));
     Func("frag_main", Vector{loc_in}, ty.f32(),
          Vector{
              If(cond, Block(Return(0.5_f))),

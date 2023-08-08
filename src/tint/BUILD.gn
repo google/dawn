@@ -789,6 +789,8 @@ libtint_source_set("libtint_builtins_src") {
     "lang/core/address_space.h",
     "lang/core/attribute.cc",
     "lang/core/attribute.h",
+    "lang/core/binary_op.cc",
+    "lang/core/binary_op.h",
     "lang/core/builtin.cc",
     "lang/core/builtin.h",
     "lang/core/builtin_value.cc",

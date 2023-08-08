@@ -157,25 +157,25 @@
 	</Type>
 
 	<Type Name="tint::ast::BinaryExpression">
-		<DisplayString Condition="op==tint::ast::BinaryOp::kNone">({*lhs} NONE {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kAnd">({*lhs} &amp; {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kOr">({*lhs} | {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kXor">({*lhs} ^ {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kLogicalAnd">({*lhs} &amp;&amp; {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kLogicalOr">({*lhs} || {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kEqual">({*lhs} == {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kNotEqual">({*lhs} != {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kLessThan">({*lhs} &lt; {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kGreaterThan">({*lhs} &gt; {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kLessThanEqual">({*lhs} &lt;= {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kGreaterThanEqual">({*lhs} &gt;= {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kShiftLeft">({*lhs} &lt;&lt; {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kShiftRight">({*lhs} >> {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kAdd">({*lhs} + {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kSubtract">({*lhs} - {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kMultiply">({*lhs} * {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kDivide">({*lhs} / {*rhs})</DisplayString>
-		<DisplayString Condition="op==tint::ast::BinaryOp::kModulo">({*lhs} % {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kNone">({*lhs} NONE {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kAnd">({*lhs} &amp; {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kOr">({*lhs} | {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kXor">({*lhs} ^ {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kLogicalAnd">({*lhs} &amp;&amp; {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kLogicalOr">({*lhs} || {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kEqual">({*lhs} == {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kNotEqual">({*lhs} != {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kLessThan">({*lhs} &lt; {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kGreaterThan">({*lhs} &gt; {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kLessThanEqual">({*lhs} &lt;= {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kGreaterThanEqual">({*lhs} &gt;= {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kShiftLeft">({*lhs} &lt;&lt; {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kShiftRight">({*lhs} >> {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kAdd">({*lhs} + {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kSubtract">({*lhs} - {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kMultiply">({*lhs} * {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kDivide">({*lhs} / {*rhs})</DisplayString>
+		<DisplayString Condition="op==tint::core::BinaryOp::kModulo">({*lhs} % {*rhs})</DisplayString>
 	</Type>
 
 	<Type Name="tint::ast::CallExpression">

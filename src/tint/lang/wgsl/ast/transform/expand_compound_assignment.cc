@@ -61,7 +61,10 @@ struct ExpandCompoundAssignment::State {
     /// @param lhs the lhs expression from the source statement
     /// @param rhs the rhs expression in the destination module
     /// @param op the binary operator
-    void Expand(const Statement* stmt, const Expression* lhs, const Expression* rhs, BinaryOp op) {
+    void Expand(const Statement* stmt,
+                const Expression* lhs,
+                const Expression* rhs,
+                core::BinaryOp op) {
         // Helper function to create the new LHS expression. This will be called
         // twice when building the non-compound assignment statement, so must
         // not produce expressions that cause side effects.
@@ -178,7 +181,7 @@ Transform::ApplyResult ExpandCompoundAssignment::Apply(const Program* src,
             state.Expand(assign, assign->lhs, ctx.Clone(assign->rhs), assign->op);
         } else if (auto* inc_dec = node->As<IncrementDecrementStatement>()) {
             // For increment/decrement statements, `i++` becomes `i = i + 1`.
-            auto op = inc_dec->increment ? BinaryOp::kAdd : BinaryOp::kSubtract;
+            auto op = inc_dec->increment ? core::BinaryOp::kAdd : core::BinaryOp::kSubtract;
             state.Expand(inc_dec, inc_dec->lhs, ctx.dst->Expr(1_a), op);
         }
     }

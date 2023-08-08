@@ -101,7 +101,7 @@ struct OffsetLiteral final : Castable<OffsetLiteral, Offset> {
 /// OffsetBinOp is an implementation of Offset that constructs a binary-op of
 /// two Offsets.
 struct OffsetBinOp : Offset {
-    BinaryOp op;
+    core::BinaryOp op;
     Offset const* lhs = nullptr;
     Offset const* rhs = nullptr;
 
@@ -391,7 +391,7 @@ struct DecomposeMemoryAccess::State {
             }
         }
         auto* out = offsets_.Create<OffsetBinOp>();
-        out->op = BinaryOp::kAdd;
+        out->op = core::BinaryOp::kAdd;
         out->lhs = lhs;
         out->rhs = rhs;
         return out;
@@ -423,7 +423,7 @@ struct DecomposeMemoryAccess::State {
             return offsets_.Create<OffsetLiteral>(lhs_lit->literal * rhs_lit->literal);
         }
         auto* out = offsets_.Create<OffsetBinOp>();
-        out->op = BinaryOp::kMultiply;
+        out->op = core::BinaryOp::kMultiply;
         out->lhs = lhs;
         out->rhs = rhs;
         return out;
@@ -499,7 +499,7 @@ struct DecomposeMemoryAccess::State {
                     TINT_ICE() << "unexpected non-constant array count";
                     arr_cnt = 1;
                 }
-                auto* for_cond = b.create<BinaryExpression>(BinaryOp::kLessThan, b.Expr(i),
+                auto* for_cond = b.create<BinaryExpression>(core::BinaryOp::kLessThan, b.Expr(i),
                                                             b.Expr(u32(arr_cnt.value())));
                 auto* for_cont = b.Assign(i, b.Add(i, 1_u));
                 auto* arr_el = b.IndexAccessor(arr, i);
@@ -585,8 +585,8 @@ struct DecomposeMemoryAccess::State {
                             TINT_ICE() << "unexpected non-constant array count";
                             arr_cnt = 1;
                         }
-                        auto* for_cond = b.create<BinaryExpression>(BinaryOp::kLessThan, b.Expr(i),
-                                                                    b.Expr(u32(arr_cnt.value())));
+                        auto* for_cond = b.create<BinaryExpression>(
+                            core::BinaryOp::kLessThan, b.Expr(i), b.Expr(u32(arr_cnt.value())));
                         auto* for_cont = b.Assign(i, b.Add(i, 1_u));
                         auto* arr_el = b.IndexAccessor(array, i);
                         auto* el_offset = b.Add(b.Expr("offset"), b.Mul(i, u32(arr_ty->Stride())));

@@ -130,7 +130,7 @@ class Table {
     /// @param is_compound true if the binary operator is being used as a compound assignment
     /// @return the operator call target signature. If the operator was not found
     ///         BinaryOperator::result will be nullptr.
-    virtual BinaryOperator Lookup(ast::BinaryOp op,
+    virtual BinaryOperator Lookup(core::BinaryOp op,
                                   const type::Type* lhs,
                                   const type::Type* rhs,
                                   sem::EvaluationStage earliest_eval_stage,

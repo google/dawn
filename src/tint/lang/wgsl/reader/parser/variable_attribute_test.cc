@@ -51,7 +51,7 @@ TEST_F(WGSLParserTest, Attribute_Id_Expression) {
     ASSERT_TRUE(loc->expr->Is<ast::BinaryExpression>());
     auto* expr = loc->expr->As<ast::BinaryExpression>();
 
-    EXPECT_EQ(ast::BinaryOp::kAdd, expr->op);
+    EXPECT_EQ(core::BinaryOp::kAdd, expr->op);
     auto* v = expr->lhs->As<ast::IntLiteralExpression>();
     ASSERT_NE(nullptr, v);
     EXPECT_EQ(v->value, 4u);
@@ -150,7 +150,7 @@ TEST_F(WGSLParserTest, Attribute_Location_Expression) {
     ASSERT_TRUE(loc->expr->Is<ast::BinaryExpression>());
     auto* expr = loc->expr->As<ast::BinaryExpression>();
 
-    EXPECT_EQ(ast::BinaryOp::kAdd, expr->op);
+    EXPECT_EQ(core::BinaryOp::kAdd, expr->op);
     auto* v = expr->lhs->As<ast::IntLiteralExpression>();
     ASSERT_NE(nullptr, v);
     EXPECT_EQ(v->value, 4u);
@@ -465,7 +465,7 @@ TEST_F(WGSLParserTest, Attribute_Binding_Expression) {
     ASSERT_TRUE(binding->expr->Is<ast::BinaryExpression>());
     auto* expr = binding->expr->As<ast::BinaryExpression>();
 
-    EXPECT_EQ(ast::BinaryOp::kAdd, expr->op);
+    EXPECT_EQ(core::BinaryOp::kAdd, expr->op);
     auto* v = expr->lhs->As<ast::IntLiteralExpression>();
     ASSERT_NE(nullptr, v);
     EXPECT_EQ(v->value, 4u);
@@ -566,7 +566,7 @@ TEST_F(WGSLParserTest, Attribute_group_expression) {
     ASSERT_TRUE(group->expr->Is<ast::BinaryExpression>());
     auto* expr = group->expr->As<ast::BinaryExpression>();
 
-    EXPECT_EQ(ast::BinaryOp::kAdd, expr->op);
+    EXPECT_EQ(core::BinaryOp::kAdd, expr->op);
     auto* v = expr->lhs->As<ast::IntLiteralExpression>();
     ASSERT_NE(nullptr, v);
     EXPECT_EQ(v->value, 4u);

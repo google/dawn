@@ -20,7 +20,7 @@ namespace {
 
 struct BinaryData {
     const char* result;
-    ast::BinaryOp op;
+    core::BinaryOp op;
 };
 inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
     StringStream str;
@@ -33,8 +33,8 @@ TEST_P(MslBinaryTest, Emit) {
     auto params = GetParam();
 
     auto type = [&] {
-        return ((params.op == ast::BinaryOp::kLogicalAnd) ||
-                (params.op == ast::BinaryOp::kLogicalOr))
+        return ((params.op == core::BinaryOp::kLogicalAnd) ||
+                (params.op == core::BinaryOp::kLogicalOr))
                    ? ty.bool_()
                    : ty.u32();
     };
@@ -54,24 +54,24 @@ TEST_P(MslBinaryTest, Emit) {
 INSTANTIATE_TEST_SUITE_P(
     MslASTPrinterTest,
     MslBinaryTest,
-    testing::Values(BinaryData{"(left & right)", ast::BinaryOp::kAnd},
-                    BinaryData{"(left | right)", ast::BinaryOp::kOr},
-                    BinaryData{"(left ^ right)", ast::BinaryOp::kXor},
-                    BinaryData{"(left && right)", ast::BinaryOp::kLogicalAnd},
-                    BinaryData{"(left || right)", ast::BinaryOp::kLogicalOr},
-                    BinaryData{"(left == right)", ast::BinaryOp::kEqual},
-                    BinaryData{"(left != right)", ast::BinaryOp::kNotEqual},
-                    BinaryData{"(left < right)", ast::BinaryOp::kLessThan},
-                    BinaryData{"(left > right)", ast::BinaryOp::kGreaterThan},
-                    BinaryData{"(left <= right)", ast::BinaryOp::kLessThanEqual},
-                    BinaryData{"(left >= right)", ast::BinaryOp::kGreaterThanEqual},
-                    BinaryData{"(left << right)", ast::BinaryOp::kShiftLeft},
-                    BinaryData{"(left >> right)", ast::BinaryOp::kShiftRight},
-                    BinaryData{"(left + right)", ast::BinaryOp::kAdd},
-                    BinaryData{"(left - right)", ast::BinaryOp::kSubtract},
-                    BinaryData{"(left * right)", ast::BinaryOp::kMultiply},
-                    BinaryData{"(left / right)", ast::BinaryOp::kDivide},
-                    BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
+    testing::Values(BinaryData{"(left & right)", core::BinaryOp::kAnd},
+                    BinaryData{"(left | right)", core::BinaryOp::kOr},
+                    BinaryData{"(left ^ right)", core::BinaryOp::kXor},
+                    BinaryData{"(left && right)", core::BinaryOp::kLogicalAnd},
+                    BinaryData{"(left || right)", core::BinaryOp::kLogicalOr},
+                    BinaryData{"(left == right)", core::BinaryOp::kEqual},
+                    BinaryData{"(left != right)", core::BinaryOp::kNotEqual},
+                    BinaryData{"(left < right)", core::BinaryOp::kLessThan},
+                    BinaryData{"(left > right)", core::BinaryOp::kGreaterThan},
+                    BinaryData{"(left <= right)", core::BinaryOp::kLessThanEqual},
+                    BinaryData{"(left >= right)", core::BinaryOp::kGreaterThanEqual},
+                    BinaryData{"(left << right)", core::BinaryOp::kShiftLeft},
+                    BinaryData{"(left >> right)", core::BinaryOp::kShiftRight},
+                    BinaryData{"(left + right)", core::BinaryOp::kAdd},
+                    BinaryData{"(left - right)", core::BinaryOp::kSubtract},
+                    BinaryData{"(left * right)", core::BinaryOp::kMultiply},
+                    BinaryData{"(left / right)", core::BinaryOp::kDivide},
+                    BinaryData{"(left % right)", core::BinaryOp::kModulo}));
 
 using MslBinaryTest_SignedOverflowDefinedBehaviour = TestParamHelper<BinaryData>;
 TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour, Emit) {
@@ -79,7 +79,7 @@ TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour, Emit) {
 
     auto a_type = ty.i32();
     auto b_type =
-        (params.op == ast::BinaryOp::kShiftLeft || params.op == ast::BinaryOp::kShiftRight)
+        (params.op == core::BinaryOp::kShiftLeft || params.op == core::BinaryOp::kShiftRight)
             ? ty.u32()
             : ty.i32();
 
@@ -95,7 +95,7 @@ TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour, Emit) {
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }
-using Op = ast::BinaryOp;
+using Op = core::BinaryOp;
 constexpr BinaryData signed_overflow_defined_behaviour_cases[] = {
     {"as_type<int>((as_type<uint>(a) << b))", Op::kShiftLeft},
     {"(a >> b)", Op::kShiftRight},
@@ -112,7 +112,7 @@ TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour_Chained, Emit) {
 
     auto a_type = ty.i32();
     auto b_type =
-        (params.op == ast::BinaryOp::kShiftLeft || params.op == ast::BinaryOp::kShiftRight)
+        (params.op == core::BinaryOp::kShiftLeft || params.op == core::BinaryOp::kShiftRight)
             ? ty.u32()
             : ty.i32();
 
@@ -129,7 +129,7 @@ TEST_P(MslBinaryTest_SignedOverflowDefinedBehaviour_Chained, Emit) {
     ASSERT_TRUE(gen.EmitExpression(out, expr2)) << gen.Diagnostics();
     EXPECT_EQ(out.str(), params.result);
 }
-using Op = ast::BinaryOp;
+using Op = core::BinaryOp;
 constexpr BinaryData signed_overflow_defined_behaviour_chained_cases[] = {
     {R"(as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(a) << b))) << b)))",
      Op::kShiftLeft},
@@ -147,7 +147,7 @@ INSTANTIATE_TEST_SUITE_P(MslASTPrinterTest,
 TEST_F(MslBinaryTest, ModF32) {
     auto* left = Var("left", ty.f32());
     auto* right = Var("right", ty.f32());
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr(left), Expr(right));
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kModulo, Expr(left), Expr(right));
     WrapInFunction(left, right, expr);
 
     ASTPrinter& gen = Build();
@@ -162,7 +162,7 @@ TEST_F(MslBinaryTest, ModF16) {
 
     auto* left = Var("left", ty.f16());
     auto* right = Var("right", ty.f16());
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr(left), Expr(right));
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kModulo, Expr(left), Expr(right));
     WrapInFunction(left, right, expr);
 
     ASTPrinter& gen = Build();
@@ -175,7 +175,7 @@ TEST_F(MslBinaryTest, ModF16) {
 TEST_F(MslBinaryTest, ModVec3F32) {
     auto* left = Var("left", ty.vec3<f32>());
     auto* right = Var("right", ty.vec3<f32>());
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr(left), Expr(right));
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kModulo, Expr(left), Expr(right));
     WrapInFunction(left, right, expr);
 
     ASTPrinter& gen = Build();
@@ -190,7 +190,7 @@ TEST_F(MslBinaryTest, ModVec3F16) {
 
     auto* left = Var("left", ty.vec3<f16>());
     auto* right = Var("right", ty.vec3<f16>());
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr(left), Expr(right));
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kModulo, Expr(left), Expr(right));
     WrapInFunction(left, right, expr);
 
     ASTPrinter& gen = Build();
@@ -203,7 +203,7 @@ TEST_F(MslBinaryTest, ModVec3F16) {
 TEST_F(MslBinaryTest, BoolAnd) {
     auto* left = Var("left", Expr(true));
     auto* right = Var("right", Expr(false));
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kAnd, Expr(left), Expr(right));
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kAnd, Expr(left), Expr(right));
     WrapInFunction(left, right, expr);
 
     ASTPrinter& gen = Build();
@@ -216,7 +216,7 @@ TEST_F(MslBinaryTest, BoolAnd) {
 TEST_F(MslBinaryTest, BoolOr) {
     auto* left = Var("left", Expr(true));
     auto* right = Var("right", Expr(false));
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kOr, Expr(left), Expr(right));
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kOr, Expr(left), Expr(right));
     WrapInFunction(left, right, expr);
 
     ASTPrinter& gen = Build();

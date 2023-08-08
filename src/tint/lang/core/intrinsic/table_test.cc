@@ -566,8 +566,8 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_RuntimeEval) {
 TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Binary_ConstantEval) {
     auto* ai = create<type::AbstractInt>();
     auto* u32 = create<type::U32>();
-    auto result = table->Lookup(ast::BinaryOp::kShiftLeft, ai, u32, sem::EvaluationStage::kConstant,
-                                Source{}, false);
+    auto result = table->Lookup(core::BinaryOp::kShiftLeft, ai, u32,
+                                sem::EvaluationStage::kConstant, Source{}, false);
     ASSERT_NE(result.result, nullptr) << Diagnostics().str();
     ASSERT_NE(result.const_eval_fn, nullptr) << Diagnostics().str();
     ASSERT_EQ(Diagnostics().str(), "");
@@ -579,7 +579,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Binary_ConstantEval) {
 TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Binary_RuntimeEval) {
     auto* ai = create<type::AbstractInt>();
     auto* u32 = create<type::U32>();
-    auto result = table->Lookup(ast::BinaryOp::kShiftLeft, ai, u32, sem::EvaluationStage::kRuntime,
+    auto result = table->Lookup(core::BinaryOp::kShiftLeft, ai, u32, sem::EvaluationStage::kRuntime,
                                 Source{}, false);
     ASSERT_NE(result.result, nullptr) << Diagnostics().str();
     ASSERT_NE(result.const_eval_fn, nullptr) << Diagnostics().str();
@@ -733,7 +733,7 @@ TEST_F(IntrinsicTableTest, MatchUnaryOp_Runtime) {
 TEST_F(IntrinsicTableTest, MatchBinaryOp) {
     auto* i32 = create<type::I32>();
     auto* vec3_i32 = create<type::Vector>(i32, 3u);
-    auto result = table->Lookup(ast::BinaryOp::kMultiply, i32, vec3_i32,
+    auto result = table->Lookup(core::BinaryOp::kMultiply, i32, vec3_i32,
                                 sem::EvaluationStage::kConstant, Source{{12, 34}},
                                 /* is_compound */ false);
     EXPECT_EQ(result.result, vec3_i32);
@@ -745,7 +745,7 @@ TEST_F(IntrinsicTableTest, MatchBinaryOp) {
 TEST_F(IntrinsicTableTest, MismatchBinaryOp) {
     auto* f32 = create<type::F32>();
     auto* bool_ = create<type::Bool>();
-    auto result = table->Lookup(ast::BinaryOp::kMultiply, f32, bool_,
+    auto result = table->Lookup(core::BinaryOp::kMultiply, f32, bool_,
                                 sem::EvaluationStage::kConstant, Source{{12, 34}},
                                 /* is_compound */ false);
     ASSERT_EQ(result.result, nullptr);
@@ -767,7 +767,7 @@ TEST_F(IntrinsicTableTest, MismatchBinaryOp) {
 TEST_F(IntrinsicTableTest, MatchCompoundOp) {
     auto* i32 = create<type::I32>();
     auto* vec3_i32 = create<type::Vector>(i32, 3u);
-    auto result = table->Lookup(ast::BinaryOp::kMultiply, i32, vec3_i32,
+    auto result = table->Lookup(core::BinaryOp::kMultiply, i32, vec3_i32,
                                 sem::EvaluationStage::kConstant, Source{{12, 34}},
                                 /* is_compound */ true);
     EXPECT_EQ(result.result, vec3_i32);
@@ -779,7 +779,7 @@ TEST_F(IntrinsicTableTest, MatchCompoundOp) {
 TEST_F(IntrinsicTableTest, MismatchCompoundOp) {
     auto* f32 = create<type::F32>();
     auto* bool_ = create<type::Bool>();
-    auto result = table->Lookup(ast::BinaryOp::kMultiply, f32, bool_,
+    auto result = table->Lookup(core::BinaryOp::kMultiply, f32, bool_,
                                 sem::EvaluationStage::kConstant, Source{{12, 34}},
                                 /* is_compound */ true);
     ASSERT_EQ(result.result, nullptr);
@@ -1080,7 +1080,7 @@ struct IntrinsicTableAbstractBinaryTest : public resolver::ResolverTestWithParam
 TEST_P(IntrinsicTableAbstractBinaryTest, MatchAdd) {
     auto* arg_lhs = GetParam().arg_lhs(*this);
     auto* arg_rhs = GetParam().arg_rhs(*this);
-    auto result = table->Lookup(ast::BinaryOp::kAdd, arg_lhs, arg_rhs,
+    auto result = table->Lookup(core::BinaryOp::kAdd, arg_lhs, arg_rhs,
                                 sem::EvaluationStage::kConstant, Source{{12, 34}},
                                 /* is_compound */ false);
 

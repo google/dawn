@@ -401,43 +401,43 @@ bool ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr
         out << " ";
 
         switch (expr->op) {
-            case ast::BinaryOp::kAnd:
+            case core::BinaryOp::kAnd:
                 out << "&";
                 break;
-            case ast::BinaryOp::kOr:
+            case core::BinaryOp::kOr:
                 out << "|";
                 break;
-            case ast::BinaryOp::kXor:
+            case core::BinaryOp::kXor:
                 out << "^";
                 break;
-            case ast::BinaryOp::kLogicalAnd:
+            case core::BinaryOp::kLogicalAnd:
                 out << "&&";
                 break;
-            case ast::BinaryOp::kLogicalOr:
+            case core::BinaryOp::kLogicalOr:
                 out << "||";
                 break;
-            case ast::BinaryOp::kEqual:
+            case core::BinaryOp::kEqual:
                 out << "==";
                 break;
-            case ast::BinaryOp::kNotEqual:
+            case core::BinaryOp::kNotEqual:
                 out << "!=";
                 break;
-            case ast::BinaryOp::kLessThan:
+            case core::BinaryOp::kLessThan:
                 out << "<";
                 break;
-            case ast::BinaryOp::kGreaterThan:
+            case core::BinaryOp::kGreaterThan:
                 out << ">";
                 break;
-            case ast::BinaryOp::kLessThanEqual:
+            case core::BinaryOp::kLessThanEqual:
                 out << "<=";
                 break;
-            case ast::BinaryOp::kGreaterThanEqual:
+            case core::BinaryOp::kGreaterThanEqual:
                 out << ">=";
                 break;
-            case ast::BinaryOp::kShiftLeft:
+            case core::BinaryOp::kShiftLeft:
                 out << "<<";
                 break;
-            case ast::BinaryOp::kShiftRight:
+            case core::BinaryOp::kShiftRight:
                 // TODO(dsinclair): MSL is based on C++14, and >> in C++14 has
                 // implementation-defined behaviour for negative LHS.  We may have to
                 // generate extra code to implement WGSL-specified behaviour for
@@ -445,24 +445,21 @@ bool ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr
                 out << R"(>>)";
                 break;
 
-            case ast::BinaryOp::kAdd:
+            case core::BinaryOp::kAdd:
                 out << "+";
                 break;
-            case ast::BinaryOp::kSubtract:
+            case core::BinaryOp::kSubtract:
                 out << "-";
                 break;
-            case ast::BinaryOp::kMultiply:
+            case core::BinaryOp::kMultiply:
                 out << "*";
                 break;
-            case ast::BinaryOp::kDivide:
+            case core::BinaryOp::kDivide:
                 out << "/";
                 break;
-            case ast::BinaryOp::kModulo:
+            case core::BinaryOp::kModulo:
                 out << "%";
                 break;
-            case ast::BinaryOp::kNone:
-                diagnostics_.add_error(diag::System::Writer, "missing binary operation type");
-                return false;
         }
         out << " ";
         return true;
@@ -490,7 +487,7 @@ bool ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr
     auto* rhs_type = TypeOf(expr->rhs)->UnwrapRef();
 
     // Handle fmod
-    if (expr->op == ast::BinaryOp::kModulo && lhs_type->is_float_scalar_or_vector()) {
+    if (expr->op == core::BinaryOp::kModulo && lhs_type->is_float_scalar_or_vector()) {
         out << "fmod";
         ScopedParen sp(out);
         if (!EmitExpression(out, expr->lhs)) {

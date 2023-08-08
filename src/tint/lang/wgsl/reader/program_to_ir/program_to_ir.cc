@@ -528,7 +528,7 @@ class Impl {
                         : builder_.Constant(1_u);
 
         EmitCompoundAssignment(lhs, one,
-                               stmt->increment ? ast::BinaryOp::kAdd : ast::BinaryOp::kSubtract);
+                               stmt->increment ? core::BinaryOp::kAdd : core::BinaryOp::kSubtract);
     }
 
     void EmitCompoundAssignment(const ast::CompoundAssignmentStatement* stmt) {
@@ -542,7 +542,7 @@ class Impl {
         EmitCompoundAssignment(lhs, rhs, stmt->op);
     }
 
-    void EmitCompoundAssignment(ValueOrVecElAccess lhs, ir::Value* rhs, ast::BinaryOp op) {
+    void EmitCompoundAssignment(ValueOrVecElAccess lhs, ir::Value* rhs, core::BinaryOp op) {
         auto b = builder_.Append(current_block_);
         if (auto* v = std::get_if<ir::Value*>(&lhs)) {
             auto* load = b.Load(*v);
@@ -1182,7 +1182,7 @@ class Impl {
                 auto* result = b.InstructionResult(b.ir.Types().bool_());
                 if_inst->SetResults(result);
 
-                if (expr->op == ast::BinaryOp::kLogicalAnd) {
+                if (expr->op == core::BinaryOp::kLogicalAnd) {
                     if_inst->False()->Append(b.ExitIf(if_inst, b.Constant(false)));
                     PushBlock(if_inst->True());
                 } else {
@@ -1216,8 +1216,8 @@ class Impl {
                 tint::Switch(
                     expr,  //
                     [&](const ast::BinaryExpression* e) {
-                        if (e->op == ast::BinaryOp::kLogicalAnd ||
-                            e->op == ast::BinaryOp::kLogicalOr) {
+                        if (e->op == core::BinaryOp::kLogicalAnd ||
+                            e->op == core::BinaryOp::kLogicalOr) {
                             tasks.Push([=] { EndShortCircuit(e); });
                             tasks.Push([=] { Process(e->rhs); });
                             tasks.Push([=] { BeginShortCircuit(e); });
@@ -1349,46 +1349,43 @@ class Impl {
             });
     }
 
-    ir::Binary* BinaryOp(const type::Type* ty, ir::Value* lhs, ir::Value* rhs, ast::BinaryOp op) {
+    ir::Binary* BinaryOp(const type::Type* ty, ir::Value* lhs, ir::Value* rhs, core::BinaryOp op) {
         switch (op) {
-            case ast::BinaryOp::kAnd:
+            case core::BinaryOp::kAnd:
                 return builder_.And(ty, lhs, rhs);
-            case ast::BinaryOp::kOr:
+            case core::BinaryOp::kOr:
                 return builder_.Or(ty, lhs, rhs);
-            case ast::BinaryOp::kXor:
+            case core::BinaryOp::kXor:
                 return builder_.Xor(ty, lhs, rhs);
-            case ast::BinaryOp::kEqual:
+            case core::BinaryOp::kEqual:
                 return builder_.Equal(ty, lhs, rhs);
-            case ast::BinaryOp::kNotEqual:
+            case core::BinaryOp::kNotEqual:
                 return builder_.NotEqual(ty, lhs, rhs);
-            case ast::BinaryOp::kLessThan:
+            case core::BinaryOp::kLessThan:
                 return builder_.LessThan(ty, lhs, rhs);
-            case ast::BinaryOp::kGreaterThan:
+            case core::BinaryOp::kGreaterThan:
                 return builder_.GreaterThan(ty, lhs, rhs);
-            case ast::BinaryOp::kLessThanEqual:
+            case core::BinaryOp::kLessThanEqual:
                 return builder_.LessThanEqual(ty, lhs, rhs);
-            case ast::BinaryOp::kGreaterThanEqual:
+            case core::BinaryOp::kGreaterThanEqual:
                 return builder_.GreaterThanEqual(ty, lhs, rhs);
-            case ast::BinaryOp::kShiftLeft:
+            case core::BinaryOp::kShiftLeft:
                 return builder_.ShiftLeft(ty, lhs, rhs);
-            case ast::BinaryOp::kShiftRight:
+            case core::BinaryOp::kShiftRight:
                 return builder_.ShiftRight(ty, lhs, rhs);
-            case ast::BinaryOp::kAdd:
+            case core::BinaryOp::kAdd:
                 return builder_.Add(ty, lhs, rhs);
-            case ast::BinaryOp::kSubtract:
+            case core::BinaryOp::kSubtract:
                 return builder_.Subtract(ty, lhs, rhs);
-            case ast::BinaryOp::kMultiply:
+            case core::BinaryOp::kMultiply:
                 return builder_.Multiply(ty, lhs, rhs);
-            case ast::BinaryOp::kDivide:
+            case core::BinaryOp::kDivide:
                 return builder_.Divide(ty, lhs, rhs);
-            case ast::BinaryOp::kModulo:
+            case core::BinaryOp::kModulo:
                 return builder_.Modulo(ty, lhs, rhs);
-            case ast::BinaryOp::kLogicalAnd:
-            case ast::BinaryOp::kLogicalOr:
+            case core::BinaryOp::kLogicalAnd:
+            case core::BinaryOp::kLogicalOr:
                 TINT_ICE() << "short circuit op should have already been handled";
-                return nullptr;
-            case ast::BinaryOp::kNone:
-                TINT_ICE() << "missing binary operand type";
                 return nullptr;
         }
         TINT_UNREACHABLE();

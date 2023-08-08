@@ -26,7 +26,7 @@ using ForLoopStatementTest = TestHelper;
 
 TEST_F(ForLoopStatementTest, Creation) {
     auto* init = Decl(Var("i", ty.u32()));
-    auto* cond = create<BinaryExpression>(BinaryOp::kLessThan, Expr("i"), Expr(5_u));
+    auto* cond = create<BinaryExpression>(core::BinaryOp::kLessThan, Expr("i"), Expr(5_u));
     auto* cont = Assign("i", Add("i", 1_u));
     auto* body = Block(Return());
     auto* l = For(init, cond, cont, body);

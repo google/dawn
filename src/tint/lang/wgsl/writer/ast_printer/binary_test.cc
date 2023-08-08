@@ -22,7 +22,7 @@ namespace {
 
 struct BinaryData {
     const char* result;
-    ast::BinaryOp op;
+    core::BinaryOp op;
 };
 inline std::ostream& operator<<(std::ostream& out, BinaryData data) {
     StringStream str;
@@ -35,7 +35,7 @@ TEST_P(WgslBinaryTest, Emit) {
     auto params = GetParam();
 
     auto op_ty = [&] {
-        if (params.op == ast::BinaryOp::kLogicalAnd || params.op == ast::BinaryOp::kLogicalOr) {
+        if (params.op == core::BinaryOp::kLogicalAnd || params.op == core::BinaryOp::kLogicalOr) {
             return ty.bool_();
         } else {
             return ty.u32();
@@ -60,24 +60,24 @@ TEST_P(WgslBinaryTest, Emit) {
 INSTANTIATE_TEST_SUITE_P(
     WgslASTPrinterTest,
     WgslBinaryTest,
-    testing::Values(BinaryData{"(left & right)", ast::BinaryOp::kAnd},
-                    BinaryData{"(left | right)", ast::BinaryOp::kOr},
-                    BinaryData{"(left ^ right)", ast::BinaryOp::kXor},
-                    BinaryData{"(left && right)", ast::BinaryOp::kLogicalAnd},
-                    BinaryData{"(left || right)", ast::BinaryOp::kLogicalOr},
-                    BinaryData{"(left == right)", ast::BinaryOp::kEqual},
-                    BinaryData{"(left != right)", ast::BinaryOp::kNotEqual},
-                    BinaryData{"(left < right)", ast::BinaryOp::kLessThan},
-                    BinaryData{"(left > right)", ast::BinaryOp::kGreaterThan},
-                    BinaryData{"(left <= right)", ast::BinaryOp::kLessThanEqual},
-                    BinaryData{"(left >= right)", ast::BinaryOp::kGreaterThanEqual},
-                    BinaryData{"(left << right)", ast::BinaryOp::kShiftLeft},
-                    BinaryData{"(left >> right)", ast::BinaryOp::kShiftRight},
-                    BinaryData{"(left + right)", ast::BinaryOp::kAdd},
-                    BinaryData{"(left - right)", ast::BinaryOp::kSubtract},
-                    BinaryData{"(left * right)", ast::BinaryOp::kMultiply},
-                    BinaryData{"(left / right)", ast::BinaryOp::kDivide},
-                    BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
+    testing::Values(BinaryData{"(left & right)", core::BinaryOp::kAnd},
+                    BinaryData{"(left | right)", core::BinaryOp::kOr},
+                    BinaryData{"(left ^ right)", core::BinaryOp::kXor},
+                    BinaryData{"(left && right)", core::BinaryOp::kLogicalAnd},
+                    BinaryData{"(left || right)", core::BinaryOp::kLogicalOr},
+                    BinaryData{"(left == right)", core::BinaryOp::kEqual},
+                    BinaryData{"(left != right)", core::BinaryOp::kNotEqual},
+                    BinaryData{"(left < right)", core::BinaryOp::kLessThan},
+                    BinaryData{"(left > right)", core::BinaryOp::kGreaterThan},
+                    BinaryData{"(left <= right)", core::BinaryOp::kLessThanEqual},
+                    BinaryData{"(left >= right)", core::BinaryOp::kGreaterThanEqual},
+                    BinaryData{"(left << right)", core::BinaryOp::kShiftLeft},
+                    BinaryData{"(left >> right)", core::BinaryOp::kShiftRight},
+                    BinaryData{"(left + right)", core::BinaryOp::kAdd},
+                    BinaryData{"(left - right)", core::BinaryOp::kSubtract},
+                    BinaryData{"(left * right)", core::BinaryOp::kMultiply},
+                    BinaryData{"(left / right)", core::BinaryOp::kDivide},
+                    BinaryData{"(left % right)", core::BinaryOp::kModulo}));
 
 }  // namespace
 }  // namespace tint::wgsl::writer

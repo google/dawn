@@ -31,24 +31,24 @@ MutationList MutationFinderChangeBinaryOperators::FindMutations(
     // Go through each binary expression in the AST and add a mutation that
     // replaces its operator with some other type-compatible operator.
 
-    const std::vector<ast::BinaryOp> all_binary_operators = {ast::BinaryOp::kAnd,
-                                                             ast::BinaryOp::kOr,
-                                                             ast::BinaryOp::kXor,
-                                                             ast::BinaryOp::kLogicalAnd,
-                                                             ast::BinaryOp::kLogicalOr,
-                                                             ast::BinaryOp::kEqual,
-                                                             ast::BinaryOp::kNotEqual,
-                                                             ast::BinaryOp::kLessThan,
-                                                             ast::BinaryOp::kGreaterThan,
-                                                             ast::BinaryOp::kLessThanEqual,
-                                                             ast::BinaryOp::kGreaterThanEqual,
-                                                             ast::BinaryOp::kShiftLeft,
-                                                             ast::BinaryOp::kShiftRight,
-                                                             ast::BinaryOp::kAdd,
-                                                             ast::BinaryOp::kSubtract,
-                                                             ast::BinaryOp::kMultiply,
-                                                             ast::BinaryOp::kDivide,
-                                                             ast::BinaryOp::kModulo};
+    const std::vector<core::BinaryOp> all_binary_operators = {core::BinaryOp::kAnd,
+                                                              core::BinaryOp::kOr,
+                                                              core::BinaryOp::kXor,
+                                                              core::BinaryOp::kLogicalAnd,
+                                                              core::BinaryOp::kLogicalOr,
+                                                              core::BinaryOp::kEqual,
+                                                              core::BinaryOp::kNotEqual,
+                                                              core::BinaryOp::kLessThan,
+                                                              core::BinaryOp::kGreaterThan,
+                                                              core::BinaryOp::kLessThanEqual,
+                                                              core::BinaryOp::kGreaterThanEqual,
+                                                              core::BinaryOp::kShiftLeft,
+                                                              core::BinaryOp::kShiftRight,
+                                                              core::BinaryOp::kAdd,
+                                                              core::BinaryOp::kSubtract,
+                                                              core::BinaryOp::kMultiply,
+                                                              core::BinaryOp::kDivide,
+                                                              core::BinaryOp::kModulo};
 
     for (const auto* node : program.ASTNodes().Objects()) {
         const auto* binary_expr = As<ast::BinaryExpression>(node);
@@ -57,7 +57,7 @@ MutationList MutationFinderChangeBinaryOperators::FindMutations(
         }
 
         // Get vector of all operators this could be replaced with.
-        std::vector<ast::BinaryOp> allowed_replacements;
+        std::vector<core::BinaryOp> allowed_replacements;
         for (auto candidate_op : all_binary_operators) {
             if (MutationChangeBinaryOperator::CanReplaceBinaryOperator(program, *binary_expr,
                                                                        candidate_op)) {
@@ -67,7 +67,7 @@ MutationList MutationFinderChangeBinaryOperators::FindMutations(
 
         if (!allowed_replacements.empty()) {
             // Choose an available replacement operator at random.
-            const ast::BinaryOp replacement =
+            const core::BinaryOp replacement =
                 allowed_replacements[probability_context->GetRandomIndex(allowed_replacements)];
             // Add a mutation according to the chosen replacement.
             result.push_back(std::make_unique<MutationChangeBinaryOperator>(

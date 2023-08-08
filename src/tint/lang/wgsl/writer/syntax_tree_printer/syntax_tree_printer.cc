@@ -669,63 +669,63 @@ void SyntaxTreePrinter::EmitBinary(const ast::BinaryExpression* expr) {
     Line() << "]";
 }
 
-void SyntaxTreePrinter::EmitBinaryOp(const ast::BinaryOp op) {
+void SyntaxTreePrinter::EmitBinaryOp(const core::BinaryOp op) {
     switch (op) {
-        case ast::BinaryOp::kAnd:
+        case core::BinaryOp::kAnd:
             Line() << "&";
             break;
-        case ast::BinaryOp::kOr:
+        case core::BinaryOp::kOr:
             Line() << "|";
             break;
-        case ast::BinaryOp::kXor:
+        case core::BinaryOp::kXor:
             Line() << "^";
             break;
-        case ast::BinaryOp::kLogicalAnd:
+        case core::BinaryOp::kLogicalAnd:
             Line() << "&&";
             break;
-        case ast::BinaryOp::kLogicalOr:
+        case core::BinaryOp::kLogicalOr:
             Line() << "||";
             break;
-        case ast::BinaryOp::kEqual:
+        case core::BinaryOp::kEqual:
             Line() << "==";
             break;
-        case ast::BinaryOp::kNotEqual:
+        case core::BinaryOp::kNotEqual:
             Line() << "!=";
             break;
-        case ast::BinaryOp::kLessThan:
+        case core::BinaryOp::kLessThan:
             Line() << "<";
             break;
-        case ast::BinaryOp::kGreaterThan:
+        case core::BinaryOp::kGreaterThan:
             Line() << ">";
             break;
-        case ast::BinaryOp::kLessThanEqual:
+        case core::BinaryOp::kLessThanEqual:
             Line() << "<=";
             break;
-        case ast::BinaryOp::kGreaterThanEqual:
+        case core::BinaryOp::kGreaterThanEqual:
             Line() << ">=";
             break;
-        case ast::BinaryOp::kShiftLeft:
+        case core::BinaryOp::kShiftLeft:
             Line() << "<<";
             break;
-        case ast::BinaryOp::kShiftRight:
+        case core::BinaryOp::kShiftRight:
             Line() << ">>";
             break;
-        case ast::BinaryOp::kAdd:
+        case core::BinaryOp::kAdd:
             Line() << "+";
             break;
-        case ast::BinaryOp::kSubtract:
+        case core::BinaryOp::kSubtract:
             Line() << "-";
             break;
-        case ast::BinaryOp::kMultiply:
+        case core::BinaryOp::kMultiply:
             Line() << "*";
             break;
-        case ast::BinaryOp::kDivide:
+        case core::BinaryOp::kDivide:
             Line() << "/";
             break;
-        case ast::BinaryOp::kModulo:
+        case core::BinaryOp::kModulo:
             Line() << "%";
             break;
-        case ast::BinaryOp::kNone:
+        default:
             diagnostics_.add_error(diag::System::Writer, "missing binary operation type");
             break;
     }

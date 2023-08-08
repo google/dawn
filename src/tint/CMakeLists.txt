@@ -82,6 +82,8 @@ list(APPEND TINT_LIB_SRCS
   ../../include/tint/tint.h
   lang/wgsl/ast/clone_context.cc
   lang/wgsl/ast/clone_context.h
+  lang/core/binary_op.cc
+  lang/core/binary_op.h
   lang/core/fluent_types.h
   lang/core/number.cc
   lang/core/number.h

@@ -578,7 +578,7 @@ class Parser {
         const ast::Expression* lhs);
     /// Parse the `multiplicative_operator` grammar element
     /// @returns the parsed operator if successful
-    Maybe<ast::BinaryOp> multiplicative_operator();
+    Maybe<core::BinaryOp> multiplicative_operator();
     /// Parses multiplicative elements
     /// @param lhs the left side of the expression
     /// @returns the parsed expression or `lhs` if no match
@@ -612,10 +612,10 @@ class Parser {
         const ast::Expression* lhs);
     /// Parse the `additive_operator` grammar element
     /// @returns the parsed operator if successful
-    Maybe<ast::BinaryOp> additive_operator();
+    Maybe<core::BinaryOp> additive_operator();
     /// Parses a `compound_assignment_operator` grammar element
     /// @returns the parsed compound assignment operator
-    Maybe<ast::BinaryOp> compound_assignment_operator();
+    Maybe<core::BinaryOp> compound_assignment_operator();
     /// Parses a `core_lhs_expression` grammar element
     /// @returns the parsed expression or a non-kMatched failure
     Maybe<const ast::Expression*> core_lhs_expression();

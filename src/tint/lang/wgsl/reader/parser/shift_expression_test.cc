@@ -32,7 +32,7 @@ TEST_F(WGSLParserTest, ShiftExpression_PostUnary_Parses_ShiftLeft) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kShiftLeft, rel->op);
+    EXPECT_EQ(core::BinaryOp::kShiftLeft, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -57,7 +57,7 @@ TEST_F(WGSLParserTest, ShiftExpression_PostUnary_Parses_ShiftRight) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kShiftRight, rel->op);
+    EXPECT_EQ(core::BinaryOp::kShiftRight, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -77,7 +77,7 @@ TEST_F(WGSLParserTest, ShiftExpression_PostUnary_Parses_Additive) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kAdd, rel->op);
+    EXPECT_EQ(core::BinaryOp::kAdd, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -98,7 +98,7 @@ TEST_F(WGSLParserTest, ShiftExpression_PostUnary_Parses_Multiplicative) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kMultiply, rel->op);
+    EXPECT_EQ(core::BinaryOp::kMultiply, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -157,7 +157,7 @@ TEST_F(WGSLParserTest, ShiftExpression_Parses) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kShiftLeft, rel->op);
+    EXPECT_EQ(core::BinaryOp::kShiftLeft, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();

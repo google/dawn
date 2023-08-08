@@ -68,7 +68,7 @@ template <typename T>
 using alias2 = builder::alias2<T>;
 template <typename T>
 using alias3 = builder::alias3<T>;
-using Op = ast::BinaryOp;
+using Op = core::BinaryOp;
 
 TEST_F(ResolverTest, Stmt_Assign) {
     auto* v = Var("v", ty.f32());
@@ -1368,7 +1368,7 @@ struct Aliased<mat<N, M, T>, ID> {
 };
 
 struct Params {
-    ast::BinaryOp op;
+    core::BinaryOp op;
     builder::ast_type_func_ptr create_lhs_type;
     builder::ast_type_func_ptr create_rhs_type;
     builder::ast_type_func_ptr create_lhs_alias_type;
@@ -1377,7 +1377,7 @@ struct Params {
 };
 
 template <typename LHS, typename RHS, typename RES>
-constexpr Params ParamsFor(ast::BinaryOp op) {
+constexpr Params ParamsFor(core::BinaryOp op) {
     return Params{op,
                   DataType<LHS>::AST,
                   DataType<RHS>::AST,
@@ -1386,25 +1386,25 @@ constexpr Params ParamsFor(ast::BinaryOp op) {
                   DataType<RES>::Sem};
 }
 
-static constexpr ast::BinaryOp all_ops[] = {
-    ast::BinaryOp::kAnd,
-    ast::BinaryOp::kOr,
-    ast::BinaryOp::kXor,
-    ast::BinaryOp::kLogicalAnd,
-    ast::BinaryOp::kLogicalOr,
-    ast::BinaryOp::kEqual,
-    ast::BinaryOp::kNotEqual,
-    ast::BinaryOp::kLessThan,
-    ast::BinaryOp::kGreaterThan,
-    ast::BinaryOp::kLessThanEqual,
-    ast::BinaryOp::kGreaterThanEqual,
-    ast::BinaryOp::kShiftLeft,
-    ast::BinaryOp::kShiftRight,
-    ast::BinaryOp::kAdd,
-    ast::BinaryOp::kSubtract,
-    ast::BinaryOp::kMultiply,
-    ast::BinaryOp::kDivide,
-    ast::BinaryOp::kModulo,
+static constexpr core::BinaryOp all_ops[] = {
+    core::BinaryOp::kAnd,
+    core::BinaryOp::kOr,
+    core::BinaryOp::kXor,
+    core::BinaryOp::kLogicalAnd,
+    core::BinaryOp::kLogicalOr,
+    core::BinaryOp::kEqual,
+    core::BinaryOp::kNotEqual,
+    core::BinaryOp::kLessThan,
+    core::BinaryOp::kGreaterThan,
+    core::BinaryOp::kLessThanEqual,
+    core::BinaryOp::kGreaterThanEqual,
+    core::BinaryOp::kShiftLeft,
+    core::BinaryOp::kShiftRight,
+    core::BinaryOp::kAdd,
+    core::BinaryOp::kSubtract,
+    core::BinaryOp::kMultiply,
+    core::BinaryOp::kDivide,
+    core::BinaryOp::kModulo,
 };
 
 static constexpr builder::ast_type_func_ptr all_create_type_funcs[] = {
@@ -1700,11 +1700,11 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
 // (type * type * op), and processing only the triplets that are not found in
 // the `all_valid_cases` table.
 using Expr_Binary_Test_Invalid = ResolverTestWithParam<
-    std::tuple<builder::ast_type_func_ptr, builder::ast_type_func_ptr, ast::BinaryOp>>;
+    std::tuple<builder::ast_type_func_ptr, builder::ast_type_func_ptr, core::BinaryOp>>;
 TEST_P(Expr_Binary_Test_Invalid, All) {
     const builder::ast_type_func_ptr& lhs_create_type_func = std::get<0>(GetParam());
     const builder::ast_type_func_ptr& rhs_create_type_func = std::get<1>(GetParam());
-    const ast::BinaryOp op = std::get<2>(GetParam());
+    const core::BinaryOp op = std::get<2>(GetParam());
 
     // Skip if valid case
     // TODO(amaiorano): replace linear lookup with O(1) if too slow

@@ -25,7 +25,7 @@ namespace {
 using WhileStatementTest = TestHelper;
 
 TEST_F(WhileStatementTest, Creation) {
-    auto* cond = create<BinaryExpression>(BinaryOp::kLessThan, Expr("i"), Expr(5_u));
+    auto* cond = create<BinaryExpression>(core::BinaryOp::kLessThan, Expr("i"), Expr(5_u));
     auto* body = Block(Return());
     auto* l = While(cond, body);
 
@@ -34,7 +34,7 @@ TEST_F(WhileStatementTest, Creation) {
 }
 
 TEST_F(WhileStatementTest, Creation_WithSource) {
-    auto* cond = create<BinaryExpression>(BinaryOp::kLessThan, Expr("i"), Expr(5_u));
+    auto* cond = create<BinaryExpression>(core::BinaryOp::kLessThan, Expr("i"), Expr(5_u));
     auto* body = Block(Return());
     auto* l = While(Source{{20u, 2u}}, cond, body);
     auto src = l->source;
@@ -45,7 +45,7 @@ TEST_F(WhileStatementTest, Creation_WithSource) {
 TEST_F(WhileStatementTest, Creation_WithAttributes) {
     auto* attr1 = DiagnosticAttribute(core::DiagnosticSeverity::kOff, "foo");
     auto* attr2 = DiagnosticAttribute(core::DiagnosticSeverity::kOff, "bar");
-    auto* cond = create<BinaryExpression>(BinaryOp::kLessThan, Expr("i"), Expr(5_u));
+    auto* cond = create<BinaryExpression>(core::BinaryOp::kLessThan, Expr("i"), Expr(5_u));
     auto* body = Block(Return());
     auto* l = While(cond, body, tint::Vector{attr1, attr2});
 
@@ -66,7 +66,8 @@ TEST_F(WhileStatementTest, Assert_Null_Body) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            auto* cond = b.create<BinaryExpression>(BinaryOp::kLessThan, b.Expr("i"), b.Expr(5_u));
+            auto* cond =
+                b.create<BinaryExpression>(core::BinaryOp::kLessThan, b.Expr("i"), b.Expr(5_u));
             b.While(cond, nullptr);
         },
         "internal compiler error");

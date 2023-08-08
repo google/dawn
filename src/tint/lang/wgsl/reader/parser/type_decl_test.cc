@@ -319,7 +319,7 @@ TEST_F(WGSLParserTest, TypeDecl_Array_ExpressionSize) {
 
     auto* count = As<ast::BinaryExpression>(arr->arguments[1]);
     ASSERT_NE(count, nullptr);
-    EXPECT_EQ(ast::BinaryOp::kAdd, count->op);
+    EXPECT_EQ(core::BinaryOp::kAdd, count->op);
 
     auto* count_lhs = As<ast::IdentifierExpression>(count->lhs);
     ASSERT_NE(count_lhs, nullptr);

@@ -39,32 +39,32 @@ bool IsSuitableForShift(const type::Type* lhs_type, const type::Type* rhs_type) 
 
 bool CanReplaceAddSubtractWith(const type::Type* lhs_type,
                                const type::Type* rhs_type,
-                               ast::BinaryOp new_operator) {
+                               core::BinaryOp new_operator) {
     // The program is assumed to be well-typed, so this method determines when
     // 'new_operator' can be used as a type-preserving replacement in an '+' or
     // '-' expression.
     switch (new_operator) {
-        case ast::BinaryOp::kAdd:
-        case ast::BinaryOp::kSubtract:
+        case core::BinaryOp::kAdd:
+        case core::BinaryOp::kSubtract:
             // '+' and '-' are fully type compatible.
             return true;
-        case ast::BinaryOp::kAnd:
-        case ast::BinaryOp::kOr:
-        case ast::BinaryOp::kXor:
+        case core::BinaryOp::kAnd:
+        case core::BinaryOp::kOr:
+        case core::BinaryOp::kXor:
             // These operators do not have a mixed vector-scalar form, and only work
             // on integer types.
             return lhs_type == rhs_type && lhs_type->is_integer_scalar_or_vector();
-        case ast::BinaryOp::kMultiply:
+        case core::BinaryOp::kMultiply:
             // '+' and '*' are largely type-compatible, but for matrices they are only
             // type-compatible if the matrices are square.
             return !lhs_type->is_float_matrix() || lhs_type->is_square_float_matrix();
-        case ast::BinaryOp::kDivide:
-        case ast::BinaryOp::kModulo:
+        case core::BinaryOp::kDivide:
+        case core::BinaryOp::kModulo:
             // '/' is not defined for matrices.
             return lhs_type->is_numeric_scalar_or_vector() &&
                    rhs_type->is_numeric_scalar_or_vector();
-        case ast::BinaryOp::kShiftLeft:
-        case ast::BinaryOp::kShiftRight:
+        case core::BinaryOp::kShiftLeft:
+        case core::BinaryOp::kShiftRight:
             return IsSuitableForShift(lhs_type, rhs_type);
         default:
             return false;
@@ -73,15 +73,15 @@ bool CanReplaceAddSubtractWith(const type::Type* lhs_type,
 
 bool CanReplaceMultiplyWith(const type::Type* lhs_type,
                             const type::Type* rhs_type,
-                            ast::BinaryOp new_operator) {
+                            core::BinaryOp new_operator) {
     // The program is assumed to be well-typed, so this method determines when
     // 'new_operator' can be used as a type-preserving replacement in a '*'
     // expression.
     switch (new_operator) {
-        case ast::BinaryOp::kMultiply:
+        case core::BinaryOp::kMultiply:
             return true;
-        case ast::BinaryOp::kAdd:
-        case ast::BinaryOp::kSubtract:
+        case core::BinaryOp::kAdd:
+        case core::BinaryOp::kSubtract:
             // '*' is type-compatible with '+' and '-' for square matrices, and for
             // numeric scalars/vectors.
             if (lhs_type->is_square_float_matrix() && rhs_type->is_square_float_matrix()) {
@@ -89,18 +89,18 @@ bool CanReplaceMultiplyWith(const type::Type* lhs_type,
             }
             return lhs_type->is_numeric_scalar_or_vector() &&
                    rhs_type->is_numeric_scalar_or_vector();
-        case ast::BinaryOp::kAnd:
-        case ast::BinaryOp::kOr:
-        case ast::BinaryOp::kXor:
+        case core::BinaryOp::kAnd:
+        case core::BinaryOp::kOr:
+        case core::BinaryOp::kXor:
             // These operators require homogeneous integer types.
             return lhs_type == rhs_type && lhs_type->is_integer_scalar_or_vector();
-        case ast::BinaryOp::kDivide:
-        case ast::BinaryOp::kModulo:
+        case core::BinaryOp::kDivide:
+        case core::BinaryOp::kModulo:
             // '/' is not defined for matrices.
             return lhs_type->is_numeric_scalar_or_vector() &&
                    rhs_type->is_numeric_scalar_or_vector();
-        case ast::BinaryOp::kShiftLeft:
-        case ast::BinaryOp::kShiftRight:
+        case core::BinaryOp::kShiftLeft:
+        case core::BinaryOp::kShiftRight:
             return IsSuitableForShift(lhs_type, rhs_type);
         default:
             return false;
@@ -109,39 +109,39 @@ bool CanReplaceMultiplyWith(const type::Type* lhs_type,
 
 bool CanReplaceDivideOrModuloWith(const type::Type* lhs_type,
                                   const type::Type* rhs_type,
-                                  ast::BinaryOp new_operator) {
+                                  core::BinaryOp new_operator) {
     // The program is assumed to be well-typed, so this method determines when
     // 'new_operator' can be used as a type-preserving replacement in a '/'
     // expression.
     switch (new_operator) {
-        case ast::BinaryOp::kAdd:
-        case ast::BinaryOp::kSubtract:
-        case ast::BinaryOp::kMultiply:
-        case ast::BinaryOp::kDivide:
-        case ast::BinaryOp::kModulo:
+        case core::BinaryOp::kAdd:
+        case core::BinaryOp::kSubtract:
+        case core::BinaryOp::kMultiply:
+        case core::BinaryOp::kDivide:
+        case core::BinaryOp::kModulo:
             // These operators work in all contexts where '/' works.
             return true;
-        case ast::BinaryOp::kAnd:
-        case ast::BinaryOp::kOr:
-        case ast::BinaryOp::kXor:
+        case core::BinaryOp::kAnd:
+        case core::BinaryOp::kOr:
+        case core::BinaryOp::kXor:
             // These operators require homogeneous integer types.
             return lhs_type == rhs_type && lhs_type->is_integer_scalar_or_vector();
-        case ast::BinaryOp::kShiftLeft:
-        case ast::BinaryOp::kShiftRight:
+        case core::BinaryOp::kShiftLeft:
+        case core::BinaryOp::kShiftRight:
             return IsSuitableForShift(lhs_type, rhs_type);
         default:
             return false;
     }
 }
 
-bool CanReplaceLogicalAndLogicalOrWith(ast::BinaryOp new_operator) {
+bool CanReplaceLogicalAndLogicalOrWith(core::BinaryOp new_operator) {
     switch (new_operator) {
-        case ast::BinaryOp::kLogicalAnd:
-        case ast::BinaryOp::kLogicalOr:
-        case ast::BinaryOp::kAnd:
-        case ast::BinaryOp::kOr:
-        case ast::BinaryOp::kEqual:
-        case ast::BinaryOp::kNotEqual:
+        case core::BinaryOp::kLogicalAnd:
+        case core::BinaryOp::kLogicalOr:
+        case core::BinaryOp::kAnd:
+        case core::BinaryOp::kOr:
+        case core::BinaryOp::kEqual:
+        case core::BinaryOp::kNotEqual:
             // These operators all work whenever '&&' and '||' work.
             return true;
         default:
@@ -151,31 +151,31 @@ bool CanReplaceLogicalAndLogicalOrWith(ast::BinaryOp new_operator) {
 
 bool CanReplaceAndOrWith(const type::Type* lhs_type,
                          const type::Type* rhs_type,
-                         ast::BinaryOp new_operator) {
+                         core::BinaryOp new_operator) {
     switch (new_operator) {
-        case ast::BinaryOp::kAnd:
-        case ast::BinaryOp::kOr:
+        case core::BinaryOp::kAnd:
+        case core::BinaryOp::kOr:
             // '&' and '|' work in all the same contexts.
             return true;
-        case ast::BinaryOp::kAdd:
-        case ast::BinaryOp::kSubtract:
-        case ast::BinaryOp::kMultiply:
-        case ast::BinaryOp::kDivide:
-        case ast::BinaryOp::kModulo:
-        case ast::BinaryOp::kXor:
+        case core::BinaryOp::kAdd:
+        case core::BinaryOp::kSubtract:
+        case core::BinaryOp::kMultiply:
+        case core::BinaryOp::kDivide:
+        case core::BinaryOp::kModulo:
+        case core::BinaryOp::kXor:
             // '&' and '|' can be applied to booleans. In all other contexts,
             // integer numeric operators work.
             return !lhs_type->is_bool_scalar_or_vector();
-        case ast::BinaryOp::kShiftLeft:
-        case ast::BinaryOp::kShiftRight:
+        case core::BinaryOp::kShiftLeft:
+        case core::BinaryOp::kShiftRight:
             return IsSuitableForShift(lhs_type, rhs_type);
-        case ast::BinaryOp::kLogicalAnd:
-        case ast::BinaryOp::kLogicalOr:
+        case core::BinaryOp::kLogicalAnd:
+        case core::BinaryOp::kLogicalOr:
             // '&' and '|' can be applied to booleans, and for boolean scalar
             // scalar contexts, their logical counterparts work.
             return lhs_type->Is<type::Bool>();
-        case ast::BinaryOp::kEqual:
-        case ast::BinaryOp::kNotEqual:
+        case core::BinaryOp::kEqual:
+        case core::BinaryOp::kNotEqual:
             // '&' and '|' can be applied to booleans, and in these contexts equality
             // comparison operators also work.
             return lhs_type->is_bool_scalar_or_vector();
@@ -186,21 +186,21 @@ bool CanReplaceAndOrWith(const type::Type* lhs_type,
 
 bool CanReplaceXorWith(const type::Type* lhs_type,
                        const type::Type* rhs_type,
-                       ast::BinaryOp new_operator) {
+                       core::BinaryOp new_operator) {
     switch (new_operator) {
-        case ast::BinaryOp::kAdd:
-        case ast::BinaryOp::kSubtract:
-        case ast::BinaryOp::kMultiply:
-        case ast::BinaryOp::kDivide:
-        case ast::BinaryOp::kModulo:
-        case ast::BinaryOp::kAnd:
-        case ast::BinaryOp::kOr:
-        case ast::BinaryOp::kXor:
+        case core::BinaryOp::kAdd:
+        case core::BinaryOp::kSubtract:
+        case core::BinaryOp::kMultiply:
+        case core::BinaryOp::kDivide:
+        case core::BinaryOp::kModulo:
+        case core::BinaryOp::kAnd:
+        case core::BinaryOp::kOr:
+        case core::BinaryOp::kXor:
             // '^' only works on integer types, and in any such context, all other
             // integer operators also work.
             return true;
-        case ast::BinaryOp::kShiftLeft:
-        case ast::BinaryOp::kShiftRight:
+        case core::BinaryOp::kShiftLeft:
+        case core::BinaryOp::kShiftRight:
             return IsSuitableForShift(lhs_type, rhs_type);
         default:
             return false;
@@ -209,20 +209,20 @@ bool CanReplaceXorWith(const type::Type* lhs_type,
 
 bool CanReplaceShiftLeftShiftRightWith(const type::Type* lhs_type,
                                        const type::Type* rhs_type,
-                                       ast::BinaryOp new_operator) {
+                                       core::BinaryOp new_operator) {
     switch (new_operator) {
-        case ast::BinaryOp::kShiftLeft:
-        case ast::BinaryOp::kShiftRight:
+        case core::BinaryOp::kShiftLeft:
+        case core::BinaryOp::kShiftRight:
             // These operators are type-compatible.
             return true;
-        case ast::BinaryOp::kAdd:
-        case ast::BinaryOp::kSubtract:
-        case ast::BinaryOp::kMultiply:
-        case ast::BinaryOp::kDivide:
-        case ast::BinaryOp::kModulo:
-        case ast::BinaryOp::kAnd:
-        case ast::BinaryOp::kOr:
-        case ast::BinaryOp::kXor:
+        case core::BinaryOp::kAdd:
+        case core::BinaryOp::kSubtract:
+        case core::BinaryOp::kMultiply:
+        case core::BinaryOp::kDivide:
+        case core::BinaryOp::kModulo:
+        case core::BinaryOp::kAnd:
+        case core::BinaryOp::kOr:
+        case core::BinaryOp::kXor:
             // Shift operators allow mixing of signed and unsigned arguments, but in
             // the case where the arguments are homogeneous, they are type-compatible
             // with other numeric operators.
@@ -232,26 +232,26 @@ bool CanReplaceShiftLeftShiftRightWith(const type::Type* lhs_type,
     }
 }
 
-bool CanReplaceEqualNotEqualWith(const type::Type* lhs_type, ast::BinaryOp new_operator) {
+bool CanReplaceEqualNotEqualWith(const type::Type* lhs_type, core::BinaryOp new_operator) {
     switch (new_operator) {
-        case ast::BinaryOp::kEqual:
-        case ast::BinaryOp::kNotEqual:
+        case core::BinaryOp::kEqual:
+        case core::BinaryOp::kNotEqual:
             // These operators are type-compatible.
             return true;
-        case ast::BinaryOp::kLessThan:
-        case ast::BinaryOp::kLessThanEqual:
-        case ast::BinaryOp::kGreaterThan:
-        case ast::BinaryOp::kGreaterThanEqual:
+        case core::BinaryOp::kLessThan:
+        case core::BinaryOp::kLessThanEqual:
+        case core::BinaryOp::kGreaterThan:
+        case core::BinaryOp::kGreaterThanEqual:
             // An equality comparison between numeric types can be changed to an
             // ordered comparison.
             return lhs_type->is_numeric_scalar_or_vector();
-        case ast::BinaryOp::kLogicalAnd:
-        case ast::BinaryOp::kLogicalOr:
+        case core::BinaryOp::kLogicalAnd:
+        case core::BinaryOp::kLogicalOr:
             // An equality comparison between boolean scalars can be turned into a
             // logical operation.
             return lhs_type->Is<type::Bool>();
-        case ast::BinaryOp::kAnd:
-        case ast::BinaryOp::kOr:
+        case core::BinaryOp::kAnd:
+        case core::BinaryOp::kOr:
             // An equality comparison between boolean scalars or vectors can be turned
             // into a component-wise non-short-circuit logical operation.
             return lhs_type->is_bool_scalar_or_vector();
@@ -260,14 +260,14 @@ bool CanReplaceEqualNotEqualWith(const type::Type* lhs_type, ast::BinaryOp new_o
     }
 }
 
-bool CanReplaceLessThanLessThanEqualGreaterThanGreaterThanEqualWith(ast::BinaryOp new_operator) {
+bool CanReplaceLessThanLessThanEqualGreaterThanGreaterThanEqualWith(core::BinaryOp new_operator) {
     switch (new_operator) {
-        case ast::BinaryOp::kEqual:
-        case ast::BinaryOp::kNotEqual:
-        case ast::BinaryOp::kLessThan:
-        case ast::BinaryOp::kLessThanEqual:
-        case ast::BinaryOp::kGreaterThan:
-        case ast::BinaryOp::kGreaterThanEqual:
+        case core::BinaryOp::kEqual:
+        case core::BinaryOp::kNotEqual:
+        case core::BinaryOp::kLessThan:
+        case core::BinaryOp::kLessThanEqual:
+        case core::BinaryOp::kGreaterThan:
+        case core::BinaryOp::kGreaterThanEqual:
             // Ordered comparison operators can be interchanged, and equality
             // operators can be used in their place.
             return true;
@@ -282,7 +282,7 @@ MutationChangeBinaryOperator::MutationChangeBinaryOperator(
     : message_(std::move(message)) {}
 
 MutationChangeBinaryOperator::MutationChangeBinaryOperator(uint32_t binary_expr_id,
-                                                           ast::BinaryOp new_operator) {
+                                                           core::BinaryOp new_operator) {
     message_.set_binary_expr_id(binary_expr_id);
     message_.set_new_operator(static_cast<uint32_t>(new_operator));
 }
@@ -290,7 +290,7 @@ MutationChangeBinaryOperator::MutationChangeBinaryOperator(uint32_t binary_expr_
 bool MutationChangeBinaryOperator::CanReplaceBinaryOperator(
     const Program& program,
     const ast::BinaryExpression& binary_expr,
-    ast::BinaryOp new_operator) {
+    core::BinaryOp new_operator) {
     if (new_operator == binary_expr.op) {
         // An operator should not be replaced with itself, as this would be a no-op.
         return false;
@@ -307,33 +307,32 @@ bool MutationChangeBinaryOperator::CanReplaceBinaryOperator(
         rhs_type->Is<type::Reference>() ? rhs_type->As<type::Reference>()->StoreType() : rhs_type;
 
     switch (binary_expr.op) {
-        case ast::BinaryOp::kAdd:
-        case ast::BinaryOp::kSubtract:
+        case core::BinaryOp::kAdd:
+        case core::BinaryOp::kSubtract:
             return CanReplaceAddSubtractWith(lhs_basic_type, rhs_basic_type, new_operator);
-        case ast::BinaryOp::kMultiply:
+        case core::BinaryOp::kMultiply:
             return CanReplaceMultiplyWith(lhs_basic_type, rhs_basic_type, new_operator);
-        case ast::BinaryOp::kDivide:
-        case ast::BinaryOp::kModulo:
+        case core::BinaryOp::kDivide:
+        case core::BinaryOp::kModulo:
             return CanReplaceDivideOrModuloWith(lhs_basic_type, rhs_basic_type, new_operator);
-        case ast::BinaryOp::kAnd:
-        case ast::BinaryOp::kOr:
+        case core::BinaryOp::kAnd:
+        case core::BinaryOp::kOr:
             return CanReplaceAndOrWith(lhs_basic_type, rhs_basic_type, new_operator);
-        case ast::BinaryOp::kXor:
+        case core::BinaryOp::kXor:
             return CanReplaceXorWith(lhs_basic_type, rhs_basic_type, new_operator);
-        case ast::BinaryOp::kShiftLeft:
-        case ast::BinaryOp::kShiftRight:
+        case core::BinaryOp::kShiftLeft:
+        case core::BinaryOp::kShiftRight:
             return CanReplaceShiftLeftShiftRightWith(lhs_basic_type, rhs_basic_type, new_operator);
-        case ast::BinaryOp::kLogicalAnd:
-        case ast::BinaryOp::kLogicalOr:
+        case core::BinaryOp::kLogicalAnd:
+        case core::BinaryOp::kLogicalOr:
             return CanReplaceLogicalAndLogicalOrWith(new_operator);
-        case ast::BinaryOp::kEqual:
-        case ast::BinaryOp::kNotEqual:
+        case core::BinaryOp::kEqual:
+        case core::BinaryOp::kNotEqual:
             return CanReplaceEqualNotEqualWith(lhs_basic_type, new_operator);
-        case ast::BinaryOp::kLessThan:
-        case ast::BinaryOp::kLessThanEqual:
-        case ast::BinaryOp::kGreaterThan:
-        case ast::BinaryOp::kGreaterThanEqual:
-        case ast::BinaryOp::kNone:
+        case core::BinaryOp::kLessThan:
+        case core::BinaryOp::kLessThanEqual:
+        case core::BinaryOp::kGreaterThan:
+        case core::BinaryOp::kGreaterThanEqual:
             return CanReplaceLessThanLessThanEqualGreaterThanGreaterThanEqualWith(new_operator);
             assert(false && "Unreachable");
             return false;
@@ -350,7 +349,7 @@ bool MutationChangeBinaryOperator::IsApplicable(const Program& program,
         return false;
     }
     // Check whether the replacement is acceptable.
-    const auto new_operator = static_cast<ast::BinaryOp>(message_.new_operator());
+    const auto new_operator = static_cast<core::BinaryOp>(message_.new_operator());
     return CanReplaceBinaryOperator(program, *binary_expr_node, new_operator);
 }
 
@@ -363,90 +362,87 @@ void MutationChangeBinaryOperator::Apply(const NodeIdMap& node_id_map,
 
     // Clone the binary expression, with the appropriate new operator.
     const ast::BinaryExpression* cloned_replacement;
-    switch (static_cast<ast::BinaryOp>(message_.new_operator())) {
-        case ast::BinaryOp::kAnd:
+    switch (static_cast<core::BinaryOp>(message_.new_operator())) {
+        case core::BinaryOp::kAnd:
             cloned_replacement = clone_context.dst->And(clone_context.Clone(binary_expr_node->lhs),
                                                         clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kOr:
+        case core::BinaryOp::kOr:
             cloned_replacement = clone_context.dst->Or(clone_context.Clone(binary_expr_node->lhs),
                                                        clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kXor:
+        case core::BinaryOp::kXor:
             cloned_replacement = clone_context.dst->Xor(clone_context.Clone(binary_expr_node->lhs),
                                                         clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kLogicalAnd:
+        case core::BinaryOp::kLogicalAnd:
             cloned_replacement =
                 clone_context.dst->LogicalAnd(clone_context.Clone(binary_expr_node->lhs),
                                               clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kLogicalOr:
+        case core::BinaryOp::kLogicalOr:
             cloned_replacement =
                 clone_context.dst->LogicalOr(clone_context.Clone(binary_expr_node->lhs),
                                              clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kEqual:
+        case core::BinaryOp::kEqual:
             cloned_replacement =
                 clone_context.dst->Equal(clone_context.Clone(binary_expr_node->lhs),
                                          clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kNotEqual:
+        case core::BinaryOp::kNotEqual:
             cloned_replacement =
                 clone_context.dst->NotEqual(clone_context.Clone(binary_expr_node->lhs),
                                             clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kLessThan:
+        case core::BinaryOp::kLessThan:
             cloned_replacement =
                 clone_context.dst->LessThan(clone_context.Clone(binary_expr_node->lhs),
                                             clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kGreaterThan:
+        case core::BinaryOp::kGreaterThan:
             cloned_replacement =
                 clone_context.dst->GreaterThan(clone_context.Clone(binary_expr_node->lhs),
                                                clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kLessThanEqual:
+        case core::BinaryOp::kLessThanEqual:
             cloned_replacement =
                 clone_context.dst->LessThanEqual(clone_context.Clone(binary_expr_node->lhs),
                                                  clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kGreaterThanEqual:
+        case core::BinaryOp::kGreaterThanEqual:
             cloned_replacement =
                 clone_context.dst->GreaterThanEqual(clone_context.Clone(binary_expr_node->lhs),
                                                     clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kShiftLeft:
+        case core::BinaryOp::kShiftLeft:
             cloned_replacement = clone_context.dst->Shl(clone_context.Clone(binary_expr_node->lhs),
                                                         clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kShiftRight:
+        case core::BinaryOp::kShiftRight:
             cloned_replacement = clone_context.dst->Shr(clone_context.Clone(binary_expr_node->lhs),
                                                         clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kAdd:
+        case core::BinaryOp::kAdd:
             cloned_replacement = clone_context.dst->Add(clone_context.Clone(binary_expr_node->lhs),
                                                         clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kSubtract:
+        case core::BinaryOp::kSubtract:
             cloned_replacement = clone_context.dst->Sub(clone_context.Clone(binary_expr_node->lhs),
                                                         clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kMultiply:
+        case core::BinaryOp::kMultiply:
             cloned_replacement = clone_context.dst->Mul(clone_context.Clone(binary_expr_node->lhs),
                                                         clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kDivide:
+        case core::BinaryOp::kDivide:
             cloned_replacement = clone_context.dst->Div(clone_context.Clone(binary_expr_node->lhs),
                                                         clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kModulo:
+        case core::BinaryOp::kModulo:
             cloned_replacement = clone_context.dst->Mod(clone_context.Clone(binary_expr_node->lhs),
                                                         clone_context.Clone(binary_expr_node->rhs));
             break;
-        case ast::BinaryOp::kNone:
-            cloned_replacement = nullptr;
-            assert(false && "Unreachable");
     }
     // Set things up so that the original binary expression will be replaced with
     // its clone, and update the id mapping.

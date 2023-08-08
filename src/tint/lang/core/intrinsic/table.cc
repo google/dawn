@@ -966,7 +966,7 @@ class Impl : public Table {
                          sem::EvaluationStage earliest_eval_stage,
                          const Source& source) override;
 
-    BinaryOperator Lookup(ast::BinaryOp op,
+    BinaryOperator Lookup(core::BinaryOp op,
                           const type::Type* lhs,
                           const type::Type* rhs,
                           sem::EvaluationStage earliest_eval_stage,
@@ -1224,7 +1224,7 @@ Table::UnaryOperator Impl::Lookup(ast::UnaryOp op,
     };
 }
 
-Table::BinaryOperator Impl::Lookup(ast::BinaryOp op,
+Table::BinaryOperator Impl::Lookup(core::BinaryOp op,
                                    const type::Type* lhs,
                                    const type::Type* rhs,
                                    sem::EvaluationStage earliest_eval_stage,
@@ -1232,45 +1232,45 @@ Table::BinaryOperator Impl::Lookup(ast::BinaryOp op,
                                    bool is_compound) {
     auto [intrinsic_index, intrinsic_name] = [&]() -> std::pair<size_t, const char*> {
         switch (op) {
-            case ast::BinaryOp::kAnd:
+            case core::BinaryOp::kAnd:
                 return {kBinaryOperatorAnd, is_compound ? "operator &= " : "operator & "};
-            case ast::BinaryOp::kOr:
+            case core::BinaryOp::kOr:
                 return {kBinaryOperatorOr, is_compound ? "operator |= " : "operator | "};
-            case ast::BinaryOp::kXor:
+            case core::BinaryOp::kXor:
                 return {kBinaryOperatorXor, is_compound ? "operator ^= " : "operator ^ "};
-            case ast::BinaryOp::kLogicalAnd:
+            case core::BinaryOp::kLogicalAnd:
                 return {kBinaryOperatorLogicalAnd, "operator && "};
-            case ast::BinaryOp::kLogicalOr:
+            case core::BinaryOp::kLogicalOr:
                 return {kBinaryOperatorLogicalOr, "operator || "};
-            case ast::BinaryOp::kEqual:
+            case core::BinaryOp::kEqual:
                 return {kBinaryOperatorEqual, "operator == "};
-            case ast::BinaryOp::kNotEqual:
+            case core::BinaryOp::kNotEqual:
                 return {kBinaryOperatorNotEqual, "operator != "};
-            case ast::BinaryOp::kLessThan:
+            case core::BinaryOp::kLessThan:
                 return {kBinaryOperatorLessThan, "operator < "};
-            case ast::BinaryOp::kGreaterThan:
+            case core::BinaryOp::kGreaterThan:
                 return {kBinaryOperatorGreaterThan, "operator > "};
-            case ast::BinaryOp::kLessThanEqual:
+            case core::BinaryOp::kLessThanEqual:
                 return {kBinaryOperatorLessThanEqual, "operator <= "};
-            case ast::BinaryOp::kGreaterThanEqual:
+            case core::BinaryOp::kGreaterThanEqual:
                 return {kBinaryOperatorGreaterThanEqual, "operator >= "};
-            case ast::BinaryOp::kShiftLeft:
+            case core::BinaryOp::kShiftLeft:
                 return {kBinaryOperatorShiftLeft, is_compound ? "operator <<= " : "operator << "};
-            case ast::BinaryOp::kShiftRight:
+            case core::BinaryOp::kShiftRight:
                 return {kBinaryOperatorShiftRight, is_compound ? "operator >>= " : "operator >> "};
-            case ast::BinaryOp::kAdd:
+            case core::BinaryOp::kAdd:
                 return {kBinaryOperatorPlus, is_compound ? "operator += " : "operator + "};
-            case ast::BinaryOp::kSubtract:
+            case core::BinaryOp::kSubtract:
                 return {kBinaryOperatorMinus, is_compound ? "operator -= " : "operator - "};
-            case ast::BinaryOp::kMultiply:
+            case core::BinaryOp::kMultiply:
                 return {kBinaryOperatorStar, is_compound ? "operator *= " : "operator * "};
-            case ast::BinaryOp::kDivide:
+            case core::BinaryOp::kDivide:
                 return {kBinaryOperatorDivide, is_compound ? "operator /= " : "operator / "};
-            case ast::BinaryOp::kModulo:
+            case core::BinaryOp::kModulo:
                 return {kBinaryOperatorModulo, is_compound ? "operator %= " : "operator % "};
-            default:
-                return {0, "<unknown>"};
         }
+        TINT_UNREACHABLE() << "unhandled BinaryOp: " << op;
+        return {};
     }();
 
     Vector args{lhs, rhs};

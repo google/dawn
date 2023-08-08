@@ -525,7 +525,7 @@ TEST_P(Use, Write_Decrement) {
 
 TEST_P(Use, Write_CompoundAssignment_LHS) {
     // *p2 += 42;
-    Run(CompoundAssign(Deref("p2"), 42_a, ast::BinaryOp::kAdd),
+    Run(CompoundAssign(Deref("p2"), 42_a, core::BinaryOp::kAdd),
         R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }
@@ -534,7 +534,7 @@ TEST_P(Use, Read_CompoundAssignment_RHS) {
     // var<private> global : i32;
     // global += *p2;
     GlobalVar("global", core::AddressSpace::kPrivate, ty.i32());
-    Run(CompoundAssign("global", Deref("p2"), ast::BinaryOp::kAdd),
+    Run(CompoundAssign("global", Deref("p2"), core::BinaryOp::kAdd),
         R"(56:78 error: invalid aliased pointer argument
 12:34 note: aliases with another argument passed here)");
 }

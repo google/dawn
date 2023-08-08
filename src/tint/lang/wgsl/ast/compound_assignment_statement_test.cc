@@ -27,7 +27,7 @@ using CompoundAssignmentStatementTest = TestHelper;
 TEST_F(CompoundAssignmentStatementTest, Creation) {
     auto* lhs = Expr("lhs");
     auto* rhs = Expr("rhs");
-    auto op = BinaryOp::kAdd;
+    auto op = core::BinaryOp::kAdd;
 
     auto* stmt = create<CompoundAssignmentStatement>(lhs, rhs, op);
     EXPECT_EQ(stmt->lhs, lhs);
@@ -38,7 +38,7 @@ TEST_F(CompoundAssignmentStatementTest, Creation) {
 TEST_F(CompoundAssignmentStatementTest, CreationWithSource) {
     auto* lhs = Expr("lhs");
     auto* rhs = Expr("rhs");
-    auto op = BinaryOp::kMultiply;
+    auto op = core::BinaryOp::kMultiply;
 
     auto* stmt = create<CompoundAssignmentStatement>(Source{Source::Location{20, 2}}, lhs, rhs, op);
     auto src = stmt->source;
@@ -49,7 +49,7 @@ TEST_F(CompoundAssignmentStatementTest, CreationWithSource) {
 TEST_F(CompoundAssignmentStatementTest, IsCompoundAssign) {
     auto* lhs = Expr("lhs");
     auto* rhs = Expr("rhs");
-    auto op = BinaryOp::kSubtract;
+    auto op = core::BinaryOp::kSubtract;
 
     auto* stmt = create<CompoundAssignmentStatement>(lhs, rhs, op);
     EXPECT_TRUE(stmt->Is<CompoundAssignmentStatement>());
@@ -59,7 +59,7 @@ TEST_F(CompoundAssignmentStatementTest, Assert_Null_LHS) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<CompoundAssignmentStatement>(nullptr, b.Expr(1_i), BinaryOp::kAdd);
+            b.create<CompoundAssignmentStatement>(nullptr, b.Expr(1_i), core::BinaryOp::kAdd);
         },
         "internal compiler error");
 }
@@ -68,7 +68,7 @@ TEST_F(CompoundAssignmentStatementTest, Assert_Null_RHS) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.create<CompoundAssignmentStatement>(b.Expr(1_i), nullptr, BinaryOp::kAdd);
+            b.create<CompoundAssignmentStatement>(b.Expr(1_i), nullptr, core::BinaryOp::kAdd);
         },
         "internal compiler error");
 }
@@ -78,7 +78,8 @@ TEST_F(CompoundAssignmentStatementTest, Assert_DifferentGenerationID_LHS) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<CompoundAssignmentStatement>(b2.Expr("lhs"), b1.Expr("rhs"), BinaryOp::kAdd);
+            b1.create<CompoundAssignmentStatement>(b2.Expr("lhs"), b1.Expr("rhs"),
+                                                   core::BinaryOp::kAdd);
         },
         "internal compiler error");
 }
@@ -88,7 +89,8 @@ TEST_F(CompoundAssignmentStatementTest, Assert_DifferentGenerationID_RHS) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<CompoundAssignmentStatement>(b1.Expr("lhs"), b2.Expr("rhs"), BinaryOp::kAdd);
+            b1.create<CompoundAssignmentStatement>(b1.Expr("lhs"), b2.Expr("rhs"),
+                                                   core::BinaryOp::kAdd);
         },
         "internal compiler error");
 }

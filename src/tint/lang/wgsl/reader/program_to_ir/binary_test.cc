@@ -73,7 +73,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Increment) {
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundAdd) {
     GlobalVar("v1", core::AddressSpace::kPrivate, ty.u32());
-    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kAdd);
+    auto* expr = CompoundAssign("v1", 1_u, core::BinaryOp::kAdd);
     WrapInFunction(expr);
 
     auto m = Build();
@@ -142,7 +142,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Decrement) {
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundSubtract) {
     GlobalVar("v1", core::AddressSpace::kPrivate, ty.u32());
-    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kSubtract);
+    auto* expr = CompoundAssign("v1", 1_u, core::BinaryOp::kSubtract);
     WrapInFunction(expr);
 
     auto m = Build();
@@ -188,7 +188,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Multiply) {
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundMultiply) {
     GlobalVar("v1", core::AddressSpace::kPrivate, ty.u32());
-    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kMultiply);
+    auto* expr = CompoundAssign("v1", 1_u, core::BinaryOp::kMultiply);
     WrapInFunction(expr);
 
     auto m = Build();
@@ -234,7 +234,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Div) {
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundDiv) {
     GlobalVar("v1", core::AddressSpace::kPrivate, ty.u32());
-    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kDivide);
+    auto* expr = CompoundAssign("v1", 1_u, core::BinaryOp::kDivide);
     WrapInFunction(expr);
 
     auto m = Build();
@@ -280,7 +280,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Modulo) {
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundModulo) {
     GlobalVar("v1", core::AddressSpace::kPrivate, ty.u32());
-    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kModulo);
+    auto* expr = CompoundAssign("v1", 1_u, core::BinaryOp::kModulo);
     WrapInFunction(expr);
 
     auto m = Build();
@@ -326,7 +326,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_And) {
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundAnd) {
     GlobalVar("v1", core::AddressSpace::kPrivate, ty.bool_());
-    auto* expr = CompoundAssign("v1", false, ast::BinaryOp::kAnd);
+    auto* expr = CompoundAssign("v1", false, core::BinaryOp::kAnd);
     WrapInFunction(expr);
 
     auto m = Build();
@@ -372,7 +372,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Or) {
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundOr) {
     GlobalVar("v1", core::AddressSpace::kPrivate, ty.bool_());
-    auto* expr = CompoundAssign("v1", false, ast::BinaryOp::kOr);
+    auto* expr = CompoundAssign("v1", false, core::BinaryOp::kOr);
     WrapInFunction(expr);
 
     auto m = Build();
@@ -418,7 +418,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_Xor) {
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundXor) {
     GlobalVar("v1", core::AddressSpace::kPrivate, ty.u32());
-    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kXor);
+    auto* expr = CompoundAssign("v1", 1_u, core::BinaryOp::kXor);
     WrapInFunction(expr);
 
     auto m = Build();
@@ -674,7 +674,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_ShiftLeft) {
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundShiftLeft) {
     GlobalVar("v1", core::AddressSpace::kPrivate, ty.u32());
-    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kShiftLeft);
+    auto* expr = CompoundAssign("v1", 1_u, core::BinaryOp::kShiftLeft);
     WrapInFunction(expr);
 
     auto m = Build();
@@ -720,7 +720,7 @@ TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_ShiftRight) {
 
 TEST_F(ProgramToIRBinaryTest, EmitExpression_Binary_CompoundShiftRight) {
     GlobalVar("v1", core::AddressSpace::kPrivate, ty.u32());
-    auto* expr = CompoundAssign("v1", 1_u, ast::BinaryOp::kShiftRight);
+    auto* expr = CompoundAssign("v1", 1_u, core::BinaryOp::kShiftRight);
     WrapInFunction(expr);
 
     auto m = Build();

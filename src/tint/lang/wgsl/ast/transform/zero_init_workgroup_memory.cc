@@ -230,7 +230,7 @@ struct ZeroInitWorkgroupMemory::State {
                 //  }
                 auto idx = b.Symbols().New("idx");
                 auto* init = b.Decl(b.Var(idx, b.ty.u32(), local_index()));
-                auto* cond = b.create<BinaryExpression>(BinaryOp::kLessThan, b.Expr(idx),
+                auto* cond = b.create<BinaryExpression>(core::BinaryOp::kLessThan, b.Expr(idx),
                                                         b.Expr(u32(num_iterations)));
                 auto* cont = b.Assign(
                     idx, b.Add(idx, workgroup_size_const ? b.Expr(u32(workgroup_size_const))
@@ -250,7 +250,7 @@ struct ZeroInitWorkgroupMemory::State {
                 //  if (local_index < num_iterations) {
                 //    ...
                 //  }
-                auto* cond = b.create<BinaryExpression>(BinaryOp::kLessThan, local_index(),
+                auto* cond = b.create<BinaryExpression>(core::BinaryOp::kLessThan, local_index(),
                                                         b.Expr(u32(num_iterations)));
                 auto block = DeclareArrayIndices(num_iterations, array_indices,
                                                  [&] { return b.Expr(local_index()); });
@@ -380,7 +380,7 @@ struct ZeroInitWorkgroupMemory::State {
         for (auto index : array_indices) {
             auto name = array_index_names.at(index);
             auto* mod = (num_iterations > index.modulo)
-                            ? b.create<BinaryExpression>(BinaryOp::kModulo, iteration(),
+                            ? b.create<BinaryExpression>(core::BinaryOp::kModulo, iteration(),
                                                          b.Expr(u32(index.modulo)))
                             : iteration();
             auto* div = (index.division != 1u) ? b.Div(mod, u32(index.division)) : mod;

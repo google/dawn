@@ -97,11 +97,11 @@ bool last_is_break(const ast::BlockStatement* stmts) {
     return tint::IsAnyOf<ast::BreakStatement>(stmts->Last());
 }
 
-bool IsRelational(tint::ast::BinaryOp op) {
-    return op == tint::ast::BinaryOp::kEqual || op == tint::ast::BinaryOp::kNotEqual ||
-           op == tint::ast::BinaryOp::kLessThan || op == tint::ast::BinaryOp::kGreaterThan ||
-           op == tint::ast::BinaryOp::kLessThanEqual ||
-           op == tint::ast::BinaryOp::kGreaterThanEqual;
+bool IsRelational(tint::core::BinaryOp op) {
+    return op == tint::core::BinaryOp::kEqual || op == tint::core::BinaryOp::kNotEqual ||
+           op == tint::core::BinaryOp::kLessThan || op == tint::core::BinaryOp::kGreaterThan ||
+           op == tint::core::BinaryOp::kLessThanEqual ||
+           op == tint::core::BinaryOp::kGreaterThanEqual;
 }
 
 bool RequiresOESSampleVariables(tint::core::BuiltinValue builtin) {
@@ -525,22 +525,22 @@ void ASTPrinter::EmitAssign(const ast::AssignmentStatement* stmt) {
 
 void ASTPrinter::EmitVectorRelational(StringStream& out, const ast::BinaryExpression* expr) {
     switch (expr->op) {
-        case ast::BinaryOp::kEqual:
+        case core::BinaryOp::kEqual:
             out << "equal";
             break;
-        case ast::BinaryOp::kNotEqual:
+        case core::BinaryOp::kNotEqual:
             out << "notEqual";
             break;
-        case ast::BinaryOp::kLessThan:
+        case core::BinaryOp::kLessThan:
             out << "lessThan";
             break;
-        case ast::BinaryOp::kGreaterThan:
+        case core::BinaryOp::kGreaterThan:
             out << "greaterThan";
             break;
-        case ast::BinaryOp::kLessThanEqual:
+        case core::BinaryOp::kLessThanEqual:
             out << "lessThanEqual";
             break;
-        case ast::BinaryOp::kGreaterThanEqual:
+        case core::BinaryOp::kGreaterThanEqual:
             out << "greaterThanEqual";
             break;
         default:
@@ -567,12 +567,12 @@ void ASTPrinter::EmitBitwiseBoolOp(StringStream& out, const ast::BinaryExpressio
         EmitExpression(out, expr->lhs);
     }
     // Emit operator.
-    if (expr->op == ast::BinaryOp::kAnd) {
+    if (expr->op == core::BinaryOp::kAnd) {
         out << " & ";
-    } else if (TINT_LIKELY(expr->op == ast::BinaryOp::kOr)) {
+    } else if (TINT_LIKELY(expr->op == core::BinaryOp::kOr)) {
         out << " | ";
     } else {
-        TINT_ICE() << "unexpected binary op: " << FriendlyName(expr->op);
+        TINT_ICE() << "unexpected binary op: " << expr->op;
         return;
     }
 
@@ -638,7 +638,7 @@ void ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr
         return;
     }
 
-    if (expr->op == ast::BinaryOp::kLogicalAnd || expr->op == ast::BinaryOp::kLogicalOr) {
+    if (expr->op == core::BinaryOp::kLogicalAnd || expr->op == core::BinaryOp::kLogicalOr) {
         auto name = UniqueIdentifier(kTempNamePrefix);
 
         {
@@ -648,7 +648,7 @@ void ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr
             pre << ";";
         }
 
-        if (expr->op == ast::BinaryOp::kLogicalOr) {
+        if (expr->op == core::BinaryOp::kLogicalOr) {
             Line() << "if (!" << name << ") {";
         } else {
             Line() << "if (" << name << ") {";
@@ -668,13 +668,13 @@ void ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr
         return;
     }
 
-    if ((expr->op == ast::BinaryOp::kAnd || expr->op == ast::BinaryOp::kOr) &&
+    if ((expr->op == core::BinaryOp::kAnd || expr->op == core::BinaryOp::kOr) &&
         TypeOf(expr->lhs)->UnwrapRef()->is_bool_scalar_or_vector()) {
         EmitBitwiseBoolOp(out, expr);
         return;
     }
 
-    if (expr->op == ast::BinaryOp::kModulo &&
+    if (expr->op == core::BinaryOp::kModulo &&
         (TypeOf(expr->lhs)->UnwrapRef()->is_float_scalar_or_vector() ||
          TypeOf(expr->rhs)->UnwrapRef()->is_float_scalar_or_vector())) {
         EmitFloatModulo(out, expr);
@@ -686,64 +686,61 @@ void ASTPrinter::EmitBinary(StringStream& out, const ast::BinaryExpression* expr
     out << " ";
 
     switch (expr->op) {
-        case ast::BinaryOp::kAnd:
+        case core::BinaryOp::kAnd:
             out << "&";
             break;
-        case ast::BinaryOp::kOr:
+        case core::BinaryOp::kOr:
             out << "|";
             break;
-        case ast::BinaryOp::kXor:
+        case core::BinaryOp::kXor:
             out << "^";
             break;
-        case ast::BinaryOp::kLogicalAnd:
-        case ast::BinaryOp::kLogicalOr: {
+        case core::BinaryOp::kLogicalAnd:
+        case core::BinaryOp::kLogicalOr: {
             // These are both handled above.
             TINT_UNREACHABLE();
             return;
         }
-        case ast::BinaryOp::kEqual:
+        case core::BinaryOp::kEqual:
             out << "==";
             break;
-        case ast::BinaryOp::kNotEqual:
+        case core::BinaryOp::kNotEqual:
             out << "!=";
             break;
-        case ast::BinaryOp::kLessThan:
+        case core::BinaryOp::kLessThan:
             out << "<";
             break;
-        case ast::BinaryOp::kGreaterThan:
+        case core::BinaryOp::kGreaterThan:
             out << ">";
             break;
-        case ast::BinaryOp::kLessThanEqual:
+        case core::BinaryOp::kLessThanEqual:
             out << "<=";
             break;
-        case ast::BinaryOp::kGreaterThanEqual:
+        case core::BinaryOp::kGreaterThanEqual:
             out << ">=";
             break;
-        case ast::BinaryOp::kShiftLeft:
+        case core::BinaryOp::kShiftLeft:
             out << "<<";
             break;
-        case ast::BinaryOp::kShiftRight:
+        case core::BinaryOp::kShiftRight:
             out << R"(>>)";
             break;
 
-        case ast::BinaryOp::kAdd:
+        case core::BinaryOp::kAdd:
             out << "+";
             break;
-        case ast::BinaryOp::kSubtract:
+        case core::BinaryOp::kSubtract:
             out << "-";
             break;
-        case ast::BinaryOp::kMultiply:
+        case core::BinaryOp::kMultiply:
             out << "*";
             break;
-        case ast::BinaryOp::kDivide:
+        case core::BinaryOp::kDivide:
             out << "/";
             break;
-        case ast::BinaryOp::kModulo:
+        case core::BinaryOp::kModulo:
             out << "%";
             break;
-        case ast::BinaryOp::kNone:
-            diagnostics_.add_error(diag::System::Writer, "missing binary operation type");
-            return;
     }
     out << " ";
     EmitExpression(out, expr->rhs);

@@ -27,7 +27,7 @@ TEST_F(WGSLParserTest, MathExpression_Parses_Multiplicative) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kMultiply, rel->op);
+    EXPECT_EQ(core::BinaryOp::kMultiply, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -51,7 +51,7 @@ TEST_F(WGSLParserTest, MathExpression_Parses_Mixed_MultiplicativeStart) {
     // op: +
     // rhs: c
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kAdd, rel->op);
+    EXPECT_EQ(core::BinaryOp::kAdd, rel->op);
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->rhs->As<ast::IdentifierExpression>();
@@ -62,7 +62,7 @@ TEST_F(WGSLParserTest, MathExpression_Parses_Mixed_MultiplicativeStart) {
     // op: *
     // rhs: b
     rel = rel->lhs->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kMultiply, rel->op);
+    EXPECT_EQ(core::BinaryOp::kMultiply, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -83,7 +83,7 @@ TEST_F(WGSLParserTest, MathExpression_Parses_Additive) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kAdd, rel->op);
+    EXPECT_EQ(core::BinaryOp::kAdd, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -107,7 +107,7 @@ TEST_F(WGSLParserTest, MathExpression_Parses_Mixed_AdditiveStart) {
     // op: +
     // rhs: b * c
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kAdd, rel->op);
+    EXPECT_EQ(core::BinaryOp::kAdd, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -118,7 +118,7 @@ TEST_F(WGSLParserTest, MathExpression_Parses_Mixed_AdditiveStart) {
     // op: *
     // rhs: c
     rel = rel->rhs->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kMultiply, rel->op);
+    EXPECT_EQ(core::BinaryOp::kMultiply, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     ident_expr = rel->lhs->As<ast::IdentifierExpression>();

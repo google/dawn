@@ -43,7 +43,7 @@ TEST_F(WGSLParserTest, BitwiseExpr_Or_Parses) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kOr, rel->op);
+    EXPECT_EQ(core::BinaryOp::kOr, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -67,7 +67,7 @@ TEST_F(WGSLParserTest, BitwiseExpr_Or_Parses_Multiple) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kOr, rel->op);
+    EXPECT_EQ(core::BinaryOp::kOr, rel->op);
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->rhs->As<ast::IdentifierExpression>();
@@ -114,7 +114,7 @@ TEST_F(WGSLParserTest, BitwiseExpr_Xor_Parses) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kXor, rel->op);
+    EXPECT_EQ(core::BinaryOp::kXor, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -137,7 +137,7 @@ TEST_F(WGSLParserTest, BitwiseExpr_Xor_Parses_Multiple) {
     // rhs: b
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kXor, rel->op);
+    EXPECT_EQ(core::BinaryOp::kXor, rel->op);
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->rhs->As<ast::IdentifierExpression>();
@@ -184,7 +184,7 @@ TEST_F(WGSLParserTest, BitwiseExpr_And_Parses) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kAnd, rel->op);
+    EXPECT_EQ(core::BinaryOp::kAnd, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -207,7 +207,7 @@ TEST_F(WGSLParserTest, BitwiseExpr_And_Parses_Multiple) {
     // rhs: b
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kAnd, rel->op);
+    EXPECT_EQ(core::BinaryOp::kAnd, rel->op);
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->rhs->As<ast::IdentifierExpression>();
@@ -242,7 +242,7 @@ TEST_F(WGSLParserTest, BitwiseExpr_And_Parses_AndAnd) {
     // rhs: true
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kAnd, rel->op);
+    EXPECT_EQ(core::BinaryOp::kAnd, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());

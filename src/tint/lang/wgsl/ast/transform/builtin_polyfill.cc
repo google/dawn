@@ -40,7 +40,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::BuiltinPolyfill::Config);
 namespace tint::ast::transform {
 
 /// BinaryOpSignature is tuple of a binary op, LHS type and RHS type
-using BinaryOpSignature = std::tuple<BinaryOp, const type::Type*, const type::Type*>;
+using BinaryOpSignature = std::tuple<core::BinaryOp, const type::Type*, const type::Type*>;
 
 /// PIMPL state for the transform
 struct BuiltinPolyfill::State {
@@ -71,8 +71,8 @@ struct BuiltinPolyfill::State {
                         return;  // Don't polyfill @const expressions
                     }
                     switch (bin_op->op) {
-                        case BinaryOp::kShiftLeft:
-                        case BinaryOp::kShiftRight: {
+                        case core::BinaryOp::kShiftLeft:
+                        case core::BinaryOp::kShiftRight: {
                             if (cfg.builtins.bitshift_modulo) {
                                 ctx.Replace(bin_op,
                                             [this, bin_op] { return BitshiftModulo(bin_op); });
@@ -80,7 +80,7 @@ struct BuiltinPolyfill::State {
                             }
                             break;
                         }
-                        case BinaryOp::kDivide: {
+                        case core::BinaryOp::kDivide: {
                             if (cfg.builtins.int_div_mod) {
                                 auto* lhs_ty = src->TypeOf(bin_op->lhs)->UnwrapRef();
                                 if (lhs_ty->is_integer_scalar_or_vector()) {
@@ -91,7 +91,7 @@ struct BuiltinPolyfill::State {
                             }
                             break;
                         }
-                        case BinaryOp::kModulo: {
+                        case core::BinaryOp::kModulo: {
                             if (cfg.builtins.int_div_mod) {
                                 auto* lhs_ty = src->TypeOf(bin_op->lhs)->UnwrapRef();
                                 if (lhs_ty->is_integer_scalar_or_vector()) {
@@ -903,7 +903,7 @@ struct BuiltinPolyfill::State {
         auto* rhs_ty = src->TypeOf(bin_op->rhs)->UnwrapRef();
         BinaryOpSignature sig{bin_op->op, lhs_ty, rhs_ty};
         auto fn = binary_op_polyfills.GetOrCreate(sig, [&] {
-            const bool is_div = bin_op->op == BinaryOp::kDivide;
+            const bool is_div = bin_op->op == core::BinaryOp::kDivide;
 
             const auto [lhs_el_ty, lhs_width] = lhs_ty->Elements(lhs_ty, 1);
             const auto [rhs_el_ty, rhs_width] = rhs_ty->Elements(rhs_ty, 1);

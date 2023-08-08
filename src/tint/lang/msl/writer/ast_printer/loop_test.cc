@@ -417,7 +417,7 @@ TEST_F(MslASTPrinterTest, Emit_WhileWithMultiCond) {
 
     auto* t = Let("t", Expr(true));
     auto* multi_stmt = LogicalAnd(t, false);
-    // create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(t), Expr(false));
+    // create<ast::BinaryExpression>(core::BinaryOp::kLogicalAnd, Expr(t), Expr(false));
     auto* f = While(multi_stmt, Block(Return()));
     WrapInFunction(t, f);
 

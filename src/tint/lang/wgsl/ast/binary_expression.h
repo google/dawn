@@ -15,32 +15,10 @@
 #ifndef SRC_TINT_LANG_WGSL_AST_BINARY_EXPRESSION_H_
 #define SRC_TINT_LANG_WGSL_AST_BINARY_EXPRESSION_H_
 
+#include "src/tint/lang/core/binary_op.h"
 #include "src/tint/lang/wgsl/ast/expression.h"
 
 namespace tint::ast {
-
-/// The operator type
-enum class BinaryOp {
-    kNone = 0,
-    kAnd,  // &
-    kOr,   // |
-    kXor,
-    kLogicalAnd,  // &&
-    kLogicalOr,   // ||
-    kEqual,
-    kNotEqual,
-    kLessThan,
-    kGreaterThan,
-    kLessThanEqual,
-    kGreaterThanEqual,
-    kShiftLeft,
-    kShiftRight,
-    kAdd,
-    kSubtract,
-    kMultiply,
-    kDivide,
-    kModulo,
-};
 
 /// An binary expression
 class BinaryExpression final : public Castable<BinaryExpression, Expression> {
@@ -55,7 +33,7 @@ class BinaryExpression final : public Castable<BinaryExpression, Expression> {
     BinaryExpression(GenerationID pid,
                      NodeID nid,
                      const Source& source,
-                     BinaryOp op,
+                     core::BinaryOp op,
                      const Expression* lhs,
                      const Expression* rhs);
     /// Move constructor
@@ -63,41 +41,41 @@ class BinaryExpression final : public Castable<BinaryExpression, Expression> {
     ~BinaryExpression() override;
 
     /// @returns true if the op is and
-    bool IsAnd() const { return op == BinaryOp::kAnd; }
+    bool IsAnd() const { return op == core::BinaryOp::kAnd; }
     /// @returns true if the op is or
-    bool IsOr() const { return op == BinaryOp::kOr; }
+    bool IsOr() const { return op == core::BinaryOp::kOr; }
     /// @returns true if the op is xor
-    bool IsXor() const { return op == BinaryOp::kXor; }
+    bool IsXor() const { return op == core::BinaryOp::kXor; }
     /// @returns true if the op is logical and
-    bool IsLogicalAnd() const { return op == BinaryOp::kLogicalAnd; }
+    bool IsLogicalAnd() const { return op == core::BinaryOp::kLogicalAnd; }
     /// @returns true if the op is logical or
-    bool IsLogicalOr() const { return op == BinaryOp::kLogicalOr; }
+    bool IsLogicalOr() const { return op == core::BinaryOp::kLogicalOr; }
     /// @returns true if the op is equal
-    bool IsEqual() const { return op == BinaryOp::kEqual; }
+    bool IsEqual() const { return op == core::BinaryOp::kEqual; }
     /// @returns true if the op is not equal
-    bool IsNotEqual() const { return op == BinaryOp::kNotEqual; }
+    bool IsNotEqual() const { return op == core::BinaryOp::kNotEqual; }
     /// @returns true if the op is less than
-    bool IsLessThan() const { return op == BinaryOp::kLessThan; }
+    bool IsLessThan() const { return op == core::BinaryOp::kLessThan; }
     /// @returns true if the op is greater than
-    bool IsGreaterThan() const { return op == BinaryOp::kGreaterThan; }
+    bool IsGreaterThan() const { return op == core::BinaryOp::kGreaterThan; }
     /// @returns true if the op is less than equal
-    bool IsLessThanEqual() const { return op == BinaryOp::kLessThanEqual; }
+    bool IsLessThanEqual() const { return op == core::BinaryOp::kLessThanEqual; }
     /// @returns true if the op is greater than equal
-    bool IsGreaterThanEqual() const { return op == BinaryOp::kGreaterThanEqual; }
+    bool IsGreaterThanEqual() const { return op == core::BinaryOp::kGreaterThanEqual; }
     /// @returns true if the op is shift left
-    bool IsShiftLeft() const { return op == BinaryOp::kShiftLeft; }
+    bool IsShiftLeft() const { return op == core::BinaryOp::kShiftLeft; }
     /// @returns true if the op is shift right
-    bool IsShiftRight() const { return op == BinaryOp::kShiftRight; }
+    bool IsShiftRight() const { return op == core::BinaryOp::kShiftRight; }
     /// @returns true if the op is add
-    bool IsAdd() const { return op == BinaryOp::kAdd; }
+    bool IsAdd() const { return op == core::BinaryOp::kAdd; }
     /// @returns true if the op is subtract
-    bool IsSubtract() const { return op == BinaryOp::kSubtract; }
+    bool IsSubtract() const { return op == core::BinaryOp::kSubtract; }
     /// @returns true if the op is multiply
-    bool IsMultiply() const { return op == BinaryOp::kMultiply; }
+    bool IsMultiply() const { return op == core::BinaryOp::kMultiply; }
     /// @returns true if the op is divide
-    bool IsDivide() const { return op == BinaryOp::kDivide; }
+    bool IsDivide() const { return op == core::BinaryOp::kDivide; }
     /// @returns true if the op is modulo
-    bool IsModulo() const { return op == BinaryOp::kModulo; }
+    bool IsModulo() const { return op == core::BinaryOp::kModulo; }
     /// @returns true if the op is an arithmetic operation
     bool IsArithmetic() const;
     /// @returns true if the op is a comparison operation
@@ -116,7 +94,7 @@ class BinaryExpression final : public Castable<BinaryExpression, Expression> {
     const BinaryExpression* Clone(CloneContext& ctx) const override;
 
     /// the binary op type
-    const BinaryOp op;
+    const core::BinaryOp op;
     /// the left side expression
     const Expression* const lhs;
     /// the right side expression
@@ -125,13 +103,13 @@ class BinaryExpression final : public Castable<BinaryExpression, Expression> {
 
 /// @param op the operator
 /// @returns true if the op is an arithmetic operation
-inline bool IsArithmetic(BinaryOp op) {
+inline bool IsArithmetic(core::BinaryOp op) {
     switch (op) {
-        case BinaryOp::kAdd:
-        case BinaryOp::kSubtract:
-        case BinaryOp::kMultiply:
-        case BinaryOp::kDivide:
-        case BinaryOp::kModulo:
+        case core::BinaryOp::kAdd:
+        case core::BinaryOp::kSubtract:
+        case core::BinaryOp::kMultiply:
+        case core::BinaryOp::kDivide:
+        case core::BinaryOp::kModulo:
             return true;
         default:
             return false;
@@ -140,14 +118,14 @@ inline bool IsArithmetic(BinaryOp op) {
 
 /// @param op the operator
 /// @returns true if the op is a comparison operation
-inline bool IsComparison(BinaryOp op) {
+inline bool IsComparison(core::BinaryOp op) {
     switch (op) {
-        case BinaryOp::kEqual:
-        case BinaryOp::kNotEqual:
-        case BinaryOp::kLessThan:
-        case BinaryOp::kLessThanEqual:
-        case BinaryOp::kGreaterThan:
-        case BinaryOp::kGreaterThanEqual:
+        case core::BinaryOp::kEqual:
+        case core::BinaryOp::kNotEqual:
+        case core::BinaryOp::kLessThan:
+        case core::BinaryOp::kLessThanEqual:
+        case core::BinaryOp::kGreaterThan:
+        case core::BinaryOp::kGreaterThanEqual:
             return true;
         default:
             return false;
@@ -156,11 +134,11 @@ inline bool IsComparison(BinaryOp op) {
 
 /// @param op the operator
 /// @returns true if the op is a bitwise operation
-inline bool IsBitwise(BinaryOp op) {
+inline bool IsBitwise(core::BinaryOp op) {
     switch (op) {
-        case BinaryOp::kAnd:
-        case BinaryOp::kOr:
-        case BinaryOp::kXor:
+        case core::BinaryOp::kAnd:
+        case core::BinaryOp::kOr:
+        case core::BinaryOp::kXor:
             return true;
         default:
             return false;
@@ -169,10 +147,10 @@ inline bool IsBitwise(BinaryOp op) {
 
 /// @param op the operator
 /// @returns true if the op is a bit shift operation
-inline bool IsBitshift(BinaryOp op) {
+inline bool IsBitshift(core::BinaryOp op) {
     switch (op) {
-        case BinaryOp::kShiftLeft:
-        case BinaryOp::kShiftRight:
+        case core::BinaryOp::kShiftLeft:
+        case core::BinaryOp::kShiftRight:
             return true;
         default:
             return false;
@@ -181,8 +159,8 @@ inline bool IsBitshift(BinaryOp op) {
 
 inline bool BinaryExpression::IsLogical() const {
     switch (op) {
-        case BinaryOp::kLogicalAnd:
-        case BinaryOp::kLogicalOr:
+        case core::BinaryOp::kLogicalAnd:
+        case core::BinaryOp::kLogicalOr:
             return true;
         default:
             return false;
@@ -205,103 +183,99 @@ inline bool BinaryExpression::IsBitshift() const {
     return ast::IsBitshift(op);
 }
 
-/// @returns the human readable name of the given BinaryOp
-/// @param op the BinaryOp
-constexpr const char* FriendlyName(BinaryOp op) {
+/// @returns the human readable name of the given core::BinaryOp
+/// @param op the core::BinaryOp
+constexpr const char* FriendlyName(core::BinaryOp op) {
     switch (op) {
-        case BinaryOp::kNone:
-            return "none";
-        case BinaryOp::kAnd:
+        case core::BinaryOp::kAnd:
             return "and";
-        case BinaryOp::kOr:
+        case core::BinaryOp::kOr:
             return "or";
-        case BinaryOp::kXor:
+        case core::BinaryOp::kXor:
             return "xor";
-        case BinaryOp::kLogicalAnd:
+        case core::BinaryOp::kLogicalAnd:
             return "logical_and";
-        case BinaryOp::kLogicalOr:
+        case core::BinaryOp::kLogicalOr:
             return "logical_or";
-        case BinaryOp::kEqual:
+        case core::BinaryOp::kEqual:
             return "equal";
-        case BinaryOp::kNotEqual:
+        case core::BinaryOp::kNotEqual:
             return "not_equal";
-        case BinaryOp::kLessThan:
+        case core::BinaryOp::kLessThan:
             return "less_than";
-        case BinaryOp::kGreaterThan:
+        case core::BinaryOp::kGreaterThan:
             return "greater_than";
-        case BinaryOp::kLessThanEqual:
+        case core::BinaryOp::kLessThanEqual:
             return "less_than_equal";
-        case BinaryOp::kGreaterThanEqual:
+        case core::BinaryOp::kGreaterThanEqual:
             return "greater_than_equal";
-        case BinaryOp::kShiftLeft:
+        case core::BinaryOp::kShiftLeft:
             return "shift_left";
-        case BinaryOp::kShiftRight:
+        case core::BinaryOp::kShiftRight:
             return "shift_right";
-        case BinaryOp::kAdd:
+        case core::BinaryOp::kAdd:
             return "add";
-        case BinaryOp::kSubtract:
+        case core::BinaryOp::kSubtract:
             return "subtract";
-        case BinaryOp::kMultiply:
+        case core::BinaryOp::kMultiply:
             return "multiply";
-        case BinaryOp::kDivide:
+        case core::BinaryOp::kDivide:
             return "divide";
-        case BinaryOp::kModulo:
+        case core::BinaryOp::kModulo:
             return "modulo";
     }
     return "<invalid>";
 }
 
-/// @returns the WGSL operator of the BinaryOp
-/// @param op the BinaryOp
-constexpr const char* Operator(BinaryOp op) {
+/// @returns the WGSL operator of the core::BinaryOp
+/// @param op the core::BinaryOp
+constexpr const char* Operator(core::BinaryOp op) {
     switch (op) {
-        case BinaryOp::kAnd:
+        case core::BinaryOp::kAnd:
             return "&";
-        case BinaryOp::kOr:
+        case core::BinaryOp::kOr:
             return "|";
-        case BinaryOp::kXor:
+        case core::BinaryOp::kXor:
             return "^";
-        case BinaryOp::kLogicalAnd:
+        case core::BinaryOp::kLogicalAnd:
             return "&&";
-        case BinaryOp::kLogicalOr:
+        case core::BinaryOp::kLogicalOr:
             return "||";
-        case BinaryOp::kEqual:
+        case core::BinaryOp::kEqual:
             return "==";
-        case BinaryOp::kNotEqual:
+        case core::BinaryOp::kNotEqual:
             return "!=";
-        case BinaryOp::kLessThan:
+        case core::BinaryOp::kLessThan:
             return "<";
-        case BinaryOp::kGreaterThan:
+        case core::BinaryOp::kGreaterThan:
             return ">";
-        case BinaryOp::kLessThanEqual:
+        case core::BinaryOp::kLessThanEqual:
             return "<=";
-        case BinaryOp::kGreaterThanEqual:
+        case core::BinaryOp::kGreaterThanEqual:
             return ">=";
-        case BinaryOp::kShiftLeft:
+        case core::BinaryOp::kShiftLeft:
             return "<<";
-        case BinaryOp::kShiftRight:
+        case core::BinaryOp::kShiftRight:
             return ">>";
-        case BinaryOp::kAdd:
+        case core::BinaryOp::kAdd:
             return "+";
-        case BinaryOp::kSubtract:
+        case core::BinaryOp::kSubtract:
             return "-";
-        case BinaryOp::kMultiply:
+        case core::BinaryOp::kMultiply:
             return "*";
-        case BinaryOp::kDivide:
+        case core::BinaryOp::kDivide:
             return "/";
-        case BinaryOp::kModulo:
+        case core::BinaryOp::kModulo:
             return "%";
-        default:
-            break;
     }
     return "<invalid>";
 }
 
 /// @param out the stream to write to
-/// @param op the BinaryOp
+/// @param op the core::BinaryOp
 /// @return the stream so calls can be chained
 template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
-auto& operator<<(STREAM& out, BinaryOp op) {
+auto& operator<<(STREAM& out, core::BinaryOp op) {
     out << FriendlyName(op);
     return out;
 }

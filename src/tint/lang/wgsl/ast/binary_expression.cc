@@ -24,7 +24,7 @@ namespace tint::ast {
 BinaryExpression::BinaryExpression(GenerationID pid,
                                    NodeID nid,
                                    const Source& src,
-                                   BinaryOp o,
+                                   core::BinaryOp o,
                                    const Expression* l,
                                    const Expression* r)
     : Base(pid, nid, src), op(o), lhs(l), rhs(r) {
@@ -32,7 +32,6 @@ BinaryExpression::BinaryExpression(GenerationID pid,
     TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(lhs, generation_id);
     TINT_ASSERT(rhs);
     TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(rhs, generation_id);
-    TINT_ASSERT(op != BinaryOp::kNone);
 }
 
 BinaryExpression::~BinaryExpression() = default;

@@ -2171,16 +2171,16 @@ Maybe<const ast::Expression*> Parser::bitwise_expression_post_unary_expression(
     const ast::Expression* lhs) {
     auto& t = peek();
 
-    ast::BinaryOp op = ast::BinaryOp::kXor;
+    std::optional<core::BinaryOp> op;
     switch (t.type()) {
         case Token::Type::kAnd:
-            op = ast::BinaryOp::kAnd;
+            op = core::BinaryOp::kAnd;
             break;
         case Token::Type::kOr:
-            op = ast::BinaryOp::kOr;
+            op = core::BinaryOp::kOr;
             break;
         case Token::Type::kXor:
-            op = ast::BinaryOp::kXor;
+            op = core::BinaryOp::kXor;
             break;
         default:
             return Failure::kNoMatch;
@@ -2197,7 +2197,7 @@ Maybe<const ast::Expression*> Parser::bitwise_expression_post_unary_expression(
                                          std::string(t.to_name()) + " expression");
         }
 
-        lhs = create<ast::BinaryExpression>(t.source(), op, lhs, rhs.value);
+        lhs = create<ast::BinaryExpression>(t.source(), *op, lhs, rhs.value);
 
         if (!match(t.type())) {
             return lhs;
@@ -2210,15 +2210,15 @@ Maybe<const ast::Expression*> Parser::bitwise_expression_post_unary_expression(
 //   : FORWARD_SLASH
 //   | MODULO
 //   | STAR
-Maybe<ast::BinaryOp> Parser::multiplicative_operator() {
+Maybe<core::BinaryOp> Parser::multiplicative_operator() {
     if (match(Token::Type::kForwardSlash)) {
-        return ast::BinaryOp::kDivide;
+        return core::BinaryOp::kDivide;
     }
     if (match(Token::Type::kMod)) {
-        return ast::BinaryOp::kModulo;
+        return core::BinaryOp::kModulo;
     }
     if (match(Token::Type::kStar)) {
-        return ast::BinaryOp::kMultiply;
+        return core::BinaryOp::kMultiply;
     }
 
     return Failure::kNoMatch;
@@ -2259,9 +2259,9 @@ Expect<const ast::Expression*> Parser::expect_multiplicative_expression_post_una
 //
 // Note, this also splits a `--` token. This is currently safe as the only way to get into
 // here is through additive expression and rules for where `--` are allowed are very restrictive.
-Maybe<ast::BinaryOp> Parser::additive_operator() {
+Maybe<core::BinaryOp> Parser::additive_operator() {
     if (match(Token::Type::kPlus)) {
-        return ast::BinaryOp::kAdd;
+        return core::BinaryOp::kAdd;
     }
 
     auto& t = peek();
@@ -2274,7 +2274,7 @@ Maybe<ast::BinaryOp> Parser::additive_operator() {
         return Failure::kNoMatch;
     }
 
-    return ast::BinaryOp::kSubtract;
+    return core::BinaryOp::kSubtract;
 }
 
 // additive_expression.pos.unary_expression
@@ -2356,12 +2356,12 @@ Expect<const ast::Expression*> Parser::expect_shift_expression_post_unary_expres
     auto& t = peek();
     if (match(Token::Type::kShiftLeft) || match(Token::Type::kShiftRight)) {
         std::string name;
-        ast::BinaryOp op = ast::BinaryOp::kNone;
+        std::optional<core::BinaryOp> op;
         if (t.Is(Token::Type::kShiftLeft)) {
-            op = ast::BinaryOp::kShiftLeft;
+            op = core::BinaryOp::kShiftLeft;
             name = "<<";
         } else if (t.Is(Token::Type::kShiftRight)) {
-            op = ast::BinaryOp::kShiftRight;
+            op = core::BinaryOp::kShiftRight;
             name = ">>";
         }
 
@@ -2374,7 +2374,7 @@ Expect<const ast::Expression*> Parser::expect_shift_expression_post_unary_expres
             return add_error(rhs_start,
                              std::string("unable to parse right side of ") + name + " expression");
         }
-        return create<ast::BinaryExpression>(t.source(), op, lhs, rhs.value);
+        return create<ast::BinaryExpression>(t.source(), *op, lhs, rhs.value);
     }
 
     return expect_math_expression_post_unary_expression(lhs);
@@ -2413,25 +2413,25 @@ Expect<const ast::Expression*> Parser::expect_relational_expression_post_unary_e
 
     auto& tok_op = peek();
 
-    ast::BinaryOp op = ast::BinaryOp::kNone;
+    std::optional<core::BinaryOp> op;
     switch (tok_op.type()) {
         case Token::Type::kLessThan:
-            op = ast::BinaryOp::kLessThan;
+            op = core::BinaryOp::kLessThan;
             break;
         case Token::Type::kGreaterThan:
-            op = ast::BinaryOp::kGreaterThan;
+            op = core::BinaryOp::kGreaterThan;
             break;
         case Token::Type::kLessThanEqual:
-            op = ast::BinaryOp::kLessThanEqual;
+            op = core::BinaryOp::kLessThanEqual;
             break;
         case Token::Type::kGreaterThanEqual:
-            op = ast::BinaryOp::kGreaterThanEqual;
+            op = core::BinaryOp::kGreaterThanEqual;
             break;
         case Token::Type::kEqualEqual:
-            op = ast::BinaryOp::kEqual;
+            op = core::BinaryOp::kEqual;
             break;
         case Token::Type::kNotEqual:
-            op = ast::BinaryOp::kNotEqual;
+            op = core::BinaryOp::kNotEqual;
             break;
         default:
             return lhs;
@@ -2449,7 +2449,7 @@ Expect<const ast::Expression*> Parser::expect_relational_expression_post_unary_e
                                       std::string(tok_op.to_name()) + " expression");
     }
 
-    return create<ast::BinaryExpression>(tok_op.source(), op, lhs, rhs.value);
+    return create<ast::BinaryExpression>(tok_op.source(), *op, lhs, rhs.value);
 }
 
 Expect<const ast::Expression*> Parser::expect_expression(std::string_view use) {
@@ -2548,11 +2548,11 @@ Maybe<const ast::Expression*> Parser::expression() {
 
         auto& t = peek();
         if (t.Is(Token::Type::kAndAnd) || t.Is(Token::Type::kOrOr)) {
-            ast::BinaryOp op = ast::BinaryOp::kNone;
+            core::BinaryOp op;
             if (t.Is(Token::Type::kAndAnd)) {
-                op = ast::BinaryOp::kLogicalAnd;
+                op = core::BinaryOp::kLogicalAnd;
             } else if (t.Is(Token::Type::kOrOr)) {
-                op = ast::BinaryOp::kLogicalOr;
+                op = core::BinaryOp::kLogicalOr;
             }
 
             while (continue_parsing()) {
@@ -2677,32 +2677,32 @@ Maybe<const ast::Expression*> Parser::unary_expression() {
 //   | xor_equal
 //   | shift_right_equal
 //   | shift_left_equal
-Maybe<ast::BinaryOp> Parser::compound_assignment_operator() {
-    ast::BinaryOp compound_op = ast::BinaryOp::kNone;
+Maybe<core::BinaryOp> Parser::compound_assignment_operator() {
+    std::optional<core::BinaryOp> compound_op;
     if (peek_is(Token::Type::kPlusEqual)) {
-        compound_op = ast::BinaryOp::kAdd;
+        compound_op = core::BinaryOp::kAdd;
     } else if (peek_is(Token::Type::kMinusEqual)) {
-        compound_op = ast::BinaryOp::kSubtract;
+        compound_op = core::BinaryOp::kSubtract;
     } else if (peek_is(Token::Type::kTimesEqual)) {
-        compound_op = ast::BinaryOp::kMultiply;
+        compound_op = core::BinaryOp::kMultiply;
     } else if (peek_is(Token::Type::kDivisionEqual)) {
-        compound_op = ast::BinaryOp::kDivide;
+        compound_op = core::BinaryOp::kDivide;
     } else if (peek_is(Token::Type::kModuloEqual)) {
-        compound_op = ast::BinaryOp::kModulo;
+        compound_op = core::BinaryOp::kModulo;
     } else if (peek_is(Token::Type::kAndEqual)) {
-        compound_op = ast::BinaryOp::kAnd;
+        compound_op = core::BinaryOp::kAnd;
     } else if (peek_is(Token::Type::kOrEqual)) {
-        compound_op = ast::BinaryOp::kOr;
+        compound_op = core::BinaryOp::kOr;
     } else if (peek_is(Token::Type::kXorEqual)) {
-        compound_op = ast::BinaryOp::kXor;
+        compound_op = core::BinaryOp::kXor;
     } else if (peek_is(Token::Type::kShiftLeftEqual)) {
-        compound_op = ast::BinaryOp::kShiftLeft;
+        compound_op = core::BinaryOp::kShiftLeft;
     } else if (peek_is(Token::Type::kShiftRightEqual)) {
-        compound_op = ast::BinaryOp::kShiftRight;
+        compound_op = core::BinaryOp::kShiftRight;
     }
-    if (compound_op != ast::BinaryOp::kNone) {
+    if (compound_op) {
         next();
-        return compound_op;
+        return *compound_op;
     }
     return Failure::kNoMatch;
 }
@@ -2813,7 +2813,7 @@ Maybe<const ast::Statement*> Parser::variable_updating_statement() {
 
     Source source;
     const ast::Expression* lhs = nullptr;
-    ast::BinaryOp compound_op = ast::BinaryOp::kNone;
+    std::optional<core::BinaryOp> compound_op;
     if (peek_is(Token::Type::kUnderscore)) {
         next();  // Consume the peek.
 
@@ -2865,8 +2865,8 @@ Maybe<const ast::Statement*> Parser::variable_updating_statement() {
         return add_error(peek(), "unable to parse right side of assignment");
     }
 
-    if (compound_op != ast::BinaryOp::kNone) {
-        return create<ast::CompoundAssignmentStatement>(source, lhs, rhs.value, compound_op);
+    if (compound_op) {
+        return create<ast::CompoundAssignmentStatement>(source, lhs, rhs.value, *compound_op);
     }
     return create<ast::AssignmentStatement>(source, lhs, rhs.value);
 }

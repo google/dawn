@@ -23,11 +23,13 @@
 #include "src/tint/utils/text/string_stream.h"
 
 // Forward declarations
+namespace tint::core {
+enum class BinaryOp;
+}
 namespace tint::ast {
 class AssignmentStatement;
 class Attribute;
 class BinaryExpression;
-enum class BinaryOp;
 class BitcastExpression;
 class BlockStatement;
 class BlockStatement;
@@ -101,7 +103,7 @@ class SyntaxTreePrinter : public tint::TextGenerator {
     void EmitBinary(const ast::BinaryExpression* expr);
     /// Handles generating a binary operator
     /// @param op the binary operator
-    void EmitBinaryOp(const ast::BinaryOp op);
+    void EmitBinaryOp(const core::BinaryOp op);
     /// Handles generating a bitcast expression
     /// @param expr the bitcast expression
     void EmitBitcast(const ast::BitcastExpression* expr);

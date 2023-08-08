@@ -60,7 +60,7 @@ TEST_F(WGSLParserTest, SwitchBody_Case_Expression) {
     ASSERT_TRUE(sel->expr->Is<ast::BinaryExpression>());
     auto* expr = sel->expr->As<ast::BinaryExpression>();
 
-    EXPECT_EQ(ast::BinaryOp::kAdd, expr->op);
+    EXPECT_EQ(core::BinaryOp::kAdd, expr->op);
     auto* v = expr->lhs->As<ast::IntLiteralExpression>();
     ASSERT_NE(nullptr, v);
     EXPECT_EQ(v->value, 1u);

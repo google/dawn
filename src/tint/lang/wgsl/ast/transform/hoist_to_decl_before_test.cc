@@ -630,7 +630,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopCont) {
     ProgramBuilder b;
     b.Func("foo", tint::Empty, b.ty.void_(), tint::Empty);
     auto* var = b.Decl(b.Var("a", b.Expr(1_i)));
-    auto* cont = b.CompoundAssign("a", b.Expr(1_i), BinaryOp::kAdd);
+    auto* cont = b.CompoundAssign("a", b.Expr(1_i), core::BinaryOp::kAdd);
     auto* s = b.For(nullptr, b.Expr(true), cont, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var, s});
 
@@ -681,7 +681,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopCont_Function) {
     ProgramBuilder b;
     b.Func("foo", tint::Empty, b.ty.void_(), tint::Empty);
     auto* var = b.Decl(b.Var("a", b.Expr(1_i)));
-    auto* cont = b.CompoundAssign("a", b.Expr(1_i), BinaryOp::kAdd);
+    auto* cont = b.CompoundAssign("a", b.Expr(1_i), core::BinaryOp::kAdd);
     auto* s = b.For(nullptr, b.Expr(true), cont, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var, s});
 
@@ -1050,7 +1050,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_ForLoopCont) {
     ProgramBuilder b;
     b.Func("foo", tint::Empty, b.ty.void_(), tint::Empty);
     auto* var = b.Decl(b.Var("a", b.Expr(1_i)));
-    auto* cont = b.CompoundAssign("a", b.Expr(1_i), BinaryOp::kAdd);
+    auto* cont = b.CompoundAssign("a", b.Expr(1_i), core::BinaryOp::kAdd);
     auto* s = b.For(nullptr, b.Expr(true), cont, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var, s});
 
@@ -1100,7 +1100,7 @@ TEST_F(HoistToDeclBeforeTest, Replace_ForLoopCont_Function) {
     ProgramBuilder b;
     b.Func("foo", tint::Empty, b.ty.void_(), tint::Empty);
     auto* var = b.Decl(b.Var("a", b.Expr(1_i)));
-    auto* cont = b.CompoundAssign("a", b.Expr(1_i), BinaryOp::kAdd);
+    auto* cont = b.CompoundAssign("a", b.Expr(1_i), core::BinaryOp::kAdd);
     auto* s = b.For(nullptr, b.Expr(true), cont, b.Block());
     b.Func("f", tint::Empty, b.ty.void_(), Vector{var, s});
 

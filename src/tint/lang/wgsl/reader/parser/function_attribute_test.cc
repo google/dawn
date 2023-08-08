@@ -57,7 +57,7 @@ TEST_F(WGSLParserTest, Attribute_Workgroup_Expression) {
 
     ASSERT_TRUE(values[0]->Is<ast::BinaryExpression>());
     auto* expr = values[0]->As<ast::BinaryExpression>();
-    EXPECT_EQ(expr->op, ast::BinaryOp::kAdd);
+    EXPECT_EQ(expr->op, core::BinaryOp::kAdd);
 
     EXPECT_EQ(expr->lhs->As<ast::IntLiteralExpression>()->value, 4);
     EXPECT_EQ(expr->lhs->As<ast::IntLiteralExpression>()->suffix,
@@ -149,7 +149,7 @@ TEST_F(WGSLParserTest, Attribute_Workgroup_2Param_Expression) {
 
     ASSERT_TRUE(values[1]->Is<ast::BinaryExpression>());
     auto* expr = values[1]->As<ast::BinaryExpression>();
-    EXPECT_EQ(expr->op, ast::BinaryOp::kSubtract);
+    EXPECT_EQ(expr->op, core::BinaryOp::kSubtract);
 
     EXPECT_EQ(expr->lhs->As<ast::IntLiteralExpression>()->value, 5);
     EXPECT_EQ(expr->lhs->As<ast::IntLiteralExpression>()->suffix,
@@ -252,7 +252,7 @@ TEST_F(WGSLParserTest, Attribute_Workgroup_3Param_Expression) {
 
     ASSERT_TRUE(values[2]->Is<ast::BinaryExpression>());
     auto* expr = values[2]->As<ast::BinaryExpression>();
-    EXPECT_EQ(expr->op, ast::BinaryOp::kShiftLeft);
+    EXPECT_EQ(expr->op, core::BinaryOp::kShiftLeft);
 
     EXPECT_EQ(expr->lhs->As<ast::IntLiteralExpression>()->value, 6);
     EXPECT_EQ(expr->lhs->As<ast::IntLiteralExpression>()->suffix,

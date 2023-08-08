@@ -31,7 +31,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, CompatibleTypes) {
     // var a : i32 = 2;
     // a += 2
     auto* var = Var("a", ty.i32(), Expr(2_i));
-    WrapInFunction(var, CompoundAssign(Source{{12, 34}}, "a", 2_i, ast::BinaryOp::kAdd));
+    WrapInFunction(var, CompoundAssign(Source{{12, 34}}, "a", 2_i, core::BinaryOp::kAdd));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -42,7 +42,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, CompatibleTypesThroughAlias) {
     // a += 2
     auto* myint = Alias("myint", ty.i32());
     auto* var = Var("a", ty.Of(myint), Expr(2_i));
-    WrapInFunction(var, CompoundAssign(Source{{12, 34}}, "a", 2_i, ast::BinaryOp::kAdd));
+    WrapInFunction(var, CompoundAssign(Source{{12, 34}}, "a", 2_i, core::BinaryOp::kAdd));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -54,7 +54,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, CompatibleTypesAssignThroughPoi
     auto* var_a = Var("a", ty.i32(), core::AddressSpace::kFunction, Expr(2_i));
     auto* var_b = Let("b", ty.ptr<function, i32>(), AddressOf(Expr("a")));
     WrapInFunction(var_a, var_b,
-                   CompoundAssign(Source{{12, 34}}, Deref("b"), 2_i, ast::BinaryOp::kAdd));
+                   CompoundAssign(Source{{12, 34}}, Deref("b"), 2_i, core::BinaryOp::kAdd));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -67,7 +67,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, IncompatibleTypes) {
 
     auto* var = Var("a", ty.i32(), Expr(2_i));
 
-    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 2.3_f, ast::BinaryOp::kAdd);
+    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 2.3_f, core::BinaryOp::kAdd);
     WrapInFunction(var, assign);
 
     ASSERT_FALSE(r()->Resolve());
@@ -84,7 +84,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, IncompatibleOp) {
 
     auto* var = Var("a", ty.f32(), Expr(1_f));
 
-    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 2_f, ast::BinaryOp::kOr);
+    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 2_f, core::BinaryOp::kOr);
     WrapInFunction(var, assign);
 
     ASSERT_FALSE(r()->Resolve());
@@ -101,7 +101,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, VectorScalar_Pass) {
 
     auto* var = Var("a", ty.vec4<f32>());
 
-    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 1_f, ast::BinaryOp::kAdd);
+    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 1_f, core::BinaryOp::kAdd);
     WrapInFunction(var, assign);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -115,7 +115,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, ScalarVector_Fail) {
 
     auto* var = Var("a", ty.f32());
 
-    auto* assign = CompoundAssign(Source{{12, 34}}, "a", Call<vec4<f32>>(), ast::BinaryOp::kAdd);
+    auto* assign = CompoundAssign(Source{{12, 34}}, "a", Call<vec4<f32>>(), core::BinaryOp::kAdd);
     WrapInFunction(var, assign);
 
     ASSERT_FALSE(r()->Resolve());
@@ -131,7 +131,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, MatrixScalar_Pass) {
 
     auto* var = Var("a", ty.mat4x4<f32>());
 
-    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 2_f, ast::BinaryOp::kMultiply);
+    auto* assign = CompoundAssign(Source{{12, 34}}, "a", 2_f, core::BinaryOp::kMultiply);
     WrapInFunction(var, assign);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -146,7 +146,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, ScalarMatrix_Fail) {
     auto* var = Var("a", ty.f32());
 
     auto* assign =
-        CompoundAssign(Source{{12, 34}}, "a", Call<mat4x4<f32>>(), ast::BinaryOp::kMultiply);
+        CompoundAssign(Source{{12, 34}}, "a", Call<mat4x4<f32>>(), core::BinaryOp::kMultiply);
     WrapInFunction(var, assign);
 
     ASSERT_FALSE(r()->Resolve());
@@ -163,7 +163,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, VectorMatrix_Pass) {
     auto* var = Var("a", ty.vec4<f32>());
 
     auto* assign =
-        CompoundAssign(Source{{12, 34}}, "a", Call<mat4x4<f32>>(), ast::BinaryOp::kMultiply);
+        CompoundAssign(Source{{12, 34}}, "a", Call<mat4x4<f32>>(), core::BinaryOp::kMultiply);
     WrapInFunction(var, assign);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -178,7 +178,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, VectorMatrix_ColumnMismatch) {
     auto* var = Var("a", ty.vec4<f32>());
 
     auto* assign =
-        CompoundAssign(Source{{12, 34}}, "a", Call<mat4x2<f32>>(), ast::BinaryOp::kMultiply);
+        CompoundAssign(Source{{12, 34}}, "a", Call<mat4x2<f32>>(), core::BinaryOp::kMultiply);
     WrapInFunction(var, assign);
 
     ASSERT_FALSE(r()->Resolve());
@@ -197,7 +197,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, VectorMatrix_ResultMismatch) {
     auto* var = Var("a", ty.vec4<f32>());
 
     auto* assign =
-        CompoundAssign(Source{{12, 34}}, "a", Call<mat2x4<f32>>(), ast::BinaryOp::kMultiply);
+        CompoundAssign(Source{{12, 34}}, "a", Call<mat2x4<f32>>(), core::BinaryOp::kMultiply);
     WrapInFunction(var, assign);
 
     ASSERT_FALSE(r()->Resolve());
@@ -214,7 +214,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, MatrixVector_Fail) {
     auto* var = Var("a", ty.mat4x4<f32>());
 
     auto* assign =
-        CompoundAssign(Source{{12, 34}}, "a", Call<vec4<f32>>(), ast::BinaryOp::kMultiply);
+        CompoundAssign(Source{{12, 34}}, "a", Call<vec4<f32>>(), core::BinaryOp::kMultiply);
     WrapInFunction(var, assign);
 
     ASSERT_FALSE(r()->Resolve());
@@ -226,7 +226,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, Phony) {
     // {
     //   _ += 1i;
     // }
-    WrapInFunction(CompoundAssign(Source{{56, 78}}, Phony(), 1_i, ast::BinaryOp::kAdd));
+    WrapInFunction(CompoundAssign(Source{{56, 78}}, Phony(), 1_i, core::BinaryOp::kAdd));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(),
                 HasSubstr("56:78 error: no matching overload for operator += (void, i32)"));
@@ -239,7 +239,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, ReadOnlyBuffer) {
     // }
     GlobalVar(Source{{12, 34}}, "a", ty.i32(), core::AddressSpace::kStorage, core::Access::kRead,
               Group(0_a), Binding(0_a));
-    WrapInFunction(CompoundAssign(Source{{56, 78}}, "a", 1_i, ast::BinaryOp::kAdd));
+    WrapInFunction(CompoundAssign(Source{{56, 78}}, "a", 1_i, core::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -250,7 +250,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, LhsLet) {
     // let a = 1i;
     // a += 1i;
     auto* a = Let(Source{{12, 34}}, "a", Expr(1_i));
-    WrapInFunction(a, CompoundAssign(Expr(Source{{56, 78}}, "a"), 1_i, ast::BinaryOp::kAdd));
+    WrapInFunction(a, CompoundAssign(Expr(Source{{56, 78}}, "a"), 1_i, core::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(56:78 error: cannot assign to let 'a'
@@ -260,7 +260,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, LhsLet) {
 
 TEST_F(ResolverCompoundAssignmentValidationTest, LhsLiteral) {
     // 1i += 1i;
-    WrapInFunction(CompoundAssign(Expr(Source{{56, 78}}, 1_i), 1_i, ast::BinaryOp::kAdd));
+    WrapInFunction(CompoundAssign(Expr(Source{{56, 78}}, 1_i), 1_i, core::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(56:78 error: cannot assign to value expression of type 'i32')");
@@ -270,7 +270,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, LhsAtomic) {
     // var<workgroup> a : atomic<i32>;
     // a += a;
     GlobalVar(Source{{12, 34}}, "a", ty.atomic(ty.i32()), core::AddressSpace::kWorkgroup);
-    WrapInFunction(CompoundAssign(Source{{56, 78}}, "a", "a", ast::BinaryOp::kAdd));
+    WrapInFunction(CompoundAssign(Source{{56, 78}}, "a", "a", core::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(

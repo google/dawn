@@ -2001,7 +2001,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` summing the arguments `lhs` and `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Add(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(ast::BinaryOp::kAdd, Expr(std::forward<LHS>(lhs)),
+        return create<ast::BinaryExpression>(core::BinaryOp::kAdd, Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
 
@@ -2011,7 +2011,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` summing the arguments `lhs` and `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Add(const Source& source, LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(source, ast::BinaryOp::kAdd,
+        return create<ast::BinaryExpression>(source, core::BinaryOp::kAdd,
                                              Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
@@ -2021,7 +2021,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` bitwise anding `lhs` and `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* And(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(ast::BinaryOp::kAnd, Expr(std::forward<LHS>(lhs)),
+        return create<ast::BinaryExpression>(core::BinaryOp::kAnd, Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
 
@@ -2030,7 +2030,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` bitwise or-ing `lhs` and `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Or(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(ast::BinaryOp::kOr, Expr(std::forward<LHS>(lhs)),
+        return create<ast::BinaryExpression>(core::BinaryOp::kOr, Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
 
@@ -2039,8 +2039,8 @@ class Builder {
     /// @returns a `ast::BinaryExpression` subtracting `rhs` from `lhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Sub(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(ast::BinaryOp::kSubtract, Expr(std::forward<LHS>(lhs)),
-                                             Expr(std::forward<RHS>(rhs)));
+        return create<ast::BinaryExpression>(
+            core::BinaryOp::kSubtract, Expr(std::forward<LHS>(lhs)), Expr(std::forward<RHS>(rhs)));
     }
 
     /// @param lhs the left hand argument to the multiplication operation
@@ -2048,8 +2048,8 @@ class Builder {
     /// @returns a `ast::BinaryExpression` multiplying `rhs` from `lhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Mul(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr(std::forward<LHS>(lhs)),
-                                             Expr(std::forward<RHS>(rhs)));
+        return create<ast::BinaryExpression>(
+            core::BinaryOp::kMultiply, Expr(std::forward<LHS>(lhs)), Expr(std::forward<RHS>(rhs)));
     }
 
     /// @param source the source information
@@ -2058,7 +2058,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` multiplying `rhs` from `lhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Mul(const Source& source, LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(source, ast::BinaryOp::kMultiply,
+        return create<ast::BinaryExpression>(source, core::BinaryOp::kMultiply,
                                              Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
@@ -2068,7 +2068,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` dividing `lhs` by `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Div(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(ast::BinaryOp::kDivide, Expr(std::forward<LHS>(lhs)),
+        return create<ast::BinaryExpression>(core::BinaryOp::kDivide, Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
 
@@ -2078,7 +2078,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` dividing `lhs` by `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Div(const Source& source, LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(source, ast::BinaryOp::kDivide,
+        return create<ast::BinaryExpression>(source, core::BinaryOp::kDivide,
                                              Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
@@ -2088,7 +2088,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` applying modulo of `lhs` by `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Mod(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr(std::forward<LHS>(lhs)),
+        return create<ast::BinaryExpression>(core::BinaryOp::kModulo, Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
 
@@ -2097,8 +2097,9 @@ class Builder {
     /// @returns a `ast::BinaryExpression` bit shifting right `lhs` by `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Shr(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(
-            ast::BinaryOp::kShiftRight, Expr(std::forward<LHS>(lhs)), Expr(std::forward<RHS>(rhs)));
+        return create<ast::BinaryExpression>(core::BinaryOp::kShiftRight,
+                                             Expr(std::forward<LHS>(lhs)),
+                                             Expr(std::forward<RHS>(rhs)));
     }
 
     /// @param lhs the left hand argument to the bit shift left operation
@@ -2107,7 +2108,7 @@ class Builder {
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Shl(LHS&& lhs, RHS&& rhs) {
         return create<ast::BinaryExpression>(
-            ast::BinaryOp::kShiftLeft, Expr(std::forward<LHS>(lhs)), Expr(std::forward<RHS>(rhs)));
+            core::BinaryOp::kShiftLeft, Expr(std::forward<LHS>(lhs)), Expr(std::forward<RHS>(rhs)));
     }
 
     /// @param source the source information
@@ -2116,7 +2117,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` bit shifting left `lhs` by `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Shl(const Source& source, LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(source, ast::BinaryOp::kShiftLeft,
+        return create<ast::BinaryExpression>(source, core::BinaryOp::kShiftLeft,
                                              Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
@@ -2126,7 +2127,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` bitwise xor-ing `lhs` and `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Xor(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(ast::BinaryOp::kXor, Expr(std::forward<LHS>(lhs)),
+        return create<ast::BinaryExpression>(core::BinaryOp::kXor, Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
 
@@ -2135,8 +2136,9 @@ class Builder {
     /// @returns a `ast::BinaryExpression` of `lhs` && `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* LogicalAnd(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(
-            ast::BinaryOp::kLogicalAnd, Expr(std::forward<LHS>(lhs)), Expr(std::forward<RHS>(rhs)));
+        return create<ast::BinaryExpression>(core::BinaryOp::kLogicalAnd,
+                                             Expr(std::forward<LHS>(lhs)),
+                                             Expr(std::forward<RHS>(rhs)));
     }
 
     /// @param source the source information
@@ -2145,7 +2147,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` of `lhs` && `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* LogicalAnd(const Source& source, LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(source, ast::BinaryOp::kLogicalAnd,
+        return create<ast::BinaryExpression>(source, core::BinaryOp::kLogicalAnd,
                                              Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
@@ -2156,7 +2158,7 @@ class Builder {
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* LogicalOr(LHS&& lhs, RHS&& rhs) {
         return create<ast::BinaryExpression>(
-            ast::BinaryOp::kLogicalOr, Expr(std::forward<LHS>(lhs)), Expr(std::forward<RHS>(rhs)));
+            core::BinaryOp::kLogicalOr, Expr(std::forward<LHS>(lhs)), Expr(std::forward<RHS>(rhs)));
     }
 
     /// @param source the source information
@@ -2165,7 +2167,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` of `lhs` || `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* LogicalOr(const Source& source, LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(source, ast::BinaryOp::kLogicalOr,
+        return create<ast::BinaryExpression>(source, core::BinaryOp::kLogicalOr,
                                              Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
@@ -2175,7 +2177,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` of `lhs` > `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* GreaterThan(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThan,
+        return create<ast::BinaryExpression>(core::BinaryOp::kGreaterThan,
                                              Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
@@ -2185,7 +2187,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` of `lhs` >= `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* GreaterThanEqual(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThanEqual,
+        return create<ast::BinaryExpression>(core::BinaryOp::kGreaterThanEqual,
                                              Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
@@ -2195,8 +2197,8 @@ class Builder {
     /// @returns a `ast::BinaryExpression` of `lhs` < `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* LessThan(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(ast::BinaryOp::kLessThan, Expr(std::forward<LHS>(lhs)),
-                                             Expr(std::forward<RHS>(rhs)));
+        return create<ast::BinaryExpression>(
+            core::BinaryOp::kLessThan, Expr(std::forward<LHS>(lhs)), Expr(std::forward<RHS>(rhs)));
     }
 
     /// @param lhs the left hand argument to the less than or equal operation
@@ -2204,7 +2206,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` of `lhs` <= `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* LessThanEqual(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(ast::BinaryOp::kLessThanEqual,
+        return create<ast::BinaryExpression>(core::BinaryOp::kLessThanEqual,
                                              Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
@@ -2214,7 +2216,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` comparing `lhs` equal to `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Equal(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(std::forward<LHS>(lhs)),
+        return create<ast::BinaryExpression>(core::BinaryOp::kEqual, Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
 
@@ -2224,7 +2226,7 @@ class Builder {
     /// @returns a `ast::BinaryExpression` comparing `lhs` equal to `rhs`
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* Equal(const Source& source, LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(source, ast::BinaryOp::kEqual,
+        return create<ast::BinaryExpression>(source, core::BinaryOp::kEqual,
                                              Expr(std::forward<LHS>(lhs)),
                                              Expr(std::forward<RHS>(rhs)));
     }
@@ -2235,8 +2237,8 @@ class Builder {
     ///          disequality
     template <typename LHS, typename RHS>
     const ast::BinaryExpression* NotEqual(LHS&& lhs, RHS&& rhs) {
-        return create<ast::BinaryExpression>(ast::BinaryOp::kNotEqual, Expr(std::forward<LHS>(lhs)),
-                                             Expr(std::forward<RHS>(rhs)));
+        return create<ast::BinaryExpression>(
+            core::BinaryOp::kNotEqual, Expr(std::forward<LHS>(lhs)), Expr(std::forward<RHS>(rhs)));
     }
 
     /// @param source the source information
@@ -2724,7 +2726,7 @@ class Builder {
     const ast::CompoundAssignmentStatement* CompoundAssign(const Source& source,
                                                            LhsExpressionInit&& lhs,
                                                            RhsExpressionInit&& rhs,
-                                                           ast::BinaryOp op) {
+                                                           core::BinaryOp op) {
         return create<ast::CompoundAssignmentStatement>(
             source, Expr(std::forward<LhsExpressionInit>(lhs)),
             Expr(std::forward<RhsExpressionInit>(rhs)), op);
@@ -2739,7 +2741,7 @@ class Builder {
     template <typename LhsExpressionInit, typename RhsExpressionInit>
     const ast::CompoundAssignmentStatement* CompoundAssign(LhsExpressionInit&& lhs,
                                                            RhsExpressionInit&& rhs,
-                                                           ast::BinaryOp op) {
+                                                           core::BinaryOp op) {
         return create<ast::CompoundAssignmentStatement>(Expr(std::forward<LhsExpressionInit>(lhs)),
                                                         Expr(std::forward<RhsExpressionInit>(rhs)),
                                                         op);

@@ -535,7 +535,7 @@ TEST_F(ResolverValidationTest, Stmt_Loop_ContinueInLoopBodySubscopeBeforeDecl_Us
     auto* body =
         Block(If(Expr(true), Block(Continue(cont_loc))), Decl(Var(decl_loc, "z", ty.i32())));
     auto* compare =
-        create<ast::BinaryExpression>(ast::BinaryOp::kLessThan, Expr(ref_loc, "z"), Expr(2_i));
+        create<ast::BinaryExpression>(core::BinaryOp::kLessThan, Expr(ref_loc, "z"), Expr(2_i));
     auto* continuing = Block(If(compare, Block()));
     auto* loop_stmt = Loop(body, continuing);
     WrapInFunction(loop_stmt);

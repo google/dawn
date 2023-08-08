@@ -82,7 +82,7 @@ std::ostream& operator<<(std::ostream& o, const ErrorCase& c) {
     return o;
 }
 
-using ResolverConstEvalBinaryOpTest = ResolverTestWithParam<std::tuple<ast::BinaryOp, Case>>;
+using ResolverConstEvalBinaryOpTest = ResolverTestWithParam<std::tuple<core::BinaryOp, Case>>;
 TEST_P(ResolverConstEvalBinaryOpTest, Test) {
     Enable(core::Extension::kF16);
     auto op = std::get<0>(GetParam());
@@ -113,7 +113,7 @@ TEST_P(ResolverConstEvalBinaryOpTest, Test) {
 
 INSTANTIATE_TEST_SUITE_P(MixedAbstractArgs,
                          ResolverConstEvalBinaryOpTest,
-                         testing::Combine(testing::Values(ast::BinaryOp::kAdd),
+                         testing::Combine(testing::Values(core::BinaryOp::kAdd),
                                           testing::ValuesIn(std::vector{
                                               // Mixed abstract type args
                                               C(1_a, 2.3_a, 3.3_a),
@@ -168,7 +168,7 @@ std::vector<Case> OpAddFloatCases() {
 }
 INSTANTIATE_TEST_SUITE_P(Add,
                          ResolverConstEvalBinaryOpTest,
-                         testing::Combine(testing::Values(ast::BinaryOp::kAdd),
+                         testing::Combine(testing::Values(core::BinaryOp::kAdd),
                                           testing::ValuesIn(Concat(  //
                                               OpAddIntCases<AInt>(),
                                               OpAddIntCases<i32>(),
@@ -224,7 +224,7 @@ std::vector<Case> OpSubFloatCases() {
 }
 INSTANTIATE_TEST_SUITE_P(Sub,
                          ResolverConstEvalBinaryOpTest,
-                         testing::Combine(testing::Values(ast::BinaryOp::kSubtract),
+                         testing::Combine(testing::Values(core::BinaryOp::kSubtract),
                                           testing::ValuesIn(Concat(  //
                                               OpSubIntCases<AInt>(),
                                               OpSubIntCases<i32>(),
@@ -401,7 +401,7 @@ std::vector<Case> OpMulMatCases() {
 INSTANTIATE_TEST_SUITE_P(Mul,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kMultiply),
+                             testing::Values(core::BinaryOp::kMultiply),
                              testing::ValuesIn(Concat(  //
                                  OpMulScalarCases<AInt>(),
                                  OpMulScalarCases<i32>(),
@@ -478,7 +478,7 @@ std::vector<Case> OpDivFloatCases() {
 INSTANTIATE_TEST_SUITE_P(Div,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kDivide),
+                             testing::Values(core::BinaryOp::kDivide),
                              testing::ValuesIn(Concat(  //
                                  OpDivIntCases<AInt>(),
                                  OpDivIntCases<i32>(),
@@ -633,7 +633,7 @@ std::vector<Case> OpModCases() {
 INSTANTIATE_TEST_SUITE_P(Mod,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kModulo),
+                             testing::Values(core::BinaryOp::kModulo),
                              testing::ValuesIn(Concat(  //
                                  OpModCases<AInt>(),
                                  OpModCases<i32>(),
@@ -657,7 +657,7 @@ std::vector<Case> OpEqualCases() {
 INSTANTIATE_TEST_SUITE_P(Equal,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kEqual),
+                             testing::Values(core::BinaryOp::kEqual),
                              testing::ValuesIn(Concat(  //
                                  OpEqualCases<AInt, true>(),
                                  OpEqualCases<i32, true>(),
@@ -669,7 +669,7 @@ INSTANTIATE_TEST_SUITE_P(Equal,
 INSTANTIATE_TEST_SUITE_P(NotEqual,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kNotEqual),
+                             testing::Values(core::BinaryOp::kNotEqual),
                              testing::ValuesIn(Concat(  //
                                  OpEqualCases<AInt, false>(),
                                  OpEqualCases<i32, false>(),
@@ -695,7 +695,7 @@ std::vector<Case> OpLessThanCases() {
 INSTANTIATE_TEST_SUITE_P(LessThan,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kLessThan),
+                             testing::Values(core::BinaryOp::kLessThan),
                              testing::ValuesIn(Concat(  //
                                  OpLessThanCases<AInt, true>(),
                                  OpLessThanCases<i32, true>(),
@@ -706,7 +706,7 @@ INSTANTIATE_TEST_SUITE_P(LessThan,
 INSTANTIATE_TEST_SUITE_P(GreaterThanEqual,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kGreaterThanEqual),
+                             testing::Values(core::BinaryOp::kGreaterThanEqual),
                              testing::ValuesIn(Concat(  //
                                  OpLessThanCases<AInt, false>(),
                                  OpLessThanCases<i32, false>(),
@@ -731,7 +731,7 @@ std::vector<Case> OpGreaterThanCases() {
 INSTANTIATE_TEST_SUITE_P(GreaterThan,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kGreaterThan),
+                             testing::Values(core::BinaryOp::kGreaterThan),
                              testing::ValuesIn(Concat(  //
                                  OpGreaterThanCases<AInt, true>(),
                                  OpGreaterThanCases<i32, true>(),
@@ -742,7 +742,7 @@ INSTANTIATE_TEST_SUITE_P(GreaterThan,
 INSTANTIATE_TEST_SUITE_P(LessThanEqual,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kLessThanEqual),
+                             testing::Values(core::BinaryOp::kLessThanEqual),
                              testing::ValuesIn(Concat(  //
                                  OpGreaterThanCases<AInt, false>(),
                                  OpGreaterThanCases<i32, false>(),
@@ -753,7 +753,7 @@ INSTANTIATE_TEST_SUITE_P(LessThanEqual,
 
 // Test that we can compare the maximum and minimum AFloat values in vectors (crbug.com/tint/1999).
 struct AbstractFloatVectorCompareCase {
-    ast::BinaryOp op;
+    core::BinaryOp op;
     bool expected_0;
     bool expected_1;
 };
@@ -777,12 +777,13 @@ TEST_P(ResolverConstEvalBinaryOpAbstractFloatVectorCompareTest, Test) {
 INSTANTIATE_TEST_SUITE_P(
     HighestLowest,
     ResolverConstEvalBinaryOpAbstractFloatVectorCompareTest,
-    testing::Values(AbstractFloatVectorCompareCase{ast::BinaryOp::kEqual, false, false},
-                    AbstractFloatVectorCompareCase{ast::BinaryOp::kNotEqual, true, true},
-                    AbstractFloatVectorCompareCase{ast::BinaryOp::kLessThan, false, true},
-                    AbstractFloatVectorCompareCase{ast::BinaryOp::kLessThanEqual, false, true},
-                    AbstractFloatVectorCompareCase{ast::BinaryOp::kGreaterThan, true, false},
-                    AbstractFloatVectorCompareCase{ast::BinaryOp::kGreaterThanEqual, true, false}));
+    testing::Values(AbstractFloatVectorCompareCase{core::BinaryOp::kEqual, false, false},
+                    AbstractFloatVectorCompareCase{core::BinaryOp::kNotEqual, true, true},
+                    AbstractFloatVectorCompareCase{core::BinaryOp::kLessThan, false, true},
+                    AbstractFloatVectorCompareCase{core::BinaryOp::kLessThanEqual, false, true},
+                    AbstractFloatVectorCompareCase{core::BinaryOp::kGreaterThan, true, false},
+                    AbstractFloatVectorCompareCase{core::BinaryOp::kGreaterThanEqual, true,
+                                                   false}));
 
 static std::vector<Case> OpLogicalAndCases() {
     return {
@@ -795,7 +796,7 @@ static std::vector<Case> OpLogicalAndCases() {
 INSTANTIATE_TEST_SUITE_P(LogicalAnd,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kLogicalAnd),
+                             testing::Values(core::BinaryOp::kLogicalAnd),
                              testing::ValuesIn(OpLogicalAndCases())));
 
 static std::vector<Case> OpLogicalOrCases() {
@@ -809,7 +810,7 @@ static std::vector<Case> OpLogicalOrCases() {
 INSTANTIATE_TEST_SUITE_P(LogicalOr,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kLogicalOr),
+                             testing::Values(core::BinaryOp::kLogicalOr),
                              testing::ValuesIn(OpLogicalOrCases())));
 
 static std::vector<Case> OpAndBoolCases() {
@@ -857,7 +858,7 @@ std::vector<Case> OpAndIntCases() {
 INSTANTIATE_TEST_SUITE_P(And,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kAnd),
+                             testing::Values(core::BinaryOp::kAnd),
                              testing::ValuesIn(            //
                                  Concat(OpAndBoolCases(),  //
                                         OpAndIntCases<AInt>(),
@@ -909,7 +910,7 @@ std::vector<Case> OpOrIntCases() {
 INSTANTIATE_TEST_SUITE_P(Or,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kOr),
+                             testing::Values(core::BinaryOp::kOr),
                              testing::ValuesIn(Concat(OpOrBoolCases(),
                                                       OpOrIntCases<AInt>(),
                                                       OpOrIntCases<i32>(),
@@ -973,7 +974,7 @@ std::vector<Case> XorCases() {
 INSTANTIATE_TEST_SUITE_P(Xor,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kXor),
+                             testing::Values(core::BinaryOp::kXor),
                              testing::ValuesIn(Concat(XorCases<AInt>(),  //
                                                       XorCases<i32>(),   //
                                                       XorCases<u32>()))));
@@ -1088,7 +1089,7 @@ std::vector<Case> ShiftLeftCases() {
 INSTANTIATE_TEST_SUITE_P(ShiftLeft,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kShiftLeft),
+                             testing::Values(core::BinaryOp::kShiftLeft),
                              testing::ValuesIn(Concat(ShiftLeftCases<AInt>(),  //
                                                       ShiftLeftCases<i32>(),   //
                                                       ShiftLeftCases<u32>()))));
@@ -1145,7 +1146,7 @@ INSTANTIATE_TEST_SUITE_P(
     AbstractMixed,
     ResolverConstEvalBinaryOpTest,
     testing::Combine(
-        testing::Values(ast::BinaryOp::kAdd),
+        testing::Values(core::BinaryOp::kAdd),
         testing::Values(C(Val(1_a), Val(2.3_a), Val(3.3_a)),
                         C(Val(2.3_a), Val(1_a), Val(3.3_a)),
                         C(Val(1_a), Vec(2.3_a, 2.3_a, 2.3_a), Vec(3.3_a, 3.3_a, 3.3_a)),
@@ -1413,7 +1414,7 @@ std::vector<Case> ShiftRightCases() {
 INSTANTIATE_TEST_SUITE_P(ShiftRight,
                          ResolverConstEvalBinaryOpTest,
                          testing::Combine(  //
-                             testing::Values(ast::BinaryOp::kShiftRight),
+                             testing::Values(core::BinaryOp::kShiftRight),
                              testing::ValuesIn(Concat(ShiftRightCases<AInt>(),  //
                                                       ShiftRightCases<i32>(),   //
                                                       ShiftRightCases<u32>()))));

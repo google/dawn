@@ -26,7 +26,7 @@ CompoundAssignmentStatement::CompoundAssignmentStatement(GenerationID pid,
                                                          const Source& src,
                                                          const Expression* l,
                                                          const Expression* r,
-                                                         BinaryOp o)
+                                                         core::BinaryOp o)
     : Base(pid, nid, src), lhs(l), rhs(r), op(o) {
     TINT_ASSERT(lhs);
     TINT_ASSERT_GENERATION_IDS_EQUAL_IF_VALID(lhs, generation_id);

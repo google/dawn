@@ -27,7 +27,7 @@ using HlslASTPrinterTest_Binary = TestHelper;
 
 struct BinaryData {
     const char* result;
-    ast::BinaryOp op;
+    core::BinaryOp op;
 
     enum Types { All = 0b11, Integer = 0b10, Float = 0b01 };
     Types valid_for = Types::All;
@@ -48,9 +48,9 @@ TEST_P(HlslBinaryTest, Emit_f32) {
     }
 
     // Skip ops that are illegal for this type
-    if (params.op == ast::BinaryOp::kAnd || params.op == ast::BinaryOp::kOr ||
-        params.op == ast::BinaryOp::kXor || params.op == ast::BinaryOp::kShiftLeft ||
-        params.op == ast::BinaryOp::kShiftRight) {
+    if (params.op == core::BinaryOp::kAnd || params.op == core::BinaryOp::kOr ||
+        params.op == core::BinaryOp::kXor || params.op == core::BinaryOp::kShiftLeft ||
+        params.op == core::BinaryOp::kShiftRight) {
         return;
     }
 
@@ -78,9 +78,9 @@ TEST_P(HlslBinaryTest, Emit_f16) {
     }
 
     // Skip ops that are illegal for this type
-    if (params.op == ast::BinaryOp::kAnd || params.op == ast::BinaryOp::kOr ||
-        params.op == ast::BinaryOp::kXor || params.op == ast::BinaryOp::kShiftLeft ||
-        params.op == ast::BinaryOp::kShiftRight) {
+    if (params.op == core::BinaryOp::kAnd || params.op == core::BinaryOp::kOr ||
+        params.op == core::BinaryOp::kXor || params.op == core::BinaryOp::kShiftLeft ||
+        params.op == core::BinaryOp::kShiftRight) {
         return;
     }
 
@@ -133,7 +133,7 @@ TEST_P(HlslBinaryTest, Emit_i32) {
     }
 
     // Skip ops that are illegal for this type
-    if (params.op == ast::BinaryOp::kShiftLeft || params.op == ast::BinaryOp::kShiftRight) {
+    if (params.op == core::BinaryOp::kShiftLeft || params.op == core::BinaryOp::kShiftRight) {
         return;
     }
 
@@ -156,31 +156,31 @@ TEST_P(HlslBinaryTest, Emit_i32) {
 INSTANTIATE_TEST_SUITE_P(
     HlslASTPrinterTest,
     HlslBinaryTest,
-    testing::Values(BinaryData{"(left & right)", ast::BinaryOp::kAnd},
-                    BinaryData{"(left | right)", ast::BinaryOp::kOr},
-                    BinaryData{"(left ^ right)", ast::BinaryOp::kXor},
-                    BinaryData{"(left == right)", ast::BinaryOp::kEqual},
-                    BinaryData{"(left != right)", ast::BinaryOp::kNotEqual},
-                    BinaryData{"(left < right)", ast::BinaryOp::kLessThan},
-                    BinaryData{"(left > right)", ast::BinaryOp::kGreaterThan},
-                    BinaryData{"(left <= right)", ast::BinaryOp::kLessThanEqual},
-                    BinaryData{"(left >= right)", ast::BinaryOp::kGreaterThanEqual},
-                    BinaryData{"(left << right)", ast::BinaryOp::kShiftLeft},
-                    BinaryData{"(left >> right)", ast::BinaryOp::kShiftRight},
-                    BinaryData{"(left + right)", ast::BinaryOp::kAdd},
-                    BinaryData{"(left - right)", ast::BinaryOp::kSubtract},
-                    BinaryData{"(left * right)", ast::BinaryOp::kMultiply},
+    testing::Values(BinaryData{"(left & right)", core::BinaryOp::kAnd},
+                    BinaryData{"(left | right)", core::BinaryOp::kOr},
+                    BinaryData{"(left ^ right)", core::BinaryOp::kXor},
+                    BinaryData{"(left == right)", core::BinaryOp::kEqual},
+                    BinaryData{"(left != right)", core::BinaryOp::kNotEqual},
+                    BinaryData{"(left < right)", core::BinaryOp::kLessThan},
+                    BinaryData{"(left > right)", core::BinaryOp::kGreaterThan},
+                    BinaryData{"(left <= right)", core::BinaryOp::kLessThanEqual},
+                    BinaryData{"(left >= right)", core::BinaryOp::kGreaterThanEqual},
+                    BinaryData{"(left << right)", core::BinaryOp::kShiftLeft},
+                    BinaryData{"(left >> right)", core::BinaryOp::kShiftRight},
+                    BinaryData{"(left + right)", core::BinaryOp::kAdd},
+                    BinaryData{"(left - right)", core::BinaryOp::kSubtract},
+                    BinaryData{"(left * right)", core::BinaryOp::kMultiply},
                     // NOTE: Integer divide covered by DivOrModBy* tests below
-                    BinaryData{"(left / right)", ast::BinaryOp::kDivide, BinaryData::Types::Float},
+                    BinaryData{"(left / right)", core::BinaryOp::kDivide, BinaryData::Types::Float},
                     // NOTE: Integer modulo covered by DivOrModBy* tests below
-                    BinaryData{"(left % right)", ast::BinaryOp::kModulo,
+                    BinaryData{"(left % right)", core::BinaryOp::kModulo,
                                BinaryData::Types::Float}));
 
 TEST_F(HlslASTPrinterTest_Binary, Multiply_VectorScalar_f32) {
     auto* lhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
     auto* rhs = Expr(1_f);
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kMultiply, lhs, rhs);
 
     WrapInFunction(expr);
 
@@ -197,7 +197,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_VectorScalar_f16) {
     auto* lhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
     auto* rhs = Expr(1_h);
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kMultiply, lhs, rhs);
 
     WrapInFunction(expr);
 
@@ -212,7 +212,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_ScalarVector_f32) {
     auto* lhs = Expr(1_f);
     auto* rhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kMultiply, lhs, rhs);
 
     WrapInFunction(expr);
 
@@ -229,7 +229,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_ScalarVector_f16) {
     auto* lhs = Expr(1_h);
     auto* rhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kMultiply, lhs, rhs);
 
     WrapInFunction(expr);
 
@@ -245,7 +245,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixScalar_f32) {
     auto* lhs = Expr("mat");
     auto* rhs = Expr(1_f);
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kMultiply, lhs, rhs);
     WrapInFunction(expr);
 
     ASTPrinter& gen = Build();
@@ -262,7 +262,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixScalar_f16) {
     auto* lhs = Expr("mat");
     auto* rhs = Expr(1_h);
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kMultiply, lhs, rhs);
     WrapInFunction(expr);
 
     ASTPrinter& gen = Build();
@@ -277,7 +277,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_ScalarMatrix_f32) {
     auto* lhs = Expr(1_f);
     auto* rhs = Expr("mat");
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kMultiply, lhs, rhs);
     WrapInFunction(expr);
 
     ASTPrinter& gen = Build();
@@ -294,7 +294,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_ScalarMatrix_f16) {
     auto* lhs = Expr(1_h);
     auto* rhs = Expr("mat");
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kMultiply, lhs, rhs);
     WrapInFunction(expr);
 
     ASTPrinter& gen = Build();
@@ -309,7 +309,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixVector_f32) {
     auto* lhs = Expr("mat");
     auto* rhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kMultiply, lhs, rhs);
     WrapInFunction(expr);
 
     ASTPrinter& gen = Build();
@@ -326,7 +326,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixVector_f16) {
     auto* lhs = Expr("mat");
     auto* rhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kMultiply, lhs, rhs);
     WrapInFunction(expr);
 
     ASTPrinter& gen = Build();
@@ -341,7 +341,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_VectorMatrix_f32) {
     auto* lhs = Call<vec3<f32>>(1_f, 1_f, 1_f);
     auto* rhs = Expr("mat");
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kMultiply, lhs, rhs);
     WrapInFunction(expr);
 
     ASTPrinter& gen = Build();
@@ -358,7 +358,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_VectorMatrix_f16) {
     auto* lhs = Call<vec3<f16>>(1_h, 1_h, 1_h);
     auto* rhs = Expr("mat");
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kMultiply, lhs, rhs);
     WrapInFunction(expr);
 
     ASTPrinter& gen = Build();
@@ -372,7 +372,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixMatrix_f32) {
     GlobalVar("lhs", ty.mat3x3<f32>(), core::AddressSpace::kPrivate);
     GlobalVar("rhs", ty.mat3x3<f32>(), core::AddressSpace::kPrivate);
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("lhs"), Expr("rhs"));
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kMultiply, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
 
     ASTPrinter& gen = Build();
@@ -388,7 +388,7 @@ TEST_F(HlslASTPrinterTest_Binary, Multiply_MatrixMatrix_f16) {
     GlobalVar("lhs", ty.mat3x3<f16>(), core::AddressSpace::kPrivate);
     GlobalVar("rhs", ty.mat3x3<f16>(), core::AddressSpace::kPrivate);
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("lhs"), Expr("rhs"));
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kMultiply, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
 
     ASTPrinter& gen = Build();
@@ -402,7 +402,7 @@ TEST_F(HlslASTPrinterTest_Binary, Logical_And) {
     GlobalVar("a", ty.bool_(), core::AddressSpace::kPrivate);
     GlobalVar("b", ty.bool_(), core::AddressSpace::kPrivate);
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b"));
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kLogicalAnd, Expr("a"), Expr("b"));
     WrapInFunction(expr);
 
     ASTPrinter& gen = Build();
@@ -425,9 +425,9 @@ TEST_F(HlslASTPrinterTest_Binary, Logical_Multi) {
     GlobalVar("d", ty.bool_(), core::AddressSpace::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(
-        ast::BinaryOp::kLogicalOr,
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("c"), Expr("d")));
+        core::BinaryOp::kLogicalOr,
+        create<ast::BinaryExpression>(core::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
+        create<ast::BinaryExpression>(core::BinaryOp::kLogicalOr, Expr("c"), Expr("d")));
     WrapInFunction(expr);
 
     ASTPrinter& gen = Build();
@@ -454,7 +454,7 @@ TEST_F(HlslASTPrinterTest_Binary, Logical_Or) {
     GlobalVar("a", ty.bool_(), core::AddressSpace::kPrivate);
     GlobalVar("b", ty.bool_(), core::AddressSpace::kPrivate);
 
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("a"), Expr("b"));
+    auto* expr = create<ast::BinaryExpression>(core::BinaryOp::kLogicalOr, Expr("a"), Expr("b"));
     WrapInFunction(expr);
 
     ASTPrinter& gen = Build();
@@ -483,9 +483,9 @@ TEST_F(HlslASTPrinterTest_Binary, If_WithLogical) {
     GlobalVar("c", ty.bool_(), core::AddressSpace::kPrivate);
 
     auto* expr =
-        If(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
+        If(create<ast::BinaryExpression>(core::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
            Block(Return(1_i)),
-           Else(If(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"), Expr("c")),
+           Else(If(create<ast::BinaryExpression>(core::BinaryOp::kLogicalOr, Expr("b"), Expr("c")),
                    Block(Return(2_i)), Else(Block(Return(3_i))))));
     Func("func", tint::Empty, ty.i32(), Vector{WrapInStatement(expr)});
 
@@ -520,8 +520,8 @@ TEST_F(HlslASTPrinterTest_Binary, Return_WithLogical) {
     GlobalVar("c", ty.bool_(), core::AddressSpace::kPrivate);
 
     auto* expr = Return(create<ast::BinaryExpression>(
-        ast::BinaryOp::kLogicalOr,
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
+        core::BinaryOp::kLogicalOr,
+        create<ast::BinaryExpression>(core::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
         Expr("c")));
     Func("func", tint::Empty, ty.bool_(), Vector{WrapInStatement(expr)});
 
@@ -551,8 +551,8 @@ TEST_F(HlslASTPrinterTest_Binary, Assign_WithLogical) {
     auto* expr =
         Assign(Expr("a"),
                create<ast::BinaryExpression>(
-                   ast::BinaryOp::kLogicalAnd,
-                   create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"), Expr("c")),
+                   core::BinaryOp::kLogicalAnd,
+                   create<ast::BinaryExpression>(core::BinaryOp::kLogicalOr, Expr("b"), Expr("c")),
                    Expr("d")));
     WrapInFunction(expr);
 
@@ -581,8 +581,8 @@ TEST_F(HlslASTPrinterTest_Binary, Decl_WithLogical) {
     auto* var =
         Var("a", ty.bool_(), core::AddressSpace::kUndefined,
             create<ast::BinaryExpression>(
-                ast::BinaryOp::kLogicalOr,
-                create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("b"), Expr("c")),
+                core::BinaryOp::kLogicalOr,
+                create<ast::BinaryExpression>(core::BinaryOp::kLogicalAnd, Expr("b"), Expr("c")),
                 Expr("d")));
 
     auto* decl = Decl(var);
@@ -619,12 +619,12 @@ TEST_F(HlslASTPrinterTest_Binary, Call_WithLogical) {
     GlobalVar("d", ty.bool_(), core::AddressSpace::kPrivate);
 
     Vector params{
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("c"), Expr("d")),
+        create<ast::BinaryExpression>(core::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
+        create<ast::BinaryExpression>(core::BinaryOp::kLogicalOr, Expr("c"), Expr("d")),
         create<ast::BinaryExpression>(
-            ast::BinaryOp::kLogicalAnd,
-            create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("a"), Expr("c")),
-            create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"), Expr("d"))),
+            core::BinaryOp::kLogicalAnd,
+            create<ast::BinaryExpression>(core::BinaryOp::kLogicalOr, Expr("a"), Expr("c")),
+            create<ast::BinaryExpression>(core::BinaryOp::kLogicalOr, Expr("b"), Expr("d"))),
     };
 
     auto* expr = CallStmt(Call("foo", params));

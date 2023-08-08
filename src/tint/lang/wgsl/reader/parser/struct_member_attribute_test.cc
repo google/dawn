@@ -50,7 +50,7 @@ TEST_F(WGSLParserTest, Attribute_Size_Expression) {
     ASSERT_TRUE(o->expr->Is<ast::BinaryExpression>());
     auto* expr = o->expr->As<ast::BinaryExpression>();
 
-    EXPECT_EQ(ast::BinaryOp::kAdd, expr->op);
+    EXPECT_EQ(core::BinaryOp::kAdd, expr->op);
     auto* v = expr->lhs->As<ast::IntLiteralExpression>();
     ASSERT_NE(nullptr, v);
     EXPECT_EQ(v->value, 4u);
@@ -152,7 +152,7 @@ TEST_F(WGSLParserTest, Attribute_Align_Expression) {
     ASSERT_TRUE(o->expr->Is<ast::BinaryExpression>());
     auto* expr = o->expr->As<ast::BinaryExpression>();
 
-    EXPECT_EQ(ast::BinaryOp::kAdd, expr->op);
+    EXPECT_EQ(core::BinaryOp::kAdd, expr->op);
     auto* v = expr->lhs->As<ast::IntLiteralExpression>();
     ASSERT_NE(nullptr, v);
     EXPECT_EQ(v->value, 4u);

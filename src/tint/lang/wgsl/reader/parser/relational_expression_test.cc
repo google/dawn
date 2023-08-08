@@ -32,7 +32,7 @@ TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_LessThan) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kLessThan, rel->op);
+    EXPECT_EQ(core::BinaryOp::kLessThan, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -57,7 +57,7 @@ TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_GreaterThan) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kGreaterThan, rel->op);
+    EXPECT_EQ(core::BinaryOp::kGreaterThan, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -82,7 +82,7 @@ TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_LessThanEqual) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kLessThanEqual, rel->op);
+    EXPECT_EQ(core::BinaryOp::kLessThanEqual, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -107,7 +107,7 @@ TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_GreaterThanEqual) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kGreaterThanEqual, rel->op);
+    EXPECT_EQ(core::BinaryOp::kGreaterThanEqual, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -132,7 +132,7 @@ TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_Equal) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kEqual, rel->op);
+    EXPECT_EQ(core::BinaryOp::kEqual, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -157,7 +157,7 @@ TEST_F(WGSLParserTest, RelationalExpression_PostUnary_Parses_NotEqual) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kNotEqual, rel->op);
+    EXPECT_EQ(core::BinaryOp::kNotEqual, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -196,7 +196,7 @@ TEST_F(WGSLParserTest, RelationalExpression_Matches) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kGreaterThanEqual, rel->op);
+    EXPECT_EQ(core::BinaryOp::kGreaterThanEqual, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -240,7 +240,7 @@ TEST_F(WGSLParserTest, RelationalExpression_Parses_Equal) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kEqual, rel->op);
+    EXPECT_EQ(core::BinaryOp::kEqual, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -265,7 +265,7 @@ TEST_F(WGSLParserTest, RelationalExpression_Parses_NotEqual) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kNotEqual, rel->op);
+    EXPECT_EQ(core::BinaryOp::kNotEqual, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();

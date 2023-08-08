@@ -401,7 +401,7 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
         }
         case Method::kCompoundAssign:
             WrapInFunction(Decl(Var("a", target_ty())),
-                           CompoundAssign("a", abstract_expr, ast::BinaryOp::kAdd));
+                           CompoundAssign("a", abstract_expr, core::BinaryOp::kAdd));
             break;
     }
 

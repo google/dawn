@@ -153,7 +153,7 @@ TEST_F(WGSLParserTest, AssignmentStmt_Phony_EqualIncrementFails) {
 
 struct CompoundData {
     std::string str;
-    ast::BinaryOp op;
+    core::BinaryOp op;
 };
 using CompoundOpTest = WGSLParserTestWithParam<CompoundData>;
 TEST_P(CompoundOpTest, CompoundOp) {
@@ -187,16 +187,16 @@ TEST_P(CompoundOpTest, CompoundOp) {
 }
 INSTANTIATE_TEST_SUITE_P(WGSLParserTest,
                          CompoundOpTest,
-                         testing::Values(CompoundData{"+=", ast::BinaryOp::kAdd},
-                                         CompoundData{"-=", ast::BinaryOp::kSubtract},
-                                         CompoundData{"*=", ast::BinaryOp::kMultiply},
-                                         CompoundData{"/=", ast::BinaryOp::kDivide},
-                                         CompoundData{"%=", ast::BinaryOp::kModulo},
-                                         CompoundData{"&=", ast::BinaryOp::kAnd},
-                                         CompoundData{"|=", ast::BinaryOp::kOr},
-                                         CompoundData{"^=", ast::BinaryOp::kXor},
-                                         CompoundData{">>=", ast::BinaryOp::kShiftRight},
-                                         CompoundData{"<<=", ast::BinaryOp::kShiftLeft}));
+                         testing::Values(CompoundData{"+=", core::BinaryOp::kAdd},
+                                         CompoundData{"-=", core::BinaryOp::kSubtract},
+                                         CompoundData{"*=", core::BinaryOp::kMultiply},
+                                         CompoundData{"/=", core::BinaryOp::kDivide},
+                                         CompoundData{"%=", core::BinaryOp::kModulo},
+                                         CompoundData{"&=", core::BinaryOp::kAnd},
+                                         CompoundData{"|=", core::BinaryOp::kOr},
+                                         CompoundData{"^=", core::BinaryOp::kXor},
+                                         CompoundData{">>=", core::BinaryOp::kShiftRight},
+                                         CompoundData{"<<=", core::BinaryOp::kShiftLeft}));
 
 TEST_F(WGSLParserTest, AssignmentStmt_MissingEqual) {
     auto p = parser("a.b.c[2].d 123");

@@ -32,7 +32,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_Parses_Plus) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kAdd, rel->op);
+    EXPECT_EQ(core::BinaryOp::kAdd, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -53,7 +53,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_Parses_Minus) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kSubtract, rel->op);
+    EXPECT_EQ(core::BinaryOp::kSubtract, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -74,7 +74,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_Parses_MinusMinus) {
 
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kSubtract, rel->op);
+    EXPECT_EQ(core::BinaryOp::kSubtract, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -102,7 +102,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_Parses_MultipleOps) {
     // op: -
     // rhs: d
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kSubtract, rel->op);
+    EXPECT_EQ(core::BinaryOp::kSubtract, rel->op);
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->rhs->As<ast::IdentifierExpression>();
@@ -113,7 +113,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_Parses_MultipleOps) {
     // op: +
     // rhs: c
     rel = rel->lhs->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kAdd, rel->op);
+    EXPECT_EQ(core::BinaryOp::kAdd, rel->op);
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
     ident_expr = rel->rhs->As<ast::IdentifierExpression>();
@@ -124,7 +124,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_Parses_MultipleOps) {
     // op: -
     // rhs: b
     rel = rel->lhs->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kSubtract, rel->op);
+    EXPECT_EQ(core::BinaryOp::kSubtract, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -148,7 +148,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_Parses_MultipleOps_MixedMultiplication
     // op: -
     // rhs: d
     auto* rel = e->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kSubtract, rel->op);
+    EXPECT_EQ(core::BinaryOp::kSubtract, rel->op);
 
     ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
     auto* ident_expr = rel->rhs->As<ast::IdentifierExpression>();
@@ -159,7 +159,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_Parses_MultipleOps_MixedMultiplication
     // op: -
     // rhs: b * c
     rel = rel->lhs->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kSubtract, rel->op);
+    EXPECT_EQ(core::BinaryOp::kSubtract, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     ident_expr = rel->lhs->As<ast::IdentifierExpression>();
@@ -170,7 +170,7 @@ TEST_F(WGSLParserTest, AdditiveExpression_Parses_MultipleOps_MixedMultiplication
     // op: *
     // rhs: c
     rel = rel->rhs->As<ast::BinaryExpression>();
-    EXPECT_EQ(ast::BinaryOp::kMultiply, rel->op);
+    EXPECT_EQ(core::BinaryOp::kMultiply, rel->op);
 
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
     ident_expr = rel->lhs->As<ast::IdentifierExpression>();

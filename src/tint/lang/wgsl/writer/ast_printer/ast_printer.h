@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/tint/lang/core/binary_op.h"
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/utils/generator/text_generator.h"
 #include "src/tint/utils/text/string_stream.h"
@@ -29,7 +30,6 @@ namespace tint::ast {
 class AssignmentStatement;
 class Attribute;
 class BinaryExpression;
-enum class BinaryOp;
 class BitcastExpression;
 class BlockStatement;
 class BlockStatement;
@@ -108,7 +108,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// Handles generating a binary operator
     /// @param out the output stream
     /// @param op the binary operator
-    void EmitBinaryOp(StringStream& out, const ast::BinaryOp op);
+    void EmitBinaryOp(StringStream& out, const core::BinaryOp op);
     /// Handles generating a bitcast expression
     /// @param out the output stream
     /// @param expr the bitcast expression

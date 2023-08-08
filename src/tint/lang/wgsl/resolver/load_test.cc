@@ -82,7 +82,7 @@ TEST_F(ResolverLoadTest, CompoundAssignment) {
     auto* ident = Expr("ref");
     WrapInFunction(Var("ref", Expr(1_i)),  //
                    Var("v", ty.i32()),     //
-                   CompoundAssign("v", ident, ast::BinaryOp::kAdd));
+                   CompoundAssign("v", ident, core::BinaryOp::kAdd));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* load = Sem().Get<sem::Load>(ident);

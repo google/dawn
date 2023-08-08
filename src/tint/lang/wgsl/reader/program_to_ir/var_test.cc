@@ -287,7 +287,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfMatrix_EvalOrder) {
 
 TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_42i) {
     WrapInFunction(Var("a", ty.i32(), core::AddressSpace::kFunction),  //
-                   CompoundAssign("a", 42_i, ast::BinaryOp::kAdd));
+                   CompoundAssign("a", 42_i, core::BinaryOp::kAdd));
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -326,7 +326,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_ArrayOfArray_EvalOrder) {
 
     WrapInFunction(
         Var("a", ty.array<array<array<i32, 5>, 5>, 5>(), core::AddressSpace::kFunction),  //
-        CompoundAssign(lhs, rhs, ast::BinaryOp::kAdd));
+        CompoundAssign(lhs, rhs, core::BinaryOp::kAdd));
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
@@ -378,7 +378,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_ArrayOfMatrix_EvalOrder) {
             Call("f", 6_i));
 
     WrapInFunction(Var("a", ty.array<mat3x4<f32>, 5>(), core::AddressSpace::kFunction),  //
-                   CompoundAssign(lhs, rhs, ast::BinaryOp::kAdd));
+                   CompoundAssign(lhs, rhs, core::BinaryOp::kAdd));
 
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
