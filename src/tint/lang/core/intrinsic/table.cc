@@ -18,6 +18,7 @@
 #include <limits>
 #include <utility>
 
+#include "src/tint/lang/core/evaluation_stage.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/abstract_numeric.h"
@@ -32,7 +33,6 @@
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/ast/binary_expression.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
-#include "src/tint/lang/wgsl/sem/evaluation_stage.h"
 #include "src/tint/lang/wgsl/sem/pipeline_stage_set.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 #include "src/tint/lang/wgsl/sem/value_conversion.h"
@@ -203,7 +203,7 @@ class MatchState {
                const Matchers& m,
                const OverloadInfo* o,
                MatcherIndex const* matcher_indices,
-               sem::EvaluationStage s)
+               EvaluationStage s)
         : builder(b),
           templates(t),
           matchers(m),
@@ -220,7 +220,7 @@ class MatchState {
     /// The current overload being evaluated
     OverloadInfo const* overload;
     /// The earliest evaluation stage of the builtin call
-    sem::EvaluationStage earliest_eval_stage;
+    EvaluationStage earliest_eval_stage;
 
     /// Type uses the next TypeMatcher from the matcher indices to match the type
     /// `ty`. If the type matches, the canonical expected type is returned. If the
@@ -365,7 +365,7 @@ const type::AbstractFloat* build_fa(MatchState& state) {
 }
 
 bool match_fa(MatchState& state, const type::Type* ty) {
-    return (state.earliest_eval_stage <= sem::EvaluationStage::kConstant) &&
+    return (state.earliest_eval_stage <= EvaluationStage::kConstant) &&
            ty->IsAnyOf<Any, type::AbstractNumeric>();
 }
 
@@ -374,7 +374,7 @@ const type::AbstractInt* build_ia(MatchState& state) {
 }
 
 bool match_ia(MatchState& state, const type::Type* ty) {
-    return (state.earliest_eval_stage <= sem::EvaluationStage::kConstant) &&
+    return (state.earliest_eval_stage <= EvaluationStage::kConstant) &&
            ty->IsAnyOf<Any, type::AbstractInt>();
 }
 
@@ -958,25 +958,25 @@ class Impl : public Table {
 
     Builtin Lookup(core::Function builtin_type,
                    VectorRef<const type::Type*> args,
-                   sem::EvaluationStage earliest_eval_stage,
+                   EvaluationStage earliest_eval_stage,
                    const Source& source) override;
 
     UnaryOperator Lookup(core::UnaryOp op,
                          const type::Type* arg,
-                         sem::EvaluationStage earliest_eval_stage,
+                         EvaluationStage earliest_eval_stage,
                          const Source& source) override;
 
     BinaryOperator Lookup(core::BinaryOp op,
                           const type::Type* lhs,
                           const type::Type* rhs,
-                          sem::EvaluationStage earliest_eval_stage,
+                          EvaluationStage earliest_eval_stage,
                           const Source& source,
                           bool is_compound) override;
 
     CtorOrConv Lookup(CtorConv type,
                       const type::Type* template_arg,
                       VectorRef<const type::Type*> args,
-                      sem::EvaluationStage earliest_eval_stage,
+                      EvaluationStage earliest_eval_stage,
                       const Source& source) override;
 
   private:
@@ -1022,7 +1022,7 @@ class Impl : public Table {
     IntrinsicPrototype MatchIntrinsic(const IntrinsicInfo& intrinsic,
                                       const char* intrinsic_name,
                                       VectorRef<const type::Type*> args,
-                                      sem::EvaluationStage earliest_eval_stage,
+                                      EvaluationStage earliest_eval_stage,
                                       TemplateState templates,
                                       const OnNoMatch& on_no_match) const;
 
@@ -1035,7 +1035,7 @@ class Impl : public Table {
     /// @returns the evaluated Candidate information.
     Candidate ScoreOverload(const OverloadInfo* overload,
                             VectorRef<const type::Type*> args,
-                            sem::EvaluationStage earliest_eval_stage,
+                            EvaluationStage earliest_eval_stage,
                             const TemplateState& templates) const;
 
     /// Performs overload resolution given the list of candidates, by ranking the conversions of
@@ -1060,7 +1060,7 @@ class Impl : public Table {
     MatchState Match(TemplateState& templates,
                      const OverloadInfo* overload,
                      MatcherIndex const* matcher_indices,
-                     sem::EvaluationStage earliest_eval_stage) const;
+                     EvaluationStage earliest_eval_stage) const;
 
     // Prints the overload for emitting diagnostics
     void PrintOverload(StringStream& ss,
@@ -1124,7 +1124,7 @@ Impl::Impl(ProgramBuilder& b) : builder(b) {}
 
 Impl::Builtin Impl::Lookup(core::Function builtin_type,
                            VectorRef<const type::Type*> args,
-                           sem::EvaluationStage earliest_eval_stage,
+                           EvaluationStage earliest_eval_stage,
                            const Source& source) {
     const char* intrinsic_name = core::str(builtin_type);
 
@@ -1168,8 +1168,8 @@ Impl::Builtin Impl::Lookup(core::Function builtin_type,
         if (overload.flags.Contains(OverloadFlag::kSupportsComputePipeline)) {
             supported_stages.Add(ast::PipelineStage::kCompute);
         }
-        auto eval_stage = overload.const_eval_fn ? sem::EvaluationStage::kConstant
-                                                 : sem::EvaluationStage::kRuntime;
+        auto eval_stage =
+            overload.const_eval_fn ? EvaluationStage::kConstant : EvaluationStage::kRuntime;
         return builder.create<sem::Builtin>(builtin_type, match.return_type, std::move(params),
                                             eval_stage, supported_stages,
                                             overload.flags.Contains(OverloadFlag::kIsDeprecated),
@@ -1180,7 +1180,7 @@ Impl::Builtin Impl::Lookup(core::Function builtin_type,
 
 Table::UnaryOperator Impl::Lookup(core::UnaryOp op,
                                   const type::Type* arg,
-                                  sem::EvaluationStage earliest_eval_stage,
+                                  EvaluationStage earliest_eval_stage,
                                   const Source& source) {
     auto [intrinsic_index, intrinsic_name] = [&]() -> std::pair<size_t, const char*> {
         switch (op) {
@@ -1227,7 +1227,7 @@ Table::UnaryOperator Impl::Lookup(core::UnaryOp op,
 Table::BinaryOperator Impl::Lookup(core::BinaryOp op,
                                    const type::Type* lhs,
                                    const type::Type* rhs,
-                                   sem::EvaluationStage earliest_eval_stage,
+                                   EvaluationStage earliest_eval_stage,
                                    const Source& source,
                                    bool is_compound) {
     auto [intrinsic_index, intrinsic_name] = [&]() -> std::pair<size_t, const char*> {
@@ -1306,7 +1306,7 @@ Table::BinaryOperator Impl::Lookup(core::BinaryOp op,
 Table::CtorOrConv Impl::Lookup(CtorConv type,
                                const type::Type* template_arg,
                                VectorRef<const type::Type*> args,
-                               sem::EvaluationStage earliest_eval_stage,
+                               EvaluationStage earliest_eval_stage,
                                const Source& source) {
     auto name = str(type);
 
@@ -1360,8 +1360,8 @@ Table::CtorOrConv Impl::Lookup(CtorConv type,
                 nullptr, static_cast<uint32_t>(params.Length()), p.type,
                 core::AddressSpace::kUndefined, core::Access::kUndefined, p.usage));
         }
-        auto eval_stage = match.overload->const_eval_fn ? sem::EvaluationStage::kConstant
-                                                        : sem::EvaluationStage::kRuntime;
+        auto eval_stage =
+            match.overload->const_eval_fn ? EvaluationStage::kConstant : EvaluationStage::kRuntime;
         auto* target = constructors.GetOrCreate(match, [&] {
             return builder.create<sem::ValueConstructor>(match.return_type, std::move(params),
                                                          eval_stage);
@@ -1374,8 +1374,8 @@ Table::CtorOrConv Impl::Lookup(CtorConv type,
         auto param = builder.create<sem::Parameter>(
             nullptr, 0u, match.parameters[0].type, core::AddressSpace::kUndefined,
             core::Access::kUndefined, match.parameters[0].usage);
-        auto eval_stage = match.overload->const_eval_fn ? sem::EvaluationStage::kConstant
-                                                        : sem::EvaluationStage::kRuntime;
+        auto eval_stage =
+            match.overload->const_eval_fn ? EvaluationStage::kConstant : EvaluationStage::kRuntime;
         return builder.create<sem::ValueConversion>(match.return_type, param, eval_stage);
     });
     return CtorOrConv{target, match.overload->const_eval_fn};
@@ -1384,7 +1384,7 @@ Table::CtorOrConv Impl::Lookup(CtorConv type,
 IntrinsicPrototype Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,
                                         const char* intrinsic_name,
                                         VectorRef<const type::Type*> args,
-                                        sem::EvaluationStage earliest_eval_stage,
+                                        EvaluationStage earliest_eval_stage,
                                         TemplateState templates,
                                         const OnNoMatch& on_no_match) const {
     size_t num_matched = 0;
@@ -1441,7 +1441,7 @@ IntrinsicPrototype Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,
 
 Impl::Candidate Impl::ScoreOverload(const OverloadInfo* overload,
                                     VectorRef<const type::Type*> args,
-                                    sem::EvaluationStage earliest_eval_stage,
+                                    EvaluationStage earliest_eval_stage,
                                     const TemplateState& in_templates) const {
     // Penalty weights for overload mismatching.
     // This scoring is used to order the suggested overloads in diagnostic on overload mismatch, and
@@ -1620,7 +1620,7 @@ Impl::Candidate Impl::ResolveCandidate(Impl::Candidates&& candidates,
 MatchState Impl::Match(TemplateState& templates,
                        const OverloadInfo* overload,
                        MatcherIndex const* matcher_indices,
-                       sem::EvaluationStage earliest_eval_stage) const {
+                       EvaluationStage earliest_eval_stage) const {
     return MatchState(builder, templates, matchers, overload, matcher_indices, earliest_eval_stage);
 }
 
@@ -1630,7 +1630,7 @@ void Impl::PrintOverload(StringStream& ss,
     TemplateState templates;
 
     // TODO(crbug.com/tint/1730): Use input evaluation stage to output only relevant overloads.
-    auto earliest_eval_stage = sem::EvaluationStage::kConstant;
+    auto earliest_eval_stage = EvaluationStage::kConstant;
 
     ss << intrinsic_name;
 

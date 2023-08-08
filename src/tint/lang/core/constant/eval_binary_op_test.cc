@@ -1429,16 +1429,16 @@ static void ValidateAnd(const sem::Info& sem, const ast::BinaryExpression* binar
     auto* lhs_sem = sem.GetVal(lhs);
     ASSERT_TRUE(lhs_sem->ConstantValue());
     EXPECT_EQ(lhs_sem->ConstantValue()->ValueAs<bool>(), false);
-    EXPECT_EQ(lhs_sem->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(lhs_sem->Stage(), core::EvaluationStage::kConstant);
 
     auto* rhs_sem = sem.GetVal(rhs);
     EXPECT_EQ(rhs_sem->ConstantValue(), nullptr);
-    EXPECT_EQ(rhs_sem->Stage(), sem::EvaluationStage::kNotEvaluated);
+    EXPECT_EQ(rhs_sem->Stage(), core::EvaluationStage::kNotEvaluated);
 
     auto* binary_sem = sem.Get(binary);
     ASSERT_TRUE(binary_sem->ConstantValue());
     EXPECT_EQ(binary_sem->ConstantValue()->ValueAs<bool>(), false);
-    EXPECT_EQ(binary_sem->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(binary_sem->Stage(), core::EvaluationStage::kConstant);
 }
 
 /// Validates that `binary` is a short-circuiting logical or expression
@@ -1449,16 +1449,16 @@ static void ValidateOr(const sem::Info& sem, const ast::BinaryExpression* binary
     auto* lhs_sem = sem.GetVal(lhs);
     ASSERT_TRUE(lhs_sem->ConstantValue());
     EXPECT_EQ(lhs_sem->ConstantValue()->ValueAs<bool>(), true);
-    EXPECT_EQ(lhs_sem->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(lhs_sem->Stage(), core::EvaluationStage::kConstant);
 
     auto* rhs_sem = sem.GetVal(rhs);
     EXPECT_EQ(rhs_sem->ConstantValue(), nullptr);
-    EXPECT_EQ(rhs_sem->Stage(), sem::EvaluationStage::kNotEvaluated);
+    EXPECT_EQ(rhs_sem->Stage(), core::EvaluationStage::kNotEvaluated);
 
     auto* binary_sem = sem.Get(binary);
     ASSERT_TRUE(binary_sem->ConstantValue());
     EXPECT_EQ(binary_sem->ConstantValue()->ValueAs<bool>(), true);
-    EXPECT_EQ(binary_sem->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(binary_sem->Stage(), core::EvaluationStage::kConstant);
 }
 
 // Naming convention for tests below:
@@ -2330,9 +2330,9 @@ TEST_F(ConstEvalTest, ShortCircuit_And_RHSVarDecl) {
     WrapInFunction(Decl(Var("b", Expr(false))), binary);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(binary)->Stage(), sem::EvaluationStage::kRuntime);
-    EXPECT_EQ(Sem().GetVal(binary->lhs)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().GetVal(binary->rhs)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(binary)->Stage(), core::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().GetVal(binary->lhs)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().GetVal(binary->rhs)->Stage(), core::EvaluationStage::kRuntime);
 }
 
 TEST_F(ConstEvalTest, ShortCircuit_Or_RHSVarDecl) {
@@ -2344,9 +2344,9 @@ TEST_F(ConstEvalTest, ShortCircuit_Or_RHSVarDecl) {
     WrapInFunction(Decl(Var("b", Expr(false))), binary);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(binary)->Stage(), sem::EvaluationStage::kRuntime);
-    EXPECT_EQ(Sem().GetVal(binary->lhs)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().GetVal(binary->rhs)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(binary)->Stage(), core::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().GetVal(binary->lhs)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().GetVal(binary->rhs)->Stage(), core::EvaluationStage::kRuntime);
 }
 
 ////////////////////////////////////////////////

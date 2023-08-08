@@ -30,7 +30,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::VariableUser);
 namespace tint::sem {
 Variable::Variable(const ast::Variable* declaration,
                    const type::Type* type,
-                   EvaluationStage stage,
+                   core::EvaluationStage stage,
                    core::AddressSpace address_space,
                    core::Access access,
                    const constant::Value* constant_value)
@@ -45,7 +45,7 @@ Variable::~Variable() = default;
 
 LocalVariable::LocalVariable(const ast::Variable* declaration,
                              const type::Type* type,
-                             EvaluationStage stage,
+                             core::EvaluationStage stage,
                              core::AddressSpace address_space,
                              core::Access access,
                              const sem::Statement* statement,
@@ -57,7 +57,7 @@ LocalVariable::~LocalVariable() = default;
 
 GlobalVariable::GlobalVariable(const ast::Variable* declaration,
                                const type::Type* type,
-                               EvaluationStage stage,
+                               core::EvaluationStage stage,
                                core::AddressSpace address_space,
                                core::Access access,
                                const constant::Value* constant_value,
@@ -79,7 +79,7 @@ Parameter::Parameter(const ast::Parameter* declaration,
                      const ParameterUsage usage /* = ParameterUsage::kNone */,
                      std::optional<tint::BindingPoint> binding_point /* = {} */,
                      std::optional<uint32_t> location /* = std::nullopt */)
-    : Base(declaration, type, EvaluationStage::kRuntime, address_space, access, nullptr),
+    : Base(declaration, type, core::EvaluationStage::kRuntime, address_space, access, nullptr),
       index_(index),
       usage_(usage),
       binding_point_(binding_point),
@@ -88,7 +88,7 @@ Parameter::Parameter(const ast::Parameter* declaration,
 Parameter::~Parameter() = default;
 
 VariableUser::VariableUser(const ast::IdentifierExpression* declaration,
-                           EvaluationStage stage,
+                           core::EvaluationStage stage,
                            Statement* statement,
                            const constant::Value* constant,
                            sem::Variable* variable)

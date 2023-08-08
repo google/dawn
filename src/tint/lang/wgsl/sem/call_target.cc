@@ -23,11 +23,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::CallTarget);
 
 namespace tint::sem {
 
-CallTarget::CallTarget(EvaluationStage stage, bool must_use) : stage_(stage), must_use_(must_use) {}
+CallTarget::CallTarget(core::EvaluationStage stage, bool must_use)
+    : stage_(stage), must_use_(must_use) {}
 
 CallTarget::CallTarget(const type::Type* return_type,
                        VectorRef<Parameter*> parameters,
-                       EvaluationStage stage,
+                       core::EvaluationStage stage,
                        bool must_use)
     : stage_(stage), must_use_(must_use) {
     SetReturnType(return_type);

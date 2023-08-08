@@ -47,7 +47,7 @@ using ValueExpressionTest = TestHelper;
 TEST_F(ValueExpressionTest, UnwrapMaterialize) {
     MockConstant c(create<type::I32>());
     auto* a = create<ValueExpression>(/* declaration */ nullptr, create<type::I32>(),
-                                      sem::EvaluationStage::kRuntime, /* statement */ nullptr,
+                                      core::EvaluationStage::kRuntime, /* statement */ nullptr,
                                       /* constant_value */ nullptr,
                                       /* has_side_effects */ false, /* root_ident */ nullptr);
     auto* b = create<Materialize>(a, /* statement */ nullptr, c.Type(), &c);

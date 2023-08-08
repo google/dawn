@@ -37,7 +37,7 @@ class IndexAccessorExpression final : public Castable<IndexAccessorExpression, A
     /// @param root_ident the (optional) root identifier for this expression
     IndexAccessorExpression(const ast::IndexAccessorExpression* declaration,
                             const type::Type* type,
-                            EvaluationStage stage,
+                            core::EvaluationStage stage,
                             const ValueExpression* object,
                             const ValueExpression* index,
                             const Statement* statement,

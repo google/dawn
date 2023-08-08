@@ -33,7 +33,7 @@ const char* Builtin::str() const {
 Builtin::Builtin(core::Function type,
                  const type::Type* return_type,
                  VectorRef<Parameter*> parameters,
-                 EvaluationStage eval_stage,
+                 core::EvaluationStage eval_stage,
                  PipelineStageSet supported_stages,
                  bool is_deprecated,
                  bool must_use)

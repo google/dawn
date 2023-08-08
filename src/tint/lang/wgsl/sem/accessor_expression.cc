@@ -24,7 +24,7 @@ namespace tint::sem {
 
 AccessorExpression::AccessorExpression(const ast::AccessorExpression* declaration,
                                        const type::Type* type,
-                                       EvaluationStage stage,
+                                       core::EvaluationStage stage,
                                        const ValueExpression* object,
                                        const Statement* statement,
                                        const constant::Value* constant,

@@ -20,7 +20,7 @@ namespace tint::sem {
 
 ValueConversion::ValueConversion(const type::Type* type,
                                  sem::Parameter* parameter,
-                                 EvaluationStage stage)
+                                 core::EvaluationStage stage)
     : Base(type, tint::Vector<sem::Parameter*, 1>{parameter}, stage, /* must_use */ true) {}
 
 ValueConversion::~ValueConversion() = default;

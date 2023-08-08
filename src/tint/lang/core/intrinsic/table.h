@@ -86,15 +86,15 @@ class Table {
     /// @param args the argument types passed to the builtin function
     /// @param earliest_eval_stage the the earliest evaluation stage that a call to
     ///        the builtin can be made. This can alter the overloads considered.
-    ///        For example, if the earliest evaluation stage is
-    ///        `sem::EvaluationStage::kRuntime`, then only overloads with concrete argument types
-    ///        will be considered, as all abstract-numerics will have been materialized
-    ///        after shader creation time (sem::EvaluationStage::kConstant).
+    ///        For example, if the earliest evaluation stage is `EvaluationStage::kRuntime`, then
+    ///        only overloads with concrete argument types will be considered, as all
+    ///        abstract-numerics will have been materialized after shader creation time
+    ///        (EvaluationStage::kConstant).
     /// @param source the source of the builtin call
     /// @return the semantic builtin if found, otherwise nullptr
     virtual Builtin Lookup(core::Function type,
                            VectorRef<const type::Type*> args,
-                           sem::EvaluationStage earliest_eval_stage,
+                           EvaluationStage earliest_eval_stage,
                            const Source& source) = 0;
 
     /// Lookup looks for the unary op overload with the given signature, raising an error
@@ -104,15 +104,15 @@ class Table {
     /// @param earliest_eval_stage the the earliest evaluation stage that a call to
     ///        the unary operator can be made. This can alter the overloads considered.
     ///        For example, if the earliest evaluation stage is
-    ///        `sem::EvaluationStage::kRuntime`, then only overloads with concrete argument types
+    ///        `EvaluationStage::kRuntime`, then only overloads with concrete argument types
     ///        will be considered, as all abstract-numerics will have been materialized
-    ///        after shader creation time (sem::EvaluationStage::kConstant).
+    ///        after shader creation time (EvaluationStage::kConstant).
     /// @param source the source of the operator call
     /// @return the operator call target signature. If the operator was not found
     ///         UnaryOperator::result will be nullptr.
     virtual UnaryOperator Lookup(core::UnaryOp op,
                                  const type::Type* arg,
-                                 sem::EvaluationStage earliest_eval_stage,
+                                 EvaluationStage earliest_eval_stage,
                                  const Source& source) = 0;
 
     /// Lookup looks for the binary op overload with the given signature, raising an error
@@ -124,16 +124,16 @@ class Table {
     /// @param earliest_eval_stage the the earliest evaluation stage that a call to
     ///        the binary operator can be made. This can alter the overloads considered.
     ///        For example, if the earliest evaluation stage is
-    ///        `sem::EvaluationStage::kRuntime`, then only overloads with concrete argument types
+    ///        `EvaluationStage::kRuntime`, then only overloads with concrete argument types
     ///        will be considered, as all abstract-numerics will have been materialized
-    ///        after shader creation time (sem::EvaluationStage::kConstant).
+    ///        after shader creation time (EvaluationStage::kConstant).
     /// @param is_compound true if the binary operator is being used as a compound assignment
     /// @return the operator call target signature. If the operator was not found
     ///         BinaryOperator::result will be nullptr.
     virtual BinaryOperator Lookup(core::BinaryOp op,
                                   const type::Type* lhs,
                                   const type::Type* rhs,
-                                  sem::EvaluationStage earliest_eval_stage,
+                                  EvaluationStage earliest_eval_stage,
                                   const Source& source,
                                   bool is_compound) = 0;
 
@@ -144,15 +144,15 @@ class Table {
     /// @param earliest_eval_stage the the earliest evaluation stage that a call to
     ///        the constructor or conversion can be made. This can alter the overloads considered.
     ///        For example, if the earliest evaluation stage is
-    ///        `sem::EvaluationStage::kRuntime`, then only overloads with concrete argument types
+    ///        `EvaluationStage::kRuntime`, then only overloads with concrete argument types
     ///        will be considered, as all abstract-numerics will have been materialized
-    ///        after shader creation time (sem::EvaluationStage::kConstant).
+    ///        after shader creation time (EvaluationStage::kConstant).
     /// @param source the source of the call
     /// @return a sem::ValueConstructor, sem::ValueConversion or nullptr if nothing matched
     virtual CtorOrConv Lookup(CtorConv type,
                               const type::Type* template_arg,
                               VectorRef<const type::Type*> args,
-                              sem::EvaluationStage earliest_eval_stage,
+                              EvaluationStage earliest_eval_stage,
                               const Source& source) = 0;
 };
 

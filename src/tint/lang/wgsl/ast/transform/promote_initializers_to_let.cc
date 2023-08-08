@@ -53,7 +53,7 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
         {
             // Follow const-chains
             auto* root_expr = expr;
-            if (expr->Stage() == sem::EvaluationStage::kConstant) {
+            if (expr->Stage() == core::EvaluationStage::kConstant) {
                 if (expr->Type()->HoldsAbstract()) {
                     // Do not hoist expressions that are not materialized, as doing so would cause
                     // premature materialization.
@@ -99,7 +99,7 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
                 continue;
             }
 
-            if (sem->Stage() == sem::EvaluationStage::kConstant) {
+            if (sem->Stage() == core::EvaluationStage::kConstant) {
                 // Expression is constant. We only need to hoist expressions if they're the
                 // outermost constant expression in a chain. Remove the immediate child nodes of the
                 // expression from const_chains, and add this expression to the const_chains. As we

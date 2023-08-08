@@ -73,7 +73,7 @@ class CallTarget : public Castable<CallTarget, Node> {
     /// @param stage the earliest evaluation stage for a call to this target
     /// @param must_use the result of the call target must be used, i.e. it cannot be used as a call
     /// statement.
-    CallTarget(EvaluationStage stage, bool must_use);
+    CallTarget(core::EvaluationStage stage, bool must_use);
 
     /// Constructor
     /// @param return_type the return type of the call target
@@ -83,7 +83,7 @@ class CallTarget : public Castable<CallTarget, Node> {
     /// statement.
     CallTarget(const type::Type* return_type,
                VectorRef<Parameter*> parameters,
-               EvaluationStage stage,
+               core::EvaluationStage stage,
                bool must_use);
 
     /// Copy constructor
@@ -113,7 +113,7 @@ class CallTarget : public Castable<CallTarget, Node> {
     const CallTargetSignature& Signature() const { return signature_; }
 
     /// @return the earliest evaluation stage for a call to this target
-    EvaluationStage Stage() const { return stage_; }
+    core::EvaluationStage Stage() const { return stage_; }
 
     /// @returns true if the result of the call target must be used, i.e. it cannot be used as a
     /// call statement.
@@ -121,7 +121,7 @@ class CallTarget : public Castable<CallTarget, Node> {
 
   private:
     CallTargetSignature signature_;
-    EvaluationStage stage_;
+    core::EvaluationStage stage_;
     const bool must_use_;
 };
 

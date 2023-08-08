@@ -2798,7 +2798,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
         auto* zero = builder_.Expr(0_i);
         auto* stmt = builder_.Sem().Get(vector)->Stmt();
         builder_.Sem().Add(zero, builder_.create<sem::ValueExpression>(
-                                     zero, i32, sem::EvaluationStage::kRuntime, stmt,
+                                     zero, i32, core::EvaluationStage::kRuntime, stmt,
                                      /* constant_value */ nullptr,
                                      /* has_side_effects */ false));
         auto* packed = tint::writer::AppendVector(&builder_, vector, zero);

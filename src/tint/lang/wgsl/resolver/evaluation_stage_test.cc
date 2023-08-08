@@ -30,7 +30,7 @@ TEST_F(ResolverEvaluationStageTest, Literal_i32) {
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kConstant);
 }
 
 TEST_F(ResolverEvaluationStageTest, Literal_f32) {
@@ -38,7 +38,7 @@ TEST_F(ResolverEvaluationStageTest, Literal_f32) {
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kConstant);
 }
 
 TEST_F(ResolverEvaluationStageTest, Vector_Init) {
@@ -46,7 +46,7 @@ TEST_F(ResolverEvaluationStageTest, Vector_Init) {
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kConstant);
 }
 
 TEST_F(ResolverEvaluationStageTest, Vector_Init_Const_Const) {
@@ -57,8 +57,8 @@ TEST_F(ResolverEvaluationStageTest, Vector_Init_Const_Const) {
     WrapInFunction(f, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(f)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(f)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kConstant);
 }
 
 TEST_F(ResolverEvaluationStageTest, Vector_Init_Runtime_Runtime) {
@@ -69,8 +69,8 @@ TEST_F(ResolverEvaluationStageTest, Vector_Init_Runtime_Runtime) {
     WrapInFunction(f, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(f)->Stage(), sem::EvaluationStage::kRuntime);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(f)->Stage(), core::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kRuntime);
 }
 
 TEST_F(ResolverEvaluationStageTest, Vector_Conv_Const) {
@@ -81,8 +81,8 @@ TEST_F(ResolverEvaluationStageTest, Vector_Conv_Const) {
     WrapInFunction(f, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(f)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(f)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kConstant);
 }
 
 TEST_F(ResolverEvaluationStageTest, Vector_Conv_Runtime) {
@@ -93,8 +93,8 @@ TEST_F(ResolverEvaluationStageTest, Vector_Conv_Runtime) {
     WrapInFunction(f, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(f)->Stage(), sem::EvaluationStage::kRuntime);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(f)->Stage(), core::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kRuntime);
 }
 
 TEST_F(ResolverEvaluationStageTest, Matrix_Init) {
@@ -102,7 +102,7 @@ TEST_F(ResolverEvaluationStageTest, Matrix_Init) {
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kConstant);
 }
 
 TEST_F(ResolverEvaluationStageTest, Array_Init) {
@@ -110,7 +110,7 @@ TEST_F(ResolverEvaluationStageTest, Array_Init) {
     WrapInFunction(expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kConstant);
 }
 
 TEST_F(ResolverEvaluationStageTest, Array_Init_Const_Const) {
@@ -121,8 +121,8 @@ TEST_F(ResolverEvaluationStageTest, Array_Init_Const_Const) {
     WrapInFunction(f, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(f)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(f)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kConstant);
 }
 
 TEST_F(ResolverEvaluationStageTest, Array_Init_Const_Override) {
@@ -135,9 +135,9 @@ TEST_F(ResolverEvaluationStageTest, Array_Init_Const_Override) {
     WrapInFunction(f1, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(f1)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().Get(f2)->Stage(), sem::EvaluationStage::kOverride);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kOverride);
+    EXPECT_EQ(Sem().Get(f1)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(f2)->Stage(), core::EvaluationStage::kOverride);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kOverride);
 }
 
 TEST_F(ResolverEvaluationStageTest, Array_Init_Override_Runtime) {
@@ -150,9 +150,9 @@ TEST_F(ResolverEvaluationStageTest, Array_Init_Override_Runtime) {
     WrapInFunction(f2, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(f1)->Stage(), sem::EvaluationStage::kOverride);
-    EXPECT_EQ(Sem().Get(f2)->Stage(), sem::EvaluationStage::kRuntime);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(f1)->Stage(), core::EvaluationStage::kOverride);
+    EXPECT_EQ(Sem().Get(f2)->Stage(), core::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kRuntime);
 }
 
 TEST_F(ResolverEvaluationStageTest, Array_Init_Const_Runtime) {
@@ -165,9 +165,9 @@ TEST_F(ResolverEvaluationStageTest, Array_Init_Const_Runtime) {
     WrapInFunction(f1, f2, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(f1)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().Get(f2)->Stage(), sem::EvaluationStage::kRuntime);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(f1)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(f2)->Stage(), core::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kRuntime);
 }
 
 TEST_F(ResolverEvaluationStageTest, Array_Init_Runtime_Runtime) {
@@ -178,8 +178,8 @@ TEST_F(ResolverEvaluationStageTest, Array_Init_Runtime_Runtime) {
     WrapInFunction(f, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(f)->Stage(), sem::EvaluationStage::kRuntime);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(f)->Stage(), core::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kRuntime);
 }
 
 TEST_F(ResolverEvaluationStageTest, IndexAccessor_Const_Const) {
@@ -192,9 +192,9 @@ TEST_F(ResolverEvaluationStageTest, IndexAccessor_Const_Const) {
     WrapInFunction(vec, idx, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(vec)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().Get(idx)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(vec)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(idx)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kConstant);
 }
 
 TEST_F(ResolverEvaluationStageTest, IndexAccessor_Runtime_Const) {
@@ -207,9 +207,9 @@ TEST_F(ResolverEvaluationStageTest, IndexAccessor_Runtime_Const) {
     WrapInFunction(vec, idx, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(vec)->Stage(), sem::EvaluationStage::kRuntime);
-    EXPECT_EQ(Sem().Get(idx)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(vec)->Stage(), core::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(idx)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kRuntime);
 }
 
 TEST_F(ResolverEvaluationStageTest, IndexAccessor_Const_Override) {
@@ -222,9 +222,9 @@ TEST_F(ResolverEvaluationStageTest, IndexAccessor_Const_Override) {
     WrapInFunction(vec, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(vec)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().Get(idx)->Stage(), sem::EvaluationStage::kOverride);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kOverride);
+    EXPECT_EQ(Sem().Get(vec)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(idx)->Stage(), core::EvaluationStage::kOverride);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kOverride);
 }
 
 TEST_F(ResolverEvaluationStageTest, IndexAccessor_Const_Runtime) {
@@ -237,9 +237,9 @@ TEST_F(ResolverEvaluationStageTest, IndexAccessor_Const_Runtime) {
     WrapInFunction(vec, idx, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(vec)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().Get(idx)->Stage(), sem::EvaluationStage::kRuntime);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(vec)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(idx)->Stage(), core::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kRuntime);
 }
 
 TEST_F(ResolverEvaluationStageTest, Swizzle_Const) {
@@ -250,8 +250,8 @@ TEST_F(ResolverEvaluationStageTest, Swizzle_Const) {
     WrapInFunction(vec, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(vec)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(vec)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kConstant);
 }
 
 TEST_F(ResolverEvaluationStageTest, Swizzle_Runtime) {
@@ -262,8 +262,8 @@ TEST_F(ResolverEvaluationStageTest, Swizzle_Runtime) {
     WrapInFunction(vec, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(vec)->Stage(), sem::EvaluationStage::kRuntime);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(vec)->Stage(), core::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kRuntime);
 }
 
 TEST_F(ResolverEvaluationStageTest, MemberAccessor_Const) {
@@ -276,8 +276,8 @@ TEST_F(ResolverEvaluationStageTest, MemberAccessor_Const) {
     WrapInFunction(str, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(str)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(str)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kConstant);
 }
 
 TEST_F(ResolverEvaluationStageTest, MemberAccessor_Runtime) {
@@ -290,8 +290,8 @@ TEST_F(ResolverEvaluationStageTest, MemberAccessor_Runtime) {
     WrapInFunction(str, expr);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(str)->Stage(), sem::EvaluationStage::kRuntime);
-    EXPECT_EQ(Sem().Get(expr)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(str)->Stage(), core::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(expr)->Stage(), core::EvaluationStage::kRuntime);
 }
 
 TEST_F(ResolverEvaluationStageTest, Binary_Runtime) {
@@ -305,9 +305,9 @@ TEST_F(ResolverEvaluationStageTest, Binary_Runtime) {
     WrapInFunction(one, result);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(lhs)->Stage(), sem::EvaluationStage::kRuntime);
-    EXPECT_EQ(Sem().Get(rhs)->Stage(), sem::EvaluationStage::kRuntime);
-    EXPECT_EQ(Sem().Get(binary)->Stage(), sem::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(lhs)->Stage(), core::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(rhs)->Stage(), core::EvaluationStage::kRuntime);
+    EXPECT_EQ(Sem().Get(binary)->Stage(), core::EvaluationStage::kRuntime);
 }
 
 TEST_F(ResolverEvaluationStageTest, Binary_Const) {
@@ -321,9 +321,9 @@ TEST_F(ResolverEvaluationStageTest, Binary_Const) {
     WrapInFunction(one, result);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(lhs)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().Get(rhs)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().Get(binary)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(lhs)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(rhs)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(binary)->Stage(), core::EvaluationStage::kConstant);
 }
 
 TEST_F(ResolverEvaluationStageTest, Binary_NotEvaluated) {
@@ -337,9 +337,9 @@ TEST_F(ResolverEvaluationStageTest, Binary_NotEvaluated) {
     WrapInFunction(one, result);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(Sem().Get(lhs)->Stage(), sem::EvaluationStage::kConstant);
-    EXPECT_EQ(Sem().Get(rhs)->Stage(), sem::EvaluationStage::kNotEvaluated);
-    EXPECT_EQ(Sem().Get(binary)->Stage(), sem::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(lhs)->Stage(), core::EvaluationStage::kConstant);
+    EXPECT_EQ(Sem().Get(rhs)->Stage(), core::EvaluationStage::kNotEvaluated);
+    EXPECT_EQ(Sem().Get(binary)->Stage(), core::EvaluationStage::kConstant);
 }
 
 }  // namespace

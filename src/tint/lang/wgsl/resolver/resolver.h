@@ -558,18 +558,18 @@ class Resolver {
     // ArrayConstructorSig represents a unique array constructor signature.
     // It is a tuple of the array type, number of arguments provided and earliest evaluation stage.
     using ArrayConstructorSig =
-        tint::UnorderedKeyWrapper<std::tuple<const type::Array*, size_t, sem::EvaluationStage>>;
+        tint::UnorderedKeyWrapper<std::tuple<const type::Array*, size_t, core::EvaluationStage>>;
 
     // StructConstructorSig represents a unique structure constructor signature.
     // It is a tuple of the structure type, number of arguments provided and earliest evaluation
     // stage.
     using StructConstructorSig =
-        tint::UnorderedKeyWrapper<std::tuple<const type::Struct*, size_t, sem::EvaluationStage>>;
+        tint::UnorderedKeyWrapper<std::tuple<const type::Struct*, size_t, core::EvaluationStage>>;
 
     /// ExprEvalStageConstraint describes a constraint on when expressions can be evaluated.
     struct ExprEvalStageConstraint {
         /// The latest stage that the expression can be evaluated
-        sem::EvaluationStage stage = sem::EvaluationStage::kRuntime;
+        core::EvaluationStage stage = core::EvaluationStage::kRuntime;
         /// The 'thing' that is imposing the contraint. e.g. "var declaration"
         /// If nullptr, then there is no constraint
         const char* constraint = nullptr;

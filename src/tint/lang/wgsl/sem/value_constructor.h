@@ -29,7 +29,7 @@ class ValueConstructor final : public Castable<ValueConstructor, CallTarget> {
     /// @param stage the earliest evaluation stage for the expression
     ValueConstructor(const type::Type* type,
                      VectorRef<Parameter*> parameters,
-                     EvaluationStage stage);
+                     core::EvaluationStage stage);
 
     /// Destructor
     ~ValueConstructor() override;

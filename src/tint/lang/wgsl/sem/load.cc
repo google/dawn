@@ -23,7 +23,7 @@ namespace tint::sem {
 Load::Load(const ValueExpression* ref, const Statement* statement)
     : Base(/* declaration */ ref->Declaration(),
            /* type */ ref->Type()->UnwrapRef(),
-           /* stage */ EvaluationStage::kRuntime,  // Loads can only be runtime
+           /* stage */ core::EvaluationStage::kRuntime,  // Loads can only be runtime
            /* statement */ statement,
            /* constant */ nullptr,
            /* has_side_effects */ ref->HasSideEffects(),

@@ -698,6 +698,7 @@ libtint_source_set("libtint_ast_src") {
 
 libtint_source_set("libtint_sem_src") {
   sources = [
+    "lang/core/evaluation_stage.h",
     "lang/wgsl/sem/accessor_expression.cc",
     "lang/wgsl/sem/accessor_expression.h",
     "lang/wgsl/sem/array_count.cc",
@@ -716,7 +717,6 @@ libtint_source_set("libtint_sem_src") {
     "lang/wgsl/sem/call.h",
     "lang/wgsl/sem/call_target.cc",
     "lang/wgsl/sem/call_target.h",
-    "lang/wgsl/sem/evaluation_stage.h",
     "lang/wgsl/sem/expression.cc",
     "lang/wgsl/sem/expression.h",
     "lang/wgsl/sem/external_texture.h",

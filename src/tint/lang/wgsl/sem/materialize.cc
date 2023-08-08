@@ -23,7 +23,8 @@ Materialize::Materialize(const ValueExpression* expr,
                          const constant::Value* constant)
     : Base(/* declaration */ expr->Declaration(),
            /* type */ type,
-           /* stage */ constant ? EvaluationStage::kConstant : EvaluationStage::kNotEvaluated,
+           /* stage */
+           constant ? core::EvaluationStage::kConstant : core::EvaluationStage::kNotEvaluated,
            /* statement */ statement,
            /* constant */ constant,
            /* has_side_effects */ false,

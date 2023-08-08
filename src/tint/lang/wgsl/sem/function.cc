@@ -30,7 +30,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Function);
 namespace tint::sem {
 
 Function::Function(const ast::Function* declaration)
-    : Base(EvaluationStage::kRuntime,
+    : Base(core::EvaluationStage::kRuntime,
            ast::HasAttribute<ast::MustUseAttribute>(declaration->attributes)),
       declaration_(declaration),
       workgroup_size_{1, 1, 1} {}

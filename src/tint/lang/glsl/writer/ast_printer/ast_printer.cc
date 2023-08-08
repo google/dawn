@@ -1272,7 +1272,7 @@ const ast::Expression* ASTPrinter::CreateF32Zero(const sem::Statement* stmt) {
     auto* zero = builder_.Expr(0_f);
     auto* f32 = builder_.create<type::F32>();
     auto* sem_zero = builder_.create<sem::ValueExpression>(
-        zero, f32, sem::EvaluationStage::kRuntime, stmt, /* constant_value */ nullptr,
+        zero, f32, core::EvaluationStage::kRuntime, stmt, /* constant_value */ nullptr,
         /* has_side_effects */ false);
     builder_.Sem().Add(zero, sem_zero);
     return zero;

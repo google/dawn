@@ -49,7 +49,7 @@ class AccessorExpression : public Castable<AccessorExpression, ValueExpression> 
     /// @param root_ident the (optional) root identifier for this expression
     AccessorExpression(const ast::AccessorExpression* declaration,
                        const type::Type* type,
-                       EvaluationStage stage,
+                       core::EvaluationStage stage,
                        const ValueExpression* object,
                        const Statement* statement,
                        const constant::Value* constant,

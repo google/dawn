@@ -61,7 +61,7 @@ const sem::ValueExpression* Zero(ProgramBuilder& b,
         TINT_UNREACHABLE() << "unsupported vector element type: " << ty->TypeInfo().name;
         return nullptr;
     }
-    auto* sem = b.create<sem::ValueExpression>(expr, ty, sem::EvaluationStage::kRuntime, stmt,
+    auto* sem = b.create<sem::ValueExpression>(expr, ty, core::EvaluationStage::kRuntime, stmt,
                                                /* constant_value */ nullptr,
                                                /* has_side_effects */ false);
     b.Sem().Add(expr, sem);
@@ -138,9 +138,9 @@ const sem::Call* AppendVector(ProgramBuilder* b,
             packed_el_sem_ty,
             b->create<sem::Parameter>(nullptr, 0u, scalar_sem->Type()->UnwrapRef(),
                                       core::AddressSpace::kUndefined, core::Access::kUndefined),
-            sem::EvaluationStage::kRuntime);
+            core::EvaluationStage::kRuntime);
         auto* scalar_cast_sem = b->create<sem::Call>(
-            scalar_cast_ast, scalar_cast_target, sem::EvaluationStage::kRuntime,
+            scalar_cast_ast, scalar_cast_target, core::EvaluationStage::kRuntime,
             Vector<const sem::ValueExpression*, 1>{scalar_sem}, statement,
             /* constant_value */ nullptr, /* has_side_effects */ false);
         b->Sem().Add(scalar_cast_ast, scalar_cast_sem);
@@ -161,8 +161,8 @@ const sem::Call* AppendVector(ProgramBuilder* b,
                                 nullptr, static_cast<uint32_t>(i), arg->Type()->UnwrapRef(),
                                 core::AddressSpace::kUndefined, core::Access::kUndefined);
                         }),
-        sem::EvaluationStage::kRuntime);
-    auto* ctor_sem = b->create<sem::Call>(ctor_ast, ctor_target, sem::EvaluationStage::kRuntime,
+        core::EvaluationStage::kRuntime);
+    auto* ctor_sem = b->create<sem::Call>(ctor_ast, ctor_target, core::EvaluationStage::kRuntime,
                                           std::move(packed), statement,
                                           /* constant_value */ nullptr,
                                           /* has_side_effects */ false);

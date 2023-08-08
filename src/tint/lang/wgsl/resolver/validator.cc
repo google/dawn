@@ -587,7 +587,7 @@ bool Validator::GlobalVariable(
         decl,  //
         [&](const ast::Var* var) {
             if (auto* init = global->Initializer();
-                init && init->Stage() > sem::EvaluationStage::kOverride) {
+                init && init->Stage() > core::EvaluationStage::kOverride) {
                 AddError("module-scope 'var' initializer must be a constant or override-expression",
                          init->Declaration()->source);
                 return false;
@@ -727,7 +727,7 @@ bool Validator::Override(const sem::GlobalVariable* v,
     auto* decl = v->Declaration();
     auto* storage_ty = v->Type()->UnwrapRef();
 
-    if (auto* init = v->Initializer(); init && init->Stage() > sem::EvaluationStage::kOverride) {
+    if (auto* init = v->Initializer(); init && init->Stage() > core::EvaluationStage::kOverride) {
         AddError("'override' initializer must be an override-expression",
                  init->Declaration()->source);
         return false;
@@ -1371,21 +1371,21 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
 }
 
 bool Validator::EvaluationStage(const sem::ValueExpression* expr,
-                                sem::EvaluationStage latest_stage,
+                                core::EvaluationStage latest_stage,
                                 std::string_view constraint) const {
-    if (expr->Stage() == sem::EvaluationStage::kNotEvaluated) {
+    if (expr->Stage() == core::EvaluationStage::kNotEvaluated) {
         return true;
     }
     if (expr->Stage() > latest_stage) {
-        auto stage_name = [](sem::EvaluationStage stage) -> std::string {
+        auto stage_name = [](core::EvaluationStage stage) -> std::string {
             switch (stage) {
-                case sem::EvaluationStage::kRuntime:
+                case core::EvaluationStage::kRuntime:
                     return "a runtime-expression";
-                case sem::EvaluationStage::kOverride:
+                case core::EvaluationStage::kOverride:
                     return "an override-expression";
-                case sem::EvaluationStage::kConstant:
+                case core::EvaluationStage::kConstant:
                     return "a const-expression";
-                case sem::EvaluationStage::kNotEvaluated:
+                case core::EvaluationStage::kNotEvaluated:
                     return "an unevaluated expression";
             }
             return "<unknown>";

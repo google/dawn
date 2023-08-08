@@ -56,7 +56,7 @@ class Variable : public Castable<Variable, Node> {
     /// @param constant_value the constant value for the variable. May be null
     Variable(const ast::Variable* declaration,
              const type::Type* type,
-             EvaluationStage stage,
+             core::EvaluationStage stage,
              core::AddressSpace address_space,
              core::Access access,
              const constant::Value* constant_value);
@@ -71,7 +71,7 @@ class Variable : public Castable<Variable, Node> {
     const type::Type* Type() const { return type_; }
 
     /// @returns the evaluation stage for an expression of this variable type
-    EvaluationStage Stage() const { return stage_; }
+    core::EvaluationStage Stage() const { return stage_; }
 
     /// @returns the address space for the variable
     core::AddressSpace AddressSpace() const { return address_space_; }
@@ -99,7 +99,7 @@ class Variable : public Castable<Variable, Node> {
   private:
     const ast::Variable* const declaration_;
     const type::Type* const type_;
-    const EvaluationStage stage_;
+    const core::EvaluationStage stage_;
     const core::AddressSpace address_space_;
     const core::Access access_;
     const constant::Value* constant_value_;
@@ -120,7 +120,7 @@ class LocalVariable final : public Castable<LocalVariable, Variable> {
     /// @param constant_value the constant value for the variable. May be null
     LocalVariable(const ast::Variable* declaration,
                   const type::Type* type,
-                  EvaluationStage stage,
+                  core::EvaluationStage stage,
                   core::AddressSpace address_space,
                   core::Access access,
                   const sem::Statement* statement,
@@ -162,7 +162,7 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     /// the spec. The location maybe attached by transforms such as CanonicalizeEntryPointIO.
     GlobalVariable(const ast::Variable* declaration,
                    const type::Type* type,
-                   EvaluationStage stage,
+                   core::EvaluationStage stage,
                    core::AddressSpace address_space,
                    core::Access access,
                    const constant::Value* constant_value,
@@ -270,7 +270,7 @@ class VariableUser final : public Castable<VariableUser, ValueExpression> {
     /// @param constant the constant value of the expression. May be null
     /// @param variable the semantic variable
     VariableUser(const ast::IdentifierExpression* declaration,
-                 EvaluationStage stage,
+                 core::EvaluationStage stage,
                  Statement* statement,
                  const constant::Value* constant,
                  sem::Variable* variable);

@@ -47,7 +47,7 @@ class MemberAccessorExpression : public Castable<MemberAccessorExpression, Acces
     /// @param root_ident the (optional) root identifier for this expression
     MemberAccessorExpression(const ast::MemberAccessorExpression* declaration,
                              const type::Type* type,
-                             EvaluationStage stage,
+                             core::EvaluationStage stage,
                              const Statement* statement,
                              const constant::Value* constant,
                              const ValueExpression* object,

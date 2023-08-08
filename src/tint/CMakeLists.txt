@@ -469,7 +469,7 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/sem/call.h
   lang/wgsl/sem/call_target.cc
   lang/wgsl/sem/call_target.h
-  lang/wgsl/sem/evaluation_stage.h
+  lang/core/evaluation_stage.h
   lang/wgsl/sem/expression.cc
   lang/wgsl/sem/expression.h
   lang/wgsl/sem/external_texture.h

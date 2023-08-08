@@ -38,7 +38,7 @@ class Call final : public Castable<Call, ValueExpression> {
     /// @param has_side_effects whether this expression may have side effects
     Call(const ast::CallExpression* declaration,
          const CallTarget* target,
-         EvaluationStage stage,
+         core::EvaluationStage stage,
          VectorRef<const sem::ValueExpression*> arguments,
          const Statement* statement,
          const constant::Value* constant,

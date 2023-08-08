@@ -292,11 +292,11 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
     sem::Variable* sem = nullptr;
     if (is_global) {
         sem = builder_->create<sem::GlobalVariable>(
-            v, ty, sem::EvaluationStage::kRuntime, core::AddressSpace::kUndefined,
+            v, ty, core::EvaluationStage::kRuntime, core::AddressSpace::kUndefined,
             core::Access::kUndefined,
             /* constant_value */ nullptr, std::nullopt, std::nullopt);
     } else {
-        sem = builder_->create<sem::LocalVariable>(v, ty, sem::EvaluationStage::kRuntime,
+        sem = builder_->create<sem::LocalVariable>(v, ty, core::EvaluationStage::kRuntime,
                                                    core::AddressSpace::kUndefined,
                                                    core::Access::kUndefined, current_statement_,
                                                    /* constant_value */ nullptr);
@@ -325,7 +325,8 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         // Note: RHS must be a const or override expression, which excludes references.
         // So there's no need to load or unwrap references here.
 
-        ExprEvalStageConstraint constraint{sem::EvaluationStage::kOverride, "override initializer"};
+        ExprEvalStageConstraint constraint{core::EvaluationStage::kOverride,
+                                           "override initializer"};
         TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
         rhs = Materialize(ValueExpression(v->initializer), ty);
         if (!rhs) {
@@ -352,7 +353,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
     }
 
     auto* sem = builder_->create<sem::GlobalVariable>(
-        v, ty, sem::EvaluationStage::kOverride, core::AddressSpace::kUndefined,
+        v, ty, core::EvaluationStage::kOverride, core::AddressSpace::kUndefined,
         core::Access::kUndefined,
         /* constant_value */ nullptr, std::nullopt, std::nullopt);
     sem->SetInitializer(rhs);
@@ -362,7 +363,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         bool ok = Switch(
             attribute,  //
             [&](const ast::IdAttribute* attr) {
-                ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@id"};
+                ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "@id"};
                 TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
                 auto* materialized = Materialize(ValueExpression(attr->expr));
@@ -438,7 +439,7 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
 
     const sem::ValueExpression* rhs = nullptr;
     {
-        ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "const initializer"};
+        ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "const initializer"};
         TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
         rhs = ValueExpression(c->initializer);
         if (!rhs) {
@@ -473,10 +474,10 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
     const auto value = rhs->ConstantValue();
     auto* sem = is_global
                     ? static_cast<sem::Variable*>(builder_->create<sem::GlobalVariable>(
-                          c, ty, sem::EvaluationStage::kConstant, core::AddressSpace::kUndefined,
+                          c, ty, core::EvaluationStage::kConstant, core::AddressSpace::kUndefined,
                           core::Access::kUndefined, value, std::nullopt, std::nullopt))
                     : static_cast<sem::Variable*>(builder_->create<sem::LocalVariable>(
-                          c, ty, sem::EvaluationStage::kConstant, core::AddressSpace::kUndefined,
+                          c, ty, core::EvaluationStage::kConstant, core::AddressSpace::kUndefined,
                           core::Access::kUndefined, current_statement_, value));
 
     sem->SetInitializer(rhs);
@@ -500,7 +501,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
     // Does the variable have a initializer?
     if (var->initializer) {
         ExprEvalStageConstraint constraint{
-            is_global ? sem::EvaluationStage::kOverride : sem::EvaluationStage::kRuntime,
+            is_global ? core::EvaluationStage::kOverride : core::EvaluationStage::kRuntime,
             "var initializer",
         };
         TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
@@ -658,7 +659,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
             binding_point = BindingPoint{group.value(), binding.value()};
         }
         sem = builder_->create<sem::GlobalVariable>(
-            var, var_ty, sem::EvaluationStage::kRuntime, address_space, access,
+            var, var_ty, core::EvaluationStage::kRuntime, address_space, access,
             /* constant_value */ nullptr, binding_point, location, index);
 
     } else {
@@ -675,7 +676,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                 return nullptr;
             }
         }
-        sem = builder_->create<sem::LocalVariable>(var, var_ty, sem::EvaluationStage::kRuntime,
+        sem = builder_->create<sem::LocalVariable>(var, var_ty, core::EvaluationStage::kRuntime,
                                                    address_space, access, current_statement_,
                                                    /* constant_value */ nullptr);
     }
@@ -927,7 +928,7 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
 }
 
 sem::Statement* Resolver::ConstAssert(const ast::ConstAssert* assertion) {
-    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "const assertion"};
+    ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "const assertion"};
     TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
     auto* expr = ValueExpression(assertion->condition);
     if (!expr) {
@@ -1261,7 +1262,7 @@ sem::CaseStatement* Resolver::CaseStatement(const ast::CaseStatement* stmt, cons
         for (auto* sel : stmt->selectors) {
             Mark(sel);
 
-            ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "case selector"};
+            ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "case selector"};
             TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
             const constant::Value* const_value = nullptr;
@@ -1512,7 +1513,7 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
             [&](const ast::UnaryOpExpression* unary) { return UnaryOp(unary); },
             [&](const ast::PhonyExpression*) {
                 return builder_->create<sem::ValueExpression>(expr, builder_->create<type::Void>(),
-                                                              sem::EvaluationStage::kRuntime,
+                                                              core::EvaluationStage::kRuntime,
                                                               current_statement_,
                                                               /* constant_value */ nullptr,
                                                               /* has_side_effects */ false);
@@ -1931,7 +1932,7 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
         return nullptr;
     }
     const auto* obj = sem_.GetVal(expr->object);
-    if (idx->Stage() != sem::EvaluationStage::kConstant) {
+    if (idx->Stage() != core::EvaluationStage::kConstant) {
         // If the index is non-constant, then the resulting expression is non-constant, so we'll
         // have to materialize the object. For example, consider:
         //     vec2(1, 2)[runtime-index]
@@ -1970,9 +1971,9 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
     }
 
     const constant::Value* val = nullptr;
-    auto stage = sem::EarliestStage(obj->Stage(), idx->Stage());
-    if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
-        stage = sem::EvaluationStage::kNotEvaluated;
+    auto stage = core::EarliestStage(obj->Stage(), idx->Stage());
+    if (stage == core::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
+        stage = core::EvaluationStage::kNotEvaluated;
     } else {
         if (auto* idx_val = idx->ConstantValue()) {
             auto res = const_eval_.Index(obj->ConstantValue(), obj->Type(), idx_val,
@@ -2005,12 +2006,12 @@ sem::ValueExpression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
     }
 
     auto stage = inner->Stage();
-    if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
-        stage = sem::EvaluationStage::kNotEvaluated;
+    if (stage == core::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
+        stage = core::EvaluationStage::kNotEvaluated;
     }
 
     const constant::Value* value = nullptr;
-    if (stage == sem::EvaluationStage::kConstant) {
+    if (stage == core::EvaluationStage::kConstant) {
         if (auto r = const_eval_.Bitcast(ty, inner->ConstantValue(), expr->source)) {
             value = r.Get();
         } else {
@@ -2039,7 +2040,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     // Resolve all of the arguments, their types and the set of behaviors.
     Vector<const sem::ValueExpression*, 8> args;
     args.Reserve(expr->args.Length());
-    auto args_stage = sem::EvaluationStage::kConstant;
+    auto args_stage = core::EvaluationStage::kConstant;
     sem::Behaviors arg_behaviors;
     for (size_t i = 0; i < expr->args.Length(); i++) {
         auto* arg = sem_.GetVal(expr->args[i]);
@@ -2047,7 +2048,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             return nullptr;
         }
         args.Push(arg);
-        args_stage = sem::EarliestStage(args_stage, arg->Stage());
+        args_stage = core::EarliestStage(args_stage, arg->Stage());
         arg_behaviors.Add(arg->Behaviors());
     }
     arg_behaviors.Remove(sem::Behavior::kNext);
@@ -2069,11 +2070,11 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         }
 
         const constant::Value* value = nullptr;
-        auto stage = sem::EarliestStage(entry.target->Stage(), args_stage);
-        if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
-            stage = sem::EvaluationStage::kNotEvaluated;
+        auto stage = core::EarliestStage(entry.target->Stage(), args_stage);
+        if (stage == core::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
+            stage = core::EvaluationStage::kNotEvaluated;
         }
-        if (stage == sem::EvaluationStage::kConstant) {
+        if (stage == core::EvaluationStage::kConstant) {
             auto const_args = ConvertArguments(args, entry.target);
             if (!const_args) {
                 return nullptr;
@@ -2099,10 +2100,10 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
         auto stage = args_stage;                 // The evaluation stage of the call
         const constant::Value* value = nullptr;  // The constant value for the call
-        if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
-            stage = sem::EvaluationStage::kNotEvaluated;
+        if (stage == core::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
+            stage = core::EvaluationStage::kNotEvaluated;
         }
-        if (stage == sem::EvaluationStage::kConstant) {
+        if (stage == core::EvaluationStage::kConstant) {
             auto els = tint::Transform(args, [&](auto* arg) { return arg->ConstantValue(); });
             if (auto r = const_eval_.ArrayOrStructCtor(ty, std::move(els))) {
                 value = r.Get();
@@ -2115,7 +2116,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 // Use the kRuntime EvaluationStage, as kConstant will trigger an assertion in
                 // the sem::ValueExpression constructor, which checks that kConstant is paired
                 // with a constant value.
-                stage = sem::EvaluationStage::kRuntime;
+                stage = core::EvaluationStage::kRuntime;
             }
         }
 
@@ -2346,9 +2347,9 @@ template <size_t N>
 sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
                                  core::Function builtin_type,
                                  Vector<const sem::ValueExpression*, N>& args) {
-    auto arg_stage = sem::EvaluationStage::kConstant;
+    auto arg_stage = core::EvaluationStage::kConstant;
     for (auto* arg : args) {
-        arg_stage = sem::EarliestStage(arg_stage, arg->Stage());
+        arg_stage = core::EarliestStage(arg_stage, arg->Stage());
     }
 
     core::intrinsic::Table::Builtin builtin;
@@ -2379,11 +2380,11 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     // If the builtin is @const, and all arguments have constant values, evaluate the builtin
     // now.
     const constant::Value* value = nullptr;
-    auto stage = sem::EarliestStage(arg_stage, builtin.sem->Stage());
-    if (stage == sem::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
-        stage = sem::EvaluationStage::kNotEvaluated;
+    auto stage = core::EarliestStage(arg_stage, builtin.sem->Stage());
+    if (stage == core::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
+        stage = core::EvaluationStage::kNotEvaluated;
     }
-    if (stage == sem::EvaluationStage::kConstant) {
+    if (stage == core::EvaluationStage::kConstant) {
         auto const_args = ConvertArguments(args, builtin.sem);
         if (!const_args) {
             return nullptr;
@@ -2959,7 +2960,7 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
     // TODO(crbug.com/tint/1420): For now, assume all function calls have side
     // effects.
     bool has_side_effects = true;
-    auto* call = builder_->create<sem::Call>(expr, target, sem::EvaluationStage::kRuntime,
+    auto* call = builder_->create<sem::Call>(expr, target, core::EvaluationStage::kRuntime,
                                              std::move(args), current_statement_,
                                              /* constant_value */ nullptr, has_side_effects);
 
@@ -3065,11 +3066,11 @@ sem::ValueExpression* Resolver::Literal(const ast::LiteralExpression* literal) {
     }
 
     const constant::Value* val = nullptr;
-    auto stage = sem::EvaluationStage::kConstant;
+    auto stage = core::EvaluationStage::kConstant;
     if (skip_const_eval_.Contains(literal)) {
-        stage = sem::EvaluationStage::kNotEvaluated;
+        stage = core::EvaluationStage::kNotEvaluated;
     }
-    if (stage == sem::EvaluationStage::kConstant) {
+    if (stage == core::EvaluationStage::kConstant) {
         val = Switch(
             literal,
             [&](const ast::BoolLiteralExpression* lit) {
@@ -3129,7 +3130,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                 if (skip_const_eval_.Contains(expr)) {
                     // This expression is short-circuited by an ancestor expression.
                     // Do not const-eval.
-                    stage = sem::EvaluationStage::kNotEvaluated;
+                    stage = core::EvaluationStage::kNotEvaluated;
                     value = nullptr;
                 }
                 auto* user = builder_->create<sem::VariableUser>(expr, stage, current_statement_,
@@ -3460,7 +3461,7 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
     auto* lhs_ty = lhs->Type();
     auto* rhs_ty = rhs->Type();
 
-    auto stage = sem::EarliestStage(lhs->Stage(), rhs->Stage());
+    auto stage = core::EarliestStage(lhs->Stage(), rhs->Stage());
     auto op = intrinsic_table_->Lookup(expr->op, lhs_ty, rhs_ty, stage, expr->source, false);
     if (!op.result) {
         return nullptr;
@@ -3482,13 +3483,13 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
     if (skip_const_eval_.Contains(expr)) {
         // This expression is short-circuited by an ancestor expression.
         // Do not const-eval.
-        stage = sem::EvaluationStage::kNotEvaluated;
-    } else if (lhs->Stage() == sem::EvaluationStage::kConstant &&
-               rhs->Stage() == sem::EvaluationStage::kNotEvaluated) {
+        stage = core::EvaluationStage::kNotEvaluated;
+    } else if (lhs->Stage() == core::EvaluationStage::kConstant &&
+               rhs->Stage() == core::EvaluationStage::kNotEvaluated) {
         // Short-circuiting binary expression. Use the LHS value and stage.
         value = lhs->ConstantValue();
-        stage = sem::EvaluationStage::kConstant;
-    } else if (stage == sem::EvaluationStage::kConstant) {
+        stage = core::EvaluationStage::kConstant;
+    } else if (stage == core::EvaluationStage::kConstant) {
         // Both LHS and RHS have expressions that are constant evaluation stage.
         if (op.const_eval_fn) {  // Do we have a @const operator?
             // Yes. Perform any required abstract argument values implicit conversions to the
@@ -3509,7 +3510,7 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
         } else {
             // The arguments have constant values, but the operator cannot be const-evaluated.
             // This can only be evaluated at runtime.
-            stage = sem::EvaluationStage::kRuntime;
+            stage = core::EvaluationStage::kRuntime;
         }
     }
 
@@ -3531,7 +3532,7 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
     const type::Type* ty = nullptr;
     const sem::Variable* root_ident = nullptr;
     const constant::Value* value = nullptr;
-    auto stage = sem::EvaluationStage::kRuntime;
+    auto stage = core::EvaluationStage::kRuntime;
 
     switch (unary->op) {
         case core::UnaryOp::kAddressOf:
@@ -3593,7 +3594,7 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
             }
 
             stage = expr->Stage();
-            if (stage == sem::EvaluationStage::kConstant) {
+            if (stage == core::EvaluationStage::kConstant) {
                 if (op.const_eval_fn) {
                     if (auto r = (const_eval_.*op.const_eval_fn)(ty, Vector{expr->ConstantValue()},
                                                                  expr->Declaration()->source)) {
@@ -3602,7 +3603,7 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
                         return nullptr;
                     }
                 } else {
-                    stage = sem::EvaluationStage::kRuntime;
+                    stage = core::EvaluationStage::kRuntime;
                 }
             }
             break;
@@ -3616,7 +3617,7 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 }
 
 tint::Result<uint32_t> Resolver::LocationAttribute(const ast::LocationAttribute* attr) {
-    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@location value"};
+    ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "@location value"};
     TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
     auto* materialized = Materialize(ValueExpression(attr->expr));
@@ -3640,7 +3641,7 @@ tint::Result<uint32_t> Resolver::LocationAttribute(const ast::LocationAttribute*
 }
 
 tint::Result<uint32_t> Resolver::IndexAttribute(const ast::IndexAttribute* attr) {
-    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@index value"};
+    ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "@index value"};
     TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
     auto* materialized = Materialize(ValueExpression(attr->expr));
@@ -3664,7 +3665,7 @@ tint::Result<uint32_t> Resolver::IndexAttribute(const ast::IndexAttribute* attr)
 }
 
 tint::Result<uint32_t> Resolver::BindingAttribute(const ast::BindingAttribute* attr) {
-    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@binding"};
+    ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "@binding"};
     TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
     auto* materialized = Materialize(ValueExpression(attr->expr));
@@ -3686,7 +3687,7 @@ tint::Result<uint32_t> Resolver::BindingAttribute(const ast::BindingAttribute* a
 }
 
 tint::Result<uint32_t> Resolver::GroupAttribute(const ast::GroupAttribute* attr) {
-    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@group"};
+    ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "@group"};
     TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
     auto* materialized = Materialize(ValueExpression(attr->expr));
@@ -3739,8 +3740,8 @@ tint::Result<sem::WorkgroupSize> Resolver::WorkgroupAttribute(const ast::Workgro
             return tint::Failure;
         }
 
-        if (expr->Stage() != sem::EvaluationStage::kConstant &&
-            expr->Stage() != sem::EvaluationStage::kOverride) {
+        if (expr->Stage() != core::EvaluationStage::kConstant &&
+            expr->Stage() != core::EvaluationStage::kOverride) {
             AddError(kErrBadExpr, value->source);
             return tint::Failure;
         }
@@ -3918,7 +3919,7 @@ const type::ArrayCount* Resolver::ArrayCount(const ast::Expression* count_expr) 
         return nullptr;
     }
 
-    if (count_sem->Stage() == sem::EvaluationStage::kOverride) {
+    if (count_sem->Stage() == core::EvaluationStage::kOverride) {
         // array count is an override expression.
         // Is the count a named 'override'?
         if (auto* user = count_sem->UnwrapMaterialize()->As<sem::VariableUser>()) {
@@ -4139,7 +4140,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     // Offset attributes are not part of the WGSL spec, but are emitted by the
                     // SPIR-V reader.
 
-                    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant,
+                    ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant,
                                                        "@offset value"};
                     TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
@@ -4162,7 +4163,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     return true;
                 },
                 [&](const ast::StructMemberAlignAttribute* attr) {
-                    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@align"};
+                    ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "@align"};
                     TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
                     auto* materialized = Materialize(ValueExpression(attr->expr));
@@ -4191,7 +4192,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     return true;
                 },
                 [&](const ast::StructMemberSizeAttribute* attr) {
-                    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@size"};
+                    ExprEvalStageConstraint constraint{core::EvaluationStage::kConstant, "@size"};
                     TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
                     auto* materialized = Materialize(ValueExpression(attr->expr));
@@ -4600,7 +4601,7 @@ sem::Statement* Resolver::CompoundAssignmentStatement(
 
         auto* lhs_ty = lhs->Type()->UnwrapRef();
         auto* rhs_ty = rhs->Type()->UnwrapRef();
-        auto stage = sem::EarliestStage(lhs->Stage(), rhs->Stage());
+        auto stage = core::EarliestStage(lhs->Stage(), rhs->Stage());
 
         auto op = intrinsic_table_->Lookup(stmt->op, lhs_ty, rhs_ty, stage, stmt->source, true);
         if (!op.result) {

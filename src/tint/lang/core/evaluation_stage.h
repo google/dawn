@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_SEM_EVALUATION_STAGE_H_
-#define SRC_TINT_LANG_WGSL_SEM_EVALUATION_STAGE_H_
+#ifndef SRC_TINT_LANG_CORE_EVALUATION_STAGE_H_
+#define SRC_TINT_LANG_CORE_EVALUATION_STAGE_H_
 
 #include <algorithm>
 #include <initializer_list>
 
-namespace tint::sem {
+namespace tint::core {
 
 /// The earliest point in time that an expression can be evaluated
 enum class EvaluationStage {
@@ -57,6 +57,6 @@ inline EvaluationStage EarliestStage(ARGS... args) {
     return EarliestStage({args...});
 }
 
-}  // namespace tint::sem
+}  // namespace tint::core
 
-#endif  // SRC_TINT_LANG_WGSL_SEM_EVALUATION_STAGE_H_
+#endif  // SRC_TINT_LANG_CORE_EVALUATION_STAGE_H_

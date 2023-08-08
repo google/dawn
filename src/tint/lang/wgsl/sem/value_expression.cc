@@ -26,7 +26,7 @@ namespace tint::sem {
 
 ValueExpression::ValueExpression(const ast::Expression* declaration,
                                  const type::Type* type,
-                                 EvaluationStage stage,
+                                 core::EvaluationStage stage,
                                  const Statement* statement,
                                  const constant::Value* constant,
                                  bool has_side_effects,
@@ -38,7 +38,7 @@ ValueExpression::ValueExpression(const ast::Expression* declaration,
       constant_(std::move(constant)),
       has_side_effects_(has_side_effects) {
     TINT_ASSERT(type_);
-    TINT_ASSERT((constant != nullptr) == (stage == EvaluationStage::kConstant));
+    TINT_ASSERT((constant != nullptr) == (stage == core::EvaluationStage::kConstant));
     if (constant != nullptr) {
         TINT_ASSERT(type_ == constant->Type());
     }

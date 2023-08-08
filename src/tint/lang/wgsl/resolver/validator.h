@@ -19,10 +19,10 @@
 #include <string>
 #include <utility>
 
+#include "src/tint/lang/core/evaluation_stage.h"
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/sem_helper.h"
-#include "src/tint/lang/wgsl/sem/evaluation_stage.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/containers/vector.h"
@@ -245,7 +245,7 @@ class Validator {
     /// @param constraint the 'thing' that is imposing the contraint. e.g. "var declaration"
     /// @returns true if @p expr is evaluated in or before @p latest_stage, false otherwise
     bool EvaluationStage(const sem::ValueExpression* expr,
-                         sem::EvaluationStage latest_stage,
+                         core::EvaluationStage latest_stage,
                          std::string_view constraint) const;
 
     /// Validates a for loop

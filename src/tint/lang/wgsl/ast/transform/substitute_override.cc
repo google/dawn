@@ -107,7 +107,7 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program* src,
         if (auto* sem = src->Sem().Get(expr)) {
             if (auto* access = sem->UnwrapMaterialize()->As<sem::IndexAccessorExpression>()) {
                 if (access->Object()->UnwrapMaterialize()->Type()->HoldsAbstract() &&
-                    access->Index()->Stage() == sem::EvaluationStage::kOverride) {
+                    access->Index()->Stage() == core::EvaluationStage::kOverride) {
                     auto* obj = b.Call(core::str(core::Function::kTintMaterialize),
                                        ctx.Clone(expr->object));
                     return b.IndexAccessor(obj, ctx.Clone(expr->index));
