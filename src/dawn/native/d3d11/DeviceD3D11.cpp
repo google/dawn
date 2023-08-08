@@ -308,6 +308,9 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
                                                BufferBase* destination,
                                                uint64_t destinationOffset,
                                                uint64_t size) {
+    // D3D11 requires that buffers are unmapped before being used in a copy.
+    DAWN_TRY(source->Unmap());
+
     CommandRecordingContext* commandContext = GetPendingCommandContext();
     return Buffer::Copy(commandContext, ToBackend(source), sourceOffset, size,
                         ToBackend(destination), destinationOffset);

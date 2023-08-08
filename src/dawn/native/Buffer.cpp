@@ -470,9 +470,6 @@ MaybeError BufferBase::CopyFromStagingBuffer() {
         return {};
     }
 
-    // D3D11 requires that buffers are unmapped before being used in a copy.
-    DAWN_TRY(mStagingBuffer->Unmap());
-
     DAWN_TRY(
         GetDevice()->CopyFromStagingToBuffer(mStagingBuffer.Get(), 0, this, 0, GetAllocatedSize()));
 
