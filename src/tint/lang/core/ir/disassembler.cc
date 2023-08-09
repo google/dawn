@@ -395,11 +395,13 @@ void Disassembler::EmitValue(Value* val) {
                         },
                         [&](const core::constant::Composite* composite) {
                             out_ << composite->Type()->FriendlyName() << "(";
+                            bool need_comma = false;
                             for (const auto* elem : composite->elements) {
-                                if (elem != composite->elements[0]) {
+                                if (need_comma) {
                                     out_ << ", ";
                                 }
                                 emit(elem);
+                                need_comma = true;
                             }
                             out_ << ")";
                         });
