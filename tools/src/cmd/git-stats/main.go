@@ -62,6 +62,7 @@ func shouldConsiderLinesOfFile(path string) bool {
 		"package-lock.json",
 		"src/tint/builtin_table.inl",
 		"src/tint/lang/core/intrinsic/table.inl",
+		"src/tint/lang/core/intrinsic/core_table_data.cc.tmpl",
 		"test/tint/",
 		"third_party/gn/webgpu-cts/test_list.txt",
 		"third_party/khronos/",

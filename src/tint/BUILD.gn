@@ -289,11 +289,12 @@ libtint_source_set("libtint_program_src") {
   sources = [
     "lang/core/constant/eval.cc",
     "lang/core/constant/eval.h",
+    "lang/core/intrinsic/core_table_data.cc",
+    "lang/core/intrinsic/core_table_data.h",
     "lang/core/intrinsic/ctor_conv.cc",
     "lang/core/intrinsic/ctor_conv.h",
     "lang/core/intrinsic/table.cc",
     "lang/core/intrinsic/table.h",
-    "lang/core/intrinsic/table.inl",
     "lang/wgsl/program/clone_context.cc",
     "lang/wgsl/program/program.cc",
     "lang/wgsl/program/program_builder.cc",

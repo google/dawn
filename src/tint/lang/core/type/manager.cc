@@ -100,6 +100,10 @@ const type::Matrix* Manager::mat(const type::Type* inner, uint32_t cols, uint32_
     return Get<type::Matrix>(vec(inner, rows), cols);
 }
 
+const type::Matrix* Manager::mat(const type::Vector* column_type, uint32_t cols) {
+    return Get<type::Matrix>(column_type, cols);
+}
+
 const type::Matrix* Manager::mat2x2(const type::Type* inner) {
     return mat(inner, 2, 2);
 }

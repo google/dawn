@@ -238,6 +238,11 @@ class Manager final {
     /// @returns the matrix type
     const type::Matrix* mat(const type::Type* inner, uint32_t cols, uint32_t rows);
 
+    /// @param column_type the column vector type
+    /// @param cols the number of columns
+    /// @returns the matrix type
+    const type::Matrix* mat(const type::Vector* column_type, uint32_t cols);
+
     /// @param inner the inner type
     /// @returns a mat2x2 with the element @p inner
     const type::Matrix* mat2x2(const type::Type* inner);

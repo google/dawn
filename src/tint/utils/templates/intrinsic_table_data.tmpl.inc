@@ -1,7 +1,7 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/src/cmd/gen to generate intrinsic_table.inl
-Used by BuiltinTable.cc for builtin overload resolution.
+Template file for use with tools/src/cmd/gen to generate the constant data that
+is held in a core::intrinsic::TableData.
 
 To update the generated file, run:
     ./tools/run gen
@@ -12,7 +12,37 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
-{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                              define "Data"                               -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{- $I := $.Intrinsics -}}
+
+namespace {{$.Namespace}} {
+namespace {
+
+using IntrinsicInfo = tint::core::intrinsic::TableData::IntrinsicInfo;
+using MatcherIndex = tint::core::intrinsic::TableData::MatcherIndex;
+using MatchState = tint::core::intrinsic::TableData::MatchState;
+using Number = tint::core::intrinsic::TableData::Number;
+using NumberMatcher = tint::core::intrinsic::TableData::NumberMatcher;
+using OverloadFlag = tint::core::intrinsic::TableData::OverloadFlag;
+using OverloadFlags = tint::core::intrinsic::TableData::OverloadFlags;
+using OverloadInfo = tint::core::intrinsic::TableData::OverloadInfo;
+using ParameterInfo = tint::core::intrinsic::TableData::ParameterInfo;
+using StringStream = tint::StringStream;
+using TemplateNumberInfo = tint::core::intrinsic::TableData::TemplateNumberInfo;
+using TemplateTypeInfo = tint::core::intrinsic::TableData::TemplateTypeInfo;
+using Type = tint::type::Type;
+using TypeMatcher = tint::core::intrinsic::TableData::TypeMatcher;
+
+template<size_t N>
+using TemplateNumberMatcher = tint::core::intrinsic::TableData::TemplateNumberMatcher<N>;
+
+template<size_t N>
+using TemplateTypeMatcher = tint::core::intrinsic::TableData::TemplateTypeMatcher<N>;
+
+static constexpr auto kNoMatcher = tint::core::intrinsic::TableData::kNoMatcher;
 
 // clang-format off
 
@@ -178,107 +208,117 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
 };
 
 // clang-format on
-{{ end -}}
+
+}  // anonymous namespace
+
+const TableData& {{$.Name}}() {
+  static const TableData data{
+    /* type_matchers */ kTypeMatchers,
+    /* number_matchers */ kNumberMatchers,
+    /* ctor_conv */ kConstructorsAndConverters,
+    /* builtins */ kBuiltins,
+    /* binary_plus */ kBinaryOperators[kBinaryOperatorPlus],
+    /* binary_minus */ kBinaryOperators[kBinaryOperatorMinus],
+    /* binary_star */ kBinaryOperators[kBinaryOperatorStar],
+    /* binary_divide */ kBinaryOperators[kBinaryOperatorDivide],
+    /* binary_modulo */ kBinaryOperators[kBinaryOperatorModulo],
+    /* binary_xor */ kBinaryOperators[kBinaryOperatorXor],
+    /* binary_and */ kBinaryOperators[kBinaryOperatorAnd],
+    /* binary_or */ kBinaryOperators[kBinaryOperatorOr],
+    /* binary_logical_and */ kBinaryOperators[kBinaryOperatorLogicalAnd],
+    /* binary_logical_or */ kBinaryOperators[kBinaryOperatorLogicalOr],
+    /* binary_equal */ kBinaryOperators[kBinaryOperatorEqual],
+    /* binary_not_equal */ kBinaryOperators[kBinaryOperatorNotEqual],
+    /* binary_less_than */ kBinaryOperators[kBinaryOperatorLessThan],
+    /* binary_greater_than */ kBinaryOperators[kBinaryOperatorGreaterThan],
+    /* binary_less_than_equal */ kBinaryOperators[kBinaryOperatorLessThanEqual],
+    /* binary_greater_than_equal */ kBinaryOperators[kBinaryOperatorGreaterThanEqual],
+    /* binary_shift_left */ kBinaryOperators[kBinaryOperatorShiftLeft],
+    /* binary_shift_right */ kBinaryOperators[kBinaryOperatorShiftRight],
+    /* unary_not */ kUnaryOperators[kUnaryOperatorNot],
+    /* unary_complement */ kUnaryOperators[kUnaryOperatorComplement],
+    /* unary_minus */ kUnaryOperators[kUnaryOperatorMinus],
+  };
+  return data;
+}
+
+}  // namespace {{$.Namespace}}
+
+{{  end -}}
+{{- end -}}
+
 
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                              define "Type"                               -}}
 {{- /* ------------------------------------------------------------------ */ -}}
 {{- $class := PascalCase .Name -}}
 /// TypeMatcher for 'type {{.Name}}'
-{{- if .Decl.Source.S.Filepath  }}
-{{- end  }}
-class {{$class}} : public TypeMatcher {
- public:
-  /// Checks whether the given type matches the matcher rules.
-  /// Match may define and refine the template types and numbers in state.
-  /// @param state the MatchState
-  /// @param type the type to match
-  /// @returns the canonicalized type on match, otherwise nullptr
-  const type::Type* Match(MatchState& state,
-                         const type::Type* type) const override;
-  /// @param state the MatchState
-  /// @return a string representation of the matcher.
-  std::string String(MatchState* state) const override;
-};
-
-const type::Type* {{$class}}::Match(MatchState& state, const type::Type* ty) const {
+constexpr TypeMatcher k{{$class}}Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
 {{- range .TemplateParams }}
 {{-   template "DeclareLocalTemplateParam" . }}
 {{- end  }}
-  if (!match_{{TrimLeft .Name "_"}}(state, ty{{range .TemplateParams}}, {{.GetName}}{{end}})) {
-    return nullptr;
-  }
+    if (!match_{{TrimLeft .Name "_"}}(state, ty{{range .TemplateParams}}, {{.GetName}}{{end}})) {
+      return nullptr;
+    }
 {{- range .TemplateParams }}
-  {{.Name}} = {{ template "MatchTemplateParam" .}}({{.Name}});
-  if ({{ template "IsTemplateParamInvalid" .}}) {
-    return nullptr;
-  }
+    {{.Name}} = {{ template "MatchTemplateParam" .}}({{.Name}});
+    if ({{ template "IsTemplateParamInvalid" .}}) {
+      return nullptr;
+    }
 {{- end  }}
-  return build_{{TrimLeft .Name "_"}}(state{{range .TemplateParams}}, {{.GetName}}{{end}});
-}
-
-std::string {{$class}}::String(MatchState*{{if .TemplateParams}} state{{end}}) const {
+    return build_{{TrimLeft .Name "_"}}(state{{range .TemplateParams}}, {{.GetName}}{{end}});
+  },
+/* string */ [](MatchState*{{if .TemplateParams}} state{{end}}) -> std::string {
 {{- range .TemplateParams }}
 {{-   template "DeclareLocalTemplateParamName" . }}
 {{- end  }}
 
 {{- if .DisplayName }}
-  StringStream ss;
-  ss{{range SplitDisplayName .DisplayName}} << {{.}}{{end}};
-  return ss.str();
+    StringStream ss;
+    ss{{range SplitDisplayName .DisplayName}} << {{.}}{{end}};
+    return ss.str();
 {{- else if .TemplateParams }}
-  return "{{.Name}}<"{{template "AppendTemplateParamNames" .TemplateParams}} + ">";
+    return "{{.Name}}<"{{template "AppendTemplateParamNames" .TemplateParams}} + ">";
 {{- else }}
-  return "{{.Name}}";
+    return "{{.Name}}";
 {{- end  }}
-}
+  }
+};
+
 {{  end -}}
+
 
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                          define "TypeMatcher"                            -}}
 {{- /* ------------------------------------------------------------------ */ -}}
 {{- $class := PascalCase .Name -}}
 /// TypeMatcher for 'match {{.Name}}'
-{{- if .Decl.Source.S.Filepath  }}
-{{- end  }}
-class {{$class}} : public TypeMatcher {
- public:
-  /// Checks whether the given type matches the matcher rules, and returns the
-  /// expected, canonicalized type on success.
-  /// Match may define and refine the template types and numbers in state.
-  /// @param state the MatchState
-  /// @param type the type to match
-  /// @returns the canonicalized type on match, otherwise nullptr
-  const type::Type* Match(MatchState& state,
-                         const type::Type* type) const override;
-  /// @param state the MatchState
-  /// @return a string representation of the matcher.
-  std::string String(MatchState* state) const override;
-};
-
-const type::Type* {{$class}}::Match(MatchState& state, const type::Type* ty) const {
+constexpr TypeMatcher k{{$class}}Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
 {{- range .PrecedenceSortedTypes }}
-  if (match_{{.Name}}(state, ty)) {
-    return build_{{.Name}}(state);
-  }
+    if (match_{{.Name}}(state, ty)) {
+      return build_{{.Name}}(state);
+    }
 {{- end }}
-  return nullptr;
-}
-
-std::string {{$class}}::String(MatchState*) const {
-  StringStream ss;
-  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
-  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss
+    return nullptr;
+  },
+/* string */ [](MatchState*) -> std::string {
+    StringStream ss;
+    // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+    // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+    ss
 {{- range .Types -}}
-{{-   if      IsFirstIn . $.Types }} << {{PascalCase .Name}}().String(nullptr)
-{{-   else if IsLastIn  . $.Types }} << " or " << {{PascalCase .Name}}().String(nullptr)
-{{-   else                        }} << ", " << {{PascalCase .Name}}().String(nullptr)
+{{-   if      IsFirstIn . $.Types }} << k{{PascalCase .Name}}Matcher.string(nullptr)
+{{-   else if IsLastIn  . $.Types }} << " or " << k{{PascalCase .Name}}Matcher.string(nullptr)
+{{-   else                        }} << ", " << k{{PascalCase .Name}}Matcher.string(nullptr)
 {{-   end -}}
 {{- end -}};
-  return ss.str();
-}
+    return ss.str();
+  }
+};
 {{  end -}}
+
 
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                          define "EnumMatcher"                            -}}
@@ -286,45 +326,30 @@ std::string {{$class}}::String(MatchState*) const {
 {{- $class := PascalCase .Name -}}
 {{- $enum := PascalCase .Enum.Name -}}
 /// EnumMatcher for 'match {{.Name}}'
-{{- if .Decl.Source.S.Filepath  }}
-{{- end  }}
-class {{$class}} : public NumberMatcher {
- public:
-  /// Checks whether the given number matches the enum matcher rules.
-  /// Match may define template numbers in state.
-  /// @param state the MatchState
-  /// @param number the enum value as a Number
-  /// @return true if the enum value matches the set
-  Number Match(MatchState& state, Number number) const override;
-  /// @param state the MatchState
-  /// @return a string representation of the matcher.
-  std::string String(MatchState* state) const override;
-};
-
+constexpr NumberMatcher k{{$class}}Matcher {
 {{ if eq 1 (len .Options) -}}
 {{-   $option := index .Options 0 }}
 {{-   $entry := printf "k%v" (PascalCase $option.Name) -}}
-Number {{$class}}::Match(MatchState&, Number number) const {
-  if (number.IsAny() || number.Value() == static_cast<uint32_t>({{$enum}}::{{$entry}})) {
-    return Number(static_cast<uint32_t>({{$enum}}::{{$entry}}));
-  }
-  return Number::invalid;
-}
+/* match */ [](MatchState&, Number number) -> Number {
+    if (number.IsAny() || number.Value() == static_cast<uint32_t>({{$enum}}::{{$entry}})) {
+      return Number(static_cast<uint32_t>({{$enum}}::{{$entry}}));
+    }
+    return Number::invalid;
+  },
 {{- else -}}
-Number {{$class}}::Match(MatchState&, Number number) const {
-  switch (static_cast<{{$enum}}>(number.Value())) {
+/* match */ [](MatchState&, Number number) -> Number {
+    switch (static_cast<{{$enum}}>(number.Value())) {
 {{-   range .Options }}
-    case {{$enum}}::k{{PascalCase .Name}}:
+      case {{$enum}}::k{{PascalCase .Name}}:
 {{-   end }}
-      return number;
-    default:
-      return Number::invalid;
-  }
-}
+        return number;
+      default:
+        return Number::invalid;
+    }
+  },
 {{- end }}
-
-std::string {{$class}}::String(MatchState*) const {
-  return "
+/* string */ [](MatchState*) -> std::string {
+    return "
 {{- range .Options -}}
 {{-   if      IsFirstIn . $.Options }}{{.Name}}
 {{-   else if IsLastIn  . $.Options }} or {{.Name}}
@@ -332,85 +357,72 @@ std::string {{$class}}::String(MatchState*) const {
 {{-   end -}}
 {{- end -}}
 ";
-}
+  }
+};
 {{  end -}}
 
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                            define "Matchers"                             -}}
 {{- /* ------------------------------------------------------------------ */ -}}
-/// Matchers holds type and number matchers
-class Matchers {
- private:
+/// Type and number matchers
 {{- $t_names := Map -}}
 {{- $n_names := Map -}}
 {{- range Iterate $.Sem.MaxTemplateTypes -}}
-{{-   $name := printf "template_type_%v" . -}}
+{{-   $name := printf "TemplateTypeMatcher<%v>::matcher" . -}}
 {{-   $t_names.Put . $name }}
-  TemplateTypeMatcher {{$name}}_{ {{- . -}} };
 {{- end }}
 {{- range Iterate $.Sem.MaxTemplateNumbers -}}
-{{-   $name := printf "template_number_%v" . -}}
+{{-   $name := printf "TemplateNumberMatcher<%v>::matcher" . -}}
 {{-   $n_names.Put . $name }}
-  TemplateNumberMatcher {{$name}}_{ {{- . -}} };
 {{- end }}
 {{- range $.Sem.Types -}}
-{{-   $name := PascalCase .Name -}}
+{{-   $name := printf "k%vMatcher" (PascalCase .Name) -}}
 {{-   $t_names.Put . $name }}
-  {{$name}} {{$name}}_;
 {{- end }}
 {{- range $.Sem.TypeMatchers -}}
-{{-   $name := PascalCase .Name -}}
+{{-   $name := printf "k%vMatcher" (PascalCase .Name) -}}
 {{-   $t_names.Put . $name }}
-  {{$name}} {{$name}}_;
 {{- end }}
 {{- range $.Sem.EnumMatchers -}}
-{{-   $name := PascalCase .Name -}}
+{{-   $name := printf "k%vMatcher" (PascalCase .Name) -}}
 {{-   $n_names.Put . $name }}
-  {{$name}} {{$name}}_;
 {{- end }}
 
- public:
-  /// Constructor
-  Matchers();
-  /// Destructor
-  ~Matchers();
-
-  /// The template types, types, and type matchers
-  TypeMatcher const* const type[{{len $.Table.TMatchers}}] = {
+/// The template types, types, and type matchers
+constexpr TypeMatcher kTypeMatchers[] = {
 {{- range $i, $m := $.Table.TMatchers }}
-    /* [{{$i}}] */
-{{-   if $m }} &{{$t_names.Get $m}}_,
-{{-   else  }} &{{$t_names.Get $i}}_,
+  /* [{{$i}}] */
+{{-   if $m }} {{$t_names.Get $m}},
+{{-   else  }} {{$t_names.Get $i}},
 {{-   end   }}
 {{- end }}
-  };
-
-  /// The template numbers, and number matchers
-  NumberMatcher const* const number[{{len $.Table.NMatchers}}] = {
-{{- range $i, $m := $.Table.NMatchers }}
-    /* [{{$i}}] */
-{{-   if $m }} &{{$n_names.Get $m}}_,
-{{-   else  }} &{{$n_names.Get $i}}_,
-{{-   end   }}
-{{- end }}
-  };
 };
 
-Matchers::Matchers() = default;
-Matchers::~Matchers() = default;
+/// The template numbers, and number matchers
+constexpr NumberMatcher kNumberMatchers[] = {
+{{- range $i, $m := $.Table.NMatchers }}
+  /* [{{$i}}] */
+{{-   if $m }} {{$n_names.Get $m}},
+{{-   else  }} {{$n_names.Get $i}},
+{{-   end   }}
+{{- end }}
+};
+
 {{- end -}}
+
 
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                     define "DeclareLocalTemplateParam"                   -}}
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-   if      IsTemplateTypeParam . }}
-  const type::Type* {{.Name}} = nullptr;
+  const Type* {{.Name}} = nullptr;
 {{-   else if IsTemplateNumberParam . }}
   Number {{.Name}} = Number::invalid;
 {{-   else if IsTemplateEnumParam . }}
   Number {{.Name}} = Number::invalid;
 {{-   end -}}
 {{- end -}}
+
 
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                   define "DeclareLocalTemplateParamName"                 -}}
@@ -424,6 +436,7 @@ Matchers::~Matchers() = default;
 {{-   end -}}
 {{- end -}}
 
+
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                       define "MatchTemplateParam"                        -}}
 {{- /* ------------------------------------------------------------------ */ -}}
@@ -435,6 +448,7 @@ Matchers::~Matchers() = default;
   state.Num
 {{-   end -}}
 {{- end -}}
+
 
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                       define "IsTemplateParamInvalid"                    -}}
@@ -448,6 +462,7 @@ Matchers::~Matchers() = default;
 {{-   end -}}
 {{- end -}}
 
+
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                      define "AppendTemplateParamNames"                   -}}
 {{- /* ------------------------------------------------------------------ */ -}}
@@ -457,6 +472,7 @@ Matchers::~Matchers() = default;
 {{-     end -}}
 {{-   end -}}
 {{- end -}}
+
 
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                           define "ExpandName"                            -}}
@@ -494,4 +510,3 @@ Matchers::~Matchers() = default;
 {{-   if eq .Kind "operator" -}}Op{{end -}}
   {{template "ExpandName" .ConstEvalFunction}}
 {{- end -}}
-
