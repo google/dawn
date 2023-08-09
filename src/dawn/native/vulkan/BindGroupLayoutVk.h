@@ -72,7 +72,7 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase {
     VkDescriptorSetLayout mHandle = VK_NULL_HANDLE;
 
     MutexProtected<SlabAllocator<BindGroup>> mBindGroupAllocator;
-    Ref<DescriptorSetAllocator> mDescriptorSetAllocator;
+    MutexProtected<Ref<DescriptorSetAllocator>> mDescriptorSetAllocator;
 };
 
 }  // namespace dawn::native::vulkan

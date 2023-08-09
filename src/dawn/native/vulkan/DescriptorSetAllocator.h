@@ -49,7 +49,7 @@ class DescriptorSetAllocator : public ObjectBase {
 
     MaybeError AllocateDescriptorPool();
 
-    BindGroupLayout* mLayout;
+    const BindGroupLayout* mLayout;
 
     std::vector<VkDescriptorPoolSize> mPoolSizes;
     SetIndex mMaxSets;
