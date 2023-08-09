@@ -178,6 +178,7 @@ extern "C" {
     {% endfor %}
 
 {% endfor %}
+
 #endif  // !defined({{API}}_SKIP_PROCS)
 
 #if !defined({{API}}_SKIP_DECLARATIONS)
@@ -204,6 +205,7 @@ extern "C" {
     {% endfor %}
 
 {% endfor %}
+
 #endif  // !defined({{API}}_SKIP_DECLARATIONS)
 
 #ifdef __cplusplus

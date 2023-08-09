@@ -130,7 +130,7 @@ DawnTestBase::PrintToStringParamName::PrintToStringParamName(const char* test) :
 
 std::string DawnTestBase::PrintToStringParamName::SanitizeParamName(
     std::string paramName,
-    const wgpu::AdapterProperties& properties,
+    const TestAdapterProperties& properties,
     size_t index) const {
     // Sanitize the adapter name for GoogleTest
     std::string sanitizedName = std::regex_replace(paramName, std::regex("[^a-zA-Z0-9]+"), "_") +
@@ -423,6 +423,8 @@ std::unique_ptr<native::Instance> DawnTestEnvironment::CreateInstance(
 }
 
 void DawnTestEnvironment::SelectPreferredAdapterProperties(const native::Instance* instance) {
+    dawnProcSetProcs(&dawn::native::GetProcs());
+
     // Get the first available preferred device type.
     std::optional<wgpu::AdapterType> preferredDeviceType;
     [&] {
@@ -610,14 +612,14 @@ void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo(native::Instance*
 
         // Preparing for outputting hex numbers
         log << std::showbase << std::hex << std::setfill('0') << std::setw(4) << " - \""
-            << properties.adapterName << "\" - \"" << properties.driverDescription
+            << properties.name << "\" - \"" << properties.driverDescription
             << (properties.selected ? " [Selected]" : "") << "\"\n"
             << "   type: " << properties.AdapterTypeName()
             << ", backend: " << properties.ParamName()
             << ", compatibilityMode: " << (properties.compatibilityMode ? "true" : "false") << "\n"
             << "   vendorId: 0x" << vendorId.str() << ", deviceId: 0x" << deviceId.str() << "\n";
 
-        if (strlen(properties.vendorName) || strlen(properties.architecture)) {
+        if (!properties.vendorName.empty() || !properties.architecture.empty()) {
             log << "   vendorName: " << properties.vendorName
                 << ", architecture: " << properties.architecture << "\n";
         }
@@ -725,7 +727,7 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
                         properties.deviceID == param.adapterProperties.deviceID &&
                         properties.vendorID == param.adapterProperties.vendorID &&
                         properties.adapterType == param.adapterProperties.adapterType &&
-                        strcmp(properties.name, param.adapterProperties.adapterName.c_str()) == 0);
+                        strcmp(properties.name, param.adapterProperties.name.c_str()) == 0);
             });
         ASSERT(it != adapters.end());
         gCurrentTest->mBackendAdapter = *it;
@@ -843,12 +845,12 @@ bool DawnTestBase::IsSwiftshader() const {
 }
 
 bool DawnTestBase::IsANGLE() const {
-    return !mParam.adapterProperties.adapterName.find("ANGLE");
+    return !mParam.adapterProperties.name.find("ANGLE");
 }
 
 bool DawnTestBase::IsANGLESwiftShader() const {
-    return !mParam.adapterProperties.adapterName.find("ANGLE") &&
-           (mParam.adapterProperties.adapterName.find("SwiftShader") != std::string::npos);
+    return !mParam.adapterProperties.name.find("ANGLE") &&
+           (mParam.adapterProperties.name.find("SwiftShader") != std::string::npos);
 }
 
 bool DawnTestBase::IsWARP() const {
@@ -989,7 +991,7 @@ wgpu::RequiredLimits DawnTestBase::GetRequiredLimits(const wgpu::SupportedLimits
     return {};
 }
 
-const wgpu::AdapterProperties& DawnTestBase::GetAdapterProperties() const {
+const TestAdapterProperties& DawnTestBase::GetAdapterProperties() const {
     return mParam.adapterProperties;
 }
 

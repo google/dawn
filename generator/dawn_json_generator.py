@@ -273,6 +273,15 @@ class StructureType(Record, Type):
     def output(self):
         return self.chained == "out" or self.extensible == "out"
 
+    @property
+    def has_free_members_function(self):
+        if not self.output:
+            return False
+        for m in self.members:
+            if m.annotation != 'value':
+                return True
+        return False
+
 
 class ConstantDefinition():
     def __init__(self, is_enabled, name, json_data):
@@ -283,11 +292,12 @@ class ConstantDefinition():
 
 
 class FunctionDeclaration():
-    def __init__(self, is_enabled, name, json_data):
+    def __init__(self, is_enabled, name, json_data, no_cpp=False):
         self.return_type = None
         self.arguments = []
         self.json_data = json_data
         self.name = Name(name)
+        self.no_cpp = no_cpp
 
 
 class Command(Record):
@@ -473,6 +483,23 @@ def parse_json(json, enabled_tags, disabled_tags=None):
 
     for struct in by_category['structure']:
         link_structure(struct, types)
+
+        if struct.has_free_members_function:
+            name = struct.name.get() + " free members"
+            func_decl = FunctionDeclaration(
+                True,
+                name, {
+                    "returns":
+                    "void",
+                    "args": [{
+                        "name": "value",
+                        "type": struct.name.get(),
+                        "annotation": "value",
+                    }]
+                },
+                no_cpp=True)
+            types[name] = func_decl
+            by_category['function'].append(func_decl)
 
     for function_pointer in by_category['function pointer']:
         link_function_pointer(function_pointer, types)
@@ -753,22 +780,23 @@ def convert_cType_to_cppType(typ, annotation, arg, indent=0):
                                                     annotation, arg)
 
 
-def decorate(name, typ, arg):
+def decorate(name, typ, arg, make_const=False):
+    maybe_const = ' const ' if make_const else ' '
     if arg.annotation == 'value':
-        return typ + ' ' + name
+        return typ + maybe_const + name
     elif arg.annotation == '*':
-        return typ + ' * ' + name
+        return typ + ' *' + maybe_const + name
     elif arg.annotation == 'const*':
-        return typ + ' const * ' + name
+        return typ + ' const *' + maybe_const + name
     elif arg.annotation == 'const*const*':
-        return 'const ' + typ + '* const * ' + name
+        return 'const ' + typ + '* const *' + maybe_const + name
     else:
         assert False
 
 
-def annotated(typ, arg):
+def annotated(typ, arg, make_const=False):
     name = as_varName(arg.name)
-    return decorate(name, typ, arg)
+    return decorate(name, typ, arg, make_const)
 
 
 def item_is_enabled(enabled_tags, json_data):
@@ -876,9 +904,9 @@ def make_base_render_params(metadata):
     return {
             'Name': lambda name: Name(name),
             'as_annotated_cType': \
-                lambda arg: annotated(as_cTypeEnumSpecialCase(arg.type), arg),
+                lambda arg, make_const=False: annotated(as_cTypeEnumSpecialCase(arg.type), arg, make_const),
             'as_annotated_cppType': \
-                lambda arg: annotated(as_cppType(arg.type.name), arg),
+                lambda arg, make_const=False: annotated(as_cppType(arg.type.name), arg, make_const),
             'as_cEnum': as_cEnum,
             'as_cppEnum': as_cppEnum,
             'as_cMethod': as_cMethod,

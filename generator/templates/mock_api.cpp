@@ -13,6 +13,7 @@
 //* limitations under the License.
 
 {% set api = metadata.api.lower() %}
+#include "dawn/common/Log.h"
 #include "mock_{{api}}.h"
 
 using namespace testing;
@@ -47,6 +48,12 @@ void ProcTableAsClass::GetProcTable({{Prefix}}ProcTable* table) {
         {% for method in c_methods(type) %}
             table->{{as_varName(type.name, method.name)}} = reinterpret_cast<{{as_cProc(type.name, method.name)}}>(Forward{{as_MethodSuffix(type.name, method.name)}});
         {% endfor %}
+    {% endfor %}
+
+    {% for type in by_category["structure"] if type.has_free_members_function %}
+        table->{{as_varName(type.name, Name("free members"))}} = []({{as_cType(type.name)}} {{as_varName(type.name)}}) {
+            dawn::WarningLog() << "No mock available for {{as_varName(type.name, Name('free members'))}}";
+        };
     {% endfor %}
 }
 

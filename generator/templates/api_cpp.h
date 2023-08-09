@@ -175,7 +175,7 @@ namespace {{metadata.namespace}} {
         CType mHandle = nullptr;
     };
 
-{% macro render_cpp_default_value(member, is_struct=True) -%}
+{% macro render_cpp_default_value(member, is_struct=True, force_default=False) -%}
     {%- if member.json_data.get("no_default", false) -%}
     {%- elif member.annotation in ["*", "const*"] and member.optional or member.default_value == "nullptr" -%}
         {{" "}}= nullptr
@@ -189,6 +189,9 @@ namespace {{metadata.namespace}} {
         {{" "}}= {{member.default_value}}
     {%- else -%}
         {{assert(member.default_value == None)}}
+        {%- if force_default -%}
+            {{" "}}= {}
+        {%- endif -%}
     {%- endif -%}
 {%- endmacro %}
 
@@ -227,7 +230,7 @@ namespace {{metadata.namespace}} {
 
     {% endfor %}
 
-    {% for function in by_category["function"] %}
+    {% for function in by_category["function"] if not function.no_cpp %}
         {{as_cppType(function.return_type.name)}} {{as_cppType(function.name)}}(
             {%- for arg in function.arguments -%}
                 {%- if not loop.first %}, {% endif -%}
@@ -250,11 +253,19 @@ namespace {{metadata.namespace}} {
         {% else %}
             struct {{as_cppType(type.name)}} {
         {% endif %}
+            {% if type.has_free_members_function %}
+                {{as_cppType(type.name)}}() = default;
+                ~{{as_cppType(type.name)}}();
+                {{as_cppType(type.name)}}(const {{as_cppType(type.name)}}&) = delete;
+                {{as_cppType(type.name)}}& operator=(const {{as_cppType(type.name)}}&) = delete;
+                {{as_cppType(type.name)}}({{as_cppType(type.name)}}&&);
+                {{as_cppType(type.name)}}& operator=({{as_cppType(type.name)}}&&);
+            {% endif %}
             {% if type.extensible %}
                 ChainedStruct{{Out}} {{const}} * nextInChain = nullptr;
             {% endif %}
             {% for member in type.members %}
-                {% set member_declaration = as_annotated_cppType(member) + render_cpp_default_value(member) %}
+                {% set member_declaration = as_annotated_cppType(member, type.has_free_members_function) + render_cpp_default_value(member, False, type.has_free_members_function) %}
                 {% if type.chained and loop.first %}
                     //* Align the first member after ChainedStruct to match the C struct layout.
                     //* It has to be aligned both to its natural and ChainedStruct's alignment.

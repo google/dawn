@@ -55,4 +55,6 @@ void SharedTextureMemoryBase::APIEndAccess(TextureBase* texture, EndAccessState*
     DAWN_UNUSED(GetDevice()->ConsumedError(DAWN_UNIMPLEMENTED_ERROR("Not implemented")));
 }
 
+void APISharedTextureMemoryEndAccessStateFreeMembers(WGPUSharedTextureMemoryEndAccessState state) {}
+
 }  // namespace dawn::native

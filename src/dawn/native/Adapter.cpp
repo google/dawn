@@ -93,14 +93,40 @@ void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
         powerPreferenceDesc->powerPreference = mPowerPreference;
     }
     properties->vendorID = mPhysicalDevice->GetVendorId();
-    properties->vendorName = mPhysicalDevice->GetVendorName().c_str();
-    properties->architecture = mPhysicalDevice->GetArchitectureName().c_str();
     properties->deviceID = mPhysicalDevice->GetDeviceId();
-    properties->name = mPhysicalDevice->GetName().c_str();
-    properties->driverDescription = mPhysicalDevice->GetDriverDescription().c_str();
     properties->adapterType = mPhysicalDevice->GetAdapterType();
     properties->backendType = mPhysicalDevice->GetBackendType();
     properties->compatibilityMode = mFeatureLevel == FeatureLevel::Compatibility;
+
+    // Get lengths, with null terminators.
+    size_t vendorNameCLen = mPhysicalDevice->GetVendorName().length() + 1;
+    size_t architectureCLen = mPhysicalDevice->GetArchitectureName().length() + 1;
+    size_t nameCLen = mPhysicalDevice->GetName().length() + 1;
+    size_t driverDescriptionCLen = mPhysicalDevice->GetDriverDescription().length() + 1;
+
+    // Allocate space for all strings.
+    char* ptr = new char[vendorNameCLen + architectureCLen + nameCLen + driverDescriptionCLen];
+
+    properties->vendorName = ptr;
+    memcpy(ptr, mPhysicalDevice->GetVendorName().c_str(), vendorNameCLen);
+    ptr += vendorNameCLen;
+
+    properties->architecture = ptr;
+    memcpy(ptr, mPhysicalDevice->GetArchitectureName().c_str(), architectureCLen);
+    ptr += architectureCLen;
+
+    properties->name = ptr;
+    memcpy(ptr, mPhysicalDevice->GetName().c_str(), nameCLen);
+    ptr += nameCLen;
+
+    properties->driverDescription = ptr;
+    memcpy(ptr, mPhysicalDevice->GetDriverDescription().c_str(), driverDescriptionCLen);
+    ptr += driverDescriptionCLen;
+}
+
+void APIAdapterPropertiesFreeMembers(WGPUAdapterProperties properties) {
+    // This single delete is enough because everything is a single allocation.
+    delete[] properties.vendorName;
 }
 
 bool AdapterBase::APIHasFeature(wgpu::FeatureName feature) const {

@@ -16,6 +16,7 @@
 #include <utility>
 
 #include "dawn/common/GPUInfo.h"
+#include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"
 
@@ -45,11 +46,13 @@
 namespace dawn {
 namespace {
 
-class PhysicalDeviceDiscoveryTests : public ::testing::Test {};
+class PhysicalDeviceDiscoveryTests : public ::testing::Test {
+    void SetUp() override { dawnProcSetProcs(&dawn::native::GetProcs()); }
+};
 
 #if defined(DAWN_ENABLE_BACKEND_VULKAN)
 // Test only discovering the SwiftShader physical devices
-TEST(PhysicalDeviceDiscoveryTests, OnlySwiftShader) {
+TEST_F(PhysicalDeviceDiscoveryTests, OnlySwiftShader) {
     native::Instance instance;
 
     native::vulkan::PhysicalDeviceDiscoveryOptions options;
@@ -69,7 +72,7 @@ TEST(PhysicalDeviceDiscoveryTests, OnlySwiftShader) {
 }
 
 // Test discovering only Vulkan physical devices
-TEST(PhysicalDeviceDiscoveryTests, OnlyVulkan) {
+TEST_F(PhysicalDeviceDiscoveryTests, OnlyVulkan) {
     native::Instance instance;
 
     native::vulkan::PhysicalDeviceDiscoveryOptions options;
@@ -87,7 +90,7 @@ TEST(PhysicalDeviceDiscoveryTests, OnlyVulkan) {
 
 #if defined(DAWN_ENABLE_BACKEND_D3D11)
 // Test discovering only D3D11 physical devices
-TEST(PhysicalDeviceDiscoveryTests, OnlyD3D11) {
+TEST_F(PhysicalDeviceDiscoveryTests, OnlyD3D11) {
     native::Instance instance;
 
     native::d3d11::PhysicalDeviceDiscoveryOptions options;
@@ -103,7 +106,7 @@ TEST(PhysicalDeviceDiscoveryTests, OnlyD3D11) {
 }
 
 // Test discovering a D3D11 physical device from a prexisting DXGI adapter
-TEST(PhysicalDeviceDiscoveryTests, MatchingDXGIAdapterD3D11) {
+TEST_F(PhysicalDeviceDiscoveryTests, MatchingDXGIAdapterD3D11) {
     using Microsoft::WRL::ComPtr;
 
     ComPtr<IDXGIFactory4> dxgiFactory;
@@ -135,7 +138,7 @@ TEST(PhysicalDeviceDiscoveryTests, MatchingDXGIAdapterD3D11) {
 
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
 // Test discovering only D3D12 physical devices
-TEST(PhysicalDeviceDiscoveryTests, OnlyD3D12) {
+TEST_F(PhysicalDeviceDiscoveryTests, OnlyD3D12) {
     native::Instance instance;
 
     native::d3d12::PhysicalDeviceDiscoveryOptions options;
@@ -151,7 +154,7 @@ TEST(PhysicalDeviceDiscoveryTests, OnlyD3D12) {
 }
 
 // Test discovering a D3D12 physical device from a prexisting DXGI adapter
-TEST(PhysicalDeviceDiscoveryTests, MatchingDXGIAdapterD3D12) {
+TEST_F(PhysicalDeviceDiscoveryTests, MatchingDXGIAdapterD3D12) {
     using Microsoft::WRL::ComPtr;
 
     ComPtr<IDXGIFactory4> dxgiFactory;
@@ -183,7 +186,7 @@ TEST(PhysicalDeviceDiscoveryTests, MatchingDXGIAdapterD3D12) {
 
 #if defined(DAWN_ENABLE_BACKEND_METAL)
 // Test discovering only Metal physical devices
-TEST(PhysicalDeviceDiscoveryTests, OnlyMetal) {
+TEST_F(PhysicalDeviceDiscoveryTests, OnlyMetal) {
     native::Instance instance;
 
     native::metal::PhysicalDeviceDiscoveryOptions options;
@@ -202,7 +205,7 @@ TEST(PhysicalDeviceDiscoveryTests, OnlyMetal) {
 #if defined(DAWN_ENABLE_BACKEND_METAL) && defined(DAWN_ENABLE_BACKEND_VULKAN)
 // Test discovering the Metal backend, then the Vulkan backend
 // does not duplicate physical devices.
-TEST(PhysicalDeviceDiscoveryTests, OneBackendThenTheOther) {
+TEST_F(PhysicalDeviceDiscoveryTests, OneBackendThenTheOther) {
     native::Instance instance;
     uint32_t metalAdapterCount = 0;
     {
@@ -239,10 +242,12 @@ TEST(PhysicalDeviceDiscoveryTests, OneBackendThenTheOther) {
 }
 #endif  // defined(DAWN_ENABLE_BACKEND_VULKAN) && defined(DAWN_ENABLE_BACKEND_METAL)
 
-class AdapterEnumerationTests : public ::testing::Test {};
+class AdapterEnumerationTests : public ::testing::Test {
+    void SetUp() override { dawnProcSetProcs(&dawn::native::GetProcs()); }
+};
 
 // Test only enumerating the fallback adapters
-TEST(AdapterEnumerationTests, OnlyFallback) {
+TEST_F(AdapterEnumerationTests, OnlyFallback) {
     native::Instance instance;
 
     wgpu::RequestAdapterOptions adapterOptions = {};
@@ -260,7 +265,7 @@ TEST(AdapterEnumerationTests, OnlyFallback) {
 }
 
 // Test enumerating only Vulkan physical devices
-TEST(AdapterEnumerationTests, OnlyVulkan) {
+TEST_F(AdapterEnumerationTests, OnlyVulkan) {
     native::Instance instance;
 
     wgpu::RequestAdapterOptions adapterOptions = {};
@@ -276,7 +281,7 @@ TEST(AdapterEnumerationTests, OnlyVulkan) {
 }
 
 // Test enumerating only D3D11 physical devices
-TEST(AdapterEnumerationTests, OnlyD3D11) {
+TEST_F(AdapterEnumerationTests, OnlyD3D11) {
     native::Instance instance;
 
     wgpu::RequestAdapterOptions adapterOptions = {};
@@ -293,7 +298,7 @@ TEST(AdapterEnumerationTests, OnlyD3D11) {
 
 #if defined(DAWN_ENABLE_BACKEND_D3D11)
 // Test enumerating a D3D11 physical device from a prexisting DXGI adapter
-TEST(AdapterEnumerationTests, MatchingDXGIAdapterD3D11) {
+TEST_F(AdapterEnumerationTests, MatchingDXGIAdapterD3D11) {
     using Microsoft::WRL::ComPtr;
 
     ComPtr<IDXGIFactory4> dxgiFactory;
@@ -337,11 +342,11 @@ TEST(AdapterEnumerationTests, MatchingDXGIAdapterD3D11) {
         adaptersAgain[0].GetProperties(&propertiesAgain);
 
         EXPECT_EQ(properties.vendorID, propertiesAgain.vendorID);
-        EXPECT_EQ(properties.vendorName, propertiesAgain.vendorName);
-        EXPECT_EQ(properties.architecture, propertiesAgain.architecture);
+        EXPECT_STREQ(properties.vendorName, propertiesAgain.vendorName);
+        EXPECT_STREQ(properties.architecture, propertiesAgain.architecture);
         EXPECT_EQ(properties.deviceID, propertiesAgain.deviceID);
-        EXPECT_EQ(properties.name, propertiesAgain.name);
-        EXPECT_EQ(properties.driverDescription, propertiesAgain.driverDescription);
+        EXPECT_STREQ(properties.name, propertiesAgain.name);
+        EXPECT_STREQ(properties.driverDescription, propertiesAgain.driverDescription);
         EXPECT_EQ(properties.adapterType, propertiesAgain.adapterType);
         EXPECT_EQ(properties.backendType, propertiesAgain.backendType);
         EXPECT_EQ(properties.compatibilityMode, propertiesAgain.compatibilityMode);
@@ -350,7 +355,7 @@ TEST(AdapterEnumerationTests, MatchingDXGIAdapterD3D11) {
 #endif  // defined(DAWN_ENABLE_BACKEND_D3D11)
 
 // Test enumerating only D3D12 physical devices
-TEST(AdapterEnumerationTests, OnlyD3D12) {
+TEST_F(AdapterEnumerationTests, OnlyD3D12) {
     native::Instance instance;
 
     wgpu::RequestAdapterOptions adapterOptions = {};
@@ -367,7 +372,7 @@ TEST(AdapterEnumerationTests, OnlyD3D12) {
 
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
 // Test enumerating a D3D12 physical device from a prexisting DXGI adapter
-TEST(AdapterEnumerationTests, MatchingDXGIAdapterD3D12) {
+TEST_F(AdapterEnumerationTests, MatchingDXGIAdapterD3D12) {
     using Microsoft::WRL::ComPtr;
 
     ComPtr<IDXGIFactory4> dxgiFactory;
@@ -411,11 +416,11 @@ TEST(AdapterEnumerationTests, MatchingDXGIAdapterD3D12) {
         adaptersAgain[0].GetProperties(&propertiesAgain);
 
         EXPECT_EQ(properties.vendorID, propertiesAgain.vendorID);
-        EXPECT_EQ(properties.vendorName, propertiesAgain.vendorName);
-        EXPECT_EQ(properties.architecture, propertiesAgain.architecture);
+        EXPECT_STREQ(properties.vendorName, propertiesAgain.vendorName);
+        EXPECT_STREQ(properties.architecture, propertiesAgain.architecture);
         EXPECT_EQ(properties.deviceID, propertiesAgain.deviceID);
-        EXPECT_EQ(properties.name, propertiesAgain.name);
-        EXPECT_EQ(properties.driverDescription, propertiesAgain.driverDescription);
+        EXPECT_STREQ(properties.name, propertiesAgain.name);
+        EXPECT_STREQ(properties.driverDescription, propertiesAgain.driverDescription);
         EXPECT_EQ(properties.adapterType, propertiesAgain.adapterType);
         EXPECT_EQ(properties.backendType, propertiesAgain.backendType);
         EXPECT_EQ(properties.compatibilityMode, propertiesAgain.compatibilityMode);
@@ -424,7 +429,7 @@ TEST(AdapterEnumerationTests, MatchingDXGIAdapterD3D12) {
 #endif  // defined(DAWN_ENABLE_BACKEND_D3D12)
 
 // Test enumerating only Metal physical devices
-TEST(AdapterEnumerationTests, OnlyMetal) {
+TEST_F(AdapterEnumerationTests, OnlyMetal) {
     native::Instance instance;
 
     wgpu::RequestAdapterOptions adapterOptions = {};
@@ -441,7 +446,7 @@ TEST(AdapterEnumerationTests, OnlyMetal) {
 
 // Test enumerating the Metal backend, then the Vulkan backend
 // does not duplicate physical devices.
-TEST(AdapterEnumerationTests, OneBackendThenTheOther) {
+TEST_F(AdapterEnumerationTests, OneBackendThenTheOther) {
     wgpu::RequestAdapterOptions adapterOptions = {};
     adapterOptions.backendType = wgpu::BackendType::Metal;
 

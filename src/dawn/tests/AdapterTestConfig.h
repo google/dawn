@@ -35,17 +35,21 @@ struct BackendTestConfig {
     std::vector<const char*> forceDisabledWorkarounds;
 };
 
-struct TestAdapterProperties : wgpu::AdapterProperties {
+struct TestAdapterProperties {
     TestAdapterProperties(const wgpu::AdapterProperties& properties, bool selected);
-    std::string adapterName;
+    uint32_t vendorID;
+    std::string vendorName;
+    std::string architecture;
+    uint32_t deviceID;
+    std::string name;
+    std::string driverDescription;
+    wgpu::AdapterType adapterType;
+    wgpu::BackendType backendType;
+    bool compatibilityMode;
     bool selected;
 
     std::string ParamName() const;
     std::string AdapterTypeName() const;
-
-  private:
-    // This may be temporary, so it is copied into |adapterName| and made private.
-    using wgpu::AdapterProperties::name;
 };
 
 struct AdapterTestParam {

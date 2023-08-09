@@ -30,6 +30,7 @@ typedef struct {{Prefix}}ProcTable {
         {% endfor %}
 
     {% endfor %}
+
 } {{Prefix}}ProcTable;
 
 #endif  // DAWN_{{Prefix.upper()}}_PROC_TABLE_H_

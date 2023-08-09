@@ -107,15 +107,15 @@ TEST_F(WireInstanceTests, RequestAdapterSuccess) {
     auto* userdata = cb.MakeUserdata(this);
     instance.RequestAdapter(&options, cb.Callback(), userdata);
 
-    wgpu::AdapterProperties fakeProperties = {};
+    WGPUAdapterProperties fakeProperties = {};
     fakeProperties.vendorID = 0x134;
     fakeProperties.vendorName = "fake-vendor";
     fakeProperties.architecture = "fake-architecture";
     fakeProperties.deviceID = 0x918;
     fakeProperties.name = "fake adapter";
     fakeProperties.driverDescription = "hello world";
-    fakeProperties.backendType = wgpu::BackendType::D3D12;
-    fakeProperties.adapterType = wgpu::AdapterType::IntegratedGPU;
+    fakeProperties.backendType = WGPUBackendType_D3D12;
+    fakeProperties.adapterType = WGPUAdapterType_IntegratedGPU;
 
     wgpu::SupportedLimits fakeLimits = {};
     fakeLimits.limits.maxTextureDimension1D = 433;
@@ -131,8 +131,7 @@ TEST_F(WireInstanceTests, RequestAdapterSuccess) {
     EXPECT_CALL(api, OnInstanceRequestAdapter(apiInstance, NotNull(), NotNull(), NotNull()))
         .WillOnce(InvokeWithoutArgs([&] {
             EXPECT_CALL(api, AdapterGetProperties(apiAdapter, NotNull()))
-                .WillOnce(
-                    SetArgPointee<1>(*reinterpret_cast<WGPUAdapterProperties*>(&fakeProperties)));
+                .WillOnce(SetArgPointee<1>(fakeProperties));
 
             EXPECT_CALL(api, AdapterGetLimits(apiAdapter, NotNull()))
                 .WillOnce(WithArg<1>(Invoke([&](WGPUSupportedLimits* limits) {
@@ -162,14 +161,15 @@ TEST_F(WireInstanceTests, RequestAdapterSuccess) {
 
             wgpu::AdapterProperties properties;
             adapter.GetProperties(&properties);
-            EXPECT_EQ(properties.vendorID, fakeProperties.vendorID);
-            EXPECT_STREQ(properties.vendorName, fakeProperties.vendorName);
-            EXPECT_STREQ(properties.architecture, fakeProperties.architecture);
-            EXPECT_EQ(properties.deviceID, fakeProperties.deviceID);
-            EXPECT_STREQ(properties.name, fakeProperties.name);
-            EXPECT_STREQ(properties.driverDescription, fakeProperties.driverDescription);
-            EXPECT_EQ(properties.backendType, fakeProperties.backendType);
-            EXPECT_EQ(properties.adapterType, fakeProperties.adapterType);
+            const auto& rhs = *reinterpret_cast<wgpu::AdapterProperties*>(&fakeProperties);
+            EXPECT_EQ(properties.vendorID, rhs.vendorID);
+            EXPECT_STREQ(properties.vendorName, rhs.vendorName);
+            EXPECT_STREQ(properties.architecture, rhs.architecture);
+            EXPECT_EQ(properties.deviceID, rhs.deviceID);
+            EXPECT_STREQ(properties.name, rhs.name);
+            EXPECT_STREQ(properties.driverDescription, rhs.driverDescription);
+            EXPECT_EQ(properties.backendType, rhs.backendType);
+            EXPECT_EQ(properties.adapterType, rhs.adapterType);
 
             wgpu::SupportedLimits limits;
             EXPECT_TRUE(adapter.GetLimits(&limits));

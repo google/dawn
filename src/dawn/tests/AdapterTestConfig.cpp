@@ -73,7 +73,16 @@ BackendTestConfig VulkanBackend(std::initializer_list<const char*> forceEnabledW
 
 TestAdapterProperties::TestAdapterProperties(const wgpu::AdapterProperties& properties,
                                              bool selected)
-    : wgpu::AdapterProperties(properties), adapterName(properties.name), selected(selected) {}
+    : vendorID(properties.vendorID),
+      vendorName(properties.vendorName),
+      architecture(properties.architecture),
+      deviceID(properties.deviceID),
+      name(properties.name),
+      driverDescription(properties.driverDescription),
+      adapterType(properties.adapterType),
+      backendType(properties.backendType),
+      compatibilityMode(properties.compatibilityMode),
+      selected(selected) {}
 
 std::string TestAdapterProperties::ParamName() const {
     switch (backendType) {
@@ -119,7 +128,7 @@ AdapterTestParam::AdapterTestParam(const BackendTestConfig& config,
       forceDisabledWorkarounds(config.forceDisabledWorkarounds) {}
 
 std::ostream& operator<<(std::ostream& os, const AdapterTestParam& param) {
-    os << param.adapterProperties.ParamName() << " " << param.adapterProperties.adapterName;
+    os << param.adapterProperties.ParamName() << " " << param.adapterProperties.name;
 
     // In a Windows Remote Desktop session there are two adapters named "Microsoft Basic Render
     // Driver" with different adapter types. We must differentiate them to avoid any tests using the

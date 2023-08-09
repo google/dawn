@@ -72,4 +72,45 @@ namespace {{native_namespace}} {
         }
 
     {% endfor %}
+
+    {% for type in by_category["structure"] if type.has_free_members_function %}
+        // {{as_cppType(type.name)}}
+        {{as_cppType(type.name)}}::~{{as_cppType(type.name)}}() {
+            if (
+                {%- for member in type.members if member.annotation != 'value' %}
+                    {% if not loop.first %} || {% endif -%}
+                    this->{{member.name.camelCase()}} != nullptr
+                {%- endfor -%}
+            ) {
+                API{{as_MethodSuffix(type.name, Name("free members"))}}(*reinterpret_cast<{{as_cType(type.name)}}*>(this));
+            }
+        }
+
+        {{as_cppType(type.name)}}::{{as_cppType(type.name)}}({{as_cppType(type.name)}}&& rhs)
+        : {% for member in type.members %}
+            {%- set memberName = member.name.camelCase() -%}
+            {{memberName}}(rhs.{{memberName}}){% if not loop.last %},{{"\n      "}}{% endif %}
+        {% endfor -%}
+        {
+            {% for member in type.members %}
+                rhs.{{member.name.camelCase()}} = {};
+            {% endfor %}
+        }
+
+        {{as_cppType(type.name)}}& {{as_cppType(type.name)}}::operator=({{as_cppType(type.name)}}&& rhs) {
+            if (&rhs == this) {
+                return *this;
+            }
+            this->~{{as_cppType(type.name)}}();
+            {% for member in type.members %}
+                this->{{member.name.camelCase()}} = std::move(rhs.{{member.name.camelCase()}});
+            {% endfor %}
+            {% for member in type.members %}
+                rhs.{{member.name.camelCase()}} = {};
+            {% endfor %}
+            return *this;
+        }
+
+    {% endfor %}
+
 } // namespace {{native_namespace}}

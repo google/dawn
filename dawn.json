@@ -136,11 +136,11 @@
         "extensible": "out",
         "members": [
             {"name": "vendor ID", "type": "uint32_t"},
-            {"name": "vendor name", "type": "char", "annotation": "const*", "length": "strlen"},
-            {"name": "architecture", "type": "char", "annotation": "const*", "length": "strlen"},
+            {"name": "vendor name", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr"},
+            {"name": "architecture", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr"},
             {"name": "device ID", "type": "uint32_t"},
-            {"name": "name", "type": "char", "annotation": "const*", "length": "strlen"},
-            {"name": "driver description", "type": "char", "annotation": "const*", "length": "strlen"},
+            {"name": "name", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr"},
+            {"name": "driver description", "type": "char", "annotation": "const*", "length": "strlen", "default": "nullptr"},
             {"name": "adapter type", "type": "adapter type"},
             {"name": "backend type", "type": "backend type"},
             {"name": "compatibility mode", "type": "bool", "default": "false", "tags": ["dawn", "emscripten"]}

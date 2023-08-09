@@ -79,6 +79,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     cmd.limits = &limits;
 
     SerializeCommand(cmd);
+    mProcs.adapterPropertiesFreeMembers(properties);
 }
 
 }  // namespace dawn::wire::server

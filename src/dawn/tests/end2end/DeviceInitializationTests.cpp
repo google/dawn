@@ -86,7 +86,7 @@ TEST_F(DeviceInitializationTest, DeviceOutlivesInstance) {
                 continue;
             }
 
-            availableAdapterProperties.push_back(properties);
+            availableAdapterProperties.push_back(std::move(properties));
         }
     }
 
@@ -136,7 +136,7 @@ TEST_F(DeviceInitializationTest, AdapterOutlivesInstance) {
             if (properties.backendType == wgpu::BackendType::D3D11) {
                 continue;
             }
-            availableAdapterProperties.push_back(properties);
+            availableAdapterProperties.push_back(std::move(properties));
         }
     }
 

@@ -66,6 +66,8 @@ class Adapter final : public ObjectBase {
     RequestTracker<RequestDeviceData> mRequestDeviceRequests;
 };
 
+void ClientAdapterPropertiesFreeMembers(WGPUAdapterProperties);
+
 }  // namespace dawn::wire::client
 
 #endif  // SRC_DAWN_WIRE_CLIENT_ADAPTER_H_
