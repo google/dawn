@@ -2578,7 +2578,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
                                      const sem::Builtin* builtin,
                                      Operand result_type,
                                      Operand result_id) {
-    using Usage = sem::ParameterUsage;
+    using Usage = core::ParameterUsage;
 
     auto& signature = builtin->Signature();
     auto& arguments = call->Arguments();

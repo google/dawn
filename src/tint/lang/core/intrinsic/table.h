@@ -18,10 +18,10 @@
 #include <memory>
 #include <string>
 
+#include "src/tint/lang/core/binary_op.h"
 #include "src/tint/lang/core/constant/eval.h"
 #include "src/tint/lang/core/intrinsic/ctor_conv.h"
 #include "src/tint/lang/core/unary_op.h"
-#include "src/tint/lang/wgsl/ast/binary_expression.h"
 #include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/utils/containers/vector.h"
 

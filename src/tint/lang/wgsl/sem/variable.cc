@@ -76,7 +76,7 @@ Parameter::Parameter(const ast::Parameter* declaration,
                      const type::Type* type,
                      core::AddressSpace address_space,
                      core::Access access,
-                     const ParameterUsage usage /* = ParameterUsage::kNone */,
+                     const core::ParameterUsage usage /* = ParameterUsage::kNone */,
                      std::optional<tint::BindingPoint> binding_point /* = {} */,
                      std::optional<uint32_t> location /* = std::nullopt */)
     : Base(declaration, type, core::EvaluationStage::kRuntime, address_space, access, nullptr),

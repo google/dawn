@@ -334,10 +334,6 @@ class TemplateNumberMatcher : public NumberMatcher {
 // TODO(bclayton): See if we can move more of this hand-rolled code to the
 // template
 ////////////////////////////////////////////////////////////////////////////////
-using TexelFormat = core::TexelFormat;
-using Access = core::Access;
-using AddressSpace = core::AddressSpace;
-using ParameterUsage = sem::ParameterUsage;
 using PipelineStage = ast::PipelineStage;
 
 /// Unique flag bits for overloads
@@ -1659,7 +1655,7 @@ void Impl::PrintOverload(StringStream& ss,
             ss << ", ";
         }
         if (parameter.usage != ParameterUsage::kNone) {
-            ss << sem::str(parameter.usage) << ": ";
+            ss << ToString(parameter.usage) << ": ";
         }
         auto* indices = parameter.matcher_indices;
         ss << Match(templates, overload, indices, earliest_eval_stage).TypeName();

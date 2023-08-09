@@ -950,7 +950,7 @@ bool ASTPrinter::EmitAtomicCall(StringStream& out,
 bool ASTPrinter::EmitTextureCall(StringStream& out,
                                  const sem::Call* call,
                                  const sem::Builtin* builtin) {
-    using Usage = sem::ParameterUsage;
+    using Usage = core::ParameterUsage;
 
     auto& signature = builtin->Signature();
     auto* expr = call->Declaration();

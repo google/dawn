@@ -593,7 +593,7 @@ tint_generated(lang/core/interpolation_type BENCH TEST)
 tint_generated(lang/core/texel_format BENCH TEST)
 
 tint_generated(lang/core/intrinsic/ctor_conv)
-tint_generated(lang/wgsl/sem/parameter_usage)
+tint_generated(lang/core/parameter_usage)
 
 if(UNIX)
   list(APPEND TINT_LIB_SRCS utils/diagnostic/printer_posix.cc)

@@ -23,9 +23,9 @@
 
 #include "src/tint/lang/core/access.h"
 #include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/parameter_usage.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/wgsl/ast/parameter.h"
-#include "src/tint/lang/wgsl/sem/parameter_usage.h"
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/utils/containers/unique_vector.h"
 #include "tint/binding_point.h"
@@ -213,7 +213,7 @@ class Parameter final : public Castable<Parameter, Variable> {
               const type::Type* type,
               core::AddressSpace address_space,
               core::Access access,
-              const ParameterUsage usage = ParameterUsage::kNone,
+              const core::ParameterUsage usage = core::ParameterUsage::kNone,
               std::optional<tint::BindingPoint> binding_point = {},
               std::optional<uint32_t> location = std::nullopt);
 
@@ -229,7 +229,7 @@ class Parameter final : public Castable<Parameter, Variable> {
     uint32_t Index() const { return index_; }
 
     /// @returns the semantic usage for the parameter
-    ParameterUsage Usage() const { return usage_; }
+    core::ParameterUsage Usage() const { return usage_; }
 
     /// @returns the CallTarget owner of this parameter
     CallTarget const* Owner() const { return owner_; }
@@ -252,7 +252,7 @@ class Parameter final : public Castable<Parameter, Variable> {
 
   private:
     const uint32_t index_;
-    const ParameterUsage usage_;
+    const core::ParameterUsage usage_;
     CallTarget const* owner_ = nullptr;
     const CastableBase* shadows_ = nullptr;
     const std::optional<tint::BindingPoint> binding_point_;

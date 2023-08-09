@@ -38,7 +38,7 @@ bool ShouldRun(const Program* program) {
         if (auto* sem_fn = program->Sem().Get(fn)) {
             for (auto* builtin : sem_fn->DirectlyCalledBuiltins()) {
                 const auto& signature = builtin->Signature();
-                auto texture = signature.Parameter(sem::ParameterUsage::kTexture);
+                auto texture = signature.Parameter(core::ParameterUsage::kTexture);
                 if (texture) {
                     auto* tex = texture->Type()->As<type::Texture>();
                     if (tex->dim() == type::TextureDimension::k1d) {
@@ -131,7 +131,7 @@ struct Texture1DTo2D::State {
                 return nullptr;
             }
             const auto& signature = builtin->Signature();
-            auto* texture = signature.Parameter(sem::ParameterUsage::kTexture);
+            auto* texture = signature.Parameter(core::ParameterUsage::kTexture);
             if (!texture) {
                 return nullptr;
             }
@@ -150,7 +150,7 @@ struct Texture1DTo2D::State {
                 return ctx.dst->MemberAccessor(new_call, "x");
             }
 
-            auto coords_index = signature.IndexOf(sem::ParameterUsage::kCoords);
+            auto coords_index = signature.IndexOf(core::ParameterUsage::kCoords);
             if (coords_index == -1) {
                 return nullptr;
             }

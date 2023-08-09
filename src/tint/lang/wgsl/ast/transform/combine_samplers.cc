@@ -227,8 +227,8 @@ struct CombineSamplers::State {
                 // Replace all texture builtin calls.
                 if (auto* builtin = call->Target()->As<sem::Builtin>()) {
                     const auto& signature = builtin->Signature();
-                    auto sampler_index = signature.IndexOf(sem::ParameterUsage::kSampler);
-                    auto texture_index = signature.IndexOf(sem::ParameterUsage::kTexture);
+                    auto sampler_index = signature.IndexOf(core::ParameterUsage::kSampler);
+                    auto texture_index = signature.IndexOf(core::ParameterUsage::kTexture);
                     if (texture_index == -1) {
                         return nullptr;
                     }

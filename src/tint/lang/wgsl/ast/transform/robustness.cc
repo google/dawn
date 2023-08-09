@@ -394,10 +394,10 @@ struct Robustness::State {
         // Indices of the mandatory texture and coords parameters, and the optional
         // array and level parameters.
         auto& signature = builtin->Signature();
-        auto texture_arg_idx = signature.IndexOf(sem::ParameterUsage::kTexture);
-        auto coords_arg_idx = signature.IndexOf(sem::ParameterUsage::kCoords);
-        auto array_arg_idx = signature.IndexOf(sem::ParameterUsage::kArrayIndex);
-        auto level_arg_idx = signature.IndexOf(sem::ParameterUsage::kLevel);
+        auto texture_arg_idx = signature.IndexOf(core::ParameterUsage::kTexture);
+        auto coords_arg_idx = signature.IndexOf(core::ParameterUsage::kCoords);
+        auto array_arg_idx = signature.IndexOf(core::ParameterUsage::kArrayIndex);
+        auto level_arg_idx = signature.IndexOf(core::ParameterUsage::kLevel);
 
         auto* texture_arg = expr->args[static_cast<size_t>(texture_arg_idx)];
 
@@ -486,10 +486,10 @@ struct Robustness::State {
         // Indices of the mandatory texture and coords parameters, and the optional
         // array and level parameters.
         auto& signature = builtin->Signature();
-        auto texture_arg_idx = signature.IndexOf(sem::ParameterUsage::kTexture);
-        auto coords_arg_idx = signature.IndexOf(sem::ParameterUsage::kCoords);
-        auto array_arg_idx = signature.IndexOf(sem::ParameterUsage::kArrayIndex);
-        auto level_arg_idx = signature.IndexOf(sem::ParameterUsage::kLevel);
+        auto texture_arg_idx = signature.IndexOf(core::ParameterUsage::kTexture);
+        auto coords_arg_idx = signature.IndexOf(core::ParameterUsage::kCoords);
+        auto array_arg_idx = signature.IndexOf(core::ParameterUsage::kArrayIndex);
+        auto level_arg_idx = signature.IndexOf(core::ParameterUsage::kLevel);
 
         auto* texture_arg = expr->args[static_cast<size_t>(texture_arg_idx)];
 

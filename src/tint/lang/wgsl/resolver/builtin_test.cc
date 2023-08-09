@@ -2200,7 +2200,7 @@ static std::string to_str(const std::string& func, VectorRef<const sem::Paramete
         if (!first) {
             out << ", ";
         }
-        out << sem::str(param->Usage());
+        out << param->Usage();
         first = false;
     }
     out << ")";

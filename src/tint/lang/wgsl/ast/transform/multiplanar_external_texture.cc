@@ -462,7 +462,7 @@ struct MultiplanarExternalTexture::State {
 
         auto texture_load_external_sym = texture_load_external_fns.GetOrCreate(call->Target(), [&] {
             auto& sig = call->Target()->Signature();
-            auto* coord_ty = sig.Parameter(sem::ParameterUsage::kCoords)->Type();
+            auto* coord_ty = sig.Parameter(core::ParameterUsage::kCoords)->Type();
 
             auto name = b.Symbols().New("textureLoadExternal");
 

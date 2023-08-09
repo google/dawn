@@ -39,7 +39,7 @@ using ::testing::HasSubstr;
 using namespace tint::core::fluent_types;  // NOLINT
 
 using Parameter = sem::Parameter;
-using ParameterUsage = sem::ParameterUsage;
+using ParameterUsage = core::ParameterUsage;
 
 using AFloatV = vec3<AFloat>;
 using AIntV = vec3<AInt>;

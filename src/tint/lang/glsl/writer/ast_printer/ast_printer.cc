@@ -1281,7 +1281,7 @@ const ast::Expression* ASTPrinter::CreateF32Zero(const sem::Statement* stmt) {
 void ASTPrinter::EmitTextureCall(StringStream& out,
                                  const sem::Call* call,
                                  const sem::Builtin* builtin) {
-    using Usage = sem::ParameterUsage;
+    using Usage = core::ParameterUsage;
 
     auto& signature = builtin->Signature();
     auto* expr = call->Declaration();
@@ -1470,7 +1470,7 @@ void ASTPrinter::EmitTextureCall(StringStream& out,
             return;
     }
 
-    if (builtin->Signature().IndexOf(sem::ParameterUsage::kOffset) >= 0) {
+    if (builtin->Signature().IndexOf(core::ParameterUsage::kOffset) >= 0) {
         out << "Offset";
     }
 

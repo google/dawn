@@ -804,12 +804,12 @@ void Inspector::GenerateSamplerTargets() {
         }
 
         const auto& signature = i->Signature();
-        int sampler_index = signature.IndexOf(sem::ParameterUsage::kSampler);
+        int sampler_index = signature.IndexOf(core::ParameterUsage::kSampler);
         if (sampler_index == -1) {
             continue;
         }
 
-        int texture_index = signature.IndexOf(sem::ParameterUsage::kTexture);
+        int texture_index = signature.IndexOf(core::ParameterUsage::kTexture);
         if (texture_index == -1) {
             continue;
         }

@@ -804,7 +804,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
 
     auto* sem = builder_->create<sem::Parameter>(
         param, index, ty, core::AddressSpace::kUndefined, core::Access::kUndefined,
-        sem::ParameterUsage::kNone, binding_point, location);
+        core::ParameterUsage::kNone, binding_point, location);
     builder_->Sem().Add(param, sem);
 
     if (!validator_.Parameter(sem)) {
@@ -2925,7 +2925,7 @@ void Resolver::CollectTextureSamplerPairs(const sem::Builtin* builtin,
                                           VectorRef<const sem::ValueExpression*> args) const {
     // Collect a texture/sampler pair for this builtin.
     const auto& signature = builtin->Signature();
-    int texture_index = signature.IndexOf(sem::ParameterUsage::kTexture);
+    int texture_index = signature.IndexOf(core::ParameterUsage::kTexture);
     if (TINT_UNLIKELY(texture_index == -1)) {
         StringStream err;
         err << "texture builtin without texture parameter";
@@ -2936,7 +2936,7 @@ void Resolver::CollectTextureSamplerPairs(const sem::Builtin* builtin,
             args[static_cast<size_t>(texture_index)]->UnwrapLoad()->As<sem::VariableUser>()) {
         auto* texture = user->Variable();
         if (!texture->Type()->UnwrapRef()->Is<type::StorageTexture>()) {
-            int sampler_index = signature.IndexOf(sem::ParameterUsage::kSampler);
+            int sampler_index = signature.IndexOf(core::ParameterUsage::kSampler);
             const sem::Variable* sampler = sampler_index != -1
                                                ? args[static_cast<size_t>(sampler_index)]
                                                      ->UnwrapLoad()

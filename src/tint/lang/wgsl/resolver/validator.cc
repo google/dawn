@@ -1628,13 +1628,13 @@ bool Validator::TextureBuiltinFunction(const sem::Call* call) const {
     std::string func_name = builtin->str();
     auto& signature = builtin->Signature();
 
-    auto check_arg_is_constexpr = [&](sem::ParameterUsage usage, int min, int max) {
+    auto check_arg_is_constexpr = [&](core::ParameterUsage usage, int min, int max) {
         auto signed_index = signature.IndexOf(usage);
         if (signed_index < 0) {
             return true;
         }
         auto index = static_cast<size_t>(signed_index);
-        std::string name = sem::str(usage);
+        std::string name{core::ToString(usage)};
         auto* arg = call->Arguments()[index];
         if (auto values = arg->ConstantValue()) {
             if (auto* vector = values->Type()->As<type::Vector>()) {
@@ -1666,8 +1666,8 @@ bool Validator::TextureBuiltinFunction(const sem::Call* call) const {
         return false;
     };
 
-    return check_arg_is_constexpr(sem::ParameterUsage::kOffset, -8, 7) &&
-           check_arg_is_constexpr(sem::ParameterUsage::kComponent, 0, 3);
+    return check_arg_is_constexpr(core::ParameterUsage::kOffset, -8, 7) &&
+           check_arg_is_constexpr(core::ParameterUsage::kComponent, 0, 3);
 }
 
 bool Validator::WorkgroupUniformLoad(const sem::Call* call) const {

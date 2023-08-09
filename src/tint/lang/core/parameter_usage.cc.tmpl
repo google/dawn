@@ -13,11 +13,11 @@ See:
 
 {{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 
-#include "src/tint/lang/wgsl/sem/parameter_usage.h"
+#include "src/tint/lang/core/parameter_usage.h"
 
-namespace tint::sem {
+namespace tint::core {
 
-const char* str(ParameterUsage usage) {
+std::string_view ToString(ParameterUsage usage) {
     switch (usage) {
         case ParameterUsage::kNone:
             return "none";
@@ -29,4 +29,4 @@ const char* str(ParameterUsage usage) {
     return "<unknown>";
 }
 
-}  // namespace tint::sem
+}  // namespace tint::core

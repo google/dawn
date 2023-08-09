@@ -1184,7 +1184,7 @@ struct BuiltinPolyfill::State {
                     case core::Function::kTextureSampleBaseClampToEdge:
                         if (cfg.builtins.texture_sample_base_clamp_to_edge_2d_f32) {
                             auto& sig = builtin->Signature();
-                            auto* tex = sig.Parameter(sem::ParameterUsage::kTexture);
+                            auto* tex = sig.Parameter(core::ParameterUsage::kTexture);
                             if (auto* stex = tex->Type()->As<type::SampledTexture>()) {
                                 if (stex->type()->Is<type::F32>()) {
                                     return builtin_polyfills.GetOrCreate(builtin, [&] {
@@ -1198,11 +1198,11 @@ struct BuiltinPolyfill::State {
                     case core::Function::kTextureStore:
                         if (cfg.builtins.bgra8unorm) {
                             auto& sig = builtin->Signature();
-                            auto* tex = sig.Parameter(sem::ParameterUsage::kTexture);
+                            auto* tex = sig.Parameter(core::ParameterUsage::kTexture);
                             if (auto* stex = tex->Type()->As<type::StorageTexture>()) {
                                 if (stex->texel_format() == core::TexelFormat::kBgra8Unorm) {
                                     size_t value_idx = static_cast<size_t>(
-                                        sig.IndexOf(sem::ParameterUsage::kValue));
+                                        sig.IndexOf(core::ParameterUsage::kValue));
                                     ctx.Replace(expr, [this, expr, value_idx] {
                                         tint::Vector<const Expression*, 3> args;
                                         for (auto* arg : expr->args) {

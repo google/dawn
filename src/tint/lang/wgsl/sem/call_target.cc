@@ -49,7 +49,7 @@ CallTargetSignature::CallTargetSignature(const type::Type* ret_ty,
 CallTargetSignature::CallTargetSignature(const CallTargetSignature&) = default;
 CallTargetSignature::~CallTargetSignature() = default;
 
-int CallTargetSignature::IndexOf(ParameterUsage usage) const {
+int CallTargetSignature::IndexOf(core::ParameterUsage usage) const {
     for (size_t i = 0; i < parameters.Length(); i++) {
         if (parameters[i]->Usage() == usage) {
             return static_cast<int>(i);

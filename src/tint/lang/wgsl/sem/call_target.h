@@ -54,12 +54,12 @@ struct CallTargetSignature {
     /// @param usage the parameter usage to find
     /// @returns the index of the parameter with the given usage, or -1 if no
     /// parameter with the given usage exists.
-    int IndexOf(ParameterUsage usage) const;
+    int IndexOf(core::ParameterUsage usage) const;
 
     /// @param usage  the parameter usage to find
     /// @returns the the parameter with the given usage, or nullptr if no parameter with the given
     /// usage exists.
-    inline const sem::Parameter* Parameter(ParameterUsage usage) const {
+    inline const sem::Parameter* Parameter(core::ParameterUsage usage) const {
         auto idx = IndexOf(usage);
         return (idx >= 0) ? parameters[static_cast<size_t>(idx)] : nullptr;
     }
