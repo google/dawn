@@ -27,7 +27,7 @@
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::constant::test {
+namespace tint::core::constant::test {
 
 // TODO(bclayton): Don't depend on resolver
 namespace builder = tint::resolver::builder;
@@ -343,6 +343,6 @@ struct BitValues {
     }
 };
 
-}  // namespace tint::constant::test
+}  // namespace tint::core::constant::test
 
 #endif  // SRC_TINT_LANG_CORE_CONSTANT_EVAL_TEST_H_

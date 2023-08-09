@@ -22,7 +22,7 @@
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::constant {
+namespace tint::core::constant {
 
 /// ScalarBase is the base class of all Scalar<T> specializations.
 /// Used for querying whether a value is a scalar type.
@@ -106,6 +106,6 @@ class Scalar : public Castable<Scalar<T>, ScalarBase> {
     }
 };
 
-}  // namespace tint::constant
+}  // namespace tint::core::constant
 
 #endif  // SRC_TINT_LANG_CORE_CONSTANT_SCALAR_H_

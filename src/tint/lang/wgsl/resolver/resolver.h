@@ -256,13 +256,15 @@ class Resolver {
 
     /// Converts `c` to `target_ty`
     /// @returns true on success, false on failure.
-    bool Convert(const constant::Value*& c, const type::Type* target_ty, const Source& source);
+    bool Convert(const core::constant::Value*& c,
+                 const type::Type* target_ty,
+                 const Source& source);
 
     /// Transforms `args` to a vector of constants, and converts each constant to the call target's
     /// parameter type.
     /// @returns the vector of constants, `tint::Failure` on failure.
     template <size_t N>
-    tint::Result<Vector<const constant::Value*, N>> ConvertArguments(
+    tint::Result<Vector<const core::constant::Value*, N>> ConvertArguments(
         const Vector<const sem::ValueExpression*, N>& args,
         const sem::CallTarget* target);
 
@@ -601,7 +603,7 @@ class Resolver {
 
     ProgramBuilder* const builder_;
     diag::List& diagnostics_;
-    constant::Eval const_eval_;
+    core::constant::Eval const_eval_;
     std::unique_ptr<core::intrinsic::Table> const intrinsic_table_;
     DependencyGraph dependencies_;
     SemHelper sem_;

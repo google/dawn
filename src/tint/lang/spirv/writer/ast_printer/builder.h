@@ -474,7 +474,7 @@ class Builder {
     /// Generates a constant value if needed
     /// @param constant the constant to generate.
     /// @returns the ID on success or 0 on failure
-    uint32_t GenerateConstantIfNeeded(const constant::Value* constant);
+    uint32_t GenerateConstantIfNeeded(const core::constant::Value* constant);
 
     /// Generates a scalar constant if needed
     /// @param constant the constant to generate.

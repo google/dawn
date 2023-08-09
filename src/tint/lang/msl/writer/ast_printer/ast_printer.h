@@ -261,7 +261,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param out the output stream
     /// @param constant the constant value to emit
     /// @returns true if the constant value was successfully emitted
-    bool EmitConstant(StringStream& out, const constant::Value* constant);
+    bool EmitConstant(StringStream& out, const core::constant::Value* constant);
     /// Handles a literal
     /// @param out the output of the expression stream
     /// @param lit the literal to emit

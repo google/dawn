@@ -16,7 +16,7 @@
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/wgsl/sem/materialize.h"
 
-namespace tint::constant::test {
+namespace tint::core::constant::test {
 namespace {
 
 using namespace tint::core::fluent_types;  // NOLINT
@@ -493,4 +493,4 @@ TEST_F(ConstEvalTest, StructAbstractSplat_to_StructDifferentTypes) {
 }
 
 }  // namespace
-}  // namespace tint::constant::test
+}  // namespace tint::core::constant::test

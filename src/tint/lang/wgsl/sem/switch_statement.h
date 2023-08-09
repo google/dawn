@@ -25,9 +25,9 @@ class CaseStatement;
 class CaseSelector;
 class SwitchStatement;
 }  // namespace tint::ast
-namespace tint::constant {
+namespace tint::core::constant {
 class Value;
-}  // namespace tint::constant
+}  // namespace tint::core::constant
 namespace tint::sem {
 class CaseStatement;
 class CaseSelector;
@@ -103,7 +103,8 @@ class CaseSelector final : public Castable<CaseSelector, Node> {
     /// Constructor
     /// @param decl the selector declaration
     /// @param val the case selector value, nullptr for a default selector
-    explicit CaseSelector(const ast::CaseSelector* decl, const constant::Value* val = nullptr);
+    explicit CaseSelector(const ast::CaseSelector* decl,
+                          const core::constant::Value* val = nullptr);
 
     /// Destructor
     ~CaseSelector() override;
@@ -115,11 +116,11 @@ class CaseSelector final : public Castable<CaseSelector, Node> {
     const ast::CaseSelector* Declaration() const;
 
     /// @returns the selector constant value, or nullptr if this is the default selector
-    const constant::Value* Value() const { return val_; }
+    const core::constant::Value* Value() const { return val_; }
 
   private:
     const ast::CaseSelector* const decl_;
-    const constant::Value* const val_;
+    const core::constant::Value* const val_;
 };
 
 }  // namespace tint::sem

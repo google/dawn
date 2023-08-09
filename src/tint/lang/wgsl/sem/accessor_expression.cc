@@ -27,7 +27,7 @@ AccessorExpression::AccessorExpression(const ast::AccessorExpression* declaratio
                                        core::EvaluationStage stage,
                                        const ValueExpression* object,
                                        const Statement* statement,
-                                       const constant::Value* constant,
+                                       const core::constant::Value* constant,
                                        bool has_side_effects,
                                        const Variable* root_ident /* = nullptr */)
     : Base(declaration, type, stage, statement, constant, has_side_effects, root_ident),

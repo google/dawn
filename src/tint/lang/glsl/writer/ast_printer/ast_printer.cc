@@ -2197,7 +2197,7 @@ void ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
     Line() << "}";
 }
 
-void ASTPrinter::EmitConstant(StringStream& out, const constant::Value* constant) {
+void ASTPrinter::EmitConstant(StringStream& out, const core::constant::Value* constant) {
     Switch(
         constant->Type(),  //
         [&](const type::Bool*) { out << (constant->ValueAs<AInt>() ? "true" : "false"); },
@@ -2210,7 +2210,7 @@ void ASTPrinter::EmitConstant(StringStream& out, const constant::Value* constant
 
             ScopedParen sp(out);
 
-            if (auto* splat = constant->As<constant::Splat>()) {
+            if (auto* splat = constant->As<core::constant::Splat>()) {
                 EmitConstant(out, splat->el);
                 return;
             }

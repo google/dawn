@@ -655,7 +655,7 @@ void Printer::EmitConstant(StringStream& out, ir::Constant* c) {
     EmitConstant(out, c->Value());
 }
 
-void Printer::EmitConstant(StringStream& out, const constant::Value* c) {
+void Printer::EmitConstant(StringStream& out, const core::constant::Value* c) {
     auto emit_values = [&](uint32_t count) {
         for (size_t i = 0; i < count; i++) {
             if (i > 0) {
@@ -676,7 +676,7 @@ void Printer::EmitConstant(StringStream& out, const constant::Value* c) {
             EmitType(out, v);
 
             ScopedParen sp(out);
-            if (auto* splat = c->As<constant::Splat>()) {
+            if (auto* splat = c->As<core::constant::Splat>()) {
                 EmitConstant(out, splat->el);
                 return;
             }

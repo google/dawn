@@ -43,7 +43,7 @@ class ValueExpression : public Castable<ValueExpression, Expression> {
                     const type::Type* type,
                     core::EvaluationStage stage,
                     const Statement* statement,
-                    const constant::Value* constant,
+                    const core::constant::Value* constant,
                     bool has_side_effects,
                     const Variable* root_ident = nullptr);
 
@@ -57,7 +57,7 @@ class ValueExpression : public Castable<ValueExpression, Expression> {
     core::EvaluationStage Stage() const { return stage_; }
 
     /// @return the constant value of this expression
-    const constant::Value* ConstantValue() const { return constant_; }
+    const core::constant::Value* ConstantValue() const { return constant_; }
 
     /// Returns the variable or parameter that this expression derives from.
     /// For reference and pointer expressions, this will either be the originating
@@ -91,7 +91,7 @@ class ValueExpression : public Castable<ValueExpression, Expression> {
   private:
     const type::Type* const type_;
     const core::EvaluationStage stage_;
-    const constant::Value* const constant_;
+    const core::constant::Value* const constant_;
     sem::Behaviors behaviors_{sem::Behavior::kNext};
     const bool has_side_effects_;
 };

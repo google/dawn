@@ -59,7 +59,7 @@ class Variable : public Castable<Variable, Node> {
              core::EvaluationStage stage,
              core::AddressSpace address_space,
              core::Access access,
-             const constant::Value* constant_value);
+             const core::constant::Value* constant_value);
 
     /// Destructor
     ~Variable() override;
@@ -80,7 +80,7 @@ class Variable : public Castable<Variable, Node> {
     core::Access Access() const { return access_; }
 
     /// @return the constant value of this expression
-    const constant::Value* ConstantValue() const { return constant_value_; }
+    const core::constant::Value* ConstantValue() const { return constant_value_; }
 
     /// @returns the variable initializer expression, or nullptr if the variable
     /// does not have one.
@@ -102,7 +102,7 @@ class Variable : public Castable<Variable, Node> {
     const core::EvaluationStage stage_;
     const core::AddressSpace address_space_;
     const core::Access access_;
-    const constant::Value* constant_value_;
+    const core::constant::Value* constant_value_;
     const ValueExpression* initializer_ = nullptr;
     tint::Vector<const VariableUser*, 8> users_;
 };
@@ -124,7 +124,7 @@ class LocalVariable final : public Castable<LocalVariable, Variable> {
                   core::AddressSpace address_space,
                   core::Access access,
                   const sem::Statement* statement,
-                  const constant::Value* constant_value);
+                  const core::constant::Value* constant_value);
 
     /// Destructor
     ~LocalVariable() override;
@@ -165,7 +165,7 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
                    core::EvaluationStage stage,
                    core::AddressSpace address_space,
                    core::Access access,
-                   const constant::Value* constant_value,
+                   const core::constant::Value* constant_value,
                    std::optional<tint::BindingPoint> binding_point = std::nullopt,
                    std::optional<uint32_t> location = std::nullopt,
                    std::optional<uint32_t> index = std::nullopt);
@@ -272,7 +272,7 @@ class VariableUser final : public Castable<VariableUser, ValueExpression> {
     VariableUser(const ast::IdentifierExpression* declaration,
                  core::EvaluationStage stage,
                  Statement* statement,
-                 const constant::Value* constant,
+                 const core::constant::Value* constant,
                  sem::Variable* variable);
     ~VariableUser() override;
 

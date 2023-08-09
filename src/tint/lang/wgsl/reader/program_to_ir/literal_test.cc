@@ -53,8 +53,8 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_True) {
     auto* init = GlobalVarInitializer(m.Get());
     ASSERT_TRUE(Is<ir::Constant>(init));
     auto* val = init->As<ir::Constant>()->Value();
-    EXPECT_TRUE(val->Is<constant::Scalar<bool>>());
-    EXPECT_TRUE(val->As<constant::Scalar<bool>>()->ValueAs<bool>());
+    EXPECT_TRUE(val->Is<core::constant::Scalar<bool>>());
+    EXPECT_TRUE(val->As<core::constant::Scalar<bool>>()->ValueAs<bool>());
 }
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_False) {
@@ -67,8 +67,8 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_False) {
     auto* init = GlobalVarInitializer(m.Get());
     ASSERT_TRUE(Is<ir::Constant>(init));
     auto* val = init->As<ir::Constant>()->Value();
-    EXPECT_TRUE(val->Is<constant::Scalar<bool>>());
-    EXPECT_FALSE(val->As<constant::Scalar<bool>>()->ValueAs<bool>());
+    EXPECT_TRUE(val->Is<core::constant::Scalar<bool>>());
+    EXPECT_FALSE(val->As<core::constant::Scalar<bool>>()->ValueAs<bool>());
 }
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_Deduped) {
@@ -111,8 +111,8 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_F32) {
     auto* init = GlobalVarInitializer(m.Get());
     ASSERT_TRUE(Is<ir::Constant>(init));
     auto* val = init->As<ir::Constant>()->Value();
-    EXPECT_TRUE(val->Is<constant::Scalar<f32>>());
-    EXPECT_EQ(1.2_f, val->As<constant::Scalar<f32>>()->ValueAs<f32>());
+    EXPECT_TRUE(val->Is<core::constant::Scalar<f32>>());
+    EXPECT_EQ(1.2_f, val->As<core::constant::Scalar<f32>>()->ValueAs<f32>());
 }
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_F32_Deduped) {
@@ -150,8 +150,8 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_F16) {
     auto* init = GlobalVarInitializer(m.Get());
     ASSERT_TRUE(Is<ir::Constant>(init));
     auto* val = init->As<ir::Constant>()->Value();
-    EXPECT_TRUE(val->Is<constant::Scalar<f16>>());
-    EXPECT_EQ(1.2_h, val->As<constant::Scalar<f16>>()->ValueAs<f32>());
+    EXPECT_TRUE(val->Is<core::constant::Scalar<f16>>());
+    EXPECT_EQ(1.2_h, val->As<core::constant::Scalar<f16>>()->ValueAs<f32>());
 }
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_F16_Deduped) {
@@ -189,8 +189,8 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_I32) {
     auto* init = GlobalVarInitializer(m.Get());
     ASSERT_TRUE(Is<ir::Constant>(init));
     auto* val = init->As<ir::Constant>()->Value();
-    EXPECT_TRUE(val->Is<constant::Scalar<i32>>());
-    EXPECT_EQ(-2_i, val->As<constant::Scalar<i32>>()->ValueAs<f32>());
+    EXPECT_TRUE(val->Is<core::constant::Scalar<i32>>());
+    EXPECT_EQ(-2_i, val->As<core::constant::Scalar<i32>>()->ValueAs<f32>());
 }
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_I32_Deduped) {
@@ -227,8 +227,8 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_U32) {
     auto* init = GlobalVarInitializer(m.Get());
     ASSERT_TRUE(Is<ir::Constant>(init));
     auto* val = init->As<ir::Constant>()->Value();
-    EXPECT_TRUE(val->Is<constant::Scalar<u32>>());
-    EXPECT_EQ(2_u, val->As<constant::Scalar<u32>>()->ValueAs<f32>());
+    EXPECT_TRUE(val->Is<core::constant::Scalar<u32>>());
+    EXPECT_EQ(2_u, val->As<core::constant::Scalar<u32>>()->ValueAs<f32>());
 }
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_U32_Deduped) {

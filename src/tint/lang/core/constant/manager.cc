@@ -27,7 +27,7 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/utils/containers/predicates.h"
 
-namespace tint::constant {
+namespace tint::core::constant {
 
 Manager::Manager() = default;
 
@@ -102,4 +102,4 @@ const Scalar<AInt>* Manager::Get(AInt value) {
     return Get<Scalar<AInt>>(types.AInt(), value);
 }
 
-}  // namespace tint::constant
+}  // namespace tint::core::constant

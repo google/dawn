@@ -1626,7 +1626,7 @@ bool ASTPrinter::EmitZeroValue(StringStream& out, const type::Type* type) {
         });
 }
 
-bool ASTPrinter::EmitConstant(StringStream& out, const constant::Value* constant) {
+bool ASTPrinter::EmitConstant(StringStream& out, const core::constant::Value* constant) {
     return Switch(
         constant->Type(),  //
         [&](const type::Bool*) {
@@ -1656,7 +1656,7 @@ bool ASTPrinter::EmitConstant(StringStream& out, const constant::Value* constant
 
             ScopedParen sp(out);
 
-            if (auto* splat = constant->As<constant::Splat>()) {
+            if (auto* splat = constant->As<core::constant::Splat>()) {
                 if (!EmitConstant(out, splat->el)) {
                     return false;
                 }

@@ -35,8 +35,8 @@ TEST_F(IR_StoreTest, CreateStore) {
 
     ASSERT_TRUE(inst->From()->Is<Constant>());
     auto lhs = inst->From()->As<Constant>()->Value();
-    ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
-    EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
+    ASSERT_TRUE(lhs->Is<core::constant::Scalar<i32>>());
+    EXPECT_EQ(4_i, lhs->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
 TEST_F(IR_StoreTest, Usage) {

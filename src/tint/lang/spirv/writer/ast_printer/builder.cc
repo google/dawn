@@ -1589,7 +1589,7 @@ uint32_t Builder::GenerateLiteralIfNeeded(const ast::LiteralExpression* lit) {
     return GenerateConstantIfNeeded(constant);
 }
 
-uint32_t Builder::GenerateConstantIfNeeded(const constant::Value* constant) {
+uint32_t Builder::GenerateConstantIfNeeded(const core::constant::Value* constant) {
     if (constant->AllZero()) {
         return GenerateConstantNullIfNeeded(constant->Type());
     }

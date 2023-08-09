@@ -28,52 +28,52 @@ TEST_F(IR_ConstantTest, f32) {
     StringStream str;
 
     auto* c = b.Constant(1.2_f);
-    EXPECT_EQ(1.2_f, c->Value()->As<constant::Scalar<f32>>()->ValueAs<f32>());
+    EXPECT_EQ(1.2_f, c->Value()->As<core::constant::Scalar<f32>>()->ValueAs<f32>());
 
-    EXPECT_TRUE(c->Value()->Is<constant::Scalar<f32>>());
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<f16>>());
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<i32>>());
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<u32>>());
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<bool>>());
+    EXPECT_TRUE(c->Value()->Is<core::constant::Scalar<f32>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<f16>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<i32>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<u32>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<bool>>());
 }
 
 TEST_F(IR_ConstantTest, f16) {
     StringStream str;
 
     auto* c = b.Constant(1.1_h);
-    EXPECT_EQ(1.1_h, c->Value()->As<constant::Scalar<f16>>()->ValueAs<f16>());
+    EXPECT_EQ(1.1_h, c->Value()->As<core::constant::Scalar<f16>>()->ValueAs<f16>());
 
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<f32>>());
-    EXPECT_TRUE(c->Value()->Is<constant::Scalar<f16>>());
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<i32>>());
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<u32>>());
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<bool>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<f32>>());
+    EXPECT_TRUE(c->Value()->Is<core::constant::Scalar<f16>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<i32>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<u32>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<bool>>());
 }
 
 TEST_F(IR_ConstantTest, i32) {
     StringStream str;
 
     auto* c = b.Constant(1_i);
-    EXPECT_EQ(1_i, c->Value()->As<constant::Scalar<i32>>()->ValueAs<i32>());
+    EXPECT_EQ(1_i, c->Value()->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
 
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<f32>>());
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<f16>>());
-    EXPECT_TRUE(c->Value()->Is<constant::Scalar<i32>>());
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<u32>>());
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<bool>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<f32>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<f16>>());
+    EXPECT_TRUE(c->Value()->Is<core::constant::Scalar<i32>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<u32>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<bool>>());
 }
 
 TEST_F(IR_ConstantTest, u32) {
     StringStream str;
 
     auto* c = b.Constant(2_u);
-    EXPECT_EQ(2_u, c->Value()->As<constant::Scalar<u32>>()->ValueAs<u32>());
+    EXPECT_EQ(2_u, c->Value()->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
 
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<f32>>());
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<f16>>());
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<i32>>());
-    EXPECT_TRUE(c->Value()->Is<constant::Scalar<u32>>());
-    EXPECT_FALSE(c->Value()->Is<constant::Scalar<bool>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<f32>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<f16>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<i32>>());
+    EXPECT_TRUE(c->Value()->Is<core::constant::Scalar<u32>>());
+    EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<bool>>());
 }
 
 TEST_F(IR_ConstantTest, bool) {
@@ -81,19 +81,19 @@ TEST_F(IR_ConstantTest, bool) {
         StringStream str;
 
         auto* c = b.Constant(false);
-        EXPECT_FALSE(c->Value()->As<constant::Scalar<bool>>()->ValueAs<bool>());
+        EXPECT_FALSE(c->Value()->As<core::constant::Scalar<bool>>()->ValueAs<bool>());
     }
 
     {
         StringStream str;
         auto c = b.Constant(true);
-        EXPECT_TRUE(c->Value()->As<constant::Scalar<bool>>()->ValueAs<bool>());
+        EXPECT_TRUE(c->Value()->As<core::constant::Scalar<bool>>()->ValueAs<bool>());
 
-        EXPECT_FALSE(c->Value()->Is<constant::Scalar<f32>>());
-        EXPECT_FALSE(c->Value()->Is<constant::Scalar<f16>>());
-        EXPECT_FALSE(c->Value()->Is<constant::Scalar<i32>>());
-        EXPECT_FALSE(c->Value()->Is<constant::Scalar<u32>>());
-        EXPECT_TRUE(c->Value()->Is<constant::Scalar<bool>>());
+        EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<f32>>());
+        EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<f16>>());
+        EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<i32>>());
+        EXPECT_FALSE(c->Value()->Is<core::constant::Scalar<u32>>());
+        EXPECT_TRUE(c->Value()->Is<core::constant::Scalar<bool>>());
     }
 }
 

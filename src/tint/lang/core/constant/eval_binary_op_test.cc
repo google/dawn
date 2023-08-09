@@ -21,7 +21,7 @@ using namespace tint::core::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;     // NOLINT
 using ::testing::HasSubstr;
 
-namespace tint::constant::test {
+namespace tint::core::constant::test {
 namespace {
 
 struct Case {
@@ -2482,4 +2482,4 @@ INSTANTIATE_TEST_SUITE_P(Nested,
 }  // namespace LogicalShortCircuit
 
 }  // namespace
-}  // namespace tint::constant::test
+}  // namespace tint::core::constant::test

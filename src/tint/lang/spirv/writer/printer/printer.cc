@@ -246,7 +246,7 @@ uint32_t Printer::Constant(ir::Constant* constant) {
     return id;
 }
 
-uint32_t Printer::Constant(const constant::Value* constant) {
+uint32_t Printer::Constant(const core::constant::Value* constant) {
     return constants_.GetOrCreate(constant, [&] {
         auto id = module_.NextId();
         auto* ty = constant->Type();

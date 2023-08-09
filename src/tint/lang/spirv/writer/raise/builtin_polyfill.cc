@@ -816,7 +816,7 @@ Result<SuccessType, std::string> BuiltinPolyfill(ir::Module* ir) {
     return Success;
 }
 
-LiteralOperand::LiteralOperand(const constant::Value* value) : Base(value) {}
+LiteralOperand::LiteralOperand(const core::constant::Value* value) : Base(value) {}
 
 LiteralOperand::~LiteralOperand() = default;
 

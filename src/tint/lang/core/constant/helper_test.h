@@ -18,7 +18,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 
-namespace tint::constant {
+namespace tint::core::constant {
 
 /// Helper base class for testing
 template <typename BASE>
@@ -31,6 +31,6 @@ using TestHelper = TestHelperBase<testing::Test>;
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
-}  // namespace tint::constant
+}  // namespace tint::core::constant
 
 #endif  // SRC_TINT_LANG_CORE_CONSTANT_HELPER_TEST_H_

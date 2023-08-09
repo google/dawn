@@ -16,7 +16,7 @@
 
 #include "src/tint/lang/core/constant/helper_test.h"
 
-namespace tint::constant {
+namespace tint::core::constant {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -176,4 +176,4 @@ TEST_F(ConstantTest_Scalar, Clone) {
 }
 
 }  // namespace
-}  // namespace tint::constant
+}  // namespace tint::core::constant

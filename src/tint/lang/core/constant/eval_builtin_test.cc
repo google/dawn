@@ -19,7 +19,7 @@
 using namespace tint::number_suffixes;  // NOLINT
 using ::testing::HasSubstr;
 
-namespace tint::constant::test {
+namespace tint::core::constant::test {
 namespace {
 
 struct Case {
@@ -2889,4 +2889,4 @@ INSTANTIATE_TEST_SUITE_P(  //
                      testing::ValuesIn(QuantizeToF16Cases())));
 
 }  // namespace
-}  // namespace tint::constant::test
+}  // namespace tint::core::constant::test

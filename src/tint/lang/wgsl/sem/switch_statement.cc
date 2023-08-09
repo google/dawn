@@ -50,7 +50,7 @@ const ast::CaseStatement* CaseStatement::Declaration() const {
     return static_cast<const ast::CaseStatement*>(Base::Declaration());
 }
 
-CaseSelector::CaseSelector(const ast::CaseSelector* decl, const constant::Value* val)
+CaseSelector::CaseSelector(const ast::CaseSelector* decl, const core::constant::Value* val)
     : Base(), decl_(decl), val_(val) {}
 
 CaseSelector::~CaseSelector() = default;

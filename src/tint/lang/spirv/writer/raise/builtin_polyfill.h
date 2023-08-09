@@ -42,7 +42,7 @@ class LiteralOperand final : public Castable<LiteralOperand, ir::Constant> {
   public:
     /// Constructor
     /// @param value the operand value
-    explicit LiteralOperand(const constant::Value* value);
+    explicit LiteralOperand(const core::constant::Value* value);
     /// Destructor
     ~LiteralOperand() override;
 };

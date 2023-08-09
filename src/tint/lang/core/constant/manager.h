@@ -23,14 +23,14 @@
 #include "src/tint/utils/containers/unique_allocator.h"
 #include "src/tint/utils/math/hash.h"
 
-namespace tint::constant {
+namespace tint::core::constant {
 class Splat;
 
 template <typename T>
 class Scalar;
-}  // namespace tint::constant
+}  // namespace tint::core::constant
 
-namespace tint::constant {
+namespace tint::core::constant {
 
 /// The constant manager holds a type manager and all the pointers to the known constant values.
 class Manager final {
@@ -152,6 +152,6 @@ class Manager final {
     UniqueAllocator<Value, Hasher, Equal> values_;
 };
 
-}  // namespace tint::constant
+}  // namespace tint::core::constant
 
 #endif  // SRC_TINT_LANG_CORE_CONSTANT_MANAGER_H_

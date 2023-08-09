@@ -27,17 +27,15 @@
 namespace tint {
 class Source;
 }  // namespace tint
-namespace tint::constant {
+namespace tint::core::constant {
 class Manager;
-}  // namespace tint::constant
+class Value;
+}  // namespace tint::core::constant
 namespace tint::diag {
 class List;
 }  // namespace tint::diag
-namespace tint::constant {
-class Value;
-}  // namespace tint::constant
 
-namespace tint::constant {
+namespace tint::core::constant {
 
 /// Eval performs shader creation-time (const-expression) expression evaluation.
 class Eval {
@@ -1217,6 +1215,6 @@ class Eval {
     bool use_runtime_semantics_ = false;
 };
 
-}  // namespace tint::constant
+}  // namespace tint::core::constant
 
 #endif  // SRC_TINT_LANG_CORE_CONSTANT_EVAL_H_

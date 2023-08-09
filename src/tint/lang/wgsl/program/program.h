@@ -67,7 +67,7 @@ class Program {
     ast::NodeID HighestASTNodeID() const { return highest_node_id_; }
 
     /// @returns a reference to the program's constants
-    const constant::Manager& Constants() const {
+    const core::constant::Manager& Constants() const {
         AssertNotMoved();
         return constants_;
     }
@@ -165,7 +165,7 @@ class Program {
 
     GenerationID id_;
     ast::NodeID highest_node_id_;
-    constant::Manager constants_;
+    core::constant::Manager constants_;
     ASTNodeAllocator ast_nodes_;
     SemNodeAllocator sem_nodes_;
     ast::Module* ast_ = nullptr;

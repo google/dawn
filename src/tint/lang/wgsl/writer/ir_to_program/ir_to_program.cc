@@ -801,13 +801,13 @@ class State {
 
     const ast::Expression* Constant(ir::Constant* c) { return Constant(c->Value()); }
 
-    const ast::Expression* Constant(const constant::Value* c) {
+    const ast::Expression* Constant(const core::constant::Value* c) {
         auto composite = [&](bool can_splat) {
             auto ty = Type(c->Type());
             if (c->AllZero()) {
                 return b.Call(ty);
             }
-            if (can_splat && c->Is<constant::Splat>()) {
+            if (can_splat && c->Is<core::constant::Splat>()) {
                 return b.Call(ty, Constant(c->Index(0)));
             }
 

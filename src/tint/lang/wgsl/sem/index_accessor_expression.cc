@@ -28,7 +28,7 @@ IndexAccessorExpression::IndexAccessorExpression(const ast::IndexAccessorExpress
                                                  const ValueExpression* object,
                                                  const ValueExpression* index,
                                                  const Statement* statement,
-                                                 const constant::Value* constant,
+                                                 const core::constant::Value* constant,
                                                  bool has_side_effects,
                                                  const Variable* root_ident /* = nullptr */)
     : Base(declaration, type, stage, object, statement, constant, has_side_effects, root_ident),

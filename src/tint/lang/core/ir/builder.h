@@ -214,7 +214,7 @@ class Builder {
     /// Creates a new ir::Constant
     /// @param val the constant value
     /// @returns the new constant
-    ir::Constant* Constant(const constant::Value* val) {
+    ir::Constant* Constant(const core::constant::Value* val) {
         return ir.constants.GetOrCreate(val, [&] { return ir.values.Create<ir::Constant>(val); });
     }
 
@@ -248,34 +248,34 @@ class Builder {
 
     /// Retrieves the inner constant from an ir::Constant
     /// @param constant the ir constant
-    /// @returns the constant::Value inside the constant
-    const constant::Value* ConstantValue(ir::Constant* constant) { return constant->Value(); }
+    /// @returns the core::constant::Value inside the constant
+    const core::constant::Value* ConstantValue(ir::Constant* constant) { return constant->Value(); }
 
-    /// Creates a constant::Value for an i32 Scalar
+    /// Creates a core::constant::Value for an i32 Scalar
     /// @param v the value
     /// @returns the new constant
-    const constant::Value* ConstantValue(i32 v) { return ir.constant_values.Get(v); }
+    const core::constant::Value* ConstantValue(i32 v) { return ir.constant_values.Get(v); }
 
-    /// Creates a constant::Value for a u32 Scalar
+    /// Creates a core::constant::Value for a u32 Scalar
     /// @param v the value
     /// @returns the new constant
-    const constant::Value* ConstantValue(u32 v) { return ir.constant_values.Get(v); }
+    const core::constant::Value* ConstantValue(u32 v) { return ir.constant_values.Get(v); }
 
-    /// Creates a constant::Value for a f32 Scalar
+    /// Creates a core::constant::Value for a f32 Scalar
     /// @param v the value
     /// @returns the new constant
-    const constant::Value* ConstantValue(f32 v) { return ir.constant_values.Get(v); }
+    const core::constant::Value* ConstantValue(f32 v) { return ir.constant_values.Get(v); }
 
-    /// Creates a constant::Value for a f16 Scalar
+    /// Creates a core::constant::Value for a f16 Scalar
     /// @param v the value
     /// @returns the new constant
-    const constant::Value* ConstantValue(f16 v) { return ir.constant_values.Get(v); }
+    const core::constant::Value* ConstantValue(f16 v) { return ir.constant_values.Get(v); }
 
-    /// Creates a constant::Value for a bool Scalar
+    /// Creates a core::constant::Value for a bool Scalar
     /// @param v the value
     /// @returns the new constant
     template <typename BOOL, typename = std::enable_if_t<std::is_same_v<BOOL, bool>>>
-    const constant::Value* ConstantValue(BOOL v) {
+    const core::constant::Value* ConstantValue(BOOL v) {
         return ir.constant_values.Get(v);
     }
 

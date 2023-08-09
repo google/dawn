@@ -14,9 +14,9 @@
 
 #include "src/tint/lang/core/constant/node.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::constant::Node);
+TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Node);
 
-namespace tint::constant {
+namespace tint::core::constant {
 
 Node::Node() = default;
 
@@ -24,4 +24,4 @@ Node::Node(const Node&) = default;
 
 Node::~Node() = default;
 
-}  // namespace tint::constant
+}  // namespace tint::core::constant

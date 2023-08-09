@@ -20,7 +20,7 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::constant {
+namespace tint::core::constant {
 
 /// Splat holds a single value, duplicated as all children.
 ///
@@ -71,6 +71,6 @@ class Splat : public Castable<Splat, Value> {
     std::variant<std::monostate, AInt, AFloat> InternalValue() const override { return {}; }
 };
 
-}  // namespace tint::constant
+}  // namespace tint::core::constant
 
 #endif  // SRC_TINT_LANG_CORE_CONSTANT_SPLAT_H_

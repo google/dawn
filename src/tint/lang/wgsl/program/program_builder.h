@@ -188,7 +188,7 @@ class ProgramBuilder : public ast::Builder {
     const type::Type* TypeOf(const ast::TypeDecl* type_decl) const;
 
     /// The constants manager
-    constant::Manager constants;
+    core::constant::Manager constants;
 
   protected:
     /// Asserts that the builder has not been moved.

@@ -26,7 +26,7 @@ Call::Call(const ast::CallExpression* declaration,
            core::EvaluationStage stage,
            VectorRef<const sem::ValueExpression*> arguments,
            const Statement* statement,
-           const constant::Value* constant,
+           const core::constant::Value* constant,
            bool has_side_effects)
     : Base(declaration, target->ReturnType(), stage, statement, constant, has_side_effects),
       target_(target),

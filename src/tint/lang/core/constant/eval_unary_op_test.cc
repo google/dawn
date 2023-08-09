@@ -16,7 +16,7 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::constant::test {
+namespace tint::core::constant::test {
 namespace {
 
 struct Case {
@@ -175,4 +175,4 @@ INSTANTIATE_TEST_SUITE_P(Not,
                                           })));
 
 }  // namespace
-}  // namespace tint::constant::test
+}  // namespace tint::core::constant::test

@@ -18,11 +18,11 @@
 #include "src/tint/lang/core/type/clone_context.h"
 
 // Forward declarations
-namespace tint::constant {
+namespace tint::core::constant {
 class Manager;
-}  // namespace tint::constant
+}  // namespace tint::core::constant
 
-namespace tint::constant {
+namespace tint::core::constant {
 
 /// Context information for cloning of constants
 struct CloneContext {
@@ -33,6 +33,6 @@ struct CloneContext {
     constant::Manager& dst;
 };
 
-}  // namespace tint::constant
+}  // namespace tint::core::constant
 
 #endif  // SRC_TINT_LANG_CORE_CONSTANT_CLONE_CONTEXT_H_

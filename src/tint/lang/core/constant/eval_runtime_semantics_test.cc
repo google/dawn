@@ -18,7 +18,7 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::constant::test {
+namespace tint::core::constant::test {
 namespace {
 
 class ConstEvalRuntimeSemanticsTest : public ConstEvalTest {
@@ -572,4 +572,4 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Vec_Overflow_SingleComponent) {
 }
 
 }  // namespace
-}  // namespace tint::constant::test
+}  // namespace tint::core::constant::test

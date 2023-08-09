@@ -16,9 +16,9 @@
 
 #include "src/tint/lang/core/constant/manager.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::constant::Splat);
+TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Splat);
 
-namespace tint::constant {
+namespace tint::core::constant {
 
 Splat::Splat(const type::Type* t, const constant::Value* e, size_t n) : type(t), el(e), count(n) {}
 
@@ -30,4 +30,4 @@ const Splat* Splat::Clone(CloneContext& ctx) const {
     return ctx.dst.Splat(ty, element, count);
 }
 
-}  // namespace tint::constant
+}  // namespace tint::core::constant

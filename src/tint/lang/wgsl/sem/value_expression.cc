@@ -28,7 +28,7 @@ ValueExpression::ValueExpression(const ast::Expression* declaration,
                                  const type::Type* type,
                                  core::EvaluationStage stage,
                                  const Statement* statement,
-                                 const constant::Value* constant,
+                                 const core::constant::Value* constant,
                                  bool has_side_effects,
                                  const Variable* root_ident /* = nullptr */)
     : Base(declaration, statement),

@@ -136,7 +136,7 @@ class Impl {
     ir::Builder builder_{mod};
 
     // The clone context used to clone data from #program_
-    constant::CloneContext clone_ctx_{
+    core::constant::CloneContext clone_ctx_{
         /* type_ctx */ type::CloneContext{
             /* src */ {&program_->Symbols()},
             /* dst */ {&builder_.ir.symbols, &builder_.ir.Types()},
@@ -1337,7 +1337,7 @@ class Impl {
             },
             [&](const ast::Const*) {
                 // Skip. This should be handled by const-eval already, so the const will be a
-                // `constant::` value at the usage sites. Can just ignore the `const` variable
+                // `core::constant::` value at the usage sites. Can just ignore the `const` variable
                 // as it should never be used.
                 //
                 // TODO(dsinclair): Probably want to store the const variable somewhere and then

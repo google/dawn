@@ -33,8 +33,8 @@ TEST_F(IR_UnaryTest, CreateComplement) {
 
     ASSERT_TRUE(inst->Val()->Is<Constant>());
     auto lhs = inst->Val()->As<Constant>()->Value();
-    ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
-    EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
+    ASSERT_TRUE(lhs->Is<core::constant::Scalar<i32>>());
+    EXPECT_EQ(4_i, lhs->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
 TEST_F(IR_UnaryTest, CreateNegation) {
@@ -45,8 +45,8 @@ TEST_F(IR_UnaryTest, CreateNegation) {
 
     ASSERT_TRUE(inst->Val()->Is<Constant>());
     auto lhs = inst->Val()->As<Constant>()->Value();
-    ASSERT_TRUE(lhs->Is<constant::Scalar<i32>>());
-    EXPECT_EQ(4_i, lhs->As<constant::Scalar<i32>>()->ValueAs<i32>());
+    ASSERT_TRUE(lhs->Is<core::constant::Scalar<i32>>());
+    EXPECT_EQ(4_i, lhs->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
 TEST_F(IR_UnaryTest, Usage) {

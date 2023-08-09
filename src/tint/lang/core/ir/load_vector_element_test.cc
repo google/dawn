@@ -35,8 +35,8 @@ TEST_F(IR_LoadVectorElementTest, Create) {
 
     ASSERT_TRUE(inst->Index()->Is<Constant>());
     auto index = inst->Index()->As<Constant>()->Value();
-    ASSERT_TRUE(index->Is<constant::Scalar<i32>>());
-    EXPECT_EQ(2_i, index->As<constant::Scalar<i32>>()->ValueAs<i32>());
+    ASSERT_TRUE(index->Is<core::constant::Scalar<i32>>());
+    EXPECT_EQ(2_i, index->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
 TEST_F(IR_LoadVectorElementTest, Usage) {

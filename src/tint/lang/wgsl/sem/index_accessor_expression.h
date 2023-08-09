@@ -41,7 +41,7 @@ class IndexAccessorExpression final : public Castable<IndexAccessorExpression, A
                             const ValueExpression* object,
                             const ValueExpression* index,
                             const Statement* statement,
-                            const constant::Value* constant,
+                            const core::constant::Value* constant,
                             bool has_side_effects,
                             const Variable* root_ident = nullptr);
 

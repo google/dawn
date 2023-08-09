@@ -36,8 +36,8 @@ TEST_F(IR_BitcastTest, Bitcast) {
     ASSERT_EQ(args.Length(), 1u);
     ASSERT_TRUE(args[0]->Is<Constant>());
     auto val = args[0]->As<Constant>()->Value();
-    ASSERT_TRUE(val->Is<constant::Scalar<i32>>());
-    EXPECT_EQ(4_i, val->As<constant::Scalar<i32>>()->ValueAs<i32>());
+    ASSERT_TRUE(val->Is<core::constant::Scalar<i32>>());
+    EXPECT_EQ(4_i, val->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
 }
 
 TEST_F(IR_BitcastTest, Result) {

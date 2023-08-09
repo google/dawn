@@ -21,9 +21,9 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/utils/rtti/switch.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::constant::Value);
+TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Value);
 
-namespace tint::constant {
+namespace tint::core::constant {
 
 Value::Value() = default;
 
@@ -102,4 +102,4 @@ bool Value::Equal(const constant::Value* b) const {
         });
 }
 
-}  // namespace tint::constant
+}  // namespace tint::core::constant

@@ -134,10 +134,10 @@ class Printer : public tint::TextGenerator {
     /// @param out the stream to write the constant too
     /// @param c the constant to emit
     void EmitConstant(StringStream& out, ir::Constant* c);
-    /// Handles constant::Value values
+    /// Handles core::constant::Value values
     /// @param out the stream to write the constant too
     /// @param c the constant to emit
-    void EmitConstant(StringStream& out, const constant::Value* c);
+    void EmitConstant(StringStream& out, const core::constant::Value* c);
 
     /// Emits the zero value for the given type
     /// @param out the stream to emit too

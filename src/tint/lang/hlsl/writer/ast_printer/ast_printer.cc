@@ -3524,7 +3524,7 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
 }
 
 bool ASTPrinter::EmitConstant(StringStream& out,
-                              const constant::Value* constant,
+                              const core::constant::Value* constant,
                               bool is_variable_initializer) {
     return Switch(
         constant->Type(),  //
@@ -3552,7 +3552,7 @@ bool ASTPrinter::EmitConstant(StringStream& out,
             return true;
         },
         [&](const type::Vector* v) {
-            if (auto* splat = constant->As<constant::Splat>()) {
+            if (auto* splat = constant->As<core::constant::Splat>()) {
                 {
                     ScopedParen sp(out);
                     if (!EmitConstant(out, splat->el, is_variable_initializer)) {

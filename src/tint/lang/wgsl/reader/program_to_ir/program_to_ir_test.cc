@@ -838,14 +838,16 @@ TEST_F(IR_FromProgramTest, Switch) {
     ASSERT_EQ(3u, cases.Length());
 
     ASSERT_EQ(1u, cases[0].selectors.Length());
-    ASSERT_TRUE(cases[0].selectors[0].val->Value()->Is<constant::Scalar<tint::i32>>());
-    EXPECT_EQ(0_i,
-              cases[0].selectors[0].val->Value()->As<constant::Scalar<tint::i32>>()->ValueOf());
+    ASSERT_TRUE(cases[0].selectors[0].val->Value()->Is<core::constant::Scalar<tint::i32>>());
+    EXPECT_EQ(
+        0_i,
+        cases[0].selectors[0].val->Value()->As<core::constant::Scalar<tint::i32>>()->ValueOf());
 
     ASSERT_EQ(1u, cases[1].selectors.Length());
-    ASSERT_TRUE(cases[1].selectors[0].val->Value()->Is<constant::Scalar<tint::i32>>());
-    EXPECT_EQ(1_i,
-              cases[1].selectors[0].val->Value()->As<constant::Scalar<tint::i32>>()->ValueOf());
+    ASSERT_TRUE(cases[1].selectors[0].val->Value()->Is<core::constant::Scalar<tint::i32>>());
+    EXPECT_EQ(
+        1_i,
+        cases[1].selectors[0].val->Value()->As<core::constant::Scalar<tint::i32>>()->ValueOf());
 
     ASSERT_EQ(1u, cases[2].selectors.Length());
     EXPECT_TRUE(cases[2].selectors[0].IsDefault());
@@ -888,13 +890,15 @@ TEST_F(IR_FromProgramTest, Switch_MultiSelector) {
     auto cases = swtch->Cases();
     ASSERT_EQ(1u, cases.Length());
     ASSERT_EQ(3u, cases[0].selectors.Length());
-    ASSERT_TRUE(cases[0].selectors[0].val->Value()->Is<constant::Scalar<tint::i32>>());
-    EXPECT_EQ(0_i,
-              cases[0].selectors[0].val->Value()->As<constant::Scalar<tint::i32>>()->ValueOf());
+    ASSERT_TRUE(cases[0].selectors[0].val->Value()->Is<core::constant::Scalar<tint::i32>>());
+    EXPECT_EQ(
+        0_i,
+        cases[0].selectors[0].val->Value()->As<core::constant::Scalar<tint::i32>>()->ValueOf());
 
-    ASSERT_TRUE(cases[0].selectors[1].val->Value()->Is<constant::Scalar<tint::i32>>());
-    EXPECT_EQ(1_i,
-              cases[0].selectors[1].val->Value()->As<constant::Scalar<tint::i32>>()->ValueOf());
+    ASSERT_TRUE(cases[0].selectors[1].val->Value()->Is<core::constant::Scalar<tint::i32>>());
+    EXPECT_EQ(
+        1_i,
+        cases[0].selectors[1].val->Value()->As<core::constant::Scalar<tint::i32>>()->ValueOf());
 
     EXPECT_TRUE(cases[0].selectors[2].IsDefault());
 
@@ -960,9 +964,10 @@ TEST_F(IR_FromProgramTest, Switch_WithBreak) {
     auto cases = swtch->Cases();
     ASSERT_EQ(2u, cases.Length());
     ASSERT_EQ(1u, cases[0].selectors.Length());
-    ASSERT_TRUE(cases[0].selectors[0].val->Value()->Is<constant::Scalar<tint::i32>>());
-    EXPECT_EQ(0_i,
-              cases[0].selectors[0].val->Value()->As<constant::Scalar<tint::i32>>()->ValueOf());
+    ASSERT_TRUE(cases[0].selectors[0].val->Value()->Is<core::constant::Scalar<tint::i32>>());
+    EXPECT_EQ(
+        0_i,
+        cases[0].selectors[0].val->Value()->As<core::constant::Scalar<tint::i32>>()->ValueOf());
 
     ASSERT_EQ(1u, cases[1].selectors.Length());
     EXPECT_TRUE(cases[1].selectors[0].IsDefault());
@@ -1004,9 +1009,10 @@ TEST_F(IR_FromProgramTest, Switch_AllReturn) {
     auto cases = swtch->Cases();
     ASSERT_EQ(2u, cases.Length());
     ASSERT_EQ(1u, cases[0].selectors.Length());
-    ASSERT_TRUE(cases[0].selectors[0].val->Value()->Is<constant::Scalar<tint::i32>>());
-    EXPECT_EQ(0_i,
-              cases[0].selectors[0].val->Value()->As<constant::Scalar<tint::i32>>()->ValueOf());
+    ASSERT_TRUE(cases[0].selectors[0].val->Value()->Is<core::constant::Scalar<tint::i32>>());
+    EXPECT_EQ(
+        0_i,
+        cases[0].selectors[0].val->Value()->As<core::constant::Scalar<tint::i32>>()->ValueOf());
 
     ASSERT_EQ(1u, cases[1].selectors.Length());
     EXPECT_TRUE(cases[1].selectors[0].IsDefault());

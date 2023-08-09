@@ -23,7 +23,7 @@
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::constant {
+namespace tint::core::constant {
 
 /// Value is the interface to a compile-time evaluated expression value.
 class Value : public Castable<Value, Node> {
@@ -88,6 +88,6 @@ class Value : public Castable<Value, Node> {
     virtual std::variant<std::monostate, AInt, AFloat> InternalValue() const = 0;
 };
 
-}  // namespace tint::constant
+}  // namespace tint::core::constant
 
 #endif  // SRC_TINT_LANG_CORE_CONSTANT_VALUE_H_

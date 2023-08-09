@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/core/constant/eval_test.h"
 
-namespace tint::constant::test {
+namespace tint::core::constant::test {
 namespace {
 
 using namespace tint::core::fluent_types;  // NOLINT
@@ -2222,4 +2222,4 @@ TEST_F(ConstEvalTest, Struct_Array_Construct) {
 }
 
 }  // namespace
-}  // namespace tint::constant::test
+}  // namespace tint::core::constant::test

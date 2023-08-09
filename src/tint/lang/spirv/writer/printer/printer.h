@@ -117,7 +117,7 @@ class Printer {
     /// Get the result ID of the constant `constant`, emitting its instruction if necessary.
     /// @param constant the constant to get the ID for
     /// @returns the result ID of the constant
-    uint32_t Constant(const constant::Value* constant);
+    uint32_t Constant(const core::constant::Value* constant);
 
     /// Get the result ID of the OpConstantNull instruction for `type`, emitting it if necessary.
     /// @param type the type to get the ID for
@@ -303,7 +303,7 @@ class Printer {
     Hashmap<FunctionType, uint32_t, 8, FunctionType::Hasher> function_types_;
 
     /// The map of constants to their result IDs.
-    Hashmap<const constant::Value*, uint32_t, 16> constants_;
+    Hashmap<const core::constant::Value*, uint32_t, 16> constants_;
 
     /// The map of types to the result IDs of their OpConstantNull instructions.
     Hashmap<const type::Type*, uint32_t, 4> constant_nulls_;

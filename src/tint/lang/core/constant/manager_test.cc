@@ -25,7 +25,7 @@
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/u32.h"
 
-namespace tint::constant {
+namespace tint::core::constant {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -184,4 +184,4 @@ TEST_F(ManagerTest, WrapDoesntAffectInner_Types) {
 }
 
 }  // namespace
-}  // namespace tint::constant
+}  // namespace tint::core::constant

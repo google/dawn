@@ -363,46 +363,47 @@ void Disassembler::EmitValue(Value* val) {
     tint::Switch(
         val,
         [&](ir::Constant* constant) {
-            std::function<void(const constant::Value*)> emit = [&](const constant::Value* c) {
-                tint::Switch(
-                    c,
-                    [&](const constant::Scalar<AFloat>* scalar) {
-                        out_ << scalar->ValueAs<AFloat>().value;
-                    },
-                    [&](const constant::Scalar<AInt>* scalar) {
-                        out_ << scalar->ValueAs<AInt>().value;
-                    },
-                    [&](const constant::Scalar<i32>* scalar) {
-                        out_ << scalar->ValueAs<i32>().value << "i";
-                    },
-                    [&](const constant::Scalar<u32>* scalar) {
-                        out_ << scalar->ValueAs<u32>().value << "u";
-                    },
-                    [&](const constant::Scalar<f32>* scalar) {
-                        out_ << scalar->ValueAs<f32>().value << "f";
-                    },
-                    [&](const constant::Scalar<f16>* scalar) {
-                        out_ << scalar->ValueAs<f16>().value << "h";
-                    },
-                    [&](const constant::Scalar<bool>* scalar) {
-                        out_ << (scalar->ValueAs<bool>() ? "true" : "false");
-                    },
-                    [&](const constant::Splat* splat) {
-                        out_ << splat->Type()->FriendlyName() << "(";
-                        emit(splat->Index(0));
-                        out_ << ")";
-                    },
-                    [&](const constant::Composite* composite) {
-                        out_ << composite->Type()->FriendlyName() << "(";
-                        for (const auto* elem : composite->elements) {
-                            if (elem != composite->elements[0]) {
-                                out_ << ", ";
+            std::function<void(const core::constant::Value*)> emit =
+                [&](const core::constant::Value* c) {
+                    tint::Switch(
+                        c,
+                        [&](const core::constant::Scalar<AFloat>* scalar) {
+                            out_ << scalar->ValueAs<AFloat>().value;
+                        },
+                        [&](const core::constant::Scalar<AInt>* scalar) {
+                            out_ << scalar->ValueAs<AInt>().value;
+                        },
+                        [&](const core::constant::Scalar<i32>* scalar) {
+                            out_ << scalar->ValueAs<i32>().value << "i";
+                        },
+                        [&](const core::constant::Scalar<u32>* scalar) {
+                            out_ << scalar->ValueAs<u32>().value << "u";
+                        },
+                        [&](const core::constant::Scalar<f32>* scalar) {
+                            out_ << scalar->ValueAs<f32>().value << "f";
+                        },
+                        [&](const core::constant::Scalar<f16>* scalar) {
+                            out_ << scalar->ValueAs<f16>().value << "h";
+                        },
+                        [&](const core::constant::Scalar<bool>* scalar) {
+                            out_ << (scalar->ValueAs<bool>() ? "true" : "false");
+                        },
+                        [&](const core::constant::Splat* splat) {
+                            out_ << splat->Type()->FriendlyName() << "(";
+                            emit(splat->Index(0));
+                            out_ << ")";
+                        },
+                        [&](const core::constant::Composite* composite) {
+                            out_ << composite->Type()->FriendlyName() << "(";
+                            for (const auto* elem : composite->elements) {
+                                if (elem != composite->elements[0]) {
+                                    out_ << ", ";
+                                }
+                                emit(elem);
                             }
-                            emit(elem);
-                        }
-                        out_ << ")";
-                    });
-            };
+                            out_ << ")";
+                        });
+                };
             emit(constant->Value());
         },
         [&](ir::InstructionResult* rv) { out_ << "%" << IdOf(rv); },

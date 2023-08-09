@@ -48,8 +48,7 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::constant {
-
+namespace tint::core::constant {
 namespace {
 
 /// Returns the first element of a parameter pack
@@ -3718,4 +3717,4 @@ void Eval::AddNote(const std::string& msg, const Source& source) const {
     diags.add_note(diag::System::Constant, msg, source);
 }
 
-}  // namespace tint::constant
+}  // namespace tint::core::constant

@@ -251,7 +251,7 @@
 		<DisplayString>vec{width_}&lt;{*subtype_}&gt;</DisplayString>
 	</Type>
 
-	<Type Name="tint::constant::Value">
+	<Type Name="tint::core::connstant::Value">
 		<DisplayString>Type={*Type()} Value={Value()}</DisplayString>
 	</Type>
 
