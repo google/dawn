@@ -2071,8 +2071,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             return nullptr;
         }
 
-        auto overload_stage = match->info->const_eval_fn ? core::EvaluationStage::kConstant
-                                                         : core::EvaluationStage::kRuntime;
+        auto overload_stage = match->const_eval_fn ? core::EvaluationStage::kConstant
+                                                   : core::EvaluationStage::kRuntime;
 
         sem::CallTarget* target_sem = nullptr;
 
@@ -2113,7 +2113,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             if (!const_args) {
                 return nullptr;
             }
-            auto const_eval_fn = match->info->const_eval_fn;
+            auto const_eval_fn = match->const_eval_fn;
             if (auto r = (const_eval_.*const_eval_fn)(target_sem->ReturnType(), const_args.Get(),
                                                       expr->source)) {
                 value = r.Get();
@@ -2411,8 +2411,8 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         if (flags.Contains(OverloadFlag::kSupportsComputePipeline)) {
             supported_stages.Add(ast::PipelineStage::kCompute);
         }
-        auto eval_stage = overload->info->const_eval_fn ? core::EvaluationStage::kConstant
-                                                        : core::EvaluationStage::kRuntime;
+        auto eval_stage = overload->const_eval_fn ? core::EvaluationStage::kConstant
+                                                  : core::EvaluationStage::kRuntime;
         return builder_->create<sem::Builtin>(
             fn, overload->return_type, std::move(params), eval_stage, supported_stages,
             flags.Contains(OverloadFlag::kIsDeprecated), flags.Contains(OverloadFlag::kMustUse));
@@ -2446,7 +2446,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         if (!const_args) {
             return nullptr;
         }
-        auto const_eval_fn = overload->info->const_eval_fn;
+        auto const_eval_fn = overload->const_eval_fn;
         if (auto r = (const_eval_.*const_eval_fn)(target->ReturnType(), const_args.Get(),
                                                   expr->source)) {
             value = r.Get();
@@ -3552,7 +3552,7 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
         stage = core::EvaluationStage::kConstant;
     } else if (stage == core::EvaluationStage::kConstant) {
         // Both LHS and RHS have expressions that are constant evaluation stage.
-        auto const_eval_fn = overload->info->const_eval_fn;
+        auto const_eval_fn = overload->const_eval_fn;
         if (const_eval_fn) {  // Do we have a @const operator?
             // Yes. Perform any required abstract argument values implicit conversions to the
             // overload parameter types, and const-eval.
@@ -3658,8 +3658,7 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
             stage = expr->Stage();
             if (stage == core::EvaluationStage::kConstant) {
-                auto const_eval_fn = overload->info->const_eval_fn;
-                if (const_eval_fn) {
+                if (auto const_eval_fn = overload->const_eval_fn) {
                     if (auto r = (const_eval_.*const_eval_fn)(ty, Vector{expr->ConstantValue()},
                                                               expr->Declaration()->source)) {
                         value = r.Get();

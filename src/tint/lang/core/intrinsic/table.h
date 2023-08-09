@@ -83,6 +83,9 @@ class Table {
         /// The resolved overload parameters
         Vector<Parameter, 8> parameters;
 
+        /// The constant evaluation function
+        constant::Eval::Function const_eval_fn = nullptr;
+
         /// Equality operator
         /// @param other the overload to compare against
         /// @returns true if this overload and @p other are the same

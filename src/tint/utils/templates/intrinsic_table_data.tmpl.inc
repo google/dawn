@@ -21,6 +21,7 @@ See:
 namespace {{$.Namespace}} {
 namespace {
 
+using ConstEvalFunctionIndex = tint::core::intrinsic::ConstEvalFunctionIndex;
 using IntrinsicInfo = tint::core::intrinsic::IntrinsicInfo;
 using MatchState = tint::core::intrinsic::MatchState;
 using Number = tint::core::intrinsic::Number;
@@ -136,10 +137,26 @@ constexpr TemplateNumberInfo kTemplateNumbers[] = {
 static_assert(TemplateNumberIndex::CanIndex(kTemplateNumbers),
               "TemplateNumberIndex is not large enough to index kTemplateNumbers");
 
+constexpr constant::Eval::Function kConstEvalFunctions[] = {
+{{- range $i, $f := .ConstEvalFunctions }}
+  /* [{{$i}}] */ &constant::Eval::{{template "ExpandName" $f}},
+{{- end }}
+};
+
+static_assert(ConstEvalFunctionIndex::CanIndex(kConstEvalFunctions),
+              "ConstEvalFunctionIndex is not large enough to index kConstEvalFunctions");
+
 constexpr OverloadInfo kOverloads[] = {
 {{- range $i, $o := .Overloads }}
   {
     /* [{{$i}}] */
+    /* flags */ OverloadFlags(OverloadFlag::kIs{{Title $o.Kind}}
+{{-   range $i, $u := $o.CanBeUsedInStage.List -}}
+        , OverloadFlag::kSupports{{Title $u}}Pipeline
+{{-   end }}
+{{-   if $o.MustUse}}, OverloadFlag::kMustUse{{end}}
+{{-   if $o.IsDeprecated}}, OverloadFlag::kIsDeprecated{{end -}}
+    ),
     /* num_parameters */ {{$o.NumParameters}},
     /* num_template_types */ {{$o.NumTemplateTypes}},
     /* num_template_numbers */ {{$o.NumTemplateNumbers}},
@@ -163,17 +180,10 @@ constexpr OverloadInfo kOverloads[] = {
 {{-   if ge $o.ReturnNumberMatcherIndicesOffset 0 }} NumberMatcherIndicesIndex({{$o.ReturnNumberMatcherIndicesOffset}})
 {{-   else                                        }} NumberMatcherIndicesIndex(/* invalid */)
 {{-   end }},
-    /* flags */ OverloadFlags(OverloadFlag::kIs{{Title $o.Kind}}
-{{-   range $i, $u := $o.CanBeUsedInStage.List -}}
-        , OverloadFlag::kSupports{{Title $u}}Pipeline
-{{-   end }}
-{{-   if $o.MustUse}}, OverloadFlag::kMustUse{{end}}
-{{-   if $o.IsDeprecated}}, OverloadFlag::kIsDeprecated{{end -}}
-    ),
-    /* const eval */
-{{-   if $o.ConstEvalFunction }} {{template "ConstEvalFn" $o}},
-{{-   else                    }} nullptr,
-{{-   end }}
+    /* const_eval_fn */
+{{-   if ge $o.ConstEvalFunctionOffset 0 }} ConstEvalFunctionIndex({{$o.ConstEvalFunctionOffset}})
+{{-   else                               }} ConstEvalFunctionIndex(/* invalid */)
+{{-   end }},
   },
 {{- end }}
 };
@@ -254,6 +264,7 @@ const core::intrinsic::TableData {{$.Name}}{
   /* number_matchers */ kNumberMatchers,
   /* parameters */ kParameters,
   /* overloads */ kOverloads,
+  /* const_eval_functions */ kConstEvalFunctions,
   /* ctor_conv */ kConstructorsAndConverters,
   /* builtins */ kBuiltins,
   /* binary_plus */ kBinaryOperators[kBinaryOperatorPlus],
@@ -537,13 +548,4 @@ constexpr NumberMatcher kNumberMatchers[] = {
 {{-   else if eq . "%"  -}}Modulo
 {{-   else              -}}{{.}}
 {{-   end -}}
-{{- end -}}
-
-
-{{- /* ------------------------------------------------------------------ */ -}}
-{{-                           define "ConstEvalFn"                           -}}
-{{- /* ------------------------------------------------------------------ */ -}}
-  &constant::Eval::
-{{-   if eq .Kind "operator" -}}Op{{end -}}
-  {{template "ExpandName" .ConstEvalFunction}}
 {{- end -}}

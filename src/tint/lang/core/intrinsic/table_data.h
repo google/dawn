@@ -45,6 +45,7 @@ enum class TableIndexNamespace {
     kNumberMatcherIndices,
     kParameter,
     kOverload,
+    kConstEvalFunction,
 };
 
 /// A wrapper around an integer type, used to index intrinsic table data
@@ -126,6 +127,9 @@ using ParameterIndex = TableIndex<TableIndexNamespace::kParameter, uint16_t>;
 /// Index type used to index TableData::overloads
 using OverloadIndex = TableIndex<TableIndexNamespace::kOverload, uint16_t>;
 
+/// Index type used to index TableData::const_eval_functions
+using ConstEvalFunctionIndex = TableIndex<TableIndexNamespace::kConstEvalFunction, uint8_t>;
+
 /// Unique flag bits for overloads
 enum class OverloadFlag {
     kIsBuiltin,                 // The overload is a builtin ('fn')
@@ -174,6 +178,8 @@ struct TemplateNumberInfo {
 
 /// OverloadInfo describes a single function overload
 struct OverloadInfo {
+    /// The flags for the overload
+    const OverloadFlags flags;
     /// Total number of parameters for the overload
     const uint8_t num_parameters;
     /// Total number of template types for the overload
@@ -190,10 +196,8 @@ struct OverloadInfo {
     const TypeMatcherIndicesIndex return_type_matcher_indices;
     /// Index of a list of number matcher indices that are used to build the return type.
     const NumberMatcherIndicesIndex return_number_matcher_indices;
-    /// The flags for the overload
-    const OverloadFlags flags;
     /// The function used to evaluate the overload at shader-creation time.
-    const constant::Eval::Function const_eval_fn;
+    const ConstEvalFunctionIndex const_eval_fn;
 };
 
 /// IntrinsicInfo describes a builtin function or operator overload
@@ -526,6 +530,14 @@ struct TableData {
         return overloads[idx.value];
     }
 
+    /// @param idx the index of the constant::Eval::Function in the table data
+    /// @returns the constant::Eval::Function with the given index
+    template <typename T>
+    constant::Eval::Function operator[](
+        TableIndex<TableIndexNamespace::kConstEvalFunction, T> idx) const {
+        return idx.IsValid() ? const_eval_functions[idx.value] : nullptr;
+    }
+
     /// The list of type infos used by the intrinsic overloads
     const Slice<const TemplateTypeInfo> template_types;
     /// The list of number infos used by the intrinsic overloads
@@ -542,6 +554,8 @@ struct TableData {
     const Slice<const ParameterInfo> parameters;
     /// The list of overloads used by the intrinsics
     const Slice<const OverloadInfo> overloads;
+    /// The list of constant evaluation functions used by the intrinsics
+    const Slice<const constant::Eval::Function> const_eval_functions;
     /// The type constructor and convertor intrinsics
     const Slice<const IntrinsicInfo> ctor_conv;
     /// The builtin function intrinsic

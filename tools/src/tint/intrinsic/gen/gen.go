@@ -51,6 +51,7 @@ type IntrinsicTable struct {
 	UnaryOperators            []Intrinsic      // kUnaryOperators table content
 	BinaryOperators           []Intrinsic      // kBinaryOperators table content
 	ConstructorsAndConverters []Intrinsic      // kInitializersAndConverters table content
+	ConstEvalFunctions        []string         // kConstEvalFunctions table content
 }
 
 // TemplateType is used to create the C++ TemplateTypeInfo structure
@@ -111,6 +112,8 @@ type Overload struct {
 	// The matcher indices index into IntrinsicTable::NMatchers.
 	// These indices are consumed by the matchers themselves.
 	ReturnNumberMatcherIndicesOffset int
+	// Index into IntrinsicTable.ConstEvalFunctions.
+	ConstEvalFunctionOffset int
 	// StageUses describes the stages an overload can be used in
 	CanBeUsedInStage sem.StageUses
 	// True if the overload is marked as @must_use
@@ -119,8 +122,6 @@ type Overload struct {
 	IsDeprecated bool
 	// The kind of overload
 	Kind string
-	// The function name used to evaluate the overload at shader-creation time
-	ConstEvalFunction string
 }
 
 // Intrinsic is used to create the C++ IntrinsicInfo structure
@@ -139,12 +140,13 @@ type IntrinsicTableBuilder struct {
 	// Lookup tables.
 	// These are packed (compressed) once all the entries have been added.
 	lut struct {
-		typeMatcherIndices   lut.LUT[int]
-		numberMatcherIndices lut.LUT[int]
-		templateTypes        lut.LUT[TemplateType]
-		templateNumbers      lut.LUT[TemplateNumber]
-		parameters           lut.LUT[Parameter]
-		overloads            lut.LUT[Overload]
+		typeMatcherIndices       lut.LUT[int]
+		numberMatcherIndices     lut.LUT[int]
+		templateTypes            lut.LUT[TemplateType]
+		templateNumbers          lut.LUT[TemplateNumber]
+		constEvalFunctionIndices lut.LUT[string]
+		parameters               lut.LUT[Parameter]
+		overloads                lut.LUT[Overload]
 	}
 }
 
@@ -175,6 +177,8 @@ type overloadBuilder struct {
 	parameterBuilders []parameterBuilder
 	// Index to the first parameter in IntrinsicTable.Parameters
 	parametersOffset *int
+	// Index into IntrinsicTable.ConstEvalFunctions
+	constEvalFunctionOffset *int
 	// Index into IntrinsicTable.TypeMatcherIndices, beginning the list of
 	// matchers required to match the return type.
 	// The matcher indices index into IntrinsicTable::TMatchers.
@@ -227,6 +231,7 @@ func (b *IntrinsicTableBuilder) newOverloadBuilder(o *sem.Overload) *overloadBui
 // - b.parameterBuilders
 // - b.returnTypeMatcherIndicesOffset
 // - b.returnNumberMatcherIndicesOffset
+// - b.constEvalFunctionOffset
 func (b *overloadBuilder) processStage0() error {
 	b.templateTypes = make([]TemplateType, len(b.overload.TemplateTypes))
 	for i, t := range b.overload.TemplateTypes {
@@ -293,6 +298,10 @@ func (b *overloadBuilder) processStage0() error {
 		}
 	}
 
+	if b.overload.ConstEvalFunction != "" {
+		b.constEvalFunctionOffset = b.lut.constEvalFunctionIndices.Add([]string{b.overload.ConstEvalFunction})
+	}
+
 	return nil
 }
 
@@ -325,13 +334,13 @@ func (b *overloadBuilder) build() (Overload, error) {
 		TemplateTypesOffset:              loadOrMinusOne(b.templateTypesOffset),
 		TemplateNumbersOffset:            loadOrMinusOne(b.templateNumbersOffset),
 		ParametersOffset:                 loadOrMinusOne(b.parametersOffset),
+		ConstEvalFunctionOffset:          loadOrMinusOne(b.constEvalFunctionOffset),
 		ReturnTypeMatcherIndicesOffset:   loadOrMinusOne(b.returnTypeMatcherIndicesOffset),
 		ReturnNumberMatcherIndicesOffset: loadOrMinusOne(b.returnNumberMatcherIndicesOffset),
 		CanBeUsedInStage:                 b.overload.CanBeUsedInStage,
 		MustUse:                          b.overload.MustUse,
 		IsDeprecated:                     b.overload.IsDeprecated,
 		Kind:                             string(b.overload.Decl.Kind),
-		ConstEvalFunction:                b.overload.ConstEvalFunction,
 	}, nil
 }
 
@@ -442,6 +451,7 @@ func BuildIntrinsicTable(s *sem.Sem) (*IntrinsicTable, error) {
 	b.lut.numberMatcherIndices = lut.New[int]()
 	b.lut.templateTypes = lut.New[TemplateType]()
 	b.lut.templateNumbers = lut.New[TemplateNumber]()
+	b.lut.constEvalFunctionIndices = lut.New[string]()
 	for _, b := range overloadBuilders {
 		b.processStage0()
 	}
@@ -451,11 +461,13 @@ func BuildIntrinsicTable(s *sem.Sem) (*IntrinsicTable, error) {
 	b.NumberMatcherIndices = b.lut.numberMatcherIndices.Compact()
 	b.TemplateTypes = b.lut.templateTypes.Compact()
 	b.TemplateNumbers = b.lut.templateNumbers.Compact()
+	b.ConstEvalFunctions = b.lut.constEvalFunctionIndices.Compact()
 	// Clear the compacted LUTs to prevent use-after-compaction
 	b.lut.typeMatcherIndices = nil
 	b.lut.numberMatcherIndices = nil
 	b.lut.templateTypes = nil
 	b.lut.templateNumbers = nil
+	b.lut.constEvalFunctionIndices = nil
 
 	// Perform the 'stage-1' processing of the overloads
 	b.lut.parameters = lut.New[Parameter]()

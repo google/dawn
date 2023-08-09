@@ -171,21 +171,21 @@ class Eval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpComplement(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result Complement(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Unary minus operator '-'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpUnaryMinus(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result UnaryMinus(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Unary not operator '!'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpNot(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result Not(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     ////////////////////////////////////////////////////////////////////////////
     // Binary Operators
@@ -196,157 +196,149 @@ class Eval {
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpPlus(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result Plus(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Minus operator '-'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpMinus(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result Minus(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Multiply operator '*' for the same type on the LHS and RHS
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpMultiply(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result Multiply(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Multiply operator '*' for matCxR<T> * vecC<T>
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpMultiplyMatVec(const type::Type* ty,
-                            VectorRef<const Value*> args,
-                            const Source& source);
+    Result MultiplyMatVec(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Multiply operator '*' for vecR<T> * matCxR<T>
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpMultiplyVecMat(const type::Type* ty,
-                            VectorRef<const Value*> args,
-                            const Source& source);
+    Result MultiplyVecMat(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Multiply operator '*' for matKxR<T> * matCxK<T>
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpMultiplyMatMat(const type::Type* ty,
-                            VectorRef<const Value*> args,
-                            const Source& source);
+    Result MultiplyMatMat(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Divide operator '/'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpDivide(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result Divide(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Modulo operator '%'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpModulo(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result Modulo(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Equality operator '=='
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpEqual(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result Equal(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Inequality operator '!='
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpNotEqual(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result NotEqual(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Less than operator '<'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpLessThan(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result LessThan(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Greater than operator '>'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpGreaterThan(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result GreaterThan(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Less than or equal operator '<='
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpLessThanEqual(const type::Type* ty,
-                           VectorRef<const Value*> args,
-                           const Source& source);
+    Result LessThanEqual(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Greater than or equal operator '>='
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpGreaterThanEqual(const type::Type* ty,
-                              VectorRef<const Value*> args,
-                              const Source& source);
+    Result GreaterThanEqual(const type::Type* ty,
+                            VectorRef<const Value*> args,
+                            const Source& source);
 
     /// Logical and operator '&&'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpLogicalAnd(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result LogicalAnd(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Logical or operator '||'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpLogicalOr(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result LogicalOr(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Bitwise and operator '&'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpAnd(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result And(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Bitwise or operator '|'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpOr(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result Or(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Bitwise xor operator '^'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpXor(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result Xor(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Bitwise shift left operator '<<'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpShiftLeft(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result ShiftLeft(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     /// Bitwise shift right operator '<<'
     /// @param ty the expression type
     /// @param args the input arguments
     /// @param source the source location
     /// @return the result value, or null if the value cannot be calculated
-    Result OpShiftRight(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
+    Result ShiftRight(const type::Type* ty, VectorRef<const Value*> args, const Source& source);
 
     ////////////////////////////////////////////////////////////////////////////
     // Builtins

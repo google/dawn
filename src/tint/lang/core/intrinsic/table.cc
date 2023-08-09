@@ -494,7 +494,8 @@ Result<Table::Overload> Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,
         return_type = types.void_();
     }
 
-    return Table::Overload{match.overload, return_type, std::move(match.parameters)};
+    return Table::Overload{match.overload, return_type, std::move(match.parameters),
+                           data[match.overload->const_eval_fn]};
 }
 
 Impl::Candidate Impl::ScoreOverload(const OverloadInfo& overload,

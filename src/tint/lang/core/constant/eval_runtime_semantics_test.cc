@@ -37,7 +37,7 @@ class ConstEvalRuntimeSemanticsTest : public ConstEvalTest {
 TEST_F(ConstEvalRuntimeSemanticsTest, Add_AInt_Overflow) {
     auto* a = constants.Get(AInt::Highest());
     auto* b = constants.Get(AInt(1));
-    auto result = eval.OpPlus(a->Type(), Vector{a, b}, {});
+    auto result = eval.Plus(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<AInt>(), 0);
     EXPECT_EQ(error(),
@@ -47,7 +47,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Add_AInt_Overflow) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Add_AFloat_Overflow) {
     auto* a = constants.Get(AFloat::Highest());
     auto* b = constants.Get(AFloat::Highest());
-    auto result = eval.OpPlus(a->Type(), Vector{a, b}, {});
+    auto result = eval.Plus(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<AFloat>(), 0.f);
     EXPECT_EQ(
@@ -58,7 +58,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Add_AFloat_Overflow) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Add_F32_Overflow) {
     auto* a = constants.Get(f32::Highest());
     auto* b = constants.Get(f32::Highest());
-    auto result = eval.OpPlus(a->Type(), Vector{a, b}, {});
+    auto result = eval.Plus(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<f32>(), 0.f);
     EXPECT_EQ(
@@ -69,7 +69,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Add_F32_Overflow) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Sub_AInt_Overflow) {
     auto* a = constants.Get(AInt::Lowest());
     auto* b = constants.Get(AInt(1));
-    auto result = eval.OpMinus(a->Type(), Vector{a, b}, {});
+    auto result = eval.Minus(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<AInt>(), 0);
     EXPECT_EQ(error(),
@@ -79,7 +79,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Sub_AInt_Overflow) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Sub_AFloat_Overflow) {
     auto* a = constants.Get(AFloat::Lowest());
     auto* b = constants.Get(AFloat::Highest());
-    auto result = eval.OpMinus(a->Type(), Vector{a, b}, {});
+    auto result = eval.Minus(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<AFloat>(), 0.f);
     EXPECT_EQ(
@@ -90,7 +90,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Sub_AFloat_Overflow) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Sub_F32_Overflow) {
     auto* a = constants.Get(f32::Lowest());
     auto* b = constants.Get(f32::Highest());
-    auto result = eval.OpMinus(a->Type(), Vector{a, b}, {});
+    auto result = eval.Minus(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<f32>(), 0.f);
     EXPECT_EQ(
@@ -101,7 +101,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Sub_F32_Overflow) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Mul_AInt_Overflow) {
     auto* a = constants.Get(AInt::Highest());
     auto* b = constants.Get(AInt(2));
-    auto result = eval.OpMultiply(a->Type(), Vector{a, b}, {});
+    auto result = eval.Multiply(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<AInt>(), 0);
     EXPECT_EQ(error(),
@@ -111,7 +111,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Mul_AInt_Overflow) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Mul_AFloat_Overflow) {
     auto* a = constants.Get(AFloat::Highest());
     auto* b = constants.Get(AFloat::Highest());
-    auto result = eval.OpMultiply(a->Type(), Vector{a, b}, {});
+    auto result = eval.Multiply(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<AFloat>(), 0.f);
     EXPECT_EQ(
@@ -122,7 +122,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Mul_AFloat_Overflow) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Mul_F32_Overflow) {
     auto* a = constants.Get(f32::Highest());
     auto* b = constants.Get(f32::Highest());
-    auto result = eval.OpMultiply(a->Type(), Vector{a, b}, {});
+    auto result = eval.Multiply(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<f32>(), 0.f);
     EXPECT_EQ(
@@ -133,7 +133,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Mul_F32_Overflow) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Div_AInt_ZeroDenominator) {
     auto* a = constants.Get(AInt(42));
     auto* b = constants.Get(AInt(0));
-    auto result = eval.OpDivide(a->Type(), Vector{a, b}, {});
+    auto result = eval.Divide(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<AInt>(), 42);
     EXPECT_EQ(error(), R"(warning: '42 / 0' cannot be represented as 'abstract-int')");
@@ -142,7 +142,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Div_AInt_ZeroDenominator) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Div_I32_ZeroDenominator) {
     auto* a = constants.Get(i32(42));
     auto* b = constants.Get(i32(0));
-    auto result = eval.OpDivide(a->Type(), Vector{a, b}, {});
+    auto result = eval.Divide(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<i32>(), 42);
     EXPECT_EQ(error(), R"(warning: '42 / 0' cannot be represented as 'i32')");
@@ -151,7 +151,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Div_I32_ZeroDenominator) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Div_U32_ZeroDenominator) {
     auto* a = constants.Get(u32(42));
     auto* b = constants.Get(u32(0));
-    auto result = eval.OpDivide(a->Type(), Vector{a, b}, {});
+    auto result = eval.Divide(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<u32>(), 42);
     EXPECT_EQ(error(), R"(warning: '42 / 0' cannot be represented as 'u32')");
@@ -160,7 +160,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Div_U32_ZeroDenominator) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Div_AFloat_ZeroDenominator) {
     auto* a = constants.Get(AFloat(42));
     auto* b = constants.Get(AFloat(0));
-    auto result = eval.OpDivide(a->Type(), Vector{a, b}, {});
+    auto result = eval.Divide(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<AFloat>(), 42.f);
     EXPECT_EQ(error(), R"(warning: '42.0 / 0.0' cannot be represented as 'abstract-float')");
@@ -169,7 +169,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Div_AFloat_ZeroDenominator) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Div_F32_ZeroDenominator) {
     auto* a = constants.Get(f32(42));
     auto* b = constants.Get(f32(0));
-    auto result = eval.OpDivide(a->Type(), Vector{a, b}, {});
+    auto result = eval.Divide(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<f32>(), 42.f);
     EXPECT_EQ(error(), R"(warning: '42.0 / 0.0' cannot be represented as 'f32')");
@@ -178,7 +178,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Div_F32_ZeroDenominator) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Div_I32_MostNegativeByMinInt) {
     auto* a = constants.Get(i32::Lowest());
     auto* b = constants.Get(i32(-1));
-    auto result = eval.OpDivide(a->Type(), Vector{a, b}, {});
+    auto result = eval.Divide(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<i32>(), i32::Lowest());
     EXPECT_EQ(error(), R"(warning: '-2147483648 / -1' cannot be represented as 'i32')");
@@ -187,7 +187,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Div_I32_MostNegativeByMinInt) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Mod_AInt_ZeroDenominator) {
     auto* a = constants.Get(AInt(42));
     auto* b = constants.Get(AInt(0));
-    auto result = eval.OpModulo(a->Type(), Vector{a, b}, {});
+    auto result = eval.Modulo(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<AInt>(), 0);
     EXPECT_EQ(error(), R"(warning: '42 % 0' cannot be represented as 'abstract-int')");
@@ -196,7 +196,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Mod_AInt_ZeroDenominator) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Mod_I32_ZeroDenominator) {
     auto* a = constants.Get(i32(42));
     auto* b = constants.Get(i32(0));
-    auto result = eval.OpModulo(a->Type(), Vector{a, b}, {});
+    auto result = eval.Modulo(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<i32>(), 0);
     EXPECT_EQ(error(), R"(warning: '42 % 0' cannot be represented as 'i32')");
@@ -205,7 +205,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Mod_I32_ZeroDenominator) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Mod_U32_ZeroDenominator) {
     auto* a = constants.Get(u32(42));
     auto* b = constants.Get(u32(0));
-    auto result = eval.OpModulo(a->Type(), Vector{a, b}, {});
+    auto result = eval.Modulo(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<u32>(), 0);
     EXPECT_EQ(error(), R"(warning: '42 % 0' cannot be represented as 'u32')");
@@ -214,7 +214,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Mod_U32_ZeroDenominator) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Mod_AFloat_ZeroDenominator) {
     auto* a = constants.Get(AFloat(42));
     auto* b = constants.Get(AFloat(0));
-    auto result = eval.OpModulo(a->Type(), Vector{a, b}, {});
+    auto result = eval.Modulo(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<AFloat>(), 0.f);
     EXPECT_EQ(error(), R"(warning: '42.0 % 0.0' cannot be represented as 'abstract-float')");
@@ -223,7 +223,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Mod_AFloat_ZeroDenominator) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Mod_F32_ZeroDenominator) {
     auto* a = constants.Get(f32(42));
     auto* b = constants.Get(f32(0));
-    auto result = eval.OpModulo(a->Type(), Vector{a, b}, {});
+    auto result = eval.Modulo(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<f32>(), 0.f);
     EXPECT_EQ(error(), R"(warning: '42.0 % 0.0' cannot be represented as 'f32')");
@@ -232,7 +232,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Mod_F32_ZeroDenominator) {
 TEST_F(ConstEvalRuntimeSemanticsTest, Mod_I32_MostNegativeByMinInt) {
     auto* a = constants.Get(i32::Lowest());
     auto* b = constants.Get(i32(-1));
-    auto result = eval.OpModulo(a->Type(), Vector{a, b}, {});
+    auto result = eval.Modulo(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<i32>(), 0);
     EXPECT_EQ(error(), R"(warning: '-2147483648 % -1' cannot be represented as 'i32')");
@@ -241,7 +241,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, Mod_I32_MostNegativeByMinInt) {
 TEST_F(ConstEvalRuntimeSemanticsTest, ShiftLeft_AInt_SignChange) {
     auto* a = constants.Get(AInt(0x0FFFFFFFFFFFFFFFll));
     auto* b = constants.Get(u32(9));
-    auto result = eval.OpShiftLeft(a->Type(), Vector{a, b}, {});
+    auto result = eval.ShiftLeft(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<AInt>(), static_cast<AInt>(0x0FFFFFFFFFFFFFFFull << 9));
     EXPECT_EQ(error(), R"(warning: shift left operation results in sign change)");
@@ -250,7 +250,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, ShiftLeft_AInt_SignChange) {
 TEST_F(ConstEvalRuntimeSemanticsTest, ShiftLeft_I32_SignChange) {
     auto* a = constants.Get(i32(0x0FFFFFFF));
     auto* b = constants.Get(u32(9));
-    auto result = eval.OpShiftLeft(a->Type(), Vector{a, b}, {});
+    auto result = eval.ShiftLeft(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<i32>(), static_cast<i32>(0x0FFFFFFFu << 9));
     EXPECT_EQ(error(), R"(warning: shift left operation results in sign change)");
@@ -259,7 +259,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, ShiftLeft_I32_SignChange) {
 TEST_F(ConstEvalRuntimeSemanticsTest, ShiftLeft_I32_MoreThanBitWidth) {
     auto* a = constants.Get(i32(0x1));
     auto* b = constants.Get(u32(33));
-    auto result = eval.OpShiftLeft(a->Type(), Vector{a, b}, {});
+    auto result = eval.ShiftLeft(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<i32>(), 2);
     EXPECT_EQ(
@@ -270,7 +270,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, ShiftLeft_I32_MoreThanBitWidth) {
 TEST_F(ConstEvalRuntimeSemanticsTest, ShiftLeft_U32_MoreThanBitWidth) {
     auto* a = constants.Get(u32(0x1));
     auto* b = constants.Get(u32(33));
-    auto result = eval.OpShiftLeft(a->Type(), Vector{a, b}, {});
+    auto result = eval.ShiftLeft(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<u32>(), 2);
     EXPECT_EQ(
@@ -281,7 +281,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, ShiftLeft_U32_MoreThanBitWidth) {
 TEST_F(ConstEvalRuntimeSemanticsTest, ShiftRight_I32_MoreThanBitWidth) {
     auto* a = constants.Get(i32(0x2));
     auto* b = constants.Get(u32(33));
-    auto result = eval.OpShiftRight(a->Type(), Vector{a, b}, {});
+    auto result = eval.ShiftRight(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<i32>(), 1);
     EXPECT_EQ(
@@ -292,7 +292,7 @@ TEST_F(ConstEvalRuntimeSemanticsTest, ShiftRight_I32_MoreThanBitWidth) {
 TEST_F(ConstEvalRuntimeSemanticsTest, ShiftRight_U32_MoreThanBitWidth) {
     auto* a = constants.Get(u32(0x2));
     auto* b = constants.Get(u32(33));
-    auto result = eval.OpShiftRight(a->Type(), Vector{a, b}, {});
+    auto result = eval.ShiftRight(a->Type(), Vector{a, b}, {});
     ASSERT_TRUE(result);
     EXPECT_EQ(result.Get()->ValueAs<u32>(), 1);
     EXPECT_EQ(

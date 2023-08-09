@@ -517,7 +517,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_ConstantEval) {
                                 EvaluationStage::kConstant, Source{});
     ASSERT_TRUE(result) << Diagnostics().str();
     ASSERT_EQ(Diagnostics().str(), "");
-    EXPECT_NE(result->info->const_eval_fn, nullptr);
+    EXPECT_NE(result->const_eval_fn, nullptr);
     EXPECT_EQ(result->return_type, af);
     ASSERT_EQ(result->parameters.Length(), 3u);
     EXPECT_EQ(result->parameters[0].type, af);
@@ -533,7 +533,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_RuntimeEval) {
                                 EvaluationStage::kRuntime, Source{});
     ASSERT_TRUE(result) << Diagnostics().str();
     ASSERT_EQ(Diagnostics().str(), "");
-    EXPECT_NE(result->info->const_eval_fn, nullptr);
+    EXPECT_NE(result->const_eval_fn, nullptr);
     EXPECT_TRUE(result->return_type->Is<type::F32>());
     ASSERT_EQ(result->parameters.Length(), 3u);
     EXPECT_TRUE(result->parameters[0].type->Is<type::F32>());
@@ -547,7 +547,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Binary_ConstantEval) {
     auto result = table->Lookup(core::BinaryOp::kShiftLeft, ai, u32, EvaluationStage::kConstant,
                                 Source{}, false);
     ASSERT_TRUE(result) << Diagnostics().str();
-    ASSERT_NE(result->info->const_eval_fn, nullptr) << Diagnostics().str();
+    ASSERT_NE(result->const_eval_fn, nullptr) << Diagnostics().str();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_EQ(result->return_type, ai);
     EXPECT_EQ(result->parameters[0].type, ai);
@@ -560,7 +560,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Binary_RuntimeEval) {
     auto result = table->Lookup(core::BinaryOp::kShiftLeft, ai, u32, EvaluationStage::kRuntime,
                                 Source{}, false);
     ASSERT_TRUE(result) << Diagnostics().str();
-    ASSERT_NE(result->info->const_eval_fn, nullptr) << Diagnostics().str();
+    ASSERT_NE(result->const_eval_fn, nullptr) << Diagnostics().str();
     ASSERT_EQ(Diagnostics().str(), "");
     EXPECT_TRUE(result->return_type->Is<type::I32>());
     EXPECT_TRUE(result->parameters[0].type->Is<type::I32>());
@@ -767,7 +767,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicit) {
     EXPECT_EQ(result->parameters[0].type, i32);
     EXPECT_EQ(result->parameters[1].type, i32);
     EXPECT_EQ(result->parameters[2].type, i32);
-    EXPECT_NE(result->info->const_eval_fn, nullptr);
+    EXPECT_NE(result->const_eval_fn, nullptr);
 }
 
 TEST_F(IntrinsicTableTest, MatchTypeInitializerExplicit) {
@@ -782,7 +782,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerExplicit) {
     EXPECT_EQ(result->parameters[0].type, i32);
     EXPECT_EQ(result->parameters[1].type, i32);
     EXPECT_EQ(result->parameters[2].type, i32);
-    EXPECT_NE(result->info->const_eval_fn, nullptr);
+    EXPECT_NE(result->const_eval_fn, nullptr);
 }
 
 TEST_F(IntrinsicTableTest, MismatchTypeInitializerImplicit) {
@@ -849,7 +849,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitVecFromVecAbstract) {
     EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 1u);
     EXPECT_EQ(result->parameters[0].type, vec3_ai);
-    EXPECT_NE(result->info->const_eval_fn, nullptr);
+    EXPECT_NE(result->const_eval_fn, nullptr);
 }
 
 TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitMatFromVec) {
@@ -865,7 +865,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitMatFromVec) {
     ASSERT_EQ(result->parameters.Length(), 2u);
     EXPECT_TYPE(result->parameters[0].type, vec2_af);
     EXPECT_TYPE(result->parameters[1].type, vec2_af);
-    EXPECT_NE(result->info->const_eval_fn, nullptr);
+    EXPECT_NE(result->const_eval_fn, nullptr);
 }
 
 TEST_F(IntrinsicTableTest, MatchTypeInitializer_ConstantEval) {
@@ -874,14 +874,14 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializer_ConstantEval) {
     auto result = table->Lookup(CtorConv::kVec3, nullptr, Vector{ai, ai, ai},
                                 EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_TRUE(result) << Diagnostics().str();
-    EXPECT_NE(result->info->const_eval_fn, nullptr);
+    EXPECT_NE(result->const_eval_fn, nullptr);
     EXPECT_EQ(result->return_type, vec3_ai);
     EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 3u);
     EXPECT_EQ(result->parameters[0].type, ai);
     EXPECT_EQ(result->parameters[1].type, ai);
     EXPECT_EQ(result->parameters[2].type, ai);
-    EXPECT_NE(result->info->const_eval_fn, nullptr);
+    EXPECT_NE(result->const_eval_fn, nullptr);
 }
 
 TEST_F(IntrinsicTableTest, MatchTypeInitializer_RuntimeEval) {
@@ -891,14 +891,14 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializer_RuntimeEval) {
     auto* i32 = create<type::I32>();
     auto* vec3_i32 = create<type::Vector>(i32, 3u);
     ASSERT_TRUE(result) << Diagnostics().str();
-    EXPECT_NE(result->info->const_eval_fn, nullptr);
+    EXPECT_NE(result->const_eval_fn, nullptr);
     EXPECT_EQ(result->return_type, vec3_i32);
     EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 3u);
     EXPECT_EQ(result->parameters[0].type, i32);
     EXPECT_EQ(result->parameters[1].type, i32);
     EXPECT_EQ(result->parameters[2].type, i32);
-    EXPECT_NE(result->info->const_eval_fn, nullptr);
+    EXPECT_NE(result->const_eval_fn, nullptr);
 }
 
 TEST_F(IntrinsicTableTest, MatchTypeConversion) {
@@ -952,7 +952,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion_ConstantEval) {
     auto result = table->Lookup(CtorConv::kVec3, af, Vector{vec3_ai}, EvaluationStage::kConstant,
                                 Source{{12, 34}});
     ASSERT_TRUE(result) << Diagnostics().str();
-    EXPECT_NE(result->info->const_eval_fn, nullptr);
+    EXPECT_NE(result->const_eval_fn, nullptr);
     // NOTE: Conversions are explicit, so there's no way to have it return abstracts
     EXPECT_EQ(result->return_type, vec3_f32);
     EXPECT_FALSE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
@@ -969,7 +969,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion_RuntimeEval) {
     auto result = table->Lookup(CtorConv::kVec3, af, Vector{vec3_ai}, EvaluationStage::kRuntime,
                                 Source{{12, 34}});
     ASSERT_TRUE(result) << Diagnostics().str();
-    EXPECT_NE(result->info->const_eval_fn, nullptr);
+    EXPECT_NE(result->const_eval_fn, nullptr);
     EXPECT_EQ(result->return_type, vec3_f32);
     EXPECT_FALSE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 1u);
