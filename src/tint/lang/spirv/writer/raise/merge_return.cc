@@ -154,7 +154,7 @@ struct State {
                 if (holds_return_.Contains(ctrl)) {
                     // Control instruction transitively holds a return.
                     ctrl->ForeachBlock([&](ir::Block* ctrl_block) { ProcessBlock(ctrl_block); });
-                    if (next && next != fn_return &&
+                    if (next && (next != fn_return || fn_return->Value()) &&
                         !tint::IsAnyOf<ir::Exit, ir::Unreachable>(next)) {
                         inner_if = CreateIfContinueExecution(ctrl);
                     }
