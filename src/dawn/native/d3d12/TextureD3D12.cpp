@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <utility>
 
+#include "absl/numeric/bits.h"
 #include "dawn/common/Constants.h"
 #include "dawn/common/Math.h"
 #include "dawn/native/DynamicUploader.h"
@@ -450,13 +451,7 @@ void Texture::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext
 
     std::vector<D3D12_RESOURCE_BARRIER> barriers;
 
-    // TODO(enga): Consider adding a Count helper.
-    uint32_t aspectCount = 0;
-    for (Aspect aspect : IterateEnumMask(range.aspects)) {
-        aspectCount++;
-        DAWN_UNUSED(aspect);
-    }
-
+    uint32_t aspectCount = absl::popcount(static_cast<uint8_t>(range.aspects));
     barriers.reserve(range.levelCount * range.layerCount * aspectCount);
 
     TransitionUsageAndGetResourceBarrier(commandContext, &barriers, newState, range);
