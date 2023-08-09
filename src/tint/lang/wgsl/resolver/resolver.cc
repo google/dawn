@@ -102,7 +102,7 @@ namespace tint::resolver {
 namespace {
 
 using CtorConvIntrinsic = core::intrinsic::CtorConv;
-using OverloadFlag = core::intrinsic::TableData::OverloadFlag;
+using OverloadFlag = core::intrinsic::OverloadFlag;
 
 constexpr int64_t kMaxArrayElementCount = 65536;
 constexpr uint32_t kMaxStatementDepth = 127;

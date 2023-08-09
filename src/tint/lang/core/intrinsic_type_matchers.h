@@ -42,70 +42,70 @@
 
 namespace tint::core {
 
-inline bool match_bool(intrinsic::TableData::MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<intrinsic::TableData::Any, type::Bool>();
+inline bool match_bool(intrinsic::MatchState&, const type::Type* ty) {
+    return ty->IsAnyOf<intrinsic::Any, type::Bool>();
 }
 
-inline const type::AbstractFloat* build_fa(intrinsic::TableData::MatchState& state) {
+inline const type::AbstractFloat* build_fa(intrinsic::MatchState& state) {
     return state.types.AFloat();
 }
 
-inline bool match_fa(intrinsic::TableData::MatchState& state, const type::Type* ty) {
+inline bool match_fa(intrinsic::MatchState& state, const type::Type* ty) {
     return (state.earliest_eval_stage <= EvaluationStage::kConstant) &&
-           ty->IsAnyOf<intrinsic::TableData::Any, type::AbstractNumeric>();
+           ty->IsAnyOf<intrinsic::Any, type::AbstractNumeric>();
 }
 
-inline const type::AbstractInt* build_ia(intrinsic::TableData::MatchState& state) {
+inline const type::AbstractInt* build_ia(intrinsic::MatchState& state) {
     return state.types.AInt();
 }
 
-inline bool match_ia(intrinsic::TableData::MatchState& state, const type::Type* ty) {
+inline bool match_ia(intrinsic::MatchState& state, const type::Type* ty) {
     return (state.earliest_eval_stage <= EvaluationStage::kConstant) &&
-           ty->IsAnyOf<intrinsic::TableData::Any, type::AbstractInt>();
+           ty->IsAnyOf<intrinsic::Any, type::AbstractInt>();
 }
 
-inline const type::Bool* build_bool(intrinsic::TableData::MatchState& state) {
+inline const type::Bool* build_bool(intrinsic::MatchState& state) {
     return state.types.bool_();
 }
 
-inline const type::F16* build_f16(intrinsic::TableData::MatchState& state) {
+inline const type::F16* build_f16(intrinsic::MatchState& state) {
     return state.types.f16();
 }
 
-inline bool match_f16(intrinsic::TableData::MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<intrinsic::TableData::Any, type::F16, type::AbstractNumeric>();
+inline bool match_f16(intrinsic::MatchState&, const type::Type* ty) {
+    return ty->IsAnyOf<intrinsic::Any, type::F16, type::AbstractNumeric>();
 }
 
-inline const type::F32* build_f32(intrinsic::TableData::MatchState& state) {
+inline const type::F32* build_f32(intrinsic::MatchState& state) {
     return state.types.f32();
 }
 
-inline bool match_f32(intrinsic::TableData::MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<intrinsic::TableData::Any, type::F32, type::AbstractNumeric>();
+inline bool match_f32(intrinsic::MatchState&, const type::Type* ty) {
+    return ty->IsAnyOf<intrinsic::Any, type::F32, type::AbstractNumeric>();
 }
 
-inline const type::I32* build_i32(intrinsic::TableData::MatchState& state) {
+inline const type::I32* build_i32(intrinsic::MatchState& state) {
     return state.types.i32();
 }
 
-inline bool match_i32(intrinsic::TableData::MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<intrinsic::TableData::Any, type::I32, type::AbstractInt>();
+inline bool match_i32(intrinsic::MatchState&, const type::Type* ty) {
+    return ty->IsAnyOf<intrinsic::Any, type::I32, type::AbstractInt>();
 }
 
-inline const type::U32* build_u32(intrinsic::TableData::MatchState& state) {
+inline const type::U32* build_u32(intrinsic::MatchState& state) {
     return state.types.u32();
 }
 
-inline bool match_u32(intrinsic::TableData::MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<intrinsic::TableData::Any, type::U32, type::AbstractInt>();
+inline bool match_u32(intrinsic::MatchState&, const type::Type* ty) {
+    return ty->IsAnyOf<intrinsic::Any, type::U32, type::AbstractInt>();
 }
 
-inline bool match_vec(intrinsic::TableData::MatchState&,
+inline bool match_vec(intrinsic::MatchState&,
                       const type::Type* ty,
-                      intrinsic::TableData::Number& N,
+                      intrinsic::Number& N,
                       const type::Type*& T) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
-        N = intrinsic::TableData::Number::any;
+    if (ty->Is<intrinsic::Any>()) {
+        N = intrinsic::Number::any;
         T = ty;
         return true;
     }
@@ -119,10 +119,8 @@ inline bool match_vec(intrinsic::TableData::MatchState&,
 }
 
 template <uint32_t N>
-inline bool match_vec(intrinsic::TableData::MatchState&,
-                      const type::Type* ty,
-                      const type::Type*& T) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
+inline bool match_vec(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
+    if (ty->Is<intrinsic::Any>()) {
         T = ty;
         return true;
     }
@@ -136,15 +134,14 @@ inline bool match_vec(intrinsic::TableData::MatchState&,
     return false;
 }
 
-inline const type::Vector* build_vec(intrinsic::TableData::MatchState& state,
-                                     intrinsic::TableData::Number N,
+inline const type::Vector* build_vec(intrinsic::MatchState& state,
+                                     intrinsic::Number N,
                                      const type::Type* el) {
     return state.types.vec(el, N.Value());
 }
 
 template <uint32_t N>
-inline const type::Vector* build_vec(intrinsic::TableData::MatchState& state,
-                                     const type::Type* el) {
+inline const type::Vector* build_vec(intrinsic::MatchState& state, const type::Type* el) {
     return state.types.vec(el, N);
 }
 
@@ -156,10 +153,8 @@ constexpr auto build_vec2 = build_vec<2>;
 constexpr auto build_vec3 = build_vec<3>;
 constexpr auto build_vec4 = build_vec<4>;
 
-inline bool match_packedVec3(intrinsic::TableData::MatchState&,
-                             const type::Type* ty,
-                             const type::Type*& T) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
+inline bool match_packedVec3(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
+    if (ty->Is<intrinsic::Any>()) {
         T = ty;
         return true;
     }
@@ -173,19 +168,18 @@ inline bool match_packedVec3(intrinsic::TableData::MatchState&,
     return false;
 }
 
-inline const type::Vector* build_packedVec3(intrinsic::TableData::MatchState& state,
-                                            const type::Type* el) {
+inline const type::Vector* build_packedVec3(intrinsic::MatchState& state, const type::Type* el) {
     return state.types.Get<type::Vector>(el, 3u, /* packed */ true);
 }
 
-inline bool match_mat(intrinsic::TableData::MatchState&,
+inline bool match_mat(intrinsic::MatchState&,
                       const type::Type* ty,
-                      intrinsic::TableData::Number& M,
-                      intrinsic::TableData::Number& N,
+                      intrinsic::Number& M,
+                      intrinsic::Number& N,
                       const type::Type*& T) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
-        M = intrinsic::TableData::Number::any;
-        N = intrinsic::TableData::Number::any;
+    if (ty->Is<intrinsic::Any>()) {
+        M = intrinsic::Number::any;
+        N = intrinsic::Number::any;
         T = ty;
         return true;
     }
@@ -199,10 +193,8 @@ inline bool match_mat(intrinsic::TableData::MatchState&,
 }
 
 template <uint32_t C, uint32_t R>
-inline bool match_mat(intrinsic::TableData::MatchState&,
-                      const type::Type* ty,
-                      const type::Type*& T) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
+inline bool match_mat(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
+    if (ty->Is<intrinsic::Any>()) {
         T = ty;
         return true;
     }
@@ -215,16 +207,16 @@ inline bool match_mat(intrinsic::TableData::MatchState&,
     return false;
 }
 
-inline const type::Matrix* build_mat(intrinsic::TableData::MatchState& state,
-                                     intrinsic::TableData::Number C,
-                                     intrinsic::TableData::Number R,
+inline const type::Matrix* build_mat(intrinsic::MatchState& state,
+                                     intrinsic::Number C,
+                                     intrinsic::Number R,
                                      const type::Type* T) {
     auto* column_type = state.types.vec(T, R.Value());
     return state.types.mat(column_type, C.Value());
 }
 
 template <uint32_t C, uint32_t R>
-inline const type::Matrix* build_mat(intrinsic::TableData::MatchState& state, const type::Type* T) {
+inline const type::Matrix* build_mat(intrinsic::MatchState& state, const type::Type* T) {
     auto* column_type = state.types.vec(T, R);
     return state.types.mat(column_type, C);
 }
@@ -249,10 +241,8 @@ constexpr auto match_mat4x2 = match_mat<4, 2>;
 constexpr auto match_mat4x3 = match_mat<4, 3>;
 constexpr auto match_mat4x4 = match_mat<4, 4>;
 
-inline bool match_array(intrinsic::TableData::MatchState&,
-                        const type::Type* ty,
-                        const type::Type*& T) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
+inline bool match_array(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
+    if (ty->Is<intrinsic::Any>()) {
         T = ty;
         return true;
     }
@@ -266,8 +256,7 @@ inline bool match_array(intrinsic::TableData::MatchState&,
     return false;
 }
 
-inline const type::Array* build_array(intrinsic::TableData::MatchState& state,
-                                      const type::Type* el) {
+inline const type::Array* build_array(intrinsic::MatchState& state, const type::Type* el) {
     return state.types.Get<type::Array>(el,
                                         /* count */ state.types.Get<type::RuntimeArrayCount>(),
                                         /* align */ 0u,
@@ -276,39 +265,37 @@ inline const type::Array* build_array(intrinsic::TableData::MatchState& state,
                                         /* stride_implicit */ 0u);
 }
 
-inline bool match_ptr(intrinsic::TableData::MatchState&,
+inline bool match_ptr(intrinsic::MatchState&,
                       const type::Type* ty,
-                      intrinsic::TableData::Number& S,
+                      intrinsic::Number& S,
                       const type::Type*& T,
-                      intrinsic::TableData::Number& A) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
-        S = intrinsic::TableData::Number::any;
+                      intrinsic::Number& A) {
+    if (ty->Is<intrinsic::Any>()) {
+        S = intrinsic::Number::any;
         T = ty;
-        A = intrinsic::TableData::Number::any;
+        A = intrinsic::Number::any;
         return true;
     }
 
     if (auto* p = ty->As<type::Pointer>()) {
-        S = intrinsic::TableData::Number(static_cast<uint32_t>(p->AddressSpace()));
+        S = intrinsic::Number(static_cast<uint32_t>(p->AddressSpace()));
         T = p->StoreType();
-        A = intrinsic::TableData::Number(static_cast<uint32_t>(p->Access()));
+        A = intrinsic::Number(static_cast<uint32_t>(p->Access()));
         return true;
     }
     return false;
 }
 
-inline const type::Pointer* build_ptr(intrinsic::TableData::MatchState& state,
-                                      intrinsic::TableData::Number S,
+inline const type::Pointer* build_ptr(intrinsic::MatchState& state,
+                                      intrinsic::Number S,
                                       const type::Type* T,
-                                      intrinsic::TableData::Number& A) {
+                                      intrinsic::Number& A) {
     return state.types.ptr(static_cast<core::AddressSpace>(S.Value()), T,
                            static_cast<core::Access>(A.Value()));
 }
 
-inline bool match_atomic(intrinsic::TableData::MatchState&,
-                         const type::Type* ty,
-                         const type::Type*& T) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
+inline bool match_atomic(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
+    if (ty->Is<intrinsic::Any>()) {
         T = ty;
         return true;
     }
@@ -320,39 +307,38 @@ inline bool match_atomic(intrinsic::TableData::MatchState&,
     return false;
 }
 
-inline const type::Atomic* build_atomic(intrinsic::TableData::MatchState& state,
-                                        const type::Type* T) {
+inline const type::Atomic* build_atomic(intrinsic::MatchState& state, const type::Type* T) {
     return state.types.atomic(T);
 }
 
-inline bool match_sampler(intrinsic::TableData::MatchState&, const type::Type* ty) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
+inline bool match_sampler(intrinsic::MatchState&, const type::Type* ty) {
+    if (ty->Is<intrinsic::Any>()) {
         return true;
     }
     return ty->Is([](const type::Sampler* s) { return s->kind() == type::SamplerKind::kSampler; });
 }
 
-inline const type::Sampler* build_sampler(intrinsic::TableData::MatchState& state) {
+inline const type::Sampler* build_sampler(intrinsic::MatchState& state) {
     return state.types.sampler();
 }
 
-inline bool match_sampler_comparison(intrinsic::TableData::MatchState&, const type::Type* ty) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
+inline bool match_sampler_comparison(intrinsic::MatchState&, const type::Type* ty) {
+    if (ty->Is<intrinsic::Any>()) {
         return true;
     }
     return ty->Is(
         [](const type::Sampler* s) { return s->kind() == type::SamplerKind::kComparisonSampler; });
 }
 
-inline const type::Sampler* build_sampler_comparison(intrinsic::TableData::MatchState& state) {
+inline const type::Sampler* build_sampler_comparison(intrinsic::MatchState& state) {
     return state.types.comparison_sampler();
 }
 
-inline bool match_texture(intrinsic::TableData::MatchState&,
+inline bool match_texture(intrinsic::MatchState&,
                           const type::Type* ty,
                           type::TextureDimension dim,
                           const type::Type*& T) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
+    if (ty->Is<intrinsic::Any>()) {
         T = ty;
         return true;
     }
@@ -367,14 +353,14 @@ inline bool match_texture(intrinsic::TableData::MatchState&,
 
 #define JOIN(a, b) a##b
 
-#define DECLARE_SAMPLED_TEXTURE(suffix, dim)                                               \
-    inline bool JOIN(match_texture_, suffix)(intrinsic::TableData::MatchState & state,     \
-                                             const type::Type* ty, const type::Type*& T) { \
-        return match_texture(state, ty, dim, T);                                           \
-    }                                                                                      \
-    inline const type::SampledTexture* JOIN(build_texture_, suffix)(                       \
-        intrinsic::TableData::MatchState & state, const type::Type* T) {                   \
-        return state.types.Get<type::SampledTexture>(dim, T);                              \
+#define DECLARE_SAMPLED_TEXTURE(suffix, dim)                                                       \
+    inline bool JOIN(match_texture_, suffix)(intrinsic::MatchState & state, const type::Type* ty,  \
+                                             const type::Type*& T) {                               \
+        return match_texture(state, ty, dim, T);                                                   \
+    }                                                                                              \
+    inline const type::SampledTexture* JOIN(build_texture_, suffix)(intrinsic::MatchState & state, \
+                                                                    const type::Type* T) {         \
+        return state.types.Get<type::SampledTexture>(dim, T);                                      \
     }
 
 DECLARE_SAMPLED_TEXTURE(1d, type::TextureDimension::k1d)
@@ -385,11 +371,11 @@ DECLARE_SAMPLED_TEXTURE(cube, type::TextureDimension::kCube)
 DECLARE_SAMPLED_TEXTURE(cube_array, type::TextureDimension::kCubeArray)
 #undef DECLARE_SAMPLED_TEXTURE
 
-inline bool match_texture_multisampled(intrinsic::TableData::MatchState&,
+inline bool match_texture_multisampled(intrinsic::MatchState&,
                                        const type::Type* ty,
                                        type::TextureDimension dim,
                                        const type::Type*& T) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
+    if (ty->Is<intrinsic::Any>()) {
         T = ty;
         return true;
     }
@@ -402,36 +388,36 @@ inline bool match_texture_multisampled(intrinsic::TableData::MatchState&,
     return false;
 }
 
-#define DECLARE_MULTISAMPLED_TEXTURE(suffix, dim)                                               \
-    inline bool JOIN(match_texture_multisampled_, suffix)(                                      \
-        intrinsic::TableData::MatchState & state, const type::Type* ty, const type::Type*& T) { \
-        return match_texture_multisampled(state, ty, dim, T);                                   \
-    }                                                                                           \
-    inline const type::MultisampledTexture* JOIN(build_texture_multisampled_, suffix)(          \
-        intrinsic::TableData::MatchState & state, const type::Type* T) {                        \
-        return state.types.Get<type::MultisampledTexture>(dim, T);                              \
+#define DECLARE_MULTISAMPLED_TEXTURE(suffix, dim)                                      \
+    inline bool JOIN(match_texture_multisampled_, suffix)(                             \
+        intrinsic::MatchState & state, const type::Type* ty, const type::Type*& T) {   \
+        return match_texture_multisampled(state, ty, dim, T);                          \
+    }                                                                                  \
+    inline const type::MultisampledTexture* JOIN(build_texture_multisampled_, suffix)( \
+        intrinsic::MatchState & state, const type::Type* T) {                          \
+        return state.types.Get<type::MultisampledTexture>(dim, T);                     \
     }
 
 DECLARE_MULTISAMPLED_TEXTURE(2d, type::TextureDimension::k2d)
 #undef DECLARE_MULTISAMPLED_TEXTURE
 
-inline bool match_texture_depth(intrinsic::TableData::MatchState&,
+inline bool match_texture_depth(intrinsic::MatchState&,
                                 const type::Type* ty,
                                 type::TextureDimension dim) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
+    if (ty->Is<intrinsic::Any>()) {
         return true;
     }
     return ty->Is([&](const type::DepthTexture* t) { return t->dim() == dim; });
 }
 
-#define DECLARE_DEPTH_TEXTURE(suffix, dim)                                                    \
-    inline bool JOIN(match_texture_depth_, suffix)(intrinsic::TableData::MatchState & state,  \
-                                                   const type::Type* ty) {                    \
-        return match_texture_depth(state, ty, dim);                                           \
-    }                                                                                         \
-    inline const type::DepthTexture* JOIN(build_texture_depth_,                               \
-                                          suffix)(intrinsic::TableData::MatchState & state) { \
-        return state.types.Get<type::DepthTexture>(dim);                                      \
+#define DECLARE_DEPTH_TEXTURE(suffix, dim)                                         \
+    inline bool JOIN(match_texture_depth_, suffix)(intrinsic::MatchState & state,  \
+                                                   const type::Type* ty) {         \
+        return match_texture_depth(state, ty, dim);                                \
+    }                                                                              \
+    inline const type::DepthTexture* JOIN(build_texture_depth_,                    \
+                                          suffix)(intrinsic::MatchState & state) { \
+        return state.types.Get<type::DepthTexture>(dim);                           \
     }
 
 DECLARE_DEPTH_TEXTURE(2d, type::TextureDimension::k2d)
@@ -440,9 +426,8 @@ DECLARE_DEPTH_TEXTURE(cube, type::TextureDimension::kCube)
 DECLARE_DEPTH_TEXTURE(cube_array, type::TextureDimension::kCubeArray)
 #undef DECLARE_DEPTH_TEXTURE
 
-inline bool match_texture_depth_multisampled_2d(intrinsic::TableData::MatchState&,
-                                                const type::Type* ty) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
+inline bool match_texture_depth_multisampled_2d(intrinsic::MatchState&, const type::Type* ty) {
+    if (ty->Is<intrinsic::Any>()) {
         return true;
     }
     return ty->Is([&](const type::DepthMultisampledTexture* t) {
@@ -451,43 +436,42 @@ inline bool match_texture_depth_multisampled_2d(intrinsic::TableData::MatchState
 }
 
 inline type::DepthMultisampledTexture* build_texture_depth_multisampled_2d(
-    intrinsic::TableData::MatchState& state) {
+    intrinsic::MatchState& state) {
     return state.types.Get<type::DepthMultisampledTexture>(type::TextureDimension::k2d);
 }
 
-inline bool match_texture_storage(intrinsic::TableData::MatchState&,
+inline bool match_texture_storage(intrinsic::MatchState&,
                                   const type::Type* ty,
                                   type::TextureDimension dim,
-                                  intrinsic::TableData::Number& F,
-                                  intrinsic::TableData::Number& A) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
-        F = intrinsic::TableData::Number::any;
-        A = intrinsic::TableData::Number::any;
+                                  intrinsic::Number& F,
+                                  intrinsic::Number& A) {
+    if (ty->Is<intrinsic::Any>()) {
+        F = intrinsic::Number::any;
+        A = intrinsic::Number::any;
         return true;
     }
     if (auto* v = ty->As<type::StorageTexture>()) {
         if (v->dim() == dim) {
-            F = intrinsic::TableData::Number(static_cast<uint32_t>(v->texel_format()));
-            A = intrinsic::TableData::Number(static_cast<uint32_t>(v->access()));
+            F = intrinsic::Number(static_cast<uint32_t>(v->texel_format()));
+            A = intrinsic::Number(static_cast<uint32_t>(v->access()));
             return true;
         }
     }
     return false;
 }
 
-#define DECLARE_STORAGE_TEXTURE(suffix, dim)                                      \
-    inline bool JOIN(match_texture_storage_, suffix)(                             \
-        intrinsic::TableData::MatchState & state, const type::Type* ty,           \
-        intrinsic::TableData::Number& F, intrinsic::TableData::Number& A) {       \
-        return match_texture_storage(state, ty, dim, F, A);                       \
-    }                                                                             \
-    inline const type::StorageTexture* JOIN(build_texture_storage_, suffix)(      \
-        intrinsic::TableData::MatchState & state, intrinsic::TableData::Number F, \
-        intrinsic::TableData::Number A) {                                         \
-        auto format = static_cast<TexelFormat>(F.Value());                        \
-        auto access = static_cast<Access>(A.Value());                             \
-        auto* T = type::StorageTexture::SubtypeFor(format, state.types);          \
-        return state.types.Get<type::StorageTexture>(dim, format, access, T);     \
+#define DECLARE_STORAGE_TEXTURE(suffix, dim)                                                     \
+    inline bool JOIN(match_texture_storage_, suffix)(intrinsic::MatchState & state,              \
+                                                     const type::Type* ty, intrinsic::Number& F, \
+                                                     intrinsic::Number& A) {                     \
+        return match_texture_storage(state, ty, dim, F, A);                                      \
+    }                                                                                            \
+    inline const type::StorageTexture* JOIN(build_texture_storage_, suffix)(                     \
+        intrinsic::MatchState & state, intrinsic::Number F, intrinsic::Number A) {               \
+        auto format = static_cast<TexelFormat>(F.Value());                                       \
+        auto access = static_cast<Access>(A.Value());                                            \
+        auto* T = type::StorageTexture::SubtypeFor(format, state.types);                         \
+        return state.types.Get<type::StorageTexture>(dim, format, access, T);                    \
     }
 
 DECLARE_STORAGE_TEXTURE(1d, type::TextureDimension::k1d)
@@ -496,96 +480,88 @@ DECLARE_STORAGE_TEXTURE(2d_array, type::TextureDimension::k2dArray)
 DECLARE_STORAGE_TEXTURE(3d, type::TextureDimension::k3d)
 #undef DECLARE_STORAGE_TEXTURE
 
-inline bool match_texture_external(intrinsic::TableData::MatchState&, const type::Type* ty) {
-    return ty->IsAnyOf<intrinsic::TableData::Any, type::ExternalTexture>();
+inline bool match_texture_external(intrinsic::MatchState&, const type::Type* ty) {
+    return ty->IsAnyOf<intrinsic::Any, type::ExternalTexture>();
 }
 
-inline const type::ExternalTexture* build_texture_external(
-    intrinsic::TableData::MatchState& state) {
+inline const type::ExternalTexture* build_texture_external(intrinsic::MatchState& state) {
     return state.types.Get<type::ExternalTexture>();
 }
 
 // Builtin types starting with a _ prefix cannot be declared in WGSL, so they
 // can only be used as return types. Because of this, they must only match Any,
 // which is used as the return type matcher.
-inline bool match_modf_result(intrinsic::TableData::MatchState&,
-                              const type::Type* ty,
-                              const type::Type*& T) {
-    if (!ty->Is<intrinsic::TableData::Any>()) {
+inline bool match_modf_result(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
+    if (!ty->Is<intrinsic::Any>()) {
         return false;
     }
     T = ty;
     return true;
 }
-inline bool match_modf_result_vec(intrinsic::TableData::MatchState&,
+inline bool match_modf_result_vec(intrinsic::MatchState&,
                                   const type::Type* ty,
-                                  intrinsic::TableData::Number& N,
+                                  intrinsic::Number& N,
                                   const type::Type*& T) {
-    if (!ty->Is<intrinsic::TableData::Any>()) {
+    if (!ty->Is<intrinsic::Any>()) {
         return false;
     }
-    N = intrinsic::TableData::Number::any;
+    N = intrinsic::Number::any;
     T = ty;
     return true;
 }
-inline bool match_frexp_result(intrinsic::TableData::MatchState&,
-                               const type::Type* ty,
-                               const type::Type*& T) {
-    if (!ty->Is<intrinsic::TableData::Any>()) {
+inline bool match_frexp_result(intrinsic::MatchState&, const type::Type* ty, const type::Type*& T) {
+    if (!ty->Is<intrinsic::Any>()) {
         return false;
     }
     T = ty;
     return true;
 }
-inline bool match_frexp_result_vec(intrinsic::TableData::MatchState&,
+inline bool match_frexp_result_vec(intrinsic::MatchState&,
                                    const type::Type* ty,
-                                   intrinsic::TableData::Number& N,
+                                   intrinsic::Number& N,
                                    const type::Type*& T) {
-    if (!ty->Is<intrinsic::TableData::Any>()) {
+    if (!ty->Is<intrinsic::Any>()) {
         return false;
     }
-    N = intrinsic::TableData::Number::any;
+    N = intrinsic::Number::any;
     T = ty;
     return true;
 }
 
-inline bool match_atomic_compare_exchange_result(intrinsic::TableData::MatchState&,
+inline bool match_atomic_compare_exchange_result(intrinsic::MatchState&,
                                                  const type::Type* ty,
                                                  const type::Type*& T) {
-    if (ty->Is<intrinsic::TableData::Any>()) {
+    if (ty->Is<intrinsic::Any>()) {
         T = ty;
         return true;
     }
     return false;
 }
 
-inline const type::Struct* build_modf_result(intrinsic::TableData::MatchState& state,
-                                             const type::Type* el) {
+inline const type::Struct* build_modf_result(intrinsic::MatchState& state, const type::Type* el) {
     return type::CreateModfResult(state.types, state.symbols, el);
 }
 
-inline const type::Struct* build_modf_result_vec(intrinsic::TableData::MatchState& state,
-                                                 intrinsic::TableData::Number& n,
+inline const type::Struct* build_modf_result_vec(intrinsic::MatchState& state,
+                                                 intrinsic::Number& n,
                                                  const type::Type* el) {
     auto* vec = state.types.vec(el, n.Value());
     return type::CreateModfResult(state.types, state.symbols, vec);
 }
 
-inline const type::Struct* build_frexp_result(intrinsic::TableData::MatchState& state,
-                                              const type::Type* el) {
+inline const type::Struct* build_frexp_result(intrinsic::MatchState& state, const type::Type* el) {
     return type::CreateFrexpResult(state.types, state.symbols, el);
 }
 
-inline const type::Struct* build_frexp_result_vec(intrinsic::TableData::MatchState& state,
-                                                  intrinsic::TableData::Number& n,
+inline const type::Struct* build_frexp_result_vec(intrinsic::MatchState& state,
+                                                  intrinsic::Number& n,
                                                   const type::Type* el) {
     auto* vec = state.types.vec(el, n.Value());
     return type::CreateFrexpResult(state.types, state.symbols, vec);
 }
 
-inline const type::Struct* build_atomic_compare_exchange_result(
-    intrinsic::TableData::MatchState& state,
-    const type::Type* ty) {
+inline const type::Struct* build_atomic_compare_exchange_result(intrinsic::MatchState& state,
+                                                                const type::Type* ty) {
     return type::CreateAtomicCompareExchangeResult(state.types, state.symbols, ty);
 }
 

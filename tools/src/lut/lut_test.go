@@ -17,13 +17,11 @@ package lut_test
 import (
 	"testing"
 
-	"dawn.googlesource.com/dawn/tools/src/list"
 	"dawn.googlesource.com/dawn/tools/src/lut"
 )
 
 func TestCompactWithFragments(t *testing.T) {
-	runes := []rune{}
-	lut := lut.New(list.Wrap(&runes))
+	lut := lut.New[rune]()
 	indices := []*int{
 		lut.Add([]rune("the life in your")),
 		lut.Add([]rune("in your life that count")),
@@ -38,7 +36,7 @@ func TestCompactWithFragments(t *testing.T) {
 		lut.Add([]rune("end, it's")),
 	}
 
-	lut.Compact()
+	runes := lut.Compact()
 
 	expect := "In the end, it's not the years in your life that count. It's the life in your years."
 	got := string(runes)

@@ -17,19 +17,16 @@ package lut
 
 import (
 	"sort"
-
-	"dawn.googlesource.com/dawn/tools/src/list"
 )
 
 // LUT is a look up table.
 // The table holds a number of items that are stored in a linear list.
-type LUT interface {
+type LUT[T comparable] interface {
 	// Add adds a sequence of items to the table.
-	// items can be a single element, a slice of element, or a List of element.
-	// Returns a pointer to the offset of the first item in the table's list.
 	// The sequence of items stored at [offset, offset+N), where N is the
 	// number of items added will remain equal, even after calling Compact().
-	Add(items interface{}) *int
+	// Returns a pointer to the start index in the list.
+	Add(items []T) *int
 	// Compact reorders the table items so that the table storage is compacted
 	// by shuffling data around and de-duplicating sequences of common data.
 	// Each originally added sequence is preserved in the resulting table, with
@@ -38,12 +35,12 @@ type LUT interface {
 	// subsequences, and removing duplicate sequences.
 	// Note that shortest common superstring is NP-hard, so heuristics are used.
 	// Compact updates pointers returned by Add().
-	Compact()
+	Compact() []T
 }
 
 // New returns a new look up table
-func New(storage list.List) LUT {
-	return &lut{storage: storage}
+func New[T comparable]() LUT[T] {
+	return &lut[T]{storage: []T{}}
 }
 
 // A sequence represents a span of entries in the table
@@ -53,21 +50,33 @@ type sequence struct {
 }
 
 // lut implements LUT
-type lut struct {
-	storage   list.List  // The List that backs this LUT
+type lut[T comparable] struct {
+	storage   []T        // The storage
 	sequences []sequence // The entries in the LUT
 }
 
-func (t *lut) Add(items interface{}) *int {
-	offset := t.storage.Count()
-	t.storage.Append(items)
-	count := t.storage.Count() - offset
+func (t *lut[T]) Add(items []T) *int {
+	if len(items) == 0 {
+		return nil
+	}
+
+	offset := len(t.storage)
+	count := len(items)
+	t.storage = append(t.storage, items...)
 	offsetPtr := &offset
 	t.sequences = append(t.sequences, sequence{offsetPtr, count})
 	return offsetPtr
 }
 
-func (t lut) Compact() {
+// match describes a sequence that can be placed.
+type match struct {
+	dst int      // destination offset
+	src sequence // source sequence
+	len int      // number of items that matched
+	idx int      // sequence index
+}
+
+func (t lut[T]) Compact() []T {
 	// Generate int32 identifiers for each unique item in the table.
 	// We use these to compare items instead of comparing the real data as this
 	// function is comparison-heavy, and integer compares are cheap.
@@ -76,7 +85,8 @@ func (t lut) Compact() {
 
 	// Make a copy the data held in the table, use the copy as the source, and
 	// t.storage as the destination.
-	srcData := list.Copy(t.storage)
+	srcData := make([]T, len(t.storage))
+	copy(srcData, t.storage)
 	dstData := t.storage
 
 	// Sort all the sequences by length, with the largest first.
@@ -111,19 +121,8 @@ func (t lut) Compact() {
 
 	// cp copies data from [srcOffset:srcOffset+count] to [dstOffset:dstOffset+count].
 	cp := func(dstOffset, srcOffset, count int) {
-		dstData.CopyFrom(srcData, dstOffset, srcOffset, count)
-		copy(
-			dstIDs[dstOffset:dstOffset+count],
-			srcIDs[srcOffset:srcOffset+count],
-		)
-	}
-
-	// match describes a sequence that can be placed.
-	type match struct {
-		dst int      // destination offset
-		src sequence // source sequence
-		len int      // number of items that matched
-		idx int      // sequence index
+		copy(dstData[dstOffset:dstOffset+count], srcData[srcOffset:srcOffset+count])
+		copy(dstIDs[dstOffset:dstOffset+count], srcIDs[srcOffset:srcOffset+count])
 	}
 
 	// number of items that have been placed.
@@ -181,7 +180,7 @@ func (t lut) Compact() {
 				// Best match wants to place the sequence to the left of the
 				// current output. We have to shuffle everything...
 				n := -best.dst
-				dstData.Copy(n, 0, newSize)
+				copy(dstData[n:n+newSize], dstData)
 				copy(dstIDs[n:n+newSize], dstIDs)
 				newSize += n
 				best.dst = 0
@@ -199,18 +198,19 @@ func (t lut) Compact() {
 	}
 
 	// Shrink the output buffer to the new size.
-	dstData.Resize(newSize)
+	dstData = dstData[:newSize]
 
 	// All done.
+	return dstData
 }
 
 // Generate a set of identifiers for all the unique items in storage
-func (t lut) itemIDs() []int32 {
-	storageSize := t.storage.Count()
+func (t lut[T]) itemIDs() []int32 {
+	storageSize := len(t.storage)
 	keys := make([]int32, storageSize)
-	dataToKey := map[interface{}]int32{}
+	dataToKey := map[T]int32{}
 	for i := 0; i < storageSize; i++ {
-		data := t.storage.Get(i)
+		data := t.storage[i]
 		key, found := dataToKey[data]
 		if !found {
 			key = int32(len(dataToKey))

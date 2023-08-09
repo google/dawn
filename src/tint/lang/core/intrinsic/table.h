@@ -75,7 +75,7 @@ class Table {
         };
 
         /// The overload information
-        const TableData::OverloadInfo* info = nullptr;
+        const OverloadInfo* info = nullptr;
 
         /// The resolved overload return type
         type::Type const* return_type = nullptr;

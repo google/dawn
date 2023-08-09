@@ -762,7 +762,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicit) {
                                 EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_TRUE(result) << Diagnostics().str();
     EXPECT_EQ(result->return_type, vec3_i32);
-    EXPECT_TRUE(result->info->flags.Contains(TableData::OverloadFlag::kIsConstructor));
+    EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 3u);
     EXPECT_EQ(result->parameters[0].type, i32);
     EXPECT_EQ(result->parameters[1].type, i32);
@@ -777,7 +777,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerExplicit) {
                                 EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_TRUE(result) << Diagnostics().str();
     EXPECT_EQ(result->return_type, vec3_i32);
-    EXPECT_TRUE(result->info->flags.Contains(TableData::OverloadFlag::kIsConstructor));
+    EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 3u);
     EXPECT_EQ(result->parameters[0].type, i32);
     EXPECT_EQ(result->parameters[1].type, i32);
@@ -846,7 +846,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitVecFromVecAbstract) {
                                 EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_TRUE(result) << Diagnostics().str();
     EXPECT_EQ(result->return_type, vec3_ai);
-    EXPECT_TRUE(result->info->flags.Contains(TableData::OverloadFlag::kIsConstructor));
+    EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 1u);
     EXPECT_EQ(result->parameters[0].type, vec3_ai);
     EXPECT_NE(result->info->const_eval_fn, nullptr);
@@ -861,7 +861,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitMatFromVec) {
                                 EvaluationStage::kConstant, Source{{12, 34}});
     ASSERT_TRUE(result) << Diagnostics().str();
     EXPECT_TYPE(result->return_type, mat2x2_af);
-    EXPECT_TRUE(result->info->flags.Contains(TableData::OverloadFlag::kIsConstructor));
+    EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 2u);
     EXPECT_TYPE(result->parameters[0].type, vec2_af);
     EXPECT_TYPE(result->parameters[1].type, vec2_af);
@@ -876,7 +876,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializer_ConstantEval) {
     ASSERT_TRUE(result) << Diagnostics().str();
     EXPECT_NE(result->info->const_eval_fn, nullptr);
     EXPECT_EQ(result->return_type, vec3_ai);
-    EXPECT_TRUE(result->info->flags.Contains(TableData::OverloadFlag::kIsConstructor));
+    EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 3u);
     EXPECT_EQ(result->parameters[0].type, ai);
     EXPECT_EQ(result->parameters[1].type, ai);
@@ -893,7 +893,7 @@ TEST_F(IntrinsicTableTest, MatchTypeInitializer_RuntimeEval) {
     ASSERT_TRUE(result) << Diagnostics().str();
     EXPECT_NE(result->info->const_eval_fn, nullptr);
     EXPECT_EQ(result->return_type, vec3_i32);
-    EXPECT_TRUE(result->info->flags.Contains(TableData::OverloadFlag::kIsConstructor));
+    EXPECT_TRUE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 3u);
     EXPECT_EQ(result->parameters[0].type, i32);
     EXPECT_EQ(result->parameters[1].type, i32);
@@ -910,7 +910,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion) {
                                 Source{{12, 34}});
     ASSERT_TRUE(result) << Diagnostics().str();
     EXPECT_EQ(result->return_type, vec3_i32);
-    EXPECT_FALSE(result->info->flags.Contains(TableData::OverloadFlag::kIsConstructor));
+    EXPECT_FALSE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 1u);
     EXPECT_EQ(result->parameters[0].type, vec3_f32);
 }
@@ -955,7 +955,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion_ConstantEval) {
     EXPECT_NE(result->info->const_eval_fn, nullptr);
     // NOTE: Conversions are explicit, so there's no way to have it return abstracts
     EXPECT_EQ(result->return_type, vec3_f32);
-    EXPECT_FALSE(result->info->flags.Contains(TableData::OverloadFlag::kIsConstructor));
+    EXPECT_FALSE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 1u);
     EXPECT_EQ(result->parameters[0].type, vec3_ai);
 }
@@ -971,7 +971,7 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion_RuntimeEval) {
     ASSERT_TRUE(result) << Diagnostics().str();
     EXPECT_NE(result->info->const_eval_fn, nullptr);
     EXPECT_EQ(result->return_type, vec3_f32);
-    EXPECT_FALSE(result->info->flags.Contains(TableData::OverloadFlag::kIsConstructor));
+    EXPECT_FALSE(result->info->flags.Contains(OverloadFlag::kIsConstructor));
     ASSERT_EQ(result->parameters.Length(), 1u);
     EXPECT_EQ(result->parameters[0].type, vec3_i32);
 }

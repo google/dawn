@@ -21,28 +21,33 @@ See:
 namespace {{$.Namespace}} {
 namespace {
 
-using IntrinsicInfo = tint::core::intrinsic::TableData::IntrinsicInfo;
-using MatcherIndex = tint::core::intrinsic::TableData::MatcherIndex;
-using MatchState = tint::core::intrinsic::TableData::MatchState;
-using Number = tint::core::intrinsic::TableData::Number;
-using NumberMatcher = tint::core::intrinsic::TableData::NumberMatcher;
-using OverloadFlag = tint::core::intrinsic::TableData::OverloadFlag;
-using OverloadFlags = tint::core::intrinsic::TableData::OverloadFlags;
-using OverloadInfo = tint::core::intrinsic::TableData::OverloadInfo;
-using ParameterInfo = tint::core::intrinsic::TableData::ParameterInfo;
+using IntrinsicInfo = tint::core::intrinsic::IntrinsicInfo;
+using MatchState = tint::core::intrinsic::MatchState;
+using Number = tint::core::intrinsic::Number;
+using NumberMatcher = tint::core::intrinsic::NumberMatcher;
+using NumberMatcherIndex = tint::core::intrinsic::NumberMatcherIndex;
+using NumberMatcherIndicesIndex = tint::core::intrinsic::NumberMatcherIndicesIndex;
+using OverloadFlag = tint::core::intrinsic::OverloadFlag;
+using OverloadFlags = tint::core::intrinsic::OverloadFlags;
+using OverloadIndex = tint::core::intrinsic::OverloadIndex;
+using OverloadInfo = tint::core::intrinsic::OverloadInfo;
+using ParameterIndex = tint::core::intrinsic::ParameterIndex;
+using ParameterInfo = tint::core::intrinsic::ParameterInfo;
 using StringStream = tint::StringStream;
-using TemplateNumberInfo = tint::core::intrinsic::TableData::TemplateNumberInfo;
-using TemplateTypeInfo = tint::core::intrinsic::TableData::TemplateTypeInfo;
+using TemplateNumberIndex = tint::core::intrinsic::TemplateNumberIndex;
+using TemplateNumberInfo = tint::core::intrinsic::TemplateNumberInfo;
+using TemplateTypeIndex = tint::core::intrinsic::TemplateTypeIndex;
+using TemplateTypeInfo = tint::core::intrinsic::TemplateTypeInfo;
 using Type = tint::type::Type;
-using TypeMatcher = tint::core::intrinsic::TableData::TypeMatcher;
+using TypeMatcher = tint::core::intrinsic::TypeMatcher;
+using TypeMatcherIndex = tint::core::intrinsic::TypeMatcherIndex;
+using TypeMatcherIndicesIndex = tint::core::intrinsic::TypeMatcherIndicesIndex;
 
 template<size_t N>
-using TemplateNumberMatcher = tint::core::intrinsic::TableData::TemplateNumberMatcher<N>;
+using TemplateNumberMatcher = tint::core::intrinsic::TemplateNumberMatcher<N>;
 
 template<size_t N>
-using TemplateTypeMatcher = tint::core::intrinsic::TableData::TemplateTypeMatcher<N>;
-
-static constexpr auto kNoMatcher = tint::core::intrinsic::TableData::kNoMatcher;
+using TemplateTypeMatcher = tint::core::intrinsic::TemplateTypeMatcher<N>;
 
 // clang-format off
 
@@ -61,17 +66,23 @@ static constexpr auto kNoMatcher = tint::core::intrinsic::TableData::kNoMatcher;
 {{- with $I.Table -}}
 {{- template "Matchers" $I }}
 
-constexpr MatcherIndex kMatcherIndices[] = {
-{{- range $i, $idx := .MatcherIndices }}
-  /* [{{$i}}] */ {{$idx}},
+constexpr TypeMatcherIndex kTypeMatcherIndices[] = {
+{{- range $i, $idx := .TypeMatcherIndices }}
+  /* [{{$i}}] */ TypeMatcherIndex({{$idx}}),
 {{- end }}
 };
 
-// Assert that the MatcherIndex is big enough to index all the matchers, plus
-// kNoMatcher.
-static_assert(static_cast<int>(sizeof(kMatcherIndices) / sizeof(kMatcherIndices[0])) <
-              static_cast<int>(std::numeric_limits<MatcherIndex>::max() - 1),
-              "MatcherIndex is not large enough to index kMatcherIndices");
+static_assert(TypeMatcherIndex::CanIndex(kTypeMatcherIndices),
+              "TypeMatcherIndex is not large enough to index kTypeMatcherIndices");
+
+constexpr NumberMatcherIndex kNumberMatcherIndices[] = {
+{{- range $i, $idx := .NumberMatcherIndices }}
+  /* [{{$i}}] */ NumberMatcherIndex({{$idx}}),
+{{- end }}
+};
+
+static_assert(NumberMatcherIndex::CanIndex(kNumberMatcherIndices),
+              "NumberMatcherIndex is not large enough to index kNumberMatcherIndices");
 
 constexpr ParameterInfo kParameters[] = {
 {{- range $i, $p := .Parameters }}
@@ -80,57 +91,77 @@ constexpr ParameterInfo kParameters[] = {
     /* usage */ ParameterUsage::
 {{-   if $p.Usage }}k{{PascalCase $p.Usage}}
 {{-   else        }}kNone
-{{-   end         }},
-    /* matcher indices */ &kMatcherIndices[{{$p.MatcherIndicesOffset}}],
+{{-   end }},
+    /* type_matcher_indices */ TypeMatcherIndicesIndex({{$p.TypeMatcherIndicesOffset}}),
+    /* number_matcher_indices */
+{{-   if ge $p.NumberMatcherIndicesOffset 0 }} NumberMatcherIndicesIndex({{$p.NumberMatcherIndicesOffset}})
+{{-   else                                  }} NumberMatcherIndicesIndex(/* invalid */)
+{{-   end }},
   },
 {{- end }}
 };
+
+static_assert(ParameterIndex::CanIndex(kParameters),
+              "ParameterIndex is not large enough to index kParameters");
 
 constexpr TemplateTypeInfo kTemplateTypes[] = {
 {{- range $i, $o := .TemplateTypes }}
   {
     /* [{{$i}}] */
     /* name */ "{{$o.Name}}",
-    /* matcher index */
-{{-   if ge $o.MatcherIndex 0 }} {{$o.MatcherIndex}}
-{{-   else                    }} kNoMatcher
-{{-   end                     }},
+    /* matcher_index */
+{{-   if ge $o.MatcherIndex 0 }} TypeMatcherIndex({{$o.MatcherIndex}})
+{{-   else                    }} TypeMatcherIndex(/* invalid */)
+{{-   end }},
   },
 {{- end }}
 };
+
+static_assert(TemplateTypeIndex::CanIndex(kTemplateTypes),
+              "TemplateTypeIndex is not large enough to index kTemplateTypes");
 
 constexpr TemplateNumberInfo kTemplateNumbers[] = {
 {{- range $i, $o := .TemplateNumbers }}
   {
     /* [{{$i}}] */
     /* name */ "{{$o.Name}}",
-    /* matcher index */
-{{-   if ge $o.MatcherIndex 0 }} {{$o.MatcherIndex}}
-{{-   else                    }} kNoMatcher
-{{-   end                     }},
+    /* matcher_index */
+{{-   if ge $o.MatcherIndex 0 }} NumberMatcherIndex({{$o.MatcherIndex}})
+{{-   else                    }} NumberMatcherIndex(/* invalid */)
+{{-   end }},
   },
 {{- end }}
 };
+
+static_assert(TemplateNumberIndex::CanIndex(kTemplateNumbers),
+              "TemplateNumberIndex is not large enough to index kTemplateNumbers");
 
 constexpr OverloadInfo kOverloads[] = {
 {{- range $i, $o := .Overloads }}
   {
     /* [{{$i}}] */
-    /* num parameters */ {{$o.NumParameters}},
-    /* num template types */ {{$o.NumTemplateTypes}},
-    /* num template numbers */ {{$o.NumTemplateNumbers}},
-    /* template types */
-{{-   if $o.TemplateTypesOffset }} &kTemplateTypes[{{$o.TemplateTypesOffset}}],
-{{-   else                      }} nullptr,
-{{-   end }}
-    /* template numbers */
-{{-   if $o.TemplateNumbersOffset }} &kTemplateNumbers[{{$o.TemplateNumbersOffset}}]
-{{-   else                        }} nullptr
+    /* num_parameters */ {{$o.NumParameters}},
+    /* num_template_types */ {{$o.NumTemplateTypes}},
+    /* num_template_numbers */ {{$o.NumTemplateNumbers}},
+    /* template_types */
+{{-   if ge $o.TemplateTypesOffset 0 }} TemplateTypeIndex({{$o.TemplateTypesOffset}})
+{{-   else                           }} TemplateTypeIndex(/* invalid */)
 {{-   end }},
-    /* parameters */ &kParameters[{{$o.ParametersOffset}}],
-    /* return matcher indices */
-{{-   if $o.ReturnMatcherIndicesOffset }} &kMatcherIndices[{{$o.ReturnMatcherIndicesOffset}}]
-{{-   else                             }} nullptr
+    /* template_numbers */
+{{-   if ge $o.TemplateNumbersOffset 0 }} TemplateNumberIndex({{$o.TemplateNumbersOffset}})
+{{-   else                             }} TemplateNumberIndex(/* invalid */)
+{{-   end }},
+    /* parameters */
+{{-   if ge $o.ParametersOffset 0 }} ParameterIndex({{$o.ParametersOffset}})
+{{-   else                        }} ParameterIndex(/* invalid */)
+{{-   end }},
+    /* return_type_matcher_indices */
+{{-   if ge $o.ReturnTypeMatcherIndicesOffset 0 }} TypeMatcherIndicesIndex({{$o.ReturnTypeMatcherIndicesOffset}})
+{{-   else                                      }} TypeMatcherIndicesIndex(/* invalid */)
+{{-   end }},
+    /* return_number_matcher_indices */
+{{-   if ge $o.ReturnNumberMatcherIndicesOffset 0 }} NumberMatcherIndicesIndex({{$o.ReturnNumberMatcherIndicesOffset}})
+{{-   else                                        }} NumberMatcherIndicesIndex(/* invalid */)
 {{-   end }},
     /* flags */ OverloadFlags(OverloadFlag::kIs{{Title $o.Kind}}
 {{-   range $i, $u := $o.CanBeUsedInStage.List -}}
@@ -147,6 +178,9 @@ constexpr OverloadInfo kOverloads[] = {
 {{- end }}
 };
 
+static_assert(OverloadIndex::CanIndex(kOverloads),
+              "OverloadIndex is not large enough to index kOverloads");
+
 constexpr IntrinsicInfo kBuiltins[] = {
 {{- range $i, $b := .Builtins }}
   {
@@ -155,7 +189,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* {{.}} */
 {{-   end }}
     /* num overloads */ {{$b.NumOverloads}},
-    /* overloads */ &kOverloads[{{$b.OverloadsOffset}}],
+    /* overloads */ OverloadIndex({{$b.OverloadsOffset}}),
   },
 {{- end }}
 };
@@ -168,7 +202,7 @@ constexpr IntrinsicInfo kUnaryOperators[] = {
     /* {{.}} */
 {{-   end }}
     /* num overloads */ {{$o.NumOverloads}},
-    /* overloads */ &kOverloads[{{$o.OverloadsOffset}}],
+    /* overloads */ OverloadIndex({{$o.OverloadsOffset}}),
   },
 {{- end }}
 };
@@ -185,7 +219,7 @@ constexpr IntrinsicInfo kBinaryOperators[] = {
     /* {{.}} */
 {{-   end }}
     /* num overloads */ {{$o.NumOverloads}},
-    /* overloads */ &kOverloads[{{$o.OverloadsOffset}}],
+    /* overloads */ OverloadIndex({{$o.OverloadsOffset}}),
   },
 {{- end }}
 };
@@ -202,7 +236,7 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
     /* {{.}} */
 {{-   end }}
     /* num overloads */ {{$o.NumOverloads}},
-    /* overloads */ &kOverloads[{{$o.OverloadsOffset}}],
+    /* overloads */ OverloadIndex({{$o.OverloadsOffset}}),
   },
 {{- end }}
 };
@@ -212,8 +246,14 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
 }  // anonymous namespace
 
 const core::intrinsic::TableData {{$.Name}}{
+  /* template_types */ kTemplateTypes,
+  /* template_numbers */ kTemplateNumbers,
+  /* type_matcher_indices */ kTypeMatcherIndices,
+  /* number_matcher_indices */ kNumberMatcherIndices,
   /* type_matchers */ kTypeMatchers,
   /* number_matchers */ kNumberMatchers,
+  /* parameters */ kParameters,
+  /* overloads */ kOverloads,
   /* ctor_conv */ kConstructorsAndConverters,
   /* builtins */ kBuiltins,
   /* binary_plus */ kBinaryOperators[kBinaryOperatorPlus],
