@@ -36,8 +36,11 @@ class TestHelperBase : public BASE, public ProgramBuilder {
         return resolver::Resolve(*this);
     }
 };
+
+/// Helper class for testing that derives from testing::Test.
 using TestHelper = TestHelperBase<testing::Test>;
 
+/// Helper class for testing that derives from `T`.
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 

@@ -46,6 +46,7 @@ enum class PipelineStageUsage {
     kComputeOutput,
 };
 
+/// StructFlag is an enumerator of struct flag bits, used by StructFlags.
 enum StructFlag {
     /// The structure is a block-decorated structure (for SPIR-V or GLSL).
     kBlock,

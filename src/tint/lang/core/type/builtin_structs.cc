@@ -34,21 +34,27 @@
 
 namespace tint::type {
 
+/// An array of `modf()` return type names for an argument of `vecN<f32>`.
 constexpr std::array kModfVecF32Names{
-    core::Builtin::kModfResultVec2F32,
-    core::Builtin::kModfResultVec3F32,
-    core::Builtin::kModfResultVec4F32,
+    core::Builtin::kModfResultVec2F32,  // return type of modf(vec2<f32>)
+    core::Builtin::kModfResultVec3F32,  // return type of modf(vec3<f32>)
+    core::Builtin::kModfResultVec4F32,  // return type of modf(vec4<f32>)
 };
+
+/// An array of `modf()` return type names for an argument of `vecN<f16>`.
 constexpr std::array kModfVecF16Names{
-    core::Builtin::kModfResultVec2F16,
-    core::Builtin::kModfResultVec3F16,
-    core::Builtin::kModfResultVec4F16,
+    core::Builtin::kModfResultVec2F16,  // return type of modf(vec2<f16>)
+    core::Builtin::kModfResultVec3F16,  // return type of modf(vec3<f16>)
+    core::Builtin::kModfResultVec4F16,  // return type of modf(vec4<f16>)
 };
+
+/// An array of `modf()` return type names for an argument of `vecN<abstract-float>`.
 constexpr std::array kModfVecAbstractNames{
-    core::Builtin::kModfResultVec2Abstract,
-    core::Builtin::kModfResultVec3Abstract,
-    core::Builtin::kModfResultVec4Abstract,
+    core::Builtin::kModfResultVec2Abstract,  // return type of modf(vec2<abstract-float>)
+    core::Builtin::kModfResultVec3Abstract,  // return type of modf(vec3<abstract-float>)
+    core::Builtin::kModfResultVec4Abstract,  // return type of modf(vec4<abstract-float>)
 };
+
 Struct* CreateModfResult(Manager& types, SymbolTable& symbols, const Type* ty) {
     auto build = [&](core::Builtin name, const Type* t) {
         return types.Struct(symbols.Register(tint::ToString(name)),
@@ -91,21 +97,27 @@ Struct* CreateModfResult(Manager& types, SymbolTable& symbols, const Type* ty) {
         });
 }
 
+/// An array of `frexp()` return type names for an argument of `vecN<f32>`.
 constexpr std::array kFrexpVecF32Names{
-    core::Builtin::kFrexpResultVec2F32,
-    core::Builtin::kFrexpResultVec3F32,
-    core::Builtin::kFrexpResultVec4F32,
+    core::Builtin::kFrexpResultVec2F32,  // return type of frexp(vec2<f32>)
+    core::Builtin::kFrexpResultVec3F32,  // return type of frexp(vec3<f32>)
+    core::Builtin::kFrexpResultVec4F32,  // return type of frexp(vec4<f32>)
 };
+
+/// An array of `frexp()` return type names for an argument of `vecN<f16>`.
 constexpr std::array kFrexpVecF16Names{
-    core::Builtin::kFrexpResultVec2F16,
-    core::Builtin::kFrexpResultVec3F16,
-    core::Builtin::kFrexpResultVec4F16,
+    core::Builtin::kFrexpResultVec2F16,  // return type of frexp(vec2<f16>)
+    core::Builtin::kFrexpResultVec3F16,  // return type of frexp(vec3<f16>)
+    core::Builtin::kFrexpResultVec4F16,  // return type of frexp(vec4<f16>)
 };
+
+/// An array of `frexp()` return type names for an argument of `vecN<abstract-float>`.
 constexpr std::array kFrexpVecAbstractNames{
-    core::Builtin::kFrexpResultVec2Abstract,
-    core::Builtin::kFrexpResultVec3Abstract,
-    core::Builtin::kFrexpResultVec4Abstract,
+    core::Builtin::kFrexpResultVec2Abstract,  // return type of frexp(vec2<abstract-float>)
+    core::Builtin::kFrexpResultVec3Abstract,  // return type of frexp(vec3<abstract-float>)
+    core::Builtin::kFrexpResultVec4Abstract,  // return type of frexp(vec4<abstract-float>)
 };
+
 Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* ty) {
     auto build = [&](core::Builtin name, const Type* fract_ty, const Type* exp_ty) {
         return types.Struct(

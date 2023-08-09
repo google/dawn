@@ -34,6 +34,7 @@ class Type;
 
 namespace tint::type {
 
+/// Flag is an enumerator of type flag bits, used by Flags.
 enum Flag {
     /// Type is constructable.
     /// @see https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
