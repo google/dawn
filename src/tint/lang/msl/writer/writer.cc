@@ -43,8 +43,9 @@ Result<Output, std::string> Generate(const Program* program, const Options& opti
         // Generate the MSL code.
         auto ir = converted.Move();
         auto impl = std::make_unique<Printer>(&ir);
-        if (!impl->Generate()) {
-            return impl->Diagnostics().str();
+        auto result = impl->Generate();
+        if (!result) {
+            return result.Failure();
         }
         output.msl = impl->Result();
     } else  // NOLINT(readability/braces)

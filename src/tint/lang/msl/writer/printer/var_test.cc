@@ -27,8 +27,8 @@ TEST_F(MslPrinterTest, VarF32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   float a = 0.0f;
 }
@@ -43,8 +43,8 @@ TEST_F(MslPrinterTest, VarI32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   int a = 1;
 }
@@ -59,8 +59,8 @@ TEST_F(MslPrinterTest, VarU32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   uint a = 1u;
 }
@@ -74,8 +74,8 @@ TEST_F(MslPrinterTest, VarArrayF32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + MetalArray() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + MetalArray() + R"(
 void foo() {
   tint_array<float, 5> a = {};
 }
@@ -92,8 +92,8 @@ TEST_F(MslPrinterTest, VarStruct) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(struct MyStruct {
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(struct MyStruct {
   float a;
   int4 b;
 };
@@ -111,8 +111,8 @@ TEST_F(MslPrinterTest, VarVecF32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   float2 a = 0.0f;
 }
@@ -127,8 +127,8 @@ TEST_F(MslPrinterTest, VarVecF16) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   half2 a = 0.0h;
 }
@@ -142,8 +142,8 @@ TEST_F(MslPrinterTest, VarMatF32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   float3x2 a = float3x2(0.0f);
 }
@@ -158,8 +158,8 @@ TEST_F(MslPrinterTest, VarMatF16) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   half3x2 a = half3x2(0.0h);
 }
@@ -174,8 +174,8 @@ TEST_F(MslPrinterTest, VarVecF32SplatZero) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   float3 a = float3(0.0f);
 }
@@ -191,8 +191,8 @@ TEST_F(MslPrinterTest, VarVecF16SplatZero) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   half3 a = half3(0.0h);
 }
@@ -208,8 +208,8 @@ TEST_F(MslPrinterTest, VarMatF32SplatZero) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   float2x3 a = float2x3(float3(0.0f), float3(0.0f));
 }
@@ -226,8 +226,8 @@ TEST_F(MslPrinterTest, VarMatF16SplatZero) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   half2x3 a = half2x3(half3(0.0h), half3(0.0h));
 }
@@ -247,8 +247,8 @@ TEST_F(MslPrinterTest, DISABLED_VarGlobalPrivate) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 struct tint_private_vars_struct {
   float a;
 };
@@ -273,8 +273,8 @@ TEST_F(MslPrinterTest, VarGlobalWorkgroup) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 threadgroup float v;
 void foo() {
   float a = v;

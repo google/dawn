@@ -27,8 +27,8 @@ TEST_F(MslPrinterTest, Return) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   if (true) {
     return;
@@ -41,8 +41,8 @@ TEST_F(MslPrinterTest, ReturnAtEndOfVoidDropped) {
     auto* func = b.Function("foo", ty.void_());
     func->Block()->Append(b.Return(func));
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
 }
 )");
@@ -52,8 +52,8 @@ TEST_F(MslPrinterTest, ReturnWithValue) {
     auto* func = b.Function("foo", ty.i32());
     func->Block()->Append(b.Return(func, 123_i));
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 int foo() {
   return 123;
 }

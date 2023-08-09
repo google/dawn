@@ -69,11 +69,10 @@ Printer::Printer(ir::Module* module) : ir_(module) {}
 
 Printer::~Printer() = default;
 
-bool Printer::Generate() {
-    auto valid = ir::Validate(*ir_);
+tint::Result<SuccessType, std::string> Printer::Generate() {
+    auto valid = ir::ValidateAndDumpIfNeeded(*ir_, "MSL writer");
     if (!valid) {
-        diagnostics_ = valid.Failure();
-        return false;
+        return std::move(valid.Failure());
     }
 
     // Run the IR transformations to prepare for MSL emission.
@@ -95,11 +94,7 @@ bool Printer::Generate() {
         EmitFunction(func);
     }
 
-    if (diagnostics_.contains_errors()) {
-        return false;
-    }
-
-    return true;
+    return Success;
 }
 
 std::string Printer::Result() const {

@@ -48,11 +48,12 @@ class Printer : public tint::TextGenerator {
     ~Printer() override;
 
     /// @returns true on successful generation; false otherwise
-    bool Generate();
+    tint::Result<SuccessType, std::string> Generate();
 
     /// @copydoc tint::TextGenerator::Result
     std::string Result() const override;
 
+  private:
     /// Emit the function
     /// @param func the function to emit
     void EmitFunction(ir::Function* func);
@@ -147,11 +148,6 @@ class Printer : public tint::TextGenerator {
     /// @returns the name of the templated `tint_array` helper type, generating it if needed
     const std::string& ArrayTemplateName();
 
-    /// Unique name of the tint_array<T, N> template.
-    /// Non-empty only if the template has been generated.
-    std::string array_template_name_;
-
-  private:
     /// @param s the structure
     /// @returns the name of the structure, taking special care of builtin structures that start
     /// with double underscores. If the structure is a builtin, then the returned name will be a
@@ -181,6 +177,10 @@ class Printer : public tint::TextGenerator {
     ir::Function* current_function_ = nullptr;
     /// The current block being emitted
     ir::Block* current_block_ = nullptr;
+
+    /// Unique name of the tint_array<T, N> template.
+    /// Non-empty only if the template has been generated.
+    std::string array_template_name_;
 
     /// The representation for an IR pointer type
     enum class PtrKind {

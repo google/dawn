@@ -27,8 +27,8 @@ TEST_F(MslPrinterTest, LetU32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   uint const l = 42u;
 }
@@ -43,8 +43,8 @@ TEST_F(MslPrinterTest, LetDuplicate) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   uint const l1 = 42u;
   uint const l2 = 42u;
@@ -59,8 +59,8 @@ TEST_F(MslPrinterTest, LetF32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   float const l = 42.0f;
 }
@@ -74,8 +74,8 @@ TEST_F(MslPrinterTest, LetI32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   int const l = 42;
 }
@@ -90,8 +90,8 @@ TEST_F(MslPrinterTest, LetF16) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   half const l = 42.0h;
 }
@@ -105,8 +105,8 @@ TEST_F(MslPrinterTest, LetVec3F32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   float3 const l = float3(1.0f, 2.0f, 3.0f);
 }
@@ -121,8 +121,8 @@ TEST_F(MslPrinterTest, LetVec3F16) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   half3 const l = half3(1.0h, 2.0h, 3.0h);
 }
@@ -138,8 +138,8 @@ TEST_F(MslPrinterTest, LetMat2x3F32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   float2x3 const l = float2x3(float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f));
 }
@@ -156,8 +156,8 @@ TEST_F(MslPrinterTest, LetMat2x3F16) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   half2x3 const l = half2x3(half3(1.0h, 2.0h, 3.0h), half3(4.0h, 5.0h, 6.0h));
 }
@@ -171,8 +171,8 @@ TEST_F(MslPrinterTest, LetArrF32) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + MetalArray() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + MetalArray() + R"(
 void foo() {
   tint_array<float, 3> const l = tint_array<float, 3>{1.0f, 2.0f, 3.0f};
 }
@@ -189,8 +189,8 @@ TEST_F(MslPrinterTest, LetArrVec2Bool) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + MetalArray() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + MetalArray() + R"(
 void foo() {
   tint_array<bool2, 3> const l = tint_array<bool2, 3>{bool2(true, false), bool2(false, true), bool2(true, false)};
 }

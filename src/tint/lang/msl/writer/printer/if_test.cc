@@ -27,8 +27,8 @@ TEST_F(MslPrinterTest, If) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   if (true) {
   }
@@ -49,8 +49,8 @@ TEST_F(MslPrinterTest, IfWithElseIf) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   if (true) {
   } else {
@@ -70,8 +70,8 @@ TEST_F(MslPrinterTest, IfWithElse) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   if (true) {
   } else {
@@ -90,8 +90,8 @@ TEST_F(MslPrinterTest, IfBothBranchesReturn) {
         b.Unreachable();
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   if (true) {
     return;
@@ -117,8 +117,8 @@ TEST_F(MslPrinterTest, IfWithSinglePhi) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   int tint_symbol;
   if (true) {
@@ -144,8 +144,8 @@ TEST_F(MslPrinterTest, IfWithMultiPhi) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   int tint_symbol;
   bool tint_symbol_1;
@@ -174,8 +174,8 @@ TEST_F(MslPrinterTest, IfWithMultiPhiReturn1) {
         b.Return(func, i->Result(0));
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 int foo() {
   int tint_symbol;
   bool tint_symbol_1;
@@ -205,8 +205,8 @@ TEST_F(MslPrinterTest, IfWithMultiPhiReturn2) {
         b.Return(func, i->Result(1));
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 bool foo() {
   int tint_symbol;
   bool tint_symbol_1;

@@ -45,12 +45,13 @@ TEST_P(MslPrinterBinaryTest, Emit) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   uint const left = 1u;
   uint const right = 2u;
-  uint const val = )" + params.result + R"(;
+  uint const val = )" + params.result +
+                           R"(;
 }
 )");
 }
@@ -81,12 +82,13 @@ TEST_P(MslPrinterBinaryBoolTest, Emit) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   uint const left = 1u;
   uint const right = 2u;
-  bool const val = )" + params.result + R"(;
+  bool const val = )" + params.result +
+                           R"(;
 }
 )");
 }
@@ -116,12 +118,13 @@ TEST_P(MslPrinterBinaryTest_SignedOverflowDefinedBehaviour, DISABLED_Emit) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   int const left = 1i;
   int const right = 3i;
-  int const val = )" + params.result + R"(;
+  int const val = )" + params.result +
+                           R"(;
       }
 )");
 }
@@ -150,12 +153,13 @@ TEST_P(MslPrinterBinaryTest_ShiftSignedOverflowDefinedBehaviour, DISABLED_Emit) 
         b.Return(func);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   int const left = 1i;
   uint const right = 2u;
-  int const val = )" + params.result + R"(;
+  int const val = )" + params.result +
+                           R"(;
       }
 )");
 }
@@ -185,12 +189,13 @@ TEST_P(MslPrinterBinaryTest_SignedOverflowDefinedBehaviour_Chained, DISABLED_Emi
         b.Let("val", expr2);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   int left;
   int right;
-  int const val = )" + params.result + R"(;
+  int const val = )" + params.result +
+                           R"(;
 )");
 }
 constexpr BinaryData signed_overflow_defined_behaviour_chained_cases[] = {
@@ -225,12 +230,13 @@ TEST_P(MslPrinterBinaryTest_ShiftSignedOverflowDefinedBehaviour_Chained, DISABLE
         b.Let("val", expr2);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   int left;
   uint right;
-  int const val = )" + params.result + R"(;
+  int const val = )" + params.result +
+                           R"(;
 )");
 }
 constexpr BinaryData shift_signed_overflow_defined_behaviour_chained_cases[] = {
@@ -254,8 +260,8 @@ TEST_F(MslPrinterTest, DISABLED_BinaryModF32) {
         b.Let("val", expr1);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   float left;
   float right;
@@ -277,8 +283,8 @@ TEST_F(MslPrinterTest, DISABLED_BinaryModF16) {
         b.Let("val", expr1);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   half left;
   half right;
@@ -298,8 +304,8 @@ TEST_F(MslPrinterTest, DISABLED_BinaryModVec3F32) {
         b.Let("val", expr1);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   float3 left;
   float3 right;
@@ -321,8 +327,8 @@ TEST_F(MslPrinterTest, DISABLED_BinaryModVec3F16) {
         b.Let("val", expr1);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   half3 left;
   half3 right;
@@ -342,8 +348,8 @@ TEST_F(MslPrinterTest, DISABLED_BinaryBoolAnd) {
         b.Let("val", expr1);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   float left;
   float right;
@@ -363,8 +369,8 @@ TEST_F(MslPrinterTest, DISABLED_BinaryBoolOr) {
         b.Let("val", expr1);
     });
 
-    ASSERT_TRUE(generator_.Generate()) << generator_.Diagnostics().str();
-    EXPECT_EQ(generator_.Result(), MetalHeader() + R"(
+    ASSERT_TRUE(Generate()) << err_ << output_;
+    EXPECT_EQ(output_, MetalHeader() + R"(
 void foo() {
   float left;
   float right;
