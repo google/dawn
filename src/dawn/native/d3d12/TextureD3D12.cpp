@@ -540,10 +540,13 @@ void Texture::TransitionSubresourceRange(std::vector<D3D12_RESOURCE_BARRIER>* ba
     barrier.Transition.StateBefore = lastState;
     barrier.Transition.StateAfter = newState;
 
-    bool isFullRange = range.baseArrayLayer == 0 && range.baseMipLevel == 0 &&
-                       range.layerCount == GetArrayLayers() &&
-                       range.levelCount == GetNumMipLevels() &&
-                       range.aspects == GetFormat().aspects;
+    // Currently Stencil8 is implemented with DXGI_FORMAT_D24_UNORM_S8_UINT, while we can only
+    // choose the stencil aspect for Stencil8 textures, so actually we cannot select the full
+    // subresource range on the Stencil8 textures.
+    bool isFullRange =
+        range.baseArrayLayer == 0 && range.baseMipLevel == 0 &&
+        range.layerCount == GetArrayLayers() && range.levelCount == GetNumMipLevels() &&
+        range.aspects == GetFormat().aspects && GetFormat().format != wgpu::TextureFormat::Stencil8;
 
     // Use a single transition for all subresources if possible.
     if (isFullRange) {

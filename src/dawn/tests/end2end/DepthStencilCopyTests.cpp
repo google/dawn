@@ -890,10 +890,6 @@ class StencilCopyTests : public DepthStencilCopyTests {
                                          uint32_t textureArrayLayerCount,
                                          uint32_t testLevel,
                                          bool checkBufferContent) {
-        // TODO(crbug.com/dawn/1835): ResourceBarrier state mismatch.
-        DAWN_SUPPRESS_TEST_IF(textureArrayLayerCount > 1 && IsD3D12() &&
-                              IsBackendValidationEnabled());
-
         // TODO(crbug.com/dawn/667): Work around the fact that some platforms are unable to read
         // stencil.
         DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
@@ -956,9 +952,6 @@ class StencilCopyTests : public DepthStencilCopyTests {
         // Copies to a single aspect are unsupported on OpenGL.
         DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
         DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
-        // TODO(crbug.com/dawn/1273): Fails on Win11 with D3D12 debug layer and full validation
-        DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
         // Create a stencil texture
         constexpr uint32_t kWidth = 4;
