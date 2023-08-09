@@ -61,11 +61,12 @@ TEST_F(SpirvWriterTest, Discard) {
                OpBranch %28
          %28 = OpLabel
          %31 = OpLoad %bool %continue_execution
-               OpSelectionMerge %32 None
-               OpBranchConditional %31 %33 %32
-         %33 = OpLabel
+         %32 = OpLogicalEqual %bool %31 %false
+               OpSelectionMerge %33 None
+               OpBranchConditional %32 %34 %33
+         %34 = OpLabel
                OpKill
-         %32 = OpLabel
+         %33 = OpLabel
                OpReturnValue %float_0_5
                OpFunctionEnd
 )");

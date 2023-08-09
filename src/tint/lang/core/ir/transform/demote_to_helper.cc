@@ -184,11 +184,13 @@ struct State {
                     // Insert a conditional terminate invocation instruction before each return
                     // instruction in the entry point function.
                     if (ret->Func()->Stage() == Function::PipelineStage::kFragment) {
-                        auto* cond = b.Load(continue_execution);
-                        auto* ifelse = b.If(cond);
-                        cond->InsertBefore(ret);
-                        ifelse->InsertBefore(ret);
-                        ifelse->True()->Append(b.TerminateInvocation());
+                        b.InsertBefore(ret, [&] {
+                            auto* cond = b.Load(continue_execution);
+                            auto* ifelse = b.If(b.Equal(ty.bool_(), cond, false));
+                            b.Append(ifelse->True(), [&] {  //
+                                b.TerminateInvocation();
+                            });
+                        });
                     }
                 },
                 [&](ControlInstruction* ctrl) {

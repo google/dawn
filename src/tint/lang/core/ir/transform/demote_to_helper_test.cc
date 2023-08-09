@@ -126,7 +126,8 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInEntryPoint) {
       }
     }
     %6:bool = load %continue_execution
-    if %6 [t: %b5] {  # if_3
+    %7:bool = eq %6, false
+    if %7 [t: %b5] {  # if_3
       %b5 = block {  # true
         terminate_invocation
       }
@@ -222,7 +223,8 @@ TEST_F(IR_DemoteToHelperTest, DiscardInEntryPoint_WriteInHelper) {
     }
     %7:void = call %foo
     %8:bool = load %continue_execution
-    if %8 [t: %b6] {  # if_3
+    %9:bool = eq %8, false
+    if %9 [t: %b6] {  # if_3
       %b6 = block {  # true
         terminate_invocation
       }
@@ -320,7 +322,8 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInEntryPoint) {
       }
     }
     %9:bool = load %continue_execution
-    if %9 [t: %b6] {  # if_3
+    %10:bool = eq %9, false
+    if %10 [t: %b6] {  # if_3
       %b6 = block {  # true
         terminate_invocation
       }
@@ -418,7 +421,8 @@ TEST_F(IR_DemoteToHelperTest, DiscardInHelper_WriteInHelper) {
   %b5 = block {
     %8:void = call %foo, %front_facing
     %9:bool = load %continue_execution
-    if %9 [t: %b6] {  # if_3
+    %10:bool = eq %9, false
+    if %10 [t: %b6] {  # if_3
       %b6 = block {  # true
         terminate_invocation
       }
@@ -493,7 +497,8 @@ TEST_F(IR_DemoteToHelperTest, WriteToInvocationPrivateAddressSpace) {
     store %priv, 42i
     store %func, 42i
     %6:bool = load %continue_execution
-    if %6 [t: %b4] {  # if_2
+    %7:bool = eq %6, false
+    if %7 [t: %b4] {  # if_2
       %b4 = block {  # true
         terminate_invocation
       }
@@ -577,7 +582,8 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
       }
     }
     %8:bool = load %continue_execution
-    if %8 [t: %b5] {  # if_3
+    %9:bool = eq %8, false
+    if %9 [t: %b5] {  # if_3
       %b5 = block {  # true
         terminate_invocation
       }
@@ -655,7 +661,8 @@ TEST_F(IR_DemoteToHelperTest, AtomicStore) {
       }
     }
     %7:bool = load %continue_execution
-    if %7 [t: %b5] {  # if_3
+    %8:bool = eq %7, false
+    if %8 [t: %b5] {  # if_3
       %b5 = block {  # true
         terminate_invocation
       }
@@ -737,7 +744,8 @@ TEST_F(IR_DemoteToHelperTest, AtomicAdd) {
     }
     %8:i32 = add %6, 1i
     %9:bool = load %continue_execution
-    if %9 [t: %b5] {  # if_3
+    %10:bool = eq %9, false
+    if %10 [t: %b5] {  # if_3
       %b5 = block {  # true
         terminate_invocation
       }
@@ -832,7 +840,8 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
     %8:i32 = access %6, 0i
     %9:i32 = add %8, 1i
     %10:bool = load %continue_execution
-    if %10 [t: %b5] {  # if_3
+    %11:bool = eq %10, false
+    if %11 [t: %b5] {  # if_3
       %b5 = block {  # true
         terminate_invocation
       }
