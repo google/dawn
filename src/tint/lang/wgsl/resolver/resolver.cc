@@ -22,6 +22,7 @@
 
 #include "src/tint/lang/core/builtin.h"
 #include "src/tint/lang/core/constant/scalar.h"
+#include "src/tint/lang/core/intrinsic_data.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
@@ -101,6 +102,7 @@ namespace tint::resolver {
 namespace {
 
 using CtorConvIntrinsic = core::intrinsic::CtorConv;
+using OverloadFlag = core::intrinsic::TableData::OverloadFlag;
 
 constexpr int64_t kMaxArrayElementCount = 65536;
 constexpr uint32_t kMaxStatementDepth = 127;
@@ -112,7 +114,10 @@ Resolver::Resolver(ProgramBuilder* builder)
     : builder_(builder),
       diagnostics_(builder->Diagnostics()),
       const_eval_(builder->constants, diagnostics_),
-      intrinsic_table_(core::intrinsic::Table::Create(*builder)),
+      intrinsic_table_(core::intrinsic::Table::Create(core::kIntrinsicData,
+                                                      builder->Types(),
+                                                      builder->Symbols(),
+                                                      builder->Diagnostics())),
       sem_(builder),
       validator_(builder,
                  sem_,
@@ -2061,32 +2066,62 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     // sem::ValueConversion call for a CtorConvIntrinsic with an optional template argument type.
     auto ctor_or_conv = [&](CtorConvIntrinsic ty, const type::Type* template_arg) -> sem::Call* {
         auto arg_tys = tint::Transform(args, [](auto* arg) { return arg->Type(); });
-        auto entry = intrinsic_table_->Lookup(ty, template_arg, arg_tys, args_stage, expr->source);
-        if (!entry.target) {
+        auto match = intrinsic_table_->Lookup(ty, template_arg, arg_tys, args_stage, expr->source);
+        if (!match) {
             return nullptr;
         }
-        if (!MaybeMaterializeAndLoadArguments(args, entry.target)) {
+
+        auto overload_stage = match->info->const_eval_fn ? core::EvaluationStage::kConstant
+                                                         : core::EvaluationStage::kRuntime;
+
+        sem::CallTarget* target_sem = nullptr;
+
+        // Is this overload a constructor or conversion?
+        if (match->info->flags.Contains(OverloadFlag::kIsConstructor)) {
+            // Type constructor
+            auto params = Transform(match->parameters, [&](auto& p, size_t i) {
+                return builder_->create<sem::Parameter>(nullptr, static_cast<uint32_t>(i), p.type,
+                                                        core::AddressSpace::kUndefined,
+                                                        core::Access::kUndefined, p.usage);
+            });
+            target_sem = constructors_.GetOrCreate(match.Get(), [&] {
+                return builder_->create<sem::ValueConstructor>(match->return_type,
+                                                               std::move(params), overload_stage);
+            });
+        } else {
+            // Type conversion
+            target_sem = converters_.GetOrCreate(match.Get(), [&] {
+                auto param = builder_->create<sem::Parameter>(
+                    nullptr, 0u, match->parameters[0].type, core::AddressSpace::kUndefined,
+                    core::Access::kUndefined, match->parameters[0].usage);
+                return builder_->create<sem::ValueConversion>(match->return_type, param,
+                                                              overload_stage);
+            });
+        }
+
+        if (!MaybeMaterializeAndLoadArguments(args, target_sem)) {
             return nullptr;
         }
 
         const core::constant::Value* value = nullptr;
-        auto stage = core::EarliestStage(entry.target->Stage(), args_stage);
+        auto stage = core::EarliestStage(overload_stage, args_stage);
         if (stage == core::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
             stage = core::EvaluationStage::kNotEvaluated;
         }
         if (stage == core::EvaluationStage::kConstant) {
-            auto const_args = ConvertArguments(args, entry.target);
+            auto const_args = ConvertArguments(args, target_sem);
             if (!const_args) {
                 return nullptr;
             }
-            if (auto r = (const_eval_.*entry.const_eval_fn)(entry.target->ReturnType(),
-                                                            const_args.Get(), expr->source)) {
+            auto const_eval_fn = match->info->const_eval_fn;
+            if (auto r = (const_eval_.*const_eval_fn)(target_sem->ReturnType(), const_args.Get(),
+                                                      expr->source)) {
                 value = r.Get();
             } else {
                 return nullptr;
             }
         }
-        return builder_->create<sem::Call>(expr, entry.target, stage, std::move(args),
+        return builder_->create<sem::Call>(expr, target_sem, stage, std::move(args),
                                            current_statement_, value, has_side_effects);
     };
 
@@ -2345,53 +2380,75 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
 template <size_t N>
 sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
-                                 core::Function builtin_type,
+                                 core::Function fn,
                                  Vector<const sem::ValueExpression*, N>& args) {
     auto arg_stage = core::EvaluationStage::kConstant;
     for (auto* arg : args) {
         arg_stage = core::EarliestStage(arg_stage, arg->Stage());
     }
 
-    core::intrinsic::Table::Builtin builtin;
-    {
-        auto arg_tys = tint::Transform(args, [](auto* arg) { return arg->Type(); });
-        builtin = intrinsic_table_->Lookup(builtin_type, arg_tys, arg_stage, expr->source);
-        if (!builtin.sem) {
-            return nullptr;
-        }
+    auto arg_tys = tint::Transform(args, [](auto* arg) { return arg->Type(); });
+    auto overload = intrinsic_table_->Lookup(fn, arg_tys, arg_stage, expr->source);
+    if (!overload) {
+        return nullptr;
     }
 
-    if (builtin_type == core::Function::kTintMaterialize) {
+    // De-duplicate builtins that are identical.
+    auto* target = builtins_.GetOrCreate(std::make_pair(overload.Get(), fn), [&] {
+        auto params = Transform(overload->parameters, [&](auto& p, size_t i) {
+            return builder_->create<sem::Parameter>(nullptr, static_cast<uint32_t>(i), p.type,
+                                                    core::AddressSpace::kUndefined,
+                                                    core::Access::kUndefined, p.usage);
+        });
+        sem::PipelineStageSet supported_stages;
+        auto flags = overload->info->flags;
+        if (flags.Contains(OverloadFlag::kSupportsVertexPipeline)) {
+            supported_stages.Add(ast::PipelineStage::kVertex);
+        }
+        if (flags.Contains(OverloadFlag::kSupportsFragmentPipeline)) {
+            supported_stages.Add(ast::PipelineStage::kFragment);
+        }
+        if (flags.Contains(OverloadFlag::kSupportsComputePipeline)) {
+            supported_stages.Add(ast::PipelineStage::kCompute);
+        }
+        auto eval_stage = overload->info->const_eval_fn ? core::EvaluationStage::kConstant
+                                                        : core::EvaluationStage::kRuntime;
+        return builder_->create<sem::Builtin>(
+            fn, overload->return_type, std::move(params), eval_stage, supported_stages,
+            flags.Contains(OverloadFlag::kIsDeprecated), flags.Contains(OverloadFlag::kMustUse));
+    });
+
+    if (fn == core::Function::kTintMaterialize) {
         args[0] = Materialize(args[0]);
         if (!args[0]) {
             return nullptr;
         }
     } else {
         // Materialize arguments if the parameter type is not abstract
-        if (!MaybeMaterializeAndLoadArguments(args, builtin.sem)) {
+        if (!MaybeMaterializeAndLoadArguments(args, target)) {
             return nullptr;
         }
     }
 
-    if (builtin.sem->IsDeprecated()) {
+    if (target->IsDeprecated()) {
         AddWarning("use of deprecated builtin", expr->source);
     }
 
     // If the builtin is @const, and all arguments have constant values, evaluate the builtin
     // now.
     const core::constant::Value* value = nullptr;
-    auto stage = core::EarliestStage(arg_stage, builtin.sem->Stage());
+    auto stage = core::EarliestStage(arg_stage, target->Stage());
     if (stage == core::EvaluationStage::kConstant && skip_const_eval_.Contains(expr)) {
         stage = core::EvaluationStage::kNotEvaluated;
     }
     if (stage == core::EvaluationStage::kConstant) {
-        auto const_args = ConvertArguments(args, builtin.sem);
+        auto const_args = ConvertArguments(args, target);
         if (!const_args) {
             return nullptr;
         }
-
-        if (auto r = (const_eval_.*builtin.const_eval_fn)(builtin.sem->ReturnType(),
-                                                          const_args.Get(), expr->source)) {
+        auto const_eval_fn = overload->info->const_eval_fn;
+        if (auto r = (const_eval_.*const_eval_fn)(target->ReturnType(), const_args.Get(),
+                                                  expr->source)) {
             value = r.Get();
         } else {
             return nullptr;
@@ -2399,13 +2456,13 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     }
 
     bool has_side_effects =
-        builtin.sem->HasSideEffects() ||
+        target->HasSideEffects() ||
         std::any_of(args.begin(), args.end(), [](auto* e) { return e->HasSideEffects(); });
-    auto* call = builder_->create<sem::Call>(expr, builtin.sem, stage, std::move(args),
+    auto* call = builder_->create<sem::Call>(expr, target, stage, std::move(args),
                                              current_statement_, value, has_side_effects);
 
     if (current_function_) {
-        current_function_->AddDirectlyCalledBuiltin(builtin.sem);
+        current_function_->AddDirectlyCalledBuiltin(target);
         current_function_->AddDirectCall(call);
     }
 
@@ -2413,14 +2470,14 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         return nullptr;
     }
 
-    if (IsTextureBuiltin(builtin_type)) {
+    if (IsTextureBuiltin(fn)) {
         if (!validator_.TextureBuiltinFunction(call)) {
             return nullptr;
         }
-        CollectTextureSamplerPairs(builtin.sem, call->Arguments());
+        CollectTextureSamplerPairs(target, call->Arguments());
     }
 
-    if (builtin_type == core::Function::kWorkgroupUniformLoad) {
+    if (fn == core::Function::kWorkgroupUniformLoad) {
         if (!validator_.WorkgroupUniformLoad(call)) {
             return nullptr;
         }
@@ -3458,22 +3515,26 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
         return nullptr;
     }
 
-    auto* lhs_ty = lhs->Type();
-    auto* rhs_ty = rhs->Type();
-
     auto stage = core::EarliestStage(lhs->Stage(), rhs->Stage());
-    auto op = intrinsic_table_->Lookup(expr->op, lhs_ty, rhs_ty, stage, expr->source, false);
-    if (!op.result) {
+    auto overload =
+        intrinsic_table_->Lookup(expr->op, lhs->Type(), rhs->Type(), stage, expr->source, false);
+    if (!overload) {
         return nullptr;
     }
-    if (ShouldMaterializeArgument(op.lhs)) {
-        lhs = Materialize(lhs, op.lhs);
+
+    auto* res_ty = overload->return_type;
+
+    // Parameter types
+    auto* lhs_ty = overload->parameters[0].type;
+    auto* rhs_ty = overload->parameters[1].type;
+    if (ShouldMaterializeArgument(lhs_ty)) {
+        lhs = Materialize(lhs, lhs_ty);
         if (!lhs) {
             return nullptr;
         }
     }
-    if (ShouldMaterializeArgument(op.rhs)) {
-        rhs = Materialize(rhs, op.rhs);
+    if (ShouldMaterializeArgument(rhs_ty)) {
+        rhs = Materialize(rhs, rhs_ty);
         if (!rhs) {
             return nullptr;
         }
@@ -3491,18 +3552,19 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
         stage = core::EvaluationStage::kConstant;
     } else if (stage == core::EvaluationStage::kConstant) {
         // Both LHS and RHS have expressions that are constant evaluation stage.
-        if (op.const_eval_fn) {  // Do we have a @const operator?
+        auto const_eval_fn = overload->info->const_eval_fn;
+        if (const_eval_fn) {  // Do we have a @const operator?
             // Yes. Perform any required abstract argument values implicit conversions to the
             // overload parameter types, and const-eval.
             Vector const_args{lhs->ConstantValue(), rhs->ConstantValue()};
             // Implicit conversion (e.g. AInt -> AFloat)
-            if (!Convert(const_args[0], op.lhs, lhs->Declaration()->source)) {
+            if (!Convert(const_args[0], lhs_ty, lhs->Declaration()->source)) {
                 return nullptr;
             }
-            if (!Convert(const_args[1], op.rhs, rhs->Declaration()->source)) {
+            if (!Convert(const_args[1], rhs_ty, rhs->Declaration()->source)) {
                 return nullptr;
             }
-            if (auto r = (const_eval_.*op.const_eval_fn)(op.result, const_args, expr->source)) {
+            if (auto r = (const_eval_.*const_eval_fn)(res_ty, const_args, expr->source)) {
                 value = r.Get();
             } else {
                 return nullptr;
@@ -3515,7 +3577,7 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
     }
 
     bool has_side_effects = lhs->HasSideEffects() || rhs->HasSideEffects();
-    auto* sem = builder_->create<sem::ValueExpression>(expr, op.result, stage, current_statement_,
+    auto* sem = builder_->create<sem::ValueExpression>(expr, res_ty, stage, current_statement_,
                                                        value, has_side_effects);
     sem->Behaviors() = lhs->Behaviors() + rhs->Behaviors();
 
@@ -3575,13 +3637,14 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
         default: {
             stage = expr->Stage();
-            auto op = intrinsic_table_->Lookup(unary->op, expr_ty, stage, unary->source);
-            if (!op.result) {
+            auto overload = intrinsic_table_->Lookup(unary->op, expr_ty, stage, unary->source);
+            if (!overload) {
                 return nullptr;
             }
-            ty = op.result;
-            if (ShouldMaterializeArgument(op.parameter)) {
-                expr = Materialize(expr, op.parameter);
+            ty = overload->return_type;
+            auto* param_ty = overload->parameters[0].type;
+            if (ShouldMaterializeArgument(param_ty)) {
+                expr = Materialize(expr, param_ty);
                 if (!expr) {
                     return nullptr;
                 }
@@ -3595,9 +3658,10 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
             stage = expr->Stage();
             if (stage == core::EvaluationStage::kConstant) {
-                if (op.const_eval_fn) {
-                    if (auto r = (const_eval_.*op.const_eval_fn)(ty, Vector{expr->ConstantValue()},
-                                                                 expr->Declaration()->source)) {
+                auto const_eval_fn = overload->info->const_eval_fn;
+                if (const_eval_fn) {
+                    if (auto r = (const_eval_.*const_eval_fn)(ty, Vector{expr->ConstantValue()},
+                                                              expr->Declaration()->source)) {
                         value = r.Get();
                     } else {
                         return nullptr;
@@ -4599,22 +4663,22 @@ sem::Statement* Resolver::CompoundAssignmentStatement(
 
         sem->Behaviors() = rhs->Behaviors() + lhs->Behaviors();
 
-        auto* lhs_ty = lhs->Type()->UnwrapRef();
-        auto* rhs_ty = rhs->Type()->UnwrapRef();
         auto stage = core::EarliestStage(lhs->Stage(), rhs->Stage());
 
-        auto op = intrinsic_table_->Lookup(stmt->op, lhs_ty, rhs_ty, stage, stmt->source, true);
-        if (!op.result) {
+        auto overload =
+            intrinsic_table_->Lookup(stmt->op, lhs->Type()->UnwrapRef(), rhs->Type()->UnwrapRef(),
+                                     stage, stmt->source, true);
+        if (!overload) {
             return false;
         }
 
         // Load or materialize the RHS if necessary.
-        rhs = Load(Materialize(rhs, op.rhs));
+        rhs = Load(Materialize(rhs, overload->parameters[1].type));
         if (!rhs) {
             return false;
         }
 
-        return validator_.Assignment(stmt, op.result);
+        return validator_.Assignment(stmt, overload->return_type);
     });
 }
 

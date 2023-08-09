@@ -114,10 +114,10 @@ struct Slice {
     size_t cap = 0;
 
     /// Constructor
-    Slice() = default;
+    constexpr Slice() = default;
 
     /// Constructor
-    Slice(EmptyType) {}  // NOLINT
+    constexpr Slice(EmptyType) {}  // NOLINT
 
     /// Copy constructor with covariance / const conversion
     /// @param other the vector to copy
@@ -132,12 +132,12 @@ struct Slice {
     /// @param d pointer to the first element in the slice
     /// @param l total number of elements in the slice
     /// @param c total capacity of the backing store for the slice
-    Slice(T* d, size_t l, size_t c) : data(d), len(l), cap(c) {}
+    constexpr Slice(T* d, size_t l, size_t c) : data(d), len(l), cap(c) {}
 
     /// Constructor
     /// @param elements c-array of elements
     template <size_t N>
-    Slice(T (&elements)[N])  // NOLINT
+    constexpr Slice(T (&elements)[N])  // NOLINT
         : data(elements), len(N), cap(N) {}
 
     /// Reinterprets this slice as `const Slice<TO>&`

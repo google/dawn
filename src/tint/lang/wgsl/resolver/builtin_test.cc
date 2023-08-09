@@ -73,6 +73,26 @@ TEST_F(ResolverBuiltinTest, ModuleScopeUsage) {
         R"(12:34 error: const initializer requires a const-expression, but expression is a runtime-expression)");
 }
 
+TEST_F(ResolverBuiltinTest, SameOverloadReturnsSameCallTarget) {
+    // let i = 42i;
+    // let a = select(1_i, 2_i, true);
+    // let b = select(3_i, 4_i, false);
+    // let c = select(5_u, 6_u, true);
+    auto* select_a = Call(core::Function::kSelect, 1_i, 2_i, true);
+    auto* select_b = Call(core::Function::kSelect, 3_i, 4_i, false);
+    auto* select_c = Call(core::Function::kSelect, 5_u, 6_u, true);
+    WrapInFunction(Decl(Let("i", Expr(42_i))),  //
+                   Decl(Let("a", select_a)),    //
+                   Decl(Let("b", select_b)),    //
+                   Decl(Let("c", select_c)));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    EXPECT_EQ(Sem().Get<sem::Call>(select_a)->Target(), Sem().Get<sem::Call>(select_b)->Target());
+    EXPECT_NE(Sem().Get<sem::Call>(select_a)->Target(), Sem().Get<sem::Call>(select_c)->Target());
+    EXPECT_NE(Sem().Get<sem::Call>(select_b)->Target(), Sem().Get<sem::Call>(select_c)->Target());
+}
+
 // Tests for Logical builtins
 namespace logical_builtin_tests {
 

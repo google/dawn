@@ -19,14 +19,11 @@
 #include <utility>
 
 #include "src/tint/lang/core/evaluation_stage.h"
-#include "src/tint/lang/core/intrinsic/core_table_data.h"
 #include "src/tint/lang/core/intrinsic/table_data.h"
-#include "src/tint/lang/wgsl/ast/binary_expression.h"
-#include "src/tint/lang/wgsl/program/program_builder.h"
-#include "src/tint/lang/wgsl/sem/pipeline_stage_set.h"
-#include "src/tint/lang/wgsl/sem/value_constructor.h"
-#include "src/tint/lang/wgsl/sem/value_conversion.h"
+#include "src/tint/lang/core/type/manager.h"
+#include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/containers/hashmap.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/math/math.h"
@@ -73,89 +70,38 @@ using TemplateState = TableData::TemplateState;
 constexpr const auto kNoMatcher = TableData::kNoMatcher;
 
 /// The Vector `N` template argument value for arrays of parameters.
-constexpr const size_t kNumFixedParams = 8;
+constexpr const size_t kNumFixedParams = decltype(Table::Overload{}.parameters)::static_length;
 
 /// The Vector `N` template argument value for arrays of overload candidates.
 constexpr const size_t kNumFixedCandidates = 8;
 
-////////////////////////////////////////////////////////////////////////////////
-// Binding functions for use in the generated builtin_table.inl
-// TODO(bclayton): See if we can move more of this hand-rolled code to the
-// template
-////////////////////////////////////////////////////////////////////////////////
-using PipelineStage = ast::PipelineStage;
-
-/// IntrinsicPrototype describes a fully matched intrinsic.
-struct IntrinsicPrototype {
-    /// Parameter describes a single parameter
-    struct Parameter {
-        /// Parameter type
-        const type::Type* const type;
-        /// Parameter usage
-        ParameterUsage const usage = ParameterUsage::kNone;
-    };
-
-    /// Hasher provides a hash function for the IntrinsicPrototype
-    struct Hasher {
-        /// @param i the IntrinsicPrototype to create a hash for
-        /// @return the hash value
-        inline std::size_t operator()(const IntrinsicPrototype& i) const {
-            size_t hash = Hash(i.parameters.Length());
-            for (auto& p : i.parameters) {
-                hash = HashCombine(hash, p.type, p.usage);
-            }
-            return Hash(hash, i.overload, i.return_type);
-        }
-    };
-
-    const TableData::OverloadInfo* overload = nullptr;
-    type::Type const* return_type = nullptr;
-    Vector<Parameter, kNumFixedParams> parameters;
-};
-
-/// Equality operator for IntrinsicPrototype
-bool operator==(const IntrinsicPrototype& a, const IntrinsicPrototype& b) {
-    if (a.overload != b.overload || a.return_type != b.return_type ||
-        a.parameters.Length() != b.parameters.Length()) {
-        return false;
-    }
-    for (size_t i = 0; i < a.parameters.Length(); i++) {
-        auto& pa = a.parameters[i];
-        auto& pb = b.parameters[i];
-        if (pa.type != pb.type || pa.usage != pb.usage) {
-            return false;
-        }
-    }
-    return true;
-}
-
 /// Impl is the private implementation of the Table interface.
 class Impl : public Table {
   public:
-    Impl(ProgramBuilder& b, const TableData& d);
+    Impl(const TableData& td, type::Manager& tys, SymbolTable& syms, diag::List& d);
 
-    Builtin Lookup(core::Function builtin_type,
-                   VectorRef<const type::Type*> args,
-                   EvaluationStage earliest_eval_stage,
-                   const Source& source) override;
+    Result<Overload> Lookup(core::Function builtin_type,
+                            VectorRef<const type::Type*> args,
+                            EvaluationStage earliest_eval_stage,
+                            const Source& source) override;
 
-    UnaryOperator Lookup(core::UnaryOp op,
-                         const type::Type* arg,
-                         EvaluationStage earliest_eval_stage,
-                         const Source& source) override;
+    Result<Overload> Lookup(core::UnaryOp op,
+                            const type::Type* arg,
+                            EvaluationStage earliest_eval_stage,
+                            const Source& source) override;
 
-    BinaryOperator Lookup(core::BinaryOp op,
-                          const type::Type* lhs,
-                          const type::Type* rhs,
-                          EvaluationStage earliest_eval_stage,
-                          const Source& source,
-                          bool is_compound) override;
+    Result<Overload> Lookup(core::BinaryOp op,
+                            const type::Type* lhs,
+                            const type::Type* rhs,
+                            EvaluationStage earliest_eval_stage,
+                            const Source& source,
+                            bool is_compound) override;
 
-    CtorOrConv Lookup(CtorConv type,
-                      const type::Type* template_arg,
-                      VectorRef<const type::Type*> args,
-                      EvaluationStage earliest_eval_stage,
-                      const Source& source) override;
+    Result<Overload> Lookup(CtorConv type,
+                            const type::Type* template_arg,
+                            VectorRef<const type::Type*> args,
+                            EvaluationStage earliest_eval_stage,
+                            const Source& source) override;
 
   private:
     /// Candidate holds information about an overload evaluated for resolution.
@@ -165,7 +111,7 @@ class Impl : public Table {
         /// The template types and numbers
         TemplateState templates;
         /// The parameter types for the candidate overload
-        Vector<IntrinsicPrototype::Parameter, kNumFixedParams> parameters;
+        Vector<Table::Overload::Parameter, kNumFixedParams> parameters;
         /// The match-score of the candidate overload.
         /// A score of zero indicates an exact match.
         /// Non-zero scores are used for diagnostics when no overload matches.
@@ -194,15 +140,13 @@ class Impl : public Table {
     ///                  defined as `f32`.
     /// @param on_no_match an error callback when no intrinsic overloads matched the provided
     ///                    arguments.
-    /// @returns the matched intrinsic. If no intrinsic could be matched then IntrinsicPrototype
-    ///          will hold nullptrs for IntrinsicPrototype::overload and
-    ///          IntrinsicPrototype::return_type.
-    IntrinsicPrototype MatchIntrinsic(const IntrinsicInfo& intrinsic,
-                                      const char* intrinsic_name,
-                                      VectorRef<const type::Type*> args,
-                                      EvaluationStage earliest_eval_stage,
-                                      TemplateState templates,
-                                      const OnNoMatch& on_no_match) const;
+    /// @returns the matched intrinsic
+    Result<Table::Overload> MatchIntrinsic(const IntrinsicInfo& intrinsic,
+                                           const char* intrinsic_name,
+                                           VectorRef<const type::Type*> args,
+                                           EvaluationStage earliest_eval_stage,
+                                           TemplateState templates,
+                                           const OnNoMatch& on_no_match) const;
 
     /// Evaluates the single overload for the provided argument types.
     /// @param overload the overload being considered
@@ -256,12 +200,10 @@ class Impl : public Table {
                               TemplateState templates,
                               VectorRef<Candidate> candidates) const;
 
-    ProgramBuilder& builder;
     const TableData& data;
-    Hashmap<IntrinsicPrototype, sem::Builtin*, 64, IntrinsicPrototype::Hasher> builtins;
-    Hashmap<IntrinsicPrototype, sem::ValueConstructor*, 16, IntrinsicPrototype::Hasher>
-        constructors;
-    Hashmap<IntrinsicPrototype, sem::ValueConversion*, 16, IntrinsicPrototype::Hasher> converters;
+    type::Manager& types;
+    SymbolTable& symbols;
+    diag::List& diags;
 };
 
 /// @return a string representing a call to a builtin with the given argument
@@ -290,12 +232,13 @@ std::string CallSignature(const char* intrinsic_name,
     return ss.str();
 }
 
-Impl::Impl(ProgramBuilder& b, const TableData& d) : builder(b), data(d) {}
+Impl::Impl(const TableData& td, type::Manager& tys, SymbolTable& syms, diag::List& d)
+    : data(td), types(tys), symbols(syms), diags(d) {}
 
-Impl::Builtin Impl::Lookup(core::Function builtin_type,
-                           VectorRef<const type::Type*> args,
-                           EvaluationStage earliest_eval_stage,
-                           const Source& source) {
+Result<Table::Overload> Impl::Lookup(core::Function builtin_type,
+                                     VectorRef<const type::Type*> args,
+                                     EvaluationStage earliest_eval_stage,
+                                     const Source& source) {
     const char* intrinsic_name = core::str(builtin_type);
 
     // Generates an error when no overloads match the provided arguments
@@ -308,66 +251,36 @@ Impl::Builtin Impl::Lookup(core::Function builtin_type,
                << (candidates.Length() > 1 ? "s:" : ":") << std::endl;
             PrintCandidates(ss, candidates, intrinsic_name);
         }
-        builder.Diagnostics().add_error(diag::System::Resolver, ss.str(), source);
+        diags.add_error(diag::System::Intrinsics, ss.str(), source);
     };
 
     // Resolve the intrinsic overload
-    auto match = MatchIntrinsic(data.builtins[static_cast<size_t>(builtin_type)], intrinsic_name,
-                                args, earliest_eval_stage, TemplateState{}, on_no_match);
-    if (!match.overload) {
-        return {};
-    }
-
-    // De-duplicate builtins that are identical.
-    auto* sem = builtins.GetOrCreate(match, [&] {
-        Vector<sem::Parameter*, kNumFixedParams> params;
-        params.Reserve(match.parameters.Length());
-        for (auto& p : match.parameters) {
-            params.Push(builder.create<sem::Parameter>(
-                nullptr, static_cast<uint32_t>(params.Length()), p.type,
-                core::AddressSpace::kUndefined, core::Access::kUndefined, p.usage));
-        }
-        sem::PipelineStageSet supported_stages;
-        auto& overload = *match.overload;
-        if (overload.flags.Contains(OverloadFlag::kSupportsVertexPipeline)) {
-            supported_stages.Add(ast::PipelineStage::kVertex);
-        }
-        if (overload.flags.Contains(OverloadFlag::kSupportsFragmentPipeline)) {
-            supported_stages.Add(ast::PipelineStage::kFragment);
-        }
-        if (overload.flags.Contains(OverloadFlag::kSupportsComputePipeline)) {
-            supported_stages.Add(ast::PipelineStage::kCompute);
-        }
-        auto eval_stage =
-            overload.const_eval_fn ? EvaluationStage::kConstant : EvaluationStage::kRuntime;
-        return builder.create<sem::Builtin>(builtin_type, match.return_type, std::move(params),
-                                            eval_stage, supported_stages,
-                                            overload.flags.Contains(OverloadFlag::kIsDeprecated),
-                                            overload.flags.Contains(OverloadFlag::kMustUse));
-    });
-    return Builtin{sem, match.overload->const_eval_fn};
+    return MatchIntrinsic(data.builtins[static_cast<size_t>(builtin_type)], intrinsic_name, args,
+                          earliest_eval_stage, TemplateState{}, on_no_match);
 }
 
-Table::UnaryOperator Impl::Lookup(core::UnaryOp op,
-                                  const type::Type* arg,
-                                  EvaluationStage earliest_eval_stage,
-                                  const Source& source) {
-    auto [intrinsic_info, intrinsic_name] = [&]() -> std::pair<const IntrinsicInfo*, const char*> {
-        switch (op) {
-            case core::UnaryOp::kComplement:
-                return {&data.unary_complement, "operator ~ "};
-            case core::UnaryOp::kNegation:
-                return {&data.unary_minus, "operator - "};
-            case core::UnaryOp::kNot:
-                return {&data.unary_not, "operator ! "};
-            default:
-                break;
-        }
-        TINT_UNREACHABLE() << "invalid unary op: " << op;
-        return {};
-    }();
-    if (!intrinsic_info) {
-        return {};
+Result<Table::Overload> Impl::Lookup(core::UnaryOp op,
+                                     const type::Type* arg,
+                                     EvaluationStage earliest_eval_stage,
+                                     const Source& source) {
+    const IntrinsicInfo* intrinsic_info = nullptr;
+    const char* intrinsic_name = nullptr;
+    switch (op) {
+        case core::UnaryOp::kComplement:
+            intrinsic_info = &data.unary_complement;
+            intrinsic_name = "operator ~ ";
+            break;
+        case core::UnaryOp::kNegation:
+            intrinsic_info = &data.unary_minus;
+            intrinsic_name = "operator - ";
+            break;
+        case core::UnaryOp::kNot:
+            intrinsic_info = &data.unary_not;
+            intrinsic_name = "operator ! ";
+            break;
+        default:
+            TINT_UNREACHABLE() << "invalid unary op: " << op;
+            return Failure;
     }
 
     Vector args{arg};
@@ -382,73 +295,95 @@ Table::UnaryOperator Impl::Lookup(core::UnaryOp op,
                << (candidates.Length() > 1 ? "s:" : ":") << std::endl;
             PrintCandidates(ss, candidates, name);
         }
-        builder.Diagnostics().add_error(diag::System::Resolver, ss.str(), source);
+        diags.add_error(diag::System::Intrinsics, ss.str(), source);
     };
 
     // Resolve the intrinsic overload
-    auto match = MatchIntrinsic(*intrinsic_info, intrinsic_name, args, earliest_eval_stage,
-                                TemplateState{}, on_no_match);
-    if (!match.overload) {
-        return {};
-    }
-
-    return UnaryOperator{
-        match.return_type,
-        match.parameters[0].type,
-        match.overload->const_eval_fn,
-    };
+    return MatchIntrinsic(*intrinsic_info, intrinsic_name, args, earliest_eval_stage,
+                          TemplateState{}, on_no_match);
 }
 
-Table::BinaryOperator Impl::Lookup(core::BinaryOp op,
-                                   const type::Type* lhs,
-                                   const type::Type* rhs,
-                                   EvaluationStage earliest_eval_stage,
-                                   const Source& source,
-                                   bool is_compound) {
-    auto [intrinsic_info, intrinsic_name] = [&]() -> std::pair<const IntrinsicInfo*, const char*> {
-        switch (op) {
-            case core::BinaryOp::kAnd:
-                return {&data.binary_and, is_compound ? "operator &= " : "operator & "};
-            case core::BinaryOp::kOr:
-                return {&data.binary_or, is_compound ? "operator |= " : "operator | "};
-            case core::BinaryOp::kXor:
-                return {&data.binary_xor, is_compound ? "operator ^= " : "operator ^ "};
-            case core::BinaryOp::kLogicalAnd:
-                return {&data.binary_logical_and, "operator && "};
-            case core::BinaryOp::kLogicalOr:
-                return {&data.binary_logical_or, "operator || "};
-            case core::BinaryOp::kEqual:
-                return {&data.binary_equal, "operator == "};
-            case core::BinaryOp::kNotEqual:
-                return {&data.binary_not_equal, "operator != "};
-            case core::BinaryOp::kLessThan:
-                return {&data.binary_less_than, "operator < "};
-            case core::BinaryOp::kGreaterThan:
-                return {&data.binary_greater_than, "operator > "};
-            case core::BinaryOp::kLessThanEqual:
-                return {&data.binary_less_than_equal, "operator <= "};
-            case core::BinaryOp::kGreaterThanEqual:
-                return {&data.binary_greater_than_equal, "operator >= "};
-            case core::BinaryOp::kShiftLeft:
-                return {&data.binary_shift_left, is_compound ? "operator <<= " : "operator << "};
-            case core::BinaryOp::kShiftRight:
-                return {&data.binary_shift_right, is_compound ? "operator >>= " : "operator >> "};
-            case core::BinaryOp::kAdd:
-                return {&data.binary_plus, is_compound ? "operator += " : "operator + "};
-            case core::BinaryOp::kSubtract:
-                return {&data.binary_minus, is_compound ? "operator -= " : "operator - "};
-            case core::BinaryOp::kMultiply:
-                return {&data.binary_star, is_compound ? "operator *= " : "operator * "};
-            case core::BinaryOp::kDivide:
-                return {&data.binary_divide, is_compound ? "operator /= " : "operator / "};
-            case core::BinaryOp::kModulo:
-                return {&data.binary_modulo, is_compound ? "operator %= " : "operator % "};
-        }
-        TINT_UNREACHABLE() << "unhandled BinaryOp: " << op;
-        return {};
-    }();
-    if (!intrinsic_info) {
-        return {};
+Result<Table::Overload> Impl::Lookup(core::BinaryOp op,
+                                     const type::Type* lhs,
+                                     const type::Type* rhs,
+                                     EvaluationStage earliest_eval_stage,
+                                     const Source& source,
+                                     bool is_compound) {
+    const IntrinsicInfo* intrinsic_info = nullptr;
+    const char* intrinsic_name = nullptr;
+    switch (op) {
+        case core::BinaryOp::kAnd:
+            intrinsic_info = &data.binary_and;
+            intrinsic_name = is_compound ? "operator &= " : "operator & ";
+            break;
+        case core::BinaryOp::kOr:
+            intrinsic_info = &data.binary_or;
+            intrinsic_name = is_compound ? "operator |= " : "operator | ";
+            break;
+        case core::BinaryOp::kXor:
+            intrinsic_info = &data.binary_xor;
+            intrinsic_name = is_compound ? "operator ^= " : "operator ^ ";
+            break;
+        case core::BinaryOp::kLogicalAnd:
+            intrinsic_info = &data.binary_logical_and;
+            intrinsic_name = "operator && ";
+            break;
+        case core::BinaryOp::kLogicalOr:
+            intrinsic_info = &data.binary_logical_or;
+            intrinsic_name = "operator || ";
+            break;
+        case core::BinaryOp::kEqual:
+            intrinsic_info = &data.binary_equal;
+            intrinsic_name = "operator == ";
+            break;
+        case core::BinaryOp::kNotEqual:
+            intrinsic_info = &data.binary_not_equal;
+            intrinsic_name = "operator != ";
+            break;
+        case core::BinaryOp::kLessThan:
+            intrinsic_info = &data.binary_less_than;
+            intrinsic_name = "operator < ";
+            break;
+        case core::BinaryOp::kGreaterThan:
+            intrinsic_info = &data.binary_greater_than;
+            intrinsic_name = "operator > ";
+            break;
+        case core::BinaryOp::kLessThanEqual:
+            intrinsic_info = &data.binary_less_than_equal;
+            intrinsic_name = "operator <= ";
+            break;
+        case core::BinaryOp::kGreaterThanEqual:
+            intrinsic_info = &data.binary_greater_than_equal;
+            intrinsic_name = "operator >= ";
+            break;
+        case core::BinaryOp::kShiftLeft:
+            intrinsic_info = &data.binary_shift_left;
+            intrinsic_name = is_compound ? "operator <<= " : "operator << ";
+            break;
+        case core::BinaryOp::kShiftRight:
+            intrinsic_info = &data.binary_shift_right;
+            intrinsic_name = is_compound ? "operator >>= " : "operator >> ";
+            break;
+        case core::BinaryOp::kAdd:
+            intrinsic_info = &data.binary_plus;
+            intrinsic_name = is_compound ? "operator += " : "operator + ";
+            break;
+        case core::BinaryOp::kSubtract:
+            intrinsic_info = &data.binary_minus;
+            intrinsic_name = is_compound ? "operator -= " : "operator - ";
+            break;
+        case core::BinaryOp::kMultiply:
+            intrinsic_info = &data.binary_star;
+            intrinsic_name = is_compound ? "operator *= " : "operator * ";
+            break;
+        case core::BinaryOp::kDivide:
+            intrinsic_info = &data.binary_divide;
+            intrinsic_name = is_compound ? "operator /= " : "operator / ";
+            break;
+        case core::BinaryOp::kModulo:
+            intrinsic_info = &data.binary_modulo;
+            intrinsic_name = is_compound ? "operator %= " : "operator % ";
+            break;
     }
 
     Vector args{lhs, rhs};
@@ -463,29 +398,19 @@ Table::BinaryOperator Impl::Lookup(core::BinaryOp op,
                << (candidates.Length() > 1 ? "s:" : ":") << std::endl;
             PrintCandidates(ss, candidates, name);
         }
-        builder.Diagnostics().add_error(diag::System::Resolver, ss.str(), source);
+        diags.add_error(diag::System::Intrinsics, ss.str(), source);
     };
 
     // Resolve the intrinsic overload
-    auto match = MatchIntrinsic(*intrinsic_info, intrinsic_name, args, earliest_eval_stage,
-                                TemplateState{}, on_no_match);
-    if (!match.overload) {
-        return {};
-    }
-
-    return BinaryOperator{
-        match.return_type,
-        match.parameters[0].type,
-        match.parameters[1].type,
-        match.overload->const_eval_fn,
-    };
+    return MatchIntrinsic(*intrinsic_info, intrinsic_name, args, earliest_eval_stage,
+                          TemplateState{}, on_no_match);
 }
 
-Table::CtorOrConv Impl::Lookup(CtorConv type,
-                               const type::Type* template_arg,
-                               VectorRef<const type::Type*> args,
-                               EvaluationStage earliest_eval_stage,
-                               const Source& source) {
+Result<Table::Overload> Impl::Lookup(CtorConv type,
+                                     const type::Type* template_arg,
+                                     VectorRef<const type::Type*> args,
+                                     EvaluationStage earliest_eval_stage,
+                                     const Source& source) {
     auto name = str(type);
 
     // Generates an error when no overloads match the provided arguments
@@ -513,7 +438,7 @@ Table::CtorOrConv Impl::Lookup(CtorConv type,
                << std::endl;
             PrintCandidates(ss, conv, name);
         }
-        builder.Diagnostics().add_error(diag::System::Resolver, ss.str(), source);
+        diags.add_error(diag::System::Intrinsics, ss.str(), source);
     };
 
     // If a template type was provided, then close the 0'th type with this.
@@ -523,48 +448,16 @@ Table::CtorOrConv Impl::Lookup(CtorConv type,
     }
 
     // Resolve the intrinsic overload
-    auto match = MatchIntrinsic(data.ctor_conv[static_cast<size_t>(type)], name, args,
-                                earliest_eval_stage, templates, on_no_match);
-    if (!match.overload) {
-        return {};
-    }
-
-    // Was this overload a constructor or conversion?
-    if (match.overload->flags.Contains(OverloadFlag::kIsConstructor)) {
-        Vector<sem::Parameter*, 8> params;
-        params.Reserve(match.parameters.Length());
-        for (auto& p : match.parameters) {
-            params.Push(builder.create<sem::Parameter>(
-                nullptr, static_cast<uint32_t>(params.Length()), p.type,
-                core::AddressSpace::kUndefined, core::Access::kUndefined, p.usage));
-        }
-        auto eval_stage =
-            match.overload->const_eval_fn ? EvaluationStage::kConstant : EvaluationStage::kRuntime;
-        auto* target = constructors.GetOrCreate(match, [&] {
-            return builder.create<sem::ValueConstructor>(match.return_type, std::move(params),
-                                                         eval_stage);
-        });
-        return CtorOrConv{target, match.overload->const_eval_fn};
-    }
-
-    // Conversion.
-    auto* target = converters.GetOrCreate(match, [&] {
-        auto param = builder.create<sem::Parameter>(
-            nullptr, 0u, match.parameters[0].type, core::AddressSpace::kUndefined,
-            core::Access::kUndefined, match.parameters[0].usage);
-        auto eval_stage =
-            match.overload->const_eval_fn ? EvaluationStage::kConstant : EvaluationStage::kRuntime;
-        return builder.create<sem::ValueConversion>(match.return_type, param, eval_stage);
-    });
-    return CtorOrConv{target, match.overload->const_eval_fn};
+    return MatchIntrinsic(data.ctor_conv[static_cast<size_t>(type)], name, args,
+                          earliest_eval_stage, templates, on_no_match);
 }
 
-IntrinsicPrototype Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,
-                                        const char* intrinsic_name,
-                                        VectorRef<const type::Type*> args,
-                                        EvaluationStage earliest_eval_stage,
-                                        TemplateState templates,
-                                        const OnNoMatch& on_no_match) const {
+Result<Table::Overload> Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,
+                                             const char* intrinsic_name,
+                                             VectorRef<const type::Type*> args,
+                                             EvaluationStage earliest_eval_stage,
+                                             TemplateState templates,
+                                             const OnNoMatch& on_no_match) const {
     size_t num_matched = 0;
     size_t match_idx = 0;
     Vector<Candidate, kNumFixedCandidates> candidates;
@@ -585,7 +478,7 @@ IntrinsicPrototype Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,
         // Sort the candidates with the most promising first
         SortCandidates(candidates);
         on_no_match(std::move(candidates));
-        return {};
+        return Failure;
     }
 
     Candidate match;
@@ -596,7 +489,7 @@ IntrinsicPrototype Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,
         match = ResolveCandidate(std::move(candidates), intrinsic_name, args, std::move(templates));
         if (!match.overload) {
             // Ambiguous overload. ResolveCandidate() will have already raised an error diagnostic.
-            return {};
+            return Failure;
         }
     }
 
@@ -608,13 +501,13 @@ IntrinsicPrototype Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,
             Match(match.templates, match.overload, indices, earliest_eval_stage).Type(&any);
         if (TINT_UNLIKELY(!return_type)) {
             TINT_ICE() << "MatchState.Match() returned null";
-            return {};
+            return Failure;
         }
     } else {
-        return_type = builder.create<type::Void>();
+        return_type = types.void_();
     }
 
-    return IntrinsicPrototype{match.overload, return_type, std::move(match.parameters)};
+    return Table::Overload{match.overload, return_type, std::move(match.parameters)};
 }
 
 Impl::Candidate Impl::ScoreOverload(const TableData::OverloadInfo* overload,
@@ -715,7 +608,7 @@ Impl::Candidate Impl::ScoreOverload(const TableData::OverloadInfo* overload,
     }
 
     // Now that all the template types have been finalized, we can construct the parameters.
-    Vector<IntrinsicPrototype::Parameter, kNumFixedParams> parameters;
+    Vector<Table::Overload::Parameter, kNumFixedParams> parameters;
     if (score == 0) {
         parameters.Reserve(num_params);
         for (size_t p = 0; p < num_params; p++) {
@@ -799,8 +692,8 @@ MatchState Impl::Match(TemplateState& templates,
                        const TableData::OverloadInfo* overload,
                        MatcherIndex const* matcher_indices,
                        EvaluationStage earliest_eval_stage) const {
-    return MatchState{builder.Types(), builder.Symbols(), templates,          data,
-                      overload,        matcher_indices,   earliest_eval_stage};
+    return MatchState{types,    symbols,         templates,          data,
+                      overload, matcher_indices, earliest_eval_stage};
 }
 
 void Impl::PrintOverload(StringStream& ss,
@@ -923,8 +816,11 @@ void Impl::ErrAmbiguousOverload(const char* intrinsic_name,
 
 }  // namespace
 
-std::unique_ptr<Table> Table::Create(ProgramBuilder& builder) {
-    return std::make_unique<Impl>(builder, CoreTableData());
+std::unique_ptr<Table> Table::Create(const TableData& data,
+                                     type::Manager& types,
+                                     SymbolTable& symbols,
+                                     diag::List& diags) {
+    return std::make_unique<Impl>(data, types, symbols, diags);
 }
 
 Table::~Table() = default;

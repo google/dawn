@@ -33,14 +33,14 @@ inline bool operator>=(Severity a, Severity b) {
     return static_cast<int>(a) >= static_cast<int>(b);
 }
 
-/// System is an enumerator of Tint systems that can be the originator of a
-/// diagnostic message.
+/// System is an enumerator of Tint systems that can be the originator of a diagnostic message.
 enum class System {
     AST,
     Builtin,
     Clone,
     Constant,
     Inspector,
+    Intrinsics,
     IR,
     Program,
     ProgramBuilder,

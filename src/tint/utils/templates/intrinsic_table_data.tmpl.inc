@@ -211,36 +211,33 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
 
 }  // anonymous namespace
 
-const TableData& {{$.Name}}() {
-  static const TableData data{
-    /* type_matchers */ kTypeMatchers,
-    /* number_matchers */ kNumberMatchers,
-    /* ctor_conv */ kConstructorsAndConverters,
-    /* builtins */ kBuiltins,
-    /* binary_plus */ kBinaryOperators[kBinaryOperatorPlus],
-    /* binary_minus */ kBinaryOperators[kBinaryOperatorMinus],
-    /* binary_star */ kBinaryOperators[kBinaryOperatorStar],
-    /* binary_divide */ kBinaryOperators[kBinaryOperatorDivide],
-    /* binary_modulo */ kBinaryOperators[kBinaryOperatorModulo],
-    /* binary_xor */ kBinaryOperators[kBinaryOperatorXor],
-    /* binary_and */ kBinaryOperators[kBinaryOperatorAnd],
-    /* binary_or */ kBinaryOperators[kBinaryOperatorOr],
-    /* binary_logical_and */ kBinaryOperators[kBinaryOperatorLogicalAnd],
-    /* binary_logical_or */ kBinaryOperators[kBinaryOperatorLogicalOr],
-    /* binary_equal */ kBinaryOperators[kBinaryOperatorEqual],
-    /* binary_not_equal */ kBinaryOperators[kBinaryOperatorNotEqual],
-    /* binary_less_than */ kBinaryOperators[kBinaryOperatorLessThan],
-    /* binary_greater_than */ kBinaryOperators[kBinaryOperatorGreaterThan],
-    /* binary_less_than_equal */ kBinaryOperators[kBinaryOperatorLessThanEqual],
-    /* binary_greater_than_equal */ kBinaryOperators[kBinaryOperatorGreaterThanEqual],
-    /* binary_shift_left */ kBinaryOperators[kBinaryOperatorShiftLeft],
-    /* binary_shift_right */ kBinaryOperators[kBinaryOperatorShiftRight],
-    /* unary_not */ kUnaryOperators[kUnaryOperatorNot],
-    /* unary_complement */ kUnaryOperators[kUnaryOperatorComplement],
-    /* unary_minus */ kUnaryOperators[kUnaryOperatorMinus],
-  };
-  return data;
-}
+const core::intrinsic::TableData {{$.Name}}{
+  /* type_matchers */ kTypeMatchers,
+  /* number_matchers */ kNumberMatchers,
+  /* ctor_conv */ kConstructorsAndConverters,
+  /* builtins */ kBuiltins,
+  /* binary_plus */ kBinaryOperators[kBinaryOperatorPlus],
+  /* binary_minus */ kBinaryOperators[kBinaryOperatorMinus],
+  /* binary_star */ kBinaryOperators[kBinaryOperatorStar],
+  /* binary_divide */ kBinaryOperators[kBinaryOperatorDivide],
+  /* binary_modulo */ kBinaryOperators[kBinaryOperatorModulo],
+  /* binary_xor */ kBinaryOperators[kBinaryOperatorXor],
+  /* binary_and */ kBinaryOperators[kBinaryOperatorAnd],
+  /* binary_or */ kBinaryOperators[kBinaryOperatorOr],
+  /* binary_logical_and */ kBinaryOperators[kBinaryOperatorLogicalAnd],
+  /* binary_logical_or */ kBinaryOperators[kBinaryOperatorLogicalOr],
+  /* binary_equal */ kBinaryOperators[kBinaryOperatorEqual],
+  /* binary_not_equal */ kBinaryOperators[kBinaryOperatorNotEqual],
+  /* binary_less_than */ kBinaryOperators[kBinaryOperatorLessThan],
+  /* binary_greater_than */ kBinaryOperators[kBinaryOperatorGreaterThan],
+  /* binary_less_than_equal */ kBinaryOperators[kBinaryOperatorLessThanEqual],
+  /* binary_greater_than_equal */ kBinaryOperators[kBinaryOperatorGreaterThanEqual],
+  /* binary_shift_left */ kBinaryOperators[kBinaryOperatorShiftLeft],
+  /* binary_shift_right */ kBinaryOperators[kBinaryOperatorShiftRight],
+  /* unary_not */ kUnaryOperators[kUnaryOperatorNot],
+  /* unary_complement */ kUnaryOperators[kUnaryOperatorComplement],
+  /* unary_minus */ kUnaryOperators[kUnaryOperatorMinus],
+};
 
 }  // namespace {{$.Namespace}}
 

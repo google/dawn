@@ -516,14 +516,15 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/sem/while_statement.h
   lang/core/constant/eval.cc
   lang/core/constant/eval.h
-  lang/wgsl/resolver/dependency_graph.cc
-  lang/wgsl/resolver/dependency_graph.h
-  lang/core/intrinsic/core_table_data.cc
-  lang/core/intrinsic/core_table_data.h
   lang/core/intrinsic/ctor_conv.cc
   lang/core/intrinsic/ctor_conv.h
   lang/core/intrinsic/table.cc
   lang/core/intrinsic/table.h
+  lang/core/intrinsic_data.cc
+  lang/core/intrinsic_data.h
+  lang/core/intrinsic_type_matchers.h
+  lang/wgsl/resolver/dependency_graph.cc
+  lang/wgsl/resolver/dependency_graph.h
   lang/wgsl/resolver/resolve.cc
   lang/wgsl/resolver/resolve.h
   lang/wgsl/resolver/resolver.cc

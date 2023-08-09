@@ -19,65 +19,82 @@
 #include <string>
 
 #include "src/tint/lang/core/binary_op.h"
-#include "src/tint/lang/core/constant/eval.h"
+#include "src/tint/lang/core/function.h"
 #include "src/tint/lang/core/intrinsic/ctor_conv.h"
+#include "src/tint/lang/core/intrinsic/table_data.h"
+#include "src/tint/lang/core/parameter_usage.h"
 #include "src/tint/lang/core/unary_op.h"
-#include "src/tint/lang/wgsl/sem/builtin.h"
 #include "src/tint/utils/containers/vector.h"
 
 // Forward declarations
-namespace tint {
-class ProgramBuilder;
-}  // namespace tint
+namespace tint::diag {
+class List;
+}  // namespace tint::diag
+namespace tint::type {
+class Manager;
+}  // namespace tint::type
 
 namespace tint::core::intrinsic {
 
 /// Table is a lookup table of all the WGSL builtin functions and intrinsic operators
 class Table {
   public:
-    /// @param builder the program builder
+    /// @param data the intrinsic table data
+    /// @param types the type manager
+    /// @param symbols the symbol table
+    /// @param diags the diagnostic list to append errors to
     /// @return a pointer to a newly created Table
-    static std::unique_ptr<Table> Create(ProgramBuilder& builder);
+    static std::unique_ptr<Table> Create(const TableData& data,
+                                         type::Manager& types,
+                                         SymbolTable& symbols,
+                                         diag::List& diags);
 
     /// Destructor
     virtual ~Table();
 
-    /// Builtin describes a resolved builtin function
-    struct Builtin {
-        /// The semantic info for the builtin
-        const sem::Builtin* sem = nullptr;
-        /// The constant evaluation function
-        constant::Eval::Function const_eval_fn = nullptr;
-    };
+    /// Overload describes a fully matched builtin function overload
+    struct Overload {
+        /// Parameter describes a single parameter
+        struct Parameter {
+            /// Parameter type
+            const type::Type* const type;
+            /// Parameter usage
+            core::ParameterUsage const usage = core::ParameterUsage::kNone;
 
-    /// UnaryOperator describes a resolved unary operator
-    struct UnaryOperator {
-        /// The result type of the unary operator
-        const type::Type* result = nullptr;
-        /// The type of the parameter of the unary operator
-        const type::Type* parameter = nullptr;
-        /// The constant evaluation function
-        constant::Eval::Function const_eval_fn = nullptr;
-    };
+            /// Equality operator
+            /// @param other the parameter to compare against
+            /// @returns true if this parameter and @p other are the same
+            bool operator==(const Parameter& other) const {
+                return type == other.type && usage == other.usage;
+            }
 
-    /// BinaryOperator describes a resolved binary operator
-    struct BinaryOperator {
-        /// The result type of the binary operator
-        const type::Type* result = nullptr;
-        /// The type of LHS parameter of the binary operator
-        const type::Type* lhs = nullptr;
-        /// The type of RHS parameter of the binary operator
-        const type::Type* rhs = nullptr;
-        /// The constant evaluation function
-        constant::Eval::Function const_eval_fn = nullptr;
-    };
+            /// Inequality operator
+            /// @param other the parameter to compare against
+            /// @returns false if this parameter and @p other are the same
+            bool operator!=(const Parameter& other) const { return !(*this == other); }
+        };
 
-    /// CtorOrConv describes a resolved value constructor or conversion
-    struct CtorOrConv {
-        /// The result type of the value constructor or conversion
-        const sem::CallTarget* target = nullptr;
-        /// The constant evaluation function
-        constant::Eval::Function const_eval_fn = nullptr;
+        /// The overload information
+        const TableData::OverloadInfo* info = nullptr;
+
+        /// The resolved overload return type
+        type::Type const* return_type = nullptr;
+
+        /// The resolved overload parameters
+        Vector<Parameter, 8> parameters;
+
+        /// Equality operator
+        /// @param other the overload to compare against
+        /// @returns true if this overload and @p other are the same
+        bool operator==(const Overload& other) const {
+            return info == other.info && return_type == other.return_type &&
+                   parameters == other.parameters;
+        }
+
+        /// Inequality operator
+        /// @param other the overload to compare against
+        /// @returns false if this overload and @p other are the same
+        bool operator!=(const Overload& other) const { return !(*this == other); }
     };
 
     /// Lookup looks for the builtin overload with the given signature, raising an error diagnostic
@@ -91,11 +108,11 @@ class Table {
     ///        abstract-numerics will have been materialized after shader creation time
     ///        (EvaluationStage::kConstant).
     /// @param source the source of the builtin call
-    /// @return the semantic builtin if found, otherwise nullptr
-    virtual Builtin Lookup(core::Function type,
-                           VectorRef<const type::Type*> args,
-                           EvaluationStage earliest_eval_stage,
-                           const Source& source) = 0;
+    /// @return the resolved builtin function overload
+    virtual Result<Overload> Lookup(core::Function type,
+                                    VectorRef<const type::Type*> args,
+                                    EvaluationStage earliest_eval_stage,
+                                    const Source& source) = 0;
 
     /// Lookup looks for the unary op overload with the given signature, raising an error
     /// diagnostic if the operator was not found.
@@ -108,12 +125,11 @@ class Table {
     ///        will be considered, as all abstract-numerics will have been materialized
     ///        after shader creation time (EvaluationStage::kConstant).
     /// @param source the source of the operator call
-    /// @return the operator call target signature. If the operator was not found
-    ///         UnaryOperator::result will be nullptr.
-    virtual UnaryOperator Lookup(core::UnaryOp op,
-                                 const type::Type* arg,
-                                 EvaluationStage earliest_eval_stage,
-                                 const Source& source) = 0;
+    /// @return the resolved unary operator overload
+    virtual Result<Overload> Lookup(core::UnaryOp op,
+                                    const type::Type* arg,
+                                    EvaluationStage earliest_eval_stage,
+                                    const Source& source) = 0;
 
     /// Lookup looks for the binary op overload with the given signature, raising an error
     /// diagnostic if the operator was not found.
@@ -128,14 +144,13 @@ class Table {
     ///        will be considered, as all abstract-numerics will have been materialized
     ///        after shader creation time (EvaluationStage::kConstant).
     /// @param is_compound true if the binary operator is being used as a compound assignment
-    /// @return the operator call target signature. If the operator was not found
-    ///         BinaryOperator::result will be nullptr.
-    virtual BinaryOperator Lookup(core::BinaryOp op,
-                                  const type::Type* lhs,
-                                  const type::Type* rhs,
-                                  EvaluationStage earliest_eval_stage,
-                                  const Source& source,
-                                  bool is_compound) = 0;
+    /// @return the resolved binary operator overload
+    virtual Result<Overload> Lookup(core::BinaryOp op,
+                                    const type::Type* lhs,
+                                    const type::Type* rhs,
+                                    EvaluationStage earliest_eval_stage,
+                                    const Source& source,
+                                    bool is_compound) = 0;
 
     /// Lookup looks for the value constructor or conversion overload for the given CtorConv.
     /// @param type the type being constructed or converted
@@ -148,14 +163,32 @@ class Table {
     ///        will be considered, as all abstract-numerics will have been materialized
     ///        after shader creation time (EvaluationStage::kConstant).
     /// @param source the source of the call
-    /// @return a sem::ValueConstructor, sem::ValueConversion or nullptr if nothing matched
-    virtual CtorOrConv Lookup(CtorConv type,
-                              const type::Type* template_arg,
-                              VectorRef<const type::Type*> args,
-                              EvaluationStage earliest_eval_stage,
-                              const Source& source) = 0;
+    /// @return the resolved type constructor or conversion function overload
+    virtual Result<Overload> Lookup(CtorConv type,
+                                    const type::Type* template_arg,
+                                    VectorRef<const type::Type*> args,
+                                    EvaluationStage earliest_eval_stage,
+                                    const Source& source) = 0;
 };
 
 }  // namespace tint::core::intrinsic
+
+namespace tint {
+
+/// Hasher specialization for core::intrinsic::Table::Overload
+template <>
+struct Hasher<core::intrinsic::Table::Overload> {
+    /// @param i the core::intrinsic::Table::Overload to create a hash for
+    /// @return the hash value
+    inline std::size_t operator()(const core::intrinsic::Table::Overload& i) const {
+        size_t hash = Hash(i.parameters.Length());
+        for (auto& p : i.parameters) {
+            hash = HashCombine(hash, p.type, p.usage);
+        }
+        return Hash(hash, i.info, i.return_type);
+    }
+};
+
+}  // namespace tint
 
 #endif  // SRC_TINT_LANG_CORE_INTRINSIC_TABLE_H_
