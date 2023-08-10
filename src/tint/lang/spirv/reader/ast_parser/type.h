@@ -305,7 +305,7 @@ struct Array final : public Castable<Array, Type> {
 struct Sampler final : public Castable<Sampler, Type> {
     /// Constructor
     /// @param k the sampler kind
-    explicit Sampler(type::SamplerKind k);
+    explicit Sampler(core::type::SamplerKind k);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -321,7 +321,7 @@ struct Sampler final : public Castable<Sampler, Type> {
 #endif  // NDEBUG
 
     /// the sampler kind
-    type::SamplerKind const kind;
+    core::type::SamplerKind const kind;
 };
 
 /// Base class for texture types
@@ -330,21 +330,21 @@ struct Texture : public Castable<Texture, Type> {
 
     /// Constructor
     /// @param d the texture dimensions
-    explicit Texture(type::TextureDimension d);
+    explicit Texture(core::type::TextureDimension d);
 
     /// Copy constructor
     /// @param other the other type to copy
     Texture(const Texture& other);
 
     /// the texture dimensions
-    type::TextureDimension const dims;
+    core::type::TextureDimension const dims;
 };
 
 /// `texture_depth_D` type
 struct DepthTexture final : public Castable<DepthTexture, Texture> {
     /// Constructor
     /// @param d the texture dimensions
-    explicit DepthTexture(type::TextureDimension d);
+    explicit DepthTexture(core::type::TextureDimension d);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -364,7 +364,7 @@ struct DepthTexture final : public Castable<DepthTexture, Texture> {
 struct DepthMultisampledTexture final : public Castable<DepthMultisampledTexture, Texture> {
     /// Constructor
     /// @param d the texture dimensions
-    explicit DepthMultisampledTexture(type::TextureDimension d);
+    explicit DepthMultisampledTexture(core::type::TextureDimension d);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -385,7 +385,7 @@ struct MultisampledTexture final : public Castable<MultisampledTexture, Texture>
     /// Constructor
     /// @param d the texture dimensions
     /// @param t the multisampled texture type
-    MultisampledTexture(type::TextureDimension d, const Type* t);
+    MultisampledTexture(core::type::TextureDimension d, const Type* t);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -409,7 +409,7 @@ struct SampledTexture final : public Castable<SampledTexture, Texture> {
     /// Constructor
     /// @param d the texture dimensions
     /// @param t the sampled texture type
-    SampledTexture(type::TextureDimension d, const Type* t);
+    SampledTexture(core::type::TextureDimension d, const Type* t);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -434,7 +434,7 @@ struct StorageTexture final : public Castable<StorageTexture, Texture> {
     /// @param d the texture dimensions
     /// @param f the storage image format
     /// @param a the access control
-    StorageTexture(type::TextureDimension d, core::TexelFormat f, core::Access a);
+    StorageTexture(core::type::TextureDimension d, core::TexelFormat f, core::Access a);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -590,31 +590,33 @@ class TypeManager {
     /// @param k the sampler kind
     /// @return a Sampler type. Repeated calls with the same arguments will return
     /// the same pointer.
-    const reader::Sampler* Sampler(type::SamplerKind k);
+    const reader::Sampler* Sampler(core::type::SamplerKind k);
     /// @param d the texture dimensions
     /// @return a DepthTexture type. Repeated calls with the same arguments will
     /// return the same pointer.
-    const reader::DepthTexture* DepthTexture(type::TextureDimension d);
+    const reader::DepthTexture* DepthTexture(core::type::TextureDimension d);
     /// @param d the texture dimensions
     /// @return a DepthMultisampledTexture type. Repeated calls with the same
     /// arguments will return the same pointer.
-    const reader::DepthMultisampledTexture* DepthMultisampledTexture(type::TextureDimension d);
+    const reader::DepthMultisampledTexture* DepthMultisampledTexture(
+        core::type::TextureDimension d);
     /// @param d the texture dimensions
     /// @param t the multisampled texture type
     /// @return a MultisampledTexture type. Repeated calls with the same arguments
     /// will return the same pointer.
-    const reader::MultisampledTexture* MultisampledTexture(type::TextureDimension d, const Type* t);
+    const reader::MultisampledTexture* MultisampledTexture(core::type::TextureDimension d,
+                                                           const Type* t);
     /// @param d the texture dimensions
     /// @param t the sampled texture type
     /// @return a SampledTexture type. Repeated calls with the same arguments will
     /// return the same pointer.
-    const reader::SampledTexture* SampledTexture(type::TextureDimension d, const Type* t);
+    const reader::SampledTexture* SampledTexture(core::type::TextureDimension d, const Type* t);
     /// @param d the texture dimensions
     /// @param f the storage image format
     /// @param a the access control
     /// @return a StorageTexture type. Repeated calls with the same arguments will
     /// return the same pointer.
-    const reader::StorageTexture* StorageTexture(type::TextureDimension d,
+    const reader::StorageTexture* StorageTexture(core::type::TextureDimension d,
                                                  core::TexelFormat f,
                                                  core::Access a);
 

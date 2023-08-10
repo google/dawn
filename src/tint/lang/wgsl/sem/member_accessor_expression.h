@@ -22,9 +22,9 @@
 namespace tint::ast {
 class MemberAccessorExpression;
 }  // namespace tint::ast
-namespace tint::type {
+namespace tint::core::type {
 class StructMember;
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 namespace tint::sem {
 
@@ -46,7 +46,7 @@ class MemberAccessorExpression : public Castable<MemberAccessorExpression, Acces
     /// @param has_side_effects whether this expression may have side effects
     /// @param root_ident the (optional) root identifier for this expression
     MemberAccessorExpression(const ast::MemberAccessorExpression* declaration,
-                             const type::Type* type,
+                             const core::type::Type* type,
                              core::EvaluationStage stage,
                              const Statement* statement,
                              const core::constant::Value* constant,
@@ -70,11 +70,11 @@ class StructMemberAccess final : public Castable<StructMemberAccess, MemberAcces
     /// @param has_side_effects whether this expression may have side effects
     /// @param root_ident the (optional) root identifier for this expression
     StructMemberAccess(const ast::MemberAccessorExpression* declaration,
-                       const type::Type* type,
+                       const core::type::Type* type,
                        const Statement* statement,
                        const core::constant::Value* constant,
                        const ValueExpression* object,
-                       const type::StructMember* member,
+                       const core::type::StructMember* member,
                        bool has_side_effects,
                        const Variable* root_ident = nullptr);
 
@@ -82,10 +82,10 @@ class StructMemberAccess final : public Castable<StructMemberAccess, MemberAcces
     ~StructMemberAccess() override;
 
     /// @returns the structure member
-    type::StructMember const* Member() const { return member_; }
+    core::type::StructMember const* Member() const { return member_; }
 
   private:
-    type::StructMember const* const member_;
+    core::type::StructMember const* const member_;
 };
 
 /// Swizzle holds the semantic information for a ast::MemberAccessorExpression
@@ -102,7 +102,7 @@ class Swizzle final : public Castable<Swizzle, MemberAccessorExpression> {
     /// @param has_side_effects whether this expression may have side effects
     /// @param root_ident the (optional) root identifier for this expression
     Swizzle(const ast::MemberAccessorExpression* declaration,
-            const type::Type* type,
+            const core::type::Type* type,
             const Statement* statement,
             const core::constant::Value* constant,
             const ValueExpression* object,

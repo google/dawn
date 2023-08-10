@@ -174,7 +174,7 @@ class Inspector {
     /// @param location the location value if provided
     /// @param variables the list to add the variables to
     void AddEntryPointInOutVariables(std::string name,
-                                     const type::Type* type,
+                                     const core::type::Type* type,
                                      VectorRef<const ast::Attribute*> attributes,
                                      std::optional<uint32_t> location,
                                      std::vector<StageVariable>& variables) const;
@@ -183,7 +183,7 @@ class Inspector {
     /// If `type` is a struct, recurse into members to check for the attribute.
     /// Otherwise, check `attributes` for the attribute.
     bool ContainsBuiltin(core::BuiltinValue builtin,
-                         const type::Type* type,
+                         const core::type::Type* type,
                          VectorRef<const ast::Attribute*> attributes) const;
 
     /// Gathers all the texture resource bindings of the given type for the given
@@ -226,7 +226,7 @@ class Inspector {
     /// @param attributes attributes associated with the parameter or structure member
     /// @returns the interpolation type and sampling modes for the value
     std::tuple<InterpolationType, InterpolationSampling> CalculateInterpolationData(
-        const type::Type* type,
+        const core::type::Type* type,
         VectorRef<const ast::Attribute*> attributes) const;
 
     /// For a N-uple of expressions, resolve to the appropriate global resources

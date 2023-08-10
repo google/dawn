@@ -20,7 +20,7 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 using DepthMultisampledTextureTest = TestHelper;
@@ -61,12 +61,12 @@ TEST_F(DepthMultisampledTextureTest, FriendlyName) {
 TEST_F(DepthMultisampledTextureTest, Clone) {
     auto* a = create<DepthMultisampledTexture>(TextureDimension::k2d);
 
-    type::Manager mgr;
-    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+    core::type::Manager mgr;
+    core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* dt = a->Clone(ctx);
     EXPECT_EQ(dt->dim(), TextureDimension::k2d);
 }
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::core::type

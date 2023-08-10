@@ -53,13 +53,13 @@ template <size_t N>
 inline void CollectScalars(const constant::Value* c, Vector<builder::Scalar, N>& scalars) {
     Switch(
         c->Type(),  //
-        [&](const type::AbstractInt*) { scalars.Push(c->ValueAs<AInt>()); },
-        [&](const type::AbstractFloat*) { scalars.Push(c->ValueAs<AFloat>()); },
-        [&](const type::Bool*) { scalars.Push(c->ValueAs<bool>()); },
-        [&](const type::I32*) { scalars.Push(c->ValueAs<i32>()); },
-        [&](const type::U32*) { scalars.Push(c->ValueAs<u32>()); },
-        [&](const type::F32*) { scalars.Push(c->ValueAs<f32>()); },
-        [&](const type::F16*) { scalars.Push(c->ValueAs<f16>()); },
+        [&](const core::type::AbstractInt*) { scalars.Push(c->ValueAs<AInt>()); },
+        [&](const core::type::AbstractFloat*) { scalars.Push(c->ValueAs<AFloat>()); },
+        [&](const core::type::Bool*) { scalars.Push(c->ValueAs<bool>()); },
+        [&](const core::type::I32*) { scalars.Push(c->ValueAs<i32>()); },
+        [&](const core::type::U32*) { scalars.Push(c->ValueAs<u32>()); },
+        [&](const core::type::F32*) { scalars.Push(c->ValueAs<f32>()); },
+        [&](const core::type::F16*) { scalars.Push(c->ValueAs<f16>()); },
         [&](Default) {
             size_t i = 0;
             while (auto* child = c->Index(i++)) {

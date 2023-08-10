@@ -256,17 +256,17 @@ class Number {
 };
 
 /// A special type that matches all TypeMatchers
-class Any final : public Castable<Any, type::Type> {
+class Any final : public Castable<Any, core::type::Type> {
   public:
     Any();
     ~Any() override;
 
-    /// @copydoc type::UniqueNode::Equals
-    bool Equals(const type::UniqueNode& other) const override;
-    /// @copydoc type::Type::FriendlyName
+    /// @copydoc core::type::UniqueNode::Equals
+    bool Equals(const core::type::UniqueNode& other) const override;
+    /// @copydoc core::type::Type::FriendlyName
     std::string FriendlyName() const override;
-    /// @copydoc type::Type::Clone
-    type::Type* Clone(type::CloneContext& ctx) const override;
+    /// @copydoc core::type::Type::Clone
+    core::type::Type* Clone(core::type::CloneContext& ctx) const override;
 };
 
 /// TemplateState holds the state of the template numbers and types.
@@ -282,7 +282,7 @@ class TemplateState {
     /// @param idx the index of the template type
     /// @param ty the type
     /// @returns true on match or newly defined
-    const type::Type* Type(size_t idx, const type::Type* ty) {
+    const core::type::Type* Type(size_t idx, const core::type::Type* ty) {
         if (idx >= types_.Length()) {
             types_.Resize(idx + 1);
         }
@@ -291,7 +291,7 @@ class TemplateState {
             t = ty;
             return ty;
         }
-        ty = type::Type::Common(Vector{t, ty});
+        ty = core::type::Type::Common(Vector{t, ty});
         if (ty) {
             t = ty;
         }
@@ -319,7 +319,7 @@ class TemplateState {
     /// @param idx the index of the template type
     /// @returns the template type with index @p idx, or nullptr if the type was not
     /// defined.
-    const type::Type* Type(size_t idx) const {
+    const core::type::Type* Type(size_t idx) const {
         if (idx >= types_.Length()) {
             return nullptr;
         }
@@ -329,7 +329,7 @@ class TemplateState {
     /// SetType replaces the template type with index @p idx with type @p ty.
     /// @param idx the index of the template type
     /// @param ty the new type for the template
-    void SetType(size_t idx, const type::Type* ty) {
+    void SetType(size_t idx, const core::type::Type* ty) {
         if (idx >= types_.Length()) {
             types_.Resize(idx + 1);
         }
@@ -349,7 +349,7 @@ class TemplateState {
     size_t Count() const { return types_.Length() + numbers_.Length(); }
 
   private:
-    Vector<const type::Type*, 4> types_;
+    Vector<const core::type::Type*, 4> types_;
     Vector<Number, 2> numbers_;
 };
 
@@ -366,7 +366,7 @@ class MatchState {
     /// @param type_matcher_indices the remaining type matcher indices
     /// @param number_matcher_indices the remaining number matcher indices
     /// @param s the required evaluation stage of the overload
-    MatchState(type::Manager& ty_mgr,
+    MatchState(core::type::Manager& ty_mgr,
                SymbolTable& syms,
                TemplateState& t,
                const TableData& d,
@@ -384,7 +384,7 @@ class MatchState {
           number_matcher_indices_(number_matcher_indices) {}
 
     /// The type manager
-    type::Manager& types;
+    core::type::Manager& types;
 
     /// The symbol manager
     SymbolTable& symbols;
@@ -405,7 +405,7 @@ class MatchState {
     /// @param ty the type to try matching
     /// @returns the canonical expected type if the type matches, otherwise nullptr.
     /// @note: The matcher indices are progressed on calling.
-    inline const type::Type* Type(const type::Type* ty);
+    inline const core::type::Type* Type(const core::type::Type* ty);
 
     /// Num uses the next NumMatcher from the matcher indices to match @p number.
     /// @param number the number to try matching
@@ -435,7 +435,7 @@ struct TypeMatcher {
     /// Match may define and refine the template types and numbers in state.
     /// The parameter `type` is the type to match
     /// Returns the canonicalized type on match, otherwise nullptr
-    using MatchFn = const type::Type*(MatchState& state, const type::Type* type);
+    using MatchFn = const core::type::Type*(MatchState& state, const core::type::Type* type);
 
     /// @see #MatchFn
     MatchFn* const match;
@@ -604,7 +604,7 @@ struct TableData {
     const IntrinsicInfo& unary_minus;
 };
 
-const type::Type* MatchState::Type(const type::Type* ty) {
+const core::type::Type* MatchState::Type(const core::type::Type* ty) {
     TypeMatcherIndex matcher_index{(*type_matcher_indices_++).value};
     auto& matcher = data[matcher_index];
     return matcher.match(*this, ty);
@@ -637,7 +637,7 @@ struct TemplateTypeMatcher {
     /// The TypeMatcher for the template type with the index `INDEX`
     static constexpr TypeMatcher matcher{
         /* match */
-        [](MatchState& state, const type::Type* type) -> const type::Type* {
+        [](MatchState& state, const core::type::Type* type) -> const core::type::Type* {
             if (type->Is<Any>()) {
                 return state.templates.Type(INDEX);
             }

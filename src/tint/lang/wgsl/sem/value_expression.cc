@@ -25,7 +25,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::ValueExpression);
 namespace tint::sem {
 
 ValueExpression::ValueExpression(const ast::Expression* declaration,
-                                 const type::Type* type,
+                                 const core::type::Type* type,
                                  core::EvaluationStage stage,
                                  const Statement* statement,
                                  const core::constant::Value* constant,

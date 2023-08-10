@@ -380,7 +380,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, AtomicCompareExchangeWeak) {
     func->SetParams({cmp, val});
 
     b.Append(func->Block(), [&] {
-        auto* result_ty = type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32());
+        auto* result_ty = core::type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32());
         auto* result = b.Call(result_ty, core::Function::kAtomicCompareExchangeWeak, var, cmp, val);
         b.Return(func, b.Access(ty.i32(), result, 0_u));
     });
@@ -1104,8 +1104,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, Select_ScalarCondition_VectorOperands) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_2D) {
-    auto* t =
-        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
     auto* lod = b.FunctionParam("lod", ty.i32());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -1142,7 +1142,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_2D) {
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_2DArray) {
     auto* t = b.FunctionParam(
-        "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.i32());
     auto* lod = b.FunctionParam("lod", ty.i32());
@@ -1182,7 +1182,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_2DArray) {
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_2DArray_IndexDifferentType) {
     auto* t = b.FunctionParam(
-        "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.u32());
     auto* lod = b.FunctionParam("lod", ty.i32());
@@ -1223,7 +1223,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_2DArray_IndexDifferentType) 
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_Multisampled2D) {
     auto* t = b.FunctionParam(
-        "t", ty.Get<type::MultisampledTexture>(type::TextureDimension::k2d, ty.f32()));
+        "t", ty.Get<core::type::MultisampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
     auto* sample_idx = b.FunctionParam("sample_idx", ty.i32());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -1259,7 +1259,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_Multisampled2D) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_Depth2D) {
-    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
+    auto* t =
+        b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
     auto* lod = b.FunctionParam("lod", ty.i32());
     auto* func = b.Function("foo", ty.f32());
@@ -1296,8 +1297,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureLoad_Depth2D) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_1D) {
-    auto* t =
-        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k1d, ty.f32()));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k1d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.f32());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -1334,8 +1335,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_1D) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_2D) {
-    auto* t =
-        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -1372,8 +1373,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_2D) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_2D_Offset) {
-    auto* t =
-        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -1412,7 +1413,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_2D_Offset) {
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_2DArray_Offset) {
     auto* t = b.FunctionParam(
-        "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.i32());
@@ -1453,8 +1454,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSample_2DArray_Offset) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2D) {
-    auto* t =
-        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* bias = b.FunctionParam("bias", ty.f32());
@@ -1493,8 +1494,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2D) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2D_Offset) {
-    auto* t =
-        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* bias = b.FunctionParam("bias", ty.f32());
@@ -1534,7 +1535,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2D_Offset) {
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2DArray_Offset) {
     auto* t = b.FunctionParam(
-        "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.i32());
@@ -1576,7 +1577,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2DArray_Offset) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D) {
-    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
+    auto* t =
+        b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* dref = b.FunctionParam("dref", ty.f32());
@@ -1614,7 +1616,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D_Offset) {
-    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
+    auto* t =
+        b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* dref = b.FunctionParam("dref", ty.f32());
@@ -1653,7 +1656,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D_Offset) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2DArray_Offset) {
-    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2dArray));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.i32());
@@ -1695,7 +1699,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2DArray_Offset) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D) {
-    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
+    auto* t =
+        b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* dref = b.FunctionParam("dref", ty.f32());
@@ -1734,7 +1739,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D_Offset) {
-    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
+    auto* t =
+        b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* dref = b.FunctionParam("dref", ty.f32());
@@ -1773,7 +1779,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D_Offset) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2DArray_Offset) {
-    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2dArray));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.i32());
@@ -1815,8 +1822,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2DArray_Offset
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2D) {
-    auto* t =
-        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* ddx = b.FunctionParam("ddx", ty.vec2<f32>());
@@ -1856,8 +1863,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2D) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2D_Offset) {
-    auto* t =
-        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* ddx = b.FunctionParam("ddx", ty.vec2<f32>());
@@ -1898,7 +1905,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2D_Offset) {
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2DArray_Offset) {
     auto* t = b.FunctionParam(
-        "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.i32());
@@ -1941,8 +1948,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2DArray_Offset) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleLevel_2D) {
-    auto* t =
-        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* lod = b.FunctionParam("lod", ty.f32());
@@ -1981,8 +1988,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleLevel_2D) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleLevel_2D_Offset) {
-    auto* t =
-        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* lod = b.FunctionParam("lod", ty.f32());
@@ -2022,7 +2029,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleLevel_2D_Offset) {
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleLevel_2DArray_Offset) {
     auto* t = b.FunctionParam(
-        "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.i32());
@@ -2064,8 +2071,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleLevel_2DArray_Offset) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2D) {
-    auto* t =
-        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* component = b.FunctionParam("component", ty.i32());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
@@ -2104,8 +2111,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2D) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2D_Offset) {
-    auto* t =
-        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* component = b.FunctionParam("component", ty.i32());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
@@ -2145,7 +2152,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2D_Offset) {
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2DArray_Offset) {
     auto* t = b.FunctionParam(
-        "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* component = b.FunctionParam("component", ty.i32());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
@@ -2187,7 +2194,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_2DArray_Offset) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_Depth2D) {
-    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
+    auto* t =
+        b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -2224,7 +2232,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_Depth2D) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D) {
-    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
+    auto* t =
+        b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* depth = b.FunctionParam("depth", ty.f32());
@@ -2263,7 +2272,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D_Offset) {
-    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2d));
+    auto* t =
+        b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* depth = b.FunctionParam("depth", ty.f32());
@@ -2302,7 +2312,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D_Offset) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2DArray) {
-    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2dArray));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray));
     auto* s = b.FunctionParam("s", ty.sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.u32());
@@ -2345,9 +2356,10 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2DArray) {
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2D) {
     auto format = core::TexelFormat::kR32Float;
-    auto* t = b.FunctionParam(
-        "t", ty.Get<type::StorageTexture>(type::TextureDimension::k2d, format, core::Access::kWrite,
-                                          type::StorageTexture::SubtypeFor(format, ty)));
+    auto* t =
+        b.FunctionParam("t", ty.Get<core::type::StorageTexture>(
+                                 core::type::TextureDimension::k2d, format, core::Access::kWrite,
+                                 core::type::StorageTexture::SubtypeFor(format, ty)));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
     auto* texel = b.FunctionParam("texel", ty.i32());
     auto* func = b.Function("foo", ty.void_());
@@ -2385,9 +2397,9 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2D) {
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2DArray) {
     auto format = core::TexelFormat::kR32Float;
     auto* t = b.FunctionParam(
-        "t",
-        ty.Get<type::StorageTexture>(type::TextureDimension::k2dArray, format, core::Access::kWrite,
-                                     type::StorageTexture::SubtypeFor(format, ty)));
+        "t", ty.Get<core::type::StorageTexture>(
+                 core::type::TextureDimension::k2dArray, format, core::Access::kWrite,
+                 core::type::StorageTexture::SubtypeFor(format, ty)));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.i32());
     auto* texel = b.FunctionParam("texel", ty.i32());
@@ -2427,9 +2439,9 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2DArray) {
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2DArray_IndexDifferentType) {
     auto format = core::TexelFormat::kR32Float;
     auto* t = b.FunctionParam(
-        "t",
-        ty.Get<type::StorageTexture>(type::TextureDimension::k2dArray, format, core::Access::kWrite,
-                                     type::StorageTexture::SubtypeFor(format, ty)));
+        "t", ty.Get<core::type::StorageTexture>(
+                 core::type::TextureDimension::k2dArray, format, core::Access::kWrite,
+                 core::type::StorageTexture::SubtypeFor(format, ty)));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.u32());
     auto* texel = b.FunctionParam("texel", ty.i32());
@@ -2468,8 +2480,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2DArray_IndexDifferentType)
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_2D_ImplicitLod) {
-    auto* t =
-        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
     auto* func = b.Function("foo", ty.vec2<u32>());
     func->SetParams({t});
 
@@ -2503,8 +2515,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_2D_ImplicitLod) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_2D_ExplicitLod) {
-    auto* t =
-        b.FunctionParam("t", ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
     auto* lod = b.FunctionParam("lod", ty.i32());
     auto* func = b.Function("foo", ty.vec2<u32>());
     func->SetParams({t, lod});
@@ -2540,7 +2552,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_2D_ExplicitLod) {
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_2DArray) {
     auto* t = b.FunctionParam(
-        "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()));
     auto* func = b.Function("foo", ty.vec2<u32>());
     func->SetParams({t});
 
@@ -2576,7 +2588,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_2DArray) {
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_Multisampled) {
     auto* t = b.FunctionParam(
-        "t", ty.Get<type::MultisampledTexture>(type::TextureDimension::k2d, ty.f32()));
+        "t", ty.Get<core::type::MultisampledTexture>(core::type::TextureDimension::k2d, ty.f32()));
     auto* func = b.Function("foo", ty.vec2<u32>());
     func->SetParams({t});
 
@@ -2611,7 +2623,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureDimensions_Multisampled) {
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_2DArray) {
     auto* t = b.FunctionParam(
-        "t", ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()));
+        "t", ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, ty.f32()));
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({t});
 
@@ -2646,8 +2658,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_2DArray) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_CubeArray) {
-    auto* t = b.FunctionParam(
-        "t", ty.Get<type::SampledTexture>(type::TextureDimension::kCubeArray, ty.f32()));
+    auto* t = b.FunctionParam("t", ty.Get<core::type::SampledTexture>(
+                                       core::type::TextureDimension::kCubeArray, ty.f32()));
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({t});
 
@@ -2682,7 +2694,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_CubeArray) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_Depth2DArray) {
-    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::k2dArray));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray));
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({t});
 
@@ -2717,7 +2730,8 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_Depth2DArray) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_DepthCubeArray) {
-    auto* t = b.FunctionParam("t", ty.Get<type::DepthTexture>(type::TextureDimension::kCubeArray));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::kCubeArray));
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({t});
 
@@ -2753,9 +2767,10 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_DepthCubeArray) {
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_Storage2DArray) {
     auto format = core::TexelFormat::kR32Float;
-    auto* t = b.FunctionParam(
-        "t", ty.Get<type::StorageTexture>(type::TextureDimension::k2d, format, core::Access::kWrite,
-                                          type::StorageTexture::SubtypeFor(format, ty)));
+    auto* t =
+        b.FunctionParam("t", ty.Get<core::type::StorageTexture>(
+                                 core::type::TextureDimension::k2d, format, core::Access::kWrite,
+                                 core::type::StorageTexture::SubtypeFor(format, ty)));
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({t});
 

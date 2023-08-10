@@ -20,13 +20,13 @@
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/text/string_stream.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Reference);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::Reference);
 
-namespace tint::type {
+namespace tint::core::type {
 
 Reference::Reference(core::AddressSpace address_space, const Type* subtype, core::Access access)
     : Base(Hash(tint::TypeInfo::Of<Reference>().full_hashcode, address_space, subtype, access),
-           type::Flags{}),
+           core::type::Flags{}),
       subtype_(subtype),
       address_space_(address_space),
       access_(access) {
@@ -60,4 +60,4 @@ Reference* Reference::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<Reference>(address_space_, ty, access_);
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

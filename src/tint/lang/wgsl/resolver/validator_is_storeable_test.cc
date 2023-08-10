@@ -24,79 +24,79 @@ namespace {
 using ValidatorIsStorableTest = ResolverTest;
 
 TEST_F(ValidatorIsStorableTest, Void) {
-    EXPECT_FALSE(v()->IsStorable(create<type::Void>()));
+    EXPECT_FALSE(v()->IsStorable(create<core::type::Void>()));
 }
 
 TEST_F(ValidatorIsStorableTest, Scalar) {
-    EXPECT_TRUE(v()->IsStorable(create<type::Bool>()));
-    EXPECT_TRUE(v()->IsStorable(create<type::I32>()));
-    EXPECT_TRUE(v()->IsStorable(create<type::U32>()));
-    EXPECT_TRUE(v()->IsStorable(create<type::F32>()));
-    EXPECT_TRUE(v()->IsStorable(create<type::F16>()));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Bool>()));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::I32>()));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::U32>()));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::F32>()));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::F16>()));
 }
 
 TEST_F(ValidatorIsStorableTest, Vector) {
-    EXPECT_TRUE(v()->IsStorable(create<type::Vector>(create<type::I32>(), 2u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Vector>(create<type::I32>(), 3u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Vector>(create<type::I32>(), 4u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Vector>(create<type::U32>(), 2u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Vector>(create<type::U32>(), 3u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Vector>(create<type::U32>(), 4u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Vector>(create<type::F32>(), 2u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Vector>(create<type::F32>(), 3u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Vector>(create<type::F32>(), 4u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Vector>(create<type::F16>(), 2u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Vector>(create<type::F16>(), 3u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Vector>(create<type::F16>(), 4u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Vector>(create<core::type::I32>(), 2u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Vector>(create<core::type::I32>(), 3u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Vector>(create<core::type::I32>(), 4u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Vector>(create<core::type::U32>(), 2u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Vector>(create<core::type::U32>(), 3u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Vector>(create<core::type::U32>(), 4u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Vector>(create<core::type::F32>(), 2u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Vector>(create<core::type::F32>(), 3u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Vector>(create<core::type::F32>(), 4u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Vector>(create<core::type::F16>(), 2u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Vector>(create<core::type::F16>(), 3u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Vector>(create<core::type::F16>(), 4u)));
 }
 
 TEST_F(ValidatorIsStorableTest, Matrix) {
-    auto* vec2_f32 = create<type::Vector>(create<type::F32>(), 2u);
-    auto* vec3_f32 = create<type::Vector>(create<type::F32>(), 3u);
-    auto* vec4_f32 = create<type::Vector>(create<type::F32>(), 4u);
-    auto* vec2_f16 = create<type::Vector>(create<type::F16>(), 2u);
-    auto* vec3_f16 = create<type::Vector>(create<type::F16>(), 3u);
-    auto* vec4_f16 = create<type::Vector>(create<type::F16>(), 4u);
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec2_f32, 2u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec2_f32, 3u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec2_f32, 4u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec3_f32, 2u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec3_f32, 3u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec3_f32, 4u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec4_f32, 2u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec4_f32, 3u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec4_f32, 4u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec2_f16, 2u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec2_f16, 3u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec2_f16, 4u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec3_f16, 2u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec3_f16, 3u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec3_f16, 4u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec4_f16, 2u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec4_f16, 3u)));
-    EXPECT_TRUE(v()->IsStorable(create<type::Matrix>(vec4_f16, 4u)));
+    auto* vec2_f32 = create<core::type::Vector>(create<core::type::F32>(), 2u);
+    auto* vec3_f32 = create<core::type::Vector>(create<core::type::F32>(), 3u);
+    auto* vec4_f32 = create<core::type::Vector>(create<core::type::F32>(), 4u);
+    auto* vec2_f16 = create<core::type::Vector>(create<core::type::F16>(), 2u);
+    auto* vec3_f16 = create<core::type::Vector>(create<core::type::F16>(), 3u);
+    auto* vec4_f16 = create<core::type::Vector>(create<core::type::F16>(), 4u);
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec2_f32, 2u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec2_f32, 3u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec2_f32, 4u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec3_f32, 2u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec3_f32, 3u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec3_f32, 4u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec4_f32, 2u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec4_f32, 3u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec4_f32, 4u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec2_f16, 2u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec2_f16, 3u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec2_f16, 4u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec3_f16, 2u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec3_f16, 3u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec3_f16, 4u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec4_f16, 2u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec4_f16, 3u)));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Matrix>(vec4_f16, 4u)));
 }
 
 TEST_F(ValidatorIsStorableTest, Pointer) {
-    auto* ptr = create<type::Pointer>(core::AddressSpace::kPrivate, create<type::I32>(),
-                                      core::Access::kReadWrite);
+    auto* ptr = create<core::type::Pointer>(core::AddressSpace::kPrivate, create<core::type::I32>(),
+                                            core::Access::kReadWrite);
     EXPECT_FALSE(v()->IsStorable(ptr));
 }
 
 TEST_F(ValidatorIsStorableTest, Atomic) {
-    EXPECT_TRUE(v()->IsStorable(create<type::Atomic>(create<type::I32>())));
-    EXPECT_TRUE(v()->IsStorable(create<type::Atomic>(create<type::U32>())));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Atomic>(create<core::type::I32>())));
+    EXPECT_TRUE(v()->IsStorable(create<core::type::Atomic>(create<core::type::U32>())));
 }
 
 TEST_F(ValidatorIsStorableTest, ArraySizedOfStorable) {
-    auto* arr = create<type::Array>(create<type::I32>(), create<type::ConstantArrayCount>(5u), 4u,
-                                    20u, 4u, 4u);
+    auto* arr = create<core::type::Array>(
+        create<core::type::I32>(), create<core::type::ConstantArrayCount>(5u), 4u, 20u, 4u, 4u);
     EXPECT_TRUE(v()->IsStorable(arr));
 }
 
 TEST_F(ValidatorIsStorableTest, ArrayUnsizedOfStorable) {
-    auto* arr =
-        create<type::Array>(create<type::I32>(), create<type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
+    auto* arr = create<core::type::Array>(create<core::type::I32>(),
+                                          create<core::type::RuntimeArrayCount>(), 4u, 4u, 4u, 4u);
     EXPECT_TRUE(v()->IsStorable(arr));
 }
 

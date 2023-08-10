@@ -54,7 +54,7 @@ class MslPrinterTestHelperBase : public BASE {
     /// The test builder.
     ir::Builder b{mod};
     /// The type manager.
-    type::Manager& ty{mod.Types()};
+    core::type::Manager& ty{mod.Types()};
 
   protected:
     /// The MSL writer.

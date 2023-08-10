@@ -16,7 +16,7 @@
 #include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/type/helper_test.h"
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 using ReferenceTest = TestHelper;
@@ -83,8 +83,8 @@ TEST_F(ReferenceTest, Clone) {
     auto* a =
         create<Reference>(core::AddressSpace::kStorage, create<I32>(), core::Access::kReadWrite);
 
-    type::Manager mgr;
-    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+    core::type::Manager mgr;
+    core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* ref = a->Clone(ctx);
     EXPECT_TRUE(ref->StoreType()->Is<I32>());
@@ -93,4 +93,4 @@ TEST_F(ReferenceTest, Clone) {
 }
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::core::type

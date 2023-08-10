@@ -29,7 +29,7 @@ Load::Load(const ValueExpression* ref, const Statement* statement)
            /* has_side_effects */ ref->HasSideEffects(),
            /* root_ident */ ref->RootIdentifier()),
       reference_(ref) {
-    TINT_ASSERT(ref->Type()->Is<type::Reference>());
+    TINT_ASSERT(ref->Type()->Is<core::type::Reference>());
 }
 
 Load::~Load() = default;

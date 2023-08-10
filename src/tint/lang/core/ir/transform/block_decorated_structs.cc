@@ -42,7 +42,7 @@ void Run(Module* ir) {
         if (!var) {
             continue;
         }
-        auto* ptr = var->Result()->Type()->As<type::Pointer>();
+        auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
         if (!ptr || !core::IsHostShareable(ptr->AddressSpace())) {
             continue;
         }
@@ -51,14 +51,14 @@ void Run(Module* ir) {
 
     // Now process the buffer variables.
     for (auto* var : buffer_variables) {
-        auto* ptr = var->Result()->Type()->As<type::Pointer>();
+        auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
         auto* store_ty = ptr->StoreType();
 
         bool wrapped = false;
-        Vector<const type::StructMember*, 4> members;
+        Vector<const core::type::StructMember*, 4> members;
 
         // Build the member list for the block-decorated structure.
-        if (auto* str = store_ty->As<type::Struct>(); str && !str->HasFixedFootprint()) {
+        if (auto* str = store_ty->As<core::type::Struct>(); str && !str->HasFixedFootprint()) {
             // We know the original struct will only ever be used as the store type of a buffer, so
             // just redeclare it as a block-decorated struct.
             for (auto* member : str->Members()) {
@@ -67,25 +67,25 @@ void Run(Module* ir) {
         } else {
             // The original struct might be used in other places, so create a new block-decorated
             // struct that wraps the original struct.
-            members.Push(ir->Types().Get<type::StructMember>(
+            members.Push(ir->Types().Get<core::type::StructMember>(
                 /* name */ ir->symbols.New(),
                 /* type */ store_ty,
                 /* index */ 0u,
                 /* offset */ 0u,
                 /* align */ store_ty->Align(),
                 /* size */ store_ty->Size(),
-                /* attributes */ type::StructMemberAttributes{}));
+                /* attributes */ core::type::StructMemberAttributes{}));
             wrapped = true;
         }
 
         // Create the block-decorated struct.
-        auto* block_struct = ir->Types().Get<type::Struct>(
+        auto* block_struct = ir->Types().Get<core::type::Struct>(
             /* name */ ir->symbols.New(),
             /* members */ members,
             /* align */ store_ty->Align(),
             /* size */ tint::RoundUp(store_ty->Align(), store_ty->Size()),
             /* size_no_padding */ store_ty->Size());
-        block_struct->SetStructFlag(type::StructFlag::kBlock);
+        block_struct->SetStructFlag(core::type::StructFlag::kBlock);
 
         // Replace the old variable declaration with one that uses the block-decorated struct type.
         auto* new_var =

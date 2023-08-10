@@ -936,12 +936,12 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Scalar) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<core::type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);
-    EXPECT_TRUE(members[0]->Type()->Is<type::F32>());
-    EXPECT_TRUE(members[1]->Type()->Is<type::I32>());
+    EXPECT_TRUE(members[0]->Type()->Is<core::type::F32>());
+    EXPECT_TRUE(members[1]->Type()->Is<core::type::I32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec2) {
@@ -949,16 +949,16 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec2) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<core::type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);
-    ASSERT_TRUE(members[0]->Type()->Is<type::Vector>());
-    ASSERT_TRUE(members[1]->Type()->Is<type::Vector>());
-    EXPECT_EQ(members[0]->Type()->As<type::Vector>()->Width(), 2u);
-    EXPECT_TRUE(members[0]->Type()->As<type::Vector>()->type()->Is<type::F32>());
-    EXPECT_EQ(members[1]->Type()->As<type::Vector>()->Width(), 2u);
-    EXPECT_TRUE(members[1]->Type()->As<type::Vector>()->type()->Is<type::I32>());
+    ASSERT_TRUE(members[0]->Type()->Is<core::type::Vector>());
+    ASSERT_TRUE(members[1]->Type()->Is<core::type::Vector>());
+    EXPECT_EQ(members[0]->Type()->As<core::type::Vector>()->Width(), 2u);
+    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_EQ(members[1]->Type()->As<core::type::Vector>()->Width(), 2u);
+    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->type()->Is<core::type::I32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec3) {
@@ -966,16 +966,16 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec3) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<core::type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);
-    ASSERT_TRUE(members[0]->Type()->Is<type::Vector>());
-    ASSERT_TRUE(members[1]->Type()->Is<type::Vector>());
-    EXPECT_EQ(members[0]->Type()->As<type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(members[0]->Type()->As<type::Vector>()->type()->Is<type::F32>());
-    EXPECT_EQ(members[1]->Type()->As<type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(members[1]->Type()->As<type::Vector>()->type()->Is<type::I32>());
+    ASSERT_TRUE(members[0]->Type()->Is<core::type::Vector>());
+    ASSERT_TRUE(members[1]->Type()->Is<core::type::Vector>());
+    EXPECT_EQ(members[0]->Type()->As<core::type::Vector>()->Width(), 3u);
+    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_EQ(members[1]->Type()->As<core::type::Vector>()->Width(), 3u);
+    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->type()->Is<core::type::I32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec4) {
@@ -983,16 +983,16 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec4) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<core::type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);
-    ASSERT_TRUE(members[0]->Type()->Is<type::Vector>());
-    ASSERT_TRUE(members[1]->Type()->Is<type::Vector>());
-    EXPECT_EQ(members[0]->Type()->As<type::Vector>()->Width(), 4u);
-    EXPECT_TRUE(members[0]->Type()->As<type::Vector>()->type()->Is<type::F32>());
-    EXPECT_EQ(members[1]->Type()->As<type::Vector>()->Width(), 4u);
-    EXPECT_TRUE(members[1]->Type()->As<type::Vector>()->type()->Is<type::I32>());
+    ASSERT_TRUE(members[0]->Type()->Is<core::type::Vector>());
+    ASSERT_TRUE(members[1]->Type()->Is<core::type::Vector>());
+    EXPECT_EQ(members[0]->Type()->As<core::type::Vector>()->Width(), 4u);
+    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_EQ(members[1]->Type()->As<core::type::Vector>()->Width(), 4u);
+    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->type()->Is<core::type::I32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Scalar) {
@@ -1000,12 +1000,12 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Scalar) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<core::type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);
-    EXPECT_TRUE(members[0]->Type()->Is<type::F32>());
-    EXPECT_TRUE(members[1]->Type()->Is<type::F32>());
+    EXPECT_TRUE(members[0]->Type()->Is<core::type::F32>());
+    EXPECT_TRUE(members[1]->Type()->Is<core::type::F32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Vec2) {
@@ -1013,16 +1013,16 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Vec2) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<core::type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);
-    ASSERT_TRUE(members[0]->Type()->Is<type::Vector>());
-    ASSERT_TRUE(members[1]->Type()->Is<type::Vector>());
-    EXPECT_EQ(members[0]->Type()->As<type::Vector>()->Width(), 2u);
-    EXPECT_TRUE(members[0]->Type()->As<type::Vector>()->type()->Is<type::F32>());
-    EXPECT_EQ(members[1]->Type()->As<type::Vector>()->Width(), 2u);
-    EXPECT_TRUE(members[1]->Type()->As<type::Vector>()->type()->Is<type::F32>());
+    ASSERT_TRUE(members[0]->Type()->Is<core::type::Vector>());
+    ASSERT_TRUE(members[1]->Type()->Is<core::type::Vector>());
+    EXPECT_EQ(members[0]->Type()->As<core::type::Vector>()->Width(), 2u);
+    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_EQ(members[1]->Type()->As<core::type::Vector>()->Width(), 2u);
+    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Vec3) {
@@ -1030,16 +1030,16 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Vec3) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<core::type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);
-    ASSERT_TRUE(members[0]->Type()->Is<type::Vector>());
-    ASSERT_TRUE(members[1]->Type()->Is<type::Vector>());
-    EXPECT_EQ(members[0]->Type()->As<type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(members[0]->Type()->As<type::Vector>()->type()->Is<type::F32>());
-    EXPECT_EQ(members[1]->Type()->As<type::Vector>()->Width(), 3u);
-    EXPECT_TRUE(members[1]->Type()->As<type::Vector>()->type()->Is<type::F32>());
+    ASSERT_TRUE(members[0]->Type()->Is<core::type::Vector>());
+    ASSERT_TRUE(members[1]->Type()->Is<core::type::Vector>());
+    EXPECT_EQ(members[0]->Type()->As<core::type::Vector>()->Width(), 3u);
+    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_EQ(members[1]->Type()->As<core::type::Vector>()->Width(), 3u);
+    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Vec4) {
@@ -1047,16 +1047,16 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Vec4) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* res_ty = TypeOf(builtin)->As<type::Struct>();
+    auto* res_ty = TypeOf(builtin)->As<core::type::Struct>();
     ASSERT_TRUE(res_ty != nullptr);
     auto members = res_ty->Members();
     ASSERT_EQ(members.Length(), 2u);
-    ASSERT_TRUE(members[0]->Type()->Is<type::Vector>());
-    ASSERT_TRUE(members[1]->Type()->Is<type::Vector>());
-    EXPECT_EQ(members[0]->Type()->As<type::Vector>()->Width(), 4u);
-    EXPECT_TRUE(members[0]->Type()->As<type::Vector>()->type()->Is<type::F32>());
-    EXPECT_EQ(members[1]->Type()->As<type::Vector>()->Width(), 4u);
-    EXPECT_TRUE(members[1]->Type()->As<type::Vector>()->type()->Is<type::F32>());
+    ASSERT_TRUE(members[0]->Type()->Is<core::type::Vector>());
+    ASSERT_TRUE(members[1]->Type()->Is<core::type::Vector>());
+    EXPECT_EQ(members[0]->Type()->As<core::type::Vector>()->Width(), 4u);
+    EXPECT_TRUE(members[0]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
+    EXPECT_EQ(members[1]->Type()->As<core::type::Vector>()->Width(), 4u);
+    EXPECT_TRUE(members[1]->Type()->As<core::type::Vector>()->type()->Is<core::type::F32>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Cross_Float_Vec3) {
@@ -1158,7 +1158,7 @@ TEST_P(FloatAllMatching, Scalar) {
          });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
+    EXPECT_TRUE(TypeOf(builtin)->Is<core::type::F32>());
 }
 
 TEST_P(FloatAllMatching, Vec2) {
@@ -1282,7 +1282,7 @@ TEST_P(IntegerAllMatching, ScalarUnsigned) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->Is<type::U32>());
+    EXPECT_TRUE(TypeOf(builtin)->Is<core::type::U32>());
 }
 
 TEST_P(IntegerAllMatching, Vec2Unsigned) {
@@ -1342,7 +1342,7 @@ TEST_P(IntegerAllMatching, ScalarSigned) {
     WrapInFunction(builtin);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_TRUE(TypeOf(builtin)->Is<type::I32>());
+    EXPECT_TRUE(TypeOf(builtin)->Is<core::type::I32>());
 }
 
 TEST_P(IntegerAllMatching, Vec2Signed) {

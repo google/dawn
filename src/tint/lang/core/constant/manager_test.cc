@@ -95,7 +95,7 @@ TEST_F(ManagerTest, Get_i32) {
 
     auto* c = cm.Get(1_i);
     static_assert(std::is_same_v<const Scalar<i32>*, decltype(c)>);
-    ASSERT_TRUE(Is<type::I32>(c->Type()));
+    ASSERT_TRUE(Is<core::type::I32>(c->Type()));
     EXPECT_EQ(c->value, 1_i);
 }
 
@@ -104,7 +104,7 @@ TEST_F(ManagerTest, Get_u32) {
 
     auto* c = cm.Get(1_u);
     static_assert(std::is_same_v<const Scalar<u32>*, decltype(c)>);
-    ASSERT_TRUE(Is<type::U32>(c->Type()));
+    ASSERT_TRUE(Is<core::type::U32>(c->Type()));
     EXPECT_EQ(c->value, 1_u);
 }
 
@@ -113,7 +113,7 @@ TEST_F(ManagerTest, Get_f32) {
 
     auto* c = cm.Get(1_f);
     static_assert(std::is_same_v<const Scalar<f32>*, decltype(c)>);
-    ASSERT_TRUE(Is<type::F32>(c->Type()));
+    ASSERT_TRUE(Is<core::type::F32>(c->Type()));
     EXPECT_EQ(c->value, 1_f);
 }
 
@@ -122,7 +122,7 @@ TEST_F(ManagerTest, Get_f16) {
 
     auto* c = cm.Get(1_h);
     static_assert(std::is_same_v<const Scalar<f16>*, decltype(c)>);
-    ASSERT_TRUE(Is<type::F16>(c->Type()));
+    ASSERT_TRUE(Is<core::type::F16>(c->Type()));
     EXPECT_EQ(c->value, 1_h);
 }
 
@@ -131,7 +131,7 @@ TEST_F(ManagerTest, Get_bool) {
 
     auto* c = cm.Get(true);
     static_assert(std::is_same_v<const Scalar<bool>*, decltype(c)>);
-    ASSERT_TRUE(Is<type::Bool>(c->Type()));
+    ASSERT_TRUE(Is<core::type::Bool>(c->Type()));
     EXPECT_EQ(c->value, true);
 }
 
@@ -140,7 +140,7 @@ TEST_F(ManagerTest, Get_AFloat) {
 
     auto* c = cm.Get(1._a);
     static_assert(std::is_same_v<const Scalar<AFloat>*, decltype(c)>);
-    ASSERT_TRUE(Is<type::AbstractFloat>(c->Type()));
+    ASSERT_TRUE(Is<core::type::AbstractFloat>(c->Type()));
     EXPECT_EQ(c->value, 1._a);
 }
 
@@ -149,7 +149,7 @@ TEST_F(ManagerTest, Get_AInt) {
 
     auto* c = cm.Get(1_a);
     static_assert(std::is_same_v<const Scalar<AInt>*, decltype(c)>);
-    ASSERT_TRUE(Is<type::AbstractInt>(c->Type()));
+    ASSERT_TRUE(Is<core::type::AbstractInt>(c->Type()));
     EXPECT_EQ(c->value, 1_a);
 }
 
@@ -172,12 +172,12 @@ TEST_F(ManagerTest, WrapDoesntAffectInner_Types) {
     Manager inner;
     Manager outer = Manager::Wrap(inner);
 
-    inner.types.Get<type::I32>();
+    inner.types.Get<core::type::I32>();
 
     EXPECT_EQ(count(inner.types), 1u);
     EXPECT_EQ(count(outer.types), 0u);
 
-    outer.types.Get<type::U32>();
+    outer.types.Get<core::type::U32>();
 
     EXPECT_EQ(count(inner.types), 1u);
     EXPECT_EQ(count(outer.types), 1u);

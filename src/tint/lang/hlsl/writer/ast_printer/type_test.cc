@@ -86,7 +86,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Array_WithoutName) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_Bool) {
-    auto* bool_ = create<type::Bool>();
+    auto* bool_ = create<core::type::Bool>();
 
     ASTPrinter& gen = Build();
 
@@ -98,7 +98,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Bool) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_F16) {
-    auto* f16 = create<type::F16>();
+    auto* f16 = create<core::type::F16>();
 
     ASTPrinter& gen = Build();
 
@@ -110,7 +110,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_F16) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_F32) {
-    auto* f32 = create<type::F32>();
+    auto* f32 = create<core::type::F32>();
 
     ASTPrinter& gen = Build();
 
@@ -122,7 +122,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_F32) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_I32) {
-    auto* i32 = create<type::I32>();
+    auto* i32 = create<core::type::I32>();
 
     ASTPrinter& gen = Build();
 
@@ -134,9 +134,9 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_I32) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_Matrix_F16) {
-    auto* f16 = create<type::F16>();
-    auto* vec3 = create<type::Vector>(f16, 3u);
-    auto* mat2x3 = create<type::Matrix>(vec3, 2u);
+    auto* f16 = create<core::type::F16>();
+    auto* vec3 = create<core::type::Vector>(f16, 3u);
+    auto* mat2x3 = create<core::type::Matrix>(vec3, 2u);
 
     ASTPrinter& gen = Build();
 
@@ -148,9 +148,9 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Matrix_F16) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_Matrix_F32) {
-    auto* f32 = create<type::F32>();
-    auto* vec3 = create<type::Vector>(f32, 3u);
-    auto* mat2x3 = create<type::Matrix>(vec3, 2u);
+    auto* f32 = create<core::type::F32>();
+    auto* vec3 = create<core::type::Vector>(f32, 3u);
+    auto* mat2x3 = create<core::type::Matrix>(vec3, 2u);
 
     ASTPrinter& gen = Build();
 
@@ -171,7 +171,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_StructDecl) {
     ASTPrinter& gen = Build();
 
     tint::TextGenerator::TextBuffer buf;
-    auto* str = program->TypeOf(s)->As<type::Struct>();
+    auto* str = program->TypeOf(s)->As<core::type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {
   int a;
@@ -203,7 +203,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Struct) {
 
     ASTPrinter& gen = Build();
 
-    auto* str = program->TypeOf(s)->As<type::Struct>();
+    auto* str = program->TypeOf(s)->As<core::type::Struct>();
     StringStream out;
     ASSERT_TRUE(
         gen.EmitType(out, str, core::AddressSpace::kUndefined, core::Access::kReadWrite, ""))
@@ -238,7 +238,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Struct_WithOffsetAttributes) {
     ASTPrinter& gen = Build();
 
     tint::TextGenerator::TextBuffer buf;
-    auto* str = program->TypeOf(s)->As<type::Struct>();
+    auto* str = program->TypeOf(s)->As<core::type::Struct>();
     ASSERT_TRUE(gen.EmitStructType(&buf, str)) << gen.Diagnostics();
     EXPECT_EQ(buf.String(), R"(struct S {
   int a;
@@ -248,7 +248,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Struct_WithOffsetAttributes) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_U32) {
-    auto* u32 = create<type::U32>();
+    auto* u32 = create<core::type::U32>();
 
     ASTPrinter& gen = Build();
 
@@ -260,8 +260,8 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_U32) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_Vector) {
-    auto* f32 = create<type::F32>();
-    auto* vec3 = create<type::Vector>(f32, 3u);
+    auto* f32 = create<core::type::F32>();
+    auto* vec3 = create<core::type::Vector>(f32, 3u);
 
     ASTPrinter& gen = Build();
 
@@ -273,7 +273,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Vector) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitType_Void) {
-    auto* void_ = create<type::Void>();
+    auto* void_ = create<core::type::Void>();
 
     ASTPrinter& gen = Build();
 
@@ -285,7 +285,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitType_Void) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitSampler) {
-    auto* sampler = create<type::Sampler>(type::SamplerKind::kSampler);
+    auto* sampler = create<core::type::Sampler>(core::type::SamplerKind::kSampler);
 
     ASTPrinter& gen = Build();
 
@@ -297,7 +297,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitSampler) {
 }
 
 TEST_F(HlslASTPrinterTest_Type, EmitSamplerComparison) {
-    auto* sampler = create<type::Sampler>(type::SamplerKind::kComparisonSampler);
+    auto* sampler = create<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler);
 
     ASTPrinter& gen = Build();
 
@@ -309,7 +309,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitSamplerComparison) {
 }
 
 struct HlslDepthTextureData {
-    type::TextureDimension dim;
+    core::type::TextureDimension dim;
     std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out, HlslDepthTextureData data) {
@@ -342,18 +342,18 @@ TEST_P(HlslDepthTexturesTest, Emit) {
 INSTANTIATE_TEST_SUITE_P(
     HlslASTPrinterTest_Type,
     HlslDepthTexturesTest,
-    testing::Values(HlslDepthTextureData{type::TextureDimension::k2d,
+    testing::Values(HlslDepthTextureData{core::type::TextureDimension::k2d,
                                          "Texture2D tex : register(t1, space2);"},
-                    HlslDepthTextureData{type::TextureDimension::k2dArray,
+                    HlslDepthTextureData{core::type::TextureDimension::k2dArray,
                                          "Texture2DArray tex : register(t1, space2);"},
-                    HlslDepthTextureData{type::TextureDimension::kCube,
+                    HlslDepthTextureData{core::type::TextureDimension::kCube,
                                          "TextureCube tex : register(t1, space2);"},
-                    HlslDepthTextureData{type::TextureDimension::kCubeArray,
+                    HlslDepthTextureData{core::type::TextureDimension::kCubeArray,
                                          "TextureCubeArray tex : register(t1, space2);"}));
 
 using HlslDepthMultisampledTexturesTest = TestHelper;
 TEST_F(HlslDepthMultisampledTexturesTest, Emit) {
-    auto t = ty.depth_multisampled_texture(type::TextureDimension::k2d);
+    auto t = ty.depth_multisampled_texture(core::type::TextureDimension::k2d);
 
     GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
@@ -373,7 +373,7 @@ TEST_F(HlslDepthMultisampledTexturesTest, Emit) {
 
 enum class TextureDataType { F32, U32, I32 };
 struct HlslSampledTextureData {
-    type::TextureDimension dim;
+    core::type::TextureDimension dim;
     TextureDataType datatype;
     std::string result;
 };
@@ -420,99 +420,99 @@ INSTANTIATE_TEST_SUITE_P(HlslASTPrinterTest_Type,
                          HlslSampledTexturesTest,
                          testing::Values(
                              HlslSampledTextureData{
-                                 type::TextureDimension::k1d,
+                                 core::type::TextureDimension::k1d,
                                  TextureDataType::F32,
                                  "Texture1D<float4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  TextureDataType::F32,
                                  "Texture2D<float4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  TextureDataType::F32,
                                  "Texture2DArray<float4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::k3d,
+                                 core::type::TextureDimension::k3d,
                                  TextureDataType::F32,
                                  "Texture3D<float4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::kCube,
+                                 core::type::TextureDimension::kCube,
                                  TextureDataType::F32,
                                  "TextureCube<float4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::kCubeArray,
+                                 core::type::TextureDimension::kCubeArray,
                                  TextureDataType::F32,
                                  "TextureCubeArray<float4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::k1d,
+                                 core::type::TextureDimension::k1d,
                                  TextureDataType::U32,
                                  "Texture1D<uint4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  TextureDataType::U32,
                                  "Texture2D<uint4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  TextureDataType::U32,
                                  "Texture2DArray<uint4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::k3d,
+                                 core::type::TextureDimension::k3d,
                                  TextureDataType::U32,
                                  "Texture3D<uint4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::kCube,
+                                 core::type::TextureDimension::kCube,
                                  TextureDataType::U32,
                                  "TextureCube<uint4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::kCubeArray,
+                                 core::type::TextureDimension::kCubeArray,
                                  TextureDataType::U32,
                                  "TextureCubeArray<uint4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::k1d,
+                                 core::type::TextureDimension::k1d,
                                  TextureDataType::I32,
                                  "Texture1D<int4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  TextureDataType::I32,
                                  "Texture2D<int4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  TextureDataType::I32,
                                  "Texture2DArray<int4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::k3d,
+                                 core::type::TextureDimension::k3d,
                                  TextureDataType::I32,
                                  "Texture3D<int4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::kCube,
+                                 core::type::TextureDimension::kCube,
                                  TextureDataType::I32,
                                  "TextureCube<int4> tex : register(t1, space2);",
                              },
                              HlslSampledTextureData{
-                                 type::TextureDimension::kCubeArray,
+                                 core::type::TextureDimension::kCubeArray,
                                  TextureDataType::I32,
                                  "TextureCubeArray<int4> tex : register(t1, space2);",
                              }));
 
 TEST_F(HlslASTPrinterTest_Type, EmitMultisampledTexture) {
-    auto* f32 = create<type::F32>();
-    auto* s = create<type::MultisampledTexture>(type::TextureDimension::k2d, f32);
+    auto* f32 = create<core::type::F32>();
+    auto* s = create<core::type::MultisampledTexture>(core::type::TextureDimension::k2d, f32);
 
     ASTPrinter& gen = Build();
 
@@ -523,7 +523,7 @@ TEST_F(HlslASTPrinterTest_Type, EmitMultisampledTexture) {
 }
 
 struct HlslStorageTextureData {
-    type::TextureDimension dim;
+    core::type::TextureDimension dim;
     core::TexelFormat imgfmt;
     std::string result;
 };
@@ -562,31 +562,31 @@ INSTANTIATE_TEST_SUITE_P(
     HlslASTPrinterTest_Type,
     HlslStorageTexturesTest,
     testing::Values(
-        HlslStorageTextureData{type::TextureDimension::k1d, core::TexelFormat::kRgba8Unorm,
+        HlslStorageTextureData{core::type::TextureDimension::k1d, core::TexelFormat::kRgba8Unorm,
                                "RWTexture1D<float4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k2d, core::TexelFormat::kRgba16Float,
+        HlslStorageTextureData{core::type::TextureDimension::k2d, core::TexelFormat::kRgba16Float,
                                "RWTexture2D<float4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k2dArray, core::TexelFormat::kR32Float,
+        HlslStorageTextureData{core::type::TextureDimension::k2dArray, core::TexelFormat::kR32Float,
                                "RWTexture2DArray<float4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k3d, core::TexelFormat::kRg32Float,
+        HlslStorageTextureData{core::type::TextureDimension::k3d, core::TexelFormat::kRg32Float,
                                "RWTexture3D<float4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k1d, core::TexelFormat::kRgba32Float,
+        HlslStorageTextureData{core::type::TextureDimension::k1d, core::TexelFormat::kRgba32Float,
                                "RWTexture1D<float4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k2d, core::TexelFormat::kRgba16Uint,
+        HlslStorageTextureData{core::type::TextureDimension::k2d, core::TexelFormat::kRgba16Uint,
                                "RWTexture2D<uint4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k2dArray, core::TexelFormat::kR32Uint,
+        HlslStorageTextureData{core::type::TextureDimension::k2dArray, core::TexelFormat::kR32Uint,
                                "RWTexture2DArray<uint4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k3d, core::TexelFormat::kRg32Uint,
+        HlslStorageTextureData{core::type::TextureDimension::k3d, core::TexelFormat::kRg32Uint,
                                "RWTexture3D<uint4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k1d, core::TexelFormat::kRgba32Uint,
+        HlslStorageTextureData{core::type::TextureDimension::k1d, core::TexelFormat::kRgba32Uint,
                                "RWTexture1D<uint4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k2d, core::TexelFormat::kRgba16Sint,
+        HlslStorageTextureData{core::type::TextureDimension::k2d, core::TexelFormat::kRgba16Sint,
                                "RWTexture2D<int4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k2dArray, core::TexelFormat::kR32Sint,
+        HlslStorageTextureData{core::type::TextureDimension::k2dArray, core::TexelFormat::kR32Sint,
                                "RWTexture2DArray<int4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k3d, core::TexelFormat::kRg32Sint,
+        HlslStorageTextureData{core::type::TextureDimension::k3d, core::TexelFormat::kRg32Sint,
                                "RWTexture3D<int4> tex : register(u1, space2);"},
-        HlslStorageTextureData{type::TextureDimension::k1d, core::TexelFormat::kRgba32Sint,
+        HlslStorageTextureData{core::type::TextureDimension::k1d, core::TexelFormat::kRgba32Sint,
                                "RWTexture1D<int4> tex : register(u1, space2);"}));
 
 }  // namespace

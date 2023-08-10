@@ -290,7 +290,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Handle) {
     // a = b;
 
     auto make_type = [&] {
-        return ty.storage_texture(type::TextureDimension::k1d, core::TexelFormat::kRgba8Unorm,
+        return ty.storage_texture(core::type::TextureDimension::k1d, core::TexelFormat::kRgba8Unorm,
                                   core::Access::kWrite);
     };
 
@@ -420,9 +420,9 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {
     auto* U = Structure("U", Vector{
                                  Member("i", ty.i32()),
                              });
-    GlobalVar("tex", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Group(0_a),
+    GlobalVar("tex", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), Group(0_a),
               Binding(0_a));
-    GlobalVar("smp", ty.sampler(type::SamplerKind::kSampler), Group(0_a), Binding(1_a));
+    GlobalVar("smp", ty.sampler(core::type::SamplerKind::kSampler), Group(0_a), Binding(1_a));
     GlobalVar("u", ty.Of(U), core::AddressSpace::kUniform, Group(0_a), Binding(2_a));
     GlobalVar("s", ty.Of(S), core::AddressSpace::kStorage, Group(0_a), Binding(3_a));
     GlobalVar("wg", ty.array<f32, 10>(), core::AddressSpace::kWorkgroup);

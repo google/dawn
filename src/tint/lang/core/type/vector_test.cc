@@ -15,7 +15,7 @@
 #include "src/tint/lang/core/type/helper_test.h"
 #include "src/tint/lang/core/type/texture.h"
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 using VectorTest = TestHelper;
@@ -83,8 +83,8 @@ TEST_F(VectorTest, FriendlyName_Packed) {
 TEST_F(VectorTest, Clone) {
     auto* a = create<Vector>(create<I32>(), 2u);
 
-    type::Manager mgr;
-    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+    core::type::Manager mgr;
+    core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* vec = a->Clone(ctx);
     EXPECT_TRUE(vec->type()->Is<I32>());
@@ -95,8 +95,8 @@ TEST_F(VectorTest, Clone) {
 TEST_F(VectorTest, Clone_Packed) {
     auto* a = create<Vector>(create<I32>(), 3u, true);
 
-    type::Manager mgr;
-    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+    core::type::Manager mgr;
+    core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* vec = a->Clone(ctx);
     EXPECT_TRUE(vec->type()->Is<I32>());
@@ -105,4 +105,4 @@ TEST_F(VectorTest, Clone_Packed) {
 }
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::core::type

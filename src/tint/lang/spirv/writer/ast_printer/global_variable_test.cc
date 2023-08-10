@@ -235,7 +235,8 @@ TEST_F(SpirvASTPrinterTest, GlobalConst_Nested_Vec_Initializer) {
 }
 
 TEST_F(SpirvASTPrinterTest, GlobalVar_WithBindingAndGroup) {
-    auto* v = GlobalVar("var", ty.sampler(type::SamplerKind::kSampler), Binding(2_a), Group(3_a));
+    auto* v =
+        GlobalVar("var", ty.sampler(core::type::SamplerKind::kSampler), Binding(2_a), Group(3_a));
 
     Builder& b = Build();
 
@@ -475,7 +476,7 @@ OpName %9 "unused_entry_point"
 TEST_F(SpirvASTPrinterTest, GlobalVar_TextureStorageWriteOnly) {
     // var<uniform_constant> a : texture_storage_2d<r32uint, write>;
 
-    auto type = ty.storage_texture(type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+    auto type = ty.storage_texture(core::type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
                                    core::Access::kWrite);
 
     auto* var_a = GlobalVar("a", type, Binding(0_a), Group(0_a));

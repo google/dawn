@@ -98,11 +98,11 @@ Function::TransitivelyReferencedBuiltinVariables() const {
 }
 
 Function::VariableBindings Function::TransitivelyReferencedSamplerVariables() const {
-    return TransitivelyReferencedSamplerVariablesImpl(type::SamplerKind::kSampler);
+    return TransitivelyReferencedSamplerVariablesImpl(core::type::SamplerKind::kSampler);
 }
 
 Function::VariableBindings Function::TransitivelyReferencedComparisonSamplerVariables() const {
-    return TransitivelyReferencedSamplerVariablesImpl(type::SamplerKind::kComparisonSampler);
+    return TransitivelyReferencedSamplerVariablesImpl(core::type::SamplerKind::kComparisonSampler);
 }
 
 Function::VariableBindings Function::TransitivelyReferencedSampledTextureVariables() const {
@@ -137,12 +137,12 @@ bool Function::HasAncestorEntryPoint(Symbol symbol) const {
 }
 
 Function::VariableBindings Function::TransitivelyReferencedSamplerVariablesImpl(
-    type::SamplerKind kind) const {
+    core::type::SamplerKind kind) const {
     VariableBindings ret;
 
     for (auto* global : TransitivelyReferencedGlobals()) {
         auto* unwrapped_type = global->Type()->UnwrapRef();
-        auto* sampler = unwrapped_type->As<type::Sampler>();
+        auto* sampler = unwrapped_type->As<core::type::Sampler>();
         if (sampler == nullptr || sampler->kind() != kind) {
             continue;
         }
@@ -160,13 +160,13 @@ Function::VariableBindings Function::TransitivelyReferencedSampledTextureVariabl
 
     for (auto* global : TransitivelyReferencedGlobals()) {
         auto* unwrapped_type = global->Type()->UnwrapRef();
-        auto* texture = unwrapped_type->As<type::Texture>();
+        auto* texture = unwrapped_type->As<core::type::Texture>();
         if (texture == nullptr) {
             continue;
         }
 
-        auto is_multisampled = texture->Is<type::MultisampledTexture>();
-        auto is_sampled = texture->Is<type::SampledTexture>();
+        auto is_multisampled = texture->Is<core::type::MultisampledTexture>();
+        auto is_sampled = texture->Is<core::type::SampledTexture>();
 
         if ((multisampled && !is_multisampled) || (!multisampled && !is_sampled)) {
             continue;

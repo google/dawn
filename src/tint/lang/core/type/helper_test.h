@@ -21,7 +21,7 @@
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// Helper class for testing
 template <typename BASE>
@@ -44,13 +44,13 @@ using TestHelper = TestHelperBase<testing::Test>;
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 /// Helper macro for testing that a type was as expected
 #define EXPECT_TYPE(GOT, EXPECT)                                                                \
     do {                                                                                        \
-        const type::Type* got = GOT;                                                            \
-        const type::Type* expect = EXPECT;                                                      \
+        const core::type::Type* got = GOT;                                                      \
+        const core::type::Type* expect = EXPECT;                                                \
         if (got != expect) {                                                                    \
             ADD_FAILURE() << #GOT " != " #EXPECT "\n"                                           \
                           << "  " #GOT ": " << (got ? got->FriendlyName() : "<null>") << "\n"   \

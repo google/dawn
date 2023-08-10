@@ -517,9 +517,9 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
     auto format = core::TexelFormat::kR32Float;
     auto* texture =
         b.Var("texture", ty.ptr(core::AddressSpace::kHandle,
-                                ty.Get<type::StorageTexture>(
-                                    type::TextureDimension::k2d, format, core::Access::kWrite,
-                                    type::StorageTexture::SubtypeFor(format, ty))));
+                                ty.Get<core::type::StorageTexture>(
+                                    core::type::TextureDimension::k2d, format, core::Access::kWrite,
+                                    core::type::StorageTexture::SubtypeFor(format, ty))));
     texture->SetBindingPoint(0, 0);
     b.RootBlock()->Append(texture);
 
@@ -777,8 +777,9 @@ TEST_F(IR_DemoteToHelperTest, AtomicCompareExchange) {
             b.Discard();
             b.ExitIf(ifelse);
         });
-        auto* result = b.Call(type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32()),
-                              core::Function::kAtomicCompareExchangeWeak, buffer, 0_i, 42_i);
+        auto* result =
+            b.Call(core::type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32()),
+                   core::Function::kAtomicCompareExchangeWeak, buffer, 0_i, 42_i);
         b.Add(ty.i32(), b.Access(ty.i32(), result, 0_i), 1_i);
         b.Return(ep, 0.5_f);
     });

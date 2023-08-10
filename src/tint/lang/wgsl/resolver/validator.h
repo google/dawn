@@ -63,16 +63,16 @@ class Statement;
 class SwitchStatement;
 class WhileStatement;
 }  // namespace tint::sem
-namespace tint::type {
+namespace tint::core::type {
 class Atomic;
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 namespace tint::resolver {
 
 /// TypeAndAddressSpace is a pair of type and address space
 struct TypeAndAddressSpace {
     /// The type
-    const type::Type* type;
+    const core::type::Type* type;
     /// The address space
     core::AddressSpace address_space;
 
@@ -102,7 +102,7 @@ class Validator {
     Validator(ProgramBuilder* builder,
               SemHelper& helper,
               const core::Extensions& enabled_extensions,
-              const Hashmap<const type::Type*, const Source*, 8>& atomic_composite_info,
+              const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info,
               Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts);
     ~Validator();
 
@@ -135,19 +135,19 @@ class Validator {
 
     /// @param type the given type
     /// @returns true if the given type is a plain type
-    bool IsPlain(const type::Type* type) const;
+    bool IsPlain(const core::type::Type* type) const;
 
     /// @param type the given type
     /// @returns true if the given type is a fixed-footprint type
-    bool IsFixedFootprint(const type::Type* type) const;
+    bool IsFixedFootprint(const core::type::Type* type) const;
 
     /// @param type the given type
     /// @returns true if the given type is storable
-    bool IsStorable(const type::Type* type) const;
+    bool IsStorable(const core::type::Type* type) const;
 
     /// @param type the given type
     /// @returns true if the given type is host-shareable
-    bool IsHostShareable(const type::Type* type) const;
+    bool IsHostShareable(const core::type::Type* type) const;
 
     /// Validates pipeline stages
     /// @param entry_points the entry points to the module
@@ -169,7 +169,7 @@ class Validator {
     /// @param el_source the source of the array element, or the array if the array does not have a
     ///        locally-declared element AST node.
     /// @returns true on success, false otherwise.
-    bool Array(const type::Array* arr, const Source& el_source) const;
+    bool Array(const core::type::Array* arr, const Source& el_source) const;
 
     /// Validates an array stride attribute
     /// @param attr the stride attribute to validate
@@ -184,25 +184,25 @@ class Validator {
     /// @param a the atomic ast node
     /// @param s the atomic sem node
     /// @returns true on success, false otherwise.
-    bool Atomic(const ast::TemplatedIdentifier* a, const type::Atomic* s) const;
+    bool Atomic(const ast::TemplatedIdentifier* a, const core::type::Atomic* s) const;
 
     /// Validates a pointer type
     /// @param a the pointer ast node
     /// @param s the pointer sem node
     /// @returns true on success, false otherwise.
-    bool Pointer(const ast::TemplatedIdentifier* a, const type::Pointer* s) const;
+    bool Pointer(const ast::TemplatedIdentifier* a, const core::type::Pointer* s) const;
 
     /// Validates an assignment
     /// @param a the assignment statement
     /// @param rhs_ty the type of the right hand side
     /// @returns true on success, false otherwise.
-    bool Assignment(const ast::Statement* a, const type::Type* rhs_ty) const;
+    bool Assignment(const ast::Statement* a, const core::type::Type* rhs_ty) const;
 
     /// Validates a bitcase
     /// @param cast the bitcast expression
     /// @param to the destination type
     /// @returns true on success, false otherwise
-    bool Bitcast(const ast::BitcastExpression* cast, const type::Type* to) const;
+    bool Bitcast(const ast::BitcastExpression* cast, const core::type::Type* to) const;
 
     /// Validates a break statement
     /// @param stmt the break statement to validate
@@ -217,7 +217,7 @@ class Validator {
     /// @param is_input true if this is an input attribute
     /// @returns true on success, false otherwise.
     bool BuiltinAttribute(const ast::BuiltinAttribute* attr,
-                          const type::Type* storage_type,
+                          const core::type::Type* storage_type,
                           ast::PipelineStage stage,
                           const bool is_input) const;
 
@@ -299,7 +299,7 @@ class Validator {
     /// @param storage_type the storage type of the attached variable
     /// @returns true on succes, false otherwise
     bool InterpolateAttribute(const ast::InterpolateAttribute* attr,
-                              const type::Type* storage_type) const;
+                              const core::type::Type* storage_type) const;
 
     /// Validates a builtin call
     /// @param call the builtin call to validate
@@ -319,7 +319,7 @@ class Validator {
     /// @param is_input true if this is an input variable
     /// @returns true on success, false otherwise.
     bool LocationAttribute(const ast::LocationAttribute* loc_attr,
-                           const type::Type* type,
+                           const core::type::Type* type,
                            ast::PipelineStage stage,
                            const Source& source,
                            const bool is_input = false) const;
@@ -340,13 +340,15 @@ class Validator {
     /// @param from the abstract numeric type
     /// @param source the source of the materialization
     /// @returns true on success, false otherwise
-    bool Materialize(const type::Type* to, const type::Type* from, const Source& source) const;
+    bool Materialize(const core::type::Type* to,
+                     const core::type::Type* from,
+                     const Source& source) const;
 
     /// Validates a matrix
     /// @param el_ty the matrix element type to validate
     /// @param source the source of the matrix
     /// @returns true on success, false otherwise
-    bool Matrix(const type::Type* el_ty, const Source& source) const;
+    bool Matrix(const core::type::Type* el_ty, const Source& source) const;
 
     /// Validates a function parameter
     /// @param var the variable to validate
@@ -360,8 +362,8 @@ class Validator {
     /// @param current_statement the current statement being resolved
     /// @returns true on success, false otherwise
     bool Return(const ast::ReturnStatement* ret,
-                const type::Type* func_type,
-                const type::Type* ret_type,
+                const core::type::Type* func_type,
+                const core::type::Type* ret_type,
                 sem::Statement* current_statement) const;
 
     /// Validates a list of statements
@@ -373,19 +375,19 @@ class Validator {
     /// @param t the texture to validate
     /// @param source the source of the texture
     /// @returns true on success, false otherwise
-    bool StorageTexture(const type::StorageTexture* t, const Source& source) const;
+    bool StorageTexture(const core::type::StorageTexture* t, const Source& source) const;
 
     /// Validates a sampled texture
     /// @param t the texture to validate
     /// @param source the source of the texture
     /// @returns true on success, false otherwise
-    bool SampledTexture(const type::SampledTexture* t, const Source& source) const;
+    bool SampledTexture(const core::type::SampledTexture* t, const Source& source) const;
 
     /// Validates a multisampled texture
     /// @param t the texture to validate
     /// @param source the source of the texture
     /// @returns true on success, false otherwise
-    bool MultisampledTexture(const type::MultisampledTexture* t, const Source& source) const;
+    bool MultisampledTexture(const core::type::MultisampledTexture* t, const Source& source) const;
 
     /// Validates a structure
     /// @param str the structure to validate
@@ -398,7 +400,7 @@ class Validator {
     /// @param struct_type the type of the structure
     /// @returns true on success, false otherwise
     bool StructureInitializer(const ast::CallExpression* ctor,
-                              const type::Struct* struct_type) const;
+                              const core::type::Struct* struct_type) const;
 
     /// Validates a switch statement
     /// @param s the switch to validate
@@ -433,20 +435,20 @@ class Validator {
     /// @param initializer the RHS initializer expression
     /// @returns true on succes, false otherwise
     bool VariableInitializer(const ast::Variable* v,
-                             const type::Type* storage_type,
+                             const core::type::Type* storage_type,
                              const sem::ValueExpression* initializer) const;
 
     /// Validates a vector
     /// @param el_ty the vector element type to validate
     /// @param source the source of the vector
     /// @returns true on success, false otherwise
-    bool Vector(const type::Type* el_ty, const Source& source) const;
+    bool Vector(const core::type::Type* el_ty, const Source& source) const;
 
     /// Validates an array constructor
     /// @param ctor the call expresion to validate
     /// @param arr_type the type of the array
     /// @returns true on success, false otherwise
-    bool ArrayConstructor(const ast::CallExpression* ctor, const type::Array* arr_type) const;
+    bool ArrayConstructor(const ast::CallExpression* ctor, const core::type::Array* arr_type) const;
 
     /// Validates a texture builtin function
     /// @param call the builtin call to validate
@@ -485,7 +487,9 @@ class Validator {
     /// @param sc the address space
     /// @param source the source of the type
     /// @returns true on success, false otherwise
-    bool AddressSpaceLayout(const type::Type* type, core::AddressSpace sc, Source source) const;
+    bool AddressSpaceLayout(const core::type::Type* type,
+                            core::AddressSpace sc,
+                            Source source) const;
 
     /// @returns true if the attribute list contains a
     /// ast::DisableValidationAttribute with the validation mode equal to
@@ -507,7 +511,7 @@ class Validator {
     /// @param ty the type to check
     /// @returns true if @p ty is an array with an `override` expression element count, otherwise
     ///          false.
-    bool IsArrayWithOverrideCount(const type::Type* ty) const;
+    bool IsArrayWithOverrideCount(const core::type::Type* ty) const;
 
     /// Raises an error about an array type using an `override` expression element count, outside
     /// the single allowed use of a `var<workgroup>`.
@@ -529,7 +533,7 @@ class Validator {
     /// @param size the vector dimension
     /// @param element_type scalar vector sub-element type
     /// @return pretty string representation
-    std::string VectorPretty(uint32_t size, const type::Type* element_type) const;
+    std::string VectorPretty(uint32_t size, const core::type::Type* element_type) const;
 
     /// Raises an error if combination of @p store_ty, @p access and @p address_space are not valid
     /// for a `var` or `ptr` declaration.
@@ -538,7 +542,7 @@ class Validator {
     /// @param address_space the var or pointer address space
     /// @param source the source for the error
     /// @returns true on success, false if an error was raised.
-    bool CheckTypeAccessAddressSpace(const type::Type* store_ty,
+    bool CheckTypeAccessAddressSpace(const core::type::Type* store_ty,
                                      core::Access access,
                                      core::AddressSpace address_space,
                                      VectorRef<const tint::ast::Attribute*> attributes,
@@ -548,7 +552,7 @@ class Validator {
     SemHelper& sem_;
     DiagnosticFilterStack diagnostic_filters_;
     const core::Extensions& enabled_extensions_;
-    const Hashmap<const type::Type*, const Source*, 8>& atomic_composite_info_;
+    const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info_;
     Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts_;
 };
 

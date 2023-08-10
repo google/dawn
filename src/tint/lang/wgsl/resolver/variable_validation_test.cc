@@ -144,7 +144,7 @@ TEST_F(ResolverVariableValidationTest, VarTypeNotConstructible) {
 TEST_F(ResolverVariableValidationTest, LetTypeNotConstructible) {
     // @group(0) @binding(0) var t1 : texture_2d<f32>;
     // let t2 : t1;
-    auto* t1 = GlobalVar("t1", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
+    auto* t1 = GlobalVar("t1", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
                          Group(0_a), Binding(0_a));
     auto* t2 = Let(Source{{56, 78}}, "t2", Expr(t1));
     WrapInFunction(t2);
@@ -367,7 +367,7 @@ TEST_F(ResolverVariableValidationTest, NonConstructibleType_InferredType) {
     // fn foo() {
     //   var v = s;
     // }
-    GlobalVar("s", ty.sampler(type::SamplerKind::kSampler), Group(0_a), Binding(0_a));
+    GlobalVar("s", ty.sampler(core::type::SamplerKind::kSampler), Group(0_a), Binding(0_a));
     auto* v = Var(Source{{12, 34}}, "v", Expr("s"));
     WrapInFunction(v);
 

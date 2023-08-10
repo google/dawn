@@ -93,13 +93,13 @@ class ProgramBuilder : public ast::Builder {
     static ProgramBuilder Wrap(const Program* program);
 
     /// @returns a reference to the program's types
-    type::Manager& Types() {
+    core::type::Manager& Types() {
         AssertNotMoved();
         return constants.types;
     }
 
     /// @returns a reference to the program's types
-    const type::Manager& Types() const {
+    const core::type::Manager& Types() const {
         AssertNotMoved();
         return constants.types;
     }
@@ -143,21 +143,21 @@ class ProgramBuilder : public ast::Builder {
     /// @returns the node pointer
     template <typename T, typename... ARGS>
     tint::traits::EnableIf<tint::traits::IsTypeOrDerived<T, sem::Node> &&
-                               !tint::traits::IsTypeOrDerived<T, type::Node>,
+                               !tint::traits::IsTypeOrDerived<T, core::type::Node>,
                            T>*
     create(ARGS&&... args) {
         AssertNotMoved();
         return sem_nodes_.Create<T>(std::forward<ARGS>(args)...);
     }
 
-    /// Creates a new type::Node owned by the ProgramBuilder.
+    /// Creates a new core::type::Node owned by the ProgramBuilder.
     /// When the ProgramBuilder is destructed, owned ProgramBuilder and the returned node will also
-    /// be destructed. If T derives from type::UniqueNode, then the calling create() for the same
-    /// `T` and arguments will return the same pointer.
+    /// be destructed. If T derives from core::type::UniqueNode, then the calling create() for the
+    /// same `T` and arguments will return the same pointer.
     /// @param args the arguments to pass to the constructor
     /// @returns the new, or existing node
     template <typename T, typename... ARGS>
-    tint::traits::EnableIfIsType<T, type::Node>* create(ARGS&&... args) {
+    tint::traits::EnableIfIsType<T, core::type::Node>* create(ARGS&&... args) {
         AssertNotMoved();
         return constants.types.Get<T>(std::forward<ARGS>(args)...);
     }
@@ -168,7 +168,7 @@ class ProgramBuilder : public ast::Builder {
     /// @param expr the AST expression
     /// @return the resolved semantic type for the expression, or nullptr if the
     /// expression has no resolved type.
-    const type::Type* TypeOf(const ast::Expression* expr) const;
+    const core::type::Type* TypeOf(const ast::Expression* expr) const;
 
     /// Helper for returning the resolved semantic type of the variable `var`.
     /// @note As the Resolver is run when the Program is built, this will only be
@@ -176,7 +176,7 @@ class ProgramBuilder : public ast::Builder {
     /// @param var the AST variable
     /// @return the resolved semantic type for the variable, or nullptr if the
     /// variable has no resolved type.
-    const type::Type* TypeOf(const ast::Variable* var) const;
+    const core::type::Type* TypeOf(const ast::Variable* var) const;
 
     /// Helper for returning the resolved semantic type of the AST type
     /// declaration `type_decl`.
@@ -185,7 +185,7 @@ class ProgramBuilder : public ast::Builder {
     /// @param type_decl the AST type declaration
     /// @return the resolved semantic type for the type declaration, or nullptr if
     /// the type declaration has no resolved type.
-    const type::Type* TypeOf(const ast::TypeDecl* type_decl) const;
+    const core::type::Type* TypeOf(const ast::TypeDecl* type_decl) const;
 
     /// The constants manager
     core::constant::Manager constants;

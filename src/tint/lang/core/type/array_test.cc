@@ -16,7 +16,7 @@
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/wgsl/sem/array_count.h"
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 using ArrayTest = TestHelper;
@@ -167,8 +167,8 @@ TEST_F(ArrayTest, HasFixedFootprint) {
 TEST_F(ArrayTest, CloneSizedArray) {
     auto* ary = create<Array>(create<U32>(), create<ConstantArrayCount>(2u), 4u, 8u, 32u, 16u);
 
-    type::Manager mgr;
-    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+    core::type::Manager mgr;
+    core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* val = ary->Clone(ctx);
 
@@ -186,8 +186,8 @@ TEST_F(ArrayTest, CloneSizedArray) {
 TEST_F(ArrayTest, CloneRuntimeArray) {
     auto* ary = create<Array>(create<U32>(), create<RuntimeArrayCount>(), 4u, 8u, 32u, 32u);
 
-    type::Manager mgr;
-    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+    core::type::Manager mgr;
+    core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* val = ary->Clone(ctx);
     ASSERT_NE(val, nullptr);
@@ -201,4 +201,4 @@ TEST_F(ArrayTest, CloneRuntimeArray) {
 }
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::core::type

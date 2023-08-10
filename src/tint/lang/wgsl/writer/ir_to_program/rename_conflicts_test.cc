@@ -62,7 +62,7 @@ class IRToProgramRenameConflictsTest : public testing::Test {
     /// The test IR builder.
     ir::Builder b{mod};
     /// The type manager.
-    type::Manager& ty{mod.Types()};
+    core::type::Manager& ty{mod.Types()};
 };
 
 TEST_F(IRToProgramRenameConflictsTest, NoModify_SingleNamedRootBlockVar) {

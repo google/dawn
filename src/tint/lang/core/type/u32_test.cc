@@ -15,7 +15,7 @@
 #include "src/tint/lang/core/type/helper_test.h"
 #include "src/tint/lang/core/type/texture.h"
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 using U32Test = TestHelper;
@@ -47,12 +47,12 @@ TEST_F(U32Test, FriendlyName) {
 TEST_F(U32Test, Clone) {
     auto* a = create<U32>();
 
-    type::Manager mgr;
-    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+    core::type::Manager mgr;
+    core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* b = a->Clone(ctx);
     ASSERT_TRUE(b->Is<U32>());
 }
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::core::type

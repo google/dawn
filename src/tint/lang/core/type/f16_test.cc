@@ -15,7 +15,7 @@
 #include "src/tint/lang/core/type/helper_test.h"
 #include "src/tint/lang/core/type/texture.h"
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 using F16Test = TestHelper;
@@ -47,12 +47,12 @@ TEST_F(F16Test, FriendlyName) {
 TEST_F(F16Test, Clone) {
     auto* a = create<F16>();
 
-    type::Manager mgr;
-    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+    core::type::Manager mgr;
+    core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* b = a->Clone(ctx);
     ASSERT_TRUE(b->Is<F16>());
 }
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::core::type

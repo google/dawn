@@ -22,7 +22,7 @@
 #include "src/tint/lang/core/type/unique_node.h"
 #include "src/tint/utils/symbol/symbol_table.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// An array count
 class ArrayCount : public Castable<ArrayCount, UniqueNode> {
@@ -93,6 +93,6 @@ class RuntimeArrayCount final : public Castable<RuntimeArrayCount, ArrayCount> {
     RuntimeArrayCount* Clone(CloneContext& ctx) const override;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_ARRAY_COUNT_H_

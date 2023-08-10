@@ -37,7 +37,7 @@ struct VectorConstructorInfo {
 VectorConstructorInfo AsVectorConstructor(const sem::ValueExpression* expr) {
     if (auto* call = expr->As<sem::Call>()) {
         if (auto* ctor = call->Target()->As<sem::ValueConstructor>()) {
-            if (ctor->ReturnType()->Is<type::Vector>()) {
+            if (ctor->ReturnType()->Is<core::type::Vector>()) {
                 return {call, ctor};
             }
         }
@@ -46,16 +46,16 @@ VectorConstructorInfo AsVectorConstructor(const sem::ValueExpression* expr) {
 }
 
 const sem::ValueExpression* Zero(ProgramBuilder& b,
-                                 const type::Type* ty,
+                                 const core::type::Type* ty,
                                  const sem::Statement* stmt) {
     const ast::Expression* expr = nullptr;
-    if (ty->Is<type::I32>()) {
+    if (ty->Is<core::type::I32>()) {
         expr = b.Expr(0_i);
-    } else if (ty->Is<type::U32>()) {
+    } else if (ty->Is<core::type::U32>()) {
         expr = b.Expr(0_u);
-    } else if (ty->Is<type::F32>()) {
+    } else if (ty->Is<core::type::F32>()) {
         expr = b.Expr(0_f);
-    } else if (ty->Is<type::Bool>()) {
+    } else if (ty->Is<core::type::Bool>()) {
         expr = b.Expr(false);
     } else {
         TINT_UNREACHABLE() << "unsupported vector element type: " << ty->TypeInfo().name;
@@ -74,11 +74,11 @@ const sem::Call* AppendVector(ProgramBuilder* b,
                               const ast::Expression* vector_ast,
                               const ast::Expression* scalar_ast) {
     uint32_t packed_size;
-    const type::Type* packed_el_sem_ty;
+    const core::type::Type* packed_el_sem_ty;
     auto* vector_sem = b->Sem().GetVal(vector_ast);
     auto* scalar_sem = b->Sem().GetVal(scalar_ast);
     auto* vector_ty = vector_sem->Type()->UnwrapRef();
-    if (auto* vec = vector_ty->As<type::Vector>()) {
+    if (auto* vec = vector_ty->As<core::type::Vector>()) {
         packed_size = vec->Width() + 1;
         packed_el_sem_ty = vec->type();
     } else {
@@ -88,10 +88,10 @@ const sem::Call* AppendVector(ProgramBuilder* b,
 
     auto packed_el_ast_ty = Switch(
         packed_el_sem_ty,  //
-        [&](const type::I32*) { return b->ty.i32(); },
-        [&](const type::U32*) { return b->ty.u32(); },
-        [&](const type::F32*) { return b->ty.f32(); },
-        [&](const type::Bool*) { return b->ty.bool_(); },
+        [&](const core::type::I32*) { return b->ty.i32(); },
+        [&](const core::type::U32*) { return b->ty.u32(); },
+        [&](const core::type::F32*) { return b->ty.f32(); },
+        [&](const core::type::Bool*) { return b->ty.bool_(); },
         [&](Default) {
             TINT_UNREACHABLE() << "unsupported vector element type: "
                                << packed_el_sem_ty->TypeInfo().name;
@@ -101,7 +101,7 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     auto* statement = vector_sem->Stmt();
 
     auto packed_ast_ty = b->ty.vec(packed_el_ast_ty, packed_size);
-    auto* packed_sem_ty = b->create<type::Vector>(packed_el_sem_ty, packed_size);
+    auto* packed_sem_ty = b->create<core::type::Vector>(packed_el_sem_ty, packed_size);
 
     // If the coordinates are already passed in a vector constructor, with only
     // scalar components supplied, extract the elements into the new vector

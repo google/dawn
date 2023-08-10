@@ -42,8 +42,8 @@ inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
 
 // This tests that we do not push OpTypeSampledImage and float_0 type twice.
 TEST_F(BuiltinSpirvASTPrinterTest, Call_TextureSampleCompare_Twice) {
-    auto s = ty.sampler(type::SamplerKind::kComparisonSampler);
-    auto t = ty.depth_texture(type::TextureDimension::k2d);
+    auto s = ty.sampler(core::type::SamplerKind::kComparisonSampler);
+    auto t = ty.depth_texture(core::type::TextureDimension::k2d);
 
     auto* tex = GlobalVar("texture", t, Binding(0_a), Group(0_a));
     auto* sampler = GlobalVar("sampler", s, Binding(1_a), Group(0_a));

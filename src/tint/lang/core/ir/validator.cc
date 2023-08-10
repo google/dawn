@@ -321,7 +321,7 @@ void Validator::CheckCall(Call* call) {
 }
 
 void Validator::CheckAccess(ir::Access* a) {
-    bool is_ptr = a->Object()->Type()->Is<type::Pointer>();
+    bool is_ptr = a->Object()->Type()->Is<core::type::Pointer>();
     auto* ty = a->Object()->Type()->UnwrapPtr();
 
     auto current = [&] { return is_ptr ? "ptr<" + ty->FriendlyName() + ">" : ty->FriendlyName(); };
@@ -338,7 +338,7 @@ void Validator::CheckAccess(ir::Access* a) {
             return;
         }
 
-        if (is_ptr && ty->Is<type::Vector>()) {
+        if (is_ptr && ty->Is<core::type::Vector>()) {
             err("cannot obtain address of vector element");
             return;
         }
@@ -379,7 +379,7 @@ void Validator::CheckAccess(ir::Access* a) {
     }
 
     auto* want_ty = a->Result()->Type()->UnwrapPtr();
-    bool want_ptr = a->Result()->Type()->Is<type::Pointer>();
+    bool want_ptr = a->Result()->Type()->Is<core::type::Pointer>();
     if (TINT_UNLIKELY(ty != want_ty || is_ptr != want_ptr)) {
         std::string want =
             want_ptr ? "ptr<" + want_ty->FriendlyName() + ">" : want_ty->FriendlyName();
@@ -406,7 +406,7 @@ void Validator::CheckUnary(ir::Unary* u) {
 void Validator::CheckIf(If* if_) {
     CheckOperandNotNull(if_, if_->Condition(), If::kConditionOperandOffset);
 
-    if (if_->Condition() && !if_->Condition()->Type()->Is<type::Bool>()) {
+    if (if_->Condition() && !if_->Condition()->Type()->Is<core::type::Bool>()) {
         AddError(if_, If::kConditionOperandOffset,
                  InstError(if_, "condition must be a `bool` type"));
     }
@@ -512,7 +512,7 @@ void Validator::CheckReturn(Return* ret) {
         AddError(ret, InstError(ret, "undefined function"));
         return;
     }
-    if (func->ReturnType()->Is<type::Void>()) {
+    if (func->ReturnType()->Is<core::type::Void>()) {
         if (ret->Value()) {
             AddError(ret, InstError(ret, "unexpected return value"));
         }
@@ -604,7 +604,7 @@ void Validator::CheckStoreVectorElement(StoreVectorElement* s) {
     }
 }
 
-const type::Type* Validator::GetVectorPtrElementType(Instruction* inst, size_t idx) {
+const core::type::Type* Validator::GetVectorPtrElementType(Instruction* inst, size_t idx) {
     auto* operand = inst->Operands()[idx];
     if (TINT_UNLIKELY(!operand)) {
         return nullptr;
@@ -615,9 +615,9 @@ const type::Type* Validator::GetVectorPtrElementType(Instruction* inst, size_t i
         return nullptr;
     }
 
-    auto* vec_ptr_ty = type->As<type::Pointer>();
+    auto* vec_ptr_ty = type->As<core::type::Pointer>();
     if (TINT_LIKELY(vec_ptr_ty)) {
-        auto* vec_ty = vec_ptr_ty->StoreType()->As<type::Vector>();
+        auto* vec_ty = vec_ptr_ty->StoreType()->As<core::type::Vector>();
         if (TINT_LIKELY(vec_ty)) {
             return vec_ty->type();
         }

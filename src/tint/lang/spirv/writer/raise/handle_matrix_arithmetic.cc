@@ -40,12 +40,12 @@ void Run(ir::Module* ir) {
         }
         if (auto* binary = inst->As<ir::Binary>()) {
             TINT_ASSERT(binary->Operands().Length() == 2);
-            if (binary->LHS()->Type()->Is<type::Matrix>() ||
-                binary->RHS()->Type()->Is<type::Matrix>()) {
+            if (binary->LHS()->Type()->Is<core::type::Matrix>() ||
+                binary->RHS()->Type()->Is<core::type::Matrix>()) {
                 binary_worklist.Push(binary);
             }
         } else if (auto* convert = inst->As<ir::Convert>()) {
-            if (convert->Result()->Type()->Is<type::Matrix>()) {
+            if (convert->Result()->Type()->Is<core::type::Matrix>()) {
                 convert_worklist.Push(convert);
             }
         }
@@ -71,7 +71,7 @@ void Run(ir::Module* ir) {
 
         // Helper to replace the instruction with a column-wise operation.
         auto column_wise = [&](enum ir::Binary::Kind op) {
-            auto* mat = ty->As<type::Matrix>();
+            auto* mat = ty->As<core::type::Matrix>();
             Vector<ir::Value*, 4> args;
             for (uint32_t col = 0; col < mat->columns(); col++) {
                 b.InsertBefore(binary, [&] {
@@ -93,22 +93,22 @@ void Run(ir::Module* ir) {
                 break;
             case ir::Binary::Kind::kMultiply:
                 // Select the SPIR-V intrinsic that corresponds to the operation being performed.
-                if (lhs_ty->Is<type::Matrix>()) {
-                    if (rhs_ty->Is<type::Scalar>()) {
+                if (lhs_ty->Is<core::type::Matrix>()) {
+                    if (rhs_ty->Is<core::type::Scalar>()) {
                         replace(
                             b.Call(ty, ir::IntrinsicCall::Kind::kSpirvMatrixTimesScalar, lhs, rhs));
-                    } else if (rhs_ty->Is<type::Vector>()) {
+                    } else if (rhs_ty->Is<core::type::Vector>()) {
                         replace(
                             b.Call(ty, ir::IntrinsicCall::Kind::kSpirvMatrixTimesVector, lhs, rhs));
-                    } else if (rhs_ty->Is<type::Matrix>()) {
+                    } else if (rhs_ty->Is<core::type::Matrix>()) {
                         replace(
                             b.Call(ty, ir::IntrinsicCall::Kind::kSpirvMatrixTimesMatrix, lhs, rhs));
                     }
                 } else {
-                    if (lhs_ty->Is<type::Scalar>()) {
+                    if (lhs_ty->Is<core::type::Scalar>()) {
                         replace(
                             b.Call(ty, ir::IntrinsicCall::Kind::kSpirvMatrixTimesScalar, rhs, lhs));
-                    } else if (lhs_ty->Is<type::Vector>()) {
+                    } else if (lhs_ty->Is<core::type::Vector>()) {
                         replace(
                             b.Call(ty, ir::IntrinsicCall::Kind::kSpirvVectorTimesMatrix, lhs, rhs));
                     }
@@ -124,8 +124,8 @@ void Run(ir::Module* ir) {
     // Replace the matrix convert instructions that we found.
     for (auto* convert : convert_worklist) {
         auto* arg = convert->Args()[ir::Convert::kValueOperandOffset];
-        auto* in_mat = arg->Type()->As<type::Matrix>();
-        auto* out_mat = convert->Result()->Type()->As<type::Matrix>();
+        auto* in_mat = arg->Type()->As<core::type::Matrix>();
+        auto* out_mat = convert->Result()->Type()->As<core::type::Matrix>();
 
         // Extract and convert each column separately.
         Vector<ir::Value*, 4> args;

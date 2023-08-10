@@ -14,26 +14,26 @@
 
 #include "src/tint/lang/core/type/texture_dimension.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
-std::string_view ToString(type::TextureDimension dim) {
+std::string_view ToString(core::type::TextureDimension dim) {
     switch (dim) {
-        case type::TextureDimension::kNone:
+        case core::type::TextureDimension::kNone:
             return "None";
-        case type::TextureDimension::k1d:
+        case core::type::TextureDimension::k1d:
             return "1d";
-        case type::TextureDimension::k2d:
+        case core::type::TextureDimension::k2d:
             return "2d";
-        case type::TextureDimension::k2dArray:
+        case core::type::TextureDimension::k2dArray:
             return "2d_array";
-        case type::TextureDimension::k3d:
+        case core::type::TextureDimension::k3d:
             return "3d";
-        case type::TextureDimension::kCube:
+        case core::type::TextureDimension::kCube:
             return "cube";
-        case type::TextureDimension::kCubeArray:
+        case core::type::TextureDimension::kCubeArray:
             return "cube_array";
     }
     return "<unknown>";
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

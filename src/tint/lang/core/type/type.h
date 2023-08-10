@@ -28,11 +28,11 @@ namespace tint {
 class ProgramBuilder;
 class SymbolTable;
 }  // namespace tint
-namespace tint::type {
+namespace tint::core::type {
 class Type;
-}  // namespace tint::type
+}  // namespace tint::core::type
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// Flag is an enumerator of type flag bits, used by Flags.
 enum Flag {
@@ -97,7 +97,7 @@ class Type : public Castable<Type, UniqueNode> {
     virtual Type* Clone(CloneContext& ctx) const = 0;
 
     /// @returns the flags on the type
-    type::Flags Flags() { return flags_; }
+    core::type::Flags Flags() { return flags_; }
 
     /// @returns true if type is constructable
     /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
@@ -228,31 +228,31 @@ class Type : public Castable<Type, UniqueNode> {
     /// Constructor
     /// @param hash the immutable hash for the node
     /// @param flags the flags of this type
-    Type(size_t hash, type::Flags flags);
+    Type(size_t hash, core::type::Flags flags);
 
     /// The flags of this type.
-    const type::Flags flags_;
+    const core::type::Flags flags_;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 namespace std {
 
-/// std::hash specialization for tint::type::Type
+/// std::hash specialization for tint::core::type::Type
 template <>
-struct hash<tint::type::Type> {
+struct hash<tint::core::type::Type> {
     /// @param type the type to obtain a hash from
     /// @returns the hash of the type
-    size_t operator()(const tint::type::Type& type) const { return type.unique_hash; }
+    size_t operator()(const tint::core::type::Type& type) const { return type.unique_hash; }
 };
 
-/// std::equal_to specialization for tint::type::Type
+/// std::equal_to specialization for tint::core::type::Type
 template <>
-struct equal_to<tint::type::Type> {
+struct equal_to<tint::core::type::Type> {
     /// @param a the first type to compare
     /// @param b the second type to compare
     /// @returns true if the two types are equal
-    bool operator()(const tint::type::Type& a, const tint::type::Type& b) const {
+    bool operator()(const tint::core::type::Type& a, const tint::core::type::Type& b) const {
         return a.Equals(b);
     }
 };

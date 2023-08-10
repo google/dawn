@@ -53,21 +53,21 @@ struct PackedVec3::State {
     static constexpr const char* kStructMemberName = "elements";
 
     /// The names of the structures used to wrap packed vec3 types.
-    Hashmap<const type::Type*, Symbol, 4> packed_vec3_wrapper_struct_names;
+    Hashmap<const core::type::Type*, Symbol, 4> packed_vec3_wrapper_struct_names;
 
     /// A cache of host-shareable structures that have been rewritten.
-    Hashmap<const type::Type*, Symbol, 4> rewritten_structs;
+    Hashmap<const core::type::Type*, Symbol, 4> rewritten_structs;
 
     /// A map from type to the name of a helper function used to pack that type.
-    Hashmap<const type::Type*, Symbol, 4> pack_helpers;
+    Hashmap<const core::type::Type*, Symbol, 4> pack_helpers;
 
     /// A map from type to the name of a helper function used to unpack that type.
-    Hashmap<const type::Type*, Symbol, 4> unpack_helpers;
+    Hashmap<const core::type::Type*, Symbol, 4> unpack_helpers;
 
     /// @param ty the type to test
     /// @returns true if `ty` is a vec3, false otherwise
-    bool IsVec3(const type::Type* ty) {
-        if (auto* vec = ty->As<type::Vector>()) {
+    bool IsVec3(const core::type::Type* ty) {
+        if (auto* vec = ty->As<core::type::Vector>()) {
             if (vec->Width() == 3) {
                 return true;
             }
@@ -77,13 +77,13 @@ struct PackedVec3::State {
 
     /// @param ty the type to test
     /// @returns true if `ty` is or contains a vec3, false otherwise
-    bool ContainsVec3(const type::Type* ty) {
+    bool ContainsVec3(const core::type::Type* ty) {
         return Switch(
             ty,  //
-            [&](const type::Vector* vec) { return IsVec3(vec); },
-            [&](const type::Matrix* mat) { return ContainsVec3(mat->ColumnType()); },
-            [&](const type::Array* arr) { return ContainsVec3(arr->ElemType()); },
-            [&](const type::Struct* str) {
+            [&](const core::type::Vector* vec) { return IsVec3(vec); },
+            [&](const core::type::Matrix* mat) { return ContainsVec3(mat->ColumnType()); },
+            [&](const core::type::Array* arr) { return ContainsVec3(arr->ElemType()); },
+            [&](const core::type::Struct* str) {
                 for (auto* member : str->Members()) {
                     if (ContainsVec3(member->Type())) {
                         return true;
@@ -96,8 +96,8 @@ struct PackedVec3::State {
     /// Create a `__packed_vec3` type with the same element type as `ty`.
     /// @param ty a three-element vector type
     /// @returns the new AST type
-    Type MakePackedVec3(const type::Type* ty) {
-        auto* vec = ty->As<type::Vector>();
+    Type MakePackedVec3(const core::type::Type* ty) {
+        auto* vec = ty->As<core::type::Vector>();
         TINT_ASSERT(vec != nullptr && vec->Width() == 3);
         return b.ty(core::Builtin::kPackedVec3, CreateASTTypeFor(ctx, vec->type()));
     }
@@ -111,10 +111,10 @@ struct PackedVec3::State {
     /// @param ty the type to rewrite
     /// @param array_element `true` if this is being called for the element of an array
     /// @returns the new AST type, or nullptr if rewriting was not necessary
-    Type RewriteType(const type::Type* ty, bool array_element = false) {
+    Type RewriteType(const core::type::Type* ty, bool array_element = false) {
         return Switch(
             ty,
-            [&](const type::Vector* vec) -> Type {
+            [&](const core::type::Vector* vec) -> Type {
                 if (IsVec3(vec)) {
                     if (array_element) {
                         // Create a struct with a single `__packed_vec3` member.
@@ -136,7 +136,7 @@ struct PackedVec3::State {
                 }
                 return {};
             },
-            [&](const type::Matrix* mat) -> Type {
+            [&](const core::type::Matrix* mat) -> Type {
                 // Rewrite the matrix as an array of columns that use the aligned wrapper struct.
                 auto new_col_type = RewriteType(mat->ColumnType(), /* array_element */ true);
                 if (new_col_type) {
@@ -144,23 +144,23 @@ struct PackedVec3::State {
                 }
                 return {};
             },
-            [&](const type::Array* arr) -> Type {
+            [&](const core::type::Array* arr) -> Type {
                 // Rewrite the array with the modified element type.
                 auto new_type = RewriteType(arr->ElemType(), /* array_element */ true);
                 if (new_type) {
                     tint::Vector<const Attribute*, 1> attrs;
-                    if (arr->Count()->Is<type::RuntimeArrayCount>()) {
+                    if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
                         return b.ty.array(new_type, std::move(attrs));
                     } else if (auto count = arr->ConstantCount()) {
                         return b.ty.array(new_type, u32(count.value()), std::move(attrs));
                     } else {
-                        TINT_ICE() << type::Array::kErrExpectedConstantCount;
+                        TINT_ICE() << core::type::Array::kErrExpectedConstantCount;
                         return {};
                     }
                 }
                 return {};
             },
-            [&](const type::Struct* str) -> Type {
+            [&](const core::type::Struct* str) -> Type {
                 if (ContainsVec3(str)) {
                     auto name = rewritten_structs.GetOrCreate(str, [&] {
                         tint::Vector<const StructMember*, 4> members;
@@ -219,8 +219,8 @@ struct PackedVec3::State {
     /// @returns the name of the helper function
     Symbol MakePackUnpackHelper(
         const char* name_prefix,
-        const type::Type* ty,
-        const std::function<const Expression*(const Expression*, const type::Type*)>&
+        const core::type::Type* ty,
+        const std::function<const Expression*(const Expression*, const core::type::Type*)>&
             pack_or_unpack_element,
         const std::function<Type()>& in_type,
         const std::function<Type()>& out_type) {
@@ -232,7 +232,8 @@ struct PackedVec3::State {
         //   for (var i = 0u; i < num_elements; i = i + 1) {
         //     result[i] = pack_or_unpack_element(in[i]);
         //   }
-        auto copy_array_elements = [&](uint32_t num_elements, const type::Type* element_type) {
+        auto copy_array_elements = [&](uint32_t num_elements,
+                                       const core::type::Type* element_type) {
             // Generate an expression for packing or unpacking an element of the array.
             auto* element = pack_or_unpack_element(b.IndexAccessor("in", "i"), element_type);
             statements.Push(b.For(                   //
@@ -247,14 +248,14 @@ struct PackedVec3::State {
         // Copy the elements of the value over to the result.
         Switch(
             ty,
-            [&](const type::Array* arr) {
+            [&](const core::type::Array* arr) {
                 TINT_ASSERT(arr->ConstantCount());
                 copy_array_elements(arr->ConstantCount().value(), arr->ElemType());
             },
-            [&](const type::Matrix* mat) {
+            [&](const core::type::Matrix* mat) {
                 copy_array_elements(mat->columns(), mat->ColumnType());
             },
-            [&](const type::Struct* str) {
+            [&](const core::type::Struct* str) {
                 // Copy the struct members over one at a time, packing/unpacking as necessary.
                 for (auto* member : str->Members()) {
                     const Expression* element =
@@ -281,13 +282,13 @@ struct PackedVec3::State {
     /// @param expr the composite value expression to unpack
     /// @param ty the unpacked type
     /// @returns an expression that holds the unpacked value
-    const Expression* UnpackComposite(const Expression* expr, const type::Type* ty) {
+    const Expression* UnpackComposite(const Expression* expr, const core::type::Type* ty) {
         auto helper = unpack_helpers.GetOrCreate(ty, [&] {
             return MakePackUnpackHelper(
                 "tint_unpack_vec3_in_composite", ty,
                 [&](const Expression* element,
-                    const type::Type* element_type) -> const Expression* {
-                    if (element_type->Is<type::Vector>()) {
+                    const core::type::Type* element_type) -> const Expression* {
+                    if (element_type->Is<core::type::Vector>()) {
                         // Unpack a `__packed_vec3` by casting it to a regular vec3.
                         // If it is an array element, extract the vector from the wrapper struct.
                         if (element->Is<IndexAccessorExpression>()) {
@@ -309,13 +310,13 @@ struct PackedVec3::State {
     /// @param expr the composite value expression to pack
     /// @param ty the unpacked type
     /// @returns an expression that holds the packed value
-    const Expression* PackComposite(const Expression* expr, const type::Type* ty) {
+    const Expression* PackComposite(const Expression* expr, const core::type::Type* ty) {
         auto helper = pack_helpers.GetOrCreate(ty, [&] {
             return MakePackUnpackHelper(
                 "tint_pack_vec3_in_composite", ty,
                 [&](const Expression* element,
-                    const type::Type* element_type) -> const Expression* {
-                    if (element_type->Is<type::Vector>()) {
+                    const core::type::Type* element_type) -> const Expression* {
+                    if (element_type->Is<core::type::Vector>()) {
                         // Pack a vector element by casting it to a packed_vec3.
                         // If it is an array element, construct a wrapper struct.
                         auto* packed = b.Call(MakePackedVec3(element_type), element);
@@ -375,7 +376,7 @@ struct PackedVec3::State {
                 sem.Get(node),
                 [&](const sem::TypeExpression* type) {
                     // Rewrite pointers to types that contain vec3s.
-                    auto* ptr = type->Type()->As<type::Pointer>();
+                    auto* ptr = type->Type()->As<core::type::Pointer>();
                     if (ptr && core::IsHostShareable(ptr->AddressSpace())) {
                         auto new_store_type = RewriteType(ptr->StoreType());
                         if (new_store_type) {
@@ -406,7 +407,7 @@ struct PackedVec3::State {
                         auto* rhs = sem.GetVal(assign->rhs);
                         if (!ContainsVec3(rhs->Type()) ||
                             !core::IsHostShareable(
-                                lhs->Type()->As<type::Reference>()->AddressSpace())) {
+                                lhs->Type()->As<core::type::Reference>()->AddressSpace())) {
                             // Skip assignments to address spaces that are not host-shareable, or
                             // that do not contain vec3 types.
                             return;
@@ -441,7 +442,7 @@ struct PackedVec3::State {
                     // If the expression produces a reference to a vec3 in a host-shareable address
                     // space from an array element, extract the packed vector from the wrapper
                     // struct.
-                    if (auto* ref = accessor->Type()->As<type::Reference>()) {
+                    if (auto* ref = accessor->Type()->As<core::type::Reference>()) {
                         if (IsVec3(ref->StoreType()) &&
                             core::IsHostShareable(ref->AddressSpace())) {
                             ctx.Replace(node, b.MemberAccessor(ctx.Clone(accessor->Declaration()),

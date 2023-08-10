@@ -17,9 +17,9 @@
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/utils/math/hash.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::AbstractFloat);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::AbstractFloat);
 
-namespace tint::type {
+namespace tint::core::type {
 
 AbstractFloat::AbstractFloat() : Base(Hash(tint::TypeInfo::Of<AbstractFloat>().full_hashcode)) {}
 
@@ -33,4 +33,4 @@ AbstractFloat* AbstractFloat::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<AbstractFloat>();
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

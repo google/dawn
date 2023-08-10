@@ -47,7 +47,7 @@ struct State {
     ir::Builder b{*ir};
 
     /// The type manager.
-    type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir->Types()};
 
     /// Process the module.
     void Process() {
@@ -178,7 +178,7 @@ struct State {
         auto* access = ptr->Source()->As<ir::Access>();
         TINT_ASSERT_OR_RETURN_VALUE(access, nullptr);
         TINT_ASSERT_OR_RETURN_VALUE(access->Indices().Length() == 1u, nullptr);
-        TINT_ASSERT_OR_RETURN_VALUE(access->Object()->Type()->UnwrapPtr()->Is<type::Struct>(),
+        TINT_ASSERT_OR_RETURN_VALUE(access->Object()->Type()->UnwrapPtr()->Is<core::type::Struct>(),
                                     nullptr);
         auto* const_idx = access->Indices()[0]->As<ir::Constant>();
 
@@ -198,7 +198,7 @@ struct State {
 
         auto* pointer = builtin->Args()[0];
         auto* memory = [&]() -> ir::Value* {
-            switch (pointer->Type()->As<type::Pointer>()->AddressSpace()) {
+            switch (pointer->Type()->As<core::type::Pointer>()->AddressSpace()) {
                 case core::AddressSpace::kWorkgroup:
                     return b.Constant(u32(SpvScopeWorkgroup));
                 case core::AddressSpace::kStorage:
@@ -211,7 +211,7 @@ struct State {
         auto* memory_semantics = b.Constant(u32(SpvMemorySemanticsMaskNone));
 
         // Helper to build the intrinsic call with the common operands.
-        auto build = [&](const type::Type* type, enum ir::IntrinsicCall::Kind intrinsic) {
+        auto build = [&](const core::type::Type* type, enum ir::IntrinsicCall::Kind intrinsic) {
             return b.Call(type, intrinsic, pointer, memory, memory_semantics);
         };
 
@@ -242,8 +242,9 @@ struct State {
                 compare->InsertBefore(builtin);
 
                 // Construct the atomicCompareExchange result structure.
-                call = b.Construct(type::CreateAtomicCompareExchangeResult(ty, ir->symbols, int_ty),
-                                   Vector{original, compare->Result()});
+                call = b.Construct(
+                    core::type::CreateAtomicCompareExchangeResult(ty, ir->symbols, int_ty),
+                    Vector{original, compare->Result()});
                 break;
             }
             case core::Function::kAtomicExchange:
@@ -304,7 +305,7 @@ struct State {
 
             auto* v1 = builtin->Args()[0];
             auto* v2 = builtin->Args()[1];
-            auto* vec = v1->Type()->As<type::Vector>();
+            auto* vec = v1->Type()->As<core::type::Vector>();
             auto* elty = vec->type();
             for (uint32_t i = 0; i < vec->Width(); i++) {
                 b.InsertBefore(builtin, [&] {
@@ -343,8 +344,8 @@ struct State {
         // If the condition is scalar and the objects are vectors, we need to splat the condition
         // into a vector of the same size.
         // TODO(jrprice): We don't need to do this if we're targeting SPIR-V 1.4 or newer.
-        auto* vec = builtin->Result()->Type()->As<type::Vector>();
-        if (vec && args[0]->Type()->Is<type::Scalar>()) {
+        auto* vec = builtin->Result()->Type()->As<core::type::Vector>();
+        if (vec && args[0]->Type()->Is<core::type::Scalar>()) {
             Vector<ir::Value*, 4> elements;
             elements.Resize(vec->Width(), args[0]);
 
@@ -431,7 +432,7 @@ struct State {
     ir::Value* AppendArrayIndex(ir::Value* coords,
                                 ir::Value* array_idx,
                                 ir::Instruction* insertion_point) {
-        auto* vec = coords->Type()->As<type::Vector>();
+        auto* vec = coords->Type()->As<core::type::Vector>();
         auto* element_ty = vec->type();
 
         // Convert the index to match the coordinate type if needed.
@@ -462,7 +463,7 @@ struct State {
         auto* texture = next_arg();
         auto* sampler = next_arg();
         auto* coords = next_arg();
-        auto* texture_ty = texture->Type()->As<type::Texture>();
+        auto* texture_ty = texture->Type()->As<core::type::Texture>();
 
         // Use OpSampledImage to create an OpTypeSampledImage object.
         auto* sampled_image =
@@ -531,7 +532,7 @@ struct State {
 
         // Call the intrinsic.
         // If this is a depth comparison, the result is always f32, otherwise vec4f.
-        auto* result_ty = depth ? static_cast<const type::Type*>(ty.f32()) : ty.vec4<f32>();
+        auto* result_ty = depth ? static_cast<const core::type::Type*>(ty.f32()) : ty.vec4<f32>();
         auto* texture_call = b.Call(result_ty, intrinsic, std::move(intrinsic_args));
         texture_call->InsertBefore(builtin);
 
@@ -539,7 +540,8 @@ struct State {
 
         // If this is not a depth comparison but we are sampling a depth texture, extract the first
         // component to get the scalar f32 that SPIR-V expects.
-        if (!depth && texture_ty->IsAnyOf<type::DepthTexture, type::DepthMultisampledTexture>()) {
+        if (!depth &&
+            texture_ty->IsAnyOf<core::type::DepthTexture, core::type::DepthMultisampledTexture>()) {
             auto* extract = b.Access(ty.f32(), result, 0_u);
             extract->InsertBefore(builtin);
             result = extract->Result();
@@ -568,7 +570,7 @@ struct State {
         auto* texture = next_arg();
         auto* sampler = next_arg();
         auto* coords = next_arg();
-        auto* texture_ty = texture->Type()->As<type::Texture>();
+        auto* texture_ty = texture->Type()->As<core::type::Texture>();
 
         // Use OpSampledImage to create an OpTypeSampledImage object.
         auto* sampled_image =
@@ -634,7 +636,7 @@ struct State {
 
         auto* texture = next_arg();
         auto* coords = next_arg();
-        auto* texture_ty = texture->Type()->As<type::Texture>();
+        auto* texture_ty = texture->Type()->As<core::type::Texture>();
 
         // Append the array index to the coordinates if provided.
         auto* array_idx = IsTextureArray(texture_ty->dim()) ? next_arg() : nullptr;
@@ -650,7 +652,8 @@ struct State {
 
         // Add the optional image operands, if any.
         ImageOperands operands;
-        if (texture_ty->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture>()) {
+        if (texture_ty->IsAnyOf<core::type::MultisampledTexture,
+                                core::type::DepthMultisampledTexture>()) {
             operands.sample = next_arg();
         } else {
             operands.lod = next_arg();
@@ -660,7 +663,7 @@ struct State {
         // Call the intrinsic.
         // The result is always a vec4 in SPIR-V.
         auto* result_ty = builtin->Result()->Type();
-        bool expects_scalar_result = result_ty->Is<type::Scalar>();
+        bool expects_scalar_result = result_ty->Is<core::type::Scalar>();
         if (expects_scalar_result) {
             result_ty = ty.vec4(result_ty);
         }
@@ -691,7 +694,7 @@ struct State {
 
         auto* texture = next_arg();
         auto* coords = next_arg();
-        auto* texture_ty = texture->Type()->As<type::Texture>();
+        auto* texture_ty = texture->Type()->As<core::type::Texture>();
 
         // Append the array index to the coordinates if provided.
         auto* array_idx = IsTextureArray(texture_ty->dim()) ? next_arg() : nullptr;
@@ -729,15 +732,16 @@ struct State {
         };
 
         auto* texture = next_arg();
-        auto* texture_ty = texture->Type()->As<type::Texture>();
+        auto* texture_ty = texture->Type()->As<core::type::Texture>();
 
         Vector<ir::Value*, 8> intrinsic_args;
         intrinsic_args.Push(texture);
 
         // Determine which SPIR-V intrinsic to use, and add the Lod argument if needed.
         enum ir::IntrinsicCall::Kind intrinsic;
-        if (texture_ty->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture,
-                                type::StorageTexture>()) {
+        if (texture_ty
+                ->IsAnyOf<core::type::MultisampledTexture, core::type::DepthMultisampledTexture,
+                          core::type::StorageTexture>()) {
             intrinsic = ir::IntrinsicCall::Kind::kSpirvImageQuerySize;
         } else {
             intrinsic = ir::IntrinsicCall::Kind::kSpirvImageQuerySizeLod;
@@ -751,8 +755,8 @@ struct State {
 
         // Add an extra component to the result vector for arrayed textures.
         auto* result_ty = builtin->Result()->Type();
-        if (type::IsTextureArray(texture_ty->dim())) {
-            auto* vec = result_ty->As<type::Vector>();
+        if (core::type::IsTextureArray(texture_ty->dim())) {
+            auto* vec = result_ty->As<core::type::Vector>();
             result_ty = ty.vec(vec->type(), vec->Width() + 1);
         }
 
@@ -763,7 +767,7 @@ struct State {
         auto* result = texture_call->Result();
 
         // Swizzle the first two components from the result for arrayed textures.
-        if (type::IsTextureArray(texture_ty->dim())) {
+        if (core::type::IsTextureArray(texture_ty->dim())) {
             auto* swizzle = b.Swizzle(builtin->Result()->Type(), result, {0, 1});
             swizzle->InsertBefore(builtin);
             result = swizzle->Result();
@@ -777,15 +781,16 @@ struct State {
     /// @returns the replacement value
     ir::Value* TextureNumLayers(ir::CoreBuiltinCall* builtin) {
         auto* texture = builtin->Args()[0];
-        auto* texture_ty = texture->Type()->As<type::Texture>();
+        auto* texture_ty = texture->Type()->As<core::type::Texture>();
 
         Vector<ir::Value*, 2> intrinsic_args;
         intrinsic_args.Push(texture);
 
         // Determine which SPIR-V intrinsic to use, and add the Lod argument if needed.
         enum ir::IntrinsicCall::Kind intrinsic;
-        if (texture_ty->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture,
-                                type::StorageTexture>()) {
+        if (texture_ty
+                ->IsAnyOf<core::type::MultisampledTexture, core::type::DepthMultisampledTexture,
+                          core::type::StorageTexture>()) {
             intrinsic = ir::IntrinsicCall::Kind::kSpirvImageQuerySize;
         } else {
             intrinsic = ir::IntrinsicCall::Kind::kSpirvImageQuerySizeLod;
@@ -820,12 +825,12 @@ LiteralOperand::LiteralOperand(const core::constant::Value* value) : Base(value)
 
 LiteralOperand::~LiteralOperand() = default;
 
-SampledImage::SampledImage(const type::Type* image)
+SampledImage::SampledImage(const core::type::Type* image)
     : Base(static_cast<size_t>(Hash(tint::TypeInfo::Of<SampledImage>().full_hashcode, image)),
-           type::Flags{}),
+           core::type::Flags{}),
       image_(image) {}
 
-SampledImage* SampledImage::Clone(type::CloneContext& ctx) const {
+SampledImage* SampledImage::Clone(core::type::CloneContext& ctx) const {
     auto* image = image_->Clone(ctx);
     return ctx.dst.mgr->Get<SampledImage>(image);
 }

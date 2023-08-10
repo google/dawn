@@ -14,10 +14,10 @@
 
 #include "src/tint/lang/core/type/unique_node.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::UniqueNode);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::UniqueNode);
 
-namespace tint::type {
+namespace tint::core::type {
 
 UniqueNode::~UniqueNode() = default;
 
-}  // namespace tint::type
+}  // namespace tint::core::type

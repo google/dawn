@@ -39,19 +39,19 @@ struct State {
     Builder b{*ir};
 
     /// The type manager.
-    type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir->Types()};
 
     /// The symbol table.
     SymbolTable& sym{ir->symbols};
 
     /// Map from original type to a new type with decomposed matrices.
-    Hashmap<const type::Type*, const type::Type*, 4> rewritten_types{};
+    Hashmap<const core::type::Type*, const core::type::Type*, 4> rewritten_types{};
 
     /// Map from struct member to its new index.
-    Hashmap<const type::StructMember*, uint32_t, 4> member_index_map{};
+    Hashmap<const core::type::StructMember*, uint32_t, 4> member_index_map{};
 
     /// Map from a type to a helper function that will convert its rewritten form back to it.
-    Hashmap<const type::Struct*, Function*, 4> convert_helpers{};
+    Hashmap<const core::type::Struct*, Function*, 4> convert_helpers{};
 
     /// Process the module.
     void Process() {
@@ -66,7 +66,7 @@ struct State {
             if (!var || !var->Alive()) {
                 continue;
             }
-            auto* ptr = var->Result()->Type()->As<type::Pointer>();
+            auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
             if (!ptr || ptr->AddressSpace() != core::AddressSpace::kUniform) {
                 continue;
             }
@@ -80,7 +80,7 @@ struct State {
         for (auto* var : buffer_variables) {
             // Create a new variable with the modified store type.
             const auto& bp = var->BindingPoint();
-            auto* store_type = var->Result()->Type()->As<type::Pointer>()->StoreType();
+            auto* store_type = var->Result()->Type()->As<core::type::Pointer>()->StoreType();
             auto* new_var = b.Var(ty.ptr(uniform, RewriteType(store_type)));
             new_var->SetBindingPoint(bp->group, bp->binding);
             if (auto name = ir->NameOf(var)) {
@@ -99,25 +99,25 @@ struct State {
 
     /// @param mat the matrix type to check
     /// @returns true if @p mat needs to be decomposed
-    static bool NeedsDecomposing(const type::Matrix* mat) { return mat->ColumnStride() & 15; }
+    static bool NeedsDecomposing(const core::type::Matrix* mat) { return mat->ColumnStride() & 15; }
 
     /// Rewrite a type if necessary, decomposing contained matrices.
     /// @param type the type to rewrite
     /// @returns the new type
-    const type::Type* RewriteType(const type::Type* type) {
-        return rewritten_types.GetOrCreate(type, [&]() -> const type::Type* {
+    const core::type::Type* RewriteType(const core::type::Type* type) {
+        return rewritten_types.GetOrCreate(type, [&]() -> const core::type::Type* {
             return tint::Switch(
                 type,
-                [&](const type::Array* arr) -> const type::Type* {
+                [&](const core::type::Array* arr) -> const core::type::Type* {
                     // Create a new array with element type potentially rewritten.
                     return ty.array(RewriteType(arr->ElemType()), arr->ConstantCount().value());
                 },
-                [&](const type::Struct* str) -> const type::Type* {
+                [&](const core::type::Struct* str) -> const core::type::Type* {
                     bool needs_rewrite = false;
                     uint32_t member_index = 0;
-                    Vector<const type::StructMember*, 4> new_members;
+                    Vector<const core::type::StructMember*, 4> new_members;
                     for (auto* member : str->Members()) {
-                        auto* mat = member->Type()->As<type::Matrix>();
+                        auto* mat = member->Type()->As<core::type::Matrix>();
                         if (mat && NeedsDecomposing(mat)) {
                             // Decompose these matrices into a separate member for each column.
                             member_index_map.Add(member, member_index);
@@ -126,9 +126,9 @@ struct State {
                             for (uint32_t i = 0; i < mat->columns(); i++) {
                                 StringStream ss;
                                 ss << member->Name().Name() << "_col" << std::to_string(i);
-                                new_members.Push(ty.Get<type::StructMember>(
+                                new_members.Push(ty.Get<core::type::StructMember>(
                                     sym.New(ss.str()), col, member_index, offset, col->Align(),
-                                    col->Size(), type::StructMemberAttributes{}));
+                                    col->Size(), core::type::StructMemberAttributes{}));
                                 offset += col->Align();
                                 member_index++;
                             }
@@ -136,9 +136,10 @@ struct State {
                         } else {
                             // For all other types, recursively rewrite them as necessary.
                             auto* new_member_ty = RewriteType(member->Type());
-                            new_members.Push(ty.Get<type::StructMember>(
+                            new_members.Push(ty.Get<core::type::StructMember>(
                                 member->Name(), new_member_ty, member_index, member->Offset(),
-                                member->Align(), member->Size(), type::StructMemberAttributes{}));
+                                member->Align(), member->Size(),
+                                core::type::StructMemberAttributes{}));
                             member_index_map.Add(member, member_index);
                             member_index++;
                             if (new_member_ty != member->Type()) {
@@ -153,9 +154,9 @@ struct State {
                     }
 
                     // Create a new struct with the rewritten members.
-                    auto* new_str = ty.Get<type::Struct>(sym.New(str->Name().Name() + "_std140"),
-                                                         std::move(new_members), str->Align(),
-                                                         str->Size(), str->SizeNoPadding());
+                    auto* new_str = ty.Get<core::type::Struct>(
+                        sym.New(str->Name().Name() + "_std140"), std::move(new_members),
+                        str->Align(), str->Size(), str->SizeNoPadding());
                     for (auto flag : str->StructFlags()) {
                         new_str->SetStructFlag(flag);
                     }
@@ -173,7 +174,7 @@ struct State {
     /// @param root the root value being accessed into
     /// @param indices the access indices that get to the first column of the decomposed matrix
     /// @returns the loaded matrix
-    Value* LoadMatrix(const type::Matrix* mat, Value* root, Vector<Value*, 4> indices) {
+    Value* LoadMatrix(const core::type::Matrix* mat, Value* root, Vector<Value*, 4> indices) {
         // Load each column vector from the struct and reconstruct the original matrix type.
         Vector<Value*, 4> args;
         auto first_column = indices.Back()->As<Constant>()->Value()->ValueAs<uint32_t>();
@@ -189,17 +190,17 @@ struct State {
     /// @param source the value to convert
     /// @param orig_ty the original type to convert type
     /// @returns the converted value
-    Value* Convert(Value* source, const type::Type* orig_ty) {
+    Value* Convert(Value* source, const core::type::Type* orig_ty) {
         if (source->Type() == orig_ty) {
             // The type was not rewritten, so just return the source value.
             return source;
         }
         return tint::Switch(
             orig_ty,  //
-            [&](const type::Struct* str) -> Value* {
+            [&](const core::type::Struct* str) -> Value* {
                 // Create a helper function that converts the struct to the original type.
                 auto* helper = convert_helpers.GetOrCreate(str, [&] {
-                    auto* input_str = source->Type()->As<type::Struct>();
+                    auto* input_str = source->Type()->As<core::type::Struct>();
                     auto* func = b.Function("convert_" + str->FriendlyName(), str);
                     auto* input = b.FunctionParam("input", input_str);
                     func->SetParams({input});
@@ -207,7 +208,7 @@ struct State {
                         uint32_t index = 0;
                         Vector<Value*, 4> args;
                         for (auto* member : str->Members()) {
-                            if (auto* mat = member->Type()->As<type::Matrix>();
+                            if (auto* mat = member->Type()->As<core::type::Matrix>();
                                 mat && NeedsDecomposing(mat)) {
                                 // Extract each decomposed column and reconstruct the matrix.
                                 Vector<Value*, 4> columns;
@@ -235,7 +236,7 @@ struct State {
                 // Call the helper function to convert the struct.
                 return b.Call(str, helper, source)->Result();
             },
-            [&](const type::Array* arr) -> Value* {
+            [&](const core::type::Array* arr) -> Value* {
                 // Create a loop that copies and converts each element of the array.
                 auto* el_ty = source->Type()->Elements().type;
                 auto* new_arr = b.Var(ty.ptr(function, arr));
@@ -262,7 +263,7 @@ struct State {
                     auto* current_type = access->Object()->Type()->UnwrapPtr();
                     Vector<Value*, 4> indices;
                     for (auto idx : access->Indices()) {
-                        if (auto* str = current_type->As<type::Struct>()) {
+                        if (auto* str = current_type->As<core::type::Struct>()) {
                             uint32_t old_index = idx->As<Constant>()->Value()->ValueAs<uint32_t>();
                             uint32_t new_index = *member_index_map.Get(str->Members()[old_index]);
                             indices.Push(b.Constant(u32(new_index)));
@@ -275,7 +276,7 @@ struct State {
                         // If we've hit a matrix that was decomposed, load the whole matrix.
                         // Any additional accesses will extract columns instead of producing
                         // pointers.
-                        if (auto* mat = current_type->As<type::Matrix>();
+                        if (auto* mat = current_type->As<core::type::Matrix>();
                             mat && NeedsDecomposing(mat)) {
                             replacement = LoadMatrix(mat, replacement, std::move(indices));
                             indices.Clear();
@@ -284,7 +285,7 @@ struct State {
 
                     if (!indices.IsEmpty()) {
                         // Emit the access with the modified indices.
-                        if (replacement->Type()->Is<type::Pointer>()) {
+                        if (replacement->Type()->Is<core::type::Pointer>()) {
                             current_type = ty.ptr(uniform, RewriteType(current_type));
                         }
                         auto* new_access = b.Access(current_type, replacement, std::move(indices));
@@ -297,7 +298,7 @@ struct State {
                     access->Destroy();
                 },
                 [&](Load* load) {
-                    if (!replacement->Type()->Is<type::Pointer>()) {
+                    if (!replacement->Type()->Is<core::type::Pointer>()) {
                         // We have already loaded to a value type, so this load just folds away.
                         load->Result()->ReplaceAllUsesWith(replacement);
                     } else {
@@ -311,7 +312,7 @@ struct State {
                 [&](LoadVectorElement* load) {
                     // We should have loaded the decomposed matrix, reconstructed it, so this is now
                     // extracting from a value type.
-                    TINT_ASSERT(!replacement->Type()->Is<type::Pointer>());
+                    TINT_ASSERT(!replacement->Type()->Is<core::type::Pointer>());
                     auto* access = b.Access(load->Result()->Type(), replacement, load->Index());
                     load->Result()->ReplaceAllUsesWith(access->Result());
                     load->Destroy();

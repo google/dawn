@@ -38,8 +38,8 @@ struct ShaderIOBackendState {
     /// @param type the type of the input
     /// @param attributes the IO attributes
     virtual void AddInput(Symbol name,
-                          const type::Type* type,
-                          type::StructMemberAttributes attributes) {
+                          const core::type::Type* type,
+                          core::type::StructMemberAttributes attributes) {
         inputs.Push({name, type, std::move(attributes)});
     }
 
@@ -48,8 +48,8 @@ struct ShaderIOBackendState {
     /// @param type the type of the output
     /// @param attributes the IO attributes
     virtual void AddOutput(Symbol name,
-                           const type::Type* type,
-                           type::StructMemberAttributes attributes) {
+                           const core::type::Type* type,
+                           core::type::StructMemberAttributes attributes) {
         outputs.Push({name, type, std::move(attributes)});
     }
 
@@ -81,16 +81,16 @@ struct ShaderIOBackendState {
     Builder b{*ir};
 
     /// The type manager.
-    type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir->Types()};
 
     /// The original entry point function.
     Function* func = nullptr;
 
     /// The list of shader inputs.
-    Vector<type::Manager::StructMemberDesc, 4> inputs;
+    Vector<core::type::Manager::StructMemberDesc, 4> inputs;
 
     /// The list of shader outputs.
-    Vector<type::Manager::StructMemberDesc, 4> outputs;
+    Vector<core::type::Manager::StructMemberDesc, 4> outputs;
 };
 
 /// The signature for a function that creates a backend state object.

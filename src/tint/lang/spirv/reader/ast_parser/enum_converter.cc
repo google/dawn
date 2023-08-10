@@ -100,34 +100,34 @@ core::BuiltinValue EnumConverter::ToBuiltin(spv::BuiltIn b) {
     return core::BuiltinValue::kUndefined;
 }
 
-type::TextureDimension EnumConverter::ToDim(spv::Dim dim, bool arrayed) {
+core::type::TextureDimension EnumConverter::ToDim(spv::Dim dim, bool arrayed) {
     if (arrayed) {
         switch (dim) {
             case spv::Dim::Dim2D:
-                return type::TextureDimension::k2dArray;
+                return core::type::TextureDimension::k2dArray;
             case spv::Dim::Cube:
-                return type::TextureDimension::kCubeArray;
+                return core::type::TextureDimension::kCubeArray;
             default:
                 break;
         }
         Fail() << "arrayed dimension must be 2D or Cube. Got " << int(dim);
-        return type::TextureDimension::kNone;
+        return core::type::TextureDimension::kNone;
     }
     // Assume non-arrayed
     switch (dim) {
         case spv::Dim::Dim1D:
-            return type::TextureDimension::k1d;
+            return core::type::TextureDimension::k1d;
         case spv::Dim::Dim2D:
-            return type::TextureDimension::k2d;
+            return core::type::TextureDimension::k2d;
         case spv::Dim::Dim3D:
-            return type::TextureDimension::k3d;
+            return core::type::TextureDimension::k3d;
         case spv::Dim::Cube:
-            return type::TextureDimension::kCube;
+            return core::type::TextureDimension::kCube;
         default:
             break;
     }
     Fail() << "invalid dimension: " << int(dim);
-    return type::TextureDimension::kNone;
+    return core::type::TextureDimension::kNone;
 }
 
 core::TexelFormat EnumConverter::ToTexelFormat(spv::ImageFormat fmt) {

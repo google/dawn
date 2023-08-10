@@ -117,7 +117,7 @@ TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedArray) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, GenerateBool) {
-    auto* bool_ = create<type::Bool>();
+    auto* bool_ = create<core::type::Bool>();
 
     Builder& b = Build();
 
@@ -131,8 +131,8 @@ TEST_F(SpirvASTPrinterTest_Type, GenerateBool) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedBool) {
-    auto* bool_ = create<type::Bool>();
-    auto* i32 = create<type::I32>();
+    auto* bool_ = create<core::type::Bool>();
+    auto* i32 = create<core::type::I32>();
 
     Builder& b = Build();
 
@@ -145,7 +145,7 @@ TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedBool) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, GenerateF32) {
-    auto* f32 = create<type::F32>();
+    auto* f32 = create<core::type::F32>();
 
     Builder& b = Build();
 
@@ -159,8 +159,8 @@ TEST_F(SpirvASTPrinterTest_Type, GenerateF32) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedF32) {
-    auto* f32 = create<type::F32>();
-    auto* i32 = create<type::I32>();
+    auto* f32 = create<core::type::F32>();
+    auto* i32 = create<core::type::I32>();
 
     Builder& b = Build();
 
@@ -173,7 +173,7 @@ TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedF32) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, GenerateF16) {
-    auto* f16 = create<type::F16>();
+    auto* f16 = create<core::type::F16>();
 
     Builder& b = Build();
 
@@ -187,8 +187,8 @@ TEST_F(SpirvASTPrinterTest_Type, GenerateF16) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedF16) {
-    auto* f16 = create<type::F16>();
-    auto* i32 = create<type::I32>();
+    auto* f16 = create<core::type::F16>();
+    auto* i32 = create<core::type::I32>();
 
     Builder& b = Build();
 
@@ -201,7 +201,7 @@ TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedF16) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, GenerateI32) {
-    auto* i32 = create<type::I32>();
+    auto* i32 = create<core::type::I32>();
 
     Builder& b = Build();
 
@@ -215,8 +215,8 @@ TEST_F(SpirvASTPrinterTest_Type, GenerateI32) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedI32) {
-    auto* f32 = create<type::F32>();
-    auto* i32 = create<type::I32>();
+    auto* f32 = create<core::type::F32>();
+    auto* i32 = create<core::type::I32>();
 
     Builder& b = Build();
 
@@ -229,9 +229,9 @@ TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedI32) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, GenerateMatrix) {
-    auto* f32 = create<type::F32>();
-    auto* vec3 = create<type::Vector>(f32, 3u);
-    auto* mat2x3 = create<type::Matrix>(vec3, 2u);
+    auto* f32 = create<core::type::F32>();
+    auto* vec3 = create<core::type::Vector>(f32, 3u);
+    auto* mat2x3 = create<core::type::Matrix>(vec3, 2u);
 
     Builder& b = Build();
 
@@ -247,9 +247,9 @@ TEST_F(SpirvASTPrinterTest_Type, GenerateMatrix) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedMatrix) {
-    auto* i32 = create<type::I32>();
-    auto* col = create<type::Vector>(i32, 4u);
-    auto* mat = create<type::Matrix>(col, 3u);
+    auto* i32 = create<core::type::I32>();
+    auto* col = create<core::type::Vector>(i32, 4u);
+    auto* mat = create<core::type::Matrix>(col, 3u);
 
     Builder& b = Build();
 
@@ -262,9 +262,9 @@ TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedMatrix) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, GenerateF16Matrix) {
-    auto* f16 = create<type::F16>();
-    auto* vec3 = create<type::Vector>(f16, 3u);
-    auto* mat2x3 = create<type::Matrix>(vec3, 2u);
+    auto* f16 = create<core::type::F16>();
+    auto* vec3 = create<core::type::Vector>(f16, 3u);
+    auto* mat2x3 = create<core::type::Matrix>(vec3, 2u);
 
     Builder& b = Build();
 
@@ -280,9 +280,9 @@ TEST_F(SpirvASTPrinterTest_Type, GenerateF16Matrix) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedF16Matrix) {
-    auto* f16 = create<type::F16>();
-    auto* col = create<type::Vector>(f16, 4u);
-    auto* mat = create<type::Matrix>(col, 3u);
+    auto* f16 = create<core::type::F16>();
+    auto* col = create<core::type::Vector>(f16, 4u);
+    auto* mat = create<core::type::Matrix>(col, 3u);
 
     Builder& b = Build();
 
@@ -295,8 +295,9 @@ TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedF16Matrix) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, GeneratePtr) {
-    auto* i32 = create<type::I32>();
-    auto* ptr = create<type::Pointer>(core::AddressSpace::kOut, i32, core::Access::kReadWrite);
+    auto* i32 = create<core::type::I32>();
+    auto* ptr =
+        create<core::type::Pointer>(core::AddressSpace::kOut, i32, core::Access::kReadWrite);
 
     Builder& b = Build();
 
@@ -310,8 +311,9 @@ TEST_F(SpirvASTPrinterTest_Type, GeneratePtr) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedPtr) {
-    auto* i32 = create<type::I32>();
-    auto* ptr = create<type::Pointer>(core::AddressSpace::kOut, i32, core::Access::kReadWrite);
+    auto* i32 = create<core::type::I32>();
+    auto* ptr =
+        create<core::type::Pointer>(core::AddressSpace::kOut, i32, core::Access::kReadWrite);
 
     Builder& b = Build();
 
@@ -519,7 +521,7 @@ OpDecorate %21 ArrayStride 64
 }
 
 TEST_F(SpirvASTPrinterTest_Type, GenerateU32) {
-    auto* u32 = create<type::U32>();
+    auto* u32 = create<core::type::U32>();
 
     Builder& b = Build();
 
@@ -533,8 +535,8 @@ TEST_F(SpirvASTPrinterTest_Type, GenerateU32) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedU32) {
-    auto* u32 = create<type::U32>();
-    auto* f32 = create<type::F32>();
+    auto* u32 = create<core::type::U32>();
+    auto* f32 = create<core::type::F32>();
 
     Builder& b = Build();
 
@@ -547,7 +549,7 @@ TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedU32) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, GenerateVector) {
-    auto* vec = create<type::Vector>(create<type::F32>(), 3u);
+    auto* vec = create<core::type::Vector>(create<core::type::F32>(), 3u);
 
     Builder& b = Build();
 
@@ -562,8 +564,8 @@ TEST_F(SpirvASTPrinterTest_Type, GenerateVector) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedVector) {
-    auto* i32 = create<type::I32>();
-    auto* vec = create<type::Vector>(i32, 3u);
+    auto* i32 = create<core::type::I32>();
+    auto* vec = create<core::type::Vector>(i32, 3u);
 
     Builder& b = Build();
 
@@ -576,7 +578,7 @@ TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedVector) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, GenerateVoid) {
-    auto* void_ = create<type::Void>();
+    auto* void_ = create<core::type::Void>();
 
     Builder& b = Build();
 
@@ -590,8 +592,8 @@ TEST_F(SpirvASTPrinterTest_Type, GenerateVoid) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, ReturnsGeneratedVoid) {
-    auto* void_ = create<type::Void>();
-    auto* i32 = create<type::I32>();
+    auto* void_ = create<core::type::Void>();
+    auto* i32 = create<core::type::I32>();
 
     Builder& b = Build();
 
@@ -635,7 +637,7 @@ INSTANTIATE_TEST_SUITE_P(
                     PtrData{core::AddressSpace::kFunction, SpvStorageClassFunction}));
 
 TEST_F(SpirvASTPrinterTest_Type, DepthTexture_Generate_2d) {
-    auto* two_d = create<type::DepthTexture>(type::TextureDimension::k2d);
+    auto* two_d = create<core::type::DepthTexture>(core::type::TextureDimension::k2d);
 
     Builder& b = Build();
 
@@ -649,7 +651,7 @@ TEST_F(SpirvASTPrinterTest_Type, DepthTexture_Generate_2d) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, DepthTexture_Generate_2dArray) {
-    auto* two_d_array = create<type::DepthTexture>(type::TextureDimension::k2dArray);
+    auto* two_d_array = create<core::type::DepthTexture>(core::type::TextureDimension::k2dArray);
 
     Builder& b = Build();
 
@@ -663,7 +665,7 @@ TEST_F(SpirvASTPrinterTest_Type, DepthTexture_Generate_2dArray) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, DepthTexture_Generate_Cube) {
-    auto* cube = create<type::DepthTexture>(type::TextureDimension::kCube);
+    auto* cube = create<core::type::DepthTexture>(core::type::TextureDimension::kCube);
 
     Builder& b = Build();
 
@@ -678,7 +680,7 @@ TEST_F(SpirvASTPrinterTest_Type, DepthTexture_Generate_Cube) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, DepthTexture_Generate_CubeArray) {
-    auto* cube_array = create<type::DepthTexture>(type::TextureDimension::kCubeArray);
+    auto* cube_array = create<core::type::DepthTexture>(core::type::TextureDimension::kCubeArray);
 
     Builder& b = Build();
 
@@ -695,8 +697,8 @@ TEST_F(SpirvASTPrinterTest_Type, DepthTexture_Generate_CubeArray) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, MultisampledTexture_Generate_2d_i32) {
-    auto* i32 = create<type::I32>();
-    auto* ms = create<type::MultisampledTexture>(type::TextureDimension::k2d, i32);
+    auto* i32 = create<core::type::I32>();
+    auto* ms = create<core::type::MultisampledTexture>(core::type::TextureDimension::k2d, i32);
 
     Builder& b = Build();
 
@@ -708,8 +710,8 @@ TEST_F(SpirvASTPrinterTest_Type, MultisampledTexture_Generate_2d_i32) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, MultisampledTexture_Generate_2d_u32) {
-    auto* u32 = create<type::U32>();
-    auto* ms = create<type::MultisampledTexture>(type::TextureDimension::k2d, u32);
+    auto* u32 = create<core::type::U32>();
+    auto* ms = create<core::type::MultisampledTexture>(core::type::TextureDimension::k2d, u32);
 
     Builder& b = Build();
 
@@ -722,8 +724,8 @@ TEST_F(SpirvASTPrinterTest_Type, MultisampledTexture_Generate_2d_u32) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, MultisampledTexture_Generate_2d_f32) {
-    auto* f32 = create<type::F32>();
-    auto* ms = create<type::MultisampledTexture>(type::TextureDimension::k2d, f32);
+    auto* f32 = create<core::type::F32>();
+    auto* ms = create<core::type::MultisampledTexture>(core::type::TextureDimension::k2d, f32);
 
     Builder& b = Build();
 
@@ -736,7 +738,8 @@ TEST_F(SpirvASTPrinterTest_Type, MultisampledTexture_Generate_2d_f32) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_1d_i32) {
-    auto* s = create<type::SampledTexture>(type::TextureDimension::k1d, create<type::I32>());
+    auto* s = create<core::type::SampledTexture>(core::type::TextureDimension::k1d,
+                                                 create<core::type::I32>());
 
     Builder& b = Build();
 
@@ -753,8 +756,8 @@ TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_1d_i32) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_1d_u32) {
-    auto* u32 = create<type::U32>();
-    auto* s = create<type::SampledTexture>(type::TextureDimension::k1d, u32);
+    auto* u32 = create<core::type::U32>();
+    auto* s = create<core::type::SampledTexture>(core::type::TextureDimension::k1d, u32);
 
     Builder& b = Build();
 
@@ -771,8 +774,8 @@ TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_1d_u32) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_1d_f32) {
-    auto* f32 = create<type::F32>();
-    auto* s = create<type::SampledTexture>(type::TextureDimension::k1d, f32);
+    auto* f32 = create<core::type::F32>();
+    auto* s = create<core::type::SampledTexture>(core::type::TextureDimension::k1d, f32);
 
     Builder& b = Build();
 
@@ -789,8 +792,8 @@ TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_1d_f32) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_2d) {
-    auto* f32 = create<type::F32>();
-    auto* s = create<type::SampledTexture>(type::TextureDimension::k2d, f32);
+    auto* f32 = create<core::type::F32>();
+    auto* s = create<core::type::SampledTexture>(core::type::TextureDimension::k2d, f32);
 
     Builder& b = Build();
 
@@ -803,8 +806,8 @@ TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_2d) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_2d_array) {
-    auto* f32 = create<type::F32>();
-    auto* s = create<type::SampledTexture>(type::TextureDimension::k2dArray, f32);
+    auto* f32 = create<core::type::F32>();
+    auto* s = create<core::type::SampledTexture>(core::type::TextureDimension::k2dArray, f32);
 
     Builder& b = Build();
 
@@ -817,8 +820,8 @@ TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_2d_array) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_3d) {
-    auto* f32 = create<type::F32>();
-    auto* s = create<type::SampledTexture>(type::TextureDimension::k3d, f32);
+    auto* f32 = create<core::type::F32>();
+    auto* s = create<core::type::SampledTexture>(core::type::TextureDimension::k3d, f32);
 
     Builder& b = Build();
 
@@ -831,8 +834,8 @@ TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_3d) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_Cube) {
-    auto* f32 = create<type::F32>();
-    auto* s = create<type::SampledTexture>(type::TextureDimension::kCube, f32);
+    auto* f32 = create<core::type::F32>();
+    auto* s = create<core::type::SampledTexture>(core::type::TextureDimension::kCube, f32);
 
     Builder& b = Build();
 
@@ -846,8 +849,8 @@ TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_Cube) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_CubeArray) {
-    auto* f32 = create<type::F32>();
-    auto* s = create<type::SampledTexture>(type::TextureDimension::kCubeArray, f32);
+    auto* f32 = create<core::type::F32>();
+    auto* s = create<core::type::SampledTexture>(core::type::TextureDimension::kCubeArray, f32);
 
     Builder& b = Build();
 
@@ -863,7 +866,7 @@ TEST_F(SpirvASTPrinterTest_Type, SampledTexture_Generate_CubeArray) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, StorageTexture_Generate_1d) {
-    auto s = ty.storage_texture(type::TextureDimension::k1d, core::TexelFormat::kR32Float,
+    auto s = ty.storage_texture(core::type::TextureDimension::k1d, core::TexelFormat::kR32Float,
                                 core::Access::kWrite);
 
     ast::Type ty = GlobalVar("test_var", s, Binding(0_a), Group(0_a))->type;
@@ -878,7 +881,7 @@ TEST_F(SpirvASTPrinterTest_Type, StorageTexture_Generate_1d) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, StorageTexture_Generate_2d) {
-    auto s = ty.storage_texture(type::TextureDimension::k2d, core::TexelFormat::kR32Float,
+    auto s = ty.storage_texture(core::type::TextureDimension::k2d, core::TexelFormat::kR32Float,
                                 core::Access::kWrite);
 
     ast::Type ty = GlobalVar("test_var", s, Binding(0_a), Group(0_a))->type;
@@ -893,8 +896,8 @@ TEST_F(SpirvASTPrinterTest_Type, StorageTexture_Generate_2d) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, StorageTexture_Generate_2dArray) {
-    auto s = ty.storage_texture(type::TextureDimension::k2dArray, core::TexelFormat::kR32Float,
-                                core::Access::kWrite);
+    auto s = ty.storage_texture(core::type::TextureDimension::k2dArray,
+                                core::TexelFormat::kR32Float, core::Access::kWrite);
 
     ast::Type ty = GlobalVar("test_var", s, Binding(0_a), Group(0_a))->type;
 
@@ -908,7 +911,7 @@ TEST_F(SpirvASTPrinterTest_Type, StorageTexture_Generate_2dArray) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, StorageTexture_Generate_3d) {
-    auto s = ty.storage_texture(type::TextureDimension::k3d, core::TexelFormat::kR32Float,
+    auto s = ty.storage_texture(core::type::TextureDimension::k3d, core::TexelFormat::kR32Float,
                                 core::Access::kWrite);
 
     ast::Type ty = GlobalVar("test_var", s, Binding(0_a), Group(0_a))->type;
@@ -923,7 +926,7 @@ TEST_F(SpirvASTPrinterTest_Type, StorageTexture_Generate_3d) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, StorageTexture_Generate_SampledTypeFloat_Format_r32float) {
-    auto s = ty.storage_texture(type::TextureDimension::k2d, core::TexelFormat::kR32Float,
+    auto s = ty.storage_texture(core::type::TextureDimension::k2d, core::TexelFormat::kR32Float,
                                 core::Access::kWrite);
 
     ast::Type ty = GlobalVar("test_var", s, Binding(0_a), Group(0_a))->type;
@@ -938,7 +941,7 @@ TEST_F(SpirvASTPrinterTest_Type, StorageTexture_Generate_SampledTypeFloat_Format
 }
 
 TEST_F(SpirvASTPrinterTest_Type, StorageTexture_Generate_SampledTypeSint_Format_r32sint) {
-    auto s = ty.storage_texture(type::TextureDimension::k2d, core::TexelFormat::kR32Sint,
+    auto s = ty.storage_texture(core::type::TextureDimension::k2d, core::TexelFormat::kR32Sint,
                                 core::Access::kWrite);
 
     ast::Type ty = GlobalVar("test_var", s, Binding(0_a), Group(0_a))->type;
@@ -953,7 +956,7 @@ TEST_F(SpirvASTPrinterTest_Type, StorageTexture_Generate_SampledTypeSint_Format_
 }
 
 TEST_F(SpirvASTPrinterTest_Type, StorageTexture_Generate_SampledTypeUint_Format_r32uint) {
-    auto s = ty.storage_texture(type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+    auto s = ty.storage_texture(core::type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
                                 core::Access::kWrite);
 
     ast::Type ty = GlobalVar("test_var", s, Binding(0_a), Group(0_a))->type;
@@ -968,7 +971,7 @@ TEST_F(SpirvASTPrinterTest_Type, StorageTexture_Generate_SampledTypeUint_Format_
 }
 
 TEST_F(SpirvASTPrinterTest_Type, Sampler) {
-    auto* sampler = create<type::Sampler>(type::SamplerKind::kSampler);
+    auto* sampler = create<core::type::Sampler>(core::type::SamplerKind::kSampler);
 
     Builder& b = Build();
 
@@ -978,7 +981,7 @@ TEST_F(SpirvASTPrinterTest_Type, Sampler) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, ComparisonSampler) {
-    auto* sampler = create<type::Sampler>(type::SamplerKind::kComparisonSampler);
+    auto* sampler = create<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler);
 
     Builder& b = Build();
 
@@ -988,8 +991,8 @@ TEST_F(SpirvASTPrinterTest_Type, ComparisonSampler) {
 }
 
 TEST_F(SpirvASTPrinterTest_Type, Dedup_Sampler_And_ComparisonSampler) {
-    auto* comp_sampler = create<type::Sampler>(type::SamplerKind::kComparisonSampler);
-    auto* sampler = create<type::Sampler>(type::SamplerKind::kSampler);
+    auto* comp_sampler = create<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler);
+    auto* sampler = create<core::type::Sampler>(core::type::SamplerKind::kSampler);
 
     Builder& b = Build();
 

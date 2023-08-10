@@ -104,17 +104,17 @@ struct ResourceBinding {
     TexelFormat image_format;
 };
 
-/// Convert from internal type::TextureDimension to public
+/// Convert from internal core::type::TextureDimension to public
 /// ResourceBinding::TextureDimension
 /// @param type_dim internal value to convert from
 /// @returns the publicly visible equivalent
 ResourceBinding::TextureDimension TypeTextureDimensionToResourceBindingTextureDimension(
-    const type::TextureDimension& type_dim);
+    const core::type::TextureDimension& type_dim);
 
-/// Infer ResourceBinding::SampledKind for a given type::Type
+/// Infer ResourceBinding::SampledKind for a given core::type::Type
 /// @param base_type internal type to infer from
 /// @returns the publicly visible equivalent
-ResourceBinding::SampledKind BaseTypeToSampledKind(const type::Type* base_type);
+ResourceBinding::SampledKind BaseTypeToSampledKind(const core::type::Type* base_type);
 
 /// Convert from internal core::TexelFormat to public
 /// ResourceBinding::TexelFormat

@@ -25,7 +25,7 @@ using namespace tint::number_suffixes;  // NOLINT
 using ConstantTest_Composite = TestHelper;
 
 TEST_F(ConstantTest_Composite, AllZero) {
-    auto* vec3f = create<type::Vector>(create<type::F32>(), 3u);
+    auto* vec3f = create<core::type::Vector>(create<core::type::F32>(), 3u);
 
     auto* fPos0 = constants.Get(0_f);
     auto* fNeg0 = constants.Get(-0_f);
@@ -41,7 +41,7 @@ TEST_F(ConstantTest_Composite, AllZero) {
 }
 
 TEST_F(ConstantTest_Composite, AnyZero) {
-    auto* vec3f = create<type::Vector>(create<type::F32>(), 3u);
+    auto* vec3f = create<core::type::Vector>(create<core::type::F32>(), 3u);
 
     auto* fPos0 = constants.Get(0_f);
     auto* fNeg0 = constants.Get(-0_f);
@@ -57,7 +57,7 @@ TEST_F(ConstantTest_Composite, AnyZero) {
 }
 
 TEST_F(ConstantTest_Composite, Index) {
-    auto* vec3f = create<type::Vector>(create<type::F32>(), 3u);
+    auto* vec3f = create<core::type::Vector>(create<core::type::F32>(), 3u);
 
     auto* fPos0 = constants.Get(0_f);
     auto* fPos1 = constants.Get(1_f);
@@ -75,7 +75,7 @@ TEST_F(ConstantTest_Composite, Index) {
 }
 
 TEST_F(ConstantTest_Composite, Clone) {
-    auto* vec3f = create<type::Vector>(create<type::F32>(), 3u);
+    auto* vec3f = create<core::type::Vector>(create<core::type::F32>(), 3u);
 
     auto* fPos0 = constants.Get(0_f);
     auto* fPos1 = constants.Get(1_f);
@@ -83,11 +83,11 @@ TEST_F(ConstantTest_Composite, Clone) {
     auto* composite = constants.Composite(vec3f, Vector{fPos1, fPos0});
 
     constant::Manager mgr;
-    constant::CloneContext ctx{type::CloneContext{{nullptr}, {nullptr, &mgr.types}}, mgr};
+    constant::CloneContext ctx{core::type::CloneContext{{nullptr}, {nullptr, &mgr.types}}, mgr};
 
     auto* r = composite->As<Composite>()->Clone(ctx);
     ASSERT_NE(r, nullptr);
-    EXPECT_TRUE(r->type->Is<type::Vector>());
+    EXPECT_TRUE(r->type->Is<core::type::Vector>());
     EXPECT_FALSE(r->all_zero);
     EXPECT_TRUE(r->any_zero);
     ASSERT_EQ(r->elements.Length(), 2u);

@@ -21,7 +21,7 @@
 #include "src/tint/lang/core/type/i32.h"
 #include "src/tint/lang/core/type/u32.h"
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 template <typename T>
@@ -112,4 +112,4 @@ TEST_F(ManagerTest, WrapDoesntAffectInner) {
 }
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::core::type

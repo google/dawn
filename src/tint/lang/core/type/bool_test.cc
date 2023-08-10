@@ -15,7 +15,7 @@
 #include "src/tint/lang/core/type/helper_test.h"
 #include "src/tint/lang/core/type/texture.h"
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 using BoolTest = TestHelper;
@@ -46,12 +46,12 @@ TEST_F(BoolTest, FriendlyName) {
 
 TEST_F(BoolTest, Clone) {
     auto* a = create<Bool>();
-    type::Manager mgr;
-    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+    core::type::Manager mgr;
+    core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* b = a->Clone(ctx);
     ASSERT_TRUE(b->Is<Bool>());
 }
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::core::type

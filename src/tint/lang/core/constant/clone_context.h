@@ -27,7 +27,7 @@ namespace tint::core::constant {
 /// Context information for cloning of constants
 struct CloneContext {
     /// The context for cloning type information
-    type::CloneContext type_ctx;
+    core::type::CloneContext type_ctx;
 
     /// Destination information
     constant::Manager& dst;

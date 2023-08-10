@@ -137,7 +137,7 @@ class Impl {
 
     // The clone context used to clone data from #program_
     core::constant::CloneContext clone_ctx_{
-        /* type_ctx */ type::CloneContext{
+        /* type_ctx */ core::type::CloneContext{
             /* src */ {&program_->Symbols()},
             /* dst */ {&builder_.ir.symbols, &builder_.ir.Types()},
         },
@@ -919,8 +919,10 @@ class Impl {
 
                 // The access result type should match the source result type. If the source is a
                 // pointer, we generate a pointer.
-                const type::Type* ty = sem->Type()->UnwrapRef()->Clone(impl.clone_ctx_.type_ctx);
-                if (auto* ptr = obj->Type()->As<type::Pointer>(); ptr && !ty->Is<type::Pointer>()) {
+                const core::type::Type* ty =
+                    sem->Type()->UnwrapRef()->Clone(impl.clone_ctx_.type_ctx);
+                if (auto* ptr = obj->Type()->As<core::type::Pointer>();
+                    ptr && !ty->Is<core::type::Pointer>()) {
                     ty = impl.builder_.ir.Types().ptr(ptr->AddressSpace(), ty, ptr->Access());
                 }
 
@@ -1141,12 +1143,12 @@ class Impl {
                     return std::nullopt;
                 }
 
-                auto* ref = access->Object()->Type()->As<type::Reference>();
+                auto* ref = access->Object()->Type()->As<core::type::Reference>();
                 if (!ref) {
                     return std::nullopt;
                 }
 
-                if (!ref->StoreType()->Is<type::Vector>()) {
+                if (!ref->StoreType()->Is<core::type::Vector>()) {
                     return std::nullopt;
                 }
                 return tint::Switch(
@@ -1280,8 +1282,8 @@ class Impl {
         return tint::Switch(  //
             var,
             [&](const ast::Var* v) {
-                auto* ref = sem->Type()->As<type::Reference>();
-                auto* ty = builder_.ir.Types().Get<type::Pointer>(
+                auto* ref = sem->Type()->As<core::type::Reference>();
+                auto* ty = builder_.ir.Types().Get<core::type::Pointer>(
                     ref->AddressSpace(), ref->StoreType()->Clone(clone_ctx_.type_ctx),
                     ref->Access());
 
@@ -1349,7 +1351,10 @@ class Impl {
             });
     }
 
-    ir::Binary* BinaryOp(const type::Type* ty, ir::Value* lhs, ir::Value* rhs, core::BinaryOp op) {
+    ir::Binary* BinaryOp(const core::type::Type* ty,
+                         ir::Value* lhs,
+                         ir::Value* rhs,
+                         core::BinaryOp op) {
         switch (op) {
             case core::BinaryOp::kAnd:
                 return builder_.And(ty, lhs, rhs);

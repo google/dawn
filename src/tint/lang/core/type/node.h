@@ -17,7 +17,7 @@
 
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// Node is the base class for all type nodes
 class Node : public Castable<Node> {
@@ -32,6 +32,6 @@ class Node : public Castable<Node> {
     ~Node() override;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_NODE_H_

@@ -19,11 +19,11 @@
 namespace tint {
 class SymbolTable;
 }  // namespace tint
-namespace tint::type {
+namespace tint::core::type {
 class Manager;
-}  // namespace tint::type
+}  // namespace tint::core::type
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// Context information for cloning of types
 struct CloneContext {
@@ -42,6 +42,6 @@ struct CloneContext {
     } dst;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_CLONE_CONTEXT_H_

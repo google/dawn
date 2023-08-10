@@ -35,7 +35,7 @@ class Value : public Castable<Value, Node> {
     ~Value() override;
 
     /// @returns the type of the value
-    virtual const type::Type* Type() const = 0;
+    virtual const core::type::Type* Type() const = 0;
 
     /// @param i the index of the element
     /// @returns the child element with the given index, or nullptr if there are no children, or

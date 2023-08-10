@@ -19,13 +19,13 @@
 namespace tint {
 class SymbolTable;
 }  // namespace tint
-namespace tint::type {
+namespace tint::core::type {
 class Manager;
 class Struct;
 class Type;
-}  // namespace tint::type
+}  // namespace tint::core::type
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// @param types the type manager
 /// @param symbols the symbol table
@@ -45,6 +45,6 @@ Struct* CreateFrexpResult(Manager& types, SymbolTable& symbols, const Type* frac
 /// @returns the builtin struct type for a atomic_compare_exchange() builtin call.
 Struct* CreateAtomicCompareExchangeResult(Manager& types, SymbolTable& symbols, const Type* ty);
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_BUILTIN_STRUCTS_H_

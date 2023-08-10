@@ -16,7 +16,7 @@
 #include "src/tint/lang/core/type/helper_test.h"
 #include "src/tint/lang/core/type/texture.h"
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 using PointerTest = TestHelper;
@@ -83,8 +83,8 @@ TEST_F(PointerTest, Clone) {
     auto* a =
         create<Pointer>(core::AddressSpace::kStorage, create<I32>(), core::Access::kReadWrite);
 
-    type::Manager mgr;
-    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+    core::type::Manager mgr;
+    core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* ptr = a->Clone(ctx);
     EXPECT_TRUE(ptr->StoreType()->Is<I32>());
@@ -93,4 +93,4 @@ TEST_F(PointerTest, Clone) {
 }
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::core::type

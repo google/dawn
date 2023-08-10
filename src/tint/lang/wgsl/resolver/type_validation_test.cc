@@ -836,7 +836,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
 }
 
 TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
-    auto tex_ty = ty.sampled_texture(Source{{12, 34}}, type::TextureDimension::k2d, ty.f32());
+    auto tex_ty = ty.sampled_texture(Source{{12, 34}}, core::type::TextureDimension::k2d, ty.f32());
     GlobalVar("arr", ty.array(tex_ty, 4_i), core::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
@@ -912,7 +912,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest, CanonicalTest, testing::Val
 
 namespace SampledTextureTests {
 
-using SampledTextureDimensionTest = ResolverTestWithParam<type::TextureDimension>;
+using SampledTextureDimensionTest = ResolverTestWithParam<core::type::TextureDimension>;
 TEST_P(SampledTextureDimensionTest, All) {
     auto& params = GetParam();
     GlobalVar(Source{{12, 34}}, "a", ty.sampled_texture(params, ty.i32()), Group(0_a),
@@ -923,14 +923,14 @@ TEST_P(SampledTextureDimensionTest, All) {
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          SampledTextureDimensionTest,
                          testing::Values(  //
-                             type::TextureDimension::k1d,
-                             type::TextureDimension::k2d,
-                             type::TextureDimension::k2dArray,
-                             type::TextureDimension::k3d,
-                             type::TextureDimension::kCube,
-                             type::TextureDimension::kCubeArray));
+                             core::type::TextureDimension::k1d,
+                             core::type::TextureDimension::k2d,
+                             core::type::TextureDimension::k2dArray,
+                             core::type::TextureDimension::k3d,
+                             core::type::TextureDimension::kCube,
+                             core::type::TextureDimension::kCubeArray));
 
-using MultisampledTextureDimensionTest = ResolverTestWithParam<type::TextureDimension>;
+using MultisampledTextureDimensionTest = ResolverTestWithParam<core::type::TextureDimension>;
 TEST_P(MultisampledTextureDimensionTest, All) {
     auto& params = GetParam();
     GlobalVar("a", ty.multisampled_texture(Source{{12, 34}}, params, ty.i32()), Group(0_a),
@@ -940,7 +940,7 @@ TEST_P(MultisampledTextureDimensionTest, All) {
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          MultisampledTextureDimensionTest,
-                         testing::Values(type::TextureDimension::k2d));
+                         testing::Values(core::type::TextureDimension::k2d));
 
 struct TypeParams {
     builder::ast_type_func_ptr type_func;
@@ -978,10 +978,10 @@ using SampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
 TEST_P(SampledTextureTypeTest, All) {
     auto& params = GetParam();
     Enable(core::Extension::kF16);
-    GlobalVar(
-        "a",
-        ty.sampled_texture(Source{{12, 34}}, type::TextureDimension::k2d, params.type_func(*this)),
-        Group(0_a), Binding(0_a));
+    GlobalVar("a",
+              ty.sampled_texture(Source{{12, 34}}, core::type::TextureDimension::k2d,
+                                 params.type_func(*this)),
+              Group(0_a), Binding(0_a));
 
     if (params.is_valid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -999,7 +999,7 @@ TEST_P(MultisampledTextureTypeTest, All) {
     auto& params = GetParam();
     Enable(core::Extension::kF16);
     GlobalVar("a",
-              ty.multisampled_texture(Source{{12, 34}}, type::TextureDimension::k2d,
+              ty.multisampled_texture(Source{{12, 34}}, core::type::TextureDimension::k2d,
                                       params.type_func(*this)),
               Group(0_a), Binding(0_a));
 
@@ -1088,20 +1088,20 @@ TEST_P(StorageTextureFormatTest, All) {
     // @group(0) @binding(3)
     // var d : texture_storage_3d<*, write>;
 
-    auto st_a = ty.storage_texture(Source{{12, 34}}, type::TextureDimension::k1d, params.format,
-                                   core::Access::kWrite);
+    auto st_a = ty.storage_texture(Source{{12, 34}}, core::type::TextureDimension::k1d,
+                                   params.format, core::Access::kWrite);
     GlobalVar("a", st_a, Group(0_a), Binding(0_a));
 
     ast::Type st_b =
-        ty.storage_texture(type::TextureDimension::k2d, params.format, core::Access::kWrite);
+        ty.storage_texture(core::type::TextureDimension::k2d, params.format, core::Access::kWrite);
     GlobalVar("b", st_b, Group(0_a), Binding(1_a));
 
-    ast::Type st_c =
-        ty.storage_texture(type::TextureDimension::k2dArray, params.format, core::Access::kWrite);
+    ast::Type st_c = ty.storage_texture(core::type::TextureDimension::k2dArray, params.format,
+                                        core::Access::kWrite);
     GlobalVar("c", st_c, Group(0_a), Binding(2_a));
 
     ast::Type st_d =
-        ty.storage_texture(type::TextureDimension::k3d, params.format, core::Access::kWrite);
+        ty.storage_texture(core::type::TextureDimension::k3d, params.format, core::Access::kWrite);
     GlobalVar("d", st_d, Group(0_a), Binding(3_a));
 
     if (params.is_valid) {
@@ -1147,7 +1147,7 @@ TEST_F(StorageTextureAccessTest, RWAccess_Fail) {
     // @group(0) @binding(0)
     // var a : texture_storage_1d<r32uint, read_write>;
 
-    auto st = ty.storage_texture(Source{{12, 34}}, type::TextureDimension::k1d,
+    auto st = ty.storage_texture(Source{{12, 34}}, core::type::TextureDimension::k1d,
                                  core::TexelFormat::kR32Uint, core::Access::kReadWrite);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
@@ -1161,7 +1161,7 @@ TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
     // @group(0) @binding(0)
     // var a : texture_storage_1d<r32uint, read>;
 
-    auto st = ty.storage_texture(Source{{12, 34}}, type::TextureDimension::k1d,
+    auto st = ty.storage_texture(Source{{12, 34}}, core::type::TextureDimension::k1d,
                                  core::TexelFormat::kR32Uint, core::Access::kRead);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
@@ -1175,7 +1175,7 @@ TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
     // @group(0) @binding(0)
     // var a : texture_storage_1d<r32uint, write>;
 
-    auto st = ty.storage_texture(type::TextureDimension::k1d, core::TexelFormat::kR32Uint,
+    auto st = ty.storage_texture(core::type::TextureDimension::k1d, core::TexelFormat::kR32Uint,
                                  core::Access::kWrite);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));

@@ -24,14 +24,14 @@
 #include "src/tint/utils/symbol/symbol_table.h"
 #include "src/tint/utils/text/string_stream.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Struct);
-TINT_INSTANTIATE_TYPEINFO(tint::type::StructMember);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::Struct);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::StructMember);
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
-type::Flags FlagsFrom(VectorRef<const StructMember*> members) {
-    type::Flags flags{
+core::type::Flags FlagsFrom(VectorRef<const StructMember*> members) {
+    core::type::Flags flags{
         Flag::kConstructable,
         Flag::kCreationFixedFootprint,
         Flag::kFixedFootprint,
@@ -180,7 +180,7 @@ Struct* Struct::Clone(CloneContext& ctx) const {
 }
 
 StructMember::StructMember(Symbol name,
-                           const type::Type* type,
+                           const core::type::Type* type,
                            uint32_t index,
                            uint32_t offset,
                            uint32_t align,
@@ -202,4 +202,4 @@ StructMember* StructMember::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<StructMember>(sym, ty, index_, offset_, align_, size_, attributes_);
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

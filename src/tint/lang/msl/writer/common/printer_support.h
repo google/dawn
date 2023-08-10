@@ -35,7 +35,7 @@ struct SizeAndAlign {
 
 /// @param ty the type to generate size and align for
 /// @returns the MSL packed type size and alignment in bytes for the given type.
-SizeAndAlign MslPackedTypeSizeAndAlign(const type::Type* ty);
+SizeAndAlign MslPackedTypeSizeAndAlign(const core::type::Type* ty);
 
 /// Converts a builtin to an attribute name
 /// @param builtin the builtin to convert

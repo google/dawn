@@ -16,13 +16,13 @@
 
 #include "src/tint/lang/core/type/manager.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Bool);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::Bool);
 
-namespace tint::type {
+namespace tint::core::type {
 
 Bool::Bool()
     : Base(static_cast<size_t>(tint::TypeInfo::Of<Bool>().full_hashcode),
-           type::Flags{
+           core::type::Flags{
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,
@@ -46,4 +46,4 @@ Bool* Bool::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<Bool>();
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

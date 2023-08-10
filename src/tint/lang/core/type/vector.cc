@@ -20,13 +20,13 @@
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/text/string_stream.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Vector);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::Vector);
 
-namespace tint::type {
+namespace tint::core::type {
 
 Vector::Vector(Type const* subtype, uint32_t width, bool packed /* = false */)
     : Base(Hash(tint::TypeInfo::Of<Vector>().full_hashcode, width, subtype, packed),
-           type::Flags{
+           core::type::Flags{
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,
@@ -86,4 +86,4 @@ const Type* Vector::Element(uint32_t index) const {
     return index < width_ ? subtype_ : nullptr;
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

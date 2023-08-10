@@ -5662,9 +5662,9 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
                           << inst.PrettyPrint();
         }
         switch (texture_type->dims) {
-            case type::TextureDimension::k2d:
-            case type::TextureDimension::k2dArray:
-            case type::TextureDimension::k3d:
+            case core::type::TextureDimension::k2d:
+            case core::type::TextureDimension::k2dArray:
+            case core::type::TextureDimension::k3d:
                 break;
             default:
                 return Fail() << "ConstOffset is only permitted for 2D, 2D Arrayed, "
@@ -5787,14 +5787,14 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
             const ast::Expression* dims_call =
                 builder_.Call("textureDimensions", std::move(dims_args));
             auto dims = texture_type->dims;
-            if ((dims == type::TextureDimension::kCube) ||
-                (dims == type::TextureDimension::kCubeArray)) {
+            if ((dims == core::type::TextureDimension::kCube) ||
+                (dims == core::type::TextureDimension::kCubeArray)) {
                 // textureDimension returns a 3-element vector but SPIR-V expects 2.
                 dims_call =
                     create<ast::MemberAccessorExpression>(Source{}, dims_call, PrefixSwizzle(2));
             }
             exprs.Push(dims_call);
-            if (type::IsTextureArray(dims)) {
+            if (core::type::IsTextureArray(dims)) {
                 auto num_layers = builder_.Call("textureNumLayers", GetImageExpression(inst));
                 exprs.Push(num_layers);
             }
@@ -5979,10 +5979,10 @@ FunctionEmitter::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageA
     if (!texture_type) {
         return {};
     }
-    type::TextureDimension dim = texture_type->dims;
+    core::type::TextureDimension dim = texture_type->dims;
     // Number of regular coordinates.
-    uint32_t num_axes = static_cast<uint32_t>(type::NumCoordinateAxes(dim));
-    bool is_arrayed = type::IsTextureArray(dim);
+    uint32_t num_axes = static_cast<uint32_t>(core::type::NumCoordinateAxes(dim));
+    bool is_arrayed = core::type::IsTextureArray(dim);
     if ((num_axes == 0) || (num_axes > 3)) {
         Fail() << "unsupported image dimensionality for " << texture_type->TypeInfo().name
                << " prompted by " << inst.PrettyPrint();

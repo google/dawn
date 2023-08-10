@@ -75,9 +75,9 @@ struct State {
     /// The IR builder.
     Builder b{*ir};
     /// The type manager.
-    type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir->Types()};
     /// The set of struct members that need to have their IO attributes stripped.
-    Hashset<const type::StructMember*, 8> members_to_strip;
+    Hashset<const core::type::StructMember*, 8> members_to_strip;
 
     /// The entry point currently being processed.
     Function* func = nullptr;
@@ -132,7 +132,7 @@ struct State {
     /// Gather the shader inputs.
     void GatherInputs() {
         for (auto* param : func->Params()) {
-            if (auto* str = param->Type()->As<type::Struct>()) {
+            if (auto* str = param->Type()->As<core::type::Struct>()) {
                 for (auto* member : str->Members()) {
                     auto name = str->Name().Name() + "_" + member->Name().Name();
                     backend->AddInput(ir->symbols.Register(name), member->Type(),
@@ -141,7 +141,7 @@ struct State {
                 }
             } else {
                 // Pull out the IO attributes and remove them from the parameter.
-                type::StructMemberAttributes attributes;
+                core::type::StructMemberAttributes attributes;
                 if (auto loc = param->Location()) {
                     attributes.location = loc->value;
                     if (loc->interpolation) {
@@ -163,11 +163,11 @@ struct State {
 
     /// Gather the shader outputs.
     void GatherOutput() {
-        if (func->ReturnType()->Is<type::Void>()) {
+        if (func->ReturnType()->Is<core::type::Void>()) {
             return;
         }
 
-        if (auto* str = func->ReturnType()->As<type::Struct>()) {
+        if (auto* str = func->ReturnType()->As<core::type::Struct>()) {
             for (auto* member : str->Members()) {
                 auto name = str->Name().Name() + "_" + member->Name().Name();
                 backend->AddOutput(ir->symbols.Register(name), member->Type(),
@@ -176,7 +176,7 @@ struct State {
             }
         } else {
             // Pull out the IO attributes and remove them from the original function.
-            type::StructMemberAttributes attributes;
+            core::type::StructMemberAttributes attributes;
             if (auto loc = func->ReturnLocation()) {
                 attributes.location = loc->value;
                 func->ClearReturnLocation();
@@ -198,7 +198,7 @@ struct State {
         uint32_t input_idx = 0;
         Vector<Value*, 4> args;
         for (auto* param : func->Params()) {
-            if (auto* str = param->Type()->As<type::Struct>()) {
+            if (auto* str = param->Type()->As<core::type::Struct>()) {
                 Vector<Value*, 4> construct_args;
                 for (uint32_t i = 0; i < str->Members().Length(); i++) {
                     construct_args.Push(backend->GetInput(builder, input_idx++));
@@ -216,13 +216,13 @@ struct State {
     /// @param builder the IR builder for new instructions
     /// @param inner_result the return value from calling the original entry point function
     void SetOutputs(Builder& builder, Value* inner_result) {
-        if (auto* str = inner_result->Type()->As<type::Struct>()) {
+        if (auto* str = inner_result->Type()->As<core::type::Struct>()) {
             for (auto* member : str->Members()) {
                 Value* from =
                     builder.Access(member->Type(), inner_result, u32(member->Index()))->Result();
                 backend->SetOutput(builder, member->Index(), from);
             }
-        } else if (!inner_result->Type()->Is<type::Void>()) {
+        } else if (!inner_result->Type()->Is<core::type::Void>()) {
             backend->SetOutput(builder, 0u, inner_result);
         }
     }
@@ -232,7 +232,7 @@ struct State {
         // Remove IO attributes from all structure members that had them prior to this transform.
         for (auto* member : members_to_strip) {
             // TODO(crbug.com/tint/745): Remove the const_cast.
-            const_cast<type::StructMember*>(member)->SetAttributes({});
+            const_cast<core::type::StructMember*>(member)->SetAttributes({});
         }
     }
 };
@@ -248,7 +248,7 @@ void RunShaderIOBase(Module* module, std::function<MakeBackendStateFunc> make_ba
         }
 
         // Skip entry points with no inputs or outputs.
-        if (func->Params().IsEmpty() && func->ReturnType()->Is<type::Void>()) {
+        if (func->Params().IsEmpty() && func->ReturnType()->Is<core::type::Void>()) {
             continue;
         }
 

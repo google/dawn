@@ -38,7 +38,7 @@ class Builtin final : public Castable<Builtin, CallTarget> {
     /// @param is_deprecated true if the particular overload is considered deprecated
     /// @param must_use true if the builtin was annotated with `@must_use`
     Builtin(core::Function type,
-            const type::Type* return_type,
+            const core::type::Type* return_type,
             VectorRef<Parameter*> parameters,
             core::EvaluationStage eval_stage,
             PipelineStageSet supported_stages,

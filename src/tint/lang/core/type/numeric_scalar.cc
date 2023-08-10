@@ -14,12 +14,12 @@
 
 #include "src/tint/lang/core/type/numeric_scalar.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::NumericScalar);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::NumericScalar);
 
-namespace tint::type {
+namespace tint::core::type {
 
-NumericScalar::NumericScalar(size_t hash, type::Flags flags) : Base(hash, flags) {}
+NumericScalar::NumericScalar(size_t hash, core::type::Flags flags) : Base(hash, flags) {}
 
 NumericScalar::~NumericScalar() = default;
 
-}  // namespace tint::type
+}  // namespace tint::core::type

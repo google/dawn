@@ -79,7 +79,7 @@ class Module {
     void SetName(Value* value, Symbol name);
 
     /// @return the type manager for the module
-    type::Manager& Types() { return constant_values.types; }
+    core::type::Manager& Types() { return constant_values.types; }
 
     /// The block allocator
     BlockAllocator<Block> blocks;

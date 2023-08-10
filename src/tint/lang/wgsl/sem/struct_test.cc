@@ -44,7 +44,7 @@ TEST_F(SemStructTest, Equals) {
 
     EXPECT_TRUE(a->Equals(*a));
     EXPECT_FALSE(a->Equals(*b));
-    EXPECT_FALSE(a->Equals(type::Void{}));
+    EXPECT_FALSE(a->Equals(core::type::Void{}));
 }
 
 TEST_F(SemStructTest, FriendlyName) {

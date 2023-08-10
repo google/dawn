@@ -27,17 +27,17 @@ SemHelper::SemHelper(ProgramBuilder* builder) : builder_(builder) {}
 
 SemHelper::~SemHelper() = default;
 
-std::string SemHelper::TypeNameOf(const type::Type* ty) const {
+std::string SemHelper::TypeNameOf(const core::type::Type* ty) const {
     return RawTypeNameOf(ty->UnwrapRef());
 }
 
-std::string SemHelper::RawTypeNameOf(const type::Type* ty) const {
+std::string SemHelper::RawTypeNameOf(const core::type::Type* ty) const {
     return ty->FriendlyName();
 }
 
-type::Type* SemHelper::TypeOf(const ast::Expression* expr) const {
+core::type::Type* SemHelper::TypeOf(const ast::Expression* expr) const {
     auto* sem = GetVal(expr);
-    return sem ? const_cast<type::Type*>(sem->Type()) : nullptr;
+    return sem ? const_cast<core::type::Type*>(sem->Type()) : nullptr;
 }
 
 std::string SemHelper::Describe(const sem::Expression* expr) const {

@@ -37,8 +37,8 @@ class Load final : public Castable<Load, ValueExpression> {
     const ValueExpression* Reference() const { return reference_; }
 
     /// @returns the type of the loaded reference.
-    const type::Reference* ReferenceType() const {
-        return static_cast<const type::Reference*>(reference_->Type());
+    const core::type::Reference* ReferenceType() const {
+        return static_cast<const core::type::Reference*>(reference_->Type());
     }
 
   private:

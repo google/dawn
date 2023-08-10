@@ -62,7 +62,7 @@ struct LocalizeStructArrayAssignment::State {
                     continue;
                 }
                 auto og = GetOriginatingTypeAndAddressSpace(assign_stmt);
-                if (!(og.first->Is<type::Struct>() &&
+                if (!(og.first->Is<core::type::Struct>() &&
                       (og.second == core::AddressSpace::kFunction ||
                        og.second == core::AddressSpace::kPrivate))) {
                     continue;
@@ -170,7 +170,7 @@ struct LocalizeStructArrayAssignment::State {
                 // Indexing a member access expr?
                 if (auto* ma = ia->object->As<MemberAccessorExpression>()) {
                     // That accesses an array?
-                    if (src->TypeOf(ma)->UnwrapRef()->Is<type::Array>()) {
+                    if (src->TypeOf(ma)->UnwrapRef()->Is<core::type::Array>()) {
                         result = true;
                         return TraverseAction::Stop;
                     }
@@ -185,7 +185,7 @@ struct LocalizeStructArrayAssignment::State {
     // Returns the type and address space of the originating variable of the lhs
     // of the assignment statement.
     // See https://www.w3.org/TR/WGSL/#originating-variable-section
-    std::pair<const type::Type*, core::AddressSpace> GetOriginatingTypeAndAddressSpace(
+    std::pair<const core::type::Type*, core::AddressSpace> GetOriginatingTypeAndAddressSpace(
         const AssignmentStatement* assign_stmt) {
         auto* root_ident = src->Sem().GetVal(assign_stmt->lhs)->RootIdentifier();
         if (TINT_UNLIKELY(!root_ident)) {
@@ -196,16 +196,16 @@ struct LocalizeStructArrayAssignment::State {
 
         return Switch(
             root_ident->Type(),  //
-            [&](const type::Reference* ref) {
+            [&](const core::type::Reference* ref) {
                 return std::make_pair(ref->StoreType(), ref->AddressSpace());
             },
-            [&](const type::Pointer* ptr) {
+            [&](const core::type::Pointer* ptr) {
                 return std::make_pair(ptr->StoreType(), ptr->AddressSpace());
             },
             [&](Default) {
                 TINT_ICE() << "Expecting to find variable of type pointer or reference on lhs "
                               "of assignment statement";
-                return std::pair<const type::Type*, core::AddressSpace>{};
+                return std::pair<const core::type::Type*, core::AddressSpace>{};
             });
     }
 };

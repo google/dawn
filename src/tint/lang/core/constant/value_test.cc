@@ -39,7 +39,7 @@ TEST_F(ConstantTest_Value, Equal_Scalar_Scalar) {
 }
 
 TEST_F(ConstantTest_Value, Equal_Splat_Splat) {
-    auto* vec3f = create<type::Vector>(create<type::F32>(), 3u);
+    auto* vec3f = create<core::type::Vector>(create<core::type::F32>(), 3u);
 
     auto* vec3f_1_1_1 = constants.Splat(vec3f, constants.Get(1_f), 3);
     auto* vec3f_2_2_2 = constants.Splat(vec3f, constants.Get(2_f), 3);
@@ -50,7 +50,7 @@ TEST_F(ConstantTest_Value, Equal_Splat_Splat) {
 }
 
 TEST_F(ConstantTest_Value, Equal_Composite_Composite) {
-    auto* vec3f = create<type::Vector>(create<type::F32>(), 3u);
+    auto* vec3f = create<core::type::Vector>(create<core::type::F32>(), 3u);
 
     auto* vec3f_1_1_2 = constants.Composite(
         vec3f, Vector{constants.Get(1_f), constants.Get(1_f), constants.Get(2_f)});
@@ -63,7 +63,7 @@ TEST_F(ConstantTest_Value, Equal_Composite_Composite) {
 }
 
 TEST_F(ConstantTest_Value, Equal_Splat_Composite) {
-    auto* vec3f = create<type::Vector>(create<type::F32>(), 3u);
+    auto* vec3f = create<core::type::Vector>(create<core::type::F32>(), 3u);
 
     auto* vec3f_1_1_1 = constants.Splat(vec3f, constants.Get(1_f), 3);
     auto* vec3f_1_2_1 = constants.Composite(

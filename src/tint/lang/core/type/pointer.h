@@ -21,7 +21,7 @@
 #include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/type/type.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// A pointer type.
 class Pointer final : public Castable<Pointer, Type> {
@@ -62,6 +62,6 @@ class Pointer final : public Castable<Pointer, Type> {
     core::Access const access_;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_POINTER_H_

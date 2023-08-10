@@ -177,7 +177,7 @@ class State {
     Hashset<core::Extension, 4> enables_;
 
     /// Map of struct to output program name.
-    Hashmap<const type::Struct*, Symbol, 8> structs_;
+    Hashmap<const core::type::Struct*, Symbol, 8> structs_;
 
     /// True if 'diagnostic(off, derivative_uniformity)' has been emitted
     bool disabled_derivative_uniformity_ = false;
@@ -512,7 +512,7 @@ class State {
 
     void Var(ir::Var* var) {
         auto* val = var->Result();
-        auto* ptr = As<type::Pointer>(val->Type());
+        auto* ptr = As<core::type::Pointer>(val->Type());
         auto ty = Type(ptr->StoreType());
         Symbol name = NameFor(var->Result());
         Bind(var->Result(), name, PtrKind::kRef);
@@ -585,7 +585,7 @@ class State {
                 }
 
                 auto* expr = b.Call(c->Func(), std::move(args));
-                if (!call->HasResults() || call->Result()->Type()->Is<type::Void>()) {
+                if (!call->HasResults() || call->Result()->Type()->Is<core::type::Void>()) {
                     Append(b.CallStmt(expr));
                     return;
                 }
@@ -633,19 +633,19 @@ class State {
         for (auto* index : a->Indices()) {
             tint::Switch(
                 obj_ty,
-                [&](const type::Vector* vec) {
+                [&](const core::type::Vector* vec) {
                     TINT_DEFER(obj_ty = vec->type());
                     expr = VectorMemberAccess(expr, index);
                 },
-                [&](const type::Matrix* mat) {
+                [&](const core::type::Matrix* mat) {
                     obj_ty = mat->ColumnType();
                     expr = b.IndexAccessor(expr, Expr(index));
                 },
-                [&](const type::Array* arr) {
+                [&](const core::type::Array* arr) {
                     obj_ty = arr->ElemType();
                     expr = b.IndexAccessor(expr, Expr(index));
                 },
-                [&](const type::Struct* s) {
+                [&](const core::type::Struct* s) {
                     if (auto* c = index->As<ir::Constant>()) {
                         auto i = c->Value()->ValueAs<uint32_t>();
                         TINT_ASSERT_OR_RETURN(i < s->Members().Length());
@@ -679,7 +679,8 @@ class State {
     void Binary(ir::Binary* e) {
         if (e->Kind() == ir::Binary::Kind::kEqual) {
             auto* rhs = e->RHS()->As<ir::Constant>();
-            if (rhs && rhs->Type()->Is<type::Bool>() && rhs->Value()->ValueAs<bool>() == false) {
+            if (rhs && rhs->Type()->Is<core::type::Bool>() &&
+                rhs->Value()->ValueAs<bool>() == false) {
                 // expr == false
                 Bind(e->Result(), b.Not(Expr(e->LHS())));
                 return;
@@ -790,7 +791,7 @@ class State {
             return b.Expr("<error>");
         }
 
-        if (value->Type()->Is<type::Pointer>()) {
+        if (value->Type()->Is<core::type::Pointer>()) {
             return ToPtrKind(expr, got_ptr_kind, want_ptr_kind);
         }
 
@@ -819,18 +820,18 @@ class State {
         };
         return tint::Switch(
             c->Type(),  //
-            [&](const type::I32*) { return b.Expr(c->ValueAs<i32>()); },
-            [&](const type::U32*) { return b.Expr(c->ValueAs<u32>()); },
-            [&](const type::F32*) { return b.Expr(c->ValueAs<f32>()); },
-            [&](const type::F16*) {
+            [&](const core::type::I32*) { return b.Expr(c->ValueAs<i32>()); },
+            [&](const core::type::U32*) { return b.Expr(c->ValueAs<u32>()); },
+            [&](const core::type::F32*) { return b.Expr(c->ValueAs<f32>()); },
+            [&](const core::type::F16*) {
                 Enable(core::Extension::kF16);
                 return b.Expr(c->ValueAs<f16>());
             },
-            [&](const type::Bool*) { return b.Expr(c->ValueAs<bool>()); },
-            [&](const type::Array*) { return composite(/* can_splat */ false); },
-            [&](const type::Vector*) { return composite(/* can_splat */ true); },
-            [&](const type::Matrix*) { return composite(/* can_splat */ false); },
-            [&](const type::Struct*) { return composite(/* can_splat */ false); },
+            [&](const core::type::Bool*) { return b.Expr(c->ValueAs<bool>()); },
+            [&](const core::type::Array*) { return composite(/* can_splat */ false); },
+            [&](const core::type::Vector*) { return composite(/* can_splat */ true); },
+            [&](const core::type::Matrix*) { return composite(/* can_splat */ false); },
+            [&](const core::type::Struct*) { return composite(/* can_splat */ false); },
             [&](Default) {
                 UNHANDLED_CASE(c->Type());
                 return b.Expr("<error>");
@@ -856,22 +857,22 @@ class State {
     /// @param ty the type::Type
     /// @return an ast::Type from @p ty.
     /// @note May be a semantically-invalid placeholder type on error.
-    ast::Type Type(const type::Type* ty) {
+    ast::Type Type(const core::type::Type* ty) {
         return tint::Switch(
-            ty,                                              //
-            [&](const type::Void*) { return ast::Type{}; },  //
-            [&](const type::I32*) { return b.ty.i32(); },    //
-            [&](const type::U32*) { return b.ty.u32(); },    //
-            [&](const type::F16*) {
+            ty,                                                    //
+            [&](const core::type::Void*) { return ast::Type{}; },  //
+            [&](const core::type::I32*) { return b.ty.i32(); },    //
+            [&](const core::type::U32*) { return b.ty.u32(); },    //
+            [&](const core::type::F16*) {
                 Enable(core::Extension::kF16);
                 return b.ty.f16();
             },
-            [&](const type::F32*) { return b.ty.f32(); },  //
-            [&](const type::Bool*) { return b.ty.bool_(); },
-            [&](const type::Matrix* m) {
+            [&](const core::type::F32*) { return b.ty.f32(); },  //
+            [&](const core::type::Bool*) { return b.ty.bool_(); },
+            [&](const core::type::Matrix* m) {
                 return b.ty.mat(Type(m->type()), m->columns(), m->rows());
             },
-            [&](const type::Vector* v) {
+            [&](const core::type::Vector* v) {
                 auto el = Type(v->type());
                 if (v->Packed()) {
                     TINT_ASSERT(v->Width() == 3u);
@@ -880,42 +881,42 @@ class State {
                     return b.ty.vec(el, v->Width());
                 }
             },
-            [&](const type::Array* a) {
+            [&](const core::type::Array* a) {
                 auto el = Type(a->ElemType());
                 Vector<const ast::Attribute*, 1> attrs;
                 if (!a->IsStrideImplicit()) {
                     attrs.Push(b.Stride(a->Stride()));
                 }
-                if (a->Count()->Is<type::RuntimeArrayCount>()) {
+                if (a->Count()->Is<core::type::RuntimeArrayCount>()) {
                     return b.ty.array(el, std::move(attrs));
                 }
                 auto count = a->ConstantCount();
                 if (TINT_UNLIKELY(!count)) {
-                    TINT_ICE() << type::Array::kErrExpectedConstantCount;
+                    TINT_ICE() << core::type::Array::kErrExpectedConstantCount;
                     return b.ty.array(el, u32(1), std::move(attrs));
                 }
                 return b.ty.array(el, u32(count.value()), std::move(attrs));
             },
-            [&](const type::Struct* s) { return Struct(s); },
-            [&](const type::Atomic* a) { return b.ty.atomic(Type(a->Type())); },
-            [&](const type::DepthTexture* t) { return b.ty.depth_texture(t->dim()); },
-            [&](const type::DepthMultisampledTexture* t) {
+            [&](const core::type::Struct* s) { return Struct(s); },
+            [&](const core::type::Atomic* a) { return b.ty.atomic(Type(a->Type())); },
+            [&](const core::type::DepthTexture* t) { return b.ty.depth_texture(t->dim()); },
+            [&](const core::type::DepthMultisampledTexture* t) {
                 return b.ty.depth_multisampled_texture(t->dim());
             },
-            [&](const type::ExternalTexture*) { return b.ty.external_texture(); },
-            [&](const type::MultisampledTexture* t) {
+            [&](const core::type::ExternalTexture*) { return b.ty.external_texture(); },
+            [&](const core::type::MultisampledTexture* t) {
                 auto el = Type(t->type());
                 return b.ty.multisampled_texture(t->dim(), el);
             },
-            [&](const type::SampledTexture* t) {
+            [&](const core::type::SampledTexture* t) {
                 auto el = Type(t->type());
                 return b.ty.sampled_texture(t->dim(), el);
             },
-            [&](const type::StorageTexture* t) {
+            [&](const core::type::StorageTexture* t) {
                 return b.ty.storage_texture(t->dim(), t->texel_format(), t->access());
             },
-            [&](const type::Sampler* s) { return b.ty.sampler(s->kind()); },
-            [&](const type::Pointer* p) {
+            [&](const core::type::Sampler* s) { return b.ty.sampler(s->kind()); },
+            [&](const core::type::Pointer* p) {
                 // Note: type::Pointer always has an inferred access, but WGSL only allows an
                 // explicit access in the 'storage' address space.
                 auto el = Type(p->StoreType());
@@ -925,7 +926,7 @@ class State {
                                   : core::Access::kUndefined;
                 return b.ty.ptr(address_space, el, access);
             },
-            [&](const type::Reference*) {
+            [&](const core::type::Reference*) {
                 TINT_ICE() << "reference types should never appear in the IR";
                 return b.ty.i32();
             },
@@ -935,9 +936,9 @@ class State {
             });
     }
 
-    ast::Type Struct(const type::Struct* s) {
+    ast::Type Struct(const core::type::Struct* s) {
         auto n = structs_.GetOrCreate(s, [&] {
-            auto members = tint::Transform<8>(s->Members(), [&](const type::StructMember* m) {
+            auto members = tint::Transform<8>(s->Members(), [&](const core::type::StructMember* m) {
                 auto ty = Type(m->Type());
                 const auto& ir_attrs = m->Attributes();
                 Vector<const ast::Attribute*, 4> ast_attrs;
@@ -1015,7 +1016,7 @@ class State {
                 return;
             }
         } else {
-            if (value->Type()->Is<type::Pointer>()) {
+            if (value->Type()->Is<core::type::Pointer>()) {
                 expr = ToPtrKind(expr, ptr_kind, PtrKind::kPtr);
             }
             auto mod_name = mod.NameOf(value);
@@ -1057,7 +1058,7 @@ class State {
             return false;
         }
         auto* result = i->Result();
-        if (!result->Type()->Is<type::Bool>()) {
+        if (!result->Type()->Is<core::type::Bool>()) {
             return false;  // Wrong result type
         }
         if (i->Exits().Count() != 2) {
@@ -1113,7 +1114,7 @@ class State {
 
     bool IsConstant(ir::Value* val, bool value) {
         if (auto* c = val->As<ir::Constant>()) {
-            if (c->Type()->Is<type::Bool>()) {
+            if (c->Type()->Is<core::type::Bool>()) {
                 return c->Value()->ValueAs<bool>() == value;
             }
         }

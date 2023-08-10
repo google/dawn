@@ -55,7 +55,7 @@ class Variable : public Castable<Variable, Node> {
     /// @param access the variable access control type
     /// @param constant_value the constant value for the variable. May be null
     Variable(const ast::Variable* declaration,
-             const type::Type* type,
+             const core::type::Type* type,
              core::EvaluationStage stage,
              core::AddressSpace address_space,
              core::Access access,
@@ -68,7 +68,7 @@ class Variable : public Castable<Variable, Node> {
     const ast::Variable* Declaration() const { return declaration_; }
 
     /// @returns the canonical type for the variable
-    const type::Type* Type() const { return type_; }
+    const core::type::Type* Type() const { return type_; }
 
     /// @returns the evaluation stage for an expression of this variable type
     core::EvaluationStage Stage() const { return stage_; }
@@ -98,7 +98,7 @@ class Variable : public Castable<Variable, Node> {
 
   private:
     const ast::Variable* const declaration_;
-    const type::Type* const type_;
+    const core::type::Type* const type_;
     const core::EvaluationStage stage_;
     const core::AddressSpace address_space_;
     const core::Access access_;
@@ -119,7 +119,7 @@ class LocalVariable final : public Castable<LocalVariable, Variable> {
     /// @param statement the statement that declared this local variable
     /// @param constant_value the constant value for the variable. May be null
     LocalVariable(const ast::Variable* declaration,
-                  const type::Type* type,
+                  const core::type::Type* type,
                   core::EvaluationStage stage,
                   core::AddressSpace address_space,
                   core::Access access,
@@ -161,7 +161,7 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     /// Note, a GlobalVariable generally doesn't have a `location` in WGSL, as it isn't allowed by
     /// the spec. The location maybe attached by transforms such as CanonicalizeEntryPointIO.
     GlobalVariable(const ast::Variable* declaration,
-                   const type::Type* type,
+                   const core::type::Type* type,
                    core::EvaluationStage stage,
                    core::AddressSpace address_space,
                    core::Access access,
@@ -210,7 +210,7 @@ class Parameter final : public Castable<Parameter, Variable> {
     /// @param location the location value, if set
     Parameter(const ast::Parameter* declaration,
               uint32_t index,
-              const type::Type* type,
+              const core::type::Type* type,
               core::AddressSpace address_space,
               core::Access access,
               const core::ParameterUsage usage = core::ParameterUsage::kNone,

@@ -51,7 +51,7 @@ Transform::ApplyResult VarForDynamicIndex::Apply(const Program* src,
         }
 
         auto* indexed = sem.GetVal(object_expr);
-        if (!indexed->Type()->IsAnyOf<type::Array, type::Matrix>()) {
+        if (!indexed->Type()->IsAnyOf<core::type::Array, core::type::Matrix>()) {
             // We only care about array and matrices.
             return true;
         }

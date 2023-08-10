@@ -37,9 +37,9 @@ struct AccessToReplace {
     // The index of the first dynamic index.
     size_t first_dynamic_index = 0;
     // The object type that corresponds to the source of the first dynamic index.
-    const type::Type* dynamic_index_source_type = nullptr;
+    const core::type::Type* dynamic_index_source_type = nullptr;
     // If the access indexes a vector, then the type of that vector
-    const type::Vector* vector_access_type = nullptr;
+    const core::type::Vector* vector_access_type = nullptr;
 };
 
 // A partial access chain that uses constant indices to get to an object that will be
@@ -79,14 +79,14 @@ void WalkAccessChain(ir::Access* access, CALLBACK&& callback) {
 }
 
 std::optional<AccessToReplace> ShouldReplace(ir::Access* access) {
-    if (access->Result()->Type()->Is<type::Pointer>()) {
+    if (access->Result()->Type()->Is<core::type::Pointer>()) {
         // No need to modify accesses into pointer types.
         return {};
     }
 
     std::optional<AccessToReplace> result;
-    WalkAccessChain(access, [&](size_t i, ir::Value* index, const type::Type* ty) {
-        if (auto* vec = ty->As<type::Vector>()) {
+    WalkAccessChain(access, [&](size_t i, ir::Value* index, const core::type::Type* ty) {
+        if (auto* vec = ty->As<core::type::Vector>()) {
             // If we haven't found a dynamic index before the vector, then the transform doesn't
             // need to hoist the access into a var as a vector value can be dynamically indexed.
             // If we have found a dynamic index before the vector, then make a note that we're
@@ -153,7 +153,7 @@ void Run(ir::Module* ir) {
 
         // Create a new access instruction using the local variable as the source.
         Vector<ir::Value*, 4> indices{access->Indices().Offset(to_replace.first_dynamic_index)};
-        const type::Type* access_type = access->Result()->Type();
+        const core::type::Type* access_type = access->Result()->Type();
         ir::Value* vector_index = nullptr;
         if (to_replace.vector_access_type) {
             // The old access indexed the element of a vector.

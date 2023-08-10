@@ -98,30 +98,31 @@ std::string InterpolationToAttribute(core::InterpolationType type,
     return attr;
 }
 
-SizeAndAlign MslPackedTypeSizeAndAlign(const type::Type* ty) {
+SizeAndAlign MslPackedTypeSizeAndAlign(const core::type::Type* ty) {
     return tint::Switch(
         ty,
 
         // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
         // 2.1 Scalar Data Types
-        [&](const type::U32*) {
+        [&](const core::type::U32*) {
             return SizeAndAlign{4, 4};
         },
-        [&](const type::I32*) {
+        [&](const core::type::I32*) {
             return SizeAndAlign{4, 4};
         },
-        [&](const type::F32*) {
+        [&](const core::type::F32*) {
             return SizeAndAlign{4, 4};
         },
-        [&](const type::F16*) {
+        [&](const core::type::F16*) {
             return SizeAndAlign{2, 2};
         },
 
-        [&](const type::Vector* vec) {
+        [&](const core::type::Vector* vec) {
             auto num_els = vec->Width();
             auto* el_ty = vec->type();
             SizeAndAlign el_size_align = MslPackedTypeSizeAndAlign(el_ty);
-            if (el_ty->IsAnyOf<type::U32, type::I32, type::F32, type::F16>()) {
+            if (el_ty->IsAnyOf<core::type::U32, core::type::I32, core::type::F32,
+                               core::type::F16>()) {
                 // Use a packed_vec type for 3-element vectors only.
                 if (num_els == 3) {
                     // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
@@ -138,14 +139,14 @@ SizeAndAlign MslPackedTypeSizeAndAlign(const type::Type* ty) {
             return SizeAndAlign{};
         },
 
-        [&](const type::Matrix* mat) {
+        [&](const core::type::Matrix* mat) {
             // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
             // 2.3 Matrix Data Types
             auto cols = mat->columns();
             auto rows = mat->rows();
             auto* el_ty = mat->type();
             // Metal only support half and float matrix.
-            if (el_ty->IsAnyOf<type::F32, type::F16>()) {
+            if (el_ty->IsAnyOf<core::type::F32, core::type::F16>()) {
                 static constexpr SizeAndAlign table_f32[] = {
                     /* float2x2 */ {16, 8},
                     /* float2x3 */ {32, 16},
@@ -169,7 +170,7 @@ SizeAndAlign MslPackedTypeSizeAndAlign(const type::Type* ty) {
                     /* half4x4 */ {32, 8},
                 };
                 if (cols >= 2 && cols <= 4 && rows >= 2 && rows <= 4) {
-                    if (el_ty->Is<type::F32>()) {
+                    if (el_ty->Is<core::type::F32>()) {
                         return table_f32[(3 * (cols - 2)) + (rows - 2)];
                     } else {
                         return table_f16[(3 * (cols - 2)) + (rows - 2)];
@@ -181,30 +182,30 @@ SizeAndAlign MslPackedTypeSizeAndAlign(const type::Type* ty) {
             return SizeAndAlign{};
         },
 
-        [&](const type::Array* arr) {
+        [&](const core::type::Array* arr) {
             if (TINT_UNLIKELY(!arr->IsStrideImplicit())) {
                 TINT_ICE()
                     << "arrays with explicit strides should not exist past the SPIR-V reader";
                 return SizeAndAlign{};
             }
-            if (arr->Count()->Is<type::RuntimeArrayCount>()) {
+            if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
                 return SizeAndAlign{arr->Stride(), arr->Align()};
             }
             if (auto count = arr->ConstantCount()) {
                 return SizeAndAlign{arr->Stride() * count.value(), arr->Align()};
             }
-            TINT_ICE() << type::Array::kErrExpectedConstantCount;
+            TINT_ICE() << core::type::Array::kErrExpectedConstantCount;
             return SizeAndAlign{};
         },
 
-        [&](const type::Struct* str) {
+        [&](const core::type::Struct* str) {
             // TODO(crbug.com/tint/650): There's an assumption here that MSL's
             // default structure size and alignment matches WGSL's. We need to
             // confirm this.
             return SizeAndAlign{str->Size(), str->Align()};
         },
 
-        [&](const type::Atomic* atomic) { return MslPackedTypeSizeAndAlign(atomic->Type()); },
+        [&](const core::type::Atomic* atomic) { return MslPackedTypeSizeAndAlign(atomic->Type()); },
 
         [&](Default) {
             TINT_UNREACHABLE() << "Unhandled type " << ty->TypeInfo().name;

@@ -32,10 +32,10 @@ namespace tint::sem {
 class Module;
 class ValueExpression;
 }  // namespace tint::sem
-namespace tint::type {
+namespace tint::core::type {
 class Node;
 class Type;
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 namespace tint::sem {
 

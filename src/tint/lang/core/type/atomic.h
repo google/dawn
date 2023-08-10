@@ -19,24 +19,24 @@
 
 #include "src/tint/lang/core/type/type.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// A atomic type.
 class Atomic final : public Castable<Atomic, Type> {
   public:
     /// Constructor
     /// @param subtype the atomic type
-    explicit Atomic(const type::Type* subtype);
+    explicit Atomic(const core::type::Type* subtype);
 
     /// Destructor
     ~Atomic() override;
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other
-    bool Equals(const type::UniqueNode& other) const override;
+    bool Equals(const core::type::UniqueNode& other) const override;
 
     /// @returns the atomic type
-    const type::Type* Type() const { return subtype_; }
+    const core::type::Type* Type() const { return subtype_; }
 
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
@@ -53,9 +53,9 @@ class Atomic final : public Castable<Atomic, Type> {
     Atomic* Clone(CloneContext& ctx) const override;
 
   private:
-    type::Type const* const subtype_;
+    core::type::Type const* const subtype_;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_ATOMIC_H_

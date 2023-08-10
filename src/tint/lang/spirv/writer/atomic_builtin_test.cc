@@ -86,7 +86,7 @@ TEST_F(SpirvWriterTest, AtomicCompareExchangeWeak) {
     func->SetParams({cmp, val});
 
     b.Append(func->Block(), [&] {
-        auto* result_ty = type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32());
+        auto* result_ty = core::type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32());
         auto* result = b.Call(result_ty, core::Function::kAtomicCompareExchangeWeak, var, cmp, val);
         auto* original = b.Access(ty.i32(), result, 0_u);
         b.Return(func, original);

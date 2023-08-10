@@ -23,11 +23,11 @@
 #include "src/tint/lang/core/type/texture_dimension.h"
 
 // Forward declarations
-namespace tint::type {
+namespace tint::core::type {
 class Manager;
-}  // namespace tint::type
+}  // namespace tint::core::type
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// A storage texture type.
 class StorageTexture final : public Castable<StorageTexture, Texture> {
@@ -77,6 +77,6 @@ class StorageTexture final : public Castable<StorageTexture, Texture> {
     Type* const subtype_;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_STORAGE_TEXTURE_H_

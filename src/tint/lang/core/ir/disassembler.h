@@ -30,7 +30,7 @@
 #include "src/tint/utils/text/string_stream.h"
 
 // Forward declarations.
-namespace tint::type {
+namespace tint::core::type {
 class Struct;
 }
 
@@ -140,7 +140,7 @@ class Disassembler {
     void EmitSwitch(Switch* s);
     void EmitLoop(Loop* l);
     void EmitIf(If* i);
-    void EmitStructDecl(const type::Struct* str);
+    void EmitStructDecl(const core::type::Struct* str);
     void EmitLine();
     void EmitOperand(Instruction* inst, size_t index);
     void EmitOperandList(Instruction* inst, size_t start_index = 0);

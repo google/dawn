@@ -21,9 +21,9 @@
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/text/string_stream.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::StorageTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::StorageTexture);
 
-namespace tint::type {
+namespace tint::core::type {
 
 StorageTexture::StorageTexture(TextureDimension dim,
                                core::TexelFormat format,
@@ -89,4 +89,4 @@ StorageTexture* StorageTexture::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<StorageTexture>(dim(), texel_format_, access_, ty);
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

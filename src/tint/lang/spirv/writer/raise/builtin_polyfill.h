@@ -49,11 +49,11 @@ class LiteralOperand final : public Castable<LiteralOperand, ir::Constant> {
 
 /// SampledImage represents an OpTypeSampledImage in SPIR-V.
 /// TODO(jrprice): Move this to lang/spirv.
-class SampledImage final : public Castable<SampledImage, type::Type> {
+class SampledImage final : public Castable<SampledImage, core::type::Type> {
   public:
     /// Constructor
     /// @param image the image type
-    explicit SampledImage(const type::Type* image);
+    explicit SampledImage(const core::type::Type* image);
 
     /// @param other the other node to compare against
     /// @returns true if the this type is equal to @p other
@@ -64,13 +64,13 @@ class SampledImage final : public Castable<SampledImage, type::Type> {
 
     /// @param ctx the clone context
     /// @returns a clone of this type
-    SampledImage* Clone(type::CloneContext& ctx) const override;
+    SampledImage* Clone(core::type::CloneContext& ctx) const override;
 
     /// @returns the image type
-    const type::Type* Image() const { return image_; }
+    const core::type::Type* Image() const { return image_; }
 
   private:
-    const type::Type* image_;
+    const core::type::Type* image_;
 };
 
 }  // namespace tint::spirv::writer::raise

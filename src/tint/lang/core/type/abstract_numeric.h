@@ -19,7 +19,7 @@
 
 #include "src/tint/lang/core/type/numeric_scalar.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// The base class for abstract-int and abstract-float types.
 /// @see https://www.w3.org/TR/WGSL/#types-for-creation-time-constants
@@ -39,6 +39,6 @@ class AbstractNumeric : public Castable<AbstractNumeric, NumericScalar> {
     uint32_t Align() const override;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_ABSTRACT_NUMERIC_H_

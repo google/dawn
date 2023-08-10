@@ -168,7 +168,7 @@ struct ZeroInitWorkgroupMemory::State {
                 }
             }
 
-            if (auto* str = sem.Get(param)->Type()->As<type::Struct>()) {
+            if (auto* str = sem.Get(param)->Type()->As<core::type::Struct>()) {
                 for (auto* member : str->Members()) {
                     if (member->Attributes().builtin == core::BuiltinValue::kLocalInvocationIndex) {
                         local_index = [=] {
@@ -289,7 +289,7 @@ struct ZeroInitWorkgroupMemory::State {
     /// @param ty the expression type
     /// @param get_expr a function that builds the AST nodes for the expression.
     /// @returns true on success, false on failure
-    [[nodiscard]] bool BuildZeroingStatements(const type::Type* ty,
+    [[nodiscard]] bool BuildZeroingStatements(const core::type::Type* ty,
                                               const BuildZeroingExpr& get_expr) {
         if (CanTriviallyZero(ty)) {
             auto var = get_expr(1u);
@@ -302,7 +302,7 @@ struct ZeroInitWorkgroupMemory::State {
             return true;
         }
 
-        if (auto* atomic = ty->As<type::Atomic>()) {
+        if (auto* atomic = ty->As<core::type::Atomic>()) {
             auto* zero_init = b.Call(CreateASTTypeFor(ctx, atomic->Type()));
             auto expr = get_expr(1u);
             if (!expr) {
@@ -314,7 +314,7 @@ struct ZeroInitWorkgroupMemory::State {
             return true;
         }
 
-        if (auto* str = ty->As<type::Struct>()) {
+        if (auto* str = ty->As<core::type::Struct>()) {
             for (auto* member : str->Members()) {
                 auto name = ctx.Clone(member->Name());
                 auto get_member = [&](uint32_t num_values) {
@@ -332,7 +332,7 @@ struct ZeroInitWorkgroupMemory::State {
             return true;
         }
 
-        if (auto* arr = ty->As<type::Array>()) {
+        if (auto* arr = ty->As<core::type::Array>()) {
             auto get_el = [&](uint32_t num_values) {
                 // num_values is the number of values to zero for the element type.
                 // The number of iterations required to zero the array and its elements is:
@@ -342,7 +342,7 @@ struct ZeroInitWorkgroupMemory::State {
                 auto count = arr->ConstantCount();
                 if (!count) {
                     ctx.dst->Diagnostics().add_error(diag::System::Transform,
-                                                     type::Array::kErrExpectedConstantCount);
+                                                     core::type::Array::kErrExpectedConstantCount);
                     return Expression{};  // error
                 }
                 auto modulo = num_values * count.value();
@@ -409,7 +409,7 @@ struct ZeroInitWorkgroupMemory::State {
             // Constant value could not be found. Build expression instead.
             workgroup_size_expr = [this, expr, size = workgroup_size_expr] {
                 auto* e = ctx.Clone(expr);
-                if (ctx.src->TypeOf(expr)->UnwrapRef()->Is<type::I32>()) {
+                if (ctx.src->TypeOf(expr)->UnwrapRef()->Is<core::type::I32>()) {
                     e = b.Call<u32>(e);
                 }
                 return size ? b.Mul(size(), e) : e;
@@ -435,18 +435,18 @@ struct ZeroInitWorkgroupMemory::State {
     /// then the type needs to be initialized by decomposing the initialization into multiple
     /// sub-initializations.
     /// @param ty the type to inspect
-    bool CanTriviallyZero(const type::Type* ty) {
-        if (ty->Is<type::Atomic>()) {
+    bool CanTriviallyZero(const core::type::Type* ty) {
+        if (ty->Is<core::type::Atomic>()) {
             return false;
         }
-        if (auto* str = ty->As<type::Struct>()) {
+        if (auto* str = ty->As<core::type::Struct>()) {
             for (auto* member : str->Members()) {
                 if (!CanTriviallyZero(member->Type())) {
                     return false;
                 }
             }
         }
-        if (ty->Is<type::Array>()) {
+        if (ty->Is<core::type::Array>()) {
             return false;
         }
         // True for all other storable types

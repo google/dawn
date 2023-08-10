@@ -58,14 +58,14 @@ class EnumConverter {
     /// @param dim the SPIR-V Dim value
     /// @param arrayed true if the texture is arrayed
     /// @returns a Tint AST texture dimension
-    type::TextureDimension ToDim(spv::Dim dim, bool arrayed);
+    core::type::TextureDimension ToDim(spv::Dim dim, bool arrayed);
 
     /// Converts a possibly arrayed SPIR-V Dim to a Tint texture dimension.
     /// On failure, logs an error and returns kNone
     /// @param dim the SPIR-V Dim value
     /// @param arrayed true if the texture is arrayed
     /// @returns a Tint AST texture dimension
-    type::TextureDimension ToDim(SpvDim dim, bool arrayed) {
+    core::type::TextureDimension ToDim(SpvDim dim, bool arrayed) {
         return ToDim(static_cast<spv::Dim>(dim), arrayed);
     }
 

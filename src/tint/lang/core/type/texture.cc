@@ -14,44 +14,44 @@
 
 #include "src/tint/lang/core/type/texture.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Texture);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::Texture);
 
-namespace tint::type {
+namespace tint::core::type {
 
-Texture::Texture(size_t hash, TextureDimension dim) : Base(hash, type::Flags{}), dim_(dim) {}
+Texture::Texture(size_t hash, TextureDimension dim) : Base(hash, core::type::Flags{}), dim_(dim) {}
 
 Texture::~Texture() = default;
 
-bool IsTextureArray(type::TextureDimension dim) {
+bool IsTextureArray(core::type::TextureDimension dim) {
     switch (dim) {
-        case type::TextureDimension::k2dArray:
-        case type::TextureDimension::kCubeArray:
+        case core::type::TextureDimension::k2dArray:
+        case core::type::TextureDimension::kCubeArray:
             return true;
-        case type::TextureDimension::k2d:
-        case type::TextureDimension::kNone:
-        case type::TextureDimension::k1d:
-        case type::TextureDimension::k3d:
-        case type::TextureDimension::kCube:
+        case core::type::TextureDimension::k2d:
+        case core::type::TextureDimension::kNone:
+        case core::type::TextureDimension::k1d:
+        case core::type::TextureDimension::k3d:
+        case core::type::TextureDimension::kCube:
             return false;
     }
     return false;
 }
 
-int NumCoordinateAxes(type::TextureDimension dim) {
+int NumCoordinateAxes(core::type::TextureDimension dim) {
     switch (dim) {
-        case type::TextureDimension::kNone:
+        case core::type::TextureDimension::kNone:
             return 0;
-        case type::TextureDimension::k1d:
+        case core::type::TextureDimension::k1d:
             return 1;
-        case type::TextureDimension::k2d:
-        case type::TextureDimension::k2dArray:
+        case core::type::TextureDimension::k2d:
+        case core::type::TextureDimension::k2dArray:
             return 2;
-        case type::TextureDimension::k3d:
-        case type::TextureDimension::kCube:
-        case type::TextureDimension::kCubeArray:
+        case core::type::TextureDimension::k3d:
+        case core::type::TextureDimension::kCube:
+        case core::type::TextureDimension::kCubeArray:
             return 3;
     }
     return 0;
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

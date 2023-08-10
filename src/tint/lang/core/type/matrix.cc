@@ -21,13 +21,13 @@
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/text/string_stream.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Matrix);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::Matrix);
 
-namespace tint::type {
+namespace tint::core::type {
 
 Matrix::Matrix(const Vector* column_type, uint32_t columns)
     : Base(Hash(tint::TypeInfo::Of<Vector>().full_hashcode, columns, column_type),
-           type::Flags{
+           core::type::Flags{
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,
@@ -83,4 +83,4 @@ Matrix* Matrix::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<Matrix>(col_ty, columns_);
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

@@ -20,7 +20,7 @@ namespace tint::sem {
 
 TypeExpression::TypeExpression(const ast::Expression* declaration,
                                const Statement* statement,
-                               const type::Type* type)
+                               const core::type::Type* type)
     : Base(declaration, statement), type_(type) {}
 
 TypeExpression::~TypeExpression() = default;

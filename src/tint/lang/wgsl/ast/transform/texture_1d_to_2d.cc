@@ -40,8 +40,8 @@ bool ShouldRun(const Program* program) {
                 const auto& signature = builtin->Signature();
                 auto texture = signature.Parameter(core::ParameterUsage::kTexture);
                 if (texture) {
-                    auto* tex = texture->Type()->As<type::Texture>();
-                    if (tex->dim() == type::TextureDimension::k1d) {
+                    auto* tex = texture->Type()->As<core::type::Texture>();
+                    if (tex->dim() == core::type::TextureDimension::k1d) {
                         return true;
                     }
                 }
@@ -51,11 +51,11 @@ bool ShouldRun(const Program* program) {
     for (auto* var : program->AST().GlobalVariables()) {
         if (Switch(
                 program->Sem().Get(var)->Type()->UnwrapRef(),
-                [&](const type::SampledTexture* tex) {
-                    return tex->dim() == type::TextureDimension::k1d;
+                [&](const core::type::SampledTexture* tex) {
+                    return tex->dim() == core::type::TextureDimension::k1d;
                 },
-                [&](const type::StorageTexture* storage_tex) {
-                    return storage_tex->dim() == type::TextureDimension::k1d;
+                [&](const core::type::StorageTexture* storage_tex) {
+                    return storage_tex->dim() == core::type::TextureDimension::k1d;
                 })) {
             return true;
         }
@@ -98,18 +98,18 @@ struct Texture1DTo2D::State {
         ctx.ReplaceAll([&](const Variable* v) -> const Variable* {
             const Variable* r = Switch(
                 sem.Get(v)->Type()->UnwrapRef(),
-                [&](const type::SampledTexture* tex) -> const Variable* {
-                    if (tex->dim() == type::TextureDimension::k1d) {
-                        auto type = ctx.dst->ty.sampled_texture(type::TextureDimension::k2d,
+                [&](const core::type::SampledTexture* tex) -> const Variable* {
+                    if (tex->dim() == core::type::TextureDimension::k1d) {
+                        auto type = ctx.dst->ty.sampled_texture(core::type::TextureDimension::k2d,
                                                                 CreateASTTypeFor(ctx, tex->type()));
                         return create_var(v, type);
                     } else {
                         return nullptr;
                     }
                 },
-                [&](const type::StorageTexture* storage_tex) -> const Variable* {
-                    if (storage_tex->dim() == type::TextureDimension::k1d) {
-                        auto type = ctx.dst->ty.storage_texture(type::TextureDimension::k2d,
+                [&](const core::type::StorageTexture* storage_tex) -> const Variable* {
+                    if (storage_tex->dim() == core::type::TextureDimension::k1d) {
+                        auto type = ctx.dst->ty.storage_texture(core::type::TextureDimension::k2d,
                                                                 storage_tex->texel_format(),
                                                                 storage_tex->access());
                         return create_var(v, type);
@@ -135,8 +135,8 @@ struct Texture1DTo2D::State {
             if (!texture) {
                 return nullptr;
             }
-            auto* tex = texture->Type()->As<type::Texture>();
-            if (tex->dim() != type::TextureDimension::k1d) {
+            auto* tex = texture->Type()->As<core::type::Texture>();
+            if (tex->dim() != core::type::TextureDimension::k1d) {
                 return nullptr;
             }
 

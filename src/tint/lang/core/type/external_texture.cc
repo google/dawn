@@ -17,9 +17,9 @@
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::ExternalTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::ExternalTexture);
 
-namespace tint::type {
+namespace tint::core::type {
 
 ExternalTexture::ExternalTexture()
     : Base(static_cast<size_t>(tint::TypeInfo::Of<ExternalTexture>().full_hashcode),
@@ -39,4 +39,4 @@ ExternalTexture* ExternalTexture::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<ExternalTexture>();
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

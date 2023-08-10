@@ -21,9 +21,9 @@
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/text/string_stream.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::DepthMultisampledTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::DepthMultisampledTexture);
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 bool IsValidDepthDimension(TextureDimension dim) {
@@ -56,4 +56,4 @@ DepthMultisampledTexture* DepthMultisampledTexture::Clone(CloneContext& ctx) con
     return ctx.dst.mgr->Get<DepthMultisampledTexture>(dim());
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

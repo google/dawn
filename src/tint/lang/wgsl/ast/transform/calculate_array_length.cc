@@ -101,8 +101,8 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
     // get_buffer_size_intrinsic() emits the function decorated with
     // BufferSizeIntrinsic that is transformed by the HLSL writer into a call to
     // [RW]ByteAddressBuffer.GetDimensions().
-    std::unordered_map<const type::Reference*, Symbol> buffer_size_intrinsics;
-    auto get_buffer_size_intrinsic = [&](const type::Reference* buffer_type) {
+    std::unordered_map<const core::type::Reference*, Symbol> buffer_size_intrinsics;
+    auto get_buffer_size_intrinsic = [&](const core::type::Reference* buffer_type) {
         return tint::GetOrCreate(buffer_size_intrinsics, buffer_type, [&] {
             auto name = b.Sym();
             auto type = CreateASTTypeFor(ctx, buffer_type);
@@ -166,7 +166,8 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                         break;
                     }
                     auto* storage_buffer_var = storage_buffer_sem->Variable();
-                    auto* storage_buffer_type = storage_buffer_sem->Type()->As<type::Reference>();
+                    auto* storage_buffer_type =
+                        storage_buffer_sem->Type()->As<core::type::Reference>();
 
                     // Generate BufferSizeIntrinsic for this storage type if we haven't already
                     auto buffer_size = get_buffer_size_intrinsic(storage_buffer_type);
@@ -199,16 +200,16 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                             auto name = b.Sym();
                             const Expression* total_size = b.Expr(buffer_size_result->variable);
 
-                            const type::Array* array_type = Switch(
+                            const core::type::Array* array_type = Switch(
                                 storage_buffer_type->StoreType(),
-                                [&](const type::Struct* str) {
+                                [&](const core::type::Struct* str) {
                                     // The variable is a struct, so subtract the byte offset of
                                     // the array member.
                                     auto* array_member_sem = str->Members().Back();
                                     total_size = b.Sub(total_size, u32(array_member_sem->Offset()));
-                                    return array_member_sem->Type()->As<type::Array>();
+                                    return array_member_sem->Type()->As<core::type::Array>();
                                 },
-                                [&](const type::Array* arr) { return arr; });
+                                [&](const core::type::Array* arr) { return arr; });
 
                             if (TINT_UNLIKELY(!array_type)) {
                                 TINT_ICE() << "expected form of arrayLength argument to be "

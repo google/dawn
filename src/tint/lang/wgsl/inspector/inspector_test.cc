@@ -77,7 +77,7 @@ class InspectorGetSampledTextureResourceBindingsTest : public InspectorBuilder,
 class InspectorGetSampledArrayTextureResourceBindingsTest : public InspectorBuilder,
                                                             public testing::Test {};
 struct GetSampledTextureTestParams {
-    type::TextureDimension type_dim;
+    core::type::TextureDimension type_dim;
     inspector::ResourceBinding::TextureDimension inspector_dim;
     inspector::ResourceBinding::SampledKind sampled_kind;
 };
@@ -101,7 +101,7 @@ class InspectorGetMultisampledTextureResourceBindingsTestWithParam
 class InspectorGetStorageTextureResourceBindingsTest : public InspectorBuilder,
                                                        public testing::Test {};
 struct GetDepthTextureTestParams {
-    type::TextureDimension type_dim;
+    core::type::TextureDimension type_dim;
     inspector::ResourceBinding::TextureDimension inspector_dim;
 };
 class InspectorGetDepthTextureResourceBindingsTestWithParam
@@ -111,7 +111,7 @@ class InspectorGetDepthTextureResourceBindingsTestWithParam
 class InspectorGetDepthMultisampledTextureResourceBindingsTest : public InspectorBuilder,
                                                                  public testing::Test {};
 
-typedef std::tuple<type::TextureDimension, ResourceBinding::TextureDimension> DimensionParams;
+typedef std::tuple<core::type::TextureDimension, ResourceBinding::TextureDimension> DimensionParams;
 typedef std::tuple<core::TexelFormat, ResourceBinding::TexelFormat, ResourceBinding::SampledKind>
     TexelFormatParams;
 typedef std::tuple<DimensionParams, TexelFormatParams> GetStorageTextureTestParams;
@@ -1830,14 +1830,14 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
                                                 MemberInfo{0, ty.i32()},
                                             });
 
-    auto s_texture_type = ty.sampled_texture(type::TextureDimension::k1d, ty.f32());
+    auto s_texture_type = ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32());
     AddResource("s_texture", s_texture_type, 2, 0);
     AddSampler("s_var", 3, 0);
     AddGlobalVariable("s_coords", ty.f32());
     MakeSamplerReferenceBodyFunction("s_func", "s_texture", "s_var", "s_coords", ty.f32(),
                                      tint::Empty);
 
-    auto cs_depth_texture_type = ty.depth_texture(type::TextureDimension::k2d);
+    auto cs_depth_texture_type = ty.depth_texture(core::type::TextureDimension::k2d);
     AddResource("cs_texture", cs_depth_texture_type, 3, 1);
     AddComparisonSampler("cs_var", 3, 2);
     AddGlobalVariable("cs_coords", ty.vec2<f32>());
@@ -1845,7 +1845,7 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
     MakeComparisonSamplerReferenceBodyFunction("cs_func", "cs_texture", "cs_var", "cs_coords",
                                                "cs_depth", ty.f32(), tint::Empty);
 
-    auto depth_ms_texture_type = ty.depth_multisampled_texture(type::TextureDimension::k2d);
+    auto depth_ms_texture_type = ty.depth_multisampled_texture(core::type::TextureDimension::k2d);
     AddResource("depth_ms_texture", depth_ms_texture_type, 3, 3);
     Func("depth_ms_func", tint::Empty, ty.void_(),
          Vector{
@@ -1853,7 +1853,7 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
          });
 
     auto st_type =
-        MakeStorageTextureTypes(type::TextureDimension::k2d, core::TexelFormat::kR32Uint);
+        MakeStorageTextureTypes(core::type::TextureDimension::k2d, core::TexelFormat::kR32Uint);
     AddStorageTexture("st_var", st_type, 4, 0);
     MakeStorageTextureBodyFunction("st_func", "st_var", ty.vec2<u32>(), tint::Empty);
 
@@ -2631,7 +2631,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
 }
 
 TEST_F(InspectorGetSamplerResourceBindingsTest, Simple) {
-    auto sampled_texture_type = ty.sampled_texture(type::TextureDimension::k1d, ty.f32());
+    auto sampled_texture_type = ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32());
     AddResource("foo_texture", sampled_texture_type, 0, 0);
     AddSampler("foo_sampler", 0, 1);
     AddGlobalVariable("foo_coords", ty.f32());
@@ -2666,7 +2666,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, NoSampler) {
 }
 
 TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
-    auto sampled_texture_type = ty.sampled_texture(type::TextureDimension::k1d, ty.f32());
+    auto sampled_texture_type = ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32());
     AddResource("foo_texture", sampled_texture_type, 0, 0);
     AddSampler("foo_sampler", 0, 1);
     AddGlobalVariable("foo_coords", ty.f32());
@@ -2691,7 +2691,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
 }
 
 TEST_F(InspectorGetSamplerResourceBindingsTest, UnknownEntryPoint) {
-    auto sampled_texture_type = ty.sampled_texture(type::TextureDimension::k1d, ty.f32());
+    auto sampled_texture_type = ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32());
     AddResource("foo_texture", sampled_texture_type, 0, 0);
     AddSampler("foo_sampler", 0, 1);
     AddGlobalVariable("foo_coords", ty.f32());
@@ -2708,7 +2708,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, UnknownEntryPoint) {
 }
 
 TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
-    auto depth_texture_type = ty.depth_texture(type::TextureDimension::k2d);
+    auto depth_texture_type = ty.depth_texture(core::type::TextureDimension::k2d);
     AddResource("foo_texture", depth_texture_type, 0, 0);
     AddComparisonSampler("foo_sampler", 0, 1);
     AddGlobalVariable("foo_coords", ty.vec2<f32>());
@@ -2729,7 +2729,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
 }
 
 TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
-    auto depth_texture_type = ty.depth_texture(type::TextureDimension::k2d);
+    auto depth_texture_type = ty.depth_texture(core::type::TextureDimension::k2d);
     AddResource("foo_texture", depth_texture_type, 0, 0);
     AddComparisonSampler("foo_sampler", 0, 1);
     AddGlobalVariable("foo_coords", ty.vec2<f32>());
@@ -2766,7 +2766,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, NoSampler) {
 }
 
 TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
-    auto depth_texture_type = ty.depth_texture(type::TextureDimension::k2d);
+    auto depth_texture_type = ty.depth_texture(core::type::TextureDimension::k2d);
     AddResource("foo_texture", depth_texture_type, 0, 0);
     AddComparisonSampler("foo_sampler", 0, 1);
     AddGlobalVariable("foo_coords", ty.vec2<f32>());
@@ -2792,7 +2792,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
 }
 
 TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, UnknownEntryPoint) {
-    auto depth_texture_type = ty.depth_texture(type::TextureDimension::k2d);
+    auto depth_texture_type = ty.depth_texture(core::type::TextureDimension::k2d);
     AddResource("foo_texture", depth_texture_type, 0, 0);
     AddComparisonSampler("foo_sampler", 0, 1);
     AddGlobalVariable("foo_coords", ty.vec2<f32>());
@@ -2811,7 +2811,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, UnknownEntryPoint) {
 }
 
 TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, SkipsSamplers) {
-    auto sampled_texture_type = ty.sampled_texture(type::TextureDimension::k1d, ty.f32());
+    auto sampled_texture_type = ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32());
     AddResource("foo_texture", sampled_texture_type, 0, 0);
     AddSampler("foo_sampler", 0, 1);
     AddGlobalVariable("foo_coords", ty.f32());
@@ -2878,16 +2878,16 @@ TEST_P(InspectorGetSampledTextureResourceBindingsTestWithParam, textureSample) {
 INSTANTIATE_TEST_SUITE_P(
     InspectorGetSampledTextureResourceBindingsTest,
     InspectorGetSampledTextureResourceBindingsTestWithParam,
-    testing::Values(GetSampledTextureTestParams{type::TextureDimension::k1d,
+    testing::Values(GetSampledTextureTestParams{core::type::TextureDimension::k1d,
                                                 inspector::ResourceBinding::TextureDimension::k1d,
                                                 inspector::ResourceBinding::SampledKind::kFloat},
-                    GetSampledTextureTestParams{type::TextureDimension::k2d,
+                    GetSampledTextureTestParams{core::type::TextureDimension::k2d,
                                                 inspector::ResourceBinding::TextureDimension::k2d,
                                                 inspector::ResourceBinding::SampledKind::kFloat},
-                    GetSampledTextureTestParams{type::TextureDimension::k3d,
+                    GetSampledTextureTestParams{core::type::TextureDimension::k3d,
                                                 inspector::ResourceBinding::TextureDimension::k3d,
                                                 inspector::ResourceBinding::SampledKind::kFloat},
-                    GetSampledTextureTestParams{type::TextureDimension::kCube,
+                    GetSampledTextureTestParams{core::type::TextureDimension::kCube,
                                                 inspector::ResourceBinding::TextureDimension::kCube,
                                                 inspector::ResourceBinding::SampledKind::kFloat}));
 
@@ -2923,10 +2923,10 @@ INSTANTIATE_TEST_SUITE_P(
     InspectorGetSampledArrayTextureResourceBindingsTest,
     InspectorGetSampledArrayTextureResourceBindingsTestWithParam,
     testing::Values(
-        GetSampledTextureTestParams{type::TextureDimension::k2dArray,
+        GetSampledTextureTestParams{core::type::TextureDimension::k2dArray,
                                     inspector::ResourceBinding::TextureDimension::k2dArray,
                                     inspector::ResourceBinding::SampledKind::kFloat},
-        GetSampledTextureTestParams{type::TextureDimension::kCubeArray,
+        GetSampledTextureTestParams{core::type::TextureDimension::kCubeArray,
                                     inspector::ResourceBinding::TextureDimension::kCubeArray,
                                     inspector::ResourceBinding::SampledKind::kFloat}));
 
@@ -2969,13 +2969,13 @@ INSTANTIATE_TEST_SUITE_P(
     InspectorGetMultisampledTextureResourceBindingsTest,
     InspectorGetMultisampledTextureResourceBindingsTestWithParam,
     testing::Values(
-        GetMultisampledTextureTestParams{type::TextureDimension::k2d,
+        GetMultisampledTextureTestParams{core::type::TextureDimension::k2d,
                                          inspector::ResourceBinding::TextureDimension::k2d,
                                          inspector::ResourceBinding::SampledKind::kFloat},
-        GetMultisampledTextureTestParams{type::TextureDimension::k2d,
+        GetMultisampledTextureTestParams{core::type::TextureDimension::k2d,
                                          inspector::ResourceBinding::TextureDimension::k2d,
                                          inspector::ResourceBinding::SampledKind::kSInt},
-        GetMultisampledTextureTestParams{type::TextureDimension::k2d,
+        GetMultisampledTextureTestParams{core::type::TextureDimension::k2d,
                                          inspector::ResourceBinding::TextureDimension::k2d,
                                          inspector::ResourceBinding::SampledKind::kUInt}));
 
@@ -3009,7 +3009,7 @@ TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
     TexelFormatParams format_params;
     std::tie(dim_params, format_params) = GetParam();
 
-    type::TextureDimension dim;
+    core::type::TextureDimension dim;
     ResourceBinding::TextureDimension expected_dim;
     std::tie(dim, expected_dim) = dim_params;
 
@@ -3023,14 +3023,14 @@ TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
 
     ast::Type dim_type;
     switch (dim) {
-        case type::TextureDimension::k1d:
+        case core::type::TextureDimension::k1d:
             dim_type = ty.u32();
             break;
-        case type::TextureDimension::k2d:
-        case type::TextureDimension::k2dArray:
+        case core::type::TextureDimension::k2d:
+        case core::type::TextureDimension::k2dArray:
             dim_type = ty.vec2<u32>();
             break;
-        case type::TextureDimension::k3d:
+        case core::type::TextureDimension::k3d:
             dim_type = ty.vec3<u32>();
             break;
         default:
@@ -3061,13 +3061,13 @@ TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
 INSTANTIATE_TEST_SUITE_P(
     InspectorGetStorageTextureResourceBindingsTest,
     InspectorGetStorageTextureResourceBindingsTestWithParam,
-    testing::Combine(testing::Values(std::make_tuple(type::TextureDimension::k1d,
+    testing::Combine(testing::Values(std::make_tuple(core::type::TextureDimension::k1d,
                                                      ResourceBinding::TextureDimension::k1d),
-                                     std::make_tuple(type::TextureDimension::k2d,
+                                     std::make_tuple(core::type::TextureDimension::k2d,
                                                      ResourceBinding::TextureDimension::k2d),
-                                     std::make_tuple(type::TextureDimension::k2dArray,
+                                     std::make_tuple(core::type::TextureDimension::k2dArray,
                                                      ResourceBinding::TextureDimension::k2dArray),
-                                     std::make_tuple(type::TextureDimension::k3d,
+                                     std::make_tuple(core::type::TextureDimension::k3d,
                                                      ResourceBinding::TextureDimension::k3d)),
                      testing::Values(std::make_tuple(core::TexelFormat::kR32Float,
                                                      ResourceBinding::TexelFormat::kR32Float,
@@ -3146,17 +3146,17 @@ INSTANTIATE_TEST_SUITE_P(
     InspectorGetDepthTextureResourceBindingsTest,
     InspectorGetDepthTextureResourceBindingsTestWithParam,
     testing::Values(
-        GetDepthTextureTestParams{type::TextureDimension::k2d,
+        GetDepthTextureTestParams{core::type::TextureDimension::k2d,
                                   inspector::ResourceBinding::TextureDimension::k2d},
-        GetDepthTextureTestParams{type::TextureDimension::k2dArray,
+        GetDepthTextureTestParams{core::type::TextureDimension::k2dArray,
                                   inspector::ResourceBinding::TextureDimension::k2dArray},
-        GetDepthTextureTestParams{type::TextureDimension::kCube,
+        GetDepthTextureTestParams{core::type::TextureDimension::kCube,
                                   inspector::ResourceBinding::TextureDimension::kCube},
-        GetDepthTextureTestParams{type::TextureDimension::kCubeArray,
+        GetDepthTextureTestParams{core::type::TextureDimension::kCubeArray,
                                   inspector::ResourceBinding::TextureDimension::kCubeArray}));
 
 TEST_F(InspectorGetDepthMultisampledTextureResourceBindingsTest, textureDimensions) {
-    auto depth_ms_texture_type = ty.depth_multisampled_texture(type::TextureDimension::k2d);
+    auto depth_ms_texture_type = ty.depth_multisampled_texture(core::type::TextureDimension::k2d);
     AddResource("tex", depth_ms_texture_type, 0, 0);
 
     Func("ep", tint::Empty, ty.void_(),

@@ -118,7 +118,7 @@ struct SimplifyPointers::State {
                 auto* var = user->Variable();
                 if (var->Is<sem::LocalVariable>() &&  //
                     var->Declaration()->Is<Let>() &&  //
-                    var->Type()->Is<type::Pointer>()) {
+                    var->Type()->Is<core::type::Pointer>()) {
                     op.expr = var->Declaration()->initializer;
                     continue;
                 }
@@ -135,7 +135,7 @@ struct SimplifyPointers::State {
 
         bool needs_transform = false;
         for (auto* ty : ctx.src->Types()) {
-            if (ty->Is<type::Pointer>()) {
+            if (ty->Is<core::type::Pointer>()) {
                 // Program contains pointers which need removing.
                 needs_transform = true;
                 break;
@@ -154,7 +154,7 @@ struct SimplifyPointers::State {
                     }
 
                     auto* var = ctx.src->Sem().Get(let->variable);
-                    if (!var->Type()->Is<type::Pointer>()) {
+                    if (!var->Type()->Is<core::type::Pointer>()) {
                         return;  // Not a pointer type. Ignore.
                     }
 

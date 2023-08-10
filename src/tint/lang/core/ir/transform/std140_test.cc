@@ -52,7 +52,7 @@ TEST_F(IR_Std140Test, NoModify_Mat2x3) {
     auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
                                                                  {mod.symbols.New("a"), mat},
                                                              });
-    structure->SetStructFlag(type::kBlock);
+    structure->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
@@ -96,7 +96,7 @@ TEST_F(IR_Std140Test, NoModify_Mat2x4) {
     auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
                                                                  {mod.symbols.New("a"), mat},
                                                              });
-    structure->SetStructFlag(type::kBlock);
+    structure->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
@@ -140,7 +140,7 @@ TEST_F(IR_Std140Test, NoModify_Mat3x2_StorageBuffer) {
     auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
                                                                  {mod.symbols.New("a"), mat},
                                                              });
-    structure->SetStructFlag(type::kBlock);
+    structure->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(storage, structure));
     buffer->SetBindingPoint(0, 0);
@@ -186,7 +186,7 @@ TEST_F(IR_Std140Test, NoModify_Mat2x2_InsideArray) {
         ty.Struct(mod.symbols.New("MyStruct"), {
                                                    {mod.symbols.New("arr"), ty.array(mat, 4u)},
                                                });
-    structure->SetStructFlag(type::kBlock);
+    structure->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
@@ -229,7 +229,7 @@ TEST_F(IR_Std140Test, Mat3x2_LoadMatrix) {
     auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
                                                                  {mod.symbols.New("a"), mat},
                                                              });
-    structure->SetStructFlag(type::kBlock);
+    structure->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
@@ -300,7 +300,7 @@ TEST_F(IR_Std140Test, Mat3x2_LoadColumn) {
     auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
                                                                  {mod.symbols.New("a"), mat},
                                                              });
-    structure->SetStructFlag(type::kBlock);
+    structure->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
@@ -372,7 +372,7 @@ TEST_F(IR_Std140Test, Mat3x2_LoadElement) {
     auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
                                                                  {mod.symbols.New("a"), mat},
                                                              });
-    structure->SetStructFlag(type::kBlock);
+    structure->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
@@ -445,7 +445,7 @@ TEST_F(IR_Std140Test, Mat3x2_LoadStruct) {
     auto* structure = ty.Struct(mod.symbols.New("MyStruct"), {
                                                                  {mod.symbols.New("a"), mat},
                                                              });
-    structure->SetStructFlag(type::kBlock);
+    structure->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
@@ -523,7 +523,7 @@ TEST_F(IR_Std140Test, Mat3x2_LoadArrayOfStruct) {
         ty.Struct(mod.symbols.New("Outer"), {
                                                 {mod.symbols.New("arr"), ty.array(inner, 4u)},
                                             });
-    outer->SetStructFlag(type::kBlock);
+    outer->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, outer));
     buffer->SetBindingPoint(0, 0);
@@ -643,7 +643,7 @@ TEST_F(IR_Std140Test, Mat3x2_LoadNestedStruct) {
     auto* outer = ty.Struct(mod.symbols.New("Outer"), {
                                                           {mod.symbols.New("inner"), inner},
                                                       });
-    outer->SetStructFlag(type::kBlock);
+    outer->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, outer));
     buffer->SetBindingPoint(0, 0);
@@ -734,7 +734,7 @@ TEST_F(IR_Std140Test, Mat3x2_LoadStruct_WithUnmodifedNestedStruct) {
                                                           {mod.symbols.New("m"), ty.mat3x2<f32>()},
                                                           {mod.symbols.New("inner"), inner},
                                                       });
-    outer->SetStructFlag(type::kBlock);
+    outer->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, outer));
     buffer->SetBindingPoint(0, 0);
@@ -828,7 +828,7 @@ TEST_F(IR_Std140Test, Mat3x2_Nested_ChainOfAccessInstructions) {
                                                           {mod.symbols.New("arr"), arr},
                                                           {mod.symbols.New("d"), ty.i32()},
                                                       });
-    outer->SetStructFlag(type::kBlock);
+    outer->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, outer));
     buffer->SetBindingPoint(0, 0);
@@ -998,7 +998,7 @@ TEST_F(IR_Std140Test, Mat3x2_Nested_ChainOfAccessInstructions_ViaLets) {
                                                           {mod.symbols.New("arr"), arr},
                                                           {mod.symbols.New("d"), ty.i32()},
                                                       });
-    outer->SetStructFlag(type::kBlock);
+    outer->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, outer));
     buffer->SetBindingPoint(0, 0);
@@ -1173,7 +1173,7 @@ TEST_F(IR_Std140Test, Mat3x2_Nested_ChainOfAccessInstructions_DynamicIndices) {
                                                           {mod.symbols.New("arr"), arr},
                                                           {mod.symbols.New("d"), ty.i32()},
                                                       });
-    outer->SetStructFlag(type::kBlock);
+    outer->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, outer));
     buffer->SetBindingPoint(0, 0);
@@ -1336,18 +1336,18 @@ Outer_std140 = struct @align(8), @block {
 
 TEST_F(IR_Std140Test, NonDefaultAlignAndSize) {
     auto* mat = ty.mat4x2<f32>();
-    auto* structure = ty.Get<type::Struct>(
+    auto* structure = ty.Get<core::type::Struct>(
         mod.symbols.New("MyStruct"),
         Vector{
-            ty.Get<type::StructMember>(mod.symbols.New("a"), ty.i32(), 0u, 0u, 0u, 16u,
-                                       type::StructMemberAttributes{}),
-            ty.Get<type::StructMember>(mod.symbols.New("m"), mat, 1u, 64u, 32u, 64u,
-                                       type::StructMemberAttributes{}),
-            ty.Get<type::StructMember>(mod.symbols.New("b"), ty.i32(), 2u, 128u, 8u, 32u,
-                                       type::StructMemberAttributes{}),
+            ty.Get<core::type::StructMember>(mod.symbols.New("a"), ty.i32(), 0u, 0u, 0u, 16u,
+                                             core::type::StructMemberAttributes{}),
+            ty.Get<core::type::StructMember>(mod.symbols.New("m"), mat, 1u, 64u, 32u, 64u,
+                                             core::type::StructMemberAttributes{}),
+            ty.Get<core::type::StructMember>(mod.symbols.New("b"), ty.i32(), 2u, 128u, 8u, 32u,
+                                             core::type::StructMemberAttributes{}),
         },
         128u, 256u, 160u);
-    structure->SetStructFlag(type::kBlock);
+    structure->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);
@@ -1448,7 +1448,7 @@ TEST_F(IR_Std140Test, F16) {
                                                    {mod.symbols.New("c"), ty.mat4x3<f16>()},
                                                    {mod.symbols.New("d"), ty.mat4x4<f16>()},
                                                });
-    structure->SetStructFlag(type::kBlock);
+    structure->SetStructFlag(core::type::kBlock);
 
     auto* buffer = b.Var("buffer", ty.ptr(uniform, structure));
     buffer->SetBindingPoint(0, 0);

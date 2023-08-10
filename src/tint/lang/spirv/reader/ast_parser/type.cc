@@ -238,31 +238,31 @@ ast::Type Array::Build(ProgramBuilder& b) const {
     }
 }
 
-Sampler::Sampler(type::SamplerKind k) : kind(k) {}
+Sampler::Sampler(core::type::SamplerKind k) : kind(k) {}
 Sampler::Sampler(const Sampler&) = default;
 
 ast::Type Sampler::Build(ProgramBuilder& b) const {
     return b.ty.sampler(kind);
 }
 
-Texture::Texture(type::TextureDimension d) : dims(d) {}
+Texture::Texture(core::type::TextureDimension d) : dims(d) {}
 Texture::Texture(const Texture&) = default;
 
-DepthTexture::DepthTexture(type::TextureDimension d) : Base(d) {}
+DepthTexture::DepthTexture(core::type::TextureDimension d) : Base(d) {}
 DepthTexture::DepthTexture(const DepthTexture&) = default;
 
 ast::Type DepthTexture::Build(ProgramBuilder& b) const {
     return b.ty.depth_texture(dims);
 }
 
-DepthMultisampledTexture::DepthMultisampledTexture(type::TextureDimension d) : Base(d) {}
+DepthMultisampledTexture::DepthMultisampledTexture(core::type::TextureDimension d) : Base(d) {}
 DepthMultisampledTexture::DepthMultisampledTexture(const DepthMultisampledTexture&) = default;
 
 ast::Type DepthMultisampledTexture::Build(ProgramBuilder& b) const {
     return b.ty.depth_multisampled_texture(dims);
 }
 
-MultisampledTexture::MultisampledTexture(type::TextureDimension d, const Type* t)
+MultisampledTexture::MultisampledTexture(core::type::TextureDimension d, const Type* t)
     : Base(d), type(t) {}
 MultisampledTexture::MultisampledTexture(const MultisampledTexture&) = default;
 
@@ -270,14 +270,14 @@ ast::Type MultisampledTexture::Build(ProgramBuilder& b) const {
     return b.ty.multisampled_texture(dims, type->Build(b));
 }
 
-SampledTexture::SampledTexture(type::TextureDimension d, const Type* t) : Base(d), type(t) {}
+SampledTexture::SampledTexture(core::type::TextureDimension d, const Type* t) : Base(d), type(t) {}
 SampledTexture::SampledTexture(const SampledTexture&) = default;
 
 ast::Type SampledTexture::Build(ProgramBuilder& b) const {
     return b.ty.sampled_texture(dims, type->Build(b));
 }
 
-StorageTexture::StorageTexture(type::TextureDimension d, core::TexelFormat f, core::Access a)
+StorageTexture::StorageTexture(core::type::TextureDimension d, core::TexelFormat f, core::Access a)
     : Base(d), format(f), access(a) {}
 StorageTexture::StorageTexture(const StorageTexture&) = default;
 
@@ -512,30 +512,31 @@ const reader::Struct* TypeManager::Struct(Symbol name, TypeList members) {
     return state->structs_.Get(name, std::move(members));
 }
 
-const reader::Sampler* TypeManager::Sampler(type::SamplerKind kind) {
+const reader::Sampler* TypeManager::Sampler(core::type::SamplerKind kind) {
     return state->samplers_.Get(kind);
 }
 
-const reader::DepthTexture* TypeManager::DepthTexture(type::TextureDimension dims) {
+const reader::DepthTexture* TypeManager::DepthTexture(core::type::TextureDimension dims) {
     return state->depth_textures_.Get(dims);
 }
 
 const reader::DepthMultisampledTexture* TypeManager::DepthMultisampledTexture(
-    type::TextureDimension dims) {
+    core::type::TextureDimension dims) {
     return state->depth_multisampled_textures_.Get(dims);
 }
 
-const reader::MultisampledTexture* TypeManager::MultisampledTexture(type::TextureDimension dims,
-                                                                    const Type* ty) {
+const reader::MultisampledTexture* TypeManager::MultisampledTexture(
+    core::type::TextureDimension dims,
+    const Type* ty) {
     return state->multisampled_textures_.Get(dims, ty);
 }
 
-const reader::SampledTexture* TypeManager::SampledTexture(type::TextureDimension dims,
+const reader::SampledTexture* TypeManager::SampledTexture(core::type::TextureDimension dims,
                                                           const Type* ty) {
     return state->sampled_textures_.Get(dims, ty);
 }
 
-const reader::StorageTexture* TypeManager::StorageTexture(type::TextureDimension dims,
+const reader::StorageTexture* TypeManager::StorageTexture(core::type::TextureDimension dims,
                                                           core::TexelFormat fmt,
                                                           core::Access access) {
     return state->storage_textures_.Get(dims, fmt, access);
@@ -595,9 +596,9 @@ std::string Array::String() const {
 
 std::string Sampler::String() const {
     switch (kind) {
-        case type::SamplerKind::kSampler:
+        case core::type::SamplerKind::kSampler:
             return "sampler";
-        case type::SamplerKind::kComparisonSampler:
+        case core::type::SamplerKind::kComparisonSampler:
             return "sampler_comparison";
     }
     return "<unknown sampler>";

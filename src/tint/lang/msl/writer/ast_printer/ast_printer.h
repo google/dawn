@@ -102,7 +102,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// Handles generating a declared type
     /// @param ty the declared type to generate
     /// @returns true if the declared type was emitted
-    bool EmitTypeDecl(const type::Type* ty);
+    bool EmitTypeDecl(const core::type::Type* ty);
     /// Handles an index accessor expression
     /// @param out the output of the expression stream
     /// @param expr the expression to emit
@@ -312,13 +312,13 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param out the output of the type stream
     /// @param type the type to generate
     /// @returns true if the type is emitted
-    bool EmitType(StringStream& out, const type::Type* type);
+    bool EmitType(StringStream& out, const core::type::Type* type);
     /// Handles generating type and name
     /// @param out the output stream
     /// @param type the type to generate
     /// @param name the name to emit
     /// @returns true if the type is emitted
-    bool EmitTypeAndName(StringStream& out, const type::Type* type, const std::string& name);
+    bool EmitTypeAndName(StringStream& out, const core::type::Type* type, const std::string& name);
     /// Handles generating a address space
     /// @param out the output of the type stream
     /// @param sc the address space to generate
@@ -329,7 +329,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param buffer the text buffer that the type declaration will be written to
     /// @param str the struct to generate
     /// @returns true if the struct is emitted
-    bool EmitStructType(TextBuffer* buffer, const type::Struct* str);
+    bool EmitStructType(TextBuffer* buffer, const core::type::Struct* str);
     /// Handles a unary op expression
     /// @param out the output of the expression stream
     /// @param expr the expression to emit
@@ -347,7 +347,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param out the output of the expression stream
     /// @param type the type to emit the value for
     /// @returns true if the zero value was successfully emitted.
-    bool EmitZeroValue(StringStream& out, const type::Type* type);
+    bool EmitZeroValue(StringStream& out, const core::type::Type* type);
 
     /// Handles generating a builtin name
     /// @param builtin the semantic info for the builtin
@@ -382,7 +382,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @returns the name of the structure, taking special care of builtin structures that start
     /// with double underscores. If the structure is a builtin, then the returned name will be a
     /// unique name without the leading underscores.
-    std::string StructName(const type::Struct* s);
+    std::string StructName(const core::type::Struct* s);
 
     /// @return a new, unique identifier with the given prefix.
     /// @param prefix optional prefix to apply to the generated identifier. If empty "tint_symbol"
@@ -400,14 +400,14 @@ class ASTPrinter : public tint::TextGenerator {
     TextBuffer helpers_;  // Helper functions emitted at the top of the output
 
     /// Map of builtin structure to unique generated name
-    std::unordered_map<const type::Struct*, std::string> builtin_struct_names_;
+    std::unordered_map<const core::type::Struct*, std::string> builtin_struct_names_;
 
     std::function<bool()> emit_continuing_;
 
     /// Name of atomicCompareExchangeWeak() helper for the given pointer storage
     /// class and struct return type
     using ACEWKeyType =
-        tint::UnorderedKeyWrapper<std::tuple<core::AddressSpace, const type::Struct*>>;
+        tint::UnorderedKeyWrapper<std::tuple<core::AddressSpace, const core::type::Struct*>>;
     std::unordered_map<ACEWKeyType, std::string> atomicCompareExchangeWeak_;
 
     /// Unique name of the 'TINT_INVARIANT' preprocessor define.
@@ -427,9 +427,9 @@ class ASTPrinter : public tint::TextGenerator {
     std::unordered_map<std::string, std::vector<uint32_t>> workgroup_allocations_;
 
     std::unordered_map<const sem::Builtin*, std::string> builtins_;
-    std::unordered_map<const type::Type*, std::string> unary_minus_funcs_;
+    std::unordered_map<const core::type::Type*, std::string> unary_minus_funcs_;
     std::unordered_map<uint32_t, std::string> int_dot_funcs_;
-    std::unordered_set<const type::Struct*> emitted_structs_;
+    std::unordered_set<const core::type::Struct*> emitted_structs_;
 };
 
 }  // namespace tint::msl::writer

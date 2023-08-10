@@ -37,7 +37,7 @@ struct MatrixInfo {
     /// The stride in bytes between columns of the matrix
     uint32_t stride = 0;
     /// The type of the matrix
-    const type::Matrix* matrix = nullptr;
+    const core::type::Matrix* matrix = nullptr;
 
     /// @returns the identifier of an array that holds an vector column for each row of the matrix.
     Type array(ast::Builder* b) const {
@@ -72,7 +72,7 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
     // Scan the program for all storage and uniform structure matrix members with
     // a custom stride attribute. Replace these matrices with an equivalent array,
     // and populate the `decomposed` map with the members that have been replaced.
-    Hashmap<const type::StructMember*, MatrixInfo, 8> decomposed;
+    Hashmap<const core::type::StructMember*, MatrixInfo, 8> decomposed;
     for (auto* node : src->ASTNodes().Objects()) {
         if (auto* str = node->As<Struct>()) {
             auto* str_ty = src->Sem().Get(str);
@@ -81,7 +81,7 @@ Transform::ApplyResult DecomposeStridedMatrix::Apply(const Program* src,
                 continue;
             }
             for (auto* member : str_ty->Members()) {
-                auto* matrix = member->Type()->As<type::Matrix>();
+                auto* matrix = member->Type()->As<core::type::Matrix>();
                 if (!matrix) {
                     continue;
                 }

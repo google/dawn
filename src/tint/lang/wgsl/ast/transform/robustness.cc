@@ -92,7 +92,7 @@ struct Robustness::State {
                     // Inspect.
                     if (auto* user = sem.Get<sem::VariableUser>(e)) {
                         auto* v = user->Variable();
-                        if (v->Type()->Is<type::Pointer>()) {
+                        if (v->Type()->Is<core::type::Pointer>()) {
                             // Propagate predicate from pointer
                             if (auto pred = predicates.Get(v->Declaration()->initializer)) {
                                 predicates.Add(e, *pred);
@@ -181,7 +181,7 @@ struct Robustness::State {
                 if (auto pred = predicates.Get(expr)) {
                     // Expression is predicated
                     auto* sem_expr = sem.GetVal(expr);
-                    if (!sem_expr->Type()->IsAnyOf<type::Reference, type::Pointer>()) {
+                    if (!sem_expr->Type()->IsAnyOf<core::type::Reference, core::type::Pointer>()) {
                         auto pred_load = b.Symbols().New("predicated_expr");
                         auto ty = CreateASTTypeFor(ctx, sem_expr->Type());
                         hoist.InsertBefore(sem_expr->Stmt(), b.Decl(b.Var(pred_load, ty)));
@@ -224,7 +224,7 @@ struct Robustness::State {
         auto* obj_type = expr->Object()->Type();
         return Switch(
             obj_type->UnwrapRef(),  //
-            [&](const type::Vector* vec) -> const Expression* {
+            [&](const core::type::Vector* vec) -> const Expression* {
                 if (expr->Index()->ConstantValue() || expr->Index()->Is<sem::Swizzle>()) {
                     // Index and size is constant.
                     // Validation will have rejected any OOB accesses.
@@ -232,7 +232,7 @@ struct Robustness::State {
                 }
                 return b.Expr(u32(vec->Width() - 1u));
             },
-            [&](const type::Matrix* mat) -> const Expression* {
+            [&](const core::type::Matrix* mat) -> const Expression* {
                 if (expr->Index()->ConstantValue()) {
                     // Index and size is constant.
                     // Validation will have rejected any OOB accesses.
@@ -240,8 +240,8 @@ struct Robustness::State {
                 }
                 return b.Expr(u32(mat->columns() - 1u));
             },
-            [&](const type::Array* arr) -> const Expression* {
-                if (arr->Count()->Is<type::RuntimeArrayCount>()) {
+            [&](const core::type::Array* arr) -> const Expression* {
+                if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
                     // Size is unknown until runtime.
                     // Must clamp, even if the index is constant.
 
@@ -259,7 +259,7 @@ struct Robustness::State {
                 // Note: Don't be tempted to use the array override variable as an expression here,
                 // the name might be shadowed!
                 b.Diagnostics().add_error(diag::System::Transform,
-                                          type::Array::kErrExpectedConstantCount);
+                                          core::type::Array::kErrExpectedConstantCount);
                 return nullptr;
             },
             [&](Default) -> const Expression* {
@@ -275,7 +275,7 @@ struct Robustness::State {
         for (auto* fn : src->AST().Functions()) {
             for (auto* param : fn->params) {
                 auto* sem_param = sem.Get(param);
-                if (auto* ptr = sem_param->Type()->As<type::Pointer>()) {
+                if (auto* ptr = sem_param->Type()->As<core::type::Pointer>()) {
                     if (ActionFor(ptr->AddressSpace()) == Action::kPredicate) {
                         auto name = b.Symbols().New(param->name->symbol.Name() + "_predicate");
                         ctx.InsertAfter(fn->params, param, b.Param(name, b.ty.bool_()));
@@ -296,7 +296,7 @@ struct Robustness::State {
         auto* expr = call->Declaration();
         for (size_t i = 0; i < fn->Parameters().Length(); i++) {
             auto* param = fn->Parameters()[i];
-            if (auto* ptr = param->Type()->As<type::Pointer>()) {
+            if (auto* ptr = param->Type()->As<core::type::Pointer>()) {
                 if (ActionFor(ptr->AddressSpace()) == Action::kPredicate) {
                     auto* arg = expr->args[i];
                     if (auto predicate = predicates.Get(arg)) {
@@ -615,7 +615,7 @@ struct Robustness::State {
     Action ActionFor(const sem::ValueExpression* expr) {
         return Switch(
             expr->Type(),  //
-            [&](const type::Reference* t) { return ActionFor(t->AddressSpace()); },
+            [&](const core::type::Reference* t) { return ActionFor(t->AddressSpace()); },
             [&](Default) { return cfg.value_action; });
     }
 
@@ -645,8 +645,8 @@ struct Robustness::State {
     }
 
     /// @returns the vector width of @p ty, or 1 if @p ty is not a vector
-    static uint32_t WidthOf(const type::Type* ty) {
-        if (auto* vec = ty->As<type::Vector>()) {
+    static uint32_t WidthOf(const core::type::Type* ty) {
+        if (auto* vec = ty->As<core::type::Vector>()) {
             return vec->Width();
         }
         return 1u;
@@ -699,8 +699,8 @@ struct Robustness::State {
 
     /// @returns true if expr is an IndexAccessorExpression whose object is a runtime-sized array.
     bool IsIndexAccessingRuntimeSizedArray(const sem::IndexAccessorExpression* expr) {
-        auto* array_type = expr->Object()->Type()->UnwrapRef()->As<type::Array>();
-        return array_type != nullptr && array_type->Count()->Is<type::RuntimeArrayCount>();
+        auto* array_type = expr->Object()->Type()->UnwrapRef()->As<core::type::Array>();
+        return array_type != nullptr && array_type->Count()->Is<core::type::RuntimeArrayCount>();
     }
 
     /// @returns a clone of expr->Declaration() if it is an unsigned integer scalar, or

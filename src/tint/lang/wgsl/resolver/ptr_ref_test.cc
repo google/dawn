@@ -37,9 +37,10 @@ TEST_F(ResolverPtrRefTest, AddressOf) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    ASSERT_TRUE(TypeOf(expr)->Is<type::Pointer>());
-    EXPECT_TRUE(TypeOf(expr)->As<type::Pointer>()->StoreType()->Is<type::I32>());
-    EXPECT_EQ(TypeOf(expr)->As<type::Pointer>()->AddressSpace(), core::AddressSpace::kFunction);
+    ASSERT_TRUE(TypeOf(expr)->Is<core::type::Pointer>());
+    EXPECT_TRUE(TypeOf(expr)->As<core::type::Pointer>()->StoreType()->Is<core::type::I32>());
+    EXPECT_EQ(TypeOf(expr)->As<core::type::Pointer>()->AddressSpace(),
+              core::AddressSpace::kFunction);
 }
 
 TEST_F(ResolverPtrRefTest, AddressOfThenDeref) {
@@ -59,8 +60,8 @@ TEST_F(ResolverPtrRefTest, AddressOfThenDeref) {
     auto* ref = load->Reference();
     ASSERT_NE(ref, nullptr);
 
-    ASSERT_TRUE(ref->Type()->Is<type::Reference>());
-    EXPECT_TRUE(ref->Type()->As<type::Reference>()->StoreType()->Is<type::I32>());
+    ASSERT_TRUE(ref->Type()->Is<core::type::Reference>());
+    EXPECT_TRUE(ref->Type()->As<core::type::Reference>()->StoreType()->Is<core::type::I32>());
 }
 
 TEST_F(ResolverPtrRefTest, DefaultPtrAddressSpace) {
@@ -90,22 +91,22 @@ TEST_F(ResolverPtrRefTest, DefaultPtrAddressSpace) {
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    ASSERT_TRUE(TypeOf(function_ptr)->Is<type::Pointer>())
+    ASSERT_TRUE(TypeOf(function_ptr)->Is<core::type::Pointer>())
         << "function_ptr is " << TypeOf(function_ptr)->TypeInfo().name;
-    ASSERT_TRUE(TypeOf(private_ptr)->Is<type::Pointer>())
+    ASSERT_TRUE(TypeOf(private_ptr)->Is<core::type::Pointer>())
         << "private_ptr is " << TypeOf(private_ptr)->TypeInfo().name;
-    ASSERT_TRUE(TypeOf(workgroup_ptr)->Is<type::Pointer>())
+    ASSERT_TRUE(TypeOf(workgroup_ptr)->Is<core::type::Pointer>())
         << "workgroup_ptr is " << TypeOf(workgroup_ptr)->TypeInfo().name;
-    ASSERT_TRUE(TypeOf(uniform_ptr)->Is<type::Pointer>())
+    ASSERT_TRUE(TypeOf(uniform_ptr)->Is<core::type::Pointer>())
         << "uniform_ptr is " << TypeOf(uniform_ptr)->TypeInfo().name;
-    ASSERT_TRUE(TypeOf(storage_ptr)->Is<type::Pointer>())
+    ASSERT_TRUE(TypeOf(storage_ptr)->Is<core::type::Pointer>())
         << "storage_ptr is " << TypeOf(storage_ptr)->TypeInfo().name;
 
-    EXPECT_EQ(TypeOf(function_ptr)->As<type::Pointer>()->Access(), core::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(private_ptr)->As<type::Pointer>()->Access(), core::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(workgroup_ptr)->As<type::Pointer>()->Access(), core::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(uniform_ptr)->As<type::Pointer>()->Access(), core::Access::kRead);
-    EXPECT_EQ(TypeOf(storage_ptr)->As<type::Pointer>()->Access(), core::Access::kRead);
+    EXPECT_EQ(TypeOf(function_ptr)->As<core::type::Pointer>()->Access(), core::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(private_ptr)->As<core::type::Pointer>()->Access(), core::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(workgroup_ptr)->As<core::type::Pointer>()->Access(), core::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(uniform_ptr)->As<core::type::Pointer>()->Access(), core::Access::kRead);
+    EXPECT_EQ(TypeOf(storage_ptr)->As<core::type::Pointer>()->Access(), core::Access::kRead);
 }
 
 }  // namespace

@@ -25,7 +25,7 @@
 #include "src/tint/utils/containers/unique_vector.h"
 #include "src/tint/utils/macros/compiler.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// Array holds the type information for Array nodes.
 class Array final : public Castable<Array, Type> {
@@ -117,6 +117,6 @@ class Array final : public Castable<Array, Type> {
     const uint32_t implicit_stride_;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_ARRAY_H_

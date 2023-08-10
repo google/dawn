@@ -20,7 +20,7 @@
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// A depth texture type.
 class DepthTexture final : public Castable<DepthTexture, Texture> {
@@ -45,6 +45,6 @@ class DepthTexture final : public Castable<DepthTexture, Texture> {
     DepthTexture* Clone(CloneContext& ctx) const override;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_DEPTH_TEXTURE_H_

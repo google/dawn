@@ -2508,8 +2508,8 @@ const Type* ASTParser::GetHandleTypeForSpirvHandle(const spvtools::opt::Instruct
     const Type* ast_handle_type = nullptr;
     if (usage.IsSampler()) {
         ast_handle_type =
-            ty_.Sampler(usage.IsComparisonSampler() ? type::SamplerKind::kComparisonSampler
-                                                    : type::SamplerKind::kSampler);
+            ty_.Sampler(usage.IsComparisonSampler() ? core::type::SamplerKind::kComparisonSampler
+                                                    : core::type::SamplerKind::kSampler);
     } else if (usage.IsTexture()) {
         const spvtools::opt::analysis::Image* image_type =
             type_mgr_->GetType(raw_handle_type->result_id())->AsImage();
@@ -2534,9 +2534,9 @@ const Type* ASTParser::GetHandleTypeForSpirvHandle(const spvtools::opt::Instruct
             }
         }
 
-        const type::TextureDimension dim =
+        const core::type::TextureDimension dim =
             enum_converter_.ToDim(image_type->dim(), image_type->is_arrayed());
-        if (dim == type::TextureDimension::kNone) {
+        if (dim == core::type::TextureDimension::kNone) {
             return nullptr;
         }
 
@@ -2559,7 +2559,7 @@ const Type* ASTParser::GetHandleTypeForSpirvHandle(const spvtools::opt::Instruct
                     ast_handle_type = ty_.DepthTexture(dim);
                 }
             } else if (image_type->is_multisampled()) {
-                if (dim != type::TextureDimension::k2d) {
+                if (dim != core::type::TextureDimension::k2d) {
                     Fail() << "WGSL multisampled textures must be 2d and non-arrayed: "
                               "invalid multisampled texture variable or function parameter "
                            << namer_.Name(obj.result_id()) << ": " << obj.PrettyPrint();

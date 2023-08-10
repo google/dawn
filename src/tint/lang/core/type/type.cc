@@ -31,11 +31,11 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/utils/rtti/switch.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Type);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::Type);
 
-namespace tint::type {
+namespace tint::core::type {
 
-Type::Type(size_t hash, type::Flags flags) : Base(hash), flags_(flags) {
+Type::Type(size_t hash, core::type::Flags flags) : Base(hash), flags_(flags) {
     if (IsConstructible()) {
         TINT_ASSERT(HasCreationFixedFootprint());
     }
@@ -149,15 +149,15 @@ bool Type::is_bool_scalar_or_vector() const {
 }
 
 bool Type::is_numeric_vector() const {
-    return Is([](const Vector* v) { return v->type()->Is<type::NumericScalar>(); });
+    return Is([](const Vector* v) { return v->type()->Is<core::type::NumericScalar>(); });
 }
 
 bool Type::is_scalar_vector() const {
-    return Is([](const Vector* v) { return v->type()->Is<type::Scalar>(); });
+    return Is([](const Vector* v) { return v->type()->Is<core::type::Scalar>(); });
 }
 
 bool Type::is_numeric_scalar_or_vector() const {
-    return Is<type::NumericScalar>() || is_numeric_vector();
+    return Is<core::type::NumericScalar>() || is_numeric_vector();
 }
 
 bool Type::is_handle() const {
@@ -284,4 +284,4 @@ const Type* Type::Common(VectorRef<const Type*> types) {
     return common;
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

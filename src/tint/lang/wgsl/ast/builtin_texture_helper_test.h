@@ -192,8 +192,8 @@ struct TextureOverloadCase {
     TextureOverloadCase(ValidTextureOverload,
                         const char*,
                         TextureKind,
-                        type::SamplerKind,
-                        type::TextureDimension,
+                        core::type::SamplerKind,
+                        core::type::TextureDimension,
                         TextureDataType,
                         const char*,
                         std::function<Args(ProgramBuilder*)>,
@@ -202,7 +202,7 @@ struct TextureOverloadCase {
     TextureOverloadCase(ValidTextureOverload,
                         const char*,
                         TextureKind,
-                        type::TextureDimension,
+                        core::type::TextureDimension,
                         TextureDataType,
                         const char*,
                         std::function<Args(ProgramBuilder*)>,
@@ -212,7 +212,7 @@ struct TextureOverloadCase {
                         const char*,
                         tint::core::Access,
                         tint::core::TexelFormat,
-                        type::TextureDimension,
+                        core::type::TextureDimension,
                         TextureDataType,
                         const char*,
                         std::function<Args(ProgramBuilder*)>,
@@ -247,7 +247,7 @@ struct TextureOverloadCase {
     const TextureKind texture_kind;
     /// The sampler kind for the sampler parameter
     /// Used only when texture_kind is not kStorage
-    type::SamplerKind const sampler_kind = type::SamplerKind::kSampler;
+    core::type::SamplerKind const sampler_kind = core::type::SamplerKind::kSampler;
     /// The access control for the storage texture
     /// Used only when texture_kind is kStorage
     tint::core::Access const access = tint::core::Access::kReadWrite;
@@ -255,7 +255,7 @@ struct TextureOverloadCase {
     /// Used only when texture_kind is kStorage
     tint::core::TexelFormat const texel_format = tint::core::TexelFormat::kUndefined;
     /// The dimensions of the texture parameter
-    type::TextureDimension const texture_dimension;
+    core::type::TextureDimension const texture_dimension;
     /// The data type of the texture parameter
     const TextureDataType texture_data_type;
     /// Name of the function. e.g. `textureSample`, `textureSampleGrad`, etc

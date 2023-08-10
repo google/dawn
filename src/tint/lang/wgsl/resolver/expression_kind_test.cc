@@ -178,7 +178,7 @@ TEST_P(ResolverExpressionKindTest, Test) {
                 ASSERT_NE(expr, nullptr);
                 auto* ty_expr = expr->As<sem::TypeExpression>();
                 ASSERT_NE(ty_expr, nullptr);
-                EXPECT_TRUE(ty_expr->Type()->Is<type::Vector>());
+                EXPECT_TRUE(ty_expr->Type()->Is<core::type::Vector>());
             };
             break;
         }
@@ -266,7 +266,7 @@ TEST_P(ResolverExpressionKindTest, Test) {
                 ASSERT_NE(expr, nullptr);
                 auto* ty_expr = expr->As<sem::TypeExpression>();
                 ASSERT_NE(ty_expr, nullptr);
-                EXPECT_TRUE(ty_expr->Type()->Is<type::I32>());
+                EXPECT_TRUE(ty_expr->Type()->Is<core::type::I32>());
             };
             break;
         }

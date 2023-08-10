@@ -37,7 +37,7 @@ std::string NamedOverrideArrayCount::FriendlyName() const {
     return variable->Declaration()->name->symbol.Name();
 }
 
-type::ArrayCount* NamedOverrideArrayCount::Clone(type::CloneContext&) const {
+core::type::ArrayCount* NamedOverrideArrayCount::Clone(core::type::CloneContext&) const {
     TINT_UNREACHABLE() << "Named override array count clone not available";
     return nullptr;
 }
@@ -58,7 +58,7 @@ std::string UnnamedOverrideArrayCount::FriendlyName() const {
     return "[unnamed override-expression]";
 }
 
-type::ArrayCount* UnnamedOverrideArrayCount::Clone(type::CloneContext&) const {
+core::type::ArrayCount* UnnamedOverrideArrayCount::Clone(core::type::CloneContext&) const {
     TINT_UNREACHABLE() << "Unnamed override array count clone not available";
     return nullptr;
 }

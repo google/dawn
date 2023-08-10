@@ -62,7 +62,7 @@ class Function : public Castable<Function, Value> {
     /// @param rt the function return type
     /// @param stage the function stage
     /// @param wg_size the workgroup_size
-    Function(const type::Type* rt,
+    Function(const core::type::Type* rt,
              PipelineStage stage = PipelineStage::kUndefined,
              std::optional<std::array<uint32_t, 3>> wg_size = {});
     ~Function() override;
@@ -87,7 +87,7 @@ class Function : public Castable<Function, Value> {
     std::optional<std::array<uint32_t, 3>> WorkgroupSize() { return workgroup_size_; }
 
     /// @returns the return type for the function
-    const type::Type* ReturnType() { return return_.type; }
+    const core::type::Type* ReturnType() { return return_.type; }
 
     /// Sets the return attributes
     /// @param builtin the builtin to set
@@ -142,7 +142,7 @@ class Function : public Castable<Function, Value> {
     std::optional<std::array<uint32_t, 3>> workgroup_size_;
 
     struct {
-        const type::Type* type = nullptr;
+        const core::type::Type* type = nullptr;
         std::optional<enum ReturnBuiltin> builtin;
         std::optional<Location> location;
         bool invariant = false;

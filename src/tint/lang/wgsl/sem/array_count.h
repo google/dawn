@@ -29,7 +29,8 @@ namespace tint::sem {
 /// override N : i32;
 /// type arr = array<i32, N>
 /// ```
-class NamedOverrideArrayCount final : public Castable<NamedOverrideArrayCount, type::ArrayCount> {
+class NamedOverrideArrayCount final
+    : public Castable<NamedOverrideArrayCount, core::type::ArrayCount> {
   public:
     /// Constructor
     /// @param var the `override` variable
@@ -38,14 +39,14 @@ class NamedOverrideArrayCount final : public Castable<NamedOverrideArrayCount, t
 
     /// @param other the other node
     /// @returns true if this array count is equal @p other
-    bool Equals(const type::UniqueNode& other) const override;
+    bool Equals(const core::type::UniqueNode& other) const override;
 
     /// @returns the friendly name for this array count
     std::string FriendlyName() const override;
 
     /// @param ctx the clone context
     /// @returns a clone of this type
-    type::ArrayCount* Clone(type::CloneContext& ctx) const override;
+    core::type::ArrayCount* Clone(core::type::CloneContext& ctx) const override;
 
     /// The `override` variable.
     const GlobalVariable* variable;
@@ -58,7 +59,7 @@ class NamedOverrideArrayCount final : public Castable<NamedOverrideArrayCount, t
 /// type arr = array<i32, N*2>
 /// ```
 class UnnamedOverrideArrayCount final
-    : public Castable<UnnamedOverrideArrayCount, type::ArrayCount> {
+    : public Castable<UnnamedOverrideArrayCount, core::type::ArrayCount> {
   public:
     /// Constructor
     /// @param e the override expression
@@ -67,14 +68,14 @@ class UnnamedOverrideArrayCount final
 
     /// @param other the other node
     /// @returns true if this array count is equal @p other
-    bool Equals(const type::UniqueNode& other) const override;
+    bool Equals(const core::type::UniqueNode& other) const override;
 
     /// @returns the friendly name for this array count
     std::string FriendlyName() const override;
 
     /// @param ctx the clone context
     /// @returns a clone of this type
-    type::ArrayCount* Clone(type::CloneContext& ctx) const override;
+    core::type::ArrayCount* Clone(core::type::CloneContext& ctx) const override;
 
     /// The unnamed override expression.
     /// Note: Each AST expression gets a unique semantic expression node, so two equivalent AST

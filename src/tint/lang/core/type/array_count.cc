@@ -16,11 +16,11 @@
 
 #include "src/tint/lang/core/type/manager.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::ArrayCount);
-TINT_INSTANTIATE_TYPEINFO(tint::type::ConstantArrayCount);
-TINT_INSTANTIATE_TYPEINFO(tint::type::RuntimeArrayCount);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::ArrayCount);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::ConstantArrayCount);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::RuntimeArrayCount);
 
-namespace tint::type {
+namespace tint::core::type {
 
 ArrayCount::ArrayCount(size_t hash) : Base(hash) {}
 ArrayCount::~ArrayCount() = default;
@@ -61,4 +61,4 @@ RuntimeArrayCount* RuntimeArrayCount::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<RuntimeArrayCount>();
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

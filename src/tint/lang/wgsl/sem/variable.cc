@@ -29,7 +29,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::VariableUser);
 
 namespace tint::sem {
 Variable::Variable(const ast::Variable* declaration,
-                   const type::Type* type,
+                   const core::type::Type* type,
                    core::EvaluationStage stage,
                    core::AddressSpace address_space,
                    core::Access access,
@@ -44,7 +44,7 @@ Variable::Variable(const ast::Variable* declaration,
 Variable::~Variable() = default;
 
 LocalVariable::LocalVariable(const ast::Variable* declaration,
-                             const type::Type* type,
+                             const core::type::Type* type,
                              core::EvaluationStage stage,
                              core::AddressSpace address_space,
                              core::Access access,
@@ -56,7 +56,7 @@ LocalVariable::LocalVariable(const ast::Variable* declaration,
 LocalVariable::~LocalVariable() = default;
 
 GlobalVariable::GlobalVariable(const ast::Variable* declaration,
-                               const type::Type* type,
+                               const core::type::Type* type,
                                core::EvaluationStage stage,
                                core::AddressSpace address_space,
                                core::Access access,
@@ -73,7 +73,7 @@ GlobalVariable::~GlobalVariable() = default;
 
 Parameter::Parameter(const ast::Parameter* declaration,
                      uint32_t index,
-                     const type::Type* type,
+                     const core::type::Type* type,
                      core::AddressSpace address_space,
                      core::Access access,
                      const core::ParameterUsage usage /* = ParameterUsage::kNone */,
@@ -100,7 +100,7 @@ VariableUser::VariableUser(const ast::IdentifierExpression* declaration,
            /* has_side_effects */ false),
       variable_(variable) {
     auto* type = variable->Type();
-    if (type->Is<type::Pointer>() && variable->Initializer()) {
+    if (type->Is<core::type::Pointer>() && variable->Initializer()) {
         root_identifier_ = variable->Initializer()->RootIdentifier();
     } else {
         root_identifier_ = variable;

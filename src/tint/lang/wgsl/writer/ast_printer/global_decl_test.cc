@@ -108,7 +108,7 @@ TEST_F(WgslASTPrinterTest, Emit_GlobalsInterleaved) {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_Global_Sampler) {
-    GlobalVar("s", ty.sampler(type::SamplerKind::kSampler), Group(0_a), Binding(0_a));
+    GlobalVar("s", ty.sampler(core::type::SamplerKind::kSampler), Group(0_a), Binding(0_a));
 
     ASTPrinter& gen = Build();
 
@@ -119,7 +119,7 @@ TEST_F(WgslASTPrinterTest, Emit_Global_Sampler) {
 }
 
 TEST_F(WgslASTPrinterTest, Emit_Global_Texture) {
-    auto st = ty.sampled_texture(type::TextureDimension::k1d, ty.f32());
+    auto st = ty.sampled_texture(core::type::TextureDimension::k1d, ty.f32());
     GlobalVar("t", st, Group(0_a), Binding(0_a));
 
     ASTPrinter& gen = Build();

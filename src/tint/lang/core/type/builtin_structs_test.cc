@@ -29,7 +29,7 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 enum ElementType {
@@ -161,4 +161,4 @@ INSTANTIATE_TEST_SUITE_P(BuiltinAtomicCompareExchangeResultStructTest,
                          testing::Values(kI32, kU32));
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::core::type

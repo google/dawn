@@ -18,7 +18,7 @@
 #include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/traits/traits.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// The different kinds of samplers
 enum class SamplerKind {
@@ -40,6 +40,6 @@ auto& operator<<(STREAM& out, SamplerKind kind) {
     return out << ToString(kind);
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_SAMPLER_KIND_H_

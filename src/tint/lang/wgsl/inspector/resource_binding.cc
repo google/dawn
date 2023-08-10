@@ -26,44 +26,44 @@
 namespace tint::inspector {
 
 ResourceBinding::TextureDimension TypeTextureDimensionToResourceBindingTextureDimension(
-    const type::TextureDimension& type_dim) {
+    const core::type::TextureDimension& type_dim) {
     switch (type_dim) {
-        case type::TextureDimension::k1d:
+        case core::type::TextureDimension::k1d:
             return ResourceBinding::TextureDimension::k1d;
-        case type::TextureDimension::k2d:
+        case core::type::TextureDimension::k2d:
             return ResourceBinding::TextureDimension::k2d;
-        case type::TextureDimension::k2dArray:
+        case core::type::TextureDimension::k2dArray:
             return ResourceBinding::TextureDimension::k2dArray;
-        case type::TextureDimension::k3d:
+        case core::type::TextureDimension::k3d:
             return ResourceBinding::TextureDimension::k3d;
-        case type::TextureDimension::kCube:
+        case core::type::TextureDimension::kCube:
             return ResourceBinding::TextureDimension::kCube;
-        case type::TextureDimension::kCubeArray:
+        case core::type::TextureDimension::kCubeArray:
             return ResourceBinding::TextureDimension::kCubeArray;
-        case type::TextureDimension::kNone:
+        case core::type::TextureDimension::kNone:
             return ResourceBinding::TextureDimension::kNone;
     }
     return ResourceBinding::TextureDimension::kNone;
 }
 
-ResourceBinding::SampledKind BaseTypeToSampledKind(const type::Type* base_type) {
+ResourceBinding::SampledKind BaseTypeToSampledKind(const core::type::Type* base_type) {
     if (!base_type) {
         return ResourceBinding::SampledKind::kUnknown;
     }
 
-    if (auto* at = base_type->As<type::Array>()) {
+    if (auto* at = base_type->As<core::type::Array>()) {
         base_type = at->ElemType();
-    } else if (auto* mt = base_type->As<type::Matrix>()) {
+    } else if (auto* mt = base_type->As<core::type::Matrix>()) {
         base_type = mt->type();
-    } else if (auto* vt = base_type->As<type::Vector>()) {
+    } else if (auto* vt = base_type->As<core::type::Vector>()) {
         base_type = vt->type();
     }
 
-    if (base_type->Is<type::F32>()) {
+    if (base_type->Is<core::type::F32>()) {
         return ResourceBinding::SampledKind::kFloat;
-    } else if (base_type->Is<type::U32>()) {
+    } else if (base_type->Is<core::type::U32>()) {
         return ResourceBinding::SampledKind::kUInt;
-    } else if (base_type->Is<type::I32>()) {
+    } else if (base_type->Is<core::type::I32>()) {
         return ResourceBinding::SampledKind::kSInt;
     } else {
         return ResourceBinding::SampledKind::kUnknown;

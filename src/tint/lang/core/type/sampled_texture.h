@@ -20,7 +20,7 @@
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// A sampled texture type.
 class SampledTexture final : public Castable<SampledTexture, Texture> {
@@ -52,6 +52,6 @@ class SampledTexture final : public Castable<SampledTexture, Texture> {
     const Type* const type_;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_SAMPLED_TEXTURE_H_

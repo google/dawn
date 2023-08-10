@@ -21,9 +21,9 @@
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/text/string_stream.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::SampledTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::SampledTexture);
 
-namespace tint::type {
+namespace tint::core::type {
 
 SampledTexture::SampledTexture(TextureDimension dim, const Type* type)
     : Base(Hash(TypeInfo::Of<SampledTexture>().full_hashcode, dim, type), dim), type_(type) {
@@ -50,4 +50,4 @@ SampledTexture* SampledTexture::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<SampledTexture>(dim(), ty);
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

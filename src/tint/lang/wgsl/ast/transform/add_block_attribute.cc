@@ -43,7 +43,7 @@ Transform::ApplyResult AddBlockAttribute::Apply(const Program* src,
 
     // A map from a type in the source program to a block-decorated wrapper that contains it in the
     // destination program.
-    Hashmap<const type::Type*, const Struct*, 8> wrapper_structs;
+    Hashmap<const core::type::Type*, const Struct*, 8> wrapper_structs;
 
     // Process global 'var' declarations that are buffers.
     bool made_changes = false;

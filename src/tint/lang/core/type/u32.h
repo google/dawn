@@ -19,7 +19,7 @@
 
 #include "src/tint/lang/core/type/numeric_scalar.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// A unsigned int 32 type.
 class U32 final : public Castable<U32, NumericScalar> {
@@ -45,6 +45,6 @@ class U32 final : public Castable<U32, NumericScalar> {
     U32* Clone(CloneContext& ctx) const override;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_U32_H_

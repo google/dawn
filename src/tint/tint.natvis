@@ -231,23 +231,23 @@
 	<!-- sem -->
 	<!--=================================================================-->
 
-	<Type Name="tint::type::AbstractInt">
+	<Type Name="tint::core::type::AbstractInt">
 		<DisplayString>AbstractInt</DisplayString>
 	</Type>
 
-	<Type Name="tint::type::AbstractFloat">
+	<Type Name="tint::core::type::AbstractFloat">
 		<DisplayString>AbstractFloat</DisplayString>
 	</Type>
 
-	<Type Name="tint::type::Bool">
+	<Type Name="tint::core::type::Bool">
 		<DisplayString>bool</DisplayString>
 	</Type>
 
-	<Type Name="tint::type::F32">
+	<Type Name="tint::core::type::F32">
 		<DisplayString>f32</DisplayString>
 	</Type>
 
-	<Type Name="tint::type::Vector">
+	<Type Name="tint::core::type::Vector">
 		<DisplayString>vec{width_}&lt;{*subtype_}&gt;</DisplayString>
 	</Type>
 

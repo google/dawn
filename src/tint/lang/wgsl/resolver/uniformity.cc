@@ -201,7 +201,7 @@ struct FunctionInfo {
             parameters[i].sem = sem;
 
             parameters[i].value = CreateNode({"param_", param_name});
-            if (sem->Type()->Is<type::Pointer>()) {
+            if (sem->Type()->Is<core::type::Pointer>()) {
                 // Create extra nodes for a pointer parameter's initial contents and its contents
                 // when the function returns.
                 parameters[i].ptr_input_contents =
@@ -442,7 +442,7 @@ class UniformityGraph {
         auto get_param_tag = [&](UniqueVector<Node*, 4>& reachable, size_t index) {
             auto* param = sem_.Get(func->params[index]);
             auto& param_info = current_function_->parameters[index];
-            if (param->Type()->Is<type::Pointer>()) {
+            if (param->Type()->Is<core::type::Pointer>()) {
                 // For pointers, we distinguish between requiring uniformity of the contents versus
                 // the pointer itself.
                 if (reachable.Contains(param_info.ptr_input_contents)) {
@@ -1134,7 +1134,7 @@ class UniformityGraph {
                     node = v;
 
                     // Store if lhs is a partial pointer
-                    if (sem_var->Type()->Is<type::Pointer>()) {
+                    if (sem_var->Type()->Is<core::type::Pointer>()) {
                         auto* init = sem_.Get(decl->variable->initializer);
                         if (auto* unary_init = init->Declaration()->As<ast::UnaryOpExpression>()) {
                             auto* e = UnwrapIndirectAndAddressOfChain(unary_init);
@@ -1221,7 +1221,7 @@ class UniformityGraph {
                     node->AddEdge(cf);
 
                     auto* current_value = current_function_->variables.Get(param);
-                    if (param->Type()->Is<type::Pointer>()) {
+                    if (param->Type()->Is<core::type::Pointer>()) {
                         if (load_rule) {
                             // We are loading from the pointer, so add an edge to its contents.
                             node->AddEdge(current_value);
@@ -1254,7 +1254,7 @@ class UniformityGraph {
                 node->AddEdge(cf);
 
                 auto* local_value = current_function_->variables.Get(local);
-                if (local->Type()->Is<type::Pointer>()) {
+                if (local->Type()->Is<core::type::Pointer>()) {
                     if (load_rule) {
                         // We are loading from the pointer, so add an edge to its contents.
                         auto* root = var_user->RootIdentifier();
@@ -1276,7 +1276,7 @@ class UniformityGraph {
                         // the pointer value itself.
                         node->AddEdge(local_value);
                     }
-                } else if (local->Type()->Is<type::Reference>()) {
+                } else if (local->Type()->Is<core::type::Reference>()) {
                     if (load_rule) {
                         // We are loading from the reference, so add an edge to its contents.
                         node->AddEdge(local_value);
@@ -1505,7 +1505,7 @@ class UniformityGraph {
             // For pointer arguments, create an additional node to represent the contents of that
             // pointer prior to the function call.
             auto* sem_arg = sem_.GetVal(call->args[i]);
-            if (sem_arg->Type()->Is<type::Pointer>()) {
+            if (sem_arg->Type()->Is<core::type::Pointer>()) {
                 auto* arg_contents =
                     CreateNode({name, "_ptrarg_", std::to_string(i), "_contents"}, call);
                 arg_contents->type = Node::kFunctionCallArgumentContents;
@@ -1632,7 +1632,7 @@ class UniformityGraph {
                 // Capture the effects of other call parameters on the contents of this parameter
                 // after the call returns.
                 auto* sem_arg = sem_.GetVal(call->args[i]);
-                if (sem_arg->Type()->Is<type::Pointer>()) {
+                if (sem_arg->Type()->Is<core::type::Pointer>()) {
                     auto* ptr_result =
                         CreateNode({name, "_ptrarg_", std::to_string(i), "_result"}, call);
                     ptr_result->type = Node::kFunctionCallPointerArgumentResult;

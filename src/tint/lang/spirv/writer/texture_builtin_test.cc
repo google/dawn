@@ -50,7 +50,7 @@ struct TextureBuiltinTestCase {
     /// The texture type.
     TextureType texture_type;
     /// The dimensionality of the texture.
-    type::TextureDimension dim;
+    core::type::TextureDimension dim;
     /// The texel type of the texture.
     TestElementType texel_type;
     /// The builtin function arguments.
@@ -94,18 +94,18 @@ std::string PrintCase(testing::TestParamInfo<TextureBuiltinTestCase> cc) {
 
 class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCase> {
   protected:
-    const type::Texture* MakeTextureType(TextureType type,
-                                         type::TextureDimension dim,
-                                         TestElementType texel_type) {
+    const core::type::Texture* MakeTextureType(TextureType type,
+                                               core::type::TextureDimension dim,
+                                               TestElementType texel_type) {
         switch (type) {
             case kSampledTexture:
-                return ty.Get<type::SampledTexture>(dim, MakeScalarType(texel_type));
+                return ty.Get<core::type::SampledTexture>(dim, MakeScalarType(texel_type));
             case kMultisampledTexture:
-                return ty.Get<type::MultisampledTexture>(dim, MakeScalarType(texel_type));
+                return ty.Get<core::type::MultisampledTexture>(dim, MakeScalarType(texel_type));
             case kDepthTexture:
-                return ty.Get<type::DepthTexture>(dim);
+                return ty.Get<core::type::DepthTexture>(dim);
             case kDepthMultisampledTexture:
-                return ty.Get<type::DepthMultisampledTexture>(dim);
+                return ty.Get<core::type::DepthMultisampledTexture>(dim);
             case kStorageTexture:
                 core::TexelFormat format;
                 switch (texel_type) {
@@ -121,8 +121,9 @@ class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCas
                     default:
                         return nullptr;
                 }
-                return ty.Get<type::StorageTexture>(dim, format, core::Access::kWrite,
-                                                    type::StorageTexture::SubtypeFor(format, ty));
+                return ty.Get<core::type::StorageTexture>(
+                    dim, format, core::Access::kWrite,
+                    core::type::StorageTexture::SubtypeFor(format, ty));
         }
         return nullptr;
     }
@@ -180,7 +181,7 @@ class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCas
                 mod.SetName(value, arg.name);
             }
             auto* result = b.Call(result_ty, function, std::move(args));
-            if (result_ty->Is<type::Void>()) {
+            if (result_ty->Is<core::type::Void>()) {
                 b.Return(func);
             } else {
                 b.Return(func, result);
@@ -208,7 +209,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k1d,
+            core::type::TextureDimension::k1d,
             /* texel type */ kF32,
             {{"coord", 1, kF32}},
             {"result", 4, kF32},
@@ -219,7 +220,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}},
             {"result", 4, kF32},
@@ -230,7 +231,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
@@ -241,7 +242,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}},
             {"result", 4, kF32},
@@ -254,7 +255,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
@@ -267,7 +268,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k3d,
+            core::type::TextureDimension::k3d,
             /* texel type */ kF32,
             {{"coords", 3, kF32}},
             {"result", 4, kF32},
@@ -278,7 +279,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k3d,
+            core::type::TextureDimension::k3d,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"offset", 3, kI32}},
             {"result", 4, kF32},
@@ -289,7 +290,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::kCube,
+            core::type::TextureDimension::kCube,
             /* texel type */ kF32,
             {{"coords", 3, kF32}},
             {"result", 4, kF32},
@@ -300,7 +301,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::kCubeArray,
+            core::type::TextureDimension::kCubeArray,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"array_idx", 1, kI32}},
             {"result", 4, kF32},
@@ -313,7 +314,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}},
             {"result", 1, kF32},
@@ -325,7 +326,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"offset", 2, kI32}},
             {"result", 1, kF32},
@@ -337,7 +338,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::kCube,
+            core::type::TextureDimension::kCube,
             /* texel type */ kF32,
             {{"coords", 3, kF32}},
             {"result", 1, kF32},
@@ -349,7 +350,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}},
             {"result", 1, kF32},
@@ -363,7 +364,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"offset", 2, kI32}},
             {"result", 1, kF32},
@@ -377,7 +378,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::kCubeArray,
+            core::type::TextureDimension::kCubeArray,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"array_idx", 1, kI32}},
             {"result", 1, kF32},
@@ -403,7 +404,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"bias", 1, kF32}},
             {"result", 4, kF32},
@@ -414,7 +415,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"bias", 1, kF32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
@@ -425,7 +426,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"bias", 1, kF32}},
             {"result", 4, kF32},
@@ -438,7 +439,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"bias", 1, kF32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
@@ -451,7 +452,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k3d,
+            core::type::TextureDimension::k3d,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"bias", 1, kF32}},
             {"result", 4, kF32},
@@ -462,7 +463,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k3d,
+            core::type::TextureDimension::k3d,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"bias", 1, kF32}, {"offset", 3, kI32}},
             {"result", 4, kF32},
@@ -473,7 +474,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::kCube,
+            core::type::TextureDimension::kCube,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"bias", 1, kF32}},
             {"result", 4, kF32},
@@ -484,7 +485,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::kCubeArray,
+            core::type::TextureDimension::kCubeArray,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"array_idx", 1, kI32}, {"bias", 1, kF32}},
             {"result", 4, kF32},
@@ -510,7 +511,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"ddx", 2, kF32}, {"ddy", 2, kF32}},
             {"result", 4, kF32},
@@ -521,7 +522,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"ddx", 2, kF32}, {"ddy", 2, kF32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
@@ -532,7 +533,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"ddx", 2, kF32}, {"ddy", 2, kF32}},
             {"result", 4, kF32},
@@ -545,7 +546,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32},
              {"array_idx", 1, kI32},
@@ -562,7 +563,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k3d,
+            core::type::TextureDimension::k3d,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"ddx", 3, kF32}, {"ddy", 3, kF32}},
             {"result", 4, kF32},
@@ -573,7 +574,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k3d,
+            core::type::TextureDimension::k3d,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"ddx", 3, kF32}, {"ddy", 3, kF32}, {"offset", 3, kI32}},
             {"result", 4, kF32},
@@ -584,7 +585,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::kCube,
+            core::type::TextureDimension::kCube,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"ddx", 3, kF32}, {"ddy", 3, kF32}},
             {"result", 4, kF32},
@@ -595,7 +596,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::kCubeArray,
+            core::type::TextureDimension::kCubeArray,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"array_idx", 1, kI32}, {"ddx", 3, kF32}, {"ddy", 3, kF32}},
             {"result", 4, kF32},
@@ -621,7 +622,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"lod", 1, kF32}},
             {"result", 4, kF32},
@@ -632,7 +633,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"lod", 1, kF32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
@@ -643,7 +644,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"lod", 1, kF32}},
             {"result", 4, kF32},
@@ -656,7 +657,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"lod", 1, kF32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
@@ -669,7 +670,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k3d,
+            core::type::TextureDimension::k3d,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"lod", 1, kF32}},
             {"result", 4, kF32},
@@ -680,7 +681,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k3d,
+            core::type::TextureDimension::k3d,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"lod", 1, kF32}, {"offset", 3, kI32}},
             {"result", 4, kF32},
@@ -691,7 +692,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::kCube,
+            core::type::TextureDimension::kCube,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"lod", 1, kF32}},
             {"result", 4, kF32},
@@ -702,7 +703,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::kCubeArray,
+            core::type::TextureDimension::kCubeArray,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"array_idx", 1, kI32}, {"lod", 1, kF32}},
             {"result", 4, kF32},
@@ -715,7 +716,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"lod", 1, kI32}},
             {"result", 1, kF32},
@@ -728,7 +729,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"lod", 1, kI32}, {"offset", 2, kI32}},
             {"result", 1, kF32},
@@ -741,7 +742,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"lod", 1, kI32}},
             {"result", 1, kF32},
@@ -756,7 +757,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"lod", 1, kI32}, {"offset", 2, kI32}},
             {"result", 1, kF32},
@@ -771,7 +772,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::kCube,
+            core::type::TextureDimension::kCube,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"lod", 1, kI32}},
             {"result", 1, kF32},
@@ -784,7 +785,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::kCubeArray,
+            core::type::TextureDimension::kCubeArray,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"array_idx", 1, kI32}, {"lod", 1, kI32}},
             {"result", 1, kF32},
@@ -811,7 +812,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"depth", 1, kF32}},
             {"result", 1, kF32},
@@ -822,7 +823,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"depth", 1, kF32}, {"offset", 2, kI32}},
             {"result", 1, kF32},
@@ -833,7 +834,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"depth", 1, kF32}},
             {"result", 1, kF32},
@@ -846,7 +847,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"depth", 1, kF32}, {"offset", 2, kI32}},
             {"result", 1, kF32},
@@ -859,7 +860,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::kCube,
+            core::type::TextureDimension::kCube,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"depth", 1, kF32}},
             {"result", 1, kF32},
@@ -870,7 +871,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::kCubeArray,
+            core::type::TextureDimension::kCubeArray,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"array_idx", 1, kI32}, {"depth", 1, kF32}},
             {"result", 1, kF32},
@@ -896,7 +897,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"depth_l0", 1, kF32}},
             {"result", 1, kF32},
@@ -907,7 +908,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"depth_l0", 1, kF32}, {"offset", 2, kI32}},
             {"result", 1, kF32},
@@ -919,7 +920,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"depth_l0", 1, kF32}},
             {"result", 1, kF32},
@@ -932,7 +933,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32},
              {"array_idx", 1, kI32},
@@ -949,7 +950,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::kCube,
+            core::type::TextureDimension::kCube,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"depth_l0", 1, kF32}},
             {"result", 1, kF32},
@@ -960,7 +961,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::kCubeArray,
+            core::type::TextureDimension::kCubeArray,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"array_idx", 1, kI32}, {"depth_l0", 1, kF32}},
             {"result", 1, kF32},
@@ -986,7 +987,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}},
             {"result", 4, kF32},
@@ -997,7 +998,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
@@ -1008,7 +1009,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}},
             {"result", 4, kF32},
@@ -1021,7 +1022,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
@@ -1034,7 +1035,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::kCube,
+            core::type::TextureDimension::kCube,
             /* texel type */ kF32,
             {{"coords", 3, kF32}},
             {"result", 4, kF32},
@@ -1045,7 +1046,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::kCubeArray,
+            core::type::TextureDimension::kCubeArray,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"array_idx", 1, kI32}},
             {"result", 4, kF32},
@@ -1058,7 +1059,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}},
             {"result", 4, kF32},
@@ -1069,7 +1070,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
@@ -1080,7 +1081,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::kCube,
+            core::type::TextureDimension::kCube,
             /* texel type */ kF32,
             {{"coords", 3, kF32}},
             {"result", 4, kF32},
@@ -1091,7 +1092,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}},
             {"result", 4, kF32},
@@ -1104,7 +1105,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
@@ -1117,7 +1118,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::kCubeArray,
+            core::type::TextureDimension::kCubeArray,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"array_idx", 1, kI32}},
             {"result", 4, kF32},
@@ -1132,7 +1133,7 @@ INSTANTIATE_TEST_SUITE_P(
         // Test some textures with integer texel types.
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kI32,
             {{"coords", 2, kF32}},
             {"result", 4, kI32},
@@ -1143,7 +1144,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kSampledTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kU32,
             {{"coords", 2, kF32}},
             {"result", 4, kU32},
@@ -1167,7 +1168,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"depth", 1, kF32}},
             {"result", 4, kF32},
@@ -1178,7 +1179,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2d,
+            core::type::TextureDimension::k2d,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"depth", 1, kF32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
@@ -1189,7 +1190,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"depth", 1, kF32}},
             {"result", 4, kF32},
@@ -1202,7 +1203,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::k2dArray,
+            core::type::TextureDimension::k2dArray,
             /* texel type */ kF32,
             {{"coords", 2, kF32}, {"array_idx", 1, kI32}, {"depth", 1, kF32}, {"offset", 2, kI32}},
             {"result", 4, kF32},
@@ -1215,7 +1216,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::kCube,
+            core::type::TextureDimension::kCube,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"depth", 1, kF32}},
             {"result", 4, kF32},
@@ -1226,7 +1227,7 @@ INSTANTIATE_TEST_SUITE_P(
         },
         TextureBuiltinTestCase{
             kDepthTexture,
-            type::TextureDimension::kCubeArray,
+            core::type::TextureDimension::kCubeArray,
             /* texel type */ kF32,
             {{"coords", 3, kF32}, {"array_idx", 1, kI32}, {"depth", 1, kF32}},
             {"result", 4, kF32},
@@ -1251,7 +1252,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          testing::Values(
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k1d,
+                                 core::type::TextureDimension::k1d,
                                  /* texel type */ kF32,
                                  {{"coord", 1, kI32}, {"lod", 1, kI32}},
                                  {"result", 4, kF32},
@@ -1261,7 +1262,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {{"coords", 2, kI32}, {"lod", 1, kI32}},
                                  {"result", 4, kF32},
@@ -1271,7 +1272,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  /* texel type */ kF32,
                                  {{"coords", 2, kI32}, {"array_idx", 1, kI32}, {"lod", 1, kI32}},
                                  {"result", 4, kF32},
@@ -1282,7 +1283,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k3d,
+                                 core::type::TextureDimension::k3d,
                                  /* texel type */ kF32,
                                  {{"coords", 3, kI32}, {"lod", 1, kI32}},
                                  {"result", 4, kF32},
@@ -1292,7 +1293,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kMultisampledTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {{"coords", 2, kI32}, {"sample_idx", 1, kI32}},
                                  {"result", 4, kF32},
@@ -1302,7 +1303,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {{"coords", 2, kI32}, {"lod", 1, kI32}},
                                  {"result", 1, kF32},
@@ -1313,7 +1314,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  /* texel type */ kF32,
                                  {{"coords", 2, kI32}, {"array_idx", 1, kI32}, {"lod", 1, kI32}},
                                  {"result", 1, kF32},
@@ -1325,7 +1326,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthMultisampledTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {{"coords", 3, kI32}, {"sample_idx", 1, kI32}},
                                  {"result", 1, kF32},
@@ -1338,7 +1339,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              // Test some textures with integer texel types.
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kI32,
                                  {{"coords", 2, kI32}, {"lod", 1, kI32}},
                                  {"result", 4, kI32},
@@ -1348,7 +1349,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kU32,
                                  {{"coords", 2, kI32}, {"lod", 1, kI32}},
                                  {"result", 4, kU32},
@@ -1370,7 +1371,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          testing::Values(
                              TextureBuiltinTestCase{
                                  kStorageTexture,
-                                 type::TextureDimension::k1d,
+                                 core::type::TextureDimension::k1d,
                                  /* texel type */ kF32,
                                  {{"coord", 1, kI32}, {"texel", 4, kF32}},
                                  {},
@@ -1380,7 +1381,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kStorageTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {{"coords", 2, kI32}, {"texel", 4, kF32}},
                                  {},
@@ -1390,7 +1391,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kStorageTexture,
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  /* texel type */ kF32,
                                  {{"coords", 2, kI32}, {"array_idx", 1, kI32}, {"texel", 4, kF32}},
                                  {},
@@ -1401,7 +1402,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kStorageTexture,
-                                 type::TextureDimension::k3d,
+                                 core::type::TextureDimension::k3d,
                                  /* texel type */ kF32,
                                  {{"coords", 3, kI32}, {"texel", 4, kF32}},
                                  {},
@@ -1413,7 +1414,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              // Test some textures with integer texel types.
                              TextureBuiltinTestCase{
                                  kStorageTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kI32,
                                  {{"coords", 2, kI32}, {"texel", 4, kI32}},
                                  {},
@@ -1423,7 +1424,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kStorageTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kU32,
                                  {{"coords", 2, kI32}, {"texel", 4, kU32}},
                                  {},
@@ -1446,7 +1447,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              // 1D implicit Lod.
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k1d,
+                                 core::type::TextureDimension::k1d,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kU32},
@@ -1454,7 +1455,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kStorageTexture,
-                                 type::TextureDimension::k1d,
+                                 core::type::TextureDimension::k1d,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kU32},
@@ -1464,7 +1465,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              // 1D explicit Lod.
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k1d,
+                                 core::type::TextureDimension::k1d,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 1, kU32},
@@ -1474,7 +1475,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              // 2D implicit Lod.
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
@@ -1482,7 +1483,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
@@ -1493,7 +1494,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::kCube,
+                                 core::type::TextureDimension::kCube,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
@@ -1501,7 +1502,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::kCubeArray,
+                                 core::type::TextureDimension::kCubeArray,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
@@ -1512,7 +1513,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kMultisampledTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
@@ -1520,7 +1521,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
@@ -1528,7 +1529,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
@@ -1539,7 +1540,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::kCube,
+                                 core::type::TextureDimension::kCube,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
@@ -1547,7 +1548,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::kCubeArray,
+                                 core::type::TextureDimension::kCubeArray,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
@@ -1558,7 +1559,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthMultisampledTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
@@ -1566,7 +1567,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kStorageTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
@@ -1574,7 +1575,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kStorageTexture,
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 2, kU32},
@@ -1587,7 +1588,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              // 2D explicit Lod.
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 2, kU32},
@@ -1595,7 +1596,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 2, kU32},
@@ -1606,7 +1607,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::kCube,
+                                 core::type::TextureDimension::kCube,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 2, kU32},
@@ -1614,7 +1615,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::kCubeArray,
+                                 core::type::TextureDimension::kCubeArray,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 2, kU32},
@@ -1625,7 +1626,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 2, kU32},
@@ -1633,7 +1634,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 2, kU32},
@@ -1644,7 +1645,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::kCube,
+                                 core::type::TextureDimension::kCube,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 2, kU32},
@@ -1652,7 +1653,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::kCubeArray,
+                                 core::type::TextureDimension::kCubeArray,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 2, kU32},
@@ -1665,7 +1666,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              // 3D implicit lod.
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k3d,
+                                 core::type::TextureDimension::k3d,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 3, kU32},
@@ -1675,7 +1676,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              // 3D explicit lod.
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k3d,
+                                 core::type::TextureDimension::k3d,
                                  /* texel type */ kF32,
                                  {{"lod", 1, kU32}},
                                  {"result", 3, kU32},
@@ -1695,7 +1696,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          testing::Values(
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kU32},
@@ -1706,7 +1707,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::kCubeArray,
+                                 core::type::TextureDimension::kCubeArray,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kU32},
@@ -1717,7 +1718,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kU32},
@@ -1728,7 +1729,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::kCubeArray,
+                                 core::type::TextureDimension::kCubeArray,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kU32},
@@ -1739,7 +1740,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kStorageTexture,
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kU32},
@@ -1762,7 +1763,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          testing::Values(
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k1d,
+                                 core::type::TextureDimension::k1d,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kI32},
@@ -1770,7 +1771,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kI32},
@@ -1778,7 +1779,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kI32},
@@ -1786,7 +1787,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::k3d,
+                                 core::type::TextureDimension::k3d,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kI32},
@@ -1794,7 +1795,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::kCube,
+                                 core::type::TextureDimension::kCube,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kI32},
@@ -1802,7 +1803,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kSampledTexture,
-                                 type::TextureDimension::kCubeArray,
+                                 core::type::TextureDimension::kCubeArray,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kI32},
@@ -1810,7 +1811,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kI32},
@@ -1818,7 +1819,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::k2dArray,
+                                 core::type::TextureDimension::k2dArray,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kI32},
@@ -1826,7 +1827,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::kCube,
+                                 core::type::TextureDimension::kCube,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kI32},
@@ -1834,7 +1835,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthTexture,
-                                 type::TextureDimension::kCubeArray,
+                                 core::type::TextureDimension::kCubeArray,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kI32},
@@ -1854,7 +1855,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          testing::Values(
                              TextureBuiltinTestCase{
                                  kMultisampledTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kU32},
@@ -1862,7 +1863,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                              },
                              TextureBuiltinTestCase{
                                  kDepthMultisampledTexture,
-                                 type::TextureDimension::k2d,
+                                 core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
                                  {},
                                  {"result", 1, kU32},
@@ -1875,7 +1876,8 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
 ////////////////////////////////////////////////////////////////
 
 TEST_F(SpirvWriterTest, TextureSampleBaseClampToEdge_2d_f32) {
-    auto* texture_ty = ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32());
+    auto* texture_ty =
+        ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
 
     Vector<ir::FunctionParam*, 4> args;
     args.Push(b.FunctionParam("texture", texture_ty));
@@ -1910,9 +1912,9 @@ TEST_F(SpirvWriterTest, TextureSampleBaseClampToEdge_2d_f32) {
 
 TEST_F(SpirvWriterTest, Bgra8Unorm_textureStore) {
     auto format = core::TexelFormat::kBgra8Unorm;
-    auto* texture_ty =
-        ty.Get<type::StorageTexture>(type::TextureDimension::k2d, format, core::Access::kWrite,
-                                     type::StorageTexture::SubtypeFor(format, ty));
+    auto* texture_ty = ty.Get<core::type::StorageTexture>(
+        core::type::TextureDimension::k2d, format, core::Access::kWrite,
+        core::type::StorageTexture::SubtypeFor(format, ty));
 
     auto* texture = b.FunctionParam("texture", texture_ty);
     auto* coords = b.FunctionParam("coords", ty.vec2<u32>());

@@ -245,7 +245,7 @@ sem::Variable* Resolver::Variable(const ast::Variable* v, bool is_global) {
 }
 
 sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
-    const type::Type* ty = nullptr;
+    const core::type::Type* ty = nullptr;
 
     // If the variable has a declared type, resolve it.
     if (v->type) {
@@ -288,8 +288,8 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
         return nullptr;
     }
 
-    if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, const_cast<type::Type*>(ty),
-                                      v->source)) {
+    if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined,
+                                      const_cast<core::type::Type*>(ty), v->source)) {
         AddNote("while instantiating 'let' " + v->name->symbol.Name(), v->source);
         return nullptr;
     }
@@ -313,7 +313,7 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
 }
 
 sem::Variable* Resolver::Override(const ast::Override* v) {
-    const type::Type* ty = nullptr;
+    const core::type::Type* ty = nullptr;
 
     // If the variable has a declared type, resolve it.
     if (v->type) {
@@ -351,8 +351,8 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         return nullptr;
     }
 
-    if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, const_cast<type::Type*>(ty),
-                                      v->source)) {
+    if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined,
+                                      const_cast<core::type::Type*>(ty), v->source)) {
         AddNote("while instantiating 'override' " + v->name->symbol.Name(), v->source);
         return nullptr;
     }
@@ -375,7 +375,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
                 if (!materialized) {
                     return false;
                 }
-                if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
+                if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
                     AddError("@id must be an i32 or u32 value", attr->source);
                     return false;
                 }
@@ -415,7 +415,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
 }
 
 sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
-    const type::Type* ty = nullptr;
+    const core::type::Type* ty = nullptr;
 
     // If the variable has a declared type, resolve it.
     if (c->type) {
@@ -470,8 +470,8 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
         return nullptr;
     }
 
-    if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, const_cast<type::Type*>(ty),
-                                      c->source)) {
+    if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined,
+                                      const_cast<core::type::Type*>(ty), c->source)) {
         AddNote("while instantiating 'const' " + c->name->symbol.Name(), c->source);
         return nullptr;
     }
@@ -491,7 +491,7 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
 }
 
 sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
-    const type::Type* storage_ty = nullptr;
+    const core::type::Type* storage_ty = nullptr;
 
     // If the variable has a declared type, resolve it.
     if (auto ty = var->type) {
@@ -568,7 +568,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         return nullptr;
     }
 
-    auto* var_ty = builder_->create<type::Reference>(address_space, storage_ty, access);
+    auto* var_ty = builder_->create<core::type::Reference>(address_space, storage_ty, access);
 
     if (!ApplyAddressSpaceUsageToType(address_space, var_ty,
                                       var->type ? var->type->source : var->source)) {
@@ -782,7 +782,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
         return nullptr;
     }
 
-    type::Type* ty = Type(param->type);
+    core::type::Type* ty = Type(param->type);
     if (!ty) {
         return nullptr;
     }
@@ -792,11 +792,12 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param,
         return nullptr;
     }
 
-    if (auto* ptr = ty->As<type::Pointer>()) {
+    if (auto* ptr = ty->As<core::type::Pointer>()) {
         // For MSL, we push module-scope variables into the entry point as pointer
         // parameters, so we also need to handle their store type.
-        if (!ApplyAddressSpaceUsageToType(
-                ptr->AddressSpace(), const_cast<type::Type*>(ptr->StoreType()), param->source)) {
+        if (!ApplyAddressSpaceUsageToType(ptr->AddressSpace(),
+                                          const_cast<core::type::Type*>(ptr->StoreType()),
+                                          param->source)) {
             add_note();
             return nullptr;
         }
@@ -920,7 +921,7 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
     for (auto* var : transitively_referenced_overrides) {
         builder_->Sem().AddTransitivelyReferencedOverride(sem, var);
     }
-    if (auto* arr = sem->Type()->UnwrapRef()->As<type::Array>()) {
+    if (auto* arr = sem->Type()->UnwrapRef()->As<core::type::Array>()) {
         auto* refs = builder_->Sem().TransitivelyReferencedOverrides(arr);
         if (refs) {
             for (auto* var : *refs) {
@@ -940,7 +941,7 @@ sem::Statement* Resolver::ConstAssert(const ast::ConstAssert* assertion) {
         return nullptr;
     }
     auto* cond = expr->ConstantValue();
-    if (auto* ty = cond->Type(); !ty->Is<type::Bool>()) {
+    if (auto* ty = cond->Type(); !ty->Is<core::type::Bool>()) {
         AddError("const assertion condition must be a bool, got '" + ty->FriendlyName() + "'",
                  assertion->condition->source);
         return nullptr;
@@ -1015,17 +1016,17 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
 
         func->AddParameter(p);
 
-        auto* p_ty = const_cast<type::Type*>(p->Type());
-        if (auto* str = p_ty->As<type::Struct>()) {
+        auto* p_ty = const_cast<core::type::Type*>(p->Type());
+        if (auto* str = p_ty->As<core::type::Struct>()) {
             switch (decl->PipelineStage()) {
                 case ast::PipelineStage::kVertex:
-                    str->AddUsage(type::PipelineStageUsage::kVertexInput);
+                    str->AddUsage(core::type::PipelineStageUsage::kVertexInput);
                     break;
                 case ast::PipelineStage::kFragment:
-                    str->AddUsage(type::PipelineStageUsage::kFragmentInput);
+                    str->AddUsage(core::type::PipelineStageUsage::kFragmentInput);
                     break;
                 case ast::PipelineStage::kCompute:
-                    str->AddUsage(type::PipelineStageUsage::kComputeInput);
+                    str->AddUsage(core::type::PipelineStageUsage::kComputeInput);
                     break;
                 case ast::PipelineStage::kNone:
                     break;
@@ -1034,14 +1035,14 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     }
 
     // Resolve the return type
-    type::Type* return_type = nullptr;
+    core::type::Type* return_type = nullptr;
     if (auto ty = decl->return_type) {
         return_type = Type(ty);
         if (!return_type) {
             return nullptr;
         }
     } else {
-        return_type = builder_->create<type::Void>();
+        return_type = builder_->create<core::type::Void>();
     }
     func->SetReturnType(return_type);
 
@@ -1123,7 +1124,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
         }
     }
 
-    if (auto* str = return_type->As<type::Struct>()) {
+    if (auto* str = return_type->As<core::type::Struct>()) {
         if (!ApplyAddressSpaceUsageToType(core::AddressSpace::kUndefined, str, decl->source)) {
             AddNote("while instantiating return type for " + decl->name->symbol.Name(),
                     decl->source);
@@ -1132,13 +1133,13 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
 
         switch (decl->PipelineStage()) {
             case ast::PipelineStage::kVertex:
-                str->AddUsage(type::PipelineStageUsage::kVertexOutput);
+                str->AddUsage(core::type::PipelineStageUsage::kVertexOutput);
                 break;
             case ast::PipelineStage::kFragment:
-                str->AddUsage(type::PipelineStageUsage::kFragmentOutput);
+                str->AddUsage(core::type::PipelineStageUsage::kFragmentOutput);
                 break;
             case ast::PipelineStage::kCompute:
-                str->AddUsage(type::PipelineStageUsage::kComputeOutput);
+                str->AddUsage(core::type::PipelineStageUsage::kComputeOutput);
                 break;
             case ast::PipelineStage::kNone:
                 break;
@@ -1259,7 +1260,8 @@ sem::Statement* Resolver::Statement(const ast::Statement* stmt) {
         });
 }
 
-sem::CaseStatement* Resolver::CaseStatement(const ast::CaseStatement* stmt, const type::Type* ty) {
+sem::CaseStatement* Resolver::CaseStatement(const ast::CaseStatement* stmt,
+                                            const core::type::Type* ty) {
     auto* sem =
         builder_->create<sem::CaseStatement>(stmt, current_compound_statement_, current_function_);
     return StatementScope(stmt, sem, [&] {
@@ -1278,7 +1280,7 @@ sem::CaseStatement* Resolver::CaseStatement(const ast::CaseStatement* stmt, cons
                 if (!materialized) {
                     return false;
                 }
-                if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
+                if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
                     AddError("case selector must be an i32 or u32 value", sel->source);
                     return false;
                 }
@@ -1517,11 +1519,11 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
             [&](const ast::MemberAccessorExpression* member) { return MemberAccessor(member); },
             [&](const ast::UnaryOpExpression* unary) { return UnaryOp(unary); },
             [&](const ast::PhonyExpression*) {
-                return builder_->create<sem::ValueExpression>(expr, builder_->create<type::Void>(),
-                                                              core::EvaluationStage::kRuntime,
-                                                              current_statement_,
-                                                              /* constant_value */ nullptr,
-                                                              /* has_side_effects */ false);
+                return builder_->create<sem::ValueExpression>(
+                    expr, builder_->create<core::type::Void>(), core::EvaluationStage::kRuntime,
+                    current_statement_,
+                    /* constant_value */ nullptr,
+                    /* has_side_effects */ false);
             },
             [&](Default) {
                 StringStream err;
@@ -1589,12 +1591,12 @@ sem::FunctionExpression* Resolver::FunctionExpression(const ast::Expression* exp
     return sem_.AsFunctionExpression(Expression(expr));
 }
 
-type::Type* Resolver::Type(const ast::Expression* ast) {
+core::type::Type* Resolver::Type(const ast::Expression* ast) {
     auto* type_expr = TypeExpression(ast);
     if (!type_expr) {
         return nullptr;
     }
-    return const_cast<type::Type*>(type_expr->Type());
+    return const_cast<core::type::Type*>(type_expr->Type());
 }
 
 sem::BuiltinEnumExpression<core::AddressSpace>* Resolver::AddressSpaceExpression(
@@ -1688,7 +1690,7 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
     std::unordered_map<const sem::Variable*, const sem::ValueExpression*> arg_writes;
     for (size_t i = 0; i < args.Length(); i++) {
         auto* arg = args[i];
-        if (!arg->Type()->Is<type::Pointer>()) {
+        if (!arg->Type()->Is<core::type::Pointer>()) {
             continue;
         }
 
@@ -1752,38 +1754,40 @@ bool Resolver::AliasAnalysis(const sem::Call* call) {
     return true;
 }
 
-const type::Type* Resolver::ConcreteType(const type::Type* ty,
-                                         const type::Type* target_ty,
-                                         const Source& source) {
-    auto i32 = [&] { return builder_->create<type::I32>(); };
-    auto f32 = [&] { return builder_->create<type::F32>(); };
-    auto i32v = [&](uint32_t width) { return builder_->create<type::Vector>(i32(), width); };
-    auto f32v = [&](uint32_t width) { return builder_->create<type::Vector>(f32(), width); };
+const core::type::Type* Resolver::ConcreteType(const core::type::Type* ty,
+                                               const core::type::Type* target_ty,
+                                               const Source& source) {
+    auto i32 = [&] { return builder_->create<core::type::I32>(); };
+    auto f32 = [&] { return builder_->create<core::type::F32>(); };
+    auto i32v = [&](uint32_t width) { return builder_->create<core::type::Vector>(i32(), width); };
+    auto f32v = [&](uint32_t width) { return builder_->create<core::type::Vector>(f32(), width); };
     auto f32m = [&](uint32_t columns, uint32_t rows) {
-        return builder_->create<type::Matrix>(f32v(rows), columns);
+        return builder_->create<core::type::Matrix>(f32v(rows), columns);
     };
 
     return Switch(
         ty,  //
-        [&](const type::AbstractInt*) { return target_ty ? target_ty : i32(); },
-        [&](const type::AbstractFloat*) { return target_ty ? target_ty : f32(); },
-        [&](const type::Vector* v) {
+        [&](const core::type::AbstractInt*) { return target_ty ? target_ty : i32(); },
+        [&](const core::type::AbstractFloat*) { return target_ty ? target_ty : f32(); },
+        [&](const core::type::Vector* v) {
             return Switch(
                 v->type(),  //
-                [&](const type::AbstractInt*) { return target_ty ? target_ty : i32v(v->Width()); },
-                [&](const type::AbstractFloat*) {
+                [&](const core::type::AbstractInt*) {
+                    return target_ty ? target_ty : i32v(v->Width());
+                },
+                [&](const core::type::AbstractFloat*) {
                     return target_ty ? target_ty : f32v(v->Width());
                 });
         },
-        [&](const type::Matrix* m) {
+        [&](const core::type::Matrix* m) {
             return Switch(m->type(),  //
-                          [&](const type::AbstractFloat*) {
+                          [&](const core::type::AbstractFloat*) {
                               return target_ty ? target_ty : f32m(m->columns(), m->rows());
                           });
         },
-        [&](const type::Array* a) -> const type::Type* {
-            const type::Type* target_el_ty = nullptr;
-            if (auto* target_arr_ty = As<type::Array>(target_ty)) {
+        [&](const core::type::Array* a) -> const core::type::Type* {
+            const core::type::Type* target_el_ty = nullptr;
+            if (auto* target_arr_ty = As<core::type::Array>(target_ty)) {
                 target_el_ty = target_arr_ty->ElemType();
             }
             if (auto* el_ty = ConcreteType(a->ElemType(), target_el_ty, source)) {
@@ -1791,7 +1795,7 @@ const type::Type* Resolver::ConcreteType(const type::Type* ty,
             }
             return nullptr;
         },
-        [&](const type::Struct* s) -> const type::Type* {
+        [&](const core::type::Struct* s) -> const core::type::Type* {
             if (auto tys = s->ConcreteTypes(); !tys.IsEmpty()) {
                 return target_ty ? target_ty : tys[0];
             }
@@ -1805,7 +1809,7 @@ const sem::ValueExpression* Resolver::Load(const sem::ValueExpression* expr) {
         return nullptr;
     }
 
-    if (!expr->Type()->Is<type::Reference>()) {
+    if (!expr->Type()->Is<core::type::Reference>()) {
         // Expression is not a reference type, so cannot be loaded. Just return expr.
         return expr;
     }
@@ -1826,8 +1830,9 @@ const sem::ValueExpression* Resolver::Load(const sem::ValueExpression* expr) {
     return load;
 }
 
-const sem::ValueExpression* Resolver::Materialize(const sem::ValueExpression* expr,
-                                                  const type::Type* target_type /* = nullptr */) {
+const sem::ValueExpression* Resolver::Materialize(
+    const sem::ValueExpression* expr,
+    const core::type::Type* target_type /* = nullptr */) {
     if (!expr) {
         // Allow for Materialize(ValueExpression(blah)), where failures pass through Materialize()
         return nullptr;
@@ -1890,7 +1895,7 @@ bool Resolver::MaybeMaterializeAndLoadArguments(Vector<const sem::ValueExpressio
             }
             args[i] = materialized;
         }
-        if (!param_ty->Is<type::Reference>()) {
+        if (!param_ty->Is<core::type::Reference>()) {
             auto* load = Load(args[i]);
             if (!load) {
                 return false;
@@ -1901,13 +1906,13 @@ bool Resolver::MaybeMaterializeAndLoadArguments(Vector<const sem::ValueExpressio
     return true;
 }
 
-bool Resolver::ShouldMaterializeArgument(const type::Type* parameter_ty) const {
+bool Resolver::ShouldMaterializeArgument(const core::type::Type* parameter_ty) const {
     const auto* param_el_ty = parameter_ty->DeepestElement();
-    return param_el_ty && !param_el_ty->Is<type::AbstractNumeric>();
+    return param_el_ty && !param_el_ty->Is<core::type::AbstractNumeric>();
 }
 
 bool Resolver::Convert(const core::constant::Value*& c,
-                       const type::Type* target_ty,
+                       const core::type::Type* target_ty,
                        const Source& source) {
     auto r = const_eval_.Convert(target_ty, c, source);
     if (!r) {
@@ -1950,10 +1955,10 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
     auto* obj_ty = obj_raw_ty->UnwrapRef();
     auto* ty = Switch(
         obj_ty,  //
-        [&](const type::Array* arr) { return arr->ElemType(); },
-        [&](const type::Vector* vec) { return vec->type(); },
-        [&](const type::Matrix* mat) {
-            return builder_->create<type::Vector>(mat->type(), mat->rows());
+        [&](const core::type::Array* arr) { return arr->ElemType(); },
+        [&](const core::type::Vector* vec) { return vec->type(); },
+        [&](const core::type::Matrix* mat) {
+            return builder_->create<core::type::Vector>(mat->type(), mat->rows());
         },
         [&](Default) {
             AddError("cannot index type '" + sem_.TypeNameOf(obj_ty) + "'", expr->source);
@@ -1964,15 +1969,15 @@ sem::ValueExpression* Resolver::IndexAccessor(const ast::IndexAccessorExpression
     }
 
     auto* idx_ty = idx->Type()->UnwrapRef();
-    if (!idx_ty->IsAnyOf<type::I32, type::U32>()) {
+    if (!idx_ty->IsAnyOf<core::type::I32, core::type::U32>()) {
         AddError("index must be of type 'i32' or 'u32', found: '" + sem_.TypeNameOf(idx_ty) + "'",
                  idx->Declaration()->source);
         return nullptr;
     }
 
     // If we're extracting from a reference, we return a reference.
-    if (auto* ref = obj_raw_ty->As<type::Reference>()) {
-        ty = builder_->create<type::Reference>(ref->AddressSpace(), ty, ref->Access());
+    if (auto* ref = obj_raw_ty->As<core::type::Reference>()) {
+        ty = builder_->create<core::type::Reference>(ref->AddressSpace(), ty, ref->Access());
     }
 
     const core::constant::Value* val = nullptr;
@@ -2064,7 +2069,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
     // ctor_or_conv is a helper for building either a sem::ValueConstructor or
     // sem::ValueConversion call for a CtorConvIntrinsic with an optional template argument type.
-    auto ctor_or_conv = [&](CtorConvIntrinsic ty, const type::Type* template_arg) -> sem::Call* {
+    auto ctor_or_conv = [&](CtorConvIntrinsic ty,
+                            const core::type::Type* template_arg) -> sem::Call* {
         auto arg_tys = tint::Transform(args, [](auto* arg) { return arg->Type(); });
         auto match = intrinsic_table_->Lookup(ty, template_arg, arg_tys, args_stage, expr->source);
         if (!match) {
@@ -2127,7 +2133,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
     // arr_or_str_init is a helper for building a sem::ValueConstructor for an array or structure
     // constructor call target.
-    auto arr_or_str_init = [&](const type::Type* ty,
+    auto arr_or_str_init = [&](const core::type::Type* ty,
                                const sem::CallTarget* call_target) -> sem::Call* {
         if (!MaybeMaterializeAndLoadArguments(args, call_target)) {
             return nullptr;
@@ -2159,30 +2165,32 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                                            current_statement_, value, has_side_effects);
     };
 
-    auto ty_init_or_conv = [&](const type::Type* type) {
+    auto ty_init_or_conv = [&](const core::type::Type* type) {
         return Switch(
             type,  //
-            [&](const type::I32*) { return ctor_or_conv(CtorConvIntrinsic::kI32, nullptr); },
-            [&](const type::U32*) { return ctor_or_conv(CtorConvIntrinsic::kU32, nullptr); },
-            [&](const type::F16*) {
+            [&](const core::type::I32*) { return ctor_or_conv(CtorConvIntrinsic::kI32, nullptr); },
+            [&](const core::type::U32*) { return ctor_or_conv(CtorConvIntrinsic::kU32, nullptr); },
+            [&](const core::type::F16*) {
                 return validator_.CheckF16Enabled(expr->source)
                            ? ctor_or_conv(CtorConvIntrinsic::kF16, nullptr)
                            : nullptr;
             },
-            [&](const type::F32*) { return ctor_or_conv(CtorConvIntrinsic::kF32, nullptr); },
-            [&](const type::Bool*) { return ctor_or_conv(CtorConvIntrinsic::kBool, nullptr); },
-            [&](const type::Vector* v) {
+            [&](const core::type::F32*) { return ctor_or_conv(CtorConvIntrinsic::kF32, nullptr); },
+            [&](const core::type::Bool*) {
+                return ctor_or_conv(CtorConvIntrinsic::kBool, nullptr);
+            },
+            [&](const core::type::Vector* v) {
                 if (v->Packed()) {
                     TINT_ASSERT(v->Width() == 3u);
                     return ctor_or_conv(CtorConvIntrinsic::kPackedVec3, v->type());
                 }
                 return ctor_or_conv(core::intrinsic::VectorCtorConv(v->Width()), v->type());
             },
-            [&](const type::Matrix* m) {
+            [&](const core::type::Matrix* m) {
                 return ctor_or_conv(core::intrinsic::MatrixCtorConv(m->columns(), m->rows()),
                                     m->type());
             },
-            [&](const type::Array* arr) -> sem::Call* {
+            [&](const core::type::Array* arr) -> sem::Call* {
                 auto* call_target = array_ctors_.GetOrCreate(
                     ArrayConstructorSig{{arr, args.Length(), args_stage}},
                     [&]() -> sem::ValueConstructor* {
@@ -2209,7 +2217,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 }
                 return call;
             },
-            [&](const type::Struct* str) -> sem::Call* {
+            [&](const core::type::Struct* str) -> sem::Call* {
                 auto* call_target = struct_ctors_.GetOrCreate(
                     StructConstructorSig{{str, args.Length(), args_stage}},
                     [&]() -> sem::ValueConstructor* {
@@ -2246,13 +2254,13 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
     auto inferred_array = [&]() -> tint::sem::Call* {
         auto el_count =
-            builder_->create<type::ConstantArrayCount>(static_cast<uint32_t>(args.Length()));
+            builder_->create<core::type::ConstantArrayCount>(static_cast<uint32_t>(args.Length()));
         auto arg_tys = tint::Transform(args, [](auto* arg) { return arg->Type()->UnwrapRef(); });
-        auto el_ty = type::Type::Common(arg_tys);
+        auto el_ty = core::type::Type::Common(arg_tys);
         if (!el_ty) {
             AddError("cannot infer common array element type from constructor arguments",
                      expr->source);
-            Hashset<const type::Type*, 8> types;
+            Hashset<const core::type::Type*, 8> types;
             for (size_t i = 0; i < args.Length(); i++) {
                 if (types.Add(args[i]->Type())) {
                     AddNote("argument " + std::to_string(i) + " is of type '" +
@@ -2282,7 +2290,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         if (auto* ast_node = resolved->Node()) {
             return Switch(
                 sem_.Get(ast_node),  //
-                [&](type::Type* t) -> tint::sem::Call* {
+                [&](core::type::Type* t) -> tint::sem::Call* {
                     // User declared types cannot be templated.
                     if (!TINT_LIKELY(CheckNotTemplated("type", ident))) {
                         return nullptr;
@@ -2490,18 +2498,18 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     return call;
 }
 
-type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifier* ident) {
+core::type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifier* ident) {
     auto& b = *builder_;
 
-    auto check_no_tmpl_args = [&](type::Type* ty) -> type::Type* {
+    auto check_no_tmpl_args = [&](core::type::Type* ty) -> core::type::Type* {
         return TINT_LIKELY(CheckNotTemplated("type", ident)) ? ty : nullptr;
     };
-    auto af = [&] { return b.create<type::AbstractFloat>(); };
-    auto f32 = [&] { return b.create<type::F32>(); };
-    auto i32 = [&] { return b.create<type::I32>(); };
-    auto u32 = [&] { return b.create<type::U32>(); };
+    auto af = [&] { return b.create<core::type::AbstractFloat>(); };
+    auto f32 = [&] { return b.create<core::type::F32>(); };
+    auto i32 = [&] { return b.create<core::type::I32>(); };
+    auto u32 = [&] { return b.create<core::type::U32>(); };
     auto f16 = [&] {
-        return validator_.CheckF16Enabled(ident->source) ? b.create<type::F16>() : nullptr;
+        return validator_.CheckF16Enabled(ident->source) ? b.create<core::type::F16>() : nullptr;
     };
     auto templated_identifier =
         [&](size_t min_args, size_t max_args = /* use min */ 0) -> const ast::TemplatedIdentifier* {
@@ -2539,16 +2547,17 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
         }
         return tmpl_ident;
     };
-    auto vec = [&](type::Type* el, uint32_t n) -> type::Vector* {
+    auto vec = [&](core::type::Type* el, uint32_t n) -> core::type::Vector* {
         if (TINT_UNLIKELY(!el)) {
             return nullptr;
         }
         if (TINT_UNLIKELY(!validator_.Vector(el, ident->source))) {
             return nullptr;
         }
-        return b.create<type::Vector>(el, n);
+        return b.create<core::type::Vector>(el, n);
     };
-    auto mat = [&](type::Type* el, uint32_t num_columns, uint32_t num_rows) -> type::Matrix* {
+    auto mat = [&](core::type::Type* el, uint32_t num_columns,
+                   uint32_t num_rows) -> core::type::Matrix* {
         if (TINT_UNLIKELY(!el)) {
             return nullptr;
         }
@@ -2559,9 +2568,9 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
         if (!column) {
             return nullptr;
         }
-        return b.create<type::Matrix>(column, num_columns);
+        return b.create<core::type::Matrix>(column, num_columns);
     };
-    auto vec_t = [&](uint32_t n) -> type::Vector* {
+    auto vec_t = [&](uint32_t n) -> core::type::Vector* {
         auto* tmpl_ident = templated_identifier(1);
         if (TINT_UNLIKELY(!tmpl_ident)) {
             return nullptr;
@@ -2570,9 +2579,9 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
         if (TINT_UNLIKELY(!ty)) {
             return nullptr;
         }
-        return vec(const_cast<type::Type*>(ty), n);
+        return vec(const_cast<core::type::Type*>(ty), n);
     };
-    auto mat_t = [&](uint32_t num_columns, uint32_t num_rows) -> type::Matrix* {
+    auto mat_t = [&](uint32_t num_columns, uint32_t num_rows) -> core::type::Matrix* {
         auto* tmpl_ident = templated_identifier(1);
         if (TINT_UNLIKELY(!tmpl_ident)) {
             return nullptr;
@@ -2581,9 +2590,9 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
         if (TINT_UNLIKELY(!ty)) {
             return nullptr;
         }
-        return mat(const_cast<type::Type*>(ty), num_columns, num_rows);
+        return mat(const_cast<core::type::Type*>(ty), num_columns, num_rows);
     };
-    auto array = [&]() -> type::Array* {
+    auto array = [&]() -> core::type::Array* {
         UniqueVector<const sem::GlobalVariable*, 4> transitively_referenced_overrides;
         TINT_SCOPED_ASSIGNMENT(resolved_overrides_, &transitively_referenced_overrides);
 
@@ -2599,8 +2608,8 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
             return nullptr;
         }
 
-        const type::ArrayCount* el_count =
-            ast_count ? ArrayCount(ast_count) : builder_->create<type::RuntimeArrayCount>();
+        const core::type::ArrayCount* el_count =
+            ast_count ? ArrayCount(ast_count) : builder_->create<core::type::RuntimeArrayCount>();
         if (!el_count) {
             return nullptr;
         }
@@ -2619,7 +2628,7 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
             return nullptr;
         }
 
-        if (el_ty->Is<type::Atomic>()) {
+        if (el_ty->Is<core::type::Atomic>()) {
             atomic_composite_info_.Add(out, &ast_el_ty->source);
         } else {
             if (auto found = atomic_composite_info_.Get(el_ty)) {
@@ -2634,7 +2643,7 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
         }
         return out;
     };
-    auto atomic = [&]() -> type::Atomic* {
+    auto atomic = [&]() -> core::type::Atomic* {
         auto* tmpl_ident = templated_identifier(1);  // atomic<type>
         if (TINT_UNLIKELY(!tmpl_ident)) {
             return nullptr;
@@ -2646,13 +2655,13 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
         }
         auto* ty = ty_expr->Type();
 
-        auto* out = builder_->create<type::Atomic>(ty);
+        auto* out = builder_->create<core::type::Atomic>(ty);
         if (!validator_.Atomic(tmpl_ident, out)) {
             return nullptr;
         }
         return out;
     };
-    auto ptr = [&]() -> type::Pointer* {
+    auto ptr = [&]() -> core::type::Pointer* {
         auto* tmpl_ident = templated_identifier(2, 3);  // ptr<address, type [, access]>
         if (TINT_UNLIKELY(!tmpl_ident)) {
             return nullptr;
@@ -2668,7 +2677,7 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
         if (TINT_UNLIKELY(!store_ty_expr)) {
             return nullptr;
         }
-        auto* store_ty = const_cast<type::Type*>(store_ty_expr->Type());
+        auto* store_ty = const_cast<core::type::Type*>(store_ty_expr->Type());
 
         auto access = DefaultAccessForAddressSpace(address_space);
         if (tmpl_ident->arguments.Length() > 2) {
@@ -2679,7 +2688,7 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
             access = access_expr->Value();
         }
 
-        auto* out = b.create<type::Pointer>(address_space, store_ty, access);
+        auto* out = b.create<core::type::Pointer>(address_space, store_ty, access);
         if (!validator_.Pointer(tmpl_ident, out)) {
             return nullptr;
         }
@@ -2690,7 +2699,7 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
         }
         return out;
     };
-    auto sampled_texture = [&](type::TextureDimension dim) -> type::SampledTexture* {
+    auto sampled_texture = [&](core::type::TextureDimension dim) -> core::type::SampledTexture* {
         auto* tmpl_ident = templated_identifier(1);
         if (TINT_UNLIKELY(!tmpl_ident)) {
             return nullptr;
@@ -2700,10 +2709,11 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
         if (TINT_UNLIKELY(!ty_expr)) {
             return nullptr;
         }
-        auto* out = b.create<type::SampledTexture>(dim, ty_expr->Type());
+        auto* out = b.create<core::type::SampledTexture>(dim, ty_expr->Type());
         return validator_.SampledTexture(out, ident->source) ? out : nullptr;
     };
-    auto multisampled_texture = [&](type::TextureDimension dim) -> type::MultisampledTexture* {
+    auto multisampled_texture =
+        [&](core::type::TextureDimension dim) -> core::type::MultisampledTexture* {
         auto* tmpl_ident = templated_identifier(1);
         if (TINT_UNLIKELY(!tmpl_ident)) {
             return nullptr;
@@ -2713,10 +2723,10 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
         if (TINT_UNLIKELY(!ty_expr)) {
             return nullptr;
         }
-        auto* out = b.create<type::MultisampledTexture>(dim, ty_expr->Type());
+        auto* out = b.create<core::type::MultisampledTexture>(dim, ty_expr->Type());
         return validator_.MultisampledTexture(out, ident->source) ? out : nullptr;
     };
-    auto storage_texture = [&](type::TextureDimension dim) -> type::StorageTexture* {
+    auto storage_texture = [&](core::type::TextureDimension dim) -> core::type::StorageTexture* {
         auto* tmpl_ident = templated_identifier(2);
         if (TINT_UNLIKELY(!tmpl_ident)) {
             return nullptr;
@@ -2730,14 +2740,15 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
         if (TINT_UNLIKELY(!access)) {
             return nullptr;
         }
-        auto* subtype = type::StorageTexture::SubtypeFor(format->Value(), builder_->Types());
-        auto* tex = b.create<type::StorageTexture>(dim, format->Value(), access->Value(), subtype);
+        auto* subtype = core::type::StorageTexture::SubtypeFor(format->Value(), builder_->Types());
+        auto* tex =
+            b.create<core::type::StorageTexture>(dim, format->Value(), access->Value(), subtype);
         if (!validator_.StorageTexture(tex, ident->source)) {
             return nullptr;
         }
         return tex;
     };
-    auto packed_vec3_t = [&]() -> type::Vector* {
+    auto packed_vec3_t = [&]() -> core::type::Vector* {
         auto* tmpl_ident = templated_identifier(1);
         if (TINT_UNLIKELY(!tmpl_ident)) {
             return nullptr;
@@ -2750,12 +2761,12 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
         if (TINT_UNLIKELY(!validator_.Vector(el_ty, ident->source))) {
             return nullptr;
         }
-        return b.create<type::Vector>(el_ty, 3u, true);
+        return b.create<core::type::Vector>(el_ty, 3u, true);
     };
 
     switch (builtin_ty) {
         case core::Builtin::kBool:
-            return check_no_tmpl_args(b.create<type::Bool>());
+            return check_no_tmpl_args(b.create<core::type::Bool>());
         case core::Builtin::kI32:
             return check_no_tmpl_args(i32());
         case core::Builtin::kU32:
@@ -2763,7 +2774,7 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
         case core::Builtin::kF16:
             return check_no_tmpl_args(f16());
         case core::Builtin::kF32:
-            return check_no_tmpl_args(b.create<type::F32>());
+            return check_no_tmpl_args(b.create<core::type::F32>());
         case core::Builtin::kVec2:
             return vec_t(2);
         case core::Builtin::kVec3:
@@ -2855,105 +2866,124 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
         case core::Builtin::kPtr:
             return ptr();
         case core::Builtin::kSampler:
-            return check_no_tmpl_args(builder_->create<type::Sampler>(type::SamplerKind::kSampler));
+            return check_no_tmpl_args(
+                builder_->create<core::type::Sampler>(core::type::SamplerKind::kSampler));
         case core::Builtin::kSamplerComparison:
             return check_no_tmpl_args(
-                builder_->create<type::Sampler>(type::SamplerKind::kComparisonSampler));
+                builder_->create<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler));
         case core::Builtin::kTexture1D:
-            return sampled_texture(type::TextureDimension::k1d);
+            return sampled_texture(core::type::TextureDimension::k1d);
         case core::Builtin::kTexture2D:
-            return sampled_texture(type::TextureDimension::k2d);
+            return sampled_texture(core::type::TextureDimension::k2d);
         case core::Builtin::kTexture2DArray:
-            return sampled_texture(type::TextureDimension::k2dArray);
+            return sampled_texture(core::type::TextureDimension::k2dArray);
         case core::Builtin::kTexture3D:
-            return sampled_texture(type::TextureDimension::k3d);
+            return sampled_texture(core::type::TextureDimension::k3d);
         case core::Builtin::kTextureCube:
-            return sampled_texture(type::TextureDimension::kCube);
+            return sampled_texture(core::type::TextureDimension::kCube);
         case core::Builtin::kTextureCubeArray:
-            return sampled_texture(type::TextureDimension::kCubeArray);
+            return sampled_texture(core::type::TextureDimension::kCubeArray);
         case core::Builtin::kTextureDepth2D:
             return check_no_tmpl_args(
-                builder_->create<type::DepthTexture>(type::TextureDimension::k2d));
+                builder_->create<core::type::DepthTexture>(core::type::TextureDimension::k2d));
         case core::Builtin::kTextureDepth2DArray:
             return check_no_tmpl_args(
-                builder_->create<type::DepthTexture>(type::TextureDimension::k2dArray));
+                builder_->create<core::type::DepthTexture>(core::type::TextureDimension::k2dArray));
         case core::Builtin::kTextureDepthCube:
             return check_no_tmpl_args(
-                builder_->create<type::DepthTexture>(type::TextureDimension::kCube));
+                builder_->create<core::type::DepthTexture>(core::type::TextureDimension::kCube));
         case core::Builtin::kTextureDepthCubeArray:
-            return check_no_tmpl_args(
-                builder_->create<type::DepthTexture>(type::TextureDimension::kCubeArray));
+            return check_no_tmpl_args(builder_->create<core::type::DepthTexture>(
+                core::type::TextureDimension::kCubeArray));
         case core::Builtin::kTextureDepthMultisampled2D:
-            return check_no_tmpl_args(
-                builder_->create<type::DepthMultisampledTexture>(type::TextureDimension::k2d));
+            return check_no_tmpl_args(builder_->create<core::type::DepthMultisampledTexture>(
+                core::type::TextureDimension::k2d));
         case core::Builtin::kTextureExternal:
-            return check_no_tmpl_args(builder_->create<type::ExternalTexture>());
+            return check_no_tmpl_args(builder_->create<core::type::ExternalTexture>());
         case core::Builtin::kTextureMultisampled2D:
-            return multisampled_texture(type::TextureDimension::k2d);
+            return multisampled_texture(core::type::TextureDimension::k2d);
         case core::Builtin::kTextureStorage1D:
-            return storage_texture(type::TextureDimension::k1d);
+            return storage_texture(core::type::TextureDimension::k1d);
         case core::Builtin::kTextureStorage2D:
-            return storage_texture(type::TextureDimension::k2d);
+            return storage_texture(core::type::TextureDimension::k2d);
         case core::Builtin::kTextureStorage2DArray:
-            return storage_texture(type::TextureDimension::k2dArray);
+            return storage_texture(core::type::TextureDimension::k2dArray);
         case core::Builtin::kTextureStorage3D:
-            return storage_texture(type::TextureDimension::k3d);
+            return storage_texture(core::type::TextureDimension::k3d);
         case core::Builtin::kPackedVec3:
             return packed_vec3_t();
         case core::Builtin::kAtomicCompareExchangeResultI32:
-            return type::CreateAtomicCompareExchangeResult(builder_->Types(), builder_->Symbols(),
-                                                           i32());
+            return core::type::CreateAtomicCompareExchangeResult(builder_->Types(),
+                                                                 builder_->Symbols(), i32());
         case core::Builtin::kAtomicCompareExchangeResultU32:
-            return type::CreateAtomicCompareExchangeResult(builder_->Types(), builder_->Symbols(),
-                                                           u32());
+            return core::type::CreateAtomicCompareExchangeResult(builder_->Types(),
+                                                                 builder_->Symbols(), u32());
         case core::Builtin::kFrexpResultAbstract:
-            return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), af());
+            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), af());
         case core::Builtin::kFrexpResultF16:
-            return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), f16());
+            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), f16());
         case core::Builtin::kFrexpResultF32:
-            return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), f32());
+            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), f32());
         case core::Builtin::kFrexpResultVec2Abstract:
-            return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(af(), 2));
+            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
+                                                 vec(af(), 2));
         case core::Builtin::kFrexpResultVec2F16:
-            return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f16(), 2));
+            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
+                                                 vec(f16(), 2));
         case core::Builtin::kFrexpResultVec2F32:
-            return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f32(), 2));
+            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
+                                                 vec(f32(), 2));
         case core::Builtin::kFrexpResultVec3Abstract:
-            return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(af(), 3));
+            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
+                                                 vec(af(), 3));
         case core::Builtin::kFrexpResultVec3F16:
-            return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f16(), 3));
+            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
+                                                 vec(f16(), 3));
         case core::Builtin::kFrexpResultVec3F32:
-            return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f32(), 3));
+            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
+                                                 vec(f32(), 3));
         case core::Builtin::kFrexpResultVec4Abstract:
-            return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(af(), 4));
+            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
+                                                 vec(af(), 4));
         case core::Builtin::kFrexpResultVec4F16:
-            return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f16(), 4));
+            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
+                                                 vec(f16(), 4));
         case core::Builtin::kFrexpResultVec4F32:
-            return type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), vec(f32(), 4));
+            return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
+                                                 vec(f32(), 4));
         case core::Builtin::kModfResultAbstract:
-            return type::CreateModfResult(builder_->Types(), builder_->Symbols(), af());
+            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(), af());
         case core::Builtin::kModfResultF16:
-            return type::CreateModfResult(builder_->Types(), builder_->Symbols(), f16());
+            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(), f16());
         case core::Builtin::kModfResultF32:
-            return type::CreateModfResult(builder_->Types(), builder_->Symbols(), f32());
+            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(), f32());
         case core::Builtin::kModfResultVec2Abstract:
-            return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(af(), 2));
+            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
+                                                vec(af(), 2));
         case core::Builtin::kModfResultVec2F16:
-            return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f16(), 2));
+            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
+                                                vec(f16(), 2));
         case core::Builtin::kModfResultVec2F32:
-            return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f32(), 2));
+            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
+                                                vec(f32(), 2));
         case core::Builtin::kModfResultVec3Abstract:
-            return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(af(), 3));
+            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
+                                                vec(af(), 3));
         case core::Builtin::kModfResultVec3F16:
-            return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f16(), 3));
+            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
+                                                vec(f16(), 3));
         case core::Builtin::kModfResultVec3F32:
-            return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f32(), 3));
+            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
+                                                vec(f32(), 3));
         case core::Builtin::kModfResultVec4Abstract:
-            return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(af(), 4));
+            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
+                                                vec(af(), 4));
         case core::Builtin::kModfResultVec4F16:
-            return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f16(), 4));
+            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
+                                                vec(f16(), 4));
         case core::Builtin::kModfResultVec4F32:
-            return type::CreateModfResult(builder_->Types(), builder_->Symbols(), vec(f32(), 4));
+            return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
+                                                vec(f32(), 4));
         case core::Builtin::kUndefined:
             break;
     }
@@ -2965,11 +2995,11 @@ type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifie
     return nullptr;
 }
 
-size_t Resolver::NestDepth(const type::Type* ty) const {
+size_t Resolver::NestDepth(const core::type::Type* ty) const {
     return Switch(
         ty,  //
-        [](const type::Vector*) { return size_t{1}; },
-        [](const type::Matrix*) { return size_t{2}; },
+        [](const core::type::Vector*) { return size_t{1}; },
+        [](const core::type::Matrix*) { return size_t{2}; },
         [&](Default) {
             if (auto d = nest_depth_.Get(ty)) {
                 return *d;
@@ -2992,7 +3022,7 @@ void Resolver::CollectTextureSamplerPairs(const sem::Builtin* builtin,
     if (auto* user =
             args[static_cast<size_t>(texture_index)]->UnwrapLoad()->As<sem::VariableUser>()) {
         auto* texture = user->Variable();
-        if (!texture->Type()->UnwrapRef()->Is<type::StorageTexture>()) {
+        if (!texture->Type()->UnwrapRef()->Is<core::type::StorageTexture>()) {
             int sampler_index = signature.IndexOf(core::ParameterUsage::kSampler);
             const sem::Variable* sampler = sampler_index != -1
                                                ? args[static_cast<size_t>(sampler_index)]
@@ -3086,33 +3116,33 @@ void Resolver::CollectTextureSamplerPairs(sem::Function* func,
 sem::ValueExpression* Resolver::Literal(const ast::LiteralExpression* literal) {
     auto* ty = Switch(
         literal,
-        [&](const ast::IntLiteralExpression* i) -> type::Type* {
+        [&](const ast::IntLiteralExpression* i) -> core::type::Type* {
             switch (i->suffix) {
                 case ast::IntLiteralExpression::Suffix::kNone:
-                    return builder_->create<type::AbstractInt>();
+                    return builder_->create<core::type::AbstractInt>();
                 case ast::IntLiteralExpression::Suffix::kI:
-                    return builder_->create<type::I32>();
+                    return builder_->create<core::type::I32>();
                 case ast::IntLiteralExpression::Suffix::kU:
-                    return builder_->create<type::U32>();
+                    return builder_->create<core::type::U32>();
             }
             TINT_UNREACHABLE() << "Unhandled integer literal suffix: " << i->suffix;
             return nullptr;
         },
-        [&](const ast::FloatLiteralExpression* f) -> type::Type* {
+        [&](const ast::FloatLiteralExpression* f) -> core::type::Type* {
             switch (f->suffix) {
                 case ast::FloatLiteralExpression::Suffix::kNone:
-                    return builder_->create<type::AbstractFloat>();
+                    return builder_->create<core::type::AbstractFloat>();
                 case ast::FloatLiteralExpression::Suffix::kF:
-                    return builder_->create<type::F32>();
+                    return builder_->create<core::type::F32>();
                 case ast::FloatLiteralExpression::Suffix::kH:
                     return validator_.CheckF16Enabled(literal->source)
-                               ? builder_->create<type::F16>()
+                               ? builder_->create<core::type::F16>()
                                : nullptr;
             }
             TINT_UNREACHABLE() << "Unhandled float literal suffix: " << f->suffix;
             return nullptr;
         },
-        [&](const ast::BoolLiteralExpression*) { return builder_->create<type::Bool>(); },
+        [&](const ast::BoolLiteralExpression*) { return builder_->create<core::type::Bool>(); },
         [&](Default) {
             TINT_UNREACHABLE() << "Unhandled literal type: " << literal->TypeInfo().name;
             return nullptr;
@@ -3260,7 +3290,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                 variable->AddUser(user);
                 return user;
             },
-            [&](const type::Type* ty) -> sem::TypeExpression* {
+            [&](const core::type::Type* ty) -> sem::TypeExpression* {
                 // User declared types cannot be templated.
                 if (!TINT_LIKELY(CheckNotTemplated("type", ident))) {
                     return nullptr;
@@ -3371,7 +3401,7 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
 
     auto* root_ident = object->RootIdentifier();
 
-    const type::Type* ty = nullptr;
+    const core::type::Type* ty = nullptr;
 
     // Object may be a side-effecting expression (e.g. function call).
     bool has_side_effects = object->HasSideEffects();
@@ -3380,10 +3410,10 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
 
     return Switch(
         storage_ty,  //
-        [&](const type::Struct* str) -> sem::ValueExpression* {
+        [&](const core::type::Struct* str) -> sem::ValueExpression* {
             auto symbol = expr->member->symbol;
 
-            const type::StructMember* member = nullptr;
+            const core::type::StructMember* member = nullptr;
             for (auto* m : str->Members()) {
                 if (m->Name() == symbol) {
                     member = m;
@@ -3399,8 +3429,9 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
             ty = member->Type();
 
             // If we're extracting from a reference, we return a reference.
-            if (auto* ref = object_ty->As<type::Reference>()) {
-                ty = builder_->create<type::Reference>(ref->AddressSpace(), ty, ref->Access());
+            if (auto* ref = object_ty->As<core::type::Reference>()) {
+                ty =
+                    builder_->create<core::type::Reference>(ref->AddressSpace(), ty, ref->Access());
             }
 
             const core::constant::Value* val = nullptr;
@@ -3411,7 +3442,7 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
                 expr, ty, current_statement_, val, object, member, has_side_effects, root_ident);
         },
 
-        [&](const type::Vector* vec) -> sem::ValueExpression* {
+        [&](const core::type::Vector* vec) -> sem::ValueExpression* {
             std::string s = expr->member->symbol.Name();
             auto size = s.size();
             Vector<uint32_t, 4> swizzle;
@@ -3467,13 +3498,14 @@ sem::ValueExpression* Resolver::MemberAccessor(const ast::MemberAccessorExpressi
                 // A single element swizzle is just the type of the vector.
                 ty = vec->type();
                 // If we're extracting from a reference, we return a reference.
-                if (auto* ref = object_ty->As<type::Reference>()) {
-                    ty = builder_->create<type::Reference>(ref->AddressSpace(), ty, ref->Access());
+                if (auto* ref = object_ty->As<core::type::Reference>()) {
+                    ty = builder_->create<core::type::Reference>(ref->AddressSpace(), ty,
+                                                                 ref->Access());
                 }
             } else {
                 // The vector will have a number of components equal to the length of
                 // the swizzle.
-                ty = builder_->create<type::Vector>(vec->type(), static_cast<uint32_t>(size));
+                ty = builder_->create<core::type::Vector>(vec->type(), static_cast<uint32_t>(size));
 
                 // The load rule is invoked before the swizzle, if necessary.
                 obj_expr = Load(object);
@@ -3591,14 +3623,14 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
     }
     auto* expr_ty = expr->Type();
 
-    const type::Type* ty = nullptr;
+    const core::type::Type* ty = nullptr;
     const sem::Variable* root_ident = nullptr;
     const core::constant::Value* value = nullptr;
     auto stage = core::EvaluationStage::kRuntime;
 
     switch (unary->op) {
         case core::UnaryOp::kAddressOf:
-            if (auto* ref = expr_ty->As<type::Reference>()) {
+            if (auto* ref = expr_ty->As<core::type::Reference>()) {
                 if (ref->StoreType()->UnwrapRef()->is_handle()) {
                     AddError("cannot take the address of expression in handle address space",
                              unary->expr->source);
@@ -3607,14 +3639,15 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
                 auto* array = unary->expr->As<ast::IndexAccessorExpression>();
                 auto* member = unary->expr->As<ast::MemberAccessorExpression>();
-                if ((array && sem_.TypeOf(array->object)->UnwrapRef()->Is<type::Vector>()) ||
-                    (member && sem_.TypeOf(member->object)->UnwrapRef()->Is<type::Vector>())) {
+                if ((array && sem_.TypeOf(array->object)->UnwrapRef()->Is<core::type::Vector>()) ||
+                    (member &&
+                     sem_.TypeOf(member->object)->UnwrapRef()->Is<core::type::Vector>())) {
                     AddError("cannot take the address of a vector component", unary->expr->source);
                     return nullptr;
                 }
 
-                ty = builder_->create<type::Pointer>(ref->AddressSpace(), ref->StoreType(),
-                                                     ref->Access());
+                ty = builder_->create<core::type::Pointer>(ref->AddressSpace(), ref->StoreType(),
+                                                           ref->Access());
 
                 root_ident = expr->RootIdentifier();
             } else {
@@ -3624,9 +3657,9 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
             break;
 
         case core::UnaryOp::kIndirection:
-            if (auto* ptr = expr_ty->As<type::Pointer>()) {
-                ty = builder_->create<type::Reference>(ptr->AddressSpace(), ptr->StoreType(),
-                                                       ptr->Access());
+            if (auto* ptr = expr_ty->As<core::type::Pointer>()) {
+                ty = builder_->create<core::type::Reference>(ptr->AddressSpace(), ptr->StoreType(),
+                                                             ptr->Access());
                 root_ident = expr->RootIdentifier();
             } else {
                 AddError("cannot dereference expression of type '" + sem_.TypeNameOf(expr_ty) + "'",
@@ -3688,7 +3721,7 @@ tint::Result<uint32_t> Resolver::LocationAttribute(const ast::LocationAttribute*
         return tint::Failure;
     }
 
-    if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
+    if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
         AddError("@location must be an i32 or u32 value", attr->source);
         return tint::Failure;
     }
@@ -3712,7 +3745,7 @@ tint::Result<uint32_t> Resolver::IndexAttribute(const ast::IndexAttribute* attr)
         return tint::Failure;
     }
 
-    if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
+    if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
         AddError("@location must be an i32 or u32 value", attr->source);
         return tint::Failure;
     }
@@ -3735,7 +3768,7 @@ tint::Result<uint32_t> Resolver::BindingAttribute(const ast::BindingAttribute* a
     if (!materialized) {
         return tint::Failure;
     }
-    if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
+    if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
         AddError("@binding must be an i32 or u32 value", attr->source);
         return tint::Failure;
     }
@@ -3757,7 +3790,7 @@ tint::Result<uint32_t> Resolver::GroupAttribute(const ast::GroupAttribute* attr)
     if (!materialized) {
         return tint::Failure;
     }
-    if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
+    if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
         AddError("@group must be an i32 or u32 value", attr->source);
         return tint::Failure;
     }
@@ -3780,7 +3813,7 @@ tint::Result<sem::WorkgroupSize> Resolver::WorkgroupAttribute(const ast::Workgro
 
     auto values = attr->Values();
     Vector<const sem::ValueExpression*, 3> args;
-    Vector<const type::Type*, 3> arg_tys;
+    Vector<const core::type::Type*, 3> arg_tys;
 
     constexpr const char* kErrBadExpr =
         "workgroup_size argument must be a constant or override-expression of type "
@@ -3798,7 +3831,7 @@ tint::Result<sem::WorkgroupSize> Resolver::WorkgroupAttribute(const ast::Workgro
             return tint::Failure;
         }
         auto* ty = expr->Type();
-        if (!ty->IsAnyOf<type::I32, type::U32, type::AbstractInt>()) {
+        if (!ty->IsAnyOf<core::type::I32, core::type::U32, core::type::AbstractInt>()) {
             AddError(kErrBadExpr, value->source);
             return tint::Failure;
         }
@@ -3813,7 +3846,7 @@ tint::Result<sem::WorkgroupSize> Resolver::WorkgroupAttribute(const ast::Workgro
         arg_tys.Push(ty);
     }
 
-    auto* common_ty = type::Type::Common(arg_tys);
+    auto* common_ty = core::type::Type::Common(arg_tys);
     if (!common_ty) {
         AddError("workgroup_size arguments must be of the same type, either i32 or u32",
                  attr->source);
@@ -3821,8 +3854,8 @@ tint::Result<sem::WorkgroupSize> Resolver::WorkgroupAttribute(const ast::Workgro
     }
 
     // If all arguments are abstract-integers, then materialize to i32.
-    if (common_ty->Is<type::AbstractInt>()) {
-        common_ty = builder_->create<type::I32>();
+    if (common_ty->Is<core::type::AbstractInt>()) {
+        common_ty = builder_->create<core::type::I32>();
     }
 
     for (size_t i = 0; i < args.Length(); i++) {
@@ -3955,10 +3988,10 @@ bool Resolver::Enable(const ast::Enable* enable) {
     return true;
 }
 
-type::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
+core::type::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
     Mark(named_type->name);
 
-    type::Type* result = nullptr;
+    core::type::Type* result = nullptr;
     if (auto* alias = named_type->As<ast::Alias>()) {
         result = Alias(alias);
     } else if (auto* str = named_type->As<ast::Struct>()) {
@@ -3975,7 +4008,7 @@ type::Type* Resolver::TypeDecl(const ast::TypeDecl* named_type) {
     return result;
 }
 
-const type::ArrayCount* Resolver::ArrayCount(const ast::Expression* count_expr) {
+const core::type::ArrayCount* Resolver::ArrayCount(const ast::Expression* count_expr) {
     // Evaluate the constant array count expression.
     const auto* count_sem = Materialize(ValueExpression(count_expr));
     if (!count_sem) {
@@ -4014,11 +4047,11 @@ const type::ArrayCount* Resolver::ArrayCount(const ast::Expression* count_expr) 
         return nullptr;
     }
 
-    return builder_->create<type::ConstantArrayCount>(static_cast<uint32_t>(count));
+    return builder_->create<core::type::ConstantArrayCount>(static_cast<uint32_t>(count));
 }
 
 bool Resolver::ArrayAttributes(VectorRef<const ast::Attribute*> attributes,
-                               const type::Type* el_ty,
+                               const core::type::Type* el_ty,
                                uint32_t& explicit_stride) {
     if (!validator_.NoDuplicateAttributes(attributes)) {
         return false;
@@ -4053,19 +4086,19 @@ bool Resolver::ArrayAttributes(VectorRef<const ast::Attribute*> attributes,
     return true;
 }
 
-type::Array* Resolver::Array(const Source& array_source,
-                             const Source& el_source,
-                             const Source& count_source,
-                             const type::Type* el_ty,
-                             const type::ArrayCount* el_count,
-                             uint32_t explicit_stride) {
+core::type::Array* Resolver::Array(const Source& array_source,
+                                   const Source& el_source,
+                                   const Source& count_source,
+                                   const core::type::Type* el_ty,
+                                   const core::type::ArrayCount* el_count,
+                                   uint32_t explicit_stride) {
     uint32_t el_align = el_ty->Align();
     uint32_t el_size = el_ty->Size();
     uint64_t implicit_stride = el_size ? tint::RoundUp<uint64_t>(el_align, el_size) : 0;
     uint64_t stride = explicit_stride ? explicit_stride : implicit_stride;
     uint64_t size = 0;
 
-    if (auto const_count = el_count->As<type::ConstantArrayCount>()) {
+    if (auto const_count = el_count->As<core::type::ConstantArrayCount>()) {
         size = const_count->value * stride;
         if (size > std::numeric_limits<uint32_t>::max()) {
             StringStream msg;
@@ -4074,10 +4107,10 @@ type::Array* Resolver::Array(const Source& array_source,
             AddError(msg.str(), count_source);
             return nullptr;
         }
-    } else if (el_count->Is<type::RuntimeArrayCount>()) {
+    } else if (el_count->Is<core::type::RuntimeArrayCount>()) {
         size = stride;
     }
-    auto* out = builder_->create<type::Array>(
+    auto* out = builder_->create<core::type::Array>(
         el_ty, el_count, el_align, static_cast<uint32_t>(size), static_cast<uint32_t>(stride),
         static_cast<uint32_t>(implicit_stride));
 
@@ -4099,7 +4132,7 @@ type::Array* Resolver::Array(const Source& array_source,
     return out;
 }
 
-type::Type* Resolver::Alias(const ast::Alias* alias) {
+core::type::Type* Resolver::Alias(const ast::Alias* alias) {
     auto* ty = Type(alias->type);
     if (!ty) {
         return nullptr;
@@ -4194,7 +4227,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         bool has_offset_attr = false;
         bool has_align_attr = false;
         bool has_size_attr = false;
-        type::StructMemberAttributes attributes;
+        core::type::StructMemberAttributes attributes;
         for (auto* attribute : member->attributes) {
             Mark(attribute);
             bool ok = Switch(
@@ -4233,7 +4266,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     if (!materialized) {
                         return false;
                     }
-                    if (!materialized->Type()->IsAnyOf<type::I32, type::U32>()) {
+                    if (!materialized->Type()->IsAnyOf<core::type::I32, core::type::U32>()) {
                         AddError("@align must be an i32 or u32 value", attr->source);
                         return false;
                     }
@@ -4262,7 +4295,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     if (!materialized) {
                         return false;
                     }
-                    if (!materialized->Type()->IsAnyOf<type::U32, type::I32>()) {
+                    if (!materialized->Type()->IsAnyOf<core::type::U32, core::type::I32>()) {
                         AddError("@size must be an i32 or u32 value", attr->source);
                         return false;
                     }
@@ -4392,7 +4425,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
 
     for (size_t i = 0; i < sem_members.Length(); i++) {
         auto* mem_type = sem_members[i]->Type();
-        if (mem_type->Is<type::Atomic>()) {
+        if (mem_type->Is<core::type::Atomic>()) {
             atomic_composite_info_.Add(out, &sem_members[i]->Declaration()->source);
             break;
         } else {
@@ -4433,13 +4466,13 @@ sem::Statement* Resolver::ReturnStatement(const ast::ReturnStatement* stmt) {
         auto& behaviors = current_statement_->Behaviors();
         behaviors = sem::Behavior::kReturn;
 
-        const type::Type* value_ty = nullptr;
+        const core::type::Type* value_ty = nullptr;
         if (auto* value = stmt->value) {
             const auto* expr = Load(ValueExpression(value));
             if (!expr) {
                 return false;
             }
-            if (auto* ret_ty = current_function_->ReturnType(); !ret_ty->Is<type::Void>()) {
+            if (auto* ret_ty = current_function_->ReturnType(); !ret_ty->Is<core::type::Void>()) {
                 expr = Materialize(expr, ret_ty);
                 if (!expr) {
                     return false;
@@ -4449,7 +4482,7 @@ sem::Statement* Resolver::ReturnStatement(const ast::ReturnStatement* stmt) {
 
             value_ty = expr->Type();
         } else {
-            value_ty = builder_->create<type::Void>();
+            value_ty = builder_->create<core::type::Void>();
         }
 
         // Validate after processing the return value expression so that its type
@@ -4475,7 +4508,7 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
 
         // Determine the common type across all selectors and the switch expression
         // This must materialize to an integer scalar (non-abstract).
-        Vector<const type::Type*, 8> types;
+        Vector<const core::type::Type*, 8> types;
         types.Push(cond_ty);
         for (auto* case_stmt : stmt->body) {
             for (auto* sel : case_stmt->selectors) {
@@ -4489,11 +4522,11 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
                 types.Push(sem_expr->Type()->UnwrapRef());
             }
         }
-        auto* common_ty = type::Type::Common(types);
+        auto* common_ty = core::type::Type::Common(types);
         if (!common_ty || !common_ty->is_integer_scalar()) {
             // No common type found or the common type was abstract.
             // Pick i32 and let validation deal with any mismatches.
-            common_ty = builder_->create<type::I32>();
+            common_ty = builder_->create<core::type::I32>();
         }
         cond = Materialize(cond, common_ty);
         if (!cond) {
@@ -4726,9 +4759,9 @@ sem::Statement* Resolver::IncrementDecrementStatement(
 }
 
 bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
-                                            type::Type* ty,
+                                            core::type::Type* ty,
                                             const Source& usage) {
-    ty = const_cast<type::Type*>(ty->UnwrapRef());
+    ty = const_cast<core::type::Type*>(ty->UnwrapRef());
 
     if (auto* str = ty->As<sem::Struct>()) {
         if (str->AddressSpaceUsage().count(address_space)) {
@@ -4739,9 +4772,9 @@ bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
 
         for (auto* member : str->Members()) {
             auto decl = member->Declaration();
-            if (decl &&
-                !ApplyAddressSpaceUsageToType(
-                    address_space, const_cast<type::Type*>(member->Type()), decl->type->source)) {
+            if (decl && !ApplyAddressSpaceUsageToType(address_space,
+                                                      const_cast<core::type::Type*>(member->Type()),
+                                                      decl->type->source)) {
                 StringStream err;
                 err << "while analyzing structure member " << sem_.TypeNameOf(str) << "."
                     << member->Name().Name();
@@ -4752,9 +4785,9 @@ bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
         return true;
     }
 
-    if (auto* arr = ty->As<type::Array>()) {
+    if (auto* arr = ty->As<core::type::Array>()) {
         if (address_space != core::AddressSpace::kStorage) {
-            if (arr->Count()->Is<type::RuntimeArrayCount>()) {
+            if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
                 AddError("runtime-sized arrays can only be used in the <storage> address space",
                          usage);
                 return false;
@@ -4768,8 +4801,8 @@ bool Resolver::ApplyAddressSpaceUsageToType(core::AddressSpace address_space,
                 return false;
             }
         }
-        return ApplyAddressSpaceUsageToType(address_space, const_cast<type::Type*>(arr->ElemType()),
-                                            usage);
+        return ApplyAddressSpaceUsageToType(address_space,
+                                            const_cast<core::type::Type*>(arr->ElemType()), usage);
     }
 
     if (core::IsHostShareable(address_space) && !validator_.IsHostShareable(ty)) {

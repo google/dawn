@@ -279,7 +279,7 @@ class Function final : public Castable<Function, CallTarget> {
     Function(const Function&) = delete;
     Function(Function&&) = delete;
 
-    VariableBindings TransitivelyReferencedSamplerVariablesImpl(type::SamplerKind kind) const;
+    VariableBindings TransitivelyReferencedSamplerVariablesImpl(core::type::SamplerKind kind) const;
     VariableBindings TransitivelyReferencedSampledTextureVariablesImpl(bool multisampled) const;
 
     const ast::Function* const declaration_;

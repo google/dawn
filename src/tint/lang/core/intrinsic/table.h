@@ -45,7 +45,7 @@ class Table {
     /// @param diags the diagnostic list to append errors to
     /// @return a pointer to a newly created Table
     static std::unique_ptr<Table> Create(const TableData& data,
-                                         type::Manager& types,
+                                         core::type::Manager& types,
                                          SymbolTable& symbols,
                                          diag::List& diags);
 
@@ -57,7 +57,7 @@ class Table {
         /// Parameter describes a single parameter
         struct Parameter {
             /// Parameter type
-            const type::Type* const type;
+            const core::type::Type* const type;
             /// Parameter usage
             core::ParameterUsage const usage = core::ParameterUsage::kNone;
 
@@ -78,7 +78,7 @@ class Table {
         const OverloadInfo* info = nullptr;
 
         /// The resolved overload return type
-        type::Type const* return_type = nullptr;
+        core::type::Type const* return_type = nullptr;
 
         /// The resolved overload parameters
         Vector<Parameter, 8> parameters;
@@ -113,7 +113,7 @@ class Table {
     /// @param source the source of the builtin call
     /// @return the resolved builtin function overload
     virtual Result<Overload> Lookup(core::Function type,
-                                    VectorRef<const type::Type*> args,
+                                    VectorRef<const core::type::Type*> args,
                                     EvaluationStage earliest_eval_stage,
                                     const Source& source) = 0;
 
@@ -130,7 +130,7 @@ class Table {
     /// @param source the source of the operator call
     /// @return the resolved unary operator overload
     virtual Result<Overload> Lookup(core::UnaryOp op,
-                                    const type::Type* arg,
+                                    const core::type::Type* arg,
                                     EvaluationStage earliest_eval_stage,
                                     const Source& source) = 0;
 
@@ -149,8 +149,8 @@ class Table {
     /// @param is_compound true if the binary operator is being used as a compound assignment
     /// @return the resolved binary operator overload
     virtual Result<Overload> Lookup(core::BinaryOp op,
-                                    const type::Type* lhs,
-                                    const type::Type* rhs,
+                                    const core::type::Type* lhs,
+                                    const core::type::Type* rhs,
                                     EvaluationStage earliest_eval_stage,
                                     const Source& source,
                                     bool is_compound) = 0;
@@ -168,8 +168,8 @@ class Table {
     /// @param source the source of the call
     /// @return the resolved type constructor or conversion function overload
     virtual Result<Overload> Lookup(CtorConv type,
-                                    const type::Type* template_arg,
-                                    VectorRef<const type::Type*> args,
+                                    const core::type::Type* template_arg,
+                                    VectorRef<const core::type::Type*> args,
                                     EvaluationStage earliest_eval_stage,
                                     const Source& source) = 0;
 };

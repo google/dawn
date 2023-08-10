@@ -77,7 +77,7 @@ struct State {
 
   private:
     /// Map of identifier to declaration.
-    /// The declarations may be one of an ir::Value or type::Struct.
+    /// The declarations may be one of an ir::Value or core::type::Struct.
     using Scope = Hashmap<std::string_view, CastableBase*, 8>;
 
     /// The IR module.
@@ -91,10 +91,10 @@ struct State {
     void RegisterModuleScopeDecls() {
         // Declare all the user types
         for (auto* ty : ir->Types()) {
-            if (auto* str = ty->As<type::Struct>()) {
+            if (auto* str = ty->As<core::type::Struct>()) {
                 auto name = str->Name().NameView();
                 if (!IsBuiltinStruct(str)) {
-                    Declare(scopes.Front(), const_cast<type::Struct*>(str), name);
+                    Declare(scopes.Front(), const_cast<core::type::Struct*>(str), name);
                 }
             }
         }
@@ -192,30 +192,30 @@ struct State {
     }
 
     /// Ensures that the type @p type can be resolved given its identifier(s)
-    void EnsureResolvable(const type::Type* type) {
+    void EnsureResolvable(const core::type::Type* type) {
         while (type) {
             type = tint::Switch(
                 type,  //
-                [&](const type::Scalar* s) {
+                [&](const core::type::Scalar* s) {
                     EnsureResolvesTo(s->FriendlyName(), nullptr);
                     return nullptr;
                 },
-                [&](const type::Vector* v) {
+                [&](const core::type::Vector* v) {
                     EnsureResolvesTo("vec" + tint::ToString(v->Width()), nullptr);
                     return v->type();
                 },
-                [&](const type::Matrix* m) {
+                [&](const core::type::Matrix* m) {
                     EnsureResolvesTo(
                         "mat" + tint::ToString(m->columns()) + "x" + tint::ToString(m->rows()),
                         nullptr);
                     return m->type();
                 },
-                [&](const type::Pointer* p) {
+                [&](const core::type::Pointer* p) {
                     EnsureResolvesTo(tint::ToString(p->Access()), nullptr);
                     EnsureResolvesTo(tint::ToString(p->AddressSpace()), nullptr);
                     return p->StoreType();
                 },
-                [&](const type::Struct* s) {
+                [&](const core::type::Struct* s) {
                     auto name = s->Name().NameView();
                     if (IsBuiltinStruct(s)) {
                         EnsureResolvesTo(name, nullptr);
@@ -260,14 +260,14 @@ struct State {
         Switch(
             thing,  //
             [&](ir::Value* value) { ir->SetName(value, new_name); },
-            [&](type::Struct* str) { str->SetName(new_name); },
+            [&](core::type::Struct* str) { str->SetName(new_name); },
             [&](Default) {
                 TINT_ICE() << "unhandled type for renaming: " << thing->TypeInfo().name;
             });
     }
 
     /// @return true if @p s is a builtin (non-user declared) structure.
-    bool IsBuiltinStruct(const type::Struct* s) {
+    bool IsBuiltinStruct(const core::type::Struct* s) {
         // TODO(bclayton): Need to do better than this.
         return tint::HasPrefix(s->Name().NameView(), "_");
     }

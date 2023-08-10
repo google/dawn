@@ -35,7 +35,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::RemovePhonies);
 namespace tint::ast::transform {
 namespace {
 
-using SinkSignature = std::vector<const type::Type*>;
+using SinkSignature = std::vector<const core::type::Type*>;
 
 }  // namespace
 

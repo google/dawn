@@ -83,7 +83,7 @@ class SpirvWriterTestHelperBase : public BASE {
     /// The test builder.
     ir::Builder b{mod};
     /// The type manager.
-    type::Manager& ty{mod.Types()};
+    core::type::Manager& ty{mod.Types()};
 
   protected:
     /// The SPIR-V writer.
@@ -170,7 +170,7 @@ class SpirvWriterTestHelperBase : public BASE {
     /// Helper to make a scalar type corresponding to the element type `type`.
     /// @param type the element type
     /// @returns the scalar type
-    const type::Type* MakeScalarType(TestElementType type) {
+    const core::type::Type* MakeScalarType(TestElementType type) {
         switch (type) {
             case kBool:
                 return ty.bool_();
@@ -189,7 +189,9 @@ class SpirvWriterTestHelperBase : public BASE {
     /// Helper to make a vector type corresponding to the element type `type`.
     /// @param type the element type
     /// @returns the vector type
-    const type::Type* MakeVectorType(TestElementType type) { return ty.vec2(MakeScalarType(type)); }
+    const core::type::Type* MakeVectorType(TestElementType type) {
+        return ty.vec2(MakeScalarType(type));
+    }
 
     /// Helper to make a scalar value with the scalar type `type`.
     /// @param type the element type

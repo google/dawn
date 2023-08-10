@@ -21,7 +21,7 @@
 #include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/type/type.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// A reference type.
 class Reference final : public Castable<Reference, Type> {
@@ -62,6 +62,6 @@ class Reference final : public Castable<Reference, Type> {
     core::Access const access_;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_REFERENCE_H_

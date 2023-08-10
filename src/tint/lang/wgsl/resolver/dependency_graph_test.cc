@@ -489,12 +489,13 @@ const ast::Identifier* SymbolTestHelper::Add(SymbolUseKind kind,
         }
         case SymbolUseKind::GlobalVarSampledTexElemType: {
             ast::Type node = b.ty(source, symbol);
-            b.GlobalVar(b.Sym(), b.ty.sampled_texture(type::TextureDimension::k2d, node));
+            b.GlobalVar(b.Sym(), b.ty.sampled_texture(core::type::TextureDimension::k2d, node));
             return node->identifier;
         }
         case SymbolUseKind::GlobalVarMultisampledTexElemType: {
             ast::Type node = b.ty(source, symbol);
-            b.GlobalVar(b.Sym(), b.ty.multisampled_texture(type::TextureDimension::k2d, node));
+            b.GlobalVar(b.Sym(),
+                        b.ty.multisampled_texture(core::type::TextureDimension::k2d, node));
             return node->identifier;
         }
         case SymbolUseKind::GlobalVarValue: {
@@ -1722,14 +1723,14 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     GlobalVar(Sym(), ty.vec3(T));
     GlobalVar(Sym(), ty.mat3x2(T));
     GlobalVar(Sym(), ty.ptr<private_>(T));
-    GlobalVar(Sym(), ty.sampled_texture(type::TextureDimension::k2d, T));
-    GlobalVar(Sym(), ty.depth_texture(type::TextureDimension::k2d));
-    GlobalVar(Sym(), ty.depth_multisampled_texture(type::TextureDimension::k2d));
+    GlobalVar(Sym(), ty.sampled_texture(core::type::TextureDimension::k2d, T));
+    GlobalVar(Sym(), ty.depth_texture(core::type::TextureDimension::k2d));
+    GlobalVar(Sym(), ty.depth_multisampled_texture(core::type::TextureDimension::k2d));
     GlobalVar(Sym(), ty.external_texture());
-    GlobalVar(Sym(), ty.multisampled_texture(type::TextureDimension::k2d, T));
-    GlobalVar(Sym(), ty.storage_texture(type::TextureDimension::k2d, core::TexelFormat::kR32Float,
-                                        core::Access::kRead));
-    GlobalVar(Sym(), ty.sampler(type::SamplerKind::kSampler));
+    GlobalVar(Sym(), ty.multisampled_texture(core::type::TextureDimension::k2d, T));
+    GlobalVar(Sym(), ty.storage_texture(core::type::TextureDimension::k2d,
+                                        core::TexelFormat::kR32Float, core::Access::kRead));
+    GlobalVar(Sym(), ty.sampler(core::type::SamplerKind::kSampler));
 
     GlobalVar(Sym(), ty.i32(), Vector{Binding(V), Group(V)});
     GlobalVar(Sym(), ty.i32(), Vector{Location(V)});

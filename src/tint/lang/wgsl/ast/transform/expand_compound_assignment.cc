@@ -90,7 +90,7 @@ struct ExpandCompoundAssignment::State {
         // Helper function that returns `true` if the type of `expr` is a vector.
         auto is_vec = [&](const Expression* expr) {
             if (auto* val_expr = ctx.src->Sem().GetVal(expr)) {
-                return val_expr->Type()->UnwrapRef()->Is<type::Vector>();
+                return val_expr->Type()->UnwrapRef()->Is<core::type::Vector>();
             }
             return false;
         };

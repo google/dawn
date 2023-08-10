@@ -32,7 +32,7 @@
 #include "src/tint/utils/symbol/symbol_table.h"
 #include "src/tint/utils/text/string.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// An array of `modf()` return type names for an argument of `vecN<f32>`.
 constexpr std::array kModfVecF32Names{
@@ -187,4 +187,4 @@ Struct* CreateAtomicCompareExchangeResult(Manager& types, SymbolTable& symbols, 
         });
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

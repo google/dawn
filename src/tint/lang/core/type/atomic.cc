@@ -21,13 +21,13 @@
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/text/string_stream.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Atomic);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::Atomic);
 
-namespace tint::type {
+namespace tint::core::type {
 
-Atomic::Atomic(const type::Type* subtype)
+Atomic::Atomic(const core::type::Type* subtype)
     : Base(Hash(tint::TypeInfo::Of<Atomic>().full_hashcode, subtype),
-           type::Flags{
+           core::type::Flags{
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,
            }),
@@ -35,7 +35,7 @@ Atomic::Atomic(const type::Type* subtype)
     TINT_ASSERT(!subtype->Is<Reference>());
 }
 
-bool Atomic::Equals(const type::UniqueNode& other) const {
+bool Atomic::Equals(const core::type::UniqueNode& other) const {
     if (auto* o = other.As<Atomic>()) {
         return o->subtype_ == subtype_;
     }
@@ -63,4 +63,4 @@ Atomic* Atomic::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<Atomic>(ty);
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

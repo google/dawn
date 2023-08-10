@@ -19,7 +19,7 @@
 
 #include "src/tint/lang/core/type/numeric_scalar.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// A float 32 type
 class F32 final : public Castable<F32, NumericScalar> {
@@ -45,6 +45,6 @@ class F32 final : public Castable<F32, NumericScalar> {
     F32* Clone(CloneContext& ctx) const override;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_F32_H_

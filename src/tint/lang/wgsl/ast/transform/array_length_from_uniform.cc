@@ -148,14 +148,14 @@ struct ArrayLengthFromUniform::State {
             //                             array_stride
             const Expression* total_size = total_storage_buffer_size;
             auto* storage_buffer_type = storage_buffer_sem->Type()->UnwrapRef();
-            const type::Array* array_type = nullptr;
-            if (auto* str = storage_buffer_type->As<type::Struct>()) {
+            const core::type::Array* array_type = nullptr;
+            if (auto* str = storage_buffer_type->As<core::type::Struct>()) {
                 // The variable is a struct, so subtract the byte offset of the array
                 // member.
                 auto* array_member_sem = str->Members().Back();
-                array_type = array_member_sem->Type()->As<type::Array>();
+                array_type = array_member_sem->Type()->As<core::type::Array>();
                 total_size = b.Sub(total_storage_buffer_size, u32(array_member_sem->Offset()));
-            } else if (auto* arr = storage_buffer_type->As<type::Array>()) {
+            } else if (auto* arr = storage_buffer_type->As<core::type::Array>()) {
                 array_type = arr;
             } else {
                 TINT_ICE() << "expected form of arrayLength argument to be &array_var or "

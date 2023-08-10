@@ -20,7 +20,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 struct StorageTextureTest : public TestHelper {
@@ -137,8 +137,8 @@ TEST_F(StorageTextureTest, Clone) {
     auto* a =
         Create(TextureDimension::kCube, core::TexelFormat::kRgba32Float, core::Access::kReadWrite);
 
-    type::Manager mgr;
-    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+    core::type::Manager mgr;
+    core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* mt = a->Clone(ctx);
     EXPECT_EQ(mt->dim(), TextureDimension::kCube);
@@ -147,4 +147,4 @@ TEST_F(StorageTextureTest, Clone) {
 }
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::core::type

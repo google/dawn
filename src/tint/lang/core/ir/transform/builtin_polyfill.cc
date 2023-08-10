@@ -40,7 +40,7 @@ struct State {
     Builder b{*ir};
 
     /// The type manager.
-    type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir->Types()};
 
     /// The symbol table.
     SymbolTable& sym{ir->symbols};
@@ -82,9 +82,10 @@ struct State {
                         break;
                     case core::Function::kTextureSampleBaseClampToEdge:
                         if (config.texture_sample_base_clamp_to_edge_2d_f32) {
-                            auto* tex = builtin->Args()[0]->Type()->As<type::SampledTexture>();
-                            if (tex && tex->dim() == type::TextureDimension::k2d &&
-                                tex->type()->Is<type::F32>()) {
+                            auto* tex =
+                                builtin->Args()[0]->Type()->As<core::type::SampledTexture>();
+                            if (tex && tex->dim() == core::type::TextureDimension::k2d &&
+                                tex->type()->Is<core::type::F32>()) {
                                 worklist.Push(builtin);
                             }
                         }
@@ -136,8 +137,9 @@ struct State {
     /// @param el_ty the type to extend
     /// @param match the type to match the component count of
     /// @returns a type with the same number of vector components as @p match
-    const type::Type* MatchWidth(const type::Type* el_ty, const type::Type* match) {
-        if (auto* vec = match->As<type::Vector>()) {
+    const core::type::Type* MatchWidth(const core::type::Type* el_ty,
+                                       const core::type::Type* match) {
+        if (auto* vec = match->As<core::type::Vector>()) {
             return ty.vec(el_ty, vec->Width());
         }
         return el_ty;
@@ -148,8 +150,8 @@ struct State {
     /// @param element the value to extend
     /// @param match the type to match the component count of
     /// @returns a value with the same number of vector components as @p match
-    ir::Constant* MatchWidth(ir::Constant* element, const type::Type* match) {
-        if (auto* vec = match->As<type::Vector>()) {
+    ir::Constant* MatchWidth(ir::Constant* element, const core::type::Type* match) {
+        if (auto* vec = match->As<core::type::Vector>()) {
             return b.Splat(MatchWidth(element->Type(), match), element, vec->Width());
         }
         return element;
@@ -412,10 +414,10 @@ struct State {
         auto* type = call->Result()->Type();
         ir::Constant* zero = nullptr;
         ir::Constant* one = nullptr;
-        if (type->DeepestElement()->Is<type::F32>()) {
+        if (type->DeepestElement()->Is<core::type::F32>()) {
             zero = MatchWidth(b.Constant(0_f), type);
             one = MatchWidth(b.Constant(1_f), type);
-        } else if (type->DeepestElement()->Is<type::F16>()) {
+        } else if (type->DeepestElement()->Is<core::type::F16>()) {
             zero = MatchWidth(b.Constant(0_h), type);
             one = MatchWidth(b.Constant(1_h), type);
         }

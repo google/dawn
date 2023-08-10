@@ -31,15 +31,15 @@ class StructMember;
 namespace tint::sem {
 class StructMember;
 }  // namespace tint::sem
-namespace tint::type {
+namespace tint::core::type {
 class StructMember;
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 namespace tint::sem {
 
 /// Struct holds the semantic information for structures.
-/// Unlike type::Struct, sem::Struct has an AST declaration node.
-class Struct final : public Castable<Struct, type::Struct> {
+/// Unlike core::type::Struct, sem::Struct has an AST declaration node.
+class Struct final : public Castable<Struct, core::type::Struct> {
   public:
     /// Constructor
     /// @param declaration the AST structure declaration
@@ -71,8 +71,8 @@ class Struct final : public Castable<Struct, type::Struct> {
 };
 
 /// StructMember holds the semantic information for structure members.
-/// Unlike type::StructMember, sem::StructMember has an AST declaration node.
-class StructMember final : public Castable<StructMember, type::StructMember> {
+/// Unlike core::type::StructMember, sem::StructMember has an AST declaration node.
+class StructMember final : public Castable<StructMember, core::type::StructMember> {
   public:
     /// Constructor
     /// @param declaration the AST declaration node
@@ -85,12 +85,12 @@ class StructMember final : public Castable<StructMember, type::StructMember> {
     /// @param attributes the optional attributes
     StructMember(const ast::StructMember* declaration,
                  Symbol name,
-                 const type::Type* type,
+                 const core::type::Type* type,
                  uint32_t index,
                  uint32_t offset,
                  uint32_t align,
                  uint32_t size,
-                 const type::StructMemberAttributes& attributes);
+                 const core::type::StructMemberAttributes& attributes);
 
     /// Destructor
     ~StructMember() override;

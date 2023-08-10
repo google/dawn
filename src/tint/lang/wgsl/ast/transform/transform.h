@@ -88,7 +88,7 @@ class Transform : public Castable<Transform> {
     /// @param ctx the clone context
     /// @param ty the semantic type to reconstruct
     /// @returns an Type that when resolved, will produce the semantic type `ty`.
-    static Type CreateASTTypeFor(program::CloneContext& ctx, const type::Type* ty);
+    static Type CreateASTTypeFor(program::CloneContext& ctx, const core::type::Type* ty);
 
   protected:
     /// Removes the statement `stmt` from the transformed program.

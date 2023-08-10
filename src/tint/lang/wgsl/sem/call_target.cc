@@ -26,7 +26,7 @@ namespace tint::sem {
 CallTarget::CallTarget(core::EvaluationStage stage, bool must_use)
     : stage_(stage), must_use_(must_use) {}
 
-CallTarget::CallTarget(const type::Type* return_type,
+CallTarget::CallTarget(const core::type::Type* return_type,
                        VectorRef<Parameter*> parameters,
                        core::EvaluationStage stage,
                        bool must_use)
@@ -43,7 +43,7 @@ CallTarget::~CallTarget() = default;
 
 CallTargetSignature::CallTargetSignature() = default;
 
-CallTargetSignature::CallTargetSignature(const type::Type* ret_ty,
+CallTargetSignature::CallTargetSignature(const core::type::Type* ret_ty,
                                          VectorRef<const sem::Parameter*> params)
     : return_type(ret_ty), parameters(std::move(params)) {}
 CallTargetSignature::CallTargetSignature(const CallTargetSignature&) = default;

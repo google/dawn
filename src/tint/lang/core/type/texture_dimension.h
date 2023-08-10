@@ -18,7 +18,7 @@
 #include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/traits/traits.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// The dimensionality of the texture
 enum class TextureDimension {
@@ -46,10 +46,10 @@ std::string_view ToString(enum type::TextureDimension dim);
 /// @param dim the type::TextureDimension
 /// @return the stream so calls can be chained
 template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
-auto& operator<<(STREAM& out, type::TextureDimension dim) {
+auto& operator<<(STREAM& out, core::type::TextureDimension dim) {
     return out << ToString(dim);
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_TEXTURE_DIMENSION_H_

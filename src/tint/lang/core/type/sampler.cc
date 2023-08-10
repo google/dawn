@@ -17,12 +17,13 @@
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/utils/math/hash.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Sampler);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::Sampler);
 
-namespace tint::type {
+namespace tint::core::type {
 
 Sampler::Sampler(SamplerKind kind)
-    : Base(Hash(tint::TypeInfo::Of<Sampler>().full_hashcode, kind), type::Flags{}), kind_(kind) {}
+    : Base(Hash(tint::TypeInfo::Of<Sampler>().full_hashcode, kind), core::type::Flags{}),
+      kind_(kind) {}
 
 Sampler::~Sampler() = default;
 
@@ -41,4 +42,4 @@ Sampler* Sampler::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<Sampler>(kind_);
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

@@ -272,7 +272,7 @@ struct CanonicalizeEntryPointIO::State {
     /// @param attrs the attributes to apply to the shader input
     /// @returns an expression which evaluates to the value of the shader input
     const Expression* AddInput(std::string name,
-                               const type::Type* type,
+                               const core::type::Type* type,
                                std::optional<uint32_t> location,
                                tint::Vector<const Attribute*, 8> attrs) {
         auto ast_type = CreateASTTypeFor(ctx, type);
@@ -346,7 +346,7 @@ struct CanonicalizeEntryPointIO::State {
     /// @param attrs the attributes to apply to the shader output
     /// @param value the value of the shader output
     void AddOutput(std::string name,
-                   const type::Type* type,
+                   const core::type::Type* type,
                    std::optional<uint32_t> location,
                    std::optional<uint32_t> index,
                    tint::Vector<const Attribute*, 8> attrs,
@@ -432,7 +432,7 @@ struct CanonicalizeEntryPointIO::State {
         // list to pass them through to the inner function.
         tint::Vector<const Expression*, 8> inner_struct_values;
         for (auto* member : str->Members()) {
-            if (TINT_UNLIKELY(member->Type()->Is<type::Struct>())) {
+            if (TINT_UNLIKELY(member->Type()->Is<core::type::Struct>())) {
                 TINT_ICE() << "nested IO struct";
                 continue;
             }
@@ -461,12 +461,12 @@ struct CanonicalizeEntryPointIO::State {
     /// function.
     /// @param inner_ret_type the original function return type
     /// @param original_result the result object produced by the original function
-    void ProcessReturnType(const type::Type* inner_ret_type, Symbol original_result) {
+    void ProcessReturnType(const core::type::Type* inner_ret_type, Symbol original_result) {
         // Do not add interpolation attributes on fragment output
         bool do_interpolate = func_ast->PipelineStage() != PipelineStage::kFragment;
         if (auto* str = inner_ret_type->As<sem::Struct>()) {
             for (auto* member : str->Members()) {
-                if (TINT_UNLIKELY(member->Type()->Is<type::Struct>())) {
+                if (TINT_UNLIKELY(member->Type()->Is<core::type::Struct>())) {
                     TINT_ICE() << "nested IO struct";
                     continue;
                 }
@@ -480,7 +480,7 @@ struct CanonicalizeEntryPointIO::State {
                           member->Attributes().index, std::move(attributes),
                           b.MemberAccessor(original_result, name));
             }
-        } else if (!inner_ret_type->Is<type::Void>()) {
+        } else if (!inner_ret_type->Is<core::type::Void>()) {
             auto attributes =
                 CloneShaderIOAttributes(func_ast->return_type_attributes, do_interpolate);
 
@@ -507,8 +507,8 @@ struct CanonicalizeEntryPointIO::State {
         // sample mask.
         auto* builtin = b.Builtin(core::BuiltinValue::kSampleMask);
         builtin_attrs.Add(builtin, core::BuiltinValue::kSampleMask);
-        AddOutput("fixed_sample_mask", b.create<type::U32>(), std::nullopt, std::nullopt, {builtin},
-                  b.Expr(u32(cfg.fixed_sample_mask)));
+        AddOutput("fixed_sample_mask", b.create<core::type::U32>(), std::nullopt, std::nullopt,
+                  {builtin}, b.Expr(u32(cfg.fixed_sample_mask)));
     }
 
     /// Add a point size builtin to the wrapper function output.
@@ -516,8 +516,8 @@ struct CanonicalizeEntryPointIO::State {
         // Create a new output value and assign it a literal 1.0 value.
         auto* builtin = b.Builtin(core::BuiltinValue::kPointSize);
         builtin_attrs.Add(builtin, core::BuiltinValue::kPointSize);
-        AddOutput("vertex_point_size", b.create<type::F32>(), std::nullopt, std::nullopt, {builtin},
-                  b.Expr(1_f));
+        AddOutput("vertex_point_size", b.create<core::type::F32>(), std::nullopt, std::nullopt,
+                  {builtin}, b.Expr(1_f));
     }
 
     /// Create an expression for gl_Position.[component]
@@ -690,9 +690,9 @@ struct CanonicalizeEntryPointIO::State {
         }
 
         // Exit early if there is no shader IO to handle.
-        if (func_sem->Parameters().Length() == 0 && func_sem->ReturnType()->Is<type::Void>() &&
-            !needs_fixed_sample_mask && !needs_vertex_point_size &&
-            cfg.shader_style != ShaderStyle::kGlsl) {
+        if (func_sem->Parameters().Length() == 0 &&
+            func_sem->ReturnType()->Is<core::type::Void>() && !needs_fixed_sample_mask &&
+            !needs_vertex_point_size && cfg.shader_style != ShaderStyle::kGlsl) {
             return;
         }
 
@@ -700,7 +700,7 @@ struct CanonicalizeEntryPointIO::State {
         // aggregated into a single structure.
         if (!func_sem->Parameters().IsEmpty()) {
             for (auto* param : func_sem->Parameters()) {
-                if (param->Type()->Is<type::Struct>()) {
+                if (param->Type()->Is<core::type::Struct>()) {
                     ProcessStructParameter(param);
                 } else {
                     ProcessNonStructParameter(param);
@@ -718,7 +718,7 @@ struct CanonicalizeEntryPointIO::State {
 
         // Process the return type, and start building the wrapper function body.
         std::function<Type()> wrapper_ret_type = [&] { return b.ty.void_(); };
-        if (func_sem->ReturnType()->Is<type::Void>()) {
+        if (func_sem->ReturnType()->Is<core::type::Void>()) {
             // The function call is just a statement with no result.
             wrapper_body.Push(b.CallStmt(call_inner));
         } else {
@@ -866,13 +866,13 @@ struct CanonicalizeEntryPointIO::State {
     /// @returns the converted value which can be assigned to the GLSL builtin
     const Expression* ToGLSLBuiltin(core::BuiltinValue builtin,
                                     const Expression* value,
-                                    const type::Type*& type) {
+                                    const core::type::Type*& type) {
         switch (builtin) {
             case core::BuiltinValue::kVertexIndex:
             case core::BuiltinValue::kInstanceIndex:
             case core::BuiltinValue::kSampleIndex:
             case core::BuiltinValue::kSampleMask:
-                type = b.create<type::I32>();
+                type = b.create<core::type::I32>();
                 value = b.Bitcast(CreateASTTypeFor(ctx, type), value);
                 break;
             default:

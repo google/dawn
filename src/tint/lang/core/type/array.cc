@@ -23,14 +23,14 @@
 #include "src/tint/utils/symbol/symbol_table.h"
 #include "src/tint/utils/text/string_stream.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Array);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::Array);
 
-namespace tint::type {
+namespace tint::core::type {
 
 namespace {
 
-type::Flags FlagsFrom(const Type* element, const ArrayCount* count) {
-    type::Flags flags;
+core::type::Flags FlagsFrom(const Type* element, const ArrayCount* count) {
+    core::type::Flags flags;
     // Only constant-expression sized arrays are constructible
     if (count->Is<ConstantArrayCount>()) {
         if (element->IsConstructible()) {
@@ -128,4 +128,4 @@ Array* Array::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<Array>(elem_ty, count, align_, size_, stride_, implicit_stride_);
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

@@ -25,9 +25,9 @@ namespace {
 
 class MockConstant : public core::constant::Value {
   public:
-    explicit MockConstant(const type::Type* ty) : type(ty) {}
+    explicit MockConstant(const core::type::Type* ty) : type(ty) {}
     ~MockConstant() override {}
-    const type::Type* Type() const override { return type; }
+    const core::type::Type* Type() const override { return type; }
     const core::constant::Value* Index(size_t) const override { return {}; }
     size_t NumElements() const override { return 0; }
     bool AllZero() const override { return {}; }
@@ -39,14 +39,14 @@ class MockConstant : public core::constant::Value {
     std::variant<std::monostate, AInt, AFloat> InternalValue() const override { return {}; }
 
   private:
-    const type::Type* type;
+    const core::type::Type* type;
 };
 
 using ValueExpressionTest = TestHelper;
 
 TEST_F(ValueExpressionTest, UnwrapMaterialize) {
-    MockConstant c(create<type::I32>());
-    auto* a = create<ValueExpression>(/* declaration */ nullptr, create<type::I32>(),
+    MockConstant c(create<core::type::I32>());
+    auto* a = create<ValueExpression>(/* declaration */ nullptr, create<core::type::I32>(),
                                       core::EvaluationStage::kRuntime, /* statement */ nullptr,
                                       /* constant_value */ nullptr,
                                       /* has_side_effects */ false, /* root_ident */ nullptr);

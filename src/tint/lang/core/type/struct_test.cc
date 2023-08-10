@@ -16,7 +16,7 @@
 #include "src/tint/lang/core/type/helper_test.h"
 #include "src/tint/lang/core/type/texture.h"
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -205,7 +205,7 @@ TEST_F(TypeStructTest, HasFixedFootprint) {
 }
 
 TEST_F(TypeStructTest, Clone) {
-    type::StructMemberAttributes attrs_location_2;
+    core::type::StructMemberAttributes attrs_location_2;
     attrs_location_2.location = 2;
 
     auto* s = create<Struct>(
@@ -213,14 +213,14 @@ TEST_F(TypeStructTest, Clone) {
         tint::Vector{create<StructMember>(Sym("b"), create<Vector>(create<F32>(), 3u), 0u, 0u, 16u,
                                           12u, attrs_location_2),
                      create<StructMember>(Sym("a"), create<I32>(), 1u, 16u, 4u, 4u,
-                                          type::StructMemberAttributes{})},
+                                          core::type::StructMemberAttributes{})},
         4u /* align */, 8u /* size */, 16u /* size_no_padding */);
 
     GenerationID id;
     SymbolTable new_st{id};
 
-    type::Manager mgr;
-    type::CloneContext ctx{{&Symbols()}, {&new_st, &mgr}};
+    core::type::Manager mgr;
+    core::type::CloneContext ctx{{&Symbols()}, {&new_st, &mgr}};
 
     auto* st = s->Clone(ctx);
 
@@ -250,4 +250,4 @@ TEST_F(TypeStructTest, Clone) {
 }
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::core::type

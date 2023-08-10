@@ -17,7 +17,7 @@
 #include "src/tint/lang/core/type/helper_test.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 using TextureTypeDimTest = TestParamHelper<TextureDimension>;
@@ -41,4 +41,4 @@ INSTANTIATE_TEST_SUITE_P(Dimensions,
                                            TextureDimension::kCubeArray));
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::core::type

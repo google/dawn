@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Composite);
 
 namespace tint::core::constant {
 
-Composite::Composite(const type::Type* t, VectorRef<const Value*> els, bool all_0, bool any_0)
+Composite::Composite(const core::type::Type* t, VectorRef<const Value*> els, bool all_0, bool any_0)
     : type(t), elements(std::move(els)), all_zero(all_0), any_zero(any_0), hash(CalcHash()) {
     TINT_ASSERT(!elements.IsEmpty());
 }

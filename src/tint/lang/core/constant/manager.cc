@@ -37,7 +37,7 @@ Manager& Manager::operator=(Manager&& rhs) = default;
 
 Manager::~Manager() = default;
 
-const constant::Value* Manager::Composite(const type::Type* type,
+const constant::Value* Manager::Composite(const core::type::Type* type,
                                           VectorRef<const constant::Value*> elements) {
     if (elements.IsEmpty()) {
         return nullptr;
@@ -68,7 +68,7 @@ const constant::Value* Manager::Composite(const type::Type* type,
     return Get<constant::Composite>(type, std::move(elements), all_zero, any_zero);
 }
 
-const constant::Splat* Manager::Splat(const type::Type* type,
+const constant::Splat* Manager::Splat(const core::type::Type* type,
                                       const constant::Value* element,
                                       size_t n) {
     return Get<constant::Splat>(type, element, n);

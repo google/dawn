@@ -35,11 +35,11 @@ class Composite : public Castable<Composite, Value> {
     /// @param els the composite elements
     /// @param all_0 true if all elements are 0
     /// @param any_0 true if any element is 0
-    Composite(const type::Type* t, VectorRef<const Value*> els, bool all_0, bool any_0);
+    Composite(const core::type::Type* t, VectorRef<const Value*> els, bool all_0, bool any_0);
     ~Composite() override;
 
     /// @copydoc Value::Type()
-    const type::Type* Type() const override { return type; }
+    const core::type::Type* Type() const override { return type; }
 
     /// @copydoc Value::Index()
     const Value* Index(size_t i) const override {
@@ -64,7 +64,7 @@ class Composite : public Castable<Composite, Value> {
     const Composite* Clone(CloneContext& ctx) const override;
 
     /// The composite type
-    type::Type const* const type;
+    core::type::Type const* const type;
     /// The composite elements
     const Vector<const Value*, 4> elements;
     /// True if all elements are zero

@@ -32,7 +32,7 @@ class Constant : public Castable<Constant, Value> {
     const core::constant::Value* Value() { return value_; }
 
     /// @returns the type of the constant
-    const type::Type* Type() override { return value_->Type(); }
+    const core::type::Type* Type() override { return value_->Type(); }
 
   private:
     const core::constant::Value* const value_ = nullptr;

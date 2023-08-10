@@ -596,7 +596,7 @@ TEST_F(EntryPointParameterAttributeTest, DuplicateAttribute) {
 }
 
 TEST_F(EntryPointParameterAttributeTest, DuplicateInternalAttribute) {
-    auto* s = Param("s", ty.sampler(type::SamplerKind::kSampler),
+    auto* s = Param("s", ty.sampler(core::type::SamplerKind::kSampler),
                     Vector{
                         Binding(0_a),
                         Group(0_a),
@@ -975,7 +975,7 @@ TEST_P(VariableAttributeTest, IsValid) {
 
     auto attrs = createAttributes(Source{{12, 34}}, *this, params.kind);
     if (IsBindingAttribute(params.kind)) {
-        GlobalVar("a", ty.sampler(type::SamplerKind::kSampler), attrs);
+        GlobalVar("a", ty.sampler(core::type::SamplerKind::kSampler), attrs);
     } else {
         GlobalVar("a", ty.f32(), core::AddressSpace::kPrivate, attrs);
     }
@@ -1011,7 +1011,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                          TestParams{AttributeKind::kBindingAndGroup, true}));
 
 TEST_F(VariableAttributeTest, DuplicateAttribute) {
-    GlobalVar("a", ty.sampler(type::SamplerKind::kSampler), Binding(Source{{12, 34}}, 2_a),
+    GlobalVar("a", ty.sampler(core::type::SamplerKind::kSampler), Binding(Source{{12, 34}}, 2_a),
               Group(2_a), Binding(Source{{56, 78}}, 3_a));
 
     EXPECT_FALSE(r()->Resolve());
@@ -1610,7 +1610,7 @@ TEST_F(ResourceAttributeTest, StorageBufferMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, TextureMissingBinding) {
-    GlobalVar(Source{{12, 34}}, "G", ty.depth_texture(type::TextureDimension::k2d));
+    GlobalVar(Source{{12, 34}}, "G", ty.depth_texture(core::type::TextureDimension::k2d));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1618,7 +1618,7 @@ TEST_F(ResourceAttributeTest, TextureMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, SamplerMissingBinding) {
-    GlobalVar(Source{{12, 34}}, "G", ty.sampler(type::SamplerKind::kSampler));
+    GlobalVar(Source{{12, 34}}, "G", ty.sampler(core::type::SamplerKind::kSampler));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1626,7 +1626,7 @@ TEST_F(ResourceAttributeTest, SamplerMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPairMissingBinding) {
-    GlobalVar(Source{{12, 34}}, "G", ty.sampler(type::SamplerKind::kSampler), Group(1_a));
+    GlobalVar(Source{{12, 34}}, "G", ty.sampler(core::type::SamplerKind::kSampler), Group(1_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1634,7 +1634,7 @@ TEST_F(ResourceAttributeTest, BindingPairMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPairMissingGroup) {
-    GlobalVar(Source{{12, 34}}, "G", ty.sampler(type::SamplerKind::kSampler), Binding(1_a));
+    GlobalVar(Source{{12, 34}}, "G", ty.sampler(core::type::SamplerKind::kSampler), Binding(1_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1642,10 +1642,12 @@ TEST_F(ResourceAttributeTest, BindingPairMissingGroup) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByEntryPoint) {
-    GlobalVar(Source{{12, 34}}, "A", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
-              Binding(1_a), Group(2_a));
-    GlobalVar(Source{{56, 78}}, "B", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
-              Binding(1_a), Group(2_a));
+    GlobalVar(Source{{12, 34}}, "A",
+              ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), Binding(1_a),
+              Group(2_a));
+    GlobalVar(Source{{56, 78}}, "B",
+              ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), Binding(1_a),
+              Group(2_a));
 
     Func("F", tint::Empty, ty.void_(),
          Vector{
@@ -1666,10 +1668,12 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByEntryPoint) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByDifferentEntryPoints) {
-    GlobalVar(Source{{12, 34}}, "A", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
-              Binding(1_a), Group(2_a));
-    GlobalVar(Source{{56, 78}}, "B", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
-              Binding(1_a), Group(2_a));
+    GlobalVar(Source{{12, 34}}, "A",
+              ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), Binding(1_a),
+              Group(2_a));
+    GlobalVar(Source{{56, 78}}, "B",
+              ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), Binding(1_a),
+              Group(2_a));
 
     Func("F_A", tint::Empty, ty.void_(),
          Vector{
@@ -2040,7 +2044,7 @@ using GroupAndBindingTest = ResolverTest;
 TEST_F(GroupAndBindingTest, Const_I32) {
     GlobalConst("b", Expr(4_i));
     GlobalConst("g", Expr(2_i));
-    GlobalVar("val", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Binding("b"),
+    GlobalVar("val", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), Binding("b"),
               Group("g"));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -2049,7 +2053,7 @@ TEST_F(GroupAndBindingTest, Const_I32) {
 TEST_F(GroupAndBindingTest, Const_U32) {
     GlobalConst("b", Expr(4_u));
     GlobalConst("g", Expr(2_u));
-    GlobalVar("val", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Binding("b"),
+    GlobalVar("val", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), Binding("b"),
               Group("g"));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -2058,14 +2062,14 @@ TEST_F(GroupAndBindingTest, Const_U32) {
 TEST_F(GroupAndBindingTest, Const_AInt) {
     GlobalConst("b", Expr(4_a));
     GlobalConst("g", Expr(2_a));
-    GlobalVar("val", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Binding("b"),
+    GlobalVar("val", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), Binding("b"),
               Group("g"));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(GroupAndBindingTest, Binding_NonConstant) {
-    GlobalVar("val", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
+    GlobalVar("val", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
               Binding(Call<u32>(Call(Source{{12, 34}}, "dpdx", 1_a))), Group(1_i));
 
     EXPECT_FALSE(r()->Resolve());
@@ -2075,7 +2079,7 @@ TEST_F(GroupAndBindingTest, Binding_NonConstant) {
 }
 
 TEST_F(GroupAndBindingTest, Binding_Negative) {
-    GlobalVar("val", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
+    GlobalVar("val", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
               Binding(Source{{12, 34}}, -2_i), Group(1_i));
 
     EXPECT_FALSE(r()->Resolve());
@@ -2083,7 +2087,7 @@ TEST_F(GroupAndBindingTest, Binding_Negative) {
 }
 
 TEST_F(GroupAndBindingTest, Binding_F32) {
-    GlobalVar("val", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
+    GlobalVar("val", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
               Binding(Source{{12, 34}}, 2.0_f), Group(1_u));
 
     EXPECT_FALSE(r()->Resolve());
@@ -2091,7 +2095,7 @@ TEST_F(GroupAndBindingTest, Binding_F32) {
 }
 
 TEST_F(GroupAndBindingTest, Binding_AFloat) {
-    GlobalVar("val", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()),
+    GlobalVar("val", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()),
               Binding(Source{{12, 34}}, 2.0_a), Group(1_u));
 
     EXPECT_FALSE(r()->Resolve());
@@ -2099,7 +2103,7 @@ TEST_F(GroupAndBindingTest, Binding_AFloat) {
 }
 
 TEST_F(GroupAndBindingTest, Group_NonConstant) {
-    GlobalVar("val", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Binding(2_u),
+    GlobalVar("val", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), Binding(2_u),
               Group(Call<u32>(Call(Source{{12, 34}}, "dpdx", 1_a))));
 
     EXPECT_FALSE(r()->Resolve());
@@ -2109,7 +2113,7 @@ TEST_F(GroupAndBindingTest, Group_NonConstant) {
 }
 
 TEST_F(GroupAndBindingTest, Group_Negative) {
-    GlobalVar("val", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Binding(2_u),
+    GlobalVar("val", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), Binding(2_u),
               Group(Source{{12, 34}}, -1_i));
 
     EXPECT_FALSE(r()->Resolve());
@@ -2117,7 +2121,7 @@ TEST_F(GroupAndBindingTest, Group_Negative) {
 }
 
 TEST_F(GroupAndBindingTest, Group_F32) {
-    GlobalVar("val", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Binding(2_u),
+    GlobalVar("val", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), Binding(2_u),
               Group(Source{{12, 34}}, 1.0_f));
 
     EXPECT_FALSE(r()->Resolve());
@@ -2125,7 +2129,7 @@ TEST_F(GroupAndBindingTest, Group_F32) {
 }
 
 TEST_F(GroupAndBindingTest, Group_AFloat) {
-    GlobalVar("val", ty.sampled_texture(type::TextureDimension::k2d, ty.f32()), Binding(2_u),
+    GlobalVar("val", ty.sampled_texture(core::type::TextureDimension::k2d, ty.f32()), Binding(2_u),
               Group(Source{{12, 34}}, 1.0_a));
 
     EXPECT_FALSE(r()->Resolve());

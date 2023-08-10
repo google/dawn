@@ -19,7 +19,7 @@
 
 #include "src/tint/lang/core/type/numeric_scalar.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// A signed int 32 type.
 class I32 final : public Castable<I32, NumericScalar> {
@@ -45,6 +45,6 @@ class I32 final : public Castable<I32, NumericScalar> {
     I32* Clone(CloneContext& ctx) const override;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_I32_H_

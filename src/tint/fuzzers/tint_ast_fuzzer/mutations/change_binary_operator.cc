@@ -24,7 +24,7 @@ namespace tint::fuzzers::ast_fuzzer {
 
 namespace {
 
-bool IsSuitableForShift(const type::Type* lhs_type, const type::Type* rhs_type) {
+bool IsSuitableForShift(const core::type::Type* lhs_type, const core::type::Type* rhs_type) {
     // `a << b` requires b to be an unsigned scalar or vector, and `a` to be an
     // integer scalar or vector with the same width as `b`. Similar for `a >> b`.
 
@@ -37,8 +37,8 @@ bool IsSuitableForShift(const type::Type* lhs_type, const type::Type* rhs_type) 
     return false;
 }
 
-bool CanReplaceAddSubtractWith(const type::Type* lhs_type,
-                               const type::Type* rhs_type,
+bool CanReplaceAddSubtractWith(const core::type::Type* lhs_type,
+                               const core::type::Type* rhs_type,
                                core::BinaryOp new_operator) {
     // The program is assumed to be well-typed, so this method determines when
     // 'new_operator' can be used as a type-preserving replacement in an '+' or
@@ -71,8 +71,8 @@ bool CanReplaceAddSubtractWith(const type::Type* lhs_type,
     }
 }
 
-bool CanReplaceMultiplyWith(const type::Type* lhs_type,
-                            const type::Type* rhs_type,
+bool CanReplaceMultiplyWith(const core::type::Type* lhs_type,
+                            const core::type::Type* rhs_type,
                             core::BinaryOp new_operator) {
     // The program is assumed to be well-typed, so this method determines when
     // 'new_operator' can be used as a type-preserving replacement in a '*'
@@ -107,8 +107,8 @@ bool CanReplaceMultiplyWith(const type::Type* lhs_type,
     }
 }
 
-bool CanReplaceDivideOrModuloWith(const type::Type* lhs_type,
-                                  const type::Type* rhs_type,
+bool CanReplaceDivideOrModuloWith(const core::type::Type* lhs_type,
+                                  const core::type::Type* rhs_type,
                                   core::BinaryOp new_operator) {
     // The program is assumed to be well-typed, so this method determines when
     // 'new_operator' can be used as a type-preserving replacement in a '/'
@@ -149,8 +149,8 @@ bool CanReplaceLogicalAndLogicalOrWith(core::BinaryOp new_operator) {
     }
 }
 
-bool CanReplaceAndOrWith(const type::Type* lhs_type,
-                         const type::Type* rhs_type,
+bool CanReplaceAndOrWith(const core::type::Type* lhs_type,
+                         const core::type::Type* rhs_type,
                          core::BinaryOp new_operator) {
     switch (new_operator) {
         case core::BinaryOp::kAnd:
@@ -173,7 +173,7 @@ bool CanReplaceAndOrWith(const type::Type* lhs_type,
         case core::BinaryOp::kLogicalOr:
             // '&' and '|' can be applied to booleans, and for boolean scalar
             // scalar contexts, their logical counterparts work.
-            return lhs_type->Is<type::Bool>();
+            return lhs_type->Is<core::type::Bool>();
         case core::BinaryOp::kEqual:
         case core::BinaryOp::kNotEqual:
             // '&' and '|' can be applied to booleans, and in these contexts equality
@@ -184,8 +184,8 @@ bool CanReplaceAndOrWith(const type::Type* lhs_type,
     }
 }
 
-bool CanReplaceXorWith(const type::Type* lhs_type,
-                       const type::Type* rhs_type,
+bool CanReplaceXorWith(const core::type::Type* lhs_type,
+                       const core::type::Type* rhs_type,
                        core::BinaryOp new_operator) {
     switch (new_operator) {
         case core::BinaryOp::kAdd:
@@ -207,8 +207,8 @@ bool CanReplaceXorWith(const type::Type* lhs_type,
     }
 }
 
-bool CanReplaceShiftLeftShiftRightWith(const type::Type* lhs_type,
-                                       const type::Type* rhs_type,
+bool CanReplaceShiftLeftShiftRightWith(const core::type::Type* lhs_type,
+                                       const core::type::Type* rhs_type,
                                        core::BinaryOp new_operator) {
     switch (new_operator) {
         case core::BinaryOp::kShiftLeft:
@@ -232,7 +232,7 @@ bool CanReplaceShiftLeftShiftRightWith(const type::Type* lhs_type,
     }
 }
 
-bool CanReplaceEqualNotEqualWith(const type::Type* lhs_type, core::BinaryOp new_operator) {
+bool CanReplaceEqualNotEqualWith(const core::type::Type* lhs_type, core::BinaryOp new_operator) {
     switch (new_operator) {
         case core::BinaryOp::kEqual:
         case core::BinaryOp::kNotEqual:
@@ -249,7 +249,7 @@ bool CanReplaceEqualNotEqualWith(const type::Type* lhs_type, core::BinaryOp new_
         case core::BinaryOp::kLogicalOr:
             // An equality comparison between boolean scalars can be turned into a
             // logical operation.
-            return lhs_type->Is<type::Bool>();
+            return lhs_type->Is<core::type::Bool>();
         case core::BinaryOp::kAnd:
         case core::BinaryOp::kOr:
             // An equality comparison between boolean scalars or vectors can be turned
@@ -301,10 +301,12 @@ bool MutationChangeBinaryOperator::CanReplaceBinaryOperator(
     const auto* rhs_type = program.Sem().GetVal(binary_expr.rhs)->Type();
 
     // If these are reference types, unwrap them to get the pointee type.
-    const type::Type* lhs_basic_type =
-        lhs_type->Is<type::Reference>() ? lhs_type->As<type::Reference>()->StoreType() : lhs_type;
-    const type::Type* rhs_basic_type =
-        rhs_type->Is<type::Reference>() ? rhs_type->As<type::Reference>()->StoreType() : rhs_type;
+    const core::type::Type* lhs_basic_type =
+        lhs_type->Is<core::type::Reference>() ? lhs_type->As<core::type::Reference>()->StoreType()
+                                              : lhs_type;
+    const core::type::Type* rhs_basic_type =
+        rhs_type->Is<core::type::Reference>() ? rhs_type->As<core::type::Reference>()->StoreType()
+                                              : rhs_type;
 
     switch (binary_expr.op) {
         case core::BinaryOp::kAdd:

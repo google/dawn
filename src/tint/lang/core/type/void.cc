@@ -16,11 +16,12 @@
 
 #include "src/tint/lang/core/type/manager.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Void);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::Void);
 
-namespace tint::type {
+namespace tint::core::type {
 
-Void::Void() : Base(static_cast<size_t>(tint::TypeInfo::Of<Void>().full_hashcode), type::Flags{}) {}
+Void::Void()
+    : Base(static_cast<size_t>(tint::TypeInfo::Of<Void>().full_hashcode), core::type::Flags{}) {}
 
 Void::~Void() = default;
 
@@ -36,4 +37,4 @@ Void* Void::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<Void>();
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

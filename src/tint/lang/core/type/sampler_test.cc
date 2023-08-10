@@ -16,7 +16,7 @@
 #include "src/tint/lang/core/type/helper_test.h"
 #include "src/tint/lang/core/type/texture.h"
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 using SamplerTest = TestHelper;
@@ -66,12 +66,12 @@ TEST_F(SamplerTest, FriendlyNameComparisonSampler) {
 TEST_F(SamplerTest, Clone) {
     auto* a = create<Sampler>(SamplerKind::kSampler);
 
-    type::Manager mgr;
-    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+    core::type::Manager mgr;
+    core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* mt = a->Clone(ctx);
     EXPECT_EQ(mt->kind(), SamplerKind::kSampler);
 }
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::core::type

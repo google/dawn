@@ -39,7 +39,7 @@ ExternalTextureOptions::BindingsMap GenerateExternalTextureBindings(const Progra
                 auto& n = group_to_next_binding_number[bp->group];
                 n = std::max(n, bp->binding + 1);
 
-                if (sem_var->Type()->UnwrapRef()->Is<type::ExternalTexture>()) {
+                if (sem_var->Type()->UnwrapRef()->Is<core::type::ExternalTexture>()) {
                     ext_tex_bps.emplace_back(*bp);
                 }
             }

@@ -145,7 +145,7 @@ Source::Location Disassembler::MakeCurrentLocation() {
 
 std::string Disassembler::Disassemble() {
     for (auto* ty : mod_.Types()) {
-        if (auto* str = ty->As<type::Struct>()) {
+        if (auto* str = ty->As<core::type::Struct>()) {
             EmitStructDecl(str);
         }
     }
@@ -894,9 +894,9 @@ void Disassembler::EmitUnary(Unary* u) {
     sm.Store(u);
 }
 
-void Disassembler::EmitStructDecl(const type::Struct* str) {
+void Disassembler::EmitStructDecl(const core::type::Struct* str) {
     out_ << str->Name().Name() << " = struct @align(" << str->Align() << ")";
-    if (str->StructFlags().Contains(type::StructFlag::kBlock)) {
+    if (str->StructFlags().Contains(core::type::StructFlag::kBlock)) {
         out_ << ", @block";
     }
     out_ << " {";

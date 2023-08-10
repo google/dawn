@@ -64,10 +64,10 @@ class ValueExpression;
 class Variable;
 class WhileStatement;
 }  // namespace tint::sem
-namespace tint::type {
+namespace tint::core::type {
 class Array;
 class Type;
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 namespace tint::sem {
 
@@ -88,7 +88,7 @@ struct TypeMappings {
     Struct* operator()(ast::Struct*);
     StructMember* operator()(ast::StructMember*);
     SwitchStatement* operator()(ast::SwitchStatement*);
-    type::Type* operator()(ast::TypeDecl*);
+    core::type::Type* operator()(ast::TypeDecl*);
     ValueExpression* operator()(ast::AccessorExpression*);
     ValueExpression* operator()(ast::BinaryExpression*);
     ValueExpression* operator()(ast::BitcastExpression*);

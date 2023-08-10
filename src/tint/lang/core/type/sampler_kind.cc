@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/core/type/sampler_kind.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 std::string_view ToString(SamplerKind kind) {
     switch (kind) {
@@ -26,4 +26,4 @@ std::string_view ToString(SamplerKind kind) {
     return "<unknown>";
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

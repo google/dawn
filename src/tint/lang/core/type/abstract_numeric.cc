@@ -14,13 +14,13 @@
 
 #include "src/tint/lang/core/type/abstract_numeric.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::AbstractNumeric);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::AbstractNumeric);
 
-namespace tint::type {
+namespace tint::core::type {
 
 AbstractNumeric::AbstractNumeric(size_t hash)
     : Base(hash,
-           type::Flags{
+           core::type::Flags{
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,
@@ -35,4 +35,4 @@ uint32_t AbstractNumeric::Align() const {
     return 0;
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

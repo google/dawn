@@ -14,11 +14,11 @@
 
 #include "src/tint/lang/core/type/scalar.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Scalar);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::Scalar);
 
-namespace tint::type {
+namespace tint::core::type {
 
-Scalar::Scalar(size_t hash, type::Flags flags) : Base(hash, flags) {}
+Scalar::Scalar(size_t hash, core::type::Flags flags) : Base(hash, flags) {}
 
 Scalar::~Scalar() = default;
 
@@ -26,4 +26,4 @@ bool Scalar::Equals(const UniqueNode& other) const {
     return &other.TypeInfo() == &TypeInfo();
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

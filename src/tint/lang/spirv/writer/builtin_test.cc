@@ -255,7 +255,7 @@ TEST_F(SpirvWriterTest, Builtin_Determinant_Mat3x3h) {
 }
 
 TEST_F(SpirvWriterTest, Builtin_Frexp_F32) {
-    auto* str = type::CreateFrexpResult(ty, mod.symbols, ty.f32());
+    auto* str = core::type::CreateFrexpResult(ty, mod.symbols, ty.f32());
     auto* arg = b.FunctionParam("arg", ty.f32());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
@@ -270,7 +270,7 @@ TEST_F(SpirvWriterTest, Builtin_Frexp_F32) {
 }
 
 TEST_F(SpirvWriterTest, Builtin_Frexp_F16) {
-    auto* str = type::CreateFrexpResult(ty, mod.symbols, ty.f16());
+    auto* str = core::type::CreateFrexpResult(ty, mod.symbols, ty.f16());
     auto* arg = b.FunctionParam("arg", ty.f16());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
@@ -285,7 +285,7 @@ TEST_F(SpirvWriterTest, Builtin_Frexp_F16) {
 }
 
 TEST_F(SpirvWriterTest, Builtin_Frexp_Vec2f) {
-    auto* str = type::CreateFrexpResult(ty, mod.symbols, ty.vec2<f32>());
+    auto* str = core::type::CreateFrexpResult(ty, mod.symbols, ty.vec2<f32>());
     auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
@@ -300,7 +300,7 @@ TEST_F(SpirvWriterTest, Builtin_Frexp_Vec2f) {
 }
 
 TEST_F(SpirvWriterTest, Builtin_Frexp_Vec3h) {
-    auto* str = type::CreateFrexpResult(ty, mod.symbols, ty.vec3<f16>());
+    auto* str = core::type::CreateFrexpResult(ty, mod.symbols, ty.vec3<f16>());
     auto* arg = b.FunctionParam("arg", ty.vec3<f16>());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
@@ -329,7 +329,7 @@ TEST_F(SpirvWriterTest, Builtin_Length_vec4f) {
 }
 
 TEST_F(SpirvWriterTest, Builtin_Modf_F32) {
-    auto* str = type::CreateModfResult(ty, mod.symbols, ty.f32());
+    auto* str = core::type::CreateModfResult(ty, mod.symbols, ty.f32());
     auto* arg = b.FunctionParam("arg", ty.f32());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
@@ -344,7 +344,7 @@ TEST_F(SpirvWriterTest, Builtin_Modf_F32) {
 }
 
 TEST_F(SpirvWriterTest, Builtin_Modf_F16) {
-    auto* str = type::CreateModfResult(ty, mod.symbols, ty.f16());
+    auto* str = core::type::CreateModfResult(ty, mod.symbols, ty.f16());
     auto* arg = b.FunctionParam("arg", ty.f16());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
@@ -359,7 +359,7 @@ TEST_F(SpirvWriterTest, Builtin_Modf_F16) {
 }
 
 TEST_F(SpirvWriterTest, Builtin_Modf_Vec2f) {
-    auto* str = type::CreateModfResult(ty, mod.symbols, ty.vec2<f32>());
+    auto* str = core::type::CreateModfResult(ty, mod.symbols, ty.vec2<f32>());
     auto* arg = b.FunctionParam("arg", ty.vec2<f32>());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});
@@ -374,7 +374,7 @@ TEST_F(SpirvWriterTest, Builtin_Modf_Vec2f) {
 }
 
 TEST_F(SpirvWriterTest, Builtin_Modf_Vec3h) {
-    auto* str = type::CreateModfResult(ty, mod.symbols, ty.vec3<f16>());
+    auto* str = core::type::CreateModfResult(ty, mod.symbols, ty.vec3<f16>());
     auto* arg = b.FunctionParam("arg", ty.vec3<f16>());
     auto* func = b.Function("foo", str);
     func->SetParams({arg});

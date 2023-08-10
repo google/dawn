@@ -41,7 +41,7 @@ class Scalar : public Castable<Scalar<T>, ScalarBase> {
     /// Constructor
     /// @param t the scalar type
     /// @param v the scalar value
-    Scalar(const type::Type* t, T v) : type(t), value(v) {
+    Scalar(const core::type::Type* t, T v) : type(t), value(v) {
         if constexpr (IsFloatingPoint<T>) {
             TINT_ASSERT(std::isfinite(v.value));
         }
@@ -49,7 +49,7 @@ class Scalar : public Castable<Scalar<T>, ScalarBase> {
     ~Scalar() override = default;
 
     /// @copydoc Value::Type()
-    const type::Type* Type() const override { return type; }
+    const core::type::Type* Type() const override { return type; }
 
     /// @return nullptr, as Scalar does not hold any elements.
     const Value* Index(size_t) const override { return nullptr; }
@@ -91,7 +91,7 @@ class Scalar : public Castable<Scalar<T>, ScalarBase> {
     }
 
     /// The scalar type
-    type::Type const* const type;
+    core::type::Type const* const type;
     /// The scalar value
     const T value;
 

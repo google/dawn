@@ -16,13 +16,13 @@
 
 #include "src/tint/lang/core/type/manager.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::I32);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::I32);
 
-namespace tint::type {
+namespace tint::core::type {
 
 I32::I32()
     : Base(static_cast<size_t>(tint::TypeInfo::Of<I32>().full_hashcode),
-           type::Flags{
+           core::type::Flags{
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,
@@ -46,4 +46,4 @@ I32* I32::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<I32>();
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

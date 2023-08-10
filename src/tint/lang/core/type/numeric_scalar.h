@@ -17,7 +17,7 @@
 
 #include "src/tint/lang/core/type/scalar.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// Base class for all numeric-scalar types
 /// @see https://www.w3.org/TR/WGSL/#scalar-types
@@ -30,9 +30,9 @@ class NumericScalar : public Castable<NumericScalar, Scalar> {
     /// Constructor
     /// @param hash the immutable hash for the node
     /// @param flags the flags of this type
-    NumericScalar(size_t hash, type::Flags flags);
+    NumericScalar(size_t hash, core::type::Flags flags);
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_NUMERIC_SCALAR_H_

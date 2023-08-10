@@ -53,13 +53,13 @@ bool ShouldRun(const Program* program) {
 }
 
 // Returns `true` if `type` is or contains a matrix type.
-bool ContainsMatrix(const type::Type* type) {
+bool ContainsMatrix(const core::type::Type* type) {
     type = type->UnwrapRef();
-    if (type->Is<type::Matrix>()) {
+    if (type->Is<core::type::Matrix>()) {
         return true;
-    } else if (auto* ary = type->As<type::Array>()) {
+    } else if (auto* ary = type->As<core::type::Array>()) {
         return ContainsMatrix(ary->ElemType());
-    } else if (auto* str = type->As<type::Struct>()) {
+    } else if (auto* str = type->As<core::type::Struct>()) {
         for (auto* member : str->Members()) {
             if (ContainsMatrix(member->Type())) {
                 return true;
@@ -83,7 +83,7 @@ struct ModuleScopeVarToEntryPointParam::State {
     /// and add it to the global declarations now, so that they precede new global
     /// declarations that need to reference them.
     /// @param ty the type to clone
-    void CloneStructTypes(const type::Type* ty) {
+    void CloneStructTypes(const core::type::Type* ty) {
         if (auto* str = ty->As<sem::Struct>()) {
             if (!cloned_structs_.emplace(str).second) {
                 // The struct has already been cloned.
@@ -100,7 +100,7 @@ struct ModuleScopeVarToEntryPointParam::State {
             auto* ast_str = str->Declaration();
             ctx.dst->AST().AddTypeDecl(ctx.Clone(ast_str));
             ctx.Remove(ctx.src->AST().GlobalDeclarations(), ast_str);
-        } else if (auto* arr = ty->As<type::Array>()) {
+        } else if (auto* arr = ty->As<core::type::Array>()) {
             CloneStructTypes(arr->ElemType());
         }
     }
@@ -150,8 +150,8 @@ struct ModuleScopeVarToEntryPointParam::State {
                 attributes.Push(ctx.dst->Disable(DisabledValidation::kIgnoreAddressSpace));
 
                 auto param_type = store_type();
-                if (auto* arr = ty->As<type::Array>();
-                    arr && arr->Count()->Is<type::RuntimeArrayCount>()) {
+                if (auto* arr = ty->As<core::type::Array>();
+                    arr && arr->Count()->Is<core::type::RuntimeArrayCount>()) {
                     // Wrap runtime-sized arrays in structures, so that we can declare pointers to
                     // them. Ideally we'd just emit the array itself as a pointer, but this is not
                     // representable in Tint's AST.

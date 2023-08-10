@@ -25,7 +25,7 @@ class InstructionResult : public Castable<InstructionResult, Value> {
   public:
     /// Constructor
     /// @param type the type of the value
-    explicit InstructionResult(const type::Type* type);
+    explicit InstructionResult(const core::type::Type* type);
 
     /// Destructor
     ~InstructionResult() override;
@@ -34,11 +34,11 @@ class InstructionResult : public Castable<InstructionResult, Value> {
     void Destroy() override;
 
     /// @returns the type of the value
-    const type::Type* Type() override { return type_; }
+    const core::type::Type* Type() override { return type_; }
 
     /// Sets the type of the value to @p type
     /// @param type the new type of the value
-    void SetType(const type::Type* type) { type_ = type; }
+    void SetType(const core::type::Type* type) { type_ = type; }
 
     /// Sets the source instruction for this value
     /// @param inst the instruction to set
@@ -49,7 +49,7 @@ class InstructionResult : public Castable<InstructionResult, Value> {
 
   private:
     Instruction* source_ = nullptr;
-    const type::Type* type_ = nullptr;
+    const core::type::Type* type_ = nullptr;
 };
 
 }  // namespace tint::ir

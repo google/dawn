@@ -179,7 +179,7 @@ void Printer::EmitBlockInstructions(ir::Block* block) {
 void Printer::EmitBinary(ir::Binary* b) {
     if (b->Kind() == ir::Binary::Kind::kEqual) {
         auto* rhs = b->RHS()->As<ir::Constant>();
-        if (rhs && rhs->Type()->Is<type::Bool>() && rhs->Value()->ValueAs<bool>() == false) {
+        if (rhs && rhs->Type()->Is<core::type::Bool>() && rhs->Value()->ValueAs<bool>() == false) {
             // expr == false
             Bind(b->Result(), "!(" + Expr(b->LHS()) + ")");
             return;
@@ -238,7 +238,7 @@ void Printer::EmitLoad(ir::Load* l) {
 void Printer::EmitVar(ir::Var* v) {
     auto out = Line();
 
-    auto* ptr = v->Result()->Type()->As<type::Pointer>();
+    auto* ptr = v->Result()->Type()->As<core::type::Pointer>();
     TINT_ASSERT_OR_RETURN(ptr);
 
     auto space = ptr->AddressSpace();
@@ -363,23 +363,23 @@ void Printer::EmitAddressSpace(StringStream& out, core::AddressSpace sc) {
     }
 }
 
-void Printer::EmitType(StringStream& out, const type::Type* ty) {
+void Printer::EmitType(StringStream& out, const core::type::Type* ty) {
     tint::Switch(
-        ty,                                         //
-        [&](const type::Bool*) { out << "bool"; },  //
-        [&](const type::Void*) { out << "void"; },  //
-        [&](const type::F32*) { out << "float"; },  //
-        [&](const type::F16*) { out << "half"; },   //
-        [&](const type::I32*) { out << "int"; },    //
-        [&](const type::U32*) { out << "uint"; },   //
-        [&](const type::Array* arr) { EmitArrayType(out, arr); },
-        [&](const type::Vector* vec) { EmitVectorType(out, vec); },
-        [&](const type::Matrix* mat) { EmitMatrixType(out, mat); },
-        [&](const type::Atomic* atomic) { EmitAtomicType(out, atomic); },
-        [&](const type::Pointer* ptr) { EmitPointerType(out, ptr); },
-        [&](const type::Sampler*) { out << "sampler"; },  //
-        [&](const type::Texture* tex) { EmitTextureType(out, tex); },
-        [&](const type::Struct* str) {
+        ty,                                               //
+        [&](const core::type::Bool*) { out << "bool"; },  //
+        [&](const core::type::Void*) { out << "void"; },  //
+        [&](const core::type::F32*) { out << "float"; },  //
+        [&](const core::type::F16*) { out << "half"; },   //
+        [&](const core::type::I32*) { out << "int"; },    //
+        [&](const core::type::U32*) { out << "uint"; },   //
+        [&](const core::type::Array* arr) { EmitArrayType(out, arr); },
+        [&](const core::type::Vector* vec) { EmitVectorType(out, vec); },
+        [&](const core::type::Matrix* mat) { EmitMatrixType(out, mat); },
+        [&](const core::type::Atomic* atomic) { EmitAtomicType(out, atomic); },
+        [&](const core::type::Pointer* ptr) { EmitPointerType(out, ptr); },
+        [&](const core::type::Sampler*) { out << "sampler"; },  //
+        [&](const core::type::Texture* tex) { EmitTextureType(out, tex); },
+        [&](const core::type::Struct* str) {
             out << StructName(str);
 
             TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);
@@ -388,7 +388,7 @@ void Printer::EmitType(StringStream& out, const type::Type* ty) {
         [&](Default) { UNHANDLED_CASE(ty); });
 }
 
-void Printer::EmitPointerType(StringStream& out, const type::Pointer* ptr) {
+void Printer::EmitPointerType(StringStream& out, const core::type::Pointer* ptr) {
     if (ptr->Access() == core::Access::kRead) {
         out << "const ";
     }
@@ -398,28 +398,28 @@ void Printer::EmitPointerType(StringStream& out, const type::Pointer* ptr) {
     out << "*";
 }
 
-void Printer::EmitAtomicType(StringStream& out, const type::Atomic* atomic) {
-    if (atomic->Type()->Is<type::I32>()) {
+void Printer::EmitAtomicType(StringStream& out, const core::type::Atomic* atomic) {
+    if (atomic->Type()->Is<core::type::I32>()) {
         out << "atomic_int";
         return;
     }
-    if (TINT_LIKELY(atomic->Type()->Is<type::U32>())) {
+    if (TINT_LIKELY(atomic->Type()->Is<core::type::U32>())) {
         out << "atomic_uint";
         return;
     }
     TINT_ICE() << "unhandled atomic type " << atomic->Type()->FriendlyName();
 }
 
-void Printer::EmitArrayType(StringStream& out, const type::Array* arr) {
+void Printer::EmitArrayType(StringStream& out, const core::type::Array* arr) {
     out << ArrayTemplateName() << "<";
     EmitType(out, arr->ElemType());
     out << ", ";
-    if (arr->Count()->Is<type::RuntimeArrayCount>()) {
+    if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
         out << "1";
     } else {
         auto count = arr->ConstantCount();
         if (!count) {
-            TINT_ICE() << type::Array::kErrExpectedConstantCount;
+            TINT_ICE() << core::type::Array::kErrExpectedConstantCount;
             return;
         }
         out << count.value();
@@ -427,7 +427,7 @@ void Printer::EmitArrayType(StringStream& out, const type::Array* arr) {
     out << ">";
 }
 
-void Printer::EmitVectorType(StringStream& out, const type::Vector* vec) {
+void Printer::EmitVectorType(StringStream& out, const core::type::Vector* vec) {
     if (vec->Packed()) {
         out << "packed_";
     }
@@ -435,47 +435,47 @@ void Printer::EmitVectorType(StringStream& out, const type::Vector* vec) {
     out << vec->Width();
 }
 
-void Printer::EmitMatrixType(StringStream& out, const type::Matrix* mat) {
+void Printer::EmitMatrixType(StringStream& out, const core::type::Matrix* mat) {
     EmitType(out, mat->type());
     out << mat->columns() << "x" << mat->rows();
 }
 
-void Printer::EmitTextureType(StringStream& out, const type::Texture* tex) {
-    if (TINT_UNLIKELY(tex->Is<type::ExternalTexture>())) {
+void Printer::EmitTextureType(StringStream& out, const core::type::Texture* tex) {
+    if (TINT_UNLIKELY(tex->Is<core::type::ExternalTexture>())) {
         TINT_ICE() << "Multiplanar external texture transform was not run.";
         return;
     }
 
-    if (tex->IsAnyOf<type::DepthTexture, type::DepthMultisampledTexture>()) {
+    if (tex->IsAnyOf<core::type::DepthTexture, core::type::DepthMultisampledTexture>()) {
         out << "depth";
     } else {
         out << "texture";
     }
 
     switch (tex->dim()) {
-        case type::TextureDimension::k1d:
+        case core::type::TextureDimension::k1d:
             out << "1d";
             break;
-        case type::TextureDimension::k2d:
+        case core::type::TextureDimension::k2d:
             out << "2d";
             break;
-        case type::TextureDimension::k2dArray:
+        case core::type::TextureDimension::k2dArray:
             out << "2d_array";
             break;
-        case type::TextureDimension::k3d:
+        case core::type::TextureDimension::k3d:
             out << "3d";
             break;
-        case type::TextureDimension::kCube:
+        case core::type::TextureDimension::kCube:
             out << "cube";
             break;
-        case type::TextureDimension::kCubeArray:
+        case core::type::TextureDimension::kCubeArray:
             out << "cube_array";
             break;
         default:
             TINT_ICE() << "invalid texture dimensions";
             return;
     }
-    if (tex->IsAnyOf<type::MultisampledTexture, type::DepthMultisampledTexture>()) {
+    if (tex->IsAnyOf<core::type::MultisampledTexture, core::type::DepthMultisampledTexture>()) {
         out << "_ms";
     }
     out << "<";
@@ -483,9 +483,9 @@ void Printer::EmitTextureType(StringStream& out, const type::Texture* tex) {
 
     tint::Switch(
         tex,  //
-        [&](const type::DepthTexture*) { out << "float, access::sample"; },
-        [&](const type::DepthMultisampledTexture*) { out << "float, access::read"; },
-        [&](const type::StorageTexture* storage) {
+        [&](const core::type::DepthTexture*) { out << "float, access::sample"; },
+        [&](const core::type::DepthMultisampledTexture*) { out << "float, access::read"; },
+        [&](const core::type::StorageTexture* storage) {
             EmitType(out, storage->type());
             out << ", ";
 
@@ -499,18 +499,18 @@ void Printer::EmitTextureType(StringStream& out, const type::Texture* tex) {
                 return;
             }
         },
-        [&](const type::MultisampledTexture* ms) {
+        [&](const core::type::MultisampledTexture* ms) {
             EmitType(out, ms->type());
             out << ", access::read";
         },
-        [&](const type::SampledTexture* sampled) {
+        [&](const core::type::SampledTexture* sampled) {
             EmitType(out, sampled->type());
             out << ", access::sample";
         },
         [&](Default) { TINT_ICE() << "invalid texture type"; });
 }
 
-void Printer::EmitStructType(const type::Struct* str) {
+void Printer::EmitStructType(const core::type::Struct* str) {
     auto it = emitted_structs_.emplace(str);
     if (!it.second) {
         return;
@@ -592,14 +592,14 @@ void Printer::EmitStructType(const type::Struct* str) {
                 return;
             }
 
-            if (pipeline_stage_uses.count(type::PipelineStageUsage::kVertexInput)) {
+            if (pipeline_stage_uses.count(core::type::PipelineStageUsage::kVertexInput)) {
                 out << " [[attribute(" + std::to_string(location.value()) + ")]]";
-            } else if (pipeline_stage_uses.count(type::PipelineStageUsage::kVertexOutput)) {
+            } else if (pipeline_stage_uses.count(core::type::PipelineStageUsage::kVertexOutput)) {
                 out << " [[user(locn" + std::to_string(location.value()) + ")]]";
-            } else if (pipeline_stage_uses.count(type::PipelineStageUsage::kFragmentInput)) {
+            } else if (pipeline_stage_uses.count(core::type::PipelineStageUsage::kFragmentInput)) {
                 out << " [[user(locn" + std::to_string(location.value()) + ")]]";
-            } else if (TINT_LIKELY(
-                           pipeline_stage_uses.count(type::PipelineStageUsage::kFragmentOutput))) {
+            } else if (TINT_LIKELY(pipeline_stage_uses.count(
+                           core::type::PipelineStageUsage::kFragmentOutput))) {
                 out << " [[color(" + std::to_string(location.value()) + ")]]";
             } else {
                 TINT_ICE() << "invalid use of location decoration";
@@ -662,12 +662,12 @@ void Printer::EmitConstant(StringStream& out, const core::constant::Value* c) {
 
     tint::Switch(
         c->Type(),  //
-        [&](const type::Bool*) { out << (c->ValueAs<bool>() ? "true" : "false"); },
-        [&](const type::I32*) { PrintI32(out, c->ValueAs<i32>()); },
-        [&](const type::U32*) { out << c->ValueAs<u32>() << "u"; },
-        [&](const type::F32*) { PrintF32(out, c->ValueAs<f32>()); },
-        [&](const type::F16*) { PrintF16(out, c->ValueAs<f16>()); },
-        [&](const type::Vector* v) {
+        [&](const core::type::Bool*) { out << (c->ValueAs<bool>() ? "true" : "false"); },
+        [&](const core::type::I32*) { PrintI32(out, c->ValueAs<i32>()); },
+        [&](const core::type::U32*) { out << c->ValueAs<u32>() << "u"; },
+        [&](const core::type::F32*) { PrintF32(out, c->ValueAs<f32>()); },
+        [&](const core::type::F16*) { PrintF16(out, c->ValueAs<f16>()); },
+        [&](const core::type::Vector* v) {
             EmitType(out, v);
 
             ScopedParen sp(out);
@@ -677,12 +677,12 @@ void Printer::EmitConstant(StringStream& out, const core::constant::Value* c) {
             }
             emit_values(v->Width());
         },
-        [&](const type::Matrix* m) {
+        [&](const core::type::Matrix* m) {
             EmitType(out, m);
             ScopedParen sp(out);
             emit_values(m->columns());
         },
-        [&](const type::Array* a) {
+        [&](const core::type::Array* a) {
             EmitType(out, a);
             out << "{";
             TINT_DEFER(out << "}");
@@ -693,12 +693,12 @@ void Printer::EmitConstant(StringStream& out, const core::constant::Value* c) {
 
             auto count = a->ConstantCount();
             if (!count) {
-                TINT_ICE() << type::Array::kErrExpectedConstantCount;
+                TINT_ICE() << core::type::Array::kErrExpectedConstantCount;
                 return;
             }
             emit_values(*count);
         },
-        [&](const type::Struct* s) {
+        [&](const core::type::Struct* s) {
             EmitStructType(s);
             out << StructName(s) << "{";
             TINT_DEFER(out << "}");
@@ -719,26 +719,26 @@ void Printer::EmitConstant(StringStream& out, const core::constant::Value* c) {
         [&](Default) { UNHANDLED_CASE(c->Type()); });
 }
 
-void Printer::EmitZeroValue(StringStream& out, const type::Type* ty) {
+void Printer::EmitZeroValue(StringStream& out, const core::type::Type* ty) {
     Switch(
-        ty, [&](const type::Bool*) { out << "false"; },                     //
-        [&](const type::F16*) { out << "0.0h"; },                           //
-        [&](const type::F32*) { out << "0.0f"; },                           //
-        [&](const type::I32*) { out << "0"; },                              //
-        [&](const type::U32*) { out << "0u"; },                             //
-        [&](const type::Vector* vec) { EmitZeroValue(out, vec->type()); },  //
-        [&](const type::Matrix* mat) {
+        ty, [&](const core::type::Bool*) { out << "false"; },                     //
+        [&](const core::type::F16*) { out << "0.0h"; },                           //
+        [&](const core::type::F32*) { out << "0.0f"; },                           //
+        [&](const core::type::I32*) { out << "0"; },                              //
+        [&](const core::type::U32*) { out << "0u"; },                             //
+        [&](const core::type::Vector* vec) { EmitZeroValue(out, vec->type()); },  //
+        [&](const core::type::Matrix* mat) {
             EmitType(out, mat);
 
             ScopedParen sp(out);
             EmitZeroValue(out, mat->type());
         },
-        [&](const type::Array*) { out << "{}"; },   //
-        [&](const type::Struct*) { out << "{}"; },  //
+        [&](const core::type::Array*) { out << "{}"; },   //
+        [&](const core::type::Struct*) { out << "{}"; },  //
         [&](Default) { TINT_ICE() << "Invalid type for zero emission: " << ty->FriendlyName(); });
 }
 
-std::string Printer::StructName(const type::Struct* s) {
+std::string Printer::StructName(const core::type::Struct* s) {
     auto name = s->Name().Name();
     if (HasPrefix(name, "__")) {
         name = tint::GetOrCreate(builtin_struct_names_, s,
@@ -802,7 +802,7 @@ std::string Printer::Expr(ir::Value* value, PtrKind want_ptr_kind) {
         return "<error>";
     }
 
-    if (value->Type()->Is<type::Pointer>()) {
+    if (value->Type()->Is<core::type::Pointer>()) {
         return ToPtrKind(expr, got_ptr_kind, want_ptr_kind);
     }
 
@@ -841,7 +841,7 @@ void Printer::Bind(ir::Value* value, const std::string& expr, PtrKind ptr_kind) 
             auto out = Line();
             EmitType(out, value->Type());
             out << " const " << mod_name.Name() << " = ";
-            if (value->Type()->Is<type::Pointer>()) {
+            if (value->Type()->Is<core::type::Pointer>()) {
                 out << ToPtrKind(expr, ptr_kind, PtrKind::kPtr);
             } else {
                 out << expr;

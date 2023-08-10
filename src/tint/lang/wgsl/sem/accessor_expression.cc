@@ -23,7 +23,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::AccessorExpression);
 namespace tint::sem {
 
 AccessorExpression::AccessorExpression(const ast::AccessorExpression* declaration,
-                                       const type::Type* type,
+                                       const core::type::Type* type,
                                        core::EvaluationStage stage,
                                        const ValueExpression* object,
                                        const Statement* statement,

@@ -349,7 +349,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param name_printed (optional) if not nullptr and an array was printed
     /// then the boolean is set to true.
     void EmitType(StringStream& out,
-                  const type::Type* type,
+                  const core::type::Type* type,
                   core::AddressSpace address_space,
                   core::Access access,
                   const std::string& name,
@@ -361,7 +361,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param access the access control type of the variable
     /// @param name the name to emit
     void EmitTypeAndName(StringStream& out,
-                         const type::Type* type,
+                         const core::type::Type* type,
                          core::AddressSpace address_space,
                          core::Access access,
                          const std::string& name);
@@ -369,11 +369,11 @@ class ASTPrinter : public tint::TextGenerator {
     /// this function will simply return `true` without emitting anything.
     /// @param buffer the text buffer that the type declaration will be written to
     /// @param ty the struct to generate
-    void EmitStructType(TextBuffer* buffer, const type::Struct* ty);
+    void EmitStructType(TextBuffer* buffer, const core::type::Struct* ty);
     /// Handles generating the members of a structure
     /// @param buffer the text buffer that the struct members will be written to
     /// @param ty the struct to generate
-    void EmitStructMembers(TextBuffer* buffer, const type::Struct* ty);
+    void EmitStructMembers(TextBuffer* buffer, const core::type::Struct* ty);
     /// Handles a unary op expression
     /// @param out the output of the expression stream
     /// @param expr the expression to emit
@@ -381,7 +381,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// Emits the zero value for the given type
     /// @param out the output stream
     /// @param type the type to emit the value for
-    void EmitZeroValue(StringStream& out, const type::Type* type);
+    void EmitZeroValue(StringStream& out, const core::type::Type* type);
     /// Handles generating a 'var' declaration
     /// @param var the variable to generate
     void EmitVar(const ast::Var* var);
@@ -400,10 +400,10 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param stage pipeline stage in which this builtin is used
     /// @returns the string name of the builtin or blank on error
     const char* builtin_to_string(core::BuiltinValue builtin, ast::PipelineStage stage);
-    /// Converts a builtin to a type::Type appropriate for GLSL.
+    /// Converts a builtin to a core::type::Type appropriate for GLSL.
     /// @param builtin the builtin to convert
     /// @returns the appropriate semantic type or null on error.
-    type::Type* builtin_type(core::BuiltinValue builtin);
+    core::type::Type* builtin_type(core::BuiltinValue builtin);
 
   private:
     enum class VarType { kIn, kOut };
@@ -415,7 +415,7 @@ class ASTPrinter : public tint::TextGenerator {
 
     /// The map key for two semantic types.
     using BinaryOperandType =
-        tint::UnorderedKeyWrapper<std::tuple<const type::Type*, const type::Type*>>;
+        tint::UnorderedKeyWrapper<std::tuple<const core::type::Type*, const core::type::Type*>>;
 
     /// CallBuiltinHelper will call the builtin helper function, creating it
     /// if it hasn't been built already. If the builtin needs to be built then
@@ -438,13 +438,13 @@ class ASTPrinter : public tint::TextGenerator {
     /// Create a uint type corresponding to the given bool or bool vector type.
     /// @param type the bool or bool vector type to convert
     /// @returns the corresponding uint type
-    type::Type* BoolTypeToUint(const type::Type* type);
+    core::type::Type* BoolTypeToUint(const core::type::Type* type);
 
     /// @param s the structure
     /// @returns the name of the structure, taking special care of builtin structures that start
     /// with double underscores. If the structure is a builtin, then the returned name will be a
     /// unique name without the leading underscores.
-    std::string StructName(const type::Struct* s);
+    std::string StructName(const core::type::Struct* s);
 
     /// @return a new, unique identifier with the given prefix.
     /// @param prefix optional prefix to apply to the generated identifier. If empty "tint_symbol"
@@ -463,16 +463,16 @@ class ASTPrinter : public tint::TextGenerator {
     TextBuffer helpers_;
 
     /// Map of builtin structure to unique generated name
-    std::unordered_map<const type::Struct*, std::string> builtin_struct_names_;
+    std::unordered_map<const core::type::Struct*, std::string> builtin_struct_names_;
     std::function<void()> emit_continuing_;
     std::unordered_map<const sem::Builtin*, std::string> builtins_;
-    std::unordered_map<const type::Vector*, std::string> dynamic_vector_write_;
-    std::unordered_map<const type::Vector*, std::string> int_dot_funcs_;
+    std::unordered_map<const core::type::Vector*, std::string> dynamic_vector_write_;
+    std::unordered_map<const core::type::Vector*, std::string> int_dot_funcs_;
     std::unordered_map<BinaryOperandType, std::string> float_modulo_funcs_;
     // Polyfill functions for bitcast expression, BinaryOperandType indicates the source type and
     // the destination type
     std::unordered_map<BinaryOperandType, std::string> bitcast_funcs_;
-    std::unordered_set<const type::Struct*> emitted_structs_;
+    std::unordered_set<const core::type::Struct*> emitted_structs_;
     bool requires_oes_sample_variables_ = false;
     bool requires_default_precision_qualifier_ = false;
     bool requires_f16_extension_ = false;

@@ -29,7 +29,7 @@ TEST_F(ConstEvalTest, Scalar_AFloat) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    EXPECT_TRUE(sem->Type()->Is<type::AbstractFloat>());
+    EXPECT_TRUE(sem->Type()->Is<core::type::AbstractFloat>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->AllZero());
@@ -45,7 +45,7 @@ TEST_F(ConstEvalTest, Scalar_AInt) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    EXPECT_TRUE(sem->Type()->Is<type::AbstractInt>());
+    EXPECT_TRUE(sem->Type()->Is<core::type::AbstractInt>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->AllZero());
@@ -60,7 +60,7 @@ TEST_F(ConstEvalTest, Scalar_i32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    EXPECT_TRUE(sem->Type()->Is<type::I32>());
+    EXPECT_TRUE(sem->Type()->Is<core::type::I32>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->AllZero());
@@ -75,7 +75,7 @@ TEST_F(ConstEvalTest, Scalar_u32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    EXPECT_TRUE(sem->Type()->Is<type::U32>());
+    EXPECT_TRUE(sem->Type()->Is<core::type::U32>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->AllZero());
@@ -90,7 +90,7 @@ TEST_F(ConstEvalTest, Scalar_f32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    EXPECT_TRUE(sem->Type()->Is<type::F32>());
+    EXPECT_TRUE(sem->Type()->Is<core::type::F32>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->AllZero());
@@ -107,7 +107,7 @@ TEST_F(ConstEvalTest, Scalar_f16) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    EXPECT_TRUE(sem->Type()->Is<type::F16>());
+    EXPECT_TRUE(sem->Type()->Is<core::type::F16>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->AllZero());
@@ -123,7 +123,7 @@ TEST_F(ConstEvalTest, Scalar_bool) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    EXPECT_TRUE(sem->Type()->Is<type::Bool>());
+    EXPECT_TRUE(sem->Type()->Is<core::type::Bool>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->AllZero());
@@ -155,16 +155,16 @@ TEST_P(ConstEvalZeroInitTest, Test) {
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->AllZero());
 
-    if (sem->Type()->Is<type::Scalar>()) {
+    if (sem->Type()->Is<core::type::Scalar>()) {
         EXPECT_EQ(sem->ConstantValue()->Index(0), nullptr);
         EXPECT_EQ(sem->ConstantValue()->ValueAs<f32>(), 0.0f);
-    } else if (auto* vec = sem->Type()->As<type::Vector>()) {
+    } else if (auto* vec = sem->Type()->As<core::type::Vector>()) {
         for (size_t i = 0; i < vec->Width(); ++i) {
             EXPECT_TRUE(sem->ConstantValue()->Index(i)->AnyZero());
             EXPECT_TRUE(sem->ConstantValue()->Index(i)->AllZero());
             EXPECT_EQ(sem->ConstantValue()->Index(i)->ValueAs<f32>(), 0.0f);
         }
-    } else if (auto* mat = sem->Type()->As<type::Matrix>()) {
+    } else if (auto* mat = sem->Type()->As<core::type::Matrix>()) {
         for (size_t i = 0; i < mat->columns(); ++i) {
             EXPECT_TRUE(sem->ConstantValue()->Index(i)->AnyZero());
             EXPECT_TRUE(sem->ConstantValue()->Index(i)->AllZero());
@@ -174,7 +174,7 @@ TEST_P(ConstEvalZeroInitTest, Test) {
                 EXPECT_EQ(sem->ConstantValue()->Index(i)->Index(j)->ValueAs<f32>(), 0.0f);
             }
         }
-    } else if (auto* arr = sem->Type()->As<type::Array>()) {
+    } else if (auto* arr = sem->Type()->As<core::type::Array>()) {
         for (size_t i = 0; i < *(arr->ConstantCount()); ++i) {
             EXPECT_TRUE(sem->ConstantValue()->Index(i)->AnyZero());
             EXPECT_TRUE(sem->ConstantValue()->Index(i)->AllZero());
@@ -216,9 +216,9 @@ TEST_F(ConstEvalTest, Vec3_ZeroInit_i32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::I32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::I32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -245,9 +245,9 @@ TEST_F(ConstEvalTest, Vec3_ZeroInit_u32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::U32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::U32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -274,9 +274,9 @@ TEST_F(ConstEvalTest, Vec3_ZeroInit_f32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -305,9 +305,9 @@ TEST_F(ConstEvalTest, Vec3_ZeroInit_f16) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F16>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F16>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -334,9 +334,9 @@ TEST_F(ConstEvalTest, Vec3_ZeroInit_bool) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::Bool>());
+    EXPECT_TRUE(vec->type()->Is<core::type::Bool>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -363,9 +363,9 @@ TEST_F(ConstEvalTest, Vec3_Splat_i32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::I32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::I32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -392,9 +392,9 @@ TEST_F(ConstEvalTest, Vec3_Splat_u32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::U32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::U32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -421,9 +421,9 @@ TEST_F(ConstEvalTest, Vec3_Splat_f32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -452,9 +452,9 @@ TEST_F(ConstEvalTest, Vec3_Splat_f16) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F16>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F16>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -482,9 +482,9 @@ TEST_F(ConstEvalTest, Vec3_Splat_bool) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::Bool>());
+    EXPECT_TRUE(vec->type()->Is<core::type::Bool>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -512,9 +512,9 @@ TEST_F(ConstEvalTest, Vec3_FullConstruct_AInt) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::AbstractInt>());
+    EXPECT_TRUE(vec->type()->Is<core::type::AbstractInt>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -542,9 +542,9 @@ TEST_F(ConstEvalTest, Vec3_FullConstruct_AFloat) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::AbstractFloat>());
+    EXPECT_TRUE(vec->type()->Is<core::type::AbstractFloat>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -571,9 +571,9 @@ TEST_F(ConstEvalTest, Vec3_FullConstruct_i32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::I32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::I32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -600,9 +600,9 @@ TEST_F(ConstEvalTest, Vec3_FullConstruct_u32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::U32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::U32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -629,9 +629,9 @@ TEST_F(ConstEvalTest, Vec3_FullConstruct_f32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -660,9 +660,9 @@ TEST_F(ConstEvalTest, Vec3_FullConstruct_f16) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F16>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F16>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -689,9 +689,9 @@ TEST_F(ConstEvalTest, Vec3_FullConstruct_bool) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::Bool>());
+    EXPECT_TRUE(vec->type()->Is<core::type::Bool>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -718,9 +718,9 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_i32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::I32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::I32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -747,9 +747,9 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_u32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::U32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::U32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -776,9 +776,9 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -805,9 +805,9 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f32_all_10) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -834,9 +834,9 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f32_all_positive_0) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -863,9 +863,9 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f32_all_negative_0) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -892,9 +892,9 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f32_mixed_sign_0) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F32>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -923,9 +923,9 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f16) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F16>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F16>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -954,9 +954,9 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_all_10) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F16>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F16>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -985,9 +985,9 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_all_positive_0) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F16>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F16>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -1016,9 +1016,9 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_all_negative_0) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F16>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F16>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -1047,9 +1047,9 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_mixed_sign_0) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::F16>());
+    EXPECT_TRUE(vec->type()->Is<core::type::F16>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -1076,9 +1076,9 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_bool) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::Bool>());
+    EXPECT_TRUE(vec->type()->Is<core::type::Bool>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -1105,9 +1105,9 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_all_true) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::Bool>());
+    EXPECT_TRUE(vec->type()->Is<core::type::Bool>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -1134,9 +1134,9 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_all_false) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<type::Vector>();
+    auto* vec = sem->Type()->As<core::type::Vector>();
     ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<type::Bool>());
+    EXPECT_TRUE(vec->type()->Is<core::type::Bool>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -1163,9 +1163,9 @@ TEST_F(ConstEvalTest, Mat2x3_ZeroInit_f32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* mat = sem->Type()->As<type::Matrix>();
+    auto* mat = sem->Type()->As<core::type::Matrix>();
     ASSERT_NE(mat, nullptr);
-    EXPECT_TRUE(mat->type()->Is<type::F32>());
+    EXPECT_TRUE(mat->type()->Is<core::type::F32>());
     EXPECT_EQ(mat->columns(), 2u);
     EXPECT_EQ(mat->rows(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -1207,9 +1207,9 @@ TEST_F(ConstEvalTest, Mat2x3_ZeroInit_f16) {
 
     auto* sem = Sem().Get(expr);
     EXPECT_NE(sem, nullptr);
-    auto* mat = sem->Type()->As<type::Matrix>();
+    auto* mat = sem->Type()->As<core::type::Matrix>();
     ASSERT_NE(mat, nullptr);
-    EXPECT_TRUE(mat->type()->Is<type::F16>());
+    EXPECT_TRUE(mat->type()->Is<core::type::F16>());
     EXPECT_EQ(mat->columns(), 2u);
     EXPECT_EQ(mat->rows(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -1249,9 +1249,9 @@ TEST_F(ConstEvalTest, Mat3x2_Construct_Scalars_af) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* mat = sem->Type()->As<type::Matrix>();
+    auto* mat = sem->Type()->As<core::type::Matrix>();
     ASSERT_NE(mat, nullptr);
-    EXPECT_TRUE(mat->type()->Is<type::F32>());
+    EXPECT_TRUE(mat->type()->Is<core::type::F32>());
     EXPECT_EQ(mat->columns(), 3u);
     EXPECT_EQ(mat->rows(), 2u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -1294,9 +1294,9 @@ TEST_F(ConstEvalTest, Mat3x2_Construct_Columns_af) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* mat = sem->Type()->As<type::Matrix>();
+    auto* mat = sem->Type()->As<core::type::Matrix>();
     ASSERT_NE(mat, nullptr);
-    EXPECT_TRUE(mat->type()->Is<type::F32>());
+    EXPECT_TRUE(mat->type()->Is<core::type::F32>());
     EXPECT_EQ(mat->columns(), 3u);
     EXPECT_EQ(mat->rows(), 2u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -1336,9 +1336,9 @@ TEST_F(ConstEvalTest, Array_i32_Zero) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<type::Array>();
+    auto* arr = sem->Type()->As<core::type::Array>();
     ASSERT_NE(arr, nullptr);
-    EXPECT_TRUE(arr->ElemType()->Is<type::I32>());
+    EXPECT_TRUE(arr->ElemType()->Is<core::type::I32>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->AllZero());
@@ -1368,9 +1368,9 @@ TEST_F(ConstEvalTest, Array_f32_Zero) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<type::Array>();
+    auto* arr = sem->Type()->As<core::type::Array>();
     ASSERT_NE(arr, nullptr);
-    EXPECT_TRUE(arr->ElemType()->Is<type::F32>());
+    EXPECT_TRUE(arr->ElemType()->Is<core::type::F32>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->AllZero());
@@ -1400,9 +1400,9 @@ TEST_F(ConstEvalTest, Array_vec3_f32_Zero) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<type::Array>();
+    auto* arr = sem->Type()->As<core::type::Array>();
     ASSERT_NE(arr, nullptr);
-    EXPECT_TRUE(arr->ElemType()->Is<type::Vector>());
+    EXPECT_TRUE(arr->ElemType()->Is<core::type::Vector>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->AllZero());
@@ -1444,9 +1444,9 @@ TEST_F(ConstEvalTest, Array_Struct_f32_Zero) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<type::Array>();
+    auto* arr = sem->Type()->As<core::type::Array>();
     ASSERT_NE(arr, nullptr);
-    EXPECT_TRUE(arr->ElemType()->Is<type::Struct>());
+    EXPECT_TRUE(arr->ElemType()->Is<core::type::Struct>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->AllZero());
@@ -1476,9 +1476,9 @@ TEST_F(ConstEvalTest, Array_i32_Elements) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<type::Array>();
+    auto* arr = sem->Type()->As<core::type::Array>();
     ASSERT_NE(arr, nullptr);
-    EXPECT_TRUE(arr->ElemType()->Is<type::I32>());
+    EXPECT_TRUE(arr->ElemType()->Is<core::type::I32>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->AllZero());
@@ -1523,7 +1523,7 @@ TEST_P(ResolverConstEvalArrayInitTest, Test) {
 
     auto* sem = Sem().GetVal(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<type::Array>();
+    auto* arr = sem->Type()->As<core::type::Array>();
     ASSERT_NE(arr, nullptr);
 
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -1568,10 +1568,10 @@ TEST_F(ConstEvalTest, ArrayInit_Nested_f32) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* outer_arr = sem->Type()->As<type::Array>();
+    auto* outer_arr = sem->Type()->As<core::type::Array>();
     ASSERT_NE(outer_arr, nullptr);
-    EXPECT_TRUE(outer_arr->ElemType()->Is<type::Array>());
-    EXPECT_TRUE(outer_arr->ElemType()->As<type::Array>()->ElemType()->Is<type::F32>());
+    EXPECT_TRUE(outer_arr->ElemType()->Is<core::type::Array>());
+    EXPECT_TRUE(outer_arr->ElemType()->As<core::type::Array>()->ElemType()->Is<core::type::F32>());
 
     auto* arr = sem->ConstantValue();
     EXPECT_FALSE(arr->AnyZero());
@@ -1600,9 +1600,9 @@ TEST_F(ConstEvalTest, Array_f32_Elements) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<type::Array>();
+    auto* arr = sem->Type()->As<core::type::Array>();
     ASSERT_NE(arr, nullptr);
-    EXPECT_TRUE(arr->ElemType()->Is<type::F32>());
+    EXPECT_TRUE(arr->ElemType()->Is<core::type::F32>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->AllZero());
@@ -1633,9 +1633,9 @@ TEST_F(ConstEvalTest, Array_vec3_f32_Elements) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<type::Array>();
+    auto* arr = sem->Type()->As<core::type::Array>();
     ASSERT_NE(arr, nullptr);
-    EXPECT_TRUE(arr->ElemType()->Is<type::Vector>());
+    EXPECT_TRUE(arr->ElemType()->Is<core::type::Vector>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->AllZero());
@@ -1661,9 +1661,9 @@ TEST_F(ConstEvalTest, Array_Struct_f32_Elements) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* arr = sem->Type()->As<type::Array>();
+    auto* arr = sem->Type()->As<core::type::Array>();
     ASSERT_NE(arr, nullptr);
-    EXPECT_TRUE(arr->ElemType()->Is<type::Struct>());
+    EXPECT_TRUE(arr->ElemType()->Is<core::type::Struct>());
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->AllZero());
@@ -1703,7 +1703,7 @@ TEST_F(ConstEvalTest, Struct_ZeroInit) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<type::Struct>();
+    auto* str = sem->Type()->As<core::type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 5u);
 
@@ -1711,15 +1711,15 @@ TEST_F(ConstEvalTest, Struct_ZeroInit) {
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->AllZero());
 
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<type::I32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<core::type::I32>());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<i32>(), 0);
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<type::U32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<core::type::U32>());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<u32>(), 0u);
-    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<type::F32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<core::type::F32>());
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<f32>(), 0.0f);
-    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->Is<type::F16>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->Is<core::type::F16>());
     EXPECT_EQ(sem->ConstantValue()->Index(3)->ValueAs<f16>(), 0.0f);
-    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->Is<type::Bool>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->Is<core::type::Bool>());
     EXPECT_EQ(sem->ConstantValue()->Index(4)->ValueAs<bool>(), false);
 
     for (size_t i = 0; i < str->Members().Length(); ++i) {
@@ -1750,7 +1750,7 @@ TEST_F(ConstEvalTest, Struct_Nested_ZeroInit) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<type::Struct>();
+    auto* str = sem->Type()->As<core::type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 1u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
@@ -1761,15 +1761,15 @@ TEST_F(ConstEvalTest, Struct_Nested_ZeroInit) {
     EXPECT_TRUE(inner_struct->AnyZero());
     EXPECT_TRUE(inner_struct->AllZero());
 
-    EXPECT_TRUE(inner_struct->Index(0)->Type()->Is<type::I32>());
+    EXPECT_TRUE(inner_struct->Index(0)->Type()->Is<core::type::I32>());
     EXPECT_EQ(inner_struct->Index(0)->ValueAs<i32>(), 0);
-    EXPECT_TRUE(inner_struct->Index(1)->Type()->Is<type::U32>());
+    EXPECT_TRUE(inner_struct->Index(1)->Type()->Is<core::type::U32>());
     EXPECT_EQ(inner_struct->Index(1)->ValueAs<u32>(), 0u);
-    EXPECT_TRUE(inner_struct->Index(2)->Type()->Is<type::F32>());
+    EXPECT_TRUE(inner_struct->Index(2)->Type()->Is<core::type::F32>());
     EXPECT_EQ(inner_struct->Index(2)->ValueAs<f32>(), 0.0f);
-    EXPECT_TRUE(inner_struct->Index(3)->Type()->Is<type::F16>());
+    EXPECT_TRUE(inner_struct->Index(3)->Type()->Is<core::type::F16>());
     EXPECT_EQ(inner_struct->Index(3)->ValueAs<f16>(), 0.0f);
-    EXPECT_TRUE(inner_struct->Index(4)->Type()->Is<type::Bool>());
+    EXPECT_TRUE(inner_struct->Index(4)->Type()->Is<core::type::Bool>());
     EXPECT_EQ(inner_struct->Index(4)->ValueAs<bool>(), false);
 
     for (size_t i = 0; i < str->Members().Length(); ++i) {
@@ -1787,7 +1787,7 @@ TEST_F(ConstEvalTest, Struct_I32s_ZeroInit) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<type::Struct>();
+    auto* str = sem->Type()->As<core::type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 3u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -1797,17 +1797,17 @@ TEST_F(ConstEvalTest, Struct_I32s_ZeroInit) {
 
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<type::I32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<core::type::I32>());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<i32>(), 0_i);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<type::I32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<core::type::I32>());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<i32>(), 0_i);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<type::I32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<core::type::I32>());
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<i32>(), 0_i);
 }
 
@@ -1828,7 +1828,7 @@ TEST_F(ConstEvalTest, Struct_MixedScalars_ZeroInit) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<type::Struct>();
+    auto* str = sem->Type()->As<core::type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 5u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -1838,27 +1838,27 @@ TEST_F(ConstEvalTest, Struct_MixedScalars_ZeroInit) {
 
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<type::I32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<core::type::I32>());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<i32>(), 0_i);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<type::U32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<core::type::U32>());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<u32>(), 0_u);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<type::F32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<core::type::F32>());
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<f32>(), 0._f);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(3)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(3)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->Is<type::F16>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->Is<core::type::F16>());
     EXPECT_EQ(sem->ConstantValue()->Index(3)->ValueAs<f16>(), 0._h);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(4)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(4)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->Is<type::Bool>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->Is<core::type::Bool>());
     EXPECT_EQ(sem->ConstantValue()->Index(4)->ValueAs<bool>(), false);
 }
 
@@ -1875,7 +1875,7 @@ TEST_F(ConstEvalTest, Struct_VectorF32s_ZeroInit) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<type::Struct>();
+    auto* str = sem->Type()->As<core::type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 3u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -1885,27 +1885,39 @@ TEST_F(ConstEvalTest, Struct_VectorF32s_ZeroInit) {
 
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<type::Vector>());
-    EXPECT_TRUE(
-        sem->ConstantValue()->Index(0)->Type()->As<type::Vector>()->type()->Is<type::F32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<core::type::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()
+                    ->Index(0)
+                    ->Type()
+                    ->As<core::type::Vector>()
+                    ->type()
+                    ->Is<core::type::F32>());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->ValueAs<f32>(), 0._f);
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->ValueAs<f32>(), 0._f);
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(2)->ValueAs<f32>(), 0._f);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<type::Vector>());
-    EXPECT_TRUE(
-        sem->ConstantValue()->Index(1)->Type()->As<type::Vector>()->type()->Is<type::F32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<core::type::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()
+                    ->Index(1)
+                    ->Type()
+                    ->As<core::type::Vector>()
+                    ->type()
+                    ->Is<core::type::F32>());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->ValueAs<f32>(), 0._f);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->ValueAs<f32>(), 0._f);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->ValueAs<f32>(), 0._f);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<type::Vector>());
-    EXPECT_TRUE(
-        sem->ConstantValue()->Index(2)->Type()->As<type::Vector>()->type()->Is<type::F32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<core::type::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()
+                    ->Index(2)
+                    ->Type()
+                    ->As<core::type::Vector>()
+                    ->type()
+                    ->Is<core::type::F32>());
     EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(0)->ValueAs<f32>(), 0._f);
     EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(1)->ValueAs<f32>(), 0._f);
     EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(2)->ValueAs<f32>(), 0._f);
@@ -1928,7 +1940,7 @@ TEST_F(ConstEvalTest, Struct_MixedVectors_ZeroInit) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<type::Struct>();
+    auto* str = sem->Type()->As<core::type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 5u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -1938,26 +1950,38 @@ TEST_F(ConstEvalTest, Struct_MixedVectors_ZeroInit) {
 
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<type::Vector>());
-    EXPECT_TRUE(
-        sem->ConstantValue()->Index(0)->Type()->As<type::Vector>()->type()->Is<type::I32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<core::type::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()
+                    ->Index(0)
+                    ->Type()
+                    ->As<core::type::Vector>()
+                    ->type()
+                    ->Is<core::type::I32>());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->ValueAs<i32>(), 0_i);
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->ValueAs<i32>(), 0_i);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<type::Vector>());
-    EXPECT_TRUE(
-        sem->ConstantValue()->Index(1)->Type()->As<type::Vector>()->type()->Is<type::U32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<core::type::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()
+                    ->Index(1)
+                    ->Type()
+                    ->As<core::type::Vector>()
+                    ->type()
+                    ->Is<core::type::U32>());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->ValueAs<u32>(), 0_u);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->ValueAs<u32>(), 0_u);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->ValueAs<u32>(), 0_u);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<type::Vector>());
-    EXPECT_TRUE(
-        sem->ConstantValue()->Index(2)->Type()->As<type::Vector>()->type()->Is<type::F32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<core::type::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()
+                    ->Index(2)
+                    ->Type()
+                    ->As<core::type::Vector>()
+                    ->type()
+                    ->Is<core::type::F32>());
     EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(0)->ValueAs<f32>(), 0._f);
     EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(1)->ValueAs<f32>(), 0._f);
     EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(2)->ValueAs<f32>(), 0._f);
@@ -1965,18 +1989,26 @@ TEST_F(ConstEvalTest, Struct_MixedVectors_ZeroInit) {
 
     EXPECT_TRUE(sem->ConstantValue()->Index(3)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(3)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->Is<type::Vector>());
-    EXPECT_TRUE(
-        sem->ConstantValue()->Index(3)->Type()->As<type::Vector>()->type()->Is<type::F16>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->Is<core::type::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()
+                    ->Index(3)
+                    ->Type()
+                    ->As<core::type::Vector>()
+                    ->type()
+                    ->Is<core::type::F16>());
     EXPECT_EQ(sem->ConstantValue()->Index(3)->Index(0)->ValueAs<f16>(), 0._h);
     EXPECT_EQ(sem->ConstantValue()->Index(3)->Index(1)->ValueAs<f16>(), 0._h);
     EXPECT_EQ(sem->ConstantValue()->Index(3)->Index(2)->ValueAs<f16>(), 0._h);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(4)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(4)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->Is<type::Vector>());
-    EXPECT_TRUE(
-        sem->ConstantValue()->Index(4)->Type()->As<type::Vector>()->type()->Is<type::Bool>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->Is<core::type::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()
+                    ->Index(4)
+                    ->Type()
+                    ->As<core::type::Vector>()
+                    ->type()
+                    ->Is<core::type::Bool>());
     EXPECT_EQ(sem->ConstantValue()->Index(4)->Index(0)->ValueAs<bool>(), false);
     EXPECT_EQ(sem->ConstantValue()->Index(4)->Index(1)->ValueAs<bool>(), false);
 }
@@ -1999,7 +2031,7 @@ TEST_F(ConstEvalTest, Struct_Struct_ZeroInit) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<type::Struct>();
+    auto* str = sem->Type()->As<core::type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 2u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -2009,14 +2041,14 @@ TEST_F(ConstEvalTest, Struct_Struct_ZeroInit) {
 
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<type::Struct>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<core::type::Struct>());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->ValueAs<i32>(), 0_i);
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->ValueAs<u32>(), 0_u);
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(2)->ValueAs<f32>(), 0_f);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<type::Struct>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<core::type::Struct>());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->ValueAs<i32>(), 0_i);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->ValueAs<u32>(), 0_u);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->ValueAs<f32>(), 0_f);
@@ -2039,7 +2071,7 @@ TEST_F(ConstEvalTest, Struct_MixedScalars_Construct) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<type::Struct>();
+    auto* str = sem->Type()->As<core::type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 5u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -2049,27 +2081,27 @@ TEST_F(ConstEvalTest, Struct_MixedScalars_Construct) {
 
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<type::I32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<core::type::I32>());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<i32>(), 1_i);
 
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<type::U32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<core::type::U32>());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<u32>(), 2_u);
 
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<type::F32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<core::type::F32>());
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<f32>(), 3._f);
 
     EXPECT_FALSE(sem->ConstantValue()->Index(3)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(3)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->Is<type::F16>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->Is<core::type::F16>());
     EXPECT_EQ(sem->ConstantValue()->Index(3)->ValueAs<f16>(), 4._h);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(4)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(4)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->Is<type::Bool>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->Is<core::type::Bool>());
     EXPECT_EQ(sem->ConstantValue()->Index(4)->ValueAs<bool>(), false);
 }
 
@@ -2091,7 +2123,7 @@ TEST_F(ConstEvalTest, Struct_MixedVectors_Construct) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<type::Struct>();
+    auto* str = sem->Type()->As<core::type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 5u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -2101,26 +2133,38 @@ TEST_F(ConstEvalTest, Struct_MixedVectors_Construct) {
 
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<type::Vector>());
-    EXPECT_TRUE(
-        sem->ConstantValue()->Index(0)->Type()->As<type::Vector>()->type()->Is<type::I32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<core::type::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()
+                    ->Index(0)
+                    ->Type()
+                    ->As<core::type::Vector>()
+                    ->type()
+                    ->Is<core::type::I32>());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->ValueAs<i32>(), 1_i);
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->ValueAs<i32>(), 1_i);
 
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<type::Vector>());
-    EXPECT_TRUE(
-        sem->ConstantValue()->Index(1)->Type()->As<type::Vector>()->type()->Is<type::U32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<core::type::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()
+                    ->Index(1)
+                    ->Type()
+                    ->As<core::type::Vector>()
+                    ->type()
+                    ->Is<core::type::U32>());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->ValueAs<u32>(), 2_u);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->ValueAs<u32>(), 2_u);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->ValueAs<u32>(), 2_u);
 
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<type::Vector>());
-    EXPECT_TRUE(
-        sem->ConstantValue()->Index(2)->Type()->As<type::Vector>()->type()->Is<type::F32>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<core::type::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()
+                    ->Index(2)
+                    ->Type()
+                    ->As<core::type::Vector>()
+                    ->type()
+                    ->Is<core::type::F32>());
     EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(0)->ValueAs<f32>(), 3._f);
     EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(1)->ValueAs<f32>(), 3._f);
     EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(2)->ValueAs<f32>(), 3._f);
@@ -2128,18 +2172,26 @@ TEST_F(ConstEvalTest, Struct_MixedVectors_Construct) {
 
     EXPECT_FALSE(sem->ConstantValue()->Index(3)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(3)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->Is<type::Vector>());
-    EXPECT_TRUE(
-        sem->ConstantValue()->Index(3)->Type()->As<type::Vector>()->type()->Is<type::F16>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->Is<core::type::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()
+                    ->Index(3)
+                    ->Type()
+                    ->As<core::type::Vector>()
+                    ->type()
+                    ->Is<core::type::F16>());
     EXPECT_EQ(sem->ConstantValue()->Index(3)->Index(0)->ValueAs<f16>(), 4._h);
     EXPECT_EQ(sem->ConstantValue()->Index(3)->Index(1)->ValueAs<f16>(), 4._h);
     EXPECT_EQ(sem->ConstantValue()->Index(3)->Index(2)->ValueAs<f16>(), 4._h);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(4)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(4)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->Is<type::Vector>());
-    EXPECT_TRUE(
-        sem->ConstantValue()->Index(4)->Type()->As<type::Vector>()->type()->Is<type::Bool>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->Is<core::type::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()
+                    ->Index(4)
+                    ->Type()
+                    ->As<core::type::Vector>()
+                    ->type()
+                    ->Is<core::type::Bool>());
     EXPECT_EQ(sem->ConstantValue()->Index(4)->Index(0)->ValueAs<bool>(), false);
     EXPECT_EQ(sem->ConstantValue()->Index(4)->Index(1)->ValueAs<bool>(), false);
 }
@@ -2163,7 +2215,7 @@ TEST_F(ConstEvalTest, Struct_Struct_Construct) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<type::Struct>();
+    auto* str = sem->Type()->As<core::type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 2u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -2173,14 +2225,14 @@ TEST_F(ConstEvalTest, Struct_Struct_Construct) {
 
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<type::Struct>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<core::type::Struct>());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->ValueAs<i32>(), 1_i);
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->ValueAs<u32>(), 2_u);
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(2)->ValueAs<f32>(), 3_f);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<type::Struct>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<core::type::Struct>());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->ValueAs<i32>(), 4_i);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->ValueAs<u32>(), 0_u);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->ValueAs<f32>(), 6_f);
@@ -2199,7 +2251,7 @@ TEST_F(ConstEvalTest, Struct_Array_Construct) {
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
-    auto* str = sem->Type()->As<type::Struct>();
+    auto* str = sem->Type()->As<core::type::Struct>();
     ASSERT_NE(str, nullptr);
     EXPECT_EQ(str->Members().Length(), 2u);
     ASSERT_NE(sem->ConstantValue(), nullptr);
@@ -2209,13 +2261,13 @@ TEST_F(ConstEvalTest, Struct_Array_Construct) {
 
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<type::Array>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<core::type::Array>());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->ValueAs<i32>(), 1_i);
     EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->ValueAs<u32>(), 2_i);
 
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<type::Array>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<core::type::Array>());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->ValueAs<i32>(), 1_f);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->ValueAs<u32>(), 2_f);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->ValueAs<f32>(), 3_f);

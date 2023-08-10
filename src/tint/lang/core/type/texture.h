@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/core/type/type.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// A texture type.
 class Texture : public Castable<Texture, Type> {
@@ -39,7 +39,7 @@ class Texture : public Castable<Texture, Type> {
 
 /// @param dim the type::TextureDimension to query
 /// @return true if the given type::TextureDimension is an array texture
-bool IsTextureArray(type::TextureDimension dim);
+bool IsTextureArray(core::type::TextureDimension dim);
 
 /// Returns the number of axes in the coordinate used for accessing
 /// the texture, where an access is one of: sampling, fetching, load,
@@ -53,8 +53,8 @@ bool IsTextureArray(type::TextureDimension dim);
 /// size, representing the (x,y) size of each cube face, in texels.
 /// @param dim the type::TextureDimension to query
 /// @return number of dimensions in a coordinate for the dimensionality
-int NumCoordinateAxes(type::TextureDimension dim);
+int NumCoordinateAxes(core::type::TextureDimension dim);
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_TEXTURE_H_

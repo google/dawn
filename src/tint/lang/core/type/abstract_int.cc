@@ -17,9 +17,9 @@
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/utils/math/hash.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::AbstractInt);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::AbstractInt);
 
-namespace tint::type {
+namespace tint::core::type {
 
 AbstractInt::AbstractInt() : Base(Hash(tint::TypeInfo::Of<AbstractInt>().full_hashcode)) {}
 
@@ -33,4 +33,4 @@ AbstractInt* AbstractInt::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<AbstractInt>();
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

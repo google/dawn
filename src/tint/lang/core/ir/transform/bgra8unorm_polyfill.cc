@@ -38,7 +38,7 @@ struct State {
     Builder b{*ir};
 
     /// The type manager.
-    type::Manager& ty{ir->Types()};
+    core::type::Manager& ty{ir->Types()};
 
     /// Process the module.
     void Process() {
@@ -50,11 +50,11 @@ struct State {
                 if (!var) {
                     continue;
                 }
-                auto* ptr = var->Result()->Type()->As<type::Pointer>();
+                auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
                 if (!ptr) {
                     continue;
                 }
-                auto* storage_texture = ptr->StoreType()->As<type::StorageTexture>();
+                auto* storage_texture = ptr->StoreType()->As<core::type::StorageTexture>();
                 if (storage_texture &&
                     storage_texture->texel_format() == core::TexelFormat::kBgra8Unorm) {
                     ReplaceVar(var, storage_texture);
@@ -70,7 +70,7 @@ struct State {
         for (auto* func : ir->functions) {
             for (uint32_t index = 0; index < func->Params().Length(); index++) {
                 auto* param = func->Params()[index];
-                auto* storage_texture = param->Type()->As<type::StorageTexture>();
+                auto* storage_texture = param->Type()->As<core::type::StorageTexture>();
                 if (storage_texture &&
                     storage_texture->texel_format() == core::TexelFormat::kBgra8Unorm) {
                     ReplaceParameter(func, param, index, storage_texture);
@@ -82,10 +82,10 @@ struct State {
     /// Replace a variable declaration with one that uses rgba8unorm instead of bgra8unorm.
     /// @param old_var the variable declaration to replace
     /// @param bgra8 the bgra8unorm texture type
-    void ReplaceVar(Var* old_var, const type::StorageTexture* bgra8) {
+    void ReplaceVar(Var* old_var, const core::type::StorageTexture* bgra8) {
         // Redeclare the variable with a rgba8unorm texel format.
-        auto* rgba8 = ty.Get<type::StorageTexture>(bgra8->dim(), core::TexelFormat::kRgba8Unorm,
-                                                   bgra8->access(), bgra8->type());
+        auto* rgba8 = ty.Get<core::type::StorageTexture>(
+            bgra8->dim(), core::TexelFormat::kRgba8Unorm, bgra8->access(), bgra8->type());
         auto* new_var = b.Var(ty.ptr(handle, rgba8));
         auto bp = old_var->BindingPoint();
         new_var->SetBindingPoint(bp->group, bp->binding);
@@ -106,10 +106,10 @@ struct State {
     void ReplaceParameter(Function* func,
                           FunctionParam* old_param,
                           uint32_t index,
-                          const type::StorageTexture* bgra8) {
+                          const core::type::StorageTexture* bgra8) {
         // Redeclare the parameter with a rgba8unorm texel format.
-        auto* rgba8 = ty.Get<type::StorageTexture>(bgra8->dim(), core::TexelFormat::kRgba8Unorm,
-                                                   bgra8->access(), bgra8->type());
+        auto* rgba8 = ty.Get<core::type::StorageTexture>(
+            bgra8->dim(), core::TexelFormat::kRgba8Unorm, bgra8->access(), bgra8->type());
         auto* new_param = b.FunctionParam(rgba8);
         if (auto name = ir->NameOf(old_param)) {
             ir->SetName(new_param, name.NameView());
@@ -142,8 +142,8 @@ struct State {
                     call->SetOperand(use.operand_index, new_value);
                     if (call->Func() == core::Function::kTextureStore) {
                         // Swizzle the value argument of a `textureStore()` builtin.
-                        auto* tex = old_value->Type()->As<type::StorageTexture>();
-                        auto index = type::IsTextureArray(tex->dim()) ? 3u : 2u;
+                        auto* tex = old_value->Type()->As<core::type::StorageTexture>();
+                        auto index = core::type::IsTextureArray(tex->dim()) ? 3u : 2u;
                         auto* value = call->Args()[index];
                         auto* swizzle = b.Swizzle(value->Type(), value, Vector{2u, 1u, 0u, 3u});
                         swizzle->InsertBefore(call);

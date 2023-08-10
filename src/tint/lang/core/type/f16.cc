@@ -16,13 +16,13 @@
 
 #include "src/tint/lang/core/type/manager.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::F16);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::F16);
 
-namespace tint::type {
+namespace tint::core::type {
 
 F16::F16()
     : Base(static_cast<size_t>(tint::TypeInfo::Of<F16>().full_hashcode),
-           type::Flags{
+           core::type::Flags{
                Flag::kConstructable,
                Flag::kCreationFixedFootprint,
                Flag::kFixedFootprint,
@@ -46,4 +46,4 @@ F16* F16::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<F16>();
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

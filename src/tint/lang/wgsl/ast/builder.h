@@ -1127,16 +1127,18 @@ class Builder {
 
         /// @param kind the kind of sampler
         /// @returns the sampler
-        ast::Type sampler(type::SamplerKind kind) const { return sampler(builder->source_, kind); }
+        ast::Type sampler(core::type::SamplerKind kind) const {
+            return sampler(builder->source_, kind);
+        }
 
         /// @param source the Source of the node
         /// @param kind the kind of sampler
         /// @returns the sampler
-        ast::Type sampler(const Source& source, type::SamplerKind kind) const {
+        ast::Type sampler(const Source& source, core::type::SamplerKind kind) const {
             switch (kind) {
-                case type::SamplerKind::kSampler:
+                case core::type::SamplerKind::kSampler:
                     return (*this)(source, "sampler");
-                case type::SamplerKind::kComparisonSampler:
+                case core::type::SamplerKind::kComparisonSampler:
                     return (*this)(source, "sampler_comparison");
             }
             TINT_ICE() << "invalid sampler kind " << kind;
@@ -1145,22 +1147,22 @@ class Builder {
 
         /// @param dims the dimensionality of the texture
         /// @returns the depth texture
-        ast::Type depth_texture(type::TextureDimension dims) const {
+        ast::Type depth_texture(core::type::TextureDimension dims) const {
             return depth_texture(builder->source_, dims);
         }
 
         /// @param source the Source of the node
         /// @param dims the dimensionality of the texture
         /// @returns the depth texture
-        ast::Type depth_texture(const Source& source, type::TextureDimension dims) const {
+        ast::Type depth_texture(const Source& source, core::type::TextureDimension dims) const {
             switch (dims) {
-                case type::TextureDimension::k2d:
+                case core::type::TextureDimension::k2d:
                     return (*this)(source, "texture_depth_2d");
-                case type::TextureDimension::k2dArray:
+                case core::type::TextureDimension::k2dArray:
                     return (*this)(source, "texture_depth_2d_array");
-                case type::TextureDimension::kCube:
+                case core::type::TextureDimension::kCube:
                     return (*this)(source, "texture_depth_cube");
-                case type::TextureDimension::kCubeArray:
+                case core::type::TextureDimension::kCubeArray:
                     return (*this)(source, "texture_depth_cube_array");
                 default:
                     break;
@@ -1171,7 +1173,7 @@ class Builder {
 
         /// @param dims the dimensionality of the texture
         /// @returns the multisampled depth texture
-        ast::Type depth_multisampled_texture(type::TextureDimension dims) const {
+        ast::Type depth_multisampled_texture(core::type::TextureDimension dims) const {
             return depth_multisampled_texture(builder->source_, dims);
         }
 
@@ -1179,8 +1181,8 @@ class Builder {
         /// @param dims the dimensionality of the texture
         /// @returns the multisampled depth texture
         ast::Type depth_multisampled_texture(const Source& source,
-                                             type::TextureDimension dims) const {
-            if (dims == type::TextureDimension::k2d) {
+                                             core::type::TextureDimension dims) const {
+            if (dims == core::type::TextureDimension::k2d) {
                 return (*this)(source, "texture_depth_multisampled_2d");
             }
             TINT_ICE() << "invalid depth_multisampled_texture dimensions: " << dims;
@@ -1190,7 +1192,7 @@ class Builder {
         /// @param dims the dimensionality of the texture
         /// @param subtype the texture subtype.
         /// @returns the sampled texture
-        ast::Type sampled_texture(type::TextureDimension dims, ast::Type subtype) const {
+        ast::Type sampled_texture(core::type::TextureDimension dims, ast::Type subtype) const {
             return sampled_texture(builder->source_, dims, subtype);
         }
 
@@ -1199,20 +1201,20 @@ class Builder {
         /// @param subtype the texture subtype.
         /// @returns the sampled texture
         ast::Type sampled_texture(const Source& source,
-                                  type::TextureDimension dims,
+                                  core::type::TextureDimension dims,
                                   ast::Type subtype) const {
             switch (dims) {
-                case type::TextureDimension::k1d:
+                case core::type::TextureDimension::k1d:
                     return (*this)(source, "texture_1d", subtype);
-                case type::TextureDimension::k2d:
+                case core::type::TextureDimension::k2d:
                     return (*this)(source, "texture_2d", subtype);
-                case type::TextureDimension::k3d:
+                case core::type::TextureDimension::k3d:
                     return (*this)(source, "texture_3d", subtype);
-                case type::TextureDimension::k2dArray:
+                case core::type::TextureDimension::k2dArray:
                     return (*this)(source, "texture_2d_array", subtype);
-                case type::TextureDimension::kCube:
+                case core::type::TextureDimension::kCube:
                     return (*this)(source, "texture_cube", subtype);
-                case type::TextureDimension::kCubeArray:
+                case core::type::TextureDimension::kCubeArray:
                     return (*this)(source, "texture_cube_array", subtype);
                 default:
                     break;
@@ -1224,7 +1226,7 @@ class Builder {
         /// @param dims the dimensionality of the texture
         /// @param subtype the texture subtype.
         /// @returns the multisampled texture
-        ast::Type multisampled_texture(type::TextureDimension dims, ast::Type subtype) const {
+        ast::Type multisampled_texture(core::type::TextureDimension dims, ast::Type subtype) const {
             return multisampled_texture(builder->source_, dims, subtype);
         }
 
@@ -1233,9 +1235,9 @@ class Builder {
         /// @param subtype the texture subtype.
         /// @returns the multisampled texture
         ast::Type multisampled_texture(const Source& source,
-                                       type::TextureDimension dims,
+                                       core::type::TextureDimension dims,
                                        ast::Type subtype) const {
-            if (dims == type::TextureDimension::k2d) {
+            if (dims == core::type::TextureDimension::k2d) {
                 return (*this)(source, "texture_multisampled_2d", subtype);
             }
             TINT_ICE() << "invalid multisampled_texture dimensions: " << dims;
@@ -1246,7 +1248,7 @@ class Builder {
         /// @param format the texel format of the texture
         /// @param access the access control of the texture
         /// @returns the storage texture
-        ast::Type storage_texture(type::TextureDimension dims,
+        ast::Type storage_texture(core::type::TextureDimension dims,
                                   core::TexelFormat format,
                                   core::Access access) const {
             return storage_texture(builder->source_, dims, format, access);
@@ -1258,17 +1260,17 @@ class Builder {
         /// @param access the access control of the texture
         /// @returns the storage texture
         ast::Type storage_texture(const Source& source,
-                                  type::TextureDimension dims,
+                                  core::type::TextureDimension dims,
                                   core::TexelFormat format,
                                   core::Access access) const {
             switch (dims) {
-                case type::TextureDimension::k1d:
+                case core::type::TextureDimension::k1d:
                     return (*this)(source, "texture_storage_1d", format, access);
-                case type::TextureDimension::k2d:
+                case core::type::TextureDimension::k2d:
                     return (*this)(source, "texture_storage_2d", format, access);
-                case type::TextureDimension::k2dArray:
+                case core::type::TextureDimension::k2dArray:
                     return (*this)(source, "texture_storage_2d_array", format, access);
-                case type::TextureDimension::k3d:
+                case core::type::TextureDimension::k3d:
                     return (*this)(source, "texture_storage_3d", format, access);
                 default:
                     break;

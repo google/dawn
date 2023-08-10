@@ -36,16 +36,17 @@ TEST(SpirvASTParserTypeTest, SameArgumentsGivesSamePointer) {
     EXPECT_EQ(ty.Array(ty.I32(), 3, 2), ty.Array(ty.I32(), 3, 2));
     EXPECT_EQ(ty.Alias(sym, ty.I32()), ty.Alias(sym, ty.I32()));
     EXPECT_EQ(ty.Struct(sym, {ty.I32()}), ty.Struct(sym, {ty.I32()}));
-    EXPECT_EQ(ty.Sampler(type::SamplerKind::kSampler), ty.Sampler(type::SamplerKind::kSampler));
-    EXPECT_EQ(ty.DepthTexture(type::TextureDimension::k2d),
-              ty.DepthTexture(type::TextureDimension::k2d));
-    EXPECT_EQ(ty.MultisampledTexture(type::TextureDimension::k2d, ty.I32()),
-              ty.MultisampledTexture(type::TextureDimension::k2d, ty.I32()));
-    EXPECT_EQ(ty.SampledTexture(type::TextureDimension::k2d, ty.I32()),
-              ty.SampledTexture(type::TextureDimension::k2d, ty.I32()));
-    EXPECT_EQ(ty.StorageTexture(type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+    EXPECT_EQ(ty.Sampler(core::type::SamplerKind::kSampler),
+              ty.Sampler(core::type::SamplerKind::kSampler));
+    EXPECT_EQ(ty.DepthTexture(core::type::TextureDimension::k2d),
+              ty.DepthTexture(core::type::TextureDimension::k2d));
+    EXPECT_EQ(ty.MultisampledTexture(core::type::TextureDimension::k2d, ty.I32()),
+              ty.MultisampledTexture(core::type::TextureDimension::k2d, ty.I32()));
+    EXPECT_EQ(ty.SampledTexture(core::type::TextureDimension::k2d, ty.I32()),
+              ty.SampledTexture(core::type::TextureDimension::k2d, ty.I32()));
+    EXPECT_EQ(ty.StorageTexture(core::type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
                                 core::Access::kRead),
-              ty.StorageTexture(type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+              ty.StorageTexture(core::type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
                                 core::Access::kRead));
 }
 
@@ -68,29 +69,29 @@ TEST(SpirvASTParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
     EXPECT_NE(ty.Array(ty.I32(), 3, 2), ty.Array(ty.I32(), 3, 3));
     EXPECT_NE(ty.Alias(sym_a, ty.I32()), ty.Alias(sym_b, ty.I32()));
     EXPECT_NE(ty.Struct(sym_a, {ty.I32()}), ty.Struct(sym_b, {ty.I32()}));
-    EXPECT_NE(ty.Sampler(type::SamplerKind::kSampler),
-              ty.Sampler(type::SamplerKind::kComparisonSampler));
-    EXPECT_NE(ty.DepthTexture(type::TextureDimension::k2d),
-              ty.DepthTexture(type::TextureDimension::k1d));
-    EXPECT_NE(ty.MultisampledTexture(type::TextureDimension::k2d, ty.I32()),
-              ty.MultisampledTexture(type::TextureDimension::k3d, ty.I32()));
-    EXPECT_NE(ty.MultisampledTexture(type::TextureDimension::k2d, ty.I32()),
-              ty.MultisampledTexture(type::TextureDimension::k2d, ty.U32()));
-    EXPECT_NE(ty.SampledTexture(type::TextureDimension::k2d, ty.I32()),
-              ty.SampledTexture(type::TextureDimension::k3d, ty.I32()));
-    EXPECT_NE(ty.SampledTexture(type::TextureDimension::k2d, ty.I32()),
-              ty.SampledTexture(type::TextureDimension::k2d, ty.U32()));
-    EXPECT_NE(ty.StorageTexture(type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+    EXPECT_NE(ty.Sampler(core::type::SamplerKind::kSampler),
+              ty.Sampler(core::type::SamplerKind::kComparisonSampler));
+    EXPECT_NE(ty.DepthTexture(core::type::TextureDimension::k2d),
+              ty.DepthTexture(core::type::TextureDimension::k1d));
+    EXPECT_NE(ty.MultisampledTexture(core::type::TextureDimension::k2d, ty.I32()),
+              ty.MultisampledTexture(core::type::TextureDimension::k3d, ty.I32()));
+    EXPECT_NE(ty.MultisampledTexture(core::type::TextureDimension::k2d, ty.I32()),
+              ty.MultisampledTexture(core::type::TextureDimension::k2d, ty.U32()));
+    EXPECT_NE(ty.SampledTexture(core::type::TextureDimension::k2d, ty.I32()),
+              ty.SampledTexture(core::type::TextureDimension::k3d, ty.I32()));
+    EXPECT_NE(ty.SampledTexture(core::type::TextureDimension::k2d, ty.I32()),
+              ty.SampledTexture(core::type::TextureDimension::k2d, ty.U32()));
+    EXPECT_NE(ty.StorageTexture(core::type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
                                 core::Access::kRead),
-              ty.StorageTexture(type::TextureDimension::k3d, core::TexelFormat::kR32Uint,
+              ty.StorageTexture(core::type::TextureDimension::k3d, core::TexelFormat::kR32Uint,
                                 core::Access::kRead));
-    EXPECT_NE(ty.StorageTexture(type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+    EXPECT_NE(ty.StorageTexture(core::type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
                                 core::Access::kRead),
-              ty.StorageTexture(type::TextureDimension::k2d, core::TexelFormat::kR32Sint,
+              ty.StorageTexture(core::type::TextureDimension::k2d, core::TexelFormat::kR32Sint,
                                 core::Access::kRead));
-    EXPECT_NE(ty.StorageTexture(type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+    EXPECT_NE(ty.StorageTexture(core::type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
                                 core::Access::kRead),
-              ty.StorageTexture(type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
+              ty.StorageTexture(core::type::TextureDimension::k2d, core::TexelFormat::kR32Uint,
                                 core::Access::kWrite));
 }
 

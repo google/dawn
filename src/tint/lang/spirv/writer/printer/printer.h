@@ -66,11 +66,11 @@ class UserCall;
 class Value;
 class Var;
 }  // namespace tint::ir
-namespace tint::type {
+namespace tint::core::type {
 class Struct;
 class Texture;
 class Type;
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 namespace tint::spirv::writer {
 
@@ -98,7 +98,7 @@ class Printer {
     /// @param ty the type to get the ID for
     /// @param addrspace the optional address space that this type is being used for
     /// @returns the result ID of the type
-    uint32_t Type(const type::Type* ty,
+    uint32_t Type(const core::type::Type* ty,
                   core::AddressSpace addrspace = core::AddressSpace::kUndefined);
 
   private:
@@ -122,7 +122,7 @@ class Printer {
     /// Get the result ID of the OpConstantNull instruction for `type`, emitting it if necessary.
     /// @param type the type to get the ID for
     /// @returns the result ID of the OpConstantNull instruction
-    uint32_t ConstantNull(const type::Type* type);
+    uint32_t ConstantNull(const core::type::Type* type);
 
     /// Get the ID of the label for `block`.
     /// @param block the block to get the label ID for
@@ -142,20 +142,20 @@ class Printer {
     /// Get the result ID of the OpUndef instruction with type `ty`, emitting it if necessary.
     /// @param ty the type of the undef value
     /// @returns the result ID of the instruction
-    uint32_t Undef(const type::Type* ty);
+    uint32_t Undef(const core::type::Type* ty);
 
     /// Emit a struct type.
     /// @param id the result ID to use
     /// @param addrspace the optional address space that this type is being used for
     /// @param str the struct type to emit
     void EmitStructType(uint32_t id,
-                        const type::Struct* str,
+                        const core::type::Struct* str,
                         core::AddressSpace addrspace = core::AddressSpace::kUndefined);
 
     /// Emit a texture type.
     /// @param id the result ID to use
     /// @param texture the texture type to emit
-    void EmitTextureType(uint32_t id, const type::Texture* texture);
+    void EmitTextureType(uint32_t id, const core::type::Texture* texture);
 
     /// Emit a function.
     /// @param func the function to emit
@@ -297,7 +297,7 @@ class Printer {
     };
 
     /// The map of types to their result IDs.
-    Hashmap<const type::Type*, uint32_t, 8> types_;
+    Hashmap<const core::type::Type*, uint32_t, 8> types_;
 
     /// The map of function types to their result IDs.
     Hashmap<FunctionType, uint32_t, 8, FunctionType::Hasher> function_types_;
@@ -306,10 +306,10 @@ class Printer {
     Hashmap<const core::constant::Value*, uint32_t, 16> constants_;
 
     /// The map of types to the result IDs of their OpConstantNull instructions.
-    Hashmap<const type::Type*, uint32_t, 4> constant_nulls_;
+    Hashmap<const core::type::Type*, uint32_t, 4> constant_nulls_;
 
     /// The map of types to the result IDs of their OpUndef instructions.
-    Hashmap<const type::Type*, uint32_t, 4> undef_values_;
+    Hashmap<const core::type::Type*, uint32_t, 4> undef_values_;
 
     /// The map of non-constant values to their result IDs.
     Hashmap<ir::Value*, uint32_t, 8> values_;

@@ -55,7 +55,7 @@ struct SpirvAtomic::State {
     ProgramBuilder b;
     /// The clone context
     program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
-    std::unordered_map<const type::Struct*, ForkedStruct> forked_structs;
+    std::unordered_map<const core::type::Struct*, ForkedStruct> forked_structs;
     std::unordered_set<const sem::Variable*> atomic_variables;
     UniqueVector<const sem::ValueExpression*, 8> atomic_expressions;
 
@@ -157,7 +157,7 @@ struct SpirvAtomic::State {
     }
 
   private:
-    ForkedStruct& Fork(const type::Struct* str) {
+    ForkedStruct& Fork(const core::type::Struct* str) {
         auto& forked = forked_structs[str];
         if (!forked.name.IsValid()) {
             forked.name = b.Symbols().New(str->Name().Name() + "_atomic");
@@ -196,14 +196,14 @@ struct SpirvAtomic::State {
         }
     }
 
-    Type AtomicTypeFor(const type::Type* ty) {
+    Type AtomicTypeFor(const core::type::Type* ty) {
         return Switch(
             ty,  //
-            [&](const type::I32*) { return b.ty.atomic(CreateASTTypeFor(ctx, ty)); },
-            [&](const type::U32*) { return b.ty.atomic(CreateASTTypeFor(ctx, ty)); },
-            [&](const type::Struct* str) { return b.ty(Fork(str).name); },
-            [&](const type::Array* arr) {
-                if (arr->Count()->Is<type::RuntimeArrayCount>()) {
+            [&](const core::type::I32*) { return b.ty.atomic(CreateASTTypeFor(ctx, ty)); },
+            [&](const core::type::U32*) { return b.ty.atomic(CreateASTTypeFor(ctx, ty)); },
+            [&](const core::type::Struct* str) { return b.ty(Fork(str).name); },
+            [&](const core::type::Array* arr) {
+                if (arr->Count()->Is<core::type::RuntimeArrayCount>()) {
                     return b.ty.array(AtomicTypeFor(arr->ElemType()));
                 }
                 auto count = arr->ConstantCount();
@@ -216,11 +216,11 @@ struct SpirvAtomic::State {
                 }
                 return b.ty.array(AtomicTypeFor(arr->ElemType()), u32(count.value()));
             },
-            [&](const type::Pointer* ptr) {
+            [&](const core::type::Pointer* ptr) {
                 return b.ty.ptr(ptr->AddressSpace(), AtomicTypeFor(ptr->StoreType()),
                                 ptr->Access());
             },
-            [&](const type::Reference* ref) { return AtomicTypeFor(ref->StoreType()); },
+            [&](const core::type::Reference* ref) { return AtomicTypeFor(ref->StoreType()); },
             [&](Default) {
                 TINT_ICE() << "unhandled type: " << ty->FriendlyName();
                 return Type{};
@@ -230,7 +230,7 @@ struct SpirvAtomic::State {
     void ReplaceLoadsAndStores() {
         // Returns true if 'e' is a reference to an atomic variable or struct member
         auto is_ref_to_atomic_var = [&](const sem::ValueExpression* e) {
-            if (tint::Is<type::Reference>(e->Type()) && e->RootIdentifier() &&
+            if (tint::Is<core::type::Reference>(e->Type()) && e->RootIdentifier() &&
                 (atomic_variables.count(e->RootIdentifier()) != 0)) {
                 // If it's a struct member, make sure it's one we marked as atomic
                 if (auto* ma = e->As<sem::StructMemberAccess>()) {

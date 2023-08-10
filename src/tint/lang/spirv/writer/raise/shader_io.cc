@@ -68,15 +68,15 @@ struct StateImpl : ir::transform::ShaderIOBackendState {
     void MakeStructs(ir::Var*& builtin_var,
                      ir::Var*& location_var,
                      Vector<uint32_t, 4>* indices,
-                     Vector<type::Manager::StructMemberDesc, 4>& entries,
+                     Vector<core::type::Manager::StructMemberDesc, 4>& entries,
                      core::AddressSpace addrspace,
                      core::Access access,
                      const char* name_suffix) {
         // Build separate lists of builtin and location entries and record their new indices.
         uint32_t next_builtin_idx = 0;
         uint32_t next_location_idx = 0;
-        Vector<type::Manager::StructMemberDesc, 4> builtin_members;
-        Vector<type::Manager::StructMemberDesc, 4> location_members;
+        Vector<core::type::Manager::StructMemberDesc, 4> builtin_members;
+        Vector<core::type::Manager::StructMemberDesc, 4> location_members;
         for (auto io : entries) {
             if (io.attributes.builtin) {
                 // SampleMask must be an array for Vulkan.
@@ -96,7 +96,7 @@ struct StateImpl : ir::transform::ShaderIOBackendState {
             auto name = ir->NameOf(func).Name() + iotype + name_suffix;
             auto* str = ty.Struct(ir->symbols.New(name + "Struct"), std::move(members));
             auto* var = b.Var(name, ty.ptr(addrspace, str, access));
-            str->SetStructFlag(type::kBlock);
+            str->SetStructFlag(core::type::kBlock);
             b.RootBlock()->Append(var);
             return var;
         };

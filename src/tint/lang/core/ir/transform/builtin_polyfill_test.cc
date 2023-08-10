@@ -32,8 +32,8 @@ class IR_BuiltinPolyfillTest : public TransformTest {
     /// @param result_ty the result type of the builtin call
     /// @param arg_types the arguments types for the builtin call
     void Build(core::Function builtin,
-               const type::Type* result_ty,
-               VectorRef<const type::Type*> arg_types) {
+               const core::type::Type* result_ty,
+               VectorRef<const core::type::Type*> arg_types) {
         Vector<FunctionParam*, 4> args;
         for (auto* arg_ty : arg_types) {
             args.Push(b.FunctionParam("arg", arg_ty));
@@ -1059,7 +1059,8 @@ TEST_F(IR_BuiltinPolyfillTest, FirstTrailingBit_Vec4I32) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, TextureSampleBaseClampToEdge_2d_f32_NoPolyfill) {
-    auto* texture_ty = ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32());
+    auto* texture_ty =
+        ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
     Build(core::Function::kTextureSampleBaseClampToEdge, ty.vec4<f32>(),
           Vector{texture_ty, ty.sampler(), ty.vec2<f32>()});
     auto* src = R"(
@@ -1081,7 +1082,8 @@ TEST_F(IR_BuiltinPolyfillTest, TextureSampleBaseClampToEdge_2d_f32_NoPolyfill) {
 }
 
 TEST_F(IR_BuiltinPolyfillTest, TextureSampleBaseClampToEdge_2d_f32) {
-    auto* texture_ty = ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32());
+    auto* texture_ty =
+        ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
     Build(core::Function::kTextureSampleBaseClampToEdge, ty.vec4<f32>(),
           Vector{texture_ty, ty.sampler(), ty.vec2<f32>()});
     auto* src = R"(

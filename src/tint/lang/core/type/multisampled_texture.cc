@@ -21,9 +21,9 @@
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/text/string_stream.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::MultisampledTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::MultisampledTexture);
 
-namespace tint::type {
+namespace tint::core::type {
 
 MultisampledTexture::MultisampledTexture(TextureDimension dim, const Type* type)
     : Base(Hash(tint::TypeInfo::Of<MultisampledTexture>().full_hashcode, dim, type), dim),
@@ -51,4 +51,4 @@ MultisampledTexture* MultisampledTexture::Clone(CloneContext& ctx) const {
     return ctx.dst.mgr->Get<MultisampledTexture>(dim(), ty);
 }
 
-}  // namespace tint::type
+}  // namespace tint::core::type

@@ -30,20 +30,20 @@ TEST_F(ResolverAtomicTest, GlobalWorkgroupI32) {
     auto* g = GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.i32()), core::AddressSpace::kWorkgroup);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    ASSERT_TRUE(TypeOf(g)->Is<type::Reference>());
-    auto* atomic = TypeOf(g)->UnwrapRef()->As<type::Atomic>();
+    ASSERT_TRUE(TypeOf(g)->Is<core::type::Reference>());
+    auto* atomic = TypeOf(g)->UnwrapRef()->As<core::type::Atomic>();
     ASSERT_NE(atomic, nullptr);
-    EXPECT_TRUE(atomic->Type()->Is<type::I32>());
+    EXPECT_TRUE(atomic->Type()->Is<core::type::I32>());
 }
 
 TEST_F(ResolverAtomicTest, GlobalWorkgroupU32) {
     auto* g = GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.u32()), core::AddressSpace::kWorkgroup);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    ASSERT_TRUE(TypeOf(g)->Is<type::Reference>());
-    auto* atomic = TypeOf(g)->UnwrapRef()->As<type::Atomic>();
+    ASSERT_TRUE(TypeOf(g)->Is<core::type::Reference>());
+    auto* atomic = TypeOf(g)->UnwrapRef()->As<core::type::Atomic>();
     ASSERT_NE(atomic, nullptr);
-    EXPECT_TRUE(atomic->Type()->Is<type::U32>());
+    EXPECT_TRUE(atomic->Type()->Is<core::type::U32>());
 }
 
 TEST_F(ResolverAtomicTest, GlobalStorageStruct) {
@@ -52,13 +52,13 @@ TEST_F(ResolverAtomicTest, GlobalStorageStruct) {
                         Binding(0_a), Group(0_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
-    ASSERT_TRUE(TypeOf(g)->Is<type::Reference>());
+    ASSERT_TRUE(TypeOf(g)->Is<core::type::Reference>());
     auto* str = TypeOf(g)->UnwrapRef()->As<sem::Struct>();
     ASSERT_NE(str, nullptr);
     ASSERT_EQ(str->Members().Length(), 1u);
-    auto* atomic = str->Members()[0]->Type()->As<type::Atomic>();
+    auto* atomic = str->Members()[0]->Type()->As<core::type::Atomic>();
     ASSERT_NE(atomic, nullptr);
-    ASSERT_TRUE(atomic->Type()->Is<type::I32>());
+    ASSERT_TRUE(atomic->Type()->Is<core::type::I32>());
 }
 
 }  // namespace

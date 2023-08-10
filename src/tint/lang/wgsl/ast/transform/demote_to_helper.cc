@@ -106,7 +106,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
     // Mask all writes to host-visible memory using the discarded flag.
     // We also insert a discard statement before all return statements in entry points for shaders
     // that discard.
-    std::unordered_map<const type::Type*, Symbol> atomic_cmpxchg_result_types;
+    std::unordered_map<const core::type::Type*, Symbol> atomic_cmpxchg_result_types;
     for (auto* node : src->ASTNodes().Objects()) {
         Switch(
             node,
@@ -125,7 +125,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                 }
 
                 // Skip writes to invocation-private address spaces.
-                auto* ref = sem.GetVal(assign->lhs)->Type()->As<type::Reference>();
+                auto* ref = sem.GetVal(assign->lhs)->Type()->As<core::type::Reference>();
                 switch (ref->AddressSpace()) {
                     case core::AddressSpace::kStorage:
                         // Need to mask these.
@@ -186,7 +186,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                             // original member values over to it.
 
                             // Declare a struct to hold the result values.
-                            auto* result_struct = sem_call->Type()->As<type::Struct>();
+                            auto* result_struct = sem_call->Type()->As<core::type::Struct>();
                             auto* atomic_ty = result_struct->Members()[0]->Type();
                             result_ty =
                                 b.ty(tint::GetOrCreate(atomic_cmpxchg_result_types, atomic_ty, [&] {

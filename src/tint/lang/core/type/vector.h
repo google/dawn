@@ -19,7 +19,7 @@
 
 #include "src/tint/lang/core/type/type.h"
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// A vector type.
 class Vector : public Castable<Vector, Type> {
@@ -81,6 +81,6 @@ class Vector : public Castable<Vector, Type> {
     const bool packed_;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_VECTOR_H_

@@ -137,8 +137,8 @@ class SemHelper {
 
     /// @param expr the semantic node
     /// @returns nullptr if @p expr is nullptr, or @p expr cast to
-    /// sem::BuiltinEnumExpression<type::TexelFormat> if the cast is successful, otherwise an error
-    /// diagnostic is raised.
+    /// sem::BuiltinEnumExpression<core::type::TexelFormat> if the cast is successful, otherwise an
+    /// error diagnostic is raised.
     sem::BuiltinEnumExpression<core::TexelFormat>* AsTexelFormat(sem::Expression* expr) const {
         if (TINT_LIKELY(expr)) {
             auto* enum_expr = expr->As<sem::BuiltinEnumExpression<core::TexelFormat>>();
@@ -199,15 +199,15 @@ class SemHelper {
 
     /// @returns the resolved type of the ast::Expression @p expr
     /// @param expr the expression
-    type::Type* TypeOf(const ast::Expression* expr) const;
+    core::type::Type* TypeOf(const ast::Expression* expr) const;
 
     /// @returns the type name of the given semantic type, unwrapping references.
     /// @param ty the type to look up
-    std::string TypeNameOf(const type::Type* ty) const;
+    std::string TypeNameOf(const core::type::Type* ty) const;
 
     /// @returns the type name of the given semantic type, without unwrapping references.
     /// @param ty the type to look up
-    std::string RawTypeNameOf(const type::Type* ty) const;
+    std::string RawTypeNameOf(const core::type::Type* ty) const;
 
     /// Raises an error diagnostic that the expression @p got was expected to be a
     /// sem::ValueExpression, but the expression evaluated to something different.

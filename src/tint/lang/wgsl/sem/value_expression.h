@@ -40,7 +40,7 @@ class ValueExpression : public Castable<ValueExpression, Expression> {
     /// @param has_side_effects true if this expression may have side-effects
     /// @param root_ident the (optional) root identifier for this expression
     ValueExpression(const ast::Expression* declaration,
-                    const type::Type* type,
+                    const core::type::Type* type,
                     core::EvaluationStage stage,
                     const Statement* statement,
                     const core::constant::Value* constant,
@@ -51,7 +51,7 @@ class ValueExpression : public Castable<ValueExpression, Expression> {
     ~ValueExpression() override;
 
     /// @return the resolved type of the expression
-    const type::Type* Type() const { return type_; }
+    const core::type::Type* Type() const { return type_; }
 
     /// @return the earliest evaluation stage for the expression
     core::EvaluationStage Stage() const { return stage_; }
@@ -89,7 +89,7 @@ class ValueExpression : public Castable<ValueExpression, Expression> {
     const Variable* root_identifier_;
 
   private:
-    const type::Type* const type_;
+    const core::type::Type* const type_;
     const core::EvaluationStage stage_;
     const core::constant::Value* const constant_;
     sem::Behaviors behaviors_{sem::Behavior::kNext};

@@ -18,9 +18,9 @@
 #include "src/tint/lang/wgsl/sem/expression.h"
 
 // Forward declarations
-namespace tint::type {
+namespace tint::core::type {
 class Type;
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 namespace tint::sem {
 

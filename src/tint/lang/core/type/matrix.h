@@ -20,11 +20,11 @@
 #include "src/tint/lang/core/type/vector.h"
 
 // Forward declarations
-namespace tint::type {
+namespace tint::core::type {
 class Vector;
-}  // namespace tint::type
+}  // namespace tint::core::type
 
-namespace tint::type {
+namespace tint::core::type {
 
 /// A matrix type
 class Matrix final : public Castable<Matrix, Type> {
@@ -83,6 +83,6 @@ class Matrix final : public Castable<Matrix, Type> {
     const uint32_t columns_;
 };
 
-}  // namespace tint::type
+}  // namespace tint::core::type
 
 #endif  // SRC_TINT_LANG_CORE_TYPE_MATRIX_H_

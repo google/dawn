@@ -224,10 +224,10 @@ void EmitJson(const tint::Program* program) {
 
     bool struct_first = true;
     for (const auto* ty : program->Types()) {
-        if (!ty->Is<tint::type::Struct>()) {
+        if (!ty->Is<tint::core::type::Struct>()) {
             continue;
         }
-        const auto* s = ty->As<tint::type::Struct>();
+        const auto* s = ty->As<tint::core::type::Struct>();
 
         if (!struct_first) {
             std::cout << ",";
@@ -291,7 +291,7 @@ void EmitText(const tint::Program* program) {
 
     bool has_struct = false;
     for (const auto* ty : program->Types()) {
-        if (!ty->Is<tint::type::Struct>()) {
+        if (!ty->Is<tint::core::type::Struct>()) {
             continue;
         }
         has_struct = true;
@@ -301,10 +301,10 @@ void EmitText(const tint::Program* program) {
     if (has_struct) {
         std::cout << "Structures" << std::endl;
         for (const auto* ty : program->Types()) {
-            if (!ty->Is<tint::type::Struct>()) {
+            if (!ty->Is<tint::core::type::Struct>()) {
                 continue;
             }
-            const auto* s = ty->As<tint::type::Struct>();
+            const auto* s = ty->As<tint::core::type::Struct>();
             std::cout << s->Layout() << std::endl << std::endl;
         }
     }

@@ -73,7 +73,8 @@ TEST_F(WgslASTPrinterTest, EmitVariable_Access_ReadWrite) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitVariable_Decorated) {
-    auto* v = GlobalVar("a", ty.sampler(type::SamplerKind::kSampler), Group(1_a), Binding(2_a));
+    auto* v =
+        GlobalVar("a", ty.sampler(core::type::SamplerKind::kSampler), Group(1_a), Binding(2_a));
 
     ASTPrinter& gen = Build();
 

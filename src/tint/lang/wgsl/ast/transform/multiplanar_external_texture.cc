@@ -36,7 +36,7 @@ using namespace tint::core::fluent_types;  // NOLINT
 using namespace tint::number_suffixes;     // NOLINT
 
 bool ShouldRun(const Program* program) {
-    auto ext = program->Types().Find<type::ExternalTexture>();
+    auto ext = program->Types().Find<core::type::ExternalTexture>();
     return ext != nullptr;
 }
 
@@ -99,7 +99,7 @@ struct MultiplanarExternalTexture::State {
         // one uniform buffer for the ExternalTextureParams struct).
         for (auto* global : ctx.src->AST().GlobalVariables()) {
             auto* sem_var = sem.Get<sem::GlobalVariable>(global);
-            if (!sem_var->Type()->UnwrapRef()->Is<type::ExternalTexture>()) {
+            if (!sem_var->Type()->UnwrapRef()->Is<core::type::ExternalTexture>()) {
                 continue;
             }
 
@@ -138,7 +138,8 @@ struct MultiplanarExternalTexture::State {
             auto& syms = new_binding_symbols[sem_var];
             syms.plane_0 = ctx.Clone(global->name->symbol);
             syms.plane_1 = b.Symbols().New("ext_tex_plane_1");
-            b.GlobalVar(syms.plane_1, b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32()),
+            b.GlobalVar(syms.plane_1,
+                        b.ty.sampled_texture(core::type::TextureDimension::k2d, b.ty.f32()),
                         b.Group(AInt(bps.plane_1.group)), b.Binding(AInt(bps.plane_1.binding)));
             syms.params = b.Symbols().New("ext_tex_params");
             b.GlobalVar(syms.params, b.ty("ExternalTextureParams"), core::AddressSpace::kUniform,
@@ -148,9 +149,9 @@ struct MultiplanarExternalTexture::State {
             auto cloned_attributes = ctx.Clone(global->attributes);
             const Expression* cloned_initializer = ctx.Clone(global->initializer);
 
-            auto* replacement =
-                b.Var(syms.plane_0, b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32()),
-                      cloned_initializer, cloned_attributes);
+            auto* replacement = b.Var(
+                syms.plane_0, b.ty.sampled_texture(core::type::TextureDimension::k2d, b.ty.f32()),
+                cloned_initializer, cloned_attributes);
             ctx.Replace(global, replacement);
         }
 
@@ -158,7 +159,7 @@ struct MultiplanarExternalTexture::State {
         for (auto* fn : ctx.src->AST().Functions()) {
             for (const Variable* param : fn->params) {
                 if (auto* sem_var = sem.Get(param)) {
-                    if (!sem_var->Type()->UnwrapRef()->Is<type::ExternalTexture>()) {
+                    if (!sem_var->Type()->UnwrapRef()->Is<core::type::ExternalTexture>()) {
                         continue;
                     }
                     // If we find a texture_external, we must ensure the ExternalTextureParams
@@ -175,7 +176,7 @@ struct MultiplanarExternalTexture::State {
                     syms.plane_1 = b.Symbols().New("ext_tex_plane_1");
                     syms.params = b.Symbols().New("ext_tex_params");
                     auto tex2d_f32 = [&] {
-                        return b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32());
+                        return b.ty.sampled_texture(core::type::TextureDimension::k2d, b.ty.f32());
                     };
                     ctx.Replace(param, b.Param(syms.plane_0, tex2d_f32()));
                     ctx.InsertAfter(fn->params, param, b.Param(syms.plane_1, tex2d_f32()));
@@ -192,7 +193,7 @@ struct MultiplanarExternalTexture::State {
             auto* builtin = call->Target()->As<sem::Builtin>();
 
             if (builtin && !builtin->Parameters().IsEmpty() &&
-                builtin->Parameters()[0]->Type()->Is<type::ExternalTexture>() &&
+                builtin->Parameters()[0]->Type()->Is<core::type::ExternalTexture>() &&
                 builtin->Type() != core::Function::kTextureDimensions) {
                 if (auto* var_user =
                         sem.GetVal(expr->args[0])->UnwrapLoad()->As<sem::VariableUser>()) {
@@ -422,10 +423,10 @@ struct MultiplanarExternalTexture::State {
             b.Func(texture_sample_external_sym,
                    tint::Vector{
                        b.Param("plane0",
-                               b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32())),
+                               b.ty.sampled_texture(core::type::TextureDimension::k2d, b.ty.f32())),
                        b.Param("plane1",
-                               b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32())),
-                       b.Param("smp", b.ty.sampler(type::SamplerKind::kSampler)),
+                               b.ty.sampled_texture(core::type::TextureDimension::k2d, b.ty.f32())),
+                       b.Param("smp", b.ty.sampler(core::type::SamplerKind::kSampler)),
                        b.Param("coord", b.ty.vec2(b.ty.f32())),
                        b.Param("params", b.ty(params_struct_sym)),
                    },
@@ -470,9 +471,9 @@ struct MultiplanarExternalTexture::State {
             b.Func(name,
                    tint::Vector{
                        b.Param("plane0",
-                               b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32())),
+                               b.ty.sampled_texture(core::type::TextureDimension::k2d, b.ty.f32())),
                        b.Param("plane1",
-                               b.ty.sampled_texture(type::TextureDimension::k2d, b.ty.f32())),
+                               b.ty.sampled_texture(core::type::TextureDimension::k2d, b.ty.f32())),
                        b.Param("coord", CreateASTTypeFor(ctx, coord_ty)),
                        b.Param("params", b.ty(params_struct_sym)),
                    },

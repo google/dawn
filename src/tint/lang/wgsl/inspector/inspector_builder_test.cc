@@ -170,14 +170,14 @@ void InspectorBuilder::MakeStructVariableReferenceBodyFunction(
 }
 
 void InspectorBuilder::AddSampler(const std::string& name, uint32_t group, uint32_t binding) {
-    GlobalVar(name, ty.sampler(type::SamplerKind::kSampler), Binding(AInt(binding)),
+    GlobalVar(name, ty.sampler(core::type::SamplerKind::kSampler), Binding(AInt(binding)),
               Group(AInt(group)));
 }
 
 void InspectorBuilder::AddComparisonSampler(const std::string& name,
                                             uint32_t group,
                                             uint32_t binding) {
-    GlobalVar(name, ty.sampler(type::SamplerKind::kComparisonSampler), Binding(AInt(binding)),
+    GlobalVar(name, ty.sampler(core::type::SamplerKind::kComparisonSampler), Binding(AInt(binding)),
               Group(AInt(group)));
 }
 
@@ -260,16 +260,16 @@ ast::Type InspectorBuilder::GetBaseType(ResourceBinding::SampledKind sampled_kin
     }
 }
 
-ast::Type InspectorBuilder::GetCoordsType(type::TextureDimension dim, ast::Type scalar) {
+ast::Type InspectorBuilder::GetCoordsType(core::type::TextureDimension dim, ast::Type scalar) {
     switch (dim) {
-        case type::TextureDimension::k1d:
+        case core::type::TextureDimension::k1d:
             return scalar;
-        case type::TextureDimension::k2d:
-        case type::TextureDimension::k2dArray:
+        case core::type::TextureDimension::k2d:
+        case core::type::TextureDimension::k2dArray:
             return ty.vec2(scalar);
-        case type::TextureDimension::k3d:
-        case type::TextureDimension::kCube:
-        case type::TextureDimension::kCubeArray:
+        case core::type::TextureDimension::k3d:
+        case core::type::TextureDimension::kCube:
+        case core::type::TextureDimension::kCubeArray:
             return ty.vec3(scalar);
         default:
             [=] {
@@ -281,7 +281,7 @@ ast::Type InspectorBuilder::GetCoordsType(type::TextureDimension dim, ast::Type 
     return ast::Type{};
 }
 
-ast::Type InspectorBuilder::MakeStorageTextureTypes(type::TextureDimension dim,
+ast::Type InspectorBuilder::MakeStorageTextureTypes(core::type::TextureDimension dim,
                                                     core::TexelFormat format) {
     return ty.storage_texture(dim, format, core::Access::kWrite);
 }

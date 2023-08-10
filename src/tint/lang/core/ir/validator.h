@@ -228,7 +228,7 @@ class Validator {
     /// @param inst the instruction
     /// @param idx the operand index
     /// @returns the vector pointer type for the given instruction operand
-    const type::Type* GetVectorPtrElementType(Instruction* inst, size_t idx);
+    const core::type::Type* GetVectorPtrElementType(Instruction* inst, size_t idx);
 
   private:
     Module& mod_;

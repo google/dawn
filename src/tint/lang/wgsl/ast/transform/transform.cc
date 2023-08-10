@@ -64,30 +64,30 @@ void Transform::RemoveStatement(program::CloneContext& ctx, const Statement* stm
     TINT_ICE() << "unable to remove statement from parent of type " << sem->TypeInfo().name;
 }
 
-Type Transform::CreateASTTypeFor(program::CloneContext& ctx, const type::Type* ty) {
-    if (ty->Is<type::Void>()) {
+Type Transform::CreateASTTypeFor(program::CloneContext& ctx, const core::type::Type* ty) {
+    if (ty->Is<core::type::Void>()) {
         return Type{};
     }
-    if (ty->Is<type::I32>()) {
+    if (ty->Is<core::type::I32>()) {
         return ctx.dst->ty.i32();
     }
-    if (ty->Is<type::U32>()) {
+    if (ty->Is<core::type::U32>()) {
         return ctx.dst->ty.u32();
     }
-    if (ty->Is<type::F16>()) {
+    if (ty->Is<core::type::F16>()) {
         return ctx.dst->ty.f16();
     }
-    if (ty->Is<type::F32>()) {
+    if (ty->Is<core::type::F32>()) {
         return ctx.dst->ty.f32();
     }
-    if (ty->Is<type::Bool>()) {
+    if (ty->Is<core::type::Bool>()) {
         return ctx.dst->ty.bool_();
     }
-    if (auto* m = ty->As<type::Matrix>()) {
+    if (auto* m = ty->As<core::type::Matrix>()) {
         auto el = CreateASTTypeFor(ctx, m->type());
         return ctx.dst->ty.mat(el, m->columns(), m->rows());
     }
-    if (auto* v = ty->As<type::Vector>()) {
+    if (auto* v = ty->As<core::type::Vector>()) {
         auto el = CreateASTTypeFor(ctx, v->type());
         if (v->Packed()) {
             TINT_ASSERT(v->Width() == 3u);
@@ -96,13 +96,13 @@ Type Transform::CreateASTTypeFor(program::CloneContext& ctx, const type::Type* t
             return ctx.dst->ty.vec(el, v->Width());
         }
     }
-    if (auto* a = ty->As<type::Array>()) {
+    if (auto* a = ty->As<core::type::Array>()) {
         auto el = CreateASTTypeFor(ctx, a->ElemType());
         tint::Vector<const Attribute*, 1> attrs;
         if (!a->IsStrideImplicit()) {
             attrs.Push(ctx.dst->create<StrideAttribute>(a->Stride()));
         }
-        if (a->Count()->Is<type::RuntimeArrayCount>()) {
+        if (a->Count()->Is<core::type::RuntimeArrayCount>()) {
             return ctx.dst->ty.array(el, std::move(attrs));
         }
         if (auto* override = a->Count()->As<sem::NamedOverrideArrayCount>()) {
@@ -128,43 +128,43 @@ Type Transform::CreateASTTypeFor(program::CloneContext& ctx, const type::Type* t
         }
         auto count = a->ConstantCount();
         if (TINT_UNLIKELY(!count)) {
-            TINT_ICE() << type::Array::kErrExpectedConstantCount;
+            TINT_ICE() << core::type::Array::kErrExpectedConstantCount;
             return ctx.dst->ty.array(el, u32(1), std::move(attrs));
         }
         return ctx.dst->ty.array(el, u32(count.value()), std::move(attrs));
     }
-    if (auto* s = ty->As<type::Struct>()) {
+    if (auto* s = ty->As<core::type::Struct>()) {
         return ctx.dst->ty(ctx.Clone(s->Name()));
     }
-    if (auto* s = ty->As<type::Reference>()) {
+    if (auto* s = ty->As<core::type::Reference>()) {
         return CreateASTTypeFor(ctx, s->StoreType());
     }
-    if (auto* a = ty->As<type::Atomic>()) {
+    if (auto* a = ty->As<core::type::Atomic>()) {
         return ctx.dst->ty.atomic(CreateASTTypeFor(ctx, a->Type()));
     }
-    if (auto* t = ty->As<type::DepthTexture>()) {
+    if (auto* t = ty->As<core::type::DepthTexture>()) {
         return ctx.dst->ty.depth_texture(t->dim());
     }
-    if (auto* t = ty->As<type::DepthMultisampledTexture>()) {
+    if (auto* t = ty->As<core::type::DepthMultisampledTexture>()) {
         return ctx.dst->ty.depth_multisampled_texture(t->dim());
     }
-    if (ty->Is<type::ExternalTexture>()) {
+    if (ty->Is<core::type::ExternalTexture>()) {
         return ctx.dst->ty.external_texture();
     }
-    if (auto* t = ty->As<type::MultisampledTexture>()) {
+    if (auto* t = ty->As<core::type::MultisampledTexture>()) {
         return ctx.dst->ty.multisampled_texture(t->dim(), CreateASTTypeFor(ctx, t->type()));
     }
-    if (auto* t = ty->As<type::SampledTexture>()) {
+    if (auto* t = ty->As<core::type::SampledTexture>()) {
         return ctx.dst->ty.sampled_texture(t->dim(), CreateASTTypeFor(ctx, t->type()));
     }
-    if (auto* t = ty->As<type::StorageTexture>()) {
+    if (auto* t = ty->As<core::type::StorageTexture>()) {
         return ctx.dst->ty.storage_texture(t->dim(), t->texel_format(), t->access());
     }
-    if (auto* s = ty->As<type::Sampler>()) {
+    if (auto* s = ty->As<core::type::Sampler>()) {
         return ctx.dst->ty.sampler(s->kind());
     }
-    if (auto* p = ty->As<type::Pointer>()) {
-        // Note: type::Pointer always has an inferred access, but WGSL only allows an explicit
+    if (auto* p = ty->As<core::type::Pointer>()) {
+        // Note: core::type::Pointer always has an inferred access, but WGSL only allows an explicit
         // access in the 'storage' address space.
         auto address_space = p->AddressSpace();
         auto access =

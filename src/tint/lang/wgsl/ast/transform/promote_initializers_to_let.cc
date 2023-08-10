@@ -44,7 +44,7 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
     // Returns true if the expression should be hoisted to a new let statement before the
     // expression's statement.
     auto should_hoist = [&](const sem::ValueExpression* expr) {
-        if (!expr->Type()->IsAnyOf<type::Array, type::Struct>()) {
+        if (!expr->Type()->IsAnyOf<core::type::Array, core::type::Struct>()) {
             // We only care about array and struct initializers
             return false;
         }

@@ -14,9 +14,9 @@
 
 #include "src/tint/lang/core/type/node.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Node);
+TINT_INSTANTIATE_TYPEINFO(tint::core::type::Node);
 
-namespace tint::type {
+namespace tint::core::type {
 
 Node::Node() = default;
 
@@ -24,4 +24,4 @@ Node::Node(const Node&) = default;
 
 Node::~Node() = default;
 
-}  // namespace tint::type
+}  // namespace tint::core::type

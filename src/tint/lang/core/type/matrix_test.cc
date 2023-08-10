@@ -15,7 +15,7 @@
 #include "src/tint/lang/core/type/helper_test.h"
 #include "src/tint/lang/core/type/texture.h"
 
-namespace tint::type {
+namespace tint::core::type {
 namespace {
 
 using MatrixTest = TestHelper;
@@ -68,8 +68,8 @@ TEST_F(MatrixTest, FriendlyName) {
 TEST_F(MatrixTest, Clone) {
     auto* a = create<Matrix>(create<Vector>(create<I32>(), 3u), 4u);
 
-    type::Manager mgr;
-    type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
+    core::type::Manager mgr;
+    core::type::CloneContext ctx{{nullptr}, {nullptr, &mgr}};
 
     auto* mat = a->Clone(ctx);
     EXPECT_TRUE(mat->type()->Is<I32>());
@@ -78,4 +78,4 @@ TEST_F(MatrixTest, Clone) {
 }
 
 }  // namespace
-}  // namespace tint::type
+}  // namespace tint::core::type

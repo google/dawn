@@ -95,36 +95,36 @@ class Printer : public tint::TextGenerator {
     /// Emit a type
     /// @param out the stream to emit too
     /// @param ty the type to emit
-    void EmitType(StringStream& out, const type::Type* ty);
+    void EmitType(StringStream& out, const core::type::Type* ty);
 
     /// Handles generating an array declaration
     /// @param out the output stream
     /// @param arr the array to emit
-    void EmitArrayType(StringStream& out, const type::Array* arr);
+    void EmitArrayType(StringStream& out, const core::type::Array* arr);
     /// Handles generating an atomic declaration
     /// @param out the output stream
     /// @param atomic the atomic to emit
-    void EmitAtomicType(StringStream& out, const type::Atomic* atomic);
+    void EmitAtomicType(StringStream& out, const core::type::Atomic* atomic);
     /// Handles generating a pointer declaration
     /// @param out the output stream
     /// @param ptr the pointer to emit
-    void EmitPointerType(StringStream& out, const type::Pointer* ptr);
+    void EmitPointerType(StringStream& out, const core::type::Pointer* ptr);
     /// Handles generating a vector declaration
     /// @param out the output stream
     /// @param vec the vector to emit
-    void EmitVectorType(StringStream& out, const type::Vector* vec);
+    void EmitVectorType(StringStream& out, const core::type::Vector* vec);
     /// Handles generating a matrix declaration
     /// @param out the output stream
     /// @param mat the matrix to emit
-    void EmitMatrixType(StringStream& out, const type::Matrix* mat);
+    void EmitMatrixType(StringStream& out, const core::type::Matrix* mat);
     /// Handles generating a texture declaration
     /// @param out the output stream
     /// @param tex the texture to emit
-    void EmitTextureType(StringStream& out, const type::Texture* tex);
+    void EmitTextureType(StringStream& out, const core::type::Texture* tex);
     /// Handles generating a struct declaration. If the structure has already been emitted, then
     /// this function will simply return without emitting anything.
     /// @param str the struct to generate
-    void EmitStructType(const type::Struct* str);
+    void EmitStructType(const core::type::Struct* str);
 
     /// Handles generating a address space
     /// @param out the output of the type stream
@@ -143,7 +143,7 @@ class Printer : public tint::TextGenerator {
     /// Emits the zero value for the given type
     /// @param out the stream to emit too
     /// @param ty the type
-    void EmitZeroValue(StringStream& out, const type::Type* ty);
+    void EmitZeroValue(StringStream& out, const core::type::Type* ty);
 
     /// @returns the name of the templated `tint_array` helper type, generating it if needed
     const std::string& ArrayTemplateName();
@@ -152,7 +152,7 @@ class Printer : public tint::TextGenerator {
     /// @returns the name of the structure, taking special care of builtin structures that start
     /// with double underscores. If the structure is a builtin, then the returned name will be a
     /// unique name without the leading underscores.
-    std::string StructName(const type::Struct* s);
+    std::string StructName(const core::type::Struct* s);
 
     /// @return a new, unique identifier with the given prefix.
     /// @param prefix optional prefix to apply to the generated identifier. If empty "tint_symbol"
@@ -160,7 +160,7 @@ class Printer : public tint::TextGenerator {
     std::string UniqueIdentifier(const std::string& prefix = "");
 
     /// Map of builtin structure to unique generated name
-    std::unordered_map<const type::Struct*, std::string> builtin_struct_names_;
+    std::unordered_map<const core::type::Struct*, std::string> builtin_struct_names_;
 
     ir::Module* const ir_;
 
@@ -171,7 +171,7 @@ class Printer : public tint::TextGenerator {
     /// Non-empty only if an invariant attribute has been generated.
     std::string invariant_define_name_;
 
-    std::unordered_set<const type::Struct*> emitted_structs_;
+    std::unordered_set<const core::type::Struct*> emitted_structs_;
 
     /// The current function being emitted
     ir::Function* current_function_ = nullptr;

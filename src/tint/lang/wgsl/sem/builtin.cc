@@ -31,7 +31,7 @@ const char* Builtin::str() const {
 }
 
 Builtin::Builtin(core::Function type,
-                 const type::Type* return_type,
+                 const core::type::Type* return_type,
                  VectorRef<Parameter*> parameters,
                  core::EvaluationStage eval_stage,
                  PipelineStageSet supported_stages,

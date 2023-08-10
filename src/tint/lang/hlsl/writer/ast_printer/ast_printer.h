@@ -420,7 +420,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// then the boolean is set to true.
     /// @returns true if the type is emitted
     bool EmitType(StringStream& out,
-                  const type::Type* type,
+                  const core::type::Type* type,
                   core::AddressSpace address_space,
                   core::Access access,
                   const std::string& name,
@@ -433,7 +433,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param name the name to emit
     /// @returns true if the type is emitted
     bool EmitTypeAndName(StringStream& out,
-                         const type::Type* type,
+                         const core::type::Type* type,
                          core::AddressSpace address_space,
                          core::Access access,
                          const std::string& name);
@@ -442,7 +442,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param buffer the text buffer that the type declaration will be written to
     /// @param ty the struct to generate
     /// @returns true if the struct is emitted
-    bool EmitStructType(TextBuffer* buffer, const type::Struct* ty);
+    bool EmitStructType(TextBuffer* buffer, const core::type::Struct* ty);
     /// Handles a unary op expression
     /// @param out the output of the expression stream
     /// @param expr the expression to emit
@@ -453,12 +453,12 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param type the type to emit the value for
     /// @param value the value to emit
     /// @returns true if the value was successfully emitted.
-    bool EmitValue(StringStream& out, const type::Type* type, int value);
+    bool EmitValue(StringStream& out, const core::type::Type* type, int value);
     /// Emits the zero value for the given type
     /// @param out the output stream
     /// @param type the type to emit the value for
     /// @returns true if the zero value was successfully emitted.
-    bool EmitZeroValue(StringStream& out, const type::Type* type);
+    bool EmitZeroValue(StringStream& out, const core::type::Type* type);
     /// Handles generating a 'var' declaration
     /// @param var the variable to generate
     /// @returns true if the variable was emitted
@@ -474,7 +474,8 @@ class ASTPrinter : public tint::TextGenerator {
     /// via an accessor expression
     /// @param vec the vector type being assigned to
     /// @returns true on success
-    bool EmitDynamicVectorAssignment(const ast::AssignmentStatement* stmt, const type::Vector* vec);
+    bool EmitDynamicVectorAssignment(const ast::AssignmentStatement* stmt,
+                                     const core::type::Vector* vec);
     /// Emits call to a helper matrix assignment function for the input assignment
     /// statement and matrix type. This is used to work around FXC issues where
     /// assignment of a vector to a matrix with a dynamic index causes compilation
@@ -484,7 +485,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param mat the matrix type being assigned to
     /// @returns true on success
     bool EmitDynamicMatrixVectorAssignment(const ast::AssignmentStatement* stmt,
-                                           const type::Matrix* mat);
+                                           const core::type::Matrix* mat);
     /// Emits call to a helper matrix assignment function for the input assignment
     /// statement and matrix type. This is used to work around FXC issues where
     /// assignment of a scalar to a matrix with at least one dynamic index causes
@@ -494,7 +495,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param mat the matrix type being assigned to
     /// @returns true on success
     bool EmitDynamicMatrixScalarAssignment(const ast::AssignmentStatement* stmt,
-                                           const type::Matrix* mat);
+                                           const core::type::Matrix* mat);
 
     /// Handles generating a builtin method name
     /// @param builtin the semantic info for the builtin
@@ -535,7 +536,8 @@ class ASTPrinter : public tint::TextGenerator {
     };
 
     /// The map key for two semantic types.
-    using BinaryType = tint::UnorderedKeyWrapper<std::tuple<const type::Type*, const type::Type*>>;
+    using BinaryType =
+        tint::UnorderedKeyWrapper<std::tuple<const core::type::Type*, const core::type::Type*>>;
 
     /// CallBuiltinHelper will call the builtin helper function, creating it
     /// if it hasn't been built already. If the builtin needs to be built then
@@ -560,7 +562,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @returns the name of the structure, taking special care of builtin structures that start
     /// with double underscores. If the structure is a builtin, then the returned name will be a
     /// unique name without the leading underscores.
-    std::string StructName(const type::Struct* s);
+    std::string StructName(const core::type::Struct* s);
 
     /// @return a new, unique identifier with the given prefix.
     /// @param prefix optional prefix to apply to the generated identifier. If empty "tint_symbol"
@@ -579,18 +581,18 @@ class ASTPrinter : public tint::TextGenerator {
     TextBuffer helpers_;
 
     /// Map of builtin structure to unique generated name
-    std::unordered_map<const type::Struct*, std::string> builtin_struct_names_;
+    std::unordered_map<const core::type::Struct*, std::string> builtin_struct_names_;
     std::function<bool()> emit_continuing_;
-    std::unordered_map<const type::Matrix*, std::string> matrix_scalar_inits_;
+    std::unordered_map<const core::type::Matrix*, std::string> matrix_scalar_inits_;
     std::unordered_map<const sem::Builtin*, std::string> builtins_;
     // Polyfill functions for bitcast expression, BinaryType indicates the source type and the
     // destination type.
     std::unordered_map<BinaryType, std::string> bitcast_funcs_;
-    std::unordered_map<const type::Vector*, std::string> dynamic_vector_write_;
-    std::unordered_map<const type::Matrix*, std::string> dynamic_matrix_vector_write_;
-    std::unordered_map<const type::Matrix*, std::string> dynamic_matrix_scalar_write_;
-    std::unordered_map<const type::Type*, std::string> value_or_one_if_zero_;
-    std::unordered_set<const type::Struct*> emitted_structs_;
+    std::unordered_map<const core::type::Vector*, std::string> dynamic_vector_write_;
+    std::unordered_map<const core::type::Matrix*, std::string> dynamic_matrix_vector_write_;
+    std::unordered_map<const core::type::Matrix*, std::string> dynamic_matrix_scalar_write_;
+    std::unordered_map<const core::type::Type*, std::string> value_or_one_if_zero_;
+    std::unordered_set<const core::type::Struct*> emitted_structs_;
 };
 
 }  // namespace tint::hlsl::writer
