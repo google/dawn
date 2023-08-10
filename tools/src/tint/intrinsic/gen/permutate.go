@@ -60,7 +60,7 @@ func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
 	state := permutationState{
 		Permuter:        p,
 		templateTypes:   map[sem.TemplateParam]sem.FullyQualifiedName{},
-		templateNumbers: map[sem.TemplateParam]interface{}{},
+		templateNumbers: map[sem.TemplateParam]any{},
 		parameters:      map[int]sem.FullyQualifiedName{},
 	}
 
@@ -111,7 +111,11 @@ func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
 
 		// Check for hash collisions
 		if existing, collision := hashes[shortHash]; collision {
-			return fmt.Errorf("hash '%v' collision between %v and %v\nIncrease hashLength in %v",
+			return fmt.Errorf(`hash '%v' collision between
+  %v
+and
+  %v
+Increase hashLength in %v`,
 				shortHash, existing, desc, fileutils.ThisLine())
 		}
 		hashes[shortHash] = desc
@@ -209,7 +213,7 @@ func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
 type permutationState struct {
 	*Permuter
 	templateTypes   map[sem.TemplateParam]sem.FullyQualifiedName
-	templateNumbers map[sem.TemplateParam]interface{}
+	templateNumbers map[sem.TemplateParam]any
 	parameters      map[int]sem.FullyQualifiedName
 }
 
@@ -227,7 +231,7 @@ func (s permutationState) String() string {
 }
 
 func (s *permutationState) permutateFQN(in sem.FullyQualifiedName) ([]sem.FullyQualifiedName, error) {
-	args := append([]interface{}{}, in.TemplateArguments...)
+	args := append([]any{}, in.TemplateArguments...)
 	out := []sem.FullyQualifiedName{}
 
 	// permutate appends a permutation to out.
@@ -237,8 +241,11 @@ func (s *permutationState) permutateFQN(in sem.FullyQualifiedName) ([]sem.FullyQ
 	switch target := in.Target.(type) {
 	case *sem.Type:
 		permutate = func() error {
+			// Inner-most permutate lambda.
+			// Append a the current permutation to out
 			out = append(out, sem.FullyQualifiedName{Target: in.Target, TemplateArguments: args})
-			args = append([]interface{}{}, in.TemplateArguments...)
+			// Clone the argument list, for the next permutation to use.
+			args = append([]any{}, args...)
 			return nil
 		}
 	case sem.TemplateParam:
