@@ -23,13 +23,13 @@
     ls `xcode-select -p`/Platforms/MacOSX.platform/Developer/SDKs
     ```
 
-## Install `depot_tools`
+## Get the code and its dependencies
+
+### Using `depot_tools`
 
 Dawn uses the Chromium build system and dependency management so you need to [install depot_tools] and add it to the PATH.
 
 [install depot_tools]: http://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up
-
-## Get the code
 
 ```sh
 # Clone the repo as "dawn"
@@ -41,6 +41,20 @@ cp scripts/standalone.gclient .gclient
 # Fetch external dependencies and toolchains with gclient
 gclient sync
 ```
+
+### Without `depot_tools`
+
+If you cannot or do not want to depend on `depot_tools`, you may use the `tools/fetch_dawn_dependencies.py` to clone the dependencies' repositories:
+
+```sh
+# Clone the repo as "dawn"
+git clone https://dawn.googlesource.com/dawn dawn && cd dawn
+
+# Fetch dependencies (lose equivalent of gclient sync)
+python tools/fetch_dawn_dependencies.py --use-test-deps
+```
+
+Use `python tools/fetch_dawn_dependencies.py -h` to know more about the available options. The `--use-test-deps` option used above specifies to also fetch dependencies needed by tests. Contrary to `depot_tools`, this scripts does not figure out option-dependent requirements automatically.
 
 ## Build Dawn
 
