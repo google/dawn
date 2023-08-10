@@ -23,7 +23,6 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_Undefined:
         case WGPUFeatureName_Force32:
         case WGPUFeatureName_DawnNative:
-        case WGPUFeatureName_DawnShaderFloat16:  // Deprecated
         case WGPUFeatureName_ImplicitDeviceSynchronization:
         case WGPUFeatureName_SurfaceCapabilities:
         case WGPUFeatureName_D3D11MultithreadProtected:

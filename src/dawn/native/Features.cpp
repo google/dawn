@@ -221,9 +221,6 @@ Feature FromAPIFeature(wgpu::FeatureName feature) {
     switch (feature) {
         case wgpu::FeatureName::Undefined:
             return Feature::InvalidEnum;
-        case wgpu::FeatureName::DawnShaderFloat16:
-            // Deprecated.
-            return Feature::InvalidEnum;
 
         case wgpu::FeatureName::TimestampQuery:
             return Feature::TimestampQuery;

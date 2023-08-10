@@ -1651,7 +1651,6 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
             return true;
 
         case wgpu::FeatureName::PipelineStatisticsQuery:
-        case wgpu::FeatureName::DawnShaderFloat16:
         case wgpu::FeatureName::DawnInternalUsages:
         case wgpu::FeatureName::DawnMultiPlanarFormats:
         case wgpu::FeatureName::DawnNative:
