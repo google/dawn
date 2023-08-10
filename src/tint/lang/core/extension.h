@@ -30,7 +30,7 @@ namespace tint::core {
 
 /// An enumerator of WGSL extensions
 /// @see src/tint/lang/wgsl/intrinsics.def for extension descriptions
-enum class Extension {
+enum class Extension : uint8_t {
     kUndefined,
     kChromiumDisableUniformityAnalysis,
     kChromiumExperimentalDp4A,

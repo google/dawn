@@ -28,7 +28,7 @@
 namespace tint::core {
 
 /// An enumerator of builtin builtin.
-enum class Builtin {
+enum class Builtin : uint8_t {
     kUndefined,
     kAtomicCompareExchangeResultI32,
     kAtomicCompareExchangeResultU32,

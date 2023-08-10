@@ -47,7 +47,7 @@ class WhileStatement;
 class UnaryOpExpression;
 }  // namespace tint::ast
 namespace tint::core {
-enum class BuiltinValue;
+enum class BuiltinValue : uint8_t;
 }
 namespace tint::sem {
 class Expression;

@@ -29,8 +29,7 @@ namespace tint::core::intrinsic {
 
 /// CtorConv is an enumerator of types that have a constructor or converter overload
 /// declared in the intrinsic table.
-enum class CtorConv {
-    kNone = -1,
+enum class CtorConv : uint8_t {
     kI32,
     kU32,
     kF32,
@@ -49,6 +48,7 @@ enum class CtorConv {
     kMat4x3,
     kMat4x4,
     kPackedVec3,
+    kNone,
 };
 
 /// @returns the name of the type.

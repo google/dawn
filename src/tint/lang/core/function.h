@@ -31,8 +31,7 @@
 namespace tint::core {
 
 /// Enumerator of all builtin functions
-enum class Function {
-    kNone = -1,
+enum class Function : uint8_t {
     kAbs,
     kAcos,
     kAcosh,
@@ -148,6 +147,7 @@ enum class Function {
     kAtomicCompareExchangeWeak,
     kSubgroupBallot,
     kTintMaterialize,
+    kNone,
 };
 
 /// Matches the Function by name

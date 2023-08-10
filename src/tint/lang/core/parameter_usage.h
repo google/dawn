@@ -31,8 +31,7 @@ namespace tint::core {
 
 /// ParameterUsage is extra metadata for identifying a parameter based on its
 /// overload position
-enum class ParameterUsage {
-    kNone = -1,
+enum class ParameterUsage : uint8_t {
     kArrayIndex,
     kBias,
     kComponent,
@@ -55,6 +54,7 @@ enum class ParameterUsage {
     kZ,
     kZw,
     kZyw,
+    kNone,
 };
 
 /// @param value the enum value

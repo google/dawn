@@ -28,7 +28,7 @@
 namespace tint::core {
 
 /// Address space of a given pointer.
-enum class AddressSpace {
+enum class AddressSpace : uint8_t {
     kUndefined,
     kIn,
     kOut,

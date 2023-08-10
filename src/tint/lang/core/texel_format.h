@@ -28,7 +28,7 @@
 namespace tint::core {
 
 /// Enumerator of texel formats
-enum class TexelFormat {
+enum class TexelFormat : uint8_t {
     kUndefined,
     kBgra8Unorm,
     kR32Float,

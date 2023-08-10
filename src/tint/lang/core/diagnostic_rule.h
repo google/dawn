@@ -31,7 +31,7 @@
 namespace tint::core {
 
 /// WGSL core diagnostic rules.
-enum class CoreDiagnosticRule {
+enum class CoreDiagnosticRule : uint8_t {
     kUndefined,
     kDerivativeUniformity,
 };
@@ -58,7 +58,7 @@ constexpr const char* kCoreDiagnosticRuleStrings[] = {
 };
 
 /// Chromium-specific diagnostic rules.
-enum class ChromiumDiagnosticRule {
+enum class ChromiumDiagnosticRule : uint8_t {
     kUndefined,
     kUnreachableCode,
 };

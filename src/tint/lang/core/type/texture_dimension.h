@@ -21,9 +21,7 @@
 namespace tint::core::type {
 
 /// The dimensionality of the texture
-enum class TextureDimension {
-    /// Invalid texture
-    kNone = -1,
+enum class TextureDimension : uint8_t {
     /// 1 dimensional texture
     k1d,
     /// 2 dimensional texture
@@ -36,6 +34,8 @@ enum class TextureDimension {
     kCube,
     /// cube array texture
     kCubeArray,
+    /// Invalid texture
+    kNone,
 };
 
 /// @param dim the enum value

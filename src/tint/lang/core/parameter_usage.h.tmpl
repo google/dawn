@@ -24,11 +24,11 @@ namespace tint::core {
 
 /// ParameterUsage is extra metadata for identifying a parameter based on its
 /// overload position
-enum class ParameterUsage {
-    kNone = -1,
+enum class ParameterUsage : uint8_t {
 {{- range $I.Sem.UniqueParameterNames  }}
     k{{PascalCase .}},
 {{- end  }}
+    kNone,
 };
 
 /// @param value the enum value

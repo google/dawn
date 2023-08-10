@@ -66,7 +66,7 @@ class Variable;
 class WhileStatement;
 }  // namespace tint::ast
 namespace tint::core {
-enum class TexelFormat;
+enum class TexelFormat : uint8_t;
 }  // namespace tint::core
 
 namespace tint::wgsl::writer {

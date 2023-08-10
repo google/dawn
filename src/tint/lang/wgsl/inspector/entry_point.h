@@ -28,28 +28,28 @@
 namespace tint::inspector {
 
 /// Base component type of a stage variable.
-enum class ComponentType {
-    kUnknown = -1,
+enum class ComponentType : uint8_t {
     kF32,
     kU32,
     kI32,
     kF16,
+    kUnknown,
 };
 
 /// Composition of components of a stage variable.
-enum class CompositionType {
-    kUnknown = -1,
+enum class CompositionType : uint8_t {
     kScalar,
     kVec2,
     kVec3,
     kVec4,
+    kUnknown,
 };
 
 /// Type of interpolation of a stage variable.
-enum class InterpolationType { kUnknown = -1, kPerspective, kLinear, kFlat };
+enum class InterpolationType : uint8_t { kPerspective, kLinear, kFlat, kUnknown };
 
 /// Type of interpolation sampling of a stage variable.
-enum class InterpolationSampling { kUnknown = -1, kNone, kCenter, kCentroid, kSample };
+enum class InterpolationSampling : uint8_t { kNone, kCenter, kCentroid, kSample, kUnknown };
 
 /// Reflection data about an entry point input or output.
 struct StageVariable {

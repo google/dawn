@@ -30,7 +30,7 @@
 namespace tint::core {
 
 /// The interpolation sampling.
-enum class InterpolationSampling {
+enum class InterpolationSampling : uint8_t {
     kUndefined,
     kCenter,
     kCentroid,

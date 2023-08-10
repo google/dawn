@@ -21,7 +21,7 @@
 namespace tint::ast {
 
 /// The pipeline stage
-enum class PipelineStage { kNone = -1, kVertex, kFragment, kCompute };
+enum class PipelineStage : uint8_t { kVertex, kFragment, kCompute, kNone };
 
 /// @param stage the enum value
 /// @returns the string for the given enum value

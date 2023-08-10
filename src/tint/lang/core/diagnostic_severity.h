@@ -33,7 +33,7 @@
 namespace tint::core {
 
 /// The diagnostic severity control.
-enum class DiagnosticSeverity {
+enum class DiagnosticSeverity : uint8_t {
     kUndefined,
     kError,
     kInfo,

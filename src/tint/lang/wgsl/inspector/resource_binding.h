@@ -26,9 +26,7 @@ namespace tint::inspector {
 /// Container for information about how a resource is bound
 struct ResourceBinding {
     /// The dimensionality of a texture
-    enum class TextureDimension {
-        /// Invalid texture
-        kNone = -1,
+    enum class TextureDimension : uint8_t {
         /// 1 dimensional texture
         k1d,
         /// 2 dimensional texture
@@ -41,16 +39,16 @@ struct ResourceBinding {
         kCube,
         /// cube array texture
         kCubeArray,
+        /// Invalid texture
+        kNone,
     };
 
     /// Component type of the texture's data. Same as the Sampled Type parameter
     /// in SPIR-V OpTypeImage.
-    enum class SampledKind { kUnknown = -1, kFloat, kUInt, kSInt };
+    enum class SampledKind : uint8_t { kFloat, kUInt, kSInt, kUnknown };
 
     /// Enumerator of texel image formats
-    enum class TexelFormat {
-        kNone = -1,
-
+    enum class TexelFormat : uint8_t {
         kBgra8Unorm,
         kRgba8Unorm,
         kRgba8Snorm,
@@ -68,6 +66,7 @@ struct ResourceBinding {
         kRgba32Uint,
         kRgba32Sint,
         kRgba32Float,
+        kNone,
     };
 
     /// kXXX maps to entries returned by GetXXXResourceBindings call.

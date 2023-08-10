@@ -28,7 +28,7 @@
 namespace tint::core {
 
 /// Address space of a given pointer.
-enum class Access {
+enum class Access : uint8_t {
     kUndefined,
     kRead,
     kReadWrite,

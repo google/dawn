@@ -31,7 +31,7 @@
 namespace tint::core {
 
 /// Address space of a given pointer.
-enum class Attribute {
+enum class Attribute : uint8_t {
     kUndefined,
     kAlign,
     kBinding,

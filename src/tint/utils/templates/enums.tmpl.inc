@@ -40,7 +40,7 @@
 {{- /* Declares the 'enum class' for the provided sem.Enum argument.      */ -}}
 {{- /* ------------------------------------------------------------------ */ -}}
 {{- $enum := Eval "EnumName" $ -}}
-enum class {{$enum}} {
+enum class {{$enum}} : uint8_t {
     kUndefined,
 {{-   range $entry := $.Entries }}
     k{{PascalCase $entry.Name}},{{if $entry.IsInternal}}  // Tint-internal enum entry - not parsed{{end}}

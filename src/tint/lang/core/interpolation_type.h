@@ -30,7 +30,7 @@
 namespace tint::core {
 
 /// The interpolation type.
-enum class InterpolationType {
+enum class InterpolationType : uint8_t {
     kUndefined,
     kFlat,
     kLinear,
