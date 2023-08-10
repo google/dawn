@@ -18,7 +18,6 @@ See:
 {{- /* ------------------------------------------------------------------ */ -}}
 {{- $I := $.Intrinsics -}}
 
-namespace {{$.Namespace}} {
 namespace {
 
 using ConstEvalFunctionIndex = tint::core::intrinsic::ConstEvalFunctionIndex;
@@ -290,8 +289,6 @@ const core::intrinsic::TableData {{$.Name}}{
   /* unary_minus */ kUnaryOperators[kUnaryOperatorMinus],
 };
 
-}  // namespace {{$.Namespace}}
-
 {{  end -}}
 {{- end -}}
 
@@ -299,14 +296,14 @@ const core::intrinsic::TableData {{$.Name}}{
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                              define "Type"                               -}}
 {{- /* ------------------------------------------------------------------ */ -}}
-{{- $class := PascalCase .Name -}}
+{{- $name := PascalCase .Name -}}
 /// TypeMatcher for 'type {{.Name}}'
-constexpr TypeMatcher k{{$class}}Matcher {
+constexpr TypeMatcher k{{$name}}Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
 {{- range .TemplateParams }}
 {{-   template "DeclareLocalTemplateParam" . }}
 {{- end  }}
-    if (!match_{{TrimLeft .Name "_"}}(state, ty{{range .TemplateParams}}, {{.GetName}}{{end}})) {
+    if (!Match{{$name}}(state, ty{{range .TemplateParams}}, {{.GetName}}{{end}})) {
       return nullptr;
     }
 {{- range .TemplateParams }}
@@ -315,7 +312,7 @@ constexpr TypeMatcher k{{$class}}Matcher {
       return nullptr;
     }
 {{- end  }}
-    return build_{{TrimLeft .Name "_"}}(state{{range .TemplateParams}}, {{.GetName}}{{end}});
+    return Build{{$name}}(state{{range .TemplateParams}}, {{.GetName}}{{end}});
   },
 /* string */ [](MatchState*{{if .TemplateParams}} state{{end}}) -> std::string {
 {{- range .TemplateParams }}
@@ -340,13 +337,13 @@ constexpr TypeMatcher k{{$class}}Matcher {
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                          define "TypeMatcher"                            -}}
 {{- /* ------------------------------------------------------------------ */ -}}
-{{- $class := PascalCase .Name -}}
+{{- $name := PascalCase .Name -}}
 /// TypeMatcher for 'match {{.Name}}'
-constexpr TypeMatcher k{{$class}}Matcher {
+constexpr TypeMatcher k{{$name}}Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
 {{- range .PrecedenceSortedTypes }}
-    if (match_{{.Name}}(state, ty)) {
-      return build_{{.Name}}(state);
+    if (Match{{PascalCase .Name}}(state, ty)) {
+      return Build{{PascalCase .Name}}(state);
     }
 {{- end }}
     return nullptr;

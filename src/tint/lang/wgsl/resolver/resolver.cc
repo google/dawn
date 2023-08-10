@@ -22,7 +22,7 @@
 
 #include "src/tint/lang/core/builtin.h"
 #include "src/tint/lang/core/constant/scalar.h"
-#include "src/tint/lang/core/intrinsic_data.h"
+#include "src/tint/lang/core/intrinsic/data/data.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/core/type/array.h"
@@ -114,7 +114,7 @@ Resolver::Resolver(ProgramBuilder* builder)
     : builder_(builder),
       diagnostics_(builder->Diagnostics()),
       const_eval_(builder->constants, diagnostics_),
-      intrinsic_table_(core::intrinsic::Table::Create(core::kIntrinsicData,
+      intrinsic_table_(core::intrinsic::Table::Create(core::intrinsic::data::kData,
                                                       builder->Types(),
                                                       builder->Symbols(),
                                                       builder->Diagnostics())),

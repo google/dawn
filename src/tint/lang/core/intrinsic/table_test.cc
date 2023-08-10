@@ -17,8 +17,8 @@
 #include <utility>
 
 #include "gmock/gmock.h"
+#include "src/tint/lang/core/intrinsic/data/data.h"
 #include "src/tint/lang/core/intrinsic/table_data.h"
-#include "src/tint/lang/core/intrinsic_data.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
@@ -51,7 +51,7 @@ using u32V = vec3<u32>;
 class IntrinsicTableTest : public testing::Test, public ProgramBuilder {
   public:
     std::unique_ptr<Table> table =
-        Table::Create(core::kIntrinsicData, Types(), Symbols(), Diagnostics());
+        Table::Create(core::intrinsic::data::kData, Types(), Symbols(), Diagnostics());
 };
 
 TEST_F(IntrinsicTableTest, MatchF32) {
@@ -1032,7 +1032,7 @@ struct Case {
 
 struct IntrinsicTableAbstractBinaryTest : public resolver::ResolverTestWithParam<Case> {
     std::unique_ptr<Table> table =
-        Table::Create(core::kIntrinsicData, Types(), Symbols(), Diagnostics());
+        Table::Create(core::intrinsic::data::kData, Types(), Symbols(), Diagnostics());
 };
 
 TEST_P(IntrinsicTableAbstractBinaryTest, MatchAdd) {
@@ -1217,7 +1217,7 @@ struct Case {
 
 struct IntrinsicTableAbstractTernaryTest : public resolver::ResolverTestWithParam<Case> {
     std::unique_ptr<Table> table =
-        Table::Create(core::kIntrinsicData, Types(), Symbols(), Diagnostics());
+        Table::Create(core::intrinsic::data::kData, Types(), Symbols(), Diagnostics());
 };
 
 TEST_P(IntrinsicTableAbstractTernaryTest, MatchClamp) {

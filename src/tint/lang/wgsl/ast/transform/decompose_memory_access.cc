@@ -113,7 +113,7 @@ struct OffsetBinOp : Offset {
 /// LoadStoreKey is the unordered map key to a load or store intrinsic.
 struct LoadStoreKey {
     core::type::Type const* el_ty = nullptr;  // element type
-    Symbol const buffer;                // buffer name
+    Symbol const buffer;                      // buffer name
     bool operator==(const LoadStoreKey& rhs) const {
         return el_ty == rhs.el_ty && buffer == rhs.buffer;
     }
@@ -127,8 +127,8 @@ struct LoadStoreKey {
 /// AtomicKey is the unordered map key to an atomic intrinsic.
 struct AtomicKey {
     core::type::Type const* el_ty = nullptr;  // element type
-    core::Function const op;            // atomic op
-    Symbol const buffer;                // buffer name
+    core::Function const op;                  // atomic op
+    Symbol const buffer;                      // buffer name
     bool operator==(const AtomicKey& rhs) const {
         return el_ty == rhs.el_ty && op == rhs.op && buffer == rhs.buffer;
     }

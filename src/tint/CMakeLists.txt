@@ -517,11 +517,11 @@ list(APPEND TINT_LIB_SRCS
   lang/core/constant/eval.h
   lang/core/intrinsic/ctor_conv.cc
   lang/core/intrinsic/ctor_conv.h
+  lang/core/intrinsic/data/data.cc
+  lang/core/intrinsic/data/data.h
+  lang/core/intrinsic/data/type_matchers.h
   lang/core/intrinsic/table.cc
   lang/core/intrinsic/table.h
-  lang/core/intrinsic_data.cc
-  lang/core/intrinsic_data.h
-  lang/core/intrinsic_type_matchers.h
   lang/wgsl/resolver/dependency_graph.cc
   lang/wgsl/resolver/dependency_graph.h
   lang/wgsl/resolver/resolve.cc

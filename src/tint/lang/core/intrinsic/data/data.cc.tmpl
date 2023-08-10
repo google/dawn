@@ -19,8 +19,14 @@ See:
 #include <limits>
 #include <string>
 
-#include "src/tint/lang/core/intrinsic_data.h"
-#include "src/tint/lang/core/intrinsic_type_matchers.h"
+#include "src/tint/lang/core/intrinsic/data/data.h"
+#include "src/tint/lang/core/intrinsic/data/type_matchers.h"
 #include "src/tint/utils/text/string_stream.h"
 
-{{ Eval "Data" "Intrinsics" $I "Namespace" "tint::core" "Name" "kIntrinsicData" -}}
+namespace tint::core::intrinsic::data {
+
+{{ Eval "Data"
+  "Intrinsics" $I
+  "Name"       "kData" -}}
+
+}  // namespace tint::core::intrinsic::data

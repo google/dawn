@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_CORE_INTRINSIC_DATA_H_
-#define SRC_TINT_LANG_CORE_INTRINSIC_DATA_H_
+#ifndef SRC_TINT_LANG_CORE_INTRINSIC_DATA_DATA_H_
+#define SRC_TINT_LANG_CORE_INTRINSIC_DATA_DATA_H_
 
 #include "src/tint/lang/core/intrinsic/table_data.h"
 
-namespace tint::core {
+namespace tint::core::intrinsic::data {
 
-extern const intrinsic::TableData kIntrinsicData;
+extern const TableData kData;
 
-}  // namespace tint::core
+}  // namespace tint::core::intrinsic::data
 
-#endif  // SRC_TINT_LANG_CORE_INTRINSIC_DATA_H_
+#endif  // SRC_TINT_LANG_CORE_INTRINSIC_DATA_DATA_H_
