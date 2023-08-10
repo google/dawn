@@ -781,7 +781,6 @@ if(${TINT_BUILD_IR})
     lang/core/ir/access.h
     lang/core/ir/binary.cc
     lang/core/ir/binary.h
-    lang/core/ir/binding_point.h
     lang/core/ir/bitcast.cc
     lang/core/ir/bitcast.h
     lang/core/ir/block.cc

@@ -17,11 +17,11 @@
 
 #include "src/tint/lang/core/access.h"
 #include "src/tint/lang/core/address_space.h"
-#include "src/tint/lang/core/ir/binding_point.h"
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/rtti/castable.h"
+#include "tint/binding_point.h"
 
 namespace tint::ir {
 

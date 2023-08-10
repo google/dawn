@@ -52,8 +52,7 @@ Result<SuccessType, std::string> Run(ir::Module* ir, const BindingRemapperOption
         }
 
         // Replace group and binding index if requested.
-        tint::BindingPoint from{bp->group, bp->binding};
-        auto to = options.binding_points.find(from);
+        auto to = options.binding_points.find(bp.value());
         if (to != options.binding_points.end()) {
             var->SetBindingPoint(to->second.group, to->second.binding);
         }
