@@ -271,7 +271,7 @@ ResultOrError<Ref<BindGroupLayoutBase>> PipelineBase::GetBindGroupLayout(uint32_
     BindGroupIndex groupIndex(groupIndexIn);
 
     DAWN_TRY(ValidateGetBindGroupLayout(groupIndex));
-    return Ref<BindGroupLayoutBase>(mLayout->GetBindGroupLayout(groupIndex));
+    return Ref<BindGroupLayoutBase>(mLayout->GetFrontendBindGroupLayout(groupIndex));
 }
 
 BindGroupLayoutBase* PipelineBase::APIGetBindGroupLayout(uint32_t groupIndexIn) {

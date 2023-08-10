@@ -548,10 +548,9 @@ class BindGroupStateTracker : public BindGroupTrackerBase<false, uint64_t> {
             return;
         }
 
-        const uint32_t cbvUavSrvCount = ToBackend(group->GetLayout()->GetInternalBindGroupLayout())
-                                            ->GetCbvUavSrvDescriptorCount();
-        const uint32_t samplerCount = ToBackend(group->GetLayout()->GetInternalBindGroupLayout())
-                                          ->GetSamplerDescriptorCount();
+        const uint32_t cbvUavSrvCount =
+            ToBackend(group->GetLayout())->GetCbvUavSrvDescriptorCount();
+        const uint32_t samplerCount = ToBackend(group->GetLayout())->GetSamplerDescriptorCount();
 
         if (cbvUavSrvCount > 0) {
             uint32_t parameterIndex = pipelineLayout->GetCbvUavSrvRootParameterIndex(index);

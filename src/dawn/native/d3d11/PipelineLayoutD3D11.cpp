@@ -15,7 +15,7 @@
 #include "dawn/native/d3d11/PipelineLayoutD3D11.h"
 
 #include "dawn/common/BitSetIterator.h"
-#include "dawn/native/BindGroupLayout.h"
+#include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/d3d11/DeviceD3D11.h"
 
 namespace dawn::native::d3d11 {
@@ -41,7 +41,7 @@ MaybeError PipelineLayout::Initialize(Device* device) {
     mTotalUAVBindingCount = unorderedAccessViewIndex;
 
     for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
-        const BindGroupLayoutBase* bgl = GetBindGroupLayout(group);
+        const BindGroupLayoutInternalBase* bgl = GetBindGroupLayout(group);
         mIndexInfo[group].resize(bgl->GetBindingCount());
 
         for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {

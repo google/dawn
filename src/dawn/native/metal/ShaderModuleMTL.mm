@@ -14,7 +14,7 @@
 
 #include "dawn/native/metal/ShaderModuleMTL.h"
 
-#include "dawn/native/BindGroupLayout.h"
+#include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/Serializable.h"
 #include "dawn/native/TintUtils.h"

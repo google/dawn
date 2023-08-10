@@ -392,7 +392,8 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
 
 void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
     ID3D11DeviceContext1* deviceContext1 = mCommandContext->GetD3D11DeviceContext1();
-    BindGroupLayoutBase* groupLayout = mLastAppliedPipelineLayout->GetBindGroupLayout(index);
+    BindGroupLayoutInternalBase* groupLayout =
+        mLastAppliedPipelineLayout->GetBindGroupLayout(index);
     const auto& indices = ToBackend(mLastAppliedPipelineLayout)->GetBindingIndexInfo()[index];
 
     for (BindingIndex bindingIndex{0}; bindingIndex < groupLayout->GetBindingCount();

@@ -15,7 +15,7 @@
 #include "dawn/native/metal/PipelineLayoutMTL.h"
 
 #include "dawn/common/BitSetIterator.h"
-#include "dawn/native/BindGroupLayout.h"
+#include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/metal/DeviceMTL.h"
 
 namespace dawn::native::metal {

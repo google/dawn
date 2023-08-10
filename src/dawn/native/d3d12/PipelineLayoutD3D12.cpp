@@ -157,8 +157,7 @@ MaybeError PipelineLayout::Initialize() {
 
     size_t rangesCount = 0;
     for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
-        const BindGroupLayout* bindGroupLayout =
-            ToBackend(GetBindGroupLayout(group)->GetInternalBindGroupLayout());
+        const BindGroupLayout* bindGroupLayout = ToBackend(GetBindGroupLayout(group));
         rangesCount += bindGroupLayout->GetCbvUavSrvDescriptorRanges().size() +
                        bindGroupLayout->GetSamplerDescriptorRanges().size();
     }
@@ -169,8 +168,7 @@ MaybeError PipelineLayout::Initialize() {
     uint32_t rangeIndex = 0;
 
     for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
-        const BindGroupLayout* bindGroupLayout =
-            ToBackend(GetBindGroupLayout(group)->GetInternalBindGroupLayout());
+        const BindGroupLayout* bindGroupLayout = ToBackend(GetBindGroupLayout(group));
 
         // Set the root descriptor table parameter and copy ranges. Ranges are offset by the
         // bind group index Returns whether or not the parameter was set. A root parameter is
@@ -281,7 +279,7 @@ MaybeError PipelineLayout::Initialize() {
     // data should start.
     uint32_t dynamicStorageBufferLengthsShaderRegisterOffset = 0;
     for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
-        const BindGroupLayoutBase* bgl = GetBindGroupLayout(group);
+        const BindGroupLayoutInternalBase* bgl = GetBindGroupLayout(group);
 
         mDynamicStorageBufferLengthInfo[group].firstRegisterOffset =
             dynamicStorageBufferLengthsShaderRegisterOffset;

@@ -21,15 +21,16 @@
 namespace dawn::native::opengl {
 
 MaybeError ValidateGLBindGroupDescriptor(const BindGroupDescriptor* descriptor) {
-    const BindGroupLayoutInternalBase::BindingMap& bindingMap = descriptor->layout->GetBindingMap();
+    BindGroupLayoutInternalBase* layout = descriptor->layout->GetInternalBindGroupLayout();
+    const BindGroupLayoutInternalBase::BindingMap& bindingMap = layout->GetBindingMap();
     for (uint32_t i = 0; i < descriptor->entryCount; ++i) {
         const BindGroupEntry& entry = descriptor->entries[i];
 
         const auto& it = bindingMap.find(BindingNumber(entry.binding));
         BindingIndex bindingIndex = it->second;
-        ASSERT(bindingIndex < descriptor->layout->GetBindingCount());
+        ASSERT(bindingIndex < layout->GetBindingCount());
 
-        const BindingInfo& bindingInfo = descriptor->layout->GetBindingInfo(bindingIndex);
+        const BindingInfo& bindingInfo = layout->GetBindingInfo(bindingIndex);
         if (bindingInfo.bindingType == BindingInfoType::StorageTexture) {
             ASSERT(entry.textureView != nullptr);
             const uint32_t textureViewLayerCount = entry.textureView->GetLayerCount();
@@ -53,7 +54,7 @@ BindGroup::~BindGroup() = default;
 
 void BindGroup::DestroyImpl() {
     BindGroupBase::DestroyImpl();
-    ToBackend(GetLayout()->GetInternalBindGroupLayout())->DeallocateBindGroup(this);
+    ToBackend(GetLayout())->DeallocateBindGroup(this);
 }
 
 // static

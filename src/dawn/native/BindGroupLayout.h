@@ -25,8 +25,7 @@ namespace dawn::native {
 
 // Wrapper passthrough frontend object that is essentially just a Ref to a backing
 // BindGroupLayoutInternalBase and a pipeline compatibility token.
-// TODO(lokokung) Could maybe make this a final class if we update the mock objects.
-class BindGroupLayoutBase : public ApiObjectBase {
+class BindGroupLayoutBase final : public ApiObjectBase {
   public:
     BindGroupLayoutBase(DeviceBase* device,
                         const char* label,
@@ -36,50 +35,6 @@ class BindGroupLayoutBase : public ApiObjectBase {
     static BindGroupLayoutBase* MakeError(DeviceBase* device, const char* label = nullptr);
 
     ObjectType GetType() const override;
-
-    // Proxy functions that just call their respective counterparts in the internal layout.
-    const BindingInfo& GetBindingInfo(BindingIndex bindingIndex) const {
-        return mInternalLayout->GetBindingInfo(bindingIndex);
-    }
-    const BindGroupLayoutInternalBase::BindingMap& GetBindingMap() const {
-        return mInternalLayout->GetBindingMap();
-    }
-    bool HasBinding(BindingNumber bindingNumber) const {
-        return mInternalLayout->HasBinding(bindingNumber);
-    }
-    BindingIndex GetBindingIndex(BindingNumber bindingNumber) const {
-        return mInternalLayout->GetBindingIndex(bindingNumber);
-    }
-    BindingIndex GetBindingCount() const { return mInternalLayout->GetBindingCount(); }
-    BindingIndex GetBufferCount() const { return mInternalLayout->GetBufferCount(); }
-    BindingIndex GetDynamicBufferCount() const { return mInternalLayout->GetDynamicBufferCount(); }
-    uint32_t GetUnverifiedBufferCount() const {
-        return mInternalLayout->GetUnverifiedBufferCount();
-    }
-    const BindingCounts& GetBindingCountInfo() const {
-        return mInternalLayout->GetBindingCountInfo();
-    }
-    uint32_t GetExternalTextureBindingCount() const {
-        return mInternalLayout->GetExternalTextureBindingCount();
-    }
-    const ExternalTextureBindingExpansionMap& GetExternalTextureBindingExpansionMap() const {
-        return mInternalLayout->GetExternalTextureBindingExpansionMap();
-    }
-    uint32_t GetUnexpandedBindingCount() const {
-        return mInternalLayout->GetUnexpandedBindingCount();
-    }
-    size_t GetBindingDataSize() const { return mInternalLayout->GetBindingDataSize(); }
-    static constexpr size_t GetBindingDataAlignment() {
-        return BindGroupLayoutInternalBase::GetBindingDataAlignment();
-    }
-    BindGroupLayoutInternalBase::BindingDataPointers ComputeBindingDataPointers(
-        void* dataStart) const {
-        return mInternalLayout->ComputeBindingDataPointers(dataStart);
-    }
-    bool IsStorageBufferBinding(BindingIndex bindingIndex) const {
-        return mInternalLayout->IsStorageBufferBinding(bindingIndex);
-    }
-    std::string EntriesToString() const { return mInternalLayout->EntriesToString(); }
 
     // Non-proxy functions that are specific to the realized frontend object.
     BindGroupLayoutInternalBase* GetInternalBindGroupLayout() const;

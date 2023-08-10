@@ -40,8 +40,7 @@ MaybeError PipelineLayout::Initialize() {
     std::array<VkDescriptorSetLayout, kMaxBindGroups> setLayouts;
     std::array<const CachedObject*, kMaxBindGroups> cachedObjects;
     for (BindGroupIndex setIndex : IterateBitSet(GetBindGroupLayoutsMask())) {
-        const BindGroupLayoutInternalBase* bindGroupLayout =
-            GetBindGroupLayout(setIndex)->GetInternalBindGroupLayout();
+        const BindGroupLayoutInternalBase* bindGroupLayout = GetBindGroupLayout(setIndex);
         setLayouts[numSetLayouts] = ToBackend(bindGroupLayout)->GetHandle();
         cachedObjects[numSetLayouts] = bindGroupLayout;
         numSetLayouts++;

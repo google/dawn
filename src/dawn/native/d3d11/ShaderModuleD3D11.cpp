@@ -113,8 +113,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     const BindingInfoArray& moduleBindingInfo = entryPoint.bindings;
 
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-        const BindGroupLayout* groupLayout =
-            ToBackend(layout->GetBindGroupLayout(group)->GetInternalBindGroupLayout());
+        const BindGroupLayout* groupLayout = ToBackend(layout->GetBindGroupLayout(group));
         const auto& indices = layout->GetBindingIndexInfo()[group];
         const auto& groupBindingInfo = moduleBindingInfo[group];
 

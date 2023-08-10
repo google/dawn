@@ -20,7 +20,7 @@
 #include <bitset>
 
 #include "dawn/common/Constants.h"
-#include "dawn/native/BindGroupLayout.h"
+#include "dawn/native/BindGroup.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/PipelineLayout.h"
 

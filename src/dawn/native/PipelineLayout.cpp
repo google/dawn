@@ -47,8 +47,9 @@ MaybeError ValidatePipelineLayoutDescriptor(DeviceBase* device,
                         "created as part of a pipeline's default layout.",
                         i, descriptor->bindGroupLayouts[i]);
 
-        AccumulateBindingCounts(&bindingCounts,
-                                descriptor->bindGroupLayouts[i]->GetBindingCountInfo());
+        AccumulateBindingCounts(
+            &bindingCounts,
+            descriptor->bindGroupLayouts[i]->GetInternalBindGroupLayout()->GetBindingCountInfo());
     }
 
     DAWN_TRY(ValidateBindingCounts(device->GetLimits(), bindingCounts));
@@ -335,7 +336,8 @@ ObjectType PipelineLayoutBase::GetType() const {
     return ObjectType::PipelineLayout;
 }
 
-const BindGroupLayoutBase* PipelineLayoutBase::GetBindGroupLayout(BindGroupIndex group) const {
+const BindGroupLayoutBase* PipelineLayoutBase::GetFrontendBindGroupLayout(
+    BindGroupIndex group) const {
     ASSERT(!IsError());
     ASSERT(group < kMaxBindGroupsTyped);
     ASSERT(mMask[group]);
@@ -344,13 +346,22 @@ const BindGroupLayoutBase* PipelineLayoutBase::GetBindGroupLayout(BindGroupIndex
     return bgl;
 }
 
-BindGroupLayoutBase* PipelineLayoutBase::GetBindGroupLayout(BindGroupIndex group) {
+BindGroupLayoutBase* PipelineLayoutBase::GetFrontendBindGroupLayout(BindGroupIndex group) {
     ASSERT(!IsError());
     ASSERT(group < kMaxBindGroupsTyped);
     ASSERT(mMask[group]);
     BindGroupLayoutBase* bgl = mBindGroupLayouts[group].Get();
     ASSERT(bgl != nullptr);
     return bgl;
+}
+
+const BindGroupLayoutInternalBase* PipelineLayoutBase::GetBindGroupLayout(
+    BindGroupIndex group) const {
+    return GetFrontendBindGroupLayout(group)->GetInternalBindGroupLayout();
+}
+
+BindGroupLayoutInternalBase* PipelineLayoutBase::GetBindGroupLayout(BindGroupIndex group) {
+    return GetFrontendBindGroupLayout(group)->GetInternalBindGroupLayout();
 }
 
 const BindGroupLayoutMask& PipelineLayoutBase::GetBindGroupLayoutsMask() const {
@@ -379,7 +390,7 @@ size_t PipelineLayoutBase::ComputeContentHash() {
     recorder.Record(mMask);
 
     for (BindGroupIndex group : IterateBitSet(mMask)) {
-        recorder.Record(GetBindGroupLayout(group)->GetInternalBindGroupLayout()->GetContentHash());
+        recorder.Record(GetBindGroupLayout(group)->GetContentHash());
     }
 
     return recorder.GetContentHash();

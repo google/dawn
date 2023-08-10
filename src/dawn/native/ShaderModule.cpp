@@ -20,7 +20,7 @@
 #include "absl/strings/str_format.h"
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Constants.h"
-#include "dawn/native/BindGroupLayout.h"
+#include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/ChainUtils.h"
 #include "dawn/native/CompilationMessages.h"
 #include "dawn/native/Device.h"
@@ -337,7 +337,7 @@ ResultOrError<tint::Program> ParseSPIRV(const std::vector<uint32_t>& spirv,
 #endif  // TINT_BUILD_SPV_READER
 
 std::vector<uint64_t> GetBindGroupMinBufferSizes(const BindingGroupInfoMap& shaderBindings,
-                                                 const BindGroupLayoutBase* layout) {
+                                                 const BindGroupLayoutInternalBase* layout) {
     std::vector<uint64_t> requiredBufferSizes(layout->GetUnverifiedBufferCount());
     uint32_t packedIdx = 0;
 
@@ -365,7 +365,7 @@ std::vector<uint64_t> GetBindGroupMinBufferSizes(const BindingGroupInfoMap& shad
 }
 
 MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* device,
-                                                          const BindGroupLayoutBase* layout,
+                                                          const BindGroupLayoutInternalBase* layout,
                                                           SingleShaderStage entryPointStage,
                                                           BindingNumber bindingNumber,
                                                           const ShaderBindingInfo& shaderInfo) {
@@ -507,7 +507,7 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
 MaybeError ValidateCompatibilityWithBindGroupLayout(DeviceBase* device,
                                                     BindGroupIndex group,
                                                     const EntryPointMetadata& entryPoint,
-                                                    const BindGroupLayoutBase* layout) {
+                                                    const BindGroupLayoutInternalBase* layout) {
     // Iterate over all bindings used by this group in the shader, and find the
     // corresponding binding in the BindGroupLayout, if it exists.
     for (const auto& [bindingId, bindingInfo] : entryPoint.bindings[group]) {
@@ -1051,13 +1051,15 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
 
     // Validate that filtering samplers are not used with unfilterable textures.
     for (const auto& pair : entryPoint.samplerTexturePairs) {
-        const BindGroupLayoutBase* samplerBGL = layout->GetBindGroupLayout(pair.sampler.group);
+        const BindGroupLayoutInternalBase* samplerBGL =
+            layout->GetBindGroupLayout(pair.sampler.group);
         const BindingInfo& samplerInfo =
             samplerBGL->GetBindingInfo(samplerBGL->GetBindingIndex(pair.sampler.binding));
         if (samplerInfo.sampler.type != wgpu::SamplerBindingType::Filtering) {
             continue;
         }
-        const BindGroupLayoutBase* textureBGL = layout->GetBindGroupLayout(pair.texture.group);
+        const BindGroupLayoutInternalBase* textureBGL =
+            layout->GetBindGroupLayout(pair.texture.group);
         const BindingInfo& textureInfo =
             textureBGL->GetBindingInfo(textureBGL->GetBindingIndex(pair.texture.binding));
 

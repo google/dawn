@@ -153,8 +153,7 @@ BindGroup::~BindGroup() = default;
 
 void BindGroup::DestroyImpl() {
     BindGroupBase::DestroyImpl();
-    ToBackend(GetLayout()->GetInternalBindGroupLayout())
-        ->DeallocateBindGroup(this, &mDescriptorSetAllocation);
+    ToBackend(GetLayout())->DeallocateBindGroup(this, &mDescriptorSetAllocation);
 }
 
 VkDescriptorSet BindGroup::GetHandle() const {

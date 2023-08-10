@@ -15,7 +15,7 @@
 #include "dawn/native/opengl/PipelineLayoutGL.h"
 
 #include "dawn/common/BitSetIterator.h"
-#include "dawn/native/BindGroupLayout.h"
+#include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/opengl/DeviceGL.h"
 
 namespace dawn::native::opengl {
@@ -29,7 +29,7 @@ PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDescriptor* d
     GLuint storageTextureIndex = 0;
 
     for (BindGroupIndex group : IterateBitSet(GetBindGroupLayoutsMask())) {
-        const BindGroupLayoutBase* bgl = GetBindGroupLayout(group);
+        const BindGroupLayoutInternalBase* bgl = GetBindGroupLayout(group);
         mIndexInfo[group].resize(bgl->GetBindingCount());
 
         for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {

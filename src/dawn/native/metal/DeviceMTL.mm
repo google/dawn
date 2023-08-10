@@ -18,7 +18,6 @@
 #include "dawn/common/Platform.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BackendConnection.h"
-#include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/metal/BindGroupLayoutMTL.h"

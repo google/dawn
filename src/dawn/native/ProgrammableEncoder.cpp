@@ -125,7 +125,7 @@ MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,
     DAWN_TRY(GetDevice()->ValidateObject(group));
 
     // Dynamic offsets count must match the number required by the layout perfectly.
-    const BindGroupLayoutBase* layout = group->GetLayout();
+    const BindGroupLayoutInternalBase* layout = group->GetLayout();
     DAWN_INVALID_IF(
         layout->GetDynamicBufferCount() != dynamicOffsets.size(),
         "The number of dynamic offsets (%u) does not match the number of dynamic buffers (%u) "

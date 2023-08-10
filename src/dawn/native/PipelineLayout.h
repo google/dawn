@@ -67,8 +67,10 @@ class PipelineLayoutBase : public ApiObjectBase,
 
     ObjectType GetType() const override;
 
-    const BindGroupLayoutBase* GetBindGroupLayout(BindGroupIndex group) const;
-    BindGroupLayoutBase* GetBindGroupLayout(BindGroupIndex group);
+    const BindGroupLayoutBase* GetFrontendBindGroupLayout(BindGroupIndex group) const;
+    BindGroupLayoutBase* GetFrontendBindGroupLayout(BindGroupIndex group);
+    const BindGroupLayoutInternalBase* GetBindGroupLayout(BindGroupIndex group) const;
+    BindGroupLayoutInternalBase* GetBindGroupLayout(BindGroupIndex group);
     const BindGroupLayoutMask& GetBindGroupLayoutsMask() const;
 
     // Utility functions to compute inherited bind groups.

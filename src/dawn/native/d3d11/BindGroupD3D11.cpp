@@ -35,7 +35,7 @@ BindGroup::~BindGroup() = default;
 
 void BindGroup::DestroyImpl() {
     BindGroupBase::DestroyImpl();
-    ToBackend(GetLayout()->GetInternalBindGroupLayout())->DeallocateBindGroup(this);
+    ToBackend(GetLayout())->DeallocateBindGroup(this);
 }
 
 }  // namespace dawn::native::d3d11

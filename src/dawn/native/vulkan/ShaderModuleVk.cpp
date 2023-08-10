@@ -215,8 +215,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetEntryPoint(programmableStage.entryPoint.c_str()).bindings;
 
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-        const BindGroupLayout* bgl =
-            ToBackend(layout->GetBindGroupLayout(group)->GetInternalBindGroupLayout());
+        const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
         const auto& groupBindingInfo = moduleBindingInfo[group];
         for (const auto& [binding, _] : groupBindingInfo) {
             BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
@@ -235,7 +234,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     // TODO(dawn:1082): Replace this block with BuildExternalTextureTransformBindings.
     tint::ExternalTextureOptions externalTextureOptions;
     for (BindGroupIndex i : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-        const BindGroupLayoutBase* bgl = layout->GetBindGroupLayout(i);
+        const BindGroupLayoutInternalBase* bgl = layout->GetBindGroupLayout(i);
 
         for (const auto& [_, expansion] : bgl->GetExternalTextureBindingExpansionMap()) {
             externalTextureOptions

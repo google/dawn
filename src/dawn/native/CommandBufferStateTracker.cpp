@@ -107,7 +107,7 @@ Return FindStorageBufferBindingAliasing(
     StackVector<std::pair<BindGroupIndex, BindingIndex>, 8> textureBindingIndices;
 
     for (BindGroupIndex groupIndex : IterateBitSet(pipelineLayout->GetBindGroupLayoutsMask())) {
-        BindGroupLayoutBase* bgl = bindGroups[groupIndex]->GetLayout();
+        BindGroupLayoutInternalBase* bgl = bindGroups[groupIndex]->GetLayout();
 
         for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBufferCount(); ++bindingIndex) {
             const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
@@ -340,7 +340,7 @@ MaybeError CommandBufferStateTracker::ValidateNoDifferentTextureViewsOnSameTextu
     for (BindGroupIndex groupIndex :
          IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {
         BindGroupBase* bindGroup = mBindgroups[groupIndex];
-        BindGroupLayoutBase* bgl = bindGroup->GetLayout();
+        BindGroupLayoutInternalBase* bgl = bindGroup->GetLayout();
 
         for (BindingIndex bindingIndex{0}; bindingIndex < bgl->GetBindingCount(); ++bindingIndex) {
             const BindingInfo& bindingInfo = bgl->GetBindingInfo(bindingIndex);
@@ -510,8 +510,7 @@ void CommandBufferStateTracker::RecomputeLazyAspects(ValidationAspects aspects) 
 
         for (BindGroupIndex i : IterateBitSet(mLastPipelineLayout->GetBindGroupLayoutsMask())) {
             if (mBindgroups[i] == nullptr ||
-                mLastPipelineLayout->GetBindGroupLayout(i)->GetInternalBindGroupLayout() !=
-                    mBindgroups[i]->GetLayout()->GetInternalBindGroupLayout() ||
+                mLastPipelineLayout->GetBindGroupLayout(i) != mBindgroups[i]->GetLayout() ||
                 FindFirstUndersizedBuffer(mBindgroups[i]->GetUnverifiedBufferSizes(),
                                           (*mMinBufferSizes)[i])
                     .has_value()) {
@@ -606,8 +605,8 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
             DAWN_INVALID_IF(mBindgroups[i] == nullptr, "No bind group set at group index %u.",
                             static_cast<uint32_t>(i));
 
-            BindGroupLayoutBase* requiredBGL = mLastPipelineLayout->GetBindGroupLayout(i);
-            BindGroupLayoutBase* currentBGL = mBindgroups[i]->GetLayout();
+            BindGroupLayoutBase* requiredBGL = mLastPipelineLayout->GetFrontendBindGroupLayout(i);
+            BindGroupLayoutBase* currentBGL = mBindgroups[i]->GetFrontendLayout();
 
             DAWN_INVALID_IF(
                 requiredBGL->GetPipelineCompatibilityToken() != PipelineCompatibilityToken(0) &&
@@ -633,8 +632,8 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
                 mBindgroups[i], static_cast<uint32_t>(i), currentBGL, mLastPipeline);
 
             DAWN_INVALID_IF(
-                mLastPipelineLayout->GetBindGroupLayout(i)->GetInternalBindGroupLayout() !=
-                    mBindgroups[i]->GetLayout()->GetInternalBindGroupLayout(),
+                requiredBGL->GetInternalBindGroupLayout() !=
+                    currentBGL->GetInternalBindGroupLayout(),
                 "Bind group layout %s of pipeline layout %s does not match layout %s of bind "
                 "group %s set at group index %u.",
                 requiredBGL, mLastPipelineLayout, currentBGL, mBindgroups[i],

@@ -17,7 +17,7 @@
 #include <sstream>
 #include <utility>
 
-#include "dawn/native/BindGroupLayout.h"
+#include "dawn/native/BindGroupLayoutInternal.h"
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/TintUtils.h"
@@ -159,7 +159,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(const OpenGLFunctions& gl,
         GetEntryPoint(programmableStage.entryPoint).bindings;
     std::unordered_map<BindingPoint, BindingPoint> glBindings;
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-        const BindGroupLayoutBase* bgl = layout->GetBindGroupLayout(group);
+        const BindGroupLayoutInternalBase* bgl = layout->GetBindGroupLayout(group);
         const auto& groupBindingInfo = moduleBindingInfo[group];
         for (const auto& [bindingNumber, bindingInfo] : groupBindingInfo) {
             BindingIndex bindingIndex = bgl->GetBindingIndex(bindingNumber);

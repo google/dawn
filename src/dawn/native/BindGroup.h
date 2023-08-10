@@ -48,8 +48,11 @@ class BindGroupBase : public ApiObjectBase {
 
     ObjectType GetType() const override;
 
-    BindGroupLayoutBase* GetLayout();
-    const BindGroupLayoutBase* GetLayout() const;
+    BindGroupLayoutBase* GetFrontendLayout();
+    const BindGroupLayoutBase* GetFrontendLayout() const;
+    BindGroupLayoutInternalBase* GetLayout();
+    const BindGroupLayoutInternalBase* GetLayout() const;
+
     BufferBinding GetBindingAsBufferBinding(BindingIndex bindingIndex);
     SamplerBase* GetBindingAsSampler(BindingIndex bindingIndex) const;
     TextureViewBase* GetBindingAsTextureView(BindingIndex bindingIndex);
@@ -71,10 +74,12 @@ class BindGroupBase : public ApiObjectBase {
     // be first in the allocation. The binding data is stored after the Derived class.
     template <typename Derived>
     BindGroupBase(Derived* derived, DeviceBase* device, const BindGroupDescriptor* descriptor)
-        : BindGroupBase(device,
-                        descriptor,
-                        AlignPtr(reinterpret_cast<char*>(derived) + sizeof(Derived),
-                                 descriptor->layout->GetBindingDataAlignment())) {
+        : BindGroupBase(
+              device,
+              descriptor,
+              AlignPtr(
+                  reinterpret_cast<char*>(derived) + sizeof(Derived),
+                  descriptor->layout->GetInternalBindGroupLayout()->GetBindingDataAlignment())) {
         static_assert(std::is_base_of<BindGroupBase, Derived>::value);
     }
 
