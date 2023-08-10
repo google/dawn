@@ -15,11 +15,11 @@
 ## Tint executable
 add_executable(tint "")
 target_sources(tint PRIVATE
-  "generate_external_texture_bindings.cc"
-  "generate_external_texture_bindings.h"
-  "helper.cc"
-  "helper.h"
-  "main.cc"
+  "common/generate_external_texture_bindings.cc"
+  "common/generate_external_texture_bindings.h"
+  "common/helper.cc"
+  "common/helper.h"
+  "tint/main.cc"
 )
 tint_default_compile_options(tint)
 target_link_libraries(tint libtint tint_val)
@@ -43,9 +43,9 @@ endif()
 
 add_executable(tint_info "")
 target_sources(tint_info PRIVATE
-  "helper.cc"
-  "helper.h"
-  "info.cc"
+  "common/helper.cc"
+  "common/helper.h"
+  "info/main.cc"
 )
 tint_default_compile_options(tint_info)
 target_link_libraries(tint_info libtint tint_val)
@@ -56,11 +56,11 @@ endif()
 
 add_executable(tint-loopy "")
 target_sources(tint-loopy PRIVATE
-  "generate_external_texture_bindings.cc"
-  "generate_external_texture_bindings.h"
-  "helper.cc"
-  "helper.h"
-  "loopy.cc"
+  "common/generate_external_texture_bindings.cc"
+  "common/generate_external_texture_bindings.h"
+  "common/helper.cc"
+  "common/helper.h"
+  "loopy/main.cc"
 )
 tint_default_compile_options(tint-loopy)
 target_link_libraries(tint-loopy libtint tint_val)

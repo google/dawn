@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/cmd/helper.h"
+#include "src/tint/cmd/common/helper.h"
 
 #include <iostream>
 #include <utility>

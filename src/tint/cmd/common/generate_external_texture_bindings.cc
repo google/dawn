@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/cmd/generate_external_texture_bindings.h"
+#include "src/tint/cmd/common/generate_external_texture_bindings.h"
 
 #include <algorithm>
 #include <unordered_map>

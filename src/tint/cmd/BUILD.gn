@@ -17,10 +17,10 @@ import("../../../tint_overrides_with_defaults.gni")
 
 source_set("tint_cmd_helper") {
   sources = [
-    "generate_external_texture_bindings.cc",
-    "generate_external_texture_bindings.h",
-    "helper.cc",
-    "helper.h",
+    "common/generate_external_texture_bindings.cc",
+    "common/generate_external_texture_bindings.h",
+    "common/helper.cc",
+    "common/helper.h",
   ]
 
   deps = [ "${tint_root_dir}/src/tint:libtint" ]
@@ -30,7 +30,7 @@ source_set("tint_cmd_helper") {
 }
 
 executable("tint") {
-  sources = [ "main.cc" ]
+  sources = [ "tint/main.cc" ]
   deps = [
     ":tint_cmd_helper",
     "${tint_root_dir}/src/tint:libtint",
@@ -60,7 +60,7 @@ executable("tint") {
 }
 
 executable("tint_info") {
-  sources = [ "info.cc" ]
+  sources = [ "info/main.cc" ]
   deps = [
     ":tint_cmd_helper",
     "${tint_root_dir}/src/tint:libtint",

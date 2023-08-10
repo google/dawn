@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_CMD_HELPER_H_
-#define SRC_TINT_CMD_HELPER_H_
+#ifndef SRC_TINT_CMD_COMMON_HELPER_H_
+#define SRC_TINT_CMD_COMMON_HELPER_H_
 
 #include <iostream>
 #include <memory>
@@ -153,4 +153,4 @@ bool ReadFile(const std::string& input_file, std::vector<T>* buffer) {
 
 }  // namespace tint::cmd
 
-#endif  // SRC_TINT_CMD_HELPER_H_
+#endif  // SRC_TINT_CMD_COMMON_HELPER_H_

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_CMD_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_
-#define SRC_TINT_CMD_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_
+#ifndef SRC_TINT_CMD_COMMON_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_
+#define SRC_TINT_CMD_COMMON_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_
 
 #include "tint/external_texture_options.h"
 #include "tint/tint.h"
@@ -24,4 +24,4 @@ ExternalTextureOptions::BindingsMap GenerateExternalTextureBindings(const Progra
 
 }  // namespace tint::cmd
 
-#endif  // SRC_TINT_CMD_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_
+#endif  // SRC_TINT_CMD_COMMON_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_

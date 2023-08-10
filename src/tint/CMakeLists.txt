@@ -1189,9 +1189,9 @@ if(TINT_BUILD_TESTS)
   # Note, the source files are included here otherwise the cmd sources would not be included in the
   # test binary.
   list(APPEND TINT_TEST_SRCS
-    cmd/generate_external_texture_bindings.cc
-    cmd/generate_external_texture_bindings.h
-    cmd/generate_external_texture_bindings_test.cc
+    cmd/common/generate_external_texture_bindings.cc
+    cmd/common/generate_external_texture_bindings.h
+    cmd/common/generate_external_texture_bindings_test.cc
   )
 
   # Uniformity analysis tests depend on WGSL reader

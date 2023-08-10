@@ -1962,9 +1962,9 @@ if (tint_build_unittests) {
   # be included in the binary.
   tint_unittests_source_set("tint_unittests_cmd_src") {
     sources = [
-      "cmd/generate_external_texture_bindings.cc",
-      "cmd/generate_external_texture_bindings.h",
-      "cmd/generate_external_texture_bindings_test.cc",
+      "cmd/common/generate_external_texture_bindings.cc",
+      "cmd/common/generate_external_texture_bindings.h",
+      "cmd/common/generate_external_texture_bindings_test.cc",
     ]
   }
 

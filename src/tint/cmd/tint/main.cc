@@ -33,8 +33,8 @@
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 
-#include "src/tint/cmd/generate_external_texture_bindings.h"
-#include "src/tint/cmd/helper.h"
+#include "src/tint/cmd/common/generate_external_texture_bindings.h"
+#include "src/tint/cmd/common/helper.h"
 #include "src/tint/lang/hlsl/validate/val.h"
 #include "src/tint/lang/msl/validate/val.h"
 #include "src/tint/lang/wgsl/ast/module.h"
@@ -46,7 +46,34 @@
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
-#include "tint/tint.h"
+
+#if TINT_BUILD_SPV_READER
+#include "src/tint/lang/spirv/reader/reader.h"
+#endif  // TINT_BUILD_SPV_READER
+
+#if TINT_BUILD_WGSL_READER
+#include "src/tint/lang/wgsl/reader/reader.h"
+#endif  // TINT_BUILD_WGSL_READER
+
+#if TINT_BUILD_SPV_WRITER
+#include "src/tint/lang/spirv/writer/writer.h"
+#endif  // TINT_BUILD_SPV_WRITER
+
+#if TINT_BUILD_WGSL_WRITER
+#include "src/tint/lang/wgsl/writer/writer.h"
+#endif  // TINT_BUILD_WGSL_WRITER
+
+#if TINT_BUILD_MSL_WRITER
+#include "src/tint/lang/msl/writer/writer.h"
+#endif  // TINT_BUILD_MSL_WRITER
+
+#if TINT_BUILD_HLSL_WRITER
+#include "src/tint/lang/hlsl/writer/writer.h"
+#endif  // TINT_BUILD_HLSL_WRITER
+
+#if TINT_BUILD_GLSL_WRITER
+#include "src/tint/lang/glsl/writer/writer.h"
+#endif  // TINT_BUILD_GLSL_WRITER
 
 #if TINT_BUILD_IR
 #include "src/tint/lang/core/ir/disassembler.h"                     // nogncheck
