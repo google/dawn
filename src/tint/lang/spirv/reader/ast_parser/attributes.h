@@ -21,7 +21,7 @@
 #include "src/tint/utils/containers/enum_set.h"
 #include "src/tint/utils/containers/vector.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 /// Attributes holds a vector of ast::Attribute pointers, and a enum-set of flags used to hold
 /// additional metadata.
@@ -76,6 +76,6 @@ struct Attributes {
     tint::EnumSet<Flags> flags;
 };
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser
 
 #endif  // SRC_TINT_LANG_SPIRV_READER_AST_PARSER_ATTRIBUTES_H_

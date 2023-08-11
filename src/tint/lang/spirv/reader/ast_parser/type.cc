@@ -28,29 +28,29 @@
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::Type);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::Void);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::Bool);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::U32);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::F32);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::I32);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::Pointer);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::Reference);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::Vector);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::Matrix);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::Array);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::Sampler);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::Texture);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::DepthTexture);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::DepthMultisampledTexture);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::MultisampledTexture);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::SampledTexture);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::StorageTexture);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::Named);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::Alias);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::Struct);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Type);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Void);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Bool);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::U32);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::F32);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::I32);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Pointer);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Reference);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Vector);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Matrix);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Array);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Sampler);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Texture);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::DepthTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::DepthMultisampledTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::MultisampledTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::SampledTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::StorageTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Named);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Alias);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Struct);
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 namespace {
 struct PointerHasher {
@@ -309,42 +309,43 @@ struct TypeManager::State {
     /// The allocator of primitive types
     BlockAllocator<Type> allocator_;
     /// The lazily-created Void type
-    reader::Void const* void_ = nullptr;
+    ast_parser::Void const* void_ = nullptr;
     /// The lazily-created Bool type
-    reader::Bool const* bool_ = nullptr;
+    ast_parser::Bool const* bool_ = nullptr;
     /// The lazily-created U32 type
-    reader::U32 const* u32_ = nullptr;
+    ast_parser::U32 const* u32_ = nullptr;
     /// The lazily-created F32 type
-    reader::F32 const* f32_ = nullptr;
+    ast_parser::F32 const* f32_ = nullptr;
     /// The lazily-created I32 type
-    reader::I32 const* i32_ = nullptr;
+    ast_parser::I32 const* i32_ = nullptr;
     /// Unique Pointer instances
-    UniqueAllocator<reader::Pointer, PointerHasher> pointers_;
+    UniqueAllocator<ast_parser::Pointer, PointerHasher> pointers_;
     /// Unique Reference instances
-    UniqueAllocator<reader::Reference, ReferenceHasher> references_;
+    UniqueAllocator<ast_parser::Reference, ReferenceHasher> references_;
     /// Unique Vector instances
-    UniqueAllocator<reader::Vector, VectorHasher> vectors_;
+    UniqueAllocator<ast_parser::Vector, VectorHasher> vectors_;
     /// Unique Matrix instances
-    UniqueAllocator<reader::Matrix, MatrixHasher> matrices_;
+    UniqueAllocator<ast_parser::Matrix, MatrixHasher> matrices_;
     /// Unique Array instances
-    UniqueAllocator<reader::Array, ArrayHasher> arrays_;
+    UniqueAllocator<ast_parser::Array, ArrayHasher> arrays_;
     /// Unique Alias instances
-    UniqueAllocator<reader::Alias, AliasHasher> aliases_;
+    UniqueAllocator<ast_parser::Alias, AliasHasher> aliases_;
     /// Unique Struct instances
-    UniqueAllocator<reader::Struct, StructHasher> structs_;
+    UniqueAllocator<ast_parser::Struct, StructHasher> structs_;
     /// Unique Sampler instances
-    UniqueAllocator<reader::Sampler, SamplerHasher> samplers_;
+    UniqueAllocator<ast_parser::Sampler, SamplerHasher> samplers_;
     /// Unique DepthTexture instances
-    UniqueAllocator<reader::DepthTexture, DepthTextureHasher> depth_textures_;
+    UniqueAllocator<ast_parser::DepthTexture, DepthTextureHasher> depth_textures_;
     /// Unique DepthMultisampledTexture instances
-    UniqueAllocator<reader::DepthMultisampledTexture, DepthMultisampledTextureHasher>
+    UniqueAllocator<ast_parser::DepthMultisampledTexture, DepthMultisampledTextureHasher>
         depth_multisampled_textures_;
     /// Unique MultisampledTexture instances
-    UniqueAllocator<reader::MultisampledTexture, MultisampledTextureHasher> multisampled_textures_;
+    UniqueAllocator<ast_parser::MultisampledTexture, MultisampledTextureHasher>
+        multisampled_textures_;
     /// Unique SampledTexture instances
-    UniqueAllocator<reader::SampledTexture, SampledTextureHasher> sampled_textures_;
+    UniqueAllocator<ast_parser::SampledTexture, SampledTextureHasher> sampled_textures_;
     /// Unique StorageTexture instances
-    UniqueAllocator<reader::StorageTexture, StorageTextureHasher> storage_textures_;
+    UniqueAllocator<ast_parser::StorageTexture, StorageTextureHasher> storage_textures_;
 };
 
 const Type* Type::UnwrapPtr() const {
@@ -431,114 +432,114 @@ TypeManager::TypeManager() {
 
 TypeManager::~TypeManager() = default;
 
-const reader::Void* TypeManager::Void() {
+const ast_parser::Void* TypeManager::Void() {
     if (!state->void_) {
-        state->void_ = state->allocator_.Create<reader::Void>();
+        state->void_ = state->allocator_.Create<ast_parser::Void>();
     }
     return state->void_;
 }
 
-const reader::Bool* TypeManager::Bool() {
+const ast_parser::Bool* TypeManager::Bool() {
     if (!state->bool_) {
-        state->bool_ = state->allocator_.Create<reader::Bool>();
+        state->bool_ = state->allocator_.Create<ast_parser::Bool>();
     }
     return state->bool_;
 }
 
-const reader::U32* TypeManager::U32() {
+const ast_parser::U32* TypeManager::U32() {
     if (!state->u32_) {
-        state->u32_ = state->allocator_.Create<reader::U32>();
+        state->u32_ = state->allocator_.Create<ast_parser::U32>();
     }
     return state->u32_;
 }
 
-const reader::F32* TypeManager::F32() {
+const ast_parser::F32* TypeManager::F32() {
     if (!state->f32_) {
-        state->f32_ = state->allocator_.Create<reader::F32>();
+        state->f32_ = state->allocator_.Create<ast_parser::F32>();
     }
     return state->f32_;
 }
 
-const reader::I32* TypeManager::I32() {
+const ast_parser::I32* TypeManager::I32() {
     if (!state->i32_) {
-        state->i32_ = state->allocator_.Create<reader::I32>();
+        state->i32_ = state->allocator_.Create<ast_parser::I32>();
     }
     return state->i32_;
 }
 
 const Type* TypeManager::AsUnsigned(const Type* ty) {
     return Switch(
-        ty,                                         //
-        [&](const reader::I32*) { return U32(); },  //
-        [&](const reader::U32*) { return ty; },     //
-        [&](const reader::Vector* vec) {
+        ty,                                             //
+        [&](const ast_parser::I32*) { return U32(); },  //
+        [&](const ast_parser::U32*) { return ty; },     //
+        [&](const ast_parser::Vector* vec) {
             return Switch(
-                vec->type,                                                     //
-                [&](const reader::I32*) { return Vector(U32(), vec->size); },  //
-                [&](const reader::U32*) { return ty; }                         //
+                vec->type,                                                         //
+                [&](const ast_parser::I32*) { return Vector(U32(), vec->size); },  //
+                [&](const ast_parser::U32*) { return ty; }                         //
             );
         });
 }
 
-const reader::Pointer* TypeManager::Pointer(core::AddressSpace address_space,
-                                            const Type* el,
-                                            core::Access access) {
+const ast_parser::Pointer* TypeManager::Pointer(core::AddressSpace address_space,
+                                                const Type* el,
+                                                core::Access access) {
     return state->pointers_.Get(address_space, el, access);
 }
 
-const reader::Reference* TypeManager::Reference(core::AddressSpace address_space,
-                                                const Type* el,
-                                                core::Access access) {
+const ast_parser::Reference* TypeManager::Reference(core::AddressSpace address_space,
+                                                    const Type* el,
+                                                    core::Access access) {
     return state->references_.Get(address_space, el, access);
 }
 
-const reader::Vector* TypeManager::Vector(const Type* el, uint32_t size) {
+const ast_parser::Vector* TypeManager::Vector(const Type* el, uint32_t size) {
     return state->vectors_.Get(el, size);
 }
 
-const reader::Matrix* TypeManager::Matrix(const Type* el, uint32_t columns, uint32_t rows) {
+const ast_parser::Matrix* TypeManager::Matrix(const Type* el, uint32_t columns, uint32_t rows) {
     return state->matrices_.Get(el, columns, rows);
 }
 
-const reader::Array* TypeManager::Array(const Type* el, uint32_t size, uint32_t stride) {
+const ast_parser::Array* TypeManager::Array(const Type* el, uint32_t size, uint32_t stride) {
     return state->arrays_.Get(el, size, stride);
 }
 
-const reader::Alias* TypeManager::Alias(Symbol name, const Type* ty) {
+const ast_parser::Alias* TypeManager::Alias(Symbol name, const Type* ty) {
     return state->aliases_.Get(name, ty);
 }
 
-const reader::Struct* TypeManager::Struct(Symbol name, TypeList members) {
+const ast_parser::Struct* TypeManager::Struct(Symbol name, TypeList members) {
     return state->structs_.Get(name, std::move(members));
 }
 
-const reader::Sampler* TypeManager::Sampler(core::type::SamplerKind kind) {
+const ast_parser::Sampler* TypeManager::Sampler(core::type::SamplerKind kind) {
     return state->samplers_.Get(kind);
 }
 
-const reader::DepthTexture* TypeManager::DepthTexture(core::type::TextureDimension dims) {
+const ast_parser::DepthTexture* TypeManager::DepthTexture(core::type::TextureDimension dims) {
     return state->depth_textures_.Get(dims);
 }
 
-const reader::DepthMultisampledTexture* TypeManager::DepthMultisampledTexture(
+const ast_parser::DepthMultisampledTexture* TypeManager::DepthMultisampledTexture(
     core::type::TextureDimension dims) {
     return state->depth_multisampled_textures_.Get(dims);
 }
 
-const reader::MultisampledTexture* TypeManager::MultisampledTexture(
+const ast_parser::MultisampledTexture* TypeManager::MultisampledTexture(
     core::type::TextureDimension dims,
     const Type* ty) {
     return state->multisampled_textures_.Get(dims, ty);
 }
 
-const reader::SampledTexture* TypeManager::SampledTexture(core::type::TextureDimension dims,
-                                                          const Type* ty) {
+const ast_parser::SampledTexture* TypeManager::SampledTexture(core::type::TextureDimension dims,
+                                                              const Type* ty) {
     return state->sampled_textures_.Get(dims, ty);
 }
 
-const reader::StorageTexture* TypeManager::StorageTexture(core::type::TextureDimension dims,
-                                                          core::TexelFormat fmt,
-                                                          core::Access access) {
+const ast_parser::StorageTexture* TypeManager::StorageTexture(core::type::TextureDimension dims,
+                                                              core::TexelFormat fmt,
+                                                              core::Access access) {
     return state->storage_textures_.Get(dims, fmt, access);
 }
 
@@ -639,4 +640,4 @@ std::string Named::String() const {
 }
 #endif  // NDEBUG
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

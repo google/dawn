@@ -30,7 +30,7 @@
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 /// Kinds of CFG edges.
 //
@@ -1345,6 +1345,6 @@ class FunctionEmitter {
     const EntryPointInfo* ep_info_ = nullptr;
 };
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser
 
 #endif  // SRC_TINT_LANG_SPIRV_READER_AST_PARSER_FUNCTION_H_

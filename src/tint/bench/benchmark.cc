@@ -101,7 +101,7 @@ std::variant<tint::Source::File, Error> LoadInputFile(std::string name) {
     if (tint::HasSuffix(path, ".spv")) {
         auto spirv = ReadFile<uint32_t>(path);
         if (auto* buf = std::get_if<std::vector<uint32_t>>(&spirv)) {
-            auto program = tint::spirv::reader::Parse(*buf, {});
+            auto program = tint::spirv::reader::Read(*buf, {});
             if (!program.IsValid()) {
                 return Error{program.Diagnostics().str()};
             }

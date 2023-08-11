@@ -41,8 +41,7 @@ TINT_END_DISABLE_WARNING(NEWLINE_EOF);
 #include "src/tint/lang/spirv/reader/ast_parser/spirv_tools_helpers_test.h"
 #include "src/tint/lang/spirv/reader/ast_parser/usage.h"
 
-namespace tint::spirv::reader {
-namespace test {
+namespace tint::spirv::reader::ast_parser::test {
 
 /// A test class that wraps ParseImpl
 class ASTParserWrapperForTest {
@@ -284,7 +283,9 @@ std::string ToString(const Program& program, VectorRef<const ast::Statement*> st
 /// @returns the WGSL printed string of the AST node.
 std::string ToString(const Program& program, const ast::Node* node);
 
-}  // namespace test
+}  // namespace tint::spirv::reader::ast_parser::test
+
+namespace tint::spirv::reader::ast_parser {
 
 /// SPIR-V Parser test class
 template <typename T>
@@ -309,6 +310,6 @@ class SpirvASTParserTestBase : public T {
 /// Use this form when you don't need to template any further.
 using SpirvASTParserTest = SpirvASTParserTestBase<::testing::Test>;
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser
 
 #endif  // SRC_TINT_LANG_SPIRV_READER_AST_PARSER_HELPER_TEST_H_

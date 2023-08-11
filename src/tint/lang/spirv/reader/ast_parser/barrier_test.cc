@@ -19,7 +19,7 @@
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 namespace {
 
 using ::testing::Eq;
@@ -202,4 +202,4 @@ TEST_F(SpirvASTParserTest, ErrStorageBarrierInvalidMemory) {
 }
 
 }  // namespace
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

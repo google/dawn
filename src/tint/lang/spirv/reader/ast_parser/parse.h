@@ -12,25 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_SPIRV_READER_READER_H_
-#define SRC_TINT_LANG_SPIRV_READER_READER_H_
+#ifndef SRC_TINT_LANG_SPIRV_READER_AST_PARSER_PARSE_H_
+#define SRC_TINT_LANG_SPIRV_READER_AST_PARSER_PARSE_H_
 
 #include <vector>
 
 #include "src/tint/lang/spirv/reader/common/options.h"
 #include "src/tint/lang/wgsl/program/program.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
-/// Reads the SPIR-V source data, returning the parsed program.
-/// If the source data fails to parse then the returned
-/// `program.Diagnostics.contains_errors()` will be true, and the
-/// `program.Diagnostics()` will describe the error.
+/// Parses the SPIR-V source data, returning the parsed program.
+/// If the source data fails to parse then the returned `program.Diagnostics.contains_errors()` will
+/// be true, and the `program.Diagnostics()` will describe the error.
 /// @param input the source data
 /// @param options the parser options
 /// @returns the parsed program
-Program Read(const std::vector<uint32_t>& input, const Options& options = {});
+Program Parse(const std::vector<uint32_t>& input, const Options& options);
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser
 
-#endif  // SRC_TINT_LANG_SPIRV_READER_READER_H_
+#endif  // SRC_TINT_LANG_SPIRV_READER_AST_PARSER_PARSE_H_

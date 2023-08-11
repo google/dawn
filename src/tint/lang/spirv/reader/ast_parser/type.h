@@ -34,7 +34,7 @@ namespace tint {
 class ProgramBuilder;
 }  // namespace tint
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 /// Type is the base class for all types
 class Type : public Castable<Type> {
@@ -529,15 +529,15 @@ class TypeManager {
     ~TypeManager();
 
     /// @return a Void type. Repeated calls will return the same pointer.
-    const reader::Void* Void();
+    const ast_parser::Void* Void();
     /// @return a Bool type. Repeated calls will return the same pointer.
-    const reader::Bool* Bool();
+    const ast_parser::Bool* Bool();
     /// @return a U32 type. Repeated calls will return the same pointer.
-    const reader::U32* U32();
+    const ast_parser::U32* U32();
     /// @return a F32 type. Repeated calls will return the same pointer.
-    const reader::F32* F32();
+    const ast_parser::F32* F32();
     /// @return a I32 type. Repeated calls will return the same pointer.
-    const reader::I32* I32();
+    const ast_parser::I32* I32();
     /// @param ty the input type.
     /// @returns the equivalent unsigned integer scalar or vector if @p ty is a scalar or vector,
     /// otherwise nullptr.
@@ -548,83 +548,83 @@ class TypeManager {
     /// @param access the declared access mode
     /// @return a Pointer type. Repeated calls with the same arguments will return
     /// the same pointer.
-    const reader::Pointer* Pointer(core::AddressSpace address_space,
-                                   const Type* ty,
-                                   core::Access access = core::Access::kUndefined);
+    const ast_parser::Pointer* Pointer(core::AddressSpace address_space,
+                                       const Type* ty,
+                                       core::Access access = core::Access::kUndefined);
     /// @param address_space the reference address space
     /// @param ty the referenced type
     /// @param access the declared access mode
     /// @return a Reference type. Repeated calls with the same arguments will
     /// return the same pointer.
-    const reader::Reference* Reference(core::AddressSpace address_space,
-                                       const Type* ty,
-                                       core::Access access = core::Access::kUndefined);
+    const ast_parser::Reference* Reference(core::AddressSpace address_space,
+                                           const Type* ty,
+                                           core::Access access = core::Access::kUndefined);
     /// @param ty the element type
     /// @param sz the number of elements in the vector
     /// @return a Vector type. Repeated calls with the same arguments will return
     /// the same pointer.
-    const reader::Vector* Vector(const Type* ty, uint32_t sz);
+    const ast_parser::Vector* Vector(const Type* ty, uint32_t sz);
     /// @param ty the matrix element type
     /// @param c the number of columns in the matrix
     /// @param r the number of rows in the matrix
     /// @return a Matrix type. Repeated calls with the same arguments will return
     /// the same pointer.
-    const reader::Matrix* Matrix(const Type* ty, uint32_t c, uint32_t r);
+    const ast_parser::Matrix* Matrix(const Type* ty, uint32_t c, uint32_t r);
     /// @param el the element type
     /// @param sz the number of elements in the array. 0 represents runtime-sized
     /// array.
     /// @param st the byte stride of the array
     /// @return a Array type. Repeated calls with the same arguments will return
     /// the same pointer.
-    const reader::Array* Array(const Type* el, uint32_t sz, uint32_t st);
+    const ast_parser::Array* Array(const Type* el, uint32_t sz, uint32_t st);
     /// @param n the alias name
     /// @param t the aliased type
     /// @return a Alias type. Repeated calls with the same arguments will return
     /// the same pointer.
-    const reader::Alias* Alias(Symbol n, const Type* t);
+    const ast_parser::Alias* Alias(Symbol n, const Type* t);
     /// @param n the struct name
     /// @param m the member types
     /// @return a Struct type. Repeated calls with the same arguments will return
     /// the same pointer.
-    const reader::Struct* Struct(Symbol n, TypeList m);
+    const ast_parser::Struct* Struct(Symbol n, TypeList m);
     /// @param k the sampler kind
     /// @return a Sampler type. Repeated calls with the same arguments will return
     /// the same pointer.
-    const reader::Sampler* Sampler(core::type::SamplerKind k);
+    const ast_parser::Sampler* Sampler(core::type::SamplerKind k);
     /// @param d the texture dimensions
     /// @return a DepthTexture type. Repeated calls with the same arguments will
     /// return the same pointer.
-    const reader::DepthTexture* DepthTexture(core::type::TextureDimension d);
+    const ast_parser::DepthTexture* DepthTexture(core::type::TextureDimension d);
     /// @param d the texture dimensions
     /// @return a DepthMultisampledTexture type. Repeated calls with the same
     /// arguments will return the same pointer.
-    const reader::DepthMultisampledTexture* DepthMultisampledTexture(
+    const ast_parser::DepthMultisampledTexture* DepthMultisampledTexture(
         core::type::TextureDimension d);
     /// @param d the texture dimensions
     /// @param t the multisampled texture type
     /// @return a MultisampledTexture type. Repeated calls with the same arguments
     /// will return the same pointer.
-    const reader::MultisampledTexture* MultisampledTexture(core::type::TextureDimension d,
-                                                           const Type* t);
+    const ast_parser::MultisampledTexture* MultisampledTexture(core::type::TextureDimension d,
+                                                               const Type* t);
     /// @param d the texture dimensions
     /// @param t the sampled texture type
     /// @return a SampledTexture type. Repeated calls with the same arguments will
     /// return the same pointer.
-    const reader::SampledTexture* SampledTexture(core::type::TextureDimension d, const Type* t);
+    const ast_parser::SampledTexture* SampledTexture(core::type::TextureDimension d, const Type* t);
     /// @param d the texture dimensions
     /// @param f the storage image format
     /// @param a the access control
     /// @return a StorageTexture type. Repeated calls with the same arguments will
     /// return the same pointer.
-    const reader::StorageTexture* StorageTexture(core::type::TextureDimension d,
-                                                 core::TexelFormat f,
-                                                 core::Access a);
+    const ast_parser::StorageTexture* StorageTexture(core::type::TextureDimension d,
+                                                     core::TexelFormat f,
+                                                     core::Access a);
 
   private:
     struct State;
     std::unique_ptr<State> state;
 };
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser
 
 #endif  // SRC_TINT_LANG_SPIRV_READER_AST_PARSER_TYPE_H_

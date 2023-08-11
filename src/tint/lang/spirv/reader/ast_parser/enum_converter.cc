@@ -16,7 +16,7 @@
 
 #include "src/tint/lang/core/type/texture_dimension.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 EnumConverter::EnumConverter(const FailStream& fs) : fail_stream_(fs) {}
 
@@ -179,4 +179,4 @@ core::TexelFormat EnumConverter::ToTexelFormat(spv::ImageFormat fmt) {
     return core::TexelFormat::kUndefined;
 }
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

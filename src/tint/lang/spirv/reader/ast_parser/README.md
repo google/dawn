@@ -2,8 +2,8 @@
 
 This component translates SPIR-V written for Vulkan into the Tint AST.
 
-The SPIR-V reader entry point is `tint::spirv::reader::Parser`, which
-implements the Reader interface in `tint::reader::Reader`.
+The SPIR-V reader entry point is `tint::spirv::reader::Read()`, which
+performs the translation of SPIR-V to a `tint::Program`.
 
 It's usable from the Tint command line:
 

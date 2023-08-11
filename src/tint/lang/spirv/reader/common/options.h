@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_SPIRV_READER_OPTIONS_H_
-#define SRC_TINT_LANG_SPIRV_READER_OPTIONS_H_
+#ifndef SRC_TINT_LANG_SPIRV_READER_COMMON_OPTIONS_H_
+#define SRC_TINT_LANG_SPIRV_READER_COMMON_OPTIONS_H_
 
 namespace tint::spirv::reader {
 
@@ -25,4 +25,4 @@ struct Options {
 
 }  // namespace tint::spirv::reader
 
-#endif  // SRC_TINT_LANG_SPIRV_READER_OPTIONS_H_
+#endif  // SRC_TINT_LANG_SPIRV_READER_COMMON_OPTIONS_H_

@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/function.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 namespace {
 
 using ::testing::Eq;
@@ -411,4 +411,4 @@ INSTANTIATE_TEST_SUITE_P(SpirvASTParserTest_BuiltinFunctions,
                          ::testing::ValuesIn(core::kFunctionStrings));
 
 }  // namespace
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

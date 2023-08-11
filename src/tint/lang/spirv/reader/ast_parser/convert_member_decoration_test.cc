@@ -15,7 +15,7 @@
 #include "gmock/gmock.h"
 #include "src/tint/lang/spirv/reader/ast_parser/helper_test.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 namespace {
 
 using ::testing::Eq;
@@ -63,8 +63,8 @@ TEST_F(SpirvASTParserTest, ConvertMemberDecoration_Offset) {
 TEST_F(SpirvASTParserTest, ConvertMemberDecoration_Matrix2x2_Stride_Natural) {
     auto p = parser(std::vector<uint32_t>{});
 
-    reader::F32 f32;
-    reader::Matrix matrix(&f32, 2, 2);
+    ast_parser::F32 f32;
+    ast_parser::Matrix matrix(&f32, 2, 2);
     auto result =
         p->ConvertMemberDecoration(1, 1, &matrix, {uint32_t(spv::Decoration::MatrixStride), 8});
     EXPECT_TRUE(result.list.IsEmpty());
@@ -74,8 +74,8 @@ TEST_F(SpirvASTParserTest, ConvertMemberDecoration_Matrix2x2_Stride_Natural) {
 TEST_F(SpirvASTParserTest, ConvertMemberDecoration_Matrix2x2_Stride_Custom) {
     auto p = parser(std::vector<uint32_t>{});
 
-    reader::F32 f32;
-    reader::Matrix matrix(&f32, 2, 2);
+    ast_parser::F32 f32;
+    ast_parser::Matrix matrix(&f32, 2, 2);
     auto result =
         p->ConvertMemberDecoration(1, 1, &matrix, {uint32_t(spv::Decoration::MatrixStride), 16});
     ASSERT_FALSE(result.list.IsEmpty());
@@ -89,8 +89,8 @@ TEST_F(SpirvASTParserTest, ConvertMemberDecoration_Matrix2x2_Stride_Custom) {
 TEST_F(SpirvASTParserTest, ConvertMemberDecoration_Matrix2x4_Stride_Natural) {
     auto p = parser(std::vector<uint32_t>{});
 
-    reader::F32 f32;
-    reader::Matrix matrix(&f32, 2, 4);
+    ast_parser::F32 f32;
+    ast_parser::Matrix matrix(&f32, 2, 4);
     auto result =
         p->ConvertMemberDecoration(1, 1, &matrix, {uint32_t(spv::Decoration::MatrixStride), 16});
     EXPECT_TRUE(result.list.IsEmpty());
@@ -100,8 +100,8 @@ TEST_F(SpirvASTParserTest, ConvertMemberDecoration_Matrix2x4_Stride_Natural) {
 TEST_F(SpirvASTParserTest, ConvertMemberDecoration_Matrix2x4_Stride_Custom) {
     auto p = parser(std::vector<uint32_t>{});
 
-    reader::F32 f32;
-    reader::Matrix matrix(&f32, 2, 4);
+    ast_parser::F32 f32;
+    ast_parser::Matrix matrix(&f32, 2, 4);
     auto result =
         p->ConvertMemberDecoration(1, 1, &matrix, {uint32_t(spv::Decoration::MatrixStride), 64});
     ASSERT_FALSE(result.list.IsEmpty());
@@ -115,8 +115,8 @@ TEST_F(SpirvASTParserTest, ConvertMemberDecoration_Matrix2x4_Stride_Custom) {
 TEST_F(SpirvASTParserTest, ConvertMemberDecoration_Matrix2x3_Stride_Custom) {
     auto p = parser(std::vector<uint32_t>{});
 
-    reader::F32 f32;
-    reader::Matrix matrix(&f32, 2, 3);
+    ast_parser::F32 f32;
+    ast_parser::Matrix matrix(&f32, 2, 3);
     auto result =
         p->ConvertMemberDecoration(1, 1, &matrix, {uint32_t(spv::Decoration::MatrixStride), 32});
     ASSERT_FALSE(result.list.IsEmpty());
@@ -149,4 +149,4 @@ TEST_F(SpirvASTParserTest, ConvertMemberDecoration_UnhandledDecoration) {
 }
 
 }  // namespace
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

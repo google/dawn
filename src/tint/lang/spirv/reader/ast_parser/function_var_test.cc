@@ -18,7 +18,7 @@
 #include "src/tint/lang/spirv/reader/ast_parser/spirv_tools_helpers_test.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 namespace {
 
 using ::testing::Eq;
@@ -1909,4 +1909,4 @@ return;
 }
 
 }  // namespace
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

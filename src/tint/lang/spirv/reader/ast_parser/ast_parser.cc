@@ -34,7 +34,7 @@
 #include "src/tint/utils/containers/unique_vector.h"
 #include "src/tint/utils/rtti/switch.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 namespace {
 
@@ -2831,4 +2831,4 @@ WorkgroupSizeInfo::WorkgroupSizeInfo() = default;
 
 WorkgroupSizeInfo::~WorkgroupSizeInfo() = default;
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

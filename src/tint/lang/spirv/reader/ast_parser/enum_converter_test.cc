@@ -20,7 +20,7 @@
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 namespace {
 
 // Pipeline stage
@@ -380,4 +380,4 @@ INSTANTIATE_TEST_SUITE_P(
         TexelFormatCase{spv::ImageFormat::Rg8ui, false, core::TexelFormat::kUndefined}));
 
 }  // namespace
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

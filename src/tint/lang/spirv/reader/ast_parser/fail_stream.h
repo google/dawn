@@ -17,7 +17,7 @@
 
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 /// A FailStream object accumulates values onto a given stream,
 /// and can be used to record failure by writing the false value
@@ -64,6 +64,6 @@ class FailStream {
     StringStream* out_;
 };
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser
 
 #endif  // SRC_TINT_LANG_SPIRV_READER_AST_PARSER_FAIL_STREAM_H_

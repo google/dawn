@@ -14,7 +14,7 @@
 
 #include "src/tint/lang/spirv/reader/ast_parser/construct.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 Construct::Construct(const Construct* the_parent,
                      int the_depth,
@@ -60,4 +60,4 @@ Construct::Construct(const Construct* the_parent,
       end_pos(the_end_pos),
       scope_end_pos(the_scope_end_pos) {}
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

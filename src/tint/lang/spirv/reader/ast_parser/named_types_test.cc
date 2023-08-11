@@ -16,7 +16,7 @@
 #include "src/tint/lang/spirv/reader/ast_parser/helper_test.h"
 #include "src/tint/lang/spirv/reader/ast_parser/spirv_tools_helpers_test.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 namespace {
 
 using ::testing::HasSubstr;
@@ -147,4 +147,4 @@ alias Arr_1 = @stride(8) array<u32, 5u>;
 // Blocked by crbug.com/tint/32
 
 }  // namespace
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

@@ -18,7 +18,7 @@
 #include "src/tint/lang/spirv/reader/ast_parser/spirv_tools_helpers_test.h"
 #include "src/tint/utils/text/string.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 namespace {
 
 using SpvModuleScopeVarParserTest = SpirvASTParserTest;
@@ -5360,4 +5360,4 @@ fn main(@location(1) @interpolate(flat) x_1_param : u32, @location(2) @interpola
 }
 
 }  // namespace
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

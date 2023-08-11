@@ -323,7 +323,7 @@ ResultOrError<tint::Program> ParseSPIRV(const std::vector<uint32_t>& spirv,
     if (optionsDesc) {
         options.allow_non_uniform_derivatives = optionsDesc->allowNonUniformDerivatives;
     }
-    tint::Program program = tint::spirv::reader::Parse(spirv, options);
+    tint::Program program = tint::spirv::reader::Read(spirv, options);
     if (outMessages != nullptr) {
         DAWN_TRY(outMessages->AddMessages(program.Diagnostics()));
     }

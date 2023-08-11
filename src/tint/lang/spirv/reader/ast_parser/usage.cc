@@ -16,7 +16,7 @@
 
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 Usage::Usage() {}
 Usage::Usage(const Usage& other) = default;
@@ -184,4 +184,4 @@ std::string Usage::to_str() const {
     return ss.str();
 }
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

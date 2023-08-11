@@ -177,7 +177,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
             if (dump_input_) {
                 dump_input_data(spirv_input, ".spv");
             }
-            program = spirv::reader::Parse(spirv_input);
+            program = spirv::reader::Read(spirv_input);
 #endif  // TINT_BUILD_SPV_READER
             break;
         }

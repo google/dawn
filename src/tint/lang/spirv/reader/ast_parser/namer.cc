@@ -21,7 +21,7 @@
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 namespace {
 
@@ -345,4 +345,4 @@ void Namer::ResolveMemberNamesForStruct(uint32_t struct_id, uint32_t num_members
     }
 }
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

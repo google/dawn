@@ -21,7 +21,7 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 /// A structured control flow construct, consisting of a set of basic blocks.
 /// A construct is a span of blocks in the computed block order,
@@ -267,6 +267,6 @@ inline std::string ToString(const ConstructList& cl) {
     return ss.str();
 }
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser
 
 #endif  // SRC_TINT_LANG_SPIRV_READER_AST_PARSER_CONSTRUCT_H_

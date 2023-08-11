@@ -18,7 +18,7 @@
 #include "spirv-tools/libspirv.hpp"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::spirv::reader::test {
+namespace tint::spirv::reader::ast_parser::test {
 
 std::vector<uint32_t> Assemble(const std::string& spirv_assembly) {
     // TODO(dneto): Use ScopedTrace?
@@ -55,4 +55,4 @@ std::string Disassemble(const std::vector<uint32_t>& spirv_module) {
     return result;
 }
 
-}  // namespace tint::spirv::reader::test
+}  // namespace tint::spirv::reader::ast_parser::test

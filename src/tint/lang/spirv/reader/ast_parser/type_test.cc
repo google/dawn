@@ -17,7 +17,7 @@
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/spirv/reader/ast_parser/type.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 namespace {
 
 TEST(SpirvASTParserTypeTest, SameArgumentsGivesSamePointer) {
@@ -96,4 +96,4 @@ TEST(SpirvASTParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
 }
 
 }  // namespace
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

@@ -12,20 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/spirv/reader/reader.h"
+#include "src/tint/lang/spirv/reader/ast_parser/parse.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "src/tint/lang/spirv/reader/ast_parser/spirv_tools_helpers_test.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 namespace {
 
 using ParserTest = testing::Test;
 
 TEST_F(ParserTest, DataEmpty) {
     std::vector<uint32_t> data;
-    auto program = Parse(data);
+    auto program = Parse(data, {});
     auto errs = program.Diagnostics().str();
     ASSERT_FALSE(program.IsValid()) << errs;
     EXPECT_EQ(errs, "error: line:0: Invalid SPIR-V magic number.");
@@ -82,4 +82,4 @@ TEST_F(ParserTest, AllowNonUniformDerivatives_True) {
 // TODO(dneto): uint32 vec, invalid SPIR-V
 
 }  // namespace
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

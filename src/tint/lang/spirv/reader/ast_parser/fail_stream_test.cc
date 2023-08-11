@@ -17,7 +17,7 @@
 #include "gmock/gmock.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 namespace {
 
 using ::testing::Eq;
@@ -67,4 +67,4 @@ TEST_F(FailStreamTest, ShiftOperatorAccumulatesValues) {
 }
 
 }  // namespace
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

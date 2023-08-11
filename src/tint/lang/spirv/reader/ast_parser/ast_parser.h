@@ -61,7 +61,7 @@ TINT_END_DISABLE_WARNING(NEWLINE_EOF);
 /// familiar to Vulkan SPIR-V developers.  We will tend to use "image"
 /// and "sampler" instead of "handle".
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 /// The binary representation of a SPIR-V decoration enum followed by its
 /// operands, if any.
@@ -927,6 +927,6 @@ class ASTParser {
     WorkgroupSizeInfo workgroup_size_builtin_;
 };
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser
 
 #endif  // SRC_TINT_LANG_SPIRV_READER_AST_PARSER_AST_PARSER_H_

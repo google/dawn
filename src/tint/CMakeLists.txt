@@ -622,6 +622,8 @@ if(${TINT_BUILD_SPV_READER})
     lang/spirv/reader/ast_parser/function.h
     lang/spirv/reader/ast_parser/namer.cc
     lang/spirv/reader/ast_parser/namer.h
+    lang/spirv/reader/ast_parser/parse.cc
+    lang/spirv/reader/ast_parser/parse.h
     lang/spirv/reader/ast_parser/type.cc
     lang/spirv/reader/ast_parser/type.h
     lang/spirv/reader/ast_parser/usage.cc

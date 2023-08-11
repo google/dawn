@@ -16,7 +16,7 @@
 
 #include <utility>
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 EntryPointInfo::EntryPointInfo(std::string the_name,
                                ast::PipelineStage the_stage,
@@ -37,4 +37,4 @@ EntryPointInfo::EntryPointInfo(const EntryPointInfo&) = default;
 
 EntryPointInfo::~EntryPointInfo() = default;
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser

@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-namespace tint::spirv::reader::test {
+namespace tint::spirv::reader::ast_parser::test {
 
 /// @param spirv_assembly SPIR-V assembly text
 /// @returns the SPIR-V module assembled from the given text.  Numeric IDs
@@ -29,6 +29,6 @@ std::vector<uint32_t> Assemble(const std::string& spirv_assembly);
 /// @returns the disassembled module
 std::string Disassemble(const std::vector<uint32_t>& spirv_module);
 
-}  // namespace tint::spirv::reader::test
+}  // namespace tint::spirv::reader::ast_parser::test
 
 #endif  // SRC_TINT_LANG_SPIRV_READER_AST_PARSER_SPIRV_TOOLS_HELPERS_TEST_H_

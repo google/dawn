@@ -143,7 +143,7 @@
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 namespace {
 
@@ -6423,9 +6423,9 @@ bool FunctionEmitter::IsFloatOne(uint32_t value_id) {
 FunctionEmitter::FunctionDeclaration::FunctionDeclaration() = default;
 FunctionEmitter::FunctionDeclaration::~FunctionDeclaration() = default;
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser
 
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::StatementBuilder);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::SwitchStatementBuilder);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::IfStatementBuilder);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::LoopStatementBuilder);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::StatementBuilder);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::SwitchStatementBuilder);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::IfStatementBuilder);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::LoopStatementBuilder);

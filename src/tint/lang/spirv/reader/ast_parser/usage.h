@@ -20,7 +20,7 @@
 #include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/traits/traits.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 /// Records the properties of a sampler or texture based on how it's used
 /// by image instructions inside function bodies.
@@ -134,6 +134,6 @@ auto& operator<<(STREAM& out, const Usage& u) {
     return u.operator<<(out);
 }
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser
 
 #endif  // SRC_TINT_LANG_SPIRV_READER_AST_PARSER_USAGE_H_

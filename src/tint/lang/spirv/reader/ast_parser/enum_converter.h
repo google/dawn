@@ -24,7 +24,7 @@
 #include "src/tint/lang/spirv/reader/ast_parser/fail_stream.h"
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 /// A converter from SPIR-V enums to Tint AST enums.
 class EnumConverter {
@@ -91,6 +91,6 @@ class EnumConverter {
     FailStream fail_stream_;
 };
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser
 
 #endif  // SRC_TINT_LANG_SPIRV_READER_AST_PARSER_ENUM_CONVERTER_H_

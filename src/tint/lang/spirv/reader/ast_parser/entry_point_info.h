@@ -20,7 +20,7 @@
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 #include "src/tint/utils/containers/vector.h"
 
-namespace tint::spirv::reader {
+namespace tint::spirv::reader::ast_parser {
 
 /// The size of an integer-coordinate grid, in the x, y, and z dimensions.
 struct GridSize {
@@ -86,6 +86,6 @@ struct EntryPointInfo {
     GridSize workgroup_size;
 };
 
-}  // namespace tint::spirv::reader
+}  // namespace tint::spirv::reader::ast_parser
 
 #endif  // SRC_TINT_LANG_SPIRV_READER_AST_PARSER_ENTRY_POINT_INFO_H_

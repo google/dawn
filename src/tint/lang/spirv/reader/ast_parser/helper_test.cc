@@ -19,7 +19,7 @@
 
 #include "gmock/gmock.h"
 
-namespace tint::spirv::reader::test {
+namespace tint::spirv::reader::ast_parser::test {
 
 // Default to not dumping the SPIR-V assembly.
 bool ASTParserWrapperForTest::dump_successfully_converted_spirv_ = false;
@@ -81,4 +81,4 @@ std::string ToString(const Program& program, const ast::Node* node) {
         });
 }
 
-}  // namespace tint::spirv::reader::test
+}  // namespace tint::spirv::reader::ast_parser::test
