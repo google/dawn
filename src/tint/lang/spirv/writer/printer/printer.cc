@@ -1363,6 +1363,15 @@ void Printer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
         case core::Function::kTanh:
             glsl_ext_inst(GLSLstd450Tanh);
             break;
+        case core::Function::kTextureBarrier:
+            op = spv::Op::OpControlBarrier;
+            operands.clear();
+            operands.push_back(Constant(b_.ConstantValue(u32(spv::Scope::Workgroup))));
+            operands.push_back(Constant(b_.ConstantValue(u32(spv::Scope::Workgroup))));
+            operands.push_back(
+                Constant(b_.ConstantValue(u32(spv::MemorySemanticsMask::ImageMemory |
+                                              spv::MemorySemanticsMask::AcquireRelease))));
+            break;
         case core::Function::kTextureNumLevels:
             module_.PushCapability(SpvCapabilityImageQuery);
             op = spv::Op::OpImageQueryLevels;

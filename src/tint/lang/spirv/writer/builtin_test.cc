@@ -1751,6 +1751,17 @@ TEST_F(SpirvWriterTest, Builtin_StorageBarrier) {
     EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_72");
 }
 
+TEST_F(SpirvWriterTest, Builtin_TextureBarrier) {
+    auto* func = b.Function("foo", ty.void_());
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::Function::kTextureBarrier);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpControlBarrier %uint_2 %uint_2 %uint_2056");
+}
+
 TEST_F(SpirvWriterTest, Builtin_WorkgroupBarrier) {
     auto* func = b.Function("foo", ty.void_());
     b.Append(func->Block(), [&] {
