@@ -207,6 +207,11 @@ enable chromium_experimental_dp4a;
 enable chromium_experimental_subgroups;
 {{    end -}}
 
+{{- /* Check and emit chromium_experimental_read_write_storage_texture */ -}}
+{{-   if OverloadUsesReadWriteStorageTexture $overload }}
+enable chromium_experimental_read_write_storage_texture;
+{{    end -}}
+
 {{- /* Check and emit f16 */ -}}
 {{-   if OverloadUsesF16 $overload}}
 enable f16;

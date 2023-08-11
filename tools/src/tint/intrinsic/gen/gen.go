@@ -616,6 +616,18 @@ func OverloadUsesF16(overload sem.Overload) bool {
 	return false
 }
 
+// OverloadUsesReadWriteStorageTexture returns true if the overload uses a read-write storage texture.
+func OverloadUsesReadWriteStorageTexture(overload sem.Overload) bool {
+	for _, param := range overload.Parameters {
+		if strings.HasPrefix(param.Type.Target.GetName(), "texture_storage") {
+			if param.Type.TemplateArguments[1].(sem.FullyQualifiedName).Target.GetName() == "read_write" {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func loadOrMinusOne(p *int) int {
 	if p != nil {
 		return *p
