@@ -150,6 +150,9 @@ class ValidationTest : public testing::Test {
 
   protected:
     dawn::native::Adapter& GetBackendAdapter();
+    // Helper function to create testing adapter and store into ValidationTest::adapter during
+    // SetUp. Override this function to change the adapter creation behavior.
+    virtual void CreateTestAdapter(wgpu::Instance instance, wgpu::RequestAdapterOptions options);
     virtual WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter,
                                         wgpu::DeviceDescriptor descriptor);
 

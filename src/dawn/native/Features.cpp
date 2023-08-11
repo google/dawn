@@ -87,6 +87,19 @@ static constexpr FeatureEnumAndInfoList kFeatureNameAndInfoList = {{
       "Allows textures with formats \"r32float\" \"rg32float\" and \"rgba32float\" to be filtered.",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=1664",
       FeatureInfo::FeatureState::Experimental}},
+    {Feature::ChromiumExperimentalSubgroups,
+     {"chromium-experimental-subgroups",
+      "Experimental, allows using subgroup and supports the \"enable "
+      "chromium_experimental_subgroups\" directive "
+      "in WGSL. Only used to investigate the semantic of subgroups and should not be relied upon.",
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=464",
+      FeatureInfo::FeatureState::Experimental}},
+    {Feature::ChromiumExperimentalSubgroupUniformControlFlow,
+     {"chromium-experimental-subgroup-uniform-control-flow",
+      "Experimental, supports VK_KHR_shader_subgroup_uniform_control_flow on Vulkan devices. Only "
+      "used to investigate the semantic of subgroups and should not be relied upon.",
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=464",
+      FeatureInfo::FeatureState::Experimental}},
     {Feature::DawnInternalUsages,
      {"dawn-internal-usages",
       "Add internal usages to resources to affect how the texture is allocated, but not "
@@ -298,6 +311,10 @@ Feature FromAPIFeature(wgpu::FeatureName feature) {
             return Feature::SharedFenceDXGISharedHandle;
         case wgpu::FeatureName::SharedFenceMTLSharedEvent:
             return Feature::SharedFenceMTLSharedEvent;
+        case wgpu::FeatureName::ChromiumExperimentalSubgroups:
+            return Feature::ChromiumExperimentalSubgroups;
+        case wgpu::FeatureName::ChromiumExperimentalSubgroupUniformControlFlow:
+            return Feature::ChromiumExperimentalSubgroupUniformControlFlow;
     }
     return Feature::InvalidEnum;
 }
@@ -380,6 +397,10 @@ wgpu::FeatureName ToAPIFeature(Feature feature) {
             return wgpu::FeatureName::SharedFenceDXGISharedHandle;
         case Feature::SharedFenceMTLSharedEvent:
             return wgpu::FeatureName::SharedFenceMTLSharedEvent;
+        case Feature::ChromiumExperimentalSubgroups:
+            return wgpu::FeatureName::ChromiumExperimentalSubgroups;
+        case Feature::ChromiumExperimentalSubgroupUniformControlFlow:
+            return wgpu::FeatureName::ChromiumExperimentalSubgroupUniformControlFlow;
         case Feature::EnumCount:
             break;
     }

@@ -41,6 +41,8 @@ enum class Feature {
     RG11B10UfloatRenderable,
     BGRA8UnormStorage,
     Float32Filterable,
+    ChromiumExperimentalSubgroups,
+    ChromiumExperimentalSubgroupUniformControlFlow,
 
     // Dawn-specific
     DawnInternalUsages,

@@ -1806,6 +1806,8 @@
             {"value": 1011, "name": "dual source blending", "tags": ["dawn"]},
             {"value": 1012, "name": "D3D11 multithread protected", "tags": ["dawn", "native"]},
             {"value": 1013, "name": "ANGLE texture sharing", "tags": ["dawn", "native"]},
+            {"value": 1014, "name": "chromium experimental subgroups", "tags": ["dawn"]},
+            {"value": 1015, "name": "chromium experimental subgroup uniform control flow", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},

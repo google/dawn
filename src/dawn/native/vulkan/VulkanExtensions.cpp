@@ -159,13 +159,15 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::ZeroInitializeWorkgroupMemory, "VK_KHR_zero_initialize_workgroup_memory",
      VulkanVersion_1_3},
     {DeviceExt::Maintenance4, "VK_KHR_maintenance4", VulkanVersion_1_3},
+    {DeviceExt::SubgroupSizeControl, "VK_EXT_subgroup_size_control", VulkanVersion_1_3},
 
     {DeviceExt::DepthClipEnable, "VK_EXT_depth_clip_enable", NeverPromoted},
     {DeviceExt::ImageDrmFormatModifier, "VK_EXT_image_drm_format_modifier", NeverPromoted},
     {DeviceExt::Swapchain, "VK_KHR_swapchain", NeverPromoted},
-    {DeviceExt::SubgroupSizeControl, "VK_EXT_subgroup_size_control", NeverPromoted},
     {DeviceExt::QueueFamilyForeign, "VK_EXT_queue_family_foreign", NeverPromoted},
     {DeviceExt::Robustness2, "VK_EXT_robustness2", NeverPromoted},
+    {DeviceExt::ShaderSubgroupUniformControlFlow, "VK_KHR_shader_subgroup_uniform_control_flow",
+     NeverPromoted},
 
     {DeviceExt::ExternalMemoryAndroidHardwareBuffer,
      "VK_ANDROID_external_memory_android_hardware_buffer", NeverPromoted},
@@ -193,8 +195,7 @@ std::unordered_map<std::string, DeviceExt> CreateDeviceExtNameMap() {
 }
 
 DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
-                                const InstanceExtSet& instanceExts,
-                                uint32_t icdVersion) {
+                                const InstanceExtSet& instanceExts) {
     // This is very similar to EnsureDependencies for instanceExtSet. See comment there for
     // an explanation of what happens.
     DeviceExtSet visitedSet;
@@ -299,18 +300,13 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
                                   HasDep(DeviceExt::StorageBufferStorageClass);
                 break;
 
-            case DeviceExt::SubgroupSizeControl:
-                // Using the extension requires DeviceExt::GetPhysicalDeviceProperties2, but we
-                // don't need to check for it as it also requires Vulkan 1.1 in which
-                // VK_KHR_get_physical_device_properties2 was promoted.
-                hasDependencies = icdVersion >= VulkanVersion_1_1;
-                break;
-
             case DeviceExt::DepthClipEnable:
             case DeviceExt::ShaderIntegerDotProduct:
             case DeviceExt::ZeroInitializeWorkgroupMemory:
             case DeviceExt::Maintenance4:
             case DeviceExt::Robustness2:
+            case DeviceExt::SubgroupSizeControl:
+            case DeviceExt::ShaderSubgroupUniformControlFlow:
                 hasDependencies = HasDep(DeviceExt::GetPhysicalDeviceProperties2);
                 break;
 

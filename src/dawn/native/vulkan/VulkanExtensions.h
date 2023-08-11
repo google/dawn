@@ -98,14 +98,15 @@ enum class DeviceExt {
     ShaderIntegerDotProduct,
     ZeroInitializeWorkgroupMemory,
     Maintenance4,
+    SubgroupSizeControl,
 
     // Others
     DepthClipEnable,
     ImageDrmFormatModifier,
     Swapchain,
-    SubgroupSizeControl,
     QueueFamilyForeign,
     Robustness2,
+    ShaderSubgroupUniformControlFlow,
 
     // External* extensions
     ExternalMemoryAndroidHardwareBuffer,
@@ -141,8 +142,7 @@ void MarkPromotedExtensions(DeviceExtSet* extensions, uint32_t version);
 // extensions that don't have all their transitive dependencies in advertisedExts or in
 // instanceExts.
 DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
-                                const InstanceExtSet& instanceExts,
-                                uint32_t icdVersion);
+                                const InstanceExtSet& instanceExts);
 
 // The list of all known Vulkan layers.
 enum class VulkanLayer {

@@ -148,13 +148,7 @@ void ValidationTest::SetUp() {
     options.backendType = wgpu::BackendType::Null;
     options.compatibilityMode = gCurrentTest->UseCompatibilityMode();
 
-    mInstance.RequestAdapter(
-        &options,
-        [](WGPURequestAdapterStatus, WGPUAdapter cAdapter, const char*, void* userdata) {
-            *static_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter::Acquire(cAdapter);
-        },
-        &adapter);
-    FlushWire();
+    CreateTestAdapter(mInstance, options);
     ASSERT(adapter);
 
     wgpu::DeviceDescriptor deviceDescriptor = {};
@@ -176,7 +170,11 @@ ValidationTest::~ValidationTest() {
     mWireHelper.reset();
 
     // Check that all devices were destructed.
-    EXPECT_EQ(mDawnInstance->GetDeviceCountForTesting(), 0u);
+    // Note that if the test is skipped before SetUp is called, mDawnInstance will not get set and
+    // remain nullptr.
+    if (mDawnInstance) {
+        EXPECT_EQ(mDawnInstance->GetDeviceCountForTesting(), 0u);
+    }
 
     gCurrentTest = nullptr;
 }
@@ -279,6 +277,17 @@ wgpu::Device ValidationTest::RequestDeviceSync(const wgpu::DeviceDescriptor& dev
 
 dawn::native::Adapter& ValidationTest::GetBackendAdapter() {
     return mBackendAdapter;
+}
+
+void ValidationTest::CreateTestAdapter(wgpu::Instance instance,
+                                       wgpu::RequestAdapterOptions options) {
+    instance.RequestAdapter(
+        &options,
+        [](WGPURequestAdapterStatus, WGPUAdapter cAdapter, const char*, void* userdata) {
+            *static_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter::Acquire(cAdapter);
+        },
+        &adapter);
+    FlushWire();
 }
 
 WGPUDevice ValidationTest::CreateTestDevice(dawn::native::Adapter dawnAdapter,

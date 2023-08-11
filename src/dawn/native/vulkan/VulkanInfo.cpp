@@ -207,8 +207,7 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
         }
 
         MarkPromotedExtensions(&info.extensions, info.properties.apiVersion);
-        info.extensions =
-            EnsureDependencies(info.extensions, globalInfo.extensions, info.properties.apiVersion);
+        info.extensions = EnsureDependencies(info.extensions, globalInfo.extensions);
     }
 
     // Gather general and extension features and properties
@@ -285,6 +284,15 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
         if (info.extensions[DeviceExt::Robustness2]) {
             featuresChain.Add(&info.robustness2Features,
                               VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ROBUSTNESS_2_FEATURES_EXT);
+        }
+
+        // Check subgroup features and properties
+        propertiesChain.Add(&info.subgroupProperties,
+                            VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_PROPERTIES);
+        if (info.extensions[DeviceExt::ShaderSubgroupUniformControlFlow]) {
+            featuresChain.Add(
+                &info.shaderSubgroupUniformControlFlowFeatures,
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_SUBGROUP_UNIFORM_CONTROL_FLOW_FEATURES_KHR);
         }
 
         // Use vkGetPhysicalDevice{Features,Properties}2 if required to gather information about

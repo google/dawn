@@ -1412,6 +1412,9 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     if (mEnabledFeatures.IsEnabled(Feature::ShaderF16)) {
         mWGSLExtensionAllowList.insert("f16");
     }
+    if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalSubgroups)) {
+        mWGSLExtensionAllowList.insert("chromium_experimental_subgroups");
+    }
     if (IsToggleEnabled(Toggle::AllowUnsafeAPIs)) {
         mWGSLExtensionAllowList.insert("chromium_disable_uniformity_analysis");
     }

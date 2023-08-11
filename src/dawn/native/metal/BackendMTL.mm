@@ -531,6 +531,21 @@ class PhysicalDevice : public PhysicalDeviceBase {
         EnableFeature(Feature::BGRA8UnormStorage);
         EnableFeature(Feature::SurfaceCapabilities);
         EnableFeature(Feature::MSAARenderToSingleSampled);
+
+        // SIMD-scoped permute operations is supported by GPU family Metal3, Apple6, Apple7, Apple8,
+        // and Mac2.
+        // https://developer.apple.com/metal/Metal-Feature-Set-Tables.pdf
+        // Metal3 family is a superset of Apple7 and Apple8, and introduced in macOS 13.0+ or
+        // iOS 16.0+. However when building with Chrome, mac_sdk_official_version in mac_sdk.gni
+        // explicitly use Xcode 13.3 and MacOS 12.3 version 21E226, so does not support
+        // MTLGPUFamilyMetal3.
+        // Note that supportsFamily: method requires macOS 10.15+ or iOS 13.0+
+        if (@available(macOS 10.15, iOS 13.0, *)) {
+            if ([*mDevice supportsFamily:MTLGPUFamilyApple6] ||
+                [*mDevice supportsFamily:MTLGPUFamilyMac2]) {
+                EnableFeature(Feature::ChromiumExperimentalSubgroups);
+            }
+        }
     }
 
     void InitializeVendorArchitectureImpl() override {

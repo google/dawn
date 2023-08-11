@@ -61,6 +61,8 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_MSAARenderToSingleSampled:
         case WGPUFeatureName_DualSourceBlending:
         case WGPUFeatureName_ANGLETextureSharing:
+        case WGPUFeatureName_ChromiumExperimentalSubgroups:
+        case WGPUFeatureName_ChromiumExperimentalSubgroupUniformControlFlow:
             return true;
     }
 
