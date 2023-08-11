@@ -500,7 +500,11 @@ void Printer::EmitTextureType(uint32_t id, const core::type::Texture* texture) {
         texture,  //
         [&](const core::type::SampledTexture* t) { return Type(t->type()); },
         [&](const core::type::MultisampledTexture* t) { return Type(t->type()); },
-        [&](const core::type::StorageTexture* t) { return Type(t->type()); });
+        [&](const core::type::StorageTexture* t) { return Type(t->type()); },
+        [&](Default) {
+            TINT_ICE() << "unhandled texture type: " << texture->TypeInfo().name;
+            return 0u;
+        });
 
     uint32_t dim = SpvDimMax;
     uint32_t array = 0u;

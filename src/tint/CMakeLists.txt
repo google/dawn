@@ -886,6 +886,8 @@ if(${TINT_BUILD_IR})
     lang/core/ir/transform/builtin_polyfill.h
     lang/core/ir/transform/demote_to_helper.cc
     lang/core/ir/transform/demote_to_helper.h
+    lang/core/ir/transform/multiplanar_external_texture.cc
+    lang/core/ir/transform/multiplanar_external_texture.h
     lang/core/ir/transform/shader_io.cc
     lang/core/ir/transform/shader_io.h
     lang/core/ir/transform/std140.cc
@@ -1691,6 +1693,7 @@ if(TINT_BUILD_TESTS)
       lang/core/ir/transform/block_decorated_structs_test.cc
       lang/core/ir/transform/builtin_polyfill_test.cc
       lang/core/ir/transform/demote_to_helper_test.cc
+      lang/core/ir/transform/multiplanar_external_texture_test.cc
       lang/core/ir/transform/std140_test.cc
       lang/core/ir/unary_test.cc
       lang/core/ir/user_call_test.cc

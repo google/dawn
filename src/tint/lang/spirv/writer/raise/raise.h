@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/tint/lang/spirv/writer/common/options.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
@@ -28,8 +29,9 @@ namespace tint::spirv::writer::raise {
 
 /// Raise a core IR module to the SPIR-V dialect of the IR.
 /// @param module the core IR module to raise to SPIR-V dialect
+/// @param options the SPIR-V writer options
 /// @returns success or an error string
-Result<SuccessType, std::string> Raise(ir::Module* module);
+Result<SuccessType, std::string> Raise(ir::Module* module, const Options& options);
 
 }  // namespace tint::spirv::writer::raise
 

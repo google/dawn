@@ -21,6 +21,7 @@
 #include "src/tint/lang/core/ir/transform/block_decorated_structs.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
+#include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
 #include "src/tint/lang/core/ir/transform/std140.h"
 #include "src/tint/lang/spirv/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/spirv/writer/raise/expand_implicit_splats.h"
@@ -31,7 +32,7 @@
 
 namespace tint::spirv::writer::raise {
 
-Result<SuccessType, std::string> Raise(ir::Module* module) {
+Result<SuccessType, std::string> Raise(ir::Module* module, const Options& options) {
 #define RUN_TRANSFORM(name, ...)         \
     do {                                 \
         auto result = name(__VA_ARGS__); \
@@ -48,6 +49,9 @@ Result<SuccessType, std::string> Raise(ir::Module* module) {
     core_polyfills.saturate = true;
     core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
     RUN_TRANSFORM(ir::transform::BuiltinPolyfill, module, core_polyfills);
+
+    RUN_TRANSFORM(ir::transform::MultiplanarExternalTexture, module,
+                  options.external_texture_options);
 
     RUN_TRANSFORM(ir::transform::AddEmptyEntryPoint, module);
     RUN_TRANSFORM(ir::transform::Bgra8UnormPolyfill, module);
