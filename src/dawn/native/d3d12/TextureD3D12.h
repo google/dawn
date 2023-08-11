@@ -90,10 +90,6 @@ class Texture final : public d3d::Texture {
     void TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
                                     D3D12_RESOURCE_STATES newState,
                                     const SubresourceRange& range);
-    void TrackAllUsageAndTransitionNow(CommandRecordingContext* commandContext,
-                                       wgpu::TextureUsage usage);
-    void TrackAllUsageAndTransitionNow(CommandRecordingContext* commandContext,
-                                       D3D12_RESOURCE_STATES newState);
 
   private:
     using Base = d3d::Texture;

@@ -216,6 +216,7 @@ MaybeError Texture::InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
 
     D3D12_RESOURCE_DESC desc = d3d12Texture->GetDesc();
     mD3D12ResourceFlags = desc.Flags;
+    ASSERT(mD3D12ResourceFlags & D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS);
 
     AllocationInfo info;
     info.mMethod = AllocationMethod::kExternal;
@@ -338,6 +339,8 @@ void Texture::DestroyImpl() {
 }
 
 ResultOrError<ExecutionSerial> Texture::EndAccess() {
+    ASSERT(mD3D12ResourceFlags & D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS);
+
     Device* device = ToBackend(GetDevice());
     // Synchronize if texture access wasn't synchronized already due to ExecuteCommandLists.
     if (!mSignalFenceValue.has_value()) {
@@ -433,17 +436,6 @@ void Texture::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext
     TrackUsageAndTransitionNow(commandContext, D3D12TextureUsage(usage, GetFormat()), range);
 }
 
-void Texture::TrackAllUsageAndTransitionNow(CommandRecordingContext* commandContext,
-                                            wgpu::TextureUsage usage) {
-    TrackUsageAndTransitionNow(commandContext, D3D12TextureUsage(usage, GetFormat()),
-                               GetAllSubresources());
-}
-
-void Texture::TrackAllUsageAndTransitionNow(CommandRecordingContext* commandContext,
-                                            D3D12_RESOURCE_STATES newState) {
-    TrackUsageAndTransitionNow(commandContext, newState, GetAllSubresources());
-}
-
 void Texture::TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
                                          D3D12_RESOURCE_STATES newState,
                                          const SubresourceRange& range) {
@@ -513,6 +505,7 @@ void Texture::TransitionSubresourceRange(std::vector<D3D12_RESOURCE_BARRIER>* ba
     // Update the tracked state.
     state->lastState = newState;
 
+    // All simultaneous-access textures are qualified for an implicit promotion.
     // Destination states that qualify for an implicit promotion for a
     // non-simultaneous-access texture: NON_PIXEL_SHADER_RESOURCE,
     // PIXEL_SHADER_RESOURCE, COPY_SRC, COPY_DEST.
@@ -522,7 +515,8 @@ void Texture::TransitionSubresourceRange(std::vector<D3D12_RESOURCE_BARRIER>* ba
             D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
 
         if (lastState == D3D12_RESOURCE_STATE_COMMON) {
-            if (IsSubset(newState, kD3D12PromotableReadOnlyStates)) {
+            if (IsSubset(newState, kD3D12PromotableReadOnlyStates) ||
+                mD3D12ResourceFlags & D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS) {
                 // Implicit texture state decays can only occur when the texture was implicitly
                 // transitioned to a read-only state. isValidToDecay is needed to differentiate
                 // between resources that were implictly or explicitly transitioned to a
