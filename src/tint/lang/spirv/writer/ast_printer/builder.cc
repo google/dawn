@@ -260,6 +260,7 @@ bool Builder::Build() {
                 core::Extension::kChromiumExperimentalDp4A,
                 core::Extension::kChromiumExperimentalFullPtrParameters,
                 core::Extension::kChromiumExperimentalPushConstant,
+                core::Extension::kChromiumExperimentalReadWriteStorageTexture,
                 core::Extension::kChromiumExperimentalSubgroups,
                 core::Extension::kF16,
                 core::Extension::kChromiumInternalDualSourceBlending,
@@ -3010,6 +3011,11 @@ bool Builder::GenerateControlBarrierBuiltin(const sem::Builtin* builtin) {
         memory = static_cast<uint32_t>(spv::Scope::Workgroup);
         semantics = static_cast<uint32_t>(spv::MemorySemanticsMask::AcquireRelease) |
                     static_cast<uint32_t>(spv::MemorySemanticsMask::UniformMemory);
+    } else if (builtin->Type() == core::Function::kTextureBarrier) {
+        execution = static_cast<uint32_t>(spv::Scope::Workgroup);
+        memory = static_cast<uint32_t>(spv::Scope::Workgroup);
+        semantics = static_cast<uint32_t>(spv::MemorySemanticsMask::AcquireRelease) |
+                    static_cast<uint32_t>(spv::MemorySemanticsMask::ImageMemory);
     } else {
         TINT_ICE() << "unexpected barrier builtin type " << core::str(builtin->Type());
         return false;
