@@ -394,6 +394,151 @@ tint_ExternalTextureParams = struct @align(16) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(IR_MultiplanarExternalTextureTest, TextureLoad_SignedCoords) {
+    auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
+    var->SetBindingPoint(1, 2);
+    b.RootBlock()->Append(var);
+
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+    func->SetParams({coords});
+    b.Append(func->Block(), [&] {
+        auto* load = b.Load(var->Result());
+        auto* result = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, load, coords);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_external, read_write> = var @binding_point(1, 2)
+}
+
+%foo = func(%coords:vec2<i32>):vec4<f32> -> %b2 {
+  %b2 = block {
+    %4:texture_external = load %texture
+    %result:vec4<f32> = textureLoad %4, %coords
+    ret %result
+  }
+}
+)";
+    auto* expect = R"(
+tint_GammaTransferParams = struct @align(4) {
+  G:f32 @offset(0)
+  A:f32 @offset(4)
+  B:f32 @offset(8)
+  C:f32 @offset(12)
+  D:f32 @offset(16)
+  E:f32 @offset(20)
+  F:f32 @offset(24)
+  padding:u32 @offset(28)
+}
+
+tint_ExternalTextureParams = struct @align(16) {
+  numPlanes:u32 @offset(0)
+  doYuvToRgbConversionOnly:u32 @offset(4)
+  yuvToRgbConversionMatrix:mat3x4<f32> @offset(16)
+  gammaDecodeParams:tint_GammaTransferParams @offset(64)
+  gammaEncodeParams:tint_GammaTransferParams @offset(96)
+  gamutConversionMatrix:mat3x3<f32> @offset(128)
+  coordTransformationMatrix:mat3x2<f32> @offset(176)
+}
+
+%b1 = block {  # root
+  %texture_plane0:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 2)
+  %texture_plane1:ptr<handle, texture_2d<f32>, read_write> = var @binding_point(1, 3)
+  %texture_params:ptr<uniform, tint_ExternalTextureParams, read_write> = var @binding_point(1, 4)
+}
+
+%foo = func(%coords:vec2<i32>):vec4<f32> -> %b2 {
+  %b2 = block {
+    %6:texture_2d<f32> = load %texture_plane0
+    %7:texture_2d<f32> = load %texture_plane1
+    %8:tint_ExternalTextureParams = load %texture_params
+    %9:vec2<u32> = convert %coords
+    %10:vec4<f32> = call %tint_TextureLoadExternal, %6, %7, %8, %9
+    ret %10
+  }
+}
+%tint_TextureLoadExternal = func(%plane_0:texture_2d<f32>, %plane_1:texture_2d<f32>, %params:tint_ExternalTextureParams, %coords_1:vec2<u32>):vec4<f32> -> %b3 {  # %coords_1: 'coords'
+  %b3 = block {
+    %16:u32 = access %params, 1u
+    %17:mat3x4<f32> = access %params, 2u
+    %18:u32 = access %params, 0u
+    %19:bool = eq %18, 1u
+    %20:vec3<f32>, %21:f32 = if %19 [t: %b4, f: %b5] {  # if_1
+      %b4 = block {  # true
+        %22:vec4<f32> = textureLoad %plane_0, %coords_1, 0u
+        %23:vec3<f32> = swizzle %22, xyz
+        %24:f32 = access %22, 3u
+        exit_if %23, %24  # if_1
+      }
+      %b5 = block {  # false
+        %25:vec4<f32> = textureLoad %plane_0, %coords_1, 0u
+        %26:f32 = access %25, 0u
+        %27:vec2<u32> = shiftr %coords_1, vec2<u32>(1u)
+        %28:vec4<f32> = textureLoad %plane_1, %27, 0u
+        %29:vec2<f32> = swizzle %28, xy
+        %30:vec4<f32> = construct %26, %29, 1.0f
+        %31:vec3<f32> = mul %30, %17
+        exit_if %31, 1.0f  # if_1
+      }
+    }
+    %32:bool = eq %16, 0u
+    %33:vec3<f32> = if %32 [t: %b6, f: %b7] {  # if_2
+      %b6 = block {  # true
+        %34:tint_GammaTransferParams = access %params, 3u
+        %35:tint_GammaTransferParams = access %params, 4u
+        %36:mat3x3<f32> = access %params, 5u
+        %37:vec3<f32> = call %tint_GammaCorrection, %20, %34
+        %39:vec3<f32> = mul %36, %37
+        %40:vec3<f32> = call %tint_GammaCorrection, %39, %35
+        exit_if %40  # if_2
+      }
+      %b7 = block {  # false
+        exit_if %20  # if_2
+      }
+    }
+    %41:vec4<f32> = construct %33, %21
+    ret %41
+  }
+}
+%tint_GammaCorrection = func(%v:vec3<f32>, %params_1:tint_GammaTransferParams):vec3<f32> -> %b8 {  # %params_1: 'params'
+  %b8 = block {
+    %44:f32 = access %params_1, 0u
+    %45:f32 = access %params_1, 1u
+    %46:f32 = access %params_1, 2u
+    %47:f32 = access %params_1, 3u
+    %48:f32 = access %params_1, 4u
+    %49:f32 = access %params_1, 5u
+    %50:f32 = access %params_1, 6u
+    %51:vec3<f32> = construct %44
+    %52:vec3<f32> = construct %48
+    %53:vec3<f32> = abs %v
+    %54:vec3<f32> = sign %v
+    %55:vec3<bool> = lt %53, %52
+    %56:vec3<f32> = mul %47, %53
+    %57:vec3<f32> = add %56, %50
+    %58:vec3<f32> = mul %54, %57
+    %59:vec3<f32> = mul %45, %53
+    %60:vec3<f32> = add %59, %46
+    %61:vec3<f32> = pow %60, %51
+    %62:vec3<f32> = add %61, %49
+    %63:vec3<f32> = mul %54, %62
+    %64:vec3<f32> = select %63, %58, %55
+    ret %64
+  }
+}
+)";
+
+    EXPECT_EQ(src, str());
+
+    ExternalTextureOptions options;
+    options.bindings_map[{1u, 2u}] = {{1u, 3u}, {1u, 4u}};
+    Run(MultiplanarExternalTexture, options);
+    EXPECT_EQ(expect, str());
+}
+
 TEST_F(IR_MultiplanarExternalTextureTest, TextureSampleBaseClampToEdge) {
     auto* var = b.Var("texture", ty.ptr(handle, ty.Get<core::type::ExternalTexture>()));
     var->SetBindingPoint(1, 2);
