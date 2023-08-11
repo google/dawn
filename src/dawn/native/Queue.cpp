@@ -338,7 +338,7 @@ void QueueBase::APIWriteTexture(const ImageCopyTexture* destination,
                                 const Extent3D* writeSize) {
     DAWN_UNUSED(GetDevice()->ConsumedError(
         WriteTextureInternal(destination, data, dataSize, *dataLayout, writeSize),
-        "calling %s.WriteTexture(%s, (%s bytes), %s, %s)", destination, dataSize, dataLayout,
+        "calling %s.WriteTexture(%s, (%u bytes), %s, %s)", this, destination, dataSize, dataLayout,
         writeSize));
 }
 
