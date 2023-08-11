@@ -50,9 +50,16 @@ struct StateImpl : ir::transform::ShaderIOBackendState {
     /// The member indices for outputs.
     Vector<uint32_t, 4> output_indices;
 
+    /// The configuration options.
+    const ShaderIOConfig& config;
+
+    /// The frag_depth clamp arguments.
+    ir::Value* frag_depth_clamp_args = nullptr;
+
     /// Constructor
-    /// @copydoc ShaderIO::ShaderIOBackendState::ShaderIOBackendState
-    using ShaderIOBackendState::ShaderIOBackendState;
+    StateImpl(ir::Module* mod, ir::Function* f, const ShaderIOConfig& cfg)
+        : ShaderIOBackendState(mod, f), config(cfg) {}
+
     /// Destructor
     ~StateImpl() override {}
 
@@ -152,22 +159,71 @@ struct StateImpl : ir::transform::ShaderIOBackendState {
             } else {
                 to = builder.Access(ptr, builtin_output_var, u32(output_indices[idx]));
             }
+
+            // Clamp frag_depth values if necessary.
+            if (outputs[idx].attributes.builtin.value() == core::BuiltinValue::kFragDepth) {
+                value = ClampFragDepth(builder, value);
+            }
         } else {
             to = builder.Access(ptr, location_output_var, u32(output_indices[idx]));
         }
         builder.Store(to, value);
     }
+
+    /// Clamp a frag_depth builtin value if necessary.
+    /// @param builder the builder to use for new instructions
+    /// @param frag_depth the incoming frag_depth value
+    /// @returns the clamped value
+    ir::Value* ClampFragDepth(ir::Builder& builder, ir::Value* frag_depth) {
+        if (!config.clamp_frag_depth) {
+            return frag_depth;
+        }
+
+        // Create the clamp args struct and variable.
+        if (!frag_depth_clamp_args) {
+            // Check that there are no push constants in the module already.
+            for (auto* inst : *b.RootBlock()) {
+                if (auto* var = inst->As<ir::Var>()) {
+                    auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+                    if (ptr->AddressSpace() == core::AddressSpace::kPushConstant) {
+                        TINT_ICE() << "cannot clamp frag_depth with pre-existing push constants";
+                    }
+                }
+            }
+
+            // Declare the struct.
+            auto* str = ty.Struct(ir->symbols.Register("FragDepthClampArgs"),
+                                  {
+                                      {ir->symbols.Register("min"), ty.f32()},
+                                      {ir->symbols.Register("max"), ty.f32()},
+                                  });
+            str->SetStructFlag(core::type::kBlock);
+
+            // Declare the variable.
+            auto* var = b.Var("tint_frag_depth_clamp_args", ty.ptr(push_constant, str));
+            b.RootBlock()->Append(var);
+            frag_depth_clamp_args = var->Result();
+        }
+
+        // Clamp the value.
+        auto* args = builder.Load(frag_depth_clamp_args);
+        auto* frag_depth_min = builder.Access(ty.f32(), args, 0_u);
+        auto* frag_depth_max = builder.Access(ty.f32(), args, 1_u);
+        return builder
+            .Call(ty.f32(), core::Function::kClamp, frag_depth, frag_depth_min, frag_depth_max)
+            ->Result();
+    }
 };
 }  // namespace
 
-Result<SuccessType, std::string> ShaderIO(ir::Module* ir) {
+Result<SuccessType, std::string> ShaderIO(ir::Module* ir, const ShaderIOConfig& config) {
     auto result = ValidateAndDumpIfNeeded(*ir, "ShaderIO transform");
     if (!result) {
         return result;
     }
 
-    ir::transform::RunShaderIOBase(ir, [](ir::Module* mod, ir::Function* func) {
-        return std::make_unique<StateImpl>(mod, func);
+    ir::transform::RunShaderIOBase(ir, [&](ir::Module* mod, ir::Function* func) {
+        return std::make_unique<StateImpl>(mod, func, config);
     });
 
     return Success;

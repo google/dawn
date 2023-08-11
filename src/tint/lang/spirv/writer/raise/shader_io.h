@@ -26,11 +26,18 @@ class Module;
 
 namespace tint::spirv::writer::raise {
 
+/// ShaderIOConfig describes the set of configuration options for the ShaderIO transform.
+struct ShaderIOConfig {
+    /// true if frag_depth builtin outputs should be clamped
+    bool clamp_frag_depth = false;
+};
+
 /// ShaderIO is a transform that modifies each entry point function's parameters and return
 /// value to prepare them for SPIR-V codegen.
 /// @param module the module to transform
+/// @param config the configuration
 /// @returns an error string on failure
-Result<SuccessType, std::string> ShaderIO(ir::Module* module);
+Result<SuccessType, std::string> ShaderIO(ir::Module* module, const ShaderIOConfig& config);
 
 }  // namespace tint::spirv::writer::raise
 

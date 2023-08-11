@@ -61,7 +61,7 @@ Result<SuccessType, std::string> Raise(ir::Module* module, const Options& option
     RUN_TRANSFORM(ExpandImplicitSplats, module);
     RUN_TRANSFORM(HandleMatrixArithmetic, module);
     RUN_TRANSFORM(MergeReturn, module);
-    RUN_TRANSFORM(ShaderIO, module);
+    RUN_TRANSFORM(ShaderIO, module, ShaderIOConfig{options.clamp_frag_depth});
     RUN_TRANSFORM(ir::transform::Std140, module);
     RUN_TRANSFORM(VarForDynamicIndex, module);
 

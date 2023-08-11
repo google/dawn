@@ -45,12 +45,14 @@ TEST_F(SpirvWriter_ShaderIOTest, NoInputsOrOutputs) {
 
     auto* expect = src;
 
-    Run(ShaderIO);
+    ShaderIOConfig config;
+    config.clamp_frag_depth = false;
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_ShaderIOTest, Parameters_NonStruct_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, Parameters_NonStruct) {
     auto* ep = b.Function("foo", ty.void_());
     auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
     front_facing->SetBuiltin(ir::FunctionParam::Builtin::kFrontFacing);
@@ -135,12 +137,14 @@ foo_LocationInputsStruct = struct @align(4), @block {
 }
 )";
 
-    Run(ShaderIO);
+    ShaderIOConfig config;
+    config.clamp_frag_depth = false;
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_ShaderIOTest, Parameters_Struct_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, Parameters_Struct) {
     auto* str_ty = ty.Struct(mod.symbols.New("Inputs"),
                              {
                                  {
@@ -270,12 +274,14 @@ foo_LocationInputsStruct = struct @align(4), @block {
 }
 )";
 
-    Run(ShaderIO);
+    ShaderIOConfig config;
+    config.clamp_frag_depth = false;
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_ShaderIOTest, Parameters_Mixed_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, Parameters_Mixed) {
     auto* str_ty = ty.Struct(mod.symbols.New("Inputs"),
                              {
                                  {
@@ -387,12 +393,14 @@ foo_LocationInputsStruct = struct @align(4), @block {
 }
 )";
 
-    Run(ShaderIO);
+    ShaderIOConfig config;
+    config.clamp_frag_depth = false;
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructBuiltin_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructBuiltin) {
     auto* ep = b.Function("foo", ty.vec4<f32>());
     ep->SetReturnBuiltin(ir::Function::ReturnBuiltin::kPosition);
     ep->SetReturnInvariant(true);
@@ -437,12 +445,14 @@ foo_BuiltinOutputsStruct = struct @align(16), @block {
 }
 )";
 
-    Run(ShaderIO);
+    ShaderIOConfig config;
+    config.clamp_frag_depth = false;
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructLocation_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructLocation) {
     auto* ep = b.Function("foo", ty.vec4<f32>());
     ep->SetReturnLocation(1u, {});
     ep->SetStage(ir::Function::PipelineStage::kFragment);
@@ -486,12 +496,14 @@ foo_LocationOutputsStruct = struct @align(16), @block {
 }
 )";
 
-    Run(ShaderIO);
+    ShaderIOConfig config;
+    config.clamp_frag_depth = false;
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_Struct_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_Struct) {
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
                                  {
@@ -585,12 +597,14 @@ foo_LocationOutputsStruct = struct @align(4), @block {
 }
 )";
 
-    Run(ShaderIO);
+    ShaderIOConfig config;
+    config.clamp_frag_depth = false;
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedByVertexAndFragment_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedByVertexAndFragment) {
     auto* vec4f = ty.vec4<f32>();
     auto* str_ty = ty.Struct(mod.symbols.New("Interface"),
                              {
@@ -734,12 +748,14 @@ frag_LocationOutputsStruct = struct @align(16), @block {
 }
 )";
 
-    Run(ShaderIO);
+    ShaderIOConfig config;
+    config.clamp_frag_depth = false;
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
 
-TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedWithBuffer_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedWithBuffer) {
     auto* vec4f = ty.vec4<f32>();
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
@@ -823,13 +839,15 @@ vert_LocationOutputsStruct = struct @align(16), @block {
 }
 )";
 
-    Run(ShaderIO);
+    ShaderIOConfig config;
+    config.clamp_frag_depth = false;
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
 
 // Test that we change the type of the sample mask builtin to an array for SPIR-V.
-TEST_F(SpirvWriter_ShaderIOTest, SampleMask_Spirv) {
+TEST_F(SpirvWriter_ShaderIOTest, SampleMask) {
     auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
                              {
                                  {
@@ -916,7 +934,102 @@ foo_LocationOutputsStruct = struct @align(4), @block {
 }
 )";
 
-    Run(ShaderIO);
+    ShaderIOConfig config;
+    config.clamp_frag_depth = false;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_ShaderIOTest, ClampFragDepth) {
+    auto* str_ty = ty.Struct(mod.symbols.New("Outputs"),
+                             {
+                                 {
+                                     mod.symbols.New("color"),
+                                     ty.f32(),
+                                     {0u, {}, {}, {}, false},
+                                 },
+                                 {
+                                     mod.symbols.New("depth"),
+                                     ty.f32(),
+                                     {{}, {}, core::BuiltinValue::kFragDepth, {}, false},
+                                 },
+                             });
+
+    auto* ep = b.Function("foo", str_ty);
+    ep->SetStage(ir::Function::PipelineStage::kFragment);
+
+    b.Append(ep->Block(), [&] {  //
+        b.Return(ep, b.Construct(str_ty, 0.5_f, 2_f));
+    });
+
+    auto* src = R"(
+Outputs = struct @align(4) {
+  color:f32 @offset(0), @location(0)
+  depth:f32 @offset(4), @builtin(frag_depth)
+}
+
+%foo = @fragment func():Outputs -> %b1 {
+  %b1 = block {
+    %2:Outputs = construct 0.5f, 2.0f
+    ret %2
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+Outputs = struct @align(4) {
+  color:f32 @offset(0)
+  depth:f32 @offset(4)
+}
+
+foo_BuiltinOutputsStruct = struct @align(4), @block {
+  Outputs_depth:f32 @offset(0), @builtin(frag_depth)
+}
+
+foo_LocationOutputsStruct = struct @align(4), @block {
+  Outputs_color:f32 @offset(0), @location(0)
+}
+
+FragDepthClampArgs = struct @align(4), @block {
+  min:f32 @offset(0)
+  max:f32 @offset(4)
+}
+
+%b1 = block {  # root
+  %foo_BuiltinOutputs:ptr<__out, foo_BuiltinOutputsStruct, write> = var
+  %foo_LocationOutputs:ptr<__out, foo_LocationOutputsStruct, write> = var
+  %tint_frag_depth_clamp_args:ptr<push_constant, FragDepthClampArgs, read_write> = var
+}
+
+%foo_inner = func():Outputs -> %b2 {
+  %b2 = block {
+    %5:Outputs = construct 0.5f, 2.0f
+    ret %5
+  }
+}
+%foo = @fragment func():void -> %b3 {
+  %b3 = block {
+    %7:Outputs = call %foo_inner
+    %8:f32 = access %7, 0u
+    %9:ptr<__out, f32, write> = access %foo_LocationOutputs, 0u
+    store %9, %8
+    %10:f32 = access %7, 1u
+    %11:ptr<__out, f32, write> = access %foo_BuiltinOutputs, 0u
+    %12:FragDepthClampArgs = load %tint_frag_depth_clamp_args
+    %13:f32 = access %12, 0u
+    %14:f32 = access %12, 1u
+    %15:f32 = clamp %10, %13, %14
+    store %11, %15
+    ret
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.clamp_frag_depth = true;
+    Run(ShaderIO, config);
 
     EXPECT_EQ(expect, str());
 }
