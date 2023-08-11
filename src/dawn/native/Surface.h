@@ -34,8 +34,7 @@ struct IUnknown;
 
 namespace dawn::native {
 
-MaybeError ValidateSurfaceDescriptor(const InstanceBase* instance,
-                                     const SurfaceDescriptor* descriptor);
+MaybeError ValidateSurfaceDescriptor(InstanceBase* instance, const SurfaceDescriptor* descriptor);
 
 // A surface is a sum types of all the kind of windows Dawn supports. The OS-specific types
 // aren't used because they would cause compilation errors on other OSes (or require

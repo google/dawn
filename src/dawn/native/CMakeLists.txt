@@ -239,12 +239,10 @@ target_link_libraries(dawn_native
 target_include_directories(dawn_native PRIVATE ${DAWN_ABSEIL_DIR})
 
 if (DAWN_USE_X11)
-    find_package(X11 REQUIRED)
-    target_link_libraries(dawn_native PRIVATE ${X11_LIBRARIES})
     target_include_directories(dawn_native PRIVATE ${X11_INCLUDE_DIR})
     target_sources(dawn_native PRIVATE
-        "XlibXcbFunctions.cpp"
-        "XlibXcbFunctions.h"
+        "X11Functions.cpp"
+        "X11Functions.h"
     )
 endif()
 

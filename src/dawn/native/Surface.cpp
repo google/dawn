@@ -26,6 +26,7 @@
 
 #if defined(DAWN_USE_X11)
 #include "dawn/common/xlib_with_undefs.h"
+#include "dawn/native/X11Functions.h"
 #endif  // defined(DAWN_USE_X11)
 
 namespace dawn::native {
@@ -64,8 +65,7 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
 bool InheritsFromCAMetalLayer(void* obj);
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
-MaybeError ValidateSurfaceDescriptor(const InstanceBase* instance,
-                                     const SurfaceDescriptor* descriptor) {
+MaybeError ValidateSurfaceDescriptor(InstanceBase* instance, const SurfaceDescriptor* descriptor) {
     DAWN_INVALID_IF(descriptor->nextInChain == nullptr,
                     "Surface cannot be created with %s. nextInChain is not specified.", descriptor);
 
@@ -152,11 +152,15 @@ MaybeError ValidateSurfaceDescriptor(const InstanceBase* instance,
         // returns a status code. If the window is bad the call return a status of zero. We
         // need to set a temporary X11 error handler while doing this because the default
         // X11 error handler exits the program on any error.
-        XErrorHandler oldErrorHandler = XSetErrorHandler([](Display*, XErrorEvent*) { return 0; });
+        const X11Functions* x11 = instance->GetOrLoadX11Functions();
+        DAWN_INVALID_IF(!x11->IsX11Loaded(), "Couldn't load libX11.");
+
+        XErrorHandler oldErrorHandler =
+            x11->xSetErrorHandler([](Display*, XErrorEvent*) { return 0; });
         XWindowAttributes attributes;
-        int status = XGetWindowAttributes(reinterpret_cast<Display*>(xDesc->display), xDesc->window,
-                                          &attributes);
-        XSetErrorHandler(oldErrorHandler);
+        int status = x11->xGetWindowAttributes(reinterpret_cast<Display*>(xDesc->display),
+                                               xDesc->window, &attributes);
+        x11->xSetErrorHandler(oldErrorHandler);
 
         DAWN_INVALID_IF(status == 0, "Invalid X Window");
         return {};

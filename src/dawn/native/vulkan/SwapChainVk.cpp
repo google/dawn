@@ -29,7 +29,7 @@
 #include "dawn/native/vulkan/VulkanError.h"
 
 #if defined(DAWN_USE_X11)
-#include "dawn/native/XlibXcbFunctions.h"
+#include "dawn/native/X11Functions.h"
 #endif  // defined(DAWN_USE_X11)
 
 namespace dawn::native::vulkan {
@@ -149,18 +149,17 @@ ResultOrError<VkSurfaceKHR> CreateVulkanSurface(const PhysicalDevice* physicalDe
             // Fall back to using XCB surfaces if the Xlib extension isn't available.
             // See https://xcb.freedesktop.org/MixingCalls/ for more information about
             // interoperability between Xlib and XCB
-            const XlibXcbFunctions* xlibXcb =
-                physicalDevice->GetInstance()->GetOrCreateXlibXcbFunctions();
-            ASSERT(xlibXcb != nullptr);
+            const X11Functions* x11 = physicalDevice->GetInstance()->GetOrLoadX11Functions();
+            ASSERT(x11 != nullptr);
 
-            if (info.HasExt(InstanceExt::XcbSurface) && xlibXcb->IsLoaded()) {
+            if (info.HasExt(InstanceExt::XcbSurface) && x11->IsX11XcbLoaded()) {
                 VkXcbSurfaceCreateInfoKHR createInfo;
                 createInfo.sType = VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR;
                 createInfo.pNext = nullptr;
                 createInfo.flags = 0;
                 // The XCB connection lives as long as the X11 display.
                 createInfo.connection =
-                    xlibXcb->xGetXCBConnection(static_cast<Display*>(surface->GetXDisplay()));
+                    x11->xGetXCBConnection(static_cast<Display*>(surface->GetXDisplay()));
                 createInfo.window = surface->GetXWindow();
 
                 VkSurfaceKHR vkSurface = VK_NULL_HANDLE;

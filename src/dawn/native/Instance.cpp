@@ -45,7 +45,7 @@
 #endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
 
 #if defined(DAWN_USE_X11)
-#include "dawn/native/XlibXcbFunctions.h"
+#include "dawn/native/X11Functions.h"
 #endif  // defined(DAWN_USE_X11)
 
 #include <optional>
@@ -574,12 +574,12 @@ void InstanceBase::ConsumeError(std::unique_ptr<ErrorData> error) {
     dawn::ErrorLog() << error->GetFormattedMessage();
 }
 
-const XlibXcbFunctions* InstanceBase::GetOrCreateXlibXcbFunctions() {
+const X11Functions* InstanceBase::GetOrLoadX11Functions() {
 #if defined(DAWN_USE_X11)
-    if (mXlibXcbFunctions == nullptr) {
-        mXlibXcbFunctions = std::make_unique<XlibXcbFunctions>();
+    if (mX11Functions == nullptr) {
+        mX11Functions = std::make_unique<X11Functions>();
     }
-    return mXlibXcbFunctions.get();
+    return mX11Functions.get();
 #else
     UNREACHABLE();
 #endif  // defined(DAWN_USE_X11)

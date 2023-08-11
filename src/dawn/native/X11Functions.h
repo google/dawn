@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_NATIVE_XLIBXCBFUNCTIONS_H_
-#define SRC_DAWN_NATIVE_XLIBXCBFUNCTIONS_H_
+#ifndef SRC_DAWN_NATIVE_X11FUNCTIONS_H_
+#define SRC_DAWN_NATIVE_X11FUNCTIONS_H_
 
 #include "dawn/common/DynamicLib.h"
 #include "dawn/native/Error.h"
@@ -24,23 +24,28 @@ class DynamicLib;
 
 namespace dawn::native {
 
-// A helper class that dynamically loads the x11-xcb library that contains XGetXCBConnection
-// (and nothing else). This has to be dynamic because this libraries isn't present on all Linux
-// deployment platforms that Chromium targets.
-class XlibXcbFunctions {
+// A helper class that dynamically loads the x11 and x11-xcb libraries that might not be present
+// on all platforms Dawn is deployed on. Note that x11-xcb might not be present even if x11 is.
+class X11Functions {
   public:
-    XlibXcbFunctions();
-    ~XlibXcbFunctions();
+    X11Functions();
+    ~X11Functions();
 
-    bool IsLoaded() const;
+    bool IsX11Loaded() const;
+    bool IsX11XcbLoaded() const;
+
+    // Functions from x11
+    decltype(&::XSetErrorHandler) xSetErrorHandler = nullptr;
+    decltype(&::XGetWindowAttributes) xGetWindowAttributes = nullptr;
 
     // Functions from x11-xcb
     decltype(&::XGetXCBConnection) xGetXCBConnection = nullptr;
 
   private:
-    DynamicLib mLib;
+    DynamicLib mX11Lib;
+    DynamicLib mX11XcbLib;
 };
 
 }  // namespace dawn::native
 
-#endif  // SRC_DAWN_NATIVE_XLIBXCBFUNCTIONS_H_
+#endif  // SRC_DAWN_NATIVE_X11FUNCTIONS_H_

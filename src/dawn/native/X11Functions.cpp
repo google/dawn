@@ -12,19 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/XlibXcbFunctions.h"
+#include "dawn/native/X11Functions.h"
 
 namespace dawn::native {
 
-XlibXcbFunctions::XlibXcbFunctions() {
-    if (!mLib.Open("libX11-xcb.so.1") || !mLib.GetProc(&xGetXCBConnection, "XGetXCBConnection")) {
-        mLib.Close();
+X11Functions::X11Functions() {
+    if (!mX11Lib.Open("libX11.so.6") || !mX11Lib.GetProc(&xSetErrorHandler, "XSetErrorHandler") ||
+        !mX11Lib.GetProc(&xGetWindowAttributes, "XGetWindowAttributes")) {
+        mX11Lib.Close();
+    }
+
+    if (!mX11XcbLib.Open("libX11-xcb.so.1") ||
+        !mX11XcbLib.GetProc(&xGetXCBConnection, "XGetXCBConnection")) {
+        mX11XcbLib.Close();
     }
 }
-XlibXcbFunctions::~XlibXcbFunctions() = default;
+X11Functions::~X11Functions() = default;
 
-bool XlibXcbFunctions::IsLoaded() const {
-    return xGetXCBConnection != nullptr;
+bool X11Functions::IsX11Loaded() const {
+    return mX11Lib.Valid();
+}
+
+bool X11Functions::IsX11XcbLoaded() const {
+    return mX11XcbLib.Valid();
 }
 
 }  // namespace dawn::native
