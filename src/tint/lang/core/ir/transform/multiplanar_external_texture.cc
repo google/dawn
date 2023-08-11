@@ -349,7 +349,7 @@ struct State {
         //                               coords : vec2i,
         //                               params : ExternalTextureParams) -> vec4f {
         //     var rgb : vec3f;
-        //     var alpha : f32 = 1.0;
+        //     var alpha : f32;
         //     if ((params.numPlanes == 1)) {
         //       let texel = textureLoad(plane0, coord, 0);
         //       rgb = texel.rgb;
