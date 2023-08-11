@@ -1,34 +1,35 @@
-SKIP: FAILED
+RWTexture2DArray<float4> arg_0 : register(u0, space1);
 
-
-enable chromium_experimental_read_write_storage_texture;
-
-@group(1) @binding(0) var arg_0 : texture_storage_2d_array<rg32float, read_write>;
-
-fn textureStore_b71c13() {
-  var arg_1 = vec2<u32>(1u);
-  var arg_2 = 1i;
-  var arg_3 = vec4<f32>(1.0f);
-  textureStore(arg_0, arg_1, arg_2, arg_3);
+void textureStore_b71c13() {
+  uint2 arg_1 = (1u).xx;
+  int arg_2 = 1;
+  float4 arg_3 = (1.0f).xxxx;
+  arg_0[uint3(arg_1, uint(arg_2))] = arg_3;
 }
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
+float4 vertex_main_inner() {
   textureStore_b71c13();
-  return vec4<f32>();
+  return (0.0f).xxxx;
 }
 
-@fragment
-fn fragment_main() {
+tint_symbol vertex_main() {
+  const float4 inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+void fragment_main() {
   textureStore_b71c13();
+  return;
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   textureStore_b71c13();
+  return;
 }
-
-Failed to generate: builtins/gen/var/textureStore/b71c13.wgsl:24:8 error: HLSL backend does not support extension 'chromium_experimental_read_write_storage_texture'
-enable chromium_experimental_read_write_storage_texture;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-

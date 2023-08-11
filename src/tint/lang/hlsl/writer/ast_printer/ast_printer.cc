@@ -340,6 +340,7 @@ bool ASTPrinter::Generate() {
                 core::Extension::kChromiumExperimentalDp4A,
                 core::Extension::kChromiumExperimentalFullPtrParameters,
                 core::Extension::kChromiumExperimentalPushConstant,
+                core::Extension::kChromiumExperimentalReadWriteStorageTexture,
                 core::Extension::kChromiumExperimentalSubgroups,
                 core::Extension::kF16,
                 core::Extension::kChromiumInternalDualSourceBlending,
@@ -2492,6 +2493,8 @@ bool ASTPrinter::EmitBarrierCall(StringStream& out, const sem::Builtin* builtin)
     if (builtin->Type() == core::Function::kWorkgroupBarrier) {
         out << "GroupMemoryBarrierWithGroupSync()";
     } else if (builtin->Type() == core::Function::kStorageBarrier) {
+        out << "DeviceMemoryBarrierWithGroupSync()";
+    } else if (builtin->Type() == core::Function::kTextureBarrier) {
         out << "DeviceMemoryBarrierWithGroupSync()";
     } else {
         TINT_UNREACHABLE() << "unexpected barrier builtin type " << core::str(builtin->Type());

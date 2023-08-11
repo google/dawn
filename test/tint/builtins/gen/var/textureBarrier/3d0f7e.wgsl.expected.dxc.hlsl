@@ -1,18 +1,9 @@
-SKIP: FAILED
-
-
-enable chromium_experimental_read_write_storage_texture;
-
-fn textureBarrier_3d0f7e() {
-  textureBarrier();
+void textureBarrier_3d0f7e() {
+  DeviceMemoryBarrierWithGroupSync();
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   textureBarrier_3d0f7e();
+  return;
 }
-
-Failed to generate: builtins/gen/var/textureBarrier/3d0f7e.wgsl:24:8 error: HLSL backend does not support extension 'chromium_experimental_read_write_storage_texture'
-enable chromium_experimental_read_write_storage_texture;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-

@@ -1,34 +1,34 @@
-SKIP: FAILED
+RWTexture2DArray<float4> arg_0 : register(u0, space1);
+RWByteAddressBuffer prevent_dce : register(u0, space2);
 
-
-enable chromium_experimental_read_write_storage_texture;
-
-@group(1) @binding(0) var arg_0 : texture_storage_2d_array<rgba32float, read_write>;
-
-fn textureLoad_4c15b2() {
-  var res : vec4<f32> = textureLoad(arg_0, vec2<i32>(1i), 1i);
-  prevent_dce = res;
+void textureLoad_4c15b2() {
+  float4 res = arg_0.Load(int4(int3((1).xx, 1), 0));
+  prevent_dce.Store4(0u, asuint(res));
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+struct tint_symbol {
+  float4 value : SV_Position;
+};
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
+float4 vertex_main_inner() {
   textureLoad_4c15b2();
-  return vec4<f32>();
+  return (0.0f).xxxx;
 }
 
-@fragment
-fn fragment_main() {
+tint_symbol vertex_main() {
+  const float4 inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+void fragment_main() {
   textureLoad_4c15b2();
+  return;
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   textureLoad_4c15b2();
+  return;
 }
-
-Failed to generate: builtins/gen/literal/textureLoad/4c15b2.wgsl:24:8 error: HLSL backend does not support extension 'chromium_experimental_read_write_storage_texture'
-enable chromium_experimental_read_write_storage_texture;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-

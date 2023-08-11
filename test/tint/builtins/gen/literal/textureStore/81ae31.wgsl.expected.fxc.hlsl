@@ -1,31 +1,32 @@
-SKIP: FAILED
+RWTexture2DArray<float4> arg_0 : register(u0, space1);
 
-
-enable chromium_experimental_read_write_storage_texture;
-
-@group(1) @binding(0) var arg_0 : texture_storage_2d_array<r32float, read_write>;
-
-fn textureStore_81ae31() {
-  textureStore(arg_0, vec2<i32>(1i), 1i, vec4<f32>(1.0f));
+void textureStore_81ae31() {
+  arg_0[int3((1).xx, 1)] = (1.0f).xxxx;
 }
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
+struct tint_symbol {
+  float4 value : SV_Position;
+};
+
+float4 vertex_main_inner() {
   textureStore_81ae31();
-  return vec4<f32>();
+  return (0.0f).xxxx;
 }
 
-@fragment
-fn fragment_main() {
+tint_symbol vertex_main() {
+  const float4 inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = (tint_symbol)0;
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+void fragment_main() {
   textureStore_81ae31();
+  return;
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
+[numthreads(1, 1, 1)]
+void compute_main() {
   textureStore_81ae31();
+  return;
 }
-
-Failed to generate: builtins/gen/literal/textureStore/81ae31.wgsl:24:8 error: HLSL backend does not support extension 'chromium_experimental_read_write_storage_texture'
-enable chromium_experimental_read_write_storage_texture;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
