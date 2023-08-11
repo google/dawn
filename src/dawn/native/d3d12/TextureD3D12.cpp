@@ -306,6 +306,10 @@ MaybeError Texture::InitializeAsInternalTexture() {
 MaybeError Texture::InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Texture) {
     AllocationInfo info;
     info.mMethod = AllocationMethod::kExternal;
+
+    D3D12_RESOURCE_DESC desc = d3d12Texture->GetDesc();
+    mD3D12ResourceFlags = desc.Flags;
+
     // When creating the ResourceHeapAllocation, the resource heap is set to nullptr because the
     // texture is owned externally. The texture's owning entity must remain responsible for
     // memory management.
