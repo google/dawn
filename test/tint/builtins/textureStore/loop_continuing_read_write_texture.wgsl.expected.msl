@@ -1,0 +1,19 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void foo(texture2d<int, access::read_write> tint_symbol) {
+  {
+    int i = 0;
+    while (true) {
+      if (!((i < 3))) {
+        break;
+      }
+      {
+      }
+      {
+        tint_symbol.write(int4(0), uint2(int2(0))); tint_symbol.fence();
+      }
+    }
+  }
+}
+

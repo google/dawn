@@ -243,6 +243,7 @@ bool ASTPrinter::Generate() {
                 core::Extension::kChromiumDisableUniformityAnalysis,
                 core::Extension::kChromiumExperimentalFullPtrParameters,
                 core::Extension::kChromiumExperimentalPushConstant,
+                core::Extension::kChromiumExperimentalReadWriteStorageTexture,
                 core::Extension::kChromiumInternalRelaxedUniformLayout,
                 core::Extension::kF16,
                 core::Extension::kChromiumInternalDualSourceBlending,
@@ -697,6 +698,10 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
         }
         case core::Function::kWorkgroupBarrier: {
             out << "threadgroup_barrier(mem_flags::mem_threadgroup)";
+            return true;
+        }
+        case core::Function::kTextureBarrier: {
+            out << "threadgroup_barrier(mem_flags::mem_texture)";
             return true;
         }
 
@@ -1257,6 +1262,16 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
     }
 
     out << ")";
+
+    // If this is a `textureStore()` for a read-write texture, add a fence to ensure that the
+    // written values are visible to subsequent reads from the same thread.
+    if (auto* storage = texture_type->As<core::type::StorageTexture>();
+        builtin->Type() == core::Function::kTextureStore &&
+        storage->access() == core::Access::kReadWrite) {
+        out << "; ";
+        texture_expr();
+        out << ".fence()";
+    }
 
     return true;
 }
@@ -2573,6 +2588,8 @@ bool ASTPrinter::EmitType(StringStream& out, const core::type::Type* type) {
                     std::string access_str;
                     if (storage->access() == core::Access::kRead) {
                         out << ", access::read";
+                    } else if (storage->access() == core::Access::kReadWrite) {
+                        out << ", access::read_write";
                     } else if (storage->access() == core::Access::kWrite) {
                         out << ", access::write";
                     } else {

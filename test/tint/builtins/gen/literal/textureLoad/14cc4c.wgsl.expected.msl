@@ -1,34 +1,34 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-enable chromium_experimental_read_write_storage_texture;
-
-@group(1) @binding(0) var arg_0 : texture_storage_2d<rgba8unorm, read_write>;
-
-fn textureLoad_14cc4c() {
-  var res : vec4<f32> = textureLoad(arg_0, vec2<i32>(1i));
-  prevent_dce = res;
+using namespace metal;
+void textureLoad_14cc4c(texture2d<float, access::read_write> tint_symbol_1, device float4* const tint_symbol_2) {
+  float4 res = tint_symbol_1.read(uint2(int2(1)));
+  *(tint_symbol_2) = res;
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : vec4<f32>;
+struct tint_symbol {
+  float4 value [[position]];
+};
 
-@vertex
-fn vertex_main() -> @builtin(position) vec4<f32> {
-  textureLoad_14cc4c();
-  return vec4<f32>();
+float4 vertex_main_inner(texture2d<float, access::read_write> tint_symbol_3, device float4* const tint_symbol_4) {
+  textureLoad_14cc4c(tint_symbol_3, tint_symbol_4);
+  return float4(0.0f);
 }
 
-@fragment
-fn fragment_main() {
-  textureLoad_14cc4c();
+vertex tint_symbol vertex_main(texture2d<float, access::read_write> tint_symbol_5 [[texture(0)]], device float4* tint_symbol_6 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_5, tint_symbol_6);
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 
-@compute @workgroup_size(1)
-fn compute_main() {
-  textureLoad_14cc4c();
+fragment void fragment_main(texture2d<float, access::read_write> tint_symbol_7 [[texture(0)]], device float4* tint_symbol_8 [[buffer(0)]]) {
+  textureLoad_14cc4c(tint_symbol_7, tint_symbol_8);
+  return;
 }
 
-Failed to generate: builtins/gen/literal/textureLoad/14cc4c.wgsl:24:8 error: MSL backend does not support extension 'chromium_experimental_read_write_storage_texture'
-enable chromium_experimental_read_write_storage_texture;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+kernel void compute_main(texture2d<float, access::read_write> tint_symbol_9 [[texture(0)]], device float4* tint_symbol_10 [[buffer(0)]]) {
+  textureLoad_14cc4c(tint_symbol_9, tint_symbol_10);
+  return;
+}
 
