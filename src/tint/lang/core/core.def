@@ -757,10 +757,10 @@ match workgroup
 @must_use fn textureDimensions(texture: texture_depth_cube_array) -> vec2<u32>
 @must_use fn textureDimensions<L: iu32>(texture: texture_depth_cube_array, level: L) -> vec2<u32>
 @must_use fn textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<u32>
-@must_use fn textureDimensions<F: texel_format, A: write>(texture: texture_storage_1d<F, A>) -> u32
-@must_use fn textureDimensions<F: texel_format, A: write>(texture: texture_storage_2d<F, A>) -> vec2<u32>
-@must_use fn textureDimensions<F: texel_format, A: write>(texture: texture_storage_2d_array<F, A>) -> vec2<u32>
-@must_use fn textureDimensions<F: texel_format, A: write>(texture: texture_storage_3d<F, A>) -> vec3<u32>
+@must_use fn textureDimensions<F: texel_format, A: writable>(texture: texture_storage_1d<F, A>) -> u32
+@must_use fn textureDimensions<F: texel_format, A: writable>(texture: texture_storage_2d<F, A>) -> vec2<u32>
+@must_use fn textureDimensions<F: texel_format, A: writable>(texture: texture_storage_2d_array<F, A>) -> vec2<u32>
+@must_use fn textureDimensions<F: texel_format, A: writable>(texture: texture_storage_3d<F, A>) -> vec3<u32>
 @must_use fn textureDimensions(texture: texture_external) -> vec2<u32>
 @must_use fn textureGather<T: fiu32, C: iu32>(@const component: C, texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>) -> vec4<T>
 @must_use fn textureGather<T: fiu32, C: iu32>(@const component: C, texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>) -> vec4<T>

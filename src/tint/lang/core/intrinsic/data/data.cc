@@ -4722,15 +4722,25 @@ constexpr TemplateNumberInfo kTemplateNumbers[] = {
   {
     /* [7] */
     /* name */ "A",
-    /* matcher_index */ NumberMatcherIndex(6),
+    /* matcher_index */ NumberMatcherIndex(8),
   },
   {
     /* [8] */
-    /* name */ "A",
+    /* name */ "F",
     /* matcher_index */ NumberMatcherIndex(/* invalid */),
   },
   {
     /* [9] */
+    /* name */ "A",
+    /* matcher_index */ NumberMatcherIndex(6),
+  },
+  {
+    /* [10] */
+    /* name */ "A",
+    /* matcher_index */ NumberMatcherIndex(/* invalid */),
+  },
+  {
+    /* [11] */
     /* name */ "S",
     /* matcher_index */ NumberMatcherIndex(10),
   },
@@ -8108,7 +8118,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_template_types */ 0,
     /* num_template_numbers */ 2,
     /* template_types */ TemplateTypeIndex(/* invalid */),
-    /* template_numbers */ TemplateNumberIndex(6),
+    /* template_numbers */ TemplateNumberIndex(8),
     /* parameters */ ParameterIndex(375),
     /* return_type_matcher_indices */ TypeMatcherIndicesIndex(35),
     /* return_number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
@@ -10474,7 +10484,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_template_types */ 1,
     /* num_template_numbers */ 1,
     /* template_types */ TemplateTypeIndex(25),
-    /* template_numbers */ TemplateNumberIndex(8),
+    /* template_numbers */ TemplateNumberIndex(10),
     /* parameters */ ParameterIndex(366),
     /* return_type_matcher_indices */ TypeMatcherIndicesIndex(35),
     /* return_number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
@@ -10773,7 +10783,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_template_types */ 1,
     /* num_template_numbers */ 1,
     /* template_types */ TemplateTypeIndex(26),
-    /* template_numbers */ TemplateNumberIndex(9),
+    /* template_numbers */ TemplateNumberIndex(11),
     /* parameters */ ParameterIndex(0),
     /* return_type_matcher_indices */ TypeMatcherIndicesIndex(2),
     /* return_number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
@@ -10786,7 +10796,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_template_types */ 1,
     /* num_template_numbers */ 1,
     /* template_types */ TemplateTypeIndex(26),
-    /* template_numbers */ TemplateNumberIndex(9),
+    /* template_numbers */ TemplateNumberIndex(11),
     /* parameters */ ParameterIndex(0),
     /* return_type_matcher_indices */ TypeMatcherIndicesIndex(/* invalid */),
     /* return_number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
@@ -10799,7 +10809,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_template_types */ 1,
     /* num_template_numbers */ 1,
     /* template_types */ TemplateTypeIndex(26),
-    /* template_numbers */ TemplateNumberIndex(9),
+    /* template_numbers */ TemplateNumberIndex(11),
     /* parameters */ ParameterIndex(0),
     /* return_type_matcher_indices */ TypeMatcherIndicesIndex(2),
     /* return_number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
@@ -10812,7 +10822,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_template_types */ 1,
     /* num_template_numbers */ 1,
     /* template_types */ TemplateTypeIndex(26),
-    /* template_numbers */ TemplateNumberIndex(9),
+    /* template_numbers */ TemplateNumberIndex(11),
     /* parameters */ ParameterIndex(0),
     /* return_type_matcher_indices */ TypeMatcherIndicesIndex(80),
     /* return_number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
@@ -11500,10 +11510,10 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn textureDimensions(texture: texture_depth_cube_array) -> vec2<u32> */
     /* fn textureDimensions<L : iu32>(texture: texture_depth_cube_array, level: L) -> vec2<u32> */
     /* fn textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<u32> */
-    /* fn textureDimensions<F : texel_format, A : write>(texture: texture_storage_1d<F, A>) -> u32 */
-    /* fn textureDimensions<F : texel_format, A : write>(texture: texture_storage_2d<F, A>) -> vec2<u32> */
-    /* fn textureDimensions<F : texel_format, A : write>(texture: texture_storage_2d_array<F, A>) -> vec2<u32> */
-    /* fn textureDimensions<F : texel_format, A : write>(texture: texture_storage_3d<F, A>) -> vec3<u32> */
+    /* fn textureDimensions<F : texel_format, A : writable>(texture: texture_storage_1d<F, A>) -> u32 */
+    /* fn textureDimensions<F : texel_format, A : writable>(texture: texture_storage_2d<F, A>) -> vec2<u32> */
+    /* fn textureDimensions<F : texel_format, A : writable>(texture: texture_storage_2d_array<F, A>) -> vec2<u32> */
+    /* fn textureDimensions<F : texel_format, A : writable>(texture: texture_storage_3d<F, A>) -> vec3<u32> */
     /* fn textureDimensions(texture: texture_external) -> vec2<u32> */
     /* num overloads */ 27,
     /* overloads */ OverloadIndex(0),

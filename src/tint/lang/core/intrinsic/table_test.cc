@@ -601,10 +601,10 @@ TEST_F(IntrinsicTableTest, OverloadOrderByNumberOfParameters) {
   textureDimensions(texture: texture_depth_cube) -> vec2<u32>
   textureDimensions(texture: texture_depth_cube_array) -> vec2<u32>
   textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<u32>
-  textureDimensions(texture: texture_storage_1d<F, A>) -> u32  where: A is write
-  textureDimensions(texture: texture_storage_2d<F, A>) -> vec2<u32>  where: A is write
-  textureDimensions(texture: texture_storage_2d_array<F, A>) -> vec2<u32>  where: A is write
-  textureDimensions(texture: texture_storage_3d<F, A>) -> vec3<u32>  where: A is write
+  textureDimensions(texture: texture_storage_1d<F, A>) -> u32  where: A is write or read_write
+  textureDimensions(texture: texture_storage_2d<F, A>) -> vec2<u32>  where: A is write or read_write
+  textureDimensions(texture: texture_storage_2d_array<F, A>) -> vec2<u32>  where: A is write or read_write
+  textureDimensions(texture: texture_storage_3d<F, A>) -> vec3<u32>  where: A is write or read_write
   textureDimensions(texture: texture_external) -> vec2<u32>
 )");
 }
@@ -641,10 +641,10 @@ TEST_F(IntrinsicTableTest, OverloadOrderByMatchingParameter) {
   textureDimensions(texture: texture_depth_cube) -> vec2<u32>
   textureDimensions(texture: texture_depth_cube_array) -> vec2<u32>
   textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<u32>
-  textureDimensions(texture: texture_storage_1d<F, A>) -> u32  where: A is write
-  textureDimensions(texture: texture_storage_2d<F, A>) -> vec2<u32>  where: A is write
-  textureDimensions(texture: texture_storage_2d_array<F, A>) -> vec2<u32>  where: A is write
-  textureDimensions(texture: texture_storage_3d<F, A>) -> vec3<u32>  where: A is write
+  textureDimensions(texture: texture_storage_1d<F, A>) -> u32  where: A is write or read_write
+  textureDimensions(texture: texture_storage_2d<F, A>) -> vec2<u32>  where: A is write or read_write
+  textureDimensions(texture: texture_storage_2d_array<F, A>) -> vec2<u32>  where: A is write or read_write
+  textureDimensions(texture: texture_storage_3d<F, A>) -> vec3<u32>  where: A is write or read_write
   textureDimensions(texture: texture_external) -> vec2<u32>
 )");
 }
