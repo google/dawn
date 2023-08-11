@@ -113,6 +113,7 @@ class BasicTest : public UniformityAnalysisTestBase,
         kUserRequiredToBeUniform,
         kWorkgroupBarrier,
         kStorageBarrier,
+        kTextureBarrier,
         kWorkgroupUniformLoad,
         kTextureSample,
         kTextureSampleBias,
@@ -182,6 +183,8 @@ class BasicTest : public UniformityAnalysisTestBase,
                 return "workgroupBarrier()";
             case kStorageBarrier:
                 return "storageBarrier()";
+            case kTextureBarrier:
+                return "textureBarrier()";
             case kWorkgroupUniformLoad:
                 return "_ = workgroupUniformLoad(&w)";
             case kTextureSample:
@@ -257,6 +260,7 @@ class BasicTest : public UniformityAnalysisTestBase,
             CASE(kUserRequiredToBeUniform);
             CASE(kWorkgroupBarrier);
             CASE(kStorageBarrier);
+            CASE(kTextureBarrier);
             CASE(kWorkgroupUniformLoad);
             CASE(kTextureSample);
             CASE(kTextureSampleBias);
@@ -284,6 +288,8 @@ TEST_P(BasicTest, ConditionalFunctionCall) {
     auto condition = static_cast<Condition>(std::get<0>(GetParam()));
     auto function = static_cast<Function>(std::get<1>(GetParam()));
     std::string src = R"(
+enable chromium_experimental_read_write_storage_texture;
+
 var<private> p : i32;
 var<workgroup> w : i32;
 @group(0) @binding(0) var<uniform> u : i32;

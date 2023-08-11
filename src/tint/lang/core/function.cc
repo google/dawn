@@ -286,6 +286,9 @@ Function ParseFunction(std::string_view name) {
     if (name == "workgroupUniformLoad") {
         return Function::kWorkgroupUniformLoad;
     }
+    if (name == "textureBarrier") {
+        return Function::kTextureBarrier;
+    }
     if (name == "textureDimensions") {
         return Function::kTextureDimensions;
     }
@@ -551,6 +554,8 @@ const char* str(Function i) {
             return "workgroupBarrier";
         case Function::kWorkgroupUniformLoad:
             return "workgroupUniformLoad";
+        case Function::kTextureBarrier:
+            return "textureBarrier";
         case Function::kTextureDimensions:
             return "textureDimensions";
         case Function::kTextureGather:
@@ -657,7 +662,8 @@ bool IsDataUnpackingBuiltin(Function f) {
 }
 
 bool IsBarrierBuiltin(Function f) {
-    return f == Function::kWorkgroupBarrier || f == Function::kStorageBarrier;
+    return f == Function::kWorkgroupBarrier || f == Function::kStorageBarrier ||
+           f == Function::kTextureBarrier;
 }
 
 bool IsAtomicBuiltin(Function f) {

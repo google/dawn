@@ -87,7 +87,8 @@ bool IsDataUnpackingBuiltin(Function f) {
 }
 
 bool IsBarrierBuiltin(Function f) {
-    return f == Function::kWorkgroupBarrier || f == Function::kStorageBarrier;
+    return f == Function::kWorkgroupBarrier || f == Function::kStorageBarrier ||
+           f == Function::kTextureBarrier;
 }
 
 bool IsAtomicBuiltin(Function f) {

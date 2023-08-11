@@ -208,7 +208,7 @@ enable chromium_experimental_subgroups;
 {{    end -}}
 
 {{- /* Check and emit chromium_experimental_read_write_storage_texture */ -}}
-{{-   if OverloadUsesReadWriteStorageTexture $overload }}
+{{-   if or (OverloadUsesReadWriteStorageTexture $overload) (eq "textureBarrier" $builtin_name)}}
 enable chromium_experimental_read_write_storage_texture;
 {{    end -}}
 

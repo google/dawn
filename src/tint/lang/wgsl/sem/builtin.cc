@@ -99,6 +99,9 @@ core::Extension Builtin::RequiredExtension() const {
     if (IsSubgroup()) {
         return core::Extension::kChromiumExperimentalSubgroups;
     }
+    if (type_ == core::Function::kTextureBarrier) {
+        return core::Extension::kChromiumExperimentalReadWriteStorageTexture;
+    }
     return core::Extension::kUndefined;
 }
 
