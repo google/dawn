@@ -1651,6 +1651,22 @@ constexpr NumberMatcher kReadWriteMatcher {
   }
 };
 
+/// EnumMatcher for 'match writable'
+constexpr NumberMatcher kWritableMatcher {
+/* match */ [](MatchState&, Number number) -> Number {
+    switch (static_cast<Access>(number.Value())) {
+      case Access::kWrite:
+      case Access::kReadWrite:
+        return number;
+      default:
+        return Number::invalid;
+    }
+  },
+/* string */ [](MatchState*) -> std::string {
+    return "write or read_write";
+  }
+};
+
 /// EnumMatcher for 'match function_private_workgroup'
 constexpr NumberMatcher kFunctionPrivateWorkgroupMatcher {
 /* match */ [](MatchState&, Number number) -> Number {
@@ -1799,10 +1815,11 @@ constexpr NumberMatcher kNumberMatchers[] = {
   /* [5] */ kU32TexelFormatMatcher,
   /* [6] */ kWriteMatcher,
   /* [7] */ kReadWriteMatcher,
-  /* [8] */ kFunctionPrivateWorkgroupMatcher,
-  /* [9] */ kWorkgroupOrStorageMatcher,
-  /* [10] */ kStorageMatcher,
-  /* [11] */ kWorkgroupMatcher,
+  /* [8] */ kWritableMatcher,
+  /* [9] */ kFunctionPrivateWorkgroupMatcher,
+  /* [10] */ kWorkgroupOrStorageMatcher,
+  /* [11] */ kStorageMatcher,
+  /* [12] */ kWorkgroupMatcher,
 };
 
 constexpr TypeMatcherIndex kTypeMatcherIndices[] = {
@@ -1986,20 +2003,20 @@ static_assert(TypeMatcherIndex::CanIndex(kTypeMatcherIndices),
               "TypeMatcherIndex is not large enough to index kTypeMatcherIndices");
 
 constexpr NumberMatcherIndex kNumberMatcherIndices[] = {
-  /* [0] */ NumberMatcherIndex(10),
+  /* [0] */ NumberMatcherIndex(11),
   /* [1] */ NumberMatcherIndex(0),
   /* [2] */ NumberMatcherIndex(0),
   /* [3] */ NumberMatcherIndex(1),
   /* [4] */ NumberMatcherIndex(0),
   /* [5] */ NumberMatcherIndex(7),
-  /* [6] */ NumberMatcherIndex(11),
+  /* [6] */ NumberMatcherIndex(12),
   /* [7] */ NumberMatcherIndex(7),
   /* [8] */ NumberMatcherIndex(3),
-  /* [9] */ NumberMatcherIndex(6),
+  /* [9] */ NumberMatcherIndex(8),
   /* [10] */ NumberMatcherIndex(4),
-  /* [11] */ NumberMatcherIndex(6),
+  /* [11] */ NumberMatcherIndex(8),
   /* [12] */ NumberMatcherIndex(5),
-  /* [13] */ NumberMatcherIndex(6),
+  /* [13] */ NumberMatcherIndex(8),
   /* [14] */ NumberMatcherIndex(3),
   /* [15] */ NumberMatcherIndex(7),
   /* [16] */ NumberMatcherIndex(4),
@@ -4715,7 +4732,7 @@ constexpr TemplateNumberInfo kTemplateNumbers[] = {
   {
     /* [9] */
     /* name */ "S",
-    /* matcher_index */ NumberMatcherIndex(9),
+    /* matcher_index */ NumberMatcherIndex(10),
   },
 };
 
@@ -11647,18 +11664,18 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [100] */
-    /* fn textureStore<C : iu32>(texture: texture_storage_1d<f32_texel_format, write>, coords: C, value: vec4<f32>) */
-    /* fn textureStore<C : iu32>(texture: texture_storage_2d<f32_texel_format, write>, coords: vec2<C>, value: vec4<f32>) */
-    /* fn textureStore<C : iu32, A : iu32>(texture: texture_storage_2d_array<f32_texel_format, write>, coords: vec2<C>, array_index: A, value: vec4<f32>) */
-    /* fn textureStore<C : iu32>(texture: texture_storage_3d<f32_texel_format, write>, coords: vec3<C>, value: vec4<f32>) */
-    /* fn textureStore<C : iu32>(texture: texture_storage_1d<i32_texel_format, write>, coords: C, value: vec4<i32>) */
-    /* fn textureStore<C : iu32>(texture: texture_storage_2d<i32_texel_format, write>, coords: vec2<C>, value: vec4<i32>) */
-    /* fn textureStore<C : iu32, A : iu32>(texture: texture_storage_2d_array<i32_texel_format, write>, coords: vec2<C>, array_index: A, value: vec4<i32>) */
-    /* fn textureStore<C : iu32>(texture: texture_storage_3d<i32_texel_format, write>, coords: vec3<C>, value: vec4<i32>) */
-    /* fn textureStore<C : iu32>(texture: texture_storage_1d<u32_texel_format, write>, coords: C, value: vec4<u32>) */
-    /* fn textureStore<C : iu32>(texture: texture_storage_2d<u32_texel_format, write>, coords: vec2<C>, value: vec4<u32>) */
-    /* fn textureStore<C : iu32, A : iu32>(texture: texture_storage_2d_array<u32_texel_format, write>, coords: vec2<C>, array_index: A, value: vec4<u32>) */
-    /* fn textureStore<C : iu32>(texture: texture_storage_3d<u32_texel_format, write>, coords: vec3<C>, value: vec4<u32>) */
+    /* fn textureStore<C : iu32>(texture: texture_storage_1d<f32_texel_format, writable>, coords: C, value: vec4<f32>) */
+    /* fn textureStore<C : iu32>(texture: texture_storage_2d<f32_texel_format, writable>, coords: vec2<C>, value: vec4<f32>) */
+    /* fn textureStore<C : iu32, A : iu32>(texture: texture_storage_2d_array<f32_texel_format, writable>, coords: vec2<C>, array_index: A, value: vec4<f32>) */
+    /* fn textureStore<C : iu32>(texture: texture_storage_3d<f32_texel_format, writable>, coords: vec3<C>, value: vec4<f32>) */
+    /* fn textureStore<C : iu32>(texture: texture_storage_1d<i32_texel_format, writable>, coords: C, value: vec4<i32>) */
+    /* fn textureStore<C : iu32>(texture: texture_storage_2d<i32_texel_format, writable>, coords: vec2<C>, value: vec4<i32>) */
+    /* fn textureStore<C : iu32, A : iu32>(texture: texture_storage_2d_array<i32_texel_format, writable>, coords: vec2<C>, array_index: A, value: vec4<i32>) */
+    /* fn textureStore<C : iu32>(texture: texture_storage_3d<i32_texel_format, writable>, coords: vec3<C>, value: vec4<i32>) */
+    /* fn textureStore<C : iu32>(texture: texture_storage_1d<u32_texel_format, writable>, coords: C, value: vec4<u32>) */
+    /* fn textureStore<C : iu32>(texture: texture_storage_2d<u32_texel_format, writable>, coords: vec2<C>, value: vec4<u32>) */
+    /* fn textureStore<C : iu32, A : iu32>(texture: texture_storage_2d_array<u32_texel_format, writable>, coords: vec2<C>, array_index: A, value: vec4<u32>) */
+    /* fn textureStore<C : iu32>(texture: texture_storage_3d<u32_texel_format, writable>, coords: vec3<C>, value: vec4<u32>) */
     /* num overloads */ 12,
     /* overloads */ OverloadIndex(105),
   },
