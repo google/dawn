@@ -978,6 +978,7 @@ endif()
 ################################################################################
 if(TINT_BUILD_TESTS)
   list(APPEND TINT_TEST_SRCS
+    cmd/test/main_test.cc
     lang/core/number_test.cc
     lang/core/constant/composite_test.cc
     lang/core/constant/manager_test.cc
@@ -1147,7 +1148,6 @@ if(TINT_BUILD_TESTS)
     lang/wgsl/resolver/value_constructor_validation_test.cc
     lang/wgsl/resolver/variable_test.cc
     lang/wgsl/resolver/variable_validation_test.cc
-    test_main.cc
     utils/cli/cli_test.cc
     utils/command/command_test.cc
     utils/containers/bitset_test.cc
@@ -1764,7 +1764,7 @@ if(TINT_BUILD_BENCHMARKS)
 
   list(APPEND TINT_BENCHMARK_SRCS
     "utils/rtti/switch_bench.cc"
-    "bench/benchmark.cc"
+    "cmd/bench/main_bench.cc"
     "lang/wgsl/reader/reader_bench.cc"
   )
 

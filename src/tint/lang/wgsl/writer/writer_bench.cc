@@ -14,8 +14,8 @@
 
 #include <string>
 
-#include "src/tint/bench/benchmark.h"
-#include "src/tint/lang/msl/writer/writer.h"
+#include "src/tint/cmd/bench/bench.h"
+#include "src/tint/lang/wgsl/writer/writer.h"
 
 namespace tint::wgsl::writer {
 namespace {

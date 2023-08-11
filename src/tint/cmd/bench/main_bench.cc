@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/bench/benchmark.h"
-
 #include <filesystem>
 #include <iostream>
 #include <utility>
 #include <vector>
 
+#include "src/tint/cmd/bench/bench.h"
+#include "src/tint/lang/spirv/reader/reader.h"
+#include "src/tint/lang/wgsl/reader/reader.h"
+#include "src/tint/lang/wgsl/writer/writer.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
 

@@ -1513,7 +1513,7 @@ if (tint_build_unittests) {
     if (build_with_chromium) {
       sources = [ "//gpu/tint_unittests_main.cc" ]
     } else {
-      sources = [ "test_main.cc" ]
+      sources = [ "cmd/test/main_test.cc" ]
       configs += [ ":tint_unittests_config" ]
       deps += [ ":libtint" ]
 

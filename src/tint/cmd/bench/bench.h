@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_BENCH_BENCHMARK_H_
-#define SRC_TINT_BENCH_BENCHMARK_H_
+#ifndef SRC_TINT_CMD_BENCH_BENCH_H_
+#define SRC_TINT_CMD_BENCH_BENCH_H_
 
 #include <memory>
 #include <string>
 #include <variant>
 
 #include "benchmark/benchmark.h"
+#include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/utils/macros/concat.h"
-#include "tint/tint.h"
 
 namespace tint::bench {
 
@@ -87,4 +87,4 @@ std::variant<ProgramAndFile, Error> LoadProgram(std::string name);
 
 }  // namespace tint::bench
 
-#endif  // SRC_TINT_BENCH_BENCHMARK_H_
+#endif  // SRC_TINT_CMD_BENCH_BENCH_H_
