@@ -5299,8 +5299,8 @@ bool FunctionEmitter::EmitControlBarrier(const spvtools::opt::Instruction& inst)
         semantics &= ~static_cast<uint32_t>(spv::MemorySemanticsMask::WorkgroupMemory);
     }
     if (semantics & uint32_t(spv::MemorySemanticsMask::UniformMemory)) {
-        if (memory != uint32_t(spv::Scope::Device)) {
-            return Fail() << "storageBarrier requires device memory scope";
+        if (memory != uint32_t(spv::Scope::Workgroup)) {
+            return Fail() << "storageBarrier requires workgroup memory scope";
         }
         AddStatement(builder_.CallStmt(builder_.Call("storageBarrier")));
         semantics &= ~static_cast<uint32_t>(spv::MemorySemanticsMask::UniformMemory);

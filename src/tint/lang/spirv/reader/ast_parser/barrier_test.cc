@@ -87,7 +87,7 @@ TEST_F(SpirvASTParserTest, StorageBarrier) {
     %uint_72 = OpConstant %uint 72
      %helper = OpFunction %void None %1
           %4 = OpLabel
-               OpControlBarrier %uint_2 %uint_1 %uint_72
+               OpControlBarrier %uint_2 %uint_2 %uint_72
                OpReturn
                OpFunctionEnd
        %main = OpFunction %void None %1
@@ -187,18 +187,18 @@ TEST_F(SpirvASTParserTest, ErrStorageBarrierInvalidMemory) {
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
      %uint_2 = OpConstant %uint 2
-     %uint_8 = OpConstant %uint 8
     %uint_72 = OpConstant %uint 72
        %main = OpFunction %void None %1
           %4 = OpLabel
-               OpControlBarrier %uint_2 %uint_8 %uint_72
+               OpControlBarrier %uint_2 %uint_1 %uint_72
                OpReturn
                OpFunctionEnd
   )");
     EXPECT_FALSE(program.IsValid());
     EXPECT_THAT(program.Diagnostics().str(),
-                HasSubstr("storageBarrier requires device memory scope"));
+                HasSubstr("storageBarrier requires workgroup memory scope"));
 }
 
 }  // namespace
