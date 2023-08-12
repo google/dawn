@@ -18,6 +18,10 @@
 #include <utility>
 
 #include "src/tint/lang/spirv/writer/ast_printer/ast_printer.h"
+
+// Included by 'ast_printer.h', included again here for './tools/run gen' track the dependency.
+#include "spirv/unified1/spirv.h"
+
 #if TINT_BUILD_IR
 #include "src/tint/lang/core/ir/transform/binding_remapper.h"
 #include "src/tint/lang/spirv/writer/printer/printer.h"             // nogncheck

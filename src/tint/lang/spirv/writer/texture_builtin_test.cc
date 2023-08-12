@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// GEN_BUILD:CONDITION(tint_build_ir)
+
 #include "src/tint/lang/core/function.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/spirv/writer/common/helper_test.h"

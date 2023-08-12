@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// GEN_BUILD:CONDITION(is_win)
+
 #include "src/tint/utils/file/tmpfile.h"
 
 #include <stdio.h>

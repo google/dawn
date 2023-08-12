@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// GEN_BUILD:CONDITION(is_win)
+
 #include "src/tint/utils/command/command.h"
 
 #define WIN32_LEAN_AND_MEAN 1

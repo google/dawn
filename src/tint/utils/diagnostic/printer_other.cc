@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// GEN_BUILD:CONDITION((!is_linux) && (!is_mac) && (!is_win))
+
 #include <cstring>
 
 #include "src/tint/utils/diagnostic/printer.h"
