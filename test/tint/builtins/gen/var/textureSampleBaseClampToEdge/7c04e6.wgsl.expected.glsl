@@ -66,18 +66,18 @@ vec4 textureSampleExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, h
   vec2 plane1_dims = vec2(uvec2(textureSize(plane1_1, 0)));
   vec2 plane1_half_texel = (vec2(0.5f) / plane1_dims);
   vec2 plane1_clamped = clamp(modifiedCoords, plane1_half_texel, (1.0f - plane1_half_texel));
-  vec3 color = vec3(0.0f, 0.0f, 0.0f);
+  vec4 color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
-    color = textureLod(plane0_smp, plane0_clamped, 0.0f).rgb;
+    color = textureLod(plane0_smp, plane0_clamped, 0.0f).rgba;
   } else {
-    color = (vec4(textureLod(plane0_smp, plane0_clamped, 0.0f).r, textureLod(plane1_smp, plane1_clamped, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
+    color = vec4((vec4(textureLod(plane0_smp, plane0_clamped, 0.0f).r, textureLod(plane1_smp, plane1_clamped, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix), 1.0f);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
-    color = gammaCorrection(color, params.gammaDecodeParams);
-    color = (params.gamutConversionMatrix * color);
-    color = gammaCorrection(color, params.gammaEncodeParams);
+    color = vec4(gammaCorrection(color.rgb, params.gammaDecodeParams), color.a);
+    color = vec4((params.gamutConversionMatrix * color.rgb), color.a);
+    color = vec4(gammaCorrection(color.rgb, params.gammaEncodeParams), color.a);
   }
-  return vec4(color, 1.0f);
+  return color;
 }
 
 uniform highp sampler2D arg_0_1;
@@ -180,18 +180,18 @@ vec4 textureSampleExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, h
   vec2 plane1_dims = vec2(uvec2(textureSize(plane1_1, 0)));
   vec2 plane1_half_texel = (vec2(0.5f) / plane1_dims);
   vec2 plane1_clamped = clamp(modifiedCoords, plane1_half_texel, (1.0f - plane1_half_texel));
-  vec3 color = vec3(0.0f, 0.0f, 0.0f);
+  vec4 color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
-    color = textureLod(plane0_smp, plane0_clamped, 0.0f).rgb;
+    color = textureLod(plane0_smp, plane0_clamped, 0.0f).rgba;
   } else {
-    color = (vec4(textureLod(plane0_smp, plane0_clamped, 0.0f).r, textureLod(plane1_smp, plane1_clamped, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
+    color = vec4((vec4(textureLod(plane0_smp, plane0_clamped, 0.0f).r, textureLod(plane1_smp, plane1_clamped, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix), 1.0f);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
-    color = gammaCorrection(color, params.gammaDecodeParams);
-    color = (params.gamutConversionMatrix * color);
-    color = gammaCorrection(color, params.gammaEncodeParams);
+    color = vec4(gammaCorrection(color.rgb, params.gammaDecodeParams), color.a);
+    color = vec4((params.gamutConversionMatrix * color.rgb), color.a);
+    color = vec4(gammaCorrection(color.rgb, params.gammaEncodeParams), color.a);
   }
-  return vec4(color, 1.0f);
+  return color;
 }
 
 uniform highp sampler2D arg_0_1;
@@ -288,18 +288,18 @@ vec4 textureSampleExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, h
   vec2 plane1_dims = vec2(uvec2(textureSize(plane1_1, 0)));
   vec2 plane1_half_texel = (vec2(0.5f) / plane1_dims);
   vec2 plane1_clamped = clamp(modifiedCoords, plane1_half_texel, (1.0f - plane1_half_texel));
-  vec3 color = vec3(0.0f, 0.0f, 0.0f);
+  vec4 color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
-    color = textureLod(plane0_smp, plane0_clamped, 0.0f).rgb;
+    color = textureLod(plane0_smp, plane0_clamped, 0.0f).rgba;
   } else {
-    color = (vec4(textureLod(plane0_smp, plane0_clamped, 0.0f).r, textureLod(plane1_smp, plane1_clamped, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
+    color = vec4((vec4(textureLod(plane0_smp, plane0_clamped, 0.0f).r, textureLod(plane1_smp, plane1_clamped, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix), 1.0f);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
-    color = gammaCorrection(color, params.gammaDecodeParams);
-    color = (params.gamutConversionMatrix * color);
-    color = gammaCorrection(color, params.gammaEncodeParams);
+    color = vec4(gammaCorrection(color.rgb, params.gammaDecodeParams), color.a);
+    color = vec4((params.gamutConversionMatrix * color.rgb), color.a);
+    color = vec4(gammaCorrection(color.rgb, params.gammaEncodeParams), color.a);
   }
-  return vec4(color, 1.0f);
+  return color;
 }
 
 uniform highp sampler2D arg_0_1;

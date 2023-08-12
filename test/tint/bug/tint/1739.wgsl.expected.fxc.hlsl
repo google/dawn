@@ -34,18 +34,18 @@ float3 gammaCorrection(float3 v, GammaTransferParams params) {
 
 float4 textureLoadExternal(Texture2D<float4> plane0, Texture2D<float4> plane1, int2 coord, ExternalTextureParams params) {
   const int2 coord1 = (coord >> (1u).xx);
-  float3 color = float3(0.0f, 0.0f, 0.0f);
+  float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
-    color = plane0.Load(int3(coord, 0)).rgb;
+    color = plane0.Load(int3(coord, 0)).rgba;
   } else {
-    color = mul(params.yuvToRgbConversionMatrix, float4(plane0.Load(int3(coord, 0)).r, plane1.Load(int3(coord1, 0)).rg, 1.0f));
+    color = float4(mul(params.yuvToRgbConversionMatrix, float4(plane0.Load(int3(coord, 0)).r, plane1.Load(int3(coord1, 0)).rg, 1.0f)), 1.0f);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
-    color = gammaCorrection(color, params.gammaDecodeParams);
-    color = mul(color, params.gamutConversionMatrix);
-    color = gammaCorrection(color, params.gammaEncodeParams);
+    color = float4(gammaCorrection(color.rgb, params.gammaDecodeParams), color.a);
+    color = float4(mul(color.rgb, params.gamutConversionMatrix), color.a);
+    color = float4(gammaCorrection(color.rgb, params.gammaEncodeParams), color.a);
   }
-  return float4(color, 1.0f);
+  return color;
 }
 
 float3x4 ext_tex_params_load_2(uint offset) {

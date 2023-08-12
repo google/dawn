@@ -44,18 +44,18 @@ float4 textureSampleExternal(Texture2D<float4> plane0, Texture2D<float4> plane1,
   const float2 plane1_dims = float2(tint_tmp_1.xy);
   const float2 plane1_half_texel = ((0.5f).xx / plane1_dims);
   const float2 plane1_clamped = clamp(modifiedCoords, plane1_half_texel, (1.0f - plane1_half_texel));
-  float3 color = float3(0.0f, 0.0f, 0.0f);
+  float4 color = float4(0.0f, 0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
-    color = plane0.SampleLevel(smp, plane0_clamped, 0.0f).rgb;
+    color = plane0.SampleLevel(smp, plane0_clamped, 0.0f).rgba;
   } else {
-    color = mul(params.yuvToRgbConversionMatrix, float4(plane0.SampleLevel(smp, plane0_clamped, 0.0f).r, plane1.SampleLevel(smp, plane1_clamped, 0.0f).rg, 1.0f));
+    color = float4(mul(params.yuvToRgbConversionMatrix, float4(plane0.SampleLevel(smp, plane0_clamped, 0.0f).r, plane1.SampleLevel(smp, plane1_clamped, 0.0f).rg, 1.0f)), 1.0f);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
-    color = gammaCorrection(color, params.gammaDecodeParams);
-    color = mul(color, params.gamutConversionMatrix);
-    color = gammaCorrection(color, params.gammaEncodeParams);
+    color = float4(gammaCorrection(color.rgb, params.gammaDecodeParams), color.a);
+    color = float4(mul(color.rgb, params.gamutConversionMatrix), color.a);
+    color = float4(gammaCorrection(color.rgb, params.gammaEncodeParams), color.a);
   }
-  return float4(color, 1.0f);
+  return color;
 }
 
 float3x4 ext_tex_params_load_2(uint offset) {

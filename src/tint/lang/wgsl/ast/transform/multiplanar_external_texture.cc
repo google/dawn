@@ -359,39 +359,47 @@ struct MultiplanarExternalTexture::State {
                 TINT_ICE() << "unhandled builtin: " << call_type;
         }
 
-        // var color: vec3<f32>;
-        stmts.Push(b.Decl(b.Var("color", b.ty.vec3(b.ty.f32()))));
+        // var color: vec4<f32>;
+        stmts.Push(b.Decl(b.Var("color", b.ty.vec4(b.ty.f32()))));
 
         // if ((params.numPlanes == 1u))
-        stmts.Push(
-            b.If(b.Equal(b.MemberAccessor("params", "numPlanes"), b.Expr(1_a)),
-                 b.Block(
-                     // color = textureLoad(plane0, coord, 0).rgb;
-                     b.Assign("color", b.MemberAccessor(single_plane_call, "rgb"))),
-                 b.Else(b.Block(
-                     // color = vec4<f32>(plane_0_call.r, plane_1_call.rg, 1.0) *
-                     //         params.yuvToRgbConversionMatrix;
-                     b.Assign("color",
-                              b.Mul(b.Call<vec4<f32>>(b.MemberAccessor(plane_0_call, "r"),
-                                                      b.MemberAccessor(plane_1_call, "rg"), 1_a),
-                                    b.MemberAccessor("params", "yuvToRgbConversionMatrix")))))));
+        stmts.Push(b.If(
+            b.Equal(b.MemberAccessor("params", "numPlanes"), b.Expr(1_a)),
+            b.Block(
+                // color = textureLoad(plane0, coord, 0).rgba;
+                b.Assign("color", b.MemberAccessor(single_plane_call, "rgba"))),
+            b.Else(b.Block(
+                // color = vec4<f32>(vec4<f32>(plane_0_call.r, plane_1_call.rg, 1.0) *
+                //         params.yuvToRgbConversionMatrix));
+                b.Assign("color",
+                         b.Call<vec4<f32>>(
+                             b.Mul(b.Call<vec4<f32>>(b.MemberAccessor(plane_0_call, "r"),
+                                                     b.MemberAccessor(plane_1_call, "rg"), 1_a),
+                                   b.MemberAccessor("params", "yuvToRgbConversionMatrix")),
+                             1_a))))));
 
         // if (params.doYuvToRgbConversionOnly == 0u)
-        stmts.Push(
-            b.If(b.Equal(b.MemberAccessor("params", "doYuvToRgbConversionOnly"), b.Expr(0_a)),
-                 b.Block(
-                     // color = gammaConversion(color, gammaDecodeParams);
-                     b.Assign("color", b.Call("gammaCorrection", "color",
-                                              b.MemberAccessor("params", "gammaDecodeParams"))),
-                     // color = (params.gamutConversionMatrix * color);
-                     b.Assign("color",
-                              b.Mul(b.MemberAccessor("params", "gamutConversionMatrix"), "color")),
-                     // color = gammaConversion(color, gammaEncodeParams);
-                     b.Assign("color", b.Call("gammaCorrection", "color",
-                                              b.MemberAccessor("params", "gammaEncodeParams"))))));
+        stmts.Push(b.If(
+            b.Equal(b.MemberAccessor("params", "doYuvToRgbConversionOnly"), b.Expr(0_a)),
+            b.Block(
+                // color = vec4<f32>(gammaConversion(color.rgb, gammaDecodeParams), color.a);
+                b.Assign("color", b.Call<vec4<f32>>(
+                                      b.Call("gammaCorrection", b.MemberAccessor("color", "rgb"),
+                                             b.MemberAccessor("params", "gammaDecodeParams")),
+                                      b.MemberAccessor("color", "a"))),
+                // color = vec4<f32>(params.gamutConversionMatrix * color.rgb), color.a);
+                b.Assign("color", b.Call<vec4<f32>>(
+                                      b.Mul(b.MemberAccessor("params", "gamutConversionMatrix"),
+                                            b.MemberAccessor("color", "rgb")),
+                                      b.MemberAccessor("color", "a"))),
+                // color = vec4<f32>(gammaConversion(color.rgb, gammaEncodeParams), color.a);
+                b.Assign("color", b.Call<vec4<f32>>(
+                                      b.Call("gammaCorrection", b.MemberAccessor("color", "rgb"),
+                                             b.MemberAccessor("params", "gammaEncodeParams")),
+                                      b.MemberAccessor("color", "a"))))));
 
-        // return vec4<f32>(color, 1.f);
-        stmts.Push(b.Return(b.Call<vec4<f32>>("color", 1_a)));
+        // return color;
+        stmts.Push(b.Return("color"));
 
         return stmts;
     }

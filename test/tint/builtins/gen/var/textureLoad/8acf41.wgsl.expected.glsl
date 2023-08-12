@@ -59,18 +59,18 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
 
 vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, ivec2 coord, ExternalTextureParams params) {
   ivec2 coord1 = (coord >> uvec2(1u));
-  vec3 color = vec3(0.0f, 0.0f, 0.0f);
+  vec4 color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
-    color = texelFetch(plane0_1, coord, 0).rgb;
+    color = texelFetch(plane0_1, coord, 0).rgba;
   } else {
-    color = (vec4(texelFetch(plane0_1, coord, 0).r, texelFetch(plane1_1, coord1, 0).rg, 1.0f) * params.yuvToRgbConversionMatrix);
+    color = vec4((vec4(texelFetch(plane0_1, coord, 0).r, texelFetch(plane1_1, coord1, 0).rg, 1.0f) * params.yuvToRgbConversionMatrix), 1.0f);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
-    color = gammaCorrection(color, params.gammaDecodeParams);
-    color = (params.gamutConversionMatrix * color);
-    color = gammaCorrection(color, params.gammaEncodeParams);
+    color = vec4(gammaCorrection(color.rgb, params.gammaDecodeParams), color.a);
+    color = vec4((params.gamutConversionMatrix * color.rgb), color.a);
+    color = vec4(gammaCorrection(color.rgb, params.gammaEncodeParams), color.a);
   }
-  return vec4(color, 1.0f);
+  return color;
 }
 
 uniform highp sampler2D arg_0_1;
@@ -164,18 +164,18 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
 
 vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, ivec2 coord, ExternalTextureParams params) {
   ivec2 coord1 = (coord >> uvec2(1u));
-  vec3 color = vec3(0.0f, 0.0f, 0.0f);
+  vec4 color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
-    color = texelFetch(plane0_1, coord, 0).rgb;
+    color = texelFetch(plane0_1, coord, 0).rgba;
   } else {
-    color = (vec4(texelFetch(plane0_1, coord, 0).r, texelFetch(plane1_1, coord1, 0).rg, 1.0f) * params.yuvToRgbConversionMatrix);
+    color = vec4((vec4(texelFetch(plane0_1, coord, 0).r, texelFetch(plane1_1, coord1, 0).rg, 1.0f) * params.yuvToRgbConversionMatrix), 1.0f);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
-    color = gammaCorrection(color, params.gammaDecodeParams);
-    color = (params.gamutConversionMatrix * color);
-    color = gammaCorrection(color, params.gammaEncodeParams);
+    color = vec4(gammaCorrection(color.rgb, params.gammaDecodeParams), color.a);
+    color = vec4((params.gamutConversionMatrix * color.rgb), color.a);
+    color = vec4(gammaCorrection(color.rgb, params.gammaEncodeParams), color.a);
   }
-  return vec4(color, 1.0f);
+  return color;
 }
 
 uniform highp sampler2D arg_0_1;
@@ -263,18 +263,18 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
 
 vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, ivec2 coord, ExternalTextureParams params) {
   ivec2 coord1 = (coord >> uvec2(1u));
-  vec3 color = vec3(0.0f, 0.0f, 0.0f);
+  vec4 color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
-    color = texelFetch(plane0_1, coord, 0).rgb;
+    color = texelFetch(plane0_1, coord, 0).rgba;
   } else {
-    color = (vec4(texelFetch(plane0_1, coord, 0).r, texelFetch(plane1_1, coord1, 0).rg, 1.0f) * params.yuvToRgbConversionMatrix);
+    color = vec4((vec4(texelFetch(plane0_1, coord, 0).r, texelFetch(plane1_1, coord1, 0).rg, 1.0f) * params.yuvToRgbConversionMatrix), 1.0f);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
-    color = gammaCorrection(color, params.gammaDecodeParams);
-    color = (params.gamutConversionMatrix * color);
-    color = gammaCorrection(color, params.gammaEncodeParams);
+    color = vec4(gammaCorrection(color.rgb, params.gammaDecodeParams), color.a);
+    color = vec4((params.gamutConversionMatrix * color.rgb), color.a);
+    color = vec4(gammaCorrection(color.rgb, params.gammaEncodeParams), color.a);
   }
-  return vec4(color, 1.0f);
+  return color;
 }
 
 uniform highp sampler2D arg_0_1;

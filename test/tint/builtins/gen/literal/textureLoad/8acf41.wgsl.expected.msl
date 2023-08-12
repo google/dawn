@@ -81,18 +81,18 @@ float3 gammaCorrection(float3 v, GammaTransferParams params) {
 
 float4 textureLoadExternal(texture2d<float, access::sample> plane0, texture2d<float, access::sample> plane1, int2 coord, ExternalTextureParams params) {
   int2 const coord1 = (coord >> uint2(1u));
-  float3 color = 0.0f;
+  float4 color = 0.0f;
   if ((params.numPlanes == 1u)) {
-    color = plane0.read(uint2(coord), 0).rgb;
+    color = plane0.read(uint2(coord), 0).rgba;
   } else {
-    color = (float4(plane0.read(uint2(coord), 0)[0], plane1.read(uint2(coord1), 0).rg, 1.0f) * params.yuvToRgbConversionMatrix);
+    color = float4((float4(plane0.read(uint2(coord), 0)[0], plane1.read(uint2(coord1), 0).rg, 1.0f) * params.yuvToRgbConversionMatrix), 1.0f);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
-    color = gammaCorrection(color, params.gammaDecodeParams);
-    color = (params.gamutConversionMatrix * color);
-    color = gammaCorrection(color, params.gammaEncodeParams);
+    color = float4(gammaCorrection(color.rgb, params.gammaDecodeParams), color[3]);
+    color = float4((params.gamutConversionMatrix * color.rgb), color[3]);
+    color = float4(gammaCorrection(color.rgb, params.gammaEncodeParams), color[3]);
   }
-  return float4(color, 1.0f);
+  return color;
 }
 
 void textureLoad_8acf41(texture2d<float, access::sample> tint_symbol_1, texture2d<float, access::sample> tint_symbol_2, const constant ExternalTextureParams_tint_packed_vec3* const tint_symbol_3, device float4* const tint_symbol_4) {
