@@ -22,12 +22,11 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func check(t *testing.T, tmpl, expected string, fns template.Functions) {
+func check(t *testing.T, content, expected string, fns template.Functions) {
 	t.Helper()
 	w := &bytes.Buffer{}
-	err := template.Run(tmpl, w, fns)
-	if err != nil {
-		t.Errorf("template.Run() failed with %v", err)
+	if err := template.FromString("template", content).Run(w, nil, fns); err != nil {
+		t.Errorf("Template.Run() failed with %v", err)
 		return
 	}
 	got := w.String()

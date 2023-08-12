@@ -20,7 +20,9 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"text/template"
 	"unicode"
@@ -29,15 +31,35 @@ import (
 )
 
 // The template function binding table
-type Functions map[string]interface{}
+type Functions = template.FuncMap
+
+type Template struct {
+	name    string
+	content string
+}
+
+// FromFile loads the template file at path and builds and returns a Template
+// using the file content
+func FromFile(path string) (*Template, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return FromString(path, string(content)), nil
+}
+
+// FromString returns a Template with the given name from content
+func FromString(name, content string) *Template {
+	return &Template{name: name, content: content}
+}
 
 // Run executes the template tmpl, writing the output to w.
 // funcs are the functions provided to the template.
 // See https://golang.org/pkg/text/template/ for documentation on the template
 // syntax.
-func Run(tmpl string, w io.Writer, funcs Functions) error {
+func (t *Template) Run(w io.Writer, data any, funcs Functions) error {
 	g := generator{
-		template: template.New("<template>"),
+		template: template.New(t.name),
 	}
 
 	globals := newMap()
@@ -53,12 +75,18 @@ func Run(tmpl string, w io.Writer, funcs Functions) error {
 		"Iterate":    iterate,
 		"Map":        newMap,
 		"PascalCase": pascalCase,
+		"ToUpper":    strings.ToUpper,
+		"ToLower":    strings.ToLower,
+		"Repeat":     strings.Repeat,
 		"Split":      strings.Split,
 		"Title":      strings.Title,
 		"TrimLeft":   strings.TrimLeft,
 		"TrimPrefix": strings.TrimPrefix,
 		"TrimRight":  strings.TrimRight,
 		"TrimSuffix": strings.TrimSuffix,
+		"Replace":    strings.ReplaceAll,
+		"Index":      index,
+		"Error":      func(err any) string { panic(err) },
 	}
 
 	// Append custom functions
@@ -66,11 +94,11 @@ func Run(tmpl string, w io.Writer, funcs Functions) error {
 		g.funcs[name] = fn
 	}
 
-	if err := g.bindAndParse(g.template, tmpl); err != nil {
+	if err := g.bindAndParse(g.template, t.content); err != nil {
 		return err
 	}
 
-	return g.template.Execute(w, nil)
+	return g.template.Execute(w, data)
 }
 
 type generator struct {
@@ -194,4 +222,28 @@ func pascalCase(s string) string {
 		}
 	}
 	return b.String()
+}
+
+func index(obj any, indices ...any) (any, error) {
+	v := reflect.ValueOf(obj)
+	for _, idx := range indices {
+		for v.Kind() == reflect.Interface || v.Kind() == reflect.Pointer {
+			v = v.Elem()
+		}
+		if !v.IsValid() || v.IsZero() || v.IsNil() {
+			return nil, nil
+		}
+		switch v.Kind() {
+		case reflect.Array, reflect.Slice:
+			v = v.Index(idx.(int))
+		case reflect.Map:
+			v = v.MapIndex(reflect.ValueOf(idx))
+		default:
+			return nil, fmt.Errorf("cannot index %T (%v)", obj, v.Kind())
+		}
+	}
+	if !v.IsValid() || v.IsZero() || v.IsNil() {
+		return nil, nil
+	}
+	return v.Interface(), nil
 }

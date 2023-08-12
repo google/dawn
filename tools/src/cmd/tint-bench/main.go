@@ -19,7 +19,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -71,12 +70,12 @@ Searches in order: absolute, relative to CWD, then relative to `+fileutils.ThisD
 		return fmt.Errorf("missing template path")
 	}
 
-	tmpl, err := ioutil.ReadFile(tmplPath)
+	tmpl, err := template.FromFile(tmplPath)
 	if err != nil {
 		if !filepath.IsAbs(tmplPath) {
 			// Try relative to this .go file
 			tmplPath = filepath.Join(fileutils.ThisDir(), tmplPath)
-			tmpl, err = ioutil.ReadFile(tmplPath)
+			tmpl, err = template.FromFile(tmplPath)
 		}
 	}
 	if err != nil {
@@ -97,7 +96,7 @@ Searches in order: absolute, relative to CWD, then relative to `+fileutils.ThisD
 		funcs := template.Functions{
 			"Alpha": func() int { return alpha },
 		}
-		wgslPath, err := writeWGSLFile(string(tmpl), funcs)
+		wgslPath, err := writeWGSLFile(tmpl, funcs)
 		if err != nil {
 			return err
 		}
@@ -123,14 +122,14 @@ Searches in order: absolute, relative to CWD, then relative to `+fileutils.ThisD
 	return nil
 }
 
-func writeWGSLFile(tmpl string, funcs template.Functions) (string, error) {
+func writeWGSLFile(tmpl *template.Template, funcs template.Functions) (string, error) {
 	const path = "tint-bench.wgsl"
 	wgslFile, err := os.Create(path)
 	if err != nil {
 		return "", fmt.Errorf("failed to create benchmark WGSL test file: %w", err)
 	}
 	defer wgslFile.Close()
-	if err := template.Run(tmpl, wgslFile, funcs); err != nil {
+	if err := tmpl.Run(wgslFile, nil, funcs); err != nil {
 		return "", fmt.Errorf("template error:\n%w", err)
 	}
 	return path, nil

@@ -120,7 +120,7 @@ func Run[Data any](ctx context.Context, data Data, cmds ...Command[Data]) error 
 			}
 			if profile {
 				fmt.Println("download profile at: localhost:8080/profile")
-				fmt.Println("then run: 'go tool pprof <file>")
+				fmt.Println("then run: 'go tool pprof <file>'")
 				go http.ListenAndServe(":8080", mux)
 			}
 			return cmd.Run(ctx, data)
