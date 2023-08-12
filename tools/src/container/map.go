@@ -14,7 +14,10 @@
 
 package container
 
-import "sort"
+import (
+	"sort"
+	"sync"
+)
 
 // Map is a generic unordered map, which wrap's go's builtin 'map'.
 // K is the map key, which must match the 'key' constraint.
@@ -59,4 +62,34 @@ func (m Map[K, V]) Values() []V {
 		out = append(out, m[k])
 	}
 	return out
+}
+
+// GetOrCreate returns the value of the map entry with the given key, creating
+// the map entry with create() if the entry did not exist.
+func (m Map[K, V]) GetOrCreate(key K, create func() V) V {
+	value, ok := m[key]
+	if !ok {
+		value = create()
+		m[key] = value
+	}
+	return value
+}
+
+// GetOrCreateLocked is similar to GetOrCreate, but performs lookup with a
+// read-lock on the provided mutex, and a write lock on create() and map
+// insertion.
+func (m Map[K, V]) GetOrCreateLocked(mutex *sync.RWMutex, key K, create func() V) V {
+	mutex.RLock()
+	value, ok := m[key]
+	mutex.RUnlock()
+	if !ok {
+		mutex.Lock()
+		defer mutex.Unlock()
+		value, ok = m[key]
+		if !ok {
+			value = create()
+			m[key] = value
+		}
+	}
+	return value
 }

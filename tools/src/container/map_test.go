@@ -15,6 +15,7 @@
 package container_test
 
 import (
+	"sync"
 	"testing"
 
 	"dawn.googlesource.com/dawn/tools/src/container"
@@ -111,4 +112,45 @@ func TestMapValues(t *testing.T) {
 
 	m.Add("b", 3)
 	expectEq(t, `m.Values()`, m.Values(), []int{2, 3, 1})
+}
+
+func TestMapGetOrCreate(t *testing.T) {
+	m := container.NewMap[string, int]()
+
+	A := m.GetOrCreate("1", func() int { return 1 })
+	expectEq(t, "A", A, 1)
+
+	B := m.GetOrCreate("2", func() int { return 2 })
+	expectEq(t, "B", B, 2)
+
+	C := m.GetOrCreate("1", func() int { t.Error("should not be called"); return 0 })
+	expectEq(t, "C", C, 1)
+
+	D := m.GetOrCreate("2", func() int { t.Error("should not be called"); return 0 })
+	expectEq(t, "D", D, 2)
+}
+
+func TestMapGetOrCreateLocked(t *testing.T) {
+	m := container.NewMap[string, int]()
+
+	mtx := &sync.RWMutex{}
+	wg := sync.WaitGroup{}
+	wg.Add(100)
+	for i := 0; i < 100; i++ {
+		go func() {
+			defer wg.Done()
+			A := m.GetOrCreateLocked(mtx, "1", func() int { return 1 })
+			expectEq(t, "A", A, 1)
+
+			B := m.GetOrCreateLocked(mtx, "2", func() int { return 2 })
+			expectEq(t, "B", B, 2)
+
+			C := m.GetOrCreateLocked(mtx, "1", func() int { t.Error("should not be called"); return 0 })
+			expectEq(t, "C", C, 1)
+
+			D := m.GetOrCreateLocked(mtx, "2", func() int { t.Error("should not be called"); return 0 })
+			expectEq(t, "D", D, 2)
+		}()
+	}
+	wg.Wait()
 }
