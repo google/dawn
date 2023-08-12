@@ -61,12 +61,12 @@ TEST_F(ConstantTest_Scalar, AllZero) {
     EXPECT_FALSE(u1->AllZero());
 
     EXPECT_TRUE(fPos0->AllZero());
-    EXPECT_FALSE(fNeg0->AllZero());
+    EXPECT_TRUE(fNeg0->AllZero());
     EXPECT_FALSE(fPos1->AllZero());
     EXPECT_FALSE(fNeg1->AllZero());
 
     EXPECT_TRUE(f16Pos0->AllZero());
-    EXPECT_FALSE(f16Neg0->AllZero());
+    EXPECT_TRUE(f16Neg0->AllZero());
     EXPECT_FALSE(f16Pos1->AllZero());
     EXPECT_FALSE(f16Neg1->AllZero());
 
@@ -74,7 +74,7 @@ TEST_F(ConstantTest_Scalar, AllZero) {
     EXPECT_FALSE(bt->AllZero());
 
     EXPECT_TRUE(afPos0->AllZero());
-    EXPECT_FALSE(afNeg0->AllZero());
+    EXPECT_TRUE(afNeg0->AllZero());
     EXPECT_FALSE(afPos1->AllZero());
     EXPECT_FALSE(afNeg1->AllZero());
 
@@ -121,12 +121,12 @@ TEST_F(ConstantTest_Scalar, AnyZero) {
     EXPECT_FALSE(u1->AnyZero());
 
     EXPECT_TRUE(fPos0->AnyZero());
-    EXPECT_FALSE(fNeg0->AnyZero());
+    EXPECT_TRUE(fNeg0->AnyZero());
     EXPECT_FALSE(fPos1->AnyZero());
     EXPECT_FALSE(fNeg1->AnyZero());
 
     EXPECT_TRUE(f16Pos0->AnyZero());
-    EXPECT_FALSE(f16Neg0->AnyZero());
+    EXPECT_TRUE(f16Neg0->AnyZero());
     EXPECT_FALSE(f16Pos1->AnyZero());
     EXPECT_FALSE(f16Neg1->AnyZero());
 
@@ -134,7 +134,7 @@ TEST_F(ConstantTest_Scalar, AnyZero) {
     EXPECT_FALSE(bt->AnyZero());
 
     EXPECT_TRUE(afPos0->AnyZero());
-    EXPECT_FALSE(afNeg0->AnyZero());
+    EXPECT_TRUE(afNeg0->AnyZero());
     EXPECT_FALSE(afPos1->AnyZero());
     EXPECT_FALSE(afNeg1->AnyZero());
 

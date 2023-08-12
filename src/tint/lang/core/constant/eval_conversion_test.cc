@@ -416,6 +416,10 @@ TEST_F(ConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
 TEST_F(ConstEvalTest, Vec3_Convert_Small_f32_to_f16) {
     Enable(core::Extension::kF16);
 
+    // These values are chosen to force underflow when converting to f16.
+    // When the result is zero, the sign bit is *not* guaranteed to be preserved.
+    // - IEEE 754 does not require it.
+    // - C++14 does not require it.
     auto* expr = Call<vec3<f16>>(Call<vec3<f32>>(1e-20_f, -2e-30_f, 3e-40_f));
     WrapInFunction(expr);
 
@@ -429,22 +433,19 @@ TEST_F(ConstEvalTest, Vec3_Convert_Small_f32_to_f16) {
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->AllZero());
 
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<AFloat>(), 0.0);
-    EXPECT_FALSE(std::signbit(sem->ConstantValue()->Index(0)->ValueAs<AFloat>().value));
 
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<AFloat>(), -0.0);
-    EXPECT_TRUE(std::signbit(sem->ConstantValue()->Index(1)->ValueAs<AFloat>().value));
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllZero());
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<AFloat>(), 0.0);
-    EXPECT_FALSE(std::signbit(sem->ConstantValue()->Index(2)->ValueAs<AFloat>().value));
 }
 
 TEST_F(ConstEvalTest, StructAbstractSplat_to_StructDifferentTypes) {

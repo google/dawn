@@ -184,14 +184,39 @@ TEST_P(ConstEvalBuiltinTest, Test) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(  //
-    MixedAbstractArgs,
-    ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kAtan2),
-                     testing::ValuesIn(std::vector{
-                         C({0_a, -0.0_a}, kPi<AFloat>),
-                         C({1.0_a, 0_a}, kPiOver2<AFloat>),
-                     })));
+INSTANTIATE_TEST_SUITE_P(MixedAbstractArgs_Atan2,
+                         ConstEvalBuiltinTest,
+                         testing::Combine(testing::Values(core::Function::kAtan2),
+                                          testing::ValuesIn(std::vector{
+                                              C({0.0_a, 1_a}, AFloat{0}),
+                                              C({0_a, 1.0_a}, AFloat{0}),
+                                              C({1_a, 0.0_a}, kPiOver2<AFloat>),
+                                              C({1.0_a, 0_a}, kPiOver2<AFloat>),
+                                          })));
+
+INSTANTIATE_TEST_SUITE_P(MixedAbstractArgs_Max,
+                         ConstEvalBuiltinTest,
+                         testing::Combine(testing::Values(core::Function::kMax),
+                                          testing::ValuesIn(std::vector{
+                                              // AbstractInt first, AbstractFloat second
+                                              C({1_a, 2.0_a}, AFloat{2}),
+                                              C({-1_a, -2.0_a}, AFloat{-1}),
+                                              C({2_a, 0.0_a}, AFloat{2}),
+                                              C({-2_a, 0.0_a}, AFloat{0}),
+                                              C({0_a, 0.0_a}, AFloat{0}),
+                                              C({0_a, -0.0_a}, AFloat{0}),
+                                              C({-0_a, 0.0_a}, AFloat{0}),
+                                              C({-0_a, -0.0_a}, AFloat{0}),
+                                              // AbstractFloat first, AbstractInt second
+                                              C({1.0_a, 2_a}, AFloat{2}),
+                                              C({-1.0_a, -2_a}, AFloat{-1}),
+                                              C({2.0_a, 0_a}, AFloat{2}),
+                                              C({-2.0_a, 0_a}, AFloat{0}),
+                                              C({0.0_a, 0_a}, AFloat{0}),
+                                              C({0.0_a, -0_a}, AFloat{0}),
+                                              C({-0.0_a, 0_a}, AFloat{0}),
+                                              C({-0.0_a, -0_a}, AFloat{0}),
+                                          })));
 
 template <typename T>
 std::vector<Case> AbsCases() {
@@ -291,11 +316,14 @@ INSTANTIATE_TEST_SUITE_P(  //
 template <typename T>
 std::vector<Case> Atan2Cases() {
     return {
-        // If y is +/-0 and x is negative or -0, +/-PI is returned
-        C({T(0.0), -T(0.0)}, kPi<T>).PosOrNeg().FloatComp(),
-
-        // If y is +/-0 and x is positive or +0, +/-0 is returned
-        C({T(0.0), T(0.0)}, T(0.0)).PosOrNeg(),
+        // Beware that y is first:  atan2(y,x)
+        //
+        // Beware of regions where the error is unbounded:
+        //  At the orgin (0,0)
+        //  When x has very small magnitude, since atan(y/x) is a
+        //    valid formulation, and floating point division can have
+        //    large error when the divisor is subnormal.
+        //  When y is subnormal or infinite.
 
         // If x is +/-0 and y is negative, -PI/2 is returned
         C({-T(1.0), T(0.0)}, -kPiOver2<T>).FloatComp(),  //
@@ -305,11 +333,14 @@ std::vector<Case> Atan2Cases() {
         C({T(1.0), T(0.0)}, kPiOver2<T>).FloatComp(),  //
         C({T(1.0), -T(0.0)}, kPiOver2<T>).FloatComp(),
 
+        // If x is positive and y is 0, 0 is returned
+        C({T(0.0), T(1.0)}, T(0.0)).FloatComp(),  //
+        C({-T(0.0), T(1.0)}, T(0.0)).FloatComp(),
+
         // Vector tests
-        C({Vec(T(0.0), T(0.0)), Vec(-T(0.0), T(0.0))}, Vec(kPi<T>, T(0.0))).PosOrNeg().FloatComp(),
-        C({Vec(-T(1.0), -T(1.0)), Vec(T(0.0), -T(0.0))}, Vec(-kPiOver2<T>, -kPiOver2<T>))
-            .FloatComp(),
-        C({Vec(T(1.0), T(1.0)), Vec(T(0.0), -T(0.0))}, Vec(kPiOver2<T>, kPiOver2<T>)).FloatComp(),
+        C({Vec(-T(1.0), T(1.0)), Vec(T(0.0), -T(0.0))}, Vec(-kPiOver2<T>, kPiOver2<T>)).FloatComp(),
+        C({Vec(T(1.0), -T(1.0)), Vec(-T(0.0), T(0.0))}, Vec(kPiOver2<T>, -kPiOver2<T>)).FloatComp(),
+        C({Vec(T(0.0), -T(0.0)), Vec(T(1.0), T(1.0))}, Vec(T(0.0), T(0.0))).FloatComp(),
     };
 }
 INSTANTIATE_TEST_SUITE_P(  //

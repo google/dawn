@@ -36,7 +36,7 @@ TEST_F(ConstantTest_Splat, AllZero) {
     auto* SpfPos1 = constants.Splat(vec3f, fPos1, 3);
 
     EXPECT_TRUE(SpfPos0->AllZero());
-    EXPECT_FALSE(SpfNeg0->AllZero());
+    EXPECT_TRUE(SpfNeg0->AllZero());
     EXPECT_FALSE(SpfPos1->AllZero());
 }
 
@@ -52,7 +52,7 @@ TEST_F(ConstantTest_Splat, AnyZero) {
     auto* SpfPos1 = constants.Splat(vec3f, fPos1, 3);
 
     EXPECT_TRUE(SpfPos0->AnyZero());
-    EXPECT_FALSE(SpfNeg0->AnyZero());
+    EXPECT_TRUE(SpfNeg0->AnyZero());
     EXPECT_FALSE(SpfPos1->AnyZero());
 }
 

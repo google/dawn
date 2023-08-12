@@ -261,7 +261,7 @@ class VertexFormatTest : public DawnTest {
                 return bitcast<f32>(fp32u);
             }
 
-            // NaN defination in IEEE 754-1985 is :
+            // NaN definition in IEEE 754-1985 is :
             //   - sign = either 0 or 1.
             //   - biased exponent = all 1 bits.
             //   - fraction = anything except all 0 bits (since all 0 bits represents infinity).
@@ -288,7 +288,7 @@ class VertexFormatTest : public DawnTest {
 
         // Declare expected values.
         vs << "var expected : array<array<" << expectedDataType << ", "
-           << std::to_string(componentCount) << ">, " << std::to_string(kVertexNum) << ">;";
+           << std::to_string(componentCount) << ">, " << std::to_string(kVertexNum) << ">;\n";
         // Assign each elements in expected values
         // e.g. expected[0][0] = u32(1u);
         //      expected[0][1] = u32(2u);
@@ -307,7 +307,7 @@ class VertexFormatTest : public DawnTest {
                        << ") / " << std::to_string(std::numeric_limits<T>::max())
                        << ".0 , -1.0));\n";
                 } else if (isHalf) {
-                    // Becasue Vulkan and D3D12 handle -0.0f through bitcast have different
+                    // Because Vulkan and D3D12 handle -0.0f through bitcast have different
                     // result (Vulkan take -0.0f as -0.0 but D3D12 take -0.0f as 0), add workaround
                     // for -0.0f.
                     if (static_cast<uint16_t>(expectedData[i * componentCount + j]) ==
@@ -339,12 +339,15 @@ class VertexFormatTest : public DawnTest {
             if (!isInputTypeFloat) {  // Integer / unsigned integer need to match exactly.
                 vs << "    success = success && (" << testVal << " == " << expectedVal << ");\n";
             } else {
+                vs << "    success = success && (isNaNCustom(" << expectedVal << ") == isNaNCustom("
+                   << testVal << "));\n";
+                vs << "    if (!isNaNCustom(" << expectedVal << ")) {\n";
+                // Fold -0.0 into 0.0.
+                vs << "        if (" << testVal << " == 0) { " << testVal << " = 0; }\n";
+                vs << "        if (" << expectedVal << " == 0) { " << expectedVal << " = 0; }\n";
                 // TODO(shaobo.yan@intel.com) : a difference of 8 ULPs is allowed in this test
                 // because it is required on MacbookPro 11.5,AMD Radeon HD 8870M(on macOS 10.13.6),
                 // but that it might be possible to tighten.
-                vs << "    if (isNaNCustom(" << expectedVal << ")) {\n";
-                vs << "       success = success && isNaNCustom(" << testVal << ");\n";
-                vs << "    } else {\n";
                 vs << "        let testValFloatToUint : u32 = bitcast<u32>(" << testVal << ");\n";
                 vs << "        let expectedValFloatToUint : u32 = bitcast<u32>(" << expectedVal
                    << ");\n";
@@ -703,6 +706,8 @@ TEST_P(VertexFormatTest, Snorm16x4) {
 TEST_P(VertexFormatTest, Float16x2) {
     // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
+    // TODO(dawn:1566) Fails on Arm-based Android devices, when using -0.0.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
 
     std::vector<uint16_t> vertexData =
         Float32ToFloat16(std::vector<float>({14.8f, -0.0f, 22.5f, 1.3f, +0.0f, -24.8f}));
@@ -713,22 +718,28 @@ TEST_P(VertexFormatTest, Float16x2) {
 TEST_P(VertexFormatTest, Float16x4) {
     // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
+    // TODO(dawn:1566) Fails on Arm-based Android devices, when using -0.0.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
 
     std::vector<uint16_t> vertexData = Float32ToFloat16(std::vector<float>(
         {+0.0f, -16.8f, 18.2f, -0.0f, 12.5f, 1.3f, 14.8f, -12.4f, 22.5f, -48.8f, 47.4f, -24.8f}));
 
     DoVertexFormatTest(wgpu::VertexFormat::Float16x4, vertexData, vertexData);
 }
-
-TEST_P(VertexFormatTest, Float32) {
-    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+TEST_P(VertexFormatTest, Float32_Zeros) {
+    // TODO(dawn:1566) Fails on Qualcomm-based and Arm-base Android devices. When using -0.0.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
 
     std::vector<float> vertexData = {1.3f, +0.0f, -0.0f};
 
     DoVertexFormatTest(wgpu::VertexFormat::Float32, vertexData, vertexData);
+}
 
-    vertexData = std::vector<float>{+1.0f, -1.0f, 18.23f};
+TEST_P(VertexFormatTest, Float32_Plain) {
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
+    std::vector<float> vertexData = {+1.0f, -1.0f, 18.23f};
 
     DoVertexFormatTest(wgpu::VertexFormat::Float32, vertexData, vertexData);
 }
@@ -737,8 +748,10 @@ TEST_P(VertexFormatTest, Float32x2) {
     // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
 
-    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    // TODO(dawn:1566) Fails on Qualcomm-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+    // TODO(dawn:1566) Fails on Arm-based Android devices, when using -0.0.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
 
     std::vector<float> vertexData = {18.23f, -0.0f, +0.0f, +1.0f, 1.3f, -1.0f};
 
@@ -748,6 +761,8 @@ TEST_P(VertexFormatTest, Float32x2) {
 TEST_P(VertexFormatTest, Float32x3) {
     // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
+    // TODO(dawn:1566) Fails on Arm-based Android devices, when using -0.0.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
 
     std::vector<float> vertexData = {
         +0.0f, -1.0f, -0.0f, 1.0f, 1.3f, 99.45f, 23.6f, -81.2f, 55.0f,
@@ -757,6 +772,8 @@ TEST_P(VertexFormatTest, Float32x3) {
 }
 
 TEST_P(VertexFormatTest, Float32x4) {
+    // TODO(dawn:1566) Fails on Arm-based Android devices, when using -0.0.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
     std::vector<float> vertexData = {
         19.2f, -19.3f, +0.0f, 1.0f, -0.0f, 1.0f, 1.3f, -1.0f, 13.078f, 21.1965f, -1.1f, -1.2f,
     };

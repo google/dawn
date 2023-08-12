@@ -356,7 +356,9 @@ tint::Result<TO, ConversionFailure> CheckedConvert(Number<FROM> num) {
 /// Equality operator.
 /// @param a the LHS number
 /// @param b the RHS number
-/// @returns true if the numbers `a` and `b` are exactly equal. Also considers sign bit.
+/// @returns true if the numbers `a` and `b` are exactly equal.
+/// For floating point types, negative zero equals zero.
+/// IEEE 754 says "Comparison shall ignore the sign of zero (so +0 = -0)."
 template <typename A, typename B>
 bool operator==(Number<A> a, Number<B> b) {
     // Use the highest-precision integer or floating-point type to perform the comparisons.
@@ -364,11 +366,6 @@ bool operator==(Number<A> a, Number<B> b) {
         std::conditional_t<IsFloatingPoint<A> || IsFloatingPoint<B>, AFloat::type, AInt::type>;
     auto va = static_cast<T>(a.value);
     auto vb = static_cast<T>(b.value);
-    if constexpr (IsFloatingPoint<T>) {
-        if (std::signbit(va) != std::signbit(vb)) {
-            return false;
-        }
-    }
     return std::equal_to<T>()(va, vb);
 }
 
@@ -577,7 +574,7 @@ inline std::optional<AInt> CheckedDiv(AInt a, AInt b) {
 template <typename FloatingPointT,
           typename = tint::traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
 inline std::optional<FloatingPointT> CheckedDiv(FloatingPointT a, FloatingPointT b) {
-    if (b == FloatingPointT{0.0} || b == FloatingPointT{-0.0}) {
+    if (b == FloatingPointT{0.0}) {
         return {};
     }
     auto result = FloatingPointT{a.value / b.value};
@@ -624,7 +621,7 @@ inline std::optional<AInt> CheckedMod(AInt a, AInt b) {
 template <typename FloatingPointT,
           typename = tint::traits::EnableIf<IsFloatingPoint<FloatingPointT>>>
 inline std::optional<FloatingPointT> CheckedMod(FloatingPointT a, FloatingPointT b) {
-    if (b == FloatingPointT{0.0} || b == FloatingPointT{-0.0}) {
+    if (b == FloatingPointT{0.0}) {
         return {};
     }
     auto result = FloatingPointT{tint::detail::Mod(a.value, b.value)};

@@ -30,14 +30,17 @@ TEST_F(ConstantTest_Composite, AllZero) {
     auto* fPos0 = constants.Get(0_f);
     auto* fNeg0 = constants.Get(-0_f);
     auto* fPos1 = constants.Get(1_f);
+    auto* fNeg1 = constants.Get(-1_f);
 
-    auto* compositeAll = constants.Composite(vec3f, Vector{fPos0, fPos0});
-    auto* compositeAny = constants.Composite(vec3f, Vector{fNeg0, fPos1, fPos0});
-    auto* compositeNone = constants.Composite(vec3f, Vector{fNeg0, fNeg0});
+    auto* compositePosZeros = constants.Composite(vec3f, Vector{fPos0, fPos0});
+    auto* compositeNegZeros = constants.Composite(vec3f, Vector{fNeg0, fNeg0});
+    auto* compositeMixed = constants.Composite(vec3f, Vector{fNeg0, fPos1, fPos0});
+    auto* compositePosNeg = constants.Composite(vec3f, Vector{fNeg1, fPos1, fPos1});
 
-    EXPECT_TRUE(compositeAll->AllZero());
-    EXPECT_FALSE(compositeAny->AllZero());
-    EXPECT_FALSE(compositeNone->AllZero());
+    EXPECT_TRUE(compositePosZeros->AllZero());
+    EXPECT_TRUE(compositeNegZeros->AllZero());
+    EXPECT_FALSE(compositeMixed->AllZero());
+    EXPECT_FALSE(compositePosNeg->AllZero());
 }
 
 TEST_F(ConstantTest_Composite, AnyZero) {
@@ -46,14 +49,17 @@ TEST_F(ConstantTest_Composite, AnyZero) {
     auto* fPos0 = constants.Get(0_f);
     auto* fNeg0 = constants.Get(-0_f);
     auto* fPos1 = constants.Get(1_f);
+    auto* fNeg1 = constants.Get(-1_f);
 
-    auto* compositeAll = constants.Composite(vec3f, Vector{fPos0, fPos0});
-    auto* compositeAny = constants.Composite(vec3f, Vector{fNeg0, fPos1, fPos0});
-    auto* compositeNone = constants.Composite(vec3f, Vector{fNeg0, fNeg0});
+    auto* compositePosZeros = constants.Composite(vec3f, Vector{fPos0, fPos0});
+    auto* compositeNegZeros = constants.Composite(vec3f, Vector{fNeg0, fNeg0});
+    auto* compositeMixed = constants.Composite(vec3f, Vector{fNeg0, fPos1, fPos0});
+    auto* compositePosNeg = constants.Composite(vec3f, Vector{fNeg1, fPos1, fPos1});
 
-    EXPECT_TRUE(compositeAll->AnyZero());
-    EXPECT_TRUE(compositeAny->AnyZero());
-    EXPECT_FALSE(compositeNone->AnyZero());
+    EXPECT_TRUE(compositePosZeros->AnyZero());
+    EXPECT_TRUE(compositeNegZeros->AnyZero());
+    EXPECT_TRUE(compositeMixed->AnyZero());
+    EXPECT_FALSE(compositePosNeg->AllZero());
 }
 
 TEST_F(ConstantTest_Composite, Index) {

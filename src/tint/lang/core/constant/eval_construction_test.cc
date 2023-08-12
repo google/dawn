@@ -868,19 +868,19 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f32_all_negative_0) {
     EXPECT_TRUE(vec->type()->Is<core::type::F32>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
-    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->AllZero());
 
-    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<f32>(), -0_f);
 
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<f32>(), -0_f);
 
-    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllZero());
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<f32>(), -0_f);
 }
 
@@ -898,14 +898,14 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f32_mixed_sign_0) {
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->AllZero());
 
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<f32>(), 0_f);
 
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<f32>(), -0_f);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AnyZero());
@@ -1021,19 +1021,19 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_all_negative_0) {
     EXPECT_TRUE(vec->type()->Is<core::type::F16>());
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
-    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->AllZero());
 
-    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<f16>(), -0_h);
 
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<f16>(), -0_h);
 
-    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllZero());
     EXPECT_EQ(sem->ConstantValue()->Index(2)->ValueAs<f16>(), -0_h);
 }
 
@@ -1053,14 +1053,14 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_mixed_sign_0) {
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->AllZero());
 
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
     EXPECT_EQ(sem->ConstantValue()->Index(0)->ValueAs<f16>(), 0_h);
 
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
     EXPECT_EQ(sem->ConstantValue()->Index(1)->ValueAs<f16>(), -0_h);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AnyZero());

@@ -255,7 +255,7 @@ const ScalarBase* ScalarConvert(const Scalar<T>* scalar,
         using FROM = T;
         if constexpr (std::is_same_v<TO, bool>) {
             // [x -> bool]
-            return ctx.mgr.Get<Scalar<TO>>(target_ty, !scalar->IsPositiveZero());
+            return ctx.mgr.Get<Scalar<TO>>(target_ty, !scalar->IsZero());
         } else if constexpr (std::is_same_v<FROM, bool>) {
             // [bool -> x]
             return ctx.mgr.Get<Scalar<TO>>(target_ty, TO(scalar->value ? 1 : 0));

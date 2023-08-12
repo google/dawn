@@ -58,10 +58,10 @@ class Scalar : public Castable<Scalar<T>, ScalarBase> {
     size_t NumElements() const override { return 1; }
 
     /// @copydoc Value::AllZero()
-    bool AllZero() const override { return IsPositiveZero(); }
+    bool AllZero() const override { return IsZero(); }
 
     /// @copydoc Value::AnyZero()
-    bool AnyZero() const override { return IsPositiveZero(); }
+    bool AnyZero() const override { return IsZero(); }
 
     /// @copydoc Value::Hash()
     size_t Hash() const override { return tint::Hash(type, ValueOf()); }
@@ -84,10 +84,11 @@ class Scalar : public Castable<Scalar<T>, ScalarBase> {
         }
     }
 
-    /// @returns true if `value` is a positive zero.
-    inline bool IsPositiveZero() const {
+    /// @returns true if `value` is zero.
+    /// For floating point -0.0 equals 0.0, according to IEEE 754.
+    inline bool IsZero() const {
         using N = UnwrapNumber<T>;
-        return Number<N>(value) == Number<N>(0);  // Considers sign bit
+        return Number<N>(value) == Number<N>(0);
     }
 
     /// The scalar type
