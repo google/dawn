@@ -18,6 +18,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "dawn/common/MutexProtected.h"
 #include "dawn/common/Ref.h"
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/BindingInfo.h"
@@ -46,10 +47,10 @@ class ShaderVisibleDescriptorAllocator;
 // Wraps sampler descriptor heap allocations in a cache.
 class SamplerHeapCacheEntry : public RefCounted {
   public:
-    SamplerHeapCacheEntry() = default;
-    explicit SamplerHeapCacheEntry(std::vector<Sampler*> samplers);
+    explicit SamplerHeapCacheEntry(MutexProtected<StagingDescriptorAllocator>& allocator,
+                                   std::vector<Sampler*> samplers);
     SamplerHeapCacheEntry(SamplerHeapCache* cache,
-                          StagingDescriptorAllocator* allocator,
+                          MutexProtected<StagingDescriptorAllocator>& allocator,
                           std::vector<Sampler*> samplers,
                           CPUDescriptorHeapAllocation allocation);
     ~SamplerHeapCacheEntry() override;
@@ -58,7 +59,7 @@ class SamplerHeapCacheEntry : public RefCounted {
 
     std::vector<Sampler*>&& AcquireSamplers();
 
-    bool Populate(Device* device, ShaderVisibleDescriptorAllocator* allocator);
+    bool Populate(Device* device, MutexProtected<ShaderVisibleDescriptorAllocator>& allocator);
 
     // Functors necessary for the unordered_map<SamplerHeapCacheEntry*>-based cache.
     struct HashFunc {
@@ -77,7 +78,7 @@ class SamplerHeapCacheEntry : public RefCounted {
     // by the device and will already be unique.
     std::vector<Sampler*> mSamplers;
 
-    StagingDescriptorAllocator* mAllocator = nullptr;
+    MutexProtected<StagingDescriptorAllocator>& mAllocator;
     SamplerHeapCache* mCache = nullptr;
 };
 
@@ -90,7 +91,7 @@ class SamplerHeapCache {
 
     ResultOrError<Ref<SamplerHeapCacheEntry>> GetOrCreate(
         const BindGroup* group,
-        StagingDescriptorAllocator* samplerAllocator);
+        MutexProtected<StagingDescriptorAllocator>& samplerAllocator);
 
     void RemoveCacheEntry(SamplerHeapCacheEntry* entry);
 

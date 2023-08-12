@@ -18,6 +18,7 @@
 #include <memory>
 #include <vector>
 
+#include "dawn/common/MutexProtected.h"
 #include "dawn/common/SerialQueue.h"
 #include "dawn/native/d3d/DeviceD3D.h"
 #include "dawn/native/d3d12/CommandRecordingContext.h"
@@ -120,20 +121,23 @@ class Device final : public d3d::Device {
 
     void DeallocateMemory(ResourceHeapAllocation& allocation);
 
-    ShaderVisibleDescriptorAllocator* GetViewShaderVisibleDescriptorAllocator() const;
-    ShaderVisibleDescriptorAllocator* GetSamplerShaderVisibleDescriptorAllocator() const;
+    MutexProtected<ShaderVisibleDescriptorAllocator>& GetViewShaderVisibleDescriptorAllocator()
+        const;
+    MutexProtected<ShaderVisibleDescriptorAllocator>& GetSamplerShaderVisibleDescriptorAllocator()
+        const;
 
     // Returns nullptr when descriptor count is zero.
-    StagingDescriptorAllocator* GetViewStagingDescriptorAllocator(uint32_t descriptorCount) const;
+    MutexProtected<StagingDescriptorAllocator>* GetViewStagingDescriptorAllocator(
+        uint32_t descriptorCount) const;
 
-    StagingDescriptorAllocator* GetSamplerStagingDescriptorAllocator(
+    MutexProtected<StagingDescriptorAllocator>* GetSamplerStagingDescriptorAllocator(
         uint32_t descriptorCount) const;
 
     SamplerHeapCache* GetSamplerHeapCache();
 
-    StagingDescriptorAllocator* GetRenderTargetViewAllocator() const;
+    MutexProtected<StagingDescriptorAllocator>& GetRenderTargetViewAllocator() const;
 
-    StagingDescriptorAllocator* GetDepthStencilViewAllocator() const;
+    MutexProtected<StagingDescriptorAllocator>& GetDepthStencilViewAllocator() const;
 
     ResultOrError<Ref<d3d::Fence>> CreateFence(
         const d3d::ExternalImageDXGIFenceDescriptor* descriptor) override;
@@ -246,21 +250,25 @@ class Device final : public d3d::Device {
 
     // Index corresponds to Log2Ceil(descriptorCount) where descriptorCount is in
     // the range [0, kMaxSamplerDescriptorsPerBindGroup].
-    std::array<std::unique_ptr<StagingDescriptorAllocator>, kNumViewDescriptorAllocators + 1>
+    std::array<std::unique_ptr<MutexProtected<StagingDescriptorAllocator>>,
+               kNumViewDescriptorAllocators + 1>
         mViewAllocators;
 
     // Index corresponds to Log2Ceil(descriptorCount) where descriptorCount is in
     // the range [0, kMaxViewDescriptorsPerBindGroup].
-    std::array<std::unique_ptr<StagingDescriptorAllocator>, kNumSamplerDescriptorAllocators + 1>
+    std::array<std::unique_ptr<MutexProtected<StagingDescriptorAllocator>>,
+               kNumSamplerDescriptorAllocators + 1>
         mSamplerAllocators;
 
-    std::unique_ptr<StagingDescriptorAllocator> mRenderTargetViewAllocator;
+    std::unique_ptr<MutexProtected<StagingDescriptorAllocator>> mRenderTargetViewAllocator;
 
-    std::unique_ptr<StagingDescriptorAllocator> mDepthStencilViewAllocator;
+    std::unique_ptr<MutexProtected<StagingDescriptorAllocator>> mDepthStencilViewAllocator;
 
-    std::unique_ptr<ShaderVisibleDescriptorAllocator> mViewShaderVisibleDescriptorAllocator;
+    std::unique_ptr<MutexProtected<ShaderVisibleDescriptorAllocator>>
+        mViewShaderVisibleDescriptorAllocator;
 
-    std::unique_ptr<ShaderVisibleDescriptorAllocator> mSamplerShaderVisibleDescriptorAllocator;
+    std::unique_ptr<MutexProtected<ShaderVisibleDescriptorAllocator>>
+        mSamplerShaderVisibleDescriptorAllocator;
 
     // Sampler cache needs to be destroyed before the CPU sampler allocator to ensure the final
     // release is called.

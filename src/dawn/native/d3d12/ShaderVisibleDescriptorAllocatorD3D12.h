@@ -18,6 +18,7 @@
 #include <list>
 #include <memory>
 
+#include "dawn/common/MutexProtected.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/RingBufferAllocator.h"
 #include "dawn/native/d3d12/IntegerTypes.h"
@@ -46,7 +47,7 @@ class ShaderVisibleDescriptorHeap : public Pageable {
 
 class ShaderVisibleDescriptorAllocator {
   public:
-    static ResultOrError<std::unique_ptr<ShaderVisibleDescriptorAllocator>> Create(
+    static ResultOrError<std::unique_ptr<MutexProtected<ShaderVisibleDescriptorAllocator>>> Create(
         Device* device,
         D3D12_DESCRIPTOR_HEAP_TYPE heapType);
 

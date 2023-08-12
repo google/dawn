@@ -117,21 +117,23 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
 
     // Zero sized allocator is never requested and does not need to exist.
     for (uint32_t countIndex = 0; countIndex < kNumViewDescriptorAllocators; countIndex++) {
-        mViewAllocators[countIndex + 1] = std::make_unique<StagingDescriptorAllocator>(
-            this, 1u << countIndex, kShaderVisibleDescriptorHeapSize,
-            D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+        mViewAllocators[countIndex + 1] =
+            std::make_unique<MutexProtected<StagingDescriptorAllocator>>(
+                this, 1u << countIndex, kShaderVisibleDescriptorHeapSize,
+                D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     }
 
     for (uint32_t countIndex = 0; countIndex < kNumSamplerDescriptorAllocators; countIndex++) {
-        mSamplerAllocators[countIndex + 1] = std::make_unique<StagingDescriptorAllocator>(
-            this, 1u << countIndex, kShaderVisibleDescriptorHeapSize,
-            D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+        mSamplerAllocators[countIndex + 1] =
+            std::make_unique<MutexProtected<StagingDescriptorAllocator>>(
+                this, 1u << countIndex, kShaderVisibleDescriptorHeapSize,
+                D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
     }
 
-    mRenderTargetViewAllocator = std::make_unique<StagingDescriptorAllocator>(
+    mRenderTargetViewAllocator = std::make_unique<MutexProtected<StagingDescriptorAllocator>>(
         this, 1, kAttachmentDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
-    mDepthStencilViewAllocator = std::make_unique<StagingDescriptorAllocator>(
+    mDepthStencilViewAllocator = std::make_unique<MutexProtected<StagingDescriptorAllocator>>(
         this, 1, kAttachmentDescriptorHeapSize, D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
     mSamplerHeapCache = std::make_unique<SamplerHeapCache>(this);
@@ -312,10 +314,10 @@ MaybeError Device::TickImpl() {
 
     mResourceAllocatorManager->Tick(completedSerial);
     DAWN_TRY(mCommandAllocatorManager->Tick(completedSerial));
-    mViewShaderVisibleDescriptorAllocator->Tick(completedSerial);
-    mSamplerShaderVisibleDescriptorAllocator->Tick(completedSerial);
-    mRenderTargetViewAllocator->Tick(completedSerial);
-    mDepthStencilViewAllocator->Tick(completedSerial);
+    (*mViewShaderVisibleDescriptorAllocator)->Tick(completedSerial);
+    (*mSamplerShaderVisibleDescriptorAllocator)->Tick(completedSerial);
+    (*mRenderTargetViewAllocator)->Tick(completedSerial);
+    (*mDepthStencilViewAllocator)->Tick(completedSerial);
     mUsedComObjectRefs.ClearUpTo(completedSerial);
 
     if (mPendingCommands.IsOpen() && mPendingCommands.NeedsSubmit()) {
@@ -721,15 +723,17 @@ void Device::DestroyImpl() {
     mCommandQueue.Reset();
 }
 
-ShaderVisibleDescriptorAllocator* Device::GetViewShaderVisibleDescriptorAllocator() const {
-    return mViewShaderVisibleDescriptorAllocator.get();
+MutexProtected<ShaderVisibleDescriptorAllocator>& Device::GetViewShaderVisibleDescriptorAllocator()
+    const {
+    return *mViewShaderVisibleDescriptorAllocator.get();
 }
 
-ShaderVisibleDescriptorAllocator* Device::GetSamplerShaderVisibleDescriptorAllocator() const {
-    return mSamplerShaderVisibleDescriptorAllocator.get();
+MutexProtected<ShaderVisibleDescriptorAllocator>&
+Device::GetSamplerShaderVisibleDescriptorAllocator() const {
+    return *mSamplerShaderVisibleDescriptorAllocator.get();
 }
 
-StagingDescriptorAllocator* Device::GetViewStagingDescriptorAllocator(
+MutexProtected<StagingDescriptorAllocator>* Device::GetViewStagingDescriptorAllocator(
     uint32_t descriptorCount) const {
     ASSERT(descriptorCount <= kMaxViewDescriptorsPerBindGroup);
     // This is Log2 of the next power of two, plus 1.
@@ -737,7 +741,7 @@ StagingDescriptorAllocator* Device::GetViewStagingDescriptorAllocator(
     return mViewAllocators[allocatorIndex].get();
 }
 
-StagingDescriptorAllocator* Device::GetSamplerStagingDescriptorAllocator(
+MutexProtected<StagingDescriptorAllocator>* Device::GetSamplerStagingDescriptorAllocator(
     uint32_t descriptorCount) const {
     ASSERT(descriptorCount <= kMaxSamplerDescriptorsPerBindGroup);
     // This is Log2 of the next power of two, plus 1.
@@ -745,12 +749,12 @@ StagingDescriptorAllocator* Device::GetSamplerStagingDescriptorAllocator(
     return mSamplerAllocators[allocatorIndex].get();
 }
 
-StagingDescriptorAllocator* Device::GetRenderTargetViewAllocator() const {
-    return mRenderTargetViewAllocator.get();
+MutexProtected<StagingDescriptorAllocator>& Device::GetRenderTargetViewAllocator() const {
+    return *mRenderTargetViewAllocator.get();
 }
 
-StagingDescriptorAllocator* Device::GetDepthStencilViewAllocator() const {
-    return mDepthStencilViewAllocator.get();
+MutexProtected<StagingDescriptorAllocator>& Device::GetDepthStencilViewAllocator() const {
+    return *mDepthStencilViewAllocator.get();
 }
 
 SamplerHeapCache* Device::GetSamplerHeapCache() {

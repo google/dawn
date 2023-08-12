@@ -212,7 +212,7 @@ void BindGroup::DestroyImpl() {
     ASSERT(!mCPUViewAllocation.IsValid());
 }
 
-bool BindGroup::PopulateViews(ShaderVisibleDescriptorAllocator* viewAllocator) {
+bool BindGroup::PopulateViews(MutexProtected<ShaderVisibleDescriptorAllocator>& viewAllocator) {
     const BindGroupLayout* bgl = ToBackend(GetLayout());
 
     const uint32_t descriptorCount = bgl->GetCbvUavSrvDescriptorCount();
@@ -249,8 +249,9 @@ D3D12_GPU_DESCRIPTOR_HANDLE BindGroup::GetBaseSamplerDescriptor() const {
     return mSamplerAllocationEntry->GetBaseDescriptor();
 }
 
-bool BindGroup::PopulateSamplers(Device* device,
-                                 ShaderVisibleDescriptorAllocator* samplerAllocator) {
+bool BindGroup::PopulateSamplers(
+    Device* device,
+    MutexProtected<ShaderVisibleDescriptorAllocator>& samplerAllocator) {
     if (mSamplerAllocationEntry == nullptr) {
         return true;
     }

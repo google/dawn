@@ -77,11 +77,11 @@ D3D12_DESCRIPTOR_HEAP_FLAGS GetD3D12HeapFlags(D3D12_DESCRIPTOR_HEAP_TYPE heapTyp
 }
 
 // static
-ResultOrError<std::unique_ptr<ShaderVisibleDescriptorAllocator>>
+ResultOrError<std::unique_ptr<MutexProtected<ShaderVisibleDescriptorAllocator>>>
 ShaderVisibleDescriptorAllocator::Create(Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType) {
-    std::unique_ptr<ShaderVisibleDescriptorAllocator> allocator =
-        std::make_unique<ShaderVisibleDescriptorAllocator>(device, heapType);
-    DAWN_TRY(allocator->AllocateAndSwitchShaderVisibleHeap());
+    std::unique_ptr<MutexProtected<ShaderVisibleDescriptorAllocator>> allocator =
+        std::make_unique<MutexProtected<ShaderVisibleDescriptorAllocator>>(device, heapType);
+    DAWN_TRY((*allocator)->AllocateAndSwitchShaderVisibleHeap());
     return std::move(allocator);
 }
 

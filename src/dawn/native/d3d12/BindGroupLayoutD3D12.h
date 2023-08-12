@@ -83,8 +83,8 @@ class BindGroupLayout final : public BindGroupLayoutInternalBase {
 
     MutexProtected<SlabAllocator<BindGroup>> mBindGroupAllocator;
 
-    StagingDescriptorAllocator* mSamplerAllocator = nullptr;
-    StagingDescriptorAllocator* mViewAllocator = nullptr;
+    MutexProtected<StagingDescriptorAllocator>* mSamplerAllocator = nullptr;
+    MutexProtected<StagingDescriptorAllocator>* mViewAllocator = nullptr;
 };
 
 }  // namespace dawn::native::d3d12

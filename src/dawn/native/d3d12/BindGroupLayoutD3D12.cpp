@@ -159,17 +159,22 @@ ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
     uint32_t viewSizeIncrement = 0;
     CPUDescriptorHeapAllocation viewAllocation;
     if (GetCbvUavSrvDescriptorCount() > 0) {
-        DAWN_TRY_ASSIGN(viewAllocation, mViewAllocator->AllocateCPUDescriptors());
-        viewSizeIncrement = mViewAllocator->GetSizeIncrement();
+        ASSERT(mViewAllocator != nullptr);
+        DAWN_TRY((*mViewAllocator).Use([&](auto viewAllocator) -> MaybeError {
+            DAWN_TRY_ASSIGN(viewAllocation, viewAllocator->AllocateCPUDescriptors());
+            viewSizeIncrement = viewAllocator->GetSizeIncrement();
+            return {};
+        }));
     }
 
     Ref<BindGroup> bindGroup = AcquireRef<BindGroup>(
         mBindGroupAllocator->Allocate(device, descriptor, viewSizeIncrement, viewAllocation));
 
     if (GetSamplerDescriptorCount() > 0) {
+        ASSERT(mSamplerAllocator != nullptr);
         Ref<SamplerHeapCacheEntry> samplerHeapCacheEntry;
         DAWN_TRY_ASSIGN(samplerHeapCacheEntry, device->GetSamplerHeapCache()->GetOrCreate(
-                                                   bindGroup.Get(), mSamplerAllocator));
+                                                   bindGroup.Get(), *mSamplerAllocator));
         bindGroup->SetSamplerAllocationEntry(std::move(samplerHeapCacheEntry));
     }
 
@@ -179,7 +184,7 @@ ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
 void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup,
                                           CPUDescriptorHeapAllocation* viewAllocation) {
     if (viewAllocation->IsValid()) {
-        mViewAllocator->Deallocate(viewAllocation);
+        (*mViewAllocator)->Deallocate(viewAllocation);
     }
 
     mBindGroupAllocator->Deallocate(bindGroup);

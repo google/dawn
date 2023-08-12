@@ -138,8 +138,7 @@ TEST_P(D3D12DescriptorHeapTests, SwitchOverViewHeap) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     Device* d3dDevice = reinterpret_cast<Device*>(device.Get());
-    ShaderVisibleDescriptorAllocator* allocator =
-        d3dDevice->GetViewShaderVisibleDescriptorAllocator();
+    auto& allocator = d3dDevice->GetViewShaderVisibleDescriptorAllocator();
     const uint64_t heapSize = allocator->GetShaderVisibleHeapSizeForTesting();
 
     const HeapVersionID heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
@@ -194,8 +193,7 @@ TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
     wgpu::Sampler sampler = device.CreateSampler();
 
     Device* d3dDevice = reinterpret_cast<Device*>(device.Get());
-    ShaderVisibleDescriptorAllocator* allocator =
-        d3dDevice->GetSamplerShaderVisibleDescriptorAllocator();
+    auto& allocator = d3dDevice->GetSamplerShaderVisibleDescriptorAllocator();
     const uint64_t samplerHeapSize = allocator->GetShaderVisibleHeapSizeForTesting();
 
     const HeapVersionID HeapVersionID = allocator->GetShaderVisibleHeapSerialForTesting();
@@ -227,8 +225,7 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInMultipleSubmits) {
     DAWN_TEST_UNSUPPORTED_IF(
         !mD3DDevice->IsToggleEnabled(native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
-    ShaderVisibleDescriptorAllocator* allocator =
-        mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
+    auto& allocator = mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
 
     std::list<ComPtr<ID3D12DescriptorHeap>> heaps = {allocator->GetShaderVisibleHeap()};
 
@@ -271,8 +268,7 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingSubmit) {
 
     constexpr uint32_t kNumOfSwitches = 5;
 
-    ShaderVisibleDescriptorAllocator* allocator =
-        mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
+    auto& allocator = mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
 
     const HeapVersionID heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
 
@@ -303,8 +299,7 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingAndMultipleSubmits) {
 
     constexpr uint32_t kNumOfSwitches = 5;
 
-    ShaderVisibleDescriptorAllocator* allocator =
-        mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
+    auto& allocator = mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
     const HeapVersionID heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
 
     std::set<ComPtr<ID3D12DescriptorHeap>> heaps = {allocator->GetShaderVisibleHeap()};
@@ -342,8 +337,7 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingAndMultipleSubmits) {
 
 // Verify shader-visible heaps do not recycle in multiple submits.
 TEST_P(D3D12DescriptorHeapTests, GrowHeapsInMultipleSubmits) {
-    ShaderVisibleDescriptorAllocator* allocator =
-        mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
+    auto& allocator = mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
 
     const HeapVersionID heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
 
@@ -368,8 +362,7 @@ TEST_P(D3D12DescriptorHeapTests, GrowHeapsInMultipleSubmits) {
 
 // Verify shader-visible heaps do not recycle in a pending submit.
 TEST_P(D3D12DescriptorHeapTests, GrowHeapsInPendingSubmit) {
-    ShaderVisibleDescriptorAllocator* allocator =
-        mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
+    auto& allocator = mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
 
     const HeapVersionID heapSerial = allocator->GetShaderVisibleHeapSerialForTesting();
 
@@ -395,8 +388,7 @@ TEST_P(D3D12DescriptorHeapTests, GrowHeapsInPendingSubmit) {
 // once no longer pending.
 // Switches over many times until |kNumOfPooledHeaps| heaps are pool-allocated.
 TEST_P(D3D12DescriptorHeapTests, GrowAndPoolHeapsInPendingAndMultipleSubmits) {
-    ShaderVisibleDescriptorAllocator* allocator =
-        mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
+    auto& allocator = mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
 
     std::set<ComPtr<ID3D12DescriptorHeap>> heaps = {allocator->GetShaderVisibleHeap()};
 
@@ -818,11 +810,9 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
         wgpu::SamplerDescriptor samplerDescriptor;
         wgpu::Sampler sampler = device.CreateSampler(&samplerDescriptor);
 
-        ShaderVisibleDescriptorAllocator* viewAllocator =
-            mD3DDevice->GetViewShaderVisibleDescriptorAllocator();
+        auto& viewAllocator = mD3DDevice->GetViewShaderVisibleDescriptorAllocator();
 
-        ShaderVisibleDescriptorAllocator* samplerAllocator =
-            mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
+        auto& samplerAllocator = mD3DDevice->GetSamplerShaderVisibleDescriptorAllocator();
 
         const HeapVersionID viewHeapSerial = viewAllocator->GetShaderVisibleHeapSerialForTesting();
         const HeapVersionID samplerHeapSerial =
@@ -1048,8 +1038,7 @@ TEST_P(D3D12DescriptorHeapTests, AllocateDeallocateMany) {
 // on.
 TEST_P(D3D12DescriptorHeapTests, InvalidateAllocationAfterSerial) {
     Device* d3dDevice = reinterpret_cast<Device*>(device.Get());
-    ShaderVisibleDescriptorAllocator* gpuAllocator =
-        d3dDevice->GetViewShaderVisibleDescriptorAllocator();
+    auto& gpuAllocator = d3dDevice->GetViewShaderVisibleDescriptorAllocator();
 
     GPUDescriptorHeapAllocation gpuHeapDescAllocation;
 

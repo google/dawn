@@ -70,11 +70,11 @@ class StagingDescriptorAllocator {
     std::vector<uint32_t> mAvailableHeaps;  // Indices into the pool.
     std::vector<NonShaderVisibleBuffer> mPool;
 
-    Device* mDevice;
+    Device const* mDevice = nullptr;
 
-    uint32_t mSizeIncrement;  // Size of the descriptor (in bytes).
-    uint32_t mBlockSize;      // Size of the block of descriptors (in bytes).
-    uint32_t mHeapSize;       // Size of the heap (in number of descriptors).
+    const uint32_t mSizeIncrement = 0;  // Size of the descriptor (in bytes).
+    const uint32_t mBlockSize = 0;      // Size of the block of descriptors (in bytes).
+    const uint32_t mHeapSize = 0;       // Size of the heap (in number of descriptors).
 
     D3D12_DESCRIPTOR_HEAP_TYPE mHeapType;
 

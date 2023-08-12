@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_BINDGROUPD3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_BINDGROUPD3D12_H_
 
+#include "dawn/common/MutexProtected.h"
 #include "dawn/common/PlacementAllocated.h"
 #include "dawn/common/ityp_span.h"
 #include "dawn/common/ityp_stack_vec.h"
@@ -39,8 +40,9 @@ class BindGroup final : public BindGroupBase, public PlacementAllocated {
               const CPUDescriptorHeapAllocation& viewAllocation);
 
     // Returns true if the BindGroup was successfully populated.
-    bool PopulateViews(ShaderVisibleDescriptorAllocator* viewAllocator);
-    bool PopulateSamplers(Device* device, ShaderVisibleDescriptorAllocator* samplerAllocator);
+    bool PopulateViews(MutexProtected<ShaderVisibleDescriptorAllocator>& viewAllocator);
+    bool PopulateSamplers(Device* device,
+                          MutexProtected<ShaderVisibleDescriptorAllocator>& samplerAllocator);
 
     D3D12_GPU_DESCRIPTOR_HANDLE GetBaseViewDescriptor() const;
     D3D12_GPU_DESCRIPTOR_HANDLE GetBaseSamplerDescriptor() const;
