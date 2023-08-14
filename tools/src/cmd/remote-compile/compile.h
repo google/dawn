@@ -25,6 +25,8 @@ struct CompileResult {
     std::string output;
 };
 
-CompileResult CompileMslUsingMetalAPI(const std::string& src);
+CompileResult CompileMslUsingMetalAPI(const std::string& src,
+                                      uint32_t version_major,
+                                      uint32_t version_minor);
 
 #endif  // TOOLS_SRC_CMD_REMOTE_COMPILE_COMPILE_H_

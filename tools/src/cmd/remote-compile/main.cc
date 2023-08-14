@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fstream>
+#include <iostream>
+#include <regex>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -33,7 +35,7 @@ namespace {
 #endif
 
 /// Print the tool usage, and exit with 1.
-void ShowUsage() {
+[[noreturn]] void ShowUsage() {
     const char* name = "tint-remote-compile";
     printf(R"(%s is a tool for compiling a shader on a remote machine
 
@@ -212,16 +214,24 @@ struct CompileRequest : Message {  // Client -> Server
     using Response = CompileResponse;
 
     CompileRequest() : Message(Type::CompileRequest) {}
-    CompileRequest(SourceLanguage lang, std::string src)
-        : Message(Type::CompileRequest), language(lang), source(src) {}
+    CompileRequest(SourceLanguage lang, uint32_t ver_major, uint32_t ver_minor, std::string src)
+        : Message(Type::CompileRequest),
+          language(lang),
+          version_major(ver_major),
+          version_minor(ver_minor),
+          source(src) {}
 
     template <typename T>
     void Serialize(T&& f) {
         f(language);
         f(source);
+        f(version_major);
+        f(version_minor);
     }
 
-    SourceLanguage language;
+    SourceLanguage language = SourceLanguage::MSL;
+    uint32_t version_major = 0;
+    uint32_t version_minor = 0;
     std::string source;
 };
 
@@ -271,11 +281,19 @@ RESPONSE Send(Stream& s, const REQUEST& req) {
 }  // namespace
 
 bool RunServer(std::string port);
-bool RunClient(std::string address, std::string port, std::string file);
+bool RunClient(std::string address,
+               std::string port,
+               std::string file,
+               uint32_t version_major,
+               uint32_t version_minor);
 
 int main(int argc, char* argv[]) {
     bool run_server = false;
+    uint32_t version_major = 0;
+    uint32_t version_minor = 0;
     std::string port = "19000";
+
+    std::regex metal_version_re{"^-?-std=macos-metal([0-9]+)\\.([0-9]+)"};
 
     std::vector<std::string> args;
     for (int i = 1; i < argc; i++) {
@@ -302,7 +320,15 @@ int main(int argc, char* argv[]) {
         }
         if (arg == "metal") {
             for (; i < argc; i++) {
-                if (std::string(argv[i]) == "-c") {
+                arg = argv[i];
+                // metal_version_re
+                std::smatch metal_version_match;
+                if (std::regex_match(arg, metal_version_match, metal_version_re)) {
+                    version_major = std::atoi(metal_version_match[1].str().c_str());
+                    version_minor = std::atoi(metal_version_match[2].str().c_str());
+                    continue;
+                }
+                if (arg == "-c") {
                     break;
                 }
             }
@@ -330,11 +356,16 @@ int main(int argc, char* argv[]) {
                 address = args[0];
                 file = args[1];
                 break;
+            default:
+                std::cerr << "expected 1 or 2 arguments, got " << args.size() << std::endl
+                          << std::endl;
+                ShowUsage();
+                break;
         }
         if (address.empty() || file.empty()) {
             ShowUsage();
         }
-        success = RunClient(address, port, file);
+        success = RunClient(address, port, file, version_major, version_minor);
     }
 
     if (!success) {
@@ -347,10 +378,10 @@ int main(int argc, char* argv[]) {
 bool RunServer(std::string port) {
     auto server_socket = Socket::Listen("", port.c_str());
     if (!server_socket) {
-        printf("Failed to listen on port %s\n", port.c_str());
+        std::cout << "Failed to listen on port " << port << std::endl;
         return false;
     }
-    printf("Listening on port %s...\n", port.c_str());
+    std::cout << "Listening on port " << port.c_str() << "..." << std::endl;
     while (auto conn = server_socket->Accept()) {
         std::thread([=] {
             DEBUG("Client connected...");
@@ -382,7 +413,8 @@ bool RunServer(std::string port) {
                 }
 #ifdef TINT_ENABLE_MSL_COMPILATION_USING_METAL_API
                 if (req.language == SourceLanguage::MSL) {
-                    auto result = CompileMslUsingMetalAPI(req.source);
+                    auto result =
+                        CompileMslUsingMetalAPI(req.source, req.version_major, req.version_minor);
                     CompileResponse resp;
                     if (!result.success) {
                         resp.error = result.output;
@@ -400,11 +432,15 @@ bool RunServer(std::string port) {
     return true;
 }
 
-bool RunClient(std::string address, std::string port, std::string file) {
+bool RunClient(std::string address,
+               std::string port,
+               std::string file,
+               uint32_t version_major,
+               uint32_t version_minor) {
     // Read the file
     std::ifstream input(file, std::ios::binary);
     if (!input) {
-        printf("Couldn't open '%s'\n", file.c_str());
+        std::cerr << "Couldn't open '" << file << "'" << std::endl;
         return false;
     }
     std::string source((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
@@ -413,7 +449,7 @@ bool RunClient(std::string address, std::string port, std::string file) {
     DEBUG("Connecting to %s:%s...", address.c_str(), port.c_str());
     auto conn = Socket::Connect(address.c_str(), port.c_str(), timeout_ms);
     if (!conn) {
-        printf("Connection failed\n");
+        std::cerr << "Connection failed" << std::endl;
         return false;
     }
 
@@ -422,21 +458,22 @@ bool RunClient(std::string address, std::string port, std::string file) {
     DEBUG("Sending connection request...");
     auto conn_resp = Send(stream, ConnectionRequest{kProtocolVersion});
     if (!stream.error.empty()) {
-        printf("%s\n", stream.error.c_str());
+        std::cerr << stream.error << std::endl;
         return false;
     }
     if (!conn_resp.error.empty()) {
-        printf("%s\n", conn_resp.error.c_str());
+        std::cerr << conn_resp.error << std::endl;
         return false;
     }
     DEBUG("Connection established. Requesting compile...");
-    auto comp_resp = Send(stream, CompileRequest{SourceLanguage::MSL, source});
+    auto comp_resp =
+        Send(stream, CompileRequest{SourceLanguage::MSL, version_major, version_minor, source});
     if (!stream.error.empty()) {
-        printf("%s\n", stream.error.c_str());
+        std::cerr << stream.error << std::endl;
         return false;
     }
     if (!comp_resp.error.empty()) {
-        printf("%s\n", comp_resp.error.c_str());
+        std::cerr << comp_resp.error << std::endl;
         return false;
     }
     DEBUG("Compilation successful");
