@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Copyright 2023 The Tint Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+set -e # Fail on any error.
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$( cd "$SCRIPT_DIR/.." >/dev/null 2>&1 && pwd )"
+
+mkdir out/coverage || true
+cmake -S . \
+      -B out/coverage \
+      -GNinja \
+      -DCMAKE_BUILD_TYPE=RelWithDebInfo  \
+      -DLLVM_SOURCE_DIR=${LLVM_SOURCE_DIR}  \
+      -DDAWN_BUILD_NODE_BINDINGS=1  \
+      -DDAWN_EMIT_COVERAGE=1  \
+      -DLLVM_HOST_TRIPLE=x86_64-pc-win32 \
+      -DTINT_BUILD_GLSL_WRITER=1 \
+      -DTINT_BUILD_HLSL_WRITER=1 \
+      -DTINT_BUILD_MSL_WRITER=1 \
+      -DTINT_BUILD_SPV_WRITER=1 \
+      -DTINT_BUILD_WGSL_WRITER=1
+
+pushd out/coverage
+ninja
+popd
+
+./tools/run run-cts --export-coverage ./out/coverage/win_api_operation.dat --dawn-node ./out/coverage/dawn.node 'webgpu:api,operation,*'
+./tools/run run-cts --export-coverage ./out/coverage/win_api_validation.dat --dawn-node ./out/coverage/dawn.node 'webgpu:api,validation,*'
+./tools/run run-cts --export-coverage ./out/coverage/win_shader_execution.dat --dawn-node ./out/coverage/dawn.node 'webgpu:shader,execution,*'
+./tools/run run-cts --export-coverage ./out/coverage/win_shader_validation.dat --dawn-node ./out/coverage/dawn.node 'webgpu:shader,validation,*'
+./tools/run run-cts --export-coverage ./out/coverage/win.dat --dawn-node ./out/coverage/dawn.node 'webgpu:*'
