@@ -55,8 +55,8 @@ fn tint_msl_subgroup_ballot() -> vec4<u32> {
 fn foo(@builtin(subgroup_size) tint_subgroup_size : u32) {
   {
     let gt = (tint_subgroup_size > 32u);
-    tint_subgroup_size_mask[0u] = select((1u << (tint_subgroup_size - 1u)), 4294967295u, gt);
-    tint_subgroup_size_mask[1u] = select(0u, (1u << (tint_subgroup_size - 33u)), gt);
+    tint_subgroup_size_mask[0u] = select((4294967295u >> (32u - tint_subgroup_size)), 4294967295u, gt);
+    tint_subgroup_size_mask[1u] = select(0u, (4294967295u >> (64u - tint_subgroup_size)), gt);
   }
   let x : vec4u = tint_msl_subgroup_ballot();
 }
@@ -103,8 +103,8 @@ fn bar() -> vec4u {
 fn foo(@builtin(subgroup_size) tint_subgroup_size : u32) {
   {
     let gt = (tint_subgroup_size > 32u);
-    tint_subgroup_size_mask[0u] = select((1u << (tint_subgroup_size - 1u)), 4294967295u, gt);
-    tint_subgroup_size_mask[1u] = select(0u, (1u << (tint_subgroup_size - 33u)), gt);
+    tint_subgroup_size_mask[0u] = select((4294967295u >> (32u - tint_subgroup_size)), 4294967295u, gt);
+    tint_subgroup_size_mask[1u] = select(0u, (4294967295u >> (64u - tint_subgroup_size)), gt);
   }
   let x : vec4u = bar();
 }
@@ -146,8 +146,8 @@ fn tint_msl_subgroup_ballot() -> vec4<u32> {
 fn foo(@builtin(workgroup_id) group_id : vec3u, @builtin(subgroup_size) size : u32, @builtin(local_invocation_index) index : u32) {
   {
     let gt = (size > 32u);
-    tint_subgroup_size_mask[0u] = select((1u << (size - 1u)), 4294967295u, gt);
-    tint_subgroup_size_mask[1u] = select(0u, (1u << (size - 33u)), gt);
+    tint_subgroup_size_mask[0u] = select((4294967295u >> (32u - size)), 4294967295u, gt);
+    tint_subgroup_size_mask[1u] = select(0u, (4294967295u >> (64u - size)), gt);
   }
   let sz = size;
   let x : vec4u = tint_msl_subgroup_ballot();

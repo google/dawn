@@ -161,12 +161,13 @@ struct MslSubgroupBallot::State {
         // Add the following to the top of the entry point:
         // {
         //   let gt = subgroup_size > 32;
-        //   subgroup_size_mask[0] = select(1 << (subgroup_size - 1), 0xffffffff, gt);
-        //   subgroup_size_mask[1] = select(0, 1 << (subgroup_size - 33), gt);
+        //   subgroup_size_mask[0] = select(0xffffffff >> (32 - subgroup_size), 0xffffffff, gt);
+        //   subgroup_size_mask[1] = select(0, 0xffffffff >> (64 - subgroup_size), gt);
         // }
         auto* gt = b.Let(b.Sym("gt"), b.GreaterThan(subgroup_size, 32_u));
-        auto* lo = b.Call("select", b.Shl(1_u, b.Sub(subgroup_size, 1_u)), 0xffffffff_u, gt);
-        auto* hi = b.Call("select", 0_u, b.Shl(1_u, b.Sub(subgroup_size, 33_u)), gt);
+        auto* lo =
+            b.Call("select", b.Shr(0xffffffff_u, b.Sub(32_u, subgroup_size)), 0xffffffff_u, gt);
+        auto* hi = b.Call("select", 0_u, b.Shr(0xffffffff_u, b.Sub(64_u, subgroup_size)), gt);
         auto* block = b.Block(Vector{
             b.Decl(gt),
             b.Assign(b.IndexAccessor(subgroup_size_mask, 0_u), lo),

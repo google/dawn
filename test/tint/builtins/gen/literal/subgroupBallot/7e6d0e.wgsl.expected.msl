@@ -20,8 +20,8 @@ kernel void compute_main(device uint4* tint_symbol_2 [[buffer(0)]], uint tint_su
   thread tint_private_vars_struct tint_private_vars = {};
   {
     bool const gt = (tint_subgroup_size > 32u);
-    tint_private_vars.tint_subgroup_size_mask[0u] = select((1u << (tint_subgroup_size - 1u)), 4294967295u, gt);
-    tint_private_vars.tint_subgroup_size_mask[1u] = select(0u, (1u << (tint_subgroup_size - 33u)), gt);
+    tint_private_vars.tint_subgroup_size_mask[0u] = select((4294967295u >> (32u - tint_subgroup_size)), 4294967295u, gt);
+    tint_private_vars.tint_subgroup_size_mask[1u] = select(0u, (4294967295u >> (64u - tint_subgroup_size)), gt);
   }
   subgroupBallot_7e6d0e(&(tint_private_vars), tint_symbol_2);
   return;
