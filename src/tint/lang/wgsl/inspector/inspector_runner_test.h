@@ -19,7 +19,10 @@
 #include <string>
 
 #include "gtest/gtest.h"
-#include "tint/tint.h"
+
+#include "src/tint/lang/wgsl/inspector/inspector.h"
+#include "src/tint/lang/wgsl/program/program.h"
+#include "src/tint/utils/diagnostic/source.h"
 
 namespace tint::inspector {
 

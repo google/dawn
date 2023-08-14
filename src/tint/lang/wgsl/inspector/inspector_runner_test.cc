@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/lang/wgsl/inspector/inspector_runner_test.h"
+#include "src/tint/lang/wgsl/reader/reader.h"
 
 namespace tint::inspector {
 

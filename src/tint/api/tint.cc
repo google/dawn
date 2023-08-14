@@ -1,4 +1,4 @@
-// Copyright 2022 The Tint Authors.
+// Copyright 2023 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tint/tint.h"
+#include "src/tint/api/tint.h"
+
+////////////////////////////////////////////////////////////////////////////////
+// The following includes are used by './tools/run gen' to add an implicit
+// dependency from 'tint/api' to the libraries used to make up the Tint API.
+////////////////////////////////////////////////////////////////////////////////
+#if TINT_BUILD_GLSL_WRITER
+#include "src/tint/lang/glsl/writer/writer.h"  // nogncheck
+#endif
+
+#if TINT_BUILD_HLSL_WRITER
+#include "src/tint/lang/hlsl/writer/writer.h"  // nogncheck
+#endif
+
+#if TINT_BUILD_MSL_WRITER
+#include "src/tint/lang/msl/writer/writer.h"  // nogncheck
+#endif
+
+#if TINT_BUILD_SPV_READER
+#include "src/tint/lang/spirv/reader/reader.h"  // nogncheck
+#endif
+
+#if TINT_BUILD_SPV_WRITER
+#include "src/tint/lang/spirv/writer/writer.h"  // nogncheck
+#endif
+
+#if TINT_BUILD_WGSL_READER
+#include "src/tint/lang/wgsl/reader/reader.h"  // nogncheck
+#endif
+
+#if TINT_BUILD_WGSL_WRITER
+#include "src/tint/lang/wgsl/writer/writer.h"  // nogncheck
+#endif
 
 namespace tint {
 

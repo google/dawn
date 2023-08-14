@@ -20,7 +20,18 @@
 #include <string>
 #include <vector>
 
-#include "tint/tint.h"
+#include "src/tint/lang/wgsl/inspector/inspector.h"
+#include "src/tint/utils/diagnostic/source.h"
+
+#if TINT_BUILD_SPV_READER
+#include "src/tint/lang/spirv/reader/common/options.h"
+#endif
+
+// Forward declarations
+namespace tint {
+class Program;
+class InternalCompilerError;
+}  // namespace tint
 
 namespace tint::cmd {
 

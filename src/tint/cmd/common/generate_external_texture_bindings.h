@@ -16,7 +16,11 @@
 #define SRC_TINT_CMD_COMMON_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_
 
 #include "tint/external_texture_options.h"
-#include "tint/tint.h"
+
+// Forward declarations
+namespace tint {
+class Program;
+}
 
 namespace tint::cmd {
 

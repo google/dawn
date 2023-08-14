@@ -20,6 +20,15 @@
 
 #if TINT_BUILD_SPV_READER
 #include "spirv-tools/libspirv.hpp"
+#include "src/tint/lang/spirv/reader/reader.h"
+#endif
+
+#if TINT_BUILD_WGSL_WRITER
+#include "src/tint/lang/wgsl/writer/writer.h"
+#endif
+
+#if TINT_BUILD_WGSL_READER
+#include "src/tint/lang/wgsl/reader/reader.h"
 #endif
 
 #include "src/tint/utils/diagnostic/formatter.h"

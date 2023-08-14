@@ -21,6 +21,7 @@
 // TODO(tint:88): When implementing support for an install target, all of these
 //                headers will need to be moved to include/tint/.
 
+#include "src/tint/api/tint.h"
 #include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/first_index_offset.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
@@ -64,16 +65,6 @@
 #if TINT_BUILD_GLSL_WRITER
 #include "src/tint/lang/glsl/writer/writer.h"
 #endif  // TINT_BUILD_GLSL_WRITER
-
-namespace tint {
-
-/// Initialize initializes the Tint library. Call before using the Tint API.
-void Initialize();
-
-/// Shutdown uninitializes the Tint library. Call after using the Tint API.
-void Shutdown();
-
-}  // namespace tint
 
 #undef CURRENTLY_IN_TINT_PUBLIC_HEADER
 

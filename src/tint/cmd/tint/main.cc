@@ -33,11 +33,18 @@
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 
+#include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/generate_external_texture_bindings.h"
 #include "src/tint/cmd/common/helper.h"
 #include "src/tint/lang/hlsl/validate/val.h"
 #include "src/tint/lang/msl/validate/val.h"
 #include "src/tint/lang/wgsl/ast/module.h"
+#include "src/tint/lang/wgsl/ast/transform/first_index_offset.h"
+#include "src/tint/lang/wgsl/ast/transform/manager.h"
+#include "src/tint/lang/wgsl/ast/transform/renamer.h"
+#include "src/tint/lang/wgsl/ast/transform/single_entry_point.h"
+#include "src/tint/lang/wgsl/ast/transform/substitute_override.h"
+#include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
 #include "src/tint/utils/cli/cli.h"
 #include "src/tint/utils/command/command.h"
 #include "src/tint/utils/containers/transform.h"

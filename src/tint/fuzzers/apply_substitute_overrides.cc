@@ -17,6 +17,11 @@
 #include <memory>
 #include <utility>
 
+#include "src/tint/lang/wgsl/ast/transform/manager.h"
+#include "src/tint/lang/wgsl/ast/transform/substitute_override.h"
+#include "src/tint/lang/wgsl/inspector/inspector.h"
+#include "src/tint/lang/wgsl/program/program.h"
+
 namespace tint::fuzzers {
 
 Program ApplySubstituteOverrides(Program&& program) {

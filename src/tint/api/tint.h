@@ -12,20 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_FUZZERS_APPLY_SUBSTITUTE_OVERRIDES_H_
-#define SRC_TINT_FUZZERS_APPLY_SUBSTITUTE_OVERRIDES_H_
+#ifndef SRC_TINT_API_TINT_H_
+#define SRC_TINT_API_TINT_H_
 
-// Forward declarations
 namespace tint {
-class Program;
-}
 
-namespace tint::fuzzers {
+/// Initialize initializes the Tint library. Call before using the Tint API.
+void Initialize();
 
-/// @returns a new program with all overrides subsituted with const variables
-/// @param program the input program
-Program ApplySubstituteOverrides(Program&& program);
+/// Shutdown uninitializes the Tint library. Call after using the Tint API.
+void Shutdown();
 
-}  // namespace tint::fuzzers
+}  // namespace tint
 
-#endif  // SRC_TINT_FUZZERS_APPLY_SUBSTITUTE_OVERRIDES_H_
+#endif  // SRC_TINT_API_TINT_H_

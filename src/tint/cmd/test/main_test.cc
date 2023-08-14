@@ -13,7 +13,9 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
-#include "tint/tint.h"
+
+#include "src/tint/api/tint.h"
+#include "src/tint/utils/ice/ice.h"
 
 namespace {
 
