@@ -671,10 +671,19 @@ bool GenerateMsl(const tint::Program* program, const Options& options) {
         PrintHash(hash);
     }
 
+    // Default to validating against MSL 1.2.
+    // If subgroups are used, bump the version to 2.1.
+    auto msl_version = tint::msl::validate::MslVersion::kMsl_1_2;
+    for (auto* enable : program->AST().Enables()) {
+        if (enable->HasExtension(tint::core::Extension::kChromiumExperimentalSubgroups)) {
+            msl_version = tint::msl::validate::MslVersion::kMsl_2_1;
+        }
+    }
+
     if (options.validate && options.skip_hash.count(hash) == 0) {
         tint::msl::validate::Result res;
 #ifdef TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
-        res = tint::msl::validate::UsingMetalAPI(result->msl);
+        res = tint::msl::validate::UsingMetalAPI(result->msl, msl_version);
 #else
 #ifdef _WIN32
         const char* default_xcrun_exe = "metal.exe";
@@ -684,7 +693,7 @@ bool GenerateMsl(const tint::Program* program, const Options& options) {
         auto xcrun = tint::Command::LookPath(
             options.xcrun_path.empty() ? default_xcrun_exe : std::string(options.xcrun_path));
         if (xcrun.Found()) {
-            res = tint::msl::validate::Msl(xcrun.Path(), result->msl);
+            res = tint::msl::validate::Msl(xcrun.Path(), result->msl, msl_version);
         } else {
             res.output = "xcrun executable not found. Cannot validate.";
             res.failed = true;

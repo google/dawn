@@ -21,7 +21,7 @@
 
 namespace tint::msl::validate {
 
-Result Msl(const std::string& xcrun_path, const std::string& source) {
+Result Msl(const std::string& xcrun_path, const std::string& source, MslVersion version) {
     Result result;
 
     auto xcrun = tint::Command(xcrun_path);
@@ -34,17 +34,27 @@ Result Msl(const std::string& xcrun_path, const std::string& source) {
     tint::TmpFile file(".metal");
     file << source;
 
+    const char* version_str = nullptr;
+    switch (version) {
+        case MslVersion::kMsl_1_2:
+            version_str = "-std=macos-metal1.2";
+            break;
+        case MslVersion::kMsl_2_1:
+            version_str = "-std=macos-metal2.1";
+            break;
+    }
+
 #ifdef _WIN32
     // On Windows, we should actually be running metal.exe from the Metal
     // Developer Tools for Windows
-    auto res = xcrun("-x", "metal",        //
-                     "-o", "NUL",          //
-                     "-std=osx-metal1.2",  //
+    auto res = xcrun("-x", "metal",  //
+                     "-o", "NUL",    //
+                     version_str,    //
                      "-c", file.Path());
 #else
     auto res = xcrun("-sdk", "macosx", "metal",  //
                      "-o", "/dev/null",          //
-                     "-std=osx-metal1.2",        //
+                     version_str,                //
                      "-c", file.Path());
 #endif
     if (!res.out.empty()) {

@@ -360,6 +360,8 @@ list(APPEND TINT_LIB_SRCS
   lang/wgsl/ast/transform/merge_return.h
   lang/wgsl/ast/transform/module_scope_var_to_entry_point_param.cc
   lang/wgsl/ast/transform/module_scope_var_to_entry_point_param.h
+  lang/wgsl/ast/transform/msl_subgroup_ballot.cc
+  lang/wgsl/ast/transform/msl_subgroup_ballot.h
   lang/wgsl/ast/transform/multiplanar_external_texture.cc
   lang/wgsl/ast/transform/multiplanar_external_texture.h
   lang/wgsl/ast/transform/num_workgroups_from_uniform.cc
@@ -1498,6 +1500,7 @@ if(TINT_BUILD_TESTS)
       lang/wgsl/ast/transform/localize_struct_array_assignment_test.cc
       lang/wgsl/ast/transform/merge_return_test.cc
       lang/wgsl/ast/transform/module_scope_var_to_entry_point_param_test.cc
+      lang/wgsl/ast/transform/msl_subgroup_ballot_test.cc
       lang/wgsl/ast/transform/multiplanar_external_texture_test.cc
       lang/wgsl/ast/transform/num_workgroups_from_uniform_test.cc
       lang/wgsl/ast/transform/packed_vec3_test.cc

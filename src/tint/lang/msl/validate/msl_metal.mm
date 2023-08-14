@@ -24,7 +24,7 @@
 
 namespace tint::msl::validate {
 
-Result UsingMetalAPI(const std::string& src) {
+Result UsingMetalAPI(const std::string& src, MslVersion version) {
     Result result;
 
     NSError* error = nil;
@@ -40,7 +40,14 @@ Result UsingMetalAPI(const std::string& src) {
 
     MTLCompileOptions* compileOptions = [MTLCompileOptions new];
     compileOptions.fastMathEnabled = true;
-    compileOptions.languageVersion = MTLLanguageVersion1_2;
+    switch (version) {
+        case MslVersion::kMsl_1_2:
+            compileOptions.languageVersion = MTLLanguageVersion1_2;
+            break;
+        case MslVersion::kMsl_2_1:
+            compileOptions.languageVersion = MTLLanguageVersion2_1;
+            break;
+    }
 
     id<MTLLibrary> library = [device newLibraryWithSource:source
                                                   options:compileOptions

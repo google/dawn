@@ -60,6 +60,10 @@ std::string BuiltinToAttribute(core::BuiltinValue builtin) {
             return "sample_mask";
         case core::BuiltinValue::kPointSize:
             return "point_size";
+        case core::BuiltinValue::kSubgroupInvocationId:
+            return "thread_index_in_simdgroup";
+        case core::BuiltinValue::kSubgroupSize:
+            return "threads_per_simdgroup";
         default:
             break;
     }

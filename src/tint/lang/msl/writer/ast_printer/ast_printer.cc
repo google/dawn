@@ -59,6 +59,7 @@
 #include "src/tint/lang/wgsl/ast/transform/expand_compound_assignment.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/module_scope_var_to_entry_point_param.h"
+#include "src/tint/lang/wgsl/ast/transform/msl_subgroup_ballot.h"
 #include "src/tint/lang/wgsl/ast/transform/multiplanar_external_texture.h"
 #include "src/tint/lang/wgsl/ast/transform/packed_vec3.h"
 #include "src/tint/lang/wgsl/ast/transform/preserve_padding.h"
@@ -205,6 +206,9 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     manager.Add<ast::transform::RemovePhonies>();
     manager.Add<ast::transform::SimplifyPointers>();
 
+    // MslSubgroupBallot() must come after CanonicalizeEntryPointIO.
+    manager.Add<ast::transform::MslSubgroupBallot>();
+
     // ArrayLengthFromUniform must come after SimplifyPointers, as
     // it assumes that the form of the array length argument is &var.array.
     manager.Add<ast::transform::ArrayLengthFromUniform>();
@@ -244,6 +248,7 @@ bool ASTPrinter::Generate() {
                 core::Extension::kChromiumExperimentalFullPtrParameters,
                 core::Extension::kChromiumExperimentalPushConstant,
                 core::Extension::kChromiumExperimentalReadWriteStorageTexture,
+                core::Extension::kChromiumExperimentalSubgroups,
                 core::Extension::kChromiumInternalRelaxedUniformLayout,
                 core::Extension::kF16,
                 core::Extension::kChromiumInternalDualSourceBlending,
@@ -622,6 +627,12 @@ bool ASTPrinter::EmitCall(StringStream& out, const ast::CallExpression* expr) {
 bool ASTPrinter::EmitFunctionCall(StringStream& out,
                                   const sem::Call* call,
                                   const sem::Function* fn) {
+    if (ast::GetAttribute<ast::transform::MslSubgroupBallot::SimdActiveThreadsMask>(
+            fn->Declaration()->attributes) != nullptr) {
+        out << "as_type<uint2>((ulong)simd_active_threads_mask())";
+        return true;
+    }
+
     out << fn->Declaration()->name->symbol.Name() << "(";
 
     bool first = true;
@@ -1847,6 +1858,11 @@ void ASTPrinter::EmitStage(StringStream& out, ast::PipelineStage stage) {
 }
 
 bool ASTPrinter::EmitFunction(const ast::Function* func) {
+    if (func->body == nullptr) {
+        // An internal function. Do not emit.
+        return true;
+    }
+
     auto* func_sem = builder_.Sem().Get(func);
 
     {
