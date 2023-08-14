@@ -179,7 +179,7 @@ deps = {
   },
 
   'third_party/dxc': {
-    'url': '{chromium_git}/external/github.com/microsoft/DirectXShaderCompiler@dc82ed29c9330127341f1419ac99936be369bd8f',
+    'url': '{chromium_git}/external/github.com/microsoft/DirectXShaderCompiler@4b6e7991ead302c0d778d1c2a3c18484a89b5a25',
   },
   'third_party/dxheaders': {
     # The non-Windows build of DXC depends on DirectX-Headers, and at a specific commit (not ToT)
