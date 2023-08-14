@@ -163,8 +163,7 @@ MaybeError ValidateVideoTextureCanBeShared(Device* device, DXGI_FORMAT textureFo
 
 // static
 ResultOrError<Ref<Texture>> Texture::Create(Device* device, const TextureDescriptor* descriptor) {
-    Ref<Texture> dawnTexture =
-        AcquireRef(new Texture(device, descriptor, TextureState::OwnedInternal));
+    Ref<Texture> dawnTexture = AcquireRef(new Texture(device, descriptor));
 
     DAWN_INVALID_IF(dawnTexture->GetFormat().IsMultiPlanar(),
                     "Cannot create a multi-planar formatted texture directly");
@@ -180,9 +179,7 @@ ResultOrError<Ref<Texture>> Texture::CreateExternalImage(Device* device,
                                                          std::vector<Ref<d3d::Fence>> waitFences,
                                                          bool isSwapChainTexture,
                                                          bool isInitialized) {
-    Ref<Texture> dawnTexture =
-        AcquireRef(new Texture(device, descriptor, TextureState::OwnedExternal));
-
+    Ref<Texture> dawnTexture = AcquireRef(new Texture(device, descriptor));
     DAWN_TRY(dawnTexture->InitializeAsExternalTexture(std::move(d3dTexture), std::move(waitFences),
                                                       isSwapChainTexture));
 
@@ -202,8 +199,7 @@ ResultOrError<Ref<Texture>> Texture::CreateExternalImage(Device* device,
 ResultOrError<Ref<Texture>> Texture::Create(Device* device,
                                             const TextureDescriptor* descriptor,
                                             ComPtr<ID3D12Resource> d3d12Texture) {
-    Ref<Texture> dawnTexture =
-        AcquireRef(new Texture(device, descriptor, TextureState::OwnedExternal));
+    Ref<Texture> dawnTexture = AcquireRef(new Texture(device, descriptor));
     DAWN_TRY(dawnTexture->InitializeAsSwapChainTexture(std::move(d3d12Texture)));
     return std::move(dawnTexture);
 }
@@ -321,8 +317,8 @@ MaybeError Texture::InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Tex
     return {};
 }
 
-Texture::Texture(Device* device, const TextureDescriptor* descriptor, TextureState state)
-    : Base(device, descriptor, state),
+Texture::Texture(Device* device, const TextureDescriptor* descriptor)
+    : Base(device, descriptor),
       mSubresourceStateAndDecay(
           GetFormat().aspects,
           GetArrayLayers(),

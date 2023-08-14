@@ -721,7 +721,7 @@ NSRef<MTLTextureDescriptor> Texture::CreateMetalTextureDescriptor() const {
 
 // static
 ResultOrError<Ref<Texture>> Texture::Create(Device* device, const TextureDescriptor* descriptor) {
-    Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, TextureState::OwnedInternal));
+    Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
     DAWN_TRY(texture->InitializeAsInternalTexture(descriptor));
     return texture;
 }
@@ -734,8 +734,7 @@ ResultOrError<Ref<Texture>> Texture::CreateFromIOSurface(
     std::vector<MTLSharedEventAndSignalValue> waitEvents) {
     const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
 
-    Ref<Texture> texture =
-        AcquireRef(new Texture(device, textureDescriptor, TextureState::OwnedExternal));
+    Ref<Texture> texture = AcquireRef(new Texture(device, textureDescriptor));
     DAWN_TRY(texture->InitializeFromIOSurface(descriptor, textureDescriptor, ioSurface,
                                               std::move(waitEvents)));
     return texture;
@@ -745,7 +744,7 @@ ResultOrError<Ref<Texture>> Texture::CreateFromIOSurface(
 Ref<Texture> Texture::CreateWrapping(Device* device,
                                      const TextureDescriptor* descriptor,
                                      NSPRef<id<MTLTexture>> wrapped) {
-    Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, TextureState::OwnedInternal));
+    Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
     texture->InitializeAsWrapping(descriptor, std::move(wrapped));
     return texture;
 }
@@ -840,8 +839,7 @@ void Texture::IOSurfaceEndAccess(ExternalImageIOSurfaceEndAccessDescriptor* desc
     Destroy();
 }
 
-Texture::Texture(DeviceBase* dev, const TextureDescriptor* desc, TextureState st)
-    : TextureBase(dev, desc, st) {}
+Texture::Texture(DeviceBase* dev, const TextureDescriptor* desc) : TextureBase(dev, desc) {}
 
 Texture::~Texture() {}
 
@@ -1121,7 +1119,7 @@ MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
     Texture* texture = ToBackend(GetTexture());
 
     // Texture could be destroyed by the time we make a view.
-    if (GetTexture()->GetTextureState() == Texture::TextureState::Destroyed) {
+    if (GetTexture()->IsDestroyed()) {
         return {};
     }
 

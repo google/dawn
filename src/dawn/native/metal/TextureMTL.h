@@ -49,7 +49,7 @@ class Texture final : public TextureBase {
                                        const TextureDescriptor* descriptor,
                                        NSPRef<id<MTLTexture>> wrapped);
 
-    Texture(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state);
+    Texture(DeviceBase* device, const TextureDescriptor* descriptor);
 
     id<MTLTexture> GetMTLTexture() const;
     IOSurfaceRef GetIOSurface();

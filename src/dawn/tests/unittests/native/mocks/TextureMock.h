@@ -24,9 +24,7 @@ namespace dawn::native {
 
 class TextureMock : public TextureBase {
   public:
-    TextureMock(DeviceMock* device,
-                const TextureDescriptor* descriptor,
-                TextureBase::TextureState state = TextureBase::TextureState::OwnedInternal);
+    TextureMock(DeviceMock* device, const TextureDescriptor* descriptor);
     ~TextureMock() override;
 
     MOCK_METHOD(void, DestroyImpl, (), (override));

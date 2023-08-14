@@ -94,7 +94,7 @@ class Texture final : public d3d::Texture {
   private:
     using Base = d3d::Texture;
 
-    Texture(Device* device, const TextureDescriptor* descriptor, TextureState state);
+    Texture(Device* device, const TextureDescriptor* descriptor);
     ~Texture() override;
 
     MaybeError InitializeAsInternalTexture();

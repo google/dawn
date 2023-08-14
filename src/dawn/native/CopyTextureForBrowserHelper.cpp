@@ -600,8 +600,7 @@ MaybeError ValidateCopyForBrowserDestination(DeviceBase* device,
                                              const Extent3D& copySize,
                                              const CopyTextureForBrowserOptions& options) {
     DAWN_TRY(device->ValidateObject(destination.texture));
-    DAWN_INVALID_IF(destination.texture->GetTextureState() == TextureBase::TextureState::Destroyed,
-                    "Destination texture %s is destroyed.", destination.texture);
+    DAWN_TRY(destination.texture->ValidateCanUseInSubmitNow());
     DAWN_TRY_CONTEXT(ValidateImageCopyTexture(device, destination, copySize),
                      "validating the ImageCopyTexture for the destination");
     DAWN_TRY_CONTEXT(ValidateTextureCopyRange(device, destination, copySize),
@@ -652,8 +651,7 @@ MaybeError ValidateCopyTextureForBrowser(DeviceBase* device,
                                          const CopyTextureForBrowserOptions* options) {
     // Validate source
     DAWN_TRY(device->ValidateObject(source->texture));
-    DAWN_INVALID_IF(source->texture->GetTextureState() == TextureBase::TextureState::Destroyed,
-                    "Source texture %s is destroyed.", source->texture);
+    DAWN_TRY(source->texture->ValidateCanUseInSubmitNow());
     DAWN_TRY_CONTEXT(ValidateImageCopyTexture(device, *source, *copySize),
                      "validating the ImageCopyTexture for the source");
     DAWN_TRY_CONTEXT(ValidateTextureCopyRange(device, *source, *copySize),

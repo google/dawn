@@ -327,7 +327,7 @@ TextureBase* Device::CreateTextureWrappingEGLImage(const ExternalImageDescriptor
 
     // TODO(dawn:803): Validate the OpenGL texture format from the EGLImage against the format
     // in the passed-in TextureDescriptor.
-    return new Texture(this, textureDescriptor, tex, TextureBase::TextureState::OwnedInternal);
+    return new Texture(this, textureDescriptor, tex);
 }
 
 TextureBase* Device::CreateTextureWrappingGLTexture(const ExternalImageDescriptor* descriptor,
@@ -361,7 +361,7 @@ TextureBase* Device::CreateTextureWrappingGLTexture(const ExternalImageDescripto
         return nullptr;
     }
 
-    return new Texture(this, textureDescriptor, texture, TextureBase::TextureState::OwnedInternal);
+    return new Texture(this, textureDescriptor, texture);
 }
 
 MaybeError Device::TickImpl() {

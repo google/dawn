@@ -115,7 +115,7 @@ SwapChainBase::SwapChainBase(DeviceBase* device,
 
 SwapChainBase::~SwapChainBase() {
     if (mCurrentTexture != nullptr) {
-        ASSERT(mCurrentTexture->GetTextureState() == TextureBase::TextureState::Destroyed);
+        ASSERT(mCurrentTexture->IsDestroyed());
     }
 
     ASSERT(!mAttached);
@@ -223,7 +223,7 @@ void SwapChainBase::APIPresent() {
         return;
     }
 
-    ASSERT(mCurrentTexture->GetTextureState() == TextureBase::TextureState::Destroyed);
+    ASSERT(mCurrentTexture->IsDestroyed());
     mCurrentTexture = nullptr;
 }
 

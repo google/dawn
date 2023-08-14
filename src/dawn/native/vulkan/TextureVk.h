@@ -108,7 +108,7 @@ class Texture final : public TextureBase {
 
   private:
     ~Texture() override;
-    Texture(Device* device, const TextureDescriptor* descriptor, TextureState state);
+    Texture(Device* device, const TextureDescriptor* descriptor);
 
     MaybeError InitializeAsInternalTexture(VkImageUsageFlags extraUsages);
     MaybeError InitializeFromExternal(const ExternalImageDescriptorVk* descriptor,

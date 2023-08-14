@@ -317,7 +317,7 @@ class SwapChain final : public SwapChainBase {
 
 class Texture : public TextureBase {
   public:
-    Texture(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state);
+    Texture(DeviceBase* device, const TextureDescriptor* descriptor);
 };
 
 }  // namespace dawn::native::null

@@ -593,9 +593,9 @@ bool IsValidSampleCount(uint32_t sampleCount) {
 
 // TextureBase
 
-TextureBase::TextureBase(DeviceBase* device,
-                         const TextureDescriptor* descriptor,
-                         TextureState state)
+TextureBase::TextureState::TextureState() : hasAccess(true), destroyed(false) {}
+
+TextureBase::TextureBase(DeviceBase* device, const TextureDescriptor* descriptor)
     : ApiObjectBase(device, descriptor->label),
       mDimension(descriptor->dimension),
       mFormat(device->GetValidInternalFormat(descriptor->format)),
@@ -604,7 +604,6 @@ TextureBase::TextureBase(DeviceBase* device,
       mSampleCount(descriptor->sampleCount),
       mUsage(descriptor->usage),
       mInternalUsage(mUsage),
-      mState(state),
       mFormatEnumForReflection(descriptor->format) {
     uint32_t subresourceCount = mMipLevelCount * GetArrayLayers() * GetAspectCount(mFormat.aspects);
     mIsSubresourceContentInitializedAtIndex = std::vector<bool>(subresourceCount, false);
@@ -665,7 +664,7 @@ TextureBase::TextureBase(DeviceBase* device,
       mFormatEnumForReflection(descriptor->format) {}
 
 void TextureBase::DestroyImpl() {
-    mState = TextureState::Destroyed;
+    mState.destroyed = true;
 
     // Destroy all of the views associated with the texture as well.
     mTextureViews.Destroy();
@@ -746,9 +745,14 @@ void TextureBase::AddInternalUsage(wgpu::TextureUsage usage) {
     mInternalUsage |= usage;
 }
 
-TextureBase::TextureState TextureBase::GetTextureState() const {
+bool TextureBase::IsDestroyed() const {
     ASSERT(!IsError());
-    return mState;
+    return mState.destroyed;
+}
+
+void TextureBase::SetHasAccess(bool hasAccess) {
+    ASSERT(!IsError());
+    mState.hasAccess = hasAccess;
 }
 
 uint32_t TextureBase::GetSubresourceIndex(uint32_t mipLevel,
@@ -794,8 +798,8 @@ void TextureBase::SetIsSubresourceContentInitialized(bool isInitialized,
 
 MaybeError TextureBase::ValidateCanUseInSubmitNow() const {
     ASSERT(!IsError());
-    DAWN_INVALID_IF(mState == TextureState::Destroyed, "Destroyed texture %s used in a submit.",
-                    this);
+    DAWN_INVALID_IF(mState.destroyed, "Destroyed texture %s used in a submit.", this);
+
     return {};
 }
 

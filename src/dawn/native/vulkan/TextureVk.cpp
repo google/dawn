@@ -636,7 +636,7 @@ bool IsSampleCountSupported(const dawn::native::vulkan::Device* device,
 ResultOrError<Ref<Texture>> Texture::Create(Device* device,
                                             const TextureDescriptor* descriptor,
                                             VkImageUsageFlags extraUsages) {
-    Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, TextureState::OwnedInternal));
+    Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
     DAWN_TRY(texture->InitializeAsInternalTexture(extraUsages));
     return std::move(texture);
 }
@@ -647,8 +647,7 @@ ResultOrError<Texture*> Texture::CreateFromExternal(
     const ExternalImageDescriptorVk* descriptor,
     const TextureDescriptor* textureDescriptor,
     external_memory::Service* externalMemoryService) {
-    Ref<Texture> texture =
-        AcquireRef(new Texture(device, textureDescriptor, TextureState::OwnedInternal));
+    Ref<Texture> texture = AcquireRef(new Texture(device, textureDescriptor));
     DAWN_TRY(texture->InitializeFromExternal(descriptor, externalMemoryService));
     return texture.Detach();
 }
@@ -657,13 +656,13 @@ ResultOrError<Texture*> Texture::CreateFromExternal(
 Ref<Texture> Texture::CreateForSwapChain(Device* device,
                                          const TextureDescriptor* descriptor,
                                          VkImage nativeImage) {
-    Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, TextureState::OwnedExternal));
+    Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
     texture->InitializeForSwapChain(nativeImage);
     return texture;
 }
 
-Texture::Texture(Device* device, const TextureDescriptor* descriptor, TextureState state)
-    : TextureBase(device, descriptor, state),
+Texture::Texture(Device* device, const TextureDescriptor* descriptor)
+    : TextureBase(device, descriptor),
       mCombinedAspect(ComputeCombinedAspect(device, GetFormat())),
       // A usage of none will make sure the texture is transitioned before its first use as
       // required by the Vulkan spec.
@@ -993,24 +992,29 @@ void Texture::SetLabelImpl() {
 }
 
 void Texture::DestroyImpl() {
-    if (GetTextureState() == TextureState::OwnedInternal) {
-        Device* device = ToBackend(GetDevice());
+    Device* device = ToBackend(GetDevice());
 
-        // For textures created from a VkImage, the allocation if kInvalid so the Device knows
-        // to skip the deallocation of the (absence of) VkDeviceMemory.
-        device->GetResourceMemoryAllocator()->Deallocate(&mMemoryAllocation);
-
-        if (mHandle != VK_NULL_HANDLE) {
-            device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
-        }
-
-        if (mExternalAllocation != VK_NULL_HANDLE) {
-            device->GetFencedDeleter()->DeleteWhenUnused(mExternalAllocation);
-        }
-
-        mHandle = VK_NULL_HANDLE;
-        mExternalAllocation = VK_NULL_HANDLE;
+    // The VkImage is only allocated if it is backed by a valid memory allocation.
+    // It is not allocated if the Texture was initialized from an external VkImage,
+    // like a swapchin.
+    bool allocatedVkImage = (mMemoryAllocation.GetInfo().mMethod != AllocationMethod::kInvalid ||
+                             mExternalAllocation != VK_NULL_HANDLE) &&
+                            mHandle != VK_NULL_HANDLE;
+    if (allocatedVkImage) {
+        device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
     }
+
+    // For textures created from a VkImage, the allocation is kInvalid so the Device knows
+    // to skip the deallocation of the (absence of) VkDeviceMemory.
+    device->GetResourceMemoryAllocator()->Deallocate(&mMemoryAllocation);
+
+    if (mExternalAllocation != VK_NULL_HANDLE) {
+        device->GetFencedDeleter()->DeleteWhenUnused(mExternalAllocation);
+    }
+
+    mHandle = VK_NULL_HANDLE;
+    mExternalAllocation = VK_NULL_HANDLE;
+
     // For Vulkan, we currently run the base destruction code after the internal changes because
     // of the dependency on the texture state which the base code overwrites too early.
     TextureBase::DestroyImpl();
@@ -1432,7 +1436,7 @@ MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {
     }
 
     // Texture could be destroyed by the time we make a view.
-    if (GetTexture()->GetTextureState() == Texture::TextureState::Destroyed) {
+    if (GetTexture()->IsDestroyed()) {
         return {};
     }
 

@@ -182,7 +182,7 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device, const TextureDescrip
 }
 
 Texture::Texture(Device* device, const TextureDescriptor* descriptor)
-    : Texture(device, descriptor, 0, TextureState::OwnedInternal) {
+    : Texture(device, descriptor, 0) {
     const OpenGLFunctions& gl = device->GetGL();
 
     gl.GenTextures(1, &mHandle);
@@ -207,11 +207,8 @@ uint32_t Texture::GetGenID() const {
     return mGenID;
 }
 
-Texture::Texture(Device* device,
-                 const TextureDescriptor* descriptor,
-                 GLuint handle,
-                 TextureState state)
-    : TextureBase(device, descriptor, state), mHandle(handle) {
+Texture::Texture(Device* device, const TextureDescriptor* descriptor, GLuint handle)
+    : TextureBase(device, descriptor), mHandle(handle) {
     mTarget = TargetForTexture(descriptor);
 }
 
@@ -219,7 +216,7 @@ Texture::~Texture() {}
 
 void Texture::DestroyImpl() {
     TextureBase::DestroyImpl();
-    if (GetTextureState() == TextureState::OwnedInternal) {
+    if (mHandle != 0) {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
         gl.DeleteTextures(1, &mHandle);
         mHandle = 0;
@@ -560,7 +557,7 @@ TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* desc
                                             texture->GetSampleCount());
 
     // Texture could be destroyed by the time we make a view.
-    if (GetTexture()->GetTextureState() == Texture::TextureState::Destroyed) {
+    if (GetTexture()->IsDestroyed()) {
         return;
     }
 

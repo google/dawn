@@ -105,7 +105,7 @@ class Texture final : public d3d::Texture {
                                                       const TextureDescriptor* descriptor,
                                                       Kind kind);
 
-    Texture(Device* device, const TextureDescriptor* descriptor, TextureState state, Kind kind);
+    Texture(Device* device, const TextureDescriptor* descriptor, Kind kind);
     ~Texture() override;
 
     template <typename T>
