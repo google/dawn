@@ -716,7 +716,7 @@ func (e env) fetchDawnDeps() error {
 		"sync",
 		"--force",
 	); err != nil {
-		return fmt.Errorf("failed to fetch dawn dependencies:\n  %w", err)
+		return errFailedToBuild{reason: fmt.Errorf("failed to fetch dawn dependencies:\n  %w", err)}
 	}
 	return nil
 }
