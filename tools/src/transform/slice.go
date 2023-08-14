@@ -30,6 +30,15 @@ func Filter[T any](items []T, pred func(T) bool) []T {
 	return out
 }
 
+// Flatten takes a slice of slices, and returns a linearized slice
+func Flatten[T any, S ~[]T](lists []S) S {
+	flat := S{}
+	for _, list := range lists {
+		flat = append(flat, list...)
+	}
+	return flat
+}
+
 // Slice returns a new slice by transforming each element with the function fn
 func Slice[IN any, OUT any](in []IN, fn func(in IN) (OUT, error)) ([]OUT, error) {
 	out := make([]OUT, len(in))

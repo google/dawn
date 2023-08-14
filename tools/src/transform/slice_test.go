@@ -42,6 +42,14 @@ func TestFilter(t *testing.T) {
 	}
 }
 
+func TestFlatten(t *testing.T) {
+	in := [][]int{{5, 8}, {2}, {4, 6, 5}}
+	out := transform.Flatten(in)
+	if e := check(out, []int{5, 8, 2, 4, 6, 5}); e != nil {
+		t.Error(e)
+	}
+}
+
 func TestSlice(t *testing.T) {
 	in := []int{5, 8, 2, 4}
 	out, err := transform.Slice(in, func(i int) (int, error) {

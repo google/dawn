@@ -38,7 +38,7 @@ func Glob(str string) ([]string, error) {
 	// that to split the 'root' from the match 'glob'.
 	for i, c := range abs {
 		switch c {
-		case '/':
+		case filepath.Separator:
 			root, glob = abs[:i], abs[i+1:]
 		case '*', '?':
 			test, err := match.New(glob)

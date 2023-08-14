@@ -58,7 +58,7 @@ func (c *Cmd) RegisterFlags(ctx context.Context, cfg *common.Config) ([]string, 
 }
 
 func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
-	staleFiles := []string{}
+	staleFiles := common.StaleFiles{}
 	projectRoot := fileutils.DawnRoot()
 
 	// Find clang-format
@@ -174,16 +174,7 @@ func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
 	}
 
 	if len(staleFiles) > 0 {
-		fmt.Println(len(staleFiles), "files need regenerating:")
-		for _, path := range staleFiles {
-			if rel, err := filepath.Rel(projectRoot, path); err == nil {
-				fmt.Println(" •", rel)
-			} else {
-				fmt.Println(" •", path)
-			}
-		}
-		fmt.Println("Regenerate these files with: ./tools/run gen")
-		os.Exit(1)
+		return staleFiles
 	}
 
 	return nil

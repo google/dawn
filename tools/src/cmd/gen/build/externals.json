@@ -1,0 +1,28 @@
+/*
+ * This file is used by `./tools/run gen build` to map include paths to external projects.
+ */
+{
+    "abseil": {
+        "include_pattern": "absl/**",
+    },
+    "spirv-tools": {
+        "include_pattern": "spirv-tools/**",
+        "condition": "tint_build_spv_reader",
+    },
+    "spirv-headers": {
+        "include_pattern": "spirv/**",
+        "condition": "tint_build_spv_reader || tint_build_spv_writer",
+    },
+    "spirv-opt-internal": {
+        "include_pattern": "source/opt/**",
+        "condition": "tint_build_spv_reader",
+    },
+    "glslang": {
+        "include_pattern": "glslang/Public/ShaderLang.h",
+        "condition": "tint_build_glsl_writer",
+    },
+    "glslang-res-limits": {
+        "include_pattern": "glslang/Public/ResourceLimits.h",
+        "condition": "tint_build_glsl_writer",
+    },
+}

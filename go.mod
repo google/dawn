@@ -37,6 +37,7 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/maruel/subcommands v1.1.1 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
+	github.com/mzohreva/gographviz v0.0.0-20180226085351-533f4a37d9c6 // indirect
 	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/texttheater/golang-levenshtein v1.0.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
