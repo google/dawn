@@ -20,7 +20,7 @@
 #include "src/tint/lang/core/function.h"
 
 using namespace tint::core::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::spirv::writer {
 namespace {

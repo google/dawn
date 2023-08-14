@@ -21,7 +21,7 @@
 namespace tint::wgsl::reader {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 using ProgramToIRStoreTest = helpers::IRProgramTest;
 

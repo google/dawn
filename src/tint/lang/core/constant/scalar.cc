@@ -15,12 +15,12 @@
 #include "src/tint/lang/core/constant/scalar.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::core::constant::ScalarBase);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::AInt>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::AFloat>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::i32>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::u32>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::f16>);
-TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::f32>);
+TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::AInt>);
+TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::AFloat>);
+TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::i32>);
+TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::u32>);
+TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::f16>);
+TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<tint::core::f32>);
 TINT_INSTANTIATE_TYPEINFO(tint::core::constant::Scalar<bool>);
 
 namespace tint::core::constant {

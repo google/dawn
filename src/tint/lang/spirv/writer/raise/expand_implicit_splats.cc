@@ -20,7 +20,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::spirv::writer::raise {
 

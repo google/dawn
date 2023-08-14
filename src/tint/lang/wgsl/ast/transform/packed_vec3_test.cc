@@ -18,6 +18,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
@@ -26,6 +27,8 @@
 #include "src/tint/lang/wgsl/sem/struct.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/text/string.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::ast::transform {
 namespace {

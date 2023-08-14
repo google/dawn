@@ -26,6 +26,7 @@
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/constant/value.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
@@ -46,7 +47,8 @@
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string_stream.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::core::constant {
 namespace {
@@ -370,22 +372,22 @@ const Value* ConvertInternal(const Value* root_value,
             [&](const ScalarBase* scalar) {
                 auto* converted = Switch(
                     scalar,
-                    [&](const Scalar<tint::AFloat>* val) {
+                    [&](const Scalar<AFloat>* val) {
                         return ScalarConvert(val, convert->target_ty, ctx);
                     },
-                    [&](const Scalar<tint::AInt>* val) {
+                    [&](const Scalar<AInt>* val) {
                         return ScalarConvert(val, convert->target_ty, ctx);
                     },
-                    [&](const Scalar<tint::u32>* val) {
+                    [&](const Scalar<u32>* val) {
                         return ScalarConvert(val, convert->target_ty, ctx);
                     },
-                    [&](const Scalar<tint::i32>* val) {
+                    [&](const Scalar<i32>* val) {
                         return ScalarConvert(val, convert->target_ty, ctx);
                     },
-                    [&](const Scalar<tint::f32>* val) {
+                    [&](const Scalar<f32>* val) {
                         return ScalarConvert(val, convert->target_ty, ctx);
                     },
-                    [&](const Scalar<tint::f16>* val) {
+                    [&](const Scalar<f16>* val) {
                         return ScalarConvert(val, convert->target_ty, ctx);
                     },
                     [&](const Scalar<bool>* val) {

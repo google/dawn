@@ -22,7 +22,7 @@
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/utils/ice/ice.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::ast::transform {
 namespace {

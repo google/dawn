@@ -18,6 +18,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
@@ -26,6 +27,8 @@
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/math/hash.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DecomposeStridedMatrix);
 

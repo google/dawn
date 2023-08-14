@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
@@ -28,7 +29,8 @@
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CanonicalizeEntryPointIO);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CanonicalizeEntryPointIO::Config);

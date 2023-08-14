@@ -20,7 +20,7 @@
 namespace tint::ir {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 using IR_IfTest = IRTestHelper;
 
 TEST_F(IR_IfTest, Usage) {

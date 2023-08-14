@@ -13,14 +13,16 @@
 // limitations under the License.
 
 #include "gtest/gtest-spi.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 #include "src/tint/lang/core/ir/value.h"
 
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
+
 namespace tint::ir {
 namespace {
-
-using namespace tint::number_suffixes;  // NOLINT
 
 using IR_ConstantTest = IRTestHelper;
 

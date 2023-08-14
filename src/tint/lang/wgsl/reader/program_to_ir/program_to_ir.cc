@@ -20,6 +20,7 @@
 #include <variant>
 #include <vector>
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/exit_if.h"
@@ -104,10 +105,10 @@
 #include "src/tint/utils/result/result.h"
 #include "src/tint/utils/rtti/switch.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::wgsl::reader {
-
 namespace {
 
 using ResultType = tint::Result<ir::Module, diag::List>;

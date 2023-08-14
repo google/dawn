@@ -25,7 +25,7 @@
 namespace tint::ast::transform {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 // Inherit from Transform so we have access to protected methods
 struct CreateASTTypeForTest : public testing::Test, public Transform {

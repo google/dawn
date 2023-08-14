@@ -17,7 +17,7 @@
 namespace tint::ast {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 using StructMemberOffsetAttributeTest = TestHelper;
 
 TEST_F(StructMemberOffsetAttributeTest, Creation) {

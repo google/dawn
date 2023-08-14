@@ -24,6 +24,7 @@
 
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/constant/value.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
@@ -86,7 +87,8 @@
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::glsl::writer {
 namespace {

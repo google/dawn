@@ -18,6 +18,7 @@
 #include "src/tint/lang/core/constant/composite.h"
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/constant/splat.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/bitcast.h"
@@ -56,6 +57,8 @@
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::ir {
 namespace {

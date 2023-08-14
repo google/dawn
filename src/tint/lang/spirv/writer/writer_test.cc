@@ -21,7 +21,7 @@
 namespace tint::spirv::writer {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 TEST_F(SpirvWriterTest, ModuleHeader) {
     auto spirv = writer_.Generate();

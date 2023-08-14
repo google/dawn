@@ -24,7 +24,7 @@
 namespace tint::wgsl {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 class IRToProgramRoundtripTest : public helpers::IRProgramTest {
   public:

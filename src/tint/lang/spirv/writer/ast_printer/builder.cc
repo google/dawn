@@ -19,6 +19,7 @@
 
 #include "spirv/unified1/GLSL.std.450.h"
 #include "src/tint/lang/core/constant/value.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
@@ -52,6 +53,8 @@
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/macros/defer.h"
 #include "src/tint/utils/text/string_stream.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::spirv::writer {
 namespace {

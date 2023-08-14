@@ -22,7 +22,7 @@
 namespace tint::resolver {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 struct ResolverPtrRefTest : public resolver::TestHelper, public testing::Test {};
 

@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
@@ -31,8 +32,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ArrayLengthFromUniform);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ArrayLengthFromUniform::Config);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ArrayLengthFromUniform::Result);
 
+using namespace tint::core::fluent_types;  // NOLINT
+                                           //
 namespace tint::ast::transform {
-
 namespace {
 
 bool ShouldRun(const Program* program) {

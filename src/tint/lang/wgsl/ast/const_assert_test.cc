@@ -15,7 +15,10 @@
 #include "src/tint/lang/wgsl/ast/const_assert.h"
 
 #include "gtest/gtest-spi.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::ast {
 namespace {

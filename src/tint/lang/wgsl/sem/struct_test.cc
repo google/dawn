@@ -19,7 +19,7 @@
 namespace tint::sem {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 using SemStructTest = TestHelper;
 
 TEST_F(SemStructTest, Creation) {

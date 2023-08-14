@@ -19,6 +19,7 @@
 
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/extension.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/interpolation_sampling.h"
 #include "src/tint/lang/core/interpolation_type.h"
 #include "src/tint/lang/core/type/array.h"
@@ -59,8 +60,9 @@
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string.h"
 
-namespace tint::inspector {
+using namespace tint::core::fluent_types;  // NOLINT
 
+namespace tint::inspector {
 namespace {
 
 void AppendResourceBindings(std::vector<ResourceBinding>* dest,

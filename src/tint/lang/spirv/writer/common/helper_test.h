@@ -38,7 +38,7 @@
 
 namespace tint::spirv::writer {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 // Helper macro to check whether the SPIR-V output contains an instruction, dumping the full output
 // if the instruction was not present.
@@ -204,13 +204,13 @@ class SpirvWriterTestHelperBase : public BASE {
             case kBool:
                 return b.Constant(true);
             case kI32:
-                return b.Constant(i32(value));
+                return b.Constant(core::i32(value));
             case kU32:
-                return b.Constant(u32(value));
+                return b.Constant(core::u32(value));
             case kF32:
-                return b.Constant(f32(value));
+                return b.Constant(core::f32(value));
             case kF16:
-                return b.Constant(f16(value));
+                return b.Constant(core::f16(value));
         }
         return nullptr;
     }

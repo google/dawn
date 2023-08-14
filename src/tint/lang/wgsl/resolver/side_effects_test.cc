@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/extension.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
@@ -25,7 +26,8 @@
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/utils/containers/vector.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::resolver {
 namespace {

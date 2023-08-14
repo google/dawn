@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/abstract_int.h"
 #include "src/tint/lang/wgsl/ast/transform/hoist_to_decl_before.h"
 #include "src/tint/lang/wgsl/ast/traverse_expressions.h"
@@ -39,7 +40,8 @@
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DirectVariableAccess);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DirectVariableAccess::Config);
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace {
 

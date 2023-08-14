@@ -20,6 +20,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
@@ -33,12 +34,13 @@
 #include "src/tint/utils/containers/unique_vector.h"
 #include "src/tint/utils/rtti/switch.h"
 
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
+
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::SpirvAtomic);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::SpirvAtomic::Stub);
 
 namespace tint::ast::transform {
-
-using namespace tint::number_suffixes;  // NOLINT
 
 /// PIMPL state for the transform
 struct SpirvAtomic::State {

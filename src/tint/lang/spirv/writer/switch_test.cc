@@ -16,7 +16,7 @@
 
 #include "src/tint/lang/spirv/writer/common/helper_test.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::spirv::writer {
 namespace {

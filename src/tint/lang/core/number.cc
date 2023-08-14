@@ -22,7 +22,7 @@
 #include "src/tint/utils/memory/bitcast.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint {
+namespace tint::core {
 namespace {
 
 constexpr uint16_t kF16Nan = 0x7e00u;
@@ -333,7 +333,7 @@ uint16_t f16::BitsRepresentation() const {
 }
 
 // static
-Number<tint::detail::NumberKindF16> f16::FromBits(uint16_t bits) {
+core::Number<core::detail::NumberKindF16> f16::FromBits(uint16_t bits) {
     // Assert we use binary32 (i.e. float) as underlying type, which has 4 bytes.
     static_assert(std::is_same<f16::type, float>());
 
@@ -401,4 +401,4 @@ Number<tint::detail::NumberKindF16> f16::FromBits(uint16_t bits) {
     return f16(tint::Bitcast<f16::type>(val));
 }
 
-}  // namespace tint
+}  // namespace tint::core

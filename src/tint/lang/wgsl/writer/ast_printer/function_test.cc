@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
@@ -20,7 +21,8 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::wgsl::writer {
 namespace {

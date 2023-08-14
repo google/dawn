@@ -19,7 +19,7 @@
 namespace tint::core::type {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 using TypeStructTest = TestHelper;
 
 TEST_F(TypeStructTest, Creation) {

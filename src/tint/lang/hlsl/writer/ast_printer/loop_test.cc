@@ -15,7 +15,7 @@
 #include "src/tint/lang/hlsl/writer/ast_printer/helper_test.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::hlsl::writer {
 namespace {

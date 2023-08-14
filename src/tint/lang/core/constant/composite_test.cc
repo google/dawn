@@ -16,11 +16,13 @@
 
 #include "src/tint/lang/core/constant/helper_test.h"
 #include "src/tint/lang/core/constant/scalar.h"
+#include "src/tint/lang/core/fluent_types.h"
+
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::core::constant {
 namespace {
-
-using namespace tint::number_suffixes;  // NOLINT
 
 using ConstantTest_Composite = TestHelper;
 
@@ -74,10 +76,10 @@ TEST_F(ConstantTest_Composite, Index) {
     ASSERT_NE(composite->Index(1), nullptr);
     ASSERT_EQ(composite->Index(2), nullptr);
 
-    EXPECT_TRUE(composite->Index(0)->Is<Scalar<tint::f32>>());
-    EXPECT_EQ(composite->Index(0)->As<Scalar<tint::f32>>()->ValueOf(), 1.0);
-    EXPECT_TRUE(composite->Index(1)->Is<Scalar<tint::f32>>());
-    EXPECT_EQ(composite->Index(1)->As<Scalar<tint::f32>>()->ValueOf(), 0.0);
+    EXPECT_TRUE(composite->Index(0)->Is<Scalar<f32>>());
+    EXPECT_EQ(composite->Index(0)->As<Scalar<f32>>()->ValueOf(), 1.0);
+    EXPECT_TRUE(composite->Index(1)->Is<Scalar<f32>>());
+    EXPECT_EQ(composite->Index(1)->As<Scalar<f32>>()->ValueOf(), 0.0);
 }
 
 TEST_F(ConstantTest_Composite, Clone) {

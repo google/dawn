@@ -16,7 +16,7 @@
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/utils/text/string_stream.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::hlsl::writer {
 namespace {

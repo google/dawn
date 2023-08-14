@@ -16,11 +16,13 @@
 
 #include "src/tint/lang/core/constant/helper_test.h"
 #include "src/tint/lang/core/constant/scalar.h"
+#include "src/tint/lang/core/fluent_types.h"
+
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::core::constant {
 namespace {
-
-using namespace tint::number_suffixes;  // NOLINT
 
 using ConstantTest_Splat = TestHelper;
 
@@ -66,8 +68,8 @@ TEST_F(ConstantTest_Splat, Index) {
     ASSERT_NE(sp->Index(1), nullptr);
     ASSERT_EQ(sp->Index(2), nullptr);
 
-    EXPECT_EQ(sp->Index(0)->As<Scalar<tint::f32>>()->ValueOf(), 1.f);
-    EXPECT_EQ(sp->Index(1)->As<Scalar<tint::f32>>()->ValueOf(), 1.f);
+    EXPECT_EQ(sp->Index(0)->As<Scalar<f32>>()->ValueOf(), 1.f);
+    EXPECT_EQ(sp->Index(1)->As<Scalar<f32>>()->ValueOf(), 1.f);
 }
 
 TEST_F(ConstantTest_Splat, Clone) {
@@ -81,7 +83,7 @@ TEST_F(ConstantTest_Splat, Clone) {
     auto* r = sp->Clone(ctx);
     ASSERT_NE(r, nullptr);
     EXPECT_TRUE(r->type->Is<core::type::Vector>());
-    EXPECT_TRUE(r->el->Is<Scalar<tint::i32>>());
+    EXPECT_TRUE(r->el->Is<Scalar<i32>>());
     EXPECT_EQ(r->count, 2u);
 }
 

@@ -19,7 +19,7 @@
 namespace tint::ast {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 using IndexAttributeTest = TestHelper;
 
 TEST_F(IndexAttributeTest, Creation) {

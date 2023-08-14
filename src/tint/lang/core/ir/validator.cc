@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/bitcast.h"
@@ -63,6 +64,8 @@
 #if TINT_DUMP_IR_WHEN_VALIDATING
 #include <iostream>
 #endif
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::ir {
 

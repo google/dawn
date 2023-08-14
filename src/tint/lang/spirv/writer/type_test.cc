@@ -15,6 +15,7 @@
 // GEN_BUILD:CONDITION(tint_build_ir)
 
 #include "src/tint/lang/core/type/type.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/depth_texture.h"
@@ -27,6 +28,8 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/spirv/writer/common/helper_test.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::spirv::writer {
 namespace {

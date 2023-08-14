@@ -25,10 +25,13 @@
 #include <type_traits>
 #include <utility>
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/number.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/strconv/parse_num.h"
 #include "src/tint/utils/text/unicode.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::wgsl::reader {
 namespace {
@@ -450,7 +453,7 @@ std::optional<Token> Lexer::try_float() {
     advance(end - start);
 
     if (has_f_suffix) {
-        auto f = CheckedConvert<f32>(AFloat(value));
+        auto f = core::CheckedConvert<f32>(AFloat(value));
         if (!overflow && f) {
             advance(1);
             end_source(source);
@@ -460,7 +463,7 @@ std::optional<Token> Lexer::try_float() {
     }
 
     if (has_h_suffix) {
-        auto f = CheckedConvert<f16>(AFloat(value));
+        auto f = core::CheckedConvert<f16>(AFloat(value));
         if (!overflow && f) {
             advance(1);
             end_source(source);
@@ -894,7 +897,7 @@ Token Lexer::build_token_from_int_if_possible(Source source,
     advance(static_cast<size_t>(res.ptr - start_ptr) + prefix_count);
 
     if (matches(pos(), 'u')) {
-        if (!overflow && CheckedConvert<u32>(AInt(value))) {
+        if (!overflow && core::CheckedConvert<u32>(AInt(value))) {
             advance(1);
             end_source(source);
             return {Token::Type::kIntLiteral_U, source, value};
@@ -903,7 +906,7 @@ Token Lexer::build_token_from_int_if_possible(Source source,
     }
 
     if (matches(pos(), 'i')) {
-        if (!overflow && CheckedConvert<i32>(AInt(value))) {
+        if (!overflow && core::CheckedConvert<i32>(AInt(value))) {
             advance(1);
             end_source(source);
             return {Token::Type::kIntLiteral_I, source, value};

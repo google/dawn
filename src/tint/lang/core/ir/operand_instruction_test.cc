@@ -18,7 +18,7 @@
 namespace tint::ir {
 namespace {
 
-using namespace tint::number_suffixes;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;  // NOLINT
 
 using IR_OperandInstructionTest = IRTestHelper;

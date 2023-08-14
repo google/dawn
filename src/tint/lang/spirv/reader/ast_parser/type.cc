@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/utils/containers/map.h"
@@ -50,9 +51,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Named);
 TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Alias);
 TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::ast_parser::Struct);
 
-namespace tint::spirv::reader::ast_parser {
+using namespace tint::core::fluent_types;  // NOLINT
 
+namespace tint::spirv::reader::ast_parser {
 namespace {
+
 struct PointerHasher {
     size_t operator()(const Pointer& t) const { return Hash(t.address_space, t.type, t.access); }
 };

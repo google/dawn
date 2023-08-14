@@ -15,15 +15,16 @@
 #include "src/tint/lang/wgsl/resolver/resolver.h"
 
 #include "gmock/gmock.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
 
+using namespace tint::core::fluent_types;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+
 namespace tint::resolver {
 namespace {
-
-using namespace tint::core::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;     // NOLINT
 
 using ResolverIndexAccessorTest = ResolverTest;
 

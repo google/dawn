@@ -21,7 +21,10 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::inspector {
 

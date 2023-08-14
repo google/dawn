@@ -94,17 +94,17 @@ class Manager final {
     /// the same pointer is returned.
     template <typename T, typename... ARGS>
     auto* Get(ARGS&&... args) {
-        if constexpr (std::is_same_v<T, tint::AInt>) {
+        if constexpr (std::is_same_v<T, tint::core::AInt>) {
             return Get<core::type::AbstractInt>(std::forward<ARGS>(args)...);
-        } else if constexpr (std::is_same_v<T, tint::AFloat>) {
+        } else if constexpr (std::is_same_v<T, tint::core::AFloat>) {
             return Get<core::type::AbstractFloat>(std::forward<ARGS>(args)...);
-        } else if constexpr (std::is_same_v<T, tint::i32>) {
+        } else if constexpr (std::is_same_v<T, tint::core::i32>) {
             return Get<core::type::I32>(std::forward<ARGS>(args)...);
-        } else if constexpr (std::is_same_v<T, tint::u32>) {
+        } else if constexpr (std::is_same_v<T, tint::core::u32>) {
             return Get<core::type::U32>(std::forward<ARGS>(args)...);
-        } else if constexpr (std::is_same_v<T, tint::f32>) {
+        } else if constexpr (std::is_same_v<T, tint::core::f32>) {
             return Get<core::type::F32>(std::forward<ARGS>(args)...);
-        } else if constexpr (std::is_same_v<T, tint::f16>) {
+        } else if constexpr (std::is_same_v<T, tint::core::f16>) {
             return Get<core::type::F16>(std::forward<ARGS>(args)...);
         } else if constexpr (std::is_same_v<T, bool>) {
             return Get<core::type::Bool>(std::forward<ARGS>(args)...);

@@ -13,17 +13,19 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/msl/writer/ast_printer/helper_test.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
+
 namespace tint::msl::writer {
 namespace {
 
 using ::testing::HasSubstr;
-using namespace tint::number_suffixes;  // NOLINT
-
 using MslSanitizerTest = TestHelper;
 
 TEST_F(MslSanitizerTest, Call_ArrayLength) {

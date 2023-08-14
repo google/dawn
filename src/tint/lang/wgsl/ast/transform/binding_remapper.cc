@@ -18,6 +18,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/ast/disable_validation_attribute.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
@@ -28,6 +29,8 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::BindingRemapper);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::BindingRemapper::Remappings);
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::ast::transform {
 

@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
@@ -30,6 +31,8 @@
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/containers/unique_vector.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ZeroInitWorkgroupMemory);
 

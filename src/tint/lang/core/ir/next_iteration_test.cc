@@ -19,7 +19,7 @@
 namespace tint::ir {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 using IR_NextIterationTest = IRTestHelper;
 
 TEST_F(IR_NextIterationTest, Fail_NullLoop) {

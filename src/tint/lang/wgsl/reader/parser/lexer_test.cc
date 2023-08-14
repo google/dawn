@@ -19,7 +19,10 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/number.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::wgsl::reader {
 namespace {

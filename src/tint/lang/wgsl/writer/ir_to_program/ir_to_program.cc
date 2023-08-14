@@ -20,6 +20,7 @@
 
 #include "src/tint/lang/core/builtin.h"
 #include "src/tint/lang/core/constant/splat.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/bitcast.h"
@@ -85,8 +86,9 @@
     nesting_depth_++;    \
     TINT_DEFER(nesting_depth_--)
 
-namespace tint::wgsl::writer {
+using namespace tint::core::fluent_types;  // NOLINT
 
+namespace tint::wgsl::writer {
 namespace {
 
 class State {

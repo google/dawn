@@ -27,7 +27,7 @@
 #include "src/tint/utils/id/generation_id.h"
 #include "src/tint/utils/symbol/symbol_table.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::core::type {
 namespace {

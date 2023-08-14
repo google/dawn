@@ -18,6 +18,7 @@
 #include <string>
 
 #include "src/tint/lang/core/builtin.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/core/type/reference.h"
@@ -28,6 +29,8 @@
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Transform);
 

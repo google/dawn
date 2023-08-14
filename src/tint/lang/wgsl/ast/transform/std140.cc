@@ -19,6 +19,7 @@
 #include <utility>
 #include <variant>
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
@@ -34,7 +35,8 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Std140);
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace {
 

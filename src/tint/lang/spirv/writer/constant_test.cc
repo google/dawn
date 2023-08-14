@@ -14,12 +14,14 @@
 
 // GEN_BUILD:CONDITION(tint_build_ir)
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/spirv/writer/common/helper_test.h"
 
 namespace tint::spirv::writer {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 TEST_F(SpirvWriterTest, Constant_Bool) {
     writer_.Constant(b.Constant(true));

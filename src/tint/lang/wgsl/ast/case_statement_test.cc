@@ -19,7 +19,7 @@
 #include "src/tint/lang/wgsl/ast/helper_test.h"
 #include "src/tint/lang/wgsl/ast/if_statement.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::ast {
 namespace {

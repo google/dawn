@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/writer/ast_printer/helper_test.h"
 #include "src/tint/utils/text/string_stream.h"
 
 #include "gmock/gmock.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::wgsl::writer {
 namespace {

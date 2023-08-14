@@ -20,12 +20,15 @@
 #include <utility>
 
 #include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/ast/transform/canonicalize_entry_point_io.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/utils/math/hash.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::NumWorkgroupsFromUniform);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::NumWorkgroupsFromUniform::Config);

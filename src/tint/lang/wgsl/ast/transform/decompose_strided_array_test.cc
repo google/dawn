@@ -18,6 +18,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
@@ -25,7 +26,8 @@
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::ast::transform {
 namespace {

@@ -16,7 +16,7 @@
 
 #include "src/tint/lang/core/constant/scalar.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::core::constant::test {
 namespace {

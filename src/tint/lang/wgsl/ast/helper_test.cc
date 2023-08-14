@@ -16,7 +16,7 @@
 
 namespace tint::ast {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 using AstCheckIdentifierTest = TestHelper;
 

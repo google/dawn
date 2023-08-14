@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "source/opt/build_module.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
@@ -34,8 +35,9 @@
 #include "src/tint/utils/containers/unique_vector.h"
 #include "src/tint/utils/rtti/switch.h"
 
-namespace tint::spirv::reader::ast_parser {
+using namespace tint::core::fluent_types;  // NOLINT
 
+namespace tint::spirv::reader::ast_parser {
 namespace {
 
 // Input SPIR-V needs only to conform to Vulkan 1.1 requirements.
@@ -2022,7 +2024,7 @@ TypedExpression ASTParser::MakeConstantExpressionForScalarSpirvConstant(
                                        ast::IntLiteralExpression::Suffix::kU)};
         },
         [&](const F32*) {
-            if (auto f = CheckedConvert<f32>(AFloat(spirv_const->GetFloat()))) {
+            if (auto f = core::CheckedConvert<f32>(AFloat(spirv_const->GetFloat()))) {
                 return TypedExpression{ty_.F32(),
                                        create<ast::FloatLiteralExpression>(
                                            source, static_cast<double>(spirv_const->GetFloat()),

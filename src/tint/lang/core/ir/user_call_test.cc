@@ -21,7 +21,7 @@
 namespace tint::ir {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 using IR_UserCallTest = IRTestHelper;
 
 TEST_F(IR_UserCallTest, Usage) {

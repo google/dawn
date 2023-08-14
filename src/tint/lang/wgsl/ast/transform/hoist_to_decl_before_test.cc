@@ -15,6 +15,7 @@
 #include <utility>
 
 #include "gtest/gtest-spi.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/lang/wgsl/ast/transform/hoist_to_decl_before.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
@@ -24,7 +25,8 @@
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::ast::transform {
 namespace {

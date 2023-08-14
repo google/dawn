@@ -22,7 +22,7 @@
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/struct.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::ir::transform {
 

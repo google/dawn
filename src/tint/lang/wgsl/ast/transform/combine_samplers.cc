@@ -41,7 +41,7 @@ bool IsGlobal(const tint::sem::VariablePair& pair) {
 
 namespace tint::ast::transform {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 CombineSamplers::BindingInfo::BindingInfo(const BindingMap& map, const BindingPoint& placeholder)
     : binding_map(map), placeholder_binding_point(placeholder) {}

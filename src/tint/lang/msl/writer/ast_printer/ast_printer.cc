@@ -23,6 +23,7 @@
 
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/constant/value.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
 #include "src/tint/lang/core/type/bool.h"
@@ -87,6 +88,8 @@
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 #include "src/tint/utils/text/string_stream.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::msl::writer {
 namespace {

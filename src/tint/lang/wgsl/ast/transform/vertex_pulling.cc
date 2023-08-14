@@ -37,7 +37,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::VertexPulling::Config);
 namespace tint::ast::transform {
 
 using namespace tint::core::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace {
 

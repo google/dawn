@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "spirv/unified1/spirv.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
@@ -32,7 +33,8 @@
 TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::raise::LiteralOperand);
 TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::raise::SampledImage);
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::spirv::writer::raise {
 

@@ -14,12 +14,15 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/lang/core/constant/scalar.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/wgsl/ast/case_selector.h"
 #include "src/tint/lang/wgsl/ast/int_literal_expression.h"
 #include "src/tint/lang/wgsl/helpers/ir_program_test.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::wgsl::reader {
 namespace {
@@ -39,7 +42,7 @@ ir::Value* GlobalVarInitializer(ir::Module& m) {
     return var->Initializer();
 }
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 using ProgramToIRLiteralTest = helpers::IRProgramTest;
 

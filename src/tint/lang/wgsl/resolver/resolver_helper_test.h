@@ -142,7 +142,8 @@ template <typename TO>
 using alias3 = alias<TO, 3>;
 
 /// A scalar value
-using Scalar = std::variant<i32, u32, f32, f16, AInt, AFloat, bool>;
+using Scalar =
+    std::variant<core::i32, core::u32, core::f32, core::f16, core::AInt, core::AFloat, bool>;
 
 /// Returns current variant value in `s` cast to type `T`
 template <typename T>
@@ -212,9 +213,9 @@ struct DataType<bool> {
 
 /// Helper for building i32 types and expressions
 template <>
-struct DataType<i32> {
+struct DataType<core::i32> {
     /// The element type
-    using ElementType = i32;
+    using ElementType = core::i32;
 
     /// false as i32 is not a composite type
     static constexpr bool is_composite = false;
@@ -231,7 +232,7 @@ struct DataType<i32> {
     /// @param args args of size 1 with the i32 value to init with
     /// @return a new AST i32 literal value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, VectorRef<Scalar> args) {
-        return b.Expr(std::get<i32>(args[0]));
+        return b.Expr(std::get<core::i32>(args[0]));
     }
     /// @param b the ProgramBuilder
     /// @param v arg of type double that will be cast to i32.
@@ -245,9 +246,9 @@ struct DataType<i32> {
 
 /// Helper for building u32 types and expressions
 template <>
-struct DataType<u32> {
+struct DataType<core::u32> {
     /// The element type
-    using ElementType = u32;
+    using ElementType = core::u32;
 
     /// false as u32 is not a composite type
     static constexpr bool is_composite = false;
@@ -264,7 +265,7 @@ struct DataType<u32> {
     /// @param args args of size 1 with the u32 value to init with
     /// @return a new AST u32 literal value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, VectorRef<Scalar> args) {
-        return b.Expr(std::get<u32>(args[0]));
+        return b.Expr(std::get<core::u32>(args[0]));
     }
     /// @param b the ProgramBuilder
     /// @param v arg of type double that will be cast to u32.
@@ -278,9 +279,9 @@ struct DataType<u32> {
 
 /// Helper for building f32 types and expressions
 template <>
-struct DataType<f32> {
+struct DataType<core::f32> {
     /// The element type
-    using ElementType = f32;
+    using ElementType = core::f32;
 
     /// false as f32 is not a composite type
     static constexpr bool is_composite = false;
@@ -297,13 +298,13 @@ struct DataType<f32> {
     /// @param args args of size 1 with the f32 value to init with
     /// @return a new AST f32 literal value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, VectorRef<Scalar> args) {
-        return b.Expr(std::get<f32>(args[0]));
+        return b.Expr(std::get<core::f32>(args[0]));
     }
     /// @param b the ProgramBuilder
     /// @param v arg of type double that will be cast to f32.
     /// @return a new AST f32 literal value expression
     static inline const ast::Expression* ExprFromDouble(ProgramBuilder& b, double v) {
-        return Expr(b, Vector<Scalar, 1>{static_cast<f32>(v)});
+        return Expr(b, Vector<Scalar, 1>{static_cast<core::f32>(v)});
     }
     /// @returns the WGSL name for the type
     static inline std::string Name() { return "f32"; }
@@ -311,9 +312,9 @@ struct DataType<f32> {
 
 /// Helper for building f16 types and expressions
 template <>
-struct DataType<f16> {
+struct DataType<core::f16> {
     /// The element type
-    using ElementType = f16;
+    using ElementType = core::f16;
 
     /// false as f16 is not a composite type
     static constexpr bool is_composite = false;
@@ -330,7 +331,7 @@ struct DataType<f16> {
     /// @param args args of size 1 with the f16 value to init with
     /// @return a new AST f16 literal value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, VectorRef<Scalar> args) {
-        return b.Expr(std::get<f16>(args[0]));
+        return b.Expr(std::get<core::f16>(args[0]));
     }
     /// @param b the ProgramBuilder
     /// @param v arg of type double that will be cast to f16.
@@ -344,9 +345,9 @@ struct DataType<f16> {
 
 /// Helper for building abstract float types and expressions
 template <>
-struct DataType<AFloat> {
+struct DataType<core::AFloat> {
     /// The element type
-    using ElementType = AFloat;
+    using ElementType = core::AFloat;
 
     /// false as AFloat is not a composite type
     static constexpr bool is_composite = false;
@@ -362,7 +363,7 @@ struct DataType<AFloat> {
     /// @param args args of size 1 with the abstract-float value to init with
     /// @return a new AST abstract-float literal value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, VectorRef<Scalar> args) {
-        return b.Expr(std::get<AFloat>(args[0]));
+        return b.Expr(std::get<core::AFloat>(args[0]));
     }
     /// @param b the ProgramBuilder
     /// @param v arg of type double that will be cast to AFloat.
@@ -376,9 +377,9 @@ struct DataType<AFloat> {
 
 /// Helper for building abstract integer types and expressions
 template <>
-struct DataType<AInt> {
+struct DataType<core::AInt> {
     /// The element type
-    using ElementType = AInt;
+    using ElementType = core::AInt;
 
     /// false as AFloat is not a composite type
     static constexpr bool is_composite = false;
@@ -394,7 +395,7 @@ struct DataType<AInt> {
     /// @param args args of size 1 with the abstract-int value to init with
     /// @return a new AST abstract-int literal value expression
     static inline const ast::Expression* Expr(ProgramBuilder& b, VectorRef<Scalar> args) {
-        return b.Expr(std::get<AInt>(args[0]));
+        return b.Expr(std::get<core::AInt>(args[0]));
     }
     /// @param b the ProgramBuilder
     /// @param v arg of type double that will be cast to AInt.
@@ -634,7 +635,7 @@ struct DataType<core::fluent_types::array<T, N>> {
     /// @return a new AST array type
     static inline ast::Type AST(ProgramBuilder& b) {
         if (auto ast = DataType<T>::AST(b)) {
-            return b.ty.array(ast, u32(N));
+            return b.ty.array(ast, core::u32(N));
         }
         return b.ty.array<core::fluent_types::Infer>();
     }
@@ -732,9 +733,9 @@ struct Value {
         return Value{
             std::move(args),          //
             CreatePtrsFor<T>(),       //
-            tint::IsAbstract<EL_TY>,  //
-            tint::IsIntegral<EL_TY>,  //
-            tint::FriendlyName<EL_TY>(),
+            core::IsAbstract<EL_TY>,  //
+            core::IsIntegral<EL_TY>,  //
+            core::FriendlyName<EL_TY>(),
         };
     }
 

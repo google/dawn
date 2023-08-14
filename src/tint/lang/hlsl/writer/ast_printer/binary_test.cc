@@ -21,7 +21,7 @@ namespace tint::hlsl::writer {
 namespace {
 
 using namespace tint::core::fluent_types;  // NOLINT
-using namespace tint::number_suffixes;     // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 using HlslASTPrinterTest_Binary = TestHelper;
 

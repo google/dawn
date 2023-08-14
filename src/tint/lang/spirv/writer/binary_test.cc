@@ -16,9 +16,11 @@
 
 #include "src/tint/lang/spirv/writer/common/helper_test.h"
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/binary.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::spirv::writer {
 namespace {

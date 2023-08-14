@@ -24,7 +24,7 @@
 #include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/rtti/switch.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint {
 

@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "src/tint/lang/core/builtin.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/vector.h"
@@ -39,7 +40,8 @@
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::PackedVec3);
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::ast::transform {
 

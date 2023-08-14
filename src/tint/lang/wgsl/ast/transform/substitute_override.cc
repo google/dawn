@@ -17,6 +17,7 @@
 #include <functional>
 #include <utility>
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/function.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
@@ -25,6 +26,8 @@
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/rtti/switch.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::SubstituteOverride);
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::SubstituteOverride::Config);

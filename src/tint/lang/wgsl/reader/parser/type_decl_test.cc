@@ -20,7 +20,7 @@
 namespace tint::wgsl::reader {
 namespace {
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 TEST_F(WGSLParserTest, TypeDecl_Invalid) {
     auto p = parser("1234");

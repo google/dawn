@@ -18,6 +18,7 @@
 #include <array>
 
 #include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/function.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
@@ -141,7 +142,8 @@
 //           constructs
 //
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::spirv::reader::ast_parser {
 

@@ -221,22 +221,22 @@ class Builder {
     /// Creates a ir::Constant for an i32 Scalar
     /// @param v the value
     /// @returns the new constant
-    ir::Constant* Constant(i32 v) { return Constant(ConstantValue(v)); }
+    ir::Constant* Constant(core::i32 v) { return Constant(ConstantValue(v)); }
 
     /// Creates a ir::Constant for a u32 Scalar
     /// @param v the value
     /// @returns the new constant
-    ir::Constant* Constant(u32 v) { return Constant(ConstantValue(v)); }
+    ir::Constant* Constant(core::u32 v) { return Constant(ConstantValue(v)); }
 
     /// Creates a ir::Constant for a f32 Scalar
     /// @param v the value
     /// @returns the new constant
-    ir::Constant* Constant(f32 v) { return Constant(ConstantValue(v)); }
+    ir::Constant* Constant(core::f32 v) { return Constant(ConstantValue(v)); }
 
     /// Creates a ir::Constant for a f16 Scalar
     /// @param v the value
     /// @returns the new constant
-    ir::Constant* Constant(f16 v) { return Constant(ConstantValue(v)); }
+    ir::Constant* Constant(core::f16 v) { return Constant(ConstantValue(v)); }
 
     /// Creates a ir::Constant for a bool Scalar
     /// @param v the value
@@ -254,22 +254,22 @@ class Builder {
     /// Creates a core::constant::Value for an i32 Scalar
     /// @param v the value
     /// @returns the new constant
-    const core::constant::Value* ConstantValue(i32 v) { return ir.constant_values.Get(v); }
+    const core::constant::Value* ConstantValue(core::i32 v) { return ir.constant_values.Get(v); }
 
     /// Creates a core::constant::Value for a u32 Scalar
     /// @param v the value
     /// @returns the new constant
-    const core::constant::Value* ConstantValue(u32 v) { return ir.constant_values.Get(v); }
+    const core::constant::Value* ConstantValue(core::u32 v) { return ir.constant_values.Get(v); }
 
     /// Creates a core::constant::Value for a f32 Scalar
     /// @param v the value
     /// @returns the new constant
-    const core::constant::Value* ConstantValue(f32 v) { return ir.constant_values.Get(v); }
+    const core::constant::Value* ConstantValue(core::f32 v) { return ir.constant_values.Get(v); }
 
     /// Creates a core::constant::Value for a f16 Scalar
     /// @param v the value
     /// @returns the new constant
-    const core::constant::Value* ConstantValue(f16 v) { return ir.constant_values.Get(v); }
+    const core::constant::Value* ConstantValue(core::f16 v) { return ir.constant_values.Get(v); }
 
     /// Creates a core::constant::Value for a bool Scalar
     /// @param v the value
@@ -307,7 +307,7 @@ class Builder {
         using D = std::decay_t<T>;
         constexpr bool is_null = std::is_same_v<T, std::nullptr_t>;
         constexpr bool is_ptr = std::is_pointer_v<D>;
-        constexpr bool is_numeric = IsNumeric<D>;
+        constexpr bool is_numeric = core::IsNumeric<D>;
         static_assert(is_null || is_ptr || is_numeric, "invalid argument type for Value()");
 
         if constexpr (is_null) {

@@ -15,6 +15,7 @@
 #include "src/tint/lang/core/access.h"
 #include "src/tint/lang/core/address_space.h"
 #include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/interpolation_sampling.h"
 #include "src/tint/lang/core/interpolation_type.h"
 #include "src/tint/lang/core/texel_format.h"
@@ -23,7 +24,8 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::resolver {
 namespace {

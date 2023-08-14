@@ -16,7 +16,7 @@
 
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::resolver {
 namespace {

@@ -18,6 +18,7 @@
 #include <limits>
 #include <utility>
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/abstract_numeric.h"
 #include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/atomic.h"
@@ -74,6 +75,8 @@
 #include "src/tint/utils/math/math.h"
 #include "src/tint/utils/text/string.h"
 #include "src/tint/utils/text/string_stream.h"
+
+using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::resolver {
 namespace {

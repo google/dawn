@@ -91,9 +91,9 @@ struct ScalarConstant {
 
     /// @param value the value of the constant
     /// @returns a new ScalarConstant with the provided value and kind Kind::kF16
-    static inline ScalarConstant F16(f16::type value) {
+    static inline ScalarConstant F16(core::f16::type value) {
         ScalarConstant c;
-        c.value.f16 = {f16(value).BitsRepresentation()};
+        c.value.f16 = {core::f16(value).BitsRepresentation()};
         c.kind = Kind::kF16;
         return c;
     }

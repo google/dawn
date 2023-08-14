@@ -20,7 +20,7 @@
 
 using ::testing::UnorderedElementsAre;
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::resolver {
 namespace {

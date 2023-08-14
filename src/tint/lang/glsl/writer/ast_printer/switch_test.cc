@@ -16,7 +16,7 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::glsl::writer {
 namespace {

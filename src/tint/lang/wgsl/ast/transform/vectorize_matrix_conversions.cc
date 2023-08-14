@@ -18,6 +18,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/abstract_numeric.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
@@ -28,10 +29,11 @@
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/math/hash.h"
 
+using namespace tint::core::fluent_types;  // NOLINT
+
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::VectorizeMatrixConversions);
 
 namespace tint::ast::transform {
-
 namespace {
 
 bool ShouldRun(const Program* program) {
@@ -106,7 +108,7 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
             tint::Vector<const Expression*, 4> columns;
             for (uint32_t c = 0; c < dst_type->columns(); c++) {
                 auto* src_matrix_expr = src_expression_builder();
-                auto* src_column_expr = b.IndexAccessor(src_matrix_expr, b.Expr(tint::AInt(c)));
+                auto* src_column_expr = b.IndexAccessor(src_matrix_expr, b.Expr(AInt(c)));
                 columns.Push(
                     b.Call(CreateASTTypeFor(ctx, dst_type->ColumnType()), src_column_expr));
             }

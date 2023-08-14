@@ -23,9 +23,9 @@
 
 #include "gtest/gtest.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
-namespace tint {
+namespace tint::core {
 namespace {
 
 // Concats any number of std::vectors
@@ -912,4 +912,4 @@ INSTANTIATE_TEST_SUITE_P(
 TINT_END_DISABLE_WARNING(CONSTANT_OVERFLOW);
 
 }  // namespace
-}  // namespace tint
+}  // namespace tint::core

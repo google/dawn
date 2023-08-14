@@ -27,7 +27,7 @@
 #include "src/tint/lang/wgsl/sem/module.h"
 #include "src/tint/lang/wgsl/sem/value_constructor.h"
 
-using namespace tint::number_suffixes;  // NOLINT
+using namespace tint::core::number_suffixes;  // NOLINT
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::PadStructs);
 
