@@ -23,6 +23,7 @@
 #ifndef SRC_TINT_LANG_CORE_DIAGNOSTIC_RULE_H_
 #define SRC_TINT_LANG_CORE_DIAGNOSTIC_RULE_H_
 
+#include <cstdint>
 #include <string>
 #include <variant>
 

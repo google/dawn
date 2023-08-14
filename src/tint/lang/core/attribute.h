@@ -23,6 +23,8 @@
 #ifndef SRC_TINT_LANG_CORE_ATTRIBUTE_H_
 #define SRC_TINT_LANG_CORE_ATTRIBUTE_H_
 
+#include <cstdint>
+
 #include "src/tint/utils/traits/traits.h"
 
 /// \cond DO_NOT_DOCUMENT

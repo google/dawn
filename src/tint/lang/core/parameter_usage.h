@@ -23,6 +23,7 @@
 #ifndef SRC_TINT_LANG_CORE_PARAMETER_USAGE_H_
 #define SRC_TINT_LANG_CORE_PARAMETER_USAGE_H_
 
+#include <cstdint>
 #include <string>
 
 #include "src/tint/utils/traits/traits.h"
