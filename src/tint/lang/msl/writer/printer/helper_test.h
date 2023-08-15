@@ -22,6 +22,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/msl/writer/printer/printer.h"
+#include "src/tint/lang/msl/writer/raise/raise.h"
 
 namespace tint::msl::writer {
 
@@ -69,11 +70,11 @@ class MslPrinterTestHelperBase : public BASE {
     /// Run the writer on the IR module and validate the result.
     /// @returns true if generation and validation succeeded
     bool Generate() {
-        // auto raised = raise::Raise(&mod);
-        // if (!raised) {
-        //     err_ = raised.Failure();
-        //     return false;
-        // }
+        auto raised = raise::Raise(&mod);
+        if (!raised) {
+            err_ = raised.Failure();
+            return false;
+        }
 
         auto result = writer_.Generate();
         if (!result) {

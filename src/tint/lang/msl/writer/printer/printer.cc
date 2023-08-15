@@ -57,11 +57,6 @@
 using namespace tint::core::fluent_types;  // NOLINT
 
 namespace tint::msl::writer {
-namespace {
-
-void Sanitize(ir::Module*) {}
-
-}  // namespace
 
 // Helper for calling TINT_UNIMPLEMENTED() from a Switch(object_ptr) default case.
 #define UNHANDLED_CASE(object_ptr)                         \
@@ -77,9 +72,6 @@ tint::Result<SuccessType, std::string> Printer::Generate() {
     if (!valid) {
         return std::move(valid.Failure());
     }
-
-    // Run the IR transformations to prepare for MSL emission.
-    Sanitize(ir_);
 
     {
         TINT_SCOPED_ASSIGNMENT(current_buffer_, &preamble_buffer_);

@@ -742,6 +742,8 @@ if(${TINT_BUILD_MSL_WRITER})
     list(APPEND TINT_LIB_SRCS
       lang/msl/writer/printer/printer.cc
       lang/msl/writer/printer/printer.h
+      lang/msl/writer/raise/raise.cc
+      lang/msl/writer/raise/raise.h
     )
   endif()
 endif()

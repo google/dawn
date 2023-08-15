@@ -1180,6 +1180,8 @@ libtint_source_set("libtint_msl_writer_src") {
     sources += [
       "lang/msl/writer/printer/printer.cc",
       "lang/msl/writer/printer/printer.h",
+      "lang/msl/writer/raise/raise.cc",
+      "lang/msl/writer/raise/raise.h",
     ]
     deps += [
       ":libtint_ir_src",
