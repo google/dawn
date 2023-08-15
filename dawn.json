@@ -339,7 +339,9 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
-            {"value": 1, "name": "write only"}
+            {"value": 1, "name": "write only"},
+            {"value": 2, "name": "read only"},
+            {"value": 3, "name": "read write"}
         ]
     },
     "storage texture binding layout": {
@@ -1808,6 +1810,7 @@
             {"value": 1013, "name": "ANGLE texture sharing", "tags": ["dawn", "native"]},
             {"value": 1014, "name": "chromium experimental subgroups", "tags": ["dawn"]},
             {"value": 1015, "name": "chromium experimental subgroup uniform control flow", "tags": ["dawn"]},
+            {"value": 1016, "name": "chromium experimental read write storage texture", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},

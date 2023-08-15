@@ -64,6 +64,31 @@ MaybeError ValidateStorageTextureViewDimension(wgpu::TextureViewDimension dimens
     UNREACHABLE();
 }
 
+MaybeError ValidateReadWriteStorageTextureAccess(
+    DeviceBase* device,
+    const StorageTextureBindingLayout& storageTextureBindingLayout) {
+    switch (storageTextureBindingLayout.access) {
+        case wgpu::StorageTextureAccess::ReadOnly:
+        case wgpu::StorageTextureAccess::ReadWrite:
+            if (!device->APIHasFeature(
+                    wgpu::FeatureName::ChromiumExperimentalReadWriteStorageTexture)) {
+                return DAWN_VALIDATION_ERROR(
+                    "storage texture access %s cannot be used without feature "
+                    "%s",
+                    storageTextureBindingLayout.access,
+                    wgpu::FeatureName::ChromiumExperimentalReadWriteStorageTexture);
+            }
+            break;
+
+        case wgpu::StorageTextureAccess::WriteOnly:
+            break;
+        default:
+            UNREACHABLE();
+    }
+
+    return {};
+}
+
 MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
                                         const BindGroupLayoutEntry& entry,
                                         bool allowInternalBinding) {
@@ -143,11 +168,20 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
             DAWN_TRY(ValidateStorageTextureViewDimension(storageTexture.viewDimension));
         }
 
-        if (storageTexture.access == wgpu::StorageTextureAccess::WriteOnly) {
-            DAWN_INVALID_IF(entry.visibility & wgpu::ShaderStage::Vertex,
-                            "Write-only storage texture binding is used with a visibility (%s) "
-                            "that contains %s.",
-                            entry.visibility, wgpu::ShaderStage::Vertex);
+        DAWN_TRY(ValidateReadWriteStorageTextureAccess(device, storageTexture));
+
+        switch (storageTexture.access) {
+            case wgpu::StorageTextureAccess::ReadOnly:
+                break;
+            case wgpu::StorageTextureAccess::ReadWrite:
+            case wgpu::StorageTextureAccess::WriteOnly:
+                DAWN_INVALID_IF(entry.visibility & wgpu::ShaderStage::Vertex,
+                                "Storage texture binding with %s is used with a visibility (%s) "
+                                "that contains %s.",
+                                storageTexture.access, entry.visibility, wgpu::ShaderStage::Vertex);
+                break;
+            default:
+                UNREACHABLE();
         }
     }
 

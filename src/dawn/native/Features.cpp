@@ -100,6 +100,11 @@ static constexpr FeatureEnumAndInfoList kFeatureNameAndInfoList = {{
       "used to investigate the semantic of subgroups and should not be relied upon.",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=464",
       FeatureInfo::FeatureState::Experimental}},
+    {Feature::ChromiumExperimentalReadWriteStorageTexture,
+     {"chromium-experimental-read-write-storage-texture",
+      "Experimental, supports ReadOnly and ReadWrite as storage texture access mode.",
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=1972",
+      FeatureInfo::FeatureState::Experimental}},
     {Feature::DawnInternalUsages,
      {"dawn-internal-usages",
       "Add internal usages to resources to affect how the texture is allocated, but not "
@@ -315,6 +320,8 @@ Feature FromAPIFeature(wgpu::FeatureName feature) {
             return Feature::ChromiumExperimentalSubgroups;
         case wgpu::FeatureName::ChromiumExperimentalSubgroupUniformControlFlow:
             return Feature::ChromiumExperimentalSubgroupUniformControlFlow;
+        case wgpu::FeatureName::ChromiumExperimentalReadWriteStorageTexture:
+            return Feature::ChromiumExperimentalReadWriteStorageTexture;
     }
     return Feature::InvalidEnum;
 }
@@ -401,6 +408,8 @@ wgpu::FeatureName ToAPIFeature(Feature feature) {
             return wgpu::FeatureName::ChromiumExperimentalSubgroups;
         case Feature::ChromiumExperimentalSubgroupUniformControlFlow:
             return wgpu::FeatureName::ChromiumExperimentalSubgroupUniformControlFlow;
+        case Feature::ChromiumExperimentalReadWriteStorageTexture:
+            return wgpu::FeatureName::ChromiumExperimentalReadWriteStorageTexture;
         case Feature::EnumCount:
             break;
     }

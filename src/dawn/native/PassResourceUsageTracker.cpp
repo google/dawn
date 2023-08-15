@@ -132,6 +132,10 @@ void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
                     case wgpu::StorageTextureAccess::WriteOnly:
                         TextureViewUsedAs(view, wgpu::TextureUsage::StorageBinding);
                         break;
+
+                    // TODO(dawn:1972): Implement ReadOnly and ReadWrite storage texture
+                    case wgpu::StorageTextureAccess::ReadOnly:
+                    case wgpu::StorageTextureAccess::ReadWrite:
                     case wgpu::StorageTextureAccess::Undefined:
                         UNREACHABLE();
                 }

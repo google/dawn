@@ -43,6 +43,7 @@ enum class Feature {
     Float32Filterable,
     ChromiumExperimentalSubgroups,
     ChromiumExperimentalSubgroupUniformControlFlow,
+    ChromiumExperimentalReadWriteStorageTexture,
 
     // Dawn-specific
     DawnInternalUsages,

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <string>
+#include <vector>
 
 #include "dawn/common/Assert.h"
 #include "dawn/tests/unittests/validation/ValidationTest.h"
@@ -107,6 +108,30 @@ class StorageTextureValidationTests : public ValidationTest {
         descriptor.mipLevelCount = 1;
         descriptor.usage = usage;
         return device.CreateTexture(&descriptor);
+    }
+
+    struct BindGroupLayoutTestSpec {
+        wgpu::ShaderStage stage = wgpu::ShaderStage::Compute;
+        wgpu::StorageTextureAccess type;
+        bool valid;
+        wgpu::TextureFormat storageTextureFormat = wgpu::TextureFormat::R32Uint;
+    };
+
+    void DoBindGroupLayoutTest(const std::vector<BindGroupLayoutTestSpec>& testSpecs) {
+        for (const auto& testSpec : testSpecs) {
+            wgpu::BindGroupLayoutEntry entry = utils::BindingLayoutEntryInitializationHelper(
+                0, testSpec.stage, testSpec.type, testSpec.storageTextureFormat);
+
+            wgpu::BindGroupLayoutDescriptor descriptor;
+            descriptor.entryCount = 1;
+            descriptor.entries = &entry;
+
+            if (testSpec.valid) {
+                device.CreateBindGroupLayout(&descriptor);
+            } else {
+                ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
+            }
+        }
     }
 
     wgpu::ShaderModule mDefaultVSModule;
@@ -204,33 +229,21 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
     }
 }
 
-// Test that using read-only storage texture and write-only storage texture in
-// BindGroupLayout is valid, while using read-write storage texture is not allowed now.
+// Test that using write-only storage texture in BindGroupLayout is always valid, while using
+// read-only or read-write storage texture in BindGroupLayout is invalid without the optional
+// feature "chromium-experimental-read-write-storage-texture".
 TEST_F(StorageTextureValidationTests, BindGroupLayoutWithStorageTextureBindingType) {
-    struct TestSpec {
-        wgpu::ShaderStage stage;
-        wgpu::StorageTextureAccess type;
-        bool valid;
-    };
-    constexpr std::array<TestSpec, 6> kTestSpecs = {
+    const std::vector<BindGroupLayoutTestSpec> kTestSpecs = {
         {{wgpu::ShaderStage::Vertex, wgpu::StorageTextureAccess::WriteOnly, false},
+         {wgpu::ShaderStage::Vertex, wgpu::StorageTextureAccess::ReadOnly, false},
+         {wgpu::ShaderStage::Vertex, wgpu::StorageTextureAccess::ReadWrite, false},
          {wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::WriteOnly, true},
-         {wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly, true}}};
-
-    for (const auto& testSpec : kTestSpecs) {
-        wgpu::BindGroupLayoutEntry entry = utils::BindingLayoutEntryInitializationHelper(
-            0, testSpec.stage, testSpec.type, wgpu::TextureFormat::R32Uint);
-
-        wgpu::BindGroupLayoutDescriptor descriptor;
-        descriptor.entryCount = 1;
-        descriptor.entries = &entry;
-
-        if (testSpec.valid) {
-            device.CreateBindGroupLayout(&descriptor);
-        } else {
-            ASSERT_DEVICE_ERROR(device.CreateBindGroupLayout(&descriptor));
-        }
-    }
+         {wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly, false},
+         {wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadWrite, false},
+         {wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::WriteOnly, true},
+         {wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly, false},
+         {wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadWrite, false}}};
+    DoBindGroupLayoutTest(kTestSpecs);
 }
 
 // Validate it is an error to declare a read-only or write-only storage texture in shaders with any
@@ -862,6 +875,32 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneComput
         computePassEncoder.End();
         encoder.Finish();
     }
+}
+
+class ReadWriteStorageTextureValidationTests : public StorageTextureValidationTests {
+  protected:
+    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
+                                wgpu::DeviceDescriptor descriptor) override {
+        wgpu::FeatureName requiredFeatures[1] = {
+            wgpu::FeatureName::ChromiumExperimentalReadWriteStorageTexture};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 1;
+
+        return dawnAdapter.CreateDevice(&descriptor);
+    }
+};
+
+// Test that using read-only or read-write storage texture in BindGroupLayout is valid with the
+// optional feature "chromium-experimental-read-write-storage-texture".
+TEST_F(ReadWriteStorageTextureValidationTests, BindGroupLayoutWithStorageTextureBindingType) {
+    const std::vector<BindGroupLayoutTestSpec> kTestSpecs = {
+        {{wgpu::ShaderStage::Vertex, wgpu::StorageTextureAccess::ReadOnly, true},
+         {wgpu::ShaderStage::Vertex, wgpu::StorageTextureAccess::ReadWrite, false},
+         {wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadOnly, true},
+         {wgpu::ShaderStage::Fragment, wgpu::StorageTextureAccess::ReadWrite, true},
+         {wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly, true},
+         {wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadWrite, true}}};
+    DoBindGroupLayoutTest(kTestSpecs);
 }
 
 }  // anonymous namespace

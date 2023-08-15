@@ -49,6 +49,10 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
             switch (bindingInfo.storageTexture.access) {
                 case wgpu::StorageTextureAccess::WriteOnly:
                     return D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+
+                // TODO(dawn:1972): Implement ReadOnly and ReadWrite storage texture
+                case wgpu::StorageTextureAccess::ReadOnly:
+                case wgpu::StorageTextureAccess::ReadWrite:
                 case wgpu::StorageTextureAccess::Undefined:
                     UNREACHABLE();
             }
