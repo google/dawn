@@ -18,7 +18,7 @@
 
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 namespace {
 
 using IR_AddEmptyEntryPointTest = TransformTest;
@@ -55,4 +55,4 @@ TEST_F(IR_AddEmptyEntryPointTest, ExistingEntryPoint) {
 }
 
 }  // namespace
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform

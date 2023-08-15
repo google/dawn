@@ -14,12 +14,12 @@
 
 #include "src/tint/lang/core/ir/if.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::If);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::If);
 
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/utils/ice/ice.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 If::If(Value* cond, ir::Block* t, ir::Block* f) : true_(t), false_(f) {
     TINT_ASSERT(true_);
@@ -46,4 +46,4 @@ void If::ForeachBlock(const std::function<void(ir::Block*)>& cb) {
     }
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

@@ -63,12 +63,12 @@ namespace tint::msl::writer {
     TINT_UNIMPLEMENTED() << "unhandled case in Switch(): " \
                          << (object_ptr ? object_ptr->TypeInfo().name : "<null>")
 
-Printer::Printer(ir::Module* module) : ir_(module) {}
+Printer::Printer(core::ir::Module* module) : ir_(module) {}
 
 Printer::~Printer() = default;
 
 tint::Result<SuccessType, std::string> Printer::Generate() {
-    auto valid = ir::ValidateAndDumpIfNeeded(*ir_, "MSL writer");
+    auto valid = core::ir::ValidateAndDumpIfNeeded(*ir_, "MSL writer");
     if (!valid) {
         return std::move(valid.Failure());
     }
@@ -125,7 +125,7 @@ const std::string& Printer::ArrayTemplateName() {
     return array_template_name_;
 }
 
-void Printer::EmitFunction(ir::Function* func) {
+void Printer::EmitFunction(core::ir::Function* func) {
     TINT_SCOPED_ASSIGNMENT(current_function_, func);
 
     {
@@ -147,33 +147,33 @@ void Printer::EmitFunction(ir::Function* func) {
     Line() << "}";
 }
 
-void Printer::EmitBlock(ir::Block* block) {
+void Printer::EmitBlock(core::ir::Block* block) {
     MarkInlinable(block);
 
     EmitBlockInstructions(block);
 }
 
-void Printer::EmitBlockInstructions(ir::Block* block) {
+void Printer::EmitBlockInstructions(core::ir::Block* block) {
     TINT_SCOPED_ASSIGNMENT(current_block_, block);
 
     for (auto* inst : *block) {
         Switch(
-            inst,                                          //
-            [&](ir::Binary* b) { EmitBinary(b); },         //
-            [&](ir::ExitIf* e) { EmitExitIf(e); },         //
-            [&](ir::If* if_) { EmitIf(if_); },             //
-            [&](ir::Let* l) { EmitLet(l); },               //
-            [&](ir::Load* l) { EmitLoad(l); },             //
-            [&](ir::Return* r) { EmitReturn(r); },         //
-            [&](ir::Unreachable*) { EmitUnreachable(); },  //
-            [&](ir::Var* v) { EmitVar(v); },               //
+            inst,                                                //
+            [&](core::ir::Binary* b) { EmitBinary(b); },         //
+            [&](core::ir::ExitIf* e) { EmitExitIf(e); },         //
+            [&](core::ir::If* if_) { EmitIf(if_); },             //
+            [&](core::ir::Let* l) { EmitLet(l); },               //
+            [&](core::ir::Load* l) { EmitLoad(l); },             //
+            [&](core::ir::Return* r) { EmitReturn(r); },         //
+            [&](core::ir::Unreachable*) { EmitUnreachable(); },  //
+            [&](core::ir::Var* v) { EmitVar(v); },               //
             [&](Default) { TINT_ICE() << "unimplemented instruction: " << inst->TypeInfo().name; });
     }
 }
 
-void Printer::EmitBinary(ir::Binary* b) {
-    if (b->Kind() == ir::Binary::Kind::kEqual) {
-        auto* rhs = b->RHS()->As<ir::Constant>();
+void Printer::EmitBinary(core::ir::Binary* b) {
+    if (b->Kind() == core::ir::Binary::Kind::kEqual) {
+        auto* rhs = b->RHS()->As<core::ir::Constant>();
         if (rhs && rhs->Type()->Is<core::type::Bool>() && rhs->Value()->ValueAs<bool>() == false) {
             // expr == false
             Bind(b->Result(), "!(" + Expr(b->LHS()) + ")");
@@ -183,37 +183,37 @@ void Printer::EmitBinary(ir::Binary* b) {
 
     auto kind = [&] {
         switch (b->Kind()) {
-            case ir::Binary::Kind::kAdd:
+            case core::ir::Binary::Kind::kAdd:
                 return "+";
-            case ir::Binary::Kind::kSubtract:
+            case core::ir::Binary::Kind::kSubtract:
                 return "-";
-            case ir::Binary::Kind::kMultiply:
+            case core::ir::Binary::Kind::kMultiply:
                 return "*";
-            case ir::Binary::Kind::kDivide:
+            case core::ir::Binary::Kind::kDivide:
                 return "/";
-            case ir::Binary::Kind::kModulo:
+            case core::ir::Binary::Kind::kModulo:
                 return "%";
-            case ir::Binary::Kind::kAnd:
+            case core::ir::Binary::Kind::kAnd:
                 return "&";
-            case ir::Binary::Kind::kOr:
+            case core::ir::Binary::Kind::kOr:
                 return "|";
-            case ir::Binary::Kind::kXor:
+            case core::ir::Binary::Kind::kXor:
                 return "^";
-            case ir::Binary::Kind::kEqual:
+            case core::ir::Binary::Kind::kEqual:
                 return "==";
-            case ir::Binary::Kind::kNotEqual:
+            case core::ir::Binary::Kind::kNotEqual:
                 return "!=";
-            case ir::Binary::Kind::kLessThan:
+            case core::ir::Binary::Kind::kLessThan:
                 return "<";
-            case ir::Binary::Kind::kGreaterThan:
+            case core::ir::Binary::Kind::kGreaterThan:
                 return ">";
-            case ir::Binary::Kind::kLessThanEqual:
+            case core::ir::Binary::Kind::kLessThanEqual:
                 return "<=";
-            case ir::Binary::Kind::kGreaterThanEqual:
+            case core::ir::Binary::Kind::kGreaterThanEqual:
                 return ">=";
-            case ir::Binary::Kind::kShiftLeft:
+            case core::ir::Binary::Kind::kShiftLeft:
                 return "<<";
-            case ir::Binary::Kind::kShiftRight:
+            case core::ir::Binary::Kind::kShiftRight:
                 return ">>";
         }
         return "<error>";
@@ -225,12 +225,12 @@ void Printer::EmitBinary(ir::Binary* b) {
     Bind(b->Result(), str.str());
 }
 
-void Printer::EmitLoad(ir::Load* l) {
+void Printer::EmitLoad(core::ir::Load* l) {
     // Force loads to be bound as inlines
     bindings_.Add(l->Result(), InlinedValue{Expr(l->From()), PtrKind::kRef});
 }
 
-void Printer::EmitVar(ir::Var* v) {
+void Printer::EmitVar(core::ir::Var* v) {
     auto out = Line();
 
     auto* ptr = v->Result()->Type()->As<core::type::Pointer>();
@@ -269,11 +269,11 @@ void Printer::EmitVar(ir::Var* v) {
     Bind(v->Result(), name, PtrKind::kRef);
 }
 
-void Printer::EmitLet(ir::Let* l) {
+void Printer::EmitLet(core::ir::Let* l) {
     Bind(l->Result(), Expr(l->Value(), PtrKind::kPtr), PtrKind::kPtr);
 }
 
-void Printer::EmitIf(ir::If* if_) {
+void Printer::EmitIf(core::ir::If* if_) {
     // Emit any nodes that need to be used as PHI nodes
     for (auto* phi : if_->Results()) {
         if (!ir_->NameOf(phi).IsValid()) {
@@ -306,7 +306,7 @@ void Printer::EmitIf(ir::If* if_) {
     Line() << "}";
 }
 
-void Printer::EmitExitIf(ir::ExitIf* e) {
+void Printer::EmitExitIf(core::ir::ExitIf* e) {
     auto results = e->If()->Results();
     auto args = e->Args();
     for (size_t i = 0; i < e->Args().Length(); ++i) {
@@ -317,7 +317,7 @@ void Printer::EmitExitIf(ir::ExitIf* e) {
     }
 }
 
-void Printer::EmitReturn(ir::Return* r) {
+void Printer::EmitReturn(core::ir::Return* r) {
     // If this return has no arguments and the current block is for the function which is
     // being returned, skip the return.
     if (current_block_ == current_function_->Block() && r->Args().IsEmpty()) {
@@ -641,7 +641,7 @@ void Printer::EmitStructType(const core::type::Struct* str) {
     preamble_buffer_.Append(str_buf);
 }
 
-void Printer::EmitConstant(StringStream& out, ir::Constant* c) {
+void Printer::EmitConstant(StringStream& out, core::ir::Constant* c) {
     EmitConstant(out, c->Value());
 }
 
@@ -748,12 +748,12 @@ std::string Printer::UniqueIdentifier(const std::string& prefix /* = "" */) {
 
 TINT_BEGIN_DISABLE_WARNING(UNREACHABLE_CODE);
 
-std::string Printer::Expr(ir::Value* value, PtrKind want_ptr_kind) {
+std::string Printer::Expr(core::ir::Value* value, PtrKind want_ptr_kind) {
     using ExprAndPtrKind = std::pair<std::string, PtrKind>;
 
     auto [expr, got_ptr_kind] = tint::Switch(
         value,
-        [&](ir::Constant* c) -> ExprAndPtrKind {
+        [&](core::ir::Constant* c) -> ExprAndPtrKind {
             StringStream str;
             EmitConstant(str, c);
             return {str.str(), PtrKind::kRef};
@@ -816,7 +816,7 @@ std::string Printer::ToPtrKind(const std::string& in, PtrKind got, PtrKind want)
     return in;
 }
 
-void Printer::Bind(ir::Value* value, const std::string& expr, PtrKind ptr_kind) {
+void Printer::Bind(core::ir::Value* value, const std::string& expr, PtrKind ptr_kind) {
     TINT_ASSERT(value);
 
     if (can_inline_.Remove(value)) {
@@ -851,7 +851,7 @@ void Printer::Bind(ir::Value* value, const std::string& expr, PtrKind ptr_kind) 
     TINT_ICE() << "Bind(" << value->TypeInfo().name << ") called twice for same value";
 }
 
-void Printer::Bind(ir::Value* value, Symbol name, PtrKind ptr_kind) {
+void Printer::Bind(core::ir::Value* value, Symbol name, PtrKind ptr_kind) {
     TINT_ASSERT(value);
 
     bool added = bindings_.Add(value, VariableValue{name, ptr_kind});
@@ -860,10 +860,10 @@ void Printer::Bind(ir::Value* value, Symbol name, PtrKind ptr_kind) {
     }
 }
 
-void Printer::MarkInlinable(ir::Block* block) {
+void Printer::MarkInlinable(core::ir::Block* block) {
     // An ordered list of possibly-inlinable values returned by sequenced instructions that have
     // not yet been marked-for or ruled-out-for inlining.
-    UniqueVector<ir::Value*, 32> pending_resolution;
+    UniqueVector<core::ir::Value*, 32> pending_resolution;
 
     // Walk the instructions of the block starting with the first.
     for (auto* inst : *block) {

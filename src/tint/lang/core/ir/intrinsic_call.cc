@@ -16,9 +16,9 @@
 
 #include <utility>
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::IntrinsicCall);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::IntrinsicCall);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 IntrinsicCall::IntrinsicCall(InstructionResult* result, enum Kind kind, VectorRef<Value*> arguments)
     : kind_(kind) {
@@ -98,4 +98,4 @@ std::string_view ToString(enum IntrinsicCall::Kind kind) {
     return "<unknown>";
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

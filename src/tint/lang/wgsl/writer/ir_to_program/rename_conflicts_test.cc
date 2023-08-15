@@ -34,7 +34,7 @@ class IRToProgramRenameConflictsTest : public testing::Test {
     void Run() {
         // Validate the input IR.
         {
-            auto res = ir::Validate(mod);
+            auto res = core::ir::Validate(mod);
             EXPECT_TRUE(res) << res.Failure().str();
             if (!res) {
                 return;
@@ -46,21 +46,21 @@ class IRToProgramRenameConflictsTest : public testing::Test {
         EXPECT_TRUE(result) << result.Failure();
 
         // Validate the output IR.
-        auto res = ir::Validate(mod);
+        auto res = core::ir::Validate(mod);
         EXPECT_TRUE(res) << res.Failure().str();
     }
 
     /// @returns the transformed module as a disassembled string
     std::string str() {
-        ir::Disassembler dis(mod);
+        core::ir::Disassembler dis(mod);
         return "\n" + dis.Disassemble();
     }
 
   protected:
     /// The test IR module.
-    ir::Module mod;
+    core::ir::Module mod;
     /// The test IR builder.
-    ir::Builder b{mod};
+    core::ir::Builder b{mod};
     /// The type manager.
     core::type::Manager& ty{mod.Types()};
 };

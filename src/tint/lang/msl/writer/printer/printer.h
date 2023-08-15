@@ -26,7 +26,7 @@
 #include "src/tint/utils/text/string_stream.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Binary;
 class ExitIf;
 class If;
@@ -35,7 +35,7 @@ class Load;
 class Return;
 class Unreachable;
 class Var;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 namespace tint::msl::writer {
 
@@ -44,7 +44,7 @@ class Printer : public tint::TextGenerator {
   public:
     /// Constructor
     /// @param module the Tint IR module to generate
-    explicit Printer(ir::Module* module);
+    explicit Printer(core::ir::Module* module);
     ~Printer() override;
 
     /// @returns true on successful generation; false otherwise
@@ -56,41 +56,41 @@ class Printer : public tint::TextGenerator {
   private:
     /// Emit the function
     /// @param func the function to emit
-    void EmitFunction(ir::Function* func);
+    void EmitFunction(core::ir::Function* func);
 
     /// Emit a block
     /// @param block the block to emit
-    void EmitBlock(ir::Block* block);
+    void EmitBlock(core::ir::Block* block);
     /// Emit the instructions in a block
     /// @param block the block with the instructions to emit
-    void EmitBlockInstructions(ir::Block* block);
+    void EmitBlockInstructions(core::ir::Block* block);
 
     /// Emit an if instruction
     /// @param if_ the if instruction
-    void EmitIf(ir::If* if_);
+    void EmitIf(core::ir::If* if_);
     /// Emit an exit-if instruction
     /// @param e the exit-if instruction
-    void EmitExitIf(ir::ExitIf* e);
+    void EmitExitIf(core::ir::ExitIf* e);
 
     /// Emit a let instruction
     /// @param l the let instruction
-    void EmitLet(ir::Let* l);
+    void EmitLet(core::ir::Let* l);
     /// Emit a var instruction
     /// @param v the var instruction
-    void EmitVar(ir::Var* v);
+    void EmitVar(core::ir::Var* v);
     /// Emit a load instruction
     /// @param l the load instruction
-    void EmitLoad(ir::Load* l);
+    void EmitLoad(core::ir::Load* l);
 
     /// Emit a return instruction
     /// @param r the return instruction
-    void EmitReturn(ir::Return* r);
+    void EmitReturn(core::ir::Return* r);
     /// Emit an unreachable instruction
     void EmitUnreachable();
 
     /// Emit a binary instruction
     /// @param b the binary instruction
-    void EmitBinary(ir::Binary* b);
+    void EmitBinary(core::ir::Binary* b);
 
     /// Emit a type
     /// @param out the stream to emit too
@@ -131,10 +131,10 @@ class Printer : public tint::TextGenerator {
     /// @param sc the address space to generate
     void EmitAddressSpace(StringStream& out, core::AddressSpace sc);
 
-    /// Handles ir::Constant values
+    /// Handles core::ir::Constant values
     /// @param out the stream to write the constant too
     /// @param c the constant to emit
-    void EmitConstant(StringStream& out, ir::Constant* c);
+    void EmitConstant(StringStream& out, core::ir::Constant* c);
     /// Handles core::constant::Value values
     /// @param out the stream to write the constant too
     /// @param c the constant to emit
@@ -162,7 +162,7 @@ class Printer : public tint::TextGenerator {
     /// Map of builtin structure to unique generated name
     std::unordered_map<const core::type::Struct*, std::string> builtin_struct_names_;
 
-    ir::Module* const ir_;
+    core::ir::Module* const ir_;
 
     /// The buffer holding preamble text
     TextBuffer preamble_buffer_;
@@ -174,9 +174,9 @@ class Printer : public tint::TextGenerator {
     std::unordered_set<const core::type::Struct*> emitted_structs_;
 
     /// The current function being emitted
-    ir::Function* current_function_ = nullptr;
+    core::ir::Function* current_function_ = nullptr;
     /// The current block being emitted
-    ir::Block* current_block_ = nullptr;
+    core::ir::Block* current_block_ = nullptr;
 
     /// Unique name of the tint_array<T, N> template.
     /// Non-empty only if the template has been generated.
@@ -208,16 +208,16 @@ class Printer : public tint::TextGenerator {
     using ValueBinding = std::variant<VariableValue, InlinedValue, ConsumedValue>;
 
     /// IR values to their representation
-    Hashmap<ir::Value*, ValueBinding, 32> bindings_;
+    Hashmap<core::ir::Value*, ValueBinding, 32> bindings_;
 
     /// Values that can be inlined.
-    Hashset<ir::Value*, 64> can_inline_;
+    Hashset<core::ir::Value*, 64> can_inline_;
 
     /// Returns the expression for the given value
     /// @param value the value to lookup
     /// @param want_ptr_kind the pointer information for the return
     /// @returns the string expression
-    std::string Expr(ir::Value* value, PtrKind want_ptr_kind = PtrKind::kRef);
+    std::string Expr(core::ir::Value* value, PtrKind want_ptr_kind = PtrKind::kRef);
 
     /// Returns the given expression converted to the given pointer kind
     /// @param in the input expression
@@ -229,17 +229,17 @@ class Printer : public tint::TextGenerator {
     /// @param value the IR value
     /// @param expr the result expression
     /// @param ptr_kind defines how pointer values are represented by the expression
-    void Bind(ir::Value* value, const std::string& expr, PtrKind ptr_kind = PtrKind::kRef);
+    void Bind(core::ir::Value* value, const std::string& expr, PtrKind ptr_kind = PtrKind::kRef);
 
     /// Associates an IR value the 'var', 'let' or parameter of the given name
     /// @param value the IR value
     /// @param name the name for the value
     /// @param ptr_kind defines how pointer values are represented by @p expr.
-    void Bind(ir::Value* value, Symbol name, PtrKind ptr_kind = PtrKind::kRef);
+    void Bind(core::ir::Value* value, Symbol name, PtrKind ptr_kind = PtrKind::kRef);
 
     /// Marks instructions in a block for inlineability
     /// @param block the block
-    void MarkInlinable(ir::Block* block);
+    void MarkInlinable(core::ir::Block* block);
 };
 
 }  // namespace tint::msl::writer

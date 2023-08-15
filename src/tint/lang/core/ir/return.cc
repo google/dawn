@@ -18,9 +18,9 @@
 
 #include "src/tint/lang/core/ir/function.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Return);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Return);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Return::Return(Function* func) {
     AddOperand(Return::kFunctionOperandOffset, func);
@@ -33,4 +33,4 @@ Return::Return(Function* func, ir::Value* arg) {
 
 Return::~Return() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

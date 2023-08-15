@@ -20,11 +20,11 @@
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
-namespace tint::ir {
+namespace tint::core::ir {
 class Module;
 }
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 
 /// DemoteToHelper is a transform that emulates demote-to-helper semantics for discard instructions.
 ///
@@ -36,6 +36,6 @@ namespace tint::ir::transform {
 /// @returns an error string on failure
 Result<SuccessType, std::string> DemoteToHelper(Module* module);
 
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform
 
 #endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_DEMOTE_TO_HELPER_H_

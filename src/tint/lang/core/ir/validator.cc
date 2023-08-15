@@ -67,7 +67,7 @@
 
 using namespace tint::core::fluent_types;  // NOLINT
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Validator::Validator(Module& mod) : mod_(mod) {}
 
@@ -658,4 +658,4 @@ Result<SuccessType, std::string> ValidateAndDumpIfNeeded([[maybe_unused]] Module
     return Success;
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

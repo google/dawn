@@ -17,7 +17,7 @@
 #include "src/tint/lang/core/ir/block_param.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -74,4 +74,4 @@ TEST_F(IR_CoreBuiltinCallTest, Fail_TintMaterializeFunction) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::core::ir

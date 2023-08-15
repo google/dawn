@@ -14,9 +14,9 @@
 
 #include "src/tint/lang/core/ir/store_vector_element.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::StoreVectorElement);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::StoreVectorElement);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 StoreVectorElement::StoreVectorElement(ir::Value* to, ir::Value* index, ir::Value* value) {
     flags_.Add(Flag::kSequenced);
@@ -28,4 +28,4 @@ StoreVectorElement::StoreVectorElement(ir::Value* to, ir::Value* index, ir::Valu
 
 StoreVectorElement::~StoreVectorElement() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

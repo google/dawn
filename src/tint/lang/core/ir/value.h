@@ -20,11 +20,11 @@
 #include "src/tint/utils/rtti/castable.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Instruction;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A specific usage of a Value in the IR.
 struct Usage {
@@ -106,6 +106,6 @@ class Value : public Castable<Value> {
     /// Bitset of value flags
     tint::EnumSet<Flag> flags_;
 };
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_VALUE_H_

@@ -17,9 +17,9 @@
 #include "src/tint/utils/containers/predicates.h"
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::MultiInBlock);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::MultiInBlock);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 MultiInBlock::MultiInBlock() : Base() {}
 
@@ -41,4 +41,4 @@ void MultiInBlock::AddInboundSiblingBranch(ir::Terminator* node) {
     }
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

@@ -15,9 +15,9 @@
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Block);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Block);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Block::Block() : Base() {}
 
@@ -158,4 +158,4 @@ void Block::Remove(Instruction* inst) {
     inst->next = nullptr;
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

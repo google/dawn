@@ -20,11 +20,11 @@
 #include "src/tint/lang/core/ir/block.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class BlockParam;
 }
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A block that can be the target of multiple branches.
 /// MultiInBlocks maintain a list of inbound branches and a number of BlockParam parameters, used to
@@ -58,6 +58,6 @@ class MultiInBlock : public Castable<MultiInBlock, Block> {
     Vector<ir::Terminator*, 2> inbound_sibling_branches_;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_MULTI_IN_BLOCK_H_

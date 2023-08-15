@@ -18,12 +18,12 @@
 #include "src/tint/lang/core/ir/control_instruction.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Constant;
 class MultiInBlock;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 /// Switch instruction.
 ///
 /// ```
@@ -87,6 +87,6 @@ class Switch : public Castable<Switch, ControlInstruction> {
     Vector<Case, 4> cases_;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_SWITCH_H_

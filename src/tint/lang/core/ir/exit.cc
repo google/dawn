@@ -16,9 +16,9 @@
 
 #include "src/tint/lang/core/ir/control_instruction.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Exit);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Exit);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Exit::~Exit() = default;
 
@@ -40,4 +40,4 @@ void Exit::SetControlInstruction(ir::ControlInstruction* ctrl_inst) {
     }
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

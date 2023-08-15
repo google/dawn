@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A backend intrinsic call instruction in the IR.
 class IntrinsicCall : public Castable<IntrinsicCall, Call> {
@@ -90,6 +90,6 @@ auto& operator<<(STREAM& out, enum IntrinsicCall::Kind kind) {
     return out << ToString(kind);
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_INTRINSIC_CALL_H_

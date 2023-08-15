@@ -19,7 +19,7 @@
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/type/external_texture.h"
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 namespace {
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -1277,4 +1277,4 @@ tint_ExternalTextureParams = struct @align(16) {
 }
 
 }  // namespace
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform

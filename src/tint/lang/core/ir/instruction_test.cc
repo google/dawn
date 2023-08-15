@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 #include "src/tint/lang/core/ir/module.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 namespace {
 
 using IR_InstructionTest = IRTestHelper;
@@ -155,4 +155,4 @@ TEST_F(IR_InstructionTest, Fail_RemoveNotInserted) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::core::ir

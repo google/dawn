@@ -1080,7 +1080,7 @@ int main(int argc, const char** argv) {
         } else {
             auto mod = result.Move();
             if (options.dump_ir) {
-                tint::ir::Disassembler d(mod);
+                tint::core::ir::Disassembler d(mod);
                 std::cout << d.Disassemble() << std::endl;
             }
         }

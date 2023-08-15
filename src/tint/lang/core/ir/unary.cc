@@ -14,9 +14,9 @@
 
 #include "src/tint/lang/core/ir/unary.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Unary);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Unary);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Unary::Unary(InstructionResult* result, enum Kind k, Value* val) : kind_(k) {
     AddOperand(Unary::kValueOperandOffset, val);
@@ -25,4 +25,4 @@ Unary::Unary(InstructionResult* result, enum Kind k, Value* val) : kind_(k) {
 
 Unary::~Unary() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

@@ -20,16 +20,16 @@
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Module;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 namespace tint::msl::raise {
 
 /// Raise a core IR module to the MSL dialect of the IR.
 /// @param mod the core IR module to raise to MSL dialect
 /// @returns success or an error string
-Result<SuccessType, std::string> Raise(ir::Module* mod);
+Result<SuccessType, std::string> Raise(core::ir::Module* mod);
 
 }  // namespace tint::msl::raise
 

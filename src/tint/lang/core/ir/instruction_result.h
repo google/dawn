@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/utils/text/string_stream.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// An instruction result in the IR.
 class InstructionResult : public Castable<InstructionResult, Value> {
@@ -52,6 +52,6 @@ class InstructionResult : public Castable<InstructionResult, Value> {
     const core::type::Type* type_ = nullptr;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_INSTRUCTION_RESULT_H_

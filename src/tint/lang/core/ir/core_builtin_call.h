@@ -19,7 +19,7 @@
 #include "src/tint/lang/core/ir/builtin_call.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A core builtin call instruction in the IR.
 class CoreBuiltinCall : public Castable<CoreBuiltinCall, BuiltinCall> {
@@ -43,6 +43,6 @@ class CoreBuiltinCall : public Castable<CoreBuiltinCall, BuiltinCall> {
     core::Function func_;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_CORE_BUILTIN_CALL_H_

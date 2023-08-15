@@ -28,7 +28,7 @@ struct UnaryTestCase {
     /// The element type to test.
     TestElementType type;
     /// The unary operation.
-    enum ir::Unary::Kind kind;
+    enum core::ir::Unary::Kind kind;
     /// The expected SPIR-V instruction.
     std::string spirv_inst;
     /// The expected SPIR-V result type name.
@@ -69,11 +69,11 @@ TEST_P(Arithmetic, Vector) {
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest_Unary,
     Arithmetic,
-    testing::Values(UnaryTestCase{kI32, ir::Unary::Kind::kComplement, "OpNot", "int"},
-                    UnaryTestCase{kU32, ir::Unary::Kind::kComplement, "OpNot", "uint"},
-                    UnaryTestCase{kI32, ir::Unary::Kind::kNegation, "OpSNegate", "int"},
-                    UnaryTestCase{kF32, ir::Unary::Kind::kNegation, "OpFNegate", "float"},
-                    UnaryTestCase{kF16, ir::Unary::Kind::kNegation, "OpFNegate", "half"}));
+    testing::Values(UnaryTestCase{kI32, core::ir::Unary::Kind::kComplement, "OpNot", "int"},
+                    UnaryTestCase{kU32, core::ir::Unary::Kind::kComplement, "OpNot", "uint"},
+                    UnaryTestCase{kI32, core::ir::Unary::Kind::kNegation, "OpSNegate", "int"},
+                    UnaryTestCase{kF32, core::ir::Unary::Kind::kNegation, "OpFNegate", "float"},
+                    UnaryTestCase{kF16, core::ir::Unary::Kind::kNegation, "OpFNegate", "half"}));
 
 }  // namespace
 }  // namespace tint::spirv::writer

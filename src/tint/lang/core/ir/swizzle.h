@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A swizzle instruction in the IR.
 class Swizzle : public Castable<Swizzle, OperandInstruction<1, 1>> {
@@ -46,6 +46,6 @@ class Swizzle : public Castable<Swizzle, OperandInstruction<1, 1>> {
     Vector<uint32_t, 4> indices_;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_SWIZZLE_H_

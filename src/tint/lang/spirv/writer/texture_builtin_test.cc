@@ -143,12 +143,12 @@ class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCas
             result_ty = ty.vec(result_ty, params.result.width);
         }
 
-        Vector<ir::FunctionParam*, 4> func_params;
+        Vector<core::ir::FunctionParam*, 4> func_params;
 
         auto* t = b.FunctionParam(
             "t", MakeTextureType(params.texture_type, params.dim, params.texel_type));
         func_params.Push(t);
-        ir::FunctionParam* s = nullptr;
+        core::ir::FunctionParam* s = nullptr;
         if (sampler == kSampler) {
             s = b.FunctionParam("s", ty.sampler());
             func_params.Push(s);
@@ -163,7 +163,7 @@ class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCas
         b.Append(func->Block(), [&] {
             uint32_t arg_value = 1;
 
-            Vector<ir::Value*, 4> args;
+            Vector<core::ir::Value*, 4> args;
             if (function == core::Function::kTextureGather &&
                 params.texture_type != kDepthTexture) {
                 // Special case for textureGather, which has a component argument first.
@@ -1883,7 +1883,7 @@ TEST_F(SpirvWriterTest, TextureSampleBaseClampToEdge_2d_f32) {
     auto* texture_ty =
         ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
 
-    Vector<ir::FunctionParam*, 4> args;
+    Vector<core::ir::FunctionParam*, 4> args;
     args.Push(b.FunctionParam("texture", texture_ty));
     args.Push(b.FunctionParam("sampler", ty.sampler()));
     args.Push(b.FunctionParam("coords", ty.vec2<f32>()));

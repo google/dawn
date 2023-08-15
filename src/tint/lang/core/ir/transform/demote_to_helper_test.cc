@@ -21,7 +21,7 @@
 #include "src/tint/lang/core/type/f32.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 namespace {
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -858,4 +858,4 @@ __atomic_compare_exchange_result_i32 = struct @align(4) {
 }
 
 }  // namespace
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform

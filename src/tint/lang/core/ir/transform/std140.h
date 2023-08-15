@@ -20,11 +20,11 @@
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
-namespace tint::ir {
+namespace tint::core::ir {
 class Module;
 }
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 
 /// Std140 is a transform that rewrites matrix types in the uniform address space to conform to
 /// GLSL's std140 layout rules.
@@ -32,6 +32,6 @@ namespace tint::ir::transform {
 /// @returns an error string on failure
 Result<SuccessType, std::string> Std140(Module* module);
 
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform
 
 #endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_STD140_H_

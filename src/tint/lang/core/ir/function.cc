@@ -17,9 +17,9 @@
 #include "src/tint/utils/containers/predicates.h"
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Function);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Function);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Function::Function(const core::type::Type* rt,
                    PipelineStage stage,
@@ -68,4 +68,4 @@ std::string_view ToString(enum Function::ReturnBuiltin value) {
     return "<unknown>";
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

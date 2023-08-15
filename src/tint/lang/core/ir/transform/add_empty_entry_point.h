@@ -20,17 +20,17 @@
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
-namespace tint::ir {
+namespace tint::core::ir {
 class Module;
 }
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 
 /// Add an empty entry point to the module, if no other entry points exist.
 /// @param module the module to transform
 /// @returns an error string on failure
 Result<SuccessType, std::string> AddEmptyEntryPoint(Module* module);
 
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform
 
 #endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_ADD_EMPTY_ENTRY_POINT_H_

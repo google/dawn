@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A constructor instruction in the IR.
 class Construct : public Castable<Construct, Call> {
@@ -36,6 +36,6 @@ class Construct : public Castable<Construct, Call> {
     std::string_view FriendlyName() override { return "construct"; }
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_CONSTRUCT_H_

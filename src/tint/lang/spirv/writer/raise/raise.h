@@ -21,7 +21,7 @@
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Module;
 }
 
@@ -31,7 +31,7 @@ namespace tint::spirv::writer::raise {
 /// @param module the core IR module to raise to SPIR-V dialect
 /// @param options the SPIR-V writer options
 /// @returns success or an error string
-Result<SuccessType, std::string> Raise(ir::Module* module, const Options& options);
+Result<SuccessType, std::string> Raise(core::ir::Module* module, const Options& options);
 
 }  // namespace tint::spirv::writer::raise
 

@@ -19,11 +19,11 @@
 #include "src/tint/utils/rtti/castable.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class If;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A exit if instruction.
 class ExitIf : public Castable<ExitIf, Exit> {
@@ -48,6 +48,6 @@ class ExitIf : public Castable<ExitIf, Exit> {
     std::string_view FriendlyName() override { return "exit-if"; }
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_EXIT_IF_H_

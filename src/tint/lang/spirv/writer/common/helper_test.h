@@ -81,9 +81,9 @@ class SpirvWriterTestHelperBase : public BASE {
     SpirvWriterTestHelperBase() : writer_(&mod, false) {}
 
     /// The test module.
-    ir::Module mod;
+    core::ir::Module mod;
     /// The test builder.
-    ir::Builder b{mod};
+    core::ir::Builder b{mod};
     /// The type manager.
     core::type::Manager& ty{mod.Types()};
 
@@ -199,7 +199,7 @@ class SpirvWriterTestHelperBase : public BASE {
     /// @param type the element type
     /// @param value the optional value to use
     /// @returns the scalar value
-    ir::Constant* MakeScalarValue(TestElementType type, uint32_t value = 1) {
+    core::ir::Constant* MakeScalarValue(TestElementType type, uint32_t value = 1) {
         switch (type) {
             case kBool:
                 return b.Constant(true);
@@ -218,7 +218,7 @@ class SpirvWriterTestHelperBase : public BASE {
     /// Helper to make a vector value with an element type of `type`.
     /// @param type the element type
     /// @returns the vector value
-    ir::Constant* MakeVectorValue(TestElementType type) {
+    core::ir::Constant* MakeVectorValue(TestElementType type) {
         switch (type) {
             case kBool:
                 return b.Composite(MakeVectorType(type), true, false);

@@ -20,12 +20,12 @@
 #include "src/tint/lang/core/ir/operand_instruction.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Block;
 class Exit;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// Base class of instructions that perform control flow to two or more blocks, owned by the
 /// ControlInstruction.
@@ -82,6 +82,6 @@ class ControlInstruction : public Castable<ControlInstruction, OperandInstructio
     Hashset<Exit*, 2> exits_;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_CONTROL_INSTRUCTION_H_

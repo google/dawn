@@ -17,9 +17,9 @@
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Load);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Load);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Load::Load(InstructionResult* result, Value* from) {
     flags_.Add(Flag::kSequenced);
@@ -33,4 +33,4 @@ Load::Load(InstructionResult* result, Value* from) {
 
 Load::~Load() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

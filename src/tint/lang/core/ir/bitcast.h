@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A bitcast instruction in the IR.
 class Bitcast : public Castable<Bitcast, Call> {
@@ -39,6 +39,6 @@ class Bitcast : public Castable<Bitcast, Call> {
     std::string_view FriendlyName() override { return "bitcast"; }
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_BITCAST_H_

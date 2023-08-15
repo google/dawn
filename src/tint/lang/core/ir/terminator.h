@@ -20,11 +20,11 @@
 #include "src/tint/utils/rtti/castable.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Block;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// The base class of all instructions that terminate a block.
 class Terminator : public Castable<Terminator, OperandInstruction<1, 0>> {
@@ -35,6 +35,6 @@ class Terminator : public Castable<Terminator, OperandInstruction<1, 0>> {
     virtual tint::Slice<Value* const> Args() { return operands_.Slice(); }
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_TERMINATOR_H_

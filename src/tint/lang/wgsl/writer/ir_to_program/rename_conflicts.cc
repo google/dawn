@@ -44,7 +44,7 @@ namespace {
 struct State {
     /// Constructor
     /// @param i the IR module
-    explicit State(ir::Module* i) : ir(i) {}
+    explicit State(core::ir::Module* i) : ir(i) {}
 
     /// Processes the module, renaming all declarations that would prevent an identifier resolving
     /// to the correct declaration.
@@ -77,11 +77,11 @@ struct State {
 
   private:
     /// Map of identifier to declaration.
-    /// The declarations may be one of an ir::Value or core::type::Struct.
+    /// The declarations may be one of an core::ir::Value or core::type::Struct.
     using Scope = Hashmap<std::string_view, CastableBase*, 8>;
 
     /// The IR module.
-    ir::Module* ir = nullptr;
+    core::ir::Module* ir = nullptr;
 
     /// Stack of scopes
     Vector<Scope, 8> scopes{};
@@ -119,7 +119,7 @@ struct State {
     }
 
     /// Processes the instructions of the block
-    void Process(ir::Block* block) {
+    void Process(core::ir::Block* block) {
         for (auto* inst : *block) {
             Process(inst);
         }
@@ -127,7 +127,7 @@ struct State {
 
     /// Processes an instruction, ensuring that all identifier references resolve to the correct
     /// declaration. This may involve renaming of declarations in the outer scopes.
-    void Process(ir::Instruction* inst) {
+    void Process(core::ir::Instruction* inst) {
         // Check resolving of operands
         for (auto* operand : inst->Operands()) {
             if (operand) {
@@ -136,7 +136,7 @@ struct State {
                     EnsureResolvesTo(symbol.NameView(), operand);
                 }
                 // If the operand is a constant, then ensure that type name can be resolved.
-                if (auto* c = operand->As<ir::Constant>()) {
+                if (auto* c = operand->As<core::ir::Constant>()) {
                     EnsureResolvable(c->Type());
                 }
             }
@@ -144,7 +144,7 @@ struct State {
 
         Switch(
             inst,  //
-            [&](ir::Loop* loop) {
+            [&](core::ir::Loop* loop) {
                 // Initializer's scope encompasses the body and continuing
                 scopes.Push(Scope{});
                 TINT_DEFER(scopes.Pop());
@@ -161,23 +161,23 @@ struct State {
                     }
                 }
             },
-            [&](ir::ControlInstruction* ctrl) {
+            [&](core::ir::ControlInstruction* ctrl) {
                 // Traverse into the control instruction's blocks
-                ctrl->ForeachBlock([&](ir::Block* block) {
+                ctrl->ForeachBlock([&](core::ir::Block* block) {
                     scopes.Push(Scope{});
                     TINT_DEFER(scopes.Pop());
                     Process(block);
                 });
             },
-            [&](ir::Var*) {
+            [&](core::ir::Var*) {
                 // Ensure the var's type is resolvable
                 EnsureResolvable(inst->Result()->Type());
             },
-            [&](ir::Construct*) {
+            [&](core::ir::Construct*) {
                 // Ensure the type of a type constructor is resolvable
                 EnsureResolvable(inst->Result()->Type());
             },
-            [&](ir::CoreBuiltinCall* call) {
+            [&](core::ir::CoreBuiltinCall* call) {
                 // Ensure builtin of a builtin call is resolvable
                 auto name = tint::ToString(call->Func());
                 EnsureResolvesTo(name, nullptr);
@@ -259,7 +259,7 @@ struct State {
         Symbol new_name = ir->symbols.New(old_name);
         Switch(
             thing,  //
-            [&](ir::Value* value) { ir->SetName(value, new_name); },
+            [&](core::ir::Value* value) { ir->SetName(value, new_name); },
             [&](core::type::Struct* str) { str->SetName(new_name); },
             [&](Default) {
                 TINT_ICE() << "unhandled type for renaming: " << thing->TypeInfo().name;
@@ -275,7 +275,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType, std::string> RenameConflicts(ir::Module* ir) {
+Result<SuccessType, std::string> RenameConflicts(core::ir::Module* ir) {
     auto result = ValidateAndDumpIfNeeded(*ir, "RenameConflicts transform");
     if (!result) {
         return result;

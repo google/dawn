@@ -18,11 +18,11 @@
 #include "src/tint/lang/core/ir/control_instruction.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class MultiInBlock;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// If instruction.
 ///
@@ -72,6 +72,6 @@ class If : public Castable<If, ControlInstruction> {
     ir::Block* false_ = nullptr;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_IF_H_

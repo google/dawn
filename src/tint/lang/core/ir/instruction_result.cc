@@ -18,9 +18,9 @@
 #include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::InstructionResult);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::InstructionResult);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 InstructionResult::InstructionResult(const core::type::Type* type) : type_(type) {
     TINT_ASSERT(type_ != nullptr);
@@ -33,4 +33,4 @@ void InstructionResult::Destroy() {
     Base::Destroy();
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

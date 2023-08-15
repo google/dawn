@@ -27,14 +27,14 @@ using namespace tint::core::fluent_types;  // NOLINT
 namespace tint::wgsl::reader {
 namespace {
 
-ir::Value* GlobalVarInitializer(ir::Module& m) {
+core::ir::Value* GlobalVarInitializer(core::ir::Module& m) {
     if (m.root_block->Length() == 0u) {
         ADD_FAILURE() << "m.root_block has no instruction";
         return nullptr;
     }
 
     auto instr = m.root_block->Instructions();
-    auto* var = instr->As<ir::Var>();
+    auto* var = instr->As<core::ir::Var>();
     if (!var) {
         ADD_FAILURE() << "m.root_block.instructions[0] was not a var";
         return nullptr;
@@ -54,8 +54,8 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_True) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto* init = GlobalVarInitializer(m.Get());
-    ASSERT_TRUE(Is<ir::Constant>(init));
-    auto* val = init->As<ir::Constant>()->Value();
+    ASSERT_TRUE(Is<core::ir::Constant>(init));
+    auto* val = init->As<core::ir::Constant>()->Value();
     EXPECT_TRUE(val->Is<core::constant::Scalar<bool>>());
     EXPECT_TRUE(val->As<core::constant::Scalar<bool>>()->ValueAs<bool>());
 }
@@ -68,8 +68,8 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_False) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto* init = GlobalVarInitializer(m.Get());
-    ASSERT_TRUE(Is<ir::Constant>(init));
-    auto* val = init->As<ir::Constant>()->Value();
+    ASSERT_TRUE(Is<core::ir::Constant>(init));
+    auto* val = init->As<core::ir::Constant>()->Value();
     EXPECT_TRUE(val->Is<core::constant::Scalar<bool>>());
     EXPECT_FALSE(val->As<core::constant::Scalar<bool>>()->ValueAs<bool>());
 }
@@ -84,19 +84,19 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_Bool_Deduped) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto itr = m.Get().root_block->begin();
-    auto* var_a = (*itr)->As<ir::Var>();
+    auto* var_a = (*itr)->As<core::ir::Var>();
     ++itr;
 
     ASSERT_NE(var_a, nullptr);
-    auto* var_b = (*itr)->As<ir::Var>();
+    auto* var_b = (*itr)->As<core::ir::Var>();
     ++itr;
 
     ASSERT_NE(var_b, nullptr);
-    auto* var_c = (*itr)->As<ir::Var>();
+    auto* var_c = (*itr)->As<core::ir::Var>();
     ++itr;
 
     ASSERT_NE(var_c, nullptr);
-    auto* var_d = (*itr)->As<ir::Var>();
+    auto* var_d = (*itr)->As<core::ir::Var>();
     ASSERT_NE(var_d, nullptr);
 
     ASSERT_EQ(var_a->Initializer(), var_c->Initializer());
@@ -112,8 +112,8 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_F32) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto* init = GlobalVarInitializer(m.Get());
-    ASSERT_TRUE(Is<ir::Constant>(init));
-    auto* val = init->As<ir::Constant>()->Value();
+    ASSERT_TRUE(Is<core::ir::Constant>(init));
+    auto* val = init->As<core::ir::Constant>()->Value();
     EXPECT_TRUE(val->Is<core::constant::Scalar<f32>>());
     EXPECT_EQ(1.2_f, val->As<core::constant::Scalar<f32>>()->ValueAs<f32>());
 }
@@ -127,15 +127,15 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_F32_Deduped) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto itr = m.Get().root_block->begin();
-    auto* var_a = (*itr)->As<ir::Var>();
+    auto* var_a = (*itr)->As<core::ir::Var>();
     ASSERT_NE(var_a, nullptr);
     ++itr;
 
-    auto* var_b = (*itr)->As<ir::Var>();
+    auto* var_b = (*itr)->As<core::ir::Var>();
     ASSERT_NE(var_b, nullptr);
     ++itr;
 
-    auto* var_c = (*itr)->As<ir::Var>();
+    auto* var_c = (*itr)->As<core::ir::Var>();
     ASSERT_NE(var_c, nullptr);
 
     ASSERT_EQ(var_a->Initializer(), var_c->Initializer());
@@ -151,8 +151,8 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_F16) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto* init = GlobalVarInitializer(m.Get());
-    ASSERT_TRUE(Is<ir::Constant>(init));
-    auto* val = init->As<ir::Constant>()->Value();
+    ASSERT_TRUE(Is<core::ir::Constant>(init));
+    auto* val = init->As<core::ir::Constant>()->Value();
     EXPECT_TRUE(val->Is<core::constant::Scalar<f16>>());
     EXPECT_EQ(1.2_h, val->As<core::constant::Scalar<f16>>()->ValueAs<f32>());
 }
@@ -167,15 +167,15 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_F16_Deduped) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto itr = m.Get().root_block->begin();
-    auto* var_a = (*itr)->As<ir::Var>();
+    auto* var_a = (*itr)->As<core::ir::Var>();
     ASSERT_NE(var_a, nullptr);
     ++itr;
 
-    auto* var_b = (*itr)->As<ir::Var>();
+    auto* var_b = (*itr)->As<core::ir::Var>();
     ASSERT_NE(var_b, nullptr);
     ++itr;
 
-    auto* var_c = (*itr)->As<ir::Var>();
+    auto* var_c = (*itr)->As<core::ir::Var>();
     ASSERT_NE(var_c, nullptr);
 
     ASSERT_EQ(var_a->Initializer(), var_c->Initializer());
@@ -190,8 +190,8 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_I32) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto* init = GlobalVarInitializer(m.Get());
-    ASSERT_TRUE(Is<ir::Constant>(init));
-    auto* val = init->As<ir::Constant>()->Value();
+    ASSERT_TRUE(Is<core::ir::Constant>(init));
+    auto* val = init->As<core::ir::Constant>()->Value();
     EXPECT_TRUE(val->Is<core::constant::Scalar<i32>>());
     EXPECT_EQ(-2_i, val->As<core::constant::Scalar<i32>>()->ValueAs<f32>());
 }
@@ -205,15 +205,15 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_I32_Deduped) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto itr = m.Get().root_block->begin();
-    auto* var_a = (*itr)->As<ir::Var>();
+    auto* var_a = (*itr)->As<core::ir::Var>();
     ASSERT_NE(var_a, nullptr);
     ++itr;
 
-    auto* var_b = (*itr)->As<ir::Var>();
+    auto* var_b = (*itr)->As<core::ir::Var>();
     ASSERT_NE(var_b, nullptr);
     ++itr;
 
-    auto* var_c = (*itr)->As<ir::Var>();
+    auto* var_c = (*itr)->As<core::ir::Var>();
     ASSERT_NE(var_c, nullptr);
 
     ASSERT_EQ(var_a->Initializer(), var_c->Initializer());
@@ -228,8 +228,8 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_U32) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto* init = GlobalVarInitializer(m.Get());
-    ASSERT_TRUE(Is<ir::Constant>(init));
-    auto* val = init->As<ir::Constant>()->Value();
+    ASSERT_TRUE(Is<core::ir::Constant>(init));
+    auto* val = init->As<core::ir::Constant>()->Value();
     EXPECT_TRUE(val->Is<core::constant::Scalar<u32>>());
     EXPECT_EQ(2_u, val->As<core::constant::Scalar<u32>>()->ValueAs<f32>());
 }
@@ -243,15 +243,15 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_U32_Deduped) {
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
     auto itr = m.Get().root_block->begin();
-    auto* var_a = (*itr)->As<ir::Var>();
+    auto* var_a = (*itr)->As<core::ir::Var>();
     ASSERT_NE(var_a, nullptr);
     ++itr;
 
-    auto* var_b = (*itr)->As<ir::Var>();
+    auto* var_b = (*itr)->As<core::ir::Var>();
     ASSERT_NE(var_b, nullptr);
     ++itr;
 
-    auto* var_c = (*itr)->As<ir::Var>();
+    auto* var_c = (*itr)->As<core::ir::Var>();
     ASSERT_NE(var_c, nullptr);
 
     ASSERT_EQ(var_a->Initializer(), var_c->Initializer());

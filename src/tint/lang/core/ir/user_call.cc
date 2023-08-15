@@ -16,9 +16,9 @@
 
 #include <utility>
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::UserCall);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::UserCall);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 UserCall::UserCall(InstructionResult* result, Function* func, VectorRef<Value*> arguments) {
     AddOperand(UserCall::kFunctionOperandOffset, func);
@@ -28,4 +28,4 @@ UserCall::UserCall(InstructionResult* result, Function* func, VectorRef<Value*> 
 
 UserCall::~UserCall() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

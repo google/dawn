@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/constant/value.h"
 #include "src/tint/lang/core/ir/value.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// Constant in the IR.
 class Constant : public Castable<Constant, Value> {
@@ -38,6 +38,6 @@ class Constant : public Castable<Constant, Value> {
     const core::constant::Value* const value_ = nullptr;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_CONSTANT_H_

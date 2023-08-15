@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A Call instruction in the IR.
 class Call : public Castable<Call, OperandInstruction<4, 1>> {
@@ -37,6 +37,6 @@ class Call : public Castable<Call, OperandInstruction<4, 1>> {
     Call();
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_CALL_H_

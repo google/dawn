@@ -34,7 +34,7 @@ namespace {
 /// If multiple instructions are found with the type T, then an error is raised and the first is
 /// returned.
 template <typename T>
-T* FindSingleInstruction(ir::Module& mod) {
+T* FindSingleInstruction(core::ir::Module& mod) {
     T* found = nullptr;
     size_t count = 0;
     for (auto* node : mod.instructions.Objects()) {
@@ -67,7 +67,7 @@ TEST_F(IR_FromProgramTest, Func) {
     auto* f = m->functions[0];
     ASSERT_NE(f->Block(), nullptr);
 
-    EXPECT_EQ(m->functions[0]->Stage(), ir::Function::PipelineStage::kUndefined);
+    EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kUndefined);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func():void -> %b1 {
   %b1 = block {
@@ -88,7 +88,7 @@ TEST_F(IR_FromProgramTest, Func_WithParam) {
     auto* f = m->functions[0];
     ASSERT_NE(f->Block(), nullptr);
 
-    EXPECT_EQ(m->functions[0]->Stage(), ir::Function::PipelineStage::kUndefined);
+    EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kUndefined);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func(%a:u32):u32 -> %b1 {
   %b1 = block {
@@ -110,7 +110,7 @@ TEST_F(IR_FromProgramTest, Func_WithMultipleParam) {
     auto* f = m->functions[0];
     ASSERT_NE(f->Block(), nullptr);
 
-    EXPECT_EQ(m->functions[0]->Stage(), ir::Function::PipelineStage::kUndefined);
+    EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kUndefined);
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%f = func(%a:u32, %b:i32, %c:bool):void -> %b1 {
   %b1 = block {
@@ -126,7 +126,7 @@ TEST_F(IR_FromProgramTest, EntryPoint) {
     auto m = Build();
     ASSERT_TRUE(m) << (!m ? m.Failure() : "");
 
-    EXPECT_EQ(m->functions[0]->Stage(), ir::Function::PipelineStage::kFragment);
+    EXPECT_EQ(m->functions[0]->Stage(), core::ir::Function::PipelineStage::kFragment);
 }
 
 TEST_F(IR_FromProgramTest, IfStatement) {
@@ -278,7 +278,7 @@ TEST_F(IR_FromProgramTest, Loop_WithBreak) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop = FindSingleInstruction<ir::Loop>(m);
+    auto* loop = FindSingleInstruction<core::ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -311,7 +311,7 @@ TEST_F(IR_FromProgramTest, Loop_WithContinue) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop = FindSingleInstruction<ir::Loop>(m);
+    auto* loop = FindSingleInstruction<core::ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -349,7 +349,7 @@ TEST_F(IR_FromProgramTest, Loop_WithContinuing_BreakIf) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop = FindSingleInstruction<ir::Loop>(m);
+    auto* loop = FindSingleInstruction<core::ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -410,7 +410,7 @@ TEST_F(IR_FromProgramTest, Loop_WithReturn) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop = FindSingleInstruction<ir::Loop>(m);
+    auto* loop = FindSingleInstruction<core::ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -447,7 +447,7 @@ TEST_F(IR_FromProgramTest, Loop_WithOnlyReturn) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop = FindSingleInstruction<ir::Loop>(m);
+    auto* loop = FindSingleInstruction<core::ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -488,7 +488,7 @@ TEST_F(IR_FromProgramTest, Loop_WithOnlyReturn_ContinuingBreakIf) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop = FindSingleInstruction<ir::Loop>(m);
+    auto* loop = FindSingleInstruction<core::ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -526,7 +526,7 @@ TEST_F(IR_FromProgramTest, Loop_WithIf_BothBranchesBreak) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop = FindSingleInstruction<ir::Loop>(m);
+    auto* loop = FindSingleInstruction<core::ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -639,7 +639,7 @@ TEST_F(IR_FromProgramTest, While) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop = FindSingleInstruction<ir::Loop>(m);
+    auto* loop = FindSingleInstruction<core::ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -679,7 +679,7 @@ TEST_F(IR_FromProgramTest, While_Return) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop = FindSingleInstruction<ir::Loop>(m);
+    auto* loop = FindSingleInstruction<core::ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -719,7 +719,7 @@ TEST_F(IR_FromProgramTest, For) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop = FindSingleInstruction<ir::Loop>(m);
+    auto* loop = FindSingleInstruction<core::ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -768,7 +768,7 @@ TEST_F(IR_FromProgramTest, For_Init_NoCondOrContinuing) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop = FindSingleInstruction<ir::Loop>(m);
+    auto* loop = FindSingleInstruction<core::ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -801,7 +801,7 @@ TEST_F(IR_FromProgramTest, For_NoInitCondOrContinuing) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* loop = FindSingleInstruction<ir::Loop>(m);
+    auto* loop = FindSingleInstruction<core::ir::Loop>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -833,7 +833,7 @@ TEST_F(IR_FromProgramTest, Switch) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* swtch = FindSingleInstruction<ir::Switch>(m);
+    auto* swtch = FindSingleInstruction<core::ir::Switch>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -884,7 +884,7 @@ TEST_F(IR_FromProgramTest, Switch_MultiSelector) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* swtch = FindSingleInstruction<ir::Switch>(m);
+    auto* swtch = FindSingleInstruction<core::ir::Switch>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -923,7 +923,7 @@ TEST_F(IR_FromProgramTest, Switch_OnlyDefault) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* swtch = FindSingleInstruction<ir::Switch>(m);
+    auto* swtch = FindSingleInstruction<core::ir::Switch>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -956,7 +956,7 @@ TEST_F(IR_FromProgramTest, Switch_WithBreak) {
     ASSERT_TRUE(res) << (!res ? res.Failure() : "");
 
     auto m = res.Move();
-    auto* swtch = FindSingleInstruction<ir::Switch>(m);
+    auto* swtch = FindSingleInstruction<core::ir::Switch>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 
@@ -1000,7 +1000,7 @@ TEST_F(IR_FromProgramTest, Switch_AllReturn) {
 
     auto m = res.Move();
 
-    auto* swtch = FindSingleInstruction<ir::Switch>(m);
+    auto* swtch = FindSingleInstruction<core::ir::Switch>(m);
 
     ASSERT_EQ(1u, m.functions.Length());
 

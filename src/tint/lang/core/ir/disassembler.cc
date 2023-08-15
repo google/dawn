@@ -60,7 +60,7 @@
 
 using namespace tint::core::fluent_types;  // NOLINT
 
-namespace tint::ir {
+namespace tint::core::ir {
 namespace {
 
 class ScopedIndent {
@@ -931,4 +931,4 @@ void Disassembler::EmitStructDecl(const core::type::Struct* str) {
     EmitLine();
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

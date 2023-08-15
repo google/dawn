@@ -20,7 +20,7 @@
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
-namespace tint::ir {
+namespace tint::core::ir {
 class Module;
 }
 
@@ -32,7 +32,7 @@ namespace tint::spirv::writer::raise {
 /// composite.
 /// @param module the module to transform
 /// @returns an error string on failure
-Result<SuccessType, std::string> VarForDynamicIndex(ir::Module* module);
+Result<SuccessType, std::string> VarForDynamicIndex(core::ir::Module* module);
 
 }  // namespace tint::spirv::writer::raise
 

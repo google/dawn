@@ -32,7 +32,7 @@
 #include "src/tint/utils/result/result.h"
 #include "src/tint/utils/symbol/symbol_table.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// Main module class for the IR.
 class Module {
@@ -109,6 +109,6 @@ class Module {
     std::unique_ptr<Source::File> disassembly_file;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_MODULE_H_

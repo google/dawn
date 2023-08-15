@@ -14,9 +14,9 @@
 
 #include "src/tint/lang/core/ir/load_vector_element.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::LoadVectorElement);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::LoadVectorElement);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 LoadVectorElement::LoadVectorElement(InstructionResult* result, ir::Value* from, ir::Value* index) {
     flags_.Add(Flag::kSequenced);
@@ -28,4 +28,4 @@ LoadVectorElement::LoadVectorElement(InstructionResult* result, ir::Value* from,
 
 LoadVectorElement::~LoadVectorElement() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

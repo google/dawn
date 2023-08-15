@@ -20,7 +20,7 @@
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
-namespace tint::ir {
+namespace tint::core::ir {
 class Module;
 }
 
@@ -30,7 +30,7 @@ namespace tint::spirv::writer::raise {
 /// instructions and binary instructions where not supported by SPIR-V.
 /// @param module the module to transform
 /// @returns an error string on failure
-Result<SuccessType, std::string> ExpandImplicitSplats(ir::Module* module);
+Result<SuccessType, std::string> ExpandImplicitSplats(core::ir::Module* module);
 
 }  // namespace tint::spirv::writer::raise
 

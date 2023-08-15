@@ -16,9 +16,9 @@
 
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::FunctionParam);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::FunctionParam);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 FunctionParam::FunctionParam(const core::type::Type* ty) : type_(ty) {
     TINT_ASSERT(ty != nullptr);
@@ -54,4 +54,4 @@ std::string_view ToString(enum FunctionParam::Builtin value) {
     return "<unknown>";
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

@@ -20,9 +20,9 @@
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::NextIteration);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::NextIteration);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 NextIteration::NextIteration(ir::Loop* loop, VectorRef<Value*> args /* = tint::Empty */)
     : loop_(loop) {
@@ -37,4 +37,4 @@ NextIteration::NextIteration(ir::Loop* loop, VectorRef<Value*> args /* = tint::E
 
 NextIteration::~NextIteration() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

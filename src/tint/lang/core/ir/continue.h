@@ -19,11 +19,11 @@
 #include "src/tint/utils/rtti/castable.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Loop;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A continue instruction.
 class Continue : public Castable<Continue, Terminator> {
@@ -47,6 +47,6 @@ class Continue : public Castable<Continue, Terminator> {
     ir::Loop* loop_ = nullptr;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_CONTINUE_H_

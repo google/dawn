@@ -28,8 +28,8 @@ TEST_F(SpirvWriterTest, Discard) {
     b.RootBlock()->Append(buffer);
 
     auto* front_facing = b.FunctionParam("front_facing", ty.bool_());
-    front_facing->SetBuiltin(ir::FunctionParam::Builtin::kFrontFacing);
-    auto* ep = b.Function("ep", ty.f32(), ir::Function::PipelineStage::kFragment);
+    front_facing->SetBuiltin(core::ir::FunctionParam::Builtin::kFrontFacing);
+    auto* ep = b.Function("ep", ty.f32(), core::ir::Function::PipelineStage::kFragment);
     ep->SetParams({front_facing});
     ep->SetReturnLocation(0_u, {});
 

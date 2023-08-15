@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A binary instruction in the IR.
 class Binary : public Castable<Binary, OperandInstruction<2, 1>> {
@@ -86,6 +86,6 @@ auto& operator<<(STREAM& out, enum Binary::Kind kind) {
     return out << ToString(kind);
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_BINARY_H_

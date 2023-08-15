@@ -19,9 +19,9 @@
 #include "src/tint/lang/core/ir/if.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::ExitIf);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::ExitIf);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 ExitIf::ExitIf(ir::If* i, VectorRef<Value*> args) {
     SetIf(i);
@@ -38,4 +38,4 @@ ir::If* ExitIf::If() {
     return static_cast<ir::If*>(ControlInstruction());
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// An instruction in the IR.
 class BlockParam : public Castable<BlockParam, Value> {
@@ -36,6 +36,6 @@ class BlockParam : public Castable<BlockParam, Value> {
     const core::type::Type* type_ = nullptr;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_BLOCK_PARAM_H_

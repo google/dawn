@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A load instruction for a single vector element in the IR.
 class LoadVectorElement : public Castable<LoadVectorElement, OperandInstruction<3, 0>> {
@@ -46,6 +46,6 @@ class LoadVectorElement : public Castable<LoadVectorElement, OperandInstruction<
     std::string_view FriendlyName() override { return "load-vector-element"; }
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_LOAD_VECTOR_ELEMENT_H_

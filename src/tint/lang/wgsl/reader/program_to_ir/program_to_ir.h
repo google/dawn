@@ -27,15 +27,15 @@ class Program;
 
 namespace tint::wgsl::reader {
 
-/// Builds an ir::Module from the given Program
+/// Builds an core::ir::Module from the given Program
 /// @param program the Program to use.
-/// @returns the `utiils::Result` of generating the IR. The result will contain the `ir::Module` on
-/// success, otherwise the `std::string` error.
+/// @returns the `utiils::Result` of generating the IR. The result will contain the
+/// `core::ir::Module` on success, otherwise the `std::string` error.
 ///
 /// @note this assumes the `program.IsValid()`, and has had const-eval done so
 /// any abstract values have been calculated and converted into the relevant
 /// concrete types.
-tint::Result<ir::Module, std::string> ProgramToIR(const Program* program);
+tint::Result<core::ir::Module, std::string> ProgramToIR(const Program* program);
 
 }  // namespace tint::wgsl::reader
 

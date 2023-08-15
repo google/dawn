@@ -20,7 +20,7 @@
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
-namespace tint::ir {
+namespace tint::core::ir {
 class Module;
 }
 
@@ -37,7 +37,7 @@ struct ShaderIOConfig {
 /// @param module the module to transform
 /// @param config the configuration
 /// @returns an error string on failure
-Result<SuccessType, std::string> ShaderIO(ir::Module* module, const ShaderIOConfig& config);
+Result<SuccessType, std::string> ShaderIO(core::ir::Module* module, const ShaderIOConfig& config);
 
 }  // namespace tint::spirv::writer::raise
 

@@ -24,7 +24,7 @@
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 
 namespace {
 
@@ -259,4 +259,4 @@ void RunShaderIOBase(Module* module, std::function<MakeBackendStateFunc> make_ba
 
 ShaderIOBackendState::~ShaderIOBackendState() = default;
 
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform

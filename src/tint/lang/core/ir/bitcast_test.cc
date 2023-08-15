@@ -23,7 +23,7 @@
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
 
-namespace tint::ir {
+namespace tint::core::ir {
 namespace {
 
 using IR_BitcastTest = IRTestHelper;
@@ -71,4 +71,4 @@ TEST_F(IR_BitcastTest, Fail_NullType) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::core::ir

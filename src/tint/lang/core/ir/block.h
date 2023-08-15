@@ -22,11 +22,11 @@
 #include "src/tint/utils/containers/vector.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class ControlInstruction;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A block of statements. The instructions in the block are a linear list of instructions to
 /// execute. The block will terminate with a Terminator instruction at the end.
@@ -143,6 +143,6 @@ class Block : public Castable<Block> {
     ControlInstruction* parent_ = nullptr;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_BLOCK_H_

@@ -22,10 +22,10 @@
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
-namespace tint::ir {
+namespace tint::core::ir {
 class Module;
 class Texture;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 namespace tint::spirv::writer::raise {
 
@@ -33,12 +33,12 @@ namespace tint::spirv::writer::raise {
 /// SPIR-V backend intrinsic functions.
 /// @param module the module to transform
 /// @returns an error string on failure
-Result<SuccessType, std::string> BuiltinPolyfill(ir::Module* module);
+Result<SuccessType, std::string> BuiltinPolyfill(core::ir::Module* module);
 
 /// LiteralOperand is a type of constant value that is intended to be emitted as a literal in
 /// the SPIR-V instruction stream.
 /// TODO(jrprice): Move this to lang/spirv.
-class LiteralOperand final : public Castable<LiteralOperand, ir::Constant> {
+class LiteralOperand final : public Castable<LiteralOperand, core::ir::Constant> {
   public:
     /// Constructor
     /// @param value the operand value

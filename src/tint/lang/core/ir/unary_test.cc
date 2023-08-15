@@ -22,7 +22,7 @@
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
 
-namespace tint::ir {
+namespace tint::core::ir {
 namespace {
 
 using IR_UnaryTest = IRTestHelper;
@@ -79,4 +79,4 @@ TEST_F(IR_UnaryTest, Fail_NullType) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::core::ir

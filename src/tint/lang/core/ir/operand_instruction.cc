@@ -14,13 +14,13 @@
 
 #include "src/tint/lang/core/ir/operand_instruction.h"
 
-using Op10 = tint::ir::OperandInstruction<1, 0>;
-using Op11 = tint::ir::OperandInstruction<1, 1>;
-using Op20 = tint::ir::OperandInstruction<2, 0>;
-using Op30 = tint::ir::OperandInstruction<3, 0>;
-using Op21 = tint::ir::OperandInstruction<2, 1>;
-using Op31 = tint::ir::OperandInstruction<3, 1>;
-using Op41 = tint::ir::OperandInstruction<4, 1>;
+using Op10 = tint::core::ir::OperandInstruction<1, 0>;
+using Op11 = tint::core::ir::OperandInstruction<1, 1>;
+using Op20 = tint::core::ir::OperandInstruction<2, 0>;
+using Op30 = tint::core::ir::OperandInstruction<3, 0>;
+using Op21 = tint::core::ir::OperandInstruction<2, 1>;
+using Op31 = tint::core::ir::OperandInstruction<3, 1>;
+using Op41 = tint::core::ir::OperandInstruction<4, 1>;
 
 TINT_INSTANTIATE_TYPEINFO(Op10);
 TINT_INSTANTIATE_TYPEINFO(Op11);
@@ -30,4 +30,4 @@ TINT_INSTANTIATE_TYPEINFO(Op21);
 TINT_INSTANTIATE_TYPEINFO(Op31);
 TINT_INSTANTIATE_TYPEINFO(Op41);
 
-namespace tint::ir {}  // namespace tint::ir
+namespace tint::core::ir {}  // namespace tint::core::ir

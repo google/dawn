@@ -27,7 +27,7 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using SpirvWriter_VarForDynamicIndexTest = ir::transform::TransformTest;
+using SpirvWriter_VarForDynamicIndexTest = core::ir::transform::TransformTest;
 
 TEST_F(SpirvWriter_VarForDynamicIndexTest, NoModify_ConstantIndex_ArrayValue) {
     auto* arr = b.FunctionParam(ty.array<i32, 4u>());

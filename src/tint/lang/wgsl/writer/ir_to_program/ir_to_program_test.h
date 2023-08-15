@@ -22,7 +22,7 @@
 namespace tint::wgsl::writer {
 
 /// Class used for IR to Program tests
-class IRToProgramTest : public ir::IRTestHelper {
+class IRToProgramTest : public core::ir::IRTestHelper {
   public:
     /// The result of Run()
     struct Result {

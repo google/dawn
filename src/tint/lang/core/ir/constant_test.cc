@@ -21,7 +21,7 @@
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
 
-namespace tint::ir {
+namespace tint::core::ir {
 namespace {
 
 using IR_ConstantTest = IRTestHelper;
@@ -114,4 +114,4 @@ TEST_F(IR_ConstantTest, Fail_Builder_NullValue) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::core::ir

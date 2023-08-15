@@ -14,9 +14,9 @@
 
 #include "src/tint/lang/core/ir/bitcast.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Bitcast);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Bitcast);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Bitcast::Bitcast(InstructionResult* result, Value* val) {
     AddOperand(Bitcast::kValueOperandOffset, val);
@@ -25,4 +25,4 @@ Bitcast::Bitcast(InstructionResult* result, Value* val) {
 
 Bitcast::~Bitcast() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

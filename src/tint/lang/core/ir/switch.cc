@@ -16,9 +16,9 @@
 
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Switch);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Switch);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Switch::Switch(Value* cond) {
     TINT_ASSERT(cond);
@@ -34,4 +34,4 @@ void Switch::ForeachBlock(const std::function<void(ir::Block*)>& cb) {
     }
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

@@ -19,7 +19,7 @@
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 namespace {
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -605,4 +605,4 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TextureDimensions) {
 }
 
 }  // namespace
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform

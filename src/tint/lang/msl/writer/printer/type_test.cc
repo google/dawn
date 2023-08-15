@@ -411,7 +411,7 @@ struct MemberData {
     uint32_t size = 0;
     uint32_t align = 0;
 };
-core::type::Struct* MkStruct(ir::Module& mod,
+core::type::Struct* MkStruct(core::ir::Module& mod,
                              core::type::Manager& ty,
                              std::string_view name,
                              VectorRef<MemberData> data) {

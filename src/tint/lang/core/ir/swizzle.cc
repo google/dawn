@@ -18,9 +18,9 @@
 
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Swizzle);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Swizzle);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Swizzle::Swizzle(InstructionResult* result, Value* object, VectorRef<uint32_t> indices)
     : indices_(std::move(indices)) {
@@ -37,4 +37,4 @@ Swizzle::Swizzle(InstructionResult* result, Value* object, VectorRef<uint32_t> i
 
 Swizzle::~Swizzle() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

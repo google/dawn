@@ -19,11 +19,11 @@
 #include "src/tint/utils/rtti/castable.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Loop;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A exit loop instruction.
 class ExitLoop : public Castable<ExitLoop, Exit> {
@@ -48,6 +48,6 @@ class ExitLoop : public Castable<ExitLoop, Exit> {
     std::string_view FriendlyName() override { return "exit-loop"; }
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_EXIT_LOOP_H_

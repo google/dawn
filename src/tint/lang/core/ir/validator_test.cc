@@ -25,7 +25,7 @@
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/utils/text/string.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 namespace {
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -49,7 +49,8 @@ TEST_F(IR_ValidatorTest, RootBlock_NonVar) {
 
     auto res = ir::Validate(mod);
     ASSERT_FALSE(res);
-    EXPECT_EQ(res.Failure().str(), R"(:2:3 error: root block: invalid instruction: tint::ir::Loop
+    EXPECT_EQ(res.Failure().str(),
+              R"(:2:3 error: root block: invalid instruction: tint::core::ir::Loop
   loop [b: %b2] {  # loop_1
   ^^^^^^^^^^^^^
 
@@ -957,8 +958,8 @@ TEST_F(IR_ValidatorTest, Instruction_AppendedDead) {
     auto arrows = std::string(addr.length(), '^');
 
     std::string expected = R"(:3:5 error: var: destroyed instruction found in instruction list
-    <destroyed tint::ir::Var $ADDRESS>
-    ^^^^^^^^^^^^^^^^^^^^^^^^^$ARROWS^
+    <destroyed tint::core::ir::Var $ADDRESS>
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^$ARROWS^
 
 :2:3 note: In block
   %b1 = block {
@@ -967,7 +968,7 @@ TEST_F(IR_ValidatorTest, Instruction_AppendedDead) {
 note: # Disassembly
 %my_func = func():void -> %b1 {
   %b1 = block {
-    <destroyed tint::ir::Var $ADDRESS>
+    <destroyed tint::core::ir::Var $ADDRESS>
     ret
   }
 }
@@ -2926,4 +2927,4 @@ note: # Disassembly
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::core::ir

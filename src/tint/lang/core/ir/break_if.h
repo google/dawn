@@ -20,11 +20,11 @@
 #include "src/tint/utils/rtti/castable.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Loop;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A break-if iteration instruction.
 class BreakIf : public Castable<BreakIf, Terminator> {
@@ -60,6 +60,6 @@ class BreakIf : public Castable<BreakIf, Terminator> {
     ir::Loop* loop_ = nullptr;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_BREAK_IF_H_

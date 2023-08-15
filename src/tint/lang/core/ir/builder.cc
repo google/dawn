@@ -21,7 +21,7 @@
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/utils/ice/ice.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Builder::Builder(Module& mod) : ir(mod) {}
 
@@ -125,4 +125,4 @@ const core::type::Type* Builder::VectorPtrElementType(const core::type::Type* ty
     return ir.Types().i32();
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

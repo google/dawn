@@ -21,11 +21,11 @@
 #include "src/tint/utils/rtti/castable.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Block;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// An instruction in the IR.
 class Instruction : public Castable<Instruction> {
@@ -118,6 +118,6 @@ class Instruction : public Castable<Instruction> {
     tint::EnumSet<Flag> flags_;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_INSTRUCTION_H_

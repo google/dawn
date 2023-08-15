@@ -14,9 +14,9 @@
 
 #include "src/tint/lang/core/ir/store.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Store);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Store);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Store::Store(Value* to, Value* from) {
     flags_.Add(Flag::kSequenced);
@@ -27,4 +27,4 @@ Store::Store(Value* to, Value* from) {
 
 Store::~Store() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

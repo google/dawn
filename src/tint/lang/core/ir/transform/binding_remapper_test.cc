@@ -18,7 +18,7 @@
 
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 namespace {
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -238,4 +238,4 @@ TEST_F(IR_BindingRemapperTest, BindingPointCollisionSameEntryPoint) {
 }
 
 }  // namespace
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform

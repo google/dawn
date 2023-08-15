@@ -21,11 +21,11 @@
 #include "tint/external_texture_options.h"
 
 // Forward declarations.
-namespace tint::ir {
+namespace tint::core::ir {
 class Module;
 }
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 
 /// MultiplanarExternalTexture is a transform that... TODO
 /// @param module the module to transform
@@ -34,6 +34,6 @@ namespace tint::ir::transform {
 Result<SuccessType, std::string> MultiplanarExternalTexture(Module* module,
                                                             const ExternalTextureOptions& options);
 
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform
 
 #endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_MULTIPLANAR_EXTERNAL_TEXTURE_H_

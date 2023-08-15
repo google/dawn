@@ -33,38 +33,38 @@ namespace {
 /// PIMPL state for the transform, for a single function.
 struct State {
     /// The IR module.
-    ir::Module* ir = nullptr;
+    core::ir::Module* ir = nullptr;
 
     /// The IR builder.
-    ir::Builder b{*ir};
+    core::ir::Builder b{*ir};
 
     /// The type manager.
     core::type::Manager& ty{ir->Types()};
 
     /// The "has not returned" flag.
-    ir::Var* continue_execution = nullptr;
+    core::ir::Var* continue_execution = nullptr;
 
     /// The variable that holds the return value.
     /// Null when the function does not return a value.
-    ir::Var* return_val = nullptr;
+    core::ir::Var* return_val = nullptr;
 
     /// The final return at the end of the function block.
     /// May be null when the function returns in all blocks of a control instruction.
-    ir::Return* fn_return = nullptr;
+    core::ir::Return* fn_return = nullptr;
 
     /// A set of control instructions that transitively hold a return instruction
-    Hashset<ir::ControlInstruction*, 8> holds_return_;
+    Hashset<core::ir::ControlInstruction*, 8> holds_return_;
 
     /// Constructor
     /// @param mod the module
-    explicit State(ir::Module* mod) : ir(mod) {}
+    explicit State(core::ir::Module* mod) : ir(mod) {}
 
     /// Process the function.
     /// @param fn the function to process
-    void Process(ir::Function* fn) {
+    void Process(core::ir::Function* fn) {
         // Find all of the nested return instructions in the function.
         for (const auto& usage : fn->Usages()) {
-            if (auto* ret = usage.instruction->As<ir::Return>()) {
+            if (auto* ret = usage.instruction->As<core::ir::Return>()) {
                 TransitivelyMarkAsReturning(ret->Block()->Parent());
             }
         }
@@ -86,7 +86,7 @@ struct State {
         }
 
         // Look to see if the function ends with a return
-        fn_return = tint::As<ir::Return>(fn->Block()->Terminator());
+        fn_return = tint::As<core::ir::Return>(fn->Block()->Terminator());
 
         // Process the function's block.
         // This will traverse into control instructions that hold returns, and apply the necessary
@@ -105,7 +105,7 @@ struct State {
     /// Marks all the control instructions from ctrl to the function as holding a return.
     /// @param ctrl the control instruction to mark as returning, along with all ancestor control
     /// instructions.
-    void TransitivelyMarkAsReturning(ir::ControlInstruction* ctrl) {
+    void TransitivelyMarkAsReturning(core::ir::ControlInstruction* ctrl) {
         for (; ctrl; ctrl = ctrl->Block()->Parent()) {
             if (!holds_return_.Add(ctrl)) {
                 return;
@@ -118,21 +118,21 @@ struct State {
     /// instructions following the control instruction will be wrapped in a 'if' that only executes
     /// if a return was not reached.
     /// @param block the block to process
-    void ProcessBlock(ir::Block* block) {
-        ir::If* inner_if = nullptr;
+    void ProcessBlock(core::ir::Block* block) {
+        core::ir::If* inner_if = nullptr;
         for (auto* inst = *block->begin(); inst;) {  // For each instruction in 'block'
             // As we're modifying the block that we're iterating over, grab the pointer to the next
             // instruction before (potentially) moving 'inst' to another block.
             auto* next = inst->next;
             TINT_DEFER(inst = next);
 
-            if (auto* ret = inst->As<ir::Return>()) {
+            if (auto* ret = inst->As<core::ir::Return>()) {
                 // Note: Return instructions are processed without being moved into the 'if' block.
                 ProcessReturn(ret, inner_if);
                 break;  // All instructions processed.
             }
 
-            if (inst->Is<ir::Unreachable>()) {
+            if (inst->Is<core::ir::Unreachable>()) {
                 // Unreachable can become reachable once returns are turned into exits.
                 // As this is the terminator for the block, simply stop processing the
                 // instructions. A appropriate terminator will be created for this block below.
@@ -150,12 +150,13 @@ struct State {
             // Control instructions holding a return need to be processed, and then a new 'if' needs
             // to be created to hold the instructions that are between the control instruction and
             // the block's terminating instruction.
-            if (auto* ctrl = inst->As<ir::ControlInstruction>()) {
+            if (auto* ctrl = inst->As<core::ir::ControlInstruction>()) {
                 if (holds_return_.Contains(ctrl)) {
                     // Control instruction transitively holds a return.
-                    ctrl->ForeachBlock([&](ir::Block* ctrl_block) { ProcessBlock(ctrl_block); });
+                    ctrl->ForeachBlock(
+                        [&](core::ir::Block* ctrl_block) { ProcessBlock(ctrl_block); });
                     if (next && (next != fn_return || fn_return->Value()) &&
-                        !tint::IsAnyOf<ir::Exit, ir::Unreachable>(next)) {
+                        !tint::IsAnyOf<core::ir::Exit, core::ir::Unreachable>(next)) {
                         inner_if = CreateIfContinueExecution(ctrl);
                     }
                 }
@@ -164,10 +165,12 @@ struct State {
 
         if (inner_if) {
             // new_value_with_type returns a new RuntimeValue with the same type as 'v'
-            auto new_value_with_type = [&](ir::Value* v) { return b.InstructionResult(v->Type()); };
+            auto new_value_with_type = [&](core::ir::Value* v) {
+                return b.InstructionResult(v->Type());
+            };
 
             if (inner_if->True()->HasTerminator()) {
-                if (auto* exit_if = inner_if->True()->Terminator()->As<ir::ExitIf>()) {
+                if (auto* exit_if = inner_if->True()->Terminator()->As<core::ir::ExitIf>()) {
                     // Ensure the associated 'if' is updated.
                     exit_if->SetIf(inner_if);
 
@@ -185,10 +188,10 @@ struct State {
 
             // Loop over the 'if' instructions, starting with the inner-most, and add any missing
             // terminating instructions to the blocks holding the 'if'.
-            for (auto* i = inner_if; i; i = tint::As<ir::If>(i->Block()->Parent())) {
+            for (auto* i = inner_if; i; i = tint::As<core::ir::If>(i->Block()->Parent())) {
                 if (!i->Block()->HasTerminator()) {
                     // Append the exit instruction to the block holding the 'if'.
-                    Vector<ir::InstructionResult*, 8> exit_args = i->Results();
+                    Vector<core::ir::InstructionResult*, 8> exit_args = i->Results();
                     if (!i->HasResults()) {
                         i->SetResults(tint::Transform(exit_args, new_value_with_type));
                     }
@@ -204,7 +207,7 @@ struct State {
     /// @param cond the possibly null 'if(continue_execution)' instruction for the current block.
     /// @note unlike other instructions, return instructions are not automatically moved into the
     /// 'if(continue_execution)' block.
-    void ProcessReturn(ir::Return* ret, ir::If* cond) {
+    void ProcessReturn(core::ir::Return* ret, core::ir::If* cond) {
         if (ret == fn_return) {
             // 'ret' is the final instruction for the function.
             ProcessFunctionBlockReturn(ret, cond);
@@ -217,7 +220,7 @@ struct State {
     /// Transforms the return instruction that is the last instruction in the function's block.
     /// @param ret the return instruction
     /// @param cond the possibly null 'if(continue_execution)' instruction for the current block.
-    void ProcessFunctionBlockReturn(ir::Return* ret, ir::If* cond) {
+    void ProcessFunctionBlockReturn(core::ir::Return* ret, core::ir::If* cond) {
         if (!return_val) {
             return;  // No need to transform non-value, end-of-function returns
         }
@@ -238,7 +241,7 @@ struct State {
     /// Transforms the return instruction that is found in a control instruction.
     /// @param ret the return instruction
     /// @param cond the possibly null 'if(continue_execution)' instruction for the current block.
-    void ProcessNestedReturn(ir::Return* ret, ir::If* cond) {
+    void ProcessNestedReturn(core::ir::Return* ret, core::ir::If* cond) {
         // If we have a 'if(continue_execution)' block, then insert instructions into that,
         // otherwise insert into the block holding the return.
         auto* block = cond ? cond->True() : ret->Block();
@@ -253,7 +256,7 @@ struct State {
         // If the outermost control instruction is expecting exit values, then return them as
         // 'undef' values.
         auto* ctrl = block->Parent();
-        Vector<ir::Value*, 8> exit_args;
+        Vector<core::ir::Value*, 8> exit_args;
         exit_args.Resize(ctrl->Results().Length());
 
         // Replace the return instruction with an exit instruction.
@@ -264,7 +267,7 @@ struct State {
     /// Builds instructions to create a 'if(continue_execution)' conditional.
     /// @param after new instructions will be inserted after this instruction
     /// @return the 'If' control instruction
-    ir::If* CreateIfContinueExecution(ir::Instruction* after) {
+    core::ir::If* CreateIfContinueExecution(core::ir::Instruction* after) {
         auto* load = b.Load(continue_execution);
         auto* cond = b.If(load);
         load->InsertAfter(after);
@@ -274,7 +277,7 @@ struct State {
 
     /// Adds a final return instruction to the end of @p fn
     /// @param fn the function
-    void AppendFinalReturn(ir::Function* fn) {
+    void AppendFinalReturn(core::ir::Function* fn) {
         b.Append(fn->Block(), [&] {
             if (return_val) {
                 b.Return(fn, b.Load(return_val));
@@ -287,7 +290,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType, std::string> MergeReturn(ir::Module* ir) {
+Result<SuccessType, std::string> MergeReturn(core::ir::Module* ir) {
     auto result = ValidateAndDumpIfNeeded(*ir, "MergeReturn transform");
     if (!result) {
         return result;

@@ -21,7 +21,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/type/manager.h"
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 
 /// Abstract base class for the state needed to handle IO for a particular backend target.
 struct ShaderIOBackendState {
@@ -100,6 +100,6 @@ using MakeBackendStateFunc = std::unique_ptr<ShaderIOBackendState>(Module*, Func
 /// @param make_backend_state a function that creates a backend state object
 void RunShaderIOBase(Module* module, std::function<MakeBackendStateFunc> make_backend_state);
 
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform
 
 #endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_SHADER_IO_H_

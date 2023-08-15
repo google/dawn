@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A load instruction in the IR.
 class Load : public Castable<Load, OperandInstruction<1, 1>> {
@@ -40,6 +40,6 @@ class Load : public Castable<Load, OperandInstruction<1, 1>> {
     std::string_view FriendlyName() override { return "load"; }
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_LOAD_H_

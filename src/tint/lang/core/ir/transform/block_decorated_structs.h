@@ -20,11 +20,11 @@
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
-namespace tint::ir {
+namespace tint::core::ir {
 class Module;
 }
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 
 /// BlockDecoratedStructs is a transform that changes the store type of a buffer to be a special
 /// structure that is recognized as needing a block decoration in SPIR-V, potentially wrapping the
@@ -33,6 +33,6 @@ namespace tint::ir::transform {
 /// @returns an error string on failure
 Result<SuccessType, std::string> BlockDecoratedStructs(Module* module);
 
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform
 
 #endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_BLOCK_DECORATED_STRUCTS_H_

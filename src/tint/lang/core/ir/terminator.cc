@@ -16,10 +16,10 @@
 
 #include <utility>
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Terminator);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Terminator);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Terminator::~Terminator() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

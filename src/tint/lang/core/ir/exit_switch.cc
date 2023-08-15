@@ -19,9 +19,9 @@
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/switch.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::ExitSwitch);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::ExitSwitch);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 ExitSwitch::ExitSwitch(ir::Switch* sw, VectorRef<Value*> args /* = tint::Empty */) {
     SetSwitch(sw);
@@ -38,4 +38,4 @@ ir::Switch* ExitSwitch::Switch() {
     return static_cast<ir::Switch*>(ControlInstruction());
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

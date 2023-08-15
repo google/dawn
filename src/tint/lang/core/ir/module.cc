@@ -18,7 +18,7 @@
 
 #include "src/tint/utils/ice/ice.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Module::Module() = default;
 
@@ -52,4 +52,4 @@ void Module::SetName(Value* value, Symbol name) {
     value_to_name_.Replace(value, name);
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

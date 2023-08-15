@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 namespace {
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -59,4 +59,4 @@ TEST_F(IR_StoreTest, Result) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::core::ir

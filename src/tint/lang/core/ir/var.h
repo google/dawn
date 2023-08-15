@@ -23,7 +23,7 @@
 #include "src/tint/utils/rtti/castable.h"
 #include "tint/binding_point.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A var instruction in the IR.
 class Var : public Castable<Var, OperandInstruction<1, 1>> {
@@ -59,6 +59,6 @@ class Var : public Castable<Var, OperandInstruction<1, 1>> {
     std::optional<struct BindingPoint> binding_point_;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_VAR_H_

@@ -19,11 +19,11 @@
 #include "src/tint/utils/rtti/castable.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Function;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A return instruction.
 class Return : public Castable<Return, Terminator> {
@@ -66,6 +66,6 @@ class Return : public Castable<Return, Terminator> {
     std::string_view FriendlyName() override { return "return"; }
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_RETURN_H_

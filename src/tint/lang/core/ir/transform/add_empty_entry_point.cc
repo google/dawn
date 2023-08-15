@@ -20,7 +20,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 
 namespace {
 
@@ -50,4 +50,4 @@ Result<SuccessType, std::string> AddEmptyEntryPoint(Module* ir) {
     return Success;
 }
 
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform

@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// An access instruction in the IR.
 class Access : public Castable<Access, OperandInstruction<3, 1>> {
@@ -50,6 +50,6 @@ class Access : public Castable<Access, OperandInstruction<3, 1>> {
     std::string_view FriendlyName() override { return "access"; }
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_ACCESS_H_

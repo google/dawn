@@ -15,9 +15,9 @@
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Constant);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Constant);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Constant::Constant(const core::constant::Value* val) : value_(val) {
     TINT_ASSERT(value_);
@@ -25,4 +25,4 @@ Constant::Constant(const core::constant::Value* val) : value_(val) {
 
 Constant::~Constant() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

@@ -16,9 +16,9 @@
 
 #include <utility>
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::BuiltinCall);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::BuiltinCall);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 BuiltinCall::BuiltinCall(InstructionResult* result, VectorRef<Value*> arguments) {
     AddOperands(BuiltinCall::kArgsOperandOffset, std::move(arguments));
@@ -27,4 +27,4 @@ BuiltinCall::BuiltinCall(InstructionResult* result, VectorRef<Value*> arguments)
 
 BuiltinCall::~BuiltinCall() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

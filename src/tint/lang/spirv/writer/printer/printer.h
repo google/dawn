@@ -34,7 +34,7 @@
 #include "src/tint/utils/symbol/symbol.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Access;
 class Binary;
 class Bitcast;
@@ -65,7 +65,7 @@ class Unary;
 class UserCall;
 class Value;
 class Var;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 namespace tint::core::type {
 class Struct;
 class Texture;
@@ -81,7 +81,7 @@ class Printer {
     /// @param module the Tint IR module to generate
     /// @param zero_init_workgroup_memory `true` to initialize all the variables in the Workgroup
     ///                                   storage class with OpConstantNull
-    Printer(ir::Module* module, bool zero_init_workgroup_memory);
+    Printer(core::ir::Module* module, bool zero_init_workgroup_memory);
 
     /// @returns the generated SPIR-V binary on success, or an error string on failure
     tint::Result<std::vector<uint32_t>, std::string> Generate();
@@ -92,7 +92,7 @@ class Printer {
     /// Get the result ID of the constant `constant`, emitting its instruction if necessary.
     /// @param constant the constant to get the ID for
     /// @returns the result ID of the constant
-    uint32_t Constant(ir::Constant* constant);
+    uint32_t Constant(core::ir::Constant* constant);
 
     /// Get the result ID of the type `ty`, emitting a type declaration instruction if necessary.
     /// @param ty the type to get the ID for
@@ -127,17 +127,17 @@ class Printer {
     /// Get the ID of the label for `block`.
     /// @param block the block to get the label ID for
     /// @returns the ID of the block's label
-    uint32_t Label(ir::Block* block);
+    uint32_t Label(core::ir::Block* block);
 
     /// Get the result ID of the value `value`, emitting its instruction if necessary.
     /// @param value the value to get the ID for
     /// @returns the result ID of the value
-    uint32_t Value(ir::Value* value);
+    uint32_t Value(core::ir::Value* value);
 
     /// Get the result ID of the instruction result `value`, emitting its instruction if necessary.
     /// @param inst the instruction to get the ID for
     /// @returns the result ID of the instruction
-    uint32_t Value(ir::Instruction* inst);
+    uint32_t Value(core::ir::Instruction* inst);
 
     /// Get the result ID of the OpUndef instruction with type `ty`, emitting it if necessary.
     /// @param ty the type of the undef value
@@ -159,115 +159,115 @@ class Printer {
 
     /// Emit a function.
     /// @param func the function to emit
-    void EmitFunction(ir::Function* func);
+    void EmitFunction(core::ir::Function* func);
 
     /// Emit entry point declarations for a function.
     /// @param func the function to emit entry point declarations for
     /// @param id the result ID of the function declaration
-    void EmitEntryPoint(ir::Function* func, uint32_t id);
+    void EmitEntryPoint(core::ir::Function* func, uint32_t id);
 
     /// Emit a block, including the initial OpLabel, OpPhis and instructions.
     /// @param block the block to emit
-    void EmitBlock(ir::Block* block);
+    void EmitBlock(core::ir::Block* block);
 
     /// Emit all OpPhi nodes for incoming branches to @p block.
     /// @param block the block to emit the OpPhis for
-    void EmitIncomingPhis(ir::MultiInBlock* block);
+    void EmitIncomingPhis(core::ir::MultiInBlock* block);
 
     /// Emit all instructions of @p block.
     /// @param block the block's instructions to emit
-    void EmitBlockInstructions(ir::Block* block);
+    void EmitBlockInstructions(core::ir::Block* block);
 
     /// Emit the root block.
     /// @param root_block the root block to emit
-    void EmitRootBlock(ir::Block* root_block);
+    void EmitRootBlock(core::ir::Block* root_block);
 
     /// Emit an `if` flow node.
     /// @param i the if node to emit
-    void EmitIf(ir::If* i);
+    void EmitIf(core::ir::If* i);
 
     /// Emit an access instruction
     /// @param access the access instruction to emit
-    void EmitAccess(ir::Access* access);
+    void EmitAccess(core::ir::Access* access);
 
     /// Emit a binary instruction.
     /// @param binary the binary instruction to emit
-    void EmitBinary(ir::Binary* binary);
+    void EmitBinary(core::ir::Binary* binary);
 
     /// Emit a bitcast instruction.
     /// @param bitcast the bitcast instruction to emit
-    void EmitBitcast(ir::Bitcast* bitcast);
+    void EmitBitcast(core::ir::Bitcast* bitcast);
 
     /// Emit a builtin function call instruction.
     /// @param call the builtin call instruction to emit
-    void EmitCoreBuiltinCall(ir::CoreBuiltinCall* call);
+    void EmitCoreBuiltinCall(core::ir::CoreBuiltinCall* call);
 
     /// Emit a construct instruction.
     /// @param construct the construct instruction to emit
-    void EmitConstruct(ir::Construct* construct);
+    void EmitConstruct(core::ir::Construct* construct);
 
     /// Emit a convert instruction.
     /// @param convert the convert instruction to emit
-    void EmitConvert(ir::Convert* convert);
+    void EmitConvert(core::ir::Convert* convert);
 
     /// Emit an intrinsic call instruction.
     /// @param call the intrinsic call instruction to emit
-    void EmitIntrinsicCall(ir::IntrinsicCall* call);
+    void EmitIntrinsicCall(core::ir::IntrinsicCall* call);
 
     /// Emit a load instruction.
     /// @param load the load instruction to emit
-    void EmitLoad(ir::Load* load);
+    void EmitLoad(core::ir::Load* load);
 
     /// Emit a load vector element instruction.
     /// @param load the load vector element instruction to emit
-    void EmitLoadVectorElement(ir::LoadVectorElement* load);
+    void EmitLoadVectorElement(core::ir::LoadVectorElement* load);
 
     /// Emit a loop instruction.
     /// @param loop the loop instruction to emit
-    void EmitLoop(ir::Loop* loop);
+    void EmitLoop(core::ir::Loop* loop);
 
     /// Emit a store instruction.
     /// @param store the store instruction to emit
-    void EmitStore(ir::Store* store);
+    void EmitStore(core::ir::Store* store);
 
     /// Emit a store vector element instruction.
     /// @param store the store vector element instruction to emit
-    void EmitStoreVectorElement(ir::StoreVectorElement* store);
+    void EmitStoreVectorElement(core::ir::StoreVectorElement* store);
 
     /// Emit a switch instruction.
     /// @param swtch the switch instruction to emit
-    void EmitSwitch(ir::Switch* swtch);
+    void EmitSwitch(core::ir::Switch* swtch);
 
     /// Emit a swizzle instruction.
     /// @param swizzle the swizzle instruction to emit
-    void EmitSwizzle(ir::Swizzle* swizzle);
+    void EmitSwizzle(core::ir::Swizzle* swizzle);
 
     /// Emit a unary instruction.
     /// @param unary the unary instruction to emit
-    void EmitUnary(ir::Unary* unary);
+    void EmitUnary(core::ir::Unary* unary);
 
     /// Emit a user call instruction.
     /// @param call the user call instruction to emit
-    void EmitUserCall(ir::UserCall* call);
+    void EmitUserCall(core::ir::UserCall* call);
 
     /// Emit a var instruction.
     /// @param var the var instruction to emit
-    void EmitVar(ir::Var* var);
+    void EmitVar(core::ir::Var* var);
 
     /// Emit a let instruction.
     /// @param let the let instruction to emit
-    void EmitLet(ir::Let* let);
+    void EmitLet(core::ir::Let* let);
 
     /// Emit a terminator instruction.
     /// @param term the terminator instruction to emit
-    void EmitTerminator(ir::Terminator* term);
+    void EmitTerminator(core::ir::Terminator* term);
 
     /// Emit the OpPhis for the given flow control instruction.
     /// @param inst the flow control instruction
-    void EmitExitPhis(ir::ControlInstruction* inst);
+    void EmitExitPhis(core::ir::ControlInstruction* inst);
 
-    ir::Module* ir_;
-    ir::Builder b_;
+    core::ir::Module* ir_;
+    core::ir::Builder b_;
     writer::Module module_;
     BinaryWriter writer_;
 
@@ -312,10 +312,10 @@ class Printer {
     Hashmap<const core::type::Type*, uint32_t, 4> undef_values_;
 
     /// The map of non-constant values to their result IDs.
-    Hashmap<ir::Value*, uint32_t, 8> values_;
+    Hashmap<core::ir::Value*, uint32_t, 8> values_;
 
     /// The map of blocks to the IDs of their label instructions.
-    Hashmap<ir::Block*, uint32_t, 8> block_labels_;
+    Hashmap<core::ir::Block*, uint32_t, 8> block_labels_;
 
     /// The map of extended instruction set names to their result IDs.
     Hashmap<std::string_view, uint32_t, 2> imports_;

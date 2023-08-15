@@ -19,11 +19,11 @@
 #include "src/tint/utils/rtti/castable.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Switch;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A exit switch instruction.
 class ExitSwitch : public Castable<ExitSwitch, Exit> {
@@ -48,6 +48,6 @@ class ExitSwitch : public Castable<ExitSwitch, Exit> {
     std::string_view FriendlyName() override { return "exit-switch"; }
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_EXIT_SWITCH_H_

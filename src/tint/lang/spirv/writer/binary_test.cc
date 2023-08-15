@@ -30,7 +30,7 @@ struct BinaryTestCase {
     /// The element type to test.
     TestElementType type;
     /// The binary operation.
-    enum ir::Binary::Kind kind;
+    enum core::ir::Binary::Kind kind;
     /// The expected SPIR-V instruction.
     std::string spirv_inst;
     /// The expected SPIR-V result type name.
@@ -71,52 +71,53 @@ TEST_P(Arithmetic_Bitwise, Vector) {
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest_Binary_I32,
     Arithmetic_Bitwise,
-    testing::Values(BinaryTestCase{kI32, ir::Binary::Kind::kAdd, "OpIAdd", "int"},
-                    BinaryTestCase{kI32, ir::Binary::Kind::kSubtract, "OpISub", "int"},
-                    BinaryTestCase{kI32, ir::Binary::Kind::kMultiply, "OpIMul", "int"},
-                    BinaryTestCase{kI32, ir::Binary::Kind::kDivide, "OpSDiv", "int"},
-                    BinaryTestCase{kI32, ir::Binary::Kind::kModulo, "OpSRem", "int"},
-                    BinaryTestCase{kI32, ir::Binary::Kind::kAnd, "OpBitwiseAnd", "int"},
-                    BinaryTestCase{kI32, ir::Binary::Kind::kOr, "OpBitwiseOr", "int"},
-                    BinaryTestCase{kI32, ir::Binary::Kind::kXor, "OpBitwiseXor", "int"},
-                    BinaryTestCase{kI32, ir::Binary::Kind::kShiftLeft, "OpShiftLeftLogical", "int"},
-                    BinaryTestCase{kI32, ir::Binary::Kind::kShiftRight, "OpShiftRightArithmetic",
-                                   "int"}));
+    testing::Values(BinaryTestCase{kI32, core::ir::Binary::Kind::kAdd, "OpIAdd", "int"},
+                    BinaryTestCase{kI32, core::ir::Binary::Kind::kSubtract, "OpISub", "int"},
+                    BinaryTestCase{kI32, core::ir::Binary::Kind::kMultiply, "OpIMul", "int"},
+                    BinaryTestCase{kI32, core::ir::Binary::Kind::kDivide, "OpSDiv", "int"},
+                    BinaryTestCase{kI32, core::ir::Binary::Kind::kModulo, "OpSRem", "int"},
+                    BinaryTestCase{kI32, core::ir::Binary::Kind::kAnd, "OpBitwiseAnd", "int"},
+                    BinaryTestCase{kI32, core::ir::Binary::Kind::kOr, "OpBitwiseOr", "int"},
+                    BinaryTestCase{kI32, core::ir::Binary::Kind::kXor, "OpBitwiseXor", "int"},
+                    BinaryTestCase{kI32, core::ir::Binary::Kind::kShiftLeft, "OpShiftLeftLogical",
+                                   "int"},
+                    BinaryTestCase{kI32, core::ir::Binary::Kind::kShiftRight,
+                                   "OpShiftRightArithmetic", "int"}));
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest_Binary_U32,
     Arithmetic_Bitwise,
     testing::Values(
-        BinaryTestCase{kU32, ir::Binary::Kind::kAdd, "OpIAdd", "uint"},
-        BinaryTestCase{kU32, ir::Binary::Kind::kSubtract, "OpISub", "uint"},
-        BinaryTestCase{kU32, ir::Binary::Kind::kMultiply, "OpIMul", "uint"},
-        BinaryTestCase{kU32, ir::Binary::Kind::kDivide, "OpUDiv", "uint"},
-        BinaryTestCase{kU32, ir::Binary::Kind::kModulo, "OpUMod", "uint"},
-        BinaryTestCase{kU32, ir::Binary::Kind::kAnd, "OpBitwiseAnd", "uint"},
-        BinaryTestCase{kU32, ir::Binary::Kind::kOr, "OpBitwiseOr", "uint"},
-        BinaryTestCase{kU32, ir::Binary::Kind::kXor, "OpBitwiseXor", "uint"},
-        BinaryTestCase{kU32, ir::Binary::Kind::kShiftLeft, "OpShiftLeftLogical", "uint"},
-        BinaryTestCase{kU32, ir::Binary::Kind::kShiftRight, "OpShiftRightLogical", "uint"}));
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kAdd, "OpIAdd", "uint"},
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kSubtract, "OpISub", "uint"},
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kMultiply, "OpIMul", "uint"},
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kDivide, "OpUDiv", "uint"},
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kModulo, "OpUMod", "uint"},
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kAnd, "OpBitwiseAnd", "uint"},
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kOr, "OpBitwiseOr", "uint"},
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kXor, "OpBitwiseXor", "uint"},
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kShiftLeft, "OpShiftLeftLogical", "uint"},
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kShiftRight, "OpShiftRightLogical", "uint"}));
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest_Binary_F32,
     Arithmetic_Bitwise,
-    testing::Values(BinaryTestCase{kF32, ir::Binary::Kind::kAdd, "OpFAdd", "float"},
-                    BinaryTestCase{kF32, ir::Binary::Kind::kSubtract, "OpFSub", "float"},
-                    BinaryTestCase{kF32, ir::Binary::Kind::kMultiply, "OpFMul", "float"},
-                    BinaryTestCase{kF32, ir::Binary::Kind::kDivide, "OpFDiv", "float"},
-                    BinaryTestCase{kF32, ir::Binary::Kind::kModulo, "OpFRem", "float"}));
+    testing::Values(BinaryTestCase{kF32, core::ir::Binary::Kind::kAdd, "OpFAdd", "float"},
+                    BinaryTestCase{kF32, core::ir::Binary::Kind::kSubtract, "OpFSub", "float"},
+                    BinaryTestCase{kF32, core::ir::Binary::Kind::kMultiply, "OpFMul", "float"},
+                    BinaryTestCase{kF32, core::ir::Binary::Kind::kDivide, "OpFDiv", "float"},
+                    BinaryTestCase{kF32, core::ir::Binary::Kind::kModulo, "OpFRem", "float"}));
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest_Binary_F16,
     Arithmetic_Bitwise,
-    testing::Values(BinaryTestCase{kF16, ir::Binary::Kind::kAdd, "OpFAdd", "half"},
-                    BinaryTestCase{kF16, ir::Binary::Kind::kSubtract, "OpFSub", "half"},
-                    BinaryTestCase{kF16, ir::Binary::Kind::kMultiply, "OpFMul", "half"},
-                    BinaryTestCase{kF16, ir::Binary::Kind::kDivide, "OpFDiv", "half"},
-                    BinaryTestCase{kF16, ir::Binary::Kind::kModulo, "OpFRem", "half"}));
+    testing::Values(BinaryTestCase{kF16, core::ir::Binary::Kind::kAdd, "OpFAdd", "half"},
+                    BinaryTestCase{kF16, core::ir::Binary::Kind::kSubtract, "OpFSub", "half"},
+                    BinaryTestCase{kF16, core::ir::Binary::Kind::kMultiply, "OpFMul", "half"},
+                    BinaryTestCase{kF16, core::ir::Binary::Kind::kDivide, "OpFDiv", "half"},
+                    BinaryTestCase{kF16, core::ir::Binary::Kind::kModulo, "OpFRem", "half"}));
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest_Binary_Bool,
     Arithmetic_Bitwise,
-    testing::Values(BinaryTestCase{kBool, ir::Binary::Kind::kAnd, "OpLogicalAnd", "bool"},
-                    BinaryTestCase{kBool, ir::Binary::Kind::kOr, "OpLogicalOr", "bool"}));
+    testing::Values(BinaryTestCase{kBool, core::ir::Binary::Kind::kAnd, "OpLogicalAnd", "bool"},
+                    BinaryTestCase{kBool, core::ir::Binary::Kind::kOr, "OpLogicalOr", "bool"}));
 
 TEST_F(SpirvWriterTest, Binary_ScalarTimesVector_F32) {
     auto* scalar = b.FunctionParam("scalar", ty.f32());
@@ -259,47 +260,53 @@ INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest_Binary_I32,
     Comparison,
     testing::Values(
-        BinaryTestCase{kI32, ir::Binary::Kind::kEqual, "OpIEqual", "bool"},
-        BinaryTestCase{kI32, ir::Binary::Kind::kNotEqual, "OpINotEqual", "bool"},
-        BinaryTestCase{kI32, ir::Binary::Kind::kGreaterThan, "OpSGreaterThan", "bool"},
-        BinaryTestCase{kI32, ir::Binary::Kind::kGreaterThanEqual, "OpSGreaterThanEqual", "bool"},
-        BinaryTestCase{kI32, ir::Binary::Kind::kLessThan, "OpSLessThan", "bool"},
-        BinaryTestCase{kI32, ir::Binary::Kind::kLessThanEqual, "OpSLessThanEqual", "bool"}));
+        BinaryTestCase{kI32, core::ir::Binary::Kind::kEqual, "OpIEqual", "bool"},
+        BinaryTestCase{kI32, core::ir::Binary::Kind::kNotEqual, "OpINotEqual", "bool"},
+        BinaryTestCase{kI32, core::ir::Binary::Kind::kGreaterThan, "OpSGreaterThan", "bool"},
+        BinaryTestCase{kI32, core::ir::Binary::Kind::kGreaterThanEqual, "OpSGreaterThanEqual",
+                       "bool"},
+        BinaryTestCase{kI32, core::ir::Binary::Kind::kLessThan, "OpSLessThan", "bool"},
+        BinaryTestCase{kI32, core::ir::Binary::Kind::kLessThanEqual, "OpSLessThanEqual", "bool"}));
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest_Binary_U32,
     Comparison,
     testing::Values(
-        BinaryTestCase{kU32, ir::Binary::Kind::kEqual, "OpIEqual", "bool"},
-        BinaryTestCase{kU32, ir::Binary::Kind::kNotEqual, "OpINotEqual", "bool"},
-        BinaryTestCase{kU32, ir::Binary::Kind::kGreaterThan, "OpUGreaterThan", "bool"},
-        BinaryTestCase{kU32, ir::Binary::Kind::kGreaterThanEqual, "OpUGreaterThanEqual", "bool"},
-        BinaryTestCase{kU32, ir::Binary::Kind::kLessThan, "OpULessThan", "bool"},
-        BinaryTestCase{kU32, ir::Binary::Kind::kLessThanEqual, "OpULessThanEqual", "bool"}));
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kEqual, "OpIEqual", "bool"},
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kNotEqual, "OpINotEqual", "bool"},
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kGreaterThan, "OpUGreaterThan", "bool"},
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kGreaterThanEqual, "OpUGreaterThanEqual",
+                       "bool"},
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kLessThan, "OpULessThan", "bool"},
+        BinaryTestCase{kU32, core::ir::Binary::Kind::kLessThanEqual, "OpULessThanEqual", "bool"}));
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest_Binary_F32,
     Comparison,
     testing::Values(
-        BinaryTestCase{kF32, ir::Binary::Kind::kEqual, "OpFOrdEqual", "bool"},
-        BinaryTestCase{kF32, ir::Binary::Kind::kNotEqual, "OpFOrdNotEqual", "bool"},
-        BinaryTestCase{kF32, ir::Binary::Kind::kGreaterThan, "OpFOrdGreaterThan", "bool"},
-        BinaryTestCase{kF32, ir::Binary::Kind::kGreaterThanEqual, "OpFOrdGreaterThanEqual", "bool"},
-        BinaryTestCase{kF32, ir::Binary::Kind::kLessThan, "OpFOrdLessThan", "bool"},
-        BinaryTestCase{kF32, ir::Binary::Kind::kLessThanEqual, "OpFOrdLessThanEqual", "bool"}));
+        BinaryTestCase{kF32, core::ir::Binary::Kind::kEqual, "OpFOrdEqual", "bool"},
+        BinaryTestCase{kF32, core::ir::Binary::Kind::kNotEqual, "OpFOrdNotEqual", "bool"},
+        BinaryTestCase{kF32, core::ir::Binary::Kind::kGreaterThan, "OpFOrdGreaterThan", "bool"},
+        BinaryTestCase{kF32, core::ir::Binary::Kind::kGreaterThanEqual, "OpFOrdGreaterThanEqual",
+                       "bool"},
+        BinaryTestCase{kF32, core::ir::Binary::Kind::kLessThan, "OpFOrdLessThan", "bool"},
+        BinaryTestCase{kF32, core::ir::Binary::Kind::kLessThanEqual, "OpFOrdLessThanEqual",
+                       "bool"}));
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest_Binary_F16,
     Comparison,
     testing::Values(
-        BinaryTestCase{kF16, ir::Binary::Kind::kEqual, "OpFOrdEqual", "bool"},
-        BinaryTestCase{kF16, ir::Binary::Kind::kNotEqual, "OpFOrdNotEqual", "bool"},
-        BinaryTestCase{kF16, ir::Binary::Kind::kGreaterThan, "OpFOrdGreaterThan", "bool"},
-        BinaryTestCase{kF16, ir::Binary::Kind::kGreaterThanEqual, "OpFOrdGreaterThanEqual", "bool"},
-        BinaryTestCase{kF16, ir::Binary::Kind::kLessThan, "OpFOrdLessThan", "bool"},
-        BinaryTestCase{kF16, ir::Binary::Kind::kLessThanEqual, "OpFOrdLessThanEqual", "bool"}));
+        BinaryTestCase{kF16, core::ir::Binary::Kind::kEqual, "OpFOrdEqual", "bool"},
+        BinaryTestCase{kF16, core::ir::Binary::Kind::kNotEqual, "OpFOrdNotEqual", "bool"},
+        BinaryTestCase{kF16, core::ir::Binary::Kind::kGreaterThan, "OpFOrdGreaterThan", "bool"},
+        BinaryTestCase{kF16, core::ir::Binary::Kind::kGreaterThanEqual, "OpFOrdGreaterThanEqual",
+                       "bool"},
+        BinaryTestCase{kF16, core::ir::Binary::Kind::kLessThan, "OpFOrdLessThan", "bool"},
+        BinaryTestCase{kF16, core::ir::Binary::Kind::kLessThanEqual, "OpFOrdLessThanEqual",
+                       "bool"}));
 INSTANTIATE_TEST_SUITE_P(SpirvWriterTest_Binary_Bool,
                          Comparison,
-                         testing::Values(BinaryTestCase{kBool, ir::Binary::Kind::kEqual,
+                         testing::Values(BinaryTestCase{kBool, core::ir::Binary::Kind::kEqual,
                                                         "OpLogicalEqual", "bool"},
-                                         BinaryTestCase{kBool, ir::Binary::Kind::kNotEqual,
+                                         BinaryTestCase{kBool, core::ir::Binary::Kind::kNotEqual,
                                                         "OpLogicalNotEqual", "bool"}));
 
 TEST_F(SpirvWriterTest, Binary_Chain) {

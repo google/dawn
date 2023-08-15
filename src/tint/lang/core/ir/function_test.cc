@@ -16,7 +16,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 namespace {
 
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -67,4 +67,4 @@ TEST_F(IR_FunctionTest, Fail_NullBlock) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::core::ir

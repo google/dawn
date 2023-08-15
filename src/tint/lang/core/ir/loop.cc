@@ -19,9 +19,9 @@
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Loop);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Loop);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Loop::Loop(ir::Block* i, ir::MultiInBlock* b, ir::MultiInBlock* c)
     : initializer_(i), body_(b), continuing_(c) {
@@ -58,4 +58,4 @@ bool Loop::HasInitializer() {
     return initializer_->HasTerminator();
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

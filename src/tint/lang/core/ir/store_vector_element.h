@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A store instruction for a single vector element in the IR.
 class StoreVectorElement : public Castable<StoreVectorElement, OperandInstruction<3, 0>> {
@@ -52,6 +52,6 @@ class StoreVectorElement : public Castable<StoreVectorElement, OperandInstructio
     std::string_view FriendlyName() override { return "store-vector-element"; }
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_STORE_VECTOR_ELEMENT_H_

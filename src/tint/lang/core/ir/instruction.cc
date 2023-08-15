@@ -17,9 +17,9 @@
 #include "src/tint/lang/core/ir/block.h"
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Instruction);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Instruction);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Instruction::Instruction() = default;
 
@@ -60,4 +60,4 @@ void Instruction::Remove() {
     Block()->Remove(this);
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

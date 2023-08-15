@@ -19,7 +19,7 @@
 
 #include "src/tint/lang/core/interpolation.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A function parameter in the IR.
 struct Location {
@@ -29,6 +29,6 @@ struct Location {
     std::optional<core::Interpolation> interpolation;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_LOCATION_H_

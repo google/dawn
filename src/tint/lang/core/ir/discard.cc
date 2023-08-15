@@ -15,12 +15,12 @@
 #include "src/tint/lang/core/ir/discard.h"
 #include "src/tint/lang/core/type/void.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Discard);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Discard);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Discard::Discard() = default;
 
 Discard::~Discard() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

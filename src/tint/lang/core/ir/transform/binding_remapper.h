@@ -21,11 +21,11 @@
 #include "tint/binding_remapper_options.h"
 
 // Forward declarations.
-namespace tint::ir {
+namespace tint::core::ir {
 class Module;
 }
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 
 /// BindingRemapper is a transform that remaps binding point indices and access controls.
 /// @param module the module to transform
@@ -34,6 +34,6 @@ namespace tint::ir::transform {
 Result<SuccessType, std::string> BindingRemapper(Module* module,
                                                  const BindingRemapperOptions& options);
 
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform
 
 #endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_BINDING_REMAPPER_H_

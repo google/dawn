@@ -25,7 +25,7 @@
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/validator.h"
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 
 /// Helper class for testing IR transforms.
 template <typename BASE>
@@ -68,6 +68,6 @@ using TransformTest = TransformTestBase<testing::Test>;
 template <typename T>
 using TransformTestWithParam = TransformTestBase<testing::TestWithParam<T>>;
 
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform
 
 #endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_HELPER_TEST_H_

@@ -18,9 +18,9 @@
 #include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Value);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Value);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Value::Value() = default;
 
@@ -54,4 +54,4 @@ void Value::ReplaceAllUsesWith(Value* replacement) {
     }
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

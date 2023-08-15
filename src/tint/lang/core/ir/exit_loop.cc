@@ -20,9 +20,9 @@
 #include "src/tint/lang/core/ir/loop.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::ExitLoop);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::ExitLoop);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 ExitLoop::ExitLoop(ir::Loop* loop, VectorRef<Value*> args /* = tint::Empty */) {
     SetLoop(loop);
@@ -39,4 +39,4 @@ ir::Loop* ExitLoop::Loop() {
     return static_cast<ir::Loop*>(ControlInstruction());
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

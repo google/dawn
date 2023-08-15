@@ -20,7 +20,7 @@
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
-namespace tint::ir {
+namespace tint::core::ir {
 class Module;
 }
 
@@ -31,7 +31,7 @@ namespace tint::wgsl::writer {
 /// scope.
 /// @param module the module to transform
 /// @returns an error string on failure
-Result<SuccessType, std::string> RenameConflicts(ir::Module* module);
+Result<SuccessType, std::string> RenameConflicts(core::ir::Module* module);
 
 }  // namespace tint::wgsl::writer
 

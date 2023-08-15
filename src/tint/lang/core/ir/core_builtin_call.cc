@@ -18,9 +18,9 @@
 
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::CoreBuiltinCall);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::CoreBuiltinCall);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 CoreBuiltinCall::CoreBuiltinCall(InstructionResult* result,
                                  core::Function func,
@@ -32,4 +32,4 @@ CoreBuiltinCall::CoreBuiltinCall(InstructionResult* result,
 
 CoreBuiltinCall::~CoreBuiltinCall() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

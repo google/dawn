@@ -23,7 +23,7 @@
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Access;
 class ExitIf;
 class ExitLoop;
@@ -33,9 +33,9 @@ class LoadVectorElement;
 class Return;
 class StoreVectorElement;
 class Var;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// Validates that a given IR module is correctly formed
 /// @param mod the module to validate
@@ -242,6 +242,6 @@ class Validator {
     void DisassembleIfNeeded();
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_VALIDATOR_H_

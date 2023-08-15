@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A unary instruction in the IR.
 class Unary : public Castable<Unary, OperandInstruction<1, 1>> {
@@ -52,6 +52,6 @@ class Unary : public Castable<Unary, OperandInstruction<1, 1>> {
     enum Kind kind_;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_UNARY_H_

@@ -71,7 +71,7 @@
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// Builds an ir::Module
 class Builder {
@@ -953,6 +953,6 @@ class Builder {
     const core::type::Type* VectorPtrElementType(const core::type::Type* type);
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_BUILDER_H_

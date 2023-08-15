@@ -20,11 +20,11 @@
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
-namespace tint::ir {
+namespace tint::core::ir {
 class Module;
 }
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 
 /// The set of polyfills that should be applied.
 struct BuiltinPolyfillConfig {
@@ -50,6 +50,6 @@ struct BuiltinPolyfillConfig {
 Result<SuccessType, std::string> BuiltinPolyfill(Module* module,
                                                  const BuiltinPolyfillConfig& config);
 
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform
 
 #endif  // SRC_TINT_LANG_CORE_IR_TRANSFORM_BUILTIN_POLYFILL_H_

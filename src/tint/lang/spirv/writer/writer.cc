@@ -55,7 +55,7 @@ Result<Output, std::string> Generate(const Program* program, const Options& opti
         auto ir = converted.Move();
 
         // Apply transforms as required by writer options.
-        auto remapper = ir::transform::BindingRemapper(&ir, options.binding_remapper_options);
+        auto remapper = core::ir::transform::BindingRemapper(&ir, options.binding_remapper_options);
         if (!remapper) {
             return remapper.Failure();
         }

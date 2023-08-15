@@ -17,17 +17,17 @@
 
 #include "src/tint/lang/wgsl/program/program.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 class Module;
 }
 
 namespace tint::wgsl::writer {
 
-/// Builds a tint::Program from an ir::Module
+/// Builds a tint::Program from an core::ir::Module
 /// @param module the IR module
 /// @return the tint::Program.
 /// @note Check the returned Program::Diagnostics() for any errors.
-Program IRToProgram(ir::Module& module);
+Program IRToProgram(core::ir::Module& module);
 
 }  // namespace tint::wgsl::writer
 

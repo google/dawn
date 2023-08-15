@@ -17,9 +17,9 @@
 #include "src/tint/lang/core/ir/store.h"
 #include "src/tint/utils/ice/ice.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Var);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Var);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Var::Var(InstructionResult* result) {
     if (result && result->Type()) {
@@ -48,4 +48,4 @@ void Var::DestroyIfOnlyAssigned() {
     }
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

@@ -20,7 +20,7 @@
 
 using namespace tint::core::fluent_types;  // NOLINT
 
-namespace tint::ir {
+namespace tint::core::ir {
 namespace {
 
 using IR_SwizzleTest = IRTestHelper;
@@ -87,4 +87,4 @@ TEST_F(IR_SwizzleTest, Fail_IndexOutOfRange) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::core::ir

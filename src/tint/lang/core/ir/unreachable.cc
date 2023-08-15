@@ -14,10 +14,10 @@
 
 #include "src/tint/lang/core/ir/unreachable.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Unreachable);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Unreachable);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Unreachable::~Unreachable() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

@@ -16,9 +16,9 @@
 
 #include <utility>
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Access);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Access);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 //! @cond Doxygen_Suppress
 Access::Access(InstructionResult* result, Value* object, VectorRef<Value*> indices) {
@@ -30,4 +30,4 @@ Access::Access(InstructionResult* result, Value* object, VectorRef<Value*> indic
 Access::~Access() = default;
 //! @endcond
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

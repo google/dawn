@@ -14,9 +14,9 @@
 
 #include "src/tint/lang/core/ir/binary.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Binary);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Binary);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Binary::Binary(InstructionResult* result, enum Kind kind, Value* lhs, Value* rhs) : kind_(kind) {
     AddOperand(Binary::kLhsOperandOffset, lhs);
@@ -64,4 +64,4 @@ std::string_view ToString(enum Binary::Kind kind) {
     return "<unknown>";
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

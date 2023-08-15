@@ -24,7 +24,7 @@
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-namespace tint::ir::transform {
+namespace tint::core::ir::transform {
 
 namespace {
 
@@ -214,4 +214,4 @@ Result<SuccessType, std::string> DemoteToHelper(Module* ir) {
     return Success;
 }
 
-}  // namespace tint::ir::transform
+}  // namespace tint::core::ir::transform

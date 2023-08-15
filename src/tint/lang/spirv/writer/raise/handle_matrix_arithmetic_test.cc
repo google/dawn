@@ -25,7 +25,7 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using SpirvWriter_HandleMatrixArithmeticTest = ir::transform::TransformTest;
+using SpirvWriter_HandleMatrixArithmeticTest = core::ir::transform::TransformTest;
 
 TEST_F(SpirvWriter_HandleMatrixArithmeticTest, Add_Mat2x3f) {
     auto* arg1 = b.FunctionParam("arg1", ty.mat2x3<f32>());

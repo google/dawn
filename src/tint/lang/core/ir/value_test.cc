@@ -19,7 +19,7 @@
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
 
-namespace tint::ir {
+namespace tint::core::ir {
 namespace {
 
 using IR_ValueTest = IRTestHelper;
@@ -77,4 +77,4 @@ TEST_F(IR_ValueTest, Destroy_HasSource) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::core::ir

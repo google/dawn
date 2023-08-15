@@ -16,9 +16,9 @@
 
 #include <utility>
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Convert);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Convert);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Convert::Convert(InstructionResult* result, Value* value) {
     AddOperand(Convert::kValueOperandOffset, value);
@@ -27,4 +27,4 @@ Convert::Convert(InstructionResult* result, Value* value) {
 
 Convert::~Convert() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

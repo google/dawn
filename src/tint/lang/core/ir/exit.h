@@ -18,11 +18,11 @@
 #include "src/tint/lang/core/ir/terminator.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class ControlInstruction;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// The base class for all exit terminators.
 class Exit : public Castable<Exit, Terminator> {
@@ -44,6 +44,6 @@ class Exit : public Castable<Exit, Terminator> {
     ir::ControlInstruction* ctrl_inst_ = nullptr;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_EXIT_H_

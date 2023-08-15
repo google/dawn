@@ -150,11 +150,11 @@ const core::type::Type* DedupType(const core::type::Type* ty, core::type::Manage
 
 }  // namespace
 
-Printer::Printer(ir::Module* module, bool zero_init_workgroup_mem)
+Printer::Printer(core::ir::Module* module, bool zero_init_workgroup_mem)
     : ir_(module), b_(*module), zero_init_workgroup_memory_(zero_init_workgroup_mem) {}
 
 Result<std::vector<uint32_t>, std::string> Printer::Generate() {
-    auto valid = ir::ValidateAndDumpIfNeeded(*ir_, "SPIR-V writer");
+    auto valid = core::ir::ValidateAndDumpIfNeeded(*ir_, "SPIR-V writer");
     if (!valid) {
         return std::move(valid.Failure());
     }
@@ -231,7 +231,7 @@ uint32_t Printer::Builtin(core::BuiltinValue builtin, core::AddressSpace addrspa
     return SpvBuiltInMax;
 }
 
-uint32_t Printer::Constant(ir::Constant* constant) {
+uint32_t Printer::Constant(core::ir::Constant* constant) {
     // If it is a literal operand, just return the value.
     if (auto* literal = constant->As<raise::LiteralOperand>()) {
         return literal->Value()->ValueAs<uint32_t>();
@@ -383,18 +383,20 @@ uint32_t Printer::Type(const core::type::Type* ty,
     });
 }
 
-uint32_t Printer::Value(ir::Instruction* inst) {
+uint32_t Printer::Value(core::ir::Instruction* inst) {
     return Value(inst->Result());
 }
 
-uint32_t Printer::Value(ir::Value* value) {
+uint32_t Printer::Value(core::ir::Value* value) {
     return Switch(
         value,  //
-        [&](ir::Constant* constant) { return Constant(constant); },
-        [&](ir::Value*) { return values_.GetOrCreate(value, [&] { return module_.NextId(); }); });
+        [&](core::ir::Constant* constant) { return Constant(constant); },
+        [&](core::ir::Value*) {
+            return values_.GetOrCreate(value, [&] { return module_.NextId(); });
+        });
 }
 
-uint32_t Printer::Label(ir::Block* block) {
+uint32_t Printer::Label(core::ir::Block* block) {
     return block_labels_.GetOrCreate(block, [&] { return module_.NextId(); });
 }
 
@@ -573,14 +575,14 @@ void Printer::EmitTextureType(uint32_t id, const core::type::Texture* texture) {
                      {id, sampled_type, dim, depth, array, ms, sampled, format});
 }
 
-void Printer::EmitFunction(ir::Function* func) {
+void Printer::EmitFunction(core::ir::Function* func) {
     auto id = Value(func);
 
     // Emit the function name.
     module_.PushDebug(spv::Op::OpName, {id, Operand(ir_->NameOf(func).Name())});
 
     // Emit OpEntryPoint and OpExecutionMode declarations if needed.
-    if (func->Stage() != ir::Function::PipelineStage::kUndefined) {
+    if (func->Stage() != core::ir::Function::PipelineStage::kUndefined) {
         EmitEntryPoint(func, id);
     }
 
@@ -628,10 +630,10 @@ void Printer::EmitFunction(ir::Function* func) {
     module_.PushFunction(current_function_);
 }
 
-void Printer::EmitEntryPoint(ir::Function* func, uint32_t id) {
+void Printer::EmitEntryPoint(core::ir::Function* func, uint32_t id) {
     SpvExecutionModel stage = SpvExecutionModelMax;
     switch (func->Stage()) {
-        case ir::Function::PipelineStage::kCompute: {
+        case core::ir::Function::PipelineStage::kCompute: {
             stage = SpvExecutionModelGLCompute;
             module_.PushExecutionMode(
                 spv::Op::OpExecutionMode,
@@ -639,17 +641,17 @@ void Printer::EmitEntryPoint(ir::Function* func, uint32_t id) {
                  func->WorkgroupSize()->at(1), func->WorkgroupSize()->at(2)});
             break;
         }
-        case ir::Function::PipelineStage::kFragment: {
+        case core::ir::Function::PipelineStage::kFragment: {
             stage = SpvExecutionModelFragment;
             module_.PushExecutionMode(spv::Op::OpExecutionMode,
                                       {id, U32Operand(SpvExecutionModeOriginUpperLeft)});
             break;
         }
-        case ir::Function::PipelineStage::kVertex: {
+        case core::ir::Function::PipelineStage::kVertex: {
             stage = SpvExecutionModelVertex;
             break;
         }
-        case ir::Function::PipelineStage::kUndefined:
+        case core::ir::Function::PipelineStage::kUndefined:
             TINT_ICE() << "undefined pipeline stage for entry point";
             return;
     }
@@ -659,7 +661,7 @@ void Printer::EmitEntryPoint(ir::Function* func, uint32_t id) {
     // Add the list of all referenced shader IO variables.
     if (ir_->root_block) {
         for (auto* global : *ir_->root_block) {
-            auto* var = global->As<ir::Var>();
+            auto* var = global->As<core::ir::Var>();
             if (!var) {
                 continue;
             }
@@ -702,18 +704,18 @@ void Printer::EmitEntryPoint(ir::Function* func, uint32_t id) {
     module_.PushEntryPoint(spv::Op::OpEntryPoint, operands);
 }
 
-void Printer::EmitRootBlock(ir::Block* root_block) {
+void Printer::EmitRootBlock(core::ir::Block* root_block) {
     for (auto* inst : *root_block) {
         Switch(
             inst,  //
-            [&](ir::Var* v) { return EmitVar(v); },
+            [&](core::ir::Var* v) { return EmitVar(v); },
             [&](Default) {
                 TINT_ICE() << "unimplemented root block instruction: " << inst->TypeInfo().name;
             });
     }
 }
 
-void Printer::EmitBlock(ir::Block* block) {
+void Printer::EmitBlock(core::ir::Block* block) {
     // Emit the label.
     // Skip if this is the function's entry block, as it will be emitted by the function object.
     if (!current_function_.instructions().empty()) {
@@ -727,7 +729,7 @@ void Printer::EmitBlock(ir::Block* block) {
         return;
     }
 
-    if (auto* mib = block->As<ir::MultiInBlock>()) {
+    if (auto* mib = block->As<core::ir::MultiInBlock>()) {
         // Emit all OpPhi nodes for incoming branches to block.
         EmitIncomingPhis(mib);
     }
@@ -736,7 +738,7 @@ void Printer::EmitBlock(ir::Block* block) {
     EmitBlockInstructions(block);
 }
 
-void Printer::EmitIncomingPhis(ir::MultiInBlock* block) {
+void Printer::EmitIncomingPhis(core::ir::MultiInBlock* block) {
     // Emit Phi nodes for all the incoming block parameters
     for (size_t param_idx = 0; param_idx < block->Params().Length(); param_idx++) {
         auto* param = block->Params()[param_idx];
@@ -752,34 +754,34 @@ void Printer::EmitIncomingPhis(ir::MultiInBlock* block) {
     }
 }
 
-void Printer::EmitBlockInstructions(ir::Block* block) {
+void Printer::EmitBlockInstructions(core::ir::Block* block) {
     for (auto* inst : *block) {
         Switch(
-            inst,                                                           //
-            [&](ir::Access* a) { EmitAccess(a); },                          //
-            [&](ir::Binary* b) { EmitBinary(b); },                          //
-            [&](ir::Bitcast* b) { EmitBitcast(b); },                        //
-            [&](ir::CoreBuiltinCall* b) { EmitCoreBuiltinCall(b); },        //
-            [&](ir::Construct* c) { EmitConstruct(c); },                    //
-            [&](ir::Convert* c) { EmitConvert(c); },                        //
-            [&](ir::IntrinsicCall* i) { EmitIntrinsicCall(i); },            //
-            [&](ir::Load* l) { EmitLoad(l); },                              //
-            [&](ir::LoadVectorElement* l) { EmitLoadVectorElement(l); },    //
-            [&](ir::Loop* l) { EmitLoop(l); },                              //
-            [&](ir::Switch* sw) { EmitSwitch(sw); },                        //
-            [&](ir::Swizzle* s) { EmitSwizzle(s); },                        //
-            [&](ir::Store* s) { EmitStore(s); },                            //
-            [&](ir::StoreVectorElement* s) { EmitStoreVectorElement(s); },  //
-            [&](ir::UserCall* c) { EmitUserCall(c); },                      //
-            [&](ir::Unary* u) { EmitUnary(u); },                            //
-            [&](ir::Var* v) { EmitVar(v); },                                //
-            [&](ir::Let* l) { EmitLet(l); },                                //
-            [&](ir::If* i) { EmitIf(i); },                                  //
-            [&](ir::Terminator* t) { EmitTerminator(t); },                  //
+            inst,                                                                 //
+            [&](core::ir::Access* a) { EmitAccess(a); },                          //
+            [&](core::ir::Binary* b) { EmitBinary(b); },                          //
+            [&](core::ir::Bitcast* b) { EmitBitcast(b); },                        //
+            [&](core::ir::CoreBuiltinCall* b) { EmitCoreBuiltinCall(b); },        //
+            [&](core::ir::Construct* c) { EmitConstruct(c); },                    //
+            [&](core::ir::Convert* c) { EmitConvert(c); },                        //
+            [&](core::ir::IntrinsicCall* i) { EmitIntrinsicCall(i); },            //
+            [&](core::ir::Load* l) { EmitLoad(l); },                              //
+            [&](core::ir::LoadVectorElement* l) { EmitLoadVectorElement(l); },    //
+            [&](core::ir::Loop* l) { EmitLoop(l); },                              //
+            [&](core::ir::Switch* sw) { EmitSwitch(sw); },                        //
+            [&](core::ir::Swizzle* s) { EmitSwizzle(s); },                        //
+            [&](core::ir::Store* s) { EmitStore(s); },                            //
+            [&](core::ir::StoreVectorElement* s) { EmitStoreVectorElement(s); },  //
+            [&](core::ir::UserCall* c) { EmitUserCall(c); },                      //
+            [&](core::ir::Unary* u) { EmitUnary(u); },                            //
+            [&](core::ir::Var* v) { EmitVar(v); },                                //
+            [&](core::ir::Let* l) { EmitLet(l); },                                //
+            [&](core::ir::If* i) { EmitIf(i); },                                  //
+            [&](core::ir::Terminator* t) { EmitTerminator(t); },                  //
             [&](Default) { TINT_ICE() << "unimplemented instruction: " << inst->TypeInfo().name; });
 
         // Set the name for the SPIR-V result ID if provided in the module.
-        if (inst->Result() && !inst->Is<ir::Var>()) {
+        if (inst->Result() && !inst->Is<core::ir::Var>()) {
             if (auto name = ir_->NameOf(inst)) {
                 module_.PushDebug(spv::Op::OpName, {Value(inst), Operand(name.Name())});
             }
@@ -792,10 +794,10 @@ void Printer::EmitBlockInstructions(ir::Block* block) {
     }
 }
 
-void Printer::EmitTerminator(ir::Terminator* t) {
+void Printer::EmitTerminator(core::ir::Terminator* t) {
     tint::Switch(  //
         t,         //
-        [&](ir::Return*) {
+        [&](core::ir::Return*) {
             if (!t->Args().IsEmpty()) {
                 TINT_ASSERT(t->Args().Length() == 1u);
                 OperandList operands;
@@ -806,7 +808,7 @@ void Printer::EmitTerminator(ir::Terminator* t) {
             }
             return;
         },
-        [&](ir::BreakIf* breakif) {
+        [&](core::ir::BreakIf* breakif) {
             current_function_.push_inst(spv::Op::OpBranchConditional,
                                         {
                                             Value(breakif->Condition()),
@@ -814,24 +816,28 @@ void Printer::EmitTerminator(ir::Terminator* t) {
                                             loop_header_label_,
                                         });
         },
-        [&](ir::Continue* cont) {
+        [&](core::ir::Continue* cont) {
             current_function_.push_inst(spv::Op::OpBranch, {Label(cont->Loop()->Continuing())});
         },
-        [&](ir::ExitIf*) { current_function_.push_inst(spv::Op::OpBranch, {if_merge_label_}); },
-        [&](ir::ExitLoop*) { current_function_.push_inst(spv::Op::OpBranch, {loop_merge_label_}); },
-        [&](ir::ExitSwitch*) {
+        [&](core::ir::ExitIf*) {
+            current_function_.push_inst(spv::Op::OpBranch, {if_merge_label_});
+        },
+        [&](core::ir::ExitLoop*) {
+            current_function_.push_inst(spv::Op::OpBranch, {loop_merge_label_});
+        },
+        [&](core::ir::ExitSwitch*) {
             current_function_.push_inst(spv::Op::OpBranch, {switch_merge_label_});
         },
-        [&](ir::NextIteration*) {
+        [&](core::ir::NextIteration*) {
             current_function_.push_inst(spv::Op::OpBranch, {loop_header_label_});
         },
-        [&](ir::TerminateInvocation*) { current_function_.push_inst(spv::Op::OpKill, {}); },
-        [&](ir::Unreachable*) { current_function_.push_inst(spv::Op::OpUnreachable, {}); },
+        [&](core::ir::TerminateInvocation*) { current_function_.push_inst(spv::Op::OpKill, {}); },
+        [&](core::ir::Unreachable*) { current_function_.push_inst(spv::Op::OpUnreachable, {}); },
 
         [&](Default) { TINT_ICE() << "unimplemented branch: " << t->TypeInfo().name; });
 }
 
-void Printer::EmitIf(ir::If* i) {
+void Printer::EmitIf(core::ir::If* i) {
     auto* true_block = i->True();
     auto* false_block = i->False();
 
@@ -846,11 +852,11 @@ void Printer::EmitIf(ir::If* i) {
     uint32_t true_label = merge_label;
     uint32_t false_label = merge_label;
     if (true_block->Length() > 1 || i->HasResults() ||
-        (true_block->HasTerminator() && !true_block->Terminator()->Is<ir::ExitIf>())) {
+        (true_block->HasTerminator() && !true_block->Terminator()->Is<core::ir::ExitIf>())) {
         true_label = Label(true_block);
     }
     if (false_block->Length() > 1 || i->HasResults() ||
-        (false_block->HasTerminator() && !false_block->Terminator()->Is<ir::ExitIf>())) {
+        (false_block->HasTerminator() && !false_block->Terminator()->Is<core::ir::ExitIf>())) {
         false_label = Label(false_block);
     }
 
@@ -874,7 +880,7 @@ void Printer::EmitIf(ir::If* i) {
     EmitExitPhis(i);
 }
 
-void Printer::EmitAccess(ir::Access* access) {
+void Printer::EmitAccess(core::ir::Access* access) {
     auto* ty = access->Result()->Type();
 
     auto id = Value(access);
@@ -893,7 +899,7 @@ void Printer::EmitAccess(ir::Access* access) {
     // If we hit a non-constant index into a vector type, use OpVectorExtractDynamic for it.
     auto* source_ty = access->Object()->Type();
     for (auto* idx : access->Indices()) {
-        if (auto* constant = idx->As<ir::Constant>()) {
+        if (auto* constant = idx->As<core::ir::Constant>()) {
             // Push the index to the chain and update the current type.
             auto i = constant->Value()->ValueAs<u32>();
             operands.push_back(i);
@@ -922,7 +928,7 @@ void Printer::EmitAccess(ir::Access* access) {
     current_function_.push_inst(spv::Op::OpCompositeExtract, std::move(operands));
 }
 
-void Printer::EmitBinary(ir::Binary* binary) {
+void Printer::EmitBinary(core::ir::Binary* binary) {
     auto id = Value(binary);
     auto lhs = Value(binary->LHS());
     auto rhs = Value(binary->RHS());
@@ -932,11 +938,11 @@ void Printer::EmitBinary(ir::Binary* binary) {
     // Determine the opcode.
     spv::Op op = spv::Op::Max;
     switch (binary->Kind()) {
-        case ir::Binary::Kind::kAdd: {
+        case core::ir::Binary::Kind::kAdd: {
             op = ty->is_integer_scalar_or_vector() ? spv::Op::OpIAdd : spv::Op::OpFAdd;
             break;
         }
-        case ir::Binary::Kind::kDivide: {
+        case core::ir::Binary::Kind::kDivide: {
             if (ty->is_signed_integer_scalar_or_vector()) {
                 op = spv::Op::OpSDiv;
             } else if (ty->is_unsigned_integer_scalar_or_vector()) {
@@ -946,7 +952,7 @@ void Printer::EmitBinary(ir::Binary* binary) {
             }
             break;
         }
-        case ir::Binary::Kind::kMultiply: {
+        case core::ir::Binary::Kind::kMultiply: {
             if (ty->is_integer_scalar_or_vector()) {
                 op = spv::Op::OpIMul;
             } else if (ty->is_float_scalar_or_vector()) {
@@ -954,11 +960,11 @@ void Printer::EmitBinary(ir::Binary* binary) {
             }
             break;
         }
-        case ir::Binary::Kind::kSubtract: {
+        case core::ir::Binary::Kind::kSubtract: {
             op = ty->is_integer_scalar_or_vector() ? spv::Op::OpISub : spv::Op::OpFSub;
             break;
         }
-        case ir::Binary::Kind::kModulo: {
+        case core::ir::Binary::Kind::kModulo: {
             if (ty->is_signed_integer_scalar_or_vector()) {
                 op = spv::Op::OpSRem;
             } else if (ty->is_unsigned_integer_scalar_or_vector()) {
@@ -969,7 +975,7 @@ void Printer::EmitBinary(ir::Binary* binary) {
             break;
         }
 
-        case ir::Binary::Kind::kAnd: {
+        case core::ir::Binary::Kind::kAnd: {
             if (ty->is_integer_scalar_or_vector()) {
                 op = spv::Op::OpBitwiseAnd;
             } else if (ty->is_bool_scalar_or_vector()) {
@@ -977,7 +983,7 @@ void Printer::EmitBinary(ir::Binary* binary) {
             }
             break;
         }
-        case ir::Binary::Kind::kOr: {
+        case core::ir::Binary::Kind::kOr: {
             if (ty->is_integer_scalar_or_vector()) {
                 op = spv::Op::OpBitwiseOr;
             } else if (ty->is_bool_scalar_or_vector()) {
@@ -985,16 +991,16 @@ void Printer::EmitBinary(ir::Binary* binary) {
             }
             break;
         }
-        case ir::Binary::Kind::kXor: {
+        case core::ir::Binary::Kind::kXor: {
             op = spv::Op::OpBitwiseXor;
             break;
         }
 
-        case ir::Binary::Kind::kShiftLeft: {
+        case core::ir::Binary::Kind::kShiftLeft: {
             op = spv::Op::OpShiftLeftLogical;
             break;
         }
-        case ir::Binary::Kind::kShiftRight: {
+        case core::ir::Binary::Kind::kShiftRight: {
             if (ty->is_signed_integer_scalar_or_vector()) {
                 op = spv::Op::OpShiftRightArithmetic;
             } else if (ty->is_unsigned_integer_scalar_or_vector()) {
@@ -1003,7 +1009,7 @@ void Printer::EmitBinary(ir::Binary* binary) {
             break;
         }
 
-        case ir::Binary::Kind::kEqual: {
+        case core::ir::Binary::Kind::kEqual: {
             if (lhs_ty->is_bool_scalar_or_vector()) {
                 op = spv::Op::OpLogicalEqual;
             } else if (lhs_ty->is_float_scalar_or_vector()) {
@@ -1013,7 +1019,7 @@ void Printer::EmitBinary(ir::Binary* binary) {
             }
             break;
         }
-        case ir::Binary::Kind::kNotEqual: {
+        case core::ir::Binary::Kind::kNotEqual: {
             if (lhs_ty->is_bool_scalar_or_vector()) {
                 op = spv::Op::OpLogicalNotEqual;
             } else if (lhs_ty->is_float_scalar_or_vector()) {
@@ -1023,7 +1029,7 @@ void Printer::EmitBinary(ir::Binary* binary) {
             }
             break;
         }
-        case ir::Binary::Kind::kGreaterThan: {
+        case core::ir::Binary::Kind::kGreaterThan: {
             if (lhs_ty->is_float_scalar_or_vector()) {
                 op = spv::Op::OpFOrdGreaterThan;
             } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {
@@ -1033,7 +1039,7 @@ void Printer::EmitBinary(ir::Binary* binary) {
             }
             break;
         }
-        case ir::Binary::Kind::kGreaterThanEqual: {
+        case core::ir::Binary::Kind::kGreaterThanEqual: {
             if (lhs_ty->is_float_scalar_or_vector()) {
                 op = spv::Op::OpFOrdGreaterThanEqual;
             } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {
@@ -1043,7 +1049,7 @@ void Printer::EmitBinary(ir::Binary* binary) {
             }
             break;
         }
-        case ir::Binary::Kind::kLessThan: {
+        case core::ir::Binary::Kind::kLessThan: {
             if (lhs_ty->is_float_scalar_or_vector()) {
                 op = spv::Op::OpFOrdLessThan;
             } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {
@@ -1053,7 +1059,7 @@ void Printer::EmitBinary(ir::Binary* binary) {
             }
             break;
         }
-        case ir::Binary::Kind::kLessThanEqual: {
+        case core::ir::Binary::Kind::kLessThanEqual: {
             if (lhs_ty->is_float_scalar_or_vector()) {
                 op = spv::Op::OpFOrdLessThanEqual;
             } else if (lhs_ty->is_signed_integer_scalar_or_vector()) {
@@ -1069,7 +1075,7 @@ void Printer::EmitBinary(ir::Binary* binary) {
     current_function_.push_inst(op, {Type(ty), id, lhs, rhs});
 }
 
-void Printer::EmitBitcast(ir::Bitcast* bitcast) {
+void Printer::EmitBitcast(core::ir::Bitcast* bitcast) {
     auto* ty = bitcast->Result()->Type();
     if (ty == bitcast->Val()->Type()) {
         values_.Add(bitcast->Result(), Value(bitcast->Val()));
@@ -1079,7 +1085,7 @@ void Printer::EmitBitcast(ir::Bitcast* bitcast) {
                                 {Type(ty), Value(bitcast), Value(bitcast->Val())});
 }
 
-void Printer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
+void Printer::EmitCoreBuiltinCall(core::ir::CoreBuiltinCall* builtin) {
     auto* result_ty = builtin->Result()->Type();
 
     if (builtin->Func() == core::Function::kAbs &&
@@ -1425,7 +1431,7 @@ void Printer::EmitCoreBuiltinCall(ir::CoreBuiltinCall* builtin) {
     current_function_.push_inst(op, operands);
 }
 
-void Printer::EmitConstruct(ir::Construct* construct) {
+void Printer::EmitConstruct(core::ir::Construct* construct) {
     // If there is just a single argument with the same type as the result, this is an identity
     // constructor and we can just pass through the ID of the argument.
     if (construct->Args().Length() == 1 &&
@@ -1441,7 +1447,7 @@ void Printer::EmitConstruct(ir::Construct* construct) {
     current_function_.push_inst(spv::Op::OpCompositeConstruct, std::move(operands));
 }
 
-void Printer::EmitConvert(ir::Convert* convert) {
+void Printer::EmitConvert(core::ir::Convert* convert) {
     auto* res_ty = convert->Result()->Type();
     auto* arg_ty = convert->Args()[0]->Type();
 
@@ -1485,8 +1491,8 @@ void Printer::EmitConvert(ir::Convert* convert) {
         operands.push_back(ConstantNull(arg_ty));
     } else if (arg_ty->is_bool_scalar_or_vector()) {
         // Select between constant one and zero, splatting them to vectors if necessary.
-        ir::Constant* one = nullptr;
-        ir::Constant* zero = nullptr;
+        core::ir::Constant* one = nullptr;
+        core::ir::Constant* zero = nullptr;
         Switch(
             res_ty->DeepestElement(),  //
             [&](const core::type::F32*) {
@@ -1523,107 +1529,107 @@ void Printer::EmitConvert(ir::Convert* convert) {
     current_function_.push_inst(op, std::move(operands));
 }
 
-void Printer::EmitIntrinsicCall(ir::IntrinsicCall* call) {
+void Printer::EmitIntrinsicCall(core::ir::IntrinsicCall* call) {
     auto id = Value(call);
 
     spv::Op op = spv::Op::Max;
     switch (call->Kind()) {
-        case ir::IntrinsicCall::Kind::kSpirvArrayLength:
+        case core::ir::IntrinsicCall::Kind::kSpirvArrayLength:
             op = spv::Op::OpArrayLength;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvAtomicIAdd:
+        case core::ir::IntrinsicCall::Kind::kSpirvAtomicIAdd:
             op = spv::Op::OpAtomicIAdd;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvAtomicISub:
+        case core::ir::IntrinsicCall::Kind::kSpirvAtomicISub:
             op = spv::Op::OpAtomicISub;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvAtomicAnd:
+        case core::ir::IntrinsicCall::Kind::kSpirvAtomicAnd:
             op = spv::Op::OpAtomicAnd;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvAtomicCompareExchange:
+        case core::ir::IntrinsicCall::Kind::kSpirvAtomicCompareExchange:
             op = spv::Op::OpAtomicCompareExchange;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvAtomicExchange:
+        case core::ir::IntrinsicCall::Kind::kSpirvAtomicExchange:
             op = spv::Op::OpAtomicExchange;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvAtomicLoad:
+        case core::ir::IntrinsicCall::Kind::kSpirvAtomicLoad:
             op = spv::Op::OpAtomicLoad;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvAtomicOr:
+        case core::ir::IntrinsicCall::Kind::kSpirvAtomicOr:
             op = spv::Op::OpAtomicOr;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvAtomicSMax:
+        case core::ir::IntrinsicCall::Kind::kSpirvAtomicSMax:
             op = spv::Op::OpAtomicSMax;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvAtomicSMin:
+        case core::ir::IntrinsicCall::Kind::kSpirvAtomicSMin:
             op = spv::Op::OpAtomicSMin;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvAtomicStore:
+        case core::ir::IntrinsicCall::Kind::kSpirvAtomicStore:
             op = spv::Op::OpAtomicStore;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvAtomicUMax:
+        case core::ir::IntrinsicCall::Kind::kSpirvAtomicUMax:
             op = spv::Op::OpAtomicUMax;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvAtomicUMin:
+        case core::ir::IntrinsicCall::Kind::kSpirvAtomicUMin:
             op = spv::Op::OpAtomicUMin;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvAtomicXor:
+        case core::ir::IntrinsicCall::Kind::kSpirvAtomicXor:
             op = spv::Op::OpAtomicXor;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvDot:
+        case core::ir::IntrinsicCall::Kind::kSpirvDot:
             op = spv::Op::OpDot;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvImageFetch:
+        case core::ir::IntrinsicCall::Kind::kSpirvImageFetch:
             op = spv::Op::OpImageFetch;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvImageGather:
+        case core::ir::IntrinsicCall::Kind::kSpirvImageGather:
             op = spv::Op::OpImageGather;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvImageDrefGather:
+        case core::ir::IntrinsicCall::Kind::kSpirvImageDrefGather:
             op = spv::Op::OpImageDrefGather;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvImageQuerySize:
+        case core::ir::IntrinsicCall::Kind::kSpirvImageQuerySize:
             module_.PushCapability(SpvCapabilityImageQuery);
             op = spv::Op::OpImageQuerySize;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvImageQuerySizeLod:
+        case core::ir::IntrinsicCall::Kind::kSpirvImageQuerySizeLod:
             module_.PushCapability(SpvCapabilityImageQuery);
             op = spv::Op::OpImageQuerySizeLod;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvImageSampleImplicitLod:
+        case core::ir::IntrinsicCall::Kind::kSpirvImageSampleImplicitLod:
             op = spv::Op::OpImageSampleImplicitLod;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvImageSampleExplicitLod:
+        case core::ir::IntrinsicCall::Kind::kSpirvImageSampleExplicitLod:
             op = spv::Op::OpImageSampleExplicitLod;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvImageSampleDrefImplicitLod:
+        case core::ir::IntrinsicCall::Kind::kSpirvImageSampleDrefImplicitLod:
             op = spv::Op::OpImageSampleDrefImplicitLod;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvImageSampleDrefExplicitLod:
+        case core::ir::IntrinsicCall::Kind::kSpirvImageSampleDrefExplicitLod:
             op = spv::Op::OpImageSampleDrefExplicitLod;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvImageWrite:
+        case core::ir::IntrinsicCall::Kind::kSpirvImageWrite:
             op = spv::Op::OpImageWrite;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvMatrixTimesMatrix:
+        case core::ir::IntrinsicCall::Kind::kSpirvMatrixTimesMatrix:
             op = spv::Op::OpMatrixTimesMatrix;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvMatrixTimesScalar:
+        case core::ir::IntrinsicCall::Kind::kSpirvMatrixTimesScalar:
             op = spv::Op::OpMatrixTimesScalar;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvMatrixTimesVector:
+        case core::ir::IntrinsicCall::Kind::kSpirvMatrixTimesVector:
             op = spv::Op::OpMatrixTimesVector;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvSampledImage:
+        case core::ir::IntrinsicCall::Kind::kSpirvSampledImage:
             op = spv::Op::OpSampledImage;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvSelect:
+        case core::ir::IntrinsicCall::Kind::kSpirvSelect:
             op = spv::Op::OpSelect;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvVectorTimesMatrix:
+        case core::ir::IntrinsicCall::Kind::kSpirvVectorTimesMatrix:
             op = spv::Op::OpVectorTimesMatrix;
             break;
-        case ir::IntrinsicCall::Kind::kSpirvVectorTimesScalar:
+        case core::ir::IntrinsicCall::Kind::kSpirvVectorTimesScalar:
             op = spv::Op::OpVectorTimesScalar;
             break;
     }
@@ -1638,12 +1644,12 @@ void Printer::EmitIntrinsicCall(ir::IntrinsicCall* call) {
     current_function_.push_inst(op, operands);
 }
 
-void Printer::EmitLoad(ir::Load* load) {
+void Printer::EmitLoad(core::ir::Load* load) {
     current_function_.push_inst(spv::Op::OpLoad,
                                 {Type(load->Result()->Type()), Value(load), Value(load->From())});
 }
 
-void Printer::EmitLoadVectorElement(ir::LoadVectorElement* load) {
+void Printer::EmitLoadVectorElement(core::ir::LoadVectorElement* load) {
     auto* vec_ptr_ty = load->From()->Type()->As<core::type::Pointer>();
     auto* el_ty = load->Result()->Type();
     auto* el_ptr_ty = ir_->Types().ptr(vec_ptr_ty->AddressSpace(), el_ty, vec_ptr_ty->Access());
@@ -1655,7 +1661,7 @@ void Printer::EmitLoadVectorElement(ir::LoadVectorElement* load) {
                                 {Type(load->Result()->Type()), Value(load), el_ptr_id});
 }
 
-void Printer::EmitLoop(ir::Loop* loop) {
+void Printer::EmitLoop(core::ir::Loop* loop) {
     auto init_label = loop->HasInitializer() ? Label(loop->Initializer()) : 0;
     auto body_label = Label(loop->Body());
     auto continuing_label = Label(loop->Continuing());
@@ -1703,7 +1709,7 @@ void Printer::EmitLoop(ir::Loop* loop) {
     EmitExitPhis(loop);
 }
 
-void Printer::EmitSwitch(ir::Switch* swtch) {
+void Printer::EmitSwitch(core::ir::Switch* swtch) {
     // Find the default selector. There must be exactly one.
     uint32_t default_label = 0u;
     for (auto& c : swtch->Cases()) {
@@ -1748,7 +1754,7 @@ void Printer::EmitSwitch(ir::Switch* swtch) {
     EmitExitPhis(swtch);
 }
 
-void Printer::EmitSwizzle(ir::Swizzle* swizzle) {
+void Printer::EmitSwizzle(core::ir::Swizzle* swizzle) {
     auto id = Value(swizzle);
     auto obj = Value(swizzle->Object());
     OperandList operands = {Type(swizzle->Result()->Type()), id, obj, obj};
@@ -1758,11 +1764,11 @@ void Printer::EmitSwizzle(ir::Swizzle* swizzle) {
     current_function_.push_inst(spv::Op::OpVectorShuffle, operands);
 }
 
-void Printer::EmitStore(ir::Store* store) {
+void Printer::EmitStore(core::ir::Store* store) {
     current_function_.push_inst(spv::Op::OpStore, {Value(store->To()), Value(store->From())});
 }
 
-void Printer::EmitStoreVectorElement(ir::StoreVectorElement* store) {
+void Printer::EmitStoreVectorElement(core::ir::StoreVectorElement* store) {
     auto* vec_ptr_ty = store->To()->Type()->As<core::type::Pointer>();
     auto* el_ty = store->Value()->Type();
     auto* el_ptr_ty = ir_->Types().ptr(vec_ptr_ty->AddressSpace(), el_ty, vec_ptr_ty->Access());
@@ -1773,15 +1779,15 @@ void Printer::EmitStoreVectorElement(ir::StoreVectorElement* store) {
     current_function_.push_inst(spv::Op::OpStore, {el_ptr_id, Value(store->Value())});
 }
 
-void Printer::EmitUnary(ir::Unary* unary) {
+void Printer::EmitUnary(core::ir::Unary* unary) {
     auto id = Value(unary);
     auto* ty = unary->Result()->Type();
     spv::Op op = spv::Op::Max;
     switch (unary->Kind()) {
-        case ir::Unary::Kind::kComplement:
+        case core::ir::Unary::Kind::kComplement:
             op = spv::Op::OpNot;
             break;
-        case ir::Unary::Kind::kNegation:
+        case core::ir::Unary::Kind::kNegation:
             if (ty->is_float_scalar_or_vector()) {
                 op = spv::Op::OpFNegate;
             } else if (ty->is_signed_integer_scalar_or_vector()) {
@@ -1792,7 +1798,7 @@ void Printer::EmitUnary(ir::Unary* unary) {
     current_function_.push_inst(op, {Type(ty), id, Value(unary->Val())});
 }
 
-void Printer::EmitUserCall(ir::UserCall* call) {
+void Printer::EmitUserCall(core::ir::UserCall* call) {
     auto id = Value(call);
     OperandList operands = {Type(call->Result()->Type()), id, Value(call->Func())};
     for (auto* arg : call->Args()) {
@@ -1801,7 +1807,7 @@ void Printer::EmitUserCall(ir::UserCall* call) {
     current_function_.push_inst(spv::Op::OpFunctionCall, operands);
 }
 
-void Printer::EmitVar(ir::Var* var) {
+void Printer::EmitVar(core::ir::Var* var) {
     auto id = Value(var);
     auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
     auto ty = Type(ptr);
@@ -1824,7 +1830,7 @@ void Printer::EmitVar(ir::Var* var) {
             TINT_ASSERT(!current_function_);
             OperandList operands = {ty, id, U32Operand(SpvStorageClassPrivate)};
             if (var->Initializer()) {
-                TINT_ASSERT(var->Initializer()->Is<ir::Constant>());
+                TINT_ASSERT(var->Initializer()->Is<core::ir::Constant>());
                 operands.push_back(Value(var->Initializer()));
             }
             module_.PushType(spv::Op::OpVariable, operands);
@@ -1876,15 +1882,15 @@ void Printer::EmitVar(ir::Var* var) {
     }
 }
 
-void Printer::EmitLet(ir::Let* let) {
+void Printer::EmitLet(core::ir::Let* let) {
     auto id = Value(let->Value());
     values_.Add(let->Result(), id);
 }
 
-void Printer::EmitExitPhis(ir::ControlInstruction* inst) {
+void Printer::EmitExitPhis(core::ir::ControlInstruction* inst) {
     struct Branch {
         uint32_t label = 0;
-        ir::Value* value = nullptr;
+        core::ir::Value* value = nullptr;
         bool operator<(const Branch& other) const { return label < other.label; }
     };
 

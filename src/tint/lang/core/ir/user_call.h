@@ -19,7 +19,7 @@
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A user call instruction in the IR.
 class UserCall : public Castable<UserCall, Call> {
@@ -47,6 +47,6 @@ class UserCall : public Castable<UserCall, Call> {
     std::string_view FriendlyName() override { return "user-call"; }
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_USER_CALL_H_

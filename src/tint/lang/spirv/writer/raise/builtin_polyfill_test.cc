@@ -31,7 +31,7 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using SpirvWriter_BuiltinPolyfillTest = ir::transform::TransformTest;
+using SpirvWriter_BuiltinPolyfillTest = core::ir::transform::TransformTest;
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, ArrayLength) {
     auto* arr = ty.runtime_array(ty.i32());

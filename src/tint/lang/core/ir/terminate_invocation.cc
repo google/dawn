@@ -14,10 +14,10 @@
 
 #include "src/tint/lang/core/ir/terminate_invocation.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::TerminateInvocation);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::TerminateInvocation);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 TerminateInvocation::~TerminateInvocation() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

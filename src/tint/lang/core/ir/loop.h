@@ -18,11 +18,11 @@
 #include "src/tint/lang/core/ir/control_instruction.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class MultiInBlock;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// Loop instruction.
 ///
@@ -88,6 +88,6 @@ class Loop : public Castable<Loop, ControlInstruction> {
     ir::MultiInBlock* continuing_ = nullptr;
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_LOOP_H_

@@ -16,9 +16,9 @@
 
 #include <utility>
 
-TINT_INSTANTIATE_TYPEINFO(tint::ir::Construct);
+TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Construct);
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 Construct::Construct(InstructionResult* result, VectorRef<Value*> arguments) {
     AddOperands(Construct::kArgsOperandOffset, std::move(arguments));
@@ -27,4 +27,4 @@ Construct::Construct(InstructionResult* result, VectorRef<Value*> arguments) {
 
 Construct::~Construct() = default;
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir

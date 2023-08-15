@@ -32,7 +32,7 @@
 
 namespace tint::spirv::writer::raise {
 
-Result<SuccessType, std::string> Raise(ir::Module* module, const Options& options) {
+Result<SuccessType, std::string> Raise(core::ir::Module* module, const Options& options) {
 #define RUN_TRANSFORM(name, ...)         \
     do {                                 \
         auto result = name(__VA_ARGS__); \
@@ -41,28 +41,28 @@ Result<SuccessType, std::string> Raise(ir::Module* module, const Options& option
         }                                \
     } while (false)
 
-    ir::transform::BuiltinPolyfillConfig core_polyfills;
+    core::ir::transform::BuiltinPolyfillConfig core_polyfills;
     core_polyfills.count_leading_zeros = true;
     core_polyfills.count_trailing_zeros = true;
     core_polyfills.first_leading_bit = true;
     core_polyfills.first_trailing_bit = true;
     core_polyfills.saturate = true;
     core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
-    RUN_TRANSFORM(ir::transform::BuiltinPolyfill, module, core_polyfills);
+    RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
 
-    RUN_TRANSFORM(ir::transform::MultiplanarExternalTexture, module,
+    RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module,
                   options.external_texture_options);
 
-    RUN_TRANSFORM(ir::transform::AddEmptyEntryPoint, module);
-    RUN_TRANSFORM(ir::transform::Bgra8UnormPolyfill, module);
-    RUN_TRANSFORM(ir::transform::BlockDecoratedStructs, module);
+    RUN_TRANSFORM(core::ir::transform::AddEmptyEntryPoint, module);
+    RUN_TRANSFORM(core::ir::transform::Bgra8UnormPolyfill, module);
+    RUN_TRANSFORM(core::ir::transform::BlockDecoratedStructs, module);
     RUN_TRANSFORM(BuiltinPolyfill, module);
-    RUN_TRANSFORM(ir::transform::DemoteToHelper, module);
+    RUN_TRANSFORM(core::ir::transform::DemoteToHelper, module);
     RUN_TRANSFORM(ExpandImplicitSplats, module);
     RUN_TRANSFORM(HandleMatrixArithmetic, module);
     RUN_TRANSFORM(MergeReturn, module);
     RUN_TRANSFORM(ShaderIO, module, ShaderIOConfig{options.clamp_frag_depth});
-    RUN_TRANSFORM(ir::transform::Std140, module);
+    RUN_TRANSFORM(core::ir::transform::Std140, module);
     RUN_TRANSFORM(VarForDynamicIndex, module);
 
     return Success;

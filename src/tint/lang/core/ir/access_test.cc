@@ -20,7 +20,7 @@
 
 using namespace tint::core::fluent_types;  // NOLINT
 
-namespace tint::ir {
+namespace tint::core::ir {
 namespace {
 
 using IR_AccessTest = IRTestHelper;
@@ -61,4 +61,4 @@ TEST_F(IR_AccessTest, Fail_NullType) {
 }
 
 }  // namespace
-}  // namespace tint::ir
+}  // namespace tint::core::ir

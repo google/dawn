@@ -26,12 +26,12 @@
 #include "src/tint/utils/ice/ice.h"
 
 // Forward declarations
-namespace tint::ir {
+namespace tint::core::ir {
 class Block;
 class FunctionTerminator;
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// An IR representation of a function
 class Function : public Castable<Function, Value> {
@@ -176,6 +176,6 @@ auto& operator<<(STREAM& out, enum Function::ReturnBuiltin value) {
     return out << ToString(value);
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_FUNCTION_H_

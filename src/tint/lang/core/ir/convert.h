@@ -19,7 +19,7 @@
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/utils/rtti/castable.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A value conversion instruction in the IR.
 class Convert : public Castable<Convert, Call> {
@@ -37,6 +37,6 @@ class Convert : public Castable<Convert, Call> {
     std::string_view FriendlyName() override { return "convert"; }
 };
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_CONVERT_H_

@@ -24,7 +24,7 @@
 #include "src/tint/utils/rtti/castable.h"
 #include "tint/binding_point.h"
 
-namespace tint::ir {
+namespace tint::core::ir {
 
 /// A function parameter in the IR.
 class FunctionParam : public Castable<FunctionParam, Value> {
@@ -118,6 +118,6 @@ auto& operator<<(STREAM& out, enum FunctionParam::Builtin value) {
     return out << ToString(value);
 }
 
-}  // namespace tint::ir
+}  // namespace tint::core::ir
 
 #endif  // SRC_TINT_LANG_CORE_IR_FUNCTION_PARAM_H_

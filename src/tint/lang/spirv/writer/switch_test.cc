@@ -26,7 +26,7 @@ TEST_F(SpirvWriterTest, Switch_Basic) {
     b.Append(func->Block(), [&] {
         auto* swtch = b.Switch(42_i);
 
-        auto* def_case = b.Case(swtch, Vector{ir::Switch::CaseSelector()});
+        auto* def_case = b.Case(swtch, Vector{core::ir::Switch::CaseSelector()});
         b.Append(def_case, [&] {  //
             b.ExitSwitch(swtch);
         });
@@ -52,17 +52,17 @@ TEST_F(SpirvWriterTest, Switch_MultipleCases) {
     b.Append(func->Block(), [&] {
         auto* swtch = b.Switch(42_i);
 
-        auto* case_a = b.Case(swtch, Vector{ir::Switch::CaseSelector{b.Constant(1_i)}});
+        auto* case_a = b.Case(swtch, Vector{core::ir::Switch::CaseSelector{b.Constant(1_i)}});
         b.Append(case_a, [&] {  //
             b.ExitSwitch(swtch);
         });
 
-        auto* case_b = b.Case(swtch, Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
+        auto* case_b = b.Case(swtch, Vector{core::ir::Switch::CaseSelector{b.Constant(2_i)}});
         b.Append(case_b, [&] {  //
             b.ExitSwitch(swtch);
         });
 
-        auto* def_case = b.Case(swtch, Vector{ir::Switch::CaseSelector()});
+        auto* def_case = b.Case(swtch, Vector{core::ir::Switch::CaseSelector()});
         b.Append(def_case, [&] {  //
             b.ExitSwitch(swtch);
         });
@@ -92,20 +92,20 @@ TEST_F(SpirvWriterTest, Switch_MultipleSelectorsPerCase) {
     b.Append(func->Block(), [&] {
         auto* swtch = b.Switch(42_i);
 
-        auto* case_a = b.Case(swtch, Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
-                                            ir::Switch::CaseSelector{b.Constant(3_i)}});
+        auto* case_a = b.Case(swtch, Vector{core::ir::Switch::CaseSelector{b.Constant(1_i)},
+                                            core::ir::Switch::CaseSelector{b.Constant(3_i)}});
         b.Append(case_a, [&] {  //
             b.ExitSwitch(swtch);
         });
 
-        auto* case_b = b.Case(swtch, Vector{ir::Switch::CaseSelector{b.Constant(2_i)},
-                                            ir::Switch::CaseSelector{b.Constant(4_i)}});
+        auto* case_b = b.Case(swtch, Vector{core::ir::Switch::CaseSelector{b.Constant(2_i)},
+                                            core::ir::Switch::CaseSelector{b.Constant(4_i)}});
         b.Append(case_b, [&] {  //
             b.ExitSwitch(swtch);
         });
 
-        auto* def_case = b.Case(
-            swtch, Vector{ir::Switch::CaseSelector{b.Constant(5_i)}, ir::Switch::CaseSelector()});
+        auto* def_case = b.Case(swtch, Vector{core::ir::Switch::CaseSelector{b.Constant(5_i)},
+                                              core::ir::Switch::CaseSelector()});
         b.Append(def_case, [&] {  //
             b.ExitSwitch(swtch);
         });
@@ -135,17 +135,17 @@ TEST_F(SpirvWriterTest, Switch_AllCasesReturn) {
     b.Append(func->Block(), [&] {
         auto* swtch = b.Switch(42_i);
 
-        auto* case_a = b.Case(swtch, Vector{ir::Switch::CaseSelector{b.Constant(1_i)}});
+        auto* case_a = b.Case(swtch, Vector{core::ir::Switch::CaseSelector{b.Constant(1_i)}});
         b.Append(case_a, [&] {  //
             b.Return(func);
         });
 
-        auto* case_b = b.Case(swtch, Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
+        auto* case_b = b.Case(swtch, Vector{core::ir::Switch::CaseSelector{b.Constant(2_i)}});
         b.Append(case_b, [&] {  //
             b.Return(func);
         });
 
-        auto* def_case = b.Case(swtch, Vector{ir::Switch::CaseSelector()});
+        auto* def_case = b.Case(swtch, Vector{core::ir::Switch::CaseSelector()});
         b.Append(def_case, [&] {  //
             b.Return(func);
         });
@@ -175,7 +175,7 @@ TEST_F(SpirvWriterTest, Switch_ConditionalBreak) {
     b.Append(func->Block(), [&] {
         auto* swtch = b.Switch(42_i);
 
-        auto* case_a = b.Case(swtch, Vector{ir::Switch::CaseSelector{b.Constant(1_i)}});
+        auto* case_a = b.Case(swtch, Vector{core::ir::Switch::CaseSelector{b.Constant(1_i)}});
         b.Append(case_a, [&] {
             auto* cond_break = b.If(true);
             b.Append(cond_break->True(), [&] {  //
@@ -188,7 +188,7 @@ TEST_F(SpirvWriterTest, Switch_ConditionalBreak) {
             b.Return(func);
         });
 
-        auto* def_case = b.Case(swtch, Vector{ir::Switch::CaseSelector()});
+        auto* def_case = b.Case(swtch, Vector{core::ir::Switch::CaseSelector()});
         b.Append(def_case, [&] {  //
             b.ExitSwitch(swtch);
         });
@@ -221,13 +221,13 @@ TEST_F(SpirvWriterTest, Switch_Phi_SingleValue) {
     b.Append(func->Block(), [&] {
         auto* s = b.Switch(42_i);
         s->SetResults(b.InstructionResult(ty.i32()));
-        auto* case_a = b.Case(s, Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
-                                        ir::Switch::CaseSelector{nullptr}});
+        auto* case_a = b.Case(s, Vector{core::ir::Switch::CaseSelector{b.Constant(1_i)},
+                                        core::ir::Switch::CaseSelector{nullptr}});
         b.Append(case_a, [&] {  //
             b.ExitSwitch(s, 10_i);
         });
 
-        auto* case_b = b.Case(s, Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
+        auto* case_b = b.Case(s, Vector{core::ir::Switch::CaseSelector{b.Constant(2_i)}});
         b.Append(case_b, [&] {  //
             b.ExitSwitch(s, 20_i);
         });
@@ -256,13 +256,13 @@ TEST_F(SpirvWriterTest, Switch_Phi_SingleValue_CaseReturn) {
     b.Append(func->Block(), [&] {
         auto* s = b.Switch(42_i);
         s->SetResults(b.InstructionResult(ty.i32()));
-        auto* case_a = b.Case(s, Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
-                                        ir::Switch::CaseSelector{nullptr}});
+        auto* case_a = b.Case(s, Vector{core::ir::Switch::CaseSelector{b.Constant(1_i)},
+                                        core::ir::Switch::CaseSelector{nullptr}});
         b.Append(case_a, [&] {  //
             b.Return(func, 10_i);
         });
 
-        auto* case_b = b.Case(s, Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
+        auto* case_b = b.Case(s, Vector{core::ir::Switch::CaseSelector{b.Constant(2_i)}});
         b.Append(case_b, [&] {  //
             b.ExitSwitch(s, 20_i);
         });
@@ -304,13 +304,13 @@ TEST_F(SpirvWriterTest, Switch_Phi_MultipleValue_0) {
     b.Append(func->Block(), [&] {
         auto* s = b.Switch(42_i);
         s->SetResults(b.InstructionResult(ty.i32()), b.InstructionResult(ty.bool_()));
-        auto* case_a = b.Case(s, Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
-                                        ir::Switch::CaseSelector{nullptr}});
+        auto* case_a = b.Case(s, Vector{core::ir::Switch::CaseSelector{b.Constant(1_i)},
+                                        core::ir::Switch::CaseSelector{nullptr}});
         b.Append(case_a, [&] {  //
             b.ExitSwitch(s, 10_i, true);
         });
 
-        auto* case_b = b.Case(s, Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
+        auto* case_b = b.Case(s, Vector{core::ir::Switch::CaseSelector{b.Constant(2_i)}});
         b.Append(case_b, [&] {  //
             b.ExitSwitch(s, 20_i, false);
         });
@@ -340,13 +340,13 @@ TEST_F(SpirvWriterTest, Switch_Phi_MultipleValue_1) {
     b.Append(func->Block(), [&] {
         auto* s = b.Switch(b.Constant(42_i));
         s->SetResults(b.InstructionResult(ty.i32()), b.InstructionResult(ty.bool_()));
-        auto* case_a = b.Case(s, Vector{ir::Switch::CaseSelector{b.Constant(1_i)},
-                                        ir::Switch::CaseSelector{nullptr}});
+        auto* case_a = b.Case(s, Vector{core::ir::Switch::CaseSelector{b.Constant(1_i)},
+                                        core::ir::Switch::CaseSelector{nullptr}});
         b.Append(case_a, [&] {  //
             b.ExitSwitch(s, 10_i, true);
         });
 
-        auto* case_b = b.Case(s, Vector{ir::Switch::CaseSelector{b.Constant(2_i)}});
+        auto* case_b = b.Case(s, Vector{core::ir::Switch::CaseSelector{b.Constant(2_i)}});
         b.Append(case_b, [&] {  //
             b.ExitSwitch(s, 20_i, false);
         });
