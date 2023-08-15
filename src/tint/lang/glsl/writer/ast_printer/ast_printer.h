@@ -476,6 +476,7 @@ class ASTPrinter : public tint::TextGenerator {
     bool requires_oes_sample_variables_ = false;
     bool requires_default_precision_qualifier_ = false;
     bool requires_f16_extension_ = false;
+    bool requires_dual_source_blending_extension_ = false;
     Version version_;
 };
 

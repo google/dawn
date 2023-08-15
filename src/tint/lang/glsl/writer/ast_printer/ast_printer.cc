@@ -323,6 +323,10 @@ bool ASTPrinter::Generate() {
         extensions.Append("#extension GL_AMD_gpu_shader_half_float : require");
     }
 
+    if (requires_dual_source_blending_extension_) {
+        extensions.Append("#extension GL_EXT_blend_func_extended : require");
+    }
+
     auto indent = current_buffer_->current_indent;
 
     if (!extensions.lines.empty()) {
@@ -348,6 +352,10 @@ void ASTPrinter::RecordExtension(const ast::Enable* enable) {
 
     if (enable->HasExtension(core::Extension::kF16)) {
         requires_f16_extension_ = true;
+    }
+
+    if (enable->HasExtension(core::Extension::kChromiumInternalDualSourceBlending)) {
+        requires_dual_source_blending_extension_ = true;
     }
 }
 
