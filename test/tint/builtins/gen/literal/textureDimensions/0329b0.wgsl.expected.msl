@@ -1,0 +1,34 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void textureDimensions_0329b0(texture1d<int, access::read> tint_symbol_1, device uint* const tint_symbol_2) {
+  uint res = tint_symbol_1.get_width(0);
+  *(tint_symbol_2) = res;
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner(texture1d<int, access::read> tint_symbol_3, device uint* const tint_symbol_4) {
+  textureDimensions_0329b0(tint_symbol_3, tint_symbol_4);
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main(texture1d<int, access::read> tint_symbol_5 [[texture(0)]], device uint* tint_symbol_6 [[buffer(0)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_5, tint_symbol_6);
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main(texture1d<int, access::read> tint_symbol_7 [[texture(0)]], device uint* tint_symbol_8 [[buffer(0)]]) {
+  textureDimensions_0329b0(tint_symbol_7, tint_symbol_8);
+  return;
+}
+
+kernel void compute_main(texture1d<int, access::read> tint_symbol_9 [[texture(0)]], device uint* tint_symbol_10 [[buffer(0)]]) {
+  textureDimensions_0329b0(tint_symbol_9, tint_symbol_10);
+  return;
+}
+

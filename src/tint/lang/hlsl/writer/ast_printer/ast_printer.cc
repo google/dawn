@@ -3318,7 +3318,8 @@ bool ASTPrinter::EmitHandleVariable(const ast::Var* var, const sem::Variable* se
 
     if (unwrapped_type->Is<core::type::Texture>()) {
         register_space = "t";
-        if (unwrapped_type->Is<core::type::StorageTexture>()) {
+        if (auto* st = unwrapped_type->As<core::type::StorageTexture>();
+            st && st->access() != core::Access::kRead) {
             register_space = "u";
         }
     } else if (unwrapped_type->Is<core::type::Sampler>()) {

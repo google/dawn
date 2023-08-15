@@ -1651,6 +1651,22 @@ constexpr NumberMatcher kReadWriteMatcher {
   }
 };
 
+/// EnumMatcher for 'match readable'
+constexpr NumberMatcher kReadableMatcher {
+/* match */ [](MatchState&, Number number) -> Number {
+    switch (static_cast<Access>(number.Value())) {
+      case Access::kRead:
+      case Access::kReadWrite:
+        return number;
+      default:
+        return Number::invalid;
+    }
+  },
+/* string */ [](MatchState*) -> std::string {
+    return "read or read_write";
+  }
+};
+
 /// EnumMatcher for 'match writable'
 constexpr NumberMatcher kWritableMatcher {
 /* match */ [](MatchState&, Number number) -> Number {
@@ -1815,11 +1831,12 @@ constexpr NumberMatcher kNumberMatchers[] = {
   /* [5] */ kU32TexelFormatMatcher,
   /* [6] */ kWriteMatcher,
   /* [7] */ kReadWriteMatcher,
-  /* [8] */ kWritableMatcher,
-  /* [9] */ kFunctionPrivateWorkgroupMatcher,
-  /* [10] */ kWorkgroupOrStorageMatcher,
-  /* [11] */ kStorageMatcher,
-  /* [12] */ kWorkgroupMatcher,
+  /* [8] */ kReadableMatcher,
+  /* [9] */ kWritableMatcher,
+  /* [10] */ kFunctionPrivateWorkgroupMatcher,
+  /* [11] */ kWorkgroupOrStorageMatcher,
+  /* [12] */ kStorageMatcher,
+  /* [13] */ kWorkgroupMatcher,
 };
 
 constexpr TypeMatcherIndex kTypeMatcherIndices[] = {
@@ -2003,26 +2020,26 @@ static_assert(TypeMatcherIndex::CanIndex(kTypeMatcherIndices),
               "TypeMatcherIndex is not large enough to index kTypeMatcherIndices");
 
 constexpr NumberMatcherIndex kNumberMatcherIndices[] = {
-  /* [0] */ NumberMatcherIndex(11),
+  /* [0] */ NumberMatcherIndex(12),
   /* [1] */ NumberMatcherIndex(0),
   /* [2] */ NumberMatcherIndex(0),
   /* [3] */ NumberMatcherIndex(1),
   /* [4] */ NumberMatcherIndex(0),
   /* [5] */ NumberMatcherIndex(7),
-  /* [6] */ NumberMatcherIndex(12),
+  /* [6] */ NumberMatcherIndex(13),
   /* [7] */ NumberMatcherIndex(7),
   /* [8] */ NumberMatcherIndex(3),
-  /* [9] */ NumberMatcherIndex(8),
+  /* [9] */ NumberMatcherIndex(9),
   /* [10] */ NumberMatcherIndex(4),
-  /* [11] */ NumberMatcherIndex(8),
+  /* [11] */ NumberMatcherIndex(9),
   /* [12] */ NumberMatcherIndex(5),
-  /* [13] */ NumberMatcherIndex(8),
+  /* [13] */ NumberMatcherIndex(9),
   /* [14] */ NumberMatcherIndex(3),
-  /* [15] */ NumberMatcherIndex(7),
+  /* [15] */ NumberMatcherIndex(8),
   /* [16] */ NumberMatcherIndex(4),
-  /* [17] */ NumberMatcherIndex(7),
+  /* [17] */ NumberMatcherIndex(8),
   /* [18] */ NumberMatcherIndex(5),
-  /* [19] */ NumberMatcherIndex(7),
+  /* [19] */ NumberMatcherIndex(8),
   /* [20] */ NumberMatcherIndex(1),
   /* [21] */ NumberMatcherIndex(2),
   /* [22] */ NumberMatcherIndex(0),
@@ -4722,17 +4739,12 @@ constexpr TemplateNumberInfo kTemplateNumbers[] = {
   {
     /* [7] */
     /* name */ "A",
-    /* matcher_index */ NumberMatcherIndex(8),
-  },
-  {
-    /* [8] */
-    /* name */ "A",
     /* matcher_index */ NumberMatcherIndex(/* invalid */),
   },
   {
-    /* [9] */
+    /* [8] */
     /* name */ "S",
-    /* matcher_index */ NumberMatcherIndex(10),
+    /* matcher_index */ NumberMatcherIndex(11),
   },
 };
 
@@ -10474,7 +10486,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_template_types */ 1,
     /* num_template_numbers */ 1,
     /* template_types */ TemplateTypeIndex(25),
-    /* template_numbers */ TemplateNumberIndex(8),
+    /* template_numbers */ TemplateNumberIndex(7),
     /* parameters */ ParameterIndex(366),
     /* return_type_matcher_indices */ TypeMatcherIndicesIndex(35),
     /* return_number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
@@ -10773,7 +10785,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_template_types */ 1,
     /* num_template_numbers */ 1,
     /* template_types */ TemplateTypeIndex(26),
-    /* template_numbers */ TemplateNumberIndex(9),
+    /* template_numbers */ TemplateNumberIndex(8),
     /* parameters */ ParameterIndex(0),
     /* return_type_matcher_indices */ TypeMatcherIndicesIndex(2),
     /* return_number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
@@ -10786,7 +10798,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_template_types */ 1,
     /* num_template_numbers */ 1,
     /* template_types */ TemplateTypeIndex(26),
-    /* template_numbers */ TemplateNumberIndex(9),
+    /* template_numbers */ TemplateNumberIndex(8),
     /* parameters */ ParameterIndex(0),
     /* return_type_matcher_indices */ TypeMatcherIndicesIndex(/* invalid */),
     /* return_number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
@@ -10799,7 +10811,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_template_types */ 1,
     /* num_template_numbers */ 1,
     /* template_types */ TemplateTypeIndex(26),
-    /* template_numbers */ TemplateNumberIndex(9),
+    /* template_numbers */ TemplateNumberIndex(8),
     /* parameters */ ParameterIndex(0),
     /* return_type_matcher_indices */ TypeMatcherIndicesIndex(2),
     /* return_number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
@@ -10812,7 +10824,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_template_types */ 1,
     /* num_template_numbers */ 1,
     /* template_types */ TemplateTypeIndex(26),
-    /* template_numbers */ TemplateNumberIndex(9),
+    /* template_numbers */ TemplateNumberIndex(8),
     /* parameters */ ParameterIndex(0),
     /* return_type_matcher_indices */ TypeMatcherIndicesIndex(80),
     /* return_number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
@@ -11506,10 +11518,10 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn textureDimensions(texture: texture_depth_cube_array) -> vec2<u32> */
     /* fn textureDimensions<L : iu32>(texture: texture_depth_cube_array, level: L) -> vec2<u32> */
     /* fn textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<u32> */
-    /* fn textureDimensions<F : texel_format, A : writable>(texture: texture_storage_1d<F, A>) -> u32 */
-    /* fn textureDimensions<F : texel_format, A : writable>(texture: texture_storage_2d<F, A>) -> vec2<u32> */
-    /* fn textureDimensions<F : texel_format, A : writable>(texture: texture_storage_2d_array<F, A>) -> vec2<u32> */
-    /* fn textureDimensions<F : texel_format, A : writable>(texture: texture_storage_3d<F, A>) -> vec3<u32> */
+    /* fn textureDimensions<F : texel_format, A : access>(texture: texture_storage_1d<F, A>) -> u32 */
+    /* fn textureDimensions<F : texel_format, A : access>(texture: texture_storage_2d<F, A>) -> vec2<u32> */
+    /* fn textureDimensions<F : texel_format, A : access>(texture: texture_storage_2d_array<F, A>) -> vec2<u32> */
+    /* fn textureDimensions<F : texel_format, A : access>(texture: texture_storage_3d<F, A>) -> vec3<u32> */
     /* fn textureDimensions(texture: texture_external) -> vec2<u32> */
     /* num overloads */ 27,
     /* overloads */ OverloadIndex(0),
@@ -11548,7 +11560,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn textureNumLayers<T : fiu32>(texture: texture_cube_array<T>) -> u32 */
     /* fn textureNumLayers(texture: texture_depth_2d_array) -> u32 */
     /* fn textureNumLayers(texture: texture_depth_cube_array) -> u32 */
-    /* fn textureNumLayers<F : texel_format, A : writable>(texture: texture_storage_2d_array<F, A>) -> u32 */
+    /* fn textureNumLayers<F : texel_format, A : access>(texture: texture_storage_2d_array<F, A>) -> u32 */
     /* num overloads */ 5,
     /* overloads */ OverloadIndex(246),
   },
@@ -11696,18 +11708,18 @@ constexpr IntrinsicInfo kBuiltins[] = {
     /* fn textureLoad<C : iu32, A : iu32, L : iu32>(texture: texture_depth_2d_array, coords: vec2<C>, array_index: A, level: L) -> f32 */
     /* fn textureLoad<C : iu32, S : iu32>(texture: texture_depth_multisampled_2d, coords: vec2<C>, sample_index: S) -> f32 */
     /* fn textureLoad<C : iu32>(texture: texture_external, coords: vec2<C>) -> vec4<f32> */
-    /* fn textureLoad<C : iu32>(texture: texture_storage_1d<f32_texel_format, read_write>, coords: C) -> vec4<f32> */
-    /* fn textureLoad<C : iu32>(texture: texture_storage_1d<i32_texel_format, read_write>, coords: C) -> vec4<i32> */
-    /* fn textureLoad<C : iu32>(texture: texture_storage_1d<u32_texel_format, read_write>, coords: C) -> vec4<u32> */
-    /* fn textureLoad<C : iu32>(texture: texture_storage_2d<f32_texel_format, read_write>, coords: vec2<C>) -> vec4<f32> */
-    /* fn textureLoad<C : iu32>(texture: texture_storage_2d<i32_texel_format, read_write>, coords: vec2<C>) -> vec4<i32> */
-    /* fn textureLoad<C : iu32>(texture: texture_storage_2d<u32_texel_format, read_write>, coords: vec2<C>) -> vec4<u32> */
-    /* fn textureLoad<C : iu32, A : iu32>(texture: texture_storage_2d_array<f32_texel_format, read_write>, coords: vec2<C>, array_index: A) -> vec4<f32> */
-    /* fn textureLoad<C : iu32, A : iu32>(texture: texture_storage_2d_array<i32_texel_format, read_write>, coords: vec2<C>, array_index: A) -> vec4<i32> */
-    /* fn textureLoad<C : iu32, A : iu32>(texture: texture_storage_2d_array<u32_texel_format, read_write>, coords: vec2<C>, array_index: A) -> vec4<u32> */
-    /* fn textureLoad<C : iu32>(texture: texture_storage_3d<f32_texel_format, read_write>, coords: vec3<C>) -> vec4<f32> */
-    /* fn textureLoad<C : iu32>(texture: texture_storage_3d<i32_texel_format, read_write>, coords: vec3<C>) -> vec4<i32> */
-    /* fn textureLoad<C : iu32>(texture: texture_storage_3d<u32_texel_format, read_write>, coords: vec3<C>) -> vec4<u32> */
+    /* fn textureLoad<C : iu32>(texture: texture_storage_1d<f32_texel_format, readable>, coords: C) -> vec4<f32> */
+    /* fn textureLoad<C : iu32>(texture: texture_storage_1d<i32_texel_format, readable>, coords: C) -> vec4<i32> */
+    /* fn textureLoad<C : iu32>(texture: texture_storage_1d<u32_texel_format, readable>, coords: C) -> vec4<u32> */
+    /* fn textureLoad<C : iu32>(texture: texture_storage_2d<f32_texel_format, readable>, coords: vec2<C>) -> vec4<f32> */
+    /* fn textureLoad<C : iu32>(texture: texture_storage_2d<i32_texel_format, readable>, coords: vec2<C>) -> vec4<i32> */
+    /* fn textureLoad<C : iu32>(texture: texture_storage_2d<u32_texel_format, readable>, coords: vec2<C>) -> vec4<u32> */
+    /* fn textureLoad<C : iu32, A : iu32>(texture: texture_storage_2d_array<f32_texel_format, readable>, coords: vec2<C>, array_index: A) -> vec4<f32> */
+    /* fn textureLoad<C : iu32, A : iu32>(texture: texture_storage_2d_array<i32_texel_format, readable>, coords: vec2<C>, array_index: A) -> vec4<i32> */
+    /* fn textureLoad<C : iu32, A : iu32>(texture: texture_storage_2d_array<u32_texel_format, readable>, coords: vec2<C>, array_index: A) -> vec4<u32> */
+    /* fn textureLoad<C : iu32>(texture: texture_storage_3d<f32_texel_format, readable>, coords: vec3<C>) -> vec4<f32> */
+    /* fn textureLoad<C : iu32>(texture: texture_storage_3d<i32_texel_format, readable>, coords: vec3<C>) -> vec4<i32> */
+    /* fn textureLoad<C : iu32>(texture: texture_storage_3d<u32_texel_format, readable>, coords: vec3<C>) -> vec4<u32> */
     /* num overloads */ 21,
     /* overloads */ OverloadIndex(27),
   },

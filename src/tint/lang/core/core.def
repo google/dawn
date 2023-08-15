@@ -399,6 +399,9 @@ match u32_texel_format
 
 match write: access.write
 match read_write: access.read_write
+match readable
+  : access.read
+  | access.read_write
 match writable
   : access.write
   | access.read_write
@@ -758,10 +761,10 @@ match workgroup
 @must_use fn textureDimensions(texture: texture_depth_cube_array) -> vec2<u32>
 @must_use fn textureDimensions<L: iu32>(texture: texture_depth_cube_array, level: L) -> vec2<u32>
 @must_use fn textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<u32>
-@must_use fn textureDimensions<F: texel_format, A: writable>(texture: texture_storage_1d<F, A>) -> u32
-@must_use fn textureDimensions<F: texel_format, A: writable>(texture: texture_storage_2d<F, A>) -> vec2<u32>
-@must_use fn textureDimensions<F: texel_format, A: writable>(texture: texture_storage_2d_array<F, A>) -> vec2<u32>
-@must_use fn textureDimensions<F: texel_format, A: writable>(texture: texture_storage_3d<F, A>) -> vec3<u32>
+@must_use fn textureDimensions<F: texel_format, A: access>(texture: texture_storage_1d<F, A>) -> u32
+@must_use fn textureDimensions<F: texel_format, A: access>(texture: texture_storage_2d<F, A>) -> vec2<u32>
+@must_use fn textureDimensions<F: texel_format, A: access>(texture: texture_storage_2d_array<F, A>) -> vec2<u32>
+@must_use fn textureDimensions<F: texel_format, A: access>(texture: texture_storage_3d<F, A>) -> vec3<u32>
 @must_use fn textureDimensions(texture: texture_external) -> vec2<u32>
 @must_use fn textureGather<T: fiu32, C: iu32>(@const component: C, texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>) -> vec4<T>
 @must_use fn textureGather<T: fiu32, C: iu32>(@const component: C, texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>) -> vec4<T>
@@ -785,7 +788,7 @@ match workgroup
 @must_use fn textureNumLayers<T: fiu32>(texture: texture_cube_array<T>) -> u32
 @must_use fn textureNumLayers(texture: texture_depth_2d_array) -> u32
 @must_use fn textureNumLayers(texture: texture_depth_cube_array) -> u32
-@must_use fn textureNumLayers<F: texel_format, A: writable>(texture: texture_storage_2d_array<F, A>) -> u32
+@must_use fn textureNumLayers<F: texel_format, A: access>(texture: texture_storage_2d_array<F, A>) -> u32
 @must_use fn textureNumLevels<T: fiu32>(texture: texture_1d<T>) -> u32
 @must_use fn textureNumLevels<T: fiu32>(texture: texture_2d<T>) -> u32
 @must_use fn textureNumLevels<T: fiu32>(texture: texture_2d_array<T>) -> u32
@@ -878,18 +881,18 @@ fn textureStore<C: iu32>(texture: texture_storage_3d<u32_texel_format, writable>
 @must_use fn textureLoad<C: iu32, A: iu32, L: iu32>(texture: texture_depth_2d_array, coords: vec2<C>, array_index: A, level: L) -> f32
 @must_use fn textureLoad<C: iu32, S: iu32>(texture: texture_depth_multisampled_2d, coords: vec2<C>, sample_index: S) -> f32
 @must_use fn textureLoad<C: iu32>(texture: texture_external, coords: vec2<C>) -> vec4<f32>
-@must_use fn textureLoad<C: iu32>(texture: texture_storage_1d<f32_texel_format, read_write>, coords: C) -> vec4<f32>
-@must_use fn textureLoad<C: iu32>(texture: texture_storage_1d<i32_texel_format, read_write>, coords: C) -> vec4<i32>
-@must_use fn textureLoad<C: iu32>(texture: texture_storage_1d<u32_texel_format, read_write>, coords: C) -> vec4<u32>
-@must_use fn textureLoad<C: iu32>(texture: texture_storage_2d<f32_texel_format, read_write>, coords: vec2<C>) -> vec4<f32>
-@must_use fn textureLoad<C: iu32>(texture: texture_storage_2d<i32_texel_format, read_write>, coords: vec2<C>) -> vec4<i32>
-@must_use fn textureLoad<C: iu32>(texture: texture_storage_2d<u32_texel_format, read_write>, coords: vec2<C>) -> vec4<u32>
-@must_use fn textureLoad<C: iu32, A: iu32>(texture: texture_storage_2d_array<f32_texel_format, read_write>, coords: vec2<C>, array_index: A) -> vec4<f32>
-@must_use fn textureLoad<C: iu32, A: iu32>(texture: texture_storage_2d_array<i32_texel_format, read_write>, coords: vec2<C>, array_index: A) -> vec4<i32>
-@must_use fn textureLoad<C: iu32, A: iu32>(texture: texture_storage_2d_array<u32_texel_format, read_write>, coords: vec2<C>, array_index: A) -> vec4<u32>
-@must_use fn textureLoad<C: iu32>(texture: texture_storage_3d<f32_texel_format, read_write>, coords: vec3<C>) -> vec4<f32>
-@must_use fn textureLoad<C: iu32>(texture: texture_storage_3d<i32_texel_format, read_write>, coords: vec3<C>) -> vec4<i32>
-@must_use fn textureLoad<C: iu32>(texture: texture_storage_3d<u32_texel_format, read_write>, coords: vec3<C>) -> vec4<u32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_1d<f32_texel_format, readable>, coords: C) -> vec4<f32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_1d<i32_texel_format, readable>, coords: C) -> vec4<i32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_1d<u32_texel_format, readable>, coords: C) -> vec4<u32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_2d<f32_texel_format, readable>, coords: vec2<C>) -> vec4<f32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_2d<i32_texel_format, readable>, coords: vec2<C>) -> vec4<i32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_2d<u32_texel_format, readable>, coords: vec2<C>) -> vec4<u32>
+@must_use fn textureLoad<C: iu32, A: iu32>(texture: texture_storage_2d_array<f32_texel_format, readable>, coords: vec2<C>, array_index: A) -> vec4<f32>
+@must_use fn textureLoad<C: iu32, A: iu32>(texture: texture_storage_2d_array<i32_texel_format, readable>, coords: vec2<C>, array_index: A) -> vec4<i32>
+@must_use fn textureLoad<C: iu32, A: iu32>(texture: texture_storage_2d_array<u32_texel_format, readable>, coords: vec2<C>, array_index: A) -> vec4<u32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_3d<f32_texel_format, readable>, coords: vec3<C>) -> vec4<f32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_3d<i32_texel_format, readable>, coords: vec3<C>) -> vec4<i32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_3d<u32_texel_format, readable>, coords: vec3<C>) -> vec4<u32>
 
 @stage("fragment", "compute") fn atomicLoad<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>) -> T
 @stage("fragment", "compute") fn atomicStore<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T)
