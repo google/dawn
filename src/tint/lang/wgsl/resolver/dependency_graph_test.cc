@@ -27,7 +27,7 @@ namespace tint::resolver {
 namespace {
 
 using ::testing::ElementsAre;
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 template <typename T>

@@ -1091,6 +1091,7 @@ if (tint_build_ir) {
       ]
       deps += [
         ":libtint_ast_src",
+        ":libtint_builtins_src",
         ":libtint_ir_src",
         ":libtint_program_src",
         ":libtint_sem_src",

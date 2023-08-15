@@ -21,7 +21,7 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/utils/ice/ice.h"
 
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 namespace tint::ir::transform {

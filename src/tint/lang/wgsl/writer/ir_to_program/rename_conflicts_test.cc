@@ -25,7 +25,7 @@
 namespace tint::wgsl::writer {
 namespace {
 
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 class IRToProgramRenameConflictsTest : public testing::Test {

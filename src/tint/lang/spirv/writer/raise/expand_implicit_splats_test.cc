@@ -21,7 +21,7 @@
 namespace tint::spirv::writer::raise {
 namespace {
 
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 using SpirvWriter_ExpandImplicitSplatsTest = ir::transform::TransformTest;

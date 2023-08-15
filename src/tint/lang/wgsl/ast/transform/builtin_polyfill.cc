@@ -31,7 +31,7 @@
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/rtti/switch.h"
 
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::BuiltinPolyfill);

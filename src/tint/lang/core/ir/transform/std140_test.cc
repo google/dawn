@@ -25,7 +25,7 @@
 namespace tint::ir::transform {
 namespace {
 
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 using IR_Std140Test = TransformTest;

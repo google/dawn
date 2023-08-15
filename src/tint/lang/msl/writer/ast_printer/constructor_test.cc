@@ -19,7 +19,7 @@ namespace tint::msl::writer {
 namespace {
 
 using ::testing::HasSubstr;
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 using MslASTPrinterTest_Constructor = TestHelper;

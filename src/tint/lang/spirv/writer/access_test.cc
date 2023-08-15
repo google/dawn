@@ -19,7 +19,7 @@
 namespace tint::spirv::writer {
 namespace {
 
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 TEST_F(SpirvWriterTest, Access_Array_Value_ConstantIndex) {

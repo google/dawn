@@ -20,7 +20,7 @@
 #include "src/tint/lang/core/type/builtin_structs.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::spirv::writer {
 namespace {

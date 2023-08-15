@@ -24,7 +24,7 @@ namespace tint::resolver {
 namespace {
 
 using ::testing::UnorderedElementsAre;
-using namespace tint::core::fluent_types;  // NOLINT
+using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
 using ResolverPipelineStageUseTest = ResolverTest;
