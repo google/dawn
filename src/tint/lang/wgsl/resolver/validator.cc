@@ -312,6 +312,16 @@ bool Validator::Pointer(const ast::TemplatedIdentifier* a, const core::type::Poi
 
 bool Validator::StorageTexture(const core::type::StorageTexture* t, const Source& source) const {
     switch (t->access()) {
+        case core::Access::kRead:
+            if (!enabled_extensions_.Contains(
+                    core::Extension::kChromiumExperimentalReadWriteStorageTexture)) {
+                AddError(
+                    "read-only storage textures require the "
+                    "chromium_experimental_read_write_storage_texture extension to be enabled",
+                    source);
+                return false;
+            }
+            break;
         case core::Access::kReadWrite:
             if (!enabled_extensions_.Contains(
                     core::Extension::kChromiumExperimentalReadWriteStorageTexture)) {
@@ -326,9 +336,6 @@ bool Validator::StorageTexture(const core::type::StorageTexture* t, const Source
             break;
         case core::Access::kUndefined:
             AddError("storage texture missing access control", source);
-            return false;
-        default:
-            AddError("storage textures currently only support 'write' access control", source);
             return false;
     }
 

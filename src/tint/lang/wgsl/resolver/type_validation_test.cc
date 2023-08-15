@@ -1143,7 +1143,19 @@ TEST_F(StorageTextureAccessTest, MissingAccess_Fail) {
     EXPECT_EQ(r()->error(), R"(12:34 error: 'texture_storage_1d' requires 2 template arguments)");
 }
 
-TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
+TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
+    // @group(0) @binding(0)
+    // var a : texture_storage_1d<r32uint, write>;
+
+    auto st = ty.storage_texture(core::type::TextureDimension::k1d, core::TexelFormat::kR32Uint,
+                                 core::Access::kWrite);
+
+    GlobalVar("a", st, Group(0_a), Binding(0_a));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(StorageTextureAccessTest, ReadOnlyAccess_WithoutExtension_Fail) {
     // @group(0) @binding(0)
     // var a : texture_storage_1d<r32uint, read>;
 
@@ -1154,15 +1166,18 @@ TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: storage textures currently only support 'write' access control");
+              "12:34 error: read-only storage textures require the "
+              "chromium_experimental_read_write_storage_texture extension to be enabled");
 }
 
-TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
+TEST_F(StorageTextureAccessTest, ReadOnlyAccess_WithExtension_Pass) {
+    // enable chromium_experimental_read_write_storage_texture;
     // @group(0) @binding(0)
-    // var a : texture_storage_1d<r32uint, write>;
+    // var a : texture_storage_1d<r32uint, read>;
 
-    auto st = ty.storage_texture(core::type::TextureDimension::k1d, core::TexelFormat::kR32Uint,
-                                 core::Access::kWrite);
+    Enable(core::Extension::kChromiumExperimentalReadWriteStorageTexture);
+    auto st = ty.storage_texture(Source{{12, 34}}, core::type::TextureDimension::k1d,
+                                 core::TexelFormat::kR32Uint, core::Access::kRead);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 
