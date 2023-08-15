@@ -93,12 +93,16 @@ file(READ "${NODE_API_HEADERS_DIR}/symbols.js" NAPI_SYMBOLS_JS_CONTENT)
 string(REGEX MATCHALL "napi_[a-z0-9_]*" NAPI_SYMBOLS "${NAPI_SYMBOLS_JS_CONTENT}")
 
 if (WIN32)
+    set(NODE_API_BINARY_FILE "node.exe" CACHE STRING
+       "The name of the file in which to find the Node-API symbols."
+    )
+
     # Generate the NapiSymbols.def file from the Napi symbol list
     set(NAPI_SYMBOLS_DEF "${DAWN_NODE_GEN_DIR}/NapiSymbols.def")
     list(TRANSFORM NAPI_SYMBOLS PREPEND "  ")
     list(TRANSFORM NAPI_SYMBOLS APPEND "\n")
     string(REPLACE ";" "" NAPI_SYMBOLS "${NAPI_SYMBOLS}")
-    string(PREPEND NAPI_SYMBOLS "LIBRARY node.exe\nEXPORTS\n")
+    string(PREPEND NAPI_SYMBOLS "LIBRARY ${NODE_API_BINARY_FILE}\nEXPORTS\n")
     file(GENERATE OUTPUT "${NAPI_SYMBOLS_DEF}" CONTENT "${NAPI_SYMBOLS}")
     # Generate the NapiSymbols.lib from the NapiSymbols.def file
     set(NAPI_SYMBOLS_LIB "${DAWN_NODE_GEN_DIR}/NapiSymbols.lib")
