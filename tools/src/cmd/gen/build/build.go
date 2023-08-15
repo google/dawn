@@ -233,10 +233,10 @@ func scanSourceFiles(p *Project) error {
 					if strings.HasPrefix(include.path, srcTint) {
 						// #include "src/tint/..."
 						include.path = include.path[len(srcTint)+1:] // Strip 'src/tint/'
-						includeFile := p.File(include.path)
 
-						if _, err := os.Stat(includeFile.AbsPath()); err != nil {
-							return fmt.Errorf(`%v:%v includes non-existent file '%v'`, file.Path(), include.line, includeFile.AbsPath())
+						includeFile := p.File(include.path)
+						if includeFile == nil {
+							return fmt.Errorf(`%v:%v includes non-existent file '%v'`, file.Path(), include.line, include.path)
 						}
 
 						dependencyKind := targetKindFromFilename(include.path)
