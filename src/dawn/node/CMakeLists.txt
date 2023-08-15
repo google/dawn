@@ -13,7 +13,7 @@
 # limitations under the License.
 
 set(DAWN_NODE_GEN_DIR "${DAWN_BUILD_GEN_DIR}/node")
-set(IDLGEN_TOOL_DIR   "${CMAKE_SOURCE_DIR}/tools/src/cmd/idlgen")
+set(IDLGEN_TOOL_DIR   "${PROJECT_SOURCE_DIR}/tools/src/cmd/idlgen")
 
 # idlgen() is a function that uses the tools/src/cmd/idlgen/main.go tool to
 # generate code from an IDL file and template.
