@@ -1389,8 +1389,8 @@ if(TINT_BUILD_TESTS)
       lang/spirv/writer/common/instruction_test.cc
       lang/spirv/writer/common/module_test.cc
       lang/spirv/writer/common/operand_test.cc
-      lang/spirv/writer/common/spv_dump.cc
-      lang/spirv/writer/common/spv_dump.h
+      lang/spirv/writer/common/spv_dump_test.cc
+      lang/spirv/writer/common/spv_dump_test.h
     )
 
     if(${TINT_BUILD_IR})

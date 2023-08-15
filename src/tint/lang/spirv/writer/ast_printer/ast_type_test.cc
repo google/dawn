@@ -18,7 +18,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
 #include "src/tint/lang/spirv/writer/ast_printer/helper_test.h"
-#include "src/tint/lang/spirv/writer/common/spv_dump.h"
+#include "src/tint/lang/spirv/writer/common/spv_dump_test.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
