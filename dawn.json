@@ -1796,6 +1796,7 @@
             {"value": 10, "name": "RG11B10 ufloat renderable"},
             {"value": 11, "name": "BGRA8 unorm storage"},
             {"value": 12, "name": "float32 filterable"},
+
             {"value": 1002, "name": "dawn internal usages", "tags": ["dawn"]},
             {"value": 1003, "name": "dawn multi planar formats", "tags": ["dawn"]},
             {"value": 1004, "name": "dawn native", "tags": ["dawn", "native"]},
@@ -1811,6 +1812,8 @@
             {"value": 1014, "name": "chromium experimental subgroups", "tags": ["dawn"]},
             {"value": 1015, "name": "chromium experimental subgroup uniform control flow", "tags": ["dawn"]},
             {"value": 1016, "name": "chromium experimental read write storage texture", "tags": ["dawn"]},
+            {"value": 1017, "name": "pixel local storage coherent", "tags": ["dawn"]},
+            {"value": 1018, "name": "pixel local storage non coherent", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},
@@ -2003,6 +2006,26 @@
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "bind group layout count", "type": "size_t"},
             {"name": "bind group layouts", "type": "bind group layout", "annotation": "const*", "length": "bind group layout count"}
+        ]
+    },
+    "pipeline layout pixel local storage": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "chained": "in",
+        "chain roots": ["pipeline layout descriptor"],
+        "members": [
+            {"name": "total pixel local storage size", "type": "size_t"},
+            {"name": "storage attachment count", "type": "size_t", "default": 0},
+            {"name": "storage attachments", "type": "pipeline layout storage attachment", "annotation": "const*", "length": "storage attachment count"}
+        ]
+    },
+    "pipeline layout storage attachment": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "extensible": "in",
+        "members": [
+            {"name": "offset", "type": "uint64_t", "default": 0},
+            {"name": "format", "type": "texture format"}
         ]
     },
     "pipeline statistic name": {
@@ -2390,6 +2413,29 @@
             {"name": "max draw count", "type": "uint64_t", "default": 50000000}
         ]
     },
+    "render pass pixel local storage": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "chained": "in",
+        "chain roots": ["render pass descriptor"],
+        "members": [
+            {"name": "total pixel local storage size", "type": "size_t"},
+            {"name": "storage attachment count", "type": "size_t", "default": 0},
+            {"name": "storage attachments", "type": "render pass storage attachment", "annotation": "const*", "length": "storage attachment count"}
+        ]
+    },
+    "render pass storage attachment": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "extensible": "in",
+        "members": [
+            {"name": "offset", "type": "uint64_t", "default": 0},
+            {"name": "storage", "type": "texture view"},
+            {"name": "load op", "type": "load op"},
+            {"name": "store op", "type": "store op"},
+            {"name": "clear value", "type": "color"}
+        ]
+    },
     "render pass encoder": {
         "category": "object",
         "no autolock": true,
@@ -2539,6 +2585,10 @@
                     {"name": "query set", "type": "query set"},
                     {"name": "query index", "type": "uint32_t"}
                 ]
+            },
+            {
+                "name": "pixel local storage barrier",
+                "tags": ["dawn"]
             },
             {
                 "name": "end"
@@ -3008,6 +3058,8 @@
             {"value": 1011, "name": "request adapter options get GL proc", "tags": ["dawn", "native"]},
             {"value": 1012, "name": "dawn multisample state render to single sampled", "tags": ["dawn"]},
             {"value": 1013, "name": "dawn render pass color attachment render to single sampled", "tags": ["dawn"]},
+            {"value": 1014, "name": "render pass pixel local storage", "tags": ["dawn"]},
+            {"value": 1015, "name": "pipeline layout pixel local storage", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk image descriptor", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory vk dedicated allocation descriptor", "tags": ["dawn", "native"]},
@@ -3251,7 +3303,8 @@
             {"value": 4, "name": "texture binding"},
             {"value": 8, "name": "storage binding"},
             {"value": 16, "name": "render attachment"},
-            {"value": 32, "name": "transient attachment", "tags": ["dawn"]}
+            {"value": 32, "name": "transient attachment", "tags": ["dawn"]},
+            {"value": 64, "name": "storage attachment", "tags": ["dawn"]}
         ]
     },
     "texture view descriptor": {

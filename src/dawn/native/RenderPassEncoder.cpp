@@ -440,4 +440,18 @@ void RenderPassEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t query
         "encoding %s.WriteTimestamp(%s, %u).", this, querySet, queryIndex);
 }
 
+void RenderPassEncoder::APIPixelLocalStorageBarrier() {
+    mEncodingContext->TryEncode(
+        this,
+        [&](CommandAllocator* allocator) -> MaybeError {
+            if (IsValidationEnabled()) {
+                DAWN_TRY(ValidateHasPLSFeature(GetDevice()));
+            }
+
+            allocator->Allocate<PixelLocalStorageBarrierCmd>(Command::PixelLocalStorageBarrier);
+            return {};
+        },
+        "encoding %s.PixelLocalStorageBarrier().", this);
+}
+
 }  // namespace dawn::native

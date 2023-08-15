@@ -1672,6 +1672,8 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
         case wgpu::FeatureName::SurfaceCapabilities:
         case wgpu::FeatureName::TransientAttachments:
         case wgpu::FeatureName::MSAARenderToSingleSampled:
+        case wgpu::FeatureName::PixelLocalStorageCoherent:
+        case wgpu::FeatureName::PixelLocalStorageNonCoherent:
         case wgpu::FeatureName::Undefined:
             return false;
     }

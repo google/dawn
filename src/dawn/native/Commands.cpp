@@ -125,6 +125,12 @@ void FreeCommands(CommandIterator* commands) {
                 cmd->~ClearBufferCmd();
                 break;
             }
+            case Command::PixelLocalStorageBarrier: {
+                PixelLocalStorageBarrierCmd* cmd =
+                    commands->NextCommand<PixelLocalStorageBarrierCmd>();
+                cmd->~PixelLocalStorageBarrierCmd();
+                break;
+            }
             case Command::InsertDebugMarker: {
                 InsertDebugMarkerCmd* cmd = commands->NextCommand<InsertDebugMarkerCmd>();
                 commands->NextData<char>(cmd->length + 1);
@@ -286,6 +292,10 @@ void SkipCommand(CommandIterator* commands, Command type) {
 
         case Command::ClearBuffer:
             commands->NextCommand<ClearBufferCmd>();
+            break;
+
+        case Command::PixelLocalStorageBarrier:
+            commands->NextCommand<PixelLocalStorageBarrierCmd>();
             break;
 
         case Command::InsertDebugMarker: {

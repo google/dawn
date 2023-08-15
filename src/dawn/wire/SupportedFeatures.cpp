@@ -64,6 +64,8 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_ChromiumExperimentalSubgroups:
         case WGPUFeatureName_ChromiumExperimentalSubgroupUniformControlFlow:
         case WGPUFeatureName_ChromiumExperimentalReadWriteStorageTexture:
+        case WGPUFeatureName_PixelLocalStorageCoherent:
+        case WGPUFeatureName_PixelLocalStorageNonCoherent:
             return true;
     }
 

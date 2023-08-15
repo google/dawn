@@ -544,4 +544,13 @@ MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
     return {};
 }
 
+MaybeError ValidateHasPLSFeature(const DeviceBase* device) {
+    DAWN_INVALID_IF(
+        !(device->HasFeature(Feature::PixelLocalStorageCoherent) ||
+          device->HasFeature(Feature::PixelLocalStorageNonCoherent)),
+        "Pixel Local Storage feature used without either of the pixel-local-storage-coherent or "
+        "pixel-local-storage-non-coherent features enabled.");
+    return {};
+}
+
 }  // namespace dawn::native

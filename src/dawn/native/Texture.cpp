@@ -22,6 +22,7 @@
 #include "dawn/common/Math.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/ChainUtils.h"
+#include "dawn/native/CommandValidation.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/EnumMaskIterator.h"
 #include "dawn/native/ObjectType_autogen.h"
@@ -337,6 +338,13 @@ MaybeError ValidateTextureUsage(const DeviceBase* device,
                         "The texture usage (%s) includes %s, which requires that the texture usage "
                         "be exactly %s",
                         usage, kTransientAttachment, kAllowedTransientUsage);
+    }
+
+    if (usage & wgpu::TextureUsage::StorageAttachment) {
+        DAWN_TRY_CONTEXT(ValidateHasPLSFeature(device), "validating usage of %s",
+                         wgpu::TextureUsage::StorageAttachment);
+
+        // TODO(dawn:1704): Validate the constraints on the dimension, format, etc.
     }
 
     // Only allows simple readonly texture usages.

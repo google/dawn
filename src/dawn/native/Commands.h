@@ -55,6 +55,7 @@ enum class Command {
     EndRenderPass,
     ExecuteBundles,
     InsertDebugMarker,
+    PixelLocalStorageBarrier,
     PopDebugGroup,
     PushDebugGroup,
     ResolveQuerySet,
@@ -265,6 +266,8 @@ struct ClearBufferCmd {
 struct InsertDebugMarkerCmd {
     uint32_t length;
 };
+
+struct PixelLocalStorageBarrierCmd {};
 
 struct PopDebugGroupCmd {};
 

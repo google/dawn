@@ -361,6 +361,7 @@ dawn_test("dawn_unittests") {
     "unittests/validation/ObjectCachingTests.cpp",
     "unittests/validation/OverridableConstantsValidationTests.cpp",
     "unittests/validation/PipelineAndPassCompatibilityTests.cpp",
+    "unittests/validation/PixelLocalStorageTests.cpp",
     "unittests/validation/QueryValidationTests.cpp",
     "unittests/validation/QueueOnSubmittedWorkDoneValidationTests.cpp",
     "unittests/validation/QueueSubmitValidationTests.cpp",

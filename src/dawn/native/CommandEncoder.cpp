@@ -497,8 +497,9 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
                                         uint32_t* sampleCount,
                                         uint32_t* implicitSampleCount,
                                         UsageValidationMode usageValidationMode) {
-    DAWN_TRY(ValidateSingleSType(descriptor->nextInChain,
-                                 wgpu::SType::RenderPassDescriptorMaxDrawCount));
+    DAWN_TRY(
+        ValidateSTypes(descriptor->nextInChain, {{wgpu::SType::RenderPassDescriptorMaxDrawCount},
+                                                 {wgpu::SType::RenderPassPixelLocalStorage}}));
 
     uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
     DAWN_INVALID_IF(
@@ -590,6 +591,14 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
             "colorAttachmentCount (%u) is not supported when the render pass has implicit sample "
             "count (%u). (Currently) colorAttachmentCount = 1 is supported.",
             descriptor->colorAttachmentCount, *implicitSampleCount);
+    }
+
+    const RenderPassPixelLocalStorage* pls = nullptr;
+    FindInChain(descriptor->nextInChain, &pls);
+    if (pls != nullptr) {
+        DAWN_TRY(ValidateHasPLSFeature(device));
+
+        // TODO(dawn:1704): Validate limits, formats, offsets don't collide and the total size.
     }
 
     return {};

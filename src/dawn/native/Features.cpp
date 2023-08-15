@@ -157,6 +157,23 @@ static constexpr FeatureEnumAndInfoList kFeatureNameAndInfoList = {{
       "https://chromium.googlesource.com/angle/angle/+/refs/heads/main/extensions/"
       "EGL_ANGLE_display_texture_share_group.txt",
       FeatureInfo::FeatureState::Stable}},
+    {Feature::PixelLocalStorageCoherent,
+     {"pixel-local-storage-coherent",
+      "Supports passing information between invocation in a render pass that cover the same pixel."
+      "This helps more efficiently implement algorithms that would otherwise require ping-ponging"
+      "between render targets. The coherent version of this extension means that no barrier calls"
+      "are needed to prevent data races between fragment shaders on the same pixel.",
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=1704",
+      FeatureInfo::FeatureState::Experimental}},
+    {Feature::PixelLocalStorageNonCoherent,
+     {"pixel-local-storage-non-coherent",
+      "Supports passing information between invocation in a render pass that cover the same pixel."
+      "This helps more efficiently implement algorithms that would otherwise require ping-ponging"
+      "between render targets. The non-coherent version of this extension means that barrier calls"
+      "are needed to prevent data races between fragment shaders on the same pixels (note that "
+      "overlapping fragments from the same draw cannot be made data race free).",
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=1704",
+      FeatureInfo::FeatureState::Experimental}},
     {Feature::SharedTextureMemoryVkDedicatedAllocation,
      {"shared-texture-memory-vk-dedicated-allocation",
       "Support specifying whether a Vulkan allocation for shared texture memory is a dedicated "
@@ -288,6 +305,10 @@ Feature FromAPIFeature(wgpu::FeatureName feature) {
             return Feature::D3D11MultithreadProtected;
         case wgpu::FeatureName::ANGLETextureSharing:
             return Feature::ANGLETextureSharing;
+        case wgpu::FeatureName::PixelLocalStorageCoherent:
+            return Feature::PixelLocalStorageCoherent;
+        case wgpu::FeatureName::PixelLocalStorageNonCoherent:
+            return Feature::PixelLocalStorageNonCoherent;
         case wgpu::FeatureName::SharedTextureMemoryVkDedicatedAllocation:
             return Feature::SharedTextureMemoryVkDedicatedAllocation;
         case wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer:
@@ -376,6 +397,10 @@ wgpu::FeatureName ToAPIFeature(Feature feature) {
             return wgpu::FeatureName::D3D11MultithreadProtected;
         case Feature::ANGLETextureSharing:
             return wgpu::FeatureName::ANGLETextureSharing;
+        case Feature::PixelLocalStorageCoherent:
+            return wgpu::FeatureName::PixelLocalStorageCoherent;
+        case Feature::PixelLocalStorageNonCoherent:
+            return wgpu::FeatureName::PixelLocalStorageNonCoherent;
         case Feature::SharedTextureMemoryVkDedicatedAllocation:
             return wgpu::FeatureName::SharedTextureMemoryVkDedicatedAllocation;
         case Feature::SharedTextureMemoryAHardwareBuffer:

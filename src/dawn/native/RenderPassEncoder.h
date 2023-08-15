@@ -65,6 +65,8 @@ class RenderPassEncoder final : public RenderEncoderBase {
 
     void APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
 
+    void APIPixelLocalStorageBarrier();
+
     // Internal code that already locked the device should call this method instead of
     // APIEnd() to avoid the device being locked again.
     void End();

@@ -23,6 +23,8 @@
 #include "dawn/common/Numeric.h"
 #include "dawn/common/ityp_stack_vec.h"
 #include "dawn/native/BindGroupLayout.h"
+#include "dawn/native/ChainUtils.h"
+#include "dawn/native/CommandValidation.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectContentHasher.h"
 #include "dawn/native/ObjectType_autogen.h"
@@ -33,7 +35,14 @@ namespace dawn::native {
 MaybeError ValidatePipelineLayoutDescriptor(DeviceBase* device,
                                             const PipelineLayoutDescriptor* descriptor,
                                             PipelineCompatibilityToken pipelineCompatibilityToken) {
-    DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain is not nullptr.");
+    const PipelineLayoutPixelLocalStorage* pls = nullptr;
+    FindInChain(descriptor->nextInChain, &pls);
+    if (pls != nullptr) {
+        DAWN_TRY(ValidateHasPLSFeature(device));
+
+        // TODO(dawn:1704): Validate limits, formats, offsets don't collide and the total size.
+    }
+
     DAWN_INVALID_IF(descriptor->bindGroupLayoutCount > kMaxBindGroups,
                     "bindGroupLayoutCount (%i) is larger than the maximum allowed (%i).",
                     descriptor->bindGroupLayoutCount, kMaxBindGroups);

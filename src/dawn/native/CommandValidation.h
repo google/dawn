@@ -99,6 +99,8 @@ using ColorAttachmentFormats = StackVector<const Format*, kMaxColorAttachments>;
 MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
                                                  const ColorAttachmentFormats& formats);
 
+MaybeError ValidateHasPLSFeature(const DeviceBase* device);
+
 }  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_COMMANDVALIDATION_H_
