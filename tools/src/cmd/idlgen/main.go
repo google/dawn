@@ -205,6 +205,7 @@ func simplify(in *ast.File) (*ast.File, declarations) {
 		interfaces := map[string]*ast.Interface{}
 		mixins := map[string]*ast.Mixin{}
 		includes := []*ast.Includes{}
+		enums := map[string]*ast.Enum{}
 		for _, d := range in.Declarations {
 			switch d := d.(type) {
 			case *ast.Interface:
@@ -222,6 +223,16 @@ func simplify(in *ast.File) (*ast.File, declarations) {
 				s.declarations[d.Name] = d
 			case *ast.Includes:
 				includes = append(includes, d)
+			case *ast.Enum:
+				if e, ok := enums[d.Name]; ok {
+					// Merge partial enums into one enum
+					e.Values = append(e.Values, d.Values...)
+				} else {
+					clone := *d
+					d := &clone
+					enums[d.Name] = d
+					s.declarations[d.Name] = d
+				}
 			default:
 				if name := nameOf(d); name != "" {
 					s.declarations[nameOf(d)] = d

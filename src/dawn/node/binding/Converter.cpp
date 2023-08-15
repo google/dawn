@@ -1610,6 +1610,12 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
         case interop::GPUFeatureName::kFloat32Filterable:
             out = wgpu::FeatureName::Float32Filterable;
             return true;
+        case interop::GPUFeatureName::kChromiumExperimentalSubgroups:
+            out = wgpu::FeatureName::ChromiumExperimentalSubgroups;
+            return true;
+        case interop::GPUFeatureName::kChromiumExperimentalSubgroupUniformControlFlow:
+            out = wgpu::FeatureName::ChromiumExperimentalSubgroupUniformControlFlow;
+            return true;
     }
     return false;
 }
@@ -1648,6 +1654,12 @@ bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
             return true;
         case wgpu::FeatureName::Float32Filterable:
             out = interop::GPUFeatureName::kFloat32Filterable;
+            return true;
+        case wgpu::FeatureName::ChromiumExperimentalSubgroups:
+            out = interop::GPUFeatureName::kChromiumExperimentalSubgroups;
+            return true;
+        case wgpu::FeatureName::ChromiumExperimentalSubgroupUniformControlFlow:
+            out = interop::GPUFeatureName::kChromiumExperimentalSubgroupUniformControlFlow;
             return true;
 
         case wgpu::FeatureName::PipelineStatisticsQuery:

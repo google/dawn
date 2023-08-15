@@ -23,6 +23,7 @@ idlgen(
     IDLS
         "${CMAKE_CURRENT_SOURCE_DIR}/Browser.idl"
         "${WEBGPU_IDL_PATH}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/DawnExtensions.idl"
     DEPENDS
         "${CMAKE_CURRENT_SOURCE_DIR}/WebGPUCommon.tmpl"
     OUTPUT
@@ -35,6 +36,7 @@ idlgen(
     IDLS
         "${CMAKE_CURRENT_SOURCE_DIR}/Browser.idl"
         "${WEBGPU_IDL_PATH}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/DawnExtensions.idl"
     DEPENDS
         "${CMAKE_CURRENT_SOURCE_DIR}/WebGPUCommon.tmpl"
     OUTPUT
