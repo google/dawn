@@ -90,7 +90,7 @@ struct Coverage {
 // Initialize() initializes the Dawn node module, registering all the WebGPU
 // types into the global object, and adding the 'create' function on the exported
 // object.
-Napi::Object Initialize(Napi::Env env, Napi::Object exports) {
+NAPI_MODULE_EXPORT Napi::Object Initialize(Napi::Env env, Napi::Object exports) {
     // Set all the Dawn procedure function pointers.
     dawnProcSetProcs(&dawn::native::GetProcs());
 
