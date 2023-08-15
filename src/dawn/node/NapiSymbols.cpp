@@ -25,12 +25,16 @@
 #error "NapiSymbols.cpp is not used on Windows"
 #endif
 
+#ifdef __clang__
 #define NAPI_SYMBOL(NAME)                                                              \
     __attribute__((weak)) void NAME() {                                                \
         UNREACHABLE(                                                                   \
             "#NAME is a weak stub, and should have been runtime replaced by the node " \
             "implementation");                                                         \
     }
+#else
+#define NAPI_SYMBOL(NAME)
+#endif
 
 extern "C" {
 // List of Napi symbols generated from the node_api_headers/symbols.js file
