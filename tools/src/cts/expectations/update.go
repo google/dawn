@@ -282,6 +282,12 @@ func (u *updater) preserveRetryOnFailures() error {
 
 			glob, err := u.qt.tree.Glob(q)
 			if err != nil {
+				if errors.As(err, &query.ErrNoDataForQuery{}) {
+					// No results for this RetryOnFailure expectation.
+					// Flaky tests might have been removed from the CTS.
+					// These expectations will be automatically removed by updater.expectation()
+					continue
+				}
 				return err
 			}
 			for _, indices := range glob {
