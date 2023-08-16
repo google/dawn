@@ -26,6 +26,7 @@ tint_add_target("utils/file"
 
 tint_target_add_dependencies("utils/file"
   "utils/ice"
+  "utils/macros"
   "utils/text"
 )
 
@@ -53,4 +54,5 @@ tint_add_target("utils/file:test"
 
 tint_target_add_dependencies("utils/file:test"
   "utils/file"
+  "utils/text"
 )

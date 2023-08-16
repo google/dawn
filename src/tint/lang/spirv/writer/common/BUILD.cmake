@@ -36,6 +36,7 @@ tint_add_target("lang/spirv/writer/common"
 )
 
 tint_target_add_dependencies("lang/spirv/writer/common"
+  "utils/macros"
   "utils/math"
   "utils/reflection"
 )
@@ -58,7 +59,22 @@ tint_add_target("lang/spirv/writer/common:test"
 )
 
 tint_target_add_dependencies("lang/spirv/writer/common:test"
+  "lang/core"
+  "lang/core/constant"
   "lang/core/type"
+  "utils/containers"
+  "utils/diagnostic"
+  "utils/ice"
+  "utils/id"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/reflection"
+  "utils/result"
+  "utils/rtti"
+  "utils/symbol"
+  "utils/text"
+  "utils/traits"
 )
 
 if (TINT_BUILD_IR)

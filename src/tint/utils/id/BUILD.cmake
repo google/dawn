@@ -27,6 +27,7 @@ tint_add_target("utils/id"
 
 tint_target_add_dependencies("utils/id"
   "utils/ice"
+  "utils/macros"
   "utils/text"
   "utils/traits"
 )

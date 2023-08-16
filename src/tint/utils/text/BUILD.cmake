@@ -31,6 +31,12 @@ tint_add_target("utils/text"
 
 tint_target_add_dependencies("utils/text"
   "utils/containers"
+  "utils/ice"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/rtti"
+  "utils/traits"
 )
 
 tint_add_target("utils/text:test"
@@ -41,6 +47,11 @@ tint_add_target("utils/text:test"
 
 tint_target_add_dependencies("utils/text:test"
   "utils/containers"
+  "utils/ice"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/rtti"
   "utils/text"
   "utils/traits"
 )

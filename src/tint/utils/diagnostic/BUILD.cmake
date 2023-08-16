@@ -63,4 +63,6 @@ tint_add_target("utils/diagnostic:test"
 
 tint_target_add_dependencies("utils/diagnostic:test"
   "utils/diagnostic"
+  "utils/text"
+  "utils/traits"
 )

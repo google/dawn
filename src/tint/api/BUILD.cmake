@@ -26,13 +26,35 @@ tint_add_target("api"
 )
 
 tint_target_add_dependencies("api"
+  "lang/core"
+  "lang/core/constant"
+  "lang/core/type"
+  "lang/hlsl/writer/common"
+  "lang/spirv/reader/common"
+  "lang/wgsl/ast"
+  "lang/wgsl/program"
   "lang/wgsl/reader"
+  "lang/wgsl/sem"
   "lang/wgsl/writer"
+  "utils/containers"
+  "utils/diagnostic"
+  "utils/ice"
+  "utils/id"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/reflection"
+  "utils/result"
+  "utils/rtti"
+  "utils/symbol"
+  "utils/text"
+  "utils/traits"
 )
 
 if (TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies("api"
     "lang/glsl/writer"
+    "lang/glsl/writer/common"
   )
 endif(TINT_BUILD_GLSL_WRITER)
 
@@ -45,6 +67,7 @@ endif(TINT_BUILD_HLSL_WRITER)
 if (TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies("api"
     "lang/msl/writer"
+    "lang/msl/writer/common"
   )
 endif(TINT_BUILD_MSL_WRITER)
 
@@ -57,5 +80,6 @@ endif(TINT_BUILD_SPV_READER)
 if (TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies("api"
     "lang/spirv/writer"
+    "lang/spirv/writer/common"
   )
 endif(TINT_BUILD_SPV_WRITER)

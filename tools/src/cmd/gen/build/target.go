@@ -31,10 +31,8 @@ type Target struct {
 	Directory *Directory
 	// All project-relative paths of source files that are part of this target
 	SourceFileSet container.Set[string]
-	// Target names of all dependencies of this target
-	DependencyNames container.Set[TargetName]
-	// All external dependencies used by this target
-	ExternalDependencyMap container.Map[ExternalDependencyName, ExternalDependency]
+	// Dependencies of this target
+	Dependencies *Dependencies
 	// An optional condition for building this target
 	Condition string
 }
@@ -42,6 +40,7 @@ type Target struct {
 // AddSourceFile adds the File to the target's source set
 func (t *Target) AddSourceFile(f *File) {
 	t.SourceFileSet.Add(f.Path())
+	f.Target = t
 }
 
 // SourceFiles returns the sorted list of the target's source files
@@ -56,57 +55,6 @@ func (t *Target) SourceFiles() []*File {
 // SourceFiles returns the sorted list of the target's source files that have no build condition
 func (t *Target) UnconditionalSourceFiles() []*File {
 	return transform.Filter(t.SourceFiles(), func(t *File) bool { return t.Condition == "" })
-}
-
-// AddDependency adds dep to this target's list of dependencies
-func (t *Target) AddDependency(dep *Target) {
-	if dep != t {
-		t.DependencyNames.Add(dep.Name)
-	}
-}
-
-// AddExternalDependency adds the external dependency with the given name to this target's list of
-// external dependencies with the given condition
-func (t *Target) AddExternalDependency(name ExternalDependencyName, condition string) {
-	if existing, ok := t.ExternalDependencyMap[name]; ok && existing.Condition != condition {
-		panic("external dependency added twice with different conditions")
-	}
-	t.ExternalDependencyMap.Add(name, ExternalDependency{Name: name, Condition: condition})
-}
-
-// Dependencies returns the sorted list of dependencies of this target
-func (t *Target) Dependencies() []*Target {
-	out := make([]*Target, len(t.DependencyNames))
-	for i, name := range t.DependencyNames.List() {
-		out[i] = t.Directory.Project.Targets[name]
-	}
-	return out
-}
-
-// UnconditionalDependencies returns the sorted list of dependencies that have no build condition.
-func (t *Target) UnconditionalDependencies() []*Target {
-	return transform.Filter(t.Dependencies(), func(t *Target) bool { return t.Condition == "" })
-}
-
-// ExternalDependencies returns the sorted list of external dependencies.
-func (t *Target) ExternalDependencies() []ExternalDependency {
-	out := make([]ExternalDependency, 0, len(t.ExternalDependencyMap))
-	for _, name := range t.ExternalDependencyMap.Keys() {
-		out = append(out, t.ExternalDependencyMap[name])
-	}
-	return out
-}
-
-// ConditionalExternalDependencies returns the sorted list of external dependencies that have a
-// build condition.
-func (t *Target) ConditionalExternalDependencies() []ExternalDependency {
-	return transform.Filter(t.ExternalDependencies(), func(t ExternalDependency) bool { return t.Condition != "" })
-}
-
-// ConditionalExternalDependencies returns the sorted list of external dependencies that have no
-// build condition.
-func (t *Target) UnconditionalExternalDependencies() []ExternalDependency {
-	return transform.Filter(t.ExternalDependencies(), func(t ExternalDependency) bool { return t.Condition == "" })
 }
 
 // A collection of source files and dependencies sharing the same condition
@@ -129,7 +77,7 @@ func (t *Target) Conditionals() []*TargetConditional {
 			c.SourceFiles = append(c.SourceFiles, file)
 		}
 	}
-	for name := range t.DependencyNames {
+	for name := range t.Dependencies.internal {
 		dep := t.Directory.Project.Targets[name]
 		if dep.Condition != "" {
 			c := m.GetOrCreate(dep.Condition, func() *TargetConditional {
@@ -138,7 +86,8 @@ func (t *Target) Conditionals() []*TargetConditional {
 			c.InternalDependencies = append(c.InternalDependencies, dep)
 		}
 	}
-	for _, dep := range t.ExternalDependencyMap {
+	for name := range t.Dependencies.external {
+		dep := t.Directory.Project.externals[name]
 		if dep.Condition != "" {
 			c := m.GetOrCreate(dep.Condition, func() *TargetConditional {
 				return &TargetConditional{Condition: dep.Condition}

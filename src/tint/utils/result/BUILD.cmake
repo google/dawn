@@ -27,6 +27,7 @@ tint_add_target("utils/result"
 
 tint_target_add_dependencies("utils/result"
   "utils/ice"
+  "utils/macros"
   "utils/text"
   "utils/traits"
 )
@@ -36,5 +37,9 @@ tint_add_target("utils/result:test"
 )
 
 tint_target_add_dependencies("utils/result:test"
+  "utils/ice"
+  "utils/macros"
   "utils/result"
+  "utils/text"
+  "utils/traits"
 )

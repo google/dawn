@@ -38,5 +38,6 @@ tint_add_target("utils/memory:test"
 )
 
 tint_target_add_dependencies("utils/memory:test"
+  "utils/math"
   "utils/memory"
 )

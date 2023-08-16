@@ -31,17 +31,37 @@ tint_add_target("lang/msl/writer/common"
 tint_target_add_dependencies("lang/msl/writer/common"
   "lang/core"
   "lang/core/type"
+  "utils/containers"
   "utils/ice"
+  "utils/id"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
   "utils/reflection"
   "utils/rtti"
   "utils/strconv"
+  "utils/symbol"
   "utils/text"
+  "utils/traits"
 )
 
 endif(TINT_BUILD_MSL_WRITER)
 if(TINT_BUILD_MSL_WRITER)
 tint_add_target("lang/msl/writer/common:test"
   lang/msl/writer/common/printer_support_test.cc
+)
+
+tint_target_add_dependencies("lang/msl/writer/common:test"
+  "lang/core"
+  "lang/core/type"
+  "utils/containers"
+  "utils/ice"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/rtti"
+  "utils/text"
+  "utils/traits"
 )
 
 if (TINT_BUILD_MSL_WRITER)

@@ -32,6 +32,7 @@ tint_target_add_dependencies("utils/strconv"
   "utils/macros"
   "utils/result"
   "utils/text"
+  "utils/traits"
 )
 
 tint_target_add_external_dependencies("utils/strconv"

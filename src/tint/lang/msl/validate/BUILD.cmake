@@ -27,10 +27,26 @@ tint_add_target("lang/msl/validate"
 )
 
 tint_target_add_dependencies("lang/msl/validate"
+  "lang/core"
+  "lang/core/constant"
+  "lang/core/type"
   "lang/wgsl/ast"
   "lang/wgsl/program"
+  "lang/wgsl/sem"
   "utils/command"
+  "utils/containers"
+  "utils/diagnostic"
   "utils/file"
+  "utils/ice"
+  "utils/id"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/result"
+  "utils/rtti"
+  "utils/symbol"
+  "utils/text"
+  "utils/traits"
 )
 
 endif(TINT_BUILD_MSL_WRITER)

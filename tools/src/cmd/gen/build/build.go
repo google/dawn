@@ -78,6 +78,7 @@ func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
 		{"populating source files", populateSourceFiles},
 		{"scanning source files", scanSourceFiles},
 		{"loading directory configs", applyDirectoryConfigs},
+		{"building dependencies", buildDependencies},
 		{"checking for cycles", checkForCycles},
 		{"emitting build files", emitBuildFiles},
 	} {
@@ -124,10 +125,11 @@ func loadExternals(p *Project) error {
 		if err != nil {
 			return fmt.Errorf("'externals.json' matcher error: %w", err)
 		}
-		p.externals = append(p.externals, projectExternalDependency{
-			name:                ExternalDependencyName(name),
+		name := ExternalDependencyName(name)
+		p.externals.Add(name, ExternalDependency{
+			Name:                name,
+			Condition:           external.Condition,
 			includePatternMatch: match,
-			condition:           external.Condition,
 		})
 	}
 
@@ -172,12 +174,6 @@ func populateSourceFiles(p *Project) error {
 // * #includes to build a dependencies between targets
 // * 'GEN_BUILD:' directives
 func scanSourceFiles(p *Project) error {
-	// Include describes a #include in a source file
-	type Include struct {
-		path string
-		line int
-	}
-
 	// ParsedFile describes all the includes and conditions found in a source file
 	type ParsedFile struct {
 		conditions []string
@@ -228,37 +224,7 @@ func scanSourceFiles(p *Project) error {
 					}
 				}
 
-				// Resolve includes, and add dependencies to the targets
-				for _, include := range parsed.includes {
-					if strings.HasPrefix(include.path, srcTint) {
-						// #include "src/tint/..."
-						include.path = include.path[len(srcTint)+1:] // Strip 'src/tint/'
-
-						includeFile := p.File(include.path)
-						if includeFile == nil {
-							return fmt.Errorf(`%v:%v includes non-existent file '%v'`, file.Path(), include.line, include.path)
-						}
-
-						dependencyKind := targetKindFromFilename(include.path)
-						if dependencyKind == targetInvalid {
-							return fmt.Errorf(`%v:%v unknown target type for include '%v'`, file.Path(), include.line, includeFile.Path())
-						}
-						if target.Kind == targetLib && dependencyKind == targetTest {
-							return fmt.Errorf(`%v:%v lib target must not include test code '%v'`, file.Path(), include.line, includeFile.Path())
-						}
-
-						if dependency := p.Target(includeFile.Directory, dependencyKind); dependency != nil {
-							target.AddDependency(dependency)
-						}
-					} else {
-						// Check for external includes
-						for _, external := range p.externals {
-							if external.includePatternMatch(include.path) {
-								target.AddExternalDependency(external.name, external.condition)
-							}
-						}
-					}
-				}
+				file.Includes = append(file.Includes, parsed.includes...)
 			}
 		}
 	}
@@ -332,13 +298,113 @@ func applyDirectoryConfigs(p *Project) error {
 				}
 				target := p.AddTarget(dir, tc.kind)
 				for _, dep := range additionalDeps {
-					target.AddDependency(dep)
+					if dep != target {
+						target.Dependencies.AddInternal(dep)
+					}
 				}
 			}
 		}
 	}
 
 	return nil
+}
+
+// buildDependencies walks all the #includes in all files, building the dependency information for
+// all targets and files in the project. Errors if any cyclic includes are found.
+func buildDependencies(p *Project) error {
+	type state int
+	const (
+		unvisited state = iota
+		visiting
+		checked
+	)
+
+	cache := container.NewMap[string, state]()
+
+	type FileInclude struct {
+		file string
+		inc  Include
+	}
+
+	var walk func(file *File, route []FileInclude) error
+	walk = func(file *File, route []FileInclude) error {
+		// Adds the dependency to the file and target's list of internal dependencies
+		addInternalDependency := func(dep *Target) {
+			file.TransitiveDependencies.AddInternal(dep)
+			if file.Target != dep {
+				file.Target.Dependencies.AddInternal(dep)
+			}
+		}
+		// Adds the dependency to the file and target's list of external dependencies
+		addExternalDependency := func(dep ExternalDependency) {
+			file.TransitiveDependencies.AddExternal(dep)
+			file.Target.Dependencies.AddExternal(dep)
+		}
+
+		filePath := file.Path()
+		switch cache[filePath] {
+		case unvisited:
+			cache[filePath] = visiting
+
+			for _, include := range file.Includes {
+				if strings.HasPrefix(include.Path, srcTint) {
+					// #include "src/tint/..."
+					path := include.Path[len(srcTint)+1:] // Strip 'src/tint/'
+
+					includeFile := p.File(path)
+					if includeFile == nil {
+						return fmt.Errorf(`%v:%v includes non-existent file '%v'`, file.Path(), include.Line, path)
+					}
+
+					if file.Target.Kind == targetLib && includeFile.Target.Kind != targetLib {
+						return fmt.Errorf(`%v:%v lib target must not include %v target`, file.Path(), include.Line, includeFile.Target.Kind)
+					}
+
+					addInternalDependency(includeFile.Target)
+
+					// Gather the dependencies for the included file
+					if err := walk(includeFile, append(route, FileInclude{file: file.Path(), inc: include})); err != nil {
+						return err
+					}
+
+					for _, dependency := range includeFile.TransitiveDependencies.Internal() {
+						addInternalDependency(dependency)
+					}
+					for _, dependency := range includeFile.TransitiveDependencies.External() {
+						addExternalDependency(dependency)
+					}
+
+				} else {
+					// Check for external includes
+					for _, external := range p.externals.Values() {
+						if external.includePatternMatch(include.Path) {
+							addExternalDependency(external)
+						}
+					}
+				}
+
+			}
+
+			cache[filePath] = checked
+
+		case visiting:
+			err := strings.Builder{}
+			fmt.Fprintln(&err, "cyclic include found:")
+			for _, include := range route {
+				fmt.Fprintf(&err, "  %v:%v includes '%v'\n", include.file, include.inc.Line, include.inc.Path)
+			}
+			return fmt.Errorf(err.String())
+		}
+		return nil
+	}
+
+	for _, file := range p.Files.Values() {
+		if err := walk(file, []FileInclude{}); err != nil {
+			return err
+		}
+	}
+	return nil
+
 }
 
 // checkForCycles ensures that the graph of target dependencies are acyclic (a DAG)
@@ -357,7 +423,7 @@ func checkForCycles(p *Project) error {
 		switch cache[t.Name] {
 		case unvisited:
 			cache[t.Name] = visiting
-			for _, dep := range t.Dependencies() {
+			for _, dep := range t.Dependencies.Internal() {
 				if err := walk(dep, append(path, dep.Name)); err != nil {
 					return err
 				}
@@ -518,8 +584,8 @@ func emitDotFile(p *Project, kind TargetKind) error {
 		nodes.Add(target.Name, g.AddNode(string(target.Name)))
 	}
 	for _, target := range targets {
-		for _, dep := range target.DependencyNames.List() {
-			g.AddEdge(nodes[target.Name], nodes[dep], "")
+		for _, dep := range target.Dependencies.Internal() {
+			g.AddEdge(nodes[target.Name], nodes[dep.Name], "")
 		}
 	}
 

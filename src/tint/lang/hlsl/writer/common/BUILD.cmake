@@ -26,5 +26,6 @@ tint_add_target("lang/hlsl/writer/common"
 )
 
 tint_target_add_dependencies("lang/hlsl/writer/common"
+  "utils/macros"
   "utils/reflection"
 )

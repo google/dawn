@@ -34,12 +34,32 @@ tint_add_target("lang/msl/writer"
 )
 
 tint_target_add_dependencies("lang/msl/writer"
+  "lang/core"
+  "lang/core/constant"
+  "lang/core/type"
   "lang/msl/writer/raise"
+  "lang/wgsl/ast"
+  "lang/wgsl/program"
+  "lang/wgsl/sem"
+  "utils/containers"
+  "utils/diagnostic"
+  "utils/generator"
+  "utils/ice"
+  "utils/id"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/reflection"
   "utils/result"
+  "utils/rtti"
+  "utils/symbol"
+  "utils/text"
+  "utils/traits"
 )
 
 if (TINT_BUILD_IR)
   tint_target_add_dependencies("lang/msl/writer"
+    "lang/core/ir"
     "lang/wgsl/reader/program_to_ir"
   )
 endif(TINT_BUILD_IR)
@@ -65,13 +85,31 @@ tint_add_target("lang/msl/writer:bench"
 
 tint_target_add_dependencies("lang/msl/writer:bench"
   "cmd/bench"
+  "lang/core"
+  "lang/core/constant"
+  "lang/core/type"
   "lang/wgsl/ast"
+  "lang/wgsl/program"
   "lang/wgsl/sem"
+  "utils/containers"
+  "utils/diagnostic"
+  "utils/ice"
+  "utils/id"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/reflection"
+  "utils/result"
+  "utils/rtti"
+  "utils/symbol"
+  "utils/text"
+  "utils/traits"
 )
 
 if (TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies("lang/msl/writer:bench"
     "lang/msl/writer"
+    "lang/msl/writer/common"
   )
 endif(TINT_BUILD_MSL_WRITER)
 

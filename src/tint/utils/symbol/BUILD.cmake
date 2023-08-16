@@ -31,7 +31,12 @@ tint_target_add_dependencies("utils/symbol"
   "utils/containers"
   "utils/ice"
   "utils/id"
+  "utils/macros"
+  "utils/math"
   "utils/memory"
+  "utils/rtti"
+  "utils/text"
+  "utils/traits"
 )
 
 tint_add_target("utils/symbol:test"
@@ -40,5 +45,14 @@ tint_add_target("utils/symbol:test"
 )
 
 tint_target_add_dependencies("utils/symbol:test"
+  "utils/containers"
+  "utils/ice"
+  "utils/id"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/rtti"
   "utils/symbol"
+  "utils/text"
+  "utils/traits"
 )

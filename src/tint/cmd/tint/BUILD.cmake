@@ -27,22 +27,41 @@ tint_add_target("cmd/tint:cmd"
 tint_target_add_dependencies("cmd/tint:cmd"
   "api"
   "cmd/common"
+  "lang/core"
+  "lang/core/constant"
+  "lang/core/type"
+  "lang/hlsl/writer/common"
+  "lang/spirv/reader/common"
   "lang/wgsl/ast"
   "lang/wgsl/ast/transform"
   "lang/wgsl/helpers"
+  "lang/wgsl/inspector"
+  "lang/wgsl/program"
   "lang/wgsl/reader"
+  "lang/wgsl/sem"
   "lang/wgsl/writer"
   "utils/cli"
   "utils/command"
   "utils/containers"
   "utils/diagnostic"
+  "utils/ice"
+  "utils/id"
   "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/reflection"
+  "utils/result"
+  "utils/rtti"
+  "utils/strconv"
+  "utils/symbol"
   "utils/text"
+  "utils/traits"
 )
 
 if (TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies("cmd/tint:cmd"
     "lang/glsl/writer"
+    "lang/glsl/writer/common"
   )
   tint_target_add_external_dependencies("cmd/tint:cmd"
     "glslang"
@@ -68,6 +87,7 @@ if (TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies("cmd/tint:cmd"
     "lang/msl/validate"
     "lang/msl/writer"
+    "lang/msl/writer/common"
   )
 endif(TINT_BUILD_MSL_WRITER)
 
@@ -86,5 +106,6 @@ endif(TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
 if (TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies("cmd/tint:cmd"
     "lang/spirv/writer"
+    "lang/spirv/writer/common"
   )
 endif(TINT_BUILD_SPV_WRITER)

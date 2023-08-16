@@ -34,5 +34,6 @@ tint_add_target("utils/reflection:test"
 )
 
 tint_target_add_dependencies("utils/reflection:test"
+  "utils/macros"
   "utils/reflection"
 )

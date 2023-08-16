@@ -14,6 +14,8 @@
 
 package build
 
+import "dawn.googlesource.com/dawn/tools/src/match"
+
 // ExternalDependency describes a dependency on an external library
 type ExternalDependency struct {
 	// Name of the library.
@@ -21,6 +23,8 @@ type ExternalDependency struct {
 	Name ExternalDependencyName
 	// The optional condition for using this dependency
 	Condition string
+	// Include file pattern matcher
+	includePatternMatch match.Test
 }
 
 // Name of an external dependency

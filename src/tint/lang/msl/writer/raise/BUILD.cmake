@@ -26,5 +26,9 @@ tint_add_target("lang/msl/writer/raise"
 )
 
 tint_target_add_dependencies("lang/msl/writer/raise"
+  "utils/ice"
+  "utils/macros"
   "utils/result"
+  "utils/text"
+  "utils/traits"
 )

@@ -32,9 +32,26 @@ tint_add_target("lang/glsl/writer"
 )
 
 tint_target_add_dependencies("lang/glsl/writer"
+  "lang/core"
+  "lang/core/constant"
+  "lang/core/type"
   "lang/wgsl/ast"
   "lang/wgsl/ast/transform"
+  "lang/wgsl/program"
+  "lang/wgsl/sem"
+  "utils/containers"
+  "utils/diagnostic"
+  "utils/generator"
+  "utils/ice"
+  "utils/id"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
   "utils/result"
+  "utils/rtti"
+  "utils/symbol"
+  "utils/text"
+  "utils/traits"
 )
 
 if (TINT_BUILD_GLSL_WRITER)
@@ -52,12 +69,30 @@ tint_add_target("lang/glsl/writer:bench"
 
 tint_target_add_dependencies("lang/glsl/writer:bench"
   "cmd/bench"
+  "lang/core"
+  "lang/core/constant"
+  "lang/core/type"
   "lang/wgsl/ast"
+  "lang/wgsl/program"
+  "lang/wgsl/sem"
+  "utils/containers"
+  "utils/diagnostic"
+  "utils/ice"
+  "utils/id"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/result"
+  "utils/rtti"
+  "utils/symbol"
+  "utils/text"
+  "utils/traits"
 )
 
 if (TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies("lang/glsl/writer:bench"
     "lang/glsl/writer"
+    "lang/glsl/writer/common"
   )
 endif(TINT_BUILD_GLSL_WRITER)
 

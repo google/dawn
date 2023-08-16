@@ -29,8 +29,15 @@ tint_add_target("lang/hlsl/validate"
 tint_target_add_dependencies("lang/hlsl/validate"
   "lang/wgsl/ast"
   "utils/command"
+  "utils/containers"
   "utils/file"
+  "utils/ice"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/rtti"
   "utils/text"
+  "utils/traits"
 )
 
 endif(TINT_BUILD_HLSL_WRITER)

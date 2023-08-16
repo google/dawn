@@ -43,10 +43,21 @@ tint_add_target("lang/core/ir/transform"
 )
 
 tint_target_add_dependencies("lang/core/ir/transform"
+  "lang/core"
+  "lang/core/constant"
   "lang/core/type"
+  "utils/containers"
+  "utils/diagnostic"
   "utils/ice"
+  "utils/id"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
   "utils/result"
+  "utils/rtti"
+  "utils/symbol"
   "utils/text"
+  "utils/traits"
 )
 
 if (TINT_BUILD_IR)
@@ -70,7 +81,21 @@ tint_add_target("lang/core/ir/transform:test"
 )
 
 tint_target_add_dependencies("lang/core/ir/transform:test"
+  "lang/core"
+  "lang/core/constant"
   "lang/core/type"
+  "utils/containers"
+  "utils/diagnostic"
+  "utils/ice"
+  "utils/id"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/result"
+  "utils/rtti"
+  "utils/symbol"
+  "utils/text"
+  "utils/traits"
 )
 
 if (TINT_BUILD_IR)

@@ -39,7 +39,11 @@ tint_add_target("utils/rtti:test"
 )
 
 tint_target_add_dependencies("utils/rtti:test"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
   "utils/rtti"
+  "utils/traits"
 )
 
 tint_add_target("utils/rtti:bench"
@@ -47,5 +51,9 @@ tint_add_target("utils/rtti:bench"
 )
 
 tint_target_add_dependencies("utils/rtti:bench"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
   "utils/rtti"
+  "utils/traits"
 )

@@ -16,14 +16,26 @@ package build
 
 import "path"
 
+// Include describes a single #include in a file
+type Include struct {
+	Path string
+	Line int
+}
+
 // File holds information about a source file
 type File struct {
 	// The directory that holds this source file
 	Directory *Directory
+	// The target that this source file belongs to
+	Target *Target
 	// The name of the file
 	Name string
 	// An optional condition used to build this source file
 	Condition string
+	// All the #include made by this file
+	Includes []Include
+	// All the transitive dependencies of this file
+	TransitiveDependencies *Dependencies
 }
 
 // Path returns the project-relative path of the file

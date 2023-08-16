@@ -40,11 +40,21 @@ tint_add_target("lang/spirv/writer/raise"
 
 tint_target_add_dependencies("lang/spirv/writer/raise"
   "lang/core"
+  "lang/core/constant"
   "lang/core/type"
   "utils/containers"
+  "utils/diagnostic"
   "utils/ice"
+  "utils/id"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/reflection"
   "utils/result"
   "utils/rtti"
+  "utils/symbol"
+  "utils/text"
+  "utils/traits"
 )
 
 if (TINT_BUILD_IR)
@@ -78,11 +88,26 @@ tint_add_target("lang/spirv/writer/raise:test"
 )
 
 tint_target_add_dependencies("lang/spirv/writer/raise:test"
+  "lang/core"
+  "lang/core/constant"
   "lang/core/type"
+  "utils/containers"
+  "utils/diagnostic"
+  "utils/ice"
+  "utils/id"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/result"
+  "utils/rtti"
+  "utils/symbol"
+  "utils/text"
+  "utils/traits"
 )
 
 if (TINT_BUILD_IR)
   tint_target_add_dependencies("lang/spirv/writer/raise:test"
+    "lang/core/ir"
     "lang/core/ir/transform:test"
   )
 endif(TINT_BUILD_IR)

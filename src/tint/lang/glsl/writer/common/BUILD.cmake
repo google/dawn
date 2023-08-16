@@ -30,6 +30,8 @@ tint_add_target("lang/glsl/writer/common"
 tint_target_add_dependencies("lang/glsl/writer/common"
   "lang/core"
   "lang/wgsl/sem"
+  "utils/text"
+  "utils/traits"
 )
 
 endif(TINT_BUILD_GLSL_WRITER)

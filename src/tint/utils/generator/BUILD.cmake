@@ -29,5 +29,7 @@ tint_target_add_dependencies("utils/generator"
   "utils/containers"
   "utils/diagnostic"
   "utils/ice"
+  "utils/macros"
   "utils/text"
+  "utils/traits"
 )

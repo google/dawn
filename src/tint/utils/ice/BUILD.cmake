@@ -36,4 +36,5 @@ tint_add_target("utils/ice:test"
 
 tint_target_add_dependencies("utils/ice:test"
   "utils/ice"
+  "utils/macros"
 )

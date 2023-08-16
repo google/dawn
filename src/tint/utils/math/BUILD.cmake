@@ -35,5 +35,10 @@ tint_add_target("utils/math:test"
 
 tint_target_add_dependencies("utils/math:test"
   "utils/containers"
+  "utils/ice"
+  "utils/macros"
   "utils/math"
+  "utils/memory"
+  "utils/rtti"
+  "utils/traits"
 )

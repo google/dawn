@@ -22,7 +22,6 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/gen/common"
 	"dawn.googlesource.com/dawn/tools/src/container"
-	"dawn.googlesource.com/dawn/tools/src/match"
 )
 
 // Project holds information about all the directories, targets and source files
@@ -39,17 +38,7 @@ type Project struct {
 	// A map of target name to target.
 	Targets container.Map[TargetName, *Target]
 	// A list of external project dependencies used by the project
-	externals []projectExternalDependency
-}
-
-// projectExternalDependency describes an external dependency of a Project
-type projectExternalDependency struct {
-	// name of the external dependency
-	name ExternalDependencyName
-	// include matcher
-	includePatternMatch match.Test
-	// condition of the dependency
-	condition string
+	externals container.Map[ExternalDependencyName, ExternalDependency]
 }
 
 // NewProject returns a newly initialized Project
@@ -60,6 +49,7 @@ func NewProject(root string, cfg *common.Config) *Project {
 		Files:       container.NewMap[string, *File](),
 		Directories: container.NewMap[string, *Directory](),
 		Targets:     container.NewMap[TargetName, *Target](),
+		externals:   container.NewMap[ExternalDependencyName, ExternalDependency](),
 	}
 }
 
@@ -68,8 +58,9 @@ func (p *Project) AddFile(file string) *File {
 	return p.Files.GetOrCreate(file, func() *File {
 		dir, name := path.Split(file)
 		return &File{
-			Directory: p.Directory(dir),
-			Name:      name,
+			Directory:              p.Directory(dir),
+			Name:                   name,
+			TransitiveDependencies: NewDependencies(p),
 		}
 	})
 }
@@ -84,12 +75,11 @@ func (p *Project) AddTarget(dir *Directory, kind TargetKind) *Target {
 	name := p.TargetName(dir, kind)
 	return p.Targets.GetOrCreate(name, func() *Target {
 		t := &Target{
-			Name:                  name,
-			Directory:             dir,
-			Kind:                  kind,
-			SourceFileSet:         container.NewSet[string](),
-			DependencyNames:       container.NewSet[TargetName](),
-			ExternalDependencyMap: container.NewMap[ExternalDependencyName, ExternalDependency](),
+			Name:          name,
+			Directory:     dir,
+			Kind:          kind,
+			SourceFileSet: container.NewSet[string](),
+			Dependencies:  NewDependencies(p),
 		}
 		dir.TargetNames.Add(name)
 		p.Targets.Add(name, t)

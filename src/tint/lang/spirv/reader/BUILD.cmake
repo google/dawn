@@ -30,8 +30,25 @@ tint_add_target("lang/spirv/reader"
 )
 
 tint_target_add_dependencies("lang/spirv/reader"
+  "lang/core"
+  "lang/core/constant"
+  "lang/core/type"
   "lang/spirv/reader/common"
+  "lang/wgsl/ast"
   "lang/wgsl/program"
+  "lang/wgsl/sem"
+  "utils/containers"
+  "utils/diagnostic"
+  "utils/ice"
+  "utils/id"
+  "utils/macros"
+  "utils/math"
+  "utils/memory"
+  "utils/result"
+  "utils/rtti"
+  "utils/symbol"
+  "utils/text"
+  "utils/traits"
 )
 
 if (TINT_BUILD_SPV_READER)
