@@ -178,19 +178,6 @@ if(TINT_ENABLE_BREAK_IN_DEBUGGER)
     PROPERTIES COMPILE_DEFINITIONS "TINT_ENABLE_BREAK_IN_DEBUGGER=1" )
 endif()
 
-# If we're building on mac / ios and we have CoreGraphics, then we can use the
-# metal API to validate our shaders. This is roughly 4x faster than invoking
-# the metal shader compiler executable.
-if(APPLE)
-  find_library(LIB_CORE_GRAPHICS CoreGraphics)
-  if(LIB_CORE_GRAPHICS)
-    target_sources(tint_val PRIVATE "lang/msl/validate/msl_metal.mm")
-    target_compile_definitions(tint_val PUBLIC "-DTINT_ENABLE_MSL_VALIDATION_USING_METAL_API=1")
-    target_compile_options(tint_val PRIVATE "-fmodules" "-fcxx-modules")
-    target_link_options(tint_val PUBLIC "-framework" "CoreGraphics")
-  endif()
-endif()
-
 ################################################################################
 # Tests
 ################################################################################
@@ -577,6 +564,19 @@ endfunction()
 # Include the generated build files
 ################################################################################
 include("BUILD.cmake")
+
+# If we're building on mac / ios and we have CoreGraphics, then we can use the
+# metal API to validate our shaders. This is roughly 4x faster than invoking
+# the metal shader compiler executable.
+if(APPLE AND TINT_BUILD_MSL_WRITER)
+  find_library(LIB_CORE_GRAPHICS CoreGraphics)
+  if(LIB_CORE_GRAPHICS)
+    target_sources("tint_lang_msl_validate" PRIVATE "lang/msl/validate/msl_metal.mm")
+    target_compile_definitions("tint_lang_msl_validate" PUBLIC "-DTINT_ENABLE_MSL_VALIDATION_USING_METAL_API=1")
+    target_compile_options("tint_lang_msl_validate" PRIVATE "-fmodules" "-fcxx-modules")
+    target_link_options("tint_lang_msl_validate" PUBLIC "-framework" "CoreGraphics")
+  endif()
+endif()
 
 ################################################################################
 # Tint aliases
