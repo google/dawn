@@ -23,25 +23,6 @@ void TintInternalCompilerErrorReporter(const tint::InternalCompilerError& err) {
     FAIL() << err.Error();
 }
 
-struct Flags {
-    bool spirv_reader_dump_converted = false;
-
-    bool parse(int argc, char** argv) {
-        bool errored = false;
-        for (int i = 1; i < argc && !errored; i++) {
-            auto match = [&](std::string name) { return name == argv[i]; };
-
-            if (match("--dump-spirv")) {
-                spirv_reader_dump_converted = true;
-            } else {
-                std::cout << "Unknown flag '" << argv[i] << "'" << std::endl;
-                return false;
-            }
-        }
-        return true;
-    }
-};
-
 }  // namespace
 
 // Entry point for tint unit tests
@@ -49,11 +30,6 @@ int main(int argc, char** argv) {
     testing::InitGoogleMock(&argc, argv);
 
     tint::Initialize();
-
-    Flags flags;
-    if (!flags.parse(argc, argv)) {
-        return -1;
-    }
 
     tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
 

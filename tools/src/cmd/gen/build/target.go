@@ -33,6 +33,8 @@ type Target struct {
 	SourceFileSet container.Set[string]
 	// Dependencies of this target
 	Dependencies *Dependencies
+	// An optional custom output name for the target
+	OutputName string
 	// An optional condition for building this target
 	Condition string
 }

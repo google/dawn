@@ -14,6 +14,8 @@
 
 package build
 
+import "strings"
+
 // TargetKind is an enumerator of target kinds
 type TargetKind string
 
@@ -26,6 +28,10 @@ const (
 	targetBench TargetKind = "bench"
 	// An executable target.
 	targetCmd TargetKind = "cmd"
+	// A test executable target.
+	targetTestCmd TargetKind = "test_cmd"
+	// A benchmark executable target.
+	targetBenchCmd TargetKind = "bench_cmd"
 	// An invalid target.
 	targetInvalid TargetKind = "<invalid>"
 )
@@ -36,4 +42,25 @@ var AllTargetKinds = []TargetKind{
 	targetTest,
 	targetBench,
 	targetCmd,
+	targetTestCmd,
+	targetBenchCmd,
+}
+
+// targetKindFromFilename returns the target kind my pattern matching the filename
+func targetKindFromFilename(filename string) TargetKind {
+	switch {
+	case filename == "main_test.cc":
+		return targetTestCmd
+	case filename == "main_bench.cc":
+		return targetBenchCmd
+	case strings.HasSuffix(filename, "_test.cc"), strings.HasSuffix(filename, "_test.h"):
+		return targetTest
+	case strings.HasSuffix(filename, "_bench.cc"), strings.HasSuffix(filename, "_bench.h"):
+		return targetBench
+	case filename == "main.cc":
+		return targetCmd
+	case strings.HasSuffix(filename, ".cc"), strings.HasSuffix(filename, ".h"):
+		return targetLib
+	}
+	return targetInvalid
 }

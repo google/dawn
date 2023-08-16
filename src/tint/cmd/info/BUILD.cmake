@@ -56,3 +56,5 @@ if (TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
     "spirv-tools"
   )
 endif(TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
+
+tint_target_set_output_name("cmd/info:cmd" "tint_info")

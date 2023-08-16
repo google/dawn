@@ -1,6 +1,8 @@
 {{- Eval "Includes"         $}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "lib")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "cmd")}}
+{{- Eval "TargetIfNotEmpty" ($.Project.Target $ "test_cmd")}}
+{{- Eval "TargetIfNotEmpty" ($.Project.Target $ "bench_cmd")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "test")}}
 {{- Eval "TargetIfNotEmpty" ($.Project.Target $ "bench")}}
 
@@ -99,6 +101,11 @@ if ({{Eval "Expression" $Cond.Condition}})
   )
 {{-     end}}
 endif({{Eval "Expression" $Cond.Condition}})
+{{-   end}}
+
+{{-   if $.OutputName}}
+{{/*   newline */}}
+tint_target_set_output_name("{{$.Name}}" "{{$.OutputName}}")
 {{-   end}}
 {{/*   newline */}}
 {{-   if $.Condition}}

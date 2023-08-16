@@ -234,24 +234,6 @@ func scanSourceFiles(p *Project) error {
 // applyDirectoryConfigs loads a 'BUILD.cfg' file in each source directory (if found), and
 // applies the config to the Directory and/or Targets.
 func applyDirectoryConfigs(p *Project) error {
-	// Config for a single target of a directory
-	type TargetConfig struct {
-		AdditionalDependencies []string
-	}
-	// Config for a directory
-	type DirectoryConfig struct {
-		// Condition for all targets in the directory
-		Condition string
-		// Configuration for the 'lib' target
-		Lib TargetConfig
-		// Configuration for the 'test' target
-		Test TargetConfig
-		// Configuration for the 'bench' target
-		Bench TargetConfig
-		// Configuration for the 'cmd' target
-		Cmd TargetConfig
-	}
-
 	// For each directory in the project...
 	for _, dir := range p.Directories.Values() {
 		path := path.Join(dir.AbsPath(), "BUILD.cfg")
@@ -276,11 +258,24 @@ func applyDirectoryConfigs(p *Project) error {
 			cfg  *TargetConfig
 			kind TargetKind
 		}{
-			{&cfg.Lib, targetLib},
-			{&cfg.Test, targetTest},
-			{&cfg.Bench, targetBench},
-			{&cfg.Cmd, targetCmd},
+			{cfg.Lib, targetLib},
+			{cfg.Test, targetTest},
+			{cfg.TestCmd, targetTestCmd},
+			{cfg.Bench, targetBench},
+			{cfg.BenchCmd, targetBenchCmd},
+			{cfg.Cmd, targetCmd},
 		} {
+			if tc.cfg == nil {
+				continue
+			}
+			target := p.Target(dir, tc.kind)
+			if target == nil {
+				return fmt.Errorf("%v: no files for target %v", path, tc.kind)
+			}
+
+			// Apply any custom output name
+			target.OutputName = tc.cfg.OutputName
+
 			// Add any additional dependencies
 			for _, depPattern := range tc.cfg.AdditionalDependencies {
 				match, err := match.New(depPattern)
@@ -296,7 +291,6 @@ func applyDirectoryConfigs(p *Project) error {
 				if len(additionalDeps) == 0 {
 					return fmt.Errorf("%v: %v.AdditionalDependencies '%v' did not match any targets", path, tc.kind, depPattern)
 				}
-				target := p.AddTarget(dir, tc.kind)
 				for _, dep := range additionalDeps {
 					if dep != target {
 						target.Dependencies.AddInternal(dep)
@@ -553,21 +547,6 @@ func emitBuildFiles(p *Project) error {
 	}
 
 	return nil
-}
-
-// targetKindFromFilename returns the target kind my pattern matching the filename
-func targetKindFromFilename(filename string) TargetKind {
-	switch {
-	case strings.HasSuffix(filename, "_test.cc"), strings.HasSuffix(filename, "_test.h"):
-		return targetTest
-	case strings.HasSuffix(filename, "_bench.cc"), strings.HasSuffix(filename, "_bench.h"):
-		return targetBench
-	case filename == "main.cc":
-		return targetCmd
-	case strings.HasSuffix(filename, ".cc"), strings.HasSuffix(filename, ".h"):
-		return targetLib
-	}
-	return targetInvalid
 }
 
 // emitDotFile writes a GraphViz DOT file visualizing the target dependency graph

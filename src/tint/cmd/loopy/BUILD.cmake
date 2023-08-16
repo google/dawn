@@ -95,3 +95,5 @@ if (TINT_BUILD_SPV_WRITER)
     "lang/spirv/writer/common"
   )
 endif(TINT_BUILD_SPV_WRITER)
+
+tint_target_set_output_name("cmd/loopy:cmd" "tint_loopy")

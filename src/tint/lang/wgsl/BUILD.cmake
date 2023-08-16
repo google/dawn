@@ -30,6 +30,7 @@ include(lang/wgsl/sem/BUILD.cmake)
 include(lang/wgsl/writer/BUILD.cmake)
 
 tint_add_target("lang/wgsl:test"
+  lang/wgsl/wgsl_test.cc
 )
 
 tint_target_add_dependencies("lang/wgsl:test"
