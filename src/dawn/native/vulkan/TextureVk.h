@@ -142,6 +142,7 @@ class Texture final : public TextureBase {
     bool CanReuseWithoutBarrier(wgpu::TextureUsage lastUsage, wgpu::TextureUsage usage);
 
     VkImage mHandle = VK_NULL_HANDLE;
+    bool mOwnsHandle = false;
     ResourceMemoryAllocation mMemoryAllocation;
     VkDeviceMemory mExternalAllocation = VK_NULL_HANDLE;
 

@@ -736,6 +736,7 @@ MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
     DAWN_TRY(CheckVkSuccess(
         device->fn.CreateImage(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
         "CreateImage"));
+    mOwnsHandle = true;
 
     // Create the image memory and associate it with the container
     VkMemoryRequirements requirements;
@@ -847,6 +848,7 @@ MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptorVk* desc
     }
 
     DAWN_TRY_ASSIGN(mHandle, externalMemoryService->CreateImage(descriptor, baseCreateInfo));
+    mOwnsHandle = true;
 
     SetLabelHelper("Dawn_ExternalTexture");
 
@@ -998,13 +1000,7 @@ void Texture::SetLabelImpl() {
 void Texture::DestroyImpl() {
     Device* device = ToBackend(GetDevice());
 
-    // The VkImage is only allocated if it is backed by a valid memory allocation.
-    // It is not allocated if the Texture was initialized from an external VkImage,
-    // like a swapchin.
-    bool allocatedVkImage = (mMemoryAllocation.GetInfo().mMethod != AllocationMethod::kInvalid ||
-                             mExternalAllocation != VK_NULL_HANDLE) &&
-                            mHandle != VK_NULL_HANDLE;
-    if (allocatedVkImage) {
+    if (mOwnsHandle) {
         device->GetFencedDeleter()->DeleteWhenUnused(mHandle);
     }
 
