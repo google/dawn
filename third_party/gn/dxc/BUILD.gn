@@ -2208,6 +2208,23 @@ dxcompiler_sourceset("dxcompiler_sources") {
   ]
 }
 
+source_set("windows_version_resource") {
+  defines = [
+    # Include version.inc
+    "INCLUDE_HLSL_VERSION_FILE",
+
+    # TODO(crbug.com/1473311): For now, GN's rc.exe doesn't handle empty string macros
+    # the same way as MS's rc.exe, so we make these single space strings.
+    "RC_INTERNAL_NAME=\" \"",
+    "RC_ORIGINAL_FILENAME=\" \"",
+  ]
+  include_dirs = [
+    # Use our custom "version.inc" that includes DXC's version.inc and overrides fields
+    "build/",
+  ]
+  sources = [ "$dawn_dxc_dir/resources/windows_version_resource.rc" ]
+}
+
 loadable_module("dxcompiler") {
   if (dawn_has_build) {
     configs -= [ "//build/config/compiler:chromium_code" ]
@@ -2256,6 +2273,8 @@ loadable_module("dxcompiler") {
 
   if (is_win) {
     sources = [ "$dawn_dxc_dir/tools/clang/tools/dxcompiler/DXCompiler.def" ]
+
+    deps += [ ":windows_version_resource" ]
   }
 }
 
