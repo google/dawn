@@ -608,7 +608,7 @@ class PipelineStatisticsQueryTests : public QueryTests {
 
         if (pipelineStatistics.size() > 0) {
             descriptor.pipelineStatistics = pipelineStatistics.data();
-            descriptor.pipelineStatisticsCount = pipelineStatistics.size();
+            descriptor.pipelineStatisticCount = pipelineStatistics.size();
         }
         return device.CreateQuerySet(&descriptor);
     }

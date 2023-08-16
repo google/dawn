@@ -134,7 +134,7 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
         return promise;
     }
 
-    desc.requiredFeaturesCount = requiredFeatures.size();
+    desc.requiredFeatureCount = requiredFeatures.size();
     desc.requiredFeatures = requiredFeatures.data();
     desc.requiredLimits = &limits;
 

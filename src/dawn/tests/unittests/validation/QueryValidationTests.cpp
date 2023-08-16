@@ -33,7 +33,7 @@ class QuerySetValidationTest : public ValidationTest {
 
         if (pipelineStatistics.size() > 0) {
             descriptor.pipelineStatistics = pipelineStatistics.data();
-            descriptor.pipelineStatisticsCount = pipelineStatistics.size();
+            descriptor.pipelineStatisticCount = pipelineStatistics.size();
         }
 
         return cDevice.CreateQuerySet(&descriptor);
@@ -280,7 +280,7 @@ class TimestampQueryValidationTest : public QuerySetValidationTest {
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::TimestampQuery};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 1;
+        descriptor.requiredFeatureCount = 1;
 
         return dawnAdapter.CreateDevice(&descriptor);
     }
@@ -577,7 +577,7 @@ class TimestampQueryInsidePassesValidationTest : public QuerySetValidationTest {
         wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::TimestampQuery,
                                                  wgpu::FeatureName::TimestampQueryInsidePasses};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 2;
+        descriptor.requiredFeatureCount = 2;
 
         return dawnAdapter.CreateDevice(&descriptor);
     }
@@ -719,7 +719,7 @@ class PipelineStatisticsQueryValidationTest : public QuerySetValidationTest {
         // when ValidationTest creating testing instance, so we can test it.
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::PipelineStatisticsQuery};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 1;
+        descriptor.requiredFeatureCount = 1;
 
         return dawnAdapter.CreateDevice(&descriptor);
     }

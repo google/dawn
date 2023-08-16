@@ -21,7 +21,7 @@ namespace dawn::utils {
 ComboRenderBundleEncoderDescriptor::ComboRenderBundleEncoderDescriptor() {
     wgpu::RenderBundleEncoderDescriptor* descriptor = this;
 
-    descriptor->colorFormatsCount = 0;
+    descriptor->colorFormatCount = 0;
     descriptor->colorFormats = &cColorFormats[0];
 }
 

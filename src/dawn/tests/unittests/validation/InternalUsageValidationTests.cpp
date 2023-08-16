@@ -71,7 +71,7 @@ class TextureInternalUsageValidationTest : public ValidationTest {
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::DawnInternalUsages};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 1;
+        descriptor.requiredFeatureCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 };

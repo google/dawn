@@ -130,7 +130,7 @@ void ValidationTest::SetUp() {
     const char* allowUnsafeApisToggle = "allow_unsafe_apis";
     WGPUDawnTogglesDescriptor instanceToggles = {};
     instanceToggles.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
-    instanceToggles.enabledTogglesCount = 1;
+    instanceToggles.enabledToggleCount = 1;
     instanceToggles.enabledToggles = &allowUnsafeApisToggle;
 
     WGPUInstanceDescriptor instanceDesc = {};
@@ -307,9 +307,9 @@ WGPUDevice ValidationTest::CreateTestDevice(dawn::native::Adapter dawnAdapter,
     deviceDescriptor.nextInChain = &deviceTogglesDesc;
 
     deviceTogglesDesc.enabledToggles = enabledToggles.data();
-    deviceTogglesDesc.enabledTogglesCount = enabledToggles.size();
+    deviceTogglesDesc.enabledToggleCount = enabledToggles.size();
     deviceTogglesDesc.disabledToggles = disabledToggles.data();
-    deviceTogglesDesc.disabledTogglesCount = disabledToggles.size();
+    deviceTogglesDesc.disabledToggleCount = disabledToggles.size();
 
     return dawnAdapter.CreateDevice(&deviceDescriptor);
 }

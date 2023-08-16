@@ -737,10 +737,10 @@ class ShaderModuleExtensionValidationTestBase : public ValidationTest {
         // Explicitly enable or disable the AllowUnsafeAPIs toggle.
         if (allowUnsafeAPIs) {
             deviceTogglesDesc.enabledToggles = &toggle;
-            deviceTogglesDesc.enabledTogglesCount = 1;
+            deviceTogglesDesc.enabledToggleCount = 1;
         } else {
             deviceTogglesDesc.disabledToggles = &toggle;
-            deviceTogglesDesc.disabledTogglesCount = 1;
+            deviceTogglesDesc.disabledToggleCount = 1;
         }
 
         instance.RequestAdapter(
@@ -769,7 +769,7 @@ class ShaderModuleExtensionValidationTestBase : public ValidationTest {
         }
 
         descriptor.requiredFeatures = requiredFeatures.data();
-        descriptor.requiredFeaturesCount = requiredFeatures.size();
+        descriptor.requiredFeatureCount = requiredFeatures.size();
 
         return dawnAdapter.CreateDevice(&descriptor);
     }

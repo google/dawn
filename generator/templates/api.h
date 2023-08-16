@@ -67,6 +67,8 @@
 #define {{API}}_NULLABLE
 #endif
 
+#define WGPU_BREAKING_CHANGE_COUNT_RENAME
+
 #include <stdint.h>
 #include <stddef.h>
 

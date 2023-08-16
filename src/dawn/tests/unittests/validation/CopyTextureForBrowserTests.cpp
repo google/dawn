@@ -105,7 +105,7 @@ class CopyTextureForBrowserInternalUsageTest : public CopyTextureForBrowserTest 
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName feature = wgpu::FeatureName::DawnInternalUsages;
         descriptor.requiredFeatures = &feature;
-        descriptor.requiredFeaturesCount = 1;
+        descriptor.requiredFeatureCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 };
@@ -146,7 +146,7 @@ class CopyExternalTextureForBrowserInternalUsageTest : public CopyExternalTextur
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName feature = wgpu::FeatureName::DawnInternalUsages;
         descriptor.requiredFeatures = &feature;
-        descriptor.requiredFeaturesCount = 1;
+        descriptor.requiredFeatureCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 };

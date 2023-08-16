@@ -704,7 +704,7 @@ class D32S8TextureFormatsValidationTests : public TextureValidationTest {
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::Depth32FloatStencil8};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 1;
+        descriptor.requiredFeatureCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 };
@@ -728,7 +728,7 @@ class CompressedTextureFormatsValidationTests : public TextureValidationTest {
                                                  wgpu::FeatureName::TextureCompressionETC2,
                                                  wgpu::FeatureName::TextureCompressionASTC};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 3;
+        descriptor.requiredFeatureCount = 3;
 
         return dawnAdapter.CreateDevice(&descriptor);
     }
@@ -883,7 +883,7 @@ class RG11B10UfloatTextureFormatsValidationTests : public TextureValidationTest 
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::RG11B10UfloatRenderable};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 1;
+        descriptor.requiredFeatureCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 };
@@ -906,7 +906,7 @@ class BGRA8UnormTextureFormatsValidationTests : public TextureValidationTest {
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::BGRA8UnormStorage};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 1;
+        descriptor.requiredFeatureCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 };
@@ -1042,7 +1042,7 @@ class TransientAttachmentValidationTest : public TextureValidationTest {
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::TransientAttachments};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 1;
+        descriptor.requiredFeatureCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 };

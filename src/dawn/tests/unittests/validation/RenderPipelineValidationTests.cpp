@@ -31,7 +31,7 @@ class RenderPipelineValidationTest : public ValidationTest {
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::ShaderF16};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 1;
+        descriptor.requiredFeatureCount = 1;
 
         return dawnAdapter.CreateDevice(&descriptor);
     }
@@ -1675,7 +1675,7 @@ class DepthClipControlValidationTest : public RenderPipelineValidationTest {
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::DepthClipControl};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 1;
+        descriptor.requiredFeatureCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 };
@@ -1975,7 +1975,7 @@ class RenderPipelineTransientAttachmentValidationTest : public RenderPipelineVal
         wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::ShaderF16,
                                                  wgpu::FeatureName::TransientAttachments};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 2;
+        descriptor.requiredFeatureCount = 2;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 };
@@ -2094,7 +2094,7 @@ class MSAARenderToSingleSampledPipelineDescriptorValidationTest
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::MSAARenderToSingleSampled};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 1;
+        descriptor.requiredFeatureCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 
@@ -2296,7 +2296,7 @@ class DualSourceBlendingFeatureTest : public RenderPipelineValidationTest {
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::DualSourceBlending};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 1;
+        descriptor.requiredFeatureCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 };

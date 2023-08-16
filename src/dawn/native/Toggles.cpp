@@ -500,7 +500,7 @@ TogglesState TogglesState::CreateFromTogglesDescriptor(const DawnTogglesDescript
     }
 
     TogglesInfo togglesInfo;
-    for (uint32_t i = 0; i < togglesDesc->enabledTogglesCount; ++i) {
+    for (uint32_t i = 0; i < togglesDesc->enabledToggleCount; ++i) {
         Toggle toggle = togglesInfo.ToggleNameToEnum(togglesDesc->enabledToggles[i]);
         if (toggle != Toggle::InvalidEnum) {
             const ToggleInfo* toggleInfo = togglesInfo.GetToggleInfo(toggle);
@@ -512,7 +512,7 @@ TogglesState TogglesState::CreateFromTogglesDescriptor(const DawnTogglesDescript
             }
         }
     }
-    for (uint32_t i = 0; i < togglesDesc->disabledTogglesCount; ++i) {
+    for (uint32_t i = 0; i < togglesDesc->disabledToggleCount; ++i) {
         Toggle toggle = togglesInfo.ToggleNameToEnum(togglesDesc->disabledToggles[i]);
         if (toggle != Toggle::InvalidEnum) {
             const ToggleInfo* toggleInfo = togglesInfo.GetToggleInfo(toggle);

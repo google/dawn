@@ -78,7 +78,7 @@ TEST_F(DebugMarkerValidationTest, RenderUnbalancedPop) {
 TEST_F(DebugMarkerValidationTest, RenderBundleSuccess) {
     utils::ComboRenderBundleEncoderDescriptor desc;
     desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
 
     wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&desc);
     encoder.PushDebugGroup("Event Start");
@@ -94,7 +94,7 @@ TEST_F(DebugMarkerValidationTest, RenderBundleSuccess) {
 TEST_F(DebugMarkerValidationTest, RenderBundleUnbalancedPush) {
     utils::ComboRenderBundleEncoderDescriptor desc;
     desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
 
     wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&desc);
     encoder.PushDebugGroup("Event Start");
@@ -109,7 +109,7 @@ TEST_F(DebugMarkerValidationTest, RenderBundleUnbalancedPush) {
 TEST_F(DebugMarkerValidationTest, RenderBundleUnbalancedPop) {
     utils::ComboRenderBundleEncoderDescriptor desc;
     desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
 
     wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&desc);
     encoder.PushDebugGroup("Event Start");

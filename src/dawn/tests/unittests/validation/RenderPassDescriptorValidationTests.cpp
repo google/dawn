@@ -579,7 +579,7 @@ TEST_F(RenderPassDescriptorValidationTest, MaxDrawCount) {
     wgpu::Texture colorTexture = device.CreateTexture(&colorTextureDescriptor);
 
     utils::ComboRenderBundleEncoderDescriptor bundleEncoderDescriptor;
-    bundleEncoderDescriptor.colorFormatsCount = 1;
+    bundleEncoderDescriptor.colorFormatCount = 1;
     bundleEncoderDescriptor.cColorFormats[0] = kColorFormat;
 
     wgpu::Buffer indexBuffer =
@@ -1563,7 +1563,7 @@ class MSAARenderToSingleSampledRenderPassDescriptorValidationTest
                                 wgpu::DeviceDescriptor descriptor) override {
         wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::MSAARenderToSingleSampled};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 1;
+        descriptor.requiredFeatureCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 

@@ -127,7 +127,7 @@ TEST_F(RenderBundleValidationTest, Empty) {
     PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
     desc.cColorFormats[0] = renderPass.attachmentFormat;
 
     wgpu::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
@@ -148,7 +148,7 @@ TEST_F(RenderBundleValidationTest, EmptyErrorEncoderProducesErrorBundle) {
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
     // Having 0 attachments is invalid!
-    desc.colorFormatsCount = 0;
+    desc.colorFormatCount = 0;
 
     wgpu::RenderBundleEncoder renderBundleEncoder;
     ASSERT_DEVICE_ERROR(renderBundleEncoder = device.CreateRenderBundleEncoder(&desc));
@@ -178,7 +178,7 @@ TEST_F(RenderBundleValidationTest, SimpleSuccess) {
     PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
     desc.cColorFormats[0] = renderPass.attachmentFormat;
 
     wgpu::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
@@ -201,7 +201,7 @@ TEST_F(RenderBundleValidationTest, DebugGroups) {
     PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
     desc.cColorFormats[0] = renderPass.attachmentFormat;
 
     // Test a single debug group works.
@@ -260,7 +260,7 @@ TEST_F(RenderBundleValidationTest, StateInheritance) {
     PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
     desc.cColorFormats[0] = renderPass.attachmentFormat;
 
     // Render bundle does not inherit pipeline so the draw is invalid.
@@ -345,7 +345,7 @@ TEST_F(RenderBundleValidationTest, StatePersistence) {
     PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
     desc.cColorFormats[0] = renderPass.attachmentFormat;
 
     // Render bundle does not persist pipeline so the draw is invalid.
@@ -430,7 +430,7 @@ TEST_F(RenderBundleValidationTest, ClearsState) {
     PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
     desc.cColorFormats[0] = renderPass.attachmentFormat;
 
     wgpu::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
@@ -522,7 +522,7 @@ TEST_F(RenderBundleValidationTest, MultipleBundles) {
     PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
     desc.cColorFormats[0] = renderPass.attachmentFormat;
 
     wgpu::RenderBundle renderBundles[2] = {};
@@ -555,7 +555,7 @@ TEST_F(RenderBundleValidationTest, ExecuteMultipleTimes) {
     PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
     desc.cColorFormats[0] = renderPass.attachmentFormat;
 
     wgpu::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
@@ -578,7 +578,7 @@ TEST_F(RenderBundleValidationTest, ExecuteMultipleTimes) {
 // Test that it is an error to call Finish() on a render bundle encoder twice.
 TEST_F(RenderBundleValidationTest, FinishTwice) {
     utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
     desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Uint;
 
     wgpu::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
@@ -597,7 +597,7 @@ TEST_F(RenderBundleValidationTest, RequiresAtLeastOneTextureFormat) {
     // Test success with one color format.
     {
         utils::ComboRenderBundleEncoderDescriptor desc = {};
-        desc.colorFormatsCount = 1;
+        desc.colorFormatCount = 1;
         desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Uint;
         device.CreateRenderBundleEncoder(&desc);
     }
@@ -617,18 +617,18 @@ TEST_F(RenderBundleValidationTest, ColorFormatsCountOutOfBounds) {
         colorFormats[i] = wgpu::TextureFormat::R8Unorm;
     }
 
-    // colorFormatsCount <= kMaxColorAttachments is valid.
+    // colorFormatCount <= kMaxColorAttachments is valid.
     {
         wgpu::RenderBundleEncoderDescriptor desc;
-        desc.colorFormatsCount = kMaxColorAttachments;
+        desc.colorFormatCount = kMaxColorAttachments;
         desc.colorFormats = colorFormats.data();
         device.CreateRenderBundleEncoder(&desc);
     }
 
-    // colorFormatsCount > kMaxColorAttachments is invalid.
+    // colorFormatCount > kMaxColorAttachments is invalid.
     {
         wgpu::RenderBundleEncoderDescriptor desc;
-        desc.colorFormatsCount = kMaxColorAttachments + 1;
+        desc.colorFormatCount = kMaxColorAttachments + 1;
         desc.colorFormats = colorFormats.data();
         ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
     }
@@ -639,7 +639,7 @@ TEST_F(RenderBundleValidationTest, SparseColorFormats) {
     // Sparse color formats is valid.
     {
         utils::ComboRenderBundleEncoderDescriptor desc = {};
-        desc.colorFormatsCount = 2;
+        desc.colorFormatCount = 2;
         desc.cColorFormats[0] = wgpu::TextureFormat::Undefined;
         desc.cColorFormats[1] = wgpu::TextureFormat::RGBA8Unorm;
         device.CreateRenderBundleEncoder(&desc);
@@ -648,7 +648,7 @@ TEST_F(RenderBundleValidationTest, SparseColorFormats) {
     // When all color formats are undefined, depth stencil format must not be undefined.
     {
         utils::ComboRenderBundleEncoderDescriptor desc = {};
-        desc.colorFormatsCount = 1;
+        desc.colorFormatCount = 1;
         desc.cColorFormats[0] = wgpu::TextureFormat::Undefined;
         desc.depthStencilFormat = wgpu::TextureFormat::Undefined;
         ASSERT_DEVICE_ERROR(
@@ -658,7 +658,7 @@ TEST_F(RenderBundleValidationTest, SparseColorFormats) {
     }
     {
         utils::ComboRenderBundleEncoderDescriptor desc = {};
-        desc.colorFormatsCount = 1;
+        desc.colorFormatCount = 1;
         desc.cColorFormats[0] = wgpu::TextureFormat::Undefined;
         desc.depthStencilFormat = wgpu::TextureFormat::Depth24PlusStencil8;
         device.CreateRenderBundleEncoder(&desc);
@@ -698,7 +698,7 @@ TEST_F(RenderBundleValidationTest, UsageTracking) {
     PlaceholderRenderPass renderPass(device);
 
     utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
     desc.cColorFormats[0] = renderPass.attachmentFormat;
 
     wgpu::RenderBundle renderBundle0;
@@ -792,7 +792,7 @@ TEST_F(RenderBundleValidationTest, UsageTracking) {
 // Test that encoding SetPipline with an incompatible color format produces an error.
 TEST_F(RenderBundleValidationTest, PipelineColorFormatMismatch) {
     utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
-    renderBundleDesc.colorFormatsCount = 3;
+    renderBundleDesc.colorFormatCount = 3;
     renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
     renderBundleDesc.cColorFormats[1] = wgpu::TextureFormat::RG16Float;
     renderBundleDesc.cColorFormats[2] = wgpu::TextureFormat::R16Sint;
@@ -850,7 +850,7 @@ TEST_F(RenderBundleValidationTest, PipelineColorFormatMismatch) {
 // Test that encoding SetPipline with an incompatible depth stencil format produces an error.
 TEST_F(RenderBundleValidationTest, PipelineDepthStencilFormatMismatch) {
     utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
-    renderBundleDesc.colorFormatsCount = 1;
+    renderBundleDesc.colorFormatCount = 1;
     renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
     renderBundleDesc.depthStencilFormat = wgpu::TextureFormat::Depth24PlusStencil8;
 
@@ -903,7 +903,7 @@ TEST_F(RenderBundleValidationTest, PipelineDepthStencilFormatMismatch) {
 // Test that encoding SetPipline with an incompatible sample count produces an error.
 TEST_F(RenderBundleValidationTest, PipelineSampleCountMismatch) {
     utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
-    renderBundleDesc.colorFormatsCount = 1;
+    renderBundleDesc.colorFormatCount = 1;
     renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
     renderBundleDesc.sampleCount = 4;
 
@@ -937,7 +937,7 @@ TEST_F(RenderBundleValidationTest, PipelineSampleCountMismatch) {
 // Test that encoding ExecuteBundles with an incompatible color format produces an error.
 TEST_F(RenderBundleValidationTest, RenderPassColorFormatMismatch) {
     utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
-    renderBundleDesc.colorFormatsCount = 3;
+    renderBundleDesc.colorFormatCount = 3;
     renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
     renderBundleDesc.cColorFormats[1] = wgpu::TextureFormat::RG16Float;
     renderBundleDesc.cColorFormats[2] = wgpu::TextureFormat::R16Sint;
@@ -1008,7 +1008,7 @@ TEST_F(RenderBundleValidationTest, RenderPassColorFormatMismatch) {
 // error.
 TEST_F(RenderBundleValidationTest, RenderPassDepthStencilFormatMismatch) {
     utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
-    renderBundleDesc.colorFormatsCount = 1;
+    renderBundleDesc.colorFormatCount = 1;
     renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
     renderBundleDesc.depthStencilFormat = wgpu::TextureFormat::Depth24Plus;
 
@@ -1070,7 +1070,7 @@ TEST_F(RenderBundleValidationTest, RenderPassDepthStencilFormatMismatch) {
 // Test that encoding ExecuteBundles with an incompatible sample count produces an error.
 TEST_F(RenderBundleValidationTest, RenderPassSampleCountMismatch) {
     utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
-    renderBundleDesc.colorFormatsCount = 1;
+    renderBundleDesc.colorFormatCount = 1;
     renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
 
     wgpu::RenderBundleEncoder renderBundleEncoder =
@@ -1116,7 +1116,7 @@ TEST_F(RenderBundleValidationTest, TextureFormats) {
     // Test that color formats are validated as color.
     {
         utils::ComboRenderBundleEncoderDescriptor desc = {};
-        desc.colorFormatsCount = 1;
+        desc.colorFormatCount = 1;
         desc.cColorFormats[0] = wgpu::TextureFormat::Depth24PlusStencil8;
         ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
     }
@@ -1124,7 +1124,7 @@ TEST_F(RenderBundleValidationTest, TextureFormats) {
     // Test that color formats are validated as renderable.
     {
         utils::ComboRenderBundleEncoderDescriptor desc = {};
-        desc.colorFormatsCount = 1;
+        desc.colorFormatCount = 1;
         desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Snorm;
         ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&desc));
     }
@@ -1192,7 +1192,7 @@ TEST_F(RenderBundleValidationTest, RenderBundleColorFormatsBytesPerSample) {
 
     for (const TestCase& testCase : kTestCases) {
         utils::ComboRenderBundleEncoderDescriptor descriptor;
-        descriptor.colorFormatsCount = testCase.formats.size();
+        descriptor.colorFormatCount = testCase.formats.size();
         for (size_t i = 0; i < testCase.formats.size(); i++) {
             descriptor.cColorFormats[i] = testCase.formats.at(i);
         }

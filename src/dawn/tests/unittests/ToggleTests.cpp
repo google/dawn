@@ -117,7 +117,7 @@ TEST_F(InstanceToggleTest, InstanceTogglesSet) {
         const char* allowUnsafeApisToggle = "allow_unsafe_apis";
         WGPUDawnTogglesDescriptor instanceTogglesDesc = {};
         instanceTogglesDesc.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
-        instanceTogglesDesc.enabledTogglesCount = 1;
+        instanceTogglesDesc.enabledToggleCount = 1;
         instanceTogglesDesc.enabledToggles = &allowUnsafeApisToggle;
 
         WGPUInstanceDescriptor instanceDesc = {};
@@ -135,7 +135,7 @@ TEST_F(InstanceToggleTest, InstanceTogglesSet) {
         const char* allowUnsafeApisToggle = "allow_unsafe_apis";
         WGPUDawnTogglesDescriptor instanceTogglesDesc = {};
         instanceTogglesDesc.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
-        instanceTogglesDesc.disabledTogglesCount = 1;
+        instanceTogglesDesc.disabledToggleCount = 1;
         instanceTogglesDesc.disabledToggles = &allowUnsafeApisToggle;
 
         WGPUInstanceDescriptor instanceDesc = {};
@@ -186,7 +186,7 @@ TEST_F(InstanceToggleTest, InstanceTogglesInheritToAdapterAndDevice) {
         const char* allowUnsafeApisToggle = "allow_unsafe_apis";
         WGPUDawnTogglesDescriptor instanceTogglesDesc = {};
         instanceTogglesDesc.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
-        instanceTogglesDesc.enabledTogglesCount = 1;
+        instanceTogglesDesc.enabledToggleCount = 1;
         instanceTogglesDesc.enabledToggles = &allowUnsafeApisToggle;
 
         WGPUInstanceDescriptor instanceDesc = {};
@@ -204,7 +204,7 @@ TEST_F(InstanceToggleTest, InstanceTogglesInheritToAdapterAndDevice) {
         const char* allowUnsafeApisToggle = "allow_unsafe_apis";
         WGPUDawnTogglesDescriptor instanceTogglesDesc = {};
         instanceTogglesDesc.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
-        instanceTogglesDesc.disabledTogglesCount = 1;
+        instanceTogglesDesc.disabledToggleCount = 1;
         instanceTogglesDesc.disabledToggles = &allowUnsafeApisToggle;
 
         WGPUInstanceDescriptor instanceDesc = {};
@@ -297,7 +297,7 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
     // Create adapter with UseDXC enabled in toggles descriptor
     {
         wgpu::DawnTogglesDescriptor adapterTogglesDesc = {};
-        adapterTogglesDesc.enabledTogglesCount = 1;
+        adapterTogglesDesc.enabledToggleCount = 1;
         adapterTogglesDesc.enabledToggles = &useDXCToggle;
 
         // The created adapter should enable required UseDXC toggle and inherit disabled
@@ -309,7 +309,7 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
     // Create adapter with explicitly overriding AllowUnsafeAPIs in toggles descriptor
     {
         wgpu::DawnTogglesDescriptor adapterTogglesDesc = {};
-        adapterTogglesDesc.enabledTogglesCount = 1;
+        adapterTogglesDesc.enabledToggleCount = 1;
         adapterTogglesDesc.enabledToggles = &allowUnsafeApisToggle;
 
         // The created adapter should enable overridden AllowUnsafeAPIs toggle.
@@ -321,7 +321,7 @@ TEST_F(AdapterToggleTest, AdapterTogglesSetAndInheritToDevice) {
     {
         std::vector<const char*> enableAdapterToggles = {useDXCToggle, allowUnsafeApisToggle};
         wgpu::DawnTogglesDescriptor adapterTogglesDesc = {};
-        adapterTogglesDesc.enabledTogglesCount = enableAdapterToggles.size();
+        adapterTogglesDesc.enabledToggleCount = enableAdapterToggles.size();
         adapterTogglesDesc.enabledToggles = enableAdapterToggles.data();
 
         // The created adapter should enable required UseDXC and overridden AllowUnsafeAPIs toggle.
@@ -385,7 +385,7 @@ TEST_F(DeviceToggleTest, DeviceSetToggles) {
     // Create device with a device toggle required enabled. This should always work.
     {
         wgpu::DawnTogglesDescriptor deviceTogglesDesc = {};
-        deviceTogglesDesc.enabledTogglesCount = 1;
+        deviceTogglesDesc.enabledToggleCount = 1;
         deviceTogglesDesc.enabledToggles = &dumpShaderToggle;
 
         // The device created from all adapter should have DumpShader device toggle enabled.
@@ -395,7 +395,7 @@ TEST_F(DeviceToggleTest, DeviceSetToggles) {
     // Create device with a device toggle required disabled. This should always work.
     {
         wgpu::DawnTogglesDescriptor deviceTogglesDesc = {};
-        deviceTogglesDesc.disabledTogglesCount = 1;
+        deviceTogglesDesc.disabledToggleCount = 1;
         deviceTogglesDesc.disabledToggles = &dumpShaderToggle;
 
         // The device created from all adapter should have DumpShader device toggle enabled.
@@ -475,7 +475,7 @@ TEST_F(DeviceToggleTest, DeviceOverridingInstanceToggle) {
     // toggle is not forced.
     {
         wgpu::DawnTogglesDescriptor deviceTogglesDesc = {};
-        deviceTogglesDesc.enabledTogglesCount = 1;
+        deviceTogglesDesc.enabledToggleCount = 1;
         deviceTogglesDesc.enabledToggles = &allowUnsafeApisToggle;
 
         // The device created from default adapter should have AllowUnsafeAPIs device toggle
@@ -502,7 +502,7 @@ TEST_F(DeviceToggleTest, DeviceOverridingInstanceToggle) {
     // toggle is not forced.
     {
         wgpu::DawnTogglesDescriptor deviceTogglesDesc = {};
-        deviceTogglesDesc.disabledTogglesCount = 1;
+        deviceTogglesDesc.disabledToggleCount = 1;
         deviceTogglesDesc.disabledToggles = &allowUnsafeApisToggle;
 
         // The device created from default adapter should have UseDXC device toggle enabled.
@@ -594,7 +594,7 @@ TEST_F(DeviceToggleTest, DeviceOverridingAdapterToggle) {
     // toggle is not forced.
     {
         wgpu::DawnTogglesDescriptor deviceTogglesDesc = {};
-        deviceTogglesDesc.enabledTogglesCount = 1;
+        deviceTogglesDesc.enabledToggleCount = 1;
         deviceTogglesDesc.enabledToggles = &useDXCToggle;
 
         // The device created from default adapter should have UseDXC device toggle enabled.
@@ -619,7 +619,7 @@ TEST_F(DeviceToggleTest, DeviceOverridingAdapterToggle) {
     // toggle is not forced.
     {
         wgpu::DawnTogglesDescriptor deviceTogglesDesc = {};
-        deviceTogglesDesc.disabledTogglesCount = 1;
+        deviceTogglesDesc.disabledToggleCount = 1;
         deviceTogglesDesc.disabledToggles = &useDXCToggle;
 
         // The device created from default adapter should have UseDXC device toggle enabled.

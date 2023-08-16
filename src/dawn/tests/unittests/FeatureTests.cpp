@@ -79,7 +79,7 @@ TEST_F(FeatureTests, AdapterWithRequiredFeatureDisabled) {
             wgpu::DeviceDescriptor deviceDescriptor;
             wgpu::FeatureName featureName = FeatureEnumToAPIFeature(notSupportedFeature);
             deviceDescriptor.requiredFeatures = &featureName;
-            deviceDescriptor.requiredFeaturesCount = 1;
+            deviceDescriptor.requiredFeatureCount = 1;
 
             WGPUDevice deviceWithFeature = adapterWithoutFeature.CreateDevice(
                 reinterpret_cast<const WGPUDeviceDescriptor*>(&deviceDescriptor));
@@ -94,7 +94,7 @@ TEST_F(FeatureTests, AdapterWithRequiredFeatureDisabled) {
             wgpu::DeviceDescriptor deviceDescriptor;
             wgpu::FeatureName featureName = FeatureEnumToAPIFeature(notSupportedFeature);
             deviceDescriptor.requiredFeatures = &featureName;
-            deviceDescriptor.requiredFeaturesCount = 1;
+            deviceDescriptor.requiredFeatureCount = 1;
 
             WGPUDevice deviceWithFeature = adapterWithoutFeature.CreateDevice(
                 reinterpret_cast<const WGPUDeviceDescriptor*>(&deviceDescriptor));
@@ -117,7 +117,7 @@ TEST_F(FeatureTests, RequireAndGetEnabledFeatures) {
 
         wgpu::DeviceDescriptor deviceDescriptor;
         deviceDescriptor.requiredFeatures = &featureName;
-        deviceDescriptor.requiredFeaturesCount = 1;
+        deviceDescriptor.requiredFeatureCount = 1;
 
         // Test with the default adapter.
         {

@@ -50,7 +50,7 @@ void DawnNativeTest::SetUp() {
     // features).
     const char* allowUnsafeApisToggle = "allow_unsafe_apis";
     wgpu::DawnTogglesDescriptor instanceToggles;
-    instanceToggles.enabledTogglesCount = 1;
+    instanceToggles.enabledToggleCount = 1;
     instanceToggles.enabledToggles = &allowUnsafeApisToggle;
 
     platform = CreateTestPlatform();

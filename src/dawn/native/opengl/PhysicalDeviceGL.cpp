@@ -344,7 +344,7 @@ ResultOrError<Ref<DeviceBase>> PhysicalDevice::CreateDeviceImpl(AdapterBase* ada
         GetBackendType() == wgpu::BackendType::OpenGL ? EGL_OPENGL_API : EGL_OPENGL_ES_API;
     std::unique_ptr<Device::Context> context;
     bool useANGLETextureSharing = false;
-    for (size_t i = 0; i < descriptor->requiredFeaturesCount; ++i) {
+    for (size_t i = 0; i < descriptor->requiredFeatureCount; ++i) {
         if (descriptor->requiredFeatures[i] == wgpu::FeatureName::ANGLETextureSharing) {
             useANGLETextureSharing = true;
         }

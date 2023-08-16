@@ -34,9 +34,9 @@ TogglesLoader::TogglesLoader(const Flags& flags) {
 
 DawnTogglesDescriptor TogglesLoader::GetDescriptor() {
     DawnTogglesDescriptor result;
-    result.enabledTogglesCount = enabledToggles_.size();
+    result.enabledToggleCount = enabledToggles_.size();
     result.enabledToggles = enabledToggles_.data();
-    result.disabledTogglesCount = disabledToggles_.size();
+    result.disabledToggleCount = disabledToggles_.size();
     result.disabledToggles = disabledToggles_.data();
     return result;
 }

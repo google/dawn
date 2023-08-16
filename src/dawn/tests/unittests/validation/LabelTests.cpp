@@ -361,7 +361,7 @@ TEST_F(LabelTest, RenderBundleEncoder) {
     std::string label = "test";
 
     utils::ComboRenderBundleEncoderDescriptor descriptor = {};
-    descriptor.colorFormatsCount = 1;
+    descriptor.colorFormatCount = 1;
     descriptor.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
 
     // The label should be empty if one was not set.

@@ -441,7 +441,7 @@ void DrawCallPerf::SetUp() {
     // If using render bundles, record the render commands now.
     if (GetParam().withRenderBundle == RenderBundle::Yes) {
         wgpu::RenderBundleEncoderDescriptor descriptor = {};
-        descriptor.colorFormatsCount = 1;
+        descriptor.colorFormatCount = 1;
         descriptor.colorFormats = &renderPipelineDesc.cTargets[0].format;
         descriptor.depthStencilFormat = wgpu::TextureFormat::Depth24PlusStencil8;
 

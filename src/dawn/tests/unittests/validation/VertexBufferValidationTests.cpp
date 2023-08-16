@@ -139,7 +139,7 @@ TEST_F(VertexBufferValidationTest, UnsetVertexBuffer) {
     }
 
     utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
-    renderBundleDesc.colorFormatsCount = 1;
+    renderBundleDesc.colorFormatCount = 1;
     renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
     // Control case: set the vertex buffer needed by a pipeline in render bundle encoder is valid.
     {
@@ -185,7 +185,7 @@ TEST_F(VertexBufferValidationTest, UnsetInvalidatesVertexValidationCache) {
     // Render bundle case.
     {
         utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
-        renderBundleDesc.colorFormatsCount = 1;
+        renderBundleDesc.colorFormatCount = 1;
         renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
 
         wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&renderBundleDesc);
@@ -376,7 +376,7 @@ TEST_F(VertexBufferValidationTest, VertexBufferSlotValidation) {
     }
 
     utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
-    renderBundleDesc.colorFormatsCount = 1;
+    renderBundleDesc.colorFormatCount = 1;
     renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
 
     // Control case: using the last vertex buffer slot in render bundles is ok.
@@ -458,7 +458,7 @@ TEST_F(VertexBufferValidationTest, VertexBufferOffsetOOBValidation) {
     }
 
     utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
-    renderBundleDesc.colorFormatsCount = 1;
+    renderBundleDesc.colorFormatCount = 1;
     renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
 
     // Control case, using the full buffer, with or without an explicit size is valid.
@@ -562,7 +562,7 @@ TEST_F(VertexBufferValidationTest, InvalidUsage) {
     }
 
     utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
-    renderBundleDesc.colorFormatsCount = 1;
+    renderBundleDesc.colorFormatCount = 1;
     renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
     // Control case: using the vertex buffer is valid.
     {

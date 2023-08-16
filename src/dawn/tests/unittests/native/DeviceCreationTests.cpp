@@ -55,7 +55,7 @@ class DeviceCreationTest : public testing::Test {
         const char* allowUnsafeApisToggle = "allow_unsafe_apis";
         WGPUDawnTogglesDescriptor unsafeInstanceTogglesDesc = {};
         unsafeInstanceTogglesDesc.chain.sType = WGPUSType::WGPUSType_DawnTogglesDescriptor;
-        unsafeInstanceTogglesDesc.enabledTogglesCount = 1;
+        unsafeInstanceTogglesDesc.enabledToggleCount = 1;
         unsafeInstanceTogglesDesc.enabledToggles = &allowUnsafeApisToggle;
         WGPUInstanceDescriptor unsafeInstanceDesc = {};
         unsafeInstanceDesc.nextInChain = &unsafeInstanceTogglesDesc.chain;
@@ -106,7 +106,7 @@ TEST_F(DeviceCreationTest, CreateDeviceWithTogglesSuccess) {
 
     const char* toggle = "skip_validation";
     deviceTogglesDesc.enabledToggles = &toggle;
-    deviceTogglesDesc.enabledTogglesCount = 1;
+    deviceTogglesDesc.enabledToggleCount = 1;
 
     wgpu::Device device = adapter.CreateDevice(&desc);
     EXPECT_NE(device, nullptr);
@@ -139,7 +139,7 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringExperimentalFeatures) {
 
         wgpu::DeviceDescriptor deviceDescriptor;
         deviceDescriptor.requiredFeatures = &featureName;
-        deviceDescriptor.requiredFeaturesCount = 1;
+        deviceDescriptor.requiredFeatureCount = 1;
 
         // Test creating device on default adapter would fail.
         {
@@ -166,7 +166,7 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringExperimentalFeatures) {
             const char* const enableToggles[] = {"allow_unsafe_apis"};
             wgpu::DawnTogglesDescriptor deviceTogglesDesc;
             deviceTogglesDesc.enabledToggles = enableToggles;
-            deviceTogglesDesc.enabledTogglesCount = 1;
+            deviceTogglesDesc.enabledToggleCount = 1;
             deviceDescriptor.nextInChain = &deviceTogglesDesc;
 
             // Test on adapter with AllowUnsafeApis disabled.
@@ -198,7 +198,7 @@ TEST_F(DeviceCreationTest, CreateDeviceRequiringExperimentalFeatures) {
             const char* const disableToggles[] = {"allow_unsafe_apis"};
             wgpu::DawnTogglesDescriptor deviceToggleDesc;
             deviceToggleDesc.disabledToggles = disableToggles;
-            deviceToggleDesc.disabledTogglesCount = 1;
+            deviceToggleDesc.disabledToggleCount = 1;
             deviceDescriptor.nextInChain = &deviceToggleDesc;
 
             // Test on adapter with DisallowUnsafeApis enabled.
@@ -308,7 +308,7 @@ TEST_F(DeviceCreationTest, RequestDeviceFailure) {
     wgpu::DeviceDescriptor desc = {};
     wgpu::FeatureName invalidFeature = static_cast<wgpu::FeatureName>(WGPUFeatureName_Force32);
     desc.requiredFeatures = &invalidFeature;
-    desc.requiredFeaturesCount = 1;
+    desc.requiredFeatureCount = 1;
 
     adapter.RequestDevice(&desc, cb.Callback(), cb.MakeUserdata(this));
 }

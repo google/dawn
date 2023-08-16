@@ -64,13 +64,13 @@ MaybeError ValidateRenderBundleEncoderDescriptor(DeviceBase* device,
                     "Sample count (%u) is not supported.", descriptor->sampleCount);
 
     uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
-    DAWN_INVALID_IF(descriptor->colorFormatsCount > maxColorAttachments,
+    DAWN_INVALID_IF(descriptor->colorFormatCount > maxColorAttachments,
                     "Color formats count (%u) exceeds maximum number of color attachements (%u).",
-                    descriptor->colorFormatsCount, maxColorAttachments);
+                    descriptor->colorFormatCount, maxColorAttachments);
 
     bool allColorFormatsUndefined = true;
     ColorAttachmentFormats colorAttachmentFormats;
-    for (uint32_t i = 0; i < descriptor->colorFormatsCount; ++i) {
+    for (uint32_t i = 0; i < descriptor->colorFormatCount; ++i) {
         wgpu::TextureFormat format = descriptor->colorFormats[i];
         if (format != wgpu::TextureFormat::Undefined) {
             DAWN_TRY_CONTEXT(ValidateColorAttachmentFormat(device, format),

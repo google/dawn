@@ -119,9 +119,9 @@ struct ParamTogglesHelper {
 
         togglesDesc = {};
         togglesDesc.enabledToggles = enabledToggles.data();
-        togglesDesc.enabledTogglesCount = enabledToggles.size();
+        togglesDesc.enabledToggleCount = enabledToggles.size();
         togglesDesc.disabledToggles = disabledToggles.data();
-        togglesDesc.disabledTogglesCount = disabledToggles.size();
+        togglesDesc.disabledToggleCount = disabledToggles.size();
     }
 };
 }  // anonymous namespace
@@ -387,7 +387,7 @@ std::unique_ptr<native::Instance> DawnTestEnvironment::CreateInstance(
     // features).
     const char* allowUnsafeApisToggle = "allow_unsafe_apis";
     wgpu::DawnTogglesDescriptor instanceToggles;
-    instanceToggles.enabledTogglesCount = 1;
+    instanceToggles.enabledToggleCount = 1;
     instanceToggles.enabledToggles = &allowUnsafeApisToggle;
 
     wgpu::DawnInstanceDescriptor dawnInstanceDesc;
@@ -705,9 +705,9 @@ DawnTestBase::DawnTestBase(const AdapterTestParam& param) : mParam(param) {
         const auto& enabledToggles = gCurrentTest->mParam.forceEnabledWorkarounds;
         const auto& disabledToggles = gCurrentTest->mParam.forceDisabledWorkarounds;
         wgpu::DawnTogglesDescriptor adapterToggles;
-        adapterToggles.enabledTogglesCount = enabledToggles.size();
+        adapterToggles.enabledToggleCount = enabledToggles.size();
         adapterToggles.enabledToggles = enabledToggles.data();
-        adapterToggles.disabledTogglesCount = disabledToggles.size();
+        adapterToggles.disabledToggleCount = disabledToggles.size();
         adapterToggles.disabledToggles = disabledToggles.data();
 
         wgpu::RequestAdapterOptions adapterOptions;
@@ -1048,7 +1048,7 @@ WGPUDevice DawnTestBase::CreateDeviceImpl(std::string isolationKey,
         *reinterpret_cast<const wgpu::DeviceDescriptor*>(descriptor);
     deviceDescriptor.requiredLimits = &requiredLimits;
     deviceDescriptor.requiredFeatures = requiredFeatures.data();
-    deviceDescriptor.requiredFeaturesCount = requiredFeatures.size();
+    deviceDescriptor.requiredFeatureCount = requiredFeatures.size();
 
     wgpu::DawnCacheDeviceDescriptor cacheDesc = {};
     deviceDescriptor.nextInChain = &cacheDesc;

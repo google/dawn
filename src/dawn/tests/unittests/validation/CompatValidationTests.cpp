@@ -920,7 +920,7 @@ class CompatCompressedTextureToBufferCopyValidationTests : public CompatValidati
         }
 
         descriptor.requiredFeatures = requiredFeatures.data();
-        descriptor.requiredFeaturesCount = requiredFeatures.size();
+        descriptor.requiredFeatureCount = requiredFeatures.size();
         return dawnAdapter.CreateDevice(&descriptor);
     }
 

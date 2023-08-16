@@ -161,8 +161,8 @@
         "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "required features count", "type": "size_t", "default": 0},
-            {"name": "required features", "type": "feature name", "annotation": "const*", "length": "required features count", "default": "nullptr"},
+            {"name": "required feature count", "type": "size_t", "default": 0},
+            {"name": "required features", "type": "feature name", "annotation": "const*", "length": "required feature count", "default": "nullptr"},
             {"name": "required limits", "type": "required limits", "annotation": "const*", "optional": true},
             {"name": "default queue", "type": "queue descriptor"},
             {"name": "device lost callback", "type": "device lost callback", "default": "nullptr"},
@@ -175,10 +175,10 @@
         "chained": "in",
         "chain roots": ["instance descriptor", "request adapter options", "device descriptor"],
         "members": [
-            {"name": "enabled toggles count", "type": "size_t", "default": 0},
-            {"name": "enabled toggles", "type": "char", "annotation": "const*const*", "length": "enabled toggles count"},
-            {"name": "disabled toggles count", "type": "size_t", "default": 0},
-            {"name": "disabled toggles", "type": "char", "annotation": "const*const*", "length": "disabled toggles count"}
+            {"name": "enabled toggle count", "type": "size_t", "default": 0},
+            {"name": "enabled toggles", "type": "char", "annotation": "const*const*", "length": "enabled toggle count"},
+            {"name": "disabled toggle count", "type": "size_t", "default": 0},
+            {"name": "disabled toggles", "type": "char", "annotation": "const*const*", "length": "disabled toggle count"}
         ]
     },
     "dawn cache device descriptor" : {
@@ -2105,8 +2105,8 @@
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "type", "type": "query type"},
             {"name": "count", "type": "uint32_t"},
-            {"name": "pipeline statistics", "type": "pipeline statistic name", "annotation": "const*", "length": "pipeline statistics count"},
-            {"name": "pipeline statistics count", "type": "size_t", "default": "0"}
+            {"name": "pipeline statistics", "type": "pipeline statistic name", "annotation": "const*", "length": "pipeline statistic count"},
+            {"name": "pipeline statistic count", "type": "size_t", "default": "0"}
         ]
     },
     "query type": {
@@ -2348,8 +2348,8 @@
         "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "color formats count", "type": "size_t"},
-            {"name": "color formats", "type": "texture format", "annotation": "const*", "length": "color formats count"},
+            {"name": "color format count", "type": "size_t"},
+            {"name": "color formats", "type": "texture format", "annotation": "const*", "length": "color format count"},
             {"name": "depth stencil format", "type": "texture format", "default": "undefined"},
             {"name": "sample count", "type": "uint32_t", "default": "1"},
             {"name": "depth read only", "type": "bool", "default": "false"},

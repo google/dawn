@@ -1392,9 +1392,9 @@ void DeviceBase::ApplyFeatures(const DeviceDescriptor* deviceDescriptor) {
     ASSERT(deviceDescriptor);
     // Validate all required features with device toggles.
     ASSERT(GetPhysicalDevice()->SupportsAllRequiredFeatures(
-        {deviceDescriptor->requiredFeatures, deviceDescriptor->requiredFeaturesCount}, mToggles));
+        {deviceDescriptor->requiredFeatures, deviceDescriptor->requiredFeatureCount}, mToggles));
 
-    for (uint32_t i = 0; i < deviceDescriptor->requiredFeaturesCount; ++i) {
+    for (uint32_t i = 0; i < deviceDescriptor->requiredFeatureCount; ++i) {
         mEnabledFeatures.EnableFeature(deviceDescriptor->requiredFeatures[i]);
     }
 }

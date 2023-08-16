@@ -162,7 +162,7 @@ TEST_P(DeviceLostTest, CreateRenderBundleEncoderFails) {
     LoseDeviceForTesting();
 
     wgpu::RenderBundleEncoderDescriptor descriptor;
-    descriptor.colorFormatsCount = 0;
+    descriptor.colorFormatCount = 0;
     descriptor.colorFormats = nullptr;
     ASSERT_DEVICE_ERROR(device.CreateRenderBundleEncoder(&descriptor));
 }

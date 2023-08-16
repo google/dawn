@@ -119,7 +119,7 @@ TEST_F(IndexBufferValidationTest, IndexBufferOffsetOOBValidation) {
     }
 
     utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
-    renderBundleDesc.colorFormatsCount = 1;
+    renderBundleDesc.colorFormatCount = 1;
     renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
 
     // Control case, using the full buffer, with or without an explicit size is valid.
@@ -165,7 +165,7 @@ TEST_F(IndexBufferValidationTest, IndexBufferFormatMatchesPipelineStripFormat) {
         utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {0, 1, 2});
 
     utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
-    renderBundleDesc.colorFormatsCount = 1;
+    renderBundleDesc.colorFormatCount = 1;
     renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
 
     // Expected to fail because pipeline and index formats don't match.
@@ -254,7 +254,7 @@ TEST_F(IndexBufferValidationTest, InvalidUsage) {
     }
 
     utils::ComboRenderBundleEncoderDescriptor renderBundleDesc = {};
-    renderBundleDesc.colorFormatsCount = 1;
+    renderBundleDesc.colorFormatCount = 1;
     renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
     // Control case: using the index buffer is valid.
     {

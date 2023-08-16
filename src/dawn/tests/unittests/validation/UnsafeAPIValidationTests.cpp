@@ -37,7 +37,7 @@ class UnsafeAPIValidationTest : public ValidationTest {
         descriptor.nextInChain = &deviceTogglesDesc;
         const char* toggle = "allow_unsafe_apis";
         deviceTogglesDesc.disabledToggles = &toggle;
-        deviceTogglesDesc.disabledTogglesCount = 1;
+        deviceTogglesDesc.disabledToggleCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 };

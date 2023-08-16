@@ -116,7 +116,7 @@ TEST_F(WireAdapterTests, RequestDevicePassesDescriptor) {
         EXPECT_CALL(api, OnAdapterRequestDevice(apiAdapter, NotNull(), NotNull(), NotNull()))
             .WillOnce(WithArg<1>(Invoke([](const WGPUDeviceDescriptor* apiDesc) {
                 EXPECT_EQ(apiDesc->label, nullptr);
-                EXPECT_EQ(apiDesc->requiredFeaturesCount, 0u);
+                EXPECT_EQ(apiDesc->requiredFeatureCount, 0u);
                 EXPECT_EQ(apiDesc->requiredLimits, nullptr);
             })));
         FlushClient();
@@ -133,7 +133,7 @@ TEST_F(WireAdapterTests, RequestDevicePassesDescriptor) {
         wgpu::DeviceDescriptor desc = {};
         desc.label = "hello device";
         desc.requiredLimits = &limits;
-        desc.requiredFeaturesCount = features.size();
+        desc.requiredFeatureCount = features.size();
         desc.requiredFeatures = features.data();
 
         adapter.RequestDevice(&desc, cb.Callback(), userdata);
@@ -142,7 +142,7 @@ TEST_F(WireAdapterTests, RequestDevicePassesDescriptor) {
             .WillOnce(WithArg<1>(Invoke([&](const WGPUDeviceDescriptor* apiDesc) {
                 EXPECT_STREQ(apiDesc->label, desc.label);
 
-                ASSERT_EQ(apiDesc->requiredFeaturesCount, features.size());
+                ASSERT_EQ(apiDesc->requiredFeatureCount, features.size());
                 for (uint32_t i = 0; i < features.size(); ++i) {
                     EXPECT_EQ(apiDesc->requiredFeatures[i],
                               static_cast<WGPUFeatureName>(features[i]));

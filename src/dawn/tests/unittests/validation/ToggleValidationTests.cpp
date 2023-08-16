@@ -55,7 +55,7 @@ TEST_F(ToggleValidationTest, OverrideToggleUsage) {
         wgpu::DawnTogglesDescriptor deviceTogglesDesc;
         descriptor.nextInChain = &deviceTogglesDesc;
         deviceTogglesDesc.enabledToggles = &kValidToggleName;
-        deviceTogglesDesc.enabledTogglesCount = 1;
+        deviceTogglesDesc.enabledToggleCount = 1;
 
         wgpu::Device deviceWithToggle =
             wgpu::Device::Acquire(GetBackendAdapter().CreateDevice(&descriptor));
@@ -76,7 +76,7 @@ TEST_F(ToggleValidationTest, OverrideToggleUsage) {
         wgpu::DawnTogglesDescriptor deviceTogglesDesc;
         descriptor.nextInChain = &deviceTogglesDesc;
         deviceTogglesDesc.enabledToggles = &kInvalidToggleName;
-        deviceTogglesDesc.enabledTogglesCount = 1;
+        deviceTogglesDesc.enabledToggleCount = 1;
 
         wgpu::Device deviceWithToggle =
             wgpu::Device::Acquire(GetBackendAdapter().CreateDevice(&descriptor));
@@ -97,7 +97,7 @@ TEST_F(ToggleValidationTest, TurnOffVsyncWithToggle) {
     wgpu::DawnTogglesDescriptor deviceTogglesDesc;
     descriptor.nextInChain = &deviceTogglesDesc;
     deviceTogglesDesc.enabledToggles = &kValidToggleName;
-    deviceTogglesDesc.enabledTogglesCount = 1;
+    deviceTogglesDesc.enabledToggleCount = 1;
 
     wgpu::Device deviceWithToggle =
         wgpu::Device::Acquire(GetBackendAdapter().CreateDevice(&descriptor));

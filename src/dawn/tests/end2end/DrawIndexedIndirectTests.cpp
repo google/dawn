@@ -519,7 +519,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInSamePass) {
     std::vector<wgpu::RenderBundle> bundles;
     {
         utils::ComboRenderBundleEncoderDescriptor desc = {};
-        desc.colorFormatsCount = 1;
+        desc.colorFormatCount = 1;
         desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
         wgpu::RenderBundleEncoder bundleEncoder = device.CreateRenderBundleEncoder(&desc);
         bundleEncoder.SetPipeline(pipeline);
@@ -530,7 +530,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInSamePass) {
     }
     {
         utils::ComboRenderBundleEncoderDescriptor desc = {};
-        desc.colorFormatsCount = 1;
+        desc.colorFormatCount = 1;
         desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
         wgpu::RenderBundleEncoder bundleEncoder = device.CreateRenderBundleEncoder(&desc);
         bundleEncoder.SetPipeline(pipeline);
@@ -575,7 +575,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInDifferentPasses) {
     {
         wgpu::RenderBundle bundle;
         utils::ComboRenderBundleEncoderDescriptor desc = {};
-        desc.colorFormatsCount = 1;
+        desc.colorFormatCount = 1;
         desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
         wgpu::RenderBundleEncoder bundleEncoder = device.CreateRenderBundleEncoder(&desc);
         bundleEncoder.SetPipeline(pipeline);
@@ -596,7 +596,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInDifferentPasses) {
     {
         wgpu::RenderBundle bundle;
         utils::ComboRenderBundleEncoderDescriptor desc = {};
-        desc.colorFormatsCount = 1;
+        desc.colorFormatCount = 1;
         desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
         wgpu::RenderBundleEncoder bundleEncoder = device.CreateRenderBundleEncoder(&desc);
         bundleEncoder.SetPipeline(pipeline);
@@ -645,7 +645,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateReusedBundleWithChangingParams) {
     // Encode a single bundle that always uses indirectBuffer offset 0 for its params.
     wgpu::RenderBundle bundle;
     utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
     desc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
     wgpu::RenderBundleEncoder bundleEncoder = device.CreateRenderBundleEncoder(&desc);
     bundleEncoder.SetPipeline(pipeline);

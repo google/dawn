@@ -33,15 +33,15 @@ class ComputePipelineOverridableConstantsValidationTest : public ValidationTest 
 
         wgpu::DawnTogglesDescriptor deviceTogglesDesc;
         deviceTogglesDesc.enabledToggles = enabledToggles.data();
-        deviceTogglesDesc.enabledTogglesCount = enabledToggles.size();
+        deviceTogglesDesc.enabledToggleCount = enabledToggles.size();
         deviceTogglesDesc.disabledToggles = disabledToggles.data();
-        deviceTogglesDesc.disabledTogglesCount = disabledToggles.size();
+        deviceTogglesDesc.disabledToggleCount = disabledToggles.size();
 
         const wgpu::FeatureName requiredFeatures[] = {wgpu::FeatureName::ShaderF16};
 
         deviceDescriptor.nextInChain = &deviceTogglesDesc;
         deviceDescriptor.requiredFeatures = requiredFeatures;
-        deviceDescriptor.requiredFeaturesCount = 1;
+        deviceDescriptor.requiredFeatureCount = 1;
 
         return dawnAdapter.CreateDevice(&deviceDescriptor);
     }

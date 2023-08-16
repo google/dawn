@@ -95,7 +95,7 @@ class RenderBundleTest : public DawnTest {
 // Basic test of RenderBundle.
 TEST_P(RenderBundleTest, Basic) {
     utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
     desc.cColorFormats[0] = renderPass.colorFormat;
 
     wgpu::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);
@@ -123,7 +123,7 @@ TEST_P(RenderBundleTest, Basic) {
 // Test execution of multiple render bundles
 TEST_P(RenderBundleTest, MultipleBundles) {
     utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
     desc.cColorFormats[0] = renderPass.colorFormat;
 
     wgpu::RenderBundle renderBundles[2];
@@ -164,7 +164,7 @@ TEST_P(RenderBundleTest, MultipleBundles) {
 // Test execution of a bundle along with render pass commands.
 TEST_P(RenderBundleTest, BundleAndRenderPassCommands) {
     utils::ComboRenderBundleEncoderDescriptor desc = {};
-    desc.colorFormatsCount = 1;
+    desc.colorFormatCount = 1;
     desc.cColorFormats[0] = renderPass.colorFormat;
 
     wgpu::RenderBundleEncoder renderBundleEncoder = device.CreateRenderBundleEncoder(&desc);

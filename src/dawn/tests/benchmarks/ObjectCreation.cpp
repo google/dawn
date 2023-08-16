@@ -39,7 +39,7 @@ class ObjectCreation : public NullDeviceBenchmarkFixture {
     wgpu::DeviceDescriptor GetDeviceDescriptor() const override {
         wgpu::DeviceDescriptor deviceDesc = {};
         deviceDesc.requiredFeatures = requiredFeatures.data();
-        deviceDesc.requiredFeaturesCount = requiredFeatures.size();
+        deviceDesc.requiredFeatureCount = requiredFeatures.size();
         return deviceDesc;
     }
 

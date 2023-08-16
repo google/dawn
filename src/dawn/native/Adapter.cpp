@@ -175,7 +175,7 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDevice(const DeviceDescriptor*
     // that not supported by the adapter. We allow such toggles overriding for the convinience e.g.
     // creating a deivce for internal usage with AllowUnsafeAPI enabled from an adapter that
     // disabled AllowUnsafeAPIS.
-    for (uint32_t i = 0; i < descriptor->requiredFeaturesCount; ++i) {
+    for (uint32_t i = 0; i < descriptor->requiredFeatureCount; ++i) {
         wgpu::FeatureName feature = descriptor->requiredFeatures[i];
         DAWN_TRY(mPhysicalDevice->ValidateFeatureSupportedWithToggles(feature, deviceToggles));
     }

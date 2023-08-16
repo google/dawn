@@ -543,7 +543,7 @@ class WriteTextureTest_CompressedTextureFormats : public QueueWriteTextureValida
                                                  wgpu::FeatureName::TextureCompressionETC2,
                                                  wgpu::FeatureName::TextureCompressionASTC};
         descriptor.requiredFeatures = requiredFeatures;
-        descriptor.requiredFeaturesCount = 3;
+        descriptor.requiredFeatureCount = 3;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 

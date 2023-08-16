@@ -468,7 +468,7 @@ interop::Interface<interop::GPURenderBundleEncoder> GPUDevice::createRenderBundl
 
     wgpu::RenderBundleEncoderDescriptor desc{};
     if (!conv(desc.label, descriptor.label) ||
-        !conv(desc.colorFormats, desc.colorFormatsCount, descriptor.colorFormats) ||
+        !conv(desc.colorFormats, desc.colorFormatCount, descriptor.colorFormats) ||
         !conv(desc.depthStencilFormat, descriptor.depthStencilFormat) ||
         !conv(desc.sampleCount, descriptor.sampleCount) ||
         !conv(desc.depthReadOnly, descriptor.depthReadOnly) ||
