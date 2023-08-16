@@ -5307,6 +5307,14 @@ bool FunctionEmitter::EmitControlBarrier(const spvtools::opt::Instruction& inst)
         AddStatement(builder_.CallStmt(builder_.Call("storageBarrier")));
         semantics &= ~static_cast<uint32_t>(spv::MemorySemanticsMask::UniformMemory);
     }
+    if (semantics & uint32_t(spv::MemorySemanticsMask::ImageMemory)) {
+        if (memory != uint32_t(spv::Scope::Workgroup)) {
+            return Fail() << "textureBarrier requires workgroup memory scope";
+        }
+        parser_impl_.Enable(core::Extension::kChromiumExperimentalReadWriteStorageTexture);
+        AddStatement(builder_.CallStmt(builder_.Call("textureBarrier")));
+        semantics &= ~static_cast<uint32_t>(spv::MemorySemanticsMask::ImageMemory);
+    }
     if (semantics) {
         return Fail() << "unsupported control barrier semantics: " << semantics;
     }

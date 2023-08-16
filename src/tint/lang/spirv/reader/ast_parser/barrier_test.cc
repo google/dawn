@@ -109,6 +109,39 @@ TEST_F(SpirvASTParserTest, StorageBarrier) {
     EXPECT_EQ(builtin->Type(), core::Function::kStorageBarrier);
 }
 
+TEST_F(SpirvASTParserTest, TextureBarrier) {
+    auto program = ParseAndBuild(R"(
+               OpName %helper "helper"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+     %uint_1 = OpConstant %uint 1
+  %uint_2056 = OpConstant %uint 2056
+     %helper = OpFunction %void None %1
+          %4 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_2056
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %1
+          %5 = OpLabel
+               OpReturn
+               OpFunctionEnd
+  )");
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    auto* helper = program.AST().Functions().Find(program.Symbols().Get("helper"));
+    ASSERT_NE(helper, nullptr);
+    ASSERT_GT(helper->body->statements.Length(), 0u);
+    auto* call = helper->body->statements[0]->As<ast::CallStatement>();
+    ASSERT_NE(call, nullptr);
+    EXPECT_EQ(call->expr->args.Length(), 0u);
+    auto* sem_call = program.Sem().Get<sem::Call>(call->expr);
+    ASSERT_NE(sem_call, nullptr);
+    auto* builtin = sem_call->Target()->As<sem::Builtin>();
+    ASSERT_NE(builtin, nullptr);
+    EXPECT_EQ(builtin->Type(), core::Function::kTextureBarrier);
+}
+
 TEST_F(SpirvASTParserTest, ErrBarrierInvalidExecution) {
     auto program = ParseAndBuild(R"(
        %void = OpTypeVoid
@@ -199,6 +232,25 @@ TEST_F(SpirvASTParserTest, ErrStorageBarrierInvalidMemory) {
     EXPECT_FALSE(program.IsValid());
     EXPECT_THAT(program.Diagnostics().str(),
                 HasSubstr("storageBarrier requires workgroup memory scope"));
+}
+
+TEST_F(SpirvASTParserTest, ErrTextureBarrierInvalidMemory) {
+    auto program = ParseAndBuild(R"(
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+  %uint_2056 = OpConstant %uint 2056
+       %main = OpFunction %void None %1
+          %4 = OpLabel
+               OpControlBarrier %uint_2 %uint_1 %uint_2056
+               OpReturn
+               OpFunctionEnd
+  )");
+    EXPECT_FALSE(program.IsValid());
+    EXPECT_THAT(program.Diagnostics().str(),
+                HasSubstr("textureBarrier requires workgroup memory scope"));
 }
 
 }  // namespace
