@@ -14,8 +14,9 @@
 
 function(add_tint_regex_fuzzer NAME)
   add_executable(${NAME} ${NAME}.cc ${REGEX_FUZZER_SOURCES})
-  target_link_libraries(${NAME} libtint-fuzz libtint_regex_fuzzer)
-  tint_default_compile_options(${NAME})
+  target_link_libraries(${NAME} PRIVATE libtint_regex_fuzzer)
+  tint_fuzzer_compile_options(${NAME})
+  tint_spvtools_compile_options(${NAME})
   target_compile_definitions(${NAME} PRIVATE CUSTOM_MUTATOR)
   target_include_directories(${NAME} PRIVATE ${CMAKE_BINARY_DIR})
 endfunction()

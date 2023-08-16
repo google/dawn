@@ -7,7 +7,7 @@
     },
     "spirv-tools": {
         "include_pattern": "spirv-tools/**",
-        "condition": "tint_build_spv_reader",
+        "condition": "tint_build_spv_reader || tint_build_spv_writer",
     },
     "spirv-headers": {
         "include_pattern": "spirv/**",
@@ -15,7 +15,7 @@
     },
     "spirv-opt-internal": {
         "include_pattern": "source/opt/**",
-        "condition": "tint_build_spv_reader",
+        "condition": "tint_build_spv_reader || tint_build_spv_writer",
     },
     "glslang": {
         "include_pattern": "glslang/Public/ShaderLang.h",

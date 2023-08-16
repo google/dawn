@@ -76,6 +76,7 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
         }
         return result;
 #else
+        (void)wgsl;
         return std::string("error: Tint not built with the WGSL reader");
 #endif
     }

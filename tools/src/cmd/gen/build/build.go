@@ -392,8 +392,7 @@ func emitBuildFiles(p *Project) error {
 		return err
 	}
 	if len(templatePaths) == 0 {
-		fmt.Println("warning: no BUILD template files found")
-		return nil
+		return fmt.Errorf("no template files found")
 	}
 
 	// Load the templates
