@@ -33,6 +33,8 @@ tint_add_target("lang/spirv/writer"
 )
 
 tint_target_add_dependencies("lang/spirv/writer"
+  "api/common"
+  "api/options"
   "lang/core"
   "lang/core/constant"
   "lang/core/type"
@@ -88,6 +90,8 @@ tint_add_target("lang/spirv/writer:test"
 )
 
 tint_target_add_dependencies("lang/spirv/writer:test"
+  "api/common"
+  "api/options"
   "lang/core"
   "lang/core/constant"
   "lang/core/type"
@@ -161,6 +165,8 @@ tint_add_target("lang/spirv/writer:bench"
 )
 
 tint_target_add_dependencies("lang/spirv/writer:bench"
+  "api/common"
+  "api/options"
   "cmd/bench"
   "lang/core"
   "lang/core/constant"

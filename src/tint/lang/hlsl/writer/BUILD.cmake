@@ -32,6 +32,8 @@ tint_add_target("lang/hlsl/writer"
 )
 
 tint_target_add_dependencies("lang/hlsl/writer"
+  "api/common"
+  "api/options"
   "lang/core"
   "lang/core/constant"
   "lang/core/type"
@@ -69,6 +71,8 @@ tint_add_target("lang/hlsl/writer:bench"
 )
 
 tint_target_add_dependencies("lang/hlsl/writer:bench"
+  "api/common"
+  "api/options"
   "cmd/bench"
   "lang/core"
   "lang/core/constant"

@@ -18,7 +18,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "tint/override_id.h"
+#include "src/tint/api/common/override_id.h"
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 #include "src/tint/utils/reflection/reflection.h"

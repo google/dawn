@@ -17,8 +17,8 @@
 
 #include <string>
 
+#include "src/tint/api/options/binding_remapper.h"
 #include "src/tint/utils/result/result.h"
-#include "tint/binding_remapper_options.h"
 
 // Forward declarations.
 namespace tint::core::ir {

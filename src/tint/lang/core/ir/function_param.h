@@ -17,12 +17,12 @@
 
 #include <utility>
 
+#include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/ir/location.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/rtti/castable.h"
-#include "tint/binding_point.h"
 
 namespace tint::core::ir {
 

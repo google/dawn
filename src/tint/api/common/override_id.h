@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_OVERRIDE_ID_H_
-#define SRC_TINT_OVERRIDE_ID_H_
+#ifndef SRC_TINT_API_COMMON_OVERRIDE_ID_H_
+#define SRC_TINT_API_COMMON_OVERRIDE_ID_H_
 
 #include <stdint.h>
 #include <functional>
@@ -24,6 +24,7 @@ namespace tint {
 
 /// OverrideId is a numerical identifier for an override variable, unique per program.
 struct OverrideId {
+    /// The identifier value
     uint16_t value = 0;
 
     /// Reflect the fields of this struct so that it can be used by tint::ForeachField()
@@ -63,4 +64,4 @@ class hash<tint::OverrideId> {
 
 }  // namespace std
 
-#endif  // SRC_TINT_OVERRIDE_ID_H_
+#endif  // SRC_TINT_API_COMMON_OVERRIDE_ID_H_

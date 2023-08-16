@@ -15,6 +15,6 @@
 #if defined(_MSC_VER) && !defined(__clang__)
 
 // A placeholder symbol used to make MSVC emit a .lib for this lib target.
-int tint_lang_spirv_reader_common = 1;
+int tint_lang_spirv_reader_common_symbol = 1;
 
 #endif

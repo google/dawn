@@ -21,6 +21,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "src/tint/api/options/array_length_from_uniform.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
@@ -44,7 +45,6 @@
 #include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/generator/text_generator.h"
 #include "src/tint/utils/text/string_stream.h"
-#include "tint/array_length_from_uniform_options.h"
 
 namespace tint::sem {
 class Builtin;

@@ -15,10 +15,10 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "src/tint/api/common/binding_point.h"
 #include "src/tint/cmd/common/generate_external_texture_bindings.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
-#include "tint/binding_point.h"
 
 namespace tint::cmd {
 namespace {

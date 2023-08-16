@@ -21,6 +21,8 @@
 #include <unordered_set>
 #include <utility>
 
+#include "src/tint/api/common/binding_point.h"
+#include "src/tint/api/options/array_length_from_uniform.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/hlsl/writer/common/options.h"
 #include "src/tint/lang/wgsl/ast/transform/decompose_memory_access.h"
@@ -28,8 +30,6 @@
 #include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/generator/text_generator.h"
 #include "src/tint/utils/math/hash.h"
-#include "tint/array_length_from_uniform_options.h"
-#include "tint/binding_point.h"
 
 // Forward declarations
 namespace tint::sem {

@@ -20,15 +20,13 @@
 # Do not modify this file directly
 ################################################################################
 
-tint_add_target("lang/hlsl/writer/common"
-  lang/hlsl/writer/common/options.cc
-  lang/hlsl/writer/common/options.h
+tint_add_target("api/common"
+  api/common/binding_point.h
+  api/common/common.cc
+  api/common/override_id.h
 )
 
-tint_target_add_dependencies("lang/hlsl/writer/common"
-  "api/common"
-  "api/options"
-  "lang/core"
+tint_target_add_dependencies("api/common"
   "utils/macros"
   "utils/math"
   "utils/reflection"

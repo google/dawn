@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDE_TINT_ARRAY_LENGTH_FROM_UNIFORM_OPTIONS_H_
-#define INCLUDE_TINT_ARRAY_LENGTH_FROM_UNIFORM_OPTIONS_H_
+#ifndef SRC_TINT_API_OPTIONS_ARRAY_LENGTH_FROM_UNIFORM_H_
+#define SRC_TINT_API_OPTIONS_ARRAY_LENGTH_FROM_UNIFORM_H_
 
 #include <unordered_map>
 
-#include "tint/binding_point.h"
+#include "src/tint/api/common/binding_point.h"
 
 namespace tint {
 
@@ -37,4 +37,4 @@ struct ArrayLengthFromUniformOptions {
 
 }  // namespace tint
 
-#endif  // INCLUDE_TINT_ARRAY_LENGTH_FROM_UNIFORM_OPTIONS_H_
+#endif  // SRC_TINT_API_OPTIONS_ARRAY_LENGTH_FROM_UNIFORM_H_

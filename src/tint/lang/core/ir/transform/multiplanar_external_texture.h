@@ -17,8 +17,8 @@
 
 #include <string>
 
+#include "src/tint/api/options/external_texture.h"
 #include "src/tint/utils/result/result.h"
-#include "tint/external_texture_options.h"
 
 // Forward declarations.
 namespace tint::core::ir {

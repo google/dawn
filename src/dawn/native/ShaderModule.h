@@ -39,7 +39,7 @@
 #include "dawn/native/PerStage.h"
 #include "dawn/native/VertexFormat.h"
 #include "dawn/native/dawn_platform.h"
-#include "tint/override_id.h"
+#include "tint/tint.h"
 
 namespace tint {
 

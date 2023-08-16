@@ -30,6 +30,8 @@ tint_add_target("lang/spirv/writer/ast_printer"
 )
 
 tint_target_add_dependencies("lang/spirv/writer/ast_printer"
+  "api/common"
+  "api/options"
   "lang/core"
   "lang/core/constant"
   "lang/core/type"
@@ -99,6 +101,8 @@ tint_add_target("lang/spirv/writer/ast_printer:test"
 )
 
 tint_target_add_dependencies("lang/spirv/writer/ast_printer:test"
+  "api/common"
+  "api/options"
   "lang/core"
   "lang/core/constant"
   "lang/core/type"

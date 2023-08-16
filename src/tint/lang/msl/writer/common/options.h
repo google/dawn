@@ -15,10 +15,10 @@
 #ifndef SRC_TINT_LANG_MSL_WRITER_COMMON_OPTIONS_H_
 #define SRC_TINT_LANG_MSL_WRITER_COMMON_OPTIONS_H_
 
+#include "src/tint/api/options/array_length_from_uniform.h"
+#include "src/tint/api/options/binding_remapper.h"
+#include "src/tint/api/options/external_texture.h"
 #include "src/tint/utils/reflection/reflection.h"
-#include "tint/array_length_from_uniform_options.h"
-#include "tint/binding_remapper_options.h"
-#include "tint/external_texture_options.h"
 
 namespace tint::msl::writer {
 

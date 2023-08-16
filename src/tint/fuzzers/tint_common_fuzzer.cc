@@ -30,6 +30,7 @@
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 
+#include "src/tint/api/common/binding_point.h"
 #include "src/tint/fuzzers/apply_substitute_overrides.h"
 #include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/wgsl/ast/module.h"
@@ -39,7 +40,6 @@
 #include "src/tint/utils/diagnostic/formatter.h"
 #include "src/tint/utils/diagnostic/printer.h"
 #include "src/tint/utils/math/hash.h"
-#include "tint/binding_point.h"
 
 namespace tint::fuzzers {
 

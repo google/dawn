@@ -19,11 +19,11 @@
 #include <optional>
 #include <vector>
 
+#include "src/tint/api/common/binding_point.h"
+#include "src/tint/api/options/array_length_from_uniform.h"
+#include "src/tint/api/options/binding_remapper.h"
+#include "src/tint/api/options/external_texture.h"
 #include "src/tint/utils/reflection/reflection.h"
-#include "tint/array_length_from_uniform_options.h"
-#include "tint/binding_point.h"
-#include "tint/binding_remapper_options.h"
-#include "tint/external_texture_options.h"
 
 namespace tint::hlsl::writer {
 

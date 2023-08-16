@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef INCLUDE_TINT_BINDING_REMAPPER_OPTIONS_H_
-#define INCLUDE_TINT_BINDING_REMAPPER_OPTIONS_H_
+#ifndef SRC_TINT_API_OPTIONS_BINDING_REMAPPER_H_
+#define SRC_TINT_API_OPTIONS_BINDING_REMAPPER_H_
 
 #include <unordered_map>
 
+#include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/access.h"
-#include "tint/binding_point.h"
 
 namespace tint {
 
@@ -46,4 +46,4 @@ struct BindingRemapperOptions {
 
 }  // namespace tint
 
-#endif  // INCLUDE_TINT_BINDING_REMAPPER_OPTIONS_H_
+#endif  // SRC_TINT_API_OPTIONS_BINDING_REMAPPER_H_

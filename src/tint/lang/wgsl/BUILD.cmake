@@ -33,6 +33,7 @@ tint_add_target("lang/wgsl:test"
 )
 
 tint_target_add_dependencies("lang/wgsl:test"
+  "api/common"
   "lang/core"
   "lang/core/constant"
   "lang/core/type"

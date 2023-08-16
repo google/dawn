@@ -12,20 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifdef TINT_BUILD_SYNTAX_TREE_WRITER
+#if defined(_MSC_VER) && !defined(__clang__)
 
-#include "src/tint/lang/wgsl/writer/options.h"
+// A placeholder symbol used to make MSVC emit a .lib for this lib target.
+int tint_api_common_symbol = 1;
 
-namespace tint::wgsl::writer {
-
-Options::Options() = default;
-
-Options::~Options() = default;
-
-Options::Options(const Options&) = default;
-
-Options& Options::operator=(const Options&) = default;
-
-}  // namespace tint::wgsl::writer
-
-#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
+#endif

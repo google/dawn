@@ -34,6 +34,8 @@ tint_add_target("lang/msl/writer"
 )
 
 tint_target_add_dependencies("lang/msl/writer"
+  "api/common"
+  "api/options"
   "lang/core"
   "lang/core/constant"
   "lang/core/type"
@@ -84,6 +86,8 @@ tint_add_target("lang/msl/writer:bench"
 )
 
 tint_target_add_dependencies("lang/msl/writer:bench"
+  "api/common"
+  "api/options"
   "cmd/bench"
   "lang/core"
   "lang/core/constant"

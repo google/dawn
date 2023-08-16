@@ -19,7 +19,7 @@
 #include <unordered_set>
 #include <utility>
 
-#include "tint/override_id.h"
+#include "src/tint/api/common/override_id.h"
 
 #include "src/tint/lang/core/constant/manager.h"
 #include "src/tint/lang/core/extension.h"

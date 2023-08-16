@@ -36,9 +36,14 @@ tint_add_target("lang/spirv/writer/common"
 )
 
 tint_target_add_dependencies("lang/spirv/writer/common"
+  "api/common"
+  "api/options"
+  "lang/core"
   "utils/macros"
   "utils/math"
   "utils/reflection"
+  "utils/text"
+  "utils/traits"
 )
 
 if (TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
@@ -59,6 +64,8 @@ tint_add_target("lang/spirv/writer/common:test"
 )
 
 tint_target_add_dependencies("lang/spirv/writer/common:test"
+  "api/common"
+  "api/options"
   "lang/core"
   "lang/core/constant"
   "lang/core/type"

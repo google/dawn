@@ -29,6 +29,7 @@ tint_add_target("lang/wgsl/writer/ir_to_program"
 )
 
 tint_target_add_dependencies("lang/wgsl/writer/ir_to_program"
+  "api/common"
   "lang/core"
   "lang/core/constant"
   "lang/core/type"
@@ -43,6 +44,7 @@ tint_target_add_dependencies("lang/wgsl/writer/ir_to_program"
   "utils/macros"
   "utils/math"
   "utils/memory"
+  "utils/reflection"
   "utils/result"
   "utils/rtti"
   "utils/symbol"
@@ -66,6 +68,7 @@ tint_add_target("lang/wgsl/writer/ir_to_program:test"
 )
 
 tint_target_add_dependencies("lang/wgsl/writer/ir_to_program:test"
+  "api/common"
   "lang/core"
   "lang/core/constant"
   "lang/core/type"

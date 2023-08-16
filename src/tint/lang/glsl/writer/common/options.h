@@ -18,10 +18,10 @@
 #include <string>
 #include <unordered_map>
 
+#include "src/tint/api/options/external_texture.h"
 #include "src/tint/lang/core/access.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/lang/wgsl/sem/sampler_texture_pair.h"
-#include "tint/external_texture_options.h"
 
 namespace tint::glsl::writer {
 

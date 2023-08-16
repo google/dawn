@@ -16,10 +16,10 @@
 
 #include <utility>
 
+#include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/wgsl/ast/transform/binding_remapper.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/inspector/inspector.h"
-#include "tint/binding_point.h"
 
 namespace tint::writer {
 

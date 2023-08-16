@@ -26,6 +26,8 @@ tint_add_target("cmd/tint:cmd"
 
 tint_target_add_dependencies("cmd/tint:cmd"
   "api"
+  "api/common"
+  "api/options"
   "cmd/common"
   "lang/core"
   "lang/core/constant"

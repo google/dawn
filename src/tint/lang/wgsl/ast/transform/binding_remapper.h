@@ -17,9 +17,9 @@
 
 #include <unordered_map>
 
+#include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/access.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
-#include "tint/binding_point.h"
 
 namespace tint::ast::transform {
 

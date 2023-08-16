@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_CMD_COMMON_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_
 #define SRC_TINT_CMD_COMMON_GENERATE_EXTERNAL_TEXTURE_BINDINGS_H_
 
-#include "tint/external_texture_options.h"
+#include "src/tint/api/options/external_texture.h"
 
 // Forward declarations
 namespace tint {

@@ -27,6 +27,8 @@ tint_add_target("lang/spirv/writer/printer"
 )
 
 tint_target_add_dependencies("lang/spirv/writer/printer"
+  "api/common"
+  "api/options"
   "lang/core"
   "lang/core/constant"
   "lang/core/type"
