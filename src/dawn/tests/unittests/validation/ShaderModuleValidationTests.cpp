@@ -789,12 +789,12 @@ constexpr struct WGSLExtensionInfo kExtensions[] = {
     {"chromium_experimental_dp4a", true, "chromium-experimental-dp4a"},
     {"chromium_experimental_subgroups", true, "chromium-experimental-subgroups"},
     {"chromium_disable_uniformity_analysis", true, nullptr},
+    {"chromium_internal_dual_source_blending", true, "dual-source-blending"},
 
     // Currently the following WGSL extensions are not enabled under any situation.
     /*
     {"chromium_experimental_full_ptr_parameters", true, nullptr},
     {"chromium_experimental_push_constant", true, nullptr},
-    {"chromium_internal_dual_source_blending", true, nullptr},
     {"chromium_internal_relaxed_uniform_layout", true, nullptr},
     */
 };

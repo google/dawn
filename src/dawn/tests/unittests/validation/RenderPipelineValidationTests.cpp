@@ -2361,5 +2361,40 @@ TEST_F(DualSourceBlendingFeatureTest, FeatureEnumsValidWithFeatureEnabled) {
     }
 }
 
+// Test that rendering to multiple render targets while using dual source blending results in an
+// error.
+TEST_F(DualSourceBlendingFeatureTest, MultipleRenderTargetsNotAllowed) {
+    wgpu::SupportedLimits limits;
+    device.GetLimits(&limits);
+
+    for (uint32_t location = 1; location < limits.limits.maxColorAttachments; location++) {
+        std::ostringstream sstream;
+        sstream << R"(
+                enable chromium_internal_dual_source_blending;
+
+                struct TestData {
+                    color : vec4f,
+                    blend : vec4f
+                }
+
+                @group(0) @binding(0) var<uniform> testData : TestData;
+
+                struct FragOut {
+                    @location(0) @index(0) color : vec4<f32>,
+                    @location(0) @index(1) blend : vec4<f32>,
+                    @location()"
+                << location << R"("invalidOutput : vec4<f32>
+                }
+
+                @fragment fn main() -> FragOut {
+                    var output : FragOut;
+                    output.color = testData.color;
+                    output.blend = testData.blend;
+                    return output;)";
+
+        ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, sstream.str().c_str()));
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn

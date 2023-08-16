@@ -102,9 +102,13 @@ D3D11_BLEND D3DBlendFactor(wgpu::BlendFactor blendFactor) {
         case wgpu::BlendFactor::OneMinusConstant:
             return D3D11_BLEND_INV_BLEND_FACTOR;
         case wgpu::BlendFactor::Src1:
+            return D3D11_BLEND_SRC1_COLOR;
         case wgpu::BlendFactor::OneMinusSrc1:
+            return D3D11_BLEND_INV_SRC1_COLOR;
         case wgpu::BlendFactor::Src1Alpha:
+            return D3D11_BLEND_SRC1_ALPHA;
         case wgpu::BlendFactor::OneMinusSrc1Alpha:
+            return D3D11_BLEND_INV_SRC1_ALPHA;
         default:
             UNREACHABLE();
     }
@@ -123,6 +127,10 @@ D3D11_BLEND D3DBlendAlphaFactor(wgpu::BlendFactor factor) {
             return D3D11_BLEND_DEST_ALPHA;
         case wgpu::BlendFactor::OneMinusDst:
             return D3D11_BLEND_INV_DEST_ALPHA;
+        case wgpu::BlendFactor::Src1:
+            return D3D11_BLEND_SRC1_ALPHA;
+        case wgpu::BlendFactor::OneMinusSrc1:
+            return D3D11_BLEND_INV_SRC1_ALPHA;
 
         // Other blend factors translate to the same D3D11 enum as the color blend factors.
         default:

@@ -519,6 +519,10 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES);
     }
 
+    if (HasFeature(Feature::DualSourceBlending)) {
+        usedKnobs.features.dualSrcBlend = VK_TRUE;
+    }
+
     if (mDeviceInfo.HasExt(DeviceExt::Robustness2)) {
         ASSERT(usedKnobs.HasExt(DeviceExt::Robustness2));
 

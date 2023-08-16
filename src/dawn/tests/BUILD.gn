@@ -534,6 +534,7 @@ source_set("end2end_tests_sources") {
     "end2end/DrawIndexedTests.cpp",
     "end2end/DrawIndirectTests.cpp",
     "end2end/DrawTests.cpp",
+    "end2end/DualSourceBlendTests.cpp",
     "end2end/DynamicBufferOffsetTests.cpp",
     "end2end/EntryPointTests.cpp",
     "end2end/ExperimentalDP4aTests.cpp",

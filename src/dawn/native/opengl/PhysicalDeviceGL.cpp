@@ -187,6 +187,12 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     if (mFunctions.IsGLExtensionSupported("GL_AMD_gpu_shader_half_float")) {
         EnableFeature(Feature::ShaderF16);
     }
+
+    // DualSourceBlending
+    if (mFunctions.IsGLExtensionSupported("GL_EXT_blend_func_extended") ||
+        mFunctions.IsAtLeastGL(3, 3)) {
+        EnableFeature(Feature::DualSourceBlending);
+    }
 }
 
 namespace {

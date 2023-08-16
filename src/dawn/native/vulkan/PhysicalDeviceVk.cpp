@@ -216,6 +216,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::IndirectFirstInstance);
     }
 
+    if (mDeviceInfo.features.dualSrcBlend == VK_TRUE) {
+        EnableFeature(Feature::DualSourceBlending);
+    }
+
     if (mDeviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
         mDeviceInfo.HasExt(DeviceExt::_16BitStorage) &&
         mDeviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&

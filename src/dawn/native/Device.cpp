@@ -1418,6 +1418,9 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     if (IsToggleEnabled(Toggle::AllowUnsafeAPIs)) {
         mWGSLExtensionAllowList.insert("chromium_disable_uniformity_analysis");
     }
+    if (mEnabledFeatures.IsEnabled(Feature::DualSourceBlending)) {
+        mWGSLExtensionAllowList.insert("chromium_internal_dual_source_blending");
+    }
 }
 
 WGSLExtensionSet DeviceBase::GetWGSLExtensionAllowList() const {

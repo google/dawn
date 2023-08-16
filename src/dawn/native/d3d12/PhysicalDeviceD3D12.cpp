@@ -125,6 +125,7 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     EnableFeature(Feature::DepthClipControl);
     EnableFeature(Feature::SurfaceCapabilities);
     EnableFeature(Feature::Float32Filterable);
+    EnableFeature(Feature::DualSourceBlending);
 
     if (AreTimestampQueriesSupported()) {
         EnableFeature(Feature::TimestampQuery);
