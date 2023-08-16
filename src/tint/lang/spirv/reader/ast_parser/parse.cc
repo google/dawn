@@ -47,6 +47,33 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
         builder.DiagnosticDirective(core::DiagnosticSeverity::kOff, "derivative_uniformity");
     }
 
+    if (!options.allow_chromium_extensions) {
+        // Check if any Chromium extensions were used.
+        for (auto* enable : builder.AST().Enables()) {
+            for (auto* extension : enable->extensions) {
+                switch (extension->name) {
+                    case core::Extension::kUndefined:
+                    case core::Extension::kChromiumDisableUniformityAnalysis:
+                    case core::Extension::kChromiumExperimentalDp4A:
+                    case core::Extension::kChromiumExperimentalFullPtrParameters:
+                    case core::Extension::kChromiumExperimentalPushConstant:
+                    case core::Extension::kChromiumExperimentalReadWriteStorageTexture:
+                    case core::Extension::kChromiumExperimentalSubgroups:
+                    case core::Extension::kChromiumInternalDualSourceBlending:
+                    case core::Extension::kChromiumInternalRelaxedUniformLayout: {
+                        StringStream ss;
+                        ss << "module requires " << ToString(extension->name)
+                           << ", but 'allow-chromium-extensions' was not passed";
+                        builder.Diagnostics().add_error(diag::System::Reader, ss.str());
+                        return Program(std::move(builder));
+                    }
+                    case core::Extension::kF16:
+                        break;
+                }
+            }
+        }
+    }
+
     // The SPIR-V parser can construct disjoint AST nodes, which is invalid for
     // the Resolver. Clone the Program to clean these up.
     Program program_with_disjoint_ast(std::move(builder));

@@ -2009,6 +2009,7 @@ if (tint_build_unittests) {
       "lang/spirv/reader/ast_parser/module_var_test.cc",
       "lang/spirv/reader/ast_parser/named_types_test.cc",
       "lang/spirv/reader/ast_parser/namer_test.cc",
+      "lang/spirv/reader/ast_parser/parser_test.cc",
       "lang/spirv/reader/ast_parser/spirv_tools_helpers_test.cc",
       "lang/spirv/reader/ast_parser/spirv_tools_helpers_test.h",
       "lang/spirv/reader/ast_parser/type_test.cc",

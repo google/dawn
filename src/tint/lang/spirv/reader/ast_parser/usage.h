@@ -66,9 +66,11 @@ class Usage {
     /// @returns true if this usage is a dpeth texture usage.
     bool IsDepthTexture() const { return is_depth_; }
     /// @returns true if this usage is a read-only storage texture
-    bool IsStorageReadTexture() const { return is_storage_read_; }
+    bool IsStorageReadOnlyTexture() const { return is_storage_read_ && !is_storage_write_; }
+    /// @returns true if this usage is a read-write storage texture
+    bool IsStorageReadWriteTexture() const { return is_storage_read_ && is_storage_write_; }
     /// @returns true if this usage is a write-only storage texture
-    bool IsStorageWriteTexture() const { return is_storage_write_; }
+    bool IsStorageWriteOnlyTexture() const { return is_storage_write_ && !is_storage_read_; }
 
     /// @returns true if this is a storage texture.
     bool IsStorageTexture() const { return is_storage_read_ || is_storage_write_; }

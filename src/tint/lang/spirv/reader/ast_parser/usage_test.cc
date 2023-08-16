@@ -34,8 +34,9 @@ TEST_F(SpirvASTParserTest, Usage_Trivial_Properties) {
     EXPECT_FALSE(u.IsSampledTexture());
     EXPECT_FALSE(u.IsMultisampledTexture());
     EXPECT_FALSE(u.IsDepthTexture());
-    EXPECT_FALSE(u.IsStorageReadTexture());
-    EXPECT_FALSE(u.IsStorageWriteTexture());
+    EXPECT_FALSE(u.IsStorageReadOnlyTexture());
+    EXPECT_FALSE(u.IsStorageReadWriteTexture());
+    EXPECT_FALSE(u.IsStorageWriteOnlyTexture());
 }
 
 TEST_F(SpirvASTParserTest, Usage_Trivial_Output) {
@@ -87,8 +88,9 @@ TEST_F(SpirvASTParserTest, Usage_Add) {
     EXPECT_FALSE(a.IsSampledTexture());
     EXPECT_FALSE(a.IsMultisampledTexture());
     EXPECT_FALSE(a.IsDepthTexture());
-    EXPECT_TRUE(a.IsStorageReadTexture());
-    EXPECT_FALSE(a.IsStorageWriteTexture());
+    EXPECT_TRUE(a.IsStorageReadOnlyTexture());
+    EXPECT_FALSE(a.IsStorageReadWriteTexture());
+    EXPECT_FALSE(a.IsStorageWriteOnlyTexture());
 
     StringStream ss;
     ss << a;
@@ -108,8 +110,9 @@ TEST_F(SpirvASTParserTest, Usage_AddSampler) {
     EXPECT_FALSE(u.IsSampledTexture());
     EXPECT_FALSE(u.IsMultisampledTexture());
     EXPECT_FALSE(u.IsDepthTexture());
-    EXPECT_FALSE(u.IsStorageReadTexture());
-    EXPECT_FALSE(u.IsStorageWriteTexture());
+    EXPECT_FALSE(u.IsStorageReadOnlyTexture());
+    EXPECT_FALSE(u.IsStorageReadWriteTexture());
+    EXPECT_FALSE(u.IsStorageWriteOnlyTexture());
 
     ss << u;
     EXPECT_THAT(ss.str(), Eq("Usage(Sampler( ))"));
@@ -133,8 +136,9 @@ TEST_F(SpirvASTParserTest, Usage_AddComparisonSampler) {
     EXPECT_FALSE(u.IsSampledTexture());
     EXPECT_FALSE(u.IsMultisampledTexture());
     EXPECT_FALSE(u.IsDepthTexture());
-    EXPECT_FALSE(u.IsStorageReadTexture());
-    EXPECT_FALSE(u.IsStorageWriteTexture());
+    EXPECT_FALSE(u.IsStorageReadOnlyTexture());
+    EXPECT_FALSE(u.IsStorageReadWriteTexture());
+    EXPECT_FALSE(u.IsStorageWriteOnlyTexture());
 
     ss << u;
     EXPECT_THAT(ss.str(), Eq("Usage(Sampler( comparison ))"));
@@ -157,8 +161,9 @@ TEST_F(SpirvASTParserTest, Usage_AddTexture) {
     EXPECT_FALSE(u.IsSampledTexture());
     EXPECT_FALSE(u.IsMultisampledTexture());
     EXPECT_FALSE(u.IsDepthTexture());
-    EXPECT_FALSE(u.IsStorageReadTexture());
-    EXPECT_FALSE(u.IsStorageWriteTexture());
+    EXPECT_FALSE(u.IsStorageReadOnlyTexture());
+    EXPECT_FALSE(u.IsStorageReadWriteTexture());
+    EXPECT_FALSE(u.IsStorageWriteOnlyTexture());
 
     ss << u;
     EXPECT_THAT(ss.str(), Eq("Usage(Texture( ))"));
@@ -181,8 +186,9 @@ TEST_F(SpirvASTParserTest, Usage_AddSampledTexture) {
     EXPECT_TRUE(u.IsSampledTexture());
     EXPECT_FALSE(u.IsMultisampledTexture());
     EXPECT_FALSE(u.IsDepthTexture());
-    EXPECT_FALSE(u.IsStorageReadTexture());
-    EXPECT_FALSE(u.IsStorageWriteTexture());
+    EXPECT_FALSE(u.IsStorageReadOnlyTexture());
+    EXPECT_FALSE(u.IsStorageReadWriteTexture());
+    EXPECT_FALSE(u.IsStorageWriteOnlyTexture());
 
     ss << u;
     EXPECT_THAT(ss.str(), Eq("Usage(Texture( is_sampled ))"));
@@ -205,8 +211,9 @@ TEST_F(SpirvASTParserTest, Usage_AddMultisampledTexture) {
     EXPECT_TRUE(u.IsSampledTexture());
     EXPECT_TRUE(u.IsMultisampledTexture());
     EXPECT_FALSE(u.IsDepthTexture());
-    EXPECT_FALSE(u.IsStorageReadTexture());
-    EXPECT_FALSE(u.IsStorageWriteTexture());
+    EXPECT_FALSE(u.IsStorageReadOnlyTexture());
+    EXPECT_FALSE(u.IsStorageReadWriteTexture());
+    EXPECT_FALSE(u.IsStorageWriteOnlyTexture());
 
     ss << u;
     EXPECT_THAT(ss.str(), Eq("Usage(Texture( is_sampled ms ))"));
@@ -229,8 +236,9 @@ TEST_F(SpirvASTParserTest, Usage_AddDepthTexture) {
     EXPECT_TRUE(u.IsSampledTexture());
     EXPECT_FALSE(u.IsMultisampledTexture());
     EXPECT_TRUE(u.IsDepthTexture());
-    EXPECT_FALSE(u.IsStorageReadTexture());
-    EXPECT_FALSE(u.IsStorageWriteTexture());
+    EXPECT_FALSE(u.IsStorageReadOnlyTexture());
+    EXPECT_FALSE(u.IsStorageReadWriteTexture());
+    EXPECT_FALSE(u.IsStorageWriteOnlyTexture());
 
     ss << u;
     EXPECT_THAT(ss.str(), Eq("Usage(Texture( is_sampled depth ))"));
@@ -253,8 +261,9 @@ TEST_F(SpirvASTParserTest, Usage_AddStorageReadTexture) {
     EXPECT_FALSE(u.IsSampledTexture());
     EXPECT_FALSE(u.IsMultisampledTexture());
     EXPECT_FALSE(u.IsDepthTexture());
-    EXPECT_TRUE(u.IsStorageReadTexture());
-    EXPECT_FALSE(u.IsStorageWriteTexture());
+    EXPECT_TRUE(u.IsStorageReadOnlyTexture());
+    EXPECT_FALSE(u.IsStorageReadWriteTexture());
+    EXPECT_FALSE(u.IsStorageWriteOnlyTexture());
 
     ss << u;
     EXPECT_THAT(ss.str(), Eq("Usage(Texture( read ))"));
@@ -277,13 +286,41 @@ TEST_F(SpirvASTParserTest, Usage_AddStorageWriteTexture) {
     EXPECT_FALSE(u.IsSampledTexture());
     EXPECT_FALSE(u.IsMultisampledTexture());
     EXPECT_FALSE(u.IsDepthTexture());
-    EXPECT_FALSE(u.IsStorageReadTexture());
-    EXPECT_TRUE(u.IsStorageWriteTexture());
+    EXPECT_FALSE(u.IsStorageReadOnlyTexture());
+    EXPECT_FALSE(u.IsStorageReadWriteTexture());
+    EXPECT_TRUE(u.IsStorageWriteOnlyTexture());
 
     ss << u;
     EXPECT_THAT(ss.str(), Eq("Usage(Texture( write ))"));
 
     auto copy(u);
+    u.AddStorageWriteTexture();
+    EXPECT_TRUE(u == copy);
+}
+
+TEST_F(SpirvASTParserTest, Usage_AddStorageReadWriteTexture) {
+    StringStream ss;
+    Usage u;
+    u.AddStorageReadTexture();
+    u.AddStorageWriteTexture();
+
+    EXPECT_TRUE(u.IsValid());
+    EXPECT_TRUE(u.IsComplete());
+    EXPECT_FALSE(u.IsSampler());
+    EXPECT_FALSE(u.IsComparisonSampler());
+    EXPECT_TRUE(u.IsTexture());
+    EXPECT_FALSE(u.IsSampledTexture());
+    EXPECT_FALSE(u.IsMultisampledTexture());
+    EXPECT_FALSE(u.IsDepthTexture());
+    EXPECT_FALSE(u.IsStorageReadOnlyTexture());
+    EXPECT_TRUE(u.IsStorageReadWriteTexture());
+    EXPECT_FALSE(u.IsStorageWriteOnlyTexture());
+
+    ss << u;
+    EXPECT_THAT(ss.str(), Eq("Usage(Texture( read write ))"));
+
+    auto copy(u);
+    u.AddStorageReadTexture();
     u.AddStorageWriteTexture();
     EXPECT_TRUE(u == copy);
 }

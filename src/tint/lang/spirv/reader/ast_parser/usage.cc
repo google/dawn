@@ -98,11 +98,6 @@ bool Usage::IsValid() const {
                 return false;
             }
         }
-
-        // Can't be both read and write.  This is a restriction in WebGPU.
-        if (is_storage_read_ && is_storage_write_) {
-            return false;
-        }
     }
     return true;
 }

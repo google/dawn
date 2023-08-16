@@ -313,6 +313,14 @@ violations that may be produced)",
             opts->spirv_reader_options.allow_non_uniform_derivatives = true;
         }
     });
+    auto& allow_chromium_extensions = options.Add<BoolOption>(
+        "allow-chromium-extensions",
+        "When using SPIR-V input, allow the use of Chromium-specific extensions", Default{false});
+    TINT_DEFER({
+        if (allow_chromium_extensions.value.value_or(false)) {
+            opts->spirv_reader_options.allow_chromium_extensions = true;
+        }
+    });
 #endif
 
     auto& disable_wg_init = options.Add<BoolOption>(

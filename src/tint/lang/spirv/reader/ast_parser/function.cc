@@ -5633,9 +5633,10 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
         image_operands_mask ^= uint32_t(spv::ImageOperandsMask::Lod);
         arg_index++;
     } else if ((op == spv::Op::OpImageFetch || op == spv::Op::OpImageRead) &&
-               !texture_type->IsAnyOf<DepthMultisampledTexture, MultisampledTexture>()) {
-        // textureLoad requires an explicit level-of-detail parameter for
-        // non-multisampled texture types.
+               !texture_type
+                    ->IsAnyOf<DepthMultisampledTexture, MultisampledTexture, StorageTexture>()) {
+        // textureLoad requires an explicit level-of-detail parameter for non-multisampled and
+        // non-storage texture types.
         args.Push(parser_impl_.MakeNullValue(ty_.I32()));
     }
     if (arg_index + 1 < num_args &&

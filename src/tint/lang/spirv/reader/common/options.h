@@ -21,6 +21,8 @@ namespace tint::spirv::reader {
 struct Options {
     /// Set to `true` to allow calls to derivative builtins in non-uniform control flow.
     bool allow_non_uniform_derivatives = false;
+    /// Set to `true` to allow use of Chromium-specific extensions.
+    bool allow_chromium_extensions = false;
 };
 
 }  // namespace tint::spirv::reader
