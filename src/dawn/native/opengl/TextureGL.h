@@ -45,6 +45,7 @@ class Texture final : public TextureBase {
     MaybeError ClearTexture(const SubresourceRange& range, TextureBase::ClearValue clearValue);
 
     GLuint mHandle;
+    bool mOwnsHandle = false;
     GLenum mTarget;
     uint32_t mGenID = 0;
 };

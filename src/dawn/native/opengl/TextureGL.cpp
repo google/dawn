@@ -186,6 +186,7 @@ Texture::Texture(Device* device, const TextureDescriptor* descriptor)
     const OpenGLFunctions& gl = device->GetGL();
 
     gl.GenTextures(1, &mHandle);
+    mOwnsHandle = true;
     uint32_t levels = GetNumMipLevels();
 
     const GLFormat& glFormat = GetGLFormat();
@@ -216,7 +217,7 @@ Texture::~Texture() {}
 
 void Texture::DestroyImpl() {
     TextureBase::DestroyImpl();
-    if (mHandle != 0) {
+    if (mOwnsHandle) {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
         gl.DeleteTextures(1, &mHandle);
         mHandle = 0;
