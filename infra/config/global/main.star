@@ -51,6 +51,10 @@ luci.project(
             roles = "role/configs.validator",
             users = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
         ),
+        luci.binding(
+            roles = "role/swarming.taskServiceAccount",
+            users = "dawn-automated-expectations@chops-service-accounts.iam.gserviceaccount.com",
+        ),
     ],
 )
 
