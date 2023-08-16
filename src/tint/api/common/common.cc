@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if defined(_MSC_VER) && !defined(__clang__)
-
-// A placeholder symbol used to make MSVC emit a .lib for this lib target.
-int tint_api_common_symbol = 1;
-
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wmissing-variable-declarations"
 #endif
+
+// A placeholder symbol used to emit a symbol for this lib target.
+int tint_api_common_symbol = 1;

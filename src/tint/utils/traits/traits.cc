@@ -14,9 +14,9 @@
 
 #include "src/tint/utils/traits/traits.h"
 
-#if defined(_MSC_VER) && !defined(__clang__)
-
-// A placeholder symbol used to make MSVC emit a .lib for this lib target.
-int tint_utils_traits_symbol = 1;
-
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wmissing-variable-declarations"
 #endif
+
+// A placeholder symbol used to emit a symbol for this lib target.
+int tint_utils_traits_symbol = 1;
