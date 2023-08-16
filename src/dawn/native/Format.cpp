@@ -178,6 +178,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
                      bool supportsResolveTarget, uint32_t byteSize, SampleTypeBit sampleTypes,
                      uint8_t componentCount, uint8_t renderTargetPixelByteCost = 0,
                      uint8_t renderTargetComponentAlignment = 0,
+                     bool supportsReadWriteStorageUsage = false,
                      wgpu::TextureFormat baseFormat = wgpu::TextureFormat::Undefined) {
             Format internalFormat;
             internalFormat.format = format;
@@ -185,6 +186,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
             internalFormat.isCompressed = false;
             internalFormat.unsupportedReason = unsupportedReason;
             internalFormat.supportsStorageUsage = supportsStorageUsage;
+            internalFormat.supportsReadWriteStorageUsage = supportsReadWriteStorageUsage;
 
             if (supportsMultisample) {
                 ASSERT(renderable);
@@ -236,18 +238,20 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
             AddFormat(internalFormat);
         };
 
-    auto AddColorFormat =
-        [&AddConditionalColorFormat](
-            wgpu::TextureFormat format, bool renderable, bool supportsStorageUsage,
-            bool supportsMultisample, bool supportsResolveTarget, uint32_t byteSize,
-            SampleTypeBit sampleTypes, uint8_t componentCount,
-            uint8_t renderTargetPixelByteCost = 0, uint8_t renderTargetComponentAlignment = 0,
-            wgpu::TextureFormat baseFormat = wgpu::TextureFormat::Undefined) {
-            AddConditionalColorFormat(format, std::monostate{}, renderable, supportsStorageUsage,
-                                      supportsMultisample, supportsResolveTarget, byteSize,
-                                      sampleTypes, componentCount, renderTargetPixelByteCost,
-                                      renderTargetComponentAlignment, baseFormat);
-        };
+    auto AddColorFormat = [&AddConditionalColorFormat](
+                              wgpu::TextureFormat format, bool renderable,
+                              bool supportsStorageUsage, bool supportsMultisample,
+                              bool supportsResolveTarget, uint32_t byteSize,
+                              SampleTypeBit sampleTypes, uint8_t componentCount,
+                              uint8_t renderTargetPixelByteCost = 0,
+                              uint8_t renderTargetComponentAlignment = 0,
+                              bool supportsReadWriteStorageUsage = false,
+                              wgpu::TextureFormat baseFormat = wgpu::TextureFormat::Undefined) {
+        AddConditionalColorFormat(
+            format, std::monostate{}, renderable, supportsStorageUsage, supportsMultisample,
+            supportsResolveTarget, byteSize, sampleTypes, componentCount, renderTargetPixelByteCost,
+            renderTargetComponentAlignment, supportsReadWriteStorageUsage, baseFormat);
+    };
 
     auto AddDepthFormat = [&AddFormat](wgpu::TextureFormat format, uint32_t byteSize,
                                        UnsupportedReason unsupportedReason) {
@@ -388,21 +392,22 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
 
         // 4 bytes color formats
         SampleTypeBit sampleTypeFor32BitFloatFormats = device->HasFeature(Feature::Float32Filterable) ? kAnyFloat : SampleTypeBit::UnfilterableFloat;
-        AddColorFormat(wgpu::TextureFormat::R32Uint, true, true, false, false, 4, SampleTypeBit::Uint, 1, 4, 4);
-        AddColorFormat(wgpu::TextureFormat::R32Sint, true, true, false, false, 4, SampleTypeBit::Sint, 1, 4, 4);
-        AddColorFormat(wgpu::TextureFormat::R32Float, true, true, true, false, 4, sampleTypeFor32BitFloatFormats, 1, 4, 4);
+        bool SupportsReadWriteStorageUsage = device->HasFeature(Feature::ChromiumExperimentalReadWriteStorageTexture);
+        AddColorFormat(wgpu::TextureFormat::R32Uint, true, true, false, false, 4, SampleTypeBit::Uint, 1, 4, 4, SupportsReadWriteStorageUsage);
+        AddColorFormat(wgpu::TextureFormat::R32Sint, true, true, false, false, 4, SampleTypeBit::Sint, 1, 4, 4, SupportsReadWriteStorageUsage);
+        AddColorFormat(wgpu::TextureFormat::R32Float, true, true, true, false, 4, sampleTypeFor32BitFloatFormats, 1, 4, 4, SupportsReadWriteStorageUsage);
         AddColorFormat(wgpu::TextureFormat::RG16Uint, true, false, true, false, 4, SampleTypeBit::Uint, 2, 4, 2);
         AddColorFormat(wgpu::TextureFormat::RG16Sint, true, false, true, false, 4, SampleTypeBit::Sint, 2, 4, 2);
         AddColorFormat(wgpu::TextureFormat::RG16Float, true, false, true, true, 4, kAnyFloat, 2, 4, 2);
         AddColorFormat(wgpu::TextureFormat::RGBA8Unorm, true, true, true, true, 4, kAnyFloat, 4, 8, 1);
-        AddColorFormat(wgpu::TextureFormat::RGBA8UnormSrgb, true, false, true, true, 4, kAnyFloat, 4, 8, 1, wgpu::TextureFormat::RGBA8Unorm);
+        AddColorFormat(wgpu::TextureFormat::RGBA8UnormSrgb, true, false, true, true, 4, kAnyFloat, 4, 8, 1, false, wgpu::TextureFormat::RGBA8Unorm);
         AddColorFormat(wgpu::TextureFormat::RGBA8Snorm, false, true, false, false, 4, kAnyFloat, 4);
         AddColorFormat(wgpu::TextureFormat::RGBA8Uint, true, true, true, false, 4, SampleTypeBit::Uint, 4, 4, 1);
         AddColorFormat(wgpu::TextureFormat::RGBA8Sint, true, true, true, false, 4, SampleTypeBit::Sint, 4, 4, 1);
 
         bool BGRA8UnormSupportsStorageUsage = device->HasFeature(Feature::BGRA8UnormStorage);
         AddColorFormat(wgpu::TextureFormat::BGRA8Unorm, true, BGRA8UnormSupportsStorageUsage, true, true, 4, kAnyFloat, 4, 8, 1);
-        AddConditionalColorFormat(wgpu::TextureFormat::BGRA8UnormSrgb, device->IsCompatibilityMode() ? UnsupportedReason(CompatibilityMode{}) : Format::supported, true, false, true, true, 4, kAnyFloat, 4, 8, 1, wgpu::TextureFormat::BGRA8Unorm);
+        AddConditionalColorFormat(wgpu::TextureFormat::BGRA8UnormSrgb, device->IsCompatibilityMode() ? UnsupportedReason(CompatibilityMode{}) : Format::supported, true, false, true, true, 4, kAnyFloat, 4, 8, 1, false, wgpu::TextureFormat::BGRA8Unorm);
         AddColorFormat(wgpu::TextureFormat::RGB10A2Unorm, true, false, true, true, 4, kAnyFloat, 4, 8, 4);
 
         bool isRG11B10UfloatRenderable = device->HasFeature(Feature::RG11B10UfloatRenderable);

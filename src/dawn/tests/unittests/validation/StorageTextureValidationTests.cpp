@@ -903,5 +903,24 @@ TEST_F(ReadWriteStorageTextureValidationTests, BindGroupLayoutWithStorageTexture
     DoBindGroupLayoutTest(kTestSpecs);
 }
 
+// Test that using read-only storage texture in BindGroupLayout is valid with all formats that
+// can be used as storage texture, while read-write storage texture access is only available on the
+// formats that support read-write storage texture access.
+TEST_F(ReadWriteStorageTextureValidationTests, ReadWriteStorageTextureFormat) {
+    for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
+        if (!utils::TextureFormatSupportsStorageTexture(format, UseCompatibilityMode())) {
+            continue;
+        }
+
+        bool supportsReadWriteStorageTexture =
+            utils::TextureFormatSupportsReadWriteStorageTexture(format);
+        const std::vector<BindGroupLayoutTestSpec> kTestSpecs = {
+            {{wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadOnly, true, format},
+             {wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadWrite,
+              supportsReadWriteStorageTexture, format}}};
+        DoBindGroupLayoutTest(kTestSpecs);
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn

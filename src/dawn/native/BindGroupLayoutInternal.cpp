@@ -86,6 +86,14 @@ MaybeError ValidateReadWriteStorageTextureAccess(
             UNREACHABLE();
     }
 
+    if (storageTextureBindingLayout.access == wgpu::StorageTextureAccess::ReadWrite) {
+        const Format* format = nullptr;
+        DAWN_TRY_ASSIGN(format, device->GetInternalFormat(storageTextureBindingLayout.format));
+        DAWN_INVALID_IF(!format->supportsReadWriteStorageUsage,
+                        "Texture format %s does not support storage texture access %s",
+                        storageTextureBindingLayout.format, wgpu::StorageTextureAccess::ReadWrite);
+    }
+
     return {};
 }
 

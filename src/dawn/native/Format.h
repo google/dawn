@@ -112,6 +112,7 @@ struct Format {
     // A format can be known but not supported because it is part of a disabled extension.
     UnsupportedReason unsupportedReason;
     bool supportsStorageUsage = false;
+    bool supportsReadWriteStorageUsage = false;
     bool supportsMultisample = false;
     bool supportsResolveTarget = false;
     Aspect aspects{};

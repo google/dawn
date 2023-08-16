@@ -192,6 +192,17 @@ bool TextureFormatSupportsResolveTarget(wgpu::TextureFormat textureFormat) {
     }
 }
 
+bool TextureFormatSupportsReadWriteStorageTexture(wgpu::TextureFormat format) {
+    switch (format) {
+        case wgpu::TextureFormat::R32Float:
+        case wgpu::TextureFormat::R32Sint:
+        case wgpu::TextureFormat::R32Uint:
+            return true;
+        default:
+            return false;
+    }
+}
+
 bool IsStencilOnlyFormat(wgpu::TextureFormat textureFormat) {
     return textureFormat == wgpu::TextureFormat::Stencil8;
 }
