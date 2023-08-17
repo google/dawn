@@ -281,7 +281,9 @@ function(tint_translate_target TARGET_OUT KIND_OUT GN_TARGET_IN)
   # Disable targets that aren't enabled with build flags and add test / bench
   # target name suffixes
   if(${KIND} STREQUAL cmd)
-    if(NOT TINT_BUILD_CMD_TOOLS)
+    if(TINT_BUILD_CMD_TOOLS)
+      set(TARGET "${TARGET}_cmd")
+    else()
       set(TARGET TINT_TARGET_DISABLED)
       set(KIND   TINT_TARGET_DISABLED)
     endif()
