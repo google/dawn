@@ -30,6 +30,8 @@ if (tint_build_ir) {
       "add_empty_entry_point.h",
       "bgra8unorm_polyfill.cc",
       "bgra8unorm_polyfill.h",
+      "binary_polyfill.cc",
+      "binary_polyfill.h",
       "binding_remapper.cc",
       "binding_remapper.h",
       "block_decorated_structs.cc",
@@ -77,6 +79,7 @@ if (tint_build_ir) {
     sources = [
       "add_empty_entry_point_test.cc",
       "bgra8unorm_polyfill_test.cc",
+      "binary_polyfill_test.cc",
       "binding_remapper_test.cc",
       "block_decorated_structs_test.cc",
       "builtin_polyfill_test.cc",

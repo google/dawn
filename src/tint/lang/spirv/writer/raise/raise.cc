@@ -18,6 +18,7 @@
 
 #include "src/tint/lang/core/ir/transform/add_empty_entry_point.h"
 #include "src/tint/lang/core/ir/transform/bgra8unorm_polyfill.h"
+#include "src/tint/lang/core/ir/transform/binary_polyfill.h"
 #include "src/tint/lang/core/ir/transform/block_decorated_structs.h"
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
@@ -40,6 +41,10 @@ Result<SuccessType, std::string> Raise(core::ir::Module* module, const Options& 
             return result;               \
         }                                \
     } while (false)
+
+    core::ir::transform::BinaryPolyfillConfig binary_polyfills;
+    binary_polyfills.bitshift_modulo = true;
+    RUN_TRANSFORM(core::ir::transform::BinaryPolyfill, module, binary_polyfills);
 
     core::ir::transform::BuiltinPolyfillConfig core_polyfills;
     core_polyfills.count_leading_zeros = true;
