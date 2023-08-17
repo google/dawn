@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 
+	"dawn.googlesource.com/dawn/tools/src/auth"
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 	"go.chromium.org/luci/auth/client/authcli"
@@ -48,7 +49,7 @@ func (cmd) Desc() string {
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
 	flag.StringVar(&c.flags.output, "o", "results.txt", "output file. '-' writes to stdout")
 	c.flags.source.RegisterFlags(cfg)
-	c.flags.auth.Register(flag.CommandLine, common.DefaultAuthOptions())
+	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions())
 	return nil, nil
 }
 

@@ -26,6 +26,7 @@ import (
 	"strings"
 	"time"
 
+	"dawn.googlesource.com/dawn/tools/src/auth"
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
@@ -57,7 +58,7 @@ func (cmd) Desc() string {
 }
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
-	c.flags.auth.Register(flag.CommandLine, common.DefaultAuthOptions())
+	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions())
 	c.flags.results.RegisterFlags(cfg)
 	return nil, nil
 }

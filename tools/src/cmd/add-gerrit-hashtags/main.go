@@ -16,6 +16,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -24,10 +25,12 @@ import (
 	"strings"
 	"time"
 
+	"dawn.googlesource.com/dawn/tools/src/auth"
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/dawn"
 	"dawn.googlesource.com/dawn/tools/src/gerrit"
 	"dawn.googlesource.com/dawn/tools/src/git"
+	"go.chromium.org/luci/auth/client/authcli"
 )
 
 const (
@@ -36,10 +39,6 @@ const (
 )
 
 var (
-	// See https://dawn-review.googlesource.com/new-password for obtaining
-	// username and password for gerrit.
-	gerritUser  = flag.String("gerrit-user", "", "gerrit authentication username")
-	gerritPass  = flag.String("gerrit-pass", "", "gerrit authentication password")
 	repoFlag    = flag.String("repo", "dawn", "the project (tint or dawn)")
 	userFlag    = flag.String("user", defaultUser(), "user name / email")
 	afterFlag   = flag.String("after", "", "start date")
@@ -47,6 +46,7 @@ var (
 	daysFlag    = flag.Int("days", 30, "interval in days (used if --after is not specified)")
 	verboseFlag = flag.Bool("v", false, "verbose mode - lists all the changes")
 	dryrunFlag  = flag.Bool("dry", false, "dry mode. Don't apply any changes")
+	authFlags   = authcli.Flags{}
 )
 
 func defaultUser() string {
@@ -65,6 +65,8 @@ func defaultUser() string {
 }
 
 func main() {
+	authFlags.Register(flag.CommandLine, auth.DefaultAuthOptions())
+
 	flag.Usage = func() {
 		out := flag.CommandLine.Output()
 		fmt.Fprintf(out, "%v adds any missing hashtags parsed from the CL description to the Gerrit change.\n", toolName)
@@ -102,9 +104,13 @@ func run() error {
 		after = before.Add(-time.Hour * time.Duration(24**daysFlag))
 	}
 
-	g, err := gerrit.New(dawn.GerritURL, gerrit.Credentials{
-		Username: *gerritUser, Password: *gerritPass,
-	})
+	ctx := context.Background()
+	auth, err := authFlags.Options()
+	if err != nil {
+		return err
+	}
+
+	g, err := gerrit.New(ctx, auth, dawn.GerritURL)
 	if err != nil {
 		return err
 	}

@@ -30,6 +30,7 @@ import (
 	"text/tabwriter"
 	"time"
 
+	commonAuth "dawn.googlesource.com/dawn/tools/src/auth"
 	"dawn.googlesource.com/dawn/tools/src/buildbucket"
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/container"
@@ -90,7 +91,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	gitPath, _ := exec.LookPath("git")
 	npmPath, _ := exec.LookPath("npm")
 	nodePath, _ := exec.LookPath("node")
-	c.flags.auth.Register(flag.CommandLine, common.DefaultAuthOptions())
+	c.flags.auth.Register(flag.CommandLine, commonAuth.DefaultAuthOptions())
 	flag.StringVar(&c.flags.gitPath, "git", gitPath, "path to git")
 	flag.StringVar(&c.flags.npmPath, "npm", npmPath, "path to npm")
 	flag.StringVar(&c.flags.nodePath, "node", nodePath, "path to node")
@@ -135,7 +136,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	if err != nil {
 		return fmt.Errorf("failed to obtain authentication options: %w", err)
 	}
-	gerrit, err := gerrit.New(cfg.Gerrit.Host, gerrit.Credentials{})
+	gerrit, err := gerrit.New(ctx, auth, cfg.Gerrit.Host)
 	if err != nil {
 		return err
 	}

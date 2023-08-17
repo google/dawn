@@ -31,7 +31,7 @@ func init() {
 type cmd struct {
 	flags struct {
 		expectations string // expectations file path
-		slow string         // slow test expectations file path
+		slow         string // slow test expectations file path
 	}
 }
 

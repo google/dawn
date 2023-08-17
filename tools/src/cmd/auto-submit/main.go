@@ -17,6 +17,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -25,9 +26,11 @@ import (
 	"strings"
 	"time"
 
+	"dawn.googlesource.com/dawn/tools/src/auth"
 	"dawn.googlesource.com/dawn/tools/src/dawn"
 	"dawn.googlesource.com/dawn/tools/src/gerrit"
 	"dawn.googlesource.com/dawn/tools/src/git"
+	"go.chromium.org/luci/auth/client/authcli"
 )
 
 const (
@@ -36,14 +39,11 @@ const (
 )
 
 var (
-	// See https://dawn-review.googlesource.com/new-password for obtaining
-	// username and password for gerrit.
-	gerritUser  = flag.String("gerrit-user", "", "gerrit authentication username")
-	gerritPass  = flag.String("gerrit-pass", "", "gerrit authentication password")
 	repoFlag    = flag.String("repo", "dawn", "the repo")
 	userFlag    = flag.String("user", defaultUser(), "user name / email")
 	verboseFlag = flag.Bool("v", false, "verbose mode")
 	dryrunFlag  = flag.Bool("dry", false, "dry mode. Don't apply any labels")
+	authFlags   = authcli.Flags{}
 )
 
 func defaultUser() string {
@@ -62,6 +62,8 @@ func defaultUser() string {
 }
 
 func main() {
+	authFlags.Register(flag.CommandLine, auth.DefaultAuthOptions())
+
 	flag.Usage = func() {
 		out := flag.CommandLine.Output()
 		fmt.Fprintf(out,
@@ -86,9 +88,13 @@ func run() error {
 		return fmt.Errorf("Missing required 'user' flag")
 	}
 
-	g, err := gerrit.New(dawn.GerritURL, gerrit.Credentials{
-		Username: *gerritUser, Password: *gerritPass,
-	})
+	ctx := context.Background()
+	auth, err := authFlags.Options()
+	if err != nil {
+		return err
+	}
+
+	g, err := gerrit.New(ctx, auth, dawn.GerritURL)
 	if err != nil {
 		return err
 	}

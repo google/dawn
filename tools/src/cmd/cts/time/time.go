@@ -22,6 +22,7 @@ import (
 	"sort"
 	"time"
 
+	"dawn.googlesource.com/dawn/tools/src/auth"
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
@@ -55,7 +56,7 @@ func (cmd) Desc() string {
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
 	c.flags.source.RegisterFlags(cfg)
-	c.flags.auth.Register(flag.CommandLine, common.DefaultAuthOptions())
+	c.flags.auth.Register(flag.CommandLine, auth.DefaultAuthOptions())
 	flag.IntVar(&c.flags.topN, "top", 0, "print the top N slowest tests")
 	flag.BoolVar(&c.flags.histogram, "histogram", false, "print a histogram of test timings")
 	flag.StringVar(&c.flags.query, "query", "", "test query to filter results")
