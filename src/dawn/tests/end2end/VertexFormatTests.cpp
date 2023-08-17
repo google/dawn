@@ -242,6 +242,22 @@ class VertexFormatTest : public DawnTest {
         vs << "    @builtin(vertex_index) VertexIndex : u32,\n";
         vs << "}\n";
 
+        // These functions map a 32-bit scalar value to its bits in u32, except
+        // that the negative zero floating point value is remapped to u32(0),
+        // which is also the bit representation for +0.0.
+        // This is necessary because of the simple way we compute ULP.
+        // Negative zero *equals* zero, so treat it as having the same bit
+        // representation.
+        vs << R"(
+            fn rectify_u32(a: u32) -> u32 { return a; }
+            fn rectify_i32(a: i32) -> u32 { return bitcast<u32>(a); }
+            fn rectify_f32(a: f32) -> u32 {
+              const negative_zero_bits = 1u << 31u;
+              let b = bitcast<u32>(a);
+              return select(b, 0u, b == negative_zero_bits);
+            }
+        )";
+
         // Because x86 CPU using "extended
         // precision"(https://en.wikipedia.org/wiki/Extended_precision) during float
         // math(https://developer.nvidia.com/sites/default/files/akamai/cuda/files/NVIDIA-CUDA-Floating-Point.pdf),
@@ -310,6 +326,8 @@ class VertexFormatTest : public DawnTest {
                     // Because Vulkan and D3D12 handle -0.0f through bitcast have different
                     // result (Vulkan take -0.0f as -0.0 but D3D12 take -0.0f as 0), add workaround
                     // for -0.0f.
+                    // TODO(dawn:1566) Since rectify_32 will be used, we might
+                    // not need this.
                     if (static_cast<uint16_t>(expectedData[i * componentCount + j]) ==
                         kNegativeZeroInHalf) {
                         vs << "-0.0);\n";
@@ -342,15 +360,13 @@ class VertexFormatTest : public DawnTest {
                 vs << "    success = success && (isNaNCustom(" << expectedVal << ") == isNaNCustom("
                    << testVal << "));\n";
                 vs << "    if (!isNaNCustom(" << expectedVal << ")) {\n";
-                // Fold -0.0 into 0.0.
-                vs << "        if (" << testVal << " == 0) { " << testVal << " = 0; }\n";
-                vs << "        if (" << expectedVal << " == 0) { " << expectedVal << " = 0; }\n";
                 // TODO(shaobo.yan@intel.com) : a difference of 8 ULPs is allowed in this test
                 // because it is required on MacbookPro 11.5,AMD Radeon HD 8870M(on macOS 10.13.6),
                 // but that it might be possible to tighten.
-                vs << "        let testValFloatToUint : u32 = bitcast<u32>(" << testVal << ");\n";
-                vs << "        let expectedValFloatToUint : u32 = bitcast<u32>(" << expectedVal
-                   << ");\n";
+                vs << "        let testValFloatToUint : u32 = rectify_" << expectedDataType << "("
+                   << testVal << ");\n";
+                vs << "        let expectedValFloatToUint : u32 = rectify_" << expectedDataType
+                   << "(" << expectedVal << ");\n";
                 vs << "        success = success && max(testValFloatToUint, "
                       "expectedValFloatToUint)";
                 vs << "        - min(testValFloatToUint, expectedValFloatToUint) < 8u;\n";
@@ -705,9 +721,8 @@ TEST_P(VertexFormatTest, Snorm16x4) {
 
 TEST_P(VertexFormatTest, Float16x2) {
     // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
+    // TODO(dawn:1566) Might pass when using rectify_f32?
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
-    // TODO(dawn:1566) Fails on Arm-based Android devices, when using -0.0.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
 
     std::vector<uint16_t> vertexData =
         Float32ToFloat16(std::vector<float>({14.8f, -0.0f, 22.5f, 1.3f, +0.0f, -24.8f}));
@@ -717,9 +732,8 @@ TEST_P(VertexFormatTest, Float16x2) {
 
 TEST_P(VertexFormatTest, Float16x4) {
     // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
+    // TODO(dawn:1566) Might pass when using rectify_f32?
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
-    // TODO(dawn:1566) Fails on Arm-based Android devices, when using -0.0.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
 
     std::vector<uint16_t> vertexData = Float32ToFloat16(std::vector<float>(
         {+0.0f, -16.8f, 18.2f, -0.0f, 12.5f, 1.3f, 14.8f, -12.4f, 22.5f, -48.8f, 47.4f, -24.8f}));
@@ -727,9 +741,9 @@ TEST_P(VertexFormatTest, Float16x4) {
     DoVertexFormatTest(wgpu::VertexFormat::Float16x4, vertexData, vertexData);
 }
 TEST_P(VertexFormatTest, Float32_Zeros) {
-    // TODO(dawn:1566) Fails on Qualcomm-based and Arm-base Android devices. When using -0.0.
+    // TODO(dawn:1566) Fails on Qualcomm-based Android devices. When using -0.0.
+    // This might pass now that we use rectify_f32?
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
 
     std::vector<float> vertexData = {1.3f, +0.0f, -0.0f};
 
@@ -746,12 +760,11 @@ TEST_P(VertexFormatTest, Float32_Plain) {
 
 TEST_P(VertexFormatTest, Float32x2) {
     // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
+    // TODO(dawn:1566) This might pass now that we use rectify_f32?
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
 
     // TODO(dawn:1566) Fails on Qualcomm-based Android devices.
     DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
-    // TODO(dawn:1566) Fails on Arm-based Android devices, when using -0.0.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
 
     std::vector<float> vertexData = {18.23f, -0.0f, +0.0f, +1.0f, 1.3f, -1.0f};
 
@@ -760,9 +773,8 @@ TEST_P(VertexFormatTest, Float32x2) {
 
 TEST_P(VertexFormatTest, Float32x3) {
     // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
+    // TODO(dawn:1566) This might pass now that we use rectify_f32?
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
-    // TODO(dawn:1566) Fails on Arm-based Android devices, when using -0.0.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
 
     std::vector<float> vertexData = {
         +0.0f, -1.0f, -0.0f, 1.0f, 1.3f, 99.45f, 23.6f, -81.2f, 55.0f,
@@ -772,8 +784,6 @@ TEST_P(VertexFormatTest, Float32x3) {
 }
 
 TEST_P(VertexFormatTest, Float32x4) {
-    // TODO(dawn:1566) Fails on Arm-based Android devices, when using -0.0.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsARM());
     std::vector<float> vertexData = {
         19.2f, -19.3f, +0.0f, 1.0f, -0.0f, 1.0f, 1.3f, -1.0f, 13.078f, 21.1965f, -1.1f, -1.2f,
     };
