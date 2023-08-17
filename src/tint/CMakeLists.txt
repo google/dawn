@@ -75,11 +75,6 @@ function(tint_default_compile_options TARGET)
     -Weverything
   )
 
-  if(APPLE)
-    # Silence 'has no symbols' warnings for header-only libraries.
-    target_link_options(${TARGET} PRIVATE "-no_warning_for_no_symbols")
-  endif()
-
   if(COMPILER_IS_LIKE_GNU)
     target_compile_options(${TARGET} PRIVATE
       -pedantic-errors
