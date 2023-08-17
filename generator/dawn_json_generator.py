@@ -247,12 +247,14 @@ class StructureType(Record, Type):
         if self.chained:
             assert self.chained == 'in' or self.chained == 'out'
             assert 'chain roots' in json_data
+            self.chain_roots = []
         if self.extensible:
             assert self.extensible == 'in' or self.extensible == 'out'
         # Chained structs inherit from wgpu::ChainedStruct, which has
         # nextInChain, so setting both extensible and chained would result in
         # two nextInChain members.
         assert not (self.extensible and self.chained)
+        self.extensions = []
 
     def update_metadata(self):
         Record.update_metadata(self)
@@ -384,6 +386,9 @@ def link_object(obj, types):
 
 def link_structure(struct, types):
     struct.members = linked_record_members(struct.json_data['members'], types)
+    for root in struct.json_data.get('chain roots', []):
+        struct.chain_roots.append(types[root])
+        types[root].extensions.append(struct)
     struct.chain_roots = [types[root] for root in struct.json_data.get('chain roots', [])]
     assert all((root.category == 'structure' for root in struct.chain_roots))
 

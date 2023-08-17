@@ -18,7 +18,9 @@
 {% set native_dir = impl_dir + namespace_name.Dirs() %}
 #include "{{native_dir}}/ChainUtils_autogen.h"
 
+#include <tuple>
 #include <unordered_set>
+#include <utility>
 
 namespace {{native_namespace}} {
 
@@ -74,5 +76,57 @@ MaybeError ValidateSTypes(const ChainedStructOut* chain,
     DAWN_INVALID_IF(!allSTypes.empty(), "Unsupported sType %s.", *allSTypes.begin());
     return {};
 }
+
+//
+// Unpacked chain helpers.
+//
+{% for type in by_category["structure"] %}
+    {% if type.extensible == "in" %}
+        {% set unpackedChain = "Unpacked" + as_cppType(type.name) + "Chain" %}
+        ResultOrError<{{unpackedChain}}> ValidateAndUnpackChain(const {{as_cppType(type.name)}}* chain) {
+            const ChainedStruct* next = chain->nextInChain;
+            {{unpackedChain}} result;
+
+            //* Branching generation block to avoid warnings when the struct is not currently
+            //* extendable:
+            //*   -Wunreachable-code-loop-increment:
+            //*      error: loop will run at most once (loop increment never executed)
+            {% if len(type.extensions) == 0 %}
+                if (next != nullptr) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Unexpected chained struct of type %s found on %s chain.",
+                        next->sType, "{{as_cppType(type.name)}}"
+                    );
+                }
+            {% else %}
+                for (; next != nullptr; next = next->nextInChain) {
+                    switch (next->sType) {
+                        {% for extension in type.extensions %}
+                            case STypeFor<{{as_cppType(extension.name)}}>: {
+                                auto& member = std::get<const {{as_cppType(extension.name)}}*>(result);
+                                if (member != nullptr) {
+                                    return DAWN_VALIDATION_ERROR(
+                                        "Duplicate chained struct of type %s found on %s chain.",
+                                        next->sType, "{{as_cppType(type.name)}}"
+                                    );
+                                } else {
+                                    member = static_cast<const {{as_cppType(extension.name)}}*>(next);
+                                }
+                                break;
+                            }
+                        {% endfor %}
+                        default:
+                          return DAWN_VALIDATION_ERROR(
+                              "Unexpected chained struct of type %s found on %s chain.",
+                              next->sType, "{{as_cppType(type.name)}}"
+                          );
+                    }
+                }
+            {% endif %}
+            return result;
+        }
+
+    {% endif %}
+{% endfor %}
 
 }  // namespace {{native_namespace}}

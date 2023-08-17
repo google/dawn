@@ -23,8 +23,11 @@
 {% set native_namespace = namespace_name.namespace_case() %}
 {% set native_dir = impl_dir + namespace_name.Dirs() %}
 {% set prefix = metadata.proc_table_prefix.lower() %}
+#include <tuple>
+
 #include "{{native_dir}}/{{prefix}}_platform.h"
 #include "{{native_dir}}/Error.h"
+#include "{{native_dir}}/{{namespace}}_structs_autogen.h"
 
 namespace {{native_namespace}} {
 
@@ -35,7 +38,7 @@ namespace {{native_namespace}} {
     {% for value in types["s type"].values %}
         {% if value.valid and value.name.get() in types %}
             template <>
-            inline {{namespace}}::SType STypeFor<{{as_cppEnum(value.name)}}> = {{namespace}}::SType::{{as_cppEnum(value.name)}};
+            constexpr inline {{namespace}}::SType STypeFor<{{as_cppEnum(value.name)}}> = {{namespace}}::SType::{{as_cppEnum(value.name)}};
         {% endif %}
     {% endfor %}
 
@@ -138,6 +141,25 @@ namespace {{native_namespace}} {
             "Chain can only contain a single chained struct.");
         return ValidateSingleSTypeInner(chain, sType, sTypes...);
     }
+
+    //
+    // Unpacked chain types structs and helpers.
+    //   Note that unpacked types are tuples to enable further templating extensions based on
+    //   typing via something like std::get<const Extension*> in templated functions.
+    //
+    {% for type in by_category["structure"] %}
+        {% if type.extensible == "in" %}
+            {% set unpackedChain = "Unpacked" + as_cppType(type.name) + "Chain" %}
+            using {{unpackedChain}} = std::tuple<
+                {% for extension in type.extensions %}
+                    const {{as_cppType(extension.name)}}*{{ "," if not loop.last else "" }}
+                {% endfor %}
+            >;
+            ResultOrError<{{unpackedChain}}> ValidateAndUnpackChain(const {{as_cppType(type.name)}}* chain);
+
+        {% endif %}
+    {% endfor %}
+
 
 }  // namespace {{native_namespace}}
 
