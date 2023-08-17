@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_helpers'
+################################################################################
 tint_add_target("lang/wgsl/helpers"
   lang/wgsl/helpers/append_vector.cc
   lang/wgsl/helpers/append_vector.h
@@ -54,6 +57,9 @@ tint_target_add_dependencies("lang/wgsl/helpers"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_helpers_test'
+################################################################################
 tint_add_target("lang/wgsl/helpers:test"
   lang/wgsl/helpers/append_vector_test.cc
   lang/wgsl/helpers/check_supported_extensions_test.cc

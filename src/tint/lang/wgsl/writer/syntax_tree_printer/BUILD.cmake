@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_writer_syntax_tree_printer'
+################################################################################
 tint_add_target("lang/wgsl/writer/syntax_tree_printer"
   lang/wgsl/writer/syntax_tree_printer/syntax_tree_printer.cc
   lang/wgsl/writer/syntax_tree_printer/syntax_tree_printer.h

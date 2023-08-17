@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_ast_transform'
+################################################################################
 tint_add_target("lang/wgsl/ast/transform"
   lang/wgsl/ast/transform/add_block_attribute.cc
   lang/wgsl/ast/transform/add_block_attribute.h
@@ -156,6 +159,9 @@ tint_target_add_dependencies("lang/wgsl/ast/transform"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_ast_transform_test'
+################################################################################
 tint_add_target("lang/wgsl/ast/transform:test"
   lang/wgsl/ast/transform/add_block_attribute_test.cc
   lang/wgsl/ast/transform/add_empty_entry_point_test.cc

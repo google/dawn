@@ -21,6 +21,9 @@
 ################################################################################
 
 if(TINT_BUILD_HLSL_WRITER)
+################################################################################
+# CMake target: 'tint_lang_hlsl_validate'
+################################################################################
 tint_add_target("lang/hlsl/validate"
   lang/hlsl/validate/hlsl.cc
   lang/hlsl/validate/val.h

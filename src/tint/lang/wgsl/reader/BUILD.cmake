@@ -23,6 +23,9 @@
 include(lang/wgsl/reader/parser/BUILD.cmake)
 include(lang/wgsl/reader/program_to_ir/BUILD.cmake)
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_reader'
+################################################################################
 tint_add_target("lang/wgsl/reader"
   lang/wgsl/reader/reader.cc
   lang/wgsl/reader/reader.h
@@ -53,6 +56,9 @@ tint_target_add_dependencies("lang/wgsl/reader"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_reader_bench'
+################################################################################
 tint_add_target("lang/wgsl/reader:bench"
   lang/wgsl/reader/reader_bench.cc
 )

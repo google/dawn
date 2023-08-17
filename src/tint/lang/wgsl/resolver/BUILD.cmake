@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_resolver'
+################################################################################
 tint_add_target("lang/wgsl/resolver"
   lang/wgsl/resolver/dependency_graph.cc
   lang/wgsl/resolver/dependency_graph.h
@@ -60,6 +63,9 @@ tint_target_add_dependencies("lang/wgsl/resolver"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_resolver_test'
+################################################################################
 tint_add_target("lang/wgsl/resolver:test"
   lang/wgsl/resolver/address_space_layout_validation_test.cc
   lang/wgsl/resolver/address_space_validation_test.cc

@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_utils_result'
+################################################################################
 tint_add_target("utils/result"
   utils/result/result.cc
   utils/result/result.h
@@ -32,6 +35,9 @@ tint_target_add_dependencies("utils/result"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_utils_result_test'
+################################################################################
 tint_add_target("utils/result:test"
   utils/result/result_test.cc
 )

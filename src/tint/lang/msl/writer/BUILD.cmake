@@ -26,6 +26,9 @@ include(lang/msl/writer/printer/BUILD.cmake)
 include(lang/msl/writer/raise/BUILD.cmake)
 
 if(TINT_BUILD_MSL_WRITER)
+################################################################################
+# CMake target: 'tint_lang_msl_writer'
+################################################################################
 tint_add_target("lang/msl/writer"
   lang/msl/writer/output.cc
   lang/msl/writer/output.h
@@ -81,6 +84,9 @@ endif(TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR)
 
 endif(TINT_BUILD_MSL_WRITER)
 if(TINT_BUILD_MSL_WRITER)
+################################################################################
+# CMake target: 'tint_lang_msl_writer_bench'
+################################################################################
 tint_add_target("lang/msl/writer:bench"
   lang/msl/writer/writer_bench.cc
 )

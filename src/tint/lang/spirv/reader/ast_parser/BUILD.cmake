@@ -21,6 +21,9 @@
 ################################################################################
 
 if(TINT_BUILD_SPV_READER)
+################################################################################
+# CMake target: 'tint_lang_spirv_reader_ast_parser'
+################################################################################
 tint_add_target("lang/spirv/reader/ast_parser"
   lang/spirv/reader/ast_parser/ast_parser.cc
   lang/spirv/reader/ast_parser/ast_parser.h
@@ -79,6 +82,9 @@ endif(TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
 
 endif(TINT_BUILD_SPV_READER)
 if(TINT_BUILD_SPV_READER)
+################################################################################
+# CMake target: 'tint_lang_spirv_reader_ast_parser_test'
+################################################################################
 tint_add_target("lang/spirv/reader/ast_parser:test"
   lang/spirv/reader/ast_parser/ast_parser_test.cc
   lang/spirv/reader/ast_parser/barrier_test.cc

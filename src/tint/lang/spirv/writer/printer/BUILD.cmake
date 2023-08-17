@@ -21,6 +21,9 @@
 ################################################################################
 
 if(TINT_BUILD_SPV_WRITER  AND  TINT_BUILD_IR)
+################################################################################
+# CMake target: 'tint_lang_spirv_writer_printer'
+################################################################################
 tint_add_target("lang/spirv/writer/printer"
   lang/spirv/writer/printer/printer.cc
   lang/spirv/writer/printer/printer.h

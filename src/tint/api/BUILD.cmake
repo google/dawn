@@ -23,6 +23,9 @@
 include(api/common/BUILD.cmake)
 include(api/options/BUILD.cmake)
 
+################################################################################
+# CMake target: 'tint_api'
+################################################################################
 tint_add_target("api"
   api/tint.cc
   api/tint.h

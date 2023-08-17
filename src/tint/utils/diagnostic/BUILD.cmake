@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_utils_diagnostic'
+################################################################################
 tint_add_target("utils/diagnostic"
   utils/diagnostic/diagnostic.cc
   utils/diagnostic/diagnostic.h
@@ -54,6 +57,9 @@ if (IS_WIN)
   )
 endif(IS_WIN)
 
+################################################################################
+# CMake target: 'tint_utils_diagnostic_test'
+################################################################################
 tint_add_target("utils/diagnostic:test"
   utils/diagnostic/diagnostic_test.cc
   utils/diagnostic/formatter_test.cc

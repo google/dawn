@@ -21,6 +21,9 @@
 ################################################################################
 
 if(TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR)
+################################################################################
+# CMake target: 'tint_lang_msl_writer_printer'
+################################################################################
 tint_add_target("lang/msl/writer/printer"
   lang/msl/writer/printer/printer.cc
   lang/msl/writer/printer/printer.h
@@ -61,6 +64,9 @@ endif(TINT_BUILD_MSL_WRITER)
 
 endif(TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR)
 if(TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR)
+################################################################################
+# CMake target: 'tint_lang_msl_writer_printer_test'
+################################################################################
 tint_add_target("lang/msl/writer/printer:test"
   lang/msl/writer/printer/binary_test.cc
   lang/msl/writer/printer/constant_test.cc

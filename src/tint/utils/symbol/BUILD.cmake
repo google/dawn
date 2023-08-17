@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_utils_symbol'
+################################################################################
 tint_add_target("utils/symbol"
   utils/symbol/symbol.cc
   utils/symbol/symbol.h
@@ -39,6 +42,9 @@ tint_target_add_dependencies("utils/symbol"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_utils_symbol_test'
+################################################################################
 tint_add_target("utils/symbol:test"
   utils/symbol/symbol_table_test.cc
   utils/symbol/symbol_test.cc

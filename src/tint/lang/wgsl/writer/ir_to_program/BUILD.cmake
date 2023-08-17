@@ -21,6 +21,9 @@
 ################################################################################
 
 if(TINT_BUILD_IR)
+################################################################################
+# CMake target: 'tint_lang_wgsl_writer_ir_to_program'
+################################################################################
 tint_add_target("lang/wgsl/writer/ir_to_program"
   lang/wgsl/writer/ir_to_program/ir_to_program.cc
   lang/wgsl/writer/ir_to_program/ir_to_program.h
@@ -60,6 +63,9 @@ endif(TINT_BUILD_IR)
 
 endif(TINT_BUILD_IR)
 if(TINT_BUILD_IR)
+################################################################################
+# CMake target: 'tint_lang_wgsl_writer_ir_to_program_test'
+################################################################################
 tint_add_target("lang/wgsl/writer/ir_to_program:test"
   lang/wgsl/writer/ir_to_program/inlining_test.cc
   lang/wgsl/writer/ir_to_program/ir_to_program_test.cc

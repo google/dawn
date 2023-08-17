@@ -24,6 +24,9 @@ include(lang/spirv/reader/ast_parser/BUILD.cmake)
 include(lang/spirv/reader/common/BUILD.cmake)
 
 if(TINT_BUILD_SPV_READER)
+################################################################################
+# CMake target: 'tint_lang_spirv_reader'
+################################################################################
 tint_add_target("lang/spirv/reader"
   lang/spirv/reader/reader.cc
   lang/spirv/reader/reader.h

@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_lang_core_constant'
+################################################################################
 tint_add_target("lang/core/constant"
   lang/core/constant/clone_context.h
   lang/core/constant/composite.cc
@@ -55,6 +58,9 @@ tint_target_add_dependencies("lang/core/constant"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_lang_core_constant_test'
+################################################################################
 tint_add_target("lang/core/constant:test"
   lang/core/constant/composite_test.cc
   lang/core/constant/eval_binary_op_test.cc

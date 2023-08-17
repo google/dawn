@@ -21,6 +21,9 @@
 ################################################################################
 
 if(TINT_BUILD_GLSL_WRITER)
+################################################################################
+# CMake target: 'tint_lang_glsl_writer_common'
+################################################################################
 tint_add_target("lang/glsl/writer/common"
   lang/glsl/writer/common/options.cc
   lang/glsl/writer/common/options.h

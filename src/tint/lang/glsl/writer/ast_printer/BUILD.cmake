@@ -21,6 +21,9 @@
 ################################################################################
 
 if(TINT_BUILD_GLSL_WRITER)
+################################################################################
+# CMake target: 'tint_lang_glsl_writer_ast_printer'
+################################################################################
 tint_add_target("lang/glsl/writer/ast_printer"
   lang/glsl/writer/ast_printer/ast_printer.cc
   lang/glsl/writer/ast_printer/ast_printer.h
@@ -62,6 +65,9 @@ endif(TINT_BUILD_GLSL_WRITER)
 
 endif(TINT_BUILD_GLSL_WRITER)
 if(TINT_BUILD_GLSL_WRITER)
+################################################################################
+# CMake target: 'tint_lang_glsl_writer_ast_printer_test'
+################################################################################
 tint_add_target("lang/glsl/writer/ast_printer:test"
   lang/glsl/writer/ast_printer/array_accessor_test.cc
   lang/glsl/writer/ast_printer/assign_test.cc

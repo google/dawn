@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_sem'
+################################################################################
 tint_add_target("lang/wgsl/sem"
   lang/wgsl/sem/accessor_expression.cc
   lang/wgsl/sem/accessor_expression.h
@@ -109,6 +112,9 @@ tint_target_add_dependencies("lang/wgsl/sem"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_sem_test'
+################################################################################
 tint_add_target("lang/wgsl/sem:test"
   lang/wgsl/sem/builtin_test.cc
   lang/wgsl/sem/diagnostic_severity_test.cc

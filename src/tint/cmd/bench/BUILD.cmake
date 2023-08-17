@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_cmd_bench'
+################################################################################
 tint_add_target("cmd/bench"
   cmd/bench/bench.h
   cmd/bench/benchmark.cc
@@ -46,6 +49,9 @@ tint_target_add_dependencies("cmd/bench"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_cmd_bench_bench_cmd'
+################################################################################
 tint_add_target("cmd/bench:bench_cmd"
   cmd/bench/main_bench.cc
 )

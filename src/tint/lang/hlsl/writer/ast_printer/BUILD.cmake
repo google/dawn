@@ -21,6 +21,9 @@
 ################################################################################
 
 if(TINT_BUILD_HLSL_WRITER)
+################################################################################
+# CMake target: 'tint_lang_hlsl_writer_ast_printer'
+################################################################################
 tint_add_target("lang/hlsl/writer/ast_printer"
   lang/hlsl/writer/ast_printer/ast_printer.cc
   lang/hlsl/writer/ast_printer/ast_printer.h
@@ -57,6 +60,9 @@ tint_target_add_dependencies("lang/hlsl/writer/ast_printer"
 
 endif(TINT_BUILD_HLSL_WRITER)
 if(TINT_BUILD_HLSL_WRITER)
+################################################################################
+# CMake target: 'tint_lang_hlsl_writer_ast_printer_test'
+################################################################################
 tint_add_target("lang/hlsl/writer/ast_printer:test"
   lang/hlsl/writer/ast_printer/array_accessor_test.cc
   lang/hlsl/writer/ast_printer/assign_test.cc

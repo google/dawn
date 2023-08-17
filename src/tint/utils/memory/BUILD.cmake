@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_utils_memory'
+################################################################################
 tint_add_target("utils/memory"
   utils/memory/bitcast.h
   utils/memory/block_allocator.h
@@ -31,6 +34,9 @@ tint_target_add_dependencies("utils/memory"
   "utils/math"
 )
 
+################################################################################
+# CMake target: 'tint_utils_memory_test'
+################################################################################
 tint_add_target("utils/memory:test"
   utils/memory/bitcast_test.cc
   utils/memory/block_allocator_test.cc

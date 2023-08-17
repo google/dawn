@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_lang_spirv_reader_common'
+################################################################################
 tint_add_target("lang/spirv/reader/common"
   lang/spirv/reader/common/common.cc
   lang/spirv/reader/common/options.h

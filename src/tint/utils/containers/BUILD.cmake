@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_utils_containers'
+################################################################################
 tint_add_target("utils/containers"
   utils/containers/bitset.h
   utils/containers/containers.cc
@@ -47,6 +50,9 @@ tint_target_add_dependencies("utils/containers"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_utils_containers_test'
+################################################################################
 tint_add_target("utils/containers:test"
   utils/containers/bitset_test.cc
   utils/containers/enum_set_test.cc

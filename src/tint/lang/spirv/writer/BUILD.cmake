@@ -26,6 +26,9 @@ include(lang/spirv/writer/printer/BUILD.cmake)
 include(lang/spirv/writer/raise/BUILD.cmake)
 
 if(TINT_BUILD_SPV_WRITER)
+################################################################################
+# CMake target: 'tint_lang_spirv_writer'
+################################################################################
 tint_add_target("lang/spirv/writer"
   lang/spirv/writer/output.h
   lang/spirv/writer/writer.cc
@@ -86,6 +89,9 @@ endif(TINT_BUILD_SPV_WRITER  AND  TINT_BUILD_IR)
 
 endif(TINT_BUILD_SPV_WRITER)
 if(TINT_BUILD_SPV_WRITER)
+################################################################################
+# CMake target: 'tint_lang_spirv_writer_test'
+################################################################################
 tint_add_target("lang/spirv/writer:test"
 )
 
@@ -165,6 +171,9 @@ endif(TINT_BUILD_SPV_WRITER  AND  TINT_BUILD_IR)
 
 endif(TINT_BUILD_SPV_WRITER)
 if(TINT_BUILD_SPV_WRITER)
+################################################################################
+# CMake target: 'tint_lang_spirv_writer_bench'
+################################################################################
 tint_add_target("lang/spirv/writer:bench"
 )
 

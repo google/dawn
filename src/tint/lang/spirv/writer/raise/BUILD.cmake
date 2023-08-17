@@ -21,6 +21,9 @@
 ################################################################################
 
 if(TINT_BUILD_SPV_WRITER  AND  TINT_BUILD_IR)
+################################################################################
+# CMake target: 'tint_lang_spirv_writer_raise'
+################################################################################
 tint_add_target("lang/spirv/writer/raise"
   lang/spirv/writer/raise/builtin_polyfill.cc
   lang/spirv/writer/raise/builtin_polyfill.h
@@ -80,6 +83,9 @@ endif(TINT_BUILD_SPV_WRITER)
 
 endif(TINT_BUILD_SPV_WRITER  AND  TINT_BUILD_IR)
 if(TINT_BUILD_SPV_WRITER  AND  TINT_BUILD_IR)
+################################################################################
+# CMake target: 'tint_lang_spirv_writer_raise_test'
+################################################################################
 tint_add_target("lang/spirv/writer/raise:test"
   lang/spirv/writer/raise/builtin_polyfill_test.cc
   lang/spirv/writer/raise/expand_implicit_splats_test.cc

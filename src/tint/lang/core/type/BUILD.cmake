@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_lang_core_type'
+################################################################################
 tint_add_target("lang/core/type"
   lang/core/type/abstract_float.cc
   lang/core/type/abstract_float.h
@@ -108,6 +111,9 @@ tint_target_add_dependencies("lang/core/type"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_lang_core_type_test'
+################################################################################
 tint_add_target("lang/core/type:test"
   lang/core/type/array_test.cc
   lang/core/type/atomic_test.cc

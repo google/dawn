@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_utils_math'
+################################################################################
 tint_add_target("utils/math"
   utils/math/crc32.h
   utils/math/hash.h
@@ -27,6 +30,9 @@ tint_add_target("utils/math"
   utils/math/math.h
 )
 
+################################################################################
+# CMake target: 'tint_utils_math_test'
+################################################################################
 tint_add_target("utils/math:test"
   utils/math/crc32_test.cc
   utils/math/hash_test.cc

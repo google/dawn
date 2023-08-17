@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_reader_parser'
+################################################################################
 tint_add_target("lang/wgsl/reader/parser"
   lang/wgsl/reader/parser/classify_template_args.cc
   lang/wgsl/reader/parser/classify_template_args.h
@@ -57,6 +60,9 @@ tint_target_add_dependencies("lang/wgsl/reader/parser"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_reader_parser_test'
+################################################################################
 tint_add_target("lang/wgsl/reader/parser:test"
   lang/wgsl/reader/parser/additive_expression_test.cc
   lang/wgsl/reader/parser/argument_expression_list_test.cc

@@ -23,6 +23,9 @@
 include(lang/core/ir/transform/BUILD.cmake)
 
 if(TINT_BUILD_IR)
+################################################################################
+# CMake target: 'tint_lang_core_ir'
+################################################################################
 tint_add_target("lang/core/ir"
   lang/core/ir/access.cc
   lang/core/ir/access.h
@@ -145,6 +148,9 @@ tint_target_add_dependencies("lang/core/ir"
 
 endif(TINT_BUILD_IR)
 if(TINT_BUILD_IR)
+################################################################################
+# CMake target: 'tint_lang_core_ir_test'
+################################################################################
 tint_add_target("lang/core/ir:test"
   lang/core/ir/access_test.cc
   lang/core/ir/binary_test.cc

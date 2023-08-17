@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_utils_rtti'
+################################################################################
 tint_add_target("utils/rtti"
   utils/rtti/castable.cc
   utils/rtti/castable.h
@@ -33,6 +36,9 @@ tint_target_add_dependencies("utils/rtti"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_utils_rtti_test'
+################################################################################
 tint_add_target("utils/rtti:test"
   utils/rtti/castable_test.cc
   utils/rtti/switch_test.cc
@@ -50,6 +56,9 @@ tint_target_add_external_dependencies("utils/rtti:test"
   "gtest"
 )
 
+################################################################################
+# CMake target: 'tint_utils_rtti_bench'
+################################################################################
 tint_add_target("utils/rtti:bench"
   utils/rtti/switch_bench.cc
 )

@@ -24,6 +24,9 @@ include(lang/hlsl/writer/ast_printer/BUILD.cmake)
 include(lang/hlsl/writer/common/BUILD.cmake)
 
 if(TINT_BUILD_HLSL_WRITER)
+################################################################################
+# CMake target: 'tint_lang_hlsl_writer'
+################################################################################
 tint_add_target("lang/hlsl/writer"
   lang/hlsl/writer/output.cc
   lang/hlsl/writer/output.h
@@ -66,6 +69,9 @@ endif(TINT_BUILD_HLSL_WRITER)
 
 endif(TINT_BUILD_HLSL_WRITER)
 if(TINT_BUILD_HLSL_WRITER)
+################################################################################
+# CMake target: 'tint_lang_hlsl_writer_bench'
+################################################################################
 tint_add_target("lang/hlsl/writer:bench"
   lang/hlsl/writer/writer_bench.cc
 )

@@ -25,6 +25,9 @@ include(lang/core/intrinsic/BUILD.cmake)
 include(lang/core/ir/BUILD.cmake)
 include(lang/core/type/BUILD.cmake)
 
+################################################################################
+# CMake target: 'tint_lang_core'
+################################################################################
 tint_add_target("lang/core"
   lang/core/access.cc
   lang/core/access.h
@@ -76,6 +79,9 @@ tint_target_add_dependencies("lang/core"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_lang_core_test'
+################################################################################
 tint_add_target("lang/core:test"
   lang/core/access_test.cc
   lang/core/address_space_test.cc
@@ -118,6 +124,9 @@ tint_target_add_external_dependencies("lang/core:test"
   "gtest"
 )
 
+################################################################################
+# CMake target: 'tint_lang_core_bench'
+################################################################################
 tint_add_target("lang/core:bench"
   lang/core/access_bench.cc
   lang/core/address_space_bench.cc

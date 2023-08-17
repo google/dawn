@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_writer_ast_printer'
+################################################################################
 tint_add_target("lang/wgsl/writer/ast_printer"
   lang/wgsl/writer/ast_printer/ast_printer.cc
   lang/wgsl/writer/ast_printer/ast_printer.h
@@ -48,6 +51,9 @@ tint_target_add_dependencies("lang/wgsl/writer/ast_printer"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_writer_ast_printer_test'
+################################################################################
 tint_add_target("lang/wgsl/writer/ast_printer:test"
   lang/wgsl/writer/ast_printer/alias_type_test.cc
   lang/wgsl/writer/ast_printer/array_accessor_test.cc

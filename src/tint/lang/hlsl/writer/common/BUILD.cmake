@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_lang_hlsl_writer_common'
+################################################################################
 tint_add_target("lang/hlsl/writer/common"
   lang/hlsl/writer/common/options.cc
   lang/hlsl/writer/common/options.h

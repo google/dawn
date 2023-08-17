@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_utils_strconv'
+################################################################################
 tint_add_target("utils/strconv"
   utils/strconv/float_to_string.cc
   utils/strconv/float_to_string.h
@@ -39,6 +42,9 @@ tint_target_add_external_dependencies("utils/strconv"
   "abseil"
 )
 
+################################################################################
+# CMake target: 'tint_utils_strconv_test'
+################################################################################
 tint_add_target("utils/strconv:test"
   utils/strconv/float_to_string_test.cc
 )

@@ -29,6 +29,9 @@ include(lang/wgsl/resolver/BUILD.cmake)
 include(lang/wgsl/sem/BUILD.cmake)
 include(lang/wgsl/writer/BUILD.cmake)
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_test'
+################################################################################
 tint_add_target("lang/wgsl:test"
   lang/wgsl/wgsl_test.cc
 )

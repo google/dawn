@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_utils_cli'
+################################################################################
 tint_add_target("utils/cli"
   utils/cli/cli.cc
   utils/cli/cli.h
@@ -38,6 +41,9 @@ tint_target_add_dependencies("utils/cli"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_utils_cli_test'
+################################################################################
 tint_add_target("utils/cli:test"
   utils/cli/cli_test.cc
 )

@@ -21,6 +21,9 @@
 ################################################################################
 
 if(TINT_BUILD_SPV_WRITER)
+################################################################################
+# CMake target: 'tint_lang_spirv_writer_common'
+################################################################################
 tint_add_target("lang/spirv/writer/common"
   lang/spirv/writer/common/binary_writer.cc
   lang/spirv/writer/common/binary_writer.h
@@ -54,6 +57,9 @@ endif(TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
 
 endif(TINT_BUILD_SPV_WRITER)
 if(TINT_BUILD_SPV_WRITER)
+################################################################################
+# CMake target: 'tint_lang_spirv_writer_common_test'
+################################################################################
 tint_add_target("lang/spirv/writer/common:test"
   lang/spirv/writer/common/binary_writer_test.cc
   lang/spirv/writer/common/instruction_test.cc

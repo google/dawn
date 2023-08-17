@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_api_options'
+################################################################################
 tint_add_target("api/options"
   api/options/array_length_from_uniform.h
   api/options/binding_remapper.h

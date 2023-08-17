@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_utils_generator'
+################################################################################
 tint_add_target("utils/generator"
   utils/generator/text_generator.cc
   utils/generator/text_generator.h

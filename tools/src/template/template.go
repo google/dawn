@@ -84,7 +84,7 @@ func (t *Template) Run(w io.Writer, data any, funcs Functions) error {
 		"TrimPrefix": strings.TrimPrefix,
 		"TrimRight":  strings.TrimRight,
 		"TrimSuffix": strings.TrimSuffix,
-		"Replace":    strings.ReplaceAll,
+		"Replace":    replace,
 		"Index":      index,
 		"Error":      func(err any) string { panic(err) },
 	}
@@ -246,4 +246,8 @@ func index(obj any, indices ...any) (any, error) {
 		return nil, nil
 	}
 	return v.Interface(), nil
+}
+
+func replace(s string, oldNew ...string) string {
+	return strings.NewReplacer(oldNew...).Replace(s)
 }

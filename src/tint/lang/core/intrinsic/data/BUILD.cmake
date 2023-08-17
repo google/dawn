@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_lang_core_intrinsic_data'
+################################################################################
 tint_add_target("lang/core/intrinsic/data"
   lang/core/intrinsic/data/data.cc
   lang/core/intrinsic/data/data.h

@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_utils_reflection'
+################################################################################
 tint_add_target("utils/reflection"
   utils/reflection/reflection.cc
   utils/reflection/reflection.h
@@ -29,6 +32,9 @@ tint_target_add_dependencies("utils/reflection"
   "utils/macros"
 )
 
+################################################################################
+# CMake target: 'tint_utils_reflection_test'
+################################################################################
 tint_add_target("utils/reflection:test"
   utils/reflection/reflection_test.cc
 )

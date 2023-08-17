@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_utils_ice'
+################################################################################
 tint_add_target("utils/ice"
   utils/ice/ice.cc
   utils/ice/ice.h
@@ -30,6 +33,9 @@ tint_target_add_dependencies("utils/ice"
   "utils/macros"
 )
 
+################################################################################
+# CMake target: 'tint_utils_ice_test'
+################################################################################
 tint_add_target("utils/ice:test"
   utils/ice/ice_test.cc
 )

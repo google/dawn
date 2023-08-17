@@ -43,6 +43,9 @@ include({{$subdir.Path}}/BUILD.cmake)
 {{-   if $.Condition}}
 if({{Eval "Expression" $.Condition}})
 {{-   end}}
+################################################################################
+# CMake target: 'tint_{{Replace (print $.Name) "/" "_"  ":" "_"}}'
+################################################################################
 tint_add_target("{{$.Name}}"
 {{- /* Emit unconditional files */}}
 {{-   $UnconditionalSourceFiles := $.UnconditionalSourceFiles}}

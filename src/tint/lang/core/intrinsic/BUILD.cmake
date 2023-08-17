@@ -22,6 +22,9 @@
 
 include(lang/core/intrinsic/data/BUILD.cmake)
 
+################################################################################
+# CMake target: 'tint_lang_core_intrinsic'
+################################################################################
 tint_add_target("lang/core/intrinsic"
   lang/core/intrinsic/ctor_conv.cc
   lang/core/intrinsic/ctor_conv.h
@@ -48,6 +51,9 @@ tint_target_add_dependencies("lang/core/intrinsic"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_lang_core_intrinsic_test'
+################################################################################
 tint_add_target("lang/core/intrinsic:test"
   lang/core/intrinsic/table_test.cc
 )

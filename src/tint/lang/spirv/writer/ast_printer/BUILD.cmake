@@ -21,6 +21,9 @@
 ################################################################################
 
 if(TINT_BUILD_SPV_WRITER)
+################################################################################
+# CMake target: 'tint_lang_spirv_writer_ast_printer'
+################################################################################
 tint_add_target("lang/spirv/writer/ast_printer"
   lang/spirv/writer/ast_printer/ast_printer.cc
   lang/spirv/writer/ast_printer/ast_printer.h
@@ -69,6 +72,9 @@ endif(TINT_BUILD_SPV_WRITER)
 
 endif(TINT_BUILD_SPV_WRITER)
 if(TINT_BUILD_SPV_WRITER)
+################################################################################
+# CMake target: 'tint_lang_spirv_writer_ast_printer_test'
+################################################################################
 tint_add_target("lang/spirv/writer/ast_printer:test"
   lang/spirv/writer/ast_printer/accessor_expression_test.cc
   lang/spirv/writer/ast_printer/assign_test.cc

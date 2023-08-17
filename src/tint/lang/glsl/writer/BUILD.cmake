@@ -24,6 +24,9 @@ include(lang/glsl/writer/ast_printer/BUILD.cmake)
 include(lang/glsl/writer/common/BUILD.cmake)
 
 if(TINT_BUILD_GLSL_WRITER)
+################################################################################
+# CMake target: 'tint_lang_glsl_writer'
+################################################################################
 tint_add_target("lang/glsl/writer"
   lang/glsl/writer/output.cc
   lang/glsl/writer/output.h
@@ -66,6 +69,9 @@ endif(TINT_BUILD_GLSL_WRITER)
 
 endif(TINT_BUILD_GLSL_WRITER)
 if(TINT_BUILD_GLSL_WRITER)
+################################################################################
+# CMake target: 'tint_lang_glsl_writer_bench'
+################################################################################
 tint_add_target("lang/glsl/writer:bench"
   lang/glsl/writer/writer_bench.cc
 )

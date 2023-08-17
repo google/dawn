@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_inspector'
+################################################################################
 tint_add_target("lang/wgsl/inspector"
   lang/wgsl/inspector/entry_point.cc
   lang/wgsl/inspector/entry_point.h
@@ -54,6 +57,9 @@ tint_target_add_dependencies("lang/wgsl/inspector"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_inspector_test'
+################################################################################
 tint_add_target("lang/wgsl/inspector:test"
   lang/wgsl/inspector/inspector_builder_test.cc
   lang/wgsl/inspector/inspector_builder_test.h

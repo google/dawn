@@ -24,6 +24,9 @@ include(lang/wgsl/writer/ast_printer/BUILD.cmake)
 include(lang/wgsl/writer/ir_to_program/BUILD.cmake)
 include(lang/wgsl/writer/syntax_tree_printer/BUILD.cmake)
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_writer'
+################################################################################
 tint_add_target("lang/wgsl/writer"
   lang/wgsl/writer/options.cc
   lang/wgsl/writer/options.h
@@ -58,6 +61,9 @@ tint_target_add_dependencies("lang/wgsl/writer"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_writer_bench'
+################################################################################
 tint_add_target("lang/wgsl/writer:bench"
   lang/wgsl/writer/writer_bench.cc
 )

@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_lang_msl_writer_raise'
+################################################################################
 tint_add_target("lang/msl/writer/raise"
   lang/msl/writer/raise/raise.cc
   lang/msl/writer/raise/raise.h

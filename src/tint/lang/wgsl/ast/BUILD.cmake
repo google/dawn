@@ -22,6 +22,9 @@
 
 include(lang/wgsl/ast/transform/BUILD.cmake)
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_ast'
+################################################################################
 tint_add_target("lang/wgsl/ast"
   lang/wgsl/ast/accessor_expression.cc
   lang/wgsl/ast/accessor_expression.h
@@ -201,6 +204,9 @@ tint_target_add_dependencies("lang/wgsl/ast"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_lang_wgsl_ast_test'
+################################################################################
 tint_add_target("lang/wgsl/ast:test"
   lang/wgsl/ast/alias_test.cc
   lang/wgsl/ast/assignment_statement_test.cc

@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_utils_macros'
+################################################################################
 tint_add_target("utils/macros"
   utils/macros/compiler.h
   utils/macros/concat.h
@@ -29,6 +32,9 @@ tint_add_target("utils/macros"
   utils/macros/scoped_assignment.h
 )
 
+################################################################################
+# CMake target: 'tint_utils_macros_test'
+################################################################################
 tint_add_target("utils/macros:test"
   utils/macros/defer_test.cc
   utils/macros/scoped_assignment_test.cc

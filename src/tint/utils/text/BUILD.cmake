@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_utils_text'
+################################################################################
 tint_add_target("utils/text"
   utils/text/string.cc
   utils/text/string.h
@@ -39,6 +42,9 @@ tint_target_add_dependencies("utils/text"
   "utils/traits"
 )
 
+################################################################################
+# CMake target: 'tint_utils_text_test'
+################################################################################
 tint_add_target("utils/text:test"
   utils/text/string_stream_test.cc
   utils/text/string_test.cc

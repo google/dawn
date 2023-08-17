@@ -21,6 +21,9 @@
 ################################################################################
 
 if(TINT_BUILD_IR)
+################################################################################
+# CMake target: 'tint_lang_wgsl_reader_program_to_ir'
+################################################################################
 tint_add_target("lang/wgsl/reader/program_to_ir"
   lang/wgsl/reader/program_to_ir/program_to_ir.cc
   lang/wgsl/reader/program_to_ir/program_to_ir.h
@@ -57,6 +60,9 @@ endif(TINT_BUILD_IR)
 
 endif(TINT_BUILD_IR)
 if(TINT_BUILD_IR)
+################################################################################
+# CMake target: 'tint_lang_wgsl_reader_program_to_ir_test'
+################################################################################
 tint_add_target("lang/wgsl/reader/program_to_ir:test"
   lang/wgsl/reader/program_to_ir/accessor_test.cc
   lang/wgsl/reader/program_to_ir/binary_test.cc

@@ -21,6 +21,9 @@
 ################################################################################
 
 if(TINT_BUILD_MSL_WRITER)
+################################################################################
+# CMake target: 'tint_lang_msl_writer_common'
+################################################################################
 tint_add_target("lang/msl/writer/common"
   lang/msl/writer/common/options.cc
   lang/msl/writer/common/options.h
@@ -49,6 +52,9 @@ tint_target_add_dependencies("lang/msl/writer/common"
 
 endif(TINT_BUILD_MSL_WRITER)
 if(TINT_BUILD_MSL_WRITER)
+################################################################################
+# CMake target: 'tint_lang_msl_writer_common_test'
+################################################################################
 tint_add_target("lang/msl/writer/common:test"
   lang/msl/writer/common/printer_support_test.cc
 )

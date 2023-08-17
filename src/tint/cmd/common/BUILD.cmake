@@ -20,6 +20,9 @@
 # Do not modify this file directly
 ################################################################################
 
+################################################################################
+# CMake target: 'tint_cmd_common'
+################################################################################
 tint_add_target("cmd/common"
   cmd/common/generate_external_texture_bindings.cc
   cmd/common/generate_external_texture_bindings.h
@@ -67,6 +70,9 @@ if (TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
   )
 endif(TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
 
+################################################################################
+# CMake target: 'tint_cmd_common_test'
+################################################################################
 tint_add_target("cmd/common:test"
   cmd/common/generate_external_texture_bindings_test.cc
 )

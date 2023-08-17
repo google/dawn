@@ -21,6 +21,9 @@
 ################################################################################
 
 if(TINT_BUILD_IR)
+################################################################################
+# CMake target: 'tint_lang_core_ir_transform'
+################################################################################
 tint_add_target("lang/core/ir/transform"
   lang/core/ir/transform/add_empty_entry_point.cc
   lang/core/ir/transform/add_empty_entry_point.h
@@ -71,6 +74,9 @@ endif(TINT_BUILD_IR)
 
 endif(TINT_BUILD_IR)
 if(TINT_BUILD_IR)
+################################################################################
+# CMake target: 'tint_lang_core_ir_transform_test'
+################################################################################
 tint_add_target("lang/core/ir/transform:test"
   lang/core/ir/transform/add_empty_entry_point_test.cc
   lang/core/ir/transform/bgra8unorm_polyfill_test.cc
