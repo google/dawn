@@ -53,6 +53,8 @@ std::optional<Program> FlattenBindings(const Program* program) {
                 case tint::inspector::ResourceBinding::ResourceType::kSampledTexture:
                 case tint::inspector::ResourceBinding::ResourceType::kMultisampledTexture:
                 case tint::inspector::ResourceBinding::ResourceType::kWriteOnlyStorageTexture:
+                case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageTexture:
+                case tint::inspector::ResourceBinding::ResourceType::kReadWriteStorageTexture:
                 case tint::inspector::ResourceBinding::ResourceType::kDepthTexture:
                 case tint::inspector::ResourceBinding::ResourceType::kDepthMultisampledTexture:
                 case tint::inspector::ResourceBinding::ResourceType::kExternalTexture:

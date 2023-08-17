@@ -338,7 +338,7 @@ std::vector<ResourceBinding> Inspector::GetResourceBindings(const std::string& e
              &Inspector::GetComparisonSamplerResourceBindings,
              &Inspector::GetSampledTextureResourceBindings,
              &Inspector::GetMultisampledTextureResourceBindings,
-             &Inspector::GetWriteOnlyStorageTextureResourceBindings,
+             &Inspector::GetStorageTextureResourceBindings,
              &Inspector::GetDepthTextureResourceBindings,
              &Inspector::GetDepthMultisampledTextureResourceBindings,
              &Inspector::GetExternalTextureResourceBindings,
@@ -449,7 +449,7 @@ std::vector<ResourceBinding> Inspector::GetMultisampledTextureResourceBindings(
     return GetSampledTextureResourceBindingsImpl(entry_point, true);
 }
 
-std::vector<ResourceBinding> Inspector::GetWriteOnlyStorageTextureResourceBindings(
+std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindings(
     const std::string& entry_point) {
     return GetStorageTextureResourceBindingsImpl(entry_point);
 }
@@ -762,7 +762,19 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
         auto* texture_type = var->Type()->UnwrapRef()->As<core::type::StorageTexture>();
 
         ResourceBinding entry;
-        entry.resource_type = ResourceBinding::ResourceType::kWriteOnlyStorageTexture;
+        switch (texture_type->access()) {
+            case core::Access::kWrite:
+                entry.resource_type = ResourceBinding::ResourceType::kWriteOnlyStorageTexture;
+                break;
+            case core::Access::kReadWrite:
+                entry.resource_type = ResourceBinding::ResourceType::kReadWriteStorageTexture;
+                break;
+            case core::Access::kRead:
+                entry.resource_type = ResourceBinding::ResourceType::kReadOnlyStorageTexture;
+                break;
+            case core::Access::kUndefined:
+                TINT_UNREACHABLE() << "unhandled storage texture access";
+        }
         entry.bind_group = binding_info.group;
         entry.binding = binding_info.binding;
 

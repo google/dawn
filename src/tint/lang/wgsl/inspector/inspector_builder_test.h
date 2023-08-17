@@ -284,11 +284,14 @@ class InspectorBuilder : public ProgramBuilder {
     /// @returns a pointer to a type appropriate for the coord param
     ast::Type GetCoordsType(core::type::TextureDimension dim, ast::Type scalar);
 
-    /// Generates appropriate types for a Read-Only StorageTexture
+    /// Generates appropriate types for a StorageTexture
     /// @param dim the texture dimension of the storage texture
     /// @param format the texel format of the storage texture
+    /// @param access the storage texture access
     /// @returns the storage texture type
-    ast::Type MakeStorageTextureTypes(core::type::TextureDimension dim, core::TexelFormat format);
+    ast::Type MakeStorageTextureTypes(core::type::TextureDimension dim,
+                                      core::TexelFormat format,
+                                      core::Access access);
 
     /// Adds a storage texture variable to the program
     /// @param name the name of the variable

@@ -285,8 +285,9 @@ ast::Type InspectorBuilder::GetCoordsType(core::type::TextureDimension dim, ast:
 }
 
 ast::Type InspectorBuilder::MakeStorageTextureTypes(core::type::TextureDimension dim,
-                                                    core::TexelFormat format) {
-    return ty.storage_texture(dim, format, core::Access::kWrite);
+                                                    core::TexelFormat format,
+                                                    core::Access access) {
+    return ty.storage_texture(dim, format, access);
 }
 
 void InspectorBuilder::AddStorageTexture(const std::string& name,

@@ -373,7 +373,7 @@ void CommonFuzzer::RunInspector(Program* program) {
         inspector.GetMultisampledTextureResourceBindings(ep.name);
         CHECK_INSPECTOR(program, inspector);
 
-        inspector.GetWriteOnlyStorageTextureResourceBindings(ep.name);
+        inspector.GetStorageTextureResourceBindings(ep.name);
         CHECK_INSPECTOR(program, inspector);
 
         inspector.GetDepthTextureResourceBindings(ep.name);
