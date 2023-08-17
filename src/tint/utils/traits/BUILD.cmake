@@ -32,3 +32,7 @@ tint_add_target("utils/traits:test"
 tint_target_add_dependencies("utils/traits:test"
   "utils/traits"
 )
+
+tint_target_add_external_dependencies("utils/traits:test"
+  "gtest"
+)

@@ -95,6 +95,10 @@ tint_target_add_dependencies("lang/msl/writer/printer:test"
   "utils/traits"
 )
 
+tint_target_add_external_dependencies("lang/msl/writer/printer:test"
+  "gtest"
+)
+
 if (TINT_BUILD_IR)
   tint_target_add_dependencies("lang/msl/writer/printer:test"
     "lang/core/ir"

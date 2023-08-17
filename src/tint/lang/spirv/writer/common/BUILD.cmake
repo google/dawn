@@ -84,6 +84,10 @@ tint_target_add_dependencies("lang/spirv/writer/common:test"
   "utils/traits"
 )
 
+tint_target_add_external_dependencies("lang/spirv/writer/common:test"
+  "gtest"
+)
+
 if (TINT_BUILD_IR)
   tint_target_add_sources("lang/spirv/writer/common:test"
     "lang/spirv/writer/common/helper_test.h"

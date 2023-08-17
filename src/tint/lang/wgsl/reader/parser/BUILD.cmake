@@ -152,3 +152,7 @@ tint_target_add_dependencies("lang/wgsl/reader/parser:test"
   "utils/text"
   "utils/traits"
 )
+
+tint_target_add_external_dependencies("lang/wgsl/reader/parser:test"
+  "gtest"
+)

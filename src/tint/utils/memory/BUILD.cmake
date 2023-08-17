@@ -41,3 +41,7 @@ tint_target_add_dependencies("utils/memory:test"
   "utils/math"
   "utils/memory"
 )
+
+tint_target_add_external_dependencies("utils/memory:test"
+  "gtest"
+)

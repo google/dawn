@@ -142,6 +142,10 @@ tint_target_add_dependencies("lang/spirv/reader/ast_parser:test"
   "utils/traits"
 )
 
+tint_target_add_external_dependencies("lang/spirv/reader/ast_parser:test"
+  "gtest"
+)
+
 if (TINT_BUILD_SPV_READER)
   tint_target_add_dependencies("lang/spirv/reader/ast_parser:test"
     "lang/spirv/reader/ast_parser"

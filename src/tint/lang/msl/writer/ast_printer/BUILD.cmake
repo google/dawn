@@ -121,6 +121,10 @@ tint_target_add_dependencies("lang/msl/writer/ast_printer:test"
   "utils/traits"
 )
 
+tint_target_add_external_dependencies("lang/msl/writer/ast_printer:test"
+  "gtest"
+)
+
 if (TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies("lang/msl/writer/ast_printer:test"
     "lang/msl/writer"

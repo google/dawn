@@ -110,6 +110,10 @@ tint_target_add_dependencies("lang/spirv/writer:test"
   "utils/traits"
 )
 
+tint_target_add_external_dependencies("lang/spirv/writer:test"
+  "gtest"
+)
+
 if (TINT_BUILD_IR)
   tint_target_add_sources("lang/spirv/writer:test"
     "lang/spirv/writer/access_test.cc"

@@ -38,3 +38,7 @@ tint_target_add_dependencies("utils/ice:test"
   "utils/ice"
   "utils/macros"
 )
+
+tint_target_add_external_dependencies("utils/ice:test"
+  "gtest"
+)

@@ -120,6 +120,10 @@ tint_target_add_dependencies("lang/hlsl/writer/ast_printer:test"
   "utils/traits"
 )
 
+tint_target_add_external_dependencies("lang/hlsl/writer/ast_printer:test"
+  "gtest"
+)
+
 if (TINT_BUILD_HLSL_WRITER)
   tint_target_add_dependencies("lang/hlsl/writer/ast_printer:test"
     "lang/hlsl/writer"

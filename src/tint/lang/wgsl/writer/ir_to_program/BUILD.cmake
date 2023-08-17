@@ -91,6 +91,10 @@ tint_target_add_dependencies("lang/wgsl/writer/ir_to_program:test"
   "utils/traits"
 )
 
+tint_target_add_external_dependencies("lang/wgsl/writer/ir_to_program:test"
+  "gtest"
+)
+
 if (TINT_BUILD_IR)
   tint_target_add_dependencies("lang/wgsl/writer/ir_to_program:test"
     "lang/core/ir"

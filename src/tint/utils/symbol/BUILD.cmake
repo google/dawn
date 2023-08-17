@@ -56,3 +56,7 @@ tint_target_add_dependencies("utils/symbol:test"
   "utils/text"
   "utils/traits"
 )
+
+tint_target_add_external_dependencies("utils/symbol:test"
+  "gtest"
+)

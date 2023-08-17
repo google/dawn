@@ -125,6 +125,10 @@ tint_target_add_dependencies("lang/glsl/writer/ast_printer:test"
   "utils/traits"
 )
 
+tint_target_add_external_dependencies("lang/glsl/writer/ast_printer:test"
+  "gtest"
+)
+
 if (TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies("lang/glsl/writer/ast_printer:test"
     "lang/glsl/writer"

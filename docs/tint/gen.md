@@ -53,6 +53,29 @@ The graph of target dependencies must be acyclic (DAG).
 Target dependencies are automatically inferred from `#include`s made by the source files.
 Additional target dependencies can be added with the use of a [`BUILD.cfg` file](#buildcfg-files).
 
+### External dependencies
+
+All external dependencies must be declared in [`tools/src/cmd/gen/build/externals.json`](../../tools/src/cmd/gen/build/externals.json).
+
+The syntax of this file is:
+
+```json
+{
+    "external-target-name": {
+        "IncludePatterns": [
+          /*
+            A list of #include path patterns that refer to this external target.
+            You may use the '*' wildcard for a single directory, or '**' as a multi-directory wildcard.
+          */
+          "myexternal/**.h",
+        ],
+        /* An optional build condition expression to wrap all uses of this external dependency */
+        "Condition": "expression",
+    },
+    /* Repeat the above for all external targets */
+}
+```
+
 ### `GEN_BUILD` directives
 
 Source and build files can be annotated with special directives in comments to control the build file generation.
@@ -90,13 +113,20 @@ The syntax of `TargetConfig` is:
 {
   /* An override for the output file name for the target */
   "OutputName": "name",
-  "AdditionalDependencies": [
-    /*
-      A list of target patterns that should in added as dependencies to this target.
-      And use the '*' wildcard for a single directory, or '**' as a multi-directory
-      wildcard.
-    */
-  ],
+  "AdditionalDependencies": {
+    "Internal": [
+      /*
+        A list of target name patterns that should in added as dependencies to this target.
+        You may use the '*' wildcard for a single directory, or '**' as a multi-directory wildcard.
+      */
+    ],
+    "External": [
+      /*
+        A list of external targets that should in added as dependencies to this target.
+        Must match an external dependency declared in tools/src/cmd/gen/build/externals.json
+      */
+    ]
+  },
 }
 ```
 

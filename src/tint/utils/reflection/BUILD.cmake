@@ -37,3 +37,7 @@ tint_target_add_dependencies("utils/reflection:test"
   "utils/macros"
   "utils/reflection"
 )
+
+tint_target_add_external_dependencies("utils/reflection:test"
+  "gtest"
+)

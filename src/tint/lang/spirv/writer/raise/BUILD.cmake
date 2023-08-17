@@ -109,6 +109,10 @@ tint_target_add_dependencies("lang/spirv/writer/raise:test"
   "utils/traits"
 )
 
+tint_target_add_external_dependencies("lang/spirv/writer/raise:test"
+  "gtest"
+)
+
 if (TINT_BUILD_IR)
   tint_target_add_dependencies("lang/spirv/writer/raise:test"
     "lang/core/ir"

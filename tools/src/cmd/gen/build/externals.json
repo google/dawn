@@ -3,26 +3,32 @@
  */
 {
     "abseil": {
-        "include_pattern": "absl/**",
+        "IncludePatterns": ["absl/**"],
     },
     "spirv-tools": {
-        "include_pattern": "spirv-tools/**",
-        "condition": "tint_build_spv_reader || tint_build_spv_writer",
+        "IncludePatterns": ["spirv-tools/**"],
+        "Condition": "tint_build_spv_reader || tint_build_spv_writer",
     },
     "spirv-headers": {
-        "include_pattern": "spirv/**",
-        "condition": "tint_build_spv_reader || tint_build_spv_writer",
+        "IncludePatterns": ["spirv/**"],
+        "Condition": "tint_build_spv_reader || tint_build_spv_writer",
     },
     "spirv-opt-internal": {
-        "include_pattern": "source/opt/**",
-        "condition": "tint_build_spv_reader || tint_build_spv_writer",
+        "IncludePatterns": ["source/opt/**"],
+        "Condition": "tint_build_spv_reader || tint_build_spv_writer",
     },
     "glslang": {
-        "include_pattern": "glslang/Public/ShaderLang.h",
-        "condition": "tint_build_glsl_writer",
+        "IncludePatterns": ["glslang/Public/ShaderLang.h"],
+        "Condition": "tint_build_glsl_writer",
     },
     "glslang-res-limits": {
-        "include_pattern": "glslang/Public/ResourceLimits.h",
-        "condition": "tint_build_glsl_writer",
+        "IncludePatterns": ["glslang/Public/ResourceLimits.h"],
+        "Condition": "tint_build_glsl_writer",
+    },
+    "gtest": {
+        "IncludePatterns": [
+            "gtest/**",
+            "gmock/**",
+        ],
     },
 }

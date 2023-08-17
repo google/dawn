@@ -18,8 +18,13 @@ package build
 type TargetConfig struct {
 	// Override for the output name of this target
 	OutputName string
-	// List of additional dependencies patterns to add to this target
-	AdditionalDependencies []string
+	// Additional dependencies to add to this target
+	AdditionalDependencies struct {
+		// List of internal dependency patterns
+		Internal []string
+		// List of external dependencies
+		External []ExternalDependencyName
+	}
 }
 
 // Config for a directory

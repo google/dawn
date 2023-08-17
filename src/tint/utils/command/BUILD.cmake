@@ -54,3 +54,7 @@ tint_add_target("utils/command:test"
 tint_target_add_dependencies("utils/command:test"
   "utils/command"
 )
+
+tint_target_add_external_dependencies("utils/command:test"
+  "gtest"
+)

@@ -114,6 +114,10 @@ tint_target_add_dependencies("lang/core:test"
   "utils/traits"
 )
 
+tint_target_add_external_dependencies("lang/core:test"
+  "gtest"
+)
+
 tint_add_target("lang/core:bench"
   lang/core/access_bench.cc
   lang/core/address_space_bench.cc

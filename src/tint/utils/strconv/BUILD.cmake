@@ -47,3 +47,7 @@ tint_target_add_dependencies("utils/strconv:test"
   "utils/memory"
   "utils/strconv"
 )
+
+tint_target_add_external_dependencies("utils/strconv:test"
+  "gtest"
+)

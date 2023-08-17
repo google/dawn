@@ -161,8 +161,6 @@ endfunction()
 function(tint_test_compile_options TARGET)
   tint_default_compile_options(${TARGET})
   set_target_properties(${TARGET} PROPERTIES FOLDER "Tests")
-  target_include_directories(${TARGET} PRIVATE ${gmock_SOURCE_DIR}/include)
-  target_link_libraries(${TARGET} PRIVATE gmock)
 
   if(NOT MSVC)
     target_compile_options(${TARGET} PRIVATE
@@ -476,6 +474,9 @@ function(tint_target_add_external_dependencies GN_TARGET)
         target_link_libraries(${TARGET} PRIVATE
           absl_strings
         )
+      elseif(${DEPENDENCY} STREQUAL "gtest")
+        target_include_directories(${TARGET} PRIVATE ${gmock_SOURCE_DIR}/include)
+        target_link_libraries(${TARGET} PRIVATE gmock)
       elseif(${DEPENDENCY} STREQUAL "spirv-headers")
         tint_spvheaders_compile_options(${TARGET})
       elseif(${DEPENDENCY} STREQUAL "spirv-tools")

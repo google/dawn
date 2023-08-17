@@ -61,6 +61,10 @@ tint_target_add_dependencies("cmd/test:test_cmd"
   "utils/traits:test"
 )
 
+tint_target_add_external_dependencies("cmd/test:test_cmd"
+  "gtest"
+)
+
 if (TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies("cmd/test:test_cmd"
     "lang/glsl/writer/ast_printer:test"

@@ -60,6 +60,10 @@ tint_target_add_dependencies("lang/wgsl:test"
   "utils/traits"
 )
 
+tint_target_add_external_dependencies("lang/wgsl:test"
+  "gtest"
+)
+
 if (TINT_BUILD_IR)
   tint_target_add_dependencies("lang/wgsl:test"
     "lang/core/ir"

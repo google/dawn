@@ -37,3 +37,7 @@ tint_add_target("utils/macros:test"
 tint_target_add_dependencies("utils/macros:test"
   "utils/macros"
 )
+
+tint_target_add_external_dependencies("utils/macros:test"
+  "gtest"
+)

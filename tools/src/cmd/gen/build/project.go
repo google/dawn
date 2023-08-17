@@ -22,6 +22,7 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/gen/common"
 	"dawn.googlesource.com/dawn/tools/src/container"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 )
 
 // Project holds information about all the directories, targets and source files
@@ -39,17 +40,20 @@ type Project struct {
 	Targets container.Map[TargetName, *Target]
 	// A list of external project dependencies used by the project
 	externals container.Map[ExternalDependencyName, ExternalDependency]
+	// Path to the 'externals.json' file
+	externalsJsonPath string
 }
 
 // NewProject returns a newly initialized Project
 func NewProject(root string, cfg *common.Config) *Project {
 	return &Project{
-		cfg:         cfg,
-		Root:        root,
-		Files:       container.NewMap[string, *File](),
-		Directories: container.NewMap[string, *Directory](),
-		Targets:     container.NewMap[TargetName, *Target](),
-		externals:   container.NewMap[ExternalDependencyName, ExternalDependency](),
+		cfg:               cfg,
+		Root:              root,
+		Files:             container.NewMap[string, *File](),
+		Directories:       container.NewMap[string, *Directory](),
+		Targets:           container.NewMap[TargetName, *Target](),
+		externals:         container.NewMap[ExternalDependencyName, ExternalDependency](),
+		externalsJsonPath: path.Join(fileutils.ThisDir(), "externals.json"),
 	}
 }
 

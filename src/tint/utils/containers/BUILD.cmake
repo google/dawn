@@ -85,3 +85,7 @@ tint_target_add_dependencies("utils/containers:test"
   "utils/text"
   "utils/traits"
 )
+
+tint_target_add_external_dependencies("utils/containers:test"
+  "gtest"
+)

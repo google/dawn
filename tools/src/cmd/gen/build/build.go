@@ -106,14 +106,14 @@ func (c Cmd) Run(ctx context.Context, cfg *common.Config) error {
 
 // loadExternals loads the 'externals.json' file in this directory.
 func loadExternals(p *Project) error {
-	content, err := os.ReadFile(path.Join(fileutils.ThisDir(), "externals.json"))
+	content, err := os.ReadFile(p.externalsJsonPath)
 	if err != nil {
 		return err
 	}
 
 	externals := container.NewMap[string, struct {
-		IncludePattern string `json:"include_pattern"`
-		Condition      string
+		IncludePatterns []string
+		Condition       string
 	}]()
 	if err := json.Unmarshal(jsonc.ToJSON(content), &externals); err != nil {
 		return fmt.Errorf("failed to parse 'externals.json': %w", err)
@@ -121,10 +121,26 @@ func loadExternals(p *Project) error {
 
 	for _, name := range externals.Keys() {
 		external := externals[name]
-		match, err := match.New(external.IncludePattern)
-		if err != nil {
-			return fmt.Errorf("'externals.json' matcher error: %w", err)
+		if len(external.IncludePatterns) == 0 {
+			return fmt.Errorf("'externals.json': '%v' requires at least one pattern in IncludePatterns", name)
 		}
+		matchers := []match.Test{}
+		for _, pattern := range external.IncludePatterns {
+			matcher, err := match.New(pattern)
+			if err != nil {
+				return fmt.Errorf("'externals.json': matcher error: %w", err)
+			}
+			matchers = append(matchers, matcher)
+		}
+		match := func(s string) bool {
+			for _, matcher := range matchers {
+				if matcher(s) {
+					return true
+				}
+			}
+			return false
+		}
+
 		name := ExternalDependencyName(name)
 		p.externals.Add(name, ExternalDependency{
 			Name:                name,
@@ -276,11 +292,11 @@ func applyDirectoryConfigs(p *Project) error {
 			// Apply any custom output name
 			target.OutputName = tc.cfg.OutputName
 
-			// Add any additional dependencies
-			for _, depPattern := range tc.cfg.AdditionalDependencies {
+			// Add any additional internal dependencies
+			for _, depPattern := range tc.cfg.AdditionalDependencies.Internal {
 				match, err := match.New(depPattern)
 				if err != nil {
-					return fmt.Errorf("%v: failed to parse %v.AdditionalDependencies '%v': %w", path, tc.kind, depPattern, err)
+					return fmt.Errorf("%v: invalid pattern for '%v'.AdditionalDependencies.Internal.'%v': %w", path, tc.kind, depPattern, err)
 				}
 				additionalDeps := []*Target{}
 				for _, target := range p.Targets.Keys() {
@@ -289,13 +305,22 @@ func applyDirectoryConfigs(p *Project) error {
 					}
 				}
 				if len(additionalDeps) == 0 {
-					return fmt.Errorf("%v: %v.AdditionalDependencies '%v' did not match any targets", path, tc.kind, depPattern)
+					return fmt.Errorf("%v: '%v'.AdditionalDependencies.Internal.'%v' did not match any targets", path, tc.kind, depPattern)
 				}
 				for _, dep := range additionalDeps {
 					if dep != target {
 						target.Dependencies.AddInternal(dep)
 					}
 				}
+			}
+			// Add any additional internal dependencies
+			for _, name := range tc.cfg.AdditionalDependencies.External {
+				dep, ok := p.externals[name]
+				if !ok {
+					return fmt.Errorf("%v: external dependency '%v'.AdditionalDependencies.External.'%v' not declared in '%v'",
+						path, tc.kind, name, p.externalsJsonPath)
+				}
+				target.Dependencies.AddExternal(dep)
 			}
 		}
 	}

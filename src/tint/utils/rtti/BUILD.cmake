@@ -46,6 +46,10 @@ tint_target_add_dependencies("utils/rtti:test"
   "utils/traits"
 )
 
+tint_target_add_external_dependencies("utils/rtti:test"
+  "gtest"
+)
+
 tint_add_target("utils/rtti:bench"
   utils/rtti/switch_bench.cc
 )

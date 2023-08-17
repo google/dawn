@@ -104,6 +104,10 @@ tint_target_add_dependencies("lang/core/ir/transform:test"
   "utils/traits"
 )
 
+tint_target_add_external_dependencies("lang/core/ir/transform:test"
+  "gtest"
+)
+
 if (TINT_BUILD_IR)
   tint_target_add_dependencies("lang/core/ir/transform:test"
     "lang/core/ir"

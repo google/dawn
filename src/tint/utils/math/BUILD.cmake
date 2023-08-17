@@ -42,3 +42,7 @@ tint_target_add_dependencies("utils/math:test"
   "utils/rtti"
   "utils/traits"
 )
+
+tint_target_add_external_dependencies("utils/math:test"
+  "gtest"
+)

@@ -158,3 +158,7 @@ tint_target_add_dependencies("lang/core/type:test"
   "utils/text"
   "utils/traits"
 )
+
+tint_target_add_external_dependencies("lang/core/type:test"
+  "gtest"
+)

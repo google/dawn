@@ -96,3 +96,7 @@ tint_target_add_dependencies("cmd/common:test"
   "utils/text"
   "utils/traits"
 )
+
+tint_target_add_external_dependencies("cmd/common:test"
+  "gtest"
+)

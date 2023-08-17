@@ -66,6 +66,10 @@ tint_target_add_dependencies("lang/msl/writer/common:test"
   "utils/traits"
 )
 
+tint_target_add_external_dependencies("lang/msl/writer/common:test"
+  "gtest"
+)
+
 if (TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies("lang/msl/writer/common:test"
     "lang/msl/writer/common"

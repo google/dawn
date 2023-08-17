@@ -56,3 +56,7 @@ tint_target_add_dependencies("utils/file:test"
   "utils/file"
   "utils/text"
 )
+
+tint_target_add_external_dependencies("utils/file:test"
+  "gtest"
+)
