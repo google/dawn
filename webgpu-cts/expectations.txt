@@ -98,6 +98,15 @@ crbug.com/1344876 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToT
 crbug.com/1344876 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
 
 ################################################################################
+# video tests fail on SwiftShader. Due to multiplanar formatted textures not
+# being handled properly in Chrome's WebGPU decoder.
+################################################################################
+crbug.com/1467566 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
+crbug.com/1467566 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ Failure ]
+crbug.com/1467566 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,external_texture,video:importExternalTexture* [ Failure ]
+crbug.com/1467566 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,external_texture,video:importExternalTexture* [ Failure ]
+
+################################################################################
 # external_texture failures
 # KEEP
 ################################################################################
