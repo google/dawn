@@ -114,59 +114,48 @@ interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::re
     auto promise =
         interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>>(env, PROMISE_INFO);
 
-    if (options.forceFallbackAdapter) {
-        // Software adapters are not currently supported.
-        promise.Resolve({});
-        return promise;
-    }
-
     RequestAdapterOptions nativeOptions;
+    nativeOptions.forceFallbackAdapter = options.forceFallbackAdapter;
+    nativeOptions.compatibilityMode = options.compatibilityMode;
+
+    // Convert the power preference.
+    nativeOptions.powerPreference = PowerPreference::Undefined;
     if (options.powerPreference.has_value()) {
-        // TODO(dneto): Assign power preference
+        switch (options.powerPreference.value()) {
+            case interop::GPUPowerPreference::kLowPower:
+                nativeOptions.powerPreference = PowerPreference::LowPower;
+                break;
+            case interop::GPUPowerPreference::kHighPerformance:
+                nativeOptions.powerPreference = PowerPreference::HighPerformance;
+                break;
+        }
     }
 
-    // Propagate toggles.
-    TogglesLoader togglesLoader(flags_);
-    DawnTogglesDescriptor togglesDescriptor = togglesLoader.GetDescriptor();
-    nativeOptions.nextInChain = &togglesDescriptor;
-
-    auto adapters = instance_.EnumerateAdapters(&nativeOptions);
-    if (adapters.empty()) {
-        promise.Resolve({});
-        return promise;
-    }
-
+    // Choose the backend to use.
 #if defined(_WIN32)
-    constexpr auto defaultBackendType = wgpu::BackendType::D3D12;
+    constexpr auto kDefaultBackendType = wgpu::BackendType::D3D12;
 #elif defined(__linux__)
-    constexpr auto defaultBackendType = wgpu::BackendType::Vulkan;
+    constexpr auto kDefaultBackendType = wgpu::BackendType::Vulkan;
 #elif defined(__APPLE__)
-    constexpr auto defaultBackendType = wgpu::BackendType::Metal;
+    constexpr auto kDefaultBackendType = wgpu::BackendType::Metal;
 #else
 #error "Unsupported platform"
 #endif
+    nativeOptions.backendType = kDefaultBackendType;
 
-    // Check for backend override from env var / flag
+    // Check for backend override from env var / flag.
     std::string forceBackend;
     if (auto f = flags_.Get("backend")) {
         forceBackend = *f;
     } else if (std::string envVar = GetEnvVar("DAWNNODE_BACKEND"); !envVar.empty()) {
         forceBackend = envVar;
     }
-
-    // Check for specific adapter name
-    std::string adapterName;
-    if (auto f = flags_.Get("adapter")) {
-        adapterName = *f;
-    }
-
     std::transform(forceBackend.begin(), forceBackend.end(), forceBackend.begin(),
                    [](char c) { return std::tolower(c); });
 
-    auto targetBackendType = defaultBackendType;
     if (!forceBackend.empty()) {
         if (auto parsed = ParseBackend(forceBackend)) {
-            targetBackendType = parsed.value();
+            nativeOptions.backendType = parsed.value();
         } else {
             std::stringstream msg;
             msg << "unrecognised backend '" + forceBackend + "'" << std::endl
@@ -182,13 +171,27 @@ interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>> GPU::re
         }
     }
 
+    // Propagate toggles.
+    TogglesLoader togglesLoader(flags_);
+    DawnTogglesDescriptor togglesDescriptor = togglesLoader.GetDescriptor();
+    nativeOptions.nextInChain = &togglesDescriptor;
+
+    auto adapters = instance_.EnumerateAdapters(&nativeOptions);
+    if (adapters.empty()) {
+        promise.Resolve({});
+        return promise;
+    }
+
+    // Check for specific adapter name
+    std::string adapterName;
+    if (auto f = flags_.Get("adapter")) {
+        adapterName = *f;
+    }
+
     dawn::native::Adapter* adapter = nullptr;
     for (auto& a : adapters) {
         wgpu::AdapterProperties props;
         a.GetProperties(&props);
-        if (props.backendType != targetBackendType) {
-            continue;
-        }
         if (!adapterName.empty() && props.name &&
             std::string(props.name).find(adapterName) == std::string::npos) {
             continue;

@@ -41,6 +41,7 @@ class GPUAdapter final : public interop::GPUAdapter {
     interop::Interface<interop::GPUSupportedFeatures> getFeatures(Napi::Env) override;
     interop::Interface<interop::GPUSupportedLimits> getLimits(Napi::Env) override;
     bool getIsFallbackAdapter(Napi::Env) override;
+    bool getIsCompatibilityMode(Napi::Env) override;
 
   private:
     dawn::native::Adapter adapter_;

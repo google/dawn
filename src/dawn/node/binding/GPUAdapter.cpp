@@ -99,6 +99,12 @@ bool GPUAdapter::getIsFallbackAdapter(Napi::Env) {
     return adapterProperties.adapterType == WGPUAdapterType_CPU;
 }
 
+bool GPUAdapter::getIsCompatibilityMode(Napi::Env) {
+    WGPUAdapterProperties adapterProperties = {};
+    adapter_.GetProperties(&adapterProperties);
+    return adapterProperties.compatibilityMode;
+}
+
 interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevice(
     Napi::Env env,
     interop::GPUDeviceDescriptor descriptor) {

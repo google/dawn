@@ -19,3 +19,11 @@ enum GPUFeatureName {
     "chromium-experimental-subgroups",
     "chromium-experimental-subgroup-uniform-control-flow",
 };
+
+dictionary GPURequestAdapterOptions {
+    boolean compatibilityMode = false;
+};
+
+interface GPUAdapter {
+    readonly attribute boolean isCompatibilityMode;
+};
