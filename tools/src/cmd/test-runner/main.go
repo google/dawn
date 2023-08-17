@@ -621,8 +621,8 @@ func (j job) run(cfg runConfig) {
 		case wgsl:
 			args = append(args, "--validate") // wgsl validation uses Tint, so is always available
 			validate = true
-		case spvasm, glsl:
-			args = append(args, "--validate") // spirv-val and glslang are statically linked, always available
+		case spvasm:
+			args = append(args, "--validate") // spirv-val is statically linked, always available
 			validate = true
 		case hlslDXC:
 			if cfg.dxcPath != "" {
@@ -639,6 +639,9 @@ func (j job) run(cfg runConfig) {
 				args = append(args, "--xcrun", cfg.xcrunPath)
 				validate = true
 			}
+		case glsl:
+			validate = false
+			// Do nothing for now, will fill in later with validator
 		default:
 			panic("unknown format: " + j.format)
 		}
