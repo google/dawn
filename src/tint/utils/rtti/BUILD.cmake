@@ -21,52 +21,55 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_rtti'
+# Target:    tint_utils_rtti
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/rtti"
+tint_add_target(tint_utils_rtti lib
   utils/rtti/castable.cc
   utils/rtti/castable.h
   utils/rtti/switch.h
 )
 
-tint_target_add_dependencies("utils/rtti"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_rtti lib
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_traits
 )
 
 ################################################################################
-# CMake target: 'tint_utils_rtti_test'
+# Target:    tint_utils_rtti_test
+# Kind:      test
 ################################################################################
-tint_add_target("utils/rtti:test"
+tint_add_target(tint_utils_rtti_test test
   utils/rtti/castable_test.cc
   utils/rtti/switch_test.cc
 )
 
-tint_target_add_dependencies("utils/rtti:test"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/rtti"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_rtti_test test
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("utils/rtti:test"
+tint_target_add_external_dependencies(tint_utils_rtti_test test
   "gtest"
 )
 
 ################################################################################
-# CMake target: 'tint_utils_rtti_bench'
+# Target:    tint_utils_rtti_bench
+# Kind:      bench
 ################################################################################
-tint_add_target("utils/rtti:bench"
+tint_add_target(tint_utils_rtti_bench bench
   utils/rtti/switch_bench.cc
 )
 
-tint_target_add_dependencies("utils/rtti:bench"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/rtti"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_rtti_bench bench
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+  tint_utils_traits
 )

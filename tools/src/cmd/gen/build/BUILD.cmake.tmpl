@@ -40,13 +40,19 @@ include({{$subdir.Path}}/BUILD.cmake)
 --------------------------------------------------------------------------------
 */ -}}
 {{- define "Target"}}
+{{-   $Kind := $.Kind}}
+{{-   $Name := Eval "TargetName" $}}
 {{-   if $.Condition}}
 if({{Eval "Expression" $.Condition}})
 {{-   end}}
 ################################################################################
-# CMake target: 'tint_{{Replace (print $.Name) "/" "_"  ":" "_"}}'
+# Target:    {{$Name}}
+# Kind:      {{$Kind}}
+{{-   if $.Condition}}
+# Condition: {{Eval "Expression" $.Condition}}
+{{-   end}}
 ################################################################################
-tint_add_target("{{$.Name}}"
+tint_add_target({{$Name}} {{$Kind}}
 {{- /* Emit unconditional files */}}
 {{-   $UnconditionalSourceFiles := $.UnconditionalSourceFiles}}
 {{-   if $UnconditionalSourceFiles }}
@@ -60,9 +66,9 @@ tint_add_target("{{$.Name}}"
 {{-   $UnconditionalDeps    := $.Dependencies.UnconditionalInternal }}
 {{-   if $UnconditionalDeps}}
 {{/*   newline */}}
-tint_target_add_dependencies("{{$.Name}}"
+tint_target_add_dependencies({{$Name}} {{$Kind}}
 {{-     range $Dep := $UnconditionalDeps}}
-  "{{$Dep.Name}}"
+  {{Eval "TargetName" $Dep}}
 {{-     end}}
 )
 {{-   end}}
@@ -71,7 +77,7 @@ tint_target_add_dependencies("{{$.Name}}"
 {{-   $UnconditionalExtDeps := $.Dependencies.UnconditionalExternal }}
 {{-   if $UnconditionalExtDeps}}
 {{/*   newline */}}
-tint_target_add_external_dependencies("{{$.Name}}"
+tint_target_add_external_dependencies({{$Name}} {{$Kind}}
 {{-     range $Dep := $UnconditionalExtDeps}}
   "{{$Dep.Name}}"
 {{-     end}}
@@ -83,21 +89,21 @@ tint_target_add_external_dependencies("{{$.Name}}"
 {{/*   newline */}}
 if ({{Eval "Expression" $Cond.Condition}})
 {{-     if $Cond.SourceFiles}}
-  tint_target_add_sources("{{$.Name}}"
+  tint_target_add_sources({{$Name}} {{$Kind}}
 {{-       range $File := $Cond.SourceFiles}}
     "{{$File.Path}}"
 {{-       end}}
   )
 {{-     end}}
 {{-     if $Cond.InternalDependencies}}
-  tint_target_add_dependencies("{{$.Name}}"
+  tint_target_add_dependencies({{$Name}} {{$Kind}}
 {{-       range $Dep := $Cond.InternalDependencies}}
-    "{{$Dep.Name}}"
+    {{Eval "TargetName" $Dep}}
 {{-       end}}
   )
 {{-     end}}
 {{-     if $Cond.ExternalDependencies}}
-  tint_target_add_external_dependencies("{{$.Name}}"
+  tint_target_add_external_dependencies({{$Name}} {{$Kind}}
 {{-       range $Dep := $Cond.ExternalDependencies}}
     "{{$Dep.Name}}"
 {{-       end}}
@@ -108,12 +114,22 @@ endif({{Eval "Expression" $Cond.Condition}})
 
 {{-   if $.OutputName}}
 {{/*   newline */}}
-tint_target_set_output_name("{{$.Name}}" "{{$.OutputName}}")
+tint_target_set_output_name({{$Name}} {{$Kind}} "{{$.OutputName}}")
 {{-   end}}
 {{/*   newline */}}
 {{-   if $.Condition}}
 endif({{Eval "Expression" $.Condition}})
 {{-   end}}
+{{- end}}
+
+
+{{- /*
+--------------------------------------------------------------------------------
+-- Emits a CMake target name
+--------------------------------------------------------------------------------
+*/ -}}
+{{- define "TargetName"}}
+{{-   Replace (printf "tint_%v" $.Name) "/" "_"  ":" "_"}}
 {{- end}}
 
 
@@ -131,3 +147,4 @@ endif({{Eval "Expression" $.Condition}})
 {{- end}}
 
 {{- /* eat newlines */ -}}
+

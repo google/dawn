@@ -21,18 +21,19 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_generator'
+# Target:    tint_utils_generator
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/generator"
+tint_add_target(tint_utils_generator lib
   utils/generator/text_generator.cc
   utils/generator/text_generator.h
 )
 
-tint_target_add_dependencies("utils/generator"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/macros"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_generator lib
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_text
+  tint_utils_traits
 )

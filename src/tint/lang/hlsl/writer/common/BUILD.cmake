@@ -21,20 +21,21 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_lang_hlsl_writer_common'
+# Target:    tint_lang_hlsl_writer_common
+# Kind:      lib
 ################################################################################
-tint_add_target("lang/hlsl/writer/common"
+tint_add_target(tint_lang_hlsl_writer_common lib
   lang/hlsl/writer/common/options.cc
   lang/hlsl/writer/common/options.h
 )
 
-tint_target_add_dependencies("lang/hlsl/writer/common"
-  "api/common"
-  "api/options"
-  "lang/core"
-  "utils/macros"
-  "utils/math"
-  "utils/reflection"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_hlsl_writer_common lib
+  tint_api_common
+  tint_api_options
+  tint_lang_core
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_reflection
+  tint_utils_text
+  tint_utils_traits
 )

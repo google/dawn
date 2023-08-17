@@ -21,17 +21,18 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_lang_msl_writer_raise'
+# Target:    tint_lang_msl_writer_raise
+# Kind:      lib
 ################################################################################
-tint_add_target("lang/msl/writer/raise"
+tint_add_target(tint_lang_msl_writer_raise lib
   lang/msl/writer/raise/raise.cc
   lang/msl/writer/raise/raise.h
 )
 
-tint_target_add_dependencies("lang/msl/writer/raise"
-  "utils/ice"
-  "utils/macros"
-  "utils/result"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_msl_writer_raise lib
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_result
+  tint_utils_text
+  tint_utils_traits
 )

@@ -24,9 +24,11 @@ include(lang/core/ir/transform/BUILD.cmake)
 
 if(TINT_BUILD_IR)
 ################################################################################
-# CMake target: 'tint_lang_core_ir'
+# Target:    tint_lang_core_ir
+# Kind:      lib
+# Condition: TINT_BUILD_IR
 ################################################################################
-tint_add_target("lang/core/ir"
+tint_add_target(tint_lang_core_ir lib
   lang/core/ir/access.cc
   lang/core/ir/access.h
   lang/core/ir/binary.cc
@@ -126,32 +128,34 @@ tint_add_target("lang/core/ir"
   lang/core/ir/var.h
 )
 
-tint_target_add_dependencies("lang/core/ir"
-  "api/common"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_core_ir lib
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 endif(TINT_BUILD_IR)
 if(TINT_BUILD_IR)
 ################################################################################
-# CMake target: 'tint_lang_core_ir_test'
+# Target:    tint_lang_core_ir_test
+# Kind:      test
+# Condition: TINT_BUILD_IR
 ################################################################################
-tint_add_target("lang/core/ir:test"
+tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/access_test.cc
   lang/core/ir/binary_test.cc
   lang/core/ir/bitcast_test.cc
@@ -194,33 +198,33 @@ tint_add_target("lang/core/ir:test"
   lang/core/ir/var_test.cc
 )
 
-tint_target_add_dependencies("lang/core/ir:test"
-  "api/common"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_core_ir_test test
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("lang/core/ir:test"
+tint_target_add_external_dependencies(tint_lang_core_ir_test test
   "gtest"
 )
 
 if (TINT_BUILD_IR)
-  tint_target_add_dependencies("lang/core/ir:test"
-    "lang/core/ir"
+  tint_target_add_dependencies(tint_lang_core_ir_test test
+    tint_lang_core_ir
   )
 endif(TINT_BUILD_IR)
 

@@ -22,25 +22,27 @@
 
 if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
-# CMake target: 'tint_lang_hlsl_validate'
+# Target:    tint_lang_hlsl_validate
+# Kind:      lib
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
-tint_add_target("lang/hlsl/validate"
+tint_add_target(tint_lang_hlsl_validate lib
   lang/hlsl/validate/hlsl.cc
   lang/hlsl/validate/val.h
 )
 
-tint_target_add_dependencies("lang/hlsl/validate"
-  "lang/wgsl/ast"
-  "utils/command"
-  "utils/containers"
-  "utils/file"
-  "utils/ice"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/rtti"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_hlsl_validate lib
+  tint_lang_wgsl_ast
+  tint_utils_command
+  tint_utils_containers
+  tint_utils_file
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+  tint_utils_text
+  tint_utils_traits
 )
 
 endif(TINT_BUILD_HLSL_WRITER)

@@ -27,99 +27,103 @@ include(lang/msl/writer/raise/BUILD.cmake)
 
 if(TINT_BUILD_MSL_WRITER)
 ################################################################################
-# CMake target: 'tint_lang_msl_writer'
+# Target:    tint_lang_msl_writer
+# Kind:      lib
+# Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
-tint_add_target("lang/msl/writer"
+tint_add_target(tint_lang_msl_writer lib
   lang/msl/writer/output.cc
   lang/msl/writer/output.h
   lang/msl/writer/writer.cc
   lang/msl/writer/writer.h
 )
 
-tint_target_add_dependencies("lang/msl/writer"
-  "api/common"
-  "api/options"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/msl/writer/raise"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/generator"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_msl_writer lib
+  tint_api_common
+  tint_api_options
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_msl_writer_raise
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_generator
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 if (TINT_BUILD_IR)
-  tint_target_add_dependencies("lang/msl/writer"
-    "lang/core/ir"
-    "lang/wgsl/reader/program_to_ir"
+  tint_target_add_dependencies(tint_lang_msl_writer lib
+    tint_lang_core_ir
+    tint_lang_wgsl_reader_program_to_ir
   )
 endif(TINT_BUILD_IR)
 
 if (TINT_BUILD_MSL_WRITER)
-  tint_target_add_dependencies("lang/msl/writer"
-    "lang/msl/writer/ast_printer"
-    "lang/msl/writer/common"
+  tint_target_add_dependencies(tint_lang_msl_writer lib
+    tint_lang_msl_writer_ast_printer
+    tint_lang_msl_writer_common
   )
 endif(TINT_BUILD_MSL_WRITER)
 
 if (TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR)
-  tint_target_add_dependencies("lang/msl/writer"
-    "lang/msl/writer/printer"
+  tint_target_add_dependencies(tint_lang_msl_writer lib
+    tint_lang_msl_writer_printer
   )
 endif(TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR)
 
 endif(TINT_BUILD_MSL_WRITER)
 if(TINT_BUILD_MSL_WRITER)
 ################################################################################
-# CMake target: 'tint_lang_msl_writer_bench'
+# Target:    tint_lang_msl_writer_bench
+# Kind:      bench
+# Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
-tint_add_target("lang/msl/writer:bench"
+tint_add_target(tint_lang_msl_writer_bench bench
   lang/msl/writer/writer_bench.cc
 )
 
-tint_target_add_dependencies("lang/msl/writer:bench"
-  "api/common"
-  "api/options"
-  "cmd/bench"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_msl_writer_bench bench
+  tint_api_common
+  tint_api_options
+  tint_cmd_bench
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 if (TINT_BUILD_MSL_WRITER)
-  tint_target_add_dependencies("lang/msl/writer:bench"
-    "lang/msl/writer"
-    "lang/msl/writer/common"
+  tint_target_add_dependencies(tint_lang_msl_writer_bench bench
+    tint_lang_msl_writer
+    tint_lang_msl_writer_common
   )
 endif(TINT_BUILD_MSL_WRITER)
 

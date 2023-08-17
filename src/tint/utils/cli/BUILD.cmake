@@ -21,47 +21,49 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_cli'
+# Target:    tint_utils_cli
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/cli"
+tint_add_target(tint_utils_cli lib
   utils/cli/cli.cc
   utils/cli/cli.h
 )
 
-tint_target_add_dependencies("utils/cli"
-  "utils/containers"
-  "utils/ice"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/result"
-  "utils/rtti"
-  "utils/strconv"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_cli lib
+  tint_utils_containers
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_strconv
+  tint_utils_text
+  tint_utils_traits
 )
 
 ################################################################################
-# CMake target: 'tint_utils_cli_test'
+# Target:    tint_utils_cli_test
+# Kind:      test
 ################################################################################
-tint_add_target("utils/cli:test"
+tint_add_target(tint_utils_cli_test test
   utils/cli/cli_test.cc
 )
 
-tint_target_add_dependencies("utils/cli:test"
-  "utils/cli"
-  "utils/containers"
-  "utils/ice"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/result"
-  "utils/rtti"
-  "utils/strconv"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_cli_test test
+  tint_utils_cli
+  tint_utils_containers
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_strconv
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("utils/cli:test"
+tint_target_add_external_dependencies(tint_utils_cli_test test
   "gtest"
 )

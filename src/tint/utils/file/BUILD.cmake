@@ -21,48 +21,50 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_file'
+# Target:    tint_utils_file
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/file"
+tint_add_target(tint_utils_file lib
   utils/file/tmpfile.h
 )
 
-tint_target_add_dependencies("utils/file"
-  "utils/ice"
-  "utils/macros"
-  "utils/text"
+tint_target_add_dependencies(tint_utils_file lib
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_text
 )
 
 if ((NOT IS_LINUX)  AND  (NOT IS_MAC)  AND  (NOT IS_WIN))
-  tint_target_add_sources("utils/file"
+  tint_target_add_sources(tint_utils_file lib
     "utils/file/tmpfile_other.cc"
   )
 endif((NOT IS_LINUX)  AND  (NOT IS_MAC)  AND  (NOT IS_WIN))
 
 if (IS_LINUX  OR  IS_MAC)
-  tint_target_add_sources("utils/file"
+  tint_target_add_sources(tint_utils_file lib
     "utils/file/tmpfile_posix.cc"
   )
 endif(IS_LINUX  OR  IS_MAC)
 
 if (IS_WIN)
-  tint_target_add_sources("utils/file"
+  tint_target_add_sources(tint_utils_file lib
     "utils/file/tmpfile_windows.cc"
   )
 endif(IS_WIN)
 
 ################################################################################
-# CMake target: 'tint_utils_file_test'
+# Target:    tint_utils_file_test
+# Kind:      test
 ################################################################################
-tint_add_target("utils/file:test"
+tint_add_target(tint_utils_file_test test
   utils/file/tmpfile_test.cc
 )
 
-tint_target_add_dependencies("utils/file:test"
-  "utils/file"
-  "utils/text"
+tint_target_add_dependencies(tint_utils_file_test test
+  tint_utils_file
+  tint_utils_text
 )
 
-tint_target_add_external_dependencies("utils/file:test"
+tint_target_add_external_dependencies(tint_utils_file_test test
   "gtest"
 )

@@ -22,24 +22,26 @@
 
 if(TINT_BUILD_GLSL_WRITER)
 ################################################################################
-# CMake target: 'tint_lang_glsl_writer_common'
+# Target:    tint_lang_glsl_writer_common
+# Kind:      lib
+# Condition: TINT_BUILD_GLSL_WRITER
 ################################################################################
-tint_add_target("lang/glsl/writer/common"
+tint_add_target(tint_lang_glsl_writer_common lib
   lang/glsl/writer/common/options.cc
   lang/glsl/writer/common/options.h
   lang/glsl/writer/common/version.h
 )
 
-tint_target_add_dependencies("lang/glsl/writer/common"
-  "api/common"
-  "api/options"
-  "lang/core"
-  "lang/wgsl/sem"
-  "utils/macros"
-  "utils/math"
-  "utils/reflection"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_glsl_writer_common lib
+  tint_api_common
+  tint_api_options
+  tint_lang_core
+  tint_lang_wgsl_sem
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_reflection
+  tint_utils_text
+  tint_utils_traits
 )
 
 endif(TINT_BUILD_GLSL_WRITER)

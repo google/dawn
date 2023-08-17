@@ -22,48 +22,52 @@
 
 if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
-# CMake target: 'tint_lang_hlsl_writer_ast_printer'
+# Target:    tint_lang_hlsl_writer_ast_printer
+# Kind:      lib
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
-tint_add_target("lang/hlsl/writer/ast_printer"
+tint_add_target(tint_lang_hlsl_writer_ast_printer lib
   lang/hlsl/writer/ast_printer/ast_printer.cc
   lang/hlsl/writer/ast_printer/ast_printer.h
 )
 
-tint_target_add_dependencies("lang/hlsl/writer/ast_printer"
-  "api/common"
-  "api/options"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/hlsl/writer/common"
-  "lang/wgsl/ast"
-  "lang/wgsl/ast/transform"
-  "lang/wgsl/helpers"
-  "lang/wgsl/program"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/generator"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/strconv"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_hlsl_writer_ast_printer lib
+  tint_api_common
+  tint_api_options
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_hlsl_writer_common
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_ast_transform
+  tint_lang_wgsl_helpers
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_generator
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_strconv
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 endif(TINT_BUILD_HLSL_WRITER)
 if(TINT_BUILD_HLSL_WRITER)
 ################################################################################
-# CMake target: 'tint_lang_hlsl_writer_ast_printer_test'
+# Target:    tint_lang_hlsl_writer_ast_printer_test
+# Kind:      test
+# Condition: TINT_BUILD_HLSL_WRITER
 ################################################################################
-tint_add_target("lang/hlsl/writer/ast_printer:test"
+tint_add_target(tint_lang_hlsl_writer_ast_printer_test test
   lang/hlsl/writer/ast_printer/array_accessor_test.cc
   lang/hlsl/writer/ast_printer/assign_test.cc
   lang/hlsl/writer/ast_printer/ast_printer_test.cc
@@ -97,43 +101,43 @@ tint_add_target("lang/hlsl/writer/ast_printer:test"
   lang/hlsl/writer/ast_printer/workgroup_var_test.cc
 )
 
-tint_target_add_dependencies("lang/hlsl/writer/ast_printer:test"
-  "api/common"
-  "api/options"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/hlsl/writer/common"
-  "lang/wgsl/ast"
-  "lang/wgsl/ast/transform"
-  "lang/wgsl/ast:test"
-  "lang/wgsl/program"
-  "lang/wgsl/resolver"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/generator"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_hlsl_writer_ast_printer_test test
+  tint_api_common
+  tint_api_options
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_hlsl_writer_common
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_ast_transform
+  tint_lang_wgsl_ast_test
+  tint_lang_wgsl_program
+  tint_lang_wgsl_resolver
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_generator
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("lang/hlsl/writer/ast_printer:test"
+tint_target_add_external_dependencies(tint_lang_hlsl_writer_ast_printer_test test
   "gtest"
 )
 
 if (TINT_BUILD_HLSL_WRITER)
-  tint_target_add_dependencies("lang/hlsl/writer/ast_printer:test"
-    "lang/hlsl/writer"
-    "lang/hlsl/writer/ast_printer"
+  tint_target_add_dependencies(tint_lang_hlsl_writer_ast_printer_test test
+    tint_lang_hlsl_writer
+    tint_lang_hlsl_writer_ast_printer
   )
 endif(TINT_BUILD_HLSL_WRITER)
 

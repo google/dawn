@@ -21,33 +21,35 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_memory'
+# Target:    tint_utils_memory
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/memory"
+tint_add_target(tint_utils_memory lib
   utils/memory/bitcast.h
   utils/memory/block_allocator.h
   utils/memory/bump_allocator.h
   utils/memory/memory.cc
 )
 
-tint_target_add_dependencies("utils/memory"
-  "utils/math"
+tint_target_add_dependencies(tint_utils_memory lib
+  tint_utils_math
 )
 
 ################################################################################
-# CMake target: 'tint_utils_memory_test'
+# Target:    tint_utils_memory_test
+# Kind:      test
 ################################################################################
-tint_add_target("utils/memory:test"
+tint_add_target(tint_utils_memory_test test
   utils/memory/bitcast_test.cc
   utils/memory/block_allocator_test.cc
   utils/memory/bump_allocator_test.cc
 )
 
-tint_target_add_dependencies("utils/memory:test"
-  "utils/math"
-  "utils/memory"
+tint_target_add_dependencies(tint_utils_memory_test test
+  tint_utils_math
+  tint_utils_memory
 )
 
-tint_target_add_external_dependencies("utils/memory:test"
+tint_target_add_external_dependencies(tint_utils_memory_test test
   "gtest"
 )

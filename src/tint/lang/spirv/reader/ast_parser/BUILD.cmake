@@ -22,9 +22,11 @@
 
 if(TINT_BUILD_SPV_READER)
 ################################################################################
-# CMake target: 'tint_lang_spirv_reader_ast_parser'
+# Target:    tint_lang_spirv_reader_ast_parser
+# Kind:      lib
+# Condition: TINT_BUILD_SPV_READER
 ################################################################################
-tint_add_target("lang/spirv/reader/ast_parser"
+tint_add_target(tint_lang_spirv_reader_ast_parser lib
   lang/spirv/reader/ast_parser/ast_parser.cc
   lang/spirv/reader/ast_parser/ast_parser.h
   lang/spirv/reader/ast_parser/attributes.h
@@ -47,34 +49,34 @@ tint_add_target("lang/spirv/reader/ast_parser"
   lang/spirv/reader/ast_parser/usage.h
 )
 
-tint_target_add_dependencies("lang/spirv/reader/ast_parser"
-  "api/common"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/spirv/reader/common"
-  "lang/wgsl/ast"
-  "lang/wgsl/ast/transform"
-  "lang/wgsl/program"
-  "lang/wgsl/resolver"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_spirv_reader_ast_parser lib
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_spirv_reader_common
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_ast_transform
+  tint_lang_wgsl_program
+  tint_lang_wgsl_resolver
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 if (TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
-  tint_target_add_external_dependencies("lang/spirv/reader/ast_parser"
+  tint_target_add_external_dependencies(tint_lang_spirv_reader_ast_parser lib
     "spirv-headers"
     "spirv-opt-internal"
   )
@@ -83,9 +85,11 @@ endif(TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
 endif(TINT_BUILD_SPV_READER)
 if(TINT_BUILD_SPV_READER)
 ################################################################################
-# CMake target: 'tint_lang_spirv_reader_ast_parser_test'
+# Target:    tint_lang_spirv_reader_ast_parser_test
+# Kind:      test
+# Condition: TINT_BUILD_SPV_READER
 ################################################################################
-tint_add_target("lang/spirv/reader/ast_parser:test"
+tint_add_target(tint_lang_spirv_reader_ast_parser_test test
   lang/spirv/reader/ast_parser/ast_parser_test.cc
   lang/spirv/reader/ast_parser/barrier_test.cc
   lang/spirv/reader/ast_parser/constant_test.cc
@@ -122,44 +126,44 @@ tint_add_target("lang/spirv/reader/ast_parser:test"
   lang/spirv/reader/ast_parser/user_name_test.cc
 )
 
-tint_target_add_dependencies("lang/spirv/reader/ast_parser:test"
-  "api/common"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/spirv/reader/common"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/sem"
-  "lang/wgsl/writer/ast_printer"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/generator"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_spirv_reader_ast_parser_test test
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_spirv_reader_common
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_lang_wgsl_writer_ast_printer
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_generator
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("lang/spirv/reader/ast_parser:test"
+tint_target_add_external_dependencies(tint_lang_spirv_reader_ast_parser_test test
   "gtest"
 )
 
 if (TINT_BUILD_SPV_READER)
-  tint_target_add_dependencies("lang/spirv/reader/ast_parser:test"
-    "lang/spirv/reader/ast_parser"
+  tint_target_add_dependencies(tint_lang_spirv_reader_ast_parser_test test
+    tint_lang_spirv_reader_ast_parser
   )
 endif(TINT_BUILD_SPV_READER)
 
 if (TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
-  tint_target_add_external_dependencies("lang/spirv/reader/ast_parser:test"
+  tint_target_add_external_dependencies(tint_lang_spirv_reader_ast_parser_test test
     "spirv-headers"
     "spirv-opt-internal"
     "spirv-tools"

@@ -21,16 +21,17 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_id'
+# Target:    tint_utils_id
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/id"
+tint_add_target(tint_utils_id lib
   utils/id/generation_id.cc
   utils/id/generation_id.h
 )
 
-tint_target_add_dependencies("utils/id"
-  "utils/ice"
-  "utils/macros"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_id lib
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_text
+  tint_utils_traits
 )

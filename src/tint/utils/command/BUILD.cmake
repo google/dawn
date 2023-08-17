@@ -21,46 +21,48 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_command'
+# Target:    tint_utils_command
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/command"
+tint_add_target(tint_utils_command lib
   utils/command/command.h
 )
 
-tint_target_add_dependencies("utils/command"
-  "utils/macros"
-  "utils/text"
+tint_target_add_dependencies(tint_utils_command lib
+  tint_utils_macros
+  tint_utils_text
 )
 
 if ((NOT IS_LINUX)  AND  (NOT IS_MAC)  AND  (NOT IS_WIN))
-  tint_target_add_sources("utils/command"
+  tint_target_add_sources(tint_utils_command lib
     "utils/command/command_other.cc"
   )
 endif((NOT IS_LINUX)  AND  (NOT IS_MAC)  AND  (NOT IS_WIN))
 
 if (IS_LINUX  OR  IS_MAC)
-  tint_target_add_sources("utils/command"
+  tint_target_add_sources(tint_utils_command lib
     "utils/command/command_posix.cc"
   )
 endif(IS_LINUX  OR  IS_MAC)
 
 if (IS_WIN)
-  tint_target_add_sources("utils/command"
+  tint_target_add_sources(tint_utils_command lib
     "utils/command/command_windows.cc"
   )
 endif(IS_WIN)
 
 ################################################################################
-# CMake target: 'tint_utils_command_test'
+# Target:    tint_utils_command_test
+# Kind:      test
 ################################################################################
-tint_add_target("utils/command:test"
+tint_add_target(tint_utils_command_test test
   utils/command/command_test.cc
 )
 
-tint_target_add_dependencies("utils/command:test"
-  "utils/command"
+tint_target_add_dependencies(tint_utils_command_test test
+  tint_utils_command
 )
 
-tint_target_add_external_dependencies("utils/command:test"
+tint_target_add_external_dependencies(tint_utils_command_test test
   "gtest"
 )

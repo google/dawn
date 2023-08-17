@@ -21,9 +21,10 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_lang_core_constant'
+# Target:    tint_lang_core_constant
+# Kind:      lib
 ################################################################################
-tint_add_target("lang/core/constant"
+tint_add_target(tint_lang_core_constant lib
   lang/core/constant/clone_context.h
   lang/core/constant/composite.cc
   lang/core/constant/composite.h
@@ -41,27 +42,28 @@ tint_add_target("lang/core/constant"
   lang/core/constant/value.h
 )
 
-tint_target_add_dependencies("lang/core/constant"
-  "lang/core"
-  "lang/core/type"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_core_constant lib
+  tint_lang_core
+  tint_lang_core_type
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 ################################################################################
-# CMake target: 'tint_lang_core_constant_test'
+# Target:    tint_lang_core_constant_test
+# Kind:      test
 ################################################################################
-tint_add_target("lang/core/constant:test"
+tint_add_target(tint_lang_core_constant_test test
   lang/core/constant/composite_test.cc
   lang/core/constant/eval_binary_op_test.cc
   lang/core/constant/eval_bitcast_test.cc
@@ -80,34 +82,34 @@ tint_add_target("lang/core/constant:test"
   lang/core/constant/value_test.cc
 )
 
-tint_target_add_dependencies("lang/core/constant:test"
-  "api/common"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/intrinsic"
-  "lang/core/type"
-  "lang/core/type:test"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/reader"
-  "lang/wgsl/resolver"
-  "lang/wgsl/resolver:test"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_core_constant_test test
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_intrinsic
+  tint_lang_core_type
+  tint_lang_core_type_test
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_reader
+  tint_lang_wgsl_resolver
+  tint_lang_wgsl_resolver_test
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("lang/core/constant:test"
+tint_target_add_external_dependencies(tint_lang_core_constant_test test
   "gtest"
 )

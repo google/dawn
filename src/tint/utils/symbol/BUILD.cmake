@@ -21,48 +21,50 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_symbol'
+# Target:    tint_utils_symbol
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/symbol"
+tint_add_target(tint_utils_symbol lib
   utils/symbol/symbol.cc
   utils/symbol/symbol.h
   utils/symbol/symbol_table.cc
   utils/symbol/symbol_table.h
 )
 
-tint_target_add_dependencies("utils/symbol"
-  "utils/containers"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/rtti"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_symbol lib
+  tint_utils_containers
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+  tint_utils_text
+  tint_utils_traits
 )
 
 ################################################################################
-# CMake target: 'tint_utils_symbol_test'
+# Target:    tint_utils_symbol_test
+# Kind:      test
 ################################################################################
-tint_add_target("utils/symbol:test"
+tint_add_target(tint_utils_symbol_test test
   utils/symbol/symbol_table_test.cc
   utils/symbol/symbol_test.cc
 )
 
-tint_target_add_dependencies("utils/symbol:test"
-  "utils/containers"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_symbol_test test
+  tint_utils_containers
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("utils/symbol:test"
+tint_target_add_external_dependencies(tint_utils_symbol_test test
   "gtest"
 )

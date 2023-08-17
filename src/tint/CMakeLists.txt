@@ -239,103 +239,61 @@ endif()
 # See also: docs/tint/gen.md
 ################################################################################
 
-# A special name given to targets and target kinds that are not to be built due
-# to the active CMake flags.
-set(TINT_TARGET_DISABLED "<DISABLED>")
-
-# tint_translate_target(TARGET_OUT KIND_OUT GN_TARGET_IN)
+# tint_check_target_is_enabled(IS_ENABLED KIND)
 #
-# Translates a GN-style target to a CMake target name, and target kind.
-# The GN-style target is of the form `<path>` for a 'lib' target or
-# `<path>:<kind>` for any other target kind.
+# Checks whether a target of the kind KIND is enabled.
+# Assigns TRUE or FALSE to IS_ENABLED based on whether the target is enabled.
 #
 # Parameters:
-#   TARGET_OUT   - The name of the variable receieving the CMake target name
-#   KIND_OUT     - The name of the variable receieving the target kind
-#   GN_TARGET_IN - The GN-style target name
-function(tint_translate_target TARGET_OUT KIND_OUT GN_TARGET_IN)
-  string(REGEX MATCH "^([^:]+):(.+)$" MATCH ${GN_TARGET_IN})
-  if(MATCH)
-    # Explicit target kind
-    set(TARGET ${CMAKE_MATCH_1})
-    set(KIND ${CMAKE_MATCH_2})
-  else()
-    # Implicit 'lib'
-    set(TARGET ${GN_TARGET_IN})
-    set(KIND "lib")
-  endif()
-
-  # Replace path slashes with underscores.
-  string(REPLACE "/" "_" TARGET "${TARGET}")
-
-  # Add 'tint_' prefix
-  set(TARGET "tint_${TARGET}")
-
-  # Disable targets that aren't enabled with build flags and add test / bench
-  # target name suffixes
+#   IS_ENABLED - the output variable
+#   KIND       - the target kind
+function(tint_check_target_is_enabled IS_ENABLED KIND)
+  set(IS_ENABLED FALSE PARENT_SCOPE) # Default to disabled
   if(${KIND} STREQUAL cmd)
     if(TINT_BUILD_CMD_TOOLS)
-      set(TARGET "${TARGET}_cmd")
-    else()
-      set(TARGET TINT_TARGET_DISABLED)
-      set(KIND   TINT_TARGET_DISABLED)
+      set(IS_ENABLED TRUE PARENT_SCOPE)
     endif()
   elseif(${KIND} STREQUAL test_cmd)
     if(TINT_BUILD_TESTS)
-      set(TARGET "${TARGET}_test_cmd")
-    else()
-      set(TARGET TINT_TARGET_DISABLED)
-      set(KIND   TINT_TARGET_DISABLED)
+      set(IS_ENABLED TRUE PARENT_SCOPE)
     endif()
   elseif(${KIND} STREQUAL bench_cmd)
     if(TINT_BUILD_BENCHMARKS)
-      set(TARGET "${TARGET}_bench_cmd")
-    else()
-      set(TARGET TINT_TARGET_DISABLED)
-      set(KIND   TINT_TARGET_DISABLED)
+      set(IS_ENABLED TRUE PARENT_SCOPE)
     endif()
   elseif(${KIND} STREQUAL test)
     if(TINT_BUILD_TESTS)
-      set(TARGET "${TARGET}_test")
-    else()
-      set(TARGET TINT_TARGET_DISABLED)
-      set(KIND   TINT_TARGET_DISABLED)
+      set(IS_ENABLED TRUE PARENT_SCOPE)
     endif()
   elseif(${KIND} STREQUAL bench)
     if(TINT_BUILD_BENCHMARKS)
-      set(TARGET "${TARGET}_bench")
-    else()
-      set(TARGET TINT_TARGET_DISABLED)
-      set(KIND   TINT_TARGET_DISABLED)
+      set(IS_ENABLED TRUE PARENT_SCOPE)
     endif()
   elseif(${KIND} STREQUAL lib)
+    set(IS_ENABLED TRUE PARENT_SCOPE)
   else()
     message(FATAL_ERROR "unhandled target kind ${KIND}")
   endif()
-
-  # Output values
-  set(${TARGET_OUT} ${TARGET} PARENT_SCOPE)
-  set(${KIND_OUT}   ${KIND}   PARENT_SCOPE)
 endfunction()
 
-# tint_add_target(GN_TARGET [SOURCES...])
+# tint_add_target(TARGET KIND [SOURCES...])
 #
-# Registers the target with the given GN-style target name, with the provided
-# sources. Additional sources can be appended with subsequent calls to
-# tint_target_add_sources()
+# Registers a Tint target with the provided sources.
+# Additional sources can be appended with subsequent calls to tint_target_add_sources()
 #
 # Parameters:
-#   GN_TARGET - The GN-style target name
-#   SOURCES   - a list of source files, relative to this directory
-function(tint_add_target GN_TARGET)
+#   TARGET   - The target name
+#   KIND     - The target kind
+#   SOURCES  - a list of source files, relative to this directory
+function(tint_add_target TARGET KIND)
   set(SOURCES ${ARGN})
 
-  # Split the GN-style target name into the CMake target name and target kind
-  tint_translate_target(TARGET KIND ${GN_TARGET})
-
-  if(${KIND} STREQUAL ${TINT_TARGET_DISABLED})
+  tint_check_target_is_enabled(IS_ENABLED ${KIND})
+  if(NOT IS_ENABLED)
     return() # Target is disabled via build flags
-  elseif(${KIND} STREQUAL lib)
+  endif()
+
+  if(${KIND} STREQUAL lib)
     add_library(${TARGET} STATIC EXCLUDE_FROM_ALL)
     tint_default_compile_options(${TARGET})
 
@@ -370,20 +328,19 @@ function(tint_add_target GN_TARGET)
   target_sources(${TARGET} PRIVATE ${SOURCES})
 endfunction()
 
-# tint_target_add_sources(GN_TARGET [SOURCES...])
+# tint_target_add_sources(TARGET [SOURCES...])
 #
-# Adds source files to the target with the given GN-style target name.
+# Adds source files to a Tint target
 #
 # Parameters:
-#   GN_TARGET - The GN-style target name
-#   SOURCES   - a list of source files, relative to this directory
-function(tint_target_add_sources GN_TARGET)
+#   TARGET   - The target name
+#   KIND     - The target kind
+#   SOURCES  - a list of source files, relative to this directory
+function(tint_target_add_sources TARGET KIND)
   set(SOURCES ${ARGN})
 
-  # Split the GN-style target name into the CMake target name and target kind
-  tint_translate_target(TARGET KIND ${GN_TARGET})
-
-  if(${KIND} STREQUAL ${TINT_TARGET_DISABLED})
+  tint_check_target_is_enabled(IS_ENABLED ${KIND})
+  if(NOT IS_ENABLED)
     return() # Target is disabled via build flags
   endif()
 
@@ -396,63 +353,54 @@ function(tint_target_add_sources GN_TARGET)
   endif()
 endfunction()
 
-# tint_target_add_dependencies(GN_TARGET DEPENDENCIES...)
+# tint_target_add_dependencies(TARGET DEPENDENCIES...)
 #
-# Adds dependencies to the target with the given GN-style target name.
+# Adds dependencies to a Tint target.
 #
 # Parameters:
-#   GN_TARGET    - The GN-style target name
-#   DEPENDENCIES - a list of GN-style target names
-function(tint_target_add_dependencies GN_TARGET)
+#   TARGET       - The target name
+#   KIND         - The target kind
+#   DEPENDENCIES - a list of target names
+function(tint_target_add_dependencies TARGET KIND)
   set(DEPENDENCIES ${ARGN})
 
-  # Split the GN-style target name into the CMake target name and target kind
-  tint_translate_target(TARGET KIND ${GN_TARGET})
-
-  if(${KIND} STREQUAL ${TINT_TARGET_DISABLED})
+  tint_check_target_is_enabled(IS_ENABLED ${KIND})
+  if(NOT IS_ENABLED)
     return() # Target is disabled via build flags
   endif()
 
-  # Translate list of GN-style target names to CMake target names
-  set(DEPENDENCY_TARGETS "")
-  foreach(DEPENDENCY ${DEPENDENCIES})
-    tint_translate_target(DEP_TARGET DEP_KIND ${DEPENDENCY})
-    list(APPEND DEPENDENCY_TARGETS ${DEP_TARGET})
-  endforeach()
-
   # Register the dependencies
-  target_link_libraries(${TARGET} PRIVATE ${DEPENDENCY_TARGETS})
+  target_link_libraries(${TARGET} PRIVATE ${DEPENDENCIES})
 
   # If there's a corresponding fuzz target for this target, add the corresponding fuzz dependencies
   # to the fuzz target.
   set(FUZZ_TARGET "${TARGET}${TINT_FUZZ_SUFFIX}")
   if(TARGET "${FUZZ_TARGET}")
-    set(FUZZ_DEPENDENCY_TARGETS "")
+    set(FUZZ_DEPENDENCIES "")
 
-    foreach(TARGET ${DEPENDENCY_TARGETS})
-      list(APPEND FUZZ_DEPENDENCY_TARGETS "${TARGET}${TINT_FUZZ_SUFFIX}")
+    foreach(TARGET ${DEPENDENCIES})
+      list(APPEND FUZZ_DEPENDENCIES "${TARGET}${TINT_FUZZ_SUFFIX}")
     endforeach()
 
-    target_link_libraries("${FUZZ_TARGET}" PRIVATE ${FUZZ_DEPENDENCY_TARGETS})
+    target_link_libraries("${FUZZ_TARGET}" PRIVATE ${FUZZ_DEPENDENCIES})
   endif()
 endfunction()
 
-# tint_target_add_external_dependencies(GN_TARGET DEPENDENCIES...)
+# tint_target_add_external_dependencies(TARGET KIND DEPENDENCIES...)
 #
-# Adds external dependencies to the target with the given GN-style target name.
+# Adds external dependencies to a Tint target.
 #
 # Parameters:
-#   GN_TARGET    - The GN-style target name
+#   TARGET       - The target name
+#   KIND         - The target kind
 #   DEPENDENCIES - a list of external target names
 #
 # See tools/src/cmd/gen/build/externals.json for the list of external dependencies.
-function(tint_target_add_external_dependencies GN_TARGET)
+function(tint_target_add_external_dependencies UNSUFFIXED_TARGET KIND)
   set(DEPENDENCIES ${ARGN})
 
-  # Split the GN-style target name into the CMake target name and target kind
-  tint_translate_target(UNSUFFIXED_TARGET KIND ${GN_TARGET})
-
-  if(${KIND} STREQUAL ${TINT_TARGET_DISABLED})
+  tint_check_target_is_enabled(IS_ENABLED ${KIND})
+  if(NOT IS_ENABLED)
     return() # Target is disabled via build flags
   endif()
 
@@ -507,18 +455,17 @@ function(tint_target_add_external_dependencies GN_TARGET)
   endforeach()
 endfunction()
 
-# tint_target_set_output_name(GN_TARGET OUTPUT_NAME)
+# tint_target_set_output_name(TARGET KIND OUTPUT_NAME)
 #
 # Overrides the output name for the given target
 #
 # Parameters:
-#   GN_TARGET   - The GN-style target name
+#   TARGET      - The target name
+#   KIND        - The target kind
 #   OUTPUT_NAME - the new name for the target output
-function(tint_target_set_output_name GN_TARGET OUTPUT_NAME)
-  # Split the GN-style target name into the CMake target name and target kind
-  tint_translate_target(TARGET KIND ${GN_TARGET})
-
-  if(${KIND} STREQUAL ${TINT_TARGET_DISABLED})
+function(tint_target_set_output_name TARGET KIND OUTPUT_NAME)
+  tint_check_target_is_enabled(IS_ENABLED ${KIND})
+  if(NOT IS_ENABLED)
     return() # Target is disabled via build flags
   endif()
 

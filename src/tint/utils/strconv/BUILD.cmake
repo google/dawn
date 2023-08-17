@@ -21,39 +21,41 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_strconv'
+# Target:    tint_utils_strconv
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/strconv"
+tint_add_target(tint_utils_strconv lib
   utils/strconv/float_to_string.cc
   utils/strconv/float_to_string.h
   utils/strconv/parse_num.cc
   utils/strconv/parse_num.h
 )
 
-tint_target_add_dependencies("utils/strconv"
-  "utils/ice"
-  "utils/macros"
-  "utils/result"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_strconv lib
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_result
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("utils/strconv"
+tint_target_add_external_dependencies(tint_utils_strconv lib
   "abseil"
 )
 
 ################################################################################
-# CMake target: 'tint_utils_strconv_test'
+# Target:    tint_utils_strconv_test
+# Kind:      test
 ################################################################################
-tint_add_target("utils/strconv:test"
+tint_add_target(tint_utils_strconv_test test
   utils/strconv/float_to_string_test.cc
 )
 
-tint_target_add_dependencies("utils/strconv:test"
-  "utils/memory"
-  "utils/strconv"
+tint_target_add_dependencies(tint_utils_strconv_test test
+  tint_utils_memory
+  tint_utils_strconv
 )
 
-tint_target_add_external_dependencies("utils/strconv:test"
+tint_target_add_external_dependencies(tint_utils_strconv_test test
   "gtest"
 )

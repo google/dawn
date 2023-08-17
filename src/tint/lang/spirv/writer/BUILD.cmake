@@ -27,101 +27,105 @@ include(lang/spirv/writer/raise/BUILD.cmake)
 
 if(TINT_BUILD_SPV_WRITER)
 ################################################################################
-# CMake target: 'tint_lang_spirv_writer'
+# Target:    tint_lang_spirv_writer
+# Kind:      lib
+# Condition: TINT_BUILD_SPV_WRITER
 ################################################################################
-tint_add_target("lang/spirv/writer"
+tint_add_target(tint_lang_spirv_writer lib
   lang/spirv/writer/output.h
   lang/spirv/writer/writer.cc
   lang/spirv/writer/writer.h
 )
 
-tint_target_add_dependencies("lang/spirv/writer"
-  "api/common"
-  "api/options"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_spirv_writer lib
+  tint_api_common
+  tint_api_options
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 if (TINT_BUILD_IR)
-  tint_target_add_dependencies("lang/spirv/writer"
-    "lang/core/ir"
-    "lang/core/ir/transform"
-    "lang/wgsl/reader/program_to_ir"
+  tint_target_add_dependencies(tint_lang_spirv_writer lib
+    tint_lang_core_ir
+    tint_lang_core_ir_transform
+    tint_lang_wgsl_reader_program_to_ir
   )
 endif(TINT_BUILD_IR)
 
 if (TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
-  tint_target_add_external_dependencies("lang/spirv/writer"
+  tint_target_add_external_dependencies(tint_lang_spirv_writer lib
     "spirv-headers"
   )
 endif(TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
 
 if (TINT_BUILD_SPV_WRITER)
-  tint_target_add_dependencies("lang/spirv/writer"
-    "lang/spirv/writer/ast_printer"
-    "lang/spirv/writer/common"
+  tint_target_add_dependencies(tint_lang_spirv_writer lib
+    tint_lang_spirv_writer_ast_printer
+    tint_lang_spirv_writer_common
   )
 endif(TINT_BUILD_SPV_WRITER)
 
 if (TINT_BUILD_SPV_WRITER  AND  TINT_BUILD_IR)
-  tint_target_add_dependencies("lang/spirv/writer"
-    "lang/spirv/writer/printer"
-    "lang/spirv/writer/raise"
+  tint_target_add_dependencies(tint_lang_spirv_writer lib
+    tint_lang_spirv_writer_printer
+    tint_lang_spirv_writer_raise
   )
 endif(TINT_BUILD_SPV_WRITER  AND  TINT_BUILD_IR)
 
 endif(TINT_BUILD_SPV_WRITER)
 if(TINT_BUILD_SPV_WRITER)
 ################################################################################
-# CMake target: 'tint_lang_spirv_writer_test'
+# Target:    tint_lang_spirv_writer_test
+# Kind:      test
+# Condition: TINT_BUILD_SPV_WRITER
 ################################################################################
-tint_add_target("lang/spirv/writer:test"
+tint_add_target(tint_lang_spirv_writer_test test
 )
 
-tint_target_add_dependencies("lang/spirv/writer:test"
-  "api/common"
-  "api/options"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_spirv_writer_test test
+  tint_api_common
+  tint_api_options
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("lang/spirv/writer:test"
+tint_target_add_external_dependencies(tint_lang_spirv_writer_test test
   "gtest"
 )
 
 if (TINT_BUILD_IR)
-  tint_target_add_sources("lang/spirv/writer:test"
+  tint_target_add_sources(tint_lang_spirv_writer_test test
     "lang/spirv/writer/access_test.cc"
     "lang/spirv/writer/atomic_builtin_test.cc"
     "lang/spirv/writer/binary_test.cc"
@@ -143,75 +147,77 @@ if (TINT_BUILD_IR)
     "lang/spirv/writer/var_test.cc"
     "lang/spirv/writer/writer_test.cc"
   )
-  tint_target_add_dependencies("lang/spirv/writer:test"
-    "lang/core/ir"
+  tint_target_add_dependencies(tint_lang_spirv_writer_test test
+    tint_lang_core_ir
   )
 endif(TINT_BUILD_IR)
 
 if (TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
-  tint_target_add_external_dependencies("lang/spirv/writer:test"
+  tint_target_add_external_dependencies(tint_lang_spirv_writer_test test
     "spirv-headers"
     "spirv-tools"
   )
 endif(TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
 
 if (TINT_BUILD_SPV_WRITER)
-  tint_target_add_dependencies("lang/spirv/writer:test"
-    "lang/spirv/writer/common"
-    "lang/spirv/writer/common:test"
+  tint_target_add_dependencies(tint_lang_spirv_writer_test test
+    tint_lang_spirv_writer_common
+    tint_lang_spirv_writer_common_test
   )
 endif(TINT_BUILD_SPV_WRITER)
 
 if (TINT_BUILD_SPV_WRITER  AND  TINT_BUILD_IR)
-  tint_target_add_dependencies("lang/spirv/writer:test"
-    "lang/spirv/writer/printer"
-    "lang/spirv/writer/raise"
+  tint_target_add_dependencies(tint_lang_spirv_writer_test test
+    tint_lang_spirv_writer_printer
+    tint_lang_spirv_writer_raise
   )
 endif(TINT_BUILD_SPV_WRITER  AND  TINT_BUILD_IR)
 
 endif(TINT_BUILD_SPV_WRITER)
 if(TINT_BUILD_SPV_WRITER)
 ################################################################################
-# CMake target: 'tint_lang_spirv_writer_bench'
+# Target:    tint_lang_spirv_writer_bench
+# Kind:      bench
+# Condition: TINT_BUILD_SPV_WRITER
 ################################################################################
-tint_add_target("lang/spirv/writer:bench"
+tint_add_target(tint_lang_spirv_writer_bench bench
 )
 
-tint_target_add_dependencies("lang/spirv/writer:bench"
-  "api/common"
-  "api/options"
-  "cmd/bench"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_spirv_writer_bench bench
+  tint_api_common
+  tint_api_options
+  tint_cmd_bench
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 if (TINT_BUILD_IR)
-  tint_target_add_sources("lang/spirv/writer:bench"
+  tint_target_add_sources(tint_lang_spirv_writer_bench bench
     "lang/spirv/writer/writer_bench.cc"
   )
 endif(TINT_BUILD_IR)
 
 if (TINT_BUILD_SPV_WRITER)
-  tint_target_add_dependencies("lang/spirv/writer:bench"
-    "lang/spirv/writer"
-    "lang/spirv/writer/common"
+  tint_target_add_dependencies(tint_lang_spirv_writer_bench bench
+    tint_lang_spirv_writer
+    tint_lang_spirv_writer_common
   )
 endif(TINT_BUILD_SPV_WRITER)
 

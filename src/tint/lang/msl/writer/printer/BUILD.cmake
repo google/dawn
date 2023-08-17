@@ -22,52 +22,56 @@
 
 if(TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR)
 ################################################################################
-# CMake target: 'tint_lang_msl_writer_printer'
+# Target:    tint_lang_msl_writer_printer
+# Kind:      lib
+# Condition: TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR
 ################################################################################
-tint_add_target("lang/msl/writer/printer"
+tint_add_target(tint_lang_msl_writer_printer lib
   lang/msl/writer/printer/printer.cc
   lang/msl/writer/printer/printer.h
 )
 
-tint_target_add_dependencies("lang/msl/writer/printer"
-  "api/common"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/generator"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_msl_writer_printer lib
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_generator
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 if (TINT_BUILD_IR)
-  tint_target_add_dependencies("lang/msl/writer/printer"
-    "lang/core/ir"
+  tint_target_add_dependencies(tint_lang_msl_writer_printer lib
+    tint_lang_core_ir
   )
 endif(TINT_BUILD_IR)
 
 if (TINT_BUILD_MSL_WRITER)
-  tint_target_add_dependencies("lang/msl/writer/printer"
-    "lang/msl/writer/common"
+  tint_target_add_dependencies(tint_lang_msl_writer_printer lib
+    tint_lang_msl_writer_common
   )
 endif(TINT_BUILD_MSL_WRITER)
 
 endif(TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR)
 if(TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR)
 ################################################################################
-# CMake target: 'tint_lang_msl_writer_printer_test'
+# Target:    tint_lang_msl_writer_printer_test
+# Kind:      test
+# Condition: TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR
 ################################################################################
-tint_add_target("lang/msl/writer/printer:test"
+tint_add_target(tint_lang_msl_writer_printer_test test
   lang/msl/writer/printer/binary_test.cc
   lang/msl/writer/printer/constant_test.cc
   lang/msl/writer/printer/function_test.cc
@@ -79,41 +83,41 @@ tint_add_target("lang/msl/writer/printer:test"
   lang/msl/writer/printer/var_test.cc
 )
 
-tint_target_add_dependencies("lang/msl/writer/printer:test"
-  "api/common"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/msl/writer/raise"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/generator"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_msl_writer_printer_test test
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_msl_writer_raise
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_generator
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("lang/msl/writer/printer:test"
+tint_target_add_external_dependencies(tint_lang_msl_writer_printer_test test
   "gtest"
 )
 
 if (TINT_BUILD_IR)
-  tint_target_add_dependencies("lang/msl/writer/printer:test"
-    "lang/core/ir"
+  tint_target_add_dependencies(tint_lang_msl_writer_printer_test test
+    tint_lang_core_ir
   )
 endif(TINT_BUILD_IR)
 
 if (TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR)
-  tint_target_add_dependencies("lang/msl/writer/printer:test"
-    "lang/msl/writer/printer"
+  tint_target_add_dependencies(tint_lang_msl_writer_printer_test test
+    tint_lang_msl_writer_printer
   )
 endif(TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR)
 

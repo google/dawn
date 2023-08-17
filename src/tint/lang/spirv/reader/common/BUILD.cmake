@@ -21,9 +21,10 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_lang_spirv_reader_common'
+# Target:    tint_lang_spirv_reader_common
+# Kind:      lib
 ################################################################################
-tint_add_target("lang/spirv/reader/common"
+tint_add_target(tint_lang_spirv_reader_common lib
   lang/spirv/reader/common/common.cc
   lang/spirv/reader/common/options.h
 )

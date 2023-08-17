@@ -21,9 +21,10 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_containers'
+# Target:    tint_utils_containers
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/containers"
+tint_add_target(tint_utils_containers lib
   utils/containers/bitset.h
   utils/containers/containers.cc
   utils/containers/enum_set.h
@@ -41,19 +42,20 @@ tint_add_target("utils/containers"
   utils/containers/vector.h
 )
 
-tint_target_add_dependencies("utils/containers"
-  "utils/ice"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/rtti"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_containers lib
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+  tint_utils_traits
 )
 
 ################################################################################
-# CMake target: 'tint_utils_containers_test'
+# Target:    tint_utils_containers_test
+# Kind:      test
 ################################################################################
-tint_add_target("utils/containers:test"
+tint_add_target(tint_utils_containers_test test
   utils/containers/bitset_test.cc
   utils/containers/enum_set_test.cc
   utils/containers/hashmap_test.cc
@@ -69,29 +71,29 @@ tint_add_target("utils/containers:test"
   utils/containers/vector_test.cc
 )
 
-tint_target_add_dependencies("utils/containers:test"
-  "api/common"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_containers_test test
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("utils/containers:test"
+tint_target_add_external_dependencies(tint_utils_containers_test test
   "gtest"
 )

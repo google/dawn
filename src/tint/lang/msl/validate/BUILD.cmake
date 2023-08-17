@@ -22,34 +22,36 @@
 
 if(TINT_BUILD_MSL_WRITER)
 ################################################################################
-# CMake target: 'tint_lang_msl_validate'
+# Target:    tint_lang_msl_validate
+# Kind:      lib
+# Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
-tint_add_target("lang/msl/validate"
+tint_add_target(tint_lang_msl_validate lib
   lang/msl/validate/msl.cc
   lang/msl/validate/val.h
 )
 
-tint_target_add_dependencies("lang/msl/validate"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/sem"
-  "utils/command"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/file"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_msl_validate lib
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils_command
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_file
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 endif(TINT_BUILD_MSL_WRITER)

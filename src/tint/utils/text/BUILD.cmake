@@ -21,9 +21,10 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_text'
+# Target:    tint_utils_text
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/text"
+tint_add_target(tint_utils_text lib
   utils/text/string.cc
   utils/text/string.h
   utils/text/string_stream.cc
@@ -32,36 +33,37 @@ tint_add_target("utils/text"
   utils/text/unicode.h
 )
 
-tint_target_add_dependencies("utils/text"
-  "utils/containers"
-  "utils/ice"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/rtti"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_text lib
+  tint_utils_containers
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+  tint_utils_traits
 )
 
 ################################################################################
-# CMake target: 'tint_utils_text_test'
+# Target:    tint_utils_text_test
+# Kind:      test
 ################################################################################
-tint_add_target("utils/text:test"
+tint_add_target(tint_utils_text_test test
   utils/text/string_stream_test.cc
   utils/text/string_test.cc
   utils/text/unicode_test.cc
 )
 
-tint_target_add_dependencies("utils/text:test"
-  "utils/containers"
-  "utils/ice"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/rtti"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_text_test test
+  tint_utils_containers
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("utils/text:test"
+tint_target_add_external_dependencies(tint_utils_text_test test
   "gtest"
 )

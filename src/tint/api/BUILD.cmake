@@ -24,70 +24,71 @@ include(api/common/BUILD.cmake)
 include(api/options/BUILD.cmake)
 
 ################################################################################
-# CMake target: 'tint_api'
+# Target:    tint_api
+# Kind:      lib
 ################################################################################
-tint_add_target("api"
+tint_add_target(tint_api lib
   api/tint.cc
   api/tint.h
 )
 
-tint_target_add_dependencies("api"
-  "api/common"
-  "api/options"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/hlsl/writer/common"
-  "lang/spirv/reader/common"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/reader"
-  "lang/wgsl/sem"
-  "lang/wgsl/writer"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_api lib
+  tint_api_common
+  tint_api_options
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_hlsl_writer_common
+  tint_lang_spirv_reader_common
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_reader
+  tint_lang_wgsl_sem
+  tint_lang_wgsl_writer
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 if (TINT_BUILD_GLSL_WRITER)
-  tint_target_add_dependencies("api"
-    "lang/glsl/writer"
-    "lang/glsl/writer/common"
+  tint_target_add_dependencies(tint_api lib
+    tint_lang_glsl_writer
+    tint_lang_glsl_writer_common
   )
 endif(TINT_BUILD_GLSL_WRITER)
 
 if (TINT_BUILD_HLSL_WRITER)
-  tint_target_add_dependencies("api"
-    "lang/hlsl/writer"
+  tint_target_add_dependencies(tint_api lib
+    tint_lang_hlsl_writer
   )
 endif(TINT_BUILD_HLSL_WRITER)
 
 if (TINT_BUILD_MSL_WRITER)
-  tint_target_add_dependencies("api"
-    "lang/msl/writer"
-    "lang/msl/writer/common"
+  tint_target_add_dependencies(tint_api lib
+    tint_lang_msl_writer
+    tint_lang_msl_writer_common
   )
 endif(TINT_BUILD_MSL_WRITER)
 
 if (TINT_BUILD_SPV_READER)
-  tint_target_add_dependencies("api"
-    "lang/spirv/reader"
+  tint_target_add_dependencies(tint_api lib
+    tint_lang_spirv_reader
   )
 endif(TINT_BUILD_SPV_READER)
 
 if (TINT_BUILD_SPV_WRITER)
-  tint_target_add_dependencies("api"
-    "lang/spirv/writer"
-    "lang/spirv/writer/common"
+  tint_target_add_dependencies(tint_api lib
+    tint_lang_spirv_writer
+    tint_lang_spirv_writer_common
   )
 endif(TINT_BUILD_SPV_WRITER)

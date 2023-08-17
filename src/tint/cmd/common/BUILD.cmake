@@ -21,88 +21,90 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_cmd_common'
+# Target:    tint_cmd_common
+# Kind:      lib
 ################################################################################
-tint_add_target("cmd/common"
+tint_add_target(tint_cmd_common lib
   cmd/common/generate_external_texture_bindings.cc
   cmd/common/generate_external_texture_bindings.h
   cmd/common/helper.cc
   cmd/common/helper.h
 )
 
-tint_target_add_dependencies("cmd/common"
-  "api/common"
-  "api/options"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/spirv/reader/common"
-  "lang/wgsl/ast"
-  "lang/wgsl/inspector"
-  "lang/wgsl/program"
-  "lang/wgsl/reader"
-  "lang/wgsl/sem"
-  "lang/wgsl/writer"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_cmd_common lib
+  tint_api_common
+  tint_api_options
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_spirv_reader_common
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_inspector
+  tint_lang_wgsl_program
+  tint_lang_wgsl_reader
+  tint_lang_wgsl_sem
+  tint_lang_wgsl_writer
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 if (TINT_BUILD_SPV_READER)
-  tint_target_add_dependencies("cmd/common"
-    "lang/spirv/reader"
+  tint_target_add_dependencies(tint_cmd_common lib
+    tint_lang_spirv_reader
   )
 endif(TINT_BUILD_SPV_READER)
 
 if (TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
-  tint_target_add_external_dependencies("cmd/common"
+  tint_target_add_external_dependencies(tint_cmd_common lib
     "spirv-tools"
   )
 endif(TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
 
 ################################################################################
-# CMake target: 'tint_cmd_common_test'
+# Target:    tint_cmd_common_test
+# Kind:      test
 ################################################################################
-tint_add_target("cmd/common:test"
+tint_add_target(tint_cmd_common_test test
   cmd/common/generate_external_texture_bindings_test.cc
 )
 
-tint_target_add_dependencies("cmd/common:test"
-  "api/common"
-  "api/options"
-  "cmd/common"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/resolver"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_cmd_common_test test
+  tint_api_common
+  tint_api_options
+  tint_cmd_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_resolver
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("cmd/common:test"
+tint_target_add_external_dependencies(tint_cmd_common_test test
   "gtest"
 )

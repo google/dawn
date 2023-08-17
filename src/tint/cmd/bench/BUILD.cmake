@@ -21,99 +21,101 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_cmd_bench'
+# Target:    tint_cmd_bench
+# Kind:      lib
 ################################################################################
-tint_add_target("cmd/bench"
+tint_add_target(tint_cmd_bench lib
   cmd/bench/bench.h
   cmd/bench/benchmark.cc
 )
 
-tint_target_add_dependencies("cmd/bench"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_cmd_bench lib
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 ################################################################################
-# CMake target: 'tint_cmd_bench_bench_cmd'
+# Target:    tint_cmd_bench_bench_cmd
+# Kind:      bench_cmd
 ################################################################################
-tint_add_target("cmd/bench:bench_cmd"
+tint_add_target(tint_cmd_bench_bench_cmd bench_cmd
   cmd/bench/main_bench.cc
 )
 
-tint_target_add_dependencies("cmd/bench:bench_cmd"
-  "cmd/bench"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/core:bench"
-  "lang/spirv/reader/common"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/reader"
-  "lang/wgsl/reader:bench"
-  "lang/wgsl/sem"
-  "lang/wgsl/writer"
-  "lang/wgsl/writer:bench"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/rtti:bench"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
+  tint_cmd_bench
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_core_bench
+  tint_lang_spirv_reader_common
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_reader
+  tint_lang_wgsl_reader_bench
+  tint_lang_wgsl_sem
+  tint_lang_wgsl_writer
+  tint_lang_wgsl_writer_bench
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_rtti_bench
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 if (TINT_BUILD_GLSL_WRITER)
-  tint_target_add_dependencies("cmd/bench:bench_cmd"
-    "lang/glsl/writer:bench"
+  tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
+    tint_lang_glsl_writer_bench
   )
 endif(TINT_BUILD_GLSL_WRITER)
 
 if (TINT_BUILD_HLSL_WRITER)
-  tint_target_add_dependencies("cmd/bench:bench_cmd"
-    "lang/hlsl/writer:bench"
+  tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
+    tint_lang_hlsl_writer_bench
   )
 endif(TINT_BUILD_HLSL_WRITER)
 
 if (TINT_BUILD_MSL_WRITER)
-  tint_target_add_dependencies("cmd/bench:bench_cmd"
-    "lang/msl/writer:bench"
+  tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
+    tint_lang_msl_writer_bench
   )
 endif(TINT_BUILD_MSL_WRITER)
 
 if (TINT_BUILD_SPV_READER)
-  tint_target_add_dependencies("cmd/bench:bench_cmd"
-    "lang/spirv/reader"
+  tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
+    tint_lang_spirv_reader
   )
 endif(TINT_BUILD_SPV_READER)
 
 if (TINT_BUILD_SPV_WRITER)
-  tint_target_add_dependencies("cmd/bench:bench_cmd"
-    "lang/spirv/writer:bench"
+  tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
+    tint_lang_spirv_writer_bench
   )
 endif(TINT_BUILD_SPV_WRITER)
 
-tint_target_set_output_name("cmd/bench:bench_cmd" "tint_benchmark")
+tint_target_set_output_name(tint_cmd_bench_bench_cmd bench_cmd "tint_benchmark")

@@ -21,29 +21,31 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_reflection'
+# Target:    tint_utils_reflection
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/reflection"
+tint_add_target(tint_utils_reflection lib
   utils/reflection/reflection.cc
   utils/reflection/reflection.h
 )
 
-tint_target_add_dependencies("utils/reflection"
-  "utils/macros"
+tint_target_add_dependencies(tint_utils_reflection lib
+  tint_utils_macros
 )
 
 ################################################################################
-# CMake target: 'tint_utils_reflection_test'
+# Target:    tint_utils_reflection_test
+# Kind:      test
 ################################################################################
-tint_add_target("utils/reflection:test"
+tint_add_target(tint_utils_reflection_test test
   utils/reflection/reflection_test.cc
 )
 
-tint_target_add_dependencies("utils/reflection:test"
-  "utils/macros"
-  "utils/reflection"
+tint_target_add_dependencies(tint_utils_reflection_test test
+  tint_utils_macros
+  tint_utils_reflection
 )
 
-tint_target_add_external_dependencies("utils/reflection:test"
+tint_target_add_external_dependencies(tint_utils_reflection_test test
   "gtest"
 )

@@ -21,35 +21,37 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_result'
+# Target:    tint_utils_result
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/result"
+tint_add_target(tint_utils_result lib
   utils/result/result.cc
   utils/result/result.h
 )
 
-tint_target_add_dependencies("utils/result"
-  "utils/ice"
-  "utils/macros"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_result lib
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_text
+  tint_utils_traits
 )
 
 ################################################################################
-# CMake target: 'tint_utils_result_test'
+# Target:    tint_utils_result_test
+# Kind:      test
 ################################################################################
-tint_add_target("utils/result:test"
+tint_add_target(tint_utils_result_test test
   utils/result/result_test.cc
 )
 
-tint_target_add_dependencies("utils/result:test"
-  "utils/ice"
-  "utils/macros"
-  "utils/result"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_result_test test
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_result
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("utils/result:test"
+tint_target_add_external_dependencies(tint_utils_result_test test
   "gtest"
 )

@@ -25,38 +25,40 @@ include(lang/spirv/reader/common/BUILD.cmake)
 
 if(TINT_BUILD_SPV_READER)
 ################################################################################
-# CMake target: 'tint_lang_spirv_reader'
+# Target:    tint_lang_spirv_reader
+# Kind:      lib
+# Condition: TINT_BUILD_SPV_READER
 ################################################################################
-tint_add_target("lang/spirv/reader"
+tint_add_target(tint_lang_spirv_reader lib
   lang/spirv/reader/reader.cc
   lang/spirv/reader/reader.h
 )
 
-tint_target_add_dependencies("lang/spirv/reader"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/spirv/reader/common"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_spirv_reader lib
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_spirv_reader_common
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 if (TINT_BUILD_SPV_READER)
-  tint_target_add_dependencies("lang/spirv/reader"
-    "lang/spirv/reader/ast_parser"
+  tint_target_add_dependencies(tint_lang_spirv_reader lib
+    tint_lang_spirv_reader_ast_parser
   )
 endif(TINT_BUILD_SPV_READER)
 

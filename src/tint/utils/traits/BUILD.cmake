@@ -21,24 +21,26 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_traits'
+# Target:    tint_utils_traits
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/traits"
+tint_add_target(tint_utils_traits lib
   utils/traits/traits.cc
   utils/traits/traits.h
 )
 
 ################################################################################
-# CMake target: 'tint_utils_traits_test'
+# Target:    tint_utils_traits_test
+# Kind:      test
 ################################################################################
-tint_add_target("utils/traits:test"
+tint_add_target(tint_utils_traits_test test
   utils/traits/traits_test.cc
 )
 
-tint_target_add_dependencies("utils/traits:test"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_traits_test test
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("utils/traits:test"
+tint_target_add_external_dependencies(tint_utils_traits_test test
   "gtest"
 )

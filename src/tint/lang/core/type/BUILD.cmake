@@ -21,9 +21,10 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_lang_core_type'
+# Target:    tint_lang_core_type
+# Kind:      lib
 ################################################################################
-tint_add_target("lang/core/type"
+tint_add_target(tint_lang_core_type lib
   lang/core/type/abstract_float.cc
   lang/core/type/abstract_float.h
   lang/core/type/abstract_int.cc
@@ -95,26 +96,27 @@ tint_add_target("lang/core/type"
   lang/core/type/void.h
 )
 
-tint_target_add_dependencies("lang/core/type"
-  "lang/core"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_core_type lib
+  tint_lang_core
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 ################################################################################
-# CMake target: 'tint_lang_core_type_test'
+# Target:    tint_lang_core_type_test
+# Kind:      test
 ################################################################################
-tint_add_target("lang/core/type:test"
+tint_add_target(tint_lang_core_type_test test
   lang/core/type/array_test.cc
   lang/core/type/atomic_test.cc
   lang/core/type/bool_test.cc
@@ -141,30 +143,30 @@ tint_add_target("lang/core/type:test"
   lang/core/type/vector_test.cc
 )
 
-tint_target_add_dependencies("lang/core/type:test"
-  "api/common"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/resolver"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_core_type_test test
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_resolver
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("lang/core/type:test"
+tint_target_add_external_dependencies(tint_lang_core_type_test test
   "gtest"
 )

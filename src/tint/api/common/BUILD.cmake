@@ -21,18 +21,19 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_api_common'
+# Target:    tint_api_common
+# Kind:      lib
 ################################################################################
-tint_add_target("api/common"
+tint_add_target(tint_api_common lib
   api/common/binding_point.h
   api/common/common.cc
   api/common/override_id.h
 )
 
-tint_target_add_dependencies("api/common"
-  "utils/macros"
-  "utils/math"
-  "utils/reflection"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_api_common lib
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_reflection
+  tint_utils_text
+  tint_utils_traits
 )

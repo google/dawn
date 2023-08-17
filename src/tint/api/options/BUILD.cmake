@@ -21,21 +21,22 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_api_options'
+# Target:    tint_api_options
+# Kind:      lib
 ################################################################################
-tint_add_target("api/options"
+tint_add_target(tint_api_options lib
   api/options/array_length_from_uniform.h
   api/options/binding_remapper.h
   api/options/external_texture.h
   api/options/options.cc
 )
 
-tint_target_add_dependencies("api/options"
-  "api/common"
-  "lang/core"
-  "utils/macros"
-  "utils/math"
-  "utils/reflection"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_api_options lib
+  tint_api_common
+  tint_lang_core
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_reflection
+  tint_utils_text
+  tint_utils_traits
 )

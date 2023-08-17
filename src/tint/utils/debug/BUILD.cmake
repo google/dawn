@@ -21,9 +21,10 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_debug'
+# Target:    tint_utils_debug
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/debug"
+tint_add_target(tint_utils_debug lib
   utils/debug/debugger.cc
   utils/debug/debugger.h
 )

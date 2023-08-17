@@ -26,9 +26,10 @@ include(lang/core/ir/BUILD.cmake)
 include(lang/core/type/BUILD.cmake)
 
 ################################################################################
-# CMake target: 'tint_lang_core'
+# Target:    tint_lang_core
+# Kind:      lib
 ################################################################################
-tint_add_target("lang/core"
+tint_add_target(tint_lang_core lib
   lang/core/access.cc
   lang/core/access.h
   lang/core/address_space.cc
@@ -66,23 +67,24 @@ tint_add_target("lang/core"
   lang/core/unary_op.h
 )
 
-tint_target_add_dependencies("lang/core"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/result"
-  "utils/rtti"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_core lib
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_text
+  tint_utils_traits
 )
 
 ################################################################################
-# CMake target: 'tint_lang_core_test'
+# Target:    tint_lang_core_test
+# Kind:      test
 ################################################################################
-tint_add_target("lang/core:test"
+tint_add_target(tint_lang_core_test test
   lang/core/access_test.cc
   lang/core/address_space_test.cc
   lang/core/attribute_test.cc
@@ -97,37 +99,38 @@ tint_add_target("lang/core:test"
   lang/core/texel_format_test.cc
 )
 
-tint_target_add_dependencies("lang/core:test"
-  "api/common"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_core_test test
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("lang/core:test"
+tint_target_add_external_dependencies(tint_lang_core_test test
   "gtest"
 )
 
 ################################################################################
-# CMake target: 'tint_lang_core_bench'
+# Target:    tint_lang_core_bench
+# Kind:      bench
 ################################################################################
-tint_add_target("lang/core:bench"
+tint_add_target(tint_lang_core_bench bench
   lang/core/access_bench.cc
   lang/core/address_space_bench.cc
   lang/core/attribute_bench.cc
@@ -141,15 +144,15 @@ tint_add_target("lang/core:bench"
   lang/core/texel_format_bench.cc
 )
 
-tint_target_add_dependencies("lang/core:bench"
-  "lang/core"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/rtti"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_core_bench bench
+  tint_lang_core
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+  tint_utils_text
+  tint_utils_traits
 )

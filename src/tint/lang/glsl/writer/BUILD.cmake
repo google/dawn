@@ -25,86 +25,90 @@ include(lang/glsl/writer/common/BUILD.cmake)
 
 if(TINT_BUILD_GLSL_WRITER)
 ################################################################################
-# CMake target: 'tint_lang_glsl_writer'
+# Target:    tint_lang_glsl_writer
+# Kind:      lib
+# Condition: TINT_BUILD_GLSL_WRITER
 ################################################################################
-tint_add_target("lang/glsl/writer"
+tint_add_target(tint_lang_glsl_writer lib
   lang/glsl/writer/output.cc
   lang/glsl/writer/output.h
   lang/glsl/writer/writer.cc
   lang/glsl/writer/writer.h
 )
 
-tint_target_add_dependencies("lang/glsl/writer"
-  "api/common"
-  "api/options"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/wgsl/ast"
-  "lang/wgsl/ast/transform"
-  "lang/wgsl/program"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/generator"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_glsl_writer lib
+  tint_api_common
+  tint_api_options
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_ast_transform
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_generator
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 if (TINT_BUILD_GLSL_WRITER)
-  tint_target_add_dependencies("lang/glsl/writer"
-    "lang/glsl/writer/ast_printer"
-    "lang/glsl/writer/common"
+  tint_target_add_dependencies(tint_lang_glsl_writer lib
+    tint_lang_glsl_writer_ast_printer
+    tint_lang_glsl_writer_common
   )
 endif(TINT_BUILD_GLSL_WRITER)
 
 endif(TINT_BUILD_GLSL_WRITER)
 if(TINT_BUILD_GLSL_WRITER)
 ################################################################################
-# CMake target: 'tint_lang_glsl_writer_bench'
+# Target:    tint_lang_glsl_writer_bench
+# Kind:      bench
+# Condition: TINT_BUILD_GLSL_WRITER
 ################################################################################
-tint_add_target("lang/glsl/writer:bench"
+tint_add_target(tint_lang_glsl_writer_bench bench
   lang/glsl/writer/writer_bench.cc
 )
 
-tint_target_add_dependencies("lang/glsl/writer:bench"
-  "api/common"
-  "api/options"
-  "cmd/bench"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_glsl_writer_bench bench
+  tint_api_common
+  tint_api_options
+  tint_cmd_bench
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 if (TINT_BUILD_GLSL_WRITER)
-  tint_target_add_dependencies("lang/glsl/writer:bench"
-    "lang/glsl/writer"
-    "lang/glsl/writer/common"
+  tint_target_add_dependencies(tint_lang_glsl_writer_bench bench
+    tint_lang_glsl_writer
+    tint_lang_glsl_writer_common
   )
 endif(TINT_BUILD_GLSL_WRITER)
 

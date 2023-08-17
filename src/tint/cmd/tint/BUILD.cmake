@@ -21,98 +21,99 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_cmd_tint_cmd'
+# Target:    tint_cmd_tint_cmd
+# Kind:      cmd
 ################################################################################
-tint_add_target("cmd/tint:cmd"
+tint_add_target(tint_cmd_tint_cmd cmd
   cmd/tint/main.cc
 )
 
-tint_target_add_dependencies("cmd/tint:cmd"
-  "api"
-  "api/common"
-  "api/options"
-  "cmd/common"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/hlsl/writer/common"
-  "lang/spirv/reader/common"
-  "lang/wgsl/ast"
-  "lang/wgsl/ast/transform"
-  "lang/wgsl/helpers"
-  "lang/wgsl/inspector"
-  "lang/wgsl/program"
-  "lang/wgsl/reader"
-  "lang/wgsl/sem"
-  "lang/wgsl/writer"
-  "utils/cli"
-  "utils/command"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/strconv"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_cmd_tint_cmd cmd
+  tint_api
+  tint_api_common
+  tint_api_options
+  tint_cmd_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_hlsl_writer_common
+  tint_lang_spirv_reader_common
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_ast_transform
+  tint_lang_wgsl_helpers
+  tint_lang_wgsl_inspector
+  tint_lang_wgsl_program
+  tint_lang_wgsl_reader
+  tint_lang_wgsl_sem
+  tint_lang_wgsl_writer
+  tint_utils_cli
+  tint_utils_command
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_strconv
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 if (TINT_BUILD_GLSL_WRITER)
-  tint_target_add_dependencies("cmd/tint:cmd"
-    "lang/glsl/writer"
-    "lang/glsl/writer/common"
+  tint_target_add_dependencies(tint_cmd_tint_cmd cmd
+    tint_lang_glsl_writer
+    tint_lang_glsl_writer_common
   )
-  tint_target_add_external_dependencies("cmd/tint:cmd"
+  tint_target_add_external_dependencies(tint_cmd_tint_cmd cmd
     "glslang"
     "glslang-res-limits"
   )
 endif(TINT_BUILD_GLSL_WRITER)
 
 if (TINT_BUILD_HLSL_WRITER)
-  tint_target_add_dependencies("cmd/tint:cmd"
-    "lang/hlsl/validate"
-    "lang/hlsl/writer"
+  tint_target_add_dependencies(tint_cmd_tint_cmd cmd
+    tint_lang_hlsl_validate
+    tint_lang_hlsl_writer
   )
 endif(TINT_BUILD_HLSL_WRITER)
 
 if (TINT_BUILD_IR)
-  tint_target_add_dependencies("cmd/tint:cmd"
-    "lang/core/ir"
-    "lang/wgsl/reader/program_to_ir"
+  tint_target_add_dependencies(tint_cmd_tint_cmd cmd
+    tint_lang_core_ir
+    tint_lang_wgsl_reader_program_to_ir
   )
 endif(TINT_BUILD_IR)
 
 if (TINT_BUILD_MSL_WRITER)
-  tint_target_add_dependencies("cmd/tint:cmd"
-    "lang/msl/validate"
-    "lang/msl/writer"
-    "lang/msl/writer/common"
+  tint_target_add_dependencies(tint_cmd_tint_cmd cmd
+    tint_lang_msl_validate
+    tint_lang_msl_writer
+    tint_lang_msl_writer_common
   )
 endif(TINT_BUILD_MSL_WRITER)
 
 if (TINT_BUILD_SPV_READER)
-  tint_target_add_dependencies("cmd/tint:cmd"
-    "lang/spirv/reader"
+  tint_target_add_dependencies(tint_cmd_tint_cmd cmd
+    tint_lang_spirv_reader
   )
 endif(TINT_BUILD_SPV_READER)
 
 if (TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
-  tint_target_add_external_dependencies("cmd/tint:cmd"
+  tint_target_add_external_dependencies(tint_cmd_tint_cmd cmd
     "spirv-tools"
   )
 endif(TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
 
 if (TINT_BUILD_SPV_WRITER)
-  tint_target_add_dependencies("cmd/tint:cmd"
-    "lang/spirv/writer"
-    "lang/spirv/writer/common"
+  tint_target_add_dependencies(tint_cmd_tint_cmd cmd
+    tint_lang_spirv_writer
+    tint_lang_spirv_writer_common
   )
 endif(TINT_BUILD_SPV_WRITER)
 
-tint_target_set_output_name("cmd/tint:cmd" "tint")
+tint_target_set_output_name(tint_cmd_tint_cmd cmd "tint")

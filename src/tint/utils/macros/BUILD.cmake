@@ -21,9 +21,10 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_macros'
+# Target:    tint_utils_macros
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/macros"
+tint_add_target(tint_utils_macros lib
   utils/macros/compiler.h
   utils/macros/concat.h
   utils/macros/defer.h
@@ -33,17 +34,18 @@ tint_add_target("utils/macros"
 )
 
 ################################################################################
-# CMake target: 'tint_utils_macros_test'
+# Target:    tint_utils_macros_test
+# Kind:      test
 ################################################################################
-tint_add_target("utils/macros:test"
+tint_add_target(tint_utils_macros_test test
   utils/macros/defer_test.cc
   utils/macros/scoped_assignment_test.cc
 )
 
-tint_target_add_dependencies("utils/macros:test"
-  "utils/macros"
+tint_target_add_dependencies(tint_utils_macros_test test
+  tint_utils_macros
 )
 
-tint_target_add_external_dependencies("utils/macros:test"
+tint_target_add_external_dependencies(tint_utils_macros_test test
   "gtest"
 )

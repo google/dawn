@@ -21,9 +21,10 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_math'
+# Target:    tint_utils_math
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/math"
+tint_add_target(tint_utils_math lib
   utils/math/crc32.h
   utils/math/hash.h
   utils/math/math.cc
@@ -31,24 +32,25 @@ tint_add_target("utils/math"
 )
 
 ################################################################################
-# CMake target: 'tint_utils_math_test'
+# Target:    tint_utils_math_test
+# Kind:      test
 ################################################################################
-tint_add_target("utils/math:test"
+tint_add_target(tint_utils_math_test test
   utils/math/crc32_test.cc
   utils/math/hash_test.cc
   utils/math/math_test.cc
 )
 
-tint_target_add_dependencies("utils/math:test"
-  "utils/containers"
-  "utils/ice"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/rtti"
-  "utils/traits"
+tint_target_add_dependencies(tint_utils_math_test test
+  tint_utils_containers
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("utils/math:test"
+tint_target_add_external_dependencies(tint_utils_math_test test
   "gtest"
 )

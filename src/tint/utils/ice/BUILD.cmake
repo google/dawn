@@ -21,30 +21,32 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_utils_ice'
+# Target:    tint_utils_ice
+# Kind:      lib
 ################################################################################
-tint_add_target("utils/ice"
+tint_add_target(tint_utils_ice lib
   utils/ice/ice.cc
   utils/ice/ice.h
 )
 
-tint_target_add_dependencies("utils/ice"
-  "utils/debug"
-  "utils/macros"
+tint_target_add_dependencies(tint_utils_ice lib
+  tint_utils_debug
+  tint_utils_macros
 )
 
 ################################################################################
-# CMake target: 'tint_utils_ice_test'
+# Target:    tint_utils_ice_test
+# Kind:      test
 ################################################################################
-tint_add_target("utils/ice:test"
+tint_add_target(tint_utils_ice_test test
   utils/ice/ice_test.cc
 )
 
-tint_target_add_dependencies("utils/ice:test"
-  "utils/ice"
-  "utils/macros"
+tint_target_add_dependencies(tint_utils_ice_test test
+  tint_utils_ice
+  tint_utils_macros
 )
 
-tint_target_add_external_dependencies("utils/ice:test"
+tint_target_add_external_dependencies(tint_utils_ice_test test
   "gtest"
 )

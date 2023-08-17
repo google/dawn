@@ -21,9 +21,10 @@
 ################################################################################
 
 ################################################################################
-# CMake target: 'tint_lang_wgsl_inspector'
+# Target:    tint_lang_wgsl_inspector
+# Kind:      lib
 ################################################################################
-tint_add_target("lang/wgsl/inspector"
+tint_add_target(tint_lang_wgsl_inspector lib
   lang/wgsl/inspector/entry_point.cc
   lang/wgsl/inspector/entry_point.h
   lang/wgsl/inspector/inspector.cc
@@ -34,33 +35,34 @@ tint_add_target("lang/wgsl/inspector"
   lang/wgsl/inspector/scalar.h
 )
 
-tint_target_add_dependencies("lang/wgsl/inspector"
-  "api/common"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/wgsl/ast"
-  "lang/wgsl/program"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_wgsl_inspector lib
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_program
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
 ################################################################################
-# CMake target: 'tint_lang_wgsl_inspector_test'
+# Target:    tint_lang_wgsl_inspector_test
+# Kind:      test
 ################################################################################
-tint_add_target("lang/wgsl/inspector:test"
+tint_add_target(tint_lang_wgsl_inspector_test test
   lang/wgsl/inspector/inspector_builder_test.cc
   lang/wgsl/inspector/inspector_builder_test.h
   lang/wgsl/inspector/inspector_runner_test.cc
@@ -68,32 +70,32 @@ tint_add_target("lang/wgsl/inspector:test"
   lang/wgsl/inspector/inspector_test.cc
 )
 
-tint_target_add_dependencies("lang/wgsl/inspector:test"
-  "api/common"
-  "lang/core"
-  "lang/core/constant"
-  "lang/core/type"
-  "lang/wgsl/ast"
-  "lang/wgsl/inspector"
-  "lang/wgsl/program"
-  "lang/wgsl/reader"
-  "lang/wgsl/resolver"
-  "lang/wgsl/sem"
-  "utils/containers"
-  "utils/diagnostic"
-  "utils/ice"
-  "utils/id"
-  "utils/macros"
-  "utils/math"
-  "utils/memory"
-  "utils/reflection"
-  "utils/result"
-  "utils/rtti"
-  "utils/symbol"
-  "utils/text"
-  "utils/traits"
+tint_target_add_dependencies(tint_lang_wgsl_inspector_test test
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_inspector
+  tint_lang_wgsl_program
+  tint_lang_wgsl_reader
+  tint_lang_wgsl_resolver
+  tint_lang_wgsl_sem
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
 )
 
-tint_target_add_external_dependencies("lang/wgsl/inspector:test"
+tint_target_add_external_dependencies(tint_lang_wgsl_inspector_test test
   "gtest"
 )
