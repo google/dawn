@@ -192,8 +192,9 @@ func populateSourceFiles(p *Project) error {
 func scanSourceFiles(p *Project) error {
 	// ParsedFile describes all the includes and conditions found in a source file
 	type ParsedFile struct {
-		conditions []string
-		includes   []Include
+		removeFromProject bool
+		conditions        []string
+		includes          []Include
 	}
 
 	// parseFile parses the source file at 'path' represented by 'file'
@@ -205,6 +206,10 @@ func scanSourceFiles(p *Project) error {
 		}
 		out := &ParsedFile{}
 		for i, line := range strings.Split(string(body), "\n") {
+			if match := reIgnoreFile.FindStringSubmatch(line); len(match) > 0 {
+				out.removeFromProject = true
+				continue
+			}
 			if match := reCondition.FindStringSubmatch(line); len(match) > 0 {
 				out.conditions = append(out.conditions, match[1])
 			}
@@ -230,6 +235,11 @@ func scanSourceFiles(p *Project) error {
 			for _, file := range target.SourceFiles() {
 				// Retrieve the parsed file information
 				parsed := parsedFiles[file.Path()]
+
+				if parsed.removeFromProject {
+					file.RemoveFromProject()
+					continue
+				}
 
 				// Apply any conditions
 				for _, condition := range parsed.conditions {
@@ -617,7 +627,8 @@ func emitDotFile(p *Project, kind TargetKind) error {
 var (
 	// Regular expressions used by this file
 	reInclude       = regexp.MustCompile(`\s*#\s*include\s*\"([^"]+)\"`)
-	reIgnoreInclude = regexp.MustCompile(`//\s*GEN_BUILD:IGNORE`)
+	reIgnoreFile    = regexp.MustCompile(`//\s*GEN_BUILD:IGNORE_FILE`)
+	reIgnoreInclude = regexp.MustCompile(`//\s*GEN_BUILD:IGNORE_INCLUDE`)
 	reCondition     = regexp.MustCompile(`//\s*GEN_BUILD:CONDITION\((.*)\)\s*$`)
 	reDoNotGenerate = regexp.MustCompile(`#\s*GEN_BUILD:DO_NOT_GENERATE`)
 )

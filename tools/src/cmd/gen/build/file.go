@@ -43,7 +43,14 @@ func (f *File) Path() string {
 	return path.Join(f.Directory.Path, f.Name)
 }
 
-// Path returns the absolute path of the file
+// AbsPath returns the absolute path of the file
 func (f *File) AbsPath() string {
 	return path.Join(f.Directory.AbsPath(), f.Name)
+}
+
+// RemoveFromProject removes the File from the project
+func (f *File) RemoveFromProject() {
+	path := f.Path()
+	f.Target.SourceFileSet.Remove(path)
+	f.Directory.Project.Files.Remove(path)
 }

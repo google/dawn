@@ -82,7 +82,8 @@ Source and build files can be annotated with special directives in comments to c
 
 | Directive | Description |
 |-----------|-------------|
-| `GEN_BUILD:IGNORE` | Apply to the end of a `#include` in a source file to ignore this include for dependency analysis <br> Example: `#include "foo/bar.h"  // GEN_BUILD:IGNORE` |
+| `GEN_BUILD:IGNORE_FILE` | Add to a source file to have the file ignored by the generator <br> Example: `// GEN_BUILD:IGNORE_FILE` |
+| `GEN_BUILD:IGNORE_INCLUDE` | Apply to the end of a `#include` in a source file to ignore this include for dependency analysis <br> Example: `#include "foo/bar.h"  // GEN_BUILD:IGNORE_INCLUDE` |
 | `GEN_BUILD:CONDITION(`_cond_`)` | Applies the build condition for this source file. <br> Example: `// GEN_BUILD:CONDITION(is_linux)` |
 | `GEN_BUILD:DO_NOT_GENERATE` | Prevents the `BUILD.*` file from being generated. <br> Example: `# GEN_BUILD:DO_NOT_GENERATE` |
 
