@@ -59,13 +59,30 @@ if (build_with_chromium) {
 
   source_set("tint_fuzzer_common_src") {
     public_configs = [
-      "${tint_root_dir}/src/tint:tint_config",
-      "${tint_root_dir}/src/tint:tint_common_config",
+      "${tint_src_dir}:tint_config",
+      "${tint_src_dir}:tint_common_config",
     ]
 
     public_deps = [
-      "${tint_root_dir}/src/tint:libtint",
       "${tint_spirv_tools_dir}/:spvtools_val",
+      "${tint_src_dir}/api",
+      "${tint_src_dir}/api/common",
+      "${tint_src_dir}/lang/core/type",
+      "${tint_src_dir}/lang/glsl/writer",
+      "${tint_src_dir}/lang/hlsl/writer",
+      "${tint_src_dir}/lang/msl/writer",
+      "${tint_src_dir}/lang/spirv/writer",
+      "${tint_src_dir}/lang/wgsl/ast",
+      "${tint_src_dir}/lang/wgsl/ast/transform",
+      "${tint_src_dir}/lang/wgsl/helpers",
+      "${tint_src_dir}/lang/wgsl/inspector",
+      "${tint_src_dir}/lang/wgsl/program",
+      "${tint_src_dir}/lang/wgsl/reader",
+      "${tint_src_dir}/lang/wgsl/resolver",
+      "${tint_src_dir}/lang/wgsl/sem",
+      "${tint_src_dir}/lang/wgsl/writer",
+      "${tint_src_dir}/utils/diagnostic",
+      "${tint_src_dir}/utils/math",
     ]
 
     sources = [
@@ -106,6 +123,11 @@ if (build_with_chromium) {
     fuzzer_test("tint_ast_clone_fuzzer") {
       sources = [ "tint_ast_clone_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common_with_init_src" ]
+      deps += [
+        "${tint_src_dir}/lang/wgsl/reader",
+        "${tint_src_dir}/lang/wgsl/reader/parser",
+      ]
+
       dict = "dictionary.txt"
       libfuzzer_options = tint_fuzzer_common_libfuzzer_options
       seed_corpus = fuzzer_corpus_wgsl_dir

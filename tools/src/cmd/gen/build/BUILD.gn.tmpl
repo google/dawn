@@ -1,0 +1,150 @@
+
+import("{{Repeat "../" .Depth}}../../../tint_overrides_with_defaults.gni")
+
+import("${tint_src_dir}/tint.gni")
+
+{{- if $.Project.Target $ "test_cmd"}}
+{{/*   newline */}}
+if (tint_build_unittests) {
+  import("//testing/test.gni")
+}
+{{- end}}
+
+{{- Eval "SourceSetIfNotEmpty" ($.Project.Target $ "lib")}}
+{{- Eval "SourceSetIfNotEmpty" ($.Project.Target $ "cmd")}}
+{{- Eval "SourceSetIfNotEmpty" ($.Project.Target $ "test")}}
+{{- Eval "SourceSetIfNotEmpty" ($.Project.Target $ "test_cmd")}}
+
+
+{{- /*
+--------------------------------------------------------------------------------
+-- Emits a GN source set if it contains any files
+--------------------------------------------------------------------------------
+*/ -}}
+{{- define "SourceSetIfNotEmpty"}}
+{{-   if $}}
+{{-     if len $.SourceFiles}}{{Eval "SourceSet" $}}{{end}}
+{{-   end}}
+{{- end}}
+
+
+{{- /*
+--------------------------------------------------------------------------------
+-- Emits a GN source set
+--------------------------------------------------------------------------------
+*/ -}}
+{{- define "SourceSet"}}
+
+{{- /* Target condition */}}
+{{-   if $.Condition}}
+if({{$.Condition}}) {
+{{-   end}}
+
+{{  if      eq $.Kind "lib" -}}
+libtint_source_set("{{$.Directory.Name}}") {
+{{- else if eq $.Kind "cmd" -}}
+executable("{{$.Directory.Name}}") {
+{{- else if eq $.Kind "test" -}}
+tint_unittests_source_set("unittests") {
+  testonly = true
+{{- else if eq $.Kind "test_cmd" -}}
+test("{{$.Directory.Name}}") {
+{{- else }}{{Error $.Kind}}
+{{- end  }}
+{{- if $.OutputName }}
+  output_name = "{{$.OutputName}}"
+{{- end}}
+  sources = [
+{{- range $File := $.UnconditionalSourceFiles}}
+    "{{TrimPrefix $File.Name $.Directory.Path}}",
+{{- end}}
+  ]
+  deps = [
+
+{{- /* Emit unconditional inernal dependencies */}}
+{{- range $Dep := $.Dependencies.UnconditionalInternal}}
+    "{{Eval "Dependency" $Dep}}",
+{{- end}}
+
+{{- /* Emit unconditional external dependencies */}}
+{{- range $Dep := $.Dependencies.UnconditionalExternal}}
+    {{Eval "ExternalDependencyTargets" $Dep}}
+{{- end}}
+  ]
+
+{{- /* Emit conditional source files and dependencies */}}
+{{-   range $Cond := $.Conditionals}}
+{{/*   newline */}}
+  if ({{$Cond.Condition}}) {
+{{-     if $Cond.SourceFiles}}
+    sources += [
+{{-       range $File := $Cond.SourceFiles}}
+      "{{TrimPrefix $File.Name $.Directory.Path}}",
+{{-       end}}
+    ]
+{{-     end}}
+{{-     if or $Cond.InternalDependencies $Cond.ExternalDependencies}}
+    deps += [
+{{-       range $Dep := $Cond.InternalDependencies}}
+      "{{Eval "Dependency" $Dep}}",
+{{-       end}}
+{{-       range $Dep := $Cond.ExternalDependencies}}
+      {{Eval "ExternalDependencyTargets" $Dep}}
+{{-       end}}
+    ]
+{{-     end}}
+  }
+{{-   end}}
+
+{{- if $.Dependencies.ContainsExternal "spirv-opt-internal"}}
+  public_configs = [ "${tint_spirv_tools_dir}/:spvtools_internal_config" ]
+{{- end}}
+
+{{- if eq $.Kind "test_cmd" }}
+  testonly = true
+  configs += [ "${tint_src_dir}:tint_unittests_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+{{- end}}
+}
+
+{{- /* Target condition */}}
+{{-   if $.Condition}}}{{-   end}}
+{{- end}}
+
+
+{{- /*
+--------------------------------------------------------------------------------
+-- Emits a dependency target name
+--------------------------------------------------------------------------------
+*/ -}}
+{{- define "Dependency"}}
+{{-   $Path := printf "${tint_src_dir}/%v" $.Directory.Path}}
+{{-   if      eq $.Kind "lib"  }}{{$Path}}
+{{-   else if eq $.Kind "test" }}{{$Path}}:unittests
+{{-   else                     }}{{$Path}}:{{$.Kind}}
+{{-   end}}
+{{- end}}
+
+
+{{- /*
+--------------------------------------------------------------------------------
+-- Emits comma separated, quoted external dependency target name(s) with a trailing comma
+-- External target names are declared in tools/src/cmd/gen/build/externals.json
+--------------------------------------------------------------------------------
+*/ -}}
+{{- define "ExternalDependencyTargets"}}
+{{-        if eq $.Name "abseil"             -}}"${tint_src_dir}:abseil",
+{{-   else if eq $.Name "gtest"              -}}"${tint_src_dir}:gmock_and_gtest",
+{{-   else if eq $.Name "spirv-tools"        -}}"${tint_spirv_tools_dir}:spvtools_headers", "${tint_spirv_tools_dir}:spvtools_val",
+{{-   else if eq $.Name "spirv-opt-internal" -}}"${tint_spirv_tools_dir}:spvtools", "${tint_spirv_tools_dir}:spvtools_opt",
+{{-   else if eq $.Name "spirv-headers"      -}}"${tint_spirv_headers_dir}:spv_headers",
+{{-   else if eq $.Name "glslang"            -}}"${tint_glslang_dir}:glslang_lib_sources",
+{{-   else if eq $.Name "glslang-res-limits" -}}"${tint_glslang_dir}:glslang_default_resource_limits_sources",
+{{-   else                                   -}}{{Error (printf "unhandled external dependency '%v'" $)}}
+{{-   end}}
+{{- end}}
+

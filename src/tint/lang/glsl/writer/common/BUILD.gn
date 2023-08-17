@@ -20,6 +20,26 @@
 # Do not modify this file directly
 ################################################################################
 
-import("../../../tint_overrides_with_defaults.gni")
+import("../../../../../../tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
+if (tint_build_glsl_writer) {
+  libtint_source_set("common") {
+    sources = [
+      "options.cc",
+      "options.h",
+      "version.h",
+    ]
+    deps = [
+      "${tint_src_dir}/api/common",
+      "${tint_src_dir}/api/options",
+      "${tint_src_dir}/lang/core",
+      "${tint_src_dir}/lang/wgsl/sem",
+      "${tint_src_dir}/utils/macros",
+      "${tint_src_dir}/utils/math",
+      "${tint_src_dir}/utils/reflection",
+      "${tint_src_dir}/utils/text",
+      "${tint_src_dir}/utils/traits",
+    ]
+  }
+}

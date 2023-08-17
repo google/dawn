@@ -20,6 +20,30 @@
 # Do not modify this file directly
 ################################################################################
 
-import("../../../tint_overrides_with_defaults.gni")
+import("../../../../tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
+
+libtint_source_set("memory") {
+  sources = [
+    "bitcast.h",
+    "block_allocator.h",
+    "bump_allocator.h",
+    "memory.cc",
+  ]
+  deps = [ "${tint_src_dir}/utils/math" ]
+}
+
+tint_unittests_source_set("unittests") {
+  testonly = true
+  sources = [
+    "bitcast_test.cc",
+    "block_allocator_test.cc",
+    "bump_allocator_test.cc",
+  ]
+  deps = [
+    "${tint_src_dir}:gmock_and_gtest",
+    "${tint_src_dir}/utils/math",
+    "${tint_src_dir}/utils/memory",
+  ]
+}

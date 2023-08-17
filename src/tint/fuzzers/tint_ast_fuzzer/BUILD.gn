@@ -27,15 +27,21 @@ if (build_with_chromium) {
 
   source_set("tint_ast_fuzzer") {
     public_configs = [
-      "${tint_root_dir}/src/tint:tint_config",
-      "${tint_root_dir}/src/tint:tint_common_config",
+      "${tint_src_dir}:tint_config",
+      "${tint_src_dir}:tint_common_config",
     ]
 
     include_dirs = [ "${target_gen_dir}/../../../.." ]
 
     deps = [
       ":tint_ast_fuzzer_proto",
-      "${tint_root_dir}/src/tint/fuzzers:tint_fuzzer_common_src",
+      "${tint_src_dir}/fuzzers:tint_fuzzer_common_src",
+      "${tint_src_dir}/lang/core",
+      "${tint_src_dir}/lang/wgsl/ast",
+      "${tint_src_dir}/lang/wgsl/program",
+      "${tint_src_dir}/lang/wgsl/resolver",
+      "${tint_src_dir}/lang/wgsl/sem",
+      "${tint_src_dir}/utils/rtti",
       "//third_party/protobuf:protobuf_full",
     ]
 

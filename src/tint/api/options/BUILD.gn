@@ -20,6 +20,24 @@
 # Do not modify this file directly
 ################################################################################
 
-import("../../../tint_overrides_with_defaults.gni")
+import("../../../../tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
+
+libtint_source_set("options") {
+  sources = [
+    "array_length_from_uniform.h",
+    "binding_remapper.h",
+    "external_texture.h",
+    "options.cc",
+  ]
+  deps = [
+    "${tint_src_dir}/api/common",
+    "${tint_src_dir}/lang/core",
+    "${tint_src_dir}/utils/macros",
+    "${tint_src_dir}/utils/math",
+    "${tint_src_dir}/utils/reflection",
+    "${tint_src_dir}/utils/text",
+    "${tint_src_dir}/utils/traits",
+  ]
+}

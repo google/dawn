@@ -1,0 +1,71 @@
+# Copyright 2023 The Tint Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build_overrides/build.gni")
+
+import("../../tint_overrides_with_defaults.gni")
+
+template("libtint_source_set") {
+  source_set(target_name) {
+    forward_variables_from(invoker, "*", [ "configs" ])
+
+    if (!defined(invoker.deps)) {
+      deps = []
+    }
+
+    if (defined(invoker.configs)) {
+      configs += invoker.configs
+    }
+
+    configs += [ "${tint_src_dir}:tint_common_config" ]
+
+    if (build_with_chromium) {
+      configs -= [ "//build/config/compiler:chromium_code" ]
+      configs += [ "//build/config/compiler:no_chromium_code" ]
+    }
+
+    if (!defined(invoker.public_configs)) {
+      public_configs = []
+    }
+
+    public_configs += [ "${tint_src_dir}:tint_public_config" ]
+  }
+}
+
+template("tint_unittests_source_set") {
+  if (tint_build_unittests) {
+    source_set(target_name) {
+      forward_variables_from(invoker, "*", [ "configs" ])
+
+      if (defined(invoker.configs)) {
+        configs += invoker.configs
+      }
+
+      configs += [ "${tint_src_dir}:tint_unittests_config" ]
+
+      if (build_with_chromium) {
+        configs -= [ "//build/config/compiler:chromium_code" ]
+        configs += [ "//build/config/compiler:no_chromium_code" ]
+      }
+
+      testonly = true
+
+      if (!defined(invoker.deps)) {
+        deps = []
+      }
+
+      deps += [ "${tint_src_dir}:gmock_and_gtest" ]
+    }
+  }
+}

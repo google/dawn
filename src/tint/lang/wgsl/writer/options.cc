@@ -18,6 +18,8 @@
 
 namespace tint::wgsl::writer {
 
+#ifdef TINT_BUILD_SYNTAX_TREE_WRITER
+
 Options::Options() = default;
 
 Options::~Options() = default;
@@ -25,6 +27,8 @@ Options::~Options() = default;
 Options::Options(const Options&) = default;
 
 Options& Options::operator=(const Options&) = default;
+
+#endif  // TINT_BUILD_SYNTAX_TREE_WRITER
 
 }  // namespace tint::wgsl::writer
 

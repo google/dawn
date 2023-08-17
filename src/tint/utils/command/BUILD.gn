@@ -20,6 +20,35 @@
 # Do not modify this file directly
 ################################################################################
 
-import("../../../tint_overrides_with_defaults.gni")
+import("../../../../tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
+
+libtint_source_set("command") {
+  sources = [ "command.h" ]
+  deps = [
+    "${tint_src_dir}/utils/macros",
+    "${tint_src_dir}/utils/text",
+  ]
+
+  if (!is_linux && !is_mac && !is_win) {
+    sources += [ "command_other.cc" ]
+  }
+
+  if (is_linux || is_mac) {
+    sources += [ "command_posix.cc" ]
+  }
+
+  if (is_win) {
+    sources += [ "command_windows.cc" ]
+  }
+}
+
+tint_unittests_source_set("unittests") {
+  testonly = true
+  sources = [ "command_test.cc" ]
+  deps = [
+    "${tint_src_dir}:gmock_and_gtest",
+    "${tint_src_dir}/utils/command",
+  ]
+}

@@ -20,6 +20,30 @@
 # Do not modify this file directly
 ################################################################################
 
-import("../../../tint_overrides_with_defaults.gni")
+import("../../../../tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
+
+libtint_source_set("macros") {
+  sources = [
+    "compiler.h",
+    "concat.h",
+    "defer.h",
+    "foreach.h",
+    "macros.cc",
+    "scoped_assignment.h",
+  ]
+  deps = []
+}
+
+tint_unittests_source_set("unittests") {
+  testonly = true
+  sources = [
+    "defer_test.cc",
+    "scoped_assignment_test.cc",
+  ]
+  deps = [
+    "${tint_src_dir}:gmock_and_gtest",
+    "${tint_src_dir}/utils/macros",
+  ]
+}

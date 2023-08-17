@@ -20,6 +20,36 @@
 # Do not modify this file directly
 ################################################################################
 
-import("../../../tint_overrides_with_defaults.gni")
+import("../../../../tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
+
+libtint_source_set("rtti") {
+  sources = [
+    "castable.cc",
+    "castable.h",
+    "switch.h",
+  ]
+  deps = [
+    "${tint_src_dir}/utils/macros",
+    "${tint_src_dir}/utils/math",
+    "${tint_src_dir}/utils/memory",
+    "${tint_src_dir}/utils/traits",
+  ]
+}
+
+tint_unittests_source_set("unittests") {
+  testonly = true
+  sources = [
+    "castable_test.cc",
+    "switch_test.cc",
+  ]
+  deps = [
+    "${tint_src_dir}:gmock_and_gtest",
+    "${tint_src_dir}/utils/macros",
+    "${tint_src_dir}/utils/math",
+    "${tint_src_dir}/utils/memory",
+    "${tint_src_dir}/utils/rtti",
+    "${tint_src_dir}/utils/traits",
+  ]
+}

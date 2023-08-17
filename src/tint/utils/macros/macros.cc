@@ -17,4 +17,4 @@
 #endif
 
 // A placeholder symbol used to emit a symbol for this lib target.
-int tint_utils_reflection_symbol = 1;
+int tint_utils_macros_symbol = 1;

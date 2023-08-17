@@ -20,6 +20,51 @@
 # Do not modify this file directly
 ################################################################################
 
-import("../../../tint_overrides_with_defaults.gni")
+import("../../../../tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
+
+libtint_source_set("diagnostic") {
+  sources = [
+    "diagnostic.cc",
+    "diagnostic.h",
+    "formatter.cc",
+    "formatter.h",
+    "printer.cc",
+    "printer.h",
+    "source.cc",
+    "source.h",
+  ]
+  deps = [
+    "${tint_src_dir}/utils/text",
+    "${tint_src_dir}/utils/traits",
+  ]
+
+  if (!is_linux && !is_mac && !is_win) {
+    sources += [ "printer_other.cc" ]
+  }
+
+  if (is_linux || is_mac) {
+    sources += [ "printer_posix.cc" ]
+  }
+
+  if (is_win) {
+    sources += [ "printer_windows.cc" ]
+  }
+}
+
+tint_unittests_source_set("unittests") {
+  testonly = true
+  sources = [
+    "diagnostic_test.cc",
+    "formatter_test.cc",
+    "printer_test.cc",
+    "source_test.cc",
+  ]
+  deps = [
+    "${tint_src_dir}:gmock_and_gtest",
+    "${tint_src_dir}/utils/diagnostic",
+    "${tint_src_dir}/utils/text",
+    "${tint_src_dir}/utils/traits",
+  ]
+}

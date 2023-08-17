@@ -20,14 +20,14 @@ group("all") {
     "src/dawn/fuzzers",
     "src/dawn/native:webgpu_dawn",
     "src/dawn/tests",
-    "src/tint:libtint",
-    "src/tint:tint_unittests",
+    "src/tint/api",
+    "src/tint/cmd/test",
     "src/tint/fuzzers",
   ]
   if (dawn_standalone) {
     deps += [
       "src/dawn/samples",
-      "src/tint/cmd:tint",
+      "src/tint/cmd/tint",
     ]
   }
 }

@@ -27,6 +27,11 @@ declare_args() {
     tint_spirv_tools_dir = "//third_party/vulkan-deps/spirv-tools/src"
   }
 
+  # Path to glslang checkout
+  if (!defined(tint_glslang_dir)) {
+    tint_glslang_dir = "//third_party/vulkan-deps/glslang/src"
+  }
+
   # Path to googletest checkout
   if (!defined(tint_googletest_dir)) {
     tint_googletest_dir = "//third_party/googletest"
@@ -85,5 +90,12 @@ declare_args() {
   # Build unittests
   if (!defined(tint_build_unittests)) {
     tint_build_unittests = true
+  }
+}
+
+declare_args() {
+  # Directory holding tint source
+  if (!defined(tint_src_dir)) {
+    tint_src_dir = "${tint_root_dir}/src/tint"
   }
 }
