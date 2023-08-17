@@ -550,13 +550,13 @@ func emitBuildFiles(p *Project) error {
 			}
 
 			if string(existing) != w.String() {
-				stale = append(stale, outputPath)
-			}
-
-			if !p.cfg.Flags.CheckStale {
-				if err := os.WriteFile(outputPath, w.Bytes(), 0666); err != nil {
-					return nil, err
+				if !p.cfg.Flags.CheckStale {
+					if err := os.WriteFile(outputPath, w.Bytes(), 0666); err != nil {
+						return nil, err
+					}
 				}
+
+				stale = append(stale, outputPath)
 			}
 
 		}
