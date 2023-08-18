@@ -462,6 +462,53 @@ luci.builder(
     service_account = "dawn-try-builder@chops-service-accounts.iam.gserviceaccount.com",
 )
 
+luci.builder(
+    name = "cts-roller",
+    bucket = "ci",
+    # Run at 5 UTC and 9 UTC - which is 10pm PST and 5am EST
+    schedule = "0 5,9 * * *",
+    executable = luci.recipe(
+        name = "dawn", # TODO(dawn:1940): Replace with CTS roller recipe when ready.
+        cipd_package = "infra/recipe_bundles/chromium.googlesource.com/chromium/tools/build",
+        cipd_version = "refs/heads/main",
+    ),
+    dimensions = {
+        "cpu": "x86-64",
+        "os": os.LINUX.dimension,
+        "pool": "luci.flex.ci",
+    },
+    properties = {
+        "repo_name": "dawn",
+        "runhooks": True,
+    },
+    caches = [
+        swarming.cache("golang"),
+        swarming.cache("gocache"),
+        swarming.cache("nodejs"),
+        swarming.cache("npmcache"),
+    ],
+    notifies = [
+        luci.notifier(
+            name = "cts-roller-notifier",
+            # TODO(dawn:1940): Switch to the rotation email when stable
+            # notify_rotation_urls = [
+            #     "https://chrome-ops-rotation-proxy.appspot.com/current/grotation:webgpu-gardener",
+            # ],
+            notify_emails = ["enga@chromium.org"],
+            # TODO(dawn:1940): Remove SUCCESS when stable
+            on_occurrence = ["SUCCESS", "FAILURE", "INFRA_FAILURE"],
+        )
+    ],
+    service_account = "dawn-automated-expectations@chops-service-accounts.iam.gserviceaccount.com",
+)
+
+luci.console_view_entry(
+    console_view = "ci",
+    builder = "ci/cts-roller",
+    category = "cron|roll",
+    short_name = "cts",
+)
+
 #                        name, clang, debug, cpu(, fuzzer)
 dawn_standalone_builder("linux-clang-dbg-x64", True, True, "x64")
 dawn_standalone_builder("linux-clang-dbg-x86", True, True, "x86")
