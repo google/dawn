@@ -4001,8 +4001,8 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
 
             case GLSLstd450Normalize:
                 // WGSL does not have scalar form of the normalize builtin.
-                // The answer would be 1 anyway, so return that directly.
-                return {ty_.F32(), builder_.Expr(1_f)};
+                // In this case we map normalize(x) to sign(x).
+                return {ty_.F32(), builder_.Call("sign", MakeOperand(inst, 2).expr)};
 
             case GLSLstd450FaceForward: {
                 // If dot(Nref, Incident) < 0, the result is Normal, otherwise -Normal.

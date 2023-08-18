@@ -783,7 +783,7 @@ INSTANTIATE_TEST_SUITE_P(Samples,
 // above.
 
 TEST_F(SpirvASTParserTest, Normalize_Scalar) {
-    // Scalar normalize always results in 1.0
+    // Scalar normalize maps to sign.
     const auto assembly = Preamble() + R"(
      %1 = OpExtInst %float %glsl Normalize %f1
      OpReturn
@@ -795,7 +795,7 @@ TEST_F(SpirvASTParserTest, Normalize_Scalar) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body, HasSubstr("let x_1 = 1.0f;")) << body;
+    EXPECT_THAT(body, HasSubstr("let x_1 = sign(f1);")) << body;
 }
 
 TEST_F(SpirvASTParserTest, Normalize_Vector2) {
