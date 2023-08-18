@@ -30,6 +30,8 @@ namespace tint::core::ir::transform {
 struct BinaryPolyfillConfig {
     /// Should the RHS of a shift be masked to make it modulo the bit-width of the LHS?
     bool bitshift_modulo = false;
+    /// Should integer divide and modulo be polyfilled to avoid DBZ and integer overflow?
+    bool int_div_mod = false;
 };
 
 /// BinaryPolyfill is a transform that modifies binary instructions to prepare them for raising to

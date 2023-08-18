@@ -44,6 +44,12 @@ struct State {
     /// The symbol table.
     SymbolTable& sym{ir->symbols};
 
+    /// Map from integer type to its divide helper function.
+    Hashmap<const type::Type*, Function*, 4> int_div_helpers{};
+
+    /// Map from integer type to its modulo helper function.
+    Hashmap<const type::Type*, Function*, 4> int_mod_helpers{};
+
     /// Process the module.
     void Process() {
         // Find the binary instructions that need to be polyfilled.
@@ -54,6 +60,13 @@ struct State {
             }
             if (auto* binary = inst->As<ir::Binary>()) {
                 switch (binary->Kind()) {
+                    case ir::Binary::Kind::kDivide:
+                    case ir::Binary::Kind::kModulo:
+                        if (config.int_div_mod &&
+                            binary->Result()->Type()->is_integer_scalar_or_vector()) {
+                            worklist.Push(binary);
+                        }
+                        break;
                     case ir::Binary::Kind::kShiftLeft:
                     case ir::Binary::Kind::kShiftRight:
                         if (config.bitshift_modulo) {
@@ -70,6 +83,10 @@ struct State {
         for (auto* binary : worklist) {
             ir::Value* replacement = nullptr;
             switch (binary->Kind()) {
+                case Binary::Kind::kDivide:
+                case Binary::Kind::kModulo:
+                    replacement = IntDivMod(binary);
+                    break;
                 case Binary::Kind::kShiftLeft:
                 case Binary::Kind::kShiftRight:
                     replacement = MaskShiftAmount(binary);
@@ -113,6 +130,90 @@ struct State {
             return b.Splat(MatchWidth(element->Type(), match), element, vec->Width());
         }
         return element;
+    }
+
+    /// Replace an integer divide or modulo with a call to helper function that prevents
+    /// divide-by-zero and signed integer overflow.
+    /// @param binary the binary instruction
+    /// @returns the replacement value
+    ir::Value* IntDivMod(ir::Binary* binary) {
+        auto* result_ty = binary->Result()->Type();
+        bool is_div = binary->Kind() == Binary::Kind::kDivide;
+        bool is_signed = result_ty->is_signed_integer_scalar_or_vector();
+
+        auto& helpers = is_div ? int_div_helpers : int_mod_helpers;
+        auto* helper = helpers.GetOrCreate(result_ty, [&] {
+            // Generate a name for the helper function.
+            StringStream name;
+            name << "tint_" << (is_div ? "div_" : "mod_");
+            if (auto* vec = result_ty->As<type::Vector>()) {
+                name << "v" << vec->Width() << vec->type()->FriendlyName();
+            } else {
+                name << result_ty->FriendlyName();
+            }
+
+            // Create the helper function.
+            auto* func = b.Function(name.str(), result_ty);
+            auto* lhs = b.FunctionParam("lhs", result_ty);
+            auto* rhs = b.FunctionParam("rhs", result_ty);
+            func->SetParams({lhs, rhs});
+            b.Append(func->Block(), [&] {
+                // Generate constants for zero and one with types that match the result type.
+                ir::Constant* one = nullptr;
+                ir::Constant* zero = nullptr;
+                if (is_signed) {
+                    one = MatchWidth(b.Constant(1_i), result_ty);
+                    zero = MatchWidth(b.Constant(0_i), result_ty);
+                } else {
+                    one = MatchWidth(b.Constant(1_u), result_ty);
+                    zero = MatchWidth(b.Constant(0_u), result_ty);
+                }
+
+                // Select either the RHS or a constant one value if the RHS is zero.
+                // If this is a signed operation, we also check for `INT_MIN / -1`.
+                auto* bool_ty = MatchWidth(ty.bool_(), result_ty);
+                auto* cond = b.Equal(bool_ty, rhs, zero);
+                if (is_signed) {
+                    auto* lowest = MatchWidth(b.Constant(i32::Lowest()), result_ty);
+                    auto* minus_one = MatchWidth(b.Constant(-1_i), result_ty);
+                    auto* lhs_is_lowest = b.Equal(bool_ty, lhs, lowest);
+                    auto* rhs_is_minus_one = b.Equal(bool_ty, rhs, minus_one);
+                    cond = b.Or(bool_ty, cond, b.And(bool_ty, lhs_is_lowest, rhs_is_minus_one));
+                }
+                auto* rhs_or_one = b.Call(result_ty, core::Function::kSelect, rhs, one, cond);
+
+                if (binary->Kind() == Binary::Kind::kDivide) {
+                    // Perform the divide with the modified RHS.
+                    b.Return(func, b.Divide(result_ty, lhs, rhs_or_one)->Result());
+                } else if (binary->Kind() == Binary::Kind::kModulo) {
+                    // Calculate the modulo manually, as modulo with negative operands is undefined
+                    // behavior for many backends:
+                    //   result = lhs - ((lhs / rhs_or_one) * rhs_or_one)
+                    auto* whole = b.Divide(result_ty, lhs, rhs_or_one);
+                    auto* remainder =
+                        b.Subtract(result_ty, lhs, b.Multiply(result_ty, whole, rhs_or_one));
+                    b.Return(func, remainder->Result());
+                }
+            });
+            return func;
+        });
+
+        /// Helper to splat a value to match the vector width of the result type if necessary.
+        auto maybe_splat = [&](ir::Value* value) -> ir::Value* {
+            if (value->Type()->Is<type::Scalar>() && result_ty->Is<core::type::Vector>()) {
+                return b.Construct(result_ty, value)->Result();
+            }
+            return value;
+        };
+
+        // Call the helper function, splatting the arguments to match the target vector width.
+        Value* result = nullptr;
+        b.InsertBefore(binary, [&] {
+            auto* lhs = maybe_splat(binary->LHS());
+            auto* rhs = maybe_splat(binary->RHS());
+            result = b.Call(result_ty, helper, lhs, rhs)->Result();
+        });
+        return result;
     }
 
     /// Mask the RHS of a shift instruction to ensure it is modulo the bitwidth of the LHS.

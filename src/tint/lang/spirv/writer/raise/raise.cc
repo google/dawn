@@ -44,6 +44,7 @@ Result<SuccessType, std::string> Raise(core::ir::Module* module, const Options& 
 
     core::ir::transform::BinaryPolyfillConfig binary_polyfills;
     binary_polyfills.bitshift_modulo = true;
+    binary_polyfills.int_div_mod = true;
     RUN_TRANSFORM(core::ir::transform::BinaryPolyfill, module, binary_polyfills);
 
     core::ir::transform::BuiltinPolyfillConfig core_polyfills;
