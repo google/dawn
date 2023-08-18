@@ -273,28 +273,28 @@ TEST_F(SpirvWriterTest, Switch_Phi_SingleValue_CaseReturn) {
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
           %4 = OpLabel
-%return_value = OpVariable %_ptr_Function_int Function
+%return_value = OpVariable %_ptr_Function_int Function %7
 %continue_execution = OpVariable %_ptr_Function_bool Function
                OpStore %continue_execution %true
-               OpSelectionMerge %14 None
-               OpSwitch %int_42 %11 1 %11 2 %13
-         %11 = OpLabel
+               OpSelectionMerge %15 None
+               OpSwitch %int_42 %12 1 %12 2 %14
+         %12 = OpLabel
                OpStore %continue_execution %false
                OpStore %return_value %int_10
-               OpBranch %14
-         %13 = OpLabel
-               OpBranch %14
+               OpBranch %15
          %14 = OpLabel
-         %17 = OpPhi %int %18 %11 %int_20 %13
-         %20 = OpLoad %bool %continue_execution
-               OpSelectionMerge %21 None
-               OpBranchConditional %20 %22 %21
+               OpBranch %15
+         %15 = OpLabel
+         %18 = OpPhi %int %19 %12 %int_20 %14
+         %21 = OpLoad %bool %continue_execution
+               OpSelectionMerge %22 None
+               OpBranchConditional %21 %23 %22
+         %23 = OpLabel
+               OpStore %return_value %18
+               OpBranch %22
          %22 = OpLabel
-               OpStore %return_value %17
-               OpBranch %21
-         %21 = OpLabel
-         %23 = OpLoad %int %return_value
-               OpReturnValue %23
+         %24 = OpLoad %int %return_value
+               OpReturnValue %24
                OpFunctionEnd
 )");
 }

@@ -165,27 +165,27 @@ TEST_F(SpirvWriterTest, If_Phi_SingleValue_TrueReturn) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%17 = OpUndef %int");
+    EXPECT_INST("%18 = OpUndef %int");
     EXPECT_INST(R"(
-               OpSelectionMerge %11 None
-               OpBranchConditional %true %12 %13
-         %12 = OpLabel
+               OpSelectionMerge %12 None
+               OpBranchConditional %true %13 %14
+         %13 = OpLabel
                OpStore %continue_execution %false
                OpStore %return_value %int_42
-               OpBranch %11
-         %13 = OpLabel
-               OpBranch %11
-         %11 = OpLabel
-         %16 = OpPhi %int %17 %12 %int_20 %13
-         %19 = OpLoad %bool %continue_execution
-               OpSelectionMerge %20 None
-               OpBranchConditional %19 %21 %20
+               OpBranch %12
+         %14 = OpLabel
+               OpBranch %12
+         %12 = OpLabel
+         %17 = OpPhi %int %18 %13 %int_20 %14
+         %20 = OpLoad %bool %continue_execution
+               OpSelectionMerge %21 None
+               OpBranchConditional %20 %22 %21
+         %22 = OpLabel
+               OpStore %return_value %17
+               OpBranch %21
          %21 = OpLabel
-               OpStore %return_value %16
-               OpBranch %20
-         %20 = OpLabel
-         %22 = OpLoad %int %return_value
-               OpReturnValue %22
+         %23 = OpLoad %int %return_value
+               OpReturnValue %23
                OpFunctionEnd
 )");
 }
@@ -205,27 +205,27 @@ TEST_F(SpirvWriterTest, If_Phi_SingleValue_FalseReturn) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%18 = OpUndef %int");
+    EXPECT_INST("%19 = OpUndef %int");
     EXPECT_INST(R"(
-               OpSelectionMerge %11 None
-               OpBranchConditional %true %12 %13
-         %12 = OpLabel
-               OpBranch %11
+               OpSelectionMerge %12 None
+               OpBranchConditional %true %13 %14
          %13 = OpLabel
+               OpBranch %12
+         %14 = OpLabel
                OpStore %continue_execution %false
                OpStore %return_value %int_42
-               OpBranch %11
-         %11 = OpLabel
-         %16 = OpPhi %int %int_10 %12 %18 %13
-         %19 = OpLoad %bool %continue_execution
-               OpSelectionMerge %20 None
-               OpBranchConditional %19 %21 %20
+               OpBranch %12
+         %12 = OpLabel
+         %17 = OpPhi %int %int_10 %13 %19 %14
+         %20 = OpLoad %bool %continue_execution
+               OpSelectionMerge %21 None
+               OpBranchConditional %20 %22 %21
+         %22 = OpLabel
+               OpStore %return_value %17
+               OpBranch %21
          %21 = OpLabel
-               OpStore %return_value %16
-               OpBranch %20
-         %20 = OpLabel
-         %22 = OpLoad %int %return_value
-               OpReturnValue %22
+         %23 = OpLoad %int %return_value
+               OpReturnValue %23
                OpFunctionEnd
 )");
 }

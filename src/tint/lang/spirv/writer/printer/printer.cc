@@ -1815,9 +1815,12 @@ void Printer::EmitVar(core::ir::Var* var) {
     switch (ptr->AddressSpace()) {
         case core::AddressSpace::kFunction: {
             TINT_ASSERT(current_function_);
-            current_function_.push_var({ty, id, U32Operand(SpvStorageClassFunction)});
             if (var->Initializer()) {
+                current_function_.push_var({ty, id, U32Operand(SpvStorageClassFunction)});
                 current_function_.push_inst(spv::Op::OpStore, {id, Value(var->Initializer())});
+            } else {
+                current_function_.push_var(
+                    {ty, id, U32Operand(SpvStorageClassFunction), ConstantNull(ptr->StoreType())});
             }
             break;
         }
@@ -1832,6 +1835,8 @@ void Printer::EmitVar(core::ir::Var* var) {
             if (var->Initializer()) {
                 TINT_ASSERT(var->Initializer()->Is<core::ir::Constant>());
                 operands.push_back(Value(var->Initializer()));
+            } else {
+                operands.push_back(ConstantNull(ptr->StoreType()));
             }
             module_.PushType(spv::Op::OpVariable, operands);
             break;
