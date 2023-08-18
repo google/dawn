@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import("scripts/dawn_overrides_with_defaults.gni")
-import("tint_overrides_with_defaults.gni")
+import("scripts/tint_overrides_with_defaults.gni")
 
 group("all") {
   testonly = true

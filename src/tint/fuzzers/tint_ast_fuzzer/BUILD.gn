@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import("//build_overrides/build.gni")
-import("../../../../tint_overrides_with_defaults.gni")
+import("../../../../scripts/tint_overrides_with_defaults.gni")
 
 if (build_with_chromium) {
   import("//third_party/protobuf/proto_library.gni")

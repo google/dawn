@@ -20,7 +20,7 @@
 # Do not modify this file directly
 ################################################################################
 
-import("../../../../../tint_overrides_with_defaults.gni")
+import("../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
 if (tint_build_msl_writer) {
