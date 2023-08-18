@@ -55,10 +55,15 @@ bool ApiObjectList::Untrack(ApiObjectBase* object) {
 }
 
 void ApiObjectList::Destroy() {
-    std::lock_guard<std::mutex> lock(mMutex);
-    mMarkedDestroyed = true;
-    while (!mObjects.empty()) {
-        auto* head = mObjects.head();
+    LinkedList<ApiObjectBase> objects;
+    {
+        std::lock_guard<std::mutex> lock(mMutex);
+        mMarkedDestroyed = true;
+        mObjects.MoveInto(&objects);
+    }
+
+    while (!objects.empty()) {
+        auto* head = objects.head();
         bool removed = head->RemoveFromList();
         ASSERT(removed);
         head->value()->DestroyImpl();
