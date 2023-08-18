@@ -162,7 +162,8 @@ BindGroup::BindGroup(Device* device,
                 }
 
                 switch (bindingInfo.storageTexture.access) {
-                    case wgpu::StorageTextureAccess::WriteOnly: {
+                    case wgpu::StorageTextureAccess::WriteOnly:
+                    case wgpu::StorageTextureAccess::ReadWrite: {
                         D3D12_UNORDERED_ACCESS_VIEW_DESC uav = view->GetUAVDescriptor();
                         d3d12Device->CreateUnorderedAccessView(
                             resource, nullptr, &uav,
@@ -171,9 +172,8 @@ BindGroup::BindGroup(Device* device,
                         break;
                     }
 
-                    // TODO(dawn:1972): Implement ReadOnly and ReadWrite storage texture
+                    // TODO(dawn:1972): Implement ReadWrite storage texture
                     case wgpu::StorageTextureAccess::ReadOnly:
-                    case wgpu::StorageTextureAccess::ReadWrite:
                     case wgpu::StorageTextureAccess::Undefined:
                         UNREACHABLE();
                 }
