@@ -73,4 +73,20 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
     return {};
 }
 
+bool Queue::HasPendingCommands() const {
+    return ToBackend(GetDevice())->HasPendingCommands();
+}
+
+ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
+    return ToBackend(GetDevice())->CheckAndUpdateCompletedSerials();
+}
+
+void Queue::ForceEventualFlushOfCommands() {
+    return ToBackend(GetDevice())->ForceEventualFlushOfCommands();
+}
+
+MaybeError Queue::WaitForIdleForDestruction() {
+    return ToBackend(GetDevice())->WaitForIdleForDestruction();
+}
+
 }  // namespace dawn::native::opengl

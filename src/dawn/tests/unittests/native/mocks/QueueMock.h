@@ -38,6 +38,11 @@ class QueueMock : public QueueBase {
                 (const ImageCopyTexture&, const void*, const TextureDataLayout&, const Extent3D&),
                 (override));
     MOCK_METHOD(void, DestroyImpl, (), (override));
+
+    MOCK_METHOD(ResultOrError<ExecutionSerial>, CheckAndUpdateCompletedSerials, (), (override));
+    MOCK_METHOD(bool, HasPendingCommands, (), (const, override));
+    MOCK_METHOD(void, ForceEventualFlushOfCommands, (), (override));
+    MOCK_METHOD(MaybeError, WaitForIdleForDestruction, (), (override));
 };
 
 }  // namespace dawn::native

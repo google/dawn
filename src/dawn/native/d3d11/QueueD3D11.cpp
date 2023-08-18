@@ -85,4 +85,20 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
                           dataLayout.bytesPerRow, dataLayout.rowsPerImage);
 }
 
+bool Queue::HasPendingCommands() const {
+    return ToBackend(GetDevice())->HasPendingCommands();
+}
+
+ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
+    return ToBackend(GetDevice())->CheckAndUpdateCompletedSerials();
+}
+
+void Queue::ForceEventualFlushOfCommands() {
+    return ToBackend(GetDevice())->ForceEventualFlushOfCommands();
+}
+
+MaybeError Queue::WaitForIdleForDestruction() {
+    return ToBackend(GetDevice())->WaitForIdleForDestruction();
+}
+
 }  // namespace dawn::native::d3d11

@@ -34,6 +34,10 @@ class Queue final : public QueueBase {
     void Initialize();
 
     MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
+    bool HasPendingCommands() const override;
+    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
+    void ForceEventualFlushOfCommands() override;
+    MaybeError WaitForIdleForDestruction() override;
 
     // Dawn API
     void SetLabelImpl() override;

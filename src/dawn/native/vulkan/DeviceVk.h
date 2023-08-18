@@ -58,7 +58,7 @@ class Device final : public DeviceBase {
     const VulkanGlobalInfo& GetGlobalInfo() const;
     VkDevice GetVkDevice() const;
     uint32_t GetGraphicsQueueFamily() const;
-    VkQueue GetQueue() const;
+    VkQueue GetVkQueue() const;
 
     FencedDeleter* GetFencedDeleter() const;
     RenderPassCache* GetRenderPassCache() const;
@@ -115,7 +115,11 @@ class Device final : public DeviceBase {
     // Used to associate this device with validation layer messages.
     const char* GetDebugPrefix() { return mDebugPrefix.c_str(); }
 
-    void ForceEventualFlushOfCommands() override;
+    // TODO(dawn:1413) move these methods the vulkan::Queue.
+    void ForceEventualFlushOfCommands();
+    bool HasPendingCommands() const;
+    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials();
+    MaybeError WaitForIdleForDestruction();
 
   private:
     Device(AdapterBase* adapter,
@@ -167,8 +171,6 @@ class Device final : public DeviceBase {
     void CheckDebugMessagesAfterDestruction() const;
 
     void DestroyImpl() override;
-    MaybeError WaitForIdleForDestruction() override;
-    bool HasPendingCommands() const override;
 
     // To make it easier to use fn it is a public const member. However
     // the Device is allowed to mutate them through these private methods.
@@ -189,7 +191,6 @@ class Device final : public DeviceBase {
     std::unique_ptr<external_semaphore::Service> mExternalSemaphoreService;
 
     ResultOrError<VkFence> GetUnusedFence();
-    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
 
     // We track which operations are in flight on the GPU with an increasing serial.
     // This works only because we have a single queue. Each submit to a queue is associated

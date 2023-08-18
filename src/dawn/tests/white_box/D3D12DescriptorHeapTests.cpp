@@ -20,6 +20,7 @@
 #include "dawn/native/Toggles.h"
 #include "dawn/native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
+#include "dawn/native/d3d12/QueueD3D12.h"
 #include "dawn/native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 #include "dawn/native/d3d12/StagingDescriptorAllocatorD3D12.h"
 #include "dawn/tests/DawnTest.h"
@@ -41,7 +42,8 @@ class D3D12DescriptorHeapTests : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-        mD3DDevice = reinterpret_cast<Device*>(device.Get());
+        mD3DDevice = ToBackend(FromAPI(device.Get()));
+        mD3DQueue = ToBackend(mD3DDevice->GetQueue());
 
         mSimpleVSModule = utils::CreateShaderModule(device, R"(
 
@@ -95,6 +97,7 @@ class D3D12DescriptorHeapTests : public DawnTest {
     }
 
     Device* mD3DDevice = nullptr;
+    Queue* mD3DQueue = nullptr;
 
     wgpu::ShaderModule mSimpleVSModule;
     wgpu::ShaderModule mSimpleFSModule;
@@ -239,7 +242,7 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInMultipleSubmits) {
         EXPECT_TRUE(std::find(heaps.begin(), heaps.end(), heap) == heaps.end());
         heaps.push_back(heap);
         // CheckPassedSerials() will update the last internally completed serial.
-        EXPECT_TRUE(mD3DDevice->CheckPassedSerials().IsSuccess());
+        EXPECT_TRUE(mD3DQueue->CheckPassedSerials().IsSuccess());
         // NextSerial() will increment the last internally submitted serial.
         EXPECT_TRUE(mD3DDevice->NextSerial().IsSuccess());
     }
@@ -252,7 +255,7 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInMultipleSubmits) {
         ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeap();
         EXPECT_TRUE(heaps.front() == heap);
         heaps.pop_front();
-        EXPECT_TRUE(mD3DDevice->CheckPassedSerials().IsSuccess());
+        EXPECT_TRUE(mD3DQueue->CheckPassedSerials().IsSuccess());
         EXPECT_TRUE(mD3DDevice->NextSerial().IsSuccess());
     }
 
@@ -319,7 +322,7 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingAndMultipleSubmits) {
     EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), kNumOfSwitches);
 
     // Ensure switched-over heaps can be recycled by advancing the GPU.
-    mD3DDevice->AssumeCommandsComplete();
+    mD3DQueue->AssumeCommandsComplete();
 
     // Switch-over |kNumOfSwitches| again reusing the same heaps.
     for (uint32_t i = 0; i < kNumOfSwitches; i++) {
@@ -405,7 +408,7 @@ TEST_P(D3D12DescriptorHeapTests, GrowAndPoolHeapsInPendingAndMultipleSubmits) {
     EXPECT_EQ(allocator->GetShaderVisiblePoolSizeForTesting(), kNumOfPooledHeaps);
 
     // Ensure switched-over heaps can be recycled by advancing the GPU.
-    mD3DDevice->AssumeCommandsComplete();
+    mD3DQueue->AssumeCommandsComplete();
 
     // Switch-over the pool-allocated heaps.
     for (uint32_t i = 0; i < kNumOfPooledHeaps; i++) {

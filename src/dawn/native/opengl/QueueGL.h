@@ -35,6 +35,11 @@ class Queue final : public QueueBase {
                                 const void* data,
                                 const TextureDataLayout& dataLayout,
                                 const Extent3D& writeSizePixel) override;
+
+    bool HasPendingCommands() const override;
+    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
+    void ForceEventualFlushOfCommands() override;
+    MaybeError WaitForIdleForDestruction() override;
 };
 
 }  // namespace dawn::native::opengl

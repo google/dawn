@@ -47,7 +47,6 @@ class ExecutionQueueBase {
     // make all commands look completed.
     void AssumeCommandsComplete();
 
-  protected:
     // Increment mLastSubmittedSerial when we submit the next serial
     void IncrementLastSubmittedCommandSerial();
 
@@ -65,8 +64,8 @@ class ExecutionQueueBase {
     // mLastSubmittedSerial tracks the last submitted command serial.
     // During device removal, the serials could be artificially incremented
     // to make it appear as if commands have been compeleted.
-    ExecutionSerial mCompletedSerial = ExecutionSerial(0);
-    ExecutionSerial mLastSubmittedSerial = ExecutionSerial(0);
+    ExecutionSerial mCompletedSerial = kBeginningOfGPUTime;
+    ExecutionSerial mLastSubmittedSerial = kBeginningOfGPUTime;
 
     // Indicates whether the backend has pending commands to be submitted as soon as possible.
     virtual bool HasPendingCommands() const = 0;

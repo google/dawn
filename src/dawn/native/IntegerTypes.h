@@ -64,6 +64,7 @@ using FenceAPISerial = TypedInteger<struct FenceAPISerialT, uint64_t>;
 // compare its serial with the currently completed serial.
 using ExecutionSerial = TypedInteger<struct QueueSerialT, uint64_t>;
 constexpr ExecutionSerial kMaxExecutionSerial = ExecutionSerial(~uint64_t(0));
+constexpr ExecutionSerial kBeginningOfGPUTime = ExecutionSerial(0);
 
 // An identifier that indicates which Pipeline a BindGroupLayout is compatible with. Pipelines
 // created with a default layout will produce BindGroupLayouts with a non-zero compatibility

@@ -84,13 +84,18 @@ class Device final : public DeviceBase {
     uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
 
     float GetTimestampPeriodInNS() const override;
-    void ForceEventualFlushOfCommands() override;
 
     class Context {
       public:
         virtual ~Context() {}
         virtual void MakeCurrent() = 0;
     };
+
+    // TODO(dawn:1413) move these methods to the opengl::Queue.
+    void ForceEventualFlushOfCommands();
+    bool HasPendingCommands() const;
+    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials();
+    MaybeError WaitForIdleForDestruction();
 
   private:
     Device(AdapterBase* adapter,
@@ -130,10 +135,7 @@ class Device final : public DeviceBase {
         const Surface* surface) const override;
 
     GLenum GetBGRAInternalFormat() const;
-    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void DestroyImpl() override;
-    MaybeError WaitForIdleForDestruction() override;
-    bool HasPendingCommands() const override;
 
     const OpenGLFunctions mGL;
 

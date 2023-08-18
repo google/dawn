@@ -62,7 +62,7 @@ struct ShaderModuleParseResult;
 
 using WGSLExtensionSet = std::unordered_set<std::string>;
 
-class DeviceBase : public RefCountedWithExternalCount, public ExecutionQueueBase {
+class DeviceBase : public RefCountedWithExternalCount {
   public:
     DeviceBase(AdapterBase* adapter,
                const DeviceDescriptor* descriptor,
@@ -446,6 +446,10 @@ class DeviceBase : public RefCountedWithExternalCount, public ExecutionQueueBase
     // submitted in the next Tick. However in the 'Passive' mode, the submission will be postponed
     // as late as possible, for example, until the client has explictly issued a submission.
     enum class SubmitMode { Normal, Passive };
+
+    // TODO(dawn:1413): Remove this proxy methods in favor of using the ExecutionQueue directly.
+    ExecutionSerial GetLastSubmittedCommandSerial() const;
+    ExecutionSerial GetPendingCommandSerial() const;
 
   protected:
     // Constructor used only for mocking and testing.

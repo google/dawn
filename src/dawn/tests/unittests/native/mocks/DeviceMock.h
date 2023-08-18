@@ -63,7 +63,6 @@ class DeviceMock : public DeviceBase {
     MOCK_METHOD(uint64_t, GetOptimalBufferToTextureCopyOffsetAlignment, (), (const, override));
 
     MOCK_METHOD(float, GetTimestampPeriodInNS, (), (const, override));
-    MOCK_METHOD(void, ForceEventualFlushOfCommands, (), (override));
 
     MOCK_METHOD(ResultOrError<Ref<BindGroupBase>>,
                 CreateBindGroupImpl,
@@ -127,10 +126,7 @@ class DeviceMock : public DeviceBase {
 
     MOCK_METHOD(MaybeError, TickImpl, (), (override));
 
-    MOCK_METHOD(ResultOrError<ExecutionSerial>, CheckAndUpdateCompletedSerials, (), (override));
     MOCK_METHOD(void, DestroyImpl, (), (override));
-    MOCK_METHOD(MaybeError, WaitForIdleForDestruction, (), (override));
-    MOCK_METHOD(bool, HasPendingCommands, (), (const, override));
 
   private:
     Ref<InstanceBase> mInstance;

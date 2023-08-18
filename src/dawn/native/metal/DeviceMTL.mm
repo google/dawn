@@ -249,7 +249,7 @@ ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
 }
 
 ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
-    uint64_t frontendCompletedSerial{GetCompletedCommandSerial()};
+    uint64_t frontendCompletedSerial{GetQueue()->GetCompletedCommandSerial()};
     // sometimes we increase the serials, in which case the completed serial in
     // the device base will surpass the completed serial we have in the metal backend, so we
     // must update ours when we see that the completed serial from device base has
@@ -313,7 +313,7 @@ MaybeError Device::SubmitPendingCommandBuffer() {
         return {};
     }
 
-    IncrementLastSubmittedCommandSerial();
+    GetQueue()->IncrementLastSubmittedCommandSerial();
 
     // Acquire the pending command buffer, which is retained. It must be released later.
     NSPRef<id<MTLCommandBuffer>> pendingCommands = mCommandContext.AcquireCommands();
@@ -466,12 +466,12 @@ void Device::WaitForCommandsToBeScheduled() {
 MaybeError Device::WaitForIdleForDestruction() {
     // Forget all pending commands.
     mCommandContext.AcquireCommands();
-    DAWN_TRY(CheckPassedSerials());
+    DAWN_TRY(GetQueue()->CheckPassedSerials());
 
     // Wait for all commands to be finished so we can free resources
-    while (GetCompletedCommandSerial() != GetLastSubmittedCommandSerial()) {
+    while (GetQueue()->GetCompletedCommandSerial() != GetQueue()->GetLastSubmittedCommandSerial()) {
         usleep(100);
-        DAWN_TRY(CheckPassedSerials());
+        DAWN_TRY(GetQueue()->CheckPassedSerials());
     }
 
     return {};

@@ -48,4 +48,20 @@ MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* co
     }
 }
 
+bool Queue::HasPendingCommands() const {
+    return ToBackend(GetDevice())->HasPendingCommands();
+}
+
+ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
+    return ToBackend(GetDevice())->CheckAndUpdateCompletedSerials();
+}
+
+void Queue::ForceEventualFlushOfCommands() {
+    return ToBackend(GetDevice())->ForceEventualFlushOfCommands();
+}
+
+MaybeError Queue::WaitForIdleForDestruction() {
+    return ToBackend(GetDevice())->WaitForIdleForDestruction();
+}
+
 }  // namespace dawn::native::metal

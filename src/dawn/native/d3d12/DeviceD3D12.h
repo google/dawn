@@ -90,8 +90,6 @@ class Device final : public d3d::Device {
 
     void ReferenceUntilUnused(ComPtr<IUnknown> object);
 
-    void ForceEventualFlushOfCommands() override;
-
     MaybeError ExecutePendingCommandContext();
 
     MaybeError CopyFromStagingToBufferImpl(BufferBase* source,
@@ -168,6 +166,12 @@ class Device final : public d3d::Device {
     // Dawn APIs
     void SetLabelImpl() override;
 
+    // TODO(dawn:1413) move these methods to the d3d12::Queue.
+    void ForceEventualFlushOfCommands();
+    bool HasPendingCommands() const;
+    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials();
+    MaybeError WaitForIdleForDestruction();
+
   private:
     using Base = d3d::Device;
 
@@ -209,8 +213,6 @@ class Device final : public d3d::Device {
                                            void* userdata) override;
 
     void DestroyImpl() override;
-    MaybeError WaitForIdleForDestruction() override;
-    bool HasPendingCommands() const override;
 
     MaybeError CheckDebugLayerAndGenerateErrors();
     void AppendDebugLayerMessages(ErrorData* error) override;
@@ -221,7 +223,6 @@ class Device final : public d3d::Device {
 
     ComPtr<ID3D12Fence> mFence;
     HANDLE mFenceEvent = nullptr;
-    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
 
     ComPtr<ID3D12Device> mD3d12Device;  // Device is owned by adapter and will not be outlived.
     ComPtr<ID3D12CommandQueue> mCommandQueue;

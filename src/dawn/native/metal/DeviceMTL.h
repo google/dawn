@@ -87,7 +87,11 @@ class Device final : public DeviceBase {
     // single-byte buffer
     id<MTLBuffer> GetMockBlitMtlBuffer();
 
-    void ForceEventualFlushOfCommands() override;
+    // TODO(dawn:1413) move these methods to the metal::Queue.
+    void ForceEventualFlushOfCommands();
+    bool HasPendingCommands() const;
+    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials();
+    MaybeError WaitForIdleForDestruction();
 
   private:
     Device(AdapterBase* adapter,
@@ -135,9 +139,6 @@ class Device final : public DeviceBase {
         const Surface* surface) const override;
 
     void DestroyImpl() override;
-    MaybeError WaitForIdleForDestruction() override;
-    bool HasPendingCommands() const override;
-    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
 
     NSPRef<id<MTLDevice>> mMtlDevice;
     NSPRef<id> mMtlSharedEvent = nil;  // MTLSharedEvent not available until macOS 10.14+.

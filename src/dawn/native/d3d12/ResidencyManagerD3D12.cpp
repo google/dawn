@@ -22,6 +22,7 @@
 #include "dawn/native/d3d12/Forward.h"
 #include "dawn/native/d3d12/HeapD3D12.h"
 #include "dawn/native/d3d12/PhysicalDeviceD3D12.h"
+#include "dawn/native/d3d12/QueueD3D12.h"
 
 namespace dawn::native::d3d12 {
 
@@ -169,7 +170,7 @@ ResultOrError<Pageable*> ResidencyManager::RemoveSingleEntryFromLRU(
 
     // We must ensure that any previous use of a resource has completed before the resource can
     // be evicted.
-    if (lastSubmissionSerial > mDevice->GetCompletedCommandSerial()) {
+    if (lastSubmissionSerial > mDevice->GetQueue()->GetCompletedCommandSerial()) {
         DAWN_TRY(mDevice->WaitForSerial(lastSubmissionSerial));
     }
 

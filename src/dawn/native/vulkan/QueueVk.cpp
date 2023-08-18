@@ -62,7 +62,23 @@ void Queue::SetLabelImpl() {
     Device* device = ToBackend(GetDevice());
     // TODO(crbug.com/dawn/1344): When we start using multiple queues this needs to be adjusted
     // so it doesn't always change the default queue's label.
-    SetDebugName(device, VK_OBJECT_TYPE_QUEUE, device->GetQueue(), "Dawn_Queue", GetLabel());
+    SetDebugName(device, VK_OBJECT_TYPE_QUEUE, device->GetVkQueue(), "Dawn_Queue", GetLabel());
+}
+
+bool Queue::HasPendingCommands() const {
+    return ToBackend(GetDevice())->HasPendingCommands();
+}
+
+ResultOrError<ExecutionSerial> Queue::CheckAndUpdateCompletedSerials() {
+    return ToBackend(GetDevice())->CheckAndUpdateCompletedSerials();
+}
+
+void Queue::ForceEventualFlushOfCommands() {
+    return ToBackend(GetDevice())->ForceEventualFlushOfCommands();
+}
+
+MaybeError Queue::WaitForIdleForDestruction() {
+    return ToBackend(GetDevice())->WaitForIdleForDestruction();
 }
 
 }  // namespace dawn::native::vulkan
