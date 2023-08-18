@@ -1415,6 +1415,9 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalSubgroups)) {
         mWGSLExtensionAllowList.insert("chromium_experimental_subgroups");
     }
+    if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalReadWriteStorageTexture)) {
+        mWGSLExtensionAllowList.insert("chromium_experimental_read_write_storage_texture");
+    }
     if (IsToggleEnabled(Toggle::AllowUnsafeAPIs)) {
         mWGSLExtensionAllowList.insert("chromium_disable_uniformity_analysis");
     }
