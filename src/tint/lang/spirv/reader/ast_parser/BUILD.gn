@@ -23,6 +23,10 @@
 import("../../../../../../tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
+
+if (tint_build_unittests) {
+  import("//testing/test.gni")
+}
 if (tint_build_spv_reader) {
   libtint_source_set("ast_parser") {
     sources = [
@@ -83,85 +87,87 @@ if (tint_build_spv_reader) {
     public_configs = [ "${tint_spirv_tools_dir}/:spvtools_internal_config" ]
   }
 }
-if (tint_build_spv_reader) {
-  tint_unittests_source_set("unittests") {
-    testonly = true
-    sources = [
-      "ast_parser_test.cc",
-      "barrier_test.cc",
-      "constant_test.cc",
-      "convert_member_decoration_test.cc",
-      "convert_type_test.cc",
-      "enum_converter_test.cc",
-      "fail_stream_test.cc",
-      "function_arithmetic_test.cc",
-      "function_bit_test.cc",
-      "function_call_test.cc",
-      "function_cfg_test.cc",
-      "function_composite_test.cc",
-      "function_conversion_test.cc",
-      "function_decl_test.cc",
-      "function_glsl_std_450_test.cc",
-      "function_logical_test.cc",
-      "function_memory_test.cc",
-      "function_misc_test.cc",
-      "function_var_test.cc",
-      "get_decorations_test.cc",
-      "handle_test.cc",
-      "helper_test.cc",
-      "helper_test.h",
-      "import_test.cc",
-      "module_function_decl_test.cc",
-      "module_var_test.cc",
-      "named_types_test.cc",
-      "namer_test.cc",
-      "parser_test.cc",
-      "spirv_tools_helpers_test.cc",
-      "spirv_tools_helpers_test.h",
-      "type_test.cc",
-      "usage_test.cc",
-      "user_name_test.cc",
-    ]
-    deps = [
-      "${tint_src_dir}:gmock_and_gtest",
-      "${tint_src_dir}/api/common",
-      "${tint_src_dir}/lang/core",
-      "${tint_src_dir}/lang/core/constant",
-      "${tint_src_dir}/lang/core/type",
-      "${tint_src_dir}/lang/spirv/reader/common",
-      "${tint_src_dir}/lang/wgsl/ast",
-      "${tint_src_dir}/lang/wgsl/program",
-      "${tint_src_dir}/lang/wgsl/sem",
-      "${tint_src_dir}/lang/wgsl/writer/ast_printer",
-      "${tint_src_dir}/utils/containers",
-      "${tint_src_dir}/utils/diagnostic",
-      "${tint_src_dir}/utils/generator",
-      "${tint_src_dir}/utils/ice",
-      "${tint_src_dir}/utils/id",
-      "${tint_src_dir}/utils/macros",
-      "${tint_src_dir}/utils/math",
-      "${tint_src_dir}/utils/memory",
-      "${tint_src_dir}/utils/reflection",
-      "${tint_src_dir}/utils/result",
-      "${tint_src_dir}/utils/rtti",
-      "${tint_src_dir}/utils/symbol",
-      "${tint_src_dir}/utils/text",
-      "${tint_src_dir}/utils/traits",
-    ]
-
-    if (tint_build_spv_reader) {
-      deps += [ "${tint_src_dir}/lang/spirv/reader/ast_parser" ]
-    }
-
-    if (tint_build_spv_reader || tint_build_spv_writer) {
-      deps += [
-        "${tint_spirv_headers_dir}:spv_headers",
-        "${tint_spirv_tools_dir}:spvtools",
-        "${tint_spirv_tools_dir}:spvtools_headers",
-        "${tint_spirv_tools_dir}:spvtools_opt",
-        "${tint_spirv_tools_dir}:spvtools_val",
+if (tint_build_unittests) {
+  if (tint_build_spv_reader) {
+    tint_unittests_source_set("unittests") {
+      testonly = true
+      sources = [
+        "ast_parser_test.cc",
+        "barrier_test.cc",
+        "constant_test.cc",
+        "convert_member_decoration_test.cc",
+        "convert_type_test.cc",
+        "enum_converter_test.cc",
+        "fail_stream_test.cc",
+        "function_arithmetic_test.cc",
+        "function_bit_test.cc",
+        "function_call_test.cc",
+        "function_cfg_test.cc",
+        "function_composite_test.cc",
+        "function_conversion_test.cc",
+        "function_decl_test.cc",
+        "function_glsl_std_450_test.cc",
+        "function_logical_test.cc",
+        "function_memory_test.cc",
+        "function_misc_test.cc",
+        "function_var_test.cc",
+        "get_decorations_test.cc",
+        "handle_test.cc",
+        "helper_test.cc",
+        "helper_test.h",
+        "import_test.cc",
+        "module_function_decl_test.cc",
+        "module_var_test.cc",
+        "named_types_test.cc",
+        "namer_test.cc",
+        "parser_test.cc",
+        "spirv_tools_helpers_test.cc",
+        "spirv_tools_helpers_test.h",
+        "type_test.cc",
+        "usage_test.cc",
+        "user_name_test.cc",
       ]
+      deps = [
+        "${tint_src_dir}:gmock_and_gtest",
+        "${tint_src_dir}/api/common",
+        "${tint_src_dir}/lang/core",
+        "${tint_src_dir}/lang/core/constant",
+        "${tint_src_dir}/lang/core/type",
+        "${tint_src_dir}/lang/spirv/reader/common",
+        "${tint_src_dir}/lang/wgsl/ast",
+        "${tint_src_dir}/lang/wgsl/program",
+        "${tint_src_dir}/lang/wgsl/sem",
+        "${tint_src_dir}/lang/wgsl/writer/ast_printer",
+        "${tint_src_dir}/utils/containers",
+        "${tint_src_dir}/utils/diagnostic",
+        "${tint_src_dir}/utils/generator",
+        "${tint_src_dir}/utils/ice",
+        "${tint_src_dir}/utils/id",
+        "${tint_src_dir}/utils/macros",
+        "${tint_src_dir}/utils/math",
+        "${tint_src_dir}/utils/memory",
+        "${tint_src_dir}/utils/reflection",
+        "${tint_src_dir}/utils/result",
+        "${tint_src_dir}/utils/rtti",
+        "${tint_src_dir}/utils/symbol",
+        "${tint_src_dir}/utils/text",
+        "${tint_src_dir}/utils/traits",
+      ]
+
+      if (tint_build_spv_reader) {
+        deps += [ "${tint_src_dir}/lang/spirv/reader/ast_parser" ]
+      }
+
+      if (tint_build_spv_reader || tint_build_spv_writer) {
+        deps += [
+          "${tint_spirv_headers_dir}:spv_headers",
+          "${tint_spirv_tools_dir}:spvtools",
+          "${tint_spirv_tools_dir}:spvtools_headers",
+          "${tint_spirv_tools_dir}:spvtools_opt",
+          "${tint_spirv_tools_dir}:spvtools_val",
+        ]
+      }
+      public_configs = [ "${tint_spirv_tools_dir}/:spvtools_internal_config" ]
     }
-    public_configs = [ "${tint_spirv_tools_dir}/:spvtools_internal_config" ]
   }
 }

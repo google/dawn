@@ -36,6 +36,27 @@ const (
 	targetInvalid TargetKind = "<invalid>"
 )
 
+// IsLib returns true if the TargetKind is 'lib'
+func (k TargetKind) IsLib() bool { return k == targetLib }
+
+// IsTest returns true if the TargetKind is 'test'
+func (k TargetKind) IsTest() bool { return k == targetTest }
+
+// IsBench returns true if the TargetKind is 'bench'
+func (k TargetKind) IsBench() bool { return k == targetBench }
+
+// IsCmd returns true if the TargetKind is 'cmd'
+func (k TargetKind) IsCmd() bool { return k == targetCmd }
+
+// IsTestCmd returns true if the TargetKind is 'test_cmd'
+func (k TargetKind) IsTestCmd() bool { return k == targetTestCmd }
+
+// IsBenchCmd returns true if the TargetKind is 'bench_cmd'
+func (k TargetKind) IsBenchCmd() bool { return k == targetBenchCmd }
+
+// IsTestOrTestCmd returns true if the TargetKind is 'test' or 'test_cmd'
+func (k TargetKind) IsTestOrTestCmd() bool { return k.IsTest() || k.IsTestCmd() }
+
 // All the target kinds
 var AllTargetKinds = []TargetKind{
 	targetLib,

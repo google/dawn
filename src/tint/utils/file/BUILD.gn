@@ -24,6 +24,10 @@ import("../../../../tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
 
+if (tint_build_unittests) {
+  import("//testing/test.gni")
+}
+
 libtint_source_set("file") {
   sources = [ "tmpfile.h" ]
   deps = [
@@ -44,13 +48,14 @@ libtint_source_set("file") {
     sources += [ "tmpfile_windows.cc" ]
   }
 }
-
-tint_unittests_source_set("unittests") {
-  testonly = true
-  sources = [ "tmpfile_test.cc" ]
-  deps = [
-    "${tint_src_dir}:gmock_and_gtest",
-    "${tint_src_dir}/utils/file",
-    "${tint_src_dir}/utils/text",
-  ]
+if (tint_build_unittests) {
+  tint_unittests_source_set("unittests") {
+    testonly = true
+    sources = [ "tmpfile_test.cc" ]
+    deps = [
+      "${tint_src_dir}:gmock_and_gtest",
+      "${tint_src_dir}/utils/file",
+      "${tint_src_dir}/utils/text",
+    ]
+  }
 }

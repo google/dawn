@@ -24,6 +24,10 @@ import("../../../../tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
 
+if (tint_build_unittests) {
+  import("//testing/test.gni")
+}
+
 libtint_source_set("diagnostic") {
   sources = [
     "diagnostic.cc",
@@ -52,19 +56,20 @@ libtint_source_set("diagnostic") {
     sources += [ "printer_windows.cc" ]
   }
 }
-
-tint_unittests_source_set("unittests") {
-  testonly = true
-  sources = [
-    "diagnostic_test.cc",
-    "formatter_test.cc",
-    "printer_test.cc",
-    "source_test.cc",
-  ]
-  deps = [
-    "${tint_src_dir}:gmock_and_gtest",
-    "${tint_src_dir}/utils/diagnostic",
-    "${tint_src_dir}/utils/text",
-    "${tint_src_dir}/utils/traits",
-  ]
+if (tint_build_unittests) {
+  tint_unittests_source_set("unittests") {
+    testonly = true
+    sources = [
+      "diagnostic_test.cc",
+      "formatter_test.cc",
+      "printer_test.cc",
+      "source_test.cc",
+    ]
+    deps = [
+      "${tint_src_dir}:gmock_and_gtest",
+      "${tint_src_dir}/utils/diagnostic",
+      "${tint_src_dir}/utils/text",
+      "${tint_src_dir}/utils/traits",
+    ]
+  }
 }

@@ -24,6 +24,10 @@ import("../../../../tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
 
+if (tint_build_unittests) {
+  import("//testing/test.gni")
+}
+
 libtint_source_set("macros") {
   sources = [
     "compiler.h",
@@ -35,15 +39,16 @@ libtint_source_set("macros") {
   ]
   deps = []
 }
-
-tint_unittests_source_set("unittests") {
-  testonly = true
-  sources = [
-    "defer_test.cc",
-    "scoped_assignment_test.cc",
-  ]
-  deps = [
-    "${tint_src_dir}:gmock_and_gtest",
-    "${tint_src_dir}/utils/macros",
-  ]
+if (tint_build_unittests) {
+  tint_unittests_source_set("unittests") {
+    testonly = true
+    sources = [
+      "defer_test.cc",
+      "scoped_assignment_test.cc",
+    ]
+    deps = [
+      "${tint_src_dir}:gmock_and_gtest",
+      "${tint_src_dir}/utils/macros",
+    ]
+  }
 }

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import("scripts/dawn_overrides_with_defaults.gni")
+import("tint_overrides_with_defaults.gni")
 
 group("all") {
   testonly = true
@@ -21,9 +22,11 @@ group("all") {
     "src/dawn/native:webgpu_dawn",
     "src/dawn/tests",
     "src/tint/api",
-    "src/tint/cmd/test",
     "src/tint/fuzzers",
   ]
+  if (tint_build_unittests) {
+    deps += [ "src/tint/cmd/test" ]
+  }
   if (dawn_standalone) {
     deps += [
       "src/dawn/samples",

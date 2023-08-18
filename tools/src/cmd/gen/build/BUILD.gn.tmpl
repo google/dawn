@@ -3,17 +3,17 @@ import("{{Repeat "../" .Depth}}../../../tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
 
-{{- if $.Project.Target $ "test_cmd"}}
+{{- if or ($.Project.Target $ "test") ($.Project.Target $ "test_cmd")}}
 {{/*   newline */}}
 if (tint_build_unittests) {
   import("//testing/test.gni")
 }
 {{- end}}
 
-{{- Eval "SourceSetIfNotEmpty" ($.Project.Target $ "lib")}}
-{{- Eval "SourceSetIfNotEmpty" ($.Project.Target $ "cmd")}}
-{{- Eval "SourceSetIfNotEmpty" ($.Project.Target $ "test")}}
-{{- Eval "SourceSetIfNotEmpty" ($.Project.Target $ "test_cmd")}}
+{{- Eval "TargetIfNotEmpty" ($.Project.Target $ "lib")}}
+{{- Eval "TargetIfNotEmpty" ($.Project.Target $ "cmd")}}
+{{- Eval "TargetIfNotEmpty" ($.Project.Target $ "test")}}
+{{- Eval "TargetIfNotEmpty" ($.Project.Target $ "test_cmd")}}
 
 
 {{- /*
@@ -21,9 +21,9 @@ if (tint_build_unittests) {
 -- Emits a GN source set if it contains any files
 --------------------------------------------------------------------------------
 */ -}}
-{{- define "SourceSetIfNotEmpty"}}
+{{- define "TargetIfNotEmpty"}}
 {{-   if $}}
-{{-     if len $.SourceFiles}}{{Eval "SourceSet" $}}{{end}}
+{{-     if len $.SourceFiles}}{{Eval "Target" $}}{{end}}
 {{-   end}}
 {{- end}}
 
@@ -33,21 +33,25 @@ if (tint_build_unittests) {
 -- Emits a GN source set
 --------------------------------------------------------------------------------
 */ -}}
-{{- define "SourceSet"}}
+{{- define "Target"}}
+
+{{-   if Contains (print $.Kind) "test"}}
+if (tint_build_unittests) {
+{{-   end}}
 
 {{- /* Target condition */}}
 {{-   if $.Condition}}
 if({{$.Condition}}) {
 {{-   end}}
 
-{{  if      eq $.Kind "lib" -}}
+{{  if      $.Kind.IsLib -}}
 libtint_source_set("{{$.Directory.Name}}") {
-{{- else if eq $.Kind "cmd" -}}
+{{- else if $.Kind.IsCmd -}}
 executable("{{$.Directory.Name}}") {
-{{- else if eq $.Kind "test" -}}
+{{- else if $.Kind.IsTest -}}
 tint_unittests_source_set("unittests") {
   testonly = true
-{{- else if eq $.Kind "test_cmd" -}}
+{{- else if $.Kind.IsTestCmd -}}
 test("{{$.Directory.Name}}") {
 {{- else }}{{Error $.Kind}}
 {{- end  }}
@@ -100,7 +104,7 @@ test("{{$.Directory.Name}}") {
   public_configs = [ "${tint_spirv_tools_dir}/:spvtools_internal_config" ]
 {{- end}}
 
-{{- if eq $.Kind "test_cmd" }}
+{{- if $.Kind.IsTestCmd }}
   testonly = true
   configs += [ "${tint_src_dir}:tint_unittests_config" ]
 
@@ -112,9 +116,11 @@ test("{{$.Directory.Name}}") {
 }
 
 {{- /* Target condition */}}
-{{-   if $.Condition}}}{{-   end}}
-{{- end}}
+{{-   if $.Condition}}}{{end}}
+{{- /* if(tint_build_unittests) */}}
+{{-   if $.Kind.IsTestOrTestCmd}}}{{end}}
 
+{{- end}}
 
 {{- /*
 --------------------------------------------------------------------------------
@@ -123,9 +129,9 @@ test("{{$.Directory.Name}}") {
 */ -}}
 {{- define "Dependency"}}
 {{-   $Path := printf "${tint_src_dir}/%v" $.Directory.Path}}
-{{-   if      eq $.Kind "lib"  }}{{$Path}}
-{{-   else if eq $.Kind "test" }}{{$Path}}:unittests
-{{-   else                     }}{{$Path}}:{{$.Kind}}
+{{-   if      $.Kind.IsLib  }}{{$Path}}
+{{-   else if $.Kind.IsTest }}{{$Path}}:unittests
+{{-   else                  }}{{$Path}}:{{$.Kind}}
 {{-   end}}
 {{- end}}
 
