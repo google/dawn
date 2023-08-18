@@ -31,7 +31,7 @@ type File struct {
 	// The name of the file
 	Name string
 	// An optional condition used to build this source file
-	Condition string
+	Condition Condition
 	// All the #include made by this file
 	Includes []Include
 	// All the transitive dependencies of this file

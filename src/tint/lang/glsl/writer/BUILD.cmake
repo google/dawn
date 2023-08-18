@@ -62,7 +62,7 @@ tint_target_add_dependencies(tint_lang_glsl_writer lib
   tint_utils_traits
 )
 
-if (TINT_BUILD_GLSL_WRITER)
+if(TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_lang_glsl_writer lib
     tint_lang_glsl_writer_ast_printer
     tint_lang_glsl_writer_common
@@ -105,7 +105,7 @@ tint_target_add_dependencies(tint_lang_glsl_writer_bench bench
   tint_utils_traits
 )
 
-if (TINT_BUILD_GLSL_WRITER)
+if(TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_lang_glsl_writer_bench bench
     tint_lang_glsl_writer
     tint_lang_glsl_writer_common

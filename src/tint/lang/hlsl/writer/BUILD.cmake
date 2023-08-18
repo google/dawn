@@ -63,7 +63,7 @@ tint_target_add_dependencies(tint_lang_hlsl_writer lib
   tint_utils_traits
 )
 
-if (TINT_BUILD_HLSL_WRITER)
+if(TINT_BUILD_HLSL_WRITER)
   tint_target_add_dependencies(tint_lang_hlsl_writer lib
     tint_lang_hlsl_writer_ast_printer
   )
@@ -106,7 +106,7 @@ tint_target_add_dependencies(tint_lang_hlsl_writer_bench bench
   tint_utils_traits
 )
 
-if (TINT_BUILD_HLSL_WRITER)
+if(TINT_BUILD_HLSL_WRITER)
   tint_target_add_dependencies(tint_lang_hlsl_writer_bench bench
     tint_lang_hlsl_writer
   )

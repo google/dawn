@@ -51,11 +51,11 @@ tint_target_add_dependencies(tint_lang_spirv_writer_common lib
   tint_utils_traits
 )
 
-if (TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
+if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
   tint_target_add_external_dependencies(tint_lang_spirv_writer_common lib
     "spirv-headers"
   )
-endif(TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
+endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
 
 endif(TINT_BUILD_SPV_WRITER)
 if(TINT_BUILD_SPV_WRITER)
@@ -98,7 +98,7 @@ tint_target_add_external_dependencies(tint_lang_spirv_writer_common_test test
   "gtest"
 )
 
-if (TINT_BUILD_IR)
+if(TINT_BUILD_IR)
   tint_target_add_sources(tint_lang_spirv_writer_common_test test
     "lang/spirv/writer/common/helper_test.h"
   )
@@ -107,24 +107,24 @@ if (TINT_BUILD_IR)
   )
 endif(TINT_BUILD_IR)
 
-if (TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
+if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
   tint_target_add_external_dependencies(tint_lang_spirv_writer_common_test test
     "spirv-headers"
     "spirv-tools"
   )
-endif(TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
+endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
 
-if (TINT_BUILD_SPV_WRITER)
+if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_lang_spirv_writer_common_test test
     tint_lang_spirv_writer_common
   )
 endif(TINT_BUILD_SPV_WRITER)
 
-if (TINT_BUILD_SPV_WRITER  AND  TINT_BUILD_IR)
+if(TINT_BUILD_SPV_WRITER AND TINT_BUILD_IR)
   tint_target_add_dependencies(tint_lang_spirv_writer_common_test test
     tint_lang_spirv_writer_printer
     tint_lang_spirv_writer_raise
   )
-endif(TINT_BUILD_SPV_WRITER  AND  TINT_BUILD_IR)
+endif(TINT_BUILD_SPV_WRITER AND TINT_BUILD_IR)
 
 endif(TINT_BUILD_SPV_WRITER)

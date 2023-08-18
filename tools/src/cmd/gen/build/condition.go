@@ -14,19 +14,6 @@
 
 package build
 
-import "dawn.googlesource.com/dawn/tools/src/match"
+import "dawn.googlesource.com/dawn/tools/src/cnf"
 
-// ExternalDependency describes a dependency on an external library
-type ExternalDependency struct {
-	// Name of the library.
-	// See 'externals.json'
-	Name ExternalDependencyName
-	// The optional condition for using this dependency
-	Condition Condition
-	// Include file pattern matcher
-	includePatternMatch match.Test
-}
-
-// Name of an external dependency
-// See 'externals.json'
-type ExternalDependencyName string
+type Condition = cnf.Expr

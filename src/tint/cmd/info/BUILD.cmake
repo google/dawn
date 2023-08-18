@@ -55,10 +55,10 @@ tint_target_add_dependencies(tint_cmd_info_cmd cmd
   tint_utils_traits
 )
 
-if (TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
+if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
   tint_target_add_external_dependencies(tint_cmd_info_cmd cmd
     "spirv-tools"
   )
-endif(TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
+endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
 
 tint_target_set_output_name(tint_cmd_info_cmd cmd "tint_info")

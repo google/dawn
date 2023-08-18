@@ -87,7 +87,7 @@ tint_target_add_external_dependencies({{$Name}} {{$Kind}}
 {{- /* Emit conditional source files and dependencies */}}
 {{-   range $Cond := $.Conditionals}}
 {{/*   newline */}}
-if ({{Eval "Expression" $Cond.Condition}})
+if({{Eval "Expression" $Cond.Condition}})
 {{-     if $Cond.SourceFiles}}
   tint_target_add_sources({{$Name}} {{$Kind}}
 {{-       range $File := $Cond.SourceFiles}}
@@ -139,11 +139,7 @@ endif({{Eval "Expression" $.Condition}})
 --------------------------------------------------------------------------------
 */ -}}
 {{- define "Expression"}}
-{{-   $expr := $ }}
-{{-   $expr = Replace $expr "!"  "NOT "}}
-{{-   $expr = Replace $expr "&&" " AND "}}
-{{-   $expr = Replace $expr "||" " OR "}}
-{{-   ToUpper $expr}}
+{{-   ToUpper ($.Format " AND " " OR " "NOT ")}}
 {{- end}}
 
 {{- /* eat newlines */ -}}

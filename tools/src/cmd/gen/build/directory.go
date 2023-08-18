@@ -18,6 +18,7 @@ import (
 	"path"
 	"strings"
 
+	"dawn.googlesource.com/dawn/tools/src/cnf"
 	"dawn.googlesource.com/dawn/tools/src/container"
 )
 
@@ -64,4 +65,49 @@ func (d *Directory) Subdirectories() []*Directory {
 		out[i] = d.Project.Directories[path.Join(d.Path, name)]
 	}
 	return out
+}
+
+// DecomposedConditionals returns the combined decomposed ANDs, ORs and unary expressions of all
+// the conditional expressions used by the targets in this directory. This can be used by templates
+// that need to break expressions down into separate sub-expressions.
+func (d *Directory) DecomposedConditionals() cnf.Decomposed {
+	// Gather up all the conditional expressions used by targets in this directory
+	expressions := container.NewMap[cnf.Key, cnf.Expr]()
+	addExpr := func(expr cnf.Expr) {
+		if len(expr) > 0 {
+			expressions.Add(expr.Key(), expr)
+		}
+	}
+	for _, target := range d.Targets() {
+		addExpr(target.Condition)
+		for _, c := range target.Conditionals() {
+			addExpr(c.Condition)
+		}
+	}
+
+	// Build maps for the AND, OR and unary sub-expressions.
+	allAnds := container.NewMap[cnf.Key, cnf.Ands]()
+	allOrs := container.NewMap[cnf.Key, cnf.Ors]()
+	allUnarys := container.NewMap[cnf.Key, cnf.Unary]()
+
+	// Populate the maps
+	for _, expr := range expressions {
+		decomposed := cnf.Decompose(expr)
+		for _, ands := range decomposed.Ands {
+			allAnds.Add(ands.Key(), ands)
+		}
+		for _, ors := range decomposed.Ors {
+			allOrs.Add(ors.Key(), ors)
+		}
+		for _, unarys := range decomposed.Unarys {
+			allUnarys.Add(unarys.Key(), unarys)
+		}
+	}
+
+	// Return the decomposed expressions
+	return cnf.Decomposed{
+		Ands:   allAnds.Values(),
+		Ors:    allOrs.Values(),
+		Unarys: allUnarys.Values(),
+	}
 }

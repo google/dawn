@@ -70,7 +70,7 @@ tint_target_add_dependencies(tint_lang_core_ir_transform lib
   tint_utils_traits
 )
 
-if (TINT_BUILD_IR)
+if(TINT_BUILD_IR)
   tint_target_add_dependencies(tint_lang_core_ir_transform lib
     tint_lang_core_ir
   )
@@ -121,7 +121,7 @@ tint_target_add_external_dependencies(tint_lang_core_ir_transform_test test
   "gtest"
 )
 
-if (TINT_BUILD_IR)
+if(TINT_BUILD_IR)
   tint_target_add_dependencies(tint_lang_core_ir_transform_test test
     tint_lang_core_ir
     tint_lang_core_ir_transform

@@ -57,7 +57,7 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program lib
   tint_utils_traits
 )
 
-if (TINT_BUILD_IR)
+if(TINT_BUILD_IR)
   tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program lib
     tint_lang_core_ir
   )
@@ -105,7 +105,7 @@ tint_target_add_external_dependencies(tint_lang_wgsl_writer_ir_to_program_test t
   "gtest"
 )
 
-if (TINT_BUILD_IR)
+if(TINT_BUILD_IR)
   tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program_test test
     tint_lang_core_ir
     tint_lang_core_ir_test

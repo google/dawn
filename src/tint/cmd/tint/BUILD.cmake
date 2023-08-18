@@ -64,7 +64,7 @@ tint_target_add_dependencies(tint_cmd_tint_cmd cmd
   tint_utils_traits
 )
 
-if (TINT_BUILD_GLSL_WRITER)
+if(TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_cmd_tint_cmd cmd
     tint_lang_glsl_writer
     tint_lang_glsl_writer_common
@@ -75,21 +75,21 @@ if (TINT_BUILD_GLSL_WRITER)
   )
 endif(TINT_BUILD_GLSL_WRITER)
 
-if (TINT_BUILD_HLSL_WRITER)
+if(TINT_BUILD_HLSL_WRITER)
   tint_target_add_dependencies(tint_cmd_tint_cmd cmd
     tint_lang_hlsl_validate
     tint_lang_hlsl_writer
   )
 endif(TINT_BUILD_HLSL_WRITER)
 
-if (TINT_BUILD_IR)
+if(TINT_BUILD_IR)
   tint_target_add_dependencies(tint_cmd_tint_cmd cmd
     tint_lang_core_ir
     tint_lang_wgsl_reader_program_to_ir
   )
 endif(TINT_BUILD_IR)
 
-if (TINT_BUILD_MSL_WRITER)
+if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_cmd_tint_cmd cmd
     tint_lang_msl_validate
     tint_lang_msl_writer
@@ -97,19 +97,19 @@ if (TINT_BUILD_MSL_WRITER)
   )
 endif(TINT_BUILD_MSL_WRITER)
 
-if (TINT_BUILD_SPV_READER)
+if(TINT_BUILD_SPV_READER)
   tint_target_add_dependencies(tint_cmd_tint_cmd cmd
     tint_lang_spirv_reader
   )
 endif(TINT_BUILD_SPV_READER)
 
-if (TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
+if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
   tint_target_add_external_dependencies(tint_cmd_tint_cmd cmd
     "spirv-tools"
   )
-endif(TINT_BUILD_SPV_READER  OR  TINT_BUILD_SPV_WRITER)
+endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
 
-if (TINT_BUILD_SPV_WRITER)
+if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_cmd_tint_cmd cmd
     tint_lang_spirv_writer
     tint_lang_spirv_writer_common

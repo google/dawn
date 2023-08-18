@@ -88,31 +88,31 @@ tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
   tint_utils_traits
 )
 
-if (TINT_BUILD_GLSL_WRITER)
+if(TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
     tint_lang_glsl_writer_bench
   )
 endif(TINT_BUILD_GLSL_WRITER)
 
-if (TINT_BUILD_HLSL_WRITER)
+if(TINT_BUILD_HLSL_WRITER)
   tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
     tint_lang_hlsl_writer_bench
   )
 endif(TINT_BUILD_HLSL_WRITER)
 
-if (TINT_BUILD_MSL_WRITER)
+if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
     tint_lang_msl_writer_bench
   )
 endif(TINT_BUILD_MSL_WRITER)
 
-if (TINT_BUILD_SPV_READER)
+if(TINT_BUILD_SPV_READER)
   tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
     tint_lang_spirv_reader
   )
 endif(TINT_BUILD_SPV_READER)
 
-if (TINT_BUILD_SPV_WRITER)
+if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
     tint_lang_spirv_writer_bench
   )

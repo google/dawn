@@ -34,19 +34,19 @@ tint_target_add_dependencies(tint_utils_file lib
   tint_utils_text
 )
 
-if ((NOT IS_LINUX)  AND  (NOT IS_MAC)  AND  (NOT IS_WIN))
+if((NOT IS_LINUX) AND (NOT IS_MAC) AND (NOT IS_WIN))
   tint_target_add_sources(tint_utils_file lib
     "utils/file/tmpfile_other.cc"
   )
-endif((NOT IS_LINUX)  AND  (NOT IS_MAC)  AND  (NOT IS_WIN))
+endif((NOT IS_LINUX) AND (NOT IS_MAC) AND (NOT IS_WIN))
 
-if (IS_LINUX  OR  IS_MAC)
+if(IS_LINUX OR IS_MAC)
   tint_target_add_sources(tint_utils_file lib
     "utils/file/tmpfile_posix.cc"
   )
-endif(IS_LINUX  OR  IS_MAC)
+endif(IS_LINUX OR IS_MAC)
 
-if (IS_WIN)
+if(IS_WIN)
   tint_target_add_sources(tint_utils_file lib
     "utils/file/tmpfile_windows.cc"
   )

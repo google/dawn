@@ -36,7 +36,7 @@ type Target struct {
 	// An optional custom output name for the target
 	OutputName string
 	// An optional condition for building this target
-	Condition string
+	Condition Condition
 }
 
 // AddSourceFile adds the File to the target's source set
@@ -56,12 +56,12 @@ func (t *Target) SourceFiles() []*File {
 
 // SourceFiles returns the sorted list of the target's source files that have no build condition
 func (t *Target) UnconditionalSourceFiles() []*File {
-	return transform.Filter(t.SourceFiles(), func(t *File) bool { return t.Condition == "" })
+	return transform.Filter(t.SourceFiles(), func(t *File) bool { return t.Condition == nil })
 }
 
 // A collection of source files and dependencies sharing the same condition
 type TargetConditional struct {
-	Condition            string
+	Condition            Condition
 	SourceFiles          []*File
 	InternalDependencies []*Target
 	ExternalDependencies []ExternalDependency
@@ -95,8 +95,8 @@ func (t *Target) Conditionals() TargetConditionals {
 	m := container.NewMap[string, *TargetConditional]()
 	for name := range t.SourceFileSet {
 		file := t.Directory.Project.Files[name]
-		if file.Condition != "" {
-			c := m.GetOrCreate(file.Condition, func() *TargetConditional {
+		if file.Condition != nil {
+			c := m.GetOrCreate(file.Condition.String(), func() *TargetConditional {
 				return &TargetConditional{Condition: file.Condition}
 			})
 			c.SourceFiles = append(c.SourceFiles, file)
@@ -104,8 +104,8 @@ func (t *Target) Conditionals() TargetConditionals {
 	}
 	for name := range t.Dependencies.internal {
 		dep := t.Directory.Project.Targets[name]
-		if dep.Condition != "" {
-			c := m.GetOrCreate(dep.Condition, func() *TargetConditional {
+		if dep.Condition != nil {
+			c := m.GetOrCreate(dep.Condition.String(), func() *TargetConditional {
 				return &TargetConditional{Condition: dep.Condition}
 			})
 			c.InternalDependencies = append(c.InternalDependencies, dep)
@@ -113,8 +113,8 @@ func (t *Target) Conditionals() TargetConditionals {
 	}
 	for name := range t.Dependencies.external {
 		dep := t.Directory.Project.externals[name]
-		if dep.Condition != "" {
-			c := m.GetOrCreate(dep.Condition, func() *TargetConditional {
+		if dep.Condition != nil {
+			c := m.GetOrCreate(dep.Condition.String(), func() *TargetConditional {
 				return &TargetConditional{Condition: dep.Condition}
 			})
 			c.ExternalDependencies = append(c.ExternalDependencies, dep)

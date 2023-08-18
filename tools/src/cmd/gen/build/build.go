@@ -32,6 +32,7 @@ import (
 	"strings"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/gen/common"
+	"dawn.googlesource.com/dawn/tools/src/cnf"
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/glob"
@@ -116,19 +117,20 @@ func loadExternals(p *Project) error {
 		Condition       string
 	}]()
 	if err := json.Unmarshal(jsonc.ToJSON(content), &externals); err != nil {
-		return fmt.Errorf("failed to parse 'externals.json': %w", err)
+		return fmt.Errorf("failed to parse '%v': %w", p.externalsJsonPath, err)
 	}
 
 	for _, name := range externals.Keys() {
 		external := externals[name]
 		if len(external.IncludePatterns) == 0 {
-			return fmt.Errorf("'externals.json': '%v' requires at least one pattern in IncludePatterns", name)
+			return fmt.Errorf("%v: '%v' requires at least one pattern in IncludePatterns",
+				p.externalsJsonPath, name)
 		}
 		matchers := []match.Test{}
 		for _, pattern := range external.IncludePatterns {
 			matcher, err := match.New(pattern)
 			if err != nil {
-				return fmt.Errorf("'externals.json': matcher error: %w", err)
+				return fmt.Errorf("%v: matcher error: %w", p.externalsJsonPath, err)
 			}
 			matchers = append(matchers, matcher)
 		}
@@ -141,10 +143,16 @@ func loadExternals(p *Project) error {
 			return false
 		}
 
+		cond, err := cnf.Parse(external.Condition)
+		if err != nil {
+			return fmt.Errorf("%v: could not parse condition: %w",
+				p.externalsJsonPath, err)
+		}
+
 		name := ExternalDependencyName(name)
 		p.externals.Add(name, ExternalDependency{
 			Name:                name,
-			Condition:           external.Condition,
+			Condition:           cond,
 			includePatternMatch: match,
 		})
 	}
@@ -243,11 +251,14 @@ func scanSourceFiles(p *Project) error {
 
 				// Apply any conditions
 				for _, condition := range parsed.conditions {
-					if file.Condition == "" {
-						file.Condition = condition
-					} else {
-						file.Condition += " && " + condition
+					cond, err := cnf.Parse(condition)
+					if err != nil {
+						return fmt.Errorf("%v: could not parse condition: %w", file, err)
 					}
+					if file.Condition != nil {
+						cond = cnf.Optimize(cnf.And(file.Condition, cond))
+					}
+					file.Condition = cond
 				}
 
 				file.Includes = append(file.Includes, parsed.includes...)
@@ -276,7 +287,11 @@ func applyDirectoryConfigs(p *Project) error {
 
 		// Apply any directory-level condition
 		for _, target := range dir.Targets() {
-			target.Condition = cfg.Condition
+			cond, err := cnf.Parse(cfg.Condition)
+			if err != nil {
+				return fmt.Errorf("%v: could not parse condition: %w", path, err)
+			}
+			target.Condition = cond
 		}
 
 		// For each target config...

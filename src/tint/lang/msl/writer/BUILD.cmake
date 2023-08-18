@@ -64,25 +64,25 @@ tint_target_add_dependencies(tint_lang_msl_writer lib
   tint_utils_traits
 )
 
-if (TINT_BUILD_IR)
+if(TINT_BUILD_IR)
   tint_target_add_dependencies(tint_lang_msl_writer lib
     tint_lang_core_ir
     tint_lang_wgsl_reader_program_to_ir
   )
 endif(TINT_BUILD_IR)
 
-if (TINT_BUILD_MSL_WRITER)
+if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_lang_msl_writer lib
     tint_lang_msl_writer_ast_printer
     tint_lang_msl_writer_common
   )
 endif(TINT_BUILD_MSL_WRITER)
 
-if (TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR)
+if(TINT_BUILD_MSL_WRITER AND TINT_BUILD_IR)
   tint_target_add_dependencies(tint_lang_msl_writer lib
     tint_lang_msl_writer_printer
   )
-endif(TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR)
+endif(TINT_BUILD_MSL_WRITER AND TINT_BUILD_IR)
 
 endif(TINT_BUILD_MSL_WRITER)
 if(TINT_BUILD_MSL_WRITER)
@@ -120,7 +120,7 @@ tint_target_add_dependencies(tint_lang_msl_writer_bench bench
   tint_utils_traits
 )
 
-if (TINT_BUILD_MSL_WRITER)
+if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_lang_msl_writer_bench bench
     tint_lang_msl_writer
     tint_lang_msl_writer_common

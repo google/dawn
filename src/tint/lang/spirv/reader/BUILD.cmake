@@ -56,7 +56,7 @@ tint_target_add_dependencies(tint_lang_spirv_reader lib
   tint_utils_traits
 )
 
-if (TINT_BUILD_SPV_READER)
+if(TINT_BUILD_SPV_READER)
   tint_target_add_dependencies(tint_lang_spirv_reader lib
     tint_lang_spirv_reader_ast_parser
   )

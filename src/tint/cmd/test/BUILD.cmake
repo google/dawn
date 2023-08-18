@@ -69,19 +69,19 @@ tint_target_add_external_dependencies(tint_cmd_test_test_cmd test_cmd
   "gtest"
 )
 
-if (TINT_BUILD_GLSL_WRITER)
+if(TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
     tint_lang_glsl_writer_ast_printer_test
   )
 endif(TINT_BUILD_GLSL_WRITER)
 
-if (TINT_BUILD_HLSL_WRITER)
+if(TINT_BUILD_HLSL_WRITER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
     tint_lang_hlsl_writer_ast_printer_test
   )
 endif(TINT_BUILD_HLSL_WRITER)
 
-if (TINT_BUILD_IR)
+if(TINT_BUILD_IR)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
     tint_lang_core_ir_transform_test
     tint_lang_core_ir_test
@@ -90,26 +90,26 @@ if (TINT_BUILD_IR)
   )
 endif(TINT_BUILD_IR)
 
-if (TINT_BUILD_MSL_WRITER)
+if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
     tint_lang_msl_writer_ast_printer_test
     tint_lang_msl_writer_common_test
   )
 endif(TINT_BUILD_MSL_WRITER)
 
-if (TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR)
+if(TINT_BUILD_MSL_WRITER AND TINT_BUILD_IR)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
     tint_lang_msl_writer_printer_test
   )
-endif(TINT_BUILD_MSL_WRITER  AND  TINT_BUILD_IR)
+endif(TINT_BUILD_MSL_WRITER AND TINT_BUILD_IR)
 
-if (TINT_BUILD_SPV_READER)
+if(TINT_BUILD_SPV_READER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
     tint_lang_spirv_reader_ast_parser_test
   )
 endif(TINT_BUILD_SPV_READER)
 
-if (TINT_BUILD_SPV_WRITER)
+if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
     tint_lang_spirv_writer_ast_printer_test
     tint_lang_spirv_writer_common_test
@@ -117,10 +117,10 @@ if (TINT_BUILD_SPV_WRITER)
   )
 endif(TINT_BUILD_SPV_WRITER)
 
-if (TINT_BUILD_SPV_WRITER  AND  TINT_BUILD_IR)
+if(TINT_BUILD_SPV_WRITER AND TINT_BUILD_IR)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
     tint_lang_spirv_writer_raise_test
   )
-endif(TINT_BUILD_SPV_WRITER  AND  TINT_BUILD_IR)
+endif(TINT_BUILD_SPV_WRITER AND TINT_BUILD_IR)
 
 tint_target_set_output_name(tint_cmd_test_test_cmd test_cmd "tint_unittests")

@@ -134,7 +134,7 @@ tint_target_add_external_dependencies(tint_lang_hlsl_writer_ast_printer_test tes
   "gtest"
 )
 
-if (TINT_BUILD_HLSL_WRITER)
+if(TINT_BUILD_HLSL_WRITER)
   tint_target_add_dependencies(tint_lang_hlsl_writer_ast_printer_test test
     tint_lang_hlsl_writer
     tint_lang_hlsl_writer_ast_printer

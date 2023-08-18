@@ -59,7 +59,7 @@ func (d *Dependencies) Internal() []*Target {
 
 // UnconditionalInternal returns the sorted list of dependencies that have no build condition.
 func (d *Dependencies) UnconditionalInternal() []*Target {
-	return transform.Filter(d.Internal(), func(d *Target) bool { return d.Condition == "" })
+	return transform.Filter(d.Internal(), func(d *Target) bool { return d.Condition == nil })
 }
 
 // External returns the sorted list of external dependencies.
@@ -74,13 +74,13 @@ func (d *Dependencies) External() []ExternalDependency {
 // ConditionalExternalDependencies returns the sorted list of external dependencies that have a
 // build condition.
 func (d *Dependencies) ConditionalExternal() []ExternalDependency {
-	return transform.Filter(d.External(), func(e ExternalDependency) bool { return e.Condition != "" })
+	return transform.Filter(d.External(), func(e ExternalDependency) bool { return e.Condition != nil })
 }
 
 // ConditionalExternalDependencies returns the sorted list of external dependencies that have no
 // build condition.
 func (d *Dependencies) UnconditionalExternal() []ExternalDependency {
-	return transform.Filter(d.External(), func(e ExternalDependency) bool { return e.Condition == "" })
+	return transform.Filter(d.External(), func(e ExternalDependency) bool { return e.Condition == nil })
 }
 
 // ContainsExternal returns true if the external dependencies contains name
