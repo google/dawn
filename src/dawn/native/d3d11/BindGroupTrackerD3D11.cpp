@@ -188,12 +188,22 @@ MaybeError BindGroupTracker::Apply() {
                     }
 
                     case BindingInfoType::StorageTexture: {
-                        ASSERT(bindingInfo.storageTexture.access ==
-                               wgpu::StorageTextureAccess::WriteOnly);
-                        ComPtr<ID3D11UnorderedAccessView> d3d11UAV;
-                        TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
-                        DAWN_TRY_ASSIGN(d3d11UAV, view->CreateD3D11UnorderedAccessView());
-                        d3d11UAVs.insert(d3d11UAVs.begin(), std::move(d3d11UAV));
+                        switch (bindingInfo.storageTexture.access) {
+                            case wgpu::StorageTextureAccess::WriteOnly:
+                            case wgpu::StorageTextureAccess::ReadWrite: {
+                                ComPtr<ID3D11UnorderedAccessView> d3d11UAV;
+                                TextureView* view =
+                                    ToBackend(group->GetBindingAsTextureView(bindingIndex));
+                                DAWN_TRY_ASSIGN(d3d11UAV, view->CreateD3D11UnorderedAccessView());
+                                d3d11UAVs.insert(d3d11UAVs.begin(), std::move(d3d11UAV));
+                                break;
+                            }
+                            // TODO(dawn:1972): Support ReadOnly storage texture access
+                            case wgpu::StorageTextureAccess::ReadOnly:
+                            default:
+                                UNREACHABLE();
+                                break;
+                        }
                         break;
                     }
                     case BindingInfoType::Texture:
@@ -371,13 +381,22 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
             }
 
             case BindingInfoType::StorageTexture: {
-                ASSERT(bindingInfo.storageTexture.access == wgpu::StorageTextureAccess::WriteOnly);
-                if (bindingVisibility & wgpu::ShaderStage::Compute) {
-                    ComPtr<ID3D11UnorderedAccessView> d3d11UAV;
-                    TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
-                    DAWN_TRY_ASSIGN(d3d11UAV, view->CreateD3D11UnorderedAccessView());
-                    deviceContext1->CSSetUnorderedAccessViews(bindingSlot, 1,
-                                                              d3d11UAV.GetAddressOf(), nullptr);
+                TextureView* view = ToBackend(group->GetBindingAsTextureView(bindingIndex));
+                switch (bindingInfo.storageTexture.access) {
+                    case wgpu::StorageTextureAccess::WriteOnly:
+                    case wgpu::StorageTextureAccess::ReadWrite: {
+                        ComPtr<ID3D11UnorderedAccessView> d3d11UAV;
+                        DAWN_TRY_ASSIGN(d3d11UAV, view->CreateD3D11UnorderedAccessView());
+                        if (bindingVisibility & wgpu::ShaderStage::Compute) {
+                            deviceContext1->CSSetUnorderedAccessViews(
+                                bindingSlot, 1, d3d11UAV.GetAddressOf(), nullptr);
+                        }
+                        break;
+                    }
+                    // TODO(dawn:1972): Support ReadOnly storage texture access
+                    case wgpu::StorageTextureAccess::ReadOnly:
+                    default:
+                        UNREACHABLE();
                 }
                 break;
             }
@@ -485,15 +504,25 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
             }
 
             case BindingInfoType::StorageTexture: {
-                ASSERT(bindingInfo.storageTexture.access == wgpu::StorageTextureAccess::WriteOnly);
-                ID3D11UnorderedAccessView* nullUAV = nullptr;
-                if (bindingVisibility & wgpu::ShaderStage::Fragment) {
-                    deviceContext1->OMSetRenderTargetsAndUnorderedAccessViews(
-                        D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr, bindingSlot,
-                        1, &nullUAV, nullptr);
-                }
-                if (bindingVisibility & wgpu::ShaderStage::Compute) {
-                    deviceContext1->CSSetUnorderedAccessViews(bindingSlot, 1, &nullUAV, nullptr);
+                switch (bindingInfo.storageTexture.access) {
+                    case wgpu::StorageTextureAccess::WriteOnly:
+                    case wgpu::StorageTextureAccess::ReadWrite: {
+                        ID3D11UnorderedAccessView* nullUAV = nullptr;
+                        if (bindingVisibility & wgpu::ShaderStage::Fragment) {
+                            deviceContext1->OMSetRenderTargetsAndUnorderedAccessViews(
+                                D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr,
+                                bindingSlot, 1, &nullUAV, nullptr);
+                        }
+                        if (bindingVisibility & wgpu::ShaderStage::Compute) {
+                            deviceContext1->CSSetUnorderedAccessViews(bindingSlot, 1, &nullUAV,
+                                                                      nullptr);
+                        }
+                        break;
+                    }
+                    // TODO(dawn:1972): Support ReadOnly storage texture access
+                    case wgpu::StorageTextureAccess::ReadOnly:
+                    default:
+                        UNREACHABLE();
                 }
                 break;
             }
