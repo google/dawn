@@ -572,6 +572,8 @@ source_set("end2end_tests_sources") {
     "end2end/ShaderF16Tests.cpp",
     "end2end/ShaderTests.cpp",
     "end2end/ShaderValidationTests.cpp",
+    "end2end/SharedTextureMemoryTests.cpp",
+    "end2end/SharedTextureMemoryTests.h",
     "end2end/StorageTextureTests.cpp",
     "end2end/SubresourceRenderAttachmentTests.cpp",
     "end2end/Texture3DTests.cpp",
@@ -605,12 +607,21 @@ source_set("end2end_tests_sources") {
     sources += [ "end2end/D3D12CachingTests.cpp" ]
   }
 
-  if (dawn_enable_metal) {
-    sources += [
-      "end2end/IOSurfaceWrappingTests.cpp",
-      "end2end/VideoViewsTests_mac.cpp",
-    ]
+  if (is_mac || is_ios) {
+    if (dawn_enable_metal) {
+      sources += [
+        "end2end/IOSurfaceWrappingTests.cpp",
+        "end2end/VideoViewsTests_mac.cpp",
+      ]
+    }
+    sources += [ "end2end/SharedTextureMemoryTests_apple.mm" ]
+
     frameworks = [ "IOSurface.framework" ]
+
+    if (filter_include(configs, [ "//build/config/compiler:enable_arc" ]) !=
+        []) {
+      configs -= [ "//build/config/compiler:enable_arc" ]
+    }
   }
 
   if (dawn_supports_glfw_for_windowing) {

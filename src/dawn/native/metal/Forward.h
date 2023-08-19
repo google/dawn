@@ -32,6 +32,8 @@ class QuerySet;
 class Queue;
 class RenderPipeline;
 class Sampler;
+class SharedFence;
+class SharedTextureMemory;
 class ShaderModule;
 class SwapChain;
 class Texture;
@@ -51,6 +53,8 @@ struct MetalBackendTraits {
     using RenderPipelineType = RenderPipeline;
     using SamplerType = Sampler;
     using ShaderModuleType = ShaderModule;
+    using SharedFenceType = SharedFence;
+    using SharedTextureMemoryType = SharedTextureMemory;
     using SwapChainType = SwapChain;
     using TextureType = Texture;
     using TextureViewType = TextureView;

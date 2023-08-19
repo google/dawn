@@ -231,6 +231,8 @@ bool IsDepthOnlyFormat(wgpu::TextureFormat textureFormat);
 bool IsStencilOnlyFormat(wgpu::TextureFormat textureFormat);
 bool IsDepthOrStencilFormat(wgpu::TextureFormat textureFormat);
 
+bool IsMultiPlanarFormat(wgpu::TextureFormat textureFormat);
+
 bool TextureFormatSupportsMultisampling(wgpu::TextureFormat textureFormat);
 bool TextureFormatSupportsResolveTarget(wgpu::TextureFormat textureFormat);
 

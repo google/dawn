@@ -547,6 +547,11 @@ class PhysicalDevice : public PhysicalDeviceBase {
                 EnableFeature(Feature::ChromiumExperimentalSubgroups);
             }
         }
+
+        EnableFeature(Feature::SharedTextureMemoryIOSurface);
+        if (@available(macOS 10.14, iOS 12.0, *)) {
+            EnableFeature(Feature::SharedFenceMTLSharedEvent);
+        }
     }
 
     void InitializeVendorArchitectureImpl() override {

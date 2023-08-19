@@ -17,12 +17,14 @@
 
 #include <vector>
 
+#include "dawn/common/WeakRef.h"
 #include "dawn/common/ityp_array.h"
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Format.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/ObjectBase.h"
+#include "dawn/native/SharedTextureMemory.h"
 #include "dawn/native/Subresource.h"
 
 #include "dawn/native/dawn_platform.h"
@@ -37,7 +39,8 @@ enum class AllowMultiPlanarTextureFormat {
 MaybeError ValidateTextureDescriptor(
     const DeviceBase* device,
     const TextureDescriptor* descriptor,
-    AllowMultiPlanarTextureFormat allowMultiPlanar = AllowMultiPlanarTextureFormat::No);
+    AllowMultiPlanarTextureFormat allowMultiPlanar = AllowMultiPlanarTextureFormat::No,
+    std::optional<wgpu::TextureUsage> allowedSharedTextureMemoryUsage = std::nullopt);
 MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
                                          const TextureBase* texture,
                                          const TextureViewDescriptor* descriptor);
@@ -115,6 +118,8 @@ class TextureBase : public ApiObjectBase {
 
     bool IsImplicitMSAARenderTextureViewSupported() const;
 
+    Ref<SharedTextureMemoryBase> TryGetSharedTextureMemory();
+
     // Dawn API
     TextureViewBase* APICreateView(const TextureViewDescriptor* descriptor = nullptr);
     void APIDestroy();
@@ -133,6 +138,9 @@ class TextureBase : public ApiObjectBase {
 
     void DestroyImpl() override;
     void AddInternalUsage(wgpu::TextureUsage usage);
+
+    // The shared texture memory the texture was created from. May be null.
+    WeakRef<SharedTextureMemoryBase> mSharedTextureMemory;
 
   private:
     struct TextureState {

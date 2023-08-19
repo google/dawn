@@ -138,6 +138,11 @@ class Device final : public DeviceBase {
     ResultOrError<wgpu::TextureUsage> GetSupportedSurfaceUsageImpl(
         const Surface* surface) const override;
 
+    ResultOrError<Ref<SharedTextureMemoryBase>> ImportSharedTextureMemoryImpl(
+        const SharedTextureMemoryDescriptor* descriptor) override;
+    ResultOrError<Ref<SharedFenceBase>> ImportSharedFenceImpl(
+        const SharedFenceDescriptor* descriptor) override;
+
     void DestroyImpl() override;
 
     NSPRef<id<MTLDevice>> mMtlDevice;

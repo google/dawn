@@ -31,6 +31,7 @@ namespace dawn::native::metal {
 class CommandRecordingContext;
 class Device;
 struct MTLSharedEventAndSignalValue;
+class SharedTextureMemory;
 
 MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat format);
 MaybeError ValidateIOSurfaceCanBeWrapped(const DeviceBase* device,
@@ -45,6 +46,9 @@ class Texture final : public TextureBase {
         const ExternalImageDescriptor* descriptor,
         IOSurfaceRef ioSurface,
         std::vector<MTLSharedEventAndSignalValue> waitEvents);
+    static ResultOrError<Ref<Texture>> CreateFromSharedTextureMemory(
+        SharedTextureMemory* memory,
+        const TextureDescriptor* descriptor);
     static Ref<Texture> CreateWrapping(Device* device,
                                        const TextureDescriptor* descriptor,
                                        NSPRef<id<MTLTexture>> wrapped);

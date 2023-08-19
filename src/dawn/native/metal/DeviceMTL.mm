@@ -18,6 +18,7 @@
 #include "dawn/common/Platform.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/BackendConnection.h"
+#include "dawn/native/ChainUtils_autogen.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/metal/BindGroupLayoutMTL.h"
@@ -31,6 +32,8 @@
 #include "dawn/native/metal/RenderPipelineMTL.h"
 #include "dawn/native/metal/SamplerMTL.h"
 #include "dawn/native/metal/ShaderModuleMTL.h"
+#include "dawn/native/metal/SharedFenceMTL.h"
+#include "dawn/native/metal/SharedTextureMemoryMTL.h"
 #include "dawn/native/metal/SwapChainMTL.h"
 #include "dawn/native/metal/TextureMTL.h"
 #include "dawn/native/metal/UtilsMetal.h"
@@ -147,7 +150,7 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     if (mCommandQueue == nil) {
         return DAWN_INTERNAL_ERROR("Failed to allocate MTLCommandQueue.");
     }
-    if (@available(macOS 10.14, *)) {
+    if (@available(macOS 10.14, iOS 12.0, *)) {
         mMtlSharedEvent.Acquire([*mMtlDevice newSharedEvent]);
     }
 
@@ -246,6 +249,41 @@ ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
                                 wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc |
                                 wgpu::TextureUsage::CopyDst;
     return usages;
+}
+
+ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImpl(
+    const SharedTextureMemoryDescriptor* baseDescriptor) {
+    DAWN_TRY(ValidateSingleSType(baseDescriptor->nextInChain,
+                                 wgpu::SType::SharedTextureMemoryIOSurfaceDescriptor));
+
+    const SharedTextureMemoryIOSurfaceDescriptor* descriptor = nullptr;
+    FindInChain(baseDescriptor->nextInChain, &descriptor);
+
+    DAWN_INVALID_IF(descriptor == nullptr,
+                    "SharedTextureMemoryIOSurfaceDescriptor must be chained.");
+
+    DAWN_INVALID_IF(!HasFeature(Feature::SharedTextureMemoryIOSurface), "%s is not enabled.",
+                    wgpu::FeatureName::SharedTextureMemoryIOSurface);
+
+    return SharedTextureMemory::Create(this, baseDescriptor->label, descriptor);
+}
+
+ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
+    const SharedFenceDescriptor* baseDescriptor) {
+    DAWN_TRY(ValidateSingleSType(baseDescriptor->nextInChain,
+                                 wgpu::SType::SharedFenceMTLSharedEventDescriptor));
+
+    const SharedFenceMTLSharedEventDescriptor* descriptor = nullptr;
+    FindInChain(baseDescriptor->nextInChain, &descriptor);
+
+    DAWN_INVALID_IF(descriptor == nullptr, "SharedFenceMTLSharedEventDescriptor must be chained.");
+
+    DAWN_INVALID_IF(!HasFeature(Feature::SharedFenceMTLSharedEvent), "%s is not enabled.",
+                    wgpu::FeatureName::SharedFenceMTLSharedEvent);
+    if (@available(macOS 10.14, ios 12.0, *)) {
+        return SharedFence::Create(this, baseDescriptor->label, descriptor);
+    }
+    UNREACHABLE();
 }
 
 ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {

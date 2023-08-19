@@ -146,6 +146,15 @@ bool IsDepthOrStencilFormat(wgpu::TextureFormat textureFormat) {
     }
 }
 
+bool IsMultiPlanarFormat(wgpu::TextureFormat textureFormat) {
+    switch (textureFormat) {
+        case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
+            return true;
+        default:
+            return false;
+    }
+}
+
 bool TextureFormatSupportsMultisampling(wgpu::TextureFormat textureFormat) {
     if (IsBCTextureFormat(textureFormat) || IsETC2TextureFormat(textureFormat) ||
         IsASTCTextureFormat(textureFormat)) {

@@ -19,10 +19,22 @@
 
 namespace dawn::native {
 
+namespace {
+
+class ErrorSharedFence : public SharedFenceBase {
+  public:
+    ErrorSharedFence(DeviceBase* device, const SharedFenceDescriptor* descriptor)
+        : SharedFenceBase(device, descriptor, ObjectBase::kError) {}
+
+    MaybeError ExportInfoImpl(SharedFenceExportInfo* info) const override { UNREACHABLE(); }
+};
+
+}  // namespace
+
 // static
 SharedFenceBase* SharedFenceBase::MakeError(DeviceBase* device,
                                             const SharedFenceDescriptor* descriptor) {
-    return new SharedFenceBase(device, descriptor, ObjectBase::kError);
+    return new ErrorSharedFence(device, descriptor);
 }
 
 SharedFenceBase::SharedFenceBase(DeviceBase* device,
@@ -30,14 +42,26 @@ SharedFenceBase::SharedFenceBase(DeviceBase* device,
                                  ObjectBase::ErrorTag tag)
     : ApiObjectBase(device, tag, descriptor->label) {}
 
+SharedFenceBase::SharedFenceBase(DeviceBase* device, const char* label)
+    : ApiObjectBase(device, label) {}
+
 ObjectType SharedFenceBase::GetType() const {
     return ObjectType::SharedFence;
 }
 
 void SharedFenceBase::APIExportInfo(SharedFenceExportInfo* info) const {
-    DAWN_UNUSED(GetDevice()->ConsumedError(DAWN_UNIMPLEMENTED_ERROR("Not implemented")));
+    DAWN_UNUSED(GetDevice()->ConsumedError(ExportInfo(info)));
 }
 
 void SharedFenceBase::DestroyImpl() {}
+
+MaybeError SharedFenceBase::ExportInfo(SharedFenceExportInfo* info) const {
+    // Set the type to undefined. It will be overwritten to the actual type
+    // as long as no error occurs.
+    info->type = wgpu::SharedFenceType::Undefined;
+
+    DAWN_TRY(GetDevice()->ValidateObject(this));
+    return ExportInfoImpl(info);
+}
 
 }  // namespace dawn::native

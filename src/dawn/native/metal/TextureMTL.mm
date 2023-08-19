@@ -21,6 +21,8 @@
 #include "dawn/native/EnumMaskIterator.h"
 #include "dawn/native/metal/BufferMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
+#include "dawn/native/metal/SharedFenceMTL.h"
+#include "dawn/native/metal/SharedTextureMemoryMTL.h"
 #include "dawn/native/metal/UtilsMetal.h"
 
 #include <CoreVideo/CVPixelBuffer.h>
@@ -741,6 +743,21 @@ ResultOrError<Ref<Texture>> Texture::CreateFromIOSurface(
 }
 
 // static
+ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
+    SharedTextureMemory* memory,
+    const TextureDescriptor* descriptor) {
+    ExternalImageDescriptorIOSurface ioSurfaceImageDesc;
+    ioSurfaceImageDesc.isInitialized = false;  // Initialized state is set on memory.BeginAccess.
+
+    Device* device = ToBackend(memory->GetDevice());
+    Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
+    DAWN_TRY(texture->InitializeFromIOSurface(&ioSurfaceImageDesc, descriptor,
+                                              memory->GetIOSurface(), {}));
+    texture->mSharedTextureMemory = GetWeakRef(static_cast<SharedTextureMemoryBase*>(memory));
+    return texture;
+}
+
+// static
 Ref<Texture> Texture::CreateWrapping(Device* device,
                                      const TextureDescriptor* descriptor,
                                      NSPRef<id<MTLTexture>> wrapped) {
@@ -815,8 +832,15 @@ MaybeError Texture::InitializeFromIOSurface(const ExternalImageDescriptor* descr
 }
 
 void Texture::SynchronizeTextureBeforeUse(CommandRecordingContext* commandContext) {
-    if (@available(macOS 10.14, *)) {
-        if (!mWaitEvents.empty()) {
+    if (@available(macOS 10.14, iOS 12.0, *)) {
+        SharedTextureMemoryBase::PendingFenceList fences;
+        Ref<SharedTextureMemoryBase> memory = TryGetSharedTextureMemory();
+        if (memory != nullptr) {
+            memory->AcquireBeginFences(this, &fences);
+            memory->SetLastUsageSerial(GetDevice()->GetPendingCommandSerial());
+        }
+
+        if (!mWaitEvents.empty() || !fences->empty()) {
             // There may be an open blit encoder from a copy command or writeBuffer.
             // Wait events are only allowed if there is no encoder open.
             commandContext->EndBlit();
@@ -827,6 +851,11 @@ void Texture::SynchronizeTextureBeforeUse(CommandRecordingContext* commandContex
             id rawEvent = *waitEvent.sharedEvent;
             id<MTLSharedEvent> sharedEvent = static_cast<id<MTLSharedEvent>>(rawEvent);
             [commandBuffer encodeWaitForEvent:sharedEvent value:waitEvent.signaledValue];
+        }
+
+        for (const auto& fence : fences) {
+            [commandBuffer encodeWaitForEvent:ToBackend(fence.object)->GetMTLSharedEvent()
+                                        value:fence.signaledValue];
         }
     }
 }

@@ -748,6 +748,12 @@ using DawnTest = DawnTestWithParams<>;
         DawnTestBase::PrintToStringParamName(#testName));                               \
     GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(testName)
 
+#define DAWN_INSTANTIATE_PREFIXED_TEST_P(prefix, testName, ...)                    \
+    INSTANTIATE_TEST_SUITE_P(                                                      \
+        prefix, testName,                                                          \
+        ::testing::ValuesIn(MakeParamGenerator<testName::ParamType>(__VA_ARGS__)), \
+        DawnTestBase::PrintToStringParamName(#testName))
+
 // Instantiate the test once for each backend provided in the first param list.
 // The test will be parameterized over the following param lists.
 // Use it like this:
@@ -784,8 +790,8 @@ using DawnTest = DawnTestWithParams<>;
         DAWN_PP_EXPAND(DAWN_PP_EXPAND(DAWN_PP_FOR_EACH)(DAWN_TEST_PARAM_STRUCT_DECL_STRUCT_FIELD,  \
                                                         __VA_ARGS__))                              \
     };                                                                                             \
-    std::ostream& operator<<(std::ostream& o,                                                      \
-                             const DAWN_PP_CONCATENATE(_Dawn_, StructName) & param) {              \
+    inline std::ostream& operator<<(std::ostream& o,                                               \
+                                    const DAWN_PP_CONCATENATE(_Dawn_, StructName) & param) {       \
         DAWN_PP_EXPAND(DAWN_PP_EXPAND(DAWN_PP_FOR_EACH)(DAWN_TEST_PARAM_STRUCT_PRINT_STRUCT_FIELD, \
                                                         __VA_ARGS__))                              \
         return o;                                                                                  \
@@ -796,7 +802,7 @@ using DawnTest = DawnTestWithParams<>;
             : AdapterTestParam(param),                                                             \
               DAWN_PP_CONCATENATE(_Dawn_, StructName){std::forward<Args>(args)...} {}              \
     };                                                                                             \
-    std::ostream& operator<<(std::ostream& o, const StructName& param) {                           \
+    inline std::ostream& operator<<(std::ostream& o, const StructName& param) {                    \
         o << static_cast<const AdapterTestParam&>(param);                                          \
         o << "; " << static_cast<const DAWN_PP_CONCATENATE(_Dawn_, StructName)&>(param);           \
         return o;                                                                                  \
