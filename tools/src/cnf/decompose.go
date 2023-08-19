@@ -31,7 +31,7 @@ type Decomposed struct {
 // hold the deduplicated AND expressions, otherwise Decomposed.Ands will be
 // empty.
 // If e has two or more Unary expressions OR'd together, then Decomposed.ORs
-// will hold the deduplicated OR expressions, otherwise Decomposed.Ands will be
+// will hold the deduplicated OR expressions, otherwise Decomposed.ORs will be
 // empty.
 // Decomposed.Unarys will hold all the deduplicated Unary expressions.
 func Decompose(e Expr) Decomposed {
