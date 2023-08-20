@@ -322,10 +322,14 @@ bool ValidationTest::UseCompatibilityMode() const {
 void ValidationTest::OnDeviceError(WGPUErrorType type, const char* message, void* userdata) {
     ASSERT(type != WGPUErrorType_NoError);
     auto* self = static_cast<ValidationTest*>(userdata);
-    self->mDeviceErrorMessage = message;
 
     ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;
-    ASSERT_FALSE(self->mError) << "Got two errors in expect block";
+    ASSERT_FALSE(self->mError) << "Got two errors in expect block, first one is:\n"  //
+                               << self->mDeviceErrorMessage                          //
+                               << "\nsecond one is:\n"                               //
+                               << message;
+
+    self->mDeviceErrorMessage = message;
     if (self->mExpectError) {
         ASSERT_THAT(message, self->mErrorMatcher);
     }
