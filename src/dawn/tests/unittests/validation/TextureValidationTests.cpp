@@ -645,10 +645,10 @@ TEST_F(TextureValidationTest, TextureDimensionNotSupportRenderAttachment) {
         {wgpu::TextureDimension::e1D, wgpu::TextureDimension::e2D, wgpu::TextureDimension::e3D}};
     for (wgpu::TextureDimension dimension : kTextureDimensions) {
         descriptor.dimension = dimension;
-        if (dimension == wgpu::TextureDimension::e2D) {
-            device.CreateTexture(&descriptor);
-        } else {
+        if (dimension == wgpu::TextureDimension::e1D) {
             ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+        } else {
+            device.CreateTexture(&descriptor);
         }
     }
 }

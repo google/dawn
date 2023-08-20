@@ -102,6 +102,7 @@ struct RenderPassColorAttachmentInfo {
     ~RenderPassColorAttachmentInfo();
 
     Ref<TextureViewBase> view;
+    uint32_t depthSlice;
     Ref<TextureViewBase> resolveTarget;
     wgpu::LoadOp loadOp;
     wgpu::StoreOp storeOp;

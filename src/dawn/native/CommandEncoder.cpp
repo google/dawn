@@ -242,6 +242,27 @@ MaybeError ValidateResolveTarget(const DeviceBase* device,
     return {};
 }
 
+MaybeError ValidateColorAttachmentDepthSlice(const TextureViewBase* attachment,
+                                             uint32_t depthSlice) {
+    if (attachment->GetDimension() == wgpu::TextureViewDimension::e3D) {
+        const Extent3D& attachmentSize =
+            attachment->GetTexture()->GetMipLevelSingleSubresourceVirtualSize(
+                attachment->GetBaseMipLevel());
+
+        DAWN_INVALID_IF(depthSlice >= attachmentSize.depthOrArrayLayers,
+                        "The depth slice index (%u) of 3D %s used as attachment is >= the "
+                        "depthOrArrayLayers (%u) of its subresource at mip level (%u).",
+                        depthSlice, attachment, attachmentSize.depthOrArrayLayers,
+                        attachment->GetBaseMipLevel());
+    } else {
+        DAWN_INVALID_IF(depthSlice != 0,
+                        "The depth slice index (%u) of non-3D %s used as attachment is not 0.",
+                        depthSlice, attachment);
+    }
+
+    return {};
+}
+
 MaybeError ValidateColorAttachmentRenderToSingleSampled(
     const DeviceBase* device,
     const RenderPassColorAttachment& colorAttachment,
@@ -346,6 +367,7 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
         DAWN_TRY(ValidateResolveTarget(device, colorAttachment, usageValidationMode));
     }
 
+    DAWN_TRY(ValidateColorAttachmentDepthSlice(attachment, colorAttachment.depthSlice));
     DAWN_TRY(ValidateAttachmentArrayLayersAndLevelCount(attachment));
     DAWN_TRY(ValidateOrSetAttachmentSize(attachment, width, height));
 
@@ -1030,6 +1052,8 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
                     resolveTarget = descriptor->colorAttachments[i].resolveTarget;
 
                     cmd->colorAttachments[index].view = colorTarget;
+                    cmd->colorAttachments[index].depthSlice =
+                        descriptor->colorAttachments[i].depthSlice;
                     cmd->colorAttachments[index].loadOp = descriptor->colorAttachments[i].loadOp;
                     cmd->colorAttachments[index].storeOp = descriptor->colorAttachments[i].storeOp;
                 } else {

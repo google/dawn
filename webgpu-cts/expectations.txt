@@ -620,6 +620,11 @@ crbug.com/dawn/1970 [ android ] webgpu:web_platform,canvas,getCurrentTexture:con
 crbug.com/dawn/1970 [ android ] webgpu:web_platform,canvas,getCurrentTexture:single_frames:canvasType="onscreen" [ Failure ]
 
 ################################################################################
+# 3D texture is allowed to be created with usage RenderAttachment. These tests need to be updated once spec change is landed.
+################################################################################
+crbug.com/dawn/1020 webgpu:api,validation,createTexture:texture_usage:dimension="3d";* [ Failure ]
+
+################################################################################
 # untriaged Android failures
 ################################################################################
 crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,validation,texture,bgra8unorm_storage:configure_storage_usage_on_canvas_context_with_bgra8unorm_storage:* [ Failure ]

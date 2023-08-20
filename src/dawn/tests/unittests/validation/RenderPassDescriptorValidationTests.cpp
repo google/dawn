@@ -407,6 +407,67 @@ TEST_F(RenderPassDescriptorValidationTest, TextureViewLayerCountForColorAndDepth
     }
 }
 
+// Depth slice index must be within the depth range of 3D color attachment and must be 0 for non-3D
+// color attachment.
+TEST_F(RenderPassDescriptorValidationTest, TextureViewDepthSliceForColor) {
+    constexpr uint32_t kSize = 8;
+    constexpr uint32_t kDepthOrArrayLayers = 4;
+    constexpr wgpu::TextureFormat kColorFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+    wgpu::Texture colorTexture3D = CreateTexture(device, wgpu::TextureDimension::e3D, kColorFormat,
+                                                 kSize, kSize, kDepthOrArrayLayers, 2);
+
+    wgpu::TextureView colorView2D = Create2DAttachment(device, kSize, kSize, kColorFormat);
+
+    wgpu::TextureViewDescriptor baseDescriptor;
+    baseDescriptor.dimension = wgpu::TextureViewDimension::e3D;
+    baseDescriptor.baseArrayLayer = 0;
+    baseDescriptor.arrayLayerCount = 1;
+    baseDescriptor.baseMipLevel = 0;
+    baseDescriptor.mipLevelCount = 1;
+
+    // Control case: Depth slice index within the depth range of 3D color attachment is valid.
+    {
+        wgpu::TextureView view = colorTexture3D.CreateView(&baseDescriptor);
+        utils::ComboRenderPassDescriptor renderPass({view});
+        renderPass.cColorAttachments[0].depthSlice = kDepthOrArrayLayers - 1;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // Depth slice index out of the depth range of 3D color attachment is invalid.
+    {
+        wgpu::TextureView view = colorTexture3D.CreateView(&baseDescriptor);
+        utils::ComboRenderPassDescriptor renderPass({view});
+        renderPass.cColorAttachments[0].depthSlice = kDepthOrArrayLayers;
+        AssertBeginRenderPassError(&renderPass);
+    }
+
+    // Depth slice index out of the depth range of 3D color attachment with non-zero mip level is
+    // invalid.
+    {
+        wgpu::TextureViewDescriptor descriptor = baseDescriptor;
+        descriptor.baseMipLevel = 1;
+        wgpu::TextureView view = colorTexture3D.CreateView(&descriptor);
+        utils::ComboRenderPassDescriptor renderPass({view});
+        renderPass.cColorAttachments[0].depthSlice = kDepthOrArrayLayers >> 1;
+        AssertBeginRenderPassError(&renderPass);
+    }
+
+    // Control case: Depth slice must be 0 for non-3D color attachment.
+    {
+        utils::ComboRenderPassDescriptor renderPass({colorView2D});
+        renderPass.cColorAttachments[0].depthSlice = 0;
+        AssertBeginRenderPassSuccess(&renderPass);
+    }
+
+    // Non-zero depth slice is invalid for non-3D color attachment.
+    {
+        utils::ComboRenderPassDescriptor renderPass({colorView2D});
+        renderPass.cColorAttachments[0].depthSlice = 1;
+        AssertBeginRenderPassError(&renderPass);
+    }
+}
+
 // Check that the render pass depth attachment must have the RenderAttachment usage.
 TEST_F(RenderPassDescriptorValidationTest, DepthAttachmentInvalidUsage) {
     // Control case: using a texture with RenderAttachment is valid.
