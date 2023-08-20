@@ -53,16 +53,17 @@ namespace {
 {{- end}}
 
 
-void Initialize(Napi::Env env) {
+Napi::Object Initialize(Napi::Env env) {
   auto* wrapper = Wrappers::Init(env);
-  auto global = env.Global();
+  auto exports = Napi::Object::New(env);
 {{- range $ := .Declarations}}
 {{-   if IsInterfaceOrNamespace $}}
 {{-     if not (HasAnnotation $ "LegacyNoInterfaceObject")}}
-  global.Set(Napi::String::New(env, "{{$.Name}}"), wrapper->{{$.Name}}_ctor.Value());
+  exports.Set(Napi::String::New(env, "{{$.Name}}"), wrapper->{{$.Name}}_ctor.Value());
 {{-     end}}
 {{-   end}}
 {{- end}}
+  return exports;
 }
 
 }  // namespace interop

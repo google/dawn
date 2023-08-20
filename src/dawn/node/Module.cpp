@@ -32,6 +32,7 @@ int __llvm_profile_write_file(void);
 #endif  // DAWN_EMIT_COVERAGE
 
 namespace {
+
 Napi::Value CreateGPU(const Napi::CallbackInfo& info) {
     const auto& env = info.Env();
 
@@ -95,7 +96,7 @@ NAPI_MODULE_EXPORT Napi::Object Initialize(Napi::Env env, Napi::Object exports) 
     dawnProcSetProcs(&dawn::native::GetProcs());
 
     // Register all the interop types
-    wgpu::interop::Initialize(env);
+    exports.Set(Napi::String::New(env, "globals"), wgpu::interop::Initialize(env));
 
     // Export function that creates and returns the wgpu::interop::GPU interface
     exports.Set(Napi::String::New(env, "create"), Napi::Function::New<CreateGPU>(env));

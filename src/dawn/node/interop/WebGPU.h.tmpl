@@ -38,8 +38,9 @@ See:
 namespace wgpu {
 namespace interop {
 
-// Initialize() registers the WebGPU types with the Napi environment.
-void Initialize(Napi::Env env);
+// Initialize() registers the WebGPU types with the Napi environment
+// and returns an object containing their JavaScript interfaces.
+Napi::Object Initialize(Napi::Env env);
 
 {{  range $ := .Declarations}}
 {{-        if IsDictionary $}}{{template "Dictionary" $}}

@@ -125,6 +125,10 @@ interop::Promise<interop::Interface<interop::GPUDevice>> GPUAdapter::requestDevi
 
         requiredFeatures.emplace_back(feature);
     }
+    if (!conv(desc.label, descriptor.label)) {
+        Napi::Error::New(env, "invalid value for label").ThrowAsJavaScriptException();
+        return promise;
+    }
 
     wgpu::RequiredLimits limits;
 #define COPY_LIMIT(LIMIT)                                        \

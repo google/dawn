@@ -135,3 +135,14 @@ else()
     file(GENERATE OUTPUT "${NAPI_SYMBOLS_H}" CONTENT "${NAPI_SYMBOLS}")
     target_sources(dawn_node PRIVATE "NapiSymbols.cpp")
 endif()
+
+macro(javascript file)
+    add_custom_command(
+        TARGET dawn_node POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_SOURCE_DIR}/src/dawn/node/${file}"
+            "${Dawn_BINARY_DIR}/${file}")
+endmacro()
+
+javascript("index.js")
+javascript("cts.js")

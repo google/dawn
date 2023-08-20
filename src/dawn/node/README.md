@@ -59,13 +59,13 @@ ninja dawn.node
 Now you can run CTS:
 
 ```sh
-./tools/run run-cts --dawn-node=<path-to-dawn.node> [WebGPU CTS query]
+./tools/run run-cts --dawn-node=<path-to-cts.js> [WebGPU CTS query]
 ```
 
 Or if you checked out your own CTS repo:
 
 ```sh
-./tools/run run-cts --dawn-node=<path-to-dawn.node> --cts=<path-to-cts> [WebGPU CTS query]
+./tools/run run-cts --dawn-node=<path-to-cts.js> --cts=<path-to-cts> [WebGPU CTS query]
 ```
 
 If this fails with the error message `TypeError: expander is not a function or its return value is not iterable`, try appending `--build=false` to the start of the `run-cts` command line flags.
@@ -73,7 +73,7 @@ If this fails with the error message `TypeError: expander is not a function or i
 To test against SwiftShader instead of the default Vulkan device, prefix `./tools/run run-cts` with `VK_ICD_FILENAMES=<swiftshader-cmake-build>/Linux/vk_swiftshader_icd.json`. For example:
 
 ```sh
-VK_ICD_FILENAMES=<swiftshader-cmake-build>/Linux/vk_swiftshader_icd.json ./tools/run run-cts --dawn-node=<path-to-dawn.node> [WebGPU CTS query]
+VK_ICD_FILENAMES=<swiftshader-cmake-build>/Linux/vk_swiftshader_icd.json ./tools/run run-cts --dawn-node=<path-to-cts.js> [WebGPU CTS query]
 ```
 
 The `--flag` parameter must be passed in multiple times, once for each flag begin set. Here are some common arguments:
@@ -87,7 +87,7 @@ The `--flag` parameter must be passed in multiple times, once for each flag begi
 For example, on Windows, to use the d3dcompiler_47.dll from a Chromium checkout, and to dump shader output, we could run the following using Git Bash:
 
 ```sh
-./tools/run run-cts --verbose --dawn-node=/c/src/dawn/build/Debug/dawn.node --cts=/c/src/webgpu-cts --flag=dlldir="C:\src\chromium\src\out\Release" --flag=enable-dawn-features=dump_shaders 'webgpu:shader,execution,builtin,abs:integer_builtin_functions,abs_unsigned:storageClass="storage";storageMode="read_write";containerType="vector";isAtomic=false;baseType="u32";type="vec2%3Cu32%3E"'
+./tools/run run-cts --verbose --dawn-node=/c/src/dawn/node/cts.js --cts=/c/src/webgpu-cts --flag=dlldir="C:\src\chromium\src\out\Release" --flag=enable-dawn-features=dump_shaders 'webgpu:shader,execution,builtin,abs:integer_builtin_functions,abs_unsigned:storageClass="storage";storageMode="read_write";containerType="vector";isAtomic=false;baseType="u32";type="vec2%3Cu32%3E"'
 ```
 
 Note that we pass `--verbose` above so that all test output, including the dumped shader, is written to stdout.
@@ -157,7 +157,7 @@ Open or create the `.vscode/launch.json` file, and add:
         "--",
         "placeholder-arg",
         "--gpu-provider",
-        "[path-to-dawn.node]", // REPLACE: [path-to-dawn.node]
+        "[path-to-cts.js]", // REPLACE: [path-to-cts.js]
         "[test-query]" // REPLACE: [test-query]
       ],
       "cwd": "[cts-root]" // REPLACE: [cts-root]
@@ -169,7 +169,7 @@ Open or create the `.vscode/launch.json` file, and add:
 Replacing:
 
 - `[cts-root]` with the path to the CTS root directory. If you are editing the `.vscode/launch.json` from within the CTS workspace, then you may use `${workspaceFolder}`.
-- `[path-to-dawn.node]` this the path to the `dawn.node` module built by the [build step](#Build)
+- `[cts.js]` this is the path to the `cts.js` module copied by the [build step](#Build)
 - `test-query` with the test query string. Example: `webgpu:shader,execution,builtin,abs:*`
 
 ## Debugging dawn-node issues in gdb/lldb
@@ -182,7 +182,7 @@ cd <cts-root-dir>
     -e "require('./src/common/tools/setup-ts-in-node.js');require('./src/common/runtime/cmdline.ts');" \
     -- \
     placeholder-arg \
-    --gpu-provider [path to dawn.node] \
+    --gpu-provider [path to cts.js] \
     [test-query]
 ```
 
