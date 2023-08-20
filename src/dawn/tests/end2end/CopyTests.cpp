@@ -184,11 +184,12 @@ class CopyTests_T2B : public CopyTests, public DawnTestWithParams<CopyTextureFor
                                GetParam().mTextureFormat == wgpu::TextureFormat::RG11B10Ufloat) &&
                               IsAndroid() && IsVulkan());
 
-        // TODO(dawn:1935): Many 16 float formats tests failing for D3D11 backend on Intel Gen12.
+        // TODO(dawn:1935): Many 16 float formats tests failing for D3D11 and OpenGLES backends on
+        // Intel Gen12.
         DAWN_SUPPRESS_TEST_IF((GetParam().mTextureFormat == wgpu::TextureFormat::R16Float ||
                                GetParam().mTextureFormat == wgpu::TextureFormat::RGBA16Float ||
                                GetParam().mTextureFormat == wgpu::TextureFormat::RG11B10Ufloat) &&
-                              IsD3D11() && IsIntelGen12());
+                              (IsD3D11() || IsOpenGLES()) && IsIntelGen12());
     }
     static BufferSpec MinimumBufferSpec(uint32_t width, uint32_t height, uint32_t depth = 1) {
         return CopyTests::MinimumBufferSpec(width, height, depth, GetParam().mTextureFormat);
