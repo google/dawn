@@ -316,7 +316,42 @@
             {"name": "multisampled", "type": "bool", "default": "false"}
         ]
     },
-
+    "surface capabilities": {
+        "category": "structure",
+        "tags": ["upstream"],
+        "extensible": "out",
+        "members": [
+            {"name": "format count", "type": "size_t"},
+            {"name": "formats", "type": "texture format", "annotation": "*"},
+            {"name": "present mode count", "type": "size_t"},
+            {"name": "present modes", "type": "present mode", "annotation": "*"},
+            {"name": "alpha mode count", "type": "size_t"},
+            {"name": "alpha modes", "type": "composite alpha mode", "annotation": "*"}
+        ],
+        "methods": [
+            {
+                "name": "free members",
+                "returns": "void",
+                "args": []
+            }
+        ]
+    },
+    "surface configuration": {
+        "category": "structure",
+        "tags": ["upstream"],
+        "extensible": "in",
+        "members": [
+            {"name": "device", "type": "device"},
+            {"name": "format", "type": "texture format"},
+            {"name": "usage", "type": "texture usage"},
+            {"name": "view format count", "type": "size_t"},
+            {"name": "view formats", "type": "texture format", "annotation": "const*"},
+            {"name": "alpha mode", "type": "composite alpha mode"},
+            {"name": "width", "type": "uint32_t"},
+            {"name": "height", "type": "uint32_t"},
+            {"name": "present mode", "type": "present mode"}
+        ]
+    },
     "external texture binding entry": {
         "category": "structure",
         "chained": "in",
@@ -340,8 +375,8 @@
         "values": [
             {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
             {"value": 1, "name": "write only"},
-            {"value": 2, "name": "read only"},
-            {"value": 3, "name": "read write"}
+            {"value": 2, "name": "read only", "tags": ["dawn"]},
+            {"value": 3, "name": "read write", "tags": ["dawn"]}
         ]
     },
     "storage texture binding layout": {
@@ -400,10 +435,10 @@
             {"value": 10, "name": "src alpha saturated"},
             {"value": 11, "name": "constant"},
             {"value": 12, "name": "one minus constant"},
-            {"value": 13, "name": "src1"},
-            {"value": 14, "name": "one minus src1"},
-            {"value": 15, "name": "src1 alpha"},
-            {"value": 16, "name": "one minus src1 alpha"}
+            {"value": 13, "name": "src1", "tags": ["dawn"]},
+            {"value": 14, "name": "one minus src1", "tags": ["dawn"]},
+            {"value": 15, "name": "src1 alpha", "tags": ["dawn"]},
+            {"value": 16, "name": "one minus src1 alpha", "tags": ["dawn"]}
         ]
     },
     "blend operation": {
@@ -868,6 +903,17 @@
             }
         ]
     },
+    "composite alpha mode": {
+        "category": "enum",
+        "tags": ["upstream"],
+        "values": [
+            {"value": 0, "name": "auto"},
+            {"value": 1, "name": "opaque"},
+            {"value": 2, "name": "premultiplied"},
+            {"value": 3, "name": "unpremultiplied"},
+            {"value": 4, "name": "inherit"}
+        ]
+    },
     "compute pass timestamp location": {
         "category": "enum",
         "values": [
@@ -1106,6 +1152,7 @@
             },
             {
                 "name": "create swap chain",
+                "tags": ["dawn", "emscripten"],
                 "returns": "swap chain",
                 "args": [
                     {"name": "surface", "type": "surface"},
@@ -2051,9 +2098,10 @@
         "category": "enum",
         "emscripten_no_enum_table": true,
         "values": [
-            {"value": 0, "name": "immediate"},
-            {"value": 1, "name": "mailbox"},
-            {"value": 2, "name": "fifo"}
+            {"value": 0, "name": "fifo"},
+            {"value": 1, "name": "fifo relaxed", "tags": ["upstream"]},
+            {"value": 2, "name": "immediate"},
+            {"value": 3, "name": "mailbox"}
         ]
     },
     "programmable stage descriptor": {
@@ -2908,12 +2956,49 @@
         "no autolock": true,
         "methods": [
             {
+                "name": "configure",
+                "returns": "void",
+                "tags": ["upstream"],
+                "args": [
+                    {"name": "config", "type": "surface configuration", "annotation": "const*"}
+                ]
+            },
+            {
+                "name": "get capabilities",
+                "returns": "void",
+                "tags": ["upstream"],
+                "args": [
+                    {"name": "adapter", "type": "adapter"},
+                    {"name": "capabilities", "type": "surface capabilities", "annotation": "*"}
+                ]
+            },
+            {
+                "name": "get current texture",
+                "returns": "void",
+                "tags": ["upstream"],
+                "args": [
+                    {"name": "surface texture", "type": "surface texture", "annotation": "*"}
+                ]
+            },
+            {
                 "name": "get preferred format",
                 "returns": "texture format",
                 "tags": ["upstream", "emscripten"],
                 "args": [
                     {"name": "adapter", "type": "adapter"}
                 ]
+            },
+            {
+                "name": "present",
+                "returns": "void",
+                "tags": ["upstream"],
+                "args": []
+            },
+            {
+                "name": "unconfigure",
+                "returns": "void",
+                "tags": ["upstream"],
+                "args": []
             }
         ]
     },
@@ -3010,6 +3095,7 @@
     },
     "swap chain": {
         "category": "object",
+        "tags": ["dawn", "emscripten"],
         "methods": [
             {"name": "get current texture view", "returns": "texture view"},
             {"name": "get current texture", "returns": "texture", "tags": ["dawn"]},
@@ -3018,6 +3104,7 @@
     },
     "swap chain descriptor": {
         "category": "structure",
+        "tags": ["dawn", "emscripten"],
         "extensible": "in",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
@@ -3026,6 +3113,15 @@
             {"name": "width", "type": "uint32_t"},
             {"name": "height", "type": "uint32_t"},
             {"name": "present mode", "type": "present mode"}
+        ]
+    },
+    "surface texture": {
+        "category": "structure",
+        "tags": ["upstream"],
+        "members": [
+            {"name": "texture", "type": "texture"},
+            {"name": "suboptimal", "type": "bool"},
+            {"name": "status", "type": "surface get current texture status"}
         ]
     },
     "s type": {
@@ -3141,6 +3237,18 @@
             {
                 "name": "destroy"
             }
+        ]
+    },
+    "surface get current texture status": {
+        "category": "enum",
+        "tags": ["upstream"],
+        "values": [
+            {"value": 0, "name": "success"},
+            {"value": 1, "name": "timeout"},
+            {"value": 2, "name": "outdated"},
+            {"value": 3, "name": "lost"},
+            {"value": 4, "name": "out of memory"},
+            {"value": 5, "name": "device lost"}
         ]
     },
     "texture aspect": {
