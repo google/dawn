@@ -247,6 +247,11 @@ TEST_P(RenderPassTest_RegressionDawn1389, ClearMultisubresourceAfterWriteDepth16
     // TODO(dawn:1705): fix this test for Intel D3D11.
     DAWN_SUPPRESS_TEST_IF(IsD3D11() && IsIntel());
 
+    // TODO(crbug.com/dawn/1989): Failed on Intel Gen12 GPUs because of Windows Vulkan driver issue,
+    // when copying to a D16_UNORM depth texture and clearing one subresource, other subresources
+    // will have incorrect values. Remove this suppression once the issue is fixed.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsWindows() && IsIntelGen12());
+
     // Test all combinatons of multi-mip, multi-layer
     for (uint32_t mipLevelCount : {1, 5}) {
         for (uint32_t arrayLayerCount : {1, 7}) {
