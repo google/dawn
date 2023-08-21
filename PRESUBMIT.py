@@ -120,7 +120,7 @@ def _NonInclusiveFileFilter(file):
         "src/tint/transform/canonicalize_entry_point_io.cc",  # External URL
         "test/tint/samples/compute_boids.wgsl",  # External URL
         "third_party/gn/dxc/BUILD.gn",  # Third party file
-        "third_party/khronos/KHR/khrplatform.h",  # Third party file
+        "third_party/khronos/EGL-Registry/api/KHR/khrplatform.h",  # Third party file
         "tools/roll-all",  # Branch name
         "tools/src/container/key.go",  # External URL
         "go.sum",  # External URL

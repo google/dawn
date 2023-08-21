@@ -106,8 +106,8 @@ endif()
 
 # Header-only library for khrplatform.h
 add_library(dawn_khronos_platform INTERFACE)
-target_sources(dawn_khronos_platform INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/khronos/KHR/khrplatform.h")
-target_include_directories(dawn_khronos_platform INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/khronos")
+target_sources(dawn_khronos_platform INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/khronos/EGL-Registry/api/KHR/khrplatform.h")
+target_include_directories(dawn_khronos_platform INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/khronos/EGL-Registry/api")
 
 # Header-only library for Vulkan headers
 add_library(dawn_vulkan_headers INTERFACE)

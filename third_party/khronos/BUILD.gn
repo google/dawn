@@ -16,11 +16,11 @@
 # headers for header inclusion check.
 
 config("khronos_headers_public") {
-  include_dirs = [ "." ]
+  include_dirs = [ "EGL-Registry/api" ]
 }
 
 source_set("khronos_platform") {
-  sources = [ "KHR/khrplatform.h" ]
+  sources = [ "EGL-Registry/api/KHR/khrplatform.h" ]
 
   public_configs = [ ":khronos_headers_public" ]
 }
