@@ -156,11 +156,11 @@ func run() error {
 
 	unrollConstEvalLoopsDefault := runtime.GOOS != "windows"
 
-	var dawnNode, cts, node, npx, resultsPath, expectationsPath, logFilename, backend, adapterName, coverageFile string
+	var bin, cts, node, npx, resultsPath, expectationsPath, logFilename, backend, adapterName, coverageFile string
 	var verbose, isolated, build, validate, dumpShaders, unrollConstEvalLoops, genCoverage bool
 	var numRunners int
 	var flags dawnNodeFlags
-	flag.StringVar(&dawnNode, "dawn-node", "", "path to dawn.node module")
+	flag.StringVar(&bin, "bin", defaultBinPath(), "path to the directory holding cts.js and dawn.node")
 	flag.StringVar(&cts, "cts", defaultCtsPath(), "root directory of WebGPU CTS")
 	flag.StringVar(&node, "node", defaultNodePath(), "path to node executable")
 	flag.StringVar(&npx, "npx", "", "path to npx executable")
@@ -193,18 +193,22 @@ func run() error {
 	defer stdout.Close() // Required to flush the mux chan
 
 	// Check mandatory arguments
-	if dawnNode == "" || cts == "" {
+	if bin == "" || cts == "" {
 		showUsage()
 	}
-	if !isFile(dawnNode) {
-		return fmt.Errorf("'%v' is not a file", dawnNode)
+	for _, dir := range []string{cts, bin} {
+		if !isDir(dir) {
+			return fmt.Errorf("'%v' is not a directory", dir)
+		}
 	}
-	if !isDir(cts) {
-		return fmt.Errorf("'%v' is not a directory", cts)
+	for _, file := range []string{"cts.js", "dawn.node"} {
+		if !isFile(filepath.Join(bin, file)) {
+			return fmt.Errorf("'%v' does not contain '%v'", bin, file)
+		}
 	}
 
 	// Make paths absolute
-	for _, path := range []*string{&dawnNode, &cts} {
+	for _, path := range []*string{&bin, &cts} {
 		abs, err := filepath.Abs(*path)
 		if err != nil {
 			return fmt.Errorf("unable to get absolute path for '%v'", *path)
@@ -261,7 +265,7 @@ func run() error {
 		verbose:              verbose,
 		node:                 node,
 		npx:                  npx,
-		dawnNode:             dawnNode,
+		bin:                  bin,
 		cts:                  cts,
 		tmpDir:               filepath.Join(os.TempDir(), "dawn-cts"),
 		unrollConstEvalLoops: unrollConstEvalLoops,
@@ -280,8 +284,6 @@ func run() error {
 	}
 
 	if genCoverage {
-		dawnOutDir := filepath.Dir(dawnNode)
-
 		profdata, err := exec.LookPath("llvm-profdata")
 		if err != nil {
 			profdata = ""
@@ -297,7 +299,7 @@ func run() error {
 		}
 
 		llvmCov := ""
-		turboCov := filepath.Join(dawnOutDir, "turbo-cov"+fileutils.ExeExt)
+		turboCov := filepath.Join(bin, "turbo-cov"+fileutils.ExeExt)
 		if !fileutils.IsExe(turboCov) {
 			turboCov = ""
 			if path, err := exec.LookPath("llvm-cov"); err == nil {
@@ -308,7 +310,7 @@ func run() error {
 		}
 		r.covEnv = &cov.Env{
 			Profdata: profdata,
-			Binary:   dawnNode,
+			Binary:   bin,
 			Cov:      llvmCov,
 			TurboCov: turboCov,
 		}
@@ -324,7 +326,7 @@ func run() error {
 	}
 
 	cache := cache{}
-	cachePath := dawnNode + ".runcts.cache"
+	cachePath := filepath.Join(bin, "runcts.cache")
 	if err := cache.load(cachePath); err != nil && verbose {
 		fmt.Fprintln(stdout, "failed to load cache from", cachePath, err)
 	}
@@ -462,7 +464,7 @@ type runner struct {
 	verbose              bool
 	node                 string
 	npx                  string
-	dawnNode             string
+	bin                  string
 	cts                  string
 	tmpDir               string
 	unrollConstEvalLoops bool
@@ -692,7 +694,7 @@ func (r *runner) runServer(ctx context.Context, id int, caseIndices <-chan int, 
 			// start at 1, so just inject a placeholder argument.
 			"placeholder-arg",
 			// Actual arguments begin here
-			"--gpu-provider", r.dawnNode,
+			"--gpu-provider", filepath.Join(r.bin, "cts.js"),
 			"--data", filepath.Join(r.cts, "out-node", "data"),
 		}
 		if r.colors {
@@ -1140,7 +1142,7 @@ func (r *runner) runTestcase(ctx context.Context, query string) result {
 		// start at 1, so just inject a placeholder argument.
 		"placeholder-arg",
 		// Actual arguments begin here
-		"--gpu-provider", r.dawnNode,
+		"--gpu-provider", filepath.Join(r.bin, "cts.js"),
 		"--verbose", // always required to emit test pass results
 		"--quiet",
 	}
@@ -1385,6 +1387,18 @@ func defaultNodePath() string {
 		return path
 	}
 
+	return ""
+}
+
+// defaultBinPath looks for the binary output directory at <dawn>/out/active.
+// This is used as the default for the --bin command line flag.
+func defaultBinPath() string {
+	if dawnRoot := fileutils.DawnRoot(); dawnRoot != "" {
+		bin := filepath.Join(dawnRoot, "out/active")
+		if info, err := os.Stat(bin); err == nil && info.IsDir() {
+			return bin
+		}
+	}
 	return ""
 }
 
