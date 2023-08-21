@@ -57,7 +57,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
 
 void PhysicalDevice::InitializeSupportedFeaturesImpl() {
     // Enable all features by default for the convenience of tests.
-    for (uint32_t i = 0; i < static_cast<uint32_t>(Feature::EnumCount); i++) {
+    for (uint32_t i = 0; i < kEnumCount<Feature>; i++) {
         EnableFeature(static_cast<Feature>(i));
     }
 }

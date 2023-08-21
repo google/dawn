@@ -198,8 +198,6 @@ class InstanceBase final : public RefCountedWithExternalCount {
     bool mDeprecatedDiscoveredDefaultPhysicalDevices = false;
 
     TogglesState mToggles;
-
-    FeaturesInfo mFeaturesInfo;
     TogglesInfo mTogglesInfo;
 
 #if defined(DAWN_USE_X11)

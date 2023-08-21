@@ -85,12 +85,10 @@ MaybeError ValidateTimestampQuery(const DeviceBase* device,
                                   Feature requiredFeature) {
     DAWN_TRY(device->ValidateObject(querySet));
 
-    DAWN_INVALID_IF(!device->HasFeature(requiredFeature),
-                    "Timestamp queries used without the %s feature enabled.",
-                    device->GetPhysicalDevice()
-                        ->GetInstance()
-                        ->GetFeatureInfo(FeatureEnumToAPIFeature(requiredFeature))
-                        ->name);
+    DAWN_INVALID_IF(
+        !device->HasFeature(requiredFeature),
+        "Timestamp queries used without the %s feature enabled.",
+        device->GetPhysicalDevice()->GetInstance()->GetFeatureInfo(ToAPI(requiredFeature))->name);
 
     DAWN_INVALID_IF(querySet->GetQueryType() != wgpu::QueryType::Timestamp,
                     "The type of %s is not %s.", querySet, wgpu::QueryType::Timestamp);

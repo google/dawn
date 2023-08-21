@@ -541,7 +541,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     AddCompressedFormat(wgpu::TextureFormat::ASTC12x12UnormSrgb, ByteSize(16), Width(12), Height(12), astcFormatUnsupportedReason, ComponentCount(4), wgpu::TextureFormat::ASTC12x12Unorm);
 
     // multi-planar formats
-    const UnsupportedReason multiPlanarFormatUnsupportedReason = device->HasFeature(Feature::MultiPlanarFormats) ?  Format::supported : RequiresFeature{wgpu::FeatureName::DawnMultiPlanarFormats};
+    const UnsupportedReason multiPlanarFormatUnsupportedReason = device->HasFeature(Feature::DawnMultiPlanarFormats) ?  Format::supported : RequiresFeature{wgpu::FeatureName::DawnMultiPlanarFormats};
     AddMultiAspectFormat(wgpu::TextureFormat::R8BG8Biplanar420Unorm, Aspect::Plane0 | Aspect::Plane1,
         wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::RG8Unorm, Cap::None, multiPlanarFormatUnsupportedReason, ComponentCount(3));
 

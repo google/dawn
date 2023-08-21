@@ -1783,7 +1783,7 @@
     "feature name": {
         "category": "enum",
         "values": [
-            {"value": 0, "name": "undefined", "jsrepr": "undefined"},
+            {"value": 0, "name": "undefined", "jsrepr": "undefined", "valid": false},
             {"value": 1, "name": "depth clip control"},
             {"value": 2, "name": "depth32 float stencil8"},
             {"value": 3, "name": "timestamp query"},

@@ -340,7 +340,7 @@ MaybeError ValidateTextureUsage(const DeviceBase* device,
         DAWN_INVALID_IF(
             !device->HasFeature(Feature::TransientAttachments),
             "The texture usage (%s) includes %s, which requires the %s feature to be set", usage,
-            kTransientAttachment, FeatureEnumToAPIFeature(Feature::TransientAttachments));
+            kTransientAttachment, ToAPI(Feature::TransientAttachments));
 
         const auto kAllowedTransientUsage =
             kTransientAttachment | wgpu::TextureUsage::RenderAttachment;

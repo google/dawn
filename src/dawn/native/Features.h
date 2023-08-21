@@ -22,69 +22,20 @@
 
 #include "dawn/common/ityp_bitset.h"
 #include "dawn/native/DawnNative.h"
+#include "dawn/native/Features_autogen.h"
 #include "dawn/webgpu_cpp.h"
 
 namespace dawn::native {
 
-enum class Feature {
-    TextureCompressionBC,
-    TextureCompressionETC2,
-    TextureCompressionASTC,
-    PipelineStatisticsQuery,
-    TimestampQuery,
-    TimestampQueryInsidePasses,
-    DepthClipControl,
-    Depth32FloatStencil8,
-    ChromiumExperimentalDp4a,
-    IndirectFirstInstance,
-    ShaderF16,
-    RG11B10UfloatRenderable,
-    BGRA8UnormStorage,
-    Float32Filterable,
-    ChromiumExperimentalSubgroups,
-    ChromiumExperimentalSubgroupUniformControlFlow,
-    ChromiumExperimentalReadWriteStorageTexture,
+extern const ityp::array<Feature, FeatureInfo, kEnumCount<Feature>> kFeatureNameAndInfoList;
 
-    // Dawn-specific
-    DawnInternalUsages,
-    MultiPlanarFormats,
-    DawnNative,
-    ImplicitDeviceSynchronization,
-    SurfaceCapabilities,
-    TransientAttachments,
-    MSAARenderToSingleSampled,
-    DualSourceBlending,
-    D3D11MultithreadProtected,
-    ANGLETextureSharing,
-    PixelLocalStorageCoherent,
-    PixelLocalStorageNonCoherent,
-    Norm16TextureFormats,
-
-    SharedTextureMemoryVkDedicatedAllocation,
-    SharedTextureMemoryAHardwareBuffer,
-    SharedTextureMemoryDmaBuf,
-    SharedTextureMemoryOpaqueFD,
-    SharedTextureMemoryZirconHandle,
-    SharedTextureMemoryDXGISharedHandle,
-    SharedTextureMemoryD3D11Texture2D,
-    SharedTextureMemoryIOSurface,
-    SharedTextureMemoryEGLImage,
-
-    SharedFenceVkSemaphoreOpaqueFD,
-    SharedFenceVkSemaphoreSyncFD,
-    SharedFenceVkSemaphoreZirconHandle,
-    SharedFenceDXGISharedHandle,
-    SharedFenceMTLSharedEvent,
-
-    EnumCount,
-    InvalidEnum = EnumCount,
-    FeatureMin = TextureCompressionBC,
-};
+wgpu::FeatureName ToAPI(Feature feature);
+Feature FromAPI(wgpu::FeatureName feature);
 
 // A wrapper of the bitset to store if an feature is enabled or not. This wrapper provides the
 // convenience to convert the enums of enum class Feature to the indices of a bitset.
 struct FeaturesSet {
-    std::bitset<static_cast<size_t>(Feature::EnumCount)> featuresBitSet;
+    ityp::bitset<Feature, kEnumCount<Feature>> featuresBitSet;
 
     void EnableFeature(Feature feature);
     void EnableFeature(wgpu::FeatureName feature);
@@ -94,23 +45,6 @@ struct FeaturesSet {
     // non-null.
     size_t EnumerateFeatures(wgpu::FeatureName* features) const;
     std::vector<const char*> GetEnabledFeatureNames() const;
-};
-
-wgpu::FeatureName FeatureEnumToAPIFeature(Feature feature);
-
-class FeaturesInfo {
-  public:
-    FeaturesInfo();
-    ~FeaturesInfo();
-
-    // Used to query the details of an feature. Return nullptr if featureName is not a valid
-    // name of an feature supported in Dawn
-    const FeatureInfo* GetFeatureInfo(wgpu::FeatureName feature) const;
-    Feature FeatureNameToEnum(const char* featureName) const;
-    wgpu::FeatureName FeatureNameToAPIEnum(const char* featureName) const;
-
-  private:
-    std::unordered_map<std::string, Feature> mFeatureNameToEnumMap;
 };
 
 }  // namespace dawn::native

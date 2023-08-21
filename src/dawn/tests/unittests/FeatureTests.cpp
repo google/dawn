@@ -43,12 +43,13 @@ class FeatureTests : public testing::Test {
     std::vector<wgpu::FeatureName> GetAllFeatureNames() {
         std::vector<wgpu::FeatureName> allFeatureNames(kTotalFeaturesCount);
         for (size_t i = 0; i < kTotalFeaturesCount; ++i) {
-            allFeatureNames[i] = FeatureEnumToAPIFeature(static_cast<native::Feature>(i));
+            allFeatureNames[i] = native::ToAPI(static_cast<native::Feature>(i));
         }
         return allFeatureNames;
     }
 
-    static constexpr size_t kTotalFeaturesCount = static_cast<size_t>(native::Feature::EnumCount);
+    static constexpr size_t kTotalFeaturesCount =
+        static_cast<size_t>(native::kEnumCount<native::Feature>);
 
   protected:
     // By default DisallowUnsafeAPIs is enabled in this instance.
@@ -77,7 +78,7 @@ TEST_F(FeatureTests, AdapterWithRequiredFeatureDisabled) {
             native::Adapter adapterWithoutFeature(&mAdapterBase);
 
             wgpu::DeviceDescriptor deviceDescriptor;
-            wgpu::FeatureName featureName = FeatureEnumToAPIFeature(notSupportedFeature);
+            wgpu::FeatureName featureName = native::ToAPI(notSupportedFeature);
             deviceDescriptor.requiredFeatures = &featureName;
             deviceDescriptor.requiredFeatureCount = 1;
 
@@ -92,7 +93,7 @@ TEST_F(FeatureTests, AdapterWithRequiredFeatureDisabled) {
             native::Adapter adapterWithoutFeature(&mUnsafeAdapterBase);
 
             wgpu::DeviceDescriptor deviceDescriptor;
-            wgpu::FeatureName featureName = FeatureEnumToAPIFeature(notSupportedFeature);
+            wgpu::FeatureName featureName = ToAPI(notSupportedFeature);
             deviceDescriptor.requiredFeatures = &featureName;
             deviceDescriptor.requiredFeatureCount = 1;
 
@@ -109,11 +110,10 @@ TEST_F(FeatureTests, AdapterWithRequiredFeatureDisabled) {
 TEST_F(FeatureTests, RequireAndGetEnabledFeatures) {
     native::Adapter adapter(&mAdapterBase);
     native::Adapter unsafeAdapterAllow(&mUnsafeAdapterBase);
-    native::FeaturesInfo featuresInfo;
 
     for (size_t i = 0; i < kTotalFeaturesCount; ++i) {
         native::Feature feature = static_cast<native::Feature>(i);
-        wgpu::FeatureName featureName = FeatureEnumToAPIFeature(feature);
+        wgpu::FeatureName featureName = ToAPI(feature);
 
         wgpu::DeviceDescriptor deviceDescriptor;
         deviceDescriptor.requiredFeatures = &featureName;
@@ -126,7 +126,7 @@ TEST_F(FeatureTests, RequireAndGetEnabledFeatures) {
 
             // Creating a device with experimental feature requires the adapter enables
             // AllowUnsafeAPIs or disables DisallowUnsafeApis, otherwise expect validation error.
-            if (featuresInfo.GetFeatureInfo(featureName)->featureState ==
+            if (native::kFeatureNameAndInfoList[feature].featureState ==
                 native::FeatureInfo::FeatureState::Experimental) {
                 ASSERT_EQ(nullptr, deviceBase) << i;
             } else {

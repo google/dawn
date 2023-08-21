@@ -1116,6 +1116,14 @@ class MultiGeneratorFromDawnJSON(Generator):
                            'src/' + native_dir + '/ChainUtils_autogen.cpp',
                            frontend_params))
             renders.append(
+                FileRender('dawn/native/Features.h',
+                           'src/' + native_dir + '/Features_autogen.h',
+                           frontend_params))
+            renders.append(
+                FileRender('dawn/native/Features.inl',
+                           'src/' + native_dir + '/Features_autogen.inl',
+                           frontend_params))
+            renders.append(
                 FileRender('dawn/native/api_absl_format.h',
                            'src/' + native_dir + '/' + api + '_absl_format_autogen.h',
                            frontend_params))

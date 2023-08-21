@@ -514,7 +514,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
         // Uses newTextureWithDescriptor::iosurface::plane which is available
         // on ios 11.0+ and macOS 11.0+
         if (@available(macOS 10.11, iOS 11.0, *)) {
-            EnableFeature(Feature::MultiPlanarFormats);
+            EnableFeature(Feature::DawnMultiPlanarFormats);
         }
 
         if (@available(macOS 11.0, iOS 10.0, *)) {

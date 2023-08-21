@@ -35,6 +35,9 @@ class bitset : private ::std::bitset<N> {
     explicit constexpr bitset(const Base& rhs) : Base(rhs) {}
 
   public:
+    const Base& AsBase() const { return static_cast<const Base&>(*this); }
+    Base& AsBase() { return static_cast<Base&>(*this); }
+
     using reference = typename Base::reference;
 
     constexpr bitset() noexcept : Base() {}

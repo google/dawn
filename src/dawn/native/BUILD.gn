@@ -86,6 +86,8 @@ dawn_json_generator("utils_gen") {
   outputs = [
     "src/dawn/native/ChainUtils_autogen.h",
     "src/dawn/native/ChainUtils_autogen.cpp",
+    "src/dawn/native/Features_autogen.h",
+    "src/dawn/native/Features_autogen.inl",
     "src/dawn/native/ProcTable.cpp",
     "src/dawn/native/dawn_platform_autogen.h",
     "src/dawn/native/wgpu_structs_autogen.h",

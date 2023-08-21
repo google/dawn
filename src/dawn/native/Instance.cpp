@@ -328,7 +328,11 @@ Toggle InstanceBase::ToggleNameToEnum(const char* toggleName) {
 }
 
 const FeatureInfo* InstanceBase::GetFeatureInfo(wgpu::FeatureName feature) {
-    return mFeaturesInfo.GetFeatureInfo(feature);
+    Feature f = FromAPI(feature);
+    if (f == Feature::InvalidEnum) {
+        return nullptr;
+    }
+    return &kFeatureNameAndInfoList[f];
 }
 
 std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
