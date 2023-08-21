@@ -31,4 +31,8 @@
             "gmock/**",
         ],
     },
+    "winsock": {
+        "IncludePatterns": ["winsock2.h"],
+        "Condition": "is_win",
+    },
 }

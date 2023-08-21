@@ -40,7 +40,7 @@ enum class MslVersion {
 struct Result {
     /// True if validation passed
     bool failed = false;
-    /// Output of DXC.
+    /// Output of Metal compiler.
     std::string output;
 };
 

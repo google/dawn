@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TOOLS_SRC_CMD_REMOTE_COMPILE_SOCKET_H_
-#define TOOLS_SRC_CMD_REMOTE_COMPILE_SOCKET_H_
+#ifndef SRC_TINT_UTILS_SOCKET_SOCKET_H_
+#define SRC_TINT_UTILS_SOCKET_SOCKET_H_
 
 #include <atomic>
 #include <memory>
@@ -40,6 +40,9 @@ class Socket {
     /// @returns the Socket that listens for connections
     static std::shared_ptr<Socket> Listen(const char* address, const char* port);
 
+    /// Destructor
+    virtual ~Socket();
+
     /// Attempts to read at most `n` bytes into buffer, returning the actual number of bytes read.
     /// read() will block until the socket is closed or at least one byte is read.
     /// @param buffer the output buffer. Must be at least `n` bytes in size.
@@ -65,4 +68,4 @@ class Socket {
     virtual std::shared_ptr<Socket> Accept() = 0;
 };
 
-#endif  // TOOLS_SRC_CMD_REMOTE_COMPILE_SOCKET_H_
+#endif  // SRC_TINT_UTILS_SOCKET_SOCKET_H_

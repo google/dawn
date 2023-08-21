@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "tools/src/cmd/remote-compile/socket.h"
+#include "src/tint/utils/socket/socket.h"
 
-#include "tools/src/cmd/remote-compile/rwmutex.h"
+#include "src/tint/utils/socket/rwmutex.h"
 
 #if defined(_WIN32)
 #include <winsock2.h>
@@ -101,6 +101,8 @@ class Impl : public Socket {
         if (err) {
             printf("getaddrinfo(%s, %s) error: %s\n", address, port, gai_strerror(err));
         }
+#else
+        (void)err;
 #endif
 
         if (info) {
@@ -110,16 +112,18 @@ class Impl : public Socket {
             return out;
         }
 
-        freeaddrinfo(info);
         Term();
         return nullptr;
     }
 
     explicit Impl(SOCKET socket) : info(nullptr), s(socket) {}
-    Impl(addrinfo* info, SOCKET socket) : info(info), s(socket) {}
 
-    ~Impl() {
-        freeaddrinfo(info);
+    Impl(addrinfo* i, SOCKET socket) : info(i), s(socket) {}
+
+    ~Impl() override {
+        if (info) {
+            freeaddrinfo(info);
+        }
         Close();
         Term();
     }
@@ -193,9 +197,9 @@ class Impl : public Socket {
             if (s == InvalidSocket) {
                 return 0;
             }
-            size_t len = recv(s, reinterpret_cast<char*>(buffer), static_cast<int>(bytes), 0);
+            auto len = recv(s, reinterpret_cast<char*>(buffer), bytes, 0);
             if (len > 0) {
-                return len;
+                return static_cast<size_t>(len);
             }
         }
         // Socket closed or errored
@@ -212,7 +216,7 @@ class Impl : public Socket {
         if (bytes == 0) {
             return true;
         }
-        return ::send(s, reinterpret_cast<const char*>(buffer), static_cast<int>(bytes), 0) > 0;
+        return ::send(s, reinterpret_cast<const char*>(buffer), bytes, 0) > 0;
     }
 
     std::shared_ptr<Socket> Accept() override {
@@ -220,8 +224,8 @@ class Impl : public Socket {
         Lock([&](SOCKET socket, const addrinfo*) {
             if (socket != InvalidSocket) {
                 Init();
-                if (auto s = ::accept(socket, 0, 0); s >= 0) {
-                    out = std::make_shared<Impl>(s);
+                if (auto sock = ::accept(socket, nullptr, nullptr); s >= 0) {
+                    out = std::make_shared<Impl>(sock);
                     out->SetOptions();
                 }
             }
@@ -237,13 +241,15 @@ class Impl : public Socket {
 
 }  // anonymous namespace
 
+Socket::~Socket() = default;
+
 std::shared_ptr<Socket> Socket::Listen(const char* address, const char* port) {
     auto impl = Impl::create(address, port);
     if (!impl) {
         return nullptr;
     }
     impl->Lock([&](SOCKET socket, const addrinfo* info) {
-        if (bind(socket, info->ai_addr, static_cast<int>(info->ai_addrlen)) != 0) {
+        if (bind(socket, info->ai_addr, info->ai_addrlen) != 0) {
             impl.reset();
             return;
         }
@@ -271,7 +277,7 @@ std::shared_ptr<Socket> Socket::Connect(const char* address,
         }
 
         if (timeout_ms == 0) {
-            if (::connect(socket, info->ai_addr, static_cast<int>(info->ai_addrlen)) == 0) {
+            if (::connect(socket, info->ai_addr, info->ai_addrlen) == 0) {
                 out = impl;
             }
             return;
@@ -281,7 +287,7 @@ std::shared_ptr<Socket> Socket::Connect(const char* address,
             return;
         }
 
-        auto res = ::connect(socket, info->ai_addr, static_cast<int>(info->ai_addrlen));
+        auto res = ::connect(socket, info->ai_addr, info->ai_addrlen);
         if (res == 0) {
             if (SetBlocking(socket, true)) {
                 out = impl;
@@ -295,7 +301,7 @@ std::shared_ptr<Socket> Socket::Connect(const char* address,
 
             timeval tv;
             tv.tv_sec = timeout_us / 1000000;
-            tv.tv_usec = timeout_us - static_cast<uint32_t>(tv.tv_sec * 1000000);
+            tv.tv_usec = static_cast<int>(timeout_us - (tv.tv_sec * 1000000));
             res = select(static_cast<int>(socket + 1), nullptr, &fdset, nullptr, &tv);
             if (res > 0 && !Errored(socket) && SetBlocking(socket, true)) {
                 out = impl;

@@ -20,23 +20,26 @@
 # Do not modify this file directly
 ################################################################################
 
-include(utils/cli/BUILD.cmake)
-include(utils/command/BUILD.cmake)
-include(utils/containers/BUILD.cmake)
-include(utils/debug/BUILD.cmake)
-include(utils/diagnostic/BUILD.cmake)
-include(utils/file/BUILD.cmake)
-include(utils/generator/BUILD.cmake)
-include(utils/ice/BUILD.cmake)
-include(utils/id/BUILD.cmake)
-include(utils/macros/BUILD.cmake)
-include(utils/math/BUILD.cmake)
-include(utils/memory/BUILD.cmake)
-include(utils/reflection/BUILD.cmake)
-include(utils/result/BUILD.cmake)
-include(utils/rtti/BUILD.cmake)
-include(utils/socket/BUILD.cmake)
-include(utils/strconv/BUILD.cmake)
-include(utils/symbol/BUILD.cmake)
-include(utils/text/BUILD.cmake)
-include(utils/traits/BUILD.cmake)
+################################################################################
+# Target:    tint_cmd_remote_compile_cmd
+# Kind:      cmd
+################################################################################
+tint_add_target(tint_cmd_remote_compile_cmd cmd
+  cmd/remote_compile/main.cc
+)
+
+tint_target_add_dependencies(tint_cmd_remote_compile_cmd cmd
+  tint_lang_wgsl_ast
+  tint_utils_macros
+  tint_utils_socket
+  tint_utils_text
+  tint_utils_traits
+)
+
+if(TINT_BUILD_MSL_WRITER)
+  tint_target_add_dependencies(tint_cmd_remote_compile_cmd cmd
+    tint_lang_msl_validate
+  )
+endif(TINT_BUILD_MSL_WRITER)
+
+tint_target_set_output_name(tint_cmd_remote_compile_cmd cmd "tint_remote_compile")

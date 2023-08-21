@@ -20,23 +20,18 @@
 # Do not modify this file directly
 ################################################################################
 
-include(utils/cli/BUILD.cmake)
-include(utils/command/BUILD.cmake)
-include(utils/containers/BUILD.cmake)
-include(utils/debug/BUILD.cmake)
-include(utils/diagnostic/BUILD.cmake)
-include(utils/file/BUILD.cmake)
-include(utils/generator/BUILD.cmake)
-include(utils/ice/BUILD.cmake)
-include(utils/id/BUILD.cmake)
-include(utils/macros/BUILD.cmake)
-include(utils/math/BUILD.cmake)
-include(utils/memory/BUILD.cmake)
-include(utils/reflection/BUILD.cmake)
-include(utils/result/BUILD.cmake)
-include(utils/rtti/BUILD.cmake)
-include(utils/socket/BUILD.cmake)
-include(utils/strconv/BUILD.cmake)
-include(utils/symbol/BUILD.cmake)
-include(utils/text/BUILD.cmake)
-include(utils/traits/BUILD.cmake)
+################################################################################
+# Target:    tint_utils_socket
+# Kind:      lib
+################################################################################
+tint_add_target(tint_utils_socket lib
+  utils/socket/rwmutex.h
+  utils/socket/socket.cc
+  utils/socket/socket.h
+)
+
+if(IS_WIN)
+  tint_target_add_external_dependencies(tint_utils_socket lib
+    "winsock"
+  )
+endif(IS_WIN)

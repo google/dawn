@@ -23,8 +23,9 @@
 #include <type_traits>
 #include <vector>
 
-#include "tools/src/cmd/remote-compile/compile.h"
-#include "tools/src/cmd/remote-compile/socket.h"
+#include "src/tint/lang/msl/validate/val.h"
+#include "src/tint/utils/macros/compiler.h"
+#include "src/tint/utils/socket/socket.h"
 
 namespace {
 
@@ -33,6 +34,14 @@ namespace {
 #else
 #define DEBUG(...)
 #endif
+
+/// The return structure of a compile function
+struct CompileResult {
+    /// True if shader compiled
+    bool success = false;
+    /// Output of the compiler
+    std::string output;
+};
 
 /// Print the tool usage, and exit with 1.
 [[noreturn]] void ShowUsage() {
@@ -214,11 +223,11 @@ struct CompileRequest : Message {  // Client -> Server
     using Response = CompileResponse;
 
     CompileRequest() : Message(Type::CompileRequest) {}
-    CompileRequest(SourceLanguage lang, uint32_t ver_major, uint32_t ver_minor, std::string src)
+    CompileRequest(SourceLanguage lang, int ver_major, int ver_minor, std::string src)
         : Message(Type::CompileRequest),
           language(lang),
-          version_major(ver_major),
-          version_minor(ver_minor),
+          version_major(uint32_t(ver_major)),
+          version_minor(uint32_t(ver_minor)),
           source(src) {}
 
     template <typename T>
@@ -284,13 +293,13 @@ bool RunServer(std::string port);
 bool RunClient(std::string address,
                std::string port,
                std::string file,
-               uint32_t version_major,
-               uint32_t version_minor);
+               int version_major,
+               int version_minor);
 
 int main(int argc, char* argv[]) {
     bool run_server = false;
-    uint32_t version_major = 0;
-    uint32_t version_minor = 0;
+    int version_major = 0;
+    int version_minor = 0;
     std::string port = "19000";
 
     std::regex metal_version_re{"^-?-std=macos-metal([0-9]+)\\.([0-9]+)"};
@@ -347,9 +356,11 @@ int main(int argc, char* argv[]) {
         std::string file;
         switch (args.size()) {
             case 1:
+                TINT_BEGIN_DISABLE_WARNING(DEPRECATED);
                 if (auto* addr = getenv("TINT_REMOTE_COMPILE_ADDRESS")) {
                     address = addr;
                 }
+                TINT_END_DISABLE_WARNING(DEPRECATED);
                 file = args[0];
                 break;
             case 2:
@@ -360,7 +371,6 @@ int main(int argc, char* argv[]) {
                 std::cerr << "expected 1 or 2 arguments, got " << args.size() << std::endl
                           << std::endl;
                 ShowUsage();
-                break;
         }
         if (address.empty() || file.empty()) {
             ShowUsage();
@@ -385,7 +395,7 @@ bool RunServer(std::string port) {
     while (auto conn = server_socket->Accept()) {
         std::thread([=] {
             DEBUG("Client connected...");
-            Stream stream{conn.get()};
+            Stream stream{conn.get(), ""};
 
             {
                 ConnectionRequest req;
@@ -411,12 +421,15 @@ bool RunServer(std::string port) {
                     DEBUG("%s\n", stream.error.c_str());
                     return;
                 }
-#ifdef TINT_ENABLE_MSL_COMPILATION_USING_METAL_API
+#ifdef TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
                 if (req.language == SourceLanguage::MSL) {
-                    auto result =
-                        CompileMslUsingMetalAPI(req.source, req.version_major, req.version_minor);
+                    auto version = tint::msl::validate::MslVersion::kMsl_1_2;
+                    if (req.version_major == 2 && req.version_minor == 1) {
+                        version = tint::msl::validate::MslVersion::kMsl_2_1;
+                    }
+                    auto result = tint::msl::validate::UsingMetalAPI(req.source, version);
                     CompileResponse resp;
-                    if (!result.success) {
+                    if (result.failed) {
                         resp.error = result.output;
                     }
                     stream << resp;
@@ -435,8 +448,8 @@ bool RunServer(std::string port) {
 bool RunClient(std::string address,
                std::string port,
                std::string file,
-               uint32_t version_major,
-               uint32_t version_minor) {
+               int version_major,
+               int version_minor) {
     // Read the file
     std::ifstream input(file, std::ios::binary);
     if (!input) {
@@ -453,7 +466,7 @@ bool RunClient(std::string address,
         return false;
     }
 
-    Stream stream{conn.get()};
+    Stream stream{conn.get(), ""};
 
     DEBUG("Sending connection request...");
     auto conn_resp = Send(stream, ConnectionRequest{kProtocolVersion});

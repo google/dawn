@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef TOOLS_SRC_CMD_REMOTE_COMPILE_RWMUTEX_H_
-#define TOOLS_SRC_CMD_REMOTE_COMPILE_RWMUTEX_H_
+#ifndef SRC_TINT_UTILS_SOCKET_RWMUTEX_H_
+#define SRC_TINT_UTILS_SOCKET_RWMUTEX_H_
 
 #include <condition_variable>
 #include <mutex>
@@ -187,4 +187,4 @@ WLock& WLock::operator=(WLock&& other) {
     return *this;
 }
 
-#endif  // TOOLS_SRC_CMD_REMOTE_COMPILE_RWMUTEX_H_
+#endif  // SRC_TINT_UTILS_SOCKET_RWMUTEX_H_

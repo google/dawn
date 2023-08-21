@@ -30,6 +30,7 @@ group("all") {
   if (dawn_standalone) {
     deps += [
       "src/dawn/samples",
+      "src/tint/cmd/remote_compile",
       "src/tint/cmd/tint",
     ]
   }

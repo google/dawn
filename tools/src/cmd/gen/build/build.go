@@ -641,7 +641,7 @@ func emitDotFile(p *Project, kind TargetKind) error {
 
 var (
 	// Regular expressions used by this file
-	reInclude       = regexp.MustCompile(`\s*#\s*include\s*\"([^"]+)\"`)
+	reInclude       = regexp.MustCompile(`\s*#\s*include\s*(?:\"|<)([^(\"|>)]+)(?:\"|>)`)
 	reIgnoreFile    = regexp.MustCompile(`//\s*GEN_BUILD:IGNORE_FILE`)
 	reIgnoreInclude = regexp.MustCompile(`//\s*GEN_BUILD:IGNORE_INCLUDE`)
 	reCondition     = regexp.MustCompile(`//\s*GEN_BUILD:CONDITION\((.*)\)\s*$`)

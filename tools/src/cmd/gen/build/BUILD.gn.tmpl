@@ -150,6 +150,7 @@ test("{{$.Directory.Name}}") {
 {{-   else if eq $.Name "spirv-headers"      -}}"${tint_spirv_headers_dir}:spv_headers",
 {{-   else if eq $.Name "glslang"            -}}"${tint_glslang_dir}:glslang_lib_sources",
 {{-   else if eq $.Name "glslang-res-limits" -}}"${tint_glslang_dir}:glslang_default_resource_limits_sources",
+{{-   else if eq $.Name "winsock"            -}}"${tint_src_dir}:winsock",
 {{-   else                                   -}}{{Error (printf "unhandled external dependency '%v'" $.Name)}}
 {{-   end}}
 {{- end}}
