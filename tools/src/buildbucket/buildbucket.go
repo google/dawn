@@ -201,6 +201,7 @@ func (r *Buildbucket) StartBuild(
 	ctx context.Context,
 	ps gerrit.Patchset,
 	builder Builder,
+	parentSwarmingRunId string,
 	forceBuild bool) (Build, error) {
 
 	id := ""
@@ -208,11 +209,16 @@ func (r *Buildbucket) StartBuild(
 		id = utils.Hash(ps, builder)
 	}
 
-	build, err := r.client.ScheduleBuild(ctx, &bbpb.ScheduleBuildRequest{
+	req := &bbpb.ScheduleBuildRequest{
 		RequestId:     id,
 		Builder:       builder.pb(),
 		GerritChanges: []*bbpb.GerritChange{gerritChange(ps)},
-	})
+	}
+	if parentSwarmingRunId != "" {
+		req.Swarming.ParentRunId = parentSwarmingRunId
+	}
+
+	build, err := r.client.ScheduleBuild(ctx, req)
 	if err != nil {
 		return Build{}, fmt.Errorf("failed to start build for patchset %+v on builder %+v: %w", ps, builder, err)
 	}

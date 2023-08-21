@@ -68,15 +68,16 @@ const (
 )
 
 type rollerFlags struct {
-	gitPath        string
-	npmPath        string
-	nodePath       string
-	auth           authcli.Flags
-	cacheDir       string
-	force          bool // Create a new roll, even if CTS is up to date
-	rebuild        bool // Rebuild the expectations file from scratch
-	preserve       bool // If false, abandon past roll changes
-	sendToGardener bool // If true, automatically send to the gardener for review
+	gitPath             string
+	npmPath             string
+	nodePath            string
+	auth                authcli.Flags
+	cacheDir            string
+	force               bool // Create a new roll, even if CTS is up to date
+	rebuild             bool // Rebuild the expectations file from scratch
+	preserve            bool // If false, abandon past roll changes
+	sendToGardener      bool // If true, automatically send to the gardener for review
+	parentSwarmingRunId string
 }
 
 type cmd struct {
@@ -104,7 +105,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.BoolVar(&c.flags.rebuild, "rebuild", false, "rebuild the expectation file from scratch")
 	flag.BoolVar(&c.flags.preserve, "preserve", false, "do not abandon existing rolls")
 	flag.BoolVar(&c.flags.sendToGardener, "send-to-gardener", false, "send the CL to the WebGPU gardener for review")
-
+	flag.StringVar(&c.flags.parentSwarmingRunId, "parent-swarming-run-id", "", "parent swarming run id. All triggered tasks will be children of this task and will be canceled if the parent is canceled.")
 	return nil, nil
 }
 
@@ -164,31 +165,33 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 
 	// Construct the roller, and roll
 	r := roller{
-		cfg:      cfg,
-		flags:    c.flags,
-		auth:     auth,
-		bb:       bb,
-		rdb:      rdb,
-		git:      git,
-		gerrit:   gerrit,
-		chromium: chromium,
-		dawn:     dawn,
-		ctsDir:   ctsDir,
+		cfg:                 cfg,
+		flags:               c.flags,
+		auth:                auth,
+		bb:                  bb,
+		parentSwarmingRunId: c.flags.parentSwarmingRunId,
+		rdb:                 rdb,
+		git:                 git,
+		gerrit:              gerrit,
+		chromium:            chromium,
+		dawn:                dawn,
+		ctsDir:              ctsDir,
 	}
 	return r.roll(ctx)
 }
 
 type roller struct {
-	cfg      common.Config
-	flags    rollerFlags
-	auth     auth.Options
-	bb       *buildbucket.Buildbucket
-	rdb      *resultsdb.ResultsDB
-	git      *git.Git
-	gerrit   *gerrit.Gerrit
-	chromium *gitiles.Gitiles
-	dawn     *gitiles.Gitiles
-	ctsDir   string
+	cfg                 common.Config
+	flags               rollerFlags
+	auth                auth.Options
+	bb                  *buildbucket.Buildbucket
+	parentSwarmingRunId string
+	rdb                 *resultsdb.ResultsDB
+	git                 *git.Git
+	gerrit              *gerrit.Gerrit
+	chromium            *gitiles.Gitiles
+	dawn                *gitiles.Gitiles
+	ctsDir              string
 }
 
 func (r *roller) roll(ctx context.Context) error {
@@ -335,7 +338,7 @@ func (r *roller) roll(ctx context.Context) error {
 	for attempt := 0; ; attempt++ {
 		// Kick builds
 		log.Printf("building (attempt %v)...\n", attempt)
-		builds, err := common.GetOrStartBuildsAndWait(ctx, r.cfg, ps, r.bb, false)
+		builds, err := common.GetOrStartBuildsAndWait(ctx, r.cfg, ps, r.bb, r.parentSwarmingRunId, false)
 		if err != nil {
 			return err
 		}

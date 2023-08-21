@@ -127,7 +127,7 @@ func (r *ResultSource) GetResults(ctx context.Context, cfg Config, auth auth.Opt
 	// Obtain the patchset's results, kicking a build if there are no results
 	// already available.
 	log.Printf("fetching results from cl %v ps %v...", ps.Change, ps.Patchset)
-	builds, err := GetOrStartBuildsAndWait(ctx, cfg, *ps, bb, false)
+	builds, err := GetOrStartBuildsAndWait(ctx, cfg, *ps, bb, "", false)
 	if err != nil {
 		return nil, err
 	}

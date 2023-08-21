@@ -117,6 +117,7 @@ func GetOrStartBuildsAndWait(
 	cfg Config,
 	ps gerrit.Patchset,
 	bb *buildbucket.Buildbucket,
+	parentSwarmingRunId string,
 	retest bool) (BuildsByName, error) {
 
 	builds := BuildsByName{}
@@ -151,7 +152,7 @@ func GetOrStartBuildsAndWait(
 	// Kick any missing builds
 	for name, builder := range cfg.Builders {
 		if build, found := builds[name]; !found || shouldKick(build) {
-			build, err := bb.StartBuild(ctx, ps, builder, retest)
+			build, err := bb.StartBuild(ctx, ps, builder, parentSwarmingRunId, retest)
 			if err != nil {
 				return nil, err
 			}
