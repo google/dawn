@@ -17,9 +17,12 @@ package roll
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -65,14 +68,15 @@ const (
 )
 
 type rollerFlags struct {
-	gitPath  string
-	npmPath  string
-	nodePath string
-	auth     authcli.Flags
-	cacheDir string
-	force    bool // Create a new roll, even if CTS is up to date
-	rebuild  bool // Rebuild the expectations file from scratch
-	preserve bool // If false, abandon past roll changes
+	gitPath        string
+	npmPath        string
+	nodePath       string
+	auth           authcli.Flags
+	cacheDir       string
+	force          bool // Create a new roll, even if CTS is up to date
+	rebuild        bool // Rebuild the expectations file from scratch
+	preserve       bool // If false, abandon past roll changes
+	sendToGardener bool // If true, automatically send to the gardener for review
 }
 
 type cmd struct {
@@ -99,6 +103,7 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	flag.BoolVar(&c.flags.force, "force", false, "create a new roll, even if CTS is up to date")
 	flag.BoolVar(&c.flags.rebuild, "rebuild", false, "rebuild the expectation file from scratch")
 	flag.BoolVar(&c.flags.preserve, "preserve", false, "do not abandon existing rolls")
+	flag.BoolVar(&c.flags.sendToGardener, "send-to-gardener", false, "send the CL to the WebGPU gardener for review")
 
 	return nil, nil
 }
@@ -396,7 +401,33 @@ func (r *roller) roll(ctx context.Context) error {
 		}
 	}
 
-	if err := r.gerrit.SetReadyForReview(changeID, "CTS roll succeeded"); err != nil {
+	reviewer := ""
+	if r.flags.sendToGardener {
+		resp, err := http.Get("https://chrome-ops-rotation-proxy.appspot.com/current/grotation:webgpu-gardener")
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		jsonResponse, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		type StructuredJsonResponse struct {
+			Emails []string
+		}
+		var jsonRes StructuredJsonResponse
+		if err := json.Unmarshal(jsonResponse, &jsonRes); err != nil {
+			return err
+		}
+		if len(jsonRes.Emails) < 1 {
+			return fmt.Errorf("Expected at least one email in JSON response %s", jsonRes)
+		}
+		reviewer = jsonRes.Emails[0]
+	}
+
+	if err := r.gerrit.SetReadyForReview(changeID, "CTS roll succeeded", reviewer); err != nil {
 		return fmt.Errorf("failed to mark change as ready for review: %v", err)
 	}
 

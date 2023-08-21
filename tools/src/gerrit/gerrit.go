@@ -19,6 +19,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"net/url"
 	"strconv"
 	"strings"
@@ -311,12 +312,24 @@ func (g *Gerrit) Comment(ps Patchset, msg string, comments []FileComment) error 
 }
 
 // SetReadyForReview marks the change as ready for review.
-func (g *Gerrit) SetReadyForReview(changeID, message string) error {
+func (g *Gerrit) SetReadyForReview(changeID, message, reviewer string) error {
 	resp, err := g.client.Changes.SetReadyForReview(changeID, &gerrit.ReadyForReviewInput{
 		Message: message,
 	})
 	if err != nil && resp.StatusCode != 409 { // 409: already ready
 		return err
+	}
+	if reviewer != "" {
+		// Log the reviewer and then replace with enga@.
+		// TODO(crbug.com/dawn/1940): Use the actual reviewer when the bot is stable.
+		log.Printf("Got reviewer %s", reviewer)
+		reviewer = "enga@chromium.org"
+		_, resp, err = g.client.Changes.AddReviewer(changeID, &gerrit.ReviewerInput{
+			Reviewer: reviewer,
+		})
+		if err != nil && resp.StatusCode != 409 { // 409: already ready
+			return err
+		}
 	}
 	return nil
 }
