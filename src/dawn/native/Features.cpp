@@ -174,6 +174,9 @@ static constexpr FeatureEnumAndInfoList kFeatureNameAndInfoList = {{
       "overlapping fragments from the same draw cannot be made data race free).",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=1704",
       FeatureInfo::FeatureState::Experimental}},
+    {Feature::Norm16TextureFormats,
+     {"norm16-texture-formats", "Supports R/RG/RGBA16 norm texture formats",
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=1982", FeatureInfo::FeatureState::Stable}},
     {Feature::SharedTextureMemoryVkDedicatedAllocation,
      {"shared-texture-memory-vk-dedicated-allocation",
       "Support specifying whether a Vulkan allocation for shared texture memory is a dedicated "
@@ -309,6 +312,8 @@ Feature FromAPIFeature(wgpu::FeatureName feature) {
             return Feature::PixelLocalStorageCoherent;
         case wgpu::FeatureName::PixelLocalStorageNonCoherent:
             return Feature::PixelLocalStorageNonCoherent;
+        case wgpu::FeatureName::Norm16TextureFormats:
+            return Feature::Norm16TextureFormats;
         case wgpu::FeatureName::SharedTextureMemoryVkDedicatedAllocation:
             return Feature::SharedTextureMemoryVkDedicatedAllocation;
         case wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer:
@@ -371,6 +376,8 @@ wgpu::FeatureName ToAPIFeature(Feature feature) {
             return wgpu::FeatureName::DawnInternalUsages;
         case Feature::MultiPlanarFormats:
             return wgpu::FeatureName::DawnMultiPlanarFormats;
+        case Feature::Norm16TextureFormats:
+            return wgpu::FeatureName::Norm16TextureFormats;
         case Feature::DawnNative:
             return wgpu::FeatureName::DawnNative;
         case Feature::ChromiumExperimentalDp4a:

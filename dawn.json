@@ -1814,6 +1814,7 @@
             {"value": 1016, "name": "chromium experimental read write storage texture", "tags": ["dawn"]},
             {"value": 1017, "name": "pixel local storage coherent", "tags": ["dawn"]},
             {"value": 1018, "name": "pixel local storage non coherent", "tags": ["dawn"]},
+            {"value": 1019, "name": "norm16 texture formats", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},
@@ -3292,7 +3293,14 @@
             {"value": 93, "name": "ASTC 12x12 unorm",       "jsrepr": "'astc-12x12-unorm'"},
             {"value": 94, "name": "ASTC 12x12 unorm srgb",  "jsrepr": "'astc-12x12-unorm-srgb'"},
 
-            {"value": 95, "name": "R8 BG8 Biplanar 420 unorm", "tags": ["dawn"]}
+            {"value": 95, "name": "R16 unorm", "tags": ["dawn"]},
+            {"value": 96, "name": "RG16 unorm", "tags": ["dawn"]},
+            {"value": 97, "name": "RGBA16 unorm", "tags": ["dawn"]},
+            {"value": 98, "name": "R16 snorm", "tags": ["dawn"]},
+            {"value": 99, "name": "RG16 snorm", "tags": ["dawn"]},
+            {"value": 100, "name": "RGBA16 snorm", "tags": ["dawn"]},
+
+            {"value": 101, "name": "R8 BG8 Biplanar 420 unorm", "tags": ["dawn"]}
         ]
     },
     "texture usage": {

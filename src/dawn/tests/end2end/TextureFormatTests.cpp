@@ -440,6 +440,9 @@ class TextureFormatTest : public DawnTest {
         ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
         ASSERT(formatInfo.type == TextureComponentType::Float);
 
+        DAWN_TEST_UNSUPPORTED_IF((utils::IsNorm16TextureFormat(formatInfo.format)) &&
+                                 !IsNorm16TextureFormatsSupported());
+
         T maxValue = std::numeric_limits<T>::max();
         std::vector<T> textureData = {0, 1, maxValue, maxValue};
         std::vector<float> uncompressedData = {0.0f, 1.0f / maxValue, 1.0f, 1.0f};
@@ -453,6 +456,9 @@ class TextureFormatTest : public DawnTest {
         static_assert(std::is_signed<T>::value && std::is_integral<T>::value);
         ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
         ASSERT(formatInfo.type == TextureComponentType::Float);
+
+        DAWN_TEST_UNSUPPORTED_IF((utils::IsNorm16TextureFormat(formatInfo.format)) &&
+                                 !IsNorm16TextureFormatsSupported());
 
         T maxValue = std::numeric_limits<T>::max();
         T minValue = std::numeric_limits<T>::min();
@@ -523,21 +529,25 @@ class TextureFormatTest : public DawnTest {
                               new ExpectFloat16(textureData));
     }
 
-    // For "rg11b10ufloat-renderable" feature test
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
         if (SupportsFeatures({wgpu::FeatureName::RG11B10UfloatRenderable})) {
             mIsRG11B10UfloatRenderableSupported = true;
-            return {wgpu::FeatureName::RG11B10UfloatRenderable};
-        } else {
-            mIsRG11B10UfloatRenderableSupported = false;
-            return {};
+            requiredFeatures.push_back(wgpu::FeatureName::RG11B10UfloatRenderable);
         }
+        if (SupportsFeatures({wgpu::FeatureName::Norm16TextureFormats})) {
+            mIsNorm16TextureFormatsSupported = true;
+            requiredFeatures.push_back(wgpu::FeatureName::Norm16TextureFormats);
+        }
+        return requiredFeatures;
     }
 
     bool IsRG11B10UfloatRenderableSupported() { return mIsRG11B10UfloatRenderableSupported; }
+    bool IsNorm16TextureFormatsSupported() { return mIsNorm16TextureFormatsSupported; }
 
   private:
     bool mIsRG11B10UfloatRenderableSupported = false;
+    bool mIsNorm16TextureFormatsSupported = false;
 };
 
 // Test the R8Unorm format
@@ -548,6 +558,21 @@ TEST_P(TextureFormatTest, R8Unorm) {
 // Test the RG8Unorm format
 TEST_P(TextureFormatTest, RG8Unorm) {
     DoUnormTest<uint8_t>({wgpu::TextureFormat::RG8Unorm, 2, TextureComponentType::Float, 2});
+}
+
+// Test the R16Unorm format
+TEST_P(TextureFormatTest, R16Unorm) {
+    DoUnormTest<uint16_t>({wgpu::TextureFormat::R16Unorm, 2, TextureComponentType::Float, 1});
+}
+
+// Test the RG16Unorm format
+TEST_P(TextureFormatTest, RG16Unorm) {
+    DoUnormTest<uint16_t>({wgpu::TextureFormat::RG16Unorm, 4, TextureComponentType::Float, 2});
+}
+
+// Test the RGBA16Unorm format
+TEST_P(TextureFormatTest, RGBA16Unorm) {
+    DoUnormTest<uint16_t>({wgpu::TextureFormat::RGBA16Unorm, 8, TextureComponentType::Float, 4});
 }
 
 // Test the RGBA8Unorm format
@@ -583,6 +608,21 @@ TEST_P(TextureFormatTest, RG8Snorm) {
 // Test the RGBA8Snorm format
 TEST_P(TextureFormatTest, RGBA8Snorm) {
     DoSnormTest<int8_t>({wgpu::TextureFormat::RGBA8Snorm, 4, TextureComponentType::Float, 4});
+}
+
+// Test the R16Snorm format
+TEST_P(TextureFormatTest, R16Snorm) {
+    DoSnormTest<int16_t>({wgpu::TextureFormat::R16Snorm, 2, TextureComponentType::Float, 1});
+}
+
+// Test the RG16Snorm format
+TEST_P(TextureFormatTest, RG16Snorm) {
+    DoSnormTest<int16_t>({wgpu::TextureFormat::RG16Snorm, 4, TextureComponentType::Float, 2});
+}
+
+// Test the RGBA16Snorm format
+TEST_P(TextureFormatTest, RGBA16Snorm) {
+    DoSnormTest<int16_t>({wgpu::TextureFormat::RGBA16Snorm, 8, TextureComponentType::Float, 4});
 }
 
 // Test the R8Uint format

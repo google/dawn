@@ -254,6 +254,10 @@ MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat fo
         case wgpu::TextureFormat::R8Sint:
             return MTLPixelFormatR8Sint;
 
+        case wgpu::TextureFormat::R16Unorm:
+            return MTLPixelFormatR16Unorm;
+        case wgpu::TextureFormat::R16Snorm:
+            return MTLPixelFormatR16Snorm;
         case wgpu::TextureFormat::R16Uint:
             return MTLPixelFormatR16Uint;
         case wgpu::TextureFormat::R16Sint:
@@ -275,6 +279,10 @@ MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat fo
             return MTLPixelFormatR32Sint;
         case wgpu::TextureFormat::R32Float:
             return MTLPixelFormatR32Float;
+        case wgpu::TextureFormat::RG16Unorm:
+            return MTLPixelFormatRG16Unorm;
+        case wgpu::TextureFormat::RG16Snorm:
+            return MTLPixelFormatRG16Snorm;
         case wgpu::TextureFormat::RG16Uint:
             return MTLPixelFormatRG16Uint;
         case wgpu::TextureFormat::RG16Sint:
@@ -308,6 +316,10 @@ MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat fo
             return MTLPixelFormatRG32Sint;
         case wgpu::TextureFormat::RG32Float:
             return MTLPixelFormatRG32Float;
+        case wgpu::TextureFormat::RGBA16Unorm:
+            return MTLPixelFormatRGBA16Unorm;
+        case wgpu::TextureFormat::RGBA16Snorm:
+            return MTLPixelFormatRGBA16Snorm;
         case wgpu::TextureFormat::RGBA16Uint:
             return MTLPixelFormatRGBA16Uint;
         case wgpu::TextureFormat::RGBA16Sint:

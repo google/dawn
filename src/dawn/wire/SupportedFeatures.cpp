@@ -66,6 +66,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_ChromiumExperimentalReadWriteStorageTexture:
         case WGPUFeatureName_PixelLocalStorageCoherent:
         case WGPUFeatureName_PixelLocalStorageNonCoherent:
+        case WGPUFeatureName_Norm16TextureFormats:
             return true;
     }
 

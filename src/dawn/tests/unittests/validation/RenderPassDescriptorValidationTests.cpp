@@ -993,7 +993,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest,
 // Tests the texture format of the resolve target must support being used as resolve target.
 TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetFormat) {
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
-        if (!utils::TextureFormatSupportsMultisampling(format) ||
+        if (!utils::TextureFormatSupportsMultisampling(device, format) ||
             utils::IsDepthOrStencilFormat(format)) {
             continue;
         }
@@ -1006,7 +1006,7 @@ TEST_F(MultisampledRenderPassDescriptorValidationTest, ResolveTargetFormat) {
 
         utils::ComboRenderPassDescriptor renderPass({colorTexture.CreateView()});
         renderPass.cColorAttachments[0].resolveTarget = resolveTarget.CreateView();
-        if (utils::TextureFormatSupportsResolveTarget(format)) {
+        if (utils::TextureFormatSupportsResolveTarget(device, format)) {
             AssertBeginRenderPassSuccess(&renderPass);
         } else {
             AssertBeginRenderPassError(&renderPass);

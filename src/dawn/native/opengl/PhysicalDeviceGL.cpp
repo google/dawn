@@ -218,6 +218,11 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         mFunctions.IsAtLeastGL(3, 3)) {
         EnableFeature(Feature::DualSourceBlending);
     }
+
+    // Norm16TextureFormats
+    if (mFunctions.IsGLExtensionSupported("GL_EXT_texture_norm16")) {
+        EnableFeature(Feature::Norm16TextureFormats);
+    }
 }
 
 namespace {

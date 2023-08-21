@@ -552,6 +552,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
         if (@available(macOS 10.14, iOS 12.0, *)) {
             EnableFeature(Feature::SharedFenceMTLSharedEvent);
         }
+
+        EnableFeature(Feature::Norm16TextureFormats);
     }
 
     void InitializeVendorArchitectureImpl() override {

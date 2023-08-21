@@ -456,6 +456,15 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
         AddColorFormat(wgpu::TextureFormat::RGBA32Sint, Cap::Renderable | Cap::StorageW, ByteSize(16), SampleTypeBit::Sint, ComponentCount(4), RenderTargetPixelByteCost(16), RenderTargetComponentAlignment(4));
         AddColorFormat(wgpu::TextureFormat::RGBA32Float, Cap::Renderable | Cap::StorageW, ByteSize(16), sampleTypeFor32BitFloatFormats, ComponentCount(4), RenderTargetPixelByteCost(16), RenderTargetComponentAlignment(4));
 
+        // Norm16 color formats
+        auto norm16Capabilities = device->HasFeature(Feature::Norm16TextureFormats) ? Cap::Renderable | Cap::Multisample | Cap::Resolve : Cap::None;
+        AddColorFormat(wgpu::TextureFormat::R16Unorm, norm16Capabilities, ByteSize(2), kAnyFloat, ComponentCount(1), RenderTargetPixelByteCost(2), RenderTargetComponentAlignment(2));
+        AddColorFormat(wgpu::TextureFormat::RG16Unorm, norm16Capabilities, ByteSize(4), kAnyFloat, ComponentCount(2), RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(2));
+        AddColorFormat(wgpu::TextureFormat::RGBA16Unorm, norm16Capabilities, ByteSize(8), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(2));
+        AddColorFormat(wgpu::TextureFormat::R16Snorm, norm16Capabilities, ByteSize(2), kAnyFloat, ComponentCount(1), RenderTargetPixelByteCost(2), RenderTargetComponentAlignment(2));
+        AddColorFormat(wgpu::TextureFormat::RG16Snorm, norm16Capabilities, ByteSize(4), kAnyFloat, ComponentCount(2), RenderTargetPixelByteCost(4), RenderTargetComponentAlignment(2));
+        AddColorFormat(wgpu::TextureFormat::RGBA16Snorm, norm16Capabilities, ByteSize(8), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(2));
+
         // Depth-stencil formats
         AddStencilFormat(wgpu::TextureFormat::Stencil8, Format::supported);
         AddDepthFormat(wgpu::TextureFormat::Depth16Unorm, 2, Format::supported);
