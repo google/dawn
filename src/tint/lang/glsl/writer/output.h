@@ -19,6 +19,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/api/options/texture_builtins_from_uniform.h"
 #include "src/tint/lang/wgsl/ast/pipeline_stage.h"
 
 namespace tint::glsl::writer {
@@ -39,6 +40,13 @@ struct Output {
 
     /// The list of entry points in the generated GLSL.
     std::vector<std::pair<std::string, ast::PipelineStage>> entry_points;
+
+    /// True if the shader needs a UBO.
+    bool needs_internal_uniform_buffer = false;
+
+    /// Store a map of global texture variable binding points to the byte offset and data type to
+    /// push into the internal uniform buffer.
+    TextureBuiltinsFromUniformOptions::BindingPointToFieldAndOffset bindpoint_to_data;
 };
 
 }  // namespace tint::glsl::writer

@@ -30,6 +30,7 @@ libtint_source_set("options") {
     "binding_remapper.h",
     "external_texture.h",
     "options.cc",
+    "texture_builtins_from_uniform.h",
   ]
   deps = [
     "${tint_src_dir}/api/common",

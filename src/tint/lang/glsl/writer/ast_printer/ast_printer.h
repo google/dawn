@@ -21,6 +21,7 @@
 #include <unordered_set>
 #include <utility>
 
+#include "src/tint/api/options/texture_builtins_from_uniform.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
@@ -53,6 +54,13 @@ struct SanitizedResult {
 
     /// The sanitized program.
     Program program;
+
+    /// True if the shader needs a UBO.
+    bool needs_internal_uniform_buffer = false;
+
+    /// Store a map of global texture variable binding point to the byte offset and data type to
+    /// push into the internal uniform buffer.
+    TextureBuiltinsFromUniformOptions::BindingPointToFieldAndOffset bindpoint_to_data;
 };
 
 /// Sanitize a program in preparation for generating GLSL.

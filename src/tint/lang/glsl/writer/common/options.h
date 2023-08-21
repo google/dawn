@@ -15,10 +15,12 @@
 #ifndef SRC_TINT_LANG_GLSL_WRITER_COMMON_OPTIONS_H_
 #define SRC_TINT_LANG_GLSL_WRITER_COMMON_OPTIONS_H_
 
+#include <optional>
 #include <string>
 #include <unordered_map>
 
 #include "src/tint/api/options/external_texture.h"
+#include "src/tint/api/options/texture_builtins_from_uniform.h"
 #include "src/tint/lang/core/access.h"
 #include "src/tint/lang/glsl/writer/common/version.h"
 #include "src/tint/lang/wgsl/sem/sampler_texture_pair.h"
@@ -66,6 +68,11 @@ struct Options {
     /// Options used in the binding mappings for external textures
     ExternalTextureOptions external_texture_options = {};
 
+    /// Options used to map WGSL textureNumLevels/textureNumSamples builtins to internal uniform
+    /// buffer values. If not specified, emits corresponding GLSL builtins
+    /// textureQueryLevels/textureSamples directly.
+    std::optional<TextureBuiltinsFromUniformOptions> texture_builtins_from_uniform = std::nullopt;
+
     /// The GLSL version to emit
     Version version;
 
@@ -74,6 +81,7 @@ struct Options {
                  allow_collisions,
                  disable_workgroup_init,
                  external_texture_options,
+                 texture_builtins_from_uniform,
                  version);
 };
 

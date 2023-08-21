@@ -15,6 +15,7 @@
 #include "src/tint/lang/glsl/writer/writer.h"
 
 #include <memory>
+#include <utility>
 
 #include "src/tint/lang/glsl/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/wgsl/ast/transform/binding_remapper.h"
@@ -43,6 +44,8 @@ Result<Output, std::string> Generate(const Program* program,
 
     Output output;
     output.glsl = impl->Result();
+    output.needs_internal_uniform_buffer = sanitized_result.needs_internal_uniform_buffer;
+    output.bindpoint_to_data = std::move(sanitized_result.bindpoint_to_data);
 
     // Collect the list of entry points in the sanitized program.
     for (auto* func : sanitized_result.program.AST().Functions()) {

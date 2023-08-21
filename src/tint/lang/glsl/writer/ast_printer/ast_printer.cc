@@ -62,6 +62,7 @@
 #include "src/tint/lang/wgsl/ast/transform/single_entry_point.h"
 #include "src/tint/lang/wgsl/ast/transform/std140.h"
 #include "src/tint/lang/wgsl/ast/transform/texture_1d_to_2d.h"
+#include "src/tint/lang/wgsl/ast/transform/texture_builtins_from_uniform.h"
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 #include "src/tint/lang/wgsl/ast/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
@@ -229,6 +230,15 @@ SanitizedResult Sanitize(const Program* in,
 
     manager.Add<ast::transform::RemovePhonies>();
 
+    // TextureBuiltinsFromUniform must come before CombineSamplers to preserve texture binding point
+    // info, instead of combined sampler binding point. As a result, TextureBuiltinsFromUniform also
+    // comes before BindingRemapper so the binding point info it reflects is before remapping.
+    if (options.texture_builtins_from_uniform) {
+        manager.Add<ast::transform::TextureBuiltinsFromUniform>();
+        data.Add<ast::transform::TextureBuiltinsFromUniform::Config>(
+            options.texture_builtins_from_uniform->ubo_binding);
+    }
+
     data.Add<ast::transform::CombineSamplers::BindingInfo>(options.binding_map,
                                                            options.placeholder_binding_point);
     manager.Add<ast::transform::CombineSamplers>();
@@ -254,6 +264,10 @@ SanitizedResult Sanitize(const Program* in,
     SanitizedResult result;
     ast::transform::DataMap outputs;
     result.program = manager.Run(in, data, outputs);
+    if (auto* res = outputs.Get<ast::transform::TextureBuiltinsFromUniform::Result>()) {
+        result.needs_internal_uniform_buffer = true;
+        result.bindpoint_to_data = std::move(res->bindpoint_to_data);
+    }
     return result;
 }
 
