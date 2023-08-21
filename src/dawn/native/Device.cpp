@@ -483,10 +483,11 @@ void DeviceBase::Destroy() {
             UNREACHABLE();
             break;
     }
-    ASSERT(mQueue->GetCompletedCommandSerial() == GetLastSubmittedCommandSerial());
 
     if (mState != State::BeingCreated) {
         // The GPU timeline is finished.
+        ASSERT(mQueue->GetCompletedCommandSerial() == GetLastSubmittedCommandSerial());
+
         // Finish destroying all objects owned by the device and tick the queue-related tasks
         // since they should be complete. This must be done before DestroyImpl() it may
         // relinquish resources that will be freed by backends in the DestroyImpl() call.
