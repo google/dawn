@@ -129,7 +129,7 @@ class DataBuilder {
             T out{};
             if constexpr (tint::HasReflection<T>) {
                 ForeachField(out, [&](auto& field) { b->build(field); });
-            } else if constexpr (std::is_pod_v<T>) {
+            } else if constexpr (std::is_standard_layout_v<T>) {
                 b->build(&out, sizeof(T));
             } else {
                 static_assert(sizeof(T) == 0, "cannot build type");
