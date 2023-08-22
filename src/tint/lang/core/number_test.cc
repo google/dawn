@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <cmath>
+#include <cstdint>
 #include <tuple>
 #include <variant>
 #include <vector>
@@ -602,8 +603,8 @@ INSTANTIATE_TEST_SUITE_P(
         {AInt(-0x4000000000000000ll), AInt(0x1000000000000000ll), AInt(-4)},
         {AInt(-0x4000000000000000ll), AInt(-0x1000000000000000ll), AInt(4)},
         {AInt(-0x4000000000000000ll), AInt(0x1000000000000000ll), AInt(-4)},
-        {AInt(-0x8000000000000000ll), AInt(0x1000000000000000ll), AInt(-8)},
-        {AInt(-0x8000000000000000ll), AInt(-0x1000000000000000ll), AInt(8)},
+        {AInt(INT64_MIN), AInt(0x1000000000000000ll), AInt(-8)},
+        {AInt(INT64_MIN), AInt(-0x1000000000000000ll), AInt(8)},
         {AInt(0), AInt::Highest(), AInt(0)},
         {AInt(0), AInt::Lowest(), AInt(0)},
         {OVERFLOW, AInt(0x1000000000000000ll), AInt(8)},
@@ -884,8 +885,8 @@ INSTANTIATE_TEST_SUITE_P(
         {AInt(-0x4000000000000000ll), AInt(0x1000000000000000ll), AInt(-4), AInt(0)},
         {AInt(-0x4000000000000000ll), AInt(-0x1000000000000000ll), AInt(4), AInt(0)},
         {AInt(-0x4000000000000000ll), AInt(0x1000000000000000ll), AInt(-4), AInt(0)},
-        {AInt(-0x8000000000000000ll), AInt(0x1000000000000000ll), AInt(-8), AInt(0)},
-        {AInt(-0x8000000000000000ll), AInt(-0x1000000000000000ll), AInt(8), AInt(0)},
+        {AInt(INT64_MIN), AInt(0x1000000000000000ll), AInt(-8), AInt(0)},
+        {AInt(INT64_MIN), AInt(-0x1000000000000000ll), AInt(8), AInt(0)},
         {AInt::Highest(), AInt(1), AInt(1), AInt(AInt::kHighestValue - 1)},
         {AInt::Lowest(), AInt(1), AInt(-1), AInt(AInt::kLowestValue + 1)},
         {AInt::Highest(), AInt(1), AInt(0x7fffffff00000000ll), AInt(0x00000000ffffffffll)},
