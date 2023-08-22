@@ -72,7 +72,7 @@ void Run(core::ir::Module* ir) {
         };
 
         // Helper to replace the instruction with a column-wise operation.
-        auto column_wise = [&](enum core::ir::Binary::Kind op) {
+        auto column_wise = [&](auto op) {
             auto* mat = ty->As<core::type::Matrix>();
             Vector<core::ir::Value*, 4> args;
             for (uint32_t col = 0; col < mat->columns(); col++) {
