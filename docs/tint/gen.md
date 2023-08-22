@@ -55,7 +55,7 @@ Additional target dependencies can be added with the use of a [`BUILD.cfg` file]
 
 ### External dependencies
 
-All external dependencies must be declared in [`tools/src/cmd/gen/build/externals.json`](../../tools/src/cmd/gen/build/externals.json).
+All external dependencies must be declared in [`src/tint/externals.json`](../../src/tint/externals.json).
 
 The syntax of this file is:
 
@@ -124,7 +124,7 @@ The syntax of `TargetConfig` is:
     "External": [
       /*
         A list of external targets that should in added as dependencies to this target.
-        Must match an external dependency declared in tools/src/cmd/gen/build/externals.json
+        Must match an external dependency declared in src/tint/externals.json
       */
     ]
   },

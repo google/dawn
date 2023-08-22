@@ -395,7 +395,7 @@ endfunction()
 #   KIND         - The target kind
 #   DEPENDENCIES - a list of external target names
 #
-# See tools/src/cmd/gen/build/externals.json for the list of external dependencies.
+# See src/tint/externals.json for the list of external dependencies.
 function(tint_target_add_external_dependencies UNSUFFIXED_TARGET KIND)
   set(DEPENDENCIES ${ARGN})
 
