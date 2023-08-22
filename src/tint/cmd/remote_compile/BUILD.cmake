@@ -36,6 +36,10 @@ tint_target_add_dependencies(tint_cmd_remote_compile_cmd cmd
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_cmd_remote_compile_cmd cmd
+  "thread"
+)
+
 if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_cmd_remote_compile_cmd cmd
     tint_lang_msl_validate

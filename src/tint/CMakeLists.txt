@@ -426,18 +426,16 @@ function(tint_target_add_external_dependencies UNSUFFIXED_TARGET KIND)
             -Wno-weak-vtables
           )
         endif()
+      elseif(${DEPENDENCY} STREQUAL "glslang-res-limits")
+        target_link_libraries(${TARGET} PRIVATE
+          glslang-default-resource-limits
+        )
       elseif(${DEPENDENCY} STREQUAL "gtest")
         target_include_directories(${TARGET} PRIVATE ${gmock_SOURCE_DIR}/include)
         target_link_libraries(${TARGET} PRIVATE gmock)
       elseif(${DEPENDENCY} STREQUAL "metal")
-        find_library(FoundationFramework Foundation)
-        if(NOT FoundationFramework)
-          message(FATAL_ERROR "Foundation framework not found")
-        endif()
-        find_library(MetalFramework Metal)
-        if(NOT MetalFramework)
-          message(FATAL_ERROR "Metal framework not found")
-        endif()
+        find_library(FoundationFramework Foundation REQUIRED)
+        find_library(MetalFramework Metal REQUIRED)
         target_link_libraries(${TARGET} PRIVATE ${FoundationFramework} ${MetalFramework})
       elseif(${DEPENDENCY} STREQUAL "spirv-headers")
         tint_spvheaders_compile_options(${TARGET})
@@ -453,10 +451,9 @@ function(tint_target_add_external_dependencies UNSUFFIXED_TARGET KIND)
           "${TINT_SPIRV_TOOLS_DIR}/source"
           "${spirv-tools_BINARY_DIR}"
         )
-      elseif(${DEPENDENCY} STREQUAL "glslang-res-limits")
-        target_link_libraries(${TARGET} PRIVATE
-          glslang-default-resource-limits
-        )
+      elseif(${DEPENDENCY} STREQUAL "thread")
+        find_package(Threads REQUIRED)
+        target_link_libraries(${TARGET} PRIVATE Threads::Threads)
       elseif(${DEPENDENCY} STREQUAL "winsock")
         target_link_libraries(${TARGET} PRIVATE ws2_32)
       else()
@@ -502,9 +499,6 @@ endfunction()
 # Include the generated build files
 ################################################################################
 include("BUILD.cmake")
-
-find_package(Threads REQUIRED)
-target_link_libraries(tint_cmd_remote_compile_cmd PRIVATE Threads::Threads)
 
 ################################################################################
 # Additional fuzzer tests

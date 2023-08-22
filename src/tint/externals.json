@@ -14,6 +14,11 @@
         ],
         "Condition": "is_mac",
     },
+    "thread": {
+        "IncludePatterns": [
+            "thread"
+        ],
+    },
     "spirv-tools": {
         "IncludePatterns": [
             "spirv-tools/**"
