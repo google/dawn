@@ -14,6 +14,7 @@
 
 #include "src/tint/utils/socket/socket.h"
 
+#include "src/tint/utils/macros/compiler.h"
 #include "src/tint/utils/socket/rwmutex.h"
 
 #if defined(_WIN32)
@@ -295,9 +296,12 @@ std::shared_ptr<Socket> Socket::Connect(const char* address,
         } else {
             const auto timeout_us = timeout_ms * 1000;
 
+            // Note: These macros introduce identifiers that start with `__`.
+            TINT_BEGIN_DISABLE_WARNING(RESERVED_IDENTIFIER);
             fd_set fdset;
             FD_ZERO(&fdset);
             FD_SET(socket, &fdset);
+            TINT_END_DISABLE_WARNING(RESERVED_IDENTIFIER);
 
             timeval tv;
             tv.tv_sec = timeout_us / 1000000;

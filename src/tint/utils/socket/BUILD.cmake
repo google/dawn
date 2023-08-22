@@ -31,6 +31,10 @@ tint_add_target(tint_utils_socket lib
   utils/socket/socket.h
 )
 
+tint_target_add_dependencies(tint_utils_socket lib
+  tint_utils_macros
+)
+
 if(IS_WIN)
   tint_target_add_external_dependencies(tint_utils_socket lib
     "winsock"

@@ -31,7 +31,7 @@ libtint_source_set("socket") {
     "socket.cc",
     "socket.h",
   ]
-  deps = []
+  deps = [ "${tint_src_dir}/utils/macros" ]
 
   if (is_win) {
     deps += [ "${tint_src_dir}:winsock" ]

@@ -132,7 +132,7 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
     COMMON_CMAKE_FLAGS+=" -DTINT_RANDOMIZE_HASHES=1"
 
     if [ "$BUILD_TOOLCHAIN" == "clang" ]; then
-        using clang-10.0.0
+        using clang-13.0.1
         COMMON_CMAKE_FLAGS+=" -DTINT_BUILD_FUZZERS=1"
         COMMON_CMAKE_FLAGS+=" -DTINT_BUILD_SPIRV_TOOLS_FUZZER=1"
         COMMON_CMAKE_FLAGS+=" -DTINT_BUILD_AST_FUZZER=1"
