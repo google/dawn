@@ -873,7 +873,7 @@ void FunctionEmitter::PushGuard(const std::string& guard_name, uint32_t end_id) 
     auto* cond = builder_.Expr(Source{}, guard_name);
     auto* builder = AddStatementBuilder<IfStatementBuilder>(cond);
 
-    PushNewStatementBlock(top.GetConstruct(), end_id, [=](const StatementList& stmts) {
+    PushNewStatementBlock(top.GetConstruct(), end_id, [=, this](const StatementList& stmts) {
         builder->body = create<ast::BlockStatement>(Source{}, stmts, tint::Empty);
     });
 }
@@ -885,7 +885,7 @@ void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
     auto* cond = MakeTrue(Source{});
     auto* builder = AddStatementBuilder<IfStatementBuilder>(cond);
 
-    PushNewStatementBlock(top.GetConstruct(), end_id, [=](const StatementList& stmts) {
+    PushNewStatementBlock(top.GetConstruct(), end_id, [=, this](const StatementList& stmts) {
         builder->body = create<ast::BlockStatement>(Source{}, stmts, tint::Empty);
     });
 }
@@ -2902,7 +2902,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
     // But make sure we do it in the right order.
     auto push_else = [this, builder, else_end, construct, false_is_break, false_is_continue] {
         // Push the else clause onto the stack first.
-        PushNewStatementBlock(construct, else_end, [=](const StatementList& stmts) {
+        PushNewStatementBlock(construct, else_end, [=, this](const StatementList& stmts) {
             // Only set the else-clause if there are statements to fill it.
             if (!stmts.IsEmpty()) {
                 // The "else" consists of the statement list from the top of
@@ -2953,7 +2953,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
         }
 
         // Push the then clause onto the stack.
-        PushNewStatementBlock(construct, then_end, [=](const StatementList& stmts) {
+        PushNewStatementBlock(construct, then_end, [=, this](const StatementList& stmts) {
             builder->body = create<ast::BlockStatement>(Source{}, stmts, tint::Empty);
         });
         if (true_is_break) {
@@ -3066,7 +3066,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
         // for the case, and fill the case clause once the block is generated.
         auto case_idx = swch->cases.Length();
         swch->cases.Push(nullptr);
-        PushNewStatementBlock(construct, end_id, [=](const StatementList& stmts) {
+        PushNewStatementBlock(construct, end_id, [=, this](const StatementList& stmts) {
             auto* body = create<ast::BlockStatement>(Source{}, stmts, tint::Empty);
             swch->cases[case_idx] = create<ast::CaseStatement>(Source{}, selectors, body);
         });
@@ -3081,7 +3081,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
 
 bool FunctionEmitter::EmitLoopStart(const Construct* construct) {
     auto* builder = AddStatementBuilder<LoopStatementBuilder>();
-    PushNewStatementBlock(construct, construct->end_id, [=](const StatementList& stmts) {
+    PushNewStatementBlock(construct, construct->end_id, [=, this](const StatementList& stmts) {
         builder->body = create<ast::BlockStatement>(Source{}, stmts, tint::Empty);
     });
     return success();
@@ -3096,7 +3096,7 @@ bool FunctionEmitter::EmitContinuingStart(const Construct* construct) {
         return Fail() << "internal error: starting continue construct, "
                          "expected loop on top of stack";
     }
-    PushNewStatementBlock(construct, construct->end_id, [=](const StatementList& stmts) {
+    PushNewStatementBlock(construct, construct->end_id, [=, this](const StatementList& stmts) {
         loop->continuing = create<ast::BlockStatement>(Source{}, stmts, tint::Empty);
     });
 

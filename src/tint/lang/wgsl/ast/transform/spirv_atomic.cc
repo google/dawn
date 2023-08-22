@@ -256,7 +256,7 @@ struct SpirvAtomic::State {
                     [&](const AssignmentStatement* assign) {
                         auto* sem_lhs = ctx.src->Sem().GetVal(assign->lhs);
                         if (is_ref_to_atomic_var(sem_lhs)) {
-                            ctx.Replace(assign, [=] {
+                            ctx.Replace(assign, [=, this] {
                                 auto* lhs = ctx.CloneWithoutTransform(assign->lhs);
                                 auto* rhs = ctx.CloneWithoutTransform(assign->rhs);
                                 auto* call = b.Call(core::str(core::Function::kAtomicStore),
@@ -268,7 +268,7 @@ struct SpirvAtomic::State {
 
                         auto sem_rhs = ctx.src->Sem().GetVal(assign->rhs);
                         if (is_ref_to_atomic_var(sem_rhs->UnwrapLoad())) {
-                            ctx.Replace(assign->rhs, [=] {
+                            ctx.Replace(assign->rhs, [=, this] {
                                 auto* rhs = ctx.CloneWithoutTransform(assign->rhs);
                                 return b.Call(core::str(core::Function::kAtomicLoad),
                                               b.AddressOf(rhs));
@@ -280,7 +280,7 @@ struct SpirvAtomic::State {
                         auto* var = decl->variable;
                         if (auto* sem_init = ctx.src->Sem().GetVal(var->initializer)) {
                             if (is_ref_to_atomic_var(sem_init->UnwrapLoad())) {
-                                ctx.Replace(var->initializer, [=] {
+                                ctx.Replace(var->initializer, [=, this] {
                                     auto* rhs = ctx.CloneWithoutTransform(var->initializer);
                                     return b.Call(core::str(core::Function::kAtomicLoad),
                                                   b.AddressOf(rhs));
