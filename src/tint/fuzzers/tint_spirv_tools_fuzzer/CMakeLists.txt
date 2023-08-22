@@ -54,6 +54,8 @@ function(configure_spirv_tools_fuzzer_target NAME SOURCES)
     )
     tint_default_compile_options(${NAME})
     target_compile_options(${NAME} PRIVATE
+        -Wno-conditional-uninitialized
+        -Wno-covered-switch-default
         -Wno-missing-prototypes
         -Wno-zero-as-null-pointer-constant
         -Wno-reserved-id-macro

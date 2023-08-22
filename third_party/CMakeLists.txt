@@ -49,7 +49,7 @@ if ((${TINT_BUILD_SPIRV_TOOLS_FUZZER} OR ${TINT_BUILD_AST_FUZZER}) AND
         (NOT TARGET protobuf::libprotobuf OR NOT TARGET protobuf::protoc))
     set(protobuf_BUILD_TESTS OFF CACHE BOOL "Controls whether protobuf tests are built" FORCE)
     set(protobuf_MSVC_STATIC_RUNTIME OFF CACHE BOOL "Controls whether a protobuf static runtime is built" FORCE)
-    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/protobuf/cmake)
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/protobuf)
 endif()
 
 if (NOT TARGET SPIRV-Tools)
