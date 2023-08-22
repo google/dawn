@@ -2411,7 +2411,7 @@
         "extensible": "in",
         "members": [
             {"name": "view", "type": "texture view", "optional": true},
-            {"name": "depth slice", "type": "uint32_t", "default": "0"},
+            {"name": "depth slice", "type": "uint32_t", "default": "0", "tags": ["dawn"]},
             {"name": "resolve target", "type": "texture view", "optional": true},
             {"name": "load op", "type": "load op"},
             {"name": "store op", "type": "store op"},
