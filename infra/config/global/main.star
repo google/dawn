@@ -465,13 +465,14 @@ luci.builder(
 luci.builder(
     name = "cts-roller",
     bucket = "ci",
-    # Run at 5 UTC and 9 UTC - which is 10pm PST and 5am EST
-    schedule = "0 5,9 * * *",
+    # Run at 5 UTC - which is 10pm PST
+    schedule = "0 5 * * *",
     executable = luci.recipe(
-        name = "dawn", # TODO(dawn:1940): Replace with CTS roller recipe when ready.
+        name = "dawn/roll_cts",
         cipd_package = "infra/recipe_bundles/chromium.googlesource.com/chromium/tools/build",
         cipd_version = "refs/heads/main",
     ),
+    execution_timeout = 9 * time.hour,
     dimensions = {
         "cpu": "x86-64",
         "os": os.LINUX.dimension,
