@@ -109,6 +109,13 @@ config("tint_config") {
   }
 }
 
+source_set("metal") {
+  frameworks = [
+    "Foundation.framework",
+    "Metal.framework",
+  ]
+}
+
 config("tint_unittests_config") {
   include_dirs = [
     "${tint_googletest_dir}/googlemock/include",

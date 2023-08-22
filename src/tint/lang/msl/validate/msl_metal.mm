@@ -12,15 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifdef TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
+// GEN_BUILD:CONDITION(is_mac)
 
-@import Metal;
+#import <Metal/Metal.h>
 
-// Disable: error: treating #include as an import of module 'std.string'
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wauto-import"
 #include "src/tint/lang/msl/validate/val.h"
-#pragma clang diagnostic pop
 
 namespace tint::msl::validate {
 
@@ -62,5 +58,3 @@ Result UsingMetalAPI(const std::string& src, MslVersion version) {
 }
 
 }  // namespace tint::msl::validate
-
-#endif  // TINT_ENABLE_MSL_VALIDATION_USING_METAL_API

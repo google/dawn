@@ -52,14 +52,14 @@ struct Result {
 /// @return the result of the compile
 Result Msl(const std::string& xcrun_path, const std::string& source, MslVersion version);
 
-#ifdef TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
+#ifdef __APPLE__
 /// Msl attempts to compile the shader with the runtime Metal Shader Compiler
 /// API, verifying that the shader compiles successfully.
 /// @param source the generated MSL source
 /// @param version the version of MSL to validate against
 /// @return the result of the compile
 Result UsingMetalAPI(const std::string& source, MslVersion version);
-#endif  // TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
+#endif  // __APPLE__
 
 }  // namespace tint::msl::validate
 

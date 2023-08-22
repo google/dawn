@@ -51,5 +51,10 @@ if (tint_build_msl_writer) {
       "${tint_src_dir}/utils/text",
       "${tint_src_dir}/utils/traits",
     ]
+
+    if (is_mac) {
+      sources += [ "msl_metal.mm" ]
+      deps += [ "${tint_src_dir}:metal" ]
+    }
   }
 }

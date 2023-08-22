@@ -5,6 +5,10 @@
     "abseil": {
         "IncludePatterns": ["absl/**"],
     },
+    "metal": {
+        "IncludePatterns": ["Metal/Metal.h"],
+        "Condition": "is_mac",
+    },
     "spirv-tools": {
         "IncludePatterns": ["spirv-tools/**"],
         "Condition": "tint_build_spv_reader || tint_build_spv_writer",

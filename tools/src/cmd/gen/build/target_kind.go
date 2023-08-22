@@ -80,7 +80,9 @@ func targetKindFromFilename(filename string) TargetKind {
 		return targetBench
 	case filename == "main.cc":
 		return targetCmd
-	case strings.HasSuffix(filename, ".cc"), strings.HasSuffix(filename, ".h"):
+	case strings.HasSuffix(filename, ".cc"),
+		strings.HasSuffix(filename, ".mm"),
+		strings.HasSuffix(filename, ".h"):
 		return targetLib
 	}
 	return targetInvalid

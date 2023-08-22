@@ -421,7 +421,7 @@ bool RunServer(std::string port) {
                     DEBUG("%s\n", stream.error.c_str());
                     return;
                 }
-#ifdef TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
+#ifdef __APPLE__
                 if (req.language == SourceLanguage::MSL) {
                     auto version = tint::msl::validate::MslVersion::kMsl_1_2;
                     if (req.version_major == 2 && req.version_minor == 1) {
