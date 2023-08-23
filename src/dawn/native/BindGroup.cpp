@@ -63,7 +63,7 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
                     "Binding size (%u) is larger than the size (%u) of %s.", bindingSize,
                     bufferSize, entry.buffer);
 
-    DAWN_INVALID_IF(bindingSize == 0, "Binding size is zero");
+    DAWN_INVALID_IF(bindingSize == 0, "Binding size for %s is zero.", entry.buffer);
 
     // Note that no overflow can happen because we already checked that
     // bufferSize >= bindingSize
@@ -85,9 +85,10 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
             requiredUsage = wgpu::BufferUsage::Storage;
             maxBindingSize = device->GetLimits().v1.maxStorageBufferBindingSize;
             requiredBindingAlignment = device->GetLimits().v1.minStorageBufferOffsetAlignment;
-            DAWN_INVALID_IF(bindingSize % 4 != 0,
-                            "Binding size (%u) isn't a multiple of 4 when binding type is (%s).",
-                            bindingSize, bindingInfo.buffer.type);
+            DAWN_INVALID_IF(
+                bindingSize % 4 != 0,
+                "Binding size (%u) of %s isn't a multiple of 4 when binding type is (%s).",
+                bindingSize, entry.buffer, bindingInfo.buffer.type);
             break;
         case kInternalStorageBufferBinding:
             requiredUsage = kInternalStorageBuffer;
@@ -99,20 +100,20 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
     }
 
     DAWN_INVALID_IF(!IsAligned(entry.offset, requiredBindingAlignment),
-                    "Offset (%u) does not satisfy the minimum %s alignment (%u).", entry.offset,
-                    bindingInfo.buffer.type, requiredBindingAlignment);
+                    "Offset (%u) of %s does not satisfy the minimum %s alignment (%u).",
+                    entry.offset, entry.buffer, bindingInfo.buffer.type, requiredBindingAlignment);
 
     DAWN_INVALID_IF(!(entry.buffer->GetUsage() & requiredUsage),
                     "Binding usage (%s) of %s doesn't match expected usage (%s).",
                     entry.buffer->GetUsageExternalOnly(), entry.buffer, requiredUsage);
 
     DAWN_INVALID_IF(bindingSize < bindingInfo.buffer.minBindingSize,
-                    "Binding size (%u) is smaller than the minimum binding size (%u).", bindingSize,
-                    bindingInfo.buffer.minBindingSize);
+                    "Binding size (%u) of %s is smaller than the minimum binding size (%u).",
+                    bindingSize, entry.buffer, bindingInfo.buffer.minBindingSize);
 
     DAWN_INVALID_IF(bindingSize > maxBindingSize,
-                    "Binding size (%u) is larger than the maximum binding size (%u).", bindingSize,
-                    maxBindingSize);
+                    "Binding size (%u) of %s is larger than the maximum binding size (%u).",
+                    bindingSize, entry.buffer, maxBindingSize);
 
     return {};
 }
