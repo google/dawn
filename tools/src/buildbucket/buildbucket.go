@@ -215,7 +215,9 @@ func (r *Buildbucket) StartBuild(
 		GerritChanges: []*bbpb.GerritChange{gerritChange(ps)},
 	}
 	if parentSwarmingRunId != "" {
-		req.Swarming.ParentRunId = parentSwarmingRunId
+		req.Swarming = &bbpb.ScheduleBuildRequest_Swarming{
+			ParentRunId: parentSwarmingRunId,
+		}
 	}
 
 	build, err := r.client.ScheduleBuild(ctx, req)
