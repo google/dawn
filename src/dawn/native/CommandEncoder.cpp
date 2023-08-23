@@ -1689,13 +1689,13 @@ void CommandEncoder::APICopyTextureToTexture(const ImageCopyTexture* source,
                 DAWN_TRY_CONTEXT(ValidateImageCopyTexture(GetDevice(), *destination, *copySize),
                                  "validating destination %s.", destination->texture);
 
-                DAWN_TRY(
-                    ValidateTextureToTextureCopyRestrictions(*source, *destination, *copySize));
-
                 DAWN_TRY_CONTEXT(ValidateTextureCopyRange(GetDevice(), *source, *copySize),
                                  "validating source %s copy range.", source->texture);
                 DAWN_TRY_CONTEXT(ValidateTextureCopyRange(GetDevice(), *destination, *copySize),
                                  "validating source %s copy range.", destination->texture);
+
+                DAWN_TRY(
+                    ValidateTextureToTextureCopyRestrictions(*source, *destination, *copySize));
 
                 DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc,
                                           mUsageValidationMode));
