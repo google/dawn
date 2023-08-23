@@ -228,6 +228,7 @@ source_set("sources") {
     "CallbackTaskManager.cpp",
     "CallbackTaskManager.h",
     "ChainUtils.h",
+    "ChainUtilsImpl.h",
     "CommandAllocator.cpp",
     "CommandAllocator.h",
     "CommandBuffer.cpp",

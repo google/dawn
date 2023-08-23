@@ -17,29 +17,4 @@
 
 #include "dawn/native/ChainUtils_autogen.h"
 
-namespace dawn::native {
-
-struct DawnInstanceDescriptor;
-
-namespace d3d {
-struct RequestAdapterOptionsLUID;
-}
-
-namespace opengl {
-struct RequestAdapterOptionsGetGLProc;
-}
-
-template <>
-inline wgpu::SType STypeFor<DawnInstanceDescriptor> = wgpu::SType(WGPUSType_DawnInstanceDescriptor);
-
-template <>
-inline wgpu::SType STypeFor<d3d::RequestAdapterOptionsLUID> =
-    wgpu::SType(WGPUSType_RequestAdapterOptionsLUID);
-
-template <>
-inline wgpu::SType STypeFor<opengl::RequestAdapterOptionsGetGLProc> =
-    wgpu::SType(WGPUSType_RequestAdapterOptionsGetGLProc);
-
-}  // namespace dawn::native
-
 #endif  // SRC_DAWN_NATIVE_CHAINUTILS_H_
