@@ -637,7 +637,7 @@ crbug.com/dawn/1992 [ android-r qualcomm ] webgpu:shader,execution,expression,bi
 ################################################################################
 # WebGpuMessageTimeoutError on Win Intel Release
 ################################################################################
-crbug.com/1462375 [ intel win10 release ] webgpu:shader,validation,expression,call,builtin* [ RetryOnFailure ]
+crbug.com/1462375 [ intel win10 release ] webgpu:shader,validation,expression,call,builtin* [ Failure ]
 
 ################################################################################
 # WebGpuMessageTimeoutError on Win Nvidia
