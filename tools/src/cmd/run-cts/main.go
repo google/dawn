@@ -62,7 +62,7 @@ func showUsage() {
 run-cts is a tool used to run the WebGPU CTS using the Dawn module for NodeJS
 
 Usage:
-  run-cts --dawn-node=<path to dawn.node> --cts=<path to WebGPU CTS> [test-query]`)
+  run-cts --bin=<path to directory containing dawn.node> --cts=<path to WebGPU CTS> [test-query]`)
 	os.Exit(1)
 }
 
