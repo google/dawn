@@ -30,24 +30,37 @@ using utils::BinarySemaphore;
 
 class CacheableT : public RefCounted, public ContentLessObjectCacheable<CacheableT> {
   public:
-    explicit CacheableT(size_t value) : mValue(value) {}
-    CacheableT(size_t value, std::function<void(CacheableT*)> deleteFn)
-        : mValue(value), mDeleteFn(deleteFn) {}
+    explicit CacheableT(size_t value) : mHash(value), mValue(value) {}
+    CacheableT(size_t hash, size_t value) : mHash(hash), mValue(value) {}
 
     ~CacheableT() override { mDeleteFn(this); }
 
     struct HashFunc {
-        size_t operator()(const CacheableT* x) const { return x->mValue; }
+        size_t operator()(const CacheableT* x) const {
+            x->mHashFn(x);
+            return x->mHash;
+        }
     };
 
     struct EqualityFunc {
         bool operator()(const CacheableT* l, const CacheableT* r) const {
+            l->mEqualFn(l);
+            r->mEqualFn(r);
             return l->mValue == r->mValue;
         }
     };
 
+    void SetHashFn(std::function<void(const CacheableT*)> fn) { mHashFn = fn; }
+    void SetEqualFn(std::function<void(const CacheableT*)> fn) { mEqualFn = fn; }
+    void SetDeleteFn(std::function<void(CacheableT*)> fn) { mDeleteFn = fn; }
+
   private:
+    size_t mHash;
     size_t mValue;
+
+    // Injectable functions to allow for isolated thread testing.
+    std::function<void(const CacheableT*)> mHashFn = [](const CacheableT*) -> void {};
+    std::function<void(const CacheableT*)> mEqualFn = [](const CacheableT*) -> void {};
     std::function<void(CacheableT*)> mDeleteFn = [](CacheableT*) -> void {};
 };
 
@@ -60,7 +73,8 @@ TEST(ContentLessObjectCacheTest, Empty) {
 // Non-empty cache returns false on Empty().
 TEST(ContentLessObjectCacheTest, NonEmpty) {
     ContentLessObjectCache<CacheableT> cache;
-    Ref<CacheableT> object = AcquireRef(new CacheableT(1, [&](CacheableT* x) { cache.Erase(x); }));
+    Ref<CacheableT> object = AcquireRef(new CacheableT(1));
+    object->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
     EXPECT_TRUE(cache.Insert(object.Get()).second);
     EXPECT_FALSE(cache.Empty());
 }
@@ -68,7 +82,8 @@ TEST(ContentLessObjectCacheTest, NonEmpty) {
 // Object inserted into the cache are findable.
 TEST(ContentLessObjectCacheTest, Insert) {
     ContentLessObjectCache<CacheableT> cache;
-    Ref<CacheableT> object = AcquireRef(new CacheableT(1, [&](CacheableT* x) { cache.Erase(x); }));
+    Ref<CacheableT> object = AcquireRef(new CacheableT(1));
+    object->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
     EXPECT_TRUE(cache.Insert(object.Get()).second);
 
     CacheableT blueprint(1);
@@ -76,10 +91,11 @@ TEST(ContentLessObjectCacheTest, Insert) {
     EXPECT_TRUE(object.Get() == cached.Get());
 }
 
-// Duplicate insert calls on different objects with the same hash only inserts the first.
+// Duplicate insert calls on different equivalent objects only inserts the first.
 TEST(ContentLessObjectCacheTest, InsertDuplicate) {
     ContentLessObjectCache<CacheableT> cache;
-    Ref<CacheableT> object1 = AcquireRef(new CacheableT(1, [&](CacheableT* x) { cache.Erase(x); }));
+    Ref<CacheableT> object1 = AcquireRef(new CacheableT(1));
+    object1->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
     EXPECT_TRUE(cache.Insert(object1.Get()).second);
 
     Ref<CacheableT> object2 = AcquireRef(new CacheableT(1));
@@ -88,6 +104,25 @@ TEST(ContentLessObjectCacheTest, InsertDuplicate) {
     CacheableT blueprint(1);
     Ref<CacheableT> cached = cache.Find(&blueprint);
     EXPECT_TRUE(object1.Get() == cached.Get());
+}
+
+// Duplicate insert calls on different objects with the same hash inserts both objects.
+TEST(ContentLessObjectCacheTest, InsertHashDuplicate) {
+    ContentLessObjectCache<CacheableT> cache;
+    Ref<CacheableT> object1 = AcquireRef(new CacheableT(1, 1));
+    object1->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
+    EXPECT_TRUE(cache.Insert(object1.Get()).second);
+
+    Ref<CacheableT> object2 = AcquireRef(new CacheableT(1, 2));
+    object2->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
+    EXPECT_TRUE(cache.Insert(object2.Get()).second);
+
+    CacheableT blueprint1(1, 1);
+    Ref<CacheableT> cached1 = cache.Find(&blueprint1);
+    EXPECT_TRUE(object1.Get() == cached1.Get());
+    CacheableT blueprint2(1, 2);
+    Ref<CacheableT> cached2 = cache.Find(&blueprint2);
+    EXPECT_TRUE(object2.Get() == cached2.Get());
 }
 
 // Erasing the only entry leaves the cache empty.
@@ -101,10 +136,11 @@ TEST(ContentLessObjectCacheTest, Erase) {
     EXPECT_TRUE(cache.Empty());
 }
 
-// Erasing a hash equivalent but not pointer equivalent entry is a no-op.
+// Erasing an equivalent but not pointer equivalent entry is a no-op.
 TEST(ContentLessObjectCacheTest, EraseDuplicate) {
     ContentLessObjectCache<CacheableT> cache;
-    Ref<CacheableT> object1 = AcquireRef(new CacheableT(1, [&](CacheableT* x) { cache.Erase(x); }));
+    Ref<CacheableT> object1 = AcquireRef(new CacheableT(1));
+    object1->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
     EXPECT_TRUE(cache.Insert(object1.Get()).second);
     EXPECT_FALSE(cache.Empty());
 
@@ -122,8 +158,8 @@ TEST(ContentLessObjectCacheTest, InsertingAndFinding) {
 
     auto f = [&] {
         for (size_t i = 0; i < kNumObjects; i++) {
-            Ref<CacheableT> object =
-                AcquireRef(new CacheableT(i, [&](CacheableT* x) { cache.Erase(x); }));
+            Ref<CacheableT> object = AcquireRef(new CacheableT(i));
+            object->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
             if (cache.Insert(object.Get()).second) {
                 // This shouldn't race because exactly 1 thread should successfully insert.
                 objects[i] = object;
@@ -151,11 +187,12 @@ TEST(ContentLessObjectCacheTest, FindDeleting) {
     BinarySemaphore semA, semB;
 
     ContentLessObjectCache<CacheableT> cache;
-    Ref<CacheableT> object = AcquireRef(new CacheableT(1, [&](CacheableT* x) {
+    Ref<CacheableT> object = AcquireRef(new CacheableT(1));
+    object->SetDeleteFn([&](CacheableT* x) {
         semA.Release();
         semB.Acquire();
         cache.Erase(x);
-    }));
+    });
     EXPECT_TRUE(cache.Insert(object.Get()).second);
 
     // Thread A will release the last reference of the original object.
@@ -174,24 +211,95 @@ TEST(ContentLessObjectCacheTest, FindDeleting) {
     tB.join();
 }
 
+// Finding an equivalent element when the cached version is in the process of deletion and the
+// last ref of the object is actually the one acquired inside the find operation does not deadlock
+// and returns the cached value. This is a regression test for dawn:1993.
+TEST(ContentLessObjectCacheTest, FindDeletingLastRef) {
+    BinarySemaphore semA, semB;
+
+    ContentLessObjectCache<CacheableT> cache;
+    Ref<CacheableT> object = AcquireRef(new CacheableT(1));
+    object->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
+    object->SetEqualFn([&](const CacheableT* x) {
+        semA.Release();
+        semB.Acquire();
+    });
+    EXPECT_TRUE(cache.Insert(object.Get()).second);
+    CacheableT* objectPtr = object.Get();
+
+    // Thread A will release the last reference of the original object after the object has been
+    // promoted internally for equality check.
+    auto threadA = [&] {
+        semA.Acquire();
+        object = nullptr;
+        semB.Release();
+    };
+    // Thread B will try to Find the entry before the original object is destroyed.
+    auto threadB = [&] {
+        CacheableT blueprint(1);
+        EXPECT_TRUE(cache.Find(&blueprint) == objectPtr);
+    };
+
+    std::thread tA(threadA);
+    std::thread tB(threadB);
+    tA.join();
+    tB.join();
+}
+
+// Finding a non-equivalent but hash equivalent element when the cached version is in the process
+// of deletion and the last ref of the object is actually the one acquired inside the find operation
+// does not deadlock and returns nullptr. This is a regression test for dawn:1993.
+TEST(ContentLessObjectCacheTest, FindDeletingLastRefHashEquivalent) {
+    BinarySemaphore semA, semB;
+
+    ContentLessObjectCache<CacheableT> cache;
+    Ref<CacheableT> object = AcquireRef(new CacheableT(1, 1));
+    object->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
+    object->SetEqualFn([&](const CacheableT* x) {
+        semA.Release();
+        semB.Acquire();
+    });
+    EXPECT_TRUE(cache.Insert(object.Get()).second);
+
+    // Thread A will release the last reference of the original object after the object has been
+    // promoted internally for equality check.
+    auto threadA = [&] {
+        semA.Acquire();
+        object = nullptr;
+        semB.Release();
+    };
+    // Thread B will try to Find a hash-equivalent entry before the original object is destroyed.
+    auto threadB = [&] {
+        CacheableT blueprint(1, 2);
+        EXPECT_TRUE(cache.Find(&blueprint) == nullptr);
+    };
+
+    std::thread tA(threadA);
+    std::thread tB(threadB);
+    tA.join();
+    tB.join();
+}
+
 // Inserting an element that has an entry which is in process of deletion should insert the new
 // object.
 TEST(ContentLessObjectCacheTest, InsertDeleting) {
     BinarySemaphore semA, semB;
 
     ContentLessObjectCache<CacheableT> cache;
-    Ref<CacheableT> object1 = AcquireRef(new CacheableT(1, [&](CacheableT* x) {
+    Ref<CacheableT> object1 = AcquireRef(new CacheableT(1));
+    object1->SetDeleteFn([&](CacheableT* x) {
         semA.Release();
         semB.Acquire();
         cache.Erase(x);
-    }));
+    });
     EXPECT_TRUE(cache.Insert(object1.Get()).second);
 
-    Ref<CacheableT> object2 = AcquireRef(new CacheableT(1, [&](CacheableT* x) { cache.Erase(x); }));
+    Ref<CacheableT> object2 = AcquireRef(new CacheableT(1));
+    object2->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
 
     // Thread A will release the last reference of the original object.
     auto threadA = [&] { object1 = nullptr; };
-    // Thread B will try to Insert a hash equivalent entry before the original is completely
+    // Thread B will try to Insert an equivalent entry before the original is completely
     // destroyed.
     auto threadB = [&] {
         semA.Acquire();
@@ -207,6 +315,80 @@ TEST(ContentLessObjectCacheTest, InsertDeleting) {
     CacheableT blueprint(1);
     Ref<CacheableT> cached = cache.Find(&blueprint);
     EXPECT_TRUE(object2.Get() == cached.Get());
+}
+
+// Inserting an equivalent element when the cached version is in the process of deletion and the
+// last ref of the object is actually the one acquired inside the find operation does not deadlock
+// and no insert happens. This is a regression test for dawn:1993.
+TEST(ContentLessObjectCacheTest, InsertDeletingLastRef) {
+    BinarySemaphore semA, semB;
+
+    ContentLessObjectCache<CacheableT> cache;
+    Ref<CacheableT> object1 = AcquireRef(new CacheableT(1));
+    object1->SetEqualFn([&](const CacheableT* x) {
+        semA.Release();
+        semB.Acquire();
+    });
+    object1->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
+    EXPECT_TRUE(cache.Insert(object1.Get()).second);
+    CacheableT* object1Ptr = object1.Get();
+
+    // Thread A will release the last reference of the original object after the object has been
+    // promoted internally for equality check.
+    auto threadA = [&] {
+        semA.Acquire();
+        object1 = nullptr;
+        semB.Release();
+    };
+    // Thread B will try to Insert an equivalent entry before the original object is destroyed.
+    auto threadB = [&] {
+        Ref<CacheableT> object2 = AcquireRef(new CacheableT(1));
+        auto result = cache.Insert(object2.Get());
+        EXPECT_FALSE(result.second);
+        EXPECT_TRUE(result.first == object1Ptr);
+    };
+
+    std::thread tA(threadA);
+    std::thread tB(threadB);
+    tA.join();
+    tB.join();
+}
+
+// Inserting a non-equivalent but hash equivalent element when the cached version is in the process
+// of deletion and the last ref of the object is actually the one acquired inside the find operation
+// does not deadlock and the insert occurs successfully. This is a regression test for dawn:1993.
+TEST(ContentLessObjectCacheTest, InsertDeletingLastRefHashEquivalent) {
+    BinarySemaphore semA, semB;
+
+    ContentLessObjectCache<CacheableT> cache;
+    Ref<CacheableT> object1 = AcquireRef(new CacheableT(1, 1));
+    object1->SetEqualFn([&](const CacheableT* x) {
+        semA.Release();
+        semB.Acquire();
+    });
+    object1->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
+    EXPECT_TRUE(cache.Insert(object1.Get()).second);
+
+    // Thread A will release the last reference of the original object after the object has been
+    // promoted internally for equality check.
+    auto threadA = [&] {
+        semA.Acquire();
+        object1 = nullptr;
+        semB.Release();
+    };
+    // Thread B will try to Insert a hash equivalent entry before the original object is destroyed.
+    auto threadB = [&] {
+        Ref<CacheableT> object2 = AcquireRef(new CacheableT(1, 2));
+        object2->SetDeleteFn([&](CacheableT* x) { cache.Erase(x); });
+        auto result = cache.Insert(object2.Get());
+        EXPECT_TRUE(result.second);
+        EXPECT_TRUE(result.first == object2.Get());
+    };
+
+    std::thread tA(threadA);
+    std::thread tB(threadB);
+    tA.join();
+    tB.join();
 }
 
 }  // anonymous namespace
