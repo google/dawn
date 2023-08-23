@@ -28,6 +28,7 @@
 #include "dawn/native/Pipeline.h"
 #include "dawn/native/PipelineLayout.h"
 #include "dawn/native/RenderPipeline.h"
+#include "dawn/native/SpirvValidation.h"
 #include "dawn/native/TintUtils.h"
 
 #include "tint/tint.h"
@@ -983,6 +984,10 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
         DAWN_INVALID_IF(device->IsToggleEnabled(Toggle::DisallowSpirv), "SPIR-V is disallowed.");
 
         std::vector<uint32_t> spirv(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
+#ifdef DAWN_ENABLE_SPIRV_VALIDATION
+        const bool dumpSpirv = device->IsToggleEnabled(Toggle::DumpShaders);
+        DAWN_TRY(ValidateSpirv(device, spirv.data(), spirv.size(), dumpSpirv));
+#endif
         tint::Program program;
         DAWN_TRY_ASSIGN(program, ParseSPIRV(spirv, outMessages, spirvOptions));
         parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
