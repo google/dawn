@@ -30,6 +30,9 @@ class PipelineLayout final : public PipelineLayoutBase {
   public:
     PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
 
+    // GL backend does not support separate bind group index
+    // BindingIndexInfo is a map from BindingPoint(group, binding) to a flattened GLuint binding
+    // number.
     using BindingIndexInfo =
         ityp::array<BindGroupIndex, ityp::vector<BindingIndex, GLuint>, kMaxBindGroups>;
     const BindingIndexInfo& GetBindingIndexInfo() const;
@@ -38,11 +41,15 @@ class PipelineLayout final : public PipelineLayoutBase {
     size_t GetNumSamplers() const;
     size_t GetNumSampledTextures() const;
 
+    GLuint GetInternalUniformBinding() const;
+
   private:
     ~PipelineLayout() override = default;
     BindingIndexInfo mIndexInfo;
     size_t mNumSamplers;
     size_t mNumSampledTextures;
+
+    GLuint mInternalUniformBinding;
 };
 
 }  // namespace dawn::native::opengl

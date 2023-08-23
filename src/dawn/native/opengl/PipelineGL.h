@@ -15,9 +15,12 @@
 #ifndef SRC_DAWN_NATIVE_OPENGL_PIPELINEGL_H_
 #define SRC_DAWN_NATIVE_OPENGL_PIPELINEGL_H_
 
+#include <utility>
 #include <vector>
 
 #include "dawn/native/Pipeline.h"
+
+#include "include/tint/tint.h"
 
 #include "dawn/native/PerStage.h"
 #include "dawn/native/opengl/opengl_platform.h"
@@ -31,6 +34,8 @@ namespace dawn::native::opengl {
 struct OpenGLFunctions;
 class PipelineLayout;
 class Sampler;
+class Buffer;
+class TextureView;
 
 class PipelineGL {
   public:
@@ -47,6 +52,10 @@ class PipelineGL {
     const std::vector<GLuint>& GetTextureUnitsForTextureView(GLuint index) const;
     GLuint GetProgramHandle() const;
 
+    const Buffer* GetInternalUniformBuffer() const;
+    const tint::TextureBuiltinsFromUniformOptions::BindingPointToFieldAndOffset&
+    GetBindingPointBuiltinDataInfo() const;
+
   protected:
     void ApplyNow(const OpenGLFunctions& gl);
     MaybeError InitializeBase(const OpenGLFunctions& gl,
@@ -62,6 +71,16 @@ class PipelineGL {
     // TODO(enga): This could live on the Device, or elsewhere, but currently it makes Device
     // destruction complex as it requires the sampler to be destroyed before the sampler cache.
     Ref<Sampler> mPlaceholderSampler;
+
+    // Maintain an internal uniform buffer to store extra information needed by shader emulation.
+    GLuint mInternalUniformBufferBinding;
+    bool mNeedsTextureBuiltinUniformBuffer;
+    Ref<Buffer> mTextureBuiltinsBuffer;
+
+    // Reflect info from tint: a map from texture binding point to extra data need to push into the
+    // internal uniform buffer.
+    tint::TextureBuiltinsFromUniformOptions::BindingPointToFieldAndOffset
+        mBindingPointEmulatedBuiltins;
 };
 
 }  // namespace dawn::native::opengl

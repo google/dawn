@@ -551,14 +551,20 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheLayout) {
             utils::CreateShaderModule(device, kFragmentShaderBindGroup00Uniform.data());
         desc.cFragment.entryPoint = "main";
         desc.layout = utils::MakePipelineLayout(
-            device, {
-                        utils::MakeBindGroupLayout(
-                            device,
-                            {
-                                {0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform},
-                                {1, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform},
-                            }),
-                    });
+            device,
+            {
+                utils::MakeBindGroupLayout(
+                    device,
+                    {
+                        {0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform},
+                        {1, wgpu::ShaderStage::Fragment,
+                         // Note: OpenGL pipeline uses an internal uniform buffer which can be
+                         // impacted by the extra uniform buffer binding layout, resulting in a
+                         // shader module cache miss.
+                         (IsOpenGL() || IsOpenGLES()) ? wgpu::BufferBindingType::ReadOnlyStorage
+                                                      : wgpu::BufferBindingType::Uniform},
+                    }),
+            });
         EXPECT_CACHE_STATS(mMockCache, Hit(2 * counts.shaderModule), Add(counts.pipeline),
                            device.CreateRenderPipeline(&desc));
     }

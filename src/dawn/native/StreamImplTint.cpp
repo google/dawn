@@ -51,6 +51,14 @@ void stream::Stream<tint::BindingPoint>::Write(stream::Sink* sink,
 
 // static
 template <>
+MaybeError stream::Stream<tint::BindingPoint>::Read(Source* s, tint::BindingPoint* point) {
+    DAWN_TRY(StreamOut(s, &point->group));
+    DAWN_TRY(StreamOut(s, &point->binding));
+    return {};
+}
+
+// static
+template <>
 void stream::Stream<tint::ExternalTextureOptions::BindingPoints>::Write(
     stream::Sink* sink,
     const tint::ExternalTextureOptions::BindingPoints& point) {
@@ -108,6 +116,14 @@ template <>
 void stream::Stream<tint::ArrayLengthFromUniformOptions>::Write(
     stream::Sink* sink,
     const tint::ArrayLengthFromUniformOptions& options) {
+    StreamInTintObject(options, sink);
+}
+
+// static
+template <>
+void stream::Stream<tint::TextureBuiltinsFromUniformOptions>::Write(
+    stream::Sink* sink,
+    const tint::TextureBuiltinsFromUniformOptions& options) {
     StreamInTintObject(options, sink);
 }
 

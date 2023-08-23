@@ -73,6 +73,9 @@ PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDescriptor* d
 
     mNumSamplers = samplerIndex;
     mNumSampledTextures = sampledTextureIndex;
+
+    // Set internal uniform binding as the next unused uboIndex.
+    mInternalUniformBinding = uboIndex;
 }
 
 const PipelineLayout::BindingIndexInfo& PipelineLayout::GetBindingIndexInfo() const {
@@ -89,6 +92,10 @@ size_t PipelineLayout::GetNumSamplers() const {
 
 size_t PipelineLayout::GetNumSampledTextures() const {
     return mNumSampledTextures;
+}
+
+GLuint PipelineLayout::GetInternalUniformBinding() const {
+    return mInternalUniformBinding;
 }
 
 }  // namespace dawn::native::opengl
