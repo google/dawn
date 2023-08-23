@@ -467,7 +467,7 @@ namespace detail {
 template <typename F, typename... CONSTANTS>
 Eval::Result TransformElements(Manager& mgr,
                                const core::type::Type* composite_ty,
-                               F&& f,
+                               const F& f,
                                size_t index,
                                CONSTANTS&&... cs) {
     auto [el_ty, n] = First(cs...)->Type()->Elements();
@@ -506,19 +506,21 @@ Eval::Result TransformElements(Manager& mgr,
 template <typename F, typename... CONSTANTS>
 Eval::Result TransformElements(Manager& mgr,
                                const core::type::Type* composite_ty,
-                               F&& f,
+                               const F& f,
                                CONSTANTS&&... cs) {
     return detail::TransformElements(mgr, composite_ty, f, 0, cs...);
 }
+
+/// Signature of a binary transformation callback.
+using BinaryTransform = std::function<Eval::Result(const Value*, const Value*)>;
 
 /// TransformBinaryDifferingArityElements constructs a new constant of type `composite_ty` by
 /// applying the transformation function 'f' on each of the most deeply nested elements of both `c0`
 /// and `c1`. Unlike TransformElements, this function handles the constants being of different
 /// arity, e.g. vector-scalar, scalar-vector.
-template <typename F>
 Eval::Result TransformBinaryDifferingArityElements(Manager& mgr,
                                                    const core::type::Type* composite_ty,
-                                                   F&& f,
+                                                   const BinaryTransform& f,
                                                    const Value* c0,
                                                    const Value* c1) {
     uint32_t n0 = c0->Type()->Elements(nullptr, 1).count;
