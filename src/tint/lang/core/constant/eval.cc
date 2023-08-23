@@ -486,8 +486,8 @@ Eval::Result TransformElements(Manager& mgr,
     Vector<const Value*, 8> els;
     els.Reserve(n);
     for (uint32_t i = 0; i < n; i++) {
-        if (auto el = detail::TransformElements(mgr, composite_el_ty, std::forward<F>(f), index + i,
-                                                cs->Index(i)...)) {
+        if (auto el =
+                detail::TransformElements(mgr, composite_el_ty, f, index + i, cs->Index(i)...)) {
             els.Push(el.Get());
 
         } else {
@@ -511,16 +511,16 @@ Eval::Result TransformElements(Manager& mgr,
     return detail::TransformElements(mgr, composite_ty, f, 0, cs...);
 }
 
-/// TransformBinaryElements constructs a new constant of type `composite_ty` by applying the
-/// transformation function 'f' on each of the most deeply nested elements of both `c0` and `c1`.
-/// Unlike TransformElements, this function handles the constants being of different arity, e.g.
-/// vector-scalar, scalar-vector.
+/// TransformBinaryDifferingArityElements constructs a new constant of type `composite_ty` by
+/// applying the transformation function 'f' on each of the most deeply nested elements of both `c0`
+/// and `c1`. Unlike TransformElements, this function handles the constants being of different
+/// arity, e.g. vector-scalar, scalar-vector.
 template <typename F>
-Eval::Result TransformBinaryElements(Manager& mgr,
-                                     const core::type::Type* composite_ty,
-                                     F&& f,
-                                     const Value* c0,
-                                     const Value* c1) {
+Eval::Result TransformBinaryDifferingArityElements(Manager& mgr,
+                                                   const core::type::Type* composite_ty,
+                                                   F&& f,
+                                                   const Value* c0,
+                                                   const Value* c1) {
     uint32_t n0 = c0->Type()->Elements(nullptr, 1).count;
     uint32_t n1 = c1->Type()->Elements(nullptr, 1).count;
     uint32_t max_n = std::max(n0, n1);
@@ -540,8 +540,8 @@ Eval::Result TransformBinaryElements(Manager& mgr,
             }
             return c->Index(i);
         };
-        if (auto el = TransformBinaryElements(mgr, element_ty, std::forward<F>(f),
-                                              nested_or_self(c0, n0), nested_or_self(c1, n1))) {
+        if (auto el = TransformBinaryDifferingArityElements(
+                mgr, element_ty, f, nested_or_self(c0, n0), nested_or_self(c1, n1))) {
             els.Push(el.Get());
         } else {
             return el.Failure();
@@ -1204,7 +1204,7 @@ Eval::Result Eval::Mul(const Source& source,
     auto transform = [&](const Value* c0, const Value* c1) {
         return Dispatch_fia_fiu32_f16(MulFunc(source, c0->Type()), c0, c1);
     };
-    return TransformBinaryElements(mgr, ty, transform, v1, v2);
+    return TransformBinaryDifferingArityElements(mgr, ty, transform, v1, v2);
 }
 
 Eval::Result Eval::Sub(const Source& source,
@@ -1214,7 +1214,7 @@ Eval::Result Eval::Sub(const Source& source,
     auto transform = [&](const Value* c0, const Value* c1) {
         return Dispatch_fia_fiu32_f16(SubFunc(source, c0->Type()), c0, c1);
     };
-    return TransformBinaryElements(mgr, ty, transform, v1, v2);
+    return TransformBinaryDifferingArityElements(mgr, ty, transform, v1, v2);
 }
 
 auto Eval::Det2Func(const Source& source, const core::type::Type* elem_ty) {
@@ -1555,7 +1555,7 @@ Eval::Result Eval::Plus(const core::type::Type* ty,
         return Dispatch_fia_fiu32_f16(AddFunc(source, c0->Type()), c0, c1);
     };
 
-    return TransformBinaryElements(mgr, ty, transform, args[0], args[1]);
+    return TransformBinaryDifferingArityElements(mgr, ty, transform, args[0], args[1]);
 }
 
 Eval::Result Eval::Minus(const core::type::Type* ty,
@@ -1742,7 +1742,7 @@ Eval::Result Eval::Divide(const core::type::Type* ty,
         return Dispatch_fia_fiu32_f16(DivFunc(source, c0->Type()), c0, c1);
     };
 
-    return TransformBinaryElements(mgr, ty, transform, args[0], args[1]);
+    return TransformBinaryDifferingArityElements(mgr, ty, transform, args[0], args[1]);
 }
 
 Eval::Result Eval::Modulo(const core::type::Type* ty,
@@ -1752,7 +1752,7 @@ Eval::Result Eval::Modulo(const core::type::Type* ty,
         return Dispatch_fia_fiu32_f16(ModFunc(source, c0->Type()), c0, c1);
     };
 
-    return TransformBinaryElements(mgr, ty, transform, args[0], args[1]);
+    return TransformBinaryDifferingArityElements(mgr, ty, transform, args[0], args[1]);
 }
 
 Eval::Result Eval::Equal(const core::type::Type* ty,
