@@ -1152,6 +1152,151 @@ enable chromium_experimental_read_write_storage_texture;
                               expectedData.size() * sizeof(uint32_t));
 }
 
+// Verify read-only storage texture can work correctly in compute shaders.
+TEST_P(ReadWriteStorageTextureTests, ReadOnlyStorageTextureInComputeShader) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsReadWriteStorageTextureSupported());
+
+    // TODO(dawn:1972): Support read-only storage texture on D3D11, OpenGL and OpenGL ES backends.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() || IsOpenGL() || IsOpenGLES());
+
+    constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
+    const std::vector<uint8_t> kInitialTextureData = GetExpectedData(kStorageTextureFormat);
+    wgpu::Texture readonlyStorageTexture = CreateTextureWithTestData(
+        kInitialTextureData.data(), kInitialTextureData.size(), kStorageTextureFormat);
+
+    std::ostringstream sstream;
+    sstream << R"(
+enable chromium_experimental_read_write_storage_texture;
+@group(0) @binding(0) var srcImage : texture_storage_2d<r32uint, read>;
+@group(0) @binding(1) var<storage, read_write> output : u32;
+
+@compute @workgroup_size(1)
+fn main() {
+    for (var y = 0u; y < )"
+            << kHeight << R"(; y++) {
+        for (var x = 0u; x < )"
+            << kWidth << R"(; x++) {
+            var expected = vec4u(1u + x + y * 4u, 0, 0, 1u);
+            var pixel = textureLoad(srcImage, vec2u(x, y));
+            if (any(pixel != expected)) {
+                output = 0u;
+                return;
+            }
+        }
+    }
+    output = 1u;
+})";
+    uint32_t kInitialValue = 0xFF;
+    wgpu::Buffer resultBuffer =
+        utils::CreateBufferFromData(device, &kInitialValue, sizeof(kInitialValue),
+                                    wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
+
+    wgpu::ComputePipeline pipeline = CreateComputePipeline(sstream.str().c_str());
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                             {{0, readonlyStorageTexture.CreateView()}, {1, resultBuffer}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder computePassEncoder = encoder.BeginComputePass();
+    computePassEncoder.SetBindGroup(0, bindGroup);
+    computePassEncoder.SetPipeline(pipeline);
+    computePassEncoder.DispatchWorkgroups(1);
+    computePassEncoder.End();
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    // Check if the contents in the result buffer are what we expect.
+    constexpr uint32_t kExpectedValue = 1u;
+    EXPECT_BUFFER_U32_RANGE_EQ(&kExpectedValue, resultBuffer, 0, 1u);
+}
+
+// Verify read-only storage texture can work correctly in vertex shaders.
+TEST_P(ReadWriteStorageTextureTests, ReadOnlyStorageTextureInVertexShader) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsReadWriteStorageTextureSupported());
+
+    // TODO(dawn:1972): Support read-only storage texture on D3D11, OpenGL and OpenGL ES backends.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() || IsOpenGL() || IsOpenGLES());
+
+    constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
+    const std::vector<uint8_t> kInitialTextureData = GetExpectedData(kStorageTextureFormat);
+    wgpu::Texture readonlyStorageTexture = CreateTextureWithTestData(
+        kInitialTextureData.data(), kInitialTextureData.size(), kStorageTextureFormat);
+
+    std::ostringstream vsstream;
+    vsstream << R"(
+enable chromium_experimental_read_write_storage_texture;
+@group(0) @binding(0) var srcImage : texture_storage_2d<r32uint, read>;
+
+struct VertexOutput {
+    @builtin(position) pos: vec4f,
+    @location(0) color: vec4f,
+}
+
+@vertex fn main() -> VertexOutput {
+    var vertexOutput : VertexOutput;
+    vertexOutput.pos = vec4f(0, 0, 0, 1);
+    for (var y = 0u; y < )"
+             << kHeight << R"(; y++) {
+        for (var x = 0u; x < )"
+             << kWidth << R"(; x++) {
+            var expected = vec4u(1u + x + y * 4u, 0, 0, 1u);
+            var pixel = textureLoad(srcImage, vec2u(x, y));
+            if (any(pixel != expected)) {
+                vertexOutput.color = vec4f(1, 0, 0, 1);
+                return vertexOutput;
+            }
+        }
+    }
+    vertexOutput.color = vec4f(0, 1, 0, 1);
+    return vertexOutput;
+})";
+    const char* kFragmentShader = R"(
+struct FragmentInput {
+    @location(0) color: vec4f,
+}
+
+@fragment fn main(fragmentInput : FragmentInput) -> @location(0) vec4f {
+    return fragmentInput.color;
+})";
+
+    CheckDrawsGreen(vsstream.str().c_str(), kFragmentShader, readonlyStorageTexture);
+}
+
+// Verify read-only storage texture can work correctly in fragment shaders.
+TEST_P(ReadWriteStorageTextureTests, ReadOnlyStorageTextureInFragmentShader) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsReadWriteStorageTextureSupported());
+
+    // TODO(dawn:1972): Support read-only storage texture on D3D11, OpenGL and OpenGL ES backends.
+    DAWN_SUPPRESS_TEST_IF(IsD3D11() || IsOpenGL() || IsOpenGLES());
+
+    constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
+    const std::vector<uint8_t> kInitialTextureData = GetExpectedData(kStorageTextureFormat);
+    wgpu::Texture readonlyStorageTexture = CreateTextureWithTestData(
+        kInitialTextureData.data(), kInitialTextureData.size(), kStorageTextureFormat);
+
+    std::ostringstream fsstream;
+    fsstream << R"(
+enable chromium_experimental_read_write_storage_texture;
+@group(0) @binding(0) var srcImage : texture_storage_2d<r32uint, read>;
+
+@fragment fn main() -> @location(0) vec4f {
+    for (var y = 0u; y < )"
+             << kHeight << R"(; y++) {
+        for (var x = 0u; x < )"
+             << kWidth << R"(; x++) {
+            var expected = vec4u(1u + x + y * 4u, 0, 0, 1u);
+            var pixel = textureLoad(srcImage, vec2u(x, y));
+            if (any(pixel != expected)) {
+                return vec4f(1, 0, 0, 1);
+            }
+        }
+    }
+    return vec4f(0, 1, 0, 1);
+})";
+
+    CheckDrawsGreen(kSimpleVertexShader, fsstream.str().c_str(), readonlyStorageTexture);
+}
+
 // TODO(dawn:1972): Support ReadWrite storage texture access on OpenGL
 DAWN_INSTANTIATE_TEST(ReadWriteStorageTextureTests,
                       D3D11Backend(),

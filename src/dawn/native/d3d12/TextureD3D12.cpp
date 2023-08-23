@@ -57,9 +57,8 @@ D3D12_RESOURCE_STATES D3D12TextureUsage(wgpu::TextureUsage usage, const Format& 
     if (usage & wgpu::TextureUsage::CopyDst) {
         resourceState |= D3D12_RESOURCE_STATE_COPY_DEST;
     }
-    if (usage & (wgpu::TextureUsage::TextureBinding)) {
-        resourceState |= (D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
-                          D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+    if (usage & (wgpu::TextureUsage::TextureBinding | kReadOnlyStorageTexture)) {
+        resourceState |= D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE;
     }
     if (usage & wgpu::TextureUsage::StorageBinding) {
         resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
@@ -507,8 +506,7 @@ void Texture::TransitionSubresourceRange(std::vector<D3D12_RESOURCE_BARRIER>* ba
     // PIXEL_SHADER_RESOURCE, COPY_SRC, COPY_DEST.
     {
         const D3D12_RESOURCE_STATES kD3D12PromotableReadOnlyStates =
-            D3D12_RESOURCE_STATE_COPY_SOURCE | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
-            D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+            D3D12_RESOURCE_STATE_COPY_SOURCE | D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE;
 
         if (lastState == D3D12_RESOURCE_STATE_COMMON) {
             if (IsSubset(newState, kD3D12PromotableReadOnlyStates) ||

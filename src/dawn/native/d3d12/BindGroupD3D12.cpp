@@ -171,9 +171,14 @@ BindGroup::BindGroup(Device* device,
                                                       descriptorHeapOffsets[bindingIndex]));
                         break;
                     }
-
-                    // TODO(dawn:1972): Implement ReadWrite storage texture
-                    case wgpu::StorageTextureAccess::ReadOnly:
+                    case wgpu::StorageTextureAccess::ReadOnly: {
+                        D3D12_SHADER_RESOURCE_VIEW_DESC srv = view->GetSRVDescriptor();
+                        d3d12Device->CreateShaderResourceView(
+                            resource, &srv,
+                            viewAllocation.OffsetFrom(viewSizeIncrement,
+                                                      descriptorHeapOffsets[bindingIndex]));
+                        break;
+                    }
                     case wgpu::StorageTextureAccess::Undefined:
                         UNREACHABLE();
                 }

@@ -674,6 +674,9 @@ TextureBase::TextureBase(DeviceBase* device, const TextureDescriptor* descriptor
             AddInternalUsage(wgpu::TextureUsage::TextureBinding);
         }
     }
+    if (mInternalUsage & wgpu::TextureUsage::StorageBinding) {
+        AddInternalUsage(kReadOnlyStorageTexture);
+    }
 }
 
 TextureBase::~TextureBase() = default;

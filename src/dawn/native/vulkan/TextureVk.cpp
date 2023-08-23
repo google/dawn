@@ -70,7 +70,7 @@ VkAccessFlags VulkanAccessFlags(wgpu::TextureUsage usage, const Format& format) 
     if (usage & wgpu::TextureUsage::CopyDst) {
         flags |= VK_ACCESS_TRANSFER_WRITE_BIT;
     }
-    if (usage & wgpu::TextureUsage::TextureBinding) {
+    if (usage & (wgpu::TextureUsage::TextureBinding | kReadOnlyStorageTexture)) {
         flags |= VK_ACCESS_SHADER_READ_BIT;
     }
     if (usage & wgpu::TextureUsage::StorageBinding) {
@@ -121,7 +121,7 @@ VkPipelineStageFlags VulkanPipelineStage(wgpu::TextureUsage usage, const Format&
     if (usage & (wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst)) {
         flags |= VK_PIPELINE_STAGE_TRANSFER_BIT;
     }
-    if (usage & wgpu::TextureUsage::TextureBinding) {
+    if (usage & (wgpu::TextureUsage::TextureBinding | kReadOnlyStorageTexture)) {
         // TODO(crbug.com/dawn/851): Only transition to the usage we care about to avoid
         // introducing FS -> VS dependencies that would prevent parallelization on tiler
         // GPUs
@@ -572,6 +572,7 @@ VkImageLayout VulkanImageLayout(const Texture* texture, wgpu::TextureUsage usage
             // and store operations on storage images can only be done on the images in
             // VK_IMAGE_LAYOUT_GENERAL layout.
         case wgpu::TextureUsage::StorageBinding:
+        case kReadOnlyStorageTexture:
             return VK_IMAGE_LAYOUT_GENERAL;
 
         case wgpu::TextureUsage::RenderAttachment:

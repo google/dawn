@@ -1019,5 +1019,166 @@ TEST_F(ReadWriteStorageTextureValidationTests, StorageTextureAccessInPipeline) {
     }
 }
 
+class ReadWriteStorageTextureResourceUsageTrackingTests
+    : public ReadWriteStorageTextureValidationTests {
+  protected:
+    enum class BindingType : uint8_t {
+        ReadOnlyStorage = 0,
+        WriteOnlyStorage,
+        ReadWriteStorage,
+        TextureBinding,
+        BindingTypeCount,
+    };
+
+    void SetUp() override {
+        ReadWriteStorageTextureValidationTests::SetUp();
+
+        wgpu::Texture storageTexture =
+            CreateTexture(wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::TextureBinding |
+                              wgpu::TextureUsage::RenderAttachment,
+                          kFormat);
+        storageTextureView = storageTexture.CreateView();
+
+        bindGroupLayouts[static_cast<size_t>(BindingType::ReadOnlyStorage)] =
+            utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute,
+                          wgpu::StorageTextureAccess::ReadOnly, kFormat}});
+        bindGroupLayouts[static_cast<size_t>(BindingType::WriteOnlyStorage)] =
+            utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute,
+                          wgpu::StorageTextureAccess::WriteOnly, kFormat}});
+        bindGroupLayouts[static_cast<size_t>(BindingType::ReadWriteStorage)] =
+            utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute,
+                          wgpu::StorageTextureAccess::ReadWrite, kFormat}});
+        bindGroupLayouts[static_cast<size_t>(BindingType::TextureBinding)] =
+            utils::MakeBindGroupLayout(
+                device, {{0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute,
+                          wgpu::TextureSampleType::Uint}});
+
+        for (size_t bindingType = 0; bindingType < bindGroups.size(); ++bindingType) {
+            bindGroups[bindingType] = utils::MakeBindGroup(device, bindGroupLayouts[bindingType],
+                                                           {{0, storageTextureView}});
+        }
+    }
+
+    bool IsReadOnlyBindingType(BindingType bindingType) {
+        constexpr std::array<BindingType, 2> readonlyCompatibleUsageSet = {
+            BindingType::ReadOnlyStorage, BindingType::TextureBinding};
+        return std::find(readonlyCompatibleUsageSet.begin(), readonlyCompatibleUsageSet.end(),
+                         bindingType) != readonlyCompatibleUsageSet.end();
+    }
+
+    static const wgpu::TextureFormat kFormat = wgpu::TextureFormat::R32Uint;
+
+    wgpu::TextureView storageTextureView;
+    std::array<wgpu::BindGroupLayout, static_cast<size_t>(BindingType::BindingTypeCount)>
+        bindGroupLayouts;
+    std::array<wgpu::BindGroup, static_cast<size_t>(BindingType::BindingTypeCount)> bindGroups;
+};
+
+// Test the usage scope rule and writable storage texture aliasing rule of read-only and read-write
+// storage textures in a render pass.
+TEST_F(ReadWriteStorageTextureResourceUsageTrackingTests, StorageTextureInRenderPass) {
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+                @vertex fn main() -> @builtin(position) vec4f {
+                    return vec4f();
+                })");
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+                @fragment fn main() {
+                })");
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.vertex.module = vsModule;
+    pipelineDescriptor.cFragment.module = fsModule;
+    pipelineDescriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
+
+    // Test usage scope rules in bind groups
+    {
+        PlaceholderRenderPass placeholderRenderPass(device);
+
+        for (size_t bindingType1 = 0;
+             bindingType1 < static_cast<size_t>(BindingType::BindingTypeCount); ++bindingType1) {
+            for (size_t bindingType2 = 0;
+                 bindingType2 < static_cast<size_t>(BindingType::BindingTypeCount);
+                 ++bindingType2) {
+                pipelineDescriptor.layout = utils::MakePipelineLayout(
+                    device, {{bindGroupLayouts[bindingType1], bindGroupLayouts[bindingType2]}});
+                wgpu::RenderPipeline renderPipeline =
+                    device.CreateRenderPipeline(&pipelineDescriptor);
+
+                wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+                wgpu::RenderPassEncoder renderPassEncoder =
+                    encoder.BeginRenderPass(&placeholderRenderPass);
+                renderPassEncoder.SetBindGroup(0, bindGroups[bindingType1]);
+                renderPassEncoder.SetBindGroup(1, bindGroups[bindingType2]);
+                renderPassEncoder.SetPipeline(renderPipeline);
+                renderPassEncoder.Draw(1);
+                renderPassEncoder.End();
+
+                // It is valid if two usages are both read-only ones.
+                if (IsReadOnlyBindingType(static_cast<BindingType>(bindingType1)) &&
+                    IsReadOnlyBindingType(static_cast<BindingType>(bindingType2))) {
+                    encoder.Finish();
+                } else {
+                    ASSERT_DEVICE_ERROR(encoder.Finish());
+                }
+            }
+        }
+    }
+
+    // Test usage scope rules on using the same texture as both read-only or read-write storage
+    // texture access and render attachment
+    {
+        utils::ComboRenderPassDescriptor renderPass({storageTextureView});
+        std::array<size_t, 2> ReadWriteStorageTextureBindings = {
+            static_cast<size_t>(BindingType::ReadOnlyStorage),
+            static_cast<size_t>(BindingType::ReadWriteStorage)};
+        for (size_t bindingType1 : ReadWriteStorageTextureBindings) {
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPass);
+            renderPassEncoder.SetBindGroup(0, bindGroups[bindingType1]);
+            renderPassEncoder.End();
+            ASSERT_DEVICE_ERROR(encoder.Finish());
+        }
+    }
+}
+
+// Test the usage scope rule and writable storage texture aliasing rule of read-only and read-write
+// storage textures in a compute pass.
+TEST_F(ReadWriteStorageTextureResourceUsageTrackingTests, StorageTextureInComputePass) {
+    wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
+                @compute @workgroup_size(1) fn main() {
+                })");
+
+    for (size_t bindingType1 = 0; bindingType1 < static_cast<size_t>(BindingType::BindingTypeCount);
+         ++bindingType1) {
+        for (size_t bindingType2 = 0;
+             bindingType2 < static_cast<size_t>(BindingType::BindingTypeCount); ++bindingType2) {
+            wgpu::ComputePipelineDescriptor pipelineDescriptor;
+            pipelineDescriptor.layout = utils::MakePipelineLayout(
+                device, {{bindGroupLayouts[bindingType1], bindGroupLayouts[bindingType2]}});
+            pipelineDescriptor.compute.module = csModule;
+            pipelineDescriptor.compute.entryPoint = "main";
+            wgpu::ComputePipeline computePipeline =
+                device.CreateComputePipeline(&pipelineDescriptor);
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder computePassEncoder = encoder.BeginComputePass();
+            computePassEncoder.SetBindGroup(0, bindGroups[bindingType1]);
+            computePassEncoder.SetBindGroup(1, bindGroups[bindingType2]);
+            computePassEncoder.SetPipeline(computePipeline);
+            computePassEncoder.DispatchWorkgroups(1);
+            computePassEncoder.End();
+            if ((IsReadOnlyBindingType(static_cast<BindingType>(bindingType1)) &&
+                 IsReadOnlyBindingType(static_cast<BindingType>(bindingType2)))) {
+                encoder.Finish();
+            } else {
+                ASSERT_DEVICE_ERROR(encoder.Finish());
+            }
+        }
+    }
+}
+
 }  // anonymous namespace
 }  // namespace dawn
