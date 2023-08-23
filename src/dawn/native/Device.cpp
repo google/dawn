@@ -1525,7 +1525,13 @@ void DeviceBase::APIInjectError(wgpu::ErrorType type, const char* message) {
 }
 
 void DeviceBase::APIValidateTextureDescriptor(const TextureDescriptor* desc) {
-    DAWN_UNUSED(ConsumedError(ValidateTextureDescriptor(this, desc)));
+    AllowMultiPlanarTextureFormat allowMultiPlanar;
+    if (HasFeature(Feature::MultiPlanarFormatExtendedUsages)) {
+        allowMultiPlanar = AllowMultiPlanarTextureFormat::Yes;
+    } else {
+        allowMultiPlanar = AllowMultiPlanarTextureFormat::No;
+    }
+    DAWN_UNUSED(ConsumedError(ValidateTextureDescriptor(this, desc, allowMultiPlanar)));
 }
 
 QueueBase* DeviceBase::GetQueue() const {
@@ -1806,7 +1812,14 @@ ResultOrError<Ref<SwapChainBase>> DeviceBase::CreateSwapChain(
 ResultOrError<Ref<TextureBase>> DeviceBase::CreateTexture(const TextureDescriptor* descriptor) {
     DAWN_TRY(ValidateIsAlive());
     if (IsValidationEnabled()) {
-        DAWN_TRY_CONTEXT(ValidateTextureDescriptor(this, descriptor), "validating %s.", descriptor);
+        AllowMultiPlanarTextureFormat allowMultiPlanar;
+        if (HasFeature(Feature::MultiPlanarFormatExtendedUsages)) {
+            allowMultiPlanar = AllowMultiPlanarTextureFormat::Yes;
+        } else {
+            allowMultiPlanar = AllowMultiPlanarTextureFormat::No;
+        }
+        DAWN_TRY_CONTEXT(ValidateTextureDescriptor(this, descriptor, allowMultiPlanar),
+                         "validating %s.", descriptor);
     }
     return CreateTextureImpl(descriptor);
 }

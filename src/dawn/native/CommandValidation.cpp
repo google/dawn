@@ -400,8 +400,9 @@ ResultOrError<Aspect> SingleAspectUsedByImageCopyTexture(const ImageCopyTexture&
             ASSERT(format.aspects & Aspect::Stencil);
             return Aspect::Stencil;
         case wgpu::TextureAspect::Plane0Only:
+            return Aspect::Plane0;
         case wgpu::TextureAspect::Plane1Only:
-            break;
+            return Aspect::Plane1;
     }
     UNREACHABLE();
 }

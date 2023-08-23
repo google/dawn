@@ -709,7 +709,7 @@ MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
 
     VkImageFormatListCreateInfo imageFormatListInfo = {};
     std::vector<VkFormat> viewFormats;
-    bool requiresCreateMutableFormatBit = GetViewFormats().any();
+    bool requiresViewFormatsList = GetViewFormats().any();
     // As current SPIR-V SPEC doesn't support 'bgra8' as a valid image format, to support the
     // STORAGE usage of BGRA8Unorm we have to create an RGBA8Unorm image view on the BGRA8Unorm
     // storage texture and polyfill it as RGBA8Unorm in Tint. See http://crbug.com/dawn/1641 for
@@ -717,10 +717,19 @@ MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
     if (createInfo.format == VK_FORMAT_B8G8R8A8_UNORM &&
         createInfo.usage & VK_IMAGE_USAGE_STORAGE_BIT) {
         viewFormats.push_back(VK_FORMAT_R8G8B8A8_UNORM);
-        requiresCreateMutableFormatBit = true;
+        requiresViewFormatsList = true;
     }
-    if (requiresCreateMutableFormatBit) {
+    if (GetFormat().IsMultiPlanar() || requiresViewFormatsList) {
+        // Multi-planar image needs to have VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT in order to be able
+        // to create per-plane view. See
+        // https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkImageCreateFlagBits.html
+        //
+        // Note: we cannot include R8 & RG8 in the viewFormats list of
+        // G8_B8R8_2PLANE_420_UNORM. The Vulkan validation layer will disallow that.
         createInfo.flags |= VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT;
+    }
+
+    if (requiresViewFormatsList) {
         if (device->GetDeviceInfo().HasExt(DeviceExt::ImageFormatList)) {
             createInfoChain.Add(&imageFormatListInfo,
                                 VK_STRUCTURE_TYPE_IMAGE_FORMAT_LIST_CREATE_INFO);
@@ -1272,15 +1281,17 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
     imageRange.levelCount = 1;
     imageRange.layerCount = 1;
 
-    if (GetFormat().isCompressed) {
+    if (GetFormat().isCompressed || GetFormat().IsMultiPlanar()) {
         if (range.aspects == Aspect::None) {
             return {};
         }
         // need to clear the texture with a copy from buffer
-        ASSERT(range.aspects == Aspect::Color);
+        ASSERT(range.aspects == Aspect::Color || range.aspects == Aspect::Plane0 ||
+               range.aspects == Aspect::Plane1);
         const TexelBlockInfo& blockInfo = GetFormat().GetAspectInfo(range.aspects).block;
 
         Extent3D largestMipSize = GetMipLevelSingleSubresourcePhysicalSize(range.baseMipLevel);
+        largestMipSize = GetFormat().GetAspectSize(range.aspects, largestMipSize);
 
         uint32_t bytesPerRow = Align((largestMipSize.width / blockInfo.width) * blockInfo.byteSize,
                                      device->GetOptimalBytesPerRowAlignment());
@@ -1297,6 +1308,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* recordingContext,
         for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
              ++level) {
             Extent3D copySize = GetMipLevelSingleSubresourcePhysicalSize(level);
+            copySize = GetFormat().GetAspectSize(range.aspects, copySize);
             imageRange.baseMipLevel = level;
             for (uint32_t layer = range.baseArrayLayer;
                  layer < range.baseArrayLayer + range.layerCount; ++layer) {

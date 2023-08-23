@@ -143,8 +143,8 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
             // of I915_FORMAT_MOD_Y_TILED.
             flags |= GBM_BO_USE_SW_WRITE_RARELY;
         }
-        gbm_bo* gbmBo = gbm_bo_create(mGbmDevice, VideoViewsTests::kYUVImageDataWidthInTexels,
-                                      VideoViewsTests::kYUVImageDataHeightInTexels,
+        gbm_bo* gbmBo = gbm_bo_create(mGbmDevice, VideoViewsTestsBase::kYUVImageDataWidthInTexels,
+                                      VideoViewsTestsBase::kYUVImageDataHeightInTexels,
                                       GetGbmBoFormat(format), flags);
         if (gbmBo == nullptr) {
             return nullptr;
@@ -153,18 +153,18 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
         if (initialized) {
             void* mapHandle = nullptr;
             uint32_t strideBytes = 0;
-            void* addr = gbm_bo_map(gbmBo, 0, 0, VideoViewsTests::kYUVImageDataWidthInTexels,
-                                    VideoViewsTests::kYUVImageDataHeightInTexels,
+            void* addr = gbm_bo_map(gbmBo, 0, 0, VideoViewsTestsBase::kYUVImageDataWidthInTexels,
+                                    VideoViewsTestsBase::kYUVImageDataHeightInTexels,
                                     GBM_BO_TRANSFER_WRITE, &strideBytes, &mapHandle);
             EXPECT_NE(addr, nullptr);
             std::vector<uint8_t> initialData =
-                VideoViewsTests::GetTestTextureData(format, isCheckerboard);
+                VideoViewsTestsBase::GetTestTextureData(format, isCheckerboard);
             uint8_t* srcBegin = initialData.data();
             uint8_t* srcEnd = srcBegin + initialData.size();
             uint8_t* dstBegin = static_cast<uint8_t*>(addr);
-            for (; srcBegin < srcEnd;
-                 srcBegin += VideoViewsTests::kYUVImageDataWidthInTexels, dstBegin += strideBytes) {
-                std::memcpy(dstBegin, srcBegin, VideoViewsTests::kYUVImageDataWidthInTexels);
+            for (; srcBegin < srcEnd; srcBegin += VideoViewsTestsBase::kYUVImageDataWidthInTexels,
+                                      dstBegin += strideBytes) {
+                std::memcpy(dstBegin, srcBegin, VideoViewsTestsBase::kYUVImageDataWidthInTexels);
             }
 
             gbm_bo_unmap(gbmBo, mapHandle);
@@ -174,8 +174,8 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
         textureDesc.format = format;
         textureDesc.dimension = wgpu::TextureDimension::e2D;
         textureDesc.usage = usage;
-        textureDesc.size = {VideoViewsTests::kYUVImageDataWidthInTexels,
-                            VideoViewsTests::kYUVImageDataHeightInTexels, 1};
+        textureDesc.size = {VideoViewsTestsBase::kYUVImageDataWidthInTexels,
+                            VideoViewsTestsBase::kYUVImageDataHeightInTexels, 1};
 
         wgpu::DawnTextureInternalUsageDescriptor internalDesc;
         internalDesc.internalUsage = wgpu::TextureUsage::CopySrc;

@@ -361,9 +361,12 @@ MaybeError ValidateTextureUsage(const DeviceBase* device,
         // Legacy path
         // TODO(crbug.com/dawn/1795): Remove after migrating all old usages.
         // Only allows simple readonly texture usages.
-        constexpr wgpu::TextureUsage kValidMultiPlanarUsages =
+        wgpu::TextureUsage validMultiPlanarUsages =
             wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc;
-        DAWN_INVALID_IF(format->IsMultiPlanar() && !IsSubset(usage, kValidMultiPlanarUsages),
+        if (device->HasFeature(Feature::MultiPlanarFormatExtendedUsages)) {
+            validMultiPlanarUsages |= wgpu::TextureUsage::CopyDst;
+        }
+        DAWN_INVALID_IF(format->IsMultiPlanar() && !IsSubset(usage, validMultiPlanarUsages),
                         "The texture usage (%s) is incompatible with the multi-planar format (%s).",
                         usage, format->format);
     } else {

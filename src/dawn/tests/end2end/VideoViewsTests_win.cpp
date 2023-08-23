@@ -99,13 +99,13 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         textureDesc.format = format;
         textureDesc.dimension = wgpu::TextureDimension::e2D;
         textureDesc.usage = usage;
-        textureDesc.size = {VideoViewsTests::kYUVImageDataWidthInTexels,
-                            VideoViewsTests::kYUVImageDataHeightInTexels, 1};
+        textureDesc.size = {VideoViewsTestsBase::kYUVImageDataWidthInTexels,
+                            VideoViewsTestsBase::kYUVImageDataHeightInTexels, 1};
 
         // Create a DX11 texture with data then wrap it in a shared handle.
         D3D11_TEXTURE2D_DESC d3dDescriptor;
-        d3dDescriptor.Width = VideoViewsTests::kYUVImageDataWidthInTexels;
-        d3dDescriptor.Height = VideoViewsTests::kYUVImageDataHeightInTexels;
+        d3dDescriptor.Width = VideoViewsTestsBase::kYUVImageDataWidthInTexels;
+        d3dDescriptor.Height = VideoViewsTestsBase::kYUVImageDataHeightInTexels;
         d3dDescriptor.MipLevels = 1;
         d3dDescriptor.ArraySize = 1;
         d3dDescriptor.Format = GetDXGITextureFormat(format);
@@ -117,11 +117,11 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         d3dDescriptor.MiscFlags = D3D11_RESOURCE_MISC_SHARED_NTHANDLE | D3D11_RESOURCE_MISC_SHARED;
 
         std::vector<uint8_t> initialData =
-            VideoViewsTests::GetTestTextureData(format, isCheckerboard);
+            VideoViewsTestsBase::GetTestTextureData(format, isCheckerboard);
 
         D3D11_SUBRESOURCE_DATA subres;
         subres.pSysMem = initialData.data();
-        subres.SysMemPitch = VideoViewsTests::kYUVImageDataWidthInTexels;
+        subres.SysMemPitch = VideoViewsTestsBase::kYUVImageDataWidthInTexels;
 
         ComPtr<ID3D11Texture2D> d3d11Texture;
         HRESULT hr = mD3d11Device->CreateTexture2D(

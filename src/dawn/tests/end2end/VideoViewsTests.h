@@ -53,7 +53,7 @@ class VideoViewsTestBackend {
     virtual void DestroyVideoTextureForTest(std::unique_ptr<PlatformTexture>&& platformTexture) = 0;
 };
 
-class VideoViewsTests : public DawnTest {
+class VideoViewsTestsBase : public DawnTest {
   public:
     // The width and height in texels are 4 for all YUV formats.
     static constexpr uint32_t kYUVImageDataWidthInTexels = 4;
@@ -90,12 +90,10 @@ class VideoViewsTests : public DawnTest {
 
   protected:
     void SetUp() override;
-    void TearDown() override;
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override;
     bool IsMultiPlanarFormatsSupported() const;
     wgpu::ShaderModule GetTestVertexShaderModule() const;
 
-    std::unique_ptr<VideoViewsTestBackend> mBackend;
     bool mIsMultiPlanarFormatsSupported = false;
 };
 

@@ -66,7 +66,7 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
     size_t GetSubSamplingFactorPerPlane(wgpu::TextureFormat format, size_t plane) {
         switch (format) {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
-                return plane == VideoViewsTests::kYUVLumaPlaneIndex ? 1 : 2;
+                return plane == VideoViewsTestsBase::kYUVLumaPlaneIndex ? 1 : 2;
             default:
                 UNREACHABLE();
                 return 0;
@@ -76,7 +76,7 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
     size_t BytesPerElement(wgpu::TextureFormat format, size_t plane) {
         switch (format) {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
-                return plane == VideoViewsTests::kYUVLumaPlaneIndex ? 1 : 2;
+                return plane == VideoViewsTestsBase::kYUVLumaPlaneIndex ? 1 : 2;
             default:
                 UNREACHABLE();
                 return 0;
@@ -91,19 +91,19 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
         CFMutableDictionaryRef dict(CFDictionaryCreateMutable(kCFAllocatorDefault, 0,
                                                               &kCFTypeDictionaryKeyCallBacks,
                                                               &kCFTypeDictionaryValueCallBacks));
-        AddIntegerValue(dict, kIOSurfaceWidth, VideoViewsTests::kYUVImageDataWidthInTexels);
-        AddIntegerValue(dict, kIOSurfaceHeight, VideoViewsTests::kYUVImageDataHeightInTexels);
+        AddIntegerValue(dict, kIOSurfaceWidth, VideoViewsTestsBase::kYUVImageDataWidthInTexels);
+        AddIntegerValue(dict, kIOSurfaceHeight, VideoViewsTestsBase::kYUVImageDataHeightInTexels);
         AddIntegerValue(dict, kIOSurfacePixelFormat, ToCVFormat(format));
 
-        size_t num_planes = VideoViewsTests::NumPlanes(format);
+        size_t num_planes = VideoViewsTestsBase::NumPlanes(format);
 
         CFMutableArrayRef planes(
             CFArrayCreateMutable(kCFAllocatorDefault, num_planes, &kCFTypeArrayCallBacks));
         size_t total_bytes_alloc = 0;
         for (size_t plane = 0; plane < num_planes; ++plane) {
             const size_t factor = GetSubSamplingFactorPerPlane(format, plane);
-            const size_t plane_width = VideoViewsTests::kYUVImageDataWidthInTexels / factor;
-            const size_t plane_height = VideoViewsTests::kYUVImageDataHeightInTexels / factor;
+            const size_t plane_width = VideoViewsTestsBase::kYUVImageDataWidthInTexels / factor;
+            const size_t plane_height = VideoViewsTestsBase::kYUVImageDataHeightInTexels / factor;
             const size_t plane_bytes_per_element = BytesPerElement(format, plane);
             const size_t plane_bytes_per_row = IOSurfaceAlignProperty(
                 kIOSurfacePlaneBytesPerRow, plane_width * plane_bytes_per_element);
@@ -138,7 +138,7 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
         if (initialized) {
             IOSurfaceLock(surface, 0, nullptr);
             for (size_t plane = 0; plane < num_planes; ++plane) {
-                std::vector<uint8_t> data = VideoViewsTests::GetTestTextureDataWithPlaneIndex(
+                std::vector<uint8_t> data = VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex(
                     plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane),
                     IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard);
                 void* pointer = IOSurfaceGetBaseAddressOfPlane(surface, plane);
@@ -151,8 +151,8 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
         textureDesc.format = format;
         textureDesc.dimension = wgpu::TextureDimension::e2D;
         textureDesc.usage = usage;
-        textureDesc.size = {VideoViewsTests::kYUVImageDataWidthInTexels,
-                            VideoViewsTests::kYUVImageDataHeightInTexels, 1};
+        textureDesc.size = {VideoViewsTestsBase::kYUVImageDataWidthInTexels,
+                            VideoViewsTestsBase::kYUVImageDataHeightInTexels, 1};
 
         wgpu::DawnTextureInternalUsageDescriptor internalDesc;
         internalDesc.internalUsage = wgpu::TextureUsage::CopySrc;

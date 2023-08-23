@@ -108,6 +108,11 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
     {Feature::DawnMultiPlanarFormats,
      {"Import and use multi-planar texture formats with per plane views",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=551", FeatureInfo::FeatureState::Stable}},
+    {Feature::MultiPlanarFormatExtendedUsages,
+     {"Enable creating multi-planar formatted textures directly without importing. Also allows "
+      "including CopyDst as texture's usage and per plane copies between a texture and a buffer.",
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=551",
+      FeatureInfo::FeatureState::Experimental}},
     {Feature::DawnNative,
      {"WebGPU is running on top of dawn_native.",
       "https://dawn.googlesource.com/dawn/+/refs/heads/main/docs/dawn/features/"

@@ -1862,6 +1862,7 @@
             {"value": 1017, "name": "pixel local storage coherent", "tags": ["dawn"]},
             {"value": 1018, "name": "pixel local storage non coherent", "tags": ["dawn"]},
             {"value": 1019, "name": "norm16 texture formats", "tags": ["dawn"]},
+            {"value": 1020, "name": "multi planar format extended usages", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},
