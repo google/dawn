@@ -75,11 +75,18 @@ MaybeError PipelineLayout::Initialize(Device* device) {
                     break;
 
                 case BindingInfoType::StorageTexture:
-                    // TODO(dawn:1972): Support ReadOnly storage texture access.
-                    ASSERT(bindingInfo.storageTexture.access !=
-                           wgpu::StorageTextureAccess::ReadOnly);
-                    mIndexInfo[group][bindingIndex] = --unorderedAccessViewIndex;
-                    mUAVBindGroups.set(group);
+                    switch (bindingInfo.storageTexture.access) {
+                        case wgpu::StorageTextureAccess::ReadWrite:
+                        case wgpu::StorageTextureAccess::WriteOnly:
+                            mIndexInfo[group][bindingIndex] = --unorderedAccessViewIndex;
+                            mUAVBindGroups.set(group);
+                            break;
+                        case wgpu::StorageTextureAccess::ReadOnly:
+                            mIndexInfo[group][bindingIndex] = shaderResourceViewIndex++;
+                            break;
+                        case wgpu::StorageTextureAccess::Undefined:
+                            UNREACHABLE();
+                    }
                     break;
             }
         }

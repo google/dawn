@@ -198,8 +198,8 @@ MaybeError BindGroupTracker::Apply() {
                                 d3d11UAVs.insert(d3d11UAVs.begin(), std::move(d3d11UAV));
                                 break;
                             }
-                            // TODO(dawn:1972): Support ReadOnly storage texture access
                             case wgpu::StorageTextureAccess::ReadOnly:
+                                break;
                             default:
                                 UNREACHABLE();
                                 break;
@@ -393,8 +393,23 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                         }
                         break;
                     }
-                    // TODO(dawn:1972): Support ReadOnly storage texture access
-                    case wgpu::StorageTextureAccess::ReadOnly:
+                    case wgpu::StorageTextureAccess::ReadOnly: {
+                        ComPtr<ID3D11ShaderResourceView> d3d11SRV;
+                        DAWN_TRY_ASSIGN(d3d11SRV, view->CreateD3D11ShaderResourceView());
+                        if (bindingVisibility & wgpu::ShaderStage::Vertex) {
+                            deviceContext1->VSSetShaderResources(bindingSlot, 1,
+                                                                 d3d11SRV.GetAddressOf());
+                        }
+                        if (bindingVisibility & wgpu::ShaderStage::Fragment) {
+                            deviceContext1->PSSetShaderResources(bindingSlot, 1,
+                                                                 d3d11SRV.GetAddressOf());
+                        }
+                        if (bindingVisibility & wgpu::ShaderStage::Compute) {
+                            deviceContext1->CSSetShaderResources(bindingSlot, 1,
+                                                                 d3d11SRV.GetAddressOf());
+                        }
+                        break;
+                    }
                     default:
                         UNREACHABLE();
                 }
@@ -519,8 +534,19 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
                         }
                         break;
                     }
-                    // TODO(dawn:1972): Support ReadOnly storage texture access
-                    case wgpu::StorageTextureAccess::ReadOnly:
+                    case wgpu::StorageTextureAccess::ReadOnly: {
+                        ID3D11ShaderResourceView* nullSRV = nullptr;
+                        if (bindingVisibility & wgpu::ShaderStage::Vertex) {
+                            deviceContext1->VSSetShaderResources(bindingSlot, 1, &nullSRV);
+                        }
+                        if (bindingVisibility & wgpu::ShaderStage::Fragment) {
+                            deviceContext1->PSSetShaderResources(bindingSlot, 1, &nullSRV);
+                        }
+                        if (bindingVisibility & wgpu::ShaderStage::Compute) {
+                            deviceContext1->CSSetShaderResources(bindingSlot, 1, &nullSRV);
+                        }
+                        break;
+                    }
                     default:
                         UNREACHABLE();
                 }

@@ -1156,8 +1156,8 @@ enable chromium_experimental_read_write_storage_texture;
 TEST_P(ReadWriteStorageTextureTests, ReadOnlyStorageTextureInComputeShader) {
     DAWN_TEST_UNSUPPORTED_IF(!IsReadWriteStorageTextureSupported());
 
-    // TODO(dawn:1972): Support read-only storage texture on D3D11, OpenGL and OpenGL ES backends.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() || IsOpenGL() || IsOpenGLES());
+    // TODO(dawn:1972): Support read-only storage texture on OpenGL and OpenGL ES backends.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
     const std::vector<uint8_t> kInitialTextureData = GetExpectedData(kStorageTextureFormat);
@@ -1214,8 +1214,8 @@ fn main() {
 TEST_P(ReadWriteStorageTextureTests, ReadOnlyStorageTextureInVertexShader) {
     DAWN_TEST_UNSUPPORTED_IF(!IsReadWriteStorageTextureSupported());
 
-    // TODO(dawn:1972): Support read-only storage texture on D3D11, OpenGL and OpenGL ES backends.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() || IsOpenGL() || IsOpenGLES());
+    // TODO(dawn:1972): Support read-only storage texture on OpenGL and OpenGL ES backends.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
     const std::vector<uint8_t> kInitialTextureData = GetExpectedData(kStorageTextureFormat);
@@ -1266,8 +1266,8 @@ struct FragmentInput {
 TEST_P(ReadWriteStorageTextureTests, ReadOnlyStorageTextureInFragmentShader) {
     DAWN_TEST_UNSUPPORTED_IF(!IsReadWriteStorageTextureSupported());
 
-    // TODO(dawn:1972): Support read-only storage texture on D3D11, OpenGL and OpenGL ES backends.
-    DAWN_SUPPRESS_TEST_IF(IsD3D11() || IsOpenGL() || IsOpenGLES());
+    // TODO(dawn:1972): Support read-only storage texture on OpenGL and OpenGL ES backends.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
     const std::vector<uint8_t> kInitialTextureData = GetExpectedData(kStorageTextureFormat);
