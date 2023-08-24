@@ -102,7 +102,6 @@ class ApiObjectBase : public ObjectBase, public LinkNode<ApiObjectBase> {
 
     // Dawn API
     void APISetLabel(const char* label);
-    void APIRelease();
 
   protected:
     // Overriding of the RefCounted's DeleteThis function ensures that instances of objects
