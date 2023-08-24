@@ -24,7 +24,10 @@
 {% set native_dir = impl_dir + namespace_name.Dirs() %}
 {% set prefix = metadata.proc_table_prefix.lower() %}
 #include <tuple>
+#include <type_traits>
+#include <unordered_set>
 
+#include "absl/strings/str_format.h"
 #include "{{native_dir}}/{{prefix}}_platform.h"
 #include "{{native_dir}}/Error.h"
 #include "{{native_dir}}/{{namespace}}_structs_autogen.h"
@@ -44,6 +47,15 @@ namespace detail {
             constexpr inline {{namespace}}::SType STypeForImpl<{{as_cppEnum(value.name)}}> = {{namespace}}::SType::{{as_cppEnum(value.name)}};
         {% endif %}
     {% endfor %}
+
+    template <typename Arg, typename... Rest>
+    std::string STypesToString() {
+        if constexpr (sizeof...(Rest)) {
+            return absl::StrFormat("%s, ", STypeForImpl<Arg>) + STypesToString<Rest...>();
+        } else {
+            return absl::StrFormat("%s", STypeForImpl<Arg>);
+        }
+    }
 
     //
     // Unpacked chain types structs and helpers.
@@ -68,6 +80,21 @@ namespace detail {
     struct UnpackedChain<AdditionalExtensionsList<Additionals...>, Ts...> {
         using Type = std::tuple<Ts..., Additionals...>;
     };
+
+    // Template function that returns a string of the non-nullptr STypes from an unpacked chain.
+    template <typename Unpacked>
+    std::string UnpackedChainToString(const Unpacked& unpacked) {
+        std::string result = "( ";
+        std::apply(
+            [&](const auto*... args) {
+                (([&](const auto* arg) {
+                    if (arg != nullptr) {
+                        result += absl::StrFormat("%s, ", arg->sType);
+                    }
+                }(args)), ...);}, unpacked);
+        result += " )";
+        return result;
+    }
 
 }  // namespace detail
 
@@ -176,6 +203,12 @@ namespace detail {
         return ValidateSingleSTypeInner(chain, sType, sTypes...);
     }
 
+    // Template type to get root type from the unpacked chain and vice-versa.
+    template <typename Unpacked>
+    struct RootTypeFor;
+    template <typename Root>
+    struct UnpackedTypeFor;
+
 }  // namespace {{native_namespace}}
 
 // Include specializations before declaring types for ordering purposes.
@@ -192,6 +225,10 @@ namespace {{native_namespace}} {
                     const {{as_cppType(extension.name)}}*{{ "," if not loop.last else "" }}
                 {% endfor %}
             >::Type;
+            template <>
+            struct UnpackedTypeFor<{{as_cppType(type.name)}}> {
+                using Type = {{unpackedChain}};
+            };
             ResultOrError<{{unpackedChain}}> ValidateAndUnpackChain(const {{as_cppType(type.name)}}* chain);
 
         {% endif %}

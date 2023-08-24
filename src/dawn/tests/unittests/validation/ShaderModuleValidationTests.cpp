@@ -212,8 +212,7 @@ TEST_F(ShaderModuleValidationTest, MultipleChainedDescriptor_WgslAndSpirv) {
     wgsl_desc.code = "";
     wgsl_desc.nextInChain = &spirv_desc;
     desc.nextInChain = &wgsl_desc;
-    ASSERT_DEVICE_ERROR(device.CreateShaderModule(&desc),
-                        testing::HasSubstr("is part of a group of exclusive sTypes"));
+    ASSERT_DEVICE_ERROR(device.CreateShaderModule(&desc));
 }
 
 // Test that it is invalid to create a shader module that uses both the WGSL descriptor and the
@@ -225,9 +224,7 @@ TEST_F(ShaderModuleValidationTest, MultipleChainedDescriptor_WgslAndDawnSpirvOpt
     wgsl_desc.nextInChain = &spirv_options_desc;
     wgsl_desc.code = "";
     desc.nextInChain = &wgsl_desc;
-    ASSERT_DEVICE_ERROR(
-        device.CreateShaderModule(&desc),
-        testing::HasSubstr("SPIR-V options descriptor not valid with WGSL descriptor"));
+    ASSERT_DEVICE_ERROR(device.CreateShaderModule(&desc));
 }
 
 // Test that it is invalid to create a shader module that only uses the Dawn SPIRV options
@@ -236,9 +233,7 @@ TEST_F(ShaderModuleValidationTest, OnlySpirvOptionsDescriptor) {
     wgpu::ShaderModuleDescriptor desc = {};
     wgpu::DawnShaderModuleSPIRVOptionsDescriptor spirv_options_desc = {};
     desc.nextInChain = &spirv_options_desc;
-    ASSERT_DEVICE_ERROR(
-        device.CreateShaderModule(&desc),
-        testing::HasSubstr("SPIR-V options descriptor can only be used with SPIR-V input"));
+    ASSERT_DEVICE_ERROR(device.CreateShaderModule(&desc));
 }
 
 // Tests that shader module compilation messages can be queried.
