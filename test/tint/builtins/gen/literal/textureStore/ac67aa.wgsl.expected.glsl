@@ -28,7 +28,7 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(rg32ui) uniform highp writeonly uimage3D arg_0;
 void textureStore_ac67aa() {

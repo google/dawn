@@ -16,8 +16,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:13: 'tint_symbol_2' : undeclared identifier
-ERROR: 0:13: '' : compilation terminated
+ERROR: 0:13: 'tint_symbol_2' : undeclared identifier 
+ERROR: 0:13: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

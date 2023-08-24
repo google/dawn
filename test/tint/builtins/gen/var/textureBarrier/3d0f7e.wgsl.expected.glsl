@@ -1,15 +1,9 @@
 SKIP: FAILED
 
-
-enable chromium_experimental_read_write_storage_texture;
-
-fn textureBarrier_3d0f7e() {
-  textureBarrier();
-}
-
-@compute @workgroup_size(1)
-fn compute_main() {
-  textureBarrier_3d0f7e();
-}
-
-Failed to generate: error: Unknown builtin method: textureBarrier
+../../src/tint/lang/glsl/writer/ast_printer/ast_printer.cc:1294 internal compiler error: TINT_UNREACHABLE unexpected barrier builtin type textureBarrier
+********************************************************************
+*  The tint shader compiler has encountered an unexpected error.   *
+*                                                                  *
+*  Please help us fix this issue by submitting a bug report at     *
+*  crbug.com/tint with the source program that triggered the bug.  *
+********************************************************************

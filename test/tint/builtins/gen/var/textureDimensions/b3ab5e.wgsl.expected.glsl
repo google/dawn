@@ -3,9 +3,14 @@ SKIP: FAILED
 #version 310 es
 
 uniform highp samplerCubeArray arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 void textureDimensions_b3ab5e() {
   int arg_1 = 1;
   uvec2 res = uvec2(textureSize(arg_0_1, arg_1).xy);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -29,12 +34,17 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 uniform highp samplerCubeArray arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 void textureDimensions_b3ab5e() {
   int arg_1 = 1;
   uvec2 res = uvec2(textureSize(arg_0_1, arg_1).xy);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -55,9 +65,14 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 
 uniform highp samplerCubeArray arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 void textureDimensions_b3ab5e() {
   int arg_1 = 1;
   uvec2 res = uvec2(textureSize(arg_0_1, arg_1).xy);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

@@ -49,7 +49,7 @@ struct UBO {
 
 VertexOutput vs_main(VertexInput tint_symbol) {
   vec3 quad_pos = (mat2x3(render_params.inner.right, render_params.inner.up) * tint_symbol.quad_pos);
-  vec3 position = (tint_symbol.position + (quad_pos * 0.01f));
+  vec3 position = (tint_symbol.position + (quad_pos * 0.00999999977648258209f));
   VertexOutput tint_symbol_1 = VertexOutput(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f), vec2(0.0f, 0.0f));
   tint_symbol_1.position = (render_params.inner.modelViewProjectionMatrix * vec4(position, 1.0f));
   tint_symbol_1.color = tint_symbol.color;
@@ -69,7 +69,7 @@ void main() {
   return;
 }
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(location = 0) in vec4 color_1;
 layout(location = 1) in vec2 quad_pos_1;
@@ -124,8 +124,8 @@ void main() {
 
 vec2 rand_seed = vec2(0.0f, 0.0f);
 float rand() {
-  rand_seed.x = fract((cos(dot(rand_seed, vec2(23.140779495f, 232.616897583f))) * 136.816802979f));
-  rand_seed.y = fract((cos(dot(rand_seed, vec2(54.478565216f, 345.841522217f))) * 534.764526367f));
+  rand_seed.x = fract((cos(dot(rand_seed, vec2(23.1407794952392578125f, 232.6168975830078125f))) * 136.816802978515625f));
+  rand_seed.y = fract((cos(dot(rand_seed, vec2(54.478565216064453125f, 345.841522216796875f))) * 534.7645263671875f));
   return rand_seed.y;
 }
 
@@ -208,11 +208,11 @@ void simulate(uvec3 GlobalInvocationID) {
     particle.position = vec3((((uv - 0.5f) * 3.0f) * vec2(1.0f, -1.0f)), 0.0f);
     particle.color = texelFetch(tint_symbol_2_1, ivec2(coord), 0);
     float tint_symbol = rand();
-    particle.velocity.x = ((tint_symbol - 0.5f) * 0.100000001f);
+    particle.velocity.x = ((tint_symbol - 0.5f) * 0.10000000149011611938f);
     float tint_symbol_1 = rand();
-    particle.velocity.y = ((tint_symbol_1 - 0.5f) * 0.100000001f);
+    particle.velocity.y = ((tint_symbol_1 - 0.5f) * 0.10000000149011611938f);
     float tint_symbol_3 = rand();
-    particle.velocity.z = (tint_symbol_3 * 0.300000012f);
+    particle.velocity.z = (tint_symbol_3 * 0.30000001192092895508f);
     float tint_symbol_4 = rand();
     particle.lifetime = (0.5f + (tint_symbol_4 * 2.0f));
   }
@@ -356,7 +356,7 @@ void export_level(uvec3 coord) {
     float d = buf_in.weights[((src_offset + 1u) + ubo.inner.width)];
     float sum = dot(vec4(a, b, c, d), vec4(1.0f));
     buf_out.weights[dst_offset] = (sum / 4.0f);
-    vec4 probabilities = (vec4(a, (a + b), ((a + b) + c), sum) / max(sum, 0.0001f));
+    vec4 probabilities = (vec4(a, (a + b), ((a + b) + c), sum) / max(sum, 0.00009999999747378752f));
     imageStore(tex_out, ivec2(coord.xy), probabilities);
   }
 }

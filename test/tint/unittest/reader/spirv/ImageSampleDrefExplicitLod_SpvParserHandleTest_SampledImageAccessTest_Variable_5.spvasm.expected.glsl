@@ -1,7 +1,11 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
+precision highp float;
+
+int tint_ftoi(float v) {
+  return ((v < 2147483520.0f) ? ((v < -2147483648.0f) ? (-2147483647 - 1) : int(v)) : 2147483647);
+}
 
 uniform highp samplerCubeArrayShadow x_20_x_10;
 
@@ -22,8 +26,7 @@ void main_1() {
   float coords1 = 1.0f;
   vec2 coords12 = vf12;
   vec3 coords123 = vf123;
-  vec4 coords1234 = vf1234;
-  float x_79 = texture(x_20_x_10, vec4(coords1234.xyz, float(int(round(coords1234.w)))), 0.200000003f);
+  float x_79 = texture(x_20_x_10, vec4(vf1234.xyz, float(tint_ftoi(round(vf1234.w)))), 0.20000000298023223877f);
   return;
 }
 
@@ -36,8 +39,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:4: 'samplerCubeArrayShadow' : Reserved word. 
-ERROR: 0:4: '' : compilation terminated 
+ERROR: 0:8: 'samplerCubeArrayShadow' : Reserved word. 
+ERROR: 0:8: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

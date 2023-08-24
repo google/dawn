@@ -31,7 +31,7 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(rg32f) uniform highp writeonly image2DArray arg_0;
 void textureStore_dfa9a1() {

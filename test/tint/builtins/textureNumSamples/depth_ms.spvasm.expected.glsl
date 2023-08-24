@@ -6,8 +6,7 @@ vec4 tint_symbol_1 = vec4(0.0f);
 uniform highp sampler2DMS arg_0_1;
 void textureNumSamples_a3c8a0() {
   int res = 0;
-  int x_16 = int(uint(textureSamples(arg_0_1)));
-  res = x_16;
+  res = int(uint(textureSamples(arg_0_1)));
   return;
 }
 
@@ -48,13 +47,12 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 uniform highp sampler2DMS arg_0_1;
 void textureNumSamples_a3c8a0() {
   int res = 0;
-  int x_16 = int(uint(textureSamples(arg_0_1)));
-  res = x_16;
+  res = int(uint(textureSamples(arg_0_1)));
   return;
 }
 
@@ -87,8 +85,7 @@ ERROR: 2 compilation errors.  No code generated.
 uniform highp sampler2DMS arg_0_1;
 void textureNumSamples_a3c8a0() {
   int res = 0;
-  int x_16 = int(uint(textureSamples(arg_0_1)));
-  res = x_16;
+  res = int(uint(textureSamples(arg_0_1)));
   return;
 }
 

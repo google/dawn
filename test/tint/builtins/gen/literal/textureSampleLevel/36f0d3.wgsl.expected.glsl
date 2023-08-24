@@ -4,8 +4,13 @@ SKIP: FAILED
 
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void textureSampleLevel_36f0d3() {
   float res = textureLodOffset(arg_0_arg_1, vec4(vec3(vec2(1.0f), float(1)), 0.0f), float(1u), ivec2(1));
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -22,19 +27,24 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:6: 'textureLodOffset' : no matching overloaded function found 
-ERROR: 0:6: '' : compilation terminated 
+ERROR: 0:10: 'textureLodOffset' : no matching overloaded function found 
+ERROR: 0:10: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void textureSampleLevel_36f0d3() {
   float res = textureLodOffset(arg_0_arg_1, vec4(vec3(vec2(1.0f), float(1)), 0.0f), float(1u), ivec2(1));
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -46,8 +56,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:7: 'textureLodOffset' : no matching overloaded function found 
-ERROR: 0:7: '' : compilation terminated 
+ERROR: 0:11: 'textureLodOffset' : no matching overloaded function found 
+ERROR: 0:11: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -56,8 +66,13 @@ ERROR: 2 compilation errors.  No code generated.
 
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  float inner;
+} prevent_dce;
+
 void textureSampleLevel_36f0d3() {
   float res = textureLodOffset(arg_0_arg_1, vec4(vec3(vec2(1.0f), float(1)), 0.0f), float(1u), ivec2(1));
+  prevent_dce.inner = res;
 }
 
 void compute_main() {
@@ -70,8 +85,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:6: 'textureLodOffset' : no matching overloaded function found 
-ERROR: 0:6: '' : compilation terminated 
+ERROR: 0:10: 'textureLodOffset' : no matching overloaded function found 
+ERROR: 0:10: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

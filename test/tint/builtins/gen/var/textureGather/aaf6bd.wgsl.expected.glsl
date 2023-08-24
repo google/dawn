@@ -4,10 +4,15 @@ SKIP: FAILED
 
 uniform highp isamplerCubeArray arg_1_arg_2;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 void textureGather_aaf6bd() {
   vec3 arg_3 = vec3(1.0f);
   int arg_4 = 1;
   ivec4 res = textureGather(arg_1_arg_2, vec4(arg_3, float(arg_4)), int(1u));
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -31,14 +36,19 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 uniform highp isamplerCubeArray arg_1_arg_2;
+
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
 
 void textureGather_aaf6bd() {
   vec3 arg_3 = vec3(1.0f);
   int arg_4 = 1;
   ivec4 res = textureGather(arg_1_arg_2, vec4(arg_3, float(arg_4)), int(1u));
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -60,10 +70,15 @@ ERROR: 2 compilation errors.  No code generated.
 
 uniform highp isamplerCubeArray arg_1_arg_2;
 
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  ivec4 inner;
+} prevent_dce;
+
 void textureGather_aaf6bd() {
   vec3 arg_3 = vec3(1.0f);
   int arg_4 = 1;
   ivec4 res = textureGather(arg_1_arg_2, vec4(arg_3, float(arg_4)), int(1u));
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

@@ -3,8 +3,13 @@ SKIP: FAILED
 #version 310 es
 
 layout(rg32ui) uniform highp writeonly uimage2D arg_0;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 void textureDimensions_9573f3() {
   uvec2 res = uvec2(imageSize(arg_0));
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -28,11 +33,16 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(rg32ui) uniform highp writeonly uimage2D arg_0;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 void textureDimensions_9573f3() {
   uvec2 res = uvec2(imageSize(arg_0));
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -53,8 +63,13 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 
 layout(rg32ui) uniform highp writeonly uimage2D arg_0;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uvec2 inner;
+} prevent_dce;
+
 void textureDimensions_9573f3() {
   uvec2 res = uvec2(imageSize(arg_0));
+  prevent_dce.inner = res;
 }
 
 void compute_main() {

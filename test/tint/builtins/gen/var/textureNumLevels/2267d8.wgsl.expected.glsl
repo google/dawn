@@ -3,8 +3,13 @@ SKIP: FAILED
 #version 310 es
 
 uniform highp isamplerCube arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void textureNumLevels_2267d8() {
   uint res = uint(textureQueryLevels(arg_0_1));
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -21,18 +26,23 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:9: 'textureQueryLevels' : no matching overloaded function found 
+ERROR: 0:9: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 uniform highp isamplerCube arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void textureNumLevels_2267d8() {
   uint res = uint(textureQueryLevels(arg_0_1));
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -44,8 +54,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:6: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:6: '' : compilation terminated 
+ERROR: 0:10: 'textureQueryLevels' : no matching overloaded function found 
+ERROR: 0:10: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -53,8 +63,13 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 
 uniform highp isamplerCube arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void textureNumLevels_2267d8() {
   uint res = uint(textureQueryLevels(arg_0_1));
+  prevent_dce.inner = res;
 }
 
 void compute_main() {
@@ -67,8 +82,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:5: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:5: '' : compilation terminated 
+ERROR: 0:9: 'textureQueryLevels' : no matching overloaded function found 
+ERROR: 0:9: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

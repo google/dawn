@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 uniform highp samplerCubeArray x_20_1;
 void main_1() {
@@ -10,7 +10,6 @@ void main_1() {
   vec2 vf21 = vec2(2.0f, 1.0f);
   vec3 vf123 = vec3(1.0f, 2.0f, 3.0f);
   vec4 vf1234 = vec4(1.0f, 2.0f, 3.0f, 4.0f);
-  int i1 = 1;
   ivec2 vi12 = ivec2(1, 2);
   ivec3 vi123 = ivec3(1, 2, 3);
   ivec4 vi1234 = ivec4(1, 2, 3, 4);
@@ -22,7 +21,7 @@ void main_1() {
   vec2 coords12 = vf12;
   vec3 coords123 = vf123;
   vec4 coords1234 = vf1234;
-  ivec3 x_99 = ivec3(uvec3(uvec2(textureSize(x_20_1, i1).xy).xy, uint(textureSize(x_20_1, 0).z)));
+  ivec3 x_99 = ivec3(uvec3(uvec2(textureSize(x_20_1, 1).xy).xy, uint(textureSize(x_20_1, 0).z)));
   return;
 }
 

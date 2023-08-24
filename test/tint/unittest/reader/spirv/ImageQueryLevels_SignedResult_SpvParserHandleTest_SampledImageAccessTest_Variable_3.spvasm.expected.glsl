@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 uniform highp samplerCube x_20_1;
 void main_1() {

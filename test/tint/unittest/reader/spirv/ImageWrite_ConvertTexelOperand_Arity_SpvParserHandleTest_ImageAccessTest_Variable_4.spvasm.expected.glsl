@@ -1,7 +1,7 @@
 SKIP: FAILED
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 layout(rg32f) uniform highp writeonly image2D x_20;
 void main_1() {

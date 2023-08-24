@@ -3,8 +3,13 @@ SKIP: FAILED
 #version 310 es
 
 uniform highp samplerCubeArray arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void textureNumLayers_34cefa() {
   uint res = uint(textureSize(arg_0_1, 0).z);
+  prevent_dce.inner = res;
 }
 
 vec4 vertex_main() {
@@ -28,11 +33,16 @@ ERROR: 2 compilation errors.  No code generated.
 
 
 #version 310 es
-precision mediump float;
+precision highp float;
 
 uniform highp samplerCubeArray arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void textureNumLayers_34cefa() {
   uint res = uint(textureSize(arg_0_1, 0).z);
+  prevent_dce.inner = res;
 }
 
 void fragment_main() {
@@ -53,8 +63,13 @@ ERROR: 2 compilation errors.  No code generated.
 #version 310 es
 
 uniform highp samplerCubeArray arg_0_1;
+layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
+  uint inner;
+} prevent_dce;
+
 void textureNumLayers_34cefa() {
   uint res = uint(textureSize(arg_0_1, 0).z);
+  prevent_dce.inner = res;
 }
 
 void compute_main() {
