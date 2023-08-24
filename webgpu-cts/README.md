@@ -21,6 +21,28 @@ Useful command-line arguments:
  - `--enable-dawn-backend-validation`: Enable Dawn's backend validation.
  - `--use-webgpu-adapter=[default,swiftshader,compat]`: Forwarded to the browser to select a particular WebGPU adapter.
 
+## Running the CTS locally on Android
+
+If you want to run the full CTS on Android with expectations locally, some additional setup is required.
+
+First, as explained in the [GPU Testing doc](https://source.chromium.org/chromium/chromium/src/+/main:docs/gpu/gpu_testing.md) you need to build the `telemetry_gpu_integration_test_android_chrome` target. This target _must_ be built in either the `out/Release` or `out/Debug` directories, as those are the only two that can be targeted by the test runner when executing tests on Android.
+
+When executing the tests, use `--browser=android-chromium` (which will look in `out/Release` by default) and limit the tests to one job at a time with `--jobs=1`.
+
+An example of a known-working command line is:
+
+```sh
+./content/test/gpu/run_gpu_integration_test.py webgpu_cts --show-stdout --browser=android-chromium --stable-jobs --jobs=1 --extra-browser-args="--enable-logging=stderr --js-flags=--expose-gc --force_high_performance_gpu --use-webgpu-power-preference=default-high-performance"
+```
+
+### Android Proxy errors
+
+When running the tests on Android devices with the above commands, some devices have been observed to start displaying an `ERR_PROXY_CONNECTION_FAILED` error when attempting to browse with Chrome/Chromium. This is the result of command line proxy settings used by the test runner accidentally not getting cleaned up, likely because the script was terminated early. Should it happen to you the command line used by Chrome can be cleared by running the following command from the root of a Chromium checkout:
+
+```sh
+build/android/adb_chrome_public_command_line ""
+```
+
 # Running a local CTS build on Swarming
 Often, it's useful to test changes on Chrome's infrastructure if it's difficult to reproduce a bug locally. To do that, we can package our local build as an "isolate" and upload it to Swarming to run there. This is often much faster than uploading your CL to Gerrit and triggering tryjobs.
 
