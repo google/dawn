@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <vector>
+
 #include "dawn/tests/DawnTest.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
@@ -98,6 +100,17 @@ class ExternalTextureTests : public DawnTest {
         }
     }
 
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::Norm16TextureFormats})) {
+            mIsNorm16TextureFormatsSupported = true;
+            requiredFeatures.push_back(wgpu::FeatureName::Norm16TextureFormats);
+        }
+        return requiredFeatures;
+    }
+
+    bool IsNorm16TextureFormatsSupported() { return mIsNorm16TextureFormatsSupported; }
+
     static constexpr uint32_t kWidth = 4;
     static constexpr uint32_t kHeight = 4;
     static constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
@@ -107,6 +120,8 @@ class ExternalTextureTests : public DawnTest {
 
     wgpu::ShaderModule vsModule;
     wgpu::ShaderModule fsSampleExternalTextureModule;
+
+    bool mIsNorm16TextureFormatsSupported = false;
 };
 
 TEST_P(ExternalTextureTests, CreateExternalTextureSuccess) {
@@ -250,6 +265,103 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTexture) {
         // Pipeline Creation
         utils::ComboRenderPipelineDescriptor descriptor;
         // descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsSampleExternalTextureModule;
+        descriptor.cTargets[0].format = kFormat;
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+        // Create an ExternalTextureDescriptor from the texture views
+        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
+        externalDesc.plane0 = externalViewPlane0;
+        externalDesc.plane1 = externalViewPlane1;
+        externalDesc.visibleOrigin = {0, 0};
+        externalDesc.visibleSize = {kWidth, kHeight};
+
+        // Import the external texture
+        wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
+
+        // Create a sampler and bind group
+        wgpu::Sampler sampler = device.CreateSampler();
+
+        wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                                                         {{0, sampler}, {1, externalTexture}});
+
+        // Run the shader, which should sample from the external texture and draw a triangle into
+        // the upper left corner of the render texture.
+        wgpu::TextureView renderView = renderTexture.CreateView();
+        utils::ComboRenderPassDescriptor renderPass({renderView}, nullptr);
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+        {
+            pass.SetPipeline(pipeline);
+            pass.SetBindGroup(0, bindGroup);
+            pass.Draw(3);
+            pass.End();
+        }
+
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_PIXEL_RGBA8_EQ(expectation.rgba, renderTexture, 0, 0);
+    }
+}
+
+TEST_P(ExternalTextureTests, SampleMultiplanarExternalTextureNorm16) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsNorm16TextureFormatsSupported());
+
+    // TODO(crbug.com/tint/1774): Tint has an issue compiling shaders that use external textures on
+    // OpenGL/OpenGLES.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    wgpu::Texture sampledTexturePlane0 =
+        Create2DTexture(device, kWidth, kHeight, wgpu::TextureFormat::R16Unorm,
+                        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
+    wgpu::Texture sampledTexturePlane1 =
+        Create2DTexture(device, kWidth, kHeight, wgpu::TextureFormat::RG16Unorm,
+                        wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
+
+    wgpu::Texture renderTexture =
+        Create2DTexture(device, kWidth, kHeight, kFormat,
+                        wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment);
+
+    // Create a texture view for the external texture
+    wgpu::TextureView externalViewPlane0 = sampledTexturePlane0.CreateView();
+    wgpu::TextureView externalViewPlane1 = sampledTexturePlane1.CreateView();
+
+    struct ConversionExpectation {
+        double y;
+        double u;
+        double v;
+        utils::RGBA8 rgba;
+    };
+
+    // Conversion expectations for BT.709 YUV source and sRGB destination.
+    std::array<ConversionExpectation, 7> expectations = {
+        {{0.0, .5, .5, utils::RGBA8::kBlack},
+         {0.2126, 0.4172, 1.0, utils::RGBA8::kRed},
+         {0.7152, 0.1402, 0.0175, utils::RGBA8::kGreen},
+         {0.0722, 1.0, 0.4937, utils::RGBA8::kBlue},
+         {0.6382, 0.3232, 0.6644, {246, 169, 90, 255}},
+         {0.5423, 0.5323, 0.4222, {120, 162, 169, 255}},
+         {0.2345, 0.4383, 0.6342, {125, 53, 32, 255}}}};
+
+    for (const ConversionExpectation& expectation : expectations) {
+        // Initialize the texture planes with YUV data
+        {
+            utils::ComboRenderPassDescriptor renderPass({externalViewPlane0, externalViewPlane1},
+                                                        nullptr);
+            renderPass.cColorAttachments[0].clearValue = {expectation.y, 0.0f, 0.0f, 0.0f};
+            renderPass.cColorAttachments[1].clearValue = {expectation.u, expectation.v, 0.0f, 0.0f};
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+            pass.End();
+
+            wgpu::CommandBuffer commands = encoder.Finish();
+            queue.Submit(1, &commands);
+        }
+
+        // Pipeline Creation
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsSampleExternalTextureModule;
         descriptor.cTargets[0].format = kFormat;

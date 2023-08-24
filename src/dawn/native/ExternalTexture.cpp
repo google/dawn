@@ -55,8 +55,6 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
 
     DAWN_TRY(device->ValidateObject(descriptor->plane0));
 
-    wgpu::TextureFormat plane0Format = descriptor->plane0->GetFormat().format;
-
     DAWN_INVALID_IF(!descriptor->gamutConversionMatrix,
                     "The gamut conversion matrix must be non-null.");
 
@@ -66,37 +64,39 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
     DAWN_INVALID_IF(!descriptor->dstTransferFunctionParameters,
                     "The destination transfer function parameters must be non-null.");
 
+    DAWN_TRY(ValidateExternalTexturePlane(descriptor->plane0));
+
+    auto CheckPlaneFormat = [](const DeviceBase* device, const Format& format,
+                               uint32_t requiredComponentCount) -> MaybeError {
+        DAWN_INVALID_IF(format.aspects != Aspect::Color, "The format (%s) is not a color format.",
+                        format.format);
+        DAWN_INVALID_IF(!IsSubset(SampleTypeBit::Float,
+                                  format.GetAspectInfo(Aspect::Color).supportedSampleTypes),
+                        "The format (%s) is not filterable float.", format.format);
+        DAWN_INVALID_IF(format.componentCount != requiredComponentCount,
+                        "The format (%s) component count (%u) is not %u.", format.format,
+                        requiredComponentCount, format.componentCount);
+        return {};
+    };
+
     if (descriptor->plane1) {
         DAWN_INVALID_IF(
             !descriptor->yuvToRgbConversionMatrix,
             "When more than one plane is set, the YUV-to-RGB conversion matrix must be non-null.");
 
         DAWN_TRY(device->ValidateObject(descriptor->plane1));
-        wgpu::TextureFormat plane1Format = descriptor->plane1->GetFormat().format;
+        DAWN_TRY(ValidateExternalTexturePlane(descriptor->plane1));
 
-        DAWN_INVALID_IF(plane0Format != wgpu::TextureFormat::R8Unorm,
-                        "The bi-planar external texture plane (%s) format (%s) is not %s.",
-                        descriptor->plane0, plane0Format, wgpu::TextureFormat::R8Unorm);
-        DAWN_INVALID_IF(plane1Format != wgpu::TextureFormat::RG8Unorm,
-                        "The bi-planar external texture plane (%s) format (%s) is not %s.",
-                        descriptor->plane1, plane1Format, wgpu::TextureFormat::RG8Unorm);
-
-        DAWN_TRY(ValidateExternalTexturePlane(descriptor->plane0));
+        // Y + UV case.
+        DAWN_TRY_CONTEXT(CheckPlaneFormat(device, descriptor->plane0->GetFormat(), 1),
+                         "validating the format of plane 0 (%s)", descriptor->plane0);
+        DAWN_TRY_CONTEXT(CheckPlaneFormat(device, descriptor->plane1->GetFormat(), 2),
+                         "validating the format of plane 1 (%s)", descriptor->plane1);
         DAWN_TRY(ValidateExternalTexturePlane(descriptor->plane1));
     } else {
-        switch (plane0Format) {
-            case wgpu::TextureFormat::RGBA8Unorm:
-            case wgpu::TextureFormat::BGRA8Unorm:
-            case wgpu::TextureFormat::RGBA16Float:
-                DAWN_TRY(ValidateExternalTexturePlane(descriptor->plane0));
-                break;
-            default:
-                return DAWN_VALIDATION_ERROR(
-                    "The external texture plane (%s) format (%s) is not a supported format "
-                    "(%s, %s, %s).",
-                    descriptor->plane0, plane0Format, wgpu::TextureFormat::RGBA8Unorm,
-                    wgpu::TextureFormat::BGRA8Unorm, wgpu::TextureFormat::RGBA16Float);
-        }
+        // RGBA case.
+        DAWN_TRY_CONTEXT(CheckPlaneFormat(device, descriptor->plane0->GetFormat(), 4),
+                         "validating the format of plane 0 (%s)", descriptor->plane0);
     }
 
     DAWN_INVALID_IF(descriptor->visibleSize.width == 0 || descriptor->visibleSize.height == 0,
