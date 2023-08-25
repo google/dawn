@@ -94,6 +94,16 @@ MaybeError ValidateTextureFormatForTextureToBufferCopyInCompatibilityMode(
     return {};
 }
 
+MaybeError ValidateSourceTextureFormatForTextureToTextureCopyInCompatibilityMode(
+    const TextureBase* texture) {
+    DAWN_INVALID_IF(
+        texture->GetFormat().isCompressed,
+        "%s with format %s cannot be used as the source in a texture to texture copy in "
+        "compatibility mode.",
+        texture, texture->GetFormat().format);
+    return {};
+}
+
 MaybeError ValidateTextureDepthStencilToBufferCopyRestrictions(const ImageCopyTexture& src) {
     Aspect aspectUsed;
     DAWN_TRY_ASSIGN(aspectUsed, SingleAspectUsedByImageCopyTexture(src));
@@ -1701,6 +1711,11 @@ void CommandEncoder::APICopyTextureToTexture(const ImageCopyTexture* source,
                                           mUsageValidationMode));
                 DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst,
                                           mUsageValidationMode));
+
+                if (GetDevice()->IsCompatibilityMode()) {
+                    DAWN_TRY(ValidateSourceTextureFormatForTextureToTextureCopyInCompatibilityMode(
+                        source->texture));
+                }
             }
 
             mTopLevelTextures.insert(source->texture);

@@ -908,7 +908,7 @@ TEST_F(CompatValidationTest, CanNotCreateBGRA8UnormTextureWithBGRA8UnormSrgbView
                         testing::HasSubstr("not supported in compatibility mode"));
 }
 
-class CompatCompressedTextureToBufferCopyValidationTests : public CompatValidationTest {
+class CompatCompressedCopyT2BAndCopyT2TValidationTests : public CompatValidationTest {
   protected:
     WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
@@ -944,7 +944,7 @@ class CompatCompressedTextureToBufferCopyValidationTests : public CompatValidati
     };
 };
 
-TEST_F(CompatCompressedTextureToBufferCopyValidationTests, CanNotCopyCompressedTextureToBuffer) {
+TEST_F(CompatCompressedCopyT2BAndCopyT2TValidationTests, CanNotCopyCompressedTextureToBuffer) {
     for (TextureInfo textureInfo : textureInfos) {
         if (!device.HasFeature(textureInfo.feature)) {
             continue;
@@ -971,5 +971,29 @@ TEST_F(CompatCompressedTextureToBufferCopyValidationTests, CanNotCopyCompressedT
     }
 }
 
+TEST_F(CompatCompressedCopyT2BAndCopyT2TValidationTests, CanNotCopyCompressedTextureToTexture) {
+    for (TextureInfo textureInfo : textureInfos) {
+        if (!device.HasFeature(textureInfo.feature)) {
+            continue;
+        }
+
+        wgpu::TextureDescriptor descriptor;
+        descriptor.size = {4, 4, 1};
+        descriptor.dimension = wgpu::TextureDimension::e2D;
+        descriptor.format = textureInfo.format;
+        descriptor.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture srcTexture = device.CreateTexture(&descriptor);
+
+        descriptor.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
+        wgpu::Texture dstTexture = device.CreateTexture(&descriptor);
+
+        wgpu::ImageCopyTexture source = utils::CreateImageCopyTexture(srcTexture);
+        wgpu::ImageCopyTexture destination = utils::CreateImageCopyTexture(dstTexture);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.CopyTextureToTexture(&source, &destination, &descriptor.size);
+        ASSERT_DEVICE_ERROR(encoder.Finish(), testing::HasSubstr("cannot be used"));
+    }
+}
 }  // anonymous namespace
 }  // namespace dawn
