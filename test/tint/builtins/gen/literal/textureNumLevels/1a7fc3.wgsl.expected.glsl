@@ -1,14 +1,19 @@
-SKIP: FAILED
-
 #version 310 es
 
-uniform highp usampler2D arg_0_1;
+struct tint_symbol {
+  uint texture_builtin_value_0;
+};
+
+layout(binding = 0, std140) uniform tint_symbol_1_block_ubo {
+  tint_symbol inner;
+} tint_symbol_1;
+
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uint inner;
 } prevent_dce;
 
 void textureNumLevels_1a7fc3() {
-  uint res = uint(textureQueryLevels(arg_0_1));
+  uint res = tint_symbol_1.inner.texture_builtin_value_0;
   prevent_dce.inner = res;
 }
 
@@ -25,23 +30,23 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:9: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision highp float;
 
-uniform highp usampler2D arg_0_1;
+struct tint_symbol {
+  uint texture_builtin_value_0;
+};
+
+layout(binding = 0, std140) uniform tint_symbol_1_block_ubo {
+  tint_symbol inner;
+} tint_symbol_1;
+
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uint inner;
 } prevent_dce;
 
 void textureNumLevels_1a7fc3() {
-  uint res = uint(textureQueryLevels(arg_0_1));
+  uint res = tint_symbol_1.inner.texture_builtin_value_0;
   prevent_dce.inner = res;
 }
 
@@ -53,22 +58,22 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:10: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:10: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
-uniform highp usampler2D arg_0_1;
+struct tint_symbol {
+  uint texture_builtin_value_0;
+};
+
+layout(binding = 0, std140) uniform tint_symbol_1_block_ubo {
+  tint_symbol inner;
+} tint_symbol_1;
+
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uint inner;
 } prevent_dce;
 
 void textureNumLevels_1a7fc3() {
-  uint res = uint(textureQueryLevels(arg_0_1));
+  uint res = tint_symbol_1.inner.texture_builtin_value_0;
   prevent_dce.inner = res;
 }
 
@@ -81,10 +86,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:9: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-

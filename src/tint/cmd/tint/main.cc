@@ -883,6 +883,10 @@ bool GenerateGlsl(const tint::Program* program, const Options& options) {
         gen_options.disable_robustness = !options.enable_robustness;
         gen_options.external_texture_options.bindings_map =
             tint::cmd::GenerateExternalTextureBindings(prg);
+        tint::TextureBuiltinsFromUniformOptions textureBuiltinsFromUniform;
+        constexpr uint32_t kMaxBindGroups = 4u;
+        textureBuiltinsFromUniform.ubo_binding = {kMaxBindGroups, 0u};
+        gen_options.texture_builtins_from_uniform = std::move(textureBuiltinsFromUniform);
         auto result = tint::glsl::writer::Generate(prg, gen_options, entry_point_name);
         if (!result) {
             tint::cmd::PrintWGSL(std::cerr, *prg);

@@ -1,12 +1,17 @@
-SKIP: FAILED
-
 #version 310 es
 
+struct tint_symbol_3 {
+  uint texture_builtin_value_0;
+};
+
+layout(binding = 0, std140) uniform tint_symbol_4_block_ubo {
+  tint_symbol_3 inner;
+} tint_symbol_4;
+
 vec4 tint_symbol_1 = vec4(0.0f);
-uniform highp sampler2DMS arg_0_1;
 void textureNumSamples_a3c8a0() {
   int res = 0;
-  res = int(uint(textureSamples(arg_0_1)));
+  res = int(tint_symbol_4.inner.texture_builtin_value_0);
   return;
 }
 
@@ -27,8 +32,8 @@ struct vertex_main_out {
 
 vertex_main_out vertex_main() {
   vertex_main_1();
-  vertex_main_out tint_symbol_3 = vertex_main_out(tint_symbol_1);
-  return tint_symbol_3;
+  vertex_main_out tint_symbol_5 = vertex_main_out(tint_symbol_1);
+  return tint_symbol_5;
 }
 
 void main() {
@@ -39,20 +44,20 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:7: 'textureSamples' : no matching overloaded function found 
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision highp float;
 
-uniform highp sampler2DMS arg_0_1;
+struct tint_symbol {
+  uint texture_builtin_value_0;
+};
+
+layout(binding = 0, std140) uniform tint_symbol_1_block_ubo {
+  tint_symbol inner;
+} tint_symbol_1;
+
 void textureNumSamples_a3c8a0() {
   int res = 0;
-  res = int(uint(textureSamples(arg_0_1)));
+  res = int(tint_symbol_1.inner.texture_builtin_value_0);
   return;
 }
 
@@ -73,19 +78,19 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:7: 'textureSamples' : no matching overloaded function found 
-ERROR: 0:7: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
-uniform highp sampler2DMS arg_0_1;
+struct tint_symbol {
+  uint texture_builtin_value_0;
+};
+
+layout(binding = 0, std140) uniform tint_symbol_1_block_ubo {
+  tint_symbol inner;
+} tint_symbol_1;
+
 void textureNumSamples_a3c8a0() {
   int res = 0;
-  res = int(uint(textureSamples(arg_0_1)));
+  res = int(tint_symbol_1.inner.texture_builtin_value_0);
   return;
 }
 
@@ -107,10 +112,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:6: 'textureSamples' : no matching overloaded function found 
-ERROR: 0:6: '' : compilation terminated 
-ERROR: 2 compilation errors.  No code generated.
-
-
-
