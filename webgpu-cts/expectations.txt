@@ -74,7 +74,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2023-08-22 01:50:49AM
+# Last rolled: 2023-08-24 05:16:07PM
 
 ################################################################################
 # copyToTexture failures on Linux
@@ -631,12 +631,12 @@ crbug.com/dawn/1992 [ android-r qualcomm ] webgpu:shader,execution,expression,bi
 ################################################################################
 # WebGpuMessageTimeoutError on Win Intel Release
 ################################################################################
-crbug.com/1462375 [ intel win10 release ] webgpu:shader,validation,expression,call,builtin* [ Failure ]
+crbug.com/1462375 [ intel release win10 ] webgpu:shader,validation,expression,call,builtin* [ Failure ]
 
 ################################################################################
 # WebGpuMessageTimeoutError on Win Nvidia
 ################################################################################
-crbug.com/dawn/1994 [ nvidia-0x2184 win10 webgpu-adapter-default ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ RetryOnFailure ]
+crbug.com/dawn/1994 [ nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,video:copy_from_video:* [ RetryOnFailure ]
 
 ################################################################################
 # device_lost tests GPU connection lost on Win Nvidia
@@ -689,7 +689,6 @@ crbug.com/dawn/0000 [ amd-0x67ef dawn-no-backend-validation target-cpu-64 ventur
 crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm target-cpu-32 ] webgpu:shader,execution,expression,binary,f32_multiplication:scalar_vector:inputSource="const";dim=2 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm target-cpu-32 ] webgpu:shader,execution,expression,binary,i32_arithmetic:division_vector_scalar:inputSource="const";vectorize_lhs=4 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm target-cpu-32 ] webgpu:shader,execution,expression,binary,i32_arithmetic:division_vector_scalar:inputSource="const";vectorize_lhs=4 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm target-cpu-32 ] webgpu:shader,execution,expression,call,builtin,bitcast:i32_to_f32:inputSource="const";vectorize=3;alias=true [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm target-cpu-32 ] webgpu:shader,execution,expression,call,builtin,faceForward:f32_vec3:inputSource="const" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-backend-validation qualcomm target-cpu-32 ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="const";vectorize=2 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r dawn-no-backend-validation qualcomm target-cpu-32 ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="const";vectorize=2 [ RetryOnFailure ]
@@ -1705,6 +1704,10 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 ubuntu webgpu-adap
 ################################################################################
 crbug.com/dawn/0000 [ android-r ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:orientation="none";srcDoFlipYDuringCopy=true;dstPremultiplied=true [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,memory_model,weak:store_buffer:memType="atomic_workgroup" [ Failure ]
+crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,bitcast:* [ Failure ]
+crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ Failure ]
+crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,binary,u32_arithmetic:addition_scalar_vector:inputSource="const";vectorize_rhs=4 [ Failure ]
+crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,normalize:f32_vec2:inputSource="const" [ Failure ]
 
 crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="none";colorSpaceConversion="none";* [ Failure ]
 crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="flipY";* [ Failure ]
@@ -1719,6 +1722,3 @@ crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,ImageData:copy_subrect_fro
 crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,ImageData:from_ImageData:orientation="flipY";* [ Failure ]
 crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,image:copy_subrect_from_2D_Canvas:orientation="flipY";* [ Failure ]
 crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,image:from_image:orientation="flipY";* [ Failure ]
-
-# These tests are consistently timing out on every platform, which takes a very long time. Skipping until we can triage further.
-crbug.com/dawn/1900 webgpu:shader,execution,zero_init:compute,zero_init:* [ Skip ]
