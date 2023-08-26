@@ -358,10 +358,12 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                         case wgpu::StorageTextureAccess::WriteOnly:
                             access = GL_WRITE_ONLY;
                             break;
-
-                        // TODO(dawn:1972): Implement ReadOnly and ReadWrite storage texture
-                        case wgpu::StorageTextureAccess::ReadOnly:
                         case wgpu::StorageTextureAccess::ReadWrite:
+                            access = GL_READ_WRITE;
+                            break;
+                        case wgpu::StorageTextureAccess::ReadOnly:
+                            access = GL_READ_ONLY;
+                            break;
                         case wgpu::StorageTextureAccess::Undefined:
                             UNREACHABLE();
                     }

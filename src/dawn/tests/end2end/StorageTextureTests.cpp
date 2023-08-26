@@ -1156,9 +1156,6 @@ enable chromium_experimental_read_write_storage_texture;
 TEST_P(ReadWriteStorageTextureTests, ReadOnlyStorageTextureInComputeShader) {
     DAWN_TEST_UNSUPPORTED_IF(!IsReadWriteStorageTextureSupported());
 
-    // TODO(dawn:1972): Support read-only storage texture on OpenGL and OpenGL ES backends.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
     const std::vector<uint8_t> kInitialTextureData = GetExpectedData(kStorageTextureFormat);
     wgpu::Texture readonlyStorageTexture = CreateTextureWithTestData(
@@ -1214,8 +1211,9 @@ fn main() {
 TEST_P(ReadWriteStorageTextureTests, ReadOnlyStorageTextureInVertexShader) {
     DAWN_TEST_UNSUPPORTED_IF(!IsReadWriteStorageTextureSupported());
 
-    // TODO(dawn:1972): Support read-only storage texture on OpenGL and OpenGL ES backends.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+    // TODO(dawn:1972): Investigate why ANGLE produces wrong HLSL code for read-only storage
+    // textures in vertex shader.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
 
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
     const std::vector<uint8_t> kInitialTextureData = GetExpectedData(kStorageTextureFormat);
@@ -1266,8 +1264,8 @@ struct FragmentInput {
 TEST_P(ReadWriteStorageTextureTests, ReadOnlyStorageTextureInFragmentShader) {
     DAWN_TEST_UNSUPPORTED_IF(!IsReadWriteStorageTextureSupported());
 
-    // TODO(dawn:1972): Support read-only storage texture on OpenGL and OpenGL ES backends.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+    // TODO(dawn:1972): Investigate why the test fails on ANGLE.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
 
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
     const std::vector<uint8_t> kInitialTextureData = GetExpectedData(kStorageTextureFormat);
@@ -1297,10 +1295,11 @@ enable chromium_experimental_read_write_storage_texture;
     CheckDrawsGreen(kSimpleVertexShader, fsstream.str().c_str(), readonlyStorageTexture);
 }
 
-// TODO(dawn:1972): Support ReadWrite storage texture access on OpenGL
 DAWN_INSTANTIATE_TEST(ReadWriteStorageTextureTests,
                       D3D11Backend(),
                       D3D12Backend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
                       MetalBackend(),
                       VulkanBackend());
 
