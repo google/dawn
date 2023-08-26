@@ -1,14 +1,12 @@
-SKIP: FAILED
-
 #version 310 es
 
-layout(rgba8) uniform highp image2D arg_0;
+layout(rgba8) uniform highp readonly image2D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec4 inner;
 } prevent_dce;
 
 void textureLoad_519ab5() {
-  vec4 res = texelFetch(arg_0, ivec2(1, 0));
+  vec4 res = imageLoad(arg_0, ivec2(1, 0));
   prevent_dce.inner = res;
 }
 
@@ -25,22 +23,16 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:3: 'rgba8' : format requires readonly or writeonly memory qualifier 
-ERROR: 1 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision highp float;
 
-layout(rgba8) uniform highp image2D arg_0;
+layout(rgba8) uniform highp readonly image2D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec4 inner;
 } prevent_dce;
 
 void textureLoad_519ab5() {
-  vec4 res = texelFetch(arg_0, ivec2(1, 0));
+  vec4 res = imageLoad(arg_0, ivec2(1, 0));
   prevent_dce.inner = res;
 }
 
@@ -52,21 +44,15 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'rgba8' : format requires readonly or writeonly memory qualifier 
-ERROR: 1 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
-layout(rgba8) uniform highp image2D arg_0;
+layout(rgba8) uniform highp readonly image2D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   vec4 inner;
 } prevent_dce;
 
 void textureLoad_519ab5() {
-  vec4 res = texelFetch(arg_0, ivec2(1, 0));
+  vec4 res = imageLoad(arg_0, ivec2(1, 0));
   prevent_dce.inner = res;
 }
 
@@ -79,9 +65,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:3: 'rgba8' : format requires readonly or writeonly memory qualifier 
-ERROR: 1 compilation errors.  No code generated.
-
-
-

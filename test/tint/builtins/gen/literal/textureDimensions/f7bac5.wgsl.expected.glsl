@@ -1,8 +1,6 @@
-SKIP: FAILED
-
 #version 310 es
 
-layout(rgba32i) uniform highp iimage2DArray arg_0;
+layout(rgba32i) uniform highp readonly iimage2DArray arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec2 inner;
 } prevent_dce;
@@ -25,16 +23,10 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:3: 'rgba32i' : format requires readonly or writeonly memory qualifier 
-ERROR: 1 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision highp float;
 
-layout(rgba32i) uniform highp iimage2DArray arg_0;
+layout(rgba32i) uniform highp readonly iimage2DArray arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec2 inner;
 } prevent_dce;
@@ -52,15 +44,9 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'rgba32i' : format requires readonly or writeonly memory qualifier 
-ERROR: 1 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
-layout(rgba32i) uniform highp iimage2DArray arg_0;
+layout(rgba32i) uniform highp readonly iimage2DArray arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec2 inner;
 } prevent_dce;
@@ -79,9 +65,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:3: 'rgba32i' : format requires readonly or writeonly memory qualifier 
-ERROR: 1 compilation errors.  No code generated.
-
-
-

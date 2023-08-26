@@ -1,14 +1,12 @@
-SKIP: FAILED
-
 #version 310 es
 
-layout(r32i) uniform highp writeonly iimage3D arg_0;
+layout(r32i) uniform highp iimage3D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec4 inner;
 } prevent_dce;
 
 void textureLoad_b27c33() {
-  ivec4 res = texelFetch(arg_0, ivec3(1));
+  ivec4 res = imageLoad(arg_0, ivec3(1));
   prevent_dce.inner = res;
 }
 
@@ -25,24 +23,16 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:9: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:9: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of int'
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision highp float;
 
-layout(r32i) uniform highp writeonly iimage3D arg_0;
+layout(r32i) uniform highp iimage3D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec4 inner;
 } prevent_dce;
 
 void textureLoad_b27c33() {
-  ivec4 res = texelFetch(arg_0, ivec3(1));
+  ivec4 res = imageLoad(arg_0, ivec3(1));
   prevent_dce.inner = res;
 }
 
@@ -54,23 +44,15 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:10: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:10: '=' :  cannot convert from ' const float' to ' temp mediump 4-component vector of int'
-ERROR: 0:10: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
-layout(r32i) uniform highp writeonly iimage3D arg_0;
+layout(r32i) uniform highp iimage3D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   ivec4 inner;
 } prevent_dce;
 
 void textureLoad_b27c33() {
-  ivec4 res = texelFetch(arg_0, ivec3(1));
+  ivec4 res = imageLoad(arg_0, ivec3(1));
   prevent_dce.inner = res;
 }
 
@@ -83,11 +65,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:9: 'texelFetch' : no matching overloaded function found 
-ERROR: 0:9: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of int'
-ERROR: 0:9: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
-
-
-

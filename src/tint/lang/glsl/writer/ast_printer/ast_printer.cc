@@ -1290,6 +1290,8 @@ void ASTPrinter::EmitBarrierCall(StringStream& out, const sem::Builtin* builtin)
         out << "barrier()";
     } else if (builtin->Type() == core::Function::kStorageBarrier) {
         out << "{ barrier(); memoryBarrierBuffer(); }";
+    } else if (builtin->Type() == core::Function::kTextureBarrier) {
+        out << "{ barrier(); memoryBarrierImage(); }";
     } else {
         TINT_UNREACHABLE() << "unexpected barrier builtin type " << core::str(builtin->Type());
     }
@@ -1485,7 +1487,11 @@ void ASTPrinter::EmitTextureCall(StringStream& out,
             glsl_ret_width = 1;
             break;
         case core::Function::kTextureLoad:
-            out << "texelFetch";
+            if (texture_type->Is<core::type::StorageTexture>()) {
+                out << "imageLoad";
+            } else {
+                out << "texelFetch";
+            }
             break;
         case core::Function::kTextureStore:
             out << "imageStore";
@@ -2726,8 +2732,36 @@ void ASTPrinter::EmitType(StringStream& out,
 
         out << "highp ";
 
-        if (storage && storage->access() != core::Access::kRead) {
-            out << "writeonly ";
+        if (storage) {
+            switch (storage->access()) {
+                case core::Access::kRead:
+                    out << "readonly ";
+                    break;
+                case core::Access::kWrite:
+                    out << "writeonly ";
+                    break;
+                case core::Access::kReadWrite: {
+                    // ESSL 3.1 SPEC (chapter 4.9, Memory Access Qualifiers):
+                    // Except for image variables qualified with the format qualifiers r32f, r32i,
+                    // and r32ui, image variables must specify either memory qualifier readonly or
+                    // the memory qualifier writeonly.
+                    switch (storage->texel_format()) {
+                        case core::TexelFormat::kR32Float:
+                        case core::TexelFormat::kR32Sint:
+                        case core::TexelFormat::kR32Uint:
+                            break;
+                        default: {
+                            // TODO(dawn:1972): Fix the tests that contain read-write storage
+                            // textures with illegal formats.
+                            out << "writeonly ";
+                            break;
+                        }
+                    }
+                } break;
+                default:
+                    TINT_UNREACHABLE() << "unexpected storage texture access " << storage->access();
+                    return;
+            }
         }
         auto* subtype = sampled   ? sampled->type()
                         : storage ? storage->type()

@@ -1,15 +1,13 @@
-SKIP: FAILED
-
 #version 310 es
 
-layout(rgba16ui) uniform highp uimage2D arg_0;
+layout(rgba16ui) uniform highp readonly uimage2D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec4 inner;
 } prevent_dce;
 
 void textureLoad_ecc823() {
   ivec2 arg_1 = ivec2(1);
-  uvec4 res = texelFetch(arg_0, arg_1);
+  uvec4 res = imageLoad(arg_0, arg_1);
   prevent_dce.inner = res;
 }
 
@@ -26,23 +24,17 @@ void main() {
   gl_Position.z = ((2.0f * gl_Position.z) - gl_Position.w);
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:3: 'rgba16ui' : format requires readonly or writeonly memory qualifier 
-ERROR: 1 compilation errors.  No code generated.
-
-
-
 #version 310 es
 precision highp float;
 
-layout(rgba16ui) uniform highp uimage2D arg_0;
+layout(rgba16ui) uniform highp readonly uimage2D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec4 inner;
 } prevent_dce;
 
 void textureLoad_ecc823() {
   ivec2 arg_1 = ivec2(1);
-  uvec4 res = texelFetch(arg_0, arg_1);
+  uvec4 res = imageLoad(arg_0, arg_1);
   prevent_dce.inner = res;
 }
 
@@ -54,22 +46,16 @@ void main() {
   fragment_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:4: 'rgba16ui' : format requires readonly or writeonly memory qualifier 
-ERROR: 1 compilation errors.  No code generated.
-
-
-
 #version 310 es
 
-layout(rgba16ui) uniform highp uimage2D arg_0;
+layout(rgba16ui) uniform highp readonly uimage2D arg_0;
 layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
   uvec4 inner;
 } prevent_dce;
 
 void textureLoad_ecc823() {
   ivec2 arg_1 = ivec2(1);
-  uvec4 res = texelFetch(arg_0, arg_1);
+  uvec4 res = imageLoad(arg_0, arg_1);
   prevent_dce.inner = res;
 }
 
@@ -82,9 +68,3 @@ void main() {
   compute_main();
   return;
 }
-Error parsing GLSL shader:
-ERROR: 0:3: 'rgba16ui' : format requires readonly or writeonly memory qualifier 
-ERROR: 1 compilation errors.  No code generated.
-
-
-
