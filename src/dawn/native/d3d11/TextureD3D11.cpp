@@ -165,6 +165,7 @@ MaybeError ValidateVideoTextureCanBeShared(Device* device, DXGI_FORMAT textureFo
         device->GetDeviceInfo().supportsSharedResourceCapabilityTier2;
     switch (textureFormat) {
         case DXGI_FORMAT_NV12:
+        case DXGI_FORMAT_P010:
             if (supportsSharedResourceCapabilityTier2) {
                 return {};
             }

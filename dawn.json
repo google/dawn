@@ -1863,6 +1863,7 @@
             {"value": 1018, "name": "pixel local storage non coherent", "tags": ["dawn"]},
             {"value": 1019, "name": "norm16 texture formats", "tags": ["dawn"]},
             {"value": 1020, "name": "multi planar format extended usages", "tags": ["dawn"]},
+            {"value": 1021, "name": "multi planar format p010", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},
@@ -3409,7 +3410,8 @@
             {"value": 99, "name": "RG16 snorm", "tags": ["dawn"]},
             {"value": 100, "name": "RGBA16 snorm", "tags": ["dawn"]},
 
-            {"value": 101, "name": "R8 BG8 Biplanar 420 unorm", "tags": ["dawn"]}
+            {"value": 101, "name": "R8 BG8 Biplanar 420 unorm", "tags": ["dawn"]},
+            {"value": 102, "name": "R10X6 BG10X6 Biplanar 420 unorm", "tags": ["dawn"]}
         ]
     },
     "texture usage": {

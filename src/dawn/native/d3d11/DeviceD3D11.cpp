@@ -460,7 +460,7 @@ ResultOrError<std::unique_ptr<d3d::ExternalImageDXGIImpl>> Device::CreateExterna
     // Shared handle is assumed to support resource sharing capability. The resource
     // shared capability tier must agree to share resources between D3D devices.
     const Format* format = GetInternalFormat(textureDescriptor->format).AcquireSuccess();
-    if (format->IsMultiPlanar()) {
+    if (format->IsMultiPlanar() && descriptor->GetType() == ExternalImageType::DXGISharedHandle) {
         DAWN_TRY(ValidateVideoTextureCanBeShared(
             this, d3d::DXGITextureFormat(textureDescriptor->format)));
     }

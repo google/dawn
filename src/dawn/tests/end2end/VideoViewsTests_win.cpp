@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "VideoViewsTests.h"
@@ -85,6 +86,8 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         switch (format) {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                 return DXGI_FORMAT_NV12;
+            case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
+                return DXGI_FORMAT_P010;
             default:
                 UNREACHABLE();
         }
@@ -116,12 +119,18 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         d3dDescriptor.CPUAccessFlags = 0;
         d3dDescriptor.MiscFlags = D3D11_RESOURCE_MISC_SHARED_NTHANDLE | D3D11_RESOURCE_MISC_SHARED;
 
-        std::vector<uint8_t> initialData =
-            VideoViewsTestsBase::GetTestTextureData(format, isCheckerboard);
-
         D3D11_SUBRESOURCE_DATA subres;
-        subres.pSysMem = initialData.data();
         subres.SysMemPitch = VideoViewsTestsBase::kYUVImageDataWidthInTexels;
+
+        std::variant<std::vector<uint8_t>, std::vector<uint16_t>> initialData;
+        if (format == wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm) {
+            initialData = VideoViewsTestsBase::GetTestTextureData<uint16_t>(format, isCheckerboard);
+            subres.pSysMem = std::get<1>(initialData).data();
+            subres.SysMemPitch *= 2;
+        } else {
+            initialData = VideoViewsTestsBase::GetTestTextureData<uint8_t>(format, isCheckerboard);
+            subres.pSysMem = std::get<0>(initialData).data();
+        }
 
         ComPtr<ID3D11Texture2D> d3d11Texture;
         HRESULT hr = mD3d11Device->CreateTexture2D(
@@ -212,6 +221,13 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
 std::vector<BackendTestConfig> VideoViewsTestBackend::Backends() {
     return {D3D11Backend(), D3D12Backend()};
 }
+
+// static
+std::vector<Format> VideoViewsTestBackend::Formats() {
+    return {wgpu::TextureFormat::R8BG8Biplanar420Unorm,
+            wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm};
+}
+
 // static
 std::unique_ptr<VideoViewsTestBackend> VideoViewsTestBackend::Create() {
     return std::make_unique<VideoViewsTestBackendWin>();

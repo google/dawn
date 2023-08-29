@@ -23,9 +23,13 @@
 
 namespace dawn {
 
+using Format = wgpu::TextureFormat;
+DAWN_TEST_PARAM_STRUCT(Params, Format);
+
 class VideoViewsTestBackend {
   public:
     static std::vector<BackendTestConfig> Backends();
+    static std::vector<Format> Formats();
     static std::unique_ptr<VideoViewsTestBackend> Create();
 
     virtual ~VideoViewsTestBackend();
@@ -53,7 +57,7 @@ class VideoViewsTestBackend {
     virtual void DestroyVideoTextureForTest(std::unique_ptr<PlatformTexture>&& platformTexture) = 0;
 };
 
-class VideoViewsTestsBase : public DawnTest {
+class VideoViewsTestsBase : public DawnTestWithParams<Params> {
   public:
     // The width and height in texels are 4 for all YUV formats.
     static constexpr uint32_t kYUVImageDataWidthInTexels = 4;
@@ -81,20 +85,31 @@ class VideoViewsTestsBase : public DawnTest {
         dawn::utils::RGBA8{81, 0, 0, 0xFF},     // Y
         dawn::utils::RGBA8{90, 240, 0, 0xFF}};  // UV
 
-    static std::vector<uint8_t> GetTestTextureData(wgpu::TextureFormat format, bool isCheckerboard);
+    static constexpr dawn::utils::RGBA8 kTolerance{1, 1, 1, 0};
+
+    template <typename T>
+    static std::vector<T> GetTestTextureData(wgpu::TextureFormat format, bool isCheckerboard);
     static uint32_t NumPlanes(wgpu::TextureFormat format);
     static std::vector<uint8_t> GetTestTextureDataWithPlaneIndex(size_t planeIndex,
                                                                  size_t bytesPerRow,
                                                                  size_t height,
                                                                  bool isCheckerboard);
+    static std::array<Format, 2> PlaneFormats(Format textureFormat);
 
   protected:
     void SetUp() override;
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override;
     bool IsMultiPlanarFormatsSupported() const;
+    bool IsMultiPlanarFormatP010Supported() const;
+    bool IsNorm16TextureFormatsSupported() const;
     wgpu::ShaderModule GetTestVertexShaderModule() const;
+    wgpu::TextureFormat GetFormat() const;
+    wgpu::TextureFormat GetPlaneFormat(int plane) const;
+    bool IsFormatSupported() const;
 
     bool mIsMultiPlanarFormatsSupported = false;
+    bool mIsMultiPlanarFormatP010Supported = false;
+    bool mIsNorm16TextureFormatsSupported = false;
 };
 
 }  // namespace dawn

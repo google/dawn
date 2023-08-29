@@ -218,6 +218,8 @@ ResultOrError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t
             return wgpu::TextureFormat::R8Unorm;
         case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
             return wgpu::TextureFormat::R8BG8Biplanar420Unorm;
+        case kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange:
+            return wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm;
         default:
             return DAWN_VALIDATION_ERROR("Unsupported IOSurface format (%x).", format);
     }
@@ -629,6 +631,7 @@ MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat fo
             }
 
         case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
+        case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
         case wgpu::TextureFormat::Undefined:
             UNREACHABLE();
     }

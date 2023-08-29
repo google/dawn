@@ -726,17 +726,6 @@ DawnTestWithParams<Params>::DawnTestWithParams() : DawnTestBase(this->GetParam()
 
 using DawnTest = DawnTestWithParams<>;
 
-// Instantiate the test once for all backends in the second param. Use it like this:
-//     DAWN_INSTANTIATE_TEST_V(MyTestFixture, std::vector<BackendTestConfig>({{MetalBackend},
-//     {OpenGLBackend}})
-#define DAWN_INSTANTIATE_TEST_V(testName, testParams)                               \
-    INSTANTIATE_TEST_SUITE_P(                                                       \
-        , testName,                                                                 \
-        testing::ValuesIn(::dawn::detail::GetAvailableAdapterTestParamsForBackends( \
-            testParams.data(), testParams.size())),                                 \
-        DawnTestBase::PrintToStringParamName(#testName));                           \
-    GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(testName)
-
 // Instantiate the test once for each backend provided after the first argument. Use it like this:
 //     DAWN_INSTANTIATE_TEST(MyTestFixture, MetalBackend, OpenGLBackend)
 #define DAWN_INSTANTIATE_TEST(testName, ...)                                            \
@@ -768,6 +757,15 @@ using DawnTest = DawnTestWithParams<>;
     INSTANTIATE_TEST_SUITE_P(                                                                  \
         , testName, ::testing::ValuesIn(MakeParamGenerator<testName::ParamType>(__VA_ARGS__)), \
         DawnTestBase::PrintToStringParamName(#testName));                                      \
+    GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(testName)
+
+// Basically same as DAWN_INSTANTIATE_TEST_P, except that each backend is provided in the
+// 'backends' param list.
+#define DAWN_INSTANTIATE_TEST_B(testName, backends, ...)                                     \
+    INSTANTIATE_TEST_SUITE_P(                                                                \
+        , testName,                                                                          \
+        ::testing::ValuesIn(MakeParamGenerator<testName::ParamType>(backends, __VA_ARGS__)), \
+        DawnTestBase::PrintToStringParamName(#testName));                                    \
     GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(testName)
 
 // Implementation for DAWN_TEST_PARAM_STRUCT to declare/print struct fields.

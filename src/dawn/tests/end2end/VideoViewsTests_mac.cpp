@@ -183,6 +183,12 @@ std::vector<BackendTestConfig> VideoViewsTestBackend::Backends() {
 }
 
 // static
+std::vector<Format> VideoViewsTestBackend::Formats() {
+    // TODO(dawn:551): Support sharing P010 video surfaces.
+    return {wgpu::TextureFormat::R8BG8Biplanar420Unorm};
+}
+
+// static
 std::unique_ptr<VideoViewsTestBackend> VideoViewsTestBackend::Create() {
     return std::make_unique<VideoViewsTestBackendIOSurface>();
 }
