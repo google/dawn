@@ -158,7 +158,7 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
                                     GBM_BO_TRANSFER_WRITE, &strideBytes, &mapHandle);
             EXPECT_NE(addr, nullptr);
             std::vector<uint8_t> initialData =
-                VideoViewsTestsBase::GetTestTextureData(format, isCheckerboard);
+                VideoViewsTestsBase::GetTestTextureData<uint8_t>(format, isCheckerboard);
             uint8_t* srcBegin = initialData.data();
             uint8_t* srcEnd = srcBegin + initialData.size();
             uint8_t* dstBegin = static_cast<uint8_t*>(addr);
