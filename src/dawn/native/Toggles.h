@@ -190,6 +190,9 @@ class TogglesInfo {
     TogglesInfo();
     ~TogglesInfo();
 
+    // Retrieves all fo the ToggleInfo information
+    static std::vector<const ToggleInfo*> AllToggleInfos();
+
     // Used to query the details of a toggle. Return nullptr if toggleName is not a valid name
     // of a toggle supported in Dawn.
     const ToggleInfo* GetToggleInfo(const char* toggleName);

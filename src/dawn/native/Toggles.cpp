@@ -650,6 +650,17 @@ const char* ToggleEnumToName(Toggle toggle) {
     return toggleNameAndInfo.info.name;
 }
 
+// static
+std::vector<const ToggleInfo*> TogglesInfo::AllToggleInfos() {
+    std::vector<const ToggleInfo*> infos;
+    infos.reserve(kToggleNameAndInfoList.size());
+
+    for (const auto& entry : kToggleNameAndInfoList) {
+        infos.push_back(&(entry.info));
+    }
+    return infos;
+}
+
 TogglesInfo::TogglesInfo() = default;
 
 TogglesInfo::~TogglesInfo() = default;

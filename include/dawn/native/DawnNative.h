@@ -86,7 +86,6 @@ class DAWN_NATIVE_EXPORT Adapter {
     void GetProperties(wgpu::AdapterProperties* properties) const;
     void GetProperties(WGPUAdapterProperties* properties) const;
 
-    std::vector<const char*> GetSupportedExtensions() const;
     std::vector<const char*> GetSupportedFeatures() const;
     bool GetLimits(WGPUSupportedLimits* limits) const;
 

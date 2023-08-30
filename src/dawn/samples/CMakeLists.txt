@@ -45,3 +45,8 @@ target_link_libraries(ComputeBoids dawn_sample_utils)
 add_executable(Animometer "Animometer.cpp")
 common_compile_options(Animometer)
 target_link_libraries(Animometer dawn_sample_utils)
+
+add_executable(DawnInfo "DawnInfo.cpp")
+common_compile_options(DawnInfo)
+target_link_libraries(DawnInfo dawn_sample_utils)
+

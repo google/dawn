@@ -20,6 +20,7 @@ group("samples") {
     ":CHelloTriangle",
     ":ComputeBoids",
     ":CppHelloTriangle",
+    ":DawnInfo",
     ":ManualSwapChainTest",
   ]
 }
@@ -74,4 +75,8 @@ sample("Animometer") {
 
 sample("ManualSwapChainTest") {
   sources = [ "ManualSwapChainTest.cpp" ]
+}
+
+sample("DawnInfo") {
+  sources = [ "DawnInfo.cpp" ]
 }
