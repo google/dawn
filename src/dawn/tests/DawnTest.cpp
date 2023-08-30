@@ -133,8 +133,15 @@ std::string DawnTestBase::PrintToStringParamName::SanitizeParamName(
     const TestAdapterProperties& properties,
     size_t index) const {
     // Sanitize the adapter name for GoogleTest
-    std::string sanitizedName = std::regex_replace(paramName, std::regex("[^a-zA-Z0-9]+"), "_") +
-                                (properties.compatibilityMode ? "_compat" : "");
+    std::string sanitizedName = std::move(paramName);
+    for (size_t i = 0; i < sanitizedName.length(); ++i) {
+        if (!std::isalnum(sanitizedName[i])) {
+            sanitizedName[i] = '_';
+        }
+    }
+    if (properties.compatibilityMode) {
+        sanitizedName += "_compat";
+    }
 
     // Strip trailing underscores, if any.
     while (sanitizedName.back() == '_') {
