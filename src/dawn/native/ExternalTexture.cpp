@@ -92,7 +92,6 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
                          "validating the format of plane 0 (%s)", descriptor->plane0);
         DAWN_TRY_CONTEXT(CheckPlaneFormat(device, descriptor->plane1->GetFormat(), 2),
                          "validating the format of plane 1 (%s)", descriptor->plane1);
-        DAWN_TRY(ValidateExternalTexturePlane(descriptor->plane1));
     } else {
         // RGBA case.
         DAWN_TRY_CONTEXT(CheckPlaneFormat(device, descriptor->plane0->GetFormat(), 4),
