@@ -166,7 +166,7 @@ struct ZeroInitWorkgroupMemory::State {
             if (auto* builtin_attr = GetAttribute<BuiltinAttribute>(param->attributes)) {
                 auto builtin = sem.Get(builtin_attr)->Value();
                 if (builtin == core::BuiltinValue::kLocalInvocationIndex) {
-                    local_index = [=, this] { return b.Expr(ctx.Clone(param->name->symbol)); };
+                    local_index = [=] { return b.Expr(ctx.Clone(param->name->symbol)); };
                     break;
                 }
             }
@@ -174,7 +174,7 @@ struct ZeroInitWorkgroupMemory::State {
             if (auto* str = sem.Get(param)->Type()->As<core::type::Struct>()) {
                 for (auto* member : str->Members()) {
                     if (member->Attributes().builtin == core::BuiltinValue::kLocalInvocationIndex) {
-                        local_index = [=, this] {
+                        local_index = [=] {
                             auto* param_expr = b.Expr(ctx.Clone(param->name->symbol));
                             auto member_name = ctx.Clone(member->Name());
                             return b.MemberAccessor(param_expr, member_name);
@@ -190,7 +190,7 @@ struct ZeroInitWorkgroupMemory::State {
             auto* local_invocation_index = b.Builtin(core::BuiltinValue::kLocalInvocationIndex);
             auto* param = b.Param(param_name, b.ty.u32(), tint::Vector{local_invocation_index});
             ctx.InsertBack(fn->params, param);
-            local_index = [=, this] { return b.Expr(param->name->symbol); };
+            local_index = [=] { return b.Expr(param->name->symbol); };
         }
 
         // Take the zeroing statements and bin them by the number of iterations

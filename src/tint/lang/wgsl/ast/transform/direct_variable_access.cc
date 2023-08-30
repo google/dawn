@@ -541,7 +541,7 @@ struct DirectVariableAccess::State {
 
             // The dynamic index needs to be hoisted (if it hasn't been already).
             auto fn = FnInfoFor(idx->Stmt()->Function());
-            fn->hoisted_exprs.GetOrCreate(idx, [=, this] {
+            fn->hoisted_exprs.GetOrCreate(idx, [=] {
                 // Create a name for the new 'let'
                 auto name = b.Symbols().New("ptr_index_save");
                 // Insert a new 'let' just above the dynamic index statement.

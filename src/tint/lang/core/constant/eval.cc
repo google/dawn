@@ -1125,7 +1125,7 @@ tint::Result<NumberT> Eval::Sqrt(const Source& source, NumberT v) {
 }
 
 auto Eval::SqrtFunc(const Source& source, const core::type::Type* elem_ty) {
-    return [=, this](auto v) -> Eval::Result {
+    return [=](auto v) -> Eval::Result {
         if (auto r = Sqrt(source, v)) {
             return CreateScalar(source, elem_ty, r.Get());
         }
@@ -1147,7 +1147,7 @@ tint::Result<NumberT> Eval::Clamp(const Source& source, NumberT e, NumberT low, 
 }
 
 auto Eval::ClampFunc(const Source& source, const core::type::Type* elem_ty) {
-    return [=, this](auto e, auto low, auto high) -> Eval::Result {
+    return [=](auto e, auto low, auto high) -> Eval::Result {
         if (auto r = Clamp(source, e, low, high)) {
             return CreateScalar(source, elem_ty, r.Get());
         }
@@ -1156,7 +1156,7 @@ auto Eval::ClampFunc(const Source& source, const core::type::Type* elem_ty) {
 }
 
 auto Eval::AddFunc(const Source& source, const core::type::Type* elem_ty) {
-    return [=, this](auto a1, auto a2) -> Eval::Result {
+    return [=](auto a1, auto a2) -> Eval::Result {
         if (auto r = Add(source, a1, a2)) {
             return CreateScalar(source, elem_ty, r.Get());
         }
@@ -1165,7 +1165,7 @@ auto Eval::AddFunc(const Source& source, const core::type::Type* elem_ty) {
 }
 
 auto Eval::SubFunc(const Source& source, const core::type::Type* elem_ty) {
-    return [=, this](auto a1, auto a2) -> Eval::Result {
+    return [=](auto a1, auto a2) -> Eval::Result {
         if (auto r = Sub(source, a1, a2)) {
             return CreateScalar(source, elem_ty, r.Get());
         }
@@ -1174,7 +1174,7 @@ auto Eval::SubFunc(const Source& source, const core::type::Type* elem_ty) {
 }
 
 auto Eval::MulFunc(const Source& source, const core::type::Type* elem_ty) {
-    return [=, this](auto a1, auto a2) -> Eval::Result {
+    return [=](auto a1, auto a2) -> Eval::Result {
         if (auto r = Mul(source, a1, a2)) {
             return CreateScalar(source, elem_ty, r.Get());
         }
@@ -1183,7 +1183,7 @@ auto Eval::MulFunc(const Source& source, const core::type::Type* elem_ty) {
 }
 
 auto Eval::DivFunc(const Source& source, const core::type::Type* elem_ty) {
-    return [=, this](auto a1, auto a2) -> Eval::Result {
+    return [=](auto a1, auto a2) -> Eval::Result {
         if (auto r = Div(source, a1, a2)) {
             return CreateScalar(source, elem_ty, r.Get());
         }
@@ -1192,7 +1192,7 @@ auto Eval::DivFunc(const Source& source, const core::type::Type* elem_ty) {
 }
 
 auto Eval::ModFunc(const Source& source, const core::type::Type* elem_ty) {
-    return [=, this](auto a1, auto a2) -> Eval::Result {
+    return [=](auto a1, auto a2) -> Eval::Result {
         if (auto r = Mod(source, a1, a2)) {
             return CreateScalar(source, elem_ty, r.Get());
         }
@@ -1201,7 +1201,7 @@ auto Eval::ModFunc(const Source& source, const core::type::Type* elem_ty) {
 }
 
 auto Eval::Dot2Func(const Source& source, const core::type::Type* elem_ty) {
-    return [=, this](auto a1, auto a2, auto b1, auto b2) -> Eval::Result {
+    return [=](auto a1, auto a2, auto b1, auto b2) -> Eval::Result {
         if (auto r = Dot2(source, a1, a2, b1, b2)) {
             return CreateScalar(source, elem_ty, r.Get());
         }
@@ -1210,7 +1210,7 @@ auto Eval::Dot2Func(const Source& source, const core::type::Type* elem_ty) {
 }
 
 auto Eval::Dot3Func(const Source& source, const core::type::Type* elem_ty) {
-    return [=, this](auto a1, auto a2, auto a3, auto b1, auto b2, auto b3) -> Eval::Result {
+    return [=](auto a1, auto a2, auto a3, auto b1, auto b2, auto b3) -> Eval::Result {
         if (auto r = Dot3(source, a1, a2, a3, b1, b2, b3)) {
             return CreateScalar(source, elem_ty, r.Get());
         }
@@ -1219,8 +1219,8 @@ auto Eval::Dot3Func(const Source& source, const core::type::Type* elem_ty) {
 }
 
 auto Eval::Dot4Func(const Source& source, const core::type::Type* elem_ty) {
-    return [=, this](auto a1, auto a2, auto a3, auto a4, auto b1, auto b2, auto b3,
-                     auto b4) -> Eval::Result {
+    return [=](auto a1, auto a2, auto a3, auto a4, auto b1, auto b2, auto b3,
+               auto b4) -> Eval::Result {
         if (auto r = Dot4(source, a1, a2, a3, a4, b1, b2, b3, b4)) {
             return CreateScalar(source, elem_ty, r.Get());
         }
@@ -1293,7 +1293,7 @@ Eval::Result Eval::Sub(const Source& source,
 }
 
 auto Eval::Det2Func(const Source& source, const core::type::Type* elem_ty) {
-    return [=, this](auto a, auto b, auto c, auto d) -> Eval::Result {
+    return [=](auto a, auto b, auto c, auto d) -> Eval::Result {
         if (auto r = Det2(source, a, b, c, d)) {
             return CreateScalar(source, elem_ty, r.Get());
         }
@@ -1302,8 +1302,8 @@ auto Eval::Det2Func(const Source& source, const core::type::Type* elem_ty) {
 }
 
 auto Eval::Det3Func(const Source& source, const core::type::Type* elem_ty) {
-    return [=, this](auto a, auto b, auto c, auto d, auto e, auto f, auto g, auto h,
-                     auto i) -> Eval::Result {
+    return [=](auto a, auto b, auto c, auto d, auto e, auto f, auto g, auto h,
+               auto i) -> Eval::Result {
         if (auto r = Det3(source, a, b, c, d, e, f, g, h, i)) {
             return CreateScalar(source, elem_ty, r.Get());
         }
@@ -1312,8 +1312,8 @@ auto Eval::Det3Func(const Source& source, const core::type::Type* elem_ty) {
 }
 
 auto Eval::Det4Func(const Source& source, const core::type::Type* elem_ty) {
-    return [=, this](auto a, auto b, auto c, auto d, auto e, auto f, auto g, auto h, auto i, auto j,
-                     auto k, auto l, auto m, auto n, auto o, auto p) -> Eval::Result {
+    return [=](auto a, auto b, auto c, auto d, auto e, auto f, auto g, auto h, auto i, auto j,
+               auto k, auto l, auto m, auto n, auto o, auto p) -> Eval::Result {
         if (auto r = Det4(source, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)) {
             return CreateScalar(source, elem_ty, r.Get());
         }
