@@ -6,7 +6,7 @@ void textureGatherCompare_144a9a() {
   float2 arg_2 = (1.0f).xx;
   uint arg_3 = 1u;
   float arg_4 = 1.0f;
-  float4 res = arg_0.GatherCmp(arg_1, float3(arg_2, float(arg_3)), arg_4, (1).xx);
+  float4 res = arg_0.GatherCmp(arg_1, float3(arg_2, float(arg_3)), arg_4, int2((1).xx));
   prevent_dce.Store4(0u, asuint(res));
 }
 

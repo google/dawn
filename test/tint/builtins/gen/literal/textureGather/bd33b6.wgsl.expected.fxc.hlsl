@@ -3,7 +3,7 @@ SamplerState arg_2 : register(s2, space1);
 RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureGather_bd33b6() {
-  int4 res = arg_1.GatherGreen(arg_2, float3((1.0f).xx, float(1u)), (1).xx);
+  int4 res = arg_1.GatherGreen(arg_2, float3((1.0f).xx, float(1u)), int2((1).xx));
   prevent_dce.Store4(0u, asuint(res));
 }
 

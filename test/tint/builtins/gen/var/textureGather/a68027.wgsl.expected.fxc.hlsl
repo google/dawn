@@ -5,7 +5,7 @@ RWByteAddressBuffer prevent_dce : register(u0, space2);
 void textureGather_a68027() {
   float2 arg_2 = (1.0f).xx;
   uint arg_3 = 1u;
-  float4 res = arg_0.Gather(arg_1, float3(arg_2, float(arg_3)), (1).xx);
+  float4 res = arg_0.Gather(arg_1, float3(arg_2, float(arg_3)), int2((1).xx));
   prevent_dce.Store4(0u, asuint(res));
 }
 

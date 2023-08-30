@@ -2819,6 +2819,36 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
         return emit_vector_appended_with_i32_zero(vector);
     };
 
+    auto emit_arg_expression = [&](const ast::Expression* arg_expr) -> bool {
+        // TODO(crbug.com/tint/1976): Workaround DXC bug that fails to compile texture loads with
+        // splatted constants. DXC fails to convert the coord arg, for e.g. `0.xxx`, from a vector
+        // of 64-bit ints to a vector of 32-bit ints to match the texture load parameter type. We
+        // work around this for now by explicitly casting the splatted constant to the right type,
+        // for e.g. `int3(0.xxx)`.
+        bool emitted_cast = false;
+        if (auto* sem = builder_.Sem().GetVal(arg_expr)) {
+            if (auto* constant = sem->ConstantValue()) {
+                if (auto* splat = constant->As<core::constant::Splat>()) {
+                    if (splat->Type()->is_signed_integer_vector()) {
+                        if (!EmitType(out, constant->Type(), core::AddressSpace::kUndefined,
+                                      core::Access::kUndefined, "")) {
+                            return false;
+                        }
+                        out << "(";
+                        emitted_cast = true;
+                    }
+                }
+            }
+        }
+        if (!EmitExpression(out, arg_expr)) {
+            return false;
+        }
+        if (emitted_cast) {
+            out << ")";
+        }
+        return true;
+    };
+
     if (auto* array_index = arg(Usage::kArrayIndex)) {
         // Array index needs to be appended to the coordinates.
         auto* packed = tint::writer::AppendVector(&builder_, param_coords, array_index);
@@ -2837,10 +2867,13 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
         if (!emit_vector_appended_with_level(param_coords)) {
             return false;
         }
-    } else {
+    } else if (builtin->Type() == core::Function::kTextureStore) {
+        // param_coords is an index expression, not a function arg
         if (!EmitExpression(out, param_coords)) {
             return false;
         }
+    } else if (!emit_arg_expression(param_coords)) {
+        return false;
     }
 
     for (auto usage : {Usage::kDepthRef, Usage::kBias, Usage::kLevel, Usage::kDdx, Usage::kDdy,
@@ -2850,7 +2883,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
         }
         if (auto* e = arg(usage)) {
             out << ", ";
-            if (!EmitExpression(out, e)) {
+            if (!emit_arg_expression(e)) {
                 return false;
             }
         }

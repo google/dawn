@@ -5,7 +5,7 @@ RWByteAddressBuffer prevent_dce : register(u0, space2);
 void textureSampleLevel_749baf() {
   float2 arg_2 = (1.0f).xx;
   int arg_3 = 1;
-  float res = arg_0.SampleLevel(arg_1, arg_2, arg_3, (1).xx).x;
+  float res = arg_0.SampleLevel(arg_1, arg_2, arg_3, int2((1).xx)).x;
   prevent_dce.Store(0u, asuint(res));
 }
 

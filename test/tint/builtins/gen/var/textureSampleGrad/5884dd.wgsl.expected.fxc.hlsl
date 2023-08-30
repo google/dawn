@@ -6,7 +6,7 @@ void textureSampleGrad_5884dd() {
   float3 arg_2 = (1.0f).xxx;
   float3 arg_3 = (1.0f).xxx;
   float3 arg_4 = (1.0f).xxx;
-  float4 res = arg_0.SampleGrad(arg_1, arg_2, arg_3, arg_4, (1).xxx);
+  float4 res = arg_0.SampleGrad(arg_1, arg_2, arg_3, arg_4, int3((1).xxx));
   prevent_dce.Store4(0u, asuint(res));
 }
 

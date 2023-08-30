@@ -7,7 +7,7 @@ void textureSampleGrad_7cd6de() {
   uint arg_3 = 1u;
   float2 arg_4 = (1.0f).xx;
   float2 arg_5 = (1.0f).xx;
-  float4 res = arg_0.SampleGrad(arg_1, float3(arg_2, float(arg_3)), arg_4, arg_5, (1).xx);
+  float4 res = arg_0.SampleGrad(arg_1, float3(arg_2, float(arg_3)), arg_4, arg_5, int2((1).xx));
   prevent_dce.Store4(0u, asuint(res));
 }
 

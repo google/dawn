@@ -3,7 +3,7 @@ SamplerState arg_1 : register(s1, space1);
 RWByteAddressBuffer prevent_dce : register(u0, space2);
 
 void textureSampleLevel_cdfe0f() {
-  float res = arg_0.SampleLevel(arg_1, float3((1.0f).xx, float(1u)), 1u, (1).xx).x;
+  float res = arg_0.SampleLevel(arg_1, float3((1.0f).xx, float(1u)), 1u, int2((1).xx)).x;
   prevent_dce.Store(0u, asuint(res));
 }
 

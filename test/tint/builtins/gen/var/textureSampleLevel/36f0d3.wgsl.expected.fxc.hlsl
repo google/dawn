@@ -6,7 +6,7 @@ void textureSampleLevel_36f0d3() {
   float2 arg_2 = (1.0f).xx;
   int arg_3 = 1;
   uint arg_4 = 1u;
-  float res = arg_0.SampleLevel(arg_1, float3(arg_2, float(arg_3)), arg_4, (1).xx).x;
+  float res = arg_0.SampleLevel(arg_1, float3(arg_2, float(arg_3)), arg_4, int2((1).xx)).x;
   prevent_dce.Store(0u, asuint(res));
 }
 

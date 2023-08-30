@@ -5,7 +5,7 @@ RWByteAddressBuffer prevent_dce : register(u0, space2);
 void textureSampleCompare_dec064() {
   float2 arg_2 = (1.0f).xx;
   float arg_3 = 1.0f;
-  float res = arg_0.SampleCmp(arg_1, arg_2, arg_3, (1).xx);
+  float res = arg_0.SampleCmp(arg_1, arg_2, arg_3, int2((1).xx));
   prevent_dce.Store(0u, asuint(res));
 }
 
