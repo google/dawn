@@ -42,18 +42,26 @@ def find_and_print_errors(glob_pathname):
     for f in files:
         found_error = False
         with open(f, "r") as fs:
-            first_line = fs.readline()
+            all_lines = fs.readlines()
+            first_line = all_lines[0]
             if not first_line.startswith("SKIP:"):
                 continue
-            for line in fs:
-                m = re.search('error( X[0-9]+)*?:(.*)', line)
+            # The most refined errors are printed at the end, so search for error lines from bottom-up
+            all_lines.reverse()
+            for line in all_lines:
+                m = re.search('.*\.hlsl:[0-9]+:.*?(error.*)', line)
                 if m:
-                    add_error(error_to_file, m.group(), f)
+                    add_error(error_to_file, m.groups()[0], f)
                     found_error = True
                 else:
-                    if "exit status" in line:
-                        add_error(error_to_file, line, f)
+                    m = re.search('error( X[0-9]+)*?:(.*)', line)
+                    if m:
+                        add_error(error_to_file, m.group(), f)
                         found_error = True
+                    else:
+                        if "exit status" in line:
+                            add_error(error_to_file, line, f)
+                            found_error = True
                 if found_error:
                     break # Stop on first error string found
 
