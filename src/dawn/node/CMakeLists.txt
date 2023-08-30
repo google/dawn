@@ -140,7 +140,7 @@ macro(javascript file)
     add_custom_command(
         TARGET dawn_node POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${CMAKE_SOURCE_DIR}/src/dawn/node/${file}"
+            "${PROJECT_SOURCE_DIR}/src/dawn/node/${file}"
             "${Dawn_BINARY_DIR}/${file}")
 endmacro()
 
