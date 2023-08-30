@@ -107,8 +107,7 @@ if (dawn_enable_opengl) {
     script = "${dawn_root}/generator/opengl_loader_generator.py"
     args = [
       "--gl-xml",
-      rebase_path("${dawn_root}/third_party/khronos/OpenGL-Registry/xml/gl.xml",
-                  root_build_dir),
+      rebase_path("${dawn_opengl_registry_dir}/xml/gl.xml", root_build_dir),
       "--supported-extensions",
       rebase_path("opengl/supported_extensions.json", root_build_dir),
     ]

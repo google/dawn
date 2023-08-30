@@ -97,3 +97,7 @@ if (!defined(dawn_dxheaders_dir)) {
 if (!defined(dawn_version_file)) {
   dawn_version_file = ""
 }
+
+if (!defined(dawn_opengl_registry_dir)) {
+  dawn_opengl_registry_dir = "${dawn_root}/third_party/khronos/OpenGL-Registry"
+}
