@@ -46,19 +46,6 @@ class RefCount {
     std::atomic<uint64_t> mRefCount;
 };
 
-// Forward declaration for Ref needed until TryGetRef can be removed with WeakRefs.
-// TODO(dawn:1769) Remove once WeakRef implementation is complete with cache.
-template <typename T>
-class Ref;
-
-// TODO(dawn:1769) Move to Ref.h once TryGetRef can be removed.
-template <typename T>
-Ref<T> AcquireRef(T* pointee) {
-    Ref<T> ref;
-    ref.Acquire(pointee);
-    return ref;
-}
-
 class RefCounted {
   public:
     explicit RefCounted(uint64_t payload = 0);

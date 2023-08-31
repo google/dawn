@@ -39,6 +39,19 @@ struct RefCountedTraits {
 }  // namespace detail
 
 template <typename T>
+class Ref : public RefBase<T*, detail::RefCountedTraits<T>> {
+  public:
+    using RefBase<T*, detail::RefCountedTraits<T>>::RefBase;
+};
+
+template <typename T>
+Ref<T> AcquireRef(T* pointee) {
+    Ref<T> ref;
+    ref.Acquire(pointee);
+    return ref;
+}
+
+template <typename T>
 struct UnwrapRef {
     using type = T;
 };
@@ -54,12 +67,6 @@ struct IsRef {
 template <typename T>
 struct IsRef<Ref<T>> {
     static constexpr bool value = true;
-};
-
-template <typename T>
-class Ref : public RefBase<T*, detail::RefCountedTraits<T>> {
-  public:
-    using RefBase<T*, detail::RefCountedTraits<T>>::RefBase;
 };
 
 }  // namespace dawn
