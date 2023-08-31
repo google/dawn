@@ -2553,7 +2553,7 @@ const Type* ASTParser::GetHandleTypeForSpirvHandle(const spvtools::opt::Instruct
             // usage as well.  That is, it's valid for a Vulkan shader to use an
             // OpImage variable with an OpImage*Dref* instruction.  In WGSL we must
             // treat that as a depth texture.
-            if (image_type->depth() || usage.IsDepthTexture()) {
+            if (image_type->depth() == 1 || usage.IsDepthTexture()) {
                 if (image_type->is_multisampled()) {
                     ast_handle_type = ty_.DepthMultisampledTexture(dim);
                 } else {

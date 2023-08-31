@@ -4340,5 +4340,110 @@ TEST_F(SpvParserHandleTest, OpUndef_FunctionParam) {
     EXPECT_EQ(p->error(), "invalid handle object passed as function parameter");
 }
 
+TEST_F(SpvParserHandleTest, Image_UnknownDepth_NonDepthUse) {
+    const auto assembly = R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %1 "main"
+               OpExecutionMode %1 OriginUpperLeft
+               OpDecorate %7 DescriptorSet 0
+               OpDecorate %7 Binding 0
+               OpDecorate %8 DescriptorSet 0
+               OpDecorate %8 Binding 1
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+          %4 = OpTypeImage %float 2D 2 0 0 1 Unknown
+          %5 = OpTypeSampler
+    %v2float = OpTypeVector %float 2
+       %void = OpTypeVoid
+         %15 = OpTypeFunction %void
+          %6 = OpTypeSampledImage %4
+%_ptr_UniformConstant_4 = OpTypePointer UniformConstant %4
+          %7 = OpVariable %_ptr_UniformConstant_4 UniformConstant
+%_ptr_UniformConstant_5 = OpTypePointer UniformConstant %5
+          %8 = OpVariable %_ptr_UniformConstant_5 UniformConstant
+      %const = OpConstantNull %v2float
+          %1 = OpFunction %void None %15
+         %18 = OpLabel
+         %20 = OpLoad %4 %7
+         %21 = OpLoad %5 %8
+         %22 = OpSampledImage %6 %20 %21
+         %23 = OpImageSampleImplicitLod %v4float %22 %const None
+               OpReturn
+               OpFunctionEnd
+    )";
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    const auto got = test::ToString(p->program());
+    auto* expect = R"(@group(0) @binding(0) var x_7 : texture_2d<f32>;
+
+@group(0) @binding(1) var x_8 : sampler;
+
+fn main_1() {
+  let x_23 = textureSample(x_7, x_8, vec2f());
+  return;
+}
+
+@fragment
+fn main() {
+  main_1();
+}
+)";
+    ASSERT_EQ(expect, got);
+}
+
+TEST_F(SpvParserHandleTest, Image_UnknownDepth_DepthUse) {
+    const auto assembly = R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %1 "main"
+               OpExecutionMode %1 OriginUpperLeft
+               OpDecorate %7 DescriptorSet 0
+               OpDecorate %7 Binding 0
+               OpDecorate %8 DescriptorSet 0
+               OpDecorate %8 Binding 1
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+          %4 = OpTypeImage %float 2D 2 0 0 1 Unknown
+          %5 = OpTypeSampler
+    %v2float = OpTypeVector %float 2
+       %void = OpTypeVoid
+         %15 = OpTypeFunction %void
+          %6 = OpTypeSampledImage %4
+%_ptr_UniformConstant_4 = OpTypePointer UniformConstant %4
+          %7 = OpVariable %_ptr_UniformConstant_4 UniformConstant
+%_ptr_UniformConstant_5 = OpTypePointer UniformConstant %5
+          %8 = OpVariable %_ptr_UniformConstant_5 UniformConstant
+      %const = OpConstantNull %v2float
+    %float_0 = OpConstantNull %float
+          %1 = OpFunction %void None %15
+         %18 = OpLabel
+         %20 = OpLoad %4 %7
+         %21 = OpLoad %5 %8
+         %22 = OpSampledImage %6 %20 %21
+         %23 = OpImageSampleDrefImplicitLod %v4float %22 %const %float_0 None
+               OpReturn
+               OpFunctionEnd
+    )";
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule());
+    const auto got = test::ToString(p->program());
+    auto* expect = R"(@group(0) @binding(0) var x_7 : texture_depth_2d;
+
+@group(0) @binding(1) var x_8 : sampler_comparison;
+
+fn main_1() {
+  let x_23 = textureSampleCompare(x_7, x_8, vec2f(), 0.0f);
+  return;
+}
+
+@fragment
+fn main() {
+  main_1();
+}
+)";
+    ASSERT_EQ(expect, got);
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader::ast_parser
