@@ -17,9 +17,8 @@
 #ifndef {{DIR}}_FEATURES_AUTOGEN_H_
 #define {{DIR}}_FEATURES_AUTOGEN_H_
 
-#include "dawn/native/dawn_platform.h"
-#include "dawn/native/DawnNative.h"
 #include "dawn/common/ityp_array.h"
+#include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
 
