@@ -763,6 +763,9 @@ crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,robust_
 crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,zero_init:compute,zero_init:* [ Failure ]
 crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,validation,expression,call,builtin,atan:* [ Failure ]
 crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,validation,expression,call,builtin,tan:* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,firstTrailingBit:i32:inputSource="const";vectorize=3 [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,min:i32:inputSource="const";* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,unary,i32_conversion:i32:inputSource="const";* [ Failure ]
 
 ################################################################################
 # New failures. Please triage:
