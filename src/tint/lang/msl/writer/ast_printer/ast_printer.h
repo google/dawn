@@ -348,6 +348,22 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param type the type to emit the value for
     /// @returns true if the zero value was successfully emitted.
     bool EmitZeroValue(StringStream& out, const core::type::Type* type);
+    /// Handles generating a call to the `dot4I8Packed()` builtin
+    /// @param out the output of the expression stream
+    /// @param expr the call expression
+    /// @param builtin the semantic information for the builtin
+    /// @returns true if the call expression is emitted
+    bool EmitDot4I8PackedCall(StringStream& out,
+                              const ast::CallExpression* expr,
+                              const sem::Builtin* builtin);
+    /// Handles generating a call to the `dot4U8Packed()` builtin
+    /// @param out the output of the expression stream
+    /// @param expr the call expression
+    /// @param builtin the semantic information for the builtin
+    /// @returns true if the call expression is emitted
+    bool EmitDot4U8PackedCall(StringStream& out,
+                              const ast::CallExpression* expr,
+                              const sem::Builtin* builtin);
 
     /// Handles generating a builtin name
     /// @param builtin the semantic info for the builtin

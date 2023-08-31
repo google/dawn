@@ -255,6 +255,7 @@ bool ASTPrinter::Generate() {
                 core::Extension::kChromiumInternalRelaxedUniformLayout,
                 core::Extension::kF16,
                 core::Extension::kChromiumInternalDualSourceBlending,
+                core::Extension::kChromiumExperimentalDp4A,
             })) {
         return false;
     }
@@ -678,6 +679,10 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
             return EmitDegreesCall(out, expr, builtin);
         case core::Function::kRadians:
             return EmitRadiansCall(out, expr, builtin);
+        case core::Function::kDot4I8Packed:
+            return EmitDot4I8PackedCall(out, expr, builtin);
+        case core::Function::kDot4U8Packed:
+            return EmitDot4U8PackedCall(out, expr, builtin);
 
         case core::Function::kPack2X16Float:
         case core::Function::kUnpack2X16Float: {
@@ -1333,6 +1338,32 @@ bool ASTPrinter::EmitDotCall(StringStream& out,
     }
     out << ")";
     return true;
+}
+
+bool ASTPrinter::EmitDot4I8PackedCall(StringStream& out,
+                                      const ast::CallExpression* expr,
+                                      const sem::Builtin* builtin) {
+    return CallBuiltinHelper(
+        out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
+            Line(b) << "packed_char4 vec1 = as_type<packed_char4>(" << params[0] << ");";
+            Line(b) << "packed_char4 vec2 = as_type<packed_char4>(" << params[1] << ");";
+            Line(b) << "return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2] + vec1[3] "
+                       "* vec2[3];";
+            return true;
+        });
+}
+
+bool ASTPrinter::EmitDot4U8PackedCall(StringStream& out,
+                                      const ast::CallExpression* expr,
+                                      const sem::Builtin* builtin) {
+    return CallBuiltinHelper(
+        out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
+            Line(b) << "packed_uchar4 vec1 = as_type<packed_uchar4>(" << params[0] << ");";
+            Line(b) << "packed_uchar4 vec2 = as_type<packed_uchar4>(" << params[1] << ");";
+            Line(b) << "return vec1[0] * vec2[0] + vec1[1] * vec2[1] + vec1[2] * vec2[2] + vec1[3] "
+                       "* vec2[3];";
+            return true;
+        });
 }
 
 bool ASTPrinter::EmitModfCall(StringStream& out,

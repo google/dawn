@@ -133,6 +133,7 @@ DAWN_INSTANTIATE_TEST_P(ExperimentalDP4aTests,
                         {
                             D3D12Backend(),
                             D3D12Backend({}, {"use_dxc"}),
+                            MetalBackend(),
                             VulkanBackend(),
                         },
                         {true, false});
