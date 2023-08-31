@@ -309,4 +309,12 @@ uint64_t GetAllocatedSizeForTesting(WGPUBuffer buffer) {
     return FromAPI(buffer)->GetAllocatedSize();
 }
 
+std::vector<const ToggleInfo*> AllToggleInfos() {
+    return TogglesInfo::AllToggleInfos();
+}
+
+FeatureInfo GetFeatureInfo(wgpu::FeatureName featureName) {
+    return kFeatureNameAndInfoList[FromAPI(featureName)];
+}
+
 }  // namespace dawn::native

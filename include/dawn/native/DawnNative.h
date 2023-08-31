@@ -15,23 +15,15 @@
 #ifndef INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_
 #define INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_
 
-#include <string>
 #include <vector>
 
 #include "dawn/dawn_proc_table.h"
 #include "dawn/native/dawn_native_export.h"
-#include "dawn/webgpu.h"
-#include "dawn/webgpu_cpp_chained_struct.h"
+#include "dawn/webgpu_cpp.h"
 
 namespace dawn::platform {
 class Platform;
 }  // namespace dawn::platform
-
-namespace wgpu {
-struct AdapterProperties;
-struct DeviceDescriptor;
-struct RequestAdapterOptions;
-}  // namespace wgpu
 
 namespace dawn::native {
 
@@ -293,6 +285,10 @@ DAWN_NATIVE_EXPORT bool CheckIsErrorForTesting(void* objectHandle);
 DAWN_NATIVE_EXPORT const char* GetObjectLabelForTesting(void* objectHandle);
 
 DAWN_NATIVE_EXPORT uint64_t GetAllocatedSizeForTesting(WGPUBuffer buffer);
+
+DAWN_NATIVE_EXPORT std::vector<const ToggleInfo*> AllToggleInfos();
+
+DAWN_NATIVE_EXPORT FeatureInfo GetFeatureInfo(wgpu::FeatureName featureName);
 
 }  // namespace dawn::native
 
