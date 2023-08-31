@@ -15,12 +15,14 @@
 # Empty targets to add the include dirs and list the sources of Khronos
 # headers for header inclusion check.
 
+import("../../scripts/dawn_overrides_with_defaults.gni")
+
 config("khronos_headers_public") {
-  include_dirs = [ "EGL-Registry/api" ]
+  include_dirs = [ "${dawn_egl_registry_dir}/api" ]
 }
 
 source_set("khronos_platform") {
-  sources = [ "EGL-Registry/api/KHR/khrplatform.h" ]
+  sources = [ "${dawn_egl_registry_dir}/api/KHR/khrplatform.h" ]
 
   public_configs = [ ":khronos_headers_public" ]
 }
