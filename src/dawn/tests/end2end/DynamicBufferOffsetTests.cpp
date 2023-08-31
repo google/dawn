@@ -422,11 +422,7 @@ TEST_P(DynamicBufferOffsetTests, InheritDynamicOffsetsRenderPipeline) {
 }
 
 // Test inherit dynamic offsets on compute pipeline
-// TODO(shaobo.yan@intel.com) : Try this test on GTX1080 and cannot reproduce the failure.
-// Suspect it is due to dawn doesn't handle sync between two dispatch and disable this case.
-// Will double check root cause after got GTX1660.
 TEST_P(DynamicBufferOffsetTests, InheritDynamicOffsetsComputePipeline) {
-    DAWN_SUPPRESS_TEST_IF(IsWindows());
     wgpu::ComputePipeline pipeline = CreateComputePipeline();
     wgpu::ComputePipeline testPipeline = CreateComputePipeline(true);
 
