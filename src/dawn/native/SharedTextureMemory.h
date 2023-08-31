@@ -19,6 +19,7 @@
 #include <stack>
 
 #include "dawn/common/StackContainer.h"
+#include "dawn/common/WeakRef.h"
 #include "dawn/common/WeakRefSupport.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/IntegerTypes.h"
@@ -28,6 +29,7 @@
 
 namespace dawn::native {
 
+class SharedTextureMemoryState;
 struct SharedTextureMemoryDescriptor;
 struct SharedTextureMemoryBeginAccessDescriptor;
 struct SharedTextureMemoryEndAccessState;
@@ -46,18 +48,19 @@ class SharedTextureMemoryBase : public ApiObjectBase,
 
     void APIGetProperties(SharedTextureMemoryProperties* properties) const;
     TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
-    void APIBeginAccess(TextureBase* texture, const BeginAccessDescriptor* descriptor);
-    void APIEndAccess(TextureBase* texture, EndAccessState* state);
+    // Returns true if access was acquired. If it returns true, then APIEndAccess must
+    // be called to release access. Other errors may occur even if `true` is returned.
+    // Use an error scope to catch them.
+    bool APIBeginAccess(TextureBase* texture, const BeginAccessDescriptor* descriptor);
+    // Returns true if access was released.
+    bool APIEndAccess(TextureBase* texture, EndAccessState* state);
 
     ObjectType GetType() const override;
 
-    // Acquire the begin fences for the current access scope on `texture`.
-    void AcquireBeginFences(TextureBase* texture, PendingFenceList* fences);
+    SharedTextureMemoryState* GetState() const;
 
-    // Set the last usage serial. This indicates when the SharedFence exported
-    // from APIEndAccess will complete.
-    void SetLastUsageSerial(ExecutionSerial lastUsageSerial);
-    ExecutionSerial GetLastUsageSerial() const;
+    // Validate that the texture was created from this SharedTextureMemory.
+    MaybeError ValidateTextureCreatedFromSelf(TextureBase* texture);
 
   protected:
     SharedTextureMemoryBase(DeviceBase* device,
@@ -91,16 +94,35 @@ class SharedTextureMemoryBase : public ApiObjectBase,
     // EndAccessImpl validates the operation is valid on the backend, and returns the end fence.
     virtual ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture) = 0;
 
-    // Begin an access scope on `texture`. Passing a list of fences that should be waited on before
-    // use.
-    void PushAccessFences(TextureBase* texture,
-                          const SharedTextureMemoryBeginAccessDescriptor* descriptor);
-    // End an access scope on `texture`, writing out any fences that have not yet been acquired.
-    void PopAccessFences(TextureBase* texture, PendingFenceList* fences);
+    Ref<SharedTextureMemoryState> mState;
+};
 
-    // Map of texture -> stack of PendingFenceList.
-    std::map<Ref<TextureBase>, std::stack<PendingFenceList>> mAccessScopes;
+// SharedTextureMemoryState is a separate object because it needs to live as long as
+// the SharedTextureMemory or any textures created from the SharedTextureMemory. This
+// allows state needed by the texture to persist after the SharedTextureMemory itself
+// has been dropped.
+class SharedTextureMemoryState : public RefCounted {
+  public:
+    using PendingFenceList = SharedTextureMemoryBase::PendingFenceList;
+
+    explicit SharedTextureMemoryState(WeakRef<SharedTextureMemoryBase> sharedTextureMemory);
+
+    void AcquirePendingFences(PendingFenceList* fences);
+
+    // Set the last usage serial. This indicates when the SharedFence exported
+    // from APIEndAccess will complete.
+    void SetLastUsageSerial(ExecutionSerial lastUsageSerial);
+    ExecutionSerial GetLastUsageSerial() const;
+
+    const WeakRef<SharedTextureMemoryBase>& GetSharedTextureMemory() const;
+
+  private:
+    friend class SharedTextureMemoryBase;
+
+    PendingFenceList mPendingFences;
     ExecutionSerial mLastUsageSerial{0};
+
+    WeakRef<SharedTextureMemoryBase> mSharedTextureMemory;
 };
 
 }  // namespace dawn::native

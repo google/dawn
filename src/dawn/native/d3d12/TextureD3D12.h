@@ -31,6 +31,7 @@
 
 namespace dawn::native::d3d12 {
 
+class SharedTextureMemory;
 class CommandRecordingContext;
 class Device;
 
@@ -50,6 +51,9 @@ class Texture final : public d3d::Texture {
     static ResultOrError<Ref<Texture>> Create(Device* device,
                                               const TextureDescriptor* descriptor,
                                               ComPtr<ID3D12Resource> d3d12Texture);
+    static ResultOrError<Ref<Texture>> CreateFromSharedTextureMemory(
+        SharedTextureMemory* memory,
+        const TextureDescriptor* descriptor);
 
     // For external textures, returns the Device internal fence's value associated with the last
     // ExecuteCommandLists that used this texture. If nullopt is returned, the texture wasn't used.
@@ -90,6 +94,9 @@ class Texture final : public d3d::Texture {
     void TrackUsageAndTransitionNow(CommandRecordingContext* commandContext,
                                     D3D12_RESOURCE_STATES newState,
                                     const SubresourceRange& range);
+    // Reset the D3D12_RESOURCE_STATES and decay tracking to indicate that
+    // all subresources are now in the COMMON state.
+    void ResetSubresourceStateAndDecayToCommon();
 
   private:
     using Base = d3d::Texture;
@@ -121,6 +128,9 @@ class Texture final : public d3d::Texture {
 
         bool operator==(const StateAndDecay& other) const;
     };
+
+    SubresourceStorage<StateAndDecay> InitialSubresourceStateAndDecay() const;
+
     void TransitionUsageAndGetResourceBarrier(CommandRecordingContext* commandContext,
                                               std::vector<D3D12_RESOURCE_BARRIER>* barrier,
                                               D3D12_RESOURCE_STATES newState,

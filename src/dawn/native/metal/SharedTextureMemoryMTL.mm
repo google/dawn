@@ -122,7 +122,7 @@ MaybeError SharedTextureMemory::BeginAccessImpl(TextureBase* texture,
         SharedFenceBase* fence = descriptor->fences[i];
 
         SharedFenceExportInfo exportInfo;
-        fence->APIExportInfo(&exportInfo);
+        DAWN_TRY(fence->ExportInfo(&exportInfo));
         switch (exportInfo.type) {
             case wgpu::SharedFenceType::MTLSharedEvent:
                 DAWN_INVALID_IF(!GetDevice()->HasFeature(Feature::SharedFenceMTLSharedEvent),
@@ -153,7 +153,9 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(TextureBas
         DAWN_TRY_ASSIGN(fence, SharedFence::Create(ToBackend(GetDevice()),
                                                    "Internal MTLSharedEvent", &newDesc));
 
-        return FenceAndSignalValue{std::move(fence), static_cast<uint64_t>(GetLastUsageSerial())};
+        return FenceAndSignalValue{
+            std::move(fence),
+            static_cast<uint64_t>(texture->GetSharedTextureMemoryState()->GetLastUsageSerial())};
     }
     UNREACHABLE();
 }

@@ -768,7 +768,7 @@ ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
     DAWN_TRY(texture->InitializeFromIOSurface(&ioSurfaceImageDesc, descriptor,
                                               memory->GetIOSurface(), {}));
-    texture->mSharedTextureMemory = GetWeakRef(static_cast<SharedTextureMemoryBase*>(memory));
+    texture->mSharedTextureMemoryState = memory->GetState();
     return texture;
 }
 
@@ -849,10 +849,10 @@ MaybeError Texture::InitializeFromIOSurface(const ExternalImageDescriptor* descr
 void Texture::SynchronizeTextureBeforeUse(CommandRecordingContext* commandContext) {
     if (@available(macOS 10.14, iOS 12.0, *)) {
         SharedTextureMemoryBase::PendingFenceList fences;
-        Ref<SharedTextureMemoryBase> memory = TryGetSharedTextureMemory();
-        if (memory != nullptr) {
-            memory->AcquireBeginFences(this, &fences);
-            memory->SetLastUsageSerial(GetDevice()->GetPendingCommandSerial());
+        SharedTextureMemoryState* memoryState = GetSharedTextureMemoryState();
+        if (memoryState != nullptr) {
+            memoryState->AcquirePendingFences(&fences);
+            memoryState->SetLastUsageSerial(GetDevice()->GetPendingCommandSerial());
         }
 
         if (!mWaitEvents.empty() || !fences->empty()) {

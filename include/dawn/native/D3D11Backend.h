@@ -36,6 +36,17 @@ using AdapterDiscoveryOptions = PhysicalDeviceDiscoveryOptions;
 
 DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D11Device> GetD3D11Device(WGPUDevice device);
 
+// May be chained on SharedTextureMemoryDescriptor
+struct DAWN_NATIVE_EXPORT SharedTextureMemoryD3D11Texture2DDescriptor : wgpu::ChainedStruct {
+    SharedTextureMemoryD3D11Texture2DDescriptor() {
+        sType = static_cast<wgpu::SType>(WGPUSType_SharedTextureMemoryD3D11Texture2DDescriptor);
+    }
+
+    // This ID3D11Texture2D object must be created from the same ID3D11Device used in the
+    // WGPUDevice.
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+};
+
 }  // namespace dawn::native::d3d11
 
 #endif  // INCLUDE_DAWN_NATIVE_D3D11BACKEND_H_

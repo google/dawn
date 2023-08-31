@@ -35,6 +35,7 @@
 #include "dawn/native/d3d11/PipelineLayoutD3D11.h"
 #include "dawn/native/d3d11/QuerySetD3D11.h"
 #include "dawn/native/d3d11/RenderPipelineD3D11.h"
+#include "dawn/native/d3d11/SharedFenceD3D11.h"
 #include "dawn/native/d3d11/TextureD3D11.h"
 #include "dawn/native/d3d11/UtilsD3D11.h"
 
@@ -94,6 +95,24 @@ class VertexBufferTracker {
     ityp::array<VertexBufferSlot, UINT, kMaxVertexBuffers> mOffsets = {};
 };
 
+MaybeError SynchronizeTextureBeforeUse(Texture* texture, CommandRecordingContext* commandContext) {
+    SharedTextureMemoryBase::PendingFenceList fences;
+    SharedTextureMemoryState* memoryState = texture->GetSharedTextureMemoryState();
+    if (memoryState == nullptr) {
+        return {};
+    }
+
+    memoryState->AcquirePendingFences(&fences);
+    memoryState->SetLastUsageSerial(texture->GetDevice()->GetPendingCommandSerial());
+
+    for (auto& fence : fences) {
+        DAWN_TRY(CheckHRESULT(commandContext->GetD3D11DeviceContext4()->Wait(
+                                  ToBackend(fence.object)->GetD3DFence(), fence.signaledValue),
+                              "ID3D11DeviceContext4::Wait"));
+    }
+    return {};
+}
+
 }  // namespace
 
 // Create CommandBuffer
@@ -140,6 +159,10 @@ MaybeError CommandBuffer::Execute() {
         switch (type) {
             case Command::BeginComputePass: {
                 mCommands.NextCommand<BeginComputePassCmd>();
+                for (TextureBase* texture :
+                     GetResourceUsages().computePasses[nextComputePassNumber].referencedTextures) {
+                    DAWN_TRY(SynchronizeTextureBeforeUse(ToBackend(texture), commandContext));
+                }
                 for (const SyncScopeResourceUsage& scope :
                      GetResourceUsages().computePasses[nextComputePassNumber].dispatchUsages) {
                     DAWN_TRY(LazyClearSyncScope(scope));
@@ -152,6 +175,19 @@ MaybeError CommandBuffer::Execute() {
 
             case Command::BeginRenderPass: {
                 auto* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
+                for (TextureBase* texture :
+                     GetResourceUsages().renderPasses[nextRenderPassNumber].textures) {
+                    DAWN_TRY(SynchronizeTextureBeforeUse(ToBackend(texture), commandContext));
+                }
+                for (ExternalTextureBase* externalTexture :
+                     GetResourceUsages().renderPasses[nextRenderPassNumber].externalTextures) {
+                    for (auto& view : externalTexture->GetTextureViews()) {
+                        if (view.Get()) {
+                            DAWN_TRY(SynchronizeTextureBeforeUse(ToBackend(view->GetTexture()),
+                                                                 commandContext));
+                        }
+                    }
+                }
                 DAWN_TRY(
                     LazyClearSyncScope(GetResourceUsages().renderPasses[nextRenderPassNumber]));
                 LazyClearRenderPassAttachments(cmd);
@@ -218,6 +254,7 @@ MaybeError CommandBuffer::Execute() {
                 DAWN_TRY(buffer->EnsureDataInitialized(commandContext));
 
                 Texture* texture = ToBackend(dst.texture.Get());
+                DAWN_TRY(SynchronizeTextureBeforeUse(texture, commandContext));
                 SubresourceRange subresources = GetSubresourcesAffectedByCopy(dst, copy->copySize);
 
                 DAWN_ASSERT(scopedMap.GetMappedData());
@@ -242,6 +279,7 @@ MaybeError CommandBuffer::Execute() {
 
                 SubresourceRange subresources = GetSubresourcesAffectedByCopy(src, copy->copySize);
                 Texture* texture = ToBackend(src.texture.Get());
+                DAWN_TRY(SynchronizeTextureBeforeUse(texture, commandContext));
                 DAWN_TRY(
                     texture->EnsureSubresourceContentInitialized(commandContext, subresources));
 
@@ -274,6 +312,10 @@ MaybeError CommandBuffer::Execute() {
                     continue;
                 }
 
+                DAWN_TRY(SynchronizeTextureBeforeUse(ToBackend(copy->source.texture.Get()),
+                                                     commandContext));
+                DAWN_TRY(SynchronizeTextureBeforeUse(ToBackend(copy->destination.texture.Get()),
+                                                     commandContext));
                 DAWN_TRY(Texture::Copy(commandContext, copy));
                 break;
             }

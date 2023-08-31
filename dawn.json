@@ -1525,6 +1525,7 @@
             },
             {
                 "name": "begin access",
+                "returns": "bool",
                 "args": [
                     {"name": "texture", "type": "texture"},
                     {"name": "descriptor", "type": "shared texture memory begin access descriptor", "annotation": "const*"}
@@ -1532,6 +1533,7 @@
             },
             {
                 "name": "end access",
+                "returns": "bool",
                 "args": [
                     {"name": "texture", "type": "texture"},
                     {"name": "descriptor", "type": "shared texture memory end access state", "annotation": "*"}

@@ -33,6 +33,8 @@
 #include "dawn/native/d3d12/Forward.h"
 #include "dawn/native/d3d12/HeapD3D12.h"
 #include "dawn/native/d3d12/ResourceAllocatorManagerD3D12.h"
+#include "dawn/native/d3d12/SharedFenceD3D12.h"
+#include "dawn/native/d3d12/SharedTextureMemoryD3D12.h"
 #include "dawn/native/d3d12/StagingDescriptorAllocatorD3D12.h"
 #include "dawn/native/d3d12/TextureCopySplitter.h"
 #include "dawn/native/d3d12/UtilsD3D12.h"
@@ -203,6 +205,17 @@ ResultOrError<Ref<Texture>> Texture::Create(Device* device,
     return std::move(dawnTexture);
 }
 
+// static
+ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
+    SharedTextureMemory* memory,
+    const TextureDescriptor* descriptor) {
+    Device* device = ToBackend(memory->GetDevice());
+    Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
+    DAWN_TRY(texture->InitializeAsExternalTexture(memory->GetD3DResource(), {}, false));
+    texture->mSharedTextureMemoryState = memory->GetState();
+    return texture;
+}
+
 MaybeError Texture::InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
                                                 std::vector<Ref<d3d::Fence>> waitFences,
                                                 bool isSwapChainTexture) {
@@ -321,12 +334,7 @@ MaybeError Texture::InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Tex
 }
 
 Texture::Texture(Device* device, const TextureDescriptor* descriptor)
-    : Base(device, descriptor),
-      mSubresourceStateAndDecay(
-          GetFormat().aspects,
-          GetArrayLayers(),
-          GetNumMipLevels(),
-          {D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON, kMaxExecutionSerial, false}) {}
+    : Base(device, descriptor), mSubresourceStateAndDecay(InitialSubresourceStateAndDecay()) {}
 
 Texture::~Texture() = default;
 
@@ -407,6 +415,21 @@ MaybeError Texture::SynchronizeImportedTextureBeforeUse() {
         device->ReferenceUntilUnused(static_cast<Fence*>(fence.Get())->GetD3D12Fence());
     }
     mWaitFences.clear();
+
+    SharedTextureMemoryBase::PendingFenceList fences;
+    SharedTextureMemoryState* memoryState = GetSharedTextureMemoryState();
+    if (memoryState != nullptr) {
+        memoryState->AcquirePendingFences(&fences);
+        memoryState->SetLastUsageSerial(GetDevice()->GetPendingCommandSerial());
+    }
+
+    for (const auto& fence : fences) {
+        DAWN_TRY(CheckHRESULT(device->GetCommandQueue()->Wait(
+                                  ToBackend(fence.object)->GetD3DFence(), fence.signaledValue),
+                              "D3D12 fence wait"));
+        // Keep D3D12 fence alive until commands complete.
+        device->ReferenceUntilUnused(ToBackend(fence.object)->GetD3DFence());
+    }
     return {};
 }
 
@@ -618,6 +641,17 @@ void Texture::TrackUsageAndGetResourceBarrierForPass(CommandRecordingContext* co
             D3D12_RESOURCE_STATES newState = D3D12TextureUsage(usage, GetFormat());
             TransitionSubresourceRange(barriers, mergeRange, state, newState, pendingCommandSerial);
         });
+}
+
+SubresourceStorage<Texture::StateAndDecay> Texture::InitialSubresourceStateAndDecay() const {
+    return {GetFormat().aspects,
+            GetArrayLayers(),
+            GetNumMipLevels(),
+            {D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON, kMaxExecutionSerial, false}};
+}
+
+void Texture::ResetSubresourceStateAndDecayToCommon() {
+    mSubresourceStateAndDecay = InitialSubresourceStateAndDecay();
 }
 
 D3D12_RENDER_TARGET_VIEW_DESC Texture::GetRTVDescriptor(const Format& format,

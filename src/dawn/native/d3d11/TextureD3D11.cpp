@@ -31,6 +31,7 @@
 #include "dawn/native/d3d11/DeviceD3D11.h"
 #include "dawn/native/d3d11/FenceD3D11.h"
 #include "dawn/native/d3d11/Forward.h"
+#include "dawn/native/d3d11/SharedTextureMemoryD3D11.h"
 #include "dawn/native/d3d11/UtilsD3D11.h"
 
 namespace dawn::native::d3d11 {
@@ -222,6 +223,17 @@ ResultOrError<Ref<Texture>> Texture::CreateExternalImage(Device* device,
     dawnTexture->SetIsSubresourceContentInitialized(isInitialized,
                                                     dawnTexture->GetAllSubresources());
     return std::move(dawnTexture);
+}
+
+// static
+ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
+    SharedTextureMemory* memory,
+    const TextureDescriptor* descriptor) {
+    Device* device = ToBackend(memory->GetDevice());
+    Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, Kind::Normal));
+    DAWN_TRY(texture->InitializeAsExternalTexture(memory->GetD3DResource(), {}, false));
+    texture->mSharedTextureMemoryState = memory->GetState();
+    return texture;
 }
 
 template <typename T>

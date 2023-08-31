@@ -89,7 +89,11 @@ namespace detail {
             [&](const auto*... args) {
                 (([&](const auto* arg) {
                     if (arg != nullptr) {
-                        result += absl::StrFormat("%s, ", arg->sType);
+                        // reinterpret_cast because this chained struct might be forward-declared
+                        // without a definition. The definition may only be available on a
+                        // particular backend.
+                        const auto* chainedStruct = reinterpret_cast<const wgpu::ChainedStruct*>(arg);
+                        result += absl::StrFormat("%s, ", chainedStruct->sType);
                     }
                 }(args)), ...);}, unpacked);
         result += " )";

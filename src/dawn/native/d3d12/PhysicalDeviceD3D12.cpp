@@ -157,6 +157,9 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         (bgra8unormFormatInfo.Support1 & D3D12_FORMAT_SUPPORT1_TYPED_UNORDERED_ACCESS_VIEW)) {
         EnableFeature(Feature::BGRA8UnormStorage);
     }
+
+    EnableFeature(Feature::SharedTextureMemoryDXGISharedHandle);
+    EnableFeature(Feature::SharedFenceDXGISharedHandle);
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {

@@ -241,97 +241,64 @@ DXGI_FORMAT DXGITypelessTextureFormat(wgpu::TextureFormat format) {
     }
 }
 
+#define UNCOMPRESSED_COLOR_FORMATS(X)                                       \
+    X(wgpu::TextureFormat::R8Unorm, DXGI_FORMAT_R8_UNORM)                   \
+    X(wgpu::TextureFormat::R8Snorm, DXGI_FORMAT_R8_SNORM)                   \
+    X(wgpu::TextureFormat::R8Uint, DXGI_FORMAT_R8_UINT)                     \
+    X(wgpu::TextureFormat::R8Sint, DXGI_FORMAT_R8_SINT)                     \
+                                                                            \
+    X(wgpu::TextureFormat::R16Unorm, DXGI_FORMAT_R16_UNORM)                 \
+    X(wgpu::TextureFormat::R16Snorm, DXGI_FORMAT_R16_SNORM)                 \
+    X(wgpu::TextureFormat::R16Uint, DXGI_FORMAT_R16_UINT)                   \
+    X(wgpu::TextureFormat::R16Sint, DXGI_FORMAT_R16_SINT)                   \
+    X(wgpu::TextureFormat::R16Float, DXGI_FORMAT_R16_FLOAT)                 \
+    X(wgpu::TextureFormat::RG8Unorm, DXGI_FORMAT_R8G8_UNORM)                \
+    X(wgpu::TextureFormat::RG8Snorm, DXGI_FORMAT_R8G8_SNORM)                \
+    X(wgpu::TextureFormat::RG8Uint, DXGI_FORMAT_R8G8_UINT)                  \
+    X(wgpu::TextureFormat::RG8Sint, DXGI_FORMAT_R8G8_SINT)                  \
+                                                                            \
+    X(wgpu::TextureFormat::R32Uint, DXGI_FORMAT_R32_UINT)                   \
+    X(wgpu::TextureFormat::R32Sint, DXGI_FORMAT_R32_SINT)                   \
+    X(wgpu::TextureFormat::R32Float, DXGI_FORMAT_R32_FLOAT)                 \
+    X(wgpu::TextureFormat::RG16Unorm, DXGI_FORMAT_R16G16_UNORM)             \
+    X(wgpu::TextureFormat::RG16Snorm, DXGI_FORMAT_R16G16_SNORM)             \
+    X(wgpu::TextureFormat::RG16Uint, DXGI_FORMAT_R16G16_UINT)               \
+    X(wgpu::TextureFormat::RG16Sint, DXGI_FORMAT_R16G16_SINT)               \
+    X(wgpu::TextureFormat::RG16Float, DXGI_FORMAT_R16G16_FLOAT)             \
+    X(wgpu::TextureFormat::RGBA8Unorm, DXGI_FORMAT_R8G8B8A8_UNORM)          \
+    X(wgpu::TextureFormat::RGBA8UnormSrgb, DXGI_FORMAT_R8G8B8A8_UNORM_SRGB) \
+    X(wgpu::TextureFormat::RGBA8Snorm, DXGI_FORMAT_R8G8B8A8_SNORM)          \
+    X(wgpu::TextureFormat::RGBA8Uint, DXGI_FORMAT_R8G8B8A8_UINT)            \
+    X(wgpu::TextureFormat::RGBA8Sint, DXGI_FORMAT_R8G8B8A8_SINT)            \
+    X(wgpu::TextureFormat::BGRA8Unorm, DXGI_FORMAT_B8G8R8A8_UNORM)          \
+    X(wgpu::TextureFormat::BGRA8UnormSrgb, DXGI_FORMAT_B8G8R8A8_UNORM_SRGB) \
+    X(wgpu::TextureFormat::RGB10A2Unorm, DXGI_FORMAT_R10G10B10A2_UNORM)     \
+    X(wgpu::TextureFormat::RG11B10Ufloat, DXGI_FORMAT_R11G11B10_FLOAT)      \
+    X(wgpu::TextureFormat::RGB9E5Ufloat, DXGI_FORMAT_R9G9B9E5_SHAREDEXP)    \
+                                                                            \
+    X(wgpu::TextureFormat::RG32Uint, DXGI_FORMAT_R32G32_UINT)               \
+    X(wgpu::TextureFormat::RG32Sint, DXGI_FORMAT_R32G32_SINT)               \
+    X(wgpu::TextureFormat::RG32Float, DXGI_FORMAT_R32G32_FLOAT)             \
+    X(wgpu::TextureFormat::RGBA16Unorm, DXGI_FORMAT_R16G16B16A16_UNORM)     \
+    X(wgpu::TextureFormat::RGBA16Snorm, DXGI_FORMAT_R16G16B16A16_SNORM)     \
+    X(wgpu::TextureFormat::RGBA16Uint, DXGI_FORMAT_R16G16B16A16_UINT)       \
+    X(wgpu::TextureFormat::RGBA16Sint, DXGI_FORMAT_R16G16B16A16_SINT)       \
+    X(wgpu::TextureFormat::RGBA16Float, DXGI_FORMAT_R16G16B16A16_FLOAT)     \
+                                                                            \
+    X(wgpu::TextureFormat::RGBA32Uint, DXGI_FORMAT_R32G32B32A32_UINT)       \
+    X(wgpu::TextureFormat::RGBA32Sint, DXGI_FORMAT_R32G32B32A32_SINT)       \
+    X(wgpu::TextureFormat::RGBA32Float, DXGI_FORMAT_R32G32B32A32_FLOAT)     \
+                                                                            \
+    X(wgpu::TextureFormat::R8BG8Biplanar420Unorm, DXGI_FORMAT_NV12)         \
+    X(wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm, DXGI_FORMAT_P010)
+
 DXGI_FORMAT DXGITextureFormat(wgpu::TextureFormat format) {
     switch (format) {
-        case wgpu::TextureFormat::R8Unorm:
-            return DXGI_FORMAT_R8_UNORM;
-        case wgpu::TextureFormat::R8Snorm:
-            return DXGI_FORMAT_R8_SNORM;
-        case wgpu::TextureFormat::R8Uint:
-            return DXGI_FORMAT_R8_UINT;
-        case wgpu::TextureFormat::R8Sint:
-            return DXGI_FORMAT_R8_SINT;
-
-        case wgpu::TextureFormat::R16Unorm:
-            return DXGI_FORMAT_R16_UNORM;
-        case wgpu::TextureFormat::R16Snorm:
-            return DXGI_FORMAT_R16_SNORM;
-        case wgpu::TextureFormat::R16Uint:
-            return DXGI_FORMAT_R16_UINT;
-        case wgpu::TextureFormat::R16Sint:
-            return DXGI_FORMAT_R16_SINT;
-        case wgpu::TextureFormat::R16Float:
-            return DXGI_FORMAT_R16_FLOAT;
-        case wgpu::TextureFormat::RG8Unorm:
-            return DXGI_FORMAT_R8G8_UNORM;
-        case wgpu::TextureFormat::RG8Snorm:
-            return DXGI_FORMAT_R8G8_SNORM;
-        case wgpu::TextureFormat::RG8Uint:
-            return DXGI_FORMAT_R8G8_UINT;
-        case wgpu::TextureFormat::RG8Sint:
-            return DXGI_FORMAT_R8G8_SINT;
-
-        case wgpu::TextureFormat::R32Uint:
-            return DXGI_FORMAT_R32_UINT;
-        case wgpu::TextureFormat::R32Sint:
-            return DXGI_FORMAT_R32_SINT;
-        case wgpu::TextureFormat::R32Float:
-            return DXGI_FORMAT_R32_FLOAT;
-
-        case wgpu::TextureFormat::RG16Unorm:
-            return DXGI_FORMAT_R16G16_UNORM;
-        case wgpu::TextureFormat::RG16Snorm:
-            return DXGI_FORMAT_R16G16_SNORM;
-        case wgpu::TextureFormat::RG16Uint:
-            return DXGI_FORMAT_R16G16_UINT;
-        case wgpu::TextureFormat::RG16Sint:
-            return DXGI_FORMAT_R16G16_SINT;
-        case wgpu::TextureFormat::RG16Float:
-            return DXGI_FORMAT_R16G16_FLOAT;
-        case wgpu::TextureFormat::RGBA8Unorm:
-            return DXGI_FORMAT_R8G8B8A8_UNORM;
-        case wgpu::TextureFormat::RGBA8UnormSrgb:
-            return DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-        case wgpu::TextureFormat::RGBA8Snorm:
-            return DXGI_FORMAT_R8G8B8A8_SNORM;
-        case wgpu::TextureFormat::RGBA8Uint:
-            return DXGI_FORMAT_R8G8B8A8_UINT;
-        case wgpu::TextureFormat::RGBA8Sint:
-            return DXGI_FORMAT_R8G8B8A8_SINT;
-        case wgpu::TextureFormat::BGRA8Unorm:
-            return DXGI_FORMAT_B8G8R8A8_UNORM;
-        case wgpu::TextureFormat::BGRA8UnormSrgb:
-            return DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
-        case wgpu::TextureFormat::RGB10A2Unorm:
-            return DXGI_FORMAT_R10G10B10A2_UNORM;
-        case wgpu::TextureFormat::RG11B10Ufloat:
-            return DXGI_FORMAT_R11G11B10_FLOAT;
-        case wgpu::TextureFormat::RGB9E5Ufloat:
-            return DXGI_FORMAT_R9G9B9E5_SHAREDEXP;
-
-        case wgpu::TextureFormat::RG32Uint:
-            return DXGI_FORMAT_R32G32_UINT;
-        case wgpu::TextureFormat::RG32Sint:
-            return DXGI_FORMAT_R32G32_SINT;
-        case wgpu::TextureFormat::RG32Float:
-            return DXGI_FORMAT_R32G32_FLOAT;
-        case wgpu::TextureFormat::RGBA16Unorm:
-            return DXGI_FORMAT_R16G16B16A16_UNORM;
-        case wgpu::TextureFormat::RGBA16Snorm:
-            return DXGI_FORMAT_R16G16B16A16_SNORM;
-        case wgpu::TextureFormat::RGBA16Uint:
-            return DXGI_FORMAT_R16G16B16A16_UINT;
-        case wgpu::TextureFormat::RGBA16Sint:
-            return DXGI_FORMAT_R16G16B16A16_SINT;
-        case wgpu::TextureFormat::RGBA16Float:
-            return DXGI_FORMAT_R16G16B16A16_FLOAT;
-
-        case wgpu::TextureFormat::RGBA32Uint:
-            return DXGI_FORMAT_R32G32B32A32_UINT;
-        case wgpu::TextureFormat::RGBA32Sint:
-            return DXGI_FORMAT_R32G32B32A32_SINT;
-        case wgpu::TextureFormat::RGBA32Float:
-            return DXGI_FORMAT_R32G32B32A32_FLOAT;
+#define X(wgpuFormat, dxgiFormat) \
+    case wgpuFormat:              \
+        return dxgiFormat;
+        UNCOMPRESSED_COLOR_FORMATS(X)
+#undef X
 
         case wgpu::TextureFormat::Depth16Unorm:
             return DXGI_FORMAT_D16_UNORM;
@@ -373,11 +340,6 @@ DXGI_FORMAT DXGITextureFormat(wgpu::TextureFormat format) {
             return DXGI_FORMAT_BC7_UNORM;
         case wgpu::TextureFormat::BC7RGBAUnormSrgb:
             return DXGI_FORMAT_BC7_UNORM_SRGB;
-
-        case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
-            return DXGI_FORMAT_NV12;
-        case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
-            return DXGI_FORMAT_P010;
 
         case wgpu::TextureFormat::ETC2RGB8Unorm:
         case wgpu::TextureFormat::ETC2RGB8UnormSrgb:
@@ -423,6 +385,21 @@ DXGI_FORMAT DXGITextureFormat(wgpu::TextureFormat format) {
             UNREACHABLE();
     }
 }
+
+ResultOrError<wgpu::TextureFormat> FromUncompressedColorDXGITextureFormat(DXGI_FORMAT format) {
+    switch (format) {
+#define X(wgpuFormat, dxgiFormat) \
+    case dxgiFormat:              \
+        return wgpuFormat;
+        UNCOMPRESSED_COLOR_FORMATS(X)
+#undef X
+
+        default:
+            return DAWN_VALIDATION_ERROR("Unsupported DXGI format %x", format);
+    }
+}
+
+#undef UNCOMPRESSED_COLOR_FORMATS
 
 DXGI_FORMAT DXGIVertexFormat(wgpu::VertexFormat format) {
     switch (format) {

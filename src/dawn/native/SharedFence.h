@@ -31,6 +31,8 @@ class SharedFenceBase : public ApiObjectBase {
 
     void APIExportInfo(SharedFenceExportInfo* info) const;
 
+    MaybeError ExportInfo(SharedFenceExportInfo* info) const;
+
   protected:
     SharedFenceBase(DeviceBase* device, const char* label);
     SharedFenceBase(DeviceBase* device,
@@ -38,8 +40,6 @@ class SharedFenceBase : public ApiObjectBase {
                     ObjectBase::ErrorTag tag);
 
   private:
-    MaybeError ExportInfo(SharedFenceExportInfo* info) const;
-
     void DestroyImpl() override;
     virtual MaybeError ExportInfoImpl(SharedFenceExportInfo* info) const = 0;
 };

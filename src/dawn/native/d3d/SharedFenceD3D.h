@@ -12,31 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_NATIVE_D3D_UTILSD3D_H_
-#define SRC_DAWN_NATIVE_D3D_UTILSD3D_H_
+#ifndef SRC_DAWN_NATIVE_D3D_SHARED_FENCE_D3D_H_
+#define SRC_DAWN_NATIVE_D3D_SHARED_FENCE_D3D_H_
 
-#include <string>
-
-#include "dawn/native/Error.h"
+#include "dawn/native/SharedFence.h"
 #include "dawn/native/d3d/d3d_platform.h"
 
 namespace dawn::native::d3d {
 
-ResultOrError<std::wstring> ConvertStringToWstring(std::string_view s);
+class Device;
 
-bool IsTypeless(DXGI_FORMAT format);
+class SharedFence : public SharedFenceBase {
+  public:
+    ~SharedFence() override;
 
-bool IsDepthStencil(DXGI_FORMAT format);
+  protected:
+    SharedFence(Device* device, const char* label, HANDLE ownedHandle);
 
-uint64_t MakeDXCVersion(uint64_t majorVersion, uint64_t minorVersion);
+  private:
+    MaybeError ExportInfoImpl(SharedFenceExportInfo* info) const override;
 
-DXGI_FORMAT DXGITypelessTextureFormat(wgpu::TextureFormat format);
-
-DXGI_FORMAT DXGITextureFormat(wgpu::TextureFormat format);
-ResultOrError<wgpu::TextureFormat> FromUncompressedColorDXGITextureFormat(DXGI_FORMAT format);
-
-DXGI_FORMAT DXGIVertexFormat(wgpu::VertexFormat format);
+    HANDLE mHandle = nullptr;
+};
 
 }  // namespace dawn::native::d3d
 
-#endif  // SRC_DAWN_NATIVE_D3D_UTILSD3D_H_
+#endif  // SRC_DAWN_NATIVE_D3D_SHARED_FENCE_D3D_H_

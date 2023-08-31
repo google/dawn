@@ -147,6 +147,10 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::DawnMultiPlanarFormats);
         EnableFeature(Feature::MultiPlanarFormatP010);
     }
+
+    EnableFeature(Feature::SharedTextureMemoryDXGISharedHandle);
+    EnableFeature(Feature::SharedTextureMemoryD3D11Texture2D);
+    EnableFeature(Feature::SharedFenceDXGISharedHandle);
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {

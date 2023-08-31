@@ -69,6 +69,13 @@ SharedTextureMemoryTestBackend::CreatePerDeviceSharedTextureMemoriesFilterByUsag
     return out;
 }
 
+wgpu::Device SharedTextureMemoryTests::CreateDevice() {
+    if (GetParam().mBackend->UseSameDevice()) {
+        return device;
+    }
+    return DawnTestBase::CreateDevice();
+}
+
 void SharedTextureMemoryTests::UseInRenderPass(wgpu::Device& deviceObj, wgpu::Texture& texture) {
     wgpu::CommandEncoder encoder = deviceObj.CreateCommandEncoder();
     utils::ComboRenderPassDescriptor passDescriptor({texture.CreateView()});
@@ -304,10 +311,12 @@ TEST_P(SharedTextureMemoryNoFeatureTests, CreationWithoutFeature) {
         wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
         beginDesc.initialized = true;
 
-        ASSERT_DEVICE_ERROR_MSG(memory.BeginAccess(texture, &beginDesc), HasSubstr("is invalid"));
+        ASSERT_DEVICE_ERROR_MSG(EXPECT_TRUE(memory.BeginAccess(texture, &beginDesc)),
+                                HasSubstr("is invalid"));
 
         wgpu::SharedTextureMemoryEndAccessState endState = {};
-        ASSERT_DEVICE_ERROR_MSG(memory.EndAccess(texture, &endState), HasSubstr("is invalid"));
+        ASSERT_DEVICE_ERROR_MSG(EXPECT_TRUE(memory.EndAccess(texture, &endState)),
+                                HasSubstr("is invalid"));
     }
 }
 
@@ -539,8 +548,8 @@ TEST_P(SharedTextureMemoryTests, DoubleBeginAccess) {
     beginDesc.initialized = true;
 
     // It should be an error to BeginAccess twice in a row.
-    memory.BeginAccess(texture, &beginDesc);
-    ASSERT_DEVICE_ERROR_MSG(memory.BeginAccess(texture, &beginDesc),
+    EXPECT_TRUE(memory.BeginAccess(texture, &beginDesc));
+    ASSERT_DEVICE_ERROR_MSG(EXPECT_FALSE(memory.BeginAccess(texture, &beginDesc)),
                             HasSubstr("Cannot begin access with"));
 }
 
@@ -554,8 +563,8 @@ TEST_P(SharedTextureMemoryTests, DoubleBeginAccessSeparateTextures) {
     beginDesc.initialized = true;
 
     // It should be an error to BeginAccess twice in a row.
-    memory.BeginAccess(texture1, &beginDesc);
-    ASSERT_DEVICE_ERROR_MSG(memory.BeginAccess(texture2, &beginDesc),
+    EXPECT_TRUE(memory.BeginAccess(texture1, &beginDesc));
+    ASSERT_DEVICE_ERROR_MSG(EXPECT_FALSE(memory.BeginAccess(texture2, &beginDesc)),
                             HasSubstr("Cannot begin access with"));
 }
 
@@ -567,13 +576,14 @@ TEST_P(SharedTextureMemoryTests, DoubleEndAccess) {
     wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
     beginDesc.initialized = true;
 
-    memory.BeginAccess(texture, &beginDesc);
+    EXPECT_TRUE(memory.BeginAccess(texture, &beginDesc));
 
     wgpu::SharedTextureMemoryEndAccessState endState = {};
-    memory.EndAccess(texture, &endState);
+    EXPECT_TRUE(memory.EndAccess(texture, &endState));
 
     // Invalid to end access a second time.
-    ASSERT_DEVICE_ERROR_MSG(memory.EndAccess(texture, &endState), HasSubstr("Cannot end access"));
+    ASSERT_DEVICE_ERROR_MSG(EXPECT_FALSE(memory.EndAccess(texture, &endState)),
+                            HasSubstr("Cannot end access"));
 }
 
 // Test that it is an error to call EndAccess on a texture that was not the one BeginAccess was
@@ -586,10 +596,11 @@ TEST_P(SharedTextureMemoryTests, BeginThenEndOnDifferentTexture) {
     wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
     beginDesc.initialized = true;
 
-    memory.BeginAccess(texture1, &beginDesc);
+    EXPECT_TRUE(memory.BeginAccess(texture1, &beginDesc));
 
     wgpu::SharedTextureMemoryEndAccessState endState = {};
-    ASSERT_DEVICE_ERROR_MSG(memory.EndAccess(texture2, &endState), HasSubstr("Cannot end access"));
+    ASSERT_DEVICE_ERROR_MSG(EXPECT_FALSE(memory.EndAccess(texture2, &endState)),
+                            HasSubstr("Cannot end access"));
 }
 
 // Test that it is an error to call EndAccess without a preceding BeginAccess.
@@ -598,7 +609,8 @@ TEST_P(SharedTextureMemoryTests, EndAccessWithoutBegin) {
     wgpu::Texture texture = memory.CreateTexture();
 
     wgpu::SharedTextureMemoryEndAccessState endState = {};
-    ASSERT_DEVICE_ERROR_MSG(memory.EndAccess(texture, &endState), HasSubstr("Cannot end access"));
+    ASSERT_DEVICE_ERROR_MSG(EXPECT_FALSE(memory.EndAccess(texture, &endState)),
+                            HasSubstr("Cannot end access"));
 }
 
 // Test that it is an error to use the texture on the queue without a preceding BeginAccess.
@@ -630,150 +642,6 @@ TEST_P(SharedTextureMemoryTests, UseWithoutBegin) {
                 device.GetQueue().WriteTexture(&dest, &data, sizeof(data), &dataLayout, &writeSize),
                 HasSubstr("without current access"));
         }
-    }
-}
-
-// Fences are tracked by BeginAccess regardless of whether or not the operation
-// was successful. In error conditions, the same fences are returned in EndAccess, so that
-// the caller can free them (the implementation did not consume them), and the wait condition
-// isn't dropped on the floor entirely.
-// If there are invalid nested accesses, forwarding waits for the invalid accesses still occurs.
-// The mental model is that there is a stack of scopes per (memory, texture) pair.
-TEST_P(SharedTextureMemoryTests, AccessStack) {
-    const auto& memories = GetParam().mBackend->CreateSharedTextureMemories(device);
-    ASSERT_GT(memories.size(), 1u);
-
-    for (size_t i = 0; i < memories.size(); ++i) {
-        // Create multiple textures for use in the test.
-        // The test will use them to Begin/End access in nested and interleaved
-        // patterns to verify the access stack is tracked separately per-texture.
-        wgpu::Texture texture1 = memories[i].CreateTexture();
-        wgpu::Texture texture2 = memories[i].CreateTexture();
-        wgpu::Texture texture3 = memories[i].CreateTexture();
-        wgpu::Texture texture4 = memories[i].CreateTexture();
-        wgpu::Texture texture5 = memories[i].CreateTexture();
-
-        std::vector<wgpu::SharedFence> fences;
-        std::vector<uint64_t> signaledValues;
-
-        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
-        wgpu::SharedTextureMemoryEndAccessState endState;
-        beginDesc.initialized = true;
-
-        auto CheckFencesMatch = [&](const wgpu::SharedTextureMemoryBeginAccessDescriptor& begin,
-                                    const wgpu::SharedTextureMemoryEndAccessState& end) {
-            ASSERT_EQ(begin.fenceCount, end.fenceCount);
-            for (size_t j = 0; j < end.fenceCount; ++j) {
-                EXPECT_EQ(begin.fences[j].Get(), end.fences[j].Get());
-                EXPECT_EQ(begin.signaledValues[j], end.signaledValues[j]);
-            }
-        };
-
-        // Begin/EndAccess to generate multiple fences.
-        while (fences.size() < 7) {
-            endState = {};
-            memories[i].BeginAccess(texture1, &beginDesc);
-            memories[i].EndAccess(texture1, &endState);
-
-            ASSERT_GT(endState.fenceCount, 0u);
-            for (size_t j = 0; j < endState.fenceCount; ++j) {
-                fences.push_back(std::move(endState.fences[j]));
-                signaledValues.push_back(endState.signaledValues[j]);
-            }
-        }
-
-        // Begin access on memories[i], texture1 using the first fence.
-        auto ti1BeginDesc = beginDesc = {};
-        ti1BeginDesc.initialized = true;
-        ti1BeginDesc.fenceCount = 1;
-        ti1BeginDesc.fences = &fences[0];
-        ti1BeginDesc.signaledValues = &signaledValues[0];
-        memories[i].BeginAccess(texture1, &ti1BeginDesc);
-
-        // Begin access on memories[i], texture2 with no fences.
-        auto ti2BeginDesc = beginDesc = {};
-        ti2BeginDesc.fenceCount = 0;
-        ASSERT_DEVICE_ERROR(memories[i].BeginAccess(texture2, &ti2BeginDesc));
-
-        // Begin access on memories[i], texture3 with two fences.
-        auto ti3BeginDesc = beginDesc = {};
-        ti3BeginDesc.fenceCount = 2;
-        ti3BeginDesc.fences = &fences[1];
-        ti3BeginDesc.signaledValues = &signaledValues[1];
-        ASSERT_DEVICE_ERROR(memories[i].BeginAccess(texture3, &ti3BeginDesc));
-
-        auto tj3BeginDesc = beginDesc = {};
-        if (i + 1 < memories.size()) {
-            // Begin access on memories[i + 1], texture3 with one fence.
-            tj3BeginDesc.fenceCount = 1;
-            tj3BeginDesc.fences = &fences[3];
-            tj3BeginDesc.signaledValues = &signaledValues[3];
-            ASSERT_DEVICE_ERROR(memories[i + 1].BeginAccess(texture3, &tj3BeginDesc));
-        }
-
-        // End access on memories[i], texture2.
-        // Expect the same fences from the BeginAccess operation.
-        ASSERT_DEVICE_ERROR(memories[i].EndAccess(texture2, &endState));
-        CheckFencesMatch(ti2BeginDesc, endState);
-
-        // End access on memories[i], texture1. The begin was valid.
-        // This should be valid too.
-        memories[i].EndAccess(texture1, &endState);
-
-        // Begin access on memories[i], texture4 with two fences.
-        auto ti4BeginDesc = beginDesc = {};
-        ti4BeginDesc.initialized = true;
-        ti4BeginDesc.fenceCount = 1;
-        ti4BeginDesc.fences = &fences[4];
-        ti4BeginDesc.signaledValues = &signaledValues[4];
-        memories[i].BeginAccess(texture4, &ti4BeginDesc);
-
-        auto tj5BeginDesc = beginDesc = {};
-        if (i + 1 < memories.size()) {
-            // Begin access on memories[i + 1], texture5 with one fence.
-            tj5BeginDesc.fenceCount = 1;
-            tj5BeginDesc.fences = &fences[6];
-            tj5BeginDesc.signaledValues = &signaledValues[6];
-            ASSERT_DEVICE_ERROR(memories[i + 1].BeginAccess(texture5, &tj5BeginDesc));
-
-            // End access on memories[i + 1], texture3.
-            ASSERT_DEVICE_ERROR(memories[i + 1].EndAccess(texture3, &endState));
-            CheckFencesMatch(tj3BeginDesc, endState);
-        }
-
-        // End access on memories[i], texture3.
-        ASSERT_DEVICE_ERROR(memories[i].EndAccess(texture3, &endState));
-        CheckFencesMatch(ti3BeginDesc, endState);
-
-        // EndAccess on memories[i], texture4.
-        memories[i].EndAccess(texture4, &endState);
-
-        if (i + 1 < memories.size()) {
-            // End access on memories[i + 1], texture5.
-            ASSERT_DEVICE_ERROR(memories[i + 1].EndAccess(texture5, &endState));
-            CheckFencesMatch(tj5BeginDesc, endState);
-        }
-    }
-}
-
-// Test that it is an error to call BeginAccess on a texture that wasn't created from the same
-// memory.
-TEST_P(SharedTextureMemoryTests, MismatchingMemory) {
-    const auto& memories = GetParam().mBackend->CreateSharedTextureMemories(device);
-    wgpu::SharedTextureMemory otherMemory = GetParam().mBackend->CreateSharedTextureMemory(device);
-    for (size_t i = 0; i < memories.size(); ++i) {
-        wgpu::Texture texture = memories[i].CreateTexture();
-
-        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
-        beginDesc.initialized = true;
-
-        ASSERT_DEVICE_ERROR_MSG(otherMemory.BeginAccess(texture, &beginDesc),
-                                HasSubstr("cannot be used with"));
-
-        // End access so the access scope is balanced.
-        wgpu::SharedTextureMemoryEndAccessState endState;
-        ASSERT_DEVICE_ERROR_MSG(otherMemory.EndAccess(texture, &endState),
-                                HasSubstr("cannot be used with"));
     }
 }
 
@@ -810,7 +678,9 @@ TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
         memory.GetProperties(&properties);
 
         // Skipped for multiplanar formats because those must be initialized on import.
-        if (utils::IsMultiPlanarFormat(properties.format)) {
+        // We also need render attachment usage to initially populate the texture.
+        if (utils::IsMultiPlanarFormat(properties.format) ||
+            (properties.usage & wgpu::TextureUsage::RenderAttachment) == 0) {
             continue;
         }
 
@@ -838,11 +708,11 @@ TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
         memory.BeginAccess(texture, &beginDesc);
 
         // Use the texture on the GPU which should lazy clear it.
-        if (properties.usage & wgpu::TextureUsage::RenderAttachment) {
-            UseInRenderPass(device, texture);
-        } else {
-            ASSERT(properties.usage & wgpu::TextureUsage::CopySrc);
+        if (properties.usage & wgpu::TextureUsage::CopySrc) {
             UseInCopy(device, texture);
+        } else {
+            ASSERT(properties.usage & wgpu::TextureUsage::RenderAttachment);
+            UseInRenderPass(device, texture);
         }
 
         AsNonConst(endState.initialized) = false;  // should be overrwritten
@@ -1071,12 +941,60 @@ TEST_P(SharedTextureMemoryTests, RenderThenTextureDestroyBeforeEndAccessThenSamp
     }
 }
 
+// Test accessing the memory on one device, dropping all memories, then
+// accessing on the second device. Operations on the second device must
+// still wait for the preceding operations to complete.
+TEST_P(SharedTextureMemoryTests, RenderThenDropAllMemoriesThenSample) {
+    std::vector<wgpu::Device> devices = {device, CreateDevice()};
+    for (auto memories : GetParam().mBackend->CreatePerDeviceSharedTextureMemoriesFilterByUsage(
+             devices, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding)) {
+        // Create two textures from each memory.
+        wgpu::Texture textures[] = {memories[0].CreateTexture(), memories[1].CreateTexture()};
+
+        // Make two command buffers, one that clears the texture, another that samples.
+        wgpu::CommandBuffer commandBuffer0 =
+            MakeFourColorsClearCommandBuffer(devices[0], textures[0]);
+        auto [commandBuffer1, colorTarget] =
+            MakeCheckBySamplingCommandBuffer(devices[1], textures[1]);
+
+        wgpu::SharedTextureMemoryBeginAccessDescriptor beginDesc = {};
+        beginDesc.initialized = false;
+        wgpu::SharedTextureMemoryEndAccessState endState = {};
+        // Render to the texture.
+        {
+            memories[0].BeginAccess(textures[0], &beginDesc);
+            devices[0].GetQueue().Submit(1, &commandBuffer0);
+            memories[0].EndAccess(textures[0], &endState);
+        }
+
+        std::vector<wgpu::SharedFence> sharedFences(endState.fenceCount);
+        for (size_t i = 0; i < endState.fenceCount; ++i) {
+            sharedFences[i] = GetParam().mBackend->ImportFenceTo(devices[1], endState.fences[i]);
+        }
+        beginDesc.fenceCount = endState.fenceCount;
+        beginDesc.fences = sharedFences.data();
+        beginDesc.signaledValues = endState.signaledValues;
+        beginDesc.initialized = endState.initialized;
+
+        // Begin access, then drop all memories.
+        memories[1].BeginAccess(textures[1], &beginDesc);
+        memories.clear();
+
+        // Sample from the texture and check the contents.
+        devices[1].GetQueue().Submit(1, &commandBuffer1);
+        CheckFourColors(devices[1], textures[1].GetFormat(), colorTarget);
+    }
+}
+
 // Test rendering to a texture memory on one device, then sampling it using another device.
 // Destroy or destroy the first device after submitting the commands, but before performing
 // EndAccess. The second device should still be able to wait on the first device and see the
 // results.
 // This tests both cases where the device is destroyed, and where the device is lost.
 TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThenSample) {
+    // Not supported if using the same device. Not possible to lose one without losing the other.
+    DAWN_TEST_UNSUPPORTED_IF(GetParam().mBackend->UseSameDevice());
+
     auto DoTest = [&](auto DestroyOrLoseDevice) {
         std::vector<wgpu::Device> devices = {CreateDevice(), CreateDevice()};
         auto perDeviceMemories =
@@ -1133,6 +1051,8 @@ TEST_P(SharedTextureMemoryTests, RenderThenLoseOrDestroyDeviceBeforeEndAccessThe
 // Write to the texture, then read from two separate devices concurrently, then write again.
 // Reads should happen strictly after the writes. The final write should wait for the reads.
 TEST_P(SharedTextureMemoryTests, SeparateDevicesWriteThenConcurrentReadThenWrite) {
+    DAWN_TEST_UNSUPPORTED_IF(!GetParam().mBackend->SupportsConcurrentRead());
+
     std::vector<wgpu::Device> devices = {device, CreateDevice(), CreateDevice()};
     for (const auto& memories :
          GetParam().mBackend->CreatePerDeviceSharedTextureMemoriesFilterByUsage(

@@ -608,6 +608,10 @@ source_set("end2end_tests_sources") {
     sources += [ "end2end/D3D12CachingTests.cpp" ]
   }
 
+  if (is_win) {
+    sources += [ "end2end/SharedTextureMemoryTests_win.cpp" ]
+  }
+
   if (is_mac || is_ios) {
     if (dawn_enable_metal) {
       sources += [
@@ -664,6 +668,7 @@ source_set("white_box_tests_sources") {
   ]
 
   sources = []
+  libs = []
 
   if (dawn_enable_vulkan) {
     deps += [ "${dawn_vulkan_headers_dir}:vulkan_headers" ]
@@ -727,8 +732,6 @@ source_set("white_box_tests_sources") {
     sources += [ "white_box/GLTextureWrappingTests.cpp" ]
     include_dirs = [ "//third_party/khronos" ]
   }
-
-  libs = []
 }
 
 dawn_test("dawn_end2end_tests") {

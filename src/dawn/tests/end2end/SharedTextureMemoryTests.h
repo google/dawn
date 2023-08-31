@@ -55,6 +55,16 @@ class SharedTextureMemoryTestBackend {
     std::vector<std::vector<wgpu::SharedTextureMemory>>
     CreatePerDeviceSharedTextureMemoriesFilterByUsage(const std::vector<wgpu::Device>& devices,
                                                       wgpu::TextureUsage requiredUsage);
+
+    // Return true if the test should always use the same device.
+    // Some interop paths require the same underyling backend device.
+    virtual bool UseSameDevice() const { return false; }
+
+    // Whether or not the backing supports concurrent reads. This is
+    // a property of the underlying API (keyed mutex, vk binary semaphore),
+    // so it is concurrent reads across disjoint Dawn devices - not concurrent
+    // reads on the same Dawn device.
+    virtual bool SupportsConcurrentRead() const { return true; }
 };
 
 inline std::ostream& operator<<(std::ostream& o, SharedTextureMemoryTestBackend* backend) {
@@ -75,6 +85,8 @@ class SharedTextureMemoryTests : public DawnTestWithParams<SharedTextureMemoryTe
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override;
 
     void SetUp() override;
+
+    wgpu::Device CreateDevice();
 
     void UseInRenderPass(wgpu::Device& deviceObj, wgpu::Texture& texture);
     void UseInCopy(wgpu::Device& deviceObj, wgpu::Texture& texture);

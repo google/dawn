@@ -158,7 +158,7 @@ TEST_P(SharedTextureMemoryTests, SharedFenceSuccessfulImportExport) {
     }
 }
 
-// Test that it is an error to import a shared fence with a null MTLSharedEvent
+// Test that it is an error to import a shared fence without enabling the feature.
 TEST_P(SharedTextureMemoryNoFeatureTests, SharedFenceImportWithoutFeature) {
     if (@available(macOS 10.14, iOS 12.0, *)) {
         auto mtlDevice = AcquireNSPRef(MTLCreateSystemDefaultDevice());

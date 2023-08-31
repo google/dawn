@@ -37,6 +37,7 @@ namespace dawn::native::d3d11 {
 class CommandRecordingContext;
 class Device;
 class TextureView;
+class SharedTextureMemory;
 
 MaybeError ValidateTextureCanBeWrapped(ID3D11Resource* d3d11Resource,
                                        const TextureDescriptor* descriptor);
@@ -54,6 +55,9 @@ class Texture final : public d3d::Texture {
                                                            std::vector<Ref<d3d::Fence>> waitFences,
                                                            bool isSwapChainTexture,
                                                            bool isInitialized);
+    static ResultOrError<Ref<Texture>> CreateFromSharedTextureMemory(
+        SharedTextureMemory* memory,
+        const TextureDescriptor* descriptor);
     ID3D11Resource* GetD3D11Resource() const;
 
     D3D11_RENDER_TARGET_VIEW_DESC GetRTVDescriptor(const Format& format,
