@@ -17,8 +17,8 @@
 
 #include "dawn/native/MetalBackend.h"
 
-#include "dawn/native/metal/CommandRecordingContext.h"
 #include "dawn/native/metal/DeviceMTL.h"
+#include "dawn/native/metal/QueueMTL.h"
 #include "dawn/native/metal/TextureMTL.h"
 
 namespace dawn::native::metal {
@@ -55,7 +55,7 @@ void IOSurfaceEndAccess(WGPUTexture cTexture,
 void WaitForCommandsToBeScheduled(WGPUDevice device) {
     Device* backendDevice = ToBackend(FromAPI(device));
     auto deviceLock(backendDevice->GetScopedLock());
-    backendDevice->WaitForCommandsToBeScheduled();
+    ToBackend(backendDevice->GetQueue())->WaitForCommandsToBeScheduled();
 }
 
 }  // namespace dawn::native::metal

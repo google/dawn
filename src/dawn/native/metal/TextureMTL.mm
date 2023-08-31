@@ -21,6 +21,7 @@
 #include "dawn/native/EnumMaskIterator.h"
 #include "dawn/native/metal/BufferMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
+#include "dawn/native/metal/QueueMTL.h"
 #include "dawn/native/metal/SharedFenceMTL.h"
 #include "dawn/native/metal/SharedTextureMemoryMTL.h"
 #include "dawn/native/metal/UtilsMetal.h"
@@ -877,7 +878,7 @@ void Texture::SynchronizeTextureBeforeUse(CommandRecordingContext* commandContex
 
 void Texture::IOSurfaceEndAccess(ExternalImageIOSurfaceEndAccessDescriptor* descriptor) {
     ASSERT(descriptor);
-    ToBackend(GetDevice())->ExportLastSignaledEvent(descriptor);
+    ToBackend(GetDevice()->GetQueue())->ExportLastSignaledEvent(descriptor);
     descriptor->isInitialized = IsSubresourceContentInitialized(GetAllSubresources());
     // Destroy the texture as it should not longer be used after EndAccess.
     Destroy();

@@ -34,7 +34,6 @@
 namespace dawn::native::metal {
 
 struct KalmanInfo;
-struct ExternalImageMTLSharedEventDescriptor;
 
 class Device final : public DeviceBase {
   public:
@@ -49,19 +48,15 @@ class Device final : public DeviceBase {
     MaybeError TickImpl() override;
 
     id<MTLDevice> GetMTLDevice();
-    id<MTLCommandQueue> GetMTLQueue();
 
+    // TODO(dawn:1413) Use the metal::Queue directly instead of this proxy method.
     CommandRecordingContext* GetPendingCommandContext(
         Device::SubmitMode submitMode = Device::SubmitMode::Normal);
-    MaybeError SubmitPendingCommandBuffer();
-
-    void ExportLastSignaledEvent(ExternalImageMTLSharedEventDescriptor* desc);
 
     Ref<Texture> CreateTextureWrappingIOSurface(
         const ExternalImageDescriptor* descriptor,
         IOSurfaceRef ioSurface,
         std::vector<MTLSharedEventAndSignalValue> waitEvents);
-    void WaitForCommandsToBeScheduled();
 
     MaybeError CopyFromStagingToBufferImpl(BufferBase* source,
                                            uint64_t sourceOffset,
@@ -86,12 +81,6 @@ class Device final : public DeviceBase {
     // Get a MTLBuffer that can be used as a mock in a no-op blit encoder based on filling this
     // single-byte buffer
     id<MTLBuffer> GetMockBlitMtlBuffer();
-
-    // TODO(dawn:1413) move these methods to the metal::Queue.
-    void ForceEventualFlushOfCommands();
-    bool HasPendingCommands() const;
-    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials();
-    MaybeError WaitForIdleForDestruction();
 
   private:
     Device(AdapterBase* adapter,
@@ -146,19 +135,6 @@ class Device final : public DeviceBase {
     void DestroyImpl() override;
 
     NSPRef<id<MTLDevice>> mMtlDevice;
-    NSPRef<id> mMtlSharedEvent = nil;  // MTLSharedEvent not available until macOS 10.14+.
-    NSPRef<id<MTLCommandQueue>> mCommandQueue;
-
-    CommandRecordingContext mCommandContext;
-
-    // The completed serial is updated in a Metal completion handler that can be fired on a
-    // different thread, so it needs to be atomic.
-    std::atomic<uint64_t> mCompletedSerial;
-
-    // mLastSubmittedCommands will be accessed in a Metal schedule handler that can be fired on
-    // a different thread so we guard access to it with a mutex.
-    std::mutex mLastSubmittedCommandsMutex;
-    NSPRef<id<MTLCommandBuffer>> mLastSubmittedCommands;
 
     // The current estimation of timestamp period
     float mTimestampPeriod = 1.0f;

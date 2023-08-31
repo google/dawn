@@ -15,23 +15,52 @@
 #ifndef SRC_DAWN_NATIVE_METAL_QUEUEMTL_H_
 #define SRC_DAWN_NATIVE_METAL_QUEUEMTL_H_
 
+#import <Metal/Metal.h>
 #include "dawn/native/Queue.h"
+#include "dawn/native/metal/CommandRecordingContext.h"
 
 namespace dawn::native::metal {
 
 class Device;
+struct ExternalImageMTLSharedEventDescriptor;
 
 class Queue final : public QueueBase {
   public:
+    static ResultOrError<Ref<Queue>> Create(Device* device, const QueueDescriptor* descriptor);
+
+    CommandRecordingContext* GetPendingCommandContext(SubmitMode submitMode = SubmitMode::Normal);
+    MaybeError SubmitPendingCommandBuffer();
+    void WaitForCommandsToBeScheduled();
+    void ExportLastSignaledEvent(ExternalImageMTLSharedEventDescriptor* desc);
+    void Destroy();
+
+  private:
     Queue(Device* device, const QueueDescriptor* descriptor);
     ~Queue() override;
 
-  private:
+    MaybeError Initialize();
+
     MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override;
     bool HasPendingCommands() const override;
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void ForceEventualFlushOfCommands() override;
     MaybeError WaitForIdleForDestruction() override;
+
+    NSPRef<id<MTLCommandQueue>> mCommandQueue;
+    CommandRecordingContext mCommandContext;
+
+    // mLastSubmittedCommands will be accessed in a Metal schedule handler that can be fired on
+    // a different thread so we guard access to it with a mutex.
+    std::mutex mLastSubmittedCommandsMutex;
+    NSPRef<id<MTLCommandBuffer>> mLastSubmittedCommands;
+
+    // The completed serial is updated in a Metal completion handler that can be fired on a
+    // different thread, so it needs to be atomic.
+    std::atomic<uint64_t> mCompletedSerial;
+
+    // A shared event that can be exported for synchronization with other users of Metal.
+    // MTLSharedEvent is not available until macOS 10.14+ so use just `id`.
+    NSPRef<id> mMtlSharedEvent = nullptr;
 };
 
 }  // namespace dawn::native::metal

@@ -56,6 +56,11 @@ class ExecutionQueueBase {
     // resources.
     virtual MaybeError WaitForIdleForDestruction() = 0;
 
+    // In the 'Normal' mode, currently recorded commands in the backend submitted in the next Tick.
+    // However in the 'Passive' mode, the submission will be postponed as late as possible, for
+    // example, until the client has explictly issued a submission.
+    enum class SubmitMode { Normal, Passive };
+
   private:
     // Each backend should implement to check their passed fences if there are any and return a
     // completed serial. Return 0 should indicate no fences to check.

@@ -14,7 +14,9 @@
 
 #include "dawn/tests/DawnTest.h"
 
-#include "dawn/native/metal/DeviceMTL.h"
+#include "dawn/native/Device.h"
+#include "dawn/native/metal/Forward.h"
+#include "dawn/native/metal/QueueMTL.h"
 
 namespace dawn::native {
 namespace {
@@ -27,11 +29,11 @@ class MetalAutoreleasePoolTests : public DawnTest {
         DawnTest::SetUp();
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
-        mMtlDevice = reinterpret_cast<Device*>(device.Get());
+        mMtlQueue = ToBackend(FromAPI(device.Get())->GetQueue());
     }
 
   protected:
-    Device* mMtlDevice = nullptr;
+    Queue* mMtlQueue = nullptr;
 };
 
 // Test that the MTLCommandBuffer owned by the pending command context can
@@ -40,11 +42,11 @@ TEST_P(MetalAutoreleasePoolTests, CommandBufferOutlivesAutorelease) {
     @autoreleasepool {
         // Get the recording context which will allocate a MTLCommandBuffer.
         // It will get autoreleased at the end of this block.
-        mMtlDevice->GetPendingCommandContext();
+        mMtlQueue->GetPendingCommandContext();
     }
 
     // Submitting the command buffer should succeed.
-    ASSERT_TRUE(mMtlDevice->SubmitPendingCommandBuffer().IsSuccess());
+    ASSERT_TRUE(mMtlQueue->SubmitPendingCommandBuffer().IsSuccess());
 }
 
 // Test that the MTLBlitCommandEncoder owned by the pending command context
@@ -54,12 +56,12 @@ TEST_P(MetalAutoreleasePoolTests, EncoderOutlivesAutorelease) {
         // Get the recording context which will allocate a MTLCommandBuffer.
         // Begin a blit encoder.
         // Both will get autoreleased at the end of this block.
-        mMtlDevice->GetPendingCommandContext()->EnsureBlit();
+        mMtlQueue->GetPendingCommandContext()->EnsureBlit();
     }
 
     // Submitting the command buffer should succeed.
-    mMtlDevice->GetPendingCommandContext()->EndBlit();
-    ASSERT_TRUE(mMtlDevice->SubmitPendingCommandBuffer().IsSuccess());
+    mMtlQueue->GetPendingCommandContext()->EndBlit();
+    ASSERT_TRUE(mMtlQueue->SubmitPendingCommandBuffer().IsSuccess());
 }
 
 DAWN_INSTANTIATE_TEST(MetalAutoreleasePoolTests, MetalBackend());

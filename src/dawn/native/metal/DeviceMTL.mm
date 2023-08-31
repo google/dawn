@@ -123,9 +123,7 @@ Device::Device(AdapterBase* adapter,
                NSPRef<id<MTLDevice>> mtlDevice,
                const DeviceDescriptor* descriptor,
                const TogglesState& deviceToggles)
-    : DeviceBase(adapter, descriptor, deviceToggles),
-      mMtlDevice(std::move(mtlDevice)),
-      mCompletedSerial(0) {
+    : DeviceBase(adapter, descriptor, deviceToggles), mMtlDevice(std::move(mtlDevice)) {
     // On macOS < 11.0, we only can check whether counter sampling is supported, and the counter
     // only can be sampled between command boundary using sampleCountersInBuffer API if it's
     // supported.
@@ -146,15 +144,8 @@ Device::~Device() {
 }
 
 MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
-    mCommandQueue.Acquire([*mMtlDevice newCommandQueue]);
-    if (mCommandQueue == nil) {
-        return DAWN_INTERNAL_ERROR("Failed to allocate MTLCommandQueue.");
-    }
-    if (@available(macOS 10.14, iOS 12.0, *)) {
-        mMtlSharedEvent.Acquire([*mMtlDevice newSharedEvent]);
-    }
-
-    DAWN_TRY(mCommandContext.PrepareNextCommandBuffer(*mCommandQueue));
+    Ref<Queue> queue;
+    DAWN_TRY_ASSIGN(queue, Queue::Create(this, &descriptor->defaultQueue));
 
     if (mIsTimestampQueryEnabled && !IsToggleEnabled(Toggle::DisableTimestampQueryConversion)) {
         // Make a best guess of timestamp period based on device vendor info, and converge it to
@@ -175,7 +166,7 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
         }
     }
 
-    return DeviceBase::Initialize(AcquireRef(new Queue(this, &descriptor->defaultQueue)));
+    return DeviceBase::Initialize(std::move(queue));
 }
 
 ResultOrError<Ref<BindGroupBase>> Device::CreateBindGroupImpl(
@@ -286,27 +277,8 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
     UNREACHABLE();
 }
 
-ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
-    uint64_t frontendCompletedSerial{GetQueue()->GetCompletedCommandSerial()};
-    // sometimes we increase the serials, in which case the completed serial in
-    // the device base will surpass the completed serial we have in the metal backend, so we
-    // must update ours when we see that the completed serial from device base has
-    // increased.
-    //
-    // This update has to be atomic otherwise there is a race with the `addCompletedHandler`
-    // call below and this call could set the mCompletedSerial backwards.
-    uint64_t current = mCompletedSerial.load();
-    while (frontendCompletedSerial > current &&
-           !mCompletedSerial.compare_exchange_weak(current, frontendCompletedSerial)) {
-    }
-
-    return ExecutionSerial(mCompletedSerial.load());
-}
-
 MaybeError Device::TickImpl() {
-    if (mCommandContext.NeedsSubmit()) {
-        DAWN_TRY(SubmitPendingCommandBuffer());
-    }
+    DAWN_TRY(ToBackend(GetQueue())->SubmitPendingCommandBuffer());
 
     // Just run timestamp period calculation when timestamp feature is enabled and timestamp
     // conversion is not disabled.
@@ -324,89 +296,8 @@ id<MTLDevice> Device::GetMTLDevice() {
     return mMtlDevice.Get();
 }
 
-id<MTLCommandQueue> Device::GetMTLQueue() {
-    return mCommandQueue.Get();
-}
-
 CommandRecordingContext* Device::GetPendingCommandContext(Device::SubmitMode submitMode) {
-    if (submitMode == DeviceBase::SubmitMode::Normal) {
-        mCommandContext.SetNeedsSubmit();
-    }
-    mCommandContext.MarkUsed();
-    return &mCommandContext;
-}
-
-bool Device::HasPendingCommands() const {
-    return mCommandContext.NeedsSubmit();
-}
-
-void Device::ForceEventualFlushOfCommands() {
-    if (mCommandContext.WasUsed()) {
-        mCommandContext.SetNeedsSubmit();
-    }
-}
-
-MaybeError Device::SubmitPendingCommandBuffer() {
-    if (!mCommandContext.NeedsSubmit()) {
-        return {};
-    }
-
-    GetQueue()->IncrementLastSubmittedCommandSerial();
-
-    // Acquire the pending command buffer, which is retained. It must be released later.
-    NSPRef<id<MTLCommandBuffer>> pendingCommands = mCommandContext.AcquireCommands();
-
-    // Replace mLastSubmittedCommands with the mutex held so we avoid races between the
-    // schedule handler and this code.
-    {
-        std::lock_guard<std::mutex> lock(mLastSubmittedCommandsMutex);
-        mLastSubmittedCommands = pendingCommands;
-    }
-
-    // Make a local copy of the pointer to the commands because it's not clear how ObjC blocks
-    // handle types with copy / move constructors being referenced in the block..
-    id<MTLCommandBuffer> pendingCommandsPointer = pendingCommands.Get();
-    [*pendingCommands addScheduledHandler:^(id<MTLCommandBuffer>) {
-        // This is DRF because we hold the mutex for mLastSubmittedCommands and pendingCommands
-        // is a local value (and not the member itself).
-        std::lock_guard<std::mutex> lock(mLastSubmittedCommandsMutex);
-        if (this->mLastSubmittedCommands.Get() == pendingCommandsPointer) {
-            this->mLastSubmittedCommands = nullptr;
-        }
-    }];
-
-    // Update the completed serial once the completed handler is fired. Make a local copy of
-    // mLastSubmittedSerial so it is captured by value.
-    ExecutionSerial pendingSerial = GetLastSubmittedCommandSerial();
-    // this ObjC block runs on a different thread
-    [*pendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
-        TRACE_EVENT_ASYNC_END0(GetPlatform(), GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
-                               uint64_t(pendingSerial));
-        ASSERT(uint64_t(pendingSerial) > mCompletedSerial.load());
-        this->mCompletedSerial = uint64_t(pendingSerial);
-    }];
-
-    TRACE_EVENT_ASYNC_BEGIN0(GetPlatform(), GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
-                             uint64_t(pendingSerial));
-    if (@available(macOS 10.14, *)) {
-        id rawEvent = *mMtlSharedEvent;
-        id<MTLSharedEvent> sharedEvent = static_cast<id<MTLSharedEvent>>(rawEvent);
-        [*pendingCommands encodeSignalEvent:sharedEvent value:static_cast<uint64_t>(pendingSerial)];
-    }
-    [*pendingCommands commit];
-
-    return mCommandContext.PrepareNextCommandBuffer(*mCommandQueue);
-}
-
-void Device::ExportLastSignaledEvent(ExternalImageMTLSharedEventDescriptor* desc) {
-    // Ensure commands are submitted before getting the last submited serial.
-    // Ignore the error since we still want to export the serial of the last successful
-    // submission - that was the last serial that was actually signaled.
-    ForceEventualFlushOfCommands();
-    DAWN_UNUSED(ConsumedError(SubmitPendingCommandBuffer()));
-
-    desc->sharedEvent = *mMtlSharedEvent;
-    desc->signaledValue = static_cast<uint64_t>(GetLastSubmittedCommandSerial());
+    return ToBackend(GetQueue())->GetPendingCommandContext(submitMode);
 }
 
 MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
@@ -485,43 +376,10 @@ Ref<Texture> Device::CreateTextureWrappingIOSurface(
     return result;
 }
 
-void Device::WaitForCommandsToBeScheduled() {
-    if (ConsumedError(SubmitPendingCommandBuffer())) {
-        return;
-    }
-
-    // Only lock the object while we take a reference to it, otherwise we could block further
-    // progress if the driver calls the scheduled handler (which also acquires the lock) before
-    // finishing the waitUntilScheduled.
-    NSPRef<id<MTLCommandBuffer>> lastSubmittedCommands;
-    {
-        std::lock_guard<std::mutex> lock(mLastSubmittedCommandsMutex);
-        lastSubmittedCommands = mLastSubmittedCommands;
-    }
-    [*lastSubmittedCommands waitUntilScheduled];
-}
-
-MaybeError Device::WaitForIdleForDestruction() {
-    // Forget all pending commands.
-    mCommandContext.AcquireCommands();
-    DAWN_TRY(GetQueue()->CheckPassedSerials());
-
-    // Wait for all commands to be finished so we can free resources
-    while (GetQueue()->GetCompletedCommandSerial() != GetQueue()->GetLastSubmittedCommandSerial()) {
-        usleep(100);
-        DAWN_TRY(GetQueue()->CheckPassedSerials());
-    }
-
-    return {};
-}
-
 void Device::DestroyImpl() {
     ASSERT(GetState() == State::Disconnected);
 
-    // Forget all pending commands.
-    mCommandContext.AcquireCommands();
-
-    mCommandQueue = nullptr;
+    GetQueue()->Destroy();
     mMtlDevice = nullptr;
     mMockBlitMtlBuffer = nullptr;
 }

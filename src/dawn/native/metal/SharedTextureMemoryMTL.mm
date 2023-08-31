@@ -18,6 +18,7 @@
 
 #include "dawn/native/metal/CommandRecordingContext.h"
 #include "dawn/native/metal/DeviceMTL.h"
+#include "dawn/native/metal/QueueMTL.h"
 #include "dawn/native/metal/SharedFenceMTL.h"
 #include "dawn/native/metal/TextureMTL.h"
 
@@ -144,7 +145,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(TextureBas
 
     if (@available(macOS 10.14, iOS 12.0, *)) {
         ExternalImageIOSurfaceEndAccessDescriptor oldEndAccessDesc;
-        ToBackend(GetDevice())->ExportLastSignaledEvent(&oldEndAccessDesc);
+        ToBackend(GetDevice()->GetQueue())->ExportLastSignaledEvent(&oldEndAccessDesc);
 
         SharedFenceMTLSharedEventDescriptor newDesc;
         newDesc.sharedEvent = oldEndAccessDesc.sharedEvent;
