@@ -92,13 +92,6 @@ const std::string& kMatMulFloatBodyPart1 = R"(
             var ACached : f32;
             var BCached : array<f32, 4>;
 
-            // Without this initialization strange values show up in acc.
-            // TODO: Remove it once the following bug is fixed.
-            // https://bugs.chromium.org/p/tint/issues/detail?id=759
-            for (var index : u32 = 0u; index < RowPerThread * ColPerThread; index = index + 1u) {
-                acc[index] = 0.;
-            }
-
             let ColPerThreadA : u32 = TileInner / 8u;
             let tileColA : u32 = local_id.x * ColPerThreadA;
             let RowPerThreadB : u32 = TileInner / 8u;
@@ -256,13 +249,6 @@ const std::string& kMatMulVec4BodyPart1 = R"(
             var acc: array<vec4f, 4>;
             var ACached : vec4f;
             var BCached : array<vec4f, 4>;
-
-            // Without this initialization strange values show up in acc.
-            // TODO: Remove it once the following bug is fixed.
-            // https://bugs.chromium.org/p/tint/issues/detail?id=759
-            for (var index : u32 = 0u; index < RowPerThread; index = index + 1u) {
-                acc[index] = vec4f(0.0, 0.0, 0.0, 0.0);
-            }
 
             var globalColA : u32 = tileCol;
             let RowPerThreadB : u32 = TileInner / 8u;
