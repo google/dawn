@@ -169,9 +169,8 @@ TEST_P(BindGroupTests, ReusedUBO) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
         struct VertexUniformBuffer {
-            transform : vec4f
+            transform : mat2x2f
         }
 
         @group(0) @binding(0) var <uniform> vertexUbo : VertexUniformBuffer;
@@ -183,8 +182,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
                 vec2f( 1.0, 1.0),
                 vec2f(-1.0, -1.0));
 
-            var transform = mat2x2<f32>(vertexUbo.transform.xy, vertexUbo.transform.zw);
-            return vec4f(transform * pos[VertexIndex], 0.0, 1.0);
+            return vec4f(vertexUbo.transform * pos[VertexIndex], 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -247,11 +245,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
-        struct VertexUniformBuffer {
-            transform : vec4f
-        }
-        @group(0) @binding(0) var <uniform> vertexUbo : VertexUniformBuffer;
+        @group(0) @binding(0) var <uniform> transform : mat2x2f;
 
         @vertex
         fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
@@ -260,7 +254,6 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
                 vec2f( 1.0, 1.0),
                 vec2f(-1.0, -1.0));
 
-            var transform = mat2x2<f32>(vertexUbo.transform.xy, vertexUbo.transform.zw);
             return vec4f(transform * pos[VertexIndex], 0.0, 1.0);
         })");
 
@@ -350,10 +343,9 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        // TODO(crbug.com/tint/369): Use a mat2x2 when Tint translates it correctly.
-        struct VertexUniformBuffer {
-            transform : vec4f
-        }
+         struct VertexUniformBuffer {
+             transform : mat2x2f
+         }
 
         @group(0) @binding(0) var <uniform> vertexUbo1 : VertexUniformBuffer;
         @group(1) @binding(0) var <uniform> vertexUbo2 : VertexUniformBuffer;
@@ -365,10 +357,8 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
                 vec2f( 1.0, 1.0),
                 vec2f(-1.0, -1.0));
 
-            return vec4f(mat2x2<f32>(
-                vertexUbo1.transform.xy + vertexUbo2.transform.xy,
-                vertexUbo1.transform.zw + vertexUbo2.transform.zw
-            ) * pos[VertexIndex], 0.0, 1.0);
+            return vec4f(
+                (vertexUbo1.transform + vertexUbo2.transform) * pos[VertexIndex], 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
