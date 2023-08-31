@@ -67,6 +67,8 @@
 # tags: [ webgpu-adapter-default webgpu-adapter-swiftshader ]
 # WebGPU Compat Mode
 # tags: [ webgpu-compat webgpu-not-compat ]
+# WebGPU DXC
+# tags: [ webgpu-dxc-enabled webgpu-dxc-disabled webgpu-dxc-default ]
 # Clang coverage
 # tags: [ clang-coverage no-clang-coverage ]
 # Skia Graphite
@@ -752,6 +754,36 @@ crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-defau
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-32 ] worker_webgpu:api,operation,compute,basic:large_dispatch:dispatchSize=65535 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-32 ] worker_webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rg16float";storeOperation="store" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-32 ] worker_webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_with_depth_stencil_attachment:colorStoreOperation="store";depthStencilStoreOperation="store" [ RetryOnFailure ]
+
+################################################################################
+# untriaged DXC failures
+################################################################################
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,binary,bitwise:* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,binary,bitwise_shift:* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,binary,i32_arithmetic:* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,asin:f32:* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,bitcast:* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,clamp:i32:inputSource="const";* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,countOneBits:i32:inputSource="const";* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,countTrailingZeros:i32:inputSource="const";* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,extractBits:i32:inputSource="const";* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,firstLeadingBit:i32:inputSource="const";* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,frexp:f32_vec2_exp:inputSource="const" [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,insertBits:integer:inputSource="const";signed=true;* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,max:i32:inputSource="const";* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,reverseBits:i32:inputSource="const";* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,sign:i32:inputSource="const";* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,tanh:f32:* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,unary,i32_arithmetic:negation:inputSource="const";* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,unary,i32_complement:i32_complement:inputSource="const";* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,unary,i32_conversion:f32:inputSource="const";* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,flow_control,loop:nested_loops:preventValueOptimizations=false [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,padding:array_of_matCx3:* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,padding:matCx3:* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="workgroup";access="read";containerType="vector";* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,zero_init:compute,zero_init:* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,validation,expression,call,builtin,atan:* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,validation,expression,call,builtin,tan:* [ Failure ]
 
 ################################################################################
 # New failures. Please triage:
