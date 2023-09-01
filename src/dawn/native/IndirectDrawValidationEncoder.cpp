@@ -261,6 +261,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
     struct Pass {
         uint32_t flags;
         BufferBase* inputIndirectBuffer;
+        IndirectDrawMetadata::DrawType drawType;
         uint64_t outputParamsSize = 0;
         uint64_t batchDataSize = 0;
         std::unique_ptr<void, void (*)(void*)> batchData{nullptr, std::free};
@@ -269,8 +270,9 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
 
     // First stage is grouping all batches into passes. We try to pack as many batches into a
     // single pass as possible. Batches can be grouped together as long as they're validating
-    // data from the same indirect buffer, but they may still be split into multiple passes if
-    // the number of draw calls in a pass would exceed some (very high) upper bound.
+    // data from the same indirect buffer and draw type, but they may still be split into
+    // multiple passes if the number of draw calls in a pass would exceed some (very high)
+    // upper bound.
     uint64_t outputParamsSize = 0;
     std::vector<Pass> passes;
     IndirectDrawMetadata::IndexedIndirectBufferValidationInfoMap& bufferInfoMap =
@@ -315,7 +317,8 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
             }
 
             Pass* currentPass = passes.empty() ? nullptr : &passes.back();
-            if (currentPass && currentPass->inputIndirectBuffer == config.inputIndirectBuffer) {
+            if (currentPass && currentPass->inputIndirectBuffer == config.inputIndirectBuffer &&
+                currentPass->drawType == config.drawType) {
                 uint64_t nextBatchDataOffset =
                     Align(currentPass->batchDataSize, minStorageBufferOffsetAlignment);
                 uint64_t newPassBatchDataSize = nextBatchDataOffset + newBatch.dataSize;
@@ -333,6 +336,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
 
             Pass newPass{};
             newPass.inputIndirectBuffer = config.inputIndirectBuffer;
+            newPass.drawType = config.drawType;
             newPass.batchDataSize = newBatch.dataSize;
             newPass.batches.push_back(newBatch);
             newPass.flags = 0;
