@@ -142,26 +142,7 @@ def process_dir(args, dir_path, required_submodules):
                                         capture_output=True)
 
         log(f"Fetching dependency '{submodule}'")
-        if not submodule_path.is_dir():
-            if args.shallow:
-                log(f"Shallow cloning '{git_url}' at '{git_tag}' into '{submodule_path}'"
-                    )
-                shallow_clone(git, git_url, git_tag, submodule_path)
-            else:
-                log(f"Cloning '{git_url}' into '{submodule_path}'")
-                subprocess.run([
-                    args.git,
-                    'clone',
-                    '--recurse-submodules',
-                    git_url,
-                    submodule_path,
-                ],
-                               capture_output=True)
-
-            log(f"Checking out tag '{git_tag}'")
-            git('checkout', git_tag)
-
-        elif (submodule_path / ".git").is_dir():
+        if (submodule_path / ".git").is_dir():
             # The module was already cloned, but we may need to update it
             proc = git('rev-parse', 'HEAD')
             need_update = proc.stdout.decode().strip() != git_tag
@@ -182,9 +163,23 @@ def process_dir(args, dir_path, required_submodules):
                 git('checkout', git_tag)
 
         else:
-            # The caller may have "flattened" the source tree to get rid of
-            # some heavy submodules.
-            log(f"(Overridden by a local copy of the submodule)")
+            if args.shallow:
+                log(f"Shallow cloning '{git_url}' at '{git_tag}' into '{submodule_path}'"
+                    )
+                shallow_clone(git, git_url, git_tag)
+            else:
+                log(f"Cloning '{git_url}' into '{submodule_path}'")
+                subprocess.run([
+                    args.git,
+                    'clone',
+                    '--recurse-submodules',
+                    git_url,
+                    submodule_path,
+                ],
+                               capture_output=True)
+
+            log(f"Checking out tag '{git_tag}'")
+            git('checkout', git_tag)
 
         # Recursive call
         required_subsubmodules = [
@@ -194,12 +189,11 @@ def process_dir(args, dir_path, required_submodules):
         process_dir(args, submodule_path, required_subsubmodules)
 
 
-def shallow_clone(git, git_url, git_tag, submodule_path):
+def shallow_clone(git, git_url, git_tag):
     """
     Fetching only 1 commit is not exposed in the git clone API, so we decompose
     it manually in git init, git fetch, git reset.
     """
-    submodule_path.mkdir()
     git('init')
     git('fetch', git_url, git_tag, '--depth', '1')
 
