@@ -104,6 +104,7 @@ enum class Toggle {
     D3D12Use64KBAlignedMSAATexture,
     ResolveMultipleAttachmentInSeparatePasses,
     D3D12CreateNotZeroedHeap,
+    D3D12DontUseNotZeroedHeapFlagOnTexturesAsCommitedResources,
 
     // Unresolved issues.
     NoWorkaroundSampleMaskBecomesZeroForAllButLastColorTarget,

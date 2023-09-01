@@ -320,6 +320,21 @@ bool ShouldAllocateAsCommittedResource(Device* device, bool forceAllocateAsCommi
            device->IsToggleEnabled(Toggle::DisableResourceSuballocation);
 }
 
+D3D12_HEAP_FLAGS GetHeapFlagsForCommittedResource(Device* device,
+                                                  const D3D12_RESOURCE_DESC& resourceDescriptor) {
+    if (!device->IsToggleEnabled(Toggle::D3D12CreateNotZeroedHeap)) {
+        return D3D12_HEAP_FLAG_NONE;
+    }
+
+    if (device->IsToggleEnabled(
+            Toggle::D3D12DontUseNotZeroedHeapFlagOnTexturesAsCommitedResources) &&
+        resourceDescriptor.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER) {
+        return D3D12_HEAP_FLAG_NONE;
+    }
+
+    return D3D12_HEAP_FLAG_CREATE_NOT_ZEROED;
+}
+
 }  // namespace
 
 ResourceAllocatorManager::ResourceAllocatorManager(Device* device) : mDevice(device) {
@@ -581,9 +596,12 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::CreateCommittedR
         mDevice->IsToggleEnabled(Toggle::D3D12Use64KBAlignedMSAATexture)) {
         appliedResourceDescriptor.Alignment = D3D12_SMALL_MSAA_RESOURCE_PLACEMENT_ALIGNMENT;
     }
+
+    D3D12_HEAP_FLAGS heapFlags =
+        GetHeapFlagsForCommittedResource(mDevice, appliedResourceDescriptor);
     DAWN_TRY(CheckOutOfMemoryHRESULT(
         mDevice->GetD3D12Device()->CreateCommittedResource(
-            &heapProperties, D3D12_HEAP_FLAG_NONE, &appliedResourceDescriptor, initialUsage,
+            &heapProperties, heapFlags, &appliedResourceDescriptor, initialUsage,
             optimizedClearValue, IID_PPV_ARGS(&committedResource)),
         "ID3D12Device::CreateCommittedResource"));
 

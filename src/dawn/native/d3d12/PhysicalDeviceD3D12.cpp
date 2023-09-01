@@ -633,6 +633,13 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
         }
     }
 
+    // Currently these workarounds are only needed on Intel Gen9 and Gen11 GPUs.
+    // See http://crbug.com/dawn/484 for more information.
+    if (gpu_info::IsIntelGen9(vendorId, deviceId) || gpu_info::IsIntelGen11(vendorId, deviceId)) {
+        deviceToggles->Default(Toggle::D3D12DontUseNotZeroedHeapFlagOnTexturesAsCommitedResources,
+                               true);
+    }
+
 #if D3D12_SDK_VERSION >= 602
     D3D12_FEATURE_DATA_D3D12_OPTIONS13 featureData13;
     if (FAILED(mD3d12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS13, &featureData13,
