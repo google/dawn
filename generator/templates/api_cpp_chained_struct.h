@@ -28,12 +28,6 @@
 // which exposes capabilities that may require correctly set proc tables.
 namespace {{metadata.namespace}} {
 
-    namespace detail {
-        constexpr size_t ConstexprMax(size_t a, size_t b) {
-            return a > b ? a : b;
-        }
-    }  // namespace detail
-
     enum class SType : uint32_t;
 
     struct ChainedStruct {

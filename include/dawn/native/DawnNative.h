@@ -133,9 +133,7 @@ enum BackendValidationLevel { Full, Partial, Disabled };
 // Can be chained in InstanceDescriptor
 struct DAWN_NATIVE_EXPORT DawnInstanceDescriptor : wgpu::ChainedStruct {
     DawnInstanceDescriptor();
-    static constexpr size_t kFirstMemberAlignment =
-        wgpu::detail::ConstexprMax(alignof(wgpu::ChainedStruct), alignof(uint32_t));
-    alignas(kFirstMemberAlignment) uint32_t additionalRuntimeSearchPathsCount = 0;
+    uint32_t additionalRuntimeSearchPathsCount = 0;
     const char* const* additionalRuntimeSearchPaths;
     dawn::platform::Platform* platform = nullptr;
 

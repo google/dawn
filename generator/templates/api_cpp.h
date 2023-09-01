@@ -31,6 +31,12 @@
 
 namespace {{metadata.namespace}} {
 
+    namespace detail {
+        constexpr size_t ConstexprMax(size_t a, size_t b) {
+            return a > b ? a : b;
+        }
+    }  // namespace detail
+
     {% set c_prefix = metadata.c_prefix %}
     {% for constant in by_category["constant"] %}
         {% set type = as_cppType(constant.type.name) %}
