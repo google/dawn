@@ -369,7 +369,7 @@ crbug.com/tint/1943 [ win10 ] webgpu:shader,execution,memory_model,barrier:workg
 # OOM within Tint's uniformity analysis on Windows Intel
 # KEEP
 ################################################################################
-crbug.com/tint/2026 [ intel-0x9bc5 win10 target-cpu-32 ] webgpu:shader,validation,functions,alias_analysis:* [ Faillure ]
+crbug.com/tint/2026 [ intel-0x9bc5 win10 target-cpu-32 ] webgpu:shader,validation,functions,alias_analysis:* [ Failure ]
 
 ################################################################################
 # Skipped due to device creation failures
@@ -1728,9 +1728,9 @@ crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,validatio
 # but often fail without validation and on Intel as well
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:orientation="none";* [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Failure ]
+crbug.com/dawn/0000 [ win10 webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ Failure ]
+crbug.com/dawn/0000 [ win10 webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:orientation="none";* [ Failure ]
+crbug.com/dawn/0000 [ win10 webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Failure ]
 
 ################################################################################
 # Manually added failures to facilitate roll. Please triage:
