@@ -230,6 +230,7 @@ std::optional<core::BinaryOp> ConvertBinaryOp(spv::Op opcode) {
             return core::BinaryOp::kDivide;
         case spv::Op::OpUMod:
         case spv::Op::OpSMod:
+        case spv::Op::OpSRem:
         case spv::Op::OpFRem:
             return core::BinaryOp::kModulo;
         case spv::Op::OpLogicalEqual:
