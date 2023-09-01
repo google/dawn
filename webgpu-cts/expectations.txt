@@ -728,14 +728,6 @@ crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default win10 ] web
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rgba32uint" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:format:canvasType="offscreen";format="rgba8sint" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-backend-validation webgpu-adapter-default win10 ] webgpu:web_platform,canvas,configure:format:canvasType="onscreen";format="r8unorm" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="flipY";colorSpaceConversion="none";srcDoFlipYDuringCopy=false;dstPremultiplied=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="flipY";colorSpaceConversion="none";srcDoFlipYDuringCopy=false;dstPremultiplied=true [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="flipY";colorSpaceConversion="none";srcDoFlipYDuringCopy=true;dstPremultiplied=true [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="flipY";colorSpaceConversion="default";srcDoFlipYDuringCopy=false;dstPremultiplied=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="flipY";colorSpaceConversion="default";srcDoFlipYDuringCopy=false;dstPremultiplied=true [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="flipY";colorSpaceConversion="default";srcDoFlipYDuringCopy=true;dstPremultiplied=true [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="none";colorSpaceConversion="default";srcDoFlipYDuringCopy=false;dstPremultiplied=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="none";colorSpaceConversion="default";srcDoFlipYDuringCopy=true;dstPremultiplied=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-32 ] worker_webgpu:api,operation,compute,basic:large_dispatch:dispatchSize=65535 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-32 ] worker_webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_only:colorFormat="rg16float";storeOperation="store" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-32 ] worker_webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_with_depth_stencil_attachment:colorStoreOperation="store";depthStencilStoreOperation="store" [ RetryOnFailure ]
@@ -762,6 +754,7 @@ crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,express
 crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,unary,i32_arithmetic:negation:inputSource="const";* [ Failure ]
 crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,unary,i32_complement:i32_complement:inputSource="const";* [ Failure ]
 crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,unary,i32_conversion:f32:inputSource="const";* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,unary,i32_conversion:u32:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,flow_control,loop:nested_loops:preventValueOptimizations=false [ Failure ]
 crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,padding:array_of_matCx3:* [ Failure ]
 crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,padding:matCx3:* [ Failure ]
@@ -772,6 +765,7 @@ crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,validation,expres
 crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,firstTrailingBit:i32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,call,builtin,min:i32:inputSource="const";* [ Failure ]
 crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,unary,i32_conversion:i32:inputSource="const";* [ Failure ]
+crbug.com/tint/0000 [ win10 webgpu-dxc-enabled intel-0x9bc5 dawn-backend-validation ] webgpu:api,operation,command_buffer,queries,occlusionQuery:occlusion_query,basic:writeMask=0;renderMode="direct";bufferOffset="zero";querySetOffset="non-zero" [ Failure ]
 
 ################################################################################
 # New failures. Please triage:
@@ -1075,8 +1069,6 @@ crbug.com/dawn/0000 [ apple dawn-backend-validation target-cpu-64 ventura ] webg
 crbug.com/dawn/0000 [ apple dawn-no-backend-validation target-cpu-64 ventura ] webgpu:shader,validation,expression,call,builtin,tan:values:stage="override";type="vec4%3Cf16%3E" [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-0x3e9b target-cpu-64 ventura ] webgpu:shader,validation,expression,call,builtin,tan:values:stage="override";type="vec4%3Cf16%3E" [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x3e9b target-cpu-64 ventura ] webgpu:shader,validation,expression,call,builtin,tan:values:stage="override";type="vec4%3Cf16%3E" [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="flipY";colorSpaceConversion="none";srcDoFlipYDuringCopy=true;dstPremultiplied=false [ Failure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="flipY";colorSpaceConversion="default";srcDoFlipYDuringCopy=true;dstPremultiplied=false [ Failure ]
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ventura webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:canvasType="offscreen";dstColorFormat="bgra8unorm";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/dawn/0000 [ amd-0x67ef dawn-backend-validation ventura webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:canvasType="offscreen";dstColorFormat="bgra8unorm";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
 crbug.com/dawn/0000 [ amd-0x67ef dawn-no-backend-validation ventura webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_bitmaprenderer_context_canvas:canvasType="offscreen";dstColorFormat="bgra8unorm";dstAlphaMode="opaque";srcDoFlipYDuringCopy=false [ Failure ]
@@ -1732,6 +1724,15 @@ crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,validatio
 crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,validation,expression,call,builtin,atan2:values:stage="constant";type="vec4%3Cabstract-float%3E" [ RetryOnFailure ]
 
 ################################################################################
+# copy_subrect_from_* tests are very flaky on Windows NVIDIA w/ validation
+# but often fail without validation and on Intel as well
+# KEEP
+################################################################################
+crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ Failure ]
+crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:orientation="none";* [ Failure ]
+crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="none";* [ Failure ]
+
+################################################################################
 # Manually added failures to facilitate roll. Please triage:
 ################################################################################
 crbug.com/dawn/0000 [ android-r ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:orientation="none";srcDoFlipYDuringCopy=true;dstPremultiplied=true [ Failure ]
@@ -1739,12 +1740,6 @@ crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,memory_model,weak:stor
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,binary,u32_arithmetic:addition_scalar_vector:inputSource="const";vectorize_rhs=4 [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,normalize:f32_vec2:inputSource="const" [ Failure ]
 
-crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="none";colorSpaceConversion="none";* [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="flipY";* [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="none";orientation="none";colorSpaceConversion="none";srcDoFlipYDuringCopy=true;* [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="premultiply";orientation="none";colorSpaceConversion="none";* [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:alpha="premultiply";orientation="flipY";* [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:orientation="none";srcDoFlipYDuringCopy=false;* [ Failure ]
 crbug.com/dawn/0000 [ win10 ] webgpu:shader,validation,expression,call,builtin,atan2:values:stage="override";type="f32" [ Failure ]
 
 # The "flipY" tests appear to be broken across all platforms.
