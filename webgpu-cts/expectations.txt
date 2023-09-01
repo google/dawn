@@ -76,7 +76,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2023-08-24 05:16:07PM
+# Last rolled: 2023-08-30 04:50:21PM
 
 ################################################################################
 # copyToTexture failures on Linux
@@ -282,15 +282,6 @@ crbug.com/1469914 [ nvidia-0x2184 win10 ] webgpu:web_platform,canvas,readbackFro
 crbug.com/1469914 [ apple ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
 crbug.com/1469914 [ intel-0x3e9b ventura ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
 crbug.com/1469914 [ intel-0x9bc5 win10 ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:onscreenCanvas,snapshot:format="rgba16float";alphaMode="premultiplied";colorSpace="srgb";snapshotType="imageBitmap" [ Failure ]
-
-################################################################################
-# Failures due to rgba8unorm not being supported for canvas on macOS.
-# Could be made more precise.
-################################################################################
-crbug.com/1410936 [ ventura ] webgpu:web_platform,canvas,configure:device:* [ Failure ]
-crbug.com/1410936 [ ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:usage:* [ Failure ]
-crbug.com/1410936 [ ventura ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="offscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
-crbug.com/1410936 [ ventura ] webgpu:web_platform,canvas,configure:viewFormats:canvasType="onscreen";format="rgba8unorm";viewFormatFeature="_undef_" [ Failure ]
 
 ################################################################################
 # Occlusion result incorrect with writeMask 0 on Windows Intel
@@ -689,6 +680,7 @@ crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builti
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,inversesqrt:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,log2:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,log:f32:inputSource="const";vectorize=3 [ Failure ]
+crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="const";vectorize="_undef_" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,max:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,max:u32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="const";vectorize=3 [ Failure ]
@@ -697,7 +689,9 @@ crbug.com/dawn/0000 [ amd-0x67ef ] webgpu:shader,execution,expression,call,built
 crbug.com/dawn/0000 [ qualcomm ] webgpu:shader,execution,expression,call,builtin,step:f32:inputSource="const";vectorize=2 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,step:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ amd-0x67ef ] webgpu:shader,execution,expression,call,builtin,unpack2x16snorm:unpack:inputSource="storage_rw" [ Failure ]
-crbug.com/dawn/0000 [ android-r dawn-backend-validation ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="private";access="read";containerType="vector";shadowingMode="function-scope";isAtomic=false [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="private";access="read";containerType="vector";shadowingMode="function-scope";isAtomic=false [ RetryOnFailure ]
+crbug.com/dawn/0000 [ android-r ] webgpu:shader,validation,expression,call,builtin,atan2:values:stage="constant";type="vec4%3Cf32%3E" [ Failure ]
+crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,unary,f32_arithmetic:negation:inputSource="const";vectorize=2 [ RetryOnFailure ]
 
 ################################################################################
 # New flakes. Please triage:
@@ -1729,21 +1723,15 @@ crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,validatio
 # KEEP
 ################################################################################
 crbug.com/dawn/0000 [ win10 webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ Failure ]
-crbug.com/dawn/0000 [ win10 webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:orientation="none";* [ Failure ]
+crbug.com/dawn/0000 [ win10 webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:* [ Failure ]
 crbug.com/dawn/0000 [ win10 webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Failure ]
 
 ################################################################################
 # Manually added failures to facilitate roll. Please triage:
 ################################################################################
-crbug.com/dawn/0000 [ android-r ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:orientation="none";srcDoFlipYDuringCopy=true;dstPremultiplied=true [ Failure ]
+crbug.com/dawn/0000 [ android-r ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:srcDoFlipYDuringCopy=true;dstPremultiplied=true [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,memory_model,weak:store_buffer:memType="atomic_workgroup" [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,binary,u32_arithmetic:addition_scalar_vector:inputSource="const";vectorize_rhs=4 [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,normalize:f32_vec2:inputSource="const" [ Failure ]
 
 crbug.com/dawn/0000 [ win10 ] webgpu:shader,validation,expression,call,builtin,atan2:values:stage="override";type="f32" [ Failure ]
-
-# The "flipY" tests appear to be broken across all platforms.
-crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:orientation="flipY";* [ Failure ]
-crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,ImageData:from_ImageData:orientation="flipY";* [ Failure ]
-crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,image:copy_subrect_from_2D_Canvas:orientation="flipY";* [ Failure ]
-crbug.com/dawn/0000 webgpu:web_platform,copyToTexture,image:from_image:orientation="flipY";* [ Failure ]
