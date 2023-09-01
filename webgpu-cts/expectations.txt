@@ -1730,7 +1730,7 @@ crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,validatio
 ################################################################################
 crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_ImageData:* [ Failure ]
 crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageData:copy_subrect_from_ImageData:orientation="none";* [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:orientation="none";* [ Failure ]
+crbug.com/dawn/0000 [ win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:copy_subrect_from_2D_Canvas:* [ Failure ]
 
 ################################################################################
 # Manually added failures to facilitate roll. Please triage:
