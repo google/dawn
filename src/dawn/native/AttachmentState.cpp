@@ -151,7 +151,7 @@ bool AttachmentState::EqualityFunc::operator()(const AttachmentState* a,
         return false;
     }
 
-    // Both attachment state must either enable MSSA render to single sampled or disable it.
+    // Both attachment state must either enable MSAA render to single sampled or disable it.
     if (a->mIsMSAARenderToSingleSampledEnabled != b->mIsMSAARenderToSingleSampledEnabled) {
         return false;
     }
