@@ -445,8 +445,7 @@ source_set("test_infra_sources") {
 
   public_deps = [ ":gmock_and_gtest" ]
 
-  if (dawn_supports_glfw_for_windowing || dawn_enable_opengl) {
-    assert(dawn_supports_glfw_for_windowing)
+  if (dawn_supports_glfw_for_windowing) {
     public_deps += [ "${dawn_root}/src/dawn/glfw" ]
   }
 

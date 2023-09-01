@@ -36,10 +36,9 @@
 #include "dawn/native/MetalBackend.h"
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
-#if defined(DAWN_ENABLE_BACKEND_DESKTOP_GL) || defined(DAWN_ENABLE_BACKEND_OPENGLES)
-#include "GLFW/glfw3.h"
+#if defined(DAWN_ENABLE_BACKEND_OPENGL)
 #include "dawn/native/OpenGLBackend.h"
-#endif  // defined(DAWN_ENABLE_BACKEND_DESKTOP_GL) || defined(DAWN_ENABLE_BACKEND_OPENGLES)
+#endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
 
 #include <gtest/gtest.h>
 

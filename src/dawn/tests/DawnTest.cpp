@@ -46,7 +46,6 @@
 #include "dawn/wire/WireServer.h"
 
 #if defined(DAWN_ENABLE_BACKEND_OPENGL)
-#include "GLFW/glfw3.h"
 #include "dawn/native/OpenGLBackend.h"
 #endif  // DAWN_ENABLE_BACKEND_OPENGL
 
