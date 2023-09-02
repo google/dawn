@@ -276,8 +276,8 @@ DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device) {
     return FromAPI(device)->APITick();
 }
 
-DAWN_NATIVE_EXPORT bool InstanceProcessEvents(WGPUInstance instance) {
-    return FromAPI(instance)->APIProcessEvents();
+DAWN_NATIVE_EXPORT void InstanceProcessEvents(WGPUInstance instance) {
+    FromAPI(instance)->APIProcessEvents();
 }
 
 // ExternalImageDescriptor

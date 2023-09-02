@@ -145,7 +145,7 @@ class InstanceBase final : public RefCountedWithExternalCount {
 
     // Dawn API
     Surface* APICreateSurface(const SurfaceDescriptor* descriptor);
-    bool APIProcessEvents();
+    void APIProcessEvents();
 
   private:
     explicit InstanceBase(const TogglesState& instanceToggles);
