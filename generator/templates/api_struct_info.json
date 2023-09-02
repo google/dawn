@@ -20,7 +20,7 @@
 //*
     {
         {% set api = metadata.api.lower() %}
-        "file": "{api}/{api}.h",
+        "file": "{{api}}/{{api}}.h",
         "defines": [],
         "structs": {
             "{{metadata.c_prefix}}ChainedStruct": [

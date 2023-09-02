@@ -572,7 +572,8 @@ def compute_wire_params(api_params, wire_json):
             is_void = method.return_type.name.canonical_case() == 'void'
             if not (is_object or is_void):
                 assert command_suffix in (
-                    wire_json['special items']['client_handwritten_commands'])
+                    wire_json['special items']['client_handwritten_commands']
+                ), command_suffix
                 continue
 
             if command_suffix in (

@@ -173,8 +173,8 @@ def _do_renders(renders, template_dir):
         trim_blocks=True,
         line_comment_prefix='//*')
 
-    def do_assert(expr):
-        assert expr
+    def do_assert(expr, message=''):
+        assert expr, message
         return ''
 
     def debug(text):

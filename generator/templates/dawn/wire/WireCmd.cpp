@@ -51,7 +51,7 @@
     {%- elif as_cType(member.type.name) == "size_t" -%}
         {{as_cType(types["uint64_t"].name)}}
     {%- else -%}
-        {%- do assert(member.type.is_wire_transparent) -%}
+        {%- do assert(member.type.is_wire_transparent, 'wire transparent') -%}
         {{as_cType(member.type.name)}}
     {%- endif -%}
 {%- endmacro -%}
@@ -200,7 +200,7 @@
                     {
                 {% endif %}
                 {% if member.annotation != "value" %}
-                        {% do assert(member.annotation != "const*const*") %}
+                        {% do assert(member.annotation != "const*const*", "const*const* not valid here") %}
                         auto memberLength = {{member_length(member, "record.")}};
                         auto size = WireAlignSizeofN<{{member_transfer_type(member)}}>(memberLength);
                         ASSERT(size);
@@ -208,7 +208,7 @@
                         //* Structures might contain more pointers so we need to add their extra size as well.
                         {% if member.type.category == "structure" %}
                             for (decltype(memberLength) i = 0; i < memberLength; ++i) {
-                                {% do assert(member.annotation == "const*") %}
+                                {% do assert(member.annotation == "const*", "unhandled annotation: " + member.annotation) %}
                                 result += {{as_cType(member.type.name)}}GetExtraRequiredSize(record.{{as_varName(member.name)}}[i]);
                             }
                         {% endif %}
