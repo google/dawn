@@ -280,7 +280,7 @@ class DawnTestBase {
     bool HasBackendTypeFilter() const;
     wgpu::BackendType GetBackendTypeFilter() const;
 
-    wgpu::Instance GetInstance() const;
+    const wgpu::Instance& GetInstance() const;
     native::Adapter GetAdapter() const;
 
     virtual std::unique_ptr<platform::Platform> CreateTestPlatform();
