@@ -39,7 +39,9 @@ declare_args() {
   # libGLESv2.so, apparently without regard for the use_static_angle=true
   # GN variable. Chromium's linker on Android disallows production of more
   # than one shared object per target (?).
-  dawn_use_angle = !is_android
+  # For now, ANGLE and thus the GLES backend are only enabled for component
+  # builds on Android.
+  dawn_use_angle = !is_android || is_component_build
 
   # Enables SwiftShader as the fallback adapter. Requires dawn_swiftshader_dir
   # to be set to take effect.
@@ -83,8 +85,11 @@ declare_args() {
   # Enables the compilation of Dawn's OpenGLES backend
   # (WebGPU/Compat subset)
   # Disables OpenGLES when compiling for UWP, since UWP only supports d3d
+  # Disables OpenGLES when not using ANGLE on Android. Native GLES drivers
+  # are buggy and require ANGLE's workarounds.
   dawn_enable_opengles =
-      (is_linux && !is_chromeos) || (is_win && !dawn_is_winuwp)
+      (is_linux && !is_chromeos) || (is_win && !dawn_is_winuwp) ||
+      (is_android && dawn_use_angle)
 
   # Enables the compilation of Dawn's Vulkan backend
   # Disables vulkan when compiling for UWP, since UWP only supports d3d
