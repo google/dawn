@@ -537,292 +537,118 @@ bool Converter::Convert(wgpu::TextureFormat& out, const interop::GPUTextureForma
 }
 
 bool Converter::Convert(interop::GPUTextureFormat& out, wgpu::TextureFormat in) {
+#define CASE(WGPU, INTEROP)                       \
+    case wgpu::TextureFormat::WGPU:               \
+        out = interop::GPUTextureFormat::INTEROP; \
+        return true
+
     switch (in) {
-        case wgpu::TextureFormat::R8Unorm:
-            out = interop::GPUTextureFormat::kR8Unorm;
-            return true;
-        case wgpu::TextureFormat::R8Snorm:
-            out = interop::GPUTextureFormat::kR8Snorm;
-            return true;
-        case wgpu::TextureFormat::R8Uint:
-            out = interop::GPUTextureFormat::kR8Uint;
-            return true;
-        case wgpu::TextureFormat::R8Sint:
-            out = interop::GPUTextureFormat::kR8Sint;
-            return true;
-        case wgpu::TextureFormat::R16Uint:
-            out = interop::GPUTextureFormat::kR16Uint;
-            return true;
-        case wgpu::TextureFormat::R16Sint:
-            out = interop::GPUTextureFormat::kR16Sint;
-            return true;
-        case wgpu::TextureFormat::R16Float:
-            out = interop::GPUTextureFormat::kR16Float;
-            return true;
-        case wgpu::TextureFormat::RG8Unorm:
-            out = interop::GPUTextureFormat::kRg8Unorm;
-            return true;
-        case wgpu::TextureFormat::RG8Snorm:
-            out = interop::GPUTextureFormat::kRg8Snorm;
-            return true;
-        case wgpu::TextureFormat::RG8Uint:
-            out = interop::GPUTextureFormat::kRg8Uint;
-            return true;
-        case wgpu::TextureFormat::RG8Sint:
-            out = interop::GPUTextureFormat::kRg8Sint;
-            return true;
-        case wgpu::TextureFormat::R32Uint:
-            out = interop::GPUTextureFormat::kR32Uint;
-            return true;
-        case wgpu::TextureFormat::R32Sint:
-            out = interop::GPUTextureFormat::kR32Sint;
-            return true;
-        case wgpu::TextureFormat::R32Float:
-            out = interop::GPUTextureFormat::kR32Float;
-            return true;
-        case wgpu::TextureFormat::RG16Uint:
-            out = interop::GPUTextureFormat::kRg16Uint;
-            return true;
-        case wgpu::TextureFormat::RG16Sint:
-            out = interop::GPUTextureFormat::kRg16Sint;
-            return true;
-        case wgpu::TextureFormat::RG16Float:
-            out = interop::GPUTextureFormat::kRg16Float;
-            return true;
-        case wgpu::TextureFormat::RGBA8Unorm:
-            out = interop::GPUTextureFormat::kRgba8Unorm;
-            return true;
-        case wgpu::TextureFormat::RGBA8UnormSrgb:
-            out = interop::GPUTextureFormat::kRgba8UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::RGBA8Snorm:
-            out = interop::GPUTextureFormat::kRgba8Snorm;
-            return true;
-        case wgpu::TextureFormat::RGBA8Uint:
-            out = interop::GPUTextureFormat::kRgba8Uint;
-            return true;
-        case wgpu::TextureFormat::RGBA8Sint:
-            out = interop::GPUTextureFormat::kRgba8Sint;
-            return true;
-        case wgpu::TextureFormat::BGRA8Unorm:
-            out = interop::GPUTextureFormat::kBgra8Unorm;
-            return true;
-        case wgpu::TextureFormat::BGRA8UnormSrgb:
-            out = interop::GPUTextureFormat::kBgra8UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::RGB9E5Ufloat:
-            out = interop::GPUTextureFormat::kRgb9E5Ufloat;
-            return true;
-        case wgpu::TextureFormat::RGB10A2Unorm:
-            out = interop::GPUTextureFormat::kRgb10A2Unorm;
-            return true;
-        case wgpu::TextureFormat::RG11B10Ufloat:
-            out = interop::GPUTextureFormat::kRg11B10Ufloat;
-            return true;
-        case wgpu::TextureFormat::RG32Uint:
-            out = interop::GPUTextureFormat::kRg32Uint;
-            return true;
-        case wgpu::TextureFormat::RG32Sint:
-            out = interop::GPUTextureFormat::kRg32Sint;
-            return true;
-        case wgpu::TextureFormat::RG32Float:
-            out = interop::GPUTextureFormat::kRg32Float;
-            return true;
-        case wgpu::TextureFormat::RGBA16Uint:
-            out = interop::GPUTextureFormat::kRgba16Uint;
-            return true;
-        case wgpu::TextureFormat::RGBA16Sint:
-            out = interop::GPUTextureFormat::kRgba16Sint;
-            return true;
-        case wgpu::TextureFormat::RGBA16Float:
-            out = interop::GPUTextureFormat::kRgba16Float;
-            return true;
-        case wgpu::TextureFormat::RGBA32Uint:
-            out = interop::GPUTextureFormat::kRgba32Uint;
-            return true;
-        case wgpu::TextureFormat::RGBA32Sint:
-            out = interop::GPUTextureFormat::kRgba32Sint;
-            return true;
-        case wgpu::TextureFormat::RGBA32Float:
-            out = interop::GPUTextureFormat::kRgba32Float;
-            return true;
-        case wgpu::TextureFormat::Stencil8:
-            out = interop::GPUTextureFormat::kStencil8;
-            return true;
-        case wgpu::TextureFormat::Depth16Unorm:
-            out = interop::GPUTextureFormat::kDepth16Unorm;
-            return true;
-        case wgpu::TextureFormat::Depth24Plus:
-            out = interop::GPUTextureFormat::kDepth24Plus;
-            return true;
-        case wgpu::TextureFormat::Depth24PlusStencil8:
-            out = interop::GPUTextureFormat::kDepth24PlusStencil8;
-            return true;
-        case wgpu::TextureFormat::Depth32Float:
-            out = interop::GPUTextureFormat::kDepth32Float;
-            return true;
-        case wgpu::TextureFormat::Depth32FloatStencil8:
-            out = interop::GPUTextureFormat::kDepth32FloatStencil8;
-            return true;
-        case wgpu::TextureFormat::BC1RGBAUnorm:
-            out = interop::GPUTextureFormat::kBc1RgbaUnorm;
-            return true;
-        case wgpu::TextureFormat::BC1RGBAUnormSrgb:
-            out = interop::GPUTextureFormat::kBc1RgbaUnormSrgb;
-            return true;
-        case wgpu::TextureFormat::BC2RGBAUnorm:
-            out = interop::GPUTextureFormat::kBc2RgbaUnorm;
-            return true;
-        case wgpu::TextureFormat::BC2RGBAUnormSrgb:
-            out = interop::GPUTextureFormat::kBc2RgbaUnormSrgb;
-            return true;
-        case wgpu::TextureFormat::BC3RGBAUnorm:
-            out = interop::GPUTextureFormat::kBc3RgbaUnorm;
-            return true;
-        case wgpu::TextureFormat::BC3RGBAUnormSrgb:
-            out = interop::GPUTextureFormat::kBc3RgbaUnormSrgb;
-            return true;
-        case wgpu::TextureFormat::BC4RUnorm:
-            out = interop::GPUTextureFormat::kBc4RUnorm;
-            return true;
-        case wgpu::TextureFormat::BC4RSnorm:
-            out = interop::GPUTextureFormat::kBc4RSnorm;
-            return true;
-        case wgpu::TextureFormat::BC5RGUnorm:
-            out = interop::GPUTextureFormat::kBc5RgUnorm;
-            return true;
-        case wgpu::TextureFormat::BC5RGSnorm:
-            out = interop::GPUTextureFormat::kBc5RgSnorm;
-            return true;
-        case wgpu::TextureFormat::BC6HRGBUfloat:
-            out = interop::GPUTextureFormat::kBc6HRgbUfloat;
-            return true;
-        case wgpu::TextureFormat::BC6HRGBFloat:
-            out = interop::GPUTextureFormat::kBc6HRgbFloat;
-            return true;
-        case wgpu::TextureFormat::BC7RGBAUnorm:
-            out = interop::GPUTextureFormat::kBc7RgbaUnorm;
-            return true;
-        case wgpu::TextureFormat::BC7RGBAUnormSrgb:
-            out = interop::GPUTextureFormat::kBc7RgbaUnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ETC2RGB8Unorm:
-            out = interop::GPUTextureFormat::kEtc2Rgb8Unorm;
-            return true;
-        case wgpu::TextureFormat::ETC2RGB8UnormSrgb:
-            out = interop::GPUTextureFormat::kEtc2Rgb8UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ETC2RGB8A1Unorm:
-            out = interop::GPUTextureFormat::kEtc2Rgb8A1Unorm;
-            return true;
-        case wgpu::TextureFormat::ETC2RGB8A1UnormSrgb:
-            out = interop::GPUTextureFormat::kEtc2Rgb8A1UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ETC2RGBA8Unorm:
-            out = interop::GPUTextureFormat::kEtc2Rgba8Unorm;
-            return true;
-        case wgpu::TextureFormat::ETC2RGBA8UnormSrgb:
-            out = interop::GPUTextureFormat::kEtc2Rgba8UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::EACR11Unorm:
-            out = interop::GPUTextureFormat::kEacR11Unorm;
-            return true;
-        case wgpu::TextureFormat::EACR11Snorm:
-            out = interop::GPUTextureFormat::kEacR11Snorm;
-            return true;
-        case wgpu::TextureFormat::EACRG11Unorm:
-            out = interop::GPUTextureFormat::kEacRg11Unorm;
-            return true;
-        case wgpu::TextureFormat::EACRG11Snorm:
-            out = interop::GPUTextureFormat::kEacRg11Snorm;
-            return true;
-        case wgpu::TextureFormat::ASTC4x4Unorm:
-            out = interop::GPUTextureFormat::kAstc4X4Unorm;
-            return true;
-        case wgpu::TextureFormat::ASTC4x4UnormSrgb:
-            out = interop::GPUTextureFormat::kAstc4X4UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ASTC5x4Unorm:
-            out = interop::GPUTextureFormat::kAstc5X4Unorm;
-            return true;
-        case wgpu::TextureFormat::ASTC5x4UnormSrgb:
-            out = interop::GPUTextureFormat::kAstc5X4UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ASTC5x5Unorm:
-            out = interop::GPUTextureFormat::kAstc5X5Unorm;
-            return true;
-        case wgpu::TextureFormat::ASTC5x5UnormSrgb:
-            out = interop::GPUTextureFormat::kAstc5X5UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ASTC6x5Unorm:
-            out = interop::GPUTextureFormat::kAstc6X5Unorm;
-            return true;
-        case wgpu::TextureFormat::ASTC6x5UnormSrgb:
-            out = interop::GPUTextureFormat::kAstc6X5UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ASTC6x6Unorm:
-            out = interop::GPUTextureFormat::kAstc6X6Unorm;
-            return true;
-        case wgpu::TextureFormat::ASTC6x6UnormSrgb:
-            out = interop::GPUTextureFormat::kAstc6X6UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ASTC8x5Unorm:
-            out = interop::GPUTextureFormat::kAstc8X5Unorm;
-            return true;
-        case wgpu::TextureFormat::ASTC8x5UnormSrgb:
-            out = interop::GPUTextureFormat::kAstc8X5UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ASTC8x6Unorm:
-            out = interop::GPUTextureFormat::kAstc8X6Unorm;
-            return true;
-        case wgpu::TextureFormat::ASTC8x6UnormSrgb:
-            out = interop::GPUTextureFormat::kAstc8X6UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ASTC8x8Unorm:
-            out = interop::GPUTextureFormat::kAstc8X8Unorm;
-            return true;
-        case wgpu::TextureFormat::ASTC8x8UnormSrgb:
-            out = interop::GPUTextureFormat::kAstc8X8UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ASTC10x5Unorm:
-            out = interop::GPUTextureFormat::kAstc10X5Unorm;
-            return true;
-        case wgpu::TextureFormat::ASTC10x5UnormSrgb:
-            out = interop::GPUTextureFormat::kAstc10X5UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ASTC10x6Unorm:
-            out = interop::GPUTextureFormat::kAstc10X6Unorm;
-            return true;
-        case wgpu::TextureFormat::ASTC10x6UnormSrgb:
-            out = interop::GPUTextureFormat::kAstc10X6UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ASTC10x8Unorm:
-            out = interop::GPUTextureFormat::kAstc10X8Unorm;
-            return true;
-        case wgpu::TextureFormat::ASTC10x8UnormSrgb:
-            out = interop::GPUTextureFormat::kAstc10X8UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ASTC10x10Unorm:
-            out = interop::GPUTextureFormat::kAstc10X10Unorm;
-            return true;
-        case wgpu::TextureFormat::ASTC10x10UnormSrgb:
-            out = interop::GPUTextureFormat::kAstc10X10UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ASTC12x10Unorm:
-            out = interop::GPUTextureFormat::kAstc12X10Unorm;
-            return true;
-        case wgpu::TextureFormat::ASTC12x10UnormSrgb:
-            out = interop::GPUTextureFormat::kAstc12X10UnormSrgb;
-            return true;
-        case wgpu::TextureFormat::ASTC12x12Unorm:
-            out = interop::GPUTextureFormat::kAstc12X12Unorm;
-            return true;
-        case wgpu::TextureFormat::ASTC12x12UnormSrgb:
-            out = interop::GPUTextureFormat::kAstc12X12UnormSrgb;
-            return true;
+        CASE(ASTC10x10Unorm, kAstc10X10Unorm);
+        CASE(ASTC10x10UnormSrgb, kAstc10X10UnormSrgb);
+        CASE(ASTC10x5Unorm, kAstc10X5Unorm);
+        CASE(ASTC10x5UnormSrgb, kAstc10X5UnormSrgb);
+        CASE(ASTC10x6Unorm, kAstc10X6Unorm);
+        CASE(ASTC10x6UnormSrgb, kAstc10X6UnormSrgb);
+        CASE(ASTC10x8Unorm, kAstc10X8Unorm);
+        CASE(ASTC10x8UnormSrgb, kAstc10X8UnormSrgb);
+        CASE(ASTC12x10Unorm, kAstc12X10Unorm);
+        CASE(ASTC12x10UnormSrgb, kAstc12X10UnormSrgb);
+        CASE(ASTC12x12Unorm, kAstc12X12Unorm);
+        CASE(ASTC12x12UnormSrgb, kAstc12X12UnormSrgb);
+        CASE(ASTC4x4Unorm, kAstc4X4Unorm);
+        CASE(ASTC4x4UnormSrgb, kAstc4X4UnormSrgb);
+        CASE(ASTC5x4Unorm, kAstc5X4Unorm);
+        CASE(ASTC5x4UnormSrgb, kAstc5X4UnormSrgb);
+        CASE(ASTC5x5Unorm, kAstc5X5Unorm);
+        CASE(ASTC5x5UnormSrgb, kAstc5X5UnormSrgb);
+        CASE(ASTC6x5Unorm, kAstc6X5Unorm);
+        CASE(ASTC6x5UnormSrgb, kAstc6X5UnormSrgb);
+        CASE(ASTC6x6Unorm, kAstc6X6Unorm);
+        CASE(ASTC6x6UnormSrgb, kAstc6X6UnormSrgb);
+        CASE(ASTC8x5Unorm, kAstc8X5Unorm);
+        CASE(ASTC8x5UnormSrgb, kAstc8X5UnormSrgb);
+        CASE(ASTC8x6Unorm, kAstc8X6Unorm);
+        CASE(ASTC8x6UnormSrgb, kAstc8X6UnormSrgb);
+        CASE(ASTC8x8Unorm, kAstc8X8Unorm);
+        CASE(ASTC8x8UnormSrgb, kAstc8X8UnormSrgb);
+        CASE(BC1RGBAUnorm, kBc1RgbaUnorm);
+        CASE(BC1RGBAUnormSrgb, kBc1RgbaUnormSrgb);
+        CASE(BC2RGBAUnorm, kBc2RgbaUnorm);
+        CASE(BC2RGBAUnormSrgb, kBc2RgbaUnormSrgb);
+        CASE(BC3RGBAUnorm, kBc3RgbaUnorm);
+        CASE(BC3RGBAUnormSrgb, kBc3RgbaUnormSrgb);
+        CASE(BC4RSnorm, kBc4RSnorm);
+        CASE(BC4RUnorm, kBc4RUnorm);
+        CASE(BC5RGSnorm, kBc5RgSnorm);
+        CASE(BC5RGUnorm, kBc5RgUnorm);
+        CASE(BC6HRGBFloat, kBc6HRgbFloat);
+        CASE(BC6HRGBUfloat, kBc6HRgbUfloat);
+        CASE(BC7RGBAUnorm, kBc7RgbaUnorm);
+        CASE(BC7RGBAUnormSrgb, kBc7RgbaUnormSrgb);
+        CASE(BGRA8Unorm, kBgra8Unorm);
+        CASE(BGRA8UnormSrgb, kBgra8UnormSrgb);
+        CASE(Depth16Unorm, kDepth16Unorm);
+        CASE(Depth24Plus, kDepth24Plus);
+        CASE(Depth24PlusStencil8, kDepth24PlusStencil8);
+        CASE(Depth32Float, kDepth32Float);
+        CASE(Depth32FloatStencil8, kDepth32FloatStencil8);
+        CASE(EACR11Snorm, kEacR11Snorm);
+        CASE(EACR11Unorm, kEacR11Unorm);
+        CASE(EACRG11Snorm, kEacRg11Snorm);
+        CASE(EACRG11Unorm, kEacRg11Unorm);
+        CASE(ETC2RGB8A1Unorm, kEtc2Rgb8A1Unorm);
+        CASE(ETC2RGB8A1UnormSrgb, kEtc2Rgb8A1UnormSrgb);
+        CASE(ETC2RGB8Unorm, kEtc2Rgb8Unorm);
+        CASE(ETC2RGB8UnormSrgb, kEtc2Rgb8UnormSrgb);
+        CASE(ETC2RGBA8Unorm, kEtc2Rgba8Unorm);
+        CASE(ETC2RGBA8UnormSrgb, kEtc2Rgba8UnormSrgb);
+        CASE(R16Float, kR16Float);
+        CASE(R16Sint, kR16Sint);
+        CASE(R16Uint, kR16Uint);
+        CASE(R32Float, kR32Float);
+        CASE(R32Sint, kR32Sint);
+        CASE(R32Uint, kR32Uint);
+        CASE(R8Sint, kR8Sint);
+        CASE(R8Snorm, kR8Snorm);
+        CASE(R8Uint, kR8Uint);
+        CASE(R8Unorm, kR8Unorm);
+        CASE(RG11B10Ufloat, kRg11B10Ufloat);
+        CASE(RG16Float, kRg16Float);
+        CASE(RG16Sint, kRg16Sint);
+        CASE(RG16Uint, kRg16Uint);
+        CASE(RG32Float, kRg32Float);
+        CASE(RG32Sint, kRg32Sint);
+        CASE(RG32Uint, kRg32Uint);
+        CASE(RG8Sint, kRg8Sint);
+        CASE(RG8Snorm, kRg8Snorm);
+        CASE(RG8Uint, kRg8Uint);
+        CASE(RG8Unorm, kRg8Unorm);
+        CASE(RGB10A2Unorm, kRgb10A2Unorm);
+        CASE(RGB9E5Ufloat, kRgb9E5Ufloat);
+        CASE(RGBA16Float, kRgba16Float);
+        CASE(RGBA16Sint, kRgba16Sint);
+        CASE(RGBA16Uint, kRgba16Uint);
+        CASE(RGBA32Float, kRgba32Float);
+        CASE(RGBA32Sint, kRgba32Sint);
+        CASE(RGBA32Uint, kRgba32Uint);
+        CASE(RGBA8Sint, kRgba8Sint);
+        CASE(RGBA8Snorm, kRgba8Snorm);
+        CASE(RGBA8Uint, kRgba8Uint);
+        CASE(RGBA8Unorm, kRgba8Unorm);
+        CASE(RGBA8UnormSrgb, kRgba8UnormSrgb);
+        CASE(Stencil8, kStencil8);
+#undef CASE
+
+        case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
+        case wgpu::TextureFormat::R16Snorm:
+        case wgpu::TextureFormat::R16Unorm:
+        case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
+        case wgpu::TextureFormat::RG16Snorm:
+        case wgpu::TextureFormat::RG16Unorm:
+        case wgpu::TextureFormat::RGBA16Snorm:
+        case wgpu::TextureFormat::RGBA16Unorm:
 
         case wgpu::TextureFormat::Undefined:
-        case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
             return false;
     }
 
@@ -1621,61 +1447,62 @@ bool Converter::Convert(wgpu::FeatureName& out, interop::GPUFeatureName in) {
 }
 
 bool Converter::Convert(interop::GPUFeatureName& out, wgpu::FeatureName in) {
-    switch (in) {
-        case wgpu::FeatureName::Depth32FloatStencil8:
-            out = interop::GPUFeatureName::kDepth32FloatStencil8;
-            return true;
-        case wgpu::FeatureName::TimestampQuery:
-            out = interop::GPUFeatureName::kTimestampQuery;
-            return true;
-        case wgpu::FeatureName::TextureCompressionBC:
-            out = interop::GPUFeatureName::kTextureCompressionBc;
-            return true;
-        case wgpu::FeatureName::TextureCompressionETC2:
-            out = interop::GPUFeatureName::kTextureCompressionEtc2;
-            return true;
-        case wgpu::FeatureName::TextureCompressionASTC:
-            out = interop::GPUFeatureName::kTextureCompressionAstc;
-            return true;
-        case wgpu::FeatureName::IndirectFirstInstance:
-            out = interop::GPUFeatureName::kIndirectFirstInstance;
-            return true;
-        case wgpu::FeatureName::DepthClipControl:
-            out = interop::GPUFeatureName::kDepthClipControl;
-            return true;
-        case wgpu::FeatureName::ShaderF16:
-            out = interop::GPUFeatureName::kShaderF16;
-            return true;
-        case wgpu::FeatureName::RG11B10UfloatRenderable:
-            out = interop::GPUFeatureName::kRg11B10UfloatRenderable;
-            return true;
-        case wgpu::FeatureName::BGRA8UnormStorage:
-            out = interop::GPUFeatureName::kBgra8UnormStorage;
-            return true;
-        case wgpu::FeatureName::Float32Filterable:
-            out = interop::GPUFeatureName::kFloat32Filterable;
-            return true;
-        case wgpu::FeatureName::ChromiumExperimentalSubgroups:
-            out = interop::GPUFeatureName::kChromiumExperimentalSubgroups;
-            return true;
-        case wgpu::FeatureName::ChromiumExperimentalSubgroupUniformControlFlow:
-            out = interop::GPUFeatureName::kChromiumExperimentalSubgroupUniformControlFlow;
-            return true;
+#define CASE(WGPU, INTEROP)                     \
+    case wgpu::FeatureName::WGPU:               \
+        out = interop::GPUFeatureName::INTEROP; \
+        return true
 
-        case wgpu::FeatureName::PipelineStatisticsQuery:
+    switch (in) {
+        CASE(BGRA8UnormStorage, kBgra8UnormStorage);
+        CASE(ChromiumExperimentalSubgroups, kChromiumExperimentalSubgroups);
+        CASE(ChromiumExperimentalSubgroupUniformControlFlow,
+             kChromiumExperimentalSubgroupUniformControlFlow);
+        CASE(Depth32FloatStencil8, kDepth32FloatStencil8);
+        CASE(DepthClipControl, kDepthClipControl);
+        CASE(Float32Filterable, kFloat32Filterable);
+        CASE(IndirectFirstInstance, kIndirectFirstInstance);
+        CASE(RG11B10UfloatRenderable, kRg11B10UfloatRenderable);
+        CASE(ShaderF16, kShaderF16);
+        CASE(TextureCompressionASTC, kTextureCompressionAstc);
+        CASE(TextureCompressionBC, kTextureCompressionBc);
+        CASE(TextureCompressionETC2, kTextureCompressionEtc2);
+        CASE(TimestampQuery, kTimestampQuery);
+
+#undef CASE
+
+        case wgpu::FeatureName::ANGLETextureSharing:
+        case wgpu::FeatureName::ChromiumExperimentalDp4a:
+        case wgpu::FeatureName::ChromiumExperimentalReadWriteStorageTexture:
+        case wgpu::FeatureName::D3D11MultithreadProtected:
         case wgpu::FeatureName::DawnInternalUsages:
         case wgpu::FeatureName::DawnMultiPlanarFormats:
         case wgpu::FeatureName::DawnNative:
-        case wgpu::FeatureName::ChromiumExperimentalDp4a:
-        case wgpu::FeatureName::TimestampQueryInsidePasses:
+        case wgpu::FeatureName::DualSourceBlending:
         case wgpu::FeatureName::ImplicitDeviceSynchronization:
-        case wgpu::FeatureName::SurfaceCapabilities:
-        case wgpu::FeatureName::TransientAttachments:
         case wgpu::FeatureName::MSAARenderToSingleSampled:
+        case wgpu::FeatureName::MultiPlanarFormatExtendedUsages:
+        case wgpu::FeatureName::MultiPlanarFormatP010:
+        case wgpu::FeatureName::Norm16TextureFormats:
+        case wgpu::FeatureName::PipelineStatisticsQuery:
         case wgpu::FeatureName::PixelLocalStorageCoherent:
         case wgpu::FeatureName::PixelLocalStorageNonCoherent:
-        case wgpu::FeatureName::DualSourceBlending:
-        case wgpu::FeatureName::D3D11MultithreadProtected:
+        case wgpu::FeatureName::SharedFenceDXGISharedHandle:
+        case wgpu::FeatureName::SharedFenceMTLSharedEvent:
+        case wgpu::FeatureName::SharedFenceVkSemaphoreOpaqueFD:
+        case wgpu::FeatureName::SharedFenceVkSemaphoreSyncFD:
+        case wgpu::FeatureName::SharedFenceVkSemaphoreZirconHandle:
+        case wgpu::FeatureName::SharedTextureMemoryAHardwareBuffer:
+        case wgpu::FeatureName::SharedTextureMemoryD3D11Texture2D:
+        case wgpu::FeatureName::SharedTextureMemoryDmaBuf:
+        case wgpu::FeatureName::SharedTextureMemoryDXGISharedHandle:
+        case wgpu::FeatureName::SharedTextureMemoryEGLImage:
+        case wgpu::FeatureName::SharedTextureMemoryIOSurface:
+        case wgpu::FeatureName::SharedTextureMemoryOpaqueFD:
+        case wgpu::FeatureName::SharedTextureMemoryVkDedicatedAllocation:
+        case wgpu::FeatureName::SharedTextureMemoryZirconHandle:
+        case wgpu::FeatureName::SurfaceCapabilities:
+        case wgpu::FeatureName::TimestampQueryInsidePasses:
+        case wgpu::FeatureName::TransientAttachments:
         case wgpu::FeatureName::Undefined:
             return false;
     }
