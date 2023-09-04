@@ -155,7 +155,9 @@ template <typename Index, size_t N>
 class Stream<ityp::bitset<Index, N>> {
   public:
     static void Write(Sink* s, const ityp::bitset<Index, N>& v) { StreamIn(s, v.AsBase()); }
-    static MaybeError Read(Source* s, ityp::bitset<Index, N>* v) { StreamOut(s, &v->AsBase()); }
+    static MaybeError Read(Source* s, ityp::bitset<Index, N>* v) {
+        return StreamOut(s, &v->AsBase());
+    }
 };
 
 // Stream specialization for enums.
