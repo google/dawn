@@ -651,6 +651,13 @@ crbug.com/dawn/1995 [ nvidia-0x2184 win10 ] webgpu:api,validation,state,device_l
 # KEEP
 ################################################################################
 crbug.com/dawn/2023 [ android-r ] webgpu:shader,execution,zero_init:compute,zero_init:addressSpace="workgroup";* [ Failure ]
+crbug.com/dawn/2028 [ android-r ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="private";access="read";containerType="vector";shadowingMode="function-scope";isAtomic=false [ RetryOnFailure ]
+crbug.com/dawn/2028 [ android-r ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="private";access="write";containerType="matrix";shadowingMode="none";isAtomic=false [ RetryOnFailure ]
+crbug.com/dawn/2028 [ android-r qualcomm target-cpu-32 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="function";access="write";containerType="vector";shadowingMode="none";isAtomic=false [ Failure ]
+crbug.com/dawn/2028 [ android-r qualcomm target-cpu-32 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="private";access="read";containerType="matrix";shadowingMode="module-scope";isAtomic=false [ Failure ]
+crbug.com/dawn/2028 [ android-r qualcomm target-cpu-32 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="private";access="read";containerType="vector";shadowingMode="module-scope";isAtomic=false [ Failure ]
+crbug.com/dawn/2028 [ android-r qualcomm target-cpu-32 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="private";access="write";containerType="array";shadowingMode="module-scope";isAtomic=false [ Failure ]
+crbug.com/dawn/2029 [ android-r qualcomm target-cpu-32 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=false;indirect=true;drawCallTestParameter="firstVertex";type="float32";* [ Failure ]
 
 ################################################################################
 # Tint unimplemented feature
@@ -689,12 +696,10 @@ crbug.com/dawn/0000 [ amd-0x67ef ] webgpu:shader,execution,expression,call,built
 crbug.com/dawn/0000 [ qualcomm ] webgpu:shader,execution,expression,call,builtin,step:f32:inputSource="const";vectorize=2 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,step:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ amd-0x67ef ] webgpu:shader,execution,expression,call,builtin,unpack2x16snorm:unpack:inputSource="storage_rw" [ Failure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="private";access="read";containerType="vector";shadowingMode="function-scope";isAtomic=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,validation,expression,call,builtin,atan2:values:stage="constant";type="vec4%3Cf32%3E" [ Failure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,unary,f32_arithmetic:negation:inputSource="const";vectorize=2 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,unary,f32_conversion:i32:inputSource="const";vectorize=2 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,validation,expression,call,builtin,clamp:values:stage="override";type="vec3%3Cf32%3E" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="private";access="write";containerType="matrix";shadowingMode="none";isAtomic=false [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:api,validation,encoding,cmds,compute_pass:dispatch_sizes:dispatchType="direct";* [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:api,validation,encoding,cmds,copyTextureToTexture:copy_aspects:format="depth32float-stencil8" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r ] webgpu:shader,execution,expression,call,builtin,mix:matching_f32:inputSource="storage_r";vectorize="_undef_" [ RetryOnFailure ]
@@ -1714,12 +1719,6 @@ crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,execution
 crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,execution,expression,call,builtin,faceForward:f32_vec3:inputSource="const" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="const";vectorize=2 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,execution,expression,call,builtin,pow:f32:inputSource="const";vectorize=2 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="function";access="write";containerType="vector";shadowingMode="none";isAtomic=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="private";access="read";containerType="matrix";shadowingMode="module-scope";isAtomic=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="private";access="read";containerType="vector";shadowingMode="module-scope";isAtomic=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,execution,robust_access:linear_memory:addressSpace="private";access="write";containerType="array";shadowingMode="module-scope";isAtomic=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=false;indirect=true;drawCallTestParameter="firstVertex";type="float32";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=false;errorScale=4 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,execution,robust_access_vertex:vertex_buffer_access:indexed=false;indirect=true;drawCallTestParameter="firstVertex";type="float32";additionalBuffers=0;partialLastNumber=true;offsetVertexBuffer=true;errorScale=1000000 [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,validation,expression,call,builtin,atan2:values:stage="constant";type="vec3%3Cf32%3E" [ RetryOnFailure ]
 crbug.com/dawn/0000 [ android-r qualcomm target-cpu-32 ] webgpu:shader,validation,expression,call,builtin,atan2:values:stage="constant";type="vec4%3Cabstract-float%3E" [ RetryOnFailure ]
 
