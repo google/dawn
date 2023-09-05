@@ -39,6 +39,7 @@ struct D3D12DeviceInfo {
     bool supportsRootSignatureVersion1_1;
     bool use64KBAlignedMSAATexture;
     bool supportsHeapFlagCreateNotZeroed;
+    bool supportsTextureCopyBetweenDimensions;
     // Whether the device support wave intrinsics
     bool supportsWaveOps;
     uint32_t waveLaneCountMin;

@@ -98,6 +98,15 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
         info.supportsHeapFlagCreateNotZeroed = true;
     }
 
+#if D3D12_SDK_VERSION >= 602
+    D3D12_FEATURE_DATA_D3D12_OPTIONS13 featureOptions13 = {};
+    if (SUCCEEDED(physicalDevice.GetDevice()->CheckFeatureSupport(
+            D3D12_FEATURE_D3D12_OPTIONS13, &featureOptions13, sizeof(featureOptions13)))) {
+        info.supportsTextureCopyBetweenDimensions =
+            featureOptions13.TextureCopyBetweenDimensionsSupported;
+    }
+#endif
+
     info.supportsRootSignatureVersion1_1 = false;
     D3D12_FEATURE_DATA_ROOT_SIGNATURE featureDataRootSignature = {};
     featureDataRootSignature.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
