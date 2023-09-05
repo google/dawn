@@ -437,9 +437,14 @@ function(tint_target_add_external_dependencies UNSUFFIXED_TARGET KIND)
         target_include_directories(${TARGET} PRIVATE ${gmock_SOURCE_DIR}/include)
         target_link_libraries(${TARGET} PRIVATE gmock)
       elseif(${DEPENDENCY} STREQUAL "metal")
+        find_library(CoreGraphicsFramework CoreGraphics REQUIRED)
         find_library(FoundationFramework Foundation REQUIRED)
         find_library(MetalFramework Metal REQUIRED)
-        target_link_libraries(${TARGET} PRIVATE ${FoundationFramework} ${MetalFramework})
+        target_link_libraries(${TARGET} PRIVATE 
+          ${CoreGraphicsFramework}
+          ${FoundationFramework}
+          ${MetalFramework}
+        )
       elseif(${DEPENDENCY} STREQUAL "spirv-headers")
         tint_spvheaders_compile_options(${TARGET})
       elseif(${DEPENDENCY} STREQUAL "spirv-tools")

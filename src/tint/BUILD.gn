@@ -115,6 +115,7 @@ source_set("thread") {
 
 source_set("metal") {
   frameworks = [
+    "CoreGraphics.framework",
     "Foundation.framework",
     "Metal.framework",
   ]
