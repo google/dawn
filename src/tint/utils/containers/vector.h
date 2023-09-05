@@ -558,9 +558,9 @@ class Vector {
             }
         }
 
-        /// Frees `data`, if not nullptr and isn't a pointer to #small_arr
+        /// Frees `data`, if isn't a pointer to #small_arr
         void Free(T* data) const {
-            if (data && data != small_arr[0].Get()) {
+            if (data != small_arr[0].Get()) {
                 delete[] Bitcast<TStorage*>(data);
             }
         }
@@ -580,12 +580,8 @@ class Vector {
             slice.cap = new_cap;
         }
 
-        /// Frees `data`, if not nullptr.
-        void Free(T* data) const {
-            if (data) {
-                delete[] Bitcast<TStorage*>(data);
-            }
-        }
+        /// Frees `data`.
+        void Free(T* data) const { delete[] Bitcast<TStorage*>(data); }
 
         /// Indicates whether the slice structure can be std::move()d.
         /// @returns true
