@@ -77,7 +77,11 @@ struct Options {
     Version version;
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
-    TINT_REFLECT(disable_robustness,
+    TINT_REFLECT(binding_map,
+                 placeholder_binding_point,
+                 binding_points,
+                 access_controls,
+                 disable_robustness,
                  allow_collisions,
                  disable_workgroup_init,
                  external_texture_options,

@@ -76,7 +76,12 @@ struct Options {
                  root_constant_binding_point,
                  disable_workgroup_init,
                  external_texture_options,
-                 array_length_from_uniform);
+                 array_length_from_uniform,
+                 binding_remapper_options,
+                 interstage_locations,
+                 truncate_interstage_variables,
+                 polyfill_reflect_vec2_f32,
+                 binding_points_ignored_in_robustness_transform);
 };
 
 }  // namespace tint::hlsl::writer

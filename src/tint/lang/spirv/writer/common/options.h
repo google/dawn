@@ -61,7 +61,9 @@ struct Options {
     TINT_REFLECT(disable_robustness,
                  emit_vertex_point_size,
                  disable_workgroup_init,
+                 clamp_frag_depth,
                  external_texture_options,
+                 binding_remapper_options,
                  use_zero_initialize_workgroup_memory_extension,
                  disable_image_robustness,
                  disable_runtime_sized_array_index_clamping);

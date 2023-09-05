@@ -74,7 +74,8 @@ struct Options {
                  emit_vertex_point_size,
                  disable_workgroup_init,
                  external_texture_options,
-                 array_length_from_uniform);
+                 array_length_from_uniform,
+                 binding_remapper_options);
 };
 
 }  // namespace tint::msl::writer
