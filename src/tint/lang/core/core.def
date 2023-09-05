@@ -84,6 +84,8 @@ enum extension {
   chromium_internal_relaxed_uniform_layout
   // A Chromium-specific extension that enables dual source blending.
   chromium_internal_dual_source_blending
+  // A Chromium-specific extension that enables pixel local storage.
+  chromium_experimental_pixel_local
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#storage-class

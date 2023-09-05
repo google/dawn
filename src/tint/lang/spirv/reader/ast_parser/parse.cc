@@ -56,6 +56,7 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
                     case core::Extension::kChromiumDisableUniformityAnalysis:
                     case core::Extension::kChromiumExperimentalDp4A:
                     case core::Extension::kChromiumExperimentalFullPtrParameters:
+                    case core::Extension::kChromiumExperimentalPixelLocal:
                     case core::Extension::kChromiumExperimentalPushConstant:
                     case core::Extension::kChromiumExperimentalReadWriteStorageTexture:
                     case core::Extension::kChromiumExperimentalSubgroups:

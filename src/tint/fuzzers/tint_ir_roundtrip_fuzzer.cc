@@ -50,6 +50,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
             switch (ext->name) {
                 case tint::core::Extension::kChromiumExperimentalDp4A:
                 case tint::core::Extension::kChromiumExperimentalFullPtrParameters:
+                case tint::core::Extension::kChromiumExperimentalPixelLocal:
                 case tint::core::Extension::kChromiumExperimentalPushConstant:
                 case tint::core::Extension::kChromiumInternalDualSourceBlending:
                 case tint::core::Extension::kChromiumInternalRelaxedUniformLayout:

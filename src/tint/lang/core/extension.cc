@@ -38,6 +38,9 @@ Extension ParseExtension(std::string_view str) {
     if (str == "chromium_experimental_full_ptr_parameters") {
         return Extension::kChromiumExperimentalFullPtrParameters;
     }
+    if (str == "chromium_experimental_pixel_local") {
+        return Extension::kChromiumExperimentalPixelLocal;
+    }
     if (str == "chromium_experimental_push_constant") {
         return Extension::kChromiumExperimentalPushConstant;
     }
@@ -69,6 +72,8 @@ std::string_view ToString(Extension value) {
             return "chromium_experimental_dp4a";
         case Extension::kChromiumExperimentalFullPtrParameters:
             return "chromium_experimental_full_ptr_parameters";
+        case Extension::kChromiumExperimentalPixelLocal:
+            return "chromium_experimental_pixel_local";
         case Extension::kChromiumExperimentalPushConstant:
             return "chromium_experimental_push_constant";
         case Extension::kChromiumExperimentalReadWriteStorageTexture:

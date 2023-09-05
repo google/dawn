@@ -36,6 +36,7 @@ enum class Extension : uint8_t {
     kChromiumDisableUniformityAnalysis,
     kChromiumExperimentalDp4A,
     kChromiumExperimentalFullPtrParameters,
+    kChromiumExperimentalPixelLocal,
     kChromiumExperimentalPushConstant,
     kChromiumExperimentalReadWriteStorageTexture,
     kChromiumExperimentalSubgroups,
@@ -62,15 +63,11 @@ auto& operator<<(STREAM& out, Extension value) {
 Extension ParseExtension(std::string_view str);
 
 constexpr const char* kExtensionStrings[] = {
-    "chromium_disable_uniformity_analysis",
-    "chromium_experimental_dp4a",
-    "chromium_experimental_full_ptr_parameters",
-    "chromium_experimental_push_constant",
-    "chromium_experimental_read_write_storage_texture",
-    "chromium_experimental_subgroups",
-    "chromium_internal_dual_source_blending",
-    "chromium_internal_relaxed_uniform_layout",
-    "f16",
+    "chromium_disable_uniformity_analysis",      "chromium_experimental_dp4a",
+    "chromium_experimental_full_ptr_parameters", "chromium_experimental_pixel_local",
+    "chromium_experimental_push_constant",       "chromium_experimental_read_write_storage_texture",
+    "chromium_experimental_subgroups",           "chromium_internal_dual_source_blending",
+    "chromium_internal_relaxed_uniform_layout",  "f16",
 };
 
 // A unique vector of extensions
