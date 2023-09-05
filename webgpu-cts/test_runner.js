@@ -149,7 +149,8 @@ globalTestConfig.noRaceWithRejectOnTimeout = true;
 // compiler (Intel GPU) is very slow to compile rolled loops. Intel drivers for
 // linux may also suffer the same performance issues, so unroll const-eval loops
 // if we're not running on Windows.
-if (navigator.userAgent.indexOf("Windows") !== -1) {
+const isWindows = navigator.userAgent.includes("Windows");
+if (!isWindows) {
   globalTestConfig.unrollConstEvalLoops = true;
 }
 
