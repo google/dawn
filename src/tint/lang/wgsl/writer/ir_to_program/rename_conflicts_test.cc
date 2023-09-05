@@ -19,6 +19,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/matrix.h"
 
