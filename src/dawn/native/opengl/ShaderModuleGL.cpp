@@ -167,16 +167,28 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
     std::unordered_map<BindingPoint, BindingPoint> glBindings;
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
         const BindGroupLayoutInternalBase* bgl = layout->GetBindGroupLayout(group);
+        const auto& indices = layout->GetBindingIndexInfo()[group];
         const auto& groupBindingInfo = moduleBindingInfo[group];
         for (const auto& [bindingNumber, bindingInfo] : groupBindingInfo) {
             BindingIndex bindingIndex = bgl->GetBindingIndex(bindingNumber);
-            GLuint shaderIndex = layout->GetBindingIndexInfo()[group][bindingIndex];
+            GLuint shaderIndex = indices[bindingIndex];
             BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
                                          static_cast<uint32_t>(bindingNumber)};
             BindingPoint dstBindingPoint{0, shaderIndex};
             if (srcBindingPoint != dstBindingPoint) {
                 glBindings.emplace(srcBindingPoint, dstBindingPoint);
             }
+        }
+
+        for (const auto& [_, expansion] : bgl->GetExternalTextureBindingExpansionMap()) {
+            uint32_t plane1Slot = indices[bgl->GetBindingIndex(expansion.plane1)];
+            uint32_t paramsSlot = indices[bgl->GetBindingIndex(expansion.params)];
+            glBindings.emplace(
+                BindingPoint{static_cast<uint32_t>(group), static_cast<uint32_t>(expansion.plane1)},
+                BindingPoint{0u, plane1Slot});
+            glBindings.emplace(
+                BindingPoint{static_cast<uint32_t>(group), static_cast<uint32_t>(expansion.params)},
+                BindingPoint{0u, paramsSlot});
         }
     }
 

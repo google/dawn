@@ -143,10 +143,6 @@ TEST_P(ExternalTextureTests, CreateExternalTextureSuccess) {
 }
 
 TEST_P(ExternalTextureTests, SampleExternalTexture) {
-    // TODO(crbug.com/tint/1774): Tint has an issue compiling shaders that use external textures on
-    // OpenGL/OpenGLES.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-
     wgpu::Texture sampledTexture =
         Create2DTexture(device, kWidth, kHeight, kFormat,
                         wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
@@ -407,10 +403,6 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTextureNorm16) {
 // square in the lower left and a blue square in the lower right. The image is then sampled as an
 // external texture and rotated 0, 90, 180, and 270 degrees with and without the y-axis flipped.
 TEST_P(ExternalTextureTests, RotateAndOrFlipSinglePlane) {
-    // TODO(crbug.com/tint/1774): Tint has an issue compiling shaders that use external textures on
-    // OpenGL/OpenGLES.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-
     const wgpu::ShaderModule sourceTextureFsModule = utils::CreateShaderModule(device, R"(
         @fragment fn main(@builtin(position) FragCoord : vec4f)
                                  -> @location(0) vec4f {
@@ -754,10 +746,6 @@ TEST_P(ExternalTextureTests, RotateAndOrFlipMultiplanar) {
 // This test draws a 2x2 multi-colored square surrounded by a 1px black border. We test the external
 // texture crop functionality by cropping to specific ranges inside the texture.
 TEST_P(ExternalTextureTests, CropSinglePlane) {
-    // TODO(crbug.com/tint/1774): Tint has an issue compiling shaders that use external textures on
-    // OpenGL/OpenGLES.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-
     const wgpu::ShaderModule sourceTextureFsModule = utils::CreateShaderModule(device, R"(
         @fragment fn main(@builtin(position) FragCoord : vec4f)
                                  -> @location(0) vec4f {
@@ -1109,10 +1097,6 @@ TEST_P(ExternalTextureTests, CropMultiplanar) {
 
 // Test that sampling an external texture with non-one alpha preserves the alpha channel.
 TEST_P(ExternalTextureTests, SampleExternalTextureAlpha) {
-    // TODO(crbug.com/tint/1774): Tint has an issue compiling shaders that use external textures on
-    // OpenGL/OpenGLES.
-    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
-
     wgpu::Texture sampledTexture =
         Create2DTexture(device, kWidth, kHeight, kFormat,
                         wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment);
