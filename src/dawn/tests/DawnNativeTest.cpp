@@ -54,7 +54,7 @@ void DawnNativeTest::SetUp() {
     instanceToggles.enabledToggles = &allowUnsafeApisToggle;
 
     platform = CreateTestPlatform();
-    wgpu::DawnInstanceDescriptor dawnInstanceDesc;
+    dawn::native::DawnInstanceDescriptor dawnInstanceDesc;
     dawnInstanceDesc.platform = platform.get();
     dawnInstanceDesc.nextInChain = &instanceToggles;
 

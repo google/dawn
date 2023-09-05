@@ -396,7 +396,7 @@ std::unique_ptr<native::Instance> DawnTestEnvironment::CreateInstance(
     instanceToggles.enabledToggleCount = 1;
     instanceToggles.enabledToggles = &allowUnsafeApisToggle;
 
-    wgpu::DawnInstanceDescriptor dawnInstanceDesc;
+    dawn::native::DawnInstanceDescriptor dawnInstanceDesc;
     dawnInstanceDesc.platform = platform;
     dawnInstanceDesc.nextInChain = &instanceToggles;
 

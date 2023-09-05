@@ -290,10 +290,4 @@ DAWN_NATIVE_EXPORT FeatureInfo GetFeatureInfo(wgpu::FeatureName featureName);
 
 }  // namespace dawn::native
 
-// Alias the DawnInstanceDescriptor up to wgpu.
-// TODO(dawn:1374) Remove this aliasing once the usages are updated.
-namespace wgpu {
-using dawn::native::DawnInstanceDescriptor;
-}  // namespace wgpu
-
 #endif  // INCLUDE_DAWN_NATIVE_DAWNNATIVE_H_
