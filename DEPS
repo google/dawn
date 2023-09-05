@@ -59,7 +59,7 @@ deps = {
     'condition': 'dawn_standalone',
   },
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@79ab87fa54614258c4c95891e873223371194525',
+    'url': '{chromium_git}/chromium/src/buildtools@a9a6f0c49d0e8fa0cda37337430b4736ab3dc944',
     'condition': 'dawn_standalone',
   },
   'third_party/clang-format/script': {
@@ -164,7 +164,7 @@ deps = {
   },
 
   'third_party/vulkan-deps': {
-    'url': '{chromium_git}/vulkan-deps@5857bae969d54323f987b6d1ebb4a7e809381eef',
+    'url': '{chromium_git}/vulkan-deps@988fe1c529b0ad42c09944465cd1431b8b5e204f',
     'condition': 'dawn_standalone',
   },
 
