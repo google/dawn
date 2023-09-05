@@ -83,137 +83,137 @@ class TransformBuilder {
     /// @tparam T - A fuzzer transform
     template <typename T>
     struct AddTransformImpl;
+};
 
-    /// Implementation of AddTransform for ShuffleTransform
-    template <>
-    struct AddTransformImpl<ShuffleTransform> {
-        /// Add instance of ShuffleTransform to TransformBuilder
-        /// @param tb - TransformBuilder to add transform to
-        static void impl(TransformBuilder* tb) {
-            tb->manager()->Add<ShuffleTransform>(tb->builder_.build<size_t>());
-        }
-    };
+/// Implementation of AddTransform for ShuffleTransform
+template <>
+struct TransformBuilder::AddTransformImpl<ShuffleTransform> {
+    /// Add instance of ShuffleTransform to TransformBuilder
+    /// @param tb - TransformBuilder to add transform to
+    static void impl(TransformBuilder* tb) {
+        tb->manager()->Add<ShuffleTransform>(tb->builder_.build<size_t>());
+    }
+};
 
-    /// Implementation of AddTransform for ast::transform::Robustness
-    template <>
-    struct AddTransformImpl<ast::transform::Robustness> {
-        /// Add instance of ast::transform::Robustness to TransformBuilder
-        /// @param tb - TransformBuilder to add transform to
-        static void impl(TransformBuilder* tb) { tb->manager()->Add<ast::transform::Robustness>(); }
-    };
+/// Implementation of AddTransform for ast::transform::Robustness
+template <>
+struct TransformBuilder::AddTransformImpl<ast::transform::Robustness> {
+    /// Add instance of ast::transform::Robustness to TransformBuilder
+    /// @param tb - TransformBuilder to add transform to
+    static void impl(TransformBuilder* tb) { tb->manager()->Add<ast::transform::Robustness>(); }
+};
 
-    /// Implementation of AddTransform for ast::transform::FirstIndexOffset
-    template <>
-    struct AddTransformImpl<ast::transform::FirstIndexOffset> {
-        /// Add instance of ast::transform::FirstIndexOffset to TransformBuilder
-        /// @param tb - TransformBuilder to add transform to
-        static void impl(TransformBuilder* tb) {
-            struct Config {
-                uint32_t group;
-                uint32_t binding;
-            };
+/// Implementation of AddTransform for ast::transform::FirstIndexOffset
+template <>
+struct TransformBuilder::AddTransformImpl<ast::transform::FirstIndexOffset> {
+    /// Add instance of ast::transform::FirstIndexOffset to TransformBuilder
+    /// @param tb - TransformBuilder to add transform to
+    static void impl(TransformBuilder* tb) {
+        struct Config {
+            uint32_t group;
+            uint32_t binding;
+        };
 
-            Config config = tb->builder()->build<Config>();
+        Config config = tb->builder()->build<Config>();
 
-            tb->data_map()->Add<tint::ast::transform::FirstIndexOffset::BindingPoint>(
-                config.binding, config.group);
-            tb->manager()->Add<ast::transform::FirstIndexOffset>();
-        }
-    };
+        tb->data_map()->Add<tint::ast::transform::FirstIndexOffset::BindingPoint>(config.binding,
+                                                                                  config.group);
+        tb->manager()->Add<ast::transform::FirstIndexOffset>();
+    }
+};
 
-    /// Implementation of AddTransform for ast::transform::BindingRemapper
-    template <>
-    struct AddTransformImpl<ast::transform::BindingRemapper> {
-        /// Add instance of ast::transform::BindingRemapper to TransformBuilder
-        /// @param tb - TransformBuilder to add transform to
-        static void impl(TransformBuilder* tb) {
-            struct Config {
-                uint8_t old_group;
-                uint8_t old_binding;
-                uint8_t new_group;
-                uint8_t new_binding;
-                core::Access new_access;
-            };
+/// Implementation of AddTransform for ast::transform::BindingRemapper
+template <>
+struct TransformBuilder::AddTransformImpl<ast::transform::BindingRemapper> {
+    /// Add instance of ast::transform::BindingRemapper to TransformBuilder
+    /// @param tb - TransformBuilder to add transform to
+    static void impl(TransformBuilder* tb) {
+        struct Config {
+            uint8_t old_group;
+            uint8_t old_binding;
+            uint8_t new_group;
+            uint8_t new_binding;
+            core::Access new_access;
+        };
 
-            std::vector<Config> configs = tb->builder()->vector<Config>();
-            ast::transform::BindingRemapper::BindingPoints binding_points;
-            ast::transform::BindingRemapper::AccessControls accesses;
-            for (const auto& config : configs) {
-                binding_points[{config.old_binding, config.old_group}] = {config.new_binding,
-                                                                          config.new_group};
-                accesses[{config.old_binding, config.old_group}] = config.new_access;
-            }
-
-            tb->data_map()->Add<ast::transform::BindingRemapper::Remappings>(
-                binding_points, accesses, tb->builder()->build<bool>());
-            tb->manager()->Add<ast::transform::BindingRemapper>();
-        }
-    };
-
-    /// Implementation of AddTransform for ast::transform::Renamer
-    template <>
-    struct AddTransformImpl<ast::transform::Renamer> {
-        /// Add instance of ast::transform::Renamer to TransformBuilder
-        /// @param tb - TransformBuilder to add transform to
-        static void impl(TransformBuilder* tb) { tb->manager()->Add<ast::transform::Renamer>(); }
-    };
-
-    /// Implementation of AddTransform for ast::transform::SingleEntryPoint
-    template <>
-    struct AddTransformImpl<ast::transform::SingleEntryPoint> {
-        /// Add instance of ast::transform::SingleEntryPoint to TransformBuilder
-        /// @param tb - TransformBuilder to add transform to
-        static void impl(TransformBuilder* tb) {
-            auto input = tb->builder()->build<std::string>();
-            ast::transform::SingleEntryPoint::Config cfg(input);
-
-            tb->data_map()->Add<ast::transform::SingleEntryPoint::Config>(cfg);
-            tb->manager()->Add<ast::transform::SingleEntryPoint>();
-        }
-    };  // struct AddTransformImpl<ast::transform::SingleEntryPoint>
-
-    /// Implementation of AddTransform for ast::transform::VertexPulling
-    template <>
-    struct AddTransformImpl<ast::transform::VertexPulling> {
-        /// Add instance of ast::transform::VertexPulling to TransformBuilder
-        /// @param tb - TransformBuilder to add transform to
-        static void impl(TransformBuilder* tb) {
-            ast::transform::VertexPulling::Config cfg;
-            cfg.vertex_state = tb->builder()->vector<ast::transform::VertexBufferLayoutDescriptor>(
-                GenerateVertexBufferLayoutDescriptor);
-            cfg.pulling_group = tb->builder()->build<uint32_t>();
-
-            tb->data_map()->Add<ast::transform::VertexPulling::Config>(cfg);
-            tb->manager()->Add<ast::transform::VertexPulling>();
+        std::vector<Config> configs = tb->builder()->vector<Config>();
+        ast::transform::BindingRemapper::BindingPoints binding_points;
+        ast::transform::BindingRemapper::AccessControls accesses;
+        for (const auto& config : configs) {
+            binding_points[{config.old_binding, config.old_group}] = {config.new_binding,
+                                                                      config.new_group};
+            accesses[{config.old_binding, config.old_group}] = config.new_access;
         }
 
-      private:
-        /// Generate an instance of ast::transform::VertexAttributeDescriptor
-        /// @param b - DataBuilder to use
-        static ast::transform::VertexAttributeDescriptor GenerateVertexAttributeDescriptor(
-            DataBuilder* b) {
-            ast::transform::VertexAttributeDescriptor desc{};
-            desc.format = b->enum_class<ast::transform::VertexFormat>(
-                static_cast<uint8_t>(ast::transform::VertexFormat::kLastEntry) + 1);
-            desc.offset = b->build<uint32_t>();
-            desc.shader_location = b->build<uint32_t>();
-            return desc;
-        }
+        tb->data_map()->Add<ast::transform::BindingRemapper::Remappings>(
+            binding_points, accesses, tb->builder()->build<bool>());
+        tb->manager()->Add<ast::transform::BindingRemapper>();
+    }
+};
 
-        /// Generate an instance of VertexBufferLayoutDescriptor
-        /// @param b - DataBuilder to use
-        static ast::transform::VertexBufferLayoutDescriptor GenerateVertexBufferLayoutDescriptor(
-            DataBuilder* b) {
-            ast::transform::VertexBufferLayoutDescriptor desc;
-            desc.array_stride = b->build<uint32_t>();
-            desc.step_mode = b->enum_class<ast::transform::VertexStepMode>(
-                static_cast<uint8_t>(ast::transform::VertexStepMode::kLastEntry) + 1);
-            desc.attributes = b->vector<ast::transform::VertexAttributeDescriptor>(
-                GenerateVertexAttributeDescriptor);
-            return desc;
-        }
-    };
-};  // class TransformBuilder
+/// Implementation of AddTransform for ast::transform::Renamer
+template <>
+struct TransformBuilder::AddTransformImpl<ast::transform::Renamer> {
+    /// Add instance of ast::transform::Renamer to TransformBuilder
+    /// @param tb - TransformBuilder to add transform to
+    static void impl(TransformBuilder* tb) { tb->manager()->Add<ast::transform::Renamer>(); }
+};
+
+/// Implementation of AddTransform for ast::transform::SingleEntryPoint
+template <>
+struct TransformBuilder::AddTransformImpl<ast::transform::SingleEntryPoint> {
+    /// Add instance of ast::transform::SingleEntryPoint to TransformBuilder
+    /// @param tb - TransformBuilder to add transform to
+    static void impl(TransformBuilder* tb) {
+        auto input = tb->builder()->build<std::string>();
+        ast::transform::SingleEntryPoint::Config cfg(input);
+
+        tb->data_map()->Add<ast::transform::SingleEntryPoint::Config>(cfg);
+        tb->manager()->Add<ast::transform::SingleEntryPoint>();
+    }
+};
+
+/// Implementation of AddTransform for ast::transform::VertexPulling
+template <>
+struct TransformBuilder::AddTransformImpl<ast::transform::VertexPulling> {
+    /// Add instance of ast::transform::VertexPulling to TransformBuilder
+    /// @param tb - TransformBuilder to add transform to
+    static void impl(TransformBuilder* tb) {
+        ast::transform::VertexPulling::Config cfg;
+        cfg.vertex_state = tb->builder()->vector<ast::transform::VertexBufferLayoutDescriptor>(
+            GenerateVertexBufferLayoutDescriptor);
+        cfg.pulling_group = tb->builder()->build<uint32_t>();
+
+        tb->data_map()->Add<ast::transform::VertexPulling::Config>(cfg);
+        tb->manager()->Add<ast::transform::VertexPulling>();
+    }
+
+  private:
+    /// Generate an instance of ast::transform::VertexAttributeDescriptor
+    /// @param b - DataBuilder to use
+    static ast::transform::VertexAttributeDescriptor GenerateVertexAttributeDescriptor(
+        DataBuilder* b) {
+        ast::transform::VertexAttributeDescriptor desc{};
+        desc.format = b->enum_class<ast::transform::VertexFormat>(
+            static_cast<uint8_t>(ast::transform::VertexFormat::kLastEntry) + 1);
+        desc.offset = b->build<uint32_t>();
+        desc.shader_location = b->build<uint32_t>();
+        return desc;
+    }
+
+    /// Generate an instance of VertexBufferLayoutDescriptor
+    /// @param b - DataBuilder to use
+    static ast::transform::VertexBufferLayoutDescriptor GenerateVertexBufferLayoutDescriptor(
+        DataBuilder* b) {
+        ast::transform::VertexBufferLayoutDescriptor desc;
+        desc.array_stride = b->build<uint32_t>();
+        desc.step_mode = b->enum_class<ast::transform::VertexStepMode>(
+            static_cast<uint8_t>(ast::transform::VertexStepMode::kLastEntry) + 1);
+        desc.attributes =
+            b->vector<ast::transform::VertexAttributeDescriptor>(GenerateVertexAttributeDescriptor);
+        return desc;
+    }
+};
 
 }  // namespace tint::fuzzers
 

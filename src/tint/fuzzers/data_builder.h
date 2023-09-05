@@ -137,63 +137,63 @@ class DataBuilder {
             return out;
         }
     };
+};
 
-    /// Specialization for bool
-    template <>
-    struct BuildImpl<bool> {
-        /// Generate a pseudo-random bool
-        /// @param b - data builder to use
-        /// @returns a boolean with even odds of being true or false
-        static bool impl(DataBuilder* b) { return b->generator_.GetBool(); }
-    };
+/// Specialization for bool
+template <>
+struct DataBuilder::BuildImpl<bool> {
+    /// Generate a pseudo-random bool
+    /// @param b - data builder to use
+    /// @returns a boolean with even odds of being true or false
+    static bool impl(DataBuilder* b) { return b->generator_.GetBool(); }
+};
 
-    /// Specialization for std::string
-    template <>
-    struct BuildImpl<std::string> {
-        /// Generate a pseudo-random string
-        /// @param b - data builder to use
-        /// @returns a string filled with pseudo-random data
-        static std::string impl(DataBuilder* b) {
-            auto count = b->build<uint8_t>();
-            if (count == 0) {
-                return "";
-            }
-            std::vector<uint8_t> source(count);
-            b->build(source.data(), count);
-            return {source.begin(), source.end()};
+/// Specialization for std::string
+template <>
+struct DataBuilder::BuildImpl<std::string> {
+    /// Generate a pseudo-random string
+    /// @param b - data builder to use
+    /// @returns a string filled with pseudo-random data
+    static std::string impl(DataBuilder* b) {
+        auto count = b->build<uint8_t>();
+        if (count == 0) {
+            return "";
         }
-    };
+        std::vector<uint8_t> source(count);
+        b->build(source.data(), count);
+        return {source.begin(), source.end()};
+    }
+};
 
-    /// Specialization for std::optional
-    template <typename T>
-    struct BuildImpl<std::optional<T>> {
-        /// Generate a pseudo-random optional<T>
-        /// @param b - data builder to use
-        /// @returns a either a nullopt, or a randomly filled T
-        static std::optional<T> impl(DataBuilder* b) {
-            if (b->build<bool>()) {
-                return b->build<T>();
-            }
-            return std::nullopt;
+/// Specialization for std::optional
+template <typename T>
+struct DataBuilder::BuildImpl<std::optional<T>> {
+    /// Generate a pseudo-random optional<T>
+    /// @param b - data builder to use
+    /// @returns a either a nullopt, or a randomly filled T
+    static std::optional<T> impl(DataBuilder* b) {
+        if (b->build<bool>()) {
+            return b->build<T>();
         }
-    };
+        return std::nullopt;
+    }
+};
 
-    /// Specialization for std::unordered_map<K, V>
-    template <typename K, typename V>
-    struct BuildImpl<std::unordered_map<K, V>> {
-        /// Generate a pseudo-random std::unordered_map<K, V>
-        /// @param b - data builder to use
-        /// @returns std::unordered_map<K, V> filled with
-        /// pseudo-random data
-        static std::unordered_map<K, V> impl(DataBuilder* b) {
-            std::unordered_map<K, V> out;
-            uint8_t count = b->build<uint8_t>();
-            for (uint8_t i = 0; i < count; ++i) {
-                out.emplace(b->build<K>(), b->build<V>());
-            }
-            return out;
+/// Specialization for std::unordered_map<K, V>
+template <typename K, typename V>
+struct DataBuilder::BuildImpl<std::unordered_map<K, V>> {
+    /// Generate a pseudo-random std::unordered_map<K, V>
+    /// @param b - data builder to use
+    /// @returns std::unordered_map<K, V> filled with
+    /// pseudo-random data
+    static std::unordered_map<K, V> impl(DataBuilder* b) {
+        std::unordered_map<K, V> out;
+        uint8_t count = b->build<uint8_t>();
+        for (uint8_t i = 0; i < count; ++i) {
+            out.emplace(b->build<K>(), b->build<V>());
         }
-    };
+        return out;
+    }
 };
 
 }  // namespace tint::fuzzers
