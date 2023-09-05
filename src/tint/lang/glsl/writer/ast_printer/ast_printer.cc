@@ -67,6 +67,7 @@
 #include "src/tint/lang/wgsl/ast/transform/zero_init_workgroup_memory.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/helpers/append_vector.h"
+#include "src/tint/lang/wgsl/helpers/check_supported_extensions.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/call.h"
@@ -277,6 +278,20 @@ ASTPrinter::ASTPrinter(const Program* program, const Version& version)
 ASTPrinter::~ASTPrinter() = default;
 
 bool ASTPrinter::Generate() {
+    if (!tint::writer::CheckSupportedExtensions(
+            "GLSL", builder_.AST(), diagnostics_,
+            Vector{
+                core::Extension::kChromiumDisableUniformityAnalysis,
+                core::Extension::kChromiumExperimentalDp4A,
+                core::Extension::kChromiumExperimentalFullPtrParameters,
+                core::Extension::kChromiumInternalDualSourceBlending,
+                core::Extension::kChromiumExperimentalReadWriteStorageTexture,
+                core::Extension::kChromiumExperimentalPushConstant,
+                core::Extension::kF16,
+            })) {
+        return false;
+    }
+
     {
         auto out = Line();
         out << "#version " << version_.major_version << version_.minor_version << "0";

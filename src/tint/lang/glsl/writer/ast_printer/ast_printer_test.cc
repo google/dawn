@@ -108,5 +108,15 @@ int my_func() {
 )");
 }
 
+TEST_F(GlslASTPrinterTest, UnsupportedExtension) {
+    Enable(Source{{12, 34}}, core::Extension::kUndefined);
+
+    ASTPrinter& gen = Build();
+
+    ASSERT_FALSE(gen.Generate());
+    EXPECT_EQ(gen.Diagnostics().str(),
+              R"(12:34 error: GLSL backend does not support extension 'undefined')");
+}
+
 }  // namespace
 }  // namespace tint::glsl::writer
