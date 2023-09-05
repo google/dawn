@@ -60,7 +60,7 @@
 #define TINT_DISABLE_WARNING_WEAK_VTABLES _Pragma("clang diagnostic ignored \"-Wweak-vtables\"")
 #define TINT_DISABLE_WARNING_FLOAT_EQUAL _Pragma("clang diagnostic ignored \"-Wfloat-equal\"")
 #define TINT_DISABLE_WARNING_DEPRECATED /* currently no-op */
-#define TINT_DISABLE_WARNING_RESERVED_IDENTIFIER                     \
+#define TINT_DISABLE_WARNING_RESERVED_IDENTIFIER \
     _Pragma("clang diagnostic ignored \"-Wreserved-identifier\"")
 
 // clang-format off
