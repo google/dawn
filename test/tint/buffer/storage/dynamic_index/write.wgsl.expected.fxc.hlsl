@@ -72,13 +72,13 @@ void main_inner(uint idx) {
   sb.Store(((544u * idx) + 4u), asuint(0));
   sb.Store(((544u * idx) + 8u), asuint(0u));
   sb.Store2(((544u * idx) + 16u), asuint((0.0f).xx));
-  sb.Store2(((544u * idx) + 24u), asuint((0).xx));
+  sb.Store2(((544u * idx) + 24u), asuint(int2((0).xx)));
   sb.Store2(((544u * idx) + 32u), asuint((0u).xx));
   sb.Store3(((544u * idx) + 48u), asuint((0.0f).xxx));
-  sb.Store3(((544u * idx) + 64u), asuint((0).xxx));
+  sb.Store3(((544u * idx) + 64u), asuint(int3((0).xxx)));
   sb.Store3(((544u * idx) + 80u), asuint((0u).xxx));
   sb.Store4(((544u * idx) + 96u), asuint((0.0f).xxxx));
-  sb.Store4(((544u * idx) + 112u), asuint((0).xxxx));
+  sb.Store4(((544u * idx) + 112u), asuint(int4((0).xxxx)));
   sb.Store4(((544u * idx) + 128u), asuint((0u).xxxx));
   sb_store_12(((544u * idx) + 144u), float2x2((0.0f).xx, (0.0f).xx));
   sb_store_13(((544u * idx) + 160u), float2x3((0.0f).xxx, (0.0f).xxx));

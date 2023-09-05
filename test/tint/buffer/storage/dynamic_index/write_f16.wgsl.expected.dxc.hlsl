@@ -136,15 +136,15 @@ void main_inner(uint idx) {
   sb.Store(((800u * idx) + 8u), asuint(0u));
   sb.Store<float16_t>(((800u * idx) + 12u), float16_t(0.0h));
   sb.Store2(((800u * idx) + 16u), asuint((0.0f).xx));
-  sb.Store2(((800u * idx) + 24u), asuint((0).xx));
+  sb.Store2(((800u * idx) + 24u), asuint(int2((0).xx)));
   sb.Store2(((800u * idx) + 32u), asuint((0u).xx));
   sb.Store<vector<float16_t, 2> >(((800u * idx) + 40u), (float16_t(0.0h)).xx);
   sb.Store3(((800u * idx) + 48u), asuint((0.0f).xxx));
-  sb.Store3(((800u * idx) + 64u), asuint((0).xxx));
+  sb.Store3(((800u * idx) + 64u), asuint(int3((0).xxx)));
   sb.Store3(((800u * idx) + 80u), asuint((0u).xxx));
   sb.Store<vector<float16_t, 3> >(((800u * idx) + 96u), (float16_t(0.0h)).xxx);
   sb.Store4(((800u * idx) + 112u), asuint((0.0f).xxxx));
-  sb.Store4(((800u * idx) + 128u), asuint((0).xxxx));
+  sb.Store4(((800u * idx) + 128u), asuint(int4((0).xxxx)));
   sb.Store4(((800u * idx) + 144u), asuint((0u).xxxx));
   sb.Store<vector<float16_t, 4> >(((800u * idx) + 160u), (float16_t(0.0h)).xxxx);
   sb_store_16(((800u * idx) + 168u), float2x2((0.0f).xx, (0.0f).xx));
