@@ -217,6 +217,9 @@ endif()
 # Fuzzers
 ################################################################################
 if(TINT_BUILD_FUZZERS)
+  if(NOT COMPILER_IS_CLANG)
+    message(FATAL_ERROR "TINT_BUILD_FUZZERS can only be enabled with the Clang toolchain")
+  endif()
   add_subdirectory(fuzzers)
   set(TINT_FUZZ_SUFFIX "_fuzz")
 endif()
