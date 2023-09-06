@@ -156,7 +156,13 @@ cd /d %SRC_DIR% || goto :error
 rem Run tests with DXC, FXC and Metal validation
 set OLD_PATH=%PATH%
 set PATH=C:\Program Files\Metal Developer Tools\macos\bin;%PATH%
-call git bash -- ./test/tint/test-all.sh %BUILD_DIR%/tint.exe --verbose || goto :error
+if "%BUILD_TYPE%" == "Debug" (
+    rem TODO(crbug.com/2034): Add back glsl once we fix the ~7x slowdown in Windows Debug builds
+    set TEST_ALL_FORMATS=wgsl,spvasm,msl,hlsl
+) else (
+    set TEST_ALL_FORMATS=wgsl,spvasm,msl,hlsl,glsl
+)
+call git bash -- ./test/tint/test-all.sh %BUILD_DIR%/tint.exe --verbose --format %TEST_ALL_FORMATS% || goto :error
 set PATH=%OLD_PATH%
 @echo off
 
