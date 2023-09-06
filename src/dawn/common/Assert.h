@@ -46,7 +46,7 @@
 
 #define DAWN_CHECK_CALLSITE_HELPER(file, func, line, condition)           \
     do {                                                                  \
-        if (!(condition)) {                                               \
+        if (DAWN_UNLIKELY(!(condition))) {                                \
             ::dawn::HandleAssertionFailure(file, func, line, #condition); \
             abort();                                                      \
         }                                                                 \
@@ -54,7 +54,7 @@
 
 #define DAWN_ASSERT_CALLSITE_HELPER(file, func, line, condition)          \
     do {                                                                  \
-        if (!(condition)) {                                               \
+        if (DAWN_UNLIKELY(!(condition))) {                                \
             ::dawn::HandleAssertionFailure(file, func, line, #condition); \
         }                                                                 \
     } while (DAWN_ASSERT_LOOP_CONDITION)
@@ -63,7 +63,7 @@
 
 #define DAWN_CHECK_CALLSITE_HELPER(file, func, line, condition) \
     do {                                                        \
-        if (!(condition)) {                                     \
+        if (DAWN_UNLIKELY(!(condition))) {                      \
             abort();                                            \
         }                                                       \
     } while (DAWN_ASSERT_LOOP_CONDITION)
