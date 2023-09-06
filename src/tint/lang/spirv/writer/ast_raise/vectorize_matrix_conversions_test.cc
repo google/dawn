@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/vectorize_matrix_conversions.h"
+#include "src/tint/lang/spirv/writer/ast_raise/vectorize_matrix_conversions.h"
 
 #include <string>
 #include <utility>
@@ -20,10 +20,11 @@
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/utils/text/string.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 namespace {
 
-using VectorizeMatrixConversionsTest = TransformTestWithParam<std::pair<uint32_t, uint32_t>>;
+using VectorizeMatrixConversionsTest =
+    ast::transform::TransformTestWithParam<std::pair<uint32_t, uint32_t>>;
 
 TEST_F(VectorizeMatrixConversionsTest, ShouldRunEmptyModule) {
     auto* src = R"()";
@@ -408,4 +409,4 @@ INSTANTIATE_TEST_SUITE_P(VectorizeMatrixConversionsTest,
                                          std::make_pair(4, 4)));
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer

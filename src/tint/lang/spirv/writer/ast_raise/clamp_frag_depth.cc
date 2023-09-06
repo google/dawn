@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/clamp_frag_depth.h"
+#include "src/tint/lang/spirv/writer/ast_raise/clamp_frag_depth.h"
 
 #include <utility>
 
@@ -31,9 +31,9 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ClampFragDepth);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::ClampFragDepth);
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 
 /// PIMPL state for the transform
 struct ClampFragDepth::State {
@@ -53,7 +53,7 @@ struct ClampFragDepth::State {
     Transform::ApplyResult Run() {
         // Abort on any use of push constants in the module.
         for (auto* global : src->AST().GlobalVariables()) {
-            if (auto* var = global->As<Var>()) {
+            if (auto* var = global->As<ast::Var>()) {
                 auto* v = src->Sem().Get(var);
                 if (TINT_UNLIKELY(v->AddressSpace() == core::AddressSpace::kPushConstant)) {
                     TINT_ICE()
@@ -84,15 +84,15 @@ struct ClampFragDepth::State {
         b.Enable(core::Extension::kChromiumExperimentalPushConstant);
 
         b.Structure(b.Symbols().New("FragDepthClampArgs"),
-                    tint::Vector{b.Member("min", b.ty.f32()), b.Member("max", b.ty.f32())});
+                    Vector{b.Member("min", b.ty.f32()), b.Member("max", b.ty.f32())});
 
         auto args_sym = b.Symbols().New("frag_depth_clamp_args");
         b.GlobalVar(args_sym, b.ty("FragDepthClampArgs"), core::AddressSpace::kPushConstant);
 
         auto base_fn_sym = b.Symbols().New("clamp_frag_depth");
-        b.Func(base_fn_sym, tint::Vector{b.Param("v", b.ty.f32())}, b.ty.f32(),
-               tint::Vector{b.Return(b.Call("clamp", "v", b.MemberAccessor(args_sym, "min"),
-                                            b.MemberAccessor(args_sym, "max")))});
+        b.Func(base_fn_sym, Vector{b.Param("v", b.ty.f32())}, b.ty.f32(),
+               Vector{b.Return(b.Call("clamp", "v", b.MemberAccessor(args_sym, "min"),
+                                      b.MemberAccessor(args_sym, "max")))});
 
         // If true, the currently cloned function returns frag depth directly as a scalar
         bool returns_frag_depth_as_value = false;
@@ -103,14 +103,14 @@ struct ClampFragDepth::State {
 
         // Map of io struct to helper function to return the structure with the depth clamping
         // applied.
-        Hashmap<const Struct*, Symbol, 4u> io_structs_clamp_helpers;
+        Hashmap<const ast::Struct*, Symbol, 4u> io_structs_clamp_helpers;
 
         // Register a callback that will be called for each visted AST function.
         // This call wraps the cloning of the function's statements, and will assign to
         // `returns_frag_depth_as_value` or `returns_frag_depth_as_struct_helper` if the function's
         // return value requires depth clamping.
-        ctx.ReplaceAll([&](const Function* fn) {
-            if (fn->PipelineStage() != PipelineStage::kFragment) {
+        ctx.ReplaceAll([&](const ast::Function* fn) {
+            if (fn->PipelineStage() != ast::PipelineStage::kFragment) {
                 return ctx.CloneWithoutTransform(fn);
             }
 
@@ -131,17 +131,17 @@ struct ClampFragDepth::State {
                     auto fn_sym =
                         b.Symbols().New("clamp_frag_depth_" + struct_ty->name->symbol.Name());
 
-                    tint::Vector<const Expression*, 8u> initializer_args;
+                    Vector<const ast::Expression*, 8u> initializer_args;
                     for (auto* member : struct_ty->members) {
-                        const Expression* arg =
+                        const ast::Expression* arg =
                             b.MemberAccessor("s", ctx.Clone(member->name->symbol));
                         if (ContainsFragDepth(member->attributes)) {
                             arg = b.Call(base_fn_sym, arg);
                         }
                         initializer_args.Push(arg);
                     }
-                    tint::Vector params{b.Param("s", ctx.Clone(return_ty))};
-                    tint::Vector body{
+                    Vector params{b.Param("s", ctx.Clone(return_ty))};
+                    Vector body{
                         b.Return(b.Call(ctx.Clone(return_ty), std::move(initializer_args))),
                     };
                     b.Func(fn_sym, params, ctx.Clone(return_ty), body);
@@ -156,7 +156,7 @@ struct ClampFragDepth::State {
         });
 
         // Replace the return statements `return expr` with `return clamp_frag_depth(expr)`.
-        ctx.ReplaceAll([&](const ReturnStatement* stmt) -> const ReturnStatement* {
+        ctx.ReplaceAll([&](const ast::ReturnStatement* stmt) -> const ast::ReturnStatement* {
             if (returns_frag_depth_as_value) {
                 return b.Return(stmt->source, b.Call(base_fn_sym, ctx.Clone(stmt->value)));
             }
@@ -175,7 +175,7 @@ struct ClampFragDepth::State {
     /// @returns true if the transform should run
     bool ShouldRun() {
         for (auto* fn : src->AST().Functions()) {
-            if (fn->PipelineStage() == PipelineStage::kFragment &&
+            if (fn->PipelineStage() == ast::PipelineStage::kFragment &&
                 (ReturnsFragDepthAsValue(fn) || ReturnsFragDepthInStruct(fn))) {
                 return true;
             }
@@ -185,9 +185,9 @@ struct ClampFragDepth::State {
     }
     /// @param attrs the attributes to examine
     /// @returns true if @p attrs contains a `@builtin(frag_depth)` attribute
-    bool ContainsFragDepth(VectorRef<const Attribute*> attrs) {
+    bool ContainsFragDepth(VectorRef<const ast::Attribute*> attrs) {
         for (auto* attribute : attrs) {
-            if (auto* builtin_attr = attribute->As<BuiltinAttribute>()) {
+            if (auto* builtin_attr = attribute->As<ast::BuiltinAttribute>()) {
                 auto builtin = sem.Get(builtin_attr)->Value();
                 if (builtin == core::BuiltinValue::kFragDepth) {
                     return true;
@@ -200,14 +200,14 @@ struct ClampFragDepth::State {
 
     /// @param fn the function to examine
     /// @returns true if @p fn has a return type with a `@builtin(frag_depth)` attribute
-    bool ReturnsFragDepthAsValue(const Function* fn) {
+    bool ReturnsFragDepthAsValue(const ast::Function* fn) {
         return ContainsFragDepth(fn->return_type_attributes);
     }
 
     /// @param fn the function to examine
     /// @returns true if @p fn has a return structure with a `@builtin(frag_depth)` attribute on one
     /// of the members
-    bool ReturnsFragDepthInStruct(const Function* fn) {
+    bool ReturnsFragDepthInStruct(const ast::Function* fn) {
         if (auto* struct_ty = sem.Get(fn)->ReturnType()->As<sem::Struct>()) {
             for (auto* member : struct_ty->Members()) {
                 if (ContainsFragDepth(member->Declaration()->attributes)) {
@@ -223,8 +223,10 @@ struct ClampFragDepth::State {
 ClampFragDepth::ClampFragDepth() = default;
 ClampFragDepth::~ClampFragDepth() = default;
 
-Transform::ApplyResult ClampFragDepth::Apply(const Program* src, const DataMap&, DataMap&) const {
+ast::transform::Transform::ApplyResult ClampFragDepth::Apply(const Program* src,
+                                                             const ast::transform::DataMap&,
+                                                             ast::transform::DataMap&) const {
     return State{src}.Run();
 }
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer

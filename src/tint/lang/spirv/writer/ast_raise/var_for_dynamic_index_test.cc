@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/var_for_dynamic_index.h"
-#include "src/tint/lang/wgsl/ast/transform/for_loop_to_loop.h"
+#include "src/tint/lang/spirv/writer/ast_raise/var_for_dynamic_index.h"
+#include "src/tint/lang/spirv/writer/ast_raise/for_loop_to_loop.h"
 
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 namespace {
 
-using VarForDynamicIndexTest = TransformTest;
+using VarForDynamicIndexTest = ast::transform::TransformTest;
 
 TEST_F(VarForDynamicIndexTest, EmptyModule) {
     auto* src = "";
@@ -49,7 +49,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -73,7 +73,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -105,7 +105,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -138,7 +138,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -171,7 +171,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -204,7 +204,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -237,7 +237,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -277,7 +277,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -311,7 +311,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -364,7 +364,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -398,7 +398,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -451,7 +451,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -467,7 +467,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -483,7 +483,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -501,7 +501,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -519,7 +519,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -537,7 +537,7 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -553,11 +553,11 @@ fn f() {
 
     auto* expect = src;
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<VarForDynamicIndex>(src, data);
 
     EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer

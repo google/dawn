@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/var_for_dynamic_index.h"
+#include "src/tint/lang/spirv/writer/ast_raise/var_for_dynamic_index.h"
 
 #include <utility>
 
@@ -21,25 +21,25 @@
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::VarForDynamicIndex);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::VarForDynamicIndex);
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 
 VarForDynamicIndex::VarForDynamicIndex() = default;
 
 VarForDynamicIndex::~VarForDynamicIndex() = default;
 
-Transform::ApplyResult VarForDynamicIndex::Apply(const Program* src,
-                                                 const DataMap&,
-                                                 DataMap&) const {
+ast::transform::Transform::ApplyResult VarForDynamicIndex::Apply(const Program* src,
+                                                                 const ast::transform::DataMap&,
+                                                                 ast::transform::DataMap&) const {
     ProgramBuilder b;
     program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
-    HoistToDeclBefore hoist_to_decl_before(ctx);
+    ast::transform::HoistToDeclBefore hoist_to_decl_before(ctx);
 
     // Extracts array and matrix values that are dynamically indexed to a
     // temporary `var` local that is then indexed.
-    auto dynamic_index_to_var = [&](const IndexAccessorExpression* access_expr) {
+    auto dynamic_index_to_var = [&](const ast::IndexAccessorExpression* access_expr) {
         auto* index_expr = access_expr->index;
         auto* object_expr = access_expr->object;
         auto& sem = src->Sem();
@@ -58,13 +58,14 @@ Transform::ApplyResult VarForDynamicIndex::Apply(const Program* src,
 
         // TODO(bclayton): group multiple accesses in the same object.
         // e.g. arr[i] + arr[i+1] // Don't create two vars for this
-        return hoist_to_decl_before.Add(indexed, object_expr, HoistToDeclBefore::VariableKind::kVar,
+        return hoist_to_decl_before.Add(indexed, object_expr,
+                                        ast::transform::HoistToDeclBefore::VariableKind::kVar,
                                         "var_for_index");
     };
 
     bool index_accessor_found = false;
     for (auto* node : src->ASTNodes().Objects()) {
-        if (auto* access_expr = node->As<IndexAccessorExpression>()) {
+        if (auto* access_expr = node->As<ast::IndexAccessorExpression>()) {
             if (!dynamic_index_to_var(access_expr)) {
                 return resolver::Resolve(b);
             }
@@ -79,4 +80,4 @@ Transform::ApplyResult VarForDynamicIndex::Apply(const Program* src,
     return resolver::Resolve(b);
 }
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer

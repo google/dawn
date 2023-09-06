@@ -38,8 +38,6 @@ tint_add_target(tint_lang_wgsl_ast_transform lib
   lang/wgsl/ast/transform/builtin_polyfill.h
   lang/wgsl/ast/transform/canonicalize_entry_point_io.cc
   lang/wgsl/ast/transform/canonicalize_entry_point_io.h
-  lang/wgsl/ast/transform/clamp_frag_depth.cc
-  lang/wgsl/ast/transform/clamp_frag_depth.h
   lang/wgsl/ast/transform/combine_samplers.cc
   lang/wgsl/ast/transform/combine_samplers.h
   lang/wgsl/ast/transform/data.cc
@@ -60,16 +58,12 @@ tint_add_target(tint_lang_wgsl_ast_transform lib
   lang/wgsl/ast/transform/first_index_offset.h
   lang/wgsl/ast/transform/fold_trivial_lets.cc
   lang/wgsl/ast/transform/fold_trivial_lets.h
-  lang/wgsl/ast/transform/for_loop_to_loop.cc
-  lang/wgsl/ast/transform/for_loop_to_loop.h
   lang/wgsl/ast/transform/get_insertion_point.cc
   lang/wgsl/ast/transform/get_insertion_point.h
   lang/wgsl/ast/transform/hoist_to_decl_before.cc
   lang/wgsl/ast/transform/hoist_to_decl_before.h
   lang/wgsl/ast/transform/manager.cc
   lang/wgsl/ast/transform/manager.h
-  lang/wgsl/ast/transform/merge_return.cc
-  lang/wgsl/ast/transform/merge_return.h
   lang/wgsl/ast/transform/module_scope_var_to_entry_point_param.cc
   lang/wgsl/ast/transform/module_scope_var_to_entry_point_param.h
   lang/wgsl/ast/transform/msl_subgroup_ballot.cc
@@ -112,16 +106,10 @@ tint_add_target(tint_lang_wgsl_ast_transform lib
   lang/wgsl/ast/transform/transform.h
   lang/wgsl/ast/transform/unshadow.cc
   lang/wgsl/ast/transform/unshadow.h
-  lang/wgsl/ast/transform/var_for_dynamic_index.cc
-  lang/wgsl/ast/transform/var_for_dynamic_index.h
-  lang/wgsl/ast/transform/vectorize_matrix_conversions.cc
-  lang/wgsl/ast/transform/vectorize_matrix_conversions.h
   lang/wgsl/ast/transform/vectorize_scalar_matrix_initializers.cc
   lang/wgsl/ast/transform/vectorize_scalar_matrix_initializers.h
   lang/wgsl/ast/transform/vertex_pulling.cc
   lang/wgsl/ast/transform/vertex_pulling.h
-  lang/wgsl/ast/transform/while_to_loop.cc
-  lang/wgsl/ast/transform/while_to_loop.h
   lang/wgsl/ast/transform/zero_init_workgroup_memory.cc
   lang/wgsl/ast/transform/zero_init_workgroup_memory.h
 )
@@ -162,7 +150,6 @@ tint_add_target(tint_lang_wgsl_ast_transform_test test
   lang/wgsl/ast/transform/binding_remapper_test.cc
   lang/wgsl/ast/transform/builtin_polyfill_test.cc
   lang/wgsl/ast/transform/canonicalize_entry_point_io_test.cc
-  lang/wgsl/ast/transform/clamp_frag_depth_test.cc
   lang/wgsl/ast/transform/combine_samplers_test.cc
   lang/wgsl/ast/transform/decompose_strided_array_test.cc
   lang/wgsl/ast/transform/decompose_strided_matrix_test.cc
@@ -172,12 +159,10 @@ tint_add_target(tint_lang_wgsl_ast_transform_test test
   lang/wgsl/ast/transform/expand_compound_assignment_test.cc
   lang/wgsl/ast/transform/first_index_offset_test.cc
   lang/wgsl/ast/transform/fold_trivial_lets_test.cc
-  lang/wgsl/ast/transform/for_loop_to_loop_test.cc
   lang/wgsl/ast/transform/get_insertion_point_test.cc
   lang/wgsl/ast/transform/helper_test.h
   lang/wgsl/ast/transform/hoist_to_decl_before_test.cc
   lang/wgsl/ast/transform/manager_test.cc
-  lang/wgsl/ast/transform/merge_return_test.cc
   lang/wgsl/ast/transform/module_scope_var_to_entry_point_param_test.cc
   lang/wgsl/ast/transform/msl_subgroup_ballot_test.cc
   lang/wgsl/ast/transform/multiplanar_external_texture_test.cc
@@ -202,11 +187,8 @@ tint_add_target(tint_lang_wgsl_ast_transform_test test
   lang/wgsl/ast/transform/texture_builtins_from_uniform_test.cc
   lang/wgsl/ast/transform/transform_test.cc
   lang/wgsl/ast/transform/unshadow_test.cc
-  lang/wgsl/ast/transform/var_for_dynamic_index_test.cc
-  lang/wgsl/ast/transform/vectorize_matrix_conversions_test.cc
   lang/wgsl/ast/transform/vectorize_scalar_matrix_initializers_test.cc
   lang/wgsl/ast/transform/vertex_pulling_test.cc
-  lang/wgsl/ast/transform/while_to_loop_test.cc
   lang/wgsl/ast/transform/zero_init_workgroup_memory_test.cc
 )
 

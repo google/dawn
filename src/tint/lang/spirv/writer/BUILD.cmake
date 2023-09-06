@@ -22,6 +22,7 @@
 ################################################################################
 
 include(lang/spirv/writer/ast_printer/BUILD.cmake)
+include(lang/spirv/writer/ast_raise/BUILD.cmake)
 include(lang/spirv/writer/common/BUILD.cmake)
 include(lang/spirv/writer/printer/BUILD.cmake)
 include(lang/spirv/writer/raise/BUILD.cmake)

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/vectorize_matrix_conversions.h"
+#include "src/tint/lang/spirv/writer/ast_raise/vectorize_matrix_conversions.h"
 
 #include <tuple>
 #include <unordered_map>
@@ -31,9 +31,9 @@
 
 using namespace tint::core::fluent_types;  // NOLINT
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::VectorizeMatrixConversions);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::VectorizeMatrixConversions);
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 namespace {
 
 bool ShouldRun(const Program* program) {
@@ -59,9 +59,10 @@ VectorizeMatrixConversions::VectorizeMatrixConversions() = default;
 
 VectorizeMatrixConversions::~VectorizeMatrixConversions() = default;
 
-Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
-                                                         const DataMap&,
-                                                         DataMap&) const {
+ast::transform::Transform::ApplyResult VectorizeMatrixConversions::Apply(
+    const Program* src,
+    const ast::transform::DataMap&,
+    ast::transform::DataMap&) const {
     if (!ShouldRun(src)) {
         return SkipTransform;
     }
@@ -74,7 +75,7 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
 
     std::unordered_map<HelperFunctionKey, Symbol> matrix_convs;
 
-    ctx.ReplaceAll([&](const CallExpression* expr) -> const CallExpression* {
+    ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::CallExpression* {
         auto* call = src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
         auto* ty_conv = call->Target()->As<sem::ValueConversion>();
         if (!ty_conv) {
@@ -105,7 +106,7 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
         }
 
         auto build_vectorized_conversion_expression = [&](auto&& src_expression_builder) {
-            tint::Vector<const Expression*, 4> columns;
+            Vector<const ast::Expression*, 4> columns;
             for (uint32_t c = 0; c < dst_type->columns(); c++) {
                 auto* src_matrix_expr = src_expression_builder();
                 auto* src_column_expr = b.IndexAccessor(src_matrix_expr, b.Expr(AInt(c)));
@@ -129,11 +130,11 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
                                             src_type->type()->FriendlyName() + "_" +
                                             dst_type->type()->FriendlyName());
                 b.Func(name,
-                       tint::Vector{
+                       Vector{
                            b.Param("value", CreateASTTypeFor(ctx, src_type)),
                        },
                        CreateASTTypeFor(ctx, dst_type),
-                       tint::Vector{
+                       Vector{
                            b.Return(build_vectorized_conversion_expression([&] {  //
                                return b.Expr("value");
                            })),
@@ -148,4 +149,4 @@ Transform::ApplyResult VectorizeMatrixConversions::Apply(const Program* src,
     return resolver::Resolve(b);
 }
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer

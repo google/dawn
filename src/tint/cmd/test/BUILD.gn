@@ -110,6 +110,7 @@ if (tint_build_unittests) {
       deps += [
         "${tint_src_dir}/lang/spirv/writer:unittests",
         "${tint_src_dir}/lang/spirv/writer/ast_printer:unittests",
+        "${tint_src_dir}/lang/spirv/writer/ast_raise:unittests",
         "${tint_src_dir}/lang/spirv/writer/common:unittests",
       ]
     }

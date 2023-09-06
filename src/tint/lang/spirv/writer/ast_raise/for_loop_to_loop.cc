@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/for_loop_to_loop.h"
+#include "src/tint/lang/spirv/writer/ast_raise/for_loop_to_loop.h"
 
 #include <utility>
 
@@ -21,14 +21,14 @@
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ForLoopToLoop);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::ForLoopToLoop);
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 namespace {
 
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
-        if (node->Is<ForLoopStatement>()) {
+        if (node->Is<ast::ForLoopStatement>()) {
             return true;
         }
     }
@@ -41,7 +41,9 @@ ForLoopToLoop::ForLoopToLoop() = default;
 
 ForLoopToLoop::~ForLoopToLoop() = default;
 
-Transform::ApplyResult ForLoopToLoop::Apply(const Program* src, const DataMap&, DataMap&) const {
+ast::transform::Transform::ApplyResult ForLoopToLoop::Apply(const Program* src,
+                                                            const ast::transform::DataMap&,
+                                                            ast::transform::DataMap&) const {
     if (!ShouldRun(src)) {
         return SkipTransform;
     }
@@ -49,8 +51,8 @@ Transform::ApplyResult ForLoopToLoop::Apply(const Program* src, const DataMap&, 
     ProgramBuilder b;
     program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
-    ctx.ReplaceAll([&](const ForLoopStatement* for_loop) -> const Statement* {
-        tint::Vector<const Statement*, 8> stmts;
+    ctx.ReplaceAll([&](const ast::ForLoopStatement* for_loop) -> const ast::Statement* {
+        tint::Vector<const ast::Statement*, 8> stmts;
         if (auto* cond = for_loop->condition) {
             // !condition
             auto* not_cond = b.Not(ctx.Clone(cond));
@@ -65,7 +67,7 @@ Transform::ApplyResult ForLoopToLoop::Apply(const Program* src, const DataMap&, 
             stmts.Push(ctx.Clone(stmt));
         }
 
-        const BlockStatement* continuing = nullptr;
+        const ast::BlockStatement* continuing = nullptr;
         if (auto* cont = for_loop->continuing) {
             continuing = b.Block(ctx.Clone(cont));
         }
@@ -84,4 +86,4 @@ Transform::ApplyResult ForLoopToLoop::Apply(const Program* src, const DataMap&, 
     return resolver::Resolve(b);
 }
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer

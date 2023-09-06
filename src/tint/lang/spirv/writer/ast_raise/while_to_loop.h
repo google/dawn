@@ -1,4 +1,4 @@
-// Copyright 2021 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,29 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_FOR_LOOP_TO_LOOP_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_FOR_LOOP_TO_LOOP_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_WHILE_TO_LOOP_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_WHILE_TO_LOOP_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 
-/// ForLoopToLoop is a Transform that converts a for-loop statement into a loop
+/// WhileToLoop is a Transform that converts a while statement into a loop
 /// statement. This is required by the SPIR-V writer.
-class ForLoopToLoop final : public Castable<ForLoopToLoop, Transform> {
+class WhileToLoop final : public Castable<WhileToLoop, ast::transform::Transform> {
   public:
     /// Constructor
-    ForLoopToLoop();
+    WhileToLoop();
 
     /// Destructor
-    ~ForLoopToLoop() override;
+    ~WhileToLoop() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_FOR_LOOP_TO_LOOP_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_WHILE_TO_LOOP_H_

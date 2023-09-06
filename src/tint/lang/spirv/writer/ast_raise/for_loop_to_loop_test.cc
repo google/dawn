@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/for_loop_to_loop.h"
+#include "src/tint/lang/spirv/writer/ast_raise/for_loop_to_loop.h"
 
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 namespace {
 
-using ForLoopToLoopTest = TransformTest;
+using ForLoopToLoopTest = ast::transform::TransformTest;
 
 TEST_F(ForLoopToLoopTest, ShouldRunEmptyModule) {
     auto* src = R"()";
@@ -369,4 +369,4 @@ fn f() {
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer

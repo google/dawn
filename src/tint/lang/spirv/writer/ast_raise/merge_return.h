@@ -12,27 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_MERGE_RETURN_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_MERGE_RETURN_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_MERGE_RETURN_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_MERGE_RETURN_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 
 /// Merge return statements into a single return at the end of the function.
-class MergeReturn final : public Castable<MergeReturn, Transform> {
+class MergeReturn final : public Castable<MergeReturn, ast::transform::Transform> {
   public:
     /// Constructor
     MergeReturn();
     /// Destructor
     ~MergeReturn() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_MERGE_RETURN_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_MERGE_RETURN_H_

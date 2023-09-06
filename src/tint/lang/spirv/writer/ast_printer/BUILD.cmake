@@ -69,6 +69,7 @@ endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
 
 if(TINT_BUILD_SPV_WRITER)
   tint_target_add_dependencies(tint_lang_spirv_writer_ast_printer lib
+    tint_lang_spirv_writer_ast_raise
     tint_lang_spirv_writer_common
   )
 endif(TINT_BUILD_SPV_WRITER)

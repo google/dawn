@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/merge_return.h"
+#include "src/tint/lang/spirv/writer/ast_raise/merge_return.h"
 
 #include <utility>
 
@@ -23,21 +23,21 @@
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::MergeReturn);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::MergeReturn);
 
 using namespace tint::core::number_suffixes;  // NOLINT
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 
 namespace {
 
 /// Returns `true` if `stmt` has the behavior `behavior`.
-bool HasBehavior(const Program* program, const Statement* stmt, sem::Behavior behavior) {
+bool HasBehavior(const Program* program, const ast::Statement* stmt, sem::Behavior behavior) {
     return program->Sem().Get(stmt)->Behaviors().Contains(behavior);
 }
 
 /// Returns `true` if `func` needs to be transformed.
-bool NeedsTransform(const Program* program, const Function* func) {
+bool NeedsTransform(const Program* program, const ast::Function* func) {
     // Entry points and intrinsic declarations never need transforming.
     if (func->IsEntryPoint() || func->body == nullptr) {
         return false;
@@ -51,7 +51,7 @@ bool NeedsTransform(const Program* program, const Function* func) {
         if (HasBehavior(program, s, sem::Behavior::kReturn)) {
             // If this statement is itself a return, it will be the only exit point,
             // so no need to apply the transform to the function.
-            if (s->Is<ReturnStatement>()) {
+            if (s->Is<ast::ReturnStatement>()) {
                 return false;
             } else {
                 // Apply the transform in all other cases.
@@ -80,7 +80,7 @@ class State {
     ast::Builder& b;
 
     /// The function.
-    const Function* function;
+    const ast::Function* function;
 
     /// The symbol for the return flag variable.
     Symbol flag;
@@ -94,32 +94,32 @@ class State {
   public:
     /// Constructor
     /// @param context the clone context
-    State(program::CloneContext& context, const Function* func)
+    State(program::CloneContext& context, const ast::Function* func)
         : ctx(context), b(*ctx.dst), function(func) {}
 
     /// Process a statement (recursively).
-    void ProcessStatement(const Statement* stmt) {
+    void ProcessStatement(const ast::Statement* stmt) {
         if (stmt == nullptr || !HasBehavior(ctx.src, stmt, sem::Behavior::kReturn)) {
             return;
         }
 
         Switch(
-            stmt, [&](const BlockStatement* block) { ProcessBlock(block); },
-            [&](const CaseStatement* c) { ProcessStatement(c->body); },
-            [&](const ForLoopStatement* f) {
+            stmt, [&](const ast::BlockStatement* block) { ProcessBlock(block); },
+            [&](const ast::CaseStatement* c) { ProcessStatement(c->body); },
+            [&](const ast::ForLoopStatement* f) {
                 TINT_SCOPED_ASSIGNMENT(is_in_loop_or_switch, true);
                 ProcessStatement(f->body);
             },
-            [&](const IfStatement* i) {
+            [&](const ast::IfStatement* i) {
                 ProcessStatement(i->body);
                 ProcessStatement(i->else_statement);
             },
-            [&](const LoopStatement* l) {
+            [&](const ast::LoopStatement* l) {
                 TINT_SCOPED_ASSIGNMENT(is_in_loop_or_switch, true);
                 ProcessStatement(l->body);
             },
-            [&](const ReturnStatement* r) {
-                tint::Vector<const Statement*, 3> stmts;
+            [&](const ast::ReturnStatement* r) {
+                Vector<const ast::Statement*, 3> stmts;
                 // Set the return flag to signal that we have hit a return.
                 stmts.Push(b.Assign(b.Expr(flag), true));
                 if (r->value) {
@@ -132,25 +132,25 @@ class State {
                 }
                 ctx.Replace(r, b.Block(std::move(stmts)));
             },
-            [&](const SwitchStatement* s) {
+            [&](const ast::SwitchStatement* s) {
                 TINT_SCOPED_ASSIGNMENT(is_in_loop_or_switch, true);
                 for (auto* c : s->body) {
                     ProcessStatement(c);
                 }
             },
-            [&](const WhileStatement* w) {
+            [&](const ast::WhileStatement* w) {
                 TINT_SCOPED_ASSIGNMENT(is_in_loop_or_switch, true);
                 ProcessStatement(w->body);
             },
             [&](Default) { TINT_ICE() << "unhandled statement type"; });
     }
 
-    void ProcessBlock(const BlockStatement* block) {
+    void ProcessBlock(const ast::BlockStatement* block) {
         // We will rebuild the contents of the block statement.
         // We may introduce conditionals around statements that follow a statement with the
         // `Return` behavior, so build a stack of statement lists that represent the new
         // (potentially nested) conditional blocks.
-        tint::Vector<tint::Vector<const Statement*, 8>, 8> new_stmts({{}});
+        Vector<Vector<const ast::Statement*, 8>, 8> new_stmts({{}});
 
         // Insert variables for the return flag and return value at the top of the function.
         if (block == function->body) {
@@ -175,12 +175,12 @@ class State {
                 if (is_in_loop_or_switch) {
                     // We're in a loop/switch, and so we would have inserted a `break`.
                     // If we've just come out of a loop/switch statement, we need to `break` again.
-                    if (s->IsAnyOf<LoopStatement, ForLoopStatement, SwitchStatement>()) {
+                    if (s->IsAnyOf<ast::LoopStatement, ast::ForLoopStatement,
+                                   ast::SwitchStatement>()) {
                         // If the loop only has the 'Return' behavior, we can just unconditionally
                         // break. Otherwise check the return flag.
                         if (HasBehavior(ctx.src, s, sem::Behavior::kNext)) {
-                            new_stmts.Back().Push(
-                                b.If(b.Expr(flag), b.Block(tint::Vector{b.Break()})));
+                            new_stmts.Back().Push(b.If(b.Expr(flag), b.Block(Vector{b.Break()})));
                         } else {
                             new_stmts.Back().Push(b.Break());
                         }
@@ -195,7 +195,7 @@ class State {
 
         // Descend the stack of new block statements, wrapping them in conditionals.
         while (new_stmts.Length() > 1) {
-            const IfStatement* i = nullptr;
+            const ast::IfStatement* i = nullptr;
             if (new_stmts.Back().Length() > 0) {
                 i = b.If(b.Not(b.Expr(flag)), b.Block(new_stmts.Back()));
             }
@@ -216,7 +216,9 @@ class State {
 
 }  // namespace
 
-Transform::ApplyResult MergeReturn::Apply(const Program* src, const DataMap&, DataMap&) const {
+ast::transform::Transform::ApplyResult MergeReturn::Apply(const Program* src,
+                                                          const ast::transform::DataMap&,
+                                                          ast::transform::DataMap&) const {
     ProgramBuilder b;
     program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
@@ -240,4 +242,4 @@ Transform::ApplyResult MergeReturn::Apply(const Program* src, const DataMap&, Da
     return resolver::Resolve(b);
 }
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer

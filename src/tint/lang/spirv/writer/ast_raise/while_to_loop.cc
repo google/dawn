@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/while_to_loop.h"
+#include "src/tint/lang/spirv/writer/ast_raise/while_to_loop.h"
 
 #include <utility>
 
@@ -21,14 +21,14 @@
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::WhileToLoop);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::WhileToLoop);
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 namespace {
 
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
-        if (node->Is<WhileStatement>()) {
+        if (node->Is<ast::WhileStatement>()) {
             return true;
         }
     }
@@ -41,7 +41,9 @@ WhileToLoop::WhileToLoop() = default;
 
 WhileToLoop::~WhileToLoop() = default;
 
-Transform::ApplyResult WhileToLoop::Apply(const Program* src, const DataMap&, DataMap&) const {
+ast::transform::Transform::ApplyResult WhileToLoop::Apply(const Program* src,
+                                                          const ast::transform::DataMap&,
+                                                          ast::transform::DataMap&) const {
     if (!ShouldRun(src)) {
         return SkipTransform;
     }
@@ -49,8 +51,8 @@ Transform::ApplyResult WhileToLoop::Apply(const Program* src, const DataMap&, Da
     ProgramBuilder b;
     program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
-    ctx.ReplaceAll([&](const WhileStatement* w) -> const Statement* {
-        tint::Vector<const Statement*, 16> stmts;
+    ctx.ReplaceAll([&](const ast::WhileStatement* w) -> const ast::Statement* {
+        tint::Vector<const ast::Statement*, 16> stmts;
         auto* cond = w->condition;
 
         // !condition
@@ -66,7 +68,7 @@ Transform::ApplyResult WhileToLoop::Apply(const Program* src, const DataMap&, Da
             stmts.Push(ctx.Clone(stmt));
         }
 
-        const BlockStatement* continuing = nullptr;
+        const ast::BlockStatement* continuing = nullptr;
 
         auto* body = b.Block(stmts);
         auto* loop = b.Loop(body, continuing);
@@ -78,4 +80,4 @@ Transform::ApplyResult WhileToLoop::Apply(const Program* src, const DataMap&, Da
     return resolver::Resolve(b);
 }
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer

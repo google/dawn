@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_VECTORIZE_MATRIX_CONVERSIONS_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_VECTORIZE_MATRIX_CONVERSIONS_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_VECTORIZE_MATRIX_CONVERSIONS_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_VECTORIZE_MATRIX_CONVERSIONS_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 
 /// A transform that converts matrix conversions (between f32 and f16 matrices) to the vector form.
-class VectorizeMatrixConversions final : public Castable<VectorizeMatrixConversions, Transform> {
+class VectorizeMatrixConversions final
+    : public Castable<VectorizeMatrixConversions, ast::transform::Transform> {
   public:
     /// Constructor
     VectorizeMatrixConversions();
@@ -28,12 +29,12 @@ class VectorizeMatrixConversions final : public Castable<VectorizeMatrixConversi
     /// Destructor
     ~VectorizeMatrixConversions() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_VECTORIZE_MATRIX_CONVERSIONS_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_VECTORIZE_MATRIX_CONVERSIONS_H_

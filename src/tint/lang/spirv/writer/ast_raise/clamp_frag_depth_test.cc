@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/clamp_frag_depth.h"
+#include "src/tint/lang/spirv/writer/ast_raise/clamp_frag_depth.h"
 
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 namespace {
 
-using ClampFragDepthTest = TransformTest;
+using ClampFragDepthTest = ast::transform::TransformTest;
 
 TEST_F(ClampFragDepthTest, ShouldRunEmptyModule) {
     auto* src = R"()";
@@ -378,4 +378,4 @@ fn main() -> S {
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer

@@ -29,24 +29,30 @@ if (tint_build_unittests) {
   import("//testing/test.gni")
 }
 if (tint_build_spv_writer) {
-  libtint_source_set("ast_printer") {
+  libtint_source_set("ast_raise") {
     sources = [
-      "ast_printer.cc",
-      "ast_printer.h",
-      "builder.cc",
-      "builder.h",
-      "scalar_constant.h",
+      "clamp_frag_depth.cc",
+      "clamp_frag_depth.h",
+      "for_loop_to_loop.cc",
+      "for_loop_to_loop.h",
+      "merge_return.cc",
+      "merge_return.h",
+      "var_for_dynamic_index.cc",
+      "var_for_dynamic_index.h",
+      "vectorize_matrix_conversions.cc",
+      "vectorize_matrix_conversions.h",
+      "while_to_loop.cc",
+      "while_to_loop.h",
     ]
     deps = [
       "${tint_src_dir}/api/common",
-      "${tint_src_dir}/api/options",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/ast/transform",
-      "${tint_src_dir}/lang/wgsl/helpers",
       "${tint_src_dir}/lang/wgsl/program",
+      "${tint_src_dir}/lang/wgsl/resolver",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
@@ -62,17 +68,6 @@ if (tint_build_spv_writer) {
       "${tint_src_dir}/utils/text",
       "${tint_src_dir}/utils/traits",
     ]
-
-    if (tint_build_spv_reader || tint_build_spv_writer) {
-      deps += [ "${tint_spirv_headers_dir}:spv_headers" ]
-    }
-
-    if (tint_build_spv_writer) {
-      deps += [
-        "${tint_src_dir}/lang/spirv/writer/ast_raise",
-        "${tint_src_dir}/lang/spirv/writer/common",
-      ]
-    }
   }
 }
 if (tint_build_unittests) {
@@ -80,47 +75,25 @@ if (tint_build_unittests) {
     tint_unittests_source_set("unittests") {
       testonly = true
       sources = [
-        "accessor_expression_test.cc",
-        "assign_test.cc",
-        "ast_builtin_test.cc",
-        "ast_discard_test.cc",
-        "ast_function_test.cc",
-        "ast_if_test.cc",
-        "ast_loop_test.cc",
-        "ast_printer_test.cc",
-        "ast_switch_test.cc",
-        "ast_type_test.cc",
-        "binary_expression_test.cc",
-        "bitcast_expression_test.cc",
-        "block_test.cc",
-        "builtin_texture_test.cc",
-        "call_test.cc",
-        "const_assert_test.cc",
-        "constructor_expression_test.cc",
-        "entry_point_test.cc",
-        "format_conversion_test.cc",
-        "function_attribute_test.cc",
-        "function_variable_test.cc",
-        "global_variable_test.cc",
-        "helper_test.h",
-        "ident_expression_test.cc",
-        "literal_test.cc",
-        "return_test.cc",
-        "scalar_constant_test.cc",
-        "unary_op_expression_test.cc",
+        "clamp_frag_depth_test.cc",
+        "for_loop_to_loop_test.cc",
+        "merge_return_test.cc",
+        "var_for_dynamic_index_test.cc",
+        "vectorize_matrix_conversions_test.cc",
+        "while_to_loop_test.cc",
       ]
       deps = [
         "${tint_src_dir}:gmock_and_gtest",
-        "${tint_src_dir}/api/common",
-        "${tint_src_dir}/api/options",
         "${tint_src_dir}/lang/core",
         "${tint_src_dir}/lang/core/constant",
         "${tint_src_dir}/lang/core/type",
         "${tint_src_dir}/lang/wgsl/ast",
-        "${tint_src_dir}/lang/wgsl/ast:unittests",
+        "${tint_src_dir}/lang/wgsl/ast/transform",
+        "${tint_src_dir}/lang/wgsl/ast/transform:unittests",
         "${tint_src_dir}/lang/wgsl/program",
-        "${tint_src_dir}/lang/wgsl/resolver",
+        "${tint_src_dir}/lang/wgsl/reader",
         "${tint_src_dir}/lang/wgsl/sem",
+        "${tint_src_dir}/lang/wgsl/writer",
         "${tint_src_dir}/utils/containers",
         "${tint_src_dir}/utils/diagnostic",
         "${tint_src_dir}/utils/ice",
@@ -136,21 +109,8 @@ if (tint_build_unittests) {
         "${tint_src_dir}/utils/traits",
       ]
 
-      if (tint_build_spv_reader || tint_build_spv_writer) {
-        deps += [
-          "${tint_spirv_headers_dir}:spv_headers",
-          "${tint_spirv_tools_dir}:spvtools_headers",
-          "${tint_spirv_tools_dir}:spvtools_val",
-        ]
-      }
-
       if (tint_build_spv_writer) {
-        deps += [
-          "${tint_src_dir}/lang/spirv/writer",
-          "${tint_src_dir}/lang/spirv/writer/ast_printer",
-          "${tint_src_dir}/lang/spirv/writer/common",
-          "${tint_src_dir}/lang/spirv/writer/common:unittests",
-        ]
+        deps += [ "${tint_src_dir}/lang/spirv/writer/ast_raise" ]
       }
     }
   }

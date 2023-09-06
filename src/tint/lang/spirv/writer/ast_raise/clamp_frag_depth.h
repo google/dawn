@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_CLAMP_FRAG_DEPTH_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_CLAMP_FRAG_DEPTH_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_CLAMP_FRAG_DEPTH_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_CLAMP_FRAG_DEPTH_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 
 /// Add clamping of the `@builtin(frag_depth)` output of fragment shaders using two push constants
 /// provided by the outside environment. For example the following code:
@@ -49,22 +49,22 @@ namespace tint::ast::transform {
 ///     return clamp_frag_depth(0.0);
 ///   }
 /// ```
-class ClampFragDepth final : public Castable<ClampFragDepth, Transform> {
+class ClampFragDepth final : public Castable<ClampFragDepth, ast::transform::Transform> {
   public:
     /// Constructor
     ClampFragDepth();
     /// Destructor
     ~ClampFragDepth() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 
   private:
     struct State;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_CLAMP_FRAG_DEPTH_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_CLAMP_FRAG_DEPTH_H_

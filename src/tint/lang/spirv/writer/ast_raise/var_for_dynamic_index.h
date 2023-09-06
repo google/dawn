@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_VAR_FOR_DYNAMIC_INDEX_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_VAR_FOR_DYNAMIC_INDEX_H_
+#ifndef SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_VAR_FOR_DYNAMIC_INDEX_H_
+#define SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_VAR_FOR_DYNAMIC_INDEX_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 
 /// A transform that extracts array and matrix values that are dynamically
 /// indexed to a temporary `var` local before performing the index. This
 /// transform is used by the SPIR-V writer as there is no SPIR-V instruction
 /// that can dynamically index a non-pointer composite.
-class VarForDynamicIndex final : public Castable<VarForDynamicIndex, Transform> {
+class VarForDynamicIndex final : public Castable<VarForDynamicIndex, ast::transform::Transform> {
   public:
     /// Constructor
     VarForDynamicIndex();
@@ -31,12 +31,12 @@ class VarForDynamicIndex final : public Castable<VarForDynamicIndex, Transform> 
     /// Destructor
     ~VarForDynamicIndex() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_VAR_FOR_DYNAMIC_INDEX_H_
+#endif  // SRC_TINT_LANG_SPIRV_WRITER_AST_RAISE_VAR_FOR_DYNAMIC_INDEX_H_

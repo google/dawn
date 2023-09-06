@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/merge_return.h"
+#include "src/tint/lang/spirv/writer/ast_raise/merge_return.h"
 
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::writer {
 namespace {
 
-using MergeReturnTest = TransformTest;
+using MergeReturnTest = ast::transform::TransformTest;
 
 TEST_F(MergeReturnTest, ShouldRunEmptyModule) {
     auto* src = R"()";
@@ -857,4 +857,4 @@ fn foo() -> i32 {
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::writer
