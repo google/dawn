@@ -43,7 +43,7 @@ bool Mutex::IsLockedByCurrentThread() {
     return mOwner.load(std::memory_order_acquire) == std::this_thread::get_id();
 #else
     // This is not supported.
-    abort();
+    CHECK(false);
 #endif
 }
 }  // namespace dawn
