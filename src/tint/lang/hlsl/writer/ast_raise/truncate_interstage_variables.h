@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_TRUNCATE_INTERSTAGE_VARIABLES_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_TRUNCATE_INTERSTAGE_VARIABLES_H_
+#ifndef SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_TRUNCATE_INTERSTAGE_VARIABLES_H_
+#define SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_TRUNCATE_INTERSTAGE_VARIABLES_H_
 
 #include <bitset>
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::hlsl::writer {
 
 /// TruncateInterstageVariables is a transform that truncate interstage variables.
 /// It must be run after CanonicalizeEntryPointIO which guarantees all interstage variables of
@@ -88,10 +88,11 @@ namespace tint::ast::transform {
 ///  }
 /// ```
 ///
-class TruncateInterstageVariables final : public Castable<TruncateInterstageVariables, Transform> {
+class TruncateInterstageVariables final
+    : public Castable<TruncateInterstageVariables, ast::transform::Transform> {
   public:
     /// Configuration options for the transform
-    struct Config final : public Castable<Config, Data> {
+    struct Config final : public Castable<Config, ast::transform::Data> {
         /// Constructor
         Config();
 
@@ -119,12 +120,12 @@ class TruncateInterstageVariables final : public Castable<TruncateInterstageVari
     /// Destructor
     ~TruncateInterstageVariables() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::hlsl::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_TRUNCATE_INTERSTAGE_VARIABLES_H_
+#endif  // SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_TRUNCATE_INTERSTAGE_VARIABLES_H_

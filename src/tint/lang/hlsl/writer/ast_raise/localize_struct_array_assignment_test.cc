@@ -12,16 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/localize_struct_array_assignment.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/localize_struct_array_assignment.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
-namespace tint::ast::transform {
+namespace tint::hlsl::writer {
 namespace {
 
-using LocalizeStructArrayAssignmentTest = TransformTest;
+using LocalizeStructArrayAssignmentTest = ast::transform::TransformTest;
+using Unshadow = ast::transform::Unshadow;
+using SimplifyPointers = ast::transform::SimplifyPointers;
 
 TEST_F(LocalizeStructArrayAssignmentTest, EmptyModule) {
     auto* src = R"()";
@@ -844,4 +846,4 @@ fn main() {
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::hlsl::writer

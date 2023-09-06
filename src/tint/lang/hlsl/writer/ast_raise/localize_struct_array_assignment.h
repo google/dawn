@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_LOCALIZE_STRUCT_ARRAY_ASSIGNMENT_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_LOCALIZE_STRUCT_ARRAY_ASSIGNMENT_H_
+#ifndef SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_LOCALIZE_STRUCT_ARRAY_ASSIGNMENT_H_
+#define SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_LOCALIZE_STRUCT_ARRAY_ASSIGNMENT_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::hlsl::writer {
 
 /// This transforms replaces assignment to dynamically-indexed fixed-size arrays
 /// in structs on shader-local variables with code that copies the arrays to a
@@ -28,7 +28,7 @@ namespace tint::ast::transform {
 /// @note Depends on the following transforms to have been run first:
 /// * SimplifyPointers
 class LocalizeStructArrayAssignment final
-    : public Castable<LocalizeStructArrayAssignment, Transform> {
+    : public Castable<LocalizeStructArrayAssignment, ast::transform::Transform> {
   public:
     /// Constructor
     LocalizeStructArrayAssignment();
@@ -36,15 +36,15 @@ class LocalizeStructArrayAssignment final
     /// Destructor
     ~LocalizeStructArrayAssignment() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 
   private:
     struct State;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::hlsl::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_LOCALIZE_STRUCT_ARRAY_ASSIGNMENT_H_
+#endif  // SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_LOCALIZE_STRUCT_ARRAY_ASSIGNMENT_H_

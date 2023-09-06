@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/truncate_interstage_variables.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/truncate_interstage_variables.h"
 
 #include <memory>
 #include <string>
@@ -28,10 +28,10 @@
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/text/unicode.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::TruncateInterstageVariables);
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::TruncateInterstageVariables::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::hlsl::writer::TruncateInterstageVariables);
+TINT_INSTANTIATE_TYPEINFO(tint::hlsl::writer::TruncateInterstageVariables::Config);
 
-namespace tint::ast::transform {
+namespace tint::hlsl::writer {
 
 namespace {
 
@@ -48,9 +48,10 @@ struct TruncatedStructAndConverter {
 TruncateInterstageVariables::TruncateInterstageVariables() = default;
 TruncateInterstageVariables::~TruncateInterstageVariables() = default;
 
-Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
-                                                          const DataMap& config,
-                                                          DataMap&) const {
+ast::transform::Transform::ApplyResult TruncateInterstageVariables::Apply(
+    const Program* src,
+    const ast::transform::DataMap& config,
+    ast::transform::DataMap&) const {
     ProgramBuilder b;
     program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
@@ -76,7 +77,7 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
             continue;
         }
 
-        if (func_ast->PipelineStage() != PipelineStage::kVertex) {
+        if (func_ast->PipelineStage() != ast::PipelineStage::kVertex) {
             // Currently only vertex stage could have interstage output variables that need
             // truncated.
             continue;
@@ -119,8 +120,8 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
             old_shader_io_structs_to_new_struct_and_truncate_functions.GetOrCreate(str, [&] {
                 auto new_struct_sym = b.Symbols().New();
 
-                tint::Vector<const StructMember*, 20> truncated_members;
-                tint::Vector<const Expression*, 20> initializer_exprs;
+                Vector<const ast::StructMember*, 20> truncated_members;
+                Vector<const ast::Expression*, 20> initializer_exprs;
 
                 for (auto* member : str->Members()) {
                     if (omit_members.Contains(member)) {
@@ -136,10 +137,9 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
 
                 // Create the mapping function to truncate the shader io.
                 auto mapping_fn_sym = b.Symbols().New("truncate_shader_output");
-                b.Func(mapping_fn_sym,
-                       tint::Vector{b.Param("io", ctx.Clone(func_ast->return_type))},
+                b.Func(mapping_fn_sym, Vector{b.Param("io", ctx.Clone(func_ast->return_type))},
                        b.ty(new_struct_sym),
-                       tint::Vector{
+                       Vector{
                            b.Return(b.Call(new_struct_sym, std::move(initializer_exprs))),
                        });
                 return TruncatedStructAndConverter{new_struct_sym, mapping_fn_sym};
@@ -155,24 +155,25 @@ Transform::ApplyResult TruncateInterstageVariables::Apply(const Program* src,
     }
 
     // Replace return statements with new truncated shader IO struct
-    ctx.ReplaceAll([&](const ReturnStatement* return_statement) -> const ReturnStatement* {
-        auto* return_sem = sem.Get(return_statement);
-        if (auto mapping_fn_sym =
-                entry_point_functions_to_truncate_functions.Find(return_sem->Function())) {
-            return b.Return(return_statement->source,
-                            b.Call(*mapping_fn_sym, ctx.Clone(return_statement->value)));
-        }
-        return nullptr;
-    });
+    ctx.ReplaceAll(
+        [&](const ast::ReturnStatement* return_statement) -> const ast::ReturnStatement* {
+            auto* return_sem = sem.Get(return_statement);
+            if (auto mapping_fn_sym =
+                    entry_point_functions_to_truncate_functions.Find(return_sem->Function())) {
+                return b.Return(return_statement->source,
+                                b.Call(*mapping_fn_sym, ctx.Clone(return_statement->value)));
+            }
+            return nullptr;
+        });
 
     // Remove IO attributes from old shader IO struct which is not used as entry point output
     // anymore.
     for (auto it : old_shader_io_structs_to_new_struct_and_truncate_functions) {
-        const Struct* struct_ty = it.key->Declaration();
+        const ast::Struct* struct_ty = it.key->Declaration();
         for (auto* member : struct_ty->members) {
             for (auto* attr : member->attributes) {
-                if (attr->IsAnyOf<BuiltinAttribute, LocationAttribute, InterpolateAttribute,
-                                  InvariantAttribute>()) {
+                if (attr->IsAnyOf<ast::BuiltinAttribute, ast::LocationAttribute,
+                                  ast::InterpolateAttribute, ast::InvariantAttribute>()) {
                     ctx.Remove(member->attributes, attr);
                 }
             }
@@ -192,4 +193,4 @@ TruncateInterstageVariables::Config::~Config() = default;
 TruncateInterstageVariables::Config& TruncateInterstageVariables::Config::operator=(const Config&) =
     default;
 
-}  // namespace tint::ast::transform
+}  // namespace tint::hlsl::writer

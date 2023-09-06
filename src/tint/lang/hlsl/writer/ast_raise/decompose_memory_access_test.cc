@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/decompose_memory_access.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/decompose_memory_access.h"
 
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
-namespace tint::ast::transform {
+namespace tint::hlsl::writer {
 namespace {
 
-using DecomposeMemoryAccessTest = TransformTest;
+using DecomposeMemoryAccessTest = ast::transform::TransformTest;
 
 TEST_F(DecomposeMemoryAccessTest, ShouldRunEmptyModule) {
     auto* src = R"()";
@@ -3942,4 +3942,4 @@ struct S {
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::hlsl::writer

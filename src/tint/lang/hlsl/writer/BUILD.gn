@@ -60,7 +60,10 @@ if (tint_build_hlsl_writer) {
     ]
 
     if (tint_build_hlsl_writer) {
-      deps += [ "${tint_src_dir}/lang/hlsl/writer/ast_printer" ]
+      deps += [
+        "${tint_src_dir}/lang/hlsl/writer/ast_printer",
+        "${tint_src_dir}/lang/hlsl/writer/ast_raise",
+      ]
     }
   }
 }

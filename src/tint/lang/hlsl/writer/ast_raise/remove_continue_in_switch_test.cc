@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/remove_continue_in_switch.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/remove_continue_in_switch.h"
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
-namespace tint::ast::transform {
+namespace tint::hlsl::writer {
 namespace {
 
-using RemoveContinueInSwitchTest = TransformTest;
+using RemoveContinueInSwitchTest = ast::transform::TransformTest;
 
 TEST_F(RemoveContinueInSwitchTest, ShouldRun_True) {
     auto* src = R"(
@@ -101,7 +101,7 @@ TEST_F(RemoveContinueInSwitchTest, EmptyModule) {
     auto* src = "";
     auto* expect = src;
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -163,7 +163,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -247,7 +247,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -332,7 +332,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -423,7 +423,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -501,7 +501,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -553,7 +553,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -607,11 +607,11 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<RemoveContinueInSwitch>(src, data);
 
     EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::hlsl::writer

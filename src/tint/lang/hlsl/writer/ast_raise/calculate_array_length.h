@@ -12,31 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_CALCULATE_ARRAY_LENGTH_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_CALCULATE_ARRAY_LENGTH_H_
+#ifndef SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_CALCULATE_ARRAY_LENGTH_H_
+#define SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_CALCULATE_ARRAY_LENGTH_H_
 
 #include <string>
 
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::hlsl::writer {
 
 /// CalculateArrayLength is a transform used to replace calls to arrayLength()
 /// with a value calculated from the size of the storage buffer.
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * SimplifyPointers
-class CalculateArrayLength final : public Castable<CalculateArrayLength, Transform> {
+class CalculateArrayLength final
+    : public Castable<CalculateArrayLength, ast::transform::Transform> {
   public:
     /// BufferSizeIntrinsic is an InternalAttribute that's applied to intrinsic
     /// functions used to obtain the runtime size of a storage buffer.
-    class BufferSizeIntrinsic final : public Castable<BufferSizeIntrinsic, InternalAttribute> {
+    class BufferSizeIntrinsic final : public Castable<BufferSizeIntrinsic, ast::InternalAttribute> {
       public:
         /// Constructor
         /// @param generation_id the identifier of the program that owns this node
         /// @param nid the unique node identifier
-        BufferSizeIntrinsic(GenerationID generation_id, NodeID nid);
+        BufferSizeIntrinsic(GenerationID generation_id, ast::NodeID nid);
         /// Destructor
         ~BufferSizeIntrinsic() override;
 
@@ -46,7 +47,7 @@ class CalculateArrayLength final : public Castable<CalculateArrayLength, Transfo
         /// Performs a deep clone of this object using the program::CloneContext `ctx`.
         /// @param ctx the clone context
         /// @return the newly cloned object
-        const BufferSizeIntrinsic* Clone(CloneContext& ctx) const override;
+        const BufferSizeIntrinsic* Clone(ast::CloneContext& ctx) const override;
     };
 
     /// Constructor
@@ -54,12 +55,12 @@ class CalculateArrayLength final : public Castable<CalculateArrayLength, Transfo
     /// Destructor
     ~CalculateArrayLength() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::hlsl::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_CALCULATE_ARRAY_LENGTH_H_
+#endif  // SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_CALCULATE_ARRAY_LENGTH_H_

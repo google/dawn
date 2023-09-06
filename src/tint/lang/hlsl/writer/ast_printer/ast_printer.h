@@ -24,8 +24,8 @@
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/api/options/array_length_from_uniform.h"
 #include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/decompose_memory_access.h"
 #include "src/tint/lang/hlsl/writer/common/options.h"
-#include "src/tint/lang/wgsl/ast/transform/decompose_memory_access.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/generator/text_generator.h"
@@ -147,23 +147,23 @@ class ASTPrinter : public tint::TextGenerator {
                               const sem::Call* call,
                               const sem::ValueConstructor* ctor);
     /// Handles generating a call expression to a
-    /// ast::transform::DecomposeMemoryAccess::Intrinsic for a uniform buffer
+    /// DecomposeMemoryAccess::Intrinsic for a uniform buffer
     /// @param out the output stream
     /// @param expr the call expression
-    /// @param intrinsic the ast::transform::DecomposeMemoryAccess::Intrinsic
+    /// @param intrinsic the DecomposeMemoryAccess::Intrinsic
     /// @returns true if the call expression is emitted
     bool EmitUniformBufferAccess(StringStream& out,
                                  const ast::CallExpression* expr,
-                                 const ast::transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
+                                 const DecomposeMemoryAccess::Intrinsic* intrinsic);
     /// Handles generating a call expression to a
-    /// ast::transform::DecomposeMemoryAccess::Intrinsic for a storage buffer
+    /// DecomposeMemoryAccess::Intrinsic for a storage buffer
     /// @param out the output stream
     /// @param expr the call expression
-    /// @param intrinsic the ast::transform::DecomposeMemoryAccess::Intrinsic
+    /// @param intrinsic the DecomposeMemoryAccess::Intrinsic
     /// @returns true if the call expression is emitted
     bool EmitStorageBufferAccess(StringStream& out,
                                  const ast::CallExpression* expr,
-                                 const ast::transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
+                                 const DecomposeMemoryAccess::Intrinsic* intrinsic);
     /// Handles generating a barrier intrinsic call
     /// @param out the output stream
     /// @param builtin the semantic information for the barrier builtin
@@ -176,14 +176,13 @@ class ASTPrinter : public tint::TextGenerator {
     /// @returns true if the call expression is emitted
     bool EmitStorageAtomicCall(StringStream& out,
                                const ast::CallExpression* expr,
-                               const ast::transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
+                               const DecomposeMemoryAccess::Intrinsic* intrinsic);
     /// Handles generating the helper function for the atomic intrinsic function
     /// @param func the function
     /// @param intrinsic the atomic intrinsic
     /// @returns true if the function is emitted
-    bool EmitStorageAtomicIntrinsic(
-        const ast::Function* func,
-        const ast::transform::DecomposeMemoryAccess::Intrinsic* intrinsic);
+    bool EmitStorageAtomicIntrinsic(const ast::Function* func,
+                                    const DecomposeMemoryAccess::Intrinsic* intrinsic);
     /// Handles generating an atomic intrinsic call for a workgroup variable
     /// @param out the output stream
     /// @param expr the call expression
@@ -530,8 +529,8 @@ class ASTPrinter : public tint::TextGenerator {
     };
 
     struct DMAIntrinsic {
-        ast::transform::DecomposeMemoryAccess::Intrinsic::Op op;
-        ast::transform::DecomposeMemoryAccess::Intrinsic::DataType type;
+        DecomposeMemoryAccess::Intrinsic::Op op;
+        DecomposeMemoryAccess::Intrinsic::DataType type;
         bool operator==(const DMAIntrinsic& rhs) const { return op == rhs.op && type == rhs.type; }
         /// Hasher is a std::hash function for DMAIntrinsic
         struct Hasher {

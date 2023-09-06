@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/num_workgroups_from_uniform.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/num_workgroups_from_uniform.h"
 
 #include <utility>
 
@@ -20,15 +20,17 @@
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 
-namespace tint::ast::transform {
+namespace tint::hlsl::writer {
 namespace {
 
-using NumWorkgroupsFromUniformTest = TransformTest;
+using NumWorkgroupsFromUniformTest = ast::transform::TransformTest;
+using CanonicalizeEntryPointIO = ast::transform::CanonicalizeEntryPointIO;
+using Unshadow = ast::transform::Unshadow;
 
 TEST_F(NumWorkgroupsFromUniformTest, ShouldRunEmptyModule) {
     auto* src = R"()";
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     EXPECT_FALSE(ShouldRun<NumWorkgroupsFromUniform>(src, data));
 }
@@ -40,7 +42,7 @@ fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     EXPECT_TRUE(ShouldRun<NumWorkgroupsFromUniform>(src, data));
 }
@@ -52,10 +54,9 @@ fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
 }
 )";
 
-    auto* expect =
-        "error: missing transform data for tint::ast::transform::NumWorkgroupsFromUniform";
+    auto* expect = "error: missing transform data for tint::hlsl::writer::NumWorkgroupsFromUniform";
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
     EXPECT_EQ(expect, str(got));
@@ -90,7 +91,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
@@ -134,7 +135,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
@@ -178,7 +179,7 @@ struct Builtins {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
@@ -233,7 +234,7 @@ fn main(tint_symbol : tint_symbol_1) {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
@@ -289,7 +290,7 @@ struct Builtins {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
@@ -388,7 +389,7 @@ fn main3() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
@@ -429,7 +430,7 @@ fn main(tint_symbol : tint_symbol_1) {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     data.Add<NumWorkgroupsFromUniform::Config>(BindingPoint{0, 30u});
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
@@ -530,7 +531,7 @@ fn main3() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     // Make binding point unspecified.
     data.Add<NumWorkgroupsFromUniform::Config>(std::nullopt);
@@ -684,7 +685,7 @@ fn main3() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     // Make binding point unspecified.
     data.Add<NumWorkgroupsFromUniform::Config>(std::nullopt);
@@ -693,4 +694,4 @@ fn main3() {
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::hlsl::writer

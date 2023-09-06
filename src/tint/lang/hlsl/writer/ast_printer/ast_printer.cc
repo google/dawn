@@ -33,6 +33,12 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/calculate_array_length.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/decompose_memory_access.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/localize_struct_array_assignment.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/num_workgroups_from_uniform.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/remove_continue_in_switch.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/truncate_interstage_variables.h"
 #include "src/tint/lang/wgsl/ast/call_statement.h"
 #include "src/tint/lang/wgsl/ast/id_attribute.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
@@ -41,24 +47,18 @@
 #include "src/tint/lang/wgsl/ast/transform/array_length_from_uniform.h"
 #include "src/tint/lang/wgsl/ast/transform/binding_remapper.h"
 #include "src/tint/lang/wgsl/ast/transform/builtin_polyfill.h"
-#include "src/tint/lang/wgsl/ast/transform/calculate_array_length.h"
 #include "src/tint/lang/wgsl/ast/transform/canonicalize_entry_point_io.h"
-#include "src/tint/lang/wgsl/ast/transform/decompose_memory_access.h"
 #include "src/tint/lang/wgsl/ast/transform/demote_to_helper.h"
 #include "src/tint/lang/wgsl/ast/transform/direct_variable_access.h"
 #include "src/tint/lang/wgsl/ast/transform/disable_uniformity_analysis.h"
 #include "src/tint/lang/wgsl/ast/transform/expand_compound_assignment.h"
-#include "src/tint/lang/wgsl/ast/transform/localize_struct_array_assignment.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
 #include "src/tint/lang/wgsl/ast/transform/multiplanar_external_texture.h"
-#include "src/tint/lang/wgsl/ast/transform/num_workgroups_from_uniform.h"
 #include "src/tint/lang/wgsl/ast/transform/promote_initializers_to_let.h"
 #include "src/tint/lang/wgsl/ast/transform/promote_side_effects_to_decl.h"
-#include "src/tint/lang/wgsl/ast/transform/remove_continue_in_switch.h"
 #include "src/tint/lang/wgsl/ast/transform/remove_phonies.h"
 #include "src/tint/lang/wgsl/ast/transform/robustness.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
-#include "src/tint/lang/wgsl/ast/transform/truncate_interstage_variables.h"
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 #include "src/tint/lang/wgsl/ast/transform/vectorize_scalar_matrix_initializers.h"
 #include "src/tint/lang/wgsl/ast/transform/zero_init_workgroup_memory.h"
@@ -186,7 +186,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     // SimplifyPointers transform. Can't do it right now because
     // LocalizeStructArrayAssignment introduces pointers.
     manager.Add<ast::transform::SimplifyPointers>();
-    manager.Add<ast::transform::LocalizeStructArrayAssignment>();
+    manager.Add<LocalizeStructArrayAssignment>();
 
     manager.Add<ast::transform::PromoteSideEffectsToDecl>();
 
@@ -267,18 +267,17 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         // with the current stage output.
 
         // Build the config for internal TruncateInterstageVariables transform.
-        ast::transform::TruncateInterstageVariables::Config truncate_interstage_variables_cfg;
+        TruncateInterstageVariables::Config truncate_interstage_variables_cfg;
         truncate_interstage_variables_cfg.interstage_locations =
             std::move(options.interstage_locations);
-        manager.Add<ast::transform::TruncateInterstageVariables>();
-        data.Add<ast::transform::TruncateInterstageVariables::Config>(
-            std::move(truncate_interstage_variables_cfg));
+        manager.Add<TruncateInterstageVariables>();
+        data.Add<TruncateInterstageVariables::Config>(std::move(truncate_interstage_variables_cfg));
     }
 
     // NumWorkgroupsFromUniform must come after CanonicalizeEntryPointIO, as it
     // assumes that num_workgroups builtins only appear as struct members and are
     // only accessed directly via member accessors.
-    manager.Add<ast::transform::NumWorkgroupsFromUniform>();
+    manager.Add<NumWorkgroupsFromUniform>();
     manager.Add<ast::transform::VectorizeScalarMatrixInitializers>();
     manager.Add<ast::transform::SimplifyPointers>();
     manager.Add<ast::transform::RemovePhonies>();
@@ -306,20 +305,20 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     //   of `*(&(intrinsic_load()))` expressions.
     // * RemovePhonies, as phonies can be assigned a pointer to a
     //   non-constructible buffer, or dynamic array, which DMA cannot cope with.
-    manager.Add<ast::transform::DecomposeMemoryAccess>();
+    manager.Add<DecomposeMemoryAccess>();
     // CalculateArrayLength must come after DecomposeMemoryAccess, as
     // DecomposeMemoryAccess special-cases the arrayLength() intrinsic, which
     // will be transformed by CalculateArrayLength
-    manager.Add<ast::transform::CalculateArrayLength>();
+    manager.Add<CalculateArrayLength>();
     manager.Add<ast::transform::PromoteInitializersToLet>();
 
-    manager.Add<ast::transform::RemoveContinueInSwitch>();
+    manager.Add<RemoveContinueInSwitch>();
 
     manager.Add<ast::transform::AddEmptyEntryPoint>();
 
     data.Add<ast::transform::CanonicalizeEntryPointIO::Config>(
         ast::transform::CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
-    data.Add<ast::transform::NumWorkgroupsFromUniform::Config>(options.root_constant_binding_point);
+    data.Add<NumWorkgroupsFromUniform::Config>(options.root_constant_binding_point);
 
     SanitizedResult result;
     ast::transform::DataMap outputs;
@@ -1102,7 +1101,7 @@ bool ASTPrinter::EmitFunctionCall(StringStream& out,
                                   const sem::Function* func) {
     auto* expr = call->Declaration();
 
-    if (ast::HasAttribute<ast::transform::CalculateArrayLength::BufferSizeIntrinsic>(
+    if (ast::HasAttribute<CalculateArrayLength::BufferSizeIntrinsic>(
             func->Declaration()->attributes)) {
         // Special function generated by the CalculateArrayLength transform for
         // calling X.GetDimensions(Y)
@@ -1117,8 +1116,8 @@ bool ASTPrinter::EmitFunctionCall(StringStream& out,
         return true;
     }
 
-    if (auto* intrinsic = ast::GetAttribute<ast::transform::DecomposeMemoryAccess::Intrinsic>(
-            func->Declaration()->attributes)) {
+    if (auto* intrinsic =
+            ast::GetAttribute<DecomposeMemoryAccess::Intrinsic>(func->Declaration()->attributes)) {
         switch (intrinsic->address_space) {
             case core::AddressSpace::kUniform:
                 return EmitUniformBufferAccess(out, expr, intrinsic);
@@ -1335,10 +1334,9 @@ bool ASTPrinter::EmitValueConstructor(StringStream& out,
     return true;
 }
 
-bool ASTPrinter::EmitUniformBufferAccess(
-    StringStream& out,
-    const ast::CallExpression* expr,
-    const ast::transform::DecomposeMemoryAccess::Intrinsic* intrinsic) {
+bool ASTPrinter::EmitUniformBufferAccess(StringStream& out,
+                                         const ast::CallExpression* expr,
+                                         const DecomposeMemoryAccess::Intrinsic* intrinsic) {
     auto const buffer = intrinsic->Buffer()->identifier->symbol.Name();
     auto* const offset = expr->args[0];
 
@@ -1367,7 +1365,7 @@ bool ASTPrinter::EmitUniformBufferAccess(
     // scalar_offset_index or scalar_offset_index_unified_expr. Currently only loading f16 scalar
     // require using offset in bytes.
     const bool need_offset_in_bytes =
-        intrinsic->type == ast::transform::DecomposeMemoryAccess::Intrinsic::DataType::kF16;
+        intrinsic->type == DecomposeMemoryAccess::Intrinsic::DataType::kF16;
 
     if (!scalar_offset_constant) {
         // UBO offset not compile-time known.
@@ -1398,8 +1396,8 @@ bool ASTPrinter::EmitUniformBufferAccess(
 
     const char swizzle[] = {'x', 'y', 'z', 'w'};
 
-    using Op = ast::transform::DecomposeMemoryAccess::Intrinsic::Op;
-    using DataType = ast::transform::DecomposeMemoryAccess::Intrinsic::DataType;
+    using Op = DecomposeMemoryAccess::Intrinsic::Op;
+    using DataType = DecomposeMemoryAccess::Intrinsic::DataType;
     switch (intrinsic->op) {
         case Op::kLoad: {
             auto cast = [&](const char* to, auto&& load) {
@@ -1622,16 +1620,15 @@ bool ASTPrinter::EmitUniformBufferAccess(
     return false;
 }
 
-bool ASTPrinter::EmitStorageBufferAccess(
-    StringStream& out,
-    const ast::CallExpression* expr,
-    const ast::transform::DecomposeMemoryAccess::Intrinsic* intrinsic) {
+bool ASTPrinter::EmitStorageBufferAccess(StringStream& out,
+                                         const ast::CallExpression* expr,
+                                         const DecomposeMemoryAccess::Intrinsic* intrinsic) {
     auto const buffer = intrinsic->Buffer()->identifier->symbol.Name();
     auto* const offset = expr->args[0];
     auto* const value = expr->args.Length() > 1 ? expr->args[1] : nullptr;
 
-    using Op = ast::transform::DecomposeMemoryAccess::Intrinsic::Op;
-    using DataType = ast::transform::DecomposeMemoryAccess::Intrinsic::DataType;
+    using Op = DecomposeMemoryAccess::Intrinsic::Op;
+    using DataType = DecomposeMemoryAccess::Intrinsic::DataType;
     switch (intrinsic->op) {
         case Op::kLoad: {
             auto load = [&](const char* cast, int n) {
@@ -1782,10 +1779,9 @@ bool ASTPrinter::EmitStorageBufferAccess(
     return false;
 }
 
-bool ASTPrinter::EmitStorageAtomicIntrinsic(
-    const ast::Function* func,
-    const ast::transform::DecomposeMemoryAccess::Intrinsic* intrinsic) {
-    using Op = ast::transform::DecomposeMemoryAccess::Intrinsic::Op;
+bool ASTPrinter::EmitStorageAtomicIntrinsic(const ast::Function* func,
+                                            const DecomposeMemoryAccess::Intrinsic* intrinsic) {
+    using Op = DecomposeMemoryAccess::Intrinsic::Op;
 
     const sem::Function* sem_func = builder_.Sem().Get(func);
     auto* result_ty = sem_func->ReturnType();
@@ -3125,8 +3121,7 @@ bool ASTPrinter::EmitFunction(const ast::Function* func) {
     auto* sem = builder_.Sem().Get(func);
 
     // Emit storage atomic helpers
-    if (auto* intrinsic =
-            ast::GetAttribute<ast::transform::DecomposeMemoryAccess::Intrinsic>(func->attributes)) {
+    if (auto* intrinsic = ast::GetAttribute<DecomposeMemoryAccess::Intrinsic>(func->attributes)) {
         if (intrinsic->address_space == core::AddressSpace::kStorage && intrinsic->IsAtomic()) {
             if (!EmitStorageAtomicIntrinsic(func, intrinsic)) {
                 return false;

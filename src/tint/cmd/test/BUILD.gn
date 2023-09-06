@@ -76,7 +76,10 @@ if (tint_build_unittests) {
     }
 
     if (tint_build_hlsl_writer) {
-      deps += [ "${tint_src_dir}/lang/hlsl/writer/ast_printer:unittests" ]
+      deps += [
+        "${tint_src_dir}/lang/hlsl/writer/ast_printer:unittests",
+        "${tint_src_dir}/lang/hlsl/writer/ast_raise:unittests",
+      ]
     }
 
     if (tint_build_ir) {

@@ -12,16 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/calculate_array_length.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/calculate_array_length.h"
 
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/lang/wgsl/ast/transform/simplify_pointers.h"
 #include "src/tint/lang/wgsl/ast/transform/unshadow.h"
 
-namespace tint::ast::transform {
+namespace tint::hlsl::writer {
 namespace {
 
-using CalculateArrayLengthTest = TransformTest;
+using CalculateArrayLengthTest = ast::transform::TransformTest;
+using Unshadow = ast::transform::Unshadow;
+using SimplifyPointers = ast::transform::SimplifyPointers;
 
 TEST_F(CalculateArrayLengthTest, ShouldRunEmptyModule) {
     auto* src = R"()";
@@ -548,4 +550,4 @@ struct SB2 {
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::hlsl::writer

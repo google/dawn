@@ -12,25 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_DECOMPOSE_MEMORY_ACCESS_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_DECOMPOSE_MEMORY_ACCESS_H_
+#ifndef SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_DECOMPOSE_MEMORY_ACCESS_H_
+#define SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_DECOMPOSE_MEMORY_ACCESS_H_
 
 #include <string>
 
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::hlsl::writer {
 
 /// DecomposeMemoryAccess is a transform used to replace storage and uniform buffer accesses with a
 /// combination of load, store or atomic functions on primitive types.
-class DecomposeMemoryAccess final : public Castable<DecomposeMemoryAccess, Transform> {
+class DecomposeMemoryAccess final
+    : public Castable<DecomposeMemoryAccess, ast::transform::Transform> {
   public:
     /// Intrinsic is an InternalAttribute that's used to decorate a stub function so that the HLSL
     /// transforms this into calls to
     /// `[RW]ByteAddressBuffer.Load[N]()` or `[RW]ByteAddressBuffer.Store[N]()`,
     /// with a possible cast.
-    class Intrinsic final : public Castable<Intrinsic, InternalAttribute> {
+    class Intrinsic final : public Castable<Intrinsic, ast::InternalAttribute> {
       public:
         /// Intrinsic op
         enum class Op {
@@ -77,11 +78,11 @@ class DecomposeMemoryAccess final : public Castable<DecomposeMemoryAccess, Trans
         /// @param address_space the address space of the buffer
         /// @param buffer the storage or uniform buffer identifier
         Intrinsic(GenerationID pid,
-                  NodeID nid,
+                  ast::NodeID nid,
                   Op o,
                   DataType type,
                   core::AddressSpace address_space,
-                  const IdentifierExpression* buffer);
+                  const ast::IdentifierExpression* buffer);
         /// Destructor
         ~Intrinsic() override;
 
@@ -92,13 +93,13 @@ class DecomposeMemoryAccess final : public Castable<DecomposeMemoryAccess, Trans
         /// Performs a deep clone of this object using the program::CloneContext `ctx`.
         /// @param ctx the clone context
         /// @return the newly cloned object
-        const Intrinsic* Clone(CloneContext& ctx) const override;
+        const Intrinsic* Clone(ast::CloneContext& ctx) const override;
 
         /// @return true if op is atomic
         bool IsAtomic() const;
 
         /// @return the buffer that this intrinsic operates on
-        const IdentifierExpression* Buffer() const;
+        const ast::IdentifierExpression* Buffer() const;
 
         /// The op of the intrinsic
         const Op op;
@@ -115,15 +116,15 @@ class DecomposeMemoryAccess final : public Castable<DecomposeMemoryAccess, Trans
     /// Destructor
     ~DecomposeMemoryAccess() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 
   private:
     struct State;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::hlsl::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_DECOMPOSE_MEMORY_ACCESS_H_
+#endif  // SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_DECOMPOSE_MEMORY_ACCESS_H_

@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_REMOVE_CONTINUE_IN_SWITCH_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_REMOVE_CONTINUE_IN_SWITCH_H_
+#ifndef SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_REMOVE_CONTINUE_IN_SWITCH_H_
+#define SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_REMOVE_CONTINUE_IN_SWITCH_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::hlsl::writer {
 
 /// This transform replaces continue statements in switch cases with setting a
 /// bool variable, and checking if the variable is set after the switch to
 /// continue. It is necessary to work around FXC "error X3708: continue cannot
 /// be used in a switch". See crbug.com/tint/1080.
-class RemoveContinueInSwitch final : public Castable<RemoveContinueInSwitch, Transform> {
+class RemoveContinueInSwitch final
+    : public Castable<RemoveContinueInSwitch, ast::transform::Transform> {
   public:
     /// Constructor
     RemoveContinueInSwitch();
@@ -31,15 +32,15 @@ class RemoveContinueInSwitch final : public Castable<RemoveContinueInSwitch, Tra
     /// Destructor
     ~RemoveContinueInSwitch() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 
   private:
     struct State;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::hlsl::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_REMOVE_CONTINUE_IN_SWITCH_H_
+#endif  // SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_REMOVE_CONTINUE_IN_SWITCH_H_

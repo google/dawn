@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/remove_continue_in_switch.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/remove_continue_in_switch.h"
 
 #include <string>
 #include <unordered_map>
@@ -31,9 +31,9 @@
 #include "src/tint/lang/wgsl/sem/while_statement.h"
 #include "src/tint/utils/containers/map.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::RemoveContinueInSwitch);
+TINT_INSTANTIATE_TYPEINFO(tint::hlsl::writer::RemoveContinueInSwitch);
 
-namespace tint::ast::transform {
+namespace tint::hlsl::writer {
 
 /// PIMPL state for the transform
 struct RemoveContinueInSwitch::State {
@@ -47,7 +47,7 @@ struct RemoveContinueInSwitch::State {
         bool made_changes = false;
 
         for (auto* node : src->ASTNodes().Objects()) {
-            auto* cont = node->As<ContinueStatement>();
+            auto* cont = node->As<ast::ContinueStatement>();
             if (!cont) {
                 continue;
             }
@@ -65,7 +65,7 @@ struct RemoveContinueInSwitch::State {
                 // switch.
                 auto var_name = b.Symbols().New("tint_continue");
                 auto* decl = b.Decl(b.Var(var_name, b.ty.bool_(), b.Expr(false)));
-                auto ip = utils::GetInsertionPoint(ctx, switch_stmt);
+                auto ip = ast::transform::utils::GetInsertionPoint(ctx, switch_stmt);
                 ctx.InsertBefore(ip.first->Declaration()->statements, ip.second, decl);
 
                 // Create and insert 'if (tint_continue) { continue; }' after
@@ -104,12 +104,12 @@ struct RemoveContinueInSwitch::State {
     const sem::Info& sem = src->Sem();
 
     // Map of switch statement to 'tint_continue' variable.
-    std::unordered_map<const SwitchStatement*, Symbol> switch_to_cont_var_name;
+    std::unordered_map<const ast::SwitchStatement*, Symbol> switch_to_cont_var_name;
 
     // If `cont` is within a switch statement within a loop, returns a pointer to
     // that switch statement.
-    static const SwitchStatement* GetParentSwitchInLoop(const sem::Info& sem,
-                                                        const ContinueStatement* cont) {
+    static const ast::SwitchStatement* GetParentSwitchInLoop(const sem::Info& sem,
+                                                             const ast::ContinueStatement* cont) {
         // Find whether first parent is a switch or a loop
         auto* sem_stmt = sem.Get(cont);
         auto* sem_parent = sem_stmt->FindFirstParent<sem::SwitchStatement, sem::LoopBlockStatement,
@@ -117,18 +117,19 @@ struct RemoveContinueInSwitch::State {
         if (!sem_parent) {
             return nullptr;
         }
-        return sem_parent->Declaration()->As<SwitchStatement>();
+        return sem_parent->Declaration()->As<ast::SwitchStatement>();
     }
 };
 
 RemoveContinueInSwitch::RemoveContinueInSwitch() = default;
 RemoveContinueInSwitch::~RemoveContinueInSwitch() = default;
 
-Transform::ApplyResult RemoveContinueInSwitch::Apply(const Program* src,
-                                                     const DataMap&,
-                                                     DataMap&) const {
+ast::transform::Transform::ApplyResult RemoveContinueInSwitch::Apply(
+    const Program* src,
+    const ast::transform::DataMap&,
+    ast::transform::DataMap&) const {
     State state(src);
     return state.Run();
 }
 
-}  // namespace tint::ast::transform
+}  // namespace tint::hlsl::writer

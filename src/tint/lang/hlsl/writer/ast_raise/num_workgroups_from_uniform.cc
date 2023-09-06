@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/num_workgroups_from_uniform.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/num_workgroups_from_uniform.h"
 
 #include <memory>
 #include <string>
@@ -30,15 +30,15 @@
 
 using namespace tint::core::fluent_types;  // NOLINT
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::NumWorkgroupsFromUniform);
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::NumWorkgroupsFromUniform::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::hlsl::writer::NumWorkgroupsFromUniform);
+TINT_INSTANTIATE_TYPEINFO(tint::hlsl::writer::NumWorkgroupsFromUniform::Config);
 
-namespace tint::ast::transform {
+namespace tint::hlsl::writer {
 namespace {
 
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
-        if (auto* attr = node->As<BuiltinAttribute>()) {
+        if (auto* attr = node->As<ast::BuiltinAttribute>()) {
             if (program->Sem().Get(attr)->Value() == core::BuiltinValue::kNumWorkgroups) {
                 return true;
             }
@@ -68,9 +68,10 @@ struct Accessor {
 NumWorkgroupsFromUniform::NumWorkgroupsFromUniform() = default;
 NumWorkgroupsFromUniform::~NumWorkgroupsFromUniform() = default;
 
-Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
-                                                       const DataMap& inputs,
-                                                       DataMap&) const {
+ast::transform::Transform::ApplyResult NumWorkgroupsFromUniform::Apply(
+    const Program* src,
+    const ast::transform::DataMap& inputs,
+    ast::transform::DataMap&) const {
     ProgramBuilder b;
     program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
@@ -91,7 +92,7 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
     std::unordered_set<Accessor, Accessor::Hasher> to_replace;
     for (auto* func : src->AST().Functions()) {
         // num_workgroups is only valid for compute stages.
-        if (func->PipelineStage() != PipelineStage::kCompute) {
+        if (func->PipelineStage() != ast::PipelineStage::kCompute) {
             continue;
         }
 
@@ -131,7 +132,7 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
 
     // Get (or create, on first call) the uniform buffer that will receive the
     // number of workgroups.
-    const Variable* num_workgroups_ubo = nullptr;
+    const ast::Variable* num_workgroups_ubo = nullptr;
     auto get_ubo = [&] {
         if (!num_workgroups_ubo) {
             auto* num_workgroups_struct =
@@ -171,11 +172,11 @@ Transform::ApplyResult NumWorkgroupsFromUniform::Apply(const Program* src,
     // Now replace all the places where the builtins are accessed with the value
     // loaded from the uniform buffer.
     for (auto* node : src->ASTNodes().Objects()) {
-        auto* accessor = node->As<MemberAccessorExpression>();
+        auto* accessor = node->As<ast::MemberAccessorExpression>();
         if (!accessor) {
             continue;
         }
-        auto* ident = accessor->object->As<IdentifierExpression>();
+        auto* ident = accessor->object->As<ast::IdentifierExpression>();
         if (!ident) {
             continue;
         }
@@ -195,4 +196,4 @@ NumWorkgroupsFromUniform::Config::Config(std::optional<BindingPoint> ubo_bp)
 NumWorkgroupsFromUniform::Config::Config(const Config&) = default;
 NumWorkgroupsFromUniform::Config::~Config() = default;
 
-}  // namespace tint::ast::transform
+}  // namespace tint::hlsl::writer

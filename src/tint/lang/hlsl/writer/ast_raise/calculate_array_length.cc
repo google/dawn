@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/calculate_array_length.h"
+#include "src/tint/lang/hlsl/writer/ast_raise/calculate_array_length.h"
 
 #include <unordered_map>
 #include <utility>
@@ -34,10 +34,10 @@
 #include "src/tint/utils/math/hash.h"
 #include "src/tint/utils/rtti/switch.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CalculateArrayLength);
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::CalculateArrayLength::BufferSizeIntrinsic);
+TINT_INSTANTIATE_TYPEINFO(tint::hlsl::writer::CalculateArrayLength);
+TINT_INSTANTIATE_TYPEINFO(tint::hlsl::writer::CalculateArrayLength::BufferSizeIntrinsic);
 
-namespace tint::ast::transform {
+namespace tint::hlsl::writer {
 namespace {
 
 using namespace tint::core::fluent_types;     // NOLINT
@@ -59,7 +59,7 @@ bool ShouldRun(const Program* program) {
 /// ArrayUsage describes a runtime array usage.
 /// It is used as a key by the array_length_by_usage map.
 struct ArrayUsage {
-    BlockStatement const* const block;
+    ast::BlockStatement const* const block;
     sem::Variable const* const buffer;
     bool operator==(const ArrayUsage& rhs) const {
         return block == rhs.block && buffer == rhs.buffer;
@@ -71,7 +71,7 @@ struct ArrayUsage {
 
 }  // namespace
 
-CalculateArrayLength::BufferSizeIntrinsic::BufferSizeIntrinsic(GenerationID pid, NodeID nid)
+CalculateArrayLength::BufferSizeIntrinsic::BufferSizeIntrinsic(GenerationID pid, ast::NodeID nid)
     : Base(pid, nid, tint::Empty) {}
 CalculateArrayLength::BufferSizeIntrinsic::~BufferSizeIntrinsic() = default;
 std::string CalculateArrayLength::BufferSizeIntrinsic::InternalName() const {
@@ -87,9 +87,9 @@ const CalculateArrayLength::BufferSizeIntrinsic* CalculateArrayLength::BufferSiz
 CalculateArrayLength::CalculateArrayLength() = default;
 CalculateArrayLength::~CalculateArrayLength() = default;
 
-Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
-                                                   const DataMap&,
-                                                   DataMap&) const {
+ast::transform::Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
+                                                                   const ast::transform::DataMap&,
+                                                                   ast::transform::DataMap&) const {
     if (!ShouldRun(src)) {
         return SkipTransform;
     }
@@ -106,16 +106,16 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
         return tint::GetOrCreate(buffer_size_intrinsics, buffer_type, [&] {
             auto name = b.Sym();
             auto type = CreateASTTypeFor(ctx, buffer_type);
-            auto* disable_validation = b.Disable(DisabledValidation::kFunctionParameter);
+            auto* disable_validation = b.Disable(ast::DisabledValidation::kFunctionParameter);
             b.Func(name,
-                   tint::Vector{
+                   Vector{
                        b.Param("buffer",
                                b.ty.ptr(buffer_type->AddressSpace(), type, buffer_type->Access()),
-                               tint::Vector{disable_validation}),
+                               Vector{disable_validation}),
                        b.Param("result", b.ty.ptr<function, u32>()),
                    },
                    b.ty.void_(), nullptr,
-                   tint::Vector{
+                   Vector{
                        b.ASTNodes().Create<BufferSizeIntrinsic>(b.ID(), b.AllocateNodeID()),
                    });
 
@@ -127,13 +127,13 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
 
     // Find all the arrayLength() calls...
     for (auto* node : src->ASTNodes().Objects()) {
-        if (auto* call_expr = node->As<CallExpression>()) {
+        if (auto* call_expr = node->As<ast::CallExpression>()) {
             auto* call = sem.Get(call_expr)->UnwrapMaterialize()->As<sem::Call>();
             if (auto* builtin = call->Target()->As<sem::Builtin>()) {
                 if (builtin->Type() == core::Function::kArrayLength) {
                     // We're dealing with an arrayLength() call
 
-                    if (auto* call_stmt = call->Stmt()->Declaration()->As<CallStatement>()) {
+                    if (auto* call_stmt = call->Stmt()->Declaration()->As<ast::CallStatement>()) {
                         if (call_stmt->expr == call_expr) {
                             // arrayLength() is used as a statement.
                             // The argument expression must be side-effect free, so just drop the
@@ -150,13 +150,13 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                     //   arrayLength(&struct_var.array_member)
                     //   arrayLength(&array_var)
                     auto* arg = call_expr->args[0];
-                    auto* address_of = arg->As<UnaryOpExpression>();
+                    auto* address_of = arg->As<ast::UnaryOpExpression>();
                     if (TINT_UNLIKELY(!address_of || address_of->op != core::UnaryOp::kAddressOf)) {
                         TINT_ICE()
                             << "arrayLength() expected address-of, got " << arg->TypeInfo().name;
                     }
                     auto* storage_buffer_expr = address_of->expr;
-                    if (auto* accessor = storage_buffer_expr->As<MemberAccessorExpression>()) {
+                    if (auto* accessor = storage_buffer_expr->As<ast::MemberAccessorExpression>()) {
                         storage_buffer_expr = accessor->object;
                     }
                     auto* storage_buffer_sem = sem.Get<sem::VariableUser>(storage_buffer_expr);
@@ -198,7 +198,8 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
                             // array_length = ----------------------------------------
                             //                             array_stride
                             auto name = b.Sym();
-                            const Expression* total_size = b.Expr(buffer_size_result->variable);
+                            const ast::Expression* total_size =
+                                b.Expr(buffer_size_result->variable);
 
                             const core::type::Array* array_type = Switch(
                                 storage_buffer_type->StoreType(),
@@ -242,4 +243,4 @@ Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
     return resolver::Resolve(b);
 }
 
-}  // namespace tint::ast::transform
+}  // namespace tint::hlsl::writer

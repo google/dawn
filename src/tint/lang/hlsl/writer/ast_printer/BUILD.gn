@@ -62,6 +62,10 @@ if (tint_build_hlsl_writer) {
       "${tint_src_dir}/utils/text",
       "${tint_src_dir}/utils/traits",
     ]
+
+    if (tint_build_hlsl_writer) {
+      deps += [ "${tint_src_dir}/lang/hlsl/writer/ast_raise" ]
+    }
   }
 }
 if (tint_build_unittests) {
@@ -135,6 +139,7 @@ if (tint_build_unittests) {
         deps += [
           "${tint_src_dir}/lang/hlsl/writer",
           "${tint_src_dir}/lang/hlsl/writer/ast_printer",
+          "${tint_src_dir}/lang/hlsl/writer/ast_raise",
         ]
       }
     }

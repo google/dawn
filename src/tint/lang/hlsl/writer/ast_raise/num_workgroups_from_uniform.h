@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_NUM_WORKGROUPS_FROM_UNIFORM_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_NUM_WORKGROUPS_FROM_UNIFORM_H_
+#ifndef SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_NUM_WORKGROUPS_FROM_UNIFORM_H_
+#define SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_NUM_WORKGROUPS_FROM_UNIFORM_H_
 
 #include <optional>
 
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::hlsl::writer {
 
 /// NumWorkgroupsFromUniform is a transform that implements the `num_workgroups`
 /// builtin by loading it from a uniform buffer.
@@ -39,7 +39,8 @@ namespace tint::ast::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * CanonicalizeEntryPointIO
-class NumWorkgroupsFromUniform final : public Castable<NumWorkgroupsFromUniform, Transform> {
+class NumWorkgroupsFromUniform final
+    : public Castable<NumWorkgroupsFromUniform, ast::transform::Transform> {
   public:
     /// Constructor
     NumWorkgroupsFromUniform();
@@ -47,7 +48,7 @@ class NumWorkgroupsFromUniform final : public Castable<NumWorkgroupsFromUniform,
     ~NumWorkgroupsFromUniform() override;
 
     /// Configuration options for the NumWorkgroupsFromUniform transform.
-    struct Config final : public Castable<Config, Data> {
+    struct Config final : public Castable<Config, ast::transform::Data> {
         /// Constructor
         /// @param ubo_bp the binding point to use for the generated uniform buffer. If ubo_bp
         /// contains no value, a free binding point will be used to ensure the generated program is
@@ -67,12 +68,12 @@ class NumWorkgroupsFromUniform final : public Castable<NumWorkgroupsFromUniform,
         std::optional<BindingPoint> ubo_binding;
     };
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::hlsl::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_NUM_WORKGROUPS_FROM_UNIFORM_H_
+#endif  // SRC_TINT_LANG_HLSL_WRITER_AST_RAISE_NUM_WORKGROUPS_FROM_UNIFORM_H_
