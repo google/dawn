@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_BREAK_IF_H_
 #define SRC_TINT_LANG_CORE_IR_BREAK_IF_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/terminator.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/utils/rtti/castable.h"
@@ -54,7 +56,7 @@ class BreakIf : public Castable<BreakIf, Terminator> {
     ir::Loop* Loop() { return loop_; }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "break-if"; }
+    std::string FriendlyName() override { return "break_if"; }
 
   private:
     ir::Loop* loop_ = nullptr;

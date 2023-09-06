@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_EXIT_LOOP_H_
 #define SRC_TINT_LANG_CORE_IR_EXIT_LOOP_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/exit.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -45,7 +47,7 @@ class ExitLoop : public Castable<ExitLoop, Exit> {
     ir::Loop* Loop();
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "exit-loop"; }
+    std::string FriendlyName() override { return "exit_loop"; }
 };
 
 }  // namespace tint::core::ir

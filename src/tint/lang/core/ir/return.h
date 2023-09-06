@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_RETURN_H_
 #define SRC_TINT_LANG_CORE_IR_RETURN_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/terminator.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -63,7 +65,7 @@ class Return : public Castable<Return, Terminator> {
     }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "return"; }
+    std::string FriendlyName() override { return "return"; }
 };
 
 }  // namespace tint::core::ir

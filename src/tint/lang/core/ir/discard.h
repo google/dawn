@@ -15,8 +15,9 @@
 #ifndef SRC_TINT_LANG_CORE_IR_DISCARD_H_
 #define SRC_TINT_LANG_CORE_IR_DISCARD_H_
 
-#include "src/tint/lang/core/ir/call.h"
+#include <string>
 
+#include "src/tint/lang/core/ir/call.h"
 #include "src/tint/utils/rtti/castable.h"
 
 namespace tint::core::ir {
@@ -29,7 +30,7 @@ class Discard : public Castable<Discard, Call> {
     ~Discard() override;
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "discard"; }
+    std::string FriendlyName() override { return "discard"; }
 };
 
 }  // namespace tint::core::ir

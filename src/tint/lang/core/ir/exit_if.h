@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_EXIT_IF_H_
 #define SRC_TINT_LANG_CORE_IR_EXIT_IF_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/exit.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -45,7 +47,7 @@ class ExitIf : public Castable<ExitIf, Exit> {
     ir::If* If();
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "exit-if"; }
+    std::string FriendlyName() override { return "exit_if"; }
 };
 
 }  // namespace tint::core::ir

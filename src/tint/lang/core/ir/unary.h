@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_UNARY_H_
 #define SRC_TINT_LANG_CORE_IR_UNARY_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -46,7 +48,7 @@ class Unary : public Castable<Unary, OperandInstruction<1, 1>> {
     enum Kind Kind() { return kind_; }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "unary"; }
+    std::string FriendlyName() override { return "unary"; }
 
   private:
     enum Kind kind_;

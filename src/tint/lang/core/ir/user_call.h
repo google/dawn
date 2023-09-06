@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_USER_CALL_H_
 #define SRC_TINT_LANG_CORE_IR_USER_CALL_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/utils/rtti/castable.h"
@@ -44,7 +46,7 @@ class UserCall : public Castable<UserCall, Call> {
     Function* Func() { return operands_[kFunctionOperandOffset]->As<ir::Function>(); }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "user-call"; }
+    std::string FriendlyName() override { return "call"; }
 };
 
 }  // namespace tint::core::ir

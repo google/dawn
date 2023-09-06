@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_STORE_VECTOR_ELEMENT_H_
 #define SRC_TINT_LANG_CORE_IR_STORE_VECTOR_ELEMENT_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -49,7 +51,7 @@ class StoreVectorElement : public Castable<StoreVectorElement, OperandInstructio
     ir::Value* Value() { return operands_[kValueOperandOffset]; }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "store-vector-element"; }
+    std::string FriendlyName() override { return "store_vector_element"; }
 };
 
 }  // namespace tint::core::ir

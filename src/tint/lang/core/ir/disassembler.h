@@ -144,7 +144,7 @@ class Disassembler {
     void EmitLine();
     void EmitOperand(Instruction* inst, size_t index);
     void EmitOperandList(Instruction* inst, size_t start_index = 0);
-    void EmitInstructionName(std::string_view name, Instruction* inst);
+    void EmitInstructionName(Instruction* inst);
 
     Module& mod_;
     StringStream out_;

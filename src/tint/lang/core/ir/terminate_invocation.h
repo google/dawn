@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_TERMINATE_INVOCATION_H_
 #define SRC_TINT_LANG_CORE_IR_TERMINATE_INVOCATION_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/terminator.h"
 
 namespace tint::core::ir {
@@ -25,7 +27,7 @@ class TerminateInvocation : public Castable<TerminateInvocation, Terminator> {
     ~TerminateInvocation() override;
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "terminate-invocation"; }
+    std::string FriendlyName() override { return "terminate_invocation"; }
 };
 
 }  // namespace tint::core::ir

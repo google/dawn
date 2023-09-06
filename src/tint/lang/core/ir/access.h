@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_ACCESS_H_
 #define SRC_TINT_LANG_CORE_IR_ACCESS_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -47,7 +49,7 @@ class Access : public Castable<Access, OperandInstruction<3, 1>> {
     tint::Slice<Value*> Indices() { return operands_.Slice().Offset(kIndicesOperandOffset); }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "access"; }
+    std::string FriendlyName() override { return "access"; }
 };
 
 }  // namespace tint::core::ir

@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_LET_H_
 #define SRC_TINT_LANG_CORE_IR_LET_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/operand_instruction.h"
 
 namespace tint::core::ir {
@@ -35,7 +37,7 @@ class Let : public Castable<Let, OperandInstruction<1, 1>> {
     ir::Value* Value() { return operands_[kValueOperandOffset]; }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "let"; }
+    std::string FriendlyName() override { return "let"; }
 };
 
 }  // namespace tint::core::ir

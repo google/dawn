@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_EXIT_SWITCH_H_
 #define SRC_TINT_LANG_CORE_IR_EXIT_SWITCH_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/exit.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -45,7 +47,7 @@ class ExitSwitch : public Castable<ExitSwitch, Exit> {
     ir::Switch* Switch();
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "exit-switch"; }
+    std::string FriendlyName() override { return "exit_switch"; }
 };
 
 }  // namespace tint::core::ir

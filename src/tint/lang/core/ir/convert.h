@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_CONVERT_H_
 #define SRC_TINT_LANG_CORE_IR_CONVERT_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/utils/rtti/castable.h"
@@ -34,7 +36,7 @@ class Convert : public Castable<Convert, Call> {
     ~Convert() override;
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "convert"; }
+    std::string FriendlyName() override { return "convert"; }
 };
 
 }  // namespace tint::core::ir

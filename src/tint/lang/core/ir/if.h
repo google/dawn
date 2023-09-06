@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_IF_H_
 #define SRC_TINT_LANG_CORE_IR_IF_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/control_instruction.h"
 
 // Forward declarations
@@ -65,7 +67,7 @@ class If : public Castable<If, ControlInstruction> {
     ir::Block* False() { return false_; }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "if"; }
+    std::string FriendlyName() override { return "if"; }
 
   private:
     ir::Block* true_ = nullptr;

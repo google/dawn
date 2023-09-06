@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_LOOP_H_
 #define SRC_TINT_LANG_CORE_IR_LOOP_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/control_instruction.h"
 
 // Forward declarations
@@ -80,7 +82,7 @@ class Loop : public Castable<Loop, ControlInstruction> {
     ir::MultiInBlock* Continuing() { return continuing_; }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "loop"; }
+    std::string FriendlyName() override { return "loop"; }
 
   private:
     ir::Block* initializer_ = nullptr;

@@ -39,9 +39,7 @@ class IntrinsicCall : public Castable<IntrinsicCall, core::ir::IntrinsicCall> {
     Intrinsic Kind() const { return intrinsic_; }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "spirv-intrinsic-call"; }
-
-    std::string KindName() const override { return "spirv." + std::string(ToString(intrinsic_)); }
+    std::string FriendlyName() override { return "spirv." + std::string(ToString(intrinsic_)); }
 
   private:
     Intrinsic intrinsic_ = Intrinsic::kUndefined;

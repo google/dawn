@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_NEXT_ITERATION_H_
 #define SRC_TINT_LANG_CORE_IR_NEXT_ITERATION_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/terminator.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -41,7 +43,7 @@ class NextIteration : public Castable<NextIteration, Terminator> {
     ir::Loop* Loop() { return loop_; }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "next-iteration"; }
+    std::string FriendlyName() override { return "next_iteration"; }
 
   private:
     ir::Loop* loop_ = nullptr;

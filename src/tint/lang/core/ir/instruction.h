@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_INSTRUCTION_H_
 #define SRC_TINT_LANG_CORE_IR_INSTRUCTION_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/instruction_result.h"
 #include "src/tint/lang/core/ir/value.h"
 #include "src/tint/utils/containers/enum_set.h"
@@ -58,7 +60,7 @@ class Instruction : public Castable<Instruction> {
     virtual void Destroy();
 
     /// @returns the friendly name for the instruction
-    virtual std::string_view FriendlyName() = 0;
+    virtual std::string FriendlyName() = 0;
 
     /// @returns true if the Instruction has not been destroyed with Destroy()
     bool Alive() const { return !flags_.Contains(Flag::kDead); }

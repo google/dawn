@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_SWITCH_H_
 #define SRC_TINT_LANG_CORE_IR_SWITCH_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/control_instruction.h"
 
 // Forward declarations
@@ -81,7 +83,7 @@ class Switch : public Castable<Switch, ControlInstruction> {
     Value* Condition() { return operands_[kConditionOperandOffset]; }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "switch"; }
+    std::string FriendlyName() override { return "switch"; }
 
   private:
     Vector<Case, 4> cases_;

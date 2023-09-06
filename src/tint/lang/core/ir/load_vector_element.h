@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_LOAD_VECTOR_ELEMENT_H_
 #define SRC_TINT_LANG_CORE_IR_LOAD_VECTOR_ELEMENT_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -43,7 +45,7 @@ class LoadVectorElement : public Castable<LoadVectorElement, OperandInstruction<
     ir::Value* Index() { return operands_[kIndexOperandOffset]; }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "load-vector-element"; }
+    std::string FriendlyName() override { return "load_vector_element"; }
 };
 
 }  // namespace tint::core::ir

@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_CONSTRUCT_H_
 #define SRC_TINT_LANG_CORE_IR_CONSTRUCT_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -33,7 +35,7 @@ class Construct : public Castable<Construct, Call> {
     ~Construct() override;
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "construct"; }
+    std::string FriendlyName() override { return "construct"; }
 };
 
 }  // namespace tint::core::ir

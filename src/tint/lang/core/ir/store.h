@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_STORE_H_
 #define SRC_TINT_LANG_CORE_IR_STORE_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/operand_instruction.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -42,7 +44,7 @@ class Store : public Castable<Store, OperandInstruction<2, 0>> {
     Value* From() { return operands_[kFromOperandOffset]; }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "store"; }
+    std::string FriendlyName() override { return "store"; }
 };
 
 }  // namespace tint::core::ir

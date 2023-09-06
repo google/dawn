@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_VAR_H_
 #define SRC_TINT_LANG_CORE_IR_VAR_H_
 
+#include <string>
+
 #include "src/tint/api/common/binding_point.h"
 #include "src/tint/lang/core/access.h"
 #include "src/tint/lang/core/address_space.h"
@@ -53,7 +55,7 @@ class Var : public Castable<Var, OperandInstruction<1, 1>> {
     void DestroyIfOnlyAssigned();
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "var"; }
+    std::string FriendlyName() override { return "var"; }
 
   private:
     std::optional<struct BindingPoint> binding_point_;

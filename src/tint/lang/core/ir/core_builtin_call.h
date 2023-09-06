@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_CORE_BUILTIN_CALL_H_
 #define SRC_TINT_LANG_CORE_IR_CORE_BUILTIN_CALL_H_
 
+#include <string>
+
 #include "src/tint/lang/core/function.h"
 #include "src/tint/lang/core/ir/builtin_call.h"
 #include "src/tint/utils/rtti/castable.h"
@@ -37,7 +39,7 @@ class CoreBuiltinCall : public Castable<CoreBuiltinCall, BuiltinCall> {
     core::Function Func() { return func_; }
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "core-builtin-call"; }
+    std::string FriendlyName() override { return core::str(func_); }
 
   private:
     core::Function func_;

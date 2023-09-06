@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_UNREACHABLE_H_
 #define SRC_TINT_LANG_CORE_IR_UNREACHABLE_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/terminator.h"
 
 namespace tint::core::ir {
@@ -25,7 +27,7 @@ class Unreachable : public Castable<Unreachable, Terminator> {
     ~Unreachable() override;
 
     /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "unreachable"; }
+    std::string FriendlyName() override { return "unreachable"; }
 };
 
 }  // namespace tint::core::ir

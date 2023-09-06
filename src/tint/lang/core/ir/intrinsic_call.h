@@ -33,9 +33,6 @@ class IntrinsicCall : public Castable<IntrinsicCall, Call> {
     /// @param args the intrinsic call arguments
     explicit IntrinsicCall(InstructionResult* result, VectorRef<Value*> args = tint::Empty);
     ~IntrinsicCall() override;
-
-    /// @returns the intrinsic name
-    virtual std::string KindName() const = 0;
 };
 
 }  // namespace tint::core::ir
