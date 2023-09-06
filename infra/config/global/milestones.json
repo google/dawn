@@ -57,5 +57,15 @@
             "mac",
             "win"
         ]
+    },
+    "118": {
+        "name": "m118",
+        "chromium_project": "chromium-m118",
+        "ref": "refs/heads/chromium/5993",
+        "platforms": [
+            "linux",
+            "mac",
+            "win"
+        ]
     }
 }
