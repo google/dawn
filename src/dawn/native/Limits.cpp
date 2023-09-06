@@ -58,6 +58,14 @@
     X(Maximum,             maxUniformBuffersPerShaderStage,        12,         12)
 
 // TODO(crbug.com/dawn/685):
+// These limits aren't really tiered and could probably be grouped better.
+// All Chrome platforms support 64 (iOS is 32) so there's no fingerprinting hazard in
+// extra additional buckets.
+#define LIMITS_ATTACHMENTS(X)   \
+    X(Maximum,            maxColorAttachmentBytesPerSample,        32,         64)
+
+
+// TODO(crbug.com/dawn/685):
 // These limits don't have tiers yet. Define two tiers with the same values since the macros
 // in this file expect more than one tier.
 #define LIMITS_OTHER(X)                                                            \
@@ -76,8 +84,7 @@
     X(Maximum,                  maxVertexBufferArrayStride,      2048,       2048) \
     X(Maximum,               maxInterStageShaderComponents,        60,         60) \
     X(Maximum,               maxInterStageShaderVariables,         16,         16) \
-    X(Maximum,                         maxColorAttachments,         8,          8) \
-    X(Maximum,            maxColorAttachmentBytesPerSample,        32,         32)
+    X(Maximum,                         maxColorAttachments,         8,          8)
 // clang-format on
 
 #define LIMITS_EACH_GROUP(X)              \
@@ -86,6 +93,7 @@
     X(LIMITS_STORAGE_BUFFER_BINDING_SIZE) \
     X(LIMITS_MAX_BUFFER_SIZE)             \
     X(LIMITS_RESOURCE_BINDINGS)           \
+    X(LIMITS_ATTACHMENTS)                 \
     X(LIMITS_OTHER)
 
 #define LIMITS(X)                         \
@@ -94,6 +102,7 @@
     LIMITS_STORAGE_BUFFER_BINDING_SIZE(X) \
     LIMITS_MAX_BUFFER_SIZE(X)             \
     LIMITS_RESOURCE_BINDINGS(X)           \
+    LIMITS_ATTACHMENTS(X)                 \
     LIMITS_OTHER(X)
 
 namespace dawn::native {
