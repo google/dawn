@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/decompose_strided_matrix.h"
+#include "src/tint/lang/spirv/reader/ast_lower/decompose_strided_matrix.h"
 
 #include <memory>
 #include <utility>
@@ -26,13 +26,15 @@
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::reader {
 namespace {
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-using DecomposeStridedMatrixTest = TransformTest;
+using DecomposeStridedMatrixTest = ast::transform::TransformTest;
+using Unshadow = ast::transform::Unshadow;
+using SimplifyPointers = ast::transform::SimplifyPointers;
 
 TEST_F(DecomposeStridedMatrixTest, ShouldRunEmptyModule) {
     auto* src = R"()";
@@ -70,22 +72,22 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix) {
     //   let x : mat2x2<f32> = s.m;
     // }
     ProgramBuilder b;
-    auto* S =
-        b.Structure("S", tint::Vector{
-                             b.Member("m", b.ty.mat2x2<f32>(),
-                                      tint::Vector{
-                                          b.MemberOffset(16_u),
-                                          b.create<StrideAttribute>(32u),
-                                          b.Disable(DisabledValidation::kIgnoreStrideAttribute),
-                                      }),
-                         });
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("m", b.ty.mat2x2<f32>(),
+                          Vector{
+                              b.MemberOffset(16_u),
+                              b.create<ast::StrideAttribute>(32u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                          }),
+             });
     b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
     b.Func("f", tint::Empty, b.ty.void_(),
-           tint::Vector{
+           Vector{
                b.Decl(b.Let("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
            },
-           tint::Vector{
-               b.Stage(PipelineStage::kCompute),
+           Vector{
+               b.Stage(ast::PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 
@@ -127,23 +129,23 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformColumn) {
     //   let x : vec2<f32> = s.m[1];
     // }
     ProgramBuilder b;
-    auto* S =
-        b.Structure("S", tint::Vector{
-                             b.Member("m", b.ty.mat2x2<f32>(),
-                                      tint::Vector{
-                                          b.MemberOffset(16_u),
-                                          b.create<StrideAttribute>(32u),
-                                          b.Disable(DisabledValidation::kIgnoreStrideAttribute),
-                                      }),
-                         });
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("m", b.ty.mat2x2<f32>(),
+                          Vector{
+                              b.MemberOffset(16_u),
+                              b.create<ast::StrideAttribute>(32u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                          }),
+             });
     b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
     b.Func(
         "f", tint::Empty, b.ty.void_(),
-        tint::Vector{
+        Vector{
             b.Decl(b.Let("x", b.ty.vec2<f32>(), b.IndexAccessor(b.MemberAccessor("s", "m"), 1_i))),
         },
-        tint::Vector{
-            b.Stage(PipelineStage::kCompute),
+        Vector{
+            b.Stage(ast::PipelineStage::kCompute),
             b.WorkgroupSize(1_i),
         });
 
@@ -181,22 +183,22 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix_DefaultStride) {
     //   let x : mat2x2<f32> = s.m;
     // }
     ProgramBuilder b;
-    auto* S =
-        b.Structure("S", tint::Vector{
-                             b.Member("m", b.ty.mat2x2<f32>(),
-                                      tint::Vector{
-                                          b.MemberOffset(16_u),
-                                          b.create<StrideAttribute>(8u),
-                                          b.Disable(DisabledValidation::kIgnoreStrideAttribute),
-                                      }),
-                         });
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("m", b.ty.mat2x2<f32>(),
+                          Vector{
+                              b.MemberOffset(16_u),
+                              b.create<ast::StrideAttribute>(8u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                          }),
+             });
     b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
     b.Func("f", tint::Empty, b.ty.void_(),
-           tint::Vector{
+           Vector{
                b.Decl(b.Let("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
            },
-           tint::Vector{
-               b.Stage(PipelineStage::kCompute),
+           Vector{
+               b.Stage(ast::PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 
@@ -235,23 +237,23 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageMatrix) {
     //   let x : mat2x2<f32> = s.m;
     // }
     ProgramBuilder b;
-    auto* S =
-        b.Structure("S", tint::Vector{
-                             b.Member("m", b.ty.mat2x2<f32>(),
-                                      tint::Vector{
-                                          b.MemberOffset(8_u),
-                                          b.create<StrideAttribute>(32u),
-                                          b.Disable(DisabledValidation::kIgnoreStrideAttribute),
-                                      }),
-                         });
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("m", b.ty.mat2x2<f32>(),
+                          Vector{
+                              b.MemberOffset(8_u),
+                              b.create<ast::StrideAttribute>(32u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                          }),
+             });
     b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kStorage, core::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
     b.Func("f", tint::Empty, b.ty.void_(),
-           tint::Vector{
+           Vector{
                b.Decl(b.Let("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
            },
-           tint::Vector{
-               b.Stage(PipelineStage::kCompute),
+           Vector{
+               b.Stage(ast::PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 
@@ -293,24 +295,24 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageColumn) {
     //   let x : vec2<f32> = s.m[1];
     // }
     ProgramBuilder b;
-    auto* S =
-        b.Structure("S", tint::Vector{
-                             b.Member("m", b.ty.mat2x2<f32>(),
-                                      tint::Vector{
-                                          b.MemberOffset(16_u),
-                                          b.create<StrideAttribute>(32u),
-                                          b.Disable(DisabledValidation::kIgnoreStrideAttribute),
-                                      }),
-                         });
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("m", b.ty.mat2x2<f32>(),
+                          Vector{
+                              b.MemberOffset(16_u),
+                              b.create<ast::StrideAttribute>(32u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                          }),
+             });
     b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kStorage, core::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
     b.Func(
         "f", tint::Empty, b.ty.void_(),
-        tint::Vector{
+        Vector{
             b.Decl(b.Let("x", b.ty.vec2<f32>(), b.IndexAccessor(b.MemberAccessor("s", "m"), 1_i))),
         },
-        tint::Vector{
-            b.Stage(PipelineStage::kCompute),
+        Vector{
+            b.Stage(ast::PipelineStage::kCompute),
             b.WorkgroupSize(1_i),
         });
 
@@ -348,25 +350,25 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
     //   s.m = mat2x2<f32>(vec2<f32>(1.0, 2.0), vec2<f32>(3.0, 4.0));
     // }
     ProgramBuilder b;
-    auto* S =
-        b.Structure("S", tint::Vector{
-                             b.Member("m", b.ty.mat2x2<f32>(),
-                                      tint::Vector{
-                                          b.MemberOffset(8_u),
-                                          b.create<StrideAttribute>(32u),
-                                          b.Disable(DisabledValidation::kIgnoreStrideAttribute),
-                                      }),
-                         });
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("m", b.ty.mat2x2<f32>(),
+                          Vector{
+                              b.MemberOffset(8_u),
+                              b.create<ast::StrideAttribute>(32u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                          }),
+             });
     b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kStorage, core::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
     b.Func(
         "f", tint::Empty, b.ty.void_(),
-        tint::Vector{
+        Vector{
             b.Assign(b.MemberAccessor("s", "m"),
                      b.Call<mat2x2<f32>>(b.Call<vec2<f32>>(1_f, 2_f), b.Call<vec2<f32>>(3_f, 4_f))),
         },
-        tint::Vector{
-            b.Stage(PipelineStage::kCompute),
+        Vector{
+            b.Stage(ast::PipelineStage::kCompute),
             b.WorkgroupSize(1_i),
         });
 
@@ -408,24 +410,24 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
     //   s.m[1] = vec2<f32>(1.0, 2.0);
     // }
     ProgramBuilder b;
-    auto* S =
-        b.Structure("S", tint::Vector{
-                             b.Member("m", b.ty.mat2x2<f32>(),
-                                      tint::Vector{
-                                          b.MemberOffset(8_u),
-                                          b.create<StrideAttribute>(32u),
-                                          b.Disable(DisabledValidation::kIgnoreStrideAttribute),
-                                      }),
-                         });
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("m", b.ty.mat2x2<f32>(),
+                          Vector{
+                              b.MemberOffset(8_u),
+                              b.create<ast::StrideAttribute>(32u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                          }),
+             });
     b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kStorage, core::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
     b.Func(
         "f", tint::Empty, b.ty.void_(),
-        tint::Vector{
+        Vector{
             b.Assign(b.IndexAccessor(b.MemberAccessor("s", "m"), 1_i), b.Call<vec2<f32>>(1_f, 2_f)),
         },
-        tint::Vector{
-            b.Stage(PipelineStage::kCompute),
+        Vector{
+            b.Stage(ast::PipelineStage::kCompute),
             b.WorkgroupSize(1_i),
         });
 
@@ -469,19 +471,19 @@ TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
     //   (*b)[1] = vec2<f32>(5.0, 6.0);
     // }
     ProgramBuilder b;
-    auto* S =
-        b.Structure("S", tint::Vector{
-                             b.Member("m", b.ty.mat2x2<f32>(),
-                                      tint::Vector{
-                                          b.MemberOffset(8_u),
-                                          b.create<StrideAttribute>(32u),
-                                          b.Disable(DisabledValidation::kIgnoreStrideAttribute),
-                                      }),
-                         });
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("m", b.ty.mat2x2<f32>(),
+                          Vector{
+                              b.MemberOffset(8_u),
+                              b.create<ast::StrideAttribute>(32u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                          }),
+             });
     b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kStorage, core::Access::kReadWrite,
                 b.Group(0_a), b.Binding(0_a));
     b.Func("f", tint::Empty, b.ty.void_(),
-           tint::Vector{
+           Vector{
                b.Decl(b.Let("a", b.AddressOf(b.MemberAccessor("s", "m")))),
                b.Decl(b.Let("b", b.AddressOf(b.Deref(b.AddressOf(b.Deref("a")))))),
                b.Decl(b.Let("x", b.Deref("b"))),
@@ -491,8 +493,8 @@ TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
                                                           b.Call<vec2<f32>>(3_f, 4_f))),
                b.Assign(b.IndexAccessor(b.Deref("b"), 1_i), b.Call<vec2<f32>>(5_f, 6_f)),
            },
-           tint::Vector{
-               b.Stage(PipelineStage::kCompute),
+           Vector{
+               b.Stage(ast::PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 
@@ -542,22 +544,22 @@ TEST_F(DecomposeStridedMatrixTest, ReadPrivateMatrix) {
     //   let x : mat2x2<f32> = s.m;
     // }
     ProgramBuilder b;
-    auto* S =
-        b.Structure("S", tint::Vector{
-                             b.Member("m", b.ty.mat2x2<f32>(),
-                                      tint::Vector{
-                                          b.MemberOffset(8_u),
-                                          b.create<StrideAttribute>(32u),
-                                          b.Disable(DisabledValidation::kIgnoreStrideAttribute),
-                                      }),
-                         });
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("m", b.ty.mat2x2<f32>(),
+                          Vector{
+                              b.MemberOffset(8_u),
+                              b.create<ast::StrideAttribute>(32u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                          }),
+             });
     b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kPrivate);
     b.Func("f", tint::Empty, b.ty.void_(),
-           tint::Vector{
+           Vector{
                b.Decl(b.Let("x", b.ty.mat2x2<f32>(), b.MemberAccessor("s", "m"))),
            },
-           tint::Vector{
-               b.Stage(PipelineStage::kCompute),
+           Vector{
+               b.Stage(ast::PipelineStage::kCompute),
                b.WorkgroupSize(1_i),
            });
 
@@ -596,24 +598,24 @@ TEST_F(DecomposeStridedMatrixTest, WritePrivateMatrix) {
     //   s.m = mat2x2<f32>(vec2<f32>(1.0, 2.0), vec2<f32>(3.0, 4.0));
     // }
     ProgramBuilder b;
-    auto* S =
-        b.Structure("S", tint::Vector{
-                             b.Member("m", b.ty.mat2x2<f32>(),
-                                      tint::Vector{
-                                          b.MemberOffset(8_u),
-                                          b.create<StrideAttribute>(32u),
-                                          b.Disable(DisabledValidation::kIgnoreStrideAttribute),
-                                      }),
-                         });
+    auto* S = b.Structure(
+        "S", Vector{
+                 b.Member("m", b.ty.mat2x2<f32>(),
+                          Vector{
+                              b.MemberOffset(8_u),
+                              b.create<ast::StrideAttribute>(32u),
+                              b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
+                          }),
+             });
     b.GlobalVar("s", b.ty.Of(S), core::AddressSpace::kPrivate);
     b.Func(
         "f", tint::Empty, b.ty.void_(),
-        tint::Vector{
+        Vector{
             b.Assign(b.MemberAccessor("s", "m"),
                      b.Call<mat2x2<f32>>(b.Call<vec2<f32>>(1_f, 2_f), b.Call<vec2<f32>>(3_f, 4_f))),
         },
-        tint::Vector{
-            b.Stage(PipelineStage::kCompute),
+        Vector{
+            b.Stage(ast::PipelineStage::kCompute),
             b.WorkgroupSize(1_i),
         });
 
@@ -640,4 +642,4 @@ fn f() {
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::reader

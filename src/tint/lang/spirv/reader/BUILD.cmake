@@ -21,6 +21,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+include(lang/spirv/reader/ast_lower/BUILD.cmake)
 include(lang/spirv/reader/ast_parser/BUILD.cmake)
 include(lang/spirv/reader/common/BUILD.cmake)
 

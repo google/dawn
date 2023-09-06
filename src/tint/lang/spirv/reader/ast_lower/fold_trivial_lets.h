@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_FOLD_TRIVIAL_LETS_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_FOLD_TRIVIAL_LETS_H_
+#ifndef SRC_TINT_LANG_SPIRV_READER_AST_LOWER_FOLD_TRIVIAL_LETS_H_
+#define SRC_TINT_LANG_SPIRV_READER_AST_LOWER_FOLD_TRIVIAL_LETS_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::reader {
 
 /// FoldTrivialLets is a transform that inlines the initializers of let declarations whose
 /// initializers are just identifier expressions, or lets that are only used once. This is used to
 /// clean up unnecessary let declarations created by the SPIR-V reader.
-class FoldTrivialLets final : public Castable<FoldTrivialLets, Transform> {
+class FoldTrivialLets final : public Castable<FoldTrivialLets, ast::transform::Transform> {
   public:
     /// Constructor
     FoldTrivialLets();
@@ -30,15 +30,15 @@ class FoldTrivialLets final : public Castable<FoldTrivialLets, Transform> {
     /// Destructor
     ~FoldTrivialLets() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 
   private:
     struct State;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::reader
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_FOLD_TRIVIAL_LETS_H_
+#endif  // SRC_TINT_LANG_SPIRV_READER_AST_LOWER_FOLD_TRIVIAL_LETS_H_

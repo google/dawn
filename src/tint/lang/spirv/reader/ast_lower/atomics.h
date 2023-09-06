@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_SPIRV_ATOMIC_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_SPIRV_ATOMIC_H_
+#ifndef SRC_TINT_LANG_SPIRV_READER_AST_LOWER_ATOMICS_H_
+#define SRC_TINT_LANG_SPIRV_READER_AST_LOWER_ATOMICS_H_
 
 #include <string>
 
@@ -21,27 +21,27 @@
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::reader {
 
-/// SpirvAtomic is a transform that replaces calls to stub functions created by the SPIR-V reader
+/// Atomics is a transform that replaces calls to stub functions created by the SPIR-V reader
 /// with calls to the WGSL atomic builtin. It also makes sure to replace variable declarations that
 /// are the target of the atomic operations with an atomic declaration of the same type. For
 /// structs, it creates a copy of the original struct with atomic members.
-class SpirvAtomic final : public Castable<SpirvAtomic, Transform> {
+class Atomics final : public Castable<Atomics, ast::transform::Transform> {
   public:
     /// Constructor
-    SpirvAtomic();
+    Atomics();
     /// Destructor
-    ~SpirvAtomic() override;
+    ~Atomics() override;
 
     /// Stub is an attribute applied to stub SPIR-V reader generated functions that need to be
     /// translated to an atomic builtin.
-    class Stub final : public Castable<Stub, InternalAttribute> {
+    class Stub final : public Castable<Stub, ast::InternalAttribute> {
       public:
         /// @param pid the identifier of the program that owns this node
         /// @param nid the unique node identifier
         /// @param builtin the atomic builtin this stub represents
-        Stub(GenerationID pid, NodeID nid, core::Function builtin);
+        Stub(GenerationID pid, ast::NodeID nid, core::Function builtin);
         /// Destructor
         ~Stub() override;
 
@@ -58,15 +58,15 @@ class SpirvAtomic final : public Castable<SpirvAtomic, Transform> {
         const core::Function builtin;
     };
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 
   private:
     struct State;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::reader
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_SPIRV_ATOMIC_H_
+#endif  // SRC_TINT_LANG_SPIRV_READER_AST_LOWER_ATOMICS_H_

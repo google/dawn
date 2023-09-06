@@ -108,6 +108,7 @@ endif(TINT_BUILD_MSL_WRITER AND TINT_BUILD_IR)
 
 if(TINT_BUILD_SPV_READER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
+    tint_lang_spirv_reader_ast_lower_test
     tint_lang_spirv_reader_ast_parser_test
   )
 endif(TINT_BUILD_SPV_READER)

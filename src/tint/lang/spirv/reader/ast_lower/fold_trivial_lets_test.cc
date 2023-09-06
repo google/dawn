@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/fold_trivial_lets.h"
+#include "src/tint/lang/spirv/reader/ast_lower/fold_trivial_lets.h"
 
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::reader {
 namespace {
 
-using FoldTrivialLetsTest = TransformTest;
+using FoldTrivialLetsTest = ast::transform::TransformTest;
 
 TEST_F(FoldTrivialLetsTest, Fold_IdentInitializer_AssignRHS) {
     auto* src = R"(
@@ -283,4 +283,4 @@ fn f(a : i32, b : i32, c : i32) -> i32 {
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::reader

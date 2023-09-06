@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/fold_trivial_lets.h"
+#include "src/tint/lang/spirv/reader/ast_lower/fold_trivial_lets.h"
 
 #include <utility>
 
@@ -23,9 +23,9 @@
 #include "src/tint/lang/wgsl/sem/value_expression.h"
 #include "src/tint/utils/containers/hashmap.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::FoldTrivialLets);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::FoldTrivialLets);
 
-namespace tint::ast::transform {
+namespace tint::spirv::reader {
 
 /// PIMPL state for the transform.
 struct FoldTrivialLets::State {
@@ -44,11 +44,11 @@ struct FoldTrivialLets::State {
 
     /// Process a block.
     /// @param block the block
-    void ProcessBlock(const BlockStatement* block) {
+    void ProcessBlock(const ast::BlockStatement* block) {
         // PendingLet describes a let declaration that might be inlined.
         struct PendingLet {
             // The let declaration.
-            const VariableDeclStatement* decl = nullptr;
+            const ast::VariableDeclStatement* decl = nullptr;
             // The number of uses that have not yet been inlined.
             size_t remaining_uses = 0;
         };
@@ -57,8 +57,8 @@ struct FoldTrivialLets::State {
         Hashmap<const sem::Variable*, PendingLet, 16> pending_lets;
 
         // Helper that folds pending let declarations into `expr` if possible.
-        auto fold_lets = [&](const Expression* expr) {
-            TraverseExpressions(expr, [&](const IdentifierExpression* ident) {
+        auto fold_lets = [&](const ast::Expression* expr) {
+            ast::TraverseExpressions(expr, [&](const ast::IdentifierExpression* ident) {
                 if (auto* user = sem.Get<sem::VariableUser>(ident)) {
                     auto itr = pending_lets.Find(user->Variable());
                     if (itr) {
@@ -75,19 +75,19 @@ struct FoldTrivialLets::State {
                         }
                     }
                 }
-                return TraverseAction::Descend;
+                return ast::TraverseAction::Descend;
             });
         };
 
         // Loop over all statements in the block.
         for (auto* stmt : block->statements) {
             // Check for a let declarations.
-            if (auto* decl = stmt->As<VariableDeclStatement>()) {
-                if (auto* let = decl->variable->As<Let>()) {
+            if (auto* decl = stmt->As<ast::VariableDeclStatement>()) {
+                if (auto* let = decl->variable->As<ast::Let>()) {
                     // If the initializer doesn't have side effects, we might be able to inline it.
                     if (!sem.GetVal(let->initializer)->HasSideEffects()) {  //
                         auto num_users = sem.Get(let)->Users().Length();
-                        if (let->initializer->Is<IdentifierExpression>()) {
+                        if (let->initializer->Is<ast::IdentifierExpression>()) {
                             // The initializer is a single identifier expression.
                             // We can fold it into multiple uses in the next non-let statement.
                             // We also fold previous pending lets into this one, but only if
@@ -113,14 +113,14 @@ struct FoldTrivialLets::State {
 
             // Fold pending let declarations into a select few places that are frequently generated
             // by the SPIR_V reader.
-            if (auto* assign = stmt->As<AssignmentStatement>()) {
+            if (auto* assign = stmt->As<ast::AssignmentStatement>()) {
                 // We can fold into the RHS of an assignment statement if the RHS and LHS
                 // expressions have no side effects.
                 if (!sem.GetVal(assign->lhs)->HasSideEffects() &&
                     !sem.GetVal(assign->rhs)->HasSideEffects()) {
                     fold_lets(assign->rhs);
                 }
-            } else if (auto* ifelse = stmt->As<IfStatement>()) {
+            } else if (auto* ifelse = stmt->As<ast::IfStatement>()) {
                 // We can fold into the condition of an if statement if the condition expression has
                 // no side effects.
                 if (!sem.GetVal(ifelse->condition)->HasSideEffects()) {
@@ -139,7 +139,7 @@ struct FoldTrivialLets::State {
     ApplyResult Run() {
         // Process all blocks in the module.
         for (auto* node : src->ASTNodes().Objects()) {
-            if (auto* block = node->As<BlockStatement>()) {
+            if (auto* block = node->As<ast::BlockStatement>()) {
                 ProcessBlock(block);
             }
         }
@@ -152,8 +152,10 @@ FoldTrivialLets::FoldTrivialLets() = default;
 
 FoldTrivialLets::~FoldTrivialLets() = default;
 
-Transform::ApplyResult FoldTrivialLets::Apply(const Program* src, const DataMap&, DataMap&) const {
+ast::transform::Transform::ApplyResult FoldTrivialLets::Apply(const Program* src,
+                                                              const ast::transform::DataMap&,
+                                                              ast::transform::DataMap&) const {
     return State(src).Run();
 }
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::reader

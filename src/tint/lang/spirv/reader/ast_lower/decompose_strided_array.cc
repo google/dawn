@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/decompose_strided_array.h"
+#include "src/tint/lang/spirv/reader/ast_lower/decompose_strided_array.h"
 
 #include <unordered_map>
 #include <utility>
@@ -33,17 +33,17 @@
 
 using namespace tint::core::fluent_types;  // NOLINT
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DecomposeStridedArray);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::reader::DecomposeStridedArray);
 
-namespace tint::ast::transform {
+namespace tint::spirv::reader {
 namespace {
 
 using DecomposedArrays = std::unordered_map<const core::type::Array*, Symbol>;
 
 bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
-        if (auto* ident = node->As<TemplatedIdentifier>()) {
-            if (GetAttribute<StrideAttribute>(ident->attributes)) {
+        if (auto* ident = node->As<ast::TemplatedIdentifier>()) {
+            if (ast::GetAttribute<ast::StrideAttribute>(ident->attributes)) {
                 return true;
             }
         }
@@ -57,9 +57,10 @@ DecomposeStridedArray::DecomposeStridedArray() = default;
 
 DecomposeStridedArray::~DecomposeStridedArray() = default;
 
-Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
-                                                    const DataMap&,
-                                                    DataMap&) const {
+ast::transform::Transform::ApplyResult DecomposeStridedArray::Apply(
+    const Program* src,
+    const ast::transform::DataMap&,
+    ast::transform::DataMap&) const {
     if (!ShouldRun(src)) {
         return SkipTransform;
     }
@@ -79,8 +80,8 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
     // stride for the array element type, then replace the array element type with
     // a structure, holding a single field with a @size attribute equal to the
     // array stride.
-    ctx.ReplaceAll([&](const IdentifierExpression* expr) -> const IdentifierExpression* {
-        auto* ident = expr->identifier->As<TemplatedIdentifier>();
+    ctx.ReplaceAll([&](const ast::IdentifierExpression* expr) -> const ast::IdentifierExpression* {
+        auto* ident = expr->identifier->As<ast::TemplatedIdentifier>();
         if (!ident) {
             return nullptr;
         }
@@ -95,12 +96,12 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
         if (!arr->IsStrideImplicit()) {
             auto el_ty = tint::GetOrCreate(decomposed, arr, [&] {
                 auto name = b.Symbols().New("strided_arr");
-                auto* member_ty = ctx.Clone(ident->arguments[0]->As<IdentifierExpression>());
-                auto* member = b.Member(kMemberName, Type{member_ty},
-                                        tint::Vector{
+                auto* member_ty = ctx.Clone(ident->arguments[0]->As<ast::IdentifierExpression>());
+                auto* member = b.Member(kMemberName, ast::Type{member_ty},
+                                        Vector{
                                             b.MemberSize(AInt(arr->Stride())),
                                         });
-                b.Structure(name, tint::Vector{member});
+                b.Structure(name, Vector{member});
                 return name;
             });
             if (ident->arguments.Length() > 1) {
@@ -110,14 +111,14 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
                 return b.Expr(b.ty.array(b.ty(el_ty)));
             }
         }
-        if (GetAttribute<StrideAttribute>(ident->attributes)) {
+        if (ast::GetAttribute<ast::StrideAttribute>(ident->attributes)) {
             // Strip the @stride attribute
-            auto* ty = ctx.Clone(ident->arguments[0]->As<IdentifierExpression>());
+            auto* ty = ctx.Clone(ident->arguments[0]->As<ast::IdentifierExpression>());
             if (ident->arguments.Length() > 1) {
                 auto* count = ctx.Clone(ident->arguments[1]);
-                return b.Expr(b.ty.array(Type{ty}, count));
+                return b.Expr(b.ty.array(ast::Type{ty}, count));
             } else {
-                return b.Expr(b.ty.array(Type{ty}));
+                return b.Expr(b.ty.array(ast::Type{ty}));
             }
         }
         return nullptr;
@@ -127,7 +128,7 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
     // element changed to a single field structure. These expressions are adjusted
     // to insert an additional member accessor for the single structure field.
     // Example: `arr[i]` -> `arr[i].el`
-    ctx.ReplaceAll([&](const IndexAccessorExpression* idx) -> const Expression* {
+    ctx.ReplaceAll([&](const ast::IndexAccessorExpression* idx) -> const ast::Expression* {
         if (auto* ty = src->TypeOf(idx->object)) {
             if (auto* arr = ty->UnwrapRef()->As<core::type::Array>()) {
                 if (!arr->IsStrideImplicit()) {
@@ -145,7 +146,7 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
     //   `@stride(32) array<i32, 3>(1, 2, 3)`
     // ->
     //   `array<strided_arr, 3>(strided_arr(1), strided_arr(2), strided_arr(3))`
-    ctx.ReplaceAll([&](const CallExpression* expr) -> const Expression* {
+    ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::Expression* {
         if (!expr->args.IsEmpty()) {
             if (auto* call = sem.Get(expr)->UnwrapMaterialize()->As<sem::Call>()) {
                 if (auto* ctor = call->Target()->As<sem::ValueConstructor>()) {
@@ -158,7 +159,7 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
 
                         auto* target = ctx.Clone(expr->target);
 
-                        tint::Vector<const Expression*, 8> args;
+                        Vector<const ast::Expression*, 8> args;
                         if (auto it = decomposed.find(arr); it != decomposed.end()) {
                             args.Reserve(expr->args.Length());
                             for (auto* arg : expr->args) {
@@ -180,4 +181,4 @@ Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
     return resolver::Resolve(b);
 }
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::reader

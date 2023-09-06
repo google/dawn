@@ -23,6 +23,7 @@
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
+#include "src/tint/lang/spirv/reader/ast_lower/atomics.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
 #include "src/tint/lang/wgsl/ast/bitcast_expression.h"
 #include "src/tint/lang/wgsl/ast/break_statement.h"
@@ -35,7 +36,6 @@
 #include "src/tint/lang/wgsl/ast/return_statement.h"
 #include "src/tint/lang/wgsl/ast/stage_attribute.h"
 #include "src/tint/lang/wgsl/ast/switch_statement.h"
-#include "src/tint/lang/wgsl/ast/transform/spirv_atomic.h"
 #include "src/tint/lang/wgsl/ast/unary_op_expression.h"
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/utils/containers/hashmap.h"
@@ -5878,8 +5878,8 @@ bool FunctionEmitter::EmitAtomicOp(const spvtools::opt::Instruction& inst) {
             std::move(params), ret_type,
             /* body */ nullptr,
             tint::Vector{
-                builder_.ASTNodes().Create<ast::transform::SpirvAtomic::Stub>(
-                    builder_.ID(), builder_.AllocateNodeID(), builtin),
+                builder_.ASTNodes().Create<Atomics::Stub>(builder_.ID(), builder_.AllocateNodeID(),
+                                                          builtin),
                 builder_.Disable(ast::DisabledValidation::kFunctionHasNoBody),
             });
 

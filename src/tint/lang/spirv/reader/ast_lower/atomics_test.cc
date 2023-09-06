@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/spirv_atomic.h"
+#include "src/tint/lang/spirv/reader/ast_lower/atomics.h"
 
 #include <memory>
 #include <string>
@@ -25,12 +25,12 @@
 
 using namespace tint::core::number_suffixes;  // NOLINT
 
-namespace tint::ast::transform {
+namespace tint::spirv::reader {
 namespace {
 
-class SpirvAtomicTest : public TransformTest {
+class AtomicsTest : public ast::transform::TransformTest {
   public:
-    Output Run(std::string in) {
+    ast::transform::Output Run(std::string in) {
         auto file = std::make_unique<Source::File>("test", std::move(in));
         auto parser = wgsl::reader::Parser(file.get());
         parser.Parse();
@@ -53,7 +53,7 @@ class SpirvAtomicTest : public TransformTest {
                        b.Return(0_u),
                    },
                    tint::Vector{
-                       b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(), a),
+                       b.ASTNodes().Create<Atomics::Stub>(b.ID(), b.AllocateNodeID(), a),
                    });
             b.Func(std::string{"stub_"} + core::str(a) + "_i32",
                    tint::Vector{
@@ -65,7 +65,7 @@ class SpirvAtomicTest : public TransformTest {
                        b.Return(0_i),
                    },
                    tint::Vector{
-                       b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(), a),
+                       b.ASTNodes().Create<Atomics::Stub>(b.ID(), b.AllocateNodeID(), a),
                    });
         }
 
@@ -78,8 +78,8 @@ class SpirvAtomicTest : public TransformTest {
                    b.Return(0_u),
                },
                tint::Vector{
-                   b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
-                                                          core::Function::kAtomicLoad),
+                   b.ASTNodes().Create<Atomics::Stub>(b.ID(), b.AllocateNodeID(),
+                                                      core::Function::kAtomicLoad),
                });
         b.Func("stub_atomicLoad_i32",
                tint::Vector{
@@ -90,8 +90,8 @@ class SpirvAtomicTest : public TransformTest {
                    b.Return(0_i),
                },
                tint::Vector{
-                   b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
-                                                          core::Function::kAtomicLoad),
+                   b.ASTNodes().Create<Atomics::Stub>(b.ID(), b.AllocateNodeID(),
+                                                      core::Function::kAtomicLoad),
                });
 
         b.Func("stub_atomicStore_u32",
@@ -101,8 +101,8 @@ class SpirvAtomicTest : public TransformTest {
                },
                b.ty.void_(), tint::Empty,
                tint::Vector{
-                   b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
-                                                          core::Function::kAtomicStore),
+                   b.ASTNodes().Create<Atomics::Stub>(b.ID(), b.AllocateNodeID(),
+                                                      core::Function::kAtomicStore),
                });
         b.Func("stub_atomicStore_i32",
                tint::Vector{
@@ -111,8 +111,8 @@ class SpirvAtomicTest : public TransformTest {
                },
                b.ty.void_(), tint::Empty,
                tint::Vector{
-                   b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), b.AllocateNodeID(),
-                                                          core::Function::kAtomicStore),
+                   b.ASTNodes().Create<Atomics::Stub>(b.ID(), b.AllocateNodeID(),
+                                                      core::Function::kAtomicStore),
                });
 
         b.Func("stub_atomic_compare_exchange_weak_u32",
@@ -126,8 +126,8 @@ class SpirvAtomicTest : public TransformTest {
                    b.Return(0_u),
                },
                tint::Vector{
-                   b.ASTNodes().Create<SpirvAtomic::Stub>(
-                       b.ID(), b.AllocateNodeID(), core::Function::kAtomicCompareExchangeWeak),
+                   b.ASTNodes().Create<Atomics::Stub>(b.ID(), b.AllocateNodeID(),
+                                                      core::Function::kAtomicCompareExchangeWeak),
                });
         b.Func("stub_atomic_compare_exchange_weak_i32",
                tint::Vector{b.Param("p0", b.ty.i32()), b.Param("p1", b.ty.i32()),
@@ -137,21 +137,21 @@ class SpirvAtomicTest : public TransformTest {
                    b.Return(0_i),
                },
                tint::Vector{
-                   b.ASTNodes().Create<SpirvAtomic::Stub>(
-                       b.ID(), b.AllocateNodeID(), core::Function::kAtomicCompareExchangeWeak),
+                   b.ASTNodes().Create<Atomics::Stub>(b.ID(), b.AllocateNodeID(),
+                                                      core::Function::kAtomicCompareExchangeWeak),
                });
 
         // Keep this pointer alive after Transform() returns
         files_.emplace_back(std::move(file));
 
-        return TransformTest::Run<SpirvAtomic>(resolver::Resolve(b));
+        return ast::transform::TransformTest::Run<Atomics>(resolver::Resolve(b));
     }
 
   private:
     std::vector<std::unique_ptr<Source::File>> files_;
 };
 
-TEST_F(SpirvAtomicTest, StripUnusedBuiltins) {
+TEST_F(AtomicsTest, StripUnusedBuiltins) {
     auto* src = R"(
 fn f() {
 }
@@ -164,7 +164,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, ArrayOfU32) {
+TEST_F(AtomicsTest, ArrayOfU32) {
     auto* src = R"(
 var<workgroup> wg : array<u32, 4>;
 
@@ -186,7 +186,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, ArraysOfU32) {
+TEST_F(AtomicsTest, ArraysOfU32) {
     auto* src = R"(
 var<workgroup> wg : array<array<array<u32, 1>, 2>, 3>;
 
@@ -208,7 +208,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, AliasedArraysOfU32) {
+TEST_F(AtomicsTest, AliasedArraysOfU32) {
     auto* src = R"(
 alias A0 = u32;
 
@@ -246,7 +246,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, FlatStructSingleAtomic) {
+TEST_F(AtomicsTest, FlatStructSingleAtomic) {
     auto* src = R"(
 struct S {
   a : u32,
@@ -280,7 +280,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, FlatStructMultipleAtomic) {
+TEST_F(AtomicsTest, FlatStructMultipleAtomic) {
     auto* src = R"(
 struct S {
   a : u32,
@@ -325,7 +325,7 @@ fn f2() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, NestedStruct) {
+TEST_F(AtomicsTest, NestedStruct) {
     auto* src = R"(
 struct S0 {
   a : u32,
@@ -401,7 +401,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, ArrayOfStruct) {
+TEST_F(AtomicsTest, ArrayOfStruct) {
     auto* src = R"(
 struct S {
   a : u32,
@@ -441,7 +441,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, StructOfArray) {
+TEST_F(AtomicsTest, StructOfArray) {
     auto* src = R"(
 struct S {
   a : array<i32>,
@@ -475,7 +475,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, ViaPtrLet) {
+TEST_F(AtomicsTest, ViaPtrLet) {
     auto* src = R"(
 struct S {
   i : i32,
@@ -514,7 +514,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, StructIsolatedMixedUsage) {
+TEST_F(AtomicsTest, StructIsolatedMixedUsage) {
     auto* src = R"(
 struct S {
   i : i32,
@@ -561,7 +561,7 @@ fn another_usage() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, AtomicLoad) {
+TEST_F(AtomicsTest, AtomicLoad) {
     auto* src = R"(
 var<workgroup> wg_u32 : u32;
 var<workgroup> wg_i32 : i32;
@@ -606,7 +606,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, AtomicExchange) {
+TEST_F(AtomicsTest, AtomicExchange) {
     auto* src = R"(
 var<workgroup> wg_u32 : u32;
 var<workgroup> wg_i32 : i32;
@@ -651,7 +651,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, AtomicAdd) {
+TEST_F(AtomicsTest, AtomicAdd) {
     auto* src = R"(
 var<workgroup> wg_u32 : u32;
 var<workgroup> wg_i32 : i32;
@@ -696,7 +696,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, AtomicSub) {
+TEST_F(AtomicsTest, AtomicSub) {
     auto* src = R"(
 var<workgroup> wg_u32 : u32;
 var<workgroup> wg_i32 : i32;
@@ -741,7 +741,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, AtomicMin) {
+TEST_F(AtomicsTest, AtomicMin) {
     auto* src = R"(
 var<workgroup> wg_u32 : u32;
 var<workgroup> wg_i32 : i32;
@@ -786,7 +786,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, AtomicMax) {
+TEST_F(AtomicsTest, AtomicMax) {
     auto* src = R"(
 var<workgroup> wg_u32 : u32;
 var<workgroup> wg_i32 : i32;
@@ -831,7 +831,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, AtomicAnd) {
+TEST_F(AtomicsTest, AtomicAnd) {
     auto* src = R"(
 var<workgroup> wg_u32 : u32;
 var<workgroup> wg_i32 : i32;
@@ -876,7 +876,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, AtomicOr) {
+TEST_F(AtomicsTest, AtomicOr) {
     auto* src = R"(
 var<workgroup> wg_u32 : u32;
 var<workgroup> wg_i32 : i32;
@@ -921,7 +921,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, AtomicXor) {
+TEST_F(AtomicsTest, AtomicXor) {
     auto* src = R"(
 var<workgroup> wg_u32 : u32;
 var<workgroup> wg_i32 : i32;
@@ -966,7 +966,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, AtomicCompareExchangeWeak) {
+TEST_F(AtomicsTest, AtomicCompareExchangeWeak) {
     auto* src = R"(
 var<workgroup> wg_u32 : u32;
 var<workgroup> wg_i32 : i32;
@@ -1015,7 +1015,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_Scaler) {
+TEST_F(AtomicsTest, ReplaceAssignsAndDecls_Scaler) {
     auto* src = R"(
 var<workgroup> wg : u32;
 
@@ -1046,7 +1046,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_Struct) {
+TEST_F(AtomicsTest, ReplaceAssignsAndDecls_Struct) {
     auto* src = R"(
 struct S {
   a : u32,
@@ -1089,7 +1089,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_NestedStruct) {
+TEST_F(AtomicsTest, ReplaceAssignsAndDecls_NestedStruct) {
     auto* src = R"(
 struct S0 {
   a : u32,
@@ -1144,7 +1144,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_StructMultipleAtomics) {
+TEST_F(AtomicsTest, ReplaceAssignsAndDecls_StructMultipleAtomics) {
     auto* src = R"(
 struct S {
   a : u32,
@@ -1213,7 +1213,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_ArrayOfScalar) {
+TEST_F(AtomicsTest, ReplaceAssignsAndDecls_ArrayOfScalar) {
     auto* src = R"(
 var<workgroup> wg : array<u32, 4>;
 
@@ -1244,7 +1244,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_ArrayOfStruct) {
+TEST_F(AtomicsTest, ReplaceAssignsAndDecls_ArrayOfStruct) {
     auto* src = R"(
 struct S {
   a : u32,
@@ -1287,7 +1287,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_StructOfArray) {
+TEST_F(AtomicsTest, ReplaceAssignsAndDecls_StructOfArray) {
     auto* src = R"(
 struct S {
   a : array<u32>,
@@ -1330,7 +1330,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_ViaPtrLet) {
+TEST_F(AtomicsTest, ReplaceAssignsAndDecls_ViaPtrLet) {
     auto* src = R"(
 struct S {
   i : u32,
@@ -1377,4 +1377,4 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::reader

@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_DECOMPOSE_STRIDED_MATRIX_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_DECOMPOSE_STRIDED_MATRIX_H_
+#ifndef SRC_TINT_LANG_SPIRV_READER_AST_LOWER_DECOMPOSE_STRIDED_MATRIX_H_
+#define SRC_TINT_LANG_SPIRV_READER_AST_LOWER_DECOMPOSE_STRIDED_MATRIX_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::spirv::reader {
 
 /// DecomposeStridedMatrix transforms replaces matrix members of storage or
 /// uniform buffer structures, that have a stride attribute, into an array
@@ -27,7 +27,8 @@ namespace tint::ast::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * SimplifyPointers
-class DecomposeStridedMatrix final : public Castable<DecomposeStridedMatrix, Transform> {
+class DecomposeStridedMatrix final
+    : public Castable<DecomposeStridedMatrix, ast::transform::Transform> {
   public:
     /// Constructor
     DecomposeStridedMatrix();
@@ -35,12 +36,12 @@ class DecomposeStridedMatrix final : public Castable<DecomposeStridedMatrix, Tra
     /// Destructor
     ~DecomposeStridedMatrix() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::spirv::reader
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_DECOMPOSE_STRIDED_MATRIX_H_
+#endif  // SRC_TINT_LANG_SPIRV_READER_AST_LOWER_DECOMPOSE_STRIDED_MATRIX_H_
