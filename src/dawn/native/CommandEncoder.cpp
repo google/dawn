@@ -1077,6 +1077,7 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
                     colorTarget = implicitMSAATargetRef.Get();
 
                     cmd->colorAttachments[index].view = std::move(implicitMSAATargetRef);
+                    cmd->colorAttachments[index].depthSlice = 0;
                     cmd->colorAttachments[index].loadOp = wgpu::LoadOp::Clear;
                     cmd->colorAttachments[index].storeOp = wgpu::StoreOp::Discard;
                 }
