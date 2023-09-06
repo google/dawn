@@ -1332,7 +1332,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                                  kDepthMultisampledTexture,
                                  core::type::TextureDimension::k2d,
                                  /* texel type */ kF32,
-                                 {{"coords", 3, kI32}, {"sample_idx", 1, kI32}},
+                                 {{"coords", 2, kI32}, {"sample_idx", 1, kI32}},
                                  {"result", 1, kF32},
                                  {
                                      "OpImageFetch %v4float %t %coords Sample %sample_idx",

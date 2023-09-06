@@ -19,6 +19,8 @@
 #include <utility>
 
 #include "src/tint/lang/core/fluent_types.h"
+#include "src/tint/lang/core/intrinsic/data/data.h"
+#include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/ir/access.h"
 #include "src/tint/lang/core/ir/binary.h"
 #include "src/tint/lang/core/ir/bitcast.h"
@@ -56,6 +58,7 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/utils/containers/reverse.h"
+#include "src/tint/utils/containers/transform.h"
 #include "src/tint/utils/macros/scoped_assignment.h"
 #include "src/tint/utils/rtti/switch.h"
 
@@ -186,6 +189,10 @@ class Validator {
     /// @param call the call to validate
     void CheckCall(Call* call);
 
+    /// Validates the given builtin call
+    /// @param call the call to validate
+    void CheckCoreBuiltinCall(CoreBuiltinCall* call);
+
     /// Validates the given access
     /// @param a the access to validate
     void CheckAccess(ir::Access* a);
@@ -257,7 +264,11 @@ class Validator {
     Module& mod_;
     diag::List diagnostics_;
     Disassembler dis_{mod_};
-
+    std::unique_ptr<core::intrinsic::Table> intrinsic_table_ =
+        core::intrinsic::Table::Create(core::intrinsic::data::kData,
+                                       mod_.Types(),
+                                       mod_.symbols,
+                                       diagnostics_);
     Block* current_block_ = nullptr;
     Hashset<Function*, 4> seen_functions_;
     Vector<ControlInstruction*, 8> control_stack_;
@@ -508,15 +519,22 @@ void Validator::CheckLet(Let* let) {
 
 void Validator::CheckCall(Call* call) {
     tint::Switch(
-        call,                      //
-        [&](Bitcast*) {},          //
-        [&](CoreBuiltinCall*) {},  //
-        [&](IntrinsicCall*) {},    //
-        [&](Construct*) {},        //
-        [&](Convert*) {},          //
-        [&](Discard*) {},          //
-        [&](UserCall*) {},         //
+        call,                                                  //
+        [&](Bitcast*) {},                                      //
+        [&](CoreBuiltinCall* c) { CheckCoreBuiltinCall(c); },  //
+        [&](IntrinsicCall*) {},                                //
+        [&](Construct*) {},                                    //
+        [&](Convert*) {},                                      //
+        [&](Discard*) {},                                      //
+        [&](UserCall*) {},                                     //
         [&](Default) { AddError(call, InstError(call, "missing validation")); });
+}
+
+void Validator::CheckCoreBuiltinCall(CoreBuiltinCall* call) {
+    auto args = Transform<8>(call->Args(), [&](ir::Value* v) { return v->Type(); });
+    auto result =
+        intrinsic_table_->Lookup(call->Func(), args, core::EvaluationStage::kRuntime, Source{});
+    (void)result;  // Lookup returns an error diagnostic on overload failure
 }
 
 void Validator::CheckAccess(ir::Access* a) {

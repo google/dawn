@@ -536,7 +536,8 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
             b.Discard();
             b.ExitIf(ifelse);
         });
-        b.Call(ty.void_(), core::Function::kTextureStore, texture, coord, 0.5_f);
+        b.Call(ty.void_(), core::Function::kTextureStore, b.Load(texture), coord,
+               b.Splat(b.ir.Types().vec4<f32>(), 0.5_f, 4));
         b.Return(ep, 0.5_f);
     });
 
@@ -553,7 +554,8 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
         exit_if  # if_1
       }
     }
-    %5:void = textureStore %texture, %coord, 0.5f
+    %5:texture_storage_2d<r32float, write> = load %texture
+    %6:void = textureStore %5, %coord, vec4<f32>(0.5f)
     ret 0.5f
   }
 }
@@ -574,16 +576,17 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
         exit_if  # if_1
       }
     }
-    %6:bool = load %continue_execution
-    if %6 [t: %b4] {  # if_2
+    %6:texture_storage_2d<r32float, write> = load %texture
+    %7:bool = load %continue_execution
+    if %7 [t: %b4] {  # if_2
       %b4 = block {  # true
-        %7:void = textureStore %texture, %coord, 0.5f
+        %8:void = textureStore %6, %coord, vec4<f32>(0.5f)
         exit_if  # if_2
       }
     }
-    %8:bool = load %continue_execution
-    %9:bool = eq %8, false
-    if %9 [t: %b5] {  # if_3
+    %9:bool = load %continue_execution
+    %10:bool = eq %9, false
+    if %10 [t: %b5] {  # if_3
       %b5 = block {  # true
         terminate_invocation
       }

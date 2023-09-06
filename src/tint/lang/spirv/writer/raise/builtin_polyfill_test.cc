@@ -1579,7 +1579,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleBias_2DArray_Offset) {
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D) {
     auto* t =
         b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
-    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* dref = b.FunctionParam("dref", ty.f32());
     auto* func = b.Function("foo", ty.f32());
@@ -1591,7 +1591,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D) {
     });
 
     auto* src = R"(
-%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
   %b1 = block {
     %6:f32 = textureSampleCompare %t, %s, %coords, %dref
     ret %6
@@ -1601,7 +1601,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
   %b1 = block {
     %6:spirv.sampled_image = spirv.sampled_image %t, %s
     %7:f32 = spirv.image_sample_dref_implicit_lod %6, %coords, %dref, 0u
@@ -1618,7 +1618,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D) {
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D_Offset) {
     auto* t =
         b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
-    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* dref = b.FunctionParam("dref", ty.f32());
     auto* func = b.Function("foo", ty.f32());
@@ -1631,7 +1631,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D_Offset) {
     });
 
     auto* src = R"(
-%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
   %b1 = block {
     %6:f32 = textureSampleCompare %t, %s, %coords, %dref, vec2<i32>(1i)
     ret %6
@@ -1641,7 +1641,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D_Offset) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
   %b1 = block {
     %6:spirv.sampled_image = spirv.sampled_image %t, %s
     %7:f32 = spirv.image_sample_dref_implicit_lod %6, %coords, %dref, 8u, vec2<i32>(1i)
@@ -1658,7 +1658,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2D_Offset) {
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2DArray_Offset) {
     auto* t = b.FunctionParam(
         "t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray));
-    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.i32());
     auto* bias = b.FunctionParam("bias", ty.f32());
@@ -1672,7 +1672,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2DArray_Offset) {
     });
 
     auto* src = R"(
-%foo = func(%t:texture_depth_2d_array, %s:sampler, %coords:vec2<f32>, %array_idx:i32, %bias:f32):f32 -> %b1 {
+%foo = func(%t:texture_depth_2d_array, %s:sampler_comparison, %coords:vec2<f32>, %array_idx:i32, %bias:f32):f32 -> %b1 {
   %b1 = block {
     %7:f32 = textureSampleCompare %t, %s, %coords, %array_idx, %bias, vec2<i32>(1i)
     ret %7
@@ -1682,7 +1682,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2DArray_Offset) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%t:texture_depth_2d_array, %s:sampler, %coords:vec2<f32>, %array_idx:i32, %bias:f32):f32 -> %b1 {
+%foo = func(%t:texture_depth_2d_array, %s:sampler_comparison, %coords:vec2<f32>, %array_idx:i32, %bias:f32):f32 -> %b1 {
   %b1 = block {
     %7:spirv.sampled_image = spirv.sampled_image %t, %s
     %8:f32 = convert %array_idx
@@ -1701,7 +1701,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompare_2DArray_Offset) {
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D) {
     auto* t =
         b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
-    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* dref = b.FunctionParam("dref", ty.f32());
     auto* func = b.Function("foo", ty.f32());
@@ -1714,7 +1714,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D) {
     });
 
     auto* src = R"(
-%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
   %b1 = block {
     %6:f32 = textureSampleCompareLevel %t, %s, %coords, %dref
     ret %6
@@ -1724,7 +1724,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
   %b1 = block {
     %6:spirv.sampled_image = spirv.sampled_image %t, %s
     %7:f32 = spirv.image_sample_dref_implicit_lod %6, %coords, %dref, 2u, 0.0f
@@ -1741,7 +1741,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D) {
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D_Offset) {
     auto* t =
         b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
-    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* dref = b.FunctionParam("dref", ty.f32());
     auto* func = b.Function("foo", ty.f32());
@@ -1754,7 +1754,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D_Offset) {
     });
 
     auto* src = R"(
-%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
   %b1 = block {
     %6:f32 = textureSampleCompareLevel %t, %s, %coords, %dref, vec2<i32>(1i)
     ret %6
@@ -1764,7 +1764,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D_Offset) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
   %b1 = block {
     %6:spirv.sampled_image = spirv.sampled_image %t, %s
     %7:f32 = spirv.image_sample_dref_implicit_lod %6, %coords, %dref, 10u, 0.0f, vec2<i32>(1i)
@@ -1781,7 +1781,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D_Offset) {
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2DArray_Offset) {
     auto* t = b.FunctionParam(
         "t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray));
-    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.i32());
     auto* bias = b.FunctionParam("bias", ty.f32());
@@ -1795,7 +1795,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2DArray_Offset
     });
 
     auto* src = R"(
-%foo = func(%t:texture_depth_2d_array, %s:sampler, %coords:vec2<f32>, %array_idx:i32, %bias:f32):f32 -> %b1 {
+%foo = func(%t:texture_depth_2d_array, %s:sampler_comparison, %coords:vec2<f32>, %array_idx:i32, %bias:f32):f32 -> %b1 {
   %b1 = block {
     %7:f32 = textureSampleCompareLevel %t, %s, %coords, %array_idx, %bias, vec2<i32>(1i)
     ret %7
@@ -1805,7 +1805,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2DArray_Offset
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%t:texture_depth_2d_array, %s:sampler, %coords:vec2<f32>, %array_idx:i32, %bias:f32):f32 -> %b1 {
+%foo = func(%t:texture_depth_2d_array, %s:sampler_comparison, %coords:vec2<f32>, %array_idx:i32, %bias:f32):f32 -> %b1 {
   %b1 = block {
     %7:spirv.sampled_image = spirv.sampled_image %t, %s
     %8:f32 = convert %array_idx
@@ -1833,14 +1833,14 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2D) {
 
     b.Append(func->Block(), [&] {
         auto* result =
-            b.Call(ty.vec4<f32>(), core::Function::kTextureSampleBias, t, s, coords, ddx, ddy);
+            b.Call(ty.vec4<f32>(), core::Function::kTextureSampleGrad, t, s, coords, ddx, ddy);
         b.Return(func, result);
     });
 
     auto* src = R"(
 %foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>, %ddx:vec2<f32>, %ddy:vec2<f32>):vec4<f32> -> %b1 {
   %b1 = block {
-    %7:vec4<f32> = textureSampleBias %t, %s, %coords, %ddx, %ddy
+    %7:vec4<f32> = textureSampleGrad %t, %s, %coords, %ddx, %ddy
     ret %7
   }
 }
@@ -1851,7 +1851,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2D) {
 %foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>, %ddx:vec2<f32>, %ddy:vec2<f32>):vec4<f32> -> %b1 {
   %b1 = block {
     %7:spirv.sampled_image = spirv.sampled_image %t, %s
-    %8:vec4<f32> = spirv.image_sample_implicit_lod %7, %coords, 9u, %ddx, %ddy
+    %8:vec4<f32> = spirv.image_sample_explicit_lod %7, %coords, 4u, %ddx, %ddy
     ret %8
   }
 }
@@ -1873,7 +1873,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2D_Offset) {
     func->SetParams({t, s, coords, ddx, ddy});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f32>(), core::Function::kTextureSampleBias, t, s, coords, ddx,
+        auto* result = b.Call(ty.vec4<f32>(), core::Function::kTextureSampleGrad, t, s, coords, ddx,
                               ddy, b.Splat(ty.vec2<i32>(), 1_i, 2));
         b.Return(func, result);
     });
@@ -1881,7 +1881,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2D_Offset) {
     auto* src = R"(
 %foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>, %ddx:vec2<f32>, %ddy:vec2<f32>):vec4<f32> -> %b1 {
   %b1 = block {
-    %7:vec4<f32> = textureSampleBias %t, %s, %coords, %ddx, %ddy, vec2<i32>(1i)
+    %7:vec4<f32> = textureSampleGrad %t, %s, %coords, %ddx, %ddy, vec2<i32>(1i)
     ret %7
   }
 }
@@ -1892,7 +1892,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2D_Offset) {
 %foo = func(%t:texture_2d<f32>, %s:sampler, %coords:vec2<f32>, %ddx:vec2<f32>, %ddy:vec2<f32>):vec4<f32> -> %b1 {
   %b1 = block {
     %7:spirv.sampled_image = spirv.sampled_image %t, %s
-    %8:vec4<f32> = spirv.image_sample_implicit_lod %7, %coords, 9u, %ddx, %ddy
+    %8:vec4<f32> = spirv.image_sample_explicit_lod %7, %coords, 12u, %ddx, %ddy, vec2<i32>(1i)
     ret %8
   }
 }
@@ -1915,7 +1915,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2DArray_Offset) {
     func->SetParams({t, s, coords, array_idx, ddx, ddy});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f32>(), core::Function::kTextureSampleBias, t, s, coords,
+        auto* result = b.Call(ty.vec4<f32>(), core::Function::kTextureSampleGrad, t, s, coords,
                               array_idx, ddx, ddy, b.Splat(ty.vec2<i32>(), 1_i, 2));
         b.Return(func, result);
     });
@@ -1923,7 +1923,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2DArray_Offset) {
     auto* src = R"(
 %foo = func(%t:texture_2d_array<f32>, %s:sampler, %coords:vec2<f32>, %array_idx:i32, %ddx:vec2<f32>, %ddy:vec2<f32>):vec4<f32> -> %b1 {
   %b1 = block {
-    %8:vec4<f32> = textureSampleBias %t, %s, %coords, %array_idx, %ddx, %ddy, vec2<i32>(1i)
+    %8:vec4<f32> = textureSampleGrad %t, %s, %coords, %array_idx, %ddx, %ddy, vec2<i32>(1i)
     ret %8
   }
 }
@@ -1936,7 +1936,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleGrad_2DArray_Offset) {
     %8:spirv.sampled_image = spirv.sampled_image %t, %s
     %9:f32 = convert %array_idx
     %10:vec3<f32> = construct %coords, %9
-    %11:vec4<f32> = spirv.image_sample_implicit_lod %8, %10, 9u, %ddx, %ddy
+    %11:vec4<f32> = spirv.image_sample_explicit_lod %8, %10, 12u, %ddx, %ddy, vec2<i32>(1i)
     ret %11
   }
 }
@@ -2234,7 +2234,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGather_Depth2D) {
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D) {
     auto* t =
         b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
-    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* depth = b.FunctionParam("depth", ty.f32());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -2247,7 +2247,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D) {
     });
 
     auto* src = R"(
-%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %depth:f32):vec4<f32> -> %b1 {
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %depth:f32):vec4<f32> -> %b1 {
   %b1 = block {
     %6:vec4<f32> = textureGatherCompare %t, %s, %coords, %depth
     ret %6
@@ -2257,7 +2257,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %depth:f32):vec4<f32> -> %b1 {
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %depth:f32):vec4<f32> -> %b1 {
   %b1 = block {
     %6:spirv.sampled_image = spirv.sampled_image %t, %s
     %7:vec4<f32> = spirv.image_dref_gather %6, %coords, %depth, 0u
@@ -2274,7 +2274,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D) {
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D_Offset) {
     auto* t =
         b.FunctionParam("t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2d));
-    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* depth = b.FunctionParam("depth", ty.f32());
     auto* func = b.Function("foo", ty.vec4<f32>());
@@ -2287,7 +2287,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D_Offset) {
     });
 
     auto* src = R"(
-%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %depth:f32):vec4<f32> -> %b1 {
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %depth:f32):vec4<f32> -> %b1 {
   %b1 = block {
     %6:vec4<f32> = textureGatherCompare %t, %s, %coords, %depth, vec2<i32>(1i)
     ret %6
@@ -2297,7 +2297,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D_Offset) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%t:texture_depth_2d, %s:sampler, %coords:vec2<f32>, %depth:f32):vec4<f32> -> %b1 {
+%foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %depth:f32):vec4<f32> -> %b1 {
   %b1 = block {
     %6:spirv.sampled_image = spirv.sampled_image %t, %s
     %7:vec4<f32> = spirv.image_dref_gather %6, %coords, %depth, 8u, vec2<i32>(1i)
@@ -2314,7 +2314,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2D_Offset) {
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2DArray) {
     auto* t = b.FunctionParam(
         "t", ty.Get<core::type::DepthTexture>(core::type::TextureDimension::k2dArray));
-    auto* s = b.FunctionParam("s", ty.sampler());
+    auto* s = b.FunctionParam("s", ty.comparison_sampler());
     auto* coords = b.FunctionParam("coords", ty.vec2<f32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.u32());
     auto* depth = b.FunctionParam("depth", ty.f32());
@@ -2328,7 +2328,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2DArray) {
     });
 
     auto* src = R"(
-%foo = func(%t:texture_depth_2d_array, %s:sampler, %coords:vec2<f32>, %array_idx:u32, %depth:f32):vec4<f32> -> %b1 {
+%foo = func(%t:texture_depth_2d_array, %s:sampler_comparison, %coords:vec2<f32>, %array_idx:u32, %depth:f32):vec4<f32> -> %b1 {
   %b1 = block {
     %7:vec4<f32> = textureGatherCompare %t, %s, %coords, %array_idx, %depth
     ret %7
@@ -2338,7 +2338,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2DArray) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%t:texture_depth_2d_array, %s:sampler, %coords:vec2<f32>, %array_idx:u32, %depth:f32):vec4<f32> -> %b1 {
+%foo = func(%t:texture_depth_2d_array, %s:sampler_comparison, %coords:vec2<f32>, %array_idx:u32, %depth:f32):vec4<f32> -> %b1 {
   %b1 = block {
     %7:spirv.sampled_image = spirv.sampled_image %t, %s
     %8:f32 = convert %array_idx
@@ -2355,13 +2355,13 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureGatherCompare_Depth2DArray) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2D) {
-    auto format = core::TexelFormat::kR32Float;
+    auto format = core::TexelFormat::kR32Uint;
     auto* t =
         b.FunctionParam("t", ty.Get<core::type::StorageTexture>(
                                  core::type::TextureDimension::k2d, format, core::Access::kWrite,
                                  core::type::StorageTexture::SubtypeFor(format, ty)));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
-    auto* texel = b.FunctionParam("texel", ty.i32());
+    auto* texel = b.FunctionParam("texel", ty.vec4<u32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({t, coords, texel});
 
@@ -2371,7 +2371,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2D) {
     });
 
     auto* src = R"(
-%foo = func(%t:texture_storage_2d<r32float, write>, %coords:vec2<i32>, %texel:i32):void -> %b1 {
+%foo = func(%t:texture_storage_2d<r32uint, write>, %coords:vec2<i32>, %texel:vec4<u32>):void -> %b1 {
   %b1 = block {
     %5:void = textureStore %t, %coords, %texel
     ret
@@ -2381,7 +2381,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2D) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%t:texture_storage_2d<r32float, write>, %coords:vec2<i32>, %texel:i32):void -> %b1 {
+%foo = func(%t:texture_storage_2d<r32uint, write>, %coords:vec2<i32>, %texel:vec4<u32>):void -> %b1 {
   %b1 = block {
     %5:void = spirv.image_write %t, %coords, %texel, 0u
     ret
@@ -2395,14 +2395,14 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2D) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2DArray) {
-    auto format = core::TexelFormat::kR32Float;
+    auto format = core::TexelFormat::kRgba8Sint;
     auto* t = b.FunctionParam(
         "t", ty.Get<core::type::StorageTexture>(
                  core::type::TextureDimension::k2dArray, format, core::Access::kWrite,
                  core::type::StorageTexture::SubtypeFor(format, ty)));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.i32());
-    auto* texel = b.FunctionParam("texel", ty.i32());
+    auto* texel = b.FunctionParam("texel", ty.vec4<i32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({t, coords, array_idx, texel});
 
@@ -2412,7 +2412,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2DArray) {
     });
 
     auto* src = R"(
-%foo = func(%t:texture_storage_2d_array<r32float, write>, %coords:vec2<i32>, %array_idx:i32, %texel:i32):void -> %b1 {
+%foo = func(%t:texture_storage_2d_array<rgba8sint, write>, %coords:vec2<i32>, %array_idx:i32, %texel:vec4<i32>):void -> %b1 {
   %b1 = block {
     %6:void = textureStore %t, %coords, %array_idx, %texel
     ret
@@ -2422,7 +2422,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2DArray) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%t:texture_storage_2d_array<r32float, write>, %coords:vec2<i32>, %array_idx:i32, %texel:i32):void -> %b1 {
+%foo = func(%t:texture_storage_2d_array<rgba8sint, write>, %coords:vec2<i32>, %array_idx:i32, %texel:vec4<i32>):void -> %b1 {
   %b1 = block {
     %6:vec3<i32> = construct %coords, %array_idx
     %7:void = spirv.image_write %t, %6, %texel, 0u
@@ -2437,14 +2437,14 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2DArray) {
 }
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2DArray_IndexDifferentType) {
-    auto format = core::TexelFormat::kR32Float;
+    auto format = core::TexelFormat::kRgba32Uint;
     auto* t = b.FunctionParam(
         "t", ty.Get<core::type::StorageTexture>(
                  core::type::TextureDimension::k2dArray, format, core::Access::kWrite,
                  core::type::StorageTexture::SubtypeFor(format, ty)));
     auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
     auto* array_idx = b.FunctionParam("array_idx", ty.u32());
-    auto* texel = b.FunctionParam("texel", ty.i32());
+    auto* texel = b.FunctionParam("texel", ty.vec4<u32>());
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({t, coords, array_idx, texel});
 
@@ -2454,7 +2454,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2DArray_IndexDifferentType)
     });
 
     auto* src = R"(
-%foo = func(%t:texture_storage_2d_array<r32float, write>, %coords:vec2<i32>, %array_idx:u32, %texel:i32):void -> %b1 {
+%foo = func(%t:texture_storage_2d_array<rgba32uint, write>, %coords:vec2<i32>, %array_idx:u32, %texel:vec4<u32>):void -> %b1 {
   %b1 = block {
     %6:void = textureStore %t, %coords, %array_idx, %texel
     ret
@@ -2464,7 +2464,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureStore_2DArray_IndexDifferentType)
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%t:texture_storage_2d_array<r32float, write>, %coords:vec2<i32>, %array_idx:u32, %texel:i32):void -> %b1 {
+%foo = func(%t:texture_storage_2d_array<rgba32uint, write>, %coords:vec2<i32>, %array_idx:u32, %texel:vec4<u32>):void -> %b1 {
   %b1 = block {
     %6:i32 = convert %array_idx
     %7:vec3<i32> = construct %coords, %6
@@ -2767,10 +2767,10 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_DepthCubeArray) {
 
 TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_Storage2DArray) {
     auto format = core::TexelFormat::kR32Float;
-    auto* t =
-        b.FunctionParam("t", ty.Get<core::type::StorageTexture>(
-                                 core::type::TextureDimension::k2d, format, core::Access::kWrite,
-                                 core::type::StorageTexture::SubtypeFor(format, ty)));
+    auto* t = b.FunctionParam(
+        "t", ty.Get<core::type::StorageTexture>(
+                 core::type::TextureDimension::k2dArray, format, core::Access::kWrite,
+                 core::type::StorageTexture::SubtypeFor(format, ty)));
     auto* func = b.Function("foo", ty.u32());
     func->SetParams({t});
 
@@ -2780,7 +2780,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_Storage2DArray) {
     });
 
     auto* src = R"(
-%foo = func(%t:texture_storage_2d<r32float, write>):u32 -> %b1 {
+%foo = func(%t:texture_storage_2d_array<r32float, write>):u32 -> %b1 {
   %b1 = block {
     %3:u32 = textureNumLayers %t
     ret %3
@@ -2790,7 +2790,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_Storage2DArray) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-%foo = func(%t:texture_storage_2d<r32float, write>):u32 -> %b1 {
+%foo = func(%t:texture_storage_2d_array<r32float, write>):u32 -> %b1 {
   %b1 = block {
     %3:vec3<u32> = spirv.image_query_size %t
     %4:u32 = access %3, 2u
