@@ -38,6 +38,9 @@ AddressSpace ParseAddressSpace(std::string_view str) {
     if (str == "function") {
         return AddressSpace::kFunction;
     }
+    if (str == "pixel_local") {
+        return AddressSpace::kPixelLocal;
+    }
     if (str == "private") {
         return AddressSpace::kPrivate;
     }
@@ -68,6 +71,8 @@ std::string_view ToString(AddressSpace value) {
             return "function";
         case AddressSpace::kHandle:
             return "handle";
+        case AddressSpace::kPixelLocal:
+            return "pixel_local";
         case AddressSpace::kPrivate:
             return "private";
         case AddressSpace::kPushConstant:

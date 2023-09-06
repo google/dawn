@@ -109,6 +109,7 @@ if (tint_build_unittests) {
       "load_test.cc",
       "materialize_test.cc",
       "override_test.cc",
+      "pixel_local_extension_test.cc",
       "ptr_ref_test.cc",
       "ptr_ref_validation_test.cc",
       "resolver_behavior_test.cc",

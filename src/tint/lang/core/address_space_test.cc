@@ -47,6 +47,7 @@ static constexpr Case kValidCases[] = {
     {"__in", AddressSpace::kIn},
     {"__out", AddressSpace::kOut},
     {"function", AddressSpace::kFunction},
+    {"pixel_local", AddressSpace::kPixelLocal},
     {"private", AddressSpace::kPrivate},
     {"push_constant", AddressSpace::kPushConstant},
     {"storage", AddressSpace::kStorage},
@@ -55,18 +56,20 @@ static constexpr Case kValidCases[] = {
 };
 
 static constexpr Case kInvalidCases[] = {
-    {"ccin", AddressSpace::kUndefined},          {"3", AddressSpace::kUndefined},
-    {"_Vin", AddressSpace::kUndefined},          {"__ou1", AddressSpace::kUndefined},
-    {"qq_Jt", AddressSpace::kUndefined},         {"__oll7t", AddressSpace::kUndefined},
-    {"qquntppHon", AddressSpace::kUndefined},    {"cnciv", AddressSpace::kUndefined},
-    {"funGion", AddressSpace::kUndefined},       {"priviive", AddressSpace::kUndefined},
-    {"8WWivate", AddressSpace::kUndefined},      {"pxxvate", AddressSpace::kUndefined},
-    {"pXh_cggnstant", AddressSpace::kUndefined}, {"pX_Vonstanu", AddressSpace::kUndefined},
-    {"push_consta3t", AddressSpace::kUndefined}, {"Etorage", AddressSpace::kUndefined},
-    {"sPTTrage", AddressSpace::kUndefined},      {"storadxx", AddressSpace::kUndefined},
-    {"u44iform", AddressSpace::kUndefined},      {"unSSfoVVm", AddressSpace::kUndefined},
-    {"RniR22m", AddressSpace::kUndefined},       {"w9rFroup", AddressSpace::kUndefined},
-    {"workgoup", AddressSpace::kUndefined},      {"woVROOrHup", AddressSpace::kUndefined},
+    {"ccin", AddressSpace::kUndefined},           {"3", AddressSpace::kUndefined},
+    {"_Vin", AddressSpace::kUndefined},           {"__ou1", AddressSpace::kUndefined},
+    {"qq_Jt", AddressSpace::kUndefined},          {"__oll7t", AddressSpace::kUndefined},
+    {"qquntppHon", AddressSpace::kUndefined},     {"cnciv", AddressSpace::kUndefined},
+    {"funGion", AddressSpace::kUndefined},        {"pivel_liical", AddressSpace::kUndefined},
+    {"pixel_lWW8al", AddressSpace::kUndefined},   {"piel_xxoMal", AddressSpace::kUndefined},
+    {"pXvatgg", AddressSpace::kUndefined},        {"rvaXe", AddressSpace::kUndefined},
+    {"priv3te", AddressSpace::kUndefined},        {"push_constanE", AddressSpace::kUndefined},
+    {"push_TTPnstant", AddressSpace::kUndefined}, {"puxxdh_constan", AddressSpace::kUndefined},
+    {"s44orage", AddressSpace::kUndefined},       {"stSSraVVe", AddressSpace::kUndefined},
+    {"RtoR22e", AddressSpace::kUndefined},        {"uFfo9m", AddressSpace::kUndefined},
+    {"uniorm", AddressSpace::kUndefined},         {"VOORRHrm", AddressSpace::kUndefined},
+    {"woykgoup", AddressSpace::kUndefined},       {"l77nnrrkgroGp", AddressSpace::kUndefined},
+    {"wo4kgr00up", AddressSpace::kUndefined},
 };
 
 using AddressSpaceParseTest = testing::TestWithParam<Case>;

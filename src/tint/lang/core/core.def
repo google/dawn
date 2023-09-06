@@ -96,6 +96,7 @@ enum address_space {
   uniform
   storage
   push_constant
+  pixel_local
   __in
   __out
   @internal handle

@@ -3968,8 +3968,8 @@ bool Builder::GenerateVectorType(const core::type::Vector* vec, const Operand& r
     return true;
 }
 
-SpvStorageClass Builder::ConvertAddressSpace(core::AddressSpace klass) const {
-    switch (klass) {
+SpvStorageClass Builder::ConvertAddressSpace(core::AddressSpace address_space) const {
+    switch (address_space) {
         case core::AddressSpace::kIn:
             return SpvStorageClassInput;
         case core::AddressSpace::kOut:
@@ -3988,9 +3988,12 @@ SpvStorageClass Builder::ConvertAddressSpace(core::AddressSpace klass) const {
             return SpvStorageClassPrivate;
         case core::AddressSpace::kFunction:
             return SpvStorageClassFunction;
+
+        case core::AddressSpace::kPixelLocal:
         case core::AddressSpace::kUndefined:
             break;
     }
+    TINT_UNREACHABLE() << "unhandled address space '" << address_space << "'";
     return SpvStorageClassMax;
 }
 

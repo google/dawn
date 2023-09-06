@@ -529,7 +529,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
     auto address_space = core::AddressSpace::kUndefined;
     if (var->declared_address_space) {
         auto expr = AddressSpaceExpression(var->declared_address_space);
-        if (!expr) {
+        if (TINT_UNLIKELY(!expr)) {
             return nullptr;
         }
         address_space = expr->Value();
@@ -1602,7 +1602,20 @@ core::type::Type* Resolver::Type(const ast::Expression* ast) {
 sem::BuiltinEnumExpression<core::AddressSpace>* Resolver::AddressSpaceExpression(
     const ast::Expression* expr) {
     identifier_resolve_hint_ = {expr, "address space", core::kAddressSpaceStrings};
-    return sem_.AsAddressSpace(Expression(expr));
+    auto address_space_expr = sem_.AsAddressSpace(Expression(expr));
+    if (TINT_UNLIKELY(!address_space_expr)) {
+        return nullptr;
+    }
+    if (TINT_UNLIKELY(
+            address_space_expr->Value() == core::AddressSpace::kPixelLocal &&
+            !enabled_extensions_.Contains(core::Extension::kChromiumExperimentalPixelLocal))) {
+        StringStream err;
+        err << "'pixel_local' address space requires the '"
+            << core::Extension::kChromiumExperimentalPixelLocal << "' extension enabled";
+        AddError(err.str(), expr->source);
+        return nullptr;
+    }
+    return address_space_expr;
 }
 
 sem::BuiltinEnumExpression<core::BuiltinValue>* Resolver::BuiltinValueExpression(
@@ -3984,6 +3997,16 @@ bool Resolver::Enable(const ast::Enable* enable) {
     for (auto* ext : enable->extensions) {
         Mark(ext);
         enabled_extensions_.Add(ext->name);
+
+// TODO(crbug.com/dawn/1704): Remove when chromium_experimental_pixel_local is production-ready
+#if !TINT_ENABLE_LOCAL_STORAGE_EXTENSION
+        if (ext->name == core::Extension::kChromiumExperimentalPixelLocal) {
+            AddError(std::string(core::ToString(core::Extension::kChromiumExperimentalPixelLocal)) +
+                         " requires TINT_ENABLE_LOCAL_STORAGE_EXTENSION",
+                     enable->source);
+            return false;
+        }
+#endif
     }
     return true;
 }

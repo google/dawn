@@ -37,6 +37,7 @@ enum class AddressSpace : uint8_t {
     kOut,
     kFunction,
     kHandle,  // Tint-internal enum entry - not parsed
+    kPixelLocal,
     kPrivate,
     kPushConstant,
     kStorage,
@@ -62,7 +63,8 @@ auto& operator<<(STREAM& out, AddressSpace value) {
 AddressSpace ParseAddressSpace(std::string_view str);
 
 constexpr const char* kAddressSpaceStrings[] = {
-    "__in", "__out", "function", "private", "push_constant", "storage", "uniform", "workgroup",
+    "__in",          "__out",   "function", "pixel_local", "private",
+    "push_constant", "storage", "uniform",  "workgroup",
 };
 
 /// @returns true if the AddressSpace is host-shareable

@@ -1727,8 +1727,8 @@ class Builder {
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
     ///   * ast::Type           - specifies the variable's type
-    ///   * core::AddressSpace   - specifies the variable address space
-    ///   * core::Access         - specifies the variable's access control
+    ///   * core::AddressSpace  - specifies the variable address space
+    ///   * core::Access        - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
@@ -1744,10 +1744,10 @@ class Builder {
     /// @param options the extra options passed to the ast::Var initializer
     /// Can be any of the following, in any order:
     ///   * ast::Type           - specifies the variable's type
-    ///   * core::AddressSpace   - specifies the variable address space
-    ///   * core::Access         - specifies the variable's access control
+    ///   * core::AddressSpace  - specifies the variable address space
+    ///   * core::Access        - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
-    ///   * ast::Attribute*    - specifies the variable's attributes (repeatable, or vector)
+    ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
     /// @returns a new `ast::Var`, which is automatically registered as a global variable with the
     /// ast::Module.

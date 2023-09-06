@@ -628,8 +628,7 @@ TEST_P(PtrDataTest, ConvertAddressSpace) {
 INSTANTIATE_TEST_SUITE_P(
     SpirvASTPrinterTest_Type,
     PtrDataTest,
-    testing::Values(PtrData{core::AddressSpace::kUndefined, SpvStorageClassMax},
-                    PtrData{core::AddressSpace::kIn, SpvStorageClassInput},
+    testing::Values(PtrData{core::AddressSpace::kIn, SpvStorageClassInput},
                     PtrData{core::AddressSpace::kOut, SpvStorageClassOutput},
                     PtrData{core::AddressSpace::kUniform, SpvStorageClassUniform},
                     PtrData{core::AddressSpace::kWorkgroup, SpvStorageClassWorkgroup},
