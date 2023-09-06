@@ -741,18 +741,12 @@ TEST_P(VertexFormatTest, Float16x4) {
     DoVertexFormatTest(wgpu::VertexFormat::Float16x4, vertexData, vertexData);
 }
 TEST_P(VertexFormatTest, Float32_Zeros) {
-    // TODO(dawn:1566) Fails on Qualcomm-based Android devices. When using -0.0.
-    // This might pass now that we use rectify_f32?
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
-
     std::vector<float> vertexData = {1.3f, +0.0f, -0.0f};
 
     DoVertexFormatTest(wgpu::VertexFormat::Float32, vertexData, vertexData);
 }
 
 TEST_P(VertexFormatTest, Float32_Plain) {
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
-
     std::vector<float> vertexData = {+1.0f, -1.0f, 18.23f};
 
     DoVertexFormatTest(wgpu::VertexFormat::Float32, vertexData, vertexData);
@@ -762,9 +756,6 @@ TEST_P(VertexFormatTest, Float32x2) {
     // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
     // TODO(dawn:1566) This might pass now that we use rectify_f32?
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
-
-    // TODO(dawn:1566) Fails on Qualcomm-based Android devices.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 
     std::vector<float> vertexData = {18.23f, -0.0f, +0.0f, +1.0f, 1.3f, -1.0f};
 
