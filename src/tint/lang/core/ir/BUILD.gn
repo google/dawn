@@ -177,7 +177,6 @@ if (tint_build_unittests) {
         "if_test.cc",
         "instruction_result_test.cc",
         "instruction_test.cc",
-        "intrinsic_call_test.cc",
         "ir_helper_test.h",
         "let_test.cc",
         "load_test.cc",

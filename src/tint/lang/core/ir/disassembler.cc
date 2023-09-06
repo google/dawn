@@ -479,7 +479,7 @@ void Disassembler::EmitInstruction(Instruction* inst) {
         [&](IntrinsicCall* i) {
             EmitValueWithType(i);
             out_ << " = ";
-            EmitInstructionName(tint::ToString(i->Kind()), i);
+            EmitInstructionName(i->KindName(), i);
             out_ << " ";
             EmitOperandList(i);
         },

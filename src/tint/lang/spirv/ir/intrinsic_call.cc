@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/core/ir/intrinsic_call.h"
+#include "src/tint/lang/spirv/ir/intrinsic_call.h"
 
 #include <utility>
 
-TINT_INSTANTIATE_TYPEINFO(tint::core::ir::IntrinsicCall);
+TINT_INSTANTIATE_TYPEINFO(tint::spirv::ir::IntrinsicCall);
 
-namespace tint::core::ir {
+namespace tint::spirv::ir {
 
-IntrinsicCall::IntrinsicCall(InstructionResult* result, VectorRef<Value*> arguments) {
-    AddOperands(IntrinsicCall::kArgsOperandOffset, std::move(arguments));
-    AddResult(result);
-}
+IntrinsicCall::IntrinsicCall(core::ir::InstructionResult* result,
+                             Intrinsic intrinsic,
+                             VectorRef<core::ir::Value*> arguments)
+    : Base(result, arguments), intrinsic_(intrinsic) {}
 
 IntrinsicCall::~IntrinsicCall() = default;
 
-}  // namespace tint::core::ir
+}  // namespace tint::spirv::ir

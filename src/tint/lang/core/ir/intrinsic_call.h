@@ -15,6 +15,8 @@
 #ifndef SRC_TINT_LANG_CORE_IR_INTRINSIC_CALL_H_
 #define SRC_TINT_LANG_CORE_IR_INTRINSIC_CALL_H_
 
+#include <string>
+
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -26,69 +28,15 @@ class IntrinsicCall : public Castable<IntrinsicCall, Call> {
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
 
-    /// The kind of instruction.
-    enum class Kind {
-        // SPIR-V backend intrinsics.
-        kSpirvArrayLength,
-        kSpirvAtomicAnd,
-        kSpirvAtomicCompareExchange,
-        kSpirvAtomicExchange,
-        kSpirvAtomicIAdd,
-        kSpirvAtomicISub,
-        kSpirvAtomicLoad,
-        kSpirvAtomicOr,
-        kSpirvAtomicSMax,
-        kSpirvAtomicSMin,
-        kSpirvAtomicStore,
-        kSpirvAtomicUMax,
-        kSpirvAtomicUMin,
-        kSpirvAtomicXor,
-        kSpirvDot,
-        kSpirvImageFetch,
-        kSpirvImageGather,
-        kSpirvImageDrefGather,
-        kSpirvImageQuerySize,
-        kSpirvImageQuerySizeLod,
-        kSpirvImageSampleImplicitLod,
-        kSpirvImageSampleExplicitLod,
-        kSpirvImageSampleDrefImplicitLod,
-        kSpirvImageSampleDrefExplicitLod,
-        kSpirvImageWrite,
-        kSpirvMatrixTimesMatrix,
-        kSpirvMatrixTimesScalar,
-        kSpirvMatrixTimesVector,
-        kSpirvSampledImage,
-        kSpirvSelect,
-        kSpirvVectorTimesMatrix,
-        kSpirvVectorTimesScalar,
-    };
-
     /// Constructor
     /// @param result the result value
-    /// @param kind the intrinsic kind
     /// @param args the intrinsic call arguments
-    IntrinsicCall(InstructionResult* result, enum Kind kind, VectorRef<Value*> args = tint::Empty);
+    explicit IntrinsicCall(InstructionResult* result, VectorRef<Value*> args = tint::Empty);
     ~IntrinsicCall() override;
 
-    /// @returns the builtin function
-    enum Kind Kind() { return kind_; }
-
-    /// @returns the friendly name for the instruction
-    std::string_view FriendlyName() override { return "intrinsic-call"; }
-
-  private:
-    enum Kind kind_;
+    /// @returns the intrinsic name
+    virtual std::string KindName() const = 0;
 };
-
-/// @param kind the enum value
-/// @returns the string for the given enum value
-std::string_view ToString(enum IntrinsicCall::Kind kind);
-
-/// Emits the name of the intrinsic type.
-template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
-auto& operator<<(STREAM& out, enum IntrinsicCall::Kind kind) {
-    return out << ToString(kind);
-}
 
 }  // namespace tint::core::ir
 

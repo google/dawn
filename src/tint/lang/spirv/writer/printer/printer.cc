@@ -74,6 +74,7 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
+#include "src/tint/lang/spirv/ir/intrinsic_call.h"
 #include "src/tint/lang/spirv/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/spirv/writer/common/module.h"
 #include "src/tint/lang/spirv/writer/raise/builtin_polyfill.h"
@@ -764,7 +765,7 @@ void Printer::EmitBlockInstructions(core::ir::Block* block) {
             [&](core::ir::CoreBuiltinCall* b) { EmitCoreBuiltinCall(b); },        //
             [&](core::ir::Construct* c) { EmitConstruct(c); },                    //
             [&](core::ir::Convert* c) { EmitConvert(c); },                        //
-            [&](core::ir::IntrinsicCall* i) { EmitIntrinsicCall(i); },            //
+            [&](spirv::ir::IntrinsicCall* i) { EmitIntrinsicCall(i); },           //
             [&](core::ir::Load* l) { EmitLoad(l); },                              //
             [&](core::ir::LoadVectorElement* l) { EmitLoadVectorElement(l); },    //
             [&](core::ir::Loop* l) { EmitLoop(l); },                              //
@@ -1529,109 +1530,112 @@ void Printer::EmitConvert(core::ir::Convert* convert) {
     current_function_.push_inst(op, std::move(operands));
 }
 
-void Printer::EmitIntrinsicCall(core::ir::IntrinsicCall* call) {
+void Printer::EmitIntrinsicCall(spirv::ir::IntrinsicCall* call) {
     auto id = Value(call);
 
     spv::Op op = spv::Op::Max;
     switch (call->Kind()) {
-        case core::ir::IntrinsicCall::Kind::kSpirvArrayLength:
+        case spirv::ir::Intrinsic::kArrayLength:
             op = spv::Op::OpArrayLength;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvAtomicIAdd:
+        case spirv::ir::Intrinsic::kAtomicIadd:
             op = spv::Op::OpAtomicIAdd;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvAtomicISub:
+        case spirv::ir::Intrinsic::kAtomicIsub:
             op = spv::Op::OpAtomicISub;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvAtomicAnd:
+        case spirv::ir::Intrinsic::kAtomicAnd:
             op = spv::Op::OpAtomicAnd;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvAtomicCompareExchange:
+        case spirv::ir::Intrinsic::kAtomicCompareExchange:
             op = spv::Op::OpAtomicCompareExchange;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvAtomicExchange:
+        case spirv::ir::Intrinsic::kAtomicExchange:
             op = spv::Op::OpAtomicExchange;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvAtomicLoad:
+        case spirv::ir::Intrinsic::kAtomicLoad:
             op = spv::Op::OpAtomicLoad;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvAtomicOr:
+        case spirv::ir::Intrinsic::kAtomicOr:
             op = spv::Op::OpAtomicOr;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvAtomicSMax:
+        case spirv::ir::Intrinsic::kAtomicSmax:
             op = spv::Op::OpAtomicSMax;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvAtomicSMin:
+        case spirv::ir::Intrinsic::kAtomicSmin:
             op = spv::Op::OpAtomicSMin;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvAtomicStore:
+        case spirv::ir::Intrinsic::kAtomicStore:
             op = spv::Op::OpAtomicStore;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvAtomicUMax:
+        case spirv::ir::Intrinsic::kAtomicUmax:
             op = spv::Op::OpAtomicUMax;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvAtomicUMin:
+        case spirv::ir::Intrinsic::kAtomicUmin:
             op = spv::Op::OpAtomicUMin;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvAtomicXor:
+        case spirv::ir::Intrinsic::kAtomicXor:
             op = spv::Op::OpAtomicXor;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvDot:
+        case spirv::ir::Intrinsic::kDot:
             op = spv::Op::OpDot;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvImageFetch:
+        case spirv::ir::Intrinsic::kImageFetch:
             op = spv::Op::OpImageFetch;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvImageGather:
+        case spirv::ir::Intrinsic::kImageGather:
             op = spv::Op::OpImageGather;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvImageDrefGather:
+        case spirv::ir::Intrinsic::kImageDrefGather:
             op = spv::Op::OpImageDrefGather;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvImageQuerySize:
+        case spirv::ir::Intrinsic::kImageQuerySize:
             module_.PushCapability(SpvCapabilityImageQuery);
             op = spv::Op::OpImageQuerySize;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvImageQuerySizeLod:
+        case spirv::ir::Intrinsic::kImageQuerySizeLod:
             module_.PushCapability(SpvCapabilityImageQuery);
             op = spv::Op::OpImageQuerySizeLod;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvImageSampleImplicitLod:
+        case spirv::ir::Intrinsic::kImageSampleImplicitLod:
             op = spv::Op::OpImageSampleImplicitLod;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvImageSampleExplicitLod:
+        case spirv::ir::Intrinsic::kImageSampleExplicitLod:
             op = spv::Op::OpImageSampleExplicitLod;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvImageSampleDrefImplicitLod:
+        case spirv::ir::Intrinsic::kImageSampleDrefImplicitLod:
             op = spv::Op::OpImageSampleDrefImplicitLod;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvImageSampleDrefExplicitLod:
+        case spirv::ir::Intrinsic::kImageSampleDrefExplicitLod:
             op = spv::Op::OpImageSampleDrefExplicitLod;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvImageWrite:
+        case spirv::ir::Intrinsic::kImageWrite:
             op = spv::Op::OpImageWrite;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvMatrixTimesMatrix:
+        case spirv::ir::Intrinsic::kMatrixTimesMatrix:
             op = spv::Op::OpMatrixTimesMatrix;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvMatrixTimesScalar:
+        case spirv::ir::Intrinsic::kMatrixTimesScalar:
             op = spv::Op::OpMatrixTimesScalar;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvMatrixTimesVector:
+        case spirv::ir::Intrinsic::kMatrixTimesVector:
             op = spv::Op::OpMatrixTimesVector;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvSampledImage:
+        case spirv::ir::Intrinsic::kSampledImage:
             op = spv::Op::OpSampledImage;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvSelect:
+        case spirv::ir::Intrinsic::kSelect:
             op = spv::Op::OpSelect;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvVectorTimesMatrix:
+        case spirv::ir::Intrinsic::kVectorTimesMatrix:
             op = spv::Op::OpVectorTimesMatrix;
             break;
-        case core::ir::IntrinsicCall::Kind::kSpirvVectorTimesScalar:
+        case spirv::ir::Intrinsic::kVectorTimesScalar:
             op = spv::Op::OpVectorTimesScalar;
             break;
+        case spirv::ir::Intrinsic::kUndefined:
+            TINT_ICE() << "undefined spirv intrinsic";
+            return;
     }
 
     OperandList operands;

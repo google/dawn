@@ -625,12 +625,10 @@ class Builder {
     /// @param kind the intrinsic function to call
     /// @param args the call arguments
     /// @returns the intrinsic call instruction
-    template <typename... ARGS>
-    ir::IntrinsicCall* Call(const core::type::Type* type,
-                            enum IntrinsicCall::Kind kind,
-                            ARGS&&... args) {
-        return Append(ir.instructions.Create<ir::IntrinsicCall>(
-            InstructionResult(type), kind, Values(std::forward<ARGS>(args)...)));
+    template <typename KLASS, typename KIND, typename... ARGS>
+    ir::IntrinsicCall* Call(const core::type::Type* type, KIND kind, ARGS&&... args) {
+        return Append(ir.instructions.Create<KLASS>(InstructionResult(type), kind,
+                                                    Values(std::forward<ARGS>(args)...)));
     }
 
     /// Creates a value conversion instruction

@@ -36,6 +36,7 @@ tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
   tint_lang_core_intrinsic_test
   tint_lang_core_type_test
   tint_lang_core_test
+  tint_lang_spirv_ir_test
   tint_lang_wgsl_ast_transform_test
   tint_lang_wgsl_ast_test
   tint_lang_wgsl_helpers_test

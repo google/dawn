@@ -1727,7 +1727,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D) {
 %foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
   %b1 = block {
     %6:spirv.sampled_image = spirv.sampled_image %t, %s
-    %7:f32 = spirv.image_sample_dref_implicit_lod %6, %coords, %dref, 2u, 0.0f
+    %7:f32 = spirv.image_sample_dref_explicit_lod %6, %coords, %dref, 2u, 0.0f
     ret %7
   }
 }
@@ -1767,7 +1767,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2D_Offset) {
 %foo = func(%t:texture_depth_2d, %s:sampler_comparison, %coords:vec2<f32>, %dref:f32):f32 -> %b1 {
   %b1 = block {
     %6:spirv.sampled_image = spirv.sampled_image %t, %s
-    %7:f32 = spirv.image_sample_dref_implicit_lod %6, %coords, %dref, 10u, 0.0f, vec2<i32>(1i)
+    %7:f32 = spirv.image_sample_dref_explicit_lod %6, %coords, %dref, 10u, 0.0f, vec2<i32>(1i)
     ret %7
   }
 }
@@ -1810,7 +1810,7 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureSampleCompareLevel_2DArray_Offset
     %7:spirv.sampled_image = spirv.sampled_image %t, %s
     %8:f32 = convert %array_idx
     %9:vec3<f32> = construct %coords, %8
-    %10:f32 = spirv.image_sample_dref_implicit_lod %7, %9, %bias, 10u, 0.0f, vec2<i32>(1i)
+    %10:f32 = spirv.image_sample_dref_explicit_lod %7, %9, %bias, 10u, 0.0f, vec2<i32>(1i)
     ret %10
   }
 }

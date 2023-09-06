@@ -179,7 +179,6 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/if_test.cc
   lang/core/ir/instruction_result_test.cc
   lang/core/ir/instruction_test.cc
-  lang/core/ir/intrinsic_call_test.cc
   lang/core/ir/ir_helper_test.h
   lang/core/ir/let_test.cc
   lang/core/ir/load_test.cc
