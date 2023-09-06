@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <tuple>
 #include <utility>
 
 #include "src/tint/lang/core/fluent_types.h"
@@ -2661,20 +2662,52 @@ bool Validator::CheckTypeAccessAddressSpace(const core::type::Type* store_ty,
         return false;
     }
 
-    if (address_space == core::AddressSpace::kPushConstant &&
-        !enabled_extensions_.Contains(core::Extension::kChromiumExperimentalPushConstant) &&
-        IsValidationEnabled(attributes, ast::DisabledValidation::kIgnoreAddressSpace)) {
-        AddError(
-            "use of variable address space 'push_constant' requires enabling extension "
-            "'chromium_experimental_push_constant'",
-            source);
-        return false;
-    }
-
-    if (address_space == core::AddressSpace::kStorage && access == core::Access::kWrite) {
-        // The access mode for the storage address space can only be 'read' or 'read_write'.
-        AddError("access mode 'write' is not valid for the 'storage' address space", source);
-        return false;
+    switch (address_space) {
+        case core::AddressSpace::kPixelLocal:
+            using AllowedTypes = std::tuple<core::type::I32, core::type::U32, core::type::F32>;
+            if (auto* str = store_ty->As<sem::Struct>()) {
+                for (auto* member : str->Members()) {
+                    if (TINT_UNLIKELY(!member->Type()->TypeInfo().IsAnyOfTuple<AllowedTypes>())) {
+                        AddError(
+                            "struct members used in the 'pixel_local' address space can only be of "
+                            "the type 'i32', 'u32' or 'f32'",
+                            member->Declaration()->source);
+                        AddNote("struct '" + str->Name().Name() +
+                                    "' used in the 'pixel_local' address space here",
+                                source);
+                        return false;
+                    }
+                }
+            } else if (TINT_UNLIKELY(!store_ty->TypeInfo().IsAnyOfTuple<AllowedTypes>())) {
+                AddError(
+                    "'pixel_local' address space variables can only be of type 'i32', 'u32', 'f32' "
+                    "or a struct of those types",
+                    source);
+                return false;
+            }
+            break;
+        case core::AddressSpace::kPushConstant:
+            if (TINT_UNLIKELY(!enabled_extensions_.Contains(
+                                  core::Extension::kChromiumExperimentalPushConstant) &&
+                              IsValidationEnabled(attributes,
+                                                  ast::DisabledValidation::kIgnoreAddressSpace))) {
+                AddError(
+                    "use of variable address space 'push_constant' requires enabling extension "
+                    "'chromium_experimental_push_constant'",
+                    source);
+                return false;
+            }
+            break;
+        case core::AddressSpace::kStorage:
+            if (TINT_UNLIKELY(access == core::Access::kWrite)) {
+                // The access mode for the storage address space can only be 'read' or 'read_write'.
+                AddError("access mode 'write' is not valid for the 'storage' address space",
+                         source);
+                return false;
+            }
+            break;
+        default:
+            break;
     }
 
     auto atomic_error = [&]() -> const char* {

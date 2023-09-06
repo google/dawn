@@ -687,6 +687,29 @@ struct DataType<core::fluent_types::array<T, N>> {
     }
 };
 
+/// Helper for building atomic types and expressions
+template <typename T>
+struct DataType<core::fluent_types::atomic<T>> {
+    /// The element type
+    using ElementType = typename DataType<T>::ElementType;
+
+    /// true as atomics are a composite type
+    static constexpr bool is_composite = true;
+
+    /// @param b the ProgramBuilder
+    /// @return a new AST atomic type
+    static inline ast::Type AST(ProgramBuilder& b) { return b.ty.atomic(DataType<T>::AST(b)); }
+
+    /// @param b the ProgramBuilder
+    /// @return the semantic atomic type
+    static inline const core::type::Type* Sem(ProgramBuilder& b) {
+        return b.Types().atomic(DataType<T>::Sem(b));
+    }
+
+    /// @returns the WGSL name for the type
+    static inline std::string Name() { return "atomic<" + DataType<T>::Name() + ">"; }
+};
+
 /// Struct of all creation pointer types
 struct CreatePtrs {
     /// ast node type create function
