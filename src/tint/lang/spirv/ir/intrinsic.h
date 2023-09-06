@@ -65,7 +65,6 @@ enum class Intrinsic : uint8_t {
     kSampledImage,
     kSelect,
     kVectorTimesMatrix,
-    kVectorTimesScalar,
 };
 
 /// @param value the enum value
@@ -117,7 +116,6 @@ constexpr const char* kIntrinsicStrings[] = {
     "sampled_image",
     "select",
     "vector_times_matrix",
-    "vector_times_scalar",
 };
 
 }  // namespace tint::spirv::ir

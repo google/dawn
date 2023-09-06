@@ -122,9 +122,6 @@ Intrinsic ParseIntrinsic(std::string_view str) {
     if (str == "vector_times_matrix") {
         return Intrinsic::kVectorTimesMatrix;
     }
-    if (str == "vector_times_scalar") {
-        return Intrinsic::kVectorTimesScalar;
-    }
     return Intrinsic::kUndefined;
 }
 
@@ -194,8 +191,6 @@ std::string_view ToString(Intrinsic value) {
             return "select";
         case Intrinsic::kVectorTimesMatrix:
             return "vector_times_matrix";
-        case Intrinsic::kVectorTimesScalar:
-            return "vector_times_scalar";
     }
     return "<unknown>";
 }

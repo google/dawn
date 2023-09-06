@@ -24,6 +24,7 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/texel_format.h"
+#include "src/tint/lang/spirv/ir/builtin_call.h"
 #include "src/tint/lang/spirv/ir/intrinsic_call.h"
 #include "src/tint/lang/spirv/writer/common/binary_writer.h"
 #include "src/tint/lang/spirv/writer/common/function.h"
@@ -198,6 +199,10 @@ class Printer {
     /// Emit a bitcast instruction.
     /// @param bitcast the bitcast instruction to emit
     void EmitBitcast(core::ir::Bitcast* bitcast);
+
+    /// Emit a builtin function call instruction.
+    /// @param call the builtin call instruction to emit
+    void EmitSpirvBuiltinCall(spirv::ir::BuiltinCall* call);
 
     /// Emit a builtin function call instruction.
     /// @param call the builtin call instruction to emit

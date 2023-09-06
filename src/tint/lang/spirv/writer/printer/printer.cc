@@ -763,6 +763,7 @@ void Printer::EmitBlockInstructions(core::ir::Block* block) {
             [&](core::ir::Binary* b) { EmitBinary(b); },                          //
             [&](core::ir::Bitcast* b) { EmitBitcast(b); },                        //
             [&](core::ir::CoreBuiltinCall* b) { EmitCoreBuiltinCall(b); },        //
+            [&](spirv::ir::BuiltinCall* b) { EmitSpirvBuiltinCall(b); },          //
             [&](core::ir::Construct* c) { EmitConstruct(c); },                    //
             [&](core::ir::Convert* c) { EmitConvert(c); },                        //
             [&](spirv::ir::IntrinsicCall* i) { EmitIntrinsicCall(i); },           //
@@ -1084,6 +1085,29 @@ void Printer::EmitBitcast(core::ir::Bitcast* bitcast) {
     }
     current_function_.push_inst(spv::Op::OpBitcast,
                                 {Type(ty), Value(bitcast), Value(bitcast->Val())});
+}
+
+void Printer::EmitSpirvBuiltinCall(spirv::ir::BuiltinCall* builtin) {
+    auto id = Value(builtin);
+
+    spv::Op op = spv::Op::Max;
+    switch (builtin->Func()) {
+        case spirv::ir::Function::kVectorTimesScalar:
+            op = spv::Op::OpVectorTimesScalar;
+            break;
+        case spirv::ir::Function::kNone:
+            TINT_ICE() << "undefined spirv ir function";
+            return;
+    }
+
+    OperandList operands;
+    if (!builtin->Result()->Type()->Is<core::type::Void>()) {
+        operands = {Type(builtin->Result()->Type()), id};
+    }
+    for (auto* arg : builtin->Args()) {
+        operands.push_back(Value(arg));
+    }
+    current_function_.push_inst(op, operands);
 }
 
 void Printer::EmitCoreBuiltinCall(core::ir::CoreBuiltinCall* builtin) {
@@ -1629,9 +1653,6 @@ void Printer::EmitIntrinsicCall(spirv::ir::IntrinsicCall* call) {
             break;
         case spirv::ir::Intrinsic::kVectorTimesMatrix:
             op = spv::Op::OpVectorTimesMatrix;
-            break;
-        case spirv::ir::Intrinsic::kVectorTimesScalar:
-            op = spv::Op::OpVectorTimesScalar;
             break;
         case spirv::ir::Intrinsic::kUndefined:
             TINT_ICE() << "undefined spirv intrinsic";

@@ -31,6 +31,10 @@ if (tint_build_unittests) {
 
 libtint_source_set("ir") {
   sources = [
+    "builtin_call.cc",
+    "builtin_call.h",
+    "function.cc",
+    "function.h",
     "intrinsic.cc",
     "intrinsic.h",
     "intrinsic_call.cc",

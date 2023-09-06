@@ -16,6 +16,17 @@
 // Spirv builtin definition file                                              //
 ////////////////////////////////////////////////////////////////////////////////
 
+// TODO(crbug.com/2036): add an include facility and move these duplicate match and type lines
+// into a common file.
+match f32_f16: f32 | f16
+
+type f32
+type f16
+type vec2<T>
+type vec3<T>
+type vec4<T>
+@display("vec{N}<{T}>")     type vec<N: num, T>
+
 ////////////////////////////////////////////////////////////////////////////////
 // Enumerators                                                                //
 ////////////////////////////////////////////////////////////////////////////////
@@ -52,5 +63,10 @@ enum intrinsic {
   sampled_image
   select
   vector_times_matrix
-  vector_times_scalar
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Builtin Functions                                                          //
+////////////////////////////////////////////////////////////////////////////////
+fn vector_times_scalar<T: f32_f16, N: num>(vec<N, T>, T) -> vec<N, T>
+

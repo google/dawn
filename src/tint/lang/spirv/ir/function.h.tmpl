@@ -1,0 +1,49 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/src/cmd/gen to generate function.h
+
+To update the generated file, run:
+    ./tools/run gen
+
+See:
+* tools/src/cmd/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+{{- $I := LoadIntrinsics "src/tint/lang/spirv/ir/spirv.def" -}}
+
+#ifndef SRC_TINT_LANG_SPIRV_IR_FUNCTION_H_
+#define SRC_TINT_LANG_SPIRV_IR_FUNCTION_H_
+
+#include <cstdint>
+#include <string>
+
+#include "src/tint/utils/traits/traits.h"
+
+// \cond DO_NOT_DOCUMENT
+namespace tint::spirv::ir {
+
+/// Enumerator of all builtin functions
+enum class Function : uint8_t {
+{{- range $I.Sem.Builtins }}
+    k{{PascalCase .Name}},
+{{- end }}
+    kNone,
+};
+
+/// @returns the name of the builtin function type. The spelling, including
+/// case, matches the name in the WGSL spec.
+const char* str(Function i);
+
+/// Emits the name of the builtin function type. The spelling, including case,
+/// matches the name in the WGSL spec.
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& o, Function i) {
+  return o << str(i);
+}
+
+}  // namespace tint::spirv::ir
+// \endcond
+
+#endif  // SRC_TINT_LANG_SPIRV_IR_FUNCTION_H_

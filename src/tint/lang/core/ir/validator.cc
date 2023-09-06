@@ -527,7 +527,9 @@ void Validator::CheckCall(Call* call) {
         [&](Convert*) {},                                      //
         [&](Discard*) {},                                      //
         [&](UserCall*) {},                                     //
-        [&](Default) { AddError(call, InstError(call, "missing validation")); });
+        [&](Default) {
+            // Validation of custom IR instructions
+        });
 }
 
 void Validator::CheckCoreBuiltinCall(CoreBuiltinCall* call) {

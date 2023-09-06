@@ -19,7 +19,8 @@
 #include "src/tint/lang/core/ir/builder.h"
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
-#include "src/tint/lang/spirv/ir/intrinsic_call.h"
+#include "src/tint/lang/spirv/ir/builtin_call.h"
+#include "src/tint/lang/spirv/ir/function.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
 
@@ -89,8 +90,8 @@ void Run(core::ir::Module* ir) {
         auto* result_ty = binary->Result()->Type();
         if (result_ty->is_float_vector() && binary->Kind() == core::ir::Binary::Kind::kMultiply) {
             // Use OpVectorTimesScalar for floating point multiply.
-            auto* vts = b.Call<spirv::ir::IntrinsicCall>(result_ty,
-                                                         spirv::ir::Intrinsic::kVectorTimesScalar);
+            auto* vts =
+                b.Call<spirv::ir::BuiltinCall>(result_ty, spirv::ir::Function::kVectorTimesScalar);
             if (binary->LHS()->Type()->Is<core::type::Scalar>()) {
                 vts->AppendArg(binary->RHS());
                 vts->AppendArg(binary->LHS());
