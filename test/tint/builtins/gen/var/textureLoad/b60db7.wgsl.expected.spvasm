@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 57
+; Bound: 58
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -60,7 +60,7 @@
 %_ptr_Function_v4float = OpTypePointer Function %v4float
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_v4float = OpTypePointer StorageBuffer %v4float
-         %43 = OpTypeFunction %v4float
+         %44 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %textureLoad_b60db7 = OpFunction %void None %15
          %18 = OpLabel
@@ -76,31 +76,32 @@
          %35 = OpLoad %uint %arg_2
          %36 = OpCompositeConstruct %v3uint %33 %34 %35
          %29 = OpImageRead %v4float %30 %36
-               OpStore %res %29
-         %41 = OpAccessChain %_ptr_StorageBuffer_v4float %prevent_dce %uint_0
-         %42 = OpLoad %v4float %res
-               OpStore %41 %42
+         %37 = OpVectorShuffle %v4float %29 %29 2 1 0 3
+               OpStore %res %37
+         %42 = OpAccessChain %_ptr_StorageBuffer_v4float %prevent_dce %uint_0
+         %43 = OpLoad %v4float %res
+               OpStore %42 %43
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %43
-         %45 = OpLabel
-         %46 = OpFunctionCall %void %textureLoad_b60db7
+%vertex_main_inner = OpFunction %v4float None %44
+         %46 = OpLabel
+         %47 = OpFunctionCall %void %textureLoad_b60db7
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %15
-         %48 = OpLabel
-         %49 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %49
+         %49 = OpLabel
+         %50 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %50
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %15
-         %52 = OpLabel
-         %53 = OpFunctionCall %void %textureLoad_b60db7
+         %53 = OpLabel
+         %54 = OpFunctionCall %void %textureLoad_b60db7
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %15
-         %55 = OpLabel
-         %56 = OpFunctionCall %void %textureLoad_b60db7
+         %56 = OpLabel
+         %57 = OpFunctionCall %void %textureLoad_b60db7
                OpReturn
                OpFunctionEnd

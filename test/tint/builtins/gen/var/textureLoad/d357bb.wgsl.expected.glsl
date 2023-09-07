@@ -7,7 +7,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 
 void textureLoad_d357bb() {
   int arg_1 = 1;
-  vec4 res = imageLoad(arg_0, ivec2(arg_1, 0));
+  vec4 res = imageLoad(arg_0, ivec2(arg_1, 0)).bgra;
   prevent_dce.inner = res;
 }
 
@@ -34,7 +34,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 
 void textureLoad_d357bb() {
   int arg_1 = 1;
-  vec4 res = imageLoad(arg_0, ivec2(arg_1, 0));
+  vec4 res = imageLoad(arg_0, ivec2(arg_1, 0)).bgra;
   prevent_dce.inner = res;
 }
 
@@ -55,7 +55,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 
 void textureLoad_d357bb() {
   int arg_1 = 1;
-  vec4 res = imageLoad(arg_0, ivec2(arg_1, 0));
+  vec4 res = imageLoad(arg_0, ivec2(arg_1, 0)).bgra;
   prevent_dce.inner = res;
 }
 

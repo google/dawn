@@ -441,6 +441,32 @@ fn f(tex : texture_storage_3d<rgba8unorm, write>) {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(BuiltinPolyfillTest, Bgra8unorm_TextureLoad) {
+    auto* src = R"(
+enable chromium_experimental_read_write_storage_texture;
+
+@group(0) @binding(0) var tex : texture_storage_2d<bgra8unorm, read>;
+
+fn f(coords : vec2<i32>) -> vec4<f32> {
+  return textureLoad(tex, coords);
+}
+)";
+
+    auto* expect = R"(
+enable chromium_experimental_read_write_storage_texture;
+
+@group(0) @binding(0) var tex : texture_storage_2d<rgba8unorm, read>;
+
+fn f(coords : vec2<i32>) -> vec4<f32> {
+  return textureLoad(tex, coords).bgra;
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillBgra8unorm());
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(BuiltinPolyfillTest, Bgra8unorm_TextureStore) {
     auto* src = R"(
 @group(0) @binding(0) var tex : texture_storage_2d<bgra8unorm, write>;
@@ -509,6 +535,32 @@ fn f(coords : vec2<i32>, value : vec4<f32>) {
     data.Add<BuiltinPolyfill::Config>(builtins);
 
     auto got = Run<BuiltinPolyfill>(src, std::move(data));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, Bgra8unorm_TextureLoadAndStore) {
+    auto* src = R"(
+enable chromium_experimental_read_write_storage_texture;
+
+@group(0) @binding(0) var tex : texture_storage_2d<bgra8unorm, read_write>;
+
+fn f(coords : vec2<i32>) {
+  textureStore(tex, coords, textureLoad(tex, coords));
+}
+)";
+
+    auto* expect = R"(
+enable chromium_experimental_read_write_storage_texture;
+
+@group(0) @binding(0) var tex : texture_storage_2d<rgba8unorm, read_write>;
+
+fn f(coords : vec2<i32>) {
+  textureStore(tex, coords, textureLoad(tex, coords).bgra.bgra);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillBgra8unorm());
 
     EXPECT_EQ(expect, str(got));
 }

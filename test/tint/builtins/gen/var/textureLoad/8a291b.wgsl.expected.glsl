@@ -8,7 +8,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 void textureLoad_8a291b() {
   ivec2 arg_1 = ivec2(1);
   uint arg_2 = 1u;
-  vec4 res = imageLoad(arg_0, ivec3(arg_1, int(arg_2)));
+  vec4 res = imageLoad(arg_0, ivec3(arg_1, int(arg_2))).bgra;
   prevent_dce.inner = res;
 }
 
@@ -36,7 +36,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 void textureLoad_8a291b() {
   ivec2 arg_1 = ivec2(1);
   uint arg_2 = 1u;
-  vec4 res = imageLoad(arg_0, ivec3(arg_1, int(arg_2)));
+  vec4 res = imageLoad(arg_0, ivec3(arg_1, int(arg_2))).bgra;
   prevent_dce.inner = res;
 }
 
@@ -58,7 +58,7 @@ layout(binding = 0, std430) buffer prevent_dce_block_ssbo {
 void textureLoad_8a291b() {
   ivec2 arg_1 = ivec2(1);
   uint arg_2 = 1u;
-  vec4 res = imageLoad(arg_0, ivec3(arg_1, int(arg_2)));
+  vec4 res = imageLoad(arg_0, ivec3(arg_1, int(arg_2))).bgra;
   prevent_dce.inner = res;
 }
 

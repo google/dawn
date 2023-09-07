@@ -1183,6 +1183,22 @@ struct BuiltinPolyfill::State {
                         }
                         return Symbol{};
 
+                    case core::Function::kTextureLoad:
+                        if (cfg.builtins.bgra8unorm) {
+                            auto& sig = builtin->Signature();
+                            auto* tex = sig.Parameter(core::ParameterUsage::kTexture);
+                            if (auto* stex = tex->Type()->As<core::type::StorageTexture>()) {
+                                if (stex->texel_format() == core::TexelFormat::kBgra8Unorm) {
+                                    ctx.Replace(expr, [this, expr] {
+                                        return ctx.dst->MemberAccessor(
+                                            ctx.CloneWithoutTransform(expr), "bgra");
+                                    });
+                                    made_changes = true;
+                                }
+                            }
+                        }
+                        return Symbol{};
+
                     case core::Function::kTextureSampleBaseClampToEdge:
                         if (cfg.builtins.texture_sample_base_clamp_to_edge_2d_f32) {
                             auto& sig = builtin->Signature();
