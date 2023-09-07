@@ -55,6 +55,11 @@ struct Options {
     /// Set to `true` to generate SPIR-V via the Tint IR instead of from the AST.
     bool use_tint_ir = false;
 
+    /// Set to `true` to require `SPV_KHR_subgroup_uniform_control_flow` extension and
+    /// `SubgroupUniformControlFlowKHR` execution mode for compute stage entry points in generated
+    /// SPIRV module. Issue: dawn:464
+    bool experimental_require_subgroup_uniform_control_flow = false;
+
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(disable_robustness,
                  emit_vertex_point_size,
@@ -65,7 +70,8 @@ struct Options {
                  use_zero_initialize_workgroup_memory_extension,
                  disable_image_robustness,
                  disable_runtime_sized_array_index_clamping,
-                 use_tint_ir);
+                 use_tint_ir,
+                 experimental_require_subgroup_uniform_control_flow);
 };
 
 }  // namespace tint::spirv::writer

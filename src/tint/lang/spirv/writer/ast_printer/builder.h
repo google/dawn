@@ -82,7 +82,12 @@ class Builder {
     /// @param program the program
     /// @param zero_initialize_workgroup_memory `true` to initialize all the
     /// variables in the Workgroup address space with OpConstantNull
-    explicit Builder(const Program* program, bool zero_initialize_workgroup_memory = false);
+    /// @param experimental_require_subgroup_uniform_control_flow `true` to require
+    /// `SPV_KHR_subgroup_uniform_control_flow` extension and `SubgroupUniformControlFlowKHR`
+    /// execution mode for compute stage entry points.
+    explicit Builder(const Program* program,
+                     bool zero_initialize_workgroup_memory = false,
+                     bool experimental_require_subgroup_uniform_control_flow = false);
     ~Builder();
 
     /// Generates the SPIR-V instructions for the given program
@@ -537,6 +542,7 @@ class Builder {
     std::vector<uint32_t> merge_stack_;
     std::vector<uint32_t> continue_stack_;
     bool zero_initialize_workgroup_memory_ = false;
+    bool experimental_require_subgroup_uniform_control_flow_ = false;
 
     struct ContinuingInfo {
         ContinuingInfo(const ast::Statement* last_statement,

@@ -179,6 +179,7 @@ ShaderModule::~ShaderModule() = default;
     X(bool, clampFragDepth)                                                                      \
     X(bool, disableImageRobustness)                                                              \
     X(bool, disableRuntimeSizedArrayIndexClamping)                                               \
+    X(bool, experimentalRequireSubgroupUniformControlFlow)                                       \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, platform)
 
 DAWN_MAKE_CACHE_REQUEST(SpirvCompilationRequest, SPIRV_COMPILATION_REQUEST_MEMBERS);
@@ -272,6 +273,11 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseBufferRobustAccess2);
     req.platform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
     req.substituteOverrideConfig = std::move(substituteOverrideConfig);
+    // Set subgroup uniform control flow flag for subgroup experiment, if device has
+    // Chromium-experimental-subgroup-uniform-control-flow feature. (dawn:464)
+    if (GetDevice()->HasFeature(Feature::ChromiumExperimentalSubgroupUniformControlFlow)) {
+        req.experimentalRequireSubgroupUniformControlFlow = true;
+    }
 
     const CombinedLimits& limits = GetDevice()->GetLimits();
     req.limits = LimitsForCompilationRequest::Create(limits.v1);
@@ -344,6 +350,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             options.disable_image_robustness = r.disableImageRobustness;
             options.disable_runtime_sized_array_index_clamping =
                 r.disableRuntimeSizedArrayIndexClamping;
+            options.experimental_require_subgroup_uniform_control_flow =
+                r.experimentalRequireSubgroupUniformControlFlow;
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::spirv::writer::Generate()");
             auto tintResult = tint::spirv::writer::Generate(&program, options);

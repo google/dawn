@@ -208,6 +208,11 @@ TEST_F(SpirvASTPrinterTest, EntryPoint_SharedStruct) {
     // fn frag_main(inputs : Interface) -> @builtin(frag_depth) f32 {
     //   return inputs.value;
     // }
+    //
+    // @compute @workgroup_size(1)
+    // fn compute_main() {
+    //   return;
+    // }
 
     auto* interface =
         Structure("Interface",
@@ -232,6 +237,9 @@ TEST_F(SpirvASTPrinterTest, EntryPoint_SharedStruct) {
              Builtin(core::BuiltinValue::kFragDepth),
          });
 
+    Func("compute_main", tint::Empty, ty.void_(), Vector{Return()},
+         Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_u)});
+
     Builder& b = SanitizeAndBuild();
 
     ASSERT_TRUE(b.Build()) << b.Diagnostics();
@@ -240,8 +248,10 @@ TEST_F(SpirvASTPrinterTest, EntryPoint_SharedStruct) {
 OpMemoryModel Logical GLSL450
 OpEntryPoint Vertex %23 "vert_main" %1 %5 %9
 OpEntryPoint Fragment %34 "frag_main" %10 %12 %14
+OpEntryPoint GLCompute %40 "compute_main"
 OpExecutionMode %34 OriginUpperLeft
 OpExecutionMode %34 DepthReplacing
+OpExecutionMode %40 LocalSize 1 1 1
 OpName %1 "value_1"
 OpName %5 "pos_1"
 OpName %9 "vertex_point_size"
@@ -256,6 +266,7 @@ OpName %23 "vert_main"
 OpName %30 "frag_main_inner"
 OpName %31 "inputs"
 OpName %34 "frag_main"
+OpName %40 "compute_main"
 OpDecorate %1 Location 1
 OpDecorate %5 BuiltIn Position
 OpDecorate %9 BuiltIn PointSize
@@ -313,6 +324,160 @@ OpFunctionEnd
 %39 = OpCompositeConstruct %16 %37 %38
 %36 = OpFunctionCall %3 %30 %39
 OpStore %14 %36
+OpReturn
+OpFunctionEnd
+%40 = OpFunction %22 None %21
+%41 = OpLabel
+OpReturn
+OpFunctionEnd
+)");
+
+    Validate(b);
+}
+
+// Tests SPIRV generation with experimental_require_subgroup_uniform_control_flow in
+// spirv::writer::Options set to true, should require "SPV_KHR_subgroup_uniform_control_flow"
+// extension and use SubgroupUniformControlFlowKHR execution mode on compute stage entry points.
+TEST_F(SpirvASTPrinterTest, EntryPoint_ExperimentalSubgroupUniformControlFlow) {
+    // struct Interface {
+    //   @location(1) value : f32;
+    //   @builtin(position) pos : vec4<f32>;
+    // };
+    //
+    // @vertex
+    // fn vert_main() -> Interface {
+    //   return Interface(42.0, vec4<f32>());
+    // }
+    //
+    // @fragment
+    // fn frag_main(inputs : Interface) -> @builtin(frag_depth) f32 {
+    //   return inputs.value;
+    // }
+    //
+    // @compute @workgroup_size(1)
+    // fn compute_main() {
+    //   return;
+    // }
+
+    auto* interface =
+        Structure("Interface",
+                  Vector{
+                      Member("value", ty.f32(), Vector{Location(1_u)}),
+                      Member("pos", ty.vec4<f32>(), Vector{Builtin(core::BuiltinValue::kPosition)}),
+                  });
+
+    auto* vert_retval = Call(ty.Of(interface), 42_f, Call<vec4<f32>>());
+    Func("vert_main", tint::Empty, ty.Of(interface), Vector{Return(vert_retval)},
+         Vector{
+             Stage(ast::PipelineStage::kVertex),
+         });
+
+    auto* frag_inputs = Param("inputs", ty.Of(interface));
+    Func("frag_main", Vector{frag_inputs}, ty.f32(),
+         Vector{
+             Return(MemberAccessor(Expr("inputs"), "value")),
+         },
+         Vector{Stage(ast::PipelineStage::kFragment)},
+         Vector{
+             Builtin(core::BuiltinValue::kFragDepth),
+         });
+
+    Func("compute_main", tint::Empty, ty.void_(), Vector{Return()},
+         Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_u)});
+
+    Options options = DefaultOptions();
+    options.experimental_require_subgroup_uniform_control_flow = true;
+
+    Builder& b = SanitizeAndBuild(options);
+
+    ASSERT_TRUE(b.Build()) << b.Diagnostics();
+
+    EXPECT_EQ(DumpModule(b.Module()), R"(OpCapability Shader
+OpExtension "SPV_KHR_subgroup_uniform_control_flow"
+OpMemoryModel Logical GLSL450
+OpEntryPoint Vertex %23 "vert_main" %1 %5 %9
+OpEntryPoint Fragment %34 "frag_main" %10 %12 %14
+OpEntryPoint GLCompute %40 "compute_main"
+OpExecutionMode %34 OriginUpperLeft
+OpExecutionMode %34 DepthReplacing
+OpExecutionMode %40 LocalSize 1 1 1
+OpExecutionMode %40 SubgroupUniformControlFlowKHR
+OpName %1 "value_1"
+OpName %5 "pos_1"
+OpName %9 "vertex_point_size"
+OpName %10 "value_2"
+OpName %12 "pos_2"
+OpName %14 "value_3"
+OpName %16 "Interface"
+OpMemberName %16 0 "value"
+OpMemberName %16 1 "pos"
+OpName %17 "vert_main_inner"
+OpName %23 "vert_main"
+OpName %30 "frag_main_inner"
+OpName %31 "inputs"
+OpName %34 "frag_main"
+OpName %40 "compute_main"
+OpDecorate %1 Location 1
+OpDecorate %5 BuiltIn Position
+OpDecorate %9 BuiltIn PointSize
+OpDecorate %10 Location 1
+OpDecorate %12 BuiltIn FragCoord
+OpDecorate %14 BuiltIn FragDepth
+OpMemberDecorate %16 0 Offset 0
+OpMemberDecorate %16 1 Offset 16
+%3 = OpTypeFloat 32
+%2 = OpTypePointer Output %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Output %4
+%7 = OpTypeVector %3 4
+%6 = OpTypePointer Output %7
+%8 = OpConstantNull %7
+%5 = OpVariable %6 Output %8
+%9 = OpVariable %2 Output %4
+%11 = OpTypePointer Input %3
+%10 = OpVariable %11 Input
+%13 = OpTypePointer Input %7
+%12 = OpVariable %13 Input
+%14 = OpVariable %2 Output %4
+%16 = OpTypeStruct %3 %7
+%15 = OpTypeFunction %16
+%19 = OpConstant %3 42
+%20 = OpConstantComposite %16 %19 %8
+%22 = OpTypeVoid
+%21 = OpTypeFunction %22
+%28 = OpConstant %3 1
+%29 = OpTypeFunction %3 %16
+%17 = OpFunction %16 None %15
+%18 = OpLabel
+OpReturnValue %20
+OpFunctionEnd
+%23 = OpFunction %22 None %21
+%24 = OpLabel
+%25 = OpFunctionCall %16 %17
+%26 = OpCompositeExtract %3 %25 0
+OpStore %1 %26
+%27 = OpCompositeExtract %7 %25 1
+OpStore %5 %27
+OpStore %9 %28
+OpReturn
+OpFunctionEnd
+%30 = OpFunction %3 None %29
+%31 = OpFunctionParameter %16
+%32 = OpLabel
+%33 = OpCompositeExtract %3 %31 0
+OpReturnValue %33
+OpFunctionEnd
+%34 = OpFunction %22 None %21
+%35 = OpLabel
+%37 = OpLoad %3 %10
+%38 = OpLoad %7 %12
+%39 = OpCompositeConstruct %16 %37 %38
+%36 = OpFunctionCall %3 %30 %39
+OpStore %14 %36
+OpReturn
+OpFunctionEnd
+%40 = OpFunction %22 None %21
+%41 = OpLabel
 OpReturn
 OpFunctionEnd
 )");

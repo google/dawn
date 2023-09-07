@@ -80,7 +80,12 @@ class TestHelperBase : public ProgramBuilder, public BASE {
         auto result = Sanitize(program.get(), options);
         [&] { ASSERT_TRUE(result.program.IsValid()) << result.program.Diagnostics().str(); }();
         *program = std::move(result.program);
-        spirv_builder = std::make_unique<Builder>(program.get());
+        bool zero_initialize_workgroup_memory =
+            !options.disable_workgroup_init &&
+            options.use_zero_initialize_workgroup_memory_extension;
+        spirv_builder =
+            std::make_unique<Builder>(program.get(), zero_initialize_workgroup_memory,
+                                      options.experimental_require_subgroup_uniform_control_flow);
         return *spirv_builder;
     }
 

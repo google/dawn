@@ -248,10 +248,14 @@ Builder::AccessorInfo::AccessorInfo() : source_id(0), source_type(nullptr) {}
 
 Builder::AccessorInfo::~AccessorInfo() {}
 
-Builder::Builder(const Program* program, bool zero_initialize_workgroup_memory)
+Builder::Builder(const Program* program,
+                 bool zero_initialize_workgroup_memory,
+                 bool experimental_require_subgroup_uniform_control_flow)
     : builder_(ProgramBuilder::Wrap(program)),
       scope_stack_{Scope{}},
-      zero_initialize_workgroup_memory_(zero_initialize_workgroup_memory) {}
+      zero_initialize_workgroup_memory_(zero_initialize_workgroup_memory),
+      experimental_require_subgroup_uniform_control_flow_(
+          experimental_require_subgroup_uniform_control_flow) {}
 
 Builder::~Builder() = default;
 
@@ -278,6 +282,11 @@ bool Builder::Build() {
 
     for (auto ext : builder_.Sem().Module()->Extensions()) {
         GenerateExtension(ext);
+    }
+
+    // Emit SPV_KHR_subgroup_uniform_control_flow extension if required.
+    if (experimental_require_subgroup_uniform_control_flow_) {
+        module_.PushExtension("SPV_KHR_subgroup_uniform_control_flow");
     }
 
     for (auto* var : builder_.AST().GlobalVariables()) {
@@ -483,7 +492,16 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
         if (builtin == core::BuiltinValue::kFragDepth) {
             module_.PushExecutionMode(spv::Op::OpExecutionMode,
                                       {Operand(id), U32Operand(SpvExecutionModeDepthReplacing)});
+            break;
         }
+    }
+
+    // Use SubgroupUniformControlFlow execution mode for compute stage if required.
+    if (experimental_require_subgroup_uniform_control_flow_ &&
+        func->PipelineStage() == ast::PipelineStage::kCompute) {
+        module_.PushExecutionMode(
+            spv::Op::OpExecutionMode,
+            {Operand(id), U32Operand(SpvExecutionModeSubgroupUniformControlFlowKHR)});
     }
 
     return true;

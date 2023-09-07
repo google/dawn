@@ -179,8 +179,12 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     return result;
 }
 
-ASTPrinter::ASTPrinter(const Program* program, bool zero_initialize_workgroup_memory)
-    : builder_(program, zero_initialize_workgroup_memory) {}
+ASTPrinter::ASTPrinter(const Program* program,
+                       bool zero_initialize_workgroup_memory,
+                       bool experimental_require_subgroup_uniform_control_flow)
+    : builder_(program,
+               zero_initialize_workgroup_memory,
+               experimental_require_subgroup_uniform_control_flow) {}
 
 bool ASTPrinter::Generate() {
     if (builder_.Build()) {
