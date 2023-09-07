@@ -59,12 +59,8 @@ enum class Intrinsic : uint8_t {
     kImageSampleExplicitLod,
     kImageSampleImplicitLod,
     kImageWrite,
-    kMatrixTimesMatrix,
-    kMatrixTimesScalar,
-    kMatrixTimesVector,
     kSampledImage,
     kSelect,
-    kVectorTimesMatrix,
 };
 
 /// @param value the enum value
@@ -110,12 +106,8 @@ constexpr const char* kIntrinsicStrings[] = {
     "image_sample_explicit_lod",
     "image_sample_implicit_lod",
     "image_write",
-    "matrix_times_matrix",
-    "matrix_times_scalar",
-    "matrix_times_vector",
     "sampled_image",
     "select",
-    "vector_times_matrix",
 };
 
 }  // namespace tint::spirv::ir

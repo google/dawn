@@ -29,6 +29,14 @@ const char* str(Function i) {
     switch (i) {
         case Function::kNone:
             return "<none>";
+        case Function::kMatrixTimesMatrix:
+            return "spirv.matrix_times_matrix";
+        case Function::kMatrixTimesScalar:
+            return "spirv.matrix_times_scalar";
+        case Function::kMatrixTimesVector:
+            return "spirv.matrix_times_vector";
+        case Function::kVectorTimesMatrix:
+            return "spirv.vector_times_matrix";
         case Function::kVectorTimesScalar:
             return "spirv.vector_times_scalar";
     }

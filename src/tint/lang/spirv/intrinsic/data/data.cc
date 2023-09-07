@@ -153,6 +153,186 @@ constexpr TypeMatcher kVec4Matcher {
 };
 
 
+/// TypeMatcher for 'type mat2x2'
+constexpr TypeMatcher kMat2X2Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+  const Type* T = nullptr;
+    if (!MatchMat2X2(state, ty, T)) {
+      return nullptr;
+    }
+    T = state.Type(T);
+    if (T == nullptr) {
+      return nullptr;
+    }
+    return BuildMat2X2(state, T);
+  },
+/* string */ [](MatchState* state) -> std::string {
+  const std::string T = state->TypeName();
+    return "mat2x2<" + T + ">";
+  }
+};
+
+
+/// TypeMatcher for 'type mat2x3'
+constexpr TypeMatcher kMat2X3Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+  const Type* T = nullptr;
+    if (!MatchMat2X3(state, ty, T)) {
+      return nullptr;
+    }
+    T = state.Type(T);
+    if (T == nullptr) {
+      return nullptr;
+    }
+    return BuildMat2X3(state, T);
+  },
+/* string */ [](MatchState* state) -> std::string {
+  const std::string T = state->TypeName();
+    return "mat2x3<" + T + ">";
+  }
+};
+
+
+/// TypeMatcher for 'type mat2x4'
+constexpr TypeMatcher kMat2X4Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+  const Type* T = nullptr;
+    if (!MatchMat2X4(state, ty, T)) {
+      return nullptr;
+    }
+    T = state.Type(T);
+    if (T == nullptr) {
+      return nullptr;
+    }
+    return BuildMat2X4(state, T);
+  },
+/* string */ [](MatchState* state) -> std::string {
+  const std::string T = state->TypeName();
+    return "mat2x4<" + T + ">";
+  }
+};
+
+
+/// TypeMatcher for 'type mat3x2'
+constexpr TypeMatcher kMat3X2Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+  const Type* T = nullptr;
+    if (!MatchMat3X2(state, ty, T)) {
+      return nullptr;
+    }
+    T = state.Type(T);
+    if (T == nullptr) {
+      return nullptr;
+    }
+    return BuildMat3X2(state, T);
+  },
+/* string */ [](MatchState* state) -> std::string {
+  const std::string T = state->TypeName();
+    return "mat3x2<" + T + ">";
+  }
+};
+
+
+/// TypeMatcher for 'type mat3x3'
+constexpr TypeMatcher kMat3X3Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+  const Type* T = nullptr;
+    if (!MatchMat3X3(state, ty, T)) {
+      return nullptr;
+    }
+    T = state.Type(T);
+    if (T == nullptr) {
+      return nullptr;
+    }
+    return BuildMat3X3(state, T);
+  },
+/* string */ [](MatchState* state) -> std::string {
+  const std::string T = state->TypeName();
+    return "mat3x3<" + T + ">";
+  }
+};
+
+
+/// TypeMatcher for 'type mat3x4'
+constexpr TypeMatcher kMat3X4Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+  const Type* T = nullptr;
+    if (!MatchMat3X4(state, ty, T)) {
+      return nullptr;
+    }
+    T = state.Type(T);
+    if (T == nullptr) {
+      return nullptr;
+    }
+    return BuildMat3X4(state, T);
+  },
+/* string */ [](MatchState* state) -> std::string {
+  const std::string T = state->TypeName();
+    return "mat3x4<" + T + ">";
+  }
+};
+
+
+/// TypeMatcher for 'type mat4x2'
+constexpr TypeMatcher kMat4X2Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+  const Type* T = nullptr;
+    if (!MatchMat4X2(state, ty, T)) {
+      return nullptr;
+    }
+    T = state.Type(T);
+    if (T == nullptr) {
+      return nullptr;
+    }
+    return BuildMat4X2(state, T);
+  },
+/* string */ [](MatchState* state) -> std::string {
+  const std::string T = state->TypeName();
+    return "mat4x2<" + T + ">";
+  }
+};
+
+
+/// TypeMatcher for 'type mat4x3'
+constexpr TypeMatcher kMat4X3Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+  const Type* T = nullptr;
+    if (!MatchMat4X3(state, ty, T)) {
+      return nullptr;
+    }
+    T = state.Type(T);
+    if (T == nullptr) {
+      return nullptr;
+    }
+    return BuildMat4X3(state, T);
+  },
+/* string */ [](MatchState* state) -> std::string {
+  const std::string T = state->TypeName();
+    return "mat4x3<" + T + ">";
+  }
+};
+
+
+/// TypeMatcher for 'type mat4x4'
+constexpr TypeMatcher kMat4X4Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+  const Type* T = nullptr;
+    if (!MatchMat4X4(state, ty, T)) {
+      return nullptr;
+    }
+    T = state.Type(T);
+    if (T == nullptr) {
+      return nullptr;
+    }
+    return BuildMat4X4(state, T);
+  },
+/* string */ [](MatchState* state) -> std::string {
+  const std::string T = state->TypeName();
+    return "mat4x4<" + T + ">";
+  }
+};
+
+
 /// TypeMatcher for 'type vec'
 constexpr TypeMatcher kVecMatcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
@@ -176,6 +356,40 @@ constexpr TypeMatcher kVecMatcher {
   const std::string T = state->TypeName();
     StringStream ss;
     ss << "vec" << N << "<" << T << ">";
+    return ss.str();
+  }
+};
+
+
+/// TypeMatcher for 'type mat'
+constexpr TypeMatcher kMatMatcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+  Number N = Number::invalid;
+  Number M = Number::invalid;
+  const Type* T = nullptr;
+    if (!MatchMat(state, ty, N, M, T)) {
+      return nullptr;
+    }
+    N = state.Num(N);
+    if (!N.IsValid()) {
+      return nullptr;
+    }
+    M = state.Num(M);
+    if (!M.IsValid()) {
+      return nullptr;
+    }
+    T = state.Type(T);
+    if (T == nullptr) {
+      return nullptr;
+    }
+    return BuildMat(state, N, M, T);
+  },
+/* string */ [](MatchState* state) -> std::string {
+  const std::string N = state->NumName();
+  const std::string M = state->NumName();
+  const std::string T = state->TypeName();
+    StringStream ss;
+    ss << "mat" << N << "x" << M << "<" << T << ">";
     return ss.str();
   }
 };
@@ -211,25 +425,44 @@ constexpr TypeMatcher kTypeMatchers[] = {
   /* [3] */ kVec2Matcher,
   /* [4] */ kVec3Matcher,
   /* [5] */ kVec4Matcher,
-  /* [6] */ kVecMatcher,
-  /* [7] */ kF32F16Matcher,
+  /* [6] */ kMat2X2Matcher,
+  /* [7] */ kMat2X3Matcher,
+  /* [8] */ kMat2X4Matcher,
+  /* [9] */ kMat3X2Matcher,
+  /* [10] */ kMat3X3Matcher,
+  /* [11] */ kMat3X4Matcher,
+  /* [12] */ kMat4X2Matcher,
+  /* [13] */ kMat4X3Matcher,
+  /* [14] */ kMat4X4Matcher,
+  /* [15] */ kVecMatcher,
+  /* [16] */ kMatMatcher,
+  /* [17] */ kF32F16Matcher,
 };
 
 /// The template numbers, and number matchers
 constexpr NumberMatcher kNumberMatchers[] = {
   /* [0] */ TemplateNumberMatcher<0>::matcher,
+  /* [1] */ TemplateNumberMatcher<1>::matcher,
+  /* [2] */ TemplateNumberMatcher<2>::matcher,
 };
 
 constexpr TypeMatcherIndex kTypeMatcherIndices[] = {
-  /* [0] */ TypeMatcherIndex(6),
+  /* [0] */ TypeMatcherIndex(16),
   /* [1] */ TypeMatcherIndex(0),
+  /* [2] */ TypeMatcherIndex(15),
+  /* [3] */ TypeMatcherIndex(0),
 };
 
 static_assert(TypeMatcherIndex::CanIndex(kTypeMatcherIndices),
               "TypeMatcherIndex is not large enough to index kTypeMatcherIndices");
 
 constexpr NumberMatcherIndex kNumberMatcherIndices[] = {
-  /* [0] */ NumberMatcherIndex(0),
+  /* [0] */ NumberMatcherIndex(1),
+  /* [1] */ NumberMatcherIndex(0),
+  /* [2] */ NumberMatcherIndex(1),
+  /* [3] */ NumberMatcherIndex(2),
+  /* [4] */ NumberMatcherIndex(0),
+  /* [5] */ NumberMatcherIndex(2),
 };
 
 static_assert(NumberMatcherIndex::CanIndex(kNumberMatcherIndices),
@@ -240,10 +473,52 @@ constexpr ParameterInfo kParameters[] = {
     /* [0] */
     /* usage */ core::ParameterUsage::kNone,
     /* type_matcher_indices */ TypeMatcherIndicesIndex(0),
-    /* number_matcher_indices */ NumberMatcherIndicesIndex(0),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(4),
   },
   {
     /* [1] */
+    /* usage */ core::ParameterUsage::kNone,
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(0),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(0),
+  },
+  {
+    /* [2] */
+    /* usage */ core::ParameterUsage::kNone,
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(0),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(1),
+  },
+  {
+    /* [3] */
+    /* usage */ core::ParameterUsage::kNone,
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(1),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
+  },
+  {
+    /* [4] */
+    /* usage */ core::ParameterUsage::kNone,
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(0),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(1),
+  },
+  {
+    /* [5] */
+    /* usage */ core::ParameterUsage::kNone,
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(2),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(1),
+  },
+  {
+    /* [6] */
+    /* usage */ core::ParameterUsage::kNone,
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(0),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(0),
+  },
+  {
+    /* [7] */
+    /* usage */ core::ParameterUsage::kNone,
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(2),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(1),
+  },
+  {
+    /* [8] */
     /* usage */ core::ParameterUsage::kNone,
     /* type_matcher_indices */ TypeMatcherIndicesIndex(1),
     /* number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
@@ -257,7 +532,7 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [0] */
     /* name */ "T",
-    /* matcher_index */ TypeMatcherIndex(7),
+    /* matcher_index */ TypeMatcherIndex(17),
   },
 };
 
@@ -267,7 +542,27 @@ static_assert(TemplateTypeIndex::CanIndex(kTemplateTypes),
 constexpr TemplateNumberInfo kTemplateNumbers[] = {
   {
     /* [0] */
+    /* name */ "K",
+    /* matcher_index */ NumberMatcherIndex(/* invalid */),
+  },
+  {
+    /* [1] */
+    /* name */ "C",
+    /* matcher_index */ NumberMatcherIndex(/* invalid */),
+  },
+  {
+    /* [2] */
+    /* name */ "R",
+    /* matcher_index */ NumberMatcherIndex(/* invalid */),
+  },
+  {
+    /* [3] */
     /* name */ "N",
+    /* matcher_index */ NumberMatcherIndex(/* invalid */),
+  },
+  {
+    /* [4] */
+    /* name */ "M",
     /* matcher_index */ NumberMatcherIndex(/* invalid */),
   },
 };
@@ -281,12 +576,64 @@ constexpr OverloadInfo kOverloads[] = {
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
     /* num_parameters */ 2,
     /* num_template_types */ 1,
-    /* num_template_numbers */ 1,
+    /* num_template_numbers */ 3,
     /* template_types */ TemplateTypeIndex(0),
     /* template_numbers */ TemplateNumberIndex(0),
     /* parameters */ ParameterIndex(0),
     /* return_type_matcher_indices */ TypeMatcherIndicesIndex(0),
+    /* return_number_matcher_indices */ NumberMatcherIndicesIndex(2),
+    /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
+  },
+  {
+    /* [1] */
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* num_parameters */ 2,
+    /* num_template_types */ 1,
+    /* num_template_numbers */ 2,
+    /* template_types */ TemplateTypeIndex(0),
+    /* template_numbers */ TemplateNumberIndex(3),
+    /* parameters */ ParameterIndex(2),
+    /* return_type_matcher_indices */ TypeMatcherIndicesIndex(0),
+    /* return_number_matcher_indices */ NumberMatcherIndicesIndex(1),
+    /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
+  },
+  {
+    /* [2] */
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* num_parameters */ 2,
+    /* num_template_types */ 1,
+    /* num_template_numbers */ 2,
+    /* template_types */ TemplateTypeIndex(0),
+    /* template_numbers */ TemplateNumberIndex(3),
+    /* parameters */ ParameterIndex(4),
+    /* return_type_matcher_indices */ TypeMatcherIndicesIndex(2),
     /* return_number_matcher_indices */ NumberMatcherIndicesIndex(0),
+    /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
+  },
+  {
+    /* [3] */
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* num_parameters */ 2,
+    /* num_template_types */ 1,
+    /* num_template_numbers */ 2,
+    /* template_types */ TemplateTypeIndex(0),
+    /* template_numbers */ TemplateNumberIndex(3),
+    /* parameters */ ParameterIndex(5),
+    /* return_type_matcher_indices */ TypeMatcherIndicesIndex(2),
+    /* return_number_matcher_indices */ NumberMatcherIndicesIndex(0),
+    /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
+  },
+  {
+    /* [4] */
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* num_parameters */ 2,
+    /* num_template_types */ 1,
+    /* num_template_numbers */ 1,
+    /* template_types */ TemplateTypeIndex(0),
+    /* template_numbers */ TemplateNumberIndex(3),
+    /* parameters */ ParameterIndex(7),
+    /* return_type_matcher_indices */ TypeMatcherIndicesIndex(2),
+    /* return_number_matcher_indices */ NumberMatcherIndicesIndex(1),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
 };
@@ -297,9 +644,33 @@ static_assert(OverloadIndex::CanIndex(kOverloads),
 constexpr IntrinsicInfo kBuiltins[] = {
   {
     /* [0] */
-    /* fn vector_times_scalar<T : f32_f16, N : num>(vec<N, T>, T) -> vec<N, T> */
+    /* fn matrix_times_matrix<T : f32_f16, K : num, C : num, R : num>(mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T> */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(0),
+  },
+  {
+    /* [1] */
+    /* fn matrix_times_scalar<T : f32_f16, N : num, M : num>(mat<N, M, T>, T) -> mat<N, M, T> */
+    /* num overloads */ 1,
+    /* overloads */ OverloadIndex(1),
+  },
+  {
+    /* [2] */
+    /* fn matrix_times_vector<T : f32_f16, N : num, M : num>(mat<N, M, T>, vec<N, T>) -> vec<M, T> */
+    /* num overloads */ 1,
+    /* overloads */ OverloadIndex(2),
+  },
+  {
+    /* [3] */
+    /* fn vector_times_matrix<T : f32_f16, N : num, M : num>(vec<N, T>, mat<M, N, T>) -> vec<M, T> */
+    /* num overloads */ 1,
+    /* overloads */ OverloadIndex(3),
+  },
+  {
+    /* [4] */
+    /* fn vector_times_scalar<T : f32_f16, N : num>(vec<N, T>, T) -> vec<N, T> */
+    /* num overloads */ 1,
+    /* overloads */ OverloadIndex(4),
   },
 };
 

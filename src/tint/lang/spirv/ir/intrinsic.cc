@@ -104,23 +104,11 @@ Intrinsic ParseIntrinsic(std::string_view str) {
     if (str == "image_write") {
         return Intrinsic::kImageWrite;
     }
-    if (str == "matrix_times_matrix") {
-        return Intrinsic::kMatrixTimesMatrix;
-    }
-    if (str == "matrix_times_scalar") {
-        return Intrinsic::kMatrixTimesScalar;
-    }
-    if (str == "matrix_times_vector") {
-        return Intrinsic::kMatrixTimesVector;
-    }
     if (str == "sampled_image") {
         return Intrinsic::kSampledImage;
     }
     if (str == "select") {
         return Intrinsic::kSelect;
-    }
-    if (str == "vector_times_matrix") {
-        return Intrinsic::kVectorTimesMatrix;
     }
     return Intrinsic::kUndefined;
 }
@@ -179,18 +167,10 @@ std::string_view ToString(Intrinsic value) {
             return "image_sample_implicit_lod";
         case Intrinsic::kImageWrite:
             return "image_write";
-        case Intrinsic::kMatrixTimesMatrix:
-            return "matrix_times_matrix";
-        case Intrinsic::kMatrixTimesScalar:
-            return "matrix_times_scalar";
-        case Intrinsic::kMatrixTimesVector:
-            return "matrix_times_vector";
         case Intrinsic::kSampledImage:
             return "sampled_image";
         case Intrinsic::kSelect:
             return "select";
-        case Intrinsic::kVectorTimesMatrix:
-            return "vector_times_matrix";
     }
     return "<unknown>";
 }

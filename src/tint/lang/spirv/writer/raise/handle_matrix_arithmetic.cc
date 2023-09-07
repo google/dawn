@@ -21,7 +21,7 @@
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/matrix.h"
-#include "src/tint/lang/spirv/ir/intrinsic_call.h"
+#include "src/tint/lang/spirv/ir/builtin_call.h"
 #include "src/tint/utils/ice/ice.h"
 
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -98,22 +98,22 @@ void Run(core::ir::Module* ir) {
                 // Select the SPIR-V intrinsic that corresponds to the operation being performed.
                 if (lhs_ty->Is<core::type::Matrix>()) {
                     if (rhs_ty->Is<core::type::Scalar>()) {
-                        replace(b.Call<spirv::ir::IntrinsicCall>(
-                            ty, spirv::ir::Intrinsic::kMatrixTimesScalar, lhs, rhs));
+                        replace(b.Call<spirv::ir::BuiltinCall>(
+                            ty, spirv::ir::Function::kMatrixTimesScalar, lhs, rhs));
                     } else if (rhs_ty->Is<core::type::Vector>()) {
-                        replace(b.Call<spirv::ir::IntrinsicCall>(
-                            ty, spirv::ir::Intrinsic::kMatrixTimesVector, lhs, rhs));
+                        replace(b.Call<spirv::ir::BuiltinCall>(
+                            ty, spirv::ir::Function::kMatrixTimesVector, lhs, rhs));
                     } else if (rhs_ty->Is<core::type::Matrix>()) {
-                        replace(b.Call<spirv::ir::IntrinsicCall>(
-                            ty, spirv::ir::Intrinsic::kMatrixTimesMatrix, lhs, rhs));
+                        replace(b.Call<spirv::ir::BuiltinCall>(
+                            ty, spirv::ir::Function::kMatrixTimesMatrix, lhs, rhs));
                     }
                 } else {
                     if (lhs_ty->Is<core::type::Scalar>()) {
-                        replace(b.Call<spirv::ir::IntrinsicCall>(
-                            ty, spirv::ir::Intrinsic::kMatrixTimesScalar, rhs, lhs));
+                        replace(b.Call<spirv::ir::BuiltinCall>(
+                            ty, spirv::ir::Function::kMatrixTimesScalar, rhs, lhs));
                     } else if (lhs_ty->Is<core::type::Vector>()) {
-                        replace(b.Call<spirv::ir::IntrinsicCall>(
-                            ty, spirv::ir::Intrinsic::kVectorTimesMatrix, lhs, rhs));
+                        replace(b.Call<spirv::ir::BuiltinCall>(
+                            ty, spirv::ir::Function::kVectorTimesMatrix, lhs, rhs));
                     }
                 }
                 break;

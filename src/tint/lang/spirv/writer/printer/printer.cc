@@ -1092,6 +1092,18 @@ void Printer::EmitSpirvBuiltinCall(spirv::ir::BuiltinCall* builtin) {
 
     spv::Op op = spv::Op::Max;
     switch (builtin->Func()) {
+        case spirv::ir::Function::kMatrixTimesMatrix:
+            op = spv::Op::OpMatrixTimesMatrix;
+            break;
+        case spirv::ir::Function::kMatrixTimesScalar:
+            op = spv::Op::OpMatrixTimesScalar;
+            break;
+        case spirv::ir::Function::kMatrixTimesVector:
+            op = spv::Op::OpMatrixTimesVector;
+            break;
+        case spirv::ir::Function::kVectorTimesMatrix:
+            op = spv::Op::OpVectorTimesMatrix;
+            break;
         case spirv::ir::Function::kVectorTimesScalar:
             op = spv::Op::OpVectorTimesScalar;
             break;
@@ -1636,23 +1648,11 @@ void Printer::EmitIntrinsicCall(spirv::ir::IntrinsicCall* call) {
         case spirv::ir::Intrinsic::kImageWrite:
             op = spv::Op::OpImageWrite;
             break;
-        case spirv::ir::Intrinsic::kMatrixTimesMatrix:
-            op = spv::Op::OpMatrixTimesMatrix;
-            break;
-        case spirv::ir::Intrinsic::kMatrixTimesScalar:
-            op = spv::Op::OpMatrixTimesScalar;
-            break;
-        case spirv::ir::Intrinsic::kMatrixTimesVector:
-            op = spv::Op::OpMatrixTimesVector;
-            break;
         case spirv::ir::Intrinsic::kSampledImage:
             op = spv::Op::OpSampledImage;
             break;
         case spirv::ir::Intrinsic::kSelect:
             op = spv::Op::OpSelect;
-            break;
-        case spirv::ir::Intrinsic::kVectorTimesMatrix:
-            op = spv::Op::OpVectorTimesMatrix;
             break;
         case spirv::ir::Intrinsic::kUndefined:
             TINT_ICE() << "undefined spirv intrinsic";
