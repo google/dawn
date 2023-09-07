@@ -37,14 +37,17 @@ if (tint_build_unittests) {
       "${tint_src_dir}/api/common",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
+      "${tint_src_dir}/lang/core/ir",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/helpers:unittests",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/reader",
+      "${tint_src_dir}/lang/wgsl/reader/program_to_ir",
       "${tint_src_dir}/lang/wgsl/resolver",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/lang/wgsl/writer",
+      "${tint_src_dir}/lang/wgsl/writer/ir_to_program",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
       "${tint_src_dir}/utils/ice",
@@ -60,15 +63,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/utils/traits",
     ]
 
-    if (tint_build_ir) {
-      deps += [
-        "${tint_src_dir}/lang/core/ir",
-        "${tint_src_dir}/lang/wgsl/reader/program_to_ir",
-        "${tint_src_dir}/lang/wgsl/writer/ir_to_program",
-      ]
-    }
-
-    if (tint_build_wgsl_reader && tint_build_wgsl_writer && tint_build_ir) {
+    if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
       sources += [ "ir_roundtrip_test.cc" ]
     }
   }

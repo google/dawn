@@ -39,6 +39,8 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core:unittests",
       "${tint_src_dir}/lang/core/constant:unittests",
       "${tint_src_dir}/lang/core/intrinsic:unittests",
+      "${tint_src_dir}/lang/core/ir:unittests",
+      "${tint_src_dir}/lang/core/ir/transform:unittests",
       "${tint_src_dir}/lang/core/type:unittests",
       "${tint_src_dir}/lang/spirv/ir:unittests",
       "${tint_src_dir}/lang/wgsl:unittests",
@@ -48,9 +50,11 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/wgsl/inspector:unittests",
       "${tint_src_dir}/lang/wgsl/program:unittests",
       "${tint_src_dir}/lang/wgsl/reader/parser:unittests",
+      "${tint_src_dir}/lang/wgsl/reader/program_to_ir:unittests",
       "${tint_src_dir}/lang/wgsl/resolver:unittests",
       "${tint_src_dir}/lang/wgsl/sem:unittests",
       "${tint_src_dir}/lang/wgsl/writer/ast_printer:unittests",
+      "${tint_src_dir}/lang/wgsl/writer/ir_to_program:unittests",
       "${tint_src_dir}/utils/cli:unittests",
       "${tint_src_dir}/utils/command:unittests",
       "${tint_src_dir}/utils/containers:unittests",
@@ -85,25 +89,13 @@ if (tint_build_unittests) {
       ]
     }
 
-    if (tint_build_ir) {
-      deps += [
-        "${tint_src_dir}/lang/core/ir:unittests",
-        "${tint_src_dir}/lang/core/ir/transform:unittests",
-        "${tint_src_dir}/lang/wgsl/reader/program_to_ir:unittests",
-        "${tint_src_dir}/lang/wgsl/writer/ir_to_program:unittests",
-      ]
-    }
-
     if (tint_build_msl_writer) {
       deps += [
         "${tint_src_dir}/lang/msl/writer/ast_printer:unittests",
         "${tint_src_dir}/lang/msl/writer/ast_raise:unittests",
         "${tint_src_dir}/lang/msl/writer/common:unittests",
+        "${tint_src_dir}/lang/msl/writer/printer:unittests",
       ]
-    }
-
-    if (tint_build_msl_writer && tint_build_ir) {
-      deps += [ "${tint_src_dir}/lang/msl/writer/printer:unittests" ]
     }
 
     if (tint_build_spv_reader) {
@@ -119,11 +111,8 @@ if (tint_build_unittests) {
         "${tint_src_dir}/lang/spirv/writer/ast_printer:unittests",
         "${tint_src_dir}/lang/spirv/writer/ast_raise:unittests",
         "${tint_src_dir}/lang/spirv/writer/common:unittests",
+        "${tint_src_dir}/lang/spirv/writer/raise:unittests",
       ]
-    }
-
-    if (tint_build_spv_writer && tint_build_ir) {
-      deps += [ "${tint_src_dir}/lang/spirv/writer/raise:unittests" ]
     }
     testonly = true
     configs += [ "${tint_src_dir}:tint_unittests_config" ]

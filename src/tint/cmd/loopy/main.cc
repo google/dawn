@@ -17,11 +17,8 @@
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/generate_external_texture_bindings.h"
 #include "src/tint/cmd/common/helper.h"
-
-#if TINT_BUILD_IR
 #include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
-#endif  // TINT_BUILD_IR
 
 #if TINT_BUILD_GLSL_WRITER
 #include "src/tint/lang/glsl/writer/writer.h"
@@ -388,7 +385,6 @@ int main(int argc, const char** argv) {
         program = std::move(info.program);
         source_file = std::move(info.source_file);
     }
-#if TINT_BUILD_WGSL_READER && TINT_BUILD_IR
     {
         uint32_t loop_count = 1;
         if (options.loop == Looper::kIRGenerate) {
@@ -401,7 +397,6 @@ int main(int argc, const char** argv) {
             }
         }
     }
-#endif  // TINT_BUILD_IR
 
     bool success = false;
     {

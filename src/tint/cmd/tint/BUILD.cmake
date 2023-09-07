@@ -36,6 +36,7 @@ tint_target_add_dependencies(tint_cmd_tint_cmd cmd
   tint_cmd_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_type
   tint_lang_hlsl_writer_common
   tint_lang_spirv_reader_common
@@ -45,6 +46,7 @@ tint_target_add_dependencies(tint_cmd_tint_cmd cmd
   tint_lang_wgsl_inspector
   tint_lang_wgsl_program
   tint_lang_wgsl_reader
+  tint_lang_wgsl_reader_program_to_ir
   tint_lang_wgsl_sem
   tint_lang_wgsl_writer
   tint_utils_cli
@@ -82,13 +84,6 @@ if(TINT_BUILD_HLSL_WRITER)
     tint_lang_hlsl_writer
   )
 endif(TINT_BUILD_HLSL_WRITER)
-
-if(TINT_BUILD_IR)
-  tint_target_add_dependencies(tint_cmd_tint_cmd cmd
-    tint_lang_core_ir
-    tint_lang_wgsl_reader_program_to_ir
-  )
-endif(TINT_BUILD_IR)
 
 if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_cmd_tint_cmd cmd

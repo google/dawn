@@ -21,11 +21,11 @@
 #                       Do not modify this file directly
 ################################################################################
 
-if(TINT_BUILD_MSL_WRITER AND TINT_BUILD_IR)
+if(TINT_BUILD_MSL_WRITER)
 ################################################################################
 # Target:    tint_lang_msl_writer_printer
 # Kind:      lib
-# Condition: TINT_BUILD_MSL_WRITER AND TINT_BUILD_IR
+# Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_msl_writer_printer lib
   lang/msl/writer/printer/printer.cc
@@ -36,6 +36,7 @@ tint_target_add_dependencies(tint_lang_msl_writer_printer lib
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_type
   tint_utils_containers
   tint_utils_diagnostic
@@ -53,24 +54,18 @@ tint_target_add_dependencies(tint_lang_msl_writer_printer lib
   tint_utils_traits
 )
 
-if(TINT_BUILD_IR)
-  tint_target_add_dependencies(tint_lang_msl_writer_printer lib
-    tint_lang_core_ir
-  )
-endif(TINT_BUILD_IR)
-
 if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_lang_msl_writer_printer lib
     tint_lang_msl_writer_common
   )
 endif(TINT_BUILD_MSL_WRITER)
 
-endif(TINT_BUILD_MSL_WRITER AND TINT_BUILD_IR)
-if(TINT_BUILD_MSL_WRITER AND TINT_BUILD_IR)
+endif(TINT_BUILD_MSL_WRITER)
+if(TINT_BUILD_MSL_WRITER)
 ################################################################################
 # Target:    tint_lang_msl_writer_printer_test
 # Kind:      test
-# Condition: TINT_BUILD_MSL_WRITER AND TINT_BUILD_IR
+# Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
 tint_add_target(tint_lang_msl_writer_printer_test test
   lang/msl/writer/printer/binary_test.cc
@@ -88,6 +83,7 @@ tint_target_add_dependencies(tint_lang_msl_writer_printer_test test
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_type
   tint_lang_msl_writer_raise
   tint_utils_containers
@@ -110,16 +106,10 @@ tint_target_add_external_dependencies(tint_lang_msl_writer_printer_test test
   "gtest"
 )
 
-if(TINT_BUILD_IR)
-  tint_target_add_dependencies(tint_lang_msl_writer_printer_test test
-    tint_lang_core_ir
-  )
-endif(TINT_BUILD_IR)
-
-if(TINT_BUILD_MSL_WRITER AND TINT_BUILD_IR)
+if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_lang_msl_writer_printer_test test
     tint_lang_msl_writer_printer
   )
-endif(TINT_BUILD_MSL_WRITER AND TINT_BUILD_IR)
+endif(TINT_BUILD_MSL_WRITER)
 
-endif(TINT_BUILD_MSL_WRITER AND TINT_BUILD_IR)
+endif(TINT_BUILD_MSL_WRITER)

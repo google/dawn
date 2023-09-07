@@ -62,10 +62,8 @@ struct Options {
     /// Options used in the bindings remapper
     BindingRemapperOptions binding_remapper_options = {};
 
-#if TINT_BUILD_IR
     /// Set to `true` to generate MSL via the Tint IR instead of from the AST.
     bool use_tint_ir = false;
-#endif
 
     /// Reflect the fields of this class so that it can be used by tint::ForeachField()
     TINT_REFLECT(disable_robustness,
@@ -75,7 +73,8 @@ struct Options {
                  disable_workgroup_init,
                  external_texture_options,
                  array_length_from_uniform,
-                 binding_remapper_options);
+                 binding_remapper_options,
+                 use_tint_ir);
 };
 
 }  // namespace tint::msl::writer

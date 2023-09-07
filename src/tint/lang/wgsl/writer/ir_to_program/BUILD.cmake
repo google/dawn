@@ -21,11 +21,9 @@
 #                       Do not modify this file directly
 ################################################################################
 
-if(TINT_BUILD_IR)
 ################################################################################
 # Target:    tint_lang_wgsl_writer_ir_to_program
 # Kind:      lib
-# Condition: TINT_BUILD_IR
 ################################################################################
 tint_add_target(tint_lang_wgsl_writer_ir_to_program lib
   lang/wgsl/writer/ir_to_program/ir_to_program.cc
@@ -38,6 +36,7 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program lib
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_type
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
@@ -58,18 +57,9 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program lib
   tint_utils_traits
 )
 
-if(TINT_BUILD_IR)
-  tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program lib
-    tint_lang_core_ir
-  )
-endif(TINT_BUILD_IR)
-
-endif(TINT_BUILD_IR)
-if(TINT_BUILD_IR)
 ################################################################################
 # Target:    tint_lang_wgsl_writer_ir_to_program_test
 # Kind:      test
-# Condition: TINT_BUILD_IR
 ################################################################################
 tint_add_target(tint_lang_wgsl_writer_ir_to_program_test test
   lang/wgsl/writer/ir_to_program/inlining_test.cc
@@ -82,11 +72,14 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program_test test
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
+  tint_lang_core_ir_test
   tint_lang_core_type
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
   tint_lang_wgsl_writer
+  tint_lang_wgsl_writer_ir_to_program
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -105,13 +98,3 @@ tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program_test test
 tint_target_add_external_dependencies(tint_lang_wgsl_writer_ir_to_program_test test
   "gtest"
 )
-
-if(TINT_BUILD_IR)
-  tint_target_add_dependencies(tint_lang_wgsl_writer_ir_to_program_test test
-    tint_lang_core_ir
-    tint_lang_core_ir_test
-    tint_lang_wgsl_writer_ir_to_program
-  )
-endif(TINT_BUILD_IR)
-
-endif(TINT_BUILD_IR)

@@ -59,7 +59,7 @@ if (${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_SPV_WRITER})
   add_tint_fuzzer(tint_wgsl_reader_spv_writer_fuzzer)
 endif()
 
-if (TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER AND TINT_BUILD_IR)
+if (TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
   add_tint_fuzzer(tint_ir_roundtrip_fuzzer)
   target_link_libraries(tint_ir_roundtrip_fuzzer PRIVATE tint_lang_wgsl_writer_ir_to_program)
 endif()

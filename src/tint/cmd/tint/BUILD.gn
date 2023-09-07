@@ -35,6 +35,7 @@ executable("tint") {
     "${tint_src_dir}/cmd/common",
     "${tint_src_dir}/lang/core",
     "${tint_src_dir}/lang/core/constant",
+    "${tint_src_dir}/lang/core/ir",
     "${tint_src_dir}/lang/core/type",
     "${tint_src_dir}/lang/hlsl/writer/common",
     "${tint_src_dir}/lang/spirv/reader/common",
@@ -44,6 +45,7 @@ executable("tint") {
     "${tint_src_dir}/lang/wgsl/inspector",
     "${tint_src_dir}/lang/wgsl/program",
     "${tint_src_dir}/lang/wgsl/reader",
+    "${tint_src_dir}/lang/wgsl/reader/program_to_ir",
     "${tint_src_dir}/lang/wgsl/sem",
     "${tint_src_dir}/lang/wgsl/writer",
     "${tint_src_dir}/utils/cli",
@@ -77,13 +79,6 @@ executable("tint") {
     deps += [
       "${tint_src_dir}/lang/hlsl/validate",
       "${tint_src_dir}/lang/hlsl/writer",
-    ]
-  }
-
-  if (tint_build_ir) {
-    deps += [
-      "${tint_src_dir}/lang/core/ir",
-      "${tint_src_dir}/lang/wgsl/reader/program_to_ir",
     ]
   }
 

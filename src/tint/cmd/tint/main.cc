@@ -36,6 +36,8 @@
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/generate_external_texture_bindings.h"
 #include "src/tint/cmd/common/helper.h"
+#include "src/tint/lang/core/ir/disassembler.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/hlsl/validate/val.h"
 #include "src/tint/lang/msl/validate/val.h"
 #include "src/tint/lang/wgsl/ast/module.h"
@@ -45,6 +47,7 @@
 #include "src/tint/lang/wgsl/ast/transform/single_entry_point.h"
 #include "src/tint/lang/wgsl/ast/transform/substitute_override.h"
 #include "src/tint/lang/wgsl/helpers/flatten_bindings.h"
+#include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 #include "src/tint/utils/cli/cli.h"
 #include "src/tint/utils/command/command.h"
 #include "src/tint/utils/containers/transform.h"
@@ -81,12 +84,6 @@
 #if TINT_BUILD_GLSL_WRITER
 #include "src/tint/lang/glsl/writer/writer.h"
 #endif  // TINT_BUILD_GLSL_WRITER
-
-#if TINT_BUILD_IR
-#include "src/tint/lang/core/ir/disassembler.h"                     // nogncheck
-#include "src/tint/lang/core/ir/module.h"                           // nogncheck
-#include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"  // nogncheck
-#endif                                                              // TINT_BUILD_IR
 
 #if TINT_BUILD_SPV_WRITER
 #define SPV_WRITER_ONLY(x) x
@@ -170,10 +167,8 @@ struct Options {
     tint::Hashmap<std::string, double, 8> overrides;
     std::optional<tint::BindingPoint> hlsl_root_constant_binding_point;
 
-#if TINT_BUILD_IR
     bool dump_ir = false;
     bool use_ir = false;
-#endif  // TINT_BUILD_IR
 
 #if TINT_BUILD_SYNTAX_TREE_WRITER
     bool dump_ast = false;
@@ -279,7 +274,6 @@ When specified, automatically enables MSL validation)",
         }
     });
 
-#if TINT_BUILD_IR
     auto& dump_ir = options.Add<BoolOption>("dump-ir", "Writes the IR to stdout", Alias{"emit-ir"},
                                             Default{false});
     TINT_DEFER(opts->dump_ir = *dump_ir.value);
@@ -287,7 +281,6 @@ When specified, automatically enables MSL validation)",
     auto& use_ir = options.Add<BoolOption>(
         "use-ir", "Use the IR for writers and transforms when possible", Default{false});
     TINT_DEFER(opts->use_ir = *use_ir.value);
-#endif  // TINT_BUILD_IR
 
     auto& verbose =
         options.Add<BoolOption>("verbose", "Verbose output", ShortName{"v"}, Default{false});
@@ -551,9 +544,8 @@ bool GenerateSpirv(const tint::Program* program, const Options& options) {
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.external_texture_options.bindings_map =
         tint::cmd::GenerateExternalTextureBindings(program);
-#if TINT_BUILD_IR
     gen_options.use_tint_ir = options.use_ir;
-#endif
+
     auto result = tint::spirv::writer::Generate(program, gen_options);
     if (!result) {
         tint::cmd::PrintWGSL(std::cerr, *program);
@@ -658,9 +650,7 @@ bool GenerateMsl(const tint::Program* program, const Options& options) {
 
     // TODO(jrprice): Provide a way for the user to set non-default options.
     tint::msl::writer::Options gen_options;
-#if TINT_BUILD_IR
     gen_options.use_tint_ir = options.use_ir;
-#endif
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
     gen_options.external_texture_options.bindings_map =
@@ -1084,7 +1074,7 @@ int main(int argc, const char** argv) {
     }
 #endif  // TINT_BUILD_SYNTAX_TREE_WRITER
 
-#if TINT_BUILD_WGSL_READER && TINT_BUILD_IR
+#if TINT_BUILD_WGSL_READER
     if (options.dump_ir) {
         auto result = tint::wgsl::reader::ProgramToIR(program.get());
         if (!result) {
@@ -1097,7 +1087,7 @@ int main(int argc, const char** argv) {
             }
         }
     }
-#endif  // TINT_BUILD_WGSL_READER && TINT_BUILD_IR
+#endif  // TINT_BUILD_WGSL_READER
 
     tint::inspector::Inspector inspector(program.get());
     if (options.dump_inspector_bindings) {

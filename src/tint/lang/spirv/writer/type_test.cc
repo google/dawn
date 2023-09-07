@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// GEN_BUILD:CONDITION(tint_build_ir)
-
 #include "src/tint/lang/core/type/type.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/type/bool.h"

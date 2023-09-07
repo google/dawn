@@ -34,6 +34,8 @@ tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
   tint_cmd_common_test
   tint_lang_core_constant_test
   tint_lang_core_intrinsic_test
+  tint_lang_core_ir_transform_test
+  tint_lang_core_ir_test
   tint_lang_core_type_test
   tint_lang_core_test
   tint_lang_spirv_ir_test
@@ -43,9 +45,11 @@ tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
   tint_lang_wgsl_inspector_test
   tint_lang_wgsl_program_test
   tint_lang_wgsl_reader_parser_test
+  tint_lang_wgsl_reader_program_to_ir_test
   tint_lang_wgsl_resolver_test
   tint_lang_wgsl_sem_test
   tint_lang_wgsl_writer_ast_printer_test
+  tint_lang_wgsl_writer_ir_to_program_test
   tint_lang_wgsl_test
   tint_utils_cli_test
   tint_utils_command_test
@@ -85,28 +89,14 @@ if(TINT_BUILD_HLSL_WRITER)
   )
 endif(TINT_BUILD_HLSL_WRITER)
 
-if(TINT_BUILD_IR)
-  tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
-    tint_lang_core_ir_transform_test
-    tint_lang_core_ir_test
-    tint_lang_wgsl_reader_program_to_ir_test
-    tint_lang_wgsl_writer_ir_to_program_test
-  )
-endif(TINT_BUILD_IR)
-
 if(TINT_BUILD_MSL_WRITER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
     tint_lang_msl_writer_ast_printer_test
     tint_lang_msl_writer_ast_raise_test
     tint_lang_msl_writer_common_test
-  )
-endif(TINT_BUILD_MSL_WRITER)
-
-if(TINT_BUILD_MSL_WRITER AND TINT_BUILD_IR)
-  tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
     tint_lang_msl_writer_printer_test
   )
-endif(TINT_BUILD_MSL_WRITER AND TINT_BUILD_IR)
+endif(TINT_BUILD_MSL_WRITER)
 
 if(TINT_BUILD_SPV_READER)
   tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
@@ -120,14 +110,9 @@ if(TINT_BUILD_SPV_WRITER)
     tint_lang_spirv_writer_ast_printer_test
     tint_lang_spirv_writer_ast_raise_test
     tint_lang_spirv_writer_common_test
+    tint_lang_spirv_writer_raise_test
     tint_lang_spirv_writer_test
   )
 endif(TINT_BUILD_SPV_WRITER)
-
-if(TINT_BUILD_SPV_WRITER AND TINT_BUILD_IR)
-  tint_target_add_dependencies(tint_cmd_test_test_cmd test_cmd
-    tint_lang_spirv_writer_raise_test
-  )
-endif(TINT_BUILD_SPV_WRITER AND TINT_BUILD_IR)
 
 tint_target_set_output_name(tint_cmd_test_test_cmd test_cmd "tint_unittests")

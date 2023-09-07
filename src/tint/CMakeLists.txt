@@ -42,7 +42,6 @@ function(tint_core_compile_options TARGET)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_SPV_WRITER=$<BOOL:${TINT_BUILD_SPV_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_WGSL_WRITER=$<BOOL:${TINT_BUILD_WGSL_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_SYNTAX_TREE_WRITER=$<BOOL:${TINT_BUILD_SYNTAX_TREE_WRITER}>)
-  target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_IR=$<BOOL:${TINT_BUILD_IR}>)
 
   # TODO(crbug.com/dawn/1704): Remove when chromium_experimental_pixel_local is production-ready
   target_compile_definitions(${TARGET} PUBLIC -DTINT_ENABLE_LOCAL_STORAGE_EXTENSION=$<BOOL:${TINT_ENABLE_LOCAL_STORAGE_EXTENSION}>)

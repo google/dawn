@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// GEN_BUILD:CONDITION(tint_build_wgsl_reader && tint_build_wgsl_writer && tint_build_ir)
+// GEN_BUILD:CONDITION(tint_build_wgsl_reader && tint_build_wgsl_writer)
 
 #include "src/tint/lang/wgsl/helpers/ir_program_test.h"
 #include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"

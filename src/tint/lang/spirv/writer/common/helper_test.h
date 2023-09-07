@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// GEN_BUILD:CONDITION(tint_build_ir)
-
 #ifndef SRC_TINT_LANG_SPIRV_WRITER_COMMON_HELPER_TEST_H_
 #define SRC_TINT_LANG_SPIRV_WRITER_COMMON_HELPER_TEST_H_
 

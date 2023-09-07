@@ -42,14 +42,17 @@ tint_target_add_dependencies(tint_lang_wgsl_test test
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_type
   tint_lang_wgsl_ast
   tint_lang_wgsl_helpers_test
   tint_lang_wgsl_program
   tint_lang_wgsl_reader
+  tint_lang_wgsl_reader_program_to_ir
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
   tint_lang_wgsl_writer
+  tint_lang_wgsl_writer_ir_to_program
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -69,16 +72,8 @@ tint_target_add_external_dependencies(tint_lang_wgsl_test test
   "gtest"
 )
 
-if(TINT_BUILD_IR)
-  tint_target_add_dependencies(tint_lang_wgsl_test test
-    tint_lang_core_ir
-    tint_lang_wgsl_reader_program_to_ir
-    tint_lang_wgsl_writer_ir_to_program
-  )
-endif(TINT_BUILD_IR)
-
-if(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER AND TINT_BUILD_IR)
+if(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
   tint_target_add_sources(tint_lang_wgsl_test test
     "lang/wgsl/ir_roundtrip_test.cc"
   )
-endif(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER AND TINT_BUILD_IR)
+endif(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)

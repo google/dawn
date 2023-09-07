@@ -37,10 +37,12 @@ if (tint_build_msl_writer) {
       "${tint_src_dir}/api/options",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
+      "${tint_src_dir}/lang/core/ir",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/msl/writer/raise",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/program",
+      "${tint_src_dir}/lang/wgsl/reader/program_to_ir",
       "${tint_src_dir}/lang/wgsl/sem",
       "${tint_src_dir}/utils/containers",
       "${tint_src_dir}/utils/diagnostic",
@@ -58,22 +60,12 @@ if (tint_build_msl_writer) {
       "${tint_src_dir}/utils/traits",
     ]
 
-    if (tint_build_ir) {
-      deps += [
-        "${tint_src_dir}/lang/core/ir",
-        "${tint_src_dir}/lang/wgsl/reader/program_to_ir",
-      ]
-    }
-
     if (tint_build_msl_writer) {
       deps += [
         "${tint_src_dir}/lang/msl/writer/ast_printer",
         "${tint_src_dir}/lang/msl/writer/common",
+        "${tint_src_dir}/lang/msl/writer/printer",
       ]
-    }
-
-    if (tint_build_msl_writer && tint_build_ir) {
-      deps += [ "${tint_src_dir}/lang/msl/writer/printer" ]
     }
   }
 }

@@ -18,12 +18,9 @@
 #include <utility>
 
 #include "src/tint/lang/msl/writer/ast_printer/ast_printer.h"
-
-#if TINT_BUILD_IR
-#include "src/tint/lang/msl/writer/printer/printer.h"               // nogncheck
-#include "src/tint/lang/msl/writer/raise/raise.h"                   // nogncheck
-#include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"  // nogncheck
-#endif                                                              // TINT_BUILD_IR
+#include "src/tint/lang/msl/writer/printer/printer.h"
+#include "src/tint/lang/msl/writer/raise/raise.h"
+#include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 
 namespace tint::msl::writer {
 
@@ -33,7 +30,7 @@ Result<Output, std::string> Generate(const Program* program, const Options& opti
     }
 
     Output output;
-#if TINT_BUILD_IR
+
     if (options.use_tint_ir) {
         // Convert the AST program to an IR module.
         auto converted = wgsl::reader::ProgramToIR(program);
@@ -56,9 +53,7 @@ Result<Output, std::string> Generate(const Program* program, const Options& opti
             return result.Failure();
         }
         output.msl = impl->Result();
-    } else  // NOLINT(readability/braces)
-#endif
-    {
+    } else {
         // Sanitize the program.
         auto sanitized_result = Sanitize(program, options);
         if (!sanitized_result.program.IsValid()) {

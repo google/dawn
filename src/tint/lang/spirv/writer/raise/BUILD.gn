@@ -28,7 +28,7 @@ import("${tint_src_dir}/tint.gni")
 if (tint_build_unittests) {
   import("//testing/test.gni")
 }
-if (tint_build_spv_writer && tint_build_ir) {
+if (tint_build_spv_writer) {
   libtint_source_set("raise") {
     sources = [
       "builtin_polyfill.cc",
@@ -51,6 +51,8 @@ if (tint_build_spv_writer && tint_build_ir) {
       "${tint_src_dir}/api/options",
       "${tint_src_dir}/lang/core",
       "${tint_src_dir}/lang/core/constant",
+      "${tint_src_dir}/lang/core/ir",
+      "${tint_src_dir}/lang/core/ir/transform",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/spirv/ir",
       "${tint_src_dir}/utils/containers",
@@ -68,13 +70,6 @@ if (tint_build_spv_writer && tint_build_ir) {
       "${tint_src_dir}/utils/traits",
     ]
 
-    if (tint_build_ir) {
-      deps += [
-        "${tint_src_dir}/lang/core/ir",
-        "${tint_src_dir}/lang/core/ir/transform",
-      ]
-    }
-
     if (tint_build_spv_reader || tint_build_spv_writer) {
       deps += [ "${tint_spirv_headers_dir}:spv_headers" ]
     }
@@ -85,7 +80,7 @@ if (tint_build_spv_writer && tint_build_ir) {
   }
 }
 if (tint_build_unittests) {
-  if (tint_build_spv_writer && tint_build_ir) {
+  if (tint_build_spv_writer) {
     tint_unittests_source_set("unittests") {
       testonly = true
       sources = [
@@ -101,6 +96,8 @@ if (tint_build_unittests) {
         "${tint_src_dir}/api/common",
         "${tint_src_dir}/lang/core",
         "${tint_src_dir}/lang/core/constant",
+        "${tint_src_dir}/lang/core/ir",
+        "${tint_src_dir}/lang/core/ir/transform:unittests",
         "${tint_src_dir}/lang/core/type",
         "${tint_src_dir}/utils/containers",
         "${tint_src_dir}/utils/diagnostic",
@@ -117,14 +114,7 @@ if (tint_build_unittests) {
         "${tint_src_dir}/utils/traits",
       ]
 
-      if (tint_build_ir) {
-        deps += [
-          "${tint_src_dir}/lang/core/ir",
-          "${tint_src_dir}/lang/core/ir/transform:unittests",
-        ]
-      }
-
-      if (tint_build_spv_writer && tint_build_ir) {
+      if (tint_build_spv_writer) {
         deps += [ "${tint_src_dir}/lang/spirv/writer/raise" ]
       }
     }

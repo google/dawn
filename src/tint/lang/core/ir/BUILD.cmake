@@ -23,11 +23,9 @@
 
 include(lang/core/ir/transform/BUILD.cmake)
 
-if(TINT_BUILD_IR)
 ################################################################################
 # Target:    tint_lang_core_ir
 # Kind:      lib
-# Condition: TINT_BUILD_IR
 ################################################################################
 tint_add_target(tint_lang_core_ir lib
   lang/core/ir/access.cc
@@ -151,12 +149,9 @@ tint_target_add_dependencies(tint_lang_core_ir lib
   tint_utils_traits
 )
 
-endif(TINT_BUILD_IR)
-if(TINT_BUILD_IR)
 ################################################################################
 # Target:    tint_lang_core_ir_test
 # Kind:      test
-# Condition: TINT_BUILD_IR
 ################################################################################
 tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/access_test.cc
@@ -204,6 +199,7 @@ tint_target_add_dependencies(tint_lang_core_ir_test test
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_type
   tint_utils_containers
   tint_utils_diagnostic
@@ -223,11 +219,3 @@ tint_target_add_dependencies(tint_lang_core_ir_test test
 tint_target_add_external_dependencies(tint_lang_core_ir_test test
   "gtest"
 )
-
-if(TINT_BUILD_IR)
-  tint_target_add_dependencies(tint_lang_core_ir_test test
-    tint_lang_core_ir
-  )
-endif(TINT_BUILD_IR)
-
-endif(TINT_BUILD_IR)
