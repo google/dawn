@@ -264,11 +264,8 @@ class Validator {
     Module& mod_;
     diag::List diagnostics_;
     Disassembler dis_{mod_};
-    std::unique_ptr<core::intrinsic::Table> intrinsic_table_ =
-        core::intrinsic::Table::Create(core::intrinsic::data::kData,
-                                       mod_.Types(),
-                                       mod_.symbols,
-                                       diagnostics_);
+    core::intrinsic::Context intrinsic_context_{core::intrinsic::data::kData, mod_.Types(),
+                                                mod_.symbols, diagnostics_};
     Block* current_block_ = nullptr;
     Hashset<Function*, 4> seen_functions_;
     Vector<ControlInstruction*, 8> control_stack_;
@@ -534,8 +531,8 @@ void Validator::CheckCall(Call* call) {
 
 void Validator::CheckCoreBuiltinCall(CoreBuiltinCall* call) {
     auto args = Transform<8>(call->Args(), [&](ir::Value* v) { return v->Type(); });
-    auto result =
-        intrinsic_table_->Lookup(call->Func(), args, core::EvaluationStage::kRuntime, Source{});
+    auto result = core::intrinsic::Lookup(intrinsic_context_, call->Func(), args,
+                                          core::EvaluationStage::kRuntime, Source{});
     (void)result;  // Lookup returns an error diagnostic on overload failure
 }
 

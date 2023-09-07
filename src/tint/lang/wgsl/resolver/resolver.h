@@ -612,7 +612,7 @@ class Resolver {
     ProgramBuilder* const builder_;
     diag::List& diagnostics_;
     core::constant::Eval const_eval_;
-    std::unique_ptr<core::intrinsic::Table> const intrinsic_table_;
+    core::intrinsic::Context intrinsic_context_;
     DependencyGraph dependencies_;
     SemHelper sem_;
     Validator validator_;
@@ -635,10 +635,9 @@ class Resolver {
     Hashset<const ast::Expression*, 8> skip_const_eval_;
     IdentifierResolveHint identifier_resolve_hint_;
     Hashmap<const core::type::Type*, size_t, 8> nest_depth_;
-    Hashmap<std::pair<core::intrinsic::Table::Overload, core::Function>, sem::Builtin*, 64>
-        builtins_;
-    Hashmap<core::intrinsic::Table::Overload, sem::ValueConstructor*, 16> constructors_;
-    Hashmap<core::intrinsic::Table::Overload, sem::ValueConversion*, 16> converters_;
+    Hashmap<std::pair<core::intrinsic::Overload, core::Function>, sem::Builtin*, 64> builtins_;
+    Hashmap<core::intrinsic::Overload, sem::ValueConstructor*, 16> constructors_;
+    Hashmap<core::intrinsic::Overload, sem::ValueConversion*, 16> converters_;
 };
 
 }  // namespace tint::resolver

@@ -117,10 +117,8 @@ Resolver::Resolver(ProgramBuilder* builder)
     : builder_(builder),
       diagnostics_(builder->Diagnostics()),
       const_eval_(builder->constants, diagnostics_),
-      intrinsic_table_(core::intrinsic::Table::Create(core::intrinsic::data::kData,
-                                                      builder->Types(),
-                                                      builder->Symbols(),
-                                                      builder->Diagnostics())),
+      intrinsic_context_{core::intrinsic::data::kData, builder->Types(), builder->Symbols(),
+                         builder->Diagnostics()},
       sem_(builder),
       validator_(builder,
                  sem_,
@@ -2085,7 +2083,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     auto ctor_or_conv = [&](CtorConvIntrinsic ty,
                             const core::type::Type* template_arg) -> sem::Call* {
         auto arg_tys = tint::Transform(args, [](auto* arg) { return arg->Type(); });
-        auto match = intrinsic_table_->Lookup(ty, template_arg, arg_tys, args_stage, expr->source);
+        auto match = core::intrinsic::Lookup(intrinsic_context_, ty, template_arg, arg_tys,
+                                             args_stage, expr->source);
         if (!match) {
             return nullptr;
         }
@@ -2409,7 +2408,8 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     }
 
     auto arg_tys = tint::Transform(args, [](auto* arg) { return arg->Type(); });
-    auto overload = intrinsic_table_->Lookup(fn, arg_tys, arg_stage, expr->source);
+    auto overload =
+        core::intrinsic::Lookup(intrinsic_context_, fn, arg_tys, arg_stage, expr->source);
     if (!overload) {
         return nullptr;
     }
@@ -3561,8 +3561,8 @@ sem::ValueExpression* Resolver::Binary(const ast::BinaryExpression* expr) {
     }
 
     auto stage = core::EarliestStage(lhs->Stage(), rhs->Stage());
-    auto overload =
-        intrinsic_table_->Lookup(expr->op, lhs->Type(), rhs->Type(), stage, expr->source, false);
+    auto overload = core::intrinsic::Lookup(intrinsic_context_, expr->op, lhs->Type(), rhs->Type(),
+                                            stage, expr->source, false);
     if (!overload) {
         return nullptr;
     }
@@ -3683,7 +3683,8 @@ sem::ValueExpression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
         default: {
             stage = expr->Stage();
-            auto overload = intrinsic_table_->Lookup(unary->op, expr_ty, stage, unary->source);
+            auto overload = core::intrinsic::Lookup(intrinsic_context_, unary->op, expr_ty, stage,
+                                                    unary->source);
             if (!overload) {
                 return nullptr;
             }
@@ -4721,8 +4722,8 @@ sem::Statement* Resolver::CompoundAssignmentStatement(
         auto stage = core::EarliestStage(lhs->Stage(), rhs->Stage());
 
         auto overload =
-            intrinsic_table_->Lookup(stmt->op, lhs->Type()->UnwrapRef(), rhs->Type()->UnwrapRef(),
-                                     stage, stmt->source, true);
+            core::intrinsic::Lookup(intrinsic_context_, stmt->op, lhs->Type()->UnwrapRef(),
+                                    rhs->Type()->UnwrapRef(), stage, stmt->source, true);
         if (!overload) {
             return false;
         }
