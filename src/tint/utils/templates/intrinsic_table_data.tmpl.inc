@@ -136,14 +136,17 @@ constexpr TemplateNumberInfo kTemplateNumbers[] = {
 static_assert(TemplateNumberIndex::CanIndex(kTemplateNumbers),
               "TemplateNumberIndex is not large enough to index kTemplateNumbers");
 
-constexpr constant::Eval::Function kConstEvalFunctions[] = {
-{{- range $i, $f := .ConstEvalFunctions }}
-  /* [{{$i}}] */ &constant::Eval::{{template "ExpandName" $f}},
-{{- end }}
+{{- if .ConstEvalFunctions}}
+{{/* newline */}}
+constexpr core::constant::Eval::Function kConstEvalFunctions[] = {
+{{-   range $i, $f := .ConstEvalFunctions }}
+  /* [{{$i}}] */ &core::constant::Eval::{{template "OperatorName" $f}},
+{{-   end }}
 };
 
 static_assert(ConstEvalFunctionIndex::CanIndex(kConstEvalFunctions),
               "ConstEvalFunctionIndex is not large enough to index kConstEvalFunctions");
+{{- end}}
 
 constexpr OverloadInfo kOverloads[] = {
 {{- range $i, $o := .Overloads }}
@@ -203,52 +206,65 @@ constexpr IntrinsicInfo kBuiltins[] = {
 {{- end }}
 };
 
+{{- if .UnaryOperators}}
+{{/* newline */}}
 constexpr IntrinsicInfo kUnaryOperators[] = {
-{{- range $i, $o := .UnaryOperators }}
+{{-   range $i, $o := .UnaryOperators }}
   {
     /* [{{$i}}] */
-{{-   range $o.OverloadDescriptions }}
+{{-     range $o.OverloadDescriptions }}
     /* {{.}} */
-{{-   end }}
+{{-     end }}
     /* num overloads */ {{$o.NumOverloads}},
     /* overloads */ OverloadIndex({{$o.OverloadsOffset}}),
   },
-{{- end }}
+{{-   end }}
 };
-
-{{- range $i, $o := .UnaryOperators }}
-constexpr uint8_t kUnaryOperator{{ template "ExpandName" $o.Name}} = {{$i}};
 {{- end }}
 
+{{- $unary_ops := Map }}
+{{- range $i, $o := .UnaryOperators }}
+{{-   $unary_ops.Put $o.Name true }}
+constexpr uint8_t kUnaryOperator{{ template "OperatorName" $o.Name}} = {{$i}};
+{{- end }}
+
+{{- if .BinaryOperators}}
+{{/* newline */}}
 constexpr IntrinsicInfo kBinaryOperators[] = {
-{{- range $i, $o := .BinaryOperators }}
+{{-   range $i, $o := .BinaryOperators }}
   {
     /* [{{$i}}] */
-{{-   range $o.OverloadDescriptions }}
+{{-     range $o.OverloadDescriptions }}
     /* {{.}} */
-{{-   end }}
+{{-     end }}
     /* num overloads */ {{$o.NumOverloads}},
     /* overloads */ OverloadIndex({{$o.OverloadsOffset}}),
   },
-{{- end }}
+{{-   end }}
 };
-
-{{- range $i, $o := .BinaryOperators }}
-constexpr uint8_t kBinaryOperator{{ template "ExpandName" $o.Name}} = {{$i}};
 {{- end }}
 
+{{- $bin_ops := Map }}
+{{- range $i, $o := .BinaryOperators }}
+{{-   $bin_ops.Put $o.Name true }}
+constexpr uint8_t kBinaryOperator{{ template "OperatorName" $o.Name}} = {{$i}};
+{{- end }}
+
+{{- if .ConstructorsAndConverters}}
+{{/* newline */}}
 constexpr IntrinsicInfo kConstructorsAndConverters[] = {
-{{- range $i, $o := .ConstructorsAndConverters }}
+{{-   range $i, $o := .ConstructorsAndConverters }}
   {
     /* [{{$i}}] */
-{{-   range $o.OverloadDescriptions }}
+{{-     range $o.OverloadDescriptions }}
     /* {{.}} */
-{{-   end }}
+{{-     end }}
     /* num overloads */ {{$o.NumOverloads}},
     /* overloads */ OverloadIndex({{$o.OverloadsOffset}}),
   },
-{{- end }}
+{{-   end }}
 };
+{{- end }}
 
 // clang-format on
 
@@ -263,30 +279,17 @@ const core::intrinsic::TableData {{$.Name}}{
   /* number_matchers */ kNumberMatchers,
   /* parameters */ kParameters,
   /* overloads */ kOverloads,
-  /* const_eval_functions */ kConstEvalFunctions,
-  /* ctor_conv */ kConstructorsAndConverters,
+  /* const_eval_functions */ {{if .ConstEvalFunctions}}kConstEvalFunctions{{else}}Empty{{end}},
+  /* ctor_conv */ {{if .ConstructorsAndConverters}}kConstructorsAndConverters{{else}}Empty{{end}},
   /* builtins */ kBuiltins,
-  /* binary_plus */ kBinaryOperators[kBinaryOperatorPlus],
-  /* binary_minus */ kBinaryOperators[kBinaryOperatorMinus],
-  /* binary_star */ kBinaryOperators[kBinaryOperatorStar],
-  /* binary_divide */ kBinaryOperators[kBinaryOperatorDivide],
-  /* binary_modulo */ kBinaryOperators[kBinaryOperatorModulo],
-  /* binary_xor */ kBinaryOperators[kBinaryOperatorXor],
-  /* binary_and */ kBinaryOperators[kBinaryOperatorAnd],
-  /* binary_or */ kBinaryOperators[kBinaryOperatorOr],
-  /* binary_logical_and */ kBinaryOperators[kBinaryOperatorLogicalAnd],
-  /* binary_logical_or */ kBinaryOperators[kBinaryOperatorLogicalOr],
-  /* binary_equal */ kBinaryOperators[kBinaryOperatorEqual],
-  /* binary_not_equal */ kBinaryOperators[kBinaryOperatorNotEqual],
-  /* binary_less_than */ kBinaryOperators[kBinaryOperatorLessThan],
-  /* binary_greater_than */ kBinaryOperators[kBinaryOperatorGreaterThan],
-  /* binary_less_than_equal */ kBinaryOperators[kBinaryOperatorLessThanEqual],
-  /* binary_greater_than_equal */ kBinaryOperators[kBinaryOperatorGreaterThanEqual],
-  /* binary_shift_left */ kBinaryOperators[kBinaryOperatorShiftLeft],
-  /* binary_shift_right */ kBinaryOperators[kBinaryOperatorShiftRight],
-  /* unary_not */ kUnaryOperators[kUnaryOperatorNot],
-  /* unary_complement */ kUnaryOperators[kUnaryOperatorComplement],
-  /* unary_minus */ kUnaryOperators[kUnaryOperatorMinus],
+{{- range $op := List "+" "-" "*" "/" "%" "^" "&" "|" "&&" "||" "==" "!=" "<" ">" "<=" ">=" "<<" ">>"}}
+{{-   $N := Eval "OperatorName" $op }}
+  /* binary '{{$op}}' */ {{if $bin_ops.Get .}}kBinaryOperators[kBinaryOperator{{$N}}]{{else}}tint::core::intrinsic::kNoOverloads{{end}},
+{{- end}}
+{{- range $op := List "!" "~" "-"}}
+{{-   $N := Eval "OperatorName" $op }}
+  /* unary '{{$op}}' */ {{if $unary_ops.Get .}}kUnaryOperators[kUnaryOperator{{$N}}]{{else}}tint::core::intrinsic::kNoOverloads{{end}},
+{{- end}}
 };
 
 {{  end -}}
@@ -520,7 +523,7 @@ constexpr NumberMatcher kNumberMatchers[] = {
 
 
 {{- /* ------------------------------------------------------------------ */ -}}
-{{-                           define "ExpandName"                            -}}
+{{-                          define "OperatorName"                           -}}
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-        if eq . "<<" -}}ShiftLeft
 {{-   else if eq . "&"  -}}And

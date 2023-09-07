@@ -208,6 +208,9 @@ struct IntrinsicInfo {
     const OverloadIndex overloads;
 };
 
+/// A IntrinsicInfo with no overloads
+static constexpr IntrinsicInfo kNoOverloads{0, OverloadIndex(OverloadIndex::kInvalid)};
+
 /// Number is an 32 bit unsigned integer, which can be in one of three states:
 /// * Invalid - Number has not been assigned a value
 /// * Valid   - a fixed integer value

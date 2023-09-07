@@ -73,6 +73,7 @@ func (t *Template) Run(w io.Writer, data any, funcs Functions) error {
 		"HasSuffix":  strings.HasSuffix,
 		"Import":     g.importTmpl,
 		"Iterate":    iterate,
+		"List":       list,
 		"Map":        newMap,
 		"PascalCase": pascalCase,
 		"ToUpper":    strings.ToUpper,
@@ -196,6 +197,10 @@ func iterate(n int) []int {
 	}
 	return out
 }
+
+// list returns a new slice of elements from the argument list
+// Useful for: {{- range Slice "a" "b" "c" -}}{{.}}{{end}}
+func list(elements ...any) []any { return elements }
 
 // pascalCase returns the snake-case string s transformed into 'PascalCase',
 // Rules:
