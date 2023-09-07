@@ -559,5 +559,31 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(VarForDynamicIndexTest, ShortCircuitedArrayAccess) {
+    auto* src = R"(
+const foo = (false && (array<f32, 4>()[0] == 0));
+)";
+
+    auto* expect = src;
+
+    ast::transform::DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(VarForDynamicIndexTest, ShortCircuitedMatrixAccess) {
+    auto* src = R"(
+const foo = (false && (mat4x4<f32>()[0][0] == 0));
+)";
+
+    auto* expect = src;
+
+    ast::transform::DataMap data;
+    auto got = Run<VarForDynamicIndex>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

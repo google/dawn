@@ -44,8 +44,10 @@ ast::transform::Transform::ApplyResult VarForDynamicIndex::Apply(const Program* 
         auto* object_expr = access_expr->object;
         auto& sem = src->Sem();
 
-        if (sem.GetVal(index_expr)->ConstantValue()) {
-            // Index expression resolves to a compile time value.
+        auto stage = sem.GetVal(index_expr)->Stage();
+        if (stage == core::EvaluationStage::kConstant ||
+            stage == core::EvaluationStage::kNotEvaluated) {
+            // Index expression resolves to a compile time value or will not be evaluated.
             // As this isn't a dynamic index, we can ignore this.
             return true;
         }
