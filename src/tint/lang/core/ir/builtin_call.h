@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_LANG_CORE_IR_BUILTIN_CALL_H_
 #define SRC_TINT_LANG_CORE_IR_BUILTIN_CALL_H_
 
+#include "src/tint/lang/core/intrinsic/table_data.h"
 #include "src/tint/lang/core/ir/call.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -31,6 +32,15 @@ class BuiltinCall : public Castable<BuiltinCall, Call> {
     /// @param args the conversion arguments
     explicit BuiltinCall(InstructionResult* result, VectorRef<Value*> args = tint::Empty);
     ~BuiltinCall() override;
+
+    /// @returns the identifier for the function
+    virtual size_t FuncId() = 0;
+
+    /// @returns the intrinsic name
+    virtual const char* IntrinsicName() = 0;
+
+    /// @returns the table data to validate this builtin
+    virtual const core::intrinsic::TableData& TableData() = 0;
 };
 
 }  // namespace tint::core::ir

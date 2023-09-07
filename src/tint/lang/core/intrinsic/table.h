@@ -99,7 +99,7 @@ struct Context {
 /// Lookup looks for the builtin overload with the given signature, raising an error diagnostic
 /// if the builtin was not found.
 /// @param context the intrinsic context
-/// @param type the builtin type
+/// @param builtin_type the builtin identifier
 /// @param args the argument types passed to the builtin function
 /// @param earliest_eval_stage the the earliest evaluation stage that a call to
 ///        the builtin can be made. This can alter the overloads considered.
@@ -110,7 +110,28 @@ struct Context {
 /// @param source the source of the builtin call
 /// @return the resolved builtin function overload
 Result<Overload> Lookup(Context& context,
-                        core::Function type,
+                        core::Function builtin_type,
+                        VectorRef<const core::type::Type*> args,
+                        EvaluationStage earliest_eval_stage,
+                        const Source& source);
+
+/// Lookup looks for the builtin overload with the given signature, raising an error diagnostic
+/// if the builtin was not found.
+/// @param context the intrinsic context
+/// @param intrinsic_name the name of the intrinsi
+/// @param function_id the function identifier
+/// @param args the argument types passed to the builtin function
+/// @param earliest_eval_stage the the earliest evaluation stage that a call to
+///        the builtin can be made. This can alter the overloads considered.
+///        For example, if the earliest evaluation stage is `EvaluationStage::kRuntime`, then
+///        only overloads with concrete argument types will be considered, as all
+///        abstract-numerics will have been materialized after shader creation time
+///        (EvaluationStage::kConstant).
+/// @param source the source of the builtin call
+/// @return the resolved builtin function overload
+Result<Overload> Lookup(Context& context,
+                        const char* intrinsic_name,
+                        size_t function_id,
                         VectorRef<const core::type::Type*> args,
                         EvaluationStage earliest_eval_stage,
                         const Source& source);

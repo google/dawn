@@ -588,8 +588,16 @@ Result<Overload> Lookup(Context& context,
                         VectorRef<const core::type::Type*> args,
                         EvaluationStage earliest_eval_stage,
                         const Source& source) {
-    const char* intrinsic_name = core::str(builtin_type);
+    return Lookup(context, core::str(builtin_type), static_cast<size_t>(builtin_type), args,
+                  earliest_eval_stage, source);
+}
 
+Result<Overload> Lookup(Context& context,
+                        const char* intrinsic_name,
+                        size_t function_id,
+                        VectorRef<const core::type::Type*> args,
+                        EvaluationStage earliest_eval_stage,
+                        const Source& source) {
     // Generates an error when no overloads match the provided arguments
     auto on_no_match = [&](VectorRef<Candidate> candidates) {
         StringStream ss;
@@ -604,8 +612,8 @@ Result<Overload> Lookup(Context& context,
     };
 
     // Resolve the intrinsic overload
-    return MatchIntrinsic(context, context.data.builtins[static_cast<size_t>(builtin_type)],
-                          intrinsic_name, args, earliest_eval_stage, TemplateState{}, on_no_match);
+    return MatchIntrinsic(context, context.data.builtins[function_id], intrinsic_name, args,
+                          earliest_eval_stage, TemplateState{}, on_no_match);
 }
 
 Result<Overload> Lookup(Context& context,

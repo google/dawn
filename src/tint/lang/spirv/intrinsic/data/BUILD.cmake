@@ -21,7 +21,30 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/spirv/intrinsic/BUILD.cmake)
-include(lang/spirv/ir/BUILD.cmake)
-include(lang/spirv/reader/BUILD.cmake)
-include(lang/spirv/writer/BUILD.cmake)
+################################################################################
+# Target:    tint_lang_spirv_intrinsic_data
+# Kind:      lib
+################################################################################
+tint_add_target(tint_lang_spirv_intrinsic_data lib
+  lang/spirv/intrinsic/data/data.cc
+  lang/spirv/intrinsic/data/data.h
+)
+
+tint_target_add_dependencies(tint_lang_spirv_intrinsic_data lib
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_intrinsic
+  tint_lang_core_intrinsic_data
+  tint_lang_core_type
+  tint_utils_containers
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
+)

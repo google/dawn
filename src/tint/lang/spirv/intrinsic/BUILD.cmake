@@ -21,7 +21,4 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/spirv/intrinsic/BUILD.cmake)
-include(lang/spirv/ir/BUILD.cmake)
-include(lang/spirv/reader/BUILD.cmake)
-include(lang/spirv/writer/BUILD.cmake)
+include(lang/spirv/intrinsic/data/BUILD.cmake)

@@ -17,7 +17,9 @@
 
 #include <string>
 
+#include "src/tint/lang/core/intrinsic/table_data.h"
 #include "src/tint/lang/core/ir/builtin_call.h"
+#include "src/tint/lang/spirv/intrinsic/data/data.h"
 #include "src/tint/lang/spirv/ir/function.h"
 #include "src/tint/utils/rtti/castable.h"
 
@@ -38,8 +40,17 @@ class BuiltinCall : public Castable<BuiltinCall, core::ir::BuiltinCall> {
     /// @returns the builtin function
     Function Func() { return func_; }
 
+    /// @returns the identifier for the function
+    size_t FuncId() override { return static_cast<size_t>(func_); }
+
     /// @returns the friendly name for the instruction
     std::string FriendlyName() override { return str(func_); }
+
+    /// @returns the intrinsic name
+    const char* IntrinsicName() override { return str(func_); }
+
+    /// @returns the table data to validate this builtin
+    const core::intrinsic::TableData& TableData() override { return spirv::intrinsic::data::kData; }
 
   private:
     Function func_;

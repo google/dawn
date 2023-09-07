@@ -88,7 +88,7 @@ constexpr ParameterInfo kParameters[] = {
 {{- range $i, $p := .Parameters }}
   {
     /* [{{$i}}] */
-    /* usage */ ParameterUsage::
+    /* usage */ core::ParameterUsage::
 {{-   if $p.Usage }}k{{PascalCase $p.Usage}}
 {{-   else        }}kNone
 {{-   end }},
