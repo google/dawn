@@ -801,6 +801,25 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-32 ] wo
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x9bc5 target-cpu-32 ] worker_webgpu:api,operation,render_pass,storeOp:render_pass_store_op,color_attachment_with_depth_stencil_attachment:colorStoreOperation="store";depthStencilStoreOperation="store" [ RetryOnFailure ]
 
 ################################################################################
+# Windows x86 FXC "bit 22" failures
+# KEEP
+################################################################################
+crbug.com/tint/1753 [ win10 target-cpu-32 webgpu-dxc-disabled ] webgpu:shader,execution,expression,binary,bitwise:bitwise_and_compound:type="i32";inputSource="const";* [ Skip ]
+crbug.com/tint/1753 [ win10 target-cpu-32 webgpu-dxc-disabled ] webgpu:shader,execution,expression,binary,bitwise:bitwise_and_compound:type="u32";inputSource="const";* [ Skip ]
+crbug.com/tint/1753 [ win10 target-cpu-32 webgpu-dxc-disabled ] webgpu:shader,execution,expression,binary,bitwise:bitwise_exclusive_or:type="i32";inputSource="const";* [ Skip ]
+crbug.com/tint/1753 [ win10 target-cpu-32 webgpu-dxc-disabled ] webgpu:shader,execution,expression,binary,bitwise:bitwise_exclusive_or:type="u32";inputSource="const";* [ Skip ]
+crbug.com/tint/1753 [ win10 target-cpu-32 webgpu-dxc-disabled ] webgpu:shader,execution,expression,binary,bitwise:bitwise_exclusive_or_compound:type="i32";inputSource="const";* [ Skip ]
+crbug.com/tint/1753 [ win10 target-cpu-32 webgpu-dxc-disabled ] webgpu:shader,execution,expression,binary,bitwise:bitwise_exclusive_or_compound:type="u32";inputSource="const";* [ Skip ]
+crbug.com/tint/1753 [ win10 target-cpu-32 webgpu-dxc-disabled ] webgpu:shader,execution,expression,binary,bitwise_shift:shift_right_concrete:type="i32";inputSource="const";* [ Skip ]
+crbug.com/tint/1753 [ win10 target-cpu-32 webgpu-dxc-disabled ] webgpu:shader,execution,expression,binary,i32_arithmetic:division:inputSource="const";* [ Skip ]
+crbug.com/tint/1753 [ win10 target-cpu-32 webgpu-dxc-disabled ] webgpu:shader,execution,expression,binary,i32_arithmetic:division_scalar_vector:inputSource="const";* [ Skip ]
+crbug.com/tint/1753 [ win10 target-cpu-32 webgpu-dxc-disabled ] webgpu:shader,execution,expression,binary,i32_arithmetic:division_vector_scalar:inputSource="const";* [ Skip ]
+crbug.com/tint/1753 [ win10 target-cpu-32 webgpu-dxc-disabled ] webgpu:shader,execution,expression,call,builtin,pack4x8snorm:pack:inputSource="const" [ Skip ]
+crbug.com/tint/1753 [ win10 target-cpu-32 webgpu-dxc-disabled ] webgpu:shader,execution,expression,unary,i32_arithmetic:negation:inputSource="const";* [ Skip ]
+crbug.com/tint/1753 [ win10 target-cpu-32 webgpu-dxc-disabled ] webgpu:shader,execution,expression,unary,i32_complement:i32_complement:inputSource="const";* [ Skip ]
+crbug.com/tint/1753 [ win10 target-cpu-32 webgpu-dxc-disabled ] webgpu:shader,execution,expression,unary,u32_complement:u32_complement:inputSource="const";* [ Skip ]
+
+################################################################################
 # untriaged DXC failures
 ################################################################################
 crbug.com/tint/0000 [ win10 webgpu-dxc-enabled ] webgpu:shader,execution,expression,binary,bitwise:* [ Failure ]
