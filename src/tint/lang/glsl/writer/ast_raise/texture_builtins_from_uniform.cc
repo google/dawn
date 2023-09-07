@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/texture_builtins_from_uniform.h"
+#include "src/tint/lang/glsl/writer/ast_raise/texture_builtins_from_uniform.h"
 
 #include <memory>
 #include <queue>
@@ -34,11 +34,11 @@
 #include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/rtti/switch.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::TextureBuiltinsFromUniform);
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::TextureBuiltinsFromUniform::Config);
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::TextureBuiltinsFromUniform::Result);
+TINT_INSTANTIATE_TYPEINFO(tint::glsl::writer::TextureBuiltinsFromUniform);
+TINT_INSTANTIATE_TYPEINFO(tint::glsl::writer::TextureBuiltinsFromUniform::Config);
+TINT_INSTANTIATE_TYPEINFO(tint::glsl::writer::TextureBuiltinsFromUniform::Result);
 
-namespace tint::ast::transform {
+namespace tint::glsl::writer {
 
 namespace {
 
@@ -74,7 +74,9 @@ struct TextureBuiltinsFromUniform::State {
     /// @param program the source program
     /// @param in the input transform data
     /// @param out the output transform data
-    explicit State(const Program* program, const DataMap& in, DataMap& out)
+    explicit State(const Program* program,
+                   const ast::transform::DataMap& in,
+                   ast::transform::DataMap& out)
         : src(program), inputs(in), outputs(out) {}
 
     /// Runs the transform
@@ -114,7 +116,7 @@ struct TextureBuiltinsFromUniform::State {
                                 return;
                             }
                             if (auto* call_stmt =
-                                    call->Stmt()->Declaration()->As<CallStatement>()) {
+                                    call->Stmt()->Declaration()->As<ast::CallStatement>()) {
                                 if (call_stmt->expr == call->Declaration()) {
                                     // textureNumLevels() / textureNumSamples() is used as a
                                     // statement. The argument expression must be side-effect free,
@@ -262,9 +264,9 @@ struct TextureBuiltinsFromUniform::State {
     /// The source program
     const Program* const src;
     /// The transform inputs
-    const DataMap& inputs;
+    const ast::transform::DataMap& inputs;
     /// The transform outputs
-    DataMap& outputs;
+    ast::transform::DataMap& outputs;
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
@@ -311,11 +313,13 @@ struct TextureBuiltinsFromUniform::State {
     /// f(tex, internal_uniform.texture_builtin_value), if tex is from a global
     /// variable, store the BindingPoint. or f(tex, extra_param_tex), if tex is from a function
     /// param, store the texture function parameter pointer.
-    Hashmap<const CallExpression*, Vector<std::variant<BindingPoint, const ast::Parameter*>, 4>, 8>
+    Hashmap<const ast::CallExpression*,
+            Vector<std::variant<BindingPoint, const ast::Parameter*>, 4>,
+            8>
         call_to_data;
 
     /// Texture builtin calls to be replaced by either uniform values or function parameters.
-    Hashmap<const CallExpression*, std::variant<BindingPoint, const ast::Parameter*>, 8>
+    Hashmap<const ast::CallExpression*, std::variant<BindingPoint, const ast::Parameter*>, 8>
         builtin_to_replace;
 
     /// A map from global texture bindpoint to the symbol storing its builtin value in the uniform
@@ -323,7 +327,7 @@ struct TextureBuiltinsFromUniform::State {
     Hashmap<BindingPoint, Symbol, 16> bindpoint_to_syms;
 
     /// The internal uniform buffer
-    const Variable* ubo = nullptr;
+    const ast::Variable* ubo = nullptr;
     /// Get or create a UBO including u32 scalars for texture builtin values.
     /// @returns the symbol of the uniform buffer variable.
     Symbol GetUboSym() {
@@ -348,7 +352,7 @@ struct TextureBuiltinsFromUniform::State {
         }
 
         // Find if there's any existing global variable using the same cfg->ubo_binding
-        for (auto* var : src->AST().Globals<Var>()) {
+        for (auto* var : src->AST().Globals<ast::Var>()) {
             if (var->HasBindingPoint()) {
                 auto* global_sem = sem.Get<sem::GlobalVariable>(var);
 
@@ -361,7 +365,7 @@ struct TextureBuiltinsFromUniform::State {
                     // Replace it with a new struct including the new_member.
                     // Then remove the old structure global declaration.
 
-                    ubo = var->As<Variable>();
+                    ubo = var->As<ast::Variable>();
 
                     auto* ty = global_sem->Type()->UnwrapRef();
                     auto* str = ty->As<sem::Struct>();
@@ -437,7 +441,7 @@ struct TextureBuiltinsFromUniform::State {
 
         const ast::Parameter* param = nullptr;
         for (auto p : fn->Declaration()->params) {
-            if (p->As<Variable>() == var->Declaration()) {
+            if (p->As<ast::Variable>() == var->Declaration()) {
                 param = p;
                 break;
             }
@@ -471,9 +475,10 @@ struct TextureBuiltinsFromUniform::State {
     }
 };
 
-Transform::ApplyResult TextureBuiltinsFromUniform::Apply(const Program* src,
-                                                         const DataMap& inputs,
-                                                         DataMap& outputs) const {
+ast::transform::Transform::ApplyResult TextureBuiltinsFromUniform::Apply(
+    const Program* src,
+    const ast::transform::DataMap& inputs,
+    ast::transform::DataMap& outputs) const {
     return State{src, inputs, outputs}.Run();
 }
 
@@ -488,4 +493,4 @@ TextureBuiltinsFromUniform::Result::Result(BindingPointToFieldAndOffset bindpoin
 TextureBuiltinsFromUniform::Result::Result(const Result&) = default;
 TextureBuiltinsFromUniform::Result::~Result() = default;
 
-}  // namespace tint::ast::transform
+}  // namespace tint::glsl::writer

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_TEXTURE_BUILTINS_FROM_UNIFORM_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_TEXTURE_BUILTINS_FROM_UNIFORM_H_
+#ifndef SRC_TINT_LANG_GLSL_WRITER_AST_RAISE_TEXTURE_BUILTINS_FROM_UNIFORM_H_
+#define SRC_TINT_LANG_GLSL_WRITER_AST_RAISE_TEXTURE_BUILTINS_FROM_UNIFORM_H_
 
 #include <unordered_map>
 #include <unordered_set>
@@ -27,7 +27,7 @@ namespace tint {
 class CloneContext;
 }  // namespace tint
 
-namespace tint::ast::transform {
+namespace tint::glsl::writer {
 
 /// TextureBuiltinsFromUniform is a transform that implements calls to textureNumLevels() and
 /// textureNumSamples() by retrieving the texture information from a uniform buffer, as those
@@ -50,7 +50,8 @@ namespace tint::ast::transform {
 ///
 /// This transform must run before `CombineSamplers` transform so that the binding point of the
 /// original texture object can be preserved.
-class TextureBuiltinsFromUniform final : public Castable<TextureBuiltinsFromUniform, Transform> {
+class TextureBuiltinsFromUniform final
+    : public Castable<TextureBuiltinsFromUniform, ast::transform::Transform> {
   public:
     /// Constructor
     TextureBuiltinsFromUniform();
@@ -58,7 +59,7 @@ class TextureBuiltinsFromUniform final : public Castable<TextureBuiltinsFromUnif
     ~TextureBuiltinsFromUniform() override;
 
     /// Configuration options for the TextureBuiltinsFromUniform transform.
-    struct Config final : public Castable<Config, Data> {
+    struct Config final : public Castable<Config, ast::transform::Data> {
         /// Constructor
         /// @param ubo_bp the binding point to use for the generated uniform buffer.
         explicit Config(BindingPoint ubo_bp);
@@ -80,7 +81,7 @@ class TextureBuiltinsFromUniform final : public Castable<TextureBuiltinsFromUnif
     /// Information produced about what the transform did.
     /// If there were no calls to the textureNumLevels() or textureNumSamples() builtin, then no
     /// Result will be emitted.
-    struct Result final : public Castable<Result, Data> {
+    struct Result final : public Castable<Result, ast::transform::Data> {
         /// Using for shorter names
         /// Records the field and the byte offset of the data to push in the internal uniform
         /// buffer.
@@ -105,15 +106,15 @@ class TextureBuiltinsFromUniform final : public Castable<TextureBuiltinsFromUnif
         BindingPointToFieldAndOffset bindpoint_to_data;
     };
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 
   private:
     struct State;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::glsl::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_TEXTURE_BUILTINS_FROM_UNIFORM_H_
+#endif  // SRC_TINT_LANG_GLSL_WRITER_AST_RAISE_TEXTURE_BUILTINS_FROM_UNIFORM_H_

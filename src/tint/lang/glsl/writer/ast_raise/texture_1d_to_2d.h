@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_TEXTURE_1D_TO_2D_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_TEXTURE_1D_TO_2D_H_
+#ifndef SRC_TINT_LANG_GLSL_WRITER_AST_RAISE_TEXTURE_1D_TO_2D_H_
+#define SRC_TINT_LANG_GLSL_WRITER_AST_RAISE_TEXTURE_1D_TO_2D_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::glsl::writer {
 
 /// This transform converts all 1D texture types and accesses to 2D.
 /// This is required for GLSL ES, which does not support 1D textures.
-class Texture1DTo2D final : public Castable<Texture1DTo2D, Transform> {
+class Texture1DTo2D final : public Castable<Texture1DTo2D, ast::transform::Transform> {
   public:
     /// Constructor
     Texture1DTo2D();
@@ -29,15 +29,15 @@ class Texture1DTo2D final : public Castable<Texture1DTo2D, Transform> {
     /// Destructor
     ~Texture1DTo2D() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 
   private:
     struct State;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::glsl::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_TEXTURE_1D_TO_2D_H_
+#endif  // SRC_TINT_LANG_GLSL_WRITER_AST_RAISE_TEXTURE_1D_TO_2D_H_

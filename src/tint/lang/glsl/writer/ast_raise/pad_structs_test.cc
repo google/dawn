@@ -12,23 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/pad_structs.h"
+#include "src/tint/lang/glsl/writer/ast_raise/pad_structs.h"
 
 #include <memory>
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
-namespace tint::ast::transform {
+namespace tint::glsl::writer {
 namespace {
 
-using PadStructsTest = TransformTest;
+using PadStructsTest = ast::transform::TransformTest;
 
 TEST_F(PadStructsTest, EmptyModule) {
     auto* src = "";
     auto* expect = src;
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PadStructs>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -61,7 +61,7 @@ fn main() {
   let x = u.x;
 }
 )";
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PadStructs>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -97,7 +97,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PadStructs>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -137,7 +137,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PadStructs>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -179,7 +179,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PadStructs>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -219,7 +219,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PadStructs>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -254,7 +254,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PadStructs>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -300,7 +300,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PadStructs>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -350,7 +350,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PadStructs>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -396,7 +396,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PadStructs>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -433,7 +433,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PadStructs>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -477,7 +477,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PadStructs>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -524,7 +524,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PadStructs>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -561,7 +561,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PadStructs>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -598,11 +598,11 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PadStructs>(src, data);
 
     EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::glsl::writer

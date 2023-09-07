@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/texture_1d_to_2d.h"
+#include "src/tint/lang/glsl/writer/ast_raise/texture_1d_to_2d.h"
 
 #include <utility>
 
@@ -25,11 +25,11 @@
 #include "src/tint/lang/wgsl/sem/type_expression.h"
 #include "src/tint/utils/rtti/switch.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Texture1DTo2D);
+TINT_INSTANTIATE_TYPEINFO(tint::glsl::writer::Texture1DTo2D);
 
 using namespace tint::core::number_suffixes;  // NOLINT
 
-namespace tint::ast::transform {
+namespace tint::glsl::writer {
 
 namespace {
 
@@ -87,18 +87,18 @@ struct Texture1DTo2D::State {
             return SkipTransform;
         }
 
-        auto create_var = [&](const Variable* v, Type type) -> const Variable* {
-            if (v->As<Parameter>()) {
+        auto create_var = [&](const ast::Variable* v, ast::Type type) -> const ast::Variable* {
+            if (v->As<ast::Parameter>()) {
                 return ctx.dst->Param(ctx.Clone(v->name->symbol), type, ctx.Clone(v->attributes));
             } else {
                 return ctx.dst->Var(ctx.Clone(v->name->symbol), type, ctx.Clone(v->attributes));
             }
         };
 
-        ctx.ReplaceAll([&](const Variable* v) -> const Variable* {
-            const Variable* r = Switch(
+        ctx.ReplaceAll([&](const ast::Variable* v) -> const ast::Variable* {
+            const ast::Variable* r = Switch(
                 sem.Get(v)->Type()->UnwrapRef(),
-                [&](const core::type::SampledTexture* tex) -> const Variable* {
+                [&](const core::type::SampledTexture* tex) -> const ast::Variable* {
                     if (tex->dim() == core::type::TextureDimension::k1d) {
                         auto type = ctx.dst->ty.sampled_texture(core::type::TextureDimension::k2d,
                                                                 CreateASTTypeFor(ctx, tex->type()));
@@ -107,7 +107,7 @@ struct Texture1DTo2D::State {
                         return nullptr;
                     }
                 },
-                [&](const core::type::StorageTexture* storage_tex) -> const Variable* {
+                [&](const core::type::StorageTexture* storage_tex) -> const ast::Variable* {
                     if (storage_tex->dim() == core::type::TextureDimension::k1d) {
                         auto type = ctx.dst->ty.storage_texture(core::type::TextureDimension::k2d,
                                                                 storage_tex->texel_format(),
@@ -121,7 +121,7 @@ struct Texture1DTo2D::State {
             return r;
         });
 
-        ctx.ReplaceAll([&](const CallExpression* c) -> const Expression* {
+        ctx.ReplaceAll([&](const ast::CallExpression* c) -> const ast::Expression* {
             auto* call = sem.Get(c)->UnwrapMaterialize()->As<sem::Call>();
             if (!call) {
                 return nullptr;
@@ -143,7 +143,7 @@ struct Texture1DTo2D::State {
             if (builtin->Type() == core::Function::kTextureDimensions) {
                 // If this textureDimensions() call is in a CallStatement, we can leave it
                 // unmodified since the return value will be dropped on the floor anyway.
-                if (call->Stmt()->Declaration()->Is<CallStatement>()) {
+                if (call->Stmt()->Declaration()->Is<ast::CallStatement>()) {
                     return nullptr;
                 }
                 auto* new_call = ctx.CloneWithoutTransform(c);
@@ -155,14 +155,14 @@ struct Texture1DTo2D::State {
                 return nullptr;
             }
 
-            tint::Vector<const Expression*, 8> args;
+            tint::Vector<const ast::Expression*, 8> args;
             int index = 0;
             for (auto* arg : c->args) {
                 if (index == coords_index) {
                     auto* ctype = call->Arguments()[static_cast<size_t>(coords_index)]->Type();
                     auto* coords = c->args[static_cast<size_t>(coords_index)];
 
-                    const LiteralExpression* half = nullptr;
+                    const ast::LiteralExpression* half = nullptr;
                     if (ctype->is_integer_scalar()) {
                         half = ctx.dst->Expr(0_a);
                     } else {
@@ -187,8 +187,10 @@ Texture1DTo2D::Texture1DTo2D() = default;
 
 Texture1DTo2D::~Texture1DTo2D() = default;
 
-Transform::ApplyResult Texture1DTo2D::Apply(const Program* src, const DataMap&, DataMap&) const {
+ast::transform::Transform::ApplyResult Texture1DTo2D::Apply(const Program* src,
+                                                            const ast::transform::DataMap&,
+                                                            ast::transform::DataMap&) const {
     return State(src).Run();
 }
 
-}  // namespace tint::ast::transform
+}  // namespace tint::glsl::writer

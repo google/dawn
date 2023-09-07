@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_PAD_STRUCTS_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_PAD_STRUCTS_H_
+#ifndef SRC_TINT_LANG_GLSL_WRITER_AST_RAISE_PAD_STRUCTS_H_
+#define SRC_TINT_LANG_GLSL_WRITER_AST_RAISE_PAD_STRUCTS_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::glsl::writer {
 
 /// This transform turns all explicit alignment and sizing into padding
 /// members of structs. This is required for GLSL ES, since it not support
 /// the offset= decoration.
 ///
 /// @note This transform requires the CanonicalizeEntryPointIO transform to have been run first.
-class PadStructs final : public Castable<PadStructs, Transform> {
+class PadStructs final : public Castable<PadStructs, ast::transform::Transform> {
   public:
     /// Constructor
     PadStructs();
@@ -32,12 +32,12 @@ class PadStructs final : public Castable<PadStructs, Transform> {
     /// Destructor
     ~PadStructs() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::glsl::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_PAD_STRUCTS_H_
+#endif  // SRC_TINT_LANG_GLSL_WRITER_AST_RAISE_PAD_STRUCTS_H_

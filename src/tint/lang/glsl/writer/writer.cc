@@ -19,7 +19,6 @@
 
 #include "src/tint/lang/glsl/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/wgsl/ast/transform/binding_remapper.h"
-#include "src/tint/lang/wgsl/ast/transform/combine_samplers.h"
 
 namespace tint::glsl::writer {
 

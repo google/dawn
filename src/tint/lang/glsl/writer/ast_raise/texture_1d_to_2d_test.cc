@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/texture_1d_to_2d.h"
+#include "src/tint/lang/glsl/writer/ast_raise/texture_1d_to_2d.h"
+
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
-namespace tint::ast::transform {
+namespace tint::glsl::writer {
 namespace {
 
-using Texture1DTo2DTest = TransformTest;
+using Texture1DTo2DTest = ast::transform::TransformTest;
 
 TEST_F(Texture1DTo2DTest, EmptyModule) {
     auto* src = "";
 
-    DataMap data;
+    ast::transform::DataMap data;
     EXPECT_FALSE(ShouldRun<Texture1DTo2D>(src, data));
 }
 
@@ -39,7 +40,7 @@ TEST_F(Texture1DTo2DTest, Global1DDecl) {
 @group(0) @binding(1) var s : sampler;
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -65,7 +66,7 @@ fn main() -> vec4<f32> {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -87,7 +88,7 @@ fn main() -> vec4<f32> {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -109,7 +110,7 @@ fn main() -> u32 {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -131,7 +132,7 @@ fn main() -> u32 {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -153,7 +154,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -167,7 +168,7 @@ TEST_F(Texture1DTo2DTest, GlobalStorage1DDecl) {
 @group(0) @binding(0) var t : texture_storage_2d<r32float, write>;
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -184,7 +185,7 @@ fn main() -> vec4<f32> {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     EXPECT_FALSE(ShouldRun<Texture1DTo2D>(src, data));
 }
 
@@ -193,7 +194,7 @@ TEST_F(Texture1DTo2DTest, PrivateIntNoop) {
 var<private> i : i32;
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     EXPECT_FALSE(ShouldRun<Texture1DTo2D>(src, data));
 }
 
@@ -202,7 +203,7 @@ TEST_F(Texture1DTo2DTest, GlobalMatrixNoop) {
 @group(0) @binding(0) var<uniform> m : mat2x2<f32>;
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     EXPECT_FALSE(ShouldRun<Texture1DTo2D>(src, data));
 }
 
@@ -234,7 +235,7 @@ fn main() -> vec4<f32> {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -265,7 +266,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -290,11 +291,11 @@ fn d() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<Texture1DTo2D>(src, data);
 
     EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::glsl::writer

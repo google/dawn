@@ -62,6 +62,7 @@ tint_target_add_dependencies(tint_lang_glsl_writer_ast_printer lib
 
 if(TINT_BUILD_GLSL_WRITER)
   tint_target_add_dependencies(tint_lang_glsl_writer_ast_printer lib
+    tint_lang_glsl_writer_ast_raise
     tint_lang_glsl_writer_common
   )
 endif(TINT_BUILD_GLSL_WRITER)

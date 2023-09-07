@@ -21,24 +21,24 @@
 #                       Do not modify this file directly
 ################################################################################
 
-include(lang/glsl/writer/ast_printer/BUILD.cmake)
-include(lang/glsl/writer/ast_raise/BUILD.cmake)
-include(lang/glsl/writer/common/BUILD.cmake)
-
 if(TINT_BUILD_GLSL_WRITER)
 ################################################################################
-# Target:    tint_lang_glsl_writer
+# Target:    tint_lang_glsl_writer_ast_raise
 # Kind:      lib
 # Condition: TINT_BUILD_GLSL_WRITER
 ################################################################################
-tint_add_target(tint_lang_glsl_writer lib
-  lang/glsl/writer/output.cc
-  lang/glsl/writer/output.h
-  lang/glsl/writer/writer.cc
-  lang/glsl/writer/writer.h
+tint_add_target(tint_lang_glsl_writer_ast_raise lib
+  lang/glsl/writer/ast_raise/combine_samplers.cc
+  lang/glsl/writer/ast_raise/combine_samplers.h
+  lang/glsl/writer/ast_raise/pad_structs.cc
+  lang/glsl/writer/ast_raise/pad_structs.h
+  lang/glsl/writer/ast_raise/texture_1d_to_2d.cc
+  lang/glsl/writer/ast_raise/texture_1d_to_2d.h
+  lang/glsl/writer/ast_raise/texture_builtins_from_uniform.cc
+  lang/glsl/writer/ast_raise/texture_builtins_from_uniform.h
 )
 
-tint_target_add_dependencies(tint_lang_glsl_writer lib
+tint_target_add_dependencies(tint_lang_glsl_writer_ast_raise lib
   tint_api_common
   tint_api_options
   tint_lang_core
@@ -47,10 +47,10 @@ tint_target_add_dependencies(tint_lang_glsl_writer lib
   tint_lang_wgsl_ast
   tint_lang_wgsl_ast_transform
   tint_lang_wgsl_program
+  tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
   tint_utils_containers
   tint_utils_diagnostic
-  tint_utils_generator
   tint_utils_ice
   tint_utils_id
   tint_utils_macros
@@ -64,34 +64,33 @@ tint_target_add_dependencies(tint_lang_glsl_writer lib
   tint_utils_traits
 )
 
-if(TINT_BUILD_GLSL_WRITER)
-  tint_target_add_dependencies(tint_lang_glsl_writer lib
-    tint_lang_glsl_writer_ast_printer
-    tint_lang_glsl_writer_common
-  )
-endif(TINT_BUILD_GLSL_WRITER)
-
 endif(TINT_BUILD_GLSL_WRITER)
 if(TINT_BUILD_GLSL_WRITER)
 ################################################################################
-# Target:    tint_lang_glsl_writer_bench
-# Kind:      bench
+# Target:    tint_lang_glsl_writer_ast_raise_test
+# Kind:      test
 # Condition: TINT_BUILD_GLSL_WRITER
 ################################################################################
-tint_add_target(tint_lang_glsl_writer_bench bench
-  lang/glsl/writer/writer_bench.cc
+tint_add_target(tint_lang_glsl_writer_ast_raise_test test
+  lang/glsl/writer/ast_raise/combine_samplers_test.cc
+  lang/glsl/writer/ast_raise/pad_structs_test.cc
+  lang/glsl/writer/ast_raise/texture_1d_to_2d_test.cc
+  lang/glsl/writer/ast_raise/texture_builtins_from_uniform_test.cc
 )
 
-tint_target_add_dependencies(tint_lang_glsl_writer_bench bench
+tint_target_add_dependencies(tint_lang_glsl_writer_ast_raise_test test
   tint_api_common
   tint_api_options
-  tint_cmd_bench
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_type
   tint_lang_wgsl_ast
+  tint_lang_wgsl_ast_transform
+  tint_lang_wgsl_ast_transform_test
   tint_lang_wgsl_program
+  tint_lang_wgsl_reader
   tint_lang_wgsl_sem
+  tint_lang_wgsl_writer
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -107,10 +106,13 @@ tint_target_add_dependencies(tint_lang_glsl_writer_bench bench
   tint_utils_traits
 )
 
+tint_target_add_external_dependencies(tint_lang_glsl_writer_ast_raise_test test
+  "gtest"
+)
+
 if(TINT_BUILD_GLSL_WRITER)
-  tint_target_add_dependencies(tint_lang_glsl_writer_bench bench
-    tint_lang_glsl_writer
-    tint_lang_glsl_writer_common
+  tint_target_add_dependencies(tint_lang_glsl_writer_ast_raise_test test
+    tint_lang_glsl_writer_ast_raise
   )
 endif(TINT_BUILD_GLSL_WRITER)
 

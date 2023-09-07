@@ -38,8 +38,6 @@ tint_add_target(tint_lang_wgsl_ast_transform lib
   lang/wgsl/ast/transform/builtin_polyfill.h
   lang/wgsl/ast/transform/canonicalize_entry_point_io.cc
   lang/wgsl/ast/transform/canonicalize_entry_point_io.h
-  lang/wgsl/ast/transform/combine_samplers.cc
-  lang/wgsl/ast/transform/combine_samplers.h
   lang/wgsl/ast/transform/data.cc
   lang/wgsl/ast/transform/data.h
   lang/wgsl/ast/transform/demote_to_helper.cc
@@ -60,8 +58,6 @@ tint_add_target(tint_lang_wgsl_ast_transform lib
   lang/wgsl/ast/transform/manager.h
   lang/wgsl/ast/transform/multiplanar_external_texture.cc
   lang/wgsl/ast/transform/multiplanar_external_texture.h
-  lang/wgsl/ast/transform/pad_structs.cc
-  lang/wgsl/ast/transform/pad_structs.h
   lang/wgsl/ast/transform/preserve_padding.cc
   lang/wgsl/ast/transform/preserve_padding.h
   lang/wgsl/ast/transform/promote_initializers_to_let.cc
@@ -84,10 +80,6 @@ tint_add_target(tint_lang_wgsl_ast_transform lib
   lang/wgsl/ast/transform/std140.h
   lang/wgsl/ast/transform/substitute_override.cc
   lang/wgsl/ast/transform/substitute_override.h
-  lang/wgsl/ast/transform/texture_1d_to_2d.cc
-  lang/wgsl/ast/transform/texture_1d_to_2d.h
-  lang/wgsl/ast/transform/texture_builtins_from_uniform.cc
-  lang/wgsl/ast/transform/texture_builtins_from_uniform.h
   lang/wgsl/ast/transform/transform.cc
   lang/wgsl/ast/transform/transform.h
   lang/wgsl/ast/transform/unshadow.cc
@@ -136,7 +128,6 @@ tint_add_target(tint_lang_wgsl_ast_transform_test test
   lang/wgsl/ast/transform/binding_remapper_test.cc
   lang/wgsl/ast/transform/builtin_polyfill_test.cc
   lang/wgsl/ast/transform/canonicalize_entry_point_io_test.cc
-  lang/wgsl/ast/transform/combine_samplers_test.cc
   lang/wgsl/ast/transform/demote_to_helper_test.cc
   lang/wgsl/ast/transform/direct_variable_access_test.cc
   lang/wgsl/ast/transform/disable_uniformity_analysis_test.cc
@@ -147,7 +138,6 @@ tint_add_target(tint_lang_wgsl_ast_transform_test test
   lang/wgsl/ast/transform/hoist_to_decl_before_test.cc
   lang/wgsl/ast/transform/manager_test.cc
   lang/wgsl/ast/transform/multiplanar_external_texture_test.cc
-  lang/wgsl/ast/transform/pad_structs_test.cc
   lang/wgsl/ast/transform/preserve_padding_test.cc
   lang/wgsl/ast/transform/promote_initializers_to_let_test.cc
   lang/wgsl/ast/transform/promote_side_effects_to_decl_test.cc
@@ -162,8 +152,6 @@ tint_add_target(tint_lang_wgsl_ast_transform_test test
   lang/wgsl/ast/transform/std140_f32_test.cc
   lang/wgsl/ast/transform/std140_test.cc
   lang/wgsl/ast/transform/substitute_override_test.cc
-  lang/wgsl/ast/transform/texture_1d_to_2d_test.cc
-  lang/wgsl/ast/transform/texture_builtins_from_uniform_test.cc
   lang/wgsl/ast/transform/transform_test.cc
   lang/wgsl/ast/transform/unshadow_test.cc
   lang/wgsl/ast/transform/vectorize_scalar_matrix_initializers_test.cc

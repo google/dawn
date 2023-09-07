@@ -12,23 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/texture_builtins_from_uniform.h"
+#include "src/tint/lang/glsl/writer/ast_raise/texture_builtins_from_uniform.h"
 
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
-namespace tint::ast::transform {
+namespace tint::glsl::writer {
 namespace {
 
-using TextureBuiltinsFromUniformTest = TransformTest;
+using TextureBuiltinsFromUniformTest = ast::transform::TransformTest;
 
 TEST_F(TextureBuiltinsFromUniformTest, ShouldRunEmptyModule) {
     auto* src = R"()";
 
     TextureBuiltinsFromUniform::Config cfg({0, 30u});
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     EXPECT_FALSE(ShouldRun<TextureBuiltinsFromUniform>(src, data));
@@ -46,7 +46,7 @@ fn main() {
 
     TextureBuiltinsFromUniform::Config cfg({0, 30u});
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     EXPECT_FALSE(ShouldRun<TextureBuiltinsFromUniform>(src, data));
@@ -64,7 +64,7 @@ fn main() {
 
     TextureBuiltinsFromUniform::Config cfg({0, 30u});
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     EXPECT_TRUE(ShouldRun<TextureBuiltinsFromUniform>(src, data));
@@ -81,7 +81,7 @@ fn main() {
 )";
 
     auto* expect =
-        "error: missing transform data for tint::ast::transform::TextureBuiltinsFromUniform";
+        "error: missing transform data for tint::glsl::writer::TextureBuiltinsFromUniform";
 
     auto got = Run<TextureBuiltinsFromUniform>(src);
 
@@ -115,7 +115,7 @@ fn main() {
 
     TextureBuiltinsFromUniform::Config cfg({0, 30u});
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
@@ -161,7 +161,7 @@ fn main() {
 
     TextureBuiltinsFromUniform::Config cfg({0, 30u});
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
@@ -203,7 +203,7 @@ fn main() {
 
     TextureBuiltinsFromUniform::Config cfg({0, 30u});
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
@@ -245,7 +245,7 @@ fn main() {
 
     TextureBuiltinsFromUniform::Config cfg({0, 30u});
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
@@ -293,7 +293,7 @@ fn main() {
 
     TextureBuiltinsFromUniform::Config cfg({0, 30u});
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
@@ -345,7 +345,7 @@ fn main() {
 
     TextureBuiltinsFromUniform::Config cfg({0, 30u});
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
@@ -401,7 +401,7 @@ fn main() {
 
     TextureBuiltinsFromUniform::Config cfg({0, 30u});
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
@@ -461,7 +461,7 @@ fn main() {
 
     TextureBuiltinsFromUniform::Config cfg({0, 30u});
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
@@ -538,7 +538,7 @@ fn main() {
 
     TextureBuiltinsFromUniform::Config cfg({0, 30u});
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
@@ -614,7 +614,7 @@ fn main() {
 
     TextureBuiltinsFromUniform::Config cfg({0, 30u});
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
@@ -671,7 +671,7 @@ fn main() {
 
     TextureBuiltinsFromUniform::Config cfg({0, 30u});
 
-    DataMap data;
+    ast::transform::DataMap data;
     data.Add<TextureBuiltinsFromUniform::Config>(std::move(cfg));
 
     auto got = Run<TextureBuiltinsFromUniform>(src, data);
@@ -684,4 +684,4 @@ fn main() {
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::glsl::writer

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_COMBINE_SAMPLERS_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_COMBINE_SAMPLERS_H_
+#ifndef SRC_TINT_LANG_GLSL_WRITER_AST_RAISE_COMBINE_SAMPLERS_H_
+#define SRC_TINT_LANG_GLSL_WRITER_AST_RAISE_COMBINE_SAMPLERS_H_
 
 #include <string>
 #include <unordered_map>
@@ -21,7 +21,7 @@
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 #include "src/tint/lang/wgsl/sem/sampler_texture_pair.h"
 
-namespace tint::ast::transform {
+namespace tint::glsl::writer {
 
 /// This transform converts all separate texture/sampler refences in a
 /// program into combined texture/samplers. This is required for GLSL,
@@ -52,7 +52,7 @@ namespace tint::ast::transform {
 /// information needed to represent a combined sampler in GLSL
 /// (dimensionality, component type, etc). The GLSL writer outputs such
 /// (Tint) Textures as (GLSL) Samplers.
-class CombineSamplers final : public Castable<CombineSamplers, Transform> {
+class CombineSamplers final : public Castable<CombineSamplers, ast::transform::Transform> {
   public:
     /// A pair of binding points.
     using SamplerTexturePair = sem::SamplerTexturePair;
@@ -62,7 +62,7 @@ class CombineSamplers final : public Castable<CombineSamplers, Transform> {
 
     /// The client-provided mapping from separate texture and sampler binding
     /// points to combined sampler binding point.
-    struct BindingInfo final : public Castable<BindingInfo, Data> {
+    struct BindingInfo final : public Castable<BindingInfo, ast::transform::Data> {
         /// Constructor
         /// @param map the map of all (texture, sampler) -> (combined) pairs
         /// @param placeholder the binding point to use for placeholder samplers.
@@ -88,15 +88,15 @@ class CombineSamplers final : public Castable<CombineSamplers, Transform> {
     /// Destructor
     ~CombineSamplers() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 
   private:
     struct State;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::glsl::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_COMBINE_SAMPLERS_H_
+#endif  // SRC_TINT_LANG_GLSL_WRITER_AST_RAISE_COMBINE_SAMPLERS_H_
