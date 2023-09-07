@@ -149,7 +149,12 @@ struct State {
                         swizzle->InsertBefore(call);
                         call->SetOperand(index, swizzle->Result());
                     } else if (call->Func() == core::Function::kTextureLoad) {
-                        TINT_ICE() << "unhandled bgra8unorm texture load";
+                        // Swizzle the result of a `textureLoad()` builtin.
+                        auto* swizzle =
+                            b.Swizzle(call->Result()->Type(), nullptr, Vector{2u, 1u, 0u, 3u});
+                        call->Result()->ReplaceAllUsesWith(swizzle->Result());
+                        swizzle->InsertAfter(call);
+                        swizzle->SetOperand(Swizzle::kObjectOperandOffset, call->Result());
                     }
                 },
                 [&](UserCall* call) {

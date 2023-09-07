@@ -62,6 +62,7 @@ enum intrinsic {
   image_dref_gather
   image_query_size
   image_query_size_lod
+  image_read
   image_sample_implicit_lod
   image_sample_explicit_lod
   image_sample_dref_implicit_lod

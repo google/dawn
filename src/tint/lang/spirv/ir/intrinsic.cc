@@ -89,6 +89,9 @@ Intrinsic ParseIntrinsic(std::string_view str) {
     if (str == "image_query_size_lod") {
         return Intrinsic::kImageQuerySizeLod;
     }
+    if (str == "image_read") {
+        return Intrinsic::kImageRead;
+    }
     if (str == "image_sample_dref_explicit_lod") {
         return Intrinsic::kImageSampleDrefExplicitLod;
     }
@@ -157,6 +160,8 @@ std::string_view ToString(Intrinsic value) {
             return "image_query_size";
         case Intrinsic::kImageQuerySizeLod:
             return "image_query_size_lod";
+        case Intrinsic::kImageRead:
+            return "image_read";
         case Intrinsic::kImageSampleDrefExplicitLod:
             return "image_sample_dref_explicit_lod";
         case Intrinsic::kImageSampleDrefImplicitLod:
