@@ -12,59 +12,60 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_MSL_SUBGROUP_BALLOT_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_MSL_SUBGROUP_BALLOT_H_
+#ifndef SRC_TINT_LANG_MSL_WRITER_AST_RAISE_SUBGROUP_BALLOT_H_
+#define SRC_TINT_LANG_MSL_WRITER_AST_RAISE_SUBGROUP_BALLOT_H_
 
 #include <string>
 
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::msl::writer {
 
-/// MslSubgroupBallot is a transform that replaces calls to `subgroupBallot()` with an
+/// SubgroupBallot is a transform that replaces calls to `subgroupBallot()` with an
 /// implementation that uses MSL's `simd_active_threads_mask()`.
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * CanonicalizeEntryPointIO
-class MslSubgroupBallot final : public Castable<MslSubgroupBallot, Transform> {
+class SubgroupBallot final : public Castable<SubgroupBallot, ast::transform::Transform> {
   public:
     /// Constructor
-    MslSubgroupBallot();
+    SubgroupBallot();
 
     /// Destructor
-    ~MslSubgroupBallot() override;
+    ~SubgroupBallot() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 
     /// SimdActiveThreadsMask is an InternalAttribute that is used to decorate a stub function so
     /// that the MSL backend transforms this into calls to the `simd_active_threads_mask` function.
-    class SimdActiveThreadsMask final : public Castable<SimdActiveThreadsMask, InternalAttribute> {
+    class SimdActiveThreadsMask final
+        : public Castable<SimdActiveThreadsMask, ast::InternalAttribute> {
       public:
         /// Constructor
         /// @param pid the identifier of the program that owns this node
         /// @param nid the unique node identifier
-        SimdActiveThreadsMask(GenerationID pid, NodeID nid) : Base(pid, nid, Empty) {}
+        SimdActiveThreadsMask(GenerationID pid, ast::NodeID nid) : Base(pid, nid, Empty) {}
 
         /// Destructor
         ~SimdActiveThreadsMask() override;
 
-        /// @copydoc InternalAttribute::InternalName
+        /// @copydoc ast::InternalAttribute::InternalName
         std::string InternalName() const override { return "simd_active_threads_mask"; }
 
         /// Performs a deep clone of this object using the program::CloneContext `ctx`.
         /// @param ctx the clone context
         /// @return the newly cloned object
-        const SimdActiveThreadsMask* Clone(CloneContext& ctx) const override;
+        const SimdActiveThreadsMask* Clone(ast::CloneContext& ctx) const override;
     };
 
   private:
     struct State;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::msl::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_MSL_SUBGROUP_BALLOT_H_
+#endif  // SRC_TINT_LANG_MSL_WRITER_AST_RAISE_SUBGROUP_BALLOT_H_

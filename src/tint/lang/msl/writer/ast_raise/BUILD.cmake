@@ -23,103 +23,31 @@
 
 if(TINT_BUILD_MSL_WRITER)
 ################################################################################
-# Target:    tint_lang_msl_writer_ast_printer
+# Target:    tint_lang_msl_writer_ast_raise
 # Kind:      lib
 # Condition: TINT_BUILD_MSL_WRITER
 ################################################################################
-tint_add_target(tint_lang_msl_writer_ast_printer lib
-  lang/msl/writer/ast_printer/ast_printer.cc
-  lang/msl/writer/ast_printer/ast_printer.h
+tint_add_target(tint_lang_msl_writer_ast_raise lib
+  lang/msl/writer/ast_raise/module_scope_var_to_entry_point_param.cc
+  lang/msl/writer/ast_raise/module_scope_var_to_entry_point_param.h
+  lang/msl/writer/ast_raise/packed_vec3.cc
+  lang/msl/writer/ast_raise/packed_vec3.h
+  lang/msl/writer/ast_raise/subgroup_ballot.cc
+  lang/msl/writer/ast_raise/subgroup_ballot.h
 )
 
-tint_target_add_dependencies(tint_lang_msl_writer_ast_printer lib
+tint_target_add_dependencies(tint_lang_msl_writer_ast_raise lib
   tint_api_common
-  tint_api_options
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_type
   tint_lang_wgsl_ast
   tint_lang_wgsl_ast_transform
-  tint_lang_wgsl_helpers
-  tint_lang_wgsl_program
-  tint_lang_wgsl_sem
-  tint_utils_containers
-  tint_utils_diagnostic
-  tint_utils_generator
-  tint_utils_ice
-  tint_utils_id
-  tint_utils_macros
-  tint_utils_math
-  tint_utils_memory
-  tint_utils_reflection
-  tint_utils_result
-  tint_utils_rtti
-  tint_utils_symbol
-  tint_utils_text
-  tint_utils_traits
-)
-
-if(TINT_BUILD_MSL_WRITER)
-  tint_target_add_dependencies(tint_lang_msl_writer_ast_printer lib
-    tint_lang_msl_writer_ast_raise
-    tint_lang_msl_writer_common
-  )
-endif(TINT_BUILD_MSL_WRITER)
-
-endif(TINT_BUILD_MSL_WRITER)
-if(TINT_BUILD_MSL_WRITER)
-################################################################################
-# Target:    tint_lang_msl_writer_ast_printer_test
-# Kind:      test
-# Condition: TINT_BUILD_MSL_WRITER
-################################################################################
-tint_add_target(tint_lang_msl_writer_ast_printer_test test
-  lang/msl/writer/ast_printer/array_accessor_test.cc
-  lang/msl/writer/ast_printer/assign_test.cc
-  lang/msl/writer/ast_printer/ast_function_test.cc
-  lang/msl/writer/ast_printer/ast_printer_test.cc
-  lang/msl/writer/ast_printer/ast_type_test.cc
-  lang/msl/writer/ast_printer/binary_test.cc
-  lang/msl/writer/ast_printer/bitcast_test.cc
-  lang/msl/writer/ast_printer/block_test.cc
-  lang/msl/writer/ast_printer/break_test.cc
-  lang/msl/writer/ast_printer/builtin_test.cc
-  lang/msl/writer/ast_printer/builtin_texture_test.cc
-  lang/msl/writer/ast_printer/call_test.cc
-  lang/msl/writer/ast_printer/case_test.cc
-  lang/msl/writer/ast_printer/cast_test.cc
-  lang/msl/writer/ast_printer/const_assert_test.cc
-  lang/msl/writer/ast_printer/constructor_test.cc
-  lang/msl/writer/ast_printer/continue_test.cc
-  lang/msl/writer/ast_printer/discard_test.cc
-  lang/msl/writer/ast_printer/helper_test.h
-  lang/msl/writer/ast_printer/identifier_test.cc
-  lang/msl/writer/ast_printer/if_test.cc
-  lang/msl/writer/ast_printer/import_test.cc
-  lang/msl/writer/ast_printer/loop_test.cc
-  lang/msl/writer/ast_printer/member_accessor_test.cc
-  lang/msl/writer/ast_printer/module_constant_test.cc
-  lang/msl/writer/ast_printer/return_test.cc
-  lang/msl/writer/ast_printer/sanitizer_test.cc
-  lang/msl/writer/ast_printer/switch_test.cc
-  lang/msl/writer/ast_printer/unary_op_test.cc
-  lang/msl/writer/ast_printer/variable_decl_statement_test.cc
-)
-
-tint_target_add_dependencies(tint_lang_msl_writer_ast_printer_test test
-  tint_api_common
-  tint_api_options
-  tint_lang_core
-  tint_lang_core_constant
-  tint_lang_core_type
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_ast_test
   tint_lang_wgsl_program
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
   tint_utils_containers
   tint_utils_diagnostic
-  tint_utils_generator
   tint_utils_ice
   tint_utils_id
   tint_utils_macros
@@ -133,15 +61,54 @@ tint_target_add_dependencies(tint_lang_msl_writer_ast_printer_test test
   tint_utils_traits
 )
 
-tint_target_add_external_dependencies(tint_lang_msl_writer_ast_printer_test test
+endif(TINT_BUILD_MSL_WRITER)
+if(TINT_BUILD_MSL_WRITER)
+################################################################################
+# Target:    tint_lang_msl_writer_ast_raise_test
+# Kind:      test
+# Condition: TINT_BUILD_MSL_WRITER
+################################################################################
+tint_add_target(tint_lang_msl_writer_ast_raise_test test
+  lang/msl/writer/ast_raise/module_scope_var_to_entry_point_param_test.cc
+  lang/msl/writer/ast_raise/packed_vec3_test.cc
+  lang/msl/writer/ast_raise/subgroup_ballot_test.cc
+)
+
+tint_target_add_dependencies(tint_lang_msl_writer_ast_raise_test test
+  tint_api_common
+  tint_lang_core
+  tint_lang_core_constant
+  tint_lang_core_type
+  tint_lang_wgsl_ast
+  tint_lang_wgsl_ast_transform
+  tint_lang_wgsl_ast_transform_test
+  tint_lang_wgsl_program
+  tint_lang_wgsl_reader
+  tint_lang_wgsl_resolver
+  tint_lang_wgsl_sem
+  tint_lang_wgsl_writer
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_id
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_reflection
+  tint_utils_result
+  tint_utils_rtti
+  tint_utils_symbol
+  tint_utils_text
+  tint_utils_traits
+)
+
+tint_target_add_external_dependencies(tint_lang_msl_writer_ast_raise_test test
   "gtest"
 )
 
 if(TINT_BUILD_MSL_WRITER)
-  tint_target_add_dependencies(tint_lang_msl_writer_ast_printer_test test
-    tint_lang_msl_writer
-    tint_lang_msl_writer_ast_printer
-    tint_lang_msl_writer_common
+  tint_target_add_dependencies(tint_lang_msl_writer_ast_raise_test test
+    tint_lang_msl_writer_ast_raise
   )
 endif(TINT_BUILD_MSL_WRITER)
 

@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_PACKED_VEC3_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_PACKED_VEC3_H_
+#ifndef SRC_TINT_LANG_MSL_WRITER_AST_RAISE_PACKED_VEC3_H_
+#define SRC_TINT_LANG_MSL_WRITER_AST_RAISE_PACKED_VEC3_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::msl::writer {
 
 /// A transform to be used by the MSL backend which will:
 /// * Replace `vec3<T>` types with an internal `__packed_vec3` type when they are used in
@@ -38,22 +38,22 @@ namespace tint::ast::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * ExpandCompoundAssignment
-class PackedVec3 final : public Castable<PackedVec3, Transform> {
+class PackedVec3 final : public Castable<PackedVec3, ast::transform::Transform> {
   public:
     /// Constructor
     PackedVec3();
     /// Destructor
     ~PackedVec3() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 
   private:
     struct State;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::msl::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_PACKED_VEC3_H_
+#endif  // SRC_TINT_LANG_MSL_WRITER_AST_RAISE_PACKED_VEC3_H_

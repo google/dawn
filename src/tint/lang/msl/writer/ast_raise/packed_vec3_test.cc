@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/packed_vec3.h"
+#include "src/tint/lang/msl/writer/ast_raise/packed_vec3.h"
 
 #include <string>
 #include <utility>
@@ -30,10 +30,10 @@
 
 using namespace tint::core::fluent_types;  // NOLINT
 
-namespace tint::ast::transform {
+namespace tint::msl::writer {
 namespace {
 
-using PackedVec3Test = TransformTest;
+using PackedVec3Test = ast::transform::TransformTest;
 
 TEST_F(PackedVec3Test, ShouldRun_EmptyModule) {
     auto* src = R"()";
@@ -222,7 +222,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -247,7 +247,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -272,7 +272,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -297,7 +297,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -325,7 +325,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -350,7 +350,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -375,7 +375,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -413,7 +413,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -443,7 +443,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -473,7 +473,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -503,7 +503,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -541,7 +541,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -574,7 +574,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -604,7 +604,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -642,7 +642,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -672,7 +672,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -702,7 +702,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -740,7 +740,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -770,7 +770,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -800,7 +800,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -830,7 +830,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -868,7 +868,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -901,7 +901,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -931,7 +931,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -969,7 +969,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -999,7 +999,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1029,7 +1029,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1075,7 +1075,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1113,7 +1113,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1143,7 +1143,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1173,7 +1173,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1203,7 +1203,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1249,7 +1249,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1282,7 +1282,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1320,7 +1320,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1358,7 +1358,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1388,7 +1388,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1431,7 +1431,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1461,7 +1461,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1491,7 +1491,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1535,7 +1535,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1573,7 +1573,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1611,7 +1611,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1649,7 +1649,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1693,7 +1693,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1734,7 +1734,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1772,7 +1772,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1822,7 +1822,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1860,7 +1860,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1898,7 +1898,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -1955,7 +1955,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2006,7 +2006,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2049,7 +2049,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2092,7 +2092,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2135,7 +2135,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2193,7 +2193,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2239,7 +2239,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2290,7 +2290,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2345,7 +2345,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2388,7 +2388,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2444,7 +2444,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2487,7 +2487,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2530,7 +2530,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2587,7 +2587,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2638,7 +2638,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2681,7 +2681,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2724,7 +2724,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2767,7 +2767,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2825,7 +2825,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2871,7 +2871,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2922,7 +2922,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -2977,7 +2977,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3020,7 +3020,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3076,7 +3076,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3119,7 +3119,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3162,7 +3162,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3227,7 +3227,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3286,7 +3286,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3337,7 +3337,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3380,7 +3380,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3423,7 +3423,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3466,7 +3466,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3532,7 +3532,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3578,7 +3578,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3637,7 +3637,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3692,7 +3692,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3743,7 +3743,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3799,7 +3799,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3842,7 +3842,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3903,7 +3903,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3946,7 +3946,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -3989,7 +3989,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -4043,7 +4043,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -4093,7 +4093,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -4148,7 +4148,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -4215,7 +4215,7 @@ struct S {
 @group(0) @binding(0) var<storage> P : S_tint_packed_vec3;
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(std::move(src), data);
 
     EXPECT_EQ(expect, str(got));
@@ -4268,7 +4268,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -4321,7 +4321,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     auto& vars = got.program.AST().GlobalVariables();
@@ -4440,7 +4440,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -4489,7 +4489,7 @@ fn main(s1 : S1) -> S2 {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -4521,7 +4521,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -4582,7 +4582,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -4675,7 +4675,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -4795,7 +4795,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -4889,7 +4889,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -4962,7 +4962,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -5051,7 +5051,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -5176,7 +5176,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -5292,7 +5292,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -5394,7 +5394,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -5481,7 +5481,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -5584,7 +5584,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -5726,7 +5726,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -5794,7 +5794,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -5885,7 +5885,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -5982,7 +5982,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -6088,7 +6088,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -6194,7 +6194,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -6267,7 +6267,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -6340,7 +6340,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -6418,7 +6418,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -6486,7 +6486,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -6554,7 +6554,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -6651,7 +6651,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -6676,7 +6676,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -6701,7 +6701,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -6747,7 +6747,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -6799,7 +6799,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -6864,7 +6864,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -6941,7 +6941,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -7006,7 +7006,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -7079,7 +7079,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -7201,7 +7201,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -7324,7 +7324,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -7470,7 +7470,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -7517,7 +7517,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -7563,7 +7563,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -7623,7 +7623,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -7687,7 +7687,7 @@ fn main() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -7752,7 +7752,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -7792,7 +7792,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -7874,7 +7874,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -7948,7 +7948,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -8042,7 +8042,7 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
@@ -8089,11 +8089,11 @@ fn f() {
 }
 )";
 
-    DataMap data;
+    ast::transform::DataMap data;
     auto got = Run<PackedVec3>(src, data);
 
     EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::msl::writer

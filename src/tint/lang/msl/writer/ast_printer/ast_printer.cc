@@ -42,6 +42,9 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
+#include "src/tint/lang/msl/writer/ast_raise/module_scope_var_to_entry_point_param.h"
+#include "src/tint/lang/msl/writer/ast_raise/packed_vec3.h"
+#include "src/tint/lang/msl/writer/ast_raise/subgroup_ballot.h"
 #include "src/tint/lang/msl/writer/common/printer_support.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/bool_literal_expression.h"
@@ -59,10 +62,7 @@
 #include "src/tint/lang/wgsl/ast/transform/disable_uniformity_analysis.h"
 #include "src/tint/lang/wgsl/ast/transform/expand_compound_assignment.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
-#include "src/tint/lang/wgsl/ast/transform/module_scope_var_to_entry_point_param.h"
-#include "src/tint/lang/wgsl/ast/transform/msl_subgroup_ballot.h"
 #include "src/tint/lang/wgsl/ast/transform/multiplanar_external_texture.h"
-#include "src/tint/lang/wgsl/ast/transform/packed_vec3.h"
 #include "src/tint/lang/wgsl/ast/transform/preserve_padding.h"
 #include "src/tint/lang/wgsl/ast/transform/promote_initializers_to_let.h"
 #include "src/tint/lang/wgsl/ast/transform/promote_side_effects_to_decl.h"
@@ -209,8 +209,8 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     manager.Add<ast::transform::RemovePhonies>();
     manager.Add<ast::transform::SimplifyPointers>();
 
-    // MslSubgroupBallot() must come after CanonicalizeEntryPointIO.
-    manager.Add<ast::transform::MslSubgroupBallot>();
+    // SubgroupBallot() must come after CanonicalizeEntryPointIO.
+    manager.Add<SubgroupBallot>();
 
     // ArrayLengthFromUniform must come after SimplifyPointers, as
     // it assumes that the form of the array length argument is &var.array.
@@ -223,8 +223,8 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     data.Add<ast::transform::ArrayLengthFromUniform::Config>(array_length_cfg);
 
     // PackedVec3 must come after ExpandCompoundAssignment.
-    manager.Add<ast::transform::PackedVec3>();
-    manager.Add<ast::transform::ModuleScopeVarToEntryPointParam>();
+    manager.Add<PackedVec3>();
+    manager.Add<ModuleScopeVarToEntryPointParam>();
 
     SanitizedResult result;
     ast::transform::DataMap outputs;
@@ -631,8 +631,8 @@ bool ASTPrinter::EmitCall(StringStream& out, const ast::CallExpression* expr) {
 bool ASTPrinter::EmitFunctionCall(StringStream& out,
                                   const sem::Call* call,
                                   const sem::Function* fn) {
-    if (ast::GetAttribute<ast::transform::MslSubgroupBallot::SimdActiveThreadsMask>(
-            fn->Declaration()->attributes) != nullptr) {
+    if (ast::GetAttribute<SubgroupBallot::SimdActiveThreadsMask>(fn->Declaration()->attributes) !=
+        nullptr) {
         out << "as_type<uint2>((ulong)simd_active_threads_mask())";
         return true;
     }

@@ -22,6 +22,7 @@
 ################################################################################
 
 include(lang/msl/writer/ast_printer/BUILD.cmake)
+include(lang/msl/writer/ast_raise/BUILD.cmake)
 include(lang/msl/writer/common/BUILD.cmake)
 include(lang/msl/writer/printer/BUILD.cmake)
 include(lang/msl/writer/raise/BUILD.cmake)

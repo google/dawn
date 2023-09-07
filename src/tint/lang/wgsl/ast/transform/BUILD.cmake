@@ -58,14 +58,8 @@ tint_add_target(tint_lang_wgsl_ast_transform lib
   lang/wgsl/ast/transform/hoist_to_decl_before.h
   lang/wgsl/ast/transform/manager.cc
   lang/wgsl/ast/transform/manager.h
-  lang/wgsl/ast/transform/module_scope_var_to_entry_point_param.cc
-  lang/wgsl/ast/transform/module_scope_var_to_entry_point_param.h
-  lang/wgsl/ast/transform/msl_subgroup_ballot.cc
-  lang/wgsl/ast/transform/msl_subgroup_ballot.h
   lang/wgsl/ast/transform/multiplanar_external_texture.cc
   lang/wgsl/ast/transform/multiplanar_external_texture.h
-  lang/wgsl/ast/transform/packed_vec3.cc
-  lang/wgsl/ast/transform/packed_vec3.h
   lang/wgsl/ast/transform/pad_structs.cc
   lang/wgsl/ast/transform/pad_structs.h
   lang/wgsl/ast/transform/preserve_padding.cc
@@ -152,10 +146,7 @@ tint_add_target(tint_lang_wgsl_ast_transform_test test
   lang/wgsl/ast/transform/helper_test.h
   lang/wgsl/ast/transform/hoist_to_decl_before_test.cc
   lang/wgsl/ast/transform/manager_test.cc
-  lang/wgsl/ast/transform/module_scope_var_to_entry_point_param_test.cc
-  lang/wgsl/ast/transform/msl_subgroup_ballot_test.cc
   lang/wgsl/ast/transform/multiplanar_external_texture_test.cc
-  lang/wgsl/ast/transform/packed_vec3_test.cc
   lang/wgsl/ast/transform/pad_structs_test.cc
   lang/wgsl/ast/transform/preserve_padding_test.cc
   lang/wgsl/ast/transform/promote_initializers_to_let_test.cc

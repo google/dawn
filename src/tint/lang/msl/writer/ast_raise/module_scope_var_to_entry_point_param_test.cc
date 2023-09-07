@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/module_scope_var_to_entry_point_param.h"
+#include "src/tint/lang/msl/writer/ast_raise/module_scope_var_to_entry_point_param.h"
 
 #include <utility>
 
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
-namespace tint::ast::transform {
+namespace tint::msl::writer {
 namespace {
 
-using ModuleScopeVarToEntryPointParamTest = TransformTest;
+using ModuleScopeVarToEntryPointParamTest = ast::transform::TransformTest;
 
 TEST_F(ModuleScopeVarToEntryPointParamTest, ShouldRunEmptyModule) {
     auto* src = R"()";
@@ -1369,4 +1369,4 @@ TEST_F(ModuleScopeVarToEntryPointParamTest, EmtpyModule) {
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::msl::writer

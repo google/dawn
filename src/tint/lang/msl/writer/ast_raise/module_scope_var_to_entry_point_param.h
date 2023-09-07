@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_AST_TRANSFORM_MODULE_SCOPE_VAR_TO_ENTRY_POINT_PARAM_H_
-#define SRC_TINT_LANG_WGSL_AST_TRANSFORM_MODULE_SCOPE_VAR_TO_ENTRY_POINT_PARAM_H_
+#ifndef SRC_TINT_LANG_MSL_WRITER_AST_RAISE_MODULE_SCOPE_VAR_TO_ENTRY_POINT_PARAM_H_
+#define SRC_TINT_LANG_MSL_WRITER_AST_RAISE_MODULE_SCOPE_VAR_TO_ENTRY_POINT_PARAM_H_
 
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
 
-namespace tint::ast::transform {
+namespace tint::msl::writer {
 
 /// Move module-scope variables into the entry point as parameters.
 ///
@@ -62,22 +62,22 @@ namespace tint::ast::transform {
 /// }
 /// ```
 class ModuleScopeVarToEntryPointParam final
-    : public Castable<ModuleScopeVarToEntryPointParam, Transform> {
+    : public Castable<ModuleScopeVarToEntryPointParam, ast::transform::Transform> {
   public:
     /// Constructor
     ModuleScopeVarToEntryPointParam();
     /// Destructor
     ~ModuleScopeVarToEntryPointParam() override;
 
-    /// @copydoc Transform::Apply
+    /// @copydoc ast::transform::Transform::Apply
     ApplyResult Apply(const Program* program,
-                      const DataMap& inputs,
-                      DataMap& outputs) const override;
+                      const ast::transform::DataMap& inputs,
+                      ast::transform::DataMap& outputs) const override;
 
   private:
     struct State;
 };
 
-}  // namespace tint::ast::transform
+}  // namespace tint::msl::writer
 
-#endif  // SRC_TINT_LANG_WGSL_AST_TRANSFORM_MODULE_SCOPE_VAR_TO_ENTRY_POINT_PARAM_H_
+#endif  // SRC_TINT_LANG_MSL_WRITER_AST_RAISE_MODULE_SCOPE_VAR_TO_ENTRY_POINT_PARAM_H_

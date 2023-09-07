@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/msl_subgroup_ballot.h"
+#include "src/tint/lang/msl/writer/ast_raise/subgroup_ballot.h"
 
 #include <utility>
 
@@ -24,16 +24,16 @@
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::MslSubgroupBallot);
-TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::MslSubgroupBallot::SimdActiveThreadsMask);
+TINT_INSTANTIATE_TYPEINFO(tint::msl::writer::SubgroupBallot);
+TINT_INSTANTIATE_TYPEINFO(tint::msl::writer::SubgroupBallot::SimdActiveThreadsMask);
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
 
-namespace tint::ast::transform {
+namespace tint::msl::writer {
 
 /// PIMPL state for the transform
-struct MslSubgroupBallot::State {
+struct SubgroupBallot::State {
     /// The source program
     const Program* const src;
     /// The target program builder
@@ -80,7 +80,7 @@ struct MslSubgroupBallot::State {
         // Set the subgroup size mask at the start of each entry point that transitively calls
         // `subgroupBallot()`.
         for (auto* global : src->AST().GlobalDeclarations()) {
-            auto* func = global->As<Function>();
+            auto* func = global->As<ast::Function>();
             if (func && func->IsEntryPoint() && TransitvelyCallsSubgroupBallot(sem.Get(func))) {
                 SetSubgroupSizeMask(func);
             }
@@ -102,7 +102,7 @@ struct MslSubgroupBallot::State {
             // `simd_active_threads_mask` function to return 64-bit vote.
             b.Func(intrinsic, Empty, b.ty.vec2<u32>(), nullptr,
                    Vector{b.ASTNodes().Create<SimdActiveThreadsMask>(b.ID(), b.AllocateNodeID()),
-                          b.Disable(DisabledValidation::kFunctionHasNoBody)});
+                          b.Disable(ast::DisabledValidation::kFunctionHasNoBody)});
 
             // Declare the `tint_subgroup_size_mask` variable.
             b.GlobalVar(subgroup_size_mask, core::AddressSpace::kPrivate, b.ty.vec4<u32>());
@@ -179,22 +179,22 @@ struct MslSubgroupBallot::State {
     }
 };
 
-MslSubgroupBallot::MslSubgroupBallot() = default;
+SubgroupBallot::SubgroupBallot() = default;
 
-MslSubgroupBallot::~MslSubgroupBallot() = default;
+SubgroupBallot::~SubgroupBallot() = default;
 
-Transform::ApplyResult MslSubgroupBallot::Apply(const Program* src,
-                                                const DataMap&,
-                                                DataMap&) const {
+ast::transform::Transform::ApplyResult SubgroupBallot::Apply(const Program* src,
+                                                             const ast::transform::DataMap&,
+                                                             ast::transform::DataMap&) const {
     return State(src).Run();
 }
 
-MslSubgroupBallot::SimdActiveThreadsMask::~SimdActiveThreadsMask() = default;
+SubgroupBallot::SimdActiveThreadsMask::~SimdActiveThreadsMask() = default;
 
-const MslSubgroupBallot::SimdActiveThreadsMask* MslSubgroupBallot::SimdActiveThreadsMask::Clone(
+const SubgroupBallot::SimdActiveThreadsMask* SubgroupBallot::SimdActiveThreadsMask::Clone(
     ast::CloneContext& ctx) const {
-    return ctx.dst->ASTNodes().Create<MslSubgroupBallot::SimdActiveThreadsMask>(
+    return ctx.dst->ASTNodes().Create<SubgroupBallot::SimdActiveThreadsMask>(
         ctx.dst->ID(), ctx.dst->AllocateNodeID());
 }
 
-}  // namespace tint::ast::transform
+}  // namespace tint::msl::writer

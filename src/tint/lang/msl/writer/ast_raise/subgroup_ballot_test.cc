@@ -12,22 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/lang/wgsl/ast/transform/msl_subgroup_ballot.h"
+#include "src/tint/lang/msl/writer/ast_raise/subgroup_ballot.h"
 
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 
-namespace tint::ast::transform {
+namespace tint::msl::writer {
 namespace {
 
-using MslSubgroupBallotTest = TransformTest;
+using SubgroupBallotTest = ast::transform::TransformTest;
 
-TEST_F(MslSubgroupBallotTest, EmptyModule) {
+TEST_F(SubgroupBallotTest, EmptyModule) {
     auto* src = "";
 
-    EXPECT_FALSE(ShouldRun<MslSubgroupBallot>(src));
+    EXPECT_FALSE(ShouldRun<SubgroupBallot>(src));
 }
 
-TEST_F(MslSubgroupBallotTest, DirectUse) {
+TEST_F(SubgroupBallotTest, DirectUse) {
     auto* src = R"(
 enable chromium_experimental_subgroups;
 
@@ -62,12 +62,12 @@ fn foo(@builtin(subgroup_size) tint_subgroup_size : u32) {
 }
 )";
 
-    auto got = Run<MslSubgroupBallot>(src);
+    auto got = Run<SubgroupBallot>(src);
 
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(MslSubgroupBallotTest, IndirectUse) {
+TEST_F(SubgroupBallotTest, IndirectUse) {
     auto* src = R"(
 enable chromium_experimental_subgroups;
 
@@ -110,12 +110,12 @@ fn foo(@builtin(subgroup_size) tint_subgroup_size : u32) {
 }
 )";
 
-    auto got = Run<MslSubgroupBallot>(src);
+    auto got = Run<SubgroupBallot>(src);
 
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(MslSubgroupBallotTest, PreexistingSubgroupSizeBuiltin) {
+TEST_F(SubgroupBallotTest, PreexistingSubgroupSizeBuiltin) {
     auto* src = R"(
 enable chromium_experimental_subgroups;
 
@@ -154,10 +154,10 @@ fn foo(@builtin(workgroup_id) group_id : vec3u, @builtin(subgroup_size) size : u
 }
 )";
 
-    auto got = Run<MslSubgroupBallot>(src);
+    auto got = Run<SubgroupBallot>(src);
 
     EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace
-}  // namespace tint::ast::transform
+}  // namespace tint::msl::writer
