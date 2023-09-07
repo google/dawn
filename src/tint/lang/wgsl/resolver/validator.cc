@@ -1947,26 +1947,33 @@ bool Validator::PipelineStages(VectorRef<sem::Function*> entry_points) const {
         }
     };
 
-    auto check_workgroup_storage = [&](const sem::Function* func,
-                                       const sem::Function* entry_point) {
-        auto stage = entry_point->Declaration()->PipelineStage();
-        if (stage != ast::PipelineStage::kCompute) {
-            for (auto* var : func->DirectlyReferencedGlobals()) {
-                if (var->AddressSpace() == core::AddressSpace::kWorkgroup) {
-                    StringStream stage_name;
-                    stage_name << stage;
-                    for (auto* user : var->Users()) {
-                        if (func == user->Stmt()->Function()) {
-                            AddError("workgroup memory cannot be used by " + stage_name.str() +
-                                         " pipeline stage",
-                                     user->Declaration()->source);
-                            break;
-                        }
-                    }
-                    AddNote("variable is declared here", var->Declaration()->source);
-                    backtrace(func, entry_point);
-                    return false;
+    auto check_var_uses = [&](const sem::Function* func, const sem::Function* entry_point) {
+        auto err = [&](ast::PipelineStage stage, const sem::GlobalVariable* var) {
+            Source source;
+            for (auto* user : var->Users()) {
+                if (func == user->Stmt()->Function()) {
+                    source = user->Declaration()->source;
+                    break;
                 }
+            }
+            StringStream msg;
+            msg << "var with '" << var->AddressSpace() << "' address space cannot be used by "
+                << stage << " pipeline stage";
+            AddError(msg.str(), source);
+            AddNote("variable is declared here", var->Declaration()->source);
+            backtrace(func, entry_point);
+            return false;
+        };
+
+        auto stage = entry_point->Declaration()->PipelineStage();
+        for (auto* var : func->DirectlyReferencedGlobals()) {
+            if (stage != ast::PipelineStage::kCompute &&
+                var->AddressSpace() == core::AddressSpace::kWorkgroup) {
+                return err(stage, var);
+            }
+            if (stage != ast::PipelineStage::kFragment &&
+                var->AddressSpace() == core::AddressSpace::kPixelLocal) {
+                return err(stage, var);
             }
         }
         return true;
@@ -2001,7 +2008,7 @@ bool Validator::PipelineStages(VectorRef<sem::Function*> entry_points) const {
     };
 
     auto check_func = [&](const sem::Function* func, const sem::Function* entry_point) {
-        if (!check_workgroup_storage(func, entry_point)) {
+        if (!check_var_uses(func, entry_point)) {
             return false;
         }
         if (!check_builtin_calls(func, entry_point)) {

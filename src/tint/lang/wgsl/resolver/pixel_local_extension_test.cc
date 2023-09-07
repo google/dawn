@@ -61,6 +61,136 @@ TEST_F(ResolverPixelLocalExtensionTest, AddressSpaceUsedWithoutExtension) {
 
 #if TINT_ENABLE_LOCAL_STORAGE_EXTENSION
 
+TEST_F(ResolverPixelLocalExtensionTest, VertexStageDirect) {
+    // enable chromium_experimental_pixel_local;
+    // var<pixel_local> v : u32;
+    // @vertex fn F() -> @position vec4f {
+    //   v = 42;
+    //   return vec4f();
+    // }
+    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    GlobalVar(Source{{56, 78}}, "v", ty.u32(), core::AddressSpace::kPixelLocal);
+    Func("F", Empty, ty.vec4<f32>(),
+         Vector{
+             Assign(Ident(Source{{12, 34}}, "v"), 42_a),
+             Return(Call<vec4<f32>>()),
+         },
+         Vector{Stage(ast::PipelineStage::kVertex)},
+         Vector{Builtin(core::BuiltinValue::kPosition)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: var with 'pixel_local' address space cannot be used by vertex pipeline stage
+56:78 note: variable is declared here)");
+}
+
+TEST_F(ResolverPixelLocalExtensionTest, ComputeStageDirect) {
+    // enable chromium_experimental_pixel_local;
+    // var<pixel_local> v : u32;
+    // @compute @workgroup_size(1) fn F() {
+    //   v = 42;
+    // }
+    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    GlobalVar(Source{{56, 78}}, "v", ty.u32(), core::AddressSpace::kPixelLocal);
+    Func("F", Empty, ty.void_(), Vector{Assign(Ident(Source{{12, 34}}, "v"), 42_a)},
+         Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_a)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: var with 'pixel_local' address space cannot be used by compute pipeline stage
+56:78 note: variable is declared here)");
+}
+
+TEST_F(ResolverPixelLocalExtensionTest, FragmentStageDirect) {
+    // enable chromium_experimental_pixel_local;
+    // var<pixel_local> v : u32;
+    // @fragment fn F() {
+    //   v = 42;
+    // }
+    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    GlobalVar(Source{{56, 78}}, "v", ty.u32(), core::AddressSpace::kPixelLocal);
+    Func("F", Empty, ty.void_(), Vector{Assign(Ident(Source{{12, 34}}, "v"), 42_a)},
+         Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverPixelLocalExtensionTest, VertexStageIndirect) {
+    // enable chromium_experimental_pixel_local;
+    // var<pixel_local> v : u32;
+    // fn X() { v = 42; }
+    // fn Y() { X(); }
+    // @vertex fn F() -> @position vec4f {
+    //   X();
+    //   return vec4f();
+    // }
+    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    GlobalVar(Source{{3, 4}}, "v", ty.u32(), core::AddressSpace::kPixelLocal);
+    Func(Source{{5, 6}}, "X", Empty, ty.void_(), Vector{Assign(Ident(Source{{1, 2}}, "v"), 42_a)});
+    Func(Source{{7, 8}}, "Y", Empty, ty.void_(), Vector{CallStmt(Call("X"))});
+    Func(Source{{9, 1}}, "F", Empty, ty.vec4<f32>(),
+         Vector{
+             CallStmt(Call("Y")),
+             Return(Call<vec4<f32>>()),
+         },
+         Vector{Stage(ast::PipelineStage::kVertex)},
+         Vector{Builtin(core::BuiltinValue::kPosition)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(1:2 error: var with 'pixel_local' address space cannot be used by vertex pipeline stage
+3:4 note: variable is declared here
+5:6 note: called by function 'X'
+7:8 note: called by function 'Y'
+9:1 note: called by entry point 'F')");
+}
+
+TEST_F(ResolverPixelLocalExtensionTest, ComputeStageIndirect) {
+    // enable chromium_experimental_pixel_local;
+    // var<pixel_local> v : u32;
+    // fn X() { v = 42; }
+    // fn Y() { X(); }
+    // @compute @workgroup_size(1) fn F() {
+    //   Y();
+    // }
+    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    GlobalVar(Source{{3, 4}}, "v", ty.u32(), core::AddressSpace::kPixelLocal);
+    Func(Source{{5, 6}}, "X", Empty, ty.void_(), Vector{Assign(Ident(Source{{1, 2}}, "v"), 42_a)});
+    Func(Source{{7, 8}}, "Y", Empty, ty.void_(), Vector{CallStmt(Call("X"))});
+    Func(Source{{9, 1}}, "F", Empty, ty.void_(), Vector{CallStmt(Call("Y"))},
+         Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_a)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(1:2 error: var with 'pixel_local' address space cannot be used by compute pipeline stage
+3:4 note: variable is declared here
+5:6 note: called by function 'X'
+7:8 note: called by function 'Y'
+9:1 note: called by entry point 'F')");
+}
+
+TEST_F(ResolverPixelLocalExtensionTest, FragmentStageIndirect) {
+    // enable chromium_experimental_pixel_local;
+    // var<pixel_local> v : u32;
+    // fn X() { v = 42; }
+    // fn Y() { X(); }
+    // @fragment fn F() {
+    //   Y();
+    // }
+    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    GlobalVar(Source{{3, 4}}, "v", ty.u32(), core::AddressSpace::kPixelLocal);
+    Func(Source{{5, 6}}, "X", Empty, ty.void_(), Vector{Assign(Ident(Source{{1, 2}}, "v"), 42_a)});
+    Func(Source{{7, 8}}, "Y", Empty, ty.void_(), Vector{CallStmt(Call("X"))});
+    Func(Source{{9, 1}}, "F", Empty, ty.void_(), Vector{CallStmt(Call("Y"))},
+         Vector{Stage(ast::PipelineStage::kFragment)});
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 namespace type_tests {
 struct Case {
     builder::ast_type_func_ptr type;

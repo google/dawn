@@ -81,9 +81,10 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInVertexStage) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "3:4 error: workgroup memory cannot be used by vertex pipeline "
-              "stage\n1:2 note: variable is declared here");
+    EXPECT_EQ(
+        r()->error(),
+        R"(3:4 error: var with 'workgroup' address space cannot be used by vertex pipeline stage
+1:2 note: variable is declared here)");
 }
 
 TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInFragmentStage) {
@@ -111,8 +112,9 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInFragmentStage) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(3:4 error: workgroup memory cannot be used by fragment pipeline stage
+    EXPECT_EQ(
+        r()->error(),
+        R"(3:4 error: var with 'workgroup' address space cannot be used by fragment pipeline stage
 1:2 note: variable is declared here
 5:6 note: called by function 'f2'
 7:8 note: called by function 'f1'
