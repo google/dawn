@@ -48,6 +48,7 @@ enum class Function : uint8_t {
     kAtomicUmax,
     kAtomicUmin,
     kAtomicXor,
+    kDot,
     kMatrixTimesMatrix,
     kMatrixTimesScalar,
     kMatrixTimesVector,

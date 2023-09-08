@@ -57,6 +57,8 @@ const char* str(Function i) {
             return "spirv.atomic_umin";
         case Function::kAtomicXor:
             return "spirv.atomic_xor";
+        case Function::kDot:
+            return "spirv.dot";
         case Function::kMatrixTimesMatrix:
             return "spirv.matrix_times_matrix";
         case Function::kMatrixTimesScalar:

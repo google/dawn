@@ -1134,6 +1134,9 @@ void Printer::EmitSpirvBuiltinCall(spirv::ir::BuiltinCall* builtin) {
         case spirv::ir::Function::kAtomicXor:
             op = spv::Op::OpAtomicXor;
             break;
+        case spirv::ir::Function::kDot:
+            op = spv::Op::OpDot;
+            break;
         case spirv::ir::Function::kMatrixTimesMatrix:
             op = spv::Op::OpMatrixTimesMatrix;
             break;
@@ -1613,9 +1616,6 @@ void Printer::EmitIntrinsicCall(spirv::ir::IntrinsicCall* call) {
 
     spv::Op op = spv::Op::Max;
     switch (call->Kind()) {
-        case spirv::ir::Intrinsic::kDot:
-            op = spv::Op::OpDot;
-            break;
         case spirv::ir::Intrinsic::kImageFetch:
             op = spv::Op::OpImageFetch;
             break;

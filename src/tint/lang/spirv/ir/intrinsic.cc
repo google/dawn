@@ -29,9 +29,6 @@ namespace tint::spirv::ir {
 /// @param str the string to parse
 /// @returns the parsed enum, or Intrinsic::kUndefined if the string could not be parsed.
 Intrinsic ParseIntrinsic(std::string_view str) {
-    if (str == "dot") {
-        return Intrinsic::kDot;
-    }
     if (str == "image_dref_gather") {
         return Intrinsic::kImageDrefGather;
     }
@@ -78,8 +75,6 @@ std::string_view ToString(Intrinsic value) {
     switch (value) {
         case Intrinsic::kUndefined:
             return "undefined";
-        case Intrinsic::kDot:
-            return "dot";
         case Intrinsic::kImageDrefGather:
             return "image_dref_gather";
         case Intrinsic::kImageFetch:

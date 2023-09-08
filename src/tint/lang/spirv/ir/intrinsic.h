@@ -34,7 +34,6 @@ namespace tint::spirv::ir {
 /// Intrinsic
 enum class Intrinsic : uint8_t {
     kUndefined,
-    kDot,
     kImageDrefGather,
     kImageFetch,
     kImageGather,
@@ -68,7 +67,6 @@ auto& operator<<(STREAM& out, Intrinsic value) {
 Intrinsic ParseIntrinsic(std::string_view str);
 
 constexpr const char* kIntrinsicStrings[] = {
-    "dot",
     "image_dref_gather",
     "image_fetch",
     "image_gather",

@@ -75,7 +75,6 @@ match workgroup_or_storage
 ////////////////////////////////////////////////////////////////////////////////
 
 enum intrinsic {
-  dot
   image_fetch
   image_gather
   image_dref_gather
@@ -108,6 +107,7 @@ fn array_length<I: u32, A: access>(ptr<storage, struct_with_runtime_array, A>, I
 @stage("fragment", "compute") fn atomic_umax<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
 @stage("fragment", "compute") fn atomic_umin<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
 @stage("fragment", "compute") fn atomic_xor<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
+fn dot<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> T
 fn matrix_times_matrix<T: f32_f16, K: num, C: num, R: num>(mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T>
 fn matrix_times_scalar<T: f32_f16, N: num, M: num>(mat<N, M, T>, T) -> mat<N, M, T>
 fn matrix_times_vector<T: f32_f16, N: num, M: num>(mat<N, M, T>, vec<N, T>) -> vec<M, T>

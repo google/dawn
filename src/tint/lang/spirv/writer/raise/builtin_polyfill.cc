@@ -329,8 +329,8 @@ struct State {
 
         // Replace the builtin call with a call to the spirv.dot intrinsic.
         auto args = Vector<core::ir::Value*, 4>(builtin->Args());
-        auto* call = b.Call<spirv::ir::IntrinsicCall>(builtin->Result()->Type(),
-                                                      spirv::ir::Intrinsic::kDot, std::move(args));
+        auto* call = b.Call<spirv::ir::BuiltinCall>(builtin->Result()->Type(),
+                                                    spirv::ir::Function::kDot, std::move(args));
         call->InsertBefore(builtin);
         return call->Result();
     }
