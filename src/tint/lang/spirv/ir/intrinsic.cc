@@ -29,9 +29,6 @@ namespace tint::spirv::ir {
 /// @param str the string to parse
 /// @returns the parsed enum, or Intrinsic::kUndefined if the string could not be parsed.
 Intrinsic ParseIntrinsic(std::string_view str) {
-    if (str == "array_length") {
-        return Intrinsic::kArrayLength;
-    }
     if (str == "atomic_and") {
         return Intrinsic::kAtomicAnd;
     }
@@ -120,8 +117,6 @@ std::string_view ToString(Intrinsic value) {
     switch (value) {
         case Intrinsic::kUndefined:
             return "undefined";
-        case Intrinsic::kArrayLength:
-            return "array_length";
         case Intrinsic::kAtomicAnd:
             return "atomic_and";
         case Intrinsic::kAtomicCompareExchange:

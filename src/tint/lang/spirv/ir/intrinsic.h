@@ -34,7 +34,6 @@ namespace tint::spirv::ir {
 /// Intrinsic
 enum class Intrinsic : uint8_t {
     kUndefined,
-    kArrayLength,
     kAtomicAnd,
     kAtomicCompareExchange,
     kAtomicExchange,
@@ -82,7 +81,6 @@ auto& operator<<(STREAM& out, Intrinsic value) {
 Intrinsic ParseIntrinsic(std::string_view str);
 
 constexpr const char* kIntrinsicStrings[] = {
-    "array_length",
     "atomic_and",
     "atomic_compare_exchange",
     "atomic_exchange",

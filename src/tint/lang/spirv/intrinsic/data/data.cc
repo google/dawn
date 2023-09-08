@@ -26,6 +26,7 @@
 
 #include "src/tint/lang/core/intrinsic/data/type_matchers.h"
 #include "src/tint/lang/spirv/intrinsic/data/data.h"
+#include "src/tint/lang/spirv/intrinsic/data/type_matchers.h"
 #include "src/tint/utils/text/string_stream.h"
 
 namespace tint::spirv::intrinsic::data {
@@ -71,7 +72,7 @@ constexpr TypeMatcher kF32Matcher {
     if (!MatchF32(state, ty)) {
       return nullptr;
     }
-    return BuildF32(state);
+    return BuildF32(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     return "f32";
@@ -85,10 +86,24 @@ constexpr TypeMatcher kF16Matcher {
     if (!MatchF16(state, ty)) {
       return nullptr;
     }
-    return BuildF16(state);
+    return BuildF16(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     return "f16";
+  }
+};
+
+
+/// TypeMatcher for 'type u32'
+constexpr TypeMatcher kU32Matcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+    if (!MatchU32(state, ty)) {
+      return nullptr;
+    }
+    return BuildU32(state, ty);
+  },
+/* string */ [](MatchState*) -> std::string {
+    return "u32";
   }
 };
 
@@ -104,7 +119,7 @@ constexpr TypeMatcher kVec2Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildVec2(state, T);
+    return BuildVec2(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -124,7 +139,7 @@ constexpr TypeMatcher kVec3Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildVec3(state, T);
+    return BuildVec3(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -144,7 +159,7 @@ constexpr TypeMatcher kVec4Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildVec4(state, T);
+    return BuildVec4(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -164,7 +179,7 @@ constexpr TypeMatcher kMat2X2Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat2X2(state, T);
+    return BuildMat2X2(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -184,7 +199,7 @@ constexpr TypeMatcher kMat2X3Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat2X3(state, T);
+    return BuildMat2X3(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -204,7 +219,7 @@ constexpr TypeMatcher kMat2X4Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat2X4(state, T);
+    return BuildMat2X4(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -224,7 +239,7 @@ constexpr TypeMatcher kMat3X2Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat3X2(state, T);
+    return BuildMat3X2(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -244,7 +259,7 @@ constexpr TypeMatcher kMat3X3Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat3X3(state, T);
+    return BuildMat3X3(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -264,7 +279,7 @@ constexpr TypeMatcher kMat3X4Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat3X4(state, T);
+    return BuildMat3X4(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -284,7 +299,7 @@ constexpr TypeMatcher kMat4X2Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat4X2(state, T);
+    return BuildMat4X2(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -304,7 +319,7 @@ constexpr TypeMatcher kMat4X3Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat4X3(state, T);
+    return BuildMat4X3(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -324,7 +339,7 @@ constexpr TypeMatcher kMat4X4Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat4X4(state, T);
+    return BuildMat4X4(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -349,7 +364,7 @@ constexpr TypeMatcher kVecMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildVec(state, N, T);
+    return BuildVec(state, ty, N, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string N = state->NumName();
@@ -382,7 +397,7 @@ constexpr TypeMatcher kMatMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat(state, N, M, T);
+    return BuildMat(state, ty, N, M, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string N = state->NumName();
@@ -395,14 +410,60 @@ constexpr TypeMatcher kMatMatcher {
 };
 
 
+/// TypeMatcher for 'type ptr'
+constexpr TypeMatcher kPtrMatcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+  Number S = Number::invalid;
+  const Type* T = nullptr;
+  Number A = Number::invalid;
+    if (!MatchPtr(state, ty, S, T, A)) {
+      return nullptr;
+    }
+    S = state.Num(S);
+    if (!S.IsValid()) {
+      return nullptr;
+    }
+    T = state.Type(T);
+    if (T == nullptr) {
+      return nullptr;
+    }
+    A = state.Num(A);
+    if (!A.IsValid()) {
+      return nullptr;
+    }
+    return BuildPtr(state, ty, S, T, A);
+  },
+/* string */ [](MatchState* state) -> std::string {
+  const std::string S = state->NumName();
+  const std::string T = state->TypeName();
+  const std::string A = state->NumName();
+    return "ptr<" + S + ", " + T + ", " + A + ">";
+  }
+};
+
+
+/// TypeMatcher for 'type struct_with_runtime_array'
+constexpr TypeMatcher kStructWithRuntimeArrayMatcher {
+/* match */ [](MatchState& state, const Type* ty) -> const Type* {
+    if (!MatchStructWithRuntimeArray(state, ty)) {
+      return nullptr;
+    }
+    return BuildStructWithRuntimeArray(state, ty);
+  },
+/* string */ [](MatchState*) -> std::string {
+    return "struct_with_runtime_array";
+  }
+};
+
+
 /// TypeMatcher for 'match f32_f16'
 constexpr TypeMatcher kF32F16Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     if (MatchF16(state, ty)) {
-      return BuildF16(state);
+      return BuildF16(state, ty);
     }
     return nullptr;
   },
@@ -415,6 +476,19 @@ constexpr TypeMatcher kF32F16Matcher {
   }
 };
 
+/// EnumMatcher for 'match storage'
+constexpr NumberMatcher kStorageMatcher {
+/* match */ [](MatchState&, Number number) -> Number {
+    if (number.IsAny() || number.Value() == static_cast<uint32_t>(core::AddressSpace::kStorage)) {
+      return Number(static_cast<uint32_t>(core::AddressSpace::kStorage));
+    }
+    return Number::invalid;
+  },
+/* string */ [](MatchState*) -> std::string {
+    return "storage";
+  }
+};
+
 /// Type and number matchers
 
 /// The template types, types, and type matchers
@@ -422,21 +496,24 @@ constexpr TypeMatcher kTypeMatchers[] = {
   /* [0] */ TemplateTypeMatcher<0>::matcher,
   /* [1] */ kF32Matcher,
   /* [2] */ kF16Matcher,
-  /* [3] */ kVec2Matcher,
-  /* [4] */ kVec3Matcher,
-  /* [5] */ kVec4Matcher,
-  /* [6] */ kMat2X2Matcher,
-  /* [7] */ kMat2X3Matcher,
-  /* [8] */ kMat2X4Matcher,
-  /* [9] */ kMat3X2Matcher,
-  /* [10] */ kMat3X3Matcher,
-  /* [11] */ kMat3X4Matcher,
-  /* [12] */ kMat4X2Matcher,
-  /* [13] */ kMat4X3Matcher,
-  /* [14] */ kMat4X4Matcher,
-  /* [15] */ kVecMatcher,
-  /* [16] */ kMatMatcher,
-  /* [17] */ kF32F16Matcher,
+  /* [3] */ kU32Matcher,
+  /* [4] */ kVec2Matcher,
+  /* [5] */ kVec3Matcher,
+  /* [6] */ kVec4Matcher,
+  /* [7] */ kMat2X2Matcher,
+  /* [8] */ kMat2X3Matcher,
+  /* [9] */ kMat2X4Matcher,
+  /* [10] */ kMat3X2Matcher,
+  /* [11] */ kMat3X3Matcher,
+  /* [12] */ kMat3X4Matcher,
+  /* [13] */ kMat4X2Matcher,
+  /* [14] */ kMat4X3Matcher,
+  /* [15] */ kMat4X4Matcher,
+  /* [16] */ kVecMatcher,
+  /* [17] */ kMatMatcher,
+  /* [18] */ kPtrMatcher,
+  /* [19] */ kStructWithRuntimeArrayMatcher,
+  /* [20] */ kF32F16Matcher,
 };
 
 /// The template numbers, and number matchers
@@ -444,25 +521,31 @@ constexpr NumberMatcher kNumberMatchers[] = {
   /* [0] */ TemplateNumberMatcher<0>::matcher,
   /* [1] */ TemplateNumberMatcher<1>::matcher,
   /* [2] */ TemplateNumberMatcher<2>::matcher,
+  /* [3] */ kStorageMatcher,
 };
 
 constexpr TypeMatcherIndex kTypeMatcherIndices[] = {
-  /* [0] */ TypeMatcherIndex(16),
-  /* [1] */ TypeMatcherIndex(0),
-  /* [2] */ TypeMatcherIndex(15),
+  /* [0] */ TypeMatcherIndex(18),
+  /* [1] */ TypeMatcherIndex(19),
+  /* [2] */ TypeMatcherIndex(17),
   /* [3] */ TypeMatcherIndex(0),
+  /* [4] */ TypeMatcherIndex(16),
+  /* [5] */ TypeMatcherIndex(0),
+  /* [6] */ TypeMatcherIndex(3),
 };
 
 static_assert(TypeMatcherIndex::CanIndex(kTypeMatcherIndices),
               "TypeMatcherIndex is not large enough to index kTypeMatcherIndices");
 
 constexpr NumberMatcherIndex kNumberMatcherIndices[] = {
-  /* [0] */ NumberMatcherIndex(1),
+  /* [0] */ NumberMatcherIndex(3),
   /* [1] */ NumberMatcherIndex(0),
-  /* [2] */ NumberMatcherIndex(1),
-  /* [3] */ NumberMatcherIndex(2),
-  /* [4] */ NumberMatcherIndex(0),
-  /* [5] */ NumberMatcherIndex(2),
+  /* [2] */ NumberMatcherIndex(2),
+  /* [3] */ NumberMatcherIndex(1),
+  /* [4] */ NumberMatcherIndex(2),
+  /* [5] */ NumberMatcherIndex(1),
+  /* [6] */ NumberMatcherIndex(0),
+  /* [7] */ NumberMatcherIndex(1),
 };
 
 static_assert(NumberMatcherIndex::CanIndex(kNumberMatcherIndices),
@@ -473,54 +556,66 @@ constexpr ParameterInfo kParameters[] = {
     /* [0] */
     /* usage */ core::ParameterUsage::kNone,
     /* type_matcher_indices */ TypeMatcherIndicesIndex(0),
-    /* number_matcher_indices */ NumberMatcherIndicesIndex(4),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(0),
   },
   {
     /* [1] */
     /* usage */ core::ParameterUsage::kNone,
-    /* type_matcher_indices */ TypeMatcherIndicesIndex(0),
-    /* number_matcher_indices */ NumberMatcherIndicesIndex(0),
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(3),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
   },
   {
     /* [2] */
     /* usage */ core::ParameterUsage::kNone,
-    /* type_matcher_indices */ TypeMatcherIndicesIndex(0),
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(2),
     /* number_matcher_indices */ NumberMatcherIndicesIndex(1),
   },
   {
     /* [3] */
     /* usage */ core::ParameterUsage::kNone,
-    /* type_matcher_indices */ TypeMatcherIndicesIndex(1),
-    /* number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(2),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(5),
   },
   {
     /* [4] */
     /* usage */ core::ParameterUsage::kNone,
-    /* type_matcher_indices */ TypeMatcherIndicesIndex(0),
-    /* number_matcher_indices */ NumberMatcherIndicesIndex(1),
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(2),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(6),
   },
   {
     /* [5] */
     /* usage */ core::ParameterUsage::kNone,
-    /* type_matcher_indices */ TypeMatcherIndicesIndex(2),
-    /* number_matcher_indices */ NumberMatcherIndicesIndex(1),
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(3),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
   },
   {
     /* [6] */
     /* usage */ core::ParameterUsage::kNone,
-    /* type_matcher_indices */ TypeMatcherIndicesIndex(0),
-    /* number_matcher_indices */ NumberMatcherIndicesIndex(0),
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(2),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(6),
   },
   {
     /* [7] */
     /* usage */ core::ParameterUsage::kNone,
-    /* type_matcher_indices */ TypeMatcherIndicesIndex(2),
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(4),
     /* number_matcher_indices */ NumberMatcherIndicesIndex(1),
   },
   {
     /* [8] */
     /* usage */ core::ParameterUsage::kNone,
-    /* type_matcher_indices */ TypeMatcherIndicesIndex(1),
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(2),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(5),
+  },
+  {
+    /* [9] */
+    /* usage */ core::ParameterUsage::kNone,
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(4),
+    /* number_matcher_indices */ NumberMatcherIndicesIndex(1),
+  },
+  {
+    /* [10] */
+    /* usage */ core::ParameterUsage::kNone,
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(3),
     /* number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
   },
 };
@@ -531,8 +626,13 @@ static_assert(ParameterIndex::CanIndex(kParameters),
 constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [0] */
+    /* name */ "I",
+    /* matcher_index */ TypeMatcherIndex(3),
+  },
+  {
+    /* [1] */
     /* name */ "T",
-    /* matcher_index */ TypeMatcherIndex(17),
+    /* matcher_index */ TypeMatcherIndex(20),
   },
 };
 
@@ -565,6 +665,11 @@ constexpr TemplateNumberInfo kTemplateNumbers[] = {
     /* name */ "M",
     /* matcher_index */ NumberMatcherIndex(/* invalid */),
   },
+  {
+    /* [5] */
+    /* name */ "A",
+    /* matcher_index */ NumberMatcherIndex(/* invalid */),
+  },
 };
 
 static_assert(TemplateNumberIndex::CanIndex(kTemplateNumbers),
@@ -576,12 +681,12 @@ constexpr OverloadInfo kOverloads[] = {
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
     /* num_parameters */ 2,
     /* num_template_types */ 1,
-    /* num_template_numbers */ 3,
+    /* num_template_numbers */ 1,
     /* template_types */ TemplateTypeIndex(0),
-    /* template_numbers */ TemplateNumberIndex(0),
+    /* template_numbers */ TemplateNumberIndex(5),
     /* parameters */ ParameterIndex(0),
-    /* return_type_matcher_indices */ TypeMatcherIndicesIndex(0),
-    /* return_number_matcher_indices */ NumberMatcherIndicesIndex(2),
+    /* return_type_matcher_indices */ TypeMatcherIndicesIndex(6),
+    /* return_number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -589,12 +694,12 @@ constexpr OverloadInfo kOverloads[] = {
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
     /* num_parameters */ 2,
     /* num_template_types */ 1,
-    /* num_template_numbers */ 2,
-    /* template_types */ TemplateTypeIndex(0),
-    /* template_numbers */ TemplateNumberIndex(3),
+    /* num_template_numbers */ 3,
+    /* template_types */ TemplateTypeIndex(1),
+    /* template_numbers */ TemplateNumberIndex(0),
     /* parameters */ ParameterIndex(2),
-    /* return_type_matcher_indices */ TypeMatcherIndicesIndex(0),
-    /* return_number_matcher_indices */ NumberMatcherIndicesIndex(1),
+    /* return_type_matcher_indices */ TypeMatcherIndicesIndex(2),
+    /* return_number_matcher_indices */ NumberMatcherIndicesIndex(3),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -603,11 +708,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_parameters */ 2,
     /* num_template_types */ 1,
     /* num_template_numbers */ 2,
-    /* template_types */ TemplateTypeIndex(0),
+    /* template_types */ TemplateTypeIndex(1),
     /* template_numbers */ TemplateNumberIndex(3),
     /* parameters */ ParameterIndex(4),
     /* return_type_matcher_indices */ TypeMatcherIndicesIndex(2),
-    /* return_number_matcher_indices */ NumberMatcherIndicesIndex(0),
+    /* return_number_matcher_indices */ NumberMatcherIndicesIndex(6),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -616,11 +721,11 @@ constexpr OverloadInfo kOverloads[] = {
     /* num_parameters */ 2,
     /* num_template_types */ 1,
     /* num_template_numbers */ 2,
-    /* template_types */ TemplateTypeIndex(0),
+    /* template_types */ TemplateTypeIndex(1),
     /* template_numbers */ TemplateNumberIndex(3),
-    /* parameters */ ParameterIndex(5),
-    /* return_type_matcher_indices */ TypeMatcherIndicesIndex(2),
-    /* return_number_matcher_indices */ NumberMatcherIndicesIndex(0),
+    /* parameters */ ParameterIndex(6),
+    /* return_type_matcher_indices */ TypeMatcherIndicesIndex(4),
+    /* return_number_matcher_indices */ NumberMatcherIndicesIndex(3),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
   {
@@ -628,11 +733,24 @@ constexpr OverloadInfo kOverloads[] = {
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
     /* num_parameters */ 2,
     /* num_template_types */ 1,
-    /* num_template_numbers */ 1,
-    /* template_types */ TemplateTypeIndex(0),
+    /* num_template_numbers */ 2,
+    /* template_types */ TemplateTypeIndex(1),
     /* template_numbers */ TemplateNumberIndex(3),
     /* parameters */ ParameterIndex(7),
-    /* return_type_matcher_indices */ TypeMatcherIndicesIndex(2),
+    /* return_type_matcher_indices */ TypeMatcherIndicesIndex(4),
+    /* return_number_matcher_indices */ NumberMatcherIndicesIndex(3),
+    /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
+  },
+  {
+    /* [5] */
+    /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
+    /* num_parameters */ 2,
+    /* num_template_types */ 1,
+    /* num_template_numbers */ 1,
+    /* template_types */ TemplateTypeIndex(1),
+    /* template_numbers */ TemplateNumberIndex(3),
+    /* parameters */ ParameterIndex(9),
+    /* return_type_matcher_indices */ TypeMatcherIndicesIndex(4),
     /* return_number_matcher_indices */ NumberMatcherIndicesIndex(1),
     /* const_eval_fn */ ConstEvalFunctionIndex(/* invalid */),
   },
@@ -644,33 +762,39 @@ static_assert(OverloadIndex::CanIndex(kOverloads),
 constexpr IntrinsicInfo kBuiltins[] = {
   {
     /* [0] */
-    /* fn matrix_times_matrix<T : f32_f16, K : num, C : num, R : num>(mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T> */
+    /* fn array_length<I : u32, A : access>(ptr<storage, struct_with_runtime_array, A>, I) -> u32 */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(0),
   },
   {
     /* [1] */
-    /* fn matrix_times_scalar<T : f32_f16, N : num, M : num>(mat<N, M, T>, T) -> mat<N, M, T> */
+    /* fn matrix_times_matrix<T : f32_f16, K : num, C : num, R : num>(mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T> */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(1),
   },
   {
     /* [2] */
-    /* fn matrix_times_vector<T : f32_f16, N : num, M : num>(mat<N, M, T>, vec<N, T>) -> vec<M, T> */
+    /* fn matrix_times_scalar<T : f32_f16, N : num, M : num>(mat<N, M, T>, T) -> mat<N, M, T> */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(2),
   },
   {
     /* [3] */
-    /* fn vector_times_matrix<T : f32_f16, N : num, M : num>(vec<N, T>, mat<M, N, T>) -> vec<M, T> */
+    /* fn matrix_times_vector<T : f32_f16, N : num, M : num>(mat<N, M, T>, vec<N, T>) -> vec<M, T> */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(3),
   },
   {
     /* [4] */
-    /* fn vector_times_scalar<T : f32_f16, N : num>(vec<N, T>, T) -> vec<N, T> */
+    /* fn vector_times_matrix<T : f32_f16, N : num, M : num>(vec<N, T>, mat<M, N, T>) -> vec<M, T> */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(4),
+  },
+  {
+    /* [5] */
+    /* fn vector_times_scalar<T : f32_f16, N : num>(vec<N, T>, T) -> vec<N, T> */
+    /* num overloads */ 1,
+    /* overloads */ OverloadIndex(5),
   },
 };
 

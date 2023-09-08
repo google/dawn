@@ -34,6 +34,7 @@ namespace tint::spirv::ir {
 
 /// Enumerator of all builtin functions
 enum class Function : uint8_t {
+    kArrayLength,
     kMatrixTimesMatrix,
     kMatrixTimesScalar,
     kMatrixTimesVector,

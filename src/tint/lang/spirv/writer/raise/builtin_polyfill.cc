@@ -28,6 +28,7 @@
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture.h"
+#include "src/tint/lang/spirv/ir/builtin_call.h"
 #include "src/tint/lang/spirv/ir/intrinsic_call.h"
 #include "src/tint/utils/ice/ice.h"
 
@@ -186,8 +187,8 @@ struct State {
         auto* const_idx = access->Indices()[0]->As<core::ir::Constant>();
 
         // Replace the builtin call with a call to the spirv.array_length intrinsic.
-        auto* call = b.Call<spirv::ir::IntrinsicCall>(
-            builtin->Result()->Type(), spirv::ir::Intrinsic::kArrayLength,
+        auto* call = b.Call<spirv::ir::BuiltinCall>(
+            builtin->Result()->Type(), spirv::ir::Function::kArrayLength,
             Vector{access->Object(), Literal(u32(const_idx->Value()->ValueAs<uint32_t>()))});
         call->InsertBefore(builtin);
         return call->Result();

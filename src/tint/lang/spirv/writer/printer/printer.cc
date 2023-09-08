@@ -1092,6 +1092,9 @@ void Printer::EmitSpirvBuiltinCall(spirv::ir::BuiltinCall* builtin) {
 
     spv::Op op = spv::Op::Max;
     switch (builtin->Func()) {
+        case spirv::ir::Function::kArrayLength:
+            op = spv::Op::OpArrayLength;
+            break;
         case spirv::ir::Function::kMatrixTimesMatrix:
             op = spv::Op::OpMatrixTimesMatrix;
             break;
@@ -1571,9 +1574,6 @@ void Printer::EmitIntrinsicCall(spirv::ir::IntrinsicCall* call) {
 
     spv::Op op = spv::Op::Max;
     switch (call->Kind()) {
-        case spirv::ir::Intrinsic::kArrayLength:
-            op = spv::Op::OpArrayLength;
-            break;
         case spirv::ir::Intrinsic::kAtomicIadd:
             op = spv::Op::OpAtomicIAdd;
             break;

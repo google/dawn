@@ -315,7 +315,7 @@ constexpr TypeMatcher k{{$name}}Matcher {
       return nullptr;
     }
 {{- end  }}
-    return Build{{$name}}(state{{range .TemplateParams}}, {{.GetName}}{{end}});
+    return Build{{$name}}(state, ty{{range .TemplateParams}}, {{.GetName}}{{end}});
   },
 /* string */ [](MatchState*{{if .TemplateParams}} state{{end}}) -> std::string {
 {{- range .TemplateParams }}
@@ -346,7 +346,7 @@ constexpr TypeMatcher k{{$name}}Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
 {{- range .PrecedenceSortedTypes }}
     if (Match{{PascalCase .Name}}(state, ty)) {
-      return Build{{PascalCase .Name}}(state);
+      return Build{{PascalCase .Name}}(state, ty);
     }
 {{- end }}
     return nullptr;
@@ -379,16 +379,16 @@ constexpr NumberMatcher k{{$class}}Matcher {
 {{-   $option := index .Options 0 }}
 {{-   $entry := printf "k%v" (PascalCase $option.Name) -}}
 /* match */ [](MatchState&, Number number) -> Number {
-    if (number.IsAny() || number.Value() == static_cast<uint32_t>({{$enum}}::{{$entry}})) {
-      return Number(static_cast<uint32_t>({{$enum}}::{{$entry}}));
+    if (number.IsAny() || number.Value() == static_cast<uint32_t>(core::{{$enum}}::{{$entry}})) {
+      return Number(static_cast<uint32_t>(core::{{$enum}}::{{$entry}}));
     }
     return Number::invalid;
   },
 {{- else -}}
 /* match */ [](MatchState&, Number number) -> Number {
-    switch (static_cast<{{$enum}}>(number.Value())) {
+    switch (static_cast<core::{{$enum}}>(number.Value())) {
 {{-   range .Options }}
-      case {{$enum}}::k{{PascalCase .Name}}:
+      case core::{{$enum}}::k{{PascalCase .Name}}:
 {{-   end }}
         return number;
       default:

@@ -28,6 +28,7 @@
 tint_add_target(tint_lang_spirv_intrinsic_data lib
   lang/spirv/intrinsic/data/data.cc
   lang/spirv/intrinsic/data/data.h
+  lang/spirv/intrinsic/data/type_matchers.h
 )
 
 tint_target_add_dependencies(tint_lang_spirv_intrinsic_data lib

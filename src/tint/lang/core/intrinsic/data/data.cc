@@ -69,7 +69,7 @@ constexpr TypeMatcher kBoolMatcher {
     if (!MatchBool(state, ty)) {
       return nullptr;
     }
-    return BuildBool(state);
+    return BuildBool(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     return "bool";
@@ -83,7 +83,7 @@ constexpr TypeMatcher kIaMatcher {
     if (!MatchIa(state, ty)) {
       return nullptr;
     }
-    return BuildIa(state);
+    return BuildIa(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     StringStream ss;
@@ -99,7 +99,7 @@ constexpr TypeMatcher kFaMatcher {
     if (!MatchFa(state, ty)) {
       return nullptr;
     }
-    return BuildFa(state);
+    return BuildFa(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     StringStream ss;
@@ -115,7 +115,7 @@ constexpr TypeMatcher kI32Matcher {
     if (!MatchI32(state, ty)) {
       return nullptr;
     }
-    return BuildI32(state);
+    return BuildI32(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     return "i32";
@@ -129,7 +129,7 @@ constexpr TypeMatcher kU32Matcher {
     if (!MatchU32(state, ty)) {
       return nullptr;
     }
-    return BuildU32(state);
+    return BuildU32(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     return "u32";
@@ -143,7 +143,7 @@ constexpr TypeMatcher kF32Matcher {
     if (!MatchF32(state, ty)) {
       return nullptr;
     }
-    return BuildF32(state);
+    return BuildF32(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     return "f32";
@@ -157,7 +157,7 @@ constexpr TypeMatcher kF16Matcher {
     if (!MatchF16(state, ty)) {
       return nullptr;
     }
-    return BuildF16(state);
+    return BuildF16(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     return "f16";
@@ -176,7 +176,7 @@ constexpr TypeMatcher kVec2Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildVec2(state, T);
+    return BuildVec2(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -196,7 +196,7 @@ constexpr TypeMatcher kVec3Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildVec3(state, T);
+    return BuildVec3(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -216,7 +216,7 @@ constexpr TypeMatcher kVec4Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildVec4(state, T);
+    return BuildVec4(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -236,7 +236,7 @@ constexpr TypeMatcher kMat2X2Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat2X2(state, T);
+    return BuildMat2X2(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -256,7 +256,7 @@ constexpr TypeMatcher kMat2X3Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat2X3(state, T);
+    return BuildMat2X3(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -276,7 +276,7 @@ constexpr TypeMatcher kMat2X4Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat2X4(state, T);
+    return BuildMat2X4(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -296,7 +296,7 @@ constexpr TypeMatcher kMat3X2Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat3X2(state, T);
+    return BuildMat3X2(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -316,7 +316,7 @@ constexpr TypeMatcher kMat3X3Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat3X3(state, T);
+    return BuildMat3X3(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -336,7 +336,7 @@ constexpr TypeMatcher kMat3X4Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat3X4(state, T);
+    return BuildMat3X4(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -356,7 +356,7 @@ constexpr TypeMatcher kMat4X2Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat4X2(state, T);
+    return BuildMat4X2(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -376,7 +376,7 @@ constexpr TypeMatcher kMat4X3Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat4X3(state, T);
+    return BuildMat4X3(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -396,7 +396,7 @@ constexpr TypeMatcher kMat4X4Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat4X4(state, T);
+    return BuildMat4X4(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -421,7 +421,7 @@ constexpr TypeMatcher kVecMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildVec(state, N, T);
+    return BuildVec(state, ty, N, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string N = state->NumName();
@@ -454,7 +454,7 @@ constexpr TypeMatcher kMatMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildMat(state, N, M, T);
+    return BuildMat(state, ty, N, M, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string N = state->NumName();
@@ -488,7 +488,7 @@ constexpr TypeMatcher kPtrMatcher {
     if (!A.IsValid()) {
       return nullptr;
     }
-    return BuildPtr(state, S, T, A);
+    return BuildPtr(state, ty, S, T, A);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string S = state->NumName();
@@ -510,7 +510,7 @@ constexpr TypeMatcher kAtomicMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildAtomic(state, T);
+    return BuildAtomic(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -530,7 +530,7 @@ constexpr TypeMatcher kArrayMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildArray(state, T);
+    return BuildArray(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -545,7 +545,7 @@ constexpr TypeMatcher kSamplerMatcher {
     if (!MatchSampler(state, ty)) {
       return nullptr;
     }
-    return BuildSampler(state);
+    return BuildSampler(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     return "sampler";
@@ -559,7 +559,7 @@ constexpr TypeMatcher kSamplerComparisonMatcher {
     if (!MatchSamplerComparison(state, ty)) {
       return nullptr;
     }
-    return BuildSamplerComparison(state);
+    return BuildSamplerComparison(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     return "sampler_comparison";
@@ -578,7 +578,7 @@ constexpr TypeMatcher kTexture1DMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildTexture1D(state, T);
+    return BuildTexture1D(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -598,7 +598,7 @@ constexpr TypeMatcher kTexture2DMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildTexture2D(state, T);
+    return BuildTexture2D(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -618,7 +618,7 @@ constexpr TypeMatcher kTexture2DArrayMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildTexture2DArray(state, T);
+    return BuildTexture2DArray(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -638,7 +638,7 @@ constexpr TypeMatcher kTexture3DMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildTexture3D(state, T);
+    return BuildTexture3D(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -658,7 +658,7 @@ constexpr TypeMatcher kTextureCubeMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildTextureCube(state, T);
+    return BuildTextureCube(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -678,7 +678,7 @@ constexpr TypeMatcher kTextureCubeArrayMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildTextureCubeArray(state, T);
+    return BuildTextureCubeArray(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -698,7 +698,7 @@ constexpr TypeMatcher kTextureMultisampled2DMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildTextureMultisampled2D(state, T);
+    return BuildTextureMultisampled2D(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -713,7 +713,7 @@ constexpr TypeMatcher kTextureDepth2DMatcher {
     if (!MatchTextureDepth2D(state, ty)) {
       return nullptr;
     }
-    return BuildTextureDepth2D(state);
+    return BuildTextureDepth2D(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     return "texture_depth_2d";
@@ -727,7 +727,7 @@ constexpr TypeMatcher kTextureDepth2DArrayMatcher {
     if (!MatchTextureDepth2DArray(state, ty)) {
       return nullptr;
     }
-    return BuildTextureDepth2DArray(state);
+    return BuildTextureDepth2DArray(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     return "texture_depth_2d_array";
@@ -741,7 +741,7 @@ constexpr TypeMatcher kTextureDepthCubeMatcher {
     if (!MatchTextureDepthCube(state, ty)) {
       return nullptr;
     }
-    return BuildTextureDepthCube(state);
+    return BuildTextureDepthCube(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     return "texture_depth_cube";
@@ -755,7 +755,7 @@ constexpr TypeMatcher kTextureDepthCubeArrayMatcher {
     if (!MatchTextureDepthCubeArray(state, ty)) {
       return nullptr;
     }
-    return BuildTextureDepthCubeArray(state);
+    return BuildTextureDepthCubeArray(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     return "texture_depth_cube_array";
@@ -769,7 +769,7 @@ constexpr TypeMatcher kTextureDepthMultisampled2DMatcher {
     if (!MatchTextureDepthMultisampled2D(state, ty)) {
       return nullptr;
     }
-    return BuildTextureDepthMultisampled2D(state);
+    return BuildTextureDepthMultisampled2D(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     return "texture_depth_multisampled_2d";
@@ -793,7 +793,7 @@ constexpr TypeMatcher kTextureStorage1DMatcher {
     if (!A.IsValid()) {
       return nullptr;
     }
-    return BuildTextureStorage1D(state, F, A);
+    return BuildTextureStorage1D(state, ty, F, A);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string F = state->NumName();
@@ -819,7 +819,7 @@ constexpr TypeMatcher kTextureStorage2DMatcher {
     if (!A.IsValid()) {
       return nullptr;
     }
-    return BuildTextureStorage2D(state, F, A);
+    return BuildTextureStorage2D(state, ty, F, A);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string F = state->NumName();
@@ -845,7 +845,7 @@ constexpr TypeMatcher kTextureStorage2DArrayMatcher {
     if (!A.IsValid()) {
       return nullptr;
     }
-    return BuildTextureStorage2DArray(state, F, A);
+    return BuildTextureStorage2DArray(state, ty, F, A);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string F = state->NumName();
@@ -871,7 +871,7 @@ constexpr TypeMatcher kTextureStorage3DMatcher {
     if (!A.IsValid()) {
       return nullptr;
     }
-    return BuildTextureStorage3D(state, F, A);
+    return BuildTextureStorage3D(state, ty, F, A);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string F = state->NumName();
@@ -887,7 +887,7 @@ constexpr TypeMatcher kTextureExternalMatcher {
     if (!MatchTextureExternal(state, ty)) {
       return nullptr;
     }
-    return BuildTextureExternal(state);
+    return BuildTextureExternal(state, ty);
   },
 /* string */ [](MatchState*) -> std::string {
     return "texture_external";
@@ -906,7 +906,7 @@ constexpr TypeMatcher kPackedVec3Matcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildPackedVec3(state, T);
+    return BuildPackedVec3(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -926,7 +926,7 @@ constexpr TypeMatcher kModfResultMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildModfResult(state, T);
+    return BuildModfResult(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -953,7 +953,7 @@ constexpr TypeMatcher kModfResultVecMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildModfResultVec(state, N, T);
+    return BuildModfResultVec(state, ty, N, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string N = state->NumName();
@@ -976,7 +976,7 @@ constexpr TypeMatcher kFrexpResultMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildFrexpResult(state, T);
+    return BuildFrexpResult(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -1003,7 +1003,7 @@ constexpr TypeMatcher kFrexpResultVecMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildFrexpResultVec(state, N, T);
+    return BuildFrexpResultVec(state, ty, N, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string N = state->NumName();
@@ -1026,7 +1026,7 @@ constexpr TypeMatcher kAtomicCompareExchangeResultMatcher {
     if (T == nullptr) {
       return nullptr;
     }
-    return BuildAtomicCompareExchangeResult(state, T);
+    return BuildAtomicCompareExchangeResult(state, ty, T);
   },
 /* string */ [](MatchState* state) -> std::string {
   const std::string T = state->TypeName();
@@ -1039,25 +1039,25 @@ constexpr TypeMatcher kAtomicCompareExchangeResultMatcher {
 constexpr TypeMatcher kScalarMatcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchIa(state, ty)) {
-      return BuildIa(state);
+      return BuildIa(state, ty);
     }
     if (MatchFa(state, ty)) {
-      return BuildFa(state);
+      return BuildFa(state, ty);
     }
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     if (MatchU32(state, ty)) {
-      return BuildU32(state);
+      return BuildU32(state, ty);
     }
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     if (MatchF16(state, ty)) {
-      return BuildF16(state);
+      return BuildF16(state, ty);
     }
     if (MatchBool(state, ty)) {
-      return BuildBool(state);
+      return BuildBool(state, ty);
     }
     return nullptr;
   },
@@ -1074,19 +1074,19 @@ constexpr TypeMatcher kScalarMatcher {
 constexpr TypeMatcher kConcreteScalarMatcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     if (MatchU32(state, ty)) {
-      return BuildU32(state);
+      return BuildU32(state, ty);
     }
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     if (MatchF16(state, ty)) {
-      return BuildF16(state);
+      return BuildF16(state, ty);
     }
     if (MatchBool(state, ty)) {
-      return BuildBool(state);
+      return BuildBool(state, ty);
     }
     return nullptr;
   },
@@ -1103,22 +1103,22 @@ constexpr TypeMatcher kConcreteScalarMatcher {
 constexpr TypeMatcher kScalarNoF32Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchIa(state, ty)) {
-      return BuildIa(state);
+      return BuildIa(state, ty);
     }
     if (MatchFa(state, ty)) {
-      return BuildFa(state);
+      return BuildFa(state, ty);
     }
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     if (MatchU32(state, ty)) {
-      return BuildU32(state);
+      return BuildU32(state, ty);
     }
     if (MatchF16(state, ty)) {
-      return BuildF16(state);
+      return BuildF16(state, ty);
     }
     if (MatchBool(state, ty)) {
-      return BuildBool(state);
+      return BuildBool(state, ty);
     }
     return nullptr;
   },
@@ -1135,22 +1135,22 @@ constexpr TypeMatcher kScalarNoF32Matcher {
 constexpr TypeMatcher kScalarNoF16Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchIa(state, ty)) {
-      return BuildIa(state);
+      return BuildIa(state, ty);
     }
     if (MatchFa(state, ty)) {
-      return BuildFa(state);
+      return BuildFa(state, ty);
     }
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     if (MatchU32(state, ty)) {
-      return BuildU32(state);
+      return BuildU32(state, ty);
     }
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     if (MatchBool(state, ty)) {
-      return BuildBool(state);
+      return BuildBool(state, ty);
     }
     return nullptr;
   },
@@ -1167,22 +1167,22 @@ constexpr TypeMatcher kScalarNoF16Matcher {
 constexpr TypeMatcher kScalarNoI32Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchIa(state, ty)) {
-      return BuildIa(state);
+      return BuildIa(state, ty);
     }
     if (MatchFa(state, ty)) {
-      return BuildFa(state);
+      return BuildFa(state, ty);
     }
     if (MatchU32(state, ty)) {
-      return BuildU32(state);
+      return BuildU32(state, ty);
     }
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     if (MatchF16(state, ty)) {
-      return BuildF16(state);
+      return BuildF16(state, ty);
     }
     if (MatchBool(state, ty)) {
-      return BuildBool(state);
+      return BuildBool(state, ty);
     }
     return nullptr;
   },
@@ -1199,22 +1199,22 @@ constexpr TypeMatcher kScalarNoI32Matcher {
 constexpr TypeMatcher kScalarNoU32Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchIa(state, ty)) {
-      return BuildIa(state);
+      return BuildIa(state, ty);
     }
     if (MatchFa(state, ty)) {
-      return BuildFa(state);
+      return BuildFa(state, ty);
     }
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     if (MatchF16(state, ty)) {
-      return BuildF16(state);
+      return BuildF16(state, ty);
     }
     if (MatchBool(state, ty)) {
-      return BuildBool(state);
+      return BuildBool(state, ty);
     }
     return nullptr;
   },
@@ -1231,22 +1231,22 @@ constexpr TypeMatcher kScalarNoU32Matcher {
 constexpr TypeMatcher kScalarNoBoolMatcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchIa(state, ty)) {
-      return BuildIa(state);
+      return BuildIa(state, ty);
     }
     if (MatchFa(state, ty)) {
-      return BuildFa(state);
+      return BuildFa(state, ty);
     }
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     if (MatchU32(state, ty)) {
-      return BuildU32(state);
+      return BuildU32(state, ty);
     }
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     if (MatchF16(state, ty)) {
-      return BuildF16(state);
+      return BuildF16(state, ty);
     }
     return nullptr;
   },
@@ -1263,22 +1263,22 @@ constexpr TypeMatcher kScalarNoBoolMatcher {
 constexpr TypeMatcher kFiaFiu32F16Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchIa(state, ty)) {
-      return BuildIa(state);
+      return BuildIa(state, ty);
     }
     if (MatchFa(state, ty)) {
-      return BuildFa(state);
+      return BuildFa(state, ty);
     }
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     if (MatchU32(state, ty)) {
-      return BuildU32(state);
+      return BuildU32(state, ty);
     }
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     if (MatchF16(state, ty)) {
-      return BuildF16(state);
+      return BuildF16(state, ty);
     }
     return nullptr;
   },
@@ -1295,19 +1295,19 @@ constexpr TypeMatcher kFiaFiu32F16Matcher {
 constexpr TypeMatcher kFiaFi32F16Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchIa(state, ty)) {
-      return BuildIa(state);
+      return BuildIa(state, ty);
     }
     if (MatchFa(state, ty)) {
-      return BuildFa(state);
+      return BuildFa(state, ty);
     }
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     if (MatchF16(state, ty)) {
-      return BuildF16(state);
+      return BuildF16(state, ty);
     }
     return nullptr;
   },
@@ -1324,19 +1324,19 @@ constexpr TypeMatcher kFiaFi32F16Matcher {
 constexpr TypeMatcher kFiaFiu32Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchIa(state, ty)) {
-      return BuildIa(state);
+      return BuildIa(state, ty);
     }
     if (MatchFa(state, ty)) {
-      return BuildFa(state);
+      return BuildFa(state, ty);
     }
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     if (MatchU32(state, ty)) {
-      return BuildU32(state);
+      return BuildU32(state, ty);
     }
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     return nullptr;
   },
@@ -1353,10 +1353,10 @@ constexpr TypeMatcher kFiaFiu32Matcher {
 constexpr TypeMatcher kFaF32Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchFa(state, ty)) {
-      return BuildFa(state);
+      return BuildFa(state, ty);
     }
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     return nullptr;
   },
@@ -1373,13 +1373,13 @@ constexpr TypeMatcher kFaF32Matcher {
 constexpr TypeMatcher kFaF32F16Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchFa(state, ty)) {
-      return BuildFa(state);
+      return BuildFa(state, ty);
     }
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     if (MatchF16(state, ty)) {
-      return BuildF16(state);
+      return BuildF16(state, ty);
     }
     return nullptr;
   },
@@ -1396,13 +1396,13 @@ constexpr TypeMatcher kFaF32F16Matcher {
 constexpr TypeMatcher kIaIu32Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchIa(state, ty)) {
-      return BuildIa(state);
+      return BuildIa(state, ty);
     }
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     if (MatchU32(state, ty)) {
-      return BuildU32(state);
+      return BuildU32(state, ty);
     }
     return nullptr;
   },
@@ -1419,10 +1419,10 @@ constexpr TypeMatcher kIaIu32Matcher {
 constexpr TypeMatcher kIaI32Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchIa(state, ty)) {
-      return BuildIa(state);
+      return BuildIa(state, ty);
     }
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     return nullptr;
   },
@@ -1439,16 +1439,16 @@ constexpr TypeMatcher kIaI32Matcher {
 constexpr TypeMatcher kFiu32F16Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     if (MatchU32(state, ty)) {
-      return BuildU32(state);
+      return BuildU32(state, ty);
     }
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     if (MatchF16(state, ty)) {
-      return BuildF16(state);
+      return BuildF16(state, ty);
     }
     return nullptr;
   },
@@ -1465,13 +1465,13 @@ constexpr TypeMatcher kFiu32F16Matcher {
 constexpr TypeMatcher kFiu32Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     if (MatchU32(state, ty)) {
-      return BuildU32(state);
+      return BuildU32(state, ty);
     }
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     return nullptr;
   },
@@ -1488,13 +1488,13 @@ constexpr TypeMatcher kFiu32Matcher {
 constexpr TypeMatcher kFi32F16Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     if (MatchF16(state, ty)) {
-      return BuildF16(state);
+      return BuildF16(state, ty);
     }
     return nullptr;
   },
@@ -1511,10 +1511,10 @@ constexpr TypeMatcher kFi32F16Matcher {
 constexpr TypeMatcher kFi32Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     return nullptr;
   },
@@ -1531,10 +1531,10 @@ constexpr TypeMatcher kFi32Matcher {
 constexpr TypeMatcher kF32F16Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchF32(state, ty)) {
-      return BuildF32(state);
+      return BuildF32(state, ty);
     }
     if (MatchF16(state, ty)) {
-      return BuildF16(state);
+      return BuildF16(state, ty);
     }
     return nullptr;
   },
@@ -1551,10 +1551,10 @@ constexpr TypeMatcher kF32F16Matcher {
 constexpr TypeMatcher kIu32Matcher {
 /* match */ [](MatchState& state, const Type* ty) -> const Type* {
     if (MatchI32(state, ty)) {
-      return BuildI32(state);
+      return BuildI32(state, ty);
     }
     if (MatchU32(state, ty)) {
-      return BuildU32(state);
+      return BuildU32(state, ty);
     }
     return nullptr;
   },
@@ -1570,14 +1570,14 @@ constexpr TypeMatcher kIu32Matcher {
 /// EnumMatcher for 'match f32_texel_format'
 constexpr NumberMatcher kF32TexelFormatMatcher {
 /* match */ [](MatchState&, Number number) -> Number {
-    switch (static_cast<TexelFormat>(number.Value())) {
-      case TexelFormat::kBgra8Unorm:
-      case TexelFormat::kRgba8Unorm:
-      case TexelFormat::kRgba8Snorm:
-      case TexelFormat::kRgba16Float:
-      case TexelFormat::kR32Float:
-      case TexelFormat::kRg32Float:
-      case TexelFormat::kRgba32Float:
+    switch (static_cast<core::TexelFormat>(number.Value())) {
+      case core::TexelFormat::kBgra8Unorm:
+      case core::TexelFormat::kRgba8Unorm:
+      case core::TexelFormat::kRgba8Snorm:
+      case core::TexelFormat::kRgba16Float:
+      case core::TexelFormat::kR32Float:
+      case core::TexelFormat::kRg32Float:
+      case core::TexelFormat::kRgba32Float:
         return number;
       default:
         return Number::invalid;
@@ -1591,12 +1591,12 @@ constexpr NumberMatcher kF32TexelFormatMatcher {
 /// EnumMatcher for 'match i32_texel_format'
 constexpr NumberMatcher kI32TexelFormatMatcher {
 /* match */ [](MatchState&, Number number) -> Number {
-    switch (static_cast<TexelFormat>(number.Value())) {
-      case TexelFormat::kRgba8Sint:
-      case TexelFormat::kRgba16Sint:
-      case TexelFormat::kR32Sint:
-      case TexelFormat::kRg32Sint:
-      case TexelFormat::kRgba32Sint:
+    switch (static_cast<core::TexelFormat>(number.Value())) {
+      case core::TexelFormat::kRgba8Sint:
+      case core::TexelFormat::kRgba16Sint:
+      case core::TexelFormat::kR32Sint:
+      case core::TexelFormat::kRg32Sint:
+      case core::TexelFormat::kRgba32Sint:
         return number;
       default:
         return Number::invalid;
@@ -1610,12 +1610,12 @@ constexpr NumberMatcher kI32TexelFormatMatcher {
 /// EnumMatcher for 'match u32_texel_format'
 constexpr NumberMatcher kU32TexelFormatMatcher {
 /* match */ [](MatchState&, Number number) -> Number {
-    switch (static_cast<TexelFormat>(number.Value())) {
-      case TexelFormat::kRgba8Uint:
-      case TexelFormat::kRgba16Uint:
-      case TexelFormat::kR32Uint:
-      case TexelFormat::kRg32Uint:
-      case TexelFormat::kRgba32Uint:
+    switch (static_cast<core::TexelFormat>(number.Value())) {
+      case core::TexelFormat::kRgba8Uint:
+      case core::TexelFormat::kRgba16Uint:
+      case core::TexelFormat::kR32Uint:
+      case core::TexelFormat::kRg32Uint:
+      case core::TexelFormat::kRgba32Uint:
         return number;
       default:
         return Number::invalid;
@@ -1629,8 +1629,8 @@ constexpr NumberMatcher kU32TexelFormatMatcher {
 /// EnumMatcher for 'match write'
 constexpr NumberMatcher kWriteMatcher {
 /* match */ [](MatchState&, Number number) -> Number {
-    if (number.IsAny() || number.Value() == static_cast<uint32_t>(Access::kWrite)) {
-      return Number(static_cast<uint32_t>(Access::kWrite));
+    if (number.IsAny() || number.Value() == static_cast<uint32_t>(core::Access::kWrite)) {
+      return Number(static_cast<uint32_t>(core::Access::kWrite));
     }
     return Number::invalid;
   },
@@ -1642,8 +1642,8 @@ constexpr NumberMatcher kWriteMatcher {
 /// EnumMatcher for 'match read_write'
 constexpr NumberMatcher kReadWriteMatcher {
 /* match */ [](MatchState&, Number number) -> Number {
-    if (number.IsAny() || number.Value() == static_cast<uint32_t>(Access::kReadWrite)) {
-      return Number(static_cast<uint32_t>(Access::kReadWrite));
+    if (number.IsAny() || number.Value() == static_cast<uint32_t>(core::Access::kReadWrite)) {
+      return Number(static_cast<uint32_t>(core::Access::kReadWrite));
     }
     return Number::invalid;
   },
@@ -1655,9 +1655,9 @@ constexpr NumberMatcher kReadWriteMatcher {
 /// EnumMatcher for 'match readable'
 constexpr NumberMatcher kReadableMatcher {
 /* match */ [](MatchState&, Number number) -> Number {
-    switch (static_cast<Access>(number.Value())) {
-      case Access::kRead:
-      case Access::kReadWrite:
+    switch (static_cast<core::Access>(number.Value())) {
+      case core::Access::kRead:
+      case core::Access::kReadWrite:
         return number;
       default:
         return Number::invalid;
@@ -1671,9 +1671,9 @@ constexpr NumberMatcher kReadableMatcher {
 /// EnumMatcher for 'match writable'
 constexpr NumberMatcher kWritableMatcher {
 /* match */ [](MatchState&, Number number) -> Number {
-    switch (static_cast<Access>(number.Value())) {
-      case Access::kWrite:
-      case Access::kReadWrite:
+    switch (static_cast<core::Access>(number.Value())) {
+      case core::Access::kWrite:
+      case core::Access::kReadWrite:
         return number;
       default:
         return Number::invalid;
@@ -1687,10 +1687,10 @@ constexpr NumberMatcher kWritableMatcher {
 /// EnumMatcher for 'match function_private_workgroup'
 constexpr NumberMatcher kFunctionPrivateWorkgroupMatcher {
 /* match */ [](MatchState&, Number number) -> Number {
-    switch (static_cast<AddressSpace>(number.Value())) {
-      case AddressSpace::kFunction:
-      case AddressSpace::kPrivate:
-      case AddressSpace::kWorkgroup:
+    switch (static_cast<core::AddressSpace>(number.Value())) {
+      case core::AddressSpace::kFunction:
+      case core::AddressSpace::kPrivate:
+      case core::AddressSpace::kWorkgroup:
         return number;
       default:
         return Number::invalid;
@@ -1704,9 +1704,9 @@ constexpr NumberMatcher kFunctionPrivateWorkgroupMatcher {
 /// EnumMatcher for 'match workgroup_or_storage'
 constexpr NumberMatcher kWorkgroupOrStorageMatcher {
 /* match */ [](MatchState&, Number number) -> Number {
-    switch (static_cast<AddressSpace>(number.Value())) {
-      case AddressSpace::kWorkgroup:
-      case AddressSpace::kStorage:
+    switch (static_cast<core::AddressSpace>(number.Value())) {
+      case core::AddressSpace::kWorkgroup:
+      case core::AddressSpace::kStorage:
         return number;
       default:
         return Number::invalid;
@@ -1720,8 +1720,8 @@ constexpr NumberMatcher kWorkgroupOrStorageMatcher {
 /// EnumMatcher for 'match storage'
 constexpr NumberMatcher kStorageMatcher {
 /* match */ [](MatchState&, Number number) -> Number {
-    if (number.IsAny() || number.Value() == static_cast<uint32_t>(AddressSpace::kStorage)) {
-      return Number(static_cast<uint32_t>(AddressSpace::kStorage));
+    if (number.IsAny() || number.Value() == static_cast<uint32_t>(core::AddressSpace::kStorage)) {
+      return Number(static_cast<uint32_t>(core::AddressSpace::kStorage));
     }
     return Number::invalid;
   },
@@ -1733,8 +1733,8 @@ constexpr NumberMatcher kStorageMatcher {
 /// EnumMatcher for 'match workgroup'
 constexpr NumberMatcher kWorkgroupMatcher {
 /* match */ [](MatchState&, Number number) -> Number {
-    if (number.IsAny() || number.Value() == static_cast<uint32_t>(AddressSpace::kWorkgroup)) {
-      return Number(static_cast<uint32_t>(AddressSpace::kWorkgroup));
+    if (number.IsAny() || number.Value() == static_cast<uint32_t>(core::AddressSpace::kWorkgroup)) {
+      return Number(static_cast<uint32_t>(core::AddressSpace::kWorkgroup));
     }
     return Number::invalid;
   },
