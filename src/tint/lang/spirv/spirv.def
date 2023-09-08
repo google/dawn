@@ -18,8 +18,8 @@
 
 // TODO(crbug.com/2036): add an include facility and move these duplicate match and type lines
 // into a common file.
-match f32_f16: f32 | f16
 
+type bool
 type f32
 type f16
 type i32
@@ -61,7 +61,9 @@ enum access {
   read_write
 }
 
+match f32_f16: f32 | f16
 match iu32: i32 | u32
+match scalar: f32 | f16 | i32 | u32 | bool
 
 match read_write: access.read_write
 match storage
@@ -87,7 +89,6 @@ enum intrinsic {
   image_sample_dref_explicit_lod
   image_write
   sampled_image
-  select
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -112,5 +113,7 @@ fn matrix_times_matrix<T: f32_f16, K: num, C: num, R: num>(mat<K, R, T>, mat<C, 
 fn matrix_times_scalar<T: f32_f16, N: num, M: num>(mat<N, M, T>, T) -> mat<N, M, T>
 fn matrix_times_vector<T: f32_f16, N: num, M: num>(mat<N, M, T>, vec<N, T>) -> vec<M, T>
 fn vector_times_matrix<T: f32_f16, N: num, M: num>(vec<N, T>, mat<M, N, T>) -> vec<M, T>
+fn select<T: scalar>(bool, T, T) -> T
+fn select<N: num, T: scalar>(vec<N, bool>, vec<N, T>, vec<N, T>) -> vec<N, T>
 fn vector_times_scalar<T: f32_f16, N: num>(vec<N, T>, T) -> vec<N, T>
 

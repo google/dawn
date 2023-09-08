@@ -360,8 +360,8 @@ struct State {
         }
 
         // Replace the builtin call with a call to the spirv.select intrinsic.
-        auto* call = b.Call<spirv::ir::IntrinsicCall>(
-            builtin->Result()->Type(), spirv::ir::Intrinsic::kSelect, std::move(args));
+        auto* call = b.Call<spirv::ir::BuiltinCall>(builtin->Result()->Type(),
+                                                    spirv::ir::Function::kSelect, std::move(args));
         call->InsertBefore(builtin);
         return call->Result();
     }

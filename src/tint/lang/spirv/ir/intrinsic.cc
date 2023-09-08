@@ -65,9 +65,6 @@ Intrinsic ParseIntrinsic(std::string_view str) {
     if (str == "sampled_image") {
         return Intrinsic::kSampledImage;
     }
-    if (str == "select") {
-        return Intrinsic::kSelect;
-    }
     return Intrinsic::kUndefined;
 }
 
@@ -99,8 +96,6 @@ std::string_view ToString(Intrinsic value) {
             return "image_write";
         case Intrinsic::kSampledImage:
             return "sampled_image";
-        case Intrinsic::kSelect:
-            return "select";
     }
     return "<unknown>";
 }

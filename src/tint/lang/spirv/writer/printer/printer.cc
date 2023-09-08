@@ -1146,6 +1146,9 @@ void Printer::EmitSpirvBuiltinCall(spirv::ir::BuiltinCall* builtin) {
         case spirv::ir::Function::kMatrixTimesVector:
             op = spv::Op::OpMatrixTimesVector;
             break;
+        case spirv::ir::Function::kSelect:
+            op = spv::Op::OpSelect;
+            break;
         case spirv::ir::Function::kVectorTimesMatrix:
             op = spv::Op::OpVectorTimesMatrix;
             break;
@@ -1653,9 +1656,6 @@ void Printer::EmitIntrinsicCall(spirv::ir::IntrinsicCall* call) {
             break;
         case spirv::ir::Intrinsic::kSampledImage:
             op = spv::Op::OpSampledImage;
-            break;
-        case spirv::ir::Intrinsic::kSelect:
-            op = spv::Op::OpSelect;
             break;
         case spirv::ir::Intrinsic::kUndefined:
             TINT_ICE() << "undefined spirv intrinsic";
