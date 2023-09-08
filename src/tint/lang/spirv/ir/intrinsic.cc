@@ -29,45 +29,6 @@ namespace tint::spirv::ir {
 /// @param str the string to parse
 /// @returns the parsed enum, or Intrinsic::kUndefined if the string could not be parsed.
 Intrinsic ParseIntrinsic(std::string_view str) {
-    if (str == "atomic_and") {
-        return Intrinsic::kAtomicAnd;
-    }
-    if (str == "atomic_compare_exchange") {
-        return Intrinsic::kAtomicCompareExchange;
-    }
-    if (str == "atomic_exchange") {
-        return Intrinsic::kAtomicExchange;
-    }
-    if (str == "atomic_iadd") {
-        return Intrinsic::kAtomicIadd;
-    }
-    if (str == "atomic_isub") {
-        return Intrinsic::kAtomicIsub;
-    }
-    if (str == "atomic_load") {
-        return Intrinsic::kAtomicLoad;
-    }
-    if (str == "atomic_or") {
-        return Intrinsic::kAtomicOr;
-    }
-    if (str == "atomic_smax") {
-        return Intrinsic::kAtomicSmax;
-    }
-    if (str == "atomic_smin") {
-        return Intrinsic::kAtomicSmin;
-    }
-    if (str == "atomic_store") {
-        return Intrinsic::kAtomicStore;
-    }
-    if (str == "atomic_umax") {
-        return Intrinsic::kAtomicUmax;
-    }
-    if (str == "atomic_umin") {
-        return Intrinsic::kAtomicUmin;
-    }
-    if (str == "atomic_xor") {
-        return Intrinsic::kAtomicXor;
-    }
     if (str == "dot") {
         return Intrinsic::kDot;
     }
@@ -117,32 +78,6 @@ std::string_view ToString(Intrinsic value) {
     switch (value) {
         case Intrinsic::kUndefined:
             return "undefined";
-        case Intrinsic::kAtomicAnd:
-            return "atomic_and";
-        case Intrinsic::kAtomicCompareExchange:
-            return "atomic_compare_exchange";
-        case Intrinsic::kAtomicExchange:
-            return "atomic_exchange";
-        case Intrinsic::kAtomicIadd:
-            return "atomic_iadd";
-        case Intrinsic::kAtomicIsub:
-            return "atomic_isub";
-        case Intrinsic::kAtomicLoad:
-            return "atomic_load";
-        case Intrinsic::kAtomicOr:
-            return "atomic_or";
-        case Intrinsic::kAtomicSmax:
-            return "atomic_smax";
-        case Intrinsic::kAtomicSmin:
-            return "atomic_smin";
-        case Intrinsic::kAtomicStore:
-            return "atomic_store";
-        case Intrinsic::kAtomicUmax:
-            return "atomic_umax";
-        case Intrinsic::kAtomicUmin:
-            return "atomic_umin";
-        case Intrinsic::kAtomicXor:
-            return "atomic_xor";
         case Intrinsic::kDot:
             return "dot";
         case Intrinsic::kImageDrefGather:

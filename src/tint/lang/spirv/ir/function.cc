@@ -31,6 +31,32 @@ const char* str(Function i) {
             return "<none>";
         case Function::kArrayLength:
             return "spirv.array_length";
+        case Function::kAtomicAnd:
+            return "spirv.atomic_and";
+        case Function::kAtomicCompareExchange:
+            return "spirv.atomic_compare_exchange";
+        case Function::kAtomicExchange:
+            return "spirv.atomic_exchange";
+        case Function::kAtomicIadd:
+            return "spirv.atomic_iadd";
+        case Function::kAtomicIsub:
+            return "spirv.atomic_isub";
+        case Function::kAtomicLoad:
+            return "spirv.atomic_load";
+        case Function::kAtomicOr:
+            return "spirv.atomic_or";
+        case Function::kAtomicSmax:
+            return "spirv.atomic_smax";
+        case Function::kAtomicSmin:
+            return "spirv.atomic_smin";
+        case Function::kAtomicStore:
+            return "spirv.atomic_store";
+        case Function::kAtomicUmax:
+            return "spirv.atomic_umax";
+        case Function::kAtomicUmin:
+            return "spirv.atomic_umin";
+        case Function::kAtomicXor:
+            return "spirv.atomic_xor";
         case Function::kMatrixTimesMatrix:
             return "spirv.matrix_times_matrix";
         case Function::kMatrixTimesScalar:

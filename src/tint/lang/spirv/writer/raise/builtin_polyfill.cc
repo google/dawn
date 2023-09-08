@@ -214,28 +214,28 @@ struct State {
         }();
         auto* memory_semantics = b.Constant(u32(SpvMemorySemanticsMaskNone));
 
-        // Helper to build the intrinsic call with the common operands.
-        auto build = [&](const core::type::Type* type, enum spirv::ir::Intrinsic intrinsic) {
-            return b.Call<spirv::ir::IntrinsicCall>(type, intrinsic, pointer, memory,
-                                                    memory_semantics);
+        // Helper to build the builtin call with the common operands.
+        auto build = [&](const core::type::Type* type, enum spirv::ir::Function intrinsic) {
+            return b.Call<spirv::ir::BuiltinCall>(type, intrinsic, pointer, memory,
+                                                  memory_semantics);
         };
 
         // Create the replacement call instruction.
         core::ir::Call* call = nullptr;
         switch (builtin->Func()) {
             case core::Function::kAtomicAdd:
-                call = build(result_ty, spirv::ir::Intrinsic::kAtomicIadd);
+                call = build(result_ty, spirv::ir::Function::kAtomicIadd);
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::Function::kAtomicAnd:
-                call = build(result_ty, spirv::ir::Intrinsic::kAtomicAnd);
+                call = build(result_ty, spirv::ir::Function::kAtomicAnd);
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::Function::kAtomicCompareExchangeWeak: {
                 auto* cmp = builtin->Args()[1];
                 auto* value = builtin->Args()[2];
                 auto* int_ty = value->Type();
-                call = build(int_ty, spirv::ir::Intrinsic::kAtomicCompareExchange);
+                call = build(int_ty, spirv::ir::Function::kAtomicCompareExchange);
                 call->AppendArg(memory_semantics);
                 call->AppendArg(value);
                 call->AppendArg(cmp);
@@ -253,42 +253,42 @@ struct State {
                 break;
             }
             case core::Function::kAtomicExchange:
-                call = build(result_ty, spirv::ir::Intrinsic::kAtomicExchange);
+                call = build(result_ty, spirv::ir::Function::kAtomicExchange);
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::Function::kAtomicLoad:
-                call = build(result_ty, spirv::ir::Intrinsic::kAtomicLoad);
+                call = build(result_ty, spirv::ir::Function::kAtomicLoad);
                 break;
             case core::Function::kAtomicOr:
-                call = build(result_ty, spirv::ir::Intrinsic::kAtomicOr);
+                call = build(result_ty, spirv::ir::Function::kAtomicOr);
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::Function::kAtomicMax:
                 if (result_ty->is_signed_integer_scalar()) {
-                    call = build(result_ty, spirv::ir::Intrinsic::kAtomicSmax);
+                    call = build(result_ty, spirv::ir::Function::kAtomicSmax);
                 } else {
-                    call = build(result_ty, spirv::ir::Intrinsic::kAtomicUmax);
+                    call = build(result_ty, spirv::ir::Function::kAtomicUmax);
                 }
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::Function::kAtomicMin:
                 if (result_ty->is_signed_integer_scalar()) {
-                    call = build(result_ty, spirv::ir::Intrinsic::kAtomicSmin);
+                    call = build(result_ty, spirv::ir::Function::kAtomicSmin);
                 } else {
-                    call = build(result_ty, spirv::ir::Intrinsic::kAtomicUmin);
+                    call = build(result_ty, spirv::ir::Function::kAtomicUmin);
                 }
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::Function::kAtomicStore:
-                call = build(result_ty, spirv::ir::Intrinsic::kAtomicStore);
+                call = build(result_ty, spirv::ir::Function::kAtomicStore);
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::Function::kAtomicSub:
-                call = build(result_ty, spirv::ir::Intrinsic::kAtomicIsub);
+                call = build(result_ty, spirv::ir::Function::kAtomicIsub);
                 call->AppendArg(builtin->Args()[1]);
                 break;
             case core::Function::kAtomicXor:
-                call = build(result_ty, spirv::ir::Intrinsic::kAtomicXor);
+                call = build(result_ty, spirv::ir::Function::kAtomicXor);
                 call->AppendArg(builtin->Args()[1]);
                 break;
             default:

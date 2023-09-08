@@ -1095,6 +1095,45 @@ void Printer::EmitSpirvBuiltinCall(spirv::ir::BuiltinCall* builtin) {
         case spirv::ir::Function::kArrayLength:
             op = spv::Op::OpArrayLength;
             break;
+        case spirv::ir::Function::kAtomicIadd:
+            op = spv::Op::OpAtomicIAdd;
+            break;
+        case spirv::ir::Function::kAtomicIsub:
+            op = spv::Op::OpAtomicISub;
+            break;
+        case spirv::ir::Function::kAtomicAnd:
+            op = spv::Op::OpAtomicAnd;
+            break;
+        case spirv::ir::Function::kAtomicCompareExchange:
+            op = spv::Op::OpAtomicCompareExchange;
+            break;
+        case spirv::ir::Function::kAtomicExchange:
+            op = spv::Op::OpAtomicExchange;
+            break;
+        case spirv::ir::Function::kAtomicLoad:
+            op = spv::Op::OpAtomicLoad;
+            break;
+        case spirv::ir::Function::kAtomicOr:
+            op = spv::Op::OpAtomicOr;
+            break;
+        case spirv::ir::Function::kAtomicSmax:
+            op = spv::Op::OpAtomicSMax;
+            break;
+        case spirv::ir::Function::kAtomicSmin:
+            op = spv::Op::OpAtomicSMin;
+            break;
+        case spirv::ir::Function::kAtomicStore:
+            op = spv::Op::OpAtomicStore;
+            break;
+        case spirv::ir::Function::kAtomicUmax:
+            op = spv::Op::OpAtomicUMax;
+            break;
+        case spirv::ir::Function::kAtomicUmin:
+            op = spv::Op::OpAtomicUMin;
+            break;
+        case spirv::ir::Function::kAtomicXor:
+            op = spv::Op::OpAtomicXor;
+            break;
         case spirv::ir::Function::kMatrixTimesMatrix:
             op = spv::Op::OpMatrixTimesMatrix;
             break;
@@ -1574,45 +1613,6 @@ void Printer::EmitIntrinsicCall(spirv::ir::IntrinsicCall* call) {
 
     spv::Op op = spv::Op::Max;
     switch (call->Kind()) {
-        case spirv::ir::Intrinsic::kAtomicIadd:
-            op = spv::Op::OpAtomicIAdd;
-            break;
-        case spirv::ir::Intrinsic::kAtomicIsub:
-            op = spv::Op::OpAtomicISub;
-            break;
-        case spirv::ir::Intrinsic::kAtomicAnd:
-            op = spv::Op::OpAtomicAnd;
-            break;
-        case spirv::ir::Intrinsic::kAtomicCompareExchange:
-            op = spv::Op::OpAtomicCompareExchange;
-            break;
-        case spirv::ir::Intrinsic::kAtomicExchange:
-            op = spv::Op::OpAtomicExchange;
-            break;
-        case spirv::ir::Intrinsic::kAtomicLoad:
-            op = spv::Op::OpAtomicLoad;
-            break;
-        case spirv::ir::Intrinsic::kAtomicOr:
-            op = spv::Op::OpAtomicOr;
-            break;
-        case spirv::ir::Intrinsic::kAtomicSmax:
-            op = spv::Op::OpAtomicSMax;
-            break;
-        case spirv::ir::Intrinsic::kAtomicSmin:
-            op = spv::Op::OpAtomicSMin;
-            break;
-        case spirv::ir::Intrinsic::kAtomicStore:
-            op = spv::Op::OpAtomicStore;
-            break;
-        case spirv::ir::Intrinsic::kAtomicUmax:
-            op = spv::Op::OpAtomicUMax;
-            break;
-        case spirv::ir::Intrinsic::kAtomicUmin:
-            op = spv::Op::OpAtomicUMin;
-            break;
-        case spirv::ir::Intrinsic::kAtomicXor:
-            op = spv::Op::OpAtomicXor;
-            break;
         case spirv::ir::Intrinsic::kDot:
             op = spv::Op::OpDot;
             break;
