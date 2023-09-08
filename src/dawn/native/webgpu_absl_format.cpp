@@ -15,6 +15,7 @@
 #include "dawn/native/webgpu_absl_format.h"
 
 #include <string>
+#include <vector>
 
 #include "dawn/native/AttachmentState.h"
 #include "dawn/native/BindingInfo.h"
@@ -231,6 +232,20 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     if (value->GetDevice()->HasFeature(Feature::MSAARenderToSingleSampled)) {
         s->Append(absl::StrFormat(", msaaRenderToSingleSampled: %d",
                                   value->IsMSAARenderToSingleSampledEnabled()));
+    }
+
+    if (value->HasPixelLocalStorage()) {
+        const std::vector<wgpu::TextureFormat>& plsSlots = value->GetStorageAttachmentSlots();
+        s->Append(absl::StrFormat(", totalPixelLocalStorageSize: %d",
+                                  plsSlots.size() * kPLSSlotByteSize));
+        s->Append(", storageAttachments: [ ");
+        for (size_t i = 0; i < plsSlots.size(); i++) {
+            if (plsSlots[i] != wgpu::TextureFormat::Undefined) {
+                s->Append(absl::StrFormat("{format: %s, offset: %d}, ", plsSlots[i],
+                                          i * kPLSSlotByteSize));
+            }
+        }
+        s->Append("]");
     }
 
     s->Append(" }");

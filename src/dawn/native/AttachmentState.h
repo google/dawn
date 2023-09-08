@@ -17,6 +17,7 @@
 
 #include <array>
 #include <bitset>
+#include <vector>
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/ContentLessObjectCacheable.h"
@@ -38,7 +39,9 @@ class AttachmentState final : public ObjectBase,
   public:
     // Note: Descriptors must be validated before the AttachmentState is constructed.
     explicit AttachmentState(DeviceBase* device, const RenderBundleEncoderDescriptor* descriptor);
-    explicit AttachmentState(DeviceBase* device, const RenderPipelineDescriptor* descriptor);
+    explicit AttachmentState(DeviceBase* device,
+                             const RenderPipelineDescriptor* descriptor,
+                             const PipelineLayoutBase* layout);
     explicit AttachmentState(DeviceBase* device, const RenderPassDescriptor* descriptor);
 
     // Constructor used to avoid re-parsing descriptors when we already parsed them for cache keys.
@@ -50,6 +53,8 @@ class AttachmentState final : public ObjectBase,
     wgpu::TextureFormat GetDepthStencilFormat() const;
     uint32_t GetSampleCount() const;
     bool IsMSAARenderToSingleSampledEnabled() const;
+    bool HasPixelLocalStorage() const;
+    const std::vector<wgpu::TextureFormat>& GetStorageAttachmentSlots() const;
 
     struct EqualityFunc {
         bool operator()(const AttachmentState* a, const AttachmentState* b) const;
@@ -67,6 +72,8 @@ class AttachmentState final : public ObjectBase,
     uint32_t mSampleCount = 0;
 
     bool mIsMSAARenderToSingleSampledEnabled = false;
+    bool mHasPLS = false;
+    std::vector<wgpu::TextureFormat> mStorageAttachmentSlots;
 };
 
 }  // namespace dawn::native

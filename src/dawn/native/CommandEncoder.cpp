@@ -365,7 +365,7 @@ MaybeError ValidateRenderPassColorAttachment(DeviceBase* device,
     if (colorAttachment.loadOp == wgpu::LoadOp::Clear) {
         DAWN_INVALID_IF(std::isnan(clearValue.r) || std::isnan(clearValue.g) ||
                             std::isnan(clearValue.b) || std::isnan(clearValue.a),
-                        "Color clear value (%s) contain a NaN.", &clearValue);
+                        "Color clear value (%s) contains a NaN.", &clearValue);
     }
 
     DAWN_TRY(
@@ -522,6 +522,49 @@ MaybeError ValidateTimestampLocationOnComputePass(
     return {};
 }
 
+MaybeError ValidateRenderPassPLS(DeviceBase* device,
+                                 const RenderPassPixelLocalStorage* pls,
+                                 uint32_t* width,
+                                 uint32_t* height,
+                                 uint32_t* sampleCount,
+                                 uint32_t implicitSampleCount,
+                                 UsageValidationMode usageValidationMode) {
+    StackVector<StorageAttachmentInfoForValidation, 4> attachments;
+    for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
+        const RenderPassStorageAttachment& attachment = pls->storageAttachments[i];
+
+        // Validate the attachment can be used as a storage attachment.
+        DAWN_TRY(device->ValidateObject(attachment.storage));
+        DAWN_TRY(ValidateCanUseAs(attachment.storage->GetTexture(),
+                                  wgpu::TextureUsage::StorageAttachment, usageValidationMode));
+        DAWN_TRY(ValidateAttachmentArrayLayersAndLevelCount(attachment.storage));
+        DAWN_TRY(ValidateOrSetColorAttachmentSampleCount(attachment.storage, implicitSampleCount,
+                                                         sampleCount));
+        DAWN_TRY(ValidateOrSetAttachmentSize(attachment.storage, width, height));
+
+        // Validate the load/storeOp and the clearValue.
+        DAWN_TRY(ValidateLoadOp(attachment.loadOp));
+        DAWN_TRY(ValidateStoreOp(attachment.storeOp));
+        DAWN_INVALID_IF(attachment.loadOp == wgpu::LoadOp::Undefined,
+                        "storageAttachments[%i].loadOp must be set.", i);
+        DAWN_INVALID_IF(attachment.storeOp == wgpu::StoreOp::Undefined,
+                        "storageAttachments[%i].storeOp must be set.", i);
+
+        const dawn::native::Color& clearValue = attachment.clearValue;
+        if (attachment.loadOp == wgpu::LoadOp::Clear) {
+            DAWN_INVALID_IF(std::isnan(clearValue.r) || std::isnan(clearValue.g) ||
+                                std::isnan(clearValue.b) || std::isnan(clearValue.a),
+                            "storageAttachments[%i].clearValue (%s) contains a NaN.", i,
+                            &clearValue);
+        }
+
+        attachments->push_back({attachment.offset, attachment.storage->GetFormat().format});
+    }
+
+    return ValidatePLSInfo(device, pls->totalPixelLocalStorageSize,
+                           {attachments->data(), attachments->size()});
+}
+
 MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
                                         const RenderPassDescriptor* descriptor,
                                         uint32_t* width,
@@ -612,9 +655,20 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
         }
     }
 
-    DAWN_INVALID_IF(
-        descriptor->colorAttachmentCount == 0 && descriptor->depthStencilAttachment == nullptr,
-        "Render pass has no attachments.");
+    // Validation for any pixel local storage.
+    size_t storageAttachmentCount = 0;
+    const RenderPassPixelLocalStorage* pls = nullptr;
+    FindInChain(descriptor->nextInChain, &pls);
+    if (pls != nullptr) {
+        storageAttachmentCount = pls->storageAttachmentCount;
+        DAWN_TRY(ValidateRenderPassPLS(device, pls, width, height, sampleCount,
+                                       *implicitSampleCount, usageValidationMode));
+    }
+
+    DAWN_INVALID_IF(descriptor->colorAttachmentCount == 0 &&
+                        descriptor->depthStencilAttachment == nullptr &&
+                        storageAttachmentCount == 0,
+                    "Render pass has no attachments.");
 
     if (*implicitSampleCount > 1) {
         // TODO(dawn:1710): support multiple attachments.
@@ -623,14 +677,9 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
             "colorAttachmentCount (%u) is not supported when the render pass has implicit sample "
             "count (%u). (Currently) colorAttachmentCount = 1 is supported.",
             descriptor->colorAttachmentCount, *implicitSampleCount);
-    }
-
-    const RenderPassPixelLocalStorage* pls = nullptr;
-    FindInChain(descriptor->nextInChain, &pls);
-    if (pls != nullptr) {
-        DAWN_TRY(ValidateHasPLSFeature(device));
-
-        // TODO(dawn:1704): Validate limits, formats, offsets don't collide and the total size.
+        // TODO(dawn:1704): Consider supporting MSAARenderToSingleSampled + PLS
+        DAWN_INVALID_IF(pls != nullptr,
+                        "For now PLS is invalid to use with MSAARenderToSingleSampled.");
     }
 
     return {};
@@ -1193,6 +1242,15 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
                 // Track the query availability with true on render pass again for rewrite
                 // validation and query reset on Vulkan
                 usageTracker.TrackQueryAvailability(querySet, queryIndex);
+            }
+
+            const RenderPassPixelLocalStorage* pls = nullptr;
+            FindInChain(descriptor->nextInChain, &pls);
+            if (pls != nullptr) {
+                for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
+                    usageTracker.TextureViewUsedAs(pls->storageAttachments[i].storage,
+                                                   wgpu::TextureUsage::StorageAttachment);
+                }
             }
 
             DAWN_TRY_ASSIGN(passEndCallback,

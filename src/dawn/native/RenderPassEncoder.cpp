@@ -445,7 +445,8 @@ void RenderPassEncoder::APIPixelLocalStorageBarrier() {
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
-                DAWN_TRY(ValidateHasPLSFeature(GetDevice()));
+                DAWN_INVALID_IF(!GetAttachmentState()->HasPixelLocalStorage(),
+                                "%s does not define any pixel local storage.", this);
             }
 
             allocator->Allocate<PixelLocalStorageBarrierCmd>(Command::PixelLocalStorageBarrier);

@@ -58,7 +58,7 @@ static constexpr wgpu::TextureUsage kReadOnlyStorageTexture =
 
 // Internal usage to help tracking when a subresource is used as render attachment usage
 // more than once in a render pass.
-static constexpr wgpu::TextureUsage kAgainAsRenderAttachment =
+static constexpr wgpu::TextureUsage kAgainAsAttachment =
     static_cast<wgpu::TextureUsage>(0x80000001);
 
 // Add an extra texture usage (load resolve texture to MSAA) for render pass resource tracking

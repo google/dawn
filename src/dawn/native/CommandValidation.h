@@ -99,7 +99,15 @@ using ColorAttachmentFormats = StackVector<const Format*, kMaxColorAttachments>;
 MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
                                                  const ColorAttachmentFormats& formats);
 
-MaybeError ValidateHasPLSFeature(const DeviceBase* device);
+struct StorageAttachmentInfoForValidation {
+    uint64_t offset;
+    // This format is assumed to support StorageAttachment.
+    wgpu::TextureFormat format;
+};
+MaybeError ValidatePLSInfo(
+    const DeviceBase* device,
+    uint64_t totalSize,
+    ityp::span<size_t, StorageAttachmentInfoForValidation> storageAttachments);
 
 }  // namespace dawn::native
 

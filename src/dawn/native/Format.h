@@ -115,6 +115,7 @@ struct Format {
     bool supportsReadWriteStorageUsage = false;
     bool supportsMultisample = false;
     bool supportsResolveTarget = false;
+    bool supportsStorageAttachment = false;
     Aspect aspects{};
     // Only used for renderable color formats:
     uint8_t componentCount = 0;                  // number of color channels

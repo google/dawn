@@ -2066,7 +2066,7 @@
         "chained": "in",
         "chain roots": ["pipeline layout descriptor"],
         "members": [
-            {"name": "total pixel local storage size", "type": "size_t"},
+            {"name": "total pixel local storage size", "type": "uint64_t"},
             {"name": "storage attachment count", "type": "size_t", "default": 0},
             {"name": "storage attachments", "type": "pipeline layout storage attachment", "annotation": "const*", "length": "storage attachment count"}
         ]
@@ -2473,7 +2473,7 @@
         "chained": "in",
         "chain roots": ["render pass descriptor"],
         "members": [
-            {"name": "total pixel local storage size", "type": "size_t"},
+            {"name": "total pixel local storage size", "type": "uint64_t"},
             {"name": "storage attachment count", "type": "size_t", "default": 0},
             {"name": "storage attachments", "type": "render pass storage attachment", "annotation": "const*", "length": "storage attachment count"}
         ]

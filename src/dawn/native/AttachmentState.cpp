@@ -18,6 +18,7 @@
 #include "dawn/native/ChainUtils_autogen.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectContentHasher.h"
+#include "dawn/native/PipelineLayout.h"
 #include "dawn/native/Texture.h"
 
 namespace dawn::native {
@@ -36,12 +37,15 @@ AttachmentState::AttachmentState(DeviceBase* device,
     }
     mDepthStencilFormat = descriptor->depthStencilFormat;
 
-    // TODO(dawn:1710): support MSAA render to single sampled in render bundle.
+    // TODO(dawn:1710): support MSAA render to single sampled in render bundles.
+    // TODO(dawn:1704): support PLS in render bundles.
 
     SetContentHash(ComputeContentHash());
 }
 
-AttachmentState::AttachmentState(DeviceBase* device, const RenderPipelineDescriptor* descriptor)
+AttachmentState::AttachmentState(DeviceBase* device,
+                                 const RenderPipelineDescriptor* descriptor,
+                                 const PipelineLayoutBase* layout)
     : ObjectBase(device), mSampleCount(descriptor->multisample.count) {
     const DawnMultisampleStateRenderToSingleSampled* msaaRenderToSingleSampledDesc = nullptr;
     FindInChain(descriptor->multisample.nextInChain, &msaaRenderToSingleSampledDesc);
@@ -65,6 +69,10 @@ AttachmentState::AttachmentState(DeviceBase* device, const RenderPipelineDescrip
     if (descriptor->depthStencil != nullptr) {
         mDepthStencilFormat = descriptor->depthStencil->format;
     }
+
+    mHasPLS = layout->HasPixelLocalStorage();
+    mStorageAttachmentSlots = layout->GetStorageAttachmentSlots();
+
     SetContentHash(ComputeContentHash());
 }
 
@@ -109,6 +117,20 @@ AttachmentState::AttachmentState(DeviceBase* device, const RenderPassDescriptor*
         }
     }
     ASSERT(mSampleCount > 0);
+
+    // Gather the PLS information.
+    const RenderPassPixelLocalStorage* pls = nullptr;
+    FindInChain(descriptor->nextInChain, &pls);
+    if (pls != nullptr) {
+        mHasPLS = true;
+        mStorageAttachmentSlots = std::vector<wgpu::TextureFormat>(
+            pls->totalPixelLocalStorageSize / kPLSSlotByteSize, wgpu::TextureFormat::Undefined);
+        for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
+            size_t slot = pls->storageAttachments[i].offset / kPLSSlotByteSize;
+            mStorageAttachmentSlots[slot] = pls->storageAttachments[i].storage->GetFormat().format;
+        }
+    }
+
     SetContentHash(ComputeContentHash());
 }
 
@@ -119,6 +141,8 @@ AttachmentState::AttachmentState(const AttachmentState& blueprint)
     mDepthStencilFormat = blueprint.mDepthStencilFormat;
     mSampleCount = blueprint.mSampleCount;
     mIsMSAARenderToSingleSampledEnabled = blueprint.mIsMSAARenderToSingleSampledEnabled;
+    mHasPLS = blueprint.mHasPLS;
+    mStorageAttachmentSlots = blueprint.mStorageAttachmentSlots;
     SetContentHash(blueprint.GetContentHash());
 }
 
@@ -156,6 +180,19 @@ bool AttachmentState::EqualityFunc::operator()(const AttachmentState* a,
         return false;
     }
 
+    // Check PLS
+    if (a->mHasPLS != b->mHasPLS) {
+        return false;
+    }
+    if (a->mStorageAttachmentSlots.size() != b->mStorageAttachmentSlots.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < a->mStorageAttachmentSlots.size(); i++) {
+        if (a->mStorageAttachmentSlots[i] != b->mStorageAttachmentSlots[i]) {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -176,6 +213,12 @@ size_t AttachmentState::ComputeContentHash() {
 
     // Hash MSAA render to single sampled flag
     HashCombine(&hash, mIsMSAARenderToSingleSampledEnabled);
+
+    // Hash the PLS state
+    HashCombine(&hash, mHasPLS);
+    for (wgpu::TextureFormat slotFormat : mStorageAttachmentSlots) {
+        HashCombine(&hash, slotFormat);
+    }
 
     return hash;
 }
@@ -207,4 +250,11 @@ bool AttachmentState::IsMSAARenderToSingleSampledEnabled() const {
     return mIsMSAARenderToSingleSampledEnabled;
 }
 
+bool AttachmentState::HasPixelLocalStorage() const {
+    return mHasPLS;
+}
+
+const std::vector<wgpu::TextureFormat>& AttachmentState::GetStorageAttachmentSlots() const {
+    return mStorageAttachmentSlots;
+}
 }  // namespace dawn::native

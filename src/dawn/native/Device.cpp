@@ -1007,8 +1007,9 @@ Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
 }
 
 Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
-    const RenderPipelineDescriptor* descriptor) {
-    AttachmentState blueprint(this, descriptor);
+    const RenderPipelineDescriptor* descriptor,
+    const PipelineLayoutBase* layout) {
+    AttachmentState blueprint(this, descriptor, layout);
     return GetOrCreateAttachmentState(&blueprint);
 }
 

@@ -543,12 +543,56 @@ MaybeError ValidateColorAttachmentBytesPerSample(DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateHasPLSFeature(const DeviceBase* device) {
+MaybeError ValidatePLSInfo(
+    const DeviceBase* device,
+    uint64_t totalSize,
+    ityp::span<size_t, StorageAttachmentInfoForValidation> storageAttachments) {
     DAWN_INVALID_IF(
         !(device->HasFeature(Feature::PixelLocalStorageCoherent) ||
           device->HasFeature(Feature::PixelLocalStorageNonCoherent)),
         "Pixel Local Storage feature used without either of the pixel-local-storage-coherent or "
         "pixel-local-storage-non-coherent features enabled.");
+
+    // Validate totalPixelLocalStorageSize
+    DAWN_INVALID_IF(totalSize % kPLSSlotByteSize != 0,
+                    "totalPixelLocalStorageSize (%i) is not a multiple of %i.", totalSize,
+                    kPLSSlotByteSize);
+    DAWN_INVALID_IF(totalSize > kMaxPLSSize,
+                    "totalPixelLocalStorageSize (%i) is larger than maxPixelLocalStorageSize (%i).",
+                    totalSize, kMaxPLSSize);
+
+    std::array<size_t, kMaxPLSSlots> indexForSlot;
+    constexpr size_t kSlotNotSet = std::numeric_limits<size_t>::max();
+    indexForSlot.fill(kSlotNotSet);
+    for (size_t i = 0; i < storageAttachments.size(); i++) {
+        const Format& format = device->GetValidInternalFormat(storageAttachments[i].format);
+        ASSERT(format.supportsStorageAttachment);
+
+        // Validate the slot's offset.
+        uint64_t offset = storageAttachments[i].offset;
+        DAWN_INVALID_IF(offset % kPLSSlotByteSize != 0,
+                        "storageAttachments[%i].offset (%i) is not a multiple of %i.", i, offset,
+                        kPLSSlotByteSize);
+        DAWN_INVALID_IF(
+            offset > kMaxPLSSize,
+            "storageAttachments[%i].offset (%i) is larger than maxPixelLocalStorageSize (%i).", i,
+            offset, kMaxPLSSize);
+        // This can't overflow because kMaxPLSSize + max texel byte size is way less than 2^32.
+        DAWN_INVALID_IF(
+            offset + format.GetAspectInfo(Aspect::Color).block.byteSize > totalSize,
+            "storageAttachments[%i]'s footprint [%i, %i) does not fit in the total size (%i).", i,
+            offset, format.GetAspectInfo(Aspect::Color).block.byteSize, totalSize);
+
+        // Validate that there are no collisions, each storage attachment takes a single slot so
+        // we don't need to loop over all slots for a storage attachment.
+        ASSERT(format.GetAspectInfo(Aspect::Color).block.byteSize == kPLSSlotByteSize);
+        size_t slot = offset / kPLSSlotByteSize;
+        DAWN_INVALID_IF(indexForSlot[slot] != kSlotNotSet,
+                        "storageAttachments[%i] and storageAttachment[%i] conflict.", i,
+                        indexForSlot[slot]);
+        indexForSlot[slot] = i;
+    }
+
     return {};
 }
 

@@ -216,7 +216,8 @@ class DeviceBase : public RefCountedWithExternalCount {
     Ref<AttachmentState> GetOrCreateAttachmentState(AttachmentState* blueprint);
     Ref<AttachmentState> GetOrCreateAttachmentState(
         const RenderBundleEncoderDescriptor* descriptor);
-    Ref<AttachmentState> GetOrCreateAttachmentState(const RenderPipelineDescriptor* descriptor);
+    Ref<AttachmentState> GetOrCreateAttachmentState(const RenderPipelineDescriptor* descriptor,
+                                                    const PipelineLayoutBase* layout);
     Ref<AttachmentState> GetOrCreateAttachmentState(const RenderPassDescriptor* descriptor);
 
     Ref<PipelineCacheBase> GetOrCreatePipelineCache(const CacheKey& key);
