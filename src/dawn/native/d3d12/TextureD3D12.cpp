@@ -212,7 +212,7 @@ ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
     Device* device = ToBackend(memory->GetDevice());
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor));
     DAWN_TRY(texture->InitializeAsExternalTexture(memory->GetD3DResource(), {}, false));
-    texture->mSharedTextureMemoryState = memory->GetState();
+    texture->mSharedTextureMemoryContents = memory->GetContents();
     return texture;
 }
 
@@ -417,10 +417,10 @@ MaybeError Texture::SynchronizeImportedTextureBeforeUse() {
     mWaitFences.clear();
 
     SharedTextureMemoryBase::PendingFenceList fences;
-    SharedTextureMemoryState* memoryState = GetSharedTextureMemoryState();
-    if (memoryState != nullptr) {
-        memoryState->AcquirePendingFences(&fences);
-        memoryState->SetLastUsageSerial(GetDevice()->GetPendingCommandSerial());
+    SharedTextureMemoryContents* contents = GetSharedTextureMemoryContents();
+    if (contents != nullptr) {
+        contents->AcquirePendingFences(&fences);
+        contents->SetLastUsageSerial(GetDevice()->GetPendingCommandSerial());
     }
 
     for (const auto& fence : fences) {

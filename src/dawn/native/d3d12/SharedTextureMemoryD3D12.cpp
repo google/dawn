@@ -83,7 +83,10 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
                            renderAttachmentUsage;
     }
 
-    return AcquireRef(new SharedTextureMemory(device, label, properties, std::move(d3d12Resource)));
+    auto result =
+        AcquireRef(new SharedTextureMemory(device, label, properties, std::move(d3d12Resource)));
+    result->Initialize();
+    return result;
 }
 
 SharedTextureMemory::SharedTextureMemory(Device* device,

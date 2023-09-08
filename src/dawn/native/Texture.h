@@ -119,7 +119,7 @@ class TextureBase : public ApiObjectBase {
 
     bool IsImplicitMSAARenderTextureViewSupported() const;
 
-    SharedTextureMemoryState* GetSharedTextureMemoryState() const;
+    SharedTextureMemoryContents* GetSharedTextureMemoryContents() const;
 
     // Dawn API
     TextureViewBase* APICreateView(const TextureViewDescriptor* descriptor = nullptr);
@@ -141,7 +141,7 @@ class TextureBase : public ApiObjectBase {
     void AddInternalUsage(wgpu::TextureUsage usage);
 
     // The shared texture memory state the texture was created from. May be null.
-    Ref<SharedTextureMemoryState> mSharedTextureMemoryState;
+    Ref<SharedTextureMemoryContents> mSharedTextureMemoryContents;
 
   private:
     struct TextureState {

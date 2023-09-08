@@ -94,7 +94,9 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     properties.format = format;
     properties.size = {static_cast<uint32_t>(width), static_cast<uint32_t>(height), 1};
 
-    return AcquireRef(new SharedTextureMemory(device, label, properties, ioSurface));
+    auto result = AcquireRef(new SharedTextureMemory(device, label, properties, ioSurface));
+    result->Initialize();
+    return result;
 }
 
 SharedTextureMemory::SharedTextureMemory(Device* device,
@@ -156,7 +158,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(TextureBas
 
         return FenceAndSignalValue{
             std::move(fence),
-            static_cast<uint64_t>(texture->GetSharedTextureMemoryState()->GetLastUsageSerial())};
+            static_cast<uint64_t>(texture->GetSharedTextureMemoryContents()->GetLastUsageSerial())};
     }
     UNREACHABLE();
 }

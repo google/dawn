@@ -232,7 +232,7 @@ ResultOrError<Ref<Texture>> Texture::CreateFromSharedTextureMemory(
     Device* device = ToBackend(memory->GetDevice());
     Ref<Texture> texture = AcquireRef(new Texture(device, descriptor, Kind::Normal));
     DAWN_TRY(texture->InitializeAsExternalTexture(memory->GetD3DResource(), {}, false));
-    texture->mSharedTextureMemoryState = memory->GetState();
+    texture->mSharedTextureMemoryContents = memory->GetContents();
     return texture;
 }
 

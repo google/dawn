@@ -30,6 +30,7 @@ class ErrorSharedTextureMemory : public SharedTextureMemoryBase {
     ErrorSharedTextureMemory(DeviceBase* device, const SharedTextureMemoryDescriptor* descriptor)
         : SharedTextureMemoryBase(device, descriptor, ObjectBase::kError) {}
 
+    Ref<SharedTextureMemoryContents> CreateContents() override { UNREACHABLE(); }
     ResultOrError<Ref<TextureBase>> CreateTextureImpl(
         const TextureDescriptor* descriptor) override {
         UNREACHABLE();
@@ -62,14 +63,12 @@ SharedTextureMemoryBase::SharedTextureMemoryBase(DeviceBase* device,
           {0, 0, 0},
           wgpu::TextureFormat::Undefined,
       },
-      mState(new SharedTextureMemoryState(GetWeakRef(this))) {}
+      mContents(new SharedTextureMemoryContents(GetWeakRef(this))) {}
 
 SharedTextureMemoryBase::SharedTextureMemoryBase(DeviceBase* device,
                                                  const char* label,
                                                  const SharedTextureMemoryProperties& properties)
-    : ApiObjectBase(device, label),
-      mProperties(properties),
-      mState(new SharedTextureMemoryState(GetWeakRef(this))) {
+    : ApiObjectBase(device, label), mProperties(properties) {
     const Format& internalFormat = device->GetValidInternalFormat(properties.format);
     if (!internalFormat.supportsStorageUsage) {
         ASSERT(!(mProperties.usage & wgpu::TextureUsage::StorageBinding));
@@ -85,6 +84,11 @@ ObjectType SharedTextureMemoryBase::GetType() const {
 }
 
 void SharedTextureMemoryBase::DestroyImpl() {}
+
+void SharedTextureMemoryBase::Initialize() {
+    ASSERT(!IsError());
+    mContents = CreateContents();
+}
 
 void SharedTextureMemoryBase::APIGetProperties(SharedTextureMemoryProperties* properties) const {
     properties->usage = mProperties.usage;
@@ -116,6 +120,10 @@ TextureBase* SharedTextureMemoryBase::APICreateTexture(const TextureDescriptor* 
         return TextureBase::MakeError(GetDevice(), descriptor);
     }
     return result.Detach();
+}
+
+Ref<SharedTextureMemoryContents> SharedTextureMemoryBase::CreateContents() {
+    return AcquireRef(new SharedTextureMemoryContents(GetWeakRef(this)));
 }
 
 ResultOrError<Ref<TextureBase>> SharedTextureMemoryBase::CreateTexture(
@@ -159,16 +167,16 @@ ResultOrError<Ref<TextureBase>> SharedTextureMemoryBase::CreateTexture(
     return texture;
 }
 
-SharedTextureMemoryState* SharedTextureMemoryBase::GetState() const {
-    return mState.Get();
+SharedTextureMemoryContents* SharedTextureMemoryBase::GetContents() const {
+    return mContents.Get();
 }
 
 MaybeError SharedTextureMemoryBase::ValidateTextureCreatedFromSelf(TextureBase* texture) {
-    auto* state = texture->GetSharedTextureMemoryState();
-    DAWN_INVALID_IF(state == nullptr, "%s was not created from %s.", texture, this);
+    auto* contents = texture->GetSharedTextureMemoryContents();
+    DAWN_INVALID_IF(contents == nullptr, "%s was not created from %s.", texture, this);
 
     auto* sharedTextureMemory =
-        texture->GetSharedTextureMemoryState()->GetSharedTextureMemory().Promote().Get();
+        texture->GetSharedTextureMemoryContents()->GetSharedTextureMemory().Promote().Get();
     DAWN_INVALID_IF(sharedTextureMemory != this, "%s created from %s cannot be used with %s.",
                     texture, sharedTextureMemory, this);
     return {};
@@ -198,7 +206,8 @@ MaybeError SharedTextureMemoryBase::BeginAccess(TextureBase* texture,
                                                 const BeginAccessDescriptor* descriptor) {
     // Append begin fences first. Fences should be tracked regardless of whether later errors occur.
     for (size_t i = 0; i < descriptor->fenceCount; ++i) {
-        mState->mPendingFences->push_back({descriptor->fences[i], descriptor->signaledValues[i]});
+        mContents->mPendingFences->push_back(
+            {descriptor->fences[i], descriptor->signaledValues[i]});
     }
 
     DAWN_TRY(GetDevice()->ValidateIsAlive());
@@ -240,7 +249,7 @@ bool SharedTextureMemoryBase::APIEndAccess(TextureBase* texture, EndAccessState*
 
 MaybeError SharedTextureMemoryBase::EndAccess(TextureBase* texture, EndAccessState* state) {
     PendingFenceList fenceList;
-    mState->AcquirePendingFences(&fenceList);
+    mContents->AcquirePendingFences(&fenceList);
 
     if (!texture->IsError()) {
         texture->SetHasAccess(false);
@@ -289,26 +298,27 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemoryBase::EndAccessInternal(
     return EndAccessImpl(texture);
 }
 
-// SharedTextureMemoryState
+// SharedTextureMemoryContents
 
-SharedTextureMemoryState::SharedTextureMemoryState(
+SharedTextureMemoryContents::SharedTextureMemoryContents(
     WeakRef<SharedTextureMemoryBase> sharedTextureMemory)
     : mSharedTextureMemory(std::move(sharedTextureMemory)) {}
 
-const WeakRef<SharedTextureMemoryBase>& SharedTextureMemoryState::GetSharedTextureMemory() const {
+const WeakRef<SharedTextureMemoryBase>& SharedTextureMemoryContents::GetSharedTextureMemory()
+    const {
     return mSharedTextureMemory;
 }
 
-void SharedTextureMemoryState::AcquirePendingFences(PendingFenceList* fences) {
+void SharedTextureMemoryContents::AcquirePendingFences(PendingFenceList* fences) {
     *fences = mPendingFences;
     mPendingFences->clear();
 }
 
-void SharedTextureMemoryState::SetLastUsageSerial(ExecutionSerial lastUsageSerial) {
+void SharedTextureMemoryContents::SetLastUsageSerial(ExecutionSerial lastUsageSerial) {
     mLastUsageSerial = lastUsageSerial;
 }
 
-ExecutionSerial SharedTextureMemoryState::GetLastUsageSerial() const {
+ExecutionSerial SharedTextureMemoryContents::GetLastUsageSerial() const {
     return mLastUsageSerial;
 }
 

@@ -104,7 +104,10 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     SharedTextureMemoryProperties properties;
     DAWN_TRY_ASSIGN(properties, PropertiesFromD3D11Texture(device, d3d11Texture.Get()));
 
-    return AcquireRef(new SharedTextureMemory(device, label, properties, std::move(d3d11Resource)));
+    auto result =
+        AcquireRef(new SharedTextureMemory(device, label, properties, std::move(d3d11Resource)));
+    result->Initialize();
+    return result;
 }
 
 // static
@@ -127,7 +130,10 @@ ResultOrError<Ref<SharedTextureMemory>> SharedTextureMemory::Create(
     SharedTextureMemoryProperties properties;
     DAWN_TRY_ASSIGN(properties, PropertiesFromD3D11Texture(device, descriptor->texture.Get()));
 
-    return AcquireRef(new SharedTextureMemory(device, label, properties, std::move(d3d11Resource)));
+    auto result =
+        AcquireRef(new SharedTextureMemory(device, label, properties, std::move(d3d11Resource)));
+    result->Initialize();
+    return result;
 }
 
 SharedTextureMemory::SharedTextureMemory(Device* device,

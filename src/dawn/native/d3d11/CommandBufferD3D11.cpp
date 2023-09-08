@@ -97,13 +97,13 @@ class VertexBufferTracker {
 
 MaybeError SynchronizeTextureBeforeUse(Texture* texture, CommandRecordingContext* commandContext) {
     SharedTextureMemoryBase::PendingFenceList fences;
-    SharedTextureMemoryState* memoryState = texture->GetSharedTextureMemoryState();
-    if (memoryState == nullptr) {
+    SharedTextureMemoryContents* contents = texture->GetSharedTextureMemoryContents();
+    if (contents == nullptr) {
         return {};
     }
 
-    memoryState->AcquirePendingFences(&fences);
-    memoryState->SetLastUsageSerial(texture->GetDevice()->GetPendingCommandSerial());
+    contents->AcquirePendingFences(&fences);
+    contents->SetLastUsageSerial(texture->GetDevice()->GetPendingCommandSerial());
 
     for (auto& fence : fences) {
         DAWN_TRY(CheckHRESULT(commandContext->GetD3D11DeviceContext4()->Wait(

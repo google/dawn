@@ -29,7 +29,7 @@
 
 namespace dawn::native {
 
-class SharedTextureMemoryState;
+class SharedTextureMemoryContents;
 struct SharedTextureMemoryDescriptor;
 struct SharedTextureMemoryBeginAccessDescriptor;
 struct SharedTextureMemoryEndAccessState;
@@ -46,6 +46,8 @@ class SharedTextureMemoryBase : public ApiObjectBase,
     static SharedTextureMemoryBase* MakeError(DeviceBase* device,
                                               const SharedTextureMemoryDescriptor* descriptor);
 
+    void Initialize();
+
     void APIGetProperties(SharedTextureMemoryProperties* properties) const;
     TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
     // Returns true if access was acquired. If it returns true, then APIEndAccess must
@@ -57,7 +59,7 @@ class SharedTextureMemoryBase : public ApiObjectBase,
 
     ObjectType GetType() const override;
 
-    SharedTextureMemoryState* GetState() const;
+    SharedTextureMemoryContents* GetContents() const;
 
     // Validate that the texture was created from this SharedTextureMemory.
     MaybeError ValidateTextureCreatedFromSelf(TextureBase* texture);
@@ -77,6 +79,8 @@ class SharedTextureMemoryBase : public ApiObjectBase,
     Ref<TextureBase> mCurrentAccess;
 
   private:
+    virtual Ref<SharedTextureMemoryContents> CreateContents();
+
     ResultOrError<Ref<TextureBase>> CreateTexture(const TextureDescriptor* descriptor);
     MaybeError BeginAccess(TextureBase* texture, const BeginAccessDescriptor* descriptor);
     MaybeError EndAccess(TextureBase* texture, EndAccessState* state);
@@ -94,18 +98,18 @@ class SharedTextureMemoryBase : public ApiObjectBase,
     // EndAccessImpl validates the operation is valid on the backend, and returns the end fence.
     virtual ResultOrError<FenceAndSignalValue> EndAccessImpl(TextureBase* texture) = 0;
 
-    Ref<SharedTextureMemoryState> mState;
+    Ref<SharedTextureMemoryContents> mContents;
 };
 
-// SharedTextureMemoryState is a separate object because it needs to live as long as
+// SharedTextureMemoryContents is a separate object because it needs to live as long as
 // the SharedTextureMemory or any textures created from the SharedTextureMemory. This
-// allows state needed by the texture to persist after the SharedTextureMemory itself
-// has been dropped.
-class SharedTextureMemoryState : public RefCounted {
+// allows state and objects needed by the texture to persist after the
+// SharedTextureMemory itself has been dropped.
+class SharedTextureMemoryContents : public RefCounted {
   public:
     using PendingFenceList = SharedTextureMemoryBase::PendingFenceList;
 
-    explicit SharedTextureMemoryState(WeakRef<SharedTextureMemoryBase> sharedTextureMemory);
+    explicit SharedTextureMemoryContents(WeakRef<SharedTextureMemoryBase> sharedTextureMemory);
 
     void AcquirePendingFences(PendingFenceList* fences);
 
