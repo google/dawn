@@ -1291,6 +1291,61 @@ enable chromium_experimental_read_write_storage_texture;
     CheckDrawsGreen(kSimpleVertexShader, fsstream.str().c_str(), readonlyStorageTexture);
 }
 
+// Verify using read-write storage texture access in pipeline layout is compatible with write-only
+// storage texture access in shader.
+TEST_P(ReadWriteStorageTextureTests, ReadWriteInPipelineLayoutAndWriteOnlyInShader) {
+    DAWN_TEST_UNSUPPORTED_IF(!IsReadWriteStorageTextureSupported());
+
+    constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Uint;
+    std::array<uint32_t, kWidth * kHeight> expectedData;
+    for (size_t i = 0; i < expectedData.size(); ++i) {
+        expectedData[i] = i + 1;
+    }
+
+    wgpu::Texture storageTexture = CreateTexture(
+        wgpu::TextureFormat::R32Uint,
+        wgpu::TextureUsage::StorageBinding | wgpu::TextureUsage::CopySrc, {kWidth, kHeight, 1});
+
+    std::ostringstream sstream;
+    sstream << R"(
+enable chromium_experimental_read_write_storage_texture;
+@group(0) @binding(0) var rwImage : texture_storage_2d<r32uint, write>;
+
+@compute @workgroup_size()"
+            << kWidth << ", " << kHeight << R"()
+fn main(
+  @builtin(local_invocation_id) local_id: vec3u,
+  @builtin(local_invocation_index) local_index : u32) {
+  let data1 = vec4u(local_index + 1u, 0, 0, 1);
+  textureStore(rwImage, vec2i(local_id.xy), data1);
+})";
+
+    wgpu::BindGroupLayout bindGroupLayout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Compute, wgpu::StorageTextureAccess::ReadWrite,
+                  kStorageTextureFormat, wgpu::TextureViewDimension::e2D}});
+    wgpu::ComputePipelineDescriptor computeDescriptor;
+    computeDescriptor.layout = utils::MakePipelineLayout(device, {bindGroupLayout});
+    computeDescriptor.compute.module = utils::CreateShaderModule(device, sstream.str().c_str());
+    computeDescriptor.compute.entryPoint = "main";
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&computeDescriptor);
+
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, bindGroupLayout, {{0, storageTexture.CreateView()}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder computePassEncoder = encoder.BeginComputePass();
+    computePassEncoder.SetBindGroup(0, bindGroup);
+    computePassEncoder.SetPipeline(pipeline);
+    computePassEncoder.DispatchWorkgroups(1);
+    computePassEncoder.End();
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    CheckOutputStorageTexture(storageTexture, wgpu::TextureFormat::R32Uint, {kWidth, kHeight},
+                              reinterpret_cast<const uint8_t*>(expectedData.data()),
+                              expectedData.size() * sizeof(uint32_t));
+}
+
 DAWN_INSTANTIATE_TEST(ReadWriteStorageTextureTests,
                       D3D11Backend(),
                       D3D12Backend(),

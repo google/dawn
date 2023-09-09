@@ -371,6 +371,14 @@ std::vector<uint64_t> GetBindGroupMinBufferSizes(const BindingGroupInfoMap& shad
     return requiredBufferSizes;
 }
 
+bool IsShaderCompatibleWithPipelineLayoutOnStorageTextureAccess(
+    const BindingInfo& bindingInfo,
+    const ShaderBindingInfo& shaderBindingInfo) {
+    return bindingInfo.storageTexture.access == shaderBindingInfo.storageTexture.access ||
+           (bindingInfo.storageTexture.access == wgpu::StorageTextureAccess::ReadWrite &&
+            shaderBindingInfo.storageTexture.access == wgpu::StorageTextureAccess::WriteOnly);
+}
+
 MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* device,
                                                           const BindGroupLayoutInternalBase* layout,
                                                           SingleShaderStage entryPointStage,
@@ -451,10 +459,11 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
             ASSERT(layoutInfo.storageTexture.format != wgpu::TextureFormat::Undefined);
             ASSERT(shaderInfo.storageTexture.format != wgpu::TextureFormat::Undefined);
 
-            DAWN_INVALID_IF(layoutInfo.storageTexture.access != shaderInfo.storageTexture.access,
-                            "The layout's binding access (%s) isn't compatible with the shader's "
-                            "binding access (%s).",
-                            layoutInfo.storageTexture.access, shaderInfo.storageTexture.access);
+            DAWN_INVALID_IF(
+                !IsShaderCompatibleWithPipelineLayoutOnStorageTextureAccess(layoutInfo, shaderInfo),
+                "The layout's binding access (%s) isn't compatible with the shader's "
+                "binding access (%s).",
+                layoutInfo.storageTexture.access, shaderInfo.storageTexture.access);
 
             DAWN_INVALID_IF(layoutInfo.storageTexture.format != shaderInfo.storageTexture.format,
                             "The layout's binding format (%s) doesn't match the shader's binding "

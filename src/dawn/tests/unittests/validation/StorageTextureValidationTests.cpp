@@ -989,8 +989,9 @@ TEST_F(ReadWriteStorageTextureValidationTests, ReadWriteStorageTextureAccessWith
     }
 }
 
-// Test that storage texture access in shader must match the one in pipeline layout when we create
-// a pipeline with storage texture.
+// Test that storage texture access in shader must be compatible with the one in pipeline layout
+// when we create a pipeline with storage texture. Note that read-write storage texture access in
+// pipeline layout is compatible with write-only storage texture access in shader.
 TEST_F(ReadWriteStorageTextureValidationTests, StorageTextureAccessInPipeline) {
     constexpr std::array<wgpu::StorageTextureAccess, 3> kStorageTextureAccesses = {
         {wgpu::StorageTextureAccess::ReadOnly, wgpu::StorageTextureAccess::WriteOnly,
@@ -1010,7 +1011,9 @@ TEST_F(ReadWriteStorageTextureValidationTests, StorageTextureAccessInPipeline) {
             computePipelineDescriptor.compute.entryPoint = "main";
             computePipelineDescriptor.layout =
                 utils::MakePipelineLayout(device, {{bindGroupLayout}});
-            if (accessInShader == accessInBindGroupLayout) {
+            if (accessInShader == accessInBindGroupLayout ||
+                (accessInShader == wgpu::StorageTextureAccess::WriteOnly &&
+                 accessInBindGroupLayout == wgpu::StorageTextureAccess::ReadWrite)) {
                 device.CreateComputePipeline(&computePipelineDescriptor);
             } else {
                 ASSERT_DEVICE_ERROR(device.CreateComputePipeline(&computePipelineDescriptor));
