@@ -27,7 +27,7 @@ class FeatureTests : public testing::Test {
   public:
     FeatureTests()
         : testing::Test(),
-          mInstanceBase(native::InstanceBase::Create()),
+          mInstanceBase(native::APICreateInstance(nullptr)),
           mPhysicalDevice(mInstanceBase.Get()),
           mUnsafePhysicalDevice(mInstanceBase.Get()),
           mAdapterBase(&mPhysicalDevice,

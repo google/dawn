@@ -56,7 +56,7 @@ class GetProcAddressTests : public testing::TestWithParam<DawnFlavor> {
   public:
     GetProcAddressTests()
         : testing::TestWithParam<DawnFlavor>(),
-          mNativeInstance(native::InstanceBase::Create()),
+          mNativeInstance(native::APICreateInstance(nullptr)),
           mAdapterBase(AcquireRef(new native::null::PhysicalDevice(mNativeInstance.Get())),
                        native::FeatureLevel::Core,
                        native::TogglesState(native::ToggleStage::Adapter),

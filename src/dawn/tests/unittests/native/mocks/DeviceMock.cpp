@@ -14,6 +14,7 @@
 
 #include "dawn/tests/unittests/native/mocks/DeviceMock.h"
 
+#include "dawn/native/Instance.h"
 #include "dawn/tests/unittests/native/mocks/BindGroupLayoutMock.h"
 #include "dawn/tests/unittests/native/mocks/BindGroupMock.h"
 #include "dawn/tests/unittests/native/mocks/BufferMock.h"
@@ -34,7 +35,7 @@ using ::testing::NiceMock;
 using ::testing::WithArgs;
 
 DeviceMock::DeviceMock() {
-    mInstance = InstanceBase::Create();
+    mInstance = APICreateInstance(nullptr);
 
     // Set all default creation functions to return nice mock objects.
     ON_CALL(*this, CreateBindGroupImpl)
