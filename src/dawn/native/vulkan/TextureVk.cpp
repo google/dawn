@@ -73,6 +73,9 @@ VkAccessFlags VulkanAccessFlags(wgpu::TextureUsage usage, const Format& format) 
     if (usage & (wgpu::TextureUsage::TextureBinding | kReadOnlyStorageTexture)) {
         flags |= VK_ACCESS_SHADER_READ_BIT;
     }
+    if (usage & kWriteOnlyStorageTexture) {
+        flags |= VK_ACCESS_SHADER_WRITE_BIT;
+    }
     if (usage & wgpu::TextureUsage::StorageBinding) {
         flags |= VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
     }
@@ -128,7 +131,7 @@ VkPipelineStageFlags VulkanPipelineStage(wgpu::TextureUsage usage, const Format&
         flags |= VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT |
                  VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
     }
-    if (usage & wgpu::TextureUsage::StorageBinding) {
+    if (usage & (wgpu::TextureUsage::StorageBinding | kWriteOnlyStorageTexture)) {
         flags |= VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
     }
     if (usage & (wgpu::TextureUsage::RenderAttachment | kReadOnlyRenderAttachment)) {
@@ -575,6 +578,7 @@ VkImageLayout VulkanImageLayout(const Texture* texture, wgpu::TextureUsage usage
             // VK_IMAGE_LAYOUT_GENERAL layout.
         case wgpu::TextureUsage::StorageBinding:
         case kReadOnlyStorageTexture:
+        case kWriteOnlyStorageTexture:
             return VK_IMAGE_LAYOUT_GENERAL;
 
         case wgpu::TextureUsage::RenderAttachment:

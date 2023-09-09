@@ -679,7 +679,7 @@ TextureBase::TextureBase(DeviceBase* device, const TextureDescriptor* descriptor
         }
     }
     if (mInternalUsage & wgpu::TextureUsage::StorageBinding) {
-        AddInternalUsage(kReadOnlyStorageTexture);
+        AddInternalUsage(kReadOnlyStorageTexture | kWriteOnlyStorageTexture);
     }
 }
 

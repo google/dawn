@@ -376,8 +376,9 @@ MaybeError TransitionAndClearForSyncScope(CommandRecordingContext* commandContex
     }
 
     if (passHasUAV) {
-        *passHasUAV = bufferUsages & wgpu::BufferUsage::Storage ||
-                      textureUsages & wgpu::TextureUsage::StorageBinding;
+        *passHasUAV =
+            bufferUsages & wgpu::BufferUsage::Storage ||
+            textureUsages & (wgpu::TextureUsage::StorageBinding | kWriteOnlyStorageTexture);
     }
     return {};
 }

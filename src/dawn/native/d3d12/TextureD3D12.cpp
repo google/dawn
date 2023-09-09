@@ -62,7 +62,7 @@ D3D12_RESOURCE_STATES D3D12TextureUsage(wgpu::TextureUsage usage, const Format& 
     if (usage & (wgpu::TextureUsage::TextureBinding | kReadOnlyStorageTexture)) {
         resourceState |= D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE;
     }
-    if (usage & wgpu::TextureUsage::StorageBinding) {
+    if (usage & (wgpu::TextureUsage::StorageBinding | kWriteOnlyStorageTexture)) {
         resourceState |= D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
     }
     if (usage & wgpu::TextureUsage::RenderAttachment) {
