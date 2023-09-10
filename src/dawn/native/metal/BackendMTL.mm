@@ -445,8 +445,8 @@ class PhysicalDevice : public PhysicalDeviceBase {
                 // Intentionally leak counterSets to workaround an issue where the driver
                 // over-releases the handle if it is accessed more than once. It becomes a zombie.
                 // For more information, see crbug.com/1443658.
-                // Appears to occur on Intel prior to MacOS 11, and continuing on Intel Gen 7 after
-                // that OS version.
+                // Appears to occur on non-Apple prior to MacOS 11, and continuing on Intel Gen 7
+                // and Intel Gen 11 after that OS version.
                 uint32_t vendorId = GetVendorId();
                 uint32_t deviceId = GetDeviceId();
                 if (gpu_info::IsIntelGen7(vendorId, deviceId)) {
@@ -456,7 +456,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
                     return true;
                 }
 #if DAWN_PLATFORM_IS(MACOS)
-                if (gpu_info::IsIntel(vendorId) && !IsMacOSVersionAtLeast(11)) {
+                if (!gpu_info::IsApple(vendorId) && !IsMacOSVersionAtLeast(11)) {
                     return true;
                 }
 #endif
