@@ -14,15 +14,12 @@
 
 #include "dawn/native/vulkan/ShaderModuleVk.h"
 
-#include <spirv-tools/libspirv.hpp>
-
 #include <map>
 #include <string>
 #include <vector>
 
 #include "dawn/native/CacheRequest.h"
 #include "dawn/native/Serializable.h"
-#include "dawn/native/SpirvValidation.h"
 #include "dawn/native/TintUtils.h"
 #include "dawn/native/vulkan/BindGroupLayoutVk.h"
 #include "dawn/native/vulkan/DeviceVk.h"
@@ -34,6 +31,10 @@
 #include "dawn/platform/metrics/HistogramMacros.h"
 #include "dawn/platform/tracing/TraceEvent.h"
 #include "tint/tint.h"
+
+#ifdef DAWN_ENABLE_SPIRV_VALIDATION
+#include "dawn/native/SpirvValidation.h"
+#endif
 
 namespace dawn::native::vulkan {
 
