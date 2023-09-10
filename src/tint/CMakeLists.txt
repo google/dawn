@@ -44,7 +44,7 @@ function(tint_core_compile_options TARGET)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_SYNTAX_TREE_WRITER=$<BOOL:${TINT_BUILD_SYNTAX_TREE_WRITER}>)
 
   # TODO(crbug.com/dawn/1704): Remove when chromium_experimental_pixel_local is production-ready
-  target_compile_definitions(${TARGET} PUBLIC -DTINT_ENABLE_LOCAL_STORAGE_EXTENSION=$<BOOL:${TINT_ENABLE_LOCAL_STORAGE_EXTENSION}>)
+  target_compile_definitions(${TARGET} PUBLIC -DTINT_ENABLE_PIXEL_LOCAL_EXTENSION=$<BOOL:${TINT_ENABLE_PIXEL_LOCAL_EXTENSION}>)
 
   common_compile_options(${TARGET})
 endfunction()

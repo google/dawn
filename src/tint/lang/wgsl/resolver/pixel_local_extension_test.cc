@@ -32,14 +32,14 @@ TEST_F(ResolverPixelLocalExtensionTest, AddressSpaceUsedWithExtension) {
 
     GlobalVar("v", ty.u32(), core::AddressSpace::kPixelLocal);
 
-#if TINT_ENABLE_LOCAL_STORAGE_EXTENSION
+#if TINT_ENABLE_PIXEL_LOCAL_EXTENSION
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 #else
     // TODO(crbug.com/dawn/1704): Remove when chromium_experimental_pixel_local is production-ready
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(12:34 error: chromium_experimental_pixel_local requires TINT_ENABLE_LOCAL_STORAGE_EXTENSION)");
+        R"(12:34 error: chromium_experimental_pixel_local requires TINT_ENABLE_PIXEL_LOCAL_EXTENSION)");
 #endif
 }
 
@@ -59,7 +59,7 @@ TEST_F(ResolverPixelLocalExtensionTest, AddressSpaceUsedWithoutExtension) {
         R"(12:34 error: 'pixel_local' address space requires the 'chromium_experimental_pixel_local' extension enabled)");
 }
 
-#if TINT_ENABLE_LOCAL_STORAGE_EXTENSION
+#if TINT_ENABLE_PIXEL_LOCAL_EXTENSION
 
 TEST_F(ResolverPixelLocalExtensionTest, VertexStageDirect) {
     // enable chromium_experimental_pixel_local;

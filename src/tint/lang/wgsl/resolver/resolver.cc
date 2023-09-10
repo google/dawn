@@ -4000,10 +4000,10 @@ bool Resolver::Enable(const ast::Enable* enable) {
         enabled_extensions_.Add(ext->name);
 
 // TODO(crbug.com/dawn/1704): Remove when chromium_experimental_pixel_local is production-ready
-#if !TINT_ENABLE_LOCAL_STORAGE_EXTENSION
+#if !TINT_ENABLE_PIXEL_LOCAL_EXTENSION
         if (ext->name == core::Extension::kChromiumExperimentalPixelLocal) {
             AddError(std::string(core::ToString(core::Extension::kChromiumExperimentalPixelLocal)) +
-                         " requires TINT_ENABLE_LOCAL_STORAGE_EXTENSION",
+                         " requires TINT_ENABLE_PIXEL_LOCAL_EXTENSION",
                      enable->source);
             return false;
         }

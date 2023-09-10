@@ -1053,10 +1053,10 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceNoExtension) {
     Func("f", Vector{arg}, ty.void_(), tint::Empty);
 
     if (param.address_space == core::AddressSpace::kPixelLocal) {
-#if !TINT_ENABLE_LOCAL_STORAGE_EXTENSION
+#if !TINT_ENABLE_PIXEL_LOCAL_EXTENSION
         // TODO(crbug.com/dawn/1704): Remove when chromium_experimental_pixel_local is
         // production-ready
-        GTEST_SKIP() << "requires TINT_ENABLE_LOCAL_STORAGE_EXTENSION";
+        GTEST_SKIP() << "requires TINT_ENABLE_PIXEL_LOCAL_EXTENSION";
 #else
         Enable(core::Extension::kChromiumExperimentalPixelLocal);
 #endif
@@ -1088,10 +1088,10 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithFullPtrParameter
     Func("f", Vector{arg}, ty.void_(), tint::Empty);
 
     if (param.address_space == core::AddressSpace::kPixelLocal) {
-#if !TINT_ENABLE_LOCAL_STORAGE_EXTENSION
+#if !TINT_ENABLE_PIXEL_LOCAL_EXTENSION
         // TODO(crbug.com/dawn/1704): Remove when chromium_experimental_pixel_local is
         // production-ready
-        GTEST_SKIP() << "requires TINT_ENABLE_LOCAL_STORAGE_EXTENSION";
+        GTEST_SKIP() << "requires TINT_ENABLE_PIXEL_LOCAL_EXTENSION";
 #else
         Enable(core::Extension::kChromiumExperimentalPixelLocal);
 #endif

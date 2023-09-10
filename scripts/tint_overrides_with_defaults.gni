@@ -88,8 +88,8 @@ declare_args() {
   }
 
   # TODO(crbug.com/dawn/1704): Remove when chromium_experimental_pixel_local is production-ready
-  if (!defined(tint_enable_local_storage_extension)) {
-    tint_enable_local_storage_extension = false
+  if (!defined(tint_enable_pixel_local_extension)) {
+    tint_enable_pixel_local_extension = false
   }
 }
 

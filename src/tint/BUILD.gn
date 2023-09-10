@@ -90,10 +90,10 @@ config("tint_public_config") {
   }
 
   # TODO(crbug.com/dawn/1704): Remove when chromium_experimental_pixel_local is production-ready
-  if (tint_enable_local_storage_extension) {
-    defines += [ "TINT_ENABLE_LOCAL_STORAGE_EXTENSION=1" ]
+  if (tint_enable_pixel_local_extension) {
+    defines += [ "TINT_ENABLE_PIXEL_LOCAL_EXTENSION=1" ]
   } else {
-    defines += [ "TINT_ENABLE_LOCAL_STORAGE_EXTENSION=0" ]
+    defines += [ "TINT_ENABLE_PIXEL_LOCAL_EXTENSION=0" ]
   }
 
   include_dirs = [

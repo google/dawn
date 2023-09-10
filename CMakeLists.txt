@@ -188,7 +188,7 @@ option_if_not_defined(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issu
 option_if_not_defined(TINT_RANDOMIZE_HASHES "Randomize the hash seed value to detect non-deterministic output" OFF)
 
 # TODO(crbug.com/dawn/1704): Remove when chromium_experimental_pixel_local is production-ready
-option_if_not_defined(TINT_ENABLE_LOCAL_STORAGE_EXTENSION "Enable the WIP 'chromium_experimental_pixel_local' extension" OFF)
+option_if_not_defined(TINT_ENABLE_PIXEL_LOCAL_EXTENSION "Enable the WIP 'chromium_experimental_pixel_local' extension" OFF)
 
 # Recommended setting for compability with future abseil releases.
 set(ABSL_PROPAGATE_CXX_STD ON)
