@@ -42,6 +42,9 @@ Result Msl(const std::string& xcrun_path, const std::string& source, MslVersion 
         case MslVersion::kMsl_2_1:
             version_str = "-std=macos-metal2.1";
             break;
+        case MslVersion::kMsl_2_3:
+            version_str = "-std=macos-metal2.3";
+            break;
     }
 
 #ifdef _WIN32

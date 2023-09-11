@@ -43,6 +43,11 @@ Result UsingMetalAPI(const std::string& src, MslVersion version) {
         case MslVersion::kMsl_2_1:
             compileOptions.languageVersion = MTLLanguageVersion2_1;
             break;
+        case MslVersion::kMsl_2_3:
+            if (@available(macOS 11.0, *)) {
+                compileOptions.languageVersion = MTLLanguageVersion2_3;
+            }
+            break;
     }
 
     id<MTLLibrary> library = [device newLibraryWithSource:source

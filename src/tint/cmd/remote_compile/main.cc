@@ -427,6 +427,9 @@ bool RunServer(std::string port) {
                     if (req.version_major == 2 && req.version_minor == 1) {
                         version = tint::msl::validate::MslVersion::kMsl_2_1;
                     }
+                    if (req.version_major == 2 && req.version_minor == 3) {
+                        version = tint::msl::validate::MslVersion::kMsl_2_3;
+                    }
                     auto result = tint::msl::validate::UsingMetalAPI(req.source, version);
                     CompileResponse resp;
                     if (result.failed) {

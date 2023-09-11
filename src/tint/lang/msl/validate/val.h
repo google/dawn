@@ -30,11 +30,18 @@ namespace tint::msl::validate {
 
 using EntryPointList = std::vector<std::pair<std::string, ast::PipelineStage>>;
 
-// The version of MSL to validate against.
+/// The version of MSL to validate against.
+/// Note: these must kept be in ascending order
 enum class MslVersion {
     kMsl_1_2,
     kMsl_2_1,
+    kMsl_2_3,
 };
+
+/// MslVersion less-than operator
+inline bool operator<(MslVersion a, MslVersion b) {
+    return static_cast<int>(a) < static_cast<int>(b);
+}
 
 /// The return structure of Validate()
 struct Result {
