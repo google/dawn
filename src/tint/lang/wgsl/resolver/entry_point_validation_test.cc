@@ -469,7 +469,7 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantOneVariableUsedInEntryPoint
     GlobalVar("a", ty.u32(), core::AddressSpace::kPushConstant);
 
     Func("main", {}, ty.void_(), Vector{Assign(Phony(), "a")},
-         Vector{Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
+         Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_a)});
 
     EXPECT_TRUE(r()->Resolve());
 }
@@ -487,7 +487,7 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantTwoVariablesUsedInEntryPoin
     GlobalVar(Source{{3, 4}}, "b", ty.u32(), core::AddressSpace::kPushConstant);
 
     Func(Source{{5, 6}}, "main", {}, ty.void_(), Vector{Assign(Phony(), "a"), Assign(Phony(), "b")},
-         Vector{Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
+         Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_a)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -520,7 +520,7 @@ TEST_F(ResolverEntryPointValidationTest,
 
     Func(Source{{9, 10}}, "main", {}, ty.void_(),
          Vector{CallStmt(Call("uses_a")), CallStmt(Call("uses_b"))},
-         Vector{Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
+         Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_a)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -548,9 +548,9 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantTwoVariablesUsedInDifferent
     GlobalVar("b", ty.u32(), core::AddressSpace::kPushConstant);
 
     Func("uses_a", {}, ty.void_(), Vector{Assign(Phony(), "a")},
-         Vector{Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
+         Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_a)});
     Func("uses_b", {}, ty.void_(), Vector{Assign(Phony(), "b")},
-         Vector{Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
+         Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_a)});
 
     EXPECT_TRUE(r()->Resolve());
 }

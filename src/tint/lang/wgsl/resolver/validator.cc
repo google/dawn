@@ -2036,66 +2036,15 @@ bool Validator::PipelineStages(VectorRef<sem::Function*> entry_points) const {
     return true;
 }
 
-bool Validator::PushConstants(VectorRef<sem::Function*> entry_points) const {
+bool Validator::ModuleScopeVarUsages(VectorRef<sem::Function*> entry_points) const {
     for (auto* entry_point : entry_points) {
-        // State checked and modified by check_push_constant so that it remembers previously seen
-        // push_constant variables for an entry-point.
-        const sem::Variable* push_constant_var = nullptr;
-        const sem::Function* push_constant_func = nullptr;
-
-        auto check_push_constant = [&](const sem::Function* func, const sem::Function* ep) {
-            for (auto* var : func->DirectlyReferencedGlobals()) {
-                if (var->AddressSpace() != core::AddressSpace::kPushConstant ||
-                    var == push_constant_var) {
-                    continue;
-                }
-
-                if (push_constant_var == nullptr) {
-                    push_constant_var = var;
-                    push_constant_func = func;
-                    continue;
-                }
-
-                AddError("entry point '" + ep->Declaration()->name->symbol.Name() +
-                             "' uses two different 'push_constant' variables.",
-                         ep->Declaration()->source);
-                AddNote("first 'push_constant' variable declaration is here",
-                        var->Declaration()->source);
-                if (func != ep) {
-                    TraverseCallChain(ep, func, [&](const sem::Function* f) {
-                        AddNote(
-                            "called by function '" + f->Declaration()->name->symbol.Name() + "'",
-                            f->Declaration()->source);
-                    });
-                    AddNote(
-                        "called by entry point '" + ep->Declaration()->name->symbol.Name() + "'",
-                        ep->Declaration()->source);
-                }
-                AddNote("second 'push_constant' variable declaration is here",
-                        push_constant_var->Declaration()->source);
-                if (push_constant_func != ep) {
-                    TraverseCallChain(ep, push_constant_func, [&](const sem::Function* f) {
-                        AddNote(
-                            "called by function '" + f->Declaration()->name->symbol.Name() + "'",
-                            f->Declaration()->source);
-                    });
-                    AddNote(
-                        "called by entry point '" + ep->Declaration()->name->symbol.Name() + "'",
-                        ep->Declaration()->source);
-                }
-                return false;
-            }
-
-            return true;
-        };
-
-        if (!check_push_constant(entry_point, entry_point)) {
+        if (!CheckNoMultipleModuleScopeVarsOfAddressSpace(entry_point,
+                                                          core::AddressSpace::kPushConstant)) {
             return false;
         }
-        for (auto* func : entry_point->TransitivelyCalledFunctions()) {
-            if (!check_push_constant(func, entry_point)) {
-                return false;
-            }
+        if (!CheckNoMultipleModuleScopeVarsOfAddressSpace(entry_point,
+                                                          core::AddressSpace::kPixelLocal)) {
+            return false;
         }
     }
 
@@ -2671,10 +2620,10 @@ bool Validator::CheckTypeAccessAddressSpace(const core::type::Type* store_ty,
 
     switch (address_space) {
         case core::AddressSpace::kPixelLocal:
-            using AllowedTypes = std::tuple<core::type::I32, core::type::U32, core::type::F32>;
             if (auto* str = store_ty->As<sem::Struct>()) {
                 for (auto* member : str->Members()) {
-                    if (TINT_UNLIKELY(!member->Type()->TypeInfo().IsAnyOfTuple<AllowedTypes>())) {
+                    using Allowed = std::tuple<core::type::I32, core::type::U32, core::type::F32>;
+                    if (TINT_UNLIKELY(!member->Type()->TypeInfo().IsAnyOfTuple<Allowed>())) {
                         AddError(
                             "struct members used in the 'pixel_local' address space can only be of "
                             "the type 'i32', 'u32' or 'f32'",
@@ -2685,11 +2634,8 @@ bool Validator::CheckTypeAccessAddressSpace(const core::type::Type* store_ty,
                         return false;
                     }
                 }
-            } else if (TINT_UNLIKELY(!store_ty->TypeInfo().IsAnyOfTuple<AllowedTypes>())) {
-                AddError(
-                    "'pixel_local' address space variables can only be of type 'i32', 'u32', 'f32' "
-                    "or a struct of those types",
-                    source);
+            } else if (TINT_UNLIKELY(!store_ty->TypeInfo().Is<core::type::Struct>())) {
+                AddError("'pixel_local' variable only support struct storage types", source);
                 return false;
             }
             break;
@@ -2753,6 +2699,66 @@ bool Validator::CheckTypeAccessAddressSpace(const core::type::Type* store_ty,
         [&](const core::type::Struct*) { return check_sub_atomics(); },  //
         [&](const core::type::Array*) { return check_sub_atomics(); },   //
         [&](Default) { return true; });
+}
+
+bool Validator::CheckNoMultipleModuleScopeVarsOfAddressSpace(sem::Function* entry_point,
+                                                             core::AddressSpace space) const {
+    // State checked and modified by check() so that it remembers previously seen push_constant
+    // variables for an entry-point.
+    const sem::Variable* seen_var = nullptr;
+    const sem::Function* seen_func = nullptr;
+
+    auto check = [&](const sem::Function* func, const sem::Function* ep) {
+        for (auto* var : func->DirectlyReferencedGlobals()) {
+            if (var->AddressSpace() != space || var == seen_var) {
+                continue;
+            }
+
+            if (seen_var == nullptr) {
+                seen_var = var;
+                seen_func = func;
+                continue;
+            }
+
+            std::string s{core::ToString(space)};
+
+            AddError("entry point '" + ep->Declaration()->name->symbol.Name() +
+                         "' uses two different '" + s + "' variables.",
+                     ep->Declaration()->source);
+            AddNote("first '" + s + "' variable declaration is here", var->Declaration()->source);
+            if (func != ep) {
+                TraverseCallChain(ep, func, [&](const sem::Function* f) {
+                    AddNote("called by function '" + f->Declaration()->name->symbol.Name() + "'",
+                            f->Declaration()->source);
+                });
+                AddNote("called by entry point '" + ep->Declaration()->name->symbol.Name() + "'",
+                        ep->Declaration()->source);
+            }
+            AddNote("second '" + s + "' variable declaration is here",
+                    seen_var->Declaration()->source);
+            if (seen_func != ep) {
+                TraverseCallChain(ep, seen_func, [&](const sem::Function* f) {
+                    AddNote("called by function '" + f->Declaration()->name->symbol.Name() + "'",
+                            f->Declaration()->source);
+                });
+                AddNote("called by entry point '" + ep->Declaration()->name->symbol.Name() + "'",
+                        ep->Declaration()->source);
+            }
+            return false;
+        }
+
+        return true;
+    };
+
+    if (!check(entry_point, entry_point)) {
+        return false;
+    }
+    for (auto* func : entry_point->TransitivelyCalledFunctions()) {
+        if (!check(func, entry_point)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 }  // namespace tint::resolver

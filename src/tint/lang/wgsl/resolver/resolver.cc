@@ -206,7 +206,7 @@ bool Resolver::ResolveInternal() {
         return false;
     }
 
-    if (!validator_.PushConstants(entry_points_)) {
+    if (!validator_.ModuleScopeVarUsages(entry_points_)) {
         return false;
     }
 

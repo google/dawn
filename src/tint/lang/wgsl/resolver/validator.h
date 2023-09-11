@@ -154,10 +154,11 @@ class Validator {
     /// @returns true on success, false otherwise.
     bool PipelineStages(VectorRef<sem::Function*> entry_points) const;
 
-    /// Validates push_constant variables
+    /// Validates usages of module-scope vars.
+    /// @note Must only be called after all functions have been resolved.
     /// @param entry_points the entry points to the module
     /// @returns true on success, false otherwise.
-    bool PushConstants(VectorRef<sem::Function*> entry_points) const;
+    bool ModuleScopeVarUsages(VectorRef<sem::Function*> entry_points) const;
 
     /// Validates aliases
     /// @param alias the alias to validate
@@ -547,6 +548,15 @@ class Validator {
                                      core::AddressSpace address_space,
                                      VectorRef<const tint::ast::Attribute*> attributes,
                                      const Source& source) const;
+
+    /// Raises an error if the entry_point @p entry_point uses two or more module-scope 'var's with
+    /// the address space @p space.
+    /// @param entry_point the entry point
+    /// @param space the address space
+    /// @returns true if no duplicate uses were found or false if an error was raised.
+    bool CheckNoMultipleModuleScopeVarsOfAddressSpace(sem::Function* entry_point,
+                                                      core::AddressSpace space) const;
+
     SymbolTable& symbols_;
     diag::List& diagnostics_;
     SemHelper& sem_;
