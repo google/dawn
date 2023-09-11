@@ -201,12 +201,6 @@ struct ModuleScopeVarToEntryPointParam::State {
                 }
                 break;
             }
-            case core::AddressSpace::kPushConstant: {
-                ctx.dst->Diagnostics().add_error(
-                    diag::System::Transform,
-                    "unhandled module-scope address space (" + tint::ToString(sc) + ")");
-                break;
-            }
             default: {
                 TINT_ICE() << "unhandled module-scope address space (" << sc << ")";
                 break;
