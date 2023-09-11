@@ -1,0 +1,30 @@
+# Copyright 2023 The Tint Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# GEN_BUILD:DO_NOT_GENERATE - This is a hand-crafted file.
+
+load(":flags.bzl", "declare_bool_flag", "declare_os_flag")
+
+# Declares the 'tint_build_*' flags that control what parts of Tint get built
+declare_bool_flag(name = "tint_build_glsl_writer", default = False)
+declare_bool_flag(name = "tint_build_hlsl_writer", default = True)
+declare_bool_flag(name = "tint_build_ir",          default = True)
+declare_bool_flag(name = "tint_build_msl_writer",  default = True)
+declare_bool_flag(name = "tint_build_spv_reader",  default = True)
+declare_bool_flag(name = "tint_build_spv_writer",  default = True)
+declare_bool_flag(name = "tint_build_wgsl_reader", default = True)
+declare_bool_flag(name = "tint_build_wgsl_writer", default = True)
+
+# Declares the 'os' flag that control what OS-specific Tint code gets built
+declare_os_flag()

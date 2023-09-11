@@ -38,8 +38,6 @@
 #include "src/tint/cmd/common/helper.h"
 #include "src/tint/lang/core/ir/disassembler.h"
 #include "src/tint/lang/core/ir/module.h"
-#include "src/tint/lang/hlsl/validate/val.h"
-#include "src/tint/lang/msl/validate/val.h"
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/transform/first_index_offset.h"
 #include "src/tint/lang/wgsl/ast/transform/manager.h"
@@ -74,10 +72,12 @@
 #endif  // TINT_BUILD_WGSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
+#include "src/tint/lang/msl/validate/val.h"
 #include "src/tint/lang/msl/writer/writer.h"
 #endif  // TINT_BUILD_MSL_WRITER
 
 #if TINT_BUILD_HLSL_WRITER
+#include "src/tint/lang/hlsl/validate/val.h"
 #include "src/tint/lang/hlsl/writer/writer.h"
 #endif  // TINT_BUILD_HLSL_WRITER
 
@@ -118,7 +118,7 @@
 namespace {
 
 /// Prints the given hash value in a format string that the end-to-end test runner can parse.
-void PrintHash(uint32_t hash) {
+[[maybe_unused]] void PrintHash(uint32_t hash) {
     std::cout << "<<HASH: 0x" << std::hex << hash << ">>" << std::endl;
 }
 

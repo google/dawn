@@ -35,7 +35,7 @@ if (tint_build_unittests) {
 */ -}}
 {{- define "Target"}}
 
-{{-   if Contains (print $.Kind) "test"}}
+{{-   if $.Kind.IsTestOrTestCmd}}
 if (tint_build_unittests) {
 {{-   end}}
 
