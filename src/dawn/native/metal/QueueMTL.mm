@@ -41,6 +41,7 @@ Queue::~Queue() {}
 void Queue::Destroy() {
     // Forget all pending commands.
     mCommandContext.AcquireCommands();
+    UpdateWaitingEvents(kMaxExecutionSerial);
     mCommandQueue = nullptr;
     mLastSubmittedCommands = nullptr;
     mMtlSharedEvent = nullptr;
@@ -59,6 +60,42 @@ MaybeError Queue::Initialize() {
     }
 
     return mCommandContext.PrepareNextCommandBuffer(*mCommandQueue);
+}
+
+void Queue::UpdateWaitingEvents(ExecutionSerial completedSerial) {
+    ASSERT(mCompletedSerial >= uint64_t(completedSerial) || completedSerial == kMaxExecutionSerial);
+    mWaitingEvents.Use([&](auto waitingEvents) {
+        for (auto& waiting : waitingEvents->IterateUpTo(completedSerial)) {
+            std::move(waiting).Signal();
+        }
+        waitingEvents->ClearUpTo(completedSerial);
+    });
+}
+
+SystemEventReceiver Queue::InsertWorkDoneEvent() {
+    ExecutionSerial serial = GetScheduledWorkDoneSerial();
+
+    // TODO(crbug.com/dawn/1987): Optimize to not create a pipe for every WorkDone/MapAsync event.
+    // Possible ways to do this:
+    // - Don't create the pipe until needed (see the todo on TrackedEvent::mReceiver).
+    // - Dedup event pipes when one serial is needed for multiple events (and add a
+    //   SystemEventReceiver::Duplicate() method which dup()s its underlying pipe receiver).
+    // - Create a pipe each for each new serial instead of for each requested event (tradeoff).
+    SystemEventPipeSender sender;
+    SystemEventReceiver receiver;
+    std::tie(sender, receiver) = CreateSystemEventPipe();
+
+    mWaitingEvents.Use([&](auto waitingEvents) {
+        // Check for device loss while the lock is held. Otherwise, we could enqueue the event
+        // after mWaitingEvents has been flushed for device loss, and it'll never get cleaned up.
+        if (GetDevice()->IsLost() || mCompletedSerial >= uint64_t(serial)) {
+            std::move(sender).Signal();
+        } else {
+            waitingEvents->Enqueue(std::move(sender), serial);
+        }
+    });
+
+    return receiver;
 }
 
 MaybeError Queue::WaitForIdleForDestruction() {
@@ -139,6 +176,8 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
                                uint64_t(pendingSerial));
         ASSERT(uint64_t(pendingSerial) > mCompletedSerial.load());
         this->mCompletedSerial = uint64_t(pendingSerial);
+
+        this->UpdateWaitingEvents(pendingSerial);
     }];
 
     TRACE_EVENT_ASYNC_BEGIN0(platform, GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",

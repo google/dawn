@@ -34,6 +34,7 @@ class Queue final : public ObjectBase {
     void OnSubmittedWorkDone(uint64_t signalValue,
                              WGPUQueueWorkDoneCallback callback,
                              void* userdata);
+    WGPUFuture OnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInfo& callbackInfo);
     void WriteBuffer(WGPUBuffer cBuffer, uint64_t bufferOffset, const void* data, size_t size);
     void WriteTexture(const WGPUImageCopyTexture* destination,
                       const void* data,

@@ -29,6 +29,7 @@
     "create instance": {
         "category": "function",
         "returns": "instance",
+        "_comment": "TODO(crbug.com/dawn/1987): The return type should be nullable; null is returned in error cases.",
         "args": [
             {"name": "descriptor", "type": "instance descriptor", "annotation": "const*", "optional": true}
         ]
@@ -42,7 +43,7 @@
         "category": "function",
         "returns": "proc",
         "args": [
-            {"name": "device", "type": "device"},
+            {"name": "device", "type": "device", "optional": true},
             {"name": "proc name", "type": "char", "annotation": "const*"}
         ]
     },
@@ -1951,6 +1952,15 @@
                 "name": "process events"
             },
             {
+                "name": "wait any",
+                "returns": "wait status",
+                "args": [
+                    {"name": "future count", "type": "size_t"},
+                    {"name": "futures", "type": "future wait info", "annotation": "*", "length": "future count"},
+                    {"name": "timeout NS", "type": "uint64_t"}
+                ]
+            },
+            {
                 "name": "request adapter",
                 "args": [
                     {"name": "options", "type": "request adapter options", "annotation": "const*", "optional": true, "no_default": true},
@@ -1960,10 +1970,63 @@
             }
         ]
     },
+    "callback mode": {
+        "_comment": "TODO(crbug.com/dawn/1987): Change this to an enum, and always return a future (https://github.com/webgpu-native/webgpu-headers/issues/199#issuecomment-1710784711).",
+        "category": "bitmask",
+        "values": [
+            {"name": "future", "value": 1},
+            {"name": "process events", "value": 2},
+            {"name": "spontaneous", "value": 4}
+        ]
+    },
+    "future": {
+        "category": "structure",
+        "members": [
+            {"name": "id", "type": "uint64_t"}
+        ]
+    },
+    "wait status": {
+        "category": "enum",
+        "_comment": "TODO(crbug.com/dawn/1987): This could be possibly be [[nodiscard]].",
+        "emscripten_no_enum_table": true,
+        "values": [
+            {"name": "success", "value": 0},
+            {"name": "timed out", "value": 1},
+            {"name": "unsupported timeout", "value": 2},
+            {"name": "unsupported count", "value": 3},
+            {"name": "unsupported mixed sources", "value": 4},
+            {"name": "unknown", "value": 5}
+        ]
+    },
+    "future wait info": {
+        "category": "structure",
+        "members": [
+            {"name": "future", "type": "future"},
+            {"name": "completed", "type": "bool", "default": "false"}
+        ]
+    },
+    "instance features": {
+        "category": "structure",
+        "extensible": "in",
+        "members": [
+            {"name": "timed wait any enable", "type": "bool", "default": "false"},
+            {"name": "timed wait any max count", "type": "size_t", "default": "0"}
+        ]
+    },
     "instance descriptor": {
         "category": "structure",
         "extensible": "in",
-        "members": []
+        "members": [
+            {"name": "features", "type": "instance features"}
+        ]
+    },
+    "get instance features": {
+        "category": "function",
+        "_comment": "TODO(crbug.com/dawn/1987): Figure out how to return error codes for functions like this (https://github.com/webgpu-native/webgpu-headers/issues/115).",
+        "returns": "bool",
+        "args": [
+            {"name": "features", "type": "instance features", "annotation": "*"}
+        ]
     },
     "vertex attribute": {
         "category": "structure",
@@ -2198,6 +2261,15 @@
                 ]
             },
             {
+                "name": "on submitted work done f",
+                "_comment": "TODO(crbug.com/dawn/2021): This is dawn/emscripten-only until we rename it to replace the old API. See bug for details.",
+                "tags": ["dawn", "emscripten"],
+                "returns": "future",
+                "args": [
+                    {"name": "callback info", "type": "queue work done callback info"}
+                ]
+            },
+            {
                 "name": "write buffer",
                 "args": [
                     {"name": "buffer", "type": "buffer"},
@@ -2258,6 +2330,15 @@
         "category": "function pointer",
         "args": [
             {"name": "status", "type": "queue work done status"},
+            {"name": "userdata", "type": "void *"}
+        ]
+    },
+    "queue work done callback info": {
+        "category": "structure",
+        "extensible": "in",
+        "members": [
+            {"name": "mode", "type": "callback mode"},
+            {"name": "callback", "type": "queue work done callback"},
             {"name": "userdata", "type": "void *"}
         ]
     },

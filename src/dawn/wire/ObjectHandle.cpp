@@ -14,11 +14,15 @@
 
 #include "dawn/wire/ObjectHandle.h"
 
+#include "dawn/common/Assert.h"
+
 namespace dawn::wire {
 
 ObjectHandle::ObjectHandle() = default;
 ObjectHandle::ObjectHandle(ObjectId id, ObjectGeneration generation)
-    : id(id), generation(generation) {}
+    : id(id), generation(generation) {
+    ASSERT(id != 0);
+}
 
 ObjectHandle::ObjectHandle(const volatile ObjectHandle& rhs)
     : id(rhs.id), generation(rhs.generation) {}
@@ -41,4 +45,9 @@ ObjectHandle& ObjectHandle::AssignFrom(const volatile ObjectHandle& rhs) {
     generation = rhs.generation;
     return *this;
 }
+
+bool ObjectHandle::IsValid() const {
+    return id > 0;
+}
+
 }  // namespace dawn::wire

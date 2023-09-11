@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "dawn/common/FutureUtils.h"
 #include "dawn/tests/DawnTest.h"
-
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace dawn {
@@ -59,6 +59,20 @@ TEST_P(BasicTests, QueueWriteBufferError) {
 
     uint8_t value = 187;
     ASSERT_DEVICE_ERROR(queue.WriteBuffer(buffer, 1000, &value, sizeof(value)));
+}
+
+TEST_P(BasicTests, GetInstanceFeatures) {
+    wgpu::InstanceFeatures instanceFeatures{};
+    bool success = wgpu::GetInstanceFeatures(&instanceFeatures);
+    EXPECT_TRUE(success);
+    EXPECT_EQ(instanceFeatures.timedWaitAnyEnable, !UsesWire());
+    EXPECT_EQ(instanceFeatures.timedWaitAnyMaxCount, kTimedWaitAnyMaxCountDefault);
+    EXPECT_EQ(instanceFeatures.nextInChain, nullptr);
+
+    wgpu::ChainedStruct chained{};
+    instanceFeatures.nextInChain = &chained;
+    success = wgpu::GetInstanceFeatures(&instanceFeatures);
+    EXPECT_FALSE(success);
 }
 
 DAWN_INSTANTIATE_TEST(BasicTests,

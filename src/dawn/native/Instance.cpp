@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "dawn/common/Assert.h"
+#include "dawn/common/FutureUtils.h"
 #include "dawn/common/GPUInfo.h"
 #include "dawn/common/Log.h"
 #include "dawn/common/SystemUtils.h"
@@ -47,8 +48,6 @@
 #if defined(DAWN_USE_X11)
 #include "dawn/native/X11Functions.h"
 #endif  // defined(DAWN_USE_X11)
-
-#include <optional>
 
 namespace dawn::native {
 
@@ -96,6 +95,16 @@ dawn::platform::CachingInterface* GetCachingInterface(dawn::platform::Platform* 
 
 }  // anonymous namespace
 
+wgpu::Bool APIGetInstanceFeatures(InstanceFeatures* features) {
+    if (features->nextInChain != nullptr) {
+        return false;
+    }
+
+    features->timedWaitAnyEnable = true;
+    features->timedWaitAnyMaxCount = kTimedWaitAnyMaxCountDefault;
+    return true;
+}
+
 InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor) {
     return InstanceBase::Create(descriptor).Detach();
 }
@@ -132,7 +141,10 @@ InstanceBase::~InstanceBase() = default;
 
 void InstanceBase::WillDropLastExternalRef() {
     // InstanceBase uses RefCountedWithExternalCount to break refcycles.
-    //
+
+    // Stop tracking events. See comment on ShutDown.
+    mEventManager.ShutDown();
+
     // InstanceBase holds backends which hold Refs to PhysicalDeviceBases discovered, which hold
     // Refs back to the InstanceBase.
     // In order to break this cycle and prevent leaks, when the application drops the last external
@@ -173,6 +185,8 @@ MaybeError InstanceBase::Initialize(const InstanceDescriptor* descriptor) {
     // Initialize the platform to the default for now.
     mDefaultPlatform = std::make_unique<dawn::platform::Platform>();
     SetPlatform(dawnDesc != nullptr ? dawnDesc->platform : mDefaultPlatform.get());
+
+    DAWN_TRY(mEventManager.Initialize(descriptor));
 
     return {};
 }
@@ -560,6 +574,13 @@ void InstanceBase::APIProcessEvents() {
     }
 
     mCallbackTaskManager->Flush();
+    mEventManager.ProcessPollEvents();
+}
+
+wgpu::WaitStatus InstanceBase::APIWaitAny(size_t count,
+                                          FutureWaitInfo* futures,
+                                          uint64_t timeoutNS) {
+    return mEventManager.WaitAny(count, futures, Nanoseconds(timeoutNS));
 }
 
 const std::vector<std::string>& InstanceBase::GetRuntimeSearchPaths() const {
@@ -568,6 +589,10 @@ const std::vector<std::string>& InstanceBase::GetRuntimeSearchPaths() const {
 
 const Ref<CallbackTaskManager>& InstanceBase::GetCallbackTaskManager() const {
     return mCallbackTaskManager;
+}
+
+EventManager* InstanceBase::GetEventManager() {
+    return &mEventManager;
 }
 
 void InstanceBase::ConsumeError(std::unique_ptr<ErrorData> error) {

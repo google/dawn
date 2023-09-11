@@ -27,6 +27,7 @@
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/WireDeserializeAllocator.h"
 #include "dawn/wire/client/ClientBase_autogen.h"
+#include "dawn/wire/client/EventManager.h"
 #include "dawn/wire/client/ObjectStore.h"
 
 namespace dawn::wire::client {
@@ -91,6 +92,8 @@ class Client : public ClientBase {
         mSerializer.SerializeCommand(cmd, *this, std::forward<Extensions>(es)...);
     }
 
+    EventManager* GetEventManager();
+
     void Disconnect();
     bool IsDisconnected() const;
 
@@ -105,6 +108,7 @@ class Client : public ClientBase {
     MemoryTransferService* mMemoryTransferService = nullptr;
     std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
     PerObjectType<LinkedList<ObjectBase>> mObjects;
+    EventManager mEventManager;
     bool mDisconnected = false;
 };
 

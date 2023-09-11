@@ -188,7 +188,9 @@ extern "C" {
 {% for function in by_category["function"] %}
     {{API}}_EXPORT {{as_cType(function.return_type.name)}} {{as_cMethod(None, function.name)}}(
             {%- for arg in function.arguments -%}
-                {% if not loop.first %}, {% endif %}{{as_annotated_cType(arg)}}
+                {% if not loop.first %}, {% endif -%}
+                {%- if arg.optional %}{{API}}_NULLABLE {% endif -%}
+                {{as_annotated_cType(arg)}}
             {%- endfor -%}
         ) {{API}}_FUNCTION_ATTRIBUTE;
 {% endfor %}

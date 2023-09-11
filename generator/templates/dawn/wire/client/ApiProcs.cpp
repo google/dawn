@@ -14,6 +14,7 @@
 
 #include "dawn/wire/client/ApiObjects.h"
 #include "dawn/wire/client/Client.h"
+#include "dawn/wire/client/Instance.h"
 
 #include <algorithm>
 #include <cstring>
@@ -122,11 +123,6 @@ namespace dawn::wire::client {
     {% endfor %}
 
     namespace {
-        WGPUInstance ClientCreateInstance(WGPUInstanceDescriptor const* descriptor) {
-            UNREACHABLE();
-            return nullptr;
-        }
-
         struct ProcEntry {
             WGPUProc proc;
             const char* name;
@@ -154,15 +150,14 @@ namespace dawn::wire::client {
             return entry->proc;
         }
 
-        // Special case the two free-standing functions of the API.
-        if (strcmp(procName, "wgpuGetProcAddress") == 0) {
-            return reinterpret_cast<WGPUProc>(ClientGetProcAddress);
-        }
+        // Special case the free-standing functions of the API.
+        // TODO(dawn:1238) Checking string one by one is slow, it needs to be optimized.
+        {% for function in by_category["function"] %}
+            if (strcmp(procName, "{{as_cMethod(None, function.name)}}") == 0) {
+                return reinterpret_cast<WGPUProc>(Client{{as_cppType(function.name)}});
+            }
 
-        if (strcmp(procName, "wgpuCreateInstance") == 0) {
-            return reinterpret_cast<WGPUProc>(ClientCreateInstance);
-        }
-
+        {% endfor %}
         return nullptr;
     }
 

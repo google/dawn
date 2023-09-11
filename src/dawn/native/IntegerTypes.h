@@ -21,6 +21,7 @@
 #include "dawn/common/TypedInteger.h"
 
 namespace dawn::native {
+
 // Binding numbers in the shader and BindGroup/BindGroupLayoutDescriptors
 using BindingNumber = TypedInteger<struct BindingNumberT, uint32_t>;
 constexpr BindingNumber kMaxBindingsPerBindGroupTyped = BindingNumber(kMaxBindingsPerBindGroup);
@@ -71,6 +72,8 @@ constexpr ExecutionSerial kBeginningOfGPUTime = ExecutionSerial(0);
 // token, which prevents them (and any BindGroups created with them) from being used with any
 // other pipelines.
 using PipelineCompatibilityToken = TypedInteger<struct PipelineCompatibilityTokenT, uint64_t>;
+
+using Nanoseconds = TypedInteger<struct NanosecondsT, uint64_t>;
 
 }  // namespace dawn::native
 

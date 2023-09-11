@@ -48,6 +48,7 @@ class ObjectBase : public ErrorMonad {
     explicit ObjectBase(DeviceBase* device);
     ObjectBase(DeviceBase* device, ErrorTag tag);
 
+    InstanceBase* GetInstance() const;
     DeviceBase* GetDevice() const;
 
   private:

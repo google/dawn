@@ -16,6 +16,7 @@
 #include <utility>
 
 #include "absl/strings/str_format.h"
+#include "dawn/native/Adapter.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ObjectType_autogen.h"
@@ -35,6 +36,10 @@ bool ErrorMonad::IsError() const {
 ObjectBase::ObjectBase(DeviceBase* device) : ErrorMonad(), mDevice(device) {}
 
 ObjectBase::ObjectBase(DeviceBase* device, ErrorTag) : ErrorMonad(kError), mDevice(device) {}
+
+InstanceBase* ObjectBase::GetInstance() const {
+    return mDevice->GetAdapter()->GetPhysicalDevice()->GetInstance();
+}
 
 DeviceBase* ObjectBase::GetDevice() const {
     return mDevice.Get();

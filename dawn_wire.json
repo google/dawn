@@ -172,6 +172,7 @@
     },
     "special items": {
         "client_side_structures": [
+            "FutureWaitInfo",
             "SurfaceDescriptorFromMetalLayer",
             "SurfaceDescriptorFromWindowsHWND",
             "SurfaceDescriptorFromXlibWindow",
@@ -207,6 +208,7 @@
             "QuerySetGetType",
             "QuerySetGetCount",
             "QueueOnSubmittedWorkDone",
+            "QueueOnSubmittedWorkDoneF",
             "QueueWriteBuffer",
             "QueueWriteTexture",
             "TextureGetWidth",
@@ -226,6 +228,8 @@
             "DeviceGetQueue",
             "DeviceGetSupportedSurfaceUsage",
             "DeviceInjectError",
+            "InstanceProcessEvents",
+            "InstanceWaitAny",
             "SwapChainGetCurrentTexture"
         ],
         "client_special_objects": [

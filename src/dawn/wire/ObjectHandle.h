@@ -21,9 +21,12 @@ namespace dawn::wire {
 
 using ObjectId = uint32_t;
 using ObjectGeneration = uint32_t;
+
+// ObjectHandle identifies some WebGPU object in the wire.
+// An ObjectHandle will never be reused, so can be used to uniquely identify an object forever.
 struct ObjectHandle {
-    ObjectId id;
-    ObjectGeneration generation;
+    ObjectId id = 0;
+    ObjectGeneration generation = 0;
 
     ObjectHandle();
     ObjectHandle(ObjectId id, ObjectGeneration generation);
@@ -42,6 +45,8 @@ struct ObjectHandle {
     }
     ObjectHandle& AssignFrom(const ObjectHandle& rhs);
     ObjectHandle& AssignFrom(const volatile ObjectHandle& rhs);
+
+    bool IsValid() const;
 };
 
 }  // namespace dawn::wire

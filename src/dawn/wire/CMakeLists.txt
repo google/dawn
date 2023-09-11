@@ -59,6 +59,8 @@ target_sources(dawn_wire PRIVATE
     "client/ClientInlineMemoryTransferService.cpp"
     "client/Device.cpp"
     "client/Device.h"
+    "client/EventManager.cpp"
+    "client/EventManager.h"
     "client/Instance.cpp"
     "client/Instance.h"
     "client/LimitsAndFeatures.cpp"

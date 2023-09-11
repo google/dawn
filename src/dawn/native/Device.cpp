@@ -750,6 +750,10 @@ ApiObjectList* DeviceBase::GetObjectTrackingList(ObjectType type) {
     return &mObjectLists[type];
 }
 
+InstanceBase* DeviceBase::GetInstance() const {
+    return mAdapter->GetPhysicalDevice()->GetInstance();
+}
+
 AdapterBase* DeviceBase::GetAdapter() const {
     return mAdapter.Get();
 }
@@ -2049,6 +2053,13 @@ uint64_t DeviceBase::GetBufferCopyOffsetAlignmentForDepthStencil() const {
     // For depth-stencil texture, buffer offset must be a multiple of 4, which is required
     // by WebGPU and Vulkan SPEC.
     return 4u;
+}
+
+bool DeviceBase::WaitAnyImpl(size_t futureCount,
+                             TrackedFutureWaitInfo* futures,
+                             Nanoseconds timeout) {
+    // Default for backends which don't actually need to do anything special in this case.
+    return WaitAnySystemEvent(futureCount, futures, timeout);
 }
 
 MaybeError DeviceBase::CopyFromStagingToBuffer(BufferBase* source,

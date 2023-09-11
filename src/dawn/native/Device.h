@@ -59,6 +59,7 @@ class OwnedCompilationMessages;
 struct CallbackTask;
 struct InternalPipelineStore;
 struct ShaderModuleParseResult;
+struct TrackedFutureWaitInfo;
 
 using WGSLExtensionSet = std::unordered_set<std::string>;
 
@@ -157,6 +158,7 @@ class DeviceBase : public RefCountedWithExternalCount {
 
     MaybeError ValidateObject(const ApiObjectBase* object) const;
 
+    InstanceBase* GetInstance() const;
     AdapterBase* GetAdapter() const;
     PhysicalDeviceBase* GetPhysicalDevice() const;
     virtual dawn::platform::Platform* GetPlatform() const;
@@ -429,6 +431,10 @@ class DeviceBase : public RefCountedWithExternalCount {
     void APIDestroy();
 
     virtual void AppendDebugLayerMessages(ErrorData* error) {}
+
+    [[nodiscard]] virtual bool WaitAnyImpl(size_t futureCount,
+                                           TrackedFutureWaitInfo* futures,
+                                           Nanoseconds timeout);
 
     // It is guaranteed that the wrapped mutex will outlive the Device (if the Device is deleted
     // before the AutoLockAndHoldRef).

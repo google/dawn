@@ -15,7 +15,7 @@
 #include "dawn/wire/client/Queue.h"
 
 #include "dawn/wire/client/Client.h"
-#include "dawn/wire/client/Device.h"
+#include "dawn/wire/client/EventManager.h"
 
 namespace dawn::wire::client {
 
@@ -50,6 +50,44 @@ void Queue::OnSubmittedWorkDone(uint64_t signalValue,
     cmd.requestSerial = serial;
 
     client->SerializeCommand(cmd);
+}
+
+WGPUFuture Queue::OnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInfo& callbackInfo) {
+    // TODO(crbug.com/dawn/1987): Once we always return a future, change this to log to the instance
+    // (note, not raise a validation error to the device) and return the null future.
+    ASSERT(callbackInfo.nextInChain == nullptr);
+
+    Client* client = GetClient();
+    FutureID futureIDInternal = client->GetEventManager()->TrackEvent(
+        callbackInfo.mode, [=](EventCompletionType completionType) {
+            WGPUQueueWorkDoneStatus status = completionType == EventCompletionType::Shutdown
+                                                 ? WGPUQueueWorkDoneStatus_Unknown
+                                                 : WGPUQueueWorkDoneStatus_Success;
+            callbackInfo.callback(status, callbackInfo.userdata);
+        });
+
+    struct Lambda {
+        Client* client;
+        FutureID futureIDInternal;
+    };
+    Lambda* lambda = new Lambda{client, futureIDInternal};
+    uint64_t serial = mOnWorkDoneRequests.Add(
+        {[](WGPUQueueWorkDoneStatus /* ignored */, void* userdata) {
+             auto* lambda = static_cast<Lambda*>(userdata);
+             lambda->client->GetEventManager()->SetFutureReady(lambda->futureIDInternal);
+             delete lambda;
+         },
+         lambda});
+
+    QueueOnSubmittedWorkDoneCmd cmd;
+    cmd.queueId = GetWireId();
+    cmd.signalValue = 0;
+    cmd.requestSerial = serial;
+
+    client->SerializeCommand(cmd);
+
+    FutureID futureID = (callbackInfo.mode & WGPUCallbackMode_Future) ? futureIDInternal : 0;
+    return {futureID};
 }
 
 void Queue::WriteBuffer(WGPUBuffer cBuffer, uint64_t bufferOffset, const void* data, size_t size) {
