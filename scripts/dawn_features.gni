@@ -47,11 +47,10 @@ declare_args() {
   dawn_use_swiftshader = !is_android && !is_ios
 
   # Whether we allow building DXC.
-  # Only use DXC in standalone builds until it is stable. It will be
-  # explicitly enabled in Chromium builds.
-  # DXC requires SM6.0+ which is blocklisted on x86.
+  # DXC requires SM6.0+ which is blocklisted on x86,
+  # and arm64 support is not implemented yet.
   # See crbug.com/tint/1753.
-  dawn_use_built_dxc = dawn_standalone && is_win && target_cpu != "x86"
+  dawn_use_built_dxc = is_win && target_cpu != "x86" && target_cpu != "arm64"
 }
 
 declare_args() {
