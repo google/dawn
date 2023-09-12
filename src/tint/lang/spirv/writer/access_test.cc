@@ -59,7 +59,11 @@ TEST_F(SpirvWriterTest, Access_Array_Pointer_DynamicIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result = OpAccessChain %_ptr_Function_int %arr %idx");
+    EXPECT_INST(R"(
+         %13 = OpBitcast %uint %idx
+         %14 = OpExtInst %uint %15 UMin %13 %uint_3
+     %result = OpAccessChain %_ptr_Function_int %arr %14
+)");
 }
 
 TEST_F(SpirvWriterTest, Access_Matrix_Value_ConstantIndex) {
@@ -110,9 +114,15 @@ TEST_F(SpirvWriterTest, Access_Matrix_Pointer_DynamicIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result_vector = OpAccessChain %_ptr_Function_v2float %mat %idx");
-    EXPECT_INST("%15 = OpAccessChain %_ptr_Function_float %result_vector %idx");
-    EXPECT_INST("%result_scalar = OpLoad %float %15");
+    EXPECT_INST(R"(
+         %14 = OpBitcast %uint %idx
+         %15 = OpExtInst %uint %16 UMin %14 %uint_1
+%result_vector = OpAccessChain %_ptr_Function_v2float %mat %15
+         %20 = OpBitcast %uint %idx
+         %21 = OpExtInst %uint %16 UMin %20 %uint_1
+         %22 = OpAccessChain %_ptr_Function_float %result_vector %21
+%result_scalar = OpLoad %float %22
+)");
 }
 
 TEST_F(SpirvWriterTest, Access_Vector_Value_ConstantIndex) {
@@ -141,7 +151,11 @@ TEST_F(SpirvWriterTest, Access_Vector_Value_DynamicIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%result = OpVectorExtractDynamic %int %vec %idx");
+    EXPECT_INST(R"(
+         %10 = OpBitcast %uint %idx
+         %11 = OpExtInst %uint %12 UMin %10 %uint_3
+     %result = OpVectorExtractDynamic %int %vec %11
+)");
 }
 
 TEST_F(SpirvWriterTest, Access_NestedVector_Value_DynamicIndex) {
@@ -156,8 +170,12 @@ TEST_F(SpirvWriterTest, Access_NestedVector_Value_DynamicIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%14 = OpCompositeExtract %v4int %arr 1 2");
-    EXPECT_INST("%result = OpVectorExtractDynamic %int %14 %idx");
+    EXPECT_INST(R"(
+         %13 = OpBitcast %uint %idx
+         %14 = OpExtInst %uint %15 UMin %13 %uint_3
+         %18 = OpCompositeExtract %v4int %arr 1 2
+     %result = OpVectorExtractDynamic %int %18 %14
+)");
 }
 
 TEST_F(SpirvWriterTest, Access_Struct_Value_ConstantIndex) {
@@ -229,8 +247,12 @@ TEST_F(SpirvWriterTest, LoadVectorElement_DynamicIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%11 = OpAccessChain %_ptr_Function_int %vec %idx");
-    EXPECT_INST("%result = OpLoad %int %11");
+    EXPECT_INST(R"(
+         %12 = OpBitcast %uint %idx
+         %13 = OpExtInst %uint %14 UMin %12 %uint_3
+         %16 = OpAccessChain %_ptr_Function_int %vec %13
+     %result = OpLoad %int %16
+)");
 }
 
 TEST_F(SpirvWriterTest, StoreVectorElement_ConstantIndex) {
@@ -257,8 +279,12 @@ TEST_F(SpirvWriterTest, StoreVectorElement_DynamicIndex) {
     });
 
     ASSERT_TRUE(Generate()) << Error() << output_;
-    EXPECT_INST("%11 = OpAccessChain %_ptr_Function_int %vec %idx");
-    EXPECT_INST("OpStore %11 %int_42");
+    EXPECT_INST(R"(
+         %12 = OpBitcast %uint %idx
+         %13 = OpExtInst %uint %14 UMin %12 %uint_3
+         %16 = OpAccessChain %_ptr_Function_int %vec %13
+               OpStore %16 %int_42
+)");
 }
 
 }  // namespace

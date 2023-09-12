@@ -23,6 +23,7 @@
 #include "src/tint/lang/core/ir/transform/builtin_polyfill.h"
 #include "src/tint/lang/core/ir/transform/demote_to_helper.h"
 #include "src/tint/lang/core/ir/transform/multiplanar_external_texture.h"
+#include "src/tint/lang/core/ir/transform/robustness.h"
 #include "src/tint/lang/core/ir/transform/std140.h"
 #include "src/tint/lang/spirv/writer/raise/builtin_polyfill.h"
 #include "src/tint/lang/spirv/writer/raise/expand_implicit_splats.h"
@@ -55,6 +56,16 @@ Result<SuccessType, std::string> Raise(core::ir::Module* module, const Options& 
     core_polyfills.saturate = true;
     core_polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
     RUN_TRANSFORM(core::ir::transform::BuiltinPolyfill, module, core_polyfills);
+
+    if (!options.disable_robustness) {
+        core::ir::transform::RobustnessConfig config;
+        if (options.disable_image_robustness) {
+            config.clamp_texture = false;
+        }
+        config.disable_runtime_sized_array_index_clamping =
+            options.disable_runtime_sized_array_index_clamping;
+        RUN_TRANSFORM(core::ir::transform::Robustness, module, config);
+    }
 
     RUN_TRANSFORM(core::ir::transform::MultiplanarExternalTexture, module,
                   options.external_texture_options);

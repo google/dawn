@@ -34,6 +34,7 @@ cc_library(
     "builtin_polyfill.cc",
     "demote_to_helper.cc",
     "multiplanar_external_texture.cc",
+    "robustness.cc",
     "shader_io.cc",
     "std140.cc",
   ],
@@ -46,6 +47,7 @@ cc_library(
     "builtin_polyfill.h",
     "demote_to_helper.h",
     "multiplanar_external_texture.h",
+    "robustness.h",
     "shader_io.h",
     "std140.h",
   ],
@@ -88,6 +90,7 @@ cc_library(
     "demote_to_helper_test.cc",
     "helper_test.h",
     "multiplanar_external_texture_test.cc",
+    "robustness_test.cc",
     "std140_test.cc",
   ],
   deps = [

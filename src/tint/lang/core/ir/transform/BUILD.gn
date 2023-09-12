@@ -47,6 +47,8 @@ libtint_source_set("transform") {
     "demote_to_helper.h",
     "multiplanar_external_texture.cc",
     "multiplanar_external_texture.h",
+    "robustness.cc",
+    "robustness.h",
     "shader_io.cc",
     "shader_io.h",
     "std140.cc",
@@ -89,6 +91,7 @@ if (tint_build_unittests) {
       "demote_to_helper_test.cc",
       "helper_test.h",
       "multiplanar_external_texture_test.cc",
+      "robustness_test.cc",
       "std140_test.cc",
     ]
     deps = [
