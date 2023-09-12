@@ -346,9 +346,6 @@ void CommonFuzzer::RunInspector(Program* program) {
     CHECK_INSPECTOR(program, inspector);
 
     for (auto& ep : entry_points) {
-        inspector.GetStorageSize(ep.name);
-        CHECK_INSPECTOR(program, inspector);
-
         inspector.GetResourceBindings(ep.name);
         CHECK_INSPECTOR(program, inspector);
 

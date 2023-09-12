@@ -64,7 +64,6 @@ class InspectorGetEntryPointInterpolateTest
       public testing::TestWithParam<InspectorGetEntryPointInterpolateTestParams> {};
 class InspectorGetOverrideDefaultValuesTest : public InspectorBuilder, public testing::Test {};
 class InspectorGetConstantNameToIdMapTest : public InspectorBuilder, public testing::Test {};
-class InspectorGetStorageSizeTest : public InspectorBuilder, public testing::Test {};
 class InspectorGetResourceBindingsTest : public InspectorBuilder, public testing::Test {};
 class InspectorGetUniformBufferResourceBindingsTest : public InspectorBuilder,
                                                       public testing::Test {};
@@ -1686,110 +1685,6 @@ TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {
     ASSERT_TRUE(result.count("c"));
     ASSERT_TRUE(program_->Sem().Get(c));
     EXPECT_EQ(result["c"], program_->Sem().Get(c)->OverrideId());
-}
-
-TEST_F(InspectorGetStorageSizeTest, Empty) {
-    MakeEmptyBodyFunction("ep_func", Vector{
-                                         Stage(ast::PipelineStage::kCompute),
-                                         WorkgroupSize(1_i),
-                                     });
-    Inspector& inspector = Build();
-    EXPECT_EQ(0u, inspector.GetStorageSize("ep_func"));
-}
-
-TEST_F(InspectorGetStorageSizeTest, Simple_NonStruct) {
-    AddUniformBuffer("ub_var", ty.i32(), 0, 0);
-    AddStorageBuffer("sb_var", ty.i32(), core::Access::kReadWrite, 1, 0);
-    AddStorageBuffer("rosb_var", ty.i32(), core::Access::kRead, 1, 1);
-    Func("ep_func", tint::Empty, ty.void_(),
-         Vector{
-             Decl(Let("ub", Expr("ub_var"))),
-             Decl(Let("sb", Expr("sb_var"))),
-             Decl(Let("rosb", Expr("rosb_var"))),
-         },
-         Vector{
-             Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(1_i),
-         });
-
-    Inspector& inspector = Build();
-
-    EXPECT_EQ(12u, inspector.GetStorageSize("ep_func"));
-}
-
-TEST_F(InspectorGetStorageSizeTest, Simple_Struct) {
-    auto* ub_struct_type = MakeUniformBufferType("ub_type", Vector{
-                                                                ty.i32(),
-                                                                ty.i32(),
-                                                            });
-    AddUniformBuffer("ub_var", ty.Of(ub_struct_type), 0, 0);
-    MakeStructVariableReferenceBodyFunction("ub_func", "ub_var",
-                                            Vector{
-                                                MemberInfo{0, ty.i32()},
-                                            });
-
-    auto sb = MakeStorageBufferTypes("sb_type", Vector{
-                                                    ty.i32(),
-                                                });
-    AddStorageBuffer("sb_var", sb(), core::Access::kReadWrite, 1, 0);
-    MakeStructVariableReferenceBodyFunction("sb_func", "sb_var",
-                                            Vector{
-                                                MemberInfo{0, ty.i32()},
-                                            });
-
-    auto ro_sb = MakeStorageBufferTypes("rosb_type", Vector{
-                                                         ty.i32(),
-                                                     });
-    AddStorageBuffer("rosb_var", ro_sb(), core::Access::kRead, 1, 1);
-    MakeStructVariableReferenceBodyFunction("rosb_func", "rosb_var",
-                                            Vector{
-                                                MemberInfo{0, ty.i32()},
-                                            });
-
-    MakeCallerBodyFunction("ep_func", Vector{std::string("ub_func"), "sb_func", "rosb_func"},
-                           Vector{
-                               Stage(ast::PipelineStage::kCompute),
-                               WorkgroupSize(1_i),
-                           });
-
-    Inspector& inspector = Build();
-
-    EXPECT_EQ(16u, inspector.GetStorageSize("ep_func"));
-}
-
-TEST_F(InspectorGetStorageSizeTest, NonStructVec3) {
-    AddUniformBuffer("ub_var", ty.vec3<f32>(), 0, 0);
-    Func("ep_func", tint::Empty, ty.void_(),
-         Vector{
-             Decl(Let("ub", Expr("ub_var"))),
-         },
-         Vector{
-             Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(1_i),
-         });
-
-    Inspector& inspector = Build();
-
-    EXPECT_EQ(12u, inspector.GetStorageSize("ep_func"));
-}
-
-TEST_F(InspectorGetStorageSizeTest, StructVec3) {
-    auto* ub_struct_type = MakeUniformBufferType("ub_type", Vector{
-                                                                ty.vec3<f32>(),
-                                                            });
-    AddUniformBuffer("ub_var", ty.Of(ub_struct_type), 0, 0);
-    Func("ep_func", tint::Empty, ty.void_(),
-         Vector{
-             Decl(Let("ub", Expr("ub_var"))),
-         },
-         Vector{
-             Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(1_i),
-         });
-
-    Inspector& inspector = Build();
-
-    EXPECT_EQ(16u, inspector.GetStorageSize("ep_func"));
 }
 
 TEST_F(InspectorGetResourceBindingsTest, Empty) {

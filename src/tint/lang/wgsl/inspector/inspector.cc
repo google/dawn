@@ -302,27 +302,6 @@ std::map<std::string, OverrideId> Inspector::GetNamedOverrideIds() {
     return result;
 }
 
-uint32_t Inspector::GetStorageSize(const std::string& entry_point) {
-    auto* func = FindEntryPointByName(entry_point);
-    if (!func) {
-        return 0;
-    }
-
-    size_t size = 0;
-    auto* func_sem = program_->Sem().Get(func);
-    for (auto& ruv : func_sem->TransitivelyReferencedUniformVariables()) {
-        size += ruv.first->Type()->UnwrapRef()->Size();
-    }
-    for (auto& rsv : func_sem->TransitivelyReferencedStorageBufferVariables()) {
-        size += rsv.first->Type()->UnwrapRef()->Size();
-    }
-
-    if (static_cast<uint64_t>(size) > static_cast<uint64_t>(std::numeric_limits<uint32_t>::max())) {
-        return std::numeric_limits<uint32_t>::max();
-    }
-    return static_cast<uint32_t>(size);
-}
-
 std::vector<ResourceBinding> Inspector::GetResourceBindings(const std::string& entry_point) {
     auto* func = FindEntryPointByName(entry_point);
     if (!func) {
