@@ -548,15 +548,7 @@ VkImageLayout VulkanImageLayout(const Texture* texture, wgpu::TextureUsage usage
             return VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 
             // The layout returned here is the one that will be used at bindgroup creation time.
-            // The bindgrpup's layout must match the runtime layout of the image when it is
-            // used via the bindgroup, but we don't know exactly what it will be yet. So we
-            // have to prepare for the pessimistic case.
         case wgpu::TextureUsage::TextureBinding:
-            // Only VK_IMAGE_LAYOUT_GENERAL can do sampling and storage access of texture at the
-            // same time.
-            if (texture->GetInternalUsage() & wgpu::TextureUsage::StorageBinding) {
-                return VK_IMAGE_LAYOUT_GENERAL;
-            }
             // The sampled image can be used as a readonly depth/stencil attachment at the same
             // time if it is a depth/stencil renderable format, so the image layout need to be
             // VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL.
