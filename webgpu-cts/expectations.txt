@@ -1627,3 +1627,5 @@ crbug.com/dawn/0000 [ win10 nvidia-0x2184 webgpu-dxc-enabled ] webgpu:shader,exe
 crbug.com/tint/2030 webgpu:shader,validation,expression,call,builtin,log:values:stage="override";type="f32" [ RetryOnFailure ]
 crbug.com/1479533 [ win10 intel ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="bc6h-rgb-ufloat";dimension="2d" [ Failure ]
 crbug.com/dawn/0000 [ win10 intel ] worker_webgpu:api,validation,buffer,mapping:mapAsync,usage:* [ Failure ]
+crbug.com/dawn/0000 [ android ] webgpu:shader,validation,expression,call,builtin,atan2:values:stage="constant";type="vec4%3Cf32%3E" [ Failure ]
+crbug.com/dawn/0000 [ android ] webgpu:shader,validation,expression,call,builtin,sign:values:stage="constant";type="vec3%3Cabstract-float%3E" [ Failure ]
