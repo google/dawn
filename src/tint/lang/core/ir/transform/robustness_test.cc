@@ -1637,7 +1637,7 @@ TEST_P(IR_RobustnessTest, ParamValueArray_DynamicIndex) {
 INSTANTIATE_TEST_SUITE_P(, IR_RobustnessTest, testing::Values(false, true));
 
 ////////////////////////////////////////////////////////////////
-// Test clamping non-pointer arrays.
+// Test clamping runtime-sized arrays.
 ////////////////////////////////////////////////////////////////
 
 TEST_P(IR_RobustnessTest, RuntimeSizedArray_ConstIndex) {
@@ -1871,6 +1871,60 @@ structure = struct @align(4) {
 
     RobustnessConfig cfg;
     cfg.clamp_storage = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, RuntimeSizedArray_DisableClamping) {
+    auto* arr = b.Var("arr", ty.ptr(storage, ty.array<u32>()));
+    arr->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(arr);
+
+    auto* func = b.Function("foo", ty.u32());
+    auto* idx = b.FunctionParam("idx", ty.u32());
+    func->SetParams({idx});
+    b.Append(func->Block(), [&] {
+        auto* access = b.Access(ty.ptr<storage, u32>(), arr, idx);
+        auto* load = b.Load(access);
+        b.Return(func, load);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %arr:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func(%idx:u32):u32 -> %b2 {
+  %b2 = block {
+    %4:ptr<storage, u32, read_write> = access %arr, %idx
+    %5:u32 = load %4
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %arr:ptr<storage, array<u32>, read_write> = var @binding_point(0, 0)
+}
+
+%foo = func(%idx:u32):u32 -> %b2 {
+  %b2 = block {
+    %4:u32 = arrayLength %arr
+    %5:u32 = sub %4, 1u
+    %6:u32 = min %idx, %5
+    %7:ptr<storage, u32, read_write> = access %arr, %6
+    %8:u32 = load %7
+    ret %8
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_storage = true;
+    cfg.disable_runtime_sized_array_index_clamping = !GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect : src, str());

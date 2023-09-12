@@ -129,7 +129,6 @@ struct State {
         }
 
         // TODO(jrprice): Handle config.bindings_ignored.
-        // TODO(jrprice): Handle config.disable_runtime_sized_array_index_clamping.
     }
 
     /// Check if clamping should be applied to a particular address space.
@@ -222,6 +221,11 @@ struct State {
                     }
                     TINT_ASSERT_OR_RETURN_VALUE(arr->Count()->Is<type::RuntimeArrayCount>(),
                                                 nullptr);
+
+                    // Skip clamping runtime-sized array indices if requested.
+                    if (config.disable_runtime_sized_array_index_clamping) {
+                        return nullptr;
+                    }
 
                     auto* object = access->Object();
                     if (i > 0) {
