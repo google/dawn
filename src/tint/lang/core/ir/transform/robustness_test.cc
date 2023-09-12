@@ -18,8 +18,14 @@
 
 #include "src/tint/lang/core/ir/transform/helper_test.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/depth_multisampled_texture.h"
+#include "src/tint/lang/core/type/depth_texture.h"
+#include "src/tint/lang/core/type/external_texture.h"
 #include "src/tint/lang/core/type/matrix.h"
+#include "src/tint/lang/core/type/multisampled_texture.h"
 #include "src/tint/lang/core/type/pointer.h"
+#include "src/tint/lang/core/type/sampled_texture.h"
+#include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/vector.h"
 
@@ -1865,6 +1871,1712 @@ structure = struct @align(4) {
 
     RobustnessConfig cfg;
     cfg.clamp_storage = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+////////////////////////////////////////////////////////////////
+// Test clamping texture builtin calls.
+////////////////////////////////////////////////////////////////
+
+TEST_P(IR_RobustnessTest, TextureDimensions) {
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle, ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()), read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    b.Append(func->Block(), [&] {
+        auto* handle = b.Load(texture);
+        auto* dims = b.Call(ty.vec2<u32>(), core::Function::kTextureDimensions, handle);
+        b.Return(func, dims);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+}
+
+%foo = func():vec2<u32> -> %b2 {
+  %b2 = block {
+    %3:texture_2d<f32> = load %texture
+    %4:vec2<u32> = textureDimensions %3
+    ret %4
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureDimensions_WithLevel) {
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle, ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()), read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    auto* level = b.FunctionParam("level", ty.u32());
+    func->SetParams({level});
+    b.Append(func->Block(), [&] {
+        auto* handle = b.Load(texture);
+        auto* dims = b.Call(ty.vec2<u32>(), core::Function::kTextureDimensions, handle, level);
+        b.Return(func, dims);
+    });
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+}
+
+%foo = func(%level:u32):vec2<u32> -> %b2 {
+  %b2 = block {
+    %4:texture_2d<f32> = load %texture
+    %5:vec2<u32> = textureDimensions %4, %level
+    ret %5
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+}
+
+%foo = func(%level:u32):vec2<u32> -> %b2 {
+  %b2 = block {
+    %4:texture_2d<f32> = load %texture
+    %5:u32 = textureNumLevels %4
+    %6:u32 = sub %5, 1u
+    %7:u32 = min %level, %6
+    %8:vec2<u32> = textureDimensions %4, %7
+    ret %8
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureLoad_Sampled1D) {
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle, ty.Get<type::SampledTexture>(type::TextureDimension::k1d, ty.f32()), read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.i32());
+        auto* level = b.FunctionParam("level", ty.i32());
+        func->SetParams({coords, level});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel =
+                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+            b.Return(func, texel);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.u32());
+        auto* level = b.FunctionParam("level", ty.u32());
+        func->SetParams({coords, level});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel =
+                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+            b.Return(func, texel);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_1d<f32>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:i32, %level:i32):vec4<f32> -> %b2 {
+  %b2 = block {
+    %5:texture_1d<f32> = load %texture
+    %6:vec4<f32> = textureLoad %5, %coords, %level
+    ret %6
+  }
+}
+%load_unsigned = func(%coords_1:u32, %level_1:u32):vec4<f32> -> %b3 {  # %coords_1: 'coords', %level_1: 'level'
+  %b3 = block {
+    %10:texture_1d<f32> = load %texture
+    %11:vec4<f32> = textureLoad %10, %coords_1, %level_1
+    ret %11
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_1d<f32>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:i32, %level:i32):vec4<f32> -> %b2 {
+  %b2 = block {
+    %5:texture_1d<f32> = load %texture
+    %6:u32 = textureDimensions %5
+    %7:u32 = sub %6, 1u
+    %8:u32 = convert %coords
+    %9:u32 = min %8, %7
+    %10:u32 = textureNumLevels %5
+    %11:u32 = sub %10, 1u
+    %12:u32 = convert %level
+    %13:u32 = min %12, %11
+    %14:vec4<f32> = textureLoad %5, %9, %13
+    ret %14
+  }
+}
+%load_unsigned = func(%coords_1:u32, %level_1:u32):vec4<f32> -> %b3 {  # %coords_1: 'coords', %level_1: 'level'
+  %b3 = block {
+    %18:texture_1d<f32> = load %texture
+    %19:u32 = textureDimensions %18
+    %20:u32 = sub %19, 1u
+    %21:u32 = min %coords_1, %20
+    %22:u32 = textureNumLevels %18
+    %23:u32 = sub %22, 1u
+    %24:u32 = min %level_1, %23
+    %25:vec4<f32> = textureLoad %18, %21, %24
+    ret %25
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureLoad_Sampled2D) {
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle, ty.Get<type::SampledTexture>(type::TextureDimension::k2d, ty.f32()), read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* level = b.FunctionParam("level", ty.i32());
+        func->SetParams({coords, level});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel =
+                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+            b.Return(func, texel);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* level = b.FunctionParam("level", ty.u32());
+        func->SetParams({coords, level});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel =
+                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+            b.Return(func, texel);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %level:i32):vec4<f32> -> %b2 {
+  %b2 = block {
+    %5:texture_2d<f32> = load %texture
+    %6:vec4<f32> = textureLoad %5, %coords, %level
+    ret %6
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %level_1:u32):vec4<f32> -> %b3 {  # %coords_1: 'coords', %level_1: 'level'
+  %b3 = block {
+    %10:texture_2d<f32> = load %texture
+    %11:vec4<f32> = textureLoad %10, %coords_1, %level_1
+    ret %11
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_2d<f32>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %level:i32):vec4<f32> -> %b2 {
+  %b2 = block {
+    %5:texture_2d<f32> = load %texture
+    %6:vec2<u32> = textureDimensions %5
+    %7:vec2<u32> = sub %6, vec2<u32>(1u)
+    %8:vec2<u32> = convert %coords
+    %9:vec2<u32> = min %8, %7
+    %10:u32 = textureNumLevels %5
+    %11:u32 = sub %10, 1u
+    %12:u32 = convert %level
+    %13:u32 = min %12, %11
+    %14:vec4<f32> = textureLoad %5, %9, %13
+    ret %14
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %level_1:u32):vec4<f32> -> %b3 {  # %coords_1: 'coords', %level_1: 'level'
+  %b3 = block {
+    %18:texture_2d<f32> = load %texture
+    %19:vec2<u32> = textureDimensions %18
+    %20:vec2<u32> = sub %19, vec2<u32>(1u)
+    %21:vec2<u32> = min %coords_1, %20
+    %22:u32 = textureNumLevels %18
+    %23:u32 = sub %22, 1u
+    %24:u32 = min %level_1, %23
+    %25:vec4<f32> = textureLoad %18, %21, %24
+    ret %25
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureLoad_Sampled2DArray) {
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle, ty.Get<type::SampledTexture>(type::TextureDimension::k2dArray, ty.f32()),
+               read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* layer = b.FunctionParam("layer", ty.i32());
+        auto* level = b.FunctionParam("level", ty.i32());
+        func->SetParams({coords, layer, level});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel =
+                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, layer, level);
+            b.Return(func, texel);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* layer = b.FunctionParam("layer", ty.u32());
+        auto* level = b.FunctionParam("level", ty.u32());
+        func->SetParams({coords, layer, level});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel =
+                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, layer, level);
+            b.Return(func, texel);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %layer:i32, %level:i32):vec4<f32> -> %b2 {
+  %b2 = block {
+    %6:texture_2d_array<f32> = load %texture
+    %7:vec4<f32> = textureLoad %6, %coords, %layer, %level
+    ret %7
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32, %level_1:u32):vec4<f32> -> %b3 {  # %coords_1: 'coords', %layer_1: 'layer', %level_1: 'level'
+  %b3 = block {
+    %12:texture_2d_array<f32> = load %texture
+    %13:vec4<f32> = textureLoad %12, %coords_1, %layer_1, %level_1
+    ret %13
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_2d_array<f32>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %layer:i32, %level:i32):vec4<f32> -> %b2 {
+  %b2 = block {
+    %6:texture_2d_array<f32> = load %texture
+    %7:vec2<u32> = textureDimensions %6
+    %8:vec2<u32> = sub %7, vec2<u32>(1u)
+    %9:vec2<u32> = convert %coords
+    %10:vec2<u32> = min %9, %8
+    %11:u32 = textureNumLayers %6
+    %12:u32 = sub %11, 1u
+    %13:u32 = convert %layer
+    %14:u32 = min %13, %12
+    %15:u32 = textureNumLevels %6
+    %16:u32 = sub %15, 1u
+    %17:u32 = convert %level
+    %18:u32 = min %17, %16
+    %19:vec4<f32> = textureLoad %6, %10, %14, %18
+    ret %19
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32, %level_1:u32):vec4<f32> -> %b3 {  # %coords_1: 'coords', %layer_1: 'layer', %level_1: 'level'
+  %b3 = block {
+    %24:texture_2d_array<f32> = load %texture
+    %25:vec2<u32> = textureDimensions %24
+    %26:vec2<u32> = sub %25, vec2<u32>(1u)
+    %27:vec2<u32> = min %coords_1, %26
+    %28:u32 = textureNumLayers %24
+    %29:u32 = sub %28, 1u
+    %30:u32 = min %layer_1, %29
+    %31:u32 = textureNumLevels %24
+    %32:u32 = sub %31, 1u
+    %33:u32 = min %level_1, %32
+    %34:vec4<f32> = textureLoad %24, %27, %30, %33
+    ret %34
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureLoad_Sampled3D) {
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle, ty.Get<type::SampledTexture>(type::TextureDimension::k3d, ty.f32()), read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec3<i32>());
+        auto* level = b.FunctionParam("level", ty.i32());
+        func->SetParams({coords, level});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel =
+                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+            b.Return(func, texel);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec3<u32>());
+        auto* level = b.FunctionParam("level", ty.u32());
+        func->SetParams({coords, level});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel =
+                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+            b.Return(func, texel);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec3<i32>, %level:i32):vec4<f32> -> %b2 {
+  %b2 = block {
+    %5:texture_3d<f32> = load %texture
+    %6:vec4<f32> = textureLoad %5, %coords, %level
+    ret %6
+  }
+}
+%load_unsigned = func(%coords_1:vec3<u32>, %level_1:u32):vec4<f32> -> %b3 {  # %coords_1: 'coords', %level_1: 'level'
+  %b3 = block {
+    %10:texture_3d<f32> = load %texture
+    %11:vec4<f32> = textureLoad %10, %coords_1, %level_1
+    ret %11
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_3d<f32>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec3<i32>, %level:i32):vec4<f32> -> %b2 {
+  %b2 = block {
+    %5:texture_3d<f32> = load %texture
+    %6:vec3<u32> = textureDimensions %5
+    %7:vec3<u32> = sub %6, vec3<u32>(1u)
+    %8:vec3<u32> = convert %coords
+    %9:vec3<u32> = min %8, %7
+    %10:u32 = textureNumLevels %5
+    %11:u32 = sub %10, 1u
+    %12:u32 = convert %level
+    %13:u32 = min %12, %11
+    %14:vec4<f32> = textureLoad %5, %9, %13
+    ret %14
+  }
+}
+%load_unsigned = func(%coords_1:vec3<u32>, %level_1:u32):vec4<f32> -> %b3 {  # %coords_1: 'coords', %level_1: 'level'
+  %b3 = block {
+    %18:texture_3d<f32> = load %texture
+    %19:vec3<u32> = textureDimensions %18
+    %20:vec3<u32> = sub %19, vec3<u32>(1u)
+    %21:vec3<u32> = min %coords_1, %20
+    %22:u32 = textureNumLevels %18
+    %23:u32 = sub %22, 1u
+    %24:u32 = min %level_1, %23
+    %25:vec4<f32> = textureLoad %18, %21, %24
+    ret %25
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureLoad_Multisampled2D) {
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle, ty.Get<type::MultisampledTexture>(type::TextureDimension::k2d, ty.f32()),
+               read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* level = b.FunctionParam("level", ty.i32());
+        func->SetParams({coords, level});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel =
+                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+            b.Return(func, texel);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* level = b.FunctionParam("level", ty.u32());
+        func->SetParams({coords, level});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel =
+                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+            b.Return(func, texel);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_multisampled_2d<f32>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %level:i32):vec4<f32> -> %b2 {
+  %b2 = block {
+    %5:texture_multisampled_2d<f32> = load %texture
+    %6:vec4<f32> = textureLoad %5, %coords, %level
+    ret %6
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %level_1:u32):vec4<f32> -> %b3 {  # %coords_1: 'coords', %level_1: 'level'
+  %b3 = block {
+    %10:texture_multisampled_2d<f32> = load %texture
+    %11:vec4<f32> = textureLoad %10, %coords_1, %level_1
+    ret %11
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_multisampled_2d<f32>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %level:i32):vec4<f32> -> %b2 {
+  %b2 = block {
+    %5:texture_multisampled_2d<f32> = load %texture
+    %6:vec2<u32> = textureDimensions %5
+    %7:vec2<u32> = sub %6, vec2<u32>(1u)
+    %8:vec2<u32> = convert %coords
+    %9:vec2<u32> = min %8, %7
+    %10:vec4<f32> = textureLoad %5, %9, %level
+    ret %10
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %level_1:u32):vec4<f32> -> %b3 {  # %coords_1: 'coords', %level_1: 'level'
+  %b3 = block {
+    %14:texture_multisampled_2d<f32> = load %texture
+    %15:vec2<u32> = textureDimensions %14
+    %16:vec2<u32> = sub %15, vec2<u32>(1u)
+    %17:vec2<u32> = min %coords_1, %16
+    %18:vec4<f32> = textureLoad %14, %17, %level_1
+    ret %18
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureLoad_Depth2D) {
+    auto* texture = b.Var(
+        "texture", ty.ptr(handle, ty.Get<type::DepthTexture>(type::TextureDimension::k2d), read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.f32());
+        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* level = b.FunctionParam("level", ty.i32());
+        func->SetParams({coords, level});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel = b.Call(ty.f32(), core::Function::kTextureLoad, handle, coords, level);
+            b.Return(func, texel);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.f32());
+        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* level = b.FunctionParam("level", ty.u32());
+        func->SetParams({coords, level});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel = b.Call(ty.f32(), core::Function::kTextureLoad, handle, coords, level);
+            b.Return(func, texel);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %level:i32):f32 -> %b2 {
+  %b2 = block {
+    %5:texture_depth_2d = load %texture
+    %6:f32 = textureLoad %5, %coords, %level
+    ret %6
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %level_1:u32):f32 -> %b3 {  # %coords_1: 'coords', %level_1: 'level'
+  %b3 = block {
+    %10:texture_depth_2d = load %texture
+    %11:f32 = textureLoad %10, %coords_1, %level_1
+    ret %11
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_depth_2d, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %level:i32):f32 -> %b2 {
+  %b2 = block {
+    %5:texture_depth_2d = load %texture
+    %6:vec2<u32> = textureDimensions %5
+    %7:vec2<u32> = sub %6, vec2<u32>(1u)
+    %8:vec2<u32> = convert %coords
+    %9:vec2<u32> = min %8, %7
+    %10:u32 = textureNumLevels %5
+    %11:u32 = sub %10, 1u
+    %12:u32 = convert %level
+    %13:u32 = min %12, %11
+    %14:f32 = textureLoad %5, %9, %13
+    ret %14
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %level_1:u32):f32 -> %b3 {  # %coords_1: 'coords', %level_1: 'level'
+  %b3 = block {
+    %18:texture_depth_2d = load %texture
+    %19:vec2<u32> = textureDimensions %18
+    %20:vec2<u32> = sub %19, vec2<u32>(1u)
+    %21:vec2<u32> = min %coords_1, %20
+    %22:u32 = textureNumLevels %18
+    %23:u32 = sub %22, 1u
+    %24:u32 = min %level_1, %23
+    %25:f32 = textureLoad %18, %21, %24
+    ret %25
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureLoad_Depth2DArray) {
+    auto* texture =
+        b.Var("texture",
+              ty.ptr(handle, ty.Get<type::DepthTexture>(type::TextureDimension::k2dArray), read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.f32());
+        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* layer = b.FunctionParam("layer", ty.i32());
+        auto* level = b.FunctionParam("level", ty.i32());
+        func->SetParams({coords, layer, level});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel =
+                b.Call(ty.f32(), core::Function::kTextureLoad, handle, coords, layer, level);
+            b.Return(func, texel);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.f32());
+        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* layer = b.FunctionParam("layer", ty.u32());
+        auto* level = b.FunctionParam("level", ty.u32());
+        func->SetParams({coords, layer, level});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel =
+                b.Call(ty.f32(), core::Function::kTextureLoad, handle, coords, layer, level);
+            b.Return(func, texel);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %layer:i32, %level:i32):f32 -> %b2 {
+  %b2 = block {
+    %6:texture_depth_2d_array = load %texture
+    %7:f32 = textureLoad %6, %coords, %layer, %level
+    ret %7
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32, %level_1:u32):f32 -> %b3 {  # %coords_1: 'coords', %layer_1: 'layer', %level_1: 'level'
+  %b3 = block {
+    %12:texture_depth_2d_array = load %texture
+    %13:f32 = textureLoad %12, %coords_1, %layer_1, %level_1
+    ret %13
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_depth_2d_array, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %layer:i32, %level:i32):f32 -> %b2 {
+  %b2 = block {
+    %6:texture_depth_2d_array = load %texture
+    %7:vec2<u32> = textureDimensions %6
+    %8:vec2<u32> = sub %7, vec2<u32>(1u)
+    %9:vec2<u32> = convert %coords
+    %10:vec2<u32> = min %9, %8
+    %11:u32 = textureNumLayers %6
+    %12:u32 = sub %11, 1u
+    %13:u32 = convert %layer
+    %14:u32 = min %13, %12
+    %15:u32 = textureNumLevels %6
+    %16:u32 = sub %15, 1u
+    %17:u32 = convert %level
+    %18:u32 = min %17, %16
+    %19:f32 = textureLoad %6, %10, %14, %18
+    ret %19
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32, %level_1:u32):f32 -> %b3 {  # %coords_1: 'coords', %layer_1: 'layer', %level_1: 'level'
+  %b3 = block {
+    %24:texture_depth_2d_array = load %texture
+    %25:vec2<u32> = textureDimensions %24
+    %26:vec2<u32> = sub %25, vec2<u32>(1u)
+    %27:vec2<u32> = min %coords_1, %26
+    %28:u32 = textureNumLayers %24
+    %29:u32 = sub %28, 1u
+    %30:u32 = min %layer_1, %29
+    %31:u32 = textureNumLevels %24
+    %32:u32 = sub %31, 1u
+    %33:u32 = min %level_1, %32
+    %34:f32 = textureLoad %24, %27, %30, %33
+    ret %34
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureLoad_DepthMultisampled2D) {
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle, ty.Get<type::DepthMultisampledTexture>(type::TextureDimension::k2d), read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.f32());
+        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* index = b.FunctionParam("index", ty.i32());
+        func->SetParams({coords, index});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel = b.Call(ty.f32(), core::Function::kTextureLoad, handle, coords, index);
+            b.Return(func, texel);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.f32());
+        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* index = b.FunctionParam("index", ty.u32());
+        func->SetParams({coords, index});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel = b.Call(ty.f32(), core::Function::kTextureLoad, handle, coords, index);
+            b.Return(func, texel);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_depth_multisampled_2d, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %index:i32):f32 -> %b2 {
+  %b2 = block {
+    %5:texture_depth_multisampled_2d = load %texture
+    %6:f32 = textureLoad %5, %coords, %index
+    ret %6
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %index_1:u32):f32 -> %b3 {  # %coords_1: 'coords', %index_1: 'index'
+  %b3 = block {
+    %10:texture_depth_multisampled_2d = load %texture
+    %11:f32 = textureLoad %10, %coords_1, %index_1
+    ret %11
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_depth_multisampled_2d, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %index:i32):f32 -> %b2 {
+  %b2 = block {
+    %5:texture_depth_multisampled_2d = load %texture
+    %6:vec2<u32> = textureDimensions %5
+    %7:vec2<u32> = sub %6, vec2<u32>(1u)
+    %8:vec2<u32> = convert %coords
+    %9:vec2<u32> = min %8, %7
+    %10:f32 = textureLoad %5, %9, %index
+    ret %10
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %index_1:u32):f32 -> %b3 {  # %coords_1: 'coords', %index_1: 'index'
+  %b3 = block {
+    %14:texture_depth_multisampled_2d = load %texture
+    %15:vec2<u32> = textureDimensions %14
+    %16:vec2<u32> = sub %15, vec2<u32>(1u)
+    %17:vec2<u32> = min %coords_1, %16
+    %18:f32 = textureLoad %14, %17, %index_1
+    ret %18
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureLoad_External) {
+    auto* texture = b.Var("texture", ty.ptr(handle, ty.Get<type::ExternalTexture>(), read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        func->SetParams({coords});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            b.Return(func, texel);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        func->SetParams({coords});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            b.Return(func, texel);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_external, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>):vec4<f32> -> %b2 {
+  %b2 = block {
+    %4:texture_external = load %texture
+    %5:vec4<f32> = textureLoad %4, %coords
+    ret %5
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>):vec4<f32> -> %b3 {  # %coords_1: 'coords'
+  %b3 = block {
+    %8:texture_external = load %texture
+    %9:vec4<f32> = textureLoad %8, %coords_1
+    ret %9
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_external, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>):vec4<f32> -> %b2 {
+  %b2 = block {
+    %4:texture_external = load %texture
+    %5:vec2<u32> = textureDimensions %4
+    %6:vec2<u32> = sub %5, vec2<u32>(1u)
+    %7:vec2<u32> = convert %coords
+    %8:vec2<u32> = min %7, %6
+    %9:vec4<f32> = textureLoad %4, %8
+    ret %9
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>):vec4<f32> -> %b3 {  # %coords_1: 'coords'
+  %b3 = block {
+    %12:texture_external = load %texture
+    %13:vec2<u32> = textureDimensions %12
+    %14:vec2<u32> = sub %13, vec2<u32>(1u)
+    %15:vec2<u32> = min %coords_1, %14
+    %16:vec4<f32> = textureLoad %12, %15
+    ret %16
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureLoad_Storage1D) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture =
+        b.Var("texture",
+              ty.ptr(handle,
+                     ty.Get<type::StorageTexture>(type::TextureDimension::k1d, format, read_write,
+                                                  type::StorageTexture::SubtypeFor(format, ty)),
+                     read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.i32());
+        func->SetParams({coords});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            b.Return(func, texel);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.u32());
+        func->SetParams({coords});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            b.Return(func, texel);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_1d<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:i32):vec4<f32> -> %b2 {
+  %b2 = block {
+    %4:texture_storage_1d<rgba8unorm, read_write> = load %texture
+    %5:vec4<f32> = textureLoad %4, %coords
+    ret %5
+  }
+}
+%load_unsigned = func(%coords_1:u32):vec4<f32> -> %b3 {  # %coords_1: 'coords'
+  %b3 = block {
+    %8:texture_storage_1d<rgba8unorm, read_write> = load %texture
+    %9:vec4<f32> = textureLoad %8, %coords_1
+    ret %9
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_1d<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:i32):vec4<f32> -> %b2 {
+  %b2 = block {
+    %4:texture_storage_1d<rgba8unorm, read_write> = load %texture
+    %5:u32 = textureDimensions %4
+    %6:u32 = sub %5, 1u
+    %7:u32 = convert %coords
+    %8:u32 = min %7, %6
+    %9:vec4<f32> = textureLoad %4, %8
+    ret %9
+  }
+}
+%load_unsigned = func(%coords_1:u32):vec4<f32> -> %b3 {  # %coords_1: 'coords'
+  %b3 = block {
+    %12:texture_storage_1d<rgba8unorm, read_write> = load %texture
+    %13:u32 = textureDimensions %12
+    %14:u32 = sub %13, 1u
+    %15:u32 = min %coords_1, %14
+    %16:vec4<f32> = textureLoad %12, %15
+    ret %16
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureLoad_Storage2D) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture =
+        b.Var("texture",
+              ty.ptr(handle,
+                     ty.Get<type::StorageTexture>(type::TextureDimension::k2d, format, read_write,
+                                                  type::StorageTexture::SubtypeFor(format, ty)),
+                     read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        func->SetParams({coords});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            b.Return(func, texel);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        func->SetParams({coords});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            b.Return(func, texel);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>):vec4<f32> -> %b2 {
+  %b2 = block {
+    %4:texture_storage_2d<rgba8unorm, read_write> = load %texture
+    %5:vec4<f32> = textureLoad %4, %coords
+    ret %5
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>):vec4<f32> -> %b3 {  # %coords_1: 'coords'
+  %b3 = block {
+    %8:texture_storage_2d<rgba8unorm, read_write> = load %texture
+    %9:vec4<f32> = textureLoad %8, %coords_1
+    ret %9
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>):vec4<f32> -> %b2 {
+  %b2 = block {
+    %4:texture_storage_2d<rgba8unorm, read_write> = load %texture
+    %5:vec2<u32> = textureDimensions %4
+    %6:vec2<u32> = sub %5, vec2<u32>(1u)
+    %7:vec2<u32> = convert %coords
+    %8:vec2<u32> = min %7, %6
+    %9:vec4<f32> = textureLoad %4, %8
+    ret %9
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>):vec4<f32> -> %b3 {  # %coords_1: 'coords'
+  %b3 = block {
+    %12:texture_storage_2d<rgba8unorm, read_write> = load %texture
+    %13:vec2<u32> = textureDimensions %12
+    %14:vec2<u32> = sub %13, vec2<u32>(1u)
+    %15:vec2<u32> = min %coords_1, %14
+    %16:vec4<f32> = textureLoad %12, %15
+    ret %16
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureLoad_Storage2DArray) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture = b.Var(
+        "texture",
+        ty.ptr(handle,
+               ty.Get<type::StorageTexture>(type::TextureDimension::k2dArray, format, read_write,
+                                            type::StorageTexture::SubtypeFor(format, ty)),
+               read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* layer = b.FunctionParam("layer", ty.i32());
+        func->SetParams({coords, layer});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel =
+                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, layer);
+            b.Return(func, texel);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* layer = b.FunctionParam("layer", ty.u32());
+        func->SetParams({coords, layer});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel =
+                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, layer);
+            b.Return(func, texel);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_2d_array<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %layer:i32):vec4<f32> -> %b2 {
+  %b2 = block {
+    %5:texture_storage_2d_array<rgba8unorm, read_write> = load %texture
+    %6:vec4<f32> = textureLoad %5, %coords, %layer
+    ret %6
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32):vec4<f32> -> %b3 {  # %coords_1: 'coords', %layer_1: 'layer'
+  %b3 = block {
+    %10:texture_storage_2d_array<rgba8unorm, read_write> = load %texture
+    %11:vec4<f32> = textureLoad %10, %coords_1, %layer_1
+    ret %11
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_2d_array<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %layer:i32):vec4<f32> -> %b2 {
+  %b2 = block {
+    %5:texture_storage_2d_array<rgba8unorm, read_write> = load %texture
+    %6:vec2<u32> = textureDimensions %5
+    %7:vec2<u32> = sub %6, vec2<u32>(1u)
+    %8:vec2<u32> = convert %coords
+    %9:vec2<u32> = min %8, %7
+    %10:u32 = textureNumLayers %5
+    %11:u32 = sub %10, 1u
+    %12:u32 = convert %layer
+    %13:u32 = min %12, %11
+    %14:vec4<f32> = textureLoad %5, %9, %13
+    ret %14
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32):vec4<f32> -> %b3 {  # %coords_1: 'coords', %layer_1: 'layer'
+  %b3 = block {
+    %18:texture_storage_2d_array<rgba8unorm, read_write> = load %texture
+    %19:vec2<u32> = textureDimensions %18
+    %20:vec2<u32> = sub %19, vec2<u32>(1u)
+    %21:vec2<u32> = min %coords_1, %20
+    %22:u32 = textureNumLayers %18
+    %23:u32 = sub %22, 1u
+    %24:u32 = min %layer_1, %23
+    %25:vec4<f32> = textureLoad %18, %21, %24
+    ret %25
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureLoad_Storage3D) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture =
+        b.Var("texture",
+              ty.ptr(handle,
+                     ty.Get<type::StorageTexture>(type::TextureDimension::k3d, format, read_write,
+                                                  type::StorageTexture::SubtypeFor(format, ty)),
+                     read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec3<i32>());
+        func->SetParams({coords});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            b.Return(func, texel);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.vec4<f32>());
+        auto* coords = b.FunctionParam("coords", ty.vec3<u32>());
+        func->SetParams({coords});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            b.Return(func, texel);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_3d<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec3<i32>):vec4<f32> -> %b2 {
+  %b2 = block {
+    %4:texture_storage_3d<rgba8unorm, read_write> = load %texture
+    %5:vec4<f32> = textureLoad %4, %coords
+    ret %5
+  }
+}
+%load_unsigned = func(%coords_1:vec3<u32>):vec4<f32> -> %b3 {  # %coords_1: 'coords'
+  %b3 = block {
+    %8:texture_storage_3d<rgba8unorm, read_write> = load %texture
+    %9:vec4<f32> = textureLoad %8, %coords_1
+    ret %9
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_3d<rgba8unorm, read_write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec3<i32>):vec4<f32> -> %b2 {
+  %b2 = block {
+    %4:texture_storage_3d<rgba8unorm, read_write> = load %texture
+    %5:vec3<u32> = textureDimensions %4
+    %6:vec3<u32> = sub %5, vec3<u32>(1u)
+    %7:vec3<u32> = convert %coords
+    %8:vec3<u32> = min %7, %6
+    %9:vec4<f32> = textureLoad %4, %8
+    ret %9
+  }
+}
+%load_unsigned = func(%coords_1:vec3<u32>):vec4<f32> -> %b3 {  # %coords_1: 'coords'
+  %b3 = block {
+    %12:texture_storage_3d<rgba8unorm, read_write> = load %texture
+    %13:vec3<u32> = textureDimensions %12
+    %14:vec3<u32> = sub %13, vec3<u32>(1u)
+    %15:vec3<u32> = min %coords_1, %14
+    %16:vec4<f32> = textureLoad %12, %15
+    ret %16
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureStore_Storage1D) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture =
+        b.Var("texture",
+              ty.ptr(handle,
+                     ty.Get<type::StorageTexture>(type::TextureDimension::k1d, format, write,
+                                                  type::StorageTexture::SubtypeFor(format, ty)),
+                     read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.void_());
+        auto* coords = b.FunctionParam("coords", ty.i32());
+        auto* value = b.FunctionParam("value", ty.vec4<f32>());
+        func->SetParams({coords, value});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            b.Call(ty.vec4<f32>(), core::Function::kTextureStore, handle, coords, value);
+            b.Return(func);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.void_());
+        auto* coords = b.FunctionParam("coords", ty.u32());
+        auto* value = b.FunctionParam("value", ty.vec4<f32>());
+        func->SetParams({coords, value});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            b.Call(ty.vec4<f32>(), core::Function::kTextureStore, handle, coords, value);
+            b.Return(func);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_1d<rgba8unorm, write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:i32, %value:vec4<f32>):void -> %b2 {
+  %b2 = block {
+    %5:texture_storage_1d<rgba8unorm, write> = load %texture
+    %6:vec4<f32> = textureStore %5, %coords, %value
+    ret
+  }
+}
+%load_unsigned = func(%coords_1:u32, %value_1:vec4<f32>):void -> %b3 {  # %coords_1: 'coords', %value_1: 'value'
+  %b3 = block {
+    %10:texture_storage_1d<rgba8unorm, write> = load %texture
+    %11:vec4<f32> = textureStore %10, %coords_1, %value_1
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_1d<rgba8unorm, write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:i32, %value:vec4<f32>):void -> %b2 {
+  %b2 = block {
+    %5:texture_storage_1d<rgba8unorm, write> = load %texture
+    %6:u32 = textureDimensions %5
+    %7:u32 = sub %6, 1u
+    %8:u32 = convert %coords
+    %9:u32 = min %8, %7
+    %10:vec4<f32> = textureStore %5, %9, %value
+    ret
+  }
+}
+%load_unsigned = func(%coords_1:u32, %value_1:vec4<f32>):void -> %b3 {  # %coords_1: 'coords', %value_1: 'value'
+  %b3 = block {
+    %14:texture_storage_1d<rgba8unorm, write> = load %texture
+    %15:u32 = textureDimensions %14
+    %16:u32 = sub %15, 1u
+    %17:u32 = min %coords_1, %16
+    %18:vec4<f32> = textureStore %14, %17, %value_1
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureStore_Storage2D) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture =
+        b.Var("texture",
+              ty.ptr(handle,
+                     ty.Get<type::StorageTexture>(type::TextureDimension::k2d, format, write,
+                                                  type::StorageTexture::SubtypeFor(format, ty)),
+                     read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.void_());
+        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* value = b.FunctionParam("value", ty.vec4<f32>());
+        func->SetParams({coords, value});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            b.Call(ty.vec4<f32>(), core::Function::kTextureStore, handle, coords, value);
+            b.Return(func);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.void_());
+        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* value = b.FunctionParam("value", ty.vec4<f32>());
+        func->SetParams({coords, value});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            b.Call(ty.vec4<f32>(), core::Function::kTextureStore, handle, coords, value);
+            b.Return(func);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %value:vec4<f32>):void -> %b2 {
+  %b2 = block {
+    %5:texture_storage_2d<rgba8unorm, write> = load %texture
+    %6:vec4<f32> = textureStore %5, %coords, %value
+    ret
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %value_1:vec4<f32>):void -> %b3 {  # %coords_1: 'coords', %value_1: 'value'
+  %b3 = block {
+    %10:texture_storage_2d<rgba8unorm, write> = load %texture
+    %11:vec4<f32> = textureStore %10, %coords_1, %value_1
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_2d<rgba8unorm, write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %value:vec4<f32>):void -> %b2 {
+  %b2 = block {
+    %5:texture_storage_2d<rgba8unorm, write> = load %texture
+    %6:vec2<u32> = textureDimensions %5
+    %7:vec2<u32> = sub %6, vec2<u32>(1u)
+    %8:vec2<u32> = convert %coords
+    %9:vec2<u32> = min %8, %7
+    %10:vec4<f32> = textureStore %5, %9, %value
+    ret
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %value_1:vec4<f32>):void -> %b3 {  # %coords_1: 'coords', %value_1: 'value'
+  %b3 = block {
+    %14:texture_storage_2d<rgba8unorm, write> = load %texture
+    %15:vec2<u32> = textureDimensions %14
+    %16:vec2<u32> = sub %15, vec2<u32>(1u)
+    %17:vec2<u32> = min %coords_1, %16
+    %18:vec4<f32> = textureStore %14, %17, %value_1
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureStore_Storage2DArray) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture =
+        b.Var("texture",
+              ty.ptr(handle,
+                     ty.Get<type::StorageTexture>(type::TextureDimension::k2dArray, format, write,
+                                                  type::StorageTexture::SubtypeFor(format, ty)),
+                     read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.void_());
+        auto* coords = b.FunctionParam("coords", ty.vec2<i32>());
+        auto* layer = b.FunctionParam("layer", ty.i32());
+        auto* value = b.FunctionParam("value", ty.vec4<f32>());
+        func->SetParams({coords, layer, value});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            b.Call(ty.vec4<f32>(), core::Function::kTextureStore, handle, coords, layer, value);
+            b.Return(func);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.void_());
+        auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+        auto* layer = b.FunctionParam("layer", ty.u32());
+        auto* value = b.FunctionParam("value", ty.vec4<f32>());
+        func->SetParams({coords, layer, value});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            b.Call(ty.vec4<f32>(), core::Function::kTextureStore, handle, coords, layer, value);
+            b.Return(func);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_2d_array<rgba8unorm, write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %layer:i32, %value:vec4<f32>):void -> %b2 {
+  %b2 = block {
+    %6:texture_storage_2d_array<rgba8unorm, write> = load %texture
+    %7:vec4<f32> = textureStore %6, %coords, %layer, %value
+    ret
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32, %value_1:vec4<f32>):void -> %b3 {  # %coords_1: 'coords', %layer_1: 'layer', %value_1: 'value'
+  %b3 = block {
+    %12:texture_storage_2d_array<rgba8unorm, write> = load %texture
+    %13:vec4<f32> = textureStore %12, %coords_1, %layer_1, %value_1
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_2d_array<rgba8unorm, write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec2<i32>, %layer:i32, %value:vec4<f32>):void -> %b2 {
+  %b2 = block {
+    %6:texture_storage_2d_array<rgba8unorm, write> = load %texture
+    %7:vec2<u32> = textureDimensions %6
+    %8:vec2<u32> = sub %7, vec2<u32>(1u)
+    %9:vec2<u32> = convert %coords
+    %10:vec2<u32> = min %9, %8
+    %11:u32 = textureNumLayers %6
+    %12:u32 = sub %11, 1u
+    %13:u32 = convert %layer
+    %14:u32 = min %13, %12
+    %15:vec4<f32> = textureStore %6, %10, %14, %value
+    ret
+  }
+}
+%load_unsigned = func(%coords_1:vec2<u32>, %layer_1:u32, %value_1:vec4<f32>):void -> %b3 {  # %coords_1: 'coords', %layer_1: 'layer', %value_1: 'value'
+  %b3 = block {
+    %20:texture_storage_2d_array<rgba8unorm, write> = load %texture
+    %21:vec2<u32> = textureDimensions %20
+    %22:vec2<u32> = sub %21, vec2<u32>(1u)
+    %23:vec2<u32> = min %coords_1, %22
+    %24:u32 = textureNumLayers %20
+    %25:u32 = sub %24, 1u
+    %26:u32 = min %layer_1, %25
+    %27:vec4<f32> = textureStore %20, %23, %26, %value_1
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
+    Run(Robustness, cfg);
+
+    EXPECT_EQ(GetParam() ? expect : src, str());
+}
+
+TEST_P(IR_RobustnessTest, TextureStore_Storage3D) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture =
+        b.Var("texture",
+              ty.ptr(handle,
+                     ty.Get<type::StorageTexture>(type::TextureDimension::k3d, format, write,
+                                                  type::StorageTexture::SubtypeFor(format, ty)),
+                     read));
+    texture->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(texture);
+
+    {
+        auto* func = b.Function("load_signed", ty.void_());
+        auto* coords = b.FunctionParam("coords", ty.vec3<i32>());
+        auto* value = b.FunctionParam("value", ty.vec4<f32>());
+        func->SetParams({coords, value});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            b.Call(ty.vec4<f32>(), core::Function::kTextureStore, handle, coords, value);
+            b.Return(func);
+        });
+    }
+
+    {
+        auto* func = b.Function("load_unsigned", ty.void_());
+        auto* coords = b.FunctionParam("coords", ty.vec3<u32>());
+        auto* value = b.FunctionParam("value", ty.vec4<f32>());
+        func->SetParams({coords, value});
+        b.Append(func->Block(), [&] {
+            auto* handle = b.Load(texture);
+            b.Call(ty.vec4<f32>(), core::Function::kTextureStore, handle, coords, value);
+            b.Return(func);
+        });
+    }
+
+    auto* src = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_3d<rgba8unorm, write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec3<i32>, %value:vec4<f32>):void -> %b2 {
+  %b2 = block {
+    %5:texture_storage_3d<rgba8unorm, write> = load %texture
+    %6:vec4<f32> = textureStore %5, %coords, %value
+    ret
+  }
+}
+%load_unsigned = func(%coords_1:vec3<u32>, %value_1:vec4<f32>):void -> %b3 {  # %coords_1: 'coords', %value_1: 'value'
+  %b3 = block {
+    %10:texture_storage_3d<rgba8unorm, write> = load %texture
+    %11:vec4<f32> = textureStore %10, %coords_1, %value_1
+    ret
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %texture:ptr<handle, texture_storage_3d<rgba8unorm, write>, read> = var @binding_point(0, 0)
+}
+
+%load_signed = func(%coords:vec3<i32>, %value:vec4<f32>):void -> %b2 {
+  %b2 = block {
+    %5:texture_storage_3d<rgba8unorm, write> = load %texture
+    %6:vec3<u32> = textureDimensions %5
+    %7:vec3<u32> = sub %6, vec3<u32>(1u)
+    %8:vec3<u32> = convert %coords
+    %9:vec3<u32> = min %8, %7
+    %10:vec4<f32> = textureStore %5, %9, %value
+    ret
+  }
+}
+%load_unsigned = func(%coords_1:vec3<u32>, %value_1:vec4<f32>):void -> %b3 {  # %coords_1: 'coords', %value_1: 'value'
+  %b3 = block {
+    %14:texture_storage_3d<rgba8unorm, write> = load %texture
+    %15:vec3<u32> = textureDimensions %14
+    %16:vec3<u32> = sub %15, vec3<u32>(1u)
+    %17:vec3<u32> = min %coords_1, %16
+    %18:vec4<f32> = textureStore %14, %17, %value_1
+    ret
+  }
+}
+)";
+
+    RobustnessConfig cfg;
+    cfg.clamp_texture = GetParam();
     Run(Robustness, cfg);
 
     EXPECT_EQ(GetParam() ? expect : src, str());

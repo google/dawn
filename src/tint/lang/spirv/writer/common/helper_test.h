@@ -100,9 +100,10 @@ class SpirvWriterTestHelperBase : public BASE {
 
     /// Run the specified writer on the IR module and validate the result.
     /// @param writer the writer to use for SPIR-V generation
+    /// @param options the optional writer options to use when raising the IR
     /// @returns true if generation and validation succeeded
-    bool Generate(Printer& writer) {
-        auto raised = raise::Raise(&mod, {});
+    bool Generate(Printer& writer, Options options = {}) {
+        auto raised = raise::Raise(&mod, options);
         if (!raised) {
             err_ = raised.Failure();
             return false;
@@ -126,8 +127,9 @@ class SpirvWriterTestHelperBase : public BASE {
     }
 
     /// Run the writer on the IR module and validate the result.
+    /// @param options the optional writer options to use when raising the IR
     /// @returns true if generation and validation succeeded
-    bool Generate() { return Generate(writer_); }
+    bool Generate(Options options = {}) { return Generate(writer_, options); }
 
     /// Validate the generated SPIR-V using the SPIR-V Tools Validator.
     /// @param binary the SPIR-V binary module to validate

@@ -191,7 +191,9 @@ class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCas
             }
         });
 
-        ASSERT_TRUE(Generate()) << Error() << output_;
+        Options options;
+        options.disable_image_robustness = true;
+        ASSERT_TRUE(Generate(options)) << Error() << output_;
         for (auto& inst : params.instructions) {
             EXPECT_INST(inst);
         }
@@ -1928,10 +1930,101 @@ TEST_F(SpirvWriterTest, Bgra8Unorm_textureStore) {
         b.Return(func);
     });
 
-    ASSERT_TRUE(Generate()) << Error() << output_;
+    Options options;
+    options.disable_image_robustness = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
     EXPECT_INST(R"(
          %13 = OpVectorShuffle %v4float %value %value 2 1 0 3
                OpImageWrite %texture %coords %13 None
+)");
+}
+
+////////////////////////////////////////////////////////////////
+//// Texture robustness enabled.
+////////////////////////////////////////////////////////////////
+
+TEST_F(SpirvWriterTest, TextureDimensions_WithRobustness) {
+    auto* texture_ty =
+        ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+
+    auto* texture = b.FunctionParam("texture", texture_ty);
+    auto* level = b.FunctionParam("level", ty.i32());
+    auto* func = b.Function("foo", ty.vec2<u32>());
+    func->SetParams({texture, level});
+    b.Append(func->Block(), [&] {
+        auto* dims = b.Call(ty.vec2<u32>(), core::Function::kTextureDimensions, texture, level);
+        b.Return(func, dims);
+        mod.SetName(dims, "dims");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+         %11 = OpImageQueryLevels %uint %texture
+         %12 = OpISub %uint %11 %uint_1
+         %14 = OpBitcast %uint %level
+         %15 = OpExtInst %uint %16 UMin %14 %12
+       %dims = OpImageQuerySizeLod %v2uint %texture %15
+)");
+}
+
+TEST_F(SpirvWriterTest, TextureLoad_WithRobustness) {
+    auto* texture_ty =
+        ty.Get<core::type::SampledTexture>(core::type::TextureDimension::k2d, ty.f32());
+
+    auto* texture = b.FunctionParam("texture", texture_ty);
+    auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+    auto* level = b.FunctionParam("level", ty.i32());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({texture, coords, level});
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, texture, coords, level);
+        b.Return(func, result);
+        mod.SetName(result, "result");
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+         %13 = OpImageQuerySizeLod %v2uint %texture %uint_0
+         %15 = OpISub %v2uint %13 %16
+         %18 = OpExtInst %v2uint %19 UMin %coords %15
+         %20 = OpImageQueryLevels %uint %texture
+         %21 = OpISub %uint %20 %uint_1
+         %22 = OpBitcast %uint %level
+         %23 = OpExtInst %uint %19 UMin %22 %21
+     %result = OpImageFetch %v4float %texture %18 Lod %23
+)");
+}
+
+TEST_F(SpirvWriterTest, TextureStore_WithRobustness) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* texture_ty = ty.Get<core::type::StorageTexture>(
+        core::type::TextureDimension::k2dArray, format, core::Access::kWrite,
+        core::type::StorageTexture::SubtypeFor(format, ty));
+
+    auto* texture = b.FunctionParam("texture", texture_ty);
+    auto* coords = b.FunctionParam("coords", ty.vec2<u32>());
+    auto* layer = b.FunctionParam("layer", ty.i32());
+    auto* value = b.FunctionParam("value", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.void_());
+    func->SetParams({texture, coords, layer, value});
+    b.Append(func->Block(), [&] {
+        b.Call(ty.void_(), core::Function::kTextureStore, texture, coords, layer, value);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+         %15 = OpImageQuerySize %v3uint %texture
+         %17 = OpVectorShuffle %v2uint %15 %15 0 1
+         %18 = OpISub %v2uint %17 %19
+         %21 = OpExtInst %v2uint %22 UMin %coords %18
+         %23 = OpImageQuerySize %v3uint %texture
+         %24 = OpCompositeExtract %uint %23 2
+         %25 = OpISub %uint %24 %uint_1
+         %26 = OpBitcast %uint %layer
+         %27 = OpExtInst %uint %22 UMin %26 %25
+         %28 = OpCompositeConstruct %v3uint %21 %27
+               OpImageWrite %texture %28 %value None
 )");
 }
 
