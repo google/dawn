@@ -247,6 +247,8 @@ struct EntryPointMetadata {
 
     bool usesNumWorkgroups = false;
     bool usesFragDepth = false;
+    bool usesVertexIndex = false;
+    bool usesInstanceIndex = false;
     // Used at render pipeline validation.
     bool usesSampleMaskOutput = false;
 };

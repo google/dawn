@@ -151,6 +151,18 @@ MaybeError ValidateVertexState(DeviceBase* device,
         totalAttributesNum += descriptor->buffers[i].attributeCount;
     }
 
+    if (device->IsCompatibilityMode() &&
+        (vertexMetadata.usesVertexIndex || vertexMetadata.usesInstanceIndex)) {
+        uint32_t totalEffectiveAttributesNum = totalAttributesNum +
+                                               (vertexMetadata.usesVertexIndex ? 1 : 0) +
+                                               (vertexMetadata.usesInstanceIndex ? 1 : 0);
+        DAWN_INVALID_IF(totalEffectiveAttributesNum > limits.v1.maxVertexAttributes,
+                        "Attribute count (%u) exceeds the maximum number of attributes (%u) as "
+                        "@builtin(vertex_index) and @builtin(instance_index) each use an attribute "
+                        "in compatibility mode.",
+                        totalEffectiveAttributesNum, limits.v1.maxVertexAttributes);
+    }
+
     // Every vertex attribute has a member called shaderLocation, and there are some
     // requirements for shaderLocation: 1) >=0, 2) values are different across different
     // attributes, 3) can't exceed kMaxVertexAttributes. So it can ensure that total

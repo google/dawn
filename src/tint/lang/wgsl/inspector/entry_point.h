@@ -163,6 +163,10 @@ struct EntryPoint {
     bool num_workgroups_used = false;
     /// Does the entry point use the frag_depth builtin
     bool frag_depth_used = false;
+    /// Does the entry point use the vertex_index builtin
+    bool vertex_index_used = false;
+    /// Does the entry point use the instance_index builtin
+    bool instance_index_used = false;
 };
 
 }  // namespace tint::inspector
