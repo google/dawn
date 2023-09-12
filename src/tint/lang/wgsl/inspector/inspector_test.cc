@@ -126,8 +126,6 @@ class InspectorGetExternalTextureResourceBindingsTest : public InspectorBuilder,
 
 class InspectorGetSamplerTextureUsesTest : public InspectorRunner, public testing::Test {};
 
-class InspectorGetWorkgroupStorageSizeTest : public InspectorBuilder, public testing::Test {};
-
 class InspectorGetUsedExtensionNamesTest : public InspectorRunner, public testing::Test {};
 
 class InspectorGetEnableDirectivesTest : public InspectorRunner, public testing::Test {};
@@ -264,6 +262,119 @@ TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
     EXPECT_EQ(8u, workgroup_size->x);
     EXPECT_EQ(2u, workgroup_size->y);
     EXPECT_EQ(1u, workgroup_size->z);
+}
+
+TEST_F(InspectorGetEntryPointTest, WorkgroupStorageSizeEmpty) {
+    MakeEmptyBodyFunction("ep_func", Vector{
+                                         Stage(ast::PipelineStage::kCompute),
+                                         WorkgroupSize(1_i),
+                                     });
+    Inspector& inspector = Build();
+    auto result = inspector.GetEntryPoints();
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(0u, result[0].workgroup_storage_size);
+}
+
+TEST_F(InspectorGetEntryPointTest, WorkgroupStorageSizeSimple) {
+    AddWorkgroupStorage("wg_f32", ty.f32());
+    MakePlainGlobalReferenceBodyFunction("f32_func", "wg_f32", ty.f32(), tint::Empty);
+
+    MakeCallerBodyFunction("ep_func", Vector{std::string("f32_func")},
+                           Vector{
+                               Stage(ast::PipelineStage::kCompute),
+                               WorkgroupSize(1_i),
+                           });
+
+    Inspector& inspector = Build();
+    auto result = inspector.GetEntryPoints();
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(4u, result[0].workgroup_storage_size);
+}
+
+TEST_F(InspectorGetEntryPointTest, WorkgroupStorageSizeCompoundTypes) {
+    // This struct should occupy 68 bytes. 4 from the i32 field, and another 64
+    // from the 4-element array with 16-byte stride.
+    auto* wg_struct_type = MakeStructType("WgStruct", Vector{
+                                                          ty.i32(),
+                                                          ty.array<i32, 4>(Vector{
+                                                              Stride(16),
+                                                          }),
+                                                      });
+    AddWorkgroupStorage("wg_struct_var", ty.Of(wg_struct_type));
+    MakeStructVariableReferenceBodyFunction("wg_struct_func", "wg_struct_var",
+                                            Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
+
+    // Plus another 4 bytes from this other workgroup-class f32.
+    AddWorkgroupStorage("wg_f32", ty.f32());
+    MakePlainGlobalReferenceBodyFunction("f32_func", "wg_f32", ty.f32(), tint::Empty);
+
+    MakeCallerBodyFunction("ep_func", Vector{std::string("wg_struct_func"), "f32_func"},
+                           Vector{
+                               Stage(ast::PipelineStage::kCompute),
+                               WorkgroupSize(1_i),
+                           });
+
+    Inspector& inspector = Build();
+    auto result = inspector.GetEntryPoints();
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(72u, result[0].workgroup_storage_size);
+}
+
+TEST_F(InspectorGetEntryPointTest, WorkgroupStorageSizeAlignmentPadding) {
+    // vec3<f32> has an alignment of 16 but a size of 12. We leverage this to test
+    // that our padded size calculation for workgroup storage is accurate.
+    AddWorkgroupStorage("wg_vec3", ty.vec3<f32>());
+    MakePlainGlobalReferenceBodyFunction("wg_func", "wg_vec3", ty.vec3<f32>(), tint::Empty);
+
+    MakeCallerBodyFunction("ep_func", Vector{std::string("wg_func")},
+                           Vector{
+                               Stage(ast::PipelineStage::kCompute),
+                               WorkgroupSize(1_i),
+                           });
+
+    Inspector& inspector = Build();
+    auto result = inspector.GetEntryPoints();
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(16u, result[0].workgroup_storage_size);
+}
+
+TEST_F(InspectorGetEntryPointTest, WorkgroupStorageSizeStructAlignment) {
+    // Per WGSL spec, a struct's size is the offset its last member plus the size
+    // of its last member, rounded up to the alignment of its largest member. So
+    // here the struct is expected to occupy 1024 bytes of workgroup storage.
+    const auto* wg_struct_type = MakeStructTypeFromMembers(
+        "WgStruct", Vector{
+                        MakeStructMember(0, ty.f32(), Vector{MemberAlign(1024_i)}),
+                    });
+
+    AddWorkgroupStorage("wg_struct_var", ty.Of(wg_struct_type));
+    MakeStructVariableReferenceBodyFunction("wg_struct_func", "wg_struct_var",
+                                            Vector{
+                                                MemberInfo{0, ty.f32()},
+                                            });
+
+    MakeCallerBodyFunction("ep_func", Vector{std::string("wg_struct_func")},
+                           Vector{
+                               Stage(ast::PipelineStage::kCompute),
+                               WorkgroupSize(1_i),
+                           });
+
+    Inspector& inspector = Build();
+    auto result = inspector.GetEntryPoints();
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(1024u, result[0].workgroup_storage_size);
 }
 
 TEST_F(InspectorGetEntryPointTest, NoInOutVariables) {
@@ -3380,99 +3491,6 @@ fn direct(@location(0) fragUV: vec2<f32>,
         EXPECT_EQ(0u, result[0].texture_binding_point.group);
         EXPECT_EQ(2u, result[0].texture_binding_point.binding);
     }
-}
-
-TEST_F(InspectorGetWorkgroupStorageSizeTest, Empty) {
-    MakeEmptyBodyFunction("ep_func", Vector{
-                                         Stage(ast::PipelineStage::kCompute),
-                                         WorkgroupSize(1_i),
-                                     });
-    Inspector& inspector = Build();
-    EXPECT_EQ(0u, inspector.GetWorkgroupStorageSize("ep_func"));
-}
-
-TEST_F(InspectorGetWorkgroupStorageSizeTest, Simple) {
-    AddWorkgroupStorage("wg_f32", ty.f32());
-    MakePlainGlobalReferenceBodyFunction("f32_func", "wg_f32", ty.f32(), tint::Empty);
-
-    MakeCallerBodyFunction("ep_func", Vector{std::string("f32_func")},
-                           Vector{
-                               Stage(ast::PipelineStage::kCompute),
-                               WorkgroupSize(1_i),
-                           });
-
-    Inspector& inspector = Build();
-    EXPECT_EQ(4u, inspector.GetWorkgroupStorageSize("ep_func"));
-}
-
-TEST_F(InspectorGetWorkgroupStorageSizeTest, CompoundTypes) {
-    // This struct should occupy 68 bytes. 4 from the i32 field, and another 64
-    // from the 4-element array with 16-byte stride.
-    auto* wg_struct_type = MakeStructType("WgStruct", Vector{
-                                                          ty.i32(),
-                                                          ty.array<i32, 4>(Vector{
-                                                              Stride(16),
-                                                          }),
-                                                      });
-    AddWorkgroupStorage("wg_struct_var", ty.Of(wg_struct_type));
-    MakeStructVariableReferenceBodyFunction("wg_struct_func", "wg_struct_var",
-                                            Vector{
-                                                MemberInfo{0, ty.i32()},
-                                            });
-
-    // Plus another 4 bytes from this other workgroup-class f32.
-    AddWorkgroupStorage("wg_f32", ty.f32());
-    MakePlainGlobalReferenceBodyFunction("f32_func", "wg_f32", ty.f32(), tint::Empty);
-
-    MakeCallerBodyFunction("ep_func", Vector{std::string("wg_struct_func"), "f32_func"},
-                           Vector{
-                               Stage(ast::PipelineStage::kCompute),
-                               WorkgroupSize(1_i),
-                           });
-
-    Inspector& inspector = Build();
-    EXPECT_EQ(72u, inspector.GetWorkgroupStorageSize("ep_func"));
-}
-
-TEST_F(InspectorGetWorkgroupStorageSizeTest, AlignmentPadding) {
-    // vec3<f32> has an alignment of 16 but a size of 12. We leverage this to test
-    // that our padded size calculation for workgroup storage is accurate.
-    AddWorkgroupStorage("wg_vec3", ty.vec3<f32>());
-    MakePlainGlobalReferenceBodyFunction("wg_func", "wg_vec3", ty.vec3<f32>(), tint::Empty);
-
-    MakeCallerBodyFunction("ep_func", Vector{std::string("wg_func")},
-                           Vector{
-                               Stage(ast::PipelineStage::kCompute),
-                               WorkgroupSize(1_i),
-                           });
-
-    Inspector& inspector = Build();
-    EXPECT_EQ(16u, inspector.GetWorkgroupStorageSize("ep_func"));
-}
-
-TEST_F(InspectorGetWorkgroupStorageSizeTest, StructAlignment) {
-    // Per WGSL spec, a struct's size is the offset its last member plus the size
-    // of its last member, rounded up to the alignment of its largest member. So
-    // here the struct is expected to occupy 1024 bytes of workgroup storage.
-    const auto* wg_struct_type = MakeStructTypeFromMembers(
-        "WgStruct", Vector{
-                        MakeStructMember(0, ty.f32(), Vector{MemberAlign(1024_i)}),
-                    });
-
-    AddWorkgroupStorage("wg_struct_var", ty.Of(wg_struct_type));
-    MakeStructVariableReferenceBodyFunction("wg_struct_func", "wg_struct_var",
-                                            Vector{
-                                                MemberInfo{0, ty.f32()},
-                                            });
-
-    MakeCallerBodyFunction("ep_func", Vector{std::string("wg_struct_func")},
-                           Vector{
-                               Stage(ast::PipelineStage::kCompute),
-                               WorkgroupSize(1_i),
-                           });
-
-    Inspector& inspector = Build();
-    EXPECT_EQ(1024u, inspector.GetWorkgroupStorageSize("ep_func"));
 }
 
 // Test calling GetUsedExtensionNames on a empty shader.

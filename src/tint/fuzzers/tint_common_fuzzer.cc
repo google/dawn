@@ -384,9 +384,6 @@ void CommonFuzzer::RunInspector(Program* program) {
 
         inspector.GetSamplerTextureUses(ep.name);
         CHECK_INSPECTOR(program, inspector);
-
-        inspector.GetWorkgroupStorageSize(ep.name);
-        CHECK_INSPECTOR(program, inspector);
     }
 }
 

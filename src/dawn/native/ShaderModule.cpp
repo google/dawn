@@ -893,7 +893,7 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
                     "maximum allowed (%u).",
                     numInvocations, limits.maxComputeInvocationsPerWorkgroup);
 
-    const size_t workgroupStorageSize = inspector.GetWorkgroupStorageSize(entryPointName);
+    const size_t workgroupStorageSize = entryPoint.workgroup_storage_size;
     DAWN_INVALID_IF(workgroupStorageSize > limits.maxComputeWorkgroupStorageSize,
                     "The total use of workgroup storage (%u bytes) is larger than "
                     "the maximum allowed (%u bytes).",

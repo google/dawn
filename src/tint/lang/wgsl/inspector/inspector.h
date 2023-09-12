@@ -131,11 +131,6 @@ class Inspector {
     std::vector<SamplerTexturePair> GetSamplerTextureUses(const std::string& entry_point,
                                                           const BindingPoint& placeholder);
 
-    /// @param entry_point name of the entry point to get information about.
-    /// @returns the total size in bytes of all Workgroup storage-class storage
-    /// referenced transitively by the entry point.
-    uint32_t GetWorkgroupStorageSize(const std::string& entry_point);
-
     /// @returns vector of all valid extension names used by the program. There
     /// will be no duplicated names in the returned vector even if an extension
     /// is enabled multiple times.
@@ -222,6 +217,10 @@ class Inspector {
     std::tuple<InterpolationType, InterpolationSampling> CalculateInterpolationData(
         const core::type::Type* type,
         VectorRef<const ast::Attribute*> attributes) const;
+
+    /// @param func the root function of the callgraph to consider for the computation.
+    /// @returns the total size in bytes of all Workgroup storage-class storage accessed via func.
+    uint32_t ComputeWorkgroupStorageSize(const ast::Function* func) const;
 
     /// For a N-uple of expressions, resolve to the appropriate global resources
     /// and call 'cb'.

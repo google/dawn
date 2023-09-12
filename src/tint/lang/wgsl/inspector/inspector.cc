@@ -139,6 +139,7 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
     switch (func->PipelineStage()) {
         case ast::PipelineStage::kCompute: {
             entry_point.stage = PipelineStage::kCompute;
+            entry_point.workgroup_storage_size = ComputeWorkgroupStorageSize(func);
 
             auto wgsize = sem->WorkgroupSize();
             if (wgsize[0].has_value() && wgsize[1].has_value() && wgsize[2].has_value()) {
@@ -517,31 +518,6 @@ std::vector<SamplerTexturePair> Inspector::GetSamplerTextureUses(const std::stri
     return new_pairs;
 }
 
-uint32_t Inspector::GetWorkgroupStorageSize(const std::string& entry_point) {
-    auto* func = FindEntryPointByName(entry_point);
-    if (!func) {
-        return 0;
-    }
-
-    uint32_t total_size = 0;
-    auto* func_sem = program_->Sem().Get(func);
-    for (const sem::Variable* var : func_sem->TransitivelyReferencedGlobals()) {
-        if (var->AddressSpace() == core::AddressSpace::kWorkgroup) {
-            auto* ty = var->Type()->UnwrapRef();
-            uint32_t align = ty->Align();
-            uint32_t size = ty->Size();
-
-            // This essentially matches std430 layout rules from GLSL, which are in
-            // turn specified as an upper bound for Vulkan layout sizing. Since D3D
-            // and Metal are even less specific, we assume Vulkan behavior as a
-            // good-enough approximation everywhere.
-            total_size += tint::RoundUp(align, size);
-        }
-    }
-
-    return total_size;
-}
-
 std::vector<std::string> Inspector::GetUsedExtensionNames() {
     auto& extensions = program_->Sem().Module()->Extensions();
     std::vector<std::string> out;
@@ -901,6 +877,26 @@ std::tuple<InterpolationType, InterpolationSampling> Inspector::CalculateInterpo
     }
 
     return {interpolation_type, sampling_type};
+}
+
+uint32_t Inspector::ComputeWorkgroupStorageSize(const ast::Function* func) const {
+    uint32_t total_size = 0;
+    auto* func_sem = program_->Sem().Get(func);
+    for (const sem::Variable* var : func_sem->TransitivelyReferencedGlobals()) {
+        if (var->AddressSpace() == core::AddressSpace::kWorkgroup) {
+            auto* ty = var->Type()->UnwrapRef();
+            uint32_t align = ty->Align();
+            uint32_t size = ty->Size();
+
+            // This essentially matches std430 layout rules from GLSL, which are in
+            // turn specified as an upper bound for Vulkan layout sizing. Since D3D
+            // and Metal are even less specific, we assume Vulkan behavior as a
+            // good-enough approximation everywhere.
+            total_size += tint::RoundUp(align, size);
+        }
+    }
+
+    return total_size;
 }
 
 template <size_t N, typename F>
