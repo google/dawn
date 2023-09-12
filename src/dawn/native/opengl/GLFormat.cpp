@@ -76,6 +76,7 @@ GLFormatTable BuildGLFormatTable(GLenum internalFormatForBGRA) {
         AddFormat(wgpu::TextureFormat::RGBA8Sint, GL_RGBA8I, GL_RGBA_INTEGER, GL_BYTE, Type::Int);
 
         AddFormat(wgpu::TextureFormat::BGRA8Unorm, internalFormatForBGRA, GL_BGRA, GL_UNSIGNED_BYTE, Type::Float);
+        AddFormat(wgpu::TextureFormat::RGB10A2Uint, GL_RGB10_A2UI, GL_RGBA_INTEGER, GL_UNSIGNED_INT_2_10_10_10_REV, Type::Uint);
         AddFormat(wgpu::TextureFormat::RGB10A2Unorm, GL_RGB10_A2, GL_RGBA, GL_UNSIGNED_INT_2_10_10_10_REV, Type::Float);
         AddFormat(wgpu::TextureFormat::RG11B10Ufloat, GL_R11F_G11F_B10F, GL_RGB, GL_UNSIGNED_INT_10F_11F_11F_REV, Type::Float);
         AddFormat(wgpu::TextureFormat::RGB9E5Ufloat, GL_RGB9_E5, GL_RGB, GL_UNSIGNED_INT_5_9_9_9_REV, Type::Float);

@@ -129,6 +129,7 @@ DXGI_FORMAT DXGITypelessTextureFormat(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::BGRA8UnormSrgb:
             return DXGI_FORMAT_B8G8R8A8_TYPELESS;
 
+        case wgpu::TextureFormat::RGB10A2Uint:
         case wgpu::TextureFormat::RGB10A2Unorm:
             return DXGI_FORMAT_R10G10B10A2_TYPELESS;
 
@@ -272,6 +273,7 @@ DXGI_FORMAT DXGITypelessTextureFormat(wgpu::TextureFormat format) {
     X(wgpu::TextureFormat::RGBA8Sint, DXGI_FORMAT_R8G8B8A8_SINT)            \
     X(wgpu::TextureFormat::BGRA8Unorm, DXGI_FORMAT_B8G8R8A8_UNORM)          \
     X(wgpu::TextureFormat::BGRA8UnormSrgb, DXGI_FORMAT_B8G8R8A8_UNORM_SRGB) \
+    X(wgpu::TextureFormat::RGB10A2Uint, DXGI_FORMAT_R10G10B10A2_UINT)       \
     X(wgpu::TextureFormat::RGB10A2Unorm, DXGI_FORMAT_R10G10B10A2_UNORM)     \
     X(wgpu::TextureFormat::RG11B10Ufloat, DXGI_FORMAT_R11G11B10_FLOAT)      \
     X(wgpu::TextureFormat::RGB9E5Ufloat, DXGI_FORMAT_R9G9B9E5_SHAREDEXP)    \

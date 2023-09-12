@@ -474,6 +474,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     auto BGRA8UnormSupportsStorageUsage = device->HasFeature(Feature::BGRA8UnormStorage) ? Cap::StorageW : Cap::None;
     AddColorFormat(wgpu::TextureFormat::BGRA8Unorm, Cap::Renderable | BGRA8UnormSupportsStorageUsage | Cap::Multisample | Cap::Resolve, ByteSize(4), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(1));
     AddConditionalColorFormat(wgpu::TextureFormat::BGRA8UnormSrgb, device->IsCompatibilityMode() ? UnsupportedReason(CompatibilityMode{}) : Format::supported, Cap::Renderable |  Cap::Multisample | Cap::Resolve, ByteSize(4), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(1), wgpu::TextureFormat::BGRA8Unorm);
+    AddColorFormat(wgpu::TextureFormat::RGB10A2Uint, Cap::Renderable |  Cap::Multisample, ByteSize(4), SampleTypeBit::Uint, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(4));
     AddColorFormat(wgpu::TextureFormat::RGB10A2Unorm, Cap::Renderable |  Cap::Multisample | Cap::Resolve, ByteSize(4), kAnyFloat, ComponentCount(4), RenderTargetPixelByteCost(8), RenderTargetComponentAlignment(4));
 
     auto isRG11B10UfloatCapabilities = device->HasFeature(Feature::RG11B10UfloatRenderable) ? Cap::Renderable | Cap::Multisample | Cap::Resolve : Cap::None;

@@ -639,6 +639,7 @@ bool Converter::Convert(interop::GPUTextureFormat& out, wgpu::TextureFormat in) 
         CASE(Stencil8, kStencil8);
 #undef CASE
 
+        case wgpu::TextureFormat::RGB10A2Uint:
         case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
         case wgpu::TextureFormat::R16Snorm:
         case wgpu::TextureFormat::R16Unorm:

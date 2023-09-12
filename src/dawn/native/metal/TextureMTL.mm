@@ -306,6 +306,8 @@ MTLPixelFormat MetalPixelFormat(const DeviceBase* device, wgpu::TextureFormat fo
             return MTLPixelFormatBGRA8Unorm;
         case wgpu::TextureFormat::BGRA8UnormSrgb:
             return MTLPixelFormatBGRA8Unorm_sRGB;
+        case wgpu::TextureFormat::RGB10A2Uint:
+            return MTLPixelFormatRGB10A2Uint;
         case wgpu::TextureFormat::RGB10A2Unorm:
             return MTLPixelFormatRGB10A2Unorm;
         case wgpu::TextureFormat::RG11B10Ufloat:

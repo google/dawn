@@ -282,6 +282,7 @@ uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::RGBA8Sint:
         case wgpu::TextureFormat::BGRA8Unorm:
         case wgpu::TextureFormat::BGRA8UnormSrgb:
+        case wgpu::TextureFormat::RGB10A2Uint:
         case wgpu::TextureFormat::RGB10A2Unorm:
         case wgpu::TextureFormat::RG11B10Ufloat:
         case wgpu::TextureFormat::RGB9E5Ufloat:
@@ -414,6 +415,7 @@ uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::RGBA8Sint:
         case wgpu::TextureFormat::BGRA8Unorm:
         case wgpu::TextureFormat::BGRA8UnormSrgb:
+        case wgpu::TextureFormat::RGB10A2Uint:
         case wgpu::TextureFormat::RGB10A2Unorm:
         case wgpu::TextureFormat::RG11B10Ufloat:
         case wgpu::TextureFormat::RGB9E5Ufloat:
@@ -537,6 +539,7 @@ uint32_t GetTextureFormatBlockHeight(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::RGBA8Sint:
         case wgpu::TextureFormat::BGRA8Unorm:
         case wgpu::TextureFormat::BGRA8UnormSrgb:
+        case wgpu::TextureFormat::RGB10A2Uint:
         case wgpu::TextureFormat::RGB10A2Unorm:
         case wgpu::TextureFormat::RG11B10Ufloat:
         case wgpu::TextureFormat::RGB9E5Ufloat:
@@ -665,6 +668,7 @@ const char* GetWGSLColorTextureComponentType(wgpu::TextureFormat textureFormat) 
         case wgpu::TextureFormat::RG16Uint:
         case wgpu::TextureFormat::RGBA8Uint:
         case wgpu::TextureFormat::RG32Uint:
+        case wgpu::TextureFormat::RGB10A2Uint:
         case wgpu::TextureFormat::RGBA16Uint:
         case wgpu::TextureFormat::RGBA32Uint:
             return "u32";
@@ -717,6 +721,7 @@ uint32_t GetWGSLRenderableColorTextureComponentCount(wgpu::TextureFormat texture
         case wgpu::TextureFormat::RGBA8Sint:
         case wgpu::TextureFormat::BGRA8Unorm:
         case wgpu::TextureFormat::BGRA8UnormSrgb:
+        case wgpu::TextureFormat::RGB10A2Uint:
         case wgpu::TextureFormat::RGB10A2Unorm:
         case wgpu::TextureFormat::RGBA16Unorm:
         case wgpu::TextureFormat::RGBA16Snorm:
@@ -811,6 +816,8 @@ const char* GetWGSLImageFormatQualifier(wgpu::TextureFormat textureFormat) {
             return "rg16sint";
         case wgpu::TextureFormat::RG16Float:
             return "rg16float";
+        case wgpu::TextureFormat::RGB10A2Uint:
+            return "rgb10a2uint";
         case wgpu::TextureFormat::RGB10A2Unorm:
             return "rgb10a2unorm";
         case wgpu::TextureFormat::RG11B10Ufloat:

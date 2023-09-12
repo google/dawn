@@ -805,6 +805,33 @@ TEST_P(TextureFormatTest, BGRA8UnormSrgb) {
 }
 
 // Test the RGB10A2Unorm format
+TEST_P(TextureFormatTest, RGB10A2Uint) {
+    auto MakeRGB10A2 = [](uint32_t r, uint32_t g, uint32_t b, uint32_t a) -> uint32_t {
+        ASSERT((r & 0x3FF) == r);
+        ASSERT((g & 0x3FF) == g);
+        ASSERT((b & 0x3FF) == b);
+        ASSERT((a & 0x3) == a);
+        return r | g << 10 | b << 20 | a << 30;
+    };
+
+    std::vector<uint32_t> textureData = {MakeRGB10A2(0, 0, 0, 0), MakeRGB10A2(1023, 1023, 1023, 1),
+                                         MakeRGB10A2(243, 576, 765, 2), MakeRGB10A2(0, 0, 0, 3)};
+    // clang-format off
+    std::vector<uint32_t> uncompressedData = {
+       0, 0, 0, 0,
+       1023, 1023, 1023, 1,
+       243, 576, 765, 2,
+       0, 0, 0, 3
+    };
+    // clang-format on
+
+    DoFormatSamplingTest({wgpu::TextureFormat::RGB10A2Uint, 4, TextureComponentType::Uint, 4},
+                         textureData, uncompressedData);
+    DoFormatRenderingTest({wgpu::TextureFormat::RGB10A2Uint, 4, TextureComponentType::Uint, 4},
+                          uncompressedData, textureData);
+}
+
+// Test the RGB10A2Unorm format
 TEST_P(TextureFormatTest, RGB10A2Unorm) {
     auto MakeRGB10A2 = [](uint32_t r, uint32_t g, uint32_t b, uint32_t a) -> uint32_t {
         ASSERT((r & 0x3FF) == r);
