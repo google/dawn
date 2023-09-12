@@ -25,11 +25,7 @@ dictionary EventInit {
   boolean composed = false;
 };
 
-[LegacyNoInterfaceObject] interface Navigator {
-  readonly attribute DOMString vendorSub;
-  readonly attribute DOMString productSub;
-  readonly attribute DOMString vendor;
-};
+[LegacyNoInterfaceObject] interface Navigator {};
 
 [LegacyNoInterfaceObject] interface Event {
   readonly attribute boolean bubbles;
@@ -56,39 +52,24 @@ dictionary AddEventListenerOptions : EventListenerOptions {
   boolean once = false;
 };
 
-[LegacyNoInterfaceObject] interface HTMLVideoElement {
-  attribute unsigned long width;
-  attribute unsigned long height;
-  readonly attribute unsigned long videoWidth;
-  readonly attribute unsigned long videoHeight;
-  attribute DOMString poster;
-};
-
 typedef(Int8Array or Int16Array or Int32Array or Uint8Array or Uint16Array or
         Uint32Array or Float32Array or Float64Array or
         DataView) ArrayBufferView;
 
 typedef(ArrayBufferView or ArrayBuffer) BufferSource;
 
-[LegacyNoInterfaceObject] interface ImageBitmap {
-  readonly attribute unsigned long width;
-  readonly attribute unsigned long height;
-};
+// NAPI doesn't have SharedArrayBuffer so comment out that part of AllowSharedBufferSource.
+typedef (ArrayBuffer or /* SharedArrayBuffer or [AllowShared] */ ArrayBufferView) AllowSharedBufferSource;
 
-[LegacyNoInterfaceObject] interface HTMLCanvasElement {
-  attribute unsigned long width;
-  attribute unsigned long height;
-};
-
-[LegacyNoInterfaceObject] interface OffscreenCanvas {
-  attribute unsigned long width;
-  attribute unsigned long height;
-};
-
-[LegacyNoInterfaceObject] interface EventHandler{};
-
+// Interfaces used in the WebGPU IDL that don't have an equivalent in the NAPI world.
 [LegacyNoInterfaceObject] interface DOMException {};
-
+[LegacyNoInterfaceObject] interface EventHandler{};
+[LegacyNoInterfaceObject] interface HTMLCanvasElement {};
+[LegacyNoInterfaceObject] interface HTMLImageElement {};
+[LegacyNoInterfaceObject] interface HTMLVideoElement {};
+[LegacyNoInterfaceObject] interface ImageBitmap {};
+[LegacyNoInterfaceObject] interface ImageData {};
+[LegacyNoInterfaceObject] interface OffscreenCanvas {};
 [LegacyNoInterfaceObject] interface VideoFrame {};
 
 enum PredefinedColorSpace { "srgb", "display-p3" };

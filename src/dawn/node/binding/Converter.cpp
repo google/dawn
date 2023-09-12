@@ -258,6 +258,9 @@ bool Converter::Convert(wgpu::TextureFormat& out, const interop::GPUTextureForma
         case interop::GPUTextureFormat::kRgb9E5Ufloat:
             out = wgpu::TextureFormat::RGB9E5Ufloat;
             return true;
+        case interop::GPUTextureFormat::kRgb10A2Uint:
+            out = wgpu::TextureFormat::RGB10A2Uint;
+            return true;
         case interop::GPUTextureFormat::kRgb10A2Unorm:
             out = wgpu::TextureFormat::RGB10A2Unorm;
             return true;
@@ -623,6 +626,7 @@ bool Converter::Convert(interop::GPUTextureFormat& out, wgpu::TextureFormat in) 
         CASE(RG8Snorm, kRg8Snorm);
         CASE(RG8Uint, kRg8Uint);
         CASE(RG8Unorm, kRg8Unorm);
+        CASE(RGB10A2Uint, kRgb10A2Uint);
         CASE(RGB10A2Unorm, kRgb10A2Unorm);
         CASE(RGB9E5Ufloat, kRgb9E5Ufloat);
         CASE(RGBA16Float, kRgba16Float);
@@ -639,7 +643,6 @@ bool Converter::Convert(interop::GPUTextureFormat& out, wgpu::TextureFormat in) 
         CASE(Stencil8, kStencil8);
 #undef CASE
 
-        case wgpu::TextureFormat::RGB10A2Uint:
         case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
         case wgpu::TextureFormat::R16Snorm:
         case wgpu::TextureFormat::R16Unorm:

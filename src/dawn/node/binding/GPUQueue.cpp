@@ -73,7 +73,7 @@ interop::Promise<void> GPUQueue::onSubmittedWorkDone(Napi::Env env) {
 void GPUQueue::writeBuffer(Napi::Env env,
                            interop::Interface<interop::GPUBuffer> buffer,
                            interop::GPUSize64 bufferOffset,
-                           interop::BufferSource data,
+                           interop::AllowSharedBufferSource data,
                            interop::GPUSize64 dataOffsetElements,
                            std::optional<interop::GPUSize64> sizeElements) {
     wgpu::Buffer buf = *buffer.As<GPUBuffer>();
@@ -123,7 +123,7 @@ void GPUQueue::writeBuffer(Napi::Env env,
 
 void GPUQueue::writeTexture(Napi::Env env,
                             interop::GPUImageCopyTexture destination,
-                            interop::BufferSource data,
+                            interop::AllowSharedBufferSource data,
                             interop::GPUImageDataLayout dataLayout,
                             interop::GPUExtent3D size) {
     wgpu::ImageCopyTexture dst{};
