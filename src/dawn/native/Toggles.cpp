@@ -322,8 +322,9 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
     {Toggle::DisableSubAllocationFor2DTextureWithCopyDstOrRenderAttachment,
      {"disable_sub_allocation_for_2d_texture_with_copy_dst_or_render_attachment",
       "Disable resource sub-allocation for the 2D texture with CopyDst or RenderAttachment usage. "
-      "This toggle is enabled by default on D3D12 backends using Intel Gen9.5 and Gen11 GPUs and "
-      "on Vulkan backends using Intel Gen12 GPUs due to Intel Mesa Vulkan and D3D12 driver issues.",
+      "Due to driver issues, this toggle is enabled by default on D3D12 backends using Intel "
+      "Gen9.5 or Gen11 GPUs, on Vulkan backends using Intel Gen12 GPUs, and D3D12 backends using "
+      "AMD GPUs.",
       "https://crbug.com/1237175", ToggleStage::Device}},
     {Toggle::MetalUseCombinedDepthStencilFormatForStencil8,
      {"metal_use_combined_depth_stencil_format_for_stencil8",

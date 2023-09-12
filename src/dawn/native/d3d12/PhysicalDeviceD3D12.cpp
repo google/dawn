@@ -604,10 +604,12 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
         }
     }
 
-    // Currently these workarounds are only needed on Intel Gen9.5 and Gen11 GPUs.
-    // See http://crbug.com/1237175 and http://crbug.com/dawn/1628 for more information.
+    // Currently these workarounds are needed on Intel Gen9.5 and Gen11 GPUs, as well as
+    // AMD GPUS.
+    // See http://crbug.com/1237175, http://crbug.com/dawn/1628, and http://crbug.com/dawn/2032
+    // for more information.
     if ((gpu_info::IsIntelGen9(vendorId, deviceId) && !gpu_info::IsSkylake(deviceId)) ||
-        gpu_info::IsIntelGen11(vendorId, deviceId)) {
+        gpu_info::IsIntelGen11(vendorId, deviceId) || gpu_info::IsAMD(vendorId)) {
         deviceToggles->Default(
             Toggle::DisableSubAllocationFor2DTextureWithCopyDstOrRenderAttachment, true);
         // Now we don't need to force clearing depth stencil textures with CopyDst as all the depth
