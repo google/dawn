@@ -129,6 +129,9 @@ struct State {
         }
 
         // TODO(jrprice): Handle config.bindings_ignored.
+        if (!config.bindings_ignored.empty()) {
+            TINT_UNIMPLEMENTED();
+        }
     }
 
     /// Check if clamping should be applied to a particular address space.
