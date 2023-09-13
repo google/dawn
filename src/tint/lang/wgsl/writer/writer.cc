@@ -29,10 +29,6 @@ namespace tint::wgsl::writer {
 Result<Output, std::string> Generate(const Program* program, const Options& options) {
     (void)options;
 
-    if (!program->IsValid()) {
-        return std::string("input program is not valid");
-    }
-
     Output output;
 #if TINT_BUILD_SYNTAX_TREE_WRITER
     if (options.use_syntax_tree_writer) {
