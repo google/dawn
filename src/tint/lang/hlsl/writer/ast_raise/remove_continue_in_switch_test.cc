@@ -28,7 +28,6 @@ fn f() {
     switch(i) {
       case 0: {
         continue;
-        break;
       }
       default: {
         break;
@@ -116,7 +115,6 @@ fn f() {
     switch(i) {
       case 0: {
         continue;
-        break;
       }
       default: {
         break;
@@ -135,15 +133,13 @@ fn f() {
     auto* expect = R"(
 fn f() {
   var i = 0;
+  var tint_continue : bool;
   loop {
+    tint_continue = false;
     let marker1 = 0;
-    var tint_continue : bool = false;
     switch(i) {
       case 0: {
-        {
-          tint_continue = true;
-          break;
-        }
+        tint_continue = true;
         break;
       }
       default: {
@@ -178,15 +174,12 @@ fn f() {
     switch(i) {
       case 0: {
         continue;
-        break;
       }
       case 1: {
         continue;
-        break;
       }
       case 2: {
         continue;
-        break;
       }
       default: {
         break;
@@ -205,29 +198,21 @@ fn f() {
     auto* expect = R"(
 fn f() {
   var i = 0;
+  var tint_continue : bool;
   loop {
+    tint_continue = false;
     let marker1 = 0;
-    var tint_continue : bool = false;
     switch(i) {
       case 0: {
-        {
-          tint_continue = true;
-          break;
-        }
+        tint_continue = true;
         break;
       }
       case 1: {
-        {
-          tint_continue = true;
-          break;
-        }
+        tint_continue = true;
         break;
       }
       case 2: {
-        {
-          tint_continue = true;
-          break;
-        }
+        tint_continue = true;
         break;
       }
       default: {
@@ -262,7 +247,6 @@ fn f() {
     switch(i) {
       case 0: {
         continue;
-        break;
       }
       default: {
         break;
@@ -274,7 +258,6 @@ fn f() {
     switch(i) {
       case 0: {
         continue;
-        break;
       }
       default: {
         break;
@@ -290,15 +273,13 @@ fn f() {
     auto* expect = R"(
 fn f() {
   var i = 0;
+  var tint_continue : bool;
   loop {
+    tint_continue = false;
     let marker1 = 0;
-    var tint_continue : bool = false;
     switch(i) {
       case 0: {
-        {
-          tint_continue = true;
-          break;
-        }
+        tint_continue = true;
         break;
       }
       default: {
@@ -310,20 +291,16 @@ fn f() {
     }
     let marker2 = 0;
     let marker3 = 0;
-    var tint_continue_1 : bool = false;
     switch(i) {
       case 0: {
-        {
-          tint_continue_1 = true;
-          break;
-        }
+        tint_continue = true;
         break;
       }
       default: {
         break;
       }
     }
-    if (tint_continue_1) {
+    if (tint_continue) {
       continue;
     }
     let marker4 = 0;
@@ -338,87 +315,253 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(RemoveContinueInSwitchTest, NestedLoopSwitch) {
+TEST_F(RemoveContinueInSwitchTest, NestedLoopSwitchSwitch) {
     auto* src = R"(
 fn f() {
-  var i = 0;
-  loop {
-    let marker1 = 0;
+  var j = 0;
+  for (var i = 0; i < 2; i += 2) {
     switch(i) {
       case 0: {
-        var j = 0;
-        loop {
-          let marker3 = 0;
-          switch(j) {
-            case 0: {
-              continue;
-              break;
-            }
-            default: {
-              break;
-            }
+        switch(j) {
+          case 0: {
+            continue;
           }
-          let marker4 = 0;
-          break;
+          default: {
+          }
         }
-        continue;
-        break;
       }
       default: {
-        break;
       }
     }
-    let marker2 = 0;
-    break;
   }
 }
 )";
 
     auto* expect = R"(
 fn f() {
-  var i = 0;
-  loop {
-    let marker1 = 0;
-    var tint_continue_1 : bool = false;
+  var j = 0;
+  var tint_continue : bool;
+  for(var i = 0; (i < 2); i += 2) {
+    tint_continue = false;
     switch(i) {
       case 0: {
-        var j = 0;
-        loop {
-          let marker3 = 0;
-          var tint_continue : bool = false;
+        switch(j) {
+          case 0: {
+            tint_continue = true;
+            break;
+          }
+          default: {
+          }
+        }
+        if (tint_continue) {
+          break;
+        }
+      }
+      default: {
+      }
+    }
+    if (tint_continue) {
+      continue;
+    }
+  }
+}
+)";
+
+    ast::transform::DataMap data;
+    auto got = Run<RemoveContinueInSwitch>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(RemoveContinueInSwitchTest, NestedLoopLoopSwitch) {
+    auto* src = R"(
+fn f() {
+  for (var i = 0; i < 2; i += 2) {
+    for (var j = 0; j < 2; j += 2) {
+      switch(i) {
+        case 0: {
+          continue;
+        }
+        default: {
+        }
+      }
+    }
+  }
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  for(var i = 0; (i < 2); i += 2) {
+    var tint_continue : bool;
+    for(var j = 0; (j < 2); j += 2) {
+      tint_continue = false;
+      switch(i) {
+        case 0: {
+          tint_continue = true;
+          break;
+        }
+        default: {
+        }
+      }
+      if (tint_continue) {
+        continue;
+      }
+    }
+  }
+}
+)";
+
+    ast::transform::DataMap data;
+    auto got = Run<RemoveContinueInSwitch>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(RemoveContinueInSwitchTest, NestedLoopSwitchLoopSwitch) {
+    auto* src = R"(
+fn f() {
+  for (var i = 0; i < 2; i += 2) {
+    switch(i) {
+      case 0: {
+        for (var j = 0; j < 2; j += 2) {
           switch(j) {
             case 0: {
-              {
-                tint_continue = true;
-                break;
-              }
+              continue; // j loop
+            }
+            default: {
+            }
+          }
+        }
+        continue; // i loop
+      }
+      default: {
+      }
+    }
+  }
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  var tint_continue_1 : bool;
+  for(var i = 0; (i < 2); i += 2) {
+    tint_continue_1 = false;
+    switch(i) {
+      case 0: {
+        var tint_continue : bool;
+        for(var j = 0; (j < 2); j += 2) {
+          tint_continue = false;
+          switch(j) {
+            case 0: {
+              tint_continue = true;
               break;
             }
             default: {
-              break;
             }
           }
           if (tint_continue) {
             continue;
           }
-          let marker4 = 0;
-          break;
         }
-        {
-          tint_continue_1 = true;
-          break;
-        }
+        tint_continue_1 = true;
         break;
       }
       default: {
-        break;
       }
     }
     if (tint_continue_1) {
       continue;
     }
-    let marker2 = 0;
-    break;
+  }
+}
+)";
+
+    ast::transform::DataMap data;
+    auto got = Run<RemoveContinueInSwitch>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(RemoveContinueInSwitchTest, NestedLoopSwitchLoopSwitchSwitch) {
+    auto* src = R"(
+fn f() {
+  var k = 0;
+  for (var i = 0; i < 2; i += 2) {
+    switch(i) {
+      case 0: {
+        for (var j = 0; j < 2; j += 2) {
+          switch(j) {
+            case 0: {
+              continue; // j loop
+            }
+            case 1: {
+              switch (k) {
+                case 0: {
+                  continue; // j loop
+                }
+                default: {
+                }
+              }
+            }
+            default: {
+            }
+          }
+        }
+        continue; // i loop
+      }
+      default: {
+      }
+    }
+  }
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  var k = 0;
+  var tint_continue_1 : bool;
+  for(var i = 0; (i < 2); i += 2) {
+    tint_continue_1 = false;
+    switch(i) {
+      case 0: {
+        var tint_continue : bool;
+        for(var j = 0; (j < 2); j += 2) {
+          tint_continue = false;
+          switch(j) {
+            case 0: {
+              tint_continue = true;
+              break;
+            }
+            case 1: {
+              switch(k) {
+                case 0: {
+                  tint_continue = true;
+                  break;
+                }
+                default: {
+                }
+              }
+              if (tint_continue) {
+                break;
+              }
+            }
+            default: {
+            }
+          }
+          if (tint_continue) {
+            continue;
+          }
+        }
+        tint_continue_1 = true;
+        break;
+      }
+      default: {
+      }
+    }
+    if (tint_continue_1) {
+      continue;
+    }
   }
 }
 )";
@@ -469,19 +612,18 @@ fn f() {
   var b = true;
   var c = true;
   var d = true;
+  var tint_continue : bool;
   loop {
+    tint_continue = false;
     if (a) {
       if (b) {
         let marker1 = 0;
-        var tint_continue : bool = false;
         switch(i) {
           case 0: {
             if (c) {
               if (d) {
-                {
-                  tint_continue = true;
-                  break;
-                }
+                tint_continue = true;
+                break;
               }
             }
             break;
@@ -529,15 +671,14 @@ fn f() {
 
     auto* expect = R"(
 fn f() {
+  var tint_continue : bool;
   for(var i = 0; (i < 4); i = (i + 1)) {
+    tint_continue = false;
     let marker1 = 0;
-    var tint_continue : bool = false;
     switch(i) {
       case 0: {
-        {
-          tint_continue = true;
-          break;
-        }
+        tint_continue = true;
+        break;
         break;
       }
       default: {
@@ -583,15 +724,14 @@ fn f() {
     auto* expect = R"(
 fn f() {
   var i = 0;
+  var tint_continue : bool;
   while((i < 4)) {
+    tint_continue = false;
     let marker1 = 0;
-    var tint_continue : bool = false;
     switch(i) {
       case 0: {
-        {
-          tint_continue = true;
-          break;
-        }
+        tint_continue = true;
+        break;
         break;
       }
       default: {

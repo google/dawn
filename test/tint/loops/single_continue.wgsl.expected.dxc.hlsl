@@ -1,8 +1,8 @@
 [numthreads(1, 1, 1)]
-void f() {
+void main() {
   bool tint_continue = false;
   {
-    for(int i = 0; (i < 4); i = (i + 1)) {
+    for(int i = 0; (i < 2); i = (i + 1)) {
       tint_continue = false;
       switch(i) {
         case 0: {

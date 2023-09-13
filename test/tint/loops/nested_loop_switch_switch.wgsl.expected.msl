@@ -1,0 +1,27 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void tint_symbol() {
+  int j = 0;
+  for(int i = 0; (i < 2); i = as_type<int>((as_type<uint>(i) + as_type<uint>(2)))) {
+    switch(i) {
+      case 0: {
+        switch(j) {
+          case 0: {
+            continue;
+            break;
+          }
+          default: {
+            break;
+          }
+        }
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
+  return;
+}
+

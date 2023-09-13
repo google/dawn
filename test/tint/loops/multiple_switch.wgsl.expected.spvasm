@@ -1,0 +1,64 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 32
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %main "main"
+               OpName %i "i"
+               OpName %i_1 "i_1"
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+          %6 = OpConstantNull %int
+%_ptr_Function_int = OpTypePointer Function %int
+      %int_2 = OpConstant %int 2
+       %bool = OpTypeBool
+      %int_1 = OpConstant %int 1
+       %main = OpFunction %void None %1
+          %4 = OpLabel
+          %i = OpVariable %_ptr_Function_int Function %6
+        %i_1 = OpVariable %_ptr_Function_int Function %6
+               OpStore %i %6
+               OpStore %i_1 %6
+               OpBranch %10
+         %10 = OpLabel
+               OpLoopMerge %11 %12 None
+               OpBranch %13
+         %13 = OpLabel
+         %15 = OpLoad %int %i_1
+         %17 = OpSLessThan %bool %15 %int_2
+         %14 = OpLogicalNot %bool %17
+               OpSelectionMerge %19 None
+               OpBranchConditional %14 %20 %19
+         %20 = OpLabel
+               OpBranch %11
+         %19 = OpLabel
+         %22 = OpLoad %int %i_1
+               OpSelectionMerge %21 None
+               OpSwitch %22 %23 0 %24
+         %24 = OpLabel
+               OpBranch %12
+         %23 = OpLabel
+               OpBranch %21
+         %21 = OpLabel
+         %26 = OpLoad %int %i_1
+               OpSelectionMerge %25 None
+               OpSwitch %26 %27 0 %28
+         %28 = OpLabel
+               OpBranch %12
+         %27 = OpLabel
+               OpBranch %25
+         %25 = OpLabel
+               OpBranch %12
+         %12 = OpLabel
+         %29 = OpLoad %int %i_1
+         %31 = OpIAdd %int %29 %int_1
+               OpStore %i_1 %31
+               OpBranch %10
+         %11 = OpLabel
+               OpReturn
+               OpFunctionEnd
