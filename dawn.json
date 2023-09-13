@@ -29,7 +29,7 @@
     "create instance": {
         "category": "function",
         "returns": "instance",
-        "_comment": "TODO(crbug.com/dawn/1987): The return type should be nullable; null is returned in error cases.",
+        "_comment": "TODO(crbug.com/dawn/2048): The return type should be nullable; null is returned in error cases.",
         "args": [
             {"name": "descriptor", "type": "instance descriptor", "annotation": "const*", "optional": true}
         ]
@@ -1971,7 +1971,7 @@
         ]
     },
     "callback mode": {
-        "_comment": "TODO(crbug.com/dawn/1987): Change this to an enum, and always return a future (https://github.com/webgpu-native/webgpu-headers/issues/199#issuecomment-1710784711).",
+        "_comment": "TODO(crbug.com/dawn/2052): Change this to an enum, and always return a future.",
         "category": "bitmask",
         "values": [
             {"name": "future", "value": 1},
@@ -1987,7 +1987,7 @@
     },
     "wait status": {
         "category": "enum",
-        "_comment": "TODO(crbug.com/dawn/1987): This could be possibly be [[nodiscard]].",
+        "_comment": "TODO(crbug.com/dawn/2053): This could possibly be [[nodiscard]].",
         "emscripten_no_enum_table": true,
         "values": [
             {"name": "success", "value": 0},

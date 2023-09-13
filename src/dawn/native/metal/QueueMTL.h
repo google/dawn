@@ -69,7 +69,7 @@ class Queue final : public QueueBase {
     NSPRef<id> mMtlSharedEvent = nullptr;
 
     // This mutex must be held to access mWaitingEvents (which may happen in a Metal driver thread).
-    // TODO(crbug.com/dawn/1987): if we atomically knew a conservative lower bound on the
+    // TODO(crbug.com/dawn/2065): If we atomically knew a conservative lower bound on the
     // mWaitingEvents serials, we could avoid taking this lock sometimes. Optimize if needed.
     // See old draft code: https://dawn-review.googlesource.com/c/dawn/+/137502/29
     MutexProtected<SerialQueue<ExecutionSerial, SystemEventPipeSender>> mWaitingEvents;

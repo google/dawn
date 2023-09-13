@@ -241,7 +241,7 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
         if (future.ready) {
             // Set completed before calling the callback.
             infos[future.indexInInfos].completed = true;
-            // TODO(crbug.com/dawn/1987): Guarantee the event ordering from the JS spec.
+            // TODO(crbug.com/dawn/2066): Guarantee the event ordering from the JS spec.
             ASSERT(future.event->mCallbackMode & WGPUCallbackMode_Future);
             future.event->EnsureComplete(EventCompletionType::Ready);
         }

@@ -38,14 +38,17 @@ struct InstanceDescriptor;
 // entrypoints. All events from this instance (regardless of whether from an adapter, device, queue,
 // etc.) are tracked here, and used by the instance-wide ProcessEvents and WaitAny entrypoints.
 //
-// TODO(crbug.com/dawn/1987): Can this eventually replace CallbackTaskManager?
-// TODO(crbug.com/dawn/1987): There are various ways to optimize ProcessEvents/WaitAny:
-// - Only pay attention to the earliest serial on each queue.
-// - Spontaneously set events as "early-ready" in other places when we see serials advance, e.g.
+// TODO(crbug.com/dawn/2050): Can this eventually replace CallbackTaskManager?
+//
+// There are various ways to optimize ProcessEvents/WaitAny:
+// - TODO(crbug.com/dawn/2064) Only pay attention to the earliest serial on each queue.
+// - TODO(crbug.com/dawn/2059) Spontaneously set events as "early-ready" in other places when we see
+//   serials advance, e.g.
 //   Submit, or when checking a later wait before an earlier wait.
-// - For thread-driven events (async pipeline compilation and Metal queue events), defer tracking
-//   for ProcessEvents until the event is already completed.
-// - Avoid creating OS events until they're actually needed (see the todo in TrackedEvent).
+// - TODO(crbug.com/dawn/2049) For thread-driven events (async pipeline compilation and Metal queue
+//   events), defer tracking for ProcessEvents until the event is already completed.
+// - TODO(crbug.com/dawn/2051) Avoid creating OS events until they're actually needed (see the todo
+//   in TrackedEvent).
 class EventManager final : NonMovable {
   public:
     EventManager();
@@ -120,7 +123,7 @@ class EventManager::TrackedEvent : public RefCounted {
 
     // This creates a temporary ref cycle (Device->Instance->EventManager->TrackedEvent).
     // This is OK because the instance will clear out the EventManager on shutdown.
-    // TODO(crbug.com/dawn/1987): This is a bit fragile. Is it possible to remove the ref cycle?
+    // TODO(crbug.com/dawn/2067): This is a bit fragile. Is it possible to remove the ref cycle?
     Ref<DeviceBase> mDevice;
     WGPUCallbackModeFlags mCallbackMode;
 
@@ -131,7 +134,7 @@ class EventManager::TrackedEvent : public RefCounted {
   private:
     friend class EventManager;
 
-    // TODO(crbug.com/dawn/1987): Optimize by creating an SystemEventReceiver only once actually
+    // TODO(crbug.com/dawn/2051): Optimize by creating an SystemEventReceiver only once actually
     // needed (the user asks for a timed wait or an OS event handle). This should be generally
     // achievable:
     // - For thread-driven events (async pipeline compilation and Metal queue events), use a mutex

@@ -120,7 +120,7 @@ bool Instance::OnRequestAdapterCallback(uint64_t requestSerial,
 }
 
 void Instance::ProcessEvents() {
-    // TODO(crbug.com/dawn/1987): This should only process events for this Instance, not others
+    // TODO(crbug.com/dawn/2061): This should only process events for this Instance, not others
     // on the same client. When EventManager is moved to Instance, this can be fixed.
     GetClient()->GetEventManager()->ProcessPollEvents();
 

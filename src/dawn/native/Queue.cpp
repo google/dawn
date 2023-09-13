@@ -201,7 +201,7 @@ struct WorkDoneEvent final : public EventManager::TrackedEvent {
 
     ~WorkDoneEvent() override { EnsureComplete(EventCompletionType::Shutdown); }
 
-    // TODO(crbug.com/dawn/1987): When adding support for mixed sources, return false here when
+    // TODO(crbug.com/dawn/2062): When adding support for mixed sources, return false here when
     // the device has the mixed sources feature enabled, and so can expose the fence as an OS event.
     bool MustWaitUsingDevice() const override { return true; }
 
@@ -287,7 +287,7 @@ void QueueBase::APIOnSubmittedWorkDone(uint64_t signalValue,
 }
 
 WGPUFuture QueueBase::APIOnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInfo& callbackInfo) {
-    // TODO(crbug.com/dawn/1987): Once we always return a future, change this to log to the instance
+    // TODO(crbug.com/dawn/2052): Once we always return a future, change this to log to the instance
     // (note, not raise a validation error to the device) and return the null future.
     ASSERT(callbackInfo.nextInChain == nullptr);
 
@@ -295,7 +295,7 @@ WGPUFuture QueueBase::APIOnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInf
 
     WGPUQueueWorkDoneStatus validationEarlyStatus;
     if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(0, &validationEarlyStatus))) {
-        // TODO(crbug.com/dawn/1987): This is here to pretend that things succeed when the device is
+        // TODO(crbug.com/dawn/2021): This is here to pretend that things succeed when the device is
         // lost. When the old OnSubmittedWorkDone is removed then we can update
         // ValidateOnSubmittedWorkDone to just return the correct thing here.
         if (validationEarlyStatus == WGPUQueueWorkDoneStatus_DeviceLost) {
@@ -315,7 +315,7 @@ WGPUFuture QueueBase::APIOnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInf
 }
 
 SystemEventReceiver QueueBase::InsertWorkDoneEvent() {
-    // TODO(crbug.com/dawn/1987): Implement this in all backends and remove this default impl
+    // TODO(crbug.com/dawn/2058): Implement this in all backends and remove this default impl
     CHECK(false);
 }
 

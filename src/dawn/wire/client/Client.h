@@ -108,6 +108,7 @@ class Client : public ClientBase {
     MemoryTransferService* mMemoryTransferService = nullptr;
     std::unique_ptr<MemoryTransferService> mOwnedMemoryTransferService = nullptr;
     PerObjectType<LinkedList<ObjectBase>> mObjects;
+    // TODO(crbug.com/dawn/2061) Eventually we want an EventManager per instance not per client.
     EventManager mEventManager;
     bool mDisconnected = false;
 };

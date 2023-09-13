@@ -37,7 +37,7 @@ using EventCallback = std::function<void(EventCompletionType)>;
 // entrypoints. All events from this instance (regardless of whether from an adapter, device, queue,
 // etc.) are tracked here, and used by the instance-wide ProcessEvents and WaitAny entrypoints.
 //
-// TODO(crbug.com/dawn/1987): This should probably be merged together with RequestTracker.
+// TODO(crbug.com/dawn/2060): This should probably be merged together with RequestTracker.
 class EventManager final : NonMovable {
   public:
     explicit EventManager(Client*);

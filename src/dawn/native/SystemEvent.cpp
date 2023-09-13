@@ -164,7 +164,7 @@ void SystemEventPipeSender::Signal() && {
 
 bool WaitAnySystemEvent(size_t count, TrackedFutureWaitInfo* futures, Nanoseconds timeout) {
 #if DAWN_PLATFORM_IS(WINDOWS)
-    // TODO(crbug.com/dawn/1987): Implement this.
+    // TODO(crbug.com/dawn/2054): Implement this.
     CHECK(false);
 #elif DAWN_PLATFORM_IS(POSIX)
     std::vector<pollfd> pollfds(count);

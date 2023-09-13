@@ -412,7 +412,7 @@ TEST_P(EventCompletionTests, WorkDoneDropInstanceBeforeEvent) {
     // Callback should have been called immediately because we leaked it since there's no way to
     // call WaitAny or ProcessEvents anymore.
     //
-    // TODO(crbug.com/dawn/1987): Once Spontaneous is implemented, this should no longer expect the
+    // TODO(crbug.com/dawn/2059): Once Spontaneous is implemented, this should no longer expect the
     // callback to be cleaned up immediately (and should expect it to happen on a future Tick).
     ASSERT_EQ(status, WGPUQueueWorkDoneStatus_Unknown);
 }
@@ -438,7 +438,7 @@ TEST_P(EventCompletionTests, WorkDoneDropInstanceAfterEvent) {
     // Callback should have been called immediately because we leaked it since there's no way to
     // call WaitAny or ProcessEvents anymore.
     //
-    // TODO(crbug.com/dawn/1987): Once Spontaneous is implemented, this should no longer expect the
+    // TODO(crbug.com/dawn/2059): Once Spontaneous is implemented, this should no longer expect the
     // callback to be cleaned up immediately (and should expect it to happen on a future Tick).
     ASSERT_EQ(status, WGPUQueueWorkDoneStatus_Unknown);
 }
@@ -449,7 +449,7 @@ TEST_P(EventCompletionTests, WorkDoneDropInstanceAfterEvent) {
 // - Other tests?
 
 DAWN_INSTANTIATE_TEST_P(EventCompletionTests,
-                        // TODO(crbug.com/dawn/1987): Enable tests for the rest of the backends.
+                        // TODO(crbug.com/dawn/2058): Enable tests for the rest of the backends.
                         {MetalBackend()},
                         {
                             WaitTypeAndCallbackMode::TimedWaitAny_Future,
@@ -459,11 +459,11 @@ DAWN_INSTANTIATE_TEST_P(EventCompletionTests,
                             WaitTypeAndCallbackMode::SpinProcessEvents_ProcessEvents,
                             WaitTypeAndCallbackMode::SpinProcessEvents_ProcessEventsSpontaneous,
 
-                            // TODO(crbug.com/dawn/1987): The cases with the Spontaneous flag
+                            // TODO(crbug.com/dawn/2059): The cases with the Spontaneous flag
                             // enabled were added before we implemented all of the spontaneous
                             // completions. They might accidentally be overly strict.
 
-                            // TODO(crbug.com/dawn/1987): Make guarantees that Spontaneous callbacks
+                            // TODO(crbug.com/dawn/2059): Make guarantees that Spontaneous callbacks
                             // get called (as long as you're hitting "checkpoints"), and add the
                             // corresponding tests, for example:
                             // - SpinProcessEvents_Spontaneous,
@@ -564,7 +564,7 @@ TEST_P(WaitAnyTests, UnsupportedMixedSources) {
 }
 
 DAWN_INSTANTIATE_TEST(WaitAnyTests,
-                      // TODO(crbug.com/dawn/1987): Enable tests for the rest of the backends.
+                      // TODO(crbug.com/dawn/2058): Enable tests for the rest of the backends.
                       MetalBackend());
 
 }  // anonymous namespace

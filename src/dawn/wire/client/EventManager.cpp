@@ -71,13 +71,13 @@ void EventManager::SetFutureReady(FutureID futureID) {
         TrackedEvent& trackedEvent = trackedEvents->at(futureID);  // Asserts futureID is in the map
         trackedEvent.mReady = true;
     });
-    // TODO(crbug.com/dawn/1987): Handle spontaneous completions.
+    // TODO(crbug.com/dawn/2059): Handle spontaneous completions.
 }
 
 void EventManager::ProcessPollEvents() {
     std::vector<TrackedEvent> eventsToCompleteNow;
 
-    // TODO(crbug.com/dawn/1987): EventManager shouldn't bother to track ProcessEvents-type events
+    // TODO(crbug.com/dawn/2060): EventManager shouldn't bother to track ProcessEvents-type events
     // until they've completed. We can queue them up when they're received on the wire. (Before that
     // point, the RequestTracker tracks them. If/when we merge this with RequestTracker, then we'll
     // track both here but still don't need to queue them for ProcessEvents until they complete.)
@@ -148,7 +148,7 @@ WGPUWaitStatus EventManager::WaitAny(size_t count, WGPUFutureWaitInfo* infos, ui
         }
     });
 
-    // TODO(crbug.com/dawn/1987): Guarantee the event ordering from the JS spec.
+    // TODO(crbug.com/dawn/2066): Guarantee the event ordering from the JS spec.
     for (TrackedEvent& event : eventsToCompleteNow) {
         ASSERT(event.mReady && event.mCallback);
         // .completed has already been set to true (before the callback, per API contract).
