@@ -82,8 +82,7 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
       "https://bugs.chromium.org/p/dawn/issues/detail?id=1591", FeatureInfo::FeatureState::Stable}},
     {Feature::Float32Filterable,
      {"Allows textures with formats \"r32float\" \"rg32float\" and \"rgba32float\" to be filtered.",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=1664",
-      FeatureInfo::FeatureState::Experimental}},
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=1664", FeatureInfo::FeatureState::Stable}},
     {Feature::ChromiumExperimentalSubgroups,
      {"Experimental, allows using subgroup and supports the \"enable "
       "chromium_experimental_subgroups\" directive in WGSL. Only used to investigate the semantic "
