@@ -43,8 +43,6 @@ type ptr<S: address_space, T, A: access>
 
 type struct_with_runtime_array
 
-type __atomic_compare_exchange_result<T>
-
 enum address_space {
   function
   private
@@ -96,7 +94,7 @@ enum intrinsic {
 ////////////////////////////////////////////////////////////////////////////////
 fn array_length<I: u32, A: access>(ptr<storage, struct_with_runtime_array, A>, I) -> u32
 @stage("fragment", "compute") fn atomic_and<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") fn atomic_compare_exchange<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, U, T, T) -> __atomic_compare_exchange_result<T>
+@stage("fragment", "compute") fn atomic_compare_exchange<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, U, T, T) -> T
 @stage("fragment", "compute") fn atomic_exchange<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
 @stage("fragment", "compute") fn atomic_iadd<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
 @stage("fragment", "compute") fn atomic_isub<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
@@ -104,7 +102,7 @@ fn array_length<I: u32, A: access>(ptr<storage, struct_with_runtime_array, A>, I
 @stage("fragment", "compute") fn atomic_or<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
 @stage("fragment", "compute") fn atomic_smax<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
 @stage("fragment", "compute") fn atomic_smin<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
-@stage("fragment", "compute") fn atomic_store<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
+@stage("fragment", "compute") fn atomic_store<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T)
 @stage("fragment", "compute") fn atomic_umax<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
 @stage("fragment", "compute") fn atomic_umin<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
 @stage("fragment", "compute") fn atomic_xor<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T

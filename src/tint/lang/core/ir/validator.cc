@@ -532,7 +532,11 @@ void Validator::CheckBuiltinCall(BuiltinCall* call) {
 
     auto result = core::intrinsic::Lookup(context, call->IntrinsicName(), call->FuncId(), args,
                                           core::EvaluationStage::kRuntime, Source{});
-    (void)result;  // Lookup returns an error diagnostic on overload failure
+    if (result) {
+        if (result->return_type != call->Result()->Type()) {
+            AddError(call, InstError(call, "call result type does not match builtin return type"));
+        }
+    }
 }
 
 void Validator::CheckAccess(ir::Access* a) {
