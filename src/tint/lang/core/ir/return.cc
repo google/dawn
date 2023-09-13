@@ -33,4 +33,8 @@ Return::Return(Function* func, ir::Value* arg) {
 
 Return::~Return() = default;
 
+Function* Return::Func() const {
+    return tint::As<Function>(operands_[kFunctionOperandOffset]);
+}
+
 }  // namespace tint::core::ir

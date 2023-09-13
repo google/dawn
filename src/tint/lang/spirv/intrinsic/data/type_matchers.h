@@ -16,6 +16,8 @@
 #define SRC_TINT_LANG_SPIRV_INTRINSIC_DATA_TYPE_MATCHERS_H_
 
 #include "src/tint/lang/core/intrinsic/table.h"
+#include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/struct.h"
 
 namespace tint::spirv::intrinsic::data {
 
