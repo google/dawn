@@ -150,6 +150,7 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
         }
         case ast::PipelineStage::kFragment: {
             entry_point.stage = PipelineStage::kFragment;
+            entry_point.pixel_local_members = ComputePixelLocalMemberTypes(func);
             break;
         }
         case ast::PipelineStage::kVertex: {
@@ -901,6 +902,37 @@ uint32_t Inspector::ComputeWorkgroupStorageSize(const ast::Function* func) const
     }
 
     return total_size;
+}
+
+std::vector<PixelLocalMemberType> Inspector::ComputePixelLocalMemberTypes(
+    const ast::Function* func) const {
+    auto* func_sem = program_->Sem().Get(func);
+    for (const sem::Variable* var : func_sem->TransitivelyReferencedGlobals()) {
+        if (var->AddressSpace() != core::AddressSpace::kPixelLocal) {
+            continue;
+        }
+
+        auto* str = var->Type()->UnwrapRef()->As<sem::Struct>();
+
+        std::vector<PixelLocalMemberType> types;
+        types.reserve(str->Members().Length());
+        for (auto* member : str->Members()) {
+            PixelLocalMemberType type = Switch(
+                member->Type(),  //
+                [&](const core::type::F32*) { return PixelLocalMemberType::kF32; },
+                [&](const core::type::I32*) { return PixelLocalMemberType::kI32; },
+                [&](const core::type::U32*) { return PixelLocalMemberType::kU32; },
+                [&](Default) {
+                    TINT_UNREACHABLE() << "unhandled component type";
+                    return PixelLocalMemberType::kUnknown;
+                });
+            types.push_back(type);
+        }
+
+        return types;
+    }
+
+    return {};
 }
 
 template <size_t N, typename F>

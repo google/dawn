@@ -45,6 +45,14 @@ enum class CompositionType : uint8_t {
     kUnknown,
 };
 
+/// Types of `pixel_local` variable members.
+enum class PixelLocalMemberType : uint8_t {
+    kF32,
+    kU32,
+    kI32,
+    kUnknown,
+};
+
 /// Type of interpolation of a stage variable.
 enum class InterpolationType : uint8_t { kPerspective, kLinear, kFlat, kUnknown };
 
@@ -146,6 +154,9 @@ struct EntryPoint {
     std::vector<StageVariable> output_variables;
     /// List of the pipeline overridable constants accessed via this entry point.
     std::vector<Override> overrides;
+    /// List of the variable types used in the `pixel_local` block accessed by this entry point (if
+    /// any).
+    std::vector<PixelLocalMemberType> pixel_local_members;
     /// Does the entry point use the sample_mask builtin as an input builtin
     /// variable.
     bool input_sample_mask_used = false;

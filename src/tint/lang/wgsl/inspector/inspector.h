@@ -222,6 +222,10 @@ class Inspector {
     /// @returns the total size in bytes of all Workgroup storage-class storage accessed via func.
     uint32_t ComputeWorkgroupStorageSize(const ast::Function* func) const;
 
+    /// @param func the root function of the callgraph to consider for the computation
+    /// @returns the list of member types for the `pixel_local` variable accessed via func, if any.
+    std::vector<PixelLocalMemberType> ComputePixelLocalMemberTypes(const ast::Function* func) const;
+
     /// For a N-uple of expressions, resolve to the appropriate global resources
     /// and call 'cb'.
     /// 'cb' may be called multiple times.

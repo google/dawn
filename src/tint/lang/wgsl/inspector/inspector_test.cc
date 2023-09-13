@@ -1515,6 +1515,59 @@ TEST_F(InspectorGetEntryPointTest, ImplicitInterpolate) {
     EXPECT_EQ(InterpolationSampling::kCenter, result[0].input_variables[0].interpolation_sampling);
 }
 
+TEST_F(InspectorGetEntryPointTest, PixelLocalMemberDefault) {
+    // @fragment fn foo() {}
+    MakeEmptyBodyFunction("foo", Vector{
+                                     Stage(ast::PipelineStage::kFragment),
+                                 });
+
+    Inspector& inspector = Build();
+    auto result = inspector.GetEntryPoints();
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_EQ(0u, result[0].pixel_local_members.size());
+}
+
+TEST_F(InspectorGetEntryPointTest, PixelLocalMemberTypes) {
+    // enable chromium_experimental_pixel_local;
+    // struct Ure {
+    //   toto : u32;
+    //   titi : f32;
+    //   tata: i32;
+    //   tonton : u32; // Check having the same type multiple times
+    // }
+    // var<pixel_local> pls : Ure;
+    // @fragment fn foo() {  _ = pls; }
+
+    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    Structure("Ure", Vector{
+                         Member("toto", ty.u32()),
+                         Member("titi", ty.f32()),
+                         Member("tata", ty.i32()),
+                         Member("tonton", ty.u32()),
+                     });
+    GlobalVar("pls", core::AddressSpace::kPixelLocal, ty("Ure"));
+    Func("foo", tint::Empty, ty.void_(),
+         Vector{
+             Assign(Phony(), "pls"),
+         },
+         Vector{
+             Stage(ast::PipelineStage::kFragment),
+         });
+
+    Inspector& inspector = Build();
+    auto result = inspector.GetEntryPoints();
+    ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+    ASSERT_EQ(1u, result.size());
+    ASSERT_EQ(4u, result[0].pixel_local_members.size());
+    ASSERT_EQ(PixelLocalMemberType::kU32, result[0].pixel_local_members[0]);
+    ASSERT_EQ(PixelLocalMemberType::kF32, result[0].pixel_local_members[1]);
+    ASSERT_EQ(PixelLocalMemberType::kI32, result[0].pixel_local_members[2]);
+    ASSERT_EQ(PixelLocalMemberType::kU32, result[0].pixel_local_members[3]);
+}
+
 TEST_P(InspectorGetEntryPointInterpolateTest, Test) {
     auto& params = GetParam();
     Structure("in_struct",
