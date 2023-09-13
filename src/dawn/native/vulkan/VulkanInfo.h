@@ -70,6 +70,7 @@ struct VulkanDeviceInfo : VulkanDeviceKnobs {
     VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR shaderIntegerDotProductProperties;
     VkPhysicalDeviceMaintenance4Properties propertiesMaintenance4;
     VkPhysicalDeviceSubgroupProperties subgroupProperties;
+    VkPhysicalDeviceExternalMemoryHostPropertiesEXT externalMemoryHostProperties;
 
     std::vector<VkQueueFamilyProperties> queueFamilies;
 

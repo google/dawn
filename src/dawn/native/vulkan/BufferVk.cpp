@@ -17,10 +17,15 @@
 #include <algorithm>
 #include <cstring>
 #include <limits>
+#include <memory>
 #include <utility>
 #include <vector>
 
+#include "dawn/common/GPUInfo.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/CommandBuffer.h"
+#include "dawn/native/PhysicalDevice.h"
+#include "dawn/native/Queue.h"
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/ResourceHeapVk.h"
@@ -137,7 +142,15 @@ VkAccessFlags VulkanAccessFlags(wgpu::BufferUsage usage) {
 // static
 ResultOrError<Ref<Buffer>> Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
     Ref<Buffer> buffer = AcquireRef(new Buffer(device, descriptor));
-    DAWN_TRY(buffer->Initialize(descriptor->mappedAtCreation));
+
+    const BufferHostMappedPointer* hostMappedDesc = nullptr;
+    FindInChain(descriptor->nextInChain, &hostMappedDesc);
+
+    if (hostMappedDesc != nullptr) {
+        DAWN_TRY(buffer->InitializeHostMapped(hostMappedDesc));
+    } else {
+        DAWN_TRY(buffer->Initialize(descriptor->mappedAtCreation));
+    }
     return std::move(buffer);
 }
 
@@ -239,6 +252,99 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
 
     SetLabelImpl();
 
+    return {};
+}
+
+MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappedDesc) {
+    static constexpr auto kHandleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_ALLOCATION_BIT_EXT;
+
+    mAllocatedSize = GetSize();
+
+    VkExternalMemoryBufferCreateInfo externalMemoryCreateInfo;
+    externalMemoryCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_BUFFER_CREATE_INFO;
+    externalMemoryCreateInfo.pNext = nullptr;
+    externalMemoryCreateInfo.handleTypes = kHandleType;
+
+    VkBufferCreateInfo createInfo;
+    createInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    createInfo.pNext = &externalMemoryCreateInfo;
+    createInfo.flags = 0;
+    createInfo.size = mAllocatedSize;
+    createInfo.usage = VulkanBufferUsage(GetUsage());
+    createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    createInfo.queueFamilyIndexCount = 0;
+    createInfo.pQueueFamilyIndices = 0;
+
+    Device* device = ToBackend(GetDevice());
+    DAWN_TRY(CheckVkOOMThenSuccess(
+        device->fn.CreateBuffer(device->GetVkDevice(), &createInfo, nullptr, &*mHandle),
+        "vkCreateBuffer"));
+
+    // Gather requirements for the buffer's memory and allocate it.
+    VkMemoryRequirements requirements;
+    device->fn.GetBufferMemoryRequirements(device->GetVkDevice(), mHandle, &requirements);
+
+    // Gather memory requirements from the pointer.
+    VkMemoryHostPointerPropertiesEXT hostPointerProperties;
+    hostPointerProperties.sType = VK_STRUCTURE_TYPE_MEMORY_HOST_POINTER_PROPERTIES_EXT;
+    hostPointerProperties.pNext = nullptr;
+    DAWN_TRY(CheckVkSuccess(
+        device->fn.GetMemoryHostPointerPropertiesEXT(
+            device->GetVkDevice(), VK_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_ALLOCATION_BIT_EXT,
+            hostMappedDesc->pointer, &hostPointerProperties),
+        "vkGetHostPointerPropertiesEXT"));
+
+    // Merge the memory type requirements from buffer and the host pointer.
+    // Don't do this on SwiftShader which reports incompatible memory types even though there
+    // is no real Device/Host distinction.
+    if (!gpu_info::IsGoogleSwiftshader(GetDevice()->GetPhysicalDevice()->GetVendorId(),
+                                       GetDevice()->GetPhysicalDevice()->GetDeviceId())) {
+        requirements.memoryTypeBits &= hostPointerProperties.memoryTypeBits;
+    }
+
+    MemoryKind requestKind;
+    if (GetUsage() & wgpu::BufferUsage::MapRead) {
+        requestKind = MemoryKind::LinearReadMappable;
+    } else if (GetUsage() & wgpu::BufferUsage::MapWrite) {
+        requestKind = MemoryKind::LinearWriteMappable;
+    } else {
+        UNREACHABLE();
+    }
+
+    int memoryTypeIndex =
+        device->GetResourceMemoryAllocator()->FindBestTypeIndex(requirements, requestKind);
+    DAWN_INVALID_IF(memoryTypeIndex < 0, "Failed to find suitable memory type.");
+
+    // Make a device memory wrapping the host pointer.
+    VkMemoryAllocateInfo allocateInfo;
+    allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocateInfo.pNext = nullptr;
+    allocateInfo.allocationSize = mAllocatedSize;
+    allocateInfo.memoryTypeIndex = memoryTypeIndex;
+
+    VkImportMemoryHostPointerInfoEXT importMemoryHostPointerInfo;
+    importMemoryHostPointerInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_HOST_POINTER_INFO_EXT;
+    importMemoryHostPointerInfo.pNext = nullptr;
+    importMemoryHostPointerInfo.handleType = kHandleType;
+    importMemoryHostPointerInfo.pHostPointer = hostMappedDesc->pointer;
+    allocateInfo.pNext = &importMemoryHostPointerInfo;
+
+    DAWN_TRY(CheckVkSuccess(device->fn.AllocateMemory(device->GetVkDevice(), &allocateInfo, nullptr,
+                                                      &*mDedicatedDeviceMemory),
+                            "vkAllocateMemory"));
+
+    // Finally associate it with the buffer.
+    DAWN_TRY(CheckVkSuccess(
+        device->fn.BindBufferMemory(device->GetVkDevice(), mHandle, mDedicatedDeviceMemory, 0),
+        "vkBindBufferMemory"));
+
+    mHostMappedDisposeCallback = hostMappedDesc->disposeCallback;
+    mHostMappedDisposeUserdata = hostMappedDesc->userdata;
+
+    SetLabelImpl();
+
+    // Assume the data is initialized since an external pointer was provided.
+    SetIsDataInitialized();
     return {};
 }
 
@@ -372,6 +478,31 @@ void Buffer::DestroyImpl() {
     if (mHandle != VK_NULL_HANDLE) {
         ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mHandle);
         mHandle = VK_NULL_HANDLE;
+    }
+
+    if (mDedicatedDeviceMemory != VK_NULL_HANDLE) {
+        ToBackend(GetDevice())->GetFencedDeleter()->DeleteWhenUnused(mDedicatedDeviceMemory);
+        mDedicatedDeviceMemory = VK_NULL_HANDLE;
+    }
+
+    if (mHostMappedDisposeCallback) {
+        struct DisposeTask : TrackTaskCallback {
+            explicit DisposeTask(wgpu::Callback callback, void* userdata)
+                : TrackTaskCallback(nullptr), callback(callback), userdata(userdata) {}
+            ~DisposeTask() override = default;
+
+            void FinishImpl() override { callback(userdata); }
+            void HandleDeviceLossImpl() override { callback(userdata); }
+            void HandleShutDownImpl() override { callback(userdata); }
+
+            wgpu::Callback callback;
+            void* userdata;
+        };
+        std::unique_ptr<DisposeTask> request =
+            std::make_unique<DisposeTask>(mHostMappedDisposeCallback, mHostMappedDisposeUserdata);
+        mHostMappedDisposeCallback = nullptr;
+
+        GetDevice()->GetQueue()->TrackPendingTask(std::move(request));
     }
 }
 

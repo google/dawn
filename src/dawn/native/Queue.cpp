@@ -342,6 +342,10 @@ void QueueBase::TrackTaskAfterEventualFlush(std::unique_ptr<TrackTaskCallback> t
     TrackTask(std::move(task), GetScheduledWorkDoneSerial());
 }
 
+void QueueBase::TrackPendingTask(std::unique_ptr<TrackTaskCallback> task) {
+    mTasksInFlight.Enqueue(std::move(task), GetPendingCommandSerial());
+}
+
 void QueueBase::Tick(ExecutionSerial finishedSerial) {
     // If a user calls Queue::Submit inside a task, for example in a Buffer::MapAsync callback,
     // then the device will be ticked, which in turns ticks the queue, causing reentrance here.

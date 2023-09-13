@@ -344,6 +344,14 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
          VK_TRUE)) {
         EnableFeature(Feature::ChromiumExperimentalSubgroupUniformControlFlow);
     }
+
+    if (mDeviceInfo.HasExt(DeviceExt::ExternalMemoryHost) &&
+        mDeviceInfo.externalMemoryHostProperties.minImportedHostPointerAlignment <= 4096) {
+        // TODO(crbug.com/dawn/2018): properly surface the limit.
+        // Linux nearly always exposes 4096.
+        // https://vulkan.gpuinfo.org/displayextensionproperty.php?platform=linux&extensionname=VK_EXT_external_memory_host&extensionproperty=minImportedHostPointerAlignment
+        EnableFeature(Feature::HostMappedPointer);
+    }
 }
 
 MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits) {

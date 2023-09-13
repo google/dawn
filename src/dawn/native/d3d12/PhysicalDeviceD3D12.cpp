@@ -158,6 +158,13 @@ void PhysicalDevice::InitializeSupportedFeaturesImpl() {
         EnableFeature(Feature::BGRA8UnormStorage);
     }
 
+    D3D12_FEATURE_DATA_EXISTING_HEAPS existingHeapInfo = {};
+    hr = mD3d12Device->CheckFeatureSupport(D3D12_FEATURE_EXISTING_HEAPS, &existingHeapInfo,
+                                           sizeof(existingHeapInfo));
+    if (SUCCEEDED(hr) && existingHeapInfo.Supported) {
+        EnableFeature(Feature::HostMappedPointer);
+    }
+
     EnableFeature(Feature::SharedTextureMemoryDXGISharedHandle);
     EnableFeature(Feature::SharedFenceDXGISharedHandle);
 }

@@ -355,6 +355,10 @@ MaybeError VulkanFunctions::LoadDeviceProcs(VkDevice device, const VulkanDeviceI
         GET_DEVICE_PROC(GetMemoryFdPropertiesKHR);
     }
 
+    if (deviceInfo.HasExt(DeviceExt::ExternalMemoryHost)) {
+        GET_DEVICE_PROC(GetMemoryHostPointerPropertiesEXT);
+    }
+
     if (deviceInfo.HasExt(DeviceExt::ExternalSemaphoreFD)) {
         GET_DEVICE_PROC(ImportSemaphoreFdKHR);
         GET_DEVICE_PROC(GetSemaphoreFdKHR);

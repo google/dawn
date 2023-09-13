@@ -174,6 +174,7 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::ExternalMemoryFD, "VK_KHR_external_memory_fd", NeverPromoted},
     {DeviceExt::ExternalMemoryDmaBuf, "VK_EXT_external_memory_dma_buf", NeverPromoted},
     {DeviceExt::ExternalMemoryZirconHandle, "VK_FUCHSIA_external_memory", NeverPromoted},
+    {DeviceExt::ExternalMemoryHost, "VK_EXT_external_memory_host", NeverPromoted},
     {DeviceExt::ExternalSemaphoreFD, "VK_KHR_external_semaphore_fd", NeverPromoted},
     {DeviceExt::ExternalSemaphoreZirconHandle, "VK_FUCHSIA_external_semaphore", NeverPromoted},
     //
@@ -282,6 +283,7 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
 
             case DeviceExt::ExternalMemoryFD:
             case DeviceExt::ExternalMemoryZirconHandle:
+            case DeviceExt::ExternalMemoryHost:
             case DeviceExt::QueueFamilyForeign:
                 hasDependencies = HasDep(DeviceExt::ExternalMemory);
                 break;

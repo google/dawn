@@ -113,6 +113,7 @@ enum class DeviceExt {
     ExternalMemoryFD,
     ExternalMemoryDmaBuf,
     ExternalMemoryZirconHandle,
+    ExternalMemoryHost,
     ExternalSemaphoreFD,
     ExternalSemaphoreZirconHandle,
 

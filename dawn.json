@@ -521,6 +521,24 @@
             {"name": "mapped at creation", "type": "bool", "default": "false"}
         ]
     },
+    "buffer host mapped pointer": {
+        "category": "structure",
+        "chained": "in",
+        "chain roots": ["buffer descriptor"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "pointer", "type": "void *"},
+            {"name": "dispose callback", "type": "callback"},
+            {"name": "userdata", "type": "void *"}
+        ]
+    },
+    "callback": {
+        "category": "function pointer",
+        "tags": ["dawn"],
+        "args": [
+            {"name": "userdata", "type": "void *"}
+        ]
+    },
     "buffer map callback": {
         "category": "function pointer",
         "args": [
@@ -1867,6 +1885,7 @@
             {"value": 1019, "name": "norm16 texture formats", "tags": ["dawn"]},
             {"value": 1020, "name": "multi planar format extended usages", "tags": ["dawn"]},
             {"value": 1021, "name": "multi planar format p010", "tags": ["dawn"]},
+            {"value": 1022, "name": "host mapped pointer", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk dedicated allocation", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory a hardware buffer", "tags": ["dawn", "native"]},
@@ -3243,6 +3262,7 @@
             {"value": 1013, "name": "dawn render pass color attachment render to single sampled", "tags": ["dawn"]},
             {"value": 1014, "name": "render pass pixel local storage", "tags": ["dawn"]},
             {"value": 1015, "name": "pipeline layout pixel local storage", "tags": ["dawn"]},
+            {"value": 1016, "name": "buffer host mapped pointer", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk image descriptor", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory vk dedicated allocation descriptor", "tags": ["dawn", "native"]},

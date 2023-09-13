@@ -80,8 +80,18 @@ class QueueBase : public ApiObjectBase, public ExecutionQueueBase {
                            uint64_t bufferOffset,
                            const void* data,
                            size_t size);
-    void TrackTask(std::unique_ptr<TrackTaskCallback> task, ExecutionSerial serial);
+    // Ensure a flush occurs if needed, and track this task as complete after the
+    // scheduled work is complete.
     void TrackTaskAfterEventualFlush(std::unique_ptr<TrackTaskCallback> task);
+    // Track a task as complete after the serial has passed. If the serial is in the future,
+    // a flush is forced.
+    void TrackTask(std::unique_ptr<TrackTaskCallback> task, ExecutionSerial serial);
+    // Track a task as eventually complete after the pending command serial passes.
+    // This is only needed because other parts of Dawn use pending command serial extensively.
+    // TODO(crbug.com/dawn/1413): It should be removed after ExecutionQueue for better tracking
+    // of completion.
+    void TrackPendingTask(std::unique_ptr<TrackTaskCallback> task);
+
     void Tick(ExecutionSerial finishedSerial);
     void HandleDeviceLoss();
 

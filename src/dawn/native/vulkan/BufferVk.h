@@ -65,6 +65,7 @@ class Buffer final : public BufferBase {
     using BufferBase::BufferBase;
 
     MaybeError Initialize(bool mappedAtCreation);
+    MaybeError InitializeHostMapped(const BufferHostMappedPointer* hostMappedDesc);
     void InitializeToZero(CommandRecordingContext* recordingContext);
     void ClearBuffer(CommandRecordingContext* recordingContext,
                      uint32_t clearValue,
@@ -80,6 +81,12 @@ class Buffer final : public BufferBase {
 
     VkBuffer mHandle = VK_NULL_HANDLE;
     ResourceMemoryAllocation mMemoryAllocation;
+
+    // VkDeviceMemory that is used strictly for this buffer.
+    VkDeviceMemory mDedicatedDeviceMemory = VK_NULL_HANDLE;
+
+    wgpu::Callback mHostMappedDisposeCallback = nullptr;
+    void* mHostMappedDisposeUserdata = nullptr;
 
     wgpu::BufferUsage mLastUsage = wgpu::BufferUsage::None;
 };

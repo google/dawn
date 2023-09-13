@@ -26,6 +26,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_ImplicitDeviceSynchronization:
         case WGPUFeatureName_SurfaceCapabilities:
         case WGPUFeatureName_D3D11MultithreadProtected:
+        case WGPUFeatureName_HostMappedPointer:
         case WGPUFeatureName_SharedTextureMemoryVkDedicatedAllocation:
         case WGPUFeatureName_SharedTextureMemoryAHardwareBuffer:
         case WGPUFeatureName_SharedTextureMemoryDmaBuf:

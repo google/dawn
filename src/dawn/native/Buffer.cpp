@@ -22,12 +22,15 @@
 
 #include "dawn/common/Alloc.h"
 #include "dawn/common/Assert.h"
+#include "dawn/native/Adapter.h"
 #include "dawn/native/CallbackTaskManager.h"
+#include "dawn/native/ChainUtils.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/ObjectType_autogen.h"
+#include "dawn/native/PhysicalDevice.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/ValidationUtils_autogen.h"
 #include "dawn/platform/DawnPlatform.h"
@@ -107,8 +110,37 @@ static uint32_t sZeroSizedMappingData = 0xCAFED00D;
 }  // anonymous namespace
 
 MaybeError ValidateBufferDescriptor(DeviceBase* device, const BufferDescriptor* descriptor) {
-    DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr");
+    UnpackedBufferDescriptorChain unpacked;
+    DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpackChain(descriptor));
+
     DAWN_TRY(ValidateBufferUsage(descriptor->usage));
+
+    if (const auto* hostMappedDesc = std::get<const BufferHostMappedPointer*>(unpacked)) {
+        // TODO(crbug.com/dawn/2018): Properly expose this limit.
+        uint32_t requiredAlignment = 4096;
+        if (device->GetAdapter()->GetPhysicalDevice()->GetBackendType() ==
+            wgpu::BackendType::D3D12) {
+            requiredAlignment = 65536;
+        }
+
+        DAWN_INVALID_IF(!device->HasFeature(Feature::HostMappedPointer), "%s requires %s.",
+                        hostMappedDesc->sType, ToAPI(Feature::HostMappedPointer));
+        DAWN_INVALID_IF(
+            (descriptor->usage & kMappableBufferUsages) == 0,
+            "Buffer usage (%s) created from host-mapped pointer requires mappable buffer usage.",
+            descriptor->usage);
+        DAWN_INVALID_IF(!IsAligned(descriptor->size, requiredAlignment),
+                        "Buffer size (%u) wrapping host-mapped memory was not aligned to %u.",
+                        descriptor->size, requiredAlignment);
+        DAWN_INVALID_IF(!IsPtrAligned(hostMappedDesc->pointer, requiredAlignment),
+                        "Host-mapped memory pointer (%p) was not aligned to %u.",
+                        hostMappedDesc->pointer, requiredAlignment);
+
+        // TODO(dawn:2018) consider allowing the host-mapped buffers to be mapped through WebGPU.
+        DAWN_INVALID_IF(
+            descriptor->mappedAtCreation,
+            "Buffer created from host-mapped pointer requires mappedAtCreation to be false.");
+    }
 
     wgpu::BufferUsage usage = descriptor->usage;
 
@@ -180,6 +212,12 @@ BufferBase::BufferBase(DeviceBase* device, const BufferDescriptor* descriptor)
             device->IsToggleEnabled(Toggle::UseBlitForBGRA8UnormTextureToBufferCopy)) {
             mUsage |= kInternalStorageBuffer;
         }
+    }
+
+    const BufferHostMappedPointer* hostMappedDesc = nullptr;
+    FindInChain(descriptor->nextInChain, &hostMappedDesc);
+    if (hostMappedDesc != nullptr) {
+        mState = BufferState::HostMappedPersistent;
     }
 
     GetObjectTrackingList()->Track(this);
@@ -347,6 +385,7 @@ MaybeError BufferBase::ValidateCanUseOnQueueNow() const {
             return DAWN_VALIDATION_ERROR("%s used in submit while mapped.", this);
         case BufferState::PendingMap:
             return DAWN_VALIDATION_ERROR("%s used in submit while pending map.", this);
+        case BufferState::HostMappedPersistent:
         case BufferState::Unmapped:
             return {};
     }
@@ -539,6 +578,8 @@ MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,
             UNREACHABLE();
         case BufferState::Destroyed:
             return DAWN_VALIDATION_ERROR("%s is destroyed.", this);
+        case BufferState::HostMappedPersistent:
+            return DAWN_VALIDATION_ERROR("Host-mapped %s cannot be mapped again.", this);
         case BufferState::Unmapped:
             break;
     }
@@ -588,6 +629,11 @@ bool BufferBase::CanGetMappedRange(bool writable, size_t offset, size_t size) co
     //     for error buffers too.
 
     switch (mState) {
+        // It is never valid to call GetMappedRange on a host-mapped buffer.
+        // TODO(crbug.com/dawn/2018): consider returning the same pointer here.
+        case BufferState::HostMappedPersistent:
+            return false;
+
         // Writeable Buffer::GetMappedRange is always allowed when mapped at creation.
         case BufferState::MappedAtCreation:
             return true;
@@ -606,6 +652,8 @@ bool BufferBase::CanGetMappedRange(bool writable, size_t offset, size_t size) co
 
 MaybeError BufferBase::ValidateUnmap() const {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
+    DAWN_INVALID_IF(mState == BufferState::HostMappedPersistent,
+                    "Persistently mapped buffer cannot be unmapped.");
     return {};
 }
 

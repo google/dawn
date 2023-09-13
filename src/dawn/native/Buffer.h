@@ -51,6 +51,7 @@ class BufferBase : public ApiObjectBase {
         PendingMap,
         Mapped,
         MappedAtCreation,
+        HostMappedPersistent,
         Destroyed,
     };
     static BufferBase* MakeError(DeviceBase* device, const BufferDescriptor* descriptor);

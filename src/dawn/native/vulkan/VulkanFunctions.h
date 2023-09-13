@@ -316,6 +316,9 @@ struct VulkanFunctions {
     VkFn<PFN_vkGetMemoryFdKHR> GetMemoryFdKHR = nullptr;
     VkFn<PFN_vkGetMemoryFdPropertiesKHR> GetMemoryFdPropertiesKHR = nullptr;
 
+    // VK_EXT_external_memory_host
+    VkFn<PFN_vkGetMemoryHostPointerPropertiesEXT> GetMemoryHostPointerPropertiesEXT = nullptr;
+
     // VK_KHR_external_semaphore_fd
     VkFn<PFN_vkImportSemaphoreFdKHR> ImportSemaphoreFdKHR = nullptr;
     VkFn<PFN_vkGetSemaphoreFdKHR> GetSemaphoreFdKHR = nullptr;
