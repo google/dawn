@@ -33,6 +33,7 @@
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER || TINT_BUILD_SPV_WRITER
 
+#include "src/tint/api/options/pixel_local.h"
 #include "src/tint/api/tint.h"
 #include "src/tint/cmd/common/generate_external_texture_bindings.h"
 #include "src/tint/cmd/common/helper.h"
@@ -166,6 +167,7 @@ struct Options {
     std::string xcrun_path;
     tint::Hashmap<std::string, double, 8> overrides;
     std::optional<tint::BindingPoint> hlsl_root_constant_binding_point;
+    tint::PixelLocalOptions pixel_local_options;
 
     bool dump_ir = false;
     bool use_ir = false;
@@ -358,6 +360,15 @@ used for num_workgroups in HLSL. If not specified, then
 default to binding 0 of the largest used group plus 1,
 or group 0 if no resource bound)");
 
+    auto& pixel_local_attachments =
+        options.Add<StringOption>("pixel_local_attachments",
+                                  R"(Pixel local storage attachment bindings, comma-separated
+Each binding is of the form MEMBER_INDEX=ATTACHMENT_INDEX,
+where MEMBER_INDEX is the pixel-local structure member
+index and ATTACHMENT_INDEX is the index of the emitted
+attachment.
+)");
+
     auto& skip_hash = options.Add<StringOption>(
         "skip-hash", R"(Skips validation if the hash of the output is equal to any
 of the hash codes in the comma separated list of hashes)");
@@ -436,6 +447,32 @@ Options:
             return false;
         }
         opts->hlsl_root_constant_binding_point = tint::BindingPoint{group.Get(), binding.Get()};
+    }
+
+    if (pixel_local_attachments.value.has_value()) {
+        auto bindings = tint::Split(*pixel_local_attachments.value, ",");
+        for (auto& binding : bindings) {
+            auto values = tint::Split(binding, "=");
+            if (values.Length() != 2) {
+                std::cerr << "Invalid binding " << pixel_local_attachments.name << ": " << binding
+                          << std::endl;
+                return false;
+            }
+            auto member_index = tint::ParseUint32(values[0]);
+            if (!member_index) {
+                std::cerr << "Invalid member index for " << pixel_local_attachments.name << ": "
+                          << values[0] << std::endl;
+                return false;
+            }
+            auto attachment_index = tint::ParseUint32(values[1]);
+            if (!attachment_index) {
+                std::cerr << "Invalid attachment index for " << pixel_local_attachments.name << ": "
+                          << values[1] << std::endl;
+                return false;
+            }
+            opts->pixel_local_options.attachments.emplace(member_index.Get(),
+                                                          attachment_index.Get());
+        }
     }
 
     auto files = result.Get();
@@ -653,6 +690,7 @@ bool GenerateMsl(const tint::Program* program, const Options& options) {
     gen_options.use_tint_ir = options.use_ir;
     gen_options.disable_robustness = !options.enable_robustness;
     gen_options.disable_workgroup_init = options.disable_workgroup_init;
+    gen_options.pixel_local_options = options.pixel_local_options;
     gen_options.external_texture_options.bindings_map =
         tint::cmd::GenerateExternalTextureBindings(input_program);
     gen_options.array_length_from_uniform.ubo_binding = tint::BindingPoint{0, 30};
@@ -681,7 +719,10 @@ bool GenerateMsl(const tint::Program* program, const Options& options) {
     auto msl_version = tint::msl::validate::MslVersion::kMsl_1_2;
     for (auto* enable : program->AST().Enables()) {
         if (enable->HasExtension(tint::core::Extension::kChromiumExperimentalSubgroups)) {
-            msl_version = tint::msl::validate::MslVersion::kMsl_2_1;
+            msl_version = std::max(msl_version, tint::msl::validate::MslVersion::kMsl_2_1);
+        }
+        if (enable->HasExtension(tint::core::Extension::kChromiumExperimentalPixelLocal)) {
+            msl_version = std::max(msl_version, tint::msl::validate::MslVersion::kMsl_2_3);
         }
     }
 

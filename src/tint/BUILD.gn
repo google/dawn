@@ -89,13 +89,6 @@ config("tint_public_config") {
     defines += [ "TINT_BUILD_SYNTAX_TREE_WRITER=0" ]
   }
 
-  # TODO(crbug.com/dawn/1704): Remove when chromium_experimental_pixel_local is production-ready
-  if (tint_enable_pixel_local_extension) {
-    defines += [ "TINT_ENABLE_PIXEL_LOCAL_EXTENSION=1" ]
-  } else {
-    defines += [ "TINT_ENABLE_PIXEL_LOCAL_EXTENSION=0" ]
-  }
-
   include_dirs = [
     "${tint_root_dir}/",
     "${tint_root_dir}/include/",

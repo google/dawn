@@ -1,0 +1,40 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct PixelLocal {
+  uint a [[color(1)]];
+};
+
+struct tint_private_vars_struct {
+  PixelLocal P;
+};
+
+struct f_res {
+  uint output_0 [[color(1)]];
+};
+
+void f0(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).P.a = ((*(tint_private_vars)).P.a + 9u);
+}
+
+void f1(thread tint_private_vars_struct* const tint_private_vars) {
+  f0(tint_private_vars);
+  (*(tint_private_vars)).P.a = ((*(tint_private_vars)).P.a + 8u);
+}
+
+void f2(thread tint_private_vars_struct* const tint_private_vars) {
+  (*(tint_private_vars)).P.a = ((*(tint_private_vars)).P.a + 7u);
+  f1(tint_private_vars);
+}
+
+void f_inner(thread tint_private_vars_struct* const tint_private_vars) {
+  f2(tint_private_vars);
+}
+
+fragment f_res f(PixelLocal pixel_local_1) {
+  thread tint_private_vars_struct tint_private_vars = {};
+  tint_private_vars.P = pixel_local_1;
+  f_inner(&(tint_private_vars));
+  return {.output_0=tint_private_vars.P.a};
+}
+

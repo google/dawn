@@ -176,16 +176,16 @@ struct CanonicalizeEntryPointIO::State {
         }
     }
 
-    /// Clones the shader IO attributes from @p in.
+    /// Clones the shader IO and internal attributes from @p in.
     /// @param in the attributes to clone
     /// @param do_interpolate whether to clone InterpolateAttribute
     /// @return the cloned attributes
-    template <size_t N>
-    auto CloneShaderIOAttributes(const tint::Vector<const Attribute*, N> in, bool do_interpolate) {
-        tint::Vector<const Attribute*, N> out;
+    auto CloneShaderIOAttributes(tint::VectorRef<const Attribute*> in, bool do_interpolate) {
+        tint::Vector<const Attribute*, 8> out;
         for (auto* attr : in) {
-            if (IsShaderIOAttribute(attr) &&
-                (do_interpolate || !attr->template Is<InterpolateAttribute>())) {
+            if ((IsShaderIOAttribute(attr) &&
+                 (do_interpolate || !attr->template Is<InterpolateAttribute>())) ||
+                attr->Is<ast::InternalAttribute>()) {
                 CloneAttribute(attr, out);
             }
         }

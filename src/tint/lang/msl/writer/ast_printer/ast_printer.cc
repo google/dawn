@@ -44,6 +44,7 @@
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/msl/writer/ast_raise/module_scope_var_to_entry_point_param.h"
 #include "src/tint/lang/msl/writer/ast_raise/packed_vec3.h"
+#include "src/tint/lang/msl/writer/ast_raise/pixel_local.h"
 #include "src/tint/lang/msl/writer/ast_raise/subgroup_ballot.h"
 #include "src/tint/lang/msl/writer/common/printer_support.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
@@ -212,6 +213,15 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     // SubgroupBallot() must come after CanonicalizeEntryPointIO.
     manager.Add<SubgroupBallot>();
 
+    {
+        PixelLocal::Config cfg;
+        for (auto it : options.pixel_local_options.attachments) {
+            cfg.attachments.Add(it.first, it.second);
+        }
+        data.Add<PixelLocal::Config>(cfg);
+        manager.Add<PixelLocal>();
+    }
+
     // ArrayLengthFromUniform must come after SimplifyPointers, as
     // it assumes that the form of the array length argument is &var.array.
     manager.Add<ast::transform::ArrayLengthFromUniform>();
@@ -248,14 +258,15 @@ bool ASTPrinter::Generate() {
             "MSL", builder_.AST(), diagnostics_,
             Vector{
                 core::Extension::kChromiumDisableUniformityAnalysis,
+                core::Extension::kChromiumExperimentalDp4A,
                 core::Extension::kChromiumExperimentalFullPtrParameters,
+                core::Extension::kChromiumExperimentalPixelLocal,
                 core::Extension::kChromiumExperimentalPushConstant,
                 core::Extension::kChromiumExperimentalReadWriteStorageTexture,
                 core::Extension::kChromiumExperimentalSubgroups,
+                core::Extension::kChromiumInternalDualSourceBlending,
                 core::Extension::kChromiumInternalRelaxedUniformLayout,
                 core::Extension::kF16,
-                core::Extension::kChromiumInternalDualSourceBlending,
-                core::Extension::kChromiumExperimentalDp4A,
             })) {
         return false;
     }
@@ -1987,8 +1998,20 @@ bool ASTPrinter::EmitEntryPointFunction(const ast::Function* func) {
 
             bool ok = Switch(
                 type,  //
-                [&](const core::type::Struct*) {
-                    out << " [[stage_in]]";
+                [&](const core::type::Struct* str) {
+                    bool is_pixel_local = false;
+                    if (auto* sem_str = str->As<sem::Struct>()) {
+                        for (auto* member : sem_str->Members()) {
+                            if (ast::HasAttribute<PixelLocal::Attachment>(
+                                    member->Declaration()->attributes)) {
+                                is_pixel_local = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!is_pixel_local) {
+                        out << " [[stage_in]]";
+                    }
                     return true;
                 },
                 [&](const core::type::Texture*) {
@@ -2801,7 +2824,7 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
         if (auto location = attributes.location) {
             auto& pipeline_stage_uses = str->PipelineStageUses();
             if (TINT_UNLIKELY(pipeline_stage_uses.size() != 1)) {
-                TINT_ICE() << "invalid entry point IO struct uses";
+                TINT_ICE() << "invalid entry point IO struct uses for " << str->Name().NameView();
                 return false;
             }
 
@@ -2837,6 +2860,13 @@ bool ASTPrinter::EmitStructType(TextBuffer* b, const core::type::Struct* str) {
         if (attributes.invariant) {
             invariant_define_name_ = UniqueIdentifier("TINT_INVARIANT");
             out << " " << invariant_define_name_;
+        }
+
+        if (auto* sem_mem = mem->As<sem::StructMember>()) {
+            if (auto* attachment =
+                    ast::GetAttribute<PixelLocal::Attachment>(sem_mem->Declaration()->attributes)) {
+                out << " [[color(" << attachment->index << ")]]";
+            }
         }
 
         out << ";";

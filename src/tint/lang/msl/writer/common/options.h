@@ -18,6 +18,7 @@
 #include "src/tint/api/options/array_length_from_uniform.h"
 #include "src/tint/api/options/binding_remapper.h"
 #include "src/tint/api/options/external_texture.h"
+#include "src/tint/api/options/pixel_local.h"
 #include "src/tint/utils/reflection/reflection.h"
 
 namespace tint::msl::writer {
@@ -51,6 +52,9 @@ struct Options {
 
     /// Set to `true` to disable workgroup memory zero initialization
     bool disable_workgroup_init = false;
+
+    /// Options used for dealing with pixel local storage
+    PixelLocalOptions pixel_local_options = {};
 
     /// Options used in the binding mappings for external textures
     ExternalTextureOptions external_texture_options = {};

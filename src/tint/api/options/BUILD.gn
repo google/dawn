@@ -31,6 +31,7 @@ libtint_source_set("options") {
     "binding_remapper.h",
     "external_texture.h",
     "options.cc",
+    "pixel_local.h",
     "texture_builtins_from_uniform.h",
   ]
   deps = [

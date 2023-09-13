@@ -28,11 +28,13 @@ cc_library(
   srcs = [
     "module_scope_var_to_entry_point_param.cc",
     "packed_vec3.cc",
+    "pixel_local.cc",
     "subgroup_ballot.cc",
   ],
   hdrs = [
     "module_scope_var_to_entry_point_param.h",
     "packed_vec3.h",
+    "pixel_local.h",
     "subgroup_ballot.h",
   ],
   deps = [
@@ -68,6 +70,7 @@ cc_library(
   srcs = [
     "module_scope_var_to_entry_point_param_test.cc",
     "packed_vec3_test.cc",
+    "pixel_local_test.cc",
     "subgroup_ballot_test.cc",
   ],
   deps = [

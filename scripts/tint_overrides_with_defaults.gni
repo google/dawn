@@ -86,11 +86,6 @@ declare_args() {
   if (!defined(tint_build_unittests)) {
     tint_build_unittests = true
   }
-
-  # TODO(crbug.com/dawn/1704): Remove when chromium_experimental_pixel_local is production-ready
-  if (!defined(tint_enable_pixel_local_extension)) {
-    tint_enable_pixel_local_extension = false
-  }
 }
 
 declare_args() {
