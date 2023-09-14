@@ -118,7 +118,7 @@ void SystemEventPrimitive::Close() {
 #elif DAWN_PLATFORM_IS(POSIX)
     close(AsFD(*this));
 #else
-    CHECK(false);  // Not implemented.
+    DAWN_CHECK(false);  // Not implemented.
 #endif
 
     value = kInvalid;
@@ -151,10 +151,10 @@ void SystemEventPipeSender::Signal() && {
     // Send one byte to signal the receiver
     char zero[1] = {0};
     int status = write(AsFD(mPrimitive), zero, 1);
-    CHECK(status >= 0);
+    DAWN_CHECK(status >= 0);
 #else
     // Not implemented for this platform.
-    CHECK(false);
+    DAWN_CHECK(false);
 #endif
 
     mPrimitive.Close();
@@ -165,7 +165,7 @@ void SystemEventPipeSender::Signal() && {
 bool WaitAnySystemEvent(size_t count, TrackedFutureWaitInfo* futures, Nanoseconds timeout) {
 #if DAWN_PLATFORM_IS(WINDOWS)
     // TODO(crbug.com/dawn/2054): Implement this.
-    CHECK(false);
+    DAWN_CHECK(false);
 #elif DAWN_PLATFORM_IS(POSIX)
     std::vector<pollfd> pollfds(count);
     for (size_t i = 0; i < count; ++i) {
@@ -175,7 +175,7 @@ bool WaitAnySystemEvent(size_t count, TrackedFutureWaitInfo* futures, Nanosecond
 
     int status = poll(pollfds.data(), pollfds.size(), ToMilliseconds(timeout));
 
-    CHECK(status >= 0);
+    DAWN_CHECK(status >= 0);
     if (status == 0) {
         return false;
     }
@@ -183,7 +183,7 @@ bool WaitAnySystemEvent(size_t count, TrackedFutureWaitInfo* futures, Nanosecond
     for (size_t i = 0; i < count; ++i) {
         int revents = pollfds[i].revents;
         static constexpr int kAllowedEvents = POLLIN | POLLHUP;
-        CHECK((revents & kAllowedEvents) == revents);
+        DAWN_CHECK((revents & kAllowedEvents) == revents);
     }
 
     for (size_t i = 0; i < count; ++i) {
@@ -193,7 +193,7 @@ bool WaitAnySystemEvent(size_t count, TrackedFutureWaitInfo* futures, Nanosecond
 
     return true;
 #else
-    CHECK(false);  // Not implemented.
+    DAWN_CHECK(false);  // Not implemented.
 #endif
 }
 
@@ -204,7 +204,7 @@ std::pair<SystemEventPipeSender, SystemEventReceiver> CreateSystemEventPipe() {
 #elif DAWN_PLATFORM_IS(POSIX)
     int pipeFds[2];
     int status = pipe(pipeFds);
-    CHECK(status >= 0);
+    DAWN_CHECK(status >= 0);
 
     SystemEventReceiver receiver;
     receiver.mPrimitive = SystemEventPrimitive{pipeFds[0]};
@@ -215,7 +215,7 @@ std::pair<SystemEventPipeSender, SystemEventReceiver> CreateSystemEventPipe() {
     return std::make_pair(std::move(sender), std::move(receiver));
 #else
     // Not implemented for this platform.
-    CHECK(false);
+    DAWN_CHECK(false);
 #endif
 }
 

@@ -316,7 +316,7 @@ WGPUFuture QueueBase::APIOnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInf
 
 SystemEventReceiver QueueBase::InsertWorkDoneEvent() {
     // TODO(crbug.com/dawn/2058): Implement this in all backends and remove this default impl
-    CHECK(false);
+    DAWN_CHECK(false);
 }
 
 void QueueBase::TrackTask(std::unique_ptr<TrackTaskCallback> task, ExecutionSerial serial) {
