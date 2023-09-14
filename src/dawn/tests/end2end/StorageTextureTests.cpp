@@ -161,7 +161,7 @@ class StorageTextureTests : public DawnTest {
             }
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
     }
@@ -187,7 +187,7 @@ class StorageTextureTests : public DawnTest {
                 ostream << "texture_storage_3d";
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
         ostream << "<" << utils::GetWGSLImageFormatQualifier(format) << ", ";
@@ -248,7 +248,7 @@ class StorageTextureTests : public DawnTest {
                        "f32(value) * 2.0 / 127.0, -f32(value) * 2.0 / 127.0)";
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
     }
@@ -298,7 +298,7 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
 })";
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
 
@@ -333,7 +333,7 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
                 textureStore = "textureStore(storageImage0, vec3i(x, y, slice), expected)";
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
         const char* workgroupSize = !strcmp(stage, "compute") ? " @workgroup_size(1)" : "";

@@ -218,7 +218,7 @@ class TextureFormatTest : public DawnTest {
             case TextureComponentType::Uint:
                 return {wgpu::TextureFormat::RGBA32Uint, 16, formatInfo.type, 4};
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 

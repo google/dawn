@@ -58,7 +58,7 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                 return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 return 0;
         }
     }
@@ -68,7 +68,7 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                 return plane == VideoViewsTestsBase::kYUVLumaPlaneIndex ? 1 : 2;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 return 0;
         }
     }
@@ -78,7 +78,7 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                 return plane == VideoViewsTestsBase::kYUVLumaPlaneIndex ? 1 : 2;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 return 0;
         }
     }

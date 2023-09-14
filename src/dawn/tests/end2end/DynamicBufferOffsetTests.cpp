@@ -524,7 +524,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
             sourceBindingType = wgpu::BufferBindingType::ReadOnlyStorage;
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Compute, sourceBindingType, true},
@@ -564,7 +564,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
                 )";
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
 
         shader << R"(
@@ -618,7 +618,7 @@ TEST_P(ClampedOOBDynamicBufferOffsetTests, CheckOOBAccess) {
             srcBufferByteOffset = storageBufferOffset;
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 
     std::vector<uint32_t> srcData(srcBufferSize / sizeof(uint32_t));

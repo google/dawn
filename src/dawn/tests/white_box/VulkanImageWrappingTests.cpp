@@ -74,7 +74,7 @@ class VulkanImageWrappingTestBase : public DawnTestWithParams<ImageWrappingParam
                 mBackend = CreateDMABufBackend(device);
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
 
         VulkanImageWrappingTestBackend::TestParams params;

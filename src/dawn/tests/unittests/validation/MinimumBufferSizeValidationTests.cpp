@@ -93,7 +93,7 @@ std::string GenerateBindingString(const std::vector<BindingDescriptor>& bindings
                 ostream << "var<storage, read> b" << index << " : S" << index << ";\n";
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
         index++;
     }

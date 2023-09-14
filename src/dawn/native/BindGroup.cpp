@@ -96,7 +96,7 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
             requiredBindingAlignment = device->GetLimits().v1.minStorageBufferOffsetAlignment;
             break;
         case wgpu::BufferBindingType::Undefined:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 
     DAWN_INVALID_IF(!IsAligned(entry.offset, requiredBindingAlignment),
@@ -189,7 +189,7 @@ MaybeError ValidateTextureBinding(DeviceBase* device,
             break;
         }
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
 
@@ -230,7 +230,7 @@ MaybeError ValidateSamplerBinding(const DeviceBase* device,
                             entry.sampler);
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
 
@@ -357,7 +357,7 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
                                  i, bindingInfo);
                 break;
             case BindingInfoType::ExternalTexture:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
     }

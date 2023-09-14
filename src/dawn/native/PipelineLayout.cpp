@@ -232,7 +232,7 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
                     case SampleTypeBit::Float:
                     case SampleTypeBit::UnfilterableFloat:
                     case SampleTypeBit::None:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                         break;
                     default:
                         if (shaderBinding.texture.compatibleSampleTypes ==
@@ -241,7 +241,7 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
                             // is used with a sampler.
                             entry.texture.sampleType = wgpu::TextureSampleType::UnfilterableFloat;
                         } else {
-                            UNREACHABLE();
+                            DAWN_UNREACHABLE();
                         }
                 }
                 entry.texture.viewDimension = shaderBinding.texture.viewDimension;

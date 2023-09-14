@@ -397,7 +397,7 @@ class CopySplitTest : public testing::TestWithParam<wgpu::TextureDimension> {
                 break;
             }
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
 

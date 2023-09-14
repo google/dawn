@@ -395,7 +395,7 @@ DXGI_FORMAT Texture::GetD3D12CopyableSubresourceFormat(Aspect aspect) const {
                 case Aspect::Stencil:
                     return DXGI_FORMAT_R8_UINT;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
         default:
             DAWN_ASSERT(HasOneBit(GetFormat().aspects));
@@ -690,7 +690,7 @@ D3D12_RENDER_TARGET_VIEW_DESC Texture::GetRTVDescriptor(const Format& format,
             rtvDesc.Texture3D.WSize = sliceCount;
             break;
         case wgpu::TextureDimension::e1D:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
     return rtvDesc;
@@ -763,7 +763,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
                             clearFlags |= D3D12_CLEAR_FLAG_STENCIL;
                             break;
                         default:
-                            UNREACHABLE();
+                            DAWN_UNREACHABLE();
                     }
                 }
 
@@ -956,7 +956,7 @@ TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* desc
                             D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_1);
                         break;
                     default:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                         break;
                 }
                 break;
@@ -988,13 +988,13 @@ TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* desc
                             D3D12_SHADER_COMPONENT_MAPPING_FORCE_VALUE_1);
                         break;
                     default:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                         break;
                 }
                 break;
             }
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
     }
@@ -1026,7 +1026,7 @@ TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* desc
                 break;
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     } else {
         switch (descriptor->dimension) {
@@ -1068,7 +1068,7 @@ TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* desc
                 break;
 
             case wgpu::TextureViewDimension::Undefined:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 }
@@ -1124,7 +1124,7 @@ D3D12_UNORDERED_ACCESS_VIEW_DESC TextureView::GetUAVDescriptor() const {
         case wgpu::TextureViewDimension::Cube:
         case wgpu::TextureViewDimension::CubeArray:
         case wgpu::TextureViewDimension::Undefined:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
     return uavDesc;
 }

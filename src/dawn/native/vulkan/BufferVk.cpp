@@ -308,7 +308,7 @@ MaybeError Buffer::InitializeHostMapped(const BufferHostMappedPointer* hostMappe
     } else if (GetUsage() & wgpu::BufferUsage::MapWrite) {
         requestKind = MemoryKind::LinearWriteMappable;
     } else {
-        UNREACHABLE();
+        DAWN_UNREACHABLE();
     }
 
     int memoryTypeIndex =

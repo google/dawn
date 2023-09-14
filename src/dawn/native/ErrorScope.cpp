@@ -31,7 +31,7 @@ wgpu::ErrorType ErrorFilterToErrorType(wgpu::ErrorFilter filter) {
         case wgpu::ErrorFilter::Internal:
             return wgpu::ErrorType::Internal;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 }  // namespace

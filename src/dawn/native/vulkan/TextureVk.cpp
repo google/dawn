@@ -55,7 +55,7 @@ VkImageViewType VulkanImageViewType(wgpu::TextureViewDimension dimension) {
         case wgpu::TextureViewDimension::Undefined:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 // Computes which vulkan access type could be required for the given Dawn usage.
@@ -481,7 +481,7 @@ VkFormat VulkanImageFormat(const Device* device, wgpu::TextureFormat format) {
         case wgpu::TextureFormat::Undefined:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 // Converts the Dawn usage flags to Vulkan usage flags. Also needs the format to choose
@@ -592,17 +592,17 @@ VkImageLayout VulkanImageLayout(const Texture* texture, wgpu::TextureUsage usage
             // Will be covered by RenderAttachment above, as specification of
             // TransientAttachment requires that RenderAttachment also be
             // specified.
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
 
         case wgpu::TextureUsage::StorageAttachment:
             // TODO(dawn:1704): Support PLS on Vulkan.
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
 
         case wgpu::TextureUsage::None:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 VkSampleCountFlagBits VulkanSampleCount(uint32_t sampleCount) {
@@ -612,7 +612,7 @@ VkSampleCountFlagBits VulkanSampleCount(uint32_t sampleCount) {
         case 4:
             return VK_SAMPLE_COUNT_4_BIT;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 MaybeError ValidateVulkanImageCanBeWrapped(const DeviceBase*, const TextureDescriptor* descriptor) {
@@ -643,7 +643,7 @@ bool IsSampleCountSupported(const dawn::native::vulkan::Device* device,
             vkPhysicalDevice, imageCreateInfo.format, imageCreateInfo.imageType,
             imageCreateInfo.tiling, imageCreateInfo.usage, imageCreateInfo.flags,
             &properties) != VK_SUCCESS) {
-        UNREACHABLE();
+        DAWN_UNREACHABLE();
     }
 
     return properties.sampleCounts & imageCreateInfo.samples;

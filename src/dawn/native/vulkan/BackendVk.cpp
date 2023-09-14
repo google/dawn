@@ -311,7 +311,7 @@ MaybeError VulkanInstance::Initialize(const InstanceBase* instance, ICD icd) {
             break;
 #endif  // defined(DAWN_ENABLE_SWIFTSHADER)
         // ICD::SwiftShader should not be passed if SwiftShader is not enabled.
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
         }
     }
 

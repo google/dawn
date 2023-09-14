@@ -47,7 +47,7 @@ ResultOrError<SingleShaderStage> TintPipelineStageToShaderStage(
         case tint::inspector::PipelineStage::kCompute:
             return SingleShaderStage::Compute;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 BindingInfoType TintResourceTypeToBindingInfoType(
@@ -73,7 +73,7 @@ BindingInfoType TintResourceTypeToBindingInfoType(
             return BindingInfoType::ExternalTexture;
 
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             return BindingInfoType::Buffer;
     }
 }
@@ -119,7 +119,7 @@ wgpu::TextureFormat TintImageFormatToTextureFormat(
             return wgpu::TextureFormat::Undefined;
 
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             return wgpu::TextureFormat::Undefined;
     }
 }
@@ -142,7 +142,7 @@ wgpu::TextureViewDimension TintTextureDimensionToTextureViewDimension(
         case tint::inspector::ResourceBinding::TextureDimension::kNone:
             return wgpu::TextureViewDimension::Undefined;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 SampleTypeBit TintSampledKindToSampleTypeBit(tint::inspector::ResourceBinding::SampledKind s) {
@@ -156,7 +156,7 @@ SampleTypeBit TintSampledKindToSampleTypeBit(tint::inspector::ResourceBinding::S
         case tint::inspector::ResourceBinding::SampledKind::kUnknown:
             return SampleTypeBit::None;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 ResultOrError<TextureComponentType> TintComponentTypeToTextureComponentType(
@@ -172,7 +172,7 @@ ResultOrError<TextureComponentType> TintComponentTypeToTextureComponentType(
         case tint::inspector::ComponentType::kUnknown:
             return DAWN_VALIDATION_ERROR("Attempted to convert 'Unknown' component type from Tint");
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 ResultOrError<VertexFormatBaseType> TintComponentTypeToVertexFormatBaseType(
@@ -188,7 +188,7 @@ ResultOrError<VertexFormatBaseType> TintComponentTypeToVertexFormatBaseType(
         case tint::inspector::ComponentType::kUnknown:
             return DAWN_VALIDATION_ERROR("Attempted to convert 'Unknown' component type from Tint");
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 ResultOrError<wgpu::BufferBindingType> TintResourceTypeToBufferBindingType(
@@ -203,7 +203,7 @@ ResultOrError<wgpu::BufferBindingType> TintResourceTypeToBufferBindingType(
         default:
             return DAWN_VALIDATION_ERROR("Attempted to convert non-buffer resource type");
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 ResultOrError<wgpu::StorageTextureAccess> TintResourceTypeToStorageTextureAccess(
@@ -218,7 +218,7 @@ ResultOrError<wgpu::StorageTextureAccess> TintResourceTypeToStorageTextureAccess
         default:
             return DAWN_VALIDATION_ERROR("Attempted to convert non-storage texture resource type");
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 ResultOrError<InterStageComponentType> TintComponentTypeToInterStageComponentType(
@@ -235,7 +235,7 @@ ResultOrError<InterStageComponentType> TintComponentTypeToInterStageComponentTyp
         case tint::inspector::ComponentType::kUnknown:
             return DAWN_VALIDATION_ERROR("Attempted to convert 'Unknown' component type from Tint");
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 ResultOrError<uint32_t> TintCompositionTypeToInterStageComponentCount(
@@ -252,7 +252,7 @@ ResultOrError<uint32_t> TintCompositionTypeToInterStageComponentCount(
         case tint::inspector::CompositionType::kUnknown:
             return DAWN_VALIDATION_ERROR("Attempt to convert 'Unknown' composition type from Tint");
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 ResultOrError<InterpolationType> TintInterpolationTypeToInterpolationType(
@@ -268,7 +268,7 @@ ResultOrError<InterpolationType> TintInterpolationTypeToInterpolationType(
             return DAWN_VALIDATION_ERROR(
                 "Attempted to convert 'Unknown' interpolation type from Tint");
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 ResultOrError<InterpolationSampling> TintInterpolationSamplingToInterpolationSamplingType(
@@ -286,7 +286,7 @@ ResultOrError<InterpolationSampling> TintInterpolationSamplingToInterpolationSam
             return DAWN_VALIDATION_ERROR(
                 "Attempted to convert 'Unknown' interpolation sampling type from Tint");
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 EntryPointMetadata::Override::Type FromTintOverrideType(tint::inspector::Override::Type type) {
@@ -302,7 +302,7 @@ EntryPointMetadata::Override::Type FromTintOverrideType(tint::inspector::Overrid
         case tint::inspector::Override::Type::kUint32:
             return EntryPointMetadata::Override::Type::Uint32;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,
@@ -513,7 +513,7 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
             break;
 
         case BindingInfoType::ExternalTexture: {
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
         }
     }
@@ -727,7 +727,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                         info.sampler.isComparison = true;
                         break;
                     default:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                 }
                 break;
             case BindingInfoType::Texture:
@@ -986,7 +986,7 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
             break;
         }
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
     DAWN_ASSERT(wgslDesc != nullptr);
 

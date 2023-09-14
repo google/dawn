@@ -105,7 +105,7 @@ bool IsCompleteSubresourceCopiedTo(const TextureBase* texture,
                    extent.depthOrArrayLayers == copySize.depthOrArrayLayers;
     }
 
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy, const Extent3D& copySize) {
@@ -120,7 +120,7 @@ SubresourceRange GetSubresourcesAffectedByCopy(const TextureCopy& copy, const Ex
             return {copy.aspect, {0, 1}, {copy.mipLevel, 1}};
     }
 
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass) {
@@ -162,7 +162,7 @@ void LazyClearRenderPassAttachments(BeginRenderPassCmd* renderPass) {
                 break;
 
             case wgpu::StoreOp::Undefined:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
     }

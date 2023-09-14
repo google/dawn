@@ -71,7 +71,7 @@ class SubresourceRenderAttachmentTest : public DawnTest {
                     return renderPass;
                 }
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
         }();
 
@@ -122,7 +122,7 @@ class SubresourceRenderAttachmentTest : public DawnTest {
                 format = wgpu::TextureFormat::Depth24PlusStencil8;
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
 
         constexpr uint32_t kTextureSize = kRTSize << (kMipLevelCount - 1);

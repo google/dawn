@@ -417,7 +417,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
                     wgslDesc.code = kBlitR8Snorm3D.data();
                     break;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
@@ -436,7 +436,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
                     wgslDesc.code = kBlitRG8Snorm3D.data();
                     break;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
@@ -455,7 +455,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
                     wgslDesc.code = kBlitRGBA8Snorm3D.data();
                     break;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
@@ -474,7 +474,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
                     wgslDesc.code = kBlitBGRA8Unorm3D.data();
                     break;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
             textureSampleType = wgpu::TextureSampleType::Float;
             break;
@@ -487,7 +487,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
                     wgslDesc.code = kBlitDepth16UnormArray.data();
                     break;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
             textureSampleType = wgpu::TextureSampleType::Depth;
             break;
@@ -500,7 +500,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
                     wgslDesc.code = kBlitDepth32FloatArray.data();
                     break;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
             textureSampleType = wgpu::TextureSampleType::Depth;
             break;
@@ -515,7 +515,7 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
                     wgslDesc.code = kBlitStencil8Array.data();
                     break;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
             textureSampleType = wgpu::TextureSampleType::Uint;
             break;
@@ -537,11 +537,11 @@ ResultOrError<Ref<ComputePipelineBase>> GetOrCreateTextureToBufferPipeline(
                     textureSampleType = wgpu::TextureSampleType::Uint;
                     break;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
         } break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 
     Ref<ShaderModuleBase> shaderModule;
@@ -634,7 +634,7 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
             workgroupCountX = (copyExtent.width + kWorkgroupSizeX - 1) / kWorkgroupSizeX;
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 
     Ref<BufferBase> destinationBuffer = dst.buffer;
@@ -715,7 +715,7 @@ MaybeError BlitTextureToBuffer(DeviceBase* device,
             viewDesc.aspect = wgpu::TextureAspect::StencilOnly;
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 
     viewDesc.dimension = textureViewDimension;

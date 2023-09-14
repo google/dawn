@@ -48,7 +48,7 @@ uint32_t GetD3D12ShaderVisibleHeapMinSize(D3D12_DESCRIPTOR_HEAP_TYPE heapType, b
         case D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER:
             return 256;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -63,7 +63,7 @@ uint32_t GetD3D12ShaderVisibleHeapMaxSize(D3D12_DESCRIPTOR_HEAP_TYPE heapType, b
         case D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER:
             return D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -73,7 +73,7 @@ D3D12_DESCRIPTOR_HEAP_FLAGS GetD3D12HeapFlags(D3D12_DESCRIPTOR_HEAP_TYPE heapTyp
         case D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER:
             return D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 

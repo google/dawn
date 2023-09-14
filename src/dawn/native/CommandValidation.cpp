@@ -405,7 +405,7 @@ ResultOrError<Aspect> SingleAspectUsedByImageCopyTexture(const ImageCopyTexture&
         case wgpu::TextureAspect::Plane1Only:
             return Aspect::Plane1;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 MaybeError ValidateLinearToDepthStencilCopyRestrictions(const ImageCopyTexture& dst) {

@@ -39,7 +39,7 @@ std::ostream& operator<<(std::ostream& o, EncoderType type) {
             o << "RenderPass";
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
 

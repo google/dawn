@@ -74,7 +74,7 @@ MaybeError PhysicalDevice::InitializeImpl() {
                     std::string("D3D12 driver version ") + mDriverVersion.ToString();
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 

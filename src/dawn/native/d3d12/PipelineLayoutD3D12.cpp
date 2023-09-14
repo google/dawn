@@ -67,7 +67,7 @@ D3D12_ROOT_PARAMETER_TYPE RootParameterType(wgpu::BufferBindingType type) {
         case wgpu::BufferBindingType::ReadOnlyStorage:
             return D3D12_ROOT_PARAMETER_TYPE_SRV;
         case wgpu::BufferBindingType::Undefined:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -123,7 +123,7 @@ HRESULT SerializeRootParameter1_0(Device* device,
                 break;
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
     }

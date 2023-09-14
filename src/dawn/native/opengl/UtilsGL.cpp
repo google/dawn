@@ -42,7 +42,7 @@ GLuint ToOpenGLCompareFunction(wgpu::CompareFunction compareFunction) {
         case wgpu::CompareFunction::Undefined:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 GLint GetStencilMaskFromStencilFormat(wgpu::TextureFormat depthStencilFormat) {
@@ -53,7 +53,7 @@ GLint GetStencilMaskFromStencilFormat(wgpu::TextureFormat depthStencilFormat) {
             return 0xFF;
 
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -118,7 +118,7 @@ void CopyImageSubData(const OpenGLFunctions& gl,
                 case Aspect::None:
                 case Aspect::Plane0:
                 case Aspect::Plane1:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
             if (srcTarget == GL_TEXTURE_2D) {
                 gl.FramebufferTexture2D(GL_READ_FRAMEBUFFER, glAttachment, srcTarget, srcHandle,

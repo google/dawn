@@ -61,7 +61,7 @@ void NullDeviceBenchmarkFixture::SetUp(const benchmark::State& state) {
             device.SetUncapturedErrorCallback(
                 [](WGPUErrorType, char const* message, void* userdata) {
                     dawn::ErrorLog() << message;
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
                 },
                 nullptr);
 
@@ -69,7 +69,7 @@ void NullDeviceBenchmarkFixture::SetUp(const benchmark::State& state) {
                 [](WGPUDeviceLostReason reason, char const* message, void* userdata) {
                     if (reason == WGPUDeviceLostReason_Undefined) {
                         dawn::ErrorLog() << message;
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                     }
                 },
                 nullptr);

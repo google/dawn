@@ -27,7 +27,7 @@ namespace {{native_namespace}} {
                     return "{{type.name.CamelCase()}}";
             {% endfor %}
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 

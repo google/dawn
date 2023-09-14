@@ -140,7 +140,7 @@ struct BranchesValidator<Unpacked, BranchList<Branches...>> {
 //             }
 //         }
 //         default:
-//             UNREACHABLE();
+//             DAWN_UNREACHABLE();
 //     }
 //
 // The example above checks that the unpacked chain is either:

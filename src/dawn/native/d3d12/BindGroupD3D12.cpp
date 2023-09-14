@@ -125,7 +125,7 @@ BindGroup::BindGroup(Device* device,
                         break;
                     }
                     case wgpu::BufferBindingType::Undefined:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                 }
 
                 break;
@@ -180,14 +180,14 @@ BindGroup::BindGroup(Device* device,
                         break;
                     }
                     case wgpu::StorageTextureAccess::Undefined:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                 }
 
                 break;
             }
 
             case BindingInfoType::ExternalTexture: {
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
             }
 
             case BindingInfoType::Sampler: {

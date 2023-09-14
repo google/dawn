@@ -223,7 +223,7 @@ Surface::Surface(InstanceBase* instance, const SurfaceDescriptor* descriptor)
         mXDisplay = xDesc->display;
         mXWindow = xDesc->window;
     } else {
-        UNREACHABLE();
+        DAWN_UNREACHABLE();
     }
 }
 

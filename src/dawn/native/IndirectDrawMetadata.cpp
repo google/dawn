@@ -170,7 +170,7 @@ void IndirectDrawMetadata::AddIndexedIndirectDraw(wgpu::IndexFormat indexFormat,
             numIndexBufferElements = indexBufferSize / 4;
             break;
         case wgpu::IndexFormat::Undefined:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 
     const IndexedIndirectConfig config = {indirectBuffer, numIndexBufferElements,

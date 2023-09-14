@@ -274,7 +274,7 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
     if (@available(macOS 10.14, ios 12.0, *)) {
         return SharedFence::Create(this, baseDescriptor->label, descriptor);
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 MaybeError Device::TickImpl() {

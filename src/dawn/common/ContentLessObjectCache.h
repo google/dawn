@@ -127,7 +127,7 @@ struct ContentLessObjectCacheKeyFuncs {
                         xPtr = std::get<ForErase<RefCountedT>>(x).mValue;
                         break;
                     default:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                 }
                 return {xPtr, xRef};
             };

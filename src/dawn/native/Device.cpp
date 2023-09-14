@@ -472,7 +472,7 @@ void DeviceBase::Destroy() {
             // Getting disconnected is a transient state happening in a single API call so there
             // is always an external reference keeping the Device alive, which means the
             // destructor cannot run while BeingDisconnected.
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
 
         case State::Disconnected:
@@ -480,7 +480,7 @@ void DeviceBase::Destroy() {
 
         case State::Destroyed:
             // If we are already destroyed we should've skipped this work entirely.
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
 
@@ -1621,7 +1621,7 @@ ResultOrError<Ref<CommandEncoder>> DeviceBase::CreateCommandEncoder(
 
 // Overwritten on the backends to return pipeline caches if supported.
 Ref<PipelineCacheBase> DeviceBase::GetOrCreatePipelineCacheImpl(const CacheKey& key) {
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 ResultOrError<Ref<ComputePipelineBase>> DeviceBase::CreateUninitializedComputePipeline(

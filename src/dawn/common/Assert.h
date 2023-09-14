@@ -96,7 +96,6 @@
 #define DAWN_CHECK(condition) DAWN_CHECK_CALLSITE_HELPER(__FILE__, __func__, __LINE__, condition)
 
 #if !defined(DAWN_SKIP_ASSERT_SHORTHANDS)
-#define UNREACHABLE DAWN_UNREACHABLE
 #define CHECK DAWN_CHECK
 #endif
 

@@ -87,7 +87,7 @@ class BindGroupTests : public DawnTest {
                        << " : Buffer" << i << ";";
                     break;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
         }
 

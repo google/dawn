@@ -89,7 +89,7 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
             case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
                 return DXGI_FORMAT_P010;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 

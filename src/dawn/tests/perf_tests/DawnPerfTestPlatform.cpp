@@ -58,7 +58,7 @@ const unsigned char* DawnPerfTestPlatform::GetTraceCategoryEnabledFlag(
         case platform::TraceCategory::GPUWork:
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
     return &gTraceCategories[static_cast<uint32_t>(category)].enabled;
 }

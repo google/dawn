@@ -61,7 +61,7 @@ MaybeError ValidateStorageTextureViewDimension(wgpu::TextureViewDimension dimens
         case wgpu::TextureViewDimension::Undefined:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 MaybeError ValidateReadWriteStorageTextureAccess(
@@ -83,7 +83,7 @@ MaybeError ValidateReadWriteStorageTextureAccess(
         case wgpu::StorageTextureAccess::WriteOnly:
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 
     if (storageTextureBindingLayout.access == wgpu::StorageTextureAccess::ReadWrite) {
@@ -189,7 +189,7 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
                                 storageTexture.access, entry.visibility, wgpu::ShaderStage::Vertex);
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 
@@ -351,7 +351,7 @@ bool operator!=(const BindingInfo& a, const BindingInfo& b) {
         case BindingInfoType::ExternalTexture:
             return false;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 bool IsBufferBinding(const BindGroupLayoutEntry& binding) {
@@ -690,7 +690,7 @@ bool BindGroupLayoutInternalBase::IsStorageBufferBinding(BindingIndex bindingInd
         case wgpu::BufferBindingType::Undefined:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 std::string BindGroupLayoutInternalBase::EntriesToString() const {

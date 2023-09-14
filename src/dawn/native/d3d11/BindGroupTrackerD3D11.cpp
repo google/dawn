@@ -201,7 +201,7 @@ MaybeError BindGroupTracker::Apply() {
                             case wgpu::StorageTextureAccess::ReadOnly:
                                 break;
                             default:
-                                UNREACHABLE();
+                                DAWN_UNREACHABLE();
                                 break;
                         }
                         break;
@@ -339,7 +339,7 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                         break;
                     }
                     case wgpu::BufferBindingType::Undefined:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                 }
                 break;
             }
@@ -412,7 +412,7 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                         break;
                     }
                     default:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                 }
                 break;
             }
@@ -487,7 +487,7 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
                         break;
                     }
                     case wgpu::BufferBindingType::Undefined:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                 }
                 break;
             }
@@ -550,13 +550,13 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
                         break;
                     }
                     default:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                 }
                 break;
             }
 
             case BindingInfoType::ExternalTexture: {
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
             }
         }

@@ -38,7 +38,7 @@ void stream::Stream<tint::Program>::Write(stream::Sink* sink, const tint::Progra
     // TODO(crbug.com/dawn/1481): We shouldn't need to write back to WGSL if we have a CacheKey
     // built from the initial shader module input. Then, we would never need to parse the program
     // and write back out to WGSL.
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 #endif
 }
 

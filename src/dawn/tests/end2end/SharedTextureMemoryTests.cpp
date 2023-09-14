@@ -271,7 +271,7 @@ void SharedTextureMemoryTests::CheckFourColors(wgpu::Device& deviceObj,
             EXPECT_TEXTURE_EQ(deviceObj, &utils::RGBA8::kRed, colorTarget, br, {1, 1});
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 

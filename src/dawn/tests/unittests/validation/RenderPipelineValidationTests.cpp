@@ -479,7 +479,7 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputComponentCountCompatibility) 
                 })";
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
         descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
 
@@ -1939,7 +1939,7 @@ TEST_F(InterStageVariableMatchingValidationTest, DifferentInterpolationAttribute
             case InterpolationType::Flat:
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
         return appliedAttribute;
     };

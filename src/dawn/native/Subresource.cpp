@@ -60,7 +60,7 @@ Aspect SelectFormatAspects(const Format& format, wgpu::TextureAspect aspect) {
         case wgpu::TextureAspect::Plane1Only:
             return format.aspects & Aspect::Plane1;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 uint8_t GetAspectIndex(Aspect aspect) {
@@ -75,7 +75,7 @@ uint8_t GetAspectIndex(Aspect aspect) {
         case Aspect::Stencil:
             return 1;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 

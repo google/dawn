@@ -163,7 +163,7 @@ Extent3D Format::GetAspectSize(Aspect aspect, const Extent3D& textureSize) const
                     }
                     break;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
             return planeSize;
         }
@@ -171,7 +171,7 @@ Extent3D Format::GetAspectSize(Aspect aspect, const Extent3D& textureSize) const
             break;
     }
 
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 FormatIndex Format::GetIndex() const {
@@ -293,7 +293,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
                         firstAspect->baseType = TextureComponentType::Uint;
                         break;
                     default:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                 }
             } else {
                 DAWN_ASSERT(sampleTypes & SampleTypeBit::Float);
@@ -615,7 +615,7 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     absl::FormatSink* s) {
     std::visit(
         overloaded{
-            [](const std::monostate&) { UNREACHABLE(); },
+            [](const std::monostate&) { DAWN_UNREACHABLE(); },
             [s](const RequiresFeature& requiresFeature) {
                 s->Append(absl::StrFormat("requires feature %s", requiresFeature.feature));
             },

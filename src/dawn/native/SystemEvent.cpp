@@ -146,7 +146,7 @@ void SystemEventPipeSender::Signal() && {
     DAWN_ASSERT(mPrimitive.IsValid());
 #if DAWN_PLATFORM_IS(WINDOWS)
     // This is not needed on Windows yet. It's implementable using SetEvent().
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 #elif DAWN_PLATFORM_IS(POSIX)
     // Send one byte to signal the receiver
     char zero[1] = {0};
@@ -200,7 +200,7 @@ bool WaitAnySystemEvent(size_t count, TrackedFutureWaitInfo* futures, Nanosecond
 std::pair<SystemEventPipeSender, SystemEventReceiver> CreateSystemEventPipe() {
 #if DAWN_PLATFORM_IS(WINDOWS)
     // This is not needed on Windows yet. It's implementable using CreateEvent().
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 #elif DAWN_PLATFORM_IS(POSIX)
     int pipeFds[2];
     int status = pipe(pipeFds);

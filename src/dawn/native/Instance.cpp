@@ -607,7 +607,7 @@ const X11Functions* InstanceBase::GetOrLoadX11Functions() {
     }
     return mX11Functions.get();
 #else
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 #endif  // defined(DAWN_USE_X11)
 }
 

@@ -112,7 +112,7 @@ MaybeError ValidateProgrammableStage(DeviceBase* device,
                 // https://webidl.spec.whatwg.org/#es-boolean
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
 
         if (stageInitializedConstantIdentifiers.count(constants[i].key) == 0) {
@@ -165,7 +165,7 @@ WGPUCreatePipelineAsyncStatus CreatePipelineAsyncStatusFromErrorType(InternalErr
         case InternalErrorType::OutOfMemory:
             return WGPUCreatePipelineAsyncStatus_InternalError;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             return WGPUCreatePipelineAsyncStatus_Unknown;
     }
 }

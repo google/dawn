@@ -31,7 +31,7 @@ class ErrorQuerySet final : public QuerySetBase {
         : QuerySetBase(device, descriptor, ObjectBase::kError) {}
 
   private:
-    void DestroyImpl() override { UNREACHABLE(); }
+    void DestroyImpl() override { DAWN_UNREACHABLE(); }
 };
 
 }  // anonymous namespace

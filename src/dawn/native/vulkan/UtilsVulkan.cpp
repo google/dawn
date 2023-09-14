@@ -70,7 +70,7 @@ VkCompareOp ToVulkanCompareOp(wgpu::CompareFunction op) {
         case wgpu::CompareFunction::Undefined:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 // Convert Dawn texture aspects to  Vulkan texture aspect flags
@@ -100,7 +100,7 @@ VkImageAspectFlags VulkanAspectMask(const Aspect& aspects) {
                 break;
 
             case Aspect::None:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
     return flags;

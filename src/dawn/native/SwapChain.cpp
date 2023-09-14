@@ -32,9 +32,9 @@ class ErrorSwapChain final : public SwapChainBase {
         : SwapChainBase(device, desc, ObjectBase::kError) {}
 
   private:
-    ResultOrError<Ref<TextureBase>> GetCurrentTextureImpl() override { UNREACHABLE(); }
-    MaybeError PresentImpl() override { UNREACHABLE(); }
-    void DetachFromSurfaceImpl() override { UNREACHABLE(); }
+    ResultOrError<Ref<TextureBase>> GetCurrentTextureImpl() override { DAWN_UNREACHABLE(); }
+    MaybeError PresentImpl() override { DAWN_UNREACHABLE(); }
+    void DetachFromSurfaceImpl() override { DAWN_UNREACHABLE(); }
 };
 
 }  // anonymous namespace

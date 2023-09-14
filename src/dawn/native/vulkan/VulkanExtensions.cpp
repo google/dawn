@@ -111,7 +111,7 @@ InstanceExtSet EnsureDependencies(const InstanceExtSet& advertisedExts) {
                 break;
 
             case InstanceExt::EnumCount:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
 
         trimmedSet.set(ext, hasDependencies && advertisedExts[ext]);
@@ -313,7 +313,7 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
                 break;
 
             case DeviceExt::EnumCount:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
 
         trimmedSet.set(ext, hasDependencies && advertisedExts[ext]);

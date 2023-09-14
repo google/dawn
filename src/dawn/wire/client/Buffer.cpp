@@ -260,7 +260,7 @@ bool Buffer::OnMapAsyncCallback(uint64_t requestSerial,
                 break;
             }
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
 
         mMapOffset = mRequest.offset;

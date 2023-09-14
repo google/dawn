@@ -160,7 +160,7 @@ ResultOrError<FenceAndSignalValue> SharedTextureMemory::EndAccessImpl(TextureBas
             std::move(fence),
             static_cast<uint64_t>(texture->GetSharedTextureMemoryContents()->GetLastUsageSerial())};
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 }  // namespace dawn::native::metal

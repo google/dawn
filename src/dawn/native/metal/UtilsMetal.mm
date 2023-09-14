@@ -172,7 +172,7 @@ Aspect GetDepthStencilAspects(MTLPixelFormat format) {
             return Aspect::Stencil;
 
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -196,7 +196,7 @@ MTLCompareFunction ToMetalCompareFunction(wgpu::CompareFunction compareFunction)
             return MTLCompareFunctionAlways;
 
         case wgpu::CompareFunction::Undefined:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 

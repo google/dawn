@@ -101,7 +101,7 @@ MaybeError QuerySet::Initialize() {
                     CreateCounterSampleBuffer(device, label.Get(), MTLCommonCounterSetStatistic,
                                               GetQueryCount()));
             } else {
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
             }
             break;
         case wgpu::QueryType::Timestamp:
@@ -113,11 +113,11 @@ MaybeError QuerySet::Initialize() {
                     CreateCounterSampleBuffer(device, label.Get(), MTLCommonCounterSetTimestamp,
                                               GetQueryCount()));
             } else {
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
             }
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
 

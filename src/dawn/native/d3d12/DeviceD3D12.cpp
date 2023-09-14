@@ -477,7 +477,7 @@ ResultOrError<Ref<SharedTextureMemoryBase>> Device::ImportSharedTextureMemoryImp
                 this, descriptor->label,
                 std::get<const SharedTextureMemoryDXGISharedHandleDescriptor*>(unpacked));
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -499,7 +499,7 @@ ResultOrError<Ref<SharedFenceBase>> Device::ImportSharedFenceImpl(
                 this, descriptor->label,
                 std::get<const SharedFenceDXGISharedHandleDescriptor*>(unpacked));
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 

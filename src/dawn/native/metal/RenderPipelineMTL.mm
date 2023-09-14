@@ -90,7 +90,7 @@ MTLVertexFormat VertexFormatType(wgpu::VertexFormat format) {
         case wgpu::VertexFormat::Sint32x4:
             return MTLVertexFormatInt4;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -101,7 +101,7 @@ MTLVertexStepFunction VertexStepModeFunction(wgpu::VertexStepMode mode) {
         case wgpu::VertexStepMode::Instance:
             return MTLVertexStepFunctionPerInstance;
         case wgpu::VertexStepMode::VertexBufferNotUsed:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 

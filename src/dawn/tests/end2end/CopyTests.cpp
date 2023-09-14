@@ -565,7 +565,7 @@ class CopyTests_Formats : public CopyTests_T2TBase<DawnTestWithParams<SrcColorFo
             case wgpu::TextureFormat::BGRA8UnormSrgb:
                 return wgpu::TextureFormat::BGRA8Unorm;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 
@@ -2685,7 +2685,7 @@ std::ostream& operator<<(std::ostream& o, InitializationMethod method) {
             o << "CopyTextureToTexture";
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
 
@@ -2816,7 +2816,7 @@ TEST_P(CopyToDepthStencilTextureAfterDestroyingBigBufferTests, DoTest) {
             break;
         }
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
 

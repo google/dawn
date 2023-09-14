@@ -28,7 +28,7 @@ GLenum MagFilterMode(wgpu::FilterMode filter) {
         case wgpu::FilterMode::Linear:
             return GL_LINEAR;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 GLenum MinFilterMode(wgpu::FilterMode minFilter, wgpu::MipmapFilterMode mipMapFilter) {
@@ -48,7 +48,7 @@ GLenum MinFilterMode(wgpu::FilterMode minFilter, wgpu::MipmapFilterMode mipMapFi
                     return GL_LINEAR_MIPMAP_LINEAR;
             }
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 GLenum WrapMode(wgpu::AddressMode mode) {
@@ -60,7 +60,7 @@ GLenum WrapMode(wgpu::AddressMode mode) {
         case wgpu::AddressMode::ClampToEdge:
             return GL_CLAMP_TO_EDGE;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 }  // namespace

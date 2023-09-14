@@ -166,7 +166,7 @@ struct IsResultOrError<ResultOrError<T>> {
 
 // Argument helpers are used to determine which macro implementations should be called when
 // overloading with different number of variables.
-#define DAWN_ERROR_UNIMPLEMENTED_MACRO_(...) UNREACHABLE()
+#define DAWN_ERROR_UNIMPLEMENTED_MACRO_(...) DAWN_UNREACHABLE()
 #define DAWN_ERROR_GET_5TH_ARG_HELPER_(_1, _2, _3, _4, NAME, ...) NAME
 #define DAWN_ERROR_GET_5TH_ARG_(args) DAWN_ERROR_GET_5TH_ARG_HELPER_ args
 

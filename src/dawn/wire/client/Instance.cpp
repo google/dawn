@@ -31,7 +31,7 @@ WGPUBool ClientGetInstanceFeatures(WGPUInstanceFeatures* features) {
 }
 
 WGPUInstance ClientCreateInstance(WGPUInstanceDescriptor const* descriptor) {
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
     return nullptr;
 }
 

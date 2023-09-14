@@ -56,7 +56,7 @@ class StorageTextureValidationTests : public ValidationTest {
                 return "texture_storage_cube_array";  // Note: Doesn't exist in WGSL (yet)
             case wgpu::TextureViewDimension::Undefined:
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 return "";
         }
     }
@@ -94,7 +94,7 @@ class StorageTextureValidationTests : public ValidationTest {
                 }
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
         const char* shaderStageDeclaration = "";
         switch (shaderStage) {
@@ -108,7 +108,7 @@ class StorageTextureValidationTests : public ValidationTest {
                 shaderStageDeclaration = "@compute @workgroup_size(1)";
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
 
         std::ostringstream ostream;
@@ -837,7 +837,7 @@ TEST_F(StorageTextureValidationTests, StorageTextureAndSampledTextureInOneRender
                 ASSERT_DEVICE_ERROR(encoder.Finish());
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
     }
@@ -969,7 +969,7 @@ TEST_F(ReadWriteStorageTextureValidationTests, ReadWriteStorageTextureFormatInSh
                     }
                     break;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
         }
     }

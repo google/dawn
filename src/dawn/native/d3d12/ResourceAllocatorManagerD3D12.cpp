@@ -56,7 +56,7 @@ D3D12_HEAP_TYPE GetD3D12HeapType(ResourceHeapKind resourceHeapKind) {
         case Upload_AllBuffersAndTextures:
             return D3D12_HEAP_TYPE_UPLOAD;
         case EnumCount:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -75,7 +75,7 @@ D3D12_HEAP_FLAGS GetD3D12HeapFlags(ResourceHeapKind resourceHeapKind) {
         case Default_OnlyRenderableOrDepthTextures:
             return D3D12_HEAP_FLAG_ALLOW_ONLY_RT_DS_TEXTURES;
         case EnumCount:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -92,7 +92,7 @@ ResourceHeapKind GetResourceHeapKind(D3D12_RESOURCE_DIMENSION dimension,
             case D3D12_HEAP_TYPE_READBACK:
                 return Readback_AllBuffersAndTextures;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 
@@ -106,7 +106,7 @@ ResourceHeapKind GetResourceHeapKind(D3D12_RESOURCE_DIMENSION dimension,
                 case D3D12_HEAP_TYPE_READBACK:
                     return Readback_OnlyBuffers;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
             break;
         }
@@ -123,12 +123,12 @@ ResourceHeapKind GetResourceHeapKind(D3D12_RESOURCE_DIMENSION dimension,
                 }
 
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
             break;
         }
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -160,7 +160,7 @@ uint64_t GetInitialResourcePlacementAlignment(
         }
         case D3D12_RESOURCE_DIMENSION_UNKNOWN:
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -267,7 +267,7 @@ uint32_t ComputeExtraArraySizeForIntelGen12(uint32_t width,
             tileHeight = 64;
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
     uint32_t tileWidth = kTileSize / tileHeight;
 

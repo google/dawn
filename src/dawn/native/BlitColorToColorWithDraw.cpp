@@ -85,7 +85,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateColorBlitPipeline(
             break;
         default:
             // TODO(dawn:1710): blitting integer textures are not currently supported.
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
     Ref<ShaderModuleBase> fshaderModule;

@@ -117,7 +117,7 @@ bool IsTextureViewDimensionCompatibleWithTextureDimension(
         case wgpu::TextureViewDimension::Undefined:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 bool IsArrayLayerValidForTextureViewDimension(wgpu::TextureViewDimension textureViewDimension,
@@ -138,7 +138,7 @@ bool IsArrayLayerValidForTextureViewDimension(wgpu::TextureViewDimension texture
         case wgpu::TextureViewDimension::Undefined:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 MaybeError ValidateSampleCount(const TextureDescriptor* descriptor,
@@ -227,7 +227,7 @@ MaybeError ValidateTextureViewDimensionCompatibility(const DeviceBase* device,
             break;
 
         case wgpu::TextureViewDimension::Undefined:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 
     return {};
@@ -599,8 +599,8 @@ ResultOrError<TextureViewDescriptor> GetTextureViewDescriptorWithDefaults(
                 desc.arrayLayerCount = texture->GetArrayLayers() - desc.baseArrayLayer;
                 break;
             default:
-                // We don't put UNREACHABLE() here because we validate enums only after this
-                // function sets default values. Otherwise, the UNREACHABLE() will be hit.
+                // We don't put DAWN_UNREACHABLE() here because we validate enums only after this
+                // function sets default values. Otherwise, the DAWN_UNREACHABLE() will be hit.
                 break;
         }
     }

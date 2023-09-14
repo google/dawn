@@ -2451,7 +2451,7 @@ class SetBindGroupPersistenceValidationTest : public ValidationTest {
                         ss << "var<uniform> set" << l << "_binding" << b << " : S;";
                         break;
                     default:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                 }
             }
         }

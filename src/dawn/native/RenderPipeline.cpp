@@ -565,7 +565,7 @@ MaybeError ValidateInterStageMatching(DeviceBase* device,
                     i);
             }
         }
-        UNREACHABLE();
+        DAWN_UNREACHABLE();
     }
 
     for (size_t i : IterateBitSet(vertexMetadata.usedInterStageVariables)) {
@@ -614,7 +614,7 @@ size_t IndexFormatSize(wgpu::IndexFormat format) {
         case wgpu::IndexFormat::Undefined:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 bool IsStripPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology) {
@@ -852,7 +852,7 @@ RenderPipelineBase* RenderPipelineBase::MakeError(DeviceBase* device, const char
             : RenderPipelineBase(device, ObjectBase::kError, label) {}
 
         MaybeError Initialize() override {
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             return {};
         }
     };

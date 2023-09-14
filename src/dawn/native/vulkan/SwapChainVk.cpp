@@ -188,7 +188,7 @@ VkPresentModeKHR ToVulkanPresentMode(wgpu::PresentMode mode) {
         case wgpu::PresentMode::Mailbox:
             return VK_PRESENT_MODE_MAILBOX_KHR;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 uint32_t MinImageCountForPresentMode(VkPresentModeKHR mode) {
@@ -201,7 +201,7 @@ uint32_t MinImageCountForPresentMode(VkPresentModeKHR mode) {
         default:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 }  // anonymous namespace

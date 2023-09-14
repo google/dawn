@@ -274,7 +274,7 @@ bool ShouldApplyClearBigIntegerColorValueWithDraw(
             break;
         }
         case TextureComponentType::Float:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             return false;
     }
 

@@ -30,10 +30,10 @@ VkAttachmentLoadOp VulkanAttachmentLoadOp(wgpu::LoadOp op) {
         case wgpu::LoadOp::Clear:
             return VK_ATTACHMENT_LOAD_OP_CLEAR;
         case wgpu::LoadOp::Undefined:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 VkAttachmentStoreOp VulkanAttachmentStoreOp(wgpu::StoreOp op) {
@@ -45,10 +45,10 @@ VkAttachmentStoreOp VulkanAttachmentStoreOp(wgpu::StoreOp op) {
         case wgpu::StoreOp::Discard:
             return VK_ATTACHMENT_STORE_OP_DONT_CARE;
         case wgpu::StoreOp::Undefined:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 }  // anonymous namespace
 

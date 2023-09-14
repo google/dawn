@@ -48,7 +48,7 @@ PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDescriptor* d
                             ssboIndex++;
                             break;
                         case wgpu::BufferBindingType::Undefined:
-                            UNREACHABLE();
+                            DAWN_UNREACHABLE();
                     }
                     break;
 

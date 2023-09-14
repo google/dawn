@@ -65,7 +65,7 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
                     }
                     return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
                 case wgpu::BufferBindingType::Undefined:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
         case BindingInfoType::Sampler:
             return VK_DESCRIPTOR_TYPE_SAMPLER;
@@ -75,7 +75,7 @@ VkDescriptorType VulkanDescriptorType(const BindingInfo& bindingInfo) {
         case BindingInfoType::StorageTexture:
             return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 // static

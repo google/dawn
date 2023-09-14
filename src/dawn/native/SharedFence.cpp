@@ -26,7 +26,7 @@ class ErrorSharedFence : public SharedFenceBase {
     ErrorSharedFence(DeviceBase* device, const SharedFenceDescriptor* descriptor)
         : SharedFenceBase(device, descriptor, ObjectBase::kError) {}
 
-    MaybeError ExportInfoImpl(SharedFenceExportInfo* info) const override { UNREACHABLE(); }
+    MaybeError ExportInfoImpl(SharedFenceExportInfo* info) const override { DAWN_UNREACHABLE(); }
 };
 
 }  // namespace

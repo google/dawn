@@ -152,7 +152,7 @@ MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,
                 requiredAlignment = GetDevice()->GetLimits().v1.minStorageBufferOffsetAlignment;
                 break;
             case wgpu::BufferBindingType::Undefined:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
 
         DAWN_INVALID_IF(!IsAligned(dynamicOffsets[i], requiredAlignment),

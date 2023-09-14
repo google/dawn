@@ -58,7 +58,7 @@ uint32_t GetBytesPerPixel(wgpu::TextureFormat format, wgpu::TextureAspect aspect
                     bytesPerPixel = 1;
                     break;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
                     break;
             }
             break;
@@ -1393,7 +1393,7 @@ TEST_P(DepthStencilCopyTests_RegressionDawn1083, Run) {
                                 d2, d1,  //
                             };
                         }
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                     };
 
                     // Check the depth

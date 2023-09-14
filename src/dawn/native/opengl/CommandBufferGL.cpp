@@ -50,7 +50,7 @@ GLenum IndexFormatType(wgpu::IndexFormat format) {
         case wgpu::IndexFormat::Undefined:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 bool Is1DOr2D(wgpu::TextureDimension dimension) {
@@ -98,7 +98,7 @@ GLenum VertexFormatType(wgpu::VertexFormat format) {
         case wgpu::VertexFormat::Sint32x4:
             return GL_INT;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -284,7 +284,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                             target = GL_SHADER_STORAGE_BUFFER;
                             break;
                         case wgpu::BufferBindingType::Undefined:
-                            UNREACHABLE();
+                            DAWN_UNREACHABLE();
                     }
 
                     gl.BindBufferRange(target, index, buffer, offset, binding.size);
@@ -327,7 +327,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                                 case Aspect::CombinedDepthStencil:
                                 case Aspect::Plane0:
                                 case Aspect::Plane1:
-                                    UNREACHABLE();
+                                    DAWN_UNREACHABLE();
                                 case Aspect::Depth:
                                     gl.TexParameteri(target, GL_DEPTH_STENCIL_TEXTURE_MODE,
                                                      GL_DEPTH_COMPONENT);
@@ -365,7 +365,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                             access = GL_READ_ONLY;
                             break;
                         case wgpu::StorageTextureAccess::Undefined:
-                            UNREACHABLE();
+                            DAWN_UNREACHABLE();
                     }
 
                     // OpenGL ES only supports either binding a layer or the entire
@@ -376,7 +376,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                     } else if (texture->GetArrayLayers() == view->GetLayerCount()) {
                         isLayered = GL_TRUE;
                     } else {
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                     }
 
                     gl.BindImageTexture(imageIndex, handle, view->GetBaseMipLevel(), isLayered,
@@ -387,7 +387,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                 }
 
                 case BindingInfoType::ExternalTexture:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
                     break;
             }
         }
@@ -666,7 +666,7 @@ MaybeError CommandBuffer::Execute() {
                 GLenum target = texture->GetGLTarget();
 
                 if (formatInfo.isCompressed) {
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
                 }
 
                 buffer->EnsureDataInitializedAsDestination(copy);
@@ -710,7 +710,7 @@ MaybeError CommandBuffer::Execute() {
                     case Aspect::None:
                     case Aspect::Plane0:
                     case Aspect::Plane1:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                 }
 
                 uint8_t* offset = reinterpret_cast<uint8_t*>(static_cast<uintptr_t>(dst.offset));
@@ -846,7 +846,7 @@ MaybeError CommandBuffer::Execute() {
             }
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 
@@ -924,12 +924,12 @@ MaybeError CommandBuffer::ExecuteComputePass() {
             }
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 
     // EndComputePass should have been called
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
@@ -982,7 +982,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
             } else if (format.aspects == Aspect::Stencil) {
                 glAttachment = GL_STENCIL_ATTACHMENT;
             } else {
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
             }
 
             textureView->BindToFramebuffer(GL_DRAW_FRAMEBUFFER, glAttachment);
@@ -1222,7 +1222,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
             }
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
     };
@@ -1318,7 +1318,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
     }
 
     // EndRenderPass should have been called
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 void DoTexSubImage(const OpenGLFunctions& gl,

@@ -382,7 +382,7 @@ uint32_t GetTexelBlockSizeInBytes(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::Undefined:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat) {
@@ -506,7 +506,7 @@ uint32_t GetTextureFormatBlockWidth(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::Undefined:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 uint32_t GetTextureFormatBlockHeight(wgpu::TextureFormat textureFormat) {
@@ -630,7 +630,7 @@ uint32_t GetTextureFormatBlockHeight(wgpu::TextureFormat textureFormat) {
         case wgpu::TextureFormat::Undefined:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 const char* GetWGSLColorTextureComponentType(wgpu::TextureFormat textureFormat) {
@@ -685,7 +685,7 @@ const char* GetWGSLColorTextureComponentType(wgpu::TextureFormat textureFormat) 
             return "i32";
 
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -733,7 +733,7 @@ uint32_t GetWGSLRenderableColorTextureComponentCount(wgpu::TextureFormat texture
         case wgpu::TextureFormat::RGBA32Sint:
             return 4u;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -824,7 +824,7 @@ const char* GetWGSLImageFormatQualifier(wgpu::TextureFormat textureFormat) {
             return "rg11b10ufloat";
 
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -840,7 +840,7 @@ wgpu::TextureDimension ViewDimensionToTextureDimension(const wgpu::TextureViewDi
         // TODO(crbug.com/dawn/814): Implement for 1D texture.
         case wgpu::TextureViewDimension::e1D:
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
 }

@@ -43,7 +43,7 @@ GLenum GLShaderType(SingleShaderStage stage) {
         case SingleShaderStage::Compute:
             return GL_COMPUTE_SHADER;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 tint::glsl::writer::Version::Standard ToTintGLStandard(opengl::OpenGLVersion::Standard standard) {
@@ -53,7 +53,7 @@ tint::glsl::writer::Version::Standard ToTintGLStandard(opengl::OpenGLVersion::St
         case opengl::OpenGLVersion::Standard::ES:
             return tint::glsl::writer::Version::Standard::kES;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 using BindingMap = std::unordered_map<tint::BindingPoint, tint::BindingPoint>;

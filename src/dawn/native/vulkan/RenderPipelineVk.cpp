@@ -43,7 +43,7 @@ VkVertexInputRate VulkanInputRate(wgpu::VertexStepMode stepMode) {
         case wgpu::VertexStepMode::VertexBufferNotUsed:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 VkFormat VulkanVertexFormat(wgpu::VertexFormat format) {
@@ -109,7 +109,7 @@ VkFormat VulkanVertexFormat(wgpu::VertexFormat format) {
         case wgpu::VertexFormat::Sint32x4:
             return VK_FORMAT_R32G32B32A32_SINT;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -126,7 +126,7 @@ VkPrimitiveTopology VulkanPrimitiveTopology(wgpu::PrimitiveTopology topology) {
         case wgpu::PrimitiveTopology::TriangleStrip:
             return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 bool ShouldEnablePrimitiveRestart(wgpu::PrimitiveTopology topology) {
@@ -141,7 +141,7 @@ bool ShouldEnablePrimitiveRestart(wgpu::PrimitiveTopology topology) {
         case wgpu::PrimitiveTopology::TriangleStrip:
             return true;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 VkFrontFace VulkanFrontFace(wgpu::FrontFace face) {
@@ -151,7 +151,7 @@ VkFrontFace VulkanFrontFace(wgpu::FrontFace face) {
         case wgpu::FrontFace::CW:
             return VK_FRONT_FACE_CLOCKWISE;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 VkCullModeFlagBits VulkanCullMode(wgpu::CullMode mode) {
@@ -163,7 +163,7 @@ VkCullModeFlagBits VulkanCullMode(wgpu::CullMode mode) {
         case wgpu::CullMode::Back:
             return VK_CULL_MODE_BACK_BIT;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 VkBlendFactor VulkanBlendFactor(wgpu::BlendFactor factor) {
@@ -203,7 +203,7 @@ VkBlendFactor VulkanBlendFactor(wgpu::BlendFactor factor) {
         case wgpu::BlendFactor::OneMinusSrc1Alpha:
             return VK_BLEND_FACTOR_ONE_MINUS_SRC1_ALPHA;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 VkBlendOp VulkanBlendOperation(wgpu::BlendOperation operation) {
@@ -219,7 +219,7 @@ VkBlendOp VulkanBlendOperation(wgpu::BlendOperation operation) {
         case wgpu::BlendOperation::Max:
             return VK_BLEND_OP_MAX;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 VkColorComponentFlags VulkanColorWriteMask(wgpu::ColorWriteMask mask,
@@ -286,7 +286,7 @@ VkStencilOp VulkanStencilOp(wgpu::StencilOperation op) {
         case wgpu::StencilOperation::DecrementWrap:
             return VK_STENCIL_OP_DECREMENT_AND_WRAP;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 VkPipelineDepthStencilStateCreateInfo ComputeDepthStencilDesc(const DepthStencilState* descriptor) {

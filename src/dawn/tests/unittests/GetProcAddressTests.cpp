@@ -46,7 +46,7 @@ std::ostream& operator<<(std::ostream& stream, DawnFlavor flavor) {
             break;
 
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
     return stream;
@@ -84,7 +84,7 @@ class GetProcAddressTests : public testing::TestWithParam<DawnFlavor> {
             }
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
 

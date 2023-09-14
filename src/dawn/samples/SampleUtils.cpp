@@ -49,7 +49,7 @@ void PrintDeviceError(WGPUErrorType errorType, const char* message, void*) {
             errorTypeName = "Device lost";
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             return;
     }
     dawn::ErrorLog() << errorTypeName << " error: " << message;

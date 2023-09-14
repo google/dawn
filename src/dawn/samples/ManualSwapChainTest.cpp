@@ -294,7 +294,7 @@ int main(int argc, const char* argv[]) {
                     errorTypeName = "Device lost";
                     break;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
                     return;
             }
             dawn::ErrorLog() << errorTypeName << " error: " << message;

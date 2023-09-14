@@ -50,7 +50,7 @@ bool IsMemoryKindMappable(MemoryKind memoryKind) {
             return false;
 
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -223,7 +223,7 @@ void ResourceMemoryAllocator::Deallocate(ResourceMemoryAllocation* allocation) {
             break;
 
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
 

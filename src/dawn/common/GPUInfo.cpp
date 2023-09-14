@@ -86,7 +86,7 @@ int CompareWindowsDriverVersion(PCIVendorID vendorId,
     }
 
     // TODO(crbug.com/dawn/823): support other GPU vendors
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
     return 0;
 }
 

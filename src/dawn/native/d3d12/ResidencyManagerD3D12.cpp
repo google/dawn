@@ -88,7 +88,7 @@ ResidencyManager::MemorySegmentInfo* ResidencyManager::GetMemorySegmentInfo(
             DAWN_ASSERT(!mDevice->GetDeviceInfo().isUMA);
             return &mVideoMemoryInfo.nonLocal;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 

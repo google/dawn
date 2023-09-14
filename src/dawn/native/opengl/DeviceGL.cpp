@@ -93,7 +93,7 @@ void KHRONOS_APIENTRY OnGLDebugMessage(GLenum source,
                            << "\n    Message: " << message;
 
         // Abort on an error when in Debug mode.
-        UNREACHABLE();
+        DAWN_UNREACHABLE();
     }
 }
 

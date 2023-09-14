@@ -51,7 +51,7 @@ void DumpTraceEventsToJSONFile(
                 category = "gpu";
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
 
         uint64_t microseconds = static_cast<uint64_t>(traceEvent.timestamp * 1000.0 * 1000.0);

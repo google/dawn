@@ -445,7 +445,7 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
                         0x0, 0xff, 0x1,  0x0, 0x0, 0x3f, 0xf0, 0x3};
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 return {};
         }
     }
@@ -572,7 +572,7 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
                 return FillExpectedData(testRegion, kASTCDarkRedSRGB, kASTCDarkGreenSRGB);
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 return {};
         }
     }

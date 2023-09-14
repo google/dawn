@@ -64,7 +64,7 @@ std::string GenerateBindingString(const BindingDescriptorGroups& bindingsGroups)
                     ostream << "var<storage, read> b" << index << " : S" << index << ";\n";
                     break;
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
             index++;
         }

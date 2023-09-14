@@ -128,7 +128,7 @@ TEST_F(CompatValidationTest, CanNotCreatePipelineWithDifferentPerTargetBlendStat
                 testDescriptor.cTargets[2].writeMask = wgpu::ColorWriteMask::Green;
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
 
         if (expectError) {

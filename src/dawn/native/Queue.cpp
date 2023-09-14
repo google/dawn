@@ -170,12 +170,12 @@ class ErrorQueue : public QueueBase {
 
   private:
     MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) override {
-        UNREACHABLE();
+        DAWN_UNREACHABLE();
     }
-    bool HasPendingCommands() const override { UNREACHABLE(); }
-    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override { UNREACHABLE(); }
-    void ForceEventualFlushOfCommands() override { UNREACHABLE(); }
-    MaybeError WaitForIdleForDestruction() override { UNREACHABLE(); }
+    bool HasPendingCommands() const override { DAWN_UNREACHABLE(); }
+    ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override { DAWN_UNREACHABLE(); }
+    void ForceEventualFlushOfCommands() override { DAWN_UNREACHABLE(); }
+    MaybeError WaitForIdleForDestruction() override { DAWN_UNREACHABLE(); }
 };
 
 struct WorkDoneEvent final : public EventManager::TrackedEvent {

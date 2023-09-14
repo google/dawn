@@ -44,7 +44,7 @@ MTLIndexType MTLIndexFormat(wgpu::IndexFormat format) {
         case wgpu::IndexFormat::Uint32:
             return MTLIndexTypeUInt32;
         case wgpu::IndexFormat::Undefined:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -148,7 +148,7 @@ void SetSampleBufferAttachments(PassDescriptor* descriptor, BeginPass* cmd) {
                                                      NSUInteger(cmd->endTimestamp.queryIndex));
         }
     } else {
-        UNREACHABLE();
+        DAWN_UNREACHABLE();
     }
 }
 
@@ -194,7 +194,7 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
                 break;
 
             case wgpu::LoadOp::Undefined:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
 
@@ -219,7 +219,7 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
                     descriptor.colorAttachments[i].storeAction = MTLStoreActionMultisampleResolve;
                     break;
                 case wgpu::StoreOp::Undefined:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
                     break;
             }
         } else {
@@ -231,7 +231,7 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
                     descriptor.colorAttachments[i].storeAction = MTLStoreActionDontCare;
                     break;
                 case wgpu::StoreOp::Undefined:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
                     break;
             }
         }
@@ -258,7 +258,7 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
                     break;
 
                 case wgpu::StoreOp::Undefined:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
                     break;
             }
 
@@ -273,7 +273,7 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
                     break;
 
                 case wgpu::LoadOp::Undefined:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
                     break;
             }
         }
@@ -293,7 +293,7 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
                     break;
 
                 case wgpu::StoreOp::Undefined:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
                     break;
             }
 
@@ -308,7 +308,7 @@ NSRef<MTLRenderPassDescriptor> CreateMTLRenderPassDescriptor(
                     break;
 
                 case wgpu::LoadOp::Undefined:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
                     break;
             }
         }
@@ -563,7 +563,7 @@ class BindGroupTracker : public BindGroupTrackerBase<true, uint64_t> {
                 }
 
                 case BindingInfoType::ExternalTexture:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
         }
     }
@@ -1091,7 +1091,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                             destinationBuffer:destination->GetMTLBuffer()
                             destinationOffset:NSUInteger(cmd->destinationOffset)];
                     } else {
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                     }
                 }
                 break;
@@ -1107,7 +1107,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                         EncodeEmptyBlitEncoderForWriteTimestamp(ToBackend(GetDevice()),
                                                                 commandContext, cmd);
                     } else {
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                     }
                 } else {
                     if (@available(macOS 10.15, iOS 14.0, *)) {
@@ -1118,7 +1118,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
                                      atSampleIndex:NSUInteger(cmd->queryIndex)
                                        withBarrier:YES];
                     } else {
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                     }
                 }
 
@@ -1178,7 +1178,7 @@ MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) 
             }
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 
@@ -1203,7 +1203,7 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
                 CreateMTLComputePassDescriptor(computePassCmd);
             encoder = commandContext->BeginCompute(descriptor.Get());
         } else {
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
         }
     } else {
         encoder = commandContext->BeginCompute();
@@ -1337,20 +1337,20 @@ MaybeError CommandBuffer::EncodeComputePass(CommandRecordingContext* commandCont
                                       atSampleIndex:NSUInteger(cmd->queryIndex)
                                         withBarrier:YES];
                 } else {
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
                 }
                 break;
             }
 
             default: {
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
             }
         }
     }
 
     // EndComputePass should have been called
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
@@ -1575,7 +1575,7 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
             }
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
     };
@@ -1701,7 +1701,7 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
                                       atSampleIndex:NSUInteger(cmd->queryIndex)
                                         withBarrier:YES];
                 } else {
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
                 }
                 break;
             }
@@ -1714,7 +1714,7 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
     }
 
     // EndRenderPass should have been called
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 }  // namespace dawn::native::metal

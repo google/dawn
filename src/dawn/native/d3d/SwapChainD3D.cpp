@@ -216,7 +216,7 @@ MaybeError SwapChain::InitializeSwapChainFromScratch() {
         }
 #endif  // defined(DAWN_USE_WINDOWS_UI)
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 
     DAWN_TRY(CheckHRESULT(swapChain1.As(&mDXGISwapChain), "Gettting IDXGISwapChain1"));

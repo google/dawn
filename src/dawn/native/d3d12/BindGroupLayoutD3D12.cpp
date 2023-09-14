@@ -35,7 +35,7 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
                 case wgpu::BufferBindingType::ReadOnlyStorage:
                     return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
                 case wgpu::BufferBindingType::Undefined:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
 
         case BindingInfoType::Sampler:
@@ -53,7 +53,7 @@ D3D12_DESCRIPTOR_RANGE_TYPE WGPUBindingInfoToDescriptorRangeType(const BindingIn
                 case wgpu::StorageTextureAccess::ReadOnly:
                     return D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
                 case wgpu::StorageTextureAccess::Undefined:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
     }
 }
@@ -130,7 +130,7 @@ BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor
             // handle them.
             case BindingInfoType::ExternalTexture:
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
         std::vector<D3D12_DESCRIPTOR_RANGE1>& descriptorRanges =

@@ -213,7 +213,7 @@ std::ostream& operator<<(std::ostream& o, ScaleType scaleType) {
             o << "DefaultSize";
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
     return o;
@@ -237,7 +237,7 @@ std::ostream& operator<<(std::ostream& o, CopyRect copyRect) {
             o << "FullSizeCopy";
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
     return o;
@@ -305,7 +305,7 @@ TEST_P(CopyExternalTextureForBrowserTests_Basic, Copy) {
         case ScaleType::NoScale:
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
 
@@ -342,7 +342,7 @@ TEST_P(CopyExternalTextureForBrowserTests_Basic, Copy) {
             copySize.height = naturalSize.height;
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
 
@@ -369,7 +369,7 @@ TEST_P(CopyExternalTextureForBrowserTests_Basic, Copy) {
             }
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
 

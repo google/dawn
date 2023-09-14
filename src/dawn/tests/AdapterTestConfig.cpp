@@ -102,7 +102,7 @@ std::string TestAdapterProperties::ParamName() const {
             return "Vulkan";
         case wgpu::BackendType::Undefined:
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -117,7 +117,7 @@ std::string TestAdapterProperties::AdapterTypeName() const {
         case wgpu::AdapterType::Unknown:
             return "Unknown";
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 

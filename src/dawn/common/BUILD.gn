@@ -168,7 +168,7 @@ config("internal_config") {
     # MSVC things that a switch over all the enum values of an enum class is
     # not sufficient to cover all control paths. Turn off this warning so that
     # the respective clang warning tells us where to add switch cases
-    # (otherwise we have to add default: UNREACHABLE() that silences clang too)
+    # (otherwise we have to add default: DAWN_UNREACHABLE() that silences clang too)
     cflags += [ "/wd4715" ]
 
     # MSVC emits warnings when using constructs deprecated in C++17. Silence

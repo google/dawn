@@ -1687,7 +1687,7 @@ class CopyCommandTest_T2T : public CopyCommandTest {
             case wgpu::TextureFormat::RGBA8UnormSrgb:
                 return wgpu::TextureFormat::RGBA8Unorm;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 };
@@ -2263,7 +2263,7 @@ class CopyCommandTest_CompressedTextureFormats : public CopyCommandTest {
             case wgpu::TextureFormat::ASTC12x12UnormSrgb:
                 return wgpu::TextureFormat::ASTC12x12Unorm;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 };

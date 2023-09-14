@@ -86,7 +86,7 @@ wgpu::TextureFormat UncompressedTextureFormat(wgpu::TextureFormat compressedForm
         case wgpu::TextureFormat::BC7RGBAUnormSrgb:
             return wgpu::TextureFormat::RGBA32Uint;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -118,7 +118,7 @@ DepthStencilAspectLayout DepthStencilAspectLayout(DXGI_FORMAT format, Aspect asp
             texelSize = 8u;
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
     return {texelSize, componentOffset, componentSize};
 }
@@ -607,7 +607,7 @@ MaybeError Texture::ClearCompressed(CommandRecordingContext* commandContext,
                 valueOnePerByte = 0x01010101;
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
         color = valueOnePerByte;
     }
@@ -1037,7 +1037,7 @@ MaybeError Texture::CopyInternal(CommandRecordingContext* commandContext,
             srcBox.back = src.origin.z + copy->copySize.depthOrArrayLayers;
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 
     bool isWholeSubresource = src.texture->CoverFullSubresource(src.mipLevel, copy->copySize) &&
@@ -1185,7 +1185,7 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> TextureView::CreateD3D11ShaderRe
                         srvDesc.Format = DXGI_FORMAT_X24_TYPELESS_G8_UINT;
                         break;
                     default:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                         break;
                 }
                 break;
@@ -1208,13 +1208,13 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> TextureView::CreateD3D11ShaderRe
                         srvDesc.Format = DXGI_FORMAT_X32_TYPELESS_G8X24_UINT;
                         break;
                     default:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                         break;
                 }
                 break;
             }
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
     }
@@ -1236,7 +1236,7 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> TextureView::CreateD3D11ShaderRe
                 break;
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     } else {
         switch (GetDimension()) {
@@ -1273,7 +1273,7 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> TextureView::CreateD3D11ShaderRe
                 break;
 
             case wgpu::TextureViewDimension::Undefined:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 
@@ -1353,7 +1353,7 @@ ResultOrError<ComPtr<ID3D11UnorderedAccessView>> TextureView::CreateD3D11Unorder
         case wgpu::TextureViewDimension::Cube:
         case wgpu::TextureViewDimension::CubeArray:
         case wgpu::TextureViewDimension::Undefined:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 
     ComPtr<ID3D11UnorderedAccessView> uav;

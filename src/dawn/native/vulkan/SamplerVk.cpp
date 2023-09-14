@@ -33,7 +33,7 @@ VkSamplerAddressMode VulkanSamplerAddressMode(wgpu::AddressMode mode) {
         case wgpu::AddressMode::ClampToEdge:
             return VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 VkFilter VulkanSamplerFilter(wgpu::FilterMode filter) {
@@ -43,7 +43,7 @@ VkFilter VulkanSamplerFilter(wgpu::FilterMode filter) {
         case wgpu::FilterMode::Nearest:
             return VK_FILTER_NEAREST;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 VkSamplerMipmapMode VulkanMipMapMode(wgpu::MipmapFilterMode filter) {
@@ -53,7 +53,7 @@ VkSamplerMipmapMode VulkanMipMapMode(wgpu::MipmapFilterMode filter) {
         case wgpu::MipmapFilterMode::Nearest:
             return VK_SAMPLER_MIPMAP_MODE_NEAREST;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 }  // anonymous namespace
 

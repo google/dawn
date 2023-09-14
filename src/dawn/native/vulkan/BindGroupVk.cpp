@@ -133,7 +133,7 @@ BindGroup::BindGroup(Device* device,
             }
 
             case BindingInfoType::ExternalTexture:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
 

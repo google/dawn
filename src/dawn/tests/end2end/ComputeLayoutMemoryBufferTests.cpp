@@ -72,7 +72,7 @@ std::string ScalarTypeName(ScalarType scalarType) {
         case ScalarType::f16:
             return "f16";
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
     return "";
 }
 
@@ -85,7 +85,7 @@ size_t ScalarTypeSize(ScalarType scalarType) {
         case ScalarType::f16:
             return 2;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
     return 0;
 }
 

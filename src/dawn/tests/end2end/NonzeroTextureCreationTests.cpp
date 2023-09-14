@@ -195,7 +195,7 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
                         break;
                     }
                     default:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                 }
                 break;
             }
@@ -249,7 +249,7 @@ class NonzeroTextureCreationTests : public DawnTestWithParams<Params> {
                 break;
             }
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 };

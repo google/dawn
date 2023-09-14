@@ -43,7 +43,7 @@ const char* SeverityName(LogSeverity severity) {
         case LogSeverity::Error:
             return "Error";
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             return "";
     }
 }
@@ -61,7 +61,7 @@ android_LogPriority AndroidLogPriority(LogSeverity severity) {
         case LogSeverity::Error:
             return ANDROID_LOG_ERROR;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             return ANDROID_LOG_ERROR;
     }
 }

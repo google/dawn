@@ -107,7 +107,7 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                 return GBM_FORMAT_NV12;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 
@@ -116,7 +116,7 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                 return WGPUTextureFormat_R8BG8Biplanar420Unorm;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 
@@ -125,7 +125,7 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
             case wgpu::TextureUsage::TextureBinding:
                 return WGPUTextureUsage_TextureBinding;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 

@@ -75,7 +75,7 @@ ComputePipelineBase* ComputePipelineBase::MakeError(DeviceBase* device, const ch
             : ComputePipelineBase(device, ObjectBase::kError, label) {}
 
         MaybeError Initialize() override {
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             return {};
         }
     };

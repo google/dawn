@@ -162,7 +162,7 @@ Return FindStorageBufferBindingAliasing(
                     continue;
                 case wgpu::StorageTextureAccess::Undefined:
                 default:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
 
             const TextureViewBase* textureView =
@@ -585,7 +585,7 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
         // It returns the first invalid state found. We shouldn't be able to reach this line
         // because to have invalid aspects one of the above conditions must have failed earlier.
         // If this is reached, make sure lazy aspects and the error checks above are consistent.
-        UNREACHABLE();
+        DAWN_UNREACHABLE();
         return DAWN_VALIDATION_ERROR("Index buffer is invalid.");
     }
 
@@ -721,11 +721,11 @@ MaybeError CommandBufferStateTracker::CheckMissingAspects(ValidationAspects aspe
         // It returns the first invalid state found. We shouldn't be able to reach this line
         // because to have invalid aspects one of the above conditions must have failed earlier.
         // If this is reached, make sure lazy aspects and the error checks above are consistent.
-        UNREACHABLE();
+        DAWN_UNREACHABLE();
         return DAWN_VALIDATION_ERROR("Bind groups are invalid.");
     }
 
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 void CommandBufferStateTracker::SetComputePipeline(ComputePipelineBase* pipeline) {

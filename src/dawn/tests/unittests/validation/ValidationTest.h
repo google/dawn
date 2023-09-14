@@ -26,7 +26,7 @@
 #include "gtest/gtest.h"
 
 // Argument helpers to allow macro overriding.
-#define UNIMPLEMENTED_MACRO(...) UNREACHABLE()
+#define UNIMPLEMENTED_MACRO(...) DAWN_UNREACHABLE()
 #define GET_3RD_ARG_HELPER_(_1, _2, NAME, ...) NAME
 #define GET_3RD_ARG_(args) GET_3RD_ARG_HELPER_ args
 

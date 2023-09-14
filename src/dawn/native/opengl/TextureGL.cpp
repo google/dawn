@@ -48,7 +48,7 @@ GLenum TargetForTexture(const TextureDescriptor* descriptor) {
             DAWN_ASSERT(descriptor->sampleCount == 1);
             return GL_TEXTURE_3D;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 GLenum TargetForTextureViewDimension(wgpu::TextureViewDimension dimension,
@@ -79,7 +79,7 @@ GLenum TargetForTextureViewDimension(wgpu::TextureViewDimension dimension,
         case wgpu::TextureViewDimension::Undefined:
             break;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 bool RequiresCreatingNewTextureView(const TextureBase* texture,
@@ -163,7 +163,7 @@ void AllocateTexture(const OpenGLFunctions& gl,
                                        true);
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -268,7 +268,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
                 } else if (aspects == Aspect::Stencil) {
                     gl.ClearBufferiv(GL_STENCIL, 0, &stencil);
                 } else {
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
                 }
             };
 
@@ -285,7 +285,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
             } else if (range.aspects == Aspect::Stencil) {
                 attachment = GL_STENCIL_ATTACHMENT;
             } else {
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
             }
 
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
@@ -339,7 +339,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
                         break;
 
                     case wgpu::TextureDimension::e3D:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                 }
             }
 

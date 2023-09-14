@@ -49,7 +49,7 @@ DXGI_FORMAT DXGIIndexFormat(wgpu::IndexFormat format) {
         case wgpu::IndexFormat::Uint32:
             return DXGI_FORMAT_R32_UINT;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -458,12 +458,12 @@ MaybeError CommandBuffer::ExecuteComputePass(CommandRecordingContext* commandCon
             }
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
     }
 
     // EndComputePass should have been called
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
@@ -680,7 +680,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
             }
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
                 break;
         }
 
@@ -806,7 +806,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
     }
 
     // EndRenderPass should have been called
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 void CommandBuffer::HandleDebugCommands(CommandRecordingContext* commandContext,
@@ -833,7 +833,7 @@ void CommandBuffer::HandleDebugCommands(CommandRecordingContext* commandContext,
             break;
         }
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 

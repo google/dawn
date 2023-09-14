@@ -36,7 +36,7 @@ GLenum GLPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology) {
         case wgpu::PrimitiveTopology::TriangleStrip:
             return GL_TRIANGLE_STRIP;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 void ApplyFrontFaceAndCulling(const OpenGLFunctions& gl,
@@ -93,9 +93,9 @@ GLenum GLBlendFactor(wgpu::BlendFactor factor, bool alpha) {
             return GL_SRC1_ALPHA;
         case wgpu::BlendFactor::OneMinusSrc1Alpha:
             return GL_ONE_MINUS_SRC1_ALPHA;
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 GLenum GLBlendMode(wgpu::BlendOperation operation) {
@@ -111,7 +111,7 @@ GLenum GLBlendMode(wgpu::BlendOperation operation) {
         case wgpu::BlendOperation::Max:
             return GL_MAX;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 void ApplyColorState(const OpenGLFunctions& gl,
@@ -177,7 +177,7 @@ GLuint OpenGLStencilOperation(wgpu::StencilOperation stencilOperation) {
         case wgpu::StencilOperation::DecrementWrap:
             return GL_DECR_WRAP;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 void ApplyDepthStencilState(const OpenGLFunctions& gl,
@@ -287,7 +287,7 @@ void RenderPipeline::CreateVAOForVertexState() {
                     gl.VertexAttribDivisor(glAttrib, 1);
                     break;
                 case wgpu::VertexStepMode::VertexBufferNotUsed:
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
             }
         }
     }

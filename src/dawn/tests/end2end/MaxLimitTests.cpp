@@ -195,7 +195,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
               )";
                 break;
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
 
         device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);

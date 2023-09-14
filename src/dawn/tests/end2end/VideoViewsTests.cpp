@@ -157,7 +157,7 @@ std::vector<T> VideoViewsTestsBase::GetTestTextureData(wgpu::TextureFormat forma
                 };
             }
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             return {};
     }
 }
@@ -175,7 +175,7 @@ uint32_t VideoViewsTestsBase::NumPlanes(wgpu::TextureFormat format) {
         case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
             return 2;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             return 0;
     }
 }
@@ -217,7 +217,7 @@ std::vector<uint8_t> VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex(size_
             }
             return texels;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             return {};
     }
 }
@@ -233,7 +233,7 @@ wgpu::TextureFormat VideoViewsTestsBase::GetPlaneFormat(int plane) const {
         case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
             return plane == 0 ? wgpu::TextureFormat::R16Unorm : wgpu::TextureFormat::RG16Unorm;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             return wgpu::TextureFormat::Undefined;
     }
 }
@@ -1020,7 +1020,7 @@ class VideoViewsExtendedUsagesTests : public VideoViewsTestsBase {
                         copySize.height /= 2;
                         break;
                     default:
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                 }
 
                 // Staging buffer.

@@ -32,7 +32,7 @@ D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE D3D12BeginningAccessType(wgpu::LoadOp lo
         case wgpu::LoadOp::Load:
             return D3D12_RENDER_PASS_BEGINNING_ACCESS_TYPE_PRESERVE;
         case wgpu::LoadOp::Undefined:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
 }
@@ -44,7 +44,7 @@ D3D12_RENDER_PASS_ENDING_ACCESS_TYPE D3D12EndingAccessType(wgpu::StoreOp storeOp
         case wgpu::StoreOp::Store:
             return D3D12_RENDER_PASS_ENDING_ACCESS_TYPE_PRESERVE;
         case wgpu::StoreOp::Undefined:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
             break;
     }
 }

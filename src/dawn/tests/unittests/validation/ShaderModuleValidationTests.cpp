@@ -355,7 +355,7 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
             }
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
 
         if (success) {
@@ -480,7 +480,7 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
             }
 
             default:
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
         }
 
         if (success) {

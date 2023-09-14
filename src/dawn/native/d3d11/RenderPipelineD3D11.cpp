@@ -39,7 +39,7 @@ D3D11_INPUT_CLASSIFICATION VertexStepModeFunction(wgpu::VertexStepMode mode) {
         case wgpu::VertexStepMode::Instance:
             return D3D11_INPUT_PER_INSTANCE_DATA;
         case wgpu::VertexStepMode::VertexBufferNotUsed:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -56,7 +56,7 @@ D3D_PRIMITIVE_TOPOLOGY D3DPrimitiveTopology(wgpu::PrimitiveTopology topology) {
         case wgpu::PrimitiveTopology::TriangleStrip:
             return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -69,7 +69,7 @@ D3D11_CULL_MODE D3DCullMode(wgpu::CullMode cullMode) {
         case wgpu::CullMode::Back:
             return D3D11_CULL_BACK;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -110,7 +110,7 @@ D3D11_BLEND D3DBlendFactor(wgpu::BlendFactor blendFactor) {
         case wgpu::BlendFactor::OneMinusSrc1Alpha:
             return D3D11_BLEND_INV_SRC1_ALPHA;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 
@@ -151,7 +151,7 @@ D3D11_BLEND_OP D3DBlendOperation(wgpu::BlendOperation blendOperation) {
         case wgpu::BlendOperation::Max:
             return D3D11_BLEND_OP_MAX;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 

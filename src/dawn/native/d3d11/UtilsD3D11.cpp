@@ -40,7 +40,7 @@ D3D11_COMPARISON_FUNC ToD3D11ComparisonFunc(wgpu::CompareFunction func) {
         case wgpu::CompareFunction::Always:
             return D3D11_COMPARISON_ALWAYS;
         case wgpu::CompareFunction::Undefined:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 }
 

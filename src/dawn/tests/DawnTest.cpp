@@ -238,7 +238,7 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                     mBackendValidationLevel = native::BackendValidationLevel::Disabled;
                 } else {
                     ErrorLog() << "Invalid backend validation level" << level;
-                    UNREACHABLE();
+                    DAWN_UNREACHABLE();
                 }
             } else {
                 mBackendValidationLevel = native::BackendValidationLevel::Partial;
@@ -295,7 +295,7 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                         mDevicePreferences.push_back(wgpu::AdapterType::CPU);
                     } else {
                         ErrorLog() << "Invalid device type preference: " << type;
-                        UNREACHABLE();
+                        DAWN_UNREACHABLE();
                     }
                 }
             }
@@ -331,7 +331,7 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                 ErrorLog()
                     << "Invalid backend \"" << param
                     << "\". Valid backends are: d3d12, metal, null, opengl, opengles, vulkan.";
-                UNREACHABLE();
+                DAWN_UNREACHABLE();
             }
             mHasBackendTypeFilter = true;
             continue;
@@ -382,7 +382,7 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
     if (mUseWire && mEnableImplicitDeviceSync) {
         ErrorLog()
             << "--use-wire and --enable-implicit-device-sync cannot be used at the same time";
-        UNREACHABLE();
+        DAWN_UNREACHABLE();
     }
 }
 
@@ -579,7 +579,7 @@ void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo(native::Instance*
             log << "disabled";
             break;
         default:
-            UNREACHABLE();
+            DAWN_UNREACHABLE();
     }
 
     if (GetEnabledToggles().size() > 0) {

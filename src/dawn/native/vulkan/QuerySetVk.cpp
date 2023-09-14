@@ -35,7 +35,7 @@ VkQueryType VulkanQueryType(wgpu::QueryType type) {
         case wgpu::QueryType::Timestamp:
             return VK_QUERY_TYPE_TIMESTAMP;
     }
-    UNREACHABLE();
+    DAWN_UNREACHABLE();
 }
 
 VkQueryPipelineStatisticFlags VulkanQueryPipelineStatisticFlags(
