@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/dawn/node/interop/Napi.h"
+#include "src/dawn/node/interop/NodeAPI.h"
 
 namespace wgpu::binding {
 

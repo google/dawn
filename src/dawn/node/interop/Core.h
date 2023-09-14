@@ -28,7 +28,7 @@
 #include <variant>
 #include <vector>
 
-#include "src/dawn/node/interop/Napi.h"
+#include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/utils/Debug.h"
 
 #define ENABLE_INTEROP_LOGGING 0  // Enable for verbose interop logging

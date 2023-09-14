@@ -54,7 +54,7 @@ common_compile_options(dawn_node_interop)
 target_include_directories(dawn_node_interop
     PRIVATE
         "${PROJECT_SOURCE_DIR}"
-        "${DAWN_THIRD_PARTY_DIR}"
+        "${NODE_ADDON_API_DIR}"
         "${NODE_API_HEADERS_DIR}/include"
         "${DAWN_NODE_GEN_DIR}"
 )

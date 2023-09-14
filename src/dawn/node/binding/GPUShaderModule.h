@@ -21,7 +21,7 @@
 #include "dawn/native/DawnNative.h"
 #include "dawn/webgpu_cpp.h"
 #include "src/dawn/node/binding/AsyncRunner.h"
-#include "src/dawn/node/interop/Napi.h"
+#include "src/dawn/node/interop/NodeAPI.h"
 #include "src/dawn/node/interop/WebGPU.h"
 
 namespace wgpu::binding {

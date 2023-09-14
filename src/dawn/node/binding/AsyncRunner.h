@@ -20,7 +20,7 @@
 #include <utility>
 
 #include "dawn/webgpu_cpp.h"
-#include "src/dawn/node/interop/Napi.h"
+#include "src/dawn/node/interop/NodeAPI.h"
 
 namespace wgpu::binding {
 

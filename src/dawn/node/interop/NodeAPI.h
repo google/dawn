@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_NODE_INTEROP_NAPI_H_
-#define SRC_DAWN_NODE_INTEROP_NAPI_H_
+#ifndef SRC_DAWN_NODE_INTEROP_NODEAPI_H_
+#define SRC_DAWN_NODE_INTEROP_NODEAPI_H_
 
 // Dawn is built with exceptions disabled.
 #define NAPI_DISABLE_CPP_EXCEPTIONS
 
-#include "node-addon-api/napi.h"
+#include "napi.h"  // NOLINT(build/include_directory) - external include
 
-#endif  // SRC_DAWN_NODE_INTEROP_NAPI_H_
+#endif  // SRC_DAWN_NODE_INTEROP_NODEAPI_H_
