@@ -402,6 +402,10 @@ BindingInfo CreateBindGroupLayoutInfo(const BindGroupLayoutEntry& binding) {
 }
 
 bool SortBindingsCompare(const BindGroupLayoutEntry& a, const BindGroupLayoutEntry& b) {
+    if (&a == &b) {
+        return false;
+    }
+
     const bool aIsBuffer = IsBufferBinding(a);
     const bool bIsBuffer = IsBufferBinding(b);
     if (aIsBuffer != bIsBuffer) {
