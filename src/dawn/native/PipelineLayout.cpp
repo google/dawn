@@ -259,9 +259,6 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
         return entry;
     };
 
-    PipelineCompatibilityToken pipelineCompatibilityToken =
-        device->GetNextPipelineCompatibilityToken();
-
     // Creates the BGL from the entries for a stage, checking it is valid.
     auto CreateBGL = [](DeviceBase* device, const EntryMap& entries,
                         PipelineCompatibilityToken pipelineCompatibilityToken)
@@ -285,6 +282,9 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
 
     DAWN_ASSERT(!stages.empty());
 
+    PipelineCompatibilityToken pipelineCompatibilityToken =
+        device->GetNextPipelineCompatibilityToken();
+
     // Data which BindGroupLayoutDescriptor will point to for creation
     ityp::array<BindGroupIndex, std::map<BindingNumber, BindGroupLayoutEntry>, kMaxBindGroups>
         entryData = {};
@@ -299,6 +299,11 @@ ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
     // Loops over all the reflected BindGroupLayoutEntries from shaders.
     for (const StageAndDescriptor& stage : stages) {
         const EntryPointMetadata& metadata = stage.module->GetEntryPoint(stage.entryPoint);
+
+        // TODO(dawn:1704): Find if we can usefully deduce the PLS for the pipeline layout.
+        DAWN_INVALID_IF(
+            metadata.usesPixelLocal,
+            "Implicit layouts are not supported for entry-points using `pixel_local` blocks.");
 
         for (BindGroupIndex group(0); group < metadata.bindings.size(); ++group) {
             for (const auto& [bindingNumber, shaderBinding] : metadata.bindings[group]) {

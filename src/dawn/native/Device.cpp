@@ -1440,6 +1440,10 @@ void DeviceBase::SetWGSLExtensionAllowList() {
     if (mEnabledFeatures.IsEnabled(Feature::DualSourceBlending)) {
         mWGSLExtensionAllowList.insert("chromium_internal_dual_source_blending");
     }
+    if (mEnabledFeatures.IsEnabled(Feature::PixelLocalStorageNonCoherent) ||
+        mEnabledFeatures.IsEnabled(Feature::PixelLocalStorageCoherent)) {
+        mWGSLExtensionAllowList.insert("chromium_experimental_pixel_local");
+    }
 }
 
 WGSLExtensionSet DeviceBase::GetWGSLExtensionAllowList() const {

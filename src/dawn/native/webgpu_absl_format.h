@@ -152,6 +152,12 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
+enum class PixelLocalMemberType;
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    PixelLocalMemberType value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s);
+
 template <typename I, typename T>
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
     const ityp::span<I, T>& values,
