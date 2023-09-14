@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_LANG_SPIRV_READER_AST_PARSER_SPIRV_TOOLS_HELPERS_TEST_H_
 #define SRC_TINT_LANG_SPIRV_READER_AST_PARSER_SPIRV_TOOLS_HELPERS_TEST_H_
 
+#include <cstdint>
 #include <string>
 #include <vector>
 

@@ -28,6 +28,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <cstdio>
 #endif
 
 #if defined(_WIN32)
