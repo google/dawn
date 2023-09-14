@@ -51,6 +51,8 @@ std::string_view ToString(ParameterUsage usage) {
             return "sample_index";
         case ParameterUsage::kSampler:
             return "sampler";
+        case ParameterUsage::kSourceLaneIndex:
+            return "sourceLaneIndex";
         case ParameterUsage::kTexture:
             return "texture";
         case ParameterUsage::kValue:

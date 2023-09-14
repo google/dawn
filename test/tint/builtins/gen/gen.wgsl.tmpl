@@ -203,7 +203,7 @@ enable chromium_experimental_dp4a;
 {{    end -}}
 
 {{- /* Check and emit chromium_experimental_subgroups */ -}}
-{{-   if (eq "subgroupBallot" $builtin_name)}}
+{{-   if or (eq "subgroupBallot" $builtin_name) (eq "subgroupBroadcast" $builtin_name)}}
 enable chromium_experimental_subgroups;
 {{    end -}}
 

@@ -45,6 +45,7 @@ enum class ParameterUsage : uint8_t {
     kOffset,
     kSampleIndex,
     kSampler,
+    kSourceLaneIndex,
     kTexture,
     kValue,
     kW,

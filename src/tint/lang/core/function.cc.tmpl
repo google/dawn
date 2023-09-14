@@ -105,7 +105,7 @@ bool IsDP4aBuiltin(Function f) {
 }
 
 bool IsSubgroupBuiltin(Function f) {
-    return f == Function::kSubgroupBallot;
+    return f == Function::kSubgroupBallot || f == Function::kSubgroupBroadcast;
 }
 
 bool HasSideEffects(Function f) {

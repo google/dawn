@@ -17,6 +17,10 @@
 //                                                                            //
 // This file is used to generate parts of the Tint BuiltinTable, various      //
 // enum definition files, as well as test .wgsl files.                        //
+//                                                                            //
+// After modifying this file, run:                                            //
+//    tools/run gen                                                           //
+// from the Dawn source directory.                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -910,6 +914,7 @@ fn textureStore<C: iu32>(texture: texture_storage_3d<u32_texel_format, writable>
 @stage("fragment", "compute") fn atomicCompareExchangeWeak<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T, T) -> __atomic_compare_exchange_result<T>
 
 @must_use @stage("compute") fn subgroupBallot() -> vec4<u32>
+@must_use @stage("compute") fn subgroupBroadcast<T: fiu32, L: iu32>(value: T, @const sourceLaneIndex: L) -> T
 
 ////////////////////////////////////////////////////////////////////////////////
 // Value constructors                                                         //

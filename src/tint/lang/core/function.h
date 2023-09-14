@@ -149,6 +149,7 @@ enum class Function : uint8_t {
     kAtomicExchange,
     kAtomicCompareExchangeWeak,
     kSubgroupBallot,
+    kSubgroupBroadcast,
     kTintMaterialize,
     kNone,
 };
@@ -287,6 +288,7 @@ constexpr Function kFunctions[] = {
     Function::kAtomicExchange,
     Function::kAtomicCompareExchangeWeak,
     Function::kSubgroupBallot,
+    Function::kSubgroupBroadcast,
     Function::kTintMaterialize,
 };
 
@@ -407,6 +409,7 @@ constexpr const char* kFunctionStrings[] = {
     "atomicExchange",
     "atomicCompareExchangeWeak",
     "subgroupBallot",
+    "subgroupBroadcast",
     "_tint_materialize",
 };
 
