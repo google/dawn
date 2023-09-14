@@ -288,5 +288,49 @@ TEST_F(SpirvWriterTest, If_Phi_MultipleValue_1) {
 )");
 }
 
+TEST_F(SpirvWriterTest, If_Phi_Nested) {
+    auto* func = b.Function("foo", ty.i32());
+    b.Append(func->Block(), [&] {
+        auto* outer = b.If(true);
+        outer->SetResults(b.InstructionResult(ty.i32()));
+        b.Append(outer->True(), [&] {  //
+            auto* inner = b.If(true);
+            inner->SetResults(b.InstructionResult(ty.i32()));
+            b.Append(inner->True(), [&] {  //
+                b.ExitIf(inner, 10_i);
+            });
+            b.Append(inner->False(), [&] {  //
+                b.ExitIf(inner, 20_i);
+            });
+            b.ExitIf(outer, inner->Result());
+        });
+        b.Append(outer->False(), [&] {  //
+            b.ExitIf(outer, 30_i);
+        });
+        b.Return(func, outer);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               OpSelectionMerge %5 None
+               OpBranchConditional %true %6 %7
+          %6 = OpLabel
+               OpSelectionMerge %10 None
+               OpBranchConditional %true %11 %12
+         %11 = OpLabel
+               OpBranch %10
+         %12 = OpLabel
+               OpBranch %10
+         %10 = OpLabel
+         %13 = OpPhi %int %int_10 %11 %int_20 %12
+               OpBranch %5
+          %7 = OpLabel
+               OpBranch %5
+          %5 = OpLabel
+         %16 = OpPhi %int %int_30 %7 %13 %10
+               OpReturnValue %16
+)");
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer

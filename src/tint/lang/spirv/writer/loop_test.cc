@@ -330,7 +330,7 @@ TEST_F(SpirvWriterTest, Loop_Phi_SingleValue) {
         auto* loop = b.Loop();
 
         b.Append(loop->Initializer(), [&] {  //
-            b.NextIteration(loop, 1_i, false);
+            b.NextIteration(loop, 1_i);
         });
 
         auto* loop_param = b.BlockParam(ty.i32());
@@ -421,6 +421,138 @@ TEST_F(SpirvWriterTest, Loop_Phi_MultipleValue) {
          %20 = OpSGreaterThan %bool %13 %int_5
          %17 = OpLogicalEqual %bool %19 %false
                OpBranchConditional %20 %9 %8
+          %9 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Loop_Phi_NestedIf) {
+    auto* func = b.Function("foo", ty.void_());
+
+    b.Append(func->Block(), [&] {
+        auto* loop = b.Loop();
+        b.Append(loop->Initializer(), [&] {  //
+            b.NextIteration(loop, 1_i);
+        });
+
+        auto* loop_param = b.BlockParam(ty.i32());
+        loop->Body()->SetParams({loop_param});
+        b.Append(loop->Body(), [&] {
+            auto* inner = b.If(true);
+            inner->SetResults(b.InstructionResult(ty.i32()));
+            b.Append(inner->True(), [&] {  //
+                b.ExitIf(inner, 10_i);
+            });
+            b.Append(inner->False(), [&] {  //
+                b.ExitIf(inner, 20_i);
+            });
+            b.Continue(loop, inner->Result());
+        });
+
+        auto* cont_param = b.BlockParam(ty.i32());
+        loop->Continuing()->SetParams({cont_param});
+        b.Append(loop->Continuing(), [&] {
+            auto* cmp = b.GreaterThan(ty.bool_(), cont_param, 5_i);
+            b.BreakIf(loop, cmp, cont_param);
+        });
+
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpBranch %5
+          %5 = OpLabel
+               OpBranch %8
+          %8 = OpLabel
+         %11 = OpPhi %int %int_1 %5 %13 %7
+               OpLoopMerge %9 %7 None
+               OpBranch %6
+          %6 = OpLabel
+               OpSelectionMerge %14 None
+               OpBranchConditional %true %15 %16
+         %15 = OpLabel
+               OpBranch %14
+         %16 = OpLabel
+               OpBranch %14
+         %14 = OpLabel
+         %19 = OpPhi %int %int_10 %15 %int_20 %16
+               OpBranch %7
+          %7 = OpLabel
+         %13 = OpPhi %int %19 %14
+         %22 = OpSGreaterThan %bool %13 %int_5
+               OpBranchConditional %22 %9 %8
+          %9 = OpLabel
+               OpReturn
+               OpFunctionEnd
+)");
+}
+
+TEST_F(SpirvWriterTest, Loop_Phi_NestedLoop) {
+    auto* func = b.Function("foo", ty.void_());
+
+    b.Append(func->Block(), [&] {
+        auto* outer = b.Loop();
+        b.Append(outer->Initializer(), [&] {  //
+            b.NextIteration(outer, 1_i);
+        });
+
+        auto* outer_param = b.BlockParam(ty.i32());
+        outer->Body()->SetParams({outer_param});
+        b.Append(outer->Body(), [&] {
+            auto* inner = b.Loop();
+            b.Append(inner->Initializer(), [&] {  //
+                b.NextIteration(inner);
+            });
+            b.Append(inner->Body(), [&] {  //
+                b.Continue(inner);
+            });
+            b.Append(inner->Continuing(), [&] {  //
+                b.BreakIf(inner, true);
+            });
+
+            b.Continue(outer, outer_param);
+        });
+
+        auto* cont_param = b.BlockParam(ty.i32());
+        outer->Continuing()->SetParams({cont_param});
+        b.Append(outer->Continuing(), [&] {
+            auto* cmp = b.GreaterThan(ty.bool_(), cont_param, 5_i);
+            b.BreakIf(outer, cmp, cont_param);
+        });
+
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+          %4 = OpLabel
+               OpBranch %5
+          %5 = OpLabel
+               OpBranch %8
+          %8 = OpLabel
+         %11 = OpPhi %int %int_1 %5 %13 %7
+               OpLoopMerge %9 %7 None
+               OpBranch %6
+          %6 = OpLabel
+               OpBranch %14
+         %14 = OpLabel
+               OpBranch %17
+         %17 = OpLabel
+               OpLoopMerge %18 %16 None
+               OpBranch %15
+         %15 = OpLabel
+               OpBranch %16
+         %16 = OpLabel
+               OpBranchConditional %true %18 %17
+         %18 = OpLabel
+               OpBranch %7
+          %7 = OpLabel
+         %13 = OpPhi %int %11 %18
+         %21 = OpSGreaterThan %bool %13 %int_5
+               OpBranchConditional %21 %9 %8
           %9 = OpLabel
                OpReturn
                OpFunctionEnd

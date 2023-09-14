@@ -748,7 +748,7 @@ void Printer::EmitIncomingPhis(core::ir::MultiInBlock* block) {
         for (auto* incoming : block->InboundSiblingBranches()) {
             auto* arg = incoming->Args()[param_idx];
             ops.push_back(Value(arg));
-            ops.push_back(Label(incoming->Block()));
+            ops.push_back(GetTerminatorBlockLabel(incoming));
         }
 
         current_function_.push_inst(spv::Op::OpPhi, std::move(ops));
@@ -848,7 +848,7 @@ void Printer::EmitIf(core::ir::If* i) {
     // 2. branches somewhere instead of exiting the loop (e.g. return or break), or
     // 3. the if returns a value
     // Otherwise we skip them and branch straight to the merge block.
-    uint32_t merge_label = module_.NextId();
+    uint32_t merge_label = GetMergeLabel(i);
     TINT_SCOPED_ASSIGNMENT(if_merge_label_, merge_label);
 
     uint32_t true_label = merge_label;
@@ -1697,7 +1697,7 @@ void Printer::EmitLoop(core::ir::Loop* loop) {
     auto header_label = module_.NextId();
     TINT_SCOPED_ASSIGNMENT(loop_header_label_, header_label);
 
-    auto merge_label = module_.NextId();
+    auto merge_label = GetMergeLabel(loop);
     TINT_SCOPED_ASSIGNMENT(loop_merge_label_, merge_label);
 
     if (init_label != 0) {
@@ -1762,7 +1762,7 @@ void Printer::EmitSwitch(core::ir::Switch* swtch) {
         }
     }
 
-    uint32_t merge_label = module_.NextId();
+    uint32_t merge_label = GetMergeLabel(swtch);
     TINT_SCOPED_ASSIGNMENT(switch_merge_label_, merge_label);
 
     // Emit the OpSelectionMerge and OpSwitch instructions.
@@ -1935,7 +1935,7 @@ void Printer::EmitExitPhis(core::ir::ControlInstruction* inst) {
         Vector<Branch, 8> branches;
         branches.Reserve(inst->Exits().Count());
         for (auto& exit : inst->Exits()) {
-            branches.Push(Branch{Label(exit->Block()), exit->Args()[index]});
+            branches.Push(Branch{GetTerminatorBlockLabel(exit), exit->Args()[index]});
         }
         branches.Sort();  // Sort the branches by label to ensure deterministic output
 
@@ -1950,6 +1950,26 @@ void Printer::EmitExitPhis(core::ir::ControlInstruction* inst) {
         }
         current_function_.push_inst(spv::Op::OpPhi, std::move(ops));
     }
+}
+
+uint32_t Printer::GetMergeLabel(core::ir::ControlInstruction* ci) {
+    return merge_block_labels_.GetOrCreate(ci, [&] { return module_.NextId(); });
+}
+
+uint32_t Printer::GetTerminatorBlockLabel(core::ir::Terminator* t) {
+    // Walk backwards from `t` until we find a control instruction.
+    auto* inst = t->prev;
+    while (inst) {
+        auto* prev = inst->prev;
+        if (auto* ci = inst->As<core::ir::ControlInstruction>()) {
+            // This is the last control instruction before `t`, so use its merge block label.
+            return GetMergeLabel(ci);
+        }
+        inst = prev;
+    }
+
+    // There were no control instructions before `t`, so use the label of the parent block.
+    return Label(t->Block());
 }
 
 uint32_t Printer::TexelFormat(const core::TexelFormat format) {

@@ -272,6 +272,16 @@ class Printer {
     /// @param inst the flow control instruction
     void EmitExitPhis(core::ir::ControlInstruction* inst);
 
+    /// Get the ID of the label of the merge block for a control instruction.
+    /// @param ci the control instruction to get the merge label for
+    /// @returns the label ID
+    uint32_t GetMergeLabel(core::ir::ControlInstruction* ci);
+
+    /// Get the ID of the label of the block that will contain a terminator instruction.
+    /// @param t the terminator instruction to get the block label for
+    /// @returns the label ID
+    uint32_t GetTerminatorBlockLabel(core::ir::Terminator* t);
+
     core::ir::Module* ir_;
     core::ir::Builder b_;
     writer::Module module_;
@@ -322,6 +332,9 @@ class Printer {
 
     /// The map of blocks to the IDs of their label instructions.
     Hashmap<core::ir::Block*, uint32_t, 8> block_labels_;
+
+    /// The map of control instructions to the IDs of the label of their SPIR-V merge blocks.
+    Hashmap<core::ir::ControlInstruction*, uint32_t, 8> merge_block_labels_;
 
     /// The map of extended instruction set names to their result IDs.
     Hashmap<std::string_view, uint32_t, 2> imports_;
