@@ -384,7 +384,7 @@ TEST(ChainUtilsTests, ValidateAndUnpackDuplicate) {
 // Additional extensions added via template specialization and not specified in the JSON unpack
 // properly.
 TEST(ChainUtilsTests, ValidateAndUnpackAdditionalExtensions) {
-    // DawnInstanceDescriptor is an extension on InstanceDescriptor added in ChainUtilsImpl.h.
+    // DawnInstanceDescriptor is an extension on InstanceDescriptor added in ChainUtilsImpl.inl.
     InstanceDescriptor desc;
     DawnInstanceDescriptor chain;
     desc.nextInChain = &chain;
@@ -394,7 +394,7 @@ TEST(ChainUtilsTests, ValidateAndUnpackAdditionalExtensions) {
 
 // Duplicate additional extensions added via template specialization should cause an error.
 TEST(ChainUtilsTests, ValidateAndUnpackDuplicateAdditionalExtensions) {
-    // DawnInstanceDescriptor is an extension on InstanceDescriptor added in ChainUtilsImpl.h.
+    // DawnInstanceDescriptor is an extension on InstanceDescriptor added in ChainUtilsImpl.inl.
     InstanceDescriptor desc;
     DawnInstanceDescriptor chain1;
     DawnInstanceDescriptor chain2;

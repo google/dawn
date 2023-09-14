@@ -216,7 +216,7 @@ namespace detail {
 }  // namespace {{native_namespace}}
 
 // Include specializations before declaring types for ordering purposes.
-#include "{{native_dir}}/ChainUtilsImpl.h"
+#include "{{native_dir}}/ChainUtilsImpl.inl"
 
 namespace {{native_namespace}} {
 

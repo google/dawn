@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_NATIVE_CHAINUTILSIMPL_H_
-#define SRC_DAWN_NATIVE_CHAINUTILSIMPL_H_
+#ifndef SRC_DAWN_NATIVE_CHAINUTILSIMPL_INL_
+#define SRC_DAWN_NATIVE_CHAINUTILSIMPL_INL_
 
 namespace dawn::native {
 
@@ -69,4 +69,4 @@ struct AdditionalExtensions<SharedTextureMemoryDescriptor> {
 }  // namespace detail
 }  // namespace dawn::native
 
-#endif  // SRC_DAWN_NATIVE_CHAINUTILSIMPL_H_
+#endif  // SRC_DAWN_NATIVE_CHAINUTILSIMPL_INL_
