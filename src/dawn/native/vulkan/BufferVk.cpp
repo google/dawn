@@ -362,7 +362,7 @@ void Buffer::TransitionUsageNow(CommandRecordingContext* recordingContext,
 
     if (TrackUsageAndGetResourceBarrier(recordingContext, usage, &barrier, &srcStages,
                                         &dstStages)) {
-        ASSERT(srcStages != 0 && dstStages != 0);
+        DAWN_ASSERT(srcStages != 0 && dstStages != 0);
         ToBackend(GetDevice())
             ->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0,
                                     nullptr, 1u, &barrier, 0, nullptr);
@@ -454,7 +454,7 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     if (mode & wgpu::MapMode::Read) {
         TransitionUsageNow(recordingContext, wgpu::BufferUsage::MapRead);
     } else {
-        ASSERT(mode & wgpu::MapMode::Write);
+        DAWN_ASSERT(mode & wgpu::MapMode::Write);
         TransitionUsageNow(recordingContext, wgpu::BufferUsage::MapWrite);
     }
     return {};
@@ -466,7 +466,7 @@ void Buffer::UnmapImpl() {
 
 void* Buffer::GetMappedPointer() {
     uint8_t* memory = mMemoryAllocation.GetMappedPointer();
-    ASSERT(memory != nullptr);
+    DAWN_ASSERT(memory != nullptr);
     return memory;
 }
 
@@ -550,7 +550,7 @@ bool Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* recordi
 void Buffer::TransitionMappableBuffersEagerly(const VulkanFunctions& fn,
                                               CommandRecordingContext* recordingContext,
                                               const std::set<Ref<Buffer>>& buffers) {
-    ASSERT(!buffers.empty());
+    DAWN_ASSERT(!buffers.empty());
 
     VkPipelineStageFlags srcStages = 0;
     VkPipelineStageFlags dstStages = 0;
@@ -561,7 +561,8 @@ void Buffer::TransitionMappableBuffersEagerly(const VulkanFunctions& fn,
     size_t originalBufferCount = buffers.size();
     for (const Ref<Buffer>& buffer : buffers) {
         wgpu::BufferUsage mapUsage = buffer->GetUsage() & kMapUsages;
-        ASSERT(mapUsage == wgpu::BufferUsage::MapRead || mapUsage == wgpu::BufferUsage::MapWrite);
+        DAWN_ASSERT(mapUsage == wgpu::BufferUsage::MapRead ||
+                    mapUsage == wgpu::BufferUsage::MapWrite);
         VkBufferMemoryBarrier barrier;
 
         if (buffer->TrackUsageAndGetResourceBarrier(recordingContext, mapUsage, &barrier,
@@ -570,13 +571,13 @@ void Buffer::TransitionMappableBuffersEagerly(const VulkanFunctions& fn,
         }
     }
     // TrackUsageAndGetResourceBarrier() should not modify recordingContext for map usages.
-    ASSERT(buffers.size() == originalBufferCount);
+    DAWN_ASSERT(buffers.size() == originalBufferCount);
 
     if (barriers.empty()) {
         return;
     }
 
-    ASSERT(srcStages != 0 && dstStages != 0);
+    DAWN_ASSERT(srcStages != 0 && dstStages != 0);
     fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages, 0, 0, nullptr,
                           barriers.size(), barriers.data(), 0, nullptr);
 }
@@ -586,7 +587,7 @@ void Buffer::SetLabelImpl() {
 }
 
 void Buffer::InitializeToZero(CommandRecordingContext* recordingContext) {
-    ASSERT(NeedsInitialization());
+    DAWN_ASSERT(NeedsInitialization());
 
     ClearBuffer(recordingContext, 0u);
     GetDevice()->IncrementLazyClearCountForTesting();
@@ -597,16 +598,16 @@ void Buffer::ClearBuffer(CommandRecordingContext* recordingContext,
                          uint32_t clearValue,
                          uint64_t offset,
                          uint64_t size) {
-    ASSERT(recordingContext != nullptr);
+    DAWN_ASSERT(recordingContext != nullptr);
     size = size > 0 ? size : GetAllocatedSize();
-    ASSERT(size > 0);
+    DAWN_ASSERT(size > 0);
 
     TransitionUsageNow(recordingContext, wgpu::BufferUsage::CopyDst);
 
     Device* device = ToBackend(GetDevice());
     // VK_WHOLE_SIZE doesn't work on old Windows Intel Vulkan drivers, so we don't use it.
     // Note: Allocated size must be a multiple of 4.
-    ASSERT(size % 4 == 0);
+    DAWN_ASSERT(size % 4 == 0);
     device->fn.CmdFillBuffer(recordingContext->commandBuffer, mHandle, offset, size, clearValue);
 }
 }  // namespace dawn::native::vulkan

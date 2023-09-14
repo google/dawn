@@ -50,8 +50,8 @@ MaybeError ValidateExternalTexturePlane(const TextureViewBase* textureView) {
 
 MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
                                              const ExternalTextureDescriptor* descriptor) {
-    ASSERT(descriptor);
-    ASSERT(descriptor->plane0);
+    DAWN_ASSERT(descriptor);
+    DAWN_ASSERT(descriptor->plane0);
 
     DAWN_TRY(device->ValidateObject(descriptor->plane0));
 
@@ -174,7 +174,7 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
     // passed from Chromium. The matrix was originally sourced from /skia/src/core/SkYUVMath.cpp.
     // This matrix is only used in multiplanar scenarios.
     if (params.numPlanes == 2) {
-        ASSERT(descriptor->yuvToRgbConversionMatrix);
+        DAWN_ASSERT(descriptor->yuvToRgbConversionMatrix);
         const float* yMat = descriptor->yuvToRgbConversionMatrix;
         std::copy(yMat, yMat + 12, params.yuvToRgbConversionMatrix.begin());
     }
@@ -287,8 +287,8 @@ MaybeError ExternalTextureBase::Initialize(DeviceBase* device,
     coordTransformMatrix = Translate(coordTransformMatrix, 0.5, 0.5);
 
     // Calculate scale factors and offsets from the specified visibleSize.
-    ASSERT(descriptor->visibleSize.width > 0);
-    ASSERT(descriptor->visibleSize.height > 0);
+    DAWN_ASSERT(descriptor->visibleSize.width > 0);
+    DAWN_ASSERT(descriptor->visibleSize.height > 0);
     uint32_t frameWidth = descriptor->plane0->GetTexture()->GetWidth();
     uint32_t frameHeight = descriptor->plane0->GetTexture()->GetHeight();
     float xScale =
@@ -324,7 +324,7 @@ const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>& ExternalTextureBase
 }
 
 MaybeError ExternalTextureBase::ValidateCanUseInSubmitNow() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     DAWN_INVALID_IF(mState != ExternalTextureState::Active,
                     "External texture %s used in a submit is not active.", this);
 
@@ -385,12 +385,12 @@ ObjectType ExternalTextureBase::GetType() const {
 }
 
 const Extent2D& ExternalTextureBase::GetVisibleSize() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mVisibleSize;
 }
 
 const Origin2D& ExternalTextureBase::GetVisibleOrigin() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mVisibleOrigin;
 }
 

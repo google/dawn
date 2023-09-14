@@ -31,7 +31,7 @@ CommandIterator::CommandIterator() {
 }
 
 CommandIterator::~CommandIterator() {
-    ASSERT(IsEmpty());
+    DAWN_ASSERT(IsEmpty());
 }
 
 CommandIterator::CommandIterator(CommandIterator&& other) {
@@ -43,7 +43,7 @@ CommandIterator::CommandIterator(CommandIterator&& other) {
 }
 
 CommandIterator& CommandIterator::operator=(CommandIterator&& other) {
-    ASSERT(IsEmpty());
+    DAWN_ASSERT(IsEmpty());
     if (!other.IsEmpty()) {
         mBlocks = std::move(other.mBlocks);
         other.Reset();
@@ -57,7 +57,7 @@ CommandIterator::CommandIterator(CommandAllocator allocator) : mBlocks(allocator
 }
 
 void CommandIterator::AcquireCommandBlocks(std::vector<CommandAllocator> allocators) {
-    ASSERT(IsEmpty());
+    DAWN_ASSERT(IsEmpty());
     mBlocks.clear();
     for (CommandAllocator& allocator : allocators) {
         CommandBlocks blocks = allocator.AcquireBlocks();
@@ -107,7 +107,7 @@ void CommandIterator::MakeEmptyAsDataWasDestroyed() {
     }
     mBlocks.clear();
     Reset();
-    ASSERT(IsEmpty());
+    DAWN_ASSERT(IsEmpty());
 }
 
 bool CommandIterator::IsEmpty() const {
@@ -170,9 +170,9 @@ bool CommandAllocator::IsEmpty() const {
 }
 
 CommandBlocks&& CommandAllocator::AcquireBlocks() {
-    ASSERT(mCurrentPtr != nullptr && mEndPtr != nullptr);
-    ASSERT(IsPtrAligned(mCurrentPtr, alignof(uint32_t)));
-    ASSERT(mCurrentPtr + sizeof(uint32_t) <= mEndPtr);
+    DAWN_ASSERT(mCurrentPtr != nullptr && mEndPtr != nullptr);
+    DAWN_ASSERT(IsPtrAligned(mCurrentPtr, alignof(uint32_t)));
+    DAWN_ASSERT(mCurrentPtr + sizeof(uint32_t) <= mEndPtr);
     *reinterpret_cast<uint32_t*>(mCurrentPtr) = detail::kEndOfBlock;
 
     mCurrentPtr = nullptr;

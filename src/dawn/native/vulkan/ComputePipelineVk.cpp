@@ -75,7 +75,7 @@ MaybeError ComputePipeline::Initialize() {
     VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT subgroupSizeInfo = {};
     uint32_t computeSubgroupSize = device->GetComputeSubgroupSize();
     if (computeSubgroupSize != 0u) {
-        ASSERT(device->GetDeviceInfo().HasExt(DeviceExt::SubgroupSizeControl));
+        DAWN_ASSERT(device->GetDeviceInfo().HasExt(DeviceExt::SubgroupSizeControl));
         subgroupSizeInfo.requiredSubgroupSize = computeSubgroupSize;
         stageExtChain.Add(
             &subgroupSizeInfo,

@@ -68,7 +68,7 @@ void IncrementBindingCounts(BindingCounts* bindingCounts, const BindGroupLayoutE
         }
     }
 
-    ASSERT(perStageBindingCountMember != nullptr);
+    DAWN_ASSERT(perStageBindingCountMember != nullptr);
     for (SingleShaderStage stage : IterateStages(entry.visibility)) {
         ++(bindingCounts->perStage[stage].*perStageBindingCountMember);
     }

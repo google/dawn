@@ -111,21 +111,21 @@ class D3DResourceTestBase : public DawnTestWithParams<D3D12ResourceTestParams> {
         DXGI_ADAPTER_DESC adapterDesc;
 
         HRESULT hr = dxgiAdapter->GetDesc(&adapterDesc);
-        ASSERT(hr == S_OK);
+        DAWN_ASSERT(hr == S_OK);
 
         ComPtr<IDXGIFactory4> dxgiFactory;
         hr = ::CreateDXGIFactory2(0, IID_PPV_ARGS(&dxgiFactory));
-        ASSERT(hr == S_OK);
+        DAWN_ASSERT(hr == S_OK);
 
         dxgiAdapter = nullptr;
         hr = dxgiFactory->EnumAdapterByLuid(adapterDesc.AdapterLuid, IID_PPV_ARGS(&dxgiAdapter));
-        ASSERT(hr == S_OK);
+        DAWN_ASSERT(hr == S_OK);
 
         ComPtr<ID3D11Device> d3d11Device;
         D3D_FEATURE_LEVEL d3dFeatureLevel;
         hr = ::D3D11CreateDevice(dxgiAdapter.Get(), D3D_DRIVER_TYPE_UNKNOWN, nullptr, 0, nullptr, 0,
                                  D3D11_SDK_VERSION, &d3d11Device, &d3dFeatureLevel, nullptr);
-        ASSERT(hr == S_OK);
+        DAWN_ASSERT(hr == S_OK);
         return d3d11Device;
     }
 

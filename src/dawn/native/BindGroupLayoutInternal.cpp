@@ -38,7 +38,7 @@ MaybeError ValidateStorageTextureFormat(DeviceBase* device,
     const Format* format = nullptr;
     DAWN_TRY_ASSIGN(format, device->GetInternalFormat(storageTextureFormat));
 
-    ASSERT(format != nullptr);
+    DAWN_ASSERT(format != nullptr);
     DAWN_INVALID_IF(!format->supportsStorageUsage,
                     "Texture format (%s) does not support storage textures.", storageTextureFormat);
 
@@ -412,7 +412,7 @@ bool SortBindingsCompare(const BindGroupLayoutEntry& a, const BindGroupLayoutEnt
     if (aIsBuffer) {
         bool aHasDynamicOffset = BindingHasDynamicOffset(a);
         bool bHasDynamicOffset = BindingHasDynamicOffset(b);
-        ASSERT(bIsBuffer);
+        DAWN_ASSERT(bIsBuffer);
         if (aHasDynamicOffset != bHasDynamicOffset) {
             // Buffers with dynamic offsets should come before those without.
             // This makes it easy to iterate over the dynamic buffer bindings
@@ -420,8 +420,8 @@ bool SortBindingsCompare(const BindGroupLayoutEntry& a, const BindGroupLayoutEnt
             return aHasDynamicOffset;
         }
         if (aHasDynamicOffset) {
-            ASSERT(bHasDynamicOffset);
-            ASSERT(a.binding != b.binding);
+            DAWN_ASSERT(bHasDynamicOffset);
+            DAWN_ASSERT(a.binding != b.binding);
             // Above, we ensured that dynamic buffers are first. Now, ensure that
             // dynamic buffer bindings are in increasing order. This is because dynamic
             // buffer offsets are applied in increasing order of binding number.
@@ -481,7 +481,7 @@ bool SortBindingsCompare(const BindGroupLayoutEntry& a, const BindGroupLayoutEnt
     return a.binding < b.binding;
 }
 
-// This is a utility function to help ASSERT that the BGL-binding comparator places buffers
+// This is a utility function to help DAWN_ASSERT that the BGL-binding comparator places buffers
 // first.
 bool CheckBufferBindingsFirst(ityp::span<BindingIndex, const BindingInfo> bindings) {
     BindingIndex lastBufferIndex{0};
@@ -520,15 +520,15 @@ BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
 
         if (IsBufferBinding(binding)) {
             // Buffers must be contiguously packed at the start of the binding info.
-            ASSERT(GetBufferCount() == BindingIndex(i));
+            DAWN_ASSERT(GetBufferCount() == BindingIndex(i));
         }
         IncrementBindingCounts(&mBindingCounts, binding);
 
         const auto& [_, inserted] = mBindingMap.emplace(BindingNumber(binding.binding), i);
-        ASSERT(inserted);
+        DAWN_ASSERT(inserted);
     }
-    ASSERT(CheckBufferBindingsFirst({mBindingInfo.data(), GetBindingCount()}));
-    ASSERT(mBindingInfo.size() <= kMaxBindingsPerPipelineLayoutTyped);
+    DAWN_ASSERT(CheckBufferBindingsFirst({mBindingInfo.data(), GetBindingCount()}));
+    DAWN_ASSERT(mBindingInfo.size() <= kMaxBindingsPerPipelineLayoutTyped);
 }
 
 BindGroupLayoutInternalBase::BindGroupLayoutInternalBase(
@@ -554,13 +554,13 @@ ObjectType BindGroupLayoutInternalBase::GetType() const {
 }
 
 const BindingInfo& BindGroupLayoutInternalBase::GetBindingInfo(BindingIndex bindingIndex) const {
-    ASSERT(!IsError());
-    ASSERT(bindingIndex < mBindingInfo.size());
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(bindingIndex < mBindingInfo.size());
     return mBindingInfo[bindingIndex];
 }
 
 const BindGroupLayoutInternalBase::BindingMap& BindGroupLayoutInternalBase::GetBindingMap() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mBindingMap;
 }
 
@@ -569,9 +569,9 @@ bool BindGroupLayoutInternalBase::HasBinding(BindingNumber bindingNumber) const 
 }
 
 BindingIndex BindGroupLayoutInternalBase::GetBindingIndex(BindingNumber bindingNumber) const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     const auto& it = mBindingMap.find(bindingNumber);
-    ASSERT(it != mBindingMap.end());
+    DAWN_ASSERT(it != mBindingMap.end());
     return it->second;
 }
 
@@ -655,10 +655,10 @@ size_t BindGroupLayoutInternalBase::GetBindingDataSize() const {
     // |---------buffer size array--------|
     // |-uint64_t[mUnverifiedBufferCount]-|
     size_t objectPointerStart = mBindingCounts.bufferCount * sizeof(BufferBindingData);
-    ASSERT(IsAligned(objectPointerStart, alignof(Ref<ObjectBase>)));
+    DAWN_ASSERT(IsAligned(objectPointerStart, alignof(Ref<ObjectBase>)));
     size_t bufferSizeArrayStart = Align(
         objectPointerStart + mBindingCounts.totalCount * sizeof(Ref<ObjectBase>), sizeof(uint64_t));
-    ASSERT(IsAligned(bufferSizeArrayStart, alignof(uint64_t)));
+    DAWN_ASSERT(IsAligned(bufferSizeArrayStart, alignof(uint64_t)));
     return bufferSizeArrayStart + mBindingCounts.unverifiedBufferCount * sizeof(uint64_t);
 }
 
@@ -669,9 +669,9 @@ BindGroupLayoutInternalBase::ComputeBindingDataPointers(void* dataStart) const {
     uint64_t* unverifiedBufferSizes = AlignPtr(
         reinterpret_cast<uint64_t*>(bindings + mBindingCounts.totalCount), sizeof(uint64_t));
 
-    ASSERT(IsPtrAligned(bufferData, alignof(BufferBindingData)));
-    ASSERT(IsPtrAligned(bindings, alignof(Ref<ObjectBase>)));
-    ASSERT(IsPtrAligned(unverifiedBufferSizes, alignof(uint64_t)));
+    DAWN_ASSERT(IsPtrAligned(bufferData, alignof(BufferBindingData)));
+    DAWN_ASSERT(IsPtrAligned(bindings, alignof(Ref<ObjectBase>)));
+    DAWN_ASSERT(IsPtrAligned(unverifiedBufferSizes, alignof(uint64_t)));
 
     return {{bufferData, GetBufferCount()},
             {bindings, GetBindingCount()},
@@ -679,7 +679,7 @@ BindGroupLayoutInternalBase::ComputeBindingDataPointers(void* dataStart) const {
 }
 
 bool BindGroupLayoutInternalBase::IsStorageBufferBinding(BindingIndex bindingIndex) const {
-    ASSERT(bindingIndex < GetBufferCount());
+    DAWN_ASSERT(bindingIndex < GetBufferCount());
     switch (GetBindingInfo(bindingIndex).buffer.type) {
         case wgpu::BufferBindingType::Uniform:
             return false;

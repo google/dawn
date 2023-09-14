@@ -91,27 +91,27 @@ CommandIterator* RenderBundleBase::GetCommands() {
 }
 
 const AttachmentState* RenderBundleBase::GetAttachmentState() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mAttachmentState.Get();
 }
 
 bool RenderBundleBase::IsDepthReadOnly() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mDepthReadOnly;
 }
 
 bool RenderBundleBase::IsStencilReadOnly() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mStencilReadOnly;
 }
 
 uint64_t RenderBundleBase::GetDrawCount() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mDrawCount;
 }
 
 const RenderPassResourceUsage& RenderBundleBase::GetResourceUsage() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mResourceUsage;
 }
 

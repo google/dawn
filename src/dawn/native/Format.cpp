@@ -133,10 +133,10 @@ const AspectInfo& Format::GetAspectInfo(wgpu::TextureAspect aspect) const {
 }
 
 const AspectInfo& Format::GetAspectInfo(Aspect aspect) const {
-    ASSERT(HasOneBit(aspect));
-    ASSERT(aspects & aspect);
+    DAWN_ASSERT(HasOneBit(aspect));
+    DAWN_ASSERT(aspects & aspect);
     const size_t aspectIndex = GetAspectIndex(aspect);
-    ASSERT(aspectIndex < GetAspectCount(aspects));
+    DAWN_ASSERT(aspectIndex < GetAspectCount(aspects));
     return aspectInfo[aspectIndex];
 }
 
@@ -148,10 +148,10 @@ Extent3D Format::GetAspectSize(Aspect aspect, const Extent3D& textureSize) const
         case Aspect::CombinedDepthStencil:
             return textureSize;
         case Aspect::Plane0:
-            ASSERT(IsMultiPlanar());
+            DAWN_ASSERT(IsMultiPlanar());
             return textureSize;
         case Aspect::Plane1: {
-            ASSERT(IsMultiPlanar());
+            DAWN_ASSERT(IsMultiPlanar());
             auto planeSize = textureSize;
             switch (format) {
                 case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
@@ -208,17 +208,17 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
 
     auto AddFormat = [&table, &formatsSet](Format format) {
         FormatIndex index = ComputeFormatIndex(format.format);
-        ASSERT(index < table.size());
+        DAWN_ASSERT(index < table.size());
 
         // This checks that each format is set at most once, the first part of checking that all
         // formats are set exactly once.
-        ASSERT(!formatsSet[index]);
+        DAWN_ASSERT(!formatsSet[index]);
 
         // Vulkan describes bytesPerRow in units of texels. If there's any format for which this
-        // ASSERT isn't true, then additional validation on bytesPerRow must be added.
+        // DAWN_ASSERT isn't true, then additional validation on bytesPerRow must be added.
         const bool hasMultipleAspects = !HasOneBit(format.aspects);
-        ASSERT(hasMultipleAspects ||
-               (kTextureBytesPerRowAlignment % format.aspectInfo[0].block.byteSize) == 0);
+        DAWN_ASSERT(hasMultipleAspects ||
+                    (kTextureBytesPerRowAlignment % format.aspectInfo[0].block.byteSize) == 0);
 
         table[index] = format;
         formatsSet.set(index);
@@ -251,7 +251,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
 
             bool supportsMultisample = capabilities & Cap::Multisample;
             if (supportsMultisample) {
-                ASSERT(renderable);
+                DAWN_ASSERT(renderable);
             }
             internalFormat.supportsMultisample = supportsMultisample;
             internalFormat.supportsResolveTarget = capabilities & Cap::Resolve;
@@ -261,8 +261,8 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
             if (renderable) {
                 // If the color format is renderable, it must have a pixel byte size and component
                 // alignment specified.
-                ASSERT(renderTargetPixelByteCost != RenderTargetPixelByteCost(0) &&
-                       renderTargetComponentAlignment != RenderTargetComponentAlignment(0));
+                DAWN_ASSERT(renderTargetPixelByteCost != RenderTargetPixelByteCost(0) &&
+                            renderTargetComponentAlignment != RenderTargetComponentAlignment(0));
                 internalFormat.renderTargetPixelByteCost =
                     static_cast<uint32_t>(renderTargetPixelByteCost);
                 internalFormat.renderTargetComponentAlignment =
@@ -296,7 +296,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
                         UNREACHABLE();
                 }
             } else {
-                ASSERT(sampleTypes & SampleTypeBit::Float);
+                DAWN_ASSERT(sampleTypes & SampleTypeBit::Float);
                 firstAspect->baseType = TextureComponentType::Float;
             }
             firstAspect->supportedSampleTypes = sampleTypes;
@@ -360,7 +360,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
         //    stencil8 aspect of depth-stencil8 formats.
         //  - aspectInfo[1] is the actual info used in the rest of Dawn since
         //    GetAspectIndex(Aspect::Stencil) is 1.
-        ASSERT(GetAspectIndex(Aspect::Stencil) == 1);
+        DAWN_ASSERT(GetAspectIndex(Aspect::Stencil) == 1);
 
         internalFormat.aspectInfo[0].block.byteSize = 1;
         internalFormat.aspectInfo[0].block.width = 1;
@@ -406,37 +406,39 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
             AddFormat(internalFormat);
         };
 
-    auto AddMultiAspectFormat =
-        [&AddFormat, &table](wgpu::TextureFormat format, Aspect aspects,
-                             wgpu::TextureFormat firstFormat, wgpu::TextureFormat secondFormat,
-                             Cap capabilites, UnsupportedReason unsupportedReason,
-                             ComponentCount componentCount) {
-            Format internalFormat;
-            internalFormat.format = format;
-            internalFormat.baseFormat = format;
-            internalFormat.isRenderable = capabilites & Cap::Renderable;
-            internalFormat.isCompressed = false;
-            internalFormat.unsupportedReason = unsupportedReason;
-            internalFormat.supportsStorageUsage = false;
-            internalFormat.supportsMultisample = capabilites & Cap::Multisample;
-            internalFormat.supportsResolveTarget = false;
-            internalFormat.aspects = aspects;
-            internalFormat.componentCount = static_cast<uint32_t>(componentCount);
+    auto AddMultiAspectFormat = [&AddFormat, &table](wgpu::TextureFormat format, Aspect aspects,
+                                                     wgpu::TextureFormat firstFormat,
+                                                     wgpu::TextureFormat secondFormat,
+                                                     Cap capabilites,
+                                                     UnsupportedReason unsupportedReason,
+                                                     ComponentCount componentCount) {
+        Format internalFormat;
+        internalFormat.format = format;
+        internalFormat.baseFormat = format;
+        internalFormat.isRenderable = capabilites & Cap::Renderable;
+        internalFormat.isCompressed = false;
+        internalFormat.unsupportedReason = unsupportedReason;
+        internalFormat.supportsStorageUsage = false;
+        internalFormat.supportsMultisample = capabilites & Cap::Multisample;
+        internalFormat.supportsResolveTarget = false;
+        internalFormat.aspects = aspects;
+        internalFormat.componentCount = static_cast<uint32_t>(componentCount);
 
-            // Multi aspect formats just copy information about single-aspect formats. This
-            // means that the single-plane formats must have been added before multi-aspect
-            // ones. (it is ASSERTed below).
-            const FormatIndex firstFormatIndex = ComputeFormatIndex(firstFormat);
-            const FormatIndex secondFormatIndex = ComputeFormatIndex(secondFormat);
+        // Multi aspect formats just copy information about single-aspect formats. This
+        // means that the single-plane formats must have been added before multi-aspect
+        // ones. (it is ASSERTed below).
+        const FormatIndex firstFormatIndex = ComputeFormatIndex(firstFormat);
+        const FormatIndex secondFormatIndex = ComputeFormatIndex(secondFormat);
 
-            ASSERT(table[firstFormatIndex].aspectInfo[0].format != wgpu::TextureFormat::Undefined);
-            ASSERT(table[secondFormatIndex].aspectInfo[0].format != wgpu::TextureFormat::Undefined);
+        DAWN_ASSERT(table[firstFormatIndex].aspectInfo[0].format != wgpu::TextureFormat::Undefined);
+        DAWN_ASSERT(table[secondFormatIndex].aspectInfo[0].format !=
+                    wgpu::TextureFormat::Undefined);
 
-            internalFormat.aspectInfo[0] = table[firstFormatIndex].aspectInfo[0];
-            internalFormat.aspectInfo[1] = table[secondFormatIndex].aspectInfo[0];
+        internalFormat.aspectInfo[0] = table[firstFormatIndex].aspectInfo[0];
+        internalFormat.aspectInfo[1] = table[secondFormatIndex].aspectInfo[0];
 
-            AddFormat(internalFormat);
-        };
+        AddFormat(internalFormat);
+    };
 
     // clang-format off
     // 1 byte color formats
@@ -591,7 +593,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
     // This checks that each format is set at least once, the second part of checking that all
     // formats are checked exactly once. If this assertion is failing and texture formats have
     // been added or removed recently, check that kKnownFormatCount has been updated.
-    ASSERT(formatsSet.all());
+    DAWN_ASSERT(formatsSet.all());
 
     return table;
 }

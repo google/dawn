@@ -219,12 +219,12 @@ ScopedEnvironmentVar::~ScopedEnvironmentVar() {
         bool success = SetEnvironmentVar(
             mName.c_str(), mOriginalValue.second ? mOriginalValue.first.c_str() : nullptr);
         // If we set the environment variable in the constructor, we should never fail restoring it.
-        ASSERT(success);
+        DAWN_ASSERT(success);
     }
 }
 
 bool ScopedEnvironmentVar::Set(const char* variableName, const char* value) {
-    ASSERT(!mIsSet);
+    DAWN_ASSERT(!mIsSet);
     mName = variableName;
     mOriginalValue = GetEnvironmentVar(variableName);
     mIsSet = SetEnvironmentVar(variableName, value);

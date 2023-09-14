@@ -134,12 +134,12 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const PhysicalDevice& physicalDe
     }
 
     // D3D_SHADER_MODEL is encoded as 0xMm with M the major version and m the minor version
-    ASSERT(driverShaderModel <= 0xFF);
+    DAWN_ASSERT(driverShaderModel <= 0xFF);
     uint32_t shaderModelMajor = (driverShaderModel & 0xF0) >> 4;
     uint32_t shaderModelMinor = (driverShaderModel & 0xF);
 
-    ASSERT(shaderModelMajor < 10);
-    ASSERT(shaderModelMinor < 10);
+    DAWN_ASSERT(shaderModelMajor < 10);
+    DAWN_ASSERT(shaderModelMinor < 10);
     info.shaderModel = 10 * shaderModelMajor + shaderModelMinor;
 
     // Profiles are always <stage>s_<minor>_<major> so we build the s_<minor>_major and add

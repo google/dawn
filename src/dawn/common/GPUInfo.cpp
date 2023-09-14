@@ -38,7 +38,7 @@ const std::array<uint32_t, 25> Skylake = {{0x1902, 0x1906, 0x190A, 0x190B, 0x190
 // more details.
 uint32_t GetIntelWindowsDriverBuildNumber(const DriverVersion& driverVersion) {
     size_t size = driverVersion.size();
-    ASSERT(size >= 2);
+    DAWN_ASSERT(size >= 2);
     return driverVersion[size - 2] * 10000 + driverVersion[size - 1];
 }
 
@@ -47,7 +47,7 @@ uint32_t GetIntelWindowsDriverBuildNumber(const DriverVersion& driverVersion) {
 DriverVersion::DriverVersion() = default;
 
 DriverVersion::DriverVersion(const std::initializer_list<uint16_t>& version) {
-    ASSERT(version.size() <= kMaxVersionFields);
+    DAWN_ASSERT(version.size() <= kMaxVersionFields);
     mDriverVersion->assign(version.begin(), version.end());
 }
 

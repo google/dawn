@@ -70,7 +70,7 @@ void ApiObjectList::Destroy() {
     while (!objects.empty()) {
         auto* head = objects.head();
         bool removed = head->RemoveFromList();
-        ASSERT(removed);
+        DAWN_ASSERT(removed);
         head->value()->DestroyImpl();
     }
 }
@@ -91,7 +91,7 @@ ApiObjectBase::ApiObjectBase(DeviceBase* device, ErrorTag tag, const char* label
 ApiObjectBase::ApiObjectBase(DeviceBase* device, LabelNotImplementedTag tag) : ObjectBase(device) {}
 
 ApiObjectBase::~ApiObjectBase() {
-    ASSERT(!IsAlive());
+    DAWN_ASSERT(!IsAlive());
 }
 
 void ApiObjectBase::APISetLabel(const char* label) {
@@ -131,7 +131,7 @@ void ApiObjectBase::LockAndDeleteThis() {
 }
 
 ApiObjectList* ApiObjectBase::GetObjectTrackingList() {
-    ASSERT(GetDevice() != nullptr);
+    DAWN_ASSERT(GetDevice() != nullptr);
     return GetDevice()->GetObjectTrackingList(GetType());
 }
 
@@ -140,7 +140,7 @@ void ApiObjectBase::Destroy() {
         return;
     }
     ApiObjectList* list = GetObjectTrackingList();
-    ASSERT(list != nullptr);
+    DAWN_ASSERT(list != nullptr);
     if (list->Untrack(this)) {
         DestroyImpl();
     }

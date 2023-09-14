@@ -327,14 +327,14 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
                                         const RenderPipeline* renderPipeline) {
     TRACE_EVENT0(GetDevice()->GetPlatform(), General, "ShaderModuleMTL::CreateFunction");
 
-    ASSERT(!IsError());
-    ASSERT(out);
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(out);
 
     const char* entryPointName = programmableStage.entryPoint.c_str();
 
     // Vertex stages must specify a renderPipeline
     if (stage == SingleShaderStage::Vertex) {
-        ASSERT(renderPipeline != nullptr);
+        DAWN_ASSERT(renderPipeline != nullptr);
     }
 
     CacheResult<MslCompilation> mslCompilation;
@@ -373,7 +373,7 @@ MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
                         "Unable to create library object: %s.",
                         [error.localizedDescription UTF8String]);
     }
-    ASSERT(library != nil);
+    DAWN_ASSERT(library != nil);
 
     NSRef<NSString> name = AcquireNSRef(
         [[NSString alloc] initWithUTF8String:mslCompilation->remappedEntryPointName.c_str()]);

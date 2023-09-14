@@ -92,7 +92,7 @@ ValidationTest::ValidationTest() {
     procs.instanceRequestAdapter = [](WGPUInstance instance,
                                       const WGPURequestAdapterOptions* options,
                                       WGPURequestAdapterCallback callback, void* userdata) {
-        ASSERT(gCurrentTest);
+        DAWN_ASSERT(gCurrentTest);
         dawn::native::GetProcs().instanceRequestAdapter(
             instance, options,
             [](WGPURequestAdapterStatus status, WGPUAdapter cAdapter, char const* message,
@@ -109,12 +109,12 @@ ValidationTest::ValidationTest() {
 
     procs.adapterRequestDevice = [](WGPUAdapter self, const WGPUDeviceDescriptor* descriptor,
                                     WGPURequestDeviceCallback callback, void* userdata) {
-        ASSERT(gCurrentTest);
+        DAWN_ASSERT(gCurrentTest);
         wgpu::DeviceDescriptor deviceDesc =
             *(reinterpret_cast<const wgpu::DeviceDescriptor*>(descriptor));
         WGPUDevice cDevice = gCurrentTest->CreateTestDevice(
             dawn::native::Adapter(reinterpret_cast<dawn::native::AdapterBase*>(self)), deviceDesc);
-        ASSERT(cDevice != nullptr);
+        DAWN_ASSERT(cDevice != nullptr);
         gCurrentTest->mLastCreatedBackendDevice = cDevice;
         callback(WGPURequestDeviceStatus_Success, cDevice, nullptr, userdata);
     };
@@ -149,7 +149,7 @@ void ValidationTest::SetUp() {
     options.compatibilityMode = gCurrentTest->UseCompatibilityMode();
 
     CreateTestAdapter(mInstance, options);
-    ASSERT(adapter);
+    DAWN_ASSERT(adapter);
 
     wgpu::DeviceDescriptor deviceDescriptor = {};
     deviceDescriptor.deviceLostCallback = ValidationTest::OnDeviceLost;
@@ -260,7 +260,7 @@ wgpu::SupportedLimits ValidationTest::GetSupportedLimits() const {
 }
 
 wgpu::Device ValidationTest::RequestDeviceSync(const wgpu::DeviceDescriptor& deviceDesc) {
-    ASSERT(adapter);
+    DAWN_ASSERT(adapter);
 
     wgpu::Device apiDevice;
     adapter.RequestDevice(
@@ -271,7 +271,7 @@ wgpu::Device ValidationTest::RequestDeviceSync(const wgpu::DeviceDescriptor& dev
         &apiDevice);
     FlushWire();
 
-    ASSERT(apiDevice);
+    DAWN_ASSERT(apiDevice);
     return apiDevice;
 }
 
@@ -320,7 +320,7 @@ bool ValidationTest::UseCompatibilityMode() const {
 
 // static
 void ValidationTest::OnDeviceError(WGPUErrorType type, const char* message, void* userdata) {
-    ASSERT(type != WGPUErrorType_NoError);
+    DAWN_ASSERT(type != WGPUErrorType_NoError);
     auto* self = static_cast<ValidationTest*>(userdata);
 
     ASSERT_TRUE(self->mExpectError) << "Got unexpected device error: " << message;
@@ -345,7 +345,7 @@ void ValidationTest::OnDeviceLost(WGPUDeviceLostReason reason,
         return;
     }
     ADD_FAILURE() << "Device lost during test: " << message;
-    ASSERT(false);
+    DAWN_ASSERT(false);
 }
 
 ValidationTest::PlaceholderRenderPass::PlaceholderRenderPass(const wgpu::Device& device)

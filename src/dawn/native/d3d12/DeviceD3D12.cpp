@@ -76,7 +76,7 @@ ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
 MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     mD3d12Device = ToBackend(GetPhysicalDevice())->GetDevice();
 
-    ASSERT(mD3d12Device != nullptr);
+    DAWN_ASSERT(mD3d12Device != nullptr);
 
     // Create device-global objects
     D3D12_COMMAND_QUEUE_DESC queueDesc = {};
@@ -108,12 +108,12 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
                           "D3D12 create fence"));
 
     mFenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-    ASSERT(mFenceEvent != nullptr);
+    DAWN_ASSERT(mFenceEvent != nullptr);
 
     DAWN_TRY(CheckHRESULT(mD3d12Device->CreateSharedHandle(mFence.Get(), nullptr, GENERIC_ALL,
                                                            nullptr, &mFenceHandle),
                           "D3D12 create fence handle"));
-    ASSERT(mFenceHandle != nullptr);
+    DAWN_ASSERT(mFenceHandle != nullptr);
 
     // Initialize backend services
     mCommandAllocatorManager = std::make_unique<CommandAllocatorManager>(this);
@@ -226,7 +226,7 @@ ComPtr<ID3D12CommandSignature> Device::GetDrawIndexedIndirectSignature() const {
 // Ensure DXC if use_dxc toggles are set and validated.
 MaybeError Device::EnsureDXCIfRequired() {
     if (IsToggleEnabled(Toggle::UseDXC)) {
-        ASSERT(ToBackend(GetPhysicalDevice())->GetBackend()->IsDXCAvailable());
+        DAWN_ASSERT(ToBackend(GetPhysicalDevice())->GetBackend()->IsDXCAvailable());
         DAWN_TRY(ToBackend(GetPhysicalDevice())->GetBackend()->EnsureDxcCompiler());
         DAWN_TRY(ToBackend(GetPhysicalDevice())->GetBackend()->EnsureDxcLibrary());
         DAWN_TRY(ToBackend(GetPhysicalDevice())->GetBackend()->EnsureDxcValidator());
@@ -388,7 +388,7 @@ void Device::ForceEventualFlushOfCommands() {
 }
 
 MaybeError Device::ExecutePendingCommandContext() {
-    ASSERT(IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(IsLockedByCurrentThreadIfNeeded());
 
     return mPendingCommands.ExecuteCommandList(this);
 }
@@ -530,7 +530,7 @@ void Device::CopyFromStagingToBufferHelper(CommandRecordingContext* commandConte
                                            BufferBase* destination,
                                            uint64_t destinationOffset,
                                            uint64_t size) {
-    ASSERT(commandContext != nullptr);
+    DAWN_ASSERT(commandContext != nullptr);
     Buffer* dstBuffer = ToBackend(destination);
     Buffer* srcBuffer = ToBackend(source);
     dstBuffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
@@ -663,8 +663,8 @@ MaybeError Device::WaitForIdleForDestruction() {
 void AppendDebugLayerMessagesToError(ID3D12InfoQueue* infoQueue,
                                      uint64_t totalErrors,
                                      ErrorData* error) {
-    ASSERT(totalErrors > 0);
-    ASSERT(error != nullptr);
+    DAWN_ASSERT(totalErrors > 0);
+    DAWN_ASSERT(error != nullptr);
 
     uint64_t errorsToPrint = std::min(kMaxDebugMessagesToPrint, totalErrors);
     for (uint64_t i = 0; i < errorsToPrint; ++i) {
@@ -742,7 +742,7 @@ void Device::AppendDebugLayerMessages(ErrorData* error) {
 }
 
 void Device::DestroyImpl() {
-    ASSERT(GetState() == State::Disconnected);
+    DAWN_ASSERT(GetState() == State::Disconnected);
 
     Base::DestroyImpl();
 
@@ -763,8 +763,8 @@ void Device::DestroyImpl() {
     // We need to handle clearing up com object refs that were enqeued after TickImpl
     mUsedComObjectRefs.ClearUpTo(std::numeric_limits<ExecutionSerial>::max());
 
-    ASSERT(mUsedComObjectRefs.Empty());
-    ASSERT(!mPendingCommands.IsOpen());
+    DAWN_ASSERT(mUsedComObjectRefs.Empty());
+    DAWN_ASSERT(!mPendingCommands.IsOpen());
 
     // Now that we've cleared out pending work from the queue, we can safely release it and reclaim
     // memory.
@@ -783,7 +783,7 @@ Device::GetSamplerShaderVisibleDescriptorAllocator() const {
 
 MutexProtected<StagingDescriptorAllocator>* Device::GetViewStagingDescriptorAllocator(
     uint32_t descriptorCount) const {
-    ASSERT(descriptorCount <= kMaxViewDescriptorsPerBindGroup);
+    DAWN_ASSERT(descriptorCount <= kMaxViewDescriptorsPerBindGroup);
     // This is Log2 of the next power of two, plus 1.
     uint32_t allocatorIndex = descriptorCount == 0 ? 0 : Log2Ceil(descriptorCount) + 1;
     return mViewAllocators[allocatorIndex].get();
@@ -791,7 +791,7 @@ MutexProtected<StagingDescriptorAllocator>* Device::GetViewStagingDescriptorAllo
 
 MutexProtected<StagingDescriptorAllocator>* Device::GetSamplerStagingDescriptorAllocator(
     uint32_t descriptorCount) const {
-    ASSERT(descriptorCount <= kMaxSamplerDescriptorsPerBindGroup);
+    DAWN_ASSERT(descriptorCount <= kMaxSamplerDescriptorsPerBindGroup);
     // This is Log2 of the next power of two, plus 1.
     uint32_t allocatorIndex = descriptorCount == 0 ? 0 : Log2Ceil(descriptorCount) + 1;
     return mSamplerAllocators[allocatorIndex].get();

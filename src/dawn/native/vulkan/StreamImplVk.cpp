@@ -34,7 +34,7 @@ void ValidatePnextImpl(const VkBaseOutStructure* root) {
     while (next != nullptr) {
         // Assert that the type of each pNext struct is exactly one of the specified
         // templates.
-        ASSERT(((LvlTypeMap<VK_STRUCT_TYPES>::kSType == next->sType ? 1 : 0) + ... + 0) == 1);
+        DAWN_ASSERT(((LvlTypeMap<VK_STRUCT_TYPES>::kSType == next->sType ? 1 : 0) + ... + 0) == 1);
         next = reinterpret_cast<const VkBaseOutStructure*>(next->pNext);
     }
 }
@@ -50,7 +50,7 @@ void SerializePnextImpl(stream::Sink* sink, const VkBaseOutStructure* root) {
             } else {
                 // Fail an assert here since that means that the chain had more than one of
                 // the same typed chained object.
-                ASSERT(false);
+                DAWN_ASSERT(false);
             }
         }
         next = reinterpret_cast<const VkBaseOutStructure*>(next->pNext);

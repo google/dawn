@@ -187,7 +187,7 @@
                         result += Align(std::strlen(record.{{memberName}}), kWireBufferAlignment);
                     }
                 {% else %}
-                    ASSERT(record.{{memberName}} != nullptr);
+                    DAWN_ASSERT(record.{{memberName}} != nullptr);
                     result += Align(std::strlen(record.{{memberName}}), kWireBufferAlignment);
                 {% endif %}
                 {% continue %}
@@ -203,7 +203,7 @@
                         {% do assert(member.annotation != "const*const*", "const*const* not valid here") %}
                         auto memberLength = {{member_length(member, "record.")}};
                         auto size = WireAlignSizeofN<{{member_transfer_type(member)}}>(memberLength);
-                        ASSERT(size);
+                        DAWN_ASSERT(size);
                         result += *size;
                         //* Structures might contain more pointers so we need to add their extra size as well.
                         {% if member.type.category == "structure" %}
@@ -250,8 +250,8 @@
         {% endif %}
         {% if record.chained %}
             //* Should be set by the root descriptor's call to SerializeChainedStruct.
-            ASSERT(transfer->chain.sType == {{as_cEnum(types["s type"].name, record.name)}});
-            ASSERT(transfer->chain.hasNext == (record.chain.next != nullptr));
+            DAWN_ASSERT(transfer->chain.sType == {{as_cEnum(types["s type"].name, record.name)}});
+            DAWN_ASSERT(transfer->chain.hasNext == (record.chain.next != nullptr));
         {% endif %}
 
         //* Iterate members, sorted in reverse on "attribute" so that "value" types are serialized first.
@@ -333,7 +333,7 @@
         DAWN_UNUSED(allocator);
 
         {% if is_cmd %}
-            ASSERT(transfer->commandId == {{Return}}WireCmd::{{name}});
+            DAWN_ASSERT(transfer->commandId == {{Return}}WireCmd::{{name}});
         {% endif %}
         {% if record.derived_method %}
             record->selfId = transfer->self;
@@ -349,8 +349,8 @@
             //* Should be set by the root descriptor's call to DeserializeChainedStruct.
             //* Don't check |record->chain.next| matches because it is not set until the
             //* next iteration inside DeserializeChainedStruct.
-            ASSERT(record->chain.sType == {{as_cEnum(types["s type"].name, record.name)}});
-            ASSERT(record->chain.next == nullptr);
+            DAWN_ASSERT(record->chain.sType == {{as_cEnum(types["s type"].name, record.name)}});
+            DAWN_ASSERT(record->chain.next == nullptr);
         {% endif %}
 
         //* Iterate members, sorted in reverse on "attribute" so that "value" types are serialized first.
@@ -537,7 +537,7 @@
     {% endfor %}
 
     size_t GetChainedStructExtraRequiredSize({{ChainedStructPtr}} chainedStruct) {
-        ASSERT(chainedStruct != nullptr);
+        DAWN_ASSERT(chainedStruct != nullptr);
         size_t result = 0;
         while (chainedStruct != nullptr) {
             switch (chainedStruct->sType) {
@@ -565,8 +565,8 @@
     [[nodiscard]] WireResult SerializeChainedStruct({{ChainedStructPtr}} chainedStruct,
                                                     SerializeBuffer* buffer,
                                                     const ObjectIdProvider& provider) {
-        ASSERT(chainedStruct != nullptr);
-        ASSERT(buffer != nullptr);
+        DAWN_ASSERT(chainedStruct != nullptr);
+        DAWN_ASSERT(buffer != nullptr);
         do {
             switch (chainedStruct->sType) {
                 {% for sType in sTypes %}

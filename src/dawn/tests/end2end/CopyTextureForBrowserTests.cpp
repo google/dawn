@@ -781,8 +781,8 @@ class CopyTextureForBrowser_ColorSpace
   protected:
     const ColorSpaceInfo& GetColorSpaceInfo(ColorSpace colorSpace) {
         uint32_t index = static_cast<uint32_t>(colorSpace);
-        ASSERT(index < ColorSpaceTable.size());
-        ASSERT(ColorSpaceTable[index].index == colorSpace);
+        DAWN_ASSERT(index < ColorSpaceTable.size());
+        DAWN_ASSERT(ColorSpaceTable[index].index == colorSpace);
         return ColorSpaceTable[index];
     }
 

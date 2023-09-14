@@ -47,7 +47,7 @@ std::vector<wgpu::SharedTextureMemory> SharedTextureMemoryTestBackend::CreateSha
     wgpu::Device& device) {
     std::vector<wgpu::SharedTextureMemory> memories;
     for (auto& memory : CreatePerDeviceSharedTextureMemories({device})) {
-        ASSERT(memory.size() == 1u);
+        DAWN_ASSERT(memory.size() == 1u);
         memories.push_back(std::move(memory[0]));
     }
     return memories;
@@ -664,7 +664,7 @@ TEST_P(SharedTextureMemoryTests, TextureAccessOutlivesMemory) {
         if (properties.usage & wgpu::TextureUsage::RenderAttachment) {
             UseInRenderPass(device, texture);
         } else if (properties.format != wgpu::TextureFormat::R8BG8Biplanar420Unorm) {
-            ASSERT(properties.usage & wgpu::TextureUsage::CopySrc);
+            DAWN_ASSERT(properties.usage & wgpu::TextureUsage::CopySrc);
             UseInCopy(device, texture);
         }
     }
@@ -711,7 +711,7 @@ TEST_P(SharedTextureMemoryTests, UninitializedTextureIsCleared) {
         if (properties.usage & wgpu::TextureUsage::CopySrc) {
             UseInCopy(device, texture);
         } else {
-            ASSERT(properties.usage & wgpu::TextureUsage::RenderAttachment);
+            DAWN_ASSERT(properties.usage & wgpu::TextureUsage::RenderAttachment);
             UseInRenderPass(device, texture);
         }
 

@@ -63,7 +63,8 @@ MaybeError Queue::Initialize() {
 }
 
 void Queue::UpdateWaitingEvents(ExecutionSerial completedSerial) {
-    ASSERT(mCompletedSerial >= uint64_t(completedSerial) || completedSerial == kMaxExecutionSerial);
+    DAWN_ASSERT(mCompletedSerial >= uint64_t(completedSerial) ||
+                completedSerial == kMaxExecutionSerial);
     mWaitingEvents.Use([&](auto waitingEvents) {
         for (auto& waiting : waitingEvents->IterateUpTo(completedSerial)) {
             std::move(waiting).Signal();
@@ -174,7 +175,7 @@ MaybeError Queue::SubmitPendingCommandBuffer() {
     [*pendingCommands addCompletedHandler:^(id<MTLCommandBuffer>) {
         TRACE_EVENT_ASYNC_END0(platform, GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
                                uint64_t(pendingSerial));
-        ASSERT(uint64_t(pendingSerial) > mCompletedSerial.load());
+        DAWN_ASSERT(uint64_t(pendingSerial) > mCompletedSerial.load());
         this->mCompletedSerial = uint64_t(pendingSerial);
 
         this->UpdateWaitingEvents(pendingSerial);

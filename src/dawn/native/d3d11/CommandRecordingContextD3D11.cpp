@@ -28,8 +28,8 @@
 namespace dawn::native::d3d11 {
 
 MaybeError CommandRecordingContext::Intialize(Device* device) {
-    ASSERT(!IsOpen());
-    ASSERT(device);
+    DAWN_ASSERT(!IsOpen());
+    DAWN_ASSERT(device);
     mDevice = device;
     mNeedsSubmit = false;
 
@@ -93,17 +93,17 @@ ID3D11Device* CommandRecordingContext::GetD3D11Device() const {
 }
 
 ID3D11DeviceContext* CommandRecordingContext::GetD3D11DeviceContext() const {
-    ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
     return mD3D11DeviceContext4.Get();
 }
 
 ID3D11DeviceContext1* CommandRecordingContext::GetD3D11DeviceContext1() const {
-    ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
     return mD3D11DeviceContext4.Get();
 }
 
 ID3D11DeviceContext4* CommandRecordingContext::GetD3D11DeviceContext4() const {
-    ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
     return mD3D11DeviceContext4.Get();
 }
 
@@ -116,13 +116,13 @@ Buffer* CommandRecordingContext::GetUniformBuffer() const {
 }
 
 Device* CommandRecordingContext::GetDevice() const {
-    ASSERT(mDevice.Get());
+    DAWN_ASSERT(mDevice.Get());
     return mDevice.Get();
 }
 
 void CommandRecordingContext::Release() {
     if (mIsOpen) {
-        ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
+        DAWN_ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
         mIsOpen = false;
         mNeedsSubmit = false;
         mUniformBuffer = nullptr;
@@ -169,7 +169,7 @@ CommandRecordingContext::EnterScopedCriticalSection() {
 }
 
 void CommandRecordingContext::WriteUniformBuffer(uint32_t offset, uint32_t element) {
-    ASSERT(offset < kMaxNumBuiltinElements);
+    DAWN_ASSERT(offset < kMaxNumBuiltinElements);
     if (mUniformBufferData[offset] != element) {
         mUniformBufferData[offset] = element;
         mUniformBufferDirty = true;

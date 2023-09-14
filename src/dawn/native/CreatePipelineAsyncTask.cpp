@@ -34,7 +34,7 @@ CreateComputePipelineAsyncTask::CreateComputePipelineAsyncTask(
     : mComputePipeline(std::move(nonInitializedComputePipeline)),
       mCallback(callback),
       mUserdata(userdata) {
-    ASSERT(mComputePipeline != nullptr);
+    DAWN_ASSERT(mComputePipeline != nullptr);
 }
 
 CreateComputePipelineAsyncTask::~CreateComputePipelineAsyncTask() = default;
@@ -91,7 +91,7 @@ CreateRenderPipelineAsyncTask::CreateRenderPipelineAsyncTask(
     : mRenderPipeline(std::move(nonInitializedRenderPipeline)),
       mCallback(callback),
       mUserdata(userdata) {
-    ASSERT(mRenderPipeline != nullptr);
+    DAWN_ASSERT(mRenderPipeline != nullptr);
 }
 
 CreateRenderPipelineAsyncTask::~CreateRenderPipelineAsyncTask() = default;

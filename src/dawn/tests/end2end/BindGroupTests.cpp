@@ -69,7 +69,7 @@ class BindGroupTests : public DawnTest {
     }
 
     wgpu::ShaderModule MakeFSModule(std::vector<wgpu::BufferBindingType> bindingTypes) const {
-        ASSERT(bindingTypes.size() <= kMaxBindGroups);
+        DAWN_ASSERT(bindingTypes.size() <= kMaxBindGroups);
 
         std::ostringstream fs;
         for (size_t i = 0; i < bindingTypes.size(); ++i) {
@@ -207,7 +207,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
         char padding[256 - 8 * sizeof(float)];
         float color[4];
     };
-    ASSERT(offsetof(Data, color) == 256);
+    DAWN_ASSERT(offsetof(Data, color) == 256);
     Data data{
         {1.f, 0.f, 0.f, 1.0f},
         {0},
@@ -385,7 +385,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
         char padding[256 - 4 * sizeof(float)];
         float color[4];
     };
-    ASSERT(offsetof(Data, color) == 256);
+    DAWN_ASSERT(offsetof(Data, color) == 256);
 
     std::vector<Data> data;
     std::vector<wgpu::Buffer> buffers;

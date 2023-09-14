@@ -37,27 +37,27 @@ class CacheResult {
     CacheResult() : mKey(), mValue(), mIsCached(false), mIsValid(false) {}
 
     bool IsCached() const {
-        ASSERT(mIsValid);
+        DAWN_ASSERT(mIsValid);
         return mIsCached;
     }
     const CacheKey& GetCacheKey() const {
-        ASSERT(mIsValid);
+        DAWN_ASSERT(mIsValid);
         return mKey;
     }
 
     // Note: Getting mValue is always const, since mutating it would invalidate consistency with
     // mKey.
     const T* operator->() const {
-        ASSERT(mIsValid);
+        DAWN_ASSERT(mIsValid);
         return &mValue;
     }
     const T& operator*() const {
-        ASSERT(mIsValid);
+        DAWN_ASSERT(mIsValid);
         return mValue;
     }
 
     T Acquire() {
-        ASSERT(mIsValid);
+        DAWN_ASSERT(mIsValid);
         mIsValid = false;
         return std::move(mValue);
     }

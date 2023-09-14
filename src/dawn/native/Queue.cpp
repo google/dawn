@@ -97,8 +97,8 @@ ResultOrError<UploadHandle> UploadTextureDataAligningBytesPerRowAndOffset(
                                                optimallyAlignedBytesPerRow, alignedRowsPerImage));
 
     uint64_t optimalOffsetAlignment = device->GetOptimalBufferToTextureCopyOffsetAlignment();
-    ASSERT(IsPowerOfTwo(optimalOffsetAlignment));
-    ASSERT(IsPowerOfTwo(blockInfo.byteSize));
+    DAWN_ASSERT(IsPowerOfTwo(optimalOffsetAlignment));
+    DAWN_ASSERT(IsPowerOfTwo(blockInfo.byteSize));
     // We need the offset to be aligned to both optimalOffsetAlignment and blockByteSize,
     // since both of them are powers of two, we only need to align to the max value.
     uint64_t offsetAlignment = std::max(optimalOffsetAlignment, uint64_t(blockInfo.byteSize));
@@ -114,7 +114,7 @@ ResultOrError<UploadHandle> UploadTextureDataAligningBytesPerRowAndOffset(
     DAWN_TRY_ASSIGN(uploadHandle,
                     device->GetDynamicUploader()->Allocate(
                         newDataSizeBytes, device->GetPendingCommandSerial(), offsetAlignment));
-    ASSERT(uploadHandle.mappedBuffer != nullptr);
+    DAWN_ASSERT(uploadHandle.mappedBuffer != nullptr);
 
     uint8_t* dstPointer = static_cast<uint8_t*>(uploadHandle.mappedBuffer);
     const uint8_t* srcPointer = static_cast<const uint8_t*>(data);
@@ -125,7 +125,7 @@ ResultOrError<UploadHandle> UploadTextureDataAligningBytesPerRowAndOffset(
         dataRowsPerImage = writeSizePixel.height / blockInfo.height;
     }
 
-    ASSERT(dataRowsPerImage >= alignedRowsPerImage);
+    DAWN_ASSERT(dataRowsPerImage >= alignedRowsPerImage);
     uint64_t imageAdditionalStride =
         dataLayout.bytesPerRow * (dataRowsPerImage - alignedRowsPerImage);
 
@@ -145,15 +145,15 @@ struct SubmittedWorkDone : TrackTaskCallback {
 
   private:
     void FinishImpl() override {
-        ASSERT(mCallback != nullptr);
-        ASSERT(mSerial != kMaxExecutionSerial);
+        DAWN_ASSERT(mCallback != nullptr);
+        DAWN_ASSERT(mSerial != kMaxExecutionSerial);
         TRACE_EVENT1(mPlatform, General, "Queue::SubmittedWorkDone::Finished", "serial",
                      uint64_t(mSerial));
         mCallback(WGPUQueueWorkDoneStatus_Success, mUserdata);
         mCallback = nullptr;
     }
     void HandleDeviceLossImpl() override {
-        ASSERT(mCallback != nullptr);
+        DAWN_ASSERT(mCallback != nullptr);
         mCallback(WGPUQueueWorkDoneStatus_DeviceLost, mUserdata);
         mCallback = nullptr;
     }
@@ -235,7 +235,7 @@ QueueBase::QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag, const char* l
     : ApiObjectBase(device, tag, label) {}
 
 QueueBase::~QueueBase() {
-    ASSERT(mTasksInFlight.Empty());
+    DAWN_ASSERT(mTasksInFlight.Empty());
 }
 
 void QueueBase::DestroyImpl() {}
@@ -289,7 +289,7 @@ void QueueBase::APIOnSubmittedWorkDone(uint64_t signalValue,
 WGPUFuture QueueBase::APIOnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInfo& callbackInfo) {
     // TODO(crbug.com/dawn/2052): Once we always return a future, change this to log to the instance
     // (note, not raise a validation error to the device) and return the null future.
-    ASSERT(callbackInfo.nextInChain == nullptr);
+    DAWN_ASSERT(callbackInfo.nextInChain == nullptr);
 
     Ref<EventManager::TrackedEvent> event;
 
@@ -325,7 +325,7 @@ void QueueBase::TrackTask(std::unique_ptr<TrackTaskCallback> task, ExecutionSeri
         ForceEventualFlushOfCommands();
     }
 
-    ASSERT(serial <= GetScheduledWorkDoneSerial());
+    DAWN_ASSERT(serial <= GetScheduledWorkDoneSerial());
 
     // If the serial indicated command has been completed, the task will be moved to callback task
     // manager.
@@ -412,7 +412,7 @@ MaybeError QueueBase::WriteBufferImpl(BufferBase* buffer,
     DAWN_TRY_ASSIGN(uploadHandle,
                     device->GetDynamicUploader()->Allocate(size, device->GetPendingCommandSerial(),
                                                            kCopyBufferToBufferOffsetAlignment));
-    ASSERT(uploadHandle.mappedBuffer != nullptr);
+    DAWN_ASSERT(uploadHandle.mappedBuffer != nullptr);
 
     memcpy(uploadHandle.mappedBuffer, data, size);
 
@@ -459,8 +459,8 @@ MaybeError QueueBase::WriteTextureImpl(const ImageCopyTexture& destination,
     // We are only copying the part of the data that will appear in the texture.
     // Note that validating texture copy range ensures that writeSizePixel->width and
     // writeSizePixel->height are multiples of blockWidth and blockHeight respectively.
-    ASSERT(writeSizePixel.width % blockInfo.width == 0);
-    ASSERT(writeSizePixel.height % blockInfo.height == 0);
+    DAWN_ASSERT(writeSizePixel.width % blockInfo.width == 0);
+    DAWN_ASSERT(writeSizePixel.height % blockInfo.height == 0);
     uint32_t alignedBytesPerRow = writeSizePixel.width / blockInfo.width * blockInfo.byteSize;
     uint32_t alignedRowsPerImage = writeSizePixel.height / blockInfo.height;
 
@@ -648,7 +648,7 @@ MaybeError QueueBase::SubmitInternal(uint32_t commandCount, CommandBufferBase* c
     if (device->IsValidationEnabled()) {
         DAWN_TRY(ValidateSubmit(commandCount, commands));
     }
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
 
     DAWN_TRY(SubmitImpl(commandCount, commands));
 

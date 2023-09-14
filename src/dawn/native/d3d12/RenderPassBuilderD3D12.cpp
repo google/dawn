@@ -68,8 +68,8 @@ D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_PARAMETERS D3D12EndingAccessResolveParam
     }
 
     // RESOLVE_MODE_AVERAGE is only valid for non-integer formats.
-    ASSERT(resolveDestination->GetFormat().GetAspectInfo(Aspect::Color).baseType ==
-           TextureComponentType::Float);
+    DAWN_ASSERT(resolveDestination->GetFormat().GetAspectInfo(Aspect::Color).baseType ==
+                TextureComponentType::Float);
     resolveParameters.ResolveMode = D3D12_RESOLVE_MODE_AVERAGE;
 
     resolveParameters.SubresourceCount = 1;
@@ -81,7 +81,7 @@ D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_SUBRESOURCE_PARAMETERS
 D3D12EndingAccessResolveSubresourceParameters(TextureView* resolveDestination) {
     D3D12_RENDER_PASS_ENDING_ACCESS_RESOLVE_SUBRESOURCE_PARAMETERS subresourceParameters;
     Texture* resolveDestinationTexture = ToBackend(resolveDestination->GetTexture());
-    ASSERT(resolveDestinationTexture->GetFormat().aspects == Aspect::Color);
+    DAWN_ASSERT(resolveDestinationTexture->GetFormat().aspects == Aspect::Color);
 
     subresourceParameters.DstX = 0;
     subresourceParameters.DstY = 0;

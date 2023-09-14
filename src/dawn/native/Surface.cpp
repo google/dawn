@@ -179,7 +179,7 @@ Surface::Surface(InstanceBase* instance, ErrorTag tag) : ErrorMonad(tag), mInsta
 
 Surface::Surface(InstanceBase* instance, const SurfaceDescriptor* descriptor)
     : ErrorMonad(), mInstance(instance) {
-    ASSERT(descriptor->nextInChain != nullptr);
+    DAWN_ASSERT(descriptor->nextInChain != nullptr);
     const SurfaceDescriptorFromAndroidNativeWindow* androidDesc = nullptr;
     const SurfaceDescriptorFromMetalLayer* metalDesc = nullptr;
     const SurfaceDescriptorFromWindowsHWND* hwndDesc = nullptr;
@@ -235,12 +235,12 @@ Surface::~Surface() {
 }
 
 SwapChainBase* Surface::GetAttachedSwapChain() {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mSwapChain.Get();
 }
 
 void Surface::SetAttachedSwapChain(SwapChainBase* swapChain) {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     mSwapChain = swapChain;
 }
 
@@ -249,46 +249,46 @@ InstanceBase* Surface::GetInstance() const {
 }
 
 Surface::Type Surface::GetType() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mType;
 }
 
 void* Surface::GetAndroidNativeWindow() const {
-    ASSERT(!IsError());
-    ASSERT(mType == Type::AndroidWindow);
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mType == Type::AndroidWindow);
     return mAndroidNativeWindow;
 }
 
 void* Surface::GetMetalLayer() const {
-    ASSERT(!IsError());
-    ASSERT(mType == Type::MetalLayer);
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mType == Type::MetalLayer);
     return mMetalLayer;
 }
 
 void* Surface::GetWaylandDisplay() const {
-    ASSERT(mType == Type::WaylandSurface);
+    DAWN_ASSERT(mType == Type::WaylandSurface);
     return mWaylandDisplay;
 }
 
 void* Surface::GetWaylandSurface() const {
-    ASSERT(mType == Type::WaylandSurface);
+    DAWN_ASSERT(mType == Type::WaylandSurface);
     return mWaylandSurface;
 }
 
 void* Surface::GetHInstance() const {
-    ASSERT(!IsError());
-    ASSERT(mType == Type::WindowsHWND);
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mType == Type::WindowsHWND);
     return mHInstance;
 }
 void* Surface::GetHWND() const {
-    ASSERT(!IsError());
-    ASSERT(mType == Type::WindowsHWND);
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mType == Type::WindowsHWND);
     return mHWND;
 }
 
 IUnknown* Surface::GetCoreWindow() const {
-    ASSERT(!IsError());
-    ASSERT(mType == Type::WindowsCoreWindow);
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mType == Type::WindowsCoreWindow);
 #if defined(DAWN_USE_WINDOWS_UI)
     return mCoreWindow.Get();
 #else
@@ -297,8 +297,8 @@ IUnknown* Surface::GetCoreWindow() const {
 }
 
 IUnknown* Surface::GetSwapChainPanel() const {
-    ASSERT(!IsError());
-    ASSERT(mType == Type::WindowsSwapChainPanel);
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mType == Type::WindowsSwapChainPanel);
 #if defined(DAWN_USE_WINDOWS_UI)
     return mSwapChainPanel.Get();
 #else
@@ -307,13 +307,13 @@ IUnknown* Surface::GetSwapChainPanel() const {
 }
 
 void* Surface::GetXDisplay() const {
-    ASSERT(!IsError());
-    ASSERT(mType == Type::XlibWindow);
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mType == Type::XlibWindow);
     return mXDisplay;
 }
 uint32_t Surface::GetXWindow() const {
-    ASSERT(!IsError());
-    ASSERT(mType == Type::XlibWindow);
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mType == Type::XlibWindow);
     return mXWindow;
 }
 

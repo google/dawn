@@ -20,7 +20,7 @@
 namespace dawn::native {
 
 BuddyAllocator::BuddyAllocator(uint64_t maxSize) : mMaxBlockSize(maxSize) {
-    ASSERT(IsPowerOfTwo(maxSize));
+    DAWN_ASSERT(IsPowerOfTwo(maxSize));
 
     mFreeLists.resize(Log2(mMaxBlockSize) + 1);
 
@@ -58,7 +58,7 @@ uint32_t BuddyAllocator::ComputeLevelFromBlockSize(uint64_t blockSize) const {
 
 uint64_t BuddyAllocator::GetNextFreeAlignedBlock(size_t allocationBlockLevel,
                                                  uint64_t alignment) const {
-    ASSERT(IsPowerOfTwo(alignment));
+    DAWN_ASSERT(IsPowerOfTwo(alignment));
     // The current level is the level that corresponds to the allocation size. The free list may
     // not contain a block at that level until a larger one gets allocated (and splits).
     // Continue to go up the tree until such a larger block exists.
@@ -96,7 +96,7 @@ uint64_t BuddyAllocator::GetNextFreeAlignedBlock(size_t allocationBlockLevel,
 // Note: Always insert into the head of the free-list. As when a larger free block at a lower
 // level was split, there were no smaller free blocks at a higher level to allocate.
 void BuddyAllocator::InsertFreeBlock(BuddyBlock* block, size_t level) {
-    ASSERT(block->mState == BlockState::Free);
+    DAWN_ASSERT(block->mState == BlockState::Free);
 
     // Inserted block is now the front (no prev).
     block->free.pPrev = nullptr;
@@ -114,7 +114,7 @@ void BuddyAllocator::InsertFreeBlock(BuddyBlock* block, size_t level) {
 }
 
 void BuddyAllocator::RemoveFreeBlock(BuddyBlock* block, size_t level) {
-    ASSERT(block->mState == BlockState::Free);
+    DAWN_ASSERT(block->mState == BlockState::Free);
 
     if (mFreeLists[level].head == block) {
         // Block is in HEAD position.
@@ -124,13 +124,13 @@ void BuddyAllocator::RemoveFreeBlock(BuddyBlock* block, size_t level) {
         BuddyBlock* pPrev = block->free.pPrev;
         BuddyBlock* pNext = block->free.pNext;
 
-        ASSERT(pPrev != nullptr);
-        ASSERT(pPrev->mState == BlockState::Free);
+        DAWN_ASSERT(pPrev != nullptr);
+        DAWN_ASSERT(pPrev->mState == BlockState::Free);
 
         pPrev->free.pNext = pNext;
 
         if (pNext != nullptr) {
-            ASSERT(pNext->mState == BlockState::Free);
+            DAWN_ASSERT(pNext->mState == BlockState::Free);
             pNext->free.pPrev = pPrev;
         }
     }
@@ -144,7 +144,7 @@ uint64_t BuddyAllocator::Allocate(uint64_t allocationSize, uint64_t alignment) {
     // Compute the level
     const uint32_t allocationSizeToLevel = ComputeLevelFromBlockSize(allocationSize);
 
-    ASSERT(allocationSizeToLevel < mFreeLists.size());
+    DAWN_ASSERT(allocationSizeToLevel < mFreeLists.size());
 
     uint64_t currBlockLevel = GetNextFreeAlignedBlock(allocationSizeToLevel, alignment);
 
@@ -159,7 +159,7 @@ uint64_t BuddyAllocator::Allocate(uint64_t allocationSize, uint64_t alignment) {
     BuddyBlock* currBlock = mFreeLists[currBlockLevel].head;
 
     for (; currBlockLevel < allocationSizeToLevel; currBlockLevel++) {
-        ASSERT(currBlock->mState == BlockState::Free);
+        DAWN_ASSERT(currBlock->mState == BlockState::Free);
 
         // Remove curr block (about to be split).
         RemoveFreeBlock(currBlock, currBlockLevel);
@@ -218,10 +218,10 @@ void BuddyAllocator::Deallocate(uint64_t offset) {
         currBlockLevel++;
     }
 
-    ASSERT(curr->mState == BlockState::Allocated);
+    DAWN_ASSERT(curr->mState == BlockState::Allocated);
 
     // Ensure the block is at the correct level
-    ASSERT(currBlockLevel == ComputeLevelFromBlockSize(curr->mSize));
+    DAWN_ASSERT(currBlockLevel == ComputeLevelFromBlockSize(curr->mSize));
 
     // Mark curr free so we can merge.
     curr->mState = BlockState::Free;
@@ -251,7 +251,7 @@ void BuddyAllocator::Deallocate(uint64_t offset) {
 
 // Helper which deletes a block in the tree recursively (post-order).
 void BuddyAllocator::DeleteBlock(BuddyBlock* block) {
-    ASSERT(block != nullptr);
+    DAWN_ASSERT(block != nullptr);
 
     if (block->mState == BlockState::Split) {
         // Delete the pair in same order we inserted.

@@ -239,7 +239,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
                                                 CommandEncoder* commandEncoder,
                                                 RenderPassResourceUsageTracker* usageTracker,
                                                 IndirectDrawMetadata* indirectDrawMetadata) {
-    ASSERT(device->IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
     // Since encoding validation commands may create new objects, verify that the device is alive.
     // TODO(dawn:1199): This check is obsolete if device loss causes device.destroy().
     //   - This function only happens within the context of a TryEncode which would catch the

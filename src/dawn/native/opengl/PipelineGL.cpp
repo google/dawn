@@ -67,9 +67,9 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
 
     if (needsPlaceholderSampler) {
         SamplerDescriptor desc = {};
-        ASSERT(desc.minFilter == wgpu::FilterMode::Nearest);
-        ASSERT(desc.magFilter == wgpu::FilterMode::Nearest);
-        ASSERT(desc.mipmapFilter == wgpu::MipmapFilterMode::Nearest);
+        DAWN_ASSERT(desc.minFilter == wgpu::FilterMode::Nearest);
+        DAWN_ASSERT(desc.magFilter == wgpu::FilterMode::Nearest);
+        DAWN_ASSERT(desc.mipmapFilter == wgpu::MipmapFilterMode::Nearest);
         Ref<SamplerBase> sampler;
         DAWN_TRY_ASSIGN(sampler, layout->GetDevice()->GetOrCreateSampler(&desc));
         mPlaceholderSampler = ToBackend(std::move(sampler));
@@ -169,12 +169,12 @@ void PipelineGL::DeleteProgram(const OpenGLFunctions& gl) {
 
 const std::vector<PipelineGL::SamplerUnit>& PipelineGL::GetTextureUnitsForSampler(
     GLuint index) const {
-    ASSERT(index < mUnitsForSamplers.size());
+    DAWN_ASSERT(index < mUnitsForSamplers.size());
     return mUnitsForSamplers[index];
 }
 
 const std::vector<GLuint>& PipelineGL::GetTextureUnitsForTextureView(GLuint index) const {
-    ASSERT(index < mUnitsForTextures.size());
+    DAWN_ASSERT(index < mUnitsForTextures.size());
     return mUnitsForTextures[index];
 }
 
@@ -185,7 +185,7 @@ GLuint PipelineGL::GetProgramHandle() const {
 void PipelineGL::ApplyNow(const OpenGLFunctions& gl) {
     gl.UseProgram(mProgram);
     for (GLuint unit : mPlaceholderSamplerUnits) {
-        ASSERT(mPlaceholderSampler.Get() != nullptr);
+        DAWN_ASSERT(mPlaceholderSampler.Get() != nullptr);
         gl.BindSampler(unit, mPlaceholderSampler->GetNonFilteringHandle());
     }
 

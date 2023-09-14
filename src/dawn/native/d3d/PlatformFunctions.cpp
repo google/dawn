@@ -55,7 +55,7 @@ class ScopedFileHandle final {
     explicit ScopedFileHandle(HANDLE handle) : mHandle(handle) {}
     ~ScopedFileHandle() {
         if (mHandle != INVALID_HANDLE_VALUE) {
-            ASSERT(FindClose(mHandle));
+            DAWN_ASSERT(FindClose(mHandle));
         }
     }
     HANDLE GetHandle() const { return mHandle; }
@@ -157,7 +157,7 @@ void PlatformFunctions::LoadDXIL(const std::string& baseWindowsSDKPath) {
             return;
         }
     }
-    ASSERT(!mDXILLib.Valid());
+    DAWN_ASSERT(!mDXILLib.Valid());
 }
 
 void PlatformFunctions::LoadDXCompiler(const std::string& baseWindowsSDKPath) {

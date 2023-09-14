@@ -139,7 +139,7 @@ class QueryInternalShaderTests : public DawnTest {
                  uint32_t queryCount,
                  uint32_t destinationOffset,
                  float period) {
-        ASSERT(destinationOffset % kQueryResolveAlignment == 0);
+        DAWN_ASSERT(destinationOffset % kQueryResolveAlignment == 0);
 
         uint64_t size = queryCount * sizeof(uint64_t) + destinationOffset;
 

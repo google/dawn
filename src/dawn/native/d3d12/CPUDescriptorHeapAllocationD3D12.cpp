@@ -22,21 +22,21 @@ CPUDescriptorHeapAllocation::CPUDescriptorHeapAllocation(D3D12_CPU_DESCRIPTOR_HA
     : mBaseDescriptor(baseDescriptor), mHeapIndex(heapIndex) {}
 
 D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorHeapAllocation::GetBaseDescriptor() const {
-    ASSERT(IsValid());
+    DAWN_ASSERT(IsValid());
     return mBaseDescriptor;
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorHeapAllocation::OffsetFrom(
     uint32_t sizeIncrementInBytes,
     uint32_t offsetInDescriptorCount) const {
-    ASSERT(IsValid());
+    DAWN_ASSERT(IsValid());
     D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = mBaseDescriptor;
     cpuHandle.ptr += sizeIncrementInBytes * offsetInDescriptorCount;
     return cpuHandle;
 }
 
 uint32_t CPUDescriptorHeapAllocation::GetHeapIndex() const {
-    ASSERT(mHeapIndex >= 0);
+    DAWN_ASSERT(mHeapIndex >= 0);
     return mHeapIndex;
 }
 

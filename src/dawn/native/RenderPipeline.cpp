@@ -51,7 +51,7 @@ MaybeError ValidateVertexAttribute(
 
     // No underflow is possible because the max vertex format size is smaller than
     // kMaxVertexBufferArrayStride.
-    ASSERT(kMaxVertexBufferArrayStride >= formatInfo.byteSize);
+    DAWN_ASSERT(kMaxVertexBufferArrayStride >= formatInfo.byteSize);
     DAWN_INVALID_IF(
         attribute->offset > kMaxVertexBufferArrayStride - formatInfo.byteSize,
         "Attribute offset (%u) with format %s (size: %u) doesn't fit in the maximum vertex "
@@ -60,7 +60,7 @@ MaybeError ValidateVertexAttribute(
 
     // No overflow is possible because the offset is already validated to be less
     // than kMaxVertexBufferArrayStride.
-    ASSERT(attribute->offset < kMaxVertexBufferArrayStride);
+    DAWN_ASSERT(attribute->offset < kMaxVertexBufferArrayStride);
     DAWN_INVALID_IF(
         vertexBufferStride > 0 && attribute->offset + formatInfo.byteSize > vertexBufferStride,
         "Attribute offset (%u) with format %s (size: %u) doesn't fit in the vertex buffer "
@@ -167,14 +167,14 @@ MaybeError ValidateVertexState(DeviceBase* device,
     // requirements for shaderLocation: 1) >=0, 2) values are different across different
     // attributes, 3) can't exceed kMaxVertexAttributes. So it can ensure that total
     // attribute number never exceed kMaxVertexAttributes.
-    ASSERT(totalAttributesNum <= kMaxVertexAttributes);
+    DAWN_ASSERT(totalAttributesNum <= kMaxVertexAttributes);
 
     // Validate that attributes used by the VertexState are in the shader using bitmask operations
     // but try to be helpful by finding one missing attribute to surface in the error message
     if (!IsSubset(vertexMetadata.usedVertexInputs, attributesSetMask)) {
         const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> missingAttributes =
             vertexMetadata.usedVertexInputs & ~attributesSetMask;
-        ASSERT(missingAttributes.any());
+        DAWN_ASSERT(missingAttributes.any());
 
         VertexAttributeLocation firstMissing = ityp::Sub(
             GetHighestBitIndexPlusOne(missingAttributes), VertexAttributeLocation(uint8_t(1)));
@@ -808,7 +808,7 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
     for (ColorAttachmentIndex i : IterateBitSet(mAttachmentState->GetColorAttachmentsMask())) {
         // Vertex-only render pipeline have no color attachment. For a render pipeline with
         // color attachments, there must be a valid FragmentState.
-        ASSERT(descriptor->fragment != nullptr);
+        DAWN_ASSERT(descriptor->fragment != nullptr);
         const ColorTargetState* target = &descriptor->fragment->targets[static_cast<uint8_t>(i)];
         mTargets[i] = *target;
 
@@ -866,158 +866,158 @@ ObjectType RenderPipelineBase::GetType() const {
 
 const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>&
 RenderPipelineBase::GetAttributeLocationsUsed() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mAttributeLocationsUsed;
 }
 
 const VertexAttributeInfo& RenderPipelineBase::GetAttribute(
     VertexAttributeLocation location) const {
-    ASSERT(!IsError());
-    ASSERT(mAttributeLocationsUsed[location]);
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mAttributeLocationsUsed[location]);
     return mAttributeInfos[location];
 }
 
 const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
 RenderPipelineBase::GetVertexBufferSlotsUsed() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mVertexBufferSlotsUsed;
 }
 
 const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
 RenderPipelineBase::GetVertexBufferSlotsUsedAsVertexBuffer() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mVertexBufferSlotsUsedAsVertexBuffer;
 }
 
 const ityp::bitset<VertexBufferSlot, kMaxVertexBuffers>&
 RenderPipelineBase::GetVertexBufferSlotsUsedAsInstanceBuffer() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mVertexBufferSlotsUsedAsInstanceBuffer;
 }
 
 const VertexBufferInfo& RenderPipelineBase::GetVertexBuffer(VertexBufferSlot slot) const {
-    ASSERT(!IsError());
-    ASSERT(mVertexBufferSlotsUsed[slot]);
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mVertexBufferSlotsUsed[slot]);
     return mVertexBufferInfos[slot];
 }
 
 uint32_t RenderPipelineBase::GetVertexBufferCount() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mVertexBufferCount;
 }
 
 const ColorTargetState* RenderPipelineBase::GetColorTargetState(
     ColorAttachmentIndex attachmentSlot) const {
-    ASSERT(!IsError());
-    ASSERT(attachmentSlot < mTargets.size());
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(attachmentSlot < mTargets.size());
     return &mTargets[attachmentSlot];
 }
 
 const DepthStencilState* RenderPipelineBase::GetDepthStencilState() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return &mDepthStencil;
 }
 
 wgpu::PrimitiveTopology RenderPipelineBase::GetPrimitiveTopology() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mPrimitive.topology;
 }
 
 wgpu::IndexFormat RenderPipelineBase::GetStripIndexFormat() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mPrimitive.stripIndexFormat;
 }
 
 wgpu::CullMode RenderPipelineBase::GetCullMode() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mPrimitive.cullMode;
 }
 
 wgpu::FrontFace RenderPipelineBase::GetFrontFace() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mPrimitive.frontFace;
 }
 
 bool RenderPipelineBase::IsDepthBiasEnabled() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mDepthStencil.depthBias != 0 || mDepthStencil.depthBiasSlopeScale != 0;
 }
 
 int32_t RenderPipelineBase::GetDepthBias() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mDepthStencil.depthBias;
 }
 
 float RenderPipelineBase::GetDepthBiasSlopeScale() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mDepthStencil.depthBiasSlopeScale;
 }
 
 float RenderPipelineBase::GetDepthBiasClamp() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mDepthStencil.depthBiasClamp;
 }
 
 bool RenderPipelineBase::HasUnclippedDepth() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mUnclippedDepth;
 }
 
 ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments>
 RenderPipelineBase::GetColorAttachmentsMask() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mAttachmentState->GetColorAttachmentsMask();
 }
 
 bool RenderPipelineBase::HasDepthStencilAttachment() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mAttachmentState->HasDepthStencilAttachment();
 }
 
 wgpu::TextureFormat RenderPipelineBase::GetColorAttachmentFormat(
     ColorAttachmentIndex attachment) const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mTargets[attachment].format;
 }
 
 wgpu::TextureFormat RenderPipelineBase::GetDepthStencilFormat() const {
-    ASSERT(!IsError());
-    ASSERT(mAttachmentState->HasDepthStencilAttachment());
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mAttachmentState->HasDepthStencilAttachment());
     return mDepthStencil.format;
 }
 
 uint32_t RenderPipelineBase::GetSampleCount() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mAttachmentState->GetSampleCount();
 }
 
 uint32_t RenderPipelineBase::GetSampleMask() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mMultisample.mask;
 }
 
 bool RenderPipelineBase::IsAlphaToCoverageEnabled() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mMultisample.alphaToCoverageEnabled;
 }
 
 const AttachmentState* RenderPipelineBase::GetAttachmentState() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mAttachmentState.Get();
 }
 
 bool RenderPipelineBase::WritesDepth() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mWritesDepth;
 }
 
 bool RenderPipelineBase::WritesStencil() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mWritesStencil;
 }
 
 bool RenderPipelineBase::UsesFragDepth() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mUsesFragDepth;
 }
 
@@ -1121,10 +1121,10 @@ bool RenderPipelineBase::EqualityFunc::operator()(const RenderPipelineBase* a,
             const DepthStencilState& stateA = a->mDepthStencil;
             const DepthStencilState& stateB = b->mDepthStencil;
 
-            ASSERT(!std::isnan(stateA.depthBiasSlopeScale));
-            ASSERT(!std::isnan(stateB.depthBiasSlopeScale));
-            ASSERT(!std::isnan(stateA.depthBiasClamp));
-            ASSERT(!std::isnan(stateB.depthBiasClamp));
+            DAWN_ASSERT(!std::isnan(stateA.depthBiasSlopeScale));
+            DAWN_ASSERT(!std::isnan(stateB.depthBiasSlopeScale));
+            DAWN_ASSERT(!std::isnan(stateA.depthBiasClamp));
+            DAWN_ASSERT(!std::isnan(stateB.depthBiasClamp));
 
             if (stateA.depthWriteEnabled != stateB.depthWriteEnabled ||
                 stateA.depthCompare != stateB.depthCompare ||

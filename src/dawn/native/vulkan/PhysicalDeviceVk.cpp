@@ -78,8 +78,8 @@ VulkanInstance* PhysicalDevice::GetVulkanInstance() const {
 }
 
 bool PhysicalDevice::IsDepthStencilFormatSupported(VkFormat format) const {
-    ASSERT(format == VK_FORMAT_D16_UNORM_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT ||
-           format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_S8_UINT);
+    DAWN_ASSERT(format == VK_FORMAT_D16_UNORM_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT ||
+                format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_S8_UINT);
 
     VkFormatProperties properties;
     mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(mVkPhysicalDevice, format,
@@ -599,7 +599,7 @@ void PhysicalDevice::SetupBackendDeviceToggles(TogglesState* deviceToggles) cons
     bool supportsD24s8 = IsDepthStencilFormatSupported(VK_FORMAT_D24_UNORM_S8_UINT);
     bool supportsS8 = IsDepthStencilFormatSupported(VK_FORMAT_S8_UINT);
 
-    ASSERT(supportsD32s8 || supportsD24s8);
+    DAWN_ASSERT(supportsD32s8 || supportsD24s8);
 
     if (!supportsD24s8) {
         deviceToggles->ForceSet(Toggle::VulkanUseD32S8, true);

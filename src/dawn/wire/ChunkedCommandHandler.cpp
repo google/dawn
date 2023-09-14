@@ -62,7 +62,7 @@ ChunkedCommandHandler::ChunkedCommandsResult ChunkedCommandHandler::BeginChunked
     const volatile char* commands,
     size_t commandSize,
     size_t initialSize) {
-    ASSERT(!mChunkedCommandData);
+    DAWN_ASSERT(!mChunkedCommandData);
 
     // Reserve space for all the command data we're expecting, and copy the initial data
     // to the start of the memory.

@@ -35,8 +35,8 @@ AdapterBase::AdapterBase(Ref<PhysicalDeviceBase> physicalDevice,
       mFeatureLevel(featureLevel),
       mTogglesState(requiredAdapterToggles),
       mPowerPreference(powerPreference) {
-    ASSERT(mPhysicalDevice->SupportsFeatureLevel(featureLevel));
-    ASSERT(mTogglesState.GetStage() == ToggleStage::Adapter);
+    DAWN_ASSERT(mPhysicalDevice->SupportsFeatureLevel(featureLevel));
+    DAWN_ASSERT(mTogglesState.GetStage() == ToggleStage::Adapter);
     // Cache the supported features of this adapter. Note that with device toggles overriding, a
     // device created by this adapter may support features not in this set and vice versa.
     mSupportedFeatures = mPhysicalDevice->GetSupportedFeatures(mTogglesState);
@@ -58,13 +58,13 @@ PhysicalDeviceBase* AdapterBase::GetPhysicalDevice() {
 
 InstanceBase* AdapterBase::APIGetInstance() const {
     InstanceBase* instance = mPhysicalDevice->GetInstance();
-    ASSERT(instance != nullptr);
+    DAWN_ASSERT(instance != nullptr);
     instance->APIReference();
     return instance;
 }
 
 bool AdapterBase::APIGetLimits(SupportedLimits* limits) const {
-    ASSERT(limits != nullptr);
+    DAWN_ASSERT(limits != nullptr);
     if (limits->nextInChain != nullptr) {
         return false;
     }
@@ -77,7 +77,7 @@ bool AdapterBase::APIGetLimits(SupportedLimits* limits) const {
 }
 
 void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
-    ASSERT(properties != nullptr);
+    DAWN_ASSERT(properties != nullptr);
 
     MaybeError result = ValidateSingleSType(properties->nextInChain,
                                             wgpu::SType::DawnAdapterPropertiesPowerPreference);
@@ -152,7 +152,7 @@ DeviceBase* AdapterBase::APICreateDevice(const DeviceDescriptor* descriptor) {
 }
 
 ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDevice(const DeviceDescriptor* descriptor) {
-    ASSERT(descriptor != nullptr);
+    DAWN_ASSERT(descriptor != nullptr);
 
     // Create device toggles state from required toggles descriptor and inherited adapter toggles
     // state.
@@ -183,7 +183,7 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDevice(const DeviceDescriptor*
     if (descriptor->requiredLimits != nullptr) {
         SupportedLimits supportedLimits;
         bool success = APIGetLimits(&supportedLimits);
-        ASSERT(success);
+        DAWN_ASSERT(success);
 
         DAWN_TRY_CONTEXT(ValidateLimits(supportedLimits.limits, descriptor->requiredLimits->limits),
                          "validating required limits");

@@ -124,7 +124,7 @@ class TextureViewSamplingTest : public DawnTest {
     }
 
     void InitTexture(uint32_t arrayLayerCount, uint32_t mipLevelCount) {
-        ASSERT(arrayLayerCount > 0 && mipLevelCount > 0);
+        DAWN_ASSERT(arrayLayerCount > 0 && mipLevelCount > 0);
 
         const uint32_t textureWidthLevel0 = 1 << mipLevelCount;
         const uint32_t textureHeightLevel0 = 1 << mipLevelCount;
@@ -209,8 +209,8 @@ class TextureViewSamplingTest : public DawnTest {
                            uint32_t textureMipLevels,
                            uint32_t textureViewBaseLayer,
                            uint32_t textureViewBaseMipLevel) {
-        ASSERT(textureViewBaseLayer < textureArrayLayers);
-        ASSERT(textureViewBaseMipLevel < textureMipLevels);
+        DAWN_ASSERT(textureViewBaseLayer < textureArrayLayers);
+        DAWN_ASSERT(textureViewBaseMipLevel < textureMipLevels);
 
         InitTexture(textureArrayLayers, textureMipLevels);
 
@@ -240,13 +240,13 @@ class TextureViewSamplingTest : public DawnTest {
                                 uint32_t textureMipLevels,
                                 uint32_t textureViewBaseLayer,
                                 uint32_t textureViewBaseMipLevel) {
-        ASSERT(textureViewBaseLayer < textureArrayLayers);
-        ASSERT(textureViewBaseMipLevel < textureMipLevels);
+        DAWN_ASSERT(textureViewBaseLayer < textureArrayLayers);
+        DAWN_ASSERT(textureViewBaseMipLevel < textureMipLevels);
 
         // We always set the layer count of the texture view to be 3 to match the fragment shader in
         // this test.
         constexpr uint32_t kTextureViewLayerCount = 3;
-        ASSERT(textureArrayLayers >= textureViewBaseLayer + kTextureViewLayerCount);
+        DAWN_ASSERT(textureArrayLayers >= textureViewBaseLayer + kTextureViewLayerCount);
 
         InitTexture(textureArrayLayers, textureMipLevels);
 
@@ -585,8 +585,8 @@ class TextureViewRenderingTest : public DawnTest {
                                            uint32_t textureViewBaseLevel,
                                            uint32_t textureWidthLevel0,
                                            uint32_t textureHeightLevel0) {
-        ASSERT(dimension == wgpu::TextureViewDimension::e2D ||
-               dimension == wgpu::TextureViewDimension::e2DArray);
+        DAWN_ASSERT(dimension == wgpu::TextureViewDimension::e2D ||
+                    dimension == wgpu::TextureViewDimension::e2DArray);
         ASSERT_LT(textureViewBaseLayer, layerCount);
         ASSERT_LT(textureViewBaseLevel, levelCount);
 

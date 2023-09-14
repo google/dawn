@@ -50,7 +50,7 @@ struct MapRequestTask : TrackTaskCallback {
             // This is called from a callback, and no lock will be held by default. Hence, we need
             // to lock the mutex now because mSerial might be changed by another thread.
             auto deviceLock(buffer->GetDevice()->GetScopedLock());
-            ASSERT(mSerial != kMaxExecutionSerial);
+            DAWN_ASSERT(mSerial != kMaxExecutionSerial);
             TRACE_EVENT1(mPlatform, General, "Buffer::TaskInFlight::Finished", "serial",
                          uint64_t(mSerial));
         }
@@ -238,7 +238,7 @@ BufferBase::BufferBase(DeviceBase* device,
 }
 
 BufferBase::~BufferBase() {
-    ASSERT(mState == BufferState::Unmapped || mState == BufferState::Destroyed);
+    DAWN_ASSERT(mState == BufferState::Unmapped || mState == BufferState::Destroyed);
 }
 
 void BufferBase::DestroyImpl() {
@@ -265,24 +265,24 @@ ObjectType BufferBase::GetType() const {
 }
 
 uint64_t BufferBase::GetSize() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mSize;
 }
 
 uint64_t BufferBase::GetAllocatedSize() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     // The backend must initialize this value.
-    ASSERT(mAllocatedSize != 0);
+    DAWN_ASSERT(mAllocatedSize != 0);
     return mAllocatedSize;
 }
 
 wgpu::BufferUsage BufferBase::GetUsage() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mUsage;
 }
 
 wgpu::BufferUsage BufferBase::GetUsageExternalOnly() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return GetUsage() & ~kAllInternalBufferUsages;
 }
 
@@ -318,7 +318,7 @@ MaybeError BufferBase::MapAtCreation() {
         // It should be exactly as large as the buffer allocation.
         ptr = mStagingBuffer->GetMappedPointer();
         size = mStagingBuffer->GetSize();
-        ASSERT(size == GetAllocatedSize());
+        DAWN_ASSERT(size == GetAllocatedSize());
     } else {
         // Otherwise, the buffer is directly mappable on the CPU.
         ptr = GetMappedPointer();
@@ -338,7 +338,7 @@ MaybeError BufferBase::MapAtCreation() {
 }
 
 MaybeError BufferBase::MapAtCreationInternal() {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     mMapOffset = 0;
     mMapSize = mSize;
 
@@ -375,7 +375,7 @@ MaybeError BufferBase::MapAtCreationInternal() {
 }
 
 MaybeError BufferBase::ValidateCanUseOnQueueNow() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
 
     switch (mState) {
         case BufferState::Destroyed:
@@ -394,7 +394,7 @@ MaybeError BufferBase::ValidateCanUseOnQueueNow() const {
 
 std::function<void()> BufferBase::PrepareMappingCallback(MapRequestID mapID,
                                                          WGPUBufferMapAsyncStatus status) {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
 
     if (mMapCallback != nullptr && mapID == mLastMapID) {
         auto callback = std::move(mMapCallback);
@@ -448,7 +448,7 @@ void BufferBase::APIMapAsync(wgpu::MapMode mode,
         }
         return;
     }
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
 
     mLastMapID++;
     mMapMode = mode;
@@ -502,7 +502,7 @@ uint64_t BufferBase::APIGetSize() const {
 }
 
 MaybeError BufferBase::CopyFromStagingBuffer() {
-    ASSERT(mStagingBuffer != nullptr && mSize != 0);
+    DAWN_ASSERT(mStagingBuffer != nullptr && mSize != 0);
 
     DAWN_TRY(
         GetDevice()->CopyFromStagingToBuffer(mStagingBuffer.Get(), 0, this, 0, GetAllocatedSize()));
@@ -594,7 +594,7 @@ MaybeError BufferBase::ValidateMapAsync(wgpu::MapMode mode,
                         "The buffer usages (%s) do not contain %s.", mUsage,
                         wgpu::BufferUsage::MapRead);
     } else {
-        ASSERT(mode & wgpu::MapMode::Write);
+        DAWN_ASSERT(mode & wgpu::MapMode::Write);
         DAWN_INVALID_IF(!(mUsage & wgpu::BufferUsage::MapWrite),
                         "The buffer usages (%s) do not contain %s.", mUsage,
                         wgpu::BufferUsage::MapWrite);
@@ -639,7 +639,8 @@ bool BufferBase::CanGetMappedRange(bool writable, size_t offset, size_t size) co
             return true;
 
         case BufferState::Mapped:
-            ASSERT(bool{mMapMode & wgpu::MapMode::Read} ^ bool{mMapMode & wgpu::MapMode::Write});
+            DAWN_ASSERT(bool{mMapMode & wgpu::MapMode::Read} ^
+                        bool{mMapMode & wgpu::MapMode::Write});
             return !writable || (mMapMode & wgpu::MapMode::Write);
 
         case BufferState::PendingMap:
@@ -687,7 +688,7 @@ void BufferBase::SetIsDataInitialized() {
 
 void BufferBase::MarkUsedInPendingCommands() {
     ExecutionSerial serial = GetDevice()->GetPendingCommandSerial();
-    ASSERT(serial >= mLastUsageSerial);
+    DAWN_ASSERT(serial >= mLastUsageSerial);
     mLastUsageSerial = serial;
 }
 

@@ -20,7 +20,7 @@ Mutex::~Mutex() = default;
 void Mutex::Lock() {
 #if defined(DAWN_ENABLE_ASSERTS)
     auto currentThread = std::this_thread::get_id();
-    ASSERT(mOwner.load(std::memory_order_acquire) != currentThread);
+    DAWN_ASSERT(mOwner.load(std::memory_order_acquire) != currentThread);
 #endif  // DAWN_ENABLE_ASSERTS
 
     mNativeMutex.lock();
@@ -31,7 +31,7 @@ void Mutex::Lock() {
 }
 void Mutex::Unlock() {
 #if defined(DAWN_ENABLE_ASSERTS)
-    ASSERT(IsLockedByCurrentThread());
+    DAWN_ASSERT(IsLockedByCurrentThread());
     mOwner.store(std::thread::id(), std::memory_order_release);
 #endif  // DAWN_ENABLE_ASSERTS
 

@@ -61,23 +61,23 @@ void RenderEncoderBase::DestroyImpl() {
 }
 
 const AttachmentState* RenderEncoderBase::GetAttachmentState() const {
-    ASSERT(!IsError());
-    ASSERT(mAttachmentState != nullptr);
+    DAWN_ASSERT(!IsError());
+    DAWN_ASSERT(mAttachmentState != nullptr);
     return mAttachmentState.Get();
 }
 
 bool RenderEncoderBase::IsDepthReadOnly() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mDepthReadOnly;
 }
 
 bool RenderEncoderBase::IsStencilReadOnly() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mStencilReadOnly;
 }
 
 uint64_t RenderEncoderBase::GetDrawCount() const {
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return mDrawCount;
 }
 

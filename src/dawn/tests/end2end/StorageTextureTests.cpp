@@ -35,7 +35,7 @@ class StorageTextureTests : public DawnTest {
                                  uint32_t y,
                                  uint32_t depthOrArrayLayer) {
         const uint32_t pixelValue = 1 + x + kWidth * (y + kHeight * depthOrArrayLayer);
-        ASSERT(pixelValue <= 255u / 4);
+        DAWN_ASSERT(pixelValue <= 255u / 4);
 
         switch (format) {
             // 32-bit unsigned integer formats
@@ -402,7 +402,7 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
         wgpu::TextureFormat format,
         wgpu::TextureViewDimension dimension = wgpu::TextureViewDimension::e2D) {
         uint32_t texelSize = utils::GetTexelBlockSizeInBytes(format);
-        ASSERT(kWidth * texelSize <= kTextureBytesPerRowAlignment);
+        DAWN_ASSERT(kWidth * texelSize <= kTextureBytesPerRowAlignment);
 
         const uint32_t bytesPerTextureRow = texelSize * kWidth;
         const uint32_t sliceCount =
@@ -637,7 +637,7 @@ fn IsEqualTo(pixel : vec4f, expected : vec4f) -> bool {
 
         // Check if the contents in the result buffer are what we expect.
         uint32_t texelSize = utils::GetTexelBlockSizeInBytes(format);
-        ASSERT(size.width * texelSize <= kTextureBytesPerRowAlignment);
+        DAWN_ASSERT(size.width * texelSize <= kTextureBytesPerRowAlignment);
 
         for (size_t z = 0; z < size.depthOrArrayLayers; ++z) {
             for (size_t y = 0; y < size.height; ++y) {

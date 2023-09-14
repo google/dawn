@@ -53,8 +53,8 @@ class TextureShaderBuiltinTests : public DawnTest {
     wgpu::Texture CreateTexture(uint32_t arrayLayerCount,
                                 uint32_t mipLevelCount,
                                 uint32_t sampleCount) {
-        ASSERT(arrayLayerCount > 0 && mipLevelCount > 0);
-        ASSERT(sampleCount == 1 || sampleCount == 4);
+        DAWN_ASSERT(arrayLayerCount > 0 && mipLevelCount > 0);
+        DAWN_ASSERT(sampleCount == 1 || sampleCount == 4);
 
         const uint32_t textureWidthLevel0 = 1 << mipLevelCount;
         const uint32_t textureHeightLevel0 = 1 << mipLevelCount;
@@ -284,8 +284,8 @@ TEST_P(TextureShaderBuiltinTests, OnePipelineMultipleDispatches) {
         kSampleCount_1,
         kMipLevelsView_2,
     };
-    ASSERT(sizeof(expected_1) == sizeof(expected_2));
-    ASSERT(sizeof(expected_1) == sizeof(expected_3));
+    DAWN_ASSERT(sizeof(expected_1) == sizeof(expected_2));
+    DAWN_ASSERT(sizeof(expected_1) == sizeof(expected_3));
 
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.size = sizeof(expected_1);
@@ -417,7 +417,7 @@ TEST_P(TextureShaderBuiltinTests, OneShaderModuleMultipleEntryPoints) {
         kSampleCount_2,
         99,
     };
-    ASSERT(sizeof(expected_1) == sizeof(expected_2));
+    DAWN_ASSERT(sizeof(expected_1) == sizeof(expected_2));
 
     wgpu::BufferDescriptor bufferDesc;
     bufferDesc.size = sizeof(expected_1);

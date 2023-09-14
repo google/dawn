@@ -56,7 +56,7 @@ class MockCallback<R (*)(Args...)> : public ::testing::MockFunction<R(Args...)> 
         // repeated calls to the callback still forward the userdata correctly.
         // Userdata will be destroyed when the mock is destroyed.
         auto [result, inserted] = mUserdatas.insert(std::move(mockAndUserdata));
-        ASSERT(inserted);
+        DAWN_ASSERT(inserted);
         return result->get();
     }
 
@@ -78,10 +78,10 @@ class MockCallback<R (*)(Args...)> : public ::testing::MockFunction<R(Args...)> 
                       "Last callback argument must be void* userdata");
 
         // Extract the mock.
-        ASSERT(userdata != nullptr);
+        DAWN_ASSERT(userdata != nullptr);
         auto* mockAndUserdata = reinterpret_cast<MockAndUserdata*>(userdata);
         MockCallback* mock = mockAndUserdata->mock;
-        ASSERT(mock != nullptr);
+        DAWN_ASSERT(mock != nullptr);
 
         // Replace the userdata
         std::get<ArgC - 1>(tuple) = mockAndUserdata->userdata;

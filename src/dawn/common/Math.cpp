@@ -28,12 +28,12 @@
 namespace dawn {
 
 uint32_t ScanForward(uint32_t bits) {
-    ASSERT(bits != 0);
+    DAWN_ASSERT(bits != 0);
 #if DAWN_COMPILER_IS(MSVC)
     // NOLINTNEXTLINE(runtime/int)
     unsigned long firstBitIndex = 0ul;
     unsigned char ret = _BitScanForward(&firstBitIndex, bits);
-    ASSERT(ret != 0);
+    DAWN_ASSERT(ret != 0);
     return firstBitIndex;
 #else
     return static_cast<uint32_t>(__builtin_ctz(bits));
@@ -41,12 +41,12 @@ uint32_t ScanForward(uint32_t bits) {
 }
 
 uint32_t Log2(uint32_t value) {
-    ASSERT(value != 0);
+    DAWN_ASSERT(value != 0);
 #if DAWN_COMPILER_IS(MSVC)
     // NOLINTNEXTLINE(runtime/int)
     unsigned long firstBitIndex = 0ul;
     unsigned char ret = _BitScanReverse(&firstBitIndex, value);
-    ASSERT(ret != 0);
+    DAWN_ASSERT(ret != 0);
     return firstBitIndex;
 #else
     return 31 - static_cast<uint32_t>(__builtin_clz(value));
@@ -54,13 +54,13 @@ uint32_t Log2(uint32_t value) {
 }
 
 uint32_t Log2(uint64_t value) {
-    ASSERT(value != 0);
+    DAWN_ASSERT(value != 0);
 #if DAWN_COMPILER_IS(MSVC)
 #if DAWN_PLATFORM_IS(64_BIT)
     // NOLINTNEXTLINE(runtime/int)
     unsigned long firstBitIndex = 0ul;
     unsigned char ret = _BitScanReverse64(&firstBitIndex, value);
-    ASSERT(ret != 0);
+    DAWN_ASSERT(ret != 0);
     return firstBitIndex;
 #else   // DAWN_PLATFORM_IS(64_BIT)
     // NOLINTNEXTLINE(runtime/int)
@@ -69,7 +69,7 @@ uint32_t Log2(uint64_t value) {
         return firstBitIndex + 32;
     }
     unsigned char ret = _BitScanReverse(&firstBitIndex, value & 0xFFFFFFFF);
-    ASSERT(ret != 0);
+    DAWN_ASSERT(ret != 0);
     return firstBitIndex;
 #endif  // DAWN_PLATFORM_IS(64_BIT)
 #else   // DAWN_COMPILER_IS(MSVC)
@@ -86,20 +86,20 @@ uint64_t NextPowerOfTwo(uint64_t n) {
 }
 
 bool IsPowerOfTwo(uint64_t n) {
-    ASSERT(n != 0);
+    DAWN_ASSERT(n != 0);
     return (n & (n - 1)) == 0;
 }
 
 bool IsPtrAligned(const void* ptr, size_t alignment) {
-    ASSERT(IsPowerOfTwo(alignment));
-    ASSERT(alignment != 0);
+    DAWN_ASSERT(IsPowerOfTwo(alignment));
+    DAWN_ASSERT(alignment != 0);
     return (reinterpret_cast<size_t>(ptr) & (alignment - 1)) == 0;
 }
 
 bool IsAligned(uint32_t value, size_t alignment) {
-    ASSERT(alignment <= UINT32_MAX);
-    ASSERT(IsPowerOfTwo(alignment));
-    ASSERT(alignment != 0);
+    DAWN_ASSERT(alignment <= UINT32_MAX);
+    DAWN_ASSERT(IsPowerOfTwo(alignment));
+    DAWN_ASSERT(alignment != 0);
     uint32_t alignment32 = static_cast<uint32_t>(alignment);
     return (value & (alignment32 - 1)) == 0;
 }
@@ -159,9 +159,9 @@ float SRGBToLinear(float srgb) {
 }
 
 uint64_t RoundUp(uint64_t n, uint64_t m) {
-    ASSERT(m > 0);
-    ASSERT(n > 0);
-    ASSERT(m <= std::numeric_limits<uint64_t>::max() - n);
+    DAWN_ASSERT(m > 0);
+    DAWN_ASSERT(n > 0);
+    DAWN_ASSERT(m <= std::numeric_limits<uint64_t>::max() - n);
     return ((n + m - 1) / m) * m;
 }
 

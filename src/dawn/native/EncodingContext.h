@@ -113,7 +113,7 @@ class EncodingContext {
         if (!CheckCurrentEncoder(encoder)) {
             return false;
         }
-        ASSERT(!mWasMovedToIterator);
+        DAWN_ASSERT(!mWasMovedToIterator);
         return !ConsumedError(encodeFunction(&mPendingCommands));
     }
 
@@ -125,7 +125,7 @@ class EncodingContext {
         if (!CheckCurrentEncoder(encoder)) {
             return false;
         }
-        ASSERT(!mWasMovedToIterator);
+        DAWN_ASSERT(!mWasMovedToIterator);
         return !ConsumedError(encodeFunction(&mPendingCommands), formatStr, args...);
     }
 

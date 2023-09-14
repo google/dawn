@@ -136,20 +136,20 @@ class ServiceImplementationFD : public ServiceImplementation {
             mDevice->fn.GetSemaphoreFdKHR(mDevice->GetVkDevice(), &semaphoreGetFdInfo, &fd),
             "vkGetSemaphoreFdKHR"));
 
-        ASSERT(fd >= 0);
+        DAWN_ASSERT(fd >= 0);
         return fd;
     }
 
     // Duplicate a new external handle from the given one.
     ExternalSemaphoreHandle DuplicateHandle(ExternalSemaphoreHandle handle) override {
         int fd = dup(handle);
-        ASSERT(fd >= 0);
+        DAWN_ASSERT(fd >= 0);
         return fd;
     }
 
     void CloseHandle(ExternalSemaphoreHandle handle) override {
         int ret = close(handle);
-        ASSERT(ret == 0);
+        DAWN_ASSERT(ret == 0);
     }
 
   private:

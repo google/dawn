@@ -277,7 +277,7 @@ MaybeError ValidateColorAttachmentRenderToSingleSampled(
     const DeviceBase* device,
     const RenderPassColorAttachment& colorAttachment,
     const DawnRenderPassColorAttachmentRenderToSingleSampled* msaaRenderToSingleSampledDesc) {
-    ASSERT(msaaRenderToSingleSampledDesc != nullptr);
+    DAWN_ASSERT(msaaRenderToSingleSampledDesc != nullptr);
 
     DAWN_INVALID_IF(
         !device->HasFeature(Feature::MSAARenderToSingleSampled),
@@ -406,7 +406,7 @@ MaybeError ValidateRenderPassDepthStencilAttachment(
         attachment->GetAspects() != format.aspects,
         "The depth stencil attachment %s must encompass all aspects of it's texture's format (%s).",
         attachment, format.format);
-    ASSERT(attachment->GetFormat().format == format.format);
+    DAWN_ASSERT(attachment->GetFormat().format == format.format);
 
     DAWN_INVALID_IF(!format.HasDepthOrStencil(),
                     "The depth stencil attachment %s format (%s) is not a depth stencil format.",
@@ -824,14 +824,14 @@ MaybeError ApplyMSAARenderToSingleSampledLoadOp(DeviceBase* device,
                                                 const RenderPassDescriptor* renderPassDescriptor,
                                                 uint32_t implicitSampleCount) {
     // TODO(dawn:1710): support multiple attachments.
-    ASSERT(renderPassDescriptor->colorAttachmentCount == 1);
+    DAWN_ASSERT(renderPassDescriptor->colorAttachmentCount == 1);
     if (renderPassDescriptor->colorAttachments[0].loadOp != wgpu::LoadOp::Load) {
         return {};
     }
 
     // TODO(dawn:1710): support loading resolve texture on platforms that don't support reading
     // it in fragment shader such as vulkan.
-    ASSERT(device->IsResolveTextureBlitWithDrawSupported());
+    DAWN_ASSERT(device->IsResolveTextureBlitWithDrawSupported());
 
     // Read implicit resolve texture in fragment shader and copy to the implicit MSAA attachment.
     return BlitMSAARenderToSingleSampledColorWithDraw(device, renderPassEncoder,
@@ -1003,7 +1003,7 @@ ComputePassEncoder* CommandEncoder::APIBeginComputePass(const ComputePassDescrip
 
 Ref<ComputePassEncoder> CommandEncoder::BeginComputePass(const ComputePassDescriptor* descriptor) {
     DeviceBase* device = GetDevice();
-    ASSERT(device->IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
 
     bool success = mEncodingContext.TryEncode(
         this,
@@ -1068,7 +1068,7 @@ RenderPassEncoder* CommandEncoder::APIBeginRenderPass(const RenderPassDescriptor
 
 Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescriptor* descriptor) {
     DeviceBase* device = GetDevice();
-    ASSERT(device->IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
 
     RenderPassResourceUsageTracker usageTracker;
 
@@ -1089,8 +1089,8 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
             DAWN_TRY(ValidateRenderPassDescriptor(device, descriptor, &width, &height, &sampleCount,
                                                   &implicitSampleCount, mUsageValidationMode));
 
-            ASSERT(width > 0 && height > 0 && sampleCount > 0 &&
-                   (implicitSampleCount == 0 || implicitSampleCount == sampleCount));
+            DAWN_ASSERT(width > 0 && height > 0 && sampleCount > 0 &&
+                        (implicitSampleCount == 0 || implicitSampleCount == sampleCount));
 
             mEncodingContext.WillBeginRenderPass();
             BeginRenderPassCmd* cmd =
@@ -1199,9 +1199,9 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
                     // GPURenderPassDepthStencilAttachment.stencilClearValue will be converted to
                     // the type of the stencil aspect of view by taking the same number of LSBs as
                     // the number of bits in the stencil aspect of one texel block of view.
-                    ASSERT(view->GetFormat()
-                               .GetAspectInfo(dawn::native::Aspect::Stencil)
-                               .block.byteSize == 1u);
+                    DAWN_ASSERT(view->GetFormat()
+                                    .GetAspectInfo(dawn::native::Aspect::Stencil)
+                                    .block.byteSize == 1u);
                     cmd->depthStencilAttachment.clearStencil &= 0xFF;
                 }
 
@@ -1403,7 +1403,7 @@ ResultOrError<std::function<void()>> CommandEncoder::ApplyRenderPassWorkarounds(
                 Ref<TextureBase> temporaryResolveTexture;
                 Ref<TextureViewBase> temporaryResolveView;
                 {
-                    ASSERT(device->IsLockedByCurrentThreadIfNeeded());
+                    DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
 
                     DAWN_TRY_ASSIGN(temporaryResolveTexture, device->CreateTexture(&descriptor));
 
@@ -1781,7 +1781,8 @@ void CommandEncoder::APICopyTextureToTexture(const ImageCopyTexture* source,
             mTopLevelTextures.insert(destination->texture);
 
             Aspect aspect = ConvertAspect(source->texture->GetFormat(), source->aspect);
-            ASSERT(aspect == ConvertAspect(destination->texture->GetFormat(), destination->aspect));
+            DAWN_ASSERT(aspect ==
+                        ConvertAspect(destination->texture->GetFormat(), destination->aspect));
 
             TextureCopy src;
             src.texture = source->texture;
@@ -2045,7 +2046,7 @@ CommandBufferBase* CommandEncoder::APIFinish(const CommandBufferDescriptor* desc
         errorCommandBuffer->SetEncoderLabel(this->GetLabel());
         return errorCommandBuffer;
     }
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
     return commandBuffer.Detach();
 }
 

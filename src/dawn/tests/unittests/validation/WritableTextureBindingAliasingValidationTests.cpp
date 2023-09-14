@@ -146,7 +146,7 @@ class WritableTextureBindingAliasingValidationTests : public ValidationTest {
         pipelineDescriptor.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
         pipelineDescriptor.layout = nullptr;
 
-        ASSERT(!layouts.empty());
+        DAWN_ASSERT(!layouts.empty());
         wgpu::PipelineLayoutDescriptor descriptor;
         descriptor.bindGroupLayoutCount = layouts.size();
         descriptor.bindGroupLayouts = layouts.data();
@@ -182,7 +182,7 @@ class WritableTextureBindingAliasingValidationTests : public ValidationTest {
                                                   const BindingDescriptorGroups& bindingsGroups) {
         std::vector<wgpu::BindGroup> bindGroups;
 
-        ASSERT(layouts.size() == bindingsGroups.size());
+        DAWN_ASSERT(layouts.size() == bindingsGroups.size());
         for (size_t groupIdx = 0; groupIdx < layouts.size(); groupIdx++) {
             const auto& bindings = bindingsGroups[groupIdx];
 
@@ -211,8 +211,8 @@ class WritableTextureBindingAliasingValidationTests : public ValidationTest {
         wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
         computePassEncoder.SetPipeline(computePipeline);
 
-        ASSERT(bindGroups.size() == test.bindingEntries.size());
-        ASSERT(bindGroups.size() > 0);
+        DAWN_ASSERT(bindGroups.size() == test.bindingEntries.size());
+        DAWN_ASSERT(bindGroups.size() > 0);
         for (size_t i = 0; i < bindGroups.size(); ++i) {
             computePassEncoder.SetBindGroup(i, bindGroups[i]);
         }
@@ -236,8 +236,8 @@ class WritableTextureBindingAliasingValidationTests : public ValidationTest {
         wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
         renderPassEncoder.SetPipeline(renderPipeline);
 
-        ASSERT(bindGroups.size() == test.bindingEntries.size());
-        ASSERT(bindGroups.size() > 0);
+        DAWN_ASSERT(bindGroups.size() == test.bindingEntries.size());
+        DAWN_ASSERT(bindGroups.size() > 0);
         for (size_t i = 0; i < bindGroups.size(); ++i) {
             renderPassEncoder.SetBindGroup(i, bindGroups[i]);
         }

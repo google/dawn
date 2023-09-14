@@ -167,12 +167,12 @@ void DoRender(WindowData* data) {
 
 std::ostream& operator<<(std::ostream& o, const wgpu::SwapChainDescriptor& desc) {
     // For now only render attachment is possible.
-    ASSERT(desc.usage == wgpu::TextureUsage::RenderAttachment);
+    DAWN_ASSERT(desc.usage == wgpu::TextureUsage::RenderAttachment);
     o << "RenderAttachment ";
     o << desc.width << "x" << desc.height << " ";
 
     // For now only BGRA is allowed
-    ASSERT(desc.format == wgpu::TextureFormat::BGRA8Unorm);
+    DAWN_ASSERT(desc.format == wgpu::TextureFormat::BGRA8Unorm);
     o << "BGRA8Unorm ";
 
     switch (desc.presentMode) {
@@ -212,7 +212,7 @@ void OnKeyPress(GLFWwindow* window, int key, int, int action, int) {
         return;
     }
 
-    ASSERT(windows.count(window) == 1);
+    DAWN_ASSERT(windows.count(window) == 1);
 
     WindowData* data = windows[window].get();
     switch (key) {
@@ -273,7 +273,7 @@ int main(int argc, const char* argv[]) {
     instance = std::make_unique<dawn::native::Instance>();
 
     dawn::native::Adapter chosenAdapter = instance->EnumerateAdapters()[0];
-    ASSERT(chosenAdapter);
+    DAWN_ASSERT(chosenAdapter);
 
     // Setup the device on that adapter.
     device = wgpu::Device::Acquire(chosenAdapter.CreateDevice());

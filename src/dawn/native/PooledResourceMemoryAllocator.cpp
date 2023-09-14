@@ -24,12 +24,12 @@ PooledResourceMemoryAllocator::PooledResourceMemoryAllocator(ResourceHeapAllocat
     : mHeapAllocator(heapAllocator) {}
 
 PooledResourceMemoryAllocator::~PooledResourceMemoryAllocator() {
-    ASSERT(mPool.empty());
+    DAWN_ASSERT(mPool.empty());
 }
 
 void PooledResourceMemoryAllocator::DestroyPool() {
     for (auto& resourceHeap : mPool) {
-        ASSERT(resourceHeap != nullptr);
+        DAWN_ASSERT(resourceHeap != nullptr);
         mHeapAllocator->DeallocateResourceHeap(std::move(resourceHeap));
     }
 

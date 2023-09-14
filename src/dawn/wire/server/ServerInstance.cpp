@@ -51,7 +51,7 @@ void Server::OnRequestAdapterCallback(RequestAdapterUserdata* data,
     if (status != WGPURequestAdapterStatus_Success) {
         // Free the ObjectId which will make it unusable.
         AdapterObjects().Free(data->adapterObjectId);
-        ASSERT(adapter == nullptr);
+        DAWN_ASSERT(adapter == nullptr);
         SerializeCommand(cmd);
         return;
     }

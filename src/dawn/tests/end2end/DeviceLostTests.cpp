@@ -489,7 +489,7 @@ TEST_P(DeviceLostTest, FreeBindGroupAfterDeviceLossWithPendingCommands) {
     // reference to the BGL which wouldn't be freed until the pending serial passes.
     // Since the device is lost, destruction will clean up immediately without waiting for the
     // serial. The implementation needs to be sure to clear these BGL references. At the end of
-    // Device shut down, we ASSERT that the BGL cache is empty.
+    // Device shut down, we DAWN_ASSERT that the BGL cache is empty.
     bgl = nullptr;
     bg = nullptr;
 }

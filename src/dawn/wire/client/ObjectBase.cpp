@@ -46,7 +46,7 @@ void ObjectBase::Reference() {
 }
 
 bool ObjectBase::Release() {
-    ASSERT(mRefcount != 0);
+    DAWN_ASSERT(mRefcount != 0);
     mRefcount--;
     return mRefcount == 0;
 }

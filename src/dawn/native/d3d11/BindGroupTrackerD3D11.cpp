@@ -42,47 +42,47 @@ bool CheckAllSlotsAreEmpty(CommandRecordingContext* commandContext) {
          slot < D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT - kReservedCBVSlots; ++slot) {
         ID3D11Buffer* buffer = nullptr;
         deviceContext1->VSGetConstantBuffers1(slot, 1, &buffer, nullptr, nullptr);
-        ASSERT(buffer == nullptr);
+        DAWN_ASSERT(buffer == nullptr);
         deviceContext1->PSGetConstantBuffers1(slot, 1, &buffer, nullptr, nullptr);
-        ASSERT(buffer == nullptr);
+        DAWN_ASSERT(buffer == nullptr);
         deviceContext1->CSGetConstantBuffers1(slot, 1, &buffer, nullptr, nullptr);
-        ASSERT(buffer == nullptr);
+        DAWN_ASSERT(buffer == nullptr);
     }
 
     // Check resource slots
     for (UINT slot = 0; slot < D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT; ++slot) {
         ID3D11ShaderResourceView* srv = nullptr;
         deviceContext1->VSGetShaderResources(slot, 1, &srv);
-        ASSERT(srv == nullptr);
+        DAWN_ASSERT(srv == nullptr);
         deviceContext1->PSGetShaderResources(slot, 1, &srv);
-        ASSERT(srv == nullptr);
+        DAWN_ASSERT(srv == nullptr);
         deviceContext1->CSGetShaderResources(slot, 1, &srv);
-        ASSERT(srv == nullptr);
+        DAWN_ASSERT(srv == nullptr);
     }
 
     // Check sampler slots
     for (UINT slot = 0; slot < D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT; ++slot) {
         ID3D11SamplerState* sampler = nullptr;
         deviceContext1->VSGetSamplers(slot, 1, &sampler);
-        ASSERT(sampler == nullptr);
+        DAWN_ASSERT(sampler == nullptr);
         deviceContext1->PSGetSamplers(slot, 1, &sampler);
-        ASSERT(sampler == nullptr);
+        DAWN_ASSERT(sampler == nullptr);
         deviceContext1->CSGetSamplers(slot, 1, &sampler);
-        ASSERT(sampler == nullptr);
+        DAWN_ASSERT(sampler == nullptr);
     }
 
     // Check UAV slots for compute
     for (UINT slot = 0; slot < D3D11_1_UAV_SLOT_COUNT; ++slot) {
         ID3D11UnorderedAccessView* uav = nullptr;
         deviceContext1->CSGetUnorderedAccessViews(slot, 1, &uav);
-        ASSERT(uav == nullptr);
+        DAWN_ASSERT(uav == nullptr);
     }
     // Check UAV slots for render
     for (UINT slot = 0; slot < commandContext->GetDevice()->GetUAVSlotCount(); ++slot) {
         ID3D11UnorderedAccessView* uav = nullptr;
         deviceContext1->OMGetRenderTargetsAndUnorderedAccessViews(0, nullptr, nullptr, slot, 1,
                                                                   &uav);
-        ASSERT(uav == nullptr);
+        DAWN_ASSERT(uav == nullptr);
     }
 
     return true;
@@ -135,7 +135,7 @@ BindGroupTracker::~BindGroupTracker() {
         }
     }
     // All slots should be unbound here.
-    ASSERT(CheckAllSlotsAreEmpty(mCommandContext));
+    DAWN_ASSERT(CheckAllSlotsAreEmpty(mCommandContext));
 }
 
 MaybeError BindGroupTracker::Apply() {
@@ -167,7 +167,7 @@ MaybeError BindGroupTracker::Apply() {
                         switch (bindingInfo.buffer.type) {
                             case wgpu::BufferBindingType::Storage:
                             case kInternalStorageBufferBinding: {
-                                ASSERT(IsSubset(
+                                DAWN_ASSERT(IsSubset(
                                     bindingInfo.visibility,
                                     wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute));
                                 ComPtr<ID3D11UnorderedAccessView> d3d11UAV;
@@ -305,8 +305,9 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                     }
                     case wgpu::BufferBindingType::Storage:
                     case kInternalStorageBufferBinding: {
-                        ASSERT(IsSubset(bindingInfo.visibility,
-                                        wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute));
+                        DAWN_ASSERT(
+                            IsSubset(bindingInfo.visibility,
+                                     wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute));
                         if (bindingVisibility & wgpu::ShaderStage::Compute) {
                             ComPtr<ID3D11UnorderedAccessView> d3d11UAV;
                             DAWN_TRY_ASSIGN(d3d11UAV, ToBackend(binding.buffer)
@@ -457,8 +458,9 @@ void BindGroupTracker::UnApplyBindGroup(BindGroupIndex index) {
                     }
                     case wgpu::BufferBindingType::Storage:
                     case kInternalStorageBufferBinding: {
-                        ASSERT(IsSubset(bindingInfo.visibility,
-                                        wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute));
+                        DAWN_ASSERT(
+                            IsSubset(bindingInfo.visibility,
+                                     wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Compute));
                         ID3D11UnorderedAccessView* nullUAV = nullptr;
                         if (bindingVisibility & wgpu::ShaderStage::Fragment) {
                             deviceContext1->OMSetRenderTargetsAndUnorderedAccessViews(

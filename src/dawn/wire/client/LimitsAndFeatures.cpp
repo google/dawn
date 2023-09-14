@@ -24,7 +24,7 @@ LimitsAndFeatures::LimitsAndFeatures() = default;
 LimitsAndFeatures::~LimitsAndFeatures() = default;
 
 bool LimitsAndFeatures::GetLimits(WGPUSupportedLimits* limits) const {
-    ASSERT(limits != nullptr);
+    DAWN_ASSERT(limits != nullptr);
     if (limits->nextInChain != nullptr) {
         return false;
     }
@@ -47,13 +47,13 @@ size_t LimitsAndFeatures::EnumerateFeatures(WGPUFeatureName* features) const {
 }
 
 void LimitsAndFeatures::SetLimits(const WGPUSupportedLimits* limits) {
-    ASSERT(limits != nullptr);
+    DAWN_ASSERT(limits != nullptr);
     mLimits = *limits;
     mLimits.nextInChain = nullptr;
 }
 
 void LimitsAndFeatures::SetFeatures(const WGPUFeatureName* features, uint32_t featuresCount) {
-    ASSERT(features != nullptr || featuresCount == 0);
+    DAWN_ASSERT(features != nullptr || featuresCount == 0);
     for (uint32_t i = 0; i < featuresCount; ++i) {
         // Filter out features that the server supports, but the client does not.
         // (Could be different versions)

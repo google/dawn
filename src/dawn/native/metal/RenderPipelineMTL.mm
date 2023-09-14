@@ -428,7 +428,7 @@ MaybeError RenderPipeline::Initialize() {
         return DAWN_INTERNAL_ERROR(std::string("Error creating pipeline state ") +
                                    [error.localizedDescription UTF8String]);
     }
-    ASSERT(mMtlRenderPipelineState != nil);
+    DAWN_ASSERT(mMtlRenderPipelineState != nil);
 
     // Create depth stencil state and cache it, fetch the cached depth stencil state when we
     // call setDepthStencilState() for a given render pipeline in CommandEncoder, in order
@@ -462,7 +462,7 @@ id<MTLDepthStencilState> RenderPipeline::GetMTLDepthStencilState() {
 }
 
 uint32_t RenderPipeline::GetMtlVertexBufferIndex(VertexBufferSlot slot) const {
-    ASSERT(slot < kMaxVertexBuffersTyped);
+    DAWN_ASSERT(slot < kMaxVertexBuffersTyped);
     return mMtlVertexBufferIndices[slot];
 }
 

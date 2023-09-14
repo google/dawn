@@ -208,12 +208,12 @@ OnDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     // We get to this line if no device was associated with the message. Crash so that the failure
     // is loud and makes tests fail in Debug.
     dawn::ErrorLog() << pCallbackData->pMessageIdName << ": " << pCallbackData->pMessage;
-    ASSERT(false);
+    DAWN_ASSERT(false);
 
     return VK_FALSE;
 }
 
-// A debug callback specifically for instance creation so that we don't fire an ASSERT when
+// A debug callback specifically for instance creation so that we don't fire an DAWN_ASSERT when
 // the instance fails creation in an expected manner (for example the system not having
 // Vulkan drivers).
 VKAPI_ATTR VkBool32 VKAPI_CALL
@@ -230,7 +230,7 @@ OnInstanceCreationDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT mess
 VulkanInstance::VulkanInstance() = default;
 
 VulkanInstance::~VulkanInstance() {
-    ASSERT(mMessageListenerDevices.empty());
+    DAWN_ASSERT(mMessageListenerDevices.empty());
 
     if (mDebugUtilsMessenger != VK_NULL_HANDLE) {
         mFunctions.DestroyDebugUtilsMessengerEXT(mInstance, mDebugUtilsMessenger, nullptr);

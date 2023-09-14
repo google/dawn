@@ -82,7 +82,7 @@ MaybeError ValidateSTypes(const ChainedStructOut* chain,
 // SType in 'duplicate'.
 template <typename Root, typename Unpacked, typename Ext>
 bool UnpackExtension(Unpacked& unpacked, const ChainedStruct* chain, bool& duplicate) {
-    ASSERT(chain != nullptr);
+    DAWN_ASSERT(chain != nullptr);
     if (chain->sType == STypeFor<Ext>) {
         auto& member = std::get<Ext>(unpacked);
         if (member != nullptr) {

@@ -178,7 +178,7 @@ class ContentLessObjectCache {
 
     // The dtor asserts that the cache is empty to aid in finding pointer leaks that can be
     // possible if the RefCountedT doesn't correctly implement the DeleteThis function to Uncache.
-    ~ContentLessObjectCache() { ASSERT(Empty()); }
+    ~ContentLessObjectCache() { DAWN_ASSERT(Empty()); }
 
     // Inserts the object into the cache returning a pair where the first is a Ref to the
     // inserted or existing object, and the second is a bool that is true if we inserted
@@ -201,7 +201,7 @@ class ContentLessObjectCache {
                 } else {
                     mCache.erase(it);
                     auto result = mCache.insert(weakref);
-                    ASSERT(result.second);
+                    DAWN_ASSERT(result.second);
                     obj->mCache = this;
                     return {obj, true};
                 }

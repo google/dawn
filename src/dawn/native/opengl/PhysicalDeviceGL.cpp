@@ -129,9 +129,9 @@ bool PhysicalDevice::SupportsExternalImages() const {
 
 MaybeError PhysicalDevice::InitializeImpl() {
     if (mFunctions.GetVersion().IsES()) {
-        ASSERT(GetBackendType() == wgpu::BackendType::OpenGLES);
+        DAWN_ASSERT(GetBackendType() == wgpu::BackendType::OpenGLES);
     } else {
-        ASSERT(GetBackendType() == wgpu::BackendType::OpenGL);
+        DAWN_ASSERT(GetBackendType() == wgpu::BackendType::OpenGL);
     }
 
     mName = reinterpret_cast<const char*>(mFunctions.GetString(GL_RENDERER));

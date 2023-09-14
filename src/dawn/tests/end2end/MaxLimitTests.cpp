@@ -428,7 +428,7 @@ TEST_P(MaxLimitTests, ReallyLargeBindGroup) {
         wgpu::Texture texture = device.CreateTexture(&textureDesc);
 
         if (format == wgpu::TextureFormat::R8Unorm) {
-            ASSERT(expectedValue < 255u);
+            DAWN_ASSERT(expectedValue < 255u);
         }
         wgpu::Buffer textureData =
             utils::CreateBufferFromData(device, wgpu::BufferUsage::CopySrc, {value});

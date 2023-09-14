@@ -54,7 +54,7 @@ class WireServerTraceLayer : public dawn::wire::CommandHandler {
         // Prepend the filename with the directory.
         filename = mDir + filename;
 
-        ASSERT(!mFile.is_open());
+        DAWN_ASSERT(!mFile.is_open());
         mFile.open(filename, std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
 
         // Write the initial 8 bytes. This means the fuzzer should never inject an
@@ -81,7 +81,7 @@ class WireHelperDirect : public WireHelper {
     explicit WireHelperDirect(const DawnProcTable& procs) { dawnProcSetProcs(&procs); }
 
     wgpu::Instance RegisterInstance(WGPUInstance backendInstance) override {
-        ASSERT(backendInstance != nullptr);
+        DAWN_ASSERT(backendInstance != nullptr);
         return wgpu::Instance(backendInstance);
     }
 
@@ -119,7 +119,7 @@ class WireHelperProxy : public WireHelper {
     }
 
     wgpu::Instance RegisterInstance(WGPUInstance backendInstance) override {
-        ASSERT(backendInstance != nullptr);
+        DAWN_ASSERT(backendInstance != nullptr);
 
         auto reservation = mWireClient->ReserveInstance();
         mWireServer->InjectInstance(backendInstance, reservation.id, reservation.generation);

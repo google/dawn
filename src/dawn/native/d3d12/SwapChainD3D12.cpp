@@ -50,8 +50,8 @@ void SwapChain::ReuseBuffers(SwapChainBase* previousSwapChain) {
 }
 
 MaybeError SwapChain::CollectSwapChainBuffers() {
-    ASSERT(GetDXGISwapChain() != nullptr);
-    ASSERT(mBuffers.empty());
+    DAWN_ASSERT(GetDXGISwapChain() != nullptr);
+    DAWN_ASSERT(mBuffers.empty());
 
     IDXGISwapChain3* dxgiSwapChain = GetDXGISwapChain();
     const auto& config = GetConfig();

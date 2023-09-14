@@ -48,7 +48,7 @@ inline constexpr uint32_t u32_alignof = detail::u32_alignof<T>();
 // needed at the time of writing.
 template <typename Dst, typename Src, typename = std::enable_if_t<std::is_unsigned_v<Src>>>
 inline Dst checked_cast(const Src& value) {
-    ASSERT(value <= std::numeric_limits<Dst>::max());
+    DAWN_ASSERT(value <= std::numeric_limits<Dst>::max());
     return static_cast<Dst>(value);
 }
 
@@ -69,7 +69,7 @@ bool IsDoubleValueRepresentable(double value) {
 // Returns if two inclusive integral ranges [x0, x1] and [y0, y1] have overlap.
 template <typename T>
 bool RangesOverlap(T x0, T x1, T y0, T y1) {
-    ASSERT(x0 <= x1 && y0 <= y1);
+    DAWN_ASSERT(x0 <= x1 && y0 <= y1);
     if constexpr (std::is_integral_v<T>) {
         // Two ranges DON'T have overlap if and only if:
         // 1. [x0, x1] [y0, y1], or

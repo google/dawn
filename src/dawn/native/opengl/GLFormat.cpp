@@ -24,7 +24,7 @@ GLFormatTable BuildGLFormatTable(GLenum internalFormatForBGRA) {
     auto AddFormat = [&table](wgpu::TextureFormat dawnFormat, GLenum internalFormat, GLenum format,
                               GLenum type, Type componentType) {
         FormatIndex index = ComputeFormatIndex(dawnFormat);
-        ASSERT(index < table.size());
+        DAWN_ASSERT(index < table.size());
 
         table[index].internalFormat = internalFormat;
         table[index].format = format;

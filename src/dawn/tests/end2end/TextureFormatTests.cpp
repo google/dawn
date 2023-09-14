@@ -42,7 +42,7 @@ class ExpectFloatWithTolerance : public detail::Expectation {
         : mExpected(std::move(expected)), mTolerance(tolerance) {}
 
     testing::AssertionResult Check(const void* data, size_t size) override {
-        ASSERT(size == sizeof(float) * mExpected.size());
+        DAWN_ASSERT(size == sizeof(float) * mExpected.size());
 
         const float* actual = static_cast<const float*>(data);
 
@@ -89,7 +89,7 @@ class ExpectFloat16 : public detail::Expectation {
     explicit ExpectFloat16(std::vector<uint16_t> expected) : mExpected(std::move(expected)) {}
 
     testing::AssertionResult Check(const void* data, size_t size) override {
-        ASSERT(size == sizeof(uint16_t) * mExpected.size());
+        DAWN_ASSERT(size == sizeof(uint16_t) * mExpected.size());
 
         const uint16_t* actual = static_cast<const uint16_t*>(data);
 
@@ -126,7 +126,7 @@ class ExpectRG11B10Ufloat : public detail::Expectation {
     explicit ExpectRG11B10Ufloat(std::vector<uint32_t> expected) : mExpected(std::move(expected)) {}
 
     testing::AssertionResult Check(const void* data, size_t size) override {
-        ASSERT(size == sizeof(uint32_t) * mExpected.size());
+        DAWN_ASSERT(size == sizeof(uint32_t) * mExpected.size());
 
         const uint32_t* actual = static_cast<const uint32_t*>(data);
 
@@ -160,8 +160,8 @@ class ExpectRG11B10Ufloat : public detail::Expectation {
     }
 
     bool Float11Match(uint32_t expected, uint32_t actual) {
-        ASSERT((expected & ~0x7FF) == 0);
-        ASSERT((actual & ~0x7FF) == 0);
+        DAWN_ASSERT((expected & ~0x7FF) == 0);
+        DAWN_ASSERT((actual & ~0x7FF) == 0);
 
         if (IsFloat11NaN(expected)) {
             return IsFloat11NaN(actual);
@@ -171,8 +171,8 @@ class ExpectRG11B10Ufloat : public detail::Expectation {
     }
 
     bool Float10Match(uint32_t expected, uint32_t actual) {
-        ASSERT((expected & ~0x3FF) == 0);
-        ASSERT((actual & ~0x3FF) == 0);
+        DAWN_ASSERT((expected & ~0x3FF) == 0);
+        DAWN_ASSERT((actual & ~0x3FF) == 0);
 
         if (IsFloat10NaN(expected)) {
             return IsFloat10NaN(actual);
@@ -183,13 +183,13 @@ class ExpectRG11B10Ufloat : public detail::Expectation {
 
     // The number is NaN if exponent bits are all 1 and mantissa is non-zero
     bool IsFloat11NaN(uint32_t value) {
-        ASSERT((value & ~0x7FF) == 0);
+        DAWN_ASSERT((value & ~0x7FF) == 0);
 
         return ((value & 0x7C0) == 0x7C0) && ((value & 0x3F) != 0);
     }
 
     bool IsFloat10NaN(uint32_t value) {
-        ASSERT((value & ~0x3FF) == 0);
+        DAWN_ASSERT((value & ~0x3FF) == 0);
 
         return ((value & 0x3E0) == 0x3E0) && ((value & 0x1F) != 0);
     }
@@ -275,12 +275,12 @@ class TextureFormatTest : public DawnTest {
                       size_t expectedRenderDataSize,
                       detail::Expectation* customExpectation) {
         // The input data should contain an exact number of texels
-        ASSERT(sampleDataSize % sampleFormatInfo.texelByteSize == 0);
+        DAWN_ASSERT(sampleDataSize % sampleFormatInfo.texelByteSize == 0);
         uint32_t width = sampleDataSize / sampleFormatInfo.texelByteSize;
 
         // The input data must be a multiple of 4 byte in length for WriteBuffer
-        ASSERT(sampleDataSize % 4 == 0);
-        ASSERT(expectedRenderDataSize % 4 == 0);
+        DAWN_ASSERT(sampleDataSize % 4 == 0);
+        DAWN_ASSERT(expectedRenderDataSize % 4 == 0);
 
         // Create the texture we will sample from
         wgpu::TextureDescriptor sampleTextureDesc;
@@ -293,7 +293,7 @@ class TextureFormatTest : public DawnTest {
                                                                 wgpu::BufferUsage::CopySrc);
 
         // Create the texture that we will render results to
-        ASSERT(expectedRenderDataSize == width * renderFormatInfo.texelByteSize);
+        DAWN_ASSERT(expectedRenderDataSize == width * renderFormatInfo.texelByteSize);
 
         wgpu::TextureDescriptor renderTargetDesc;
         renderTargetDesc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
@@ -437,8 +437,8 @@ class TextureFormatTest : public DawnTest {
     template <typename T>
     void DoUnormTest(FormatTestInfo formatInfo) {
         static_assert(!std::is_signed<T>::value && std::is_integral<T>::value);
-        ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == TextureComponentType::Float);
+        DAWN_ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
+        DAWN_ASSERT(formatInfo.type == TextureComponentType::Float);
 
         DAWN_TEST_UNSUPPORTED_IF((utils::IsNorm16TextureFormat(formatInfo.format)) &&
                                  !IsNorm16TextureFormatsSupported());
@@ -454,8 +454,8 @@ class TextureFormatTest : public DawnTest {
     template <typename T>
     void DoSnormTest(FormatTestInfo formatInfo) {
         static_assert(std::is_signed<T>::value && std::is_integral<T>::value);
-        ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == TextureComponentType::Float);
+        DAWN_ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
+        DAWN_ASSERT(formatInfo.type == TextureComponentType::Float);
 
         DAWN_TEST_UNSUPPORTED_IF((utils::IsNorm16TextureFormat(formatInfo.format)) &&
                                  !IsNorm16TextureFormatsSupported());
@@ -473,8 +473,8 @@ class TextureFormatTest : public DawnTest {
     template <typename T>
     void DoUintTest(FormatTestInfo formatInfo) {
         static_assert(!std::is_signed<T>::value && std::is_integral<T>::value);
-        ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == TextureComponentType::Uint);
+        DAWN_ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
+        DAWN_ASSERT(formatInfo.type == TextureComponentType::Uint);
 
         T maxValue = std::numeric_limits<T>::max();
         std::vector<T> textureData = {0, 1, maxValue, maxValue};
@@ -487,8 +487,8 @@ class TextureFormatTest : public DawnTest {
     template <typename T>
     void DoSintTest(FormatTestInfo formatInfo) {
         static_assert(std::is_signed<T>::value && std::is_integral<T>::value);
-        ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == TextureComponentType::Sint);
+        DAWN_ASSERT(sizeof(T) * formatInfo.componentCount == formatInfo.texelByteSize);
+        DAWN_ASSERT(formatInfo.type == TextureComponentType::Sint);
 
         T maxValue = std::numeric_limits<T>::max();
         T minValue = std::numeric_limits<T>::min();
@@ -500,8 +500,8 @@ class TextureFormatTest : public DawnTest {
     }
 
     void DoFloat32Test(FormatTestInfo formatInfo) {
-        ASSERT(sizeof(float) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == TextureComponentType::Float);
+        DAWN_ASSERT(sizeof(float) * formatInfo.componentCount == formatInfo.texelByteSize);
+        DAWN_ASSERT(formatInfo.type == TextureComponentType::Float);
 
         std::vector<float> textureData = {+0.0f,   -0.0f, 1.0f,     1.0e-29f,
                                           1.0e29f, NAN,   INFINITY, -INFINITY};
@@ -512,8 +512,8 @@ class TextureFormatTest : public DawnTest {
     }
 
     void DoFloat16Test(FormatTestInfo formatInfo) {
-        ASSERT(sizeof(int16_t) * formatInfo.componentCount == formatInfo.texelByteSize);
-        ASSERT(formatInfo.type == TextureComponentType::Float);
+        DAWN_ASSERT(sizeof(int16_t) * formatInfo.componentCount == formatInfo.texelByteSize);
+        DAWN_ASSERT(formatInfo.type == TextureComponentType::Float);
 
         std::vector<float> uncompressedData = {+0.0f,  -0.0f, 1.0f,     1.01e-4f,
                                                1.0e4f, NAN,   INFINITY, -INFINITY};
@@ -807,10 +807,10 @@ TEST_P(TextureFormatTest, BGRA8UnormSrgb) {
 // Test the RGB10A2Unorm format
 TEST_P(TextureFormatTest, RGB10A2Uint) {
     auto MakeRGB10A2 = [](uint32_t r, uint32_t g, uint32_t b, uint32_t a) -> uint32_t {
-        ASSERT((r & 0x3FF) == r);
-        ASSERT((g & 0x3FF) == g);
-        ASSERT((b & 0x3FF) == b);
-        ASSERT((a & 0x3) == a);
+        DAWN_ASSERT((r & 0x3FF) == r);
+        DAWN_ASSERT((g & 0x3FF) == g);
+        DAWN_ASSERT((b & 0x3FF) == b);
+        DAWN_ASSERT((a & 0x3) == a);
         return r | g << 10 | b << 20 | a << 30;
     };
 
@@ -834,10 +834,10 @@ TEST_P(TextureFormatTest, RGB10A2Uint) {
 // Test the RGB10A2Unorm format
 TEST_P(TextureFormatTest, RGB10A2Unorm) {
     auto MakeRGB10A2 = [](uint32_t r, uint32_t g, uint32_t b, uint32_t a) -> uint32_t {
-        ASSERT((r & 0x3FF) == r);
-        ASSERT((g & 0x3FF) == g);
-        ASSERT((b & 0x3FF) == b);
-        ASSERT((a & 0x3) == a);
+        DAWN_ASSERT((r & 0x3FF) == r);
+        DAWN_ASSERT((g & 0x3FF) == g);
+        DAWN_ASSERT((b & 0x3FF) == b);
+        DAWN_ASSERT((a & 0x3) == a);
         return r | g << 10 | b << 20 | a << 30;
     };
 
@@ -872,9 +872,9 @@ TEST_P(TextureFormatTest, RG11B10Ufloat) {
     constexpr uint32_t kFloat10One = 0x1E0;
 
     auto MakeRG11B10 = [](uint32_t r, uint32_t g, uint32_t b) {
-        ASSERT((r & 0x7FF) == r);
-        ASSERT((g & 0x7FF) == g);
-        ASSERT((b & 0x3FF) == b);
+        DAWN_ASSERT((r & 0x7FF) == r);
+        DAWN_ASSERT((g & 0x7FF) == g);
+        DAWN_ASSERT((b & 0x3FF) == b);
         return r | g << 11 | b << 22;
     };
 
@@ -934,10 +934,10 @@ TEST_P(TextureFormatTest, RGB9E5Ufloat) {
     float largestExponent = std::pow(2.0f, float{31 - 24});
 
     auto MakeRGB9E5 = [](uint32_t r, uint32_t g, uint32_t b, uint32_t e) {
-        ASSERT((r & 0x1FF) == r);
-        ASSERT((g & 0x1FF) == g);
-        ASSERT((b & 0x1FF) == b);
-        ASSERT((e & 0x1F) == e);
+        DAWN_ASSERT((r & 0x1FF) == r);
+        DAWN_ASSERT((g & 0x1FF) == g);
+        DAWN_ASSERT((b & 0x1FF) == b);
+        DAWN_ASSERT((e & 0x1F) == e);
         return r | g << 9 | b << 18 | e << 27;
     };
 

@@ -393,7 +393,7 @@ MaybeError RenderPipeline::Initialize() {
         descriptorD3D12.BlendState.RenderTarget[static_cast<uint8_t>(i)] =
             ComputeColorDesc(device, GetColorTargetState(i));
     }
-    ASSERT(highestColorAttachmentIndexPlusOne <= kMaxColorAttachmentsTyped);
+    DAWN_ASSERT(highestColorAttachmentIndexPlusOne <= kMaxColorAttachmentsTyped);
     descriptorD3D12.NumRenderTargets = static_cast<uint8_t>(highestColorAttachmentIndexPlusOne);
 
     descriptorD3D12.BlendState.AlphaToCoverageEnable = IsAlphaToCoverageEnabled();

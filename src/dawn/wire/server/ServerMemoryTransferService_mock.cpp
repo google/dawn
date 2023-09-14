@@ -53,7 +53,7 @@ bool MockMemoryTransferService::MockWriteHandle::DeserializeDataUpdate(
     size_t deserializeSize,
     size_t offset,
     size_t size) {
-    ASSERT(deserializeSize % sizeof(uint32_t) == 0);
+    DAWN_ASSERT(deserializeSize % sizeof(uint32_t) == 0);
     return mService->OnWriteHandleDeserializeDataUpdate(
         this, reinterpret_cast<const uint32_t*>(deserializePointer), deserializeSize, offset, size);
 }
@@ -64,7 +64,7 @@ MockMemoryTransferService::~MockMemoryTransferService() = default;
 bool MockMemoryTransferService::DeserializeReadHandle(const void* deserializePointer,
                                                       size_t deserializeSize,
                                                       ReadHandle** readHandle) {
-    ASSERT(deserializeSize % sizeof(uint32_t) == 0);
+    DAWN_ASSERT(deserializeSize % sizeof(uint32_t) == 0);
     return OnDeserializeReadHandle(reinterpret_cast<const uint32_t*>(deserializePointer),
                                    deserializeSize, readHandle);
 }
@@ -72,7 +72,7 @@ bool MockMemoryTransferService::DeserializeReadHandle(const void* deserializePoi
 bool MockMemoryTransferService::DeserializeWriteHandle(const void* deserializePointer,
                                                        size_t deserializeSize,
                                                        WriteHandle** writeHandle) {
-    ASSERT(deserializeSize % sizeof(uint32_t) == 0);
+    DAWN_ASSERT(deserializeSize % sizeof(uint32_t) == 0);
     return OnDeserializeWriteHandle(reinterpret_cast<const uint32_t*>(deserializePointer),
                                     deserializeSize, writeHandle);
 }

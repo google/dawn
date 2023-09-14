@@ -128,10 +128,10 @@ bool SamplerBase::EqualityFunc::operator()(const SamplerBase* a, const SamplerBa
         return true;
     }
 
-    ASSERT(!std::isnan(a->mLodMinClamp));
-    ASSERT(!std::isnan(b->mLodMinClamp));
-    ASSERT(!std::isnan(a->mLodMaxClamp));
-    ASSERT(!std::isnan(b->mLodMaxClamp));
+    DAWN_ASSERT(!std::isnan(a->mLodMinClamp));
+    DAWN_ASSERT(!std::isnan(b->mLodMinClamp));
+    DAWN_ASSERT(!std::isnan(a->mLodMaxClamp));
+    DAWN_ASSERT(!std::isnan(b->mLodMaxClamp));
 
     return a->mAddressModeU == b->mAddressModeU && a->mAddressModeV == b->mAddressModeV &&
            a->mAddressModeW == b->mAddressModeW && a->mMagFilter == b->mMagFilter &&

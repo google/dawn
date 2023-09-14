@@ -133,7 +133,7 @@ ScopedTintICEHandler::ScopedTintICEHandler(DeviceBase* device) {
     (void)init_once_tint_error_reporter;
 
     // Shouldn't have overlapping instances of this handler.
-    ASSERT(tlDevice == nullptr);
+    DAWN_ASSERT(tlDevice == nullptr);
     tlDevice = device;
 }
 

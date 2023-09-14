@@ -38,7 +38,7 @@ PhysicalDevice::PhysicalDevice(InstanceBase* instance)
     mName = "Null backend";
     mAdapterType = wgpu::AdapterType::CPU;
     MaybeError err = Initialize();
-    ASSERT(err.IsSuccess());
+    DAWN_ASSERT(err.IsSuccess());
 }
 
 PhysicalDevice::~PhysicalDevice() = default;
@@ -209,12 +209,12 @@ ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
 }
 
 void Device::DestroyImpl() {
-    ASSERT(GetState() == State::Disconnected);
+    DAWN_ASSERT(GetState() == State::Disconnected);
 
     // Clear pending operations before checking mMemoryUsage because some operations keep a
     // reference to Buffers.
     mPendingOperations.clear();
-    ASSERT(mMemoryUsage == 0);
+    DAWN_ASSERT(mMemoryUsage == 0);
 }
 
 void Device::ForgetPendingOperations() {
@@ -259,7 +259,7 @@ MaybeError Device::IncrementMemoryUsage(uint64_t bytes) {
 }
 
 void Device::DecrementMemoryUsage(uint64_t bytes) {
-    ASSERT(mMemoryUsage >= bytes);
+    DAWN_ASSERT(mMemoryUsage >= bytes);
     mMemoryUsage -= bytes;
 }
 
@@ -332,8 +332,8 @@ void Buffer::CopyFromStaging(BufferBase* staging,
 }
 
 void Buffer::DoWriteBuffer(uint64_t bufferOffset, const void* data, size_t size) {
-    ASSERT(bufferOffset + size <= GetSize());
-    ASSERT(mBackingData);
+    DAWN_ASSERT(bufferOffset + size <= GetSize());
+    DAWN_ASSERT(mBackingData);
     memcpy(mBackingData.get() + bufferOffset, data, size);
 }
 

@@ -95,8 +95,8 @@ ShaderVisibleDescriptorAllocator::ShaderVisibleDescriptorAllocator(
       mDescriptorCount(GetD3D12ShaderVisibleHeapMinSize(
           heapType,
           mDevice->IsToggleEnabled(Toggle::UseD3D12SmallShaderVisibleHeapForTesting))) {
-    ASSERT(heapType == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV ||
-           heapType == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+    DAWN_ASSERT(heapType == D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV ||
+                heapType == D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 }
 
 bool ShaderVisibleDescriptorAllocator::AllocateGPUDescriptors(
@@ -104,7 +104,7 @@ bool ShaderVisibleDescriptorAllocator::AllocateGPUDescriptors(
     ExecutionSerial pendingSerial,
     D3D12_CPU_DESCRIPTOR_HANDLE* baseCPUDescriptor,
     GPUDescriptorHeapAllocation* allocation) {
-    ASSERT(mHeap != nullptr);
+    DAWN_ASSERT(mHeap != nullptr);
     const uint64_t startOffset = mAllocator.Allocate(descriptorCount, pendingSerial);
     if (startOffset == RingBufferAllocator::kInvalidOffset) {
         return false;
@@ -117,7 +117,7 @@ bool ShaderVisibleDescriptorAllocator::AllocateGPUDescriptors(
     // Check for 32-bit overflow since CPU heap start handle uses size_t.
     const size_t cpuHeapStartPtr = descriptorHeap->GetCPUDescriptorHandleForHeapStart().ptr;
 
-    ASSERT(heapOffset <= std::numeric_limits<size_t>::max() - cpuHeapStartPtr);
+    DAWN_ASSERT(heapOffset <= std::numeric_limits<size_t>::max() - cpuHeapStartPtr);
 
     *baseCPUDescriptor = {cpuHeapStartPtr + static_cast<size_t>(heapOffset)};
 
@@ -232,7 +232,7 @@ bool ShaderVisibleDescriptorAllocator::IsShaderVisibleHeapLockedResidentForTesti
 }
 
 bool ShaderVisibleDescriptorAllocator::IsLastShaderVisibleHeapInLRUForTesting() const {
-    ASSERT(!mPool.empty());
+    DAWN_ASSERT(!mPool.empty());
     return mPool.back().heap->IsInResidencyLRUCache();
 }
 

@@ -88,7 +88,7 @@ ResultOrError<VkSurfaceKHR> CreateVulkanSurface(const PhysicalDevice* physicalDe
 #if DAWN_PLATFORM_IS(ANDROID)
         case Surface::Type::AndroidWindow: {
             if (info.HasExt(InstanceExt::AndroidSurface)) {
-                ASSERT(surface->GetAndroidNativeWindow() != nullptr);
+                DAWN_ASSERT(surface->GetAndroidNativeWindow() != nullptr);
 
                 VkAndroidSurfaceCreateInfoKHR createInfo;
                 createInfo.sType = VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR;
@@ -150,7 +150,7 @@ ResultOrError<VkSurfaceKHR> CreateVulkanSurface(const PhysicalDevice* physicalDe
             // See https://xcb.freedesktop.org/MixingCalls/ for more information about
             // interoperability between Xlib and XCB
             const X11Functions* x11 = physicalDevice->GetInstance()->GetOrLoadX11Functions();
-            ASSERT(x11 != nullptr);
+            DAWN_ASSERT(x11 != nullptr);
 
             if (info.HasExt(InstanceExt::XcbSurface) && x11->IsX11XcbLoaded()) {
                 VkXcbSurfaceCreateInfoKHR createInfo;
@@ -406,7 +406,7 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
             modeIndex++;
         }
 
-        ASSERT(modeIndex < kPresentModeFallbacks.size());
+        DAWN_ASSERT(modeIndex < kPresentModeFallbacks.size());
         config.presentMode = kPresentModeFallbacks[modeIndex];
     }
 
@@ -479,8 +479,8 @@ ResultOrError<SwapChain::Config> SwapChain::ChooseConfig(
 
     // Choose the number of images for the swapchain= and clamp it to the min and max from the
     // surface capabilities. maxImageCount = 0 means there is no limit.
-    ASSERT(surfaceInfo.capabilities.maxImageCount == 0 ||
-           surfaceInfo.capabilities.minImageCount <= surfaceInfo.capabilities.maxImageCount);
+    DAWN_ASSERT(surfaceInfo.capabilities.maxImageCount == 0 ||
+                surfaceInfo.capabilities.minImageCount <= surfaceInfo.capabilities.maxImageCount);
     uint32_t targetCount = MinImageCountForPresentMode(config.presentMode);
 
     targetCount = std::max(targetCount, surfaceInfo.capabilities.minImageCount);

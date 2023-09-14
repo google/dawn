@@ -65,11 +65,11 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
     bool IsFormatSupported() const { return mIsFormatSupported; }
 
     uint32_t BlockWidthInTexels() const {
-        ASSERT(IsFormatSupported());
+        DAWN_ASSERT(IsFormatSupported());
         return utils::GetTextureFormatBlockWidth(GetParam().mTextureFormat);
     }
     uint32_t BlockHeightInTexels() const {
-        ASSERT(IsFormatSupported());
+        DAWN_ASSERT(IsFormatSupported());
         return utils::GetTextureFormatBlockHeight(GetParam().mTextureFormat);
     }
 
@@ -114,7 +114,7 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
     // copyConfig.
     void InitializeDataInCompressedTexture(wgpu::Texture compressedTexture,
                                            const CopyConfig& copyConfig) {
-        ASSERT(IsFormatSupported());
+        DAWN_ASSERT(IsFormatSupported());
 
         std::vector<uint8_t> data = UploadData(copyConfig);
 
@@ -139,7 +139,7 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
                                            wgpu::Texture compressedTexture,
                                            uint32_t baseArrayLayer = 0,
                                            uint32_t baseMipLevel = 0) {
-        ASSERT(IsFormatSupported());
+        DAWN_ASSERT(IsFormatSupported());
 
         wgpu::SamplerDescriptor samplerDesc;
         samplerDesc.minFilter = wgpu::FilterMode::Nearest;
@@ -160,7 +160,7 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
 
     // Create a render pipeline for sampling from a texture and rendering into the render target.
     wgpu::RenderPipeline CreateRenderPipelineForTest() {
-        ASSERT(IsFormatSupported());
+        DAWN_ASSERT(IsFormatSupported());
 
         utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
@@ -203,7 +203,7 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
                                             const wgpu::Origin3D& expectedOrigin,
                                             const wgpu::Extent3D& expectedExtent,
                                             const std::vector<utils::RGBA8>& expected) {
-        ASSERT(IsFormatSupported());
+        DAWN_ASSERT(IsFormatSupported());
 
         utils::BasicRenderPass renderPass =
             utils::CreateBasicRenderPass(device, renderTargetSize.width, renderTargetSize.height);
@@ -232,7 +232,7 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
     // Run the tests that copies pre-prepared format data into a texture and verifies if we can
     // render correctly with the pixel values sampled from the texture.
     void TestCopyRegionIntoFormatTextures(const CopyConfig& config) {
-        ASSERT(IsFormatSupported());
+        DAWN_ASSERT(IsFormatSupported());
 
         wgpu::Texture texture = CreateTextureWithCompressedData(config);
 
@@ -580,7 +580,7 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
     std::vector<utils::RGBA8> FillExpectedData(const wgpu::Extent3D& testRegion,
                                                utils::RGBA8 leftColorInBlock,
                                                utils::RGBA8 rightColorInBlock) {
-        ASSERT(testRegion.depthOrArrayLayers == 1);
+        DAWN_ASSERT(testRegion.depthOrArrayLayers == 1);
 
         std::vector<utils::RGBA8> expectedData(testRegion.width * testRegion.height,
                                                leftColorInBlock);
@@ -604,7 +604,7 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
     }
 
     CopyConfig GetDefaultFullConfig(uint32_t depthOrArrayLayers = 1) const {
-        ASSERT(IsFormatSupported());
+        DAWN_ASSERT(IsFormatSupported());
 
         CopyConfig config;
         config.textureDescriptor.format = GetParam().mTextureFormat;
@@ -615,14 +615,14 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
         config.viewMipmapLevel = kMipmapLevelCount - 1;
 
         const wgpu::Extent3D virtualSize = GetVirtualSizeAtLevel(config);
-        ASSERT(virtualSize.width % BlockWidthInTexels() != 0u);
-        ASSERT(virtualSize.height % BlockHeightInTexels() != 0u);
+        DAWN_ASSERT(virtualSize.width % BlockWidthInTexels() != 0u);
+        DAWN_ASSERT(virtualSize.height % BlockHeightInTexels() != 0u);
 
         return config;
     }
 
     CopyConfig GetDefaultSmallConfig(uint32_t depthOrArrayLayers = 1) const {
-        ASSERT(IsFormatSupported());
+        DAWN_ASSERT(IsFormatSupported());
 
         CopyConfig config;
         config.textureDescriptor.format = GetParam().mTextureFormat;
@@ -632,7 +632,7 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
     }
 
     CopyConfig GetDefaultSubresourceConfig(uint32_t depthOrArrayLayers = 1) const {
-        ASSERT(IsFormatSupported());
+        DAWN_ASSERT(IsFormatSupported());
 
         CopyConfig config;
         config.textureDescriptor.format = GetParam().mTextureFormat;
@@ -1196,7 +1196,7 @@ class CompressedTextureWriteTextureTest : public CompressedTextureFormatTest {
     // Write the compressed texture data into the destination texture as is specified in
     // copyConfig.
     void WriteToCompressedTexture(wgpu::Texture compressedTexture, const CopyConfig& copyConfig) {
-        ASSERT(IsFormatSupported());
+        DAWN_ASSERT(IsFormatSupported());
 
         std::vector<uint8_t> data = UploadData(copyConfig);
 
@@ -1213,7 +1213,7 @@ class CompressedTextureWriteTextureTest : public CompressedTextureFormatTest {
     // Run the tests that write pre-prepared format data into a texture and verifies if we can
     // render correctly with the pixel values sampled from the texture.
     void TestWriteRegionIntoFormatTextures(const CopyConfig& config) {
-        ASSERT(IsFormatSupported());
+        DAWN_ASSERT(IsFormatSupported());
 
         wgpu::Texture texture = device.CreateTexture(&config.textureDescriptor);
         WriteToCompressedTexture(texture, config);

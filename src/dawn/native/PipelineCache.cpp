@@ -20,7 +20,7 @@ PipelineCacheBase::PipelineCacheBase(BlobCache* cache, const CacheKey& key)
     : mCache(cache), mKey(key) {}
 
 Blob PipelineCacheBase::Initialize() {
-    ASSERT(!mInitialized);
+    DAWN_ASSERT(!mInitialized);
     Blob blob = mCache->Load(mKey);
     mCacheHit = !blob.Empty();
     mInitialized = true;
@@ -28,7 +28,7 @@ Blob PipelineCacheBase::Initialize() {
 }
 
 bool PipelineCacheBase::CacheHit() const {
-    ASSERT(mInitialized);
+    DAWN_ASSERT(mInitialized);
     return mCacheHit;
 }
 
@@ -45,7 +45,7 @@ MaybeError PipelineCacheBase::Flush() {
 }
 
 MaybeError PipelineCacheBase::FlushIfNeeded() {
-    ASSERT(mInitialized);
+    DAWN_ASSERT(mInitialized);
     if (!CacheHit()) {
         return Flush();
     }

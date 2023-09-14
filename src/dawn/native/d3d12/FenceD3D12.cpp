@@ -27,7 +27,7 @@ namespace dawn::native::d3d12 {
 ResultOrError<Ref<Fence>> Fence::CreateFromHandle(ID3D12Device* device,
                                                   HANDLE unownedHandle,
                                                   UINT64 fenceValue) {
-    ASSERT(unownedHandle != nullptr);
+    DAWN_ASSERT(unownedHandle != nullptr);
     HANDLE ownedHandle = nullptr;
     if (!::DuplicateHandle(::GetCurrentProcess(), unownedHandle, ::GetCurrentProcess(),
                            &ownedHandle, 0, FALSE, DUPLICATE_SAME_ACCESS)) {

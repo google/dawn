@@ -36,12 +36,12 @@ class stack_vec : private StackVector<Value, StaticCapacity> {
     explicit stack_vec(Index size) : Base() { this->container().resize(static_cast<I>(size)); }
 
     Value& operator[](Index i) {
-        ASSERT(i < size());
+        DAWN_ASSERT(i < size());
         return Base::operator[](static_cast<I>(i));
     }
 
     constexpr const Value& operator[](Index i) const {
-        ASSERT(i < size());
+        DAWN_ASSERT(i < size());
         return Base::operator[](static_cast<I>(i));
     }
 

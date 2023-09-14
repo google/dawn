@@ -307,7 +307,7 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
                                                uint64_t size) {
     // Metal validation layers forbid  0-sized copies, assert it is skipped prior to calling
     // this function.
-    ASSERT(size != 0);
+    DAWN_ASSERT(size != 0);
 
     ToBackend(destination)
         ->EnsureDataInitializedAsDestination(
@@ -377,7 +377,7 @@ Ref<Texture> Device::CreateTextureWrappingIOSurface(
 }
 
 void Device::DestroyImpl() {
-    ASSERT(GetState() == State::Disconnected);
+    DAWN_ASSERT(GetState() == State::Disconnected);
 
     GetQueue()->Destroy();
     mMtlDevice = nullptr;

@@ -32,7 +32,7 @@ ResultOrError<Ref<QuerySet>> QuerySet::Create(Device* device,
 }
 
 MaybeError QuerySet::Initialize() {
-    ASSERT(GetQueryType() == wgpu::QueryType::Occlusion);
+    DAWN_ASSERT(GetQueryType() == wgpu::QueryType::Occlusion);
     D3D11_QUERY_DESC queryDesc = {};
     queryDesc.Query = D3D11_QUERY_OCCLUSION_PREDICATE;
 

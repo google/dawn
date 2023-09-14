@@ -42,7 +42,7 @@ void BlobCache::Store(const CacheKey& key, const Blob& value) {
 }
 
 Blob BlobCache::LoadInternal(const CacheKey& key) {
-    ASSERT(ValidateCacheKey(key));
+    DAWN_ASSERT(ValidateCacheKey(key));
     if (mCache == nullptr) {
         return Blob();
     }
@@ -52,16 +52,16 @@ Blob BlobCache::LoadInternal(const CacheKey& key) {
         Blob result = CreateBlob(expectedSize);
         const size_t actualSize =
             mCache->LoadData(key.data(), key.size(), result.Data(), expectedSize);
-        ASSERT(expectedSize == actualSize);
+        DAWN_ASSERT(expectedSize == actualSize);
         return result;
     }
     return Blob();
 }
 
 void BlobCache::StoreInternal(const CacheKey& key, size_t valueSize, const void* value) {
-    ASSERT(ValidateCacheKey(key));
-    ASSERT(value != nullptr);
-    ASSERT(valueSize > 0);
+    DAWN_ASSERT(ValidateCacheKey(key));
+    DAWN_ASSERT(value != nullptr);
+    DAWN_ASSERT(valueSize > 0);
     if (mCache == nullptr) {
         return;
     }

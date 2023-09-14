@@ -708,7 +708,7 @@ class MultithreadTextureCopyTests : public MultithreadTests {
             queue.Submit(1, &commands);
         } else {
             // Don't need encoder
-            ASSERT(encoder == nullptr);
+            DAWN_ASSERT(encoder == nullptr);
             queue.CopyTextureForBrowser(&srcView, &dst, &dstSize, copyForBrowerOptions);
         }
     }
@@ -1280,7 +1280,7 @@ class TimestampExpectation : public detail::Expectation {
 
     // Expect the timestamp results are greater than 0.
     testing::AssertionResult Check(const void* data, size_t size) override {
-        ASSERT(size % sizeof(uint64_t) == 0);
+        DAWN_ASSERT(size % sizeof(uint64_t) == 0);
         const uint64_t* timestamps = static_cast<const uint64_t*>(data);
         for (size_t i = 0; i < size / sizeof(uint64_t); i++) {
             if (timestamps[i] == 0) {

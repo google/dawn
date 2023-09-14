@@ -28,7 +28,7 @@ void HandleCreatePipelineAsyncCallback(KnownObjects<Pipeline>* knownObjects,
     } else {
         // Otherwise, free the ObjectId which will make it unusable.
         knownObjects->Free(data->pipelineObjectID);
-        ASSERT(pipeline == nullptr);
+        DAWN_ASSERT(pipeline == nullptr);
     }
 }
 

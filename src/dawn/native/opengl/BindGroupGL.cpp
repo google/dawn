@@ -28,11 +28,11 @@ MaybeError ValidateGLBindGroupDescriptor(const BindGroupDescriptor* descriptor) 
 
         const auto& it = bindingMap.find(BindingNumber(entry.binding));
         BindingIndex bindingIndex = it->second;
-        ASSERT(bindingIndex < layout->GetBindingCount());
+        DAWN_ASSERT(bindingIndex < layout->GetBindingCount());
 
         const BindingInfo& bindingInfo = layout->GetBindingInfo(bindingIndex);
         if (bindingInfo.bindingType == BindingInfoType::StorageTexture) {
-            ASSERT(entry.textureView != nullptr);
+            DAWN_ASSERT(entry.textureView != nullptr);
             const uint32_t textureViewLayerCount = entry.textureView->GetLayerCount();
             DAWN_INVALID_IF(
                 textureViewLayerCount != 1 &&

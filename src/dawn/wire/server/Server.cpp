@@ -48,7 +48,7 @@ WireResult Server::InjectTexture(WGPUTexture texture,
                                  uint32_t generation,
                                  uint32_t deviceId,
                                  uint32_t deviceGeneration) {
-    ASSERT(texture != nullptr);
+    DAWN_ASSERT(texture != nullptr);
     Known<WGPUDevice> device;
     WIRE_TRY(DeviceObjects().Get(deviceId, &device));
     if (device->generation != deviceGeneration) {
@@ -74,7 +74,7 @@ WireResult Server::InjectSwapChain(WGPUSwapChain swapchain,
                                    uint32_t generation,
                                    uint32_t deviceId,
                                    uint32_t deviceGeneration) {
-    ASSERT(swapchain != nullptr);
+    DAWN_ASSERT(swapchain != nullptr);
     Known<WGPUDevice> device;
     WIRE_TRY(DeviceObjects().Get(deviceId, &device));
     if (device->generation != deviceGeneration) {
@@ -96,7 +96,7 @@ WireResult Server::InjectSwapChain(WGPUSwapChain swapchain,
 }
 
 WireResult Server::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
-    ASSERT(device != nullptr);
+    DAWN_ASSERT(device != nullptr);
     Known<WGPUDevice> data;
     WIRE_TRY(DeviceObjects().Allocate(&data, ObjectHandle{id, generation}));
 
@@ -116,7 +116,7 @@ WireResult Server::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generat
 }
 
 WireResult Server::InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation) {
-    ASSERT(instance != nullptr);
+    DAWN_ASSERT(instance != nullptr);
     Known<WGPUInstance> data;
     WIRE_TRY(InstanceObjects().Allocate(&data, ObjectHandle{id, generation}));
 

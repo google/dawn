@@ -193,7 +193,7 @@ class MultisampledRenderingTest : public DawnTest {
         wgpu::LoadOp colorLoadOp,
         wgpu::LoadOp depthStencilLoadOp,
         bool hasDepthStencilAttachment) {
-        ASSERT(colorViews.size() == resolveTargetViews.size());
+        DAWN_ASSERT(colorViews.size() == resolveTargetViews.size());
 
         constexpr wgpu::Color kClearColor = {0.0f, 0.0f, 0.0f, 0.0f};
         constexpr float kClearDepth = 1.0f;

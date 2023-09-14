@@ -103,14 +103,14 @@ class RequiredBufferSizeInCopyTests
             utils::CreateImageCopyBuffer(buffer, kOffset, kBytesPerRow, rowsPerImage);
 
         // Initialize copied data and set expected data for buffer and texture.
-        ASSERT(sizeof(uint32_t) == kBytesPerBlock);
+        DAWN_ASSERT(sizeof(uint32_t) == kBytesPerBlock);
         uint32_t numOfBufferElements = bufferSize / kBytesPerBlock;
         std::vector<uint32_t> data(numOfBufferElements, 1);
         std::vector<uint32_t> expectedBufferData(numOfBufferElements, 0);
         std::vector<uint32_t> expectedTextureData(copySize.depthOrArrayLayers, 0);
         // Initialize the first element on every image to be 0x80808080
         uint64_t imageSize = kBytesPerRow * rowsPerImage;
-        ASSERT(bufferSize >= (imageSize * (copySize.depthOrArrayLayers - 1) + kBytesPerBlock));
+        DAWN_ASSERT(bufferSize >= (imageSize * (copySize.depthOrArrayLayers - 1) + kBytesPerBlock));
         uint32_t numOfImageElements = imageSize / kBytesPerBlock;
         for (uint32_t i = 0; i < copySize.depthOrArrayLayers; ++i) {
             data[i * numOfImageElements] = 0x80808080;

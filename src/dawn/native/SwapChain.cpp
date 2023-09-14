@@ -115,10 +115,10 @@ SwapChainBase::SwapChainBase(DeviceBase* device,
 
 SwapChainBase::~SwapChainBase() {
     if (mCurrentTexture != nullptr) {
-        ASSERT(mCurrentTexture->IsDestroyed());
+        DAWN_ASSERT(mCurrentTexture->IsDestroyed());
     }
 
-    ASSERT(!mAttached);
+    DAWN_ASSERT(!mAttached);
 }
 
 SwapChainBase::SwapChainBase(DeviceBase* device,
@@ -197,13 +197,13 @@ ResultOrError<Ref<TextureBase>> SwapChainBase::GetCurrentTexture() {
     SetChildLabel(mCurrentTexture.Get());
 
     // Check that the return texture matches exactly what was given for this descriptor.
-    ASSERT(mCurrentTexture->GetFormat().format == mFormat);
-    ASSERT(IsSubset(mUsage, mCurrentTexture->GetUsage()));
-    ASSERT(mCurrentTexture->GetDimension() == wgpu::TextureDimension::e2D);
-    ASSERT(mCurrentTexture->GetWidth() == mWidth);
-    ASSERT(mCurrentTexture->GetHeight() == mHeight);
-    ASSERT(mCurrentTexture->GetNumMipLevels() == 1);
-    ASSERT(mCurrentTexture->GetArrayLayers() == 1);
+    DAWN_ASSERT(mCurrentTexture->GetFormat().format == mFormat);
+    DAWN_ASSERT(IsSubset(mUsage, mCurrentTexture->GetUsage()));
+    DAWN_ASSERT(mCurrentTexture->GetDimension() == wgpu::TextureDimension::e2D);
+    DAWN_ASSERT(mCurrentTexture->GetWidth() == mWidth);
+    DAWN_ASSERT(mCurrentTexture->GetHeight() == mHeight);
+    DAWN_ASSERT(mCurrentTexture->GetNumMipLevels() == 1);
+    DAWN_ASSERT(mCurrentTexture->GetArrayLayers() == 1);
 
     return mCurrentTexture;
 }
@@ -223,7 +223,7 @@ void SwapChainBase::APIPresent() {
         return;
     }
 
-    ASSERT(mCurrentTexture->IsDestroyed());
+    DAWN_ASSERT(mCurrentTexture->IsDestroyed());
     mCurrentTexture = nullptr;
 }
 

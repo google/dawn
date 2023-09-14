@@ -39,7 +39,7 @@ FutureID EventManager::TrackEvent(WGPUCallbackModeFlags mode, EventCallback&& ca
     mTrackedEvents.Use([&](auto trackedEvents) {
         auto [it, inserted] =
             trackedEvents->emplace(futureID, TrackedEvent(mode, std::move(callback)));
-        ASSERT(inserted);
+        DAWN_ASSERT(inserted);
     });
 
     return futureID;
@@ -58,7 +58,7 @@ void EventManager::ShutDown() {
         for (auto& [futureID, trackedEvent] : movedEvents) {
             // Event should be already marked Ready since events are actually driven by
             // RequestTrackers (at the time of this writing), which all shut down before this.
-            ASSERT(trackedEvent.mReady);
+            DAWN_ASSERT(trackedEvent.mReady);
             trackedEvent.mCallback(EventCompletionType::Shutdown);
             trackedEvent.mCallback = nullptr;
         }
@@ -66,7 +66,7 @@ void EventManager::ShutDown() {
 }
 
 void EventManager::SetFutureReady(FutureID futureID) {
-    ASSERT(futureID > 0);
+    DAWN_ASSERT(futureID > 0);
     mTrackedEvents.Use([&](auto trackedEvents) {
         TrackedEvent& trackedEvent = trackedEvents->at(futureID);  // Asserts futureID is in the map
         trackedEvent.mReady = true;
@@ -99,7 +99,7 @@ void EventManager::ProcessPollEvents() {
     });
 
     for (TrackedEvent& event : eventsToCompleteNow) {
-        ASSERT(event.mReady && event.mCallback);
+        DAWN_ASSERT(event.mReady && event.mCallback);
         event.mCallback(EventCompletionType::Ready);
         event.mCallback = nullptr;
     }
@@ -125,7 +125,7 @@ WGPUWaitStatus EventManager::WaitAny(size_t count, WGPUFutureWaitInfo* infos, ui
     mTrackedEvents.Use([&](auto trackedEvents) {
         for (size_t i = 0; i < count; ++i) {
             FutureID futureID = infos[i].future.id;
-            ASSERT(futureID < firstInvalidFutureID);
+            DAWN_ASSERT(futureID < firstInvalidFutureID);
 
             auto it = trackedEvents->find(futureID);
             if (it == trackedEvents->end()) {
@@ -135,7 +135,7 @@ WGPUWaitStatus EventManager::WaitAny(size_t count, WGPUFutureWaitInfo* infos, ui
             }
 
             TrackedEvent& event = it->second;
-            ASSERT(event.mMode & WGPUCallbackMode_Future);
+            DAWN_ASSERT(event.mMode & WGPUCallbackMode_Future);
             // Early update .completed, in prep to complete the callback if ready.
             infos[i].completed = event.mReady;
             if (event.mReady) {
@@ -150,7 +150,7 @@ WGPUWaitStatus EventManager::WaitAny(size_t count, WGPUFutureWaitInfo* infos, ui
 
     // TODO(crbug.com/dawn/2066): Guarantee the event ordering from the JS spec.
     for (TrackedEvent& event : eventsToCompleteNow) {
-        ASSERT(event.mReady && event.mCallback);
+        DAWN_ASSERT(event.mReady && event.mCallback);
         // .completed has already been set to true (before the callback, per API contract).
         event.mCallback(EventCompletionType::Ready);
         event.mCallback = nullptr;
@@ -166,7 +166,7 @@ EventManager::TrackedEvent::TrackedEvent(WGPUCallbackModeFlags mode, EventCallba
 
 EventManager::TrackedEvent::~TrackedEvent() {
     // Make sure we're not dropping a callback on the floor.
-    ASSERT(!mCallback);
+    DAWN_ASSERT(!mCallback);
 }
 
 }  // namespace dawn::wire::client

@@ -355,7 +355,7 @@ std::vector<uint64_t> GetBindGroupMinBufferSizes(const BindingGroupInfoMap& shad
             continue;
         }
 
-        ASSERT(packedIdx < requiredBufferSizes.size());
+        DAWN_ASSERT(packedIdx < requiredBufferSizes.size());
         const auto& shaderInfo = shaderBindings.find(bindingInfo.binding);
         if (shaderInfo != shaderBindings.end()) {
             requiredBufferSizes[packedIdx] = shaderInfo->second.buffer.minBindingSize;
@@ -456,8 +456,8 @@ MaybeError ValidateCompatibilityOfSingleBindingWithLayout(const DeviceBase* devi
         }
 
         case BindingInfoType::StorageTexture: {
-            ASSERT(layoutInfo.storageTexture.format != wgpu::TextureFormat::Undefined);
-            ASSERT(shaderInfo.storageTexture.format != wgpu::TextureFormat::Undefined);
+            DAWN_ASSERT(layoutInfo.storageTexture.format != wgpu::TextureFormat::Undefined);
+            DAWN_ASSERT(shaderInfo.storageTexture.format != wgpu::TextureFormat::Undefined);
 
             DAWN_INVALID_IF(
                 !IsShaderCompatibleWithPipelineLayoutOnStorageTextureAccess(layoutInfo, shaderInfo),
@@ -569,11 +569,11 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                 auto [_, inserted] =
                     metadata->uninitializedOverrides.emplace(std::move(identifier));
                 // The insertion should have taken place
-                ASSERT(inserted);
+                DAWN_ASSERT(inserted);
             } else {
                 auto [_, inserted] = metadata->initializedOverrides.emplace(std::move(identifier));
                 // The insertion should have taken place
-                ASSERT(inserted);
+                DAWN_ASSERT(inserted);
             }
         }
     }
@@ -690,7 +690,7 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                             TintComponentTypeToTextureComponentType(outputVar.component_type));
             DAWN_TRY_ASSIGN(variable.componentCount, TintCompositionTypeToInterStageComponentCount(
                                                          outputVar.composition_type));
-            ASSERT(variable.componentCount <= 4);
+            DAWN_ASSERT(variable.componentCount <= 4);
 
             uint32_t unsanitizedAttachment = outputVar.location_attribute;
             if (DelayedInvalidIf(unsanitizedAttachment >= maxColorAttachments,
@@ -837,11 +837,11 @@ MaybeError ReflectShaderUsingTint(const DeviceBase* device,
                                   OwnedCompilationMessages* compilationMessages,
                                   EntryPointMetadataTable* entryPointMetadataTable,
                                   WGSLExtensionSet* enabledWGSLExtensions) {
-    ASSERT(program->IsValid());
+    DAWN_ASSERT(program->IsValid());
 
     tint::inspector::Inspector inspector(program);
 
-    ASSERT(enabledWGSLExtensions->empty());
+    DAWN_ASSERT(enabledWGSLExtensions->empty());
     auto usedExtensionNames = inspector.GetUsedExtensionNames();
     for (std::string name : usedExtensionNames) {
         enabledWGSLExtensions->insert(name);
@@ -858,7 +858,7 @@ MaybeError ReflectShaderUsingTint(const DeviceBase* device,
                                 ReflectEntryPointUsingTint(device, &inspector, entryPoint),
                                 "processing entry point \"%s\".", entryPoint.name);
 
-        ASSERT(entryPointMetadataTable->count(entryPoint.name) == 0);
+        DAWN_ASSERT(entryPointMetadataTable->count(entryPoint.name) == 0);
         (*entryPointMetadataTable)[entryPoint.name] = std::move(metadata);
     }
     return {};
@@ -872,7 +872,7 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
     tint::inspector::Inspector inspector(&program);
     // At this point the entry point must exist and must have workgroup size values.
     tint::inspector::EntryPoint entryPoint = inspector.GetEntryPoint(entryPointName);
-    ASSERT(entryPoint.workgroup_size.has_value());
+    DAWN_ASSERT(entryPoint.workgroup_size.has_value());
     const tint::inspector::WorkgroupSize& workgroup_size = entryPoint.workgroup_size.value();
 
     DAWN_INVALID_IF(workgroup_size.x < 1 || workgroup_size.y < 1 || workgroup_size.z < 1,
@@ -941,13 +941,13 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
                                         const ShaderModuleDescriptor* descriptor,
                                         ShaderModuleParseResult* parseResult,
                                         OwnedCompilationMessages* outMessages) {
-    ASSERT(parseResult != nullptr);
+    DAWN_ASSERT(parseResult != nullptr);
 
     UnpackedShaderModuleDescriptorChain unpacked;
     DAWN_TRY_ASSIGN(unpacked, ValidateAndUnpackChain(descriptor));
     wgpu::SType moduleType;
     DAWN_TRY_ASSIGN(moduleType, (ValidateBranches<ShaderModuleDescriptorBranches>(unpacked)));
-    ASSERT(moduleType != wgpu::SType::Invalid);
+    DAWN_ASSERT(moduleType != wgpu::SType::Invalid);
 
     ScopedTintICEHandler scopedICEHandler(device);
 
@@ -988,7 +988,7 @@ MaybeError ValidateAndParseShaderModule(DeviceBase* device,
         default:
             UNREACHABLE();
     }
-    ASSERT(wgslDesc != nullptr);
+    DAWN_ASSERT(wgslDesc != nullptr);
 
     auto tintSource = std::make_unique<TintSource>("", wgslDesc->code);
 
@@ -1065,9 +1065,9 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
         const BindingInfo& textureInfo =
             textureBGL->GetBindingInfo(textureBGL->GetBindingIndex(pair.texture.binding));
 
-        ASSERT(textureInfo.bindingType != BindingInfoType::Buffer &&
-               textureInfo.bindingType != BindingInfoType::Sampler &&
-               textureInfo.bindingType != BindingInfoType::StorageTexture);
+        DAWN_ASSERT(textureInfo.bindingType != BindingInfoType::Buffer &&
+                    textureInfo.bindingType != BindingInfoType::Sampler &&
+                    textureInfo.bindingType != BindingInfoType::StorageTexture);
 
         if (textureInfo.bindingType != BindingInfoType::Texture) {
             continue;
@@ -1079,9 +1079,9 @@ MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
         // specifies a uint/sint texture binding,
         // |ValidateCompatibilityWithBindGroupLayout| will fail since the
         // sampleType does not match.
-        ASSERT(textureInfo.texture.sampleType != wgpu::TextureSampleType::Undefined &&
-               textureInfo.texture.sampleType != wgpu::TextureSampleType::Uint &&
-               textureInfo.texture.sampleType != wgpu::TextureSampleType::Sint);
+        DAWN_ASSERT(textureInfo.texture.sampleType != wgpu::TextureSampleType::Undefined &&
+                    textureInfo.texture.sampleType != wgpu::TextureSampleType::Uint &&
+                    textureInfo.texture.sampleType != wgpu::TextureSampleType::Sint);
 
         DAWN_INVALID_IF(
             textureInfo.texture.sampleType == wgpu::TextureSampleType::UnfilterableFloat,
@@ -1101,12 +1101,12 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
                                    const ShaderModuleDescriptor* descriptor,
                                    ApiObjectBase::UntrackedByDeviceTag tag)
     : ApiObjectBase(device, descriptor->label), mType(Type::Undefined) {
-    ASSERT(descriptor->nextInChain != nullptr);
+    DAWN_ASSERT(descriptor->nextInChain != nullptr);
     const ShaderModuleSPIRVDescriptor* spirvDesc = nullptr;
     FindInChain(descriptor->nextInChain, &spirvDesc);
     const ShaderModuleWGSLDescriptor* wgslDesc = nullptr;
     FindInChain(descriptor->nextInChain, &wgslDesc);
-    ASSERT(spirvDesc || wgslDesc);
+    DAWN_ASSERT(spirvDesc || wgslDesc);
 
     if (spirvDesc) {
         mType = Type::Spirv;
@@ -1145,7 +1145,7 @@ bool ShaderModuleBase::HasEntryPoint(const std::string& entryPoint) const {
 }
 
 const EntryPointMetadata& ShaderModuleBase::GetEntryPoint(const std::string& entryPoint) const {
-    ASSERT(HasEntryPoint(entryPoint));
+    DAWN_ASSERT(HasEntryPoint(entryPoint));
     return *mEntryPoints.at(entryPoint);
 }
 
@@ -1163,7 +1163,7 @@ bool ShaderModuleBase::EqualityFunc::operator()(const ShaderModuleBase* a,
 }
 
 const tint::Program* ShaderModuleBase::GetTintProgram() const {
-    ASSERT(mTintProgram);
+    DAWN_ASSERT(mTintProgram);
     return mTintProgram.get();
 }
 

@@ -43,7 +43,7 @@ ResultOrError<id<MTLCounterSampleBuffer>> CreateCounterSampleBuffer(Device* devi
             break;
         }
     }
-    ASSERT(descriptor.counterSet != nullptr);
+    DAWN_ASSERT(descriptor.counterSet != nullptr);
 
     descriptor.sampleCount = static_cast<NSUInteger>(std::max(count, uint32_t(1u)));
     descriptor.storageMode = MTLStorageModePrivate;

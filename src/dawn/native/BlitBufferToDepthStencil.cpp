@@ -223,9 +223,9 @@ MaybeError BlitRG8ToDepth16Unorm(DeviceBase* device,
                                  TextureBase* dataTexture,
                                  const TextureCopy& dst,
                                  const Extent3D& copyExtent) {
-    ASSERT(device->IsLockedByCurrentThreadIfNeeded());
-    ASSERT(dst.texture->GetFormat().format == wgpu::TextureFormat::Depth16Unorm);
-    ASSERT(dataTexture->GetFormat().format == wgpu::TextureFormat::RG8Uint);
+    DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(dst.texture->GetFormat().format == wgpu::TextureFormat::Depth16Unorm);
+    DAWN_ASSERT(dataTexture->GetFormat().format == wgpu::TextureFormat::RG8Uint);
 
     // Allow internal usages since we need to use the destination
     // as a render attachment.
@@ -318,9 +318,9 @@ MaybeError BlitR8ToStencil(DeviceBase* device,
                            TextureBase* dataTexture,
                            const TextureCopy& dst,
                            const Extent3D& copyExtent) {
-    ASSERT(device->IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
     const Format& format = dst.texture->GetFormat();
-    ASSERT(dst.aspect == Aspect::Stencil);
+    DAWN_ASSERT(dst.aspect == Aspect::Stencil);
 
     // Allow internal usages since we need to use the destination
     // as a render attachment.
@@ -453,7 +453,7 @@ MaybeError BlitStagingBufferToDepth(DeviceBase* device,
                                     const TextureCopy& dst,
                                     const Extent3D& copyExtent) {
     const Format& format = dst.texture->GetFormat();
-    ASSERT(format.format == wgpu::TextureFormat::Depth16Unorm);
+    DAWN_ASSERT(format.format == wgpu::TextureFormat::Depth16Unorm);
 
     TextureDescriptor dataTextureDesc = {};
     dataTextureDesc.format = wgpu::TextureFormat::RG8Uint;
@@ -492,7 +492,7 @@ MaybeError BlitBufferToDepth(DeviceBase* device,
                              const TextureCopy& dst,
                              const Extent3D& copyExtent) {
     const Format& format = dst.texture->GetFormat();
-    ASSERT(format.format == wgpu::TextureFormat::Depth16Unorm);
+    DAWN_ASSERT(format.format == wgpu::TextureFormat::Depth16Unorm);
 
     TextureDescriptor dataTextureDesc = {};
     dataTextureDesc.format = wgpu::TextureFormat::RG8Uint;

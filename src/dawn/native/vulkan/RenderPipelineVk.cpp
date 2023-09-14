@@ -445,7 +445,7 @@ MaybeError RenderPipeline::Initialize() {
     // VkPipelineMultisampleStateCreateInfo.pSampleMask is an array of length
     // ceil(rasterizationSamples / 32) and since we're passing a single uint32_t
     // we have to assert that this length is indeed 1.
-    ASSERT(multisample.rasterizationSamples <= 32);
+    DAWN_ASSERT(multisample.rasterizationSamples <= 32);
     VkSampleMask sampleMask = GetSampleMask();
     multisample.pSampleMask = &sampleMask;
     multisample.alphaToCoverageEnable = IsAlphaToCoverageEnabled();

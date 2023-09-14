@@ -30,7 +30,7 @@ static constexpr uint64_t kPayloadMask = (uint64_t(1) << kPayloadBits) - 1;
 static constexpr uint64_t kRefCountIncrement = (uint64_t(1) << kPayloadBits);
 
 RefCount::RefCount(uint64_t payload) : mRefCount(kRefCountIncrement + payload) {
-    ASSERT((payload & kPayloadMask) == payload);
+    DAWN_ASSERT((payload & kPayloadMask) == payload);
 }
 
 uint64_t RefCount::GetValueForTesting() const {
@@ -46,7 +46,7 @@ uint64_t RefCount::GetPayload() const {
 }
 
 void RefCount::Increment() {
-    ASSERT((mRefCount & ~kPayloadMask) != 0);
+    DAWN_ASSERT((mRefCount & ~kPayloadMask) != 0);
 
     // The relaxed ordering guarantees only the atomicity of the update, which is enough here
     // because the reference we are copying from still exists and makes sure other threads
@@ -77,7 +77,7 @@ bool RefCount::TryIncrement() {
 }
 
 bool RefCount::Decrement() {
-    ASSERT((mRefCount & ~kPayloadMask) != 0);
+    DAWN_ASSERT((mRefCount & ~kPayloadMask) != 0);
 
     // The release fence here is to make sure all accesses to the object on a thread A
     // happen-before the object is deleted on a thread B. The release memory order ensures that

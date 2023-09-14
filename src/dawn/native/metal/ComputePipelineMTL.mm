@@ -64,7 +64,7 @@ MaybeError ComputePipeline::Initialize() {
         return DAWN_INTERNAL_ERROR("Error creating pipeline state " +
                                    std::string([error.localizedDescription UTF8String]));
     }
-    ASSERT(mMtlComputePipelineState != nil);
+    DAWN_ASSERT(mMtlComputePipelineState != nil);
 
     // Copy over the local workgroup size as it is passed to dispatch explicitly in Metal
     mLocalWorkgroupSize = computeData.localWorkgroupSize;

@@ -69,7 +69,7 @@ class BufferZeroInitTest : public DawnTest {
                          wgpu::MapMode mapMode,
                          uint64_t offset,
                          uint64_t size) {
-        ASSERT(mapMode == wgpu::MapMode::Read || mapMode == wgpu::MapMode::Write);
+        DAWN_ASSERT(mapMode == wgpu::MapMode::Read || mapMode == wgpu::MapMode::Write);
 
         bool done = false;
         buffer.MapAsync(
@@ -120,9 +120,9 @@ class BufferZeroInitTest : public DawnTest {
 
     void TestBufferZeroInitInCopyTextureToBuffer(const BufferZeroInitInCopyT2BSpec& spec) {
         constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Float;
-        ASSERT(utils::GetTexelBlockSizeInBytes(kTextureFormat) * spec.textureSize.width %
-                   kTextureBytesPerRowAlignment ==
-               0);
+        DAWN_ASSERT(utils::GetTexelBlockSizeInBytes(kTextureFormat) * spec.textureSize.width %
+                        kTextureBytesPerRowAlignment ==
+                    0);
 
         constexpr wgpu::Color kClearColor = {0.5f, 0.5f, 0.5f, 0.5f};
         wgpu::Texture texture =
@@ -216,7 +216,7 @@ class BufferZeroInitTest : public DawnTest {
                 return i_color;
             })");
 
-        ASSERT(vertexBufferCount <= 1u);
+        DAWN_ASSERT(vertexBufferCount <= 1u);
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;

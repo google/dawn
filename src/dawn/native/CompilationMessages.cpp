@@ -84,7 +84,7 @@ void OwnedCompilationMessages::AddMessage(std::string message,
                                           uint64_t offset,
                                           uint64_t length) {
     // Cannot add messages after GetCompilationInfo has been called.
-    ASSERT(mCompilationInfo.messages == nullptr);
+    DAWN_ASSERT(mCompilationInfo.messages == nullptr);
 
     mMessageStrings.push_back(message);
     mMessages.push_back({nullptr, nullptr, static_cast<WGPUCompilationMessageType>(type), lineNum,
@@ -93,7 +93,7 @@ void OwnedCompilationMessages::AddMessage(std::string message,
 
 MaybeError OwnedCompilationMessages::AddMessage(const tint::diag::Diagnostic& diagnostic) {
     // Cannot add messages after GetCompilationInfo has been called.
-    ASSERT(mCompilationInfo.messages == nullptr);
+    DAWN_ASSERT(mCompilationInfo.messages == nullptr);
 
     // Tint line and column values are 1-based.
     uint64_t lineNum = diagnostic.source.range.begin.line;
@@ -142,7 +142,7 @@ MaybeError OwnedCompilationMessages::AddMessage(const tint::diag::Diagnostic& di
             static_cast<uint64_t>(endLineStart - fileStart) + endLineCol - 1;
         // The length of the message is the difference between the starting offset and the
         // ending offset. Negative ranges aren't allowed.
-        ASSERT(endOffsetInBytes >= offsetInBytes);
+        DAWN_ASSERT(endOffsetInBytes >= offsetInBytes);
         lengthInBytes = endOffsetInBytes - offsetInBytes;
         DAWN_TRY_ASSIGN(lengthInUTF16, CountUTF16CodeUnitsFromUTF8String(std::string_view(
                                            fileStart + offsetInBytes, lengthInBytes)));
@@ -163,7 +163,7 @@ MaybeError OwnedCompilationMessages::AddMessage(const tint::diag::Diagnostic& di
 
 MaybeError OwnedCompilationMessages::AddMessages(const tint::diag::List& diagnostics) {
     // Cannot add messages after GetCompilationInfo has been called.
-    ASSERT(mCompilationInfo.messages == nullptr);
+    DAWN_ASSERT(mCompilationInfo.messages == nullptr);
 
     for (const auto& diag : diagnostics) {
         DAWN_TRY(AddMessage(diag));
@@ -176,7 +176,7 @@ MaybeError OwnedCompilationMessages::AddMessages(const tint::diag::List& diagnos
 
 void OwnedCompilationMessages::ClearMessages() {
     // Cannot clear messages after GetCompilationInfo has been called.
-    ASSERT(mCompilationInfo.messages == nullptr);
+    DAWN_ASSERT(mCompilationInfo.messages == nullptr);
 
     mMessageStrings.clear();
     mMessages.clear();

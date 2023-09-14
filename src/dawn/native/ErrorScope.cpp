@@ -56,7 +56,7 @@ void ErrorScopeStack::Push(wgpu::ErrorFilter filter) {
 }
 
 ErrorScope ErrorScopeStack::Pop() {
-    ASSERT(!mScopes.empty());
+    DAWN_ASSERT(!mScopes.empty());
     ErrorScope scope = std::move(mScopes.back());
     mScopes.pop_back();
     return scope;

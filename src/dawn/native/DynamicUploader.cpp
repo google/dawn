@@ -59,7 +59,7 @@ ResultOrError<UploadHandle> DynamicUploader::AllocateInternal(uint64_t allocatio
     for (auto& ringBuffer : mRingBuffers) {
         const RingBufferAllocator& ringBufferAllocator = ringBuffer->mAllocator;
         // Prevent overflow.
-        ASSERT(ringBufferAllocator.GetSize() >= ringBufferAllocator.GetUsedSize());
+        DAWN_ASSERT(ringBufferAllocator.GetSize() >= ringBufferAllocator.GetUsedSize());
         const uint64_t remainingSize =
             ringBufferAllocator.GetSize() - ringBufferAllocator.GetUsedSize();
         if (allocationSize <= remainingSize) {
@@ -83,7 +83,7 @@ ResultOrError<UploadHandle> DynamicUploader::AllocateInternal(uint64_t allocatio
         startOffset = targetRingBuffer->mAllocator.Allocate(allocationSize, serial);
     }
 
-    ASSERT(startOffset != RingBufferAllocator::kInvalidOffset);
+    DAWN_ASSERT(startOffset != RingBufferAllocator::kInvalidOffset);
 
     // Allocate the staging buffer backing the ringbuffer.
     // Note: the first ringbuffer will be lazily created.
@@ -100,7 +100,7 @@ ResultOrError<UploadHandle> DynamicUploader::AllocateInternal(uint64_t allocatio
         targetRingBuffer->mStagingBuffer = std::move(stagingBuffer);
     }
 
-    ASSERT(targetRingBuffer->mStagingBuffer != nullptr);
+    DAWN_ASSERT(targetRingBuffer->mStagingBuffer != nullptr);
 
     UploadHandle uploadHandle;
     uploadHandle.stagingBuffer = targetRingBuffer->mStagingBuffer.Get();
@@ -131,7 +131,7 @@ void DynamicUploader::Deallocate(ExecutionSerial lastCompletedSerial) {
 ResultOrError<UploadHandle> DynamicUploader::Allocate(uint64_t allocationSize,
                                                       ExecutionSerial serial,
                                                       uint64_t offsetAlignment) {
-    ASSERT(offsetAlignment > 0);
+    DAWN_ASSERT(offsetAlignment > 0);
     UploadHandle uploadHandle;
     DAWN_TRY_ASSIGN(uploadHandle, AllocateInternal(allocationSize + offsetAlignment - 1, serial));
     uint64_t additionalOffset =

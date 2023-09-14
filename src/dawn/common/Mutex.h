@@ -57,8 +57,8 @@ class Mutex : public RefCounted, NonCopyable {
     void Unlock();
 
     // This method is only enabled when DAWN_ENABLE_ASSERTS is turned on.
-    // Thus it should only be wrapped inside ASSERT() macro.
-    // i.e. ASSERT(mutex.IsLockedByCurrentThread())
+    // Thus it should only be wrapped inside DAWN_ASSERT() macro.
+    // i.e. DAWN_ASSERT(mutex.IsLockedByCurrentThread())
     bool IsLockedByCurrentThread();
 
   private:

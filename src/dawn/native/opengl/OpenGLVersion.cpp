@@ -36,7 +36,7 @@ MaybeError OpenGLVersion::Initialize(GetProcAddress getProc) {
         mMinorVersion = version[12] - '0';
 
         // The minor version shouldn't get to two digits.
-        ASSERT(strlen(version) <= 13 || !isdigit(version[13]));
+        DAWN_ASSERT(strlen(version) <= 13 || !isdigit(version[13]));
     } else {
         // OpenGL spec states the GL_VERSION string will be in the following format:
         // <version number><space><vendor-specific information>
@@ -48,7 +48,7 @@ MaybeError OpenGLVersion::Initialize(GetProcAddress getProc) {
         mMinorVersion = version[2] - '0';
 
         // The minor version shouldn't get to two digits.
-        ASSERT(strlen(version) <= 3 || !isdigit(version[3]));
+        DAWN_ASSERT(strlen(version) <= 3 || !isdigit(version[3]));
     }
 
     return {};

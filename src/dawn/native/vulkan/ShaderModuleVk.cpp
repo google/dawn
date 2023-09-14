@@ -92,7 +92,7 @@ class ShaderModule::ConcurrentTransformedShaderModuleCache {
     ModuleAndSpirv AddOrGet(const TransformedShaderModuleCacheKey& key,
                             VkShaderModule module,
                             CompiledSpirv compilation) {
-        ASSERT(module != VK_NULL_HANDLE);
+        DAWN_ASSERT(module != VK_NULL_HANDLE);
         std::lock_guard<std::mutex> lock(mMutex);
 
         auto iter = mTransformedShaderModuleCache.find(key);
@@ -101,7 +101,7 @@ class ShaderModule::ConcurrentTransformedShaderModuleCache {
             std::tie(iter, added) = mTransformedShaderModuleCache.emplace(
                 key, Entry{module, std::move(compilation.spirv),
                            std::move(compilation.remappedEntryPoint)});
-            ASSERT(added);
+            DAWN_ASSERT(added);
         } else {
             // No need to use FencedDeleter since this shader module was just created and does
             // not need to wait for queue operations to complete.
@@ -195,7 +195,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     TRACE_EVENT0(GetDevice()->GetPlatform(), General, "ShaderModuleVk::GetHandleAndSpirv");
 
     // If the shader was destroyed, we should never call this function.
-    ASSERT(IsAlive());
+    DAWN_ASSERT(IsAlive());
 
     ScopedTintICEHandler scopedICEHandler(GetDevice());
 
@@ -326,13 +326,13 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                 remappedEntryPoint = r.entryPointName;
             } else {
                 auto* data = transformOutputs.Get<tint::ast::transform::Renamer::Data>();
-                ASSERT(data != nullptr);
+                DAWN_ASSERT(data != nullptr);
 
                 auto it = data->remappings.find(r.entryPointName.data());
-                ASSERT(it != data->remappings.end());
+                DAWN_ASSERT(it != data->remappings.end());
                 remappedEntryPoint = it->second;
             }
-            ASSERT(remappedEntryPoint != "");
+            DAWN_ASSERT(remappedEntryPoint != "");
 
             // Validate workgroup size after program runs transforms.
             if (r.stage == SingleShaderStage::Compute) {

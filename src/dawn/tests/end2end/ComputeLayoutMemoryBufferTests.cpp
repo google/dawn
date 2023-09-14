@@ -179,7 +179,7 @@ class MemoryDataBuilder {
         for (auto& operation : mOperations) {
             switch (operation.mType) {
                 case OperationType::FillingFixed: {
-                    ASSERT(operation.mOperand == operation.mFixedFillingData.size());
+                    DAWN_ASSERT(operation.mOperand == operation.mFixedFillingData.size());
                     buffer.insert(buffer.end(), operation.mFixedFillingData.begin(),
                                   operation.mFixedFillingData.end());
                     break;
@@ -269,7 +269,7 @@ class Field {
     // Applies a @size attribute, sets the mPaddedSize to value.
     // Returns this Field so calls can be chained.
     Field& SizeAttribute(size_t value) {
-        ASSERT(value >= mSize);
+        DAWN_ASSERT(value >= mSize);
         mHasSizeAttribute = true;
         mPaddedSize = value;
         return *this;
@@ -280,8 +280,8 @@ class Field {
     // Applies a @align attribute, sets the align to value.
     // Returns this Field so calls can be chained.
     Field& AlignAttribute(size_t value) {
-        ASSERT(value >= mAlign);
-        ASSERT(IsPowerOfTwo(value));
+        DAWN_ASSERT(value >= mAlign);
+        DAWN_ASSERT(IsPowerOfTwo(value));
         mAlign = value;
         mHasAlignAttribute = true;
         return *this;
@@ -294,8 +294,8 @@ class Field {
     Field& Strided(size_t bytesData, size_t bytesPadding) {
         // Check that stride pattern cover the whole data part, i.e. the data part contains N x
         // whole data bytes and N or (N-1) x whole padding bytes.
-        ASSERT((mSize % (bytesData + bytesPadding) == 0) ||
-               ((mSize + bytesPadding) % (bytesData + bytesPadding) == 0));
+        DAWN_ASSERT((mSize % (bytesData + bytesPadding) == 0) ||
+                    ((mSize + bytesPadding) % (bytesData + bytesPadding) == 0));
         mStrideDataBytes = bytesData;
         mStridePaddingBytes = bytesPadding;
         return *this;
@@ -335,8 +335,9 @@ class Field {
         // Check that stride pattern cover the whole data part, i.e. the data part contains N x
         // whole data bytes and N or (N-1) x whole padding bytes. Note that this also handle
         // continious data, i.e. mStrideDataBytes == mSize and mStridePaddingBytes == 0, correctly.
-        ASSERT((mSize % (mStrideDataBytes + mStridePaddingBytes) == 0) ||
-               ((mSize + mStridePaddingBytes) % (mStrideDataBytes + mStridePaddingBytes) == 0));
+        DAWN_ASSERT(
+            (mSize % (mStrideDataBytes + mStridePaddingBytes) == 0) ||
+            ((mSize + mStridePaddingBytes) % (mStrideDataBytes + mStridePaddingBytes) == 0));
         size_t offset = 0;
         while (offset < mSize) {
             builder.AddData(mStrideDataBytes);
@@ -360,7 +361,7 @@ class Field {
 
     // Helper function to build a Field describing a vector type.
     static Field Vector(uint32_t n, ScalarType type) {
-        ASSERT(2 <= n && n <= 4);
+        DAWN_ASSERT(2 <= n && n <= 4);
         size_t elementSize = ScalarTypeSize(type);
         size_t vectorSize = n * elementSize;
         size_t vectorAlignment = (n == 3 ? 4 : n) * elementSize;
@@ -370,9 +371,9 @@ class Field {
 
     // Helper function to build a Field describing a matrix type.
     static Field Matrix(uint32_t col, uint32_t row, ScalarType type) {
-        ASSERT(2 <= col && col <= 4);
-        ASSERT(2 <= row && row <= 4);
-        ASSERT(type == ScalarType::f32 || type == ScalarType::f16);
+        DAWN_ASSERT(2 <= col && col <= 4);
+        DAWN_ASSERT(2 <= row && row <= 4);
+        DAWN_ASSERT(type == ScalarType::f32 || type == ScalarType::f16);
         size_t elementSize = ScalarTypeSize(type);
         size_t colVectorSize = row * elementSize;
         size_t colVectorAlignment = (row == 3 ? 4 : row) * elementSize;

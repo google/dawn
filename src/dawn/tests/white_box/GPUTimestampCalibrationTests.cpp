@@ -236,7 +236,8 @@ class GPUTimestampCalibrationTests : public DawnTestWithParams<GPUTimestampCalib
         switch (GetParam().mEncoderType) {
             case EncoderType::NonPass: {
                 // The "timestamp-query-inside-passes" feature is not supported on command encoder
-                ASSERT(GetParam().mFeatureName != wgpu::FeatureName::TimestampQueryInsidePasses);
+                DAWN_ASSERT(GetParam().mFeatureName !=
+                            wgpu::FeatureName::TimestampQueryInsidePasses);
                 encoder.WriteTimestamp(querySet, 0);
                 encoder.WriteTimestamp(querySet, 1);
                 break;

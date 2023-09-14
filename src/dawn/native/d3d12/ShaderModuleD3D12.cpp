@@ -67,7 +67,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     const std::bitset<kMaxInterStageShaderVariables>* usedInterstageVariables) {
     Device* device = ToBackend(GetDevice());
     TRACE_EVENT0(device->GetPlatform(), General, "ShaderModuleD3D12::Compile");
-    ASSERT(!IsError());
+    DAWN_ASSERT(!IsError());
 
     ScopedTintICEHandler scopedICEHandler(device);
     const EntryPointMetadata& entryPoint = GetEntryPoint(programmableStage.entryPoint);
@@ -90,7 +90,7 @@ ResultOrError<d3d::CompiledShader> ShaderModule::Compile(
     if (device->IsToggleEnabled(Toggle::UseDXC)) {
         // If UseDXC toggle are not forced to be disable, DXC should have been validated to be
         // available.
-        ASSERT(ToBackend(device->GetPhysicalDevice())->GetBackend()->IsDXCAvailable());
+        DAWN_ASSERT(ToBackend(device->GetPhysicalDevice())->GetBackend()->IsDXCAvailable());
         // We can get the DXC version information since IsDXCAvailable() is true.
         d3d::DxcVersionInfo dxcVersionInfo =
             ToBackend(device->GetPhysicalDevice())->GetBackend()->GetDxcVersion();

@@ -217,7 +217,7 @@ ResultOrError<VulkanDeviceInfo> GatherDeviceInfo(const PhysicalDevice& device) {
     //
     // Note that info.properties has already been filled at the start of this function to get
     // `apiVersion`.
-    ASSERT(info.properties.apiVersion != 0);
+    DAWN_ASSERT(info.properties.apiVersion != 0);
     if (info.extensions[DeviceExt::GetPhysicalDeviceProperties2]) {
         VkPhysicalDeviceFeatures2 features2 = {};
         features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;

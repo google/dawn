@@ -60,9 +60,9 @@ static constexpr std::array<VertexFormatInfo, 31> sVertexFormatTable = {{
 }};
 
 const VertexFormatInfo& GetVertexFormatInfo(wgpu::VertexFormat format) {
-    ASSERT(format != wgpu::VertexFormat::Undefined);
-    ASSERT(static_cast<uint32_t>(format) < sVertexFormatTable.size());
-    ASSERT(sVertexFormatTable[static_cast<uint32_t>(format)].format == format);
+    DAWN_ASSERT(format != wgpu::VertexFormat::Undefined);
+    DAWN_ASSERT(static_cast<uint32_t>(format) < sVertexFormatTable.size());
+    DAWN_ASSERT(sVertexFormatTable[static_cast<uint32_t>(format)].format == format);
     return sVertexFormatTable[static_cast<uint32_t>(format)];
 }
 

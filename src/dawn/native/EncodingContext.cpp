@@ -52,14 +52,14 @@ void EncodingContext::Destroy() {
 
 CommandIterator EncodingContext::AcquireCommands() {
     MoveToIterator();
-    ASSERT(!mWereCommandsAcquired);
+    DAWN_ASSERT(!mWereCommandsAcquired);
     mWereCommandsAcquired = true;
     return std::move(mIterator);
 }
 
 CommandIterator* EncodingContext::GetIterator() {
     MoveToIterator();
-    ASSERT(!mWereCommandsAcquired);
+    DAWN_ASSERT(!mWereCommandsAcquired);
     return &mIterator;
 }
 
@@ -80,7 +80,7 @@ void EncodingContext::HandleError(std::unique_ptr<ErrorData> error) {
 
     if (!IsFinished()) {
         // Encoding should only generate validation errors.
-        ASSERT(error->GetType() == InternalErrorType::Validation);
+        DAWN_ASSERT(error->GetType() == InternalErrorType::Validation);
         // If the encoding context is not finished, errors are deferred until
         // Finish() is called.
         if (mError == nullptr) {
@@ -95,7 +95,7 @@ void EncodingContext::HandleError(std::unique_ptr<ErrorData> error) {
 }
 
 void EncodingContext::WillBeginRenderPass() {
-    ASSERT(mCurrentEncoder == mTopLevelEncoder);
+    DAWN_ASSERT(mCurrentEncoder == mTopLevelEncoder);
     if (mDevice->IsValidationEnabled() || mDevice->MayRequireDuplicationOfIndirectParameters()) {
         // When validation is enabled or indirect parameters require duplication, we are going
         // to want to capture all commands encoded between and including BeginRenderPassCmd and
@@ -109,8 +109,8 @@ void EncodingContext::WillBeginRenderPass() {
 
 void EncodingContext::EnterPass(const ApiObjectBase* passEncoder) {
     // Assert we're at the top level.
-    ASSERT(mCurrentEncoder == mTopLevelEncoder);
-    ASSERT(passEncoder != nullptr);
+    DAWN_ASSERT(mCurrentEncoder == mTopLevelEncoder);
+    DAWN_ASSERT(passEncoder != nullptr);
 
     mCurrentEncoder = passEncoder;
 }
@@ -119,8 +119,8 @@ MaybeError EncodingContext::ExitRenderPass(const ApiObjectBase* passEncoder,
                                            RenderPassResourceUsageTracker usageTracker,
                                            CommandEncoder* commandEncoder,
                                            IndirectDrawMetadata indirectDrawMetadata) {
-    ASSERT(mCurrentEncoder != mTopLevelEncoder);
-    ASSERT(mCurrentEncoder == passEncoder);
+    DAWN_ASSERT(mCurrentEncoder != mTopLevelEncoder);
+    DAWN_ASSERT(mCurrentEncoder == passEncoder);
 
     mCurrentEncoder = mTopLevelEncoder;
 
@@ -139,7 +139,7 @@ MaybeError EncodingContext::ExitRenderPass(const ApiObjectBase* passEncoder,
         // TODO(crbug.com/dawn/1618): In future, all temp resources should be created at
         // Command Submit time, so the locking would be removed from here at that point.
         {
-            ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
+            DAWN_ASSERT(mDevice->IsLockedByCurrentThreadIfNeeded());
 
             DAWN_TRY_WITH_CLEANUP(
                 EncodeIndirectDrawValidationCommands(mDevice, commandEncoder, &usageTracker,
@@ -157,8 +157,8 @@ MaybeError EncodingContext::ExitRenderPass(const ApiObjectBase* passEncoder,
 
 void EncodingContext::ExitComputePass(const ApiObjectBase* passEncoder,
                                       ComputePassResourceUsage usages) {
-    ASSERT(mCurrentEncoder != mTopLevelEncoder);
-    ASSERT(mCurrentEncoder == passEncoder);
+    DAWN_ASSERT(mCurrentEncoder != mTopLevelEncoder);
+    DAWN_ASSERT(mCurrentEncoder == passEncoder);
 
     mCurrentEncoder = mTopLevelEncoder;
     mComputePassUsages.push_back(std::move(usages));
@@ -174,23 +174,23 @@ void EncodingContext::EnsurePassExited(const ApiObjectBase* passEncoder) {
 }
 
 const RenderPassUsages& EncodingContext::GetRenderPassUsages() const {
-    ASSERT(!mWereRenderPassUsagesAcquired);
+    DAWN_ASSERT(!mWereRenderPassUsagesAcquired);
     return mRenderPassUsages;
 }
 
 RenderPassUsages EncodingContext::AcquireRenderPassUsages() {
-    ASSERT(!mWereRenderPassUsagesAcquired);
+    DAWN_ASSERT(!mWereRenderPassUsagesAcquired);
     mWereRenderPassUsagesAcquired = true;
     return std::move(mRenderPassUsages);
 }
 
 const ComputePassUsages& EncodingContext::GetComputePassUsages() const {
-    ASSERT(!mWereComputePassUsagesAcquired);
+    DAWN_ASSERT(!mWereComputePassUsagesAcquired);
     return mComputePassUsages;
 }
 
 ComputePassUsages EncodingContext::AcquireComputePassUsages() {
-    ASSERT(!mWereComputePassUsagesAcquired);
+    DAWN_ASSERT(!mWereComputePassUsagesAcquired);
     mWereComputePassUsagesAcquired = true;
     return std::move(mComputePassUsages);
 }

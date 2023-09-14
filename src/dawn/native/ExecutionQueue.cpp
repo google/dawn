@@ -32,10 +32,10 @@ MaybeError ExecutionQueueBase::CheckPassedSerials() {
     ExecutionSerial completedSerial;
     DAWN_TRY_ASSIGN(completedSerial, CheckAndUpdateCompletedSerials());
 
-    ASSERT(completedSerial <= mLastSubmittedSerial);
+    DAWN_ASSERT(completedSerial <= mLastSubmittedSerial);
     // completedSerial should not be less than mCompletedSerial unless it is 0.
     // It can be 0 when there's no fences to check.
-    ASSERT(completedSerial >= mCompletedSerial || completedSerial == ExecutionSerial(0));
+    DAWN_ASSERT(completedSerial >= mCompletedSerial || completedSerial == ExecutionSerial(0));
 
     if (completedSerial > mCompletedSerial) {
         mCompletedSerial = completedSerial;

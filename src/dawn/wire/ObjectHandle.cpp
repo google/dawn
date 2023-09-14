@@ -21,7 +21,7 @@ namespace dawn::wire {
 ObjectHandle::ObjectHandle() = default;
 ObjectHandle::ObjectHandle(ObjectId id, ObjectGeneration generation)
     : id(id), generation(generation) {
-    ASSERT(id != 0);
+    DAWN_ASSERT(id != 0);
 }
 
 ObjectHandle::ObjectHandle(const volatile ObjectHandle& rhs)

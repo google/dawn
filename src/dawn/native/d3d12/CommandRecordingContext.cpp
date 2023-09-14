@@ -31,13 +31,13 @@
 namespace dawn::native::d3d12 {
 
 void CommandRecordingContext::AddToSharedTextureList(Texture* texture) {
-    ASSERT(IsOpen());
+    DAWN_ASSERT(IsOpen());
     mSharedTextures.insert(texture);
 }
 
 MaybeError CommandRecordingContext::Open(ID3D12Device* d3d12Device,
                                          CommandAllocatorManager* commandAllocationManager) {
-    ASSERT(!IsOpen());
+    DAWN_ASSERT(!IsOpen());
     ID3D12CommandAllocator* commandAllocator;
     DAWN_TRY_ASSIGN(commandAllocator, commandAllocationManager->ReserveCommandAllocator());
     if (mD3d12CommandList != nullptr) {
@@ -142,16 +142,16 @@ void CommandRecordingContext::TrackHeapUsage(Heap* heap, ExecutionSerial serial)
 }
 
 ID3D12GraphicsCommandList* CommandRecordingContext::GetCommandList() const {
-    ASSERT(mD3d12CommandList != nullptr);
-    ASSERT(IsOpen());
+    DAWN_ASSERT(mD3d12CommandList != nullptr);
+    DAWN_ASSERT(IsOpen());
     return mD3d12CommandList.Get();
 }
 
 // This function will fail on Windows versions prior to 1809. Support must be queried through
 // the device before calling.
 ID3D12GraphicsCommandList4* CommandRecordingContext::GetCommandList4() const {
-    ASSERT(IsOpen());
-    ASSERT(mD3d12CommandList != nullptr);
+    DAWN_ASSERT(IsOpen());
+    DAWN_ASSERT(mD3d12CommandList != nullptr);
     return mD3d12CommandList4.Get();
 }
 

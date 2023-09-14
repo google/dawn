@@ -40,9 +40,9 @@ SamplerHeapCacheEntry::SamplerHeapCacheEntry(SamplerHeapCache* cache,
       mSamplers(std::move(samplers)),
       mAllocator(allocator),
       mCache(cache) {
-    ASSERT(mCache != nullptr);
-    ASSERT(mCPUAllocation.IsValid());
-    ASSERT(!mSamplers.empty());
+    DAWN_ASSERT(mCache != nullptr);
+    DAWN_ASSERT(mCPUAllocation.IsValid());
+    DAWN_ASSERT(!mSamplers.empty());
 }
 
 std::vector<Sampler*>&& SamplerHeapCacheEntry::AcquireSamplers() {
@@ -56,7 +56,7 @@ SamplerHeapCacheEntry::~SamplerHeapCacheEntry() {
         mAllocator->Deallocate(&mCPUAllocation);
     }
 
-    ASSERT(!mCPUAllocation.IsValid());
+    DAWN_ASSERT(!mCPUAllocation.IsValid());
 }
 
 bool SamplerHeapCacheEntry::Populate(Device* device,
@@ -65,7 +65,7 @@ bool SamplerHeapCacheEntry::Populate(Device* device,
         return true;
     }
 
-    ASSERT(!mSamplers.empty());
+    DAWN_ASSERT(!mSamplers.empty());
 
     // Attempt to allocate descriptors for the currently bound shader-visible heaps.
     // If either failed, return early to re-allocate and switch the heaps.
@@ -146,13 +146,13 @@ ResultOrError<Ref<SamplerHeapCacheEntry>> SamplerHeapCache::GetOrCreate(
 SamplerHeapCache::SamplerHeapCache(Device* device) : mDevice(device) {}
 
 SamplerHeapCache::~SamplerHeapCache() {
-    ASSERT(mCache.empty());
+    DAWN_ASSERT(mCache.empty());
 }
 
 void SamplerHeapCache::RemoveCacheEntry(SamplerHeapCacheEntry* entry) {
-    ASSERT(entry->GetRefCountForTesting() == 0);
+    DAWN_ASSERT(entry->GetRefCountForTesting() == 0);
     size_t removedCount = mCache.erase(entry);
-    ASSERT(removedCount == 1);
+    DAWN_ASSERT(removedCount == 1);
 }
 
 size_t SamplerHeapCacheEntry::HashFunc::operator()(const SamplerHeapCacheEntry* entry) const {

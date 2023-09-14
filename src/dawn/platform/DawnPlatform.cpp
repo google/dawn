@@ -49,7 +49,7 @@ uint64_t Platform::AddTraceEvent(char phase,
                                  const uint64_t* argValues,
                                  unsigned char flags) {
     // AddTraceEvent cannot be called if events are disabled.
-    ASSERT(false);
+    DAWN_ASSERT(false);
     return 0;
 }
 

@@ -246,7 +246,7 @@ static constexpr FeatureEnumAndInfo kFeatureInfo[] = {
 }  // anonymous namespace
 
 void FeaturesSet::EnableFeature(Feature feature) {
-    ASSERT(feature != Feature::InvalidEnum);
+    DAWN_ASSERT(feature != Feature::InvalidEnum);
     featuresBitSet.set(feature);
 }
 
@@ -255,7 +255,7 @@ void FeaturesSet::EnableFeature(wgpu::FeatureName feature) {
 }
 
 bool FeaturesSet::IsEnabled(Feature feature) const {
-    ASSERT(feature != Feature::InvalidEnum);
+    DAWN_ASSERT(feature != Feature::InvalidEnum);
     return featuresBitSet[feature];
 }
 
@@ -280,7 +280,7 @@ std::vector<const char*> FeaturesSet::GetEnabledFeatureNames() const {
 
     uint32_t index = 0;
     for (Feature feature : IterateBitSet(featuresBitSet)) {
-        ASSERT(feature != Feature::InvalidEnum);
+        DAWN_ASSERT(feature != Feature::InvalidEnum);
         enabledFeatureNames[index] = kFeatureNameAndInfoList[feature].name;
         ++index;
     }

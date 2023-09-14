@@ -57,10 +57,11 @@ ExternalImageDXGIImpl::ExternalImageDXGIImpl(Device* backendDevice,
       mSampleCount(textureDescriptor->sampleCount),
       mViewFormats(textureDescriptor->viewFormats,
                    textureDescriptor->viewFormats + textureDescriptor->viewFormatCount) {
-    ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
-    ASSERT(mBackendDevice != nullptr);
-    ASSERT(!textureDescriptor->nextInChain || textureDescriptor->nextInChain->sType ==
-                                                  wgpu::SType::DawnTextureInternalUsageDescriptor);
+    DAWN_ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(mBackendDevice != nullptr);
+    DAWN_ASSERT(!textureDescriptor->nextInChain ||
+                textureDescriptor->nextInChain->sType ==
+                    wgpu::SType::DawnTextureInternalUsageDescriptor);
     if (textureDescriptor->nextInChain) {
         mUsageInternal = reinterpret_cast<const wgpu::DawnTextureInternalUsageDescriptor*>(
                              textureDescriptor->nextInChain)
@@ -73,7 +74,7 @@ ExternalImageDXGIImpl::ExternalImageDXGIImpl(Device* backendDevice,
 }
 
 ExternalImageDXGIImpl::~ExternalImageDXGIImpl() {
-    ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
     mDXGIKeyedMutexReleaser.reset();
     DestroyInternal();
 }
@@ -83,12 +84,12 @@ Mutex::AutoLock ExternalImageDXGIImpl::GetScopedDeviceLock() const {
 }
 
 bool ExternalImageDXGIImpl::IsValid() const {
-    ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
     return IsInList();
 }
 
 void ExternalImageDXGIImpl::DestroyInternal() {
-    ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
     if (IsInList()) {
         mD3DResource = nullptr;
     }
@@ -100,8 +101,8 @@ void ExternalImageDXGIImpl::DestroyInternal() {
 
 WGPUTexture ExternalImageDXGIImpl::BeginAccess(
     const d3d::ExternalImageDXGIBeginAccessDescriptor* descriptor) {
-    ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
-    ASSERT(descriptor != nullptr);
+    DAWN_ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(descriptor != nullptr);
 
     if (!IsInList()) {
         dawn::ErrorLog() << "Cannot use external image after device destruction";
@@ -114,7 +115,7 @@ WGPUTexture ExternalImageDXGIImpl::BeginAccess(
         return nullptr;
     }
 
-    ASSERT(mBackendDevice != nullptr);
+    DAWN_ASSERT(mBackendDevice != nullptr);
     if (mBackendDevice->GetValidInternalFormat(mFormat).IsMultiPlanar() &&
         !descriptor->isInitialized) {
         bool consumed = mBackendDevice->ConsumedError(DAWN_VALIDATION_ERROR(
@@ -170,18 +171,18 @@ WGPUTexture ExternalImageDXGIImpl::BeginAccess(
 
 void ExternalImageDXGIImpl::EndAccess(WGPUTexture texture,
                                       d3d::ExternalImageDXGIFenceDescriptor* signalFence) {
-    ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(mBackendDevice->IsLockedByCurrentThreadIfNeeded());
 
     if (!IsInList()) {
         dawn::ErrorLog() << "Cannot use external image after device destruction";
         return;
     }
 
-    ASSERT(mBackendDevice != nullptr);
-    ASSERT(signalFence != nullptr);
+    DAWN_ASSERT(mBackendDevice != nullptr);
+    DAWN_ASSERT(signalFence != nullptr);
 
     Texture* backendTexture = ToBackend(FromAPI(texture));
-    ASSERT(backendTexture != nullptr);
+    DAWN_ASSERT(backendTexture != nullptr);
 
     ExecutionSerial fenceValue;
     if (mBackendDevice->ConsumedError(backendTexture->EndAccess(), &fenceValue)) {

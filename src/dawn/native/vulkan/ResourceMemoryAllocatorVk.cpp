@@ -73,7 +73,7 @@ class ResourceMemoryAllocator::SingleTypeAllocator : public ResourceHeapAllocato
               // Take the min in the very unlikely case the memory heap is tiny.
               std::min(uint64_t(1) << Log2(mMemoryHeapSize), kBuddyHeapsSize),
               &mPooledMemoryAllocator) {
-        ASSERT(IsPowerOfTwo(kBuddyHeapsSize));
+        DAWN_ASSERT(IsPowerOfTwo(kBuddyHeapsSize));
     }
     ~SingleTypeAllocator() override = default;
 
@@ -108,7 +108,7 @@ class ResourceMemoryAllocator::SingleTypeAllocator : public ResourceHeapAllocato
                                                              nullptr, &*allocatedMemory),
                                   "vkAllocateMemory"));
 
-        ASSERT(allocatedMemory != VK_NULL_HANDLE);
+        DAWN_ASSERT(allocatedMemory != VK_NULL_HANDLE);
         return {std::make_unique<ResourceHeap>(allocatedMemory, mMemoryTypeIndex)};
     }
 
@@ -144,7 +144,7 @@ ResultOrError<ResourceMemoryAllocation> ResourceMemoryAllocator::Allocate(
     bool forceDisableSubAllocation) {
     // The Vulkan spec guarantees at least on memory type is valid.
     int memoryType = FindBestTypeIndex(requirements, kind);
-    ASSERT(memoryType >= 0);
+    DAWN_ASSERT(memoryType >= 0);
 
     VkDeviceSize size = requirements.size;
 
@@ -235,7 +235,7 @@ void ResourceMemoryAllocator::Deallocate(ResourceMemoryAllocation* allocation) {
 void ResourceMemoryAllocator::Tick(ExecutionSerial completedSerial) {
     for (const ResourceMemoryAllocation& allocation :
          mSubAllocationsToDelete.IterateUpTo(completedSerial)) {
-        ASSERT(allocation.GetInfo().mMethod == AllocationMethod::kSubAllocated);
+        DAWN_ASSERT(allocation.GetInfo().mMethod == AllocationMethod::kSubAllocated);
         size_t memoryType = ToBackend(allocation.GetResourceHeap())->GetMemoryType();
 
         mAllocatorsPerType[memoryType]->DeallocateMemory(allocation);

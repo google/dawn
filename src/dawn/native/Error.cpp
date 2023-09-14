@@ -25,8 +25,8 @@ void IgnoreErrors(MaybeError maybeError) {
         // During shutdown and destruction, device lost errors can be ignored.
         // We can also ignore other unexpected internal errors on shut down and treat it as
         // device lost so that we can continue with destruction.
-        ASSERT(errorData->GetType() == InternalErrorType::DeviceLost ||
-               errorData->GetType() == InternalErrorType::Internal);
+        DAWN_ASSERT(errorData->GetType() == InternalErrorType::DeviceLost ||
+                    errorData->GetType() == InternalErrorType::Internal);
     }
 }
 

@@ -24,12 +24,12 @@ size_t CachedObject::HashFunc::operator()(const CachedObject* obj) const {
 }
 
 size_t CachedObject::GetContentHash() const {
-    ASSERT(mIsContentHashInitialized);
+    DAWN_ASSERT(mIsContentHashInitialized);
     return mContentHash;
 }
 
 void CachedObject::SetContentHash(size_t contentHash) {
-    ASSERT(!mIsContentHashInitialized || contentHash == mContentHash);
+    DAWN_ASSERT(!mIsContentHashInitialized || contentHash == mContentHash);
     mContentHash = contentHash;
     mIsContentHashInitialized = true;
 }

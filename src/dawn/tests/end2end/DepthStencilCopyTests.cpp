@@ -45,7 +45,7 @@ uint32_t GetBytesPerPixel(wgpu::TextureFormat format, wgpu::TextureAspect aspect
     uint32_t bytesPerPixel = 0;
     switch (format) {
         case wgpu::TextureFormat::Depth24PlusStencil8: {
-            ASSERT(aspect == wgpu::TextureAspect::StencilOnly);
+            DAWN_ASSERT(aspect == wgpu::TextureAspect::StencilOnly);
             bytesPerPixel = 1;
             break;
         }
@@ -765,7 +765,7 @@ TEST_P(DepthCopyTests, BufferCopySizeEdgeCase) {
 
             // Unable to check the result since either MapAsync and CopyBufferToBuffer requires size
             // to be multiple of 4 bytes.
-            // Just run and don't crash on ASSERT.
+            // Just run and don't crash on DAWN_ASSERT.
         }
     }
 }
@@ -1245,7 +1245,7 @@ TEST_P(StencilCopyTests, BufferCopySizeEdgeCase) {
 
             // Unable to check the result since either MapAsync and CopyBufferToBuffer requires size
             // to be multiple of 4 bytes.
-            // Just run and don't crash on ASSERT.
+            // Just run and don't crash on DAWN_ASSERT.
         }
     }
 }

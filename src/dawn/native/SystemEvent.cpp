@@ -58,7 +58,7 @@ HANDLE AsHANDLE(const SystemEventPrimitive& p) {
 }
 #elif DAWN_PLATFORM_IS(POSIX)
 int AsFD(const SystemEventPrimitive& p) {
-    ASSERT(p.value <= std::numeric_limits<int>::max());
+    DAWN_ASSERT(p.value <= std::numeric_limits<int>::max());
     return p.value;
 }
 #endif
@@ -71,18 +71,18 @@ SystemEventPrimitive::SystemEventPrimitive(void* win32Handle)
     : value(reinterpret_cast<uintptr_t>(win32Handle)) {
 #if DAWN_PLATFORM_IS(WINDOWS)
     static_assert(std::is_same_v<void*, HANDLE>);
-    ASSERT(win32Handle != nullptr);
+    DAWN_ASSERT(win32Handle != nullptr);
 #else
-    ASSERT(false);  // Wrong platform.
+    DAWN_ASSERT(false);  // Wrong platform.
 #endif
 }
 
 SystemEventPrimitive::SystemEventPrimitive(int posixFd) : value(posixFd) {
 #if DAWN_PLATFORM_IS(POSIX)
     static_assert(sizeof(uintptr_t) >= sizeof(int));
-    ASSERT(posixFd > 0);
+    DAWN_ASSERT(posixFd > 0);
 #else
-    ASSERT(false);  // Wrong platform.
+    DAWN_ASSERT(false);  // Wrong platform.
 #endif
 }
 
@@ -111,7 +111,7 @@ bool SystemEventPrimitive::IsValid() const {
 }
 
 void SystemEventPrimitive::Close() {
-    ASSERT(IsValid());
+    DAWN_ASSERT(IsValid());
 
 #if DAWN_PLATFORM_IS(WINDOWS)
     CloseHandle(AsHANDLE(*this));
@@ -139,11 +139,11 @@ SystemEventReceiver SystemEventReceiver::CreateAlreadySignaled() {
 SystemEventPipeSender::~SystemEventPipeSender() {
     // Make sure it's been Signaled (or is empty) before being dropped.
     // Dropping this would "leak" the receiver (it'll never get signalled).
-    ASSERT(!mPrimitive.IsValid());
+    DAWN_ASSERT(!mPrimitive.IsValid());
 }
 
 void SystemEventPipeSender::Signal() && {
-    ASSERT(mPrimitive.IsValid());
+    DAWN_ASSERT(mPrimitive.IsValid());
 #if DAWN_PLATFORM_IS(WINDOWS)
     // This is not needed on Windows yet. It's implementable using SetEvent().
     UNREACHABLE();

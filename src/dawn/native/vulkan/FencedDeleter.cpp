@@ -21,21 +21,21 @@ namespace dawn::native::vulkan {
 FencedDeleter::FencedDeleter(Device* device) : mDevice(device) {}
 
 FencedDeleter::~FencedDeleter() {
-    ASSERT(mBuffersToDelete.Empty());
-    ASSERT(mDescriptorPoolsToDelete.Empty());
-    ASSERT(mFramebuffersToDelete.Empty());
-    ASSERT(mImagesToDelete.Empty());
-    ASSERT(mImageViewsToDelete.Empty());
-    ASSERT(mMemoriesToDelete.Empty());
-    ASSERT(mPipelinesToDelete.Empty());
-    ASSERT(mPipelineLayoutsToDelete.Empty());
-    ASSERT(mQueryPoolsToDelete.Empty());
-    ASSERT(mRenderPassesToDelete.Empty());
-    ASSERT(mSamplersToDelete.Empty());
-    ASSERT(mSemaphoresToDelete.Empty());
-    ASSERT(mShaderModulesToDelete.Empty());
-    ASSERT(mSurfacesToDelete.Empty());
-    ASSERT(mSwapChainsToDelete.Empty());
+    DAWN_ASSERT(mBuffersToDelete.Empty());
+    DAWN_ASSERT(mDescriptorPoolsToDelete.Empty());
+    DAWN_ASSERT(mFramebuffersToDelete.Empty());
+    DAWN_ASSERT(mImagesToDelete.Empty());
+    DAWN_ASSERT(mImageViewsToDelete.Empty());
+    DAWN_ASSERT(mMemoriesToDelete.Empty());
+    DAWN_ASSERT(mPipelinesToDelete.Empty());
+    DAWN_ASSERT(mPipelineLayoutsToDelete.Empty());
+    DAWN_ASSERT(mQueryPoolsToDelete.Empty());
+    DAWN_ASSERT(mRenderPassesToDelete.Empty());
+    DAWN_ASSERT(mSamplersToDelete.Empty());
+    DAWN_ASSERT(mSemaphoresToDelete.Empty());
+    DAWN_ASSERT(mShaderModulesToDelete.Empty());
+    DAWN_ASSERT(mSurfacesToDelete.Empty());
+    DAWN_ASSERT(mSwapChainsToDelete.Empty());
 }
 
 void FencedDeleter::DeleteWhenUnused(VkBuffer buffer) {

@@ -55,7 +55,7 @@ void Queue::OnSubmittedWorkDone(uint64_t signalValue,
 WGPUFuture Queue::OnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInfo& callbackInfo) {
     // TODO(crbug.com/dawn/2052): Once we always return a future, change this to log to the instance
     // (note, not raise a validation error to the device) and return the null future.
-    ASSERT(callbackInfo.nextInChain == nullptr);
+    DAWN_ASSERT(callbackInfo.nextInChain == nullptr);
 
     Client* client = GetClient();
     FutureID futureIDInternal = client->GetEventManager()->TrackEvent(

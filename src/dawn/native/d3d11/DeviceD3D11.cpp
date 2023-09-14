@@ -57,8 +57,8 @@ static constexpr uint64_t kMaxDebugMessagesToPrint = 5;
 void AppendDebugLayerMessagesToError(ID3D11InfoQueue* infoQueue,
                                      uint64_t totalErrors,
                                      ErrorData* error) {
-    ASSERT(totalErrors > 0);
-    ASSERT(error != nullptr);
+    DAWN_ASSERT(totalErrors > 0);
+    DAWN_ASSERT(error != nullptr);
 
     uint64_t errorsToPrint = std::min(kMaxDebugMessagesToPrint, totalErrors);
     for (uint64_t i = 0; i < errorsToPrint; ++i) {
@@ -106,7 +106,7 @@ ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
 
 MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     DAWN_TRY_ASSIGN(mD3d11Device, ToBackend(GetPhysicalDevice())->CreateD3D11Device());
-    ASSERT(mD3d11Device != nullptr);
+    DAWN_ASSERT(mD3d11Device != nullptr);
 
     DAWN_TRY(DeviceBase::Initialize(Queue::Create(this, &descriptor->defaultQueue)));
 
@@ -434,7 +434,7 @@ void Device::AppendDebugLayerMessages(ErrorData* error) {
 }
 
 void Device::DestroyImpl() {
-    ASSERT(GetState() == State::Disconnected);
+    DAWN_ASSERT(GetState() == State::Disconnected);
 
     Base::DestroyImpl();
 

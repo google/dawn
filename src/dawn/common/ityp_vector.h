@@ -65,27 +65,27 @@ class vector : public std::vector<Value> {
     }
 
     Value& operator[](Index i) {
-        ASSERT(i >= Index(0) && i < size());
+        DAWN_ASSERT(i >= Index(0) && i < size());
         return Base::operator[](static_cast<I>(i));
     }
 
     constexpr const Value& operator[](Index i) const {
-        ASSERT(i >= Index(0) && i < size());
+        DAWN_ASSERT(i >= Index(0) && i < size());
         return Base::operator[](static_cast<I>(i));
     }
 
     Value& at(Index i) {
-        ASSERT(i >= Index(0) && i < size());
+        DAWN_ASSERT(i >= Index(0) && i < size());
         return Base::at(static_cast<I>(i));
     }
 
     constexpr const Value& at(Index i) const {
-        ASSERT(i >= Index(0) && i < size());
+        DAWN_ASSERT(i >= Index(0) && i < size());
         return Base::at(static_cast<I>(i));
     }
 
     constexpr Index size() const {
-        ASSERT(std::numeric_limits<I>::max() >= Base::size());
+        DAWN_ASSERT(std::numeric_limits<I>::max() >= Base::size());
         return Index(static_cast<I>(Base::size()));
     }
 

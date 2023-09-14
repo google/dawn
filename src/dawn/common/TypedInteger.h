@@ -101,7 +101,7 @@ class alignas(T) TypedIntegerImpl {
 
     // Increment / decrement operators for for-loop iteration
     constexpr TypedIntegerImpl& operator++() {
-        ASSERT(this->mValue < std::numeric_limits<T>::max());
+        DAWN_ASSERT(this->mValue < std::numeric_limits<T>::max());
         ++this->mValue;
         return *this;
     }
@@ -109,13 +109,13 @@ class alignas(T) TypedIntegerImpl {
     constexpr TypedIntegerImpl operator++(int) {
         TypedIntegerImpl ret = *this;
 
-        ASSERT(this->mValue < std::numeric_limits<T>::max());
+        DAWN_ASSERT(this->mValue < std::numeric_limits<T>::max());
         ++this->mValue;
         return ret;
     }
 
     constexpr TypedIntegerImpl& operator--() {
-        ASSERT(this->mValue > std::numeric_limits<T>::min());
+        DAWN_ASSERT(this->mValue > std::numeric_limits<T>::min());
         --this->mValue;
         return *this;
     }
@@ -123,7 +123,7 @@ class alignas(T) TypedIntegerImpl {
     constexpr TypedIntegerImpl operator--(int) {
         TypedIntegerImpl ret = *this;
 
-        ASSERT(this->mValue > std::numeric_limits<T>::min());
+        DAWN_ASSERT(this->mValue > std::numeric_limits<T>::min());
         --this->mValue;
         return ret;
     }
@@ -135,7 +135,7 @@ class alignas(T) TypedIntegerImpl {
         static_assert(std::is_same<T, T2>::value);
 
         // Overflow would wrap around
-        ASSERT(lhs.mValue + rhs.mValue >= lhs.mValue);
+        DAWN_ASSERT(lhs.mValue + rhs.mValue >= lhs.mValue);
         return lhs.mValue + rhs.mValue;
     }
 
@@ -148,12 +148,12 @@ class alignas(T) TypedIntegerImpl {
         if (lhs.mValue > 0) {
             // rhs is positive: |rhs| is at most the distance between max and |lhs|.
             // rhs is negative: (positive + negative) won't overflow
-            ASSERT(rhs.mValue <= std::numeric_limits<T>::max() - lhs.mValue);
+            DAWN_ASSERT(rhs.mValue <= std::numeric_limits<T>::max() - lhs.mValue);
         } else {
             // rhs is postive: (negative + positive) won't underflow
             // rhs is negative: |rhs| isn't less than the (negative) distance between min
             // and |lhs|
-            ASSERT(rhs.mValue >= std::numeric_limits<T>::min() - lhs.mValue);
+            DAWN_ASSERT(rhs.mValue >= std::numeric_limits<T>::min() - lhs.mValue);
         }
         return lhs.mValue + rhs.mValue;
     }
@@ -165,7 +165,7 @@ class alignas(T) TypedIntegerImpl {
         static_assert(std::is_same<T, T2>::value);
 
         // Overflow would wrap around
-        ASSERT(lhs.mValue - rhs.mValue <= lhs.mValue);
+        DAWN_ASSERT(lhs.mValue - rhs.mValue <= lhs.mValue);
         return lhs.mValue - rhs.mValue;
     }
 
@@ -179,11 +179,11 @@ class alignas(T) TypedIntegerImpl {
             // rhs is positive: positive minus positive won't overflow
             // rhs is negative: |rhs| isn't less than the (negative) distance between |lhs|
             // and max.
-            ASSERT(rhs.mValue >= lhs.mValue - std::numeric_limits<T>::max());
+            DAWN_ASSERT(rhs.mValue >= lhs.mValue - std::numeric_limits<T>::max());
         } else {
             // rhs is positive: |rhs| is at most the distance between min and |lhs|
             // rhs is negative: negative minus negative won't overflow
-            ASSERT(rhs.mValue <= lhs.mValue - std::numeric_limits<T>::min());
+            DAWN_ASSERT(rhs.mValue <= lhs.mValue - std::numeric_limits<T>::min());
         }
         return lhs.mValue - rhs.mValue;
     }
@@ -192,7 +192,7 @@ class alignas(T) TypedIntegerImpl {
     constexpr std::enable_if_t<std::is_signed<T2>::value, TypedIntegerImpl> operator-() const {
         static_assert(std::is_same<T, T2>::value);
         // The negation of the most negative value cannot be represented.
-        ASSERT(this->mValue != std::numeric_limits<T>::min());
+        DAWN_ASSERT(this->mValue != std::numeric_limits<T>::min());
         return TypedIntegerImpl(-this->mValue);
     }
 

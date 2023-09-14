@@ -37,13 +37,13 @@ DescriptorSetAllocator::DescriptorSetAllocator(
     BindGroupLayout* layout,
     std::map<VkDescriptorType, uint32_t> descriptorCountPerType)
     : ObjectBase(layout->GetDevice()), mLayout(layout) {
-    ASSERT(layout != nullptr);
+    DAWN_ASSERT(layout != nullptr);
 
     // Compute the total number of descriptors for this layout.
     uint32_t totalDescriptorCount = 0;
     mPoolSizes.reserve(descriptorCountPerType.size());
     for (const auto& [type, count] : descriptorCountPerType) {
-        ASSERT(count > 0);
+        DAWN_ASSERT(count > 0);
         totalDescriptorCount += count;
         mPoolSizes.push_back(VkDescriptorPoolSize{type, count});
     }
@@ -57,12 +57,12 @@ DescriptorSetAllocator::DescriptorSetAllocator(
         mPoolSizes.push_back(VkDescriptorPoolSize{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1});
         mMaxSets = kMaxDescriptorsPerPool;
     } else {
-        ASSERT(totalDescriptorCount <= kMaxBindingsPerPipelineLayout);
+        DAWN_ASSERT(totalDescriptorCount <= kMaxBindingsPerPipelineLayout);
         static_assert(kMaxBindingsPerPipelineLayout <= kMaxDescriptorsPerPool);
 
         // Compute the total number of descriptors sets that fits given the max.
         mMaxSets = kMaxDescriptorsPerPool / totalDescriptorCount;
-        ASSERT(mMaxSets > 0);
+        DAWN_ASSERT(mMaxSets > 0);
 
         // Grow the number of desciptors in the pool to fit the computed |mMaxSets|.
         for (auto& poolSize : mPoolSizes) {
@@ -73,7 +73,7 @@ DescriptorSetAllocator::DescriptorSetAllocator(
 
 DescriptorSetAllocator::~DescriptorSetAllocator() {
     for (auto& pool : mDescriptorPools) {
-        ASSERT(pool.freeSetIndices.size() == mMaxSets);
+        DAWN_ASSERT(pool.freeSetIndices.size() == mMaxSets);
         if (pool.vkPool != VK_NULL_HANDLE) {
             Device* device = ToBackend(GetDevice());
             device->GetFencedDeleter()->DeleteWhenUnused(pool.vkPool);
@@ -86,12 +86,12 @@ ResultOrError<DescriptorSetAllocation> DescriptorSetAllocator::Allocate() {
         DAWN_TRY(AllocateDescriptorPool());
     }
 
-    ASSERT(!mAvailableDescriptorPoolIndices.empty());
+    DAWN_ASSERT(!mAvailableDescriptorPoolIndices.empty());
 
     const PoolIndex poolIndex = mAvailableDescriptorPoolIndices.back();
     DescriptorPool* pool = &mDescriptorPools[poolIndex];
 
-    ASSERT(!pool->freeSetIndices.empty());
+    DAWN_ASSERT(!pool->freeSetIndices.empty());
 
     SetIndex setIndex = pool->freeSetIndices.back();
     pool->freeSetIndices.pop_back();
@@ -104,8 +104,8 @@ ResultOrError<DescriptorSetAllocation> DescriptorSetAllocator::Allocate() {
 }
 
 void DescriptorSetAllocator::Deallocate(DescriptorSetAllocation* allocationInfo) {
-    ASSERT(allocationInfo != nullptr);
-    ASSERT(allocationInfo->set != VK_NULL_HANDLE);
+    DAWN_ASSERT(allocationInfo != nullptr);
+    DAWN_ASSERT(allocationInfo->set != VK_NULL_HANDLE);
 
     // We can't reuse the descriptor set right away because the Vulkan spec says in the
     // documentation for vkCmdBindDescriptorSets that the set may be consumed any time between
@@ -125,7 +125,7 @@ void DescriptorSetAllocator::Deallocate(DescriptorSetAllocation* allocationInfo)
 
 void DescriptorSetAllocator::FinishDeallocation(ExecutionSerial completedSerial) {
     for (const Deallocation& dealloc : mPendingDeallocations.IterateUpTo(completedSerial)) {
-        ASSERT(dealloc.poolIndex < mDescriptorPools.size());
+        DAWN_ASSERT(dealloc.poolIndex < mDescriptorPools.size());
 
         auto& freeSetIndices = mDescriptorPools[dealloc.poolIndex].freeSetIndices;
         if (freeSetIndices.empty()) {

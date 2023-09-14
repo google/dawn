@@ -445,8 +445,8 @@ class DeviceBase : public RefCountedWithExternalCount {
 
     // This method returns true if Feature::ImplicitDeviceSynchronization is turned on and the
     // device is locked by current thread. This method is only enabled when DAWN_ENABLE_ASSERTS is
-    // turned on. Thus it should only be wrapped inside ASSERT() macro. i.e.
-    // ASSERT(device.IsLockedByCurrentThread())
+    // turned on. Thus it should only be wrapped inside DAWN_ASSERT() macro. i.e.
+    // DAWN_ASSERT(device.IsLockedByCurrentThread())
     bool IsLockedByCurrentThreadIfNeeded() const;
 
     // TODO(dawn:XXX): remove this enum forwarding once no longer necessary.

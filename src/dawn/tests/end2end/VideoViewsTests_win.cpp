@@ -135,42 +135,42 @@ class VideoViewsTestBackendWin : public VideoViewsTestBackend {
         ComPtr<ID3D11Texture2D> d3d11Texture;
         HRESULT hr = mD3d11Device->CreateTexture2D(
             &d3dDescriptor, (initialized ? &subres : nullptr), &d3d11Texture);
-        ASSERT(hr == S_OK);
+        DAWN_ASSERT(hr == S_OK);
 
         ComPtr<IDXGIResource1> dxgiResource;
         hr = d3d11Texture.As(&dxgiResource);
-        ASSERT(hr == S_OK);
+        DAWN_ASSERT(hr == S_OK);
 
         HANDLE sharedHandle;
         hr = dxgiResource->CreateSharedHandle(
             nullptr, DXGI_SHARED_RESOURCE_READ | DXGI_SHARED_RESOURCE_WRITE, nullptr,
             &sharedHandle);
-        ASSERT(hr == S_OK);
+        DAWN_ASSERT(hr == S_OK);
 
         HANDLE fenceSharedHandle = nullptr;
         ComPtr<ID3D11Fence> d3d11Fence;
 
         ComPtr<ID3D11Device5> d3d11Device5;
         hr = mD3d11Device.As(&d3d11Device5);
-        ASSERT(hr == S_OK);
+        DAWN_ASSERT(hr == S_OK);
 
         hr = d3d11Device5->CreateFence(0, D3D11_FENCE_FLAG_SHARED, IID_PPV_ARGS(&d3d11Fence));
-        ASSERT(hr == S_OK);
+        DAWN_ASSERT(hr == S_OK);
 
         hr = d3d11Fence->CreateSharedHandle(nullptr, GENERIC_ALL, nullptr, &fenceSharedHandle);
-        ASSERT(hr == S_OK);
+        DAWN_ASSERT(hr == S_OK);
 
         ComPtr<ID3D11DeviceContext> d3d11DeviceContext;
         mD3d11Device->GetImmediateContext(&d3d11DeviceContext);
 
         ComPtr<ID3D11DeviceContext4> d3d11DeviceContext4;
         hr = d3d11DeviceContext.As(&d3d11DeviceContext4);
-        ASSERT(hr == S_OK);
+        DAWN_ASSERT(hr == S_OK);
         // D3D11 texture should be initialized upon CreateTexture2D, but we need to make Dawn/D3D12
         // wait on the initializtaion. The fence starts with 0 signaled, but that won't capture the
         // initialization above, so signal explicitly with 1 and make Dawn wait on it.
         hr = d3d11DeviceContext4->Signal(d3d11Fence.Get(), 1);
-        ASSERT(hr == S_OK);
+        DAWN_ASSERT(hr == S_OK);
 
         // Open the DX11 texture in Dawn from the shared handle and return it as a WebGPU texture.
         native::d3d::ExternalImageDescriptorDXGISharedHandle externalImageDesc;

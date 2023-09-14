@@ -22,7 +22,7 @@ BitSetIterator<kNumStages, SingleShaderStage> IterateStages(wgpu::ShaderStage st
 }
 
 wgpu::ShaderStage StageBit(SingleShaderStage stage) {
-    ASSERT(static_cast<uint32_t>(stage) < kNumStages);
+    DAWN_ASSERT(static_cast<uint32_t>(stage) < kNumStages);
     return static_cast<wgpu::ShaderStage>(1 << static_cast<uint32_t>(stage));
 }
 

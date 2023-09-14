@@ -351,13 +351,13 @@ class DeviceToggleTest : public ToggleTest {
         for (auto* enableToggle : expectedEnabledToggles) {
             EXPECT_THAT(deviceEnabledToggles, Contains(StrEq(enableToggle)));
             native::Toggle toggle = togglesInfo.ToggleNameToEnum(enableToggle);
-            ASSERT(toggle != native::Toggle::InvalidEnum);
+            DAWN_ASSERT(toggle != native::Toggle::InvalidEnum);
             EXPECT_TRUE(device->IsToggleEnabled(toggle));
         }
         for (auto* enableToggle : expectedDisabledToggles) {
             EXPECT_THAT(deviceEnabledToggles, Not(Contains(StrEq(enableToggle))));
             native::Toggle toggle = togglesInfo.ToggleNameToEnum(enableToggle);
-            ASSERT(toggle != native::Toggle::InvalidEnum);
+            DAWN_ASSERT(toggle != native::Toggle::InvalidEnum);
             EXPECT_FALSE(device->IsToggleEnabled(toggle));
         }
     }

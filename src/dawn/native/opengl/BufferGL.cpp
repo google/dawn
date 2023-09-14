@@ -112,7 +112,7 @@ bool Buffer::EnsureDataInitializedAsDestination(const CopyTextureToBufferCmd* co
 }
 
 void Buffer::InitializeToZero() {
-    ASSERT(NeedsInitialization());
+    DAWN_ASSERT(NeedsInitialization());
 
     const uint64_t size = GetAllocatedSize();
     Device* device = ToBackend(GetDevice());
@@ -161,7 +161,7 @@ MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) 
     if (mode & wgpu::MapMode::Read) {
         mappedData = gl.MapBufferRange(GL_ARRAY_BUFFER, offset, size, GL_MAP_READ_BIT);
     } else {
-        ASSERT(mode & wgpu::MapMode::Write);
+        DAWN_ASSERT(mode & wgpu::MapMode::Write);
         mappedData = gl.MapBufferRange(GL_ARRAY_BUFFER, offset, size,
                                        GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
     }

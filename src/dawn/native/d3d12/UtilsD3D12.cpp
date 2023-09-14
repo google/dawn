@@ -44,10 +44,10 @@ uint64_t RequiredCopySizeByD3D12(const uint32_t bytesPerRow,
     // When calculating the required copy size for B2T/T2B copy, D3D12 doesn't respect
     // rowsPerImage paddings on the last image for 3D texture, but it does respect
     // bytesPerRow paddings on the last row.
-    ASSERT(blockInfo.width == 1);
-    ASSERT(blockInfo.height == 1);
+    DAWN_ASSERT(blockInfo.width == 1);
+    DAWN_ASSERT(blockInfo.height == 1);
     uint64_t lastRowBytes = Safe32x32(blockInfo.byteSize, copySize.width);
-    ASSERT(rowsPerImage > copySize.height);
+    DAWN_ASSERT(rowsPerImage > copySize.height);
     uint64_t lastImageBytesByD3D12 = Safe32x32(bytesPerRow, rowsPerImage - 1) + lastRowBytes;
 
     requiredCopySizeByD3D12 += lastImageBytesByD3D12;
@@ -179,7 +179,7 @@ void RecordBufferTextureCopyFromSplits(BufferTextureCopyDirection direction,
                                            info.textureOffset.y, info.textureOffset.z,
                                            &bufferLocation, &sourceRegion);
         } else {
-            ASSERT(direction == BufferTextureCopyDirection::T2B);
+            DAWN_ASSERT(direction == BufferTextureCopyDirection::T2B);
             const D3D12_BOX sourceRegion =
                 ComputeD3D12BoxFromOffsetAndSize(info.textureOffset, info.copySize);
 
@@ -240,7 +240,7 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
                                              const uint32_t rowsPerImage,
                                              const TextureCopy& textureCopy,
                                              const Extent3D& copySize) {
-    ASSERT(HasOneBit(textureCopy.aspect));
+    DAWN_ASSERT(HasOneBit(textureCopy.aspect));
 
     TextureBase* texture = textureCopy.texture.Get();
     const TexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(textureCopy.aspect).block;
@@ -249,7 +249,7 @@ void RecordBufferTextureCopyWithBufferHandle(BufferTextureCopyDirection directio
         case wgpu::TextureDimension::e1D: {
             // 1D textures copy splits are a subset of the single-layer 2D texture copy splits,
             // at least while 1D textures can only have a single array layer.
-            ASSERT(texture->GetArrayLayers() == 1);
+            DAWN_ASSERT(texture->GetArrayLayers() == 1);
 
             TextureCopySubresource copyRegions = Compute2DTextureCopySubresource(
                 textureCopy.origin, copySize, blockInfo, offset, bytesPerRow);

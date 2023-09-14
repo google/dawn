@@ -59,27 +59,27 @@ bool Service::Supported() {
 }
 
 void Service::CloseHandle(ExternalSemaphoreHandle handle) {
-    ASSERT(mServiceImpl);
+    DAWN_ASSERT(mServiceImpl);
     mServiceImpl->CloseHandle(handle);
 }
 
 ResultOrError<VkSemaphore> Service::ImportSemaphore(ExternalSemaphoreHandle handle) {
-    ASSERT(mServiceImpl);
+    DAWN_ASSERT(mServiceImpl);
     return mServiceImpl->ImportSemaphore(handle);
 }
 
 ResultOrError<VkSemaphore> Service::CreateExportableSemaphore() {
-    ASSERT(mServiceImpl);
+    DAWN_ASSERT(mServiceImpl);
     return mServiceImpl->CreateExportableSemaphore();
 }
 
 ResultOrError<ExternalSemaphoreHandle> Service::ExportSemaphore(VkSemaphore semaphore) {
-    ASSERT(mServiceImpl);
+    DAWN_ASSERT(mServiceImpl);
     return mServiceImpl->ExportSemaphore(semaphore);
 }
 
 ExternalSemaphoreHandle Service::DuplicateHandle(ExternalSemaphoreHandle handle) {
-    ASSERT(mServiceImpl);
+    DAWN_ASSERT(mServiceImpl);
     return mServiceImpl->DuplicateHandle(handle);
 }
 

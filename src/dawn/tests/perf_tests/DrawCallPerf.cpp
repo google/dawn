@@ -467,7 +467,7 @@ void DrawCallPerf::RecordRenderCommands(Encoder pass) {
 
     if (GetParam().bindGroupType == BindGroup::NoChange) {
         // Incompatible. Can't change pipeline without changing bind groups.
-        ASSERT(GetParam().pipelineType == Pipeline::Static);
+        DAWN_ASSERT(GetParam().pipelineType == Pipeline::Static);
 
         // Static bind group can be set now.
         pass.SetBindGroup(uniformBindGroupIndex, mUniformBindGroups[0]);

@@ -101,7 +101,7 @@ auto GetOrCreate(ContentLessObjectCache<RefCountedT>& cache,
         }
         result = resultOrError.AcquireSuccess();
     }
-    ASSERT(result.Get() != nullptr);
+    DAWN_ASSERT(result.Get() != nullptr);
 
     bool inserted = false;
     std::tie(result, inserted) = cache.Insert(result.Get());
@@ -196,7 +196,7 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
                        const DeviceDescriptor* descriptor,
                        const TogglesState& deviceToggles)
     : mAdapter(adapter), mToggles(deviceToggles), mNextPipelineCompatibilityToken(1) {
-    ASSERT(descriptor != nullptr);
+    DAWN_ASSERT(descriptor != nullptr);
 
     mDeviceLostCallback = descriptor->deviceLostCallback;
     mDeviceLostUserdata = descriptor->deviceLostUserdata;
@@ -279,7 +279,7 @@ MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
     mDeprecationWarnings = std::make_unique<DeprecationWarnings>();
     mInternalPipelineStore = std::make_unique<InternalPipelineStore>(this);
 
-    ASSERT(GetPlatform() != nullptr);
+    DAWN_ASSERT(GetPlatform() != nullptr);
     mWorkerTaskPool = GetPlatform()->CreateWorkerTaskPool();
     mAsyncTaskManager = std::make_unique<AsyncTaskManager>(mWorkerTaskPool.get());
 
@@ -486,7 +486,7 @@ void DeviceBase::Destroy() {
 
     if (mState != State::BeingCreated) {
         // The GPU timeline is finished.
-        ASSERT(mQueue->GetCompletedCommandSerial() == GetLastSubmittedCommandSerial());
+        DAWN_ASSERT(mQueue->GetCompletedCommandSerial() == GetLastSubmittedCommandSerial());
 
         // Finish destroying all objects owned by the device and tick the queue-related tasks
         // since they should be complete. This must be done before DestroyImpl() it may
@@ -608,7 +608,7 @@ void DeviceBase::HandleError(std::unique_ptr<ErrorData> error,
 
 void DeviceBase::ConsumeError(std::unique_ptr<ErrorData> error,
                               InternalErrorType additionalAllowedErrors) {
-    ASSERT(error != nullptr);
+    DAWN_ASSERT(error != nullptr);
     HandleError(std::move(error), additionalAllowedErrors);
 }
 
@@ -711,7 +711,7 @@ void DeviceBase::StoreCachedBlob(const CacheKey& key, const Blob& blob) {
 }
 
 MaybeError DeviceBase::ValidateObject(const ApiObjectBase* object) const {
-    ASSERT(object != nullptr);
+    DAWN_ASSERT(object != nullptr);
     DAWN_INVALID_IF(object->GetDevice() != this,
                     "%s is associated with %s, and cannot be used with %s.", object,
                     object->GetDevice(), this);
@@ -742,7 +742,7 @@ DeviceBase::State DeviceBase::GetState() const {
 }
 
 bool DeviceBase::IsLost() const {
-    ASSERT(mState != State::BeingCreated);
+    DAWN_ASSERT(mState != State::BeingCreated);
     return mState != State::Alive;
 }
 
@@ -794,14 +794,14 @@ ResultOrError<const Format*> DeviceBase::GetInternalFormat(wgpu::TextureFormat f
 
 const Format& DeviceBase::GetValidInternalFormat(wgpu::TextureFormat format) const {
     FormatIndex index = ComputeFormatIndex(format);
-    ASSERT(index < mFormatTable.size());
-    ASSERT(mFormatTable[index].IsSupported());
+    DAWN_ASSERT(index < mFormatTable.size());
+    DAWN_ASSERT(mFormatTable[index].IsSupported());
     return mFormatTable[index];
 }
 
 const Format& DeviceBase::GetValidInternalFormat(FormatIndex index) const {
-    ASSERT(index < mFormatTable.size());
-    ASSERT(mFormatTable[index].IsSupported());
+    DAWN_ASSERT(index < mFormatTable.size());
+    DAWN_ASSERT(mFormatTable[index].IsSupported());
     return mFormatTable[index];
 }
 
@@ -844,12 +844,12 @@ ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::CreateEmptyPipelineLayout() {
 }
 
 BindGroupLayoutBase* DeviceBase::GetEmptyBindGroupLayout() {
-    ASSERT(mEmptyBindGroupLayout != nullptr);
+    DAWN_ASSERT(mEmptyBindGroupLayout != nullptr);
     return mEmptyBindGroupLayout.Get();
 }
 
 PipelineLayoutBase* DeviceBase::GetEmptyPipelineLayout() {
-    ASSERT(mEmptyPipelineLayout != nullptr);
+    DAWN_ASSERT(mEmptyPipelineLayout != nullptr);
     return mEmptyPipelineLayout.Get();
 }
 
@@ -865,14 +865,14 @@ Ref<RenderPipelineBase> DeviceBase::GetCachedRenderPipeline(
 
 Ref<ComputePipelineBase> DeviceBase::AddOrGetCachedComputePipeline(
     Ref<ComputePipelineBase> computePipeline) {
-    ASSERT(IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(IsLockedByCurrentThreadIfNeeded());
     auto [pipeline, _] = mCaches->computePipelines.Insert(computePipeline.Get());
     return std::move(pipeline);
 }
 
 Ref<RenderPipelineBase> DeviceBase::AddOrGetCachedRenderPipeline(
     Ref<RenderPipelineBase> renderPipeline) {
-    ASSERT(IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(IsLockedByCurrentThreadIfNeeded());
     auto [pipeline, _] = mCaches->renderPipelines.Insert(renderPipeline.Get());
     return std::move(pipeline);
 }
@@ -880,7 +880,7 @@ Ref<RenderPipelineBase> DeviceBase::AddOrGetCachedRenderPipeline(
 ResultOrError<Ref<TextureViewBase>> DeviceBase::CreateImplicitMSAARenderTextureViewFor(
     const TextureBase* singleSampledTexture,
     uint32_t sampleCount) {
-    ASSERT(IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(IsLockedByCurrentThreadIfNeeded());
 
     TextureDescriptor desc = {};
     desc.dimension = wgpu::TextureDimension::e2D;
@@ -966,7 +966,7 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::GetOrCreateShaderModule(
     const ShaderModuleDescriptor* descriptor,
     ShaderModuleParseResult* parseResult,
     OwnedCompilationMessages* compilationMessages) {
-    ASSERT(parseResult != nullptr);
+    DAWN_ASSERT(parseResult != nullptr);
 
     ShaderModuleBase blueprint(this, descriptor, ApiObjectBase::kUntrackedByDevice);
 
@@ -979,7 +979,7 @@ ResultOrError<Ref<ShaderModuleBase>> DeviceBase::GetOrCreateShaderModule(
                 // We skip the parse on creation if validation isn't enabled which let's us quickly
                 // lookup in the cache without validating and parsing. We need the parsed module
                 // now.
-                ASSERT(!IsValidationEnabled());
+                DAWN_ASSERT(!IsValidationEnabled());
                 DAWN_TRY(ValidateAndParseShaderModule(this, descriptor, parseResult,
                                                       compilationMessages));
             }
@@ -1050,7 +1050,7 @@ BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* descriptor) {
     Ref<BufferBase> result = nullptr;
     if (ConsumedError(CreateBuffer(descriptor), &result, InternalErrorType::OutOfMemory,
                       "calling %s.CreateBuffer(%s).", this, descriptor)) {
-        ASSERT(result == nullptr);
+        DAWN_ASSERT(result == nullptr);
         return BufferBase::MakeError(this, descriptor);
     }
     return result.Detach();
@@ -1349,7 +1349,7 @@ AdapterBase* DeviceBase::APIGetAdapter() {
 
 QueueBase* DeviceBase::APIGetQueue() {
     // Backends gave the primary queue during initialization.
-    ASSERT(mQueue != nullptr);
+    DAWN_ASSERT(mQueue != nullptr);
 
     // Returns a new reference to the queue.
     mQueue->Reference();
@@ -1405,9 +1405,9 @@ ResultOrError<Ref<SharedFenceBase>> DeviceBase::ImportSharedFenceImpl(
 }
 
 void DeviceBase::ApplyFeatures(const DeviceDescriptor* deviceDescriptor) {
-    ASSERT(deviceDescriptor);
+    DAWN_ASSERT(deviceDescriptor);
     // Validate all required features with device toggles.
-    ASSERT(GetPhysicalDevice()->SupportsAllRequiredFeatures(
+    DAWN_ASSERT(GetPhysicalDevice()->SupportsAllRequiredFeatures(
         {deviceDescriptor->requiredFeatures, deviceDescriptor->requiredFeatureCount}, mToggles));
 
     for (uint32_t i = 0; i < deviceDescriptor->requiredFeatureCount; ++i) {
@@ -1497,7 +1497,7 @@ void DeviceBase::EmitLog(WGPULoggingType loggingType, const char* message) {
 }
 
 bool DeviceBase::APIGetLimits(SupportedLimits* limits) const {
-    ASSERT(limits != nullptr);
+    DAWN_ASSERT(limits != nullptr);
     if (limits->nextInChain != nullptr) {
         return false;
     }
@@ -1540,7 +1540,7 @@ void DeviceBase::APIValidateTextureDescriptor(const TextureDescriptor* desc) {
 }
 
 QueueBase* DeviceBase::GetQueue() const {
-    ASSERT(mQueue != nullptr);
+    DAWN_ASSERT(mQueue != nullptr);
     return mQueue.Get();
 }
 
@@ -1880,7 +1880,7 @@ void DeviceBase::ForceSetToggleForTesting(Toggle toggle, bool isEnabled) {
 void DeviceBase::FlushCallbackTaskQueue() {
     // Callbacks might cause re-entrances. Mutex shouldn't be locked. So we expect there is no
     // locked mutex before entering this method.
-    ASSERT(mMutex == nullptr || !mMutex->IsLockedByCurrentThread());
+    DAWN_ASSERT(mMutex == nullptr || !mMutex->IsLockedByCurrentThread());
 
     Ref<CallbackTaskManager> callbackTaskManager;
 
@@ -1943,7 +1943,7 @@ void DeviceBase::AddComputePipelineAsyncCallbackTask(
             // TODO(dawn:529): call AddOrGetCachedComputePipeline() asynchronously in
             // CreateComputePipelineAsyncTaskImpl::Run() when the front-end pipeline cache is
             // thread-safe.
-            ASSERT(pipeline != nullptr);
+            DAWN_ASSERT(pipeline != nullptr);
             {
                 // This is called inside a callback, and no lock will be held by default so we
                 // have to lock now to protect the cache. Note: we don't lock inside
@@ -1988,7 +1988,7 @@ void DeviceBase::AddRenderPipelineAsyncCallbackTask(Ref<RenderPipelineBase> pipe
         // TODO(dawn:529): call AddOrGetCachedRenderPipeline() asynchronously in
         // CreateRenderPipelineAsyncTaskImpl::Run() when the front-end pipeline cache is
         // thread-safe.
-        ASSERT(pipeline != nullptr);
+        DAWN_ASSERT(pipeline != nullptr);
         {
             // This is called inside a callback, and no lock will be held by default so we have
             // to lock now to protect the cache.

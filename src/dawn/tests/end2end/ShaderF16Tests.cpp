@@ -348,7 +348,7 @@ fn FSMain(@location(0) color : vec4f) -> @location(0) vec4f {
         RGBA8(184, 108, 184, 255),
     };
 
-    ASSERT(colors.size() == kPointCount);
+    DAWN_ASSERT(colors.size() == kPointCount);
     // Color (divided by 4.0) for each point
     std::vector<float> colorData;
     for (RGBA8& color : colors) {

@@ -97,12 +97,12 @@ MaybeError BlitDepthToDepth(DeviceBase* device,
                             const TextureCopy& src,
                             const TextureCopy& dst,
                             const Extent3D& copyExtent) {
-    ASSERT(device->IsLockedByCurrentThreadIfNeeded());
-    // ASSERT that the texture have depth and are not multisampled.
-    ASSERT(src.texture->GetFormat().HasDepth());
-    ASSERT(dst.texture->GetFormat().HasDepth());
-    ASSERT(src.texture->GetSampleCount() == 1u);
-    ASSERT(dst.texture->GetSampleCount() == 1u);
+    DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
+    // DAWN_ASSERT that the texture have depth and are not multisampled.
+    DAWN_ASSERT(src.texture->GetFormat().HasDepth());
+    DAWN_ASSERT(dst.texture->GetFormat().HasDepth());
+    DAWN_ASSERT(src.texture->GetSampleCount() == 1u);
+    DAWN_ASSERT(dst.texture->GetSampleCount() == 1u);
 
     // Note: because depth texture subresources must be copied in full, this blit
     // does not need to handle copy subrects.

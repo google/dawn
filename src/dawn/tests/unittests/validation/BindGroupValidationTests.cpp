@@ -483,7 +483,7 @@ TEST_F(BindGroupValidationTest, StorageTextureUsage) {
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, view}}));
 
     // Multisampled texture is invalid with storage buffer binding
-    // Regression case for crbug.com/dawn/614 where this hit an ASSERT.
+    // Regression case for crbug.com/dawn/614 where this hit an DAWN_ASSERT.
     descriptor.sampleCount = 4;
     descriptor.usage |= wgpu::TextureUsage::RenderAttachment;
     view = device.CreateTexture(&descriptor).CreateView();
@@ -1543,10 +1543,10 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
 
     // In this test, we use all the same shader stage. Ensure that this does not exceed the
     // per-stage limit.
-    ASSERT(limits.maxDynamicUniformBuffersPerPipelineLayout <=
-           limits.maxUniformBuffersPerShaderStage);
-    ASSERT(limits.maxDynamicStorageBuffersPerPipelineLayout <=
-           limits.maxStorageBuffersPerShaderStage);
+    DAWN_ASSERT(limits.maxDynamicUniformBuffersPerPipelineLayout <=
+                limits.maxUniformBuffersPerShaderStage);
+    DAWN_ASSERT(limits.maxDynamicStorageBuffersPerPipelineLayout <=
+                limits.maxStorageBuffersPerShaderStage);
 
     for (uint32_t i = 0; i < limits.maxDynamicUniformBuffersPerPipelineLayout; ++i) {
         maxUniformDB.push_back(utils::BindingLayoutEntryInitializationHelper(

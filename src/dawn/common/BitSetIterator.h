@@ -51,7 +51,7 @@ class BitSetIterator final {
 
         T operator*() const {
             using U = UnderlyingType<T>;
-            ASSERT(static_cast<U>(mCurrentBit) <= std::numeric_limits<U>::max());
+            DAWN_ASSERT(static_cast<U>(mCurrentBit) <= std::numeric_limits<U>::max());
             return static_cast<T>(static_cast<U>(mCurrentBit));
         }
 

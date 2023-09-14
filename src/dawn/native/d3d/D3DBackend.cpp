@@ -50,7 +50,7 @@ ExternalImageDescriptorD3D11Texture::ExternalImageDescriptorD3D11Texture()
 
 ExternalImageDXGI::ExternalImageDXGI(std::unique_ptr<ExternalImageDXGIImpl> impl)
     : mImpl(std::move(impl)) {
-    ASSERT(mImpl != nullptr);
+    DAWN_ASSERT(mImpl != nullptr);
 }
 
 ExternalImageDXGI::~ExternalImageDXGI() {

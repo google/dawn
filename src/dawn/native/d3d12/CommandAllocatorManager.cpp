@@ -35,13 +35,13 @@ ResultOrError<ID3D12CommandAllocator*> CommandAllocatorManager::ReserveCommandAl
         DAWN_TRY(Tick(firstSerial));
     }
 
-    ASSERT(mFreeAllocators.any());
+    DAWN_ASSERT(mFreeAllocators.any());
 
     // Get the index of the first free allocator from the bitset
     unsigned int firstFreeIndex = *(IterateBitSet(mFreeAllocators).begin());
 
     if (firstFreeIndex >= mAllocatorCount) {
-        ASSERT(firstFreeIndex == mAllocatorCount);
+        DAWN_ASSERT(firstFreeIndex == mAllocatorCount);
         mAllocatorCount++;
         DAWN_TRY(CheckHRESULT(
             device->GetD3D12Device()->CreateCommandAllocator(

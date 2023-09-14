@@ -47,7 +47,7 @@ fn main(@builtin(vertex_index) VertexIndex : u32) -> @builtin(position) vec4f {
 })";
 
 const char* GetTextureComponentTypeString(DeviceBase* device, wgpu::TextureFormat format) {
-    ASSERT(format != wgpu::TextureFormat::Undefined);
+    DAWN_ASSERT(format != wgpu::TextureFormat::Undefined);
 
     const Format& formatInfo = device->GetValidInternalFormat(format);
     switch (formatInfo.GetAspectInfo(Aspect::Color).baseType) {
@@ -75,7 +75,7 @@ std::string ConstructFragmentShader(DeviceBase* device,
     // Only generate the assignments we need.
     for (uint32_t i : IterateBitSet(key.colorTargetsToApplyClearColorValue)) {
         wgpu::TextureFormat currentFormat = key.colorTargetFormats[i];
-        ASSERT(currentFormat != wgpu::TextureFormat::Undefined);
+        DAWN_ASSERT(currentFormat != wgpu::TextureFormat::Undefined);
 
         const char* type = GetTextureComponentTypeString(device, currentFormat);
 
@@ -209,7 +209,7 @@ ResultOrError<Ref<BufferBase>> CreateUniformBufferWithClearValues(
         offset += sizeof(uint32_t) * 4;
     }
 
-    ASSERT(offset > 0);
+    DAWN_ASSERT(offset > 0);
 
     Ref<BufferBase> outputBuffer;
     DAWN_TRY_ASSIGN(

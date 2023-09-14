@@ -35,7 +35,7 @@ class span {
     constexpr span(Value* data, Index size) : mData(data), mSize(size) {}
 
     constexpr Value& operator[](Index i) const {
-        ASSERT(i < mSize);
+        DAWN_ASSERT(i < mSize);
         return mData[static_cast<I>(i)];
     }
 
@@ -52,26 +52,26 @@ class span {
     const Value* end() const noexcept { return mData + static_cast<I>(mSize); }
 
     Value& front() {
-        ASSERT(mData != nullptr);
-        ASSERT(static_cast<I>(mSize) >= 0);
+        DAWN_ASSERT(mData != nullptr);
+        DAWN_ASSERT(static_cast<I>(mSize) >= 0);
         return *mData;
     }
 
     const Value& front() const {
-        ASSERT(mData != nullptr);
-        ASSERT(static_cast<I>(mSize) >= 0);
+        DAWN_ASSERT(mData != nullptr);
+        DAWN_ASSERT(static_cast<I>(mSize) >= 0);
         return *mData;
     }
 
     Value& back() {
-        ASSERT(mData != nullptr);
-        ASSERT(static_cast<I>(mSize) >= 0);
+        DAWN_ASSERT(mData != nullptr);
+        DAWN_ASSERT(static_cast<I>(mSize) >= 0);
         return *(mData + static_cast<I>(mSize) - 1);
     }
 
     const Value& back() const {
-        ASSERT(mData != nullptr);
-        ASSERT(static_cast<I>(mSize) >= 0);
+        DAWN_ASSERT(mData != nullptr);
+        DAWN_ASSERT(static_cast<I>(mSize) >= 0);
         return *(mData + static_cast<I>(mSize) - 1);
     }
 

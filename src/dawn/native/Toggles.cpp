@@ -474,13 +474,13 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
 }  // anonymous namespace
 
 void TogglesSet::Set(Toggle toggle, bool enabled) {
-    ASSERT(toggle != Toggle::InvalidEnum);
+    DAWN_ASSERT(toggle != Toggle::InvalidEnum);
     const size_t toggleIndex = static_cast<size_t>(toggle);
     bitset.set(toggleIndex, enabled);
 }
 
 bool TogglesSet::Has(Toggle toggle) const {
-    ASSERT(toggle != Toggle::InvalidEnum);
+    DAWN_ASSERT(toggle != Toggle::InvalidEnum);
     const size_t toggleIndex = static_cast<size_t>(toggle);
     return bitset.test(toggleIndex);
 }
@@ -533,7 +533,7 @@ TogglesState TogglesState::CreateFromTogglesDescriptor(const DawnTogglesDescript
 }
 
 TogglesState& TogglesState::InheritFrom(const TogglesState& inheritedToggles) {
-    ASSERT(inheritedToggles.GetStage() < mStage);
+    DAWN_ASSERT(inheritedToggles.GetStage() < mStage);
 
     // Do inheritance. All toggles that are force-set in the inherited toggles states would
     // be force-set in the result toggles state, and all toggles that are set in the inherited
@@ -541,7 +541,7 @@ TogglesState& TogglesState::InheritFrom(const TogglesState& inheritedToggles) {
     // state.
     for (uint32_t i : inheritedToggles.mTogglesSet.Iterate()) {
         const Toggle& toggle = static_cast<Toggle>(i);
-        ASSERT(TogglesInfo::GetToggleInfo(toggle)->stage < mStage);
+        DAWN_ASSERT(TogglesInfo::GetToggleInfo(toggle)->stage < mStage);
         bool isEnabled = inheritedToggles.mEnabledToggles.Has(toggle);
         bool isForced = inheritedToggles.mForcedToggles.Has(toggle);
         // Only inherit a toggle if it is not set by user requirement or is forced in earlier stage.
@@ -558,8 +558,8 @@ TogglesState& TogglesState::InheritFrom(const TogglesState& inheritedToggles) {
 
 // Set a toggle to given state, if the toggle has not been already set. Do nothing otherwise.
 void TogglesState::Default(Toggle toggle, bool enabled) {
-    ASSERT(toggle != Toggle::InvalidEnum);
-    ASSERT(TogglesInfo::GetToggleInfo(toggle)->stage == mStage);
+    DAWN_ASSERT(toggle != Toggle::InvalidEnum);
+    DAWN_ASSERT(TogglesInfo::GetToggleInfo(toggle)->stage == mStage);
     if (IsSet(toggle)) {
         return;
     }
@@ -568,10 +568,10 @@ void TogglesState::Default(Toggle toggle, bool enabled) {
 }
 
 void TogglesState::ForceSet(Toggle toggle, bool enabled) {
-    ASSERT(toggle != Toggle::InvalidEnum);
-    ASSERT(TogglesInfo::GetToggleInfo(toggle)->stage == mStage);
+    DAWN_ASSERT(toggle != Toggle::InvalidEnum);
+    DAWN_ASSERT(TogglesInfo::GetToggleInfo(toggle)->stage == mStage);
     // Make sure that each toggle is force-set at most once.
-    ASSERT(!mForcedToggles.Has(toggle));
+    DAWN_ASSERT(!mForcedToggles.Has(toggle));
     if (mTogglesSet.Has(toggle) && mEnabledToggles.Has(toggle) != enabled) {
         dawn::WarningLog() << "Forcing toggle \"" << ToggleEnumToName(toggle) << "\" to " << enabled
                            << " when it was " << !enabled;
@@ -582,7 +582,7 @@ void TogglesState::ForceSet(Toggle toggle, bool enabled) {
 }
 
 TogglesState& TogglesState::SetForTesting(Toggle toggle, bool enabled, bool forced) {
-    ASSERT(toggle != Toggle::InvalidEnum);
+    DAWN_ASSERT(toggle != Toggle::InvalidEnum);
     mTogglesSet.Set(toggle, true);
     mEnabledToggles.Set(toggle, enabled);
     mForcedToggles.Set(toggle, forced);
@@ -592,14 +592,14 @@ TogglesState& TogglesState::SetForTesting(Toggle toggle, bool enabled, bool forc
 
 bool TogglesState::IsSet(Toggle toggle) const {
     // Ensure that the toggle never used earlier than its stage.
-    ASSERT(TogglesInfo::GetToggleInfo(toggle)->stage <= mStage);
+    DAWN_ASSERT(TogglesInfo::GetToggleInfo(toggle)->stage <= mStage);
     return mTogglesSet.Has(toggle);
 }
 
 // Return true if the toggle is provided in enable list, and false otherwise.
 bool TogglesState::IsEnabled(Toggle toggle) const {
     // Ensure that the toggle never used earlier than its stage.
-    ASSERT(TogglesInfo::GetToggleInfo(toggle)->stage <= mStage);
+    DAWN_ASSERT(TogglesInfo::GetToggleInfo(toggle)->stage <= mStage);
     return mEnabledToggles.Has(toggle);
 }
 
@@ -614,7 +614,7 @@ std::vector<const char*> TogglesState::GetEnabledToggleNames() const {
     for (uint32_t i : mEnabledToggles.Iterate()) {
         const Toggle& toggle = static_cast<Toggle>(i);
         // All enabled toggles must be provided.
-        ASSERT(mTogglesSet.Has(toggle));
+        DAWN_ASSERT(mTogglesSet.Has(toggle));
         const char* toggleName = ToggleEnumToName(toggle);
         enabledTogglesName[index] = toggleName;
         ++index;
@@ -646,11 +646,11 @@ void StreamIn(stream::Sink* s, const TogglesState& togglesState) {
 }
 
 const char* ToggleEnumToName(Toggle toggle) {
-    ASSERT(toggle != Toggle::InvalidEnum);
+    DAWN_ASSERT(toggle != Toggle::InvalidEnum);
 
     const ToggleEnumAndInfo& toggleNameAndInfo =
         kToggleNameAndInfoList[static_cast<size_t>(toggle)];
-    ASSERT(toggleNameAndInfo.toggle == toggle);
+    DAWN_ASSERT(toggleNameAndInfo.toggle == toggle);
     return toggleNameAndInfo.info.name;
 }
 
@@ -670,7 +670,7 @@ TogglesInfo::TogglesInfo() = default;
 TogglesInfo::~TogglesInfo() = default;
 
 const ToggleInfo* TogglesInfo::GetToggleInfo(const char* toggleName) {
-    ASSERT(toggleName);
+    DAWN_ASSERT(toggleName);
 
     EnsureToggleNameToEnumMapInitialized();
 
@@ -682,13 +682,13 @@ const ToggleInfo* TogglesInfo::GetToggleInfo(const char* toggleName) {
 }
 
 const ToggleInfo* TogglesInfo::GetToggleInfo(Toggle toggle) {
-    ASSERT(toggle != Toggle::InvalidEnum);
+    DAWN_ASSERT(toggle != Toggle::InvalidEnum);
 
     return &kToggleNameAndInfoList[static_cast<size_t>(toggle)].info;
 }
 
 Toggle TogglesInfo::ToggleNameToEnum(const char* toggleName) {
-    ASSERT(toggleName);
+    DAWN_ASSERT(toggleName);
 
     EnsureToggleNameToEnumMapInitialized();
 
@@ -706,7 +706,7 @@ void TogglesInfo::EnsureToggleNameToEnumMapInitialized() {
 
     for (size_t index = 0; index < kToggleNameAndInfoList.size(); ++index) {
         const ToggleEnumAndInfo& toggleNameAndInfo = kToggleNameAndInfoList[index];
-        ASSERT(index == static_cast<size_t>(toggleNameAndInfo.toggle));
+        DAWN_ASSERT(index == static_cast<size_t>(toggleNameAndInfo.toggle));
         mToggleNameToEnumMap[toggleNameAndInfo.info.name] = toggleNameAndInfo.toggle;
     }
 

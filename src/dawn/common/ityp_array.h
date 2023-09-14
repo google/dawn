@@ -46,25 +46,25 @@ class array : private ::std::array<Value, Size> {
 
     constexpr Value& operator[](Index i) {
         I index = static_cast<I>(i);
-        ASSERT(index >= 0 && index < I(Size));
+        DAWN_ASSERT(index >= 0 && index < I(Size));
         return Base::operator[](index);
     }
 
     constexpr const Value& operator[](Index i) const {
         I index = static_cast<I>(i);
-        ASSERT(index >= 0 && index < I(Size));
+        DAWN_ASSERT(index >= 0 && index < I(Size));
         return Base::operator[](index);
     }
 
     Value& at(Index i) {
         I index = static_cast<I>(i);
-        ASSERT(index >= 0 && index < I(Size));
+        DAWN_ASSERT(index >= 0 && index < I(Size));
         return Base::at(index);
     }
 
     constexpr const Value& at(Index i) const {
         I index = static_cast<I>(i);
-        ASSERT(index >= 0 && index < I(Size));
+        DAWN_ASSERT(index >= 0 && index < I(Size));
         return Base::at(index);
     }
 

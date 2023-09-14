@@ -80,16 +80,16 @@ struct Known {
     ObjectData<T>* data;
 
     const ObjectData<T>* operator->() const {
-        ASSERT(data != nullptr);
+        DAWN_ASSERT(data != nullptr);
         return data;
     }
     ObjectData<T>* operator->() {
-        ASSERT(data != nullptr);
+        DAWN_ASSERT(data != nullptr);
         return data;
     }
 
     ObjectHandle AsHandle() const {
-        ASSERT(data != nullptr);
+        DAWN_ASSERT(data != nullptr);
         return {id, data->generation};
     }
 };
@@ -141,9 +141,9 @@ class KnownObjectsBase {
     }
 
     Known<T> FillReservation(ObjectId id, T handle) {
-        ASSERT(id < mKnown.size());
+        DAWN_ASSERT(id < mKnown.size());
         Data* data = &mKnown[id];
-        ASSERT(data->state == AllocationState::Reserved);
+        DAWN_ASSERT(data->state == AllocationState::Reserved);
         data->handle = handle;
         data->state = AllocationState::Allocated;
         return {id, data};
@@ -188,7 +188,7 @@ class KnownObjectsBase {
 
     // Marks an ID as deallocated
     void Free(ObjectId id) {
-        ASSERT(id < mKnown.size());
+        DAWN_ASSERT(id < mKnown.size());
         mKnown[id].state = AllocationState::Free;
     }
 

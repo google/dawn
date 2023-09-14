@@ -133,7 +133,7 @@ MaybeError API_AVAILABLE(macos(10.13))
         return DAWN_INTERNAL_ERROR("Failed to get the IO registry entry for the device");
     }
 
-    ASSERT(deviceEntry != IO_OBJECT_NULL);
+    DAWN_ASSERT(deviceEntry != IO_OBJECT_NULL);
 
     uint32_t vendorId = GetEntryProperty(deviceEntry.Get(), CFSTR("vendor-id"));
     uint32_t deviceId = GetEntryProperty(deviceEntry.Get(), CFSTR("device-id"));
@@ -731,7 +731,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
                                           limits->v1.maxUniformBuffersPerShaderStage +
                                           limits->v1.maxVertexBuffers;
 
-        ASSERT(maxBuffersPerStage >= baseMaxBuffersPerStage);
+        DAWN_ASSERT(maxBuffersPerStage >= baseMaxBuffersPerStage);
         {
             uint32_t additional = maxBuffersPerStage - baseMaxBuffersPerStage;
             limits->v1.maxStorageBuffersPerShaderStage += additional / 3;
@@ -742,7 +742,7 @@ class PhysicalDevice : public PhysicalDeviceBase {
         uint32_t baseMaxTexturesPerStage = limits->v1.maxSampledTexturesPerShaderStage +
                                            limits->v1.maxStorageTexturesPerShaderStage;
 
-        ASSERT(mtlLimits.maxTextureArgumentEntriesPerFunc >= baseMaxTexturesPerStage);
+        DAWN_ASSERT(mtlLimits.maxTextureArgumentEntriesPerFunc >= baseMaxTexturesPerStage);
         {
             uint32_t additional =
                 mtlLimits.maxTextureArgumentEntriesPerFunc - baseMaxTexturesPerStage;

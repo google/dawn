@@ -130,7 +130,7 @@ class RefBase {
     }
 
     [[nodiscard]] T* InitializeInto() {
-        ASSERT(mValue == Traits::kNullValue);
+        DAWN_ASSERT(mValue == Traits::kNullValue);
         return &mValue;
     }
 

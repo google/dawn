@@ -180,7 +180,7 @@ bool IsLimitUndefined<uint64_t>(uint64_t value) {
 }  // namespace
 
 void GetDefaultLimits(Limits* limits) {
-    ASSERT(limits != nullptr);
+    DAWN_ASSERT(limits != nullptr);
 #define X(Better, limitName, base, ...) limits->limitName = base;
     LIMITS(X)
 #undef X

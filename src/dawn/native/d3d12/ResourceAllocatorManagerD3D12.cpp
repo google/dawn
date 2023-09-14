@@ -366,8 +366,8 @@ ResourceAllocatorManager::~ResourceAllocatorManager() {
     Tick(std::numeric_limits<ExecutionSerial>::max());
     DestroyPool();
 
-    ASSERT(mAllocationsToDelete.Empty());
-    ASSERT(mHeapsToDelete.Empty());
+    DAWN_ASSERT(mAllocationsToDelete.Empty());
+    DAWN_ASSERT(mHeapsToDelete.Empty());
 }
 
 ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
@@ -396,7 +396,7 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
         resourceDescriptor.DepthOrArraySize > 1 && colorFormatBytesPerBlock > 0) {
         // Multisample textures have one layer at most. Only non-multisample textures need the
         // workaround.
-        ASSERT(revisedDescriptor.SampleDesc.Count <= 1);
+        DAWN_ASSERT(revisedDescriptor.SampleDesc.Count <= 1);
         revisedDescriptor.DepthOrArraySize += ComputeExtraArraySizeForIntelGen12(
             resourceDescriptor.Width, resourceDescriptor.Height,
             resourceDescriptor.DepthOrArraySize, resourceDescriptor.MipLevels,
@@ -460,11 +460,11 @@ void ResourceAllocatorManager::DeallocateMemory(ResourceHeapAllocation& allocati
     // calls DeallocateMemory again using the same allocation.
     allocation.Invalidate();
 
-    ASSERT(allocation.GetD3D12Resource() == nullptr);
+    DAWN_ASSERT(allocation.GetD3D12Resource() == nullptr);
 }
 
 void ResourceAllocatorManager::FreeMemory(ResourceHeapAllocation& allocation) {
-    ASSERT(allocation.GetInfo().mMethod == AllocationMethod::kSubAllocated);
+    DAWN_ASSERT(allocation.GetInfo().mMethod == AllocationMethod::kSubAllocated);
 
     D3D12_HEAP_PROPERTIES heapProp;
     allocation.GetD3D12Resource()->GetHeapProperties(&heapProp, nullptr);

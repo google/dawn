@@ -31,15 +31,15 @@ StagingDescriptorAllocator::StagingDescriptorAllocator(Device* device,
       mBlockSize(descriptorCount * mSizeIncrement),
       mHeapSize(RoundUp(heapSize, descriptorCount)),
       mHeapType(heapType) {
-    ASSERT(descriptorCount <= heapSize);
+    DAWN_ASSERT(descriptorCount <= heapSize);
 }
 
 StagingDescriptorAllocator::~StagingDescriptorAllocator() {
     const Index freeBlockIndicesSize = GetFreeBlockIndicesSize();
     for (auto& buffer : mPool) {
-        ASSERT(buffer.freeBlockIndices.size() == freeBlockIndicesSize);
+        DAWN_ASSERT(buffer.freeBlockIndices.size() == freeBlockIndicesSize);
     }
-    ASSERT(mAvailableHeaps.size() == mPool.size());
+    DAWN_ASSERT(mAvailableHeaps.size() == mPool.size());
 }
 
 ResultOrError<CPUDescriptorHeapAllocation> StagingDescriptorAllocator::AllocateCPUDescriptors() {
@@ -47,12 +47,12 @@ ResultOrError<CPUDescriptorHeapAllocation> StagingDescriptorAllocator::AllocateC
         DAWN_TRY(AllocateCPUHeap());
     }
 
-    ASSERT(!mAvailableHeaps.empty());
+    DAWN_ASSERT(!mAvailableHeaps.empty());
 
     const uint32_t heapIndex = mAvailableHeaps.back();
     NonShaderVisibleBuffer& buffer = mPool[heapIndex];
 
-    ASSERT(!buffer.freeBlockIndices.empty());
+    DAWN_ASSERT(!buffer.freeBlockIndices.empty());
 
     const Index blockIndex = buffer.freeBlockIndices.back();
 
@@ -97,11 +97,11 @@ MaybeError StagingDescriptorAllocator::AllocateCPUHeap() {
 }
 
 void StagingDescriptorAllocator::Deallocate(CPUDescriptorHeapAllocation* allocation) {
-    ASSERT(allocation->IsValid());
+    DAWN_ASSERT(allocation->IsValid());
 
     const uint32_t heapIndex = allocation->GetHeapIndex();
 
-    ASSERT(heapIndex < mPool.size());
+    DAWN_ASSERT(heapIndex < mPool.size());
 
     // Insert the deallocated block back into the free-list. Order does not matter. However,
     // having blocks be non-contigious could slow down future allocations due to poor cache

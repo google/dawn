@@ -198,7 +198,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
             "ID3D11Device::CreateBuffer"));
     }
 
-    ASSERT(mD3d11NonConstantBuffer || mD3d11ConstantBuffer);
+    DAWN_ASSERT(mD3d11NonConstantBuffer || mD3d11ConstantBuffer);
 
     SetLabelImpl();
 
@@ -447,7 +447,7 @@ MaybeError Buffer::ClearInternal(CommandRecordingContext* commandContext,
     if (mMappedData) {
         memset(mMappedData + offset, clearValue, size);
         // The WebGPU uniform buffer is not mappable.
-        ASSERT(!mD3d11ConstantBuffer);
+        DAWN_ASSERT(!mD3d11ConstantBuffer);
         return {};
     }
 
@@ -489,7 +489,7 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
     if (scopedMap.GetMappedData()) {
         memcpy(scopedMap.GetMappedData() + offset, data, size);
         // The WebGPU uniform buffer is not mappable.
-        ASSERT(!mD3d11ConstantBuffer);
+        DAWN_ASSERT(!mD3d11ConstantBuffer);
         return {};
     }
 
@@ -529,7 +529,7 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
         return {};
     }
 
-    ASSERT(mD3d11ConstantBuffer);
+    DAWN_ASSERT(mD3d11ConstantBuffer);
 
     // If the mD3d11NonConstantBuffer is null, we have to create a staging buffer for transfer the
     // data to mD3d11ConstantBuffer, since UpdateSubresource() has many restrictions. For example,
@@ -580,7 +580,7 @@ MaybeError Buffer::CopyInternal(CommandRecordingContext* commandContext,
     ID3D11Buffer* d3d11SourceBuffer = source->mD3d11NonConstantBuffer
                                           ? source->mD3d11NonConstantBuffer.Get()
                                           : source->mD3d11ConstantBuffer.Get();
-    ASSERT(d3d11SourceBuffer);
+    DAWN_ASSERT(d3d11SourceBuffer);
 
     if (destination->mD3d11NonConstantBuffer) {
         commandContext->GetD3D11DeviceContext()->CopySubresourceRegion(

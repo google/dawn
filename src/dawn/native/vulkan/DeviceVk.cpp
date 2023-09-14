@@ -290,7 +290,7 @@ void Device::EnqueueDeferredDeallocation(DescriptorSetAllocator* allocator) {
 }
 
 CommandRecordingContext* Device::GetPendingRecordingContext(Device::SubmitMode submitMode) {
-    ASSERT(mRecordingContext.commandBuffer != VK_NULL_HANDLE);
+    DAWN_ASSERT(mRecordingContext.commandBuffer != VK_NULL_HANDLE);
     mRecordingContext.needsSubmit |= (submitMode == DeviceBase::SubmitMode::Normal);
     mRecordingContext.used = true;
     return &mRecordingContext;
@@ -439,7 +439,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::SubgroupSizeControl)) {
-        ASSERT(usedKnobs.HasExt(DeviceExt::SubgroupSizeControl));
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::SubgroupSizeControl));
 
         // Always request all the features from VK_EXT_subgroup_size_control when available.
         usedKnobs.subgroupSizeControlFeatures = mDeviceInfo.subgroupSizeControlFeatures;
@@ -447,7 +447,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::ZeroInitializeWorkgroupMemory)) {
-        ASSERT(usedKnobs.HasExt(DeviceExt::ZeroInitializeWorkgroupMemory));
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::ZeroInitializeWorkgroupMemory));
 
         // Always allow initializing workgroup memory with OpConstantNull when available.
         // Note that the driver still won't initialize workgroup memory unless the workgroup
@@ -458,7 +458,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::ShaderIntegerDotProduct)) {
-        ASSERT(usedKnobs.HasExt(DeviceExt::ShaderIntegerDotProduct));
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::ShaderIntegerDotProduct));
 
         usedKnobs.shaderIntegerDotProductFeatures = mDeviceInfo.shaderIntegerDotProductFeatures;
         featuresChain.Add(&usedKnobs.shaderIntegerDotProductFeatures);
@@ -469,27 +469,29 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     }
 
     if (HasFeature(Feature::TextureCompressionBC)) {
-        ASSERT(ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.textureCompressionBC ==
-               VK_TRUE);
+        DAWN_ASSERT(ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.textureCompressionBC ==
+                    VK_TRUE);
         usedKnobs.features.textureCompressionBC = VK_TRUE;
     }
 
     if (HasFeature(Feature::TextureCompressionETC2)) {
-        ASSERT(ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.textureCompressionETC2 ==
-               VK_TRUE);
+        DAWN_ASSERT(
+            ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.textureCompressionETC2 ==
+            VK_TRUE);
         usedKnobs.features.textureCompressionETC2 = VK_TRUE;
     }
 
     if (HasFeature(Feature::TextureCompressionASTC)) {
-        ASSERT(
+        DAWN_ASSERT(
             ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.textureCompressionASTC_LDR ==
             VK_TRUE);
         usedKnobs.features.textureCompressionASTC_LDR = VK_TRUE;
     }
 
     if (HasFeature(Feature::PipelineStatisticsQuery)) {
-        ASSERT(ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.pipelineStatisticsQuery ==
-               VK_TRUE);
+        DAWN_ASSERT(
+            ToBackend(GetPhysicalDevice())->GetDeviceInfo().features.pipelineStatisticsQuery ==
+            VK_TRUE);
         usedKnobs.features.pipelineStatisticsQuery = VK_TRUE;
     }
 
@@ -501,12 +503,12 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     // output if necessary, relax the requirement of storageInputOutput16.
     if (HasFeature(Feature::ShaderF16)) {
         const VulkanDeviceInfo& deviceInfo = ToBackend(GetPhysicalDevice())->GetDeviceInfo();
-        ASSERT(deviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
-               deviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
-               deviceInfo.HasExt(DeviceExt::_16BitStorage) &&
-               deviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE &&
-               deviceInfo._16BitStorageFeatures.storageInputOutput16 == VK_TRUE &&
-               deviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_TRUE);
+        DAWN_ASSERT(deviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
+                    deviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
+                    deviceInfo.HasExt(DeviceExt::_16BitStorage) &&
+                    deviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE &&
+                    deviceInfo._16BitStorageFeatures.storageInputOutput16 == VK_TRUE &&
+                    deviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_TRUE);
 
         usedKnobs.shaderFloat16Int8Features.shaderFloat16 = VK_TRUE;
         usedKnobs._16BitStorageFeatures.storageBuffer16BitAccess = VK_TRUE;
@@ -524,14 +526,14 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
     }
 
     if (mDeviceInfo.HasExt(DeviceExt::Robustness2)) {
-        ASSERT(usedKnobs.HasExt(DeviceExt::Robustness2));
+        DAWN_ASSERT(usedKnobs.HasExt(DeviceExt::Robustness2));
 
         usedKnobs.robustness2Features = mDeviceInfo.robustness2Features;
         featuresChain.Add(&usedKnobs.robustness2Features);
     }
 
     if (HasFeature(Feature::ChromiumExperimentalSubgroupUniformControlFlow)) {
-        ASSERT(
+        DAWN_ASSERT(
             usedKnobs.HasExt(DeviceExt::ShaderSubgroupUniformControlFlow) &&
             mDeviceInfo.shaderSubgroupUniformControlFlowFeatures.shaderSubgroupUniformControlFlow ==
                 VK_TRUE);
@@ -592,7 +594,7 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice vkPhysica
         createInfo.pNext = &features2;
         createInfo.pEnabledFeatures = nullptr;
     } else {
-        ASSERT(features2.pNext == nullptr);
+        DAWN_ASSERT(features2.pNext == nullptr);
         createInfo.pEnabledFeatures = &usedKnobs.features;
     }
 
@@ -652,16 +654,16 @@ ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
 
         mUnusedFences.push_back(fence);
 
-        ASSERT(fenceSerial > GetQueue()->GetCompletedCommandSerial());
+        DAWN_ASSERT(fenceSerial > GetQueue()->GetCompletedCommandSerial());
         mFencesInFlight.pop();
     }
     return fenceSerial;
 }
 
 MaybeError Device::PrepareRecordingContext() {
-    ASSERT(!mRecordingContext.needsSubmit);
-    ASSERT(mRecordingContext.commandBuffer == VK_NULL_HANDLE);
-    ASSERT(mRecordingContext.commandPool == VK_NULL_HANDLE);
+    DAWN_ASSERT(!mRecordingContext.needsSubmit);
+    DAWN_ASSERT(mRecordingContext.commandBuffer == VK_NULL_HANDLE);
+    DAWN_ASSERT(mRecordingContext.commandPool == VK_NULL_HANDLE);
 
     CommandPoolAndBuffer commands;
     DAWN_TRY_ASSIGN(commands, BeginVkCommandBuffer());
@@ -678,7 +680,7 @@ MaybeError Device::PrepareRecordingContext() {
 // This should not be necessary in most cases, and is provided only to work around driver issues
 // on some hardware.
 MaybeError Device::SplitRecordingContext(CommandRecordingContext* recordingContext) {
-    ASSERT(recordingContext->used);
+    DAWN_ASSERT(recordingContext->used);
 
     DAWN_TRY(
         CheckVkSuccess(fn.EndCommandBuffer(recordingContext->commandBuffer), "vkEndCommandBuffer"));
@@ -757,7 +759,7 @@ MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
                                                uint64_t size) {
     // It is a validation error to do a 0-sized copy in Vulkan, check it is skipped prior to
     // calling this function.
-    ASSERT(size != 0);
+    DAWN_ASSERT(size != 0);
 
     CommandRecordingContext* recordingContext =
         GetPendingRecordingContext(DeviceBase::SubmitMode::Passive);
@@ -991,7 +993,7 @@ void Device::CheckDebugMessagesAfterDestruction() const {
     }
 
     // Crash in debug
-    ASSERT(false);
+    DAWN_ASSERT(false);
 }
 
 MaybeError Device::WaitForIdleForDestruction() {
@@ -1015,7 +1017,7 @@ MaybeError Device::WaitForIdleForDestruction() {
     while (!mFencesInFlight.empty()) {
         VkFence fence = mFencesInFlight.front().first;
         ExecutionSerial fenceSerial = mFencesInFlight.front().second;
-        ASSERT(fenceSerial > GetQueue()->GetCompletedCommandSerial());
+        DAWN_ASSERT(fenceSerial > GetQueue()->GetCompletedCommandSerial());
 
         VkResult result = VkResult::WrapUnsafe(VK_TIMEOUT);
         do {
@@ -1044,7 +1046,7 @@ MaybeError Device::WaitForIdleForDestruction() {
 }
 
 void Device::DestroyImpl() {
-    ASSERT(GetState() == State::Disconnected);
+    DAWN_ASSERT(GetState() == State::Disconnected);
 
     // We failed during initialization so early that we don't even have a VkDevice. There is
     // nothing to do.
@@ -1083,7 +1085,7 @@ void Device::DestroyImpl() {
     // Some commands might still be marked as in-flight if we shut down because of a device
     // loss. Recycle them as unused so that we free them below.
     RecycleCompletedCommands();
-    ASSERT(mCommandsInFlight.Empty());
+    DAWN_ASSERT(mCommandsInFlight.Empty());
 
     for (const CommandPoolAndBuffer& commands : mUnusedCommands) {
         DestroyCommandPoolAndBuffer(fn, mVkDevice, commands);
@@ -1124,14 +1126,14 @@ void Device::DestroyImpl() {
     // We need handle deleting all child objects by calling Tick() again with a large serial to
     // force all operations to look as if they were completed, and delete all objects before
     // destroying the Deleter and vkDevice.
-    ASSERT(mDeleter != nullptr);
+    DAWN_ASSERT(mDeleter != nullptr);
     mDeleter->Tick(kMaxExecutionSerial);
     mDeleter = nullptr;
 
     // VkQueues are destroyed when the VkDevice is destroyed
     // The VkDevice is needed to destroy child objects, so it must be destroyed last after all
     // child objects have been deleted.
-    ASSERT(mVkDevice != VK_NULL_HANDLE);
+    DAWN_ASSERT(mVkDevice != VK_NULL_HANDLE);
     fn.DestroyDevice(mVkDevice, nullptr);
     mVkDevice = VK_NULL_HANDLE;
 

@@ -84,7 +84,7 @@ BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor
         if (bindingIndex < GetDynamicBufferCount()) {
             continue;
         }
-        ASSERT(!bindingInfo.buffer.hasDynamicOffset);
+        DAWN_ASSERT(!bindingInfo.buffer.hasDynamicOffset);
 
         mDescriptorHeapOffsets[bindingIndex] =
             descriptorRangeType == D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER
@@ -162,7 +162,7 @@ ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
     uint32_t viewSizeIncrement = 0;
     CPUDescriptorHeapAllocation viewAllocation;
     if (GetCbvUavSrvDescriptorCount() > 0) {
-        ASSERT(mViewAllocator != nullptr);
+        DAWN_ASSERT(mViewAllocator != nullptr);
         DAWN_TRY((*mViewAllocator).Use([&](auto viewAllocator) -> MaybeError {
             DAWN_TRY_ASSIGN(viewAllocation, viewAllocator->AllocateCPUDescriptors());
             viewSizeIncrement = viewAllocator->GetSizeIncrement();
@@ -174,7 +174,7 @@ ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
         mBindGroupAllocator->Allocate(device, descriptor, viewSizeIncrement, viewAllocation));
 
     if (GetSamplerDescriptorCount() > 0) {
-        ASSERT(mSamplerAllocator != nullptr);
+        DAWN_ASSERT(mSamplerAllocator != nullptr);
         Ref<SamplerHeapCacheEntry> samplerHeapCacheEntry;
         DAWN_TRY_ASSIGN(samplerHeapCacheEntry, device->GetSamplerHeapCache()->GetOrCreate(
                                                    bindGroup.Get(), *mSamplerAllocator));

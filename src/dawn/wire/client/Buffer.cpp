@@ -104,7 +104,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
 
         buffer->mMapOffset = 0;
         buffer->mMapSize = buffer->mSize;
-        ASSERT(writeHandle != nullptr);
+        DAWN_ASSERT(writeHandle != nullptr);
         buffer->mMappedData = writeHandle->GetData();
     }
 
@@ -165,7 +165,7 @@ void Buffer::MapAsync(WGPUMapModeFlags mode,
                       size_t size,
                       WGPUBufferMapCallback callback,
                       void* userdata) {
-    ASSERT(GetRefcount() != 0);
+    DAWN_ASSERT(GetRefcount() != 0);
 
     if (mPendingMap) {
         return callback(WGPUBufferMapAsyncStatus_MappingAlreadyPending, userdata);

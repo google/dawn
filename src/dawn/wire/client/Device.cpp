@@ -68,7 +68,7 @@ Device::~Device() {
                 ToAPI(GetClient()->Get<ComputePipeline>(request->pipelineObjectID)), "",
                 request->userdata);
         } else {
-            ASSERT(request->createRenderPipelineAsyncCallback != nullptr);
+            DAWN_ASSERT(request->createRenderPipelineAsyncCallback != nullptr);
             request->createRenderPipelineAsyncCallback(
                 WGPUCreatePipelineAsyncStatus_Success,
                 ToAPI(GetClient()->Get<RenderPipeline>(request->pipelineObjectID)), "",
@@ -133,7 +133,7 @@ void Device::CancelCallbacksForDisconnect() {
                 ToAPI(GetClient()->Get<ComputePipeline>(request->pipelineObjectID)), "",
                 request->userdata);
         } else {
-            ASSERT(request->createRenderPipelineAsyncCallback != nullptr);
+            DAWN_ASSERT(request->createRenderPipelineAsyncCallback != nullptr);
             request->createRenderPipelineAsyncCallback(
                 WGPUCreatePipelineAsyncStatus_Success,
                 ToAPI(GetClient()->Get<RenderPipeline>(request->pipelineObjectID)), "",

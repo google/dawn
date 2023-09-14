@@ -42,7 +42,7 @@ class DynamicLib {
 
     template <typename T>
     bool GetProc(T** proc, const std::string& procName, std::string* error = nullptr) const {
-        ASSERT(proc != nullptr);
+        DAWN_ASSERT(proc != nullptr);
         static_assert(std::is_function<T>::value);
 
         *proc = reinterpret_cast<T*>(GetProc(procName, error));

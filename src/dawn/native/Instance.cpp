@@ -364,7 +364,7 @@ std::vector<Ref<AdapterBase>> InstanceBase::EnumerateAdapters(
         options->compatibilityMode ? FeatureLevel::Compatibility : FeatureLevel::Core;
     std::vector<Ref<AdapterBase>> adapters;
     for (const auto& physicalDevice : EnumeratePhysicalDevices(options)) {
-        ASSERT(physicalDevice->SupportsFeatureLevel(featureLevel));
+        DAWN_ASSERT(physicalDevice->SupportsFeatureLevel(featureLevel));
         adapters.push_back(
             CreateAdapter(physicalDevice, featureLevel, togglesDesc, options->powerPreference));
     }
@@ -388,8 +388,8 @@ BackendConnection* InstanceBase::GetBackendConnection(wgpu::BackendType backendT
 
     auto Register = [this](BackendConnection* connection, wgpu::BackendType expectedType) {
         if (connection != nullptr) {
-            ASSERT(connection->GetType() == expectedType);
-            ASSERT(connection->GetInstance() == this);
+            DAWN_ASSERT(connection->GetType() == expectedType);
+            DAWN_ASSERT(connection->GetInstance() == this);
             mBackends[connection->GetType()] = std::unique_ptr<BackendConnection>(connection);
         }
     };
@@ -448,7 +448,7 @@ BackendConnection* InstanceBase::GetBackendConnection(wgpu::BackendType backendT
 
 std::vector<Ref<PhysicalDeviceBase>> InstanceBase::EnumeratePhysicalDevices(
     const RequestAdapterOptions* options) {
-    ASSERT(options);
+    DAWN_ASSERT(options);
 
     BackendsBitset backendsToFind;
     if (options->backendType != wgpu::BackendType::Undefined) {
@@ -596,7 +596,7 @@ EventManager* InstanceBase::GetEventManager() {
 }
 
 void InstanceBase::ConsumeError(std::unique_ptr<ErrorData> error) {
-    ASSERT(error != nullptr);
+    DAWN_ASSERT(error != nullptr);
     dawn::ErrorLog() << error->GetFormattedMessage();
 }
 

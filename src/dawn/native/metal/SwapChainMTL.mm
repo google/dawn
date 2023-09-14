@@ -43,7 +43,7 @@ void SwapChain::DestroyImpl() {
 }
 
 MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
-    ASSERT(GetSurface()->GetType() == Surface::Type::MetalLayer);
+    DAWN_ASSERT(GetSurface()->GetType() == Surface::Type::MetalLayer);
 
     if (previousSwapChain != nullptr) {
         // TODO(crbug.com/dawn/269): figure out what should happen when surfaces are used by
@@ -57,7 +57,7 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
     }
 
     mLayer = static_cast<CAMetalLayer*>(GetSurface()->GetMetalLayer());
-    ASSERT(mLayer != nullptr);
+    DAWN_ASSERT(mLayer != nullptr);
 
     CGSize size = {};
     size.width = GetWidth();
@@ -78,7 +78,7 @@ MaybeError SwapChain::Initialize(SwapChainBase* previousSwapChain) {
 }
 
 MaybeError SwapChain::PresentImpl() {
-    ASSERT(mCurrentDrawable != nullptr);
+    DAWN_ASSERT(mCurrentDrawable != nullptr);
     [*mCurrentDrawable present];
 
     mTexture->APIDestroy();
@@ -91,7 +91,7 @@ MaybeError SwapChain::PresentImpl() {
 
 ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureImpl() {
     @autoreleasepool {
-        ASSERT(mCurrentDrawable == nullptr);
+        DAWN_ASSERT(mCurrentDrawable == nullptr);
         mCurrentDrawable = [*mLayer nextDrawable];
 
         TextureDescriptor textureDesc = GetSwapChainBaseTextureDescriptor(this);
@@ -103,7 +103,7 @@ ResultOrError<Ref<TextureBase>> SwapChain::GetCurrentTextureImpl() {
 }
 
 void SwapChain::DetachFromSurfaceImpl() {
-    ASSERT((mTexture == nullptr) == (mCurrentDrawable == nullptr));
+    DAWN_ASSERT((mTexture == nullptr) == (mCurrentDrawable == nullptr));
 
     if (mTexture != nullptr) {
         mTexture->APIDestroy();

@@ -24,7 +24,7 @@ CommandBufferMock::CommandBufferMock(DeviceMock* device,
     : CommandBufferBase(encoder, descriptor) {
     // Make sure that the command encoder was also created using the mock device since it is not
     // directly passed in.
-    ASSERT(device == encoder->GetDevice());
+    DAWN_ASSERT(device == encoder->GetDevice());
 
     ON_CALL(*this, DestroyImpl).WillByDefault([this] { this->CommandBufferBase::DestroyImpl(); });
 }

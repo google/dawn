@@ -73,16 +73,16 @@ class InlineMemoryTransferService : public MemoryTransferService {
         void* GetData() override { return mStagingData.get(); }
 
         size_t SizeOfSerializeDataUpdate(size_t offset, size_t size) override {
-            ASSERT(offset <= mSize);
-            ASSERT(size <= mSize - offset);
+            DAWN_ASSERT(offset <= mSize);
+            DAWN_ASSERT(size <= mSize - offset);
             return size;
         }
 
         void SerializeDataUpdate(void* serializePointer, size_t offset, size_t size) override {
-            ASSERT(mStagingData != nullptr);
-            ASSERT(serializePointer != nullptr);
-            ASSERT(offset <= mSize);
-            ASSERT(size <= mSize - offset);
+            DAWN_ASSERT(mStagingData != nullptr);
+            DAWN_ASSERT(serializePointer != nullptr);
+            DAWN_ASSERT(offset <= mSize);
+            DAWN_ASSERT(size <= mSize - offset);
             memcpy(serializePointer, static_cast<uint8_t*>(mStagingData.get()) + offset, size);
         }
 

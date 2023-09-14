@@ -25,7 +25,7 @@ ResourceHeapAllocation::ResourceHeapAllocation(const AllocationInfo& info,
                                                ComPtr<ID3D12Resource> resource,
                                                Heap* heap)
     : ResourceMemoryAllocation(info, offset, heap), mResource(std::move(resource)) {
-    ASSERT((info.mMethod == AllocationMethod::kExternal) == (heap == nullptr));
+    DAWN_ASSERT((info.mMethod == AllocationMethod::kExternal) == (heap == nullptr));
 }
 
 void ResourceHeapAllocation::Invalidate() {

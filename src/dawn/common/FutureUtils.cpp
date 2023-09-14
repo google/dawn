@@ -32,7 +32,7 @@ CallbackMode ValidateAndFlattenCallbackMode(WGPUCallbackModeFlags mode) {
             return CallbackMode::ProcessEventsOrSpontaneous;
         default:
             // These cases are undefined behaviors according to the API contract.
-            ASSERT(false);
+            DAWN_ASSERT(false);
             return CallbackMode::Spontaneous;
     }
 }

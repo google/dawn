@@ -185,7 +185,7 @@ class WritableBufferBindingAliasingValidationTests : public ValidationTest {
                                                   const BindingDescriptorGroups& bindingsGroups) {
         std::vector<wgpu::BindGroup> bindGroups;
 
-        ASSERT(layouts.size() == bindingsGroups.size());
+        DAWN_ASSERT(layouts.size() == bindingsGroups.size());
         for (size_t groupIdx = 0; groupIdx < layouts.size(); groupIdx++) {
             const auto& bindings = bindingsGroups[groupIdx];
 
@@ -214,8 +214,8 @@ class WritableBufferBindingAliasingValidationTests : public ValidationTest {
         wgpu::ComputePassEncoder computePassEncoder = commandEncoder.BeginComputePass();
         computePassEncoder.SetPipeline(computePipeline);
 
-        ASSERT(bindGroups.size() == test.bindingEntries.size());
-        ASSERT(bindGroups.size() > 0);
+        DAWN_ASSERT(bindGroups.size() == test.bindingEntries.size());
+        DAWN_ASSERT(bindGroups.size() > 0);
         for (size_t i = 0; i < bindGroups.size(); ++i) {
             // Assuming that in our test we
             // (1) only have buffer bindings and
@@ -255,8 +255,8 @@ class WritableBufferBindingAliasingValidationTests : public ValidationTest {
         wgpu::RenderPassEncoder renderPassEncoder = commandEncoder.BeginRenderPass(&renderPass);
         renderPassEncoder.SetPipeline(renderPipeline);
 
-        ASSERT(bindGroups.size() == test.bindingEntries.size());
-        ASSERT(bindGroups.size() > 0);
+        DAWN_ASSERT(bindGroups.size() == test.bindingEntries.size());
+        DAWN_ASSERT(bindGroups.size() > 0);
         for (size_t i = 0; i < bindGroups.size(); ++i) {
             // Assuming that in our test we
             // (1) only have buffer bindings and

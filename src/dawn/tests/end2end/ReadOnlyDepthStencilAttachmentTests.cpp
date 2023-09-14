@@ -95,7 +95,7 @@ class ReadOnlyDepthStencilAttachmentTests
                     return vec4f(textureSample(tex, samp, FragCoord.xy), 0.0, 0.0, 0.0);
                 })");
             } else {
-                ASSERT(aspect == wgpu::TextureAspect::StencilOnly);
+                DAWN_ASSERT(aspect == wgpu::TextureAspect::StencilOnly);
                 pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
                 @group(0) @binding(0) var tex : texture_2d<u32>;
 
@@ -146,7 +146,7 @@ class ReadOnlyDepthStencilAttachmentTests
         if (aspect == wgpu::TextureAspect::DepthOnly) {
             passDescriptorInit.cDepthStencilAttachmentInfo.depthClearValue = values->depthInitValue;
         } else {
-            ASSERT(aspect == wgpu::TextureAspect::StencilOnly);
+            DAWN_ASSERT(aspect == wgpu::TextureAspect::StencilOnly);
             passDescriptorInit.cDepthStencilAttachmentInfo.stencilClearValue =
                 values->stencilInitValue;
         }
@@ -184,7 +184,7 @@ class ReadOnlyDepthStencilAttachmentTests
                 pass.SetBindGroup(0, bindGroup);
             }
         } else {
-            ASSERT(aspect == wgpu::TextureAspect::StencilOnly);
+            DAWN_ASSERT(aspect == wgpu::TextureAspect::StencilOnly);
             if (sampleFromAttachment) {
                 wgpu::BindGroup bindGroup = utils::MakeBindGroup(
                     device, pipeline.GetBindGroupLayout(0), {{0, depthStencilViewInBindGroup}});

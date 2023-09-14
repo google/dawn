@@ -162,7 +162,7 @@ void FakeStorage<T>::CheckSameAs(const SubresourceStorage<T>& real) {
 
 template <typename T>
 void CheckAspectCompressed(const SubresourceStorage<T>& s, Aspect aspect, bool expected) {
-    ASSERT(HasOneBit(aspect));
+    DAWN_ASSERT(HasOneBit(aspect));
 
     uint32_t levelCount = s.GetMipLevelCountForTesting();
     uint32_t layerCount = s.GetArrayLayerCountForTesting();
@@ -193,7 +193,7 @@ void CheckLayerCompressed(const SubresourceStorage<T>& s,
                           Aspect aspect,
                           uint32_t layer,
                           bool expected) {
-    ASSERT(HasOneBit(aspect));
+    DAWN_ASSERT(HasOneBit(aspect));
 
     uint32_t levelCount = s.GetMipLevelCountForTesting();
 
@@ -701,9 +701,9 @@ TEST(SubresourceStorageTest, AspectDecompressionUpdatesLayer0) {
 //  - mLayersCompressed not initialized to true.
 //  - DecompressLayer setting Compressed to true instead of false.
 //  - Get() checking for !compressed instead of compressed for the early exit.
-//  - ASSERT in RecompressLayers was inverted.
+//  - DAWN_ASSERT in RecompressLayers was inverted.
 //  - Two != being converted to == during a rework.
-//  - (with ASSERT) that RecompressAspect didn't check that aspect 0 was compressed.
+//  - (with DAWN_ASSERT) that RecompressAspect didn't check that aspect 0 was compressed.
 //  - Missing decompression of layer 0 after introducing mInlineAspectData.
 
 }  // namespace dawn::native

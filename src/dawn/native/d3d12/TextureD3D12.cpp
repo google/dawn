@@ -49,7 +49,7 @@ D3D12_RESOURCE_STATES D3D12TextureUsage(wgpu::TextureUsage usage, const Format& 
     if (usage & kPresentTextureUsage) {
         // The present usage is only used internally by the swapchain and is never used in
         // combination with other usages.
-        ASSERT(usage == kPresentTextureUsage);
+        DAWN_ASSERT(usage == kPresentTextureUsage);
         return D3D12_RESOURCE_STATE_PRESENT;
     }
 
@@ -96,8 +96,8 @@ D3D12_RESOURCE_FLAGS D3D12ResourceFlags(wgpu::TextureUsage usage, const Format& 
         }
     }
 
-    ASSERT(!(flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) ||
-           flags == D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
+    DAWN_ASSERT(!(flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) ||
+                flags == D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
     return flags;
 }
 
@@ -138,8 +138,8 @@ MaybeError ValidateTextureCanBeWrapped(ID3D12Resource* d3d12Resource,
                     d3dDescriptor.DepthOrArraySize);
 
     // Shared textures cannot be multi-sample so no need to check those.
-    ASSERT(d3dDescriptor.SampleDesc.Count == 1);
-    ASSERT(d3dDescriptor.SampleDesc.Quality == 0);
+    DAWN_ASSERT(d3dDescriptor.SampleDesc.Count == 1);
+    DAWN_ASSERT(d3dDescriptor.SampleDesc.Quality == 0);
 
     return {};
 }
@@ -224,7 +224,7 @@ MaybeError Texture::InitializeAsExternalTexture(ComPtr<IUnknown> d3dTexture,
 
     D3D12_RESOURCE_DESC desc = d3d12Texture->GetDesc();
     mD3D12ResourceFlags = desc.Flags;
-    ASSERT(mD3D12ResourceFlags & D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS);
+    DAWN_ASSERT(mD3D12ResourceFlags & D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS);
 
     AllocationInfo info;
     info.mMethod = AllocationMethod::kExternal;
@@ -346,7 +346,7 @@ void Texture::DestroyImpl() {
 }
 
 ResultOrError<ExecutionSerial> Texture::EndAccess() {
-    ASSERT(mD3D12ResourceFlags & D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS);
+    DAWN_ASSERT(mD3D12ResourceFlags & D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS);
 
     Device* device = ToBackend(GetDevice());
     // Synchronize if texture access wasn't synchronized already due to ExecuteCommandLists.
@@ -361,10 +361,10 @@ ResultOrError<ExecutionSerial> Texture::EndAccess() {
             DAWN_TRY(SynchronizeImportedTextureAfterUse());
         }
         DAWN_TRY(device->NextSerial());
-        ASSERT(mSignalFenceValue.has_value());
+        DAWN_ASSERT(mSignalFenceValue.has_value());
     }
     ExecutionSerial ret = mSignalFenceValue.value();
-    ASSERT(ret <= device->GetLastSubmittedCommandSerial());
+    DAWN_ASSERT(ret <= device->GetLastSubmittedCommandSerial());
     // Explicitly call reset() since std::move() on optional doesn't make it std::nullopt.
     mSignalFenceValue.reset();
     return ret;
@@ -383,7 +383,7 @@ D3D12_RESOURCE_FLAGS Texture::GetD3D12ResourceFlags() const {
 }
 
 DXGI_FORMAT Texture::GetD3D12CopyableSubresourceFormat(Aspect aspect) const {
-    ASSERT(GetFormat().aspects & aspect);
+    DAWN_ASSERT(GetFormat().aspects & aspect);
 
     switch (GetFormat().format) {
         case wgpu::TextureFormat::Depth24PlusStencil8:
@@ -398,7 +398,7 @@ DXGI_FORMAT Texture::GetD3D12CopyableSubresourceFormat(Aspect aspect) const {
                     UNREACHABLE();
             }
         default:
-            ASSERT(HasOneBit(GetFormat().aspects));
+            DAWN_ASSERT(HasOneBit(GetFormat().aspects));
             return GetD3D12Format();
     }
 }
@@ -661,11 +661,11 @@ D3D12_RENDER_TARGET_VIEW_DESC Texture::GetRTVDescriptor(const Format& format,
     D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
     rtvDesc.Format = d3d::DXGITextureFormat(format.format);
     if (IsMultisampledTexture()) {
-        ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
-        ASSERT(GetNumMipLevels() == 1);
-        ASSERT(sliceCount == 1);
-        ASSERT(baseSlice == 0);
-        ASSERT(mipLevel == 0);
+        DAWN_ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
+        DAWN_ASSERT(GetNumMipLevels() == 1);
+        DAWN_ASSERT(sliceCount == 1);
+        DAWN_ASSERT(baseSlice == 0);
+        DAWN_ASSERT(mipLevel == 0);
         rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMS;
         return rtvDesc;
     }
@@ -713,10 +713,10 @@ D3D12_DEPTH_STENCIL_VIEW_DESC Texture::GetDSVDescriptor(uint32_t mipLevel,
     }
 
     if (IsMultisampledTexture()) {
-        ASSERT(GetNumMipLevels() == 1);
-        ASSERT(layerCount == 1);
-        ASSERT(baseArrayLayer == 0);
-        ASSERT(mipLevel == 0);
+        DAWN_ASSERT(GetNumMipLevels() == 1);
+        DAWN_ASSERT(layerCount == 1);
+        DAWN_ASSERT(baseArrayLayer == 0);
+        DAWN_ASSERT(mipLevel == 0);
         dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMS;
     } else {
         dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
@@ -790,7 +790,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
 
         const float clearColorRGBA[4] = {fClearColor, fClearColor, fClearColor, fClearColor};
 
-        ASSERT(range.aspects == Aspect::Color);
+        DAWN_ASSERT(range.aspects == Aspect::Color);
         for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
              ++level) {
             for (uint32_t layer = range.baseArrayLayer;
@@ -822,7 +822,7 @@ MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
             }
         }
     } else {
-        ASSERT(!IsMultisampledTexture());
+        DAWN_ASSERT(!IsMultisampledTexture());
 
         // create temp buffer with clear color to copy to the texture image
         TrackUsageAndTransitionNow(commandContext, D3D12_RESOURCE_STATE_COPY_DEST, range);
@@ -932,7 +932,7 @@ TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* desc
                 break;
             case wgpu::TextureFormat::Stencil8: {
                 Aspect aspects = SelectFormatAspects(textureFormat, descriptor->aspect);
-                ASSERT(aspects != Aspect::None);
+                DAWN_ASSERT(aspects != Aspect::None);
                 if (!HasZeroOrOneBits(aspects)) {
                     // A single aspect is not selected. The texture view must not be
                     // sampled.
@@ -964,7 +964,7 @@ TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* desc
             case wgpu::TextureFormat::Depth24PlusStencil8:
             case wgpu::TextureFormat::Depth32FloatStencil8: {
                 Aspect aspects = SelectFormatAspects(textureFormat, descriptor->aspect);
-                ASSERT(aspects != Aspect::None);
+                DAWN_ASSERT(aspects != Aspect::None);
                 if (!HasZeroOrOneBits(aspects)) {
                     // A single aspect is not selected. The texture view must not be
                     // sampled.
@@ -1018,10 +1018,10 @@ TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* desc
     if (GetTexture()->IsMultisampledTexture()) {
         switch (descriptor->dimension) {
             case wgpu::TextureViewDimension::e2DArray:
-                ASSERT(texture->GetArrayLayers() == 1);
+                DAWN_ASSERT(texture->GetArrayLayers() == 1);
                 [[fallthrough]];
             case wgpu::TextureViewDimension::e2D:
-                ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+                DAWN_ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
                 mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DMS;
                 break;
 
@@ -1039,7 +1039,7 @@ TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* desc
 
             case wgpu::TextureViewDimension::e2D:
             case wgpu::TextureViewDimension::e2DArray:
-                ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+                DAWN_ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
                 mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
                 mSrvDesc.Texture2DArray.ArraySize = descriptor->arrayLayerCount;
                 mSrvDesc.Texture2DArray.FirstArraySlice = descriptor->baseArrayLayer;
@@ -1050,8 +1050,8 @@ TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* desc
                 break;
             case wgpu::TextureViewDimension::Cube:
             case wgpu::TextureViewDimension::CubeArray:
-                ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-                ASSERT(descriptor->arrayLayerCount % 6 == 0);
+                DAWN_ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+                DAWN_ASSERT(descriptor->arrayLayerCount % 6 == 0);
                 mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBEARRAY;
                 mSrvDesc.TextureCubeArray.First2DArrayFace = descriptor->baseArrayLayer;
                 mSrvDesc.TextureCubeArray.NumCubes = descriptor->arrayLayerCount / 6;
@@ -1060,7 +1060,7 @@ TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* desc
                 mSrvDesc.TextureCubeArray.ResourceMinLODClamp = 0;
                 break;
             case wgpu::TextureViewDimension::e3D:
-                ASSERT(texture->GetDimension() == wgpu::TextureDimension::e3D);
+                DAWN_ASSERT(texture->GetDimension() == wgpu::TextureDimension::e3D);
                 mSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE3D;
                 mSrvDesc.Texture3D.MostDetailedMip = descriptor->baseMipLevel;
                 mSrvDesc.Texture3D.MipLevels = descriptor->mipLevelCount;
@@ -1078,7 +1078,7 @@ DXGI_FORMAT TextureView::GetD3D12Format() const {
 }
 
 const D3D12_SHADER_RESOURCE_VIEW_DESC& TextureView::GetSRVDescriptor() const {
-    ASSERT(mSrvDesc.Format != DXGI_FORMAT_UNKNOWN);
+    DAWN_ASSERT(mSrvDesc.Format != DXGI_FORMAT_UNKNOWN);
     return mSrvDesc;
 }
 
@@ -1089,7 +1089,7 @@ D3D12_RENDER_TARGET_VIEW_DESC TextureView::GetRTVDescriptor() const {
 
 D3D12_DEPTH_STENCIL_VIEW_DESC TextureView::GetDSVDescriptor(bool depthReadOnly,
                                                             bool stencilReadOnly) const {
-    ASSERT(GetLevelCount() == 1);
+    DAWN_ASSERT(GetLevelCount() == 1);
     return ToBackend(GetTexture())
         ->GetDSVDescriptor(GetBaseMipLevel(), GetBaseArrayLayer(), GetLayerCount(), GetAspects(),
                            depthReadOnly, stencilReadOnly);
@@ -1099,7 +1099,7 @@ D3D12_UNORDERED_ACCESS_VIEW_DESC TextureView::GetUAVDescriptor() const {
     D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc;
     uavDesc.Format = GetD3D12Format();
 
-    ASSERT(!GetTexture()->IsMultisampledTexture());
+    DAWN_ASSERT(!GetTexture()->IsMultisampledTexture());
     switch (GetDimension()) {
         case wgpu::TextureViewDimension::e1D:
             uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE1D;

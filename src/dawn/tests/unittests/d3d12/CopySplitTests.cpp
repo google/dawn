@@ -372,8 +372,8 @@ constexpr uint32_t kCheckValues[] = {1,  2,  3,  4,   5,   6,   7,    8,     // 
 class CopySplitTest : public testing::TestWithParam<wgpu::TextureDimension> {
   protected:
     void DoTest(const TextureSpec& textureSpec, const BufferSpec& bufferSpec) {
-        ASSERT(textureSpec.width % textureSpec.blockWidth == 0 &&
-               textureSpec.height % textureSpec.blockHeight == 0);
+        DAWN_ASSERT(textureSpec.width % textureSpec.blockWidth == 0 &&
+                    textureSpec.height % textureSpec.blockHeight == 0);
 
         wgpu::TextureDimension dimension = GetParam();
         TextureCopySubresource copySplit;

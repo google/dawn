@@ -38,7 +38,7 @@ wgpu::WaitStatus WaitImpl(std::vector<TrackedFutureWaitInfo>& futures, Nanosecon
     });
 
     if (timeout > Nanoseconds(0)) {
-        ASSERT(futures.size() <= kTimedWaitAnyMaxCountDefault);
+        DAWN_ASSERT(futures.size() <= kTimedWaitAnyMaxCountDefault);
 
         // If there's a timeout, check that there isn't a mix of wait devices.
         if (futures.front().event->GetWaitDevice() != futures.back().event->GetWaitDevice()) {
@@ -86,7 +86,7 @@ EventManager::EventManager() {
 }
 
 EventManager::~EventManager() {
-    ASSERT(!mTrackers.has_value());
+    DAWN_ASSERT(!mTrackers.has_value());
 }
 
 MaybeError EventManager::Initialize(const InstanceDescriptor* descriptor) {
@@ -135,7 +135,7 @@ FutureID EventManager::TrackEvent(WGPUCallbackModeFlags mode, Ref<TrackedEvent>&
 }
 
 void EventManager::ProcessPollEvents() {
-    ASSERT(mTrackers.has_value());
+    DAWN_ASSERT(mTrackers.has_value());
 
     std::vector<TrackedFutureWaitInfo> futures;
     mTrackers->pollEvents.Use([&](auto trackedPollEvents) {
@@ -152,7 +152,7 @@ void EventManager::ProcessPollEvents() {
         if (waitStatus == wgpu::WaitStatus::TimedOut) {
             return;
         }
-        ASSERT(waitStatus == wgpu::WaitStatus::Success);
+        DAWN_ASSERT(waitStatus == wgpu::WaitStatus::Success);
 
         for (TrackedFutureWaitInfo& future : futures) {
             if (future.ready) {
@@ -163,14 +163,14 @@ void EventManager::ProcessPollEvents() {
 
     for (TrackedFutureWaitInfo& future : futures) {
         if (future.ready) {
-            ASSERT(future.event->mCallbackMode & WGPUCallbackMode_ProcessEvents);
+            DAWN_ASSERT(future.event->mCallbackMode & WGPUCallbackMode_ProcessEvents);
             future.event->EnsureComplete(EventCompletionType::Ready);
         }
     }
 }
 
 wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nanoseconds timeout) {
-    ASSERT(mTrackers.has_value());
+    DAWN_ASSERT(mTrackers.has_value());
 
     // Validate for feature support.
     if (timeout > Nanoseconds(0)) {
@@ -197,8 +197,8 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
             FutureID futureID = infos[i].future.id;
 
             // Check for cases that are undefined behavior in the API contract.
-            ASSERT(futureID != 0);
-            ASSERT(futureID < firstInvalidFutureID);
+            DAWN_ASSERT(futureID != 0);
+            DAWN_ASSERT(futureID < firstInvalidFutureID);
             // TakeWaitRef below will catch if the future is waited twice at the
             // same time (unless it's already completed).
 
@@ -219,7 +219,7 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
         return wgpu::WaitStatus::Success;
     }
     // Otherwise, we should have successfully looked up all of them.
-    ASSERT(futures.size() == count);
+    DAWN_ASSERT(futures.size() == count);
 
     wgpu::WaitStatus waitStatus = WaitImpl(futures, timeout);
     if (waitStatus != wgpu::WaitStatus::Success) {
@@ -242,7 +242,7 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
             // Set completed before calling the callback.
             infos[future.indexInInfos].completed = true;
             // TODO(crbug.com/dawn/2066): Guarantee the event ordering from the JS spec.
-            ASSERT(future.event->mCallbackMode & WGPUCallbackMode_Future);
+            DAWN_ASSERT(future.event->mCallbackMode & WGPUCallbackMode_Future);
             future.event->EnsureComplete(EventCompletionType::Ready);
         }
     }
@@ -258,7 +258,7 @@ EventManager::TrackedEvent::TrackedEvent(DeviceBase* device,
     : mDevice(device), mCallbackMode(callbackMode), mReceiver(std::move(receiver)) {}
 
 EventManager::TrackedEvent::~TrackedEvent() {
-    ASSERT(mCompleted);
+    DAWN_ASSERT(mCompleted);
 }
 
 const SystemEventReceiver& EventManager::TrackedEvent::GetReceiver() const {
@@ -280,8 +280,8 @@ void EventManager::TrackedEvent::CompleteIfSpontaneous() {
     if (mCallbackMode & WGPUCallbackMode_Spontaneous) {
         bool alreadyComplete = mCompleted.exchange(true);
         // If it was already complete, but there was an error, we have no place
-        // to report it, so ASSERT. This shouldn't happen.
-        ASSERT(!alreadyComplete);
+        // to report it, so DAWN_ASSERT. This shouldn't happen.
+        DAWN_ASSERT(!alreadyComplete);
         Complete(EventCompletionType::Ready);
     }
 }
@@ -291,7 +291,7 @@ void EventManager::TrackedEvent::CompleteIfSpontaneous() {
 EventManager::TrackedEvent::WaitRef::WaitRef(TrackedEvent* event) : mRef(event) {
 #if DAWN_ENABLE_ASSERTS
     bool wasAlreadyWaited = mRef->mCurrentlyBeingWaited.exchange(true);
-    ASSERT(!wasAlreadyWaited);
+    DAWN_ASSERT(!wasAlreadyWaited);
 #endif
 }
 
@@ -299,7 +299,7 @@ EventManager::TrackedEvent::WaitRef::~WaitRef() {
 #if DAWN_ENABLE_ASSERTS
     if (mRef.Get() != nullptr) {
         bool wasAlreadyWaited = mRef->mCurrentlyBeingWaited.exchange(false);
-        ASSERT(wasAlreadyWaited);
+        DAWN_ASSERT(wasAlreadyWaited);
     }
 #endif
 }

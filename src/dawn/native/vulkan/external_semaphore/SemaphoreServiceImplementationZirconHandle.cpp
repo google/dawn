@@ -135,7 +135,7 @@ class ServiceImplementationZirconHandle : public ServiceImplementation {
                                     mDevice->GetVkDevice(), &semaphoreGetHandleInfo, &handle),
                                 "VkSemaphoreGetZirconHandleInfoFUCHSIA"));
 
-        ASSERT(handle != ZX_HANDLE_INVALID);
+        DAWN_ASSERT(handle != ZX_HANDLE_INVALID);
         return handle;
     }
 
@@ -143,13 +143,13 @@ class ServiceImplementationZirconHandle : public ServiceImplementation {
     ExternalSemaphoreHandle DuplicateHandle(ExternalSemaphoreHandle handle) override {
         zx_handle_t out_handle = ZX_HANDLE_INVALID;
         zx_status_t status = zx_handle_duplicate(handle, ZX_RIGHT_SAME_RIGHTS, &out_handle);
-        ASSERT(status == ZX_OK);
+        DAWN_ASSERT(status == ZX_OK);
         return out_handle;
     }
 
     void ServiceImplementationZirconHandle::CloseHandle(ExternalSemaphoreHandle handle) override {
         zx_status_t status = zx_handle_close(handle);
-        ASSERT(status == ZX_OK);
+        DAWN_ASSERT(status == ZX_OK);
     }
 
   private:

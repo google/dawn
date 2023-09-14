@@ -89,7 +89,7 @@ class D3D12DescriptorHeapTests : public DawnTest {
     }
 
     std::array<float, 4> GetSolidColor(uint32_t n) const {
-        ASSERT(n >> 24 == 0);
+        DAWN_ASSERT(n >> 24 == 0);
         float b = (n & 0xFF) / 255.0f;
         float g = ((n >> 8) & 0xFF) / 255.0f;
         float r = ((n >> 16) & 0xFF) / 255.0f;

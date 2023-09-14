@@ -155,7 +155,7 @@ class EventManager::TrackedEvent : public RefCounted {
 // A Ref<TrackedEvent>, but ASSERTing that a future isn't used concurrently in multiple
 // WaitAny/ProcessEvents call (by checking that there's never more than one WaitRef for a
 // TrackedEvent). For WaitAny, this checks the embedder's behavior, but for ProcessEvents this is
-// only an internal ASSERT (it's supposed to be synchronized so that this never happens).
+// only an internal DAWN_ASSERT (it's supposed to be synchronized so that this never happens).
 class EventManager::TrackedEvent::WaitRef : dawn::NonCopyable {
   public:
     WaitRef(WaitRef&& rhs) = default;

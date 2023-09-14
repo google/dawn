@@ -79,12 +79,12 @@ void SyncScopeUsageTracker::AddRenderBundleTextureUsage(
                               texture->GetNumMipLevels(), wgpu::TextureUsage::None));
     TextureSubresourceUsage* passTextureUsage = &it.first->second;
 
-    passTextureUsage->Merge(textureUsage,
-                            [](const SubresourceRange&, wgpu::TextureUsage* storedUsage,
-                               const wgpu::TextureUsage& addedUsage) {
-                                ASSERT((addedUsage & wgpu::TextureUsage::RenderAttachment) == 0);
-                                *storedUsage |= addedUsage;
-                            });
+    passTextureUsage->Merge(
+        textureUsage, [](const SubresourceRange&, wgpu::TextureUsage* storedUsage,
+                         const wgpu::TextureUsage& addedUsage) {
+            DAWN_ASSERT((addedUsage & wgpu::TextureUsage::RenderAttachment) == 0);
+            *storedUsage |= addedUsage;
+        });
 }
 
 void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {

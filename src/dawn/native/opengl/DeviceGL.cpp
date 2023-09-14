@@ -176,11 +176,11 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
 }
 
 const GLFormat& Device::GetGLFormat(const Format& format) {
-    ASSERT(format.IsSupported());
-    ASSERT(format.GetIndex() < mFormatTable.size());
+    DAWN_ASSERT(format.IsSupported());
+    DAWN_ASSERT(format.GetIndex() < mFormatTable.size());
 
     const GLFormat& result = mFormatTable[format.GetIndex()];
-    ASSERT(result.isSupportedOnBackend);
+    DAWN_ASSERT(result.isSupportedOnBackend);
     return result;
 }
 
@@ -393,7 +393,7 @@ ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
 
         mFencesInFlight.pop();
 
-        ASSERT(fenceSerial > GetQueue()->GetCompletedCommandSerial());
+        DAWN_ASSERT(fenceSerial > GetQueue()->GetCompletedCommandSerial());
     }
     return fenceSerial;
 }
@@ -414,14 +414,14 @@ MaybeError Device::CopyFromStagingToTextureImpl(const BufferBase* source,
 }
 
 void Device::DestroyImpl() {
-    ASSERT(GetState() == State::Disconnected);
+    DAWN_ASSERT(GetState() == State::Disconnected);
 }
 
 MaybeError Device::WaitForIdleForDestruction() {
     const OpenGLFunctions& gl = GetGL();
     gl.Finish();
     DAWN_TRY(GetQueue()->CheckPassedSerials());
-    ASSERT(mFencesInFlight.empty());
+    DAWN_ASSERT(mFencesInFlight.empty());
 
     return {};
 }

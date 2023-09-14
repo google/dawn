@@ -43,7 +43,7 @@ bool MockMemoryTransferService::MockReadHandle::DeserializeDataUpdate(
     size_t deserializeSize,
     size_t offset,
     size_t size) {
-    ASSERT(deserializeSize % sizeof(uint32_t) == 0);
+    DAWN_ASSERT(deserializeSize % sizeof(uint32_t) == 0);
     return mService->OnReadHandleDeserializeDataUpdate(
         this, reinterpret_cast<const uint32_t*>(deserializePointer), deserializeSize, offset, size);
 }

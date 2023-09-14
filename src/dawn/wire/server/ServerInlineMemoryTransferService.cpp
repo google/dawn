@@ -35,8 +35,8 @@ class InlineMemoryTransferService : public MemoryTransferService {
                                  size_t size,
                                  void* serializePointer) override {
             if (size > 0) {
-                ASSERT(data != nullptr);
-                ASSERT(serializePointer != nullptr);
+                DAWN_ASSERT(data != nullptr);
+                DAWN_ASSERT(serializePointer != nullptr);
                 memcpy(serializePointer, data, size);
             }
         }
@@ -69,7 +69,7 @@ class InlineMemoryTransferService : public MemoryTransferService {
     bool DeserializeReadHandle(const void* deserializePointer,
                                size_t deserializeSize,
                                ReadHandle** readHandle) override {
-        ASSERT(readHandle != nullptr);
+        DAWN_ASSERT(readHandle != nullptr);
         *readHandle = new ReadHandleImpl();
         return true;
     }
@@ -77,7 +77,7 @@ class InlineMemoryTransferService : public MemoryTransferService {
     bool DeserializeWriteHandle(const void* deserializePointer,
                                 size_t deserializeSize,
                                 WriteHandle** writeHandle) override {
-        ASSERT(writeHandle != nullptr);
+        DAWN_ASSERT(writeHandle != nullptr);
         *writeHandle = new WriteHandleImpl();
         return true;
     }

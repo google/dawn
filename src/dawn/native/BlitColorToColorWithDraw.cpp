@@ -119,7 +119,7 @@ ResultOrError<Ref<RenderPipelineBase>> GetOrCreateColorBlitPipeline(
     }
 
     // Multisample state.
-    ASSERT(sampleCount > 1);
+    DAWN_ASSERT(sampleCount > 1);
     renderPipelineDesc.multisample.count = sampleCount;
     DawnMultisampleStateRenderToSingleSampled msaaRenderToSingleSampledDesc = {};
     msaaRenderToSingleSampledDesc.enabled = true;
@@ -153,27 +153,27 @@ MaybeError BlitMSAARenderToSingleSampledColorWithDraw(
     RenderPassEncoder* renderEncoder,
     const RenderPassDescriptor* renderPassDescriptor,
     uint32_t renderPassImplicitSampleCount) {
-    ASSERT(device->IsLockedByCurrentThreadIfNeeded());
-    ASSERT(device->IsResolveTextureBlitWithDrawSupported());
+    DAWN_ASSERT(device->IsLockedByCurrentThreadIfNeeded());
+    DAWN_ASSERT(device->IsResolveTextureBlitWithDrawSupported());
 
     // TODO(dawn:1710): support multiple attachments.
-    ASSERT(renderPassDescriptor->colorAttachmentCount == 1);
+    DAWN_ASSERT(renderPassDescriptor->colorAttachmentCount == 1);
 
     // The original color attachment of the render pass will be used as source.
     TextureViewBase* src = renderPassDescriptor->colorAttachments[0].view;
     TextureBase* srcTexture = src->GetTexture();
 
-    // ASSERT that the src texture is not multisampled nor having more than 1 layer.
-    ASSERT(srcTexture->GetSampleCount() == 1u);
-    ASSERT(src->GetLayerCount() == 1u);
-    ASSERT(src->GetDimension() == wgpu::TextureViewDimension::e2D);
+    // DAWN_ASSERT that the src texture is not multisampled nor having more than 1 layer.
+    DAWN_ASSERT(srcTexture->GetSampleCount() == 1u);
+    DAWN_ASSERT(src->GetLayerCount() == 1u);
+    DAWN_ASSERT(src->GetDimension() == wgpu::TextureViewDimension::e2D);
 
     wgpu::TextureFormat depthStencilFormat = wgpu::TextureFormat::Undefined;
     if (renderPassDescriptor->depthStencilAttachment != nullptr) {
         depthStencilFormat = renderPassDescriptor->depthStencilAttachment->view->GetFormat().format;
     }
 
-    ASSERT(renderPassImplicitSampleCount > 1);
+    DAWN_ASSERT(renderPassImplicitSampleCount > 1);
 
     Ref<RenderPipelineBase> pipeline;
     DAWN_TRY_ASSIGN(pipeline,

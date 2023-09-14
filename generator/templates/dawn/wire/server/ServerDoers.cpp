@@ -56,7 +56,7 @@ namespace dawn::wire::server {
                     {% if ret|length == 1 %}
                         //* WebGPU error handling guarantees that no null object can be returned by
                         //* object creation functions.
-                        ASSERT(*{{as_varName(ret[0].name)}} != nullptr);
+                        DAWN_ASSERT(*{{as_varName(ret[0].name)}} != nullptr);
                     {% endif %}
                     return WireResult::Success;
                 }
@@ -72,7 +72,7 @@ namespace dawn::wire::server {
                     WIRE_TRY({{type.name.CamelCase()}}Objects().Get(objectId, &obj));
 
                     if (obj->state == AllocationState::Allocated) {
-                        ASSERT(obj->handle != nullptr);
+                        DAWN_ASSERT(obj->handle != nullptr);
                         {% if type.name.CamelCase() in server_reverse_lookup_objects %}
                             {{type.name.CamelCase()}}ObjectIdTable().Remove(data->handle);
                         {% endif %}

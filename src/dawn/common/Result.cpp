@@ -21,7 +21,7 @@ namespace detail {
 
 intptr_t MakePayload(const void* pointer, PayloadType type) {
     intptr_t payload = reinterpret_cast<intptr_t>(pointer);
-    ASSERT((payload & 3) == 0);
+    DAWN_ASSERT((payload & 3) == 0);
     return payload | type;
 }
 

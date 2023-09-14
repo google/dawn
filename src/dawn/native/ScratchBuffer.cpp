@@ -39,7 +39,7 @@ MaybeError ScratchBuffer::EnsureCapacity(uint64_t capacity) {
 }
 
 BufferBase* ScratchBuffer::GetBuffer() const {
-    ASSERT(mBuffer.Get() != nullptr);
+    DAWN_ASSERT(mBuffer.Get() != nullptr);
     return mBuffer.Get();
 }
 

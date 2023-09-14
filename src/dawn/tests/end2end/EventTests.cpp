@@ -42,7 +42,7 @@ std::pair<wgpu::Instance, wgpu::Device> CreateExtraInstance(wgpu::InstanceDescri
             *reinterpret_cast<wgpu::Adapter*>(userdata) = wgpu::Adapter(adapter);
         },
         &adapter2);
-    ASSERT(adapter2);
+    DAWN_ASSERT(adapter2);
 
     wgpu::Device device2;
     requestDevice(
@@ -52,7 +52,7 @@ std::pair<wgpu::Instance, wgpu::Device> CreateExtraInstance(wgpu::InstanceDescri
             *reinterpret_cast<wgpu::Device*>(userdata) = wgpu::Device(device);
         },
         &device2);
-    ASSERT(device2);
+    DAWN_ASSERT(device2);
 
     return std::pair(std::move(instance2), std::move(device2));
 }
@@ -235,7 +235,7 @@ class EventCompletionTests : public DawnTestWithParams<EventCompletionTestParams
                 // Loop at least once so we can test it with 0 futures.
                 do {
                     ASSERT_FALSE(testTimeExceeded());
-                    ASSERT(!UsesWire());
+                    DAWN_ASSERT(!UsesWire());
                     wgpu::WaitStatus status;
 
                     uint64_t oldCompletionCount = mCallbacksCompletedCount;

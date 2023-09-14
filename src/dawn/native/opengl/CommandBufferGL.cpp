@@ -320,7 +320,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
                         if (ToBackend(view->GetTexture())->GetGLFormat().format ==
                             GL_DEPTH_STENCIL) {
                             Aspect aspect = view->GetAspects();
-                            ASSERT(HasOneBit(aspect));
+                            DAWN_ASSERT(HasOneBit(aspect));
                             switch (aspect) {
                                 case Aspect::None:
                                 case Aspect::Color:
@@ -470,7 +470,7 @@ class BindGroupTracker : public BindGroupTrackerBase<false, uint64_t> {
 
 void ResolveMultisampledRenderTargets(const OpenGLFunctions& gl,
                                       const BeginRenderPassCmd* renderPass) {
-    ASSERT(renderPass != nullptr);
+    DAWN_ASSERT(renderPass != nullptr);
 
     GLuint readFbo = 0;
     GLuint writeFbo = 0;
@@ -479,7 +479,7 @@ void ResolveMultisampledRenderTargets(const OpenGLFunctions& gl,
          IterateBitSet(renderPass->attachmentState->GetColorAttachmentsMask())) {
         if (renderPass->colorAttachments[i].resolveTarget != nullptr) {
             if (readFbo == 0) {
-                ASSERT(writeFbo == 0);
+                DAWN_ASSERT(writeFbo == 0);
                 gl.GenFramebuffers(1, &readFbo);
                 gl.GenFramebuffers(1, &writeFbo);
             }
@@ -512,14 +512,14 @@ Extent3D ComputeTextureCopyExtent(const TextureCopy& textureCopy, const Extent3D
     const TextureBase* texture = textureCopy.texture.Get();
     Extent3D virtualSizeAtLevel =
         texture->GetMipLevelSingleSubresourceVirtualSize(textureCopy.mipLevel);
-    ASSERT(textureCopy.origin.x <= virtualSizeAtLevel.width);
-    ASSERT(textureCopy.origin.y <= virtualSizeAtLevel.height);
+    DAWN_ASSERT(textureCopy.origin.x <= virtualSizeAtLevel.width);
+    DAWN_ASSERT(textureCopy.origin.y <= virtualSizeAtLevel.height);
     if (copySize.width > virtualSizeAtLevel.width - textureCopy.origin.x) {
-        ASSERT(texture->GetFormat().isCompressed);
+        DAWN_ASSERT(texture->GetFormat().isCompressed);
         validTextureCopyExtent.width = virtualSizeAtLevel.width - textureCopy.origin.x;
     }
     if (copySize.height > virtualSizeAtLevel.height - textureCopy.origin.y) {
-        ASSERT(texture->GetFormat().isCompressed);
+        DAWN_ASSERT(texture->GetFormat().isCompressed);
         validTextureCopyExtent.height = virtualSizeAtLevel.height - textureCopy.origin.y;
     }
 
@@ -989,7 +989,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
         }
     }
 
-    ASSERT(gl.CheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+    DAWN_ASSERT(gl.CheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
     // Set defaults for dynamic state before executing clears and commands.
     PersistentPipelineState persistentPipelineState;
@@ -1162,7 +1162,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass) {
                 bindGroupTracker.Apply(gl);
 
                 Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());
-                ASSERT(indirectBuffer != nullptr);
+                DAWN_ASSERT(indirectBuffer != nullptr);
 
                 gl.BindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectBuffer->GetHandle());
                 gl.DrawElementsIndirect(

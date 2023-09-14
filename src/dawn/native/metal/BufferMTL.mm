@@ -75,7 +75,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
     // buffer must be aligned to the largest alignment of its members.
     if (GetUsage() &
         (wgpu::BufferUsage::Uniform | wgpu::BufferUsage::Storage | kInternalStorageBuffer)) {
-        ASSERT(IsAligned(kMinUniformOrStorageBufferAlignment, alignment));
+        DAWN_ASSERT(IsAligned(kMinUniformOrStorageBufferAlignment, alignment));
         alignment = kMinUniformOrStorageBufferAlignment;
     }
 
@@ -248,7 +248,7 @@ bool Buffer::EnsureDataInitializedAsDestination(CommandRecordingContext* command
 }
 
 void Buffer::InitializeToZero(CommandRecordingContext* commandContext) {
-    ASSERT(NeedsInitialization());
+    DAWN_ASSERT(NeedsInitialization());
 
     ClearBuffer(commandContext, uint8_t(0u));
 
@@ -260,9 +260,9 @@ void Buffer::ClearBuffer(CommandRecordingContext* commandContext,
                          uint8_t clearValue,
                          uint64_t offset,
                          uint64_t size) {
-    ASSERT(commandContext != nullptr);
+    DAWN_ASSERT(commandContext != nullptr);
     size = size > 0 ? size : GetAllocatedSize();
-    ASSERT(size > 0);
+    DAWN_ASSERT(size > 0);
     TrackUsage();
     [commandContext->EnsureBlit() fillBuffer:mMtlBuffer.Get()
                                        range:NSMakeRange(offset, size)

@@ -32,7 +32,7 @@ class WindowsDebugLogger : public PlatformDebugLogger {
         }
 
         mShouldExitHandle = CreateEventA(nullptr, TRUE, FALSE, nullptr);
-        ASSERT(mShouldExitHandle != nullptr);
+        DAWN_ASSERT(mShouldExitHandle != nullptr);
 
         mThread = std::thread(
             [](HANDLE shouldExit) {
@@ -45,18 +45,18 @@ class WindowsDebugLogger : public PlatformDebugLogger {
 
                 HANDLE file = CreateFileMappingA(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0,
                                                  sizeof(*dbWinBuffer), "DBWIN_BUFFER");
-                ASSERT(file != nullptr);
-                ASSERT(file != INVALID_HANDLE_VALUE);
+                DAWN_ASSERT(file != nullptr);
+                DAWN_ASSERT(file != INVALID_HANDLE_VALUE);
 
                 dbWinBuffer = static_cast<decltype(dbWinBuffer)>(
                     MapViewOfFile(file, SECTION_MAP_READ, 0, 0, 0));
-                ASSERT(dbWinBuffer != nullptr);
+                DAWN_ASSERT(dbWinBuffer != nullptr);
 
                 HANDLE dbWinBufferReady = CreateEventA(nullptr, FALSE, FALSE, "DBWIN_BUFFER_READY");
-                ASSERT(dbWinBufferReady != nullptr);
+                DAWN_ASSERT(dbWinBufferReady != nullptr);
 
                 HANDLE dbWinDataReady = CreateEventA(nullptr, FALSE, FALSE, "DBWIN_DATA_READY");
-                ASSERT(dbWinDataReady != nullptr);
+                DAWN_ASSERT(dbWinDataReady != nullptr);
 
                 std::array<HANDLE, 2> waitHandles = {shouldExit, dbWinDataReady};
                 while (true) {
@@ -66,7 +66,7 @@ class WindowsDebugLogger : public PlatformDebugLogger {
                     if (wait == WAIT_OBJECT_0) {
                         break;
                     }
-                    ASSERT(wait == WAIT_OBJECT_0 + 1);
+                    DAWN_ASSERT(wait == WAIT_OBJECT_0 + 1);
                     fprintf(stderr, "%.*s\n", static_cast<int>(sizeof(dbWinBuffer->data)),
                             dbWinBuffer->data);
                     fflush(stderr);
@@ -89,7 +89,7 @@ class WindowsDebugLogger : public PlatformDebugLogger {
 
         if (mShouldExitHandle != nullptr) {
             BOOL result = SetEvent(mShouldExitHandle);
-            ASSERT(result != 0);
+            DAWN_ASSERT(result != 0);
             CloseHandle(mShouldExitHandle);
         }
 

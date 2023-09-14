@@ -107,8 +107,8 @@ class CommandIterator : public NonCopyable {
 
     DAWN_FORCE_INLINE bool NextCommandId(uint32_t* commandId) {
         uint8_t* idPtr = AlignPtr(mCurrentPtr, alignof(uint32_t));
-        ASSERT(idPtr + sizeof(uint32_t) <=
-               mBlocks[mCurrentBlock].block + mBlocks[mCurrentBlock].size);
+        DAWN_ASSERT(idPtr + sizeof(uint32_t) <=
+                    mBlocks[mCurrentBlock].block + mBlocks[mCurrentBlock].size);
 
         uint32_t id = *reinterpret_cast<uint32_t*>(idPtr);
 
@@ -124,8 +124,8 @@ class CommandIterator : public NonCopyable {
 
     DAWN_FORCE_INLINE void* NextCommand(size_t commandSize, size_t commandAlignment) {
         uint8_t* commandPtr = AlignPtr(mCurrentPtr, commandAlignment);
-        ASSERT(commandPtr + sizeof(commandSize) <=
-               mBlocks[mCurrentBlock].block + mBlocks[mCurrentBlock].size);
+        DAWN_ASSERT(commandPtr + sizeof(commandSize) <=
+                    mBlocks[mCurrentBlock].block + mBlocks[mCurrentBlock].size);
 
         mCurrentPtr = commandPtr + commandSize;
         return commandPtr;
@@ -134,8 +134,8 @@ class CommandIterator : public NonCopyable {
     DAWN_FORCE_INLINE void* NextData(size_t dataSize, size_t dataAlignment) {
         uint32_t id;
         bool hasId = NextCommandId(&id);
-        ASSERT(hasId);
-        ASSERT(id == detail::kAdditionalData);
+        DAWN_ASSERT(hasId);
+        DAWN_ASSERT(id == detail::kAdditionalData);
 
         return NextCommand(dataSize, dataAlignment);
     }
@@ -207,14 +207,14 @@ class CommandAllocator : public NonCopyable {
     DAWN_FORCE_INLINE uint8_t* Allocate(uint32_t commandId,
                                         size_t commandSize,
                                         size_t commandAlignment) {
-        ASSERT(mCurrentPtr != nullptr);
-        ASSERT(mEndPtr != nullptr);
-        ASSERT(commandId != detail::kEndOfBlock);
+        DAWN_ASSERT(mCurrentPtr != nullptr);
+        DAWN_ASSERT(mEndPtr != nullptr);
+        DAWN_ASSERT(commandId != detail::kEndOfBlock);
 
         // It should always be possible to allocate one id, for kEndOfBlock tagging,
-        ASSERT(IsPtrAligned(mCurrentPtr, alignof(uint32_t)));
-        ASSERT(mEndPtr >= mCurrentPtr);
-        ASSERT(static_cast<size_t>(mEndPtr - mCurrentPtr) >= sizeof(uint32_t));
+        DAWN_ASSERT(IsPtrAligned(mCurrentPtr, alignof(uint32_t)));
+        DAWN_ASSERT(mEndPtr >= mCurrentPtr);
+        DAWN_ASSERT(static_cast<size_t>(mEndPtr - mCurrentPtr) >= sizeof(uint32_t));
 
         // The memory after the ID will contain the following:
         //   - the current ID

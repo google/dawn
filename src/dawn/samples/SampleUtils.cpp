@@ -412,7 +412,7 @@ void DoFlush() {
         bool c2sSuccess = c2sBuf->Flush();
         bool s2cSuccess = s2cBuf->Flush();
 
-        ASSERT(c2sSuccess && s2cSuccess);
+        DAWN_ASSERT(c2sSuccess && s2cSuccess);
     }
     glfwPollEvents();
 }

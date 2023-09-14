@@ -122,7 +122,7 @@ VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
             break;
     }
 
-    ASSERT(HasSameTextureCopyExtent(srcCopy, dstCopy, copySize));
+    DAWN_ASSERT(HasSameTextureCopyExtent(srcCopy, dstCopy, copySize));
     Extent3D imageExtent = ComputeTextureCopyExtent(dstCopy, copySize);
     region.extent.width = imageExtent.width;
     region.extent.height = imageExtent.height;
@@ -346,7 +346,7 @@ void ResetUsedQuerySetsOnRenderPass(Device* device,
                                     VkCommandBuffer commands,
                                     QuerySetBase* querySet,
                                     const std::vector<bool>& availability) {
-    ASSERT(availability.size() == querySet->GetQueryAvailability().size());
+    DAWN_ASSERT(availability.size() == querySet->GetQueryAvailability().size());
 
     auto currentIt = availability.begin();
     auto lastIt = availability.end();
@@ -447,13 +447,13 @@ MaybeError CommandBuffer::RecordCopyImageWithTemporaryBuffer(
     const TextureCopy& srcCopy,
     const TextureCopy& dstCopy,
     const Extent3D& copySize) {
-    ASSERT(srcCopy.texture->GetFormat().CopyCompatibleWith(dstCopy.texture->GetFormat()));
-    ASSERT(srcCopy.aspect == dstCopy.aspect);
+    DAWN_ASSERT(srcCopy.texture->GetFormat().CopyCompatibleWith(dstCopy.texture->GetFormat()));
+    DAWN_ASSERT(srcCopy.aspect == dstCopy.aspect);
     dawn::native::Format format = srcCopy.texture->GetFormat();
     const TexelBlockInfo& blockInfo = format.GetAspectInfo(srcCopy.aspect).block;
-    ASSERT(copySize.width % blockInfo.width == 0);
+    DAWN_ASSERT(copySize.width % blockInfo.width == 0);
     uint32_t widthInBlocks = copySize.width / blockInfo.width;
-    ASSERT(copySize.height % blockInfo.height == 0);
+    DAWN_ASSERT(copySize.height % blockInfo.height == 0);
     uint32_t heightInBlocks = copySize.height / blockInfo.height;
 
     // Create the temporary buffer. Note that We don't need to respect WebGPU's 256 alignment
@@ -660,9 +660,9 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                     // When there are overlapped subresources, the layout of the overlapped
                     // subresources should all be GENERAL instead of what we set now. Currently
                     // it is not allowed to copy with overlapped subresources, but we still
-                    // add the ASSERT here as a reminder for this possible misuse.
-                    ASSERT(!IsRangeOverlapped(src.origin.z, dst.origin.z,
-                                              copy->copySize.depthOrArrayLayers));
+                    // add the DAWN_ASSERT here as a reminder for this possible misuse.
+                    DAWN_ASSERT(!IsRangeOverlapped(src.origin.z, dst.origin.z,
+                                                   copy->copySize.depthOrArrayLayers));
                 }
 
                 ToBackend(src.texture)
@@ -874,7 +874,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                 DAWN_TRY_ASSIGN(uploadHandle, device->GetDynamicUploader()->Allocate(
                                                   size, device->GetPendingCommandSerial(),
                                                   kCopyBufferToBufferOffsetAlignment));
-                ASSERT(uploadHandle.mappedBuffer != nullptr);
+                DAWN_ASSERT(uploadHandle.mappedBuffer != nullptr);
                 memcpy(uploadHandle.mappedBuffer, data, size);
 
                 dstBuffer->EnsureDataInitializedAsDestination(recordingContext, offset, size);
@@ -1149,7 +1149,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
             case Command::DrawIndexedIndirect: {
                 DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
                 Buffer* buffer = ToBackend(draw->indirectBuffer.Get());
-                ASSERT(buffer != nullptr);
+                DAWN_ASSERT(buffer != nullptr);
 
                 descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_GRAPHICS);
                 device->fn.CmdDrawIndexedIndirect(commands, buffer->GetHandle(),

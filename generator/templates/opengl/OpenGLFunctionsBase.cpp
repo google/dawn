@@ -95,7 +95,7 @@ void OpenGLFunctionsBase::InitializeSupportedGLExtensions() {
 }
 
 bool OpenGLFunctionsBase::IsGLExtensionSupported(const char* extension) const {
-    ASSERT(extension != nullptr);
+    DAWN_ASSERT(extension != nullptr);
     return mSupportedGLExtensionsSet.count(extension) != 0;
 }
 

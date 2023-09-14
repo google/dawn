@@ -50,7 +50,7 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     if (status != WGPURequestDeviceStatus_Success) {
         // Free the ObjectId which will make it unusable.
         DeviceObjects().Free(data->deviceObjectId);
-        ASSERT(device == nullptr);
+        DAWN_ASSERT(device == nullptr);
         SerializeCommand(cmd);
         return;
     }
@@ -88,7 +88,7 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
 
     // Assign the handle and allocated status if the device is created successfully.
     Known<WGPUDevice> reservation = DeviceObjects().FillReservation(data->deviceObjectId, device);
-    ASSERT(reservation.data != nullptr);
+    DAWN_ASSERT(reservation.data != nullptr);
     reservation->info->server = this;
     reservation->info->self = reservation.AsHandle();
     SetForwardingDeviceCallbacks(reservation);

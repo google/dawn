@@ -72,7 +72,7 @@ class VertexBufferTracker {
     }
 
     void Apply(const RenderPipeline* renderPipeline) {
-        ASSERT(renderPipeline != nullptr);
+        DAWN_ASSERT(renderPipeline != nullptr);
 
         // If the vertex state has changed, we need to update the strides.
         if (mLastAppliedRenderPipeline != renderPipeline) {
@@ -581,7 +581,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                 DrawIndirectCmd* draw = iter->NextCommand<DrawIndirectCmd>();
 
                 Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());
-                ASSERT(indirectBuffer != nullptr);
+                DAWN_ASSERT(indirectBuffer != nullptr);
 
                 DAWN_TRY(bindGroupTracker.Apply());
                 vertexBufferTracker.Apply(lastPipeline);
@@ -607,7 +607,7 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                 DrawIndexedIndirectCmd* draw = iter->NextCommand<DrawIndexedIndirectCmd>();
 
                 Buffer* indirectBuffer = ToBackend(draw->indirectBuffer.Get());
-                ASSERT(indirectBuffer != nullptr);
+                DAWN_ASSERT(indirectBuffer != nullptr);
 
                 DAWN_TRY(bindGroupTracker.Apply());
                 vertexBufferTracker.Apply(lastPipeline);
@@ -707,8 +707,8 @@ MaybeError CommandBuffer::ExecuteRenderPass(BeginRenderPassCmd* renderPass,
                         continue;
                     }
 
-                    ASSERT(attachment.view->GetAspects() == Aspect::Color);
-                    ASSERT(attachment.resolveTarget->GetAspects() == Aspect::Color);
+                    DAWN_ASSERT(attachment.view->GetAspects() == Aspect::Color);
+                    DAWN_ASSERT(attachment.resolveTarget->GetAspects() == Aspect::Color);
 
                     Texture* resolveTexture = ToBackend(attachment.resolveTarget->GetTexture());
                     Texture* colorTexture = ToBackend(attachment.view->GetTexture());

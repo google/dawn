@@ -26,7 +26,7 @@ namespace dawn::native {
 AttachmentState::AttachmentState(DeviceBase* device,
                                  const RenderBundleEncoderDescriptor* descriptor)
     : ObjectBase(device), mSampleCount(descriptor->sampleCount) {
-    ASSERT(descriptor->colorFormatCount <= kMaxColorAttachments);
+    DAWN_ASSERT(descriptor->colorFormatCount <= kMaxColorAttachments);
     for (ColorAttachmentIndex i(uint8_t(0));
          i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorFormatCount)); ++i) {
         wgpu::TextureFormat format = descriptor->colorFormats[static_cast<uint8_t>(i)];
@@ -54,7 +54,7 @@ AttachmentState::AttachmentState(DeviceBase* device,
     }
 
     if (descriptor->fragment != nullptr) {
-        ASSERT(descriptor->fragment->targetCount <= kMaxColorAttachments);
+        DAWN_ASSERT(descriptor->fragment->targetCount <= kMaxColorAttachments);
         for (ColorAttachmentIndex i(uint8_t(0));
              i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->fragment->targetCount));
              ++i) {
@@ -104,7 +104,7 @@ AttachmentState::AttachmentState(DeviceBase* device, const RenderPassDescriptor*
         if (mSampleCount == 0) {
             mSampleCount = attachmentSampleCount;
         } else {
-            ASSERT(mSampleCount == attachmentSampleCount);
+            DAWN_ASSERT(mSampleCount == attachmentSampleCount);
         }
     }
     if (descriptor->depthStencilAttachment != nullptr) {
@@ -113,10 +113,10 @@ AttachmentState::AttachmentState(DeviceBase* device, const RenderPassDescriptor*
         if (mSampleCount == 0) {
             mSampleCount = attachment->GetTexture()->GetSampleCount();
         } else {
-            ASSERT(mSampleCount == attachment->GetTexture()->GetSampleCount());
+            DAWN_ASSERT(mSampleCount == attachment->GetTexture()->GetSampleCount());
         }
     }
-    ASSERT(mSampleCount > 0);
+    DAWN_ASSERT(mSampleCount > 0);
 
     // Gather the PLS information.
     const RenderPassPixelLocalStorage* pls = nullptr;
@@ -229,7 +229,7 @@ ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> AttachmentState::GetCol
 }
 
 wgpu::TextureFormat AttachmentState::GetColorAttachmentFormat(ColorAttachmentIndex index) const {
-    ASSERT(mColorAttachmentsSet[index]);
+    DAWN_ASSERT(mColorAttachmentsSet[index]);
     return mColorFormats[index];
 }
 
@@ -238,7 +238,7 @@ bool AttachmentState::HasDepthStencilAttachment() const {
 }
 
 wgpu::TextureFormat AttachmentState::GetDepthStencilFormat() const {
-    ASSERT(HasDepthStencilAttachment());
+    DAWN_ASSERT(HasDepthStencilAttachment());
     return mDepthStencilFormat;
 }
 

@@ -38,19 +38,19 @@ void ObjectStore::Insert(std::unique_ptr<ObjectBase> obj) {
     ObjectId id = obj->GetWireId();
 
     if (id >= mObjects.size()) {
-        ASSERT(id == mObjects.size());
+        DAWN_ASSERT(id == mObjects.size());
         mObjects.emplace_back(std::move(obj));
     } else {
         // The generation should never overflow. We don't recycle ObjectIds that would
         // overflow their next generation.
-        ASSERT(obj->GetWireGeneration() != 0);
-        ASSERT(mObjects[id] == nullptr);
+        DAWN_ASSERT(obj->GetWireGeneration() != 0);
+        DAWN_ASSERT(mObjects[id] == nullptr);
         mObjects[id] = std::move(obj);
     }
 }
 
 void ObjectStore::Free(ObjectBase* obj) {
-    ASSERT(obj->IsInList());
+    DAWN_ASSERT(obj->IsInList());
     // The wire reuses ID for objects to keep them in a packed array starting from 0.
     // To avoid issues with asynchronous server->client communication referring to an ID that's
     // already reused, each handle also has a generation that's increment by one on each reuse.

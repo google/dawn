@@ -49,8 +49,8 @@ void SwapChain::ReuseBuffers(SwapChainBase* previousSwapChain) {
 }
 
 MaybeError SwapChain::CollectSwapChainBuffers() {
-    ASSERT(GetDXGISwapChain() != nullptr);
-    ASSERT(!mBuffer);
+    DAWN_ASSERT(GetDXGISwapChain() != nullptr);
+    DAWN_ASSERT(!mBuffer);
 
     // https://learn.microsoft.com/en-us/windows/win32/api/dxgi/ne-dxgi-dxgi_swap_effect
     // DXGISwapChain is created with DXGI_SWAP_EFFECT_FLIP_DISCARD, we can read and write to the

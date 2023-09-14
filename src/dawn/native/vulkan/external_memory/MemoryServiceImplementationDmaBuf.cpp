@@ -199,7 +199,7 @@ class ServiceImplementationDmaBuf : public ServiceImplementation {
         VkImageFormatListCreateInfo imageFormatListInfo = {};
 
         if (planeCount > 1) {
-            ASSERT(format == VK_FORMAT_G8_B8R8_2PLANE_420_UNORM);
+            DAWN_ASSERT(format == VK_FORMAT_G8_B8R8_2PLANE_420_UNORM);
             viewFormats = {VK_FORMAT_R8_UNORM, VK_FORMAT_R8G8_UNORM};
             imageFormatListInfo.viewFormatCount = 2;
             imageFormatListInfo.pViewFormats = viewFormats.data();

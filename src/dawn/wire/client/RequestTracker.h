@@ -30,7 +30,7 @@ class MemoryTransferService;
 template <typename Request>
 class RequestTracker : NonCopyable {
   public:
-    ~RequestTracker() { ASSERT(mRequests.empty()); }
+    ~RequestTracker() { DAWN_ASSERT(mRequests.empty()); }
 
     uint64_t Add(Request&& request) {
         mSerial++;
