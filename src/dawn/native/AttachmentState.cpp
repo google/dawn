@@ -107,6 +107,8 @@ AttachmentState::AttachmentState(DeviceBase* device, const RenderPassDescriptor*
             DAWN_ASSERT(mSampleCount == attachmentSampleCount);
         }
     }
+
+    // Gather the depth-stencil information.
     if (descriptor->depthStencilAttachment != nullptr) {
         TextureViewBase* attachment = descriptor->depthStencilAttachment->view;
         mDepthStencilFormat = attachment->GetFormat().format;
@@ -116,7 +118,6 @@ AttachmentState::AttachmentState(DeviceBase* device, const RenderPassDescriptor*
             DAWN_ASSERT(mSampleCount == attachment->GetTexture()->GetSampleCount());
         }
     }
-    DAWN_ASSERT(mSampleCount > 0);
 
     // Gather the PLS information.
     const RenderPassPixelLocalStorage* pls = nullptr;
@@ -127,10 +128,18 @@ AttachmentState::AttachmentState(DeviceBase* device, const RenderPassDescriptor*
             pls->totalPixelLocalStorageSize / kPLSSlotByteSize, wgpu::TextureFormat::Undefined);
         for (size_t i = 0; i < pls->storageAttachmentCount; i++) {
             size_t slot = pls->storageAttachments[i].offset / kPLSSlotByteSize;
-            mStorageAttachmentSlots[slot] = pls->storageAttachments[i].storage->GetFormat().format;
+            const TextureViewBase* attachment = pls->storageAttachments[i].storage;
+            mStorageAttachmentSlots[slot] = attachment->GetFormat().format;
+
+            if (mSampleCount == 0) {
+                mSampleCount = attachment->GetTexture()->GetSampleCount();
+            } else {
+                DAWN_ASSERT(mSampleCount == attachment->GetTexture()->GetSampleCount());
+            }
         }
     }
 
+    DAWN_ASSERT(mSampleCount > 0);
     SetContentHash(ComputeContentHash());
 }
 

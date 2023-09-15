@@ -74,6 +74,7 @@ class PipelineLayoutBase : public ApiObjectBase,
     const BindGroupLayoutMask& GetBindGroupLayoutsMask() const;
     bool HasPixelLocalStorage() const;
     const std::vector<wgpu::TextureFormat>& GetStorageAttachmentSlots() const;
+    bool HasAnyStorageAttachments() const;
 
     // Utility functions to compute inherited bind groups.
     // Returns the inherited bind groups as a mask.

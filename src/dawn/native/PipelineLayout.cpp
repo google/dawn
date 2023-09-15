@@ -419,6 +419,15 @@ const std::vector<wgpu::TextureFormat>& PipelineLayoutBase::GetStorageAttachment
     return mStorageAttachmentSlots;
 }
 
+bool PipelineLayoutBase::HasAnyStorageAttachments() const {
+    for (auto format : mStorageAttachmentSlots) {
+        if (format != wgpu::TextureFormat::Undefined) {
+            return true;
+        }
+    }
+    return false;
+}
+
 BindGroupLayoutMask PipelineLayoutBase::InheritedGroupsMask(const PipelineLayoutBase* other) const {
     DAWN_ASSERT(!IsError());
     return {(1 << static_cast<uint32_t>(GroupsInheritUpTo(other))) - 1u};

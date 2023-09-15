@@ -1028,11 +1028,154 @@ TEST_F(PixelLocalStorageTest, Reflection_FormatMatching) {
     }
 }
 
+// Check that it is allowed to create render passes with only a storage attachment.
+TEST_F(PixelLocalStorageTest, RenderPassOnlyStorageAttachment) {
+    wgpu::TextureDescriptor tDesc;
+    tDesc.format = wgpu::TextureFormat::R32Uint;
+    tDesc.size = {1, 1};
+    tDesc.usage = wgpu::TextureUsage::StorageAttachment;
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    wgpu::RenderPassStorageAttachment rpAttachment;
+    rpAttachment.storage = tex.CreateView();
+    rpAttachment.offset = 0;
+    rpAttachment.loadOp = wgpu::LoadOp::Load;
+    rpAttachment.storeOp = wgpu::StoreOp::Store;
+
+    wgpu::RenderPassPixelLocalStorage rpPlsDesc;
+    rpPlsDesc.totalPixelLocalStorageSize = 4;
+    rpPlsDesc.storageAttachmentCount = 1;
+    rpPlsDesc.storageAttachments = &rpAttachment;
+
+    wgpu::RenderPassDescriptor rpDesc;
+    rpDesc.nextInChain = &rpPlsDesc;
+    rpDesc.colorAttachmentCount = 0;
+    rpDesc.depthStencilAttachment = nullptr;
+
+    // Success case: a render pass with just a storage attachment is valid.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rpDesc);
+        pass.End();
+        encoder.Finish();
+    }
+
+    // Error case: a render pass with PLS but no attachments is invalid.
+    {
+        rpPlsDesc.storageAttachmentCount = 0;
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rpDesc);
+        pass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
+// Check that it is allowed to create render pipelines with only a storage attachment.
+TEST_F(PixelLocalStorageTest, RenderPipelineOnlyStorageAttachment) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        enable chromium_experimental_pixel_local;
+
+        @vertex fn vs() -> @builtin(position) vec4f {
+            return vec4f(0, 0, 0, 0.5);
+        }
+
+        struct PLS {
+            value : u32,
+        };
+        var<pixel_local> pls : PLS;
+        @fragment fn fs() {
+            pls.value = pls.value + 1;
+        }
+    )");
+
+    wgpu::PipelineLayoutStorageAttachment plAttachment;
+    plAttachment.offset = 0;
+    plAttachment.format = wgpu::TextureFormat::R32Uint;
+
+    wgpu::PipelineLayoutPixelLocalStorage plPlsDesc;
+    plPlsDesc.totalPixelLocalStorageSize = 4;
+    plPlsDesc.storageAttachmentCount = 1;
+    plPlsDesc.storageAttachments = &plAttachment;
+
+    wgpu::PipelineLayoutDescriptor plDesc;
+    plDesc.nextInChain = &plPlsDesc;
+    plDesc.bindGroupLayoutCount = 0;
+    wgpu::PipelineLayout pl = device.CreatePipelineLayout(&plDesc);
+
+    utils::ComboRenderPipelineDescriptor pDesc;
+    pDesc.layout = pl;
+    pDesc.vertex.module = module;
+    pDesc.vertex.entryPoint = "vs";
+    pDesc.cFragment.module = module;
+    pDesc.cFragment.entryPoint = "fs";
+    pDesc.cFragment.targetCount = 0;
+
+    // Success case: a render pipeline with just a storage attachment is valid.
+    device.CreateRenderPipeline(&pDesc);
+
+    // Error case: a render pass with PLS but no attachments is invalid.
+    plPlsDesc.storageAttachmentCount = 0;
+    pDesc.layout = device.CreatePipelineLayout(&plDesc);
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&pDesc));
+}
+
+// Check that the size of the render pass is correctly deduced when there is only a storage
+// attachment. Use the SetViewport validation to check this.
+TEST_F(PixelLocalStorageTest, RenderPassSizeDetectionWithOnlyStorageAttachment) {
+    wgpu::TextureDescriptor tDesc;
+    tDesc.format = wgpu::TextureFormat::R32Uint;
+    tDesc.size = {7, 11};
+    tDesc.usage = wgpu::TextureUsage::StorageAttachment;
+    wgpu::Texture tex = device.CreateTexture(&tDesc);
+
+    wgpu::RenderPassStorageAttachment rpAttachment;
+    rpAttachment.storage = tex.CreateView();
+    rpAttachment.offset = 0;
+    rpAttachment.loadOp = wgpu::LoadOp::Load;
+    rpAttachment.storeOp = wgpu::StoreOp::Store;
+
+    wgpu::RenderPassPixelLocalStorage rpPlsDesc;
+    rpPlsDesc.totalPixelLocalStorageSize = 4;
+    rpPlsDesc.storageAttachmentCount = 1;
+    rpPlsDesc.storageAttachments = &rpAttachment;
+
+    wgpu::RenderPassDescriptor rpDesc;
+    rpDesc.nextInChain = &rpPlsDesc;
+    rpDesc.colorAttachmentCount = 0;
+    rpDesc.depthStencilAttachment = nullptr;
+
+    // Success case: viewport is exactly the size of the render pass.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rpDesc);
+        pass.SetViewport(0, 0, tDesc.size.width, tDesc.size.height, 0.0, 1.0);
+        pass.End();
+        encoder.Finish();
+    }
+
+    // Error case: viewport width is larger than the render pass's.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rpDesc);
+        pass.SetViewport(0, 0, tDesc.size.width + 1, tDesc.size.height, 0.0, 1.0);
+        pass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    // Error case: viewport width is larger than the render pass's.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&rpDesc);
+        pass.SetViewport(0, 0, tDesc.size.width, tDesc.size.height + 1, 0.0, 1.0);
+        pass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
 class PixelLocalStorageAndRenderToSingleSampledTest : public PixelLocalStorageTest {
   protected:
     WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
                                 wgpu::DeviceDescriptor descriptor) override {
-        // TODO(dawn:1704): Do we need to test both extensions?
         wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::PixelLocalStorageNonCoherent,
                                                  wgpu::FeatureName::MSAARenderToSingleSampled};
         descriptor.requiredFeatures = requiredFeatures;
@@ -1056,7 +1199,32 @@ TEST_F(PixelLocalStorageAndRenderToSingleSampledTest, CombinationIsNotAllowed) {
     ASSERT_DEVICE_ERROR(RecordRenderPass(&desc.rpDesc));
 }
 
+class PixelLocalStorageAndTransientAttachmentTest : public PixelLocalStorageTest {
+    WGPUDevice CreateTestDevice(native::Adapter dawnAdapter,
+                                wgpu::DeviceDescriptor descriptor) override {
+        wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::PixelLocalStorageNonCoherent,
+                                                 wgpu::FeatureName::TransientAttachments};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeatureCount = 2;
+        return dawnAdapter.CreateDevice(&descriptor);
+    }
+};
+
+// Check that a transient + storage attachment is allowed.
+TEST_F(PixelLocalStorageAndTransientAttachmentTest, TransientStorageAttachment) {
+    wgpu::TextureDescriptor desc;
+    desc.size = {1, 1};
+    desc.format = wgpu::TextureFormat::R32Uint;
+    desc.usage = wgpu::TextureUsage::StorageAttachment | wgpu::TextureUsage::TransientAttachment;
+    device.CreateTexture(&desc);
+
+    desc.usage |= wgpu::TextureUsage::RenderAttachment;
+    device.CreateTexture(&desc);
+}
+
 // TODO(dawn:1704): Add tests for limits
+// TODO(dawn:1704): Add tests for load/store op validation with transient.
+// TODO(dawn:1704): Allow multisampled storage attachments
 
 }  // anonymous namespace
 }  // namespace dawn

@@ -655,8 +655,11 @@ MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                                                descriptor->multisample.alphaToCoverageEnabled),
                          "validating fragment state.");
 
-        DAWN_INVALID_IF(descriptor->fragment->targetCount == 0 && !descriptor->depthStencil,
-                        "Must have at least one color or depthStencil target.");
+        bool hasStorageAttachments =
+            descriptor->layout != nullptr && descriptor->layout->HasAnyStorageAttachments();
+        DAWN_INVALID_IF(descriptor->fragment->targetCount == 0 && !descriptor->depthStencil &&
+                            !hasStorageAttachments,
+                        "No attachment was specified (color, depth-stencil or other).");
 
         DAWN_TRY(ValidateInterStageMatching(device, descriptor->vertex, *(descriptor->fragment)));
     }

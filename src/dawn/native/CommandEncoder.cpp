@@ -582,7 +582,7 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
         "Color attachment count (%u) exceeds the maximum number of color attachments (%u).",
         descriptor->colorAttachmentCount, maxColorAttachments);
 
-    bool isAllColorAttachmentNull = true;
+    bool anyColorAttachment = false;
     ColorAttachmentFormats colorAttachmentFormats;
     for (uint32_t i = 0; i < descriptor->colorAttachmentCount; ++i) {
         DAWN_TRY_CONTEXT(ValidateRenderPassColorAttachment(
@@ -590,7 +590,7 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
                              implicitSampleCount, usageValidationMode),
                          "validating colorAttachments[%u].", i);
         if (descriptor->colorAttachments[i].view) {
-            isAllColorAttachmentNull = false;
+            anyColorAttachment = true;
             colorAttachmentFormats->push_back(&descriptor->colorAttachments[i].view->GetFormat());
         }
     }
@@ -602,10 +602,6 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
                              device, descriptor->depthStencilAttachment, width, height, sampleCount,
                              usageValidationMode),
                          "validating depthStencilAttachment.");
-    } else {
-        DAWN_INVALID_IF(
-            isAllColorAttachmentNull,
-            "No color or depthStencil attachments specified. At least one is required.");
     }
 
     if (descriptor->occlusionQuerySet != nullptr) {
@@ -665,8 +661,7 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
                                        *implicitSampleCount, usageValidationMode));
     }
 
-    DAWN_INVALID_IF(descriptor->colorAttachmentCount == 0 &&
-                        descriptor->depthStencilAttachment == nullptr &&
+    DAWN_INVALID_IF(!anyColorAttachment && descriptor->depthStencilAttachment == nullptr &&
                         storageAttachmentCount == 0,
                     "Render pass has no attachments.");
 

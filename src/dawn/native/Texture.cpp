@@ -350,12 +350,15 @@ MaybeError ValidateTextureUsage(const DeviceBase* device,
             "The texture usage (%s) includes %s, which requires the %s feature to be set", usage,
             kTransientAttachment, ToAPI(Feature::TransientAttachments));
 
-        const auto kAllowedTransientUsage =
-            kTransientAttachment | wgpu::TextureUsage::RenderAttachment;
-        DAWN_INVALID_IF(usage != kAllowedTransientUsage,
-                        "The texture usage (%s) includes %s, which requires that the texture usage "
-                        "be exactly %s",
-                        usage, kTransientAttachment, kAllowedTransientUsage);
+        DAWN_INVALID_IF(
+            usage == kTransientAttachment,
+            "The texture usage is only %s (which always requires another attachment usage).",
+            kTransientAttachment);
+        const auto kAttachmentUsages = kTransientAttachment | wgpu::TextureUsage::RenderAttachment |
+                                       wgpu::TextureUsage::StorageAttachment;
+        DAWN_INVALID_IF(!IsSubset(usage, kAttachmentUsages),
+                        "The texture usage (%s) includes both %s and non-attachment usages (%s).",
+                        usage, kTransientAttachment, usage & ~kAttachmentUsages);
     }
 
     if (!allowedSharedTextureMemoryUsage) {
