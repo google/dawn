@@ -32,8 +32,8 @@ struct ShaderIOConfig {
     bool clamp_frag_depth = false;
 };
 
-/// ShaderIO is a transform that modifies each entry point function's parameters and return
-/// value to prepare them for SPIR-V codegen.
+/// ShaderIO is a transform that moves each entry point function's parameters and return value to
+/// global variables to prepare them for SPIR-V codegen.
 /// @param module the module to transform
 /// @param config the configuration
 /// @returns an error string on failure

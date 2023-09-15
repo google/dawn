@@ -18,14 +18,26 @@
 #include <string>
 
 #include "src/tint/api/common/binding_point.h"
-#include "src/tint/lang/core/access.h"
-#include "src/tint/lang/core/address_space.h"
+#include "src/tint/lang/core/builtin_value.h"
+#include "src/tint/lang/core/interpolation.h"
 #include "src/tint/lang/core/ir/operand_instruction.h"
-#include "src/tint/lang/core/type/pointer.h"
-#include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/rtti/castable.h"
 
 namespace tint::core::ir {
+
+/// Attributes that can be applied to a variable that will be used for shader IO.
+struct IOAttributes {
+    /// The value of a `@location` attribute.
+    std::optional<uint32_t> location;
+    /// The value of a `@index` attribute.
+    std::optional<uint32_t> index;
+    /// The value of a `@builtin` attribute.
+    std::optional<core::BuiltinValue> builtin;
+    /// The values of a `@interpolate` attribute.
+    std::optional<core::Interpolation> interpolation;
+    /// True if the variable is annotated with `@invariant`.
+    bool invariant = false;
+};
 
 /// A var instruction in the IR.
 class Var : public Castable<Var, OperandInstruction<1, 1>> {
@@ -51,6 +63,12 @@ class Var : public Castable<Var, OperandInstruction<1, 1>> {
     /// @returns the binding points if `Attributes` contains `kBindingPoint`
     std::optional<struct BindingPoint> BindingPoint() { return binding_point_; }
 
+    /// Sets the IO attributes
+    /// @param attrs the attributes
+    void SetAttributes(const IOAttributes& attrs) { attributes_ = attrs; }
+    /// @returns the IO attributes
+    const IOAttributes& Attributes() { return attributes_; }
+
     /// Destroys this instruction along with any assignment instructions, if the var is never read.
     void DestroyIfOnlyAssigned();
 
@@ -59,6 +77,7 @@ class Var : public Castable<Var, OperandInstruction<1, 1>> {
 
   private:
     std::optional<struct BindingPoint> binding_point_;
+    IOAttributes attributes_;
 };
 
 }  // namespace tint::core::ir

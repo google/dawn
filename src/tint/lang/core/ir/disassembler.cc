@@ -480,6 +480,23 @@ void Disassembler::EmitInstruction(Instruction* inst) {
                 out_ << " ";
                 EmitBindingPoint(v->BindingPoint().value());
             }
+            if (v->Attributes().invariant) {
+                out_ << " @invariant";
+            }
+            if (v->Attributes().location.has_value()) {
+                out_ << " @location(" << v->Attributes().location.value() << ")";
+            }
+            if (v->Attributes().interpolation.has_value()) {
+                auto& interp = v->Attributes().interpolation.value();
+                out_ << " @interpolate(" << interp.type;
+                if (interp.sampling != core::InterpolationSampling::kUndefined) {
+                    out_ << ", " << interp.sampling;
+                }
+                out_ << ")";
+            }
+            if (v->Attributes().builtin.has_value()) {
+                out_ << " @builtin(" << v->Attributes().builtin.value() << ")";
+            }
         },
         [&](Swizzle* s) {
             EmitValueWithType(s);

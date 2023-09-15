@@ -43,30 +43,30 @@ TEST_F(SpirvWriterTest, Discard) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST(R"(
-   %ep_inner = OpFunction %float None %18
+   %ep_inner = OpFunction %float None %16
 %front_facing = OpFunctionParameter %bool
+         %17 = OpLabel
+               OpSelectionMerge %18 None
+               OpBranchConditional %front_facing %19 %18
          %19 = OpLabel
-               OpSelectionMerge %20 None
-               OpBranchConditional %front_facing %21 %20
-         %21 = OpLabel
                OpStore %continue_execution %false
-               OpBranch %20
-         %20 = OpLabel
-         %23 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
-         %27 = OpLoad %bool %continue_execution
-               OpSelectionMerge %28 None
-               OpBranchConditional %27 %29 %28
-         %29 = OpLabel
-               OpStore %23 %int_42
-               OpBranch %28
-         %28 = OpLabel
-         %31 = OpLoad %bool %continue_execution
-         %32 = OpLogicalEqual %bool %31 %false
-               OpSelectionMerge %33 None
-               OpBranchConditional %32 %34 %33
-         %34 = OpLabel
+               OpBranch %18
+         %18 = OpLabel
+         %21 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+         %25 = OpLoad %bool %continue_execution
+               OpSelectionMerge %26 None
+               OpBranchConditional %25 %27 %26
+         %27 = OpLabel
+               OpStore %21 %int_42
+               OpBranch %26
+         %26 = OpLabel
+         %29 = OpLoad %bool %continue_execution
+         %30 = OpLogicalEqual %bool %29 %false
+               OpSelectionMerge %31 None
+               OpBranchConditional %30 %32 %31
+         %32 = OpLabel
                OpKill
-         %33 = OpLabel
+         %31 = OpLabel
                OpReturnValue %float_0_5
                OpFunctionEnd
 )");

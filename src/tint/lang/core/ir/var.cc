@@ -15,6 +15,7 @@
 #include "src/tint/lang/core/ir/var.h"
 
 #include "src/tint/lang/core/ir/store.h"
+#include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Var);

@@ -324,8 +324,7 @@ uint32_t Printer::Undef(const core::type::Type* type) {
     });
 }
 
-uint32_t Printer::Type(const core::type::Type* ty,
-                       core::AddressSpace addrspace /* = kUndefined */) {
+uint32_t Printer::Type(const core::type::Type* ty) {
     ty = DedupType(ty, ir_->Types());
     return types_.GetOrCreate(ty, [&] {
         auto id = module_.NextId();
@@ -369,11 +368,11 @@ uint32_t Printer::Type(const core::type::Type* ty,
                                   {id, U32Operand(SpvDecorationArrayStride), arr->Stride()});
             },
             [&](const core::type::Pointer* ptr) {
-                module_.PushType(spv::Op::OpTypePointer,
-                                 {id, U32Operand(StorageClass(ptr->AddressSpace())),
-                                  Type(ptr->StoreType(), ptr->AddressSpace())});
+                module_.PushType(
+                    spv::Op::OpTypePointer,
+                    {id, U32Operand(StorageClass(ptr->AddressSpace())), Type(ptr->StoreType())});
             },
-            [&](const core::type::Struct* str) { EmitStructType(id, str, addrspace); },
+            [&](const core::type::Struct* str) { EmitStructType(id, str); },
             [&](const core::type::Texture* tex) { EmitTextureType(id, tex); },
             [&](const core::type::Sampler*) { module_.PushType(spv::Op::OpTypeSampler, {id}); },
             [&](const raise::SampledImage* s) {
@@ -401,9 +400,7 @@ uint32_t Printer::Label(core::ir::Block* block) {
     return block_labels_.GetOrCreate(block, [&] { return module_.NextId(); });
 }
 
-void Printer::EmitStructType(uint32_t id,
-                             const core::type::Struct* str,
-                             core::AddressSpace addrspace /* = kUndefined */) {
+void Printer::EmitStructType(uint32_t id, const core::type::Struct* str) {
     // Helper to return `type` or a potentially nested array element type within `type` as a matrix
     // type, or nullptr if no such matrix type is present.
     auto get_nested_matrix_type = [&](const core::type::Type* type) {
@@ -421,56 +418,6 @@ void Printer::EmitStructType(uint32_t id,
         module_.PushAnnot(
             spv::Op::OpMemberDecorate,
             {operands[0], member->Index(), U32Operand(SpvDecorationOffset), member->Offset()});
-
-        // Generate shader IO decorations.
-        const auto& attrs = member->Attributes();
-        if (attrs.location) {
-            module_.PushAnnot(
-                spv::Op::OpMemberDecorate,
-                {operands[0], member->Index(), U32Operand(SpvDecorationLocation), *attrs.location});
-            if (attrs.interpolation) {
-                switch (attrs.interpolation->type) {
-                    case core::InterpolationType::kLinear:
-                        module_.PushAnnot(
-                            spv::Op::OpMemberDecorate,
-                            {operands[0], member->Index(), U32Operand(SpvDecorationNoPerspective)});
-                        break;
-                    case core::InterpolationType::kFlat:
-                        module_.PushAnnot(
-                            spv::Op::OpMemberDecorate,
-                            {operands[0], member->Index(), U32Operand(SpvDecorationFlat)});
-                        break;
-                    case core::InterpolationType::kPerspective:
-                    case core::InterpolationType::kUndefined:
-                        break;
-                }
-                switch (attrs.interpolation->sampling) {
-                    case core::InterpolationSampling::kCentroid:
-                        module_.PushAnnot(
-                            spv::Op::OpMemberDecorate,
-                            {operands[0], member->Index(), U32Operand(SpvDecorationCentroid)});
-                        break;
-                    case core::InterpolationSampling::kSample:
-                        module_.PushCapability(SpvCapabilitySampleRateShading);
-                        module_.PushAnnot(
-                            spv::Op::OpMemberDecorate,
-                            {operands[0], member->Index(), U32Operand(SpvDecorationSample)});
-                        break;
-                    case core::InterpolationSampling::kCenter:
-                    case core::InterpolationSampling::kUndefined:
-                        break;
-                }
-            }
-        }
-        if (attrs.builtin) {
-            module_.PushAnnot(spv::Op::OpMemberDecorate,
-                              {operands[0], member->Index(), U32Operand(SpvDecorationBuiltIn),
-                               Builtin(*attrs.builtin, addrspace)});
-        }
-        if (attrs.invariant) {
-            module_.PushAnnot(spv::Op::OpMemberDecorate,
-                              {operands[0], member->Index(), U32Operand(SpvDecorationInvariant)});
-        }
 
         // Emit matrix layout decorations if necessary.
         if (auto* matrix_type = get_nested_matrix_type(member->Type())) {
@@ -691,13 +638,9 @@ void Printer::EmitEntryPoint(core::ir::Function* func, uint32_t id) {
             operands.push_back(Value(var));
 
             // Add the `DepthReplacing` execution mode if `frag_depth` is used.
-            if (auto* str = ptr->StoreType()->As<core::type::Struct>()) {
-                for (auto* member : str->Members()) {
-                    if (member->Attributes().builtin == core::BuiltinValue::kFragDepth) {
-                        module_.PushExecutionMode(spv::Op::OpExecutionMode,
-                                                  {id, U32Operand(SpvExecutionModeDepthReplacing)});
-                    }
-                }
+            if (var->Attributes().builtin == core::BuiltinValue::kFragDepth) {
+                module_.PushExecutionMode(spv::Op::OpExecutionMode,
+                                          {id, U32Operand(SpvExecutionModeDepthReplacing)});
             }
         }
     }
@@ -1835,6 +1778,48 @@ void Printer::EmitUserCall(core::ir::UserCall* call) {
     current_function_.push_inst(spv::Op::OpFunctionCall, operands);
 }
 
+void Printer::EmitIOAttributes(uint32_t id,
+                               const core::ir::IOAttributes& attrs,
+                               core::AddressSpace addrspace) {
+    if (attrs.location) {
+        module_.PushAnnot(spv::Op::OpDecorate,
+                          {id, U32Operand(SpvDecorationLocation), *attrs.location});
+    }
+    if (attrs.interpolation) {
+        switch (attrs.interpolation->type) {
+            case core::InterpolationType::kLinear:
+                module_.PushAnnot(spv::Op::OpDecorate,
+                                  {id, U32Operand(SpvDecorationNoPerspective)});
+                break;
+            case core::InterpolationType::kFlat:
+                module_.PushAnnot(spv::Op::OpDecorate, {id, U32Operand(SpvDecorationFlat)});
+                break;
+            case core::InterpolationType::kPerspective:
+            case core::InterpolationType::kUndefined:
+                break;
+        }
+        switch (attrs.interpolation->sampling) {
+            case core::InterpolationSampling::kCentroid:
+                module_.PushAnnot(spv::Op::OpDecorate, {id, U32Operand(SpvDecorationCentroid)});
+                break;
+            case core::InterpolationSampling::kSample:
+                module_.PushCapability(SpvCapabilitySampleRateShading);
+                module_.PushAnnot(spv::Op::OpDecorate, {id, U32Operand(SpvDecorationSample)});
+                break;
+            case core::InterpolationSampling::kCenter:
+            case core::InterpolationSampling::kUndefined:
+                break;
+        }
+    }
+    if (attrs.builtin) {
+        module_.PushAnnot(spv::Op::OpDecorate, {id, U32Operand(SpvDecorationBuiltIn),
+                                                Builtin(*attrs.builtin, addrspace)});
+    }
+    if (attrs.invariant) {
+        module_.PushAnnot(spv::Op::OpDecorate, {id, U32Operand(SpvDecorationInvariant)});
+    }
+}
+
 void Printer::EmitVar(core::ir::Var* var) {
     auto id = Value(var);
     auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
@@ -1855,6 +1840,7 @@ void Printer::EmitVar(core::ir::Var* var) {
         case core::AddressSpace::kIn: {
             TINT_ASSERT(!current_function_);
             module_.PushType(spv::Op::OpVariable, {ty, id, U32Operand(SpvStorageClassInput)});
+            EmitIOAttributes(id, var->Attributes(), core::AddressSpace::kIn);
             break;
         }
         case core::AddressSpace::kPrivate: {
@@ -1878,6 +1864,7 @@ void Printer::EmitVar(core::ir::Var* var) {
         case core::AddressSpace::kOut: {
             TINT_ASSERT(!current_function_);
             module_.PushType(spv::Op::OpVariable, {ty, id, U32Operand(SpvStorageClassOutput)});
+            EmitIOAttributes(id, var->Attributes(), core::AddressSpace::kOut);
             break;
         }
         case core::AddressSpace::kHandle:

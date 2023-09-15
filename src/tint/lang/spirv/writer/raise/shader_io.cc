@@ -22,7 +22,6 @@
 #include "src/tint/lang/core/ir/transform/shader_io.h"
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/type/array.h"
-#include "src/tint/lang/core/type/struct.h"
 
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
@@ -32,23 +31,14 @@ namespace tint::spirv::writer::raise {
 namespace {
 
 /// PIMPL state for the parts of the shader IO transform specific to SPIR-V.
-/// For SPIR-V, we split builtins and locations into two separate structures each for input and
-/// output, and declare global variables for them. The wrapper entry point then loads from and
-/// stores to these variables.
-/// We also modify the type of the SampleMask builtin to be an array, as required by Vulkan.
+/// For SPIR-V, we declare a global variable for each input and output. The wrapper entry point then
+/// loads from and stores to these variables. We also modify the type of the SampleMask builtin to
+/// be an array, as required by Vulkan.
 struct StateImpl : core::ir::transform::ShaderIOBackendState {
-    /// The global variable for input builtins.
-    core::ir::Var* builtin_input_var = nullptr;
-    /// The global variable for input locations.
-    core::ir::Var* location_input_var = nullptr;
-    /// The global variable for output builtins.
-    core::ir::Var* builtin_output_var = nullptr;
-    /// The global variable for output locations.
-    core::ir::Var* location_output_var = nullptr;
-    /// The member indices for inputs.
-    Vector<uint32_t, 4> input_indices;
-    /// The member indices for outputs.
-    Vector<uint32_t, 4> output_indices;
+    /// The input variables.
+    Vector<core::ir::Var*, 4> input_vars;
+    /// The output variables.
+    Vector<core::ir::Var*, 4> output_vars;
 
     /// The configuration options.
     const ShaderIOConfig& config;
@@ -63,69 +53,63 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     /// Destructor
     ~StateImpl() override {}
 
-    /// Split the members listed in @p entries into two separate structures for builtins and
-    /// locations, and make global variables for them. Record the new member indices in @p indices.
-    /// @param builtin_var the generated global variable for builtins
-    /// @param location_var the generated global variable for locations
-    /// @param indices the new member indices
-    /// @param entries the entries to split
+    /// Declare a global variable for each IO entry listed in @p entries.
+    /// @param vars the list of variables
+    /// @param entries the entries to emit
     /// @param addrspace the address to use for the global variables
     /// @param access the access mode to use for the global variables
     /// @param name_suffix the suffix to add to struct and variable names
-    void MakeStructs(core::ir::Var*& builtin_var,
-                     core::ir::Var*& location_var,
-                     Vector<uint32_t, 4>* indices,
-                     Vector<core::type::Manager::StructMemberDesc, 4>& entries,
-                     core::AddressSpace addrspace,
-                     core::Access access,
-                     const char* name_suffix) {
-        // Build separate lists of builtin and location entries and record their new indices.
-        uint32_t next_builtin_idx = 0;
-        uint32_t next_location_idx = 0;
-        Vector<core::type::Manager::StructMemberDesc, 4> builtin_members;
-        Vector<core::type::Manager::StructMemberDesc, 4> location_members;
+    void MakeVars(Vector<core::ir::Var*, 4>& vars,
+                  Vector<core::type::Manager::StructMemberDesc, 4>& entries,
+                  core::AddressSpace addrspace,
+                  core::Access access,
+                  const char* name_suffix) {
         for (auto io : entries) {
+            StringStream name;
+            name << ir->NameOf(func).Name();
+
             if (io.attributes.builtin) {
                 // SampleMask must be an array for Vulkan.
                 if (io.attributes.builtin.value() == core::BuiltinValue::kSampleMask) {
                     io.type = ty.array<u32, 1>();
                 }
-                builtin_members.Push(io);
-                indices->Push(next_builtin_idx++);
-            } else {
-                location_members.Push(io);
-                indices->Push(next_location_idx++);
-            }
-        }
+                name << "_" << io.attributes.builtin.value();
 
-        // Declare the structs and variables if needed.
-        auto make_struct = [&](auto& members, const char* iotype) {
-            auto name = ir->NameOf(func).Name() + iotype + name_suffix;
-            auto* str = ty.Struct(ir->symbols.New(name + "Struct"), std::move(members));
-            auto* var = b.Var(name, ty.ptr(addrspace, str, access));
-            str->SetStructFlag(core::type::kBlock);
+                // Vulkan requires that fragment integer builtin inputs be Flat decorated.
+                if (func->Stage() == core::ir::Function::PipelineStage::kFragment &&
+                    addrspace == core::AddressSpace::kIn &&
+                    io.type->is_integer_scalar_or_vector()) {
+                    io.attributes.interpolation = {core::InterpolationType::kFlat};
+                }
+            } else {
+                name << "_loc" << io.attributes.location.value();
+            }
+            name << name_suffix;
+
+            // Create an IO variable and add it to the root block.
+            auto* ptr = ty.ptr(addrspace, io.type, access);
+            auto* var = b.Var(name.str(), ptr);
+            var->SetAttributes(core::ir::IOAttributes{
+                io.attributes.location,
+                io.attributes.index,
+                io.attributes.builtin,
+                io.attributes.interpolation,
+                io.attributes.invariant,
+            });
             b.RootBlock()->Append(var);
-            return var;
-        };
-        if (!builtin_members.IsEmpty()) {
-            builtin_var = make_struct(builtin_members, "_Builtin");
-        }
-        if (!location_members.IsEmpty()) {
-            location_var = make_struct(location_members, "_Location");
+            vars.Push(var);
         }
     }
 
     /// @copydoc ShaderIO::BackendState::FinalizeInputs
     Vector<core::ir::FunctionParam*, 4> FinalizeInputs() override {
-        MakeStructs(builtin_input_var, location_input_var, &input_indices, inputs,
-                    core::AddressSpace::kIn, core::Access::kRead, "Inputs");
+        MakeVars(input_vars, inputs, core::AddressSpace::kIn, core::Access::kRead, "_Input");
         return tint::Empty;
     }
 
     /// @copydoc ShaderIO::BackendState::FinalizeOutputs
     core::ir::Value* FinalizeOutputs() override {
-        MakeStructs(builtin_output_var, location_output_var, &output_indices, outputs,
-                    core::AddressSpace::kOut, core::Access::kWrite, "Outputs");
+        MakeVars(output_vars, outputs, core::AddressSpace::kOut, core::Access::kWrite, "_Output");
         return nullptr;
     }
 
@@ -133,16 +117,12 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     core::ir::Value* GetInput(core::ir::Builder& builder, uint32_t idx) override {
         // Load the input from the global variable declared earlier.
         auto* ptr = ty.ptr(core::AddressSpace::kIn, inputs[idx].type, core::Access::kRead);
-        core::ir::Access* from = nullptr;
+        auto* from = input_vars[idx]->Result();
         if (inputs[idx].attributes.builtin) {
             if (inputs[idx].attributes.builtin.value() == core::BuiltinValue::kSampleMask) {
                 // SampleMask becomes an array for SPIR-V, so load from the first element.
-                from = builder.Access(ptr, builtin_input_var, u32(input_indices[idx]), 0_u);
-            } else {
-                from = builder.Access(ptr, builtin_input_var, u32(input_indices[idx]));
+                from = builder.Access(ptr, input_vars[idx], 0_u)->Result();
             }
-        } else {
-            from = builder.Access(ptr, location_input_var, u32(input_indices[idx]));
         }
         return builder.Load(from)->Result();
     }
@@ -151,21 +131,17 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
     void SetOutput(core::ir::Builder& builder, uint32_t idx, core::ir::Value* value) override {
         // Store the output to the global variable declared earlier.
         auto* ptr = ty.ptr(core::AddressSpace::kOut, outputs[idx].type, core::Access::kWrite);
-        core::ir::Access* to = nullptr;
+        auto* to = output_vars[idx]->Result();
         if (outputs[idx].attributes.builtin) {
             if (outputs[idx].attributes.builtin.value() == core::BuiltinValue::kSampleMask) {
                 // SampleMask becomes an array for SPIR-V, so store to the first element.
-                to = builder.Access(ptr, builtin_output_var, u32(output_indices[idx]), 0_u);
-            } else {
-                to = builder.Access(ptr, builtin_output_var, u32(output_indices[idx]));
+                to = builder.Access(ptr, to, 0_u)->Result();
             }
 
             // Clamp frag_depth values if necessary.
             if (outputs[idx].attributes.builtin.value() == core::BuiltinValue::kFragDepth) {
                 value = ClampFragDepth(builder, value);
             }
-        } else {
-            to = builder.Access(ptr, location_output_var, u32(output_indices[idx]));
         }
         builder.Store(to, value);
     }

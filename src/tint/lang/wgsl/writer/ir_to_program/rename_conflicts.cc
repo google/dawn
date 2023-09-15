@@ -25,6 +25,7 @@
 #include "src/tint/lang/core/ir/validator.h"
 #include "src/tint/lang/core/ir/var.h"
 #include "src/tint/lang/core/type/matrix.h"
+#include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/lang/core/type/scalar.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/core/type/vector.h"

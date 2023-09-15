@@ -94,27 +94,19 @@ TEST_F(SpirvWriter_ShaderIOTest, Parameters_NonStruct) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-foo_BuiltinInputsStruct = struct @align(16), @block {
-  front_facing:bool @offset(0), @builtin(front_facing)
-  position:vec4<f32> @offset(16), @invariant, @builtin(position)
-}
-
-foo_LocationInputsStruct = struct @align(4), @block {
-  color1:f32 @offset(0), @location(0)
-  color2:f32 @offset(4), @location(1), @interpolate(linear, sample)
-}
-
 %b1 = block {  # root
-  %foo_BuiltinInputs:ptr<__in, foo_BuiltinInputsStruct, read> = var
-  %foo_LocationInputs:ptr<__in, foo_LocationInputsStruct, read> = var
+  %foo_front_facing_Input:ptr<__in, bool, read> = var @builtin(front_facing)
+  %foo_position_Input:ptr<__in, vec4<f32>, read> = var @invariant @builtin(position)
+  %foo_loc0_Input:ptr<__in, f32, read> = var @location(0)
+  %foo_loc1_Input:ptr<__in, f32, read> = var @location(1) @interpolate(linear, sample)
 }
 
 %foo_inner = func(%front_facing:bool, %position:vec4<f32>, %color1:f32, %color2:f32):void -> %b2 {
   %b2 = block {
     if %front_facing [t: %b3] {  # if_1
       %b3 = block {  # true
-        %8:f32 = add %color1, %color2
-        %9:vec4<f32> = mul %position, %8
+        %10:f32 = add %color1, %color2
+        %11:vec4<f32> = mul %position, %10
         exit_if  # if_1
       }
     }
@@ -123,15 +115,11 @@ foo_LocationInputsStruct = struct @align(4), @block {
 }
 %foo = @fragment func():void -> %b4 {
   %b4 = block {
-    %11:ptr<__in, bool, read> = access %foo_BuiltinInputs, 0u
-    %12:bool = load %11
-    %13:ptr<__in, vec4<f32>, read> = access %foo_BuiltinInputs, 1u
-    %14:vec4<f32> = load %13
-    %15:ptr<__in, f32, read> = access %foo_LocationInputs, 0u
-    %16:f32 = load %15
-    %17:ptr<__in, f32, read> = access %foo_LocationInputs, 1u
-    %18:f32 = load %17
-    %19:void = call %foo_inner, %12, %14, %16, %18
+    %13:bool = load %foo_front_facing_Input
+    %14:vec4<f32> = load %foo_position_Input
+    %15:f32 = load %foo_loc0_Input
+    %16:f32 = load %foo_loc1_Input
+    %17:void = call %foo_inner, %13, %14, %15, %16
     ret
   }
 }
@@ -226,31 +214,23 @@ Inputs = struct @align(16) {
   color2:f32 @offset(36)
 }
 
-foo_BuiltinInputsStruct = struct @align(16), @block {
-  Inputs_front_facing:bool @offset(0), @builtin(front_facing)
-  Inputs_position:vec4<f32> @offset(16), @invariant, @builtin(position)
-}
-
-foo_LocationInputsStruct = struct @align(4), @block {
-  Inputs_color1:f32 @offset(0), @location(0)
-  Inputs_color2:f32 @offset(4), @location(1), @interpolate(linear, sample)
-}
-
 %b1 = block {  # root
-  %foo_BuiltinInputs:ptr<__in, foo_BuiltinInputsStruct, read> = var
-  %foo_LocationInputs:ptr<__in, foo_LocationInputsStruct, read> = var
+  %foo_front_facing_Input:ptr<__in, bool, read> = var @builtin(front_facing)
+  %foo_position_Input:ptr<__in, vec4<f32>, read> = var @invariant @builtin(position)
+  %foo_loc0_Input:ptr<__in, f32, read> = var @location(0)
+  %foo_loc1_Input:ptr<__in, f32, read> = var @location(1) @interpolate(linear, sample)
 }
 
 %foo_inner = func(%inputs:Inputs):void -> %b2 {
   %b2 = block {
-    %5:bool = access %inputs, 0i
-    if %5 [t: %b3] {  # if_1
+    %7:bool = access %inputs, 0i
+    if %7 [t: %b3] {  # if_1
       %b3 = block {  # true
-        %6:vec4<f32> = access %inputs, 1i
-        %7:f32 = access %inputs, 2i
-        %8:f32 = access %inputs, 3i
-        %9:f32 = add %7, %8
-        %10:vec4<f32> = mul %6, %9
+        %8:vec4<f32> = access %inputs, 1i
+        %9:f32 = access %inputs, 2i
+        %10:f32 = access %inputs, 3i
+        %11:f32 = add %9, %10
+        %12:vec4<f32> = mul %8, %11
         exit_if  # if_1
       }
     }
@@ -259,16 +239,12 @@ foo_LocationInputsStruct = struct @align(4), @block {
 }
 %foo = @fragment func():void -> %b4 {
   %b4 = block {
-    %12:ptr<__in, bool, read> = access %foo_BuiltinInputs, 0u
-    %13:bool = load %12
-    %14:ptr<__in, vec4<f32>, read> = access %foo_BuiltinInputs, 1u
-    %15:vec4<f32> = load %14
-    %16:ptr<__in, f32, read> = access %foo_LocationInputs, 0u
-    %17:f32 = load %16
-    %18:ptr<__in, f32, read> = access %foo_LocationInputs, 1u
-    %19:f32 = load %18
-    %20:Inputs = construct %13, %15, %17, %19
-    %21:void = call %foo_inner, %20
+    %14:bool = load %foo_front_facing_Input
+    %15:vec4<f32> = load %foo_position_Input
+    %16:f32 = load %foo_loc0_Input
+    %17:f32 = load %foo_loc1_Input
+    %18:Inputs = construct %14, %15, %16, %17
+    %19:void = call %foo_inner, %18
     ret
   }
 }
@@ -347,29 +323,21 @@ Inputs = struct @align(16) {
   color1:f32 @offset(16)
 }
 
-foo_BuiltinInputsStruct = struct @align(16), @block {
-  front_facing:bool @offset(0), @builtin(front_facing)
-  Inputs_position:vec4<f32> @offset(16), @invariant, @builtin(position)
-}
-
-foo_LocationInputsStruct = struct @align(4), @block {
-  Inputs_color1:f32 @offset(0), @location(0)
-  color2:f32 @offset(4), @location(1), @interpolate(linear, sample)
-}
-
 %b1 = block {  # root
-  %foo_BuiltinInputs:ptr<__in, foo_BuiltinInputsStruct, read> = var
-  %foo_LocationInputs:ptr<__in, foo_LocationInputsStruct, read> = var
+  %foo_front_facing_Input:ptr<__in, bool, read> = var @builtin(front_facing)
+  %foo_position_Input:ptr<__in, vec4<f32>, read> = var @invariant @builtin(position)
+  %foo_loc0_Input:ptr<__in, f32, read> = var @location(0)
+  %foo_loc1_Input:ptr<__in, f32, read> = var @location(1) @interpolate(linear, sample)
 }
 
 %foo_inner = func(%front_facing:bool, %inputs:Inputs, %color2:f32):void -> %b2 {
   %b2 = block {
     if %front_facing [t: %b3] {  # if_1
       %b3 = block {  # true
-        %7:vec4<f32> = access %inputs, 0i
-        %8:f32 = access %inputs, 1i
-        %9:f32 = add %8, %color2
-        %10:vec4<f32> = mul %7, %9
+        %9:vec4<f32> = access %inputs, 0i
+        %10:f32 = access %inputs, 1i
+        %11:f32 = add %10, %color2
+        %12:vec4<f32> = mul %9, %11
         exit_if  # if_1
       }
     }
@@ -378,16 +346,12 @@ foo_LocationInputsStruct = struct @align(4), @block {
 }
 %foo = @fragment func():void -> %b4 {
   %b4 = block {
-    %12:ptr<__in, bool, read> = access %foo_BuiltinInputs, 0u
-    %13:bool = load %12
-    %14:ptr<__in, vec4<f32>, read> = access %foo_BuiltinInputs, 1u
-    %15:vec4<f32> = load %14
-    %16:ptr<__in, f32, read> = access %foo_LocationInputs, 0u
-    %17:f32 = load %16
-    %18:Inputs = construct %15, %17
-    %19:ptr<__in, f32, read> = access %foo_LocationInputs, 1u
-    %20:f32 = load %19
-    %21:void = call %foo_inner, %13, %18, %20
+    %14:bool = load %foo_front_facing_Input
+    %15:vec4<f32> = load %foo_position_Input
+    %16:f32 = load %foo_loc0_Input
+    %17:Inputs = construct %15, %16
+    %18:f32 = load %foo_loc1_Input
+    %19:void = call %foo_inner, %14, %17, %18
     ret
   }
 }
@@ -421,12 +385,8 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructBuiltin) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-foo_BuiltinOutputsStruct = struct @align(16), @block {
-  tint_symbol:vec4<f32> @offset(0), @invariant, @builtin(position)
-}
-
 %b1 = block {  # root
-  %foo_BuiltinOutputs:ptr<__out, foo_BuiltinOutputsStruct, write> = var
+  %foo_position_Output:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
 }
 
 %foo_inner = func():vec4<f32> -> %b2 {
@@ -438,8 +398,7 @@ foo_BuiltinOutputsStruct = struct @align(16), @block {
 %foo = @vertex func():void -> %b3 {
   %b3 = block {
     %5:vec4<f32> = call %foo_inner
-    %6:ptr<__out, vec4<f32>, write> = access %foo_BuiltinOutputs, 0u
-    store %6, %5
+    store %foo_position_Output, %5
     ret
   }
 }
@@ -472,12 +431,8 @@ TEST_F(SpirvWriter_ShaderIOTest, ReturnValue_NonStructLocation) {
     EXPECT_EQ(src, str());
 
     auto* expect = R"(
-foo_LocationOutputsStruct = struct @align(16), @block {
-  tint_symbol:vec4<f32> @offset(0), @location(1)
-}
-
 %b1 = block {  # root
-  %foo_LocationOutputs:ptr<__out, foo_LocationOutputsStruct, write> = var
+  %foo_loc1_Output:ptr<__out, vec4<f32>, write> = var @location(1)
 }
 
 %foo_inner = func():vec4<f32> -> %b2 {
@@ -489,8 +444,7 @@ foo_LocationOutputsStruct = struct @align(16), @block {
 %foo = @fragment func():void -> %b3 {
   %b3 = block {
     %5:vec4<f32> = call %foo_inner
-    %6:ptr<__out, vec4<f32>, write> = access %foo_LocationOutputs, 0u
-    store %6, %5
+    store %foo_loc1_Output, %5
     ret
   }
 }
@@ -559,39 +513,28 @@ Outputs = struct @align(16) {
   color2:f32 @offset(20)
 }
 
-foo_BuiltinOutputsStruct = struct @align(16), @block {
-  Outputs_position:vec4<f32> @offset(0), @invariant, @builtin(position)
-}
-
-foo_LocationOutputsStruct = struct @align(4), @block {
-  Outputs_color1:f32 @offset(0), @location(0)
-  Outputs_color2:f32 @offset(4), @location(1), @interpolate(linear, sample)
-}
-
 %b1 = block {  # root
-  %foo_BuiltinOutputs:ptr<__out, foo_BuiltinOutputsStruct, write> = var
-  %foo_LocationOutputs:ptr<__out, foo_LocationOutputsStruct, write> = var
+  %foo_position_Output:ptr<__out, vec4<f32>, write> = var @invariant @builtin(position)
+  %foo_loc0_Output:ptr<__out, f32, write> = var @location(0)
+  %foo_loc1_Output:ptr<__out, f32, write> = var @location(1) @interpolate(linear, sample)
 }
 
 %foo_inner = func():Outputs -> %b2 {
   %b2 = block {
-    %4:vec4<f32> = construct 0.0f
-    %5:Outputs = construct %4, 0.25f, 0.75f
-    ret %5
+    %5:vec4<f32> = construct 0.0f
+    %6:Outputs = construct %5, 0.25f, 0.75f
+    ret %6
   }
 }
 %foo = @vertex func():void -> %b3 {
   %b3 = block {
-    %7:Outputs = call %foo_inner
-    %8:vec4<f32> = access %7, 0u
-    %9:ptr<__out, vec4<f32>, write> = access %foo_BuiltinOutputs, 0u
-    store %9, %8
-    %10:f32 = access %7, 1u
-    %11:ptr<__out, f32, write> = access %foo_LocationOutputs, 0u
-    store %11, %10
-    %12:f32 = access %7, 2u
-    %13:ptr<__out, f32, write> = access %foo_LocationOutputs, 1u
-    store %13, %12
+    %8:Outputs = call %foo_inner
+    %9:vec4<f32> = access %8, 0u
+    store %foo_position_Output, %9
+    %10:f32 = access %8, 1u
+    store %foo_loc0_Output, %10
+    %11:f32 = access %8, 2u
+    store %foo_loc1_Output, %11
     ret
   }
 }
@@ -638,6 +581,7 @@ TEST_F(SpirvWriter_ShaderIOTest, Struct_SharedByVertexAndFragment) {
         auto* inputs = b.FunctionParam("inputs", str_ty);
         ep->SetStage(core::ir::Function::PipelineStage::kFragment);
         ep->SetParams({inputs});
+        ep->SetReturnLocation(0u, {});
 
         b.Append(ep->Block(), [&] {  //
             auto* position = b.Access(vec4f, inputs, 0_u);
@@ -660,7 +604,7 @@ Interface = struct @align(16) {
     ret %4
   }
 }
-%frag = @fragment func(%inputs:Interface):vec4<f32> -> %b2 {
+%frag = @fragment func(%inputs:Interface):vec4<f32> [@location(0)] -> %b2 {
   %b2 = block {
     %7:vec4<f32> = access %inputs, 0u
     %8:vec4<f32> = access %inputs, 1u
@@ -677,32 +621,12 @@ Interface = struct @align(16) {
   color:vec4<f32> @offset(16)
 }
 
-vert_BuiltinOutputsStruct = struct @align(16), @block {
-  Interface_position:vec4<f32> @offset(0), @builtin(position)
-}
-
-vert_LocationOutputsStruct = struct @align(16), @block {
-  Interface_color:vec4<f32> @offset(0), @location(0)
-}
-
-frag_BuiltinInputsStruct = struct @align(16), @block {
-  Interface_position:vec4<f32> @offset(0), @builtin(position)
-}
-
-frag_LocationInputsStruct = struct @align(16), @block {
-  Interface_color:vec4<f32> @offset(0), @location(0)
-}
-
-frag_LocationOutputsStruct = struct @align(16), @block {
-  tint_symbol:vec4<f32> @offset(0)
-}
-
 %b1 = block {  # root
-  %vert_BuiltinOutputs:ptr<__out, vert_BuiltinOutputsStruct, write> = var
-  %vert_LocationOutputs:ptr<__out, vert_LocationOutputsStruct, write> = var
-  %frag_BuiltinInputs:ptr<__in, frag_BuiltinInputsStruct, read> = var
-  %frag_LocationInputs:ptr<__in, frag_LocationInputsStruct, read> = var
-  %frag_LocationOutputs:ptr<__out, frag_LocationOutputsStruct, write> = var
+  %vert_position_Output:ptr<__out, vec4<f32>, write> = var @builtin(position)
+  %vert_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
+  %frag_position_Input:ptr<__in, vec4<f32>, read> = var @builtin(position)
+  %frag_loc0_Input:ptr<__in, vec4<f32>, read> = var @location(0)
+  %frag_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
 }
 
 %vert_inner = func():Interface -> %b2 {
@@ -725,24 +649,19 @@ frag_LocationOutputsStruct = struct @align(16), @block {
   %b4 = block {
     %16:Interface = call %vert_inner
     %17:vec4<f32> = access %16, 0u
-    %18:ptr<__out, vec4<f32>, write> = access %vert_BuiltinOutputs, 0u
-    store %18, %17
-    %19:vec4<f32> = access %16, 1u
-    %20:ptr<__out, vec4<f32>, write> = access %vert_LocationOutputs, 0u
-    store %20, %19
+    store %vert_position_Output, %17
+    %18:vec4<f32> = access %16, 1u
+    store %vert_loc0_Output, %18
     ret
   }
 }
 %frag = @fragment func():void -> %b5 {
   %b5 = block {
-    %22:ptr<__in, vec4<f32>, read> = access %frag_BuiltinInputs, 0u
-    %23:vec4<f32> = load %22
-    %24:ptr<__in, vec4<f32>, read> = access %frag_LocationInputs, 0u
-    %25:vec4<f32> = load %24
-    %26:Interface = construct %23, %25
-    %27:vec4<f32> = call %frag_inner, %26
-    %28:ptr<__out, vec4<f32>, write> = access %frag_LocationOutputs, 0u
-    store %28, %27
+    %20:vec4<f32> = load %frag_position_Input
+    %21:vec4<f32> = load %frag_loc0_Input
+    %22:Interface = construct %20, %21
+    %23:vec4<f32> = call %frag_inner, %22
+    store %frag_loc0_Output, %23
     ret
   }
 }
@@ -805,18 +724,10 @@ Outputs = struct @align(16) {
   color:vec4<f32> @offset(16)
 }
 
-vert_BuiltinOutputsStruct = struct @align(16), @block {
-  Outputs_position:vec4<f32> @offset(0), @builtin(position)
-}
-
-vert_LocationOutputsStruct = struct @align(16), @block {
-  Outputs_color:vec4<f32> @offset(0), @location(0)
-}
-
 %b1 = block {  # root
   %1:ptr<storage, Outputs, read> = var
-  %vert_BuiltinOutputs:ptr<__out, vert_BuiltinOutputsStruct, write> = var
-  %vert_LocationOutputs:ptr<__out, vert_LocationOutputsStruct, write> = var
+  %vert_position_Output:ptr<__out, vec4<f32>, write> = var @builtin(position)
+  %vert_loc0_Output:ptr<__out, vec4<f32>, write> = var @location(0)
 }
 
 %vert_inner = func():Outputs -> %b2 {
@@ -829,11 +740,9 @@ vert_LocationOutputsStruct = struct @align(16), @block {
   %b3 = block {
     %7:Outputs = call %vert_inner
     %8:vec4<f32> = access %7, 0u
-    %9:ptr<__out, vec4<f32>, write> = access %vert_BuiltinOutputs, 0u
-    store %9, %8
-    %10:vec4<f32> = access %7, 1u
-    %11:ptr<__out, vec4<f32>, write> = access %vert_LocationOutputs, 0u
-    store %11, %10
+    store %vert_position_Output, %8
+    %9:vec4<f32> = access %7, 1u
+    store %vert_loc0_Output, %9
     ret
   }
 }
@@ -894,22 +803,10 @@ Outputs = struct @align(4) {
   mask:u32 @offset(4)
 }
 
-foo_BuiltinInputsStruct = struct @align(4), @block {
-  mask_in:array<u32, 1> @offset(0), @builtin(sample_mask)
-}
-
-foo_BuiltinOutputsStruct = struct @align(4), @block {
-  Outputs_mask:array<u32, 1> @offset(0), @builtin(sample_mask)
-}
-
-foo_LocationOutputsStruct = struct @align(4), @block {
-  Outputs_color:f32 @offset(0), @location(0)
-}
-
 %b1 = block {  # root
-  %foo_BuiltinInputs:ptr<__in, foo_BuiltinInputsStruct, read> = var
-  %foo_BuiltinOutputs:ptr<__out, foo_BuiltinOutputsStruct, write> = var
-  %foo_LocationOutputs:ptr<__out, foo_LocationOutputsStruct, write> = var
+  %foo_sample_mask_Input:ptr<__in, array<u32, 1>, read> = var @builtin(sample_mask)
+  %foo_loc0_Output:ptr<__out, f32, write> = var @location(0)
+  %foo_sample_mask_Output:ptr<__out, array<u32, 1>, write> = var @builtin(sample_mask)
 }
 
 %foo_inner = func(%mask_in:u32):Outputs -> %b2 {
@@ -920,15 +817,14 @@ foo_LocationOutputsStruct = struct @align(4), @block {
 }
 %foo = @fragment func():void -> %b3 {
   %b3 = block {
-    %8:ptr<__in, u32, read> = access %foo_BuiltinInputs, 0u, 0u
+    %8:ptr<__in, u32, read> = access %foo_sample_mask_Input, 0u
     %9:u32 = load %8
     %10:Outputs = call %foo_inner, %9
     %11:f32 = access %10, 0u
-    %12:ptr<__out, f32, write> = access %foo_LocationOutputs, 0u
-    store %12, %11
-    %13:u32 = access %10, 1u
-    %14:ptr<__out, u32, write> = access %foo_BuiltinOutputs, 0u, 0u
-    store %14, %13
+    store %foo_loc0_Output, %11
+    %12:u32 = access %10, 1u
+    %13:ptr<__out, u32, write> = access %foo_sample_mask_Output, 0u
+    store %13, %12
     ret
   }
 }
@@ -984,22 +880,14 @@ Outputs = struct @align(4) {
   depth:f32 @offset(4)
 }
 
-foo_BuiltinOutputsStruct = struct @align(4), @block {
-  Outputs_depth:f32 @offset(0), @builtin(frag_depth)
-}
-
-foo_LocationOutputsStruct = struct @align(4), @block {
-  Outputs_color:f32 @offset(0), @location(0)
-}
-
 FragDepthClampArgs = struct @align(4), @block {
   min:f32 @offset(0)
   max:f32 @offset(4)
 }
 
 %b1 = block {  # root
-  %foo_BuiltinOutputs:ptr<__out, foo_BuiltinOutputsStruct, write> = var
-  %foo_LocationOutputs:ptr<__out, foo_LocationOutputsStruct, write> = var
+  %foo_loc0_Output:ptr<__out, f32, write> = var @location(0)
+  %foo_frag_depth_Output:ptr<__out, f32, write> = var @builtin(frag_depth)
   %tint_frag_depth_clamp_args:ptr<push_constant, FragDepthClampArgs, read_write> = var
 }
 
@@ -1013,15 +901,13 @@ FragDepthClampArgs = struct @align(4), @block {
   %b3 = block {
     %7:Outputs = call %foo_inner
     %8:f32 = access %7, 0u
-    %9:ptr<__out, f32, write> = access %foo_LocationOutputs, 0u
-    store %9, %8
-    %10:f32 = access %7, 1u
-    %11:ptr<__out, f32, write> = access %foo_BuiltinOutputs, 0u
-    %12:FragDepthClampArgs = load %tint_frag_depth_clamp_args
-    %13:f32 = access %12, 0u
-    %14:f32 = access %12, 1u
-    %15:f32 = clamp %10, %13, %14
-    store %11, %15
+    store %foo_loc0_Output, %8
+    %9:f32 = access %7, 1u
+    %10:FragDepthClampArgs = load %tint_frag_depth_clamp_args
+    %11:f32 = access %10, 0u
+    %12:f32 = access %10, 1u
+    %13:f32 = clamp %9, %11, %12
+    store %foo_frag_depth_Output, %13
     ret
   }
 }
