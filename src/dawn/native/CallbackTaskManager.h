@@ -67,8 +67,6 @@ class CallbackTaskManager : public RefCounted {
     void Flush();
 
   private:
-    std::vector<std::unique_ptr<CallbackTask>> AcquireCallbackTasks();
-
     std::mutex mCallbackTaskQueueMutex;
     std::vector<std::unique_ptr<CallbackTask>> mCallbackTaskQueue;
 };

@@ -71,14 +71,6 @@ bool CallbackTaskManager::IsEmpty() {
     return mCallbackTaskQueue.empty();
 }
 
-std::vector<std::unique_ptr<CallbackTask>> CallbackTaskManager::AcquireCallbackTasks() {
-    std::lock_guard<std::mutex> lock(mCallbackTaskQueueMutex);
-
-    std::vector<std::unique_ptr<CallbackTask>> allTasks;
-    allTasks.swap(mCallbackTaskQueue);
-    return allTasks;
-}
-
 void CallbackTaskManager::AddCallbackTask(std::unique_ptr<CallbackTask> callbackTask) {
     std::lock_guard<std::mutex> lock(mCallbackTaskQueueMutex);
     mCallbackTaskQueue.push_back(std::move(callbackTask));
@@ -103,15 +95,21 @@ void CallbackTaskManager::HandleShutDown() {
 }
 
 void CallbackTaskManager::Flush() {
-    if (!IsEmpty()) {
-        // If a user calls Queue::Submit inside the callback, then the device will be ticked,
-        // which in turns ticks the tracker, causing reentrance and dead lock here. To prevent
-        // such reentrant call, we remove all the callback tasks from mCallbackTaskManager,
-        // update mCallbackTaskManager, then call all the callbacks.
-        auto callbackTasks = AcquireCallbackTasks();
-        for (std::unique_ptr<CallbackTask>& callbackTask : callbackTasks) {
-            callbackTask->Execute();
-        }
+    std::unique_lock<std::mutex> lock(mCallbackTaskQueueMutex);
+    if (mCallbackTaskQueue.empty()) {
+        return;
+    }
+
+    // If a user calls Queue::Submit inside the callback, then the device will be ticked,
+    // which in turns ticks the tracker, causing reentrance and dead lock here. To prevent
+    // such reentrant call, we remove all the callback tasks from mCallbackTaskManager,
+    // update mCallbackTaskManager, then call all the callbacks.
+    std::vector<std::unique_ptr<CallbackTask>> allTasks;
+    allTasks.swap(mCallbackTaskQueue);
+    lock.unlock();
+
+    for (std::unique_ptr<CallbackTask>& callbackTask : allTasks) {
+        callbackTask->Execute();
     }
 }
 
