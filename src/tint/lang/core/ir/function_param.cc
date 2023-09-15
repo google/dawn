@@ -50,6 +50,10 @@ std::string_view ToString(enum FunctionParam::Builtin value) {
             return "sample_index";
         case FunctionParam::Builtin::kSampleMask:
             return "sample_mask";
+        case FunctionParam::Builtin::kSubgroupInvocationId:
+            return "subgroup_invocation_id";
+        case FunctionParam::Builtin::kSubgroupSize:
+            return "subgroup_size";
     }
     return "<unknown>";
 }

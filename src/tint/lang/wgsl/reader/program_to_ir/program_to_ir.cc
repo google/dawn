@@ -421,6 +421,14 @@ class Impl {
                                     param->SetBuiltin(
                                         core::ir::FunctionParam::Builtin::kSampleMask);
                                     break;
+                                case core::BuiltinValue::kSubgroupInvocationId:
+                                    param->SetBuiltin(
+                                        core::ir::FunctionParam::Builtin::kSubgroupInvocationId);
+                                    break;
+                                case core::BuiltinValue::kSubgroupSize:
+                                    param->SetBuiltin(
+                                        core::ir::FunctionParam::Builtin::kSubgroupSize);
+                                    break;
                                 default:
                                     TINT_ICE() << "Unknown builtin value in parameter attributes "
                                                << ident_sem->Value();

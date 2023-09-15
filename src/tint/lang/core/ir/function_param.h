@@ -53,6 +53,10 @@ class FunctionParam : public Castable<FunctionParam, Value> {
         kSampleIndex,
         /// Builtin Sample mask
         kSampleMask,
+        /// Builtin Subgroup invocation id
+        kSubgroupInvocationId,
+        /// Builtin Subgroup size
+        kSubgroupSize,
     };
 
     /// Constructor

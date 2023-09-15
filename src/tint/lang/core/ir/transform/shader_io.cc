@@ -52,6 +52,10 @@ core::BuiltinValue FunctionParamBuiltin(enum FunctionParam::Builtin builtin) {
             return core::BuiltinValue::kSampleIndex;
         case FunctionParam::Builtin::kSampleMask:
             return core::BuiltinValue::kSampleMask;
+        case FunctionParam::Builtin::kSubgroupInvocationId:
+            return core::BuiltinValue::kSubgroupInvocationId;
+        case FunctionParam::Builtin::kSubgroupSize:
+            return core::BuiltinValue::kSubgroupSize;
     }
     return core::BuiltinValue::kUndefined;
 }
