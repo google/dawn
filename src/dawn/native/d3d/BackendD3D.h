@@ -58,7 +58,7 @@ class Backend : public BackendConnection {
     MaybeError EnsureDxcCompiler();
     MaybeError EnsureDxcValidator();
     ComPtr<IDxcLibrary> GetDxcLibrary() const;
-    ComPtr<IDxcCompiler> GetDxcCompiler() const;
+    ComPtr<IDxcCompiler3> GetDxcCompiler() const;
     ComPtr<IDxcValidator> GetDxcValidator() const;
 
     // Return true if and only if DXC binary is avaliable, and the DXC compiler and validator
@@ -101,7 +101,7 @@ class Backend : public BackendConnection {
     std::unique_ptr<PlatformFunctions> mFunctions;
     ComPtr<IDXGIFactory4> mFactory;
     ComPtr<IDxcLibrary> mDxcLibrary;
-    ComPtr<IDxcCompiler> mDxcCompiler;
+    ComPtr<IDxcCompiler3> mDxcCompiler;
     ComPtr<IDxcValidator> mDxcValidator;
 
     // DXC binaries and DXC version information are checked when start up in `Initialize`. There are

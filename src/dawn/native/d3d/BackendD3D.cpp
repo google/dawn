@@ -148,7 +148,7 @@ ComPtr<IDxcLibrary> Backend::GetDxcLibrary() const {
     return mDxcLibrary;
 }
 
-ComPtr<IDxcCompiler> Backend::GetDxcCompiler() const {
+ComPtr<IDxcCompiler3> Backend::GetDxcCompiler() const {
     DAWN_ASSERT(mDxcCompiler != nullptr);
     return mDxcCompiler;
 }
@@ -168,7 +168,7 @@ void Backend::AcquireDxcVersionInformation() {
         ComPtr<IDxcVersionInfo> compilerVersionInfo;
 
         DAWN_TRY(CheckHRESULT(mDxcCompiler.As(&compilerVersionInfo),
-                              "D3D12 QueryInterface IDxcCompiler to IDxcVersionInfo"));
+                              "D3D12 QueryInterface IDxcCompiler3 to IDxcVersionInfo"));
         uint32_t compilerMajor, compilerMinor;
         DAWN_TRY(CheckHRESULT(compilerVersionInfo->GetVersion(&compilerMajor, &compilerMinor),
                               "IDxcVersionInfo::GetVersion"));

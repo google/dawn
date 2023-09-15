@@ -66,7 +66,7 @@ ComPtr<IDxcLibrary> Device::GetDxcLibrary() const {
     return ToBackend(GetPhysicalDevice())->GetBackend()->GetDxcLibrary();
 }
 
-ComPtr<IDxcCompiler> Device::GetDxcCompiler() const {
+ComPtr<IDxcCompiler3> Device::GetDxcCompiler() const {
     return ToBackend(GetPhysicalDevice())->GetBackend()->GetDxcCompiler();
 }
 

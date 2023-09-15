@@ -46,7 +46,7 @@ class Device : public DeviceBase {
     // TODO(penghuang): remove them when related code is refactored to
     // d3d12::ShaderModule.
     ComPtr<IDxcLibrary> GetDxcLibrary() const;
-    ComPtr<IDxcCompiler> GetDxcCompiler() const;
+    ComPtr<IDxcCompiler3> GetDxcCompiler() const;
     ComPtr<IDxcValidator> GetDxcValidator() const;
 
     HANDLE GetFenceHandle() const;
