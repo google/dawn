@@ -135,8 +135,12 @@ struct State {
             if (auto* str = param->Type()->As<core::type::Struct>()) {
                 for (auto* member : str->Members()) {
                     auto name = str->Name().Name() + "_" + member->Name().Name();
-                    backend->AddInput(ir->symbols.Register(name), member->Type(),
-                                      member->Attributes());
+                    auto attributes = member->Attributes();
+                    if (attributes.interpolation &&
+                        func->Stage() != Function::PipelineStage::kFragment) {
+                        attributes.interpolation = {};
+                    }
+                    backend->AddInput(ir->symbols.Register(name), member->Type(), attributes);
                     members_to_strip.Add(member);
                 }
             } else {
@@ -144,7 +148,7 @@ struct State {
                 core::type::StructMemberAttributes attributes;
                 if (auto loc = param->Location()) {
                     attributes.location = loc->value;
-                    if (loc->interpolation) {
+                    if (loc->interpolation && func->Stage() == Function::PipelineStage::kFragment) {
                         attributes.interpolation = *loc->interpolation;
                     }
                     param->ClearLocation();
@@ -170,8 +174,11 @@ struct State {
         if (auto* str = func->ReturnType()->As<core::type::Struct>()) {
             for (auto* member : str->Members()) {
                 auto name = str->Name().Name() + "_" + member->Name().Name();
-                backend->AddOutput(ir->symbols.Register(name), member->Type(),
-                                   member->Attributes());
+                auto attributes = member->Attributes();
+                if (attributes.interpolation && func->Stage() != Function::PipelineStage::kVertex) {
+                    attributes.interpolation = {};
+                }
+                backend->AddOutput(ir->symbols.Register(name), member->Type(), attributes);
                 members_to_strip.Add(member);
             }
         } else {
@@ -179,6 +186,9 @@ struct State {
             core::type::StructMemberAttributes attributes;
             if (auto loc = func->ReturnLocation()) {
                 attributes.location = loc->value;
+                if (loc->interpolation && func->Stage() == Function::PipelineStage::kVertex) {
+                    attributes.interpolation = *loc->interpolation;
+                }
                 func->ClearReturnLocation();
             } else if (auto builtin = func->ReturnBuiltin()) {
                 attributes.builtin = ReturnBuiltin(*builtin);
