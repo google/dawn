@@ -1785,6 +1785,9 @@ void Printer::EmitIOAttributes(uint32_t id,
         module_.PushAnnot(spv::Op::OpDecorate,
                           {id, U32Operand(SpvDecorationLocation), *attrs.location});
     }
+    if (attrs.index) {
+        module_.PushAnnot(spv::Op::OpDecorate, {id, U32Operand(SpvDecorationIndex), *attrs.index});
+    }
     if (attrs.interpolation) {
         switch (attrs.interpolation->type) {
             case core::InterpolationType::kLinear:
