@@ -17,7 +17,6 @@
 #include "dawn/native/Adapter.h"
 #include "dawn/native/CreatePipelineAsyncTask.h"
 #include "dawn/native/Instance.h"
-#include "dawn/native/VertexFormat.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/PipelineLayoutMTL.h"
 #include "dawn/native/metal/ShaderModuleMTL.h"

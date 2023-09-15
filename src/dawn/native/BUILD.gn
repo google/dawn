@@ -363,8 +363,6 @@ source_set("sources") {
     "Toggles.cpp",
     "Toggles.h",
     "UsageValidationMode.h",
-    "VertexFormat.cpp",
-    "VertexFormat.h",
     "VisitableMembers.h",
     "dawn_platform.h",
     "stream/BlobSource.cpp",

@@ -24,11 +24,11 @@
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/PerStage.h"
 #include "dawn/native/ProgrammableEncoder.h"
+#include "dawn/native/RenderPipeline.h"
 #include "dawn/native/ShaderModule.h"
 #include "dawn/native/Subresource.h"
 #include "dawn/native/Surface.h"
 #include "dawn/native/Texture.h"
-#include "dawn/native/VertexFormat.h"
 
 namespace dawn::native {
 

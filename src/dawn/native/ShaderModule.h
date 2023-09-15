@@ -37,7 +37,6 @@
 #include "dawn/native/Limits.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/PerStage.h"
-#include "dawn/native/VertexFormat.h"
 #include "dawn/native/dawn_platform.h"
 #include "tint/tint.h"
 

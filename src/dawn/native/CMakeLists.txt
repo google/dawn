@@ -213,8 +213,6 @@ target_sources(dawn_native PRIVATE
     "Toggles.cpp"
     "Toggles.h"
     "UsageValidationMode.h"
-    "VertexFormat.cpp"
-    "VertexFormat.h"
     "VisitableMembers.h"
     "dawn_platform.h"
     "webgpu_absl_format.cpp"

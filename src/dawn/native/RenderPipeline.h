@@ -30,6 +30,21 @@
 
 namespace dawn::native {
 
+enum class VertexFormatBaseType {
+    Float,
+    Uint,
+    Sint,
+};
+
+struct VertexFormatInfo {
+    wgpu::VertexFormat format;
+    uint32_t byteSize;
+    uint32_t componentCount;
+    VertexFormatBaseType baseType;
+};
+
+const VertexFormatInfo& GetVertexFormatInfo(wgpu::VertexFormat format);
+
 class DeviceBase;
 
 MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
