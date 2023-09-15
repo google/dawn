@@ -531,9 +531,26 @@ MaybeError Buffer::WriteInternal(CommandRecordingContext* commandContext,
 
     DAWN_ASSERT(mD3d11ConstantBuffer);
 
+    // For a full size write, UpdateSubresource() can be used to update mD3d11ConstantBuffer.
+    if (size == GetSize() && offset == 0) {
+        if (size == mAllocatedSize) {
+            d3d11DeviceContext1->UpdateSubresource(mD3d11ConstantBuffer.Get(), /*DstSubresource=*/0,
+                                                   nullptr, data,
+                                                   /*SrcRowPitch=*/size,
+                                                   /*SrcDepthPitch*/ 0);
+        } else {
+            std::vector<uint8_t> allocatedData(mAllocatedSize, 0);
+            std::memcpy(allocatedData.data(), data, size);
+            d3d11DeviceContext1->UpdateSubresource(mD3d11ConstantBuffer.Get(), /*DstSubresource=*/0,
+                                                   nullptr, allocatedData.data(),
+                                                   /*SrcRowPitch=*/mAllocatedSize,
+                                                   /*SrcDepthPitch*/ 0);
+        }
+        return {};
+    }
+
     // If the mD3d11NonConstantBuffer is null, we have to create a staging buffer for transfer the
-    // data to mD3d11ConstantBuffer, since UpdateSubresource() has many restrictions. For example,
-    // the size of the data has to be a multiple of 16, etc
+    // data to mD3d11ConstantBuffer.
     BufferDescriptor descriptor;
     descriptor.usage = wgpu::BufferUsage::MapWrite | wgpu::BufferUsage::CopySrc;
     descriptor.size = Align(size, D3D11BufferSizeAlignment(descriptor.usage));
