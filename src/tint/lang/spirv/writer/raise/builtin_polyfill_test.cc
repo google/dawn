@@ -2804,5 +2804,74 @@ TEST_F(SpirvWriter_BuiltinPolyfillTest, TextureNumLayers_Storage2DArray) {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_BuiltinPolyfillTest, QuantizeToF16_Scalar) {
+    auto* arg = b.FunctionParam("arg", ty.f32());
+    auto* func = b.Function("foo", ty.f32());
+    func->SetParams({arg});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.f32(), core::Function::kQuantizeToF16, arg);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%arg:f32):f32 -> %b1 {
+  %b1 = block {
+    %3:f32 = quantizeToF16 %arg
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = src;
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
+TEST_F(SpirvWriter_BuiltinPolyfillTest, QuantizeToF16_Vector) {
+    auto* arg = b.FunctionParam("arg", ty.vec4<f32>());
+    auto* func = b.Function("foo", ty.vec4<f32>());
+    func->SetParams({arg});
+
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.vec4<f32>(), core::Function::kQuantizeToF16, arg);
+        b.Return(func, result);
+    });
+
+    auto* src = R"(
+%foo = func(%arg:vec4<f32>):vec4<f32> -> %b1 {
+  %b1 = block {
+    %3:vec4<f32> = quantizeToF16 %arg
+    ret %3
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%foo = func(%arg:vec4<f32>):vec4<f32> -> %b1 {
+  %b1 = block {
+    %3:f32 = access %arg, 0u
+    %4:f32 = quantizeToF16 %3
+    %5:f32 = access %arg, 1u
+    %6:f32 = quantizeToF16 %5
+    %7:f32 = access %arg, 2u
+    %8:f32 = quantizeToF16 %7
+    %9:f32 = access %arg, 3u
+    %10:f32 = quantizeToF16 %9
+    %11:vec4<f32> = construct %4, %6, %8, %10
+    ret %11
+  }
+}
+)";
+
+    Run(BuiltinPolyfill);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer::raise

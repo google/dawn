@@ -91,6 +91,11 @@ struct State {
                     case core::Function::kTextureStore:
                         worklist.Push(builtin);
                         break;
+                    case core::Function::kQuantizeToF16:
+                        if (builtin->Result()->Type()->Is<core::type::Vector>()) {
+                            worklist.Push(builtin);
+                        }
+                        break;
                     default:
                         break;
                 }
@@ -146,6 +151,9 @@ struct State {
                     break;
                 case core::Function::kTextureStore:
                     replacement = TextureStore(builtin);
+                    break;
+                case core::Function::kQuantizeToF16:
+                    replacement = QuantizeToF16Vec(builtin);
                     break;
                 default:
                     break;
@@ -817,6 +825,29 @@ struct State {
         auto* extract = b.Access(ty.u32(), texture_call->Result(), 2_u);
         extract->InsertBefore(builtin);
         return extract->Result();
+    }
+
+    /// Scalarize the vector form of a `quantizeToF16()` builtin.
+    /// See crbug.com/tint/1741.
+    /// @param builtin the builtin call instruction
+    /// @returns the replacement value
+    core::ir::Value* QuantizeToF16Vec(core::ir::CoreBuiltinCall* builtin) {
+        auto* arg = builtin->Args()[0];
+        auto* vec = arg->Type()->As<core::type::Vector>();
+        TINT_ASSERT(vec);
+
+        // Replace the builtin call with a call to the spirv.dot intrinsic.
+        Vector<core::ir::Value*, 4> args;
+        for (uint32_t i = 0; i < vec->Width(); i++) {
+            auto* el = b.Access(ty.f32(), arg, u32(i));
+            auto* scalar_call = b.Call(ty.f32(), core::Function::kQuantizeToF16, el);
+            args.Push(scalar_call->Result());
+            el->InsertBefore(builtin);
+            scalar_call->InsertBefore(builtin);
+        }
+        auto* construct = b.Construct(vec, std::move(args));
+        construct->InsertBefore(builtin);
+        return construct->Result();
     }
 };
 
