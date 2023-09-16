@@ -175,8 +175,8 @@ TEST_F(SpirvWriterTest, WorkgroupVar_ZeroInitializeWithExtension) {
     EXPECT_INST("%v = OpVariable %_ptr_Workgroup_int Workgroup %4");
 }
 
-TEST_F(SpirvWriterTest, StorageVar) {
-    auto* v = b.Var("v", ty.ptr<storage, i32>());
+TEST_F(SpirvWriterTest, StorageVar_ReadOnly) {
+    auto* v = b.Var("v", ty.ptr<storage, i32, read>());
     v->SetBindingPoint(0, 0);
     b.RootBlock()->Append(v);
 
@@ -185,6 +185,7 @@ TEST_F(SpirvWriterTest, StorageVar) {
                OpDecorate %tint_symbol_1 Block
                OpDecorate %1 DescriptorSet 0
                OpDecorate %1 Binding 0
+               OpDecorate %1 NonWritable
 )");
     EXPECT_INST(R"(
 %tint_symbol_1 = OpTypeStruct %int
@@ -194,7 +195,7 @@ TEST_F(SpirvWriterTest, StorageVar) {
 }
 
 TEST_F(SpirvWriterTest, StorageVar_LoadAndStore) {
-    auto* v = b.Var("v", ty.ptr<storage, i32>());
+    auto* v = b.Var("v", ty.ptr<storage, i32, read_write>());
     v->SetBindingPoint(0, 0);
     b.RootBlock()->Append(v);
 
@@ -216,6 +217,31 @@ TEST_F(SpirvWriterTest, StorageVar_LoadAndStore) {
         %add = OpIAdd %int %load %int_1
          %16 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
                OpStore %16 %add
+)");
+}
+
+TEST_F(SpirvWriterTest, StorageVar_WriteOnly) {
+    auto* v = b.Var("v", ty.ptr<storage, i32, write>());
+    v->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(v);
+
+    auto* func = b.Function("foo", ty.void_(), core::ir::Function::PipelineStage::kCompute,
+                            std::array{1u, 1u, 1u});
+    b.Append(func->Block(), [&] {
+        b.Store(v, 42_i);
+        b.Return(func);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               OpDecorate %tint_symbol_1 Block
+               OpDecorate %1 DescriptorSet 0
+               OpDecorate %1 Binding 0
+               OpDecorate %1 NonReadable
+)");
+    EXPECT_INST(R"(
+          %9 = OpAccessChain %_ptr_StorageBuffer_int %1 %uint_0
+               OpStore %9 %int_42
 )");
 }
 
@@ -361,6 +387,74 @@ TEST_F(SpirvWriterTest, TextureVar_Load) {
 
     ASSERT_TRUE(Generate()) << Error() << output_;
     EXPECT_INST("%load = OpLoad %3 %v");
+}
+
+TEST_F(SpirvWriterTest, ReadOnlyStorageTextureVar) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
+                                ty.Get<core::type::StorageTexture>(
+                                    core::type::TextureDimension::k2d, format, read,
+                                    core::type::StorageTexture::SubtypeFor(format, ty)),
+                                core::Access::kRead));
+    v->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(v);
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               OpDecorate %v DescriptorSet 0
+               OpDecorate %v Binding 0
+               OpDecorate %v NonWritable
+)");
+    EXPECT_INST(R"(
+          %3 = OpTypeImage %float 2D 0 0 0 2 Rgba8
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant
+)");
+}
+
+TEST_F(SpirvWriterTest, ReadWriteStorageTextureVar) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
+                                ty.Get<core::type::StorageTexture>(
+                                    core::type::TextureDimension::k2d, format, read_write,
+                                    core::type::StorageTexture::SubtypeFor(format, ty)),
+                                core::Access::kRead));
+    v->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(v);
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               OpDecorate %v DescriptorSet 0
+               OpDecorate %v Binding 0
+)");
+    EXPECT_INST(R"(
+          %3 = OpTypeImage %float 2D 0 0 0 2 Rgba8
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant
+)");
+}
+
+TEST_F(SpirvWriterTest, WriteOnlyStorageTextureVar) {
+    auto format = core::TexelFormat::kRgba8Unorm;
+    auto* v = b.Var("v", ty.ptr(core::AddressSpace::kHandle,
+                                ty.Get<core::type::StorageTexture>(
+                                    core::type::TextureDimension::k2d, format, write,
+                                    core::type::StorageTexture::SubtypeFor(format, ty)),
+                                core::Access::kRead));
+    v->SetBindingPoint(0, 0);
+    b.RootBlock()->Append(v);
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST(R"(
+               OpDecorate %v DescriptorSet 0
+               OpDecorate %v Binding 0
+               OpDecorate %v NonReadable
+)");
+    EXPECT_INST(R"(
+          %3 = OpTypeImage %float 2D 0 0 0 2 Rgba8
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+          %v = OpVariable %_ptr_UniformConstant_3 UniformConstant
+)");
 }
 
 }  // namespace

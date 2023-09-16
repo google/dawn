@@ -1826,6 +1826,7 @@ void Printer::EmitIOAttributes(uint32_t id,
 void Printer::EmitVar(core::ir::Var* var) {
     auto id = Value(var);
     auto* ptr = var->Result()->Type()->As<core::type::Pointer>();
+    auto* store_ty = ptr->StoreType();
     auto ty = Type(ptr);
 
     switch (ptr->AddressSpace()) {
@@ -1836,7 +1837,7 @@ void Printer::EmitVar(core::ir::Var* var) {
                 current_function_.push_inst(spv::Op::OpStore, {id, Value(var->Initializer())});
             } else {
                 current_function_.push_var(
-                    {ty, id, U32Operand(SpvStorageClassFunction), ConstantNull(ptr->StoreType())});
+                    {ty, id, U32Operand(SpvStorageClassFunction), ConstantNull(store_ty)});
             }
             break;
         }
@@ -1853,7 +1854,7 @@ void Printer::EmitVar(core::ir::Var* var) {
                 TINT_ASSERT(var->Initializer()->Is<core::ir::Constant>());
                 operands.push_back(Value(var->Initializer()));
             } else {
-                operands.push_back(ConstantNull(ptr->StoreType()));
+                operands.push_back(ConstantNull(store_ty));
             }
             module_.PushType(spv::Op::OpVariable, operands);
             break;
@@ -1881,6 +1882,19 @@ void Printer::EmitVar(core::ir::Var* var) {
                               {id, U32Operand(SpvDecorationDescriptorSet), bp.group});
             module_.PushAnnot(spv::Op::OpDecorate,
                               {id, U32Operand(SpvDecorationBinding), bp.binding});
+
+            // Add NonReadable and NonWritable decorations to storage textures and buffers.
+            auto* st = store_ty->As<core::type::StorageTexture>();
+            if (st || store_ty->Is<core::type::Struct>()) {
+                auto access = st ? st->access() : ptr->Access();
+                if (access == core::Access::kRead) {
+                    module_.PushAnnot(spv::Op::OpDecorate,
+                                      {id, U32Operand(SpvDecorationNonWritable)});
+                } else if (access == core::Access::kWrite) {
+                    module_.PushAnnot(spv::Op::OpDecorate,
+                                      {id, U32Operand(SpvDecorationNonReadable)});
+                }
+            }
             break;
         }
         case core::AddressSpace::kWorkgroup: {
@@ -1889,7 +1903,7 @@ void Printer::EmitVar(core::ir::Var* var) {
             if (zero_init_workgroup_memory_) {
                 // If requested, use the VK_KHR_zero_initialize_workgroup_memory to zero-initialize
                 // the workgroup variable using an null constant initializer.
-                operands.push_back(ConstantNull(ptr->StoreType()));
+                operands.push_back(ConstantNull(store_ty));
             }
             module_.PushType(spv::Op::OpVariable, operands);
             break;
