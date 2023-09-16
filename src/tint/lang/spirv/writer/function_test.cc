@@ -300,6 +300,39 @@ TEST_F(SpirvWriterTest, Function_Call_Void) {
     EXPECT_INST("%result = OpFunctionCall %void %foo");
 }
 
+TEST_F(SpirvWriterTest, Function_ShaderIO_VertexPointSize) {
+    auto* func = b.Function("main", ty.vec4<f32>(), core::ir::Function::PipelineStage::kVertex);
+    func->SetReturnBuiltin(core::ir::Function::ReturnBuiltin::kPosition);
+    b.Append(func->Block(), [&] {  //
+        b.Return(func, b.Construct(ty.vec4<f32>(), 0.5_f));
+    });
+
+    Options options;
+    options.emit_vertex_point_size = true;
+    ASSERT_TRUE(Generate(options)) << Error() << output_;
+    EXPECT_INST(
+        R"(OpEntryPoint Vertex %main "main" %main_position_Output %main___point_size_Output)");
+    EXPECT_INST(R"(
+               OpDecorate %main_position_Output BuiltIn Position
+               OpDecorate %main___point_size_Output BuiltIn PointSize
+)");
+    EXPECT_INST(R"(
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+%main_position_Output = OpVariable %_ptr_Output_v4float Output
+%_ptr_Output_float = OpTypePointer Output %float
+%main___point_size_Output = OpVariable %_ptr_Output_float Output
+)");
+    EXPECT_INST(R"(
+       %main = OpFunction %void None %14
+         %15 = OpLabel
+         %16 = OpFunctionCall %v4float %main_inner
+               OpStore %main_position_Output %16
+               OpStore %main___point_size_Output %float_1
+               OpReturn
+               OpFunctionEnd
+)");
+}
+
 TEST_F(SpirvWriterTest, Function_ShaderIO_DualSourceBlend) {
     auto* outputs = ty.Struct(mod.symbols.New("Outputs"),
                               {

@@ -104,6 +104,15 @@ struct State {
         // Process the parameters and return value to prepare for building a wrapper function.
         GatherInputs();
         GatherOutput();
+
+        // Add an output for the vertex point size if needed.
+        std::optional<uint32_t> vertex_point_size_index;
+        if (func->Stage() == Function::PipelineStage::kVertex && backend->NeedsVertexPointSize()) {
+            vertex_point_size_index =
+                backend->AddOutput(ir->symbols.New("vertex_point_size"), ty.f32(),
+                                   {{}, {}, {BuiltinValue::kPointSize}, {}, false});
+        }
+
         auto new_params = backend->FinalizeInputs();
         auto* new_ret_val = backend->FinalizeOutputs();
 
@@ -128,6 +137,9 @@ struct State {
         auto inner_call_args = BuildInnerCallArgs(wrapper);
         auto* inner_result = wrapper.Call(func->ReturnType(), func, std::move(inner_call_args));
         SetOutputs(wrapper, inner_result->Result());
+        if (vertex_point_size_index) {
+            backend->SetOutput(wrapper, vertex_point_size_index.value(), b.Constant(1_f));
+        }
 
         // Return the new result.
         wrapper.Return(ep, new_ret_val);

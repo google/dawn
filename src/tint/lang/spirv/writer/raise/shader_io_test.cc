@@ -1063,5 +1063,53 @@ FragDepthClampArgs = struct @align(4), @block {
     EXPECT_EQ(expect, str());
 }
 
+TEST_F(SpirvWriter_ShaderIOTest, EmitVertexPointSize) {
+    auto* ep = b.Function("foo", ty.vec4<f32>());
+    ep->SetStage(core::ir::Function::PipelineStage::kVertex);
+    ep->SetReturnBuiltin(core::ir::Function::ReturnBuiltin::kPosition);
+
+    b.Append(ep->Block(), [&] {  //
+        b.Return(ep, b.Construct(ty.vec4<f32>(), 0.5_f));
+    });
+
+    auto* src = R"(
+%foo = @vertex func():vec4<f32> [@position] -> %b1 {
+  %b1 = block {
+    %2:vec4<f32> = construct 0.5f
+    ret %2
+  }
+}
+)";
+    EXPECT_EQ(src, str());
+
+    auto* expect = R"(
+%b1 = block {  # root
+  %foo_position_Output:ptr<__out, vec4<f32>, write> = var @builtin(position)
+  %foo___point_size_Output:ptr<__out, f32, write> = var @builtin(__point_size)
+}
+
+%foo_inner = func():vec4<f32> -> %b2 {
+  %b2 = block {
+    %4:vec4<f32> = construct 0.5f
+    ret %4
+  }
+}
+%foo = @vertex func():void -> %b3 {
+  %b3 = block {
+    %6:vec4<f32> = call %foo_inner
+    store %foo_position_Output, %6
+    store %foo___point_size_Output, 1.0f
+    ret
+  }
+}
+)";
+
+    ShaderIOConfig config;
+    config.emit_vertex_point_size = true;
+    Run(ShaderIO, config);
+
+    EXPECT_EQ(expect, str());
+}
+
 }  // namespace
 }  // namespace tint::spirv::writer::raise

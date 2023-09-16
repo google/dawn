@@ -37,20 +37,24 @@ struct ShaderIOBackendState {
     /// @param name the name of the input
     /// @param type the type of the input
     /// @param attributes the IO attributes
-    virtual void AddInput(Symbol name,
-                          const core::type::Type* type,
-                          core::type::StructMemberAttributes attributes) {
+    /// @returns the index of the input
+    virtual uint32_t AddInput(Symbol name,
+                              const core::type::Type* type,
+                              core::type::StructMemberAttributes attributes) {
         inputs.Push({name, type, std::move(attributes)});
+        return uint32_t(inputs.Length() - 1);
     }
 
     /// Add an output.
     /// @param name the name of the output
     /// @param type the type of the output
     /// @param attributes the IO attributes
-    virtual void AddOutput(Symbol name,
-                           const core::type::Type* type,
-                           core::type::StructMemberAttributes attributes) {
+    /// @returns the index of the output
+    virtual uint32_t AddOutput(Symbol name,
+                               const core::type::Type* type,
+                               core::type::StructMemberAttributes attributes) {
         outputs.Push({name, type, std::move(attributes)});
+        return uint32_t(outputs.Length() - 1);
     }
 
     /// Finalize the shader inputs and create any state needed for the new entry point function.
@@ -72,6 +76,9 @@ struct ShaderIOBackendState {
     /// @param idx the index of the output
     /// @param value the value to set
     virtual void SetOutput(Builder& builder, uint32_t idx, Value* value) = 0;
+
+    /// @returns true if a vertex point size builtin should be added
+    virtual bool NeedsVertexPointSize() const { return false; }
 
   protected:
     /// The IR module.

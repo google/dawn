@@ -30,6 +30,8 @@ namespace tint::spirv::writer::raise {
 struct ShaderIOConfig {
     /// true if frag_depth builtin outputs should be clamped
     bool clamp_frag_depth = false;
+    /// true if a vertex point size builtin output should be added
+    bool emit_vertex_point_size = false;
 };
 
 /// ShaderIO is a transform that moves each entry point function's parameters and return value to

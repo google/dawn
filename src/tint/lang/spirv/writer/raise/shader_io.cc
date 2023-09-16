@@ -189,6 +189,9 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
             .Call(ty.f32(), core::Function::kClamp, frag_depth, frag_depth_min, frag_depth_max)
             ->Result();
     }
+
+    /// @copydoc ShaderIO::BackendState::NeedsVertexPointSize
+    bool NeedsVertexPointSize() const override { return config.emit_vertex_point_size; }
 };
 }  // namespace
 
