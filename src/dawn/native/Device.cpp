@@ -511,7 +511,9 @@ void DeviceBase::Destroy() {
     mInternalPipelineStore = nullptr;
     mExternalTexturePlaceholderView = nullptr;
 
-    mQueue->AssumeCommandsComplete();
+    if (mQueue != nullptr) {
+        mQueue->AssumeCommandsComplete();
+    }
 
     // Now that the GPU timeline is empty, destroy the backend device.
     DestroyImpl();
