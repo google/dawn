@@ -2504,6 +2504,12 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         }
     }
 
+    if (fn == core::Function::kSubgroupBroadcast) {
+        if (!validator_.SubgroupBroadcast(call)) {
+            return nullptr;
+        }
+    }
+
     if (!validator_.BuiltinCall(call)) {
         return nullptr;
     }

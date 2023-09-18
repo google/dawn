@@ -461,6 +461,11 @@ class Validator {
     /// @returns true on success, false otherwise
     bool WorkgroupUniformLoad(const sem::Call* call) const;
 
+    /// Validates a subgroupBroadcast builtin function
+    /// @param call the builtin call to validate
+    /// @returns true on success, false otherwise
+    bool SubgroupBroadcast(const sem::Call* call) const;
+
     /// Validates an optional builtin function and its required extension.
     /// @param call the builtin call to validate
     /// @returns true on success, false otherwise
