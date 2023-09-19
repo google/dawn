@@ -194,7 +194,8 @@ MaybeError BindGroupTracker::Apply() {
                                 ComPtr<ID3D11UnorderedAccessView> d3d11UAV;
                                 TextureView* view =
                                     ToBackend(group->GetBindingAsTextureView(bindingIndex));
-                                DAWN_TRY_ASSIGN(d3d11UAV, view->CreateD3D11UnorderedAccessView());
+                                DAWN_TRY_ASSIGN(d3d11UAV,
+                                                view->GetOrCreateD3D11UnorderedAccessView());
                                 d3d11UAVs.insert(d3d11UAVs.begin(), std::move(d3d11UAV));
                                 break;
                             }
@@ -367,7 +368,7 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                     DAWN_TRY_ASSIGN(
                         srv, ToBackend(view->GetTexture())->GetStencilSRV(mCommandContext, view));
                 } else {
-                    DAWN_TRY_ASSIGN(srv, view->CreateD3D11ShaderResourceView());
+                    DAWN_TRY_ASSIGN(srv, view->GetOrCreateD3D11ShaderResourceView());
                 }
                 if (bindingVisibility & wgpu::ShaderStage::Vertex) {
                     deviceContext1->VSSetShaderResources(bindingSlot, 1, srv.GetAddressOf());
@@ -386,28 +387,25 @@ MaybeError BindGroupTracker::ApplyBindGroup(BindGroupIndex index) {
                 switch (bindingInfo.storageTexture.access) {
                     case wgpu::StorageTextureAccess::WriteOnly:
                     case wgpu::StorageTextureAccess::ReadWrite: {
-                        ComPtr<ID3D11UnorderedAccessView> d3d11UAV;
-                        DAWN_TRY_ASSIGN(d3d11UAV, view->CreateD3D11UnorderedAccessView());
+                        ID3D11UnorderedAccessView* d3d11UAV = nullptr;
+                        DAWN_TRY_ASSIGN(d3d11UAV, view->GetOrCreateD3D11UnorderedAccessView());
                         if (bindingVisibility & wgpu::ShaderStage::Compute) {
-                            deviceContext1->CSSetUnorderedAccessViews(
-                                bindingSlot, 1, d3d11UAV.GetAddressOf(), nullptr);
+                            deviceContext1->CSSetUnorderedAccessViews(bindingSlot, 1, &d3d11UAV,
+                                                                      nullptr);
                         }
                         break;
                     }
                     case wgpu::StorageTextureAccess::ReadOnly: {
-                        ComPtr<ID3D11ShaderResourceView> d3d11SRV;
-                        DAWN_TRY_ASSIGN(d3d11SRV, view->CreateD3D11ShaderResourceView());
+                        ID3D11ShaderResourceView* d3d11SRV = nullptr;
+                        DAWN_TRY_ASSIGN(d3d11SRV, view->GetOrCreateD3D11ShaderResourceView());
                         if (bindingVisibility & wgpu::ShaderStage::Vertex) {
-                            deviceContext1->VSSetShaderResources(bindingSlot, 1,
-                                                                 d3d11SRV.GetAddressOf());
+                            deviceContext1->VSSetShaderResources(bindingSlot, 1, &d3d11SRV);
                         }
                         if (bindingVisibility & wgpu::ShaderStage::Fragment) {
-                            deviceContext1->PSSetShaderResources(bindingSlot, 1,
-                                                                 d3d11SRV.GetAddressOf());
+                            deviceContext1->PSSetShaderResources(bindingSlot, 1, &d3d11SRV);
                         }
                         if (bindingVisibility & wgpu::ShaderStage::Compute) {
-                            deviceContext1->CSSetShaderResources(bindingSlot, 1,
-                                                                 d3d11SRV.GetAddressOf());
+                            deviceContext1->CSSetShaderResources(bindingSlot, 1, &d3d11SRV);
                         }
                         break;
                     }

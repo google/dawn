@@ -373,7 +373,7 @@ ID3D11Resource* Texture::GetD3D11Resource() const {
     return mD3d11Resource.Get();
 }
 
-D3D11_RENDER_TARGET_VIEW_DESC Texture::GetRTVDescriptor(
+ResultOrError<ComPtr<ID3D11RenderTargetView>> Texture::CreateD3D11RenderTargetView(
     const Format& format,
     const SubresourceRange& singleLevelRange) const {
     DAWN_ASSERT(singleLevelRange.levelCount == 1);
@@ -386,38 +386,46 @@ D3D11_RENDER_TARGET_VIEW_DESC Texture::GetRTVDescriptor(
         DAWN_ASSERT(singleLevelRange.baseArrayLayer == 0);
         DAWN_ASSERT(singleLevelRange.layerCount == 1);
         rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
-        return rtvDesc;
+    } else {
+        switch (GetDimension()) {
+            case wgpu::TextureDimension::e2D:
+                // Currently we always use D3D11_TEX2D_ARRAY_RTV because we cannot specify base
+                // array layer and layer count in D3D11_TEX2D_RTV. For 2D texture views, we treat
+                // them as 1-layer 2D array textures. (Just like how we treat SRVs)
+                // https://docs.microsoft.com/en-us/windows/desktop/api/d3d11/ns-d3d11-d3d11_tex2d_rtv
+                // https://docs.microsoft.com/en-us/windows/desktop/api/d3d11/ns-d3d11-d3d11_tex2d_array
+                // _rtv
+                rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+                rtvDesc.Texture2DArray.MipSlice = singleLevelRange.baseMipLevel;
+                rtvDesc.Texture2DArray.FirstArraySlice = singleLevelRange.baseArrayLayer;
+                rtvDesc.Texture2DArray.ArraySize = singleLevelRange.layerCount;
+                break;
+            case wgpu::TextureDimension::e3D:
+                rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE3D;
+                rtvDesc.Texture3D.MipSlice = singleLevelRange.baseMipLevel;
+                rtvDesc.Texture3D.FirstWSlice = singleLevelRange.baseArrayLayer;
+                rtvDesc.Texture3D.WSize = singleLevelRange.layerCount;
+                break;
+            case wgpu::TextureDimension::e1D:
+                rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE1D;
+                rtvDesc.Texture1D.MipSlice = singleLevelRange.baseMipLevel;
+                break;
+        }
     }
-    switch (GetDimension()) {
-        case wgpu::TextureDimension::e2D:
-            // Currently we always use D3D11_TEX2D_ARRAY_RTV because we cannot specify base
-            // array layer and layer count in D3D11_TEX2D_RTV. For 2D texture views, we treat
-            // them as 1-layer 2D array textures. (Just like how we treat SRVs)
-            // https://docs.microsoft.com/en-us/windows/desktop/api/d3d11/ns-d3d11-d3d11_tex2d_rtv
-            // https://docs.microsoft.com/en-us/windows/desktop/api/d3d11/ns-d3d11-d3d11_tex2d_array
-            // _rtv
-            rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
-            rtvDesc.Texture2DArray.MipSlice = singleLevelRange.baseMipLevel;
-            rtvDesc.Texture2DArray.FirstArraySlice = singleLevelRange.baseArrayLayer;
-            rtvDesc.Texture2DArray.ArraySize = singleLevelRange.layerCount;
-            break;
-        case wgpu::TextureDimension::e3D:
-            rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE3D;
-            rtvDesc.Texture3D.MipSlice = singleLevelRange.baseMipLevel;
-            rtvDesc.Texture3D.FirstWSlice = singleLevelRange.baseArrayLayer;
-            rtvDesc.Texture3D.WSize = singleLevelRange.layerCount;
-            break;
-        case wgpu::TextureDimension::e1D:
-            rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE1D;
-            rtvDesc.Texture1D.MipSlice = singleLevelRange.baseMipLevel;
-            break;
-    }
-    return rtvDesc;
+
+    ComPtr<ID3D11RenderTargetView> rtv;
+    DAWN_TRY(CheckHRESULT(ToBackend(GetDevice())
+                              ->GetD3D11Device()
+                              ->CreateRenderTargetView(GetD3D11Resource(), &rtvDesc, &rtv),
+                          "CreateRenderTargetView"));
+
+    return rtv;
 }
 
-D3D11_DEPTH_STENCIL_VIEW_DESC Texture::GetDSVDescriptor(const SubresourceRange& singleLevelRange,
-                                                        bool depthReadOnly,
-                                                        bool stencilReadOnly) const {
+ResultOrError<ComPtr<ID3D11DepthStencilView>> Texture::CreateD3D11DepthStencilView(
+    const SubresourceRange& singleLevelRange,
+    bool depthReadOnly,
+    bool stencilReadOnly) const {
     D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc;
     DAWN_ASSERT(singleLevelRange.levelCount == 1);
     dsvDesc.Format = d3d::DXGITextureFormat(GetFormat().format);
@@ -442,7 +450,12 @@ D3D11_DEPTH_STENCIL_VIEW_DESC Texture::GetDSVDescriptor(const SubresourceRange& 
         dsvDesc.Texture2DArray.ArraySize = singleLevelRange.layerCount;
     }
 
-    return dsvDesc;
+    ComPtr<ID3D11DepthStencilView> dsv;
+    DAWN_TRY(CheckHRESULT(ToBackend(GetDevice())
+                              ->GetD3D11Device()
+                              ->CreateDepthStencilView(GetD3D11Resource(), &dsvDesc, &dsv),
+                          "CreateDepthStencilView"));
+    return dsv;
 }
 
 MaybeError Texture::Clear(CommandRecordingContext* commandContext,
@@ -476,28 +489,6 @@ MaybeError Texture::ClearRenderable(CommandRecordingContext* commandContext,
                                     const D3D11ClearValue& d3d11ClearValue) {
     ID3D11DeviceContext* d3d11DeviceContext = commandContext->GetD3D11DeviceContext();
 
-    TextureViewDescriptor desc = {};
-    desc.label = "ClearTextureView";
-    desc.format = GetFormat().format;
-    switch (GetDimension()) {
-        case wgpu::TextureDimension::e1D:
-            desc.dimension = wgpu::TextureViewDimension::e1D;
-            break;
-        case wgpu::TextureDimension::e2D:
-            desc.dimension = wgpu::TextureViewDimension::e2D;
-            break;
-        case wgpu::TextureDimension::e3D:
-            desc.dimension = wgpu::TextureViewDimension::e3D;
-            break;
-    }
-    // Whether content is initialized is tracked by frontend in unit of a single layer and
-    // level, so we need to check to clear layer by layer, and level by level to make sure that
-    // lazy clears won't overwrite any initialized content.
-    desc.baseMipLevel = range.baseMipLevel;
-    desc.mipLevelCount = range.levelCount;
-    desc.arrayLayerCount = 1u;
-    desc.aspect = wgpu::TextureAspect::All;
-
     UINT clearFlags = 0;
     if (GetFormat().HasDepth() && range.aspects & Aspect::Depth) {
         clearFlags |= D3D11_CLEAR_DEPTH;
@@ -506,28 +497,32 @@ MaybeError Texture::ClearRenderable(CommandRecordingContext* commandContext,
         clearFlags |= D3D11_CLEAR_STENCIL;
     }
 
-    for (uint32_t arrayLayer = range.baseArrayLayer;
-         arrayLayer < range.baseArrayLayer + range.layerCount; ++arrayLayer) {
-        desc.baseArrayLayer = arrayLayer;
-        Ref<TextureView> view = TextureView::Create(this, &desc);
-        for (uint32_t mipLevel = range.baseMipLevel;
-             mipLevel < range.baseMipLevel + range.levelCount; ++mipLevel) {
+    SubresourceRange clearRange;
+    clearRange.aspects = range.aspects;
+    clearRange.layerCount = 1u;
+    clearRange.levelCount = 1u;
+
+    for (clearRange.baseArrayLayer = range.baseArrayLayer;
+         clearRange.baseArrayLayer < range.baseArrayLayer + range.layerCount;
+         ++clearRange.baseArrayLayer) {
+        for (clearRange.baseMipLevel = range.baseMipLevel;
+             clearRange.baseMipLevel < range.baseMipLevel + range.levelCount;
+             ++clearRange.baseMipLevel) {
             if (clearValue == TextureBase::ClearValue::Zero &&
-                IsSubresourceContentInitialized(
-                    SubresourceRange::SingleMipAndLayer(mipLevel, arrayLayer, range.aspects))) {
+                IsSubresourceContentInitialized(clearRange)) {
                 // Skip lazy clears if already initialized.
                 continue;
             }
             if (GetFormat().HasDepthOrStencil()) {
                 ComPtr<ID3D11DepthStencilView> d3d11DSV;
-                DAWN_TRY_ASSIGN(d3d11DSV, view->CreateD3D11DepthStencilView(
-                                              /*depthReadOnly=*/false,
-                                              /*stencilReadOnly=*/false, mipLevel));
+                DAWN_TRY_ASSIGN(d3d11DSV, CreateD3D11DepthStencilView(clearRange,
+                                                                      /*depthReadOnly=*/false,
+                                                                      /*stencilReadOnly=*/false));
                 d3d11DeviceContext->ClearDepthStencilView(
                     d3d11DSV.Get(), clearFlags, d3d11ClearValue.depth, d3d11ClearValue.stencil);
             } else {
                 ComPtr<ID3D11RenderTargetView> d3d11RTV;
-                DAWN_TRY_ASSIGN(d3d11RTV, view->CreateD3D11RenderTargetView(mipLevel));
+                DAWN_TRY_ASSIGN(d3d11RTV, CreateD3D11RenderTargetView(GetFormat(), clearRange));
                 d3d11DeviceContext->ClearRenderTargetView(d3d11RTV.Get(), d3d11ClearValue.color);
             }
         }
@@ -1138,7 +1133,7 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> Texture::GetStencilSRV(
     DAWN_TRY_ASSIGN(textureView, mTextureForStencilSampling->CreateView(&viewDesc));
 
     ComPtr<ID3D11ShaderResourceView> srv;
-    DAWN_TRY_ASSIGN(srv, ToBackend(textureView)->CreateD3D11ShaderResourceView());
+    DAWN_TRY_ASSIGN(srv, ToBackend(textureView)->GetOrCreateD3D11ShaderResourceView());
     return srv;
 }
 
@@ -1150,7 +1145,11 @@ Ref<TextureView> TextureView::Create(TextureBase* texture,
 
 TextureView::~TextureView() = default;
 
-ResultOrError<ComPtr<ID3D11ShaderResourceView>> TextureView::CreateD3D11ShaderResourceView() const {
+ResultOrError<ID3D11ShaderResourceView*> TextureView::GetOrCreateD3D11ShaderResourceView() {
+    if (mD3d11SharedResourceView) {
+        return mD3d11SharedResourceView.Get();
+    }
+
     Device* device = ToBackend(GetDevice());
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
     srvDesc.Format = d3d::DXGITextureFormat(GetFormat().format);
@@ -1277,52 +1276,47 @@ ResultOrError<ComPtr<ID3D11ShaderResourceView>> TextureView::CreateD3D11ShaderRe
         }
     }
 
-    ComPtr<ID3D11ShaderResourceView> srv;
-    DAWN_TRY(CheckHRESULT(device->GetD3D11Device()->CreateShaderResourceView(
-                              ToBackend(GetTexture())->GetD3D11Resource(), &srvDesc, &srv),
-                          "CreateShaderResourceView"));
-
-    return srv;
-}
-
-ResultOrError<ComPtr<ID3D11RenderTargetView>> TextureView::CreateD3D11RenderTargetView(
-    uint32_t mipLevel) const {
-    auto range = GetSubresourceRange();
-    DAWN_ASSERT(mipLevel >= range.baseMipLevel && mipLevel < range.baseMipLevel + range.levelCount);
-    range.baseMipLevel = mipLevel;
-    range.levelCount = 1u;
-    D3D11_RENDER_TARGET_VIEW_DESC rtvDesc =
-        ToBackend(GetTexture())->GetRTVDescriptor(GetFormat(), range);
-    ComPtr<ID3D11RenderTargetView> rtv;
     DAWN_TRY(CheckHRESULT(
-        ToBackend(GetDevice())
-            ->GetD3D11Device()
-            ->CreateRenderTargetView(ToBackend(GetTexture())->GetD3D11Resource(), &rtvDesc, &rtv),
-        "CreateRenderTargetView"));
-    return rtv;
+        device->GetD3D11Device()->CreateShaderResourceView(
+            ToBackend(GetTexture())->GetD3D11Resource(), &srvDesc, &mD3d11SharedResourceView),
+        "CreateShaderResourceView"));
+    return mD3d11SharedResourceView.Get();
 }
 
-ResultOrError<ComPtr<ID3D11DepthStencilView>> TextureView::CreateD3D11DepthStencilView(
+ResultOrError<ID3D11RenderTargetView*> TextureView::GetOrCreateD3D11RenderTargetView() {
+    if (mD3d11RenderTargetView) {
+        return mD3d11RenderTargetView.Get();
+    }
+    DAWN_TRY_ASSIGN(
+        mD3d11RenderTargetView,
+        ToBackend(GetTexture())->CreateD3D11RenderTargetView(GetFormat(), GetSubresourceRange()));
+    return mD3d11RenderTargetView.Get();
+}
+
+ResultOrError<ID3D11DepthStencilView*> TextureView::GetOrCreateD3D11DepthStencilView(
     bool depthReadOnly,
-    bool stencilReadOnly,
-    uint32_t mipLevel) const {
-    auto range = GetSubresourceRange();
-    DAWN_ASSERT(mipLevel >= range.baseMipLevel && mipLevel < range.baseMipLevel + range.levelCount);
-    range.baseMipLevel = mipLevel;
-    range.levelCount = 1u;
-    ComPtr<ID3D11DepthStencilView> dsv;
-    D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc =
-        ToBackend(GetTexture())->GetDSVDescriptor(range, depthReadOnly, stencilReadOnly);
-    DAWN_TRY(CheckHRESULT(
-        ToBackend(GetDevice())
-            ->GetD3D11Device()
-            ->CreateDepthStencilView(ToBackend(GetTexture())->GetD3D11Resource(), &dsvDesc, &dsv),
-        "CreateDepthStencilView"));
-    return dsv;
+    bool stencilReadOnly) {
+    // TODO: figure out if it is necessary to cache DSV for different properties.
+    if (mD3d11DepthStencilView && mD3d11DepthStencilViewDepthReadOnly == depthReadOnly &&
+        mD3d11DepthStencilViewStencilReadOnly == stencilReadOnly) {
+        return mD3d11DepthStencilView.Get();
+    }
+
+    mD3d11DepthStencilView.Reset();
+    DAWN_TRY_ASSIGN(
+        mD3d11DepthStencilView,
+        ToBackend(GetTexture())
+            ->CreateD3D11DepthStencilView(GetSubresourceRange(), depthReadOnly, stencilReadOnly));
+    mD3d11DepthStencilViewDepthReadOnly = depthReadOnly;
+    mD3d11DepthStencilViewStencilReadOnly = stencilReadOnly;
+    return mD3d11DepthStencilView.Get();
 }
 
-ResultOrError<ComPtr<ID3D11UnorderedAccessView>> TextureView::CreateD3D11UnorderedAccessView()
-    const {
+ResultOrError<ID3D11UnorderedAccessView*> TextureView::GetOrCreateD3D11UnorderedAccessView() {
+    if (mD3d11UnorderedAccessView) {
+        return mD3d11UnorderedAccessView.Get();
+    }
+
     D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
     uavDesc.Format = d3d::DXGITextureFormat(GetFormat().format);
 
@@ -1356,16 +1350,17 @@ ResultOrError<ComPtr<ID3D11UnorderedAccessView>> TextureView::CreateD3D11Unorder
             DAWN_UNREACHABLE();
     }
 
-    ComPtr<ID3D11UnorderedAccessView> uav;
-    DAWN_TRY(CheckHRESULT(ToBackend(GetDevice())
-                              ->GetD3D11Device()
-                              ->CreateUnorderedAccessView(
-                                  ToBackend(GetTexture())->GetD3D11Resource(), &uavDesc, &uav),
-                          "CreateUnorderedAccessView"));
+    DAWN_TRY(
+        CheckHRESULT(ToBackend(GetDevice())
+                         ->GetD3D11Device()
+                         ->CreateUnorderedAccessView(ToBackend(GetTexture())->GetD3D11Resource(),
+                                                     &uavDesc, &mD3d11UnorderedAccessView),
+                     "CreateUnorderedAccessView"));
 
-    SetDebugName(ToBackend(GetDevice()), uav.Get(), "Dawn_TextureView", GetLabel());
+    SetDebugName(ToBackend(GetDevice()), mD3d11UnorderedAccessView.Get(), "Dawn_TextureView",
+                 GetLabel());
 
-    return uav;
+    return mD3d11UnorderedAccessView.Get();
 }
 
 }  // namespace dawn::native::d3d11
