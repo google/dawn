@@ -1402,6 +1402,11 @@ void Printer::EmitCoreBuiltinCall(core::ir::CoreBuiltinCall* builtin) {
             operands.push_back(Constant(ir_->constant_values.Get(u32(spv::Scope::Subgroup))));
             operands.push_back(Constant(ir_->constant_values.Get(true)));
             break;
+        case core::Function::kSubgroupBroadcast:
+            module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
+            op = spv::Op::OpGroupNonUniformBroadcast;
+            operands.push_back(Constant(ir_->constant_values.Get(u32(spv::Scope::Subgroup))));
+            break;
         case core::Function::kTan:
             glsl_ext_inst(GLSLstd450Tan);
             break;

@@ -2574,6 +2574,19 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             }
             return result_id;
         }
+        case core::Function::kSubgroupBroadcast: {
+            module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
+            auto first_param_id = get_arg_as_value_id(0);
+            auto second_param_id = get_arg_as_value_id(1);
+            if (!push_function_inst(
+                    spv::Op::OpGroupNonUniformBroadcast,
+                    {Operand(result_type_id), result,
+                     Operand(GenerateConstantIfNeeded(ScalarConstant::U32(SpvScopeSubgroup))),
+                     Operand(first_param_id), Operand(second_param_id)})) {
+                return 0;
+            }
+            return result_id;
+        }
         default: {
             auto inst_id = builtin_to_glsl_method(builtin);
             if (inst_id == 0) {

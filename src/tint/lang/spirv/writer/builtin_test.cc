@@ -1786,6 +1786,45 @@ TEST_F(SpirvWriterTest, Builtin_SubgroupBallot) {
     EXPECT_INST("%result = OpGroupNonUniformBallot %v4uint %uint_3 %true");
 }
 
+TEST_F(SpirvWriterTest, Builtin_SubgroupBroadcastValueF32) {
+    auto* func = b.Function("foo", ty.f32());
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.f32(), core::Function::kSubgroupBroadcast, 1_f, 0_u);
+        mod.SetName(result, "result");
+        b.Return(func, result);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpCapability GroupNonUniformBallot");
+    EXPECT_INST("%result = OpGroupNonUniformBroadcast %float %uint_3 %float_1 %uint_0");
+}
+
+TEST_F(SpirvWriterTest, Builtin_SubgroupBroadcastValueI32) {
+    auto* func = b.Function("foo", ty.i32());
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.i32(), core::Function::kSubgroupBroadcast, 1_i, 0_u);
+        mod.SetName(result, "result");
+        b.Return(func, result);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpCapability GroupNonUniformBallot");
+    EXPECT_INST("%result = OpGroupNonUniformBroadcast %int %uint_3 %int_1 %uint_0");
+}
+
+TEST_F(SpirvWriterTest, Builtin_SubgroupBroadcastValueU32) {
+    auto* func = b.Function("foo", ty.u32());
+    b.Append(func->Block(), [&] {
+        auto* result = b.Call(ty.u32(), core::Function::kSubgroupBroadcast, 1_u, 0_u);
+        mod.SetName(result, "result");
+        b.Return(func, result);
+    });
+
+    ASSERT_TRUE(Generate()) << Error() << output_;
+    EXPECT_INST("OpCapability GroupNonUniformBallot");
+    EXPECT_INST("%result = OpGroupNonUniformBroadcast %uint %uint_3 %uint_1 %uint_0");
+}
+
 TEST_F(SpirvWriterTest, Builtin_ArrayLength) {
     auto* var = b.Var("var", ty.ptr(storage, ty.runtime_array(ty.i32())));
     var->SetBindingPoint(0, 0);
