@@ -98,7 +98,7 @@ TEST_F(ConstEvalTest, Scalar_f32) {
 }
 
 TEST_F(ConstEvalTest, Scalar_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* expr = Expr(9.9_h);
     WrapInFunction(expr);
@@ -140,7 +140,7 @@ Case C() {
 }
 using ConstEvalZeroInitTest = ConstEvalTestWithParam<Case>;
 TEST_P(ConstEvalZeroInitTest, Test) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
     auto& param = GetParam();
     auto ty = param.type(*this);
     auto* expr = Call(ty);
@@ -296,7 +296,7 @@ TEST_F(ConstEvalTest, Vec3_ZeroInit_f32) {
 }
 
 TEST_F(ConstEvalTest, Vec3_ZeroInit_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>();
     WrapInFunction(expr);
@@ -443,7 +443,7 @@ TEST_F(ConstEvalTest, Vec3_Splat_f32) {
 }
 
 TEST_F(ConstEvalTest, Vec3_Splat_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(9.9_h);
     WrapInFunction(expr);
@@ -651,7 +651,7 @@ TEST_F(ConstEvalTest, Vec3_FullConstruct_f32) {
 }
 
 TEST_F(ConstEvalTest, Vec3_FullConstruct_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(1_h, 2_h, 3_h);
     WrapInFunction(expr);
@@ -914,7 +914,7 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f32_mixed_sign_0) {
 }
 
 TEST_F(ConstEvalTest, Vec3_MixConstruct_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(1_h, Call<vec2<f16>>(2_h, 3_h));
     WrapInFunction(expr);
@@ -945,7 +945,7 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f16) {
 }
 
 TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_all_10) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(10_h, Call<vec2<f16>>(10_h, 10_h));
     WrapInFunction(expr);
@@ -976,7 +976,7 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_all_10) {
 }
 
 TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_all_positive_0) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(0_h, Call<vec2<f16>>(0_h, 0_h));
     WrapInFunction(expr);
@@ -1007,7 +1007,7 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_all_positive_0) {
 }
 
 TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_all_negative_0) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(Call<vec2<f16>>(-0_h, -0_h), -0_h);
     WrapInFunction(expr);
@@ -1038,7 +1038,7 @@ TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_all_negative_0) {
 }
 
 TEST_F(ConstEvalTest, Vec3_MixConstruct_f16_mixed_sign_0) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* expr = Call<vec3<f16>>(0_h, Call<vec2<f16>>(-0_h, 0_h));
     WrapInFunction(expr);
@@ -1198,7 +1198,7 @@ TEST_F(ConstEvalTest, Mat2x3_ZeroInit_f32) {
 }
 
 TEST_F(ConstEvalTest, Mat2x3_ZeroInit_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* expr = Call<mat2x3<f16>>();
     WrapInFunction(expr);
@@ -1513,7 +1513,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 
 using ResolverConstEvalArrayInitTest = ConstEvalTestWithParam<Case>;
 TEST_P(ResolverConstEvalArrayInitTest, Test) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
     auto& param = GetParam();
     auto* expr = param.input.Expr(*this);
     auto* a = Const("a", expr);
@@ -1686,7 +1686,7 @@ TEST_F(ConstEvalTest, Array_Struct_f32_Elements) {
 }
 
 TEST_F(ConstEvalTest, Struct_ZeroInit) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
     auto* s = Structure("S", Vector{
                                  Member("a", ty.i32()),
                                  Member("b", ty.u32()),
@@ -1729,7 +1729,7 @@ TEST_F(ConstEvalTest, Struct_ZeroInit) {
 }
 
 TEST_F(ConstEvalTest, Struct_Nested_ZeroInit) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
     auto* inner = Structure("Inner", Vector{
                                          Member("a", ty.i32()),
                                          Member("b", ty.u32()),
@@ -1812,7 +1812,7 @@ TEST_F(ConstEvalTest, Struct_I32s_ZeroInit) {
 }
 
 TEST_F(ConstEvalTest, Struct_MixedScalars_ZeroInit) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     Structure("S", Vector{
                        Member("m1", ty.i32()),
@@ -1924,7 +1924,7 @@ TEST_F(ConstEvalTest, Struct_VectorF32s_ZeroInit) {
 }
 
 TEST_F(ConstEvalTest, Struct_MixedVectors_ZeroInit) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     Structure("S", Vector{
                        Member("m1", ty.vec2<i32>()),
@@ -2055,7 +2055,7 @@ TEST_F(ConstEvalTest, Struct_Struct_ZeroInit) {
 }
 
 TEST_F(ConstEvalTest, Struct_MixedScalars_Construct) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     Structure("S", Vector{
                        Member("m1", ty.i32()),
@@ -2106,7 +2106,7 @@ TEST_F(ConstEvalTest, Struct_MixedScalars_Construct) {
 }
 
 TEST_F(ConstEvalTest, Struct_MixedVectors_Construct) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     Structure("S", Vector{
                        Member("m1", ty.vec2<i32>()),

@@ -15,9 +15,9 @@
 #include <string>
 
 #include "gtest/gtest-spi.h"
-#include "src/tint/lang/core/diagnostic_severity.h"
 #include "src/tint/lang/wgsl/ast/diagnostic_control.h"
 #include "src/tint/lang/wgsl/ast/helper_test.h"
+#include "src/tint/lang/wgsl/diagnostic_severity.h"
 
 namespace tint::ast {
 namespace {
@@ -28,7 +28,7 @@ TEST_F(DiagnosticControlTest, Assert_RuleNotNull) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            DiagnosticControl control(core::DiagnosticSeverity::kWarning, nullptr);
+            DiagnosticControl control(wgsl::DiagnosticSeverity::kWarning, nullptr);
         },
         "internal compiler error");
 }

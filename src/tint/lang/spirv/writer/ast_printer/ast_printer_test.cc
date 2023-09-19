@@ -31,7 +31,7 @@ TEST_F(SpirvASTPrinterTest, InvalidProgram) {
 }
 
 TEST_F(SpirvASTPrinterTest, UnsupportedExtension) {
-    Enable(Source{{12, 34}}, core::Extension::kUndefined);
+    Enable(Source{{12, 34}}, wgsl::Extension::kUndefined);
 
     auto program = std::make_unique<Program>(resolver::Resolve(*this));
     auto result = Generate(program.get(), Options{});

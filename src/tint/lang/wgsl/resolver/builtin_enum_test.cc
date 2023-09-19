@@ -57,7 +57,7 @@ using ResolverAddressSpaceUsedWithTemplateArgs = ResolverTestWithParam<const cha
 TEST_P(ResolverAddressSpaceUsedWithTemplateArgs, Test) {
     // fn f(p : ptr<ADDRESS_SPACE<T>, f32) {}
 
-    Enable(core::Extension::kChromiumExperimentalFullPtrParameters);
+    Enable(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
     auto* tmpl = Ident(Source{{12, 34}}, GetParam(), "T");
     Func("f", Vector{Param("p", ty("ptr", tmpl, ty.f32()))}, ty.void_(), tint::Empty);
     EXPECT_FALSE(r()->Resolve());

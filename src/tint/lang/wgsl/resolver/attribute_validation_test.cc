@@ -80,7 +80,7 @@ struct TestParams {
 struct TestWithParams : ResolverTestWithParam<TestParams> {
     void EnableExtensionIfNecessary(AttributeKind attributeKind) {
         if (attributeKind == AttributeKind::kIndex) {
-            Enable(core::Extension::kChromiumInternalDualSourceBlending);
+            Enable(wgsl::Extension::kChromiumInternalDualSourceBlending);
         }
     }
 };
@@ -96,7 +96,7 @@ static Vector<const ast::Attribute*, 2> createAttributes(const Source& source,
         case AttributeKind::kBuiltin:
             return {builder.Builtin(source, core::BuiltinValue::kPosition)};
         case AttributeKind::kDiagnostic:
-            return {builder.DiagnosticAttribute(source, core::DiagnosticSeverity::kInfo, "chromium",
+            return {builder.DiagnosticAttribute(source, wgsl::DiagnosticSeverity::kInfo, "chromium",
                                                 "unreachable_code")};
         case AttributeKind::kGroup:
             return {builder.Group(source, 1_a)};

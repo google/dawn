@@ -176,7 +176,7 @@ class State {
     Hashset<core::ir::Value*, 64> can_inline_;
 
     /// Set of enable directives emitted.
-    Hashset<core::Extension, 4> enables_;
+    Hashset<wgsl::Extension, 4> enables_;
 
     /// Map of struct to output program name.
     Hashmap<const core::type::Struct*, Symbol, 8> structs_;
@@ -581,8 +581,8 @@ class State {
             [&](core::ir::CoreBuiltinCall* c) {
                 if (!disabled_derivative_uniformity_ && RequiresDerivativeUniformity(c->Func())) {
                     // TODO(crbug.com/tint/1985): Be smarter about disabling derivative uniformity.
-                    b.DiagnosticDirective(core::DiagnosticSeverity::kOff,
-                                          core::CoreDiagnosticRule::kDerivativeUniformity);
+                    b.DiagnosticDirective(wgsl::DiagnosticSeverity::kOff,
+                                          wgsl::CoreDiagnosticRule::kDerivativeUniformity);
                     disabled_derivative_uniformity_ = true;
                 }
 
@@ -826,7 +826,7 @@ class State {
             [&](const core::type::U32*) { return b.Expr(c->ValueAs<u32>()); },
             [&](const core::type::F32*) { return b.Expr(c->ValueAs<f32>()); },
             [&](const core::type::F16*) {
-                Enable(core::Extension::kF16);
+                Enable(wgsl::Extension::kF16);
                 return b.Expr(c->ValueAs<f16>());
             },
             [&](const core::type::Bool*) { return b.Expr(c->ValueAs<bool>()); },
@@ -840,7 +840,7 @@ class State {
             });
     }
 
-    void Enable(core::Extension ext) {
+    void Enable(wgsl::Extension ext) {
         if (enables_.Add(ext)) {
             b.Enable(ext);
         }
@@ -866,7 +866,7 @@ class State {
             [&](const core::type::I32*) { return b.ty.i32(); },    //
             [&](const core::type::U32*) { return b.ty.u32(); },    //
             [&](const core::type::F16*) {
-                Enable(core::Extension::kF16);
+                Enable(wgsl::Extension::kF16);
                 return b.ty.f16();
             },
             [&](const core::type::F32*) { return b.ty.f32(); },  //
@@ -954,7 +954,7 @@ class State {
                     ast_attrs.Push(b.Location(u32(*location)));
                 }
                 if (auto index = ir_attrs.index) {
-                    Enable(core::Extension::kChromiumInternalDualSourceBlending);
+                    Enable(wgsl::Extension::kChromiumInternalDualSourceBlending);
                     ast_attrs.Push(b.Index(u32(*index)));
                 }
                 if (auto builtin = ir_attrs.builtin) {

@@ -114,7 +114,7 @@ void f() {
 }
 
 TEST_F(MslASTPrinterTest, Emit_GlobalConst_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = GlobalConst("G", Expr(1_h));
     Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
@@ -188,7 +188,7 @@ void f() {
 }
 
 TEST_F(MslASTPrinterTest, Emit_GlobalConst_vec3_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = GlobalConst("G", Call<vec3<f16>>(1_h, 2_h, 3_h));
     Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});
@@ -244,7 +244,7 @@ void f() {
 }
 
 TEST_F(MslASTPrinterTest, Emit_GlobalConst_mat2x3_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = GlobalConst("G", Call<mat2x3<f16>>(1_h, 2_h, 3_h, 4_h, 5_h, 6_h));
     Func("f", tint::Empty, ty.void_(), Vector{Decl(Let("l", Expr(var)))});

@@ -64,7 +64,7 @@ static constexpr Params all_param_types[] = {
 };
 
 TEST_F(ResolverCallTest, Valid) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     Vector<const ast::Parameter*, 4> params;
     Vector<const ast::Expression*, 4> args;

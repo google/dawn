@@ -65,7 +65,7 @@ TEST_F(WgslASTPrinterTest_Constructor, F32) {
 }
 
 TEST_F(WgslASTPrinterTest_Constructor, F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     // Use a number close to 1<<16 but whose decimal representation ends in 0.
     WrapInFunction(Expr(f16((1 << 15) - 8)));
@@ -88,7 +88,7 @@ TEST_F(WgslASTPrinterTest_Constructor, Type_F32) {
 }
 
 TEST_F(WgslASTPrinterTest_Constructor, Type_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     WrapInFunction(Call<f16>(Expr(-1.2e-5_h)));
 
@@ -140,7 +140,7 @@ TEST_F(WgslASTPrinterTest_Constructor, Type_Vec_F32) {
 }
 
 TEST_F(WgslASTPrinterTest_Constructor, Type_Vec_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     WrapInFunction(Call<vec3<f16>>(1_h, 2_h, 3_h));
 
@@ -164,7 +164,7 @@ TEST_F(WgslASTPrinterTest_Constructor, Type_Mat_F32) {
 }
 
 TEST_F(WgslASTPrinterTest_Constructor, Type_Mat_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     WrapInFunction(
         Call<mat2x3<f16>>(Call<vec3<f16>>(1_h, 2_h, 3_h), Call<vec3<f16>>(3_h, 4_h, 5_h)));

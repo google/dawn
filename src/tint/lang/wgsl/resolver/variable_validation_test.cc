@@ -506,7 +506,7 @@ TEST_F(ResolverVariableValidationTest, ConstInitWithOverrideExpr) {
 TEST_F(ResolverVariableValidationTest, GlobalVariable_PushConstantWithInitializer) {
     // enable chromium_experimental_push_constant;
     // var<push_constant> a : u32 = 0u;
-    Enable(core::Extension::kChromiumExperimentalPushConstant);
+    Enable(wgsl::Extension::kChromiumExperimentalPushConstant);
     GlobalVar(Source{{1u, 2u}}, "a", ty.u32(), core::AddressSpace::kPushConstant,
               Expr(Source{{3u, 4u}}, u32(0)));
 

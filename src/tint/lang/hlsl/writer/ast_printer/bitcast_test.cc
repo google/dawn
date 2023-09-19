@@ -62,7 +62,7 @@ TEST_F(HlslASTPrinterTest_Bitcast, EmitExpression_Bitcast_Uint) {
 }
 
 TEST_F(HlslASTPrinterTest_Bitcast, EmitExpression_Bitcast_F16_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* a = Let("a", Call<vec2<f16>>(1_h, 2_h));
     auto* b = Let("b", Bitcast<i32>(Expr("a")));
@@ -128,7 +128,7 @@ void test_function() {
 }
 
 TEST_F(HlslASTPrinterTest_Bitcast, EmitExpression_Bitcast_F16_Vec4) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* a = Let("a", Call<vec4<f16>>(1_h, 2_h, 3_h, 4_h));
     auto* b = Let("b", Bitcast<vec2<i32>>(Expr("a")));

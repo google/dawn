@@ -120,7 +120,7 @@ TEST_F(SpirvASTPrinterTest, GlobalConst_Vec_Initializer) {
 TEST_F(SpirvASTPrinterTest, GlobalConst_Vec_F16_Initializer) {
     // const c = vec3<f16>(1h, 2h, 3h);
     // var v = c;
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* c = GlobalConst("c", Call<vec3<f16>>(1_h, 2_h, 3_h));
     GlobalVar("v", core::AddressSpace::kPrivate, Expr(c));

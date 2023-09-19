@@ -109,7 +109,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_F32) {
 }
 
 TEST_F(GlslASTPrinterTest_Type, EmitType_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* f16 = create<core::type::F16>();
 
@@ -146,7 +146,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Matrix_F32) {
 }
 
 TEST_F(GlslASTPrinterTest_Type, EmitType_Matrix_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* f16 = create<core::type::F16>();
     auto* vec3 = create<core::type::Vector>(f16, 3u);
@@ -259,7 +259,7 @@ TEST_F(GlslASTPrinterTest_Type, EmitType_Vector_F32) {
 }
 
 TEST_F(GlslASTPrinterTest_Type, EmitType_Vector_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* f16 = create<core::type::F16>();
     auto* vec3 = create<core::type::Vector>(f16, 3u);

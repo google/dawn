@@ -44,7 +44,7 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
     if (options.allow_non_uniform_derivatives) {
         // Suppress errors regarding non-uniform derivative operations if requested, by adding a
         // diagnostic directive to the module.
-        builder.DiagnosticDirective(core::DiagnosticSeverity::kOff, "derivative_uniformity");
+        builder.DiagnosticDirective(wgsl::DiagnosticSeverity::kOff, "derivative_uniformity");
     }
 
     if (!options.allow_chromium_extensions) {
@@ -52,23 +52,23 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
         for (auto* enable : builder.AST().Enables()) {
             for (auto* extension : enable->extensions) {
                 switch (extension->name) {
-                    case core::Extension::kUndefined:
-                    case core::Extension::kChromiumDisableUniformityAnalysis:
-                    case core::Extension::kChromiumExperimentalDp4A:
-                    case core::Extension::kChromiumExperimentalFullPtrParameters:
-                    case core::Extension::kChromiumExperimentalPixelLocal:
-                    case core::Extension::kChromiumExperimentalPushConstant:
-                    case core::Extension::kChromiumExperimentalReadWriteStorageTexture:
-                    case core::Extension::kChromiumExperimentalSubgroups:
-                    case core::Extension::kChromiumInternalDualSourceBlending:
-                    case core::Extension::kChromiumInternalRelaxedUniformLayout: {
+                    case wgsl::Extension::kUndefined:
+                    case wgsl::Extension::kChromiumDisableUniformityAnalysis:
+                    case wgsl::Extension::kChromiumExperimentalDp4A:
+                    case wgsl::Extension::kChromiumExperimentalFullPtrParameters:
+                    case wgsl::Extension::kChromiumExperimentalPixelLocal:
+                    case wgsl::Extension::kChromiumExperimentalPushConstant:
+                    case wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture:
+                    case wgsl::Extension::kChromiumExperimentalSubgroups:
+                    case wgsl::Extension::kChromiumInternalDualSourceBlending:
+                    case wgsl::Extension::kChromiumInternalRelaxedUniformLayout: {
                         StringStream ss;
                         ss << "module requires " << ToString(extension->name)
                            << ", but 'allow-chromium-extensions' was not passed";
                         builder.Diagnostics().add_error(diag::System::Reader, ss.str());
                         return Program(std::move(builder));
                     }
-                    case core::Extension::kF16:
+                    case wgsl::Extension::kF16:
                         break;
                 }
             }

@@ -16,15 +16,15 @@
 
 #include <string>
 
-#include "src/tint/lang/core/diagnostic_severity.h"
 #include "src/tint/lang/wgsl/ast/identifier.h"
 #include "src/tint/lang/wgsl/ast/templated_identifier.h"
+#include "src/tint/lang/wgsl/diagnostic_severity.h"
 
 namespace tint::ast {
 
 DiagnosticControl::DiagnosticControl() = default;
 
-DiagnosticControl::DiagnosticControl(core::DiagnosticSeverity sev, const DiagnosticRuleName* rule)
+DiagnosticControl::DiagnosticControl(wgsl::DiagnosticSeverity sev, const DiagnosticRuleName* rule)
     : severity(sev), rule_name(rule) {
     TINT_ASSERT(rule != nullptr);
 }

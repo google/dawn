@@ -58,7 +58,7 @@ struct PixelLocal::State {
         // If the pixel local extension isn't enabled, then there must be no use of pixel_local
         // variables, and so there's nothing for this transform to do.
         if (!sem.Module()->Extensions().Contains(
-                core::Extension::kChromiumExperimentalPixelLocal)) {
+                wgsl::Extension::kChromiumExperimentalPixelLocal)) {
             return SkipTransform;
         }
 

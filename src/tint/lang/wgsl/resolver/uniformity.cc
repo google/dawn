@@ -78,7 +78,7 @@ struct CallSiteTag {
         CallSiteRequiredToBeUniform,
         CallSiteNoRestriction,
     } tag;
-    core::DiagnosticSeverity severity = core::DiagnosticSeverity::kUndefined;
+    wgsl::DiagnosticSeverity severity = wgsl::DiagnosticSeverity::kUndefined;
 };
 
 /// FunctionTag describes a functions effects on uniformity.
@@ -94,7 +94,7 @@ struct ParameterTag {
         ParameterContentsRequiredToBeUniform,
         ParameterNoRestriction,
     } tag;
-    core::DiagnosticSeverity severity = core::DiagnosticSeverity::kUndefined;
+    wgsl::DiagnosticSeverity severity = wgsl::DiagnosticSeverity::kUndefined;
 };
 
 /// Node represents a node in the graph of control flow and value nodes within the analysis of a
@@ -264,13 +264,13 @@ struct FunctionInfo {
     };
 
     /// @returns the RequiredToBeUniform node that corresponds to `severity`
-    Node* RequiredToBeUniform(core::DiagnosticSeverity severity) {
+    Node* RequiredToBeUniform(wgsl::DiagnosticSeverity severity) {
         switch (severity) {
-            case core::DiagnosticSeverity::kError:
+            case wgsl::DiagnosticSeverity::kError:
                 return required_to_be_uniform_error;
-            case core::DiagnosticSeverity::kWarning:
+            case wgsl::DiagnosticSeverity::kWarning:
                 return required_to_be_uniform_warning;
-            case core::DiagnosticSeverity::kInfo:
+            case wgsl::DiagnosticSeverity::kInfo:
                 return required_to_be_uniform_info;
             default:
                 TINT_UNREACHABLE() << "unhandled severity";
@@ -460,7 +460,7 @@ class UniformityGraph {
         // Look at which nodes are reachable from "RequiredToBeUniform".
         {
             UniqueVector<Node*, 4> reachable;
-            auto traverse = [&](core::DiagnosticSeverity severity) {
+            auto traverse = [&](wgsl::DiagnosticSeverity severity) {
                 Traverse(current_function_->RequiredToBeUniform(severity), &reachable);
                 if (reachable.Contains(current_function_->may_be_non_uniform)) {
                     MakeError(*current_function_, current_function_->may_be_non_uniform, severity);
@@ -483,11 +483,11 @@ class UniformityGraph {
                 }
                 return true;
             };
-            if (!traverse(core::DiagnosticSeverity::kError)) {
+            if (!traverse(wgsl::DiagnosticSeverity::kError)) {
                 return false;
             } else {
-                if (traverse(core::DiagnosticSeverity::kWarning)) {
-                    traverse(core::DiagnosticSeverity::kInfo);
+                if (traverse(wgsl::DiagnosticSeverity::kWarning)) {
+                    traverse(wgsl::DiagnosticSeverity::kInfo);
                 }
             }
         }
@@ -1537,8 +1537,8 @@ class UniformityGraph {
         result->type = Node::kFunctionCallReturnValue;
         Node* cf_after = CreateNode({"CF_after_", name}, call);
 
-        auto default_severity = kUniformityFailuresAsError ? core::DiagnosticSeverity::kError
-                                                           : core::DiagnosticSeverity::kWarning;
+        auto default_severity = kUniformityFailuresAsError ? wgsl::DiagnosticSeverity::kError
+                                                           : wgsl::DiagnosticSeverity::kWarning;
 
         // Get tags for the callee.
         CallSiteTag callsite_tag = {CallSiteTag::CallSiteNoRestriction};
@@ -1560,8 +1560,8 @@ class UniformityGraph {
                            builtin->Type() == core::Function::kTextureSampleCompare) {
                     // Get the severity of derivative uniformity violations in this context.
                     auto severity = sem_.DiagnosticSeverity(
-                        call, core::CoreDiagnosticRule::kDerivativeUniformity);
-                    if (severity != core::DiagnosticSeverity::kOff) {
+                        call, wgsl::CoreDiagnosticRule::kDerivativeUniformity);
+                    if (severity != wgsl::DiagnosticSeverity::kOff) {
                         callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, severity};
                     }
                     function_tag = ReturnValueMayBeNonUniform;
@@ -1734,7 +1734,7 @@ class UniformityGraph {
     /// order to find a call to a builtin function that requires uniformity with the given severity.
     const ast::CallExpression* FindBuiltinThatRequiresUniformity(
         const ast::CallExpression* call,
-        core::DiagnosticSeverity severity) {
+        wgsl::DiagnosticSeverity severity) {
         auto* target = SemCall(call)->Target();
         if (target->Is<sem::Builtin>()) {
             // This is a call to a builtin, so we must be done.
@@ -1893,11 +1893,11 @@ class UniformityGraph {
     /// @param function the function that the diagnostic is being produced for
     /// @param source_node the node that has caused a uniformity issue in `function`
     /// @param severity the severity of the diagnostic
-    void MakeError(FunctionInfo& function, Node* source_node, core::DiagnosticSeverity severity) {
+    void MakeError(FunctionInfo& function, Node* source_node, wgsl::DiagnosticSeverity severity) {
         // Helper to produce a diagnostic message, as a note or with the global failure severity.
         auto report = [&](Source source, std::string msg, bool note) {
             diag::Diagnostic error{};
-            error.severity = note ? diag::Severity::Note : core::ToSeverity(severity);
+            error.severity = note ? diag::Severity::Note : wgsl::ToSeverity(severity);
             error.system = diag::System::Resolver;
             error.source = source;
             error.message = msg;

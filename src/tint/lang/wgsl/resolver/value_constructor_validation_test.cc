@@ -79,7 +79,7 @@ TEST_P(InferTypeTest_FromConstructorExpression, All) {
     // }
     auto& params = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* initializer_expr = params.create_rhs_ast_value(*this, 0);
 
@@ -180,7 +180,7 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
     // }
     auto& params = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     Func("foo", tint::Empty, params.create_rhs_ast_type(*this),
          Vector{Return(Call(params.create_rhs_ast_type(*this)))}, {});
@@ -337,7 +337,7 @@ using ConversionConstructorValidTest = ResolverTestWithParam<Params>;
 TEST_P(ConversionConstructorValidTest, All) {
     auto& params = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     // var a : <lhs_type1> = <lhs_type2>(<rhs_type>(<rhs_value_expr>));
     auto lhs_type1 = params.lhs_type(*this);
@@ -443,7 +443,7 @@ TEST_P(ConversionConstructorInvalidTest, All) {
        << FriendlyName(rhs_type) << "(<rhs value expr>))";
     SCOPED_TRACE(ss.str());
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* a = Var("a", lhs_type1, Call(lhs_type2, Call(rhs_type, rhs_value_expr)));
 
@@ -944,7 +944,7 @@ TEST_F(ResolverValueConstructorValidationTest, F32_Success) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, F16_Success) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* expr = Call<f16>(Expr(1.5_h));
     WrapInFunction(expr);
@@ -1000,7 +1000,7 @@ TEST_F(ResolverValueConstructorValidationTest, Convert_i32_to_u32_Success) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Convert_u32_to_f16_Success) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* expr = Call<f16>(123_u);
     WrapInFunction(expr);
@@ -1020,7 +1020,7 @@ TEST_F(ResolverValueConstructorValidationTest, Convert_u32_to_f16_Success) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Convert_f16_to_f32_Success) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* expr = Call<f32>(123_h);
     WrapInFunction(expr);
@@ -1052,7 +1052,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2F32_Error_ScalarArgumentTypeM
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2F16_Error_ScalarArgumentTypeMismatch) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     WrapInFunction(Call<vec2<f16>>(Source{{12, 34}}, 1_h, 2_f));
 
@@ -1175,7 +1175,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec2F32_Success_Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec2F16_Success_Scalar) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* tc = Call<vec2<f16>>(1_h, 1_h);
     WrapInFunction(tc);
@@ -1309,7 +1309,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3F32_Error_ScalarArgumentTypeM
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3F16_Error_ScalarArgumentTypeMismatch) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     WrapInFunction(Call<vec3<f16>>(Source{{12, 34}}, 1_h, 2_h, 3_f));
 
@@ -1451,7 +1451,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec3F32_Success_Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec3F16_Success_Scalar) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* tc = Call<vec3<f16>>(1_h, 1_h, 1_h);
     WrapInFunction(tc);
@@ -1632,7 +1632,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4F32_Error_ScalarArgumentTypeM
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4F16_Error_ScalarArgumentTypeMismatch) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     WrapInFunction(Call<vec4<f16>>(Source{{12, 34}}, 1_h, 1_h, 1_f, 1_h));
 
@@ -1800,7 +1800,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vec4F32_Success_Scalar) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, Vec4F16_Success_Scalar) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* tc = Call<vec4<f16>>(1_h, 1_h, 1_h, 1_h);
     WrapInFunction(tc);
@@ -2036,7 +2036,7 @@ TEST_F(ResolverValueConstructorValidationTest, Vector_ArgumentElementTypeAlias_S
 }
 
 TEST_F(ResolverValueConstructorValidationTest, InferVec2ElementTypeFromScalars) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* vec2_bool = Call<vec2<Infer>>(true, false);
     auto* vec2_i32 = Call<vec2<Infer>>(1_i, 2_i);
@@ -2065,7 +2065,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec2ElementTypeFromScalars) 
 }
 
 TEST_F(ResolverValueConstructorValidationTest, InferVec2ElementTypeFromVec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* vec2_bool = Call<vec2<Infer>>(Call<vec2<bool>>(true, false));
     auto* vec2_i32 = Call<vec2<Infer>>(Call<vec2<i32>>(1_i, 2_i));
@@ -2094,7 +2094,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec2ElementTypeFromVec2) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromScalars) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* vec3_bool = Call<vec3<Infer>>(true, false, true);
     auto* vec3_i32 = Call<vec3<Infer>>(1_i, 2_i, 3_i);
@@ -2123,7 +2123,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromScalars) 
 }
 
 TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromVec3) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* vec3_bool = Call<vec3<Infer>>(Call<vec3<bool>>(true, false, true));
     auto* vec3_i32 = Call<vec3<Infer>>(Call<vec3<i32>>(1_i, 2_i, 3_i));
@@ -2152,7 +2152,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromVec3) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromScalarAndVec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* vec3_bool = Call<vec3<Infer>>(true, Call<vec2<bool>>(false, true));
     auto* vec3_i32 = Call<vec3<Infer>>(1_i, Call<vec2<i32>>(2_i, 3_i));
@@ -2181,7 +2181,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec3ElementTypeFromScalarAnd
 }
 
 TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromScalars) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* vec4_bool = Call<vec4<Infer>>(true, false, true, false);
     auto* vec4_i32 = Call<vec4<Infer>>(1_i, 2_i, 3_i, 4_i);
@@ -2210,7 +2210,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromScalars) 
 }
 
 TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromVec4) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* vec4_bool = Call<vec4<Infer>>(Call<vec4<bool>>(true, false, true, false));
     auto* vec4_i32 = Call<vec4<Infer>>(Call<vec4<i32>>(1_i, 2_i, 3_i, 4_i));
@@ -2239,7 +2239,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromVec4) {
 }
 
 TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromScalarAndVec3) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* vec4_bool = Call<vec4<Infer>>(true, Call<vec3<bool>>(false, true, false));
     auto* vec4_i32 = Call<vec4<Infer>>(1_i, Call<vec3<i32>>(2_i, 3_i, 4_i));
@@ -2268,7 +2268,7 @@ TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromScalarAnd
 }
 
 TEST_F(ResolverValueConstructorValidationTest, InferVec4ElementTypeFromVec2AndVec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* vec4_bool =
         Call<vec4<Infer>>(Call<vec2<bool>>(true, false), Call<vec2<bool>>(true, false));
@@ -2425,7 +2425,7 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooFewArguments) {
 
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     const std::string element_type_name = param.get_element_type_name();
     StringStream args_tys;
@@ -2454,7 +2454,7 @@ TEST_P(MatrixConstructorTest, ElementConstructor_Error_TooFewArguments) {
 
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     const std::string element_type_name = param.get_element_type_name();
     StringStream args_tys;
@@ -2482,7 +2482,7 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooManyArguments) {
 
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     const std::string element_type_name = param.get_element_type_name();
     StringStream args_tys;
@@ -2511,7 +2511,7 @@ TEST_P(MatrixConstructorTest, ElementConstructor_Error_TooManyArguments) {
 
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     const std::string element_type_name = param.get_element_type_name();
     StringStream args_tys;
@@ -2539,7 +2539,7 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_InvalidArgumentType) {
 
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     StringStream args_tys;
     Vector<const ast::Expression*, 8> args;
@@ -2567,7 +2567,7 @@ TEST_P(MatrixConstructorTest, ElementConstructor_Error_InvalidArgumentType) {
 
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     StringStream args_tys;
     Vector<const ast::Expression*, 8> args;
@@ -2599,7 +2599,7 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooFewRowsInVectorArgument
         return;
     }
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     const std::string element_type_name = param.get_element_type_name();
     StringStream args_tys;
@@ -2637,7 +2637,7 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooManyRowsInVectorArgumen
         return;
     }
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     const std::string element_type_name = param.get_element_type_name();
     StringStream args_tys;
@@ -2669,7 +2669,7 @@ TEST_P(MatrixConstructorTest, ZeroValue_Success) {
 
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     ast::Type matrix_type = param.create_mat_ast_type(*this);
     auto* tc = Call(Source{{12, 40}}, matrix_type);
@@ -2684,7 +2684,7 @@ TEST_P(MatrixConstructorTest, WithColumns_Success) {
 
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     Vector<const ast::Expression*, 4> args;
     for (uint32_t i = 0; i < param.columns; i++) {
@@ -2705,7 +2705,7 @@ TEST_P(MatrixConstructorTest, WithElements_Success) {
 
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     Vector<const ast::Expression*, 16> args;
     for (uint32_t i = 0; i < param.columns * param.rows; i++) {
@@ -2725,7 +2725,7 @@ TEST_P(MatrixConstructorTest, ElementTypeAlias_Error) {
 
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* elem_type_alias = Alias("ElemType", param.create_element_ast_type(*this));
 
@@ -2755,7 +2755,7 @@ TEST_P(MatrixConstructorTest, ElementTypeAlias_Success) {
 
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* elem_type_alias = Alias("ElemType", param.create_element_ast_type(*this));
 
@@ -2786,7 +2786,7 @@ TEST_F(ResolverValueConstructorValidationTest, MatrixConstructor_ArgumentTypeAli
 TEST_P(MatrixConstructorTest, ArgumentTypeAlias_Success) {
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     ast::Type matrix_type = param.create_mat_ast_type(*this);
     ast::Type vec_type = param.create_column_ast_type(*this);
@@ -2806,7 +2806,7 @@ TEST_P(MatrixConstructorTest, ArgumentTypeAlias_Success) {
 TEST_P(MatrixConstructorTest, ArgumentElementTypeAlias_Error) {
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     ast::Type matrix_type = param.create_mat_ast_type(*this);
     auto* u32_type_alias = Alias("UnsignedInt", ty.u32());
@@ -2833,7 +2833,7 @@ TEST_P(MatrixConstructorTest, ArgumentElementTypeAlias_Error) {
 TEST_P(MatrixConstructorTest, ArgumentElementTypeAlias_Success) {
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* elem_type_alias = Alias("ElemType", param.create_element_ast_type(*this));
 
@@ -2853,7 +2853,7 @@ TEST_P(MatrixConstructorTest, ArgumentElementTypeAlias_Success) {
 TEST_P(MatrixConstructorTest, InferElementTypeFromVectors) {
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns; i++) {
@@ -2870,7 +2870,7 @@ TEST_P(MatrixConstructorTest, InferElementTypeFromVectors) {
 TEST_P(MatrixConstructorTest, InferElementTypeFromScalars) {
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.rows * param.columns; i++) {
@@ -2886,7 +2886,7 @@ TEST_P(MatrixConstructorTest, InferElementTypeFromScalars) {
 TEST_P(MatrixConstructorTest, CannotInferElementTypeFromVectors_Mismatch) {
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     StringStream err;
     err << "12:34 error: no matching constructor for mat" << param.columns << "x" << param.rows
@@ -2917,7 +2917,7 @@ TEST_P(MatrixConstructorTest, CannotInferElementTypeFromVectors_Mismatch) {
 TEST_P(MatrixConstructorTest, CannotInferElementTypeFromScalars_Mismatch) {
     const auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     StringStream err;
     err << "12:34 error: no matching constructor for mat" << param.columns << "x" << param.rows
@@ -3001,7 +3001,7 @@ TEST_P(StructConstructorInputsTest, TooFew) {
     auto& str_params = std::get<0>(param);
     uint32_t N = std::get<1>(param);
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     Vector<const ast::StructMember*, 16> members;
     Vector<const ast::Expression*, 16> values;
@@ -3026,7 +3026,7 @@ TEST_P(StructConstructorInputsTest, TooMany) {
     auto& str_params = std::get<0>(param);
     uint32_t N = std::get<1>(param);
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     Vector<const ast::StructMember*, 16> members;
     Vector<const ast::Expression*, 8> values;
@@ -3059,7 +3059,7 @@ TEST_P(StructConstructorTypeTest, AllTypes) {
     auto& ctor_params = std::get<1>(param);
     uint32_t N = std::get<2>(param);
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     if (str_params.ast == ctor_params.ast) {
         return;

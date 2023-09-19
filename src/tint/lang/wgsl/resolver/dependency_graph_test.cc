@@ -1106,9 +1106,9 @@ TEST_F(ResolverDependencyGraphOrderedGlobalsTest, DirectiveFirst) {
     // a transform may produce such a AST tree that has some declarations before directive nodes.
     // DependencyGraph should deal with these cases.
     auto* var_1 = GlobalVar("SYMBOL1", ty.i32());
-    auto* enable = Enable(core::Extension::kF16);
+    auto* enable = Enable(wgsl::Extension::kF16);
     auto* var_2 = GlobalVar("SYMBOL2", ty.f32());
-    auto* diagnostic = DiagnosticDirective(core::DiagnosticSeverity::kWarning, "foo");
+    auto* diagnostic = DiagnosticDirective(wgsl::DiagnosticSeverity::kWarning, "foo");
 
     EXPECT_THAT(AST().GlobalDeclarations(), ElementsAre(var_1, enable, var_2, diagnostic));
     EXPECT_THAT(Build().ordered_globals, ElementsAre(enable, diagnostic, var_1, var_2));

@@ -132,10 +132,10 @@ TEST_F(ModuleTest, CloneOrder) {
 }
 
 TEST_F(ModuleTest, Directives) {
-    auto* enable_1 = Enable(core::Extension::kF16);
-    auto* diagnostic_1 = DiagnosticDirective(core::DiagnosticSeverity::kWarning, "foo");
-    auto* enable_2 = Enable(core::Extension::kChromiumExperimentalFullPtrParameters);
-    auto* diagnostic_2 = DiagnosticDirective(core::DiagnosticSeverity::kOff, "bar");
+    auto* enable_1 = Enable(wgsl::Extension::kF16);
+    auto* diagnostic_1 = DiagnosticDirective(wgsl::DiagnosticSeverity::kWarning, "foo");
+    auto* enable_2 = Enable(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
+    auto* diagnostic_2 = DiagnosticDirective(wgsl::DiagnosticSeverity::kOff, "bar");
 
     Program program(std::move(*this));
     EXPECT_THAT(program.AST().GlobalDeclarations(), ::testing::ContainerEq(tint::Vector{

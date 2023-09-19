@@ -40,6 +40,7 @@ if (tint_build_msl_writer) {
       "${tint_src_dir}/lang/core/ir",
       "${tint_src_dir}/lang/core/type",
       "${tint_src_dir}/lang/msl/writer/raise",
+      "${tint_src_dir}/lang/wgsl",
       "${tint_src_dir}/lang/wgsl/ast",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/reader/program_to_ir",

@@ -142,7 +142,7 @@ static Case E(std::initializer_list<ScalarTypes> sargs, std::string err) {
 using ConstEvalBuiltinTest = ConstEvalTestWithParam<std::tuple<core::Function, Case>>;
 
 TEST_P(ConstEvalBuiltinTest, Test) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto builtin = std::get<0>(GetParam());
     auto& c = std::get<1>(GetParam());

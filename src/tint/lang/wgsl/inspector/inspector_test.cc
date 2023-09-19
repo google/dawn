@@ -402,7 +402,7 @@ TEST_P(InspectorGetEntryPointComponentAndCompositionTest, Test) {
     std::function<ast::Type()> tint_type = GetTypeFunction(component, composition);
 
     if (component == ComponentType::kF16) {
-        Enable(core::Extension::kF16);
+        Enable(wgsl::Extension::kF16);
     }
 
     auto* in_var = Param("in_var", tint_type(),
@@ -1021,7 +1021,7 @@ TEST_F(InspectorGetEntryPointTest, OverrideReferencedByArraySizeViaAlias) {
 }
 
 TEST_F(InspectorGetEntryPointTest, OverrideTypes) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     Override("bool_var", ty.bool_());
     Override("float_var", ty.f32());
@@ -1540,7 +1540,7 @@ TEST_F(InspectorGetEntryPointTest, PixelLocalMemberTypes) {
     // var<pixel_local> pls : Ure;
     // @fragment fn foo() {  _ = pls; }
 
-    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     Structure("Ure", Vector{
                          Member("toto", ty.u32()),
                          Member("titi", ty.f32()),
@@ -1777,7 +1777,7 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, F32) {
 }
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     Override("a", ty.f16(), Id(1_a));
     Override("b", ty.f16(), Expr(0_h), Id(20_a));
@@ -3087,11 +3087,11 @@ TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
             expectedResourceType = ResourceBinding::ResourceType::kWriteOnlyStorageTexture;
             break;
         case core::Access::kRead:
-            Enable(core::Extension::kChromiumExperimentalReadWriteStorageTexture);
+            Enable(wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture);
             expectedResourceType = ResourceBinding::ResourceType::kReadOnlyStorageTexture;
             break;
         case core::Access::kReadWrite:
-            Enable(core::Extension::kChromiumExperimentalReadWriteStorageTexture);
+            Enable(wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture);
             expectedResourceType = ResourceBinding::ResourceType::kReadWriteStorageTexture;
             break;
         case core::Access::kUndefined:

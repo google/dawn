@@ -31,10 +31,38 @@ include(lang/wgsl/sem/BUILD.cmake)
 include(lang/wgsl/writer/BUILD.cmake)
 
 ################################################################################
+# Target:    tint_lang_wgsl
+# Kind:      lib
+################################################################################
+tint_add_target(tint_lang_wgsl lib
+  lang/wgsl/diagnostic_rule.cc
+  lang/wgsl/diagnostic_rule.h
+  lang/wgsl/diagnostic_severity.cc
+  lang/wgsl/diagnostic_severity.h
+  lang/wgsl/extension.cc
+  lang/wgsl/extension.h
+)
+
+tint_target_add_dependencies(tint_lang_wgsl lib
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+  tint_utils_text
+  tint_utils_traits
+)
+
+################################################################################
 # Target:    tint_lang_wgsl_test
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_wgsl_test test
+  lang/wgsl/diagnostic_rule_test.cc
+  lang/wgsl/diagnostic_severity_test.cc
+  lang/wgsl/extension_test.cc
   lang/wgsl/wgsl_test.cc
 )
 
@@ -44,6 +72,7 @@ tint_target_add_dependencies(tint_lang_wgsl_test test
   tint_lang_core_constant
   tint_lang_core_ir
   tint_lang_core_type
+  tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_helpers_test
   tint_lang_wgsl_program
@@ -77,3 +106,26 @@ if(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
     "lang/wgsl/ir_roundtrip_test.cc"
   )
 endif(TINT_BUILD_WGSL_READER AND TINT_BUILD_WGSL_WRITER)
+
+################################################################################
+# Target:    tint_lang_wgsl_bench
+# Kind:      bench
+################################################################################
+tint_add_target(tint_lang_wgsl_bench bench
+  lang/wgsl/diagnostic_rule_bench.cc
+  lang/wgsl/diagnostic_severity_bench.cc
+  lang/wgsl/extension_bench.cc
+)
+
+tint_target_add_dependencies(tint_lang_wgsl_bench bench
+  tint_lang_wgsl
+  tint_utils_containers
+  tint_utils_diagnostic
+  tint_utils_ice
+  tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
+  tint_utils_text
+  tint_utils_traits
+)

@@ -191,6 +191,7 @@ tint_target_add_dependencies(tint_lang_wgsl_ast lib
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_type
+  tint_lang_wgsl
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice
@@ -281,6 +282,7 @@ tint_target_add_dependencies(tint_lang_wgsl_ast_test test
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_type
+  tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_ast_transform
   tint_lang_wgsl_program

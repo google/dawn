@@ -98,7 +98,7 @@ TEST_F(WgslASTPrinterTest, EmitType_F32) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitType_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto type = Alias("make_type_reachable", ty.f16())->type;
 
@@ -133,7 +133,7 @@ TEST_F(WgslASTPrinterTest, EmitType_Matrix_F32) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitType_Matrix_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto type = Alias("make_type_reachable", ty.mat2x3<f16>())->type;
 
@@ -388,7 +388,7 @@ TEST_F(WgslASTPrinterTest, EmitType_Vector_F32) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitType_Vector_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto type = Alias("make_type_reachable", ty.vec3<f16>())->type;
 

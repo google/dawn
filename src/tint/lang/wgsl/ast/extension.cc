@@ -18,13 +18,13 @@
 #include "src/tint/lang/wgsl/ast/clone_context.h"
 
 //! @cond Doxygen_Suppress
-// Doxygen gets confused with tint::ast::Extension and tint::core::Extension
+// Doxygen gets confused with tint::ast::Extension and tint::wgsl::Extension
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Extension);
 
 namespace tint::ast {
 
-Extension::Extension(GenerationID pid, NodeID nid, const Source& src, core::Extension ext)
+Extension::Extension(GenerationID pid, NodeID nid, const Source& src, wgsl::Extension ext)
     : Base(pid, nid, src), name(ext) {}
 
 Extension::~Extension() = default;

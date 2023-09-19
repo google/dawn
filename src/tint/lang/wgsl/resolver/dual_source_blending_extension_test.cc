@@ -42,7 +42,7 @@ TEST_F(DualSourceBlendingExtensionTest, UseIndexAttribWithoutExtensionError) {
 class DualSourceBlendingExtensionTests : public ResolverTest {
   public:
     DualSourceBlendingExtensionTests() {
-        Enable(core::Extension::kChromiumInternalDualSourceBlending);
+        Enable(wgsl::Extension::kChromiumInternalDualSourceBlending);
     }
 };
 
@@ -148,7 +148,7 @@ TEST_F(DualSourceBlendingExtensionTests, IndexWithNonZeroLocation) {
 class DualSourceBlendingExtensionTestWithParams : public ResolverTestWithParam<int> {
   public:
     DualSourceBlendingExtensionTestWithParams() {
-        Enable(core::Extension::kChromiumInternalDualSourceBlending);
+        Enable(wgsl::Extension::kChromiumInternalDualSourceBlending);
     }
 };
 

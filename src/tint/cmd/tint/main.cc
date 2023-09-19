@@ -718,10 +718,10 @@ bool GenerateMsl(const tint::Program* program, const Options& options) {
     // If subgroups are used, bump the version to 2.1.
     auto msl_version = tint::msl::validate::MslVersion::kMsl_1_2;
     for (auto* enable : program->AST().Enables()) {
-        if (enable->HasExtension(tint::core::Extension::kChromiumExperimentalSubgroups)) {
+        if (enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalSubgroups)) {
             msl_version = std::max(msl_version, tint::msl::validate::MslVersion::kMsl_2_1);
         }
-        if (enable->HasExtension(tint::core::Extension::kChromiumExperimentalPixelLocal)) {
+        if (enable->HasExtension(tint::wgsl::Extension::kChromiumExperimentalPixelLocal)) {
             msl_version = std::max(msl_version, tint::msl::validate::MslVersion::kMsl_2_3);
         }
     }
@@ -806,7 +806,7 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
                 auto enable_list = program->AST().Enables();
                 bool dxc_require_16bit_types = false;
                 for (auto* enable : enable_list) {
-                    if (enable->HasExtension(tint::core::Extension::kF16)) {
+                    if (enable->HasExtension(tint::wgsl::Extension::kF16)) {
                         dxc_require_16bit_types = true;
                         break;
                     }

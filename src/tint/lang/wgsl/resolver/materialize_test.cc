@@ -318,7 +318,7 @@ using MaterializeAbstractNumericToConcreteType =
     MaterializeTest<std::tuple<Expectation, Method, Data>>;
 
 TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     const auto& param = GetParam();
     const auto& expectation = std::get<0>(param);
@@ -1303,7 +1303,7 @@ TEST_F(MaterializeAbstractStructure, Modf_Vector_DefaultType) {
 TEST_F(MaterializeAbstractStructure, Modf_Scalar_ExplicitType) {
     // var v = modf(1_h); // v is __modf_result_f16
     // v = modf(1);       // __modf_result_f16 <- __modf_result_abstract
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
     auto* call = Call("modf", 1_a);
     WrapInFunction(Decl(Var("v", Call("modf", 1_h))),  //
                    Assign("v", call));
@@ -1322,7 +1322,7 @@ TEST_F(MaterializeAbstractStructure, Modf_Scalar_ExplicitType) {
 TEST_F(MaterializeAbstractStructure, Modf_Vector_ExplicitType) {
     // var v = modf(vec2(1_h)); // v is __modf_result_vec2_f16
     // v = modf(vec2(1));       // __modf_result_vec2_f16 <- __modf_result_vec2_abstract
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
     auto* call = Call("modf", Call<vec2<Infer>>(1_a));
     WrapInFunction(Decl(Var("v", Call("modf", Call<vec2<Infer>>(1_h)))), Assign("v", call));
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1405,7 +1405,7 @@ TEST_F(MaterializeAbstractStructure, Frexp_Vector_DefaultType) {
 TEST_F(MaterializeAbstractStructure, Frexp_Scalar_ExplicitType) {
     // var v = frexp(1_h); // v is __frexp_result_f16
     // v = frexp(1);       // __frexp_result_f16 <- __frexp_result_abstract
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
     auto* call = Call("frexp", 1_a);
     WrapInFunction(Decl(Var("v", Call("frexp", 1_h))),  //
                    Assign("v", call));
@@ -1426,7 +1426,7 @@ TEST_F(MaterializeAbstractStructure, Frexp_Scalar_ExplicitType) {
 TEST_F(MaterializeAbstractStructure, Frexp_Vector_ExplicitType) {
     // var v = frexp(vec2(1_h)); // v is __frexp_result_vec2_f16
     // v = frexp(vec2(1));       // __frexp_result_vec2_f16 <- __frexp_result_vec2_abstract
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
     auto* call = Call("frexp", Call<vec2<Infer>>(1_a));
     WrapInFunction(Decl(Var("v", Call("frexp", Call<vec2<Infer>>(1_h)))), Assign("v", call));
     ASSERT_TRUE(r()->Resolve()) << r()->error();

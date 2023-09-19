@@ -15,8 +15,8 @@
 #ifndef SRC_TINT_LANG_WGSL_AST_EXTENSION_H_
 #define SRC_TINT_LANG_WGSL_AST_EXTENSION_H_
 
-#include "src/tint/lang/core/extension.h"
 #include "src/tint/lang/wgsl/ast/node.h"
+#include "src/tint/lang/wgsl/extension.h"
 
 namespace tint::ast {
 
@@ -31,7 +31,7 @@ class Extension final : public Castable<Extension, Node> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param ext the extension
-    Extension(GenerationID pid, NodeID nid, const Source& src, core::Extension ext);
+    Extension(GenerationID pid, NodeID nid, const Source& src, wgsl::Extension ext);
 
     /// Destructor
     ~Extension() override;
@@ -43,7 +43,7 @@ class Extension final : public Castable<Extension, Node> {
     const Extension* Clone(CloneContext& ctx) const override;
 
     /// The extension name
-    const core::Extension name;
+    const wgsl::Extension name;
 };
 
 }  // namespace tint::ast

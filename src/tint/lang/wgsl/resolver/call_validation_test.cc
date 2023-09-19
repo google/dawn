@@ -166,7 +166,7 @@ TEST_F(ResolverCallValidationTest,
     //   var v : S;
     //   foo(&v.m);
     // }
-    Enable(core::Extension::kChromiumExperimentalFullPtrParameters);
+    Enable(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
     auto* S = Structure("S", Vector{
                                  Member("m", ty.i32()),
                              });
@@ -346,7 +346,7 @@ TEST_F(ResolverCallValidationTest, LetPointer_NotWholeVar_WithFullPtrParametersE
     //   let p: ptr<function, i32> = &(v[0]);
     //   x(p);
     // }
-    Enable(core::Extension::kChromiumExperimentalFullPtrParameters);
+    Enable(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
     Func("foo",
          Vector{
              Param("p", ty.ptr<function, i32>()),
@@ -436,7 +436,7 @@ TEST_F(ResolverCallValidationTest, ComplexPointerChain_NotWholeVar_WithFullPtrPa
     //   let p3 = &(*p2)[0];
     //   foo(&*p);
     // }
-    Enable(core::Extension::kChromiumExperimentalFullPtrParameters);
+    Enable(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
     Func("foo",
          Vector{
              Param("p", ty.ptr<function, i32>()),

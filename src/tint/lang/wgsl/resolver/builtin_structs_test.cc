@@ -28,7 +28,7 @@ namespace {
 using ResolverBuiltinStructs = ResolverTestWithParam<core::Builtin>;
 
 TEST_P(ResolverBuiltinStructs, Resolve) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     // var<private> p : NAME;
     auto* var = GlobalVar("p", ty(GetParam()), core::AddressSpace::kPrivate);

@@ -8,19 +8,19 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
-{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+{{- $I := LoadIntrinsics "src/tint/lang/wgsl/wgsl.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 
-#include "src/tint/lang/core/diagnostic_severity.h"
+#include "src/tint/lang/wgsl/diagnostic_severity.h"
 
 #include <array>
 
 #include "benchmark/benchmark.h"
 
-namespace tint::core {
+namespace tint::wgsl {
 namespace {
 
 {{ Eval "BenchmarkParseEnum" ($I.Sem.Enum "diagnostic_severity")}}
 
 }  // namespace
-}  // namespace tint::core
+}  // namespace tint::wgsl

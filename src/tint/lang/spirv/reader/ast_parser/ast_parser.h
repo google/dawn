@@ -740,7 +740,7 @@ class ASTParser {
 
     /// Enable a WGSL extension, if not already enabled.
     /// @param extension the extension to enable
-    void Enable(core::Extension extension) {
+    void Enable(wgsl::Extension extension) {
         if (enabled_extensions_.Add(extension)) {
             builder_.Enable(extension);
         }
@@ -935,7 +935,7 @@ class ASTParser {
     WorkgroupSizeInfo workgroup_size_builtin_;
 
     /// Set of WGSL extensions that have been enabled.
-    Hashset<core::Extension, 4> enabled_extensions_;
+    Hashset<wgsl::Extension, 4> enabled_extensions_;
 };
 
 }  // namespace tint::spirv::reader::ast_parser

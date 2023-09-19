@@ -366,7 +366,7 @@ struct PackedVec3::State {
         // bytes from the start of a structure to the start of the next member.
         // Disable these validation rules using an internal extension, as MSL does not have these
         // restrictions.
-        b.Enable(core::Extension::kChromiumInternalRelaxedUniformLayout);
+        b.Enable(wgsl::Extension::kChromiumInternalRelaxedUniformLayout);
 
         // Track expressions that need to be packed or unpacked.
         Hashset<const sem::ValueExpression*, 8> to_pack;

@@ -54,7 +54,7 @@ TEST_F(ResolverSubgroupsExtensionTest, UseSubgroupInvocationIdAttribWithoutExten
 
 // Using an i32 for a subgroup_size builtin input should fail.
 TEST_F(ResolverSubgroupsExtensionTest, SubgroupSizeI32Error) {
-    Enable(core::Extension::kChromiumExperimentalSubgroups);
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
     Structure("Inputs",
               Vector{
                   Member("a", ty.i32(), Vector{Builtin(core::BuiltinValue::kSubgroupSize)}),
@@ -66,7 +66,7 @@ TEST_F(ResolverSubgroupsExtensionTest, SubgroupSizeI32Error) {
 
 // Using an i32 for a subgroup_invocation_id builtin input should fail.
 TEST_F(ResolverSubgroupsExtensionTest, SubgroupInvocationIdI32Error) {
-    Enable(core::Extension::kChromiumExperimentalSubgroups);
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
     Structure("Inputs",
               Vector{
                   Member("a", ty.i32(), Vector{Builtin(core::BuiltinValue::kSubgroupInvocationId)}),
@@ -78,7 +78,7 @@ TEST_F(ResolverSubgroupsExtensionTest, SubgroupInvocationIdI32Error) {
 
 // Using builtin(subgroup_size) for anything other than a compute shader input should fail.
 TEST_F(ResolverSubgroupsExtensionTest, SubgroupSizeFragmentShader) {
-    Enable(core::Extension::kChromiumExperimentalSubgroups);
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
     Func("main",
          Vector{Param("size", ty.u32(), Vector{Builtin(core::BuiltinValue::kSubgroupSize)})},
          ty.void_(), Empty, Vector{Stage(ast::PipelineStage::kFragment)});
@@ -90,7 +90,7 @@ TEST_F(ResolverSubgroupsExtensionTest, SubgroupSizeFragmentShader) {
 
 // Using builtin(subgroup_invocation_id) for anything other than a compute shader input should fail.
 TEST_F(ResolverSubgroupsExtensionTest, SubgroupInvocationIdFragmentShader) {
-    Enable(core::Extension::kChromiumExperimentalSubgroups);
+    Enable(wgsl::Extension::kChromiumExperimentalSubgroups);
     Func("main",
          Vector{Param("id", ty.u32(), Vector{Builtin(core::BuiltinValue::kSubgroupInvocationId)})},
          ty.void_(), Empty, Vector{Stage(ast::PipelineStage::kFragment)});

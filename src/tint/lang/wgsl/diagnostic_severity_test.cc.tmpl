@@ -8,29 +8,23 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
-{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+{{- $I := LoadIntrinsics "src/tint/lang/wgsl/wgsl.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 
 #include <string>
 
 #include "gtest/gtest-spi.h"
-#include "src/tint/lang/core/diagnostic_rule.h"
+#include "src/tint/lang/wgsl/diagnostic_severity.h"
 #include "src/tint/utils/text/string.h"
 
-namespace tint::core {
+namespace tint::wgsl {
 namespace {
 
-namespace core_diagnostic_rule_tests {
+namespace diagnostic_severity_tests {
 
-{{ Eval "TestParsePrintEnum" ($I.Sem.Enum "core_diagnostic_rule")}}
+{{ Eval "TestParsePrintEnum" ($I.Sem.Enum "diagnostic_severity")}}
 
-}  // namespace core_diagnostic_rule_tests
-
-namespace chromium_diagnostic_rule_tests {
-
-{{ Eval "TestParsePrintEnum" ($I.Sem.Enum "chromium_diagnostic_rule")}}
-
-}  // namespace chromium_diagnostic_rule_tests
+}  // namespace diagnostic_severity_tests
 
 }  // namespace
-}  // namespace tint::core
+}  // namespace tint::wgsl

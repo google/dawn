@@ -18,7 +18,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "src/tint/lang/core/diagnostic_severity.h"
+#include "src/tint/lang/wgsl/diagnostic_severity.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 
 // Forward declarations
@@ -37,13 +37,13 @@ struct DiagnosticControl {
     /// Constructor
     /// @param sev the diagnostic severity
     /// @param rule the diagnostic rule name
-    DiagnosticControl(core::DiagnosticSeverity sev, const DiagnosticRuleName* rule);
+    DiagnosticControl(wgsl::DiagnosticSeverity sev, const DiagnosticRuleName* rule);
 
     /// Move constructor
     DiagnosticControl(DiagnosticControl&&);
 
     /// The diagnostic severity control.
-    core::DiagnosticSeverity severity = core::DiagnosticSeverity::kUndefined;
+    wgsl::DiagnosticSeverity severity = wgsl::DiagnosticSeverity::kUndefined;
 
     /// The diagnostic rule name.
     const DiagnosticRuleName* rule_name = nullptr;

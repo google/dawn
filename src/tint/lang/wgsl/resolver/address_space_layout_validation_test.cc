@@ -372,7 +372,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_Vec3F16MemberOffs
     // @group(0) @binding(0)
     // var<uniform> a : ScalarPackedAtEndOfVec3;
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     Structure("ScalarPackedAtEndOfVec3", Vector{
                                              Member("v", ty.vec3(ty.f16())),
@@ -569,7 +569,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_UnalignedMember) {
     //     @align(1) b : f32;
     // };
     // var<push_constant> a : S;
-    Enable(core::Extension::kChromiumExperimentalPushConstant);
+    Enable(wgsl::Extension::kChromiumExperimentalPushConstant);
     Structure(Source{{12, 34}}, "S",
               Vector{Member("a", ty.f32(), Vector{MemberSize(5_a)}),
                      Member(Source{{34, 56}}, "b", ty.f32(), Vector{MemberAlign(1_i)})});
@@ -595,7 +595,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_Aligned) {
     //     @align(4) b : f32;
     // };
     // var<push_constant> a : S;
-    Enable(core::Extension::kChromiumExperimentalPushConstant);
+    Enable(wgsl::Extension::kChromiumExperimentalPushConstant);
     Structure("S", Vector{Member("a", ty.f32(), Vector{MemberSize(5_a)}),
                           Member("b", ty.f32(), Vector{MemberAlign(4_i)})});
     GlobalVar("a", ty("S"), core::AddressSpace::kPushConstant);
@@ -618,7 +618,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_StructMemb
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
 
-    Enable(core::Extension::kChromiumInternalRelaxedUniformLayout);
+    Enable(wgsl::Extension::kChromiumInternalRelaxedUniformLayout);
 
     Structure(Source{{12, 34}}, "Inner",
               Vector{
@@ -650,7 +650,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_StructMemb
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
 
-    Enable(core::Extension::kChromiumInternalRelaxedUniformLayout);
+    Enable(wgsl::Extension::kChromiumInternalRelaxedUniformLayout);
 
     Alias("Inner", ty.array<f32, 10>(Vector{Stride(16)}));
 
@@ -681,7 +681,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_MemberOffs
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
 
-    Enable(core::Extension::kChromiumInternalRelaxedUniformLayout);
+    Enable(wgsl::Extension::kChromiumInternalRelaxedUniformLayout);
 
     Structure(Source{{12, 34}}, "Inner",
               Vector{
@@ -710,7 +710,7 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_ArrayStrid
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
 
-    Enable(core::Extension::kChromiumInternalRelaxedUniformLayout);
+    Enable(wgsl::Extension::kChromiumInternalRelaxedUniformLayout);
 
     Structure(Source{{12, 34}}, "Outer",
               Vector{
@@ -734,8 +734,8 @@ TEST_F(ResolverAddressSpaceLayoutValidationTest, RelaxedUniformLayout_ArrayStrid
     // @group(0) @binding(0)
     // var<uniform> a : Outer;
 
-    Enable(core::Extension::kF16);
-    Enable(core::Extension::kChromiumInternalRelaxedUniformLayout);
+    Enable(wgsl::Extension::kF16);
+    Enable(wgsl::Extension::kChromiumInternalRelaxedUniformLayout);
 
     Structure(Source{{12, 34}}, "Outer",
               Vector{

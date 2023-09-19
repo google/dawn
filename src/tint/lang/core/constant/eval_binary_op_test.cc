@@ -84,7 +84,7 @@ std::ostream& operator<<(std::ostream& o, const ErrorCase& c) {
 
 using ConstEvalBinaryOpTest = ConstEvalTestWithParam<std::tuple<core::BinaryOp, Case>>;
 TEST_P(ConstEvalBinaryOpTest, Test) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
     auto op = std::get<0>(GetParam());
     auto& c = std::get<1>(GetParam());
 

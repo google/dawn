@@ -161,7 +161,7 @@ TEST_F(MslBinaryTest, ModF32) {
 }
 
 TEST_F(MslBinaryTest, ModF16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* left = Var("left", ty.f16());
     auto* right = Var("right", ty.f16());
@@ -189,7 +189,7 @@ TEST_F(MslBinaryTest, ModVec3F32) {
 }
 
 TEST_F(MslBinaryTest, ModVec3F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* left = Var("left", ty.vec3<f16>());
     auto* right = Var("right", ty.vec3<f16>());

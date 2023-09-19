@@ -42,7 +42,7 @@ TEST_F(ResolverVariableTest, LocalVar_NoInitializer) {
     //   var a : A;
     // }
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* S = Structure("S", Vector{Member("i", ty.i32())});
     auto* A = Alias("A", ty.Of(S));
@@ -107,7 +107,7 @@ TEST_F(ResolverVariableTest, LocalVar_WithInitializer) {
     //   var a : A = A(1);
     // }
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* S = Structure("S", Vector{Member("i", ty.i32())});
     auto* A = Alias("A", ty.Of(S));
@@ -400,7 +400,7 @@ TEST_F(ResolverVariableTest, LocalLet) {
     //   let p : pointer<function, i32> = &v;
     // }
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* S = Structure("S", Vector{Member("i", ty.i32())});
     auto* A = Alias("A", ty.Of(S));

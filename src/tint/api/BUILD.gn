@@ -38,6 +38,7 @@ libtint_source_set("api") {
     "${tint_src_dir}/lang/core/type",
     "${tint_src_dir}/lang/hlsl/writer/common",
     "${tint_src_dir}/lang/spirv/reader/common",
+    "${tint_src_dir}/lang/wgsl",
     "${tint_src_dir}/lang/wgsl/ast",
     "${tint_src_dir}/lang/wgsl/program",
     "${tint_src_dir}/lang/wgsl/reader",

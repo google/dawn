@@ -214,7 +214,7 @@ TEST_P(MslBuiltinTest, Emit) {
     auto param = GetParam();
 
     if (param.type == CallParamType::kF16) {
-        Enable(core::Extension::kF16);
+        Enable(wgsl::Extension::kF16);
 
         GlobalVar("h2", ty.vec2<f16>(), core::AddressSpace::kPrivate);
         GlobalVar("h3", ty.vec3<f16>(), core::AddressSpace::kPrivate);
@@ -438,7 +438,7 @@ kernel void test_function() {
 }
 
 TEST_F(MslASTPrinterTest, Runtime_Modf_Scalar_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     WrapInFunction(Decl(Let("f", Expr(1.5_h))),  //
                    Decl(Let("v", Call("modf", "f"))));
@@ -500,7 +500,7 @@ kernel void test_function() {
 }
 
 TEST_F(MslASTPrinterTest, Runtime_Modf_Vector_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     WrapInFunction(Decl(Let("f", Call<vec3<f16>>(1.5_h, 2.5_h, 3.5_h))),  //
                    Decl(Let("v", Call("modf", "f"))));
@@ -554,7 +554,7 @@ kernel void test_function() {
 }
 
 TEST_F(MslASTPrinterTest, Const_Modf_Scalar_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     WrapInFunction(Decl(Let("v", Call("modf", 1.5_h))));
 
@@ -600,7 +600,7 @@ kernel void test_function() {
 }
 
 TEST_F(MslASTPrinterTest, Const_Modf_Vector_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     WrapInFunction(Decl(Let("v", Call("modf", Call<vec3<f16>>(1.5_h, 2.5_h, 3.5_h)))));
 
@@ -654,7 +654,7 @@ kernel void test_function() {
 }
 
 TEST_F(MslASTPrinterTest, Runtime_Frexp_Scalar_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     WrapInFunction(Var("f", Expr(1_h)),  //
                    Var("v", Call("frexp", "f")));
@@ -716,7 +716,7 @@ kernel void test_function() {
 }
 
 TEST_F(MslASTPrinterTest, Runtime_Frexp_Vector_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     WrapInFunction(Var("f", Call<vec3<f16>>()),  //
                    Var("v", Call("frexp", "f")));
@@ -770,7 +770,7 @@ kernel void test_function() {
 }
 
 TEST_F(MslASTPrinterTest, Const_Frexp_Scalar_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     WrapInFunction(Decl(Let("v", Call("frexp", 1_h))));
 
@@ -816,7 +816,7 @@ kernel void test_function() {
 }
 
 TEST_F(MslASTPrinterTest, Const_Frexp_Vector_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     WrapInFunction(Decl(Let("v", Call("frexp", Call<vec3<f16>>()))));
 
@@ -890,7 +890,7 @@ kernel void test_function() {
 }
 
 TEST_F(MslASTPrinterTest, Degrees_Scalar_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* val = Var("val", ty.f16());
     auto* call = Call("degrees", val);
@@ -917,7 +917,7 @@ kernel void test_function() {
 }
 
 TEST_F(MslASTPrinterTest, Degrees_Vector_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* val = Var("val", ty.vec3<f16>());
     auto* call = Call("degrees", val);
@@ -994,7 +994,7 @@ kernel void test_function() {
 }
 
 TEST_F(MslASTPrinterTest, Radians_Scalar_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* val = Var("val", ty.f16());
     auto* call = Call("radians", val);
@@ -1021,7 +1021,7 @@ kernel void test_function() {
 }
 
 TEST_F(MslASTPrinterTest, Radians_Vector_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* val = Var("val", ty.vec3<f16>());
     auto* call = Call("radians", val);

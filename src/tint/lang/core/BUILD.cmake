@@ -43,13 +43,7 @@ tint_add_target(tint_lang_core lib
   lang/core/builtin.h
   lang/core/builtin_value.cc
   lang/core/builtin_value.h
-  lang/core/diagnostic_rule.cc
-  lang/core/diagnostic_rule.h
-  lang/core/diagnostic_severity.cc
-  lang/core/diagnostic_severity.h
   lang/core/evaluation_stage.h
-  lang/core/extension.cc
-  lang/core/extension.h
   lang/core/fluent_types.h
   lang/core/function.cc
   lang/core/function.h
@@ -69,14 +63,10 @@ tint_add_target(tint_lang_core lib
 )
 
 tint_target_add_dependencies(tint_lang_core lib
-  tint_utils_containers
-  tint_utils_diagnostic
   tint_utils_ice
   tint_utils_macros
-  tint_utils_math
   tint_utils_memory
   tint_utils_result
-  tint_utils_rtti
   tint_utils_text
   tint_utils_traits
 )
@@ -91,9 +81,6 @@ tint_add_target(tint_lang_core_test test
   lang/core/attribute_test.cc
   lang/core/builtin_test.cc
   lang/core/builtin_value_test.cc
-  lang/core/diagnostic_rule_test.cc
-  lang/core/diagnostic_severity_test.cc
-  lang/core/extension_test.cc
   lang/core/interpolation_sampling_test.cc
   lang/core/interpolation_type_test.cc
   lang/core/number_test.cc
@@ -105,6 +92,7 @@ tint_target_add_dependencies(tint_lang_core_test test
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_type
+  tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
@@ -137,9 +125,6 @@ tint_add_target(tint_lang_core_bench bench
   lang/core/attribute_bench.cc
   lang/core/builtin_bench.cc
   lang/core/builtin_value_bench.cc
-  lang/core/diagnostic_rule_bench.cc
-  lang/core/diagnostic_severity_bench.cc
-  lang/core/extension_bench.cc
   lang/core/interpolation_sampling_bench.cc
   lang/core/interpolation_type_bench.cc
   lang/core/texel_format_bench.cc
@@ -147,13 +132,5 @@ tint_add_target(tint_lang_core_bench bench
 
 tint_target_add_dependencies(tint_lang_core_bench bench
   tint_lang_core
-  tint_utils_containers
-  tint_utils_diagnostic
-  tint_utils_ice
-  tint_utils_macros
-  tint_utils_math
-  tint_utils_memory
-  tint_utils_rtti
-  tint_utils_text
   tint_utils_traits
 )

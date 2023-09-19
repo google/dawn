@@ -337,14 +337,14 @@ bool ASTPrinter::Generate() {
     if (!tint::writer::CheckSupportedExtensions(
             "HLSL", builder_.AST(), diagnostics_,
             Vector{
-                core::Extension::kChromiumDisableUniformityAnalysis,
-                core::Extension::kChromiumExperimentalDp4A,
-                core::Extension::kChromiumExperimentalFullPtrParameters,
-                core::Extension::kChromiumExperimentalPushConstant,
-                core::Extension::kChromiumExperimentalReadWriteStorageTexture,
-                core::Extension::kChromiumExperimentalSubgroups,
-                core::Extension::kF16,
-                core::Extension::kChromiumInternalDualSourceBlending,
+                wgsl::Extension::kChromiumDisableUniformityAnalysis,
+                wgsl::Extension::kChromiumExperimentalDp4A,
+                wgsl::Extension::kChromiumExperimentalFullPtrParameters,
+                wgsl::Extension::kChromiumExperimentalPushConstant,
+                wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture,
+                wgsl::Extension::kChromiumExperimentalSubgroups,
+                wgsl::Extension::kF16,
+                wgsl::Extension::kChromiumInternalDualSourceBlending,
             })) {
         return false;
     }

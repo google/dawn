@@ -68,7 +68,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 
 using ConstEvalSwizzleTest = ConstEvalTestWithParam<Case>;
 TEST_P(ConstEvalSwizzleTest, Test) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
     auto& param = GetParam();
     auto* expr = MemberAccessor(param.input.Expr(*this), param.swizzle);
     auto* a = Const("a", expr);

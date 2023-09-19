@@ -34,6 +34,7 @@ tint_target_add_dependencies(tint_cmd_bench lib
   tint_lang_core
   tint_lang_core_constant
   tint_lang_core_type
+  tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
   tint_lang_wgsl_sem
@@ -66,6 +67,7 @@ tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
   tint_lang_core_type
   tint_lang_core_bench
   tint_lang_spirv_reader_common
+  tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
   tint_lang_wgsl_reader
@@ -73,6 +75,7 @@ tint_target_add_dependencies(tint_cmd_bench_bench_cmd bench_cmd
   tint_lang_wgsl_sem
   tint_lang_wgsl_writer
   tint_lang_wgsl_writer_bench
+  tint_lang_wgsl_bench
   tint_utils_containers
   tint_utils_diagnostic
   tint_utils_ice

@@ -155,7 +155,7 @@ void f() {
 }
 
 TEST_F(MslASTPrinterTest, Emit_VariableDeclStatement_Const_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* C = Const("C", Expr(1_h));
     Func("f", tint::Empty, ty.void_(), Vector{Decl(C), Decl(Let("l", Expr(C)))});
@@ -229,7 +229,7 @@ void f() {
 }
 
 TEST_F(MslASTPrinterTest, Emit_VariableDeclStatement_Const_vec3_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* C = Const("C", Call<vec3<f16>>(1_h, 2_h, 3_h));
     Func("f", tint::Empty, ty.void_(), Vector{Decl(C), Decl(Let("l", Expr(C)))});
@@ -285,7 +285,7 @@ void f() {
 }
 
 TEST_F(MslASTPrinterTest, Emit_VariableDeclStatement_Const_mat2x3_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* C = Const("C", Call<mat2x3<f16>>(1_h, 2_h, 3_h, 4_h, 5_h, 6_h));
     Func("f", tint::Empty, ty.void_(), Vector{Decl(C), Decl(Let("l", Expr(C)))});
@@ -415,7 +415,7 @@ TEST_F(MslASTPrinterTest, Emit_VariableDeclStatement_Vector_f32) {
 }
 
 TEST_F(MslASTPrinterTest, Emit_VariableDeclStatement_Vector_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Var("a", ty.vec2<f16>());
     auto* stmt = Decl(var);
@@ -444,7 +444,7 @@ TEST_F(MslASTPrinterTest, Emit_VariableDeclStatement_Matrix_f32) {
 }
 
 TEST_F(MslASTPrinterTest, Emit_VariableDeclStatement_Matrix_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Var("a", ty.mat3x2<f16>());
 
@@ -473,7 +473,7 @@ TEST_F(MslASTPrinterTest, Emit_VariableDeclStatement_Initializer_ZeroVec_f32) {
 }
 
 TEST_F(MslASTPrinterTest, Emit_VariableDeclStatement_Initializer_ZeroVec_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Var("a", ty.vec3<f16>(), Call<vec3<f16>>());
 
@@ -502,7 +502,7 @@ TEST_F(MslASTPrinterTest, Emit_VariableDeclStatement_Initializer_ZeroMat_f32) {
 }
 
 TEST_F(MslASTPrinterTest, Emit_VariableDeclStatement_Initializer_ZeroMat_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Var("a", ty.mat2x3<f16>(), Call<mat2x3<f16>>());
 

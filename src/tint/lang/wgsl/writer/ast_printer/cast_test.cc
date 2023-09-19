@@ -38,7 +38,7 @@ TEST_F(WgslASTPrinterTest, EmitExpression_Cast_Scalar_F32_From_I32) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitExpression_Cast_Scalar_F16_From_I32) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<f16>(1_i);
     WrapInFunction(cast);
@@ -64,7 +64,7 @@ TEST_F(WgslASTPrinterTest, EmitExpression_Cast_Vector_F32_From_I32) {
 }
 
 TEST_F(WgslASTPrinterTest, EmitExpression_Cast_Vector_F16_From_I32) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec3<f16>>(Call<vec3<i32>>(1_i, 2_i, 3_i));
     WrapInFunction(cast);

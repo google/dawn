@@ -20,7 +20,7 @@
 namespace tint::wgsl::reader {
 namespace {
 
-using SeverityPair = std::pair<std::string, core::DiagnosticSeverity>;
+using SeverityPair = std::pair<std::string, wgsl::DiagnosticSeverity>;
 class DiagnosticControlParserTest : public WGSLParserTestWithParam<SeverityPair> {};
 
 TEST_P(DiagnosticControlParserTest, DiagnosticControl_Name) {
@@ -51,18 +51,18 @@ TEST_P(DiagnosticControlParserTest, DiagnosticControl_CategoryAndName) {
 }
 INSTANTIATE_TEST_SUITE_P(DiagnosticControlParserTest,
                          DiagnosticControlParserTest,
-                         testing::Values(SeverityPair{"error", core::DiagnosticSeverity::kError},
+                         testing::Values(SeverityPair{"error", wgsl::DiagnosticSeverity::kError},
                                          SeverityPair{"warning",
-                                                      core::DiagnosticSeverity::kWarning},
-                                         SeverityPair{"info", core::DiagnosticSeverity::kInfo},
-                                         SeverityPair{"off", core::DiagnosticSeverity::kOff}));
+                                                      wgsl::DiagnosticSeverity::kWarning},
+                                         SeverityPair{"info", wgsl::DiagnosticSeverity::kInfo},
+                                         SeverityPair{"off", wgsl::DiagnosticSeverity::kOff}));
 
 TEST_F(WGSLParserTest, DiagnosticControl_Name_TrailingComma) {
     auto p = parser("(error, foo,)");
     auto e = p->expect_diagnostic_control();
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
-    EXPECT_EQ(e->severity, core::DiagnosticSeverity::kError);
+    EXPECT_EQ(e->severity, wgsl::DiagnosticSeverity::kError);
 
     auto* r = e->rule_name;
     ASSERT_NE(r, nullptr);
@@ -75,7 +75,7 @@ TEST_F(WGSLParserTest, DiagnosticControl_CategoryAndName_TrailingComma) {
     auto e = p->expect_diagnostic_control();
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
-    EXPECT_EQ(e->severity, core::DiagnosticSeverity::kError);
+    EXPECT_EQ(e->severity, wgsl::DiagnosticSeverity::kError);
 
     auto* r = e->rule_name;
     ASSERT_NE(r, nullptr);

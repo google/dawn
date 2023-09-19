@@ -257,16 +257,16 @@ bool ASTPrinter::Generate() {
     if (!tint::writer::CheckSupportedExtensions(
             "MSL", builder_.AST(), diagnostics_,
             Vector{
-                core::Extension::kChromiumDisableUniformityAnalysis,
-                core::Extension::kChromiumExperimentalDp4A,
-                core::Extension::kChromiumExperimentalFullPtrParameters,
-                core::Extension::kChromiumExperimentalPixelLocal,
-                core::Extension::kChromiumExperimentalPushConstant,
-                core::Extension::kChromiumExperimentalReadWriteStorageTexture,
-                core::Extension::kChromiumExperimentalSubgroups,
-                core::Extension::kChromiumInternalDualSourceBlending,
-                core::Extension::kChromiumInternalRelaxedUniformLayout,
-                core::Extension::kF16,
+                wgsl::Extension::kChromiumDisableUniformityAnalysis,
+                wgsl::Extension::kChromiumExperimentalDp4A,
+                wgsl::Extension::kChromiumExperimentalFullPtrParameters,
+                wgsl::Extension::kChromiumExperimentalPixelLocal,
+                wgsl::Extension::kChromiumExperimentalPushConstant,
+                wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture,
+                wgsl::Extension::kChromiumExperimentalSubgroups,
+                wgsl::Extension::kChromiumInternalDualSourceBlending,
+                wgsl::Extension::kChromiumInternalRelaxedUniformLayout,
+                wgsl::Extension::kF16,
             })) {
         return false;
     }

@@ -16,10 +16,10 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/address_space.h"
-#include "src/tint/lang/core/extension.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
+#include "src/tint/lang/wgsl/extension.h"
 #include "src/tint/lang/wgsl/resolver/resolver_helper_test.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
@@ -167,7 +167,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 using SideEffectsBuiltinTest = resolver::ResolverTestWithParam<Case>;
 
 TEST_P(SideEffectsBuiltinTest, Test) {
-    Enable(tint::core::Extension::kChromiumExperimentalDp4A);
+    Enable(tint::wgsl::Extension::kChromiumExperimentalDp4A);
     auto& c = GetParam();
 
     uint32_t next_binding = 0;

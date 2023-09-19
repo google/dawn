@@ -30,8 +30,8 @@ Info::~Info() = default;
 
 Info& Info::operator=(Info&&) = default;
 
-core::DiagnosticSeverity Info::DiagnosticSeverity(const ast::Node* ast_node,
-                                                  core::DiagnosticRule rule) const {
+wgsl::DiagnosticSeverity Info::DiagnosticSeverity(const ast::Node* ast_node,
+                                                  wgsl::DiagnosticRule rule) const {
     // Get the diagnostic severity modification for a node.
     auto check = [&](auto* node) {
         auto& severities = node->DiagnosticSeverities();
@@ -39,13 +39,13 @@ core::DiagnosticSeverity Info::DiagnosticSeverity(const ast::Node* ast_node,
         if (itr != severities.end()) {
             return itr->second;
         }
-        return core::DiagnosticSeverity::kUndefined;
+        return wgsl::DiagnosticSeverity::kUndefined;
     };
 
     // Get the diagnostic severity modification for a function.
     auto check_func = [&](const sem::Function* func) {
         auto severity = check(func);
-        if (severity != core::DiagnosticSeverity::kUndefined) {
+        if (severity != wgsl::DiagnosticSeverity::kUndefined) {
             return severity;
         }
 
@@ -58,7 +58,7 @@ core::DiagnosticSeverity Info::DiagnosticSeverity(const ast::Node* ast_node,
         // Walk up the statement hierarchy, checking for diagnostic severity modifications.
         while (true) {
             auto severity = check(stmt);
-            if (severity != core::DiagnosticSeverity::kUndefined) {
+            if (severity != wgsl::DiagnosticSeverity::kUndefined) {
                 return severity;
             }
             if (!stmt->Parent()) {
@@ -83,7 +83,7 @@ core::DiagnosticSeverity Info::DiagnosticSeverity(const ast::Node* ast_node,
             // Use the global severity set on the module.
             return check(module_);
         });
-    TINT_ASSERT(severity != core::DiagnosticSeverity::kUndefined);
+    TINT_ASSERT(severity != wgsl::DiagnosticSeverity::kUndefined);
     return severity;
 }
 

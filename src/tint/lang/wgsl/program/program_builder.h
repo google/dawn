@@ -22,7 +22,6 @@
 #include "src/tint/api/common/override_id.h"
 
 #include "src/tint/lang/core/constant/manager.h"
-#include "src/tint/lang/core/extension.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/interpolation_sampling.h"
 #include "src/tint/lang/core/interpolation_type.h"
@@ -45,6 +44,7 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/wgsl/ast/builder.h"
+#include "src/tint/lang/wgsl/extension.h"
 #include "src/tint/lang/wgsl/program/program.h"
 #include "src/tint/lang/wgsl/sem/array_count.h"
 #include "src/tint/lang/wgsl/sem/struct.h"

@@ -258,7 +258,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 
 using ConstEvalArrayAccessTest = ConstEvalTestWithParam<Case>;
 TEST_P(ConstEvalArrayAccessTest, Test) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto& param = GetParam();
     auto* expr = param.input.Expr(*this);
@@ -333,7 +333,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 
 using ConstEvalVectorAccessTest = ConstEvalTestWithParam<Case>;
 TEST_P(ConstEvalVectorAccessTest, Test) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto& param = GetParam();
     auto* expr = param.input.Expr(*this);

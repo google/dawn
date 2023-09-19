@@ -43,6 +43,7 @@ cc_library(
     "//src/tint/lang/spirv/intrinsic/data",
     "//src/tint/lang/spirv/ir",
     "//src/tint/lang/spirv/type",
+    "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/sem",

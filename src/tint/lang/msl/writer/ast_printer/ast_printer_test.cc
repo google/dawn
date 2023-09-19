@@ -36,7 +36,7 @@ TEST_F(MslASTPrinterTest, InvalidProgram) {
 }
 
 TEST_F(MslASTPrinterTest, UnsupportedExtension) {
-    Enable(Source{{12, 34}}, core::Extension::kUndefined);
+    Enable(Source{{12, 34}}, wgsl::Extension::kUndefined);
 
     ASTPrinter& gen = Build();
 

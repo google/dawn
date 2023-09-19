@@ -109,7 +109,7 @@ int my_func() {
 }
 
 TEST_F(GlslASTPrinterTest, UnsupportedExtension) {
-    Enable(Source{{12, 34}}, core::Extension::kUndefined);
+    Enable(Source{{12, 34}}, wgsl::Extension::kUndefined);
 
     ASTPrinter& gen = Build();
 

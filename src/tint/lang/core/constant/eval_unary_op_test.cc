@@ -42,7 +42,7 @@ Case C(T input, U expected) {
 using ConstEvalUnaryOpTest = ConstEvalTestWithParam<std::tuple<core::UnaryOp, Case>>;
 
 TEST_P(ConstEvalUnaryOpTest, Test) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto op = std::get<0>(GetParam());
     auto& c = std::get<1>(GetParam());

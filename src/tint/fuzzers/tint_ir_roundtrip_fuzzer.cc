@@ -48,12 +48,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     auto is_unsupported = [](const tint::ast::Enable* enable) {
         for (auto ext : enable->extensions) {
             switch (ext->name) {
-                case tint::core::Extension::kChromiumExperimentalDp4A:
-                case tint::core::Extension::kChromiumExperimentalFullPtrParameters:
-                case tint::core::Extension::kChromiumExperimentalPixelLocal:
-                case tint::core::Extension::kChromiumExperimentalPushConstant:
-                case tint::core::Extension::kChromiumInternalDualSourceBlending:
-                case tint::core::Extension::kChromiumInternalRelaxedUniformLayout:
+                case tint::wgsl::Extension::kChromiumExperimentalDp4A:
+                case tint::wgsl::Extension::kChromiumExperimentalFullPtrParameters:
+                case tint::wgsl::Extension::kChromiumExperimentalPixelLocal:
+                case tint::wgsl::Extension::kChromiumExperimentalPushConstant:
+                case tint::wgsl::Extension::kChromiumInternalDualSourceBlending:
+                case tint::wgsl::Extension::kChromiumInternalRelaxedUniformLayout:
                     return true;
                 default:
                     break;

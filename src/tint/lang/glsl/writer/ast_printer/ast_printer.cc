@@ -280,13 +280,13 @@ bool ASTPrinter::Generate() {
     if (!tint::writer::CheckSupportedExtensions(
             "GLSL", builder_.AST(), diagnostics_,
             Vector{
-                core::Extension::kChromiumDisableUniformityAnalysis,
-                core::Extension::kChromiumExperimentalDp4A,
-                core::Extension::kChromiumExperimentalFullPtrParameters,
-                core::Extension::kChromiumInternalDualSourceBlending,
-                core::Extension::kChromiumExperimentalReadWriteStorageTexture,
-                core::Extension::kChromiumExperimentalPushConstant,
-                core::Extension::kF16,
+                wgsl::Extension::kChromiumDisableUniformityAnalysis,
+                wgsl::Extension::kChromiumExperimentalDp4A,
+                wgsl::Extension::kChromiumExperimentalFullPtrParameters,
+                wgsl::Extension::kChromiumInternalDualSourceBlending,
+                wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture,
+                wgsl::Extension::kChromiumExperimentalPushConstant,
+                wgsl::Extension::kF16,
             })) {
         return false;
     }
@@ -378,11 +378,11 @@ bool ASTPrinter::Generate() {
 void ASTPrinter::RecordExtension(const ast::Enable* enable) {
     // Deal with extension node here, recording it within the generator for later emition.
 
-    if (enable->HasExtension(core::Extension::kF16)) {
+    if (enable->HasExtension(wgsl::Extension::kF16)) {
         requires_f16_extension_ = true;
     }
 
-    if (enable->HasExtension(core::Extension::kChromiumInternalDualSourceBlending)) {
+    if (enable->HasExtension(wgsl::Extension::kChromiumInternalDualSourceBlending)) {
         requires_dual_source_blending_extension_ = true;
     }
 }

@@ -166,7 +166,7 @@ TEST_P(HlslASTPrinterTest_MemberAccessor_StorageBufferLoad_ConstantOffset, Test)
 
     auto p = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     SetupStorageBuffer(Vector{
         Member("a", ty.i32()),
@@ -301,7 +301,7 @@ TEST_P(HlslASTPrinterTest_MemberAccessor_StorageBufferLoad_DynamicOffset, Test) 
 
     auto p = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* inner = Structure("Inner", Vector{
                                          Member("a", ty.i32()),
@@ -440,7 +440,7 @@ TEST_P(HlslASTPrinterTest_MemberAccessor_UniformBufferLoad_ConstantOffset, Test)
 
     auto p = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     SetupUniformBuffer(Vector{
         Member("a", ty.i32()),
@@ -708,7 +708,7 @@ TEST_P(HlslASTPrinterTest_MemberAccessor_UniformBufferLoad_DynamicOffset, Test) 
 
     auto p = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* inner = Structure("Inner", Vector{
                                          Member("a", ty.i32()),
@@ -990,7 +990,7 @@ TEST_P(HlslASTPrinterTest_MemberAccessor_StorageBufferStore, Test) {
 
     auto p = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     SetupStorageBuffer(Vector{
         Member("a", ty.i32()),
@@ -1195,7 +1195,7 @@ TEST_F(HlslASTPrinterTest_MemberAccessor, StorageBuffer_Load_Matrix_F16_Single_E
     // var<storage> data : Data;
     // data.a[2i][1i];
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     SetupStorageBuffer(Vector{
         Member("z", ty.f16()),
@@ -1261,7 +1261,7 @@ TEST_F(HlslASTPrinterTest_MemberAccessor, UniformBuffer_Load_Matrix_F16_Single_E
     // var<uniform> data : Data;
     // data.a[2i][1i];
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     SetupUniformBuffer(Vector{
         Member("z", ty.f16()),

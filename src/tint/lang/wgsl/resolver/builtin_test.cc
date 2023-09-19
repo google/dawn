@@ -492,7 +492,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Vector_f32) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Scalar_f16) {
     auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto val = 0.5_h;
     if (param.name == std::string("acosh")) {
@@ -520,7 +520,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Scalar_f16) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Vector_f16) {
     auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto val = param.name == std::string("acosh") ? Call<vec3<f16>>(1.0_h, 2.0_h, 3.0_h)
                                                   : Call<vec3<f16>>(0.5_h, 0.5_h, 0.8_h);
@@ -549,7 +549,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Vector_f16) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, TwoParams_Scalar_f16) {
     auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call(param.name, 1_h, 1_h);
     WrapInFunction(call);
@@ -572,7 +572,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, TwoParams_Scalar_f16) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, TwoParams_Vector_f16) {
     auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call(param.name, Call<vec3<f16>>(1_h, 1_h, 3_h), Call<vec3<f16>>(1_h, 1_h, 3_h));
     WrapInFunction(call);
@@ -598,7 +598,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, TwoParams_Vector_f16) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, ThreeParams_Scalar_f16) {
     auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call(param.name, 0_h, 1_h, 2_h);
     WrapInFunction(call);
@@ -621,7 +621,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, ThreeParams_Scalar_f16) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, ThreeParams_Vector_f16) {
     auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call(param.name, Call<vec3<f16>>(0_h, 0_h, 0_h), Call<vec3<f16>>(1_h, 1_h, 1_h),
                       Call<vec3<f16>>(2_h, 2_h, 2_h));
@@ -649,7 +649,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, ThreeParams_Vector_f16) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Scalar_f16) {
     auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call(param.name, 1_h, 1_h, 1_h, 1_h);
     WrapInFunction(call);
@@ -672,7 +672,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Scalar_f16) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Vector_f16) {
     auto param = GetParam();
 
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call(param.name, Call<vec3<f16>>(1_h, 1_h, 3_h), Call<vec3<f16>>(1_h, 1_h, 3_h),
                       Call<vec3<f16>>(1_h, 1_h, 3_h), Call<vec3<f16>>(1_h, 1_h, 3_h));
@@ -766,7 +766,7 @@ TEST_F(ResolverBuiltinFloatTest, Cross_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Cross_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call("cross", Call<vec3<f16>>(1_h, 2_h, 3_h), Call<vec3<f16>>(1_h, 2_h, 3_h));
     WrapInFunction(call);
@@ -863,7 +863,7 @@ TEST_F(ResolverBuiltinFloatTest, Distance_Scalar_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Distance_Scalar_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call("distance", 1_h, 1_h);
     WrapInFunction(call);
@@ -885,7 +885,7 @@ TEST_F(ResolverBuiltinFloatTest, Distance_Vector_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Distance_Vector_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call("distance", Call<vec3<f16>>(1_h, 1_h, 3_h), Call<vec3<f16>>(1_h, 1_h, 3_h));
     WrapInFunction(call);
@@ -971,7 +971,7 @@ TEST_F(ResolverBuiltinFloatTest, FrexpScalar_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, FrexpScalar_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call("frexp", 1_h);
     WrapInFunction(call);
@@ -1035,7 +1035,7 @@ TEST_F(ResolverBuiltinFloatTest, FrexpVector_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, FrexpVector_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call("frexp", Call<vec3<f16>>());
     WrapInFunction(call);
@@ -1097,7 +1097,7 @@ TEST_F(ResolverBuiltinFloatTest, Length_Scalar_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Length_Scalar_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call("length", 1_h);
     WrapInFunction(call);
@@ -1119,7 +1119,7 @@ TEST_F(ResolverBuiltinFloatTest, Length_FloatVector_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Length_FloatVector_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call("length", Call<vec3<f16>>(1_h, 1_h, 3_h));
     WrapInFunction(call);
@@ -1174,7 +1174,7 @@ TEST_F(ResolverBuiltinFloatTest, Mix_VectorScalar_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Mix_VectorScalar_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call("mix", Call<vec3<f16>>(1_h, 1_h, 1_h), Call<vec3<f16>>(1_h, 1_h, 1_h), 4_h);
     WrapInFunction(call);
@@ -1220,7 +1220,7 @@ TEST_F(ResolverBuiltinFloatTest, ModfScalar_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, ModfScalar_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call("modf", 1_h);
     WrapInFunction(call);
@@ -1284,7 +1284,7 @@ TEST_F(ResolverBuiltinFloatTest, ModfVector_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, ModfVector_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call("modf", Call<vec3<f16>>());
     WrapInFunction(call);
@@ -1394,7 +1394,7 @@ TEST_F(ResolverBuiltinFloatTest, Normalize_Vector_f32) {
 }
 
 TEST_F(ResolverBuiltinFloatTest, Normalize_Vector_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* call = Call("normalize", Call<vec3<f16>>(1_h, 1_h, 3_h));
     WrapInFunction(call);
@@ -1857,7 +1857,7 @@ TEST_F(ResolverBuiltinTest, Determinant_2x2_f32) {
 }
 
 TEST_F(ResolverBuiltinTest, Determinant_2x2_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     GlobalVar("var", ty.mat2x2<f16>(), core::AddressSpace::kPrivate);
 
@@ -1883,7 +1883,7 @@ TEST_F(ResolverBuiltinTest, Determinant_3x3_f32) {
 }
 
 TEST_F(ResolverBuiltinTest, Determinant_3x3_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     GlobalVar("var", ty.mat3x3<f16>(), core::AddressSpace::kPrivate);
 
@@ -1909,7 +1909,7 @@ TEST_F(ResolverBuiltinTest, Determinant_4x4_f32) {
 }
 
 TEST_F(ResolverBuiltinTest, Determinant_4x4_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     GlobalVar("var", ty.mat4x4<f16>(), core::AddressSpace::kPrivate);
 
@@ -1970,7 +1970,7 @@ TEST_F(ResolverBuiltinTest, Dot_Vec2_f32) {
 }
 
 TEST_F(ResolverBuiltinTest, Dot_Vec2_f16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     GlobalVar("my_var", ty.vec2<f16>(), core::AddressSpace::kPrivate);
 

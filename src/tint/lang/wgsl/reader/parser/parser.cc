@@ -416,7 +416,7 @@ Maybe<Void> Parser::enable_directive() {
         Vector<const ast::Extension*, 4> extensions;
         while (continue_parsing()) {
             Source ext_src = peek().source();
-            auto ext = expect_enum("extension", core::ParseExtension, core::kExtensionStrings);
+            auto ext = expect_enum("extension", wgsl::ParseExtension, wgsl::kExtensionStrings);
             if (ext.errored) {
                 return Failure::kErrored;
             }
@@ -3142,9 +3142,9 @@ Expect<Void> Parser::expect_not_templated_ident_expr(const ast::Expression* expr
 //   | 'warning'
 //   | 'info'
 //   | 'off'
-Expect<core::DiagnosticSeverity> Parser::expect_severity_control_name() {
-    return expect_enum("severity control", core::ParseDiagnosticSeverity,
-                       core::kDiagnosticSeverityStrings);
+Expect<wgsl::DiagnosticSeverity> Parser::expect_severity_control_name() {
+    return expect_enum("severity control", wgsl::ParseDiagnosticSeverity,
+                       wgsl::kDiagnosticSeverityStrings);
 }
 
 // diagnostic_control

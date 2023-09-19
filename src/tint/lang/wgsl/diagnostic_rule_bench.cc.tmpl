@@ -1,6 +1,6 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/src/cmd/gen to generate extension_bench.cc
+Template file for use with tools/src/cmd/gen to generate diagnostic_control_bench.cc
 
 See:
 * tools/src/cmd/gen for structures used by this template
@@ -8,20 +8,21 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
-{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+{{- $I := LoadIntrinsics "src/tint/lang/wgsl/wgsl.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
-{{- $enum := ($I.Sem.Enum "extension") -}}
 
-#include "src/tint/lang/core/extension.h"
+#include "src/tint/lang/wgsl/diagnostic_rule.h"
 
 #include <array>
 
 #include "benchmark/benchmark.h"
 
-namespace tint::core {
+namespace tint::wgsl {
 namespace {
 
-{{ Eval "BenchmarkParseEnum" $enum }}
+{{ Eval "BenchmarkParseEnum" ($I.Sem.Enum "core_diagnostic_rule")}}
+
+{{ Eval "BenchmarkParseEnum" ($I.Sem.Enum "chromium_diagnostic_rule")}}
 
 }  // namespace
-}  // namespace tint::core
+}  // namespace tint::wgsl

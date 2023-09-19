@@ -29,7 +29,7 @@ TEST_F(ResolverPixelLocalExtensionTest, AddressSpaceUsedWithExtension) {
     // enable chromium_experimental_pixel_local;
     // struct S { a : i32 }
     // var<pixel_local> v : S;
-    Enable(Source{{12, 34}}, core::Extension::kChromiumExperimentalPixelLocal);
+    Enable(Source{{12, 34}}, wgsl::Extension::kChromiumExperimentalPixelLocal);
 
     Structure("S", Vector{Member("a", ty.i32())});
 
@@ -67,7 +67,7 @@ TEST_F(ResolverPixelLocalExtensionTest, PixelLocalTwoVariablesUsedInEntryPoint) 
     //   _ = a.i;
     //   _ = b.i;
     // }
-    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     Structure("S", Vector{Member("i", ty.i32())});
     GlobalVar(Source{{1, 2}}, "a", ty("S"), core::AddressSpace::kPixelLocal);
     GlobalVar(Source{{3, 4}}, "b", ty("S"), core::AddressSpace::kPixelLocal);
@@ -99,7 +99,7 @@ TEST_F(ResolverPixelLocalExtensionTest, PixelLocalTwoVariablesUsedInEntryPointWi
     //   uses_a();
     //   uses_b();
     // }
-    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     Structure("S", Vector{Member("i", ty.i32())});
     GlobalVar(Source{{1, 2}}, "a", ty("S"), core::AddressSpace::kPixelLocal);
     GlobalVar(Source{{3, 4}}, "b", ty("S"), core::AddressSpace::kPixelLocal);
@@ -132,7 +132,7 @@ TEST_F(ResolverPixelLocalExtensionTest, VertexStageDirect) {
     //   v.i = 42;
     //   return vec4f();
     // }
-    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     Structure("S", Vector{Member("i", ty.i32())});
     GlobalVar(Source{{56, 78}}, "v", ty("S"), core::AddressSpace::kPixelLocal);
     Func("F", Empty, ty.vec4<f32>(),
@@ -157,7 +157,7 @@ TEST_F(ResolverPixelLocalExtensionTest, ComputeStageDirect) {
     // @compute @workgroup_size(1) fn F() {
     //   v.i = 42;
     // }
-    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     Structure("S", Vector{Member("i", ty.i32())});
     GlobalVar(Source{{56, 78}}, "v", ty("S"), core::AddressSpace::kPixelLocal);
     Func("F", Empty, ty.void_(),
@@ -178,7 +178,7 @@ TEST_F(ResolverPixelLocalExtensionTest, FragmentStageDirect) {
     // @fragment fn F() {
     //   v.i = 42;
     // }
-    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     Structure("S", Vector{Member("i", ty.i32())});
     GlobalVar(Source{{56, 78}}, "v", ty("S"), core::AddressSpace::kPixelLocal);
     Func("F", Empty, ty.void_(),
@@ -198,7 +198,7 @@ TEST_F(ResolverPixelLocalExtensionTest, VertexStageIndirect) {
     //   X();
     //   return vec4f();
     // }
-    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     Structure("S", Vector{Member("i", ty.i32())});
     GlobalVar(Source{{3, 4}}, "v", ty("S"), core::AddressSpace::kPixelLocal);
     Func(Source{{5, 6}}, "X", Empty, ty.void_(),
@@ -231,7 +231,7 @@ TEST_F(ResolverPixelLocalExtensionTest, ComputeStageIndirect) {
     // @compute @workgroup_size(1) fn F() {
     //   Y();
     // }
-    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     Structure("S", Vector{Member("i", ty.i32())});
     GlobalVar(Source{{3, 4}}, "v", ty("S"), core::AddressSpace::kPixelLocal);
     Func(Source{{5, 6}}, "X", Empty, ty.void_(),
@@ -259,7 +259,7 @@ TEST_F(ResolverPixelLocalExtensionTest, FragmentStageIndirect) {
     // @fragment fn F() {
     //   Y();
     // }
-    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     Structure("S", Vector{Member("i", ty.i32())});
     GlobalVar(Source{{3, 4}}, "v", ty("S"), core::AddressSpace::kPixelLocal);
     Func(Source{{5, 6}}, "X", Empty, ty.void_(),
@@ -297,7 +297,7 @@ using ResolverPixelLocalExtensionTest_Types = ResolverTestWithParam<Case>;
 TEST_P(ResolverPixelLocalExtensionTest_Types, Direct) {
     // var<pixel_local> v : <type>;
 
-    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     GlobalVar(Source{{12, 34}}, "v", GetParam().type(*this), core::AddressSpace::kPixelLocal);
 
     EXPECT_FALSE(r()->Resolve());
@@ -312,7 +312,7 @@ TEST_P(ResolverPixelLocalExtensionTest_Types, Struct) {
     // }
     // var<pixel_local> v : S;
 
-    Enable(core::Extension::kChromiumExperimentalPixelLocal);
+    Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     Structure("S", Vector{
                        Member("a", ty.i32()),
                        Member(Source{{12, 34}}, "m", GetParam().type(*this)),

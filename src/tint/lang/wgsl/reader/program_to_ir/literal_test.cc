@@ -143,7 +143,7 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_F32_Deduped) {
 }
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
     auto* expr = Expr(1.2_h);
     GlobalVar("a", ty.f16(), core::AddressSpace::kPrivate, expr);
 
@@ -158,7 +158,7 @@ TEST_F(ProgramToIRLiteralTest, EmitLiteral_F16) {
 }
 
 TEST_F(ProgramToIRLiteralTest, EmitLiteral_F16_Deduped) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
     GlobalVar("a", ty.f16(), core::AddressSpace::kPrivate, Expr(1.2_h));
     GlobalVar("b", ty.f16(), core::AddressSpace::kPrivate, Expr(1.25_h));
     GlobalVar("c", ty.f16(), core::AddressSpace::kPrivate, Expr(1.2_h));

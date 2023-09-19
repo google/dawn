@@ -85,7 +85,7 @@ struct TypeAndAddressSpace {
 };
 
 /// DiagnosticFilterStack is a scoped stack of diagnostic filters.
-using DiagnosticFilterStack = ScopeStack<core::DiagnosticRule, core::DiagnosticSeverity>;
+using DiagnosticFilterStack = ScopeStack<wgsl::DiagnosticRule, wgsl::DiagnosticSeverity>;
 
 /// Validation logic for various ast nodes. The validations in general should
 /// be shallow and depend on the resolver to call on children. The validations
@@ -101,7 +101,7 @@ class Validator {
     /// @param valid_type_storage_layouts a set of validated type layouts by address space
     Validator(ProgramBuilder* builder,
               SemHelper& helper,
-              const core::Extensions& enabled_extensions,
+              const wgsl::Extensions& enabled_extensions,
               const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info,
               Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts);
     ~Validator();
@@ -126,7 +126,7 @@ class Validator {
     /// @param msg the diagnostic message
     /// @param source the diagnostic source
     /// @returns false if the diagnostic is an error for the given trigger rule
-    bool AddDiagnostic(core::DiagnosticRule rule,
+    bool AddDiagnostic(wgsl::DiagnosticRule rule,
                        const std::string& msg,
                        const Source& source) const;
 
@@ -566,7 +566,7 @@ class Validator {
     diag::List& diagnostics_;
     SemHelper& sem_;
     DiagnosticFilterStack diagnostic_filters_;
-    const core::Extensions& enabled_extensions_;
+    const wgsl::Extensions& enabled_extensions_;
     const Hashmap<const core::type::Type*, const Source*, 8>& atomic_composite_info_;
     Hashset<TypeAndAddressSpace, 8>& valid_type_storage_layouts_;
 };

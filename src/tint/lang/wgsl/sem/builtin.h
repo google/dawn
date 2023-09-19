@@ -18,8 +18,8 @@
 #include <string>
 #include <vector>
 
-#include "src/tint/lang/core/extension.h"
 #include "src/tint/lang/core/function.h"
+#include "src/tint/lang/wgsl/extension.h"
 #include "src/tint/lang/wgsl/sem/call_target.h"
 #include "src/tint/lang/wgsl/sem/pipeline_stage_set.h"
 #include "src/tint/utils/math/hash.h"
@@ -101,8 +101,8 @@ class Builtin final : public Castable<Builtin, CallTarget> {
     bool HasSideEffects() const;
 
     /// @returns the required extension of this builtin function. Returns
-    /// core::Extension::kNone if no extension is required.
-    core::Extension RequiredExtension() const;
+    /// wgsl::Extension::kNone if no extension is required.
+    wgsl::Extension RequiredExtension() const;
 
   private:
     const core::Function type_;

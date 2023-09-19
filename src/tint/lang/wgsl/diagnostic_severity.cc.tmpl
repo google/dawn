@@ -8,14 +8,14 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
-{{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
+{{- $I := LoadIntrinsics "src/tint/lang/wgsl/wgsl.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 
-#include "src/tint/lang/core/diagnostic_severity.h"
+#include "src/tint/lang/wgsl/diagnostic_severity.h"
 
 #include <string>
 
-namespace tint::core {
+namespace tint::wgsl {
 
 diag::Severity ToSeverity(DiagnosticSeverity sc) {
     switch (sc) {
@@ -34,4 +34,4 @@ diag::Severity ToSeverity(DiagnosticSeverity sc) {
 
 {{ Eval "EnumOStream" ($I.Sem.Enum "diagnostic_severity")}}
 
-}  // namespace tint::core
+}  // namespace tint::wgsl

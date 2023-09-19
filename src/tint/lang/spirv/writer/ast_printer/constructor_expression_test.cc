@@ -214,7 +214,7 @@ TEST_F(SpvBuilderConstructorTest, Type_F32_With_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_F16_With_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<f16>(2_h);
     WrapInFunction(cast);
@@ -289,7 +289,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_Literal) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F16_Literal) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec2<f16>>(2_h);
     WrapInFunction(cast);
@@ -333,7 +333,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F16_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2_h)));
     auto* cast = Call<vec2<f16>>("x", "x");
@@ -378,7 +378,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_F32_Const) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F16_F16_Const) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec2<f16>>(1_h, 2_h);
     WrapInFunction(cast);
@@ -423,7 +423,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_F32_With_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec2_F16_With_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec2<f16>(), Call<vec2<f16>>(1_h, 2_h)));
     auto* cast = Call<vec2<f16>>("x");
@@ -468,7 +468,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_F32_With_Vec2_Const) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec2_F16_With_Vec2_Const) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec2<f16>>(Call<vec2<f16>>(1_h, 2_h));
     WrapInFunction(cast);
@@ -514,7 +514,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2_h)));
     auto* cast = Call<vec3<f16>>("x", "x", "x");
@@ -561,7 +561,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_Const) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16_Const) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec3<f16>>(1_h, 2_h, 3_h);
     WrapInFunction(cast);
@@ -652,7 +652,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_F32_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16_F16_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2_h)));
     auto* cast = Call<vec3<f16>>("x", "x", "x");
@@ -699,7 +699,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_F32_F32_Const) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16_F16_F16_Const) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec3<f16>>(1_h, 2_h, 3_h);
     WrapInFunction(cast);
@@ -750,7 +750,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec2<f16>(), Call<vec2<f16>>(2_h, 3_h)));
     auto* cast = Call<vec3<f16>>(1_h, "x");
@@ -801,7 +801,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_Vec2_Const) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16_Vec2_Const) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec3<f16>>(1_h, Call<vec2<f16>>(2_h, 3_h));
     WrapInFunction(cast);
@@ -852,7 +852,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec2<f16>(), Call<vec2<f16>>(1_h, 2_h)));
     auto* cast = Call<vec3<f16>>("x", 3_h);
@@ -903,7 +903,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F32_Const) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F16_Const) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec3<f16>>(Call<vec2<f16>>(1_h, 2_h), 3_h);
     WrapInFunction(cast);
@@ -950,7 +950,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_F32_With_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_F16_With_Vec3) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec3<f16>(), Call<vec3<f16>>(1_h, 2_h, 3_h)));
     auto* cast = Call<vec3<f16>>("x");
@@ -997,7 +997,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_F32_With_Vec3_Const) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec3_F16_With_Vec3_Const) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec3<f16>>(Call<vec3<f16>>(1_h, 2_h, 3_h));
     WrapInFunction(cast);
@@ -1083,7 +1083,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2_h)));
     auto* cast = Call<vec4<f16>>("x");
@@ -1126,7 +1126,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Const) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_Const) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(2_h);
     WrapInFunction(cast);
@@ -1172,7 +1172,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_F32_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_F16_F16_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2_h)));
     auto* cast = Call<vec4<f16>>("x", "x", "x", "x");
@@ -1221,7 +1221,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_F32_F32_Const) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_F16_F16_F16_Const) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(1_h, 2_h, 3_h, 4_h);
     WrapInFunction(cast);
@@ -1272,7 +1272,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_F16_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec2<f16>(), Call<vec2<f16>>(1_h, 2_h)));
     auto* cast = Call<vec4<f16>>(1_h, 2_h, "x");
@@ -1323,7 +1323,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_Vec2_Const) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_F16_Vec2_Const) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(1_h, 2_h, Call<vec2<f16>>(3_h, 4_h));
     WrapInFunction(cast);
@@ -1376,7 +1376,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec2_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_Vec2_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec2<f16>(), Call<vec2<f16>>(2_h, 3_h)));
     auto* cast = Call<vec4<f16>>(1_h, "x", 4_h);
@@ -1429,7 +1429,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec2_F32_Const) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_Vec2_F16_Const) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(1_h, Call<vec2<f16>>(2_h, 3_h), 4_h);
     WrapInFunction(cast);
@@ -1482,7 +1482,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F32_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F16_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec2<f16>(), Call<vec2<f16>>(1_h, 2_h)));
     auto* cast = Call<vec4<f16>>("x", 3_h, 4_h);
@@ -1535,7 +1535,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F32_F32_Const) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F16_F16_Const) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(Call<vec2<f16>>(1_h, 2_h), 3_h, 4_h);
     WrapInFunction(cast);
@@ -1589,7 +1589,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_F32_With_Vec2_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_F16_With_Vec2_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec2<f16>(), Call<vec2<f16>>(1_h, 2_h)));
     auto* cast = Call<vec4<f16>>("x", "x");
@@ -1641,7 +1641,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_F32_With_Vec2_Vec2_Const) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_F16_With_Vec2_Vec2_Const) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(Call<vec2<f16>>(1_h, 2_h), Call<vec2<f16>>(1_h, 2_h));
     WrapInFunction(cast);
@@ -1690,7 +1690,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_Vec3) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec3<f16>(), Call<vec3<f16>>(2_h, 2_h, 2_h)));
     auto* cast = Call<vec4<f16>>(2_h, "x");
@@ -1738,7 +1738,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec3_Const) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_Vec3_Const) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(2_h, Call<vec3<f16>>(2_h, 2_h, 2_h));
     WrapInFunction(cast);
@@ -1786,7 +1786,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec3<f16>(), Call<vec3<f16>>(2_h, 2_h, 2_h)));
     auto* cast = Call<vec4<f16>>("x", 2_h);
@@ -1834,7 +1834,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F32_Const) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F16_Const) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(Call<vec3<f16>>(2_h, 2_h, 2_h), 2_h);
     WrapInFunction(cast);
@@ -1871,7 +1871,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_F32_With_Vec4) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Vec4_F16_With_Vec4) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* value = Call<vec4<f16>>(2_h, 2_h, 2_h, 2_h);
     auto* cast = Call<vec4<f16>>(value);
@@ -1912,7 +1912,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_F16_With_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* ctor = Call<f16>(2_h);
     GlobalConst("g", ty.f16(), ctor);
@@ -1952,7 +1952,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_F32_With_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_F16_With_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* ctor = Call<f16>(2_h);
     GlobalVar("g", ty.f16(), core::AddressSpace::kPrivate, ctor);
@@ -1992,7 +1992,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_U32_With_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* ctor = Call<u32>(1.5_h);
     GlobalConst("g", ty.u32(), ctor);
@@ -2032,7 +2032,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_U32_With_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_U32_With_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* ctor = Call<u32>(1.5_h);
     GlobalVar("g", ty.u32(), core::AddressSpace::kPrivate, ctor);
@@ -2074,7 +2074,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec2_With_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec2<f16>>(2_h);
     GlobalConst("g", ty.vec2<f16>(), cast);
@@ -2115,7 +2115,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec2_With_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec2_With_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec2<f16>>(2_h);
     auto* g = GlobalVar("g", ty.vec2<f16>(), core::AddressSpace::kPrivate, cast);
@@ -2156,7 +2156,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec2_F16_With_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec2<f16>>(Call<vec2<f16>>(2_h, 2_h));
     GlobalConst("g", ty.vec2<f16>(), cast);
@@ -2201,7 +2201,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec2_F32_With_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec2_F16_With_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec2<f16>>(Call<vec2<f16>>(2_h, 2_h));
     GlobalVar("a", ty.vec2<f16>(), core::AddressSpace::kPrivate, cast);
@@ -2246,7 +2246,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec3_F16_With_Vec3) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec3<f16>>(Call<vec3<f16>>(2_h, 2_h, 2_h));
     GlobalConst("g", ty.vec3<f16>(), cast);
@@ -2291,7 +2291,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_F32_With_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_F16_With_Vec3) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec3<f16>>(Call<vec3<f16>>(2_h, 2_h, 2_h));
     GlobalVar("a", ty.vec3<f16>(), core::AddressSpace::kPrivate, cast);
@@ -2336,7 +2336,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_F16_With_Vec4) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(Call<vec4<f16>>(2_h, 2_h, 2_h, 2_h));
     GlobalConst("g", ty.vec4<f16>(), cast);
@@ -2381,7 +2381,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_F32_With_Vec4) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_F16_With_Vec4) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(Call<vec4<f16>>(2_h, 2_h, 2_h, 2_h));
     GlobalVar("a", ty.vec4<f16>(), core::AddressSpace::kPrivate, cast);
@@ -2426,7 +2426,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec3_With_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec3<f16>>(2_h);
     GlobalConst("g", ty.vec3<f16>(), cast);
@@ -2467,7 +2467,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec3<f16>>(2_h);
     auto* g = GlobalVar("g", ty.vec3<f16>(), core::AddressSpace::kPrivate, cast);
@@ -2508,7 +2508,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec3_With_F16_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec3<f16>>(2_h, Call<vec2<f16>>(2_h, 2_h));
     GlobalConst("g", ty.vec3<f16>(), cast);
@@ -2549,7 +2549,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F32_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F16_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec3<f16>>(2_h, Call<vec2<f16>>(2_h, 2_h));
     auto* g = GlobalVar("g", ty.vec3<f16>(), core::AddressSpace::kPrivate, cast);
@@ -2590,7 +2590,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec3_With_Vec2_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec3<f16>>(Call<vec2<f16>>(2_h, 2_h), 2_h);
     GlobalConst("g", ty.vec3<f16>(), cast);
@@ -2631,7 +2631,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_Vec2_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_Vec2_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec3<f16>>(Call<vec2<f16>>(2_h, 2_h), 2_h);
     auto* g = GlobalVar("g", ty.vec3<f16>(), core::AddressSpace::kPrivate, cast);
@@ -2672,7 +2672,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(2_h);
     GlobalConst("g", ty.vec4<f16>(), cast);
@@ -2713,7 +2713,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(2_h);
     auto* g = GlobalVar("g", ty.vec4<f16>(), core::AddressSpace::kPrivate, cast);
@@ -2754,7 +2754,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_F16_F16_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(2_h, 2_h, Call<vec2<f16>>(2_h, 2_h));
     GlobalConst("g", ty.vec4<f16>(), cast);
@@ -2795,7 +2795,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32_F32_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16_F16_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(2_h, 2_h, Call<vec2<f16>>(2_h, 2_h));
     auto* g = GlobalVar("g", ty.vec4<f16>(), core::AddressSpace::kPrivate, cast);
@@ -2836,7 +2836,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_F16_Vec2_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(2_h, Call<vec2<f16>>(2_h, 2_h), 2_h);
     GlobalConst("g", ty.vec4<f16>(), cast);
@@ -2877,7 +2877,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32_Vec2_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16_Vec2_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(2_h, Call<vec2<f16>>(2_h, 2_h), 2_h);
     auto* g = GlobalVar("g", ty.vec4<f16>(), core::AddressSpace::kPrivate, cast);
@@ -2918,7 +2918,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_Vec2_F16_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(Call<vec2<f16>>(2_h, 2_h), 2_h, 2_h);
     GlobalConst("g", ty.vec4<f16>(), cast);
@@ -2959,7 +2959,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec2_F32_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec2_F16_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(Call<vec2<f16>>(2_h, 2_h), 2_h, 2_h);
     auto* g = GlobalVar("g", ty.vec4<f16>(), core::AddressSpace::kPrivate, cast);
@@ -3000,7 +3000,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_F16_With_Vec2_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(Call<vec2<f16>>(2_h, 2_h), Call<vec2<f16>>(2_h, 2_h));
     GlobalConst("g", ty.vec4<f16>(), cast);
@@ -3041,7 +3041,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_F32_With_Vec2_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_F16_With_Vec2_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(Call<vec2<f16>>(2_h, 2_h), Call<vec2<f16>>(2_h, 2_h));
     auto* g = GlobalVar("g", ty.vec4<f16>(), core::AddressSpace::kPrivate, cast);
@@ -3098,7 +3098,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16_Vec3) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(2_h, Call<vec3<f16>>(2_h, 2_h, 2_h));
     auto* g = GlobalVar("g", ty.vec4<f16>(), core::AddressSpace::kPrivate, cast);
@@ -3139,7 +3139,7 @@ OpReturn
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_Vec3_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(Call<vec3<f16>>(2_h, 2_h, 2_h), 2_h);
     GlobalConst("g", ty.vec4<f16>(), cast);
@@ -3180,7 +3180,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec3_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec3_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<vec4<f16>>(Call<vec3<f16>>(2_h, 2_h, 2_h), 2_h);
     auto* g = GlobalVar("g", ty.vec4<f16>(), core::AddressSpace::kPrivate, cast);
@@ -3216,7 +3216,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat2x2_F32_With_Vec2_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat2x2_F16_With_Vec2_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<mat2x2<f16>>(Call<vec2<f16>>(2_h, 2_h), Call<vec2<f16>>(2_h, 2_h));
     WrapInFunction(cast);
@@ -3255,7 +3255,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat3x2_F32_With_Vec2_Vec2_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat3x2_F16_With_Vec2_Vec2_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<mat3x2<f16>>(Call<vec2<f16>>(2_h, 2_h), Call<vec2<f16>>(2_h, 2_h),
                                    Call<vec2<f16>>(2_h, 2_h));
@@ -3295,7 +3295,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat4x2_F32_With_Vec2_Vec2_Vec2_Vec2) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat4x2_F16_With_Vec2_Vec2_Vec2_Vec2) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<mat4x2<f16>>(Call<vec2<f16>>(2_h, 2_h), Call<vec2<f16>>(2_h, 2_h),
                                    Call<vec2<f16>>(2_h, 2_h), Call<vec2<f16>>(2_h, 2_h));
@@ -3334,7 +3334,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat2x3_F32_With_Vec3_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat2x3_F16_With_Vec3_Vec3) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<mat2x3<f16>>(Call<vec3<f16>>(2_h, 2_h, 2_h), Call<vec3<f16>>(2_h, 2_h, 2_h));
     WrapInFunction(cast);
@@ -3373,7 +3373,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat3x3_F32_With_Vec3_Vec3_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat3x3_F16_With_Vec3_Vec3_Vec3) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<mat3x3<f16>>(Call<vec3<f16>>(2_h, 2_h, 2_h), Call<vec3<f16>>(2_h, 2_h, 2_h),
                                    Call<vec3<f16>>(2_h, 2_h, 2_h));
@@ -3413,7 +3413,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat4x3_F32_With_Vec3_Vec3_Vec3_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat4x3_F16_With_Vec3_Vec3_Vec3_Vec3) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<mat4x3<f16>>(Call<vec3<f16>>(2_h, 2_h, 2_h), Call<vec3<f16>>(2_h, 2_h, 2_h),
                                    Call<vec3<f16>>(2_h, 2_h, 2_h), Call<vec3<f16>>(2_h, 2_h, 2_h));
@@ -3453,7 +3453,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat2x4_F32_With_Vec4_Vec4) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat2x4_F16_With_Vec4_Vec4) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast =
         Call<mat2x4<f16>>(Call<vec4<f16>>(2_h, 2_h, 2_h, 2_h), Call<vec4<f16>>(2_h, 2_h, 2_h, 2_h));
@@ -3494,7 +3494,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat3x4_F32_With_Vec4_Vec4_Vec4) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat3x4_F16_With_Vec4_Vec4_Vec4) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast =
         Call<mat3x4<f16>>(Call<vec4<f16>>(2_h, 2_h, 2_h, 2_h), Call<vec4<f16>>(2_h, 2_h, 2_h, 2_h),
@@ -3536,7 +3536,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat4x4_F32_With_Vec4_Vec4_Vec4_Vec4) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Mat4x4_F16_With_Vec4_Vec4_Vec4_Vec4) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast =
         Call<mat4x4<f16>>(Call<vec4<f16>>(2_h, 2_h, 2_h, 2_h), Call<vec4<f16>>(2_h, 2_h, 2_h, 2_h),
@@ -3576,7 +3576,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_5_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Array_5_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* cast = Call<array<f16, 5>>(2_h, 2_h, 2_h, 2_h, 2_h);
     WrapInFunction(cast);
@@ -3618,7 +3618,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* first = Call<vec3<f16>>(1_h, 2_h, 3_h);
     auto* second = Call<vec3<f16>>(1_h, 2_h, 3_h);
@@ -3747,7 +3747,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* t = Call<f16>();
 
@@ -3854,7 +3854,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Matrix_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Matrix_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* t = Call<mat4x2<f16>>();
 
@@ -3961,7 +3961,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_I32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_F16_To_I32) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2.4_h)));
     auto* cast = Call<i32>("x");
@@ -4035,7 +4035,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_U32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_F16_To_U32) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2.4_h)));
     auto* cast = Call<u32>("x");
@@ -4109,7 +4109,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_F16_To_F32) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2_h)));
     auto* cast = Call<f32>("x");
@@ -4135,7 +4135,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F16_To_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.i32(), Expr(2_i)));
     auto* cast = Call<f16>("x");
@@ -4161,7 +4161,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_F16) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.u32(), Expr(2_u)));
     auto* cast = Call<f16>("x");
@@ -4187,7 +4187,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F16) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f32(), Expr(2_f)));
     auto* cast = Call<f16>("x");
@@ -4265,7 +4265,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_I32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F16_to_I32) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = GlobalVar("i", ty.vec3<f16>(), core::AddressSpace::kPrivate);
 
@@ -4345,7 +4345,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_U32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F16_to_U32) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = GlobalVar("i", ty.vec3<f16>(), core::AddressSpace::kPrivate);
 
@@ -4425,7 +4425,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F16_to_F32) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = GlobalVar("i", ty.vec3<f16>(), core::AddressSpace::kPrivate);
 
@@ -4453,7 +4453,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F16_to_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = GlobalVar("i", ty.vec3<i32>(), core::AddressSpace::kPrivate);
 
@@ -4481,7 +4481,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F16) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = GlobalVar("i", ty.vec3<u32>(), core::AddressSpace::kPrivate);
 
@@ -4509,7 +4509,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F16) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_F16) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* var = GlobalVar("i", ty.vec3<f32>(), core::AddressSpace::kPrivate);
 

@@ -68,6 +68,7 @@ cc_library(
     "//src/tint/lang/core/intrinsic/data",
     "//src/tint/lang/core/type",
     "//src/tint/lang/core/type:test",
+    "//src/tint/lang/wgsl",
     "//src/tint/lang/wgsl/ast",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/resolver",

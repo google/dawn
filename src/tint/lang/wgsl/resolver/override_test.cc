@@ -66,7 +66,7 @@ TEST_F(ResolverOverrideTest, WithoutId) {
 }
 
 TEST_F(ResolverOverrideTest, WithAndWithoutIds) {
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     auto* a = Override("a", ty.f32(), Expr(1_f));
     auto* b = Override("b", ty.f16(), Expr(1_h));

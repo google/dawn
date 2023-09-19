@@ -18,7 +18,6 @@
 #include <utility>
 
 #include "src/tint/lang/core/builtin_value.h"
-#include "src/tint/lang/core/extension.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/interpolation_sampling.h"
 #include "src/tint/lang/core/interpolation_type.h"
@@ -48,6 +47,7 @@
 #include "src/tint/lang/wgsl/ast/module.h"
 #include "src/tint/lang/wgsl/ast/override.h"
 #include "src/tint/lang/wgsl/ast/var.h"
+#include "src/tint/lang/wgsl/extension.h"
 #include "src/tint/lang/wgsl/sem/builtin_enum_expression.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"

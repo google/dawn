@@ -28,7 +28,7 @@ using ResolverF16ExtensionTest = ResolverTest;
 TEST_F(ResolverF16ExtensionTest, TypeUsedWithExtension) {
     // enable f16;
     // var<private> v : f16;
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     GlobalVar("v", ty.f16(), core::AddressSpace::kPrivate);
 
@@ -46,7 +46,7 @@ TEST_F(ResolverF16ExtensionTest, TypeUsedWithoutExtension) {
 TEST_F(ResolverF16ExtensionTest, Vec2TypeUsedWithExtension) {
     // enable f16;
     // var<private> v : vec2<f16>;
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     GlobalVar("v", ty.vec2<f16>(), core::AddressSpace::kPrivate);
 
@@ -64,7 +64,7 @@ TEST_F(ResolverF16ExtensionTest, Vec2TypeUsedWithoutExtension) {
 TEST_F(ResolverF16ExtensionTest, Vec2TypeInitUsedWithExtension) {
     // enable f16;
     // var<private> v = vec2<f16>();
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     GlobalVar("v", Call<vec2<f16>>(), core::AddressSpace::kPrivate);
 
@@ -82,7 +82,7 @@ TEST_F(ResolverF16ExtensionTest, Vec2TypeInitUsedWithoutExtension) {
 TEST_F(ResolverF16ExtensionTest, Vec2TypeConvUsedWithExtension) {
     // enable f16;
     // var<private> v = vec2<f16>(vec2<f32>());
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     GlobalVar("v", Call<vec2<f16>>(Call<vec2<f32>>()), core::AddressSpace::kPrivate);
 
@@ -101,7 +101,7 @@ TEST_F(ResolverF16ExtensionTest, Vec2TypeConvUsedWithoutExtension) {
 TEST_F(ResolverF16ExtensionTest, F16LiteralUsedWithExtension) {
     // enable f16;
     // var<private> v = 16h;
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     GlobalVar("v", Expr(16_h), core::AddressSpace::kPrivate);
 
@@ -121,7 +121,7 @@ using ResolverF16ExtensionBuiltinTypeAliasTest = ResolverTestWithParam<const cha
 TEST_P(ResolverF16ExtensionBuiltinTypeAliasTest, Vec2hTypeUsedWithExtension) {
     // enable f16;
     // var<private> v : vec2h;
-    Enable(core::Extension::kF16);
+    Enable(wgsl::Extension::kF16);
 
     GlobalVar("v", ty(Source{{12, 34}}, GetParam()), core::AddressSpace::kPrivate);
 

@@ -92,17 +92,17 @@ bool Builtin::HasSideEffects() const {
     return core::HasSideEffects(type_);
 }
 
-core::Extension Builtin::RequiredExtension() const {
+wgsl::Extension Builtin::RequiredExtension() const {
     if (IsDP4a()) {
-        return core::Extension::kChromiumExperimentalDp4A;
+        return wgsl::Extension::kChromiumExperimentalDp4A;
     }
     if (IsSubgroup()) {
-        return core::Extension::kChromiumExperimentalSubgroups;
+        return wgsl::Extension::kChromiumExperimentalSubgroups;
     }
     if (type_ == core::Function::kTextureBarrier) {
-        return core::Extension::kChromiumExperimentalReadWriteStorageTexture;
+        return wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture;
     }
-    return core::Extension::kUndefined;
+    return wgsl::Extension::kUndefined;
 }
 
 }  // namespace tint::sem

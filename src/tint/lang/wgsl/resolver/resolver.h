@@ -616,7 +616,7 @@ class Resolver {
     DependencyGraph dependencies_;
     SemHelper sem_;
     Validator validator_;
-    core::Extensions enabled_extensions_;
+    wgsl::Extensions enabled_extensions_;
     Vector<sem::Function*, 8> entry_points_;
     Hashmap<const core::type::Type*, const Source*, 8> atomic_composite_info_;
     tint::Bitset<0> marked_;

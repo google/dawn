@@ -364,7 +364,7 @@ struct ModuleScopeVarToEntryPointParam::State {
             ctx.dst->Structure(PrivateStructName(), std::move(private_struct_members));
             // Passing a pointer to a private variable will now involve passing a pointer to the
             // member of a structure, so enable the extension that allows this.
-            ctx.dst->Enable(core::Extension::kChromiumExperimentalFullPtrParameters);
+            ctx.dst->Enable(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
         }
 
         // Build a list of `&ident` expressions. We'll use this later to avoid generating

@@ -1054,7 +1054,7 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceNoExtension) {
     Func("f", Vector{arg}, ty.void_(), tint::Empty);
 
     if (param.address_space == core::AddressSpace::kPixelLocal) {
-        Enable(core::Extension::kChromiumExperimentalPixelLocal);
+        Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     }
 
     if (param.expectation == Expectation::kAlwaysPass) {
@@ -1080,11 +1080,11 @@ TEST_P(ResolverFunctionParameterValidationTest, AddressSpaceWithFullPtrParameter
     Structure("S", Vector{Member("a", ty.i32())});
     auto ptr_type = ty("ptr", Ident(Source{{12, 34}}, param.address_space), ty("S"));
     auto* arg = Param(Source{{12, 34}}, "p", ptr_type);
-    Enable(core::Extension::kChromiumExperimentalFullPtrParameters);
+    Enable(wgsl::Extension::kChromiumExperimentalFullPtrParameters);
     Func("f", Vector{arg}, ty.void_(), tint::Empty);
 
     if (param.address_space == core::AddressSpace::kPixelLocal) {
-        Enable(core::Extension::kChromiumExperimentalPixelLocal);
+        Enable(wgsl::Extension::kChromiumExperimentalPixelLocal);
     }
 
     if (param.expectation == Expectation::kAlwaysPass ||

@@ -22,7 +22,6 @@
 #include "src/tint/api/common/override_id.h"
 
 #include "src/tint/lang/core/constant/manager.h"
-#include "src/tint/lang/core/extension.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/interpolation_sampling.h"
 #include "src/tint/lang/core/interpolation_type.h"
@@ -100,6 +99,7 @@
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/while_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
+#include "src/tint/lang/wgsl/extension.h"
 #include "src/tint/utils/id/generation_id.h"
 #include "src/tint/utils/text/string.h"
 
@@ -1586,7 +1586,7 @@ class Builder {
     /// Adds the extension to the list of enable directives at the top of the module.
     /// @param extension the extension to enable
     /// @return an `ast::Enable` enabling the given extension.
-    const ast::Enable* Enable(core::Extension extension) {
+    const ast::Enable* Enable(wgsl::Extension extension) {
         auto* ext = create<ast::Extension>(extension);
         auto* enable = create<ast::Enable>(Vector{ext});
         AST().AddEnable(enable);
@@ -1597,7 +1597,7 @@ class Builder {
     /// @param source the enable source
     /// @param extension the extension to enable
     /// @return an `ast::Enable` enabling the given extension.
-    const ast::Enable* Enable(const Source& source, core::Extension extension) {
+    const ast::Enable* Enable(const Source& source, wgsl::Extension extension) {
         auto* ext = create<ast::Extension>(source, extension);
         auto* enable = create<ast::Enable>(source, Vector{ext});
         AST().AddEnable(enable);
@@ -3350,7 +3350,7 @@ class Builder {
     /// @returns the diagnostic attribute pointer
     template <typename... RULE_ARGS>
     const ast::DiagnosticAttribute* DiagnosticAttribute(const Source& source,
-                                                        core::DiagnosticSeverity severity,
+                                                        wgsl::DiagnosticSeverity severity,
                                                         RULE_ARGS&&... rule_args) {
         return create<ast::DiagnosticAttribute>(
             source, ast::DiagnosticControl(
@@ -3362,7 +3362,7 @@ class Builder {
     /// @param rule_args the arguments used to construct the rule name
     /// @returns the diagnostic attribute pointer
     template <typename... RULE_ARGS>
-    const ast::DiagnosticAttribute* DiagnosticAttribute(core::DiagnosticSeverity severity,
+    const ast::DiagnosticAttribute* DiagnosticAttribute(wgsl::DiagnosticSeverity severity,
                                                         RULE_ARGS&&... rule_args) {
         return create<ast::DiagnosticAttribute>(
             source_, ast::DiagnosticControl(
@@ -3376,7 +3376,7 @@ class Builder {
     /// @returns the diagnostic directive pointer
     template <typename... RULE_ARGS>
     const ast::DiagnosticDirective* DiagnosticDirective(const Source& source,
-                                                        core::DiagnosticSeverity severity,
+                                                        wgsl::DiagnosticSeverity severity,
                                                         RULE_ARGS&&... rule_args) {
         auto* rule = DiagnosticRuleName(std::forward<RULE_ARGS>(rule_args)...);
         auto* directive =
@@ -3390,7 +3390,7 @@ class Builder {
     /// @param rule_args the arguments used to construct the rule name
     /// @returns the diagnostic directive pointer
     template <typename... RULE_ARGS>
-    const ast::DiagnosticDirective* DiagnosticDirective(core::DiagnosticSeverity severity,
+    const ast::DiagnosticDirective* DiagnosticDirective(wgsl::DiagnosticSeverity severity,
                                                         RULE_ARGS&&... rule_args) {
         auto* rule = DiagnosticRuleName(std::forward<RULE_ARGS>(rule_args)...);
         auto* directive =

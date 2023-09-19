@@ -153,7 +153,7 @@ class Builder {
     /// not supported.
     /// @param ext the extension to generate
     /// @returns true on success.
-    bool GenerateExtension(core::Extension ext);
+    bool GenerateExtension(wgsl::Extension ext);
     /// Generates a label for the given id. Emits an error and returns false if
     /// we're currently outside a function.
     /// @param id the id to use for the label

@@ -155,7 +155,7 @@ bool Resolver::Resolve() {
     builder_->Sem().SetModule(mod);
 
     const bool disable_uniformity_analysis =
-        enabled_extensions_.Contains(core::Extension::kChromiumDisableUniformityAnalysis);
+        enabled_extensions_.Contains(wgsl::Extension::kChromiumDisableUniformityAnalysis);
     if (result && !disable_uniformity_analysis) {
         // Run the uniformity analysis, which requires a complete semantic module.
         if (!AnalyzeUniformity(builder_, dependencies_)) {
@@ -1606,10 +1606,10 @@ sem::BuiltinEnumExpression<core::AddressSpace>* Resolver::AddressSpaceExpression
     }
     if (TINT_UNLIKELY(
             address_space_expr->Value() == core::AddressSpace::kPixelLocal &&
-            !enabled_extensions_.Contains(core::Extension::kChromiumExperimentalPixelLocal))) {
+            !enabled_extensions_.Contains(wgsl::Extension::kChromiumExperimentalPixelLocal))) {
         StringStream err;
         err << "'pixel_local' address space requires the '"
-            << core::Extension::kChromiumExperimentalPixelLocal << "' extension enabled";
+            << wgsl::Extension::kChromiumExperimentalPixelLocal << "' extension enabled";
         AddError(err.str(), expr->source);
         return nullptr;
     }
@@ -3973,28 +3973,28 @@ bool Resolver::DiagnosticControl(const ast::DiagnosticControl& control) {
     if (control.rule_name->category) {
         Mark(control.rule_name->category);
         if (control.rule_name->category->symbol.Name() == "chromium") {
-            auto rule = core::ParseChromiumDiagnosticRule(name);
-            if (rule != core::ChromiumDiagnosticRule::kUndefined) {
+            auto rule = wgsl::ParseChromiumDiagnosticRule(name);
+            if (rule != wgsl::ChromiumDiagnosticRule::kUndefined) {
                 validator_.DiagnosticFilters().Set(rule, control.severity);
             } else {
                 StringStream ss;
                 ss << "unrecognized diagnostic rule 'chromium." << name << "'\n";
                 tint::SuggestAlternativeOptions opts;
                 opts.prefix = "chromium.";
-                tint::SuggestAlternatives(name, core::kChromiumDiagnosticRuleStrings, ss, opts);
+                tint::SuggestAlternatives(name, wgsl::kChromiumDiagnosticRuleStrings, ss, opts);
                 AddWarning(ss.str(), control.rule_name->source);
             }
         }
         return true;
     }
 
-    auto rule = core::ParseCoreDiagnosticRule(name);
-    if (rule != core::CoreDiagnosticRule::kUndefined) {
+    auto rule = wgsl::ParseCoreDiagnosticRule(name);
+    if (rule != wgsl::CoreDiagnosticRule::kUndefined) {
         validator_.DiagnosticFilters().Set(rule, control.severity);
     } else {
         StringStream ss;
         ss << "unrecognized diagnostic rule '" << name << "'\n";
-        tint::SuggestAlternatives(name, core::kCoreDiagnosticRuleStrings, ss);
+        tint::SuggestAlternatives(name, wgsl::kCoreDiagnosticRuleStrings, ss);
         AddWarning(ss.str(), control.rule_name->source);
     }
     return true;
