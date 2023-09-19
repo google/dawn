@@ -59,6 +59,10 @@ const char* str(Function i) {
             return "spirv.atomic_xor";
         case Function::kDot:
             return "spirv.dot";
+        case Function::kImageFetch:
+            return "spirv.image_fetch";
+        case Function::kImageRead:
+            return "spirv.image_read";
         case Function::kMatrixTimesMatrix:
             return "spirv.matrix_times_matrix";
         case Function::kMatrixTimesScalar:

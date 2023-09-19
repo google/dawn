@@ -1081,6 +1081,12 @@ void Printer::EmitSpirvBuiltinCall(spirv::ir::BuiltinCall* builtin) {
         case spirv::ir::Function::kDot:
             op = spv::Op::OpDot;
             break;
+        case spirv::ir::Function::kImageFetch:
+            op = spv::Op::OpImageFetch;
+            break;
+        case spirv::ir::Function::kImageRead:
+            op = spv::Op::OpImageRead;
+            break;
         case spirv::ir::Function::kMatrixTimesMatrix:
             op = spv::Op::OpMatrixTimesMatrix;
             break;
@@ -1566,9 +1572,6 @@ void Printer::EmitIntrinsicCall(spirv::ir::IntrinsicCall* call) {
 
     spv::Op op = spv::Op::Max;
     switch (call->Kind()) {
-        case spirv::ir::Intrinsic::kImageFetch:
-            op = spv::Op::OpImageFetch;
-            break;
         case spirv::ir::Intrinsic::kImageGather:
             op = spv::Op::OpImageGather;
             break;
@@ -1582,9 +1585,6 @@ void Printer::EmitIntrinsicCall(spirv::ir::IntrinsicCall* call) {
         case spirv::ir::Intrinsic::kImageQuerySizeLod:
             module_.PushCapability(SpvCapabilityImageQuery);
             op = spv::Op::OpImageQuerySizeLod;
-            break;
-        case spirv::ir::Intrinsic::kImageRead:
-            op = spv::Op::OpImageRead;
             break;
         case spirv::ir::Intrinsic::kImageSampleImplicitLod:
             op = spv::Op::OpImageSampleImplicitLod;

@@ -49,6 +49,8 @@ enum class Function : uint8_t {
     kAtomicUmin,
     kAtomicXor,
     kDot,
+    kImageFetch,
+    kImageRead,
     kMatrixTimesMatrix,
     kMatrixTimesScalar,
     kMatrixTimesVector,
