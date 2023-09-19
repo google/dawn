@@ -4148,7 +4148,7 @@ constexpr ParameterInfo kParameters[] = {
   {
     /* [349] */
     /* usage */ core::ParameterUsage::kSourceLaneIndex,
-    /* type_matcher_indices */ TypeMatcherIndicesIndex(21),
+    /* type_matcher_indices */ TypeMatcherIndicesIndex(35),
     /* number_matcher_indices */ NumberMatcherIndicesIndex(/* invalid */),
   },
   {
@@ -10860,9 +10860,9 @@ constexpr OverloadInfo kOverloads[] = {
     /* [460] */
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsComputePipeline, OverloadFlag::kMustUse),
     /* num_parameters */ 2,
-    /* num_template_types */ 2,
+    /* num_template_types */ 1,
     /* num_template_numbers */ 0,
-    /* template_types */ TemplateTypeIndex(12),
+    /* template_types */ TemplateTypeIndex(0),
     /* template_numbers */ TemplateNumberIndex(/* invalid */),
     /* parameters */ ParameterIndex(348),
     /* return_type_matcher_indices */ TypeMatcherIndicesIndex(2),
@@ -11823,7 +11823,7 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [115] */
-    /* fn subgroupBroadcast<T : fiu32, L : iu32>(value: T, @const sourceLaneIndex: L) -> T */
+    /* fn subgroupBroadcast<T : fiu32>(value: T, @const sourceLaneIndex: u32) -> T */
     /* num overloads */ 1,
     /* overloads */ OverloadIndex(460),
   },
