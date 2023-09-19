@@ -48,8 +48,8 @@ inline bool MatchSampledImage(core::intrinsic::MatchState&,
         T = ty;
         return true;
     }
-    if (auto* v = ty->As<core::type::SampledTexture>()) {
-        T = v->type();
+    if (auto* v = ty->As<spirv::type::SampledImage>()) {
+        T = v->Image();
         return true;
     }
     return false;
