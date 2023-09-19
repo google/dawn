@@ -1,6 +1,6 @@
 # Tint end-to-end tests
 
-This repo contains a large number of end-to-end tests at `<tint>/test`.
+This repo contains a large number of end-to-end tests at `<dawn>/test/tint`.
 
 ## Test files
 
@@ -16,7 +16,13 @@ If the first line of the expectation file starts `SKIP`, then the test will be s
 
 ## Running
 
-To run the end-to-end tests use the `<tint>/test/test-all.sh` script, passing the path to the tint executable as the first command line argument.
+To run the end-to-end tests use the `<dawn>/test/test-all.sh` script, passing the path to the tint executable as the first command line argument.
+
+For example, if your build directory is `out/active`, then building Dawn will
+place the standalone `tint` compiler executable in that directory.  In that case
+you can run all the tests as follows:
+
+    ./test/test-all.sh out/active/tint
 
 You can pass `--help` to see the full list of command line flags.\
 The most commonly used flags are:

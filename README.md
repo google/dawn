@@ -33,6 +33,7 @@ Developer documentation:
  - [Contributing](CONTRIBUTING.md)
  - [Code of Conduct](CODE_OF_CONDUCT.md)
  - [Testing Dawn](docs/dawn/testing.md)
+ - [Testing Tint](docs/tint/testing.md)
  - [Debugging Dawn](docs/dawn/debugging.md)
  - [Dawn's infrastructure](docs/dawn/infra.md)
  - [Dawn errors](docs/dawn/errors.md)
