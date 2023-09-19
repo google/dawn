@@ -60,7 +60,7 @@ class QueueBase : public ApiObjectBase, public ExecutionQueueBase {
     void APIOnSubmittedWorkDone(uint64_t signalValue,
                                 WGPUQueueWorkDoneCallback callback,
                                 void* userdata);
-    WGPUFuture APIOnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInfo& callbackInfo);
+    Future APIOnSubmittedWorkDoneF(const QueueWorkDoneCallbackInfo& callbackInfo);
     void APIWriteBuffer(BufferBase* buffer, uint64_t bufferOffset, const void* data, size_t size);
     void APIWriteTexture(const ImageCopyTexture* destination,
                          const void* data,
@@ -129,7 +129,7 @@ class QueueBase : public ApiObjectBase, public ExecutionQueueBase {
 
     MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands) const;
     MaybeError ValidateOnSubmittedWorkDone(uint64_t signalValue,
-                                           WGPUQueueWorkDoneStatus* status) const;
+                                           wgpu::QueueWorkDoneStatus* status) const;
     MaybeError ValidateWriteTexture(const ImageCopyTexture* destination,
                                     size_t dataSize,
                                     const TextureDataLayout& dataLayout,

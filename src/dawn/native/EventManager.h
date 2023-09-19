@@ -62,7 +62,7 @@ class EventManager final : NonMovable {
 
     class TrackedEvent;
     // Track a TrackedEvent and give it a FutureID.
-    [[nodiscard]] FutureID TrackEvent(WGPUCallbackModeFlags mode, Ref<TrackedEvent>&&);
+    [[nodiscard]] FutureID TrackEvent(wgpu::CallbackMode mode, Ref<TrackedEvent>&&);
     void ProcessPollEvents();
     [[nodiscard]] wgpu::WaitStatus WaitAny(size_t count,
                                            FutureWaitInfo* infos,
@@ -99,7 +99,7 @@ class EventManager::TrackedEvent : public RefCounted {
     // Note: TrackedEvents are (currently) only for Device events. Events like RequestAdapter and
     // RequestDevice complete immediately in dawn native, so should never need to be tracked.
     TrackedEvent(DeviceBase* device,
-                 WGPUCallbackModeFlags callbackMode,
+                 wgpu::CallbackMode callbackMode,
                  SystemEventReceiver&& receiver);
 
   public:
@@ -125,7 +125,7 @@ class EventManager::TrackedEvent : public RefCounted {
     // This is OK because the instance will clear out the EventManager on shutdown.
     // TODO(crbug.com/dawn/2067): This is a bit fragile. Is it possible to remove the ref cycle?
     Ref<DeviceBase> mDevice;
-    WGPUCallbackModeFlags mCallbackMode;
+    wgpu::CallbackMode mCallbackMode;
 
 #if DAWN_ENABLE_ASSERTS
     std::atomic<bool> mCurrentlyBeingWaited;

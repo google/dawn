@@ -49,6 +49,8 @@ namespace {{native_namespace}} {
                     {% set varName = as_varName(arg.name) %}
                     {% if arg.type.category in ["enum", "bitmask"] and arg.annotation == "value" %}
                         auto {{varName}}_ = static_cast<{{as_frontendType(arg.type)}}>({{varName}});
+                    {% elif arg.type.category == "structure" and arg.annotation == "value" %}
+                        auto {{varName}}_ = *reinterpret_cast<{{as_frontendType(arg.type)}}*>(&{{varName}});
                     {% elif arg.annotation != "value" or arg.type.category == "object" %}
                         auto {{varName}}_ = reinterpret_cast<{{decorate("", as_frontendType(arg.type), arg)}}>({{varName}});
                     {% else %}
@@ -79,6 +81,8 @@ namespace {{native_namespace}} {
                 {% if method.return_type.name.canonical_case() != "void" %}
                     {% if method.return_type.category in ["object", "enum", "bitmask"] %}
                         return ToAPI(result);
+                    {% elif method.return_type.category in ["structure"] %}
+                        return *ToAPI(&result);
                     {% else %}
                         return result;
                     {% endif %}

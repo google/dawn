@@ -108,8 +108,9 @@ void EventManager::ShutDown() {
     mTrackers.reset();
 }
 
-FutureID EventManager::TrackEvent(WGPUCallbackModeFlags mode, Ref<TrackedEvent>&& future) {
-    switch (ValidateAndFlattenCallbackMode(mode)) {
+FutureID EventManager::TrackEvent(wgpu::CallbackMode mode, Ref<TrackedEvent>&& future) {
+    // TODO(crbug.com/dawn/2052) Can remove the validation on the mode once it's an enum.
+    switch (ValidateAndFlattenCallbackMode(static_cast<WGPUCallbackModeFlags>(mode))) {
         case CallbackMode::Spontaneous:
             // We don't need to track the future because some other code is responsible for
             // completing it, and we aren't returning an ID so we don't need to be able to query it.
@@ -163,7 +164,7 @@ void EventManager::ProcessPollEvents() {
 
     for (TrackedFutureWaitInfo& future : futures) {
         if (future.ready) {
-            DAWN_ASSERT(future.event->mCallbackMode & WGPUCallbackMode_ProcessEvents);
+            DAWN_ASSERT(future.event->mCallbackMode & wgpu::CallbackMode::ProcessEvents);
             future.event->EnsureComplete(EventCompletionType::Ready);
         }
     }
@@ -242,7 +243,7 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
             // Set completed before calling the callback.
             infos[future.indexInInfos].completed = true;
             // TODO(crbug.com/dawn/2066): Guarantee the event ordering from the JS spec.
-            DAWN_ASSERT(future.event->mCallbackMode & WGPUCallbackMode_Future);
+            DAWN_ASSERT(future.event->mCallbackMode & wgpu::CallbackMode::Future);
             future.event->EnsureComplete(EventCompletionType::Ready);
         }
     }
@@ -253,7 +254,7 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
 // EventManager::TrackedEvent
 
 EventManager::TrackedEvent::TrackedEvent(DeviceBase* device,
-                                         WGPUCallbackModeFlags callbackMode,
+                                         wgpu::CallbackMode callbackMode,
                                          SystemEventReceiver&& receiver)
     : mDevice(device), mCallbackMode(callbackMode), mReceiver(std::move(receiver)) {}
 
@@ -277,7 +278,7 @@ void EventManager::TrackedEvent::EnsureComplete(EventCompletionType completionTy
 }
 
 void EventManager::TrackedEvent::CompleteIfSpontaneous() {
-    if (mCallbackMode & WGPUCallbackMode_Spontaneous) {
+    if (mCallbackMode & wgpu::CallbackMode::Spontaneous) {
         bool alreadyComplete = mCompleted.exchange(true);
         // If it was already complete, but there was an error, we have no place
         // to report it, so DAWN_ASSERT. This shouldn't happen.

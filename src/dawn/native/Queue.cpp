@@ -179,13 +179,13 @@ class ErrorQueue : public QueueBase {
 };
 
 struct WorkDoneEvent final : public EventManager::TrackedEvent {
-    std::optional<WGPUQueueWorkDoneStatus> mEarlyStatus;
+    std::optional<wgpu::QueueWorkDoneStatus> mEarlyStatus;
     WGPUQueueWorkDoneCallback mCallback;
     void* mUserdata;
 
     // Create an event backed by the given SystemEventReceiver.
     WorkDoneEvent(DeviceBase* device,
-                  const WGPUQueueWorkDoneCallbackInfo& callbackInfo,
+                  const QueueWorkDoneCallbackInfo& callbackInfo,
                   SystemEventReceiver&& receiver)
         : TrackedEvent(device, callbackInfo.mode, std::move(receiver)),
           mCallback(callbackInfo.callback),
@@ -193,9 +193,12 @@ struct WorkDoneEvent final : public EventManager::TrackedEvent {
 
     // Create an event that's ready at creation (for errors, etc.)
     WorkDoneEvent(DeviceBase* device,
-                  const WGPUQueueWorkDoneCallbackInfo& callbackInfo,
-                  WGPUQueueWorkDoneStatus earlyStatus)
-        : WorkDoneEvent(device, callbackInfo, SystemEventReceiver::CreateAlreadySignaled()) {
+                  const QueueWorkDoneCallbackInfo& callbackInfo,
+                  wgpu::QueueWorkDoneStatus earlyStatus)
+        : TrackedEvent(device, callbackInfo.mode, SystemEventReceiver::CreateAlreadySignaled()),
+          mEarlyStatus(earlyStatus),
+          mCallback(callbackInfo.callback),
+          mUserdata(callbackInfo.userdata) {
         CompleteIfSpontaneous();
     }
 
@@ -207,14 +210,14 @@ struct WorkDoneEvent final : public EventManager::TrackedEvent {
 
     void Complete(EventCompletionType completionType) override {
         // WorkDoneEvent has no error cases other than the mEarlyStatus ones.
-        WGPUQueueWorkDoneStatus status = WGPUQueueWorkDoneStatus_Success;
+        wgpu::QueueWorkDoneStatus status = wgpu::QueueWorkDoneStatus::Success;
         if (completionType == EventCompletionType::Shutdown) {
-            status = WGPUQueueWorkDoneStatus_Unknown;
+            status = wgpu::QueueWorkDoneStatus::Unknown;
         } else if (mEarlyStatus) {
             status = mEarlyStatus.value();
         }
 
-        mCallback(status, mUserdata);
+        mCallback(ToAPI(status), mUserdata);
     }
 };
 
@@ -266,10 +269,10 @@ void QueueBase::APIOnSubmittedWorkDone(uint64_t signalValue,
                                        WGPUQueueWorkDoneCallback callback,
                                        void* userdata) {
     // The error status depends on the type of error so we let the validation function choose it
-    WGPUQueueWorkDoneStatus status;
+    wgpu::QueueWorkDoneStatus status;
     if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(signalValue, &status))) {
         GetDevice()->GetCallbackTaskManager()->AddCallbackTask(
-            [callback, status, userdata] { callback(status, userdata); });
+            [callback, status, userdata] { callback(ToAPI(status), userdata); });
         return;
     }
 
@@ -286,20 +289,20 @@ void QueueBase::APIOnSubmittedWorkDone(uint64_t signalValue,
                  uint64_t(GetDevice()->GetPendingCommandSerial()));
 }
 
-WGPUFuture QueueBase::APIOnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInfo& callbackInfo) {
+Future QueueBase::APIOnSubmittedWorkDoneF(const QueueWorkDoneCallbackInfo& callbackInfo) {
     // TODO(crbug.com/dawn/2052): Once we always return a future, change this to log to the instance
     // (note, not raise a validation error to the device) and return the null future.
     DAWN_ASSERT(callbackInfo.nextInChain == nullptr);
 
     Ref<EventManager::TrackedEvent> event;
 
-    WGPUQueueWorkDoneStatus validationEarlyStatus;
+    wgpu::QueueWorkDoneStatus validationEarlyStatus;
     if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(0, &validationEarlyStatus))) {
         // TODO(crbug.com/dawn/2021): This is here to pretend that things succeed when the device is
         // lost. When the old OnSubmittedWorkDone is removed then we can update
         // ValidateOnSubmittedWorkDone to just return the correct thing here.
-        if (validationEarlyStatus == WGPUQueueWorkDoneStatus_DeviceLost) {
-            validationEarlyStatus = WGPUQueueWorkDoneStatus_Success;
+        if (validationEarlyStatus == wgpu::QueueWorkDoneStatus::DeviceLost) {
+            validationEarlyStatus = wgpu::QueueWorkDoneStatus::Success;
         }
 
         // Note: if the callback is spontaneous, it'll get called in here.
@@ -311,7 +314,7 @@ WGPUFuture QueueBase::APIOnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInf
     FutureID futureID =
         GetInstance()->GetEventManager()->TrackEvent(callbackInfo.mode, std::move(event));
 
-    return WGPUFuture{futureID};
+    return {futureID};
 }
 
 SystemEventReceiver QueueBase::InsertWorkDoneEvent() {
@@ -588,11 +591,11 @@ MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
 }
 
 MaybeError QueueBase::ValidateOnSubmittedWorkDone(uint64_t signalValue,
-                                                  WGPUQueueWorkDoneStatus* status) const {
-    *status = WGPUQueueWorkDoneStatus_DeviceLost;
+                                                  wgpu::QueueWorkDoneStatus* status) const {
+    *status = wgpu::QueueWorkDoneStatus::DeviceLost;
     DAWN_TRY(GetDevice()->ValidateIsAlive());
 
-    *status = WGPUQueueWorkDoneStatus_Error;
+    *status = wgpu::QueueWorkDoneStatus::Error;
     DAWN_TRY(GetDevice()->ValidateObject(this));
 
     DAWN_INVALID_IF(signalValue != 0, "SignalValue (%u) is not 0.", signalValue);

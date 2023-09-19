@@ -18,6 +18,7 @@
 
 namespace dawn {
 
+// TODO(crbug.com/dawn/2052) Remove this when we use an enum instead of a bitmask.
 CallbackMode ValidateAndFlattenCallbackMode(WGPUCallbackModeFlags mode) {
     switch (mode) {
         case WGPUCallbackMode_Spontaneous:

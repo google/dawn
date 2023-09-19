@@ -35,7 +35,7 @@ enum class EventCompletionType {
 };
 
 // Flattened version of the wgpu::CallbackMode flags.
-// (This will disappear when that API changes to use an enum instead of flags.)
+// TODO(crbug.com/dawn/2052) Remove when API changes to use an enum instead of flags.
 enum class [[nodiscard]] CallbackMode {
     Spontaneous,
     Future,
@@ -43,7 +43,6 @@ enum class [[nodiscard]] CallbackMode {
     ProcessEvents,
     ProcessEventsOrSpontaneous,
 };
-
 CallbackMode ValidateAndFlattenCallbackMode(WGPUCallbackModeFlags mode);
 
 }  // namespace dawn
