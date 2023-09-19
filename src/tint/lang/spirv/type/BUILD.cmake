@@ -21,59 +21,29 @@
 #                       Do not modify this file directly
 ################################################################################
 
-if(TINT_BUILD_SPV_WRITER)
 ################################################################################
-# Target:    tint_lang_spirv_writer_printer
+# Target:    tint_lang_spirv_type
 # Kind:      lib
-# Condition: TINT_BUILD_SPV_WRITER
 ################################################################################
-tint_add_target(tint_lang_spirv_writer_printer lib
-  lang/spirv/writer/printer/printer.cc
-  lang/spirv/writer/printer/printer.h
+tint_add_target(tint_lang_spirv_type lib
+  lang/spirv/type/sampled_image.cc
+  lang/spirv/type/sampled_image.h
 )
 
-tint_target_add_dependencies(tint_lang_spirv_writer_printer lib
-  tint_api_common
-  tint_api_options
+tint_target_add_dependencies(tint_lang_spirv_type lib
   tint_lang_core
   tint_lang_core_constant
-  tint_lang_core_intrinsic
-  tint_lang_core_intrinsic_data
   tint_lang_core_ir
   tint_lang_core_type
-  tint_lang_spirv_intrinsic_data
-  tint_lang_spirv_ir
-  tint_lang_spirv_type
-  tint_lang_wgsl_ast
-  tint_lang_wgsl_program
-  tint_lang_wgsl_sem
   tint_utils_containers
-  tint_utils_diagnostic
   tint_utils_ice
   tint_utils_id
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
-  tint_utils_reflection
   tint_utils_result
   tint_utils_rtti
   tint_utils_symbol
   tint_utils_text
   tint_utils_traits
 )
-
-if(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
-  tint_target_add_external_dependencies(tint_lang_spirv_writer_printer lib
-    "spirv-headers"
-  )
-endif(TINT_BUILD_SPV_READER OR TINT_BUILD_SPV_WRITER)
-
-if(TINT_BUILD_SPV_WRITER)
-  tint_target_add_dependencies(tint_lang_spirv_writer_printer lib
-    tint_lang_spirv_writer_ast_printer
-    tint_lang_spirv_writer_common
-    tint_lang_spirv_writer_raise
-  )
-endif(TINT_BUILD_SPV_WRITER)
-
-endif(TINT_BUILD_SPV_WRITER)

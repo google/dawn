@@ -75,6 +75,7 @@
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
 #include "src/tint/lang/spirv/ir/intrinsic_call.h"
+#include "src/tint/lang/spirv/type/sampled_image.h"
 #include "src/tint/lang/spirv/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/spirv/writer/common/module.h"
 #include "src/tint/lang/spirv/writer/raise/builtin_polyfill.h"
@@ -138,10 +139,10 @@ const core::type::Type* DedupType(const core::type::Type* ty, core::type::Manage
         },
 
         // Dedup a SampledImage if its underlying image will be deduped.
-        [&](const raise::SampledImage* si) -> const core::type::Type* {
+        [&](const type::SampledImage* si) -> const core::type::Type* {
             auto* img = DedupType(si->Image(), types);
             if (img != si->Image()) {
-                return types.Get<raise::SampledImage>(img);
+                return types.Get<type::SampledImage>(img);
             }
             return si;
         },
@@ -375,7 +376,7 @@ uint32_t Printer::Type(const core::type::Type* ty) {
             [&](const core::type::Struct* str) { EmitStructType(id, str); },
             [&](const core::type::Texture* tex) { EmitTextureType(id, tex); },
             [&](const core::type::Sampler*) { module_.PushType(spv::Op::OpTypeSampler, {id}); },
-            [&](const raise::SampledImage* s) {
+            [&](const type::SampledImage* s) {
                 module_.PushType(spv::Op::OpTypeSampledImage, {id, Type(s->Image())});
             },
             [&](Default) { TINT_ICE() << "unhandled type: " << ty->FriendlyName(); });
@@ -1089,6 +1090,9 @@ void Printer::EmitSpirvBuiltinCall(spirv::ir::BuiltinCall* builtin) {
         case spirv::ir::Function::kMatrixTimesVector:
             op = spv::Op::OpMatrixTimesVector;
             break;
+        case spirv::ir::Function::kSampledImage:
+            op = spv::Op::OpSampledImage;
+            break;
         case spirv::ir::Function::kSelect:
             op = spv::Op::OpSelect;
             break;
@@ -1596,9 +1600,6 @@ void Printer::EmitIntrinsicCall(spirv::ir::IntrinsicCall* call) {
             break;
         case spirv::ir::Intrinsic::kImageWrite:
             op = spv::Op::OpImageWrite;
-            break;
-        case spirv::ir::Intrinsic::kSampledImage:
-            op = spv::Op::OpSampledImage;
             break;
         case spirv::ir::Intrinsic::kUndefined:
             TINT_ICE() << "undefined spirv intrinsic";

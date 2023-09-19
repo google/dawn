@@ -21,24 +21,20 @@
 #                       Do not modify this file directly
 ################################################################################
 
-import("../../../../../../scripts/tint_overrides_with_defaults.gni")
+import("../../../../../scripts/tint_overrides_with_defaults.gni")
 
 import("${tint_src_dir}/tint.gni")
 
-libtint_source_set("data") {
+libtint_source_set("type") {
   sources = [
-    "data.cc",
-    "data.h",
-    "type_matchers.h",
+    "sampled_image.cc",
+    "sampled_image.h",
   ]
   deps = [
     "${tint_src_dir}/lang/core",
     "${tint_src_dir}/lang/core/constant",
-    "${tint_src_dir}/lang/core/intrinsic",
-    "${tint_src_dir}/lang/core/intrinsic/data",
     "${tint_src_dir}/lang/core/ir",
     "${tint_src_dir}/lang/core/type",
-    "${tint_src_dir}/lang/spirv/type",
     "${tint_src_dir}/utils/containers",
     "${tint_src_dir}/utils/ice",
     "${tint_src_dir}/utils/id",

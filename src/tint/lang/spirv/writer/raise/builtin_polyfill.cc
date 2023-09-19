@@ -30,10 +30,10 @@
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
 #include "src/tint/lang/spirv/ir/intrinsic_call.h"
+#include "src/tint/lang/spirv/type/sampled_image.h"
 #include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::raise::LiteralOperand);
-TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::raise::SampledImage);
 
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
@@ -479,9 +479,9 @@ struct State {
         auto* texture_ty = texture->Type()->As<core::type::Texture>();
 
         // Use OpSampledImage to create an OpTypeSampledImage object.
-        auto* sampled_image = b.Call<spirv::ir::IntrinsicCall>(ty.Get<SampledImage>(texture_ty),
-                                                               spirv::ir::Intrinsic::kSampledImage,
-                                                               Vector{texture, sampler});
+        auto* sampled_image = b.Call<spirv::ir::BuiltinCall>(ty.Get<type::SampledImage>(texture_ty),
+                                                             spirv::ir::Function::kSampledImage,
+                                                             Vector{texture, sampler});
         sampled_image->InsertBefore(builtin);
 
         // Append the array index to the coordinates if provided.
@@ -587,9 +587,9 @@ struct State {
         auto* texture_ty = texture->Type()->As<core::type::Texture>();
 
         // Use OpSampledImage to create an OpTypeSampledImage object.
-        auto* sampled_image = b.Call<spirv::ir::IntrinsicCall>(ty.Get<SampledImage>(texture_ty),
-                                                               spirv::ir::Intrinsic::kSampledImage,
-                                                               Vector{texture, sampler});
+        auto* sampled_image = b.Call<spirv::ir::BuiltinCall>(ty.Get<type::SampledImage>(texture_ty),
+                                                             spirv::ir::Function::kSampledImage,
+                                                             Vector{texture, sampler});
         sampled_image->InsertBefore(builtin);
 
         // Append the array index to the coordinates if provided.
@@ -867,15 +867,5 @@ Result<SuccessType, std::string> BuiltinPolyfill(core::ir::Module* ir) {
 LiteralOperand::LiteralOperand(const core::constant::Value* value) : Base(value) {}
 
 LiteralOperand::~LiteralOperand() = default;
-
-SampledImage::SampledImage(const core::type::Type* image)
-    : Base(static_cast<size_t>(Hash(tint::TypeInfo::Of<SampledImage>().full_hashcode, image)),
-           core::type::Flags{}),
-      image_(image) {}
-
-SampledImage* SampledImage::Clone(core::type::CloneContext& ctx) const {
-    auto* image = image_->Clone(ctx);
-    return ctx.dst.mgr->Get<SampledImage>(image);
-}
 
 }  // namespace tint::spirv::writer::raise

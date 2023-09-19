@@ -65,10 +65,12 @@ const char* str(Function i) {
             return "spirv.matrix_times_scalar";
         case Function::kMatrixTimesVector:
             return "spirv.matrix_times_vector";
-        case Function::kVectorTimesMatrix:
-            return "spirv.vector_times_matrix";
+        case Function::kSampledImage:
+            return "spirv.sampled_image";
         case Function::kSelect:
             return "spirv.select";
+        case Function::kVectorTimesMatrix:
+            return "spirv.vector_times_matrix";
         case Function::kVectorTimesScalar:
             return "spirv.vector_times_scalar";
     }

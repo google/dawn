@@ -52,8 +52,9 @@ enum class Function : uint8_t {
     kMatrixTimesMatrix,
     kMatrixTimesScalar,
     kMatrixTimesVector,
-    kVectorTimesMatrix,
+    kSampledImage,
     kSelect,
+    kVectorTimesMatrix,
     kVectorTimesScalar,
     kNone,
 };

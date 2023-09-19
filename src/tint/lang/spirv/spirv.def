@@ -39,9 +39,22 @@ type mat4x4<T>
 @display("vec{N}<{T}>")     type vec<N: num, T>
 @display("mat{N}x{M}<{T}>") type mat<N: num, M: num, T>
 type atomic<T>
+type sampler
+type sampler_comparison
+type texture_1d<T>
+type texture_2d<T>
+type texture_2d_array<T>
+type texture_3d<T>
+type texture_cube<T>
+type texture_cube_array<T>
+type texture_depth_2d
+type texture_depth_2d_array
+type texture_depth_cube
+type texture_depth_cube_array
 type ptr<S: address_space, T, A: access>
 
 type struct_with_runtime_array
+type sampled_image<T>
 
 enum address_space {
   function
@@ -61,6 +74,7 @@ enum access {
 
 match f32_f16: f32 | f16
 match iu32: i32 | u32
+match fiu32: f32 | i32 | u32
 match scalar: f32 | f16 | i32 | u32 | bool
 
 match read_write: access.read_write
@@ -69,6 +83,10 @@ match storage
 match workgroup_or_storage
   : address_space.workgroup
   | address_space.storage
+
+match samplers
+  : sampler
+  | sampler_comparison
 
 ////////////////////////////////////////////////////////////////////////////////
 // Enumerators                                                                //
@@ -86,13 +104,13 @@ enum intrinsic {
   image_sample_dref_implicit_lod
   image_sample_dref_explicit_lod
   image_write
-  sampled_image
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
 ////////////////////////////////////////////////////////////////////////////////
 fn array_length<I: u32, A: access>(ptr<storage, struct_with_runtime_array, A>, I) -> u32
+
 @stage("fragment", "compute") fn atomic_and<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
 @stage("fragment", "compute") fn atomic_compare_exchange<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, U, T, T) -> T
 @stage("fragment", "compute") fn atomic_exchange<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
@@ -106,12 +124,27 @@ fn array_length<I: u32, A: access>(ptr<storage, struct_with_runtime_array, A>, I
 @stage("fragment", "compute") fn atomic_umax<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
 @stage("fragment", "compute") fn atomic_umin<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
 @stage("fragment", "compute") fn atomic_xor<T: iu32, U: u32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, U, U, T) -> T
+
 fn dot<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> T
+
 fn matrix_times_matrix<T: f32_f16, K: num, C: num, R: num>(mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T>
 fn matrix_times_scalar<T: f32_f16, N: num, M: num>(mat<N, M, T>, T) -> mat<N, M, T>
 fn matrix_times_vector<T: f32_f16, N: num, M: num>(mat<N, M, T>, vec<N, T>) -> vec<M, T>
-fn vector_times_matrix<T: f32_f16, N: num, M: num>(vec<N, T>, mat<M, N, T>) -> vec<M, T>
+
+fn sampled_image<T: fiu32, S: samplers>(texture_1d<T>, S) -> sampled_image<texture_1d<T> >
+fn sampled_image<T: fiu32, S: samplers>(texture_2d<T>, S) -> sampled_image<texture_2d<T> >
+fn sampled_image<T: fiu32, S: samplers>(texture_2d_array<T>, S) -> sampled_image<texture_2d_array<T> >
+fn sampled_image<T: fiu32, S: samplers>(texture_3d<T>, S) -> sampled_image<texture_3d<T> >
+fn sampled_image<T: fiu32, S: samplers>(texture_cube<T>, S) -> sampled_image<texture_cube<T> >
+fn sampled_image<T: fiu32, S: samplers>(texture_cube_array<T>, S) -> sampled_image<texture_cube_array<T> >
+fn sampled_image<S: samplers>(texture_depth_2d, S) -> sampled_image<texture_depth_2d>
+fn sampled_image<S: samplers>(texture_depth_2d_array, S) -> sampled_image<texture_depth_2d_array>
+fn sampled_image<S: samplers>(texture_depth_cube, S) -> sampled_image<texture_depth_cube>
+fn sampled_image<S: samplers>(texture_depth_cube_array, S) -> sampled_image<texture_depth_cube_array>
+
 fn select<T: scalar>(bool, T, T) -> T
 fn select<N: num, T: scalar>(vec<N, bool>, vec<N, T>, vec<N, T>) -> vec<N, T>
+
+fn vector_times_matrix<T: f32_f16, N: num, M: num>(vec<N, T>, mat<M, N, T>) -> vec<M, T>
 fn vector_times_scalar<T: f32_f16, N: num>(vec<N, T>, T) -> vec<N, T>
 

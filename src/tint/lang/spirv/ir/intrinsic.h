@@ -45,7 +45,6 @@ enum class Intrinsic : uint8_t {
     kImageSampleExplicitLod,
     kImageSampleImplicitLod,
     kImageWrite,
-    kSampledImage,
 };
 
 /// @param value the enum value
@@ -77,7 +76,6 @@ constexpr const char* kIntrinsicStrings[] = {
     "image_sample_explicit_lod",
     "image_sample_implicit_lod",
     "image_write",
-    "sampled_image",
 };
 
 }  // namespace tint::spirv::ir
