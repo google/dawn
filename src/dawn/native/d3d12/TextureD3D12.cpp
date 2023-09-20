@@ -1116,7 +1116,7 @@ D3D12_UNORDERED_ACCESS_VIEW_DESC TextureView::GetUAVDescriptor() const {
         case wgpu::TextureViewDimension::e3D:
             uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE3D;
             uavDesc.Texture3D.FirstWSlice = 0;
-            uavDesc.Texture3D.WSize = GetTexture()->GetDepth() >> GetBaseMipLevel();
+            uavDesc.Texture3D.WSize = std::max(1u, GetTexture()->GetDepth() >> GetBaseMipLevel());
             uavDesc.Texture3D.MipSlice = GetBaseMipLevel();
             break;
         // Cube and Cubemap can't be used as storage texture. So there is no need to create UAV

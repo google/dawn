@@ -120,6 +120,45 @@ TEST_P(Texture3DTests, Sampling) {
     }
 }
 
+// Regression test for crbug.com/dawn/2072 where the WSize of D3D UAV descriptor ends up being 0.
+// (which is invalid as noted by the debug layers)
+TEST_P(Texture3DTests, LatestMipClampsDepthSizeForStorageTextures) {
+    wgpu::TextureDescriptor tDesc;
+    tDesc.dimension = wgpu::TextureDimension::e3D;
+    tDesc.size = {2, 2, 1};
+    tDesc.mipLevelCount = 2;
+    tDesc.usage = wgpu::TextureUsage::StorageBinding;
+    tDesc.format = wgpu::TextureFormat::R32Uint;
+    wgpu::Texture t = device.CreateTexture(&tDesc);
+
+    wgpu::TextureViewDescriptor vDesc;
+    vDesc.baseMipLevel = 1;
+    vDesc.mipLevelCount = 1;
+    wgpu::TextureView v = t.CreateView(&vDesc);
+
+    wgpu::ComputePipelineDescriptor pDesc;
+    pDesc.compute.module = utils::CreateShaderModule(device, R"(
+        @group(0) @binding(0) var t : texture_storage_3d<r32uint, write>;
+        @compute @workgroup_size(1) fn main() {
+            _ = t;
+        }
+    )");
+    pDesc.compute.entryPoint = "main";
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pDesc);
+
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, v}});
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetBindGroup(0, bg);
+    pass.SetPipeline(pipeline);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+}
+
 DAWN_INSTANTIATE_TEST(Texture3DTests,
                       D3D11Backend(),
                       D3D12Backend(),
