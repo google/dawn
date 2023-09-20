@@ -89,11 +89,12 @@ class VideoViewsTestsBase : public DawnTestWithParams<Params> {
 
     template <typename T>
     static std::vector<T> GetTestTextureData(wgpu::TextureFormat format, bool isCheckerboard);
+    template <typename T>
+    static std::vector<T> GetTestTextureDataWithPlaneIndex(size_t planeIndex,
+                                                           size_t bytesPerRow,
+                                                           size_t height,
+                                                           bool isCheckerboard);
     static uint32_t NumPlanes(wgpu::TextureFormat format);
-    static std::vector<uint8_t> GetTestTextureDataWithPlaneIndex(size_t planeIndex,
-                                                                 size_t bytesPerRow,
-                                                                 size_t height,
-                                                                 bool isCheckerboard);
     static std::array<Format, 2> PlaneFormats(Format textureFormat);
 
   protected:

@@ -179,17 +179,19 @@ uint32_t VideoViewsTestsBase::NumPlanes(wgpu::TextureFormat format) {
             return 0;
     }
 }
-std::vector<uint8_t> VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex(size_t planeIndex,
-                                                                           size_t bytesPerRow,
-                                                                           size_t height,
-                                                                           bool isCheckerboard) {
-    std::vector<uint8_t> texelData = VideoViewsTestsBase::GetTestTextureData<uint8_t>(
+
+template <typename T>
+std::vector<T> VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex(size_t planeIndex,
+                                                                     size_t bytesPerRow,
+                                                                     size_t height,
+                                                                     bool isCheckerboard) {
+    std::vector<T> texelData = VideoViewsTestsBase::GetTestTextureData<T>(
         wgpu::TextureFormat::R8BG8Biplanar420Unorm, isCheckerboard);
     const uint32_t texelDataRowBytes = kYUVImageDataWidthInTexels;
     const uint32_t texelDataHeight =
         planeIndex == 0 ? kYUVImageDataHeightInTexels : kYUVImageDataHeightInTexels / 2;
 
-    std::vector<uint8_t> texels(bytesPerRow * height, 0);
+    std::vector<T> texels(bytesPerRow * height, 0);
     uint32_t plane_first_texel_offset = 0;
     // The size of the test video frame is 4 x 4
     switch (planeIndex) {
@@ -221,6 +223,17 @@ std::vector<uint8_t> VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex(size_
             return {};
     }
 }
+
+template std::vector<uint8_t> VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex<uint8_t>(
+    size_t planeIndex,
+    size_t bytesPerRow,
+    size_t height,
+    bool isCheckerboard);
+template std::vector<uint16_t> VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex<uint16_t>(
+    size_t planeIndex,
+    size_t bytesPerRow,
+    size_t height,
+    bool isCheckerboard);
 
 wgpu::TextureFormat VideoViewsTestsBase::GetFormat() const {
     return GetParam().mFormat;
@@ -1031,9 +1044,10 @@ class VideoViewsExtendedUsagesTests : public VideoViewsTestsBase {
 
                 auto buffer = device.CreateBuffer(&bufferDesc);
 
-                std::vector<uint8_t> data = VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex(
-                    plane, bytesPerRow, VideoViewsTestsBase::kYUVImageDataHeightInTexels,
-                    isCheckerboard);
+                std::vector<uint8_t> data =
+                    VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex<uint8_t>(
+                        plane, bytesPerRow, VideoViewsTestsBase::kYUVImageDataHeightInTexels,
+                        isCheckerboard);
 
                 memcpy(buffer.GetMappedRange(), data.data(), bufferDesc.size);
                 buffer.Unmap();

@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "VideoViewsTests.h"
@@ -57,6 +58,8 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
         switch (format) {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                 return kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange;
+            case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
+                return kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange;
             default:
                 DAWN_UNREACHABLE();
                 return 0;
@@ -66,6 +69,7 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
     size_t GetSubSamplingFactorPerPlane(wgpu::TextureFormat format, size_t plane) {
         switch (format) {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
+            case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
                 return plane == VideoViewsTestsBase::kYUVLumaPlaneIndex ? 1 : 2;
             default:
                 DAWN_UNREACHABLE();
@@ -77,6 +81,8 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
         switch (format) {
             case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                 return plane == VideoViewsTestsBase::kYUVLumaPlaneIndex ? 1 : 2;
+            case wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm:
+                return plane == VideoViewsTestsBase::kYUVLumaPlaneIndex ? 2 : 4;
             default:
                 DAWN_UNREACHABLE();
                 return 0;
@@ -138,11 +144,20 @@ class VideoViewsTestBackendIOSurface : public VideoViewsTestBackend {
         if (initialized) {
             IOSurfaceLock(surface, 0, nullptr);
             for (size_t plane = 0; plane < num_planes; ++plane) {
-                std::vector<uint8_t> data = VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex(
-                    plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane),
-                    IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard);
                 void* pointer = IOSurfaceGetBaseAddressOfPlane(surface, plane);
-                memcpy(pointer, data.data(), data.size());
+                if (format == wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm) {
+                    std::vector<uint16_t> data =
+                        VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex<uint16_t>(
+                            plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane) / 2,
+                            IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard);
+                    memcpy(pointer, data.data(), data.size() * 2);
+                } else {
+                    std::vector<uint8_t> data =
+                        VideoViewsTestsBase::GetTestTextureDataWithPlaneIndex<uint8_t>(
+                            plane, IOSurfaceGetBytesPerRowOfPlane(surface, plane),
+                            IOSurfaceGetHeightOfPlane(surface, plane), isCheckerboard);
+                    memcpy(pointer, data.data(), data.size());
+                }
             }
             IOSurfaceUnlock(surface, 0, nullptr);
         }
@@ -184,8 +199,8 @@ std::vector<BackendTestConfig> VideoViewsTestBackend::Backends() {
 
 // static
 std::vector<Format> VideoViewsTestBackend::Formats() {
-    // TODO(dawn:551): Support sharing P010 video surfaces.
-    return {wgpu::TextureFormat::R8BG8Biplanar420Unorm};
+    return {wgpu::TextureFormat::R8BG8Biplanar420Unorm,
+            wgpu::TextureFormat::R10X6BG10X6Biplanar420Unorm};
 }
 
 // static
