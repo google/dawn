@@ -113,7 +113,8 @@ dawn_fuzzer_test("dawn_wire_server_and_vulkan_backend_fuzzer") {
   additional_configs = [ "${dawn_root}/src/dawn/common:internal_config" ]
 }
 
-if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader) {
+if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader &&
+    !disable_libfuzzer && use_fuzzing_engine) {
   import("//third_party/protobuf/proto_library.gni")
   import("${dawn_root}/generator/dawn_generator.gni")
 
