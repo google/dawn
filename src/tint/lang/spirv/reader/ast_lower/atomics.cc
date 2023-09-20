@@ -28,6 +28,7 @@
 #include "src/tint/lang/wgsl/sem/block_statement.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
+#include "src/tint/lang/wgsl/sem/load.h"
 #include "src/tint/lang/wgsl/sem/member_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/statement.h"
 #include "src/tint/utils/containers/map.h"
@@ -247,48 +248,27 @@ struct Atomics::State {
             return false;
         };
 
-        // Look for loads and stores via assignments and decls of atomic variables we've collected
-        // so far, and replace them with atomicLoad and atomicStore.
-        for (auto* atomic_var : atomic_variables) {
-            for (auto* vu : atomic_var->Users()) {
-                Switch(
-                    vu->Stmt()->Declaration(),
-                    [&](const ast::AssignmentStatement* assign) {
-                        auto* sem_lhs = ctx.src->Sem().GetVal(assign->lhs);
-                        if (is_ref_to_atomic_var(sem_lhs)) {
-                            ctx.Replace(assign, [=] {
-                                auto* lhs = ctx.CloneWithoutTransform(assign->lhs);
-                                auto* rhs = ctx.CloneWithoutTransform(assign->rhs);
-                                auto* call = b.Call(core::str(core::Function::kAtomicStore),
-                                                    b.AddressOf(lhs), rhs);
-                                return b.CallStmt(call);
-                            });
-                            return;
-                        }
-
-                        auto sem_rhs = ctx.src->Sem().GetVal(assign->rhs);
-                        if (is_ref_to_atomic_var(sem_rhs->UnwrapLoad())) {
-                            ctx.Replace(assign->rhs, [=] {
-                                auto* rhs = ctx.CloneWithoutTransform(assign->rhs);
-                                return b.Call(core::str(core::Function::kAtomicLoad),
-                                              b.AddressOf(rhs));
-                            });
-                            return;
-                        }
-                    },
-                    [&](const ast::VariableDeclStatement* decl) {
-                        auto* var = decl->variable;
-                        if (auto* sem_init = ctx.src->Sem().GetVal(var->initializer)) {
-                            if (is_ref_to_atomic_var(sem_init->UnwrapLoad())) {
-                                ctx.Replace(var->initializer, [=] {
-                                    auto* rhs = ctx.CloneWithoutTransform(var->initializer);
-                                    return b.Call(core::str(core::Function::kAtomicLoad),
-                                                  b.AddressOf(rhs));
-                                });
-                                return;
-                            }
-                        }
+        // Look for loads and stores of atomic variables we've collected so far, and replace them
+        // with atomicLoad and atomicStore.
+        for (auto* node : ctx.src->ASTNodes().Objects()) {
+            if (auto* load = ctx.src->Sem().Get<sem::Load>(node)) {
+                if (is_ref_to_atomic_var(load->Reference())) {
+                    ctx.Replace(load->Reference()->Declaration(), [=] {
+                        auto* expr = ctx.CloneWithoutTransform(load->Reference()->Declaration());
+                        return b.Call(core::str(core::Function::kAtomicLoad), b.AddressOf(expr));
                     });
+                }
+            } else if (auto* assign = node->As<ast::AssignmentStatement>()) {
+                auto* sem_lhs = ctx.src->Sem().GetVal(assign->lhs);
+                if (is_ref_to_atomic_var(sem_lhs)) {
+                    ctx.Replace(assign, [=] {
+                        auto* lhs = ctx.CloneWithoutTransform(assign->lhs);
+                        auto* rhs = ctx.CloneWithoutTransform(assign->rhs);
+                        auto* call =
+                            b.Call(core::str(core::Function::kAtomicStore), b.AddressOf(lhs), rhs);
+                        return b.CallStmt(call);
+                    });
+                }
             }
         }
     }

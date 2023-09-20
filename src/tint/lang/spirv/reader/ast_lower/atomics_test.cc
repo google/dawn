@@ -1376,5 +1376,76 @@ fn f() {
 
     EXPECT_EQ(expect, str(got));
 }
+
+TEST_F(AtomicsTest, ReplaceBitcastArgument_Scaler) {
+    auto* src = R"(
+var<workgroup> wg : u32;
+
+fn f() {
+  stub_atomicAdd_u32(wg, 1u);
+
+  wg = 0u;
+  var b : f32;
+  b = bitcast<f32>(wg);
+}
+)";
+
+    auto* expect = R"(
+var<workgroup> wg : atomic<u32>;
+
+fn f() {
+  atomicAdd(&(wg), 1u);
+  atomicStore(&(wg), 0u);
+  var b : f32;
+  b = bitcast<f32>(atomicLoad(&(wg)));
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(AtomicsTest, ReplaceBitcastArgument_Struct) {
+    auto* src = R"(
+struct S {
+  a : u32,
+}
+
+var<workgroup> wg : S;
+
+fn f() {
+  stub_atomicAdd_u32(wg.a, 1u);
+
+  wg.a = 0u;
+  var b : f32;
+  b = bitcast<f32>(wg.a);
+}
+)";
+
+    auto* expect = R"(
+struct S_atomic {
+  a : atomic<u32>,
+}
+
+struct S {
+  a : u32,
+}
+
+var<workgroup> wg : S_atomic;
+
+fn f() {
+  atomicAdd(&(wg.a), 1u);
+  atomicStore(&(wg.a), 0u);
+  var b : f32;
+  b = bitcast<f32>(atomicLoad(&(wg.a)));
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::spirv::reader
