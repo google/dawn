@@ -2386,7 +2386,7 @@ TEST_F(IRToProgramTest, For_IncInInit_Cmp) {
 
             b.Append(loop->Initializer(), [&] {
                 auto* load_i = b.Load(i);
-                auto* inc_i = b.Add(ty.i32(), load_i, 1_u);
+                auto* inc_i = b.Add(ty.u32(), load_i, 1_u);
                 b.Store(i, inc_i);
                 b.NextIteration(loop);
             });

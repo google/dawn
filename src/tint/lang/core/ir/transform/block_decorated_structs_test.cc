@@ -249,7 +249,8 @@ TEST_F(IR_BlockDecoratedStructsTest, StructUsedElsewhere) {
     b.RootBlock()->Append(private_var);
 
     auto* func = b.Function("foo", ty.void_());
-    func->Block()->Append(b.Store(buffer, private_var));
+    auto* load = func->Block()->Append(b.Load(private_var));
+    func->Block()->Append(b.Store(buffer, load));
     func->Block()->Append(b.Return(func));
 
     auto* expect = R"(
@@ -269,8 +270,9 @@ tint_symbol_1 = struct @align(4), @block {
 
 %foo = func():void -> %b2 {
   %b2 = block {
-    %4:ptr<storage, MyStruct, read_write> = access %1, 0u
-    store %4, %2
+    %4:MyStruct = load %2
+    %5:ptr<storage, MyStruct, read_write> = access %1, 0u
+    store %5, %4
     ret
   }
 }

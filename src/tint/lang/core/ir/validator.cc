@@ -246,6 +246,10 @@ class Validator {
     /// @param l the exit loop to validate
     void CheckExitLoop(ExitLoop* l);
 
+    /// Validates the given store
+    /// @param s the store to validate
+    void CheckStore(Store* s);
+
     /// Validates the given load vector element
     /// @param l the load vector element to validate
     void CheckLoadVectorElement(LoadVectorElement* l);
@@ -483,7 +487,7 @@ void Validator::CheckInstruction(Instruction* inst) {
         [&](Load*) {},                                               //
         [&](LoadVectorElement* l) { CheckLoadVectorElement(l); },    //
         [&](Loop* l) { CheckLoop(l); },                              //
-        [&](Store*) {},                                              //
+        [&](Store* s) { CheckStore(s); },                            //
         [&](StoreVectorElement* s) { CheckStoreVectorElement(s); },  //
         [&](Switch* s) { CheckSwitch(s); },                          //
         [&](Swizzle*) {},                                            //
@@ -791,6 +795,19 @@ void Validator::CheckExitLoop(ExitLoop* l) {
             break;
         }
         inst = inst->Block()->Parent();
+    }
+}
+
+void Validator::CheckStore(Store* s) {
+    CheckOperandsNotNull(s, Store::kToOperandOffset, Store::kFromOperandOffset);
+
+    if (auto* from = s->From()) {
+        if (auto* to = s->To()) {
+            if (from->Type() != to->Type()->UnwrapPtr()) {
+                AddError(s, Store::kFromOperandOffset,
+                         "value type does not match pointer element type");
+            }
+        }
     }
 }
 

@@ -2735,6 +2735,94 @@ note: # Disassembly
 )");
 }
 
+TEST_F(IR_ValidatorTest, Store_NullTo) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        b.Append(mod.instructions.Create<ir::Store>(nullptr, b.Constant(42_i)));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:3:11 error: store: operand is undefined
+    store undef, 42i
+          ^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    store undef, 42i
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Store_NullFrom) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, i32>());
+        b.Append(mod.instructions.Create<ir::Store>(var->Result(), nullptr));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:4:15 error: store: operand is undefined
+    store %2, undef
+              ^^^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:ptr<function, i32, read_write> = var
+    store %2, undef
+    ret
+  }
+}
+)");
+}
+
+TEST_F(IR_ValidatorTest, Store_TypeMismatch) {
+    auto* f = b.Function("my_func", ty.void_());
+
+    b.Append(f->Block(), [&] {
+        auto* var = b.Var(ty.ptr<function, i32>());
+        b.Append(mod.instructions.Create<ir::Store>(var->Result(), b.Constant(42_u)));
+        b.Return(f);
+    });
+
+    auto res = ir::Validate(mod);
+    ASSERT_FALSE(res);
+    EXPECT_EQ(res.Failure().str(), R"(:4:15 error: value type does not match pointer element type
+    store %2, 42u
+              ^^^
+
+:2:3 note: In block
+  %b1 = block {
+  ^^^^^^^^^^^
+
+note: # Disassembly
+%my_func = func():void -> %b1 {
+  %b1 = block {
+    %2:ptr<function, i32, read_write> = var
+    store %2, 42u
+    ret
+  }
+}
+)");
+}
+
 TEST_F(IR_ValidatorTest, LoadVectorElement_NullResult) {
     auto* f = b.Function("my_func", ty.void_());
 

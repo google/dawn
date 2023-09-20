@@ -449,9 +449,9 @@ void Disassembler::EmitInstruction(Instruction* inst) {
         [&](Store* s) {
             EmitInstructionName(s);
             out_ << " ";
-            EmitValue(s->To());
+            EmitOperand(s, Store::kToOperandOffset);
             out_ << ", ";
-            EmitValue(s->From());
+            EmitOperand(s, Store::kFromOperandOffset);
         },
         [&](StoreVectorElement* s) {
             EmitInstructionName(s);
