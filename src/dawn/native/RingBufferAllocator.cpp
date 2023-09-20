@@ -16,6 +16,8 @@
 
 #include <utility>
 
+#include "dawn/common/Math.h"
+
 // Note: Current RingBufferAllocator implementation uses two indices (start and end) to implement a
 // circular queue. However, this approach defines a full queue when one element is still unused.
 //
@@ -70,7 +72,9 @@ bool RingBufferAllocator::Empty() const {
 // queue, which identifies an existing (or new) frames-worth of resources. Internally, the
 // ring-buffer maintains offsets of 3 "memory" states: Free, Reclaimed, and Used. This is done
 // in FIFO order as older frames would free resources before newer ones.
-uint64_t RingBufferAllocator::Allocate(uint64_t allocationSize, ExecutionSerial serial) {
+uint64_t RingBufferAllocator::Allocate(uint64_t allocationSize,
+                                       ExecutionSerial serial,
+                                       uint64_t offsetAlignment) {
     // Check if the buffer is full by comparing the used size.
     // If the buffer is not split where waste occurs (e.g. cannot fit new sub-alloc in front), a
     // subsequent sub-alloc could fail where the used size was previously adjusted to include
@@ -86,43 +90,45 @@ uint64_t RingBufferAllocator::Allocate(uint64_t allocationSize, ExecutionSerial 
     }
 
     uint64_t startOffset = kInvalidOffset;
+    uint64_t currentRequestSize = 0u;
+
+    // Compute an alignment offset for the buffer if allocating at the end.
+    const uint64_t alignmentOffset = Align(mUsedEndOffset, offsetAlignment) - mUsedEndOffset;
+    const uint64_t alignedUsedEndOffset = mUsedEndOffset + alignmentOffset;
 
     // Check if the buffer is NOT split (i.e sub-alloc on ends)
     if (mUsedStartOffset <= mUsedEndOffset) {
         // Order is important (try to sub-alloc at end first).
         // This is due to FIFO order where sub-allocs are inserted from left-to-right (when not
         // wrapped).
-        if (mUsedEndOffset + allocationSize <= mMaxBlockSize) {
-            startOffset = mUsedEndOffset;
-            mUsedEndOffset += allocationSize;
-            mUsedSize += allocationSize;
-            mCurrentRequestSize += allocationSize;
+        if (alignedUsedEndOffset + allocationSize <= mMaxBlockSize) {
+            startOffset = alignedUsedEndOffset;
+            mUsedSize += allocationSize + alignmentOffset;
+            currentRequestSize = allocationSize + alignmentOffset;
         } else if (allocationSize <= mUsedStartOffset) {  // Try to sub-alloc at front.
             // Count the space at the end so that a subsequent
             // sub-alloc cannot fail when the buffer is full.
             const uint64_t requestSize = (mMaxBlockSize - mUsedEndOffset) + allocationSize;
 
             startOffset = 0;
-            mUsedEndOffset = allocationSize;
             mUsedSize += requestSize;
-            mCurrentRequestSize += requestSize;
+            currentRequestSize = requestSize;
         }
-    } else if (mUsedEndOffset + allocationSize <=
-               mUsedStartOffset) {  // Otherwise, buffer is split where sub-alloc must be
-                                    // in-between.
-        startOffset = mUsedEndOffset;
-        mUsedEndOffset += allocationSize;
-        mUsedSize += allocationSize;
-        mCurrentRequestSize += allocationSize;
+    } else if (alignedUsedEndOffset + allocationSize <= mUsedStartOffset) {
+        // Otherwise, buffer is split where sub-alloc must be in-between.
+        startOffset = alignedUsedEndOffset;
+        mUsedSize += allocationSize + alignmentOffset;
+        currentRequestSize = allocationSize + alignmentOffset;
     }
 
     if (startOffset != kInvalidOffset) {
+        mUsedEndOffset = startOffset + allocationSize;
+
         Request request;
         request.endOffset = mUsedEndOffset;
-        request.size = mCurrentRequestSize;
+        request.size = currentRequestSize;
 
         mInflightRequests.Enqueue(std::move(request), serial);
-        mCurrentRequestSize = 0;  // reset
     }
 
     return startOffset;

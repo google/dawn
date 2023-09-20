@@ -63,7 +63,9 @@ class DynamicUploader {
         RingBufferAllocator mAllocator;
     };
 
-    ResultOrError<UploadHandle> AllocateInternal(uint64_t allocationSize, ExecutionSerial serial);
+    ResultOrError<UploadHandle> AllocateInternal(uint64_t allocationSize,
+                                                 ExecutionSerial serial,
+                                                 uint64_t offsetAlignment);
 
     std::vector<std::unique_ptr<RingBuffer>> mRingBuffers;
     SerialQueue<ExecutionSerial, Ref<BufferBase>> mReleasedStagingBuffers;

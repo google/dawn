@@ -33,7 +33,9 @@ class RingBufferAllocator {
 
     RingBufferAllocator& operator=(const RingBufferAllocator&);
 
-    uint64_t Allocate(uint64_t allocationSize, ExecutionSerial serial);
+    uint64_t Allocate(uint64_t allocationSize,
+                      ExecutionSerial serial,
+                      uint64_t offsetAlignment = 1);
     void Deallocate(ExecutionSerial lastCompletedSerial);
 
     uint64_t GetSize() const;
@@ -55,8 +57,6 @@ class RingBufferAllocator {
     uint64_t mUsedStartOffset = 0;  // Head of used sub-alloc requests (in bytes).
     uint64_t mMaxBlockSize = 0;     // Max size of the ring buffer (in bytes).
     uint64_t mUsedSize = 0;         // Size of the sub-alloc requests (in bytes) of the ring buffer.
-    uint64_t mCurrentRequestSize =
-        0;  // Size of the sub-alloc requests (in bytes) of the current serial.
 };
 }  // namespace dawn::native
 
