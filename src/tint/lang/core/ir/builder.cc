@@ -25,7 +25,8 @@ namespace tint::core::ir {
 
 Builder::Builder(Module& mod) : ir(mod) {}
 
-Builder::Builder(Module& mod, ir::Block* block) : current_block_(block), ir(mod) {}
+Builder::Builder(Module& mod, ir::Block* block)
+    : insertion_point_(InsertionPoints::AppendToBlock{block}), ir(mod) {}
 
 Builder::~Builder() = default;
 
