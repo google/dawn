@@ -872,6 +872,14 @@ Result<SuccessType, diag::List> Validate(Module& mod) {
 
 Result<SuccessType, std::string> ValidateAndDumpIfNeeded([[maybe_unused]] Module& ir,
                                                          [[maybe_unused]] const char* msg) {
+#if TINT_DUMP_IR_WHEN_VALIDATING
+    Disassembler disasm(ir);
+    std::cout << "=========================================================" << std::endl;
+    std::cout << "== IR dump before " << msg << ":" << std::endl;
+    std::cout << "=========================================================" << std::endl;
+    std::cout << disasm.Disassemble();
+#endif
+
 #ifndef NDEBUG
     auto result = Validate(ir);
     if (!result) {
@@ -880,14 +888,6 @@ Result<SuccessType, std::string> ValidateAndDumpIfNeeded([[maybe_unused]] Module
         ss << "validating input to " << msg << " failed" << std::endl << result.Failure().str();
         return ss.str();
     }
-#endif
-
-#if TINT_DUMP_IR_WHEN_VALIDATING
-    Disassembler disasm(ir);
-    std::cout << "=========================================================" << std::endl;
-    std::cout << "== IR dump before " << msg << ":" << std::endl;
-    std::cout << "=========================================================" << std::endl;
-    std::cout << disasm.Disassemble();
 #endif
 
     return Success;
