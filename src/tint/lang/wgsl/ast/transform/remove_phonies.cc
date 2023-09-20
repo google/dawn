@@ -49,7 +49,7 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
 
     auto& sem = src->Sem();
 
-    Hashmap<SinkSignature, Symbol, 8, Hasher<SinkSignature>> sinks;
+    Hashmap<SinkSignature, Symbol, 8> sinks;
 
     bool made_changes = false;
     for (auto* node : src->ASTNodes().Objects()) {

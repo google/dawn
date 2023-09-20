@@ -134,6 +134,9 @@ struct EnumSet {
     /// @return true if the set is empty
     inline bool Empty() const { return set == 0; }
 
+    /// @return the hash value of this object
+    inline size_t HashCode() const { return std::hash<uint64_t>()(Value()); }
+
     /// Equality operator
     /// @param rhs the other EnumSet to compare this to
     /// @return true if this EnumSet is equal to @p rhs
@@ -242,20 +245,5 @@ auto& operator<<(STREAM& out, EnumSet<ENUM> set) {
 }
 
 }  // namespace tint
-
-namespace std {
-
-/// Custom std::hash specialization for tint::EnumSet<T>
-template <typename T>
-class hash<tint::EnumSet<T>> {
-  public:
-    /// @param e the EnumSet to create a hash for
-    /// @return the hash value
-    inline std::size_t operator()(const tint::EnumSet<T>& e) const {
-        return std::hash<uint64_t>()(e.Value());
-    }
-};
-
-}  // namespace std
 
 #endif  // SRC_TINT_UTILS_CONTAINERS_ENUM_SET_H_

@@ -38,10 +38,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::Std140);
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
 
+namespace tint::ast::transform {
 namespace {
 
 /// UniformVariable is used by Std140::State::AccessIndex to indicate the root uniform variable
-struct UniformVariable {};
+struct UniformVariable {
+    /// @returns a hash code for this object
+    size_t HashCode() const { return 0; }
+};
 
 /// Inequality operator for UniformVariable
 bool operator!=(const UniformVariable&, const UniformVariable&) {
@@ -51,6 +55,9 @@ bool operator!=(const UniformVariable&, const UniformVariable&) {
 /// DynamicIndex is used by Std140::State::AccessIndex to indicate a runtime-expression index
 struct DynamicIndex {
     size_t slot;  // The index of the expression in Std140::State::AccessChain::dynamic_indices
+
+    /// @returns a hash code for this object
+    size_t HashCode() const { return Hash(slot); }
 };
 
 /// Inequality operator for DynamicIndex
@@ -59,29 +66,6 @@ bool operator!=(const DynamicIndex& a, const DynamicIndex& b) {
 }
 
 }  // namespace
-
-namespace tint {
-
-/// Hasher specialization for UniformVariable
-template <>
-struct Hasher<UniformVariable> {
-    /// The hash function for the UniformVariable
-    /// @return the hash for the given UniformVariable
-    size_t operator()(const UniformVariable&) const { return 0; }
-};
-
-/// Hasher specialization for DynamicIndex
-template <>
-struct Hasher<DynamicIndex> {
-    /// The hash function for the DynamicIndex
-    /// @param d the DynamicIndex to hash
-    /// @return the hash for the given DynamicIndex
-    size_t operator()(const DynamicIndex& d) const { return Hash(d.slot); }
-};
-
-}  // namespace tint
-
-namespace tint::ast::transform {
 
 /// PIMPL state for the transform
 struct Std140::State {

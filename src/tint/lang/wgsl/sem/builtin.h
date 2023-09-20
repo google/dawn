@@ -104,6 +104,11 @@ class Builtin final : public Castable<Builtin, CallTarget> {
     /// wgsl::Extension::kNone if no extension is required.
     wgsl::Extension RequiredExtension() const;
 
+    /// @return the hash code for this object
+    std::size_t HashCode() const {
+        return Hash(Type(), SupportedStages(), ReturnType(), Parameters(), IsDeprecated());
+    }
+
   private:
     const core::Function type_;
     const PipelineStageSet supported_stages_;
@@ -117,21 +122,5 @@ static constexpr double kRadToDeg = 57.295779513082322865;
 static constexpr double kDegToRad = 0.017453292519943295474;
 
 }  // namespace tint::sem
-
-namespace std {
-
-/// Custom std::hash specialization for tint::sem::Builtin
-template <>
-class hash<tint::sem::Builtin> {
-  public:
-    /// @param i the Builtin to create a hash for
-    /// @return the hash value
-    inline std::size_t operator()(const tint::sem::Builtin& i) const {
-        return Hash(i.Type(), i.SupportedStages(), i.ReturnType(), i.Parameters(),
-                    i.IsDeprecated());
-    }
-};
-
-}  // namespace std
 
 #endif  // SRC_TINT_LANG_WGSL_SEM_BUILTIN_H_

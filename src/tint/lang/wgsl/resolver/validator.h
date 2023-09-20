@@ -82,6 +82,9 @@ struct TypeAndAddressSpace {
     bool operator==(const TypeAndAddressSpace& other) const {
         return type == other.type && address_space == other.address_space;
     }
+
+    /// @returns the hash value of this object
+    std::size_t HashCode() const { return Hash(type, address_space); }
 };
 
 /// DiagnosticFilterStack is a scoped stack of diagnostic filters.
@@ -572,20 +575,5 @@ class Validator {
 };
 
 }  // namespace tint::resolver
-
-namespace std {
-
-/// Custom std::hash specialization for tint::resolver::TypeAndAddressSpace.
-template <>
-class hash<tint::resolver::TypeAndAddressSpace> {
-  public:
-    /// @param tas the TypeAndAddressSpace
-    /// @return the hash value
-    inline std::size_t operator()(const tint::resolver::TypeAndAddressSpace& tas) const {
-        return Hash(tas.type, tas.address_space);
-    }
-};
-
-}  // namespace std
 
 #endif  // SRC_TINT_LANG_WGSL_RESOLVER_VALIDATOR_H_

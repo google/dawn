@@ -202,9 +202,8 @@ TEST(EnumSetTest, InequalityEnum) {
     EXPECT_TRUE(EnumSet<E>(E::A, E::B) != E::C);
 }
 
-TEST(EnumSetTest, Hash) {
-    auto hash = [&](EnumSet<E> s) { return std::hash<EnumSet<E>>()(s); };
-    EXPECT_EQ(hash(EnumSet<E>(E::A, E::B)), hash(EnumSet<E>(E::A, E::B)));
+TEST(EnumSetTest, HashCode) {
+    EXPECT_EQ(EnumSet<E>(E::A, E::B).HashCode(), EnumSet<E>(E::A, E::B).HashCode());
 }
 
 TEST(EnumSetTest, Value) {

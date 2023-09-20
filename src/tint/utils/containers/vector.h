@@ -441,6 +441,15 @@ class Vector {
     /// @returns the end for a reverse iterator
     auto rend() const { return impl_.slice.rend(); }
 
+    /// @returns a hash code for this Vector
+    size_t HashCode() const {
+        auto hash = Hash(Length());
+        for (auto& el : *this) {
+            hash = HashCombine(hash, el);
+        }
+        return hash;
+    }
+
     /// Equality operator
     /// @param other the other vector
     /// @returns true if this vector is the same length as `other`, and all elements are equal.
@@ -775,6 +784,15 @@ class VectorRef {
     /// @returns the end for a reverse iterator
     auto rend() const { return slice_.rend(); }
 
+    /// @returns a hash code of the Vector
+    size_t HashCode() const {
+        auto hash = Hash(Length());
+        for (auto& el : *this) {
+            hash = HashCombine(hash, el);
+        }
+        return hash;
+    }
+
   private:
     /// Friend class
     template <typename, size_t>
@@ -859,34 +877,6 @@ auto& operator<<(STREAM& o, VectorRef<T> vec) {
     o << "]";
     return o;
 }
-
-/// Hasher specialization for Vector
-template <typename T, size_t N>
-struct Hasher<Vector<T, N>> {
-    /// @param vector the Vector to hash
-    /// @returns a hash of the Vector
-    size_t operator()(const Vector<T, N>& vector) const {
-        auto hash = Hash(vector.Length());
-        for (auto& el : vector) {
-            hash = HashCombine(hash, el);
-        }
-        return hash;
-    }
-};
-
-/// Hasher specialization for VectorRef
-template <typename T>
-struct Hasher<VectorRef<T>> {
-    /// @param vector the VectorRef reference to hash
-    /// @returns a hash of the Vector
-    size_t operator()(const VectorRef<T>& vector) const {
-        auto hash = Hash(vector.Length());
-        for (auto& el : vector) {
-            hash = HashCombine(hash, el);
-        }
-        return hash;
-    }
-};
 
 namespace detail {
 

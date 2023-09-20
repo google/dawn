@@ -279,7 +279,7 @@ struct Hasher<Hashmap<K, V, N, HASH, EQUAL>> {
         for (auto it : map) {
             // Use an XOR to ensure that the non-deterministic ordering of the map still produces
             // the same hash value for the same entries.
-            hash ^= Hash(it.key) * 31 + Hash(it.value);
+            hash ^= Hash(it.key, it.value);
         }
         return hash;
     }

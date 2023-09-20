@@ -43,6 +43,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::DirectVariableAccess::Config);
 using namespace tint::core::number_suffixes;  // NOLINT
 using namespace tint::core::fluent_types;     // NOLINT
 
+namespace tint::ast::transform {
+
 namespace {
 
 /// AccessRoot describes the root of an AccessShape.
@@ -56,6 +58,9 @@ struct AccessRoot {
     tint::sem::Variable const* variable = nullptr;
     /// The address space of the variable or pointer type.
     tint::core::AddressSpace address_space = tint::core::AddressSpace::kUndefined;
+
+    /// @return a hash code for this object
+    size_t HashCode() const { return Hash(type, variable); }
 };
 
 /// Inequality operator for AccessRoot
@@ -68,6 +73,9 @@ bool operator!=(const AccessRoot& a, const AccessRoot& b) {
 struct DynamicIndex {
     /// The index of the expression in DirectVariableAccess::State::AccessChain::dynamic_indices
     size_t slot = 0;
+
+    /// @return a hash code for this object
+    size_t HashCode() const { return Hash(slot); }
 };
 
 /// Inequality operator for DynamicIndex
@@ -140,6 +148,9 @@ struct AccessShape {
         }
         return count;
     }
+
+    /// @return a hash code for this object
+    size_t HashCode() const { return Hash(root, ops); }
 };
 
 /// Equality operator for AccessShape
@@ -156,45 +167,12 @@ bool operator!=(const AccessShape& a, const AccessShape& b) {
 struct AccessChain : AccessShape {
     /// The array accessor index expressions. This vector is indexed by the `DynamicIndex`s in
     /// #indices.
-    tint::Vector<const tint::sem::ValueExpression*, 8> dynamic_indices;
+    Vector<const sem::ValueExpression*, 8> dynamic_indices;
     /// If true, then this access chain is used as an argument to call a variant.
     bool used_in_call = false;
 };
 
 }  // namespace
-
-namespace tint {
-
-/// Hasher specialization for AccessRoot
-template <>
-struct Hasher<AccessRoot> {
-    /// The hash function for the AccessRoot
-    /// @param d the AccessRoot to hash
-    /// @return the hash for the given AccessRoot
-    size_t operator()(const AccessRoot& d) const { return Hash(d.type, d.variable); }
-};
-
-/// Hasher specialization for DynamicIndex
-template <>
-struct Hasher<DynamicIndex> {
-    /// The hash function for the DynamicIndex
-    /// @param d the DynamicIndex to hash
-    /// @return the hash for the given DynamicIndex
-    size_t operator()(const DynamicIndex& d) const { return Hash(d.slot); }
-};
-
-/// Hasher specialization for AccessShape
-template <>
-struct Hasher<AccessShape> {
-    /// The hash function for the AccessShape
-    /// @param s the AccessShape to hash
-    /// @return the hash for the given AccessShape
-    size_t operator()(const AccessShape& s) const { return Hash(s.root, s.ops); }
-};
-
-}  // namespace tint
-
-namespace tint::ast::transform {
 
 /// The PIMPL state for the DirectVariableAccess transform
 struct DirectVariableAccess::State {
