@@ -953,9 +953,6 @@ class Eval {
     template <typename T>
     Eval::Result CreateScalar(const Source& source, const core::type::Type* t, T v);
 
-    /// ZeroValue returns a Constant for the zero-value of the type `type`.
-    const Value* ZeroValue(const core::type::Type* type);
-
     /// Adds two Number<T>s
     /// @param source the source location
     /// @param a the lhs number

@@ -129,6 +129,11 @@ class Manager final {
     /// @return a Scalar holding the AInt value @p value
     const Scalar<AInt>* Get(AInt value);
 
+    /// Constructs a constant zero-value of the type @p type.
+    /// @param type the constant type
+    /// @returns a constant zero-value for the type
+    const Value* Zero(const core::type::Type* type);
+
     /// The type manager
     core::type::Manager types;
 

@@ -30,7 +30,6 @@
 #include "src/tint/lang/core/number.h"
 #include "src/tint/lang/core/type/abstract_float.h"
 #include "src/tint/lang/core/type/abstract_int.h"
-#include "src/tint/lang/core/type/array.h"
 #include "src/tint/lang/core/type/bool.h"
 #include "src/tint/lang/core/type/f16.h"
 #include "src/tint/lang/core/type/f32.h"
@@ -638,59 +637,13 @@ Eval::Result Eval::CreateScalar(const Source& source, const core::type::Type* t,
         if (!std::isfinite(v.value)) {
             AddError(OverflowErrorMessage(v, t->FriendlyName()), source);
             if (use_runtime_semantics_) {
-                return ZeroValue(t);
+                return mgr.Zero(t);
             } else {
                 return tint::Failure;
             }
         }
     }
     return mgr.Get<Scalar<T>>(t, v);
-}
-
-const Value* Eval::ZeroValue(const core::type::Type* type) {
-    return Switch(
-        type,  //
-        [&](const core::type::Vector* v) -> const Value* {
-            auto* zero_el = ZeroValue(v->type());
-            return mgr.Splat(type, zero_el, v->Width());
-        },
-        [&](const core::type::Matrix* m) -> const Value* {
-            auto* zero_el = ZeroValue(m->ColumnType());
-            return mgr.Splat(type, zero_el, m->columns());
-        },
-        [&](const core::type::Array* a) -> const Value* {
-            if (auto n = a->ConstantCount()) {
-                if (auto* zero_el = ZeroValue(a->ElemType())) {
-                    return mgr.Splat(type, zero_el, n.value());
-                }
-            }
-            return nullptr;
-        },
-        [&](const core::type::Struct* s) -> const Value* {
-            Hashmap<const core::type::Type*, const Value*, 8> zero_by_type;
-            Vector<const Value*, 4> zeros;
-            zeros.Reserve(s->Members().Length());
-            for (auto* member : s->Members()) {
-                auto* zero = zero_by_type.GetOrCreate(member->Type(),
-                                                      [&] { return ZeroValue(member->Type()); });
-                if (!zero) {
-                    return nullptr;
-                }
-                zeros.Push(zero);
-            }
-            if (zero_by_type.Count() == 1) {
-                // All members were of the same type, so the zero value is the same for all members.
-                return mgr.Splat(type, zeros[0], s->Members().Length());
-            }
-            return mgr.Composite(s, std::move(zeros));
-        },
-        [&](Default) -> const Value* {
-            return ZeroTypeDispatch(type, [&](auto zero) -> const Value* {
-                auto el = CreateScalar(Source{}, type, zero);
-                TINT_ASSERT(el);
-                return el.Get();
-            });
-        });
 }
 
 template <typename NumberT>
@@ -1323,7 +1276,7 @@ auto Eval::Det4Func(const Source& source, const core::type::Type* elem_ty) {
 
 Eval::Result Eval::ArrayOrStructCtor(const core::type::Type* ty, VectorRef<const Value*> args) {
     if (args.IsEmpty()) {
-        return ZeroValue(ty);
+        return mgr.Zero(ty);
     }
 
     if (args.Length() == 1 && args[0]->Type() == ty) {
@@ -1351,7 +1304,7 @@ Eval::Result Eval::Conv(const core::type::Type* ty,
 }
 
 Eval::Result Eval::Zero(const core::type::Type* ty, VectorRef<const Value*>, const Source&) {
-    return ZeroValue(ty);
+    return mgr.Zero(ty);
 }
 
 Eval::Result Eval::Identity(const core::type::Type*, VectorRef<const Value*> args, const Source&) {
@@ -1436,7 +1389,7 @@ Eval::Result Eval::Index(const Value* obj_val,
         }
         AddError("index " + std::to_string(idx) + " out of bounds" + range, idx_source);
         if (use_runtime_semantics_) {
-            return ZeroValue(el.type);
+            return mgr.Zero(el.type);
         } else {
             return tint::Failure;
         }
@@ -2178,7 +2131,7 @@ Eval::Result Eval::acos(const core::type::Type* ty,
                 AddError("acos must be called with a value in the range [-1 .. 1] (inclusive)",
                          source);
                 if (use_runtime_semantics_) {
-                    return ZeroValue(c0->Type());
+                    return mgr.Zero(c0->Type());
                 } else {
                     return tint::Failure;
                 }
@@ -2199,7 +2152,7 @@ Eval::Result Eval::acosh(const core::type::Type* ty,
             if (i < NumberT(1.0)) {
                 AddError("acosh must be called with a value >= 1.0", source);
                 if (use_runtime_semantics_) {
-                    return ZeroValue(c0->Type());
+                    return mgr.Zero(c0->Type());
                 } else {
                     return tint::Failure;
                 }
@@ -2234,7 +2187,7 @@ Eval::Result Eval::asin(const core::type::Type* ty,
                 AddError("asin must be called with a value in the range [-1 .. 1] (inclusive)",
                          source);
                 if (use_runtime_semantics_) {
-                    return ZeroValue(c0->Type());
+                    return mgr.Zero(c0->Type());
                 } else {
                     return tint::Failure;
                 }
@@ -2281,7 +2234,7 @@ Eval::Result Eval::atanh(const core::type::Type* ty,
                 AddError("atanh must be called with a value in the range (-1 .. 1) (exclusive)",
                          source);
                 if (use_runtime_semantics_) {
-                    return ZeroValue(c0->Type());
+                    return mgr.Zero(c0->Type());
                 } else {
                     return tint::Failure;
                 }
@@ -2551,7 +2504,7 @@ Eval::Result Eval::exp(const core::type::Type* ty,
             if (!std::isfinite(val.value)) {
                 AddError(OverflowExpErrorMessage("e", e0), source);
                 if (use_runtime_semantics_) {
-                    return ZeroValue(c0->Type());
+                    return mgr.Zero(c0->Type());
                 } else {
                     return tint::Failure;
                 }
@@ -2573,7 +2526,7 @@ Eval::Result Eval::exp2(const core::type::Type* ty,
             if (!std::isfinite(val.value)) {
                 AddError(OverflowExpErrorMessage("2", e0), source);
                 if (use_runtime_semantics_) {
-                    return ZeroValue(c0->Type());
+                    return mgr.Zero(c0->Type());
                 } else {
                     return tint::Failure;
                 }
@@ -2922,7 +2875,7 @@ Eval::Result Eval::inverseSqrt(const core::type::Type* ty,
             if (e <= NumberT(0)) {
                 AddError("inverseSqrt must be called with a value > 0", source);
                 if (use_runtime_semantics_) {
-                    return ZeroValue(c0->Type());
+                    return mgr.Zero(c0->Type());
                 } else {
                     return tint::Failure;
                 }
@@ -2979,7 +2932,7 @@ Eval::Result Eval::ldexp(const core::type::Type* ty,
             if (e2 > bias + 1) {
                 AddError("e2 must be less than or equal to " + std::to_string(bias + 1), source);
                 if (use_runtime_semantics_) {
-                    return ZeroValue(c1->Type());
+                    return mgr.Zero(c1->Type());
                 } else {
                     return tint::Failure;
                 }
@@ -3015,7 +2968,7 @@ Eval::Result Eval::log(const core::type::Type* ty,
             if (v <= NumberT(0)) {
                 AddError("log must be called with a value > 0", source);
                 if (use_runtime_semantics_) {
-                    return ZeroValue(c0->Type());
+                    return mgr.Zero(c0->Type());
                 } else {
                     return tint::Failure;
                 }
@@ -3036,7 +2989,7 @@ Eval::Result Eval::log2(const core::type::Type* ty,
             if (v <= NumberT(0)) {
                 AddError("log2 must be called with a value > 0", source);
                 if (use_runtime_semantics_) {
-                    return ZeroValue(c0->Type());
+                    return mgr.Zero(c0->Type());
                 } else {
                     return tint::Failure;
                 }
@@ -3161,7 +3114,7 @@ Eval::Result Eval::normalize(const core::type::Type* ty,
     if (v->AllZero()) {
         AddError("zero length vector can not be normalized", source);
         if (use_runtime_semantics_) {
-            return ZeroValue(ty);
+            return mgr.Zero(ty);
         } else {
             return tint::Failure;
         }
@@ -3282,7 +3235,7 @@ Eval::Result Eval::pow(const core::type::Type* ty,
             if (!r) {
                 AddError(OverflowErrorMessage(e1, "^", e2), source);
                 if (use_runtime_semantics_) {
-                    return ZeroValue(c0->Type());
+                    return mgr.Zero(c0->Type());
                 } else {
                     return tint::Failure;
                 }
@@ -3436,7 +3389,7 @@ Eval::Result Eval::refract(const core::type::Type* ty,
 
         // If k < 0.0, returns the refraction vector 0.0
         if (k.Get()->ValueAs<AFloat>() < 0) {
-            return ZeroValue(ty);
+            return mgr.Zero(ty);
         }
 
         // Otherwise return the refraction vector e3 * e1 - (e3 * dot(e2, e1) + sqrt(k)) * e2
@@ -3862,7 +3815,7 @@ Eval::Result Eval::quantizeToF16(const core::type::Type* ty,
         if (!conv) {
             AddError(OverflowErrorMessage(value, "f16"), source);
             if (use_runtime_semantics_) {
-                return ZeroValue(c->Type());
+                return mgr.Zero(c->Type());
             } else {
                 return tint::Failure;
             }
