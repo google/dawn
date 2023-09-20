@@ -206,7 +206,7 @@ class Device final : public DeviceBase {
 
     MaybeError PrepareRecordingContext();
     ResultOrError<CommandPoolAndBuffer> BeginVkCommandBuffer();
-    void RecycleCompletedCommands();
+    void RecycleCompletedCommands(ExecutionSerial completedSerial);
 
     SerialQueue<ExecutionSerial, CommandPoolAndBuffer> mCommandsInFlight;
     // Command pools in the unused list haven't been reset yet.

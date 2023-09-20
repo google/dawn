@@ -224,9 +224,8 @@ ResultOrError<wgpu::TextureUsage> Device::GetSupportedSurfaceUsageImpl(
 }
 
 MaybeError Device::TickImpl() {
-    RecycleCompletedCommands();
-
     ExecutionSerial completedSerial = GetQueue()->GetCompletedCommandSerial();
+    RecycleCompletedCommands(completedSerial);
 
     for (Ref<DescriptorSetAllocator>& allocator :
          mDescriptorAllocatorsPendingDeallocation.IterateUpTo(completedSerial)) {
@@ -745,11 +744,11 @@ ResultOrError<CommandPoolAndBuffer> Device::BeginVkCommandBuffer() {
     return commands;
 }
 
-void Device::RecycleCompletedCommands() {
-    for (auto& commands : mCommandsInFlight.IterateUpTo(GetQueue()->GetCompletedCommandSerial())) {
+void Device::RecycleCompletedCommands(ExecutionSerial completedSerial) {
+    for (auto& commands : mCommandsInFlight.IterateUpTo(completedSerial)) {
         mUnusedCommands.push_back(commands);
     }
-    mCommandsInFlight.ClearUpTo(GetQueue()->GetCompletedCommandSerial());
+    mCommandsInFlight.ClearUpTo(completedSerial);
 }
 
 MaybeError Device::CopyFromStagingToBufferImpl(BufferBase* source,
@@ -1084,7 +1083,7 @@ void Device::DestroyImpl() {
 
     // Some commands might still be marked as in-flight if we shut down because of a device
     // loss. Recycle them as unused so that we free them below.
-    RecycleCompletedCommands();
+    RecycleCompletedCommands(kMaxExecutionSerial);
     DAWN_ASSERT(mCommandsInFlight.Empty());
 
     for (const CommandPoolAndBuffer& commands : mUnusedCommands) {
@@ -1104,17 +1103,15 @@ void Device::DestroyImpl() {
     }
     mUnusedFences.clear();
 
-    ExecutionSerial completedSerial = GetQueue()->GetCompletedCommandSerial();
     for (Ref<DescriptorSetAllocator>& allocator :
-         mDescriptorAllocatorsPendingDeallocation.IterateUpTo(completedSerial)) {
-        allocator->FinishDeallocation(completedSerial);
+         mDescriptorAllocatorsPendingDeallocation.IterateUpTo(kMaxExecutionSerial)) {
+        allocator->FinishDeallocation(kMaxExecutionSerial);
     }
 
     // Releasing the uploader enqueues buffers to be released.
     // Call Tick() again to clear them before releasing the deleter.
-    mResourceMemoryAllocator->Tick(completedSerial);
-    mDeleter->Tick(completedSerial);
-    mDescriptorAllocatorsPendingDeallocation.ClearUpTo(completedSerial);
+    mResourceMemoryAllocator->Tick(kMaxExecutionSerial);
+    mDescriptorAllocatorsPendingDeallocation.ClearUpTo(kMaxExecutionSerial);
 
     // Allow recycled memory to be deleted.
     mResourceMemoryAllocator->DestroyPool();
@@ -1123,10 +1120,8 @@ void Device::DestroyImpl() {
     // to them are guaranteed to be finished executing.
     mRenderPassCache = nullptr;
 
-    // We need handle deleting all child objects by calling Tick() again with a large serial to
-    // force all operations to look as if they were completed, and delete all objects before
-    // destroying the Deleter and vkDevice.
-    DAWN_ASSERT(mDeleter != nullptr);
+    // Delete all the remaining VkDevice child objects immediately since the GPU timeline is
+    // finished.
     mDeleter->Tick(kMaxExecutionSerial);
     mDeleter = nullptr;
 

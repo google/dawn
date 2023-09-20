@@ -244,9 +244,9 @@ DeviceBase::~DeviceBase() {
 }
 
 MaybeError DeviceBase::Initialize(Ref<QueueBase> defaultQueue) {
-    SetWGSLExtensionAllowList();
-
     mQueue = std::move(defaultQueue);
+
+    SetWGSLExtensionAllowList();
 
 #if defined(DAWN_ENABLE_ASSERTS)
     mUncapturedErrorCallback = [](WGPUErrorType, char const*, void*) {
