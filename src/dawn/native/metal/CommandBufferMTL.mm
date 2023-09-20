@@ -589,8 +589,12 @@ class VertexBufferTracker {
         : mLengthTracker(lengthTracker) {}
 
     void OnSetVertexBuffer(VertexBufferSlot slot, Buffer* buffer, uint64_t offset) {
+        id<MTLBuffer> mtlBuffer = buffer->GetMTLBuffer();
+        if (mVertexBuffers[slot] == mtlBuffer && mVertexBufferOffsets[slot] == offset) {
+            return;
+        }
         buffer->TrackUsage();
-        mVertexBuffers[slot] = buffer->GetMTLBuffer();
+        mVertexBuffers[slot] = mtlBuffer;
         mVertexBufferOffsets[slot] = offset;
 
         DAWN_ASSERT(buffer->GetSize() < std::numeric_limits<uint32_t>::max());
@@ -1517,6 +1521,9 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder,
             case Command::SetRenderPipeline: {
                 SetRenderPipelineCmd* cmd = iter->NextCommand<SetRenderPipelineCmd>();
                 RenderPipeline* newPipeline = ToBackend(cmd->pipeline).Get();
+                if (newPipeline == lastPipeline) {
+                    break;
+                }
 
                 vertexBuffers.OnSetPipeline(lastPipeline, newPipeline);
                 bindGroups.OnSetPipeline(newPipeline);
