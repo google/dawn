@@ -762,6 +762,20 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
             break;
         }
 
+        case core::Function::kSubgroupBroadcast: {
+            // The lane argument is ushort.
+            out << "simd_broadcast(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << ",ushort(";
+            if (!EmitExpression(out, expr->args[1])) {
+                return false;
+            }
+            out << "))";
+            return true;
+        }
+
         default:
             break;
     }

@@ -1,7 +1,9 @@
 enable chromium_experimental_subgroups;
 
 fn subgroupBroadcast_08beca() {
-  var res : f32 = subgroupBroadcast(1.0f, 1u);
+  var arg_0 = 1.0f;
+  const arg_1 = 1u;
+  var res : f32 = subgroupBroadcast(arg_0, arg_1);
   prevent_dce = res;
 }
 

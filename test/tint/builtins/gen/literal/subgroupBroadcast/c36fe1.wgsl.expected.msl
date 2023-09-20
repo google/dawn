@@ -1,18 +1,13 @@
-SKIP: FAILED
+#include <metal_stdlib>
 
-
-enable chromium_experimental_subgroups;
-
-fn subgroupBroadcast_c36fe1() {
-  var res : u32 = subgroupBroadcast(1u, 1u);
-  prevent_dce = res;
+using namespace metal;
+void subgroupBroadcast_c36fe1(device uint* const tint_symbol) {
+  uint res = simd_broadcast(1u,ushort(1u));
+  *(tint_symbol) = res;
 }
 
-@group(2) @binding(0) var<storage, read_write> prevent_dce : u32;
-
-@compute @workgroup_size(1)
-fn compute_main() {
-  subgroupBroadcast_c36fe1();
+kernel void compute_main(device uint* tint_symbol_1 [[buffer(0)]]) {
+  subgroupBroadcast_c36fe1(tint_symbol_1);
+  return;
 }
 
-Failed to generate: error: Unknown import method: subgroupBroadcast
