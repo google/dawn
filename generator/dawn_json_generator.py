@@ -690,6 +690,7 @@ def as_protobufTypeLPM(member):
             "uint16_t": "uint32",
             "uint32_t": "uint32",
             "uint64_t": "uint64",
+            "size_t": "uint64",
         }
 
         assert typ in cpp_to_protobuf_type
