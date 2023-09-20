@@ -571,7 +571,7 @@ class State {
         tint::Switch(
             call,  //
             [&](core::ir::UserCall* c) {
-                auto* expr = b.Call(NameFor(c->Func()), std::move(args));
+                auto* expr = b.Call(NameFor(c->Target()), std::move(args));
                 if (!call->HasResults() || call->Result()->Usages().IsEmpty()) {
                     Append(b.CallStmt(expr));
                     return;

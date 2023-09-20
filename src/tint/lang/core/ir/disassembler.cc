@@ -462,7 +462,7 @@ void Disassembler::EmitInstruction(Instruction* inst) {
             EmitValueWithType(uc);
             out_ << " = ";
             EmitInstructionName(uc);
-            out_ << " %" << IdOf(uc->Func());
+            out_ << " %" << IdOf(uc->Target());
             if (!uc->Args().IsEmpty()) {
                 out_ << ", ";
             }

@@ -102,7 +102,7 @@ struct State {
                 },
                 [&](UserCall* call) {
                     // Check if we are calling a function that contains a discard.
-                    discard = HasDiscard(call->Func());
+                    discard = HasDiscard(call->Target());
                 },
                 [&](ControlInstruction* ctrl) {
                     // Recurse into control instructions and check their blocks.
@@ -165,7 +165,7 @@ struct State {
                 },
                 [&](UserCall* call) {
                     // Recurse into user functions.
-                    ProcessFunction(call->Func());
+                    ProcessFunction(call->Target());
                 },
                 [&](Store* store) {
                     // Conditionalize stores to host-visible address spaces.
