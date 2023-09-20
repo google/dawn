@@ -17,6 +17,7 @@
 
 #include "src/tint/lang/core/intrinsic/table.h"
 #include "src/tint/lang/core/type/array.h"
+#include "src/tint/lang/core/type/manager.h"
 #include "src/tint/lang/core/type/struct.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
 
