@@ -99,6 +99,9 @@ func TestLexTokens(t *testing.T) {
 		{"enum", []tok.Token{{Kind: tok.Enum, Runes: []rune("enum"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 5, 4),
 		}}}},
+		{"import", []tok.Token{{Kind: tok.Import, Runes: []rune("import"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 7, 6),
+		}}}},
 		{":", []tok.Token{{Kind: tok.Colon, Runes: []rune(":"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 2, 1),
 		}}}},

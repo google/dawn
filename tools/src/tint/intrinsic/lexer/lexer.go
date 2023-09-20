@@ -110,6 +110,8 @@ func (l *lexer) lex() error {
 					l.tok(n, tok.Converter)
 				case "match":
 					l.tok(n, tok.Match)
+				case "import":
+					l.tok(n, tok.Import)
 				default:
 					l.tok(n, tok.Identifier)
 				}

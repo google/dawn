@@ -29,6 +29,7 @@ const (
 	Float        Kind = "float"
 	String       Kind = "string"
 	Match        Kind = "match"
+	Import       Kind = "import"
 	Function     Kind = "fn"
 	Operator     Kind = "op"
 	Constructor  Kind = "ctor"
