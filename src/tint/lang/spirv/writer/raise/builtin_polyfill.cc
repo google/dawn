@@ -751,22 +751,22 @@ struct State {
         auto* texture = next_arg();
         auto* texture_ty = texture->Type()->As<core::type::Texture>();
 
-        Vector<core::ir::Value*, 8> intrinsic_args;
-        intrinsic_args.Push(texture);
+        Vector<core::ir::Value*, 8> function_args;
+        function_args.Push(texture);
 
-        // Determine which SPIR-V intrinsic to use, and add the Lod argument if needed.
-        enum spirv::ir::Intrinsic intrinsic;
+        // Determine which SPIR-V function to use, and add the Lod argument if needed.
+        enum spirv::ir::Function function;
         if (texture_ty
                 ->IsAnyOf<core::type::MultisampledTexture, core::type::DepthMultisampledTexture,
                           core::type::StorageTexture>()) {
-            intrinsic = spirv::ir::Intrinsic::kImageQuerySize;
+            function = spirv::ir::Function::kImageQuerySize;
         } else {
-            intrinsic = spirv::ir::Intrinsic::kImageQuerySizeLod;
+            function = spirv::ir::Function::kImageQuerySizeLod;
             if (auto* lod = next_arg()) {
-                intrinsic_args.Push(lod);
+                function_args.Push(lod);
             } else {
                 // Lod wasn't explicit, so assume 0.
-                intrinsic_args.Push(b.Constant(0_u));
+                function_args.Push(b.Constant(0_u));
             }
         }
 
@@ -777,9 +777,9 @@ struct State {
             result_ty = ty.vec(vec->type(), vec->Width() + 1);
         }
 
-        // Call the intrinsic.
+        // Call the function.
         auto* texture_call =
-            b.Call<spirv::ir::IntrinsicCall>(result_ty, intrinsic, std::move(intrinsic_args));
+            b.Call<spirv::ir::BuiltinCall>(result_ty, function, std::move(function_args));
         texture_call->InsertBefore(builtin);
 
         auto* result = texture_call->Result();
@@ -801,23 +801,23 @@ struct State {
         auto* texture = builtin->Args()[0];
         auto* texture_ty = texture->Type()->As<core::type::Texture>();
 
-        Vector<core::ir::Value*, 2> intrinsic_args;
-        intrinsic_args.Push(texture);
+        Vector<core::ir::Value*, 2> function_args;
+        function_args.Push(texture);
 
-        // Determine which SPIR-V intrinsic to use, and add the Lod argument if needed.
-        enum spirv::ir::Intrinsic intrinsic;
+        // Determine which SPIR-V function to use, and add the Lod argument if needed.
+        enum spirv::ir::Function function;
         if (texture_ty
                 ->IsAnyOf<core::type::MultisampledTexture, core::type::DepthMultisampledTexture,
                           core::type::StorageTexture>()) {
-            intrinsic = spirv::ir::Intrinsic::kImageQuerySize;
+            function = spirv::ir::Function::kImageQuerySize;
         } else {
-            intrinsic = spirv::ir::Intrinsic::kImageQuerySizeLod;
-            intrinsic_args.Push(b.Constant(0_u));
+            function = spirv::ir::Function::kImageQuerySizeLod;
+            function_args.Push(b.Constant(0_u));
         }
 
-        // Call the intrinsic.
+        // Call the function.
         auto* texture_call =
-            b.Call<spirv::ir::IntrinsicCall>(ty.vec3<u32>(), intrinsic, std::move(intrinsic_args));
+            b.Call<spirv::ir::BuiltinCall>(ty.vec3<u32>(), function, std::move(function_args));
         texture_call->InsertBefore(builtin);
 
         // Extract the third component to get the number of array layers.

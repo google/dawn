@@ -65,6 +65,10 @@ const char* str(Function i) {
             return "spirv.image_fetch";
         case Function::kImageGather:
             return "spirv.image_gather";
+        case Function::kImageQuerySize:
+            return "spirv.image_query_size";
+        case Function::kImageQuerySizeLod:
+            return "spirv.image_query_size_lod";
         case Function::kImageRead:
             return "spirv.image_read";
         case Function::kMatrixTimesMatrix:

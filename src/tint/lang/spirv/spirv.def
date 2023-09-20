@@ -144,8 +144,6 @@ match readable
 ////////////////////////////////////////////////////////////////////////////////
 
 enum intrinsic {
-  image_query_size
-  image_query_size_lod
   image_sample_implicit_lod
   image_sample_explicit_lod
   image_sample_dref_implicit_lod
@@ -204,6 +202,34 @@ fn image_gather<A: iu32, B: iu32>(sampled_image<texture_depth_2d_array>, vec3<f3
 fn image_gather<A: iu32, B: iu32, C: iu32>(sampled_image<texture_depth_2d_array>, vec3<f32>, A, B, vec2<C>) -> vec4<f32>
 fn image_gather<A: iu32, B: iu32>(sampled_image<texture_depth_cube>, vec3<f32>, A, B) -> vec4<f32>
 fn image_gather<A: iu32, B: iu32>(sampled_image<texture_depth_cube_array>, vec4<f32>, A, B) -> vec4<f32>
+
+fn image_query_size<T: fiu32>(texture_1d<T>) -> u32
+fn image_query_size<T: fiu32>(texture_2d<T>) -> vec2<u32>
+fn image_query_size<T: fiu32>(texture_2d_array<T>) -> vec3<u32>
+fn image_query_size<T: fiu32>(texture_3d<T>) -> vec3<u32>
+fn image_query_size<T: fiu32>(texture_cube<T>) -> vec2<u32>
+fn image_query_size<T: fiu32>(texture_cube_array<T>) -> vec3<u32>
+fn image_query_size<T: fiu32>(texture_multisampled_2d<T>) -> vec2<u32>
+fn image_query_size(texture_depth_2d) -> vec2<u32>
+fn image_query_size(texture_depth_2d_array) -> vec3<u32>
+fn image_query_size(texture_depth_cube) -> vec2<u32>
+fn image_query_size(texture_depth_cube_array) -> vec3<u32>
+fn image_query_size(texture_depth_multisampled_2d) -> vec2<u32>
+fn image_query_size<F: texel_format, A: access>(texture_storage_1d<F, A>) -> u32
+fn image_query_size<F: texel_format, A: access>(texture_storage_2d<F, A>) -> vec2<u32>
+fn image_query_size<F: texel_format, A: access>(texture_storage_2d_array<F, A>) -> vec3<u32>
+fn image_query_size<F: texel_format, A: access>(texture_storage_3d<F, A>) -> vec3<u32>
+
+fn image_query_size_lod<T: fiu32, A: iu32>(texture_1d<T>, A) -> u32
+fn image_query_size_lod<T: fiu32, A: iu32>(texture_2d<T>, A) -> vec2<u32>
+fn image_query_size_lod<T: fiu32, A: iu32>(texture_2d_array<T>, A) -> vec3<u32>
+fn image_query_size_lod<T: fiu32, A: iu32>(texture_3d<T>, A) -> vec3<u32>
+fn image_query_size_lod<T: fiu32, A: iu32>(texture_cube<T>, A) -> vec2<u32>
+fn image_query_size_lod<T: fiu32, A: iu32>(texture_cube_array<T>, A) -> vec3<u32>
+fn image_query_size_lod<A: iu32>(texture_depth_2d, A) -> vec2<u32>
+fn image_query_size_lod<A: iu32>(texture_depth_2d_array, A) -> vec3<u32>
+fn image_query_size_lod<A: iu32>(texture_depth_cube, A) -> vec2<u32>
+fn image_query_size_lod<A: iu32>(texture_depth_cube_array, A) -> vec3<u32>
 
 fn image_read<F: f32_texel_format, A: readable, C: iu32, S: iu32>(texture_storage_1d<F, A>, C, S) -> vec4<f32>
 fn image_read<F: i32_texel_format, A: readable, C: iu32, S: iu32>(texture_storage_1d<F, A>, C, S) -> vec4<i32>

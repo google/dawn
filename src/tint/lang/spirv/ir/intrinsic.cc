@@ -29,12 +29,6 @@ namespace tint::spirv::ir {
 /// @param str the string to parse
 /// @returns the parsed enum, or Intrinsic::kUndefined if the string could not be parsed.
 Intrinsic ParseIntrinsic(std::string_view str) {
-    if (str == "image_query_size") {
-        return Intrinsic::kImageQuerySize;
-    }
-    if (str == "image_query_size_lod") {
-        return Intrinsic::kImageQuerySizeLod;
-    }
     if (str == "image_sample_dref_explicit_lod") {
         return Intrinsic::kImageSampleDrefExplicitLod;
     }
@@ -57,10 +51,6 @@ std::string_view ToString(Intrinsic value) {
     switch (value) {
         case Intrinsic::kUndefined:
             return "undefined";
-        case Intrinsic::kImageQuerySize:
-            return "image_query_size";
-        case Intrinsic::kImageQuerySizeLod:
-            return "image_query_size_lod";
         case Intrinsic::kImageSampleDrefExplicitLod:
             return "image_sample_dref_explicit_lod";
         case Intrinsic::kImageSampleDrefImplicitLod:

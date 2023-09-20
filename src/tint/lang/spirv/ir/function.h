@@ -52,6 +52,8 @@ enum class Function : uint8_t {
     kImageDrefGather,
     kImageFetch,
     kImageGather,
+    kImageQuerySize,
+    kImageQuerySizeLod,
     kImageRead,
     kMatrixTimesMatrix,
     kMatrixTimesScalar,
