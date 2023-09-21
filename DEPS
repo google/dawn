@@ -342,7 +342,18 @@ hooks = [
                 '--no_auth',
                 '--bucket', 'chromium-browser-clang/rc',
                 '-s', 'build/toolchain/win/rc/linux64/rc.sha1',
-    ]
+    ],
+  },
+  {
+    'name': 'rc_mac',
+    'pattern': '.',
+    'condition': 'dawn_standalone and checkout_win and host_os == "mac"',
+    'action': [ 'download_from_google_storage',
+                '--no_resume',
+                '--no_auth',
+                '--bucket', 'chromium-browser-clang/rc',
+                '-s', 'build/toolchain/win/rc/mac/rc.sha1',
+    ],
   },
   # Pull clang-format binaries using checked-in hashes.
   {
