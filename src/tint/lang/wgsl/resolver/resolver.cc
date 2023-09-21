@@ -20,7 +20,7 @@
 #include <limits>
 #include <utility>
 
-#include "src/tint/lang/core/builtin.h"
+#include "src/tint/lang/core/builtin_type.h"
 #include "src/tint/lang/core/constant/scalar.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/intrinsic/data/data.h"
@@ -2332,36 +2332,36 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             return BuiltinCall(expr, f, args);
         }
 
-        if (auto b = resolved->BuiltinType(); b != core::Builtin::kUndefined) {
+        if (auto b = resolved->BuiltinType(); b != core::BuiltinType::kUndefined) {
             if (!ident->Is<ast::TemplatedIdentifier>()) {
                 // No template arguments provided.
                 // Check to see if this is an inferred-element-type call.
                 switch (b) {
-                    case core::Builtin::kArray:
+                    case core::BuiltinType::kArray:
                         return inferred_array();
-                    case core::Builtin::kVec2:
+                    case core::BuiltinType::kVec2:
                         return ctor_or_conv(CtorConvIntrinsic::kVec2, nullptr);
-                    case core::Builtin::kVec3:
+                    case core::BuiltinType::kVec3:
                         return ctor_or_conv(CtorConvIntrinsic::kVec3, nullptr);
-                    case core::Builtin::kVec4:
+                    case core::BuiltinType::kVec4:
                         return ctor_or_conv(CtorConvIntrinsic::kVec4, nullptr);
-                    case core::Builtin::kMat2X2:
+                    case core::BuiltinType::kMat2X2:
                         return ctor_or_conv(CtorConvIntrinsic::kMat2x2, nullptr);
-                    case core::Builtin::kMat2X3:
+                    case core::BuiltinType::kMat2X3:
                         return ctor_or_conv(CtorConvIntrinsic::kMat2x3, nullptr);
-                    case core::Builtin::kMat2X4:
+                    case core::BuiltinType::kMat2X4:
                         return ctor_or_conv(CtorConvIntrinsic::kMat2x4, nullptr);
-                    case core::Builtin::kMat3X2:
+                    case core::BuiltinType::kMat3X2:
                         return ctor_or_conv(CtorConvIntrinsic::kMat3x2, nullptr);
-                    case core::Builtin::kMat3X3:
+                    case core::BuiltinType::kMat3X3:
                         return ctor_or_conv(CtorConvIntrinsic::kMat3x3, nullptr);
-                    case core::Builtin::kMat3X4:
+                    case core::BuiltinType::kMat3X4:
                         return ctor_or_conv(CtorConvIntrinsic::kMat3x4, nullptr);
-                    case core::Builtin::kMat4X2:
+                    case core::BuiltinType::kMat4X2:
                         return ctor_or_conv(CtorConvIntrinsic::kMat4x2, nullptr);
-                    case core::Builtin::kMat4X3:
+                    case core::BuiltinType::kMat4X3:
                         return ctor_or_conv(CtorConvIntrinsic::kMat4x3, nullptr);
-                    case core::Builtin::kMat4X4:
+                    case core::BuiltinType::kMat4X4:
                         return ctor_or_conv(CtorConvIntrinsic::kMat4x4, nullptr);
                     default:
                         break;
@@ -2517,7 +2517,8 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     return call;
 }
 
-core::type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Identifier* ident) {
+core::type::Type* Resolver::BuiltinType(core::BuiltinType builtin_ty,
+                                        const ast::Identifier* ident) {
     auto& b = *builder_;
 
     auto check_no_tmpl_args = [&](core::type::Type* ty) -> core::type::Type* {
@@ -2784,226 +2785,226 @@ core::type::Type* Resolver::BuiltinType(core::Builtin builtin_ty, const ast::Ide
     };
 
     switch (builtin_ty) {
-        case core::Builtin::kBool:
+        case core::BuiltinType::kBool:
             return check_no_tmpl_args(b.create<core::type::Bool>());
-        case core::Builtin::kI32:
+        case core::BuiltinType::kI32:
             return check_no_tmpl_args(i32());
-        case core::Builtin::kU32:
+        case core::BuiltinType::kU32:
             return check_no_tmpl_args(u32());
-        case core::Builtin::kF16:
+        case core::BuiltinType::kF16:
             return check_no_tmpl_args(f16());
-        case core::Builtin::kF32:
+        case core::BuiltinType::kF32:
             return check_no_tmpl_args(b.create<core::type::F32>());
-        case core::Builtin::kVec2:
+        case core::BuiltinType::kVec2:
             return vec_t(2);
-        case core::Builtin::kVec3:
+        case core::BuiltinType::kVec3:
             return vec_t(3);
-        case core::Builtin::kVec4:
+        case core::BuiltinType::kVec4:
             return vec_t(4);
-        case core::Builtin::kMat2X2:
+        case core::BuiltinType::kMat2X2:
             return mat_t(2, 2);
-        case core::Builtin::kMat2X3:
+        case core::BuiltinType::kMat2X3:
             return mat_t(2, 3);
-        case core::Builtin::kMat2X4:
+        case core::BuiltinType::kMat2X4:
             return mat_t(2, 4);
-        case core::Builtin::kMat3X2:
+        case core::BuiltinType::kMat3X2:
             return mat_t(3, 2);
-        case core::Builtin::kMat3X3:
+        case core::BuiltinType::kMat3X3:
             return mat_t(3, 3);
-        case core::Builtin::kMat3X4:
+        case core::BuiltinType::kMat3X4:
             return mat_t(3, 4);
-        case core::Builtin::kMat4X2:
+        case core::BuiltinType::kMat4X2:
             return mat_t(4, 2);
-        case core::Builtin::kMat4X3:
+        case core::BuiltinType::kMat4X3:
             return mat_t(4, 3);
-        case core::Builtin::kMat4X4:
+        case core::BuiltinType::kMat4X4:
             return mat_t(4, 4);
-        case core::Builtin::kMat2X2F:
+        case core::BuiltinType::kMat2X2F:
             return check_no_tmpl_args(mat(f32(), 2u, 2u));
-        case core::Builtin::kMat2X3F:
+        case core::BuiltinType::kMat2X3F:
             return check_no_tmpl_args(mat(f32(), 2u, 3u));
-        case core::Builtin::kMat2X4F:
+        case core::BuiltinType::kMat2X4F:
             return check_no_tmpl_args(mat(f32(), 2u, 4u));
-        case core::Builtin::kMat3X2F:
+        case core::BuiltinType::kMat3X2F:
             return check_no_tmpl_args(mat(f32(), 3u, 2u));
-        case core::Builtin::kMat3X3F:
+        case core::BuiltinType::kMat3X3F:
             return check_no_tmpl_args(mat(f32(), 3u, 3u));
-        case core::Builtin::kMat3X4F:
+        case core::BuiltinType::kMat3X4F:
             return check_no_tmpl_args(mat(f32(), 3u, 4u));
-        case core::Builtin::kMat4X2F:
+        case core::BuiltinType::kMat4X2F:
             return check_no_tmpl_args(mat(f32(), 4u, 2u));
-        case core::Builtin::kMat4X3F:
+        case core::BuiltinType::kMat4X3F:
             return check_no_tmpl_args(mat(f32(), 4u, 3u));
-        case core::Builtin::kMat4X4F:
+        case core::BuiltinType::kMat4X4F:
             return check_no_tmpl_args(mat(f32(), 4u, 4u));
-        case core::Builtin::kMat2X2H:
+        case core::BuiltinType::kMat2X2H:
             return check_no_tmpl_args(mat(f16(), 2u, 2u));
-        case core::Builtin::kMat2X3H:
+        case core::BuiltinType::kMat2X3H:
             return check_no_tmpl_args(mat(f16(), 2u, 3u));
-        case core::Builtin::kMat2X4H:
+        case core::BuiltinType::kMat2X4H:
             return check_no_tmpl_args(mat(f16(), 2u, 4u));
-        case core::Builtin::kMat3X2H:
+        case core::BuiltinType::kMat3X2H:
             return check_no_tmpl_args(mat(f16(), 3u, 2u));
-        case core::Builtin::kMat3X3H:
+        case core::BuiltinType::kMat3X3H:
             return check_no_tmpl_args(mat(f16(), 3u, 3u));
-        case core::Builtin::kMat3X4H:
+        case core::BuiltinType::kMat3X4H:
             return check_no_tmpl_args(mat(f16(), 3u, 4u));
-        case core::Builtin::kMat4X2H:
+        case core::BuiltinType::kMat4X2H:
             return check_no_tmpl_args(mat(f16(), 4u, 2u));
-        case core::Builtin::kMat4X3H:
+        case core::BuiltinType::kMat4X3H:
             return check_no_tmpl_args(mat(f16(), 4u, 3u));
-        case core::Builtin::kMat4X4H:
+        case core::BuiltinType::kMat4X4H:
             return check_no_tmpl_args(mat(f16(), 4u, 4u));
-        case core::Builtin::kVec2F:
+        case core::BuiltinType::kVec2F:
             return check_no_tmpl_args(vec(f32(), 2u));
-        case core::Builtin::kVec3F:
+        case core::BuiltinType::kVec3F:
             return check_no_tmpl_args(vec(f32(), 3u));
-        case core::Builtin::kVec4F:
+        case core::BuiltinType::kVec4F:
             return check_no_tmpl_args(vec(f32(), 4u));
-        case core::Builtin::kVec2H:
+        case core::BuiltinType::kVec2H:
             return check_no_tmpl_args(vec(f16(), 2u));
-        case core::Builtin::kVec3H:
+        case core::BuiltinType::kVec3H:
             return check_no_tmpl_args(vec(f16(), 3u));
-        case core::Builtin::kVec4H:
+        case core::BuiltinType::kVec4H:
             return check_no_tmpl_args(vec(f16(), 4u));
-        case core::Builtin::kVec2I:
+        case core::BuiltinType::kVec2I:
             return check_no_tmpl_args(vec(i32(), 2u));
-        case core::Builtin::kVec3I:
+        case core::BuiltinType::kVec3I:
             return check_no_tmpl_args(vec(i32(), 3u));
-        case core::Builtin::kVec4I:
+        case core::BuiltinType::kVec4I:
             return check_no_tmpl_args(vec(i32(), 4u));
-        case core::Builtin::kVec2U:
+        case core::BuiltinType::kVec2U:
             return check_no_tmpl_args(vec(u32(), 2u));
-        case core::Builtin::kVec3U:
+        case core::BuiltinType::kVec3U:
             return check_no_tmpl_args(vec(u32(), 3u));
-        case core::Builtin::kVec4U:
+        case core::BuiltinType::kVec4U:
             return check_no_tmpl_args(vec(u32(), 4u));
-        case core::Builtin::kArray:
+        case core::BuiltinType::kArray:
             return array();
-        case core::Builtin::kAtomic:
+        case core::BuiltinType::kAtomic:
             return atomic();
-        case core::Builtin::kPtr:
+        case core::BuiltinType::kPtr:
             return ptr();
-        case core::Builtin::kSampler:
+        case core::BuiltinType::kSampler:
             return check_no_tmpl_args(
                 builder_->create<core::type::Sampler>(core::type::SamplerKind::kSampler));
-        case core::Builtin::kSamplerComparison:
+        case core::BuiltinType::kSamplerComparison:
             return check_no_tmpl_args(
                 builder_->create<core::type::Sampler>(core::type::SamplerKind::kComparisonSampler));
-        case core::Builtin::kTexture1D:
+        case core::BuiltinType::kTexture1D:
             return sampled_texture(core::type::TextureDimension::k1d);
-        case core::Builtin::kTexture2D:
+        case core::BuiltinType::kTexture2D:
             return sampled_texture(core::type::TextureDimension::k2d);
-        case core::Builtin::kTexture2DArray:
+        case core::BuiltinType::kTexture2DArray:
             return sampled_texture(core::type::TextureDimension::k2dArray);
-        case core::Builtin::kTexture3D:
+        case core::BuiltinType::kTexture3D:
             return sampled_texture(core::type::TextureDimension::k3d);
-        case core::Builtin::kTextureCube:
+        case core::BuiltinType::kTextureCube:
             return sampled_texture(core::type::TextureDimension::kCube);
-        case core::Builtin::kTextureCubeArray:
+        case core::BuiltinType::kTextureCubeArray:
             return sampled_texture(core::type::TextureDimension::kCubeArray);
-        case core::Builtin::kTextureDepth2D:
+        case core::BuiltinType::kTextureDepth2D:
             return check_no_tmpl_args(
                 builder_->create<core::type::DepthTexture>(core::type::TextureDimension::k2d));
-        case core::Builtin::kTextureDepth2DArray:
+        case core::BuiltinType::kTextureDepth2DArray:
             return check_no_tmpl_args(
                 builder_->create<core::type::DepthTexture>(core::type::TextureDimension::k2dArray));
-        case core::Builtin::kTextureDepthCube:
+        case core::BuiltinType::kTextureDepthCube:
             return check_no_tmpl_args(
                 builder_->create<core::type::DepthTexture>(core::type::TextureDimension::kCube));
-        case core::Builtin::kTextureDepthCubeArray:
+        case core::BuiltinType::kTextureDepthCubeArray:
             return check_no_tmpl_args(builder_->create<core::type::DepthTexture>(
                 core::type::TextureDimension::kCubeArray));
-        case core::Builtin::kTextureDepthMultisampled2D:
+        case core::BuiltinType::kTextureDepthMultisampled2D:
             return check_no_tmpl_args(builder_->create<core::type::DepthMultisampledTexture>(
                 core::type::TextureDimension::k2d));
-        case core::Builtin::kTextureExternal:
+        case core::BuiltinType::kTextureExternal:
             return check_no_tmpl_args(builder_->create<core::type::ExternalTexture>());
-        case core::Builtin::kTextureMultisampled2D:
+        case core::BuiltinType::kTextureMultisampled2D:
             return multisampled_texture(core::type::TextureDimension::k2d);
-        case core::Builtin::kTextureStorage1D:
+        case core::BuiltinType::kTextureStorage1D:
             return storage_texture(core::type::TextureDimension::k1d);
-        case core::Builtin::kTextureStorage2D:
+        case core::BuiltinType::kTextureStorage2D:
             return storage_texture(core::type::TextureDimension::k2d);
-        case core::Builtin::kTextureStorage2DArray:
+        case core::BuiltinType::kTextureStorage2DArray:
             return storage_texture(core::type::TextureDimension::k2dArray);
-        case core::Builtin::kTextureStorage3D:
+        case core::BuiltinType::kTextureStorage3D:
             return storage_texture(core::type::TextureDimension::k3d);
-        case core::Builtin::kPackedVec3:
+        case core::BuiltinType::kPackedVec3:
             return packed_vec3_t();
-        case core::Builtin::kAtomicCompareExchangeResultI32:
+        case core::BuiltinType::kAtomicCompareExchangeResultI32:
             return core::type::CreateAtomicCompareExchangeResult(builder_->Types(),
                                                                  builder_->Symbols(), i32());
-        case core::Builtin::kAtomicCompareExchangeResultU32:
+        case core::BuiltinType::kAtomicCompareExchangeResultU32:
             return core::type::CreateAtomicCompareExchangeResult(builder_->Types(),
                                                                  builder_->Symbols(), u32());
-        case core::Builtin::kFrexpResultAbstract:
+        case core::BuiltinType::kFrexpResultAbstract:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), af());
-        case core::Builtin::kFrexpResultF16:
+        case core::BuiltinType::kFrexpResultF16:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), f16());
-        case core::Builtin::kFrexpResultF32:
+        case core::BuiltinType::kFrexpResultF32:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(), f32());
-        case core::Builtin::kFrexpResultVec2Abstract:
+        case core::BuiltinType::kFrexpResultVec2Abstract:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
                                                  vec(af(), 2));
-        case core::Builtin::kFrexpResultVec2F16:
+        case core::BuiltinType::kFrexpResultVec2F16:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
                                                  vec(f16(), 2));
-        case core::Builtin::kFrexpResultVec2F32:
+        case core::BuiltinType::kFrexpResultVec2F32:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
                                                  vec(f32(), 2));
-        case core::Builtin::kFrexpResultVec3Abstract:
+        case core::BuiltinType::kFrexpResultVec3Abstract:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
                                                  vec(af(), 3));
-        case core::Builtin::kFrexpResultVec3F16:
+        case core::BuiltinType::kFrexpResultVec3F16:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
                                                  vec(f16(), 3));
-        case core::Builtin::kFrexpResultVec3F32:
+        case core::BuiltinType::kFrexpResultVec3F32:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
                                                  vec(f32(), 3));
-        case core::Builtin::kFrexpResultVec4Abstract:
+        case core::BuiltinType::kFrexpResultVec4Abstract:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
                                                  vec(af(), 4));
-        case core::Builtin::kFrexpResultVec4F16:
+        case core::BuiltinType::kFrexpResultVec4F16:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
                                                  vec(f16(), 4));
-        case core::Builtin::kFrexpResultVec4F32:
+        case core::BuiltinType::kFrexpResultVec4F32:
             return core::type::CreateFrexpResult(builder_->Types(), builder_->Symbols(),
                                                  vec(f32(), 4));
-        case core::Builtin::kModfResultAbstract:
+        case core::BuiltinType::kModfResultAbstract:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(), af());
-        case core::Builtin::kModfResultF16:
+        case core::BuiltinType::kModfResultF16:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(), f16());
-        case core::Builtin::kModfResultF32:
+        case core::BuiltinType::kModfResultF32:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(), f32());
-        case core::Builtin::kModfResultVec2Abstract:
+        case core::BuiltinType::kModfResultVec2Abstract:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
                                                 vec(af(), 2));
-        case core::Builtin::kModfResultVec2F16:
+        case core::BuiltinType::kModfResultVec2F16:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
                                                 vec(f16(), 2));
-        case core::Builtin::kModfResultVec2F32:
+        case core::BuiltinType::kModfResultVec2F32:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
                                                 vec(f32(), 2));
-        case core::Builtin::kModfResultVec3Abstract:
+        case core::BuiltinType::kModfResultVec3Abstract:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
                                                 vec(af(), 3));
-        case core::Builtin::kModfResultVec3F16:
+        case core::BuiltinType::kModfResultVec3F16:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
                                                 vec(f16(), 3));
-        case core::Builtin::kModfResultVec3F32:
+        case core::BuiltinType::kModfResultVec3F32:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
                                                 vec(f32(), 3));
-        case core::Builtin::kModfResultVec4Abstract:
+        case core::BuiltinType::kModfResultVec4Abstract:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
                                                 vec(af(), 4));
-        case core::Builtin::kModfResultVec4F16:
+        case core::BuiltinType::kModfResultVec4F16:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
                                                 vec(f16(), 4));
-        case core::Builtin::kModfResultVec4F32:
+        case core::BuiltinType::kModfResultVec4F32:
             return core::type::CreateModfResult(builder_->Types(), builder_->Symbols(),
                                                 vec(f32(), 4));
-        case core::Builtin::kUndefined:
+        case core::BuiltinType::kUndefined:
             break;
     }
 
@@ -3324,7 +3325,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
             });
     }
 
-    if (auto builtin_ty = resolved->BuiltinType(); builtin_ty != core::Builtin::kUndefined) {
+    if (auto builtin_ty = resolved->BuiltinType(); builtin_ty != core::BuiltinType::kUndefined) {
         auto* ty = BuiltinType(builtin_ty, ident);
         if (!ty) {
             return nullptr;

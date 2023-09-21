@@ -19,7 +19,7 @@
 #include <variant>
 #include <vector>
 
-#include "src/tint/lang/core/builtin.h"
+#include "src/tint/lang/core/builtin_type.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/wgsl/ast/alias.h"
 #include "src/tint/lang/wgsl/ast/assignment_statement.h"
@@ -475,7 +475,7 @@ class DependencyScanner {
         BuiltinType type = BuiltinType::kNone;
         std::variant<std::monostate,
                      core::BuiltinFn,
-                     core::Builtin,
+                     core::BuiltinType,
                      core::BuiltinValue,
                      core::AddressSpace,
                      core::TexelFormat,
@@ -494,8 +494,8 @@ class DependencyScanner {
                 builtin_fn != core::BuiltinFn::kNone) {
                 return BuiltinInfo{BuiltinType::kFunction, builtin_fn};
             }
-            if (auto builtin_ty = core::ParseBuiltin(symbol.NameView());
-                builtin_ty != core::Builtin::kUndefined) {
+            if (auto builtin_ty = core::ParseBuiltinType(symbol.NameView());
+                builtin_ty != core::BuiltinType::kUndefined) {
                 return BuiltinInfo{BuiltinType::kBuiltin, builtin_ty};
             }
             if (auto builtin_val = core::ParseBuiltinValue(symbol.NameView());
@@ -541,7 +541,7 @@ class DependencyScanner {
                     break;
                 case BuiltinType::kBuiltin:
                     graph_.resolved_identifiers.Add(
-                        from, ResolvedIdentifier(builtin_info.Value<core::Builtin>()));
+                        from, ResolvedIdentifier(builtin_info.Value<core::BuiltinType>()));
                     break;
                 case BuiltinType::kBuiltinValue:
                     graph_.resolved_identifiers.Add(
@@ -924,7 +924,7 @@ std::string ResolvedIdentifier::String() const {
     if (auto builtin_fn = BuiltinFn(); builtin_fn != core::BuiltinFn::kNone) {
         return "builtin function '" + tint::ToString(builtin_fn) + "'";
     }
-    if (auto builtin_ty = BuiltinType(); builtin_ty != core::Builtin::kUndefined) {
+    if (auto builtin_ty = BuiltinType(); builtin_ty != core::BuiltinType::kUndefined) {
         return "builtin type '" + tint::ToString(builtin_ty) + "'";
     }
     if (auto builtin_val = BuiltinValue(); builtin_val != core::BuiltinValue::kUndefined) {

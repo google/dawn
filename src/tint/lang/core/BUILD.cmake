@@ -39,10 +39,10 @@ tint_add_target(tint_lang_core lib
   lang/core/attribute.h
   lang/core/binary_op.cc
   lang/core/binary_op.h
-  lang/core/builtin.cc
-  lang/core/builtin.h
   lang/core/builtin_fn.cc
   lang/core/builtin_fn.h
+  lang/core/builtin_type.cc
+  lang/core/builtin_type.h
   lang/core/builtin_value.cc
   lang/core/builtin_value.h
   lang/core/evaluation_stage.h
@@ -79,7 +79,7 @@ tint_add_target(tint_lang_core_test test
   lang/core/access_test.cc
   lang/core/address_space_test.cc
   lang/core/attribute_test.cc
-  lang/core/builtin_test.cc
+  lang/core/builtin_type_test.cc
   lang/core/builtin_value_test.cc
   lang/core/interpolation_sampling_test.cc
   lang/core/interpolation_type_test.cc
@@ -123,7 +123,7 @@ tint_add_target(tint_lang_core_bench bench
   lang/core/access_bench.cc
   lang/core/address_space_bench.cc
   lang/core/attribute_bench.cc
-  lang/core/builtin_bench.cc
+  lang/core/builtin_type_bench.cc
   lang/core/builtin_value_bench.cc
   lang/core/interpolation_sampling_bench.cc
   lang/core/interpolation_type_bench.cc

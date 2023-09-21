@@ -19,8 +19,8 @@
 #include <vector>
 
 #include "src/tint/lang/core/access.h"
-#include "src/tint/lang/core/builtin.h"
 #include "src/tint/lang/core/builtin_fn.h"
+#include "src/tint/lang/core/builtin_type.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/interpolation_sampling.h"
 #include "src/tint/lang/core/interpolation_type.h"
@@ -46,7 +46,7 @@ struct UnresolvedIdentifier {
 /// - core::BuiltinFn
 /// - core::Access
 /// - core::AddressSpace
-/// - core::Builtin
+/// - core::BuiltinType
 /// - core::BuiltinValue
 /// - core::InterpolationSampling
 /// - core::InterpolationType
@@ -101,13 +101,13 @@ class ResolvedIdentifier {
         return core::AddressSpace::kUndefined;
     }
 
-    /// @return the builtin type if the ResolvedIdentifier holds core::Builtin, otherwise
-    /// core::Builtin::kUndefined
-    core::Builtin BuiltinType() const {
-        if (auto n = std::get_if<core::Builtin>(&value_)) {
+    /// @return the builtin type if the ResolvedIdentifier holds core::BuiltinType, otherwise
+    /// core::BuiltinType::kUndefined
+    core::BuiltinType BuiltinType() const {
+        if (auto n = std::get_if<core::BuiltinType>(&value_)) {
             return *n;
         }
-        return core::Builtin::kUndefined;
+        return core::BuiltinType::kUndefined;
     }
 
     /// @return the builtin value if the ResolvedIdentifier holds core::BuiltinValue, otherwise
@@ -172,7 +172,7 @@ class ResolvedIdentifier {
                  core::BuiltinFn,
                  core::Access,
                  core::AddressSpace,
-                 core::Builtin,
+                 core::BuiltinType,
                  core::BuiltinValue,
                  core::InterpolationSampling,
                  core::InterpolationType,

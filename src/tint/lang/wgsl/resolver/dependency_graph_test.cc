@@ -1230,23 +1230,23 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinType, Resolve) {
 
     auto resolved = Build().resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
-    EXPECT_EQ(resolved->BuiltinType(), core::ParseBuiltin(name)) << resolved->String();
+    EXPECT_EQ(resolved->BuiltinType(), core::ParseBuiltinType(name)) << resolved->String();
 }
 
 INSTANTIATE_TEST_SUITE_P(Types,
                          ResolverDependencyGraphResolveToBuiltinType,
                          testing::Combine(testing::ValuesIn(kTypeUseKinds),
-                                          testing::ValuesIn(core::kBuiltinStrings)));
+                                          testing::ValuesIn(core::kBuiltinTypeStrings)));
 
 INSTANTIATE_TEST_SUITE_P(Values,
                          ResolverDependencyGraphResolveToBuiltinType,
                          testing::Combine(testing::ValuesIn(kValueUseKinds),
-                                          testing::ValuesIn(core::kBuiltinStrings)));
+                                          testing::ValuesIn(core::kBuiltinTypeStrings)));
 
 INSTANTIATE_TEST_SUITE_P(Functions,
                          ResolverDependencyGraphResolveToBuiltinType,
                          testing::Combine(testing::ValuesIn(kFuncUseKinds),
-                                          testing::ValuesIn(core::kBuiltinStrings)));
+                                          testing::ValuesIn(core::kBuiltinTypeStrings)));
 
 }  // namespace resolve_to_builtin_type
 
@@ -1595,12 +1595,12 @@ INSTANTIATE_TEST_SUITE_P(AddressSpace,
 INSTANTIATE_TEST_SUITE_P(BuiltinType,
                          ResolverDependencyGraphShadowKindTest,
                          testing::Combine(testing::ValuesIn(kAllUseKinds),
-                                          testing::ValuesIn(core::kBuiltinStrings)));
+                                          testing::ValuesIn(core::kBuiltinTypeStrings)));
 
 INSTANTIATE_TEST_SUITE_P(BuiltinFn,
                          ResolverDependencyGraphShadowKindTest,
                          testing::Combine(testing::ValuesIn(kAllUseKinds),
-                                          testing::ValuesIn(core::kBuiltinStrings)));
+                                          testing::ValuesIn(core::kBuiltinTypeStrings)));
 
 INSTANTIATE_TEST_SUITE_P(InterpolationSampling,
                          ResolverDependencyGraphShadowKindTest,

@@ -19,7 +19,7 @@
 #include <vector>
 
 #include "gmock/gmock.h"
-#include "src/tint/lang/core/builtin.h"
+#include "src/tint/lang/core/builtin_type.h"
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/wgsl/ast/transform/helper_test.h"
 #include "src/tint/utils/text/string.h"
@@ -1712,7 +1712,7 @@ std::string ExpandBuiltinType(std::string_view name) {
 
 std::vector<const char*> ConstructableTypes() {
     std::vector<const char*> out;
-    for (auto* ty : core::kBuiltinStrings) {
+    for (auto* ty : core::kBuiltinTypeStrings) {
         std::string_view type(ty);
         if (type != "ptr" && type != "atomic" && !tint::HasPrefix(type, "sampler") &&
             !tint::HasPrefix(type, "texture") && !tint::HasPrefix(type, "__")) {
@@ -1924,7 +1924,7 @@ INSTANTIATE_TEST_SUITE_P(RenamerBuiltinTypeTest,
 /// @return WGSL builtin identifier keywords
 std::vector<const char*> Identifiers() {
     std::vector<const char*> out;
-    for (auto* ident : core::kBuiltinStrings) {
+    for (auto* ident : core::kBuiltinTypeStrings) {
         if (!tint::HasPrefix(ident, "__")) {
             out.push_back(ident);
         }

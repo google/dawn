@@ -1,6 +1,6 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/src/cmd/gen to generate builtin.cc
+Template file for use with tools/src/cmd/gen to generate builtin_type.h
 
 To update the generated file, run:
     ./tools/run gen
@@ -14,14 +14,20 @@ See:
 {{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 {{- Import "src/tint/utils/templates/enums.tmpl.inc" -}}
 {{- $enum := ($I.Sem.Enum "builtin_type") -}}
-{{- Eval "OverrideEnumName" "Enum" $enum "Name" "Builtin" -}}
+{{- Eval "OverrideEnumName" "Enum" $enum "Name" "BuiltinType" -}}
 
-#include "src/tint/lang/core/builtin.h"
+#ifndef SRC_TINT_LANG_CORE_BUILTIN_TYPE_H_
+#define SRC_TINT_LANG_CORE_BUILTIN_TYPE_H_
+
+#include <cstdint>
+
+#include "src/tint/utils/traits/traits.h"
 
 namespace tint::core {
 
-{{ Eval "ParseEnum" $enum}}
-
-{{ Eval "EnumOStream" $enum}}
+/// An enumerator of builtin types.
+{{ Eval "DeclareEnum" $enum}}
 
 }  // namespace tint::core
+
+#endif  // SRC_TINT_LANG_CORE_BUILTIN_TYPE_H_

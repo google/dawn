@@ -18,7 +18,7 @@
 #include <tuple>
 #include <utility>
 
-#include "src/tint/lang/core/builtin.h"
+#include "src/tint/lang/core/builtin_type.h"
 #include "src/tint/lang/core/constant/splat.h"
 #include "src/tint/lang/core/fluent_types.h"
 #include "src/tint/lang/core/ir/access.h"
@@ -878,7 +878,7 @@ class State {
                 auto el = Type(v->type());
                 if (v->Packed()) {
                     TINT_ASSERT(v->Width() == 3u);
-                    return b.ty(core::Builtin::kPackedVec3, el);
+                    return b.ty(core::BuiltinType::kPackedVec3, el);
                 } else {
                     return b.ty.vec(el, v->Width());
                 }

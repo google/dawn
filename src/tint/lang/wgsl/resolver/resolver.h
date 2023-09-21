@@ -559,7 +559,7 @@ class Resolver {
     /// @returns the core::type::Type for the builtin type @p builtin_ty with the identifier @p
     /// ident
     /// @note: Will raise an ICE if @p symbol is not a builtin type.
-    core::type::Type* BuiltinType(core::Builtin builtin_ty, const ast::Identifier* ident);
+    core::type::Type* BuiltinType(core::BuiltinType builtin_ty, const ast::Identifier* ident);
 
     /// @returns the nesting depth of @ty as defined in
     /// https://gpuweb.github.io/gpuweb/wgsl/#composite-types
