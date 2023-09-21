@@ -1177,10 +1177,10 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 ////////////////////////////////////////////////////////////////////////////////
 namespace resolve_to_builtin_func {
 
-using ResolverDependencyGraphResolveToBuiltinFunc =
-    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, core::Function>>;
+using ResolverDependencyGraphResolveToBuiltinFn =
+    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, core::BuiltinFn>>;
 
-TEST_P(ResolverDependencyGraphResolveToBuiltinFunc, Resolve) {
+TEST_P(ResolverDependencyGraphResolveToBuiltinFn, Resolve) {
     const auto use = std::get<0>(GetParam());
     const auto builtin = std::get<1>(GetParam());
     const auto symbol = Symbols().New(tint::ToString(builtin));
@@ -1191,23 +1191,23 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinFunc, Resolve) {
 
     auto resolved = Build().resolved_identifiers.Get(ident);
     ASSERT_TRUE(resolved);
-    EXPECT_EQ(resolved->BuiltinFunction(), builtin) << resolved->String();
+    EXPECT_EQ(resolved->BuiltinFn(), builtin) << resolved->String();
 }
 
 INSTANTIATE_TEST_SUITE_P(Types,
-                         ResolverDependencyGraphResolveToBuiltinFunc,
+                         ResolverDependencyGraphResolveToBuiltinFn,
                          testing::Combine(testing::ValuesIn(kTypeUseKinds),
-                                          testing::ValuesIn(core::kFunctions)));
+                                          testing::ValuesIn(core::kBuiltinFns)));
 
 INSTANTIATE_TEST_SUITE_P(Values,
-                         ResolverDependencyGraphResolveToBuiltinFunc,
+                         ResolverDependencyGraphResolveToBuiltinFn,
                          testing::Combine(testing::ValuesIn(kValueUseKinds),
-                                          testing::ValuesIn(core::kFunctions)));
+                                          testing::ValuesIn(core::kBuiltinFns)));
 
 INSTANTIATE_TEST_SUITE_P(Functions,
-                         ResolverDependencyGraphResolveToBuiltinFunc,
+                         ResolverDependencyGraphResolveToBuiltinFn,
                          testing::Combine(testing::ValuesIn(kFuncUseKinds),
-                                          testing::ValuesIn(core::kFunctions)));
+                                          testing::ValuesIn(core::kBuiltinFns)));
 
 }  // namespace resolve_to_builtin_func
 
@@ -1597,7 +1597,7 @@ INSTANTIATE_TEST_SUITE_P(BuiltinType,
                          testing::Combine(testing::ValuesIn(kAllUseKinds),
                                           testing::ValuesIn(core::kBuiltinStrings)));
 
-INSTANTIATE_TEST_SUITE_P(BuiltinFunction,
+INSTANTIATE_TEST_SUITE_P(BuiltinFn,
                          ResolverDependencyGraphShadowKindTest,
                          testing::Combine(testing::ValuesIn(kAllUseKinds),
                                           testing::ValuesIn(core::kBuiltinStrings)));

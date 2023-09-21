@@ -1,6 +1,6 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/src/cmd/gen to generate function.h
+Template file for use with tools/src/cmd/gen to generate builtin_function.h
 
 To update the generated file, run:
     ./tools/run gen
@@ -13,8 +13,8 @@ See:
 
 {{- $I := LoadIntrinsics "src/tint/lang/core/core.def" -}}
 
-#ifndef SRC_TINT_LANG_CORE_FUNCTION_H_
-#define SRC_TINT_LANG_CORE_FUNCTION_H_
+#ifndef SRC_TINT_LANG_CORE_BUILTIN_FN_H_
+#define SRC_TINT_LANG_CORE_BUILTIN_FN_H_
 
 #include <cstdint>
 #include <string>
@@ -25,39 +25,39 @@ See:
 namespace tint::core {
 
 /// Enumerator of all builtin functions
-enum class Function : uint8_t {
+enum class BuiltinFn : uint8_t {
 {{- range $I.Sem.Builtins }}
     k{{PascalCase .Name}},
 {{- end }}
     kNone,
 };
 
-/// Matches the Function by name
+/// Matches the BuiltinFn by name
 /// @param name the builtin name to parse
-/// @returns the parsed Function, or Function::kNone if `name` did not
+/// @returns the parsed BuiltinFn, or BuiltinFn::kNone if `name` did not
 /// match any builtin function.
-Function ParseFunction(std::string_view name);
+BuiltinFn ParseBuiltinFn(std::string_view name);
 
 /// @returns the name of the builtin function type. The spelling, including
 /// case, matches the name in the WGSL spec.
-const char* str(Function i);
+const char* str(BuiltinFn i);
 
 /// Emits the name of the builtin function type. The spelling, including case,
 /// matches the name in the WGSL spec.
 template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
-auto& operator<<(STREAM& o, Function i) {
+auto& operator<<(STREAM& o, BuiltinFn i) {
   return o << str(i);
 }
 
 /// All builtin functions
-constexpr Function kFunctions[] = {
+constexpr BuiltinFn kBuiltinFns[] = {
 {{- range $I.Sem.Builtins }}
-    Function::k{{PascalCase .Name}},
+    BuiltinFn::k{{PascalCase .Name}},
 {{- end }}
 };
 
 /// All builtin function names
-constexpr const char* kFunctionStrings[] = {
+constexpr const char* kBuiltinFnStrings[] = {
 {{- range $I.Sem.Builtins }}
     "{{.Name}}",
 {{- end }}
@@ -66,63 +66,63 @@ constexpr const char* kFunctionStrings[] = {
 /// Determines if the given `f` is a coarse derivative.
 /// @param f the builtin type
 /// @returns true if the given derivative is coarse.
-bool IsCoarseDerivativeBuiltin(Function f);
+bool IsCoarseDerivative(BuiltinFn f);
 
 /// Determines if the given `f` is a fine derivative.
 /// @param f the builtin type
 /// @returns true if the given derivative is fine.
-bool IsFineDerivativeBuiltin(Function f);
+bool IsFineDerivative(BuiltinFn f);
 
 /// Determine if the given `f` is a derivative builtin.
 /// @param f the builtin type
 /// @returns true if the given `f` is a derivative builtin
-bool IsDerivativeBuiltin(Function f);
+bool IsDerivative(BuiltinFn f);
 
 /// Determines if the given `f` is a texture operation builtin.
 /// @param f the builtin type
 /// @returns true if the given `f` is a texture operation builtin
-bool IsTextureBuiltin(Function f);
+bool IsTexture(BuiltinFn f);
 
 /// Determines if the given `f` is an image query builtin.
 /// @param f the builtin type
 /// @returns true if the given `f` is an image query builtin
-bool IsImageQueryBuiltin(Function f);
+bool IsImageQuery(BuiltinFn f);
 
 /// Determines if the given `f` is a data packing builtin.
 /// @param f the builtin type
 /// @returns true if the given `f` is a data packing builtin
-bool IsDataPackingBuiltin(Function f);
+bool IsDataPacking(BuiltinFn f);
 
 /// Determines if the given `f` is a data unpacking builtin.
 /// @param f the builtin type
 /// @returns true if the given `f` is a data unpacking builtin
-bool IsDataUnpackingBuiltin(Function f);
+bool IsDataUnpacking(BuiltinFn f);
 
 /// Determines if the given `f` is a barrier builtin.
 /// @param f the builtin type
 /// @returns true if the given `f` is a barrier builtin
-bool IsBarrierBuiltin(Function f);
+bool IsBarrier(BuiltinFn f);
 
 /// Determines if the given `f` is an atomic builtin.
 /// @param f the builtin type
 /// @returns true if the given `f` is an atomic builtin
-bool IsAtomicBuiltin(Function f);
+bool IsAtomic(BuiltinFn f);
 
 /// Determines if the given `f` is a DP4a builtin.
 /// @param f the builtin type
 /// @returns true if the given `f` is a DP4a builtin
-bool IsDP4aBuiltin(Function f);
+bool IsDP4a(BuiltinFn f);
 
 /// Determines if the given `f` is a subgroup builtin.
 /// @param f the builtin type
 /// @returns true if the given `f` is a subgroup builtin
-bool IsSubgroupBuiltin(Function f);
+bool IsSubgroup(BuiltinFn f);
 
 /// Determines if the given `f` may have side-effects (i.e. writes to at least one of its inputs)
 /// @returns true if intrinsic may have side-effects
-bool HasSideEffects(Function f);
+bool HasSideEffects(BuiltinFn f);
 
 }  // namespace tint::core
 // \endcond
 
-#endif  // SRC_TINT_LANG_CORE_FUNCTION_H_
+#endif  // SRC_TINT_LANG_CORE_BUILTIN_FN_H_

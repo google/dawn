@@ -17,12 +17,12 @@
 #include <functional>
 #include <utility>
 
+#include "src/tint/lang/core/builtin_fn.h"
 #include "src/tint/lang/core/fluent_types.h"
-#include "src/tint/lang/core/function.h"
 #include "src/tint/lang/wgsl/program/clone_context.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
-#include "src/tint/lang/wgsl/sem/builtin.h"
+#include "src/tint/lang/wgsl/sem/builtin_fn.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
 #include "src/tint/lang/wgsl/sem/variable.h"
 #include "src/tint/utils/rtti/switch.h"
@@ -111,7 +111,7 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program* src,
             if (auto* access = sem->UnwrapMaterialize()->As<sem::IndexAccessorExpression>()) {
                 if (access->Object()->UnwrapMaterialize()->Type()->HoldsAbstract() &&
                     access->Index()->Stage() == core::EvaluationStage::kOverride) {
-                    auto* obj = b.Call(core::str(core::Function::kTintMaterialize),
+                    auto* obj = b.Call(core::str(core::BuiltinFn::kTintMaterialize),
                                        ctx.Clone(expr->object));
                     return b.IndexAccessor(obj, ctx.Clone(expr->index));
                 }

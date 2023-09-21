@@ -453,7 +453,7 @@ TEST_F(ConstEvalTest, StructAbstractSplat_to_StructDifferentTypes) {
     //   const c = modf(4.0);
     //   var v = c;
     // }
-    auto* expr_c = Call(core::Function::kModf, 0_a);
+    auto* expr_c = Call(core::BuiltinFn::kModf, 0_a);
     auto* materialized = Expr("c");
     WrapInFunction(Decl(Const("c", expr_c)), Decl(Var("v", materialized)));
 

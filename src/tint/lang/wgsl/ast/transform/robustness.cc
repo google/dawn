@@ -24,7 +24,7 @@
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
-#include "src/tint/lang/wgsl/sem/builtin.h"
+#include "src/tint/lang/wgsl/sem/builtin_fn.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
@@ -139,7 +139,7 @@ struct Robustness::State {
                     if (auto* call = sem.Get<sem::Call>(e)) {
                         Switch(
                             call->Target(),  //
-                            [&](const sem::Builtin* builtin) {
+                            [&](const sem::BuiltinFn* builtin) {
                                 // Calls to builtins may require robustness transformation.
                                 // Inspect.
                                 if (builtin->IsTexture()) {
@@ -246,7 +246,7 @@ struct Robustness::State {
                     // Must clamp, even if the index is constant.
 
                     auto* arr_ptr = b.AddressOf(ctx.Clone(expr->Object()->Declaration()));
-                    return b.Sub(b.Call(core::Function::kArrayLength, arr_ptr), 1_u);
+                    return b.Sub(b.Call(core::BuiltinFn::kArrayLength, arr_ptr), 1_u);
                 }
                 if (auto count = arr->ConstantCount()) {
                     if (expr->Index()->ConstantValue()) {
@@ -352,12 +352,12 @@ struct Robustness::State {
 
         auto* expr_sem = expr->Unwrap()->As<sem::IndexAccessorExpression>();
         auto idx = CastToU32(expr_sem->Index());
-        auto* clamped_idx = b.Call(core::Function::kMin, idx, max);
+        auto* clamped_idx = b.Call(core::BuiltinFn::kMin, idx, max);
         ctx.Replace(expr->Declaration()->index, clamped_idx);
     }
 
     /// Applies predication to the non-texture builtin call, if required.
-    void MaybePredicateNonTextureBuiltin(const sem::Call* call, const sem::Builtin* builtin) {
+    void MaybePredicateNonTextureBuiltin(const sem::Call* call, const sem::BuiltinFn* builtin) {
         // Gather the predications for the builtin arguments
         const Expression* predicate = nullptr;
         for (auto* arg : call->Declaration()->args) {
@@ -367,14 +367,14 @@ struct Robustness::State {
         }
 
         if (predicate) {
-            if (builtin->Type() == core::Function::kWorkgroupUniformLoad) {
+            if (builtin->Fn() == core::BuiltinFn::kWorkgroupUniformLoad) {
                 // https://www.w3.org/TR/WGSL/#workgroupUniformLoad-builtin:
                 //  "Executes a control barrier synchronization function that affects memory and
                 //   atomic operations in the workgroup address space."
                 // Because the call acts like a control barrier, we need to make sure that we still
                 // trigger a workgroup barrier if the predicate fails.
                 PredicateCall(call, predicate,
-                              b.Block(b.CallStmt(b.Call(core::Function::kWorkgroupBarrier))));
+                              b.Block(b.CallStmt(b.Call(core::BuiltinFn::kWorkgroupBarrier))));
             } else {
                 PredicateCall(call, predicate);
             }
@@ -383,8 +383,8 @@ struct Robustness::State {
 
     /// Applies predication to texture builtins, based on whether the coordinates, array index and
     /// level arguments are all in bounds.
-    void PredicateTextureBuiltin(const sem::Call* call, const sem::Builtin* builtin) {
-        if (!TextureBuiltinNeedsRobustness(builtin->Type())) {
+    void PredicateTextureBuiltin(const sem::Call* call, const sem::BuiltinFn* builtin) {
+        if (!TextureBuiltinNeedsRobustness(builtin->Fn())) {
             return;
         }
 
@@ -417,7 +417,7 @@ struct Robustness::State {
                 // let num_levels = textureNumLevels(texture-arg);
                 num_levels = b.Symbols().New("num_levels");
                 hoist.InsertBefore(
-                    stmt, b.Decl(b.Let(num_levels, b.Call(core::Function::kTextureNumLevels,
+                    stmt, b.Decl(b.Let(num_levels, b.Call(core::BuiltinFn::kTextureNumLevels,
                                                           ctx.Clone(texture_arg)))));
 
                 // predicate: level_idx < num_levels
@@ -442,12 +442,12 @@ struct Robustness::State {
                 // predicate: all(coords < textureDimensions(texture))
                 auto* dimensions =
                     level_idx.IsValid()
-                        ? b.Call(core::Function::kTextureDimensions, ctx.Clone(texture_arg),
-                                 b.Call(core::Function::kMin, b.Expr(level_idx),
+                        ? b.Call(core::BuiltinFn::kTextureDimensions, ctx.Clone(texture_arg),
+                                 b.Call(core::BuiltinFn::kMin, b.Expr(level_idx),
                                         b.Sub(num_levels, 1_a)))
-                        : b.Call(core::Function::kTextureDimensions, ctx.Clone(texture_arg));
+                        : b.Call(core::BuiltinFn::kTextureDimensions, ctx.Clone(texture_arg));
                 predicate =
-                    And(predicate, b.Call(core::Function::kAll, b.LessThan(coords, dimensions)));
+                    And(predicate, b.Call(core::BuiltinFn::kAll, b.LessThan(coords, dimensions)));
 
                 // Replace the level argument with `coord`
                 ctx.Replace(arg, b.Expr(coords));
@@ -457,7 +457,7 @@ struct Robustness::State {
         if (array_arg_idx >= 0) {
             // let array_idx = u32(array-arg)
             auto* arg = expr->args[static_cast<size_t>(array_arg_idx)];
-            auto* num_layers = b.Call(core::Function::kTextureNumLayers, ctx.Clone(texture_arg));
+            auto* num_layers = b.Call(core::BuiltinFn::kTextureNumLayers, ctx.Clone(texture_arg));
             auto array_idx = b.Symbols().New("array_idx");
             hoist.InsertBefore(stmt, b.Decl(b.Let(array_idx, CastToUnsigned(ctx.Clone(arg), 1u))));
 
@@ -475,8 +475,8 @@ struct Robustness::State {
 
     /// Applies bounds clamping to the coordinates, array index and level arguments of the texture
     /// builtin.
-    void ClampTextureBuiltin(const sem::Call* call, const sem::Builtin* builtin) {
-        if (!TextureBuiltinNeedsRobustness(builtin->Type())) {
+    void ClampTextureBuiltin(const sem::Call* call, const sem::BuiltinFn* builtin) {
+        if (!TextureBuiltinNeedsRobustness(builtin->Fn())) {
             return;
         }
 
@@ -502,10 +502,10 @@ struct Robustness::State {
                 const auto* arg = expr->args[static_cast<size_t>(level_arg_idx)];
                 level_idx = b.Symbols().New("level_idx");
                 const auto* num_levels =
-                    b.Call(core::Function::kTextureNumLevels, ctx.Clone(texture_arg));
+                    b.Call(core::BuiltinFn::kTextureNumLevels, ctx.Clone(texture_arg));
                 const auto* max = b.Sub(num_levels, 1_a);
                 hoist.InsertBefore(
-                    stmt, b.Decl(b.Let(level_idx, b.Call(core::Function::kMin,
+                    stmt, b.Decl(b.Let(level_idx, b.Call(core::BuiltinFn::kMin,
                                                          b.Call<u32>(ctx.Clone(arg)), max))));
                 ctx.Replace(arg, b.Expr(level_idx));
             }
@@ -519,9 +519,9 @@ struct Robustness::State {
                 const auto width = WidthOf(param->Type());
                 const auto* dimensions =
                     level_idx.IsValid()
-                        ? b.Call(core::Function::kTextureDimensions, ctx.Clone(texture_arg),
+                        ? b.Call(core::BuiltinFn::kTextureDimensions, ctx.Clone(texture_arg),
                                  level_idx)
-                        : b.Call(core::Function::kTextureDimensions, ctx.Clone(texture_arg));
+                        : b.Call(core::BuiltinFn::kTextureDimensions, ctx.Clone(texture_arg));
 
                 // dimensions is u32 or vecN<u32>
                 const auto* unsigned_max = b.Sub(dimensions, ScalarOrVec(b.Expr(1_a), width));
@@ -529,9 +529,9 @@ struct Robustness::State {
                     const auto* zero = ScalarOrVec(b.Expr(0_a), width);
                     const auto* signed_max = CastToSigned(unsigned_max, width);
                     ctx.Replace(arg,
-                                b.Call(core::Function::kClamp, ctx.Clone(arg), zero, signed_max));
+                                b.Call(core::BuiltinFn::kClamp, ctx.Clone(arg), zero, signed_max));
                 } else {
-                    ctx.Replace(arg, b.Call(core::Function::kMin, ctx.Clone(arg), unsigned_max));
+                    ctx.Replace(arg, b.Call(core::BuiltinFn::kMin, ctx.Clone(arg), unsigned_max));
                 }
             }
         }
@@ -540,14 +540,14 @@ struct Robustness::State {
         if (array_arg_idx >= 0) {
             auto* param = builtin->Parameters()[static_cast<size_t>(array_arg_idx)];
             auto* arg = expr->args[static_cast<size_t>(array_arg_idx)];
-            auto* num_layers = b.Call(core::Function::kTextureNumLayers, ctx.Clone(texture_arg));
+            auto* num_layers = b.Call(core::BuiltinFn::kTextureNumLayers, ctx.Clone(texture_arg));
 
             const auto* unsigned_max = b.Sub(num_layers, 1_a);
             if (param->Type()->is_signed_integer_scalar()) {
                 const auto* signed_max = CastToSigned(unsigned_max, 1u);
-                ctx.Replace(arg, b.Call(core::Function::kClamp, ctx.Clone(arg), 0_a, signed_max));
+                ctx.Replace(arg, b.Call(core::BuiltinFn::kClamp, ctx.Clone(arg), 0_a, signed_max));
             } else {
-                ctx.Replace(arg, b.Call(core::Function::kMin, ctx.Clone(arg), unsigned_max));
+                ctx.Replace(arg, b.Call(core::BuiltinFn::kMin, ctx.Clone(arg), unsigned_max));
             }
         }
     }
@@ -555,9 +555,9 @@ struct Robustness::State {
     /// @param type builtin type
     /// @returns true if the given builtin is a texture function that requires predication or
     /// clamping of arguments.
-    bool TextureBuiltinNeedsRobustness(core::Function type) {
-        return type == core::Function::kTextureLoad || type == core::Function::kTextureStore ||
-               type == core::Function::kTextureDimensions;
+    bool TextureBuiltinNeedsRobustness(core::BuiltinFn type) {
+        return type == core::BuiltinFn::kTextureLoad || type == core::BuiltinFn::kTextureStore ||
+               type == core::BuiltinFn::kTextureDimensions;
     }
 
     /// @returns a bitwise and of the two expressions, or the other expression if one is null.

@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/tint/lang/core/function.h"
+#include "src/tint/lang/core/builtin_fn.h"
 #include "src/tint/lang/core/intrinsic/data/data.h"
 #include "src/tint/lang/core/intrinsic/table_data.h"
 #include "src/tint/lang/core/ir/builtin_call.h"
@@ -33,7 +33,7 @@ class CoreBuiltinCall final : public Castable<CoreBuiltinCall, BuiltinCall> {
     /// @param func the builtin function
     /// @param args the conversion arguments
     CoreBuiltinCall(InstructionResult* result,
-                    core::Function func,
+                    core::BuiltinFn func,
                     VectorRef<Value*> args = tint::Empty);
     ~CoreBuiltinCall() override;
 
@@ -41,7 +41,7 @@ class CoreBuiltinCall final : public Castable<CoreBuiltinCall, BuiltinCall> {
     CoreBuiltinCall* Clone(CloneContext& ctx) override;
 
     /// @returns the builtin function
-    core::Function Func() { return func_; }
+    core::BuiltinFn Func() { return func_; }
 
     /// @returns the identifier for the function
     size_t FuncId() override { return static_cast<size_t>(func_); }
@@ -56,7 +56,7 @@ class CoreBuiltinCall final : public Castable<CoreBuiltinCall, BuiltinCall> {
     const core::intrinsic::TableData& TableData() override { return core::intrinsic::data::kData; }
 
   private:
-    core::Function func_;
+    core::BuiltinFn func_;
 };
 
 }  // namespace tint::core::ir

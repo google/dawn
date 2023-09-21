@@ -17,9 +17,9 @@
 #include <algorithm>
 #include <array>
 
+#include "src/tint/lang/core/builtin_fn.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/fluent_types.h"
-#include "src/tint/lang/core/function.h"
 #include "src/tint/lang/core/type/depth_texture.h"
 #include "src/tint/lang/core/type/sampled_texture.h"
 #include "src/tint/lang/core/type/texture_dimension.h"
@@ -456,42 +456,42 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
 }
 
 // Returns the WGSL standard library function builtin for the
-// given instruction, or core::Function::kNone
-core::Function GetBuiltin(spv::Op opcode) {
+// given instruction, or core::BuiltinFn::kNone
+core::BuiltinFn GetBuiltin(spv::Op opcode) {
     switch (opcode) {
         case spv::Op::OpBitCount:
-            return core::Function::kCountOneBits;
+            return core::BuiltinFn::kCountOneBits;
         case spv::Op::OpBitFieldInsert:
-            return core::Function::kInsertBits;
+            return core::BuiltinFn::kInsertBits;
         case spv::Op::OpBitFieldSExtract:
         case spv::Op::OpBitFieldUExtract:
-            return core::Function::kExtractBits;
+            return core::BuiltinFn::kExtractBits;
         case spv::Op::OpBitReverse:
-            return core::Function::kReverseBits;
+            return core::BuiltinFn::kReverseBits;
         case spv::Op::OpDot:
-            return core::Function::kDot;
+            return core::BuiltinFn::kDot;
         case spv::Op::OpDPdx:
-            return core::Function::kDpdx;
+            return core::BuiltinFn::kDpdx;
         case spv::Op::OpDPdy:
-            return core::Function::kDpdy;
+            return core::BuiltinFn::kDpdy;
         case spv::Op::OpFwidth:
-            return core::Function::kFwidth;
+            return core::BuiltinFn::kFwidth;
         case spv::Op::OpDPdxFine:
-            return core::Function::kDpdxFine;
+            return core::BuiltinFn::kDpdxFine;
         case spv::Op::OpDPdyFine:
-            return core::Function::kDpdyFine;
+            return core::BuiltinFn::kDpdyFine;
         case spv::Op::OpFwidthFine:
-            return core::Function::kFwidthFine;
+            return core::BuiltinFn::kFwidthFine;
         case spv::Op::OpDPdxCoarse:
-            return core::Function::kDpdxCoarse;
+            return core::BuiltinFn::kDpdxCoarse;
         case spv::Op::OpDPdyCoarse:
-            return core::Function::kDpdyCoarse;
+            return core::BuiltinFn::kDpdyCoarse;
         case spv::Op::OpFwidthCoarse:
-            return core::Function::kFwidthCoarse;
+            return core::BuiltinFn::kFwidthCoarse;
         default:
             break;
     }
-    return core::Function::kNone;
+    return core::BuiltinFn::kNone;
 }
 
 // @param opcode a SPIR-V opcode
@@ -3819,11 +3819,11 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     }
 
     const auto builtin = GetBuiltin(op);
-    if (builtin != core::Function::kNone) {
+    if (builtin != core::BuiltinFn::kNone) {
         switch (builtin) {
-            case core::Function::kExtractBits:
+            case core::BuiltinFn::kExtractBits:
                 return MakeExtractBitsCall(inst);
-            case core::Function::kInsertBits:
+            case core::BuiltinFn::kInsertBits:
                 return MakeInsertBitsCall(inst);
             default:
                 return MakeBuiltinCall(inst);
@@ -5852,7 +5852,7 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
 }
 
 bool FunctionEmitter::EmitAtomicOp(const spvtools::opt::Instruction& inst) {
-    auto emit_atomic = [&](core::Function builtin, std::initializer_list<TypedExpression> args) {
+    auto emit_atomic = [&](core::BuiltinFn builtin, std::initializer_list<TypedExpression> args) {
         // Split args into params and expressions
         ParameterList params;
         params.Reserve(args.size());
@@ -5911,38 +5911,38 @@ bool FunctionEmitter::EmitAtomicOp(const spvtools::opt::Instruction& inst) {
 
     switch (opcode(inst)) {
         case spv::Op::OpAtomicLoad:
-            return emit_atomic(core::Function::kAtomicLoad, {oper(/*ptr*/ 0)});
+            return emit_atomic(core::BuiltinFn::kAtomicLoad, {oper(/*ptr*/ 0)});
         case spv::Op::OpAtomicStore:
-            return emit_atomic(core::Function::kAtomicStore, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::BuiltinFn::kAtomicStore, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicExchange:
-            return emit_atomic(core::Function::kAtomicExchange,
+            return emit_atomic(core::BuiltinFn::kAtomicExchange,
                                {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicCompareExchange:
         case spv::Op::OpAtomicCompareExchangeWeak:
-            return emit_atomic(core::Function::kAtomicCompareExchangeWeak,
+            return emit_atomic(core::BuiltinFn::kAtomicCompareExchangeWeak,
                                {oper(/*ptr*/ 0), /*value*/ oper(5), /*comparator*/ oper(4)});
         case spv::Op::OpAtomicIIncrement:
-            return emit_atomic(core::Function::kAtomicAdd, {oper(/*ptr*/ 0), lit(1)});
+            return emit_atomic(core::BuiltinFn::kAtomicAdd, {oper(/*ptr*/ 0), lit(1)});
         case spv::Op::OpAtomicIDecrement:
-            return emit_atomic(core::Function::kAtomicSub, {oper(/*ptr*/ 0), lit(1)});
+            return emit_atomic(core::BuiltinFn::kAtomicSub, {oper(/*ptr*/ 0), lit(1)});
         case spv::Op::OpAtomicIAdd:
-            return emit_atomic(core::Function::kAtomicAdd, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::BuiltinFn::kAtomicAdd, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicISub:
-            return emit_atomic(core::Function::kAtomicSub, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::BuiltinFn::kAtomicSub, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicSMin:
-            return emit_atomic(core::Function::kAtomicMin, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::BuiltinFn::kAtomicMin, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicUMin:
-            return emit_atomic(core::Function::kAtomicMin, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::BuiltinFn::kAtomicMin, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicSMax:
-            return emit_atomic(core::Function::kAtomicMax, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::BuiltinFn::kAtomicMax, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicUMax:
-            return emit_atomic(core::Function::kAtomicMax, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::BuiltinFn::kAtomicMax, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicAnd:
-            return emit_atomic(core::Function::kAtomicAnd, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::BuiltinFn::kAtomicAnd, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicOr:
-            return emit_atomic(core::Function::kAtomicOr, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::BuiltinFn::kAtomicOr, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicXor:
-            return emit_atomic(core::Function::kAtomicXor, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
+            return emit_atomic(core::BuiltinFn::kAtomicXor, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
         case spv::Op::OpAtomicFlagTestAndSet:
         case spv::Op::OpAtomicFlagClear:
         case spv::Op::OpAtomicFMinEXT:

@@ -536,7 +536,7 @@ TEST_F(IR_DemoteToHelperTest, TextureStore) {
             b.Discard();
             b.ExitIf(ifelse);
         });
-        b.Call(ty.void_(), core::Function::kTextureStore, b.Load(texture), coord,
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, b.Load(texture), coord,
                b.Splat(b.ir.Types().vec4<f32>(), 0.5_f, 4));
         b.Return(ep, 0.5_f);
     });
@@ -618,7 +618,7 @@ TEST_F(IR_DemoteToHelperTest, AtomicStore) {
             b.Discard();
             b.ExitIf(ifelse);
         });
-        b.Call(ty.void_(), core::Function::kAtomicStore, buffer, 42_i);
+        b.Call(ty.void_(), core::BuiltinFn::kAtomicStore, buffer, 42_i);
         b.Return(ep, 0.5_f);
     });
 
@@ -697,7 +697,7 @@ TEST_F(IR_DemoteToHelperTest, AtomicAdd) {
             b.Discard();
             b.ExitIf(ifelse);
         });
-        auto* old = b.Call(ty.i32(), core::Function::kAtomicAdd, buffer, 42_i);
+        auto* old = b.Call(ty.i32(), core::BuiltinFn::kAtomicAdd, buffer, 42_i);
         b.Add(ty.i32(), old, 1_i);
         b.Return(ep, 0.5_f);
     });
@@ -782,7 +782,7 @@ TEST_F(IR_DemoteToHelperTest, AtomicCompareExchange) {
         });
         auto* result =
             b.Call(core::type::CreateAtomicCompareExchangeResult(ty, mod.symbols, ty.i32()),
-                   core::Function::kAtomicCompareExchangeWeak, buffer, 0_i, 42_i);
+                   core::BuiltinFn::kAtomicCompareExchangeWeak, buffer, 0_i, 42_i);
         b.Add(ty.i32(), b.Access(ty.i32(), result, 0_i), 1_i);
         b.Return(ep, 0.5_f);
     });

@@ -35,7 +35,7 @@ class LocationAttribute;
 class ReturnStatement;
 }  // namespace tint::ast
 namespace tint::sem {
-class Builtin;
+class BuiltinFn;
 class Variable;
 }  // namespace tint::sem
 
@@ -117,13 +117,13 @@ class Function final : public Castable<Function, CallTarget> {
     }
 
     /// @returns the list of builtins that this function directly calls.
-    const UniqueVector<const Builtin*, 4>& DirectlyCalledBuiltins() const {
+    const UniqueVector<const BuiltinFn*, 4>& DirectlyCalledBuiltins() const {
         return directly_called_builtins_;
     }
 
     /// Records that this function transitively calls `builtin`.
     /// @param builtin the builtin this function directly calls
-    void AddDirectlyCalledBuiltin(const Builtin* builtin) {
+    void AddDirectlyCalledBuiltin(const BuiltinFn* builtin) {
         directly_called_builtins_.Add(builtin);
     }
 
@@ -288,7 +288,7 @@ class Function final : public Castable<Function, CallTarget> {
     UniqueVector<const GlobalVariable*, 4> directly_referenced_globals_;
     UniqueVector<const GlobalVariable*, 8> transitively_referenced_globals_;
     UniqueVector<const Function*, 8> transitively_called_functions_;
-    UniqueVector<const Builtin*, 4> directly_called_builtins_;
+    UniqueVector<const BuiltinFn*, 4> directly_called_builtins_;
     UniqueVector<VariablePair, 8> texture_sampler_pairs_;
     std::vector<const Call*> direct_calls_;
     std::vector<const Call*> callsites_;

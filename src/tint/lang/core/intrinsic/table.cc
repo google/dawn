@@ -584,7 +584,7 @@ void ErrAmbiguousOverload(Context& context,
 }  // namespace
 
 Result<Overload> Lookup(Context& context,
-                        core::Function builtin_type,
+                        core::BuiltinFn builtin_type,
                         VectorRef<const core::type::Type*> args,
                         EvaluationStage earliest_eval_stage,
                         const Source& source) {

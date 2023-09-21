@@ -186,7 +186,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
         auto* frag_depth_min = builder.Access(ty.f32(), args, 0_u);
         auto* frag_depth_max = builder.Access(ty.f32(), args, 1_u);
         return builder
-            .Call(ty.f32(), core::Function::kClamp, frag_depth, frag_depth_min, frag_depth_max)
+            .Call(ty.f32(), core::BuiltinFn::kClamp, frag_depth, frag_depth_min, frag_depth_max)
             ->Result();
     }
 

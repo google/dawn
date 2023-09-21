@@ -1087,7 +1087,7 @@ bool ASTPrinter::EmitCall(StringStream& out, const ast::CallExpression* expr) {
     return Switch(
         target,  //
         [&](const sem::Function* func) { return EmitFunctionCall(out, call, func); },
-        [&](const sem::Builtin* builtin) { return EmitBuiltinCall(out, call, builtin); },
+        [&](const sem::BuiltinFn* builtin) { return EmitBuiltinCall(out, call, builtin); },
         [&](const sem::ValueConversion* conv) { return EmitValueConversion(out, call, conv); },
         [&](const sem::ValueConstructor* ctor) { return EmitValueConstructor(out, call, ctor); },
         [&](Default) {
@@ -1166,35 +1166,35 @@ bool ASTPrinter::EmitFunctionCall(StringStream& out,
 
 bool ASTPrinter::EmitBuiltinCall(StringStream& out,
                                  const sem::Call* call,
-                                 const sem::Builtin* builtin) {
-    const auto type = builtin->Type();
+                                 const sem::BuiltinFn* builtin) {
+    const auto type = builtin->Fn();
 
     auto* expr = call->Declaration();
     if (builtin->IsTexture()) {
         return EmitTextureCall(out, call, builtin);
     }
-    if (type == core::Function::kSelect) {
+    if (type == core::BuiltinFn::kSelect) {
         return EmitSelectCall(out, expr);
     }
-    if (type == core::Function::kModf) {
+    if (type == core::BuiltinFn::kModf) {
         return EmitModfCall(out, expr, builtin);
     }
-    if (type == core::Function::kFrexp) {
+    if (type == core::BuiltinFn::kFrexp) {
         return EmitFrexpCall(out, expr, builtin);
     }
-    if (type == core::Function::kDegrees) {
+    if (type == core::BuiltinFn::kDegrees) {
         return EmitDegreesCall(out, expr, builtin);
     }
-    if (type == core::Function::kRadians) {
+    if (type == core::BuiltinFn::kRadians) {
         return EmitRadiansCall(out, expr, builtin);
     }
-    if (type == core::Function::kSign) {
+    if (type == core::BuiltinFn::kSign) {
         return EmitSignCall(out, call, builtin);
     }
-    if (type == core::Function::kQuantizeToF16) {
+    if (type == core::BuiltinFn::kQuantizeToF16) {
         return EmitQuantizeToF16Call(out, expr, builtin);
     }
-    if (type == core::Function::kTrunc) {
+    if (type == core::BuiltinFn::kTrunc) {
         return EmitTruncCall(out, expr, builtin);
     }
     if (builtin->IsDataPacking()) {
@@ -1213,7 +1213,7 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
         return EmitDP4aCall(out, expr, builtin);
     }
     if (builtin->IsSubgroup()) {
-        if (builtin->Type() == core::Function::kSubgroupBroadcast) {
+        if (builtin->Fn() == core::BuiltinFn::kSubgroupBroadcast) {
             // Fall through the regular path.
         } else {
             return EmitSubgroupCall(out, expr, builtin);
@@ -1228,7 +1228,7 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
     // Handle single argument builtins that only accept and return uint (not int overload). We need
     // to explicitly cast the return value (we also cast the arg for good measure). See
     // crbug.com/tint/1550
-    if (type == core::Function::kCountOneBits || type == core::Function::kReverseBits) {
+    if (type == core::BuiltinFn::kCountOneBits || type == core::BuiltinFn::kReverseBits) {
         auto* arg = call->Arguments()[0];
         if (arg->Type()->UnwrapRef()->is_signed_integer_scalar_or_vector()) {
             out << "asint(" << name << "(asuint(";
@@ -1991,7 +1991,7 @@ bool ASTPrinter::EmitStorageAtomicIntrinsic(const ast::Function* func,
 
 bool ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
                                          const ast::CallExpression* expr,
-                                         const sem::Builtin* builtin) {
+                                         const sem::BuiltinFn* builtin) {
     std::string result = UniqueIdentifier("atomic_result");
 
     if (!builtin->ReturnType()->Is<core::type::Void>()) {
@@ -2018,7 +2018,7 @@ bool ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
                 if (i > 0) {
                     pre << ", ";
                 }
-                if (i == 1 && builtin->Type() == core::Function::kAtomicSub) {
+                if (i == 1 && builtin->Fn() == core::BuiltinFn::kAtomicSub) {
                     // Sub uses InterlockedAdd with the operand negated.
                     pre << "-";
                 }
@@ -2036,8 +2036,8 @@ bool ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
         return true;
     };
 
-    switch (builtin->Type()) {
-        case core::Function::kAtomicLoad: {
+    switch (builtin->Fn()) {
+        case core::BuiltinFn::kAtomicLoad: {
             // HLSL does not have an InterlockedLoad, so we emulate it with
             // InterlockedOr using 0 as the OR value
             auto pre = Line();
@@ -2054,7 +2054,7 @@ bool ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
             out << result;
             return true;
         }
-        case core::Function::kAtomicStore: {
+        case core::BuiltinFn::kAtomicStore: {
             // HLSL does not have an InterlockedStore, so we emulate it with
             // InterlockedExchange and discard the returned value
             {  // T result = 0;
@@ -2085,7 +2085,7 @@ bool ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
             }
             return true;
         }
-        case core::Function::kAtomicCompareExchangeWeak: {
+        case core::BuiltinFn::kAtomicCompareExchangeWeak: {
             if (!EmitStructType(&helpers_, builtin->ReturnType()->As<core::type::Struct>())) {
                 return false;
             }
@@ -2134,33 +2134,33 @@ bool ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
             return true;
         }
 
-        case core::Function::kAtomicAdd:
-        case core::Function::kAtomicSub:
+        case core::BuiltinFn::kAtomicAdd:
+        case core::BuiltinFn::kAtomicSub:
             return call("InterlockedAdd");
 
-        case core::Function::kAtomicMax:
+        case core::BuiltinFn::kAtomicMax:
             return call("InterlockedMax");
 
-        case core::Function::kAtomicMin:
+        case core::BuiltinFn::kAtomicMin:
             return call("InterlockedMin");
 
-        case core::Function::kAtomicAnd:
+        case core::BuiltinFn::kAtomicAnd:
             return call("InterlockedAnd");
 
-        case core::Function::kAtomicOr:
+        case core::BuiltinFn::kAtomicOr:
             return call("InterlockedOr");
 
-        case core::Function::kAtomicXor:
+        case core::BuiltinFn::kAtomicXor:
             return call("InterlockedXor");
 
-        case core::Function::kAtomicExchange:
+        case core::BuiltinFn::kAtomicExchange:
             return call("InterlockedExchange");
 
         default:
             break;
     }
 
-    TINT_UNREACHABLE() << "unsupported atomic builtin: " << builtin->Type();
+    TINT_UNREACHABLE() << "unsupported atomic builtin: " << builtin->Fn();
     return false;
 }
 
@@ -2190,7 +2190,7 @@ bool ASTPrinter::EmitSelectCall(StringStream& out, const ast::CallExpression* ex
 
 bool ASTPrinter::EmitModfCall(StringStream& out,
                               const ast::CallExpression* expr,
-                              const sem::Builtin* builtin) {
+                              const sem::BuiltinFn* builtin) {
     return CallBuiltinHelper(
         out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
             auto* ty = builtin->Parameters()[0]->Type();
@@ -2223,7 +2223,7 @@ bool ASTPrinter::EmitModfCall(StringStream& out,
 
 bool ASTPrinter::EmitFrexpCall(StringStream& out,
                                const ast::CallExpression* expr,
-                               const sem::Builtin* builtin) {
+                               const sem::BuiltinFn* builtin) {
     return CallBuiltinHelper(
         out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
             auto* ty = builtin->Parameters()[0]->Type();
@@ -2264,7 +2264,7 @@ bool ASTPrinter::EmitFrexpCall(StringStream& out,
 
 bool ASTPrinter::EmitDegreesCall(StringStream& out,
                                  const ast::CallExpression* expr,
-                                 const sem::Builtin* builtin) {
+                                 const sem::BuiltinFn* builtin) {
     return CallBuiltinHelper(out, expr, builtin,
                              [&](TextBuffer* b, const std::vector<std::string>& params) {
                                  Line(b) << "return " << params[0] << " * " << std::setprecision(20)
@@ -2275,7 +2275,7 @@ bool ASTPrinter::EmitDegreesCall(StringStream& out,
 
 bool ASTPrinter::EmitRadiansCall(StringStream& out,
                                  const ast::CallExpression* expr,
-                                 const sem::Builtin* builtin) {
+                                 const sem::BuiltinFn* builtin) {
     return CallBuiltinHelper(out, expr, builtin,
                              [&](TextBuffer* b, const std::vector<std::string>& params) {
                                  Line(b) << "return " << params[0] << " * " << std::setprecision(20)
@@ -2287,7 +2287,7 @@ bool ASTPrinter::EmitRadiansCall(StringStream& out,
 // The HLSL `sign` method always returns an `int` result (scalar or vector). In WGSL the result is
 // expected to be the same type as the argument. This injects a cast to the expected WGSL result
 // type after the call to `sign`.
-bool ASTPrinter::EmitSignCall(StringStream& out, const sem::Call* call, const sem::Builtin*) {
+bool ASTPrinter::EmitSignCall(StringStream& out, const sem::Call* call, const sem::BuiltinFn*) {
     auto* arg = call->Arguments()[0];
     if (!EmitType(out, arg->Type(), core::AddressSpace::kUndefined, core::Access::kReadWrite, "")) {
         return false;
@@ -2302,7 +2302,7 @@ bool ASTPrinter::EmitSignCall(StringStream& out, const sem::Call* call, const se
 
 bool ASTPrinter::EmitQuantizeToF16Call(StringStream& out,
                                        const ast::CallExpression* expr,
-                                       const sem::Builtin* builtin) {
+                                       const sem::BuiltinFn* builtin) {
     // Cast to f16 and back
     std::string width;
     if (auto* vec = builtin->ReturnType()->As<core::type::Vector>()) {
@@ -2319,7 +2319,7 @@ bool ASTPrinter::EmitQuantizeToF16Call(StringStream& out,
 
 bool ASTPrinter::EmitTruncCall(StringStream& out,
                                const ast::CallExpression* expr,
-                               const sem::Builtin* builtin) {
+                               const sem::BuiltinFn* builtin) {
     // HLSL's trunc is broken for very large/small float values.
     // See crbug.com/tint/1883
     return CallBuiltinHelper(  //
@@ -2333,27 +2333,27 @@ bool ASTPrinter::EmitTruncCall(StringStream& out,
 
 bool ASTPrinter::EmitDataPackingCall(StringStream& out,
                                      const ast::CallExpression* expr,
-                                     const sem::Builtin* builtin) {
+                                     const sem::BuiltinFn* builtin) {
     return CallBuiltinHelper(
         out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
             uint32_t dims = 2;
             bool is_signed = false;
             uint32_t scale = 65535;
-            if (builtin->Type() == core::Function::kPack4X8Snorm ||
-                builtin->Type() == core::Function::kPack4X8Unorm) {
+            if (builtin->Fn() == core::BuiltinFn::kPack4X8Snorm ||
+                builtin->Fn() == core::BuiltinFn::kPack4X8Unorm) {
                 dims = 4;
                 scale = 255;
             }
-            if (builtin->Type() == core::Function::kPack4X8Snorm ||
-                builtin->Type() == core::Function::kPack2X16Snorm) {
+            if (builtin->Fn() == core::BuiltinFn::kPack4X8Snorm ||
+                builtin->Fn() == core::BuiltinFn::kPack2X16Snorm) {
                 is_signed = true;
                 scale = (scale - 1) / 2;
             }
-            switch (builtin->Type()) {
-                case core::Function::kPack4X8Snorm:
-                case core::Function::kPack4X8Unorm:
-                case core::Function::kPack2X16Snorm:
-                case core::Function::kPack2X16Unorm: {
+            switch (builtin->Fn()) {
+                case core::BuiltinFn::kPack4X8Snorm:
+                case core::BuiltinFn::kPack4X8Unorm:
+                case core::BuiltinFn::kPack2X16Snorm:
+                case core::BuiltinFn::kPack2X16Unorm: {
                     {
                         auto l = Line(b);
                         l << (is_signed ? "" : "u") << "int" << dims
@@ -2379,7 +2379,7 @@ bool ASTPrinter::EmitDataPackingCall(StringStream& out,
                     }
                     break;
                 }
-                case core::Function::kPack2X16Float: {
+                case core::BuiltinFn::kPack2X16Float: {
                     Line(b) << "uint2 i = f32tof16(" << params[0] << ");";
                     Line(b) << "return i.x | (i.y << 16);";
                     break;
@@ -2396,25 +2396,25 @@ bool ASTPrinter::EmitDataPackingCall(StringStream& out,
 
 bool ASTPrinter::EmitDataUnpackingCall(StringStream& out,
                                        const ast::CallExpression* expr,
-                                       const sem::Builtin* builtin) {
+                                       const sem::BuiltinFn* builtin) {
     return CallBuiltinHelper(
         out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
             uint32_t dims = 2;
             bool is_signed = false;
             uint32_t scale = 65535;
-            if (builtin->Type() == core::Function::kUnpack4X8Snorm ||
-                builtin->Type() == core::Function::kUnpack4X8Unorm) {
+            if (builtin->Fn() == core::BuiltinFn::kUnpack4X8Snorm ||
+                builtin->Fn() == core::BuiltinFn::kUnpack4X8Unorm) {
                 dims = 4;
                 scale = 255;
             }
-            if (builtin->Type() == core::Function::kUnpack4X8Snorm ||
-                builtin->Type() == core::Function::kUnpack2X16Snorm) {
+            if (builtin->Fn() == core::BuiltinFn::kUnpack4X8Snorm ||
+                builtin->Fn() == core::BuiltinFn::kUnpack2X16Snorm) {
                 is_signed = true;
                 scale = (scale - 1) / 2;
             }
-            switch (builtin->Type()) {
-                case core::Function::kUnpack4X8Snorm:
-                case core::Function::kUnpack2X16Snorm: {
+            switch (builtin->Fn()) {
+                case core::BuiltinFn::kUnpack4X8Snorm:
+                case core::BuiltinFn::kUnpack2X16Snorm: {
                     Line(b) << "int j = int(" << params[0] << ");";
                     {  // Perform sign extension on the converted values.
                         auto l = Line(b);
@@ -2430,8 +2430,8 @@ bool ASTPrinter::EmitDataUnpackingCall(StringStream& out,
                             << (is_signed ? "-1.0" : "0.0") << ", 1.0);";
                     break;
                 }
-                case core::Function::kUnpack4X8Unorm:
-                case core::Function::kUnpack2X16Unorm: {
+                case core::BuiltinFn::kUnpack4X8Unorm:
+                case core::BuiltinFn::kUnpack2X16Unorm: {
                     Line(b) << "uint j = " << params[0] << ";";
                     {
                         auto l = Line(b);
@@ -2447,7 +2447,7 @@ bool ASTPrinter::EmitDataUnpackingCall(StringStream& out,
                     Line(b) << "return float" << dims << "(i) / " << scale << ".0;";
                     break;
                 }
-                case core::Function::kUnpack2X16Float:
+                case core::BuiltinFn::kUnpack2X16Float:
                     Line(b) << "uint i = " << params[0] << ";";
                     Line(b) << "return f16tof32(uint2(i & 0xffff, i >> 16));";
                     break;
@@ -2463,17 +2463,17 @@ bool ASTPrinter::EmitDataUnpackingCall(StringStream& out,
 
 bool ASTPrinter::EmitDP4aCall(StringStream& out,
                               const ast::CallExpression* expr,
-                              const sem::Builtin* builtin) {
+                              const sem::BuiltinFn* builtin) {
     // TODO(crbug.com/tint/1497): support the polyfill version of DP4a functions.
     return CallBuiltinHelper(
         out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
             std::string functionName;
-            switch (builtin->Type()) {
-                case core::Function::kDot4I8Packed:
+            switch (builtin->Fn()) {
+                case core::BuiltinFn::kDot4I8Packed:
                     Line(b) << "int accumulator = 0;";
                     functionName = "dot4add_i8packed";
                     break;
-                case core::Function::kDot4U8Packed:
+                case core::BuiltinFn::kDot4U8Packed:
                     Line(b) << "uint accumulator = 0u;";
                     functionName = "dot4add_u8packed";
                     break;
@@ -2489,17 +2489,17 @@ bool ASTPrinter::EmitDP4aCall(StringStream& out,
         });
 }
 
-bool ASTPrinter::EmitBarrierCall(StringStream& out, const sem::Builtin* builtin) {
+bool ASTPrinter::EmitBarrierCall(StringStream& out, const sem::BuiltinFn* builtin) {
     // TODO(crbug.com/tint/661): Combine sequential barriers to a single
     // instruction.
-    if (builtin->Type() == core::Function::kWorkgroupBarrier) {
+    if (builtin->Fn() == core::BuiltinFn::kWorkgroupBarrier) {
         out << "GroupMemoryBarrierWithGroupSync()";
-    } else if (builtin->Type() == core::Function::kStorageBarrier) {
+    } else if (builtin->Fn() == core::BuiltinFn::kStorageBarrier) {
         out << "DeviceMemoryBarrierWithGroupSync()";
-    } else if (builtin->Type() == core::Function::kTextureBarrier) {
+    } else if (builtin->Fn() == core::BuiltinFn::kTextureBarrier) {
         out << "DeviceMemoryBarrierWithGroupSync()";
     } else {
-        TINT_UNREACHABLE() << "unexpected barrier builtin type " << core::str(builtin->Type());
+        TINT_UNREACHABLE() << "unexpected barrier builtin type " << core::str(builtin->Fn());
         return false;
     }
     return true;
@@ -2507,12 +2507,12 @@ bool ASTPrinter::EmitBarrierCall(StringStream& out, const sem::Builtin* builtin)
 
 bool ASTPrinter::EmitSubgroupCall(StringStream& out,
                                   [[maybe_unused]] const ast::CallExpression* expr,
-                                  const sem::Builtin* builtin) {
-    if (builtin->Type() == core::Function::kSubgroupBallot) {
+                                  const sem::BuiltinFn* builtin) {
+    if (builtin->Fn() == core::BuiltinFn::kSubgroupBallot) {
         out << "WaveActiveBallot(true)";
     } else {
         // subgroupBroadcast is already handled in the regular builtin flow.
-        TINT_UNREACHABLE() << "unexpected subgroup builtin type " << core::str(builtin->Type());
+        TINT_UNREACHABLE() << "unexpected subgroup builtin type " << core::str(builtin->Fn());
         return false;
     }
     return true;
@@ -2551,7 +2551,7 @@ bool ASTPrinter::EmitTextureOrStorageBufferCallArgExpression(StringStream& out,
 
 bool ASTPrinter::EmitTextureCall(StringStream& out,
                                  const sem::Call* call,
-                                 const sem::Builtin* builtin) {
+                                 const sem::BuiltinFn* builtin) {
     using Usage = core::ParameterUsage;
 
     auto& signature = builtin->Signature();
@@ -2572,19 +2572,19 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
 
     auto* texture_type = TypeOf(texture)->UnwrapRef()->As<core::type::Texture>();
 
-    switch (builtin->Type()) {
-        case core::Function::kTextureDimensions:
-        case core::Function::kTextureNumLayers:
-        case core::Function::kTextureNumLevels:
-        case core::Function::kTextureNumSamples: {
+    switch (builtin->Fn()) {
+        case core::BuiltinFn::kTextureDimensions:
+        case core::BuiltinFn::kTextureNumLayers:
+        case core::BuiltinFn::kTextureNumLevels:
+        case core::BuiltinFn::kTextureNumSamples: {
             // All of these builtins use the GetDimensions() method on the texture
             bool is_ms = texture_type->IsAnyOf<core::type::MultisampledTexture,
                                                core::type::DepthMultisampledTexture>();
             int num_dimensions = 0;
             std::string swizzle;
 
-            switch (builtin->Type()) {
-                case core::Function::kTextureDimensions:
+            switch (builtin->Fn()) {
+                case core::BuiltinFn::kTextureDimensions:
                     switch (texture_type->dim()) {
                         case core::type::TextureDimension::kNone:
                             TINT_ICE() << "texture dimension is kNone";
@@ -2612,7 +2612,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                             break;
                     }
                     break;
-                case core::Function::kTextureNumLayers:
+                case core::BuiltinFn::kTextureNumLayers:
                     switch (texture_type->dim()) {
                         default:
                             TINT_ICE() << "texture dimension is not arrayed";
@@ -2627,7 +2627,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                             break;
                     }
                     break;
-                case core::Function::kTextureNumLevels:
+                case core::BuiltinFn::kTextureNumLevels:
                     switch (texture_type->dim()) {
                         default:
                             TINT_ICE() << "texture dimension does not support mips";
@@ -2649,7 +2649,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                             break;
                     }
                     break;
-                case core::Function::kTextureNumSamples:
+                case core::BuiltinFn::kTextureNumSamples:
                     switch (texture_type->dim()) {
                         default:
                             TINT_ICE() << "texture dimension does not support multisampling";
@@ -2712,7 +2712,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                         return false;
                     }
                     pre << ", ";
-                } else if (builtin->Type() == core::Function::kTextureNumLevels) {
+                } else if (builtin->Fn() == core::BuiltinFn::kTextureNumLevels) {
                     pre << "0, ";
                 }
 
@@ -2757,35 +2757,35 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
 
     uint32_t hlsl_ret_width = 4u;
 
-    switch (builtin->Type()) {
-        case core::Function::kTextureSample:
+    switch (builtin->Fn()) {
+        case core::BuiltinFn::kTextureSample:
             out << ".Sample(";
             break;
-        case core::Function::kTextureSampleBias:
+        case core::BuiltinFn::kTextureSampleBias:
             out << ".SampleBias(";
             break;
-        case core::Function::kTextureSampleLevel:
+        case core::BuiltinFn::kTextureSampleLevel:
             out << ".SampleLevel(";
             break;
-        case core::Function::kTextureSampleGrad:
+        case core::BuiltinFn::kTextureSampleGrad:
             out << ".SampleGrad(";
             break;
-        case core::Function::kTextureSampleCompare:
+        case core::BuiltinFn::kTextureSampleCompare:
             out << ".SampleCmp(";
             hlsl_ret_width = 1;
             break;
-        case core::Function::kTextureSampleCompareLevel:
+        case core::BuiltinFn::kTextureSampleCompareLevel:
             out << ".SampleCmpLevelZero(";
             hlsl_ret_width = 1;
             break;
-        case core::Function::kTextureLoad:
+        case core::BuiltinFn::kTextureLoad:
             out << ".Load(";
             // Multisampled textures do not support mip-levels.
             if (!texture_type->Is<core::type::MultisampledTexture>()) {
                 pack_level_in_coords = true;
             }
             break;
-        case core::Function::kTextureGather:
+        case core::BuiltinFn::kTextureGather:
             out << ".Gather";
             if (builtin->Parameters()[0]->Usage() == core::ParameterUsage::kComponent) {
                 switch (call->Arguments()[0]->ConstantValue()->ValueAs<AInt>()) {
@@ -2805,10 +2805,10 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             }
             out << "(";
             break;
-        case core::Function::kTextureGatherCompare:
+        case core::BuiltinFn::kTextureGatherCompare:
             out << ".GatherCmp(";
             break;
-        case core::Function::kTextureStore:
+        case core::BuiltinFn::kTextureStore:
             out << "[";
             break;
         default:
@@ -2869,7 +2869,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
         if (!emit_vector_appended_with_level(param_coords)) {
             return false;
         }
-    } else if (builtin->Type() == core::Function::kTextureStore) {
+    } else if (builtin->Fn() == core::BuiltinFn::kTextureStore) {
         // param_coords is an index expression, not a function arg
         if (!EmitExpression(out, param_coords)) {
             return false;
@@ -2891,7 +2891,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
         }
     }
 
-    if (builtin->Type() == core::Function::kTextureStore) {
+    if (builtin->Fn() == core::BuiltinFn::kTextureStore) {
         out << "] = ";
         if (!EmitExpression(out, arg(Usage::kValue))) {
             return false;
@@ -2915,7 +2915,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
         if (TINT_UNLIKELY(wgsl_ret_width > hlsl_ret_width)) {
             TINT_ICE() << "WGSL return width (" << wgsl_ret_width
                        << ") is wider than HLSL return width (" << hlsl_ret_width << ") for "
-                       << builtin->Type();
+                       << builtin->Fn();
             return false;
         }
     }
@@ -2923,81 +2923,81 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
     return true;
 }
 
-std::string ASTPrinter::generate_builtin_name(const sem::Builtin* builtin) {
-    switch (builtin->Type()) {
-        case core::Function::kAbs:
-        case core::Function::kAcos:
-        case core::Function::kAll:
-        case core::Function::kAny:
-        case core::Function::kAsin:
-        case core::Function::kAtan:
-        case core::Function::kAtan2:
-        case core::Function::kCeil:
-        case core::Function::kClamp:
-        case core::Function::kCos:
-        case core::Function::kCosh:
-        case core::Function::kCross:
-        case core::Function::kDeterminant:
-        case core::Function::kDistance:
-        case core::Function::kDot:
-        case core::Function::kExp:
-        case core::Function::kExp2:
-        case core::Function::kFloor:
-        case core::Function::kFrexp:
-        case core::Function::kLdexp:
-        case core::Function::kLength:
-        case core::Function::kLog:
-        case core::Function::kLog2:
-        case core::Function::kMax:
-        case core::Function::kMin:
-        case core::Function::kModf:
-        case core::Function::kNormalize:
-        case core::Function::kPow:
-        case core::Function::kReflect:
-        case core::Function::kRefract:
-        case core::Function::kRound:
-        case core::Function::kSaturate:
-        case core::Function::kSin:
-        case core::Function::kSinh:
-        case core::Function::kSqrt:
-        case core::Function::kStep:
-        case core::Function::kTan:
-        case core::Function::kTanh:
-        case core::Function::kTranspose:
+std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
+    switch (builtin->Fn()) {
+        case core::BuiltinFn::kAbs:
+        case core::BuiltinFn::kAcos:
+        case core::BuiltinFn::kAll:
+        case core::BuiltinFn::kAny:
+        case core::BuiltinFn::kAsin:
+        case core::BuiltinFn::kAtan:
+        case core::BuiltinFn::kAtan2:
+        case core::BuiltinFn::kCeil:
+        case core::BuiltinFn::kClamp:
+        case core::BuiltinFn::kCos:
+        case core::BuiltinFn::kCosh:
+        case core::BuiltinFn::kCross:
+        case core::BuiltinFn::kDeterminant:
+        case core::BuiltinFn::kDistance:
+        case core::BuiltinFn::kDot:
+        case core::BuiltinFn::kExp:
+        case core::BuiltinFn::kExp2:
+        case core::BuiltinFn::kFloor:
+        case core::BuiltinFn::kFrexp:
+        case core::BuiltinFn::kLdexp:
+        case core::BuiltinFn::kLength:
+        case core::BuiltinFn::kLog:
+        case core::BuiltinFn::kLog2:
+        case core::BuiltinFn::kMax:
+        case core::BuiltinFn::kMin:
+        case core::BuiltinFn::kModf:
+        case core::BuiltinFn::kNormalize:
+        case core::BuiltinFn::kPow:
+        case core::BuiltinFn::kReflect:
+        case core::BuiltinFn::kRefract:
+        case core::BuiltinFn::kRound:
+        case core::BuiltinFn::kSaturate:
+        case core::BuiltinFn::kSin:
+        case core::BuiltinFn::kSinh:
+        case core::BuiltinFn::kSqrt:
+        case core::BuiltinFn::kStep:
+        case core::BuiltinFn::kTan:
+        case core::BuiltinFn::kTanh:
+        case core::BuiltinFn::kTranspose:
             return builtin->str();
-        case core::Function::kCountOneBits:  // uint
+        case core::BuiltinFn::kCountOneBits:  // uint
             return "countbits";
-        case core::Function::kDpdx:
+        case core::BuiltinFn::kDpdx:
             return "ddx";
-        case core::Function::kDpdxCoarse:
+        case core::BuiltinFn::kDpdxCoarse:
             return "ddx_coarse";
-        case core::Function::kDpdxFine:
+        case core::BuiltinFn::kDpdxFine:
             return "ddx_fine";
-        case core::Function::kDpdy:
+        case core::BuiltinFn::kDpdy:
             return "ddy";
-        case core::Function::kDpdyCoarse:
+        case core::BuiltinFn::kDpdyCoarse:
             return "ddy_coarse";
-        case core::Function::kDpdyFine:
+        case core::BuiltinFn::kDpdyFine:
             return "ddy_fine";
-        case core::Function::kFaceForward:
+        case core::BuiltinFn::kFaceForward:
             return "faceforward";
-        case core::Function::kFract:
+        case core::BuiltinFn::kFract:
             return "frac";
-        case core::Function::kFma:
+        case core::BuiltinFn::kFma:
             return "mad";
-        case core::Function::kFwidth:
-        case core::Function::kFwidthCoarse:
-        case core::Function::kFwidthFine:
+        case core::BuiltinFn::kFwidth:
+        case core::BuiltinFn::kFwidthCoarse:
+        case core::BuiltinFn::kFwidthFine:
             return "fwidth";
-        case core::Function::kInverseSqrt:
+        case core::BuiltinFn::kInverseSqrt:
             return "rsqrt";
-        case core::Function::kMix:
+        case core::BuiltinFn::kMix:
             return "lerp";
-        case core::Function::kReverseBits:  // uint
+        case core::BuiltinFn::kReverseBits:  // uint
             return "reversebits";
-        case core::Function::kSmoothstep:
+        case core::BuiltinFn::kSmoothstep:
             return "smoothstep";
-        case core::Function::kSubgroupBroadcast:
+        case core::BuiltinFn::kSubgroupBroadcast:
             return "WaveReadLaneAt";
         default:
             diagnostics_.add_error(diag::System::Writer,
@@ -4584,14 +4584,14 @@ bool ASTPrinter::EmitLet(const ast::Let* let) {
 template <typename F>
 bool ASTPrinter::CallBuiltinHelper(StringStream& out,
                                    const ast::CallExpression* call,
-                                   const sem::Builtin* builtin,
+                                   const sem::BuiltinFn* builtin,
                                    F&& build) {
     // Generate the helper function if it hasn't been created already
     auto fn = tint::GetOrCreate(builtins_, builtin, [&]() -> std::string {
         TextBuffer b;
         TINT_DEFER(helpers_.Append(b));
 
-        auto fn_name = UniqueIdentifier(std::string("tint_") + core::str(builtin->Type()));
+        auto fn_name = UniqueIdentifier(std::string("tint_") + core::str(builtin->Fn()));
         std::vector<std::string> parameter_names;
         {
             auto decl = Line(&b);

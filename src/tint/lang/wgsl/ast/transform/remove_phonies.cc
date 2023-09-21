@@ -71,7 +71,7 @@ Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, 
                                 // have side effects. Just skip.
                                 return TraverseAction::Skip;
                             }
-                            if (call->Target()->IsAnyOf<sem::Function, sem::Builtin>() &&
+                            if (call->Target()->IsAnyOf<sem::Function, sem::BuiltinFn>() &&
                                 call->HasSideEffects()) {
                                 side_effects.push_back(expr);
                                 return TraverseAction::Skip;

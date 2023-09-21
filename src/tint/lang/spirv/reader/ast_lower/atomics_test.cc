@@ -37,10 +37,11 @@ class AtomicsTest : public ast::transform::TransformTest {
 
         auto& b = parser.builder();
 
-        core::Function two_params[] = {
-            core::Function::kAtomicExchange, core::Function::kAtomicAdd, core::Function::kAtomicSub,
-            core::Function::kAtomicMin,      core::Function::kAtomicMax, core::Function::kAtomicAnd,
-            core::Function::kAtomicOr,       core::Function::kAtomicXor,
+        core::BuiltinFn two_params[] = {
+            core::BuiltinFn::kAtomicExchange, core::BuiltinFn::kAtomicAdd,
+            core::BuiltinFn::kAtomicSub,      core::BuiltinFn::kAtomicMin,
+            core::BuiltinFn::kAtomicMax,      core::BuiltinFn::kAtomicAnd,
+            core::BuiltinFn::kAtomicOr,       core::BuiltinFn::kAtomicXor,
         };
         for (auto& a : two_params) {
             b.Func(std::string{"stub_"} + core::str(a) + "_u32",
@@ -79,7 +80,7 @@ class AtomicsTest : public ast::transform::TransformTest {
                },
                tint::Vector{
                    b.ASTNodes().Create<Atomics::Stub>(b.ID(), b.AllocateNodeID(),
-                                                      core::Function::kAtomicLoad),
+                                                      core::BuiltinFn::kAtomicLoad),
                });
         b.Func("stub_atomicLoad_i32",
                tint::Vector{
@@ -91,7 +92,7 @@ class AtomicsTest : public ast::transform::TransformTest {
                },
                tint::Vector{
                    b.ASTNodes().Create<Atomics::Stub>(b.ID(), b.AllocateNodeID(),
-                                                      core::Function::kAtomicLoad),
+                                                      core::BuiltinFn::kAtomicLoad),
                });
 
         b.Func("stub_atomicStore_u32",
@@ -102,7 +103,7 @@ class AtomicsTest : public ast::transform::TransformTest {
                b.ty.void_(), tint::Empty,
                tint::Vector{
                    b.ASTNodes().Create<Atomics::Stub>(b.ID(), b.AllocateNodeID(),
-                                                      core::Function::kAtomicStore),
+                                                      core::BuiltinFn::kAtomicStore),
                });
         b.Func("stub_atomicStore_i32",
                tint::Vector{
@@ -112,7 +113,7 @@ class AtomicsTest : public ast::transform::TransformTest {
                b.ty.void_(), tint::Empty,
                tint::Vector{
                    b.ASTNodes().Create<Atomics::Stub>(b.ID(), b.AllocateNodeID(),
-                                                      core::Function::kAtomicStore),
+                                                      core::BuiltinFn::kAtomicStore),
                });
 
         b.Func("stub_atomic_compare_exchange_weak_u32",
@@ -127,7 +128,7 @@ class AtomicsTest : public ast::transform::TransformTest {
                },
                tint::Vector{
                    b.ASTNodes().Create<Atomics::Stub>(b.ID(), b.AllocateNodeID(),
-                                                      core::Function::kAtomicCompareExchangeWeak),
+                                                      core::BuiltinFn::kAtomicCompareExchangeWeak),
                });
         b.Func("stub_atomic_compare_exchange_weak_i32",
                tint::Vector{b.Param("p0", b.ty.i32()), b.Param("p1", b.ty.i32()),
@@ -138,7 +139,7 @@ class AtomicsTest : public ast::transform::TransformTest {
                },
                tint::Vector{
                    b.ASTNodes().Create<Atomics::Stub>(b.ID(), b.AllocateNodeID(),
-                                                      core::Function::kAtomicCompareExchangeWeak),
+                                                      core::BuiltinFn::kAtomicCompareExchangeWeak),
                });
 
         // Keep this pointer alive after Transform() returns

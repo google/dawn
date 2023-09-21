@@ -180,7 +180,7 @@ struct State {
                     auto* rhs_is_minus_one = b.Equal(bool_ty, rhs, minus_one);
                     cond = b.Or(bool_ty, cond, b.And(bool_ty, lhs_is_lowest, rhs_is_minus_one));
                 }
-                auto* rhs_or_one = b.Call(result_ty, core::Function::kSelect, rhs, one, cond);
+                auto* rhs_or_one = b.Call(result_ty, core::BuiltinFn::kSelect, rhs, one, cond);
 
                 if (binary->Kind() == Binary::Kind::kDivide) {
                     // Perform the divide with the modified RHS.

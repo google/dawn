@@ -639,7 +639,7 @@ TEST_F(SpirvWriter_ExpandImplicitSplatsTest, Mix_VectorOperands_ScalarFactor) {
     func->SetParams({arg1, arg2, factor});
 
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f32>(), core::Function::kMix, arg1, arg2, factor);
+        auto* result = b.Call(ty.vec4<f32>(), core::BuiltinFn::kMix, arg1, arg2, factor);
         b.Return(func, result);
     });
 

@@ -41,12 +41,12 @@ tint_add_target(tint_lang_core lib
   lang/core/binary_op.h
   lang/core/builtin.cc
   lang/core/builtin.h
+  lang/core/builtin_fn.cc
+  lang/core/builtin_fn.h
   lang/core/builtin_value.cc
   lang/core/builtin_value.h
   lang/core/evaluation_stage.h
   lang/core/fluent_types.h
-  lang/core/function.cc
-  lang/core/function.h
   lang/core/interpolation.h
   lang/core/interpolation_sampling.cc
   lang/core/interpolation_sampling.h

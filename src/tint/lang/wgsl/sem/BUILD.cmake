@@ -36,10 +36,10 @@ tint_add_target(tint_lang_wgsl_sem lib
   lang/wgsl/sem/block_statement.h
   lang/wgsl/sem/break_if_statement.cc
   lang/wgsl/sem/break_if_statement.h
-  lang/wgsl/sem/builtin.cc
-  lang/wgsl/sem/builtin.h
   lang/wgsl/sem/builtin_enum_expression.cc
   lang/wgsl/sem/builtin_enum_expression.h
+  lang/wgsl/sem/builtin_fn.cc
+  lang/wgsl/sem/builtin_fn.h
   lang/wgsl/sem/call.cc
   lang/wgsl/sem/call.h
   lang/wgsl/sem/call_target.cc
@@ -120,7 +120,7 @@ tint_target_add_dependencies(tint_lang_wgsl_sem lib
 # Kind:      test
 ################################################################################
 tint_add_target(tint_lang_wgsl_sem_test test
-  lang/wgsl/sem/builtin_test.cc
+  lang/wgsl/sem/builtin_fn_test.cc
   lang/wgsl/sem/diagnostic_severity_test.cc
   lang/wgsl/sem/helper_test.h
   lang/wgsl/sem/struct_test.cc

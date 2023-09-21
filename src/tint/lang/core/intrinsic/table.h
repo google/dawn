@@ -19,7 +19,7 @@
 #include <string>
 
 #include "src/tint/lang/core/binary_op.h"
-#include "src/tint/lang/core/function.h"
+#include "src/tint/lang/core/builtin_fn.h"
 #include "src/tint/lang/core/intrinsic/ctor_conv.h"
 #include "src/tint/lang/core/intrinsic/table_data.h"
 #include "src/tint/lang/core/parameter_usage.h"
@@ -110,7 +110,7 @@ struct Context {
 /// @param source the source of the builtin call
 /// @return the resolved builtin function overload
 Result<Overload> Lookup(Context& context,
-                        core::Function builtin_type,
+                        core::BuiltinFn builtin_type,
                         VectorRef<const core::type::Type*> args,
                         EvaluationStage earliest_eval_stage,
                         const Source& source);

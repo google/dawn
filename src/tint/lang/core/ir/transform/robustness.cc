@@ -86,9 +86,9 @@ struct State {
                     [&](ir::CoreBuiltinCall* call) {
                         // Check if this is a texture builtin that needs to be clamped.
                         if (config.clamp_texture) {
-                            if (call->Func() == core::Function::kTextureDimensions ||
-                                call->Func() == core::Function::kTextureLoad ||
-                                call->Func() == core::Function::kTextureStore) {
+                            if (call->Func() == core::BuiltinFn::kTextureDimensions ||
+                                call->Func() == core::BuiltinFn::kTextureLoad ||
+                                call->Func() == core::BuiltinFn::kTextureStore) {
                                 texture_calls.Push(call);
                             }
                         }
@@ -192,7 +192,7 @@ struct State {
                                                   const_limit->Value()->ValueAs<uint32_t>())));
         } else {
             // Clamp it to the dynamic limit.
-            clamped_idx = b.Call(ty.u32(), core::Function::kMin, CastToU32(idx), limit)->Result();
+            clamped_idx = b.Call(ty.u32(), core::BuiltinFn::kMin, CastToU32(idx), limit)->Result();
         }
 
         // Replace the index operand with the clamped version.
@@ -242,7 +242,7 @@ struct State {
                     }
 
                     // Use the `arrayLength` builtin to get the limit of a runtime-sized array.
-                    auto* length = b.Call(ty.u32(), core::Function::kArrayLength, object);
+                    auto* length = b.Call(ty.u32(), core::BuiltinFn::kArrayLength, object);
                     return b.Subtract(ty.u32(), length, b.Constant(1_u))->Result();
                 });
 
@@ -268,10 +268,10 @@ struct State {
         // Keep hold of the clamped value to use for clamping the coordinates.
         Value* clamped_level = nullptr;
         auto clamp_level = [&](uint32_t idx) {
-            auto* num_levels = b.Call(ty.u32(), core::Function::kTextureNumLevels, args[0]);
+            auto* num_levels = b.Call(ty.u32(), core::BuiltinFn::kTextureNumLevels, args[0]);
             auto* limit = b.Subtract(ty.u32(), num_levels, 1_u);
             clamped_level =
-                b.Call(ty.u32(), core::Function::kMin, CastToU32(args[idx]), limit)->Result();
+                b.Call(ty.u32(), core::BuiltinFn::kMin, CastToU32(args[idx]), limit)->Result();
             call->SetOperand(CoreBuiltinCall::kArgsOperandOffset + idx, clamped_level);
         };
 
@@ -283,33 +283,33 @@ struct State {
                 type = ty.vec(type, vec->Width());
                 one = b.Splat(type, one, vec->Width());
             }
-            auto* dims = clamped_level ? b.Call(type, core::Function::kTextureDimensions, args[0],
+            auto* dims = clamped_level ? b.Call(type, core::BuiltinFn::kTextureDimensions, args[0],
                                                 clamped_level)
-                                       : b.Call(type, core::Function::kTextureDimensions, args[0]);
+                                       : b.Call(type, core::BuiltinFn::kTextureDimensions, args[0]);
             auto* limit = b.Subtract(type, dims, one);
             call->SetOperand(
                 CoreBuiltinCall::kArgsOperandOffset + idx,
-                b.Call(type, core::Function::kMin, CastToU32(args[idx]), limit)->Result());
+                b.Call(type, core::BuiltinFn::kMin, CastToU32(args[idx]), limit)->Result());
         };
 
         // Helper for clamping the array index.
         auto clamp_array_index = [&](uint32_t idx) {
-            auto* num_layers = b.Call(ty.u32(), core::Function::kTextureNumLayers, args[0]);
+            auto* num_layers = b.Call(ty.u32(), core::BuiltinFn::kTextureNumLayers, args[0]);
             auto* limit = b.Subtract(ty.u32(), num_layers, 1_u);
             call->SetOperand(
                 CoreBuiltinCall::kArgsOperandOffset + idx,
-                b.Call(ty.u32(), core::Function::kMin, CastToU32(args[idx]), limit)->Result());
+                b.Call(ty.u32(), core::BuiltinFn::kMin, CastToU32(args[idx]), limit)->Result());
         };
 
         // Select which arguments to clamp based on the function overload.
         switch (call->Func()) {
-            case core::Function::kTextureDimensions: {
+            case core::BuiltinFn::kTextureDimensions: {
                 if (args.Length() > 1) {
                     clamp_level(1u);
                 }
                 break;
             }
-            case core::Function::kTextureLoad: {
+            case core::BuiltinFn::kTextureLoad: {
                 clamp_coords(1u);
                 uint32_t next_arg = 2u;
                 if (type::IsTextureArray(texture->dim())) {
@@ -320,7 +320,7 @@ struct State {
                 }
                 break;
             }
-            case core::Function::kTextureStore: {
+            case core::BuiltinFn::kTextureStore: {
                 clamp_coords(1u);
                 if (type::IsTextureArray(texture->dim())) {
                     clamp_array_index(2u);

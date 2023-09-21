@@ -27,7 +27,7 @@ namespace tint::ast {
 
 /// A call expression - represents either a:
 /// * sem::Function
-/// * sem::Builtin
+/// * sem::BuiltinFn
 /// * sem::ValueConstructor
 /// * sem::ValueConversion
 class CallExpression final : public Castable<CallExpression, Expression> {

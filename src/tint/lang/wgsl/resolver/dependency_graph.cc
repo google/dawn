@@ -60,7 +60,7 @@
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/while_statement.h"
 #include "src/tint/lang/wgsl/ast/workgroup_attribute.h"
-#include "src/tint/lang/wgsl/sem/builtin.h"
+#include "src/tint/lang/wgsl/sem/builtin_fn.h"
 #include "src/tint/utils/containers/map.h"
 #include "src/tint/utils/containers/scope_stack.h"
 #include "src/tint/utils/containers/unique_vector.h"
@@ -474,7 +474,7 @@ class DependencyScanner {
 
         BuiltinType type = BuiltinType::kNone;
         std::variant<std::monostate,
-                     core::Function,
+                     core::BuiltinFn,
                      core::Builtin,
                      core::BuiltinValue,
                      core::AddressSpace,
@@ -490,8 +490,8 @@ class DependencyScanner {
     /// @returns the builtin info
     DependencyScanner::BuiltinInfo GetBuiltinInfo(Symbol symbol) {
         return builtin_info_map.GetOrCreate(symbol, [&] {
-            if (auto builtin_fn = core::ParseFunction(symbol.NameView());
-                builtin_fn != core::Function::kNone) {
+            if (auto builtin_fn = core::ParseBuiltinFn(symbol.NameView());
+                builtin_fn != core::BuiltinFn::kNone) {
                 return BuiltinInfo{BuiltinType::kFunction, builtin_fn};
             }
             if (auto builtin_ty = core::ParseBuiltin(symbol.NameView());
@@ -537,7 +537,7 @@ class DependencyScanner {
                     break;
                 case BuiltinType::kFunction:
                     graph_.resolved_identifiers.Add(
-                        from, ResolvedIdentifier(builtin_info.Value<core::Function>()));
+                        from, ResolvedIdentifier(builtin_info.Value<core::BuiltinFn>()));
                     break;
                 case BuiltinType::kBuiltin:
                     graph_.resolved_identifiers.Add(
@@ -921,7 +921,7 @@ std::string ResolvedIdentifier::String() const {
                 return "<unknown>";
             });
     }
-    if (auto builtin_fn = BuiltinFunction(); builtin_fn != core::Function::kNone) {
+    if (auto builtin_fn = BuiltinFn(); builtin_fn != core::BuiltinFn::kNone) {
         return "builtin function '" + tint::ToString(builtin_fn) + "'";
     }
     if (auto builtin_ty = BuiltinType(); builtin_ty != core::Builtin::kUndefined) {

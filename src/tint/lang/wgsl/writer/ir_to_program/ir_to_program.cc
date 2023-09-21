@@ -1141,20 +1141,20 @@ class State {
         return b.IndexAccessor(expr, Expr(index));
     }
 
-    bool RequiresDerivativeUniformity(core::Function fn) {
+    bool RequiresDerivativeUniformity(core::BuiltinFn fn) {
         switch (fn) {
-            case core::Function::kDpdxCoarse:
-            case core::Function::kDpdyCoarse:
-            case core::Function::kFwidthCoarse:
-            case core::Function::kDpdxFine:
-            case core::Function::kDpdyFine:
-            case core::Function::kFwidthFine:
-            case core::Function::kDpdx:
-            case core::Function::kDpdy:
-            case core::Function::kFwidth:
-            case core::Function::kTextureSample:
-            case core::Function::kTextureSampleBias:
-            case core::Function::kTextureSampleCompare:
+            case core::BuiltinFn::kDpdxCoarse:
+            case core::BuiltinFn::kDpdyCoarse:
+            case core::BuiltinFn::kFwidthCoarse:
+            case core::BuiltinFn::kDpdxFine:
+            case core::BuiltinFn::kDpdyFine:
+            case core::BuiltinFn::kFwidthFine:
+            case core::BuiltinFn::kDpdx:
+            case core::BuiltinFn::kDpdy:
+            case core::BuiltinFn::kFwidth:
+            case core::BuiltinFn::kTextureSample:
+            case core::BuiltinFn::kTextureSampleBias:
+            case core::BuiltinFn::kTextureSampleCompare:
                 return true;
             default:
                 return false;

@@ -41,7 +41,7 @@ bool ShouldRun(const Program* program) {
     for (auto* fn : program->AST().Functions()) {
         if (auto* sem_fn = program->Sem().Get(fn)) {
             for (auto* builtin : sem_fn->DirectlyCalledBuiltins()) {
-                if (builtin->Type() == core::Function::kArrayLength) {
+                if (builtin->Fn() == core::BuiltinFn::kArrayLength) {
                     return true;
                 }
             }
@@ -206,8 +206,8 @@ struct ArrayLengthFromUniform::State {
             }
 
             auto* call = sem.Get(call_expr)->UnwrapMaterialize()->As<sem::Call>();
-            auto* builtin = call->Target()->As<sem::Builtin>();
-            if (!builtin || builtin->Type() != core::Function::kArrayLength) {
+            auto* builtin = call->Target()->As<sem::BuiltinFn>();
+            if (!builtin || builtin->Fn() != core::BuiltinFn::kArrayLength) {
                 continue;
             }
 

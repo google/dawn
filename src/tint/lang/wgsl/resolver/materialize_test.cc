@@ -953,7 +953,7 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
             break;
         }
         case Method::kTintMaterializeBuiltin: {
-            auto* call = Call(core::str(core::Function::kTintMaterialize), abstract_expr());
+            auto* call = Call(core::str(core::BuiltinFn::kTintMaterialize), abstract_expr());
             WrapInFunction(Decl(Const("c", call)));
             break;
         }

@@ -33,7 +33,7 @@
 
 // Forward declarations
 namespace tint::sem {
-class Builtin;
+class BuiltinFn;
 class Call;
 class ValueConstructor;
 class ValueConversion;
@@ -129,7 +129,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param call the call expression
     /// @param builtin the builtin being called
     /// @returns true if the expression is emitted
-    bool EmitBuiltinCall(StringStream& out, const sem::Call* call, const sem::Builtin* builtin);
+    bool EmitBuiltinCall(StringStream& out, const sem::Call* call, const sem::BuiltinFn* builtin);
     /// Handles generating a value conversion expression
     /// @param out the output stream
     /// @param call the call expression
@@ -168,7 +168,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @param out the output stream
     /// @param builtin the semantic information for the barrier builtin
     /// @returns true if the call expression is emitted
-    bool EmitBarrierCall(StringStream& out, const sem::Builtin* builtin);
+    bool EmitBarrierCall(StringStream& out, const sem::BuiltinFn* builtin);
     /// Handles generating an atomic intrinsic call for a storage buffer variable
     /// @param out the output stream
     /// @param expr the call expression
@@ -190,14 +190,14 @@ class ASTPrinter : public tint::TextGenerator {
     /// @returns true if the call expression is emitted
     bool EmitWorkgroupAtomicCall(StringStream& out,
                                  const ast::CallExpression* expr,
-                                 const sem::Builtin* builtin);
+                                 const sem::BuiltinFn* builtin);
     /// Handles generating a call to a texture function (`textureSample`,
     /// `textureSampleGrad`, etc)
     /// @param out the output stream
     /// @param call the call expression
     /// @param builtin the semantic information for the texture builtin
     /// @returns true if the call expression is emitted
-    bool EmitTextureCall(StringStream& out, const sem::Call* call, const sem::Builtin* builtin);
+    bool EmitTextureCall(StringStream& out, const sem::Call* call, const sem::BuiltinFn* builtin);
     /// Handles generating a call to the `select()` builtin
     /// @param out the output stream
     /// @param expr the call expression
@@ -210,7 +210,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @returns true if the call expression is emitted
     bool EmitModfCall(StringStream& out,
                       const ast::CallExpression* expr,
-                      const sem::Builtin* builtin);
+                      const sem::BuiltinFn* builtin);
     /// Handles generating a call to the `frexp()` builtin
     /// @param out the output stream
     /// @param expr the call expression
@@ -218,7 +218,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @returns true if the call expression is emitted
     bool EmitFrexpCall(StringStream& out,
                        const ast::CallExpression* expr,
-                       const sem::Builtin* builtin);
+                       const sem::BuiltinFn* builtin);
     /// Handles generating a call to the `degrees()` builtin
     /// @param out the output stream
     /// @param expr the call expression
@@ -226,7 +226,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @returns true if the call expression is emitted
     bool EmitDegreesCall(StringStream& out,
                          const ast::CallExpression* expr,
-                         const sem::Builtin* builtin);
+                         const sem::BuiltinFn* builtin);
     /// Handles generating a call to the `radians()` builtin
     /// @param out the output stream
     /// @param expr the call expression
@@ -234,13 +234,13 @@ class ASTPrinter : public tint::TextGenerator {
     /// @returns true if the call expression is emitted
     bool EmitRadiansCall(StringStream& out,
                          const ast::CallExpression* expr,
-                         const sem::Builtin* builtin);
+                         const sem::BuiltinFn* builtin);
     /// Handles generating a call to the `sign()` builtin
     /// @param out the output stream
     /// @param call the call semantic node
     /// @param builtin the semantic information for the builtin
     /// @returns true if the call expression is emitted
-    bool EmitSignCall(StringStream& out, const sem::Call* call, const sem::Builtin* builtin);
+    bool EmitSignCall(StringStream& out, const sem::Call* call, const sem::BuiltinFn* builtin);
     /// Handles generating a call to data packing builtin
     /// @param out the output stream
     /// @param expr the call expression
@@ -248,7 +248,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @returns true if the call expression is emitted
     bool EmitDataPackingCall(StringStream& out,
                              const ast::CallExpression* expr,
-                             const sem::Builtin* builtin);
+                             const sem::BuiltinFn* builtin);
     /// Handles generating a call to data unpacking builtin
     /// @param out the output stream
     /// @param expr the call expression
@@ -256,7 +256,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @returns true if the call expression is emitted
     bool EmitDataUnpackingCall(StringStream& out,
                                const ast::CallExpression* expr,
-                               const sem::Builtin* builtin);
+                               const sem::BuiltinFn* builtin);
     /// Handles generating a call to the `quantizeToF16()` intrinsic
     /// @param out the output stream
     /// @param expr the call expression
@@ -264,7 +264,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @returns true if the call expression is emitted
     bool EmitQuantizeToF16Call(StringStream& out,
                                const ast::CallExpression* expr,
-                               const sem::Builtin* builtin);
+                               const sem::BuiltinFn* builtin);
     /// Handles generating a call to the `trunc()` intrinsic
     /// @param out the output stream
     /// @param expr the call expression
@@ -272,7 +272,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @returns true if the call expression is emitted
     bool EmitTruncCall(StringStream& out,
                        const ast::CallExpression* expr,
-                       const sem::Builtin* builtin);
+                       const sem::BuiltinFn* builtin);
     /// Handles generating a call to DP4a builtins (dot4I8Packed and dot4U8Packed)
     /// @param out the output stream
     /// @param expr the call expression
@@ -280,7 +280,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @returns true if the call expression is emitted
     bool EmitDP4aCall(StringStream& out,
                       const ast::CallExpression* expr,
-                      const sem::Builtin* builtin);
+                      const sem::BuiltinFn* builtin);
     /// Handles generating a call to subgroup builtins.
     /// @param out the output stream
     /// @param expr the call expression
@@ -288,7 +288,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// @returns true if the call expression is emitted
     bool EmitSubgroupCall(StringStream& out,
                           const ast::CallExpression* expr,
-                          const sem::Builtin* builtin);
+                          const sem::BuiltinFn* builtin);
     /// Handles a case statement
     /// @param s the switch statement
     /// @param case_idx the index of the switch case in the switch statement
@@ -507,7 +507,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// Handles generating a builtin method name
     /// @param builtin the semantic info for the builtin
     /// @returns the name or "" if not valid
-    std::string generate_builtin_name(const sem::Builtin* builtin);
+    std::string generate_builtin_name(const sem::BuiltinFn* builtin);
     /// Converts a builtin to an attribute name
     /// @param builtin the builtin to convert
     /// @returns the string name of the builtin or blank on error
@@ -562,7 +562,7 @@ class ASTPrinter : public tint::TextGenerator {
     template <typename F>
     bool CallBuiltinHelper(StringStream& out,
                            const ast::CallExpression* call,
-                           const sem::Builtin* builtin,
+                           const sem::BuiltinFn* builtin,
                            F&& build);
 
     /// @param s the structure
@@ -591,7 +591,7 @@ class ASTPrinter : public tint::TextGenerator {
     std::unordered_map<const core::type::Struct*, std::string> builtin_struct_names_;
     std::function<bool()> emit_continuing_;
     std::unordered_map<const core::type::Matrix*, std::string> matrix_scalar_inits_;
-    std::unordered_map<const sem::Builtin*, std::string> builtins_;
+    std::unordered_map<const sem::BuiltinFn*, std::string> builtins_;
     // Polyfill functions for bitcast expression, BinaryType indicates the source type and the
     // destination type.
     std::unordered_map<BinaryType, std::string> bitcast_funcs_;

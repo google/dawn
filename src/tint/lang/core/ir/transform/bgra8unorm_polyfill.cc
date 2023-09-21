@@ -140,7 +140,7 @@ struct State {
                 [&](CoreBuiltinCall* call) {
                     // Replace arguments to builtin functions and add swizzles if necessary.
                     call->SetOperand(use.operand_index, new_value);
-                    if (call->Func() == core::Function::kTextureStore) {
+                    if (call->Func() == core::BuiltinFn::kTextureStore) {
                         // Swizzle the value argument of a `textureStore()` builtin.
                         auto* tex = old_value->Type()->As<core::type::StorageTexture>();
                         auto index = core::type::IsTextureArray(tex->dim()) ? 3u : 2u;
@@ -148,7 +148,7 @@ struct State {
                         auto* swizzle = b.Swizzle(value->Type(), value, Vector{2u, 1u, 0u, 3u});
                         swizzle->InsertBefore(call);
                         call->SetOperand(index, swizzle->Result());
-                    } else if (call->Func() == core::Function::kTextureLoad) {
+                    } else if (call->Func() == core::BuiltinFn::kTextureLoad) {
                         // Swizzle the result of a `textureLoad()` builtin.
                         auto* swizzle =
                             b.Swizzle(call->Result()->Type(), nullptr, Vector{2u, 1u, 0u, 3u});

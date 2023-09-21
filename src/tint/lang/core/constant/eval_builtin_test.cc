@@ -139,7 +139,7 @@ static Case E(std::initializer_list<ScalarTypes> sargs, std::string err) {
     return Case{std::move(args), std::move(err)};
 }
 
-using ConstEvalBuiltinTest = ConstEvalTestWithParam<std::tuple<core::Function, Case>>;
+using ConstEvalBuiltinTest = ConstEvalTestWithParam<std::tuple<core::BuiltinFn, Case>>;
 
 TEST_P(ConstEvalBuiltinTest, Test) {
     Enable(wgsl::Extension::kF16);
@@ -186,7 +186,7 @@ TEST_P(ConstEvalBuiltinTest, Test) {
 
 INSTANTIATE_TEST_SUITE_P(MixedAbstractArgs_Atan2,
                          ConstEvalBuiltinTest,
-                         testing::Combine(testing::Values(core::Function::kAtan2),
+                         testing::Combine(testing::Values(core::BuiltinFn::kAtan2),
                                           testing::ValuesIn(std::vector{
                                               C({0.0_a, 1_a}, AFloat{0}),
                                               C({0_a, 1.0_a}, AFloat{0}),
@@ -196,7 +196,7 @@ INSTANTIATE_TEST_SUITE_P(MixedAbstractArgs_Atan2,
 
 INSTANTIATE_TEST_SUITE_P(MixedAbstractArgs_Max,
                          ConstEvalBuiltinTest,
-                         testing::Combine(testing::Values(core::Function::kMax),
+                         testing::Combine(testing::Values(core::BuiltinFn::kMax),
                                           testing::ValuesIn(std::vector{
                                               // AbstractInt first, AbstractFloat second
                                               C({1_a, 2.0_a}, AFloat{2}),
@@ -247,7 +247,7 @@ std::vector<Case> AbsCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Abs,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kAbs),
+    testing::Combine(testing::Values(core::BuiltinFn::kAbs),
                      testing::ValuesIn(Concat(AbsCases<AInt>(),  //
                                               AbsCases<i32>(),
                                               AbsCases<u32>(),
@@ -282,7 +282,7 @@ static std::vector<Case> AllCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     All,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kAll), testing::ValuesIn(AllCases())));
+    testing::Combine(testing::Values(core::BuiltinFn::kAll), testing::ValuesIn(AllCases())));
 
 static std::vector<Case> AnyCases() {
     return {
@@ -311,7 +311,7 @@ static std::vector<Case> AnyCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Any,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kAny), testing::ValuesIn(AnyCases())));
+    testing::Combine(testing::Values(core::BuiltinFn::kAny), testing::ValuesIn(AnyCases())));
 
 template <typename T>
 std::vector<Case> Atan2Cases() {
@@ -346,7 +346,7 @@ std::vector<Case> Atan2Cases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Atan2,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kAtan2),
+    testing::Combine(testing::Values(core::BuiltinFn::kAtan2),
                      testing::ValuesIn(Concat(Atan2Cases<AFloat>(),  //
                                               Atan2Cases<f32>(),
                                               Atan2Cases<f16>()))));
@@ -367,7 +367,7 @@ std::vector<Case> AtanCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Atan,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kAtan),
+    testing::Combine(testing::Values(core::BuiltinFn::kAtan),
                      testing::ValuesIn(Concat(AtanCases<AFloat>(),  //
                                               AtanCases<f32>(),
                                               AtanCases<f16>()))));
@@ -392,7 +392,7 @@ std::vector<Case> AtanhCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Atanh,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kAtanh),
+    testing::Combine(testing::Values(core::BuiltinFn::kAtanh),
                      testing::ValuesIn(Concat(AtanhCases<AFloat>(),  //
                                               AtanhCases<f32>(),
                                               AtanhCases<f16>()))));
@@ -418,7 +418,7 @@ std::vector<Case> AcosCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Acos,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kAcos),
+    testing::Combine(testing::Values(core::BuiltinFn::kAcos),
                      testing::ValuesIn(Concat(AcosCases<AFloat>(),  //
                                               AcosCases<f32>(),
                                               AcosCases<f16>()))));
@@ -440,7 +440,7 @@ std::vector<Case> AcoshCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Acosh,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kAcosh),
+    testing::Combine(testing::Values(core::BuiltinFn::kAcosh),
                      testing::ValuesIn(Concat(AcoshCases<AFloat>(),  //
                                               AcoshCases<f32>(),
                                               AcoshCases<f16>()))));
@@ -467,7 +467,7 @@ std::vector<Case> AsinCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Asin,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kAsin),
+    testing::Combine(testing::Values(core::BuiltinFn::kAsin),
                      testing::ValuesIn(Concat(AsinCases<AFloat>(),  //
                                               AsinCases<f32>(),
                                               AsinCases<f16>()))));
@@ -491,7 +491,7 @@ std::vector<Case> AsinhCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Asinh,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kAsinh),
+    testing::Combine(testing::Values(core::BuiltinFn::kAsinh),
                      testing::ValuesIn(Concat(AsinhCases<AFloat>(),  //
                                               AsinhCases<f32>(),
                                               AsinhCases<f16>()))));
@@ -513,7 +513,7 @@ INSTANTIATE_TEST_SUITE_P(  //
     Ceil,
     ConstEvalBuiltinTest,
     testing::Combine(
-        testing::Values(core::Function::kCeil),
+        testing::Values(core::BuiltinFn::kCeil),
         testing::ValuesIn(Concat(CeilCases<AFloat>(), CeilCases<f32>(), CeilCases<f16>()))));
 
 template <typename T>
@@ -558,7 +558,7 @@ std::vector<Case> ClampCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Clamp,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kClamp),
+    testing::Combine(testing::Values(core::BuiltinFn::kClamp),
                      testing::ValuesIn(Concat(ClampCases<AInt>(),  //
                                               ClampCases<i32>(),
                                               ClampCases<u32>(),
@@ -581,7 +581,7 @@ std::vector<Case> CosCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Cos,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kCos),
+    testing::Combine(testing::Values(core::BuiltinFn::kCos),
                      testing::ValuesIn(Concat(CosCases<AFloat>(),  //
                                               CosCases<f32>(),
                                               CosCases<f16>()))));
@@ -607,7 +607,7 @@ std::vector<Case> CoshCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Cosh,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kCosh),
+    testing::Combine(testing::Values(core::BuiltinFn::kCosh),
                      testing::ValuesIn(Concat(CoshCases<AFloat>(),  //
                                               CoshCases<f32>(),
                                               CoshCases<f16>()))));
@@ -654,7 +654,7 @@ std::vector<Case> CountLeadingZerosCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     CountLeadingZeros,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kCountLeadingZeros),
+    testing::Combine(testing::Values(core::BuiltinFn::kCountLeadingZeros),
                      testing::ValuesIn(Concat(CountLeadingZerosCases<i32>(),  //
                                               CountLeadingZerosCases<u32>()))));
 
@@ -700,7 +700,7 @@ std::vector<Case> CountTrailingZerosCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     CountTrailingZeros,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kCountTrailingZeros),
+    testing::Combine(testing::Values(core::BuiltinFn::kCountTrailingZeros),
                      testing::ValuesIn(Concat(CountTrailingZerosCases<i32>(),  //
                                               CountTrailingZerosCases<u32>()))));
 
@@ -737,7 +737,7 @@ std::vector<Case> CountOneBitsCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     CountOneBits,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kCountOneBits),
+    testing::Combine(testing::Values(core::BuiltinFn::kCountOneBits),
                      testing::ValuesIn(Concat(CountOneBitsCases<i32>(),  //
                                               CountOneBitsCases<u32>()))));
 
@@ -836,7 +836,7 @@ std::vector<Case> CrossCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Cross,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kCross),
+    testing::Combine(testing::Values(core::BuiltinFn::kCross),
                      testing::ValuesIn(Concat(CrossCases<AFloat>(),  //
                                               CrossCases<f32>(),     //
                                               CrossCases<f16>()))));
@@ -863,7 +863,7 @@ std::vector<Case> DistanceCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Distance,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kDistance),
+    testing::Combine(testing::Values(core::BuiltinFn::kDistance),
                      testing::ValuesIn(Concat(DistanceCases<AFloat>(),  //
                                               DistanceCases<f32>(),     //
                                               DistanceCases<f16>()))));
@@ -911,7 +911,7 @@ std::vector<Case> DotCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Dot,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kDot),
+    testing::Combine(testing::Values(core::BuiltinFn::kDot),
                      testing::ValuesIn(Concat(DotCases<AInt>(),    //
                                               DotCases<i32>(),     //
                                               DotCases<u32>(),     //
@@ -991,7 +991,7 @@ std::vector<Case> DeterminantCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Determinant,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kDeterminant),
+    testing::Combine(testing::Values(core::BuiltinFn::kDeterminant),
                      testing::ValuesIn(Concat(DeterminantCases<AFloat>(),  //
                                               DeterminantCases<f32>(),     //
                                               DeterminantCases<f16>()))));
@@ -1073,7 +1073,7 @@ std::vector<Case> FaceForwardCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     FaceForward,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kFaceForward),
+    testing::Combine(testing::Values(core::BuiltinFn::kFaceForward),
                      testing::ValuesIn(Concat(FaceForwardCases<AFloat>(),  //
                                               FaceForwardCases<f32>(),     //
                                               FaceForwardCases<f16>()))));
@@ -1136,7 +1136,7 @@ std::vector<Case> FirstLeadingBitCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     FirstLeadingBit,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kFirstLeadingBit),
+    testing::Combine(testing::Values(core::BuiltinFn::kFirstLeadingBit),
                      testing::ValuesIn(Concat(FirstLeadingBitCases<i32>(),  //
                                               FirstLeadingBitCases<u32>()))));
 
@@ -1169,7 +1169,7 @@ std::vector<Case> FirstTrailingBitCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     FirstTrailingBit,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kFirstTrailingBit),
+    testing::Combine(testing::Values(core::BuiltinFn::kFirstTrailingBit),
                      testing::ValuesIn(Concat(FirstTrailingBitCases<i32>(),  //
                                               FirstTrailingBitCases<u32>()))));
 
@@ -1189,7 +1189,7 @@ std::vector<Case> FloorCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Floor,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kFloor),
+    testing::Combine(testing::Values(core::BuiltinFn::kFloor),
                      testing::ValuesIn(Concat(FloorCases<AFloat>(),  //
                                               FloorCases<f32>(),
                                               FloorCases<f16>()))));
@@ -1213,7 +1213,7 @@ std::vector<Case> FmaCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Fma,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kFma),
+    testing::Combine(testing::Values(core::BuiltinFn::kFma),
                      testing::ValuesIn(Concat(FmaCases<AFloat>(),  //
                                               FmaCases<f32>(),
                                               FmaCases<f16>()))));
@@ -1245,7 +1245,7 @@ std::vector<Case> FractCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Fract,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kFract),
+    testing::Combine(testing::Values(core::BuiltinFn::kFract),
                      testing::ValuesIn(Concat(FractCases<AFloat>(),  //
                                               FractCases<f32>(),
                                               FractCases<f16>()))));
@@ -1302,7 +1302,7 @@ std::vector<Case> FrexpCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Frexp,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kFrexp),
+    testing::Combine(testing::Values(core::BuiltinFn::kFrexp),
                      testing::ValuesIn(Concat(FrexpCases<AFloat>(),  //
                                               FrexpCases<f32>(),     //
                                               FrexpCases<f16>()))));
@@ -1384,7 +1384,7 @@ std::vector<Case> InsertBitsCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     InsertBits,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kInsertBits),
+    testing::Combine(testing::Values(core::BuiltinFn::kInsertBits),
                      testing::ValuesIn(Concat(InsertBitsCases<i32>(),  //
                                               InsertBitsCases<u32>()))));
 
@@ -1404,7 +1404,7 @@ std::vector<Case> InverseSqrtCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     InverseSqrt,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kInverseSqrt),
+    testing::Combine(testing::Values(core::BuiltinFn::kInverseSqrt),
                      testing::ValuesIn(Concat(InverseSqrtCases<AFloat>(),  //
                                               InverseSqrtCases<f32>(),
                                               InverseSqrtCases<f16>()))));
@@ -1423,7 +1423,7 @@ std::vector<Case> DegreesAFloatCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     DegreesAFloat,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kDegrees),
+    testing::Combine(testing::Values(core::BuiltinFn::kDegrees),
                      testing::ValuesIn(DegreesAFloatCases<AFloat>())));
 
 template <typename T>
@@ -1440,7 +1440,7 @@ std::vector<Case> DegreesF32Cases() {
 INSTANTIATE_TEST_SUITE_P(  //
     DegreesF32,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kDegrees),
+    testing::Combine(testing::Values(core::BuiltinFn::kDegrees),
                      testing::ValuesIn(DegreesF32Cases<f32>())));
 
 template <typename T>
@@ -1457,7 +1457,7 @@ std::vector<Case> DegreesF16Cases() {
 INSTANTIATE_TEST_SUITE_P(  //
     DegreesF16,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kDegrees),
+    testing::Combine(testing::Values(core::BuiltinFn::kDegrees),
                      testing::ValuesIn(DegreesF16Cases<f16>())));
 
 template <typename T>
@@ -1474,7 +1474,7 @@ std::vector<Case> ExpCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Exp,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kExp),
+    testing::Combine(testing::Values(core::BuiltinFn::kExp),
                      testing::ValuesIn(Concat(ExpCases<AFloat>(),  //
                                               ExpCases<f32>(),
                                               ExpCases<f16>()))));
@@ -1495,7 +1495,7 @@ std::vector<Case> Exp2Cases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Exp2,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kExp2),
+    testing::Combine(testing::Values(core::BuiltinFn::kExp2),
                      testing::ValuesIn(Concat(Exp2Cases<AFloat>(),  //
                                               Exp2Cases<f32>(),
                                               Exp2Cases<f16>()))));
@@ -1592,7 +1592,7 @@ std::vector<Case> ExtractBitsCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     ExtractBits,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kExtractBits),
+    testing::Combine(testing::Values(core::BuiltinFn::kExtractBits),
                      testing::ValuesIn(Concat(ExtractBitsCases<i32>(),  //
                                               ExtractBitsCases<u32>()))));
 
@@ -1656,7 +1656,7 @@ std::vector<Case> LdexpCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Ldexp,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kLdexp),
+    testing::Combine(testing::Values(core::BuiltinFn::kLdexp),
                      testing::ValuesIn(Concat(LdexpCases<AFloat>(),  //
                                               LdexpCases<f32>(),
                                               LdexpCases<f16>()))));
@@ -1715,7 +1715,7 @@ std::vector<Case> LengthCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Length,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kLength),
+    testing::Combine(testing::Values(core::BuiltinFn::kLength),
                      testing::ValuesIn(Concat(LengthCases<AFloat>(),  //
                                               LengthCases<f32>(),
                                               LengthCases<f16>()))));
@@ -1731,7 +1731,7 @@ std::vector<Case> LogCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Log,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kLog),
+    testing::Combine(testing::Values(core::BuiltinFn::kLog),
                      testing::ValuesIn(Concat(LogCases<AFloat>(),  //
                                               LogCases<f32>(),
                                               LogCases<f16>()))));
@@ -1744,7 +1744,8 @@ std::vector<Case> LogF16Cases() {
 INSTANTIATE_TEST_SUITE_P(  //
     LogF16,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kLog), testing::ValuesIn(LogF16Cases<f16>())));
+    testing::Combine(testing::Values(core::BuiltinFn::kLog),
+                     testing::ValuesIn(LogF16Cases<f16>())));
 template <typename T>
 std::vector<Case> LogF32Cases() {
     return {
@@ -1754,7 +1755,8 @@ std::vector<Case> LogF32Cases() {
 INSTANTIATE_TEST_SUITE_P(  //
     LogF32,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kLog), testing::ValuesIn(LogF32Cases<f32>())));
+    testing::Combine(testing::Values(core::BuiltinFn::kLog),
+                     testing::ValuesIn(LogF32Cases<f32>())));
 
 template <typename T>
 std::vector<Case> LogAbstractCases() {
@@ -1765,7 +1767,7 @@ std::vector<Case> LogAbstractCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     LogAbstract,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kLog),
+    testing::Combine(testing::Values(core::BuiltinFn::kLog),
                      testing::ValuesIn(LogAbstractCases<AFloat>())));
 
 template <typename T>
@@ -1783,7 +1785,7 @@ std::vector<Case> Log2Cases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Log2,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kLog2),
+    testing::Combine(testing::Values(core::BuiltinFn::kLog2),
                      testing::ValuesIn(Concat(Log2Cases<AFloat>(),  //
                                               Log2Cases<f32>(),
                                               Log2Cases<f16>()))));
@@ -1796,7 +1798,7 @@ std::vector<Case> Log2F16Cases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Log2F16,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kLog2),
+    testing::Combine(testing::Values(core::BuiltinFn::kLog2),
                      testing::ValuesIn(Log2F16Cases<f16>())));
 template <typename T>
 std::vector<Case> Log2F32Cases() {
@@ -1807,7 +1809,7 @@ std::vector<Case> Log2F32Cases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Log2F32,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kLog2),
+    testing::Combine(testing::Values(core::BuiltinFn::kLog2),
                      testing::ValuesIn(Log2F32Cases<f32>())));
 template <typename T>
 std::vector<Case> Log2AbstractCases() {
@@ -1818,7 +1820,7 @@ std::vector<Case> Log2AbstractCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Log2Abstract,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kLog2),
+    testing::Combine(testing::Values(core::BuiltinFn::kLog2),
                      testing::ValuesIn(Log2AbstractCases<AFloat>())));
 
 template <typename T>
@@ -1841,7 +1843,7 @@ std::vector<Case> MaxCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Max,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kMax),
+    testing::Combine(testing::Values(core::BuiltinFn::kMax),
                      testing::ValuesIn(Concat(MaxCases<AInt>(),  //
                                               MaxCases<i32>(),
                                               MaxCases<u32>(),
@@ -1867,7 +1869,7 @@ std::vector<Case> MinCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Min,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kMin),
+    testing::Combine(testing::Values(core::BuiltinFn::kMin),
                      testing::ValuesIn(Concat(MinCases<AInt>(),  //
                                               MinCases<i32>(),
                                               MinCases<u32>(),
@@ -1957,7 +1959,7 @@ std::vector<Case> MixCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Mix,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kMix),
+    testing::Combine(testing::Values(core::BuiltinFn::kMix),
                      testing::ValuesIn(Concat(MixCases<AFloat>(),  //
                                               MixCases<f32>(),     //
                                               MixCases<f16>()))));
@@ -1991,7 +1993,7 @@ std::vector<Case> ModfCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Modf,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kModf),
+    testing::Combine(testing::Values(core::BuiltinFn::kModf),
                      testing::ValuesIn(Concat(ModfCases<AFloat>(),  //
                                               ModfCases<f32>(),     //
                                               ModfCases<f16>()))));
@@ -2021,7 +2023,7 @@ std::vector<Case> NormalizeCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Normalize,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kNormalize),
+    testing::Combine(testing::Values(core::BuiltinFn::kNormalize),
                      testing::ValuesIn(Concat(NormalizeCases<AFloat>(),  //
                                               NormalizeCases<f32>(),     //
                                               NormalizeCases<f16>()))));
@@ -2041,7 +2043,7 @@ std::vector<Case> Pack4x8snormCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Pack4x8snorm,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kPack4X8Snorm),
+    testing::Combine(testing::Values(core::BuiltinFn::kPack4X8Snorm),
                      testing::ValuesIn(Pack4x8snormCases())));
 
 std::vector<Case> Pack4x8unormCases() {
@@ -2058,7 +2060,7 @@ std::vector<Case> Pack4x8unormCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Pack4x8unorm,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kPack4X8Unorm),
+    testing::Combine(testing::Values(core::BuiltinFn::kPack4X8Unorm),
                      testing::ValuesIn(Pack4x8unormCases())));
 
 std::vector<Case> Pack2x16floatCases() {
@@ -2079,7 +2081,7 @@ std::vector<Case> Pack2x16floatCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Pack2x16float,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kPack2X16Float),
+    testing::Combine(testing::Values(core::BuiltinFn::kPack2X16Float),
                      testing::ValuesIn(Pack2x16floatCases())));
 
 std::vector<Case> Pack2x16snormCases() {
@@ -2097,7 +2099,7 @@ std::vector<Case> Pack2x16snormCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Pack2x16snorm,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kPack2X16Snorm),
+    testing::Combine(testing::Values(core::BuiltinFn::kPack2X16Snorm),
                      testing::ValuesIn(Pack2x16snormCases())));
 
 std::vector<Case> Pack2x16unormCases() {
@@ -2111,7 +2113,7 @@ std::vector<Case> Pack2x16unormCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Pack2x16unorm,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kPack2X16Unorm),
+    testing::Combine(testing::Values(core::BuiltinFn::kPack2X16Unorm),
                      testing::ValuesIn(Pack2x16unormCases())));
 
 template <typename T>
@@ -2157,7 +2159,7 @@ std::vector<Case> PowCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Pow,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kPow),
+    testing::Combine(testing::Values(core::BuiltinFn::kPow),
                      testing::ValuesIn(Concat(PowCases<AFloat>(),  //
                                               PowCases<f32>(),     //
                                               PowCases<f16>()))));
@@ -2204,7 +2206,7 @@ std::vector<Case> ReverseBitsCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     ReverseBits,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kReverseBits),
+    testing::Combine(testing::Values(core::BuiltinFn::kReverseBits),
                      testing::ValuesIn(Concat(ReverseBitsCases<i32>(),  //
                                               ReverseBitsCases<u32>()))));
 
@@ -2256,7 +2258,7 @@ std::vector<Case> ReflectCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Reflect,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kReflect),
+    testing::Combine(testing::Values(core::BuiltinFn::kReflect),
                      testing::ValuesIn(Concat(ReflectCases<AFloat>(),  //
                                               ReflectCases<f32>(),     //
                                               ReflectCases<f16>()))));
@@ -2346,7 +2348,7 @@ std::vector<Case> RefractCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Refract,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kRefract),
+    testing::Combine(testing::Values(core::BuiltinFn::kRefract),
                      testing::ValuesIn(Concat(RefractCases<AFloat>(),  //
                                               RefractCases<f32>(),     //
                                               RefractCases<f16>()))));
@@ -2365,7 +2367,7 @@ std::vector<Case> RadiansCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Radians,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kRadians),
+    testing::Combine(testing::Values(core::BuiltinFn::kRadians),
                      testing::ValuesIn(Concat(RadiansCases<AFloat>(),  //
                                               RadiansCases<f32>()))));
 
@@ -2383,7 +2385,7 @@ std::vector<Case> RadiansF16Cases() {
 INSTANTIATE_TEST_SUITE_P(  //
     RadiansF16,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kRadians),
+    testing::Combine(testing::Values(core::BuiltinFn::kRadians),
                      testing::ValuesIn(RadiansF16Cases<f16>())));
 
 template <typename T>
@@ -2409,7 +2411,7 @@ std::vector<Case> RoundCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Round,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kRound),
+    testing::Combine(testing::Values(core::BuiltinFn::kRound),
                      testing::ValuesIn(Concat(RoundCases<AFloat>(),  //
                                               RoundCases<f32>(),
                                               RoundCases<f16>()))));
@@ -2434,7 +2436,7 @@ std::vector<Case> SaturateCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Saturate,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kSaturate),
+    testing::Combine(testing::Values(core::BuiltinFn::kSaturate),
                      testing::ValuesIn(Concat(SaturateCases<AFloat>(),  //
                                               SaturateCases<f32>(),
                                               SaturateCases<f16>()))));
@@ -2476,7 +2478,7 @@ static std::vector<Case> SelectBoolCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Select,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kSelect),
+    testing::Combine(testing::Values(core::BuiltinFn::kSelect),
                      testing::ValuesIn(Concat(SelectCases<AInt>(),  //
                                               SelectCases<i32>(),
                                               SelectCases<u32>(),
@@ -2517,7 +2519,7 @@ std::vector<Case> SignCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Sign,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kSign),
+    testing::Combine(testing::Values(core::BuiltinFn::kSign),
                      testing::ValuesIn(Concat(SignCases<AInt>(),  //
                                               SignCases<i32>(),
                                               SignCases<AFloat>(),
@@ -2539,7 +2541,7 @@ std::vector<Case> SinCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Sin,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kSin),
+    testing::Combine(testing::Values(core::BuiltinFn::kSin),
                      testing::ValuesIn(Concat(SinCases<AFloat>(),  //
                                               SinCases<f32>(),
                                               SinCases<f16>()))));
@@ -2564,7 +2566,7 @@ std::vector<Case> SinhCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Sinh,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kSinh),
+    testing::Combine(testing::Values(core::BuiltinFn::kSinh),
                      testing::ValuesIn(Concat(SinhCases<AFloat>(),  //
                                               SinhCases<f32>(),
                                               SinhCases<f16>()))));
@@ -2597,7 +2599,7 @@ std::vector<Case> SmoothstepCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Smoothstep,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kSmoothstep),
+    testing::Combine(testing::Values(core::BuiltinFn::kSmoothstep),
                      testing::ValuesIn(Concat(SmoothstepCases<AFloat>(),  //
                                               SmoothstepCases<f32>(),
                                               SmoothstepCases<f16>()))));
@@ -2629,7 +2631,7 @@ std::vector<Case> StepCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Step,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kStep),
+    testing::Combine(testing::Values(core::BuiltinFn::kStep),
                      testing::ValuesIn(Concat(StepCases<AFloat>(),  //
                                               StepCases<f32>(),
                                               StepCases<f16>()))));
@@ -2650,7 +2652,7 @@ std::vector<Case> SqrtCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Sqrt,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kSqrt),
+    testing::Combine(testing::Values(core::BuiltinFn::kSqrt),
                      testing::ValuesIn(Concat(SqrtCases<AFloat>(),  //
                                               SqrtCases<f32>(),
                                               SqrtCases<f16>()))));
@@ -2669,7 +2671,7 @@ std::vector<Case> TanCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Tan,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kTan),
+    testing::Combine(testing::Values(core::BuiltinFn::kTan),
                      testing::ValuesIn(Concat(TanCases<AFloat>(),  //
                                               TanCases<f32>(),
                                               TanCases<f16>()))));
@@ -2689,7 +2691,7 @@ std::vector<Case> TanhCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Tanh,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kTanh),
+    testing::Combine(testing::Values(core::BuiltinFn::kTanh),
                      testing::ValuesIn(Concat(TanhCases<AFloat>(),  //
                                               TanhCases<f32>(),
                                               TanhCases<f16>()))));
@@ -2755,7 +2757,7 @@ std::vector<Case> TransposeCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Transpose,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kTranspose),
+    testing::Combine(testing::Values(core::BuiltinFn::kTranspose),
                      testing::ValuesIn(Concat(TransposeCases<AFloat>(),  //
                                               TransposeCases<f32>(),
                                               TransposeCases<f16>()))));
@@ -2773,7 +2775,7 @@ std::vector<Case> TruncCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Trunc,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kTrunc),
+    testing::Combine(testing::Values(core::BuiltinFn::kTrunc),
                      testing::ValuesIn(Concat(TruncCases<AFloat>(),  //
                                               TruncCases<f32>(),
                                               TruncCases<f16>()))));
@@ -2794,7 +2796,7 @@ std::vector<Case> Unpack4x8snormCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Unpack4x8snorm,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kUnpack4X8Snorm),
+    testing::Combine(testing::Values(core::BuiltinFn::kUnpack4X8Snorm),
                      testing::ValuesIn(Unpack4x8snormCases())));
 
 std::vector<Case> Unpack4x8unormCases() {
@@ -2811,7 +2813,7 @@ std::vector<Case> Unpack4x8unormCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Unpack4x8unorm,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kUnpack4X8Unorm),
+    testing::Combine(testing::Values(core::BuiltinFn::kUnpack4X8Unorm),
                      testing::ValuesIn(Unpack4x8unormCases())));
 
 std::vector<Case> Unpack2x16floatCases() {
@@ -2825,7 +2827,7 @@ std::vector<Case> Unpack2x16floatCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Unpack2x16float,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kUnpack2X16Float),
+    testing::Combine(testing::Values(core::BuiltinFn::kUnpack2X16Float),
                      testing::ValuesIn(Unpack2x16floatCases())));
 
 std::vector<Case> Unpack2x16snormCases() {
@@ -2843,7 +2845,7 @@ std::vector<Case> Unpack2x16snormCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Unpack2x16snorm,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kUnpack2X16Snorm),
+    testing::Combine(testing::Values(core::BuiltinFn::kUnpack2X16Snorm),
                      testing::ValuesIn(Unpack2x16snormCases())));
 
 std::vector<Case> Unpack2x16unormCases() {
@@ -2857,7 +2859,7 @@ std::vector<Case> Unpack2x16unormCases() {
 INSTANTIATE_TEST_SUITE_P(  //
     Unpack2x16unorm,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kUnpack2X16Unorm),
+    testing::Combine(testing::Values(core::BuiltinFn::kUnpack2X16Unorm),
                      testing::ValuesIn(Unpack2x16unormCases())));
 
 std::vector<Case> QuantizeToF16Cases() {
@@ -2916,7 +2918,7 @@ std::vector<Case> QuantizeToF16Cases() {
 INSTANTIATE_TEST_SUITE_P(  //
     QuantizeToF16,
     ConstEvalBuiltinTest,
-    testing::Combine(testing::Values(core::Function::kQuantizeToF16),
+    testing::Combine(testing::Values(core::BuiltinFn::kQuantizeToF16),
                      testing::ValuesIn(QuantizeToF16Cases())));
 
 }  // namespace

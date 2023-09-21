@@ -85,7 +85,7 @@
 #include "src/tint/lang/wgsl/ast/variable_decl_statement.h"
 #include "src/tint/lang/wgsl/ast/while_statement.h"
 #include "src/tint/lang/wgsl/program/program.h"
-#include "src/tint/lang/wgsl/sem/builtin.h"
+#include "src/tint/lang/wgsl/sem/builtin_fn.h"
 #include "src/tint/lang/wgsl/sem/call.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/index_accessor_expression.h"
@@ -1097,8 +1097,8 @@ class Impl {
                 auto* ty = sem->Target()->ReturnType()->Clone(impl.clone_ctx_.type_ctx);
                 core::ir::Instruction* inst = nullptr;
                 // If this is a builtin function, emit the specific builtin value
-                if (auto* b = sem->Target()->As<sem::Builtin>()) {
-                    inst = impl.builder_.Call(ty, b->Type(), args);
+                if (auto* b = sem->Target()->As<sem::BuiltinFn>()) {
+                    inst = impl.builder_.Call(ty, b->Fn(), args);
                 } else if (sem->Target()->As<sem::ValueConstructor>()) {
                     inst = impl.builder_.Construct(ty, std::move(args));
                 } else if (sem->Target()->Is<sem::ValueConversion>()) {

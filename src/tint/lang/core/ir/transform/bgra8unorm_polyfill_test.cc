@@ -60,7 +60,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, NoModify_ModuleScopeVariable_Rgba) {
     func->SetParams({value, coords});
     b.Append(func->Block(), [&] {
         auto* load = b.Load(var->Result());
-        b.Call(ty.void_(), core::Function::kTextureStore, load, coords, value);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, load, coords, value);
         b.Return(func);
     });
 
@@ -97,7 +97,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, NoModify_UserFunctionParameter_Rgba) {
     auto* value = b.FunctionParam("value", ty.vec4<f32>());
     func->SetParams({texture, coords, value});
     b.Append(func->Block(), [&] {
-        b.Call(ty.void_(), core::Function::kTextureStore, texture, coords, value);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, texture, coords, value);
         b.Return(func);
     });
 
@@ -133,7 +133,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopeVariable) {
     func->SetParams({value, coords});
     b.Append(func->Block(), [&] {
         auto* load = b.Load(var->Result());
-        b.Call(ty.void_(), core::Function::kTextureStore, load, coords, value);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, load, coords, value);
         b.Return(func);
     });
 
@@ -183,7 +183,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, UserFunctionParameter) {
     auto* value = b.FunctionParam("value", ty.vec4<f32>());
     func->SetParams({texture, coords, value});
     b.Append(func->Block(), [&] {
-        b.Call(ty.void_(), core::Function::kTextureStore, texture, coords, value);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, texture, coords, value);
         b.Return(func);
     });
 
@@ -228,7 +228,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopePassedToUserFunction) {
         auto* value = b.FunctionParam("value", ty.vec4<f32>());
         bar->SetParams({texture, coords, value});
         b.Append(bar->Block(), [&] {
-            b.Call(ty.void_(), core::Function::kTextureStore, texture, coords, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, texture, coords, value);
             b.Return(bar);
         });
     }
@@ -316,9 +316,9 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ModuleScopePassedToUserFunction_MultipleTextur
         auto* value = b.FunctionParam("value", ty.vec4<f32>());
         bar->SetParams({texture_a, texture_b, texture_c, coords, value});
         b.Append(bar->Block(), [&] {
-            b.Call(ty.void_(), core::Function::kTextureStore, texture_a, coords, value);
-            b.Call(ty.void_(), core::Function::kTextureStore, texture_b, coords, value);
-            b.Call(ty.void_(), core::Function::kTextureStore, texture_c, coords, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, texture_a, coords, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, texture_b, coords, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, texture_c, coords, value);
             b.Return(bar);
         });
     }
@@ -414,9 +414,9 @@ TEST_F(IR_Bgra8UnormPolyfillTest, MutipleUsesOfOneTexture) {
         auto* value = b.FunctionParam("value", ty.vec4<f32>());
         bar->SetParams({texture, coords, value});
         b.Append(bar->Block(), [&] {
-            b.Call(ty.void_(), core::Function::kTextureStore, texture, coords, value);
-            b.Call(ty.void_(), core::Function::kTextureStore, texture, coords, value);
-            b.Call(ty.void_(), core::Function::kTextureStore, texture, coords, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, texture, coords, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, texture, coords, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, texture, coords, value);
             b.Return(bar);
         });
     }
@@ -428,7 +428,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, MutipleUsesOfOneTexture) {
         foo->SetParams({coords, value});
         b.Append(foo->Block(), [&] {
             auto* load_a = b.Load(var_a->Result());
-            b.Call(ty.void_(), core::Function::kTextureStore, load_a, coords, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, load_a, coords, value);
             auto* load_b = b.Load(var_a->Result());
             b.Call(ty.void_(), bar, load_b, coords, value);
             auto* load_c = b.Load(var_a->Result());
@@ -515,7 +515,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, ArrayedImage) {
     func->SetParams({value, coords});
     b.Append(func->Block(), [&] {
         auto* load = b.Load(var->Result());
-        b.Call(ty.void_(), core::Function::kTextureStore, load, coords, index, value);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, load, coords, index, value);
         b.Return(func);
     });
 
@@ -566,7 +566,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TextureDimensions) {
     auto* func = b.Function("foo", ty.vec2<u32>());
     b.Append(func->Block(), [&] {
         auto* load = b.Load(var->Result());
-        auto* dims = b.Call(ty.vec2<u32>(), core::Function::kTextureDimensions, load);
+        auto* dims = b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, load);
         b.Return(func, dims);
         mod.SetName(dims, "dims");
     });
@@ -619,7 +619,7 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TextureLoad) {
     func->SetParams({coords});
     b.Append(func->Block(), [&] {
         auto* load = b.Load(var->Result());
-        auto* result = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, load, coords);
+        auto* result = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, load, coords);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -673,8 +673,8 @@ TEST_F(IR_Bgra8UnormPolyfillTest, TextureLoadAndStore) {
     func->SetParams({coords});
     b.Append(func->Block(), [&] {
         auto* load = b.Load(var->Result());
-        auto* result = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, load, coords);
-        b.Call(ty.void_(), core::Function::kTextureStore, load, coords, result);
+        auto* result = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, load, coords);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, load, coords, result);
         b.Return(func);
         mod.SetName(result, "result");
     });

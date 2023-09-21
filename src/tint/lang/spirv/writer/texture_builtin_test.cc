@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/tint/lang/core/builtin_fn.h"
 #include "src/tint/lang/core/fluent_types.h"
-#include "src/tint/lang/core/function.h"
 #include "src/tint/lang/core/type/depth_multisampled_texture.h"
 #include "src/tint/lang/spirv/writer/common/helper_test.h"
 
@@ -130,11 +130,11 @@ class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCas
         return nullptr;
     }
 
-    void Run(enum core::Function function, SamplerUsage sampler) {
+    void Run(enum core::BuiltinFn function, SamplerUsage sampler) {
         auto params = GetParam();
 
         auto* result_ty = MakeScalarType(params.result.type);
-        if (function == core::Function::kTextureStore) {
+        if (function == core::BuiltinFn::kTextureStore) {
             result_ty = ty.void_();
         }
         if (params.result.width > 1) {
@@ -162,7 +162,7 @@ class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCas
             uint32_t arg_value = 1;
 
             Vector<core::ir::Value*, 4> args;
-            if (function == core::Function::kTextureGather &&
+            if (function == core::BuiltinFn::kTextureGather &&
                 params.texture_type != kDepthTexture) {
                 // Special case for textureGather, which has a component argument first.
                 auto* component = MakeScalarValue(kU32, arg_value++);
@@ -205,7 +205,7 @@ class TextureBuiltinTest : public SpirvWriterTestWithParam<TextureBuiltinTestCas
 ////////////////////////////////////////////////////////////////
 using TextureSample = TextureBuiltinTest;
 TEST_P(TextureSample, Emit) {
-    Run(core::Function::kTextureSample, kSampler);
+    Run(core::BuiltinFn::kTextureSample, kSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
@@ -400,7 +400,7 @@ INSTANTIATE_TEST_SUITE_P(
 ////////////////////////////////////////////////////////////////
 using TextureSampleBias = TextureBuiltinTest;
 TEST_P(TextureSampleBias, Emit) {
-    Run(core::Function::kTextureSampleBias, kSampler);
+    Run(core::BuiltinFn::kTextureSampleBias, kSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
@@ -507,7 +507,7 @@ INSTANTIATE_TEST_SUITE_P(
 ////////////////////////////////////////////////////////////////
 using TextureSampleGrad = TextureBuiltinTest;
 TEST_P(TextureSampleGrad, Emit) {
-    Run(core::Function::kTextureSampleGrad, kSampler);
+    Run(core::BuiltinFn::kTextureSampleGrad, kSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
@@ -618,7 +618,7 @@ INSTANTIATE_TEST_SUITE_P(
 ////////////////////////////////////////////////////////////////
 using TextureSampleLevel = TextureBuiltinTest;
 TEST_P(TextureSampleLevel, Emit) {
-    Run(core::Function::kTextureSampleLevel, kSampler);
+    Run(core::BuiltinFn::kTextureSampleLevel, kSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
@@ -808,7 +808,7 @@ INSTANTIATE_TEST_SUITE_P(
 ////////////////////////////////////////////////////////////////
 using TextureSampleCompare = TextureBuiltinTest;
 TEST_P(TextureSampleCompare, Emit) {
-    Run(core::Function::kTextureSampleCompare, kComparisonSampler);
+    Run(core::BuiltinFn::kTextureSampleCompare, kComparisonSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
@@ -893,7 +893,7 @@ INSTANTIATE_TEST_SUITE_P(
 ////////////////////////////////////////////////////////////////
 using TextureSampleCompareLevel = TextureBuiltinTest;
 TEST_P(TextureSampleCompareLevel, Emit) {
-    Run(core::Function::kTextureSampleCompareLevel, kComparisonSampler);
+    Run(core::BuiltinFn::kTextureSampleCompareLevel, kComparisonSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
@@ -983,7 +983,7 @@ INSTANTIATE_TEST_SUITE_P(
 ////////////////////////////////////////////////////////////////
 using TextureGather = TextureBuiltinTest;
 TEST_P(TextureGather, Emit) {
-    Run(core::Function::kTextureGather, kSampler);
+    Run(core::BuiltinFn::kTextureGather, kSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
@@ -1164,7 +1164,7 @@ INSTANTIATE_TEST_SUITE_P(
 ////////////////////////////////////////////////////////////////
 using TextureGatherCompare = TextureBuiltinTest;
 TEST_P(TextureGatherCompare, Emit) {
-    Run(core::Function::kTextureGatherCompare, kComparisonSampler);
+    Run(core::BuiltinFn::kTextureGatherCompare, kComparisonSampler);
 }
 INSTANTIATE_TEST_SUITE_P(
     SpirvWriterTest,
@@ -1249,7 +1249,7 @@ INSTANTIATE_TEST_SUITE_P(
 ////////////////////////////////////////////////////////////////
 using TextureLoad = TextureBuiltinTest;
 TEST_P(TextureLoad, Emit) {
-    Run(core::Function::kTextureLoad, kNoSampler);
+    Run(core::BuiltinFn::kTextureLoad, kNoSampler);
 }
 INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          TextureLoad,
@@ -1368,7 +1368,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
 ////////////////////////////////////////////////////////////////
 using TextureStore = TextureBuiltinTest;
 TEST_P(TextureStore, Emit) {
-    Run(core::Function::kTextureStore, kNoSampler);
+    Run(core::BuiltinFn::kTextureStore, kNoSampler);
 }
 INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          TextureStore,
@@ -1443,7 +1443,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
 ////////////////////////////////////////////////////////////////
 using TextureDimensions = TextureBuiltinTest;
 TEST_P(TextureDimensions, Emit) {
-    Run(core::Function::kTextureDimensions, kNoSampler);
+    Run(core::BuiltinFn::kTextureDimensions, kNoSampler);
 }
 INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          TextureDimensions,
@@ -1693,7 +1693,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
 ////////////////////////////////////////////////////////////////
 using TextureNumLayers = TextureBuiltinTest;
 TEST_P(TextureNumLayers, Emit) {
-    Run(core::Function::kTextureNumLayers, kNoSampler);
+    Run(core::BuiltinFn::kTextureNumLayers, kNoSampler);
 }
 INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          TextureNumLayers,
@@ -1760,7 +1760,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
 ////////////////////////////////////////////////////////////////
 using TextureNumLevels = TextureBuiltinTest;
 TEST_P(TextureNumLevels, Emit) {
-    Run(core::Function::kTextureNumLevels, kNoSampler);
+    Run(core::BuiltinFn::kTextureNumLevels, kNoSampler);
 }
 INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          TextureNumLevels,
@@ -1852,7 +1852,7 @@ INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
 ////////////////////////////////////////////////////////////////
 using TextureNumSamples = TextureBuiltinTest;
 TEST_P(TextureNumSamples, Emit) {
-    Run(core::Function::kTextureNumSamples, kNoSampler);
+    Run(core::BuiltinFn::kTextureNumSamples, kNoSampler);
 }
 INSTANTIATE_TEST_SUITE_P(SpirvWriterTest,
                          TextureNumSamples,
@@ -1891,7 +1891,7 @@ TEST_F(SpirvWriterTest, TextureSampleBaseClampToEdge_2d_f32) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams(args);
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f32>(), core::Function::kTextureSampleBaseClampToEdge, args);
+        auto* result = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureSampleBaseClampToEdge, args);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -1926,7 +1926,7 @@ TEST_F(SpirvWriterTest, Bgra8Unorm_textureStore) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({texture, coords, value});
     b.Append(func->Block(), [&] {
-        b.Call(ty.void_(), core::Function::kTextureStore, texture, coords, value);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, texture, coords, value);
         b.Return(func);
     });
 
@@ -1952,7 +1952,7 @@ TEST_F(SpirvWriterTest, TextureDimensions_WithRobustness) {
     auto* func = b.Function("foo", ty.vec2<u32>());
     func->SetParams({texture, level});
     b.Append(func->Block(), [&] {
-        auto* dims = b.Call(ty.vec2<u32>(), core::Function::kTextureDimensions, texture, level);
+        auto* dims = b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, texture, level);
         b.Return(func, dims);
         mod.SetName(dims, "dims");
     });
@@ -1977,7 +1977,8 @@ TEST_F(SpirvWriterTest, TextureLoad_WithRobustness) {
     auto* func = b.Function("foo", ty.vec4<f32>());
     func->SetParams({texture, coords, level});
     b.Append(func->Block(), [&] {
-        auto* result = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, texture, coords, level);
+        auto* result =
+            b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, texture, coords, level);
         b.Return(func, result);
         mod.SetName(result, "result");
     });
@@ -2008,7 +2009,7 @@ TEST_F(SpirvWriterTest, TextureStore_WithRobustness) {
     auto* func = b.Function("foo", ty.void_());
     func->SetParams({texture, coords, layer, value});
     b.Append(func->Block(), [&] {
-        b.Call(ty.void_(), core::Function::kTextureStore, texture, coords, layer, value);
+        b.Call(ty.void_(), core::BuiltinFn::kTextureStore, texture, coords, layer, value);
         b.Return(func);
     });
 

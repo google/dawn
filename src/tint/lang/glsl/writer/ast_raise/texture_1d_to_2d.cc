@@ -126,7 +126,7 @@ struct Texture1DTo2D::State {
             if (!call) {
                 return nullptr;
             }
-            auto* builtin = call->Target()->As<sem::Builtin>();
+            auto* builtin = call->Target()->As<sem::BuiltinFn>();
             if (!builtin) {
                 return nullptr;
             }
@@ -140,7 +140,7 @@ struct Texture1DTo2D::State {
                 return nullptr;
             }
 
-            if (builtin->Type() == core::Function::kTextureDimensions) {
+            if (builtin->Fn() == core::BuiltinFn::kTextureDimensions) {
                 // If this textureDimensions() call is in a CallStatement, we can leave it
                 // unmodified since the return value will be dropped on the floor anyway.
                 if (call->Stmt()->Declaration()->Is<ast::CallStatement>()) {

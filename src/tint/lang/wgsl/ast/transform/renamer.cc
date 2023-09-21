@@ -1315,7 +1315,7 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
             [&](const CallExpression* call) {
                 Switch(
                     src->Sem().Get(call)->UnwrapMaterialize()->As<sem::Call>()->Target(),
-                    [&](const sem::Builtin*) {
+                    [&](const sem::BuiltinFn*) {
                         preserved_identifiers.Add(call->target->identifier);
                     },
                     [&](const sem::ValueConversion*) {

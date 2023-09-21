@@ -1519,8 +1519,8 @@ bool Validator::Call(const sem::Call* call, sem::Statement* current_statement) c
                          call->Declaration()->source);
                 sem_.NoteDeclarationSource(fn->Declaration());
             },
-            [&](const sem::Builtin* b) {
-                AddError("ignoring return value of builtin '" + tint::ToString(b->Type()) + "'",
+            [&](const sem::BuiltinFn* b) {
+                AddError("ignoring return value of builtin '" + tint::ToString(b->Fn()) + "'",
                          call->Declaration()->source);
             },
             [&](const sem::ValueConversion*) {
@@ -1633,8 +1633,8 @@ bool Validator::BuiltinCall(const sem::Call* call) const {
             // https://gpuweb.github.io/gpuweb/wgsl/#function-call-expr
             // If the called function does not return a value, a function call statement should be
             // used instead.
-            auto* builtin = call->Target()->As<sem::Builtin>();
-            auto name = tint::ToString(builtin->Type());
+            auto* builtin = call->Target()->As<sem::BuiltinFn>();
+            auto name = tint::ToString(builtin->Fn());
             AddError("builtin '" + name + "' does not return a value", call->Declaration()->source);
             return false;
         }
@@ -1643,8 +1643,8 @@ bool Validator::BuiltinCall(const sem::Call* call) const {
     return true;
 }
 
-bool Validator::TextureBuiltinFunction(const sem::Call* call) const {
-    auto* builtin = call->Target()->As<sem::Builtin>();
+bool Validator::TextureBuiltinFn(const sem::Call* call) const {
+    auto* builtin = call->Target()->As<sem::BuiltinFn>();
     if (!builtin) {
         return false;
     }
@@ -1695,7 +1695,7 @@ bool Validator::TextureBuiltinFunction(const sem::Call* call) const {
 }
 
 bool Validator::WorkgroupUniformLoad(const sem::Call* call) const {
-    auto* builtin = call->Target()->As<sem::Builtin>();
+    auto* builtin = call->Target()->As<sem::BuiltinFn>();
     if (!builtin) {
         return false;
     }
@@ -1717,7 +1717,7 @@ bool Validator::WorkgroupUniformLoad(const sem::Call* call) const {
 }
 
 bool Validator::SubgroupBroadcast(const sem::Call* call) const {
-    auto* builtin = call->Target()->As<sem::Builtin>();
+    auto* builtin = call->Target()->As<sem::BuiltinFn>();
     if (!builtin) {
         return false;
     }
@@ -1733,8 +1733,8 @@ bool Validator::SubgroupBroadcast(const sem::Call* call) const {
     return true;
 }
 
-bool Validator::RequiredExtensionForBuiltinFunction(const sem::Call* call) const {
-    const auto* builtin = call->Target()->As<sem::Builtin>();
+bool Validator::RequiredExtensionForBuiltinFn(const sem::Call* call) const {
+    const auto* builtin = call->Target()->As<sem::BuiltinFn>();
     if (!builtin) {
         return true;
     }

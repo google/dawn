@@ -26,7 +26,7 @@ using IR_CoreBuiltinCallTest = IRTestHelper;
 TEST_F(IR_CoreBuiltinCallTest, Usage) {
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
-    auto* builtin = b.Call(mod.Types().f32(), core::Function::kAbs, arg1, arg2);
+    auto* builtin = b.Call(mod.Types().f32(), core::BuiltinFn::kAbs, arg1, arg2);
 
     EXPECT_THAT(arg1->Usages(), testing::UnorderedElementsAre(Usage{builtin, 0u}));
     EXPECT_THAT(arg2->Usages(), testing::UnorderedElementsAre(Usage{builtin, 1u}));
@@ -35,7 +35,7 @@ TEST_F(IR_CoreBuiltinCallTest, Usage) {
 TEST_F(IR_CoreBuiltinCallTest, Result) {
     auto* arg1 = b.Constant(1_u);
     auto* arg2 = b.Constant(2_u);
-    auto* builtin = b.Call(mod.Types().f32(), core::Function::kAbs, arg1, arg2);
+    auto* builtin = b.Call(mod.Types().f32(), core::BuiltinFn::kAbs, arg1, arg2);
 
     EXPECT_TRUE(builtin->HasResults());
     EXPECT_FALSE(builtin->HasMultiResults());
@@ -48,7 +48,7 @@ TEST_F(IR_CoreBuiltinCallTest, Fail_NullType) {
         {
             Module mod;
             Builder b{mod};
-            b.Call(nullptr, core::Function::kAbs);
+            b.Call(nullptr, core::BuiltinFn::kAbs);
         },
         "");
 }
@@ -58,7 +58,7 @@ TEST_F(IR_CoreBuiltinCallTest, Fail_NoneFunction) {
         {
             Module mod;
             Builder b{mod};
-            b.Call(mod.Types().f32(), core::Function::kNone);
+            b.Call(mod.Types().f32(), core::BuiltinFn::kNone);
         },
         "");
 }
@@ -68,13 +68,13 @@ TEST_F(IR_CoreBuiltinCallTest, Fail_TintMaterializeFunction) {
         {
             Module mod;
             Builder b{mod};
-            b.Call(mod.Types().f32(), core::Function::kTintMaterialize);
+            b.Call(mod.Types().f32(), core::BuiltinFn::kTintMaterialize);
         },
         "");
 }
 
 TEST_F(IR_CoreBuiltinCallTest, Clone) {
-    auto* builtin = b.Call(mod.Types().f32(), core::Function::kAbs, 1_u, 2_u);
+    auto* builtin = b.Call(mod.Types().f32(), core::BuiltinFn::kAbs, 1_u, 2_u);
 
     auto* new_b = clone_ctx.Clone(builtin);
 
@@ -82,7 +82,7 @@ TEST_F(IR_CoreBuiltinCallTest, Clone) {
     EXPECT_NE(builtin->Result(), new_b->Result());
     EXPECT_EQ(mod.Types().f32(), new_b->Result()->Type());
 
-    EXPECT_EQ(core::Function::kAbs, new_b->Func());
+    EXPECT_EQ(core::BuiltinFn::kAbs, new_b->Func());
 
     auto args = new_b->Args();
     EXPECT_EQ(2u, args.Length());
@@ -95,13 +95,13 @@ TEST_F(IR_CoreBuiltinCallTest, Clone) {
 }
 
 TEST_F(IR_CoreBuiltinCallTest, CloneNoArgs) {
-    auto* builtin = b.Call(mod.Types().f32(), core::Function::kAbs);
+    auto* builtin = b.Call(mod.Types().f32(), core::BuiltinFn::kAbs);
 
     auto* new_b = clone_ctx.Clone(builtin);
     EXPECT_NE(builtin->Result(), new_b->Result());
     EXPECT_EQ(mod.Types().f32(), new_b->Result()->Type());
 
-    EXPECT_EQ(core::Function::kAbs, new_b->Func());
+    EXPECT_EQ(core::BuiltinFn::kAbs, new_b->Func());
 
     auto args = new_b->Args();
     EXPECT_TRUE(args.IsEmpty());

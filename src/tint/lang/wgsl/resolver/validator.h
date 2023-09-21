@@ -52,7 +52,7 @@ namespace tint::sem {
 class Array;
 class BlockStatement;
 class BreakIfStatement;
-class Builtin;
+class BuiltinFn;
 class Call;
 class CaseStatement;
 class ForLoopStatement;
@@ -457,7 +457,7 @@ class Validator {
     /// Validates a texture builtin function
     /// @param call the builtin call to validate
     /// @returns true on success, false otherwise
-    bool TextureBuiltinFunction(const sem::Call* call) const;
+    bool TextureBuiltinFn(const sem::Call* call) const;
 
     /// Validates a workgroupUniformLoad builtin function
     /// @param call the builtin call to validate
@@ -472,7 +472,7 @@ class Validator {
     /// Validates an optional builtin function and its required extension.
     /// @param call the builtin call to validate
     /// @returns true on success, false otherwise
-    bool RequiredExtensionForBuiltinFunction(const sem::Call* call) const;
+    bool RequiredExtensionForBuiltinFn(const sem::Call* call) const;
 
     /// Validates that 'f16' extension is enabled for f16 usage at @p source
     /// @param source the source of the f16 usage

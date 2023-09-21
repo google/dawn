@@ -23,7 +23,7 @@
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/dependency_graph.h"
 #include "src/tint/lang/wgsl/sem/block_statement.h"
-#include "src/tint/lang/wgsl/sem/builtin.h"
+#include "src/tint/lang/wgsl/sem/builtin_fn.h"
 #include "src/tint/lang/wgsl/sem/for_loop_statement.h"
 #include "src/tint/lang/wgsl/sem/function.h"
 #include "src/tint/lang/wgsl/sem/if_statement.h"
@@ -1547,17 +1547,17 @@ class UniformityGraph {
         const FunctionInfo* func_info = nullptr;
         Switch(
             sem->Target(),
-            [&](const sem::Builtin* builtin) {
+            [&](const sem::BuiltinFn* builtin) {
                 // Most builtins have no restrictions. The exceptions are barriers, derivatives,
                 // some texture sampling builtins, and atomics.
                 if (builtin->IsBarrier()) {
                     callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, default_severity};
-                } else if (builtin->Type() == core::Function::kWorkgroupUniformLoad) {
+                } else if (builtin->Fn() == core::BuiltinFn::kWorkgroupUniformLoad) {
                     callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, default_severity};
                 } else if (builtin->IsDerivative() ||
-                           builtin->Type() == core::Function::kTextureSample ||
-                           builtin->Type() == core::Function::kTextureSampleBias ||
-                           builtin->Type() == core::Function::kTextureSampleCompare) {
+                           builtin->Fn() == core::BuiltinFn::kTextureSample ||
+                           builtin->Fn() == core::BuiltinFn::kTextureSampleBias ||
+                           builtin->Fn() == core::BuiltinFn::kTextureSampleCompare) {
                     // Get the severity of derivative uniformity violations in this context.
                     auto severity = sem_.DiagnosticSeverity(
                         call, wgsl::CoreDiagnosticRule::kDerivativeUniformity);
@@ -1568,7 +1568,7 @@ class UniformityGraph {
                 } else if (builtin->IsAtomic()) {
                     callsite_tag = {CallSiteTag::CallSiteNoRestriction};
                     function_tag = ReturnValueMayBeNonUniform;
-                } else if (builtin->Type() == core::Function::kTextureLoad) {
+                } else if (builtin->Fn() == core::BuiltinFn::kTextureLoad) {
                     // Loading from a read-write storage texture may produce a non-uniform value.
                     auto* storage =
                         builtin->Parameters()[0]->Type()->As<core::type::StorageTexture>();
@@ -1669,8 +1669,8 @@ class UniformityGraph {
                     current_function_->variables.Set(root_ident, ptr_result);
                 }
             } else {
-                auto* builtin = sem->Target()->As<sem::Builtin>();
-                if (builtin && builtin->Type() == core::Function::kWorkgroupUniformLoad) {
+                auto* builtin = sem->Target()->As<sem::BuiltinFn>();
+                if (builtin && builtin->Fn() == core::BuiltinFn::kWorkgroupUniformLoad) {
                     // The workgroupUniformLoad builtin requires its parameter to be uniform.
                     current_function_->RequiredToBeUniform(default_severity)->AddEdge(args[i]);
                 } else {
@@ -1736,7 +1736,7 @@ class UniformityGraph {
         const ast::CallExpression* call,
         wgsl::DiagnosticSeverity severity) {
         auto* target = SemCall(call)->Target();
-        if (target->Is<sem::Builtin>()) {
+        if (target->Is<sem::BuiltinFn>()) {
             // This is a call to a builtin, so we must be done.
             return call;
         } else if (auto* user = target->As<sem::Function>()) {

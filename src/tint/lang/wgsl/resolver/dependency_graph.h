@@ -20,8 +20,8 @@
 
 #include "src/tint/lang/core/access.h"
 #include "src/tint/lang/core/builtin.h"
+#include "src/tint/lang/core/builtin_fn.h"
 #include "src/tint/lang/core/builtin_value.h"
-#include "src/tint/lang/core/function.h"
 #include "src/tint/lang/core/interpolation_sampling.h"
 #include "src/tint/lang/core/interpolation_type.h"
 #include "src/tint/lang/core/texel_format.h"
@@ -43,7 +43,7 @@ struct UnresolvedIdentifier {
 /// - const ast::TypeDecl*  (as const ast::Node*)
 /// - const ast::Variable*  (as const ast::Node*)
 /// - const ast::Function*  (as const ast::Node*)
-/// - core::Function
+/// - core::BuiltinFn
 /// - core::Access
 /// - core::AddressSpace
 /// - core::Builtin
@@ -74,13 +74,13 @@ class ResolvedIdentifier {
         return nullptr;
     }
 
-    /// @return the builtin function if the ResolvedIdentifier holds core::Function, otherwise
-    /// core::Function::kNone
-    core::Function BuiltinFunction() const {
-        if (auto n = std::get_if<core::Function>(&value_)) {
+    /// @return the builtin function if the ResolvedIdentifier holds core::BuiltinFn, otherwise
+    /// core::BuiltinFn::kNone
+    core::BuiltinFn BuiltinFn() const {
+        if (auto n = std::get_if<core::BuiltinFn>(&value_)) {
             return *n;
         }
-        return core::Function::kNone;
+        return core::BuiltinFn::kNone;
     }
 
     /// @return the access if the ResolvedIdentifier holds core::Access, otherwise
@@ -169,7 +169,7 @@ class ResolvedIdentifier {
   private:
     std::variant<UnresolvedIdentifier,
                  const ast::Node*,
-                 core::Function,
+                 core::BuiltinFn,
                  core::Access,
                  core::AddressSpace,
                  core::Builtin,

@@ -1944,7 +1944,7 @@ TEST_P(IR_RobustnessTest, TextureDimensions) {
     auto* func = b.Function("foo", ty.vec2<u32>());
     b.Append(func->Block(), [&] {
         auto* handle = b.Load(texture);
-        auto* dims = b.Call(ty.vec2<u32>(), core::Function::kTextureDimensions, handle);
+        auto* dims = b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, handle);
         b.Return(func, dims);
     });
 
@@ -1984,7 +1984,7 @@ TEST_P(IR_RobustnessTest, TextureDimensions_WithLevel) {
     func->SetParams({level});
     b.Append(func->Block(), [&] {
         auto* handle = b.Load(texture);
-        auto* dims = b.Call(ty.vec2<u32>(), core::Function::kTextureDimensions, handle, level);
+        auto* dims = b.Call(ty.vec2<u32>(), core::BuiltinFn::kTextureDimensions, handle, level);
         b.Return(func, dims);
     });
 
@@ -2042,7 +2042,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled1D) {
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
@@ -2055,7 +2055,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled1D) {
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
@@ -2139,7 +2139,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled2D) {
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
@@ -2152,7 +2152,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled2D) {
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
@@ -2238,7 +2238,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled2DArray) {
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, layer, level);
+                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, layer, level);
             b.Return(func, texel);
         });
     }
@@ -2252,7 +2252,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled2DArray) {
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, layer, level);
+                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, layer, level);
             b.Return(func, texel);
         });
     }
@@ -2343,7 +2343,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled3D) {
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
@@ -2356,7 +2356,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Sampled3D) {
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
@@ -2441,7 +2441,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Multisampled2D) {
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
@@ -2454,7 +2454,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Multisampled2D) {
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, level);
+                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
@@ -2529,7 +2529,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Depth2D) {
         func->SetParams({coords, level});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.f32(), core::Function::kTextureLoad, handle, coords, level);
+            auto* texel = b.Call(ty.f32(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
@@ -2541,7 +2541,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Depth2D) {
         func->SetParams({coords, level});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.f32(), core::Function::kTextureLoad, handle, coords, level);
+            auto* texel = b.Call(ty.f32(), core::BuiltinFn::kTextureLoad, handle, coords, level);
             b.Return(func, texel);
         });
     }
@@ -2626,7 +2626,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Depth2DArray) {
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.f32(), core::Function::kTextureLoad, handle, coords, layer, level);
+                b.Call(ty.f32(), core::BuiltinFn::kTextureLoad, handle, coords, layer, level);
             b.Return(func, texel);
         });
     }
@@ -2640,7 +2640,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Depth2DArray) {
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.f32(), core::Function::kTextureLoad, handle, coords, layer, level);
+                b.Call(ty.f32(), core::BuiltinFn::kTextureLoad, handle, coords, layer, level);
             b.Return(func, texel);
         });
     }
@@ -2730,7 +2730,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_DepthMultisampled2D) {
         func->SetParams({coords, index});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.f32(), core::Function::kTextureLoad, handle, coords, index);
+            auto* texel = b.Call(ty.f32(), core::BuiltinFn::kTextureLoad, handle, coords, index);
             b.Return(func, texel);
         });
     }
@@ -2742,7 +2742,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_DepthMultisampled2D) {
         func->SetParams({coords, index});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.f32(), core::Function::kTextureLoad, handle, coords, index);
+            auto* texel = b.Call(ty.f32(), core::BuiltinFn::kTextureLoad, handle, coords, index);
             b.Return(func, texel);
         });
     }
@@ -2815,7 +2815,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_External) {
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
@@ -2826,7 +2826,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_External) {
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
@@ -2905,7 +2905,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage1D) {
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
@@ -2916,7 +2916,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage1D) {
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
@@ -2995,7 +2995,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage2D) {
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
@@ -3006,7 +3006,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage2D) {
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
@@ -3087,7 +3087,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage2DArray) {
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, layer);
+                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, layer);
             b.Return(func, texel);
         });
     }
@@ -3100,7 +3100,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage2DArray) {
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
             auto* texel =
-                b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords, layer);
+                b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords, layer);
             b.Return(func, texel);
         });
     }
@@ -3186,7 +3186,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage3D) {
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
@@ -3197,7 +3197,7 @@ TEST_P(IR_RobustnessTest, TextureLoad_Storage3D) {
         func->SetParams({coords});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            auto* texel = b.Call(ty.vec4<f32>(), core::Function::kTextureLoad, handle, coords);
+            auto* texel = b.Call(ty.vec4<f32>(), core::BuiltinFn::kTextureLoad, handle, coords);
             b.Return(func, texel);
         });
     }
@@ -3277,7 +3277,7 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage1D) {
         func->SetParams({coords, value});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::Function::kTextureStore, handle, coords, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, value);
             b.Return(func);
         });
     }
@@ -3289,7 +3289,7 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage1D) {
         func->SetParams({coords, value});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::Function::kTextureStore, handle, coords, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, value);
             b.Return(func);
         });
     }
@@ -3369,7 +3369,7 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage2D) {
         func->SetParams({coords, value});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::Function::kTextureStore, handle, coords, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, value);
             b.Return(func);
         });
     }
@@ -3381,7 +3381,7 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage2D) {
         func->SetParams({coords, value});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::Function::kTextureStore, handle, coords, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, value);
             b.Return(func);
         });
     }
@@ -3462,7 +3462,7 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage2DArray) {
         func->SetParams({coords, layer, value});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::Function::kTextureStore, handle, coords, layer, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, layer, value);
             b.Return(func);
         });
     }
@@ -3475,7 +3475,7 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage2DArray) {
         func->SetParams({coords, layer, value});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::Function::kTextureStore, handle, coords, layer, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, layer, value);
             b.Return(func);
         });
     }
@@ -3562,7 +3562,7 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage3D) {
         func->SetParams({coords, value});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::Function::kTextureStore, handle, coords, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, value);
             b.Return(func);
         });
     }
@@ -3574,7 +3574,7 @@ TEST_P(IR_RobustnessTest, TextureStore_Storage3D) {
         func->SetParams({coords, value});
         b.Append(func->Block(), [&] {
             auto* handle = b.Load(texture);
-            b.Call(ty.void_(), core::Function::kTextureStore, handle, coords, value);
+            b.Call(ty.void_(), core::BuiltinFn::kTextureStore, handle, coords, value);
             b.Return(func);
         });
     }

@@ -87,7 +87,7 @@ struct Atomics::State {
                     out_args[0] = b.AddressOf(out_args[0]);
 
                     // Replace all callsites of this stub to a call to the real builtin
-                    if (stub->builtin == core::Function::kAtomicCompareExchangeWeak) {
+                    if (stub->builtin == core::BuiltinFn::kAtomicCompareExchangeWeak) {
                         // atomicCompareExchangeWeak returns a struct, so insert a call to it above
                         // the current statement, and replace the current call with the struct's
                         // `old_value` member.
@@ -255,7 +255,7 @@ struct Atomics::State {
                 if (is_ref_to_atomic_var(load->Reference())) {
                     ctx.Replace(load->Reference()->Declaration(), [=] {
                         auto* expr = ctx.CloneWithoutTransform(load->Reference()->Declaration());
-                        return b.Call(core::str(core::Function::kAtomicLoad), b.AddressOf(expr));
+                        return b.Call(core::str(core::BuiltinFn::kAtomicLoad), b.AddressOf(expr));
                     });
                 }
             } else if (auto* assign = node->As<ast::AssignmentStatement>()) {
@@ -265,7 +265,7 @@ struct Atomics::State {
                         auto* lhs = ctx.CloneWithoutTransform(assign->lhs);
                         auto* rhs = ctx.CloneWithoutTransform(assign->rhs);
                         auto* call =
-                            b.Call(core::str(core::Function::kAtomicStore), b.AddressOf(lhs), rhs);
+                            b.Call(core::str(core::BuiltinFn::kAtomicStore), b.AddressOf(lhs), rhs);
                         return b.CallStmt(call);
                     });
                 }
@@ -277,7 +277,7 @@ struct Atomics::State {
 Atomics::Atomics() = default;
 Atomics::~Atomics() = default;
 
-Atomics::Stub::Stub(GenerationID pid, ast::NodeID nid, core::Function b)
+Atomics::Stub::Stub(GenerationID pid, ast::NodeID nid, core::BuiltinFn b)
     : Base(pid, nid, tint::Empty), builtin(b) {}
 Atomics::Stub::~Stub() = default;
 std::string Atomics::Stub::InternalName() const {

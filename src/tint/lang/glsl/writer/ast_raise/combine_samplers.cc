@@ -226,7 +226,7 @@ struct CombineSamplers::State {
             if (auto* call = sem.Get(expr)->UnwrapMaterialize()->As<sem::Call>()) {
                 Vector<const ast::Expression*, 8> args;
                 // Replace all texture builtin calls.
-                if (auto* builtin = call->Target()->As<sem::Builtin>()) {
+                if (auto* builtin = call->Target()->As<sem::BuiltinFn>()) {
                     const auto& signature = builtin->Signature();
                     auto sampler_index = signature.IndexOf(core::ParameterUsage::kSampler);
                     auto texture_index = signature.IndexOf(core::ParameterUsage::kTexture);
@@ -270,7 +270,7 @@ struct CombineSamplers::State {
                         }
                     }
                     const ast::Expression* value = ctx.dst->Call(ctx.Clone(expr->target), args);
-                    if (builtin->Type() == core::Function::kTextureLoad &&
+                    if (builtin->Fn() == core::BuiltinFn::kTextureLoad &&
                         texture_var->Type()->UnwrapRef()->Is<core::type::DepthTexture>() &&
                         !call->Stmt()->Declaration()->Is<ast::CallStatement>()) {
                         value = ctx.dst->MemberAccessor(value, "x");

@@ -63,35 +63,35 @@ struct State {
             }
             if (auto* builtin = inst->As<core::ir::CoreBuiltinCall>()) {
                 switch (builtin->Func()) {
-                    case core::Function::kArrayLength:
-                    case core::Function::kAtomicAdd:
-                    case core::Function::kAtomicAnd:
-                    case core::Function::kAtomicCompareExchangeWeak:
-                    case core::Function::kAtomicExchange:
-                    case core::Function::kAtomicLoad:
-                    case core::Function::kAtomicMax:
-                    case core::Function::kAtomicMin:
-                    case core::Function::kAtomicOr:
-                    case core::Function::kAtomicStore:
-                    case core::Function::kAtomicSub:
-                    case core::Function::kAtomicXor:
-                    case core::Function::kDot:
-                    case core::Function::kSelect:
-                    case core::Function::kTextureDimensions:
-                    case core::Function::kTextureGather:
-                    case core::Function::kTextureGatherCompare:
-                    case core::Function::kTextureLoad:
-                    case core::Function::kTextureNumLayers:
-                    case core::Function::kTextureSample:
-                    case core::Function::kTextureSampleBias:
-                    case core::Function::kTextureSampleCompare:
-                    case core::Function::kTextureSampleCompareLevel:
-                    case core::Function::kTextureSampleGrad:
-                    case core::Function::kTextureSampleLevel:
-                    case core::Function::kTextureStore:
+                    case core::BuiltinFn::kArrayLength:
+                    case core::BuiltinFn::kAtomicAdd:
+                    case core::BuiltinFn::kAtomicAnd:
+                    case core::BuiltinFn::kAtomicCompareExchangeWeak:
+                    case core::BuiltinFn::kAtomicExchange:
+                    case core::BuiltinFn::kAtomicLoad:
+                    case core::BuiltinFn::kAtomicMax:
+                    case core::BuiltinFn::kAtomicMin:
+                    case core::BuiltinFn::kAtomicOr:
+                    case core::BuiltinFn::kAtomicStore:
+                    case core::BuiltinFn::kAtomicSub:
+                    case core::BuiltinFn::kAtomicXor:
+                    case core::BuiltinFn::kDot:
+                    case core::BuiltinFn::kSelect:
+                    case core::BuiltinFn::kTextureDimensions:
+                    case core::BuiltinFn::kTextureGather:
+                    case core::BuiltinFn::kTextureGatherCompare:
+                    case core::BuiltinFn::kTextureLoad:
+                    case core::BuiltinFn::kTextureNumLayers:
+                    case core::BuiltinFn::kTextureSample:
+                    case core::BuiltinFn::kTextureSampleBias:
+                    case core::BuiltinFn::kTextureSampleCompare:
+                    case core::BuiltinFn::kTextureSampleCompareLevel:
+                    case core::BuiltinFn::kTextureSampleGrad:
+                    case core::BuiltinFn::kTextureSampleLevel:
+                    case core::BuiltinFn::kTextureStore:
                         worklist.Push(builtin);
                         break;
-                    case core::Function::kQuantizeToF16:
+                    case core::BuiltinFn::kQuantizeToF16:
                         if (builtin->Result()->Type()->Is<core::type::Vector>()) {
                             worklist.Push(builtin);
                         }
@@ -106,53 +106,53 @@ struct State {
         for (auto* builtin : worklist) {
             core::ir::Value* replacement = nullptr;
             switch (builtin->Func()) {
-                case core::Function::kArrayLength:
+                case core::BuiltinFn::kArrayLength:
                     replacement = ArrayLength(builtin);
                     break;
-                case core::Function::kAtomicAdd:
-                case core::Function::kAtomicAnd:
-                case core::Function::kAtomicCompareExchangeWeak:
-                case core::Function::kAtomicExchange:
-                case core::Function::kAtomicLoad:
-                case core::Function::kAtomicMax:
-                case core::Function::kAtomicMin:
-                case core::Function::kAtomicOr:
-                case core::Function::kAtomicStore:
-                case core::Function::kAtomicSub:
-                case core::Function::kAtomicXor:
+                case core::BuiltinFn::kAtomicAdd:
+                case core::BuiltinFn::kAtomicAnd:
+                case core::BuiltinFn::kAtomicCompareExchangeWeak:
+                case core::BuiltinFn::kAtomicExchange:
+                case core::BuiltinFn::kAtomicLoad:
+                case core::BuiltinFn::kAtomicMax:
+                case core::BuiltinFn::kAtomicMin:
+                case core::BuiltinFn::kAtomicOr:
+                case core::BuiltinFn::kAtomicStore:
+                case core::BuiltinFn::kAtomicSub:
+                case core::BuiltinFn::kAtomicXor:
                     replacement = Atomic(builtin);
                     break;
-                case core::Function::kDot:
+                case core::BuiltinFn::kDot:
                     replacement = Dot(builtin);
                     break;
-                case core::Function::kSelect:
+                case core::BuiltinFn::kSelect:
                     replacement = Select(builtin);
                     break;
-                case core::Function::kTextureDimensions:
+                case core::BuiltinFn::kTextureDimensions:
                     replacement = TextureDimensions(builtin);
                     break;
-                case core::Function::kTextureGather:
-                case core::Function::kTextureGatherCompare:
+                case core::BuiltinFn::kTextureGather:
+                case core::BuiltinFn::kTextureGatherCompare:
                     replacement = TextureGather(builtin);
                     break;
-                case core::Function::kTextureLoad:
+                case core::BuiltinFn::kTextureLoad:
                     replacement = TextureLoad(builtin);
                     break;
-                case core::Function::kTextureNumLayers:
+                case core::BuiltinFn::kTextureNumLayers:
                     replacement = TextureNumLayers(builtin);
                     break;
-                case core::Function::kTextureSample:
-                case core::Function::kTextureSampleBias:
-                case core::Function::kTextureSampleCompare:
-                case core::Function::kTextureSampleCompareLevel:
-                case core::Function::kTextureSampleGrad:
-                case core::Function::kTextureSampleLevel:
+                case core::BuiltinFn::kTextureSample:
+                case core::BuiltinFn::kTextureSampleBias:
+                case core::BuiltinFn::kTextureSampleCompare:
+                case core::BuiltinFn::kTextureSampleCompareLevel:
+                case core::BuiltinFn::kTextureSampleGrad:
+                case core::BuiltinFn::kTextureSampleLevel:
                     replacement = TextureSample(builtin);
                     break;
-                case core::Function::kTextureStore:
+                case core::BuiltinFn::kTextureStore:
                     replacement = TextureStore(builtin);
                     break;
-                case core::Function::kQuantizeToF16:
+                case core::BuiltinFn::kQuantizeToF16:
                     replacement = QuantizeToF16Vec(builtin);
                     break;
                 default:
@@ -231,15 +231,15 @@ struct State {
         // Create the replacement call instruction.
         core::ir::Call* call = nullptr;
         switch (builtin->Func()) {
-            case core::Function::kAtomicAdd:
+            case core::BuiltinFn::kAtomicAdd:
                 call = build(result_ty, spirv::ir::Function::kAtomicIadd);
                 call->AppendArg(builtin->Args()[1]);
                 break;
-            case core::Function::kAtomicAnd:
+            case core::BuiltinFn::kAtomicAnd:
                 call = build(result_ty, spirv::ir::Function::kAtomicAnd);
                 call->AppendArg(builtin->Args()[1]);
                 break;
-            case core::Function::kAtomicCompareExchangeWeak: {
+            case core::BuiltinFn::kAtomicCompareExchangeWeak: {
                 auto* cmp = builtin->Args()[1];
                 auto* value = builtin->Args()[2];
                 auto* int_ty = value->Type();
@@ -260,18 +260,18 @@ struct State {
                     Vector{original, compare->Result()});
                 break;
             }
-            case core::Function::kAtomicExchange:
+            case core::BuiltinFn::kAtomicExchange:
                 call = build(result_ty, spirv::ir::Function::kAtomicExchange);
                 call->AppendArg(builtin->Args()[1]);
                 break;
-            case core::Function::kAtomicLoad:
+            case core::BuiltinFn::kAtomicLoad:
                 call = build(result_ty, spirv::ir::Function::kAtomicLoad);
                 break;
-            case core::Function::kAtomicOr:
+            case core::BuiltinFn::kAtomicOr:
                 call = build(result_ty, spirv::ir::Function::kAtomicOr);
                 call->AppendArg(builtin->Args()[1]);
                 break;
-            case core::Function::kAtomicMax:
+            case core::BuiltinFn::kAtomicMax:
                 if (result_ty->is_signed_integer_scalar()) {
                     call = build(result_ty, spirv::ir::Function::kAtomicSmax);
                 } else {
@@ -279,7 +279,7 @@ struct State {
                 }
                 call->AppendArg(builtin->Args()[1]);
                 break;
-            case core::Function::kAtomicMin:
+            case core::BuiltinFn::kAtomicMin:
                 if (result_ty->is_signed_integer_scalar()) {
                     call = build(result_ty, spirv::ir::Function::kAtomicSmin);
                 } else {
@@ -287,15 +287,15 @@ struct State {
                 }
                 call->AppendArg(builtin->Args()[1]);
                 break;
-            case core::Function::kAtomicStore:
+            case core::BuiltinFn::kAtomicStore:
                 call = build(result_ty, spirv::ir::Function::kAtomicStore);
                 call->AppendArg(builtin->Args()[1]);
                 break;
-            case core::Function::kAtomicSub:
+            case core::BuiltinFn::kAtomicSub:
                 call = build(result_ty, spirv::ir::Function::kAtomicIsub);
                 call->AppendArg(builtin->Args()[1]);
                 break;
-            case core::Function::kAtomicXor:
+            case core::BuiltinFn::kAtomicXor:
                 call = build(result_ty, spirv::ir::Function::kAtomicXor);
                 call->AppendArg(builtin->Args()[1]);
                 break;
@@ -495,33 +495,33 @@ struct State {
         core::ir::Value* depth = nullptr;
         ImageOperands operands;
         switch (builtin->Func()) {
-            case core::Function::kTextureSample:
+            case core::BuiltinFn::kTextureSample:
                 intrinsic = spirv::ir::Intrinsic::kImageSampleImplicitLod;
                 operands.offset = next_arg();
                 break;
-            case core::Function::kTextureSampleBias:
+            case core::BuiltinFn::kTextureSampleBias:
                 intrinsic = spirv::ir::Intrinsic::kImageSampleImplicitLod;
                 operands.bias = next_arg();
                 operands.offset = next_arg();
                 break;
-            case core::Function::kTextureSampleCompare:
+            case core::BuiltinFn::kTextureSampleCompare:
                 intrinsic = spirv::ir::Intrinsic::kImageSampleDrefImplicitLod;
                 depth = next_arg();
                 operands.offset = next_arg();
                 break;
-            case core::Function::kTextureSampleCompareLevel:
+            case core::BuiltinFn::kTextureSampleCompareLevel:
                 intrinsic = spirv::ir::Intrinsic::kImageSampleDrefExplicitLod;
                 depth = next_arg();
                 operands.lod = b.Constant(0_f);
                 operands.offset = next_arg();
                 break;
-            case core::Function::kTextureSampleGrad:
+            case core::BuiltinFn::kTextureSampleGrad:
                 intrinsic = spirv::ir::Intrinsic::kImageSampleExplicitLod;
                 operands.ddx = next_arg();
                 operands.ddy = next_arg();
                 operands.offset = next_arg();
                 break;
-            case core::Function::kTextureSampleLevel:
+            case core::BuiltinFn::kTextureSampleLevel:
                 intrinsic = spirv::ir::Intrinsic::kImageSampleExplicitLod;
                 operands.lod = next_arg();
                 operands.offset = next_arg();
@@ -603,11 +603,11 @@ struct State {
         core::ir::Value* depth = nullptr;
         ImageOperands operands;
         switch (builtin->Func()) {
-            case core::Function::kTextureGather:
+            case core::BuiltinFn::kTextureGather:
                 function = spirv::ir::Function::kImageGather;
                 operands.offset = next_arg();
                 break;
-            case core::Function::kTextureGatherCompare:
+            case core::BuiltinFn::kTextureGatherCompare:
                 function = spirv::ir::Function::kImageDrefGather;
                 depth = next_arg();
                 operands.offset = next_arg();
@@ -839,7 +839,7 @@ struct State {
         Vector<core::ir::Value*, 4> args;
         for (uint32_t i = 0; i < vec->Width(); i++) {
             auto* el = b.Access(ty.f32(), arg, u32(i));
-            auto* scalar_call = b.Call(ty.f32(), core::Function::kQuantizeToF16, el);
+            auto* scalar_call = b.Call(ty.f32(), core::BuiltinFn::kQuantizeToF16, el);
             args.Push(scalar_call->Result());
             el->InsertBefore(builtin);
             scalar_call->InsertBefore(builtin);

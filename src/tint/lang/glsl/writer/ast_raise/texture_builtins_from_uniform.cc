@@ -51,10 +51,10 @@ bool ShouldRun(const Program* program) {
             for (auto* builtin : sem_fn->DirectlyCalledBuiltins()) {
                 // GLSL ES  has no native support for the counterpart of
                 // textureNumLevels (textureQueryLevels) and textureNumSamples (textureSamples)
-                if (builtin->Type() == core::Function::kTextureNumLevels) {
+                if (builtin->Fn() == core::BuiltinFn::kTextureNumLevels) {
                     return true;
                 }
-                if (builtin->Type() == core::Function::kTextureNumSamples) {
+                if (builtin->Fn() == core::BuiltinFn::kTextureNumSamples) {
                     return true;
                 }
             }
@@ -110,9 +110,9 @@ struct TextureBuiltinsFromUniform::State {
 
                     tint::Switch(
                         call->Target(),
-                        [&](const sem::Builtin* builtin) {
-                            if (builtin->Type() != core::Function::kTextureNumLevels &&
-                                builtin->Type() != core::Function::kTextureNumSamples) {
+                        [&](const sem::BuiltinFn* builtin) {
+                            if (builtin->Fn() != core::BuiltinFn::kTextureNumLevels &&
+                                builtin->Fn() != core::BuiltinFn::kTextureNumSamples) {
                                 return;
                             }
                             if (auto* call_stmt =
@@ -131,7 +131,7 @@ struct TextureBuiltinsFromUniform::State {
                             TINT_ASSERT(texture_sem);
 
                             TextureBuiltinsFromUniformOptions::Field dataType =
-                                GetFieldFromBuiltinFunctionType(builtin->Type());
+                                GetFieldFromBuiltinFunctionType(builtin->Fn());
 
                             tint::Switch(
                                 texture_sem,
@@ -462,11 +462,11 @@ struct TextureBuiltinsFromUniform::State {
     /// @param type of the builtin function
     /// @returns corresponding TextureBuiltinsFromUniformOptions::Field for the builtin
     static TextureBuiltinsFromUniformOptions::Field GetFieldFromBuiltinFunctionType(
-        core::Function type) {
+        core::BuiltinFn type) {
         switch (type) {
-            case core::Function::kTextureNumLevels:
+            case core::BuiltinFn::kTextureNumLevels:
                 return TextureBuiltinsFromUniformOptions::Field::TextureNumLevels;
-            case core::Function::kTextureNumSamples:
+            case core::BuiltinFn::kTextureNumSamples:
                 return TextureBuiltinsFromUniformOptions::Field::TextureNumSamples;
             default:
                 TINT_UNREACHABLE() << "unsupported builtin function type " << type;

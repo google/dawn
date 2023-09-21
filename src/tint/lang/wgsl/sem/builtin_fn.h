@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_WGSL_SEM_BUILTIN_H_
-#define SRC_TINT_LANG_WGSL_SEM_BUILTIN_H_
+#ifndef SRC_TINT_LANG_WGSL_SEM_BUILTIN_FN_H_
+#define SRC_TINT_LANG_WGSL_SEM_BUILTIN_FN_H_
 
 #include <string>
 #include <vector>
 
-#include "src/tint/lang/core/function.h"
+#include "src/tint/lang/core/builtin_fn.h"
 #include "src/tint/lang/wgsl/extension.h"
 #include "src/tint/lang/wgsl/sem/call_target.h"
 #include "src/tint/lang/wgsl/sem/pipeline_stage_set.h"
@@ -26,8 +26,8 @@
 
 namespace tint::sem {
 
-/// Builtin holds the semantic information for a builtin function.
-class Builtin final : public Castable<Builtin, CallTarget> {
+/// BuiltinFn holds the semantic information for a builtin function.
+class BuiltinFn final : public Castable<BuiltinFn, CallTarget> {
   public:
     /// Constructor
     /// @param type the builtin type
@@ -37,19 +37,19 @@ class Builtin final : public Castable<Builtin, CallTarget> {
     /// @param supported_stages the pipeline stages that this builtin can be used in
     /// @param is_deprecated true if the particular overload is considered deprecated
     /// @param must_use true if the builtin was annotated with `@must_use`
-    Builtin(core::Function type,
-            const core::type::Type* return_type,
-            VectorRef<Parameter*> parameters,
-            core::EvaluationStage eval_stage,
-            PipelineStageSet supported_stages,
-            bool is_deprecated,
-            bool must_use);
+    BuiltinFn(core::BuiltinFn type,
+              const core::type::Type* return_type,
+              VectorRef<Parameter*> parameters,
+              core::EvaluationStage eval_stage,
+              PipelineStageSet supported_stages,
+              bool is_deprecated,
+              bool must_use);
 
     /// Destructor
-    ~Builtin() override;
+    ~BuiltinFn() override;
 
     /// @return the type of the builtin
-    core::Function Type() const { return type_; }
+    core::BuiltinFn Fn() const { return fn_; }
 
     /// @return the pipeline stages that this builtin can be used in
     PipelineStageSet SupportedStages() const { return supported_stages_; }
@@ -106,11 +106,11 @@ class Builtin final : public Castable<Builtin, CallTarget> {
 
     /// @return the hash code for this object
     std::size_t HashCode() const {
-        return Hash(Type(), SupportedStages(), ReturnType(), Parameters(), IsDeprecated());
+        return Hash(Fn(), SupportedStages(), ReturnType(), Parameters(), IsDeprecated());
     }
 
   private:
-    const core::Function type_;
+    const core::BuiltinFn fn_;
     const PipelineStageSet supported_stages_;
     const bool is_deprecated_;
 };
@@ -123,4 +123,4 @@ static constexpr double kDegToRad = 0.017453292519943295474;
 
 }  // namespace tint::sem
 
-#endif  // SRC_TINT_LANG_WGSL_SEM_BUILTIN_H_
+#endif  // SRC_TINT_LANG_WGSL_SEM_BUILTIN_FN_H_

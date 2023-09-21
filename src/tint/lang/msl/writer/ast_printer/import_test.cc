@@ -46,7 +46,7 @@ TEST_P(MslImportData_SingleParamTest, FloatScalar) {
     ASSERT_NE(sem, nullptr);
     auto* target = sem->Target();
     ASSERT_NE(target, nullptr);
-    auto* builtin = target->As<sem::Builtin>();
+    auto* builtin = target->As<sem::BuiltinFn>();
     ASSERT_NE(builtin, nullptr);
 
     ASSERT_EQ(gen.generate_builtin_name(builtin), param.msl_name);

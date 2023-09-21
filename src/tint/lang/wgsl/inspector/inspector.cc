@@ -774,7 +774,7 @@ void Inspector::GenerateSamplerTargets() {
             continue;
         }
 
-        auto* i = call->Target()->As<sem::Builtin>();
+        auto* i = call->Target()->As<sem::BuiltinFn>();
         if (!i) {
             continue;
         }

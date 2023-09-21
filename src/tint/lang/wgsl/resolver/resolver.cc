@@ -2325,7 +2325,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 });
         }
 
-        if (auto f = resolved->BuiltinFunction(); f != core::Function::kNone) {
+        if (auto f = resolved->BuiltinFn(); f != core::BuiltinFn::kNone) {
             if (!TINT_LIKELY(CheckNotTemplated("builtin", ident))) {
                 return nullptr;
             }
@@ -2400,7 +2400,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
 template <size_t N>
 sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
-                                 core::Function fn,
+                                 core::BuiltinFn fn,
                                  Vector<const sem::ValueExpression*, N>& args) {
     auto arg_stage = core::EvaluationStage::kConstant;
     for (auto* arg : args) {
@@ -2434,12 +2434,12 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         }
         auto eval_stage = overload->const_eval_fn ? core::EvaluationStage::kConstant
                                                   : core::EvaluationStage::kRuntime;
-        return builder_->create<sem::Builtin>(
+        return builder_->create<sem::BuiltinFn>(
             fn, overload->return_type, std::move(params), eval_stage, supported_stages,
             flags.Contains(OverloadFlag::kIsDeprecated), flags.Contains(OverloadFlag::kMustUse));
     });
 
-    if (fn == core::Function::kTintMaterialize) {
+    if (fn == core::BuiltinFn::kTintMaterialize) {
         args[0] = Materialize(args[0]);
         if (!args[0]) {
             return nullptr;
@@ -2487,24 +2487,24 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         current_function_->AddDirectCall(call);
     }
 
-    if (!validator_.RequiredExtensionForBuiltinFunction(call)) {
+    if (!validator_.RequiredExtensionForBuiltinFn(call)) {
         return nullptr;
     }
 
-    if (IsTextureBuiltin(fn)) {
-        if (!validator_.TextureBuiltinFunction(call)) {
+    if (IsTexture(fn)) {
+        if (!validator_.TextureBuiltinFn(call)) {
             return nullptr;
         }
         CollectTextureSamplerPairs(target, call->Arguments());
     }
 
-    if (fn == core::Function::kWorkgroupUniformLoad) {
+    if (fn == core::BuiltinFn::kWorkgroupUniformLoad) {
         if (!validator_.WorkgroupUniformLoad(call)) {
             return nullptr;
         }
     }
 
-    if (fn == core::Function::kSubgroupBroadcast) {
+    if (fn == core::BuiltinFn::kSubgroupBroadcast) {
         if (!validator_.SubgroupBroadcast(call)) {
             return nullptr;
         }
@@ -3027,7 +3027,7 @@ size_t Resolver::NestDepth(const core::type::Type* ty) const {
         });
 }
 
-void Resolver::CollectTextureSamplerPairs(const sem::Builtin* builtin,
+void Resolver::CollectTextureSamplerPairs(const sem::BuiltinFn* builtin,
                                           VectorRef<const sem::ValueExpression*> args) const {
     // Collect a texture/sampler pair for this builtin.
     const auto& signature = builtin->Signature();
@@ -3332,7 +3332,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
         return builder_->create<sem::TypeExpression>(expr, current_statement_, ty);
     }
 
-    if (resolved->BuiltinFunction() != core::Function::kNone) {
+    if (resolved->BuiltinFn() != core::BuiltinFn::kNone) {
         AddError("missing '(' for builtin function call", expr->source.End());
         return nullptr;
     }

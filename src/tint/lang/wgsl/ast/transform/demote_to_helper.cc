@@ -149,17 +149,17 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                 auto* sem_call = sem.Get<sem::Call>(call);
                 auto* stmt = sem_call ? sem_call->Stmt() : nullptr;
                 auto* func = stmt ? stmt->Function() : nullptr;
-                auto* builtin = sem_call ? sem_call->Target()->As<sem::Builtin>() : nullptr;
+                auto* builtin = sem_call ? sem_call->Target()->As<sem::BuiltinFn>() : nullptr;
                 if (functions_to_process.count(func) == 0 || !builtin) {
                     return;
                 }
 
-                if (builtin->Type() == core::Function::kTextureStore) {
+                if (builtin->Fn() == core::BuiltinFn::kTextureStore) {
                     // A call to textureStore() will always be a statement.
                     // Wrap it inside a conditional block.
                     auto* masked_call = b.If(b.Not(flag), b.Block(ctx.Clone(stmt->Declaration())));
                     ctx.Replace(stmt->Declaration(), masked_call);
-                } else if (builtin->IsAtomic() && builtin->Type() != core::Function::kAtomicLoad) {
+                } else if (builtin->IsAtomic() && builtin->Fn() != core::BuiltinFn::kAtomicLoad) {
                     // A call to an atomic builtin can be a statement or an expression.
                     if (auto* call_stmt = stmt->Declaration()->As<CallStatement>();
                         call_stmt && call_stmt->expr == call) {
@@ -180,7 +180,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                         auto result = b.Sym();
                         Type result_ty;
                         const Statement* masked_call = nullptr;
-                        if (builtin->Type() == core::Function::kAtomicCompareExchangeWeak) {
+                        if (builtin->Fn() == core::BuiltinFn::kAtomicCompareExchangeWeak) {
                             // Special case for atomicCompareExchangeWeak as we cannot name its
                             // result type. We have to declare an equivalent struct and copy the
                             // original member values over to it.
