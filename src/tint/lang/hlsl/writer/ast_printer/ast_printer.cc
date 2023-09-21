@@ -1213,7 +1213,11 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
         return EmitDP4aCall(out, expr, builtin);
     }
     if (builtin->IsSubgroup()) {
-        return EmitSubgroupCall(out, expr, builtin);
+        if (builtin->Type() == core::Function::kSubgroupBroadcast) {
+            // Fall through the regular path.
+        } else {
+            return EmitSubgroupCall(out, expr, builtin);
+        }
     }
 
     auto name = generate_builtin_name(builtin);
@@ -2507,6 +2511,7 @@ bool ASTPrinter::EmitSubgroupCall(StringStream& out,
     if (builtin->Type() == core::Function::kSubgroupBallot) {
         out << "WaveActiveBallot(true)";
     } else {
+        // subgroupBroadcast is already handled in the regular builtin flow.
         TINT_UNREACHABLE() << "unexpected subgroup builtin type " << core::str(builtin->Type());
         return false;
     }
@@ -2992,6 +2997,8 @@ std::string ASTPrinter::generate_builtin_name(const sem::Builtin* builtin) {
             return "reversebits";
         case core::Function::kSmoothstep:
             return "smoothstep";
+        case core::Function::kSubgroupBroadcast:
+            return "WaveReadLaneAt";
         default:
             diagnostics_.add_error(diag::System::Writer,
                                    "Unknown builtin method: " + std::string(builtin->str()));
