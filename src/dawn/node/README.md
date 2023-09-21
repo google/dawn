@@ -4,12 +4,12 @@ Note: This code is currently WIP. There are a number of [known issues](#known-is
 
 ## Building
 
-## System requirements
+### System requirements
 
 - [CMake 3.10](https://cmake.org/download/) or greater
 - [Go 1.13](https://golang.org/dl/) or greater
 
-## Install `depot_tools`
+### Install `depot_tools`
 
 Dawn uses the Chromium build system and dependency management so you need to [install depot_tools] and add it to the PATH.
 
@@ -73,10 +73,16 @@ Or if you checked out your own CTS repo:
 
 If this fails with the error message `TypeError: expander is not a function or its return value is not iterable`, try appending `--build=false` to the start of the `run-cts` command line flags.
 
-To test against SwiftShader instead of the default Vulkan device, prefix `./tools/run run-cts` with `VK_ICD_FILENAMES=<swiftshader-cmake-build>/Linux/vk_swiftshader_icd.json`. For example:
+To test against SwiftShader (software implementation of Vulkan) instead of the default Vulkan device, prefix `./tools/run run-cts` with `VK_ICD_FILENAMES=<swiftshader-cmake-build>/Linux/vk_swiftshader_icd.json`. For example:
 
 ```sh
 VK_ICD_FILENAMES=<swiftshader-cmake-build>/Linux/vk_swiftshader_icd.json ./tools/run run-cts --bin=<path-build-dir> [WebGPU CTS query]
+```
+
+To test against Lavapipe (mesa's software implementation of Vulkan), similarly to SwiftShader, prefix `./tools/run run-cts` with `VK_ICD_FILENAMES=<lavapipe-install-dir>/share/vulkan/icd.d/lvp_icd.x86_64.json`. For example:
+
+```sh
+VK_ICD_FILENAMES=<lavapipe-install-dir>/share/vulkan/icd.d/lvp_icd.x86_64.json ./tools/run run-cts --bin=<path-build-dir> [WebGPU CTS query]
 ```
 
 The `--flag` parameter must be passed in multiple times, once for each flag begin set. Here are some common arguments:
@@ -191,6 +197,43 @@ cd <cts-root-dir>
 
 This command is then possible to run in your debugger of choice.
 
+## Recipes for building software GPUs
+
+### Building Lavapipe (LLVM Vulkan)
+
+### System requirements
+
+- Python 3.6 or newer
+- [Meson](https://golang.org/dl/)
+- llvm-dev
+
+These can be pre-built versions from apt-get, etc.
+
+### Get source code
+
+You can either download a specific version of mesa from [here](https://docs.mesa3d.org/download.html)
+
+or use git to pull from the source tree ([details](https://docs.mesa3d.org/repository.html))
+
+```sh
+git clone https://gitlab.freedesktop.org/mesa/mesa.git
+```
+
+### Building
+
+In the source directory
+
+```sh
+mkdir <build-dir>
+meson setup <build-dir>/ -Dprefix=<lavapipe-install-dir> -Dvulkan-drivers=swrast
+meson compile -C <build-dir>
+meson install -C <build-dir>
+```
+
+This should result in Lavapipe being built and the artifacts copied to `<lavapipe-install-dir>`
+
+Further details can be found [here](https://docs.mesa3d.org/install.html)
+
 ## Known issues
 
 See https://bugs.chromium.org/p/dawn/issues/list?q=component%3ADawnNode&can=2 for tracked bugs, and `TODO`s in the code.
@@ -201,3 +244,4 @@ See https://bugs.chromium.org/p/dawn/issues/list?q=component%3ADawnNode&can=2 fo
 - Generated includes live in `src/` for `dawn/node`, but outside for Dawn. [discussion](https://dawn-review.googlesource.com/c/dawn/+/64903/9/src/dawn/node/interop/CMakeLists.txt#56)
 - Hook up to presubmit bots (CQ / Kokoro)
 - `binding::GPU` will require significant rework [once Dawn implements the device / adapter creation path properly](https://dawn-review.googlesource.com/c/dawn/+/64916/4/src/dawn/node/binding/GPU.cpp).
+
