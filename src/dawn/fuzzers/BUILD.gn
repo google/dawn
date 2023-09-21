@@ -127,6 +127,7 @@ if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader &&
     ]
   }
 
+  # Generate the `.proto` files
   dawn_json_lpm_generator("dawn_lpmfuzz_proto") {
     target = "dawn_lpmfuzz_proto"
     outputs = [
@@ -135,43 +136,31 @@ if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader &&
     ]
   }
 
-  copy("copy_dawn_custom_lpms") {
-    # Hardcoded paths because we can't get_target_outputs from a proto_library
-    # TODO(tiszka): crbug.com/1410213
+  # Copy handwritten `.proto` files to build directory
+  copy("copy_dawn_custom_lpm") {
     sources = [ "${dawn_root}/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto" ]
     outputs = [ "$root_out_dir/gen/third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.proto" ]
   }
 
+  # Generate the `.pb.h` and `.pb.cc` files
   proto_library("dawn_lpm_proto") {
     proto_in_dir = "$root_out_dir/gen"
     sources = get_target_outputs(":dawn_lpmfuzz_proto")
-    sources += get_target_outputs(":copy_dawn_custom_lpms")
+    sources += get_target_outputs(":copy_dawn_custom_lpm")
 
+    generate_python = false
     use_protobuf_full = true
     deps = [
-      ":copy_dawn_custom_lpms",
+      ":copy_dawn_custom_lpm",
       ":dawn_lpmfuzz_proto",
       "//third_party/protobuf:protobuf_full",
     ]
   }
 
-  copy("copy_dawn_lpm_proto_outputs") {
-    # Hardcoded paths because we can't get_target_outputs from a proto_library
-    # TODO(tiszka): crbug.com/1410213
-    sources = [
-      "$root_out_dir/gen/$root_out_dir/gen/third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.pb.cc",
-      "$root_out_dir/gen/$root_out_dir/gen/third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_custom_lpm.pb.h",
-      "$root_out_dir/gen/$root_out_dir/gen/third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_lpm_autogen.pb.cc",
-      "$root_out_dir/gen/$root_out_dir/gen/third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_lpm_autogen.pb.h",
-      "$root_out_dir/gen/$root_out_dir/gen/third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_object_types_lpm_autogen.pb.cc",
-      "$root_out_dir/gen/$root_out_dir/gen/third_party/dawn/src/dawn/fuzzers/lpmfuzz/dawn_object_types_lpm_autogen.pb.h",
-    ]
-    outputs = [ "$root_out_dir/gen/third_party/dawn/src/dawn/fuzzers/lpmfuzz/{{source_file_part}}" ]
-    deps = [ ":dawn_lpm_proto" ]
-  }
-
   dawn_fuzzer_test("dawn_lpm_fuzzer_vulkan_backend") {
     sources = get_target_outputs(":dawn_lpmfuzz_cpp")
+    sources += get_target_outputs(":dawn_lpm_proto_gen")
+
     sources += [
       "lpmfuzz/DawnLPMFuzzer.cpp",
       "lpmfuzz/DawnLPMFuzzer.h",
@@ -183,7 +172,7 @@ if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader &&
     ]
 
     deps = [
-      ":copy_dawn_lpm_proto_outputs",
+      ":dawn_lpm_proto",
       ":dawn_lpmfuzz_cpp",
       "${dawn_root}/src/dawn:cpp",
       "${dawn_root}/src/dawn:proc",
@@ -191,7 +180,6 @@ if (is_dawn_lpm_fuzzer && build_with_chromium && dawn_use_swiftshader &&
       "${dawn_root}/src/dawn/native:static",
       "${dawn_root}/src/dawn/utils",
       "${dawn_root}/src/dawn/wire:static",
-      "//third_party/dawn/src/dawn/fuzzers:dawn_lpm_proto",
       "//third_party/libprotobuf-mutator",
     ]
   }
