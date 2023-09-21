@@ -79,6 +79,8 @@ const char* str(BuiltinFn i) {
             return "spirv.image_sample_dref_implicit_lod";
         case BuiltinFn::kImageSampleDrefExplicitLod:
             return "spirv.image_sample_dref_explicit_lod";
+        case BuiltinFn::kImageWrite:
+            return "spirv.image_write";
         case BuiltinFn::kMatrixTimesMatrix:
             return "spirv.matrix_times_matrix";
         case BuiltinFn::kMatrixTimesScalar:

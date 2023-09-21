@@ -25,7 +25,6 @@
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
-#include "src/tint/lang/spirv/ir/intrinsic_call.h"
 #include "src/tint/lang/spirv/writer/common/binary_writer.h"
 #include "src/tint/lang/spirv/writer/common/function.h"
 #include "src/tint/lang/spirv/writer/common/module.h"
@@ -51,7 +50,6 @@ class ExitLoop;
 class ExitSwitch;
 class Function;
 class If;
-class IntrinsicCall;
 class Let;
 class Load;
 class LoadVectorElement;
@@ -210,10 +208,6 @@ class Printer {
     /// Emit a convert instruction.
     /// @param convert the convert instruction to emit
     void EmitConvert(core::ir::Convert* convert);
-
-    /// Emit an intrinsic call instruction.
-    /// @param call the intrinsic call instruction to emit
-    void EmitIntrinsicCall(spirv::ir::IntrinsicCall* call);
 
     /// Emit IO attributes.
     /// @param id the ID of the variable to decorate

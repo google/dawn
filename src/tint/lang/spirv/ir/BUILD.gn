@@ -33,10 +33,6 @@ libtint_source_set("ir") {
   sources = [
     "builtin_call.cc",
     "builtin_call.h",
-    "intrinsic.cc",
-    "intrinsic.h",
-    "intrinsic_call.cc",
-    "intrinsic_call.h",
   ]
   deps = [
     "${tint_src_dir}/api/common",
@@ -65,10 +61,7 @@ libtint_source_set("ir") {
 if (tint_build_unittests) {
   tint_unittests_source_set("unittests") {
     testonly = true
-    sources = [
-      "builtin_call_test.cc",
-      "intrinsic_call_test.cc",
-    ]
+    sources = [ "builtin_call_test.cc" ]
     deps = [
       "${tint_src_dir}:gmock_and_gtest",
       "${tint_src_dir}/api/common",

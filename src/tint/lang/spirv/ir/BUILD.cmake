@@ -28,10 +28,6 @@
 tint_add_target(tint_lang_spirv_ir lib
   lang/spirv/ir/builtin_call.cc
   lang/spirv/ir/builtin_call.h
-  lang/spirv/ir/intrinsic.cc
-  lang/spirv/ir/intrinsic.h
-  lang/spirv/ir/intrinsic_call.cc
-  lang/spirv/ir/intrinsic_call.h
 )
 
 tint_target_add_dependencies(tint_lang_spirv_ir lib
@@ -64,7 +60,6 @@ tint_target_add_dependencies(tint_lang_spirv_ir lib
 ################################################################################
 tint_add_target(tint_lang_spirv_ir_test test
   lang/spirv/ir/builtin_call_test.cc
-  lang/spirv/ir/intrinsic_call_test.cc
 )
 
 tint_target_add_dependencies(tint_lang_spirv_ir_test test

@@ -35,7 +35,6 @@
 #include "src/tint/lang/core/ir/exit_switch.h"
 #include "src/tint/lang/core/ir/function.h"
 #include "src/tint/lang/core/ir/if.h"
-#include "src/tint/lang/core/ir/intrinsic_call.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
@@ -520,7 +519,6 @@ void Validator::CheckCall(Call* call) {
         call,                                          //
         [&](Bitcast*) {},                              //
         [&](BuiltinCall* c) { CheckBuiltinCall(c); },  //
-        [&](IntrinsicCall*) {},                        //
         [&](Construct*) {},                            //
         [&](Convert*) {},                              //
         [&](Discard*) {},                              //

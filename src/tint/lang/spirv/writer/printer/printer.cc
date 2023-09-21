@@ -35,7 +35,6 @@
 #include "src/tint/lang/core/ir/exit_loop.h"
 #include "src/tint/lang/core/ir/exit_switch.h"
 #include "src/tint/lang/core/ir/if.h"
-#include "src/tint/lang/core/ir/intrinsic_call.h"
 #include "src/tint/lang/core/ir/let.h"
 #include "src/tint/lang/core/ir/load.h"
 #include "src/tint/lang/core/ir/load_vector_element.h"
@@ -74,7 +73,6 @@
 #include "src/tint/lang/core/type/u32.h"
 #include "src/tint/lang/core/type/vector.h"
 #include "src/tint/lang/core/type/void.h"
-#include "src/tint/lang/spirv/ir/intrinsic_call.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
 #include "src/tint/lang/spirv/writer/ast_printer/ast_printer.h"
 #include "src/tint/lang/spirv/writer/common/module.h"
@@ -710,7 +708,6 @@ void Printer::EmitBlockInstructions(core::ir::Block* block) {
             [&](spirv::ir::BuiltinCall* b) { EmitSpirvBuiltinCall(b); },          //
             [&](core::ir::Construct* c) { EmitConstruct(c); },                    //
             [&](core::ir::Convert* c) { EmitConvert(c); },                        //
-            [&](spirv::ir::IntrinsicCall* i) { EmitIntrinsicCall(i); },           //
             [&](core::ir::Load* l) { EmitLoad(l); },                              //
             [&](core::ir::LoadVectorElement* l) { EmitLoadVectorElement(l); },    //
             [&](core::ir::Loop* l) { EmitLoop(l); },                              //
@@ -1112,6 +1109,9 @@ void Printer::EmitSpirvBuiltinCall(spirv::ir::BuiltinCall* builtin) {
             break;
         case spirv::BuiltinFn::kImageSampleDrefExplicitLod:
             op = spv::Op::OpImageSampleDrefExplicitLod;
+            break;
+        case spirv::BuiltinFn::kImageWrite:
+            op = spv::Op::OpImageWrite;
             break;
         case spirv::BuiltinFn::kMatrixTimesMatrix:
             op = spv::Op::OpMatrixTimesMatrix;
@@ -1596,29 +1596,6 @@ void Printer::EmitConvert(core::ir::Convert* convert) {
     }
 
     current_function_.push_inst(op, std::move(operands));
-}
-
-void Printer::EmitIntrinsicCall(spirv::ir::IntrinsicCall* call) {
-    auto id = Value(call);
-
-    spv::Op op = spv::Op::Max;
-    switch (call->Kind()) {
-        case spirv::ir::Intrinsic::kImageWrite:
-            op = spv::Op::OpImageWrite;
-            break;
-        case spirv::ir::Intrinsic::kUndefined:
-            TINT_ICE() << "undefined spirv intrinsic";
-            return;
-    }
-
-    OperandList operands;
-    if (!call->Result()->Type()->Is<core::type::Void>()) {
-        operands = {Type(call->Result()->Type()), id};
-    }
-    for (auto* arg : call->Args()) {
-        operands.push_back(Value(arg));
-    }
-    current_function_.push_inst(op, operands);
 }
 
 void Printer::EmitLoad(core::ir::Load* load) {

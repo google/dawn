@@ -29,7 +29,6 @@
 #include "src/tint/lang/core/type/storage_texture.h"
 #include "src/tint/lang/core/type/texture.h"
 #include "src/tint/lang/spirv/ir/builtin_call.h"
-#include "src/tint/lang/spirv/ir/intrinsic_call.h"
 #include "src/tint/lang/spirv/type/sampled_image.h"
 #include "src/tint/utils/ice/ice.h"
 
@@ -721,19 +720,19 @@ struct State {
 
         auto* texel = next_arg();
 
-        // Start building the argument list for the intrinsic.
+        // Start building the argument list for the function.
         // The first two operands are always the texture and then the coordinates.
-        Vector<core::ir::Value*, 8> intrinsic_args;
-        intrinsic_args.Push(texture);
-        intrinsic_args.Push(coords);
-        intrinsic_args.Push(texel);
+        Vector<core::ir::Value*, 8> function_args;
+        function_args.Push(texture);
+        function_args.Push(coords);
+        function_args.Push(texel);
 
         ImageOperands operands;
-        AppendImageOperands(operands, intrinsic_args, builtin, /* requires_float_lod */ false);
+        AppendImageOperands(operands, function_args, builtin, /* requires_float_lod */ false);
 
-        // Call the intrinsic.
-        auto* texture_call = b.Call<spirv::ir::IntrinsicCall>(
-            ty.void_(), spirv::ir::Intrinsic::kImageWrite, std::move(intrinsic_args));
+        // Call the function.
+        auto* texture_call = b.Call<spirv::ir::BuiltinCall>(
+            ty.void_(), spirv::BuiltinFn::kImageWrite, std::move(function_args));
         texture_call->InsertBefore(builtin);
         return texture_call->Result();
     }

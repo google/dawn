@@ -27,13 +27,9 @@ cc_library(
   name = "ir",
   srcs = [
     "builtin_call.cc",
-    "intrinsic.cc",
-    "intrinsic_call.cc",
   ],
   hdrs = [
     "builtin_call.h",
-    "intrinsic.h",
-    "intrinsic_call.h",
   ],
   deps = [
     "//src/tint/api/common",
@@ -66,7 +62,6 @@ cc_library(
   alwayslink = True,
   srcs = [
     "builtin_call_test.cc",
-    "intrinsic_call_test.cc",
   ],
   deps = [
     "//src/tint/api/common",
