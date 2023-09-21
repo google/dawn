@@ -214,9 +214,10 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
     }
 
     if (descriptor->requiredLimits != nullptr) {
-        mLimits.v1 = ReifyDefaultLimits(descriptor->requiredLimits->limits);
+        mLimits.v1 =
+            ReifyDefaultLimits(descriptor->requiredLimits->limits, adapter->GetFeatureLevel());
     } else {
-        GetDefaultLimits(&mLimits.v1);
+        GetDefaultLimits(&mLimits.v1, adapter->GetFeatureLevel());
     }
 
     mFormatTable = BuildFormatTable(this);
@@ -233,7 +234,7 @@ DeviceBase::DeviceBase(AdapterBase* adapter,
 }
 
 DeviceBase::DeviceBase() : mState(State::Alive), mToggles(ToggleStage::Device) {
-    GetDefaultLimits(&mLimits.v1);
+    GetDefaultLimits(&mLimits.v1, FeatureLevel::Core);
     mFormatTable = BuildFormatTable(this);
 }
 

@@ -517,7 +517,7 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBig32BitIntegralValuesOnMultipleCol
     // Test cases are split so that the attachments in each case do not exceed the default
     // maxColorAttachmentBytesPerSample.
     static std::vector<TestCase> kTestCases = {
-        // Full 8 attachment case (Signed 1 and 2 components).
+        // 6 attachment case (Signed 1 and 2 components).
         {AttachmentCase::Int(wgpu::TextureFormat::R32Sint, {kMaxInt32RepresentableInFloat, 0, 0, 0},
                              {kMaxInt32RepresentableInFloat, 0, 0, 0}),
          AttachmentCase::Int(wgpu::TextureFormat::R32Sint,
@@ -528,6 +528,21 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBig32BitIntegralValuesOnMultipleCol
          AttachmentCase::Int(wgpu::TextureFormat::R32Sint,
                              {kMinInt32RepresentableInFloat - 1, 0, 0, 0},
                              {kMinInt32RepresentableInFloat - 1, 0, 0, 0}),
+         AttachmentCase::Int(
+             wgpu::TextureFormat::RG32Sint,
+             {kMaxInt32RepresentableInFloat, kMaxInt32RepresentableInFloat + 1, 0, 0},
+             {kMaxInt32RepresentableInFloat, kMaxInt32RepresentableInFloat + 1, 0, 0}),
+         AttachmentCase::Int(
+             wgpu::TextureFormat::RG32Sint,
+             {kMinInt32RepresentableInFloat, kMinInt32RepresentableInFloat - 1, 0, 0},
+             {kMinInt32RepresentableInFloat, kMinInt32RepresentableInFloat - 1, 0, 0})},
+
+        // 4 attachment case (Signed 1 and 2 components).
+        {AttachmentCase::Int(wgpu::TextureFormat::R32Sint, {kMaxInt32RepresentableInFloat, 0, 0, 0},
+                             {kMaxInt32RepresentableInFloat, 0, 0, 0}),
+         AttachmentCase::Int(wgpu::TextureFormat::R32Sint,
+                             {kMaxInt32RepresentableInFloat + 1, 0, 0, 0},
+                             {kMaxInt32RepresentableInFloat + 1, 0, 0, 0}),
          AttachmentCase::Int(
              wgpu::TextureFormat::RG32Sint,
              {kMaxInt32RepresentableInFloat, kMaxInt32RepresentableInFloat + 1, 0, 0},
@@ -593,6 +608,9 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBig32BitIntegralValuesOnMultipleCol
             expectedDataForRGBA32Float)}};
 
     for (const TestCase& testCase : kTestCases) {
+        if (testCase.size() > GetSupportedLimits().limits.maxColorAttachments) {
+            continue;
+        }
         std::vector<wgpu::Texture> textures;
         std::vector<wgpu::RenderPassColorAttachment> colorAttachmentsInfo;
         std::vector<wgpu::Buffer> outputBuffers;

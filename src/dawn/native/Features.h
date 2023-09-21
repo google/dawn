@@ -27,6 +27,8 @@
 
 namespace dawn::native {
 
+enum class FeatureLevel { Compatibility, Core };
+
 extern const ityp::array<Feature, FeatureInfo, kEnumCount<Feature>> kFeatureNameAndInfoList;
 
 wgpu::FeatureName ToAPI(Feature feature);

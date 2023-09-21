@@ -34,8 +34,6 @@ namespace dawn::native {
 
 class DeviceBase;
 
-enum class FeatureLevel { Compatibility, Core };
-
 class PhysicalDeviceBase : public RefCounted {
   public:
     PhysicalDeviceBase(InstanceBase* instance, wgpu::BackendType backend);
@@ -103,6 +101,8 @@ class PhysicalDeviceBase : public RefCounted {
     void EnableFeature(Feature feature);
     // Used for the tests that intend to use an adapter without all features enabled.
     void SetSupportedFeaturesForTesting(const std::vector<wgpu::FeatureName>& requiredFeatures);
+
+    void GetDefaultLimitsForSupportedFeatureLevel(Limits* limits) const;
 
   private:
     virtual ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(AdapterBase* adapter,
