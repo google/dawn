@@ -71,6 +71,14 @@ const char* str(BuiltinFn i) {
             return "spirv.image_query_size_lod";
         case BuiltinFn::kImageRead:
             return "spirv.image_read";
+        case BuiltinFn::kImageSampleImplicitLod:
+            return "spirv.image_sample_implicit_lod";
+        case BuiltinFn::kImageSampleExplicitLod:
+            return "spirv.image_sample_explicit_lod";
+        case BuiltinFn::kImageSampleDrefImplicitLod:
+            return "spirv.image_sample_dref_implicit_lod";
+        case BuiltinFn::kImageSampleDrefExplicitLod:
+            return "spirv.image_sample_dref_explicit_lod";
         case BuiltinFn::kMatrixTimesMatrix:
             return "spirv.matrix_times_matrix";
         case BuiltinFn::kMatrixTimesScalar:

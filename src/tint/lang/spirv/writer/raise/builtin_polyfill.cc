@@ -490,39 +490,39 @@ struct State {
             coords = AppendArrayIndex(coords, array_idx, builtin);
         }
 
-        // Determine which SPIR-V intrinsic to use and which optional image operands are needed.
-        enum spirv::ir::Intrinsic intrinsic;
+        // Determine which SPIR-V function to use and which optional image operands are needed.
+        enum spirv::BuiltinFn function;
         core::ir::Value* depth = nullptr;
         ImageOperands operands;
         switch (builtin->Func()) {
             case core::BuiltinFn::kTextureSample:
-                intrinsic = spirv::ir::Intrinsic::kImageSampleImplicitLod;
+                function = spirv::BuiltinFn::kImageSampleImplicitLod;
                 operands.offset = next_arg();
                 break;
             case core::BuiltinFn::kTextureSampleBias:
-                intrinsic = spirv::ir::Intrinsic::kImageSampleImplicitLod;
+                function = spirv::BuiltinFn::kImageSampleImplicitLod;
                 operands.bias = next_arg();
                 operands.offset = next_arg();
                 break;
             case core::BuiltinFn::kTextureSampleCompare:
-                intrinsic = spirv::ir::Intrinsic::kImageSampleDrefImplicitLod;
+                function = spirv::BuiltinFn::kImageSampleDrefImplicitLod;
                 depth = next_arg();
                 operands.offset = next_arg();
                 break;
             case core::BuiltinFn::kTextureSampleCompareLevel:
-                intrinsic = spirv::ir::Intrinsic::kImageSampleDrefExplicitLod;
+                function = spirv::BuiltinFn::kImageSampleDrefExplicitLod;
                 depth = next_arg();
                 operands.lod = b.Constant(0_f);
                 operands.offset = next_arg();
                 break;
             case core::BuiltinFn::kTextureSampleGrad:
-                intrinsic = spirv::ir::Intrinsic::kImageSampleExplicitLod;
+                function = spirv::BuiltinFn::kImageSampleExplicitLod;
                 operands.ddx = next_arg();
                 operands.ddy = next_arg();
                 operands.offset = next_arg();
                 break;
             case core::BuiltinFn::kTextureSampleLevel:
-                intrinsic = spirv::ir::Intrinsic::kImageSampleExplicitLod;
+                function = spirv::BuiltinFn::kImageSampleExplicitLod;
                 operands.lod = next_arg();
                 operands.offset = next_arg();
                 break;
@@ -530,24 +530,24 @@ struct State {
                 return nullptr;
         }
 
-        // Start building the argument list for the intrinsic.
+        // Start building the argument list for the function.
         // The first two operands are always the sampled image and then the coordinates, followed by
         // the depth reference if used.
-        Vector<core::ir::Value*, 8> intrinsic_args;
-        intrinsic_args.Push(sampled_image->Result());
-        intrinsic_args.Push(coords);
+        Vector<core::ir::Value*, 8> function_args;
+        function_args.Push(sampled_image->Result());
+        function_args.Push(coords);
         if (depth) {
-            intrinsic_args.Push(depth);
+            function_args.Push(depth);
         }
 
         // Add the optional image operands, if any.
-        AppendImageOperands(operands, intrinsic_args, builtin, /* requires_float_lod */ true);
+        AppendImageOperands(operands, function_args, builtin, /* requires_float_lod */ true);
 
-        // Call the intrinsic.
+        // Call the function.
         // If this is a depth comparison, the result is always f32, otherwise vec4f.
         auto* result_ty = depth ? static_cast<const core::type::Type*>(ty.f32()) : ty.vec4<f32>();
         auto* texture_call =
-            b.Call<spirv::ir::IntrinsicCall>(result_ty, intrinsic, std::move(intrinsic_args));
+            b.Call<spirv::ir::BuiltinCall>(result_ty, function, std::move(function_args));
         texture_call->InsertBefore(builtin);
 
         auto* result = texture_call->Result();

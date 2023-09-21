@@ -1101,6 +1101,18 @@ void Printer::EmitSpirvBuiltinCall(spirv::ir::BuiltinCall* builtin) {
         case spirv::BuiltinFn::kImageRead:
             op = spv::Op::OpImageRead;
             break;
+        case spirv::BuiltinFn::kImageSampleImplicitLod:
+            op = spv::Op::OpImageSampleImplicitLod;
+            break;
+        case spirv::BuiltinFn::kImageSampleExplicitLod:
+            op = spv::Op::OpImageSampleExplicitLod;
+            break;
+        case spirv::BuiltinFn::kImageSampleDrefImplicitLod:
+            op = spv::Op::OpImageSampleDrefImplicitLod;
+            break;
+        case spirv::BuiltinFn::kImageSampleDrefExplicitLod:
+            op = spv::Op::OpImageSampleDrefExplicitLod;
+            break;
         case spirv::BuiltinFn::kMatrixTimesMatrix:
             op = spv::Op::OpMatrixTimesMatrix;
             break;
@@ -1591,18 +1603,6 @@ void Printer::EmitIntrinsicCall(spirv::ir::IntrinsicCall* call) {
 
     spv::Op op = spv::Op::Max;
     switch (call->Kind()) {
-        case spirv::ir::Intrinsic::kImageSampleImplicitLod:
-            op = spv::Op::OpImageSampleImplicitLod;
-            break;
-        case spirv::ir::Intrinsic::kImageSampleExplicitLod:
-            op = spv::Op::OpImageSampleExplicitLod;
-            break;
-        case spirv::ir::Intrinsic::kImageSampleDrefImplicitLod:
-            op = spv::Op::OpImageSampleDrefImplicitLod;
-            break;
-        case spirv::ir::Intrinsic::kImageSampleDrefExplicitLod:
-            op = spv::Op::OpImageSampleDrefExplicitLod;
-            break;
         case spirv::ir::Intrinsic::kImageWrite:
             op = spv::Op::OpImageWrite;
             break;
