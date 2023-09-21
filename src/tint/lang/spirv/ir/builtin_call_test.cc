@@ -25,7 +25,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 using IR_SpirvBuiltinCallTest = core::ir::IRTestHelper;
 
 TEST_F(IR_SpirvBuiltinCallTest, Clone) {
-    auto* builtin = b.Call<BuiltinCall>(mod.Types().f32(), Function::kArrayLength, 1_u, 2_u);
+    auto* builtin = b.Call<BuiltinCall>(mod.Types().f32(), BuiltinFn::kArrayLength, 1_u, 2_u);
 
     auto* new_b = clone_ctx.Clone(builtin);
 
@@ -33,7 +33,7 @@ TEST_F(IR_SpirvBuiltinCallTest, Clone) {
     EXPECT_NE(builtin->Result(), new_b->Result());
     EXPECT_EQ(mod.Types().f32(), new_b->Result()->Type());
 
-    EXPECT_EQ(Function::kArrayLength, new_b->Func());
+    EXPECT_EQ(BuiltinFn::kArrayLength, new_b->Func());
 
     auto args = new_b->Args();
     EXPECT_EQ(2u, args.Length());
@@ -46,13 +46,13 @@ TEST_F(IR_SpirvBuiltinCallTest, Clone) {
 }
 
 TEST_F(IR_SpirvBuiltinCallTest, CloneNoArgs) {
-    auto* builtin = b.Call<BuiltinCall>(mod.Types().f32(), Function::kArrayLength);
+    auto* builtin = b.Call<BuiltinCall>(mod.Types().f32(), BuiltinFn::kArrayLength);
 
     auto* new_b = clone_ctx.Clone(builtin);
     EXPECT_NE(builtin->Result(), new_b->Result());
     EXPECT_EQ(mod.Types().f32(), new_b->Result()->Type());
 
-    EXPECT_EQ(Function::kArrayLength, new_b->Func());
+    EXPECT_EQ(BuiltinFn::kArrayLength, new_b->Func());
 
     auto args = new_b->Args();
     EXPECT_TRUE(args.IsEmpty());

@@ -40,6 +40,7 @@ cc_library(
     "//src/tint/lang/core/intrinsic/data",
     "//src/tint/lang/core/ir",
     "//src/tint/lang/core/type",
+    "//src/tint/lang/spirv",
     "//src/tint/lang/spirv/intrinsic/data",
     "//src/tint/lang/spirv/ir",
     "//src/tint/lang/spirv/type",

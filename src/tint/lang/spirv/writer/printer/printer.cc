@@ -1036,93 +1036,93 @@ void Printer::EmitSpirvBuiltinCall(spirv::ir::BuiltinCall* builtin) {
 
     spv::Op op = spv::Op::Max;
     switch (builtin->Func()) {
-        case spirv::ir::Function::kArrayLength:
+        case spirv::BuiltinFn::kArrayLength:
             op = spv::Op::OpArrayLength;
             break;
-        case spirv::ir::Function::kAtomicIadd:
+        case spirv::BuiltinFn::kAtomicIadd:
             op = spv::Op::OpAtomicIAdd;
             break;
-        case spirv::ir::Function::kAtomicIsub:
+        case spirv::BuiltinFn::kAtomicIsub:
             op = spv::Op::OpAtomicISub;
             break;
-        case spirv::ir::Function::kAtomicAnd:
+        case spirv::BuiltinFn::kAtomicAnd:
             op = spv::Op::OpAtomicAnd;
             break;
-        case spirv::ir::Function::kAtomicCompareExchange:
+        case spirv::BuiltinFn::kAtomicCompareExchange:
             op = spv::Op::OpAtomicCompareExchange;
             break;
-        case spirv::ir::Function::kAtomicExchange:
+        case spirv::BuiltinFn::kAtomicExchange:
             op = spv::Op::OpAtomicExchange;
             break;
-        case spirv::ir::Function::kAtomicLoad:
+        case spirv::BuiltinFn::kAtomicLoad:
             op = spv::Op::OpAtomicLoad;
             break;
-        case spirv::ir::Function::kAtomicOr:
+        case spirv::BuiltinFn::kAtomicOr:
             op = spv::Op::OpAtomicOr;
             break;
-        case spirv::ir::Function::kAtomicSmax:
+        case spirv::BuiltinFn::kAtomicSmax:
             op = spv::Op::OpAtomicSMax;
             break;
-        case spirv::ir::Function::kAtomicSmin:
+        case spirv::BuiltinFn::kAtomicSmin:
             op = spv::Op::OpAtomicSMin;
             break;
-        case spirv::ir::Function::kAtomicStore:
+        case spirv::BuiltinFn::kAtomicStore:
             op = spv::Op::OpAtomicStore;
             break;
-        case spirv::ir::Function::kAtomicUmax:
+        case spirv::BuiltinFn::kAtomicUmax:
             op = spv::Op::OpAtomicUMax;
             break;
-        case spirv::ir::Function::kAtomicUmin:
+        case spirv::BuiltinFn::kAtomicUmin:
             op = spv::Op::OpAtomicUMin;
             break;
-        case spirv::ir::Function::kAtomicXor:
+        case spirv::BuiltinFn::kAtomicXor:
             op = spv::Op::OpAtomicXor;
             break;
-        case spirv::ir::Function::kDot:
+        case spirv::BuiltinFn::kDot:
             op = spv::Op::OpDot;
             break;
-        case spirv::ir::Function::kImageDrefGather:
+        case spirv::BuiltinFn::kImageDrefGather:
             op = spv::Op::OpImageDrefGather;
             break;
-        case spirv::ir::Function::kImageFetch:
+        case spirv::BuiltinFn::kImageFetch:
             op = spv::Op::OpImageFetch;
             break;
-        case spirv::ir::Function::kImageGather:
+        case spirv::BuiltinFn::kImageGather:
             op = spv::Op::OpImageGather;
             break;
-        case spirv::ir::Function::kImageQuerySize:
+        case spirv::BuiltinFn::kImageQuerySize:
             module_.PushCapability(SpvCapabilityImageQuery);
             op = spv::Op::OpImageQuerySize;
             break;
-        case spirv::ir::Function::kImageQuerySizeLod:
+        case spirv::BuiltinFn::kImageQuerySizeLod:
             module_.PushCapability(SpvCapabilityImageQuery);
             op = spv::Op::OpImageQuerySizeLod;
             break;
-        case spirv::ir::Function::kImageRead:
+        case spirv::BuiltinFn::kImageRead:
             op = spv::Op::OpImageRead;
             break;
-        case spirv::ir::Function::kMatrixTimesMatrix:
+        case spirv::BuiltinFn::kMatrixTimesMatrix:
             op = spv::Op::OpMatrixTimesMatrix;
             break;
-        case spirv::ir::Function::kMatrixTimesScalar:
+        case spirv::BuiltinFn::kMatrixTimesScalar:
             op = spv::Op::OpMatrixTimesScalar;
             break;
-        case spirv::ir::Function::kMatrixTimesVector:
+        case spirv::BuiltinFn::kMatrixTimesVector:
             op = spv::Op::OpMatrixTimesVector;
             break;
-        case spirv::ir::Function::kSampledImage:
+        case spirv::BuiltinFn::kSampledImage:
             op = spv::Op::OpSampledImage;
             break;
-        case spirv::ir::Function::kSelect:
+        case spirv::BuiltinFn::kSelect:
             op = spv::Op::OpSelect;
             break;
-        case spirv::ir::Function::kVectorTimesMatrix:
+        case spirv::BuiltinFn::kVectorTimesMatrix:
             op = spv::Op::OpVectorTimesMatrix;
             break;
-        case spirv::ir::Function::kVectorTimesScalar:
+        case spirv::BuiltinFn::kVectorTimesScalar:
             op = spv::Op::OpVectorTimesScalar;
             break;
-        case spirv::ir::Function::kNone:
+        case spirv::BuiltinFn::kNone:
             TINT_ICE() << "undefined spirv ir function";
             return;
     }

@@ -84,6 +84,7 @@ tint_target_add_dependencies(tint_lang_spirv_writer_common_test test
   tint_lang_core_intrinsic_data
   tint_lang_core_ir
   tint_lang_core_type
+  tint_lang_spirv
   tint_lang_spirv_intrinsic_data
   tint_lang_spirv_ir
   tint_utils_containers

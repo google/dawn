@@ -99,21 +99,21 @@ void Run(core::ir::Module* ir) {
                 if (lhs_ty->Is<core::type::Matrix>()) {
                     if (rhs_ty->Is<core::type::Scalar>()) {
                         replace(b.Call<spirv::ir::BuiltinCall>(
-                            ty, spirv::ir::Function::kMatrixTimesScalar, lhs, rhs));
+                            ty, spirv::BuiltinFn::kMatrixTimesScalar, lhs, rhs));
                     } else if (rhs_ty->Is<core::type::Vector>()) {
                         replace(b.Call<spirv::ir::BuiltinCall>(
-                            ty, spirv::ir::Function::kMatrixTimesVector, lhs, rhs));
+                            ty, spirv::BuiltinFn::kMatrixTimesVector, lhs, rhs));
                     } else if (rhs_ty->Is<core::type::Matrix>()) {
                         replace(b.Call<spirv::ir::BuiltinCall>(
-                            ty, spirv::ir::Function::kMatrixTimesMatrix, lhs, rhs));
+                            ty, spirv::BuiltinFn::kMatrixTimesMatrix, lhs, rhs));
                     }
                 } else {
                     if (lhs_ty->Is<core::type::Scalar>()) {
                         replace(b.Call<spirv::ir::BuiltinCall>(
-                            ty, spirv::ir::Function::kMatrixTimesScalar, rhs, lhs));
+                            ty, spirv::BuiltinFn::kMatrixTimesScalar, rhs, lhs));
                     } else if (lhs_ty->Is<core::type::Vector>()) {
                         replace(b.Call<spirv::ir::BuiltinCall>(
-                            ty, spirv::ir::Function::kVectorTimesMatrix, lhs, rhs));
+                            ty, spirv::BuiltinFn::kVectorTimesMatrix, lhs, rhs));
                     }
                 }
                 break;

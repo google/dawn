@@ -19,8 +19,8 @@
 
 #include "src/tint/lang/core/intrinsic/table_data.h"
 #include "src/tint/lang/core/ir/builtin_call.h"
+#include "src/tint/lang/spirv/builtin_fn.h"
 #include "src/tint/lang/spirv/intrinsic/data/data.h"
-#include "src/tint/lang/spirv/ir/function.h"
 #include "src/tint/utils/rtti/castable.h"
 
 namespace tint::spirv::ir {
@@ -33,7 +33,7 @@ class BuiltinCall final : public Castable<BuiltinCall, core::ir::BuiltinCall> {
     /// @param func the builtin function
     /// @param args the conversion arguments
     BuiltinCall(core::ir::InstructionResult* result,
-                Function func,
+                BuiltinFn func,
                 VectorRef<core::ir::Value*> args = tint::Empty);
     ~BuiltinCall() override;
 
@@ -41,7 +41,7 @@ class BuiltinCall final : public Castable<BuiltinCall, core::ir::BuiltinCall> {
     BuiltinCall* Clone(core::ir::CloneContext& ctx) override;
 
     /// @returns the builtin function
-    Function Func() { return func_; }
+    BuiltinFn Func() { return func_; }
 
     /// @returns the identifier for the function
     size_t FuncId() override { return static_cast<size_t>(func_); }
@@ -56,7 +56,7 @@ class BuiltinCall final : public Castable<BuiltinCall, core::ir::BuiltinCall> {
     const core::intrinsic::TableData& TableData() override { return spirv::intrinsic::data::kData; }
 
   private:
-    Function func_;
+    BuiltinFn func_;
 };
 
 }  // namespace tint::spirv::ir
