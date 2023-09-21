@@ -65,13 +65,39 @@ InstanceBase* AdapterBase::APIGetInstance() const {
 
 bool AdapterBase::APIGetLimits(SupportedLimits* limits) const {
     DAWN_ASSERT(limits != nullptr);
-    if (limits->nextInChain != nullptr) {
+    // TODO(dawn:1955): Revisit after deciding how to improve the validation for ChainedStructOut.
+    MaybeError result =
+        ValidateSTypes(limits->nextInChain, {{wgpu::SType::DawnExperimentalSubgroupLimits}});
+    if (mPhysicalDevice->GetInstance()->ConsumedError(std::move(result))) {
         return false;
     }
     if (mUseTieredLimits) {
         limits->limits = ApplyLimitTiers(mPhysicalDevice->GetLimits().v1);
     } else {
         limits->limits = mPhysicalDevice->GetLimits().v1;
+    }
+    for (auto* chain = limits->nextInChain; chain; chain = chain->nextInChain) {
+        wgpu::ChainedStructOut originalChain = *chain;
+        switch (chain->sType) {
+            case (wgpu::SType::DawnExperimentalSubgroupLimits): {
+                DawnExperimentalSubgroupLimits* subgroupLimits =
+                    reinterpret_cast<DawnExperimentalSubgroupLimits*>(chain);
+                if (!mTogglesState.IsEnabled(Toggle::AllowUnsafeAPIs)) {
+                    // If AllowUnsafeAPIs is not enabled, return the default-initialized
+                    // DawnExperimentalSubgroupLimits object, where minSubgroupSize and
+                    // maxSubgroupSize are WGPU_LIMIT_U32_UNDEFINED.
+                    *subgroupLimits = DawnExperimentalSubgroupLimits{};
+                } else {
+                    *subgroupLimits = mPhysicalDevice->GetLimits().experimentalSubgroupLimits;
+                }
+                break;
+            }
+            default:
+                // ValidateSTypes ensures that all chained sTypes are known.
+                DAWN_UNREACHABLE();
+        }
+        // Recover the original chain
+        *chain = originalChain;
     }
     return true;
 }
@@ -181,15 +207,17 @@ ResultOrError<Ref<DeviceBase>> AdapterBase::CreateDevice(const DeviceDescriptor*
     }
 
     if (descriptor->requiredLimits != nullptr) {
+        // Only consider limits in RequiredLimits structure, and currently no chained structure
+        // supported.
+        DAWN_INVALID_IF(descriptor->requiredLimits->nextInChain != nullptr,
+                        "can not chain after requiredLimits.");
+
         SupportedLimits supportedLimits;
         bool success = APIGetLimits(&supportedLimits);
         DAWN_ASSERT(success);
 
         DAWN_TRY_CONTEXT(ValidateLimits(supportedLimits.limits, descriptor->requiredLimits->limits),
                          "validating required limits");
-
-        DAWN_INVALID_IF(descriptor->requiredLimits->nextInChain != nullptr,
-                        "nextInChain is not nullptr.");
     }
 
     return mPhysicalDevice->CreateDevice(this, descriptor, deviceToggles);

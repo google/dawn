@@ -805,6 +805,10 @@ class PhysicalDevice : public PhysicalDeviceBase {
         // TODO(crbug.com/dawn/1448):
         // - maxInterStageShaderVariables
 
+        // Experimental limits for subgroups
+        limits->experimentalSubgroupLimits.minSubgroupSize = 4;
+        limits->experimentalSubgroupLimits.maxSubgroupSize = 64;
+
         return {};
     }
 

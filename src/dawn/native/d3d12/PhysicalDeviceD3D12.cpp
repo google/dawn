@@ -348,6 +348,13 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // TODO(crbug.com/dawn/1448):
     // - maxInterStageShaderVariables
 
+    // Experimental limits for subgroups
+    limits->experimentalSubgroupLimits.minSubgroupSize = mDeviceInfo.waveLaneCountMin;
+    // Currently the WaveLaneCountMax queried from D3D12 API is not reliable and the meaning is
+    // unclear. Use 128 instead, which is the largest possible size. Reference:
+    // https://github.com/Microsoft/DirectXShaderCompiler/wiki/Wave-Intrinsics#:~:text=UINT%20WaveLaneCountMax
+    limits->experimentalSubgroupLimits.maxSubgroupSize = 128u;
+
     return {};
 }
 

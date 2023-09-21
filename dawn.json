@@ -1390,6 +1390,15 @@
             {"name": "max compute workgroups per dimension", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
         ]
     },
+    "dawn experimental subgroup limits": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["supported limits"],
+        "members": [
+            {"name": "min subgroup size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"},
+            {"name": "max subgroup size", "type": "uint32_t", "default": "WGPU_LIMIT_U32_UNDEFINED"}
+        ]
+    },
     "required limits": {
         "category": "structure",
         "extensible": "in",
@@ -3263,6 +3272,7 @@
             {"value": 1014, "name": "render pass pixel local storage", "tags": ["dawn"]},
             {"value": 1015, "name": "pipeline layout pixel local storage", "tags": ["dawn"]},
             {"value": 1016, "name": "buffer host mapped pointer", "tags": ["dawn"]},
+            {"value": 1017, "name": "dawn experimental subgroup limits", "tags": ["dawn"]},
 
             {"value": 1100, "name": "shared texture memory vk image descriptor", "tags": ["dawn", "native"]},
             {"value": 1101, "name": "shared texture memory vk dedicated allocation descriptor", "tags": ["dawn", "native"]},

@@ -35,6 +35,7 @@ class LimitsAndFeatures {
 
   private:
     WGPUSupportedLimits mLimits;
+    WGPUDawnExperimentalSubgroupLimits mExperimentalSubgroupLimits;
     std::unordered_set<WGPUFeatureName> mFeatures;
 };
 

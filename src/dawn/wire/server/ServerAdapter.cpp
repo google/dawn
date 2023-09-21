@@ -83,6 +83,10 @@ void Server::OnRequestDeviceCallback(RequestDeviceUserdata* data,
     cmd.features = features.data();
 
     WGPUSupportedLimits limits = {};
+    // Also query the DawnExperimentalSubgroupLimits and report to client.
+    WGPUDawnExperimentalSubgroupLimits experimentalSubgroupLimits = {};
+    experimentalSubgroupLimits.chain.sType = WGPUSType_DawnExperimentalSubgroupLimits;
+    limits.nextInChain = &experimentalSubgroupLimits.chain;
     mProcs.deviceGetLimits(device, &limits);
     cmd.limits = &limits;
 

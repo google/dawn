@@ -518,6 +518,12 @@ MaybeError PhysicalDevice::InitializeSupportedLimitsImpl(CombinedLimits* limits)
     // TODO(crbug.com/dawn/1448):
     // - maxInterStageShaderVariables
 
+    // Experimental limits for subgroups
+    limits->experimentalSubgroupLimits.minSubgroupSize =
+        mDeviceInfo.subgroupSizeControlProperties.minSubgroupSize;
+    limits->experimentalSubgroupLimits.maxSubgroupSize =
+        mDeviceInfo.subgroupSizeControlProperties.maxSubgroupSize;
+
     return {};
 }
 
