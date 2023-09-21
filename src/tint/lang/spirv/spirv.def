@@ -16,8 +16,9 @@
 // Spirv builtin definition file                                              //
 ////////////////////////////////////////////////////////////////////////////////
 
-// TODO(crbug.com/2036): add an include facility and move these duplicate match and type lines
-// into a common file.
+import "src/tint/lang/core/address_space.def"
+import "src/tint/lang/core/access.def"
+import "src/tint/lang/core/texel_format.def"
 
 type bool
 type f32
@@ -61,42 +62,6 @@ type ptr<S: address_space, T, A: access>
 
 type struct_with_runtime_array
 type sampled_image<T>
-
-enum address_space {
-  function
-  private
-  workgroup
-  uniform
-  storage
-  push_constant
-  pixel_local
-}
-
-enum access {
-  read
-  write
-  read_write
-}
-
-enum texel_format {
-  bgra8unorm
-  rgba8unorm
-  rgba8snorm
-  rgba8uint
-  rgba8sint
-  rgba16uint
-  rgba16sint
-  rgba16float
-  r32uint
-  r32sint
-  r32float
-  rg32uint
-  rg32sint
-  rg32float
-  rgba32uint
-  rgba32sint
-  rgba32float
-}
 
 match f32_f16: f32 | f16
 match iu32: i32 | u32

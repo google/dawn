@@ -1,0 +1,13 @@
+// https://gpuweb.github.io/gpuweb/wgsl/#storage-class
+enum address_space {
+  function
+  private
+  workgroup
+  uniform
+  storage
+  push_constant
+  pixel_local
+  __in
+  __out
+  @internal handle
+}

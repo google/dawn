@@ -13,7 +13,7 @@
 // limitations under the License.
 
 ////////////////////////////////////////////////////////////////////////////////
-// WGSL builtin definition file                                               //
+// core builtin definition file                                               //
 //                                                                            //
 // This file is used to generate parts of the Tint BuiltinTable, various      //
 // enum definition files, as well as test .wgsl files.                        //
@@ -22,6 +22,10 @@
 //    tools/run gen                                                           //
 // from the Dawn source directory.                                            //
 ////////////////////////////////////////////////////////////////////////////////
+
+import "src/tint/lang/core/address_space.def"
+import "src/tint/lang/core/access.def"
+import "src/tint/lang/core/texel_format.def"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Enumerators                                                                //
@@ -44,48 +48,6 @@ enum builtin_value {
   subgroup_invocation_id
   subgroup_size
   __point_size
-}
-
-// https://gpuweb.github.io/gpuweb/wgsl/#storage-class
-enum address_space {
-  function
-  private
-  workgroup
-  uniform
-  storage
-  push_constant
-  pixel_local
-  __in
-  __out
-  @internal handle
-}
-
-// https://gpuweb.github.io/gpuweb/wgsl/#memory-access-mode
-enum access {
-  read
-  write
-  read_write
-}
-
-// https://gpuweb.github.io/gpuweb/wgsl/#texel-formats
-enum texel_format {
-  bgra8unorm
-  rgba8unorm
-  rgba8snorm
-  rgba8uint
-  rgba8sint
-  rgba16uint
-  rgba16sint
-  rgba16float
-  r32uint
-  r32sint
-  r32float
-  rg32uint
-  rg32sint
-  rg32float
-  rgba32uint
-  rgba32sint
-  rgba32float
 }
 
 // https://www.w3.org/TR/WGSL/#interpolation
