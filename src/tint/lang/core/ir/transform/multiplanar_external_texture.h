@@ -27,7 +27,9 @@ class Module;
 
 namespace tint::core::ir::transform {
 
-/// MultiplanarExternalTexture is a transform that... TODO
+/// MultiplanarExternalTexture is a transform that splits texture_external bindings into two
+/// separate texture_2d<f32> bindings for two possible planes, along with a uniform buffer of
+/// parameters that describe how the texture should be sampled.
 /// @param module the module to transform
 /// @param options the external texture options
 /// @returns an error string on failure
