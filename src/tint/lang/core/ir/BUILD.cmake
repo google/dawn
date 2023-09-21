@@ -46,6 +46,8 @@ tint_add_target(tint_lang_core_ir lib
   lang/core/ir/builtin_call.h
   lang/core/ir/call.cc
   lang/core/ir/call.h
+  lang/core/ir/clone_context.cc
+  lang/core/ir/clone_context.h
   lang/core/ir/constant.cc
   lang/core/ir/constant.h
   lang/core/ir/construct.cc
@@ -188,7 +190,9 @@ tint_add_target(tint_lang_core_ir_test test
   lang/core/ir/store_vector_element_test.cc
   lang/core/ir/switch_test.cc
   lang/core/ir/swizzle_test.cc
+  lang/core/ir/terminate_invocation_test.cc
   lang/core/ir/unary_test.cc
+  lang/core/ir/unreachable_test.cc
   lang/core/ir/user_call_test.cc
   lang/core/ir/validator_test.cc
   lang/core/ir/value_test.cc

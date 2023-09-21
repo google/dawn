@@ -36,6 +36,15 @@ class Block : public Castable<Block> {
     Block();
     ~Block() override;
 
+    /// @param ctx the CloneContext used to clone this block
+    /// @returns a clone of this block
+    virtual Block* Clone(CloneContext& ctx);
+
+    /// Clones the block contents into the given block
+    /// @param ctx the CloneContext used to clone
+    /// @param out the block to clone into
+    virtual void CloneInto(CloneContext& ctx, Block* out);
+
     /// @returns true if this is block has a terminator instruction
     bool HasTerminator() {
         return instructions_.last != nullptr && instructions_.last->Is<ir::Terminator>();

@@ -12,27 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_LANG_CORE_IR_TERMINATE_INVOCATION_H_
-#define SRC_TINT_LANG_CORE_IR_TERMINATE_INVOCATION_H_
+#include "src/tint/lang/core/ir/clone_context.h"
 
-#include <string>
-
-#include "src/tint/lang/core/ir/terminator.h"
+#include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/let.h"
 
 namespace tint::core::ir {
 
-/// An terminate invocation instruction in the IR.
-class TerminateInvocation final : public Castable<TerminateInvocation, Terminator> {
-  public:
-    ~TerminateInvocation() override;
-
-    /// @copydoc Instruction::Clone()
-    TerminateInvocation* Clone(CloneContext& ctx) override;
-
-    /// @returns the friendly name for the instruction
-    std::string FriendlyName() override { return "terminate_invocation"; }
-};
+CloneContext::CloneContext(Module& module) : ir(module) {}
 
 }  // namespace tint::core::ir
-
-#endif  // SRC_TINT_LANG_CORE_IR_TERMINATE_INVOCATION_H_

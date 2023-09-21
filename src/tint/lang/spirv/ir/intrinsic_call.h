@@ -24,7 +24,7 @@
 namespace tint::spirv::ir {
 
 /// A spir-v intrinsic call instruction in the IR.
-class IntrinsicCall : public Castable<IntrinsicCall, core::ir::IntrinsicCall> {
+class IntrinsicCall final : public Castable<IntrinsicCall, core::ir::IntrinsicCall> {
   public:
     /// Constructor
     /// @param result the result value
@@ -34,6 +34,9 @@ class IntrinsicCall : public Castable<IntrinsicCall, core::ir::IntrinsicCall> {
                   Intrinsic intrinsic,
                   VectorRef<core::ir::Value*> args = tint::Empty);
     ~IntrinsicCall() override;
+
+    /// @copydoc core::ir::Instruction::Clone()
+    IntrinsicCall* Clone(core::ir::CloneContext& ctx) override;
 
     /// @returns the kind of the intrinsic
     Intrinsic Kind() const { return intrinsic_; }

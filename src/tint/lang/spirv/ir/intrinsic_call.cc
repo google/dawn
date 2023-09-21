@@ -16,6 +16,9 @@
 
 #include <utility>
 
+#include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/module.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::spirv::ir::IntrinsicCall);
 
 namespace tint::spirv::ir {
@@ -26,5 +29,11 @@ IntrinsicCall::IntrinsicCall(core::ir::InstructionResult* result,
     : Base(result, arguments), intrinsic_(intrinsic) {}
 
 IntrinsicCall::~IntrinsicCall() = default;
+
+IntrinsicCall* IntrinsicCall::Clone(core::ir::CloneContext& ctx) {
+    auto* new_result = ctx.Clone(Result());
+    auto new_args = ctx.Clone<IntrinsicCall::kDefaultNumOperands>(Args());
+    return ctx.ir.instructions.Create<IntrinsicCall>(new_result, intrinsic_, new_args);
+}
 
 }  // namespace tint::spirv::ir

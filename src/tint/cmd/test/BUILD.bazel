@@ -37,6 +37,7 @@ cc_binary(
     "//src/tint/lang/core/ir:test",
     "//src/tint/lang/core/type:test",
     "//src/tint/lang/core:test",
+    "//src/tint/lang/spirv/ir:test",
     "//src/tint/lang/wgsl/ast/transform:test",
     "//src/tint/lang/wgsl/ast:test",
     "//src/tint/lang/wgsl/helpers:test",

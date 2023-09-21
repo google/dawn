@@ -58,5 +58,20 @@ TEST_F(IR_StoreTest, Result) {
     EXPECT_FALSE(inst->HasMultiResults());
 }
 
+TEST_F(IR_StoreTest, Clone) {
+    auto* v = b.Var("a", mod.Types().ptr<private_, i32>());
+    auto* s = b.Store(v, b.Constant(1_i));
+
+    auto* new_v = clone_ctx.Clone(v);
+    auto* new_s = clone_ctx.Clone(s);
+
+    EXPECT_NE(s, new_s);
+    EXPECT_EQ(new_v->Result(), new_s->To());
+
+    auto new_from = new_s->From()->As<Constant>()->Value();
+    ASSERT_TRUE(new_from->Is<core::constant::Scalar<i32>>());
+    EXPECT_EQ(1_i, new_from->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

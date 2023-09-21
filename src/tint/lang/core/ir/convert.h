@@ -24,7 +24,7 @@
 namespace tint::core::ir {
 
 /// A value conversion instruction in the IR.
-class Convert : public Castable<Convert, Call> {
+class Convert final : public Castable<Convert, Call> {
   public:
     /// The offset in Operands() for the value
     static constexpr size_t kValueOperandOffset = 0;
@@ -34,6 +34,9 @@ class Convert : public Castable<Convert, Call> {
     /// @param value the value to convert
     Convert(InstructionResult* result, Value* value);
     ~Convert() override;
+
+    /// @copydoc Instruction::Clone()
+    Convert* Clone(CloneContext& ctx) override;
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() override { return "convert"; }

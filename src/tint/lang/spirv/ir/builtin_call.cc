@@ -16,6 +16,8 @@
 
 #include <utility>
 
+#include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::spirv::ir::BuiltinCall);
@@ -30,5 +32,11 @@ BuiltinCall::BuiltinCall(core::ir::InstructionResult* result,
 }
 
 BuiltinCall::~BuiltinCall() = default;
+
+BuiltinCall* BuiltinCall::Clone(core::ir::CloneContext& ctx) {
+    auto* new_result = ctx.Clone(Result());
+    auto new_args = ctx.Clone<BuiltinCall::kDefaultNumOperands>(Args());
+    return ctx.ir.instructions.Create<BuiltinCall>(new_result, func_, new_args);
+}
 
 }  // namespace tint::spirv::ir

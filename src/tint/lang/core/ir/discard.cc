@@ -13,7 +13,9 @@
 // limitations under the License.
 
 #include "src/tint/lang/core/ir/discard.h"
-#include "src/tint/lang/core/type/void.h"
+
+#include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/module.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Discard);
 
@@ -22,5 +24,9 @@ namespace tint::core::ir {
 Discard::Discard() = default;
 
 Discard::~Discard() = default;
+
+Discard* Discard::Clone(CloneContext& ctx) {
+    return ctx.ir.instructions.Create<Discard>();
+}
 
 }  // namespace tint::core::ir

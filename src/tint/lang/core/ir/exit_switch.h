@@ -28,7 +28,7 @@ class Switch;
 namespace tint::core::ir {
 
 /// A exit switch instruction.
-class ExitSwitch : public Castable<ExitSwitch, Exit> {
+class ExitSwitch final : public Castable<ExitSwitch, Exit> {
   public:
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
@@ -38,6 +38,9 @@ class ExitSwitch : public Castable<ExitSwitch, Exit> {
     /// @param args the target MultiInBlock arguments
     explicit ExitSwitch(ir::Switch* sw, VectorRef<Value*> args = tint::Empty);
     ~ExitSwitch() override;
+
+    /// @copydoc Instruction::Clone()
+    ExitSwitch* Clone(CloneContext& ctx) override;
 
     /// Re-associates the exit with the given switch instruction
     /// @param s the new switch to exit from

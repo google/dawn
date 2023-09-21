@@ -14,6 +14,9 @@
 
 #include "src/tint/lang/core/ir/binary.h"
 
+#include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/module.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Binary);
 
 namespace tint::core::ir {
@@ -25,6 +28,13 @@ Binary::Binary(InstructionResult* result, enum Kind kind, Value* lhs, Value* rhs
 }
 
 Binary::~Binary() = default;
+
+Binary* Binary::Clone(CloneContext& ctx) {
+    auto* new_result = ctx.Clone(Result());
+    auto* new_lhs = ctx.Clone(LHS());
+    auto* new_rhs = ctx.Clone(RHS());
+    return ctx.ir.instructions.Create<Binary>(new_result, kind_, new_lhs, new_rhs);
+}
 
 std::string_view ToString(enum Binary::Kind kind) {
     switch (kind) {

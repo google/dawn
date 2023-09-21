@@ -70,5 +70,19 @@ TEST_F(IR_BitcastTest, Fail_NullType) {
         "");
 }
 
+TEST_F(IR_BitcastTest, Clone) {
+    auto* inst = b.Bitcast(mod.Types().i32(), 4_i);
+
+    auto* n = clone_ctx.Clone(inst);
+
+    EXPECT_NE(inst, n);
+
+    EXPECT_EQ(mod.Types().i32(), n->Result()->Type());
+
+    auto new_val = n->Val()->As<Constant>()->Value();
+    ASSERT_TRUE(new_val->Is<core::constant::Scalar<i32>>());
+    EXPECT_EQ(4_i, new_val->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

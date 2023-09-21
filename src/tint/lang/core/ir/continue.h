@@ -28,7 +28,7 @@ class Loop;
 namespace tint::core::ir {
 
 /// A continue instruction.
-class Continue : public Castable<Continue, Terminator> {
+class Continue final : public Castable<Continue, Terminator> {
   public:
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
@@ -38,6 +38,9 @@ class Continue : public Castable<Continue, Terminator> {
     /// @param args the arguments for the MultiInBlock
     explicit Continue(ir::Loop* loop, VectorRef<Value*> args = tint::Empty);
     ~Continue() override;
+
+    /// @copydoc Instruction::Clone()
+    Continue* Clone(CloneContext& ctx) override;
 
     /// @returns the loop owning the continue block
     ir::Loop* Loop() { return loop_; }

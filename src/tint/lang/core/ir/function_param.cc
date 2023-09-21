@@ -14,6 +14,8 @@
 
 #include "src/tint/lang/core/ir/function_param.h"
 
+#include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::core::ir::FunctionParam);
@@ -56,6 +58,20 @@ std::string_view ToString(enum FunctionParam::Builtin value) {
             return "subgroup_size";
     }
     return "<unknown>";
+}
+
+FunctionParam* FunctionParam::Clone(CloneContext& ctx) {
+    auto* out = ctx.ir.values.Create<FunctionParam>(type_);
+    out->builtin_ = builtin_;
+    out->location_ = location_;
+    out->binding_point_ = binding_point_;
+    out->invariant_ = invariant_;
+
+    auto name = ctx.ir.NameOf(this);
+    if (name.IsValid()) {
+        ctx.ir.SetName(out, name);
+    }
+    return out;
 }
 
 }  // namespace tint::core::ir

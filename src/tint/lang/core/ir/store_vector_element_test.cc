@@ -66,5 +66,24 @@ TEST_F(IR_StoreVectorElementTest, Result) {
     EXPECT_FALSE(inst->HasMultiResults());
 }
 
+TEST_F(IR_StoreVectorElementTest, Clone) {
+    auto* to = b.Var(ty.ptr<private_, vec3<i32>>());
+    auto* inst = b.StoreVectorElement(to, 2_i, 4_i);
+
+    auto* new_to = clone_ctx.Clone(to);
+    auto* new_inst = clone_ctx.Clone(inst);
+
+    EXPECT_NE(inst, new_inst);
+    EXPECT_EQ(new_to->Result(), new_inst->To());
+
+    auto new_idx = new_inst->Index()->As<Constant>()->Value();
+    ASSERT_TRUE(new_idx->Is<core::constant::Scalar<i32>>());
+    EXPECT_EQ(2_i, new_idx->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
+
+    auto new_val = new_inst->Value()->As<Constant>()->Value();
+    ASSERT_TRUE(new_val->Is<core::constant::Scalar<i32>>());
+    EXPECT_EQ(4_i, new_val->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

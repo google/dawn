@@ -65,5 +65,57 @@ TEST_F(IR_LoopTest, Fail_NullContinuingBlock) {
         "");
 }
 
+TEST_F(IR_LoopTest, Clone) {
+    auto* loop = b.Loop();
+    auto* new_loop = clone_ctx.Clone(loop);
+
+    EXPECT_NE(loop, new_loop);
+    EXPECT_FALSE(new_loop->HasResults());
+    EXPECT_EQ(0u, new_loop->Exits().Count());
+    EXPECT_NE(nullptr, new_loop->Initializer());
+    EXPECT_NE(loop->Initializer(), new_loop->Initializer());
+
+    EXPECT_NE(nullptr, new_loop->Body());
+    EXPECT_NE(loop->Body(), new_loop->Body());
+
+    EXPECT_NE(nullptr, new_loop->Continuing());
+    EXPECT_NE(loop->Continuing(), new_loop->Continuing());
+}
+
+TEST_F(IR_LoopTest, CloneWithExits) {
+    Loop* new_loop = nullptr;
+    {
+        auto* loop = b.Loop();
+        b.Append(loop->Body(), [&] {
+            auto* if_ = b.If(true);
+            b.Append(if_->True(), [&] { b.Continue(loop); });
+            b.Append(if_->False(), [&] { b.ExitLoop(loop); });
+            b.Append(loop->Continuing(), [&] { b.BreakIf(loop, false); });
+
+            b.NextIteration(loop);
+        });
+        new_loop = clone_ctx.Clone(loop);
+    }
+
+    ASSERT_EQ(2u, new_loop->Body()->Length());
+    EXPECT_TRUE(new_loop->Body()->Front()->Is<If>());
+
+    auto* new_if = new_loop->Body()->Front()->As<If>();
+    ASSERT_EQ(1u, new_if->True()->Length());
+    EXPECT_TRUE(new_if->True()->Front()->Is<Continue>());
+    EXPECT_EQ(new_loop, new_if->True()->Front()->As<Continue>()->Loop());
+
+    ASSERT_EQ(1u, new_if->False()->Length());
+    EXPECT_TRUE(new_if->False()->Front()->Is<ExitLoop>());
+    EXPECT_EQ(new_loop, new_if->False()->Front()->As<ExitLoop>()->Loop());
+
+    ASSERT_EQ(1u, new_loop->Continuing()->Length());
+    EXPECT_TRUE(new_loop->Continuing()->Front()->Is<BreakIf>());
+    EXPECT_EQ(new_loop, new_loop->Continuing()->Front()->As<BreakIf>()->Loop());
+
+    EXPECT_TRUE(new_loop->Body()->Back()->Is<NextIteration>());
+    EXPECT_EQ(new_loop, new_loop->Body()->Back()->As<NextIteration>()->Loop());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

@@ -17,7 +17,9 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/block.h"
+#include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/loop.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::core::ir::ExitLoop);
@@ -30,6 +32,12 @@ ExitLoop::ExitLoop(ir::Loop* loop, VectorRef<Value*> args /* = tint::Empty */) {
 }
 
 ExitLoop::~ExitLoop() = default;
+
+ExitLoop* ExitLoop::Clone(CloneContext& ctx) {
+    auto* new_loop = ctx.Clone(Loop());
+    auto new_args = ctx.Clone<ExitLoop::kDefaultNumOperands>(Args());
+    return ctx.ir.instructions.Create<ExitLoop>(new_loop, new_args);
+}
 
 void ExitLoop::SetLoop(ir::Loop* l) {
     SetControlInstruction(l);

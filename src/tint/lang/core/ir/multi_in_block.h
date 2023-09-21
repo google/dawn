@@ -35,6 +35,12 @@ class MultiInBlock : public Castable<MultiInBlock, Block> {
     MultiInBlock();
     ~MultiInBlock() override;
 
+    /// @copydoc Block::Clone()
+    MultiInBlock* Clone(CloneContext& ctx) override;
+
+    /// @copydoc Block::CloneInto()
+    void CloneInto(CloneContext& ctx, Block* out) override;
+
     /// Sets the params to the block
     /// @param params the params for the block
     void SetParams(VectorRef<BlockParam*> params);

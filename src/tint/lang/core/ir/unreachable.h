@@ -22,9 +22,12 @@
 namespace tint::core::ir {
 
 /// An unreachable instruction in the IR.
-class Unreachable : public Castable<Unreachable, Terminator> {
+class Unreachable final : public Castable<Unreachable, Terminator> {
   public:
     ~Unreachable() override;
+
+    /// @copydoc Instruction::Clone()
+    Unreachable* Clone(CloneContext& ctx) override;
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() override { return "unreachable"; }

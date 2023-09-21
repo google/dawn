@@ -35,5 +35,43 @@ TEST_F(IR_MultiInBlockTest, Fail_NullInboundBranch) {
         "");
 }
 
+TEST_F(IR_MultiInBlockTest, CloneInto) {
+    auto* loop = b.Loop();
+
+    auto* blk = b.MultiInBlock();
+    auto* add = b.Add(mod.Types().i32(), 1_i, 2_i);
+    blk->Append(add);
+    blk->SetParams({b.BlockParam(mod.Types().i32()), b.BlockParam(mod.Types().f32())});
+    blk->SetParent(loop);
+
+    auto* terminate = b.TerminateInvocation();
+    blk->AddInboundSiblingBranch(terminate);
+
+    auto* new_blk = b.MultiInBlock();
+    blk->CloneInto(clone_ctx, new_blk);
+
+    EXPECT_EQ(0u, new_blk->InboundSiblingBranches().Length());
+
+    EXPECT_EQ(2u, new_blk->Params().Length());
+    EXPECT_EQ(mod.Types().i32(), new_blk->Params()[0]->Type());
+    EXPECT_EQ(mod.Types().f32(), new_blk->Params()[1]->Type());
+
+    EXPECT_EQ(nullptr, new_blk->Parent());
+
+    EXPECT_EQ(1u, new_blk->Length());
+    EXPECT_NE(add, new_blk->Front());
+    EXPECT_TRUE(new_blk->Front()->Is<Binary>());
+    EXPECT_EQ(Binary::Kind::kAdd, new_blk->Front()->As<Binary>()->Kind());
+}
+
+TEST_F(IR_MultiInBlockTest, CloneEmpty) {
+    auto* blk = b.MultiInBlock();
+    auto* new_blk = b.MultiInBlock();
+    blk->CloneInto(clone_ctx, new_blk);
+
+    EXPECT_EQ(0u, new_blk->InboundSiblingBranches().Length());
+    EXPECT_EQ(0u, new_blk->Params().Length());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

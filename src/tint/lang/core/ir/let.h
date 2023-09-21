@@ -22,7 +22,7 @@
 namespace tint::core::ir {
 
 /// A no-op instruction in the IR, used to position and name a value
-class Let : public Castable<Let, OperandInstruction<1, 1>> {
+class Let final : public Castable<Let, OperandInstruction<1, 1>> {
   public:
     /// The offset in Operands() for the value
     static constexpr size_t kValueOperandOffset = 0;
@@ -32,6 +32,9 @@ class Let : public Castable<Let, OperandInstruction<1, 1>> {
     /// @param value the let's value
     Let(InstructionResult* result, Value* value);
     ~Let() override;
+
+    /// @copydoc Instruction::Clone()
+    Let* Clone(CloneContext& ctx) override;
 
     /// @returns the value
     ir::Value* Value() { return operands_[kValueOperandOffset]; }

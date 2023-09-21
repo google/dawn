@@ -793,7 +793,6 @@ class Builder {
             return nullptr;
         }
         auto* let = Append(ir.instructions.Create<ir::Let>(InstructionResult(val->Type()), val));
-        ir.SetName(let, name);
         ir.SetName(let->Result(), name);
         return let;
     }

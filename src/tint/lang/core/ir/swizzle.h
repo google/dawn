@@ -23,7 +23,7 @@
 namespace tint::core::ir {
 
 /// A swizzle instruction in the IR.
-class Swizzle : public Castable<Swizzle, OperandInstruction<1, 1>> {
+class Swizzle final : public Castable<Swizzle, OperandInstruction<1, 1>> {
   public:
     /// The offset in Operands() for the object being swizzled
     static constexpr size_t kObjectOperandOffset = 0;
@@ -34,6 +34,9 @@ class Swizzle : public Castable<Swizzle, OperandInstruction<1, 1>> {
     /// @param indices the indices to swizzle
     Swizzle(InstructionResult* result, Value* object, VectorRef<uint32_t> indices);
     ~Swizzle() override;
+
+    /// @copydoc Instruction::Clone()
+    Swizzle* Clone(CloneContext& ctx) override;
 
     /// @returns the object used for the access
     Value* Object() { return operands_[kObjectOperandOffset]; }

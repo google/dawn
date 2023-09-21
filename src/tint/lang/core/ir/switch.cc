@@ -14,6 +14,8 @@
 
 #include "src/tint/lang/core/ir/switch.h"
 
+#include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Switch);
@@ -32,6 +34,27 @@ void Switch::ForeachBlock(const std::function<void(ir::Block*)>& cb) {
     for (auto& c : cases_) {
         cb(c.Block());
     }
+}
+
+Switch* Switch::Clone(CloneContext& ctx) {
+    auto* new_cond = ctx.Clone(Condition());
+    auto* new_switch = ctx.ir.instructions.Create<Switch>(new_cond);
+    ctx.Replace(this, new_switch);
+
+    new_switch->cases_.Reserve(cases_.Length());
+    for (const auto& cse : cases_) {
+        Switch::Case new_case{};
+        new_case.block = ctx.ir.blocks.Create<ir::Block>();
+        cse.block->CloneInto(ctx, new_case.block);
+
+        new_case.selectors.Reserve(cse.selectors.Length());
+        for (const auto& sel : cse.selectors) {
+            auto* new_val = sel.val ? ctx.Clone(sel.val) : nullptr;
+            new_case.selectors.Push(Switch::CaseSelector{new_val});
+        }
+        new_switch->cases_.Push(new_case);
+    }
+    return new_switch;
 }
 
 }  // namespace tint::core::ir

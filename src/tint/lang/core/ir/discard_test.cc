@@ -34,5 +34,13 @@ TEST_F(IR_DiscardTest, Result) {
     EXPECT_FALSE(inst->HasMultiResults());
 }
 
+TEST_F(IR_DiscardTest, Clone) {
+    auto* d = b.Discard();
+    auto* new_d = clone_ctx.Clone(d);
+
+    EXPECT_NE(d, new_d);
+    EXPECT_NE(nullptr, new_d);
+}
+
 }  // namespace
 }  // namespace tint::core::ir

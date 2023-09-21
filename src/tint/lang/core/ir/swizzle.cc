@@ -16,6 +16,8 @@
 
 #include <utility>
 
+#include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Swizzle);
@@ -36,5 +38,11 @@ Swizzle::Swizzle(InstructionResult* result, Value* object, VectorRef<uint32_t> i
 }
 
 Swizzle::~Swizzle() = default;
+
+Swizzle* Swizzle::Clone(CloneContext& ctx) {
+    auto* result = ctx.Clone(Result());
+    auto* new_obj = ctx.Clone(Object());
+    return ctx.ir.instructions.Create<Swizzle>(result, new_obj, indices_);
+}
 
 }  // namespace tint::core::ir

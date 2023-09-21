@@ -16,6 +16,8 @@
 
 #include <utility>
 
+#include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/lang/core/ir/switch.h"
 
@@ -29,6 +31,12 @@ ExitSwitch::ExitSwitch(ir::Switch* sw, VectorRef<Value*> args /* = tint::Empty *
 }
 
 ExitSwitch::~ExitSwitch() = default;
+
+ExitSwitch* ExitSwitch::Clone(CloneContext& ctx) {
+    auto* new_switch = ctx.Clone(Switch());
+    auto new_args = ctx.Clone<ExitSwitch::kDefaultNumOperands>(Args());
+    return ctx.ir.instructions.Create<ExitSwitch>(new_switch, new_args);
+}
 
 void ExitSwitch::SetSwitch(ir::Switch* s) {
     SetControlInstruction(s);

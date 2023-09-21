@@ -86,5 +86,22 @@ TEST_F(IR_SwizzleTest, Fail_IndexOutOfRange) {
         "");
 }
 
+TEST_F(IR_SwizzleTest, Clone) {
+    auto* var = b.Var(ty.ptr<function, i32>());
+    auto* s = b.Swizzle(mod.Types().i32(), var, {2u});
+
+    auto* new_var = clone_ctx.Clone(var);
+    auto* new_s = clone_ctx.Clone(s);
+
+    EXPECT_NE(s, new_s);
+    EXPECT_NE(nullptr, new_s->Result());
+    EXPECT_NE(s->Result(), new_s->Result());
+
+    EXPECT_EQ(new_var->Result(), new_s->Object());
+
+    EXPECT_EQ(1u, new_s->Indices().Length());
+    EXPECT_EQ(2u, new_s->Indices().Front());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

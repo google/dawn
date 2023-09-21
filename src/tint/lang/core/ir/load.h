@@ -23,7 +23,7 @@
 namespace tint::core::ir {
 
 /// A load instruction in the IR.
-class Load : public Castable<Load, OperandInstruction<1, 1>> {
+class Load final : public Castable<Load, OperandInstruction<1, 1>> {
   public:
     /// The offset in Operands() for the from value
     static constexpr size_t kFromOperandOffset = 0;
@@ -34,6 +34,9 @@ class Load : public Castable<Load, OperandInstruction<1, 1>> {
     Load(InstructionResult* result, Value* from);
 
     ~Load() override;
+
+    /// @copydoc Instruction::Clone()
+    Load* Clone(CloneContext& ctx) override;
 
     /// @returns the value being loaded from
     Value* From() { return operands_[kFromOperandOffset]; }

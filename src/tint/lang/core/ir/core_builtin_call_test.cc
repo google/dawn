@@ -73,5 +73,39 @@ TEST_F(IR_CoreBuiltinCallTest, Fail_TintMaterializeFunction) {
         "");
 }
 
+TEST_F(IR_CoreBuiltinCallTest, Clone) {
+    auto* builtin = b.Call(mod.Types().f32(), core::Function::kAbs, 1_u, 2_u);
+
+    auto* new_b = clone_ctx.Clone(builtin);
+
+    EXPECT_NE(builtin, new_b);
+    EXPECT_NE(builtin->Result(), new_b->Result());
+    EXPECT_EQ(mod.Types().f32(), new_b->Result()->Type());
+
+    EXPECT_EQ(core::Function::kAbs, new_b->Func());
+
+    auto args = new_b->Args();
+    EXPECT_EQ(2u, args.Length());
+
+    auto* val0 = args[0]->As<Constant>()->Value();
+    EXPECT_EQ(1_u, val0->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+
+    auto* val1 = args[1]->As<Constant>()->Value();
+    EXPECT_EQ(2_u, val1->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+}
+
+TEST_F(IR_CoreBuiltinCallTest, CloneNoArgs) {
+    auto* builtin = b.Call(mod.Types().f32(), core::Function::kAbs);
+
+    auto* new_b = clone_ctx.Clone(builtin);
+    EXPECT_NE(builtin->Result(), new_b->Result());
+    EXPECT_EQ(mod.Types().f32(), new_b->Result()->Type());
+
+    EXPECT_EQ(core::Function::kAbs, new_b->Func());
+
+    auto args = new_b->Args();
+    EXPECT_TRUE(args.IsEmpty());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

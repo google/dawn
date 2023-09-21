@@ -42,7 +42,7 @@ namespace tint::core::ir {
 ///                    ▼
 ///                   out
 /// ```
-class If : public Castable<If, ControlInstruction> {
+class If final : public Castable<If, ControlInstruction> {
   public:
     /// The index of the condition operand
     static constexpr size_t kConditionOperandOffset = 0;
@@ -53,6 +53,9 @@ class If : public Castable<If, ControlInstruction> {
     /// @param f the false block
     If(Value* cond, ir::Block* t, ir::Block* f);
     ~If() override;
+
+    /// @copydoc Instruction::Clone()
+    If* Clone(CloneContext& ctx) override;
 
     /// @copydoc ControlInstruction::ForeachBlock
     void ForeachBlock(const std::function<void(ir::Block*)>& cb) override;

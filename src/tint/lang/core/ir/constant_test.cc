@@ -113,5 +113,12 @@ TEST_F(IR_ConstantTest, Fail_Builder_NullValue) {
         "");
 }
 
+TEST_F(IR_ConstantTest, Clone) {
+    auto* c = b.Constant(2_u);
+    auto* new_c = clone_ctx.Clone(c);
+
+    EXPECT_EQ(c, new_c);
+}
+
 }  // namespace
 }  // namespace tint::core::ir

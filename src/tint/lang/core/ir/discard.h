@@ -23,11 +23,14 @@
 namespace tint::core::ir {
 
 /// A discard instruction in the IR.
-class Discard : public Castable<Discard, Call> {
+class Discard final : public Castable<Discard, Call> {
   public:
     /// Constructor
     Discard();
     ~Discard() override;
+
+    /// @copydoc Instruction::Clone()
+    Discard* Clone(CloneContext& ctx) override;
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() override { return "discard"; }

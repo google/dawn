@@ -23,7 +23,7 @@
 namespace tint::core::ir {
 
 /// A store instruction for a single vector element in the IR.
-class StoreVectorElement : public Castable<StoreVectorElement, OperandInstruction<3, 0>> {
+class StoreVectorElement final : public Castable<StoreVectorElement, OperandInstruction<3, 0>> {
   public:
     /// The offset in Operands() for the `to` value
     static constexpr size_t kToOperandOffset = 0;
@@ -40,6 +40,9 @@ class StoreVectorElement : public Castable<StoreVectorElement, OperandInstructio
     /// @param value the new vector element value
     StoreVectorElement(ir::Value* to, ir::Value* index, ir::Value* value);
     ~StoreVectorElement() override;
+
+    /// @copydoc Instruction::Clone()
+    StoreVectorElement* Clone(CloneContext& ctx) override;
 
     /// @returns the vector pointer value
     ir::Value* To() { return operands_[kToOperandOffset]; }

@@ -26,7 +26,7 @@
 namespace tint::spirv::ir {
 
 /// A spirv builtin call instruction in the IR.
-class BuiltinCall : public Castable<BuiltinCall, core::ir::BuiltinCall> {
+class BuiltinCall final : public Castable<BuiltinCall, core::ir::BuiltinCall> {
   public:
     /// Constructor
     /// @param result the result value
@@ -36,6 +36,9 @@ class BuiltinCall : public Castable<BuiltinCall, core::ir::BuiltinCall> {
                 Function func,
                 VectorRef<core::ir::Value*> args = tint::Empty);
     ~BuiltinCall() override;
+
+    /// @copydoc core::ir::Instruction::Clone()
+    BuiltinCall* Clone(core::ir::CloneContext& ctx) override;
 
     /// @returns the builtin function
     Function Func() { return func_; }

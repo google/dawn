@@ -12,36 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gmock/gmock.h"
 #include "gtest/gtest-spi.h"
+#include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/instruction.h"
 #include "src/tint/lang/core/ir/ir_helper_test.h"
-
-using namespace tint::core::number_suffixes;  // NOLINT
-using namespace tint::core::fluent_types;     // NOLINT
 
 namespace tint::core::ir {
 namespace {
 
-using IR_InstructionResultTest = IRTestHelper;
+using IR_UnreachableTest = IRTestHelper;
 
-TEST_F(IR_InstructionResultTest, Destroy_HasSource) {
-    EXPECT_FATAL_FAILURE(
-        {
-            Module mod;
-            Builder b{mod};
-            auto* val = b.Add(mod.Types().i32(), 1_i, 2_i)->Result();
-            val->Destroy();
-        },
-        "");
+TEST_F(IR_UnreachableTest, Unreachable) {
+    auto* inst = b.Unreachable();
+    ASSERT_TRUE(inst->Is<ir::Unreachable>());
 }
 
-TEST_F(IR_InstructionResultTest, Clone) {
-    auto* val = b.Add(mod.Types().i32(), 1_i, 2_i)->Result();
-    auto* new_res = clone_ctx.Clone(val);
+TEST_F(IR_UnreachableTest, Result) {
+    auto* inst = b.Unreachable();
 
-    EXPECT_NE(val, new_res);
-    EXPECT_EQ(nullptr, new_res->Source());
-    EXPECT_EQ(mod.Types().i32(), new_res->Type());
+    EXPECT_FALSE(inst->HasResults());
+    EXPECT_FALSE(inst->HasMultiResults());
+}
+
+TEST_F(IR_UnreachableTest, Clone) {
+    auto* d = b.Unreachable();
+    auto* new_d = clone_ctx.Clone(d);
+
+    EXPECT_NE(d, new_d);
+    EXPECT_NE(nullptr, new_d);
 }
 
 }  // namespace

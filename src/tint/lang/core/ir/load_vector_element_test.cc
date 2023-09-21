@@ -58,5 +58,23 @@ TEST_F(IR_LoadVectorElementTest, Result) {
     EXPECT_FALSE(inst->HasMultiResults());
 }
 
+TEST_F(IR_LoadVectorElementTest, Clone) {
+    auto* from = b.Var(ty.ptr<private_, vec3<i32>>());
+    auto* inst = b.LoadVectorElement(from, 2_i);
+
+    auto* new_from = clone_ctx.Clone(from);
+    auto* new_inst = clone_ctx.Clone(inst);
+
+    EXPECT_NE(inst, new_inst);
+    EXPECT_NE(nullptr, new_inst->Result());
+    EXPECT_NE(inst->Result(), new_inst->Result());
+
+    EXPECT_EQ(new_from->Result(), new_inst->From());
+
+    auto new_idx = new_inst->Index()->As<Constant>()->Value();
+    ASSERT_TRUE(new_idx->Is<core::constant::Scalar<i32>>());
+    EXPECT_EQ(2_i, new_idx->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

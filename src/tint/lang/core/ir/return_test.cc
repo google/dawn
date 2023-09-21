@@ -62,5 +62,33 @@ TEST_F(IR_ReturnTest, Result) {
     }
 }
 
+TEST_F(IR_ReturnTest, Clone) {
+    auto* func = b.Function("func", ty.i32());
+    auto* ret = b.Return(func, b.Constant(1_i));
+
+    auto* new_func = clone_ctx.Clone(func);
+    auto* new_ret = clone_ctx.Clone(ret);
+
+    EXPECT_NE(ret, new_ret);
+    EXPECT_EQ(new_func, new_ret->Func());
+
+    EXPECT_EQ(1u, new_ret->Args().Length());
+
+    auto new_val = new_ret->Value()->As<Constant>()->Value();
+    ASSERT_TRUE(new_val->Is<core::constant::Scalar<i32>>());
+    EXPECT_EQ(1_i, new_val->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
+}
+
+TEST_F(IR_ReturnTest, CloneWithoutArgs) {
+    auto* func = b.Function("func", ty.i32());
+    auto* ret = b.Return(func);
+
+    auto* new_func = clone_ctx.Clone(func);
+    auto* new_ret = clone_ctx.Clone(ret);
+
+    EXPECT_EQ(new_func, new_ret->Func());
+    EXPECT_EQ(nullptr, new_ret->Value());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

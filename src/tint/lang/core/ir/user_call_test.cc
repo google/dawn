@@ -56,5 +56,39 @@ TEST_F(IR_UserCallTest, Fail_NullType) {
         "");
 }
 
+TEST_F(IR_UserCallTest, Clone) {
+    auto* func = b.Function("myfunc", mod.Types().void_());
+    auto* e = b.Call(mod.Types().void_(), func, Vector{b.Constant(1_u), b.Constant(2_u)});
+
+    auto* new_func = clone_ctx.Clone(func);
+    auto* new_e = clone_ctx.Clone(e);
+
+    EXPECT_NE(e, new_e);
+    EXPECT_NE(nullptr, new_e->Result());
+    EXPECT_NE(e->Result(), new_e->Result());
+
+    EXPECT_EQ(new_func, new_e->Target());
+
+    auto args = new_e->Args();
+    EXPECT_EQ(2u, args.Length());
+
+    auto new_arg1 = args[0]->As<Constant>()->Value();
+    ASSERT_TRUE(new_arg1->Is<core::constant::Scalar<u32>>());
+    EXPECT_EQ(1_u, new_arg1->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+
+    auto new_arg2 = args[1]->As<Constant>()->Value();
+    ASSERT_TRUE(new_arg2->Is<core::constant::Scalar<u32>>());
+    EXPECT_EQ(2_u, new_arg2->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+}
+
+TEST_F(IR_UserCallTest, CloneWithoutArgs) {
+    auto* func = b.Function("myfunc", mod.Types().void_());
+    auto* e = b.Call(mod.Types().void_(), func);
+
+    auto* new_e = clone_ctx.Clone(e);
+
+    EXPECT_EQ(0u, new_e->Args().Length());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

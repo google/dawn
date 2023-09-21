@@ -26,7 +26,7 @@
 namespace tint::core::ir {
 
 /// A core builtin call instruction in the IR.
-class CoreBuiltinCall : public Castable<CoreBuiltinCall, BuiltinCall> {
+class CoreBuiltinCall final : public Castable<CoreBuiltinCall, BuiltinCall> {
   public:
     /// Constructor
     /// @param result the result value
@@ -36,6 +36,9 @@ class CoreBuiltinCall : public Castable<CoreBuiltinCall, BuiltinCall> {
                     core::Function func,
                     VectorRef<Value*> args = tint::Empty);
     ~CoreBuiltinCall() override;
+
+    /// @copydoc Instruction::Clone()
+    CoreBuiltinCall* Clone(CloneContext& ctx) override;
 
     /// @returns the builtin function
     core::Function Func() { return func_; }

@@ -39,5 +39,38 @@ TEST_F(IR_NextIterationTest, Result) {
     EXPECT_FALSE(inst->HasMultiResults());
 }
 
+TEST_F(IR_NextIterationTest, Clone) {
+    auto* arg1 = b.Constant(1_u);
+    auto* arg2 = b.Constant(2_u);
+
+    auto* loop = b.Loop();
+    auto* inst = b.NextIteration(loop, arg1, arg2);
+
+    auto* new_loop = clone_ctx.Clone(loop);
+    auto* new_inst = clone_ctx.Clone(inst);
+
+    EXPECT_NE(inst, new_inst);
+    EXPECT_EQ(new_loop, new_inst->Loop());
+
+    auto args = new_inst->Args();
+    EXPECT_EQ(2u, args.Length());
+
+    auto* val0 = args[0]->As<Constant>()->Value();
+    EXPECT_EQ(1_u, val0->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+
+    auto* val1 = args[1]->As<Constant>()->Value();
+    EXPECT_EQ(2_u, val1->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+}
+
+TEST_F(IR_NextIterationTest, CloneNoArgs) {
+    auto* loop = b.Loop();
+    auto* inst = b.NextIteration(loop);
+
+    auto* new_loop = clone_ctx.Clone(loop);
+    auto* new_inst = clone_ctx.Clone(inst);
+
+    EXPECT_EQ(new_loop, new_inst->Loop());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

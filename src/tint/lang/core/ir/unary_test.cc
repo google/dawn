@@ -78,5 +78,20 @@ TEST_F(IR_UnaryTest, Fail_NullType) {
         "");
 }
 
+TEST_F(IR_UnaryTest, Clone) {
+    auto* inst = b.Complement(mod.Types().i32(), 4_i);
+    auto* new_inst = clone_ctx.Clone(inst);
+
+    EXPECT_NE(inst, new_inst);
+    EXPECT_NE(nullptr, new_inst->Result());
+    EXPECT_NE(inst->Result(), new_inst->Result());
+
+    EXPECT_EQ(Unary::Kind::kComplement, new_inst->Kind());
+
+    auto new_val = new_inst->Val()->As<Constant>()->Value();
+    ASSERT_TRUE(new_val->Is<core::constant::Scalar<i32>>());
+    EXPECT_EQ(4_i, new_val->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

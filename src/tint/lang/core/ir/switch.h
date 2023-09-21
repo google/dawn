@@ -43,7 +43,7 @@ namespace tint::core::ir {
 ///                            ▼
 ///                           out
 /// ```
-class Switch : public Castable<Switch, ControlInstruction> {
+class Switch final : public Castable<Switch, ControlInstruction> {
   public:
     /// The offset in Operands() for the condition
     static constexpr size_t kConditionOperandOffset = 0;
@@ -72,6 +72,9 @@ class Switch : public Castable<Switch, ControlInstruction> {
     /// @param cond the condition
     explicit Switch(Value* cond);
     ~Switch() override;
+
+    /// @copydoc Instruction::Clone()
+    Switch* Clone(CloneContext& ctx) override;
 
     /// @copydoc ControlInstruction::ForeachBlock
     void ForeachBlock(const std::function<void(ir::Block*)>& cb) override;

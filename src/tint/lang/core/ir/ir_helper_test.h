@@ -17,6 +17,7 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/lang/core/ir/builder.h"
+#include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/module.h"
 
 namespace tint::core::ir {
@@ -34,6 +35,9 @@ class IRTestHelperBase : public BASE {
     Builder b{mod};
     /// The type manager
     core::type::Manager& ty{mod.Types()};
+
+    /// CloneContext
+    CloneContext clone_ctx{mod};
 };
 
 using IRTestHelper = IRTestHelperBase<testing::Test>;

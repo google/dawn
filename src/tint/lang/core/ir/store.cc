@@ -14,6 +14,9 @@
 
 #include "src/tint/lang/core/ir/store.h"
 
+#include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/module.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Store);
 
 namespace tint::core::ir {
@@ -26,5 +29,11 @@ Store::Store(Value* to, Value* from) {
 }
 
 Store::~Store() = default;
+
+Store* Store::Clone(CloneContext& ctx) {
+    auto* new_to = ctx.Clone(To());
+    auto* new_from = ctx.Clone(From());
+    return ctx.ir.instructions.Create<Store>(new_to, new_from);
+}
 
 }  // namespace tint::core::ir

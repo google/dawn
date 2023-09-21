@@ -29,7 +29,7 @@ class Loop;
 namespace tint::core::ir {
 
 /// A break-if iteration instruction.
-class BreakIf : public Castable<BreakIf, Terminator> {
+class BreakIf final : public Castable<BreakIf, Terminator> {
   public:
     /// The offset in Operands() for the condition
     static constexpr size_t kConditionOperandOffset = 0;
@@ -43,6 +43,9 @@ class BreakIf : public Castable<BreakIf, Terminator> {
     /// @param args the MultiInBlock arguments
     BreakIf(Value* condition, ir::Loop* loop, VectorRef<Value*> args = tint::Empty);
     ~BreakIf() override;
+
+    /// @copydoc Instruction::Clone()
+    BreakIf* Clone(CloneContext& ctx) override;
 
     /// @returns the MultiInBlock arguments
     tint::Slice<Value* const> Args() override {

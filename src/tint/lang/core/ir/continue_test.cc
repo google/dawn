@@ -56,5 +56,38 @@ TEST_F(IR_ContinueTest, Fail_NullLoop) {
         "");
 }
 
+TEST_F(IR_ContinueTest, Clone) {
+    auto* loop = b.Loop();
+    auto* cont = b.Continue(loop);
+
+    auto* new_loop = clone_ctx.Clone(loop);
+    clone_ctx.Replace(loop, new_loop);
+
+    auto* new_c = clone_ctx.Clone(cont);
+
+    EXPECT_NE(cont, new_c);
+    EXPECT_EQ(new_loop, new_c->Loop());
+    EXPECT_TRUE(new_c->Args().IsEmpty());
+}
+
+TEST_F(IR_ContinueTest, CloneWithArgs) {
+    auto* loop = b.Loop();
+    auto* arg1 = b.Constant(1_u);
+    auto* arg2 = b.Constant(2_u);
+
+    auto* cont = b.Continue(loop, arg1, arg2);
+
+    auto* new_c = clone_ctx.Clone(cont);
+
+    auto args = new_c->Args();
+    EXPECT_EQ(2u, args.Length());
+
+    auto* val0 = args[0]->As<Constant>()->Value();
+    EXPECT_EQ(1_u, val0->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+
+    auto* val1 = args[1]->As<Constant>()->Value();
+    EXPECT_EQ(2_u, val1->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

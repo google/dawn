@@ -21,7 +21,7 @@
 
 namespace tint::core::ir {
 
-/// A builtin call instruction in the IR.
+/// The base class for builtin call instructions in the IR.
 class BuiltinCall : public Castable<BuiltinCall, Call> {
   public:
     /// The base offset in Operands() for the args

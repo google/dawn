@@ -31,6 +31,9 @@ class BlockParam : public Castable<BlockParam, Value> {
     /// @returns the type of the var
     const core::type::Type* Type() override { return type_; }
 
+    /// @copydoc Instruction::Clone()
+    BlockParam* Clone(CloneContext& ctx) override;
+
   private:
     /// the result type of the instruction
     const core::type::Type* type_ = nullptr;

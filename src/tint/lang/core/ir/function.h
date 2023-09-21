@@ -67,6 +67,9 @@ class Function : public Castable<Function, Value> {
              std::optional<std::array<uint32_t, 3>> wg_size = {});
     ~Function() override;
 
+    /// @copydoc Instruction::Clone()
+    Function* Clone(CloneContext& ctx) override;
+
     /// Sets the function stage
     /// @param stage the stage to set
     void SetStage(PipelineStage stage) { pipeline_stage_ = stage; }

@@ -14,8 +14,10 @@
 
 #include "src/tint/lang/core/ir/instruction_result.h"
 
+#include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/ir/instruction.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/utils/ice/ice.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::core::ir::InstructionResult);
@@ -31,6 +33,12 @@ InstructionResult::~InstructionResult() = default;
 void InstructionResult::Destroy() {
     TINT_ASSERT(source_ == nullptr);
     Base::Destroy();
+}
+
+InstructionResult* InstructionResult::Clone(CloneContext& ctx) {
+    // Do not clone the `Source`. It will be set when this result is placed in the new parent
+    // instruction.
+    return ctx.ir.values.Create<InstructionResult>(type_);
 }
 
 }  // namespace tint::core::ir

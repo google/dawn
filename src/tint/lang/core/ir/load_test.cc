@@ -69,5 +69,19 @@ TEST_F(IR_LoadTest, Fail_NonPtr_Builder) {
         "");
 }
 
+TEST_F(IR_LoadTest, Clone) {
+    auto* var = b.Var(ty.ptr<function, i32>());
+    auto* inst = b.Load(var);
+
+    auto* new_var = clone_ctx.Clone(var);
+    auto* new_inst = clone_ctx.Clone(inst);
+
+    EXPECT_NE(inst, new_inst);
+    EXPECT_NE(nullptr, new_inst->Result());
+    EXPECT_NE(inst->Result(), new_inst->Result());
+
+    EXPECT_EQ(new_var->Result(), new_inst->From());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

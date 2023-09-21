@@ -17,7 +17,9 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/block.h"
+#include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/loop.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/utils/ice/ice.h"
 
@@ -37,5 +39,12 @@ BreakIf::BreakIf(Value* condition, ir::Loop* loop, VectorRef<Value*> args) : loo
 }
 
 BreakIf::~BreakIf() = default;
+
+BreakIf* BreakIf::Clone(CloneContext& ctx) {
+    auto* new_loop = ctx.Clone(loop_);
+    auto* new_cond = ctx.Clone(Condition());
+    auto new_args = ctx.Clone<BreakIf::kDefaultNumOperands>(Args());
+    return ctx.ir.instructions.Create<BreakIf>(new_cond, new_loop, new_args);
+}
 
 }  // namespace tint::core::ir

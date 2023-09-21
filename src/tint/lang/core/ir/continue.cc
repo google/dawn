@@ -17,7 +17,9 @@
 #include <utility>
 
 #include "src/tint/lang/core/ir/block.h"
+#include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/loop.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 #include "src/tint/utils/ice/ice.h"
 
@@ -36,5 +38,12 @@ Continue::Continue(ir::Loop* loop, VectorRef<Value*> args) : loop_(loop) {
 }
 
 Continue::~Continue() = default;
+
+Continue* Continue::Clone(CloneContext& ctx) {
+    auto* new_loop = ctx.Clone(Loop());
+    auto new_args = ctx.Clone<Continue::kDefaultNumOperands>(Args());
+
+    return ctx.ir.instructions.Create<Continue>(new_loop, new_args);
+}
 
 }  // namespace tint::core::ir

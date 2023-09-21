@@ -58,5 +58,54 @@ TEST_F(IR_VarTest, Initializer_Usage) {
     EXPECT_TRUE(init->Usages().IsEmpty());
 }
 
+TEST_F(IR_VarTest, Clone) {
+    auto* v = b.Var(mod.Types().ptr(core::AddressSpace::kFunction, mod.Types().f32()));
+    v->SetInitializer(b.Constant(4_f));
+    v->SetBindingPoint(1, 2);
+    v->SetAttributes(IOAttributes{
+        3, 4, core::BuiltinValue::kFragDepth,
+        Interpolation{core::InterpolationType::kFlat, core::InterpolationSampling::kCentroid},
+        true});
+
+    auto* new_v = clone_ctx.Clone(v);
+
+    EXPECT_NE(v, new_v);
+    ASSERT_NE(nullptr, new_v->Result());
+    EXPECT_NE(v->Result(), new_v->Result());
+    EXPECT_EQ(new_v->Result()->Type(),
+              mod.Types().ptr(core::AddressSpace::kFunction, mod.Types().f32()));
+
+    auto new_val = v->Initializer()->As<Constant>()->Value();
+    ASSERT_TRUE(new_val->Is<core::constant::Scalar<f32>>());
+    EXPECT_FLOAT_EQ(4_f, new_val->As<core::constant::Scalar<f32>>()->ValueAs<f32>());
+
+    EXPECT_TRUE(new_v->BindingPoint().has_value());
+    EXPECT_EQ(1u, new_v->BindingPoint()->group);
+    EXPECT_EQ(2u, new_v->BindingPoint()->binding);
+
+    auto& attrs = new_v->Attributes();
+    EXPECT_TRUE(attrs.location.has_value());
+    EXPECT_EQ(3u, attrs.location.value());
+
+    EXPECT_TRUE(attrs.index.has_value());
+    EXPECT_EQ(4u, attrs.index.value());
+
+    EXPECT_TRUE(attrs.builtin.has_value());
+    EXPECT_EQ(core::BuiltinValue::kFragDepth, attrs.builtin.value());
+
+    EXPECT_TRUE(attrs.interpolation.has_value());
+    EXPECT_EQ(core::InterpolationType::kFlat, attrs.interpolation->type);
+    EXPECT_EQ(core::InterpolationSampling::kCentroid, attrs.interpolation->sampling);
+
+    EXPECT_TRUE(attrs.invariant);
+}
+
+TEST_F(IR_VarTest, CloneWithName) {
+    auto* v = b.Var("v", mod.Types().ptr(core::AddressSpace::kFunction, mod.Types().f32()));
+    auto* new_v = clone_ctx.Clone(v);
+
+    EXPECT_EQ(std::string("v"), mod.NameOf(new_v).Name());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

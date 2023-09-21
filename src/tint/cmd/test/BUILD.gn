@@ -42,6 +42,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/core/ir:unittests",
       "${tint_src_dir}/lang/core/ir/transform:unittests",
       "${tint_src_dir}/lang/core/type:unittests",
+      "${tint_src_dir}/lang/spirv/ir:unittests",
       "${tint_src_dir}/lang/wgsl:unittests",
       "${tint_src_dir}/lang/wgsl/ast:unittests",
       "${tint_src_dir}/lang/wgsl/ast/transform:unittests",

@@ -53,5 +53,40 @@ TEST_F(IR_ExitSwitchTest, Destroy) {
     EXPECT_FALSE(exit->Alive());
 }
 
+TEST_F(IR_ExitSwitchTest, Clone) {
+    auto* arg1 = b.Constant(1_u);
+    auto* arg2 = b.Constant(2_u);
+    auto* switch_ = b.Switch(true);
+    auto* e = b.ExitSwitch(switch_, arg1, arg2);
+
+    auto* new_switch = clone_ctx.Clone(switch_);
+    auto* new_exit = clone_ctx.Clone(e);
+
+    EXPECT_NE(e, new_exit);
+    EXPECT_EQ(new_switch, new_exit->Switch());
+
+    auto args = new_exit->Args();
+    ASSERT_EQ(2u, args.Length());
+
+    auto new_arg1 = args[0]->As<Constant>()->Value();
+    ASSERT_TRUE(new_arg1->Is<core::constant::Scalar<u32>>());
+    EXPECT_EQ(1_u, new_arg1->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+
+    auto new_arg2 = args[1]->As<Constant>()->Value();
+    ASSERT_TRUE(new_arg2->Is<core::constant::Scalar<u32>>());
+    EXPECT_EQ(2_u, new_arg2->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+}
+
+TEST_F(IR_ExitSwitchTest, CloneNoArgs) {
+    auto* switch_ = b.Switch(true);
+    auto* e = b.ExitSwitch(switch_);
+
+    auto* new_switch = clone_ctx.Clone(switch_);
+    auto* new_exit = clone_ctx.Clone(e);
+
+    EXPECT_EQ(new_switch, new_exit->Switch());
+    EXPECT_TRUE(new_exit->Args().IsEmpty());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

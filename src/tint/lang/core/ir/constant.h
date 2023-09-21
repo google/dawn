@@ -34,6 +34,9 @@ class Constant : public Castable<Constant, Value> {
     /// @returns the type of the constant
     const core::type::Type* Type() override { return value_->Type(); }
 
+    /// @copydoc Value::Clone()
+    Constant* Clone(CloneContext& ctx) override;
+
   private:
     const core::constant::Value* const value_ = nullptr;
 };

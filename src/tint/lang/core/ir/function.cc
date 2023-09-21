@@ -14,6 +14,8 @@
 
 #include "src/tint/lang/core/ir/function.h"
 
+#include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/utils/containers/predicates.h"
 #include "src/tint/utils/ice/ice.h"
 
@@ -31,6 +33,22 @@ Function::Function(const core::type::Type* rt,
 }
 
 Function::~Function() = default;
+
+Function* Function::Clone(CloneContext& ctx) {
+    auto* new_func = ctx.ir.values.Create<Function>(return_.type, pipeline_stage_, workgroup_size_);
+    new_func->block_ = ctx.ir.blocks.Create<ir::Block>();
+    new_func->params_ = ctx.Clone<1>(params_.Slice());
+    new_func->return_.builtin = return_.builtin;
+    new_func->return_.location = return_.location;
+    new_func->return_.invariant = return_.invariant;
+
+    ctx.Replace(this, new_func);
+    block_->CloneInto(ctx, new_func->block_);
+
+    ctx.ir.SetName(new_func, ctx.ir.NameOf(this).Name());
+    ctx.ir.functions.Push(new_func);
+    return new_func;
+}
 
 void Function::SetParams(VectorRef<FunctionParam*> params) {
     params_ = std::move(params);

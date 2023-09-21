@@ -23,7 +23,7 @@
 namespace tint::core::ir {
 
 /// A constructor instruction in the IR.
-class Construct : public Castable<Construct, Call> {
+class Construct final : public Castable<Construct, Call> {
   public:
     /// The base offset in Operands() for the args
     static constexpr size_t kArgsOperandOffset = 0;
@@ -33,6 +33,9 @@ class Construct : public Castable<Construct, Call> {
     /// @param args the constructor arguments
     explicit Construct(InstructionResult* result, VectorRef<Value*> args = tint::Empty);
     ~Construct() override;
+
+    /// @copydoc Instruction::Clone()
+    Construct* Clone(CloneContext& ctx) override;
 
     /// @returns the friendly name for the instruction
     std::string FriendlyName() override { return "construct"; }

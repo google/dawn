@@ -23,7 +23,7 @@
 namespace tint::core::ir {
 
 /// A unary instruction in the IR.
-class Unary : public Castable<Unary, OperandInstruction<1, 1>> {
+class Unary final : public Castable<Unary, OperandInstruction<1, 1>> {
   public:
     /// The offset in Operands() for the value
     static constexpr size_t kValueOperandOffset = 0;
@@ -40,6 +40,9 @@ class Unary : public Castable<Unary, OperandInstruction<1, 1>> {
     /// @param val the input value for the instruction
     Unary(InstructionResult* result, enum Kind kind, Value* val);
     ~Unary() override;
+
+    /// @copydoc Instruction::Clone()
+    Unary* Clone(CloneContext& ctx) override;
 
     /// @returns the value for the instruction
     Value* Val() { return operands_[kValueOperandOffset]; }

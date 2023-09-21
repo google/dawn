@@ -374,5 +374,26 @@ TEST_F(IR_BinaryTest, Binary_Usage_SetOperand) {
     EXPECT_THAT(rhs_b->Usages(), testing::UnorderedElementsAre(Usage{inst, 1u}));
 }
 
+TEST_F(IR_BinaryTest, Clone) {
+    auto* lhs = b.Constant(2_i);
+    auto* rhs = b.Constant(4_i);
+    auto* inst = b.And(mod.Types().i32(), lhs, rhs);
+
+    auto* c = clone_ctx.Clone(inst);
+
+    EXPECT_NE(inst, c);
+
+    EXPECT_EQ(mod.Types().i32(), c->Result()->Type());
+    EXPECT_EQ(Binary::Kind::kAnd, c->Kind());
+
+    auto new_lhs = c->LHS()->As<Constant>()->Value();
+    ASSERT_TRUE(new_lhs->Is<core::constant::Scalar<i32>>());
+    EXPECT_EQ(2_i, new_lhs->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
+
+    auto new_rhs = c->RHS()->As<Constant>()->Value();
+    ASSERT_TRUE(new_rhs->Is<core::constant::Scalar<i32>>());
+    EXPECT_EQ(4_i, new_rhs->As<core::constant::Scalar<i32>>()->ValueAs<i32>());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

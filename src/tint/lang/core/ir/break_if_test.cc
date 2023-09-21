@@ -58,5 +58,49 @@ TEST_F(IR_BreakIfTest, Fail_NullLoop) {
         "");
 }
 
+TEST_F(IR_BreakIfTest, Clone) {
+    auto* loop = b.Loop();
+    auto* cond = b.Constant(true);
+    auto* arg1 = b.Constant(1_u);
+    auto* arg2 = b.Constant(2_u);
+
+    auto* brk = b.BreakIf(loop, cond, arg1, arg2);
+
+    auto* new_loop = clone_ctx.Clone(loop);
+    clone_ctx.Replace(loop, new_loop);
+
+    auto* new_brk = clone_ctx.Clone(brk);
+
+    EXPECT_NE(brk, new_brk);
+
+    EXPECT_EQ(new_loop, new_brk->Loop());
+
+    auto args = new_brk->Args();
+    EXPECT_EQ(2u, args.Length());
+
+    auto new_cond = new_brk->Condition()->As<Constant>()->Value();
+    ASSERT_TRUE(new_cond->Is<core::constant::Scalar<bool>>());
+    EXPECT_TRUE(new_cond->As<core::constant::Scalar<bool>>()->ValueAs<bool>());
+
+    auto new_arg0 = args[0]->As<Constant>()->Value();
+    ASSERT_TRUE(new_arg0->Is<core::constant::Scalar<u32>>());
+    EXPECT_EQ(1_u, new_arg0->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+
+    auto new_arg1 = args[1]->As<Constant>()->Value();
+    ASSERT_TRUE(new_arg1->Is<core::constant::Scalar<u32>>());
+    EXPECT_EQ(2_u, new_arg1->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+}
+
+TEST_F(IR_BreakIfTest, CloneNoArgs) {
+    auto* loop = b.Loop();
+    auto* cond = b.Constant(true);
+
+    auto* brk = b.BreakIf(loop, cond);
+    auto* new_brk = clone_ctx.Clone(brk);
+
+    auto args = new_brk->Args();
+    EXPECT_EQ(0u, args.Length());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

@@ -23,7 +23,7 @@
 namespace tint::core::ir {
 
 /// A load instruction for a single vector element in the IR.
-class LoadVectorElement : public Castable<LoadVectorElement, OperandInstruction<3, 0>> {
+class LoadVectorElement final : public Castable<LoadVectorElement, OperandInstruction<3, 0>> {
   public:
     /// The offset in Operands() for the `from` value
     static constexpr size_t kFromOperandOffset = 0;
@@ -37,6 +37,9 @@ class LoadVectorElement : public Castable<LoadVectorElement, OperandInstruction<
     /// @param index the new vector element index
     LoadVectorElement(InstructionResult* result, ir::Value* from, ir::Value* index);
     ~LoadVectorElement() override;
+
+    /// @copydoc Instruction::Clone()
+    LoadVectorElement* Clone(CloneContext& ctx) override;
 
     /// @returns the vector pointer value
     ir::Value* From() { return operands_[kFromOperandOffset]; }

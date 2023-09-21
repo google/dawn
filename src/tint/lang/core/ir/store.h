@@ -23,7 +23,7 @@
 namespace tint::core::ir {
 
 /// A store instruction in the IR.
-class Store : public Castable<Store, OperandInstruction<2, 0>> {
+class Store final : public Castable<Store, OperandInstruction<2, 0>> {
   public:
     /// The offset in Operands() for the `to` value
     static constexpr size_t kToOperandOffset = 0;
@@ -36,6 +36,9 @@ class Store : public Castable<Store, OperandInstruction<2, 0>> {
     /// @param from the value being stored from
     Store(Value* to, Value* from);
     ~Store() override;
+
+    /// @copydoc Instruction::Clone()
+    Store* Clone(CloneContext& ctx) override;
 
     /// @returns the value being stored too
     Value* To() { return operands_[kToOperandOffset]; }

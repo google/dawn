@@ -43,5 +43,40 @@ TEST_F(IR_ExitLoopTest, Destroy) {
     EXPECT_FALSE(exit->Alive());
 }
 
+TEST_F(IR_ExitLoopTest, Clone) {
+    auto* arg1 = b.Constant(1_u);
+    auto* arg2 = b.Constant(2_u);
+    auto* loop = b.Loop();
+    auto* e = b.ExitLoop(loop, arg1, arg2);
+
+    auto* new_loop = clone_ctx.Clone(loop);
+    auto* new_exit = clone_ctx.Clone(e);
+
+    EXPECT_NE(e, new_exit);
+    EXPECT_EQ(new_loop, new_exit->Loop());
+
+    auto args = new_exit->Args();
+    ASSERT_EQ(2u, args.Length());
+
+    auto new_arg1 = args[0]->As<Constant>()->Value();
+    ASSERT_TRUE(new_arg1->Is<core::constant::Scalar<u32>>());
+    EXPECT_EQ(1_u, new_arg1->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+
+    auto new_arg2 = args[1]->As<Constant>()->Value();
+    ASSERT_TRUE(new_arg2->Is<core::constant::Scalar<u32>>());
+    EXPECT_EQ(2_u, new_arg2->As<core::constant::Scalar<u32>>()->ValueAs<u32>());
+}
+
+TEST_F(IR_ExitLoopTest, CloneNoArgs) {
+    auto* loop = b.Loop();
+    auto* e = b.ExitLoop(loop);
+
+    auto* new_loop = clone_ctx.Clone(loop);
+    auto* new_exit = clone_ctx.Clone(e);
+
+    EXPECT_EQ(new_loop, new_exit->Loop());
+    EXPECT_TRUE(new_exit->Args().IsEmpty());
+}
+
 }  // namespace
 }  // namespace tint::core::ir

@@ -40,7 +40,7 @@ struct IOAttributes {
 };
 
 /// A var instruction in the IR.
-class Var : public Castable<Var, OperandInstruction<1, 1>> {
+class Var final : public Castable<Var, OperandInstruction<1, 1>> {
   public:
     /// The offset in Operands() for the initializer
     static constexpr size_t kInitializerOperandOffset = 0;
@@ -49,6 +49,9 @@ class Var : public Castable<Var, OperandInstruction<1, 1>> {
     /// @param result the result value
     explicit Var(InstructionResult* result);
     ~Var() override;
+
+    /// @copydoc Instruction::Clone()
+    Var* Clone(CloneContext& ctx) override;
 
     /// Sets the var initializer
     /// @param initializer the initializer

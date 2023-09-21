@@ -16,7 +16,9 @@
 
 #include <utility>
 
+#include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/function.h"
+#include "src/tint/lang/core/ir/module.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Return);
 
@@ -32,6 +34,12 @@ Return::Return(Function* func, ir::Value* arg) {
 }
 
 Return::~Return() = default;
+
+Return* Return::Clone(CloneContext& ctx) {
+    auto* new_func = ctx.Clone(Func());
+    auto new_val = Value() ? ctx.Clone(Value()) : nullptr;
+    return ctx.ir.instructions.Create<Return>(new_func, new_val);
+}
 
 Function* Return::Func() const {
     return tint::As<Function>(operands_[kFunctionOperandOffset]);

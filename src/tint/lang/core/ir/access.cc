@@ -16,6 +16,9 @@
 
 #include <utility>
 
+#include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/module.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::core::ir::Access);
 
 namespace tint::core::ir {
@@ -28,6 +31,13 @@ Access::Access(InstructionResult* result, Value* object, VectorRef<Value*> indic
 }
 
 Access::~Access() = default;
+
+Access* Access::Clone(CloneContext& ctx) {
+    auto new_result = ctx.Clone(Result());
+    auto new_obj = ctx.Clone(Object());
+    auto new_indices = ctx.Clone<Access::kDefaultNumOperands>(Indices());
+    return ctx.ir.instructions.Create<Access>(new_result, new_obj, new_indices);
+}
 //! @endcond
 
 }  // namespace tint::core::ir

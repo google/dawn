@@ -14,6 +14,8 @@
 
 #include "src/tint/lang/core/ir/load.h"
 
+#include "src/tint/lang/core/ir/clone_context.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/type/pointer.h"
 #include "src/tint/utils/ice/ice.h"
 
@@ -32,5 +34,11 @@ Load::Load(InstructionResult* result, Value* from) {
 }
 
 Load::~Load() = default;
+
+Load* Load::Clone(CloneContext& ctx) {
+    auto* new_result = ctx.Clone(Result());
+    auto* new_from = ctx.Clone(From());
+    return ctx.ir.instructions.Create<Load>(new_result, new_from);
+}
 
 }  // namespace tint::core::ir

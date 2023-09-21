@@ -36,6 +36,9 @@ class InstructionResult : public Castable<InstructionResult, Value> {
     /// @returns the type of the value
     const core::type::Type* Type() override { return type_; }
 
+    /// @copydoc Value::Clone()
+    InstructionResult* Clone(CloneContext& ctx) override;
+
     /// Sets the type of the value to @p type
     /// @param type the new type of the value
     void SetType(const core::type::Type* type) { type_ = type; }

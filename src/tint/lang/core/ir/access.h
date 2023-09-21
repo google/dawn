@@ -23,7 +23,7 @@
 namespace tint::core::ir {
 
 /// An access instruction in the IR.
-class Access : public Castable<Access, OperandInstruction<3, 1>> {
+class Access final : public Castable<Access, OperandInstruction<3, 1>> {
   public:
     /// The offset in Operands() for the object being accessed
     static constexpr size_t kObjectOperandOffset = 0;
@@ -37,6 +37,9 @@ class Access : public Castable<Access, OperandInstruction<3, 1>> {
     /// @param indices the indices to access
     Access(InstructionResult* result, Value* object, VectorRef<Value*> indices);
     ~Access() override;
+
+    /// @copydoc Instruction::Clone()
+    Access* Clone(CloneContext& ctx) override;
 
     /// @returns the object used for the access
     Value* Object() { return operands_[kObjectOperandOffset]; }

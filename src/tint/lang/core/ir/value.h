@@ -21,6 +21,7 @@
 
 // Forward declarations
 namespace tint::core::ir {
+class CloneContext;
 class Instruction;
 }  // namespace tint::core::ir
 
@@ -62,6 +63,10 @@ class Value : public Castable<Value> {
     /// Destroys the Value. Once called, the Value must not be used again.
     /// The Value must not be in use by any instruction.
     virtual void Destroy();
+
+    /// @param ctx the CloneContext used to clone this value
+    /// @returns a clone of this value
+    virtual Value* Clone(CloneContext& ctx) = 0;
 
     /// @returns true if the Value has not been destroyed with Destroy()
     bool Alive() const { return !flags_.Contains(Flag::kDead); }

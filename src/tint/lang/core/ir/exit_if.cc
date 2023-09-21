@@ -16,7 +16,9 @@
 
 #include <utility>
 
+#include "src/tint/lang/core/ir/clone_context.h"
 #include "src/tint/lang/core/ir/if.h"
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/core/ir/multi_in_block.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::core::ir::ExitIf);
@@ -29,6 +31,12 @@ ExitIf::ExitIf(ir::If* i, VectorRef<Value*> args) {
 }
 
 ExitIf::~ExitIf() = default;
+
+ExitIf* ExitIf::Clone(CloneContext& ctx) {
+    auto* new_if = ctx.Clone(If());
+    auto new_args = ctx.Clone<ExitIf::kDefaultNumOperands>(Args());
+    return ctx.ir.instructions.Create<ExitIf>(new_if, new_args);
+}
 
 void ExitIf::SetIf(ir::If* i) {
     SetControlInstruction(i);

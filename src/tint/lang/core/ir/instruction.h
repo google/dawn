@@ -25,6 +25,7 @@
 // Forward declarations
 namespace tint::core::ir {
 class Block;
+class CloneContext;
 }  // namespace tint::core::ir
 
 namespace tint::core::ir {
@@ -61,6 +62,10 @@ class Instruction : public Castable<Instruction> {
 
     /// @returns the friendly name for the instruction
     virtual std::string FriendlyName() = 0;
+
+    /// @param ctx the CloneContext used to clone this instruction
+    /// @returns a clone of this instruction
+    virtual Instruction* Clone(CloneContext& ctx) = 0;
 
     /// @returns true if the Instruction has not been destroyed with Destroy()
     bool Alive() const { return !flags_.Contains(Flag::kDead); }
