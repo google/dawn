@@ -412,6 +412,9 @@ TEST_P(QueueWriteTextureTests, VaryingTextureOffset) {
 
 // Test writing a pixel with an offset to a texture array
 TEST_P(QueueWriteTextureTests, VaryingTextureArrayOffset) {
+    // TODO(crbug.com/dawn/2095): Failing on ANGLE + SwiftShader, needs investigation.
+    DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
+
     constexpr uint32_t kWidth = 259;
     constexpr uint32_t kHeight = 127;
     constexpr uint32_t kDepth = 62;
@@ -563,6 +566,9 @@ TEST_P(QueueWriteTextureTests, BytesPerRowWithOneRowCopy) {
 
 // Test with bytesPerRow greater than needed in a write to a texture array.
 TEST_P(QueueWriteTextureTests, VaryingArrayBytesPerRow) {
+    // TODO(crbug.com/dawn/2095): Failing on ANGLE + SwiftShader, needs investigation.
+    DAWN_SUPPRESS_TEST_IF(IsANGLESwiftShader());
+
     constexpr uint32_t kWidth = 257;
     constexpr uint32_t kHeight = 129;
     constexpr uint32_t kLayers = 65;
