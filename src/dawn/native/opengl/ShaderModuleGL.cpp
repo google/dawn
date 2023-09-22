@@ -294,8 +294,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
                 tintOptions.binding_map[use] = info->GetName();
             }
 
-            tintOptions.binding_points = std::move(r.glBindings);
-            tintOptions.allow_collisions = true;
+            tintOptions.binding_remapper_options.binding_points = std::move(r.glBindings);
+            tintOptions.binding_remapper_options.allow_collisions = true;
             tintOptions.texture_builtins_from_uniform = r.textureBuiltinsFromUniform;
 
             auto result = tint::glsl::writer::Generate(program, tintOptions, r.entryPointName);
