@@ -37,7 +37,7 @@ sudo apt-get install libx11-xcb-dev
 ```
 
 If you don't have those supporting libraries, then you must use the
-`-DDAWN_USE_X11=OFF` flag on Cmake.
+`-DDAWN_USE_X11=OFF` flag on CMake (see below).
 
 ### Build
 
@@ -50,13 +50,22 @@ cmake <dawn-root-path> -GNinja -DDAWN_BUILD_NODE_BINDINGS=1
 ninja dawn.node
 ```
 
+On Windows, the steps are similar:
+
+```sh
+mkdir <build-output-path>
+cd <build-output-path>
+cmake <dawn-root-path> -DDAWN_BUILD_NODE_BINDINGS=1
+cmake --build . --target dawn_node
+```
+
 ### Running WebGPU CTS
 
 1. [Build](#build) the `dawn.node` NodeJS module.
 2. Checkout the [WebGPU CTS repo](https://github.com/gpuweb/cts) or use the one in `third_party/webgpu-cts`.
 3. Run `npm install` from inside the CTS directory to install its dependencies.
 
-Now you can run CTS:
+Now you can run CTS using our `./tools/run` shell script. On Windows, it's recommended to use MSYS2 (e.g. Git Bash):
 
 ```sh
 ./tools/run run-cts --bin=<path-build-dir> [WebGPU CTS query]

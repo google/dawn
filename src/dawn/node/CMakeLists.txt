@@ -141,7 +141,7 @@ macro(javascript file)
         TARGET dawn_node POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${PROJECT_SOURCE_DIR}/src/dawn/node/${file}"
-            "${Dawn_BINARY_DIR}/${file}")
+            "$<TARGET_FILE_DIR:dawn_node>/${file}")
 endmacro()
 
 javascript("index.js")
