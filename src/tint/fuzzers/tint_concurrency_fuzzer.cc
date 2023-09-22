@@ -52,7 +52,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
         return 0;
     }
 
-    tint::inspector::Inspector inspector(&program);
+    tint::inspector::Inspector inspector(program);
     auto entry_points = inspector.GetEntryPoints();
     std::string entry_point = entry_points.empty() ? "" : entry_points.front().name;
 
@@ -81,28 +81,28 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
             switch (static_cast<Writer>(thread_idx % static_cast<size_t>(Writer::kCount))) {
 #if TINT_BUILD_WGSL_WRITER
                 case Writer::kWGSL: {
-                    (void)tint::wgsl::writer::Generate(&program, {});
+                    (void)tint::wgsl::writer::Generate(program, {});
                     break;
                 }
 #endif  // TINT_BUILD_WGSL_WRITER
 
 #if TINT_BUILD_SPV_WRITER
                 case Writer::kSPIRV: {
-                    (void)tint::spirv::writer::Generate(&program, {});
+                    (void)tint::spirv::writer::Generate(program, {});
                     break;
                 }
 #endif  // TINT_BUILD_SPV_WRITER
 
 #if TINT_BUILD_HLSL_WRITER
                 case Writer::kHLSL: {
-                    (void)tint::hlsl::writer::Generate(&program, {});
+                    (void)tint::hlsl::writer::Generate(program, {});
                     break;
                 }
 #endif  // TINT_BUILD_HLSL_WRITER
 
 #if TINT_BUILD_GLSL_WRITER
                 case Writer::kGLSL: {
-                    (void)tint::glsl::writer::Generate(&program, {}, entry_point);
+                    (void)tint::glsl::writer::Generate(program, {}, entry_point);
                     break;
                 }
 #endif  // TINT_BUILD_GLSL_WRITER
@@ -110,8 +110,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 #if TINT_BUILD_MSL_WRITER
                 case Writer::kMSL: {
                     // Remap resource numbers to a flat namespace.
-                    if (auto flattened = tint::writer::FlattenBindings(&program)) {
-                        (void)tint::msl::writer::Generate(&flattened.value(), {});
+                    if (auto flattened = tint::writer::FlattenBindings(program)) {
+                        (void)tint::msl::writer::Generate(flattened.value(), {});
                     }
                     break;
                 }

@@ -52,7 +52,7 @@ namespace tint::fuzzers::ast_fuzzer {
 bool MaybeApplyMutation(const tint::Program& program,
                         const Mutation& mutation,
                         const NodeIdMap& node_id_map,
-                        tint::Program* out_program,
+                        tint::Program& out_program,
                         NodeIdMap* out_node_id_map,
                         protobufs::MutationSequence* mutation_sequence);
 

@@ -65,7 +65,7 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
         return 0;
     }
 
-    auto result = wgsl::writer::Generate(&program, wgsl::writer::Options());
+    auto result = wgsl::writer::Generate(program, wgsl::writer::Options());
     if (!result) {
         std::cout << "Can't generate WGSL for a valid tint::Program:" << std::endl
                   << result.Failure() << std::endl;

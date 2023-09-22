@@ -28,15 +28,15 @@ namespace {
 using TransformManagerTest = testing::Test;
 
 class AST_NoOp final : public ast::transform::Transform {
-    ApplyResult Apply(const Program*, const DataMap&, DataMap&) const override {
+    ApplyResult Apply(const Program&, const DataMap&, DataMap&) const override {
         return SkipTransform;
     }
 };
 
 class AST_AddFunction final : public ast::transform::Transform {
-    ApplyResult Apply(const Program* src, const DataMap&, DataMap&) const override {
+    ApplyResult Apply(const Program& src, const DataMap&, DataMap&) const override {
         ProgramBuilder b;
-        program::CloneContext ctx{&b, src};
+        program::CloneContext ctx{&b, &src};
         b.Func(b.Sym("ast_func"), {}, b.ty.void_(), {});
         ctx.Clone();
         return resolver::Resolve(b);
@@ -57,7 +57,7 @@ TEST_F(TransformManagerTest, AST_AlwaysClone) {
     DataMap outputs;
     manager.Add<AST_NoOp>();
 
-    auto result = manager.Run(&ast, {}, outputs);
+    auto result = manager.Run(ast, {}, outputs);
     EXPECT_TRUE(result.IsValid()) << result.Diagnostics();
     EXPECT_NE(result.ID(), ast.ID());
     ASSERT_EQ(result.AST().Functions().Length(), 1u);

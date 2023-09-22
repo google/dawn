@@ -26,7 +26,7 @@ namespace tint::fuzzers {
 
 Program ApplySubstituteOverrides(Program&& program) {
     ast::transform::SubstituteOverride::Config cfg;
-    inspector::Inspector inspector(&program);
+    inspector::Inspector inspector(program);
     auto default_values = inspector.GetOverrideDefaultValues();
     for (const auto& [override_id, scalar] : default_values) {
         // If the override is not null, then it has a default value, we can just let it use the
@@ -47,7 +47,7 @@ Program ApplySubstituteOverrides(Program&& program) {
     mgr.append(std::make_unique<ast::transform::SubstituteOverride>());
 
     ast::transform::DataMap outputs;
-    return mgr.Run(&program, override_data, outputs);
+    return mgr.Run(program, override_data, outputs);
 }
 
 }  // namespace tint::fuzzers

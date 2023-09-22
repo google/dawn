@@ -33,7 +33,7 @@ namespace tint::spirv::writer {
 /// @param program the program to translate to SPIR-V
 /// @param options the configuration options to use when generating SPIR-V
 /// @returns the resulting SPIR-V and supplementary information, or an error string
-Result<Output, std::string> Generate(const Program* program, const Options& options);
+Result<Output, std::string> Generate(const Program& program, const Options& options);
 
 }  // namespace tint::spirv::writer
 

@@ -76,7 +76,7 @@ class SyntaxTreePrinter : public tint::TextGenerator {
   public:
     /// Constructor
     /// @param program the program
-    explicit SyntaxTreePrinter(const Program* program);
+    explicit SyntaxTreePrinter(const Program& program);
     ~SyntaxTreePrinter() override;
 
     /// Generates the result data
@@ -202,7 +202,7 @@ class SyntaxTreePrinter : public tint::TextGenerator {
     void EmitAttributes(VectorRef<const ast::Attribute*> attrs);
 
   private:
-    Program const* const program_;
+    const Program& program_;
 };
 
 }  // namespace tint::wgsl::writer

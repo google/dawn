@@ -85,7 +85,7 @@ class Builder {
     /// @param experimental_require_subgroup_uniform_control_flow `true` to require
     /// `SPV_KHR_subgroup_uniform_control_flow` extension and `SubgroupUniformControlFlowKHR`
     /// execution mode for compute stage entry points.
-    explicit Builder(const Program* program,
+    explicit Builder(const Program& program,
                      bool zero_initialize_workgroup_memory = false,
                      bool experimental_require_subgroup_uniform_control_flow = false);
     ~Builder();

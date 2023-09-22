@@ -56,7 +56,7 @@ class TestHelperBase : public BODY, public ProgramBuilder {
         }();
         program = std::make_unique<Program>(resolver::Resolve(*this));
         [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
-        gen_ = std::make_unique<ASTPrinter>(program.get());
+        gen_ = std::make_unique<ASTPrinter>(*program);
         return *gen_;
     }
 
@@ -76,7 +76,7 @@ class TestHelperBase : public BODY, public ProgramBuilder {
         program = std::make_unique<Program>(resolver::Resolve(*this));
         [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
 
-        auto sanitized_result = Sanitize(program.get(), options);
+        auto sanitized_result = Sanitize(*program, options);
         [&] {
             ASSERT_TRUE(sanitized_result.program.IsValid())
                 << sanitized_result.program.Diagnostics().str();
@@ -89,10 +89,10 @@ class TestHelperBase : public BODY, public ProgramBuilder {
             ast::transform::Renamer::Target::kHlslKeywords,
             /* preserve_unicode */ true);
         transform_manager.Add<tint::ast::transform::Renamer>();
-        auto result = transform_manager.Run(&sanitized_result.program, transform_data, outputs);
+        auto result = transform_manager.Run(sanitized_result.program, transform_data, outputs);
         [&] { ASSERT_TRUE(result.IsValid()) << result.Diagnostics().str(); }();
         *program = std::move(result);
-        gen_ = std::make_unique<ASTPrinter>(program.get());
+        gen_ = std::make_unique<ASTPrinter>(*program);
         return *gen_;
     }
 

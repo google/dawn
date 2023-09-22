@@ -26,8 +26,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::WhileToLoop);
 namespace tint::spirv::writer {
 namespace {
 
-bool ShouldRun(const Program* program) {
-    for (auto* node : program->ASTNodes().Objects()) {
+bool ShouldRun(const Program& program) {
+    for (auto* node : program.ASTNodes().Objects()) {
         if (node->Is<ast::WhileStatement>()) {
             return true;
         }
@@ -41,7 +41,7 @@ WhileToLoop::WhileToLoop() = default;
 
 WhileToLoop::~WhileToLoop() = default;
 
-ast::transform::Transform::ApplyResult WhileToLoop::Apply(const Program* src,
+ast::transform::Transform::ApplyResult WhileToLoop::Apply(const Program& src,
                                                           const ast::transform::DataMap&,
                                                           ast::transform::DataMap&) const {
     if (!ShouldRun(src)) {
@@ -49,7 +49,7 @@ ast::transform::Transform::ApplyResult WhileToLoop::Apply(const Program* src,
     }
 
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     ctx.ReplaceAll([&](const ast::WhileStatement* w) -> const ast::Statement* {
         tint::Vector<const ast::Statement*, 16> stmts;

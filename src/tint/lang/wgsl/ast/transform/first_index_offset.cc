@@ -41,8 +41,8 @@ namespace {
 constexpr char kFirstVertexName[] = "first_vertex_index";
 constexpr char kFirstInstanceName[] = "first_instance_index";
 
-bool ShouldRun(const Program* program) {
-    for (auto* fn : program->AST().Functions()) {
+bool ShouldRun(const Program& program) {
+    for (auto* fn : program.AST().Functions()) {
         if (fn->PipelineStage() == PipelineStage::kVertex) {
             return true;
         }
@@ -64,7 +64,7 @@ FirstIndexOffset::Data::~Data() = default;
 FirstIndexOffset::FirstIndexOffset() = default;
 FirstIndexOffset::~FirstIndexOffset() = default;
 
-Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
+Transform::ApplyResult FirstIndexOffset::Apply(const Program& src,
                                                const DataMap& inputs,
                                                DataMap& outputs) const {
     if (!ShouldRun(src)) {
@@ -72,7 +72,7 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
     }
 
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     // Get the uniform buffer binding point
     uint32_t ub_binding = binding_;
@@ -95,7 +95,7 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
         if (auto* var = node->As<Variable>()) {
             for (auto* attr : var->attributes) {
                 if (auto* builtin_attr = attr->As<BuiltinAttribute>()) {
-                    core::BuiltinValue builtin = src->Sem().Get(builtin_attr)->Value();
+                    core::BuiltinValue builtin = src.Sem().Get(builtin_attr)->Value();
                     if (builtin == core::BuiltinValue::kVertexIndex) {
                         auto* sem_var = ctx.src->Sem().Get(var);
                         builtin_vars.emplace(sem_var, kFirstVertexName);
@@ -112,7 +112,7 @@ Transform::ApplyResult FirstIndexOffset::Apply(const Program* src,
         if (auto* member = node->As<StructMember>()) {
             for (auto* attr : member->attributes) {
                 if (auto* builtin_attr = attr->As<BuiltinAttribute>()) {
-                    core::BuiltinValue builtin = src->Sem().Get(builtin_attr)->Value();
+                    core::BuiltinValue builtin = src.Sem().Get(builtin_attr)->Value();
                     if (builtin == core::BuiltinValue::kVertexIndex) {
                         auto* sem_mem = ctx.src->Sem().Get(member);
                         builtin_members.emplace(sem_mem, kFirstVertexName);

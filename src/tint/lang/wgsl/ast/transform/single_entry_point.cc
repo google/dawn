@@ -33,11 +33,11 @@ SingleEntryPoint::SingleEntryPoint() = default;
 
 SingleEntryPoint::~SingleEntryPoint() = default;
 
-Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
+Transform::ApplyResult SingleEntryPoint::Apply(const Program& src,
                                                const DataMap& inputs,
                                                DataMap&) const {
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     auto* cfg = inputs.Get<Config>();
     if (cfg == nullptr) {
@@ -48,7 +48,7 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
 
     // Find the target entry point.
     const Function* entry_point = nullptr;
-    for (auto* f : src->AST().Functions()) {
+    for (auto* f : src.AST().Functions()) {
         if (!f->IsEntryPoint()) {
             continue;
         }
@@ -63,12 +63,12 @@ Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
         return resolver::Resolve(b);
     }
 
-    auto& sem = src->Sem();
+    auto& sem = src.Sem();
     auto& referenced_vars = sem.Get(entry_point)->TransitivelyReferencedGlobals();
 
     // Clone any module-scope variables, types, and functions that are statically referenced by the
     // target entry point.
-    for (auto* decl : src->AST().GlobalDeclarations()) {
+    for (auto* decl : src.AST().GlobalDeclarations()) {
         Switch(
             decl,  //
             [&](const TypeDecl* ty) {

@@ -35,8 +35,8 @@ namespace tint::ast::transform {
 
 namespace {
 
-bool ShouldRun(const Program* program) {
-    for (auto* node : program->ASTNodes().Objects()) {
+bool ShouldRun(const Program& program) {
+    for (auto* node : program.ASTNodes().Objects()) {
         if (node->IsAnyOf<CompoundAssignmentStatement, IncrementDecrementStatement>()) {
             return true;
         }
@@ -166,7 +166,7 @@ ExpandCompoundAssignment::ExpandCompoundAssignment() = default;
 
 ExpandCompoundAssignment::~ExpandCompoundAssignment() = default;
 
-Transform::ApplyResult ExpandCompoundAssignment::Apply(const Program* src,
+Transform::ApplyResult ExpandCompoundAssignment::Apply(const Program& src,
                                                        const DataMap&,
                                                        DataMap&) const {
     if (!ShouldRun(src)) {
@@ -174,9 +174,9 @@ Transform::ApplyResult ExpandCompoundAssignment::Apply(const Program* src,
     }
 
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
     State state(ctx);
-    for (auto* node : src->ASTNodes().Objects()) {
+    for (auto* node : src.ASTNodes().Objects()) {
         if (auto* assign = node->As<CompoundAssignmentStatement>()) {
             state.Expand(assign, assign->lhs, ctx.Clone(assign->rhs), assign->op);
         } else if (auto* inc_dec = node->As<IncrementDecrementStatement>()) {

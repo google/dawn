@@ -189,14 +189,14 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
 /// Generate SPIR-V code for a program.
 /// @param program the program to generate
 /// @returns true on success
-bool GenerateSpirv(const tint::Program* program) {
+bool GenerateSpirv(const tint::Program& program) {
 #if TINT_BUILD_SPV_WRITER
     tint::spirv::writer::Options gen_options;
     gen_options.external_texture_options.bindings_map =
         tint::cmd::GenerateExternalTextureBindings(program);
     auto result = tint::spirv::writer::Generate(program, gen_options);
     if (!result) {
-        tint::cmd::PrintWGSL(std::cerr, *program);
+        tint::cmd::PrintWGSL(std::cerr, program);
         std::cerr << "Failed to generate: " << result.Failure() << std::endl;
         return false;
     }
@@ -211,7 +211,7 @@ bool GenerateSpirv(const tint::Program* program) {
 /// Generate WGSL code for a program.
 /// @param program the program to generate
 /// @returns true on success
-bool GenerateWgsl(const tint::Program* program) {
+bool GenerateWgsl(const tint::Program& program) {
 #if TINT_BUILD_WGSL_WRITER
     tint::wgsl::writer::Options gen_options;
     auto result = tint::wgsl::writer::Generate(program, gen_options);
@@ -231,11 +231,11 @@ bool GenerateWgsl(const tint::Program* program) {
 /// Generate MSL code for a program.
 /// @param program the program to generate
 /// @returns true on success
-bool GenerateMsl(const tint::Program* program) {
+bool GenerateMsl(const tint::Program& program) {
 #if TINT_BUILD_MSL_WRITER
     // Remap resource numbers to a flat namespace.
     // TODO(crbug.com/tint/1501): Do this via Options::BindingMap.
-    const tint::Program* input_program = program;
+    const tint::Program* input_program = &program;
     auto flattened = tint::writer::FlattenBindings(program);
     if (flattened) {
         input_program = &*flattened;
@@ -243,15 +243,15 @@ bool GenerateMsl(const tint::Program* program) {
 
     tint::msl::writer::Options gen_options;
     gen_options.external_texture_options.bindings_map =
-        tint::cmd::GenerateExternalTextureBindings(input_program);
+        tint::cmd::GenerateExternalTextureBindings(*input_program);
     gen_options.array_length_from_uniform.ubo_binding = tint::BindingPoint{0, 30};
     gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 0},
                                                                           0);
     gen_options.array_length_from_uniform.bindpoint_to_size_index.emplace(tint::BindingPoint{0, 1},
                                                                           1);
-    auto result = tint::msl::writer::Generate(input_program, gen_options);
+    auto result = tint::msl::writer::Generate(*input_program, gen_options);
     if (!result) {
-        tint::cmd::PrintWGSL(std::cerr, *program);
+        tint::cmd::PrintWGSL(std::cerr, program);
         std::cerr << "Failed to generate: " << result.Failure() << std::endl;
         return false;
     }
@@ -267,14 +267,14 @@ bool GenerateMsl(const tint::Program* program) {
 /// Generate HLSL code for a program.
 /// @param program the program to generate
 /// @returns true on success
-bool GenerateHlsl(const tint::Program* program) {
+bool GenerateHlsl(const tint::Program& program) {
 #if TINT_BUILD_HLSL_WRITER
     tint::hlsl::writer::Options gen_options;
     gen_options.external_texture_options.bindings_map =
         tint::cmd::GenerateExternalTextureBindings(program);
     auto result = tint::hlsl::writer::Generate(program, gen_options);
     if (!result) {
-        tint::cmd::PrintWGSL(std::cerr, *program);
+        tint::cmd::PrintWGSL(std::cerr, program);
         std::cerr << "Failed to generate: " << result.Failure() << std::endl;
         return false;
     }
@@ -290,14 +290,14 @@ bool GenerateHlsl(const tint::Program* program) {
 /// Generate GLSL code for a program.
 /// @param program the program to generate
 /// @returns true on success
-bool GenerateGlsl(const tint::Program* program) {
+bool GenerateGlsl(const tint::Program& program) {
 #if TINT_BUILD_GLSL_WRITER
     tint::glsl::writer::Options gen_options;
     gen_options.external_texture_options.bindings_map =
         tint::cmd::GenerateExternalTextureBindings(program);
     auto result = tint::glsl::writer::Generate(program, gen_options, "");
     if (result) {
-        tint::cmd::PrintWGSL(std::cerr, *program);
+        tint::cmd::PrintWGSL(std::cerr, program);
         std::cerr << "Failed to generate: " << result.Failure() << std::endl;
         return false;
     }
@@ -377,21 +377,17 @@ int main(int argc, const char** argv) {
     }
 
     // Load the program that will actually be used
-    {
-        tint::cmd::LoadProgramOptions opts;
-        opts.filename = options.input_filename;
+    tint::cmd::LoadProgramOptions opts;
+    opts.filename = options.input_filename;
 
-        auto info = tint::cmd::LoadProgramInfo(opts);
-        program = std::move(info.program);
-        source_file = std::move(info.source_file);
-    }
+    auto info = tint::cmd::LoadProgramInfo(opts);
     {
         uint32_t loop_count = 1;
         if (options.loop == Looper::kIRGenerate) {
             loop_count = options.loop_count;
         }
         for (uint32_t i = 0; i < loop_count; ++i) {
-            auto result = tint::wgsl::reader::ProgramToIR(program.get());
+            auto result = tint::wgsl::reader::ProgramToIR(info.program);
             if (!result) {
                 std::cerr << "Failed to build IR from program: " << result.Failure() << std::endl;
             }
@@ -408,27 +404,27 @@ int main(int argc, const char** argv) {
         switch (options.format) {
             case Format::kSpirv:
                 for (uint32_t i = 0; i < loop_count; ++i) {
-                    success = GenerateSpirv(program.get());
+                    success = GenerateSpirv(info.program);
                 }
                 break;
             case Format::kWgsl:
                 for (uint32_t i = 0; i < loop_count; ++i) {
-                    success = GenerateWgsl(program.get());
+                    success = GenerateWgsl(info.program);
                 }
                 break;
             case Format::kMsl:
                 for (uint32_t i = 0; i < loop_count; ++i) {
-                    success = GenerateMsl(program.get());
+                    success = GenerateMsl(info.program);
                 }
                 break;
             case Format::kHlsl:
                 for (uint32_t i = 0; i < loop_count; ++i) {
-                    success = GenerateHlsl(program.get());
+                    success = GenerateHlsl(info.program);
                 }
                 break;
             case Format::kGlsl:
                 for (uint32_t i = 0; i < loop_count; ++i) {
-                    success = GenerateGlsl(program.get());
+                    success = GenerateGlsl(info.program);
                 }
                 break;
             case Format::kNone:

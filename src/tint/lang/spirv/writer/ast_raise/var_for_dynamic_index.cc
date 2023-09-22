@@ -29,11 +29,11 @@ VarForDynamicIndex::VarForDynamicIndex() = default;
 
 VarForDynamicIndex::~VarForDynamicIndex() = default;
 
-ast::transform::Transform::ApplyResult VarForDynamicIndex::Apply(const Program* src,
+ast::transform::Transform::ApplyResult VarForDynamicIndex::Apply(const Program& src,
                                                                  const ast::transform::DataMap&,
                                                                  ast::transform::DataMap&) const {
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     ast::transform::HoistToDeclBefore hoist_to_decl_before(ctx);
 
@@ -42,7 +42,7 @@ ast::transform::Transform::ApplyResult VarForDynamicIndex::Apply(const Program* 
     auto dynamic_index_to_var = [&](const ast::IndexAccessorExpression* access_expr) {
         auto* index_expr = access_expr->index;
         auto* object_expr = access_expr->object;
-        auto& sem = src->Sem();
+        auto& sem = src.Sem();
 
         auto stage = sem.GetVal(index_expr)->Stage();
         if (stage == core::EvaluationStage::kConstant ||
@@ -66,7 +66,7 @@ ast::transform::Transform::ApplyResult VarForDynamicIndex::Apply(const Program* 
     };
 
     bool index_accessor_found = false;
-    for (auto* node : src->ASTNodes().Objects()) {
+    for (auto* node : src.ASTNodes().Objects()) {
         if (auto* access_expr = node->As<ast::IndexAccessorExpression>()) {
             if (!dynamic_index_to_var(access_expr)) {
                 return resolver::Resolve(b);

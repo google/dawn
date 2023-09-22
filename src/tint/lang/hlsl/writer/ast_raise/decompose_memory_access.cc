@@ -52,9 +52,9 @@ namespace tint::hlsl::writer {
 
 namespace {
 
-bool ShouldRun(const Program* program) {
-    for (auto* decl : program->AST().GlobalDeclarations()) {
-        if (auto* var = program->Sem().Get<sem::Variable>(decl)) {
+bool ShouldRun(const Program& program) {
+    for (auto* decl : program.AST().GlobalDeclarations()) {
+        if (auto* var = program.Sem().Get<sem::Variable>(decl)) {
             if (var->AddressSpace() == core::AddressSpace::kStorage ||
                 var->AddressSpace() == core::AddressSpace::kUniform) {
                 return true;
@@ -795,16 +795,16 @@ DecomposeMemoryAccess::DecomposeMemoryAccess() = default;
 DecomposeMemoryAccess::~DecomposeMemoryAccess() = default;
 
 ast::transform::Transform::ApplyResult DecomposeMemoryAccess::Apply(
-    const Program* src,
+    const Program& src,
     const ast::transform::DataMap&,
     ast::transform::DataMap&) const {
     if (!ShouldRun(src)) {
         return SkipTransform;
     }
 
-    auto& sem = src->Sem();
+    auto& sem = src.Sem();
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
     State state(ctx);
 
     // Scan the AST nodes for storage and uniform buffer accesses. Complex
@@ -815,7 +815,7 @@ ast::transform::Transform::ApplyResult DecomposeMemoryAccess::Apply(
     // Inner-most expression nodes are guaranteed to be visited first because AST
     // nodes are fully immutable and require their children to be constructed
     // first so their pointer can be passed to the parent's initializer.
-    for (auto* node : src->ASTNodes().Objects()) {
+    for (auto* node : src.ASTNodes().Objects()) {
         if (auto* ident = node->As<ast::IdentifierExpression>()) {
             // X
             if (auto* sem_ident = sem.GetVal(ident)) {

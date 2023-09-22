@@ -26,15 +26,15 @@
 
 namespace tint::cmd {
 
-ExternalTextureOptions::BindingsMap GenerateExternalTextureBindings(const Program* program) {
+ExternalTextureOptions::BindingsMap GenerateExternalTextureBindings(const Program& program) {
     // TODO(tint:1491): Use Inspector once we can get binding info for all
     // variables, not just those referenced by entry points.
 
     // Collect next valid binding number per group
     std::unordered_map<uint32_t, uint32_t> group_to_next_binding_number;
     std::vector<tint::BindingPoint> ext_tex_bps;
-    for (auto* var : program->AST().GlobalVariables()) {
-        if (auto* sem_var = program->Sem().Get(var)->As<sem::GlobalVariable>()) {
+    for (auto* var : program.AST().GlobalVariables()) {
+        if (auto* sem_var = program.Sem().Get(var)->As<sem::GlobalVariable>()) {
             if (auto bp = sem_var->BindingPoint()) {
                 auto& n = group_to_next_binding_number[bp->group];
                 n = std::max(n, bp->binding + 1);

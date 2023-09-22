@@ -179,8 +179,8 @@ struct DirectVariableAccess::State {
     /// Constructor
     /// @param src the source Program
     /// @param options the transform options
-    State(const Program* src, const Options& options)
-        : ctx{&b, src, /* auto_clone_symbols */ true}, opts(options) {}
+    State(const Program& src, const Options& options)
+        : ctx{&b, &src, /* auto_clone_symbols */ true}, opts(options) {}
 
     /// The main function for the transform.
     /// @returns the ApplyResult
@@ -1188,7 +1188,7 @@ DirectVariableAccess::DirectVariableAccess() = default;
 
 DirectVariableAccess::~DirectVariableAccess() = default;
 
-Transform::ApplyResult DirectVariableAccess::Apply(const Program* program,
+Transform::ApplyResult DirectVariableAccess::Apply(const Program& program,
                                                    const DataMap& inputs,
                                                    DataMap&) const {
     Options options;

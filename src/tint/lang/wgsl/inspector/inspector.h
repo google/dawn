@@ -43,7 +43,7 @@ class Inspector {
   public:
     /// Constructor
     /// @param program Shader program to extract information from.
-    explicit Inspector(const Program* program);
+    explicit Inspector(const Program& program);
 
     /// Destructor
     ~Inspector();
@@ -144,7 +144,7 @@ class Inspector {
     std::vector<std::pair<std::string, Source>> GetEnableDirectives();
 
   private:
-    const Program* program_;
+    const Program& program_;
     diag::List diagnostics_;
     std::unique_ptr<std::unordered_map<std::string, UniqueVector<SamplerTexturePair, 4>>>
         sampler_targets_;

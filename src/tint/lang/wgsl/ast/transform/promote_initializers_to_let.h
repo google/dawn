@@ -34,7 +34,7 @@ class PromoteInitializersToLet final : public Castable<PromoteInitializersToLet,
     ~PromoteInitializersToLet() override;
 
     /// @copydoc Transform::Apply
-    ApplyResult Apply(const Program* program,
+    ApplyResult Apply(const Program& program,
                       const DataMap& inputs,
                       DataMap& outputs) const override;
 };

@@ -24,7 +24,7 @@ namespace tint::writer {
 /// group 0 within unique binding numbers.
 /// @param program A valid program
 /// @return A new program with bindings remapped if needed
-std::optional<Program> FlattenBindings(const Program* program);
+std::optional<Program> FlattenBindings(const Program& program);
 
 }  // namespace tint::writer
 

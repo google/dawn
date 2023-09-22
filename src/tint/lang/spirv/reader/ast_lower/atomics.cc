@@ -53,11 +53,11 @@ struct Atomics::State {
     };
 
     /// The source program
-    const Program* const src;
+    const Program& src;
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
     std::unordered_map<const core::type::Struct*, ForkedStruct> forked_structs;
     std::unordered_set<const sem::Variable*> atomic_variables;
     UniqueVector<const sem::ValueExpression*, 8> atomic_expressions;
@@ -65,7 +65,7 @@ struct Atomics::State {
   public:
     /// Constructor
     /// @param program the source program
-    explicit State(const Program* program) : src(program) {}
+    explicit State(const Program& program) : src(program) {}
 
     /// Runs the transform
     /// @returns the new program or SkipTransform if the transform is not required
@@ -289,7 +289,7 @@ const Atomics::Stub* Atomics::Stub::Clone(ast::CloneContext& ctx) const {
                                                      builtin);
 }
 
-ast::transform::Transform::ApplyResult Atomics::Apply(const Program* src,
+ast::transform::Transform::ApplyResult Atomics::Apply(const Program& src,
                                                       const ast::transform::DataMap&,
                                                       ast::transform::DataMap&) const {
     return State{src}.Run();

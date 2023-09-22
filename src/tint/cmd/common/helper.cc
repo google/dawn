@@ -34,6 +34,7 @@
 #include "src/tint/utils/diagnostic/formatter.h"
 #include "src/tint/utils/diagnostic/printer.h"
 #include "src/tint/utils/text/string.h"
+#include "src/tint/utils/traits/traits.h"
 
 namespace tint::cmd {
 namespace {
@@ -44,6 +45,24 @@ enum class InputFormat {
     kSpirvBin,
     kSpirvAsm,
 };
+
+/// @param out the stream to write to
+/// @param value the InputFormat
+/// @returns @p out so calls can be chained
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, InputFormat value) {
+    switch (value) {
+        case InputFormat::kUnknown:
+            break;
+        case InputFormat::kWgsl:
+            return out << "wgsl";
+        case InputFormat::kSpirvBin:
+            return out << "spirv";
+        case InputFormat::kSpirvAsm:
+            return out << "spirv asm";
+    }
+    return out << "unknown";
+}
 
 InputFormat InputFormatFromFilename(const std::string& filename) {
     auto input_format = InputFormat::kUnknown;
@@ -98,7 +117,7 @@ void PrintBindings(tint::inspector::Inspector& inspector, const std::string& ep_
 void PrintWGSL(std::ostream& out, const tint::Program& program) {
 #if TINT_BUILD_WGSL_WRITER
     tint::wgsl::writer::Options options;
-    auto result = tint::wgsl::writer::Generate(&program, options);
+    auto result = tint::wgsl::writer::Generate(program, options);
     if (result) {
         out << std::endl << result->wgsl << std::endl;
     } else {
@@ -111,95 +130,104 @@ void PrintWGSL(std::ostream& out, const tint::Program& program) {
 }
 
 ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts) {
-    std::unique_ptr<tint::Program> program;
-    std::unique_ptr<tint::Source::File> source_file;
-
     auto input_format = InputFormatFromFilename(opts.filename);
-    switch (input_format) {
-        case InputFormat::kUnknown: {
-            std::cerr << "Unknown input format" << std::endl;
-            exit(1);
-        }
-        case InputFormat::kWgsl: {
-#if TINT_BUILD_WGSL_READER
-            std::vector<uint8_t> data;
-            if (!ReadFile<uint8_t>(opts.filename, &data)) {
-                exit(1);
-            }
-            source_file = std::make_unique<tint::Source::File>(
-                opts.filename, std::string(data.begin(), data.end()));
-            program = std::make_unique<tint::Program>(tint::wgsl::reader::Parse(source_file.get()));
-            break;
-#else
-            std::cerr << "Tint not built with the WGSL reader enabled" << std::endl;
-            exit(1);
-#endif  // TINT_BUILD_WGSL_READER
-        }
-        case InputFormat::kSpirvBin: {
-#if TINT_BUILD_SPV_READER
-            std::vector<uint32_t> data;
-            if (!ReadFile<uint32_t>(opts.filename, &data)) {
-                exit(1);
-            }
-            program = std::make_unique<tint::Program>(
-                tint::spirv::reader::Read(data, opts.spirv_reader_options));
-            break;
-#else
-            std::cerr << "Tint not built with the SPIR-V reader enabled" << std::endl;
-            exit(1);
-#endif  // TINT_BUILD_SPV_READER
-        }
-        case InputFormat::kSpirvAsm: {
-#if TINT_BUILD_SPV_READER
-            std::vector<char> text;
-            if (!ReadFile<char>(opts.filename, &text)) {
-                exit(1);
-            }
-            // Use Vulkan 1.1, since this is what Tint, internally, is expecting.
-            spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_1);
-            tools.SetMessageConsumer([](spv_message_level_t, const char*, const spv_position_t& pos,
-                                        const char* msg) {
-                std::cerr << (pos.line + 1) << ":" << (pos.column + 1) << ": " << msg << std::endl;
-            });
-            std::vector<uint32_t> data;
-            if (!tools.Assemble(text.data(), text.size(), &data,
-                                SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS)) {
-                exit(1);
-            }
-            program = std::make_unique<tint::Program>(
-                tint::spirv::reader::Read(data, opts.spirv_reader_options));
-            break;
-#else
-            std::cerr << "Tint not built with the SPIR-V reader enabled" << std::endl;
-            exit(1);
-#endif  // TINT_BUILD_SPV_READER
-        }
-    }
 
-    if (!program) {
-        std::cerr << "Failed to parse input file: " << opts.filename << std::endl;
+    auto load = [&]() -> ProgramInfo {
+        switch (input_format) {
+            case InputFormat::kUnknown:
+                break;
+
+            case InputFormat::kWgsl: {
+#if TINT_BUILD_WGSL_READER
+                std::vector<uint8_t> data;
+                if (!ReadFile<uint8_t>(opts.filename, &data)) {
+                    exit(1);
+                }
+
+                auto file = std::make_unique<tint::Source::File>(
+                    opts.filename, std::string(data.begin(), data.end()));
+
+                return ProgramInfo{
+                    /* program */ tint::wgsl::reader::Parse(file.get()),
+                    /* source_file */ std::move(file),
+                };
+#else
+                std::cerr << "Tint not built with the WGSL reader enabled" << std::endl;
+                exit(1);
+#endif  // TINT_BUILD_WGSL_READER
+            }
+            case InputFormat::kSpirvBin: {
+#if TINT_BUILD_SPV_READER
+                std::vector<uint32_t> data;
+                if (!ReadFile<uint32_t>(opts.filename, &data)) {
+                    exit(1);
+                }
+
+                return ProgramInfo{
+                    /* program */ tint::spirv::reader::Read(data, opts.spirv_reader_options),
+                    /* source_file */ nullptr,
+                };
+#else
+                std::cerr << "Tint not built with the SPIR-V reader enabled" << std::endl;
+                exit(1);
+#endif  // TINT_BUILD_SPV_READER
+            }
+            case InputFormat::kSpirvAsm: {
+#if TINT_BUILD_SPV_READER
+                std::vector<char> text;
+                if (!ReadFile<char>(opts.filename, &text)) {
+                    exit(1);
+                }
+                // Use Vulkan 1.1, since this is what Tint, internally, is expecting.
+                spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_1);
+                tools.SetMessageConsumer([](spv_message_level_t, const char*,
+                                            const spv_position_t& pos, const char* msg) {
+                    std::cerr << (pos.line + 1) << ":" << (pos.column + 1) << ": " << msg
+                              << std::endl;
+                });
+                std::vector<uint32_t> data;
+                if (!tools.Assemble(text.data(), text.size(), &data,
+                                    SPV_TEXT_TO_BINARY_OPTION_PRESERVE_NUMERIC_IDS)) {
+                    exit(1);
+                }
+
+                auto file = std::make_unique<tint::Source::File>(
+                    opts.filename, std::string(text.begin(), text.end()));
+
+                return ProgramInfo{
+                    /* program */ tint::spirv::reader::Read(data, opts.spirv_reader_options),
+                    /* source_file */ std::move(file),
+                };
+#else
+                std::cerr << "Tint not built with the SPIR-V reader enabled" << std::endl;
+                exit(1);
+#endif  // TINT_BUILD_SPV_READER
+            }
+        }
+
+        std::cerr << "Unknown input format: " << input_format << std::endl;
         exit(1);
-    }
-    if (program->Diagnostics().count() > 0) {
-        if (!program->IsValid() && input_format != InputFormat::kWgsl) {
-            // Invalid program from a non-wgsl source. Print the WGSL, to help
-            // understand the diagnostics.
-            PrintWGSL(std::cout, *program);
+    };
+
+    ProgramInfo info = load();
+
+    if (info.program.Diagnostics().count() > 0) {
+        if (!info.program.IsValid() && input_format != InputFormat::kWgsl) {
+            // Invalid program from a non-wgsl source.
+            // Print the WGSL, to help understand the diagnostics.
+            PrintWGSL(std::cout, info.program);
         }
 
         auto diag_printer = tint::diag::Printer::create(stderr, true);
         tint::diag::Formatter diag_formatter;
-        diag_formatter.format(program->Diagnostics(), diag_printer.get());
+        diag_formatter.format(info.program.Diagnostics(), diag_printer.get());
     }
 
-    if (!program->IsValid()) {
+    if (!info.program.IsValid()) {
         exit(1);
     }
 
-    return ProgramInfo{
-        std::move(program),
-        std::move(source_file),
-    };
+    return info;
 }
 
 void PrintInspectorData(tint::inspector::Inspector& inspector) {

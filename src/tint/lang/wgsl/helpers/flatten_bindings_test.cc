@@ -34,7 +34,7 @@ TEST_F(FlattenBindingsTest, NoBindings) {
     Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
-    auto flattened = tint::writer::FlattenBindings(&program);
+    auto flattened = tint::writer::FlattenBindings(program);
     EXPECT_FALSE(flattened);
 }
 
@@ -47,7 +47,7 @@ TEST_F(FlattenBindingsTest, AlreadyFlat) {
     Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
-    auto flattened = tint::writer::FlattenBindings(&program);
+    auto flattened = tint::writer::FlattenBindings(program);
     EXPECT_FALSE(flattened);
 }
 
@@ -61,7 +61,7 @@ TEST_F(FlattenBindingsTest, NotFlat_SingleNamespace) {
     Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
-    auto flattened = tint::writer::FlattenBindings(&program);
+    auto flattened = tint::writer::FlattenBindings(program);
     EXPECT_TRUE(flattened);
 
     auto& vars = flattened->AST().GlobalVariables();
@@ -123,7 +123,7 @@ TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
     Program program(resolver::Resolve(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
-    auto flattened = tint::writer::FlattenBindings(&program);
+    auto flattened = tint::writer::FlattenBindings(program);
     EXPECT_TRUE(flattened);
 
     auto& vars = flattened->AST().GlobalVariables();

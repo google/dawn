@@ -66,7 +66,7 @@ class Transform : public Castable<Transform> {
     /// @param program the source program to transform
     /// @param data optional extra transform-specific input data
     /// @returns the transformation result
-    Output Run(const Program* program, const DataMap& data = {}) const;
+    Output Run(const Program& program, const DataMap& data = {}) const;
 
     /// The return value of Apply().
     /// If SkipTransform (std::nullopt), then the transform is not needed to be run.
@@ -80,7 +80,7 @@ class Transform : public Castable<Transform> {
     /// @param inputs optional extra transform-specific input data
     /// @param outputs optional extra transform-specific output data
     /// @returns a transformed program, or std::nullopt if the transform didn't need to run.
-    virtual ApplyResult Apply(const Program* program,
+    virtual ApplyResult Apply(const Program& program,
                               const DataMap& inputs,
                               DataMap& outputs) const = 0;
 

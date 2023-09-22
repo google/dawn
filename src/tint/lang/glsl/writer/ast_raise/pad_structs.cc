@@ -56,12 +56,12 @@ PadStructs::PadStructs() = default;
 
 PadStructs::~PadStructs() = default;
 
-ast::transform::Transform::ApplyResult PadStructs::Apply(const Program* src,
+ast::transform::Transform::ApplyResult PadStructs::Apply(const Program& src,
                                                          const ast::transform::DataMap&,
                                                          ast::transform::DataMap&) const {
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
-    auto& sem = src->Sem();
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
+    auto& sem = src.Sem();
 
     std::unordered_map<const ast::Struct*, const ast::Struct*> replaced_structs;
     Hashset<const ast::StructMember*, 8> padding_members;

@@ -38,7 +38,7 @@ namespace tint::hlsl::writer {
 struct LocalizeStructArrayAssignment::State {
     /// Constructor
     /// @param program the source program
-    explicit State(const Program* program) : src(program) {}
+    explicit State(const Program& program) : src(program) {}
 
     /// Runs the transform
     /// @returns the new program or SkipTransform if the transform is not required
@@ -51,7 +51,7 @@ struct LocalizeStructArrayAssignment::State {
 
         bool made_changes = false;
 
-        for (auto* node : ctx.src->ASTNodes().Objects()) {
+        for (auto* node : src.ASTNodes().Objects()) {
             if (auto* assign_stmt = node->As<ast::AssignmentStatement>()) {
                 // Process if it's an assignment statement to a dynamically indexed array
                 // within a struct on a function or private storage variable. This
@@ -154,11 +154,11 @@ struct LocalizeStructArrayAssignment::State {
 
   private:
     /// The source program
-    const Program* const src;
+    const Program& src;
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
 
     /// Returns true if `expr` contains an index accessor expression to a
     /// structure member of array type.
@@ -166,12 +166,12 @@ struct LocalizeStructArrayAssignment::State {
         bool result = false;
         TraverseExpressions(expr, [&](const ast::IndexAccessorExpression* ia) {
             // Indexing using a runtime value?
-            auto* idx_sem = src->Sem().GetVal(ia->index);
+            auto* idx_sem = src.Sem().GetVal(ia->index);
             if (!idx_sem->ConstantValue()) {
                 // Indexing a member access expr?
                 if (auto* ma = ia->object->As<ast::MemberAccessorExpression>()) {
                     // That accesses an array?
-                    if (src->TypeOf(ma)->UnwrapRef()->Is<core::type::Array>()) {
+                    if (src.TypeOf(ma)->UnwrapRef()->Is<core::type::Array>()) {
                         result = true;
                         return ast::TraverseAction::Stop;
                     }
@@ -188,7 +188,7 @@ struct LocalizeStructArrayAssignment::State {
     // See https://www.w3.org/TR/WGSL/#originating-variable-section
     std::pair<const core::type::Type*, core::AddressSpace> GetOriginatingTypeAndAddressSpace(
         const ast::AssignmentStatement* assign_stmt) {
-        auto* root_ident = src->Sem().GetVal(assign_stmt->lhs)->RootIdentifier();
+        auto* root_ident = src.Sem().GetVal(assign_stmt->lhs)->RootIdentifier();
         if (TINT_UNLIKELY(!root_ident)) {
             TINT_ICE() << "Unable to determine originating variable for lhs of assignment "
                           "statement";
@@ -216,7 +216,7 @@ LocalizeStructArrayAssignment::LocalizeStructArrayAssignment() = default;
 LocalizeStructArrayAssignment::~LocalizeStructArrayAssignment() = default;
 
 ast::transform::Transform::ApplyResult LocalizeStructArrayAssignment::Apply(
-    const Program* src,
+    const Program& src,
     const ast::transform::DataMap&,
     ast::transform::DataMap&) const {
     return State{src}.Run();

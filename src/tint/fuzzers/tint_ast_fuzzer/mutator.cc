@@ -65,10 +65,9 @@ MutationFinderList CreateMutationFinders(ProbabilityContext* probability_context
 bool MaybeApplyMutation(const tint::Program& program,
                         const Mutation& mutation,
                         const NodeIdMap& node_id_map,
-                        tint::Program* out_program,
+                        tint::Program& out_program,
                         NodeIdMap* out_node_id_map,
                         protobufs::MutationSequence* mutation_sequence) {
-    assert(out_program && "`out_program` may not be a nullptr");
     assert(out_node_id_map && "`out_node_id_map` may not be a nullptr");
 
     if (!mutation.IsApplicable(program, node_id_map)) {
@@ -93,7 +92,7 @@ bool MaybeApplyMutation(const tint::Program& program,
     }
 
     clone_context.Clone();
-    *out_program = tint::resolver::Resolve(mutated);
+    out_program = tint::resolver::Resolve(mutated);
     *out_node_id_map = std::move(new_node_id_map);
     return true;
 }
@@ -105,7 +104,7 @@ tint::Program Replay(tint::Program program, const protobufs::MutationSequence& m
     for (const auto& mutation_message : mutation_sequence.mutation()) {
         auto mutation = Mutation::FromMessage(mutation_message);
         auto status =
-            MaybeApplyMutation(program, *mutation, node_id_map, &program, &node_id_map, nullptr);
+            MaybeApplyMutation(program, *mutation, node_id_map, program, &node_id_map, nullptr);
         (void)status;  // `status` will be unused in release mode.
         assert(status && "`mutation` is inapplicable - it's most likely a bug");
         if (!program.IsValid()) {
@@ -156,7 +155,7 @@ tint::Program Mutate(tint::Program program,
                 continue;
             }
 
-            if (!MaybeApplyMutation(program, *mutation, node_id_map, &program, &node_id_map,
+            if (!MaybeApplyMutation(program, *mutation, node_id_map, program, &node_id_map,
                                     mutation_sequence)) {
                 // This `mutation` is inapplicable. This may happen if some of the
                 // earlier mutations cancelled this one.

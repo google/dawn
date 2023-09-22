@@ -36,7 +36,7 @@ ASTParserWrapperForTest::~ASTParserWrapperForTest() {
 }
 
 std::string ToString(const Program& program) {
-    wgsl::writer::ASTPrinter writer(&program);
+    wgsl::writer::ASTPrinter writer(program);
     writer.Generate();
 
     if (!writer.Diagnostics().empty()) {
@@ -46,7 +46,7 @@ std::string ToString(const Program& program) {
 }
 
 std::string ToString(const Program& program, VectorRef<const ast::Statement*> stmts) {
-    wgsl::writer::ASTPrinter writer(&program);
+    wgsl::writer::ASTPrinter writer(program);
     for (const auto* stmt : stmts) {
         writer.EmitStatement(stmt);
     }
@@ -57,7 +57,7 @@ std::string ToString(const Program& program, VectorRef<const ast::Statement*> st
 }
 
 std::string ToString(const Program& program, const ast::Node* node) {
-    wgsl::writer::ASTPrinter writer(&program);
+    wgsl::writer::ASTPrinter writer(program);
     return Switch(
         node,
         [&](const ast::Expression* expr) {

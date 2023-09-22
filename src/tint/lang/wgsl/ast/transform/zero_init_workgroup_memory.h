@@ -31,7 +31,7 @@ class ZeroInitWorkgroupMemory final : public Castable<ZeroInitWorkgroupMemory, T
     ~ZeroInitWorkgroupMemory() override;
 
     /// @copydoc Transform::Apply
-    ApplyResult Apply(const Program* program,
+    ApplyResult Apply(const Program& program,
                       const DataMap& inputs,
                       DataMap& outputs) const override;
 

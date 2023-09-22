@@ -41,7 +41,7 @@ PreservePadding::~PreservePadding() = default;
 struct PreservePadding::State {
     /// Constructor
     /// @param src the source Program
-    explicit State(const Program* src) : ctx{&b, src, /* auto_clone_symbols */ true} {}
+    explicit State(const Program& src) : ctx{&b, &src, /* auto_clone_symbols */ true} {}
 
     /// The main function for the transform.
     /// @returns the ApplyResult
@@ -240,7 +240,7 @@ struct PreservePadding::State {
     Hashmap<const core::type::Type*, Symbol, 8> helpers;
 };
 
-Transform::ApplyResult PreservePadding::Apply(const Program* program,
+Transform::ApplyResult PreservePadding::Apply(const Program& program,
                                               const DataMap&,
                                               DataMap&) const {
     return State(program).Run();

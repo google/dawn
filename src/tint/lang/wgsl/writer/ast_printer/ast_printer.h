@@ -77,7 +77,7 @@ class ASTPrinter : public tint::TextGenerator {
   public:
     /// Constructor
     /// @param program the program
-    explicit ASTPrinter(const Program* program);
+    explicit ASTPrinter(const Program& program);
     ~ASTPrinter() override;
 
     /// Generates the result data
@@ -219,7 +219,7 @@ class ASTPrinter : public tint::TextGenerator {
     void EmitAttributes(StringStream& out, VectorRef<const ast::Attribute*> attrs);
 
   private:
-    Program const* const program_;
+    const Program& program_;
 };
 
 }  // namespace tint::wgsl::writer

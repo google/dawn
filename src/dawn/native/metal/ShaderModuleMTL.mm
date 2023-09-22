@@ -280,7 +280,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
             options.external_texture_options = r.externalTextureOptions;
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::msl::writer::Generate");
-            auto result = tint::msl::writer::Generate(&program, options);
+            auto result = tint::msl::writer::Generate(program, options);
             DAWN_INVALID_IF(!result, "An error occured while generating MSL: %s.",
                             result.Failure());
 

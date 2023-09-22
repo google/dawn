@@ -33,9 +33,9 @@ namespace tint::glsl::writer {
 
 namespace {
 
-bool ShouldRun(const Program* program) {
-    for (auto* fn : program->AST().Functions()) {
-        if (auto* sem_fn = program->Sem().Get(fn)) {
+bool ShouldRun(const Program& program) {
+    for (auto* fn : program.AST().Functions()) {
+        if (auto* sem_fn = program.Sem().Get(fn)) {
             for (auto* builtin : sem_fn->DirectlyCalledBuiltins()) {
                 const auto& signature = builtin->Signature();
                 auto texture = signature.Parameter(core::ParameterUsage::kTexture);
@@ -48,9 +48,9 @@ bool ShouldRun(const Program* program) {
             }
         }
     }
-    for (auto* var : program->AST().GlobalVariables()) {
+    for (auto* var : program.AST().GlobalVariables()) {
         if (Switch(
-                program->Sem().Get(var)->Type()->UnwrapRef(),
+                program.Sem().Get(var)->Type()->UnwrapRef(),
                 [&](const core::type::SampledTexture* tex) {
                     return tex->dim() == core::type::TextureDimension::k1d;
                 },
@@ -68,22 +68,22 @@ bool ShouldRun(const Program* program) {
 /// PIMPL state for the transform
 struct Texture1DTo2D::State {
     /// The source program
-    const Program* const src;
+    const Program& src;
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
 
     /// Constructor
     /// @param program the source program
-    explicit State(const Program* program) : src(program) {}
+    explicit State(const Program& program) : src(program) {}
 
     /// Runs the transform
     /// @returns the new program or SkipTransform if the transform is not required
     ApplyResult Run() {
-        auto& sem = src->Sem();
+        auto& sem = src.Sem();
 
-        if (!ShouldRun(ctx.src)) {
+        if (!ShouldRun(src)) {
             return SkipTransform;
         }
 
@@ -187,7 +187,7 @@ Texture1DTo2D::Texture1DTo2D() = default;
 
 Texture1DTo2D::~Texture1DTo2D() = default;
 
-ast::transform::Transform::ApplyResult Texture1DTo2D::Apply(const Program* src,
+ast::transform::Transform::ApplyResult Texture1DTo2D::Apply(const Program& src,
                                                             const ast::transform::DataMap&,
                                                             ast::transform::DataMap&) const {
     return State(src).Run();

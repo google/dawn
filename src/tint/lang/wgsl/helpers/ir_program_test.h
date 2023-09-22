@@ -46,7 +46,7 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
             return program.Diagnostics().str();
         }
 
-        auto result = wgsl::reader::ProgramToIR(&program);
+        auto result = wgsl::reader::ProgramToIR(program);
         if (result) {
             auto validated = core::ir::Validate(result.Get());
             if (!validated) {
@@ -67,7 +67,7 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
             return program.Diagnostics().str();
         }
 
-        auto result = wgsl::reader::ProgramToIR(&program);
+        auto result = wgsl::reader::ProgramToIR(program);
         if (result) {
             auto validated = core::ir::Validate(result.Get());
             if (!validated) {

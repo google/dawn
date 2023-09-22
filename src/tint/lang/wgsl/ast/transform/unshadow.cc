@@ -34,20 +34,20 @@ namespace tint::ast::transform {
 /// PIMPL state for the transform
 struct Unshadow::State {
     /// The source program
-    const Program* const src;
+    const Program& src;
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
 
     /// Constructor
     /// @param program the source program
-    explicit State(const Program* program) : src(program) {}
+    explicit State(const Program& program) : src(program) {}
 
     /// Runs the transform
     /// @returns the new program or SkipTransform if the transform is not required
     Transform::ApplyResult Run() {
-        auto& sem = src->Sem();
+        auto& sem = src.Sem();
 
         // Maps a variable to its new name.
         Hashmap<const sem::Variable*, Symbol, 8> renamed_to;
@@ -124,7 +124,7 @@ Unshadow::Unshadow() = default;
 
 Unshadow::~Unshadow() = default;
 
-Transform::ApplyResult Unshadow::Apply(const Program* src, const DataMap&, DataMap&) const {
+Transform::ApplyResult Unshadow::Apply(const Program& src, const DataMap&, DataMap&) const {
     return State(src).Run();
 }
 

@@ -33,13 +33,13 @@ AddBlockAttribute::AddBlockAttribute() = default;
 
 AddBlockAttribute::~AddBlockAttribute() = default;
 
-Transform::ApplyResult AddBlockAttribute::Apply(const Program* src,
+Transform::ApplyResult AddBlockAttribute::Apply(const Program& src,
                                                 const DataMap&,
                                                 DataMap&) const {
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
-    auto& sem = src->Sem();
+    auto& sem = src.Sem();
 
     // A map from a type in the source program to a block-decorated wrapper that contains it in the
     // destination program.
@@ -47,7 +47,7 @@ Transform::ApplyResult AddBlockAttribute::Apply(const Program* src,
 
     // Process global 'var' declarations that are buffers.
     bool made_changes = false;
-    for (auto* global : src->AST().GlobalVariables()) {
+    for (auto* global : src.AST().GlobalVariables()) {
         auto* var = sem.Get(global);
         if (!core::IsHostShareable(var->AddressSpace())) {
             // Not declared in a host-sharable address space
@@ -77,7 +77,7 @@ Transform::ApplyResult AddBlockAttribute::Apply(const Program* src,
                     b.create<Struct>(b.Ident(b.Symbols().New(wrapper_name)),
                                      tint::Vector{b.Member(kMemberName, CreateASTTypeFor(ctx, ty))},
                                      tint::Vector{block});
-                ctx.InsertBefore(src->AST().GlobalDeclarations(), global, ret);
+                ctx.InsertBefore(src.AST().GlobalDeclarations(), global, ret);
                 return ret;
             });
             ctx.Replace(global->type.expr, b.Expr(wrapper->name->symbol));

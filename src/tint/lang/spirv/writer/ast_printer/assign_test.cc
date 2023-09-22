@@ -64,11 +64,11 @@ TEST_F(SpirvASTPrinterTest, Assign_Var_OutsideFunction_IsError) {
 
             pb.WrapInFunction(assign);
 
-            auto program = std::make_unique<Program>(resolver::Resolve(pb));
-            auto b = std::make_unique<Builder>(program.get());
+            auto program = resolver::Resolve(pb);
+            Builder b(program);
 
-            b->GenerateGlobalVariable(v);
-            b->GenerateAssignStatement(assign);
+            b.GenerateGlobalVariable(v);
+            b.GenerateAssignStatement(assign);
         },
         "trying to add SPIR-V instruction 62 outside a function");
 }

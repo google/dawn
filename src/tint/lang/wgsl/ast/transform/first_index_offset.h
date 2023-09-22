@@ -106,7 +106,7 @@ class FirstIndexOffset final : public Castable<FirstIndexOffset, Transform> {
     ~FirstIndexOffset() override;
 
     /// @copydoc Transform::Apply
-    ApplyResult Apply(const Program* program,
+    ApplyResult Apply(const Program& program,
                       const DataMap& inputs,
                       DataMap& outputs) const override;
 

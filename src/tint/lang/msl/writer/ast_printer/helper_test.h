@@ -54,7 +54,7 @@ class TestHelperBase : public BASE, public ProgramBuilder {
         }();
         program = std::make_unique<Program>(resolver::Resolve(*this));
         [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
-        gen_ = std::make_unique<ASTPrinter>(program.get());
+        gen_ = std::make_unique<ASTPrinter>(*program);
         return *gen_;
     }
 
@@ -74,10 +74,10 @@ class TestHelperBase : public BASE, public ProgramBuilder {
         program = std::make_unique<Program>(resolver::Resolve(*this));
         [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
 
-        auto result = Sanitize(program.get(), options);
+        auto result = Sanitize(*program, options);
         [&] { ASSERT_TRUE(result.program.IsValid()) << result.program.Diagnostics().str(); }();
         *program = std::move(result.program);
-        gen_ = std::make_unique<ASTPrinter>(program.get());
+        gen_ = std::make_unique<ASTPrinter>(*program);
         return *gen_;
     }
 

@@ -95,7 +95,7 @@ Program Parse(const std::vector<uint32_t>& input, const Options& options) {
     manager.Add<DecomposeStridedArray>();
     manager.Add<ast::transform::RemoveUnreachableStatements>();
     manager.Add<Atomics>();
-    return manager.Run(&program, {}, outputs);
+    return manager.Run(program, {}, outputs);
 }
 
 }  // namespace tint::spirv::reader::ast_parser

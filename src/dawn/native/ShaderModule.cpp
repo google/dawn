@@ -867,7 +867,7 @@ MaybeError ReflectShaderUsingTint(const DeviceBase* device,
                                   WGSLExtensionSet* enabledWGSLExtensions) {
     DAWN_ASSERT(program->IsValid());
 
-    tint::inspector::Inspector inspector(program);
+    tint::inspector::Inspector inspector(*program);
 
     DAWN_ASSERT(enabledWGSLExtensions->empty());
     auto usedExtensionNames = inspector.GetUsedExtensionNames();
@@ -897,7 +897,7 @@ ResultOrError<Extent3D> ValidateComputeStageWorkgroupSize(
     const tint::Program& program,
     const char* entryPointName,
     const LimitsForCompilationRequest& limits) {
-    tint::inspector::Inspector inspector(&program);
+    tint::inspector::Inspector inspector(program);
     // At this point the entry point must exist and must have workgroup size values.
     tint::inspector::EntryPoint entryPoint = inspector.GetEntryPoint(entryPointName);
     DAWN_ASSERT(entryPoint.workgroup_size.has_value());
@@ -1050,8 +1050,9 @@ ResultOrError<tint::Program> RunTransforms(tint::ast::transform::Manager* transf
                                            const tint::ast::transform::DataMap& inputs,
                                            tint::ast::transform::DataMap* outputs,
                                            OwnedCompilationMessages* outMessages) {
+    DAWN_ASSERT(program != nullptr);
     tint::ast::transform::DataMap transform_outputs;
-    tint::Program result = transformManager->Run(program, inputs, transform_outputs);
+    tint::Program result = transformManager->Run(*program, inputs, transform_outputs);
     if (outMessages != nullptr) {
         DAWN_TRY(outMessages->AddMessages(result.Diagnostics()));
     }

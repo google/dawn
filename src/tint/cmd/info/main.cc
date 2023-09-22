@@ -71,7 +71,7 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
     return true;
 }
 
-void EmitJson(const tint::Program* program) {
+void EmitJson(const tint::Program& program) {
     tint::inspector::Inspector inspector(program);
 
     std::cout << "{" << std::endl;
@@ -223,7 +223,7 @@ void EmitJson(const tint::Program* program) {
     std::cout << "\"structures\": [";
 
     bool struct_first = true;
-    for (const auto* ty : program->Types()) {
+    for (const auto* ty : program.Types()) {
         if (!ty->Is<tint::core::type::Struct>()) {
             continue;
         }
@@ -277,7 +277,7 @@ void EmitJson(const tint::Program* program) {
     std::cout << "}" << std::endl;
 }
 
-void EmitText(const tint::Program* program) {
+void EmitText(const tint::Program& program) {
     tint::inspector::Inspector inspector(program);
     if (!inspector.GetUsedExtensionNames().empty()) {
         std::cout << "Extensions:" << std::endl;
@@ -290,7 +290,7 @@ void EmitText(const tint::Program* program) {
     tint::cmd::PrintInspectorData(inspector);
 
     bool has_struct = false;
-    for (const auto* ty : program->Types()) {
+    for (const auto* ty : program.Types()) {
         if (!ty->Is<tint::core::type::Struct>()) {
             continue;
         }
@@ -300,7 +300,7 @@ void EmitText(const tint::Program* program) {
 
     if (has_struct) {
         std::cout << "Structures" << std::endl;
-        for (const auto* ty : program->Types()) {
+        for (const auto* ty : program.Types()) {
             if (!ty->Is<tint::core::type::Struct>()) {
                 continue;
             }
@@ -328,25 +328,18 @@ int main(int argc, const char** argv) {
         return 0;
     }
 
-    std::unique_ptr<tint::Program> program;
-    std::unique_ptr<tint::Source::File> source_file;
-
-    {
-        tint::cmd::LoadProgramOptions opts;
-        opts.filename = options.input_filename;
+    tint::cmd::LoadProgramOptions opts;
+    opts.filename = options.input_filename;
 #if TINT_BUILD_SPV_READER
-        opts.spirv_reader_options = options.spirv_reader_options;
+    opts.spirv_reader_options = options.spirv_reader_options;
 #endif
 
-        auto info = tint::cmd::LoadProgramInfo(opts);
-        program = std::move(info.program);
-        source_file = std::move(info.source_file);
-    }
+    auto info = tint::cmd::LoadProgramInfo(opts);
 
     if (options.emit_json) {
-        EmitJson(program.get());
+        EmitJson(info.program);
     } else {
-        EmitText(program.get());
+        EmitText(info.program);
     }
 
     return 0;

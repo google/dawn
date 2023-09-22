@@ -47,7 +47,7 @@ struct Robustness::State {
     /// Constructor
     /// @param p the source program
     /// @param c the transform config
-    State(const Program* p, Config&& c) : src(p), cfg(std::move(c)) {}
+    State(const Program& p, Config&& c) : src(p), cfg(std::move(c)) {}
 
     /// Runs the transform
     /// @returns the new program or SkipTransform if the transform is not required
@@ -204,13 +204,13 @@ struct Robustness::State {
 
   private:
     /// The source program
-    const Program* const src;
+    const Program& src;
     /// The transform's config
     Config cfg;
     /// The target program builder
     ProgramBuilder b{};
     /// The clone context
-    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
     /// Helper for hoisting declarations
     HoistToDeclBefore hoist{ctx};
     /// Alias to the source program's semantic info
@@ -272,7 +272,7 @@ struct Robustness::State {
     /// Transform the program to insert additional predicate parameters to all user functions that
     /// have a pointer parameter type in an address space that has predicate action.
     void AddPredicateParameters() {
-        for (auto* fn : src->AST().Functions()) {
+        for (auto* fn : src.AST().Functions()) {
             for (auto* param : fn->params) {
                 auto* sem_param = sem.Get(param);
                 if (auto* ptr = sem_param->Type()->As<core::type::Pointer>()) {
@@ -722,7 +722,7 @@ Robustness::Config& Robustness::Config::operator=(const Config&) = default;
 Robustness::Robustness() = default;
 Robustness::~Robustness() = default;
 
-Transform::ApplyResult Robustness::Apply(const Program* src,
+Transform::ApplyResult Robustness::Apply(const Program& src,
                                          const DataMap& inputs,
                                          DataMap&) const {
     Config cfg;

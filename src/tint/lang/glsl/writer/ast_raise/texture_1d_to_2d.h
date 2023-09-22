@@ -30,7 +30,7 @@ class Texture1DTo2D final : public Castable<Texture1DTo2D, ast::transform::Trans
     ~Texture1DTo2D() override;
 
     /// @copydoc ast::transform::Transform::Apply
-    ApplyResult Apply(const Program* program,
+    ApplyResult Apply(const Program& program,
                       const ast::transform::DataMap& inputs,
                       ast::transform::DataMap& outputs) const override;
 

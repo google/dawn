@@ -25,13 +25,13 @@ namespace tint::fuzzers {
 
 ShuffleTransform::ShuffleTransform(size_t seed) : seed_(seed) {}
 
-ast::transform::Transform::ApplyResult ShuffleTransform::Apply(const Program* src,
+ast::transform::Transform::ApplyResult ShuffleTransform::Apply(const Program& src,
                                                                const ast::transform::DataMap&,
                                                                ast::transform::DataMap&) const {
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
-    auto decls = src->AST().GlobalDeclarations();
+    auto decls = src.AST().GlobalDeclarations();
     auto rng = std::mt19937_64{seed_};
     std::shuffle(std::begin(decls), std::end(decls), rng);
     for (auto* decl : decls) {

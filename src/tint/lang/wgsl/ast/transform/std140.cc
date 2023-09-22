@@ -71,7 +71,7 @@ bool operator!=(const DynamicIndex& a, const DynamicIndex& b) {
 struct Std140::State {
     /// Constructor
     /// @param program the source program
-    explicit State(const Program* program) : src(program) {}
+    explicit State(const Program& program) : src(program) {}
 
     /// Runs the transform
     /// @returns the new program or SkipTransform if the transform is not required
@@ -131,7 +131,7 @@ struct Std140::State {
         };
 
         // Scan structures for members that need forking
-        for (auto* ty : src->Types()) {
+        for (auto* ty : src.Types()) {
             if (auto* str = ty->As<core::type::Struct>()) {
                 if (str->UsedAs(core::AddressSpace::kUniform)) {
                     for (auto* member : str->Members()) {
@@ -144,8 +144,8 @@ struct Std140::State {
         }
 
         // Scan uniform variables that have types that need forking
-        for (auto* decl : src->AST().GlobalVariables()) {
-            auto* global = src->Sem().Get(decl);
+        for (auto* decl : src.AST().GlobalVariables()) {
+            auto* global = src.Sem().Get(decl);
             if (global->AddressSpace() == core::AddressSpace::kUniform) {
                 if (needs_fork(global->Type()->UnwrapRef())) {
                     return true;
@@ -194,15 +194,15 @@ struct Std140::State {
     };
 
     /// The source program
-    const Program* const src;
+    const Program& src;
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
     /// Alias to the semantic info in src
-    const sem::Info& sem = src->Sem();
+    const sem::Info& sem = src.Sem();
     /// Alias to the symbols in src
-    const SymbolTable& sym = src->Symbols();
+    const SymbolTable& sym = src.Symbols();
 
     /// Map of load function signature, to the generated function
     Hashmap<LoadFnKey, Symbol, 8, LoadFnKey::Hasher> load_fns;
@@ -266,7 +266,7 @@ struct Std140::State {
     /// map (via Std140Type()).
     void ForkTypes() {
         // For each module scope declaration...
-        for (auto* global : src->Sem().Module()->DependencyOrderedDeclarations()) {
+        for (auto* global : src.Sem().Module()->DependencyOrderedDeclarations()) {
             // Check to see if this is a structure used by a uniform buffer...
             auto* str = sem.Get<sem::Struct>(global);
             if (str && str->UsedAs(core::AddressSpace::kUniform)) {
@@ -316,7 +316,7 @@ struct Std140::State {
                 if (fork_std140) {
                     // Clone any members that have not already been cloned.
                     for (auto& member : members) {
-                        if (member->generation_id == src->ID()) {
+                        if (member->generation_id == src.ID()) {
                             member = ctx.Clone(member);
                         }
                     }
@@ -325,7 +325,7 @@ struct Std140::State {
                     auto name = b.Symbols().New(str->Name().Name() + "_std140");
                     auto* std140 = b.create<Struct>(b.Ident(name), std::move(members),
                                                     ctx.Clone(str->Declaration()->attributes));
-                    ctx.InsertAfter(src->AST().GlobalDeclarations(), global, std140);
+                    ctx.InsertAfter(src.AST().GlobalDeclarations(), global, std140);
                     std140_structs.Add(str, name);
                 }
             }
@@ -336,7 +336,7 @@ struct Std140::State {
     /// type that has been forked for std140-layout.
     /// Populates the #std140_uniforms set.
     void ReplaceUniformVarTypes() {
-        for (auto* global : src->AST().GlobalVariables()) {
+        for (auto* global : src.AST().GlobalVariables()) {
             if (auto* var = global->As<Var>()) {
                 auto* v = sem.Get(var);
                 if (v->AddressSpace() == core::AddressSpace::kUniform) {
@@ -1096,7 +1096,7 @@ struct Std140::State {
                     for (auto el : *swizzle) {
                         rhs += xyzw[el];
                     }
-                    auto swizzle_ty = src->Types().Find<core::type::Vector>(
+                    auto swizzle_ty = src.Types().Find<core::type::Vector>(
                         vec->type(), static_cast<uint32_t>(swizzle->Length()));
                     auto* expr = b.MemberAccessor(lhs, rhs);
                     return {expr, swizzle_ty, rhs};
@@ -1140,7 +1140,7 @@ Std140::Std140() = default;
 
 Std140::~Std140() = default;
 
-Transform::ApplyResult Std140::Apply(const Program* src, const DataMap&, DataMap&) const {
+Transform::ApplyResult Std140::Apply(const Program& src, const DataMap&, DataMap&) const {
     return State(src).Run();
 }
 

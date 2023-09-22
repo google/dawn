@@ -40,14 +40,14 @@ DemoteToHelper::DemoteToHelper() = default;
 
 DemoteToHelper::~DemoteToHelper() = default;
 
-Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&, DataMap&) const {
-    auto& sem = src->Sem();
+Transform::ApplyResult DemoteToHelper::Apply(const Program& src, const DataMap&, DataMap&) const {
+    auto& sem = src.Sem();
 
     // Collect the set of functions that need to be processed.
     // A function needs to be processed if it is reachable by a shader that contains a discard at
     // any point in its call hierarchy.
     std::unordered_set<const sem::Function*> functions_to_process;
-    for (auto* func : src->AST().Functions()) {
+    for (auto* func : src.AST().Functions()) {
         if (!func->IsEntryPoint()) {
             continue;
         }
@@ -80,7 +80,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
     }
 
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     // Create a module-scope flag that indicates whether the current invocation has been discarded.
     auto flag = b.Symbols().New("tint_discarded");
@@ -107,7 +107,7 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
     // We also insert a discard statement before all return statements in entry points for shaders
     // that discard.
     std::unordered_map<const core::type::Type*, Symbol> atomic_cmpxchg_result_types;
-    for (auto* node : src->ASTNodes().Objects()) {
+    for (auto* node : src.ASTNodes().Objects()) {
         Switch(
             node,
 

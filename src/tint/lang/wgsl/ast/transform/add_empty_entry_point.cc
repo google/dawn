@@ -27,8 +27,8 @@ using namespace tint::core::number_suffixes;  // NOLINT
 namespace tint::ast::transform {
 namespace {
 
-bool ShouldRun(const Program* program) {
-    for (auto* func : program->AST().Functions()) {
+bool ShouldRun(const Program& program) {
+    for (auto* func : program.AST().Functions()) {
         if (func->IsEntryPoint()) {
             return false;
         }
@@ -42,7 +42,7 @@ AddEmptyEntryPoint::AddEmptyEntryPoint() = default;
 
 AddEmptyEntryPoint::~AddEmptyEntryPoint() = default;
 
-Transform::ApplyResult AddEmptyEntryPoint::Apply(const Program* src,
+Transform::ApplyResult AddEmptyEntryPoint::Apply(const Program& src,
                                                  const DataMap&,
                                                  DataMap&) const {
     if (!ShouldRun(src)) {
@@ -50,7 +50,7 @@ Transform::ApplyResult AddEmptyEntryPoint::Apply(const Program* src,
     }
 
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     b.Func(b.Symbols().New("unused_entry_point"), {}, b.ty.void_(), {},
            tint::Vector{

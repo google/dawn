@@ -37,9 +37,9 @@ using namespace tint::core::fluent_types;  // NOLINT
 namespace tint::ast::transform {
 namespace {
 
-bool ShouldRun(const Program* program) {
-    for (auto* fn : program->AST().Functions()) {
-        if (auto* sem_fn = program->Sem().Get(fn)) {
+bool ShouldRun(const Program& program) {
+    for (auto* fn : program.AST().Functions()) {
+        if (auto* sem_fn = program.Sem().Get(fn)) {
             for (auto* builtin : sem_fn->DirectlyCalledBuiltins()) {
                 if (builtin->Fn() == core::BuiltinFn::kArrayLength) {
                     return true;
@@ -61,7 +61,7 @@ struct ArrayLengthFromUniform::State {
     /// @param program the source program
     /// @param in the input transform data
     /// @param out the output transform data
-    explicit State(const Program* program, const DataMap& in, DataMap& out)
+    explicit State(const Program& program, const DataMap& in, DataMap& out)
         : src(program), inputs(in), outputs(out) {}
 
     /// Runs the transform
@@ -76,7 +76,7 @@ struct ArrayLengthFromUniform::State {
             return resolver::Resolve(b);
         }
 
-        if (!ShouldRun(ctx.src)) {
+        if (!ShouldRun(src)) {
             return SkipTransform;
         }
 
@@ -177,7 +177,7 @@ struct ArrayLengthFromUniform::State {
 
   private:
     /// The source program
-    const Program* const src;
+    const Program& src;
     /// The transform inputs
     const DataMap& inputs;
     /// The transform outputs
@@ -185,7 +185,7 @@ struct ArrayLengthFromUniform::State {
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
 
     /// Iterate over all arrayLength() builtins that operate on
     /// storage buffer variables.
@@ -196,10 +196,10 @@ struct ArrayLengthFromUniform::State {
     /// sem::GlobalVariable for the storage buffer.
     template <typename F>
     void IterateArrayLengthOnStorageVar(F&& functor) {
-        auto& sem = src->Sem();
+        auto& sem = src.Sem();
 
         // Find all calls to the arrayLength() builtin.
-        for (auto* node : src->ASTNodes().Objects()) {
+        for (auto* node : src.ASTNodes().Objects()) {
             auto* call_expr = node->As<CallExpression>();
             if (!call_expr) {
                 continue;
@@ -253,7 +253,7 @@ struct ArrayLengthFromUniform::State {
     }
 };
 
-Transform::ApplyResult ArrayLengthFromUniform::Apply(const Program* src,
+Transform::ApplyResult ArrayLengthFromUniform::Apply(const Program& src,
                                                      const DataMap& inputs,
                                                      DataMap& outputs) const {
     return State{src, inputs, outputs}.Run();

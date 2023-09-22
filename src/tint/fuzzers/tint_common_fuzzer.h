@@ -142,7 +142,7 @@ class CommonFuzzer {
 #endif  // TINT_BUILD_WGSL_READER
 
     /// Runs a series of reflection operations to exercise the Inspector API.
-    void RunInspector(Program* program);
+    void RunInspector(Program& program);
 };
 
 }  // namespace tint::fuzzers

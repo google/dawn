@@ -32,8 +32,8 @@ Output::Output() = default;
 Output::~Output() = default;
 Output::Output(const Output&) = default;
 
-Result<Output, std::string> Generate(const Program* program, const Options& options) {
-    if (!program->IsValid()) {
+Result<Output, std::string> Generate(const Program& program, const Options& options) {
+    if (!program.IsValid()) {
         return std::string("input program is not valid");
     }
 
@@ -79,7 +79,7 @@ Result<Output, std::string> Generate(const Program* program, const Options& opti
 
         // Generate the SPIR-V code.
         auto impl = std::make_unique<ASTPrinter>(
-            &sanitized_result.program, zero_initialize_workgroup_memory,
+            sanitized_result.program, zero_initialize_workgroup_memory,
             options.experimental_require_subgroup_uniform_control_flow);
         if (!impl->Generate()) {
             return impl->Diagnostics().str();

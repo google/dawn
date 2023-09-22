@@ -483,11 +483,11 @@ fn f() {
     ASSERT_NE(replacement_id, 0);
 
     ASSERT_TRUE(MaybeApplyMutation(program, MutationReplaceIdentifier(use_id, replacement_id),
-                                   node_id_map, &program, &node_id_map, nullptr));
+                                   node_id_map, program, &node_id_map, nullptr));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
     wgsl::writer::Options options;
-    auto result = wgsl::writer::Generate(&program, options);
+    auto result = wgsl::writer::Generate(program, options);
     ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn f() {
@@ -527,11 +527,11 @@ fn f(b: ptr<function, vec2<u32>>) {
     ASSERT_NE(replacement_id, 0);
 
     ASSERT_TRUE(MaybeApplyMutation(program, MutationReplaceIdentifier(use_id, replacement_id),
-                                   node_id_map, &program, &node_id_map, nullptr));
+                                   node_id_map, program, &node_id_map, nullptr));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
     wgsl::writer::Options options;
-    auto result = wgsl::writer::Generate(&program, options);
+    auto result = wgsl::writer::Generate(program, options);
     ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn f(b : ptr<function, vec2<u32>>) {

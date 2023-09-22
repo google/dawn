@@ -67,7 +67,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     tint::Program dst(src.Clone());
 
     // Expect the printed strings to match
-    ASSERT_EQ(tint::Program::printer(&src), tint::Program::printer(&dst));
+    ASSERT_EQ(tint::Program::printer(src), tint::Program::printer(dst));
 
     // Check that none of the AST nodes or type pointers in dst are found in src
     std::unordered_set<const tint::ast::Node*> src_nodes;
@@ -91,7 +91,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     std::string src_wgsl;
     tint::wgsl::writer::Options wgsl_options;
     {
-        auto result = tint::wgsl::writer::Generate(&src, wgsl_options);
+        auto result = tint::wgsl::writer::Generate(src, wgsl_options);
         ASSERT_TRUE(result == true);
         src_wgsl = result->wgsl;
 
@@ -104,7 +104,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     }
 
     // Print the dst program, check it matches the original source
-    auto result = tint::wgsl::writer::Generate(&dst, wgsl_options);
+    auto result = tint::wgsl::writer::Generate(dst, wgsl_options);
     ASSERT_TRUE(result == true);
     auto dst_wgsl = result->wgsl;
     ASSERT_EQ(src_wgsl, dst_wgsl);

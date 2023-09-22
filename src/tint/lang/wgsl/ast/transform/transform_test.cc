@@ -29,7 +29,7 @@ using namespace tint::core::number_suffixes;  // NOLINT
 
 // Inherit from Transform so we have access to protected methods
 struct CreateASTTypeForTest : public testing::Test, public Transform {
-    ApplyResult Apply(const Program*, const DataMap&, DataMap&) const override {
+    ApplyResult Apply(const Program&, const DataMap&, DataMap&) const override {
         return SkipTransform;
     }
 

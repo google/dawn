@@ -35,8 +35,8 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-bool ShouldRun(const Program* program) {
-    auto ext = program->Types().Find<core::type::ExternalTexture>();
+bool ShouldRun(const Program& program) {
+    auto ext = program.Types().Find<core::type::ExternalTexture>();
     return ext != nullptr;
 }
 
@@ -511,7 +511,7 @@ MultiplanarExternalTexture::~MultiplanarExternalTexture() = default;
 // buffer binding representing a struct of parameters. Calls to texture builtins that contain a
 // texture_external parameter will be transformed into a newly generated version of the function,
 // which can perform the desired operation on a single RGBA plane or on separate Y and UV planes.
-Transform::ApplyResult MultiplanarExternalTexture::Apply(const Program* src,
+Transform::ApplyResult MultiplanarExternalTexture::Apply(const Program& src,
                                                          const DataMap& inputs,
                                                          DataMap&) const {
     auto* new_binding_points = inputs.Get<NewBindingPoints>();
@@ -521,7 +521,7 @@ Transform::ApplyResult MultiplanarExternalTexture::Apply(const Program* src,
     }
 
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
     if (!new_binding_points) {
         b.Diagnostics().add_error(diag::System::Transform, "missing new binding point data for " +
                                                                std::string(TypeInfo().name));

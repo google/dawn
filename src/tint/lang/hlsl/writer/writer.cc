@@ -21,8 +21,8 @@
 
 namespace tint::hlsl::writer {
 
-Result<Output, std::string> Generate(const Program* program, const Options& options) {
-    if (!program->IsValid()) {
+Result<Output, std::string> Generate(const Program& program, const Options& options) {
+    if (!program.IsValid()) {
         return std::string("input program is not valid");
     }
 
@@ -33,7 +33,7 @@ Result<Output, std::string> Generate(const Program* program, const Options& opti
     }
 
     // Generate the HLSL code.
-    auto impl = std::make_unique<ASTPrinter>(&sanitized_result.program);
+    auto impl = std::make_unique<ASTPrinter>(sanitized_result.program);
     if (!impl->Generate()) {
         return impl->Diagnostics().str();
     }

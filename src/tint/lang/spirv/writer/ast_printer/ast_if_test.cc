@@ -60,10 +60,10 @@ TEST_F(SpirvASTPrinterTest, If_Empty_OutsideFunction_IsError) {
             auto* expr = pb.If(true, block);
             pb.WrapInFunction(expr);
 
-            auto program = std::make_unique<Program>(resolver::Resolve(pb));
-            auto b = std::make_unique<Builder>(program.get());
+            auto program = resolver::Resolve(pb);
+            Builder b(program);
 
-            b->GenerateIfStatement(expr);
+            b.GenerateIfStatement(expr);
         },
         "Internal error: trying to add SPIR-V instruction 247 outside a function");
 }

@@ -42,7 +42,7 @@ TEST_F(ProgramBuilderTest, WrapDoesntAffectInner) {
     ASSERT_TRUE(inner.Symbols().Get("a").IsValid());
     ASSERT_FALSE(inner.Symbols().Get("b").IsValid());
 
-    ProgramBuilder outer = ProgramBuilder::Wrap(&inner);
+    ProgramBuilder outer = ProgramBuilder::Wrap(inner);
 
     ASSERT_EQ(inner.AST().Functions().Length(), 1u);
     ASSERT_EQ(outer.AST().Functions().Length(), 1u);

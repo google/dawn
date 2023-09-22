@@ -58,7 +58,7 @@ class TestHelperBase : public ProgramBuilder, public BASE {
         }();
         program = std::make_unique<Program>(resolver::Resolve(*this));
         [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
-        spirv_builder = std::make_unique<Builder>(program.get());
+        spirv_builder = std::make_unique<Builder>(*program);
         return *spirv_builder;
     }
 
@@ -77,14 +77,14 @@ class TestHelperBase : public ProgramBuilder, public BASE {
         }();
         program = std::make_unique<Program>(resolver::Resolve(*this));
         [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
-        auto result = Sanitize(program.get(), options);
+        auto result = Sanitize(*program, options);
         [&] { ASSERT_TRUE(result.program.IsValid()) << result.program.Diagnostics().str(); }();
         *program = std::move(result.program);
         bool zero_initialize_workgroup_memory =
             !options.disable_workgroup_init &&
             options.use_zero_initialize_workgroup_memory_extension;
         spirv_builder =
-            std::make_unique<Builder>(program.get(), zero_initialize_workgroup_memory,
+            std::make_unique<Builder>(*program, zero_initialize_workgroup_memory,
                                       options.experimental_require_subgroup_uniform_control_flow);
         return *spirv_builder;
     }

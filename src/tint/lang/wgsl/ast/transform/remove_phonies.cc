@@ -43,16 +43,16 @@ RemovePhonies::RemovePhonies() = default;
 
 RemovePhonies::~RemovePhonies() = default;
 
-Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, DataMap&) const {
+Transform::ApplyResult RemovePhonies::Apply(const Program& src, const DataMap&, DataMap&) const {
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
-    auto& sem = src->Sem();
+    auto& sem = src.Sem();
 
     Hashmap<SinkSignature, Symbol, 8> sinks;
 
     bool made_changes = false;
-    for (auto* node : src->ASTNodes().Objects()) {
+    for (auto* node : src.ASTNodes().Objects()) {
         Switch(
             node,
             [&](const AssignmentStatement* stmt) {

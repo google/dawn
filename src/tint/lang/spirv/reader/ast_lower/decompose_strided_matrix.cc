@@ -67,19 +67,19 @@ DecomposeStridedMatrix::DecomposeStridedMatrix() = default;
 DecomposeStridedMatrix::~DecomposeStridedMatrix() = default;
 
 ast::transform::Transform::ApplyResult DecomposeStridedMatrix::Apply(
-    const Program* src,
+    const Program& src,
     const ast::transform::DataMap&,
     ast::transform::DataMap&) const {
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     // Scan the program for all storage and uniform structure matrix members with
     // a custom stride attribute. Replace these matrices with an equivalent array,
     // and populate the `decomposed` map with the members that have been replaced.
     Hashmap<const core::type::StructMember*, MatrixInfo, 8> decomposed;
-    for (auto* node : src->ASTNodes().Objects()) {
+    for (auto* node : src.ASTNodes().Objects()) {
         if (auto* str = node->As<ast::Struct>()) {
-            auto* str_ty = src->Sem().Get(str);
+            auto* str_ty = src.Sem().Get(str);
             if (!str_ty->UsedAs(core::AddressSpace::kUniform) &&
                 !str_ty->UsedAs(core::AddressSpace::kStorage)) {
                 continue;
@@ -119,7 +119,7 @@ ast::transform::Transform::ApplyResult DecomposeStridedMatrix::Apply(
     //   ssbo.mat[2] -> ssbo.mat[2]
     ctx.ReplaceAll(
         [&](const ast::IndexAccessorExpression* expr) -> const ast::IndexAccessorExpression* {
-            if (auto* access = src->Sem().Get<sem::StructMemberAccess>(expr->object)) {
+            if (auto* access = src.Sem().Get<sem::StructMemberAccess>(expr->object)) {
                 if (decomposed.Contains(access->Member())) {
                     auto* obj = ctx.CloneWithoutTransform(expr->object);
                     auto* idx = ctx.Clone(expr->index);
@@ -136,7 +136,7 @@ ast::transform::Transform::ApplyResult DecomposeStridedMatrix::Apply(
     //   ssbo.mat = mat_to_arr(m)
     std::unordered_map<MatrixInfo, Symbol, MatrixInfo::Hasher> mat_to_arr;
     ctx.ReplaceAll([&](const ast::AssignmentStatement* stmt) -> const ast::Statement* {
-        if (auto* access = src->Sem().Get<sem::StructMemberAccess>(stmt->lhs)) {
+        if (auto* access = src.Sem().Get<sem::StructMemberAccess>(stmt->lhs)) {
             if (auto info = decomposed.Find(access->Member())) {
                 auto fn = tint::GetOrCreate(mat_to_arr, *info, [&] {
                     auto name =
@@ -175,7 +175,7 @@ ast::transform::Transform::ApplyResult DecomposeStridedMatrix::Apply(
     //   m = arr_to_mat(ssbo.mat)
     std::unordered_map<MatrixInfo, Symbol, MatrixInfo::Hasher> arr_to_mat;
     ctx.ReplaceAll([&](const ast::MemberAccessorExpression* expr) -> const ast::Expression* {
-        if (auto* access = src->Sem().Get(expr)->UnwrapLoad()->As<sem::StructMemberAccess>()) {
+        if (auto* access = src.Sem().Get(expr)->UnwrapLoad()->As<sem::StructMemberAccess>()) {
             if (auto info = decomposed.Find(access->Member())) {
                 auto fn = tint::GetOrCreate(arr_to_mat, *info, [&] {
                     auto name =

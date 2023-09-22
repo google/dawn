@@ -22,10 +22,10 @@
 
 namespace tint::glsl::writer {
 
-Result<Output, std::string> Generate(const Program* program,
+Result<Output, std::string> Generate(const Program& program,
                                      const Options& options,
                                      const std::string& entry_point) {
-    if (!program->IsValid()) {
+    if (!program.IsValid()) {
         return std::string("input program is not valid");
     }
 
@@ -36,7 +36,7 @@ Result<Output, std::string> Generate(const Program* program,
     }
 
     // Generate the GLSL code.
-    auto impl = std::make_unique<ASTPrinter>(&sanitized_result.program, options.version);
+    auto impl = std::make_unique<ASTPrinter>(sanitized_result.program, options.version);
     if (!impl->Generate()) {
         return impl->Diagnostics().str();
     }

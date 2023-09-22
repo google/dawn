@@ -164,10 +164,10 @@ TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_WorkgroupSize_OverridableCo
                                      pb.WorkgroupSize("width", "height", "depth"),
                                      pb.Stage(ast::PipelineStage::kCompute),
                                  });
-            auto program = std::make_unique<Program>(resolver::Resolve(pb));
-            auto b = std::make_unique<Builder>(program.get());
+            auto program = resolver::Resolve(pb);
+            Builder b(program);
 
-            b->GenerateExecutionModes(func, 3);
+            b.GenerateExecutionModes(func, 3);
         },
         "override-expressions should have been removed with the SubstituteOverride transform");
 }
@@ -185,10 +185,10 @@ TEST_F(SpirvASTPrinterTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndCon
                                      pb.Stage(ast::PipelineStage::kCompute),
                                  });
 
-            auto program = std::make_unique<Program>(resolver::Resolve(pb));
-            auto b = std::make_unique<Builder>(program.get());
+            auto program = resolver::Resolve(pb);
+            Builder b(program);
 
-            b->GenerateExecutionModes(func, 3);
+            b.GenerateExecutionModes(func, 3);
         },
         "override-expressions should have been removed with the SubstituteOverride transform");
 }

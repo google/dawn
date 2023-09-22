@@ -49,7 +49,7 @@ namespace tint::msl::writer {
 struct PackedVec3::State {
     /// Constructor
     /// @param program the source program
-    explicit State(const Program* program) : src(program) {}
+    explicit State(const Program& program) : src(program) {}
 
     /// The name of the struct member used when wrapping packed vec3 types.
     static constexpr const char* kStructMemberName = "elements";
@@ -342,7 +342,7 @@ struct PackedVec3::State {
     bool ShouldRun() {
         // Check for vec3s in the types of all uniform and storage buffer variables to determine
         // if the transform is necessary.
-        for (auto* decl : src->AST().GlobalVariables()) {
+        for (auto* decl : src.AST().GlobalVariables()) {
             auto* var = sem.Get<sem::GlobalVariable>(decl);
             if (var && core::IsHostShareable(var->AddressSpace()) &&
                 ContainsVec3(var->Type()->UnwrapRef())) {
@@ -375,7 +375,7 @@ struct PackedVec3::State {
         // Replace vec3 types in host-shareable address spaces with `__packed_vec3` types, and
         // collect expressions that need to be converted to or from values that use the
         // `__packed_vec3` type.
-        for (auto* node : ctx.src->ASTNodes().Objects()) {
+        for (auto* node : src.ASTNodes().Objects()) {
             Switch(
                 sem.Get(node),
                 [&](const sem::TypeExpression* type) {
@@ -508,19 +508,19 @@ struct PackedVec3::State {
 
   private:
     /// The source program
-    const Program* const src;
+    const Program& src;
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
     /// Alias to the semantic info in ctx.src
-    const sem::Info& sem = ctx.src->Sem();
+    const sem::Info& sem = src.Sem();
 };
 
 PackedVec3::PackedVec3() = default;
 PackedVec3::~PackedVec3() = default;
 
-ast::transform::Transform::ApplyResult PackedVec3::Apply(const Program* src,
+ast::transform::Transform::ApplyResult PackedVec3::Apply(const Program& src,
                                                          const ast::transform::DataMap&,
                                                          ast::transform::DataMap&) const {
     return State{src}.Run();

@@ -30,17 +30,17 @@ namespace tint::spirv::reader {
 /// PIMPL state for the transform.
 struct FoldTrivialLets::State {
     /// The source program
-    const Program* const src;
+    const Program& src;
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
     /// The semantic info.
-    const sem::Info& sem = {ctx.src->Sem()};
+    const sem::Info& sem = src.Sem();
 
     /// Constructor
     /// @param program the source program
-    explicit State(const Program* program) : src(program) {}
+    explicit State(const Program& program) : src(program) {}
 
     /// Process a block.
     /// @param block the block
@@ -138,7 +138,7 @@ struct FoldTrivialLets::State {
     /// @returns the new program
     ApplyResult Run() {
         // Process all blocks in the module.
-        for (auto* node : src->ASTNodes().Objects()) {
+        for (auto* node : src.ASTNodes().Objects()) {
             if (auto* block = node->As<ast::BlockStatement>()) {
                 ProcessBlock(block);
             }
@@ -152,7 +152,7 @@ FoldTrivialLets::FoldTrivialLets() = default;
 
 FoldTrivialLets::~FoldTrivialLets() = default;
 
-ast::transform::Transform::ApplyResult FoldTrivialLets::Apply(const Program* src,
+ast::transform::Transform::ApplyResult FoldTrivialLets::Apply(const Program& src,
                                                               const ast::transform::DataMap&,
                                                               ast::transform::DataMap&) const {
     return State(src).Run();

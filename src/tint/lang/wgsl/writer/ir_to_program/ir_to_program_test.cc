@@ -35,11 +35,11 @@ IRToProgramTest::Result IRToProgramTest::Run() {
     auto output_program = IRToProgram(mod);
     if (!output_program.IsValid()) {
         result.err = output_program.Diagnostics().str();
-        result.ast = Program::printer(&output_program);
+        result.ast = Program::printer(output_program);
         return result;
     }
 
-    auto output = wgsl::writer::Generate(&output_program, {});
+    auto output = wgsl::writer::Generate(output_program, {});
     if (!output) {
         std::stringstream ss;
         ss << "wgsl::Generate() errored: " << output.Failure();

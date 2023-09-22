@@ -24,7 +24,7 @@
 namespace tint {
 namespace {
 
-std::string DefaultPrinter(const Program*) {
+std::string DefaultPrinter(const Program&) {
     return "<no program printer assigned>";
 }
 

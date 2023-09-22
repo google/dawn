@@ -76,13 +76,13 @@
 
 namespace tint::wgsl::writer {
 
-SyntaxTreePrinter::SyntaxTreePrinter(const Program* program) : program_(program) {}
+SyntaxTreePrinter::SyntaxTreePrinter(const Program& program) : program_(program) {}
 
 SyntaxTreePrinter::~SyntaxTreePrinter() = default;
 
 bool SyntaxTreePrinter::Generate() {
     // Generate global declarations in the order they appear in the module.
-    for (auto* decl : program_->AST().GlobalDeclarations()) {
+    for (auto* decl : program_.AST().GlobalDeclarations()) {
         Switch(
             decl,  //
             [&](const ast::DiagnosticDirective* dd) { EmitDiagnosticControl(dd->control); },
@@ -93,7 +93,7 @@ bool SyntaxTreePrinter::Generate() {
             [&](const ast::ConstAssert* ca) { EmitConstAssert(ca); },
             [&](Default) { TINT_UNREACHABLE(); });
 
-        if (decl != program_->AST().GlobalDeclarations().Back()) {
+        if (decl != program_.AST().GlobalDeclarations().Back()) {
             Line();
         }
     }

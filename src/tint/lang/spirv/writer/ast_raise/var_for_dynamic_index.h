@@ -32,7 +32,7 @@ class VarForDynamicIndex final : public Castable<VarForDynamicIndex, ast::transf
     ~VarForDynamicIndex() override;
 
     /// @copydoc ast::transform::Transform::Apply
-    ApplyResult Apply(const Program* program,
+    ApplyResult Apply(const Program& program,
                       const ast::transform::DataMap& inputs,
                       ast::transform::DataMap& outputs) const override;
 };

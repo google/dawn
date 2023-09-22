@@ -46,16 +46,16 @@ ProgramBuilder& ProgramBuilder::operator=(ProgramBuilder&& rhs) {
     return *this;
 }
 
-ProgramBuilder ProgramBuilder::Wrap(const Program* program) {
+ProgramBuilder ProgramBuilder::Wrap(const Program& program) {
     ProgramBuilder builder;
-    builder.id_ = program->ID();
-    builder.last_ast_node_id_ = program->HighestASTNodeID();
-    builder.constants = core::constant::Manager::Wrap(program->Constants());
+    builder.id_ = program.ID();
+    builder.last_ast_node_id_ = program.HighestASTNodeID();
+    builder.constants = core::constant::Manager::Wrap(program.Constants());
     builder.ast_ =
-        builder.create<ast::Module>(program->AST().source, program->AST().GlobalDeclarations());
-    builder.sem_ = sem::Info::Wrap(program->Sem());
-    builder.symbols_.Wrap(program->Symbols());
-    builder.diagnostics_ = program->Diagnostics();
+        builder.create<ast::Module>(program.AST().source, program.AST().GlobalDeclarations());
+    builder.sem_ = sem::Info::Wrap(program.Sem());
+    builder.symbols_.Wrap(program.Symbols());
+    builder.diagnostics_ = program.Diagnostics();
     return builder;
 }
 

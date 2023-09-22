@@ -39,10 +39,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::ZeroInitWorkgroupMemory);
 namespace tint::ast::transform {
 namespace {
 
-bool ShouldRun(const Program* program) {
-    for (auto* global : program->AST().GlobalVariables()) {
+bool ShouldRun(const Program& program) {
+    for (auto* global : program.AST().GlobalVariables()) {
         if (auto* var = global->As<Var>()) {
-            auto* v = program->Sem().Get(var);
+            auto* v = program.Sem().Get(var);
             if (v->AddressSpace() == core::AddressSpace::kWorkgroup) {
                 return true;
             }
@@ -461,7 +461,7 @@ ZeroInitWorkgroupMemory::ZeroInitWorkgroupMemory() = default;
 
 ZeroInitWorkgroupMemory::~ZeroInitWorkgroupMemory() = default;
 
-Transform::ApplyResult ZeroInitWorkgroupMemory::Apply(const Program* src,
+Transform::ApplyResult ZeroInitWorkgroupMemory::Apply(const Program& src,
                                                       const DataMap&,
                                                       DataMap&) const {
     if (!ShouldRun(src)) {
@@ -469,9 +469,9 @@ Transform::ApplyResult ZeroInitWorkgroupMemory::Apply(const Program* src,
     }
 
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
-    for (auto* fn : src->AST().Functions()) {
+    for (auto* fn : src.AST().Functions()) {
         if (fn->PipelineStage() == PipelineStage::kCompute) {
             State{ctx}.Run(fn);
         }

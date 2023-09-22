@@ -33,7 +33,7 @@ namespace tint::hlsl::writer {
 /// @param program the program to translate to HLSL
 /// @param options the configuration options to use when generating HLSL
 /// @returns the resulting HLSL and supplementary information, or an error string
-Result<Output, std::string> Generate(const Program* program, const Options& options);
+Result<Output, std::string> Generate(const Program& program, const Options& options);
 
 }  // namespace tint::hlsl::writer
 

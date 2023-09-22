@@ -37,7 +37,7 @@ inline std::string str(const Program& program) {
     }
 
     wgsl::writer::Options options;
-    auto result = wgsl::writer::Generate(&program, options);
+    auto result = wgsl::writer::Generate(program, options);
     if (!result) {
         return "WGSL writer failed:\n" + result.Failure();
     }
@@ -106,7 +106,7 @@ class TransformTestBase : public BASE {
         for (auto* transform_ptr : std::initializer_list<Transform*>{new TRANSFORMS()...}) {
             manager.append(std::unique_ptr<Transform>(transform_ptr));
         }
-        auto result = manager.Run(&program, data, outputs);
+        auto result = manager.Run(program, data, outputs);
         return {std::move(result), std::move(outputs)};
     }
 
@@ -124,7 +124,7 @@ class TransformTestBase : public BASE {
         const Transform& t = TRANSFORM();
 
         DataMap outputs;
-        auto result = t.Apply(&program, data, outputs);
+        auto result = t.Apply(program, data, outputs);
         if (!result) {
             return false;
         }

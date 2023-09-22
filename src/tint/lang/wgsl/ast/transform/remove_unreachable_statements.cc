@@ -38,15 +38,15 @@ RemoveUnreachableStatements::RemoveUnreachableStatements() = default;
 
 RemoveUnreachableStatements::~RemoveUnreachableStatements() = default;
 
-Transform::ApplyResult RemoveUnreachableStatements::Apply(const Program* src,
+Transform::ApplyResult RemoveUnreachableStatements::Apply(const Program& src,
                                                           const DataMap&,
                                                           DataMap&) const {
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     bool made_changes = false;
-    for (auto* node : src->ASTNodes().Objects()) {
-        if (auto* stmt = src->Sem().Get<sem::Statement>(node)) {
+    for (auto* node : src.ASTNodes().Objects()) {
+        if (auto* stmt = src.Sem().Get<sem::Statement>(node)) {
             if (!stmt->IsReachable()) {
                 RemoveStatement(ctx, stmt->Declaration());
                 made_changes = true;

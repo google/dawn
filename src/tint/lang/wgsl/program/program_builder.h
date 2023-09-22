@@ -90,7 +90,7 @@ class ProgramBuilder : public ast::Builder {
     /// function. See crbug.com/tint/460.
     /// @param program the immutable Program to wrap
     /// @return the ProgramBuilder that wraps `program`
-    static ProgramBuilder Wrap(const Program* program);
+    static ProgramBuilder Wrap(const Program& program);
 
     /// @returns a reference to the program's types
     core::type::Manager& Types() {

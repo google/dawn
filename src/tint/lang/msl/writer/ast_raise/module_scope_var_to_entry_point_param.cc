@@ -43,8 +43,8 @@ using StructMemberList = tint::Vector<const ast::StructMember*, 8>;
 // The name of the struct member for arrays that are wrapped in structures.
 const char* kWrappedArrayMemberName = "arr";
 
-bool ShouldRun(const Program* program) {
-    for (auto* decl : program->AST().GlobalDeclarations()) {
+bool ShouldRun(const Program& program) {
+    for (auto* decl : program.AST().GlobalDeclarations()) {
         if (decl->Is<ast::Variable>()) {
             return true;
         }
@@ -587,7 +587,7 @@ ModuleScopeVarToEntryPointParam::ModuleScopeVarToEntryPointParam() = default;
 ModuleScopeVarToEntryPointParam::~ModuleScopeVarToEntryPointParam() = default;
 
 ast::transform::Transform::ApplyResult ModuleScopeVarToEntryPointParam::Apply(
-    const Program* src,
+    const Program& src,
     const ast::transform::DataMap&,
     ast::transform::DataMap&) const {
     if (!ShouldRun(src)) {
@@ -595,7 +595,7 @@ ast::transform::Transform::ApplyResult ModuleScopeVarToEntryPointParam::Apply(
     }
 
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
     State state{ctx};
     state.Process();
 

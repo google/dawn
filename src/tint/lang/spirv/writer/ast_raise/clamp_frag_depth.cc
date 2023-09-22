@@ -38,23 +38,23 @@ namespace tint::spirv::writer {
 /// PIMPL state for the transform
 struct ClampFragDepth::State {
     /// The source program
-    const Program* const src;
+    const Program& src;
     /// The target program builder
     ProgramBuilder b{};
     /// The clone context
-    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
     /// The sem::Info of the program
-    const sem::Info& sem = src->Sem();
+    const sem::Info& sem = src.Sem();
     /// The symbols of the program
-    const SymbolTable& sym = src->Symbols();
+    const SymbolTable& sym = src.Symbols();
 
     /// Runs the transform
     /// @returns the new program or SkipTransform if the transform is not required
     Transform::ApplyResult Run() {
         // Abort on any use of push constants in the module.
-        for (auto* global : src->AST().GlobalVariables()) {
+        for (auto* global : src.AST().GlobalVariables()) {
             if (auto* var = global->As<ast::Var>()) {
-                auto* v = src->Sem().Get(var);
+                auto* v = src.Sem().Get(var);
                 if (TINT_UNLIKELY(v->AddressSpace() == core::AddressSpace::kPushConstant)) {
                     TINT_ICE()
                         << "ClampFragDepth doesn't know how to handle module that already use push "
@@ -174,7 +174,7 @@ struct ClampFragDepth::State {
   private:
     /// @returns true if the transform should run
     bool ShouldRun() {
-        for (auto* fn : src->AST().Functions()) {
+        for (auto* fn : src.AST().Functions()) {
             if (fn->PipelineStage() == ast::PipelineStage::kFragment &&
                 (ReturnsFragDepthAsValue(fn) || ReturnsFragDepthInStruct(fn))) {
                 return true;
@@ -223,7 +223,7 @@ struct ClampFragDepth::State {
 ClampFragDepth::ClampFragDepth() = default;
 ClampFragDepth::~ClampFragDepth() = default;
 
-ast::transform::Transform::ApplyResult ClampFragDepth::Apply(const Program* src,
+ast::transform::Transform::ApplyResult ClampFragDepth::Apply(const Program& src,
                                                              const ast::transform::DataMap&,
                                                              ast::transform::DataMap&) const {
     return State{src}.Run();

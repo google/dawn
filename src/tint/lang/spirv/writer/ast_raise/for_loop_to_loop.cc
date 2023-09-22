@@ -26,8 +26,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::ForLoopToLoop);
 namespace tint::spirv::writer {
 namespace {
 
-bool ShouldRun(const Program* program) {
-    for (auto* node : program->ASTNodes().Objects()) {
+bool ShouldRun(const Program& program) {
+    for (auto* node : program.ASTNodes().Objects()) {
         if (node->Is<ast::ForLoopStatement>()) {
             return true;
         }
@@ -41,7 +41,7 @@ ForLoopToLoop::ForLoopToLoop() = default;
 
 ForLoopToLoop::~ForLoopToLoop() = default;
 
-ast::transform::Transform::ApplyResult ForLoopToLoop::Apply(const Program* src,
+ast::transform::Transform::ApplyResult ForLoopToLoop::Apply(const Program& src,
                                                             const ast::transform::DataMap&,
                                                             ast::transform::DataMap&) const {
     if (!ShouldRun(src)) {
@@ -49,7 +49,7 @@ ast::transform::Transform::ApplyResult ForLoopToLoop::Apply(const Program* src,
     }
 
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     ctx.ReplaceAll([&](const ast::ForLoopStatement* for_loop) -> const ast::Statement* {
         tint::Vector<const ast::Statement*, 8> stmts;

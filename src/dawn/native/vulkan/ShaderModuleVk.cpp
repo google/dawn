@@ -358,7 +358,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
             options.use_tint_ir = r.useTintIR;
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::spirv::writer::Generate()");
-            auto tintResult = tint::spirv::writer::Generate(&program, options);
+            auto tintResult = tint::spirv::writer::Generate(program, options);
             DAWN_INVALID_IF(!tintResult, "An error occured while generating SPIR-V: %s.",
                             tintResult.Failure());
 

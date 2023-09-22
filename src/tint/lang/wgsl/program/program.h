@@ -152,7 +152,7 @@ class Program {
     const core::type::Type* TypeOf(const ast::TypeDecl* type_decl) const;
 
     /// A function that can be used to print a program
-    using Printer = std::string (*)(const Program*);
+    using Printer = std::string (*)(const Program&);
 
     /// The Program printer used for testing and debugging.
     static Printer printer;
@@ -178,8 +178,8 @@ class Program {
 
 /// @param program the Program
 /// @returns the GenerationID of the Program
-inline GenerationID GenerationIDOf(const Program* program) {
-    return program->ID();
+inline GenerationID GenerationIDOf(const Program& program) {
+    return program.ID();
 }
 
 }  // namespace tint

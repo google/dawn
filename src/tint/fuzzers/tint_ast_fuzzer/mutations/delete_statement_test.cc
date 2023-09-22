@@ -54,11 +54,11 @@ void CheckStatementDeletionWorks(
     auto statement_id = node_id_map.GetId(statement);
     ASSERT_NE(statement_id, 0);
     ASSERT_TRUE(MaybeApplyMutation(program, MutationDeleteStatement(statement_id), node_id_map,
-                                   &program, &node_id_map, nullptr));
+                                   program, &node_id_map, nullptr));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
     wgsl::writer::Options options;
-    auto transformed_result = wgsl::writer::Generate(&program, options);
-    auto expected_result = wgsl::writer::Generate(&expected_program, options);
+    auto transformed_result = wgsl::writer::Generate(program, options);
+    auto expected_result = wgsl::writer::Generate(expected_program, options);
     ASSERT_TRUE(transformed_result) << transformed_result.Failure();
     ASSERT_TRUE(expected_result) << expected_result.Failure();
     ASSERT_EQ(expected_result->wgsl, transformed_result->wgsl);
@@ -78,7 +78,7 @@ void CheckStatementDeletionNotAllowed(
     auto statement_id = node_id_map.GetId(statement);
     ASSERT_NE(statement_id, 0);
     ASSERT_FALSE(MaybeApplyMutation(program, MutationDeleteStatement(statement_id), node_id_map,
-                                    &program, &node_id_map, nullptr));
+                                    program, &node_id_map, nullptr));
 }
 
 TEST(DeleteStatementTest, DeleteAssignStatement) {

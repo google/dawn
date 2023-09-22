@@ -41,13 +41,13 @@ Output::Output(Program&& p) : program(std::move(p)) {}
 Transform::Transform() = default;
 Transform::~Transform() = default;
 
-Output Transform::Run(const Program* src, const DataMap& data /* = {} */) const {
+Output Transform::Run(const Program& src, const DataMap& data /* = {} */) const {
     Output output;
     if (auto program = Apply(src, data, output.data)) {
         output.program = std::move(program.value());
     } else {
         ProgramBuilder b;
-        program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+        program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
         ctx.Clone();
         output.program = resolver::Resolve(b);
     }

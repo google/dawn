@@ -47,7 +47,7 @@
 
 namespace tint::spirv::writer {
 
-SanitizedResult Sanitize(const Program* in, const Options& options) {
+SanitizedResult Sanitize(const Program& in, const Options& options) {
     ast::transform::Manager manager;
     ast::transform::DataMap data;
 
@@ -179,7 +179,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     return result;
 }
 
-ASTPrinter::ASTPrinter(const Program* program,
+ASTPrinter::ASTPrinter(const Program& program,
                        bool zero_initialize_workgroup_memory,
                        bool experimental_require_subgroup_uniform_control_flow)
     : builder_(program,

@@ -78,18 +78,18 @@
 
 namespace tint::wgsl::writer {
 
-ASTPrinter::ASTPrinter(const Program* program) : program_(program) {}
+ASTPrinter::ASTPrinter(const Program& program) : program_(program) {}
 
 ASTPrinter::~ASTPrinter() = default;
 
 bool ASTPrinter::Generate() {
     // Generate directives before any other global declarations.
     bool has_directives = false;
-    for (auto enable : program_->AST().Enables()) {
+    for (auto enable : program_.AST().Enables()) {
         EmitEnable(enable);
         has_directives = true;
     }
-    for (auto diagnostic : program_->AST().DiagnosticDirectives()) {
+    for (auto diagnostic : program_.AST().DiagnosticDirectives()) {
         auto out = Line();
         EmitDiagnosticControl(out, diagnostic->control);
         out << ";";
@@ -99,7 +99,7 @@ bool ASTPrinter::Generate() {
         Line();
     }
     // Generate global declarations in the order they appear in the module.
-    for (auto* decl : program_->AST().GlobalDeclarations()) {
+    for (auto* decl : program_.AST().GlobalDeclarations()) {
         if (decl->IsAnyOf<ast::DiagnosticDirective, ast::Enable>()) {
             continue;
         }
@@ -110,7 +110,7 @@ bool ASTPrinter::Generate() {
             [&](const ast::Variable* var) { return EmitVariable(Line(), var); },
             [&](const ast::ConstAssert* ca) { return EmitConstAssert(ca); },
             [&](Default) { TINT_UNREACHABLE(); });
-        if (decl != program_->AST().GlobalDeclarations().Back()) {
+        if (decl != program_.AST().GlobalDeclarations().Back()) {
             Line();
         }
     }
@@ -361,7 +361,7 @@ void ASTPrinter::EmitStructType(const ast::Struct* str) {
     for (auto* mem : str->members) {
         // TODO(crbug.com/tint/798) move the @offset attribute handling to the transform::Wgsl
         // sanitizer.
-        if (auto* mem_sem = program_->Sem().Get(mem)) {
+        if (auto* mem_sem = program_.Sem().Get(mem)) {
             offset = tint::RoundUp(mem_sem->Align(), offset);
             if (uint32_t padding = mem_sem->Offset() - offset) {
                 add_padding(padding);

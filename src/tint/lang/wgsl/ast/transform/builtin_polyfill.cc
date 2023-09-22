@@ -48,9 +48,9 @@ struct BuiltinPolyfill::State {
     /// Constructor
     /// @param program the source program
     /// @param config the transform config
-    State(const Program* program, const Config& config) : src(program), cfg(config) {
+    State(const Program& program, const Config& config) : src(program), cfg(config) {
         has_full_ptr_params = false;
-        for (auto* enable : src->AST().Enables()) {
+        for (auto* enable : src.AST().Enables()) {
             if (enable->HasExtension(wgsl::Extension::kChromiumExperimentalFullPtrParameters)) {
                 has_full_ptr_params = true;
                 break;
@@ -61,12 +61,12 @@ struct BuiltinPolyfill::State {
     /// Runs the transform
     /// @returns the new program or SkipTransform if the transform is not required
     Transform::ApplyResult Run() {
-        for (auto* node : src->ASTNodes().Objects()) {
+        for (auto* node : src.ASTNodes().Objects()) {
             Switch(
                 node,  //
                 [&](const CallExpression* expr) { Call(expr); },
                 [&](const BinaryExpression* bin_op) {
-                    if (auto* s = src->Sem().Get(bin_op);
+                    if (auto* s = src.Sem().Get(bin_op);
                         !s || s->Stage() == core::EvaluationStage::kConstant ||
                         s->Stage() == core::EvaluationStage::kNotEvaluated) {
                         return;  // Don't polyfill @const expressions
@@ -83,7 +83,7 @@ struct BuiltinPolyfill::State {
                         }
                         case core::BinaryOp::kDivide: {
                             if (cfg.builtins.int_div_mod) {
-                                auto* lhs_ty = src->TypeOf(bin_op->lhs)->UnwrapRef();
+                                auto* lhs_ty = src.TypeOf(bin_op->lhs)->UnwrapRef();
                                 if (lhs_ty->is_integer_scalar_or_vector()) {
                                     ctx.Replace(bin_op,
                                                 [this, bin_op] { return IntDivMod(bin_op); });
@@ -94,7 +94,7 @@ struct BuiltinPolyfill::State {
                         }
                         case core::BinaryOp::kModulo: {
                             if (cfg.builtins.int_div_mod) {
-                                auto* lhs_ty = src->TypeOf(bin_op->lhs)->UnwrapRef();
+                                auto* lhs_ty = src.TypeOf(bin_op->lhs)->UnwrapRef();
                                 if (lhs_ty->is_integer_scalar_or_vector()) {
                                     ctx.Replace(bin_op,
                                                 [this, bin_op] { return IntDivMod(bin_op); });
@@ -102,7 +102,7 @@ struct BuiltinPolyfill::State {
                                 }
                             }
                             if (cfg.builtins.precise_float_mod) {
-                                auto* lhs_ty = src->TypeOf(bin_op->lhs)->UnwrapRef();
+                                auto* lhs_ty = src.TypeOf(bin_op->lhs)->UnwrapRef();
                                 if (lhs_ty->is_float_scalar_or_vector()) {
                                     ctx.Replace(bin_op,
                                                 [this, bin_op] { return PreciseFloatMod(bin_op); });
@@ -117,7 +117,7 @@ struct BuiltinPolyfill::State {
                 },
                 [&](const Expression* expr) {
                     if (cfg.builtins.bgra8unorm) {
-                        if (auto* ty_expr = src->Sem().Get<sem::TypeExpression>(expr)) {
+                        if (auto* ty_expr = src.Sem().Get<sem::TypeExpression>(expr)) {
                             if (auto* tex = ty_expr->Type()->As<core::type::StorageTexture>()) {
                                 if (tex->texel_format() == core::TexelFormat::kBgra8Unorm) {
                                     ctx.Replace(expr, [this, tex] {
@@ -143,15 +143,15 @@ struct BuiltinPolyfill::State {
 
   private:
     /// The source program
-    Program const* const src;
+    const Program& src;
     /// The transform config
     const Config& cfg;
     /// The destination program builder
     ProgramBuilder b;
     /// The clone context
-    program::CloneContext ctx{&b, src};
+    program::CloneContext ctx{&b, &src};
     /// The source clone context
-    const sem::Info& sem = src->Sem();
+    const sem::Info& sem = src.Sem();
     /// Polyfill functions for binary operators.
     Hashmap<BinaryOpSignature, Symbol, 8> binary_op_polyfills;
     /// Polyfill builtins.
@@ -884,8 +884,8 @@ struct BuiltinPolyfill::State {
     /// @param bin_op the original BinaryExpression
     /// @return the polyfill value for bitshift operation
     const Expression* BitshiftModulo(const BinaryExpression* bin_op) {
-        auto* lhs_ty = src->TypeOf(bin_op->lhs)->UnwrapRef();
-        auto* rhs_ty = src->TypeOf(bin_op->rhs)->UnwrapRef();
+        auto* lhs_ty = src.TypeOf(bin_op->lhs)->UnwrapRef();
+        auto* rhs_ty = src.TypeOf(bin_op->rhs)->UnwrapRef();
         auto* lhs_el_ty = lhs_ty->DeepestElement();
         const Expression* mask = b.Expr(AInt(lhs_el_ty->Size() * 8 - 1));
         if (rhs_ty->Is<core::type::Vector>()) {
@@ -901,8 +901,8 @@ struct BuiltinPolyfill::State {
     /// @param bin_op the original BinaryExpression
     /// @return the polyfill divide or modulo
     const Expression* IntDivMod(const BinaryExpression* bin_op) {
-        auto* lhs_ty = src->TypeOf(bin_op->lhs)->UnwrapRef();
-        auto* rhs_ty = src->TypeOf(bin_op->rhs)->UnwrapRef();
+        auto* lhs_ty = src.TypeOf(bin_op->lhs)->UnwrapRef();
+        auto* rhs_ty = src.TypeOf(bin_op->rhs)->UnwrapRef();
         BinaryOpSignature sig{bin_op->op, lhs_ty, rhs_ty};
         auto fn = binary_op_polyfills.GetOrCreate(sig, [&] {
             const bool is_div = bin_op->op == core::BinaryOp::kDivide;
@@ -994,8 +994,8 @@ struct BuiltinPolyfill::State {
     /// @param bin_op the original BinaryExpression
     /// @return the polyfill divide or modulo
     const Expression* PreciseFloatMod(const BinaryExpression* bin_op) {
-        auto* lhs_ty = src->TypeOf(bin_op->lhs)->UnwrapRef();
-        auto* rhs_ty = src->TypeOf(bin_op->rhs)->UnwrapRef();
+        auto* lhs_ty = src.TypeOf(bin_op->lhs)->UnwrapRef();
+        auto* rhs_ty = src.TypeOf(bin_op->rhs)->UnwrapRef();
         BinaryOpSignature sig{bin_op->op, lhs_ty, rhs_ty};
         auto fn = binary_op_polyfills.GetOrCreate(sig, [&] {
             const auto [lhs_el_ty, lhs_width] = lhs_ty->Elements(lhs_ty, 1);
@@ -1071,7 +1071,7 @@ struct BuiltinPolyfill::State {
 
     /// Examines the call expression @p expr, applying any necessary polyfill transforms
     void Call(const CallExpression* expr) {
-        auto* call = src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
+        auto* call = src.Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
         if (!call || call->Stage() == core::EvaluationStage::kConstant ||
             call->Stage() == core::EvaluationStage::kNotEvaluated) {
             return;  // Don't polyfill @const expressions
@@ -1289,7 +1289,7 @@ BuiltinPolyfill::BuiltinPolyfill() = default;
 
 BuiltinPolyfill::~BuiltinPolyfill() = default;
 
-Transform::ApplyResult BuiltinPolyfill::Apply(const Program* src,
+Transform::ApplyResult BuiltinPolyfill::Apply(const Program& src,
                                               const DataMap& data,
                                               DataMap&) const {
     auto* cfg = data.Get<Config>();

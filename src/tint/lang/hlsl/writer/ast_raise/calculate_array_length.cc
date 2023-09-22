@@ -43,9 +43,9 @@ namespace {
 using namespace tint::core::fluent_types;     // NOLINT
 using namespace tint::core::number_suffixes;  // NOLINT
 
-bool ShouldRun(const Program* program) {
-    for (auto* fn : program->AST().Functions()) {
-        if (auto* sem_fn = program->Sem().Get(fn)) {
+bool ShouldRun(const Program& program) {
+    for (auto* fn : program.AST().Functions()) {
+        if (auto* sem_fn = program.Sem().Get(fn)) {
             for (auto* builtin : sem_fn->DirectlyCalledBuiltins()) {
                 if (builtin->Fn() == core::BuiltinFn::kArrayLength) {
                     return true;
@@ -87,7 +87,7 @@ const CalculateArrayLength::BufferSizeIntrinsic* CalculateArrayLength::BufferSiz
 CalculateArrayLength::CalculateArrayLength() = default;
 CalculateArrayLength::~CalculateArrayLength() = default;
 
-ast::transform::Transform::ApplyResult CalculateArrayLength::Apply(const Program* src,
+ast::transform::Transform::ApplyResult CalculateArrayLength::Apply(const Program& src,
                                                                    const ast::transform::DataMap&,
                                                                    ast::transform::DataMap&) const {
     if (!ShouldRun(src)) {
@@ -95,8 +95,8 @@ ast::transform::Transform::ApplyResult CalculateArrayLength::Apply(const Program
     }
 
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
-    auto& sem = src->Sem();
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
+    auto& sem = src.Sem();
 
     // get_buffer_size_intrinsic() emits the function decorated with
     // BufferSizeIntrinsic that is transformed by the HLSL writer into a call to
@@ -126,7 +126,7 @@ ast::transform::Transform::ApplyResult CalculateArrayLength::Apply(const Program
     std::unordered_map<ArrayUsage, Symbol, ArrayUsage::Hasher> array_length_by_usage;
 
     // Find all the arrayLength() calls...
-    for (auto* node : src->ASTNodes().Objects()) {
+    for (auto* node : src.ASTNodes().Objects()) {
         if (auto* call_expr = node->As<ast::CallExpression>()) {
             auto* call = sem.Get(call_expr)->UnwrapMaterialize()->As<sem::Call>();
             if (auto* builtin = call->Target()->As<sem::BuiltinFn>()) {

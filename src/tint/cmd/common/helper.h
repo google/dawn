@@ -38,7 +38,7 @@ namespace tint::cmd {
 /// Information on a loaded program
 struct ProgramInfo {
     /// The loaded program
-    std::unique_ptr<tint::Program> program;
+    tint::Program program;
     /// The source file information
     std::unique_ptr<tint::Source::File> source_file;
 };
@@ -70,7 +70,9 @@ struct LoadProgramOptions {
 #endif
 };
 
-/// Loads the source and program information for the given file
+/// Loads the source and program information for the given file.
+/// If the file cannot be loaded then an error is printed and the program is aborted before
+/// returning.
 /// @param opts the loading options
 ProgramInfo LoadProgramInfo(const LoadProgramOptions& opts);
 

@@ -68,7 +68,7 @@ class BindingRemapper final : public Castable<BindingRemapper, Transform> {
     ~BindingRemapper() override;
 
     /// @copydoc Transform::Apply
-    ApplyResult Apply(const Program* program,
+    ApplyResult Apply(const Program& program,
                       const DataMap& inputs,
                       DataMap& outputs) const override;
 };

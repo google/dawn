@@ -35,8 +35,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::SubstituteOverride::Config);
 namespace tint::ast::transform {
 namespace {
 
-bool ShouldRun(const Program* program) {
-    for (auto* node : program->AST().GlobalVariables()) {
+bool ShouldRun(const Program& program) {
+    for (auto* node : program.AST().GlobalVariables()) {
         if (node->Is<Override>()) {
             return true;
         }
@@ -50,11 +50,11 @@ SubstituteOverride::SubstituteOverride() = default;
 
 SubstituteOverride::~SubstituteOverride() = default;
 
-Transform::ApplyResult SubstituteOverride::Apply(const Program* src,
+Transform::ApplyResult SubstituteOverride::Apply(const Program& src,
                                                  const DataMap& config,
                                                  DataMap&) const {
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     const auto* data = config.Get<Config>();
     if (!data) {
@@ -62,7 +62,7 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program* src,
         return resolver::Resolve(b);
     }
 
-    if (!ShouldRun(ctx.src)) {
+    if (!ShouldRun(src)) {
         return SkipTransform;
     }
 
@@ -107,7 +107,7 @@ Transform::ApplyResult SubstituteOverride::Apply(const Program* src,
     // If the object is not materialized, and the 'override' variable is turned to a 'const', the
     // resulting type of the index may change. See: crbug.com/tint/1697.
     ctx.ReplaceAll([&](const IndexAccessorExpression* expr) -> const IndexAccessorExpression* {
-        if (auto* sem = src->Sem().Get(expr)) {
+        if (auto* sem = src.Sem().Get(expr)) {
             if (auto* access = sem->UnwrapMaterialize()->As<sem::IndexAccessorExpression>()) {
                 if (access->Object()->UnwrapMaterialize()->Type()->HoldsAbstract() &&
                     access->Index()->Stage() == core::EvaluationStage::kOverride) {

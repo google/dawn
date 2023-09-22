@@ -34,7 +34,9 @@ namespace tint::ast::transform {
 Manager::Manager() = default;
 Manager::~Manager() = default;
 
-Program Manager::Run(const Program* program, const DataMap& inputs, DataMap& outputs) const {
+Program Manager::Run(const Program& program_in, const DataMap& inputs, DataMap& outputs) const {
+    const Program* program = &program_in;
+
 #if TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
     auto print_program = [&](const char* msg, const Transform* transform) {
         auto wgsl = Program::printer(program);
@@ -44,9 +46,9 @@ Program Manager::Run(const Program* program, const DataMap& inputs, DataMap& out
                   << std::endl;
         std::cout << "=========================================================" << std::endl;
         std::cout << wgsl << std::endl;
-        if (!program->IsValid()) {
+        if (!program.IsValid()) {
             std::cout << "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --" << std::endl;
-            std::cout << program->Diagnostics().str() << std::endl;
+            std::cout << program.Diagnostics().str() << std::endl;
         }
         std::cout << "=========================================================" << std::endl
                   << std::endl;
@@ -58,7 +60,7 @@ Program Manager::Run(const Program* program, const DataMap& inputs, DataMap& out
     TINT_IF_PRINT_PROGRAM(print_program("Input of", nullptr));
 
     for (const auto& transform : transforms_) {
-        if (auto result = transform->Apply(program, inputs, outputs)) {
+        if (auto result = transform->Apply(*program, inputs, outputs)) {
             output.emplace(std::move(result.value()));
             program = &output.value();
 

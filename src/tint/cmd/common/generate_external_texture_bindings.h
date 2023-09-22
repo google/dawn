@@ -24,7 +24,7 @@ class Program;
 
 namespace tint::cmd {
 
-ExternalTextureOptions::BindingsMap GenerateExternalTextureBindings(const Program* program);
+ExternalTextureOptions::BindingsMap GenerateExternalTextureBindings(const Program& program);
 
 }  // namespace tint::cmd
 

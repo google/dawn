@@ -35,11 +35,11 @@ namespace tint::msl::writer {
 /// PIMPL state for the transform
 struct SubgroupBallot::State {
     /// The source program
-    const Program* const src;
+    const Program& src;
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
 
     /// The name of the `tint_subgroup_ballot` helper function.
     Symbol ballot_helper{};
@@ -52,12 +52,12 @@ struct SubgroupBallot::State {
 
     /// Constructor
     /// @param program the source program
-    explicit State(const Program* program) : src(program) {}
+    explicit State(const Program& program) : src(program) {}
 
     /// Runs the transform
     /// @returns the new program or SkipTransform if the transform is not required
     ApplyResult Run() {
-        auto& sem = src->Sem();
+        auto& sem = src.Sem();
 
         bool made_changes = false;
         for (auto* node : ctx.src->ASTNodes().Objects()) {
@@ -79,7 +79,7 @@ struct SubgroupBallot::State {
 
         // Set the subgroup size mask at the start of each entry point that transitively calls
         // `subgroupBallot()`.
-        for (auto* global : src->AST().GlobalDeclarations()) {
+        for (auto* global : src.AST().GlobalDeclarations()) {
             auto* func = global->As<ast::Function>();
             if (func && func->IsEntryPoint() && TransitvelyCallsSubgroupBallot(sem.Get(func))) {
                 SetSubgroupSizeMask(func);
@@ -145,7 +145,7 @@ struct SubgroupBallot::State {
         for (auto* param : ep->params) {
             auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(param->attributes);
             if (builtin &&
-                src->Sem()
+                src.Sem()
                         .Get<sem::BuiltinEnumExpression<core::BuiltinValue>>(builtin->builtin)
                         ->Value() == core::BuiltinValue::kSubgroupSize) {
                 subgroup_size = ctx.Clone(param->name->symbol);
@@ -183,7 +183,7 @@ SubgroupBallot::SubgroupBallot() = default;
 
 SubgroupBallot::~SubgroupBallot() = default;
 
-ast::transform::Transform::ApplyResult SubgroupBallot::Apply(const Program* src,
+ast::transform::Transform::ApplyResult SubgroupBallot::Apply(const Program& src,
                                                              const ast::transform::DataMap&,
                                                              ast::transform::DataMap&) const {
     return State(src).Run();

@@ -132,7 +132,7 @@ const declaration_order_check_4 : i32 = 1;
     ASSERT_TRUE(dst.IsValid()) << dst.Diagnostics().str();
 
     // Expect the printed strings to match
-    EXPECT_EQ(Program::printer(&src), Program::printer(&dst));
+    EXPECT_EQ(Program::printer(src), Program::printer(dst));
 
     // Check that none of the AST nodes or type pointers in dst are found in src
     std::unordered_set<const Node*> src_nodes;
@@ -156,7 +156,7 @@ const declaration_order_check_4 : i32 = 1;
     wgsl::writer::Options options;
     std::string src_wgsl;
     {
-        auto result = wgsl::writer::Generate(&src, options);
+        auto result = wgsl::writer::Generate(src, options);
         ASSERT_TRUE(result) << result.Failure();
         src_wgsl = result->wgsl;
 
@@ -169,7 +169,7 @@ const declaration_order_check_4 : i32 = 1;
     }
 
     // Print the dst module, check it matches the original source
-    auto result = wgsl::writer::Generate(&dst, options);
+    auto result = wgsl::writer::Generate(dst, options);
     ASSERT_TRUE(result);
     auto dst_wgsl = result->wgsl;
     ASSERT_EQ(src_wgsl, dst_wgsl);

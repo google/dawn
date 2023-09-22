@@ -26,7 +26,7 @@
 
 namespace tint::wgsl::writer {
 
-Result<Output, std::string> Generate(const Program* program, const Options& options) {
+Result<Output, std::string> Generate(const Program& program, const Options& options) {
     (void)options;
 
     Output output;

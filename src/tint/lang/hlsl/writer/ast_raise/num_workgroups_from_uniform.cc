@@ -36,10 +36,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::hlsl::writer::NumWorkgroupsFromUniform::Config);
 namespace tint::hlsl::writer {
 namespace {
 
-bool ShouldRun(const Program* program) {
-    for (auto* node : program->ASTNodes().Objects()) {
+bool ShouldRun(const Program& program) {
+    for (auto* node : program.ASTNodes().Objects()) {
         if (auto* attr = node->As<ast::BuiltinAttribute>()) {
-            if (program->Sem().Get(attr)->Value() == core::BuiltinValue::kNumWorkgroups) {
+            if (program.Sem().Get(attr)->Value() == core::BuiltinValue::kNumWorkgroups) {
                 return true;
             }
         }
@@ -69,11 +69,11 @@ NumWorkgroupsFromUniform::NumWorkgroupsFromUniform() = default;
 NumWorkgroupsFromUniform::~NumWorkgroupsFromUniform() = default;
 
 ast::transform::Transform::ApplyResult NumWorkgroupsFromUniform::Apply(
-    const Program* src,
+    const Program& src,
     const ast::transform::DataMap& inputs,
     ast::transform::DataMap&) const {
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     auto* cfg = inputs.Get<Config>();
     if (cfg == nullptr) {
@@ -90,13 +90,13 @@ ast::transform::Transform::ApplyResult NumWorkgroupsFromUniform::Apply(
 
     // Find all entry point parameters that declare the num_workgroups builtin.
     std::unordered_set<Accessor, Accessor::Hasher> to_replace;
-    for (auto* func : src->AST().Functions()) {
+    for (auto* func : src.AST().Functions()) {
         // num_workgroups is only valid for compute stages.
         if (func->PipelineStage() != ast::PipelineStage::kCompute) {
             continue;
         }
 
-        for (auto* param : src->Sem().Get(func)->Parameters()) {
+        for (auto* param : src.Sem().Get(func)->Parameters()) {
             // Because the CanonicalizeEntryPointIO transform has been run, builtins
             // will only appear as struct members.
             auto* str = param->Type()->As<sem::Struct>();
@@ -124,7 +124,7 @@ ast::transform::Transform::ApplyResult NumWorkgroupsFromUniform::Apply(
                 // If this is the only member, remove the struct and parameter too.
                 if (str->Members().Length() == 1) {
                     ctx.Remove(func->params, param->Declaration());
-                    ctx.Remove(src->AST().GlobalDeclarations(), str->Declaration());
+                    ctx.Remove(src.AST().GlobalDeclarations(), str->Declaration());
                 }
             }
         }
@@ -150,8 +150,8 @@ ast::transform::Transform::ApplyResult NumWorkgroupsFromUniform::Apply(
                 // plus 1, or group 0 if no resource bound.
                 group = 0;
 
-                for (auto* global : src->AST().GlobalVariables()) {
-                    auto* global_sem = src->Sem().Get<sem::GlobalVariable>(global);
+                for (auto* global : src.AST().GlobalVariables()) {
+                    auto* global_sem = src.Sem().Get<sem::GlobalVariable>(global);
                     if (auto bp = global_sem->BindingPoint()) {
                         if (bp->group >= group) {
                             group = bp->group + 1;
@@ -171,7 +171,7 @@ ast::transform::Transform::ApplyResult NumWorkgroupsFromUniform::Apply(
 
     // Now replace all the places where the builtins are accessed with the value
     // loaded from the uniform buffer.
-    for (auto* node : src->ASTNodes().Objects()) {
+    for (auto* node : src.ASTNodes().Objects()) {
         auto* accessor = node->As<ast::MemberAccessorExpression>();
         if (!accessor) {
             continue;

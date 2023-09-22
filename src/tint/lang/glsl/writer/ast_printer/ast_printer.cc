@@ -155,7 +155,7 @@ SanitizedResult::SanitizedResult() = default;
 SanitizedResult::~SanitizedResult() = default;
 SanitizedResult::SanitizedResult(SanitizedResult&&) = default;
 
-SanitizedResult Sanitize(const Program* in,
+SanitizedResult Sanitize(const Program& in,
                          const Options& options,
                          const std::string& entry_point) {
     ast::transform::Manager manager;
@@ -271,7 +271,7 @@ SanitizedResult Sanitize(const Program* in,
     return result;
 }
 
-ASTPrinter::ASTPrinter(const Program* program, const Version& version)
+ASTPrinter::ASTPrinter(const Program& program, const Version& version)
     : builder_(ProgramBuilder::Wrap(program)), version_(version) {}
 
 ASTPrinter::~ASTPrinter() = default;

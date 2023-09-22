@@ -138,11 +138,11 @@ TEST(ChangeBinaryOperatorTest, Applicable_Simple) {
 
     ASSERT_TRUE(MaybeApplyMutation(
         program, MutationChangeBinaryOperator(sum_expr_id, core::BinaryOp::kSubtract), node_id_map,
-        &program, &node_id_map, nullptr));
+        program, &node_id_map, nullptr));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
     wgsl::writer::Options options;
-    auto result = wgsl::writer::Generate(&program, options);
+    auto result = wgsl::writer::Generate(program, options);
     ASSERT_TRUE(result) << result.Failure();
 
     std::string expected_shader = R"(fn main() {
@@ -214,12 +214,12 @@ void CheckMutations(const std::string& lhs_type,
                 ASSERT_FALSE(invalid_program.IsValid()) << program.Diagnostics().str();
             }
         } else {
-            ASSERT_TRUE(MaybeApplyMutation(program, mutation, node_id_map, &program, &node_id_map,
-                                           nullptr));
+            ASSERT_TRUE(
+                MaybeApplyMutation(program, mutation, node_id_map, program, &node_id_map, nullptr));
             ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
             wgsl::writer::Options options;
-            auto result = wgsl::writer::Generate(&program, options);
+            auto result = wgsl::writer::Generate(program, options);
             ASSERT_TRUE(result) << result.Failure();
 
             ASSERT_EQ(expected_shader.str(), result->wgsl);

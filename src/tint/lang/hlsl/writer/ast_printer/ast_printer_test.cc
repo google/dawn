@@ -24,9 +24,9 @@ using HlslASTPrinterTest = TestHelper;
 TEST_F(HlslASTPrinterTest, InvalidProgram) {
     Diagnostics().add_error(diag::System::Writer, "make the program invalid");
     ASSERT_FALSE(IsValid());
-    auto program = std::make_unique<Program>(resolver::Resolve(*this));
-    ASSERT_FALSE(program->IsValid());
-    auto result = Generate(program.get(), Options{});
+    auto program = resolver::Resolve(*this);
+    ASSERT_FALSE(program.IsValid());
+    auto result = Generate(program, Options{});
     EXPECT_FALSE(result);
     EXPECT_EQ(result.Failure(), "input program is not valid");
 }

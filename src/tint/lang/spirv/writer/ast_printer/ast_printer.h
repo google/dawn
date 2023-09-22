@@ -34,7 +34,7 @@ struct SanitizedResult {
 /// Sanitize a program in preparation for generating SPIR-V.
 /// @program The program to sanitize
 /// @param options The SPIR-V generator options.
-SanitizedResult Sanitize(const Program* program, const Options& options);
+SanitizedResult Sanitize(const Program& program, const Options& options);
 
 /// Implementation class for SPIR-V generator
 class ASTPrinter {
@@ -46,7 +46,7 @@ class ASTPrinter {
     /// @param experimental_require_subgroup_uniform_control_flow `true` to require
     /// `SPV_KHR_subgroup_uniform_control_flow` extension and `SubgroupUniformControlFlowKHR`
     /// execution mode for compute stage entry points.
-    ASTPrinter(const Program* program,
+    ASTPrinter(const Program& program,
                bool zero_initialize_workgroup_memory,
                bool experimental_require_subgroup_uniform_control_flow);
 

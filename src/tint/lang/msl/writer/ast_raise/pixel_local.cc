@@ -37,23 +37,23 @@ namespace tint::msl::writer {
 /// PIMPL state for the transform
 struct PixelLocal::State {
     /// The source program
-    const Program* const src;
+    const Program& src;
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
     /// The transform config
     const Config& cfg;
 
     /// Constructor
     /// @param program the source program
     /// @param config the transform config
-    State(const Program* program, const Config& config) : src(program), cfg(config) {}
+    State(const Program& program, const Config& config) : src(program), cfg(config) {}
 
     /// Runs the transform
     /// @returns the new program or SkipTransform if the transform is not required
     ApplyResult Run() {
-        auto& sem = src->Sem();
+        auto& sem = src.Sem();
 
         // If the pixel local extension isn't enabled, then there must be no use of pixel_local
         // variables, and so there's nothing for this transform to do.
@@ -67,7 +67,7 @@ struct PixelLocal::State {
         // Change all module scope `var<pixel_local>` variables to `var<private>`.
         // We need to do this even if the variable is not referenced by the entry point as later
         // stages do not understand the pixel_local address space.
-        for (auto* global : src->AST().GlobalVariables()) {
+        for (auto* global : src.AST().GlobalVariables()) {
             if (auto* var = global->As<ast::Var>()) {
                 if (sem.Get(var)->AddressSpace() == core::AddressSpace::kPixelLocal) {
                     // Change the 'var<pixel_local>' to 'var<private>'
@@ -79,7 +79,7 @@ struct PixelLocal::State {
 
         // Find the single entry point
         const sem::Function* entry_point = nullptr;
-        for (auto* fn : src->AST().Functions()) {
+        for (auto* fn : src.AST().Functions()) {
             if (fn->IsEntryPoint()) {
                 if (entry_point != nullptr) {
                     TINT_ICE() << "PixelLocal transform requires that the SingleEntryPoint "
@@ -251,7 +251,7 @@ PixelLocal::PixelLocal() = default;
 
 PixelLocal::~PixelLocal() = default;
 
-ast::transform::Transform::ApplyResult PixelLocal::Apply(const Program* src,
+ast::transform::Transform::ApplyResult PixelLocal::Apply(const Program& src,
                                                          const ast::transform::DataMap& inputs,
                                                          ast::transform::DataMap&) const {
     auto* cfg = inputs.Get<Config>();

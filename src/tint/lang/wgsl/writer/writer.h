@@ -33,7 +33,7 @@ namespace tint::wgsl::writer {
 /// @param program the program to translate to WGSL
 /// @param options the configuration options to use when generating WGSL
 /// @returns the resulting WGSL, or an error string
-Result<Output, std::string> Generate(const Program* program, const Options& options);
+Result<Output, std::string> Generate(const Program& program, const Options& options);
 
 }  // namespace tint::wgsl::writer
 

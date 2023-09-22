@@ -35,11 +35,11 @@ PromoteInitializersToLet::PromoteInitializersToLet() = default;
 
 PromoteInitializersToLet::~PromoteInitializersToLet() = default;
 
-Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
+Transform::ApplyResult PromoteInitializersToLet::Apply(const Program& src,
                                                        const DataMap&,
                                                        DataMap&) const {
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     // Returns true if the expression should be hoisted to a new let statement before the
     // expression's statement.
@@ -89,8 +89,8 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
     Hashset<const Expression*, 32> const_chains;
 
     // Walk the AST nodes. This order guarantees that leaf-expressions are visited first.
-    for (auto* node : src->ASTNodes().Objects()) {
-        if (auto* sem = src->Sem().GetVal(node)) {
+    for (auto* node : src.ASTNodes().Objects()) {
+        if (auto* sem = src.Sem().GetVal(node)) {
             auto* stmt = sem->Stmt();
             if (!stmt) {
                 // Expression is outside of a statement. This usually means the expression is part
@@ -123,7 +123,7 @@ Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
     // After walking the full AST, const_chains only contains the outer-most constant expressions.
     // Check if any of these need hoisting, and append those to to_hoist.
     for (auto* expr : const_chains) {
-        if (auto* sem = src->Sem().GetVal(expr); should_hoist(sem)) {
+        if (auto* sem = src.Sem().GetVal(expr); should_hoist(sem)) {
             to_hoist.Push(sem);
         }
     }

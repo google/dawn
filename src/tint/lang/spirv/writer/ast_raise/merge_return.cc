@@ -32,12 +32,12 @@ namespace tint::spirv::writer {
 namespace {
 
 /// Returns `true` if `stmt` has the behavior `behavior`.
-bool HasBehavior(const Program* program, const ast::Statement* stmt, sem::Behavior behavior) {
-    return program->Sem().Get(stmt)->Behaviors().Contains(behavior);
+bool HasBehavior(const Program& program, const ast::Statement* stmt, sem::Behavior behavior) {
+    return program.Sem().Get(stmt)->Behaviors().Contains(behavior);
 }
 
 /// Returns `true` if `func` needs to be transformed.
-bool NeedsTransform(const Program* program, const ast::Function* func) {
+bool NeedsTransform(const Program& program, const ast::Function* func) {
     // Entry points and intrinsic declarations never need transforming.
     if (func->IsEntryPoint() || func->body == nullptr) {
         return false;
@@ -99,7 +99,7 @@ class State {
 
     /// Process a statement (recursively).
     void ProcessStatement(const ast::Statement* stmt) {
-        if (stmt == nullptr || !HasBehavior(ctx.src, stmt, sem::Behavior::kReturn)) {
+        if (stmt == nullptr || !HasBehavior(*ctx.src, stmt, sem::Behavior::kReturn)) {
             return;
         }
 
@@ -171,7 +171,7 @@ class State {
             // Check if the statement is or contains a return statement.
             // We need to make sure any statements that follow this one do not get executed if the
             // return flag has been set.
-            if (HasBehavior(ctx.src, s, sem::Behavior::kReturn)) {
+            if (HasBehavior(*ctx.src, s, sem::Behavior::kReturn)) {
                 if (is_in_loop_or_switch) {
                     // We're in a loop/switch, and so we would have inserted a `break`.
                     // If we've just come out of a loop/switch statement, we need to `break` again.
@@ -179,7 +179,7 @@ class State {
                                    ast::SwitchStatement>()) {
                         // If the loop only has the 'Return' behavior, we can just unconditionally
                         // break. Otherwise check the return flag.
-                        if (HasBehavior(ctx.src, s, sem::Behavior::kNext)) {
+                        if (HasBehavior(*ctx.src, s, sem::Behavior::kNext)) {
                             new_stmts.Back().Push(b.If(b.Expr(flag), b.Block(Vector{b.Break()})));
                         } else {
                             new_stmts.Back().Push(b.Break());
@@ -216,16 +216,16 @@ class State {
 
 }  // namespace
 
-ast::transform::Transform::ApplyResult MergeReturn::Apply(const Program* src,
+ast::transform::Transform::ApplyResult MergeReturn::Apply(const Program& src,
                                                           const ast::transform::DataMap&,
                                                           ast::transform::DataMap&) const {
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     bool made_changes = false;
 
     for (auto* func : ctx.src->AST().Functions()) {
-        if (!NeedsTransform(ctx.src, func)) {
+        if (!NeedsTransform(src, func)) {
             continue;
         }
 

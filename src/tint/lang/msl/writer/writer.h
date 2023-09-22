@@ -33,7 +33,7 @@ namespace tint::msl::writer {
 /// @param program the program to translate to MSL
 /// @param options the configuration options to use when generating MSL
 /// @returns the resulting MSL and supplementary information, or an error string
-Result<Output, std::string> Generate(const Program* program, const Options& options);
+Result<Output, std::string> Generate(const Program& program, const Options& options);
 
 }  // namespace tint::msl::writer
 

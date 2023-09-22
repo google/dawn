@@ -122,7 +122,7 @@ std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(
 
 }  // namespace
 
-Inspector::Inspector(const Program* program) : program_(program) {}
+Inspector::Inspector(const Program& program) : program_(program) {}
 
 Inspector::~Inspector() = default;
 
@@ -131,7 +131,7 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
     TINT_ASSERT(func != nullptr);
     TINT_ASSERT(func->IsEntryPoint());
 
-    auto* sem = program_->Sem().Get(func);
+    auto* sem = program_.Sem().Get(func);
 
     entry_point.name = func->name->symbol.Name();
     entry_point.remapped_name = func->name->symbol.Name();
@@ -245,7 +245,7 @@ EntryPoint Inspector::GetEntryPoint(const std::string& entry_point_name) {
 std::vector<EntryPoint> Inspector::GetEntryPoints() {
     std::vector<EntryPoint> result;
 
-    for (auto* func : program_->AST().Functions()) {
+    for (auto* func : program_.AST().Functions()) {
         if (!func->IsEntryPoint()) {
             continue;
         }
@@ -258,8 +258,8 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
 
 std::map<OverrideId, Scalar> Inspector::GetOverrideDefaultValues() {
     std::map<OverrideId, Scalar> result;
-    for (auto* var : program_->AST().GlobalVariables()) {
-        auto* global = program_->Sem().Get<sem::GlobalVariable>(var);
+    for (auto* var : program_.AST().GlobalVariables()) {
+        auto* global = program_.Sem().Get<sem::GlobalVariable>(var);
         if (!global || !global->Declaration()->Is<ast::Override>()) {
             continue;
         }
@@ -298,8 +298,8 @@ std::map<OverrideId, Scalar> Inspector::GetOverrideDefaultValues() {
 
 std::map<std::string, OverrideId> Inspector::GetNamedOverrideIds() {
     std::map<std::string, OverrideId> result;
-    for (auto* var : program_->AST().GlobalVariables()) {
-        auto* global = program_->Sem().Get<sem::GlobalVariable>(var);
+    for (auto* var : program_.AST().GlobalVariables()) {
+        auto* global = program_.Sem().Get<sem::GlobalVariable>(var);
         if (global && global->Declaration()->Is<ast::Override>()) {
             auto name = var->name->symbol.Name();
             result[name] = global->OverrideId();
@@ -342,7 +342,7 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
 
     std::vector<ResourceBinding> result;
 
-    auto* func_sem = program_->Sem().Get(func);
+    auto* func_sem = program_.Sem().Get(func);
     for (auto& ruv : func_sem->TransitivelyReferencedUniformVariables()) {
         auto* var = ruv.first;
         auto binding_info = ruv.second;
@@ -385,7 +385,7 @@ std::vector<ResourceBinding> Inspector::GetSamplerResourceBindings(const std::st
 
     std::vector<ResourceBinding> result;
 
-    auto* func_sem = program_->Sem().Get(func);
+    auto* func_sem = program_.Sem().Get(func);
     for (auto& rs : func_sem->TransitivelyReferencedSamplerVariables()) {
         auto binding_info = rs.second;
 
@@ -409,7 +409,7 @@ std::vector<ResourceBinding> Inspector::GetComparisonSamplerResourceBindings(
 
     std::vector<ResourceBinding> result;
 
-    auto* func_sem = program_->Sem().Get(func);
+    auto* func_sem = program_.Sem().Get(func);
     for (auto& rcs : func_sem->TransitivelyReferencedComparisonSamplerVariables()) {
         auto binding_info = rcs.second;
 
@@ -449,7 +449,7 @@ std::vector<ResourceBinding> Inspector::GetTextureResourceBindings(
     }
 
     std::vector<ResourceBinding> result;
-    auto* func_sem = program_->Sem().Get(func);
+    auto* func_sem = program_.Sem().Get(func);
     for (auto& ref : func_sem->TransitivelyReferencedVariablesOfType(texture_type)) {
         auto* var = ref.first;
         auto binding_info = ref.second;
@@ -509,7 +509,7 @@ std::vector<SamplerTexturePair> Inspector::GetSamplerTextureUses(const std::stri
     if (!func) {
         return {};
     }
-    auto* func_sem = program_->Sem().Get(func);
+    auto* func_sem = program_.Sem().Get(func);
 
     std::vector<SamplerTexturePair> new_pairs;
     for (auto pair : func_sem->TextureSamplerPairs()) {
@@ -524,7 +524,7 @@ std::vector<SamplerTexturePair> Inspector::GetSamplerTextureUses(const std::stri
 }
 
 std::vector<std::string> Inspector::GetUsedExtensionNames() {
-    auto& extensions = program_->Sem().Module()->Extensions();
+    auto& extensions = program_.Sem().Module()->Extensions();
     std::vector<std::string> out;
     out.reserve(extensions.Length());
     for (auto ext : extensions) {
@@ -537,7 +537,7 @@ std::vector<std::pair<std::string, Source>> Inspector::GetEnableDirectives() {
     std::vector<std::pair<std::string, Source>> result;
 
     // Ast nodes for enable directive are stored within global declarations list
-    auto global_decls = program_->AST().GlobalDeclarations();
+    auto global_decls = program_.AST().GlobalDeclarations();
     for (auto* node : global_decls) {
         if (auto* enable = node->As<ast::Enable>()) {
             for (auto* ext : enable->extensions) {
@@ -550,7 +550,7 @@ std::vector<std::pair<std::string, Source>> Inspector::GetEnableDirectives() {
 }
 
 const ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
-    auto* func = program_->AST().Functions().Find(program_->Symbols().Get(name));
+    auto* func = program_.AST().Functions().Find(program_.Symbols().Get(name));
     if (!func) {
         diagnostics_.add_error(diag::System::Inspector, name + " was not found!");
         return nullptr;
@@ -623,7 +623,7 @@ bool Inspector::ContainsBuiltin(core::BuiltinValue builtin,
     if (!builtin_declaration) {
         return false;
     }
-    return program_->Sem().Get(builtin_declaration)->Value() == builtin;
+    return program_.Sem().Get(builtin_declaration)->Value() == builtin;
 }
 
 std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
@@ -634,7 +634,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
         return {};
     }
 
-    auto* func_sem = program_->Sem().Get(func);
+    auto* func_sem = program_.Sem().Get(func);
     std::vector<ResourceBinding> result;
     for (auto& rsv : func_sem->TransitivelyReferencedStorageBufferVariables()) {
         auto* var = rsv.first;
@@ -673,7 +673,7 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
     }
 
     std::vector<ResourceBinding> result;
-    auto* func_sem = program_->Sem().Get(func);
+    auto* func_sem = program_.Sem().Get(func);
     auto referenced_variables = multisampled_only
                                     ? func_sem->TransitivelyReferencedMultisampledTextureVariables()
                                     : func_sem->TransitivelyReferencedSampledTextureVariables();
@@ -712,7 +712,7 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
         return {};
     }
 
-    auto* func_sem = program_->Sem().Get(func);
+    auto* func_sem = program_.Sem().Get(func);
     std::vector<ResourceBinding> result;
     for (auto& ref :
          func_sem->TransitivelyReferencedVariablesOfType<core::type::StorageTexture>()) {
@@ -761,9 +761,9 @@ void Inspector::GenerateSamplerTargets() {
     sampler_targets_ =
         std::make_unique<std::unordered_map<std::string, UniqueVector<SamplerTexturePair, 4>>>();
 
-    auto& sem = program_->Sem();
+    auto& sem = program_.Sem();
 
-    for (auto* node : program_->ASTNodes().Objects()) {
+    for (auto* node : program_.ASTNodes().Objects()) {
         auto* c = node->As<ast::CallExpression>();
         if (!c) {
             continue;
@@ -832,7 +832,7 @@ std::tuple<InterpolationType, InterpolationSampling> Inspector::CalculateInterpo
         return {InterpolationType::kPerspective, InterpolationSampling::kCenter};
     }
 
-    auto& sem = program_->Sem();
+    auto& sem = program_.Sem();
 
     auto ast_interpolation_type =
         sem.Get<sem::BuiltinEnumExpression<core::InterpolationType>>(interpolation_attribute->type)
@@ -886,7 +886,7 @@ std::tuple<InterpolationType, InterpolationSampling> Inspector::CalculateInterpo
 
 uint32_t Inspector::ComputeWorkgroupStorageSize(const ast::Function* func) const {
     uint32_t total_size = 0;
-    auto* func_sem = program_->Sem().Get(func);
+    auto* func_sem = program_.Sem().Get(func);
     for (const sem::Variable* var : func_sem->TransitivelyReferencedGlobals()) {
         if (var->AddressSpace() == core::AddressSpace::kWorkgroup) {
             auto* ty = var->Type()->UnwrapRef();
@@ -906,7 +906,7 @@ uint32_t Inspector::ComputeWorkgroupStorageSize(const ast::Function* func) const
 
 std::vector<PixelLocalMemberType> Inspector::ComputePixelLocalMemberTypes(
     const ast::Function* func) const {
-    auto* func_sem = program_->Sem().Get(func);
+    auto* func_sem = program_.Sem().Get(func);
     for (const sem::Variable* var : func_sem->TransitivelyReferencedGlobals()) {
         if (var->AddressSpace() != core::AddressSpace::kPixelLocal) {
             continue;
@@ -937,12 +937,12 @@ std::vector<PixelLocalMemberType> Inspector::ComputePixelLocalMemberTypes(
 
 template <size_t N, typename F>
 void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> exprs, F&& callback) {
-    if (TINT_UNLIKELY(!program_->IsValid())) {
+    if (TINT_UNLIKELY(!program_.IsValid())) {
         TINT_ICE() << "attempting to get originating resources in invalid program";
         return;
     }
 
-    auto& sem = program_->Sem();
+    auto& sem = program_.Sem();
 
     std::array<const sem::GlobalVariable*, N> globals{};
     std::array<const sem::Parameter*, N> parameters{};

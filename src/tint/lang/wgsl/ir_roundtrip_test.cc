@@ -34,7 +34,7 @@ class IRToProgramRoundtripTest : public helpers::IRProgramTest {
         auto input_program = wgsl::reader::Parse(&file);
         ASSERT_TRUE(input_program.IsValid()) << input_program.Diagnostics().str();
 
-        auto ir_module = wgsl::reader::ProgramToIR(&input_program);
+        auto ir_module = wgsl::reader::ProgramToIR(input_program);
         ASSERT_TRUE(ir_module) << (ir_module ? "" : ir_module.Failure());
 
         tint::core::ir::Disassembler d{ir_module.Get()};
@@ -46,12 +46,12 @@ class IRToProgramRoundtripTest : public helpers::IRProgramTest {
                    << "IR:" << std::endl                               //
                    << disassembly << std::endl                         //
                    << "AST:" << std::endl                              //
-                   << Program::printer(&output_program) << std::endl;
+                   << Program::printer(output_program) << std::endl;
         }
 
         ASSERT_TRUE(output_program.IsValid()) << output_program.Diagnostics().str();
 
-        auto output = wgsl::writer::Generate(&output_program, {});
+        auto output = wgsl::writer::Generate(output_program, {});
         ASSERT_TRUE(output) << output.Failure();
 
         auto expected = expected_wgsl.empty() ? input : tint::TrimSpace(expected_wgsl);

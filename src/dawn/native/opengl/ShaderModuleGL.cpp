@@ -265,7 +265,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             BindingPoint placeholderBindingPoint{static_cast<uint32_t>(kMaxBindGroupsTyped), 0};
 
             bool needsPlaceholderSampler = false;
-            tint::inspector::Inspector inspector(&program);
+            tint::inspector::Inspector inspector(program);
             // Find all the sampler/texture pairs for this entry point, and create
             // CombinedSamplers for them. CombinedSampler records the binding points
             // of the original texture and sampler, and generates a unique name. The
@@ -298,7 +298,7 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             tintOptions.allow_collisions = true;
             tintOptions.texture_builtins_from_uniform = r.textureBuiltinsFromUniform;
 
-            auto result = tint::glsl::writer::Generate(&program, tintOptions, r.entryPointName);
+            auto result = tint::glsl::writer::Generate(program, tintOptions, r.entryPointName);
             DAWN_INVALID_IF(!result, "An error occured while generating GLSL: %s.",
                             result.Failure());
 

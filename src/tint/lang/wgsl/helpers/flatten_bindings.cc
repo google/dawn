@@ -23,7 +23,7 @@
 
 namespace tint::writer {
 
-std::optional<Program> FlattenBindings(const Program* program) {
+std::optional<Program> FlattenBindings(const Program& program) {
     // TODO(crbug.com/tint/1101): Make this more robust for multiple entry points.
     tint::ast::transform::BindingRemapper::BindingPoints binding_points;
     uint32_t next_buffer_idx = 0;

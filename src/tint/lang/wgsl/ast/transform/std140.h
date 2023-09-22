@@ -36,7 +36,7 @@ class Std140 final : public Castable<Std140, Transform> {
     ~Std140() override;
 
     /// @copydoc Transform::Apply
-    ApplyResult Apply(const Program* program,
+    ApplyResult Apply(const Program& program,
                       const DataMap& inputs,
                       DataMap& outputs) const override;
 

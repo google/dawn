@@ -68,7 +68,7 @@ struct SanitizedResult {
 /// @param options The HLSL generator options.
 /// @param entry_point the entry point to generate GLSL for
 /// @returns the sanitized program and any supplementary information
-SanitizedResult Sanitize(const Program* program,
+SanitizedResult Sanitize(const Program& program,
                          const Options& options,
                          const std::string& entry_point);
 
@@ -78,7 +78,7 @@ class ASTPrinter : public tint::TextGenerator {
     /// Constructor
     /// @param program the program to generate
     /// @param version the GLSL version to use
-    ASTPrinter(const Program* program, const Version& version);
+    ASTPrinter(const Program& program, const Version& version);
     ~ASTPrinter() override;
 
     /// Generates the GLSL shader

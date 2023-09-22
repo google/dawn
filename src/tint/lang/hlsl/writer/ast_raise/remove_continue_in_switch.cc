@@ -37,13 +37,13 @@ namespace tint::hlsl::writer {
 struct RemoveContinueInSwitch::State {
     /// Constructor
     /// @param program the source program
-    explicit State(const Program* program) : src(program) {}
+    explicit State(const Program& program) : src(program) {}
 
     /// Runs the transform
     /// @returns the new program or SkipTransform if the transform is not required
     ApplyResult Run() {
         // First collect all switch statements within loops that contain a continue statement.
-        for (auto* node : src->ASTNodes().Objects()) {
+        for (auto* node : src.ASTNodes().Objects()) {
             auto* cont = node->As<ast::ContinueStatement>();
             if (!cont) {
                 continue;
@@ -126,13 +126,13 @@ struct RemoveContinueInSwitch::State {
 
   private:
     /// The source program
-    const Program* const src;
+    const Program& src;
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
-    /// Alias to src->sem
-    const sem::Info& sem = src->Sem();
+    program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
+    /// Alias to src.sem
+    const sem::Info& sem = src.Sem();
 
     // Vector of switch statements within a loop that contains at least one continue statement.
     Vector<const ast::SwitchStatement*, 4> switch_stmts;
@@ -177,7 +177,7 @@ RemoveContinueInSwitch::RemoveContinueInSwitch() = default;
 RemoveContinueInSwitch::~RemoveContinueInSwitch() = default;
 
 ast::transform::Transform::ApplyResult RemoveContinueInSwitch::Apply(
-    const Program* src,
+    const Program& src,
     const ast::transform::DataMap&,
     ast::transform::DataMap&) const {
     State state(src);

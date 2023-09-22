@@ -54,7 +54,7 @@ class Manager {
     /// @param inputs optional extra transform-specific input data
     /// @param outputs optional extra transform-specific output data
     /// @returns the transformed program
-    Program Run(const Program* program, const DataMap& inputs, DataMap& outputs) const;
+    Program Run(const Program& program, const DataMap& inputs, DataMap& outputs) const;
 
   private:
     std::vector<std::unique_ptr<Transform>> transforms_;

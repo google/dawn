@@ -513,7 +513,7 @@ TEST_F(SpirvASTPrinterTest, GlobalVar_WorkgroupWithZeroInit) {
 
     constexpr bool kZeroInitializeWorkgroupMemory = true;
     std::unique_ptr<Builder> b =
-        std::make_unique<Builder>(program.get(), kZeroInitializeWorkgroupMemory);
+        std::make_unique<Builder>(*program, kZeroInitializeWorkgroupMemory);
 
     EXPECT_TRUE(b->GenerateGlobalVariable(var_scalar)) << b->Diagnostics();
     EXPECT_TRUE(b->GenerateGlobalVariable(var_array)) << b->Diagnostics();

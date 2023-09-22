@@ -40,8 +40,8 @@ namespace {
 
 using DecomposedArrays = std::unordered_map<const core::type::Array*, Symbol>;
 
-bool ShouldRun(const Program* program) {
-    for (auto* node : program->ASTNodes().Objects()) {
+bool ShouldRun(const Program& program) {
+    for (auto* node : program.ASTNodes().Objects()) {
         if (auto* ident = node->As<ast::TemplatedIdentifier>()) {
             if (ast::GetAttribute<ast::StrideAttribute>(ident->attributes)) {
                 return true;
@@ -58,7 +58,7 @@ DecomposeStridedArray::DecomposeStridedArray() = default;
 DecomposeStridedArray::~DecomposeStridedArray() = default;
 
 ast::transform::Transform::ApplyResult DecomposeStridedArray::Apply(
-    const Program* src,
+    const Program& src,
     const ast::transform::DataMap&,
     ast::transform::DataMap&) const {
     if (!ShouldRun(src)) {
@@ -66,8 +66,8 @@ ast::transform::Transform::ApplyResult DecomposeStridedArray::Apply(
     }
 
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
-    const auto& sem = src->Sem();
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
+    const auto& sem = src.Sem();
 
     static constexpr const char* kMemberName = "el";
 
@@ -129,7 +129,7 @@ ast::transform::Transform::ApplyResult DecomposeStridedArray::Apply(
     // to insert an additional member accessor for the single structure field.
     // Example: `arr[i]` -> `arr[i].el`
     ctx.ReplaceAll([&](const ast::IndexAccessorExpression* idx) -> const ast::Expression* {
-        if (auto* ty = src->TypeOf(idx->object)) {
+        if (auto* ty = src.TypeOf(idx->object)) {
             if (auto* arr = ty->UnwrapRef()->As<core::type::Array>()) {
                 if (!arr->IsStrideImplicit()) {
                     auto* expr = ctx.CloneWithoutTransform(idx);

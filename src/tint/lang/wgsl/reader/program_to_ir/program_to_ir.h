@@ -35,7 +35,7 @@ namespace tint::wgsl::reader {
 /// @note this assumes the `program.IsValid()`, and has had const-eval done so
 /// any abstract values have been calculated and converted into the relevant
 /// concrete types.
-tint::Result<core::ir::Module, std::string> ProgramToIR(const Program* program);
+tint::Result<core::ir::Module, std::string> ProgramToIR(const Program& program);
 
 }  // namespace tint::wgsl::reader
 

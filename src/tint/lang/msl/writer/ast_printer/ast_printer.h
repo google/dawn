@@ -77,14 +77,14 @@ struct SanitizedResult {
 /// @program The program to sanitize
 /// @param options The MSL generator options.
 /// @returns the sanitized program and any supplementary information
-SanitizedResult Sanitize(const Program* program, const Options& options);
+SanitizedResult Sanitize(const Program& program, const Options& options);
 
 /// Implementation class for MSL generator
 class ASTPrinter : public tint::TextGenerator {
   public:
     /// Constructor
     /// @param program the program to generate
-    explicit ASTPrinter(const Program* program);
+    explicit ASTPrinter(const Program& program);
     ~ASTPrinter() override;
 
     /// @returns true on successful generation; false otherwise

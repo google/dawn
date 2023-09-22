@@ -49,11 +49,11 @@ TruncateInterstageVariables::TruncateInterstageVariables() = default;
 TruncateInterstageVariables::~TruncateInterstageVariables() = default;
 
 ast::transform::Transform::ApplyResult TruncateInterstageVariables::Apply(
-    const Program* src,
+    const Program& src,
     const ast::transform::DataMap& config,
     ast::transform::DataMap&) const {
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     const auto* data = config.Get<Config>();
     if (data == nullptr) {

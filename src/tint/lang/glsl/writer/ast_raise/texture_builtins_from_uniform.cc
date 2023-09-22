@@ -45,9 +45,9 @@ namespace {
 /// The member name of the texture builtin values.
 constexpr std::string_view kTextureBuiltinValuesMemberNamePrefix = "texture_builtin_value_";
 
-bool ShouldRun(const Program* program) {
-    for (auto* fn : program->AST().Functions()) {
-        if (auto* sem_fn = program->Sem().Get(fn)) {
+bool ShouldRun(const Program& program) {
+    for (auto* fn : program.AST().Functions()) {
+        if (auto* sem_fn = program.Sem().Get(fn)) {
             for (auto* builtin : sem_fn->DirectlyCalledBuiltins()) {
                 // GLSL ES  has no native support for the counterpart of
                 // textureNumLevels (textureQueryLevels) and textureNumSamples (textureSamples)
@@ -74,7 +74,7 @@ struct TextureBuiltinsFromUniform::State {
     /// @param program the source program
     /// @param in the input transform data
     /// @param out the output transform data
-    explicit State(const Program* program,
+    explicit State(const Program& program,
                    const ast::transform::DataMap& in,
                    ast::transform::DataMap& out)
         : src(program), inputs(in), outputs(out) {}
@@ -91,7 +91,7 @@ struct TextureBuiltinsFromUniform::State {
             return resolver::Resolve(b);
         }
 
-        if (!ShouldRun(ctx.src)) {
+        if (!ShouldRun(src)) {
             return SkipTransform;
         }
 
@@ -262,7 +262,7 @@ struct TextureBuiltinsFromUniform::State {
 
   private:
     /// The source program
-    const Program* const src;
+    const Program& src;
     /// The transform inputs
     const ast::transform::DataMap& inputs;
     /// The transform outputs
@@ -270,9 +270,9 @@ struct TextureBuiltinsFromUniform::State {
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
     /// Alias to the semantic info in ctx.src
-    const sem::Info& sem = ctx.src->Sem();
+    const sem::Info& sem = src.Sem();
 
     /// The bindpoint to byte offset and field to pass out in transform result.
     /// For one texture type, it could only be passed into one of the
@@ -352,7 +352,7 @@ struct TextureBuiltinsFromUniform::State {
         }
 
         // Find if there's any existing global variable using the same cfg->ubo_binding
-        for (auto* var : src->AST().Globals<ast::Var>()) {
+        for (auto* var : src.AST().Globals<ast::Var>()) {
             if (var->HasBindingPoint()) {
                 auto* global_sem = sem.Get<sem::GlobalVariable>(var);
 
@@ -476,7 +476,7 @@ struct TextureBuiltinsFromUniform::State {
 };
 
 ast::transform::Transform::ApplyResult TextureBuiltinsFromUniform::Apply(
-    const Program* src,
+    const Program& src,
     const ast::transform::DataMap& inputs,
     ast::transform::DataMap& outputs) const {
     return State{src, inputs, outputs}.Run();

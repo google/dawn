@@ -36,9 +36,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::spirv::writer::VectorizeMatrixConversions);
 namespace tint::spirv::writer {
 namespace {
 
-bool ShouldRun(const Program* program) {
-    for (auto* node : program->ASTNodes().Objects()) {
-        if (auto* sem = program->Sem().GetVal(node)) {
+bool ShouldRun(const Program& program) {
+    for (auto* node : program.ASTNodes().Objects()) {
+        if (auto* sem = program.Sem().GetVal(node)) {
             if (auto* call = sem->UnwrapMaterialize()->As<sem::Call>()) {
                 if (call->Target()->Is<sem::ValueConversion>() &&
                     call->Type()->Is<core::type::Matrix>()) {
@@ -60,7 +60,7 @@ VectorizeMatrixConversions::VectorizeMatrixConversions() = default;
 VectorizeMatrixConversions::~VectorizeMatrixConversions() = default;
 
 ast::transform::Transform::ApplyResult VectorizeMatrixConversions::Apply(
-    const Program* src,
+    const Program& src,
     const ast::transform::DataMap&,
     ast::transform::DataMap&) const {
     if (!ShouldRun(src)) {
@@ -68,7 +68,7 @@ ast::transform::Transform::ApplyResult VectorizeMatrixConversions::Apply(
     }
 
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     using HelperFunctionKey =
         tint::UnorderedKeyWrapper<std::tuple<const core::type::Matrix*, const core::type::Matrix*>>;
@@ -76,7 +76,7 @@ ast::transform::Transform::ApplyResult VectorizeMatrixConversions::Apply(
     std::unordered_map<HelperFunctionKey, Symbol> matrix_convs;
 
     ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::CallExpression* {
-        auto* call = src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
+        auto* call = src.Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
         auto* ty_conv = call->Target()->As<sem::ValueConversion>();
         if (!ty_conv) {
             return nullptr;

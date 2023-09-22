@@ -1258,18 +1258,18 @@ Renamer::Config::~Config() = default;
 Renamer::Renamer() = default;
 Renamer::~Renamer() = default;
 
-Transform::ApplyResult Renamer::Apply(const Program* src,
+Transform::ApplyResult Renamer::Apply(const Program& src,
                                       const DataMap& inputs,
                                       DataMap& outputs) const {
     Hashset<Symbol, 16> global_decls;
-    for (auto* decl : src->AST().TypeDecls()) {
+    for (auto* decl : src.AST().TypeDecls()) {
         global_decls.Add(decl->name->symbol);
     }
 
     // Identifiers that need to keep their symbols preserved.
     Hashset<const Identifier*, 16> preserved_identifiers;
 
-    for (auto* node : src->ASTNodes().Objects()) {
+    for (auto* node : src.ASTNodes().Objects()) {
         auto preserve_if_builtin_type = [&](const Identifier* ident) {
             if (!global_decls.Contains(ident->symbol)) {
                 preserved_identifiers.Add(ident);
@@ -1279,10 +1279,10 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
         Switch(
             node,
             [&](const MemberAccessorExpression* accessor) {
-                auto* sem = src->Sem().Get(accessor)->UnwrapLoad();
+                auto* sem = src.Sem().Get(accessor)->UnwrapLoad();
                 if (sem->Is<sem::Swizzle>()) {
                     preserved_identifiers.Add(accessor->member);
-                } else if (auto* str_expr = src->Sem().GetVal(accessor->object)) {
+                } else if (auto* str_expr = src.Sem().GetVal(accessor->object)) {
                     if (auto* ty = str_expr->Type()->UnwrapRef()->As<core::type::Struct>()) {
                         if (!ty->Is<sem::Struct>()) {  // Builtin structure
                             preserved_identifiers.Add(accessor->member);
@@ -1304,7 +1304,7 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
             },
             [&](const IdentifierExpression* expr) {
                 Switch(
-                    src->Sem().Get(expr),  //
+                    src.Sem().Get(expr),  //
                     [&](const sem::BuiltinEnumExpressionBase*) {
                         preserved_identifiers.Add(expr->identifier);
                     },
@@ -1314,7 +1314,7 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
             },
             [&](const CallExpression* call) {
                 Switch(
-                    src->Sem().Get(call)->UnwrapMaterialize()->As<sem::Call>()->Target(),
+                    src.Sem().Get(call)->UnwrapMaterialize()->As<sem::Call>()->Target(),
                     [&](const sem::BuiltinFn*) {
                         preserved_identifiers.Add(call->target->identifier);
                     },
@@ -1372,7 +1372,7 @@ Transform::ApplyResult Renamer::Apply(const Program* src,
     Hashmap<Symbol, Symbol, 32> remappings;
 
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ false};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ false};
 
     ctx.ReplaceAll([&](const Identifier* ident) -> const Identifier* {
         const auto symbol = ident->symbol;

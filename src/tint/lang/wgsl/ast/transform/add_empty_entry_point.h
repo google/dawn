@@ -28,7 +28,7 @@ class AddEmptyEntryPoint final : public Castable<AddEmptyEntryPoint, Transform> 
     ~AddEmptyEntryPoint() override;
 
     /// @copydoc Transform::Apply
-    ApplyResult Apply(const Program* program,
+    ApplyResult Apply(const Program& program,
                       const DataMap& inputs,
                       DataMap& outputs) const override;
 };

@@ -51,15 +51,15 @@ struct PointerOp {
 /// PIMPL state for the transform
 struct SimplifyPointers::State {
     /// The source program
-    const Program* const src;
+    const Program& src;
     /// The target program builder
     ProgramBuilder b;
     /// The clone context
-    program::CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx = {&b, &src, /* auto_clone_symbols */ true};
 
     /// Constructor
     /// @param program the source program
-    explicit State(const Program* program) : src(program) {}
+    explicit State(const Program& program) : src(program) {}
 
     /// Traverses the expression `expr` looking for non-literal array indexing
     /// expressions that would affect the computed address of a pointer
@@ -259,7 +259,7 @@ SimplifyPointers::SimplifyPointers() = default;
 
 SimplifyPointers::~SimplifyPointers() = default;
 
-Transform::ApplyResult SimplifyPointers::Apply(const Program* src, const DataMap&, DataMap&) const {
+Transform::ApplyResult SimplifyPointers::Apply(const Program& src, const DataMap&, DataMap&) const {
     return State(src).Run();
 }
 

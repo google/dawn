@@ -31,9 +31,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::transform::VectorizeScalarMatrixInitializer
 namespace tint::ast::transform {
 namespace {
 
-bool ShouldRun(const Program* program) {
-    for (auto* node : program->ASTNodes().Objects()) {
-        if (auto* call = program->Sem().Get<sem::Call>(node)) {
+bool ShouldRun(const Program& program) {
+    for (auto* node : program.ASTNodes().Objects()) {
+        if (auto* call = program.Sem().Get<sem::Call>(node)) {
             if (call->Target()->Is<sem::ValueConstructor>() &&
                 call->Type()->Is<core::type::Matrix>()) {
                 auto& args = call->Arguments();
@@ -52,7 +52,7 @@ VectorizeScalarMatrixInitializers::VectorizeScalarMatrixInitializers() = default
 
 VectorizeScalarMatrixInitializers::~VectorizeScalarMatrixInitializers() = default;
 
-Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* src,
+Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program& src,
                                                                 const DataMap&,
                                                                 DataMap&) const {
     if (!ShouldRun(src)) {
@@ -60,12 +60,12 @@ Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* s
     }
 
     ProgramBuilder b;
-    program::CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    program::CloneContext ctx{&b, &src, /* auto_clone_symbols */ true};
 
     std::unordered_map<const core::type::Matrix*, Symbol> scalar_inits;
 
     ctx.ReplaceAll([&](const CallExpression* expr) -> const CallExpression* {
-        auto* call = src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
+        auto* call = src.Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
         auto* ty_init = call->Target()->As<sem::ValueConstructor>();
         if (!ty_init) {
             return nullptr;

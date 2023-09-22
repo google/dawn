@@ -3786,12 +3786,12 @@ TEST_P(BuiltinTextureTest, DISABLED_OutsideFunction_IsError) {
                         pb.Stage(ast::PipelineStage::kFragment),
                     });
 
-            auto program = std::make_unique<Program>(resolver::Resolve(pb));
-            auto b = std::make_unique<Builder>(program.get());
+            auto program = resolver::Resolve(pb);
+            Builder b(program);
 
-            b->GenerateGlobalVariable(texture);
-            b->GenerateGlobalVariable(sampler);
-            b->GenerateExpression(call);
+            b.GenerateGlobalVariable(texture);
+            b.GenerateGlobalVariable(sampler);
+            b.GenerateExpression(call);
         },
         "Internal error: trying to add SPIR-V instruction ");
 }

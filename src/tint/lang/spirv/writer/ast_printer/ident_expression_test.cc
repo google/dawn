@@ -36,11 +36,11 @@ TEST_F(SpirvASTPrinterTest, IdentifierExpression_GlobalConst) {
             auto* expr = pb.Expr("c");
             pb.WrapInFunction(expr);
 
-            auto program = std::make_unique<Program>(resolver::Resolve(pb));
-            auto b = std::make_unique<Builder>(program.get());
+            auto program = resolver::Resolve(pb);
+            Builder b(program);
 
-            b->GenerateGlobalVariable(v);
-            b->GenerateIdentifierExpression(expr);
+            b.GenerateGlobalVariable(v);
+            b.GenerateIdentifierExpression(expr);
         },
         "internal compiler error: unable to find ID for variable: c");
 }

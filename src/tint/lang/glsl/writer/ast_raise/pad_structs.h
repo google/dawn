@@ -33,7 +33,7 @@ class PadStructs final : public Castable<PadStructs, ast::transform::Transform> 
     ~PadStructs() override;
 
     /// @copydoc ast::transform::Transform::Apply
-    ApplyResult Apply(const Program* program,
+    ApplyResult Apply(const Program& program,
                       const ast::transform::DataMap& inputs,
                       ast::transform::DataMap& outputs) const override;
 };
