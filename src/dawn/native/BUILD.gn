@@ -76,9 +76,9 @@ config("vulkan_rpath") {
   }
 }
 
-# Config that adds include directory for vulkan-tools.
-config("vulkan_tools_include") {
-  include_dirs = [ "${dawn_vulkan_tools_dir}" ]
+# Config that adds include directory for vulkan-utility-libraries.
+config("vulkan_utility_libraries_include") {
+  include_dirs = [ "${dawn_vulkan_utility_libraries_dir}/include" ]
 }
 
 dawn_json_generator("utils_gen") {
@@ -725,8 +725,7 @@ source_set("sources") {
   }
 
   if (dawn_enable_vulkan) {
-    configs += [ ":vulkan_tools_include" ]
-    deps += [ "${dawn_vulkan_tools_dir}:vulkan_tools_headers" ]
+    configs += [ ":vulkan_utility_libraries_include" ]
     public_deps += [ "${dawn_vulkan_headers_dir}:vulkan_headers" ]
     sources += [
       "vulkan/BackendVk.cpp",

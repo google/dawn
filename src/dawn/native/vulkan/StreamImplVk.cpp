@@ -20,7 +20,7 @@
 #include "dawn/native/stream/Stream.h"
 #include "dawn/native/vulkan/RenderPassCache.h"
 
-#include "icd/generated/vk_typemap_helper.h"
+#include <vulkan/utility/vk_struct_helper.hpp>  // NOLINT(build/include_order)
 
 namespace dawn::native {
 
@@ -34,7 +34,7 @@ void ValidatePnextImpl(const VkBaseOutStructure* root) {
     while (next != nullptr) {
         // Assert that the type of each pNext struct is exactly one of the specified
         // templates.
-        DAWN_ASSERT(((LvlTypeMap<VK_STRUCT_TYPES>::kSType == next->sType ? 1 : 0) + ... + 0) == 1);
+        DAWN_ASSERT(((vku::GetSType<VK_STRUCT_TYPES>() == next->sType ? 1 : 0) + ... + 0) == 1);
         next = reinterpret_cast<const VkBaseOutStructure*>(next->pNext);
     }
 }
@@ -44,7 +44,7 @@ void SerializePnextImpl(stream::Sink* sink, const VkBaseOutStructure* root) {
     const VkBaseOutStructure* next = reinterpret_cast<const VkBaseOutStructure*>(root->pNext);
     const VK_STRUCT_TYPE* found = nullptr;
     while (next != nullptr) {
-        if (LvlTypeMap<VK_STRUCT_TYPE>::kSType == next->sType) {
+        if (vku::GetSType<VK_STRUCT_TYPE>() == next->sType) {
             if (found == nullptr) {
                 found = reinterpret_cast<const VK_STRUCT_TYPE*>(next);
             } else {
