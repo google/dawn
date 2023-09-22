@@ -53,11 +53,13 @@ class TestHelperBase : public ProgramBuilder, public BASE {
         if (spirv_builder) {
             return *spirv_builder;
         }
-        [&] {
-            ASSERT_TRUE(IsValid()) << "Builder program is not valid\n" << Diagnostics().str();
-        }();
+        if (!IsValid()) {
+            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics().str();
+        }
         program = std::make_unique<Program>(resolver::Resolve(*this));
-        [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
+        if (!program->IsValid()) {
+            ADD_FAILURE() << program->Diagnostics().str();
+        }
         spirv_builder = std::make_unique<Builder>(*program);
         return *spirv_builder;
     }
@@ -72,13 +74,17 @@ class TestHelperBase : public ProgramBuilder, public BASE {
         if (spirv_builder) {
             return *spirv_builder;
         }
-        [&] {
-            ASSERT_TRUE(IsValid()) << "Builder program is not valid\n" << Diagnostics().str();
-        }();
+        if (!IsValid()) {
+            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics().str();
+        }
         program = std::make_unique<Program>(resolver::Resolve(*this));
-        [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
+        if (!program->IsValid()) {
+            ADD_FAILURE() << program->Diagnostics().str();
+        }
         auto result = Sanitize(*program, options);
-        [&] { ASSERT_TRUE(result.program.IsValid()) << result.program.Diagnostics().str(); }();
+        if (!result.program.IsValid()) {
+            ADD_FAILURE() << result.program.Diagnostics().str();
+        }
         *program = std::move(result.program);
         bool zero_initialize_workgroup_memory =
             !options.disable_workgroup_init &&

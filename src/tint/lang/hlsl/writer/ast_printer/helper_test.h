@@ -51,11 +51,13 @@ class TestHelperBase : public BODY, public ProgramBuilder {
         if (gen_) {
             return *gen_;
         }
-        [&] {
-            ASSERT_TRUE(IsValid()) << "Builder program is not valid\n" << Diagnostics().str();
-        }();
+        if (!IsValid()) {
+            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics().str();
+        }
         program = std::make_unique<Program>(resolver::Resolve(*this));
-        [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
+        if (!program->IsValid()) {
+            ADD_FAILURE() << program->Diagnostics().str();
+        }
         gen_ = std::make_unique<ASTPrinter>(*program);
         return *gen_;
     }
@@ -70,17 +72,18 @@ class TestHelperBase : public BODY, public ProgramBuilder {
         if (gen_) {
             return *gen_;
         }
-        [&] {
-            ASSERT_TRUE(IsValid()) << "Builder program is not valid\n" << Diagnostics().str();
-        }();
+        if (!IsValid()) {
+            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics().str();
+        }
         program = std::make_unique<Program>(resolver::Resolve(*this));
-        [&] { ASSERT_TRUE(program->IsValid()) << program->Diagnostics().str(); }();
+        if (!program->IsValid()) {
+            ADD_FAILURE() << program->Diagnostics().str();
+        }
 
         auto sanitized_result = Sanitize(*program, options);
-        [&] {
-            ASSERT_TRUE(sanitized_result.program.IsValid())
-                << sanitized_result.program.Diagnostics().str();
-        }();
+        if (!sanitized_result.program.IsValid()) {
+            ADD_FAILURE() << sanitized_result.program.Diagnostics().str();
+        }
 
         ast::transform::Manager transform_manager;
         ast::transform::DataMap transform_data;
@@ -90,7 +93,9 @@ class TestHelperBase : public BODY, public ProgramBuilder {
             /* preserve_unicode */ true);
         transform_manager.Add<tint::ast::transform::Renamer>();
         auto result = transform_manager.Run(sanitized_result.program, transform_data, outputs);
-        [&] { ASSERT_TRUE(result.IsValid()) << result.Diagnostics().str(); }();
+        if (!result.IsValid()) {
+            ADD_FAILURE() << result.Diagnostics().str();
+        }
         *program = std::move(result);
         gen_ = std::make_unique<ASTPrinter>(*program);
         return *gen_;

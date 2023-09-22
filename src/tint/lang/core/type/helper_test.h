@@ -30,9 +30,9 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     /// Builds and returns the program. Must only be called once per test
     /// @return the built program
     Program Build() {
-        [&] {
-            ASSERT_TRUE(IsValid()) << "Builder program is not valid\n" << Diagnostics().str();
-        }();
+        if (!IsValid()) {
+            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics().str();
+        }
         return resolver::Resolve(*this);
     }
 };
