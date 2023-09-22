@@ -44,7 +44,7 @@ TEST(ChangeUnaryOperatorTest, Operator_Not_Applicable) {
   )";
     Source::File file("test.wgsl", content);
     auto program = wgsl::reader::Parse(&file);
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     NodeIdMap node_id_map(program);
 
@@ -136,7 +136,7 @@ TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable1) {
   )";
     Source::File file("test.wgsl", content);
     auto program = wgsl::reader::Parse(&file);
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     NodeIdMap node_id_map(program);
 
@@ -155,7 +155,7 @@ TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable1) {
     ASSERT_TRUE(MaybeApplyMutation(program,
                                    MutationChangeUnaryOperator(comp_a_id, core::UnaryOp::kNegation),
                                    node_id_map, program, &node_id_map, nullptr));
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(program, options);
@@ -177,7 +177,7 @@ TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable2) {
     })";
     Source::File file("test.wgsl", content);
     auto program = wgsl::reader::Parse(&file);
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     NodeIdMap node_id_map(program);
 
@@ -196,7 +196,7 @@ TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable2) {
     ASSERT_TRUE(MaybeApplyMutation(program,
                                    MutationChangeUnaryOperator(comp_b_id, core::UnaryOp::kNegation),
                                    node_id_map, program, &node_id_map, nullptr));
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(program, options);
@@ -220,7 +220,7 @@ TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable3) {
   )";
     Source::File file("test.wgsl", content);
     auto program = wgsl::reader::Parse(&file);
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     NodeIdMap node_id_map(program);
 
@@ -239,7 +239,7 @@ TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable3) {
     ASSERT_TRUE(MaybeApplyMutation(
         program, MutationChangeUnaryOperator(neg_a_id, core::UnaryOp::kComplement), node_id_map,
         program, &node_id_map, nullptr));
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(program, options);
@@ -262,7 +262,7 @@ TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable4) {
   )";
     Source::File file("test.wgsl", content);
     auto program = wgsl::reader::Parse(&file);
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     NodeIdMap node_id_map(program);
 
@@ -281,7 +281,7 @@ TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable4) {
     ASSERT_TRUE(MaybeApplyMutation(
         program, MutationChangeUnaryOperator(neg_b_id, core::UnaryOp::kComplement), node_id_map,
         program, &node_id_map, nullptr));
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(program, options);

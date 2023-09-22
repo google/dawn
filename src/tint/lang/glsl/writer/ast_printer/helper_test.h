@@ -53,11 +53,11 @@ class TestHelperBase : public BODY, public ProgramBuilder {
             return *gen_;
         }
         if (!IsValid()) {
-            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics().str();
+            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics();
         }
         program = std::make_unique<Program>(resolver::Resolve(*this));
         if (!program->IsValid()) {
-            ADD_FAILURE() << program->Diagnostics().str();
+            ADD_FAILURE() << program->Diagnostics();
         }
         gen_ = std::make_unique<ASTPrinter>(*program, version);
         return *gen_;
@@ -76,16 +76,16 @@ class TestHelperBase : public BODY, public ProgramBuilder {
             return *gen_;
         }
         if (!IsValid()) {
-            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics().str();
+            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics();
         }
         program = std::make_unique<Program>(resolver::Resolve(*this));
         if (!program->IsValid()) {
-            ADD_FAILURE() << program->Diagnostics().str();
+            ADD_FAILURE() << program->Diagnostics();
         }
 
         auto sanitized_result = Sanitize(*program, options, /* entry_point */ "");
         if (!sanitized_result.program.IsValid()) {
-            ADD_FAILURE() << sanitized_result.program.Diagnostics().str();
+            ADD_FAILURE() << sanitized_result.program.Diagnostics();
         }
 
         *program = std::move(sanitized_result.program);

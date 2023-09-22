@@ -52,11 +52,11 @@ class TestHelperBase : public BODY, public ProgramBuilder {
             return *gen_;
         }
         if (!IsValid()) {
-            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics().str();
+            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics();
         }
         program = std::make_unique<Program>(resolver::Resolve(*this));
         if (!program->IsValid()) {
-            ADD_FAILURE() << program->Diagnostics().str();
+            ADD_FAILURE() << program->Diagnostics();
         }
         gen_ = std::make_unique<ASTPrinter>(*program);
         return *gen_;
@@ -73,16 +73,16 @@ class TestHelperBase : public BODY, public ProgramBuilder {
             return *gen_;
         }
         if (!IsValid()) {
-            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics().str();
+            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics();
         }
         program = std::make_unique<Program>(resolver::Resolve(*this));
         if (!program->IsValid()) {
-            ADD_FAILURE() << program->Diagnostics().str();
+            ADD_FAILURE() << program->Diagnostics();
         }
 
         auto sanitized_result = Sanitize(*program, options);
         if (!sanitized_result.program.IsValid()) {
-            ADD_FAILURE() << sanitized_result.program.Diagnostics().str();
+            ADD_FAILURE() << sanitized_result.program.Diagnostics();
         }
 
         ast::transform::Manager transform_manager;
@@ -94,7 +94,7 @@ class TestHelperBase : public BODY, public ProgramBuilder {
         transform_manager.Add<tint::ast::transform::Renamer>();
         auto result = transform_manager.Run(sanitized_result.program, transform_data, outputs);
         if (!result.IsValid()) {
-            ADD_FAILURE() << result.Diagnostics().str();
+            ADD_FAILURE() << result.Diagnostics();
         }
         *program = std::move(result);
         gen_ = std::make_unique<ASTPrinter>(*program);

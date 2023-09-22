@@ -35,7 +35,7 @@ TEST(ExpressionSizeTest, Basic) {
   )";
     Source::File file("test.wgsl", content);
     auto program = wgsl::reader::Parse(&file);
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     ExpressionSize expression_size(program);
     for (const auto* node : program.ASTNodes().Objects()) {

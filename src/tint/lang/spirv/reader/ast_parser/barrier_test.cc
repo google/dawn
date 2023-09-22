@@ -62,7 +62,7 @@ TEST_F(SpirvASTParserTest, WorkgroupBarrier) {
                OpReturn
                OpFunctionEnd
   )");
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
     auto* helper = program.AST().Functions().Find(program.Symbols().Get("helper"));
     ASSERT_NE(helper, nullptr);
     ASSERT_GT(helper->body->statements.Length(), 0u);
@@ -95,7 +95,7 @@ TEST_F(SpirvASTParserTest, StorageBarrier) {
                OpReturn
                OpFunctionEnd
   )");
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
     auto* helper = program.AST().Functions().Find(program.Symbols().Get("helper"));
     ASSERT_NE(helper, nullptr);
     ASSERT_GT(helper->body->statements.Length(), 0u);
@@ -128,7 +128,7 @@ TEST_F(SpirvASTParserTest, TextureBarrier) {
                OpReturn
                OpFunctionEnd
   )");
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
     auto* helper = program.AST().Functions().Find(program.Symbols().Get("helper"));
     ASSERT_NE(helper, nullptr);
     ASSERT_GT(helper->body->statements.Length(), 0u);
@@ -162,7 +162,7 @@ TEST_F(SpirvASTParserTest, WorkgroupAndTextureAndStorageBarrier) {
                OpReturn
                OpFunctionEnd
   )");
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
     auto* helper = program.AST().Functions().Find(program.Symbols().Get("helper"));
     ASSERT_NE(helper, nullptr);
     ASSERT_GT(helper->body->statements.Length(), 2u);

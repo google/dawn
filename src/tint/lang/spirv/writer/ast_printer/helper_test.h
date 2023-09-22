@@ -54,11 +54,11 @@ class TestHelperBase : public ProgramBuilder, public BASE {
             return *spirv_builder;
         }
         if (!IsValid()) {
-            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics().str();
+            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics();
         }
         program = std::make_unique<Program>(resolver::Resolve(*this));
         if (!program->IsValid()) {
-            ADD_FAILURE() << program->Diagnostics().str();
+            ADD_FAILURE() << program->Diagnostics();
         }
         spirv_builder = std::make_unique<Builder>(*program);
         return *spirv_builder;
@@ -75,15 +75,15 @@ class TestHelperBase : public ProgramBuilder, public BASE {
             return *spirv_builder;
         }
         if (!IsValid()) {
-            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics().str();
+            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics();
         }
         program = std::make_unique<Program>(resolver::Resolve(*this));
         if (!program->IsValid()) {
-            ADD_FAILURE() << program->Diagnostics().str();
+            ADD_FAILURE() << program->Diagnostics();
         }
         auto result = Sanitize(*program, options);
         if (!result.program.IsValid()) {
-            ADD_FAILURE() << result.program.Diagnostics().str();
+            ADD_FAILURE() << result.program.Diagnostics();
         }
         *program = std::move(result.program);
         bool zero_initialize_workgroup_memory =

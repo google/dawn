@@ -1208,7 +1208,7 @@ int main(int argc, const char** argv) {
     auto program = transform_manager.Run(info.program, std::move(transform_inputs), outputs);
     if (!program.IsValid()) {
         tint::cmd::PrintWGSL(std::cerr, program);
-        std::cerr << program.Diagnostics().str() << std::endl;
+        std::cerr << program.Diagnostics() << std::endl;
         return 1;
     }
 

@@ -101,7 +101,7 @@ TEST_F(StorageTextureTest, F32) {
 
     auto program = Build();
 
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
     ASSERT_TRUE(s->Is<Texture>());
     ASSERT_TRUE(s->Is<StorageTexture>());
     EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<F32>());
@@ -114,7 +114,7 @@ TEST_F(StorageTextureTest, U32) {
 
     auto program = Build();
 
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
     ASSERT_TRUE(s->Is<Texture>());
     ASSERT_TRUE(s->Is<StorageTexture>());
     EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<U32>());
@@ -127,7 +127,7 @@ TEST_F(StorageTextureTest, I32) {
 
     auto program = Build();
 
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
     ASSERT_TRUE(s->Is<Texture>());
     ASSERT_TRUE(s->Is<StorageTexture>());
     EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<I32>());

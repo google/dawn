@@ -48,7 +48,7 @@ Program Manager::Run(const Program& program_in, const DataMap& inputs, DataMap& 
         std::cout << wgsl << std::endl;
         if (!program.IsValid()) {
             std::cout << "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --" << std::endl;
-            std::cout << program.Diagnostics().str() << std::endl;
+            std::cout << program.Diagnostics() << std::endl;
         }
         std::cout << "=========================================================" << std::endl
                   << std::endl;

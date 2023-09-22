@@ -65,7 +65,7 @@ TEST_F(TypeStructTest, Layout) {
                                         });
 
     auto p = Build();
-    ASSERT_TRUE(p.IsValid()) << p.Diagnostics().str();
+    ASSERT_TRUE(p.IsValid()) << p.Diagnostics();
 
     auto* sem_inner_st = p.Sem().Get(inner_st);
     auto* sem_outer_st = p.Sem().Get(outer_st);
@@ -96,7 +96,7 @@ TEST_F(TypeStructTest, Location) {
                                });
 
     auto p = Build();
-    ASSERT_TRUE(p.IsValid()) << p.Diagnostics().str();
+    ASSERT_TRUE(p.IsValid()) << p.Diagnostics();
 
     auto* sem = p.Sem().Get(st);
     ASSERT_EQ(2u, sem->Members().Length());
@@ -127,7 +127,7 @@ TEST_F(TypeStructTest, IsConstructable) {
                                                 Member("runtime_sized_array", ty.array<i32>()),
                                             });
     auto p = Build();
-    ASSERT_TRUE(p.IsValid()) << p.Diagnostics().str();
+    ASSERT_TRUE(p.IsValid()) << p.Diagnostics();
 
     auto* sem_inner = p.Sem().Get(inner);
     auto* sem_outer = p.Sem().Get(outer);
@@ -160,7 +160,7 @@ TEST_F(TypeStructTest, HasCreationFixedFootprint) {
                                             });
 
     auto p = Build();
-    ASSERT_TRUE(p.IsValid()) << p.Diagnostics().str();
+    ASSERT_TRUE(p.IsValid()) << p.Diagnostics();
 
     auto* sem_inner = p.Sem().Get(inner);
     auto* sem_outer = p.Sem().Get(outer);
@@ -193,7 +193,7 @@ TEST_F(TypeStructTest, HasFixedFootprint) {
                                             });
 
     auto p = Build();
-    ASSERT_TRUE(p.IsValid()) << p.Diagnostics().str();
+    ASSERT_TRUE(p.IsValid()) << p.Diagnostics();
 
     auto* sem_inner = p.Sem().Get(inner);
     auto* sem_outer = p.Sem().Get(outer);

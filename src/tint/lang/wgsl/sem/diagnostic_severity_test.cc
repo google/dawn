@@ -130,7 +130,7 @@ class DiagnosticSeverityTest : public TestHelper {
         auto* bar = Func("bar", {}, ty.void_(), tint::Vector{return_bar});
 
         auto p = Build();
-        EXPECT_TRUE(p.IsValid()) << p.Diagnostics().str();
+        EXPECT_TRUE(p.IsValid()) << p.Diagnostics();
 
         EXPECT_EQ(p.Sem().DiagnosticSeverity(foo, rule), func_severity);
         EXPECT_EQ(p.Sem().DiagnosticSeverity(block_1, rule), block_severity);

@@ -45,8 +45,8 @@ void CheckStatementDeletionWorks(
     Source::File expected_file("expected.wgsl", expected);
     auto expected_program = wgsl::reader::Parse(&expected_file);
 
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
-    ASSERT_TRUE(expected_program.IsValid()) << expected_program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
+    ASSERT_TRUE(expected_program.IsValid()) << expected_program.Diagnostics();
 
     NodeIdMap node_id_map(program);
     const auto* statement = statement_finder(program);
@@ -55,7 +55,7 @@ void CheckStatementDeletionWorks(
     ASSERT_NE(statement_id, 0);
     ASSERT_TRUE(MaybeApplyMutation(program, MutationDeleteStatement(statement_id), node_id_map,
                                    program, &node_id_map, nullptr));
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
     wgsl::writer::Options options;
     auto transformed_result = wgsl::writer::Generate(program, options);
     auto expected_result = wgsl::writer::Generate(expected_program, options);
@@ -70,7 +70,7 @@ void CheckStatementDeletionNotAllowed(
     Source::File original_file("original.wgsl", original);
     auto program = wgsl::reader::Parse(&original_file);
 
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     NodeIdMap node_id_map(program);
     const auto* statement = statement_finder(program);

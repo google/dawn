@@ -48,7 +48,7 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
     auto program = wgsl::reader::Parse(&file);
     if (!program.IsValid()) {
         std::cout << "Trying to mutate an invalid program:" << std::endl
-                  << program.Diagnostics().str() << std::endl;
+                  << program.Diagnostics() << std::endl;
         return 0;
     }
 
@@ -61,7 +61,7 @@ extern "C" size_t LLVMFuzzerCustomMutator(uint8_t* data,
     if (!program.IsValid()) {
         std::cout << "Mutator produced invalid WGSL:" << std::endl
                   << "  seed: " << seed << std::endl
-                  << program.Diagnostics().str() << std::endl;
+                  << program.Diagnostics() << std::endl;
         return 0;
     }
 
@@ -115,7 +115,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
         fuzzer.Run(data, size);
         if (fuzzer.HasErrors()) {
             std::cout << "Fuzzing " << target.name << " produced an error" << std::endl
-                      << fuzzer.Diagnostics().str() << std::endl;
+                      << fuzzer.Diagnostics() << std::endl;
         }
     }
 

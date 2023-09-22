@@ -80,7 +80,7 @@ TEST(ChangeBinaryOperatorTest, NotApplicable_Simple) {
   )";
     Source::File file("test.wgsl", content);
     auto program = wgsl::reader::Parse(&file);
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     NodeIdMap node_id_map(program);
 
@@ -121,7 +121,7 @@ TEST(ChangeBinaryOperatorTest, Applicable_Simple) {
 )";
     Source::File file("test.wgsl", shader);
     auto program = wgsl::reader::Parse(&file);
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     NodeIdMap node_id_map(program);
 
@@ -139,7 +139,7 @@ TEST(ChangeBinaryOperatorTest, Applicable_Simple) {
     ASSERT_TRUE(MaybeApplyMutation(
         program, MutationChangeBinaryOperator(sum_expr_id, core::BinaryOp::kSubtract), node_id_map,
         program, &node_id_map, nullptr));
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(program, options);
@@ -184,7 +184,7 @@ void CheckMutations(const std::string& lhs_type,
     for (auto new_operator : all_operators) {
         Source::File file("test.wgsl", shader.str());
         auto program = wgsl::reader::Parse(&file);
-        ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+        ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
         NodeIdMap node_id_map(program);
 
@@ -211,12 +211,12 @@ void CheckMutations(const std::string& lhs_type,
             if (new_operator != binary_expr->op) {
                 Source::File invalid_file("test.wgsl", expected_shader.str());
                 auto invalid_program = wgsl::reader::Parse(&invalid_file);
-                ASSERT_FALSE(invalid_program.IsValid()) << program.Diagnostics().str();
+                ASSERT_FALSE(invalid_program.IsValid()) << program.Diagnostics();
             }
         } else {
             ASSERT_TRUE(
                 MaybeApplyMutation(program, mutation, node_id_map, program, &node_id_map, nullptr));
-            ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+            ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
             wgsl::writer::Options options;
             auto result = wgsl::writer::Generate(program, options);

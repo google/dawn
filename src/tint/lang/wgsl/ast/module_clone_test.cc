@@ -124,12 +124,12 @@ const declaration_order_check_4 : i32 = 1;
     // Parse the wgsl, create the src program
     auto src = wgsl::reader::Parse(&file);
 
-    ASSERT_TRUE(src.IsValid()) << src.Diagnostics().str();
+    ASSERT_TRUE(src.IsValid()) << src.Diagnostics();
 
     // Clone the src program to dst
     Program dst(src.Clone());
 
-    ASSERT_TRUE(dst.IsValid()) << dst.Diagnostics().str();
+    ASSERT_TRUE(dst.IsValid()) << dst.Diagnostics();
 
     // Expect the printed strings to match
     EXPECT_EQ(Program::printer(src), Program::printer(dst));

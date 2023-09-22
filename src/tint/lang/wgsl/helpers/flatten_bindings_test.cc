@@ -32,7 +32,7 @@ class FlattenBindingsTest : public ::testing::Test {};
 TEST_F(FlattenBindingsTest, NoBindings) {
     ProgramBuilder b;
     Program program(resolver::Resolve(b));
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     auto flattened = tint::writer::FlattenBindings(program);
     EXPECT_FALSE(flattened);
@@ -45,7 +45,7 @@ TEST_F(FlattenBindingsTest, AlreadyFlat) {
     b.GlobalVar("c", b.ty.i32(), core::AddressSpace::kUniform, b.Group(0_a), b.Binding(2_a));
 
     Program program(resolver::Resolve(b));
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     auto flattened = tint::writer::FlattenBindings(program);
     EXPECT_FALSE(flattened);
@@ -59,7 +59,7 @@ TEST_F(FlattenBindingsTest, NotFlat_SingleNamespace) {
     b.WrapInFunction(b.Expr("a"), b.Expr("b"), b.Expr("c"));
 
     Program program(resolver::Resolve(b));
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     auto flattened = tint::writer::FlattenBindings(program);
     EXPECT_TRUE(flattened);
@@ -121,7 +121,7 @@ TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
                      b.Assign(b.Phony(), "texture6"));
 
     Program program(resolver::Resolve(b));
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     auto flattened = tint::writer::FlattenBindings(program);
     EXPECT_TRUE(flattened);

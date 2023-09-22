@@ -116,8 +116,7 @@ class TransformTestBase : public BASE {
     template <typename TRANSFORM>
     bool ShouldRun(Program&& program, const DataMap& data = {}) {
         if (!program.IsValid()) {
-            ADD_FAILURE() << "ShouldRun() called with invalid program: "
-                          << program.Diagnostics().str();
+            ADD_FAILURE() << "ShouldRun() called with invalid program: " << program.Diagnostics();
             return false;
         }
 
@@ -130,7 +129,7 @@ class TransformTestBase : public BASE {
         }
         if (!result->IsValid()) {
             ADD_FAILURE() << "Apply() called by ShouldRun() returned errors: "
-                          << result->Diagnostics().str();
+                          << result->Diagnostics();
             return true;
         }
         return result.has_value();

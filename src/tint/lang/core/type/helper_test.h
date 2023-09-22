@@ -31,7 +31,7 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     /// @return the built program
     Program Build() {
         if (!IsValid()) {
-            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics().str();
+            ADD_FAILURE() << "ProgramBuilder is not valid: " << Diagnostics();
         }
         return resolver::Resolve(*this);
     }

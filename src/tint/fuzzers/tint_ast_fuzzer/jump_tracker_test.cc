@@ -72,7 +72,7 @@ fn main() {
   )";
     Source::File file("test.wgsl", content);
     auto program = wgsl::reader::Parse(&file);
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     JumpTracker jump_tracker(program);
 
@@ -151,7 +151,7 @@ fn main() {
   )";
     Source::File file("test.wgsl", content);
     auto program = wgsl::reader::Parse(&file);
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     JumpTracker jump_tracker(program);
 
@@ -215,7 +215,7 @@ fn main() {
   )";
     Source::File file("test.wgsl", content);
     auto program = wgsl::reader::Parse(&file);
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
 
     JumpTracker jump_tracker(program);
 

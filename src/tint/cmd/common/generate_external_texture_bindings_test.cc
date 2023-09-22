@@ -109,7 +109,7 @@ TEST_F(GenerateExternalTextureBindingsTest, Two_WithOtherBindingsInSameGroup) {
     b.GlobalVar("v4", b.ty.i32(), b.Group(0_a), b.Binding(4_a), kUniform);
 
     tint::Program program(resolver::Resolve(b));
-    ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
+    ASSERT_TRUE(program.IsValid()) << program.Diagnostics();
     auto bindings = GenerateExternalTextureBindings(program);
     ASSERT_EQ(bindings.size(), 2u);
 

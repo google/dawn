@@ -37,7 +37,7 @@ class ResolverDependencyGraphTestWithParam : public ResolverTestWithParam<T> {
         DependencyGraph graph;
         auto result = DependencyGraph::Build(this->AST(), this->Diagnostics(), graph);
         if (expected_error.empty()) {
-            EXPECT_TRUE(result) << this->Diagnostics().str();
+            EXPECT_TRUE(result) << this->Diagnostics();
         } else {
             EXPECT_FALSE(result);
             EXPECT_EQ(expected_error, this->Diagnostics().str());
