@@ -26,9 +26,7 @@ namespace dawn::wire::client {
 
 EventManager::EventManager(Client* client) : mClient(client) {}
 
-FutureID EventManager::TrackEvent(WGPUCallbackModeFlags mode, EventCallback&& callback) {
-    DAWN_UNUSED(ValidateAndFlattenCallbackMode(mode));
-
+FutureID EventManager::TrackEvent(WGPUCallbackMode mode, EventCallback&& callback) {
     FutureID futureID = mNextFutureID++;
 
     if (mClient->IsDisconnected()) {
@@ -84,7 +82,9 @@ void EventManager::ProcessPollEvents() {
     mTrackedEvents.Use([&](auto trackedEvents) {
         for (auto it = trackedEvents->begin(); it != trackedEvents->end();) {
             TrackedEvent& event = it->second;
-            bool shouldRemove = (event.mMode & WGPUCallbackMode_ProcessEvents) && event.mReady;
+            bool shouldRemove = (event.mMode == WGPUCallbackMode_AllowProcessEvents ||
+                                 event.mMode == WGPUCallbackMode_AllowSpontaneous) &&
+                                event.mReady;
             if (!shouldRemove) {
                 ++it;
                 continue;
@@ -135,7 +135,6 @@ WGPUWaitStatus EventManager::WaitAny(size_t count, WGPUFutureWaitInfo* infos, ui
             }
 
             TrackedEvent& event = it->second;
-            DAWN_ASSERT(event.mMode & WGPUCallbackMode_Future);
             // Early update .completed, in prep to complete the callback if ready.
             infos[i].completed = event.mReady;
             if (event.mReady) {
@@ -161,7 +160,7 @@ WGPUWaitStatus EventManager::WaitAny(size_t count, WGPUFutureWaitInfo* infos, ui
 
 // EventManager::TrackedEvent
 
-EventManager::TrackedEvent::TrackedEvent(WGPUCallbackModeFlags mode, EventCallback&& callback)
+EventManager::TrackedEvent::TrackedEvent(WGPUCallbackMode mode, EventCallback&& callback)
     : mMode(mode), mCallback(callback) {}
 
 EventManager::TrackedEvent::~TrackedEvent() {

@@ -85,9 +85,7 @@ WGPUFuture Queue::OnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInfo& call
     cmd.requestSerial = serial;
 
     client->SerializeCommand(cmd);
-
-    FutureID futureID = (callbackInfo.mode & WGPUCallbackMode_Future) ? futureIDInternal : 0;
-    return {futureID};
+    return {futureIDInternal};
 }
 
 void Queue::WriteBuffer(WGPUBuffer cBuffer, uint64_t bufferOffset, const void* data, size_t size) {

@@ -1999,12 +1999,11 @@
         ]
     },
     "callback mode": {
-        "_comment": "TODO(crbug.com/dawn/2052): Change this to an enum, and always return a future.",
-        "category": "bitmask",
+        "category": "enum",
         "values": [
-            {"name": "future", "value": 1},
-            {"name": "process events", "value": 2},
-            {"name": "spontaneous", "value": 4}
+            {"name": "wait any only", "value": 0},
+            {"name": "allow process events", "value": 1},
+            {"name": "allow spontaneous", "value": 2}
         ]
     },
     "future": {

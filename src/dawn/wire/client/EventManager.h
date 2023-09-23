@@ -43,7 +43,7 @@ class EventManager final : NonMovable {
     explicit EventManager(Client*);
     ~EventManager() = default;
 
-    FutureID TrackEvent(WGPUCallbackModeFlags mode, EventCallback&& callback);
+    FutureID TrackEvent(WGPUCallbackMode mode, EventCallback&& callback);
     void ShutDown();
     void SetFutureReady(FutureID futureID);
     void ProcessPollEvents();
@@ -51,13 +51,13 @@ class EventManager final : NonMovable {
 
   private:
     struct TrackedEvent : dawn::NonCopyable {
-        TrackedEvent(WGPUCallbackModeFlags mode, EventCallback&& callback);
+        TrackedEvent(WGPUCallbackMode mode, EventCallback&& callback);
         ~TrackedEvent();
 
         TrackedEvent(TrackedEvent&&) = default;
         TrackedEvent& operator=(TrackedEvent&&) = default;
 
-        WGPUCallbackModeFlags mMode;
+        WGPUCallbackMode mMode;
         // Callback. Falsey if already called.
         EventCallback mCallback;
         // These states don't need to be atomic because they're always protected by

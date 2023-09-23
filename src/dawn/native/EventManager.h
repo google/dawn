@@ -43,8 +43,7 @@ struct InstanceDescriptor;
 // There are various ways to optimize ProcessEvents/WaitAny:
 // - TODO(crbug.com/dawn/2064) Only pay attention to the earliest serial on each queue.
 // - TODO(crbug.com/dawn/2059) Spontaneously set events as "early-ready" in other places when we see
-//   serials advance, e.g.
-//   Submit, or when checking a later wait before an earlier wait.
+//   serials advance, e.g. Submit, or when checking a later wait before an earlier wait.
 // - TODO(crbug.com/dawn/2049) For thread-driven events (async pipeline compilation and Metal queue
 //   events), defer tracking for ProcessEvents until the event is already completed.
 // - TODO(crbug.com/dawn/2051) Avoid creating OS events until they're actually needed (see the todo
@@ -69,20 +68,17 @@ class EventManager final : NonMovable {
                                            Nanoseconds timeout);
 
   private:
-    struct Trackers : dawn::NonMovable {
-        // Tracks Futures (used by WaitAny).
-        MutexProtected<std::unordered_map<FutureID, Ref<TrackedEvent>>> futures;
-        // Tracks events polled by ProcessEvents.
-        MutexProtected<std::unordered_map<FutureID, Ref<TrackedEvent>>> pollEvents;
-    };
-
     bool mTimedWaitAnyEnable = false;
     size_t mTimedWaitAnyMaxCount = kTimedWaitAnyMaxCountDefault;
     std::atomic<FutureID> mNextFutureID = 1;
 
+    // Only 1 thread is allowed to call ProcessEvents at a time. This lock ensures that.
+    std::mutex mProcessEventLock;
+
     // Freed once the user has dropped their last ref to the Instance, so can't call WaitAny or
     // ProcessEvents anymore. This breaks reference cycles.
-    std::optional<Trackers> mTrackers;
+    using EventMap = std::unordered_map<FutureID, Ref<TrackedEvent>>;
+    std::optional<MutexProtected<EventMap>> mEvents;
 };
 
 // Base class for the objects that back WGPUFutures. TrackedEvent is responsible for the lifetime
@@ -154,8 +150,10 @@ class EventManager::TrackedEvent : public RefCounted {
 
 // A Ref<TrackedEvent>, but ASSERTing that a future isn't used concurrently in multiple
 // WaitAny/ProcessEvents call (by checking that there's never more than one WaitRef for a
-// TrackedEvent). For WaitAny, this checks the embedder's behavior, but for ProcessEvents this is
-// only an internal DAWN_ASSERT (it's supposed to be synchronized so that this never happens).
+// TrackedEvent). While concurrent calls on the same futures are not explicitly disallowed, they are
+// generally unintentional, and hence this can help to identify potential bugs. Note that for
+// WaitAny, this checks the embedder's behavior, but for ProcessEvents this is only an internal
+// DAWN_ASSERT (it's supposed to be synchronized so that this never happens).
 class EventManager::TrackedEvent::WaitRef : dawn::NonCopyable {
   public:
     WaitRef(WaitRef&& rhs) = default;

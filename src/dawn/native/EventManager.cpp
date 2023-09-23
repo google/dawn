@@ -29,6 +29,7 @@ namespace dawn::native {
 
 namespace {
 
+// We can replace the std::vector& when std::span is available via C++20.
 wgpu::WaitStatus WaitImpl(std::vector<TrackedFutureWaitInfo>& futures, Nanoseconds timeout) {
     // Sort the futures by how they'll be waited (their GetWaitDevice).
     // This lets us do each wait on a slice of the array.
@@ -82,11 +83,11 @@ wgpu::WaitStatus WaitImpl(std::vector<TrackedFutureWaitInfo>& futures, Nanosecon
 // EventManager
 
 EventManager::EventManager() {
-    mTrackers.emplace();  // Construct the non-movable inner struct.
+    mEvents.emplace();  // Construct the non-movable inner struct.
 }
 
 EventManager::~EventManager() {
-    DAWN_ASSERT(!mTrackers.has_value());
+    DAWN_ASSERT(!mEvents.has_value());
 }
 
 MaybeError EventManager::Initialize(const InstanceDescriptor* descriptor) {
@@ -105,73 +106,66 @@ MaybeError EventManager::Initialize(const InstanceDescriptor* descriptor) {
 }
 
 void EventManager::ShutDown() {
-    mTrackers.reset();
+    mEvents.reset();
 }
 
 FutureID EventManager::TrackEvent(wgpu::CallbackMode mode, Ref<TrackedEvent>&& future) {
-    // TODO(crbug.com/dawn/2052) Can remove the validation on the mode once it's an enum.
-    switch (ValidateAndFlattenCallbackMode(static_cast<WGPUCallbackModeFlags>(mode))) {
-        case CallbackMode::Spontaneous:
-            // We don't need to track the future because some other code is responsible for
-            // completing it, and we aren't returning an ID so we don't need to be able to query it.
-            return kNullFutureID;
-        case CallbackMode::Future:
-        case CallbackMode::FutureOrSpontaneous: {
-            FutureID futureID = mNextFutureID++;
-            if (mTrackers.has_value()) {
-                mTrackers->futures->emplace(futureID, std::move(future));
-            }
-            return futureID;
-        }
-        case CallbackMode::ProcessEvents:
-        case CallbackMode::ProcessEventsOrSpontaneous: {
-            FutureID futureID = mNextFutureID++;
-            if (mTrackers.has_value()) {
-                mTrackers->pollEvents->emplace(futureID, std::move(future));
-            }
-            // Return null future, because the user didn't actually ask for a future.
-            return kNullFutureID;
-        }
+    FutureID futureID = mNextFutureID++;
+    if (!mEvents.has_value()) {
+        return futureID;
     }
+
+    mEvents->Use([&](auto events) { events->emplace(futureID, std::move(future)); });
+    return futureID;
 }
 
 void EventManager::ProcessPollEvents() {
-    DAWN_ASSERT(mTrackers.has_value());
+    DAWN_ASSERT(mEvents.has_value());
 
     std::vector<TrackedFutureWaitInfo> futures;
-    mTrackers->pollEvents.Use([&](auto trackedPollEvents) {
-        futures.reserve(trackedPollEvents->size());
-
-        for (auto& [futureID, event] : *trackedPollEvents) {
-            futures.push_back(
-                TrackedFutureWaitInfo{futureID, TrackedEvent::WaitRef{event.Get()}, 0, false});
+    mEvents->Use([&](auto events) {
+        // Iterate all events and record poll events and spontaneous events since they are both
+        // allowed to be completed in the ProcessPoll call. Note that spontaneous events are allowed
+        // to trigger anywhere which is why we include them in the call.
+        futures.reserve(events->size());
+        for (auto& [futureID, event] : *events) {
+            if (event->mCallbackMode != wgpu::CallbackMode::WaitAnyOnly) {
+                futures.push_back(
+                    TrackedFutureWaitInfo{futureID, TrackedEvent::WaitRef{event.Get()}, 0, false});
+            }
         }
+    });
 
-        // The WaitImpl is inside of the lock to prevent any two ProcessEvents calls from
-        // calling competing OS wait syscalls at the same time.
+    {
+        // There cannot be two competing ProcessEvent calls, so we use a lock to prevent it.
+        std::lock_guard<std::mutex> lock(mProcessEventLock);
         wgpu::WaitStatus waitStatus = WaitImpl(futures, Nanoseconds(0));
         if (waitStatus == wgpu::WaitStatus::TimedOut) {
             return;
         }
         DAWN_ASSERT(waitStatus == wgpu::WaitStatus::Success);
+    }
 
+    // For all the futures we are about to complete, first ensure they're untracked. It's OK if
+    // something actually isn't tracked anymore (because it completed elsewhere while waiting.)
+    mEvents->Use([&](auto events) {
         for (TrackedFutureWaitInfo& future : futures) {
             if (future.ready) {
-                trackedPollEvents->erase(future.futureID);
+                events->erase(future.futureID);
             }
         }
     });
 
+    // Finally, call callbacks.
     for (TrackedFutureWaitInfo& future : futures) {
         if (future.ready) {
-            DAWN_ASSERT(future.event->mCallbackMode & wgpu::CallbackMode::ProcessEvents);
             future.event->EnsureComplete(EventCompletionType::Ready);
         }
     }
 }
 
 wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nanoseconds timeout) {
-    DAWN_ASSERT(mTrackers.has_value());
+    DAWN_ASSERT(mEvents.has_value());
 
     // Validate for feature support.
     if (timeout > Nanoseconds(0)) {
@@ -192,7 +186,7 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
     std::vector<TrackedFutureWaitInfo> futures;
     futures.reserve(count);
     bool anyCompleted = false;
-    mTrackers->futures.Use([&](auto trackedFutures) {
+    mEvents->Use([&](auto events) {
         FutureID firstInvalidFutureID = mNextFutureID;
         for (size_t i = 0; i < count; ++i) {
             FutureID futureID = infos[i].future.id;
@@ -203,11 +197,14 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
             // TakeWaitRef below will catch if the future is waited twice at the
             // same time (unless it's already completed).
 
-            auto it = trackedFutures->find(futureID);
-            if (it == trackedFutures->end()) {
+            // Try to find the event.
+            auto it = events->find(futureID);
+            if (it == events->end()) {
                 infos[i].completed = true;
                 anyCompleted = true;
             } else {
+                // TakeWaitRef below will catch if the future is waited twice at the same time
+                // (unless it's already completed).
                 infos[i].completed = false;
                 TrackedEvent* event = it->second.Get();
                 futures.push_back(
@@ -229,10 +226,10 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
 
     // For any futures that we're about to complete, first ensure they're untracked. It's OK if
     // something actually isn't tracked anymore (because it completed elsewhere while waiting.)
-    mTrackers->futures.Use([&](auto trackedFutures) {
+    mEvents->Use([&](auto events) {
         for (const TrackedFutureWaitInfo& future : futures) {
             if (future.ready) {
-                trackedFutures->erase(future.futureID);
+                events->erase(future.futureID);
             }
         }
     });
@@ -243,7 +240,6 @@ wgpu::WaitStatus EventManager::WaitAny(size_t count, FutureWaitInfo* infos, Nano
             // Set completed before calling the callback.
             infos[future.indexInInfos].completed = true;
             // TODO(crbug.com/dawn/2066): Guarantee the event ordering from the JS spec.
-            DAWN_ASSERT(future.event->mCallbackMode & wgpu::CallbackMode::Future);
             future.event->EnsureComplete(EventCompletionType::Ready);
         }
     }
@@ -278,7 +274,7 @@ void EventManager::TrackedEvent::EnsureComplete(EventCompletionType completionTy
 }
 
 void EventManager::TrackedEvent::CompleteIfSpontaneous() {
-    if (mCallbackMode & wgpu::CallbackMode::Spontaneous) {
+    if (mCallbackMode == wgpu::CallbackMode::AllowSpontaneous) {
         bool alreadyComplete = mCompleted.exchange(true);
         // If it was already complete, but there was an error, we have no place
         // to report it, so DAWN_ASSERT. This shouldn't happen.

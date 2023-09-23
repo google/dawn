@@ -66,28 +66,28 @@ enum class WaitType {
 };
 
 enum class WaitTypeAndCallbackMode {
-    TimedWaitAny_Future,
-    TimedWaitAny_FutureSpontaneous,
-    SpinWaitAny_Future,
-    SpinWaitAny_FutureSpontaneous,
-    SpinProcessEvents_ProcessEvents,
-    SpinProcessEvents_ProcessEventsSpontaneous,
+    TimedWaitAny_WaitAnyOnly,
+    TimedWaitAny_AllowSpontaneous,
+    SpinWaitAny_WaitAnyOnly,
+    SpinWaitAny_AllowSpontaneous,
+    SpinProcessEvents_AllowProcessEvents,
+    SpinProcessEvents_AllowSpontaneous,
 };
 
 std::ostream& operator<<(std::ostream& o, WaitTypeAndCallbackMode waitMode) {
     switch (waitMode) {
-        case WaitTypeAndCallbackMode::TimedWaitAny_Future:
-            return o << "TimedWaitAny_Future";
-        case WaitTypeAndCallbackMode::SpinWaitAny_Future:
-            return o << "SpinWaitAny_Future";
-        case WaitTypeAndCallbackMode::SpinProcessEvents_ProcessEvents:
-            return o << "SpinProcessEvents_ProcessEvents";
-        case WaitTypeAndCallbackMode::TimedWaitAny_FutureSpontaneous:
-            return o << "TimedWaitAny_FutureSpontaneous";
-        case WaitTypeAndCallbackMode::SpinWaitAny_FutureSpontaneous:
-            return o << "SpinWaitAny_FutureSpontaneous";
-        case WaitTypeAndCallbackMode::SpinProcessEvents_ProcessEventsSpontaneous:
-            return o << "SpinProcessEvents_ProcessEventsSpontaneous";
+        case WaitTypeAndCallbackMode::TimedWaitAny_WaitAnyOnly:
+            return o << "TimedWaitAny_WaitAnyOnly";
+        case WaitTypeAndCallbackMode::SpinWaitAny_WaitAnyOnly:
+            return o << "SpinWaitAny_WaitAnyOnly";
+        case WaitTypeAndCallbackMode::SpinProcessEvents_AllowProcessEvents:
+            return o << "SpinProcessEvents_AllowProcessEvents";
+        case WaitTypeAndCallbackMode::TimedWaitAny_AllowSpontaneous:
+            return o << "TimedWaitAny_AllowSpontaneous";
+        case WaitTypeAndCallbackMode::SpinWaitAny_AllowSpontaneous:
+            return o << "SpinWaitAny_AllowSpontaneous";
+        case WaitTypeAndCallbackMode::SpinProcessEvents_AllowSpontaneous:
+            return o << "SpinProcessEvents_AllowSpontaneous";
     }
 }
 
@@ -107,9 +107,9 @@ class EventCompletionTests : public DawnTestWithParams<EventCompletionTestParams
         DawnTestWithParams::SetUp();
         WaitTypeAndCallbackMode mode = GetParam().mWaitTypeAndCallbackMode;
         if (UsesWire()) {
-            DAWN_TEST_UNSUPPORTED_IF(mode == WaitTypeAndCallbackMode::TimedWaitAny_Future ||
+            DAWN_TEST_UNSUPPORTED_IF(mode == WaitTypeAndCallbackMode::TimedWaitAny_WaitAnyOnly ||
                                      mode ==
-                                         WaitTypeAndCallbackMode::TimedWaitAny_FutureSpontaneous);
+                                         WaitTypeAndCallbackMode::TimedWaitAny_AllowSpontaneous);
         }
         testInstance = GetInstance();
         testDevice = device;
@@ -141,34 +141,32 @@ class EventCompletionTests : public DawnTestWithParams<EventCompletionTestParams
 
     wgpu::CallbackMode GetCallbackMode() {
         switch (GetParam().mWaitTypeAndCallbackMode) {
-            case WaitTypeAndCallbackMode::TimedWaitAny_Future:
-            case WaitTypeAndCallbackMode::SpinWaitAny_Future:
-                return wgpu::CallbackMode::Future;
-            case WaitTypeAndCallbackMode::SpinProcessEvents_ProcessEvents:
-                return wgpu::CallbackMode::ProcessEvents;
-            case WaitTypeAndCallbackMode::TimedWaitAny_FutureSpontaneous:
-            case WaitTypeAndCallbackMode::SpinWaitAny_FutureSpontaneous:
-                return wgpu::CallbackMode::Future | wgpu::CallbackMode::Spontaneous;
-            case WaitTypeAndCallbackMode::SpinProcessEvents_ProcessEventsSpontaneous:
-                return wgpu::CallbackMode::ProcessEvents | wgpu::CallbackMode::Spontaneous;
+            case WaitTypeAndCallbackMode::TimedWaitAny_WaitAnyOnly:
+            case WaitTypeAndCallbackMode::SpinWaitAny_WaitAnyOnly:
+                return wgpu::CallbackMode::WaitAnyOnly;
+            case WaitTypeAndCallbackMode::SpinProcessEvents_AllowProcessEvents:
+                return wgpu::CallbackMode::AllowProcessEvents;
+            case WaitTypeAndCallbackMode::TimedWaitAny_AllowSpontaneous:
+            case WaitTypeAndCallbackMode::SpinWaitAny_AllowSpontaneous:
+            case WaitTypeAndCallbackMode::SpinProcessEvents_AllowSpontaneous:
+                return wgpu::CallbackMode::AllowSpontaneous;
         }
     }
 
-    bool IsSpontaneous() { return GetCallbackMode() & wgpu::CallbackMode::Spontaneous; }
+    bool IsSpontaneous() { return GetCallbackMode() == wgpu::CallbackMode::AllowSpontaneous; }
 
     void TrackForTest(wgpu::Future future) {
         mCallbacksIssuedCount++;
 
         switch (GetParam().mWaitTypeAndCallbackMode) {
-            case WaitTypeAndCallbackMode::TimedWaitAny_Future:
-            case WaitTypeAndCallbackMode::TimedWaitAny_FutureSpontaneous:
-            case WaitTypeAndCallbackMode::SpinWaitAny_Future:
-            case WaitTypeAndCallbackMode::SpinWaitAny_FutureSpontaneous:
+            case WaitTypeAndCallbackMode::TimedWaitAny_WaitAnyOnly:
+            case WaitTypeAndCallbackMode::TimedWaitAny_AllowSpontaneous:
+            case WaitTypeAndCallbackMode::SpinWaitAny_WaitAnyOnly:
+            case WaitTypeAndCallbackMode::SpinWaitAny_AllowSpontaneous:
                 mFutures.push_back(wgpu::FutureWaitInfo{future, false});
                 break;
-            case WaitTypeAndCallbackMode::SpinProcessEvents_ProcessEvents:
-            case WaitTypeAndCallbackMode::SpinProcessEvents_ProcessEventsSpontaneous:
-                ASSERT_EQ(future.id, 0ull);
+            case WaitTypeAndCallbackMode::SpinProcessEvents_AllowProcessEvents:
+            case WaitTypeAndCallbackMode::SpinProcessEvents_AllowSpontaneous:
                 break;
         }
     }
@@ -195,27 +193,27 @@ class EventCompletionTests : public DawnTestWithParams<EventCompletionTestParams
 
     void TestWaitAll(bool loopOnlyOnce = false) {
         switch (GetParam().mWaitTypeAndCallbackMode) {
-            case WaitTypeAndCallbackMode::TimedWaitAny_Future:
-            case WaitTypeAndCallbackMode::TimedWaitAny_FutureSpontaneous:
+            case WaitTypeAndCallbackMode::TimedWaitAny_WaitAnyOnly:
+            case WaitTypeAndCallbackMode::TimedWaitAny_AllowSpontaneous:
                 return TestWaitImpl(WaitType::TimedWaitAny);
-            case WaitTypeAndCallbackMode::SpinWaitAny_Future:
-            case WaitTypeAndCallbackMode::SpinWaitAny_FutureSpontaneous:
+            case WaitTypeAndCallbackMode::SpinWaitAny_WaitAnyOnly:
+            case WaitTypeAndCallbackMode::SpinWaitAny_AllowSpontaneous:
                 return TestWaitImpl(WaitType::SpinWaitAny);
-            case WaitTypeAndCallbackMode::SpinProcessEvents_ProcessEvents:
-            case WaitTypeAndCallbackMode::SpinProcessEvents_ProcessEventsSpontaneous:
+            case WaitTypeAndCallbackMode::SpinProcessEvents_AllowProcessEvents:
+            case WaitTypeAndCallbackMode::SpinProcessEvents_AllowSpontaneous:
                 return TestWaitImpl(WaitType::SpinProcessEvents);
         }
     }
 
     void TestWaitIncorrectly() {
         switch (GetParam().mWaitTypeAndCallbackMode) {
-            case WaitTypeAndCallbackMode::TimedWaitAny_Future:
-            case WaitTypeAndCallbackMode::TimedWaitAny_FutureSpontaneous:
-            case WaitTypeAndCallbackMode::SpinWaitAny_Future:
-            case WaitTypeAndCallbackMode::SpinWaitAny_FutureSpontaneous:
+            case WaitTypeAndCallbackMode::TimedWaitAny_WaitAnyOnly:
+            case WaitTypeAndCallbackMode::TimedWaitAny_AllowSpontaneous:
+            case WaitTypeAndCallbackMode::SpinWaitAny_WaitAnyOnly:
+            case WaitTypeAndCallbackMode::SpinWaitAny_AllowSpontaneous:
                 return TestWaitImpl(WaitType::SpinProcessEvents);
-            case WaitTypeAndCallbackMode::SpinProcessEvents_ProcessEvents:
-            case WaitTypeAndCallbackMode::SpinProcessEvents_ProcessEventsSpontaneous:
+            case WaitTypeAndCallbackMode::SpinProcessEvents_AllowProcessEvents:
+            case WaitTypeAndCallbackMode::SpinProcessEvents_AllowSpontaneous:
                 return TestWaitImpl(WaitType::SpinWaitAny);
         }
     }
@@ -374,8 +372,7 @@ TEST_P(EventCompletionTests, WorkDoneAlreadyCompleted) {
 // WorkDone events waited in reverse order.
 TEST_P(EventCompletionTests, WorkDoneOutOfOrder) {
     // With ProcessEvents or Spontaneous we can't control the order of completion.
-    DAWN_TEST_UNSUPPORTED_IF(GetCallbackMode() &
-                             (wgpu::CallbackMode::ProcessEvents | wgpu::CallbackMode::Spontaneous));
+    DAWN_TEST_UNSUPPORTED_IF(GetCallbackMode() != wgpu::CallbackMode::WaitAnyOnly);
 
     TrivialSubmit();
     wgpu::Future f1 = OnSubmittedWorkDone(WGPUQueueWorkDoneStatus_Success);
@@ -452,12 +449,12 @@ DAWN_INSTANTIATE_TEST_P(EventCompletionTests,
                         // TODO(crbug.com/dawn/2058): Enable tests for the rest of the backends.
                         {MetalBackend()},
                         {
-                            WaitTypeAndCallbackMode::TimedWaitAny_Future,
-                            WaitTypeAndCallbackMode::TimedWaitAny_FutureSpontaneous,
-                            WaitTypeAndCallbackMode::SpinWaitAny_Future,
-                            WaitTypeAndCallbackMode::SpinWaitAny_FutureSpontaneous,
-                            WaitTypeAndCallbackMode::SpinProcessEvents_ProcessEvents,
-                            WaitTypeAndCallbackMode::SpinProcessEvents_ProcessEventsSpontaneous,
+                            WaitTypeAndCallbackMode::TimedWaitAny_WaitAnyOnly,
+                            WaitTypeAndCallbackMode::TimedWaitAny_AllowSpontaneous,
+                            WaitTypeAndCallbackMode::SpinWaitAny_WaitAnyOnly,
+                            WaitTypeAndCallbackMode::SpinWaitAny_AllowSpontaneous,
+                            WaitTypeAndCallbackMode::SpinProcessEvents_AllowProcessEvents,
+                            WaitTypeAndCallbackMode::SpinProcessEvents_AllowSpontaneous,
 
                             // TODO(crbug.com/dawn/2059): The cases with the Spontaneous flag
                             // enabled were added before we implemented all of the spontaneous
@@ -502,7 +499,8 @@ TEST_P(WaitAnyTests, UnsupportedTimeout) {
 
     for (uint64_t timeout : {uint64_t(1), uint64_t(0), UINT64_MAX}) {
         wgpu::FutureWaitInfo info{device2.GetQueue().OnSubmittedWorkDoneF(
-            {nullptr, wgpu::CallbackMode::Future, [](WGPUQueueWorkDoneStatus, void*) {}, nullptr})};
+            {nullptr, wgpu::CallbackMode::WaitAnyOnly, [](WGPUQueueWorkDoneStatus, void*) {},
+             nullptr})};
         wgpu::WaitStatus status = instance2.WaitAny(1, &info, timeout);
         if (timeout == 0) {
             ASSERT_TRUE(status == wgpu::WaitStatus::Success ||
@@ -521,7 +519,7 @@ TEST_P(WaitAnyTests, UnsupportedCount) {
             std::vector<wgpu::FutureWaitInfo> infos;
             for (size_t i = 0; i < count; ++i) {
                 infos.push_back(
-                    {queue.OnSubmittedWorkDoneF({nullptr, wgpu::CallbackMode::Future,
+                    {queue.OnSubmittedWorkDoneF({nullptr, wgpu::CallbackMode::WaitAnyOnly,
                                                  [](WGPUQueueWorkDoneStatus, void*) {}, nullptr})});
             }
             wgpu::WaitStatus status = GetInstance().WaitAny(infos.size(), infos.data(), timeout);
@@ -545,9 +543,9 @@ TEST_P(WaitAnyTests, UnsupportedMixedSources) {
     wgpu::Queue queue2 = device2.GetQueue();
     for (uint64_t timeout : {uint64_t(0), uint64_t(1)}) {
         std::vector<wgpu::FutureWaitInfo> infos{{
-            {queue.OnSubmittedWorkDoneF({nullptr, wgpu::CallbackMode::Future,
+            {queue.OnSubmittedWorkDoneF({nullptr, wgpu::CallbackMode::WaitAnyOnly,
                                          [](WGPUQueueWorkDoneStatus, void*) {}, nullptr})},
-            {queue2.OnSubmittedWorkDoneF({nullptr, wgpu::CallbackMode::Future,
+            {queue2.OnSubmittedWorkDoneF({nullptr, wgpu::CallbackMode::WaitAnyOnly,
                                           [](WGPUQueueWorkDoneStatus, void*) {}, nullptr})},
         }};
         wgpu::WaitStatus status = GetInstance().WaitAny(infos.size(), infos.data(), timeout);
