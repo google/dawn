@@ -58,13 +58,16 @@ WGPUFuture Queue::OnSubmittedWorkDoneF(const WGPUQueueWorkDoneCallbackInfo& call
     DAWN_ASSERT(callbackInfo.nextInChain == nullptr);
 
     Client* client = GetClient();
-    FutureID futureIDInternal = client->GetEventManager()->TrackEvent(
+    auto [futureIDInternal, tracked] = client->GetEventManager()->TrackEvent(
         callbackInfo.mode, [=](EventCompletionType completionType) {
             WGPUQueueWorkDoneStatus status = completionType == EventCompletionType::Shutdown
                                                  ? WGPUQueueWorkDoneStatus_Unknown
                                                  : WGPUQueueWorkDoneStatus_Success;
             callbackInfo.callback(status, callbackInfo.userdata);
         });
+    if (!tracked) {
+        return {futureIDInternal};
+    }
 
     struct Lambda {
         Client* client;

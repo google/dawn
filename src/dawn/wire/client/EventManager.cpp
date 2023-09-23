@@ -26,12 +26,13 @@ namespace dawn::wire::client {
 
 EventManager::EventManager(Client* client) : mClient(client) {}
 
-FutureID EventManager::TrackEvent(WGPUCallbackMode mode, EventCallback&& callback) {
+std::pair<FutureID, bool> EventManager::TrackEvent(WGPUCallbackMode mode,
+                                                   EventCallback&& callback) {
     FutureID futureID = mNextFutureID++;
 
     if (mClient->IsDisconnected()) {
         callback(EventCompletionType::Shutdown);
-        return futureID;
+        return {futureID, false};
     }
 
     mTrackedEvents.Use([&](auto trackedEvents) {
@@ -40,7 +41,7 @@ FutureID EventManager::TrackEvent(WGPUCallbackMode mode, EventCallback&& callbac
         DAWN_ASSERT(inserted);
     });
 
-    return futureID;
+    return {futureID, true};
 }
 
 void EventManager::ShutDown() {

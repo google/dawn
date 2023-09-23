@@ -18,6 +18,7 @@
 #include <cstddef>
 #include <functional>
 #include <unordered_map>
+#include <utility>
 
 #include "dawn/common/FutureUtils.h"
 #include "dawn/common/MutexProtected.h"
@@ -43,7 +44,9 @@ class EventManager final : NonMovable {
     explicit EventManager(Client*);
     ~EventManager() = default;
 
-    FutureID TrackEvent(WGPUCallbackMode mode, EventCallback&& callback);
+    // Returns a pair of the FutureID and a bool that is true iff the event was successfuly tracked,
+    // false otherwise. Events may not be tracked if the client is already disconnected.
+    std::pair<FutureID, bool> TrackEvent(WGPUCallbackMode mode, EventCallback&& callback);
     void ShutDown();
     void SetFutureReady(FutureID futureID);
     void ProcessPollEvents();
