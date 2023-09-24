@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <unordered_map>
+#include <map>
 #include <utility>
 #include <vector>
 
@@ -47,13 +47,14 @@ std::pair<FutureID, bool> EventManager::TrackEvent(WGPUCallbackMode mode,
 void EventManager::ShutDown() {
     // Call any outstanding callbacks before destruction.
     while (true) {
-        std::unordered_map<FutureID, TrackedEvent> movedEvents;
+        std::map<FutureID, TrackedEvent> movedEvents;
         mTrackedEvents.Use([&](auto trackedEvents) { movedEvents = std::move(*trackedEvents); });
 
         if (movedEvents.empty()) {
             break;
         }
 
+        // Ordering guaranteed because we are using a sorted map.
         for (auto& [futureID, trackedEvent] : movedEvents) {
             // Event should be already marked Ready since events are actually driven by
             // RequestTrackers (at the time of this writing), which all shut down before this.
@@ -74,6 +75,7 @@ void EventManager::SetFutureReady(FutureID futureID) {
 }
 
 void EventManager::ProcessPollEvents() {
+    // Since events are already stored in an ordered map, this list must already be ordered.
     std::vector<TrackedEvent> eventsToCompleteNow;
 
     // TODO(crbug.com/dawn/2060): EventManager shouldn't bother to track ProcessEvents-type events
@@ -120,7 +122,9 @@ WGPUWaitStatus EventManager::WaitAny(size_t count, WGPUFutureWaitInfo* infos, ui
         return WGPUWaitStatus_Success;
     }
 
-    std::vector<TrackedEvent> eventsToCompleteNow;
+    // Since the user can specify the FutureIDs in any order, we need to use another ordered map
+    // here to ensure that the result is ordered for JS event ordering.
+    std::map<FutureID, TrackedEvent> eventsToCompleteNow;
     bool anyCompleted = false;
     const FutureID firstInvalidFutureID = mNextFutureID;
     mTrackedEvents.Use([&](auto trackedEvents) {
@@ -141,7 +145,7 @@ WGPUWaitStatus EventManager::WaitAny(size_t count, WGPUFutureWaitInfo* infos, ui
             if (event.mReady) {
                 anyCompleted = true;
                 if (event.mCallback) {
-                    eventsToCompleteNow.emplace_back(std::move(event));
+                    eventsToCompleteNow.emplace(it->first, std::move(event));
                 }
                 trackedEvents->erase(it);
             }
@@ -149,7 +153,7 @@ WGPUWaitStatus EventManager::WaitAny(size_t count, WGPUFutureWaitInfo* infos, ui
     });
 
     // TODO(crbug.com/dawn/2066): Guarantee the event ordering from the JS spec.
-    for (TrackedEvent& event : eventsToCompleteNow) {
+    for (auto& [_, event] : eventsToCompleteNow) {
         DAWN_ASSERT(event.mReady && event.mCallback);
         // .completed has already been set to true (before the callback, per API contract).
         event.mCallback(EventCompletionType::Ready);

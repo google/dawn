@@ -17,7 +17,7 @@
 
 #include <cstddef>
 #include <functional>
-#include <unordered_map>
+#include <map>
 #include <utility>
 
 #include "dawn/common/FutureUtils.h"
@@ -70,8 +70,10 @@ class EventManager final : NonMovable {
 
     Client* mClient;
 
-    // Tracks all kinds of events (for both WaitAny and ProcessEvents).
-    MutexProtected<std::unordered_map<FutureID, TrackedEvent>> mTrackedEvents;
+    // Tracks all kinds of events (for both WaitAny and ProcessEvents). We use an ordered map so
+    // that in most cases, event ordering is already implicit when we iterate the map. (Not true for
+    // WaitAny though because the user could specify the FutureIDs out of order.)
+    MutexProtected<std::map<FutureID, TrackedEvent>> mTrackedEvents;
     std::atomic<FutureID> mNextFutureID = 1;
 };
 
