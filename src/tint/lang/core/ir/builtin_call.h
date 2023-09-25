@@ -36,9 +36,6 @@ class BuiltinCall : public Castable<BuiltinCall, Call> {
     /// @returns the identifier for the function
     virtual size_t FuncId() = 0;
 
-    /// @returns the intrinsic name
-    virtual const char* IntrinsicName() = 0;
-
     /// @returns the table data to validate this builtin
     virtual const core::intrinsic::TableData& TableData() = 0;
 };

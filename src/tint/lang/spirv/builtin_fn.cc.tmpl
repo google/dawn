@@ -22,7 +22,7 @@ const char* str(BuiltinFn i) {
             return "<none>";
 {{- range $I.Sem.Builtins  }}
         case BuiltinFn::k{{PascalCase .Name}}:
-            return "spirv.{{.Name}}";
+            return "{{.Name}}";
 {{- end  }}
     }
     return "<unknown>";

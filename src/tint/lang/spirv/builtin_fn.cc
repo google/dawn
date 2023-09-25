@@ -30,71 +30,71 @@ const char* str(BuiltinFn i) {
         case BuiltinFn::kNone:
             return "<none>";
         case BuiltinFn::kArrayLength:
-            return "spirv.array_length";
+            return "array_length";
         case BuiltinFn::kAtomicAnd:
-            return "spirv.atomic_and";
+            return "atomic_and";
         case BuiltinFn::kAtomicCompareExchange:
-            return "spirv.atomic_compare_exchange";
+            return "atomic_compare_exchange";
         case BuiltinFn::kAtomicExchange:
-            return "spirv.atomic_exchange";
+            return "atomic_exchange";
         case BuiltinFn::kAtomicIadd:
-            return "spirv.atomic_iadd";
+            return "atomic_iadd";
         case BuiltinFn::kAtomicIsub:
-            return "spirv.atomic_isub";
+            return "atomic_isub";
         case BuiltinFn::kAtomicLoad:
-            return "spirv.atomic_load";
+            return "atomic_load";
         case BuiltinFn::kAtomicOr:
-            return "spirv.atomic_or";
+            return "atomic_or";
         case BuiltinFn::kAtomicSmax:
-            return "spirv.atomic_smax";
+            return "atomic_smax";
         case BuiltinFn::kAtomicSmin:
-            return "spirv.atomic_smin";
+            return "atomic_smin";
         case BuiltinFn::kAtomicStore:
-            return "spirv.atomic_store";
+            return "atomic_store";
         case BuiltinFn::kAtomicUmax:
-            return "spirv.atomic_umax";
+            return "atomic_umax";
         case BuiltinFn::kAtomicUmin:
-            return "spirv.atomic_umin";
+            return "atomic_umin";
         case BuiltinFn::kAtomicXor:
-            return "spirv.atomic_xor";
+            return "atomic_xor";
         case BuiltinFn::kDot:
-            return "spirv.dot";
+            return "dot";
         case BuiltinFn::kImageDrefGather:
-            return "spirv.image_dref_gather";
+            return "image_dref_gather";
         case BuiltinFn::kImageFetch:
-            return "spirv.image_fetch";
+            return "image_fetch";
         case BuiltinFn::kImageGather:
-            return "spirv.image_gather";
+            return "image_gather";
         case BuiltinFn::kImageQuerySize:
-            return "spirv.image_query_size";
+            return "image_query_size";
         case BuiltinFn::kImageQuerySizeLod:
-            return "spirv.image_query_size_lod";
+            return "image_query_size_lod";
         case BuiltinFn::kImageRead:
-            return "spirv.image_read";
+            return "image_read";
         case BuiltinFn::kImageSampleImplicitLod:
-            return "spirv.image_sample_implicit_lod";
+            return "image_sample_implicit_lod";
         case BuiltinFn::kImageSampleExplicitLod:
-            return "spirv.image_sample_explicit_lod";
+            return "image_sample_explicit_lod";
         case BuiltinFn::kImageSampleDrefImplicitLod:
-            return "spirv.image_sample_dref_implicit_lod";
+            return "image_sample_dref_implicit_lod";
         case BuiltinFn::kImageSampleDrefExplicitLod:
-            return "spirv.image_sample_dref_explicit_lod";
+            return "image_sample_dref_explicit_lod";
         case BuiltinFn::kImageWrite:
-            return "spirv.image_write";
+            return "image_write";
         case BuiltinFn::kMatrixTimesMatrix:
-            return "spirv.matrix_times_matrix";
+            return "matrix_times_matrix";
         case BuiltinFn::kMatrixTimesScalar:
-            return "spirv.matrix_times_scalar";
+            return "matrix_times_scalar";
         case BuiltinFn::kMatrixTimesVector:
-            return "spirv.matrix_times_vector";
+            return "matrix_times_vector";
         case BuiltinFn::kSampledImage:
-            return "spirv.sampled_image";
+            return "sampled_image";
         case BuiltinFn::kSelect:
-            return "spirv.select";
+            return "select";
         case BuiltinFn::kVectorTimesMatrix:
-            return "spirv.vector_times_matrix";
+            return "vector_times_matrix";
         case BuiltinFn::kVectorTimesScalar:
-            return "spirv.vector_times_scalar";
+            return "vector_times_scalar";
     }
     return "<unknown>";
 }

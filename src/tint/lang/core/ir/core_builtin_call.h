@@ -49,9 +49,6 @@ class CoreBuiltinCall final : public Castable<CoreBuiltinCall, BuiltinCall> {
     /// @returns the friendly name for the instruction
     std::string FriendlyName() override { return core::str(func_); }
 
-    /// @returns the intrinsic name
-    const char* IntrinsicName() override { return core::str(func_); }
-
     /// @returns the table data to validate this builtin
     const core::intrinsic::TableData& TableData() override { return core::intrinsic::data::kData; }
 
