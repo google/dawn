@@ -23,6 +23,10 @@
 // from the Dawn source directory.                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
+import "src/tint/lang/core/access.def"
+import "src/tint/lang/core/address_space.def"
+import "src/tint/lang/core/texel_format.def"
+
 ////////////////////////////////////////////////////////////////////////////////
 // Enumerators                                                                //
 ////////////////////////////////////////////////////////////////////////////////
@@ -72,3 +76,902 @@ enum extension {
   // A Chromium-specific extension that enables pixel local storage.
   chromium_experimental_pixel_local
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// WGSL primitive types                                                       //
+// Types may be decorated with @precedence(N) to prioritize which type        //
+// will be picked when multiple types of a matcher match.                     //
+// This is used to ensure that abstract numerical types materialize to the    //
+// concrete type with the lowest conversion rank.                             //
+// Types with higher the precedence values will be matched first.             //
+////////////////////////////////////////////////////////////////////////////////
+
+// https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
+type bool
+@precedence(5) @display("abstract-int")   type ia
+@precedence(4) @display("abstract-float") type fa
+@precedence(3) type i32
+@precedence(2) type u32
+@precedence(1) type f32
+@precedence(0) type f16
+type vec2<T>
+type vec3<T>
+type vec4<T>
+type mat2x2<T>
+type mat2x3<T>
+type mat2x4<T>
+type mat3x2<T>
+type mat3x3<T>
+type mat3x4<T>
+type mat4x2<T>
+type mat4x3<T>
+type mat4x4<T>
+@display("vec{N}<{T}>")     type vec<N: num, T>
+@display("mat{N}x{M}<{T}>") type mat<N: num, M: num, T>
+type ptr<S: address_space, T, A: access>
+type atomic<T>
+type array<T>
+type sampler
+type sampler_comparison
+type texture_1d<T>
+type texture_2d<T>
+type texture_2d_array<T>
+type texture_3d<T>
+type texture_cube<T>
+type texture_cube_array<T>
+type texture_multisampled_2d<T>
+type texture_depth_2d
+type texture_depth_2d_array
+type texture_depth_cube
+type texture_depth_cube_array
+type texture_depth_multisampled_2d
+type texture_storage_1d<F: texel_format, A: access>
+type texture_storage_2d<F: texel_format, A: access>
+type texture_storage_2d_array<F: texel_format, A: access>
+type texture_storage_3d<F: texel_format, A: access>
+type texture_external
+type packedVec3<T>
+
+@display("__modf_result_{T}")        type __modf_result<T>
+@display("__modf_result_vec{N}_{T}") type __modf_result_vec<N: num, T>
+@display("__frexp_result_{T}")        type __frexp_result<T>
+@display("__frexp_result_vec{N}_{T}") type __frexp_result_vec<N: num, T>
+
+type __atomic_compare_exchange_result<T>
+
+////////////////////////////////////////////////////////////////////////////////
+// Type matchers                                                              //
+//                                                                            //
+// A type matcher that can match one or more types.                           //
+////////////////////////////////////////////////////////////////////////////////
+
+match scalar: ia | fa | f32 | f16 | i32 | u32 | bool
+match concrete_scalar: f32 | f16 | i32 | u32 | bool
+match scalar_no_f32: ia | fa | i32 | f16 | u32 | bool
+match scalar_no_f16: ia | fa | f32 | i32 | u32 | bool
+match scalar_no_i32: ia | fa | f32 | f16 | u32 | bool
+match scalar_no_u32: ia | fa | f32 | f16 | i32 | bool
+match scalar_no_bool: ia | fa | f32 | f16 | i32 | u32
+match fia_fiu32_f16: fa | ia | f32 | i32 | u32 | f16
+match fia_fi32_f16: fa | ia | f32 | i32 | f16
+match fia_fiu32: fa | ia | f32 | i32 | u32
+match fa_f32: fa | f32
+match fa_f32_f16: fa | f32 | f16
+match ia_iu32: ia | i32 | u32
+match ia_i32: ia | i32
+match fiu32_f16: f32 | i32 | u32 | f16
+match fiu32: f32 | i32 | u32
+match fi32_f16: f32 | i32 | f16
+match fi32: f32 | i32
+match f32_f16: f32 | f16
+match iu32: i32 | u32
+
+////////////////////////////////////////////////////////////////////////////////
+// Enum matchers                                                              //
+//                                                                            //
+// A number matcher that can match one or more enumerator values.             //
+// All enumerator values listed in the match declaration need to be from the  //
+// same enum.                                                                 //
+////////////////////////////////////////////////////////////////////////////////
+
+// https://gpuweb.github.io/gpuweb/wgsl/#texel-formats
+match f32_texel_format
+  : texel_format.bgra8unorm
+  | texel_format.rgba8unorm
+  | texel_format.rgba8snorm
+  | texel_format.rgba16float
+  | texel_format.r32float
+  | texel_format.rg32float
+  | texel_format.rgba32float
+match i32_texel_format
+  : texel_format.rgba8sint
+  | texel_format.rgba16sint
+  | texel_format.r32sint
+  | texel_format.rg32sint
+  | texel_format.rgba32sint
+match u32_texel_format
+  : texel_format.rgba8uint
+  | texel_format.rgba16uint
+  | texel_format.r32uint
+  | texel_format.rg32uint
+  | texel_format.rgba32uint
+
+match write: access.write
+match read_write: access.read_write
+match readable
+  : access.read
+  | access.read_write
+match writable
+  : access.write
+  | access.read_write
+
+match function_private_workgroup
+  : address_space.function
+  | address_space.private
+  | address_space.workgroup
+match workgroup_or_storage
+  : address_space.workgroup
+  | address_space.storage
+match storage
+  : address_space.storage
+match workgroup
+  : address_space.workgroup
+
+////////////////////////////////////////////////////////////////////////////////
+// Builtin Functions                                                          //
+//                                                                            //
+// The builtin function declarations below declare all the built-in           //
+// functions supported by the WGSL language. This builtin definition          //
+// language supports simple static-type function declarations, as well as     //
+// single overload declarations that can match a number of different          //
+// argument types via the use of template types and template numbers          //
+//                                                                            //
+// * Basic example:                                                           //
+//                                                                            //
+//    fn isInf(f32) -> bool                                                   //
+//                                                                            //
+//   Declares an overload of the function 'isInf' that accepts a single       //
+//   parameter of type 'f32' and returns a 'bool'.                            //
+//                                                                            //
+// A template type is a type determined by the arguments to the builtin.      //
+//                                                                            //
+// * Template type example without constraint:                                //
+//                                                                            //
+//    fn arrayLength<T>(array<T>) -> u32                                      //
+//                                                                            //
+//    Declares an overload of the function 'arrayLength' that accepts a       //
+//    single argument of an array type with no constraints on the array       //
+//    element type. This overload will always return a value of the same type //
+//    as its single argument.                                                 //
+//                                                                            //
+// * Template type example with constraint:                                   //
+//                                                                            //
+//    fn abs<T: fiu32>(T) -> T                                                //
+//                                                                            //
+//    Declares an overload of the function 'abs' that accepts a single        //
+//    argument of type 'f32', 'i32' or 'u32', which returns a value of the    //
+//    same argument type.                                                     //
+//                                                                            //
+// Similarly a template number is a number or enumerator that is determined   //
+// by the arguments to the builtin.                                           //
+//                                                                            //
+// * Template number example:                                                 //
+//                                                                            //
+//    fn dpdx<N: num>(vec<N, f32>) -> vec<N, f32>                             //
+//                                                                            //
+//    Declares an overload of the function 'dpdx' that accepts a single       //
+//    argument of a variable-sized vector of 'f32', which returns a value of  //
+//    the same argument type.                                                 //
+//                                                                            //
+//                                                                            //
+// Matching algorithm for a single overload:                                  //
+// -----------------------------------------                                  //
+//                                                                            //
+// The goal of matching is to compare a function call's arguments and any     //
+// explicitly provided template types in the program source against an        //
+// overload declaration in this file, and determine if the call satisfies     //
+// the form and type constraints of the overload. If the call matches an      //
+// overload, then the overload is added to the list of 'overload candidates'  //
+// used for overload resolution (described below).                            //
+//                                                                            //
+// Prior to matching an overload, all template types are undefined.           //
+//                                                                            //
+// Template types are first defined with the type of the leftmost argument    //
+// that matches against that template type name. Subsequent arguments that    //
+// attempt to match against the template type name will either reject the     //
+// overload or refine the template, in one of 3 ways:                         //
+// (a) Fail to match, causing the overload to be immediately rejected.        //
+// (b) Match the existing template type, either exactly or via implicit       //
+//     conversion, and overload resolution continues.                         //
+// (c) Match via implicit conversion of the currently defined template type   //
+//     to the argument type. In this situation, the template type is refined  //
+//     with the more constrained argument type, and overload resolution       //
+//     continues.                                                             //
+//                                                                            //
+// To better understand, let's consider the following hypothetical overload   //
+// declaration:                                                               //
+//                                                                            //
+//    fn foo<T: scalar>(T, T);                                                //
+//                                                                            //
+//    T           - is the template type name                                 //
+//    scalar      - is a matcher for the types 'f32', 'i32', 'u32' or 'bool'  //
+//                  (declared above)                                          //
+//    <T: scalar> - declares the template type T, with the constraint that T  //
+//                  must match one of 'f32', 'i32', 'u32' or 'bool'.          //
+//                                                                            //
+// The process for resolving this overload is as follows:                     //
+//                                                                            //
+//   (1) The overload resolver begins by attempting to match the argument     //
+//       types from left to right.                                            //
+//       The first parameter type is compared against the argument type T.    //
+//       As the template type T has not been defined yet, T is defined as the //
+//       type of the first argument.                                          //
+//       There's no verification that the T type is a scalar at this stage.   //
+//   (2) The second parameter is then compared against the second argument.   //
+//       As the template type T is now defined the argument type is compared  //
+//       against the value of the defined type of T. Depending on the         //
+//       comparison of the argument type to the template type, either the     //
+//       actions of (a), (b) or (c) from above will occur.                    //
+//   (3) If all the parameters matched, constraints on the template types     //
+//       need to be checked next. If the defined type does not match the      //
+//       'match' constraint, then the overload is no longer considered.       //
+//                                                                            //
+// This algorithm for matching a single overload is less general than the     //
+// algorithm described in the WGSL spec.  But it makes the same decisions     //
+// because the overloads defined by WGSL are monotonic in the sense that once //
+// a template parameter has been refined, there is never a need to backtrack  //
+// and un-refine it to match a later argument.                                //
+//                                                                            //
+// The algorithm for matching template numbers is similar to matching         //
+// template types, except numbers need to exactly match across all uses -     //
+// there is no implicit conversion. Template numbers may match integer        //
+// numbers or enumerators.                                                    //
+//                                                                            //
+//                                                                            //
+// Overload resolution for candidate overloads                                //
+// -------------------------------------------                                //
+//                                                                            //
+// If multiple candidate overloads match a given set of arguments, then a     //
+// final overload resolution pass needs to be performed. The arguments and    //
+// overload parameter types for each candidate overload are compared,         //
+// following the algorithm described at:                                      //
+//   https://www.w3.org/TR/WGSL/#overload-resolution-section                  //
+//                                                                            //
+// If the candidate list contains a single entry, then that single candidate  //
+// is picked, and no overload resolution needs to be performed.               //
+//                                                                            //
+// If the candidate list is empty, then the call fails to resolve and an      //
+// error diagnostic is raised.                                                //
+//                                                                            //
+//                                                                            //
+// More examples                                                              //
+// -------------                                                              //
+//                                                                            //
+//   fn F()                                                                   //
+//     - Function called F.                                                   //
+//       No template types or numbers, no parameters, no return value         //
+//                                                                            //
+//   fn F() -> RETURN_TYPE                                                    //
+//     - Function with RETURN_TYPE as the return type value                   //
+//                                                                            //
+//   fn F(f32, i32)                                                           //
+//     - Two fixed-type, anonymous parameters                                 //
+//                                                                            //
+//   fn F(USAGE : f32)                                                        //
+//     - Single parameter with name USAGE.                                    //
+//       Note: Parameter names are used by Tint to infer parameter order for  //
+//       some builtin functions                                               //
+//                                                                            //
+//   fn F<T>(T)                                                               //
+//     - Single parameter of unconstrained template type T (any type)         //
+//                                                                            //
+//   fn F<T: scalar>(T)                                                       //
+//     - Single parameter of constrained template type T (must be a scalar)   //
+//                                                                            //
+//   fn F<T: fiu32>(T) -> T                                                   //
+//     - Single parameter of constrained template type T (must be a one of    //
+//       fiu32) Return type matches parameter type                            //
+//                                                                            //
+//   fn F<T, N: num>(vec<N, T>)                                               //
+//     - Single parameter of vector type with template number size N and      //
+//       element template type T                                              //
+//                                                                            //
+//   fn F<A: access>(texture_storage_1d<f32_texel_format, A>)                 //
+//     - Single parameter of texture_storage_1d type with template number     //
+//       access-control C, and of a texel format that is listed in            //
+//       f32_texel_format                                                     //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+// https://gpuweb.github.io/gpuweb/wgsl/#builtin-functions
+@must_use @const fn abs<T: fia_fiu32_f16>(T) -> T
+@must_use @const fn abs<N: num, T: fia_fiu32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn acos<T: fa_f32_f16>(@test_value(0.96891242171) T) -> T
+@must_use @const fn acos<N: num, T: fa_f32_f16>(@test_value(0.96891242171) vec<N, T>) -> vec<N, T>
+@must_use @const fn acosh<T: fa_f32_f16>(@test_value(1.5430806348) T) -> T
+@must_use @const fn acosh<N: num, T: fa_f32_f16>(@test_value(1.5430806348) vec<N, T>) -> vec<N, T>
+@must_use @const fn all(bool) -> bool
+@must_use @const fn all<N: num>(vec<N, bool>) -> bool
+@must_use @const fn any(bool) -> bool
+@must_use @const fn any<N: num>(vec<N, bool>) -> bool
+@must_use fn arrayLength<T, A: access>(ptr<storage, array<T>, A>) -> u32
+@must_use @const fn asin<T: fa_f32_f16>(@test_value(0.479425538604) T) -> T
+@must_use @const fn asin<N: num, T: fa_f32_f16>(@test_value(0.479425538604) vec<N, T>) -> vec<N, T>
+@must_use @const fn asinh<T: fa_f32_f16>(T) -> T
+@must_use @const fn asinh<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn atan<T: fa_f32_f16>(T) -> T
+@must_use @const fn atan<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn atan2<T: fa_f32_f16>(T, T) -> T
+@must_use @const fn atan2<T: fa_f32_f16, N: num>(vec<N, T>, vec<N, T>) -> vec<N, T>
+@must_use @const fn atanh<T: fa_f32_f16>(@test_value(0.5) T) -> T
+@must_use @const fn atanh<N: num, T: fa_f32_f16>(@test_value(0.5) vec<N, T>) -> vec<N, T>
+@must_use @const fn ceil<T: fa_f32_f16>(@test_value(1.5) T) -> T
+@must_use @const fn ceil<N: num, T: fa_f32_f16>(@test_value(1.5) vec<N, T>) -> vec<N, T>
+@must_use @const fn clamp<T: fia_fiu32_f16>(T, T, T) -> T
+@must_use @const fn clamp<T: fia_fiu32_f16, N: num>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
+@must_use @const fn cos<T: fa_f32_f16>(@test_value(0) T) -> T
+@must_use @const fn cos<N: num, T: fa_f32_f16>(@test_value(0) vec<N, T>) -> vec<N, T>
+@must_use @const fn cosh<T: fa_f32_f16>(@test_value(0) T) -> T
+@must_use @const fn cosh<N: num, T: fa_f32_f16>(@test_value(0) vec<N, T>) -> vec<N, T>
+@must_use @const fn countLeadingZeros<T: iu32>(T) -> T
+@must_use @const fn countLeadingZeros<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
+@must_use @const fn countOneBits<T: iu32>(T) -> T
+@must_use @const fn countOneBits<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
+@must_use @const fn countTrailingZeros<T: iu32>(T) -> T
+@must_use @const fn countTrailingZeros<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
+@must_use @const fn cross<T: fa_f32_f16>(vec3<T>, vec3<T>) -> vec3<T>
+@must_use @const fn degrees<T: fa_f32_f16>(T) -> T
+@must_use @const fn degrees<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn determinant<N: num, T: fa_f32_f16>(mat<N, N, T>) -> T
+@must_use @const fn distance<T: fa_f32_f16>(T, T) -> T
+@must_use @const fn distance<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>) -> T
+@must_use @const fn dot<N: num, T: fia_fiu32_f16>(vec<N, T>, vec<N, T>) -> T
+@must_use fn dot4I8Packed(u32, u32) -> i32
+@must_use fn dot4U8Packed(u32, u32) -> u32
+@must_use @stage("fragment") fn dpdx(f32) -> f32
+@must_use @stage("fragment") fn dpdx<N: num>(vec<N, f32>) -> vec<N, f32>
+@must_use @stage("fragment") fn dpdxCoarse(f32) -> f32
+@must_use @stage("fragment") fn dpdxCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
+@must_use @stage("fragment") fn dpdxFine(f32) -> f32
+@must_use @stage("fragment") fn dpdxFine<N: num>(vec<N, f32>) -> vec<N, f32>
+@must_use @stage("fragment") fn dpdy(f32) -> f32
+@must_use @stage("fragment") fn dpdy<N: num>(vec<N, f32>) -> vec<N, f32>
+@must_use @stage("fragment") fn dpdyCoarse(f32) -> f32
+@must_use @stage("fragment") fn dpdyCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
+@must_use @stage("fragment") fn dpdyFine(f32) -> f32
+@must_use @stage("fragment") fn dpdyFine<N: num>(vec<N, f32>) -> vec<N, f32>
+@must_use @const fn exp<T: fa_f32_f16>(T) -> T
+@must_use @const fn exp<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn exp2<T: fa_f32_f16>(T) -> T
+@must_use @const fn exp2<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn extractBits<T: iu32>(T, u32, u32) -> T
+@must_use @const fn extractBits<N: num, T: iu32>(vec<N, T>, u32, u32) -> vec<N, T>
+@must_use @const fn faceForward<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
+@must_use @const fn firstLeadingBit<T: iu32>(T) -> T
+@must_use @const fn firstLeadingBit<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
+@must_use @const fn firstTrailingBit<T: iu32>(T) -> T
+@must_use @const fn firstTrailingBit<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
+@must_use @const fn floor<T: fa_f32_f16>(@test_value(1.5) T) -> T
+@must_use @const fn floor<N: num, T: fa_f32_f16>(@test_value(1.5) vec<N, T>) -> vec<N, T>
+@must_use @const fn fma<T: fa_f32_f16>(T, T, T) -> T
+@must_use @const fn fma<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
+@must_use @const fn fract<T: fa_f32_f16>(@test_value(1.25) T) -> T
+@must_use @const fn fract<N: num, T: fa_f32_f16>(@test_value(1.25) vec<N, T>) -> vec<N, T>
+@must_use @const fn frexp<T: fa_f32_f16>(T) -> __frexp_result<T>
+@must_use @const fn frexp<N: num, T: fa_f32_f16>(vec<N, T>) -> __frexp_result_vec<N, T>
+@must_use @stage("fragment") fn fwidth(f32) -> f32
+@must_use @stage("fragment") fn fwidth<N: num>(vec<N, f32>) -> vec<N, f32>
+@must_use @stage("fragment") fn fwidthCoarse(f32) -> f32
+@must_use @stage("fragment") fn fwidthCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
+@must_use @stage("fragment") fn fwidthFine(f32) -> f32
+@must_use @stage("fragment") fn fwidthFine<N: num>(vec<N, f32>) -> vec<N, f32>
+@must_use @const fn insertBits<T: iu32>(T, T, u32, u32) -> T
+@must_use @const fn insertBits<N: num, T: iu32>(vec<N, T>, vec<N, T>, u32, u32) -> vec<N, T>
+@must_use @const fn inverseSqrt<T: fa_f32_f16>(T) -> T
+@must_use @const fn inverseSqrt<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn ldexp<T: fa_f32_f16, U: ia_i32>(T, U) -> T
+@must_use @const fn ldexp<N: num, T: fa_f32_f16, U: ia_i32>(vec<N, T>, vec<N, U>) -> vec<N, T>
+@must_use @const fn length<T: fa_f32_f16>(@test_value(0.0) T) -> T
+@must_use @const fn length<N: num, T: fa_f32_f16>(@test_value(0.0) vec<N, T>) -> T
+@must_use @const fn log<T: fa_f32_f16>(T) -> T
+@must_use @const fn log<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn log2<T: fa_f32_f16>(T) -> T
+@must_use @const fn log2<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn max<T: fia_fiu32_f16>(T, T) -> T
+@must_use @const fn max<N: num, T: fia_fiu32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
+@must_use @const fn min<T: fia_fiu32_f16>(T, T) -> T
+@must_use @const fn min<N: num, T: fia_fiu32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
+@must_use @const fn mix<T: fa_f32_f16>(T, T, T) -> T
+@must_use @const fn mix<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
+@must_use @const fn mix<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>, T) -> vec<N, T>
+@must_use @const fn modf<T: fa_f32_f16>(@test_value(-1.5) T) -> __modf_result<T>
+@must_use @const fn modf<N: num, T: fa_f32_f16>(@test_value(-1.5) vec<N, T>) -> __modf_result_vec<N, T>
+@must_use @const fn normalize<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn pack2x16float(vec2<f32>) -> u32
+@must_use @const fn pack2x16snorm(vec2<f32>) -> u32
+@must_use @const fn pack2x16unorm(vec2<f32>) -> u32
+@must_use @const fn pack4x8snorm(vec4<f32>) -> u32
+@must_use @const fn pack4x8unorm(vec4<f32>) -> u32
+@must_use @const fn pow<T: fa_f32_f16>(T, T) -> T
+@must_use @const fn pow<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
+@must_use @const fn quantizeToF16(f32) -> f32
+@must_use @const fn quantizeToF16<N: num>(vec<N, f32>) -> vec<N, f32>
+@must_use @const fn radians<T: fa_f32_f16>(T) -> T
+@must_use @const fn radians<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn reflect<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
+@must_use @const fn refract<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>, T) -> vec<N, T>
+@must_use @const fn reverseBits<T: iu32>(T) -> T
+@must_use @const fn reverseBits<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
+@must_use @const fn round<T: fa_f32_f16>(@test_value(3.5) T) -> T
+@must_use @const fn round<N: num, T: fa_f32_f16>(@test_value(3.5) vec<N, T>) -> vec<N, T>
+@must_use @const fn saturate<T: fa_f32_f16>(@test_value(2) T) -> T
+@must_use @const fn saturate<T: fa_f32_f16, N: num>(@test_value(2) vec<N, T>) -> vec<N, T>
+@must_use @const("select_bool") fn select<T: scalar>(T, T, bool) -> T
+@must_use @const("select_bool") fn select<T: scalar, N: num>(vec<N, T>, vec<N, T>, bool) -> vec<N, T>
+@must_use @const("select_boolvec") fn select<N: num, T: scalar>(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T>
+@must_use @const fn sign<T: fia_fi32_f16>(T) -> T
+@must_use @const fn sign<N: num, T: fia_fi32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn sin<T: fa_f32_f16>(@test_value(1.57079632679) T) -> T
+@must_use @const fn sin<N: num, T: fa_f32_f16>(@test_value(1.57079632679) vec<N, T>) -> vec<N, T>
+@must_use @const fn sinh<T: fa_f32_f16>(T) -> T
+@must_use @const fn sinh<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn smoothstep<T: fa_f32_f16>(@test_value(2) T, @test_value(4) T, @test_value(3) T) -> T
+@must_use @const fn smoothstep<N: num, T: fa_f32_f16>(@test_value(2) vec<N, T>, @test_value(4) vec<N, T>, @test_value(3) vec<N, T>) -> vec<N, T>
+@must_use @const fn sqrt<T: fa_f32_f16>(T) -> T
+@must_use @const fn sqrt<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn step<T: fa_f32_f16>(T, T) -> T
+@must_use @const fn step<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
+@stage("compute") fn storageBarrier()
+@must_use @const fn tan<T: fa_f32_f16>(T) -> T
+@must_use @const fn tan<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn tanh<T: fa_f32_f16>(T) -> T
+@must_use @const fn tanh<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@must_use @const fn transpose<M: num, N: num, T: fa_f32_f16>(mat<M, N, T>) -> mat<N, M, T>
+@must_use @const fn trunc<T: fa_f32_f16>(@test_value(1.5) T) -> T
+@must_use @const fn trunc<N: num, T: fa_f32_f16>(@test_value(1.5) vec<N, T>) -> vec<N, T>
+@must_use @const fn unpack2x16float(u32) -> vec2<f32>
+@must_use @const fn unpack2x16snorm(u32) -> vec2<f32>
+@must_use @const fn unpack2x16unorm(u32) -> vec2<f32>
+@must_use @const fn unpack4x8snorm(u32) -> vec4<f32>
+@must_use @const fn unpack4x8unorm(u32) -> vec4<f32>
+@stage("compute") fn workgroupBarrier()
+@must_use @stage("compute") fn workgroupUniformLoad<T>(ptr<workgroup, T, read_write>) -> T
+
+@stage("compute") fn textureBarrier()
+@must_use fn textureDimensions<T: fiu32>(texture: texture_1d<T>) -> u32
+@must_use fn textureDimensions<T: fiu32, L: iu32>(texture: texture_1d<T>, level: L) -> u32
+@must_use fn textureDimensions<T: fiu32>(texture: texture_2d<T>) -> vec2<u32>
+@must_use fn textureDimensions<T: fiu32, L: iu32>(texture: texture_2d<T>, level: L) -> vec2<u32>
+@must_use fn textureDimensions<T: fiu32>(texture: texture_2d_array<T>) -> vec2<u32>
+@must_use fn textureDimensions<T: fiu32, L: iu32>(texture: texture_2d_array<T>, level: L) -> vec2<u32>
+@must_use fn textureDimensions<T: fiu32>(texture: texture_3d<T>) -> vec3<u32>
+@must_use fn textureDimensions<T: fiu32, L: iu32>(texture: texture_3d<T>, level: L) -> vec3<u32>
+@must_use fn textureDimensions<T: fiu32>(texture: texture_cube<T>) -> vec2<u32>
+@must_use fn textureDimensions<T: fiu32, L: iu32>(texture: texture_cube<T>, level: L) -> vec2<u32>
+@must_use fn textureDimensions<T: fiu32>(texture: texture_cube_array<T>) -> vec2<u32>
+@must_use fn textureDimensions<T: fiu32, L: iu32>(texture: texture_cube_array<T>, level: L) -> vec2<u32>
+@must_use fn textureDimensions<T: fiu32>(texture: texture_multisampled_2d<T>) -> vec2<u32>
+@must_use fn textureDimensions(texture: texture_depth_2d) -> vec2<u32>
+@must_use fn textureDimensions<L: iu32>(texture: texture_depth_2d, level: L) -> vec2<u32>
+@must_use fn textureDimensions(texture: texture_depth_2d_array) -> vec2<u32>
+@must_use fn textureDimensions<L: iu32>(texture: texture_depth_2d_array, level: L) -> vec2<u32>
+@must_use fn textureDimensions(texture: texture_depth_cube) -> vec2<u32>
+@must_use fn textureDimensions<L: iu32>(texture: texture_depth_cube, level: L) -> vec2<u32>
+@must_use fn textureDimensions(texture: texture_depth_cube_array) -> vec2<u32>
+@must_use fn textureDimensions<L: iu32>(texture: texture_depth_cube_array, level: L) -> vec2<u32>
+@must_use fn textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<u32>
+@must_use fn textureDimensions<F: texel_format, A: access>(texture: texture_storage_1d<F, A>) -> u32
+@must_use fn textureDimensions<F: texel_format, A: access>(texture: texture_storage_2d<F, A>) -> vec2<u32>
+@must_use fn textureDimensions<F: texel_format, A: access>(texture: texture_storage_2d_array<F, A>) -> vec2<u32>
+@must_use fn textureDimensions<F: texel_format, A: access>(texture: texture_storage_3d<F, A>) -> vec3<u32>
+@must_use fn textureDimensions(texture: texture_external) -> vec2<u32>
+@must_use fn textureGather<T: fiu32, C: iu32>(@const component: C, texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>) -> vec4<T>
+@must_use fn textureGather<T: fiu32, C: iu32>(@const component: C, texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>) -> vec4<T>
+@must_use fn textureGather<T: fiu32, C: iu32, A: iu32>(@const component: C, texture: texture_2d_array<T>, sampler: sampler, coords: vec2<f32>, array_index: A) -> vec4<T>
+@must_use fn textureGather<T: fiu32, C: iu32, A: iu32>(@const component: C, texture: texture_2d_array<T>, sampler: sampler, coords: vec2<f32>, array_index: A, @const offset: vec2<i32>) -> vec4<T>
+@must_use fn textureGather<T: fiu32, C: iu32>(@const component: C, texture: texture_cube<T>, sampler: sampler, coords: vec3<f32>) -> vec4<T>
+@must_use fn textureGather<T: fiu32, C: iu32, A: iu32>(@const component: C, texture: texture_cube_array<T>, sampler: sampler, coords: vec3<f32>, array_index: A) -> vec4<T>
+@must_use fn textureGather(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
+@must_use fn textureGather(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>) -> vec4<f32>
+@must_use fn textureGather<A: iu32>(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A) -> vec4<f32>
+@must_use fn textureGather<A: iu32>(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A, @const offset: vec2<i32>) -> vec4<f32>
+@must_use fn textureGather(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
+@must_use fn textureGather<A: iu32>(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: A) -> vec4<f32>
+@must_use fn textureGatherCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> vec4<f32>
+@must_use fn textureGatherCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, @const offset: vec2<i32>) -> vec4<f32>
+@must_use fn textureGatherCompare<A: iu32>(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32) -> vec4<f32>
+@must_use fn textureGatherCompare<A: iu32>(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32, @const offset: vec2<i32>) -> vec4<f32>
+@must_use fn textureGatherCompare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> vec4<f32>
+@must_use fn textureGatherCompare<A: iu32>(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: A, depth_ref: f32) -> vec4<f32>
+@must_use fn textureNumLayers<T: fiu32>(texture: texture_2d_array<T>) -> u32
+@must_use fn textureNumLayers<T: fiu32>(texture: texture_cube_array<T>) -> u32
+@must_use fn textureNumLayers(texture: texture_depth_2d_array) -> u32
+@must_use fn textureNumLayers(texture: texture_depth_cube_array) -> u32
+@must_use fn textureNumLayers<F: texel_format, A: access>(texture: texture_storage_2d_array<F, A>) -> u32
+@must_use fn textureNumLevels<T: fiu32>(texture: texture_1d<T>) -> u32
+@must_use fn textureNumLevels<T: fiu32>(texture: texture_2d<T>) -> u32
+@must_use fn textureNumLevels<T: fiu32>(texture: texture_2d_array<T>) -> u32
+@must_use fn textureNumLevels<T: fiu32>(texture: texture_3d<T>) -> u32
+@must_use fn textureNumLevels<T: fiu32>(texture: texture_cube<T>) -> u32
+@must_use fn textureNumLevels<T: fiu32>(texture: texture_cube_array<T>) -> u32
+@must_use fn textureNumLevels(texture: texture_depth_2d) -> u32
+@must_use fn textureNumLevels(texture: texture_depth_2d_array) -> u32
+@must_use fn textureNumLevels(texture: texture_depth_cube) -> u32
+@must_use fn textureNumLevels(texture: texture_depth_cube_array) -> u32
+@must_use fn textureNumSamples<T: fiu32>(texture: texture_multisampled_2d<T>) -> u32
+@must_use fn textureNumSamples(texture: texture_depth_multisampled_2d) -> u32
+@must_use @stage("fragment") fn textureSample(texture: texture_1d<f32>, sampler: sampler, coords: f32) -> vec4<f32>
+@must_use @stage("fragment") fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
+@must_use @stage("fragment") fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>) -> vec4<f32>
+@must_use @stage("fragment") fn textureSample<A: iu32>(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A) -> vec4<f32>
+@must_use @stage("fragment") fn textureSample<A: iu32>(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, @const offset: vec2<i32>) -> vec4<f32>
+@must_use @stage("fragment") fn textureSample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
+@must_use @stage("fragment") fn textureSample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, @const offset: vec3<i32>) -> vec4<f32>
+@must_use @stage("fragment") fn textureSample(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
+@must_use @stage("fragment") fn textureSample<A: iu32>(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: A) -> vec4<f32>
+@must_use @stage("fragment") fn textureSample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>) -> f32
+@must_use @stage("fragment") fn textureSample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>) -> f32
+@must_use @stage("fragment") fn textureSample<A: iu32>(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A) -> f32
+@must_use @stage("fragment") fn textureSample<A: iu32>(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A, @const offset: vec2<i32>) -> f32
+@must_use @stage("fragment") fn textureSample(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> f32
+@must_use @stage("fragment") fn textureSample<A: iu32>(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: A) -> f32
+@must_use @stage("fragment") fn textureSampleBias(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, bias: f32) -> vec4<f32>
+@must_use @stage("fragment") fn textureSampleBias(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, bias: f32, @const offset: vec2<i32>) -> vec4<f32>
+@must_use @stage("fragment") fn textureSampleBias<A: iu32>(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, bias: f32) -> vec4<f32>
+@must_use @stage("fragment") fn textureSampleBias<A: iu32>(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, bias: f32, @const offset: vec2<i32>) -> vec4<f32>
+@must_use @stage("fragment") fn textureSampleBias(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: f32) -> vec4<f32>
+@must_use @stage("fragment") fn textureSampleBias(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: f32, @const offset: vec3<i32>) -> vec4<f32>
+@must_use @stage("fragment") fn textureSampleBias(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>, bias: f32) -> vec4<f32>
+@must_use @stage("fragment") fn textureSampleBias<A: iu32>(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: A, bias: f32) -> vec4<f32>
+@must_use @stage("fragment") fn textureSampleCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> f32
+@must_use @stage("fragment") fn textureSampleCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, @const offset: vec2<i32>) -> f32
+@must_use @stage("fragment") fn textureSampleCompare<A: iu32>(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32) -> f32
+@must_use @stage("fragment") fn textureSampleCompare<A: iu32>(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32, @const offset: vec2<i32>) -> f32
+@must_use @stage("fragment") fn textureSampleCompare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> f32
+@must_use @stage("fragment") fn textureSampleCompare<A: iu32>(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: A, depth_ref: f32) -> f32
+@must_use fn textureSampleCompareLevel(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> f32
+@must_use fn textureSampleCompareLevel(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, @const offset: vec2<i32>) -> f32
+@must_use fn textureSampleCompareLevel<A: iu32>(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32) -> f32
+@must_use fn textureSampleCompareLevel<A: iu32>(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: A, depth_ref: f32, @const offset: vec2<i32>) -> f32
+@must_use fn textureSampleCompareLevel(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> f32
+@must_use fn textureSampleCompareLevel<A: iu32>(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: A, depth_ref: f32) -> f32
+@must_use fn textureSampleGrad(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, ddx: vec2<f32>, ddy: vec2<f32>) -> vec4<f32>
+@must_use fn textureSampleGrad(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, ddx: vec2<f32>, ddy: vec2<f32>, @const offset: vec2<i32>) -> vec4<f32>
+@must_use fn textureSampleGrad<A: iu32>(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, ddx: vec2<f32>, ddy: vec2<f32>) -> vec4<f32>
+@must_use fn textureSampleGrad<A: iu32>(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, ddx: vec2<f32>, ddy: vec2<f32>, @const offset: vec2<i32>) -> vec4<f32>
+@must_use fn textureSampleGrad(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, ddx: vec3<f32>, ddy: vec3<f32>) -> vec4<f32>
+@must_use fn textureSampleGrad(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, ddx: vec3<f32>, ddy: vec3<f32>, @const offset: vec3<i32>) -> vec4<f32>
+@must_use fn textureSampleGrad(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>, ddx: vec3<f32>, ddy: vec3<f32>) -> vec4<f32>
+@must_use fn textureSampleGrad<A: iu32>(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: A, ddx: vec3<f32>, ddy: vec3<f32>) -> vec4<f32>
+@must_use fn textureSampleLevel(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, level: f32) -> vec4<f32>
+@must_use fn textureSampleLevel(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, level: f32, @const offset: vec2<i32>) -> vec4<f32>
+@must_use fn textureSampleLevel<A: iu32>(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, level: f32) -> vec4<f32>
+@must_use fn textureSampleLevel<A: iu32>(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: A, level: f32, @const offset: vec2<i32>) -> vec4<f32>
+@must_use fn textureSampleLevel(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, level: f32) -> vec4<f32>
+@must_use fn textureSampleLevel(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, level: f32, @const offset: vec3<i32>) -> vec4<f32>
+@must_use fn textureSampleLevel(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>, level: f32) -> vec4<f32>
+@must_use fn textureSampleLevel<A: iu32>(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: A, level: f32) -> vec4<f32>
+@must_use fn textureSampleLevel<L: iu32>(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, level: L) -> f32
+@must_use fn textureSampleLevel<L: iu32>(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, level: L, @const offset: vec2<i32>) -> f32
+@must_use fn textureSampleLevel<A: iu32, L: iu32>(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A, level: L) -> f32
+@must_use fn textureSampleLevel<A: iu32, L: iu32>(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: A, level: L, @const offset: vec2<i32>) -> f32
+@must_use fn textureSampleLevel<L: iu32>(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>, level: L) -> f32
+@must_use fn textureSampleLevel<A: iu32, L: iu32>(texture: texture_depth_cube_array,sampler: sampler, coords: vec3<f32>, array_index: A, level: L) -> f32
+@must_use fn textureSampleBaseClampToEdge(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
+@must_use fn textureSampleBaseClampToEdge(texture: texture_external, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
+fn textureStore<C: iu32>(texture: texture_storage_1d<f32_texel_format, writable>, coords: C, value: vec4<f32>)
+fn textureStore<C: iu32>(texture: texture_storage_2d<f32_texel_format, writable>, coords: vec2<C>, value: vec4<f32>)
+fn textureStore<C: iu32, A: iu32>(texture: texture_storage_2d_array<f32_texel_format, writable>, coords: vec2<C>, array_index: A, value: vec4<f32>)
+fn textureStore<C: iu32>(texture: texture_storage_3d<f32_texel_format, writable>, coords: vec3<C>, value: vec4<f32>)
+fn textureStore<C: iu32>(texture: texture_storage_1d<i32_texel_format, writable>, coords: C, value: vec4<i32>)
+fn textureStore<C: iu32>(texture: texture_storage_2d<i32_texel_format, writable>, coords: vec2<C>, value: vec4<i32>)
+fn textureStore<C: iu32, A: iu32>(texture: texture_storage_2d_array<i32_texel_format, writable>, coords: vec2<C>, array_index: A, value: vec4<i32>)
+fn textureStore<C: iu32>(texture: texture_storage_3d<i32_texel_format, writable>, coords: vec3<C>, value: vec4<i32>)
+fn textureStore<C: iu32>(texture: texture_storage_1d<u32_texel_format, writable>, coords: C, value: vec4<u32>)
+fn textureStore<C: iu32>(texture: texture_storage_2d<u32_texel_format, writable>, coords: vec2<C>, value: vec4<u32>)
+fn textureStore<C: iu32, A: iu32>(texture: texture_storage_2d_array<u32_texel_format, writable>, coords: vec2<C>, array_index: A, value: vec4<u32>)
+fn textureStore<C: iu32>(texture: texture_storage_3d<u32_texel_format, writable>, coords: vec3<C>, value: vec4<u32>)
+@must_use fn textureLoad<T: fiu32, C: iu32, L: iu32>(texture: texture_1d<T>, coords: C, level: L) -> vec4<T>
+@must_use fn textureLoad<T: fiu32, C: iu32, L: iu32>(texture: texture_2d<T>, coords: vec2<C>, level: L) -> vec4<T>
+@must_use fn textureLoad<T: fiu32, C: iu32, A: iu32, L: iu32>(texture: texture_2d_array<T>, coords: vec2<C>, array_index: A, level: L) -> vec4<T>
+@must_use fn textureLoad<T: fiu32, C: iu32, L: iu32>(texture: texture_3d<T>, coords: vec3<C>, level: L) -> vec4<T>
+@must_use fn textureLoad<T: fiu32, C: iu32, S: iu32>(texture: texture_multisampled_2d<T>, coords: vec2<C>, sample_index: S) -> vec4<T>
+@must_use fn textureLoad<C: iu32, L: iu32>(texture: texture_depth_2d, coords: vec2<C>, level: L) -> f32
+@must_use fn textureLoad<C: iu32, A: iu32, L: iu32>(texture: texture_depth_2d_array, coords: vec2<C>, array_index: A, level: L) -> f32
+@must_use fn textureLoad<C: iu32, S: iu32>(texture: texture_depth_multisampled_2d, coords: vec2<C>, sample_index: S) -> f32
+@must_use fn textureLoad<C: iu32>(texture: texture_external, coords: vec2<C>) -> vec4<f32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_1d<f32_texel_format, readable>, coords: C) -> vec4<f32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_1d<i32_texel_format, readable>, coords: C) -> vec4<i32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_1d<u32_texel_format, readable>, coords: C) -> vec4<u32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_2d<f32_texel_format, readable>, coords: vec2<C>) -> vec4<f32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_2d<i32_texel_format, readable>, coords: vec2<C>) -> vec4<i32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_2d<u32_texel_format, readable>, coords: vec2<C>) -> vec4<u32>
+@must_use fn textureLoad<C: iu32, A: iu32>(texture: texture_storage_2d_array<f32_texel_format, readable>, coords: vec2<C>, array_index: A) -> vec4<f32>
+@must_use fn textureLoad<C: iu32, A: iu32>(texture: texture_storage_2d_array<i32_texel_format, readable>, coords: vec2<C>, array_index: A) -> vec4<i32>
+@must_use fn textureLoad<C: iu32, A: iu32>(texture: texture_storage_2d_array<u32_texel_format, readable>, coords: vec2<C>, array_index: A) -> vec4<u32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_3d<f32_texel_format, readable>, coords: vec3<C>) -> vec4<f32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_3d<i32_texel_format, readable>, coords: vec3<C>) -> vec4<i32>
+@must_use fn textureLoad<C: iu32>(texture: texture_storage_3d<u32_texel_format, readable>, coords: vec3<C>) -> vec4<u32>
+
+@stage("fragment", "compute") fn atomicLoad<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>) -> T
+@stage("fragment", "compute") fn atomicStore<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T)
+@stage("fragment", "compute") fn atomicAdd<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicSub<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicMax<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicMin<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicAnd<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicOr<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicXor<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicExchange<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T) -> T
+@stage("fragment", "compute") fn atomicCompareExchangeWeak<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T, T) -> __atomic_compare_exchange_result<T>
+
+@must_use @stage("compute") fn subgroupBallot() -> vec4<u32>
+@must_use @stage("compute") fn subgroupBroadcast<T: fiu32>(value: T, @const sourceLaneIndex: u32) -> T
+
+////////////////////////////////////////////////////////////////////////////////
+// Value constructors                                                         //
+////////////////////////////////////////////////////////////////////////////////
+
+// Zero value constructors
+@must_use @const("Zero") ctor i32() -> i32
+@must_use @const("Zero") ctor u32() -> u32
+@must_use @const("Zero") ctor f32() -> f32
+@must_use @const("Zero") ctor f16() -> f16
+@must_use @const("Zero") ctor bool() -> bool
+@must_use @const("Zero") ctor vec2() -> vec2<ia>
+@must_use @const("Zero") ctor vec3() -> vec3<ia>
+@must_use @const("Zero") ctor vec4() -> vec4<ia>
+@must_use @const("Zero") ctor vec2<T: concrete_scalar>() -> vec2<T>
+@must_use @const("Zero") ctor vec3<T: concrete_scalar>() -> vec3<T>
+@must_use @const("Zero") ctor vec4<T: concrete_scalar>() -> vec4<T>
+@must_use @const("Zero") ctor mat2x2<T: f32_f16>() -> mat2x2<T>
+@must_use @const("Zero") ctor mat2x3<T: f32_f16>() -> mat2x3<T>
+@must_use @const("Zero") ctor mat2x4<T: f32_f16>() -> mat2x4<T>
+@must_use @const("Zero") ctor mat3x2<T: f32_f16>() -> mat3x2<T>
+@must_use @const("Zero") ctor mat3x3<T: f32_f16>() -> mat3x3<T>
+@must_use @const("Zero") ctor mat3x4<T: f32_f16>() -> mat3x4<T>
+@must_use @const("Zero") ctor mat4x2<T: f32_f16>() -> mat4x2<T>
+@must_use @const("Zero") ctor mat4x3<T: f32_f16>() -> mat4x3<T>
+@must_use @const("Zero") ctor mat4x4<T: f32_f16>() -> mat4x4<T>
+
+// Identity constructors
+@must_use @const("Identity") ctor i32(i32) -> i32
+@must_use @const("Identity") ctor u32(u32) -> u32
+@must_use @const("Identity") ctor f32(f32) -> f32
+@must_use @const("Identity") ctor f16(f16) -> f16
+@must_use @const("Identity") ctor bool(bool) -> bool
+@must_use @const("Identity") ctor vec2<T: scalar>(vec2<T>) -> vec2<T>
+@must_use @const("Identity") ctor vec3<T: scalar>(vec3<T>) -> vec3<T>
+@must_use @const("Identity") ctor vec4<T: scalar>(vec4<T>) -> vec4<T>
+@must_use @const("Identity") ctor mat2x2<T: f32_f16>(mat2x2<T>) -> mat2x2<T>
+@must_use @const("Identity") ctor mat2x3<T: f32_f16>(mat2x3<T>) -> mat2x3<T>
+@must_use @const("Identity") ctor mat2x4<T: f32_f16>(mat2x4<T>) -> mat2x4<T>
+@must_use @const("Identity") ctor mat3x2<T: f32_f16>(mat3x2<T>) -> mat3x2<T>
+@must_use @const("Identity") ctor mat3x3<T: f32_f16>(mat3x3<T>) -> mat3x3<T>
+@must_use @const("Identity") ctor mat3x4<T: f32_f16>(mat3x4<T>) -> mat3x4<T>
+@must_use @const("Identity") ctor mat4x2<T: f32_f16>(mat4x2<T>) -> mat4x2<T>
+@must_use @const("Identity") ctor mat4x3<T: f32_f16>(mat4x3<T>) -> mat4x3<T>
+@must_use @const("Identity") ctor mat4x4<T: f32_f16>(mat4x4<T>) -> mat4x4<T>
+
+// Vector constructors (splat)
+@must_use @const("VecSplat") ctor vec2<T: scalar>(T) -> vec2<T>
+@must_use @const("VecSplat") ctor vec3<T: scalar>(T) -> vec3<T>
+@must_use @const("VecSplat") ctor vec4<T: scalar>(T) -> vec4<T>
+
+// Vector constructors (scalar)
+@must_use @const("VecInitS") ctor vec2<T: scalar>(x: T, y: T) -> vec2<T>
+@must_use @const("VecInitS") ctor vec3<T: scalar>(x: T, y: T, z: T) -> vec3<T>
+@must_use @const("VecInitS") ctor vec4<T: scalar>(x: T, y: T, z: T, w: T) -> vec4<T>
+
+// Vector constructors (mixed)
+@must_use @const("VecInitM") ctor vec3<T: scalar>(xy: vec2<T>, z: T) -> vec3<T>
+@must_use @const("VecInitM") ctor vec3<T: scalar>(x: T, yz: vec2<T>) -> vec3<T>
+@must_use @const("VecInitM") ctor vec4<T: scalar>(xy: vec2<T>, z: T, w: T) -> vec4<T>
+@must_use @const("VecInitM") ctor vec4<T: scalar>(x: T, yz: vec2<T>, w: T) -> vec4<T>
+@must_use @const("VecInitM") ctor vec4<T: scalar>(x: T, y: T, zw: vec2<T>) -> vec4<T>
+@must_use @const("VecInitM") ctor vec4<T: scalar>(xy: vec2<T>, zw: vec2<T>) -> vec4<T>
+@must_use @const("VecInitM") ctor vec4<T: scalar>(xyz: vec3<T>, w: T) -> vec4<T>
+@must_use @const("VecInitM") ctor vec4<T: scalar>(x: T, zyw: vec3<T>) -> vec4<T>
+
+// Matrix constructors (scalar)
+@must_use @const("MatInitS")
+ctor mat2x2<T: fa_f32_f16>(T, T,
+                           T, T) -> mat2x2<T>
+@must_use @const("MatInitS")
+ctor mat2x3<T: fa_f32_f16>(T, T, T,
+                           T, T, T) -> mat2x3<T>
+@must_use @const("MatInitS")
+ctor mat2x4<T: fa_f32_f16>(T, T, T, T,
+                           T, T, T, T) -> mat2x4<T>
+@must_use @const("MatInitS")
+ctor mat3x2<T: fa_f32_f16>(T, T,
+                           T, T,
+                           T, T) -> mat3x2<T>
+@must_use @const("MatInitS")
+ctor mat3x3<T: fa_f32_f16>(T, T, T,
+                           T, T, T,
+                           T, T, T) -> mat3x3<T>
+@must_use @const("MatInitS")
+ctor mat3x4<T: fa_f32_f16>(T, T, T, T,
+                           T, T, T, T,
+                           T, T, T, T) -> mat3x4<T>
+@must_use @const("MatInitS")
+ctor mat4x2<T: fa_f32_f16>(T, T,
+                           T, T,
+                           T, T,
+                           T, T) -> mat4x2<T>
+@must_use @const("MatInitS")
+ctor mat4x3<T: fa_f32_f16>(T, T, T,
+                           T, T, T,
+                           T, T, T,
+                           T, T, T) -> mat4x3<T>
+@must_use @const("MatInitS")
+ctor mat4x4<T: fa_f32_f16>(T, T, T, T,
+                           T, T, T, T,
+                           T, T, T, T,
+                           T, T, T, T) -> mat4x4<T>
+
+// Matrix constructors (column vectors)
+@must_use @const("MatInitV") ctor mat2x2<T: fa_f32_f16>(vec2<T>, vec2<T>) -> mat2x2<T>
+@must_use @const("MatInitV") ctor mat2x3<T: fa_f32_f16>(vec3<T>, vec3<T>) -> mat2x3<T>
+@must_use @const("MatInitV") ctor mat2x4<T: fa_f32_f16>(vec4<T>, vec4<T>) -> mat2x4<T>
+@must_use @const("MatInitV") ctor mat3x2<T: fa_f32_f16>(vec2<T>, vec2<T>, vec2<T>) -> mat3x2<T>
+@must_use @const("MatInitV") ctor mat3x3<T: fa_f32_f16>(vec3<T>, vec3<T>, vec3<T>) -> mat3x3<T>
+@must_use @const("MatInitV") ctor mat3x4<T: fa_f32_f16>(vec4<T>, vec4<T>, vec4<T>) -> mat3x4<T>
+@must_use @const("MatInitV") ctor mat4x2<T: fa_f32_f16>(vec2<T>, vec2<T>, vec2<T>, vec2<T>) -> mat4x2<T>
+@must_use @const("MatInitV") ctor mat4x3<T: fa_f32_f16>(vec3<T>, vec3<T>, vec3<T>, vec3<T>) -> mat4x3<T>
+@must_use @const("MatInitV") ctor mat4x4<T: fa_f32_f16>(vec4<T>, vec4<T>, vec4<T>, vec4<T>) -> mat4x4<T>
+
+////////////////////////////////////////////////////////////////////////////////
+// Value conversions                                                          //
+////////////////////////////////////////////////////////////////////////////////
+@must_use @const conv f32<T: scalar_no_f32>(T) -> f32
+@must_use @const conv f16<T: scalar_no_f16>(T) -> f16
+@must_use @const conv i32<T: scalar_no_i32>(T) -> i32
+@must_use @const conv u32<T: scalar_no_u32>(T) -> u32
+@must_use @const conv bool<T: scalar_no_bool>(T) -> bool
+
+@must_use @const conv vec2<T: f32, U: scalar_no_f32>(vec2<U>) -> vec2<f32>
+@must_use @const conv vec2<T: f16, U: scalar_no_f16>(vec2<U>) -> vec2<f16>
+@must_use @const conv vec2<T: i32, U: scalar_no_i32>(vec2<U>) -> vec2<i32>
+@must_use @const conv vec2<T: u32, U: scalar_no_u32>(vec2<U>) -> vec2<u32>
+@must_use @const conv vec2<T: bool, U: scalar_no_bool>(vec2<U>) -> vec2<bool>
+
+@must_use @const conv vec3<T: f32, U: scalar_no_f32>(vec3<U>) -> vec3<f32>
+@must_use @const conv vec3<T: f16, U: scalar_no_f16>(vec3<U>) -> vec3<f16>
+@must_use @const conv vec3<T: i32, U: scalar_no_i32>(vec3<U>) -> vec3<i32>
+@must_use @const conv vec3<T: u32, U: scalar_no_u32>(vec3<U>) -> vec3<u32>
+@must_use @const conv vec3<T: bool, U: scalar_no_bool>(vec3<U>) -> vec3<bool>
+
+@must_use @const conv vec4<T: f32, U: scalar_no_f32>(vec4<U>) -> vec4<f32>
+@must_use @const conv vec4<T: f16, U: scalar_no_f16>(vec4<U>) -> vec4<f16>
+@must_use @const conv vec4<T: i32, U: scalar_no_i32>(vec4<U>) -> vec4<i32>
+@must_use @const conv vec4<T: u32, U: scalar_no_u32>(vec4<U>) -> vec4<u32>
+@must_use @const conv vec4<T: bool, U: scalar_no_bool>(vec4<U>) -> vec4<bool>
+
+@must_use @const conv mat2x2<T: f16>(mat2x2<f32>) -> mat2x2<f16>
+@must_use @const conv mat2x2<T: f32>(mat2x2<f16>) -> mat2x2<f32>
+@must_use @const conv mat2x3<T: f16>(mat2x3<f32>) -> mat2x3<f16>
+@must_use @const conv mat2x3<T: f32>(mat2x3<f16>) -> mat2x3<f32>
+@must_use @const conv mat2x4<T: f16>(mat2x4<f32>) -> mat2x4<f16>
+@must_use @const conv mat2x4<T: f32>(mat2x4<f16>) -> mat2x4<f32>
+@must_use @const conv mat3x2<T: f16>(mat3x2<f32>) -> mat3x2<f16>
+@must_use @const conv mat3x2<T: f32>(mat3x2<f16>) -> mat3x2<f32>
+@must_use @const conv mat3x3<T: f16>(mat3x3<f32>) -> mat3x3<f16>
+@must_use @const conv mat3x3<T: f32>(mat3x3<f16>) -> mat3x3<f32>
+@must_use @const conv mat3x4<T: f16>(mat3x4<f32>) -> mat3x4<f16>
+@must_use @const conv mat3x4<T: f32>(mat3x4<f16>) -> mat3x4<f32>
+@must_use @const conv mat4x2<T: f16>(mat4x2<f32>) -> mat4x2<f16>
+@must_use @const conv mat4x2<T: f32>(mat4x2<f16>) -> mat4x2<f32>
+@must_use @const conv mat4x3<T: f16>(mat4x3<f32>) -> mat4x3<f16>
+@must_use @const conv mat4x3<T: f32>(mat4x3<f16>) -> mat4x3<f32>
+@must_use @const conv mat4x4<T: f16>(mat4x4<f32>) -> mat4x4<f16>
+@must_use @const conv mat4x4<T: f32>(mat4x4<f16>) -> mat4x4<f32>
+
+// Conversion from vec3 to internal __packed_vec3 type.
+@must_use @const conv packedVec3<T: concrete_scalar>(vec3<T>) -> packedVec3<T>
+
+////////////////////////////////////////////////////////////////////////////////
+// Operators                                                                  //
+//                                                                            //
+// The operator declarations below declare all the unary and binary operators //
+// supported by the WGSL language (with exception for address-of and          //
+// dereference unary operators).                                              //
+//                                                                            //
+// The syntax is almost identical to builtin functions, except we use 'op'    //
+// instead of 'fn'. The resolving rules are identical to builtins, which is   //
+// described in detail above.                                                 //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+// Unary Operators                                                            //
+////////////////////////////////////////////////////////////////////////////////
+@must_use @const op ! (bool) -> bool
+@must_use @const op ! <N: num> (vec<N, bool>) -> vec<N, bool>
+
+@must_use @const op ~ <T: ia_iu32>(T) -> T
+@must_use @const op ~ <T: ia_iu32, N: num> (vec<N, T>) -> vec<N, T>
+
+@must_use @const("UnaryMinus") op - <T: fia_fi32_f16>(T) -> T
+@must_use @const("UnaryMinus") op - <T: fia_fi32_f16, N: num> (vec<N, T>) -> vec<N, T>
+
+////////////////////////////////////////////////////////////////////////////////
+// Binary Operators                                                           //
+////////////////////////////////////////////////////////////////////////////////
+@must_use @const op + <T: fia_fiu32_f16>(T, T) -> T
+@must_use @const op + <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+@must_use @const op + <T: fia_fiu32_f16, N: num> (vec<N, T>, T) -> vec<N, T>
+@must_use @const op + <T: fia_fiu32_f16, N: num> (T, vec<N, T>) -> vec<N, T>
+@must_use @const op + <T: fa_f32_f16, N: num, M: num> (mat<N, M, T>, mat<N, M, T>) -> mat<N, M, T>
+
+@must_use @const op - <T: fia_fiu32_f16>(T, T) -> T
+@must_use @const op - <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+@must_use @const op - <T: fia_fiu32_f16, N: num> (vec<N, T>, T) -> vec<N, T>
+@must_use @const op - <T: fia_fiu32_f16, N: num> (T, vec<N, T>) -> vec<N, T>
+@must_use @const op - <T: fa_f32_f16, N: num, M: num> (mat<N, M, T>, mat<N, M, T>) -> mat<N, M, T>
+
+@must_use @const("Multiply") op * <T: fia_fiu32_f16>(T, T) -> T
+@must_use @const("Multiply") op * <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+@must_use @const("Multiply") op * <T: fia_fiu32_f16, N: num> (vec<N, T>, T) -> vec<N, T>
+@must_use @const("Multiply") op * <T: fia_fiu32_f16, N: num> (T, vec<N, T>) -> vec<N, T>
+@must_use @const("Multiply") op * <T: fa_f32_f16, N: num, M: num> (T, mat<N, M, T>) -> mat<N, M, T>
+@must_use @const("Multiply") op * <T: fa_f32_f16, N: num, M: num> (mat<N, M, T>, T) -> mat<N, M, T>
+@must_use @const("MultiplyMatVec") op * <T: fa_f32_f16, C: num, R: num> (mat<C, R, T>, vec<C, T>) -> vec<R, T>
+@must_use @const("MultiplyVecMat") op * <T: fa_f32_f16, C: num, R: num> (vec<R, T>, mat<C, R, T>) -> vec<C, T>
+@must_use @const("MultiplyMatMat") op * <T: fa_f32_f16, K: num, C: num, R: num> (mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T>
+
+@must_use @const op / <T: fia_fiu32_f16>(T, T) -> T
+@must_use @const op / <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+@must_use @const op / <T: fia_fiu32_f16, N: num> (vec<N, T>, T) -> vec<N, T>
+@must_use @const op / <T: fia_fiu32_f16, N: num> (T, vec<N, T>) -> vec<N, T>
+
+@must_use @const op % <T: fia_fiu32_f16>(T, T) -> T
+@must_use @const op % <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+@must_use @const op % <T: fia_fiu32_f16, N: num> (vec<N, T>, T) -> vec<N, T>
+@must_use @const op % <T: fia_fiu32_f16, N: num> (T, vec<N, T>) -> vec<N, T>
+
+@must_use @const op ^ <T: ia_iu32>(T, T) -> T
+@must_use @const op ^ <T: ia_iu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+
+@must_use @const op & (bool, bool) -> bool
+@must_use @const op & <N: num> (vec<N, bool>, vec<N, bool>) -> vec<N, bool>
+@must_use @const op & <T: ia_iu32>(T, T) -> T
+@must_use @const op & <T: ia_iu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+
+@must_use @const op | (bool, bool) -> bool
+@must_use @const op | <N: num> (vec<N, bool>, vec<N, bool>) -> vec<N, bool>
+@must_use @const op | <T: ia_iu32>(T, T) -> T
+@must_use @const op | <T: ia_iu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+
+@must_use @const op && (bool, bool) -> bool
+@must_use @const op || (bool, bool) -> bool
+
+@must_use @const op == <T: scalar>(T, T) -> bool
+@must_use @const op == <T: scalar, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+
+@must_use @const op != <T: scalar>(T, T) -> bool
+@must_use @const op != <T: scalar, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+
+@must_use @const op < <T: fia_fiu32_f16>(T, T) -> bool
+@must_use @const op < <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+
+@must_use @const op > <T: fia_fiu32_f16>(T, T) -> bool
+@must_use @const op > <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+
+@must_use @const op <= <T: fia_fiu32_f16>(T, T) -> bool
+@must_use @const op <= <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+
+@must_use @const op >= <T: fia_fiu32_f16>(T, T) -> bool
+@must_use @const op >= <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+
+@must_use @const op << <T: ia_iu32>(T, u32) -> T
+@must_use @const op << <T: ia_iu32, N: num> (vec<N, T>, vec<N, u32>) -> vec<N, T>
+
+@must_use @const op >> <T: ia_iu32>(T, u32) -> T
+@must_use @const op >> <T: ia_iu32, N: num> (vec<N, T>, vec<N, u32>) -> vec<N, T>
+
+////////////////////////////////////////////////////////////////////////////////
+// Tint internal builtins                                                     //
+////////////////////////////////////////////////////////////////////////////////
+@const("Identity") fn _tint_materialize<T>(T) -> T

@@ -16,15 +16,30 @@
 
 #include <utility>
 
+#include "src/tint/lang/wgsl/reader/lower/lower.h"
 #include "src/tint/lang/wgsl/reader/parser/parser.h"
+#include "src/tint/lang/wgsl/reader/program_to_ir/program_to_ir.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 
 namespace tint::wgsl::reader {
 
-Program Parse(Source::File const* file) {
+Program Parse(const Source::File* file) {
     Parser parser(file);
     parser.Parse();
     return resolver::Resolve(parser.builder());
+}
+
+Result<core::ir::Module> WgslToIR(const Source::File* file) {
+    Program program = Parse(file);
+    auto module = ProgramToIR(program);
+    if (!module) {
+        return module.Failure();
+    }
+    // WGSL-dialect -> core-dialect
+    if (auto res = Lower(module.Get()); !res) {
+        return res.Failure();
+    }
+    return module;
 }
 
 }  // namespace tint::wgsl::reader

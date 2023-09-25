@@ -73,7 +73,7 @@ TEST_F(SpirvASTParserTest, WorkgroupBarrier) {
     ASSERT_NE(sem_call, nullptr);
     auto* builtin = sem_call->Target()->As<sem::BuiltinFn>();
     ASSERT_NE(builtin, nullptr);
-    EXPECT_EQ(builtin->Fn(), core::BuiltinFn::kWorkgroupBarrier);
+    EXPECT_EQ(builtin->Fn(), wgsl::BuiltinFn::kWorkgroupBarrier);
 }
 
 TEST_F(SpirvASTParserTest, StorageBarrier) {
@@ -106,7 +106,7 @@ TEST_F(SpirvASTParserTest, StorageBarrier) {
     ASSERT_NE(sem_call, nullptr);
     auto* builtin = sem_call->Target()->As<sem::BuiltinFn>();
     ASSERT_NE(builtin, nullptr);
-    EXPECT_EQ(builtin->Fn(), core::BuiltinFn::kStorageBarrier);
+    EXPECT_EQ(builtin->Fn(), wgsl::BuiltinFn::kStorageBarrier);
 }
 
 TEST_F(SpirvASTParserTest, TextureBarrier) {
@@ -139,7 +139,7 @@ TEST_F(SpirvASTParserTest, TextureBarrier) {
     ASSERT_NE(sem_call, nullptr);
     auto* builtin = sem_call->Target()->As<sem::BuiltinFn>();
     ASSERT_NE(builtin, nullptr);
-    EXPECT_EQ(builtin->Fn(), core::BuiltinFn::kTextureBarrier);
+    EXPECT_EQ(builtin->Fn(), wgsl::BuiltinFn::kTextureBarrier);
 }
 
 TEST_F(SpirvASTParserTest, WorkgroupAndTextureAndStorageBarrier) {
@@ -175,7 +175,7 @@ TEST_F(SpirvASTParserTest, WorkgroupAndTextureAndStorageBarrier) {
         ASSERT_NE(sem_call, nullptr);
         auto* builtin = sem_call->Target()->As<sem::BuiltinFn>();
         ASSERT_NE(builtin, nullptr);
-        EXPECT_EQ(builtin->Fn(), core::BuiltinFn::kWorkgroupBarrier);
+        EXPECT_EQ(builtin->Fn(), wgsl::BuiltinFn::kWorkgroupBarrier);
     }
     {
         auto* call = helper->body->statements[1]->As<ast::CallStatement>();
@@ -185,7 +185,7 @@ TEST_F(SpirvASTParserTest, WorkgroupAndTextureAndStorageBarrier) {
         ASSERT_NE(sem_call, nullptr);
         auto* builtin = sem_call->Target()->As<sem::BuiltinFn>();
         ASSERT_NE(builtin, nullptr);
-        EXPECT_EQ(builtin->Fn(), core::BuiltinFn::kStorageBarrier);
+        EXPECT_EQ(builtin->Fn(), wgsl::BuiltinFn::kStorageBarrier);
     }
     {
         auto* call = helper->body->statements[2]->As<ast::CallStatement>();
@@ -195,7 +195,7 @@ TEST_F(SpirvASTParserTest, WorkgroupAndTextureAndStorageBarrier) {
         ASSERT_NE(sem_call, nullptr);
         auto* builtin = sem_call->Target()->As<sem::BuiltinFn>();
         ASSERT_NE(builtin, nullptr);
-        EXPECT_EQ(builtin->Fn(), core::BuiltinFn::kTextureBarrier);
+        EXPECT_EQ(builtin->Fn(), wgsl::BuiltinFn::kTextureBarrier);
     }
 }
 

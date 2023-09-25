@@ -21,6 +21,7 @@
 #                       Do not modify this file directly
 ################################################################################
 
+include(lang/wgsl/reader/lower/BUILD.cmake)
 include(lang/wgsl/reader/parser/BUILD.cmake)
 include(lang/wgsl/reader/program_to_ir/BUILD.cmake)
 
@@ -37,11 +38,14 @@ tint_target_add_dependencies(tint_lang_wgsl_reader lib
   tint_api_common
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
   tint_lang_wgsl_program
+  tint_lang_wgsl_reader_lower
   tint_lang_wgsl_reader_parser
+  tint_lang_wgsl_reader_program_to_ir
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem
   tint_utils_containers
@@ -68,9 +72,11 @@ tint_add_target(tint_lang_wgsl_reader_bench bench
 )
 
 tint_target_add_dependencies(tint_lang_wgsl_reader_bench bench
+  tint_api_common
   tint_cmd_bench
   tint_lang_core
   tint_lang_core_constant
+  tint_lang_core_ir
   tint_lang_core_type
   tint_lang_wgsl
   tint_lang_wgsl_ast
@@ -84,6 +90,7 @@ tint_target_add_dependencies(tint_lang_wgsl_reader_bench bench
   tint_utils_macros
   tint_utils_math
   tint_utils_memory
+  tint_utils_reflection
   tint_utils_result
   tint_utils_rtti
   tint_utils_symbol

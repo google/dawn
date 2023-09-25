@@ -1173,28 +1173,28 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
     if (builtin->IsTexture()) {
         return EmitTextureCall(out, call, builtin);
     }
-    if (type == core::BuiltinFn::kSelect) {
+    if (type == wgsl::BuiltinFn::kSelect) {
         return EmitSelectCall(out, expr);
     }
-    if (type == core::BuiltinFn::kModf) {
+    if (type == wgsl::BuiltinFn::kModf) {
         return EmitModfCall(out, expr, builtin);
     }
-    if (type == core::BuiltinFn::kFrexp) {
+    if (type == wgsl::BuiltinFn::kFrexp) {
         return EmitFrexpCall(out, expr, builtin);
     }
-    if (type == core::BuiltinFn::kDegrees) {
+    if (type == wgsl::BuiltinFn::kDegrees) {
         return EmitDegreesCall(out, expr, builtin);
     }
-    if (type == core::BuiltinFn::kRadians) {
+    if (type == wgsl::BuiltinFn::kRadians) {
         return EmitRadiansCall(out, expr, builtin);
     }
-    if (type == core::BuiltinFn::kSign) {
+    if (type == wgsl::BuiltinFn::kSign) {
         return EmitSignCall(out, call, builtin);
     }
-    if (type == core::BuiltinFn::kQuantizeToF16) {
+    if (type == wgsl::BuiltinFn::kQuantizeToF16) {
         return EmitQuantizeToF16Call(out, expr, builtin);
     }
-    if (type == core::BuiltinFn::kTrunc) {
+    if (type == wgsl::BuiltinFn::kTrunc) {
         return EmitTruncCall(out, expr, builtin);
     }
     if (builtin->IsDataPacking()) {
@@ -1213,7 +1213,7 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
         return EmitDP4aCall(out, expr, builtin);
     }
     if (builtin->IsSubgroup()) {
-        if (builtin->Fn() == core::BuiltinFn::kSubgroupBroadcast) {
+        if (builtin->Fn() == wgsl::BuiltinFn::kSubgroupBroadcast) {
             // Fall through the regular path.
         } else {
             return EmitSubgroupCall(out, expr, builtin);
@@ -1228,7 +1228,7 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
     // Handle single argument builtins that only accept and return uint (not int overload). We need
     // to explicitly cast the return value (we also cast the arg for good measure). See
     // crbug.com/tint/1550
-    if (type == core::BuiltinFn::kCountOneBits || type == core::BuiltinFn::kReverseBits) {
+    if (type == wgsl::BuiltinFn::kCountOneBits || type == wgsl::BuiltinFn::kReverseBits) {
         auto* arg = call->Arguments()[0];
         if (arg->Type()->UnwrapRef()->is_signed_integer_scalar_or_vector()) {
             out << "asint(" << name << "(asuint(";
@@ -2018,7 +2018,7 @@ bool ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
                 if (i > 0) {
                     pre << ", ";
                 }
-                if (i == 1 && builtin->Fn() == core::BuiltinFn::kAtomicSub) {
+                if (i == 1 && builtin->Fn() == wgsl::BuiltinFn::kAtomicSub) {
                     // Sub uses InterlockedAdd with the operand negated.
                     pre << "-";
                 }
@@ -2037,7 +2037,7 @@ bool ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
     };
 
     switch (builtin->Fn()) {
-        case core::BuiltinFn::kAtomicLoad: {
+        case wgsl::BuiltinFn::kAtomicLoad: {
             // HLSL does not have an InterlockedLoad, so we emulate it with
             // InterlockedOr using 0 as the OR value
             auto pre = Line();
@@ -2054,7 +2054,7 @@ bool ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
             out << result;
             return true;
         }
-        case core::BuiltinFn::kAtomicStore: {
+        case wgsl::BuiltinFn::kAtomicStore: {
             // HLSL does not have an InterlockedStore, so we emulate it with
             // InterlockedExchange and discard the returned value
             {  // T result = 0;
@@ -2085,7 +2085,7 @@ bool ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
             }
             return true;
         }
-        case core::BuiltinFn::kAtomicCompareExchangeWeak: {
+        case wgsl::BuiltinFn::kAtomicCompareExchangeWeak: {
             if (!EmitStructType(&helpers_, builtin->ReturnType()->As<core::type::Struct>())) {
                 return false;
             }
@@ -2134,26 +2134,26 @@ bool ASTPrinter::EmitWorkgroupAtomicCall(StringStream& out,
             return true;
         }
 
-        case core::BuiltinFn::kAtomicAdd:
-        case core::BuiltinFn::kAtomicSub:
+        case wgsl::BuiltinFn::kAtomicAdd:
+        case wgsl::BuiltinFn::kAtomicSub:
             return call("InterlockedAdd");
 
-        case core::BuiltinFn::kAtomicMax:
+        case wgsl::BuiltinFn::kAtomicMax:
             return call("InterlockedMax");
 
-        case core::BuiltinFn::kAtomicMin:
+        case wgsl::BuiltinFn::kAtomicMin:
             return call("InterlockedMin");
 
-        case core::BuiltinFn::kAtomicAnd:
+        case wgsl::BuiltinFn::kAtomicAnd:
             return call("InterlockedAnd");
 
-        case core::BuiltinFn::kAtomicOr:
+        case wgsl::BuiltinFn::kAtomicOr:
             return call("InterlockedOr");
 
-        case core::BuiltinFn::kAtomicXor:
+        case wgsl::BuiltinFn::kAtomicXor:
             return call("InterlockedXor");
 
-        case core::BuiltinFn::kAtomicExchange:
+        case wgsl::BuiltinFn::kAtomicExchange:
             return call("InterlockedExchange");
 
         default:
@@ -2339,21 +2339,21 @@ bool ASTPrinter::EmitDataPackingCall(StringStream& out,
             uint32_t dims = 2;
             bool is_signed = false;
             uint32_t scale = 65535;
-            if (builtin->Fn() == core::BuiltinFn::kPack4X8Snorm ||
-                builtin->Fn() == core::BuiltinFn::kPack4X8Unorm) {
+            if (builtin->Fn() == wgsl::BuiltinFn::kPack4X8Snorm ||
+                builtin->Fn() == wgsl::BuiltinFn::kPack4X8Unorm) {
                 dims = 4;
                 scale = 255;
             }
-            if (builtin->Fn() == core::BuiltinFn::kPack4X8Snorm ||
-                builtin->Fn() == core::BuiltinFn::kPack2X16Snorm) {
+            if (builtin->Fn() == wgsl::BuiltinFn::kPack4X8Snorm ||
+                builtin->Fn() == wgsl::BuiltinFn::kPack2X16Snorm) {
                 is_signed = true;
                 scale = (scale - 1) / 2;
             }
             switch (builtin->Fn()) {
-                case core::BuiltinFn::kPack4X8Snorm:
-                case core::BuiltinFn::kPack4X8Unorm:
-                case core::BuiltinFn::kPack2X16Snorm:
-                case core::BuiltinFn::kPack2X16Unorm: {
+                case wgsl::BuiltinFn::kPack4X8Snorm:
+                case wgsl::BuiltinFn::kPack4X8Unorm:
+                case wgsl::BuiltinFn::kPack2X16Snorm:
+                case wgsl::BuiltinFn::kPack2X16Unorm: {
                     {
                         auto l = Line(b);
                         l << (is_signed ? "" : "u") << "int" << dims
@@ -2379,7 +2379,7 @@ bool ASTPrinter::EmitDataPackingCall(StringStream& out,
                     }
                     break;
                 }
-                case core::BuiltinFn::kPack2X16Float: {
+                case wgsl::BuiltinFn::kPack2X16Float: {
                     Line(b) << "uint2 i = f32tof16(" << params[0] << ");";
                     Line(b) << "return i.x | (i.y << 16);";
                     break;
@@ -2402,19 +2402,19 @@ bool ASTPrinter::EmitDataUnpackingCall(StringStream& out,
             uint32_t dims = 2;
             bool is_signed = false;
             uint32_t scale = 65535;
-            if (builtin->Fn() == core::BuiltinFn::kUnpack4X8Snorm ||
-                builtin->Fn() == core::BuiltinFn::kUnpack4X8Unorm) {
+            if (builtin->Fn() == wgsl::BuiltinFn::kUnpack4X8Snorm ||
+                builtin->Fn() == wgsl::BuiltinFn::kUnpack4X8Unorm) {
                 dims = 4;
                 scale = 255;
             }
-            if (builtin->Fn() == core::BuiltinFn::kUnpack4X8Snorm ||
-                builtin->Fn() == core::BuiltinFn::kUnpack2X16Snorm) {
+            if (builtin->Fn() == wgsl::BuiltinFn::kUnpack4X8Snorm ||
+                builtin->Fn() == wgsl::BuiltinFn::kUnpack2X16Snorm) {
                 is_signed = true;
                 scale = (scale - 1) / 2;
             }
             switch (builtin->Fn()) {
-                case core::BuiltinFn::kUnpack4X8Snorm:
-                case core::BuiltinFn::kUnpack2X16Snorm: {
+                case wgsl::BuiltinFn::kUnpack4X8Snorm:
+                case wgsl::BuiltinFn::kUnpack2X16Snorm: {
                     Line(b) << "int j = int(" << params[0] << ");";
                     {  // Perform sign extension on the converted values.
                         auto l = Line(b);
@@ -2430,8 +2430,8 @@ bool ASTPrinter::EmitDataUnpackingCall(StringStream& out,
                             << (is_signed ? "-1.0" : "0.0") << ", 1.0);";
                     break;
                 }
-                case core::BuiltinFn::kUnpack4X8Unorm:
-                case core::BuiltinFn::kUnpack2X16Unorm: {
+                case wgsl::BuiltinFn::kUnpack4X8Unorm:
+                case wgsl::BuiltinFn::kUnpack2X16Unorm: {
                     Line(b) << "uint j = " << params[0] << ";";
                     {
                         auto l = Line(b);
@@ -2447,7 +2447,7 @@ bool ASTPrinter::EmitDataUnpackingCall(StringStream& out,
                     Line(b) << "return float" << dims << "(i) / " << scale << ".0;";
                     break;
                 }
-                case core::BuiltinFn::kUnpack2X16Float:
+                case wgsl::BuiltinFn::kUnpack2X16Float:
                     Line(b) << "uint i = " << params[0] << ";";
                     Line(b) << "return f16tof32(uint2(i & 0xffff, i >> 16));";
                     break;
@@ -2469,11 +2469,11 @@ bool ASTPrinter::EmitDP4aCall(StringStream& out,
         out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
             std::string functionName;
             switch (builtin->Fn()) {
-                case core::BuiltinFn::kDot4I8Packed:
+                case wgsl::BuiltinFn::kDot4I8Packed:
                     Line(b) << "int accumulator = 0;";
                     functionName = "dot4add_i8packed";
                     break;
-                case core::BuiltinFn::kDot4U8Packed:
+                case wgsl::BuiltinFn::kDot4U8Packed:
                     Line(b) << "uint accumulator = 0u;";
                     functionName = "dot4add_u8packed";
                     break;
@@ -2492,14 +2492,14 @@ bool ASTPrinter::EmitDP4aCall(StringStream& out,
 bool ASTPrinter::EmitBarrierCall(StringStream& out, const sem::BuiltinFn* builtin) {
     // TODO(crbug.com/tint/661): Combine sequential barriers to a single
     // instruction.
-    if (builtin->Fn() == core::BuiltinFn::kWorkgroupBarrier) {
+    if (builtin->Fn() == wgsl::BuiltinFn::kWorkgroupBarrier) {
         out << "GroupMemoryBarrierWithGroupSync()";
-    } else if (builtin->Fn() == core::BuiltinFn::kStorageBarrier) {
+    } else if (builtin->Fn() == wgsl::BuiltinFn::kStorageBarrier) {
         out << "DeviceMemoryBarrierWithGroupSync()";
-    } else if (builtin->Fn() == core::BuiltinFn::kTextureBarrier) {
+    } else if (builtin->Fn() == wgsl::BuiltinFn::kTextureBarrier) {
         out << "DeviceMemoryBarrierWithGroupSync()";
     } else {
-        TINT_UNREACHABLE() << "unexpected barrier builtin type " << core::str(builtin->Fn());
+        TINT_UNREACHABLE() << "unexpected barrier builtin type " << builtin->Fn();
         return false;
     }
     return true;
@@ -2508,11 +2508,11 @@ bool ASTPrinter::EmitBarrierCall(StringStream& out, const sem::BuiltinFn* builti
 bool ASTPrinter::EmitSubgroupCall(StringStream& out,
                                   [[maybe_unused]] const ast::CallExpression* expr,
                                   const sem::BuiltinFn* builtin) {
-    if (builtin->Fn() == core::BuiltinFn::kSubgroupBallot) {
+    if (builtin->Fn() == wgsl::BuiltinFn::kSubgroupBallot) {
         out << "WaveActiveBallot(true)";
     } else {
         // subgroupBroadcast is already handled in the regular builtin flow.
-        TINT_UNREACHABLE() << "unexpected subgroup builtin type " << core::str(builtin->Fn());
+        TINT_UNREACHABLE() << "unexpected subgroup builtin type " << builtin->Fn();
         return false;
     }
     return true;
@@ -2573,10 +2573,10 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
     auto* texture_type = TypeOf(texture)->UnwrapRef()->As<core::type::Texture>();
 
     switch (builtin->Fn()) {
-        case core::BuiltinFn::kTextureDimensions:
-        case core::BuiltinFn::kTextureNumLayers:
-        case core::BuiltinFn::kTextureNumLevels:
-        case core::BuiltinFn::kTextureNumSamples: {
+        case wgsl::BuiltinFn::kTextureDimensions:
+        case wgsl::BuiltinFn::kTextureNumLayers:
+        case wgsl::BuiltinFn::kTextureNumLevels:
+        case wgsl::BuiltinFn::kTextureNumSamples: {
             // All of these builtins use the GetDimensions() method on the texture
             bool is_ms = texture_type->IsAnyOf<core::type::MultisampledTexture,
                                                core::type::DepthMultisampledTexture>();
@@ -2584,7 +2584,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             std::string swizzle;
 
             switch (builtin->Fn()) {
-                case core::BuiltinFn::kTextureDimensions:
+                case wgsl::BuiltinFn::kTextureDimensions:
                     switch (texture_type->dim()) {
                         case core::type::TextureDimension::kNone:
                             TINT_ICE() << "texture dimension is kNone";
@@ -2612,7 +2612,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                             break;
                     }
                     break;
-                case core::BuiltinFn::kTextureNumLayers:
+                case wgsl::BuiltinFn::kTextureNumLayers:
                     switch (texture_type->dim()) {
                         default:
                             TINT_ICE() << "texture dimension is not arrayed";
@@ -2627,7 +2627,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                             break;
                     }
                     break;
-                case core::BuiltinFn::kTextureNumLevels:
+                case wgsl::BuiltinFn::kTextureNumLevels:
                     switch (texture_type->dim()) {
                         default:
                             TINT_ICE() << "texture dimension does not support mips";
@@ -2649,7 +2649,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                             break;
                     }
                     break;
-                case core::BuiltinFn::kTextureNumSamples:
+                case wgsl::BuiltinFn::kTextureNumSamples:
                     switch (texture_type->dim()) {
                         default:
                             TINT_ICE() << "texture dimension does not support multisampling";
@@ -2712,7 +2712,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
                         return false;
                     }
                     pre << ", ";
-                } else if (builtin->Fn() == core::BuiltinFn::kTextureNumLevels) {
+                } else if (builtin->Fn() == wgsl::BuiltinFn::kTextureNumLevels) {
                     pre << "0, ";
                 }
 
@@ -2758,34 +2758,34 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
     uint32_t hlsl_ret_width = 4u;
 
     switch (builtin->Fn()) {
-        case core::BuiltinFn::kTextureSample:
+        case wgsl::BuiltinFn::kTextureSample:
             out << ".Sample(";
             break;
-        case core::BuiltinFn::kTextureSampleBias:
+        case wgsl::BuiltinFn::kTextureSampleBias:
             out << ".SampleBias(";
             break;
-        case core::BuiltinFn::kTextureSampleLevel:
+        case wgsl::BuiltinFn::kTextureSampleLevel:
             out << ".SampleLevel(";
             break;
-        case core::BuiltinFn::kTextureSampleGrad:
+        case wgsl::BuiltinFn::kTextureSampleGrad:
             out << ".SampleGrad(";
             break;
-        case core::BuiltinFn::kTextureSampleCompare:
+        case wgsl::BuiltinFn::kTextureSampleCompare:
             out << ".SampleCmp(";
             hlsl_ret_width = 1;
             break;
-        case core::BuiltinFn::kTextureSampleCompareLevel:
+        case wgsl::BuiltinFn::kTextureSampleCompareLevel:
             out << ".SampleCmpLevelZero(";
             hlsl_ret_width = 1;
             break;
-        case core::BuiltinFn::kTextureLoad:
+        case wgsl::BuiltinFn::kTextureLoad:
             out << ".Load(";
             // Multisampled textures do not support mip-levels.
             if (!texture_type->Is<core::type::MultisampledTexture>()) {
                 pack_level_in_coords = true;
             }
             break;
-        case core::BuiltinFn::kTextureGather:
+        case wgsl::BuiltinFn::kTextureGather:
             out << ".Gather";
             if (builtin->Parameters()[0]->Usage() == core::ParameterUsage::kComponent) {
                 switch (call->Arguments()[0]->ConstantValue()->ValueAs<AInt>()) {
@@ -2805,10 +2805,10 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             }
             out << "(";
             break;
-        case core::BuiltinFn::kTextureGatherCompare:
+        case wgsl::BuiltinFn::kTextureGatherCompare:
             out << ".GatherCmp(";
             break;
-        case core::BuiltinFn::kTextureStore:
+        case wgsl::BuiltinFn::kTextureStore:
             out << "[";
             break;
         default:
@@ -2869,7 +2869,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
         if (!emit_vector_appended_with_level(param_coords)) {
             return false;
         }
-    } else if (builtin->Fn() == core::BuiltinFn::kTextureStore) {
+    } else if (builtin->Fn() == wgsl::BuiltinFn::kTextureStore) {
         // param_coords is an index expression, not a function arg
         if (!EmitExpression(out, param_coords)) {
             return false;
@@ -2891,7 +2891,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
         }
     }
 
-    if (builtin->Fn() == core::BuiltinFn::kTextureStore) {
+    if (builtin->Fn() == wgsl::BuiltinFn::kTextureStore) {
         out << "] = ";
         if (!EmitExpression(out, arg(Usage::kValue))) {
             return false;
@@ -2925,79 +2925,79 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
 
 std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
     switch (builtin->Fn()) {
-        case core::BuiltinFn::kAbs:
-        case core::BuiltinFn::kAcos:
-        case core::BuiltinFn::kAll:
-        case core::BuiltinFn::kAny:
-        case core::BuiltinFn::kAsin:
-        case core::BuiltinFn::kAtan:
-        case core::BuiltinFn::kAtan2:
-        case core::BuiltinFn::kCeil:
-        case core::BuiltinFn::kClamp:
-        case core::BuiltinFn::kCos:
-        case core::BuiltinFn::kCosh:
-        case core::BuiltinFn::kCross:
-        case core::BuiltinFn::kDeterminant:
-        case core::BuiltinFn::kDistance:
-        case core::BuiltinFn::kDot:
-        case core::BuiltinFn::kExp:
-        case core::BuiltinFn::kExp2:
-        case core::BuiltinFn::kFloor:
-        case core::BuiltinFn::kFrexp:
-        case core::BuiltinFn::kLdexp:
-        case core::BuiltinFn::kLength:
-        case core::BuiltinFn::kLog:
-        case core::BuiltinFn::kLog2:
-        case core::BuiltinFn::kMax:
-        case core::BuiltinFn::kMin:
-        case core::BuiltinFn::kModf:
-        case core::BuiltinFn::kNormalize:
-        case core::BuiltinFn::kPow:
-        case core::BuiltinFn::kReflect:
-        case core::BuiltinFn::kRefract:
-        case core::BuiltinFn::kRound:
-        case core::BuiltinFn::kSaturate:
-        case core::BuiltinFn::kSin:
-        case core::BuiltinFn::kSinh:
-        case core::BuiltinFn::kSqrt:
-        case core::BuiltinFn::kStep:
-        case core::BuiltinFn::kTan:
-        case core::BuiltinFn::kTanh:
-        case core::BuiltinFn::kTranspose:
+        case wgsl::BuiltinFn::kAbs:
+        case wgsl::BuiltinFn::kAcos:
+        case wgsl::BuiltinFn::kAll:
+        case wgsl::BuiltinFn::kAny:
+        case wgsl::BuiltinFn::kAsin:
+        case wgsl::BuiltinFn::kAtan:
+        case wgsl::BuiltinFn::kAtan2:
+        case wgsl::BuiltinFn::kCeil:
+        case wgsl::BuiltinFn::kClamp:
+        case wgsl::BuiltinFn::kCos:
+        case wgsl::BuiltinFn::kCosh:
+        case wgsl::BuiltinFn::kCross:
+        case wgsl::BuiltinFn::kDeterminant:
+        case wgsl::BuiltinFn::kDistance:
+        case wgsl::BuiltinFn::kDot:
+        case wgsl::BuiltinFn::kExp:
+        case wgsl::BuiltinFn::kExp2:
+        case wgsl::BuiltinFn::kFloor:
+        case wgsl::BuiltinFn::kFrexp:
+        case wgsl::BuiltinFn::kLdexp:
+        case wgsl::BuiltinFn::kLength:
+        case wgsl::BuiltinFn::kLog:
+        case wgsl::BuiltinFn::kLog2:
+        case wgsl::BuiltinFn::kMax:
+        case wgsl::BuiltinFn::kMin:
+        case wgsl::BuiltinFn::kModf:
+        case wgsl::BuiltinFn::kNormalize:
+        case wgsl::BuiltinFn::kPow:
+        case wgsl::BuiltinFn::kReflect:
+        case wgsl::BuiltinFn::kRefract:
+        case wgsl::BuiltinFn::kRound:
+        case wgsl::BuiltinFn::kSaturate:
+        case wgsl::BuiltinFn::kSin:
+        case wgsl::BuiltinFn::kSinh:
+        case wgsl::BuiltinFn::kSqrt:
+        case wgsl::BuiltinFn::kStep:
+        case wgsl::BuiltinFn::kTan:
+        case wgsl::BuiltinFn::kTanh:
+        case wgsl::BuiltinFn::kTranspose:
             return builtin->str();
-        case core::BuiltinFn::kCountOneBits:  // uint
+        case wgsl::BuiltinFn::kCountOneBits:  // uint
             return "countbits";
-        case core::BuiltinFn::kDpdx:
+        case wgsl::BuiltinFn::kDpdx:
             return "ddx";
-        case core::BuiltinFn::kDpdxCoarse:
+        case wgsl::BuiltinFn::kDpdxCoarse:
             return "ddx_coarse";
-        case core::BuiltinFn::kDpdxFine:
+        case wgsl::BuiltinFn::kDpdxFine:
             return "ddx_fine";
-        case core::BuiltinFn::kDpdy:
+        case wgsl::BuiltinFn::kDpdy:
             return "ddy";
-        case core::BuiltinFn::kDpdyCoarse:
+        case wgsl::BuiltinFn::kDpdyCoarse:
             return "ddy_coarse";
-        case core::BuiltinFn::kDpdyFine:
+        case wgsl::BuiltinFn::kDpdyFine:
             return "ddy_fine";
-        case core::BuiltinFn::kFaceForward:
+        case wgsl::BuiltinFn::kFaceForward:
             return "faceforward";
-        case core::BuiltinFn::kFract:
+        case wgsl::BuiltinFn::kFract:
             return "frac";
-        case core::BuiltinFn::kFma:
+        case wgsl::BuiltinFn::kFma:
             return "mad";
-        case core::BuiltinFn::kFwidth:
-        case core::BuiltinFn::kFwidthCoarse:
-        case core::BuiltinFn::kFwidthFine:
+        case wgsl::BuiltinFn::kFwidth:
+        case wgsl::BuiltinFn::kFwidthCoarse:
+        case wgsl::BuiltinFn::kFwidthFine:
             return "fwidth";
-        case core::BuiltinFn::kInverseSqrt:
+        case wgsl::BuiltinFn::kInverseSqrt:
             return "rsqrt";
-        case core::BuiltinFn::kMix:
+        case wgsl::BuiltinFn::kMix:
             return "lerp";
-        case core::BuiltinFn::kReverseBits:  // uint
+        case wgsl::BuiltinFn::kReverseBits:  // uint
             return "reversebits";
-        case core::BuiltinFn::kSmoothstep:
+        case wgsl::BuiltinFn::kSmoothstep:
             return "smoothstep";
-        case core::BuiltinFn::kSubgroupBroadcast:
+        case wgsl::BuiltinFn::kSubgroupBroadcast:
             return "WaveReadLaneAt";
         default:
             diagnostics_.add_error(diag::System::Writer,
@@ -4591,7 +4591,7 @@ bool ASTPrinter::CallBuiltinHelper(StringStream& out,
         TextBuffer b;
         TINT_DEFER(helpers_.Append(b));
 
-        auto fn_name = UniqueIdentifier(std::string("tint_") + core::str(builtin->Fn()));
+        auto fn_name = UniqueIdentifier(std::string("tint_") + wgsl::str(builtin->Fn()));
         std::vector<std::string> parameter_names;
         {
             auto decl = Line(&b);

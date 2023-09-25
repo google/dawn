@@ -212,7 +212,7 @@ class Resolver {
     sem::Expression* Identifier(const ast::IdentifierExpression*);
     template <size_t N>
     sem::Call* BuiltinCall(const ast::CallExpression*,
-                           core::BuiltinFn,
+                           wgsl::BuiltinFn,
                            Vector<const sem::ValueExpression*, N>& args);
     sem::ValueExpression* Literal(const ast::LiteralExpression*);
     sem::ValueExpression* MemberAccessor(const ast::MemberAccessorExpression*);
@@ -635,7 +635,7 @@ class Resolver {
     Hashset<const ast::Expression*, 8> skip_const_eval_;
     IdentifierResolveHint identifier_resolve_hint_;
     Hashmap<const core::type::Type*, size_t, 8> nest_depth_;
-    Hashmap<std::pair<core::intrinsic::Overload, core::BuiltinFn>, sem::BuiltinFn*, 64> builtins_;
+    Hashmap<std::pair<core::intrinsic::Overload, wgsl::BuiltinFn>, sem::BuiltinFn*, 64> builtins_;
     Hashmap<core::intrinsic::Overload, sem::ValueConstructor*, 16> constructors_;
     Hashmap<core::intrinsic::Overload, sem::ValueConversion*, 16> converters_;
 };

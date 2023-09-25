@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-#include "src/tint/lang/core/builtin_fn.h"
+#include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/lang/wgsl/extension.h"
 #include "src/tint/lang/wgsl/sem/call_target.h"
 #include "src/tint/lang/wgsl/sem/pipeline_stage_set.h"
@@ -37,7 +37,7 @@ class BuiltinFn final : public Castable<BuiltinFn, CallTarget> {
     /// @param supported_stages the pipeline stages that this builtin can be used in
     /// @param is_deprecated true if the particular overload is considered deprecated
     /// @param must_use true if the builtin was annotated with `@must_use`
-    BuiltinFn(core::BuiltinFn type,
+    BuiltinFn(wgsl::BuiltinFn type,
               const core::type::Type* return_type,
               VectorRef<Parameter*> parameters,
               core::EvaluationStage eval_stage,
@@ -49,7 +49,7 @@ class BuiltinFn final : public Castable<BuiltinFn, CallTarget> {
     ~BuiltinFn() override;
 
     /// @return the type of the builtin
-    core::BuiltinFn Fn() const { return fn_; }
+    wgsl::BuiltinFn Fn() const { return fn_; }
 
     /// @return the pipeline stages that this builtin can be used in
     PipelineStageSet SupportedStages() const { return supported_stages_; }
@@ -110,7 +110,7 @@ class BuiltinFn final : public Castable<BuiltinFn, CallTarget> {
     }
 
   private:
-    const core::BuiltinFn fn_;
+    const wgsl::BuiltinFn fn_;
     const PipelineStageSet supported_stages_;
     const bool is_deprecated_;
 };

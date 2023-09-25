@@ -24,6 +24,8 @@
 include(lang/wgsl/ast/BUILD.cmake)
 include(lang/wgsl/helpers/BUILD.cmake)
 include(lang/wgsl/inspector/BUILD.cmake)
+include(lang/wgsl/intrinsic/BUILD.cmake)
+include(lang/wgsl/ir/BUILD.cmake)
 include(lang/wgsl/program/BUILD.cmake)
 include(lang/wgsl/reader/BUILD.cmake)
 include(lang/wgsl/resolver/BUILD.cmake)
@@ -35,6 +37,8 @@ include(lang/wgsl/writer/BUILD.cmake)
 # Kind:      lib
 ################################################################################
 tint_add_target(tint_lang_wgsl lib
+  lang/wgsl/builtin_fn.cc
+  lang/wgsl/builtin_fn.h
   lang/wgsl/diagnostic_rule.cc
   lang/wgsl/diagnostic_rule.h
   lang/wgsl/diagnostic_severity.cc
@@ -77,6 +81,7 @@ tint_target_add_dependencies(tint_lang_wgsl_test test
   tint_lang_wgsl_helpers_test
   tint_lang_wgsl_program
   tint_lang_wgsl_reader
+  tint_lang_wgsl_reader_lower
   tint_lang_wgsl_reader_program_to_ir
   tint_lang_wgsl_resolver
   tint_lang_wgsl_sem

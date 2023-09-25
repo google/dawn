@@ -680,24 +680,24 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
     auto name = generate_builtin_name(builtin);
 
     switch (builtin->Fn()) {
-        case core::BuiltinFn::kDot:
+        case wgsl::BuiltinFn::kDot:
             return EmitDotCall(out, expr, builtin);
-        case core::BuiltinFn::kModf:
+        case wgsl::BuiltinFn::kModf:
             return EmitModfCall(out, expr, builtin);
-        case core::BuiltinFn::kFrexp:
+        case wgsl::BuiltinFn::kFrexp:
             return EmitFrexpCall(out, expr, builtin);
-        case core::BuiltinFn::kDegrees:
+        case wgsl::BuiltinFn::kDegrees:
             return EmitDegreesCall(out, expr, builtin);
-        case core::BuiltinFn::kRadians:
+        case wgsl::BuiltinFn::kRadians:
             return EmitRadiansCall(out, expr, builtin);
-        case core::BuiltinFn::kDot4I8Packed:
+        case wgsl::BuiltinFn::kDot4I8Packed:
             return EmitDot4I8PackedCall(out, expr, builtin);
-        case core::BuiltinFn::kDot4U8Packed:
+        case wgsl::BuiltinFn::kDot4U8Packed:
             return EmitDot4U8PackedCall(out, expr, builtin);
 
-        case core::BuiltinFn::kPack2X16Float:
-        case core::BuiltinFn::kUnpack2X16Float: {
-            if (builtin->Fn() == core::BuiltinFn::kPack2X16Float) {
+        case wgsl::BuiltinFn::kPack2X16Float:
+        case wgsl::BuiltinFn::kUnpack2X16Float: {
+            if (builtin->Fn() == wgsl::BuiltinFn::kPack2X16Float) {
                 out << "as_type<uint>(half2(";
             } else {
                 out << "float2(as_type<half2>(";
@@ -708,7 +708,7 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
             out << "))";
             return true;
         }
-        case core::BuiltinFn::kQuantizeToF16: {
+        case wgsl::BuiltinFn::kQuantizeToF16: {
             std::string width = "";
             if (auto* vec = builtin->ReturnType()->As<core::type::Vector>()) {
                 width = std::to_string(vec->Width());
@@ -722,20 +722,20 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
         }
         // TODO(crbug.com/tint/661): Combine sequential barriers to a single
         // instruction.
-        case core::BuiltinFn::kStorageBarrier: {
+        case wgsl::BuiltinFn::kStorageBarrier: {
             out << "threadgroup_barrier(mem_flags::mem_device)";
             return true;
         }
-        case core::BuiltinFn::kWorkgroupBarrier: {
+        case wgsl::BuiltinFn::kWorkgroupBarrier: {
             out << "threadgroup_barrier(mem_flags::mem_threadgroup)";
             return true;
         }
-        case core::BuiltinFn::kTextureBarrier: {
+        case wgsl::BuiltinFn::kTextureBarrier: {
             out << "threadgroup_barrier(mem_flags::mem_texture)";
             return true;
         }
 
-        case core::BuiltinFn::kLength: {
+        case wgsl::BuiltinFn::kLength: {
             auto* sem = builder_.Sem().GetVal(expr->args[0]);
             if (sem->Type()->UnwrapRef()->Is<core::type::Scalar>()) {
                 // Emulate scalar overload using fabs(x).
@@ -744,7 +744,7 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
             break;
         }
 
-        case core::BuiltinFn::kDistance: {
+        case wgsl::BuiltinFn::kDistance: {
             auto* sem = builder_.Sem().GetVal(expr->args[0]);
             if (sem->Type()->UnwrapRef()->Is<core::type::Scalar>()) {
                 // Emulate scalar overload using fabs(x - y);
@@ -762,7 +762,7 @@ bool ASTPrinter::EmitBuiltinCall(StringStream& out,
             break;
         }
 
-        case core::BuiltinFn::kSubgroupBroadcast: {
+        case wgsl::BuiltinFn::kSubgroupBroadcast: {
             // The lane argument is ushort.
             out << "simd_broadcast(";
             if (!EmitExpression(out, expr->args[0])) {
@@ -898,37 +898,37 @@ bool ASTPrinter::EmitAtomicCall(StringStream& out,
     };
 
     switch (builtin->Fn()) {
-        case core::BuiltinFn::kAtomicLoad:
+        case wgsl::BuiltinFn::kAtomicLoad:
             return call("atomic_load_explicit", true);
 
-        case core::BuiltinFn::kAtomicStore:
+        case wgsl::BuiltinFn::kAtomicStore:
             return call("atomic_store_explicit", true);
 
-        case core::BuiltinFn::kAtomicAdd:
+        case wgsl::BuiltinFn::kAtomicAdd:
             return call("atomic_fetch_add_explicit", true);
 
-        case core::BuiltinFn::kAtomicSub:
+        case wgsl::BuiltinFn::kAtomicSub:
             return call("atomic_fetch_sub_explicit", true);
 
-        case core::BuiltinFn::kAtomicMax:
+        case wgsl::BuiltinFn::kAtomicMax:
             return call("atomic_fetch_max_explicit", true);
 
-        case core::BuiltinFn::kAtomicMin:
+        case wgsl::BuiltinFn::kAtomicMin:
             return call("atomic_fetch_min_explicit", true);
 
-        case core::BuiltinFn::kAtomicAnd:
+        case wgsl::BuiltinFn::kAtomicAnd:
             return call("atomic_fetch_and_explicit", true);
 
-        case core::BuiltinFn::kAtomicOr:
+        case wgsl::BuiltinFn::kAtomicOr:
             return call("atomic_fetch_or_explicit", true);
 
-        case core::BuiltinFn::kAtomicXor:
+        case wgsl::BuiltinFn::kAtomicXor:
             return call("atomic_fetch_xor_explicit", true);
 
-        case core::BuiltinFn::kAtomicExchange:
+        case wgsl::BuiltinFn::kAtomicExchange:
             return call("atomic_exchange_explicit", true);
 
-        case core::BuiltinFn::kAtomicCompareExchangeWeak: {
+        case wgsl::BuiltinFn::kAtomicCompareExchangeWeak: {
             auto* ptr_ty = TypeOf(expr->args[0])->UnwrapRef()->As<core::type::Pointer>();
             auto sc = ptr_ty->AddressSpace();
             auto* str = builtin->ReturnType()->As<core::type::Struct>();
@@ -1044,7 +1044,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
     bool level_is_constant_zero = texture_type->dim() == core::type::TextureDimension::k1d;
 
     switch (builtin->Fn()) {
-        case core::BuiltinFn::kTextureDimensions: {
+        case wgsl::BuiltinFn::kTextureDimensions: {
             std::vector<const char*> dims;
             switch (texture_type->dim()) {
                 case core::type::TextureDimension::kNone:
@@ -1097,21 +1097,21 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             }
             return true;
         }
-        case core::BuiltinFn::kTextureNumLayers: {
+        case wgsl::BuiltinFn::kTextureNumLayers: {
             if (!texture_expr()) {
                 return false;
             }
             out << ".get_array_size()";
             return true;
         }
-        case core::BuiltinFn::kTextureNumLevels: {
+        case wgsl::BuiltinFn::kTextureNumLevels: {
             if (!texture_expr()) {
                 return false;
             }
             out << ".get_num_mip_levels()";
             return true;
         }
-        case core::BuiltinFn::kTextureNumSamples: {
+        case wgsl::BuiltinFn::kTextureNumSamples: {
             if (!texture_expr()) {
                 return false;
             }
@@ -1129,27 +1129,27 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
     bool lod_param_is_named = true;
 
     switch (builtin->Fn()) {
-        case core::BuiltinFn::kTextureSample:
-        case core::BuiltinFn::kTextureSampleBias:
-        case core::BuiltinFn::kTextureSampleLevel:
-        case core::BuiltinFn::kTextureSampleGrad:
+        case wgsl::BuiltinFn::kTextureSample:
+        case wgsl::BuiltinFn::kTextureSampleBias:
+        case wgsl::BuiltinFn::kTextureSampleLevel:
+        case wgsl::BuiltinFn::kTextureSampleGrad:
             out << ".sample(";
             break;
-        case core::BuiltinFn::kTextureSampleCompare:
-        case core::BuiltinFn::kTextureSampleCompareLevel:
+        case wgsl::BuiltinFn::kTextureSampleCompare:
+        case wgsl::BuiltinFn::kTextureSampleCompareLevel:
             out << ".sample_compare(";
             break;
-        case core::BuiltinFn::kTextureGather:
+        case wgsl::BuiltinFn::kTextureGather:
             out << ".gather(";
             break;
-        case core::BuiltinFn::kTextureGatherCompare:
+        case wgsl::BuiltinFn::kTextureGatherCompare:
             out << ".gather_compare(";
             break;
-        case core::BuiltinFn::kTextureLoad:
+        case wgsl::BuiltinFn::kTextureLoad:
             out << ".read(";
             lod_param_is_named = false;
             break;
-        case core::BuiltinFn::kTextureStore:
+        case wgsl::BuiltinFn::kTextureStore:
             out << ".write(";
             break;
         default:
@@ -1225,7 +1225,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
             out << ")";
         }
     }
-    if (builtin->Fn() == core::BuiltinFn::kTextureSampleCompareLevel) {
+    if (builtin->Fn() == wgsl::BuiltinFn::kTextureSampleCompareLevel) {
         maybe_write_comma();
         out << "level(0)";
     }
@@ -1310,7 +1310,7 @@ bool ASTPrinter::EmitTextureCall(StringStream& out,
     // If this is a `textureStore()` for a read-write texture, add a fence to ensure that the
     // written values are visible to subsequent reads from the same thread.
     if (auto* storage = texture_type->As<core::type::StorageTexture>();
-        builtin->Fn() == core::BuiltinFn::kTextureStore &&
+        builtin->Fn() == wgsl::BuiltinFn::kTextureStore &&
         storage->access() == core::Access::kReadWrite) {
         out << "; ";
         texture_expr();
@@ -1468,143 +1468,143 @@ bool ASTPrinter::EmitRadiansCall(StringStream& out,
 std::string ASTPrinter::generate_builtin_name(const sem::BuiltinFn* builtin) {
     std::string out = "";
     switch (builtin->Fn()) {
-        case core::BuiltinFn::kAcos:
-        case core::BuiltinFn::kAcosh:
-        case core::BuiltinFn::kAll:
-        case core::BuiltinFn::kAny:
-        case core::BuiltinFn::kAsin:
-        case core::BuiltinFn::kAsinh:
-        case core::BuiltinFn::kAtanh:
-        case core::BuiltinFn::kAtan:
-        case core::BuiltinFn::kAtan2:
-        case core::BuiltinFn::kCeil:
-        case core::BuiltinFn::kCos:
-        case core::BuiltinFn::kCosh:
-        case core::BuiltinFn::kCross:
-        case core::BuiltinFn::kDeterminant:
-        case core::BuiltinFn::kDistance:
-        case core::BuiltinFn::kDot:
-        case core::BuiltinFn::kExp:
-        case core::BuiltinFn::kExp2:
-        case core::BuiltinFn::kFloor:
-        case core::BuiltinFn::kFma:
-        case core::BuiltinFn::kFract:
-        case core::BuiltinFn::kFrexp:
-        case core::BuiltinFn::kLength:
-        case core::BuiltinFn::kLdexp:
-        case core::BuiltinFn::kLog:
-        case core::BuiltinFn::kLog2:
-        case core::BuiltinFn::kMix:
-        case core::BuiltinFn::kModf:
-        case core::BuiltinFn::kNormalize:
-        case core::BuiltinFn::kPow:
-        case core::BuiltinFn::kReflect:
-        case core::BuiltinFn::kRefract:
-        case core::BuiltinFn::kSaturate:
-        case core::BuiltinFn::kSelect:
-        case core::BuiltinFn::kSin:
-        case core::BuiltinFn::kSinh:
-        case core::BuiltinFn::kSqrt:
-        case core::BuiltinFn::kStep:
-        case core::BuiltinFn::kTan:
-        case core::BuiltinFn::kTanh:
-        case core::BuiltinFn::kTranspose:
-        case core::BuiltinFn::kTrunc:
-        case core::BuiltinFn::kSign:
-        case core::BuiltinFn::kClamp:
+        case wgsl::BuiltinFn::kAcos:
+        case wgsl::BuiltinFn::kAcosh:
+        case wgsl::BuiltinFn::kAll:
+        case wgsl::BuiltinFn::kAny:
+        case wgsl::BuiltinFn::kAsin:
+        case wgsl::BuiltinFn::kAsinh:
+        case wgsl::BuiltinFn::kAtanh:
+        case wgsl::BuiltinFn::kAtan:
+        case wgsl::BuiltinFn::kAtan2:
+        case wgsl::BuiltinFn::kCeil:
+        case wgsl::BuiltinFn::kCos:
+        case wgsl::BuiltinFn::kCosh:
+        case wgsl::BuiltinFn::kCross:
+        case wgsl::BuiltinFn::kDeterminant:
+        case wgsl::BuiltinFn::kDistance:
+        case wgsl::BuiltinFn::kDot:
+        case wgsl::BuiltinFn::kExp:
+        case wgsl::BuiltinFn::kExp2:
+        case wgsl::BuiltinFn::kFloor:
+        case wgsl::BuiltinFn::kFma:
+        case wgsl::BuiltinFn::kFract:
+        case wgsl::BuiltinFn::kFrexp:
+        case wgsl::BuiltinFn::kLength:
+        case wgsl::BuiltinFn::kLdexp:
+        case wgsl::BuiltinFn::kLog:
+        case wgsl::BuiltinFn::kLog2:
+        case wgsl::BuiltinFn::kMix:
+        case wgsl::BuiltinFn::kModf:
+        case wgsl::BuiltinFn::kNormalize:
+        case wgsl::BuiltinFn::kPow:
+        case wgsl::BuiltinFn::kReflect:
+        case wgsl::BuiltinFn::kRefract:
+        case wgsl::BuiltinFn::kSaturate:
+        case wgsl::BuiltinFn::kSelect:
+        case wgsl::BuiltinFn::kSin:
+        case wgsl::BuiltinFn::kSinh:
+        case wgsl::BuiltinFn::kSqrt:
+        case wgsl::BuiltinFn::kStep:
+        case wgsl::BuiltinFn::kTan:
+        case wgsl::BuiltinFn::kTanh:
+        case wgsl::BuiltinFn::kTranspose:
+        case wgsl::BuiltinFn::kTrunc:
+        case wgsl::BuiltinFn::kSign:
+        case wgsl::BuiltinFn::kClamp:
             out += builtin->str();
             break;
-        case core::BuiltinFn::kAbs:
+        case wgsl::BuiltinFn::kAbs:
             if (builtin->ReturnType()->is_float_scalar_or_vector()) {
                 out += "fabs";
             } else {
                 out += "abs";
             }
             break;
-        case core::BuiltinFn::kCountLeadingZeros:
+        case wgsl::BuiltinFn::kCountLeadingZeros:
             out += "clz";
             break;
-        case core::BuiltinFn::kCountOneBits:
+        case wgsl::BuiltinFn::kCountOneBits:
             out += "popcount";
             break;
-        case core::BuiltinFn::kCountTrailingZeros:
+        case wgsl::BuiltinFn::kCountTrailingZeros:
             out += "ctz";
             break;
-        case core::BuiltinFn::kDpdx:
-        case core::BuiltinFn::kDpdxCoarse:
-        case core::BuiltinFn::kDpdxFine:
+        case wgsl::BuiltinFn::kDpdx:
+        case wgsl::BuiltinFn::kDpdxCoarse:
+        case wgsl::BuiltinFn::kDpdxFine:
             out += "dfdx";
             break;
-        case core::BuiltinFn::kDpdy:
-        case core::BuiltinFn::kDpdyCoarse:
-        case core::BuiltinFn::kDpdyFine:
+        case wgsl::BuiltinFn::kDpdy:
+        case wgsl::BuiltinFn::kDpdyCoarse:
+        case wgsl::BuiltinFn::kDpdyFine:
             out += "dfdy";
             break;
-        case core::BuiltinFn::kExtractBits:
+        case wgsl::BuiltinFn::kExtractBits:
             out += "extract_bits";
             break;
-        case core::BuiltinFn::kInsertBits:
+        case wgsl::BuiltinFn::kInsertBits:
             out += "insert_bits";
             break;
-        case core::BuiltinFn::kFwidth:
-        case core::BuiltinFn::kFwidthCoarse:
-        case core::BuiltinFn::kFwidthFine:
+        case wgsl::BuiltinFn::kFwidth:
+        case wgsl::BuiltinFn::kFwidthCoarse:
+        case wgsl::BuiltinFn::kFwidthFine:
             out += "fwidth";
             break;
-        case core::BuiltinFn::kMax:
+        case wgsl::BuiltinFn::kMax:
             if (builtin->ReturnType()->is_float_scalar_or_vector()) {
                 out += "fmax";
             } else {
                 out += "max";
             }
             break;
-        case core::BuiltinFn::kMin:
+        case wgsl::BuiltinFn::kMin:
             if (builtin->ReturnType()->is_float_scalar_or_vector()) {
                 out += "fmin";
             } else {
                 out += "min";
             }
             break;
-        case core::BuiltinFn::kFaceForward:
+        case wgsl::BuiltinFn::kFaceForward:
             out += "faceforward";
             break;
-        case core::BuiltinFn::kPack4X8Snorm:
+        case wgsl::BuiltinFn::kPack4X8Snorm:
             out += "pack_float_to_snorm4x8";
             break;
-        case core::BuiltinFn::kPack4X8Unorm:
+        case wgsl::BuiltinFn::kPack4X8Unorm:
             out += "pack_float_to_unorm4x8";
             break;
-        case core::BuiltinFn::kPack2X16Snorm:
+        case wgsl::BuiltinFn::kPack2X16Snorm:
             out += "pack_float_to_snorm2x16";
             break;
-        case core::BuiltinFn::kPack2X16Unorm:
+        case wgsl::BuiltinFn::kPack2X16Unorm:
             out += "pack_float_to_unorm2x16";
             break;
-        case core::BuiltinFn::kReverseBits:
+        case wgsl::BuiltinFn::kReverseBits:
             out += "reverse_bits";
             break;
-        case core::BuiltinFn::kRound:
+        case wgsl::BuiltinFn::kRound:
             out += "rint";
             break;
-        case core::BuiltinFn::kSmoothstep:
+        case wgsl::BuiltinFn::kSmoothstep:
             out += "smoothstep";
             break;
-        case core::BuiltinFn::kInverseSqrt:
+        case wgsl::BuiltinFn::kInverseSqrt:
             out += "rsqrt";
             break;
-        case core::BuiltinFn::kUnpack4X8Snorm:
+        case wgsl::BuiltinFn::kUnpack4X8Snorm:
             out += "unpack_snorm4x8_to_float";
             break;
-        case core::BuiltinFn::kUnpack4X8Unorm:
+        case wgsl::BuiltinFn::kUnpack4X8Unorm:
             out += "unpack_unorm4x8_to_float";
             break;
-        case core::BuiltinFn::kUnpack2X16Snorm:
+        case wgsl::BuiltinFn::kUnpack2X16Snorm:
             out += "unpack_snorm2x16_to_float";
             break;
-        case core::BuiltinFn::kUnpack2X16Unorm:
+        case wgsl::BuiltinFn::kUnpack2X16Unorm:
             out += "unpack_unorm2x16_to_float";
             break;
-        case core::BuiltinFn::kArrayLength:
+        case wgsl::BuiltinFn::kArrayLength:
             diagnostics_.add_error(
                 diag::System::Writer,
                 "Unable to translate builtin: " + std::string(builtin->str()) +
@@ -3070,7 +3070,7 @@ bool ASTPrinter::CallBuiltinHelper(StringStream& out,
         TextBuffer b;
         TINT_DEFER(helpers_.Append(b));
 
-        auto fn_name = UniqueIdentifier(std::string("tint_") + core::str(builtin->Fn()));
+        auto fn_name = UniqueIdentifier(std::string("tint_") + wgsl::str(builtin->Fn()));
         std::vector<std::string> parameter_names;
         {
             auto decl = Line(&b);

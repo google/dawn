@@ -1552,12 +1552,12 @@ class UniformityGraph {
                 // some texture sampling builtins, and atomics.
                 if (builtin->IsBarrier()) {
                     callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, default_severity};
-                } else if (builtin->Fn() == core::BuiltinFn::kWorkgroupUniformLoad) {
+                } else if (builtin->Fn() == wgsl::BuiltinFn::kWorkgroupUniformLoad) {
                     callsite_tag = {CallSiteTag::CallSiteRequiredToBeUniform, default_severity};
                 } else if (builtin->IsDerivative() ||
-                           builtin->Fn() == core::BuiltinFn::kTextureSample ||
-                           builtin->Fn() == core::BuiltinFn::kTextureSampleBias ||
-                           builtin->Fn() == core::BuiltinFn::kTextureSampleCompare) {
+                           builtin->Fn() == wgsl::BuiltinFn::kTextureSample ||
+                           builtin->Fn() == wgsl::BuiltinFn::kTextureSampleBias ||
+                           builtin->Fn() == wgsl::BuiltinFn::kTextureSampleCompare) {
                     // Get the severity of derivative uniformity violations in this context.
                     auto severity = sem_.DiagnosticSeverity(
                         call, wgsl::CoreDiagnosticRule::kDerivativeUniformity);
@@ -1568,7 +1568,7 @@ class UniformityGraph {
                 } else if (builtin->IsAtomic()) {
                     callsite_tag = {CallSiteTag::CallSiteNoRestriction};
                     function_tag = ReturnValueMayBeNonUniform;
-                } else if (builtin->Fn() == core::BuiltinFn::kTextureLoad) {
+                } else if (builtin->Fn() == wgsl::BuiltinFn::kTextureLoad) {
                     // Loading from a read-write storage texture may produce a non-uniform value.
                     auto* storage =
                         builtin->Parameters()[0]->Type()->As<core::type::StorageTexture>();
@@ -1670,7 +1670,7 @@ class UniformityGraph {
                 }
             } else {
                 auto* builtin = sem->Target()->As<sem::BuiltinFn>();
-                if (builtin && builtin->Fn() == core::BuiltinFn::kWorkgroupUniformLoad) {
+                if (builtin && builtin->Fn() == wgsl::BuiltinFn::kWorkgroupUniformLoad) {
                     // The workgroupUniformLoad builtin requires its parameter to be uniform.
                     current_function_->RequiredToBeUniform(default_severity)->AddEdge(args[i]);
                 } else {

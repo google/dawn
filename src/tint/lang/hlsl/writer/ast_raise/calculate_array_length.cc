@@ -47,7 +47,7 @@ bool ShouldRun(const Program& program) {
     for (auto* fn : program.AST().Functions()) {
         if (auto* sem_fn = program.Sem().Get(fn)) {
             for (auto* builtin : sem_fn->DirectlyCalledBuiltins()) {
-                if (builtin->Fn() == core::BuiltinFn::kArrayLength) {
+                if (builtin->Fn() == wgsl::BuiltinFn::kArrayLength) {
                     return true;
                 }
             }
@@ -130,7 +130,7 @@ ast::transform::Transform::ApplyResult CalculateArrayLength::Apply(const Program
         if (auto* call_expr = node->As<ast::CallExpression>()) {
             auto* call = sem.Get(call_expr)->UnwrapMaterialize()->As<sem::Call>();
             if (auto* builtin = call->Target()->As<sem::BuiltinFn>()) {
-                if (builtin->Fn() == core::BuiltinFn::kArrayLength) {
+                if (builtin->Fn() == wgsl::BuiltinFn::kArrayLength) {
                     // We're dealing with an arrayLength() call
 
                     if (auto* call_stmt = call->Stmt()->Declaration()->As<ast::CallStatement>()) {

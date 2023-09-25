@@ -31,6 +31,8 @@ if (tint_build_unittests) {
 
 libtint_source_set("wgsl") {
   sources = [
+    "builtin_fn.cc",
+    "builtin_fn.h",
     "diagnostic_rule.cc",
     "diagnostic_rule.h",
     "diagnostic_severity.cc",
@@ -71,6 +73,7 @@ if (tint_build_unittests) {
       "${tint_src_dir}/lang/wgsl/helpers:unittests",
       "${tint_src_dir}/lang/wgsl/program",
       "${tint_src_dir}/lang/wgsl/reader",
+      "${tint_src_dir}/lang/wgsl/reader/lower",
       "${tint_src_dir}/lang/wgsl/reader/program_to_ir",
       "${tint_src_dir}/lang/wgsl/resolver",
       "${tint_src_dir}/lang/wgsl/sem",

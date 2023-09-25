@@ -584,15 +584,6 @@ void ErrAmbiguousOverload(Context& context,
 }  // namespace
 
 Result<Overload> Lookup(Context& context,
-                        core::BuiltinFn builtin_type,
-                        VectorRef<const core::type::Type*> args,
-                        EvaluationStage earliest_eval_stage,
-                        const Source& source) {
-    return Lookup(context, core::str(builtin_type), static_cast<size_t>(builtin_type), args,
-                  earliest_eval_stage, source);
-}
-
-Result<Overload> Lookup(Context& context,
                         const char* intrinsic_name,
                         size_t function_id,
                         VectorRef<const core::type::Type*> args,

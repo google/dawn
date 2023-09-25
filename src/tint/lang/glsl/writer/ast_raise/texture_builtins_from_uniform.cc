@@ -51,10 +51,10 @@ bool ShouldRun(const Program& program) {
             for (auto* builtin : sem_fn->DirectlyCalledBuiltins()) {
                 // GLSL ES  has no native support for the counterpart of
                 // textureNumLevels (textureQueryLevels) and textureNumSamples (textureSamples)
-                if (builtin->Fn() == core::BuiltinFn::kTextureNumLevels) {
+                if (builtin->Fn() == wgsl::BuiltinFn::kTextureNumLevels) {
                     return true;
                 }
-                if (builtin->Fn() == core::BuiltinFn::kTextureNumSamples) {
+                if (builtin->Fn() == wgsl::BuiltinFn::kTextureNumSamples) {
                     return true;
                 }
             }
@@ -111,8 +111,8 @@ struct TextureBuiltinsFromUniform::State {
                     tint::Switch(
                         call->Target(),
                         [&](const sem::BuiltinFn* builtin) {
-                            if (builtin->Fn() != core::BuiltinFn::kTextureNumLevels &&
-                                builtin->Fn() != core::BuiltinFn::kTextureNumSamples) {
+                            if (builtin->Fn() != wgsl::BuiltinFn::kTextureNumLevels &&
+                                builtin->Fn() != wgsl::BuiltinFn::kTextureNumSamples) {
                                 return;
                             }
                             if (auto* call_stmt =
@@ -462,11 +462,11 @@ struct TextureBuiltinsFromUniform::State {
     /// @param type of the builtin function
     /// @returns corresponding TextureBuiltinsFromUniformOptions::Field for the builtin
     static TextureBuiltinsFromUniformOptions::Field GetFieldFromBuiltinFunctionType(
-        core::BuiltinFn type) {
+        wgsl::BuiltinFn type) {
         switch (type) {
-            case core::BuiltinFn::kTextureNumLevels:
+            case wgsl::BuiltinFn::kTextureNumLevels:
                 return TextureBuiltinsFromUniformOptions::Field::TextureNumLevels;
-            case core::BuiltinFn::kTextureNumSamples:
+            case wgsl::BuiltinFn::kTextureNumSamples:
                 return TextureBuiltinsFromUniformOptions::Field::TextureNumSamples;
             default:
                 TINT_UNREACHABLE() << "unsupported builtin function type " << type;

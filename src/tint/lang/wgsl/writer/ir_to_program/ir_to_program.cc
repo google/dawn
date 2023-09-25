@@ -63,6 +63,7 @@
 #include "src/tint/lang/core/type/reference.h"
 #include "src/tint/lang/core/type/sampler.h"
 #include "src/tint/lang/core/type/texture.h"
+#include "src/tint/lang/wgsl/ir/builtin_call.h"
 #include "src/tint/lang/wgsl/program/program_builder.h"
 #include "src/tint/lang/wgsl/resolver/resolve.h"
 #include "src/tint/lang/wgsl/writer/ir_to_program/rename_conflicts.h"
@@ -578,7 +579,7 @@ class State {
                 }
                 Bind(c->Result(), expr, PtrKind::kPtr);
             },
-            [&](core::ir::CoreBuiltinCall* c) {
+            [&](wgsl::ir::BuiltinCall* c) {
                 if (!disabled_derivative_uniformity_ && RequiresDerivativeUniformity(c->Func())) {
                     // TODO(crbug.com/tint/1985): Be smarter about disabling derivative uniformity.
                     b.DiagnosticDirective(wgsl::DiagnosticSeverity::kOff,
@@ -1141,20 +1142,20 @@ class State {
         return b.IndexAccessor(expr, Expr(index));
     }
 
-    bool RequiresDerivativeUniformity(core::BuiltinFn fn) {
+    bool RequiresDerivativeUniformity(wgsl::BuiltinFn fn) {
         switch (fn) {
-            case core::BuiltinFn::kDpdxCoarse:
-            case core::BuiltinFn::kDpdyCoarse:
-            case core::BuiltinFn::kFwidthCoarse:
-            case core::BuiltinFn::kDpdxFine:
-            case core::BuiltinFn::kDpdyFine:
-            case core::BuiltinFn::kFwidthFine:
-            case core::BuiltinFn::kDpdx:
-            case core::BuiltinFn::kDpdy:
-            case core::BuiltinFn::kFwidth:
-            case core::BuiltinFn::kTextureSample:
-            case core::BuiltinFn::kTextureSampleBias:
-            case core::BuiltinFn::kTextureSampleCompare:
+            case wgsl::BuiltinFn::kDpdxCoarse:
+            case wgsl::BuiltinFn::kDpdyCoarse:
+            case wgsl::BuiltinFn::kFwidthCoarse:
+            case wgsl::BuiltinFn::kDpdxFine:
+            case wgsl::BuiltinFn::kDpdyFine:
+            case wgsl::BuiltinFn::kFwidthFine:
+            case wgsl::BuiltinFn::kDpdx:
+            case wgsl::BuiltinFn::kDpdy:
+            case wgsl::BuiltinFn::kFwidth:
+            case wgsl::BuiltinFn::kTextureSample:
+            case wgsl::BuiltinFn::kTextureSampleBias:
+            case wgsl::BuiltinFn::kTextureSampleCompare:
                 return true;
             default:
                 return false;

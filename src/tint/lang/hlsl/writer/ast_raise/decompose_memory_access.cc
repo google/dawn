@@ -129,7 +129,7 @@ struct LoadStoreKey {
 /// AtomicKey is the unordered map key to an atomic intrinsic.
 struct AtomicKey {
     core::type::Type const* el_ty = nullptr;  // element type
-    core::BuiltinFn const op;                 // atomic op
+    wgsl::BuiltinFn const op;                 // atomic op
     Symbol const buffer;                      // buffer name
     bool operator==(const AtomicKey& rhs) const {
         return el_ty == rhs.el_ty && op == rhs.op && buffer == rhs.buffer;
@@ -254,42 +254,42 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicStoreFor(ast::Builder* builder,
 /// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied to a stub function for
 /// the atomic op and the type @p ty.
 DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ast::Builder* builder,
-                                                     core::BuiltinFn ity,
+                                                     wgsl::BuiltinFn ity,
                                                      const core::type::Type* ty,
                                                      const Symbol& buffer) {
     auto op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicLoad;
     switch (ity) {
-        case core::BuiltinFn::kAtomicLoad:
+        case wgsl::BuiltinFn::kAtomicLoad:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicLoad;
             break;
-        case core::BuiltinFn::kAtomicStore:
+        case wgsl::BuiltinFn::kAtomicStore:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicStore;
             break;
-        case core::BuiltinFn::kAtomicAdd:
+        case wgsl::BuiltinFn::kAtomicAdd:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicAdd;
             break;
-        case core::BuiltinFn::kAtomicSub:
+        case wgsl::BuiltinFn::kAtomicSub:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicSub;
             break;
-        case core::BuiltinFn::kAtomicMax:
+        case wgsl::BuiltinFn::kAtomicMax:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicMax;
             break;
-        case core::BuiltinFn::kAtomicMin:
+        case wgsl::BuiltinFn::kAtomicMin:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicMin;
             break;
-        case core::BuiltinFn::kAtomicAnd:
+        case wgsl::BuiltinFn::kAtomicAnd:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicAnd;
             break;
-        case core::BuiltinFn::kAtomicOr:
+        case wgsl::BuiltinFn::kAtomicOr:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicOr;
             break;
-        case core::BuiltinFn::kAtomicXor:
+        case wgsl::BuiltinFn::kAtomicXor:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicXor;
             break;
-        case core::BuiltinFn::kAtomicExchange:
+        case wgsl::BuiltinFn::kAtomicExchange:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicExchange;
             break;
-        case core::BuiltinFn::kAtomicCompareExchangeWeak:
+        case wgsl::BuiltinFn::kAtomicCompareExchangeWeak:
             op = DecomposeMemoryAccess::Intrinsic::Op::kAtomicCompareExchangeWeak;
             break;
         default:
@@ -922,7 +922,7 @@ ast::transform::Transform::ApplyResult DecomposeMemoryAccess::Apply(
         if (auto* call_expr = node->As<ast::CallExpression>()) {
             auto* call = sem.Get(call_expr)->UnwrapMaterialize()->As<sem::Call>();
             if (auto* builtin = call->Target()->As<sem::BuiltinFn>()) {
-                if (builtin->Fn() == core::BuiltinFn::kArrayLength) {
+                if (builtin->Fn() == wgsl::BuiltinFn::kArrayLength) {
                     // arrayLength(X)
                     // Don't convert X into a load, this builtin actually requires the real pointer.
                     state.TakeAccess(call_expr->args[0]);

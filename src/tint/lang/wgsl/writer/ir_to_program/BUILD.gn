@@ -46,6 +46,8 @@ libtint_source_set("ir_to_program") {
     "${tint_src_dir}/lang/core/type",
     "${tint_src_dir}/lang/wgsl",
     "${tint_src_dir}/lang/wgsl/ast",
+    "${tint_src_dir}/lang/wgsl/intrinsic/data",
+    "${tint_src_dir}/lang/wgsl/ir",
     "${tint_src_dir}/lang/wgsl/program",
     "${tint_src_dir}/lang/wgsl/resolver",
     "${tint_src_dir}/lang/wgsl/sem",

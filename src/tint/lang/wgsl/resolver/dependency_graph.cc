@@ -474,7 +474,7 @@ class DependencyScanner {
 
         BuiltinType type = BuiltinType::kNone;
         std::variant<std::monostate,
-                     core::BuiltinFn,
+                     wgsl::BuiltinFn,
                      core::BuiltinType,
                      core::BuiltinValue,
                      core::AddressSpace,
@@ -490,8 +490,8 @@ class DependencyScanner {
     /// @returns the builtin info
     DependencyScanner::BuiltinInfo GetBuiltinInfo(Symbol symbol) {
         return builtin_info_map.GetOrCreate(symbol, [&] {
-            if (auto builtin_fn = core::ParseBuiltinFn(symbol.NameView());
-                builtin_fn != core::BuiltinFn::kNone) {
+            if (auto builtin_fn = wgsl::ParseBuiltinFn(symbol.NameView());
+                builtin_fn != wgsl::BuiltinFn::kNone) {
                 return BuiltinInfo{BuiltinType::kFunction, builtin_fn};
             }
             if (auto builtin_ty = core::ParseBuiltinType(symbol.NameView());
@@ -537,7 +537,7 @@ class DependencyScanner {
                     break;
                 case BuiltinType::kFunction:
                     graph_.resolved_identifiers.Add(
-                        from, ResolvedIdentifier(builtin_info.Value<core::BuiltinFn>()));
+                        from, ResolvedIdentifier(builtin_info.Value<wgsl::BuiltinFn>()));
                     break;
                 case BuiltinType::kBuiltin:
                     graph_.resolved_identifiers.Add(
@@ -921,7 +921,7 @@ std::string ResolvedIdentifier::String() const {
                 return "<unknown>";
             });
     }
-    if (auto builtin_fn = BuiltinFn(); builtin_fn != core::BuiltinFn::kNone) {
+    if (auto builtin_fn = BuiltinFn(); builtin_fn != wgsl::BuiltinFn::kNone) {
         return "builtin function '" + tint::ToString(builtin_fn) + "'";
     }
     if (auto builtin_ty = BuiltinType(); builtin_ty != core::BuiltinType::kUndefined) {

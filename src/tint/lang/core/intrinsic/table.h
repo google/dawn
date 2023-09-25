@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "src/tint/lang/core/binary_op.h"
 #include "src/tint/lang/core/builtin_fn.h"
@@ -25,6 +26,7 @@
 #include "src/tint/lang/core/parameter_usage.h"
 #include "src/tint/lang/core/unary_op.h"
 #include "src/tint/utils/containers/vector.h"
+#include "src/tint/utils/text/string.h"
 
 // Forward declarations
 namespace tint::diag {
@@ -99,25 +101,6 @@ struct Context {
 /// Lookup looks for the builtin overload with the given signature, raising an error diagnostic
 /// if the builtin was not found.
 /// @param context the intrinsic context
-/// @param builtin_type the builtin identifier
-/// @param args the argument types passed to the builtin function
-/// @param earliest_eval_stage the the earliest evaluation stage that a call to
-///        the builtin can be made. This can alter the overloads considered.
-///        For example, if the earliest evaluation stage is `EvaluationStage::kRuntime`, then
-///        only overloads with concrete argument types will be considered, as all
-///        abstract-numerics will have been materialized after shader creation time
-///        (EvaluationStage::kConstant).
-/// @param source the source of the builtin call
-/// @return the resolved builtin function overload
-Result<Overload> Lookup(Context& context,
-                        core::BuiltinFn builtin_type,
-                        VectorRef<const core::type::Type*> args,
-                        EvaluationStage earliest_eval_stage,
-                        const Source& source);
-
-/// Lookup looks for the builtin overload with the given signature, raising an error diagnostic
-/// if the builtin was not found.
-/// @param context the intrinsic context
 /// @param intrinsic_name the name of the intrinsi
 /// @param function_id the function identifier
 /// @param args the argument types passed to the builtin function
@@ -135,6 +118,31 @@ Result<Overload> Lookup(Context& context,
                         VectorRef<const core::type::Type*> args,
                         EvaluationStage earliest_eval_stage,
                         const Source& source);
+
+/// Lookup looks for the builtin overload with the given signature, raising an error diagnostic
+/// if the builtin was not found.
+/// @param context the intrinsic context
+/// @param builtin_fn the builtin function
+/// @param args the argument types passed to the builtin function
+/// @param earliest_eval_stage the the earliest evaluation stage that a call to
+///        the builtin can be made. This can alter the overloads considered.
+///        For example, if the earliest evaluation stage is `EvaluationStage::kRuntime`, then
+///        only overloads with concrete argument types will be considered, as all
+///        abstract-numerics will have been materialized after shader creation time
+///        (EvaluationStage::kConstant).
+/// @param source the source of the builtin call
+/// @return the resolved builtin function overload
+template <typename BUILTIN_FN>
+Result<Overload> Lookup(Context& context,
+                        BUILTIN_FN builtin_fn,
+                        VectorRef<const core::type::Type*> args,
+                        EvaluationStage earliest_eval_stage,
+                        const Source& source) {
+    static_assert(std::is_enum_v<BUILTIN_FN>);
+    std::string name = tint::ToString(builtin_fn);  // TODO(bclayton): Avoid this heap allocation
+    size_t id = static_cast<size_t>(builtin_fn);
+    return Lookup(context, name.c_str(), id, std::move(args), earliest_eval_stage, source);
+}
 
 /// Lookup looks for the unary op overload with the given signature, raising an error
 /// diagnostic if the operator was not found.

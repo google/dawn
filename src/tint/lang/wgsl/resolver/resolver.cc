@@ -2325,7 +2325,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 });
         }
 
-        if (auto f = resolved->BuiltinFn(); f != core::BuiltinFn::kNone) {
+        if (auto f = resolved->BuiltinFn(); f != wgsl::BuiltinFn::kNone) {
             if (!TINT_LIKELY(CheckNotTemplated("builtin", ident))) {
                 return nullptr;
             }
@@ -2400,7 +2400,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
 template <size_t N>
 sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
-                                 core::BuiltinFn fn,
+                                 wgsl::BuiltinFn fn,
                                  Vector<const sem::ValueExpression*, N>& args) {
     auto arg_stage = core::EvaluationStage::kConstant;
     for (auto* arg : args) {
@@ -2439,7 +2439,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
             flags.Contains(OverloadFlag::kIsDeprecated), flags.Contains(OverloadFlag::kMustUse));
     });
 
-    if (fn == core::BuiltinFn::kTintMaterialize) {
+    if (fn == wgsl::BuiltinFn::kTintMaterialize) {
         args[0] = Materialize(args[0]);
         if (!args[0]) {
             return nullptr;
@@ -2498,13 +2498,13 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         CollectTextureSamplerPairs(target, call->Arguments());
     }
 
-    if (fn == core::BuiltinFn::kWorkgroupUniformLoad) {
+    if (fn == wgsl::BuiltinFn::kWorkgroupUniformLoad) {
         if (!validator_.WorkgroupUniformLoad(call)) {
             return nullptr;
         }
     }
 
-    if (fn == core::BuiltinFn::kSubgroupBroadcast) {
+    if (fn == wgsl::BuiltinFn::kSubgroupBroadcast) {
         if (!validator_.SubgroupBroadcast(call)) {
             return nullptr;
         }
@@ -3333,7 +3333,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
         return builder_->create<sem::TypeExpression>(expr, current_statement_, ty);
     }
 
-    if (resolved->BuiltinFn() != core::BuiltinFn::kNone) {
+    if (resolved->BuiltinFn() != wgsl::BuiltinFn::kNone) {
         AddError("missing '(' for builtin function call", expr->source.End());
         return nullptr;
     }

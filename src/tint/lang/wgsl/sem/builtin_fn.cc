@@ -27,10 +27,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::BuiltinFn);
 namespace tint::sem {
 
 const char* BuiltinFn::str() const {
-    return core::str(fn_);
+    return wgsl::str(fn_);
 }
 
-BuiltinFn::BuiltinFn(core::BuiltinFn type,
+BuiltinFn::BuiltinFn(wgsl::BuiltinFn type,
                      const core::type::Type* return_type,
                      VectorRef<Parameter*> parameters,
                      core::EvaluationStage eval_stage,
@@ -45,51 +45,51 @@ BuiltinFn::BuiltinFn(core::BuiltinFn type,
 BuiltinFn::~BuiltinFn() = default;
 
 bool BuiltinFn::IsCoarseDerivative() const {
-    return core::IsCoarseDerivative(fn_);
+    return wgsl::IsCoarseDerivative(fn_);
 }
 
 bool BuiltinFn::IsFineDerivative() const {
-    return core::IsFineDerivative(fn_);
+    return wgsl::IsFineDerivative(fn_);
 }
 
 bool BuiltinFn::IsDerivative() const {
-    return core::IsDerivative(fn_);
+    return wgsl::IsDerivative(fn_);
 }
 
 bool BuiltinFn::IsTexture() const {
-    return core::IsTexture(fn_);
+    return wgsl::IsTexture(fn_);
 }
 
 bool BuiltinFn::IsImageQuery() const {
-    return core::IsImageQuery(fn_);
+    return wgsl::IsImageQuery(fn_);
 }
 
 bool BuiltinFn::IsDataPacking() const {
-    return core::IsDataPacking(fn_);
+    return wgsl::IsDataPacking(fn_);
 }
 
 bool BuiltinFn::IsDataUnpacking() const {
-    return core::IsDataUnpacking(fn_);
+    return wgsl::IsDataUnpacking(fn_);
 }
 
 bool BuiltinFn::IsBarrier() const {
-    return core::IsBarrier(fn_);
+    return wgsl::IsBarrier(fn_);
 }
 
 bool BuiltinFn::IsAtomic() const {
-    return core::IsAtomic(fn_);
+    return wgsl::IsAtomic(fn_);
 }
 
 bool BuiltinFn::IsDP4a() const {
-    return core::IsDP4a(fn_);
+    return wgsl::IsDP4a(fn_);
 }
 
 bool BuiltinFn::IsSubgroup() const {
-    return core::IsSubgroup(fn_);
+    return wgsl::IsSubgroup(fn_);
 }
 
 bool BuiltinFn::HasSideEffects() const {
-    return core::HasSideEffects(fn_);
+    return wgsl::HasSideEffects(fn_);
 }
 
 wgsl::Extension BuiltinFn::RequiredExtension() const {
@@ -99,7 +99,7 @@ wgsl::Extension BuiltinFn::RequiredExtension() const {
     if (IsSubgroup()) {
         return wgsl::Extension::kChromiumExperimentalSubgroups;
     }
-    if (fn_ == core::BuiltinFn::kTextureBarrier) {
+    if (fn_ == wgsl::BuiltinFn::kTextureBarrier) {
         return wgsl::Extension::kChromiumExperimentalReadWriteStorageTexture;
     }
     return wgsl::Extension::kUndefined;

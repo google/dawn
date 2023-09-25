@@ -19,13 +19,13 @@
 #include <vector>
 
 #include "src/tint/lang/core/access.h"
-#include "src/tint/lang/core/builtin_fn.h"
 #include "src/tint/lang/core/builtin_type.h"
 #include "src/tint/lang/core/builtin_value.h"
 #include "src/tint/lang/core/interpolation_sampling.h"
 #include "src/tint/lang/core/interpolation_type.h"
 #include "src/tint/lang/core/texel_format.h"
 #include "src/tint/lang/wgsl/ast/module.h"
+#include "src/tint/lang/wgsl/builtin_fn.h"
 #include "src/tint/utils/containers/hashmap.h"
 #include "src/tint/utils/diagnostic/diagnostic.h"
 
@@ -43,7 +43,7 @@ struct UnresolvedIdentifier {
 /// - const ast::TypeDecl*  (as const ast::Node*)
 /// - const ast::Variable*  (as const ast::Node*)
 /// - const ast::Function*  (as const ast::Node*)
-/// - core::BuiltinFn
+/// - wgsl::BuiltinFn
 /// - core::Access
 /// - core::AddressSpace
 /// - core::BuiltinType
@@ -74,13 +74,13 @@ class ResolvedIdentifier {
         return nullptr;
     }
 
-    /// @return the builtin function if the ResolvedIdentifier holds core::BuiltinFn, otherwise
-    /// core::BuiltinFn::kNone
-    core::BuiltinFn BuiltinFn() const {
-        if (auto n = std::get_if<core::BuiltinFn>(&value_)) {
+    /// @return the builtin function if the ResolvedIdentifier holds wgsl::BuiltinFn, otherwise
+    /// wgsl::BuiltinFn::kNone
+    wgsl::BuiltinFn BuiltinFn() const {
+        if (auto n = std::get_if<wgsl::BuiltinFn>(&value_)) {
             return *n;
         }
-        return core::BuiltinFn::kNone;
+        return wgsl::BuiltinFn::kNone;
     }
 
     /// @return the access if the ResolvedIdentifier holds core::Access, otherwise
@@ -169,7 +169,7 @@ class ResolvedIdentifier {
   private:
     std::variant<UnresolvedIdentifier,
                  const ast::Node*,
-                 core::BuiltinFn,
+                 wgsl::BuiltinFn,
                  core::Access,
                  core::AddressSpace,
                  core::BuiltinType,

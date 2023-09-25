@@ -33,7 +33,7 @@ enum class CallParamType {
 };
 
 struct BuiltinData {
-    core::BuiltinFn builtin;
+    wgsl::BuiltinFn builtin;
     CallParamType type;
     const char* msl_name;
 };
@@ -57,88 +57,88 @@ inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
     return out;
 }
 
-const ast::CallExpression* GenerateCall(core::BuiltinFn builtin,
+const ast::CallExpression* GenerateCall(wgsl::BuiltinFn builtin,
                                         CallParamType type,
                                         ProgramBuilder* builder) {
     std::string name;
     StringStream str;
     str << name << builtin;
     switch (builtin) {
-        case core::BuiltinFn::kAcos:
-        case core::BuiltinFn::kAsin:
-        case core::BuiltinFn::kAtan:
-        case core::BuiltinFn::kCeil:
-        case core::BuiltinFn::kCos:
-        case core::BuiltinFn::kCosh:
-        case core::BuiltinFn::kDpdx:
-        case core::BuiltinFn::kDpdxCoarse:
-        case core::BuiltinFn::kDpdxFine:
-        case core::BuiltinFn::kDpdy:
-        case core::BuiltinFn::kDpdyCoarse:
-        case core::BuiltinFn::kDpdyFine:
-        case core::BuiltinFn::kExp:
-        case core::BuiltinFn::kExp2:
-        case core::BuiltinFn::kFloor:
-        case core::BuiltinFn::kFract:
-        case core::BuiltinFn::kFwidth:
-        case core::BuiltinFn::kFwidthCoarse:
-        case core::BuiltinFn::kFwidthFine:
-        case core::BuiltinFn::kInverseSqrt:
-        case core::BuiltinFn::kLength:
-        case core::BuiltinFn::kLog:
-        case core::BuiltinFn::kLog2:
-        case core::BuiltinFn::kNormalize:
-        case core::BuiltinFn::kRound:
-        case core::BuiltinFn::kSin:
-        case core::BuiltinFn::kSinh:
-        case core::BuiltinFn::kSqrt:
-        case core::BuiltinFn::kTan:
-        case core::BuiltinFn::kTanh:
-        case core::BuiltinFn::kTrunc:
-        case core::BuiltinFn::kSign:
+        case wgsl::BuiltinFn::kAcos:
+        case wgsl::BuiltinFn::kAsin:
+        case wgsl::BuiltinFn::kAtan:
+        case wgsl::BuiltinFn::kCeil:
+        case wgsl::BuiltinFn::kCos:
+        case wgsl::BuiltinFn::kCosh:
+        case wgsl::BuiltinFn::kDpdx:
+        case wgsl::BuiltinFn::kDpdxCoarse:
+        case wgsl::BuiltinFn::kDpdxFine:
+        case wgsl::BuiltinFn::kDpdy:
+        case wgsl::BuiltinFn::kDpdyCoarse:
+        case wgsl::BuiltinFn::kDpdyFine:
+        case wgsl::BuiltinFn::kExp:
+        case wgsl::BuiltinFn::kExp2:
+        case wgsl::BuiltinFn::kFloor:
+        case wgsl::BuiltinFn::kFract:
+        case wgsl::BuiltinFn::kFwidth:
+        case wgsl::BuiltinFn::kFwidthCoarse:
+        case wgsl::BuiltinFn::kFwidthFine:
+        case wgsl::BuiltinFn::kInverseSqrt:
+        case wgsl::BuiltinFn::kLength:
+        case wgsl::BuiltinFn::kLog:
+        case wgsl::BuiltinFn::kLog2:
+        case wgsl::BuiltinFn::kNormalize:
+        case wgsl::BuiltinFn::kRound:
+        case wgsl::BuiltinFn::kSin:
+        case wgsl::BuiltinFn::kSinh:
+        case wgsl::BuiltinFn::kSqrt:
+        case wgsl::BuiltinFn::kTan:
+        case wgsl::BuiltinFn::kTanh:
+        case wgsl::BuiltinFn::kTrunc:
+        case wgsl::BuiltinFn::kSign:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2");
             } else {
                 return builder->Call(str.str(), "f2");
             }
-        case core::BuiltinFn::kLdexp:
+        case wgsl::BuiltinFn::kLdexp:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2", "i2");
             } else {
                 return builder->Call(str.str(), "f2", "i2");
             }
-        case core::BuiltinFn::kAtan2:
-        case core::BuiltinFn::kDot:
-        case core::BuiltinFn::kDistance:
-        case core::BuiltinFn::kPow:
-        case core::BuiltinFn::kReflect:
-        case core::BuiltinFn::kStep:
+        case wgsl::BuiltinFn::kAtan2:
+        case wgsl::BuiltinFn::kDot:
+        case wgsl::BuiltinFn::kDistance:
+        case wgsl::BuiltinFn::kPow:
+        case wgsl::BuiltinFn::kReflect:
+        case wgsl::BuiltinFn::kStep:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2", "h2");
             } else {
                 return builder->Call(str.str(), "f2", "f2");
             }
-        case core::BuiltinFn::kStorageBarrier:
+        case wgsl::BuiltinFn::kStorageBarrier:
             return builder->Call(str.str());
-        case core::BuiltinFn::kCross:
+        case wgsl::BuiltinFn::kCross:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h3", "h3");
             } else {
                 return builder->Call(str.str(), "f3", "f3");
             }
-        case core::BuiltinFn::kFma:
-        case core::BuiltinFn::kMix:
-        case core::BuiltinFn::kFaceForward:
-        case core::BuiltinFn::kSmoothstep:
+        case wgsl::BuiltinFn::kFma:
+        case wgsl::BuiltinFn::kMix:
+        case wgsl::BuiltinFn::kFaceForward:
+        case wgsl::BuiltinFn::kSmoothstep:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2", "h2", "h2");
             } else {
                 return builder->Call(str.str(), "f2", "f2", "f2");
             }
-        case core::BuiltinFn::kAll:
-        case core::BuiltinFn::kAny:
+        case wgsl::BuiltinFn::kAll:
+        case wgsl::BuiltinFn::kAny:
             return builder->Call(str.str(), "b2");
-        case core::BuiltinFn::kAbs:
+        case wgsl::BuiltinFn::kAbs:
             if (type == CallParamType::kF32) {
                 return builder->Call(str.str(), "f2");
             } else if (type == CallParamType::kF16) {
@@ -146,17 +146,17 @@ const ast::CallExpression* GenerateCall(core::BuiltinFn builtin,
             } else {
                 return builder->Call(str.str(), "u2");
             }
-        case core::BuiltinFn::kCountLeadingZeros:
-        case core::BuiltinFn::kCountOneBits:
-        case core::BuiltinFn::kCountTrailingZeros:
-        case core::BuiltinFn::kReverseBits:
+        case wgsl::BuiltinFn::kCountLeadingZeros:
+        case wgsl::BuiltinFn::kCountOneBits:
+        case wgsl::BuiltinFn::kCountTrailingZeros:
+        case wgsl::BuiltinFn::kReverseBits:
             return builder->Call(str.str(), "u2");
-        case core::BuiltinFn::kExtractBits:
+        case wgsl::BuiltinFn::kExtractBits:
             return builder->Call(str.str(), "u2", "u1", "u1");
-        case core::BuiltinFn::kInsertBits:
+        case wgsl::BuiltinFn::kInsertBits:
             return builder->Call(str.str(), "u2", "u2", "u1", "u1");
-        case core::BuiltinFn::kMax:
-        case core::BuiltinFn::kMin:
+        case wgsl::BuiltinFn::kMax:
+        case wgsl::BuiltinFn::kMin:
             if (type == CallParamType::kF32) {
                 return builder->Call(str.str(), "f2", "f2");
             } else if (type == CallParamType::kF16) {
@@ -164,7 +164,7 @@ const ast::CallExpression* GenerateCall(core::BuiltinFn builtin,
             } else {
                 return builder->Call(str.str(), "u2", "u2");
             }
-        case core::BuiltinFn::kClamp:
+        case wgsl::BuiltinFn::kClamp:
             if (type == CallParamType::kF32) {
                 return builder->Call(str.str(), "f2", "f2", "f2");
             } else if (type == CallParamType::kF16) {
@@ -172,32 +172,32 @@ const ast::CallExpression* GenerateCall(core::BuiltinFn builtin,
             } else {
                 return builder->Call(str.str(), "u2", "u2", "u2");
             }
-        case core::BuiltinFn::kSelect:
+        case wgsl::BuiltinFn::kSelect:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "h2", "h2", "b2");
             } else {
                 return builder->Call(str.str(), "f2", "f2", "b2");
             }
-        case core::BuiltinFn::kDeterminant:
+        case wgsl::BuiltinFn::kDeterminant:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "hm2x2");
             } else {
                 return builder->Call(str.str(), "m2x2");
             }
-        case core::BuiltinFn::kPack2X16Snorm:
-        case core::BuiltinFn::kPack2X16Unorm:
+        case wgsl::BuiltinFn::kPack2X16Snorm:
+        case wgsl::BuiltinFn::kPack2X16Unorm:
             return builder->Call(str.str(), "f2");
-        case core::BuiltinFn::kPack4X8Snorm:
-        case core::BuiltinFn::kPack4X8Unorm:
+        case wgsl::BuiltinFn::kPack4X8Snorm:
+        case wgsl::BuiltinFn::kPack4X8Unorm:
             return builder->Call(str.str(), "f4");
-        case core::BuiltinFn::kUnpack4X8Snorm:
-        case core::BuiltinFn::kUnpack4X8Unorm:
-        case core::BuiltinFn::kUnpack2X16Snorm:
-        case core::BuiltinFn::kUnpack2X16Unorm:
+        case wgsl::BuiltinFn::kUnpack4X8Snorm:
+        case wgsl::BuiltinFn::kUnpack4X8Unorm:
+        case wgsl::BuiltinFn::kUnpack2X16Snorm:
+        case wgsl::BuiltinFn::kUnpack2X16Unorm:
             return builder->Call(str.str(), "u1");
-        case core::BuiltinFn::kWorkgroupBarrier:
+        case wgsl::BuiltinFn::kWorkgroupBarrier:
             return builder->Call(str.str());
-        case core::BuiltinFn::kTranspose:
+        case wgsl::BuiltinFn::kTranspose:
             if (type == CallParamType::kF16) {
                 return builder->Call(str.str(), "hm3x2");
             } else {
@@ -253,124 +253,124 @@ INSTANTIATE_TEST_SUITE_P(
     MslBuiltinTest,
     testing::Values(
         /* Logical built-in */
-        BuiltinData{core::BuiltinFn::kAll, CallParamType::kBool, "all"},
-        BuiltinData{core::BuiltinFn::kAny, CallParamType::kBool, "any"},
-        BuiltinData{core::BuiltinFn::kSelect, CallParamType::kF32, "select"},
+        BuiltinData{wgsl::BuiltinFn::kAll, CallParamType::kBool, "all"},
+        BuiltinData{wgsl::BuiltinFn::kAny, CallParamType::kBool, "any"},
+        BuiltinData{wgsl::BuiltinFn::kSelect, CallParamType::kF32, "select"},
         /* Float built-in */
-        BuiltinData{core::BuiltinFn::kAbs, CallParamType::kF32, "fabs"},
-        BuiltinData{core::BuiltinFn::kAbs, CallParamType::kF16, "fabs"},
-        BuiltinData{core::BuiltinFn::kAcos, CallParamType::kF32, "acos"},
-        BuiltinData{core::BuiltinFn::kAcos, CallParamType::kF16, "acos"},
-        BuiltinData{core::BuiltinFn::kAsin, CallParamType::kF32, "asin"},
-        BuiltinData{core::BuiltinFn::kAsin, CallParamType::kF16, "asin"},
-        BuiltinData{core::BuiltinFn::kAtan, CallParamType::kF32, "atan"},
-        BuiltinData{core::BuiltinFn::kAtan, CallParamType::kF16, "atan"},
-        BuiltinData{core::BuiltinFn::kAtan2, CallParamType::kF32, "atan2"},
-        BuiltinData{core::BuiltinFn::kAtan2, CallParamType::kF16, "atan2"},
-        BuiltinData{core::BuiltinFn::kCeil, CallParamType::kF32, "ceil"},
-        BuiltinData{core::BuiltinFn::kCeil, CallParamType::kF16, "ceil"},
-        BuiltinData{core::BuiltinFn::kClamp, CallParamType::kF32, "clamp"},
-        BuiltinData{core::BuiltinFn::kClamp, CallParamType::kF16, "clamp"},
-        BuiltinData{core::BuiltinFn::kCos, CallParamType::kF32, "cos"},
-        BuiltinData{core::BuiltinFn::kCos, CallParamType::kF16, "cos"},
-        BuiltinData{core::BuiltinFn::kCosh, CallParamType::kF32, "cosh"},
-        BuiltinData{core::BuiltinFn::kCosh, CallParamType::kF16, "cosh"},
-        BuiltinData{core::BuiltinFn::kCross, CallParamType::kF32, "cross"},
-        BuiltinData{core::BuiltinFn::kCross, CallParamType::kF16, "cross"},
-        BuiltinData{core::BuiltinFn::kDistance, CallParamType::kF32, "distance"},
-        BuiltinData{core::BuiltinFn::kDistance, CallParamType::kF16, "distance"},
-        BuiltinData{core::BuiltinFn::kExp, CallParamType::kF32, "exp"},
-        BuiltinData{core::BuiltinFn::kExp, CallParamType::kF16, "exp"},
-        BuiltinData{core::BuiltinFn::kExp2, CallParamType::kF32, "exp2"},
-        BuiltinData{core::BuiltinFn::kExp2, CallParamType::kF16, "exp2"},
-        BuiltinData{core::BuiltinFn::kFaceForward, CallParamType::kF32, "faceforward"},
-        BuiltinData{core::BuiltinFn::kFaceForward, CallParamType::kF16, "faceforward"},
-        BuiltinData{core::BuiltinFn::kFloor, CallParamType::kF32, "floor"},
-        BuiltinData{core::BuiltinFn::kFloor, CallParamType::kF16, "floor"},
-        BuiltinData{core::BuiltinFn::kFma, CallParamType::kF32, "fma"},
-        BuiltinData{core::BuiltinFn::kFma, CallParamType::kF16, "fma"},
-        BuiltinData{core::BuiltinFn::kFract, CallParamType::kF32, "fract"},
-        BuiltinData{core::BuiltinFn::kFract, CallParamType::kF16, "fract"},
-        BuiltinData{core::BuiltinFn::kInverseSqrt, CallParamType::kF32, "rsqrt"},
-        BuiltinData{core::BuiltinFn::kInverseSqrt, CallParamType::kF16, "rsqrt"},
-        BuiltinData{core::BuiltinFn::kLdexp, CallParamType::kF32, "ldexp"},
-        BuiltinData{core::BuiltinFn::kLdexp, CallParamType::kF16, "ldexp"},
-        BuiltinData{core::BuiltinFn::kLength, CallParamType::kF32, "length"},
-        BuiltinData{core::BuiltinFn::kLength, CallParamType::kF16, "length"},
-        BuiltinData{core::BuiltinFn::kLog, CallParamType::kF32, "log"},
-        BuiltinData{core::BuiltinFn::kLog, CallParamType::kF16, "log"},
-        BuiltinData{core::BuiltinFn::kLog2, CallParamType::kF32, "log2"},
-        BuiltinData{core::BuiltinFn::kLog2, CallParamType::kF16, "log2"},
-        BuiltinData{core::BuiltinFn::kMax, CallParamType::kF32, "fmax"},
-        BuiltinData{core::BuiltinFn::kMax, CallParamType::kF16, "fmax"},
-        BuiltinData{core::BuiltinFn::kMin, CallParamType::kF32, "fmin"},
-        BuiltinData{core::BuiltinFn::kMin, CallParamType::kF16, "fmin"},
-        BuiltinData{core::BuiltinFn::kNormalize, CallParamType::kF32, "normalize"},
-        BuiltinData{core::BuiltinFn::kNormalize, CallParamType::kF16, "normalize"},
-        BuiltinData{core::BuiltinFn::kPow, CallParamType::kF32, "pow"},
-        BuiltinData{core::BuiltinFn::kPow, CallParamType::kF16, "pow"},
-        BuiltinData{core::BuiltinFn::kReflect, CallParamType::kF32, "reflect"},
-        BuiltinData{core::BuiltinFn::kReflect, CallParamType::kF16, "reflect"},
-        BuiltinData{core::BuiltinFn::kSign, CallParamType::kF32, "sign"},
-        BuiltinData{core::BuiltinFn::kSign, CallParamType::kF16, "sign"},
-        BuiltinData{core::BuiltinFn::kSin, CallParamType::kF32, "sin"},
-        BuiltinData{core::BuiltinFn::kSin, CallParamType::kF16, "sin"},
-        BuiltinData{core::BuiltinFn::kSinh, CallParamType::kF32, "sinh"},
-        BuiltinData{core::BuiltinFn::kSinh, CallParamType::kF16, "sinh"},
-        BuiltinData{core::BuiltinFn::kSmoothstep, CallParamType::kF32, "smoothstep"},
-        BuiltinData{core::BuiltinFn::kSmoothstep, CallParamType::kF16, "smoothstep"},
-        BuiltinData{core::BuiltinFn::kSqrt, CallParamType::kF32, "sqrt"},
-        BuiltinData{core::BuiltinFn::kSqrt, CallParamType::kF16, "sqrt"},
-        BuiltinData{core::BuiltinFn::kStep, CallParamType::kF32, "step"},
-        BuiltinData{core::BuiltinFn::kStep, CallParamType::kF16, "step"},
-        BuiltinData{core::BuiltinFn::kTan, CallParamType::kF32, "tan"},
-        BuiltinData{core::BuiltinFn::kTan, CallParamType::kF16, "tan"},
-        BuiltinData{core::BuiltinFn::kTanh, CallParamType::kF32, "tanh"},
-        BuiltinData{core::BuiltinFn::kTanh, CallParamType::kF16, "tanh"},
-        BuiltinData{core::BuiltinFn::kTrunc, CallParamType::kF32, "trunc"},
-        BuiltinData{core::BuiltinFn::kTrunc, CallParamType::kF16, "trunc"},
+        BuiltinData{wgsl::BuiltinFn::kAbs, CallParamType::kF32, "fabs"},
+        BuiltinData{wgsl::BuiltinFn::kAbs, CallParamType::kF16, "fabs"},
+        BuiltinData{wgsl::BuiltinFn::kAcos, CallParamType::kF32, "acos"},
+        BuiltinData{wgsl::BuiltinFn::kAcos, CallParamType::kF16, "acos"},
+        BuiltinData{wgsl::BuiltinFn::kAsin, CallParamType::kF32, "asin"},
+        BuiltinData{wgsl::BuiltinFn::kAsin, CallParamType::kF16, "asin"},
+        BuiltinData{wgsl::BuiltinFn::kAtan, CallParamType::kF32, "atan"},
+        BuiltinData{wgsl::BuiltinFn::kAtan, CallParamType::kF16, "atan"},
+        BuiltinData{wgsl::BuiltinFn::kAtan2, CallParamType::kF32, "atan2"},
+        BuiltinData{wgsl::BuiltinFn::kAtan2, CallParamType::kF16, "atan2"},
+        BuiltinData{wgsl::BuiltinFn::kCeil, CallParamType::kF32, "ceil"},
+        BuiltinData{wgsl::BuiltinFn::kCeil, CallParamType::kF16, "ceil"},
+        BuiltinData{wgsl::BuiltinFn::kClamp, CallParamType::kF32, "clamp"},
+        BuiltinData{wgsl::BuiltinFn::kClamp, CallParamType::kF16, "clamp"},
+        BuiltinData{wgsl::BuiltinFn::kCos, CallParamType::kF32, "cos"},
+        BuiltinData{wgsl::BuiltinFn::kCos, CallParamType::kF16, "cos"},
+        BuiltinData{wgsl::BuiltinFn::kCosh, CallParamType::kF32, "cosh"},
+        BuiltinData{wgsl::BuiltinFn::kCosh, CallParamType::kF16, "cosh"},
+        BuiltinData{wgsl::BuiltinFn::kCross, CallParamType::kF32, "cross"},
+        BuiltinData{wgsl::BuiltinFn::kCross, CallParamType::kF16, "cross"},
+        BuiltinData{wgsl::BuiltinFn::kDistance, CallParamType::kF32, "distance"},
+        BuiltinData{wgsl::BuiltinFn::kDistance, CallParamType::kF16, "distance"},
+        BuiltinData{wgsl::BuiltinFn::kExp, CallParamType::kF32, "exp"},
+        BuiltinData{wgsl::BuiltinFn::kExp, CallParamType::kF16, "exp"},
+        BuiltinData{wgsl::BuiltinFn::kExp2, CallParamType::kF32, "exp2"},
+        BuiltinData{wgsl::BuiltinFn::kExp2, CallParamType::kF16, "exp2"},
+        BuiltinData{wgsl::BuiltinFn::kFaceForward, CallParamType::kF32, "faceforward"},
+        BuiltinData{wgsl::BuiltinFn::kFaceForward, CallParamType::kF16, "faceforward"},
+        BuiltinData{wgsl::BuiltinFn::kFloor, CallParamType::kF32, "floor"},
+        BuiltinData{wgsl::BuiltinFn::kFloor, CallParamType::kF16, "floor"},
+        BuiltinData{wgsl::BuiltinFn::kFma, CallParamType::kF32, "fma"},
+        BuiltinData{wgsl::BuiltinFn::kFma, CallParamType::kF16, "fma"},
+        BuiltinData{wgsl::BuiltinFn::kFract, CallParamType::kF32, "fract"},
+        BuiltinData{wgsl::BuiltinFn::kFract, CallParamType::kF16, "fract"},
+        BuiltinData{wgsl::BuiltinFn::kInverseSqrt, CallParamType::kF32, "rsqrt"},
+        BuiltinData{wgsl::BuiltinFn::kInverseSqrt, CallParamType::kF16, "rsqrt"},
+        BuiltinData{wgsl::BuiltinFn::kLdexp, CallParamType::kF32, "ldexp"},
+        BuiltinData{wgsl::BuiltinFn::kLdexp, CallParamType::kF16, "ldexp"},
+        BuiltinData{wgsl::BuiltinFn::kLength, CallParamType::kF32, "length"},
+        BuiltinData{wgsl::BuiltinFn::kLength, CallParamType::kF16, "length"},
+        BuiltinData{wgsl::BuiltinFn::kLog, CallParamType::kF32, "log"},
+        BuiltinData{wgsl::BuiltinFn::kLog, CallParamType::kF16, "log"},
+        BuiltinData{wgsl::BuiltinFn::kLog2, CallParamType::kF32, "log2"},
+        BuiltinData{wgsl::BuiltinFn::kLog2, CallParamType::kF16, "log2"},
+        BuiltinData{wgsl::BuiltinFn::kMax, CallParamType::kF32, "fmax"},
+        BuiltinData{wgsl::BuiltinFn::kMax, CallParamType::kF16, "fmax"},
+        BuiltinData{wgsl::BuiltinFn::kMin, CallParamType::kF32, "fmin"},
+        BuiltinData{wgsl::BuiltinFn::kMin, CallParamType::kF16, "fmin"},
+        BuiltinData{wgsl::BuiltinFn::kNormalize, CallParamType::kF32, "normalize"},
+        BuiltinData{wgsl::BuiltinFn::kNormalize, CallParamType::kF16, "normalize"},
+        BuiltinData{wgsl::BuiltinFn::kPow, CallParamType::kF32, "pow"},
+        BuiltinData{wgsl::BuiltinFn::kPow, CallParamType::kF16, "pow"},
+        BuiltinData{wgsl::BuiltinFn::kReflect, CallParamType::kF32, "reflect"},
+        BuiltinData{wgsl::BuiltinFn::kReflect, CallParamType::kF16, "reflect"},
+        BuiltinData{wgsl::BuiltinFn::kSign, CallParamType::kF32, "sign"},
+        BuiltinData{wgsl::BuiltinFn::kSign, CallParamType::kF16, "sign"},
+        BuiltinData{wgsl::BuiltinFn::kSin, CallParamType::kF32, "sin"},
+        BuiltinData{wgsl::BuiltinFn::kSin, CallParamType::kF16, "sin"},
+        BuiltinData{wgsl::BuiltinFn::kSinh, CallParamType::kF32, "sinh"},
+        BuiltinData{wgsl::BuiltinFn::kSinh, CallParamType::kF16, "sinh"},
+        BuiltinData{wgsl::BuiltinFn::kSmoothstep, CallParamType::kF32, "smoothstep"},
+        BuiltinData{wgsl::BuiltinFn::kSmoothstep, CallParamType::kF16, "smoothstep"},
+        BuiltinData{wgsl::BuiltinFn::kSqrt, CallParamType::kF32, "sqrt"},
+        BuiltinData{wgsl::BuiltinFn::kSqrt, CallParamType::kF16, "sqrt"},
+        BuiltinData{wgsl::BuiltinFn::kStep, CallParamType::kF32, "step"},
+        BuiltinData{wgsl::BuiltinFn::kStep, CallParamType::kF16, "step"},
+        BuiltinData{wgsl::BuiltinFn::kTan, CallParamType::kF32, "tan"},
+        BuiltinData{wgsl::BuiltinFn::kTan, CallParamType::kF16, "tan"},
+        BuiltinData{wgsl::BuiltinFn::kTanh, CallParamType::kF32, "tanh"},
+        BuiltinData{wgsl::BuiltinFn::kTanh, CallParamType::kF16, "tanh"},
+        BuiltinData{wgsl::BuiltinFn::kTrunc, CallParamType::kF32, "trunc"},
+        BuiltinData{wgsl::BuiltinFn::kTrunc, CallParamType::kF16, "trunc"},
         /* Integer built-in */
-        BuiltinData{core::BuiltinFn::kAbs, CallParamType::kU32, "abs"},
-        BuiltinData{core::BuiltinFn::kClamp, CallParamType::kU32, "clamp"},
-        BuiltinData{core::BuiltinFn::kCountLeadingZeros, CallParamType::kU32, "clz"},
-        BuiltinData{core::BuiltinFn::kCountOneBits, CallParamType::kU32, "popcount"},
-        BuiltinData{core::BuiltinFn::kCountTrailingZeros, CallParamType::kU32, "ctz"},
-        BuiltinData{core::BuiltinFn::kExtractBits, CallParamType::kU32, "extract_bits"},
-        BuiltinData{core::BuiltinFn::kInsertBits, CallParamType::kU32, "insert_bits"},
-        BuiltinData{core::BuiltinFn::kMax, CallParamType::kU32, "max"},
-        BuiltinData{core::BuiltinFn::kMin, CallParamType::kU32, "min"},
-        BuiltinData{core::BuiltinFn::kReverseBits, CallParamType::kU32, "reverse_bits"},
-        BuiltinData{core::BuiltinFn::kRound, CallParamType::kU32, "rint"},
+        BuiltinData{wgsl::BuiltinFn::kAbs, CallParamType::kU32, "abs"},
+        BuiltinData{wgsl::BuiltinFn::kClamp, CallParamType::kU32, "clamp"},
+        BuiltinData{wgsl::BuiltinFn::kCountLeadingZeros, CallParamType::kU32, "clz"},
+        BuiltinData{wgsl::BuiltinFn::kCountOneBits, CallParamType::kU32, "popcount"},
+        BuiltinData{wgsl::BuiltinFn::kCountTrailingZeros, CallParamType::kU32, "ctz"},
+        BuiltinData{wgsl::BuiltinFn::kExtractBits, CallParamType::kU32, "extract_bits"},
+        BuiltinData{wgsl::BuiltinFn::kInsertBits, CallParamType::kU32, "insert_bits"},
+        BuiltinData{wgsl::BuiltinFn::kMax, CallParamType::kU32, "max"},
+        BuiltinData{wgsl::BuiltinFn::kMin, CallParamType::kU32, "min"},
+        BuiltinData{wgsl::BuiltinFn::kReverseBits, CallParamType::kU32, "reverse_bits"},
+        BuiltinData{wgsl::BuiltinFn::kRound, CallParamType::kU32, "rint"},
         /* Matrix built-in */
-        BuiltinData{core::BuiltinFn::kDeterminant, CallParamType::kF32, "determinant"},
-        BuiltinData{core::BuiltinFn::kTranspose, CallParamType::kF32, "transpose"},
+        BuiltinData{wgsl::BuiltinFn::kDeterminant, CallParamType::kF32, "determinant"},
+        BuiltinData{wgsl::BuiltinFn::kTranspose, CallParamType::kF32, "transpose"},
         /* Vector built-in */
-        BuiltinData{core::BuiltinFn::kDot, CallParamType::kF32, "dot"},
+        BuiltinData{wgsl::BuiltinFn::kDot, CallParamType::kF32, "dot"},
         /* Derivate built-in */
-        BuiltinData{core::BuiltinFn::kDpdx, CallParamType::kF32, "dfdx"},
-        BuiltinData{core::BuiltinFn::kDpdxCoarse, CallParamType::kF32, "dfdx"},
-        BuiltinData{core::BuiltinFn::kDpdxFine, CallParamType::kF32, "dfdx"},
-        BuiltinData{core::BuiltinFn::kDpdy, CallParamType::kF32, "dfdy"},
-        BuiltinData{core::BuiltinFn::kDpdyCoarse, CallParamType::kF32, "dfdy"},
-        BuiltinData{core::BuiltinFn::kDpdyFine, CallParamType::kF32, "dfdy"},
-        BuiltinData{core::BuiltinFn::kFwidth, CallParamType::kF32, "fwidth"},
-        BuiltinData{core::BuiltinFn::kFwidthCoarse, CallParamType::kF32, "fwidth"},
-        BuiltinData{core::BuiltinFn::kFwidthFine, CallParamType::kF32, "fwidth"},
+        BuiltinData{wgsl::BuiltinFn::kDpdx, CallParamType::kF32, "dfdx"},
+        BuiltinData{wgsl::BuiltinFn::kDpdxCoarse, CallParamType::kF32, "dfdx"},
+        BuiltinData{wgsl::BuiltinFn::kDpdxFine, CallParamType::kF32, "dfdx"},
+        BuiltinData{wgsl::BuiltinFn::kDpdy, CallParamType::kF32, "dfdy"},
+        BuiltinData{wgsl::BuiltinFn::kDpdyCoarse, CallParamType::kF32, "dfdy"},
+        BuiltinData{wgsl::BuiltinFn::kDpdyFine, CallParamType::kF32, "dfdy"},
+        BuiltinData{wgsl::BuiltinFn::kFwidth, CallParamType::kF32, "fwidth"},
+        BuiltinData{wgsl::BuiltinFn::kFwidthCoarse, CallParamType::kF32, "fwidth"},
+        BuiltinData{wgsl::BuiltinFn::kFwidthFine, CallParamType::kF32, "fwidth"},
         /* Data packing builtin */
-        BuiltinData{core::BuiltinFn::kPack4X8Snorm, CallParamType::kF32, "pack_float_to_snorm4x8"},
-        BuiltinData{core::BuiltinFn::kPack4X8Unorm, CallParamType::kF32, "pack_float_to_unorm4x8"},
-        BuiltinData{core::BuiltinFn::kPack2X16Snorm, CallParamType::kF32,
+        BuiltinData{wgsl::BuiltinFn::kPack4X8Snorm, CallParamType::kF32, "pack_float_to_snorm4x8"},
+        BuiltinData{wgsl::BuiltinFn::kPack4X8Unorm, CallParamType::kF32, "pack_float_to_unorm4x8"},
+        BuiltinData{wgsl::BuiltinFn::kPack2X16Snorm, CallParamType::kF32,
                     "pack_float_to_snorm2x16"},
-        BuiltinData{core::BuiltinFn::kPack2X16Unorm, CallParamType::kF32,
+        BuiltinData{wgsl::BuiltinFn::kPack2X16Unorm, CallParamType::kF32,
                     "pack_float_to_unorm2x16"},
         /* Data unpacking builtin */
-        BuiltinData{core::BuiltinFn::kUnpack4X8Snorm, CallParamType::kU32,
+        BuiltinData{wgsl::BuiltinFn::kUnpack4X8Snorm, CallParamType::kU32,
                     "unpack_snorm4x8_to_float"},
-        BuiltinData{core::BuiltinFn::kUnpack4X8Unorm, CallParamType::kU32,
+        BuiltinData{wgsl::BuiltinFn::kUnpack4X8Unorm, CallParamType::kU32,
                     "unpack_unorm4x8_to_float"},
-        BuiltinData{core::BuiltinFn::kUnpack2X16Snorm, CallParamType::kU32,
+        BuiltinData{wgsl::BuiltinFn::kUnpack2X16Snorm, CallParamType::kU32,
                     "unpack_snorm2x16_to_float"},
-        BuiltinData{core::BuiltinFn::kUnpack2X16Unorm, CallParamType::kU32,
+        BuiltinData{wgsl::BuiltinFn::kUnpack2X16Unorm, CallParamType::kU32,
                     "unpack_unorm2x16_to_float"}));
 
 TEST_F(MslASTPrinterTest, Builtin_Call) {

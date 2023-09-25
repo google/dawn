@@ -1178,7 +1178,7 @@ INSTANTIATE_TEST_SUITE_P(Functions,
 namespace resolve_to_builtin_func {
 
 using ResolverDependencyGraphResolveToBuiltinFn =
-    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, core::BuiltinFn>>;
+    ResolverDependencyGraphTestWithParam<std::tuple<SymbolUseKind, wgsl::BuiltinFn>>;
 
 TEST_P(ResolverDependencyGraphResolveToBuiltinFn, Resolve) {
     const auto use = std::get<0>(GetParam());
@@ -1197,17 +1197,17 @@ TEST_P(ResolverDependencyGraphResolveToBuiltinFn, Resolve) {
 INSTANTIATE_TEST_SUITE_P(Types,
                          ResolverDependencyGraphResolveToBuiltinFn,
                          testing::Combine(testing::ValuesIn(kTypeUseKinds),
-                                          testing::ValuesIn(core::kBuiltinFns)));
+                                          testing::ValuesIn(wgsl::kBuiltinFns)));
 
 INSTANTIATE_TEST_SUITE_P(Values,
                          ResolverDependencyGraphResolveToBuiltinFn,
                          testing::Combine(testing::ValuesIn(kValueUseKinds),
-                                          testing::ValuesIn(core::kBuiltinFns)));
+                                          testing::ValuesIn(wgsl::kBuiltinFns)));
 
 INSTANTIATE_TEST_SUITE_P(Functions,
                          ResolverDependencyGraphResolveToBuiltinFn,
                          testing::Combine(testing::ValuesIn(kFuncUseKinds),
-                                          testing::ValuesIn(core::kBuiltinFns)));
+                                          testing::ValuesIn(wgsl::kBuiltinFns)));
 
 }  // namespace resolve_to_builtin_func
 

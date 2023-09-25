@@ -26,11 +26,13 @@ load("@bazel_skylib//lib:selects.bzl", "selects")
 cc_library(
   name = "wgsl",
   srcs = [
+    "builtin_fn.cc",
     "diagnostic_rule.cc",
     "diagnostic_severity.cc",
     "extension.cc",
   ],
   hdrs = [
+    "builtin_fn.h",
     "diagnostic_rule.h",
     "diagnostic_severity.h",
     "extension.h",
@@ -74,6 +76,7 @@ cc_library(
     "//src/tint/lang/wgsl/helpers:test",
     "//src/tint/lang/wgsl/program",
     "//src/tint/lang/wgsl/reader",
+    "//src/tint/lang/wgsl/reader/lower",
     "//src/tint/lang/wgsl/reader/program_to_ir",
     "//src/tint/lang/wgsl/resolver",
     "//src/tint/lang/wgsl/sem",

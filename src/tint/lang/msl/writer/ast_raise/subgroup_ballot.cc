@@ -66,7 +66,7 @@ struct SubgroupBallot::State {
                 // If this is a call to a `subgroupBallot()` builtin, replace it with a call to the
                 // helper function and make a note of the function that we are in.
                 auto* builtin = call->Target()->As<sem::BuiltinFn>();
-                if (builtin && builtin->Fn() == core::BuiltinFn::kSubgroupBallot) {
+                if (builtin && builtin->Fn() == wgsl::BuiltinFn::kSubgroupBallot) {
                     ctx.Replace(call->Declaration(), b.Call(GetHelper()));
                     ballot_callers.Add(call->Stmt()->Function());
                     made_changes = true;

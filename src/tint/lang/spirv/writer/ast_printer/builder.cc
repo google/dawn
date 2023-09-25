@@ -94,23 +94,23 @@ const core::type::Matrix* GetNestedMatrixType(const core::type::Type* type) {
 
 uint32_t builtin_to_glsl_method(const sem::BuiltinFn* builtin) {
     switch (builtin->Fn()) {
-        case core::BuiltinFn::kAcos:
+        case wgsl::BuiltinFn::kAcos:
             return GLSLstd450Acos;
-        case core::BuiltinFn::kAcosh:
+        case wgsl::BuiltinFn::kAcosh:
             return GLSLstd450Acosh;
-        case core::BuiltinFn::kAsin:
+        case wgsl::BuiltinFn::kAsin:
             return GLSLstd450Asin;
-        case core::BuiltinFn::kAsinh:
+        case wgsl::BuiltinFn::kAsinh:
             return GLSLstd450Asinh;
-        case core::BuiltinFn::kAtan:
+        case wgsl::BuiltinFn::kAtan:
             return GLSLstd450Atan;
-        case core::BuiltinFn::kAtan2:
+        case wgsl::BuiltinFn::kAtan2:
             return GLSLstd450Atan2;
-        case core::BuiltinFn::kAtanh:
+        case wgsl::BuiltinFn::kAtanh:
             return GLSLstd450Atanh;
-        case core::BuiltinFn::kCeil:
+        case wgsl::BuiltinFn::kCeil:
             return GLSLstd450Ceil;
-        case core::BuiltinFn::kClamp:
+        case wgsl::BuiltinFn::kClamp:
             if (builtin->ReturnType()->is_float_scalar_or_vector()) {
                 return GLSLstd450NClamp;
             } else if (builtin->ReturnType()->is_unsigned_integer_scalar_or_vector()) {
@@ -118,43 +118,43 @@ uint32_t builtin_to_glsl_method(const sem::BuiltinFn* builtin) {
             } else {
                 return GLSLstd450SClamp;
             }
-        case core::BuiltinFn::kCos:
+        case wgsl::BuiltinFn::kCos:
             return GLSLstd450Cos;
-        case core::BuiltinFn::kCosh:
+        case wgsl::BuiltinFn::kCosh:
             return GLSLstd450Cosh;
-        case core::BuiltinFn::kCross:
+        case wgsl::BuiltinFn::kCross:
             return GLSLstd450Cross;
-        case core::BuiltinFn::kDegrees:
+        case wgsl::BuiltinFn::kDegrees:
             return GLSLstd450Degrees;
-        case core::BuiltinFn::kDeterminant:
+        case wgsl::BuiltinFn::kDeterminant:
             return GLSLstd450Determinant;
-        case core::BuiltinFn::kDistance:
+        case wgsl::BuiltinFn::kDistance:
             return GLSLstd450Distance;
-        case core::BuiltinFn::kExp:
+        case wgsl::BuiltinFn::kExp:
             return GLSLstd450Exp;
-        case core::BuiltinFn::kExp2:
+        case wgsl::BuiltinFn::kExp2:
             return GLSLstd450Exp2;
-        case core::BuiltinFn::kFaceForward:
+        case wgsl::BuiltinFn::kFaceForward:
             return GLSLstd450FaceForward;
-        case core::BuiltinFn::kFloor:
+        case wgsl::BuiltinFn::kFloor:
             return GLSLstd450Floor;
-        case core::BuiltinFn::kFma:
+        case wgsl::BuiltinFn::kFma:
             return GLSLstd450Fma;
-        case core::BuiltinFn::kFract:
+        case wgsl::BuiltinFn::kFract:
             return GLSLstd450Fract;
-        case core::BuiltinFn::kFrexp:
+        case wgsl::BuiltinFn::kFrexp:
             return GLSLstd450FrexpStruct;
-        case core::BuiltinFn::kInverseSqrt:
+        case wgsl::BuiltinFn::kInverseSqrt:
             return GLSLstd450InverseSqrt;
-        case core::BuiltinFn::kLdexp:
+        case wgsl::BuiltinFn::kLdexp:
             return GLSLstd450Ldexp;
-        case core::BuiltinFn::kLength:
+        case wgsl::BuiltinFn::kLength:
             return GLSLstd450Length;
-        case core::BuiltinFn::kLog:
+        case wgsl::BuiltinFn::kLog:
             return GLSLstd450Log;
-        case core::BuiltinFn::kLog2:
+        case wgsl::BuiltinFn::kLog2:
             return GLSLstd450Log2;
-        case core::BuiltinFn::kMax:
+        case wgsl::BuiltinFn::kMax:
             if (builtin->ReturnType()->is_float_scalar_or_vector()) {
                 return GLSLstd450NMax;
             } else if (builtin->ReturnType()->is_unsigned_integer_scalar_or_vector()) {
@@ -162,7 +162,7 @@ uint32_t builtin_to_glsl_method(const sem::BuiltinFn* builtin) {
             } else {
                 return GLSLstd450SMax;
             }
-        case core::BuiltinFn::kMin:
+        case wgsl::BuiltinFn::kMin:
             if (builtin->ReturnType()->is_float_scalar_or_vector()) {
                 return GLSLstd450NMin;
             } else if (builtin->ReturnType()->is_unsigned_integer_scalar_or_vector()) {
@@ -170,63 +170,63 @@ uint32_t builtin_to_glsl_method(const sem::BuiltinFn* builtin) {
             } else {
                 return GLSLstd450SMin;
             }
-        case core::BuiltinFn::kMix:
+        case wgsl::BuiltinFn::kMix:
             return GLSLstd450FMix;
-        case core::BuiltinFn::kModf:
+        case wgsl::BuiltinFn::kModf:
             return GLSLstd450ModfStruct;
-        case core::BuiltinFn::kNormalize:
+        case wgsl::BuiltinFn::kNormalize:
             return GLSLstd450Normalize;
-        case core::BuiltinFn::kPack4X8Snorm:
+        case wgsl::BuiltinFn::kPack4X8Snorm:
             return GLSLstd450PackSnorm4x8;
-        case core::BuiltinFn::kPack4X8Unorm:
+        case wgsl::BuiltinFn::kPack4X8Unorm:
             return GLSLstd450PackUnorm4x8;
-        case core::BuiltinFn::kPack2X16Snorm:
+        case wgsl::BuiltinFn::kPack2X16Snorm:
             return GLSLstd450PackSnorm2x16;
-        case core::BuiltinFn::kPack2X16Unorm:
+        case wgsl::BuiltinFn::kPack2X16Unorm:
             return GLSLstd450PackUnorm2x16;
-        case core::BuiltinFn::kPack2X16Float:
+        case wgsl::BuiltinFn::kPack2X16Float:
             return GLSLstd450PackHalf2x16;
-        case core::BuiltinFn::kPow:
+        case wgsl::BuiltinFn::kPow:
             return GLSLstd450Pow;
-        case core::BuiltinFn::kRadians:
+        case wgsl::BuiltinFn::kRadians:
             return GLSLstd450Radians;
-        case core::BuiltinFn::kReflect:
+        case wgsl::BuiltinFn::kReflect:
             return GLSLstd450Reflect;
-        case core::BuiltinFn::kRefract:
+        case wgsl::BuiltinFn::kRefract:
             return GLSLstd450Refract;
-        case core::BuiltinFn::kRound:
+        case wgsl::BuiltinFn::kRound:
             return GLSLstd450RoundEven;
-        case core::BuiltinFn::kSign:
+        case wgsl::BuiltinFn::kSign:
             if (builtin->ReturnType()->is_signed_integer_scalar_or_vector()) {
                 return GLSLstd450SSign;
             } else {
                 return GLSLstd450FSign;
             }
-        case core::BuiltinFn::kSin:
+        case wgsl::BuiltinFn::kSin:
             return GLSLstd450Sin;
-        case core::BuiltinFn::kSinh:
+        case wgsl::BuiltinFn::kSinh:
             return GLSLstd450Sinh;
-        case core::BuiltinFn::kSmoothstep:
+        case wgsl::BuiltinFn::kSmoothstep:
             return GLSLstd450SmoothStep;
-        case core::BuiltinFn::kSqrt:
+        case wgsl::BuiltinFn::kSqrt:
             return GLSLstd450Sqrt;
-        case core::BuiltinFn::kStep:
+        case wgsl::BuiltinFn::kStep:
             return GLSLstd450Step;
-        case core::BuiltinFn::kTan:
+        case wgsl::BuiltinFn::kTan:
             return GLSLstd450Tan;
-        case core::BuiltinFn::kTanh:
+        case wgsl::BuiltinFn::kTanh:
             return GLSLstd450Tanh;
-        case core::BuiltinFn::kTrunc:
+        case wgsl::BuiltinFn::kTrunc:
             return GLSLstd450Trunc;
-        case core::BuiltinFn::kUnpack4X8Snorm:
+        case wgsl::BuiltinFn::kUnpack4X8Snorm:
             return GLSLstd450UnpackSnorm4x8;
-        case core::BuiltinFn::kUnpack4X8Unorm:
+        case wgsl::BuiltinFn::kUnpack4X8Unorm:
             return GLSLstd450UnpackUnorm4x8;
-        case core::BuiltinFn::kUnpack2X16Snorm:
+        case wgsl::BuiltinFn::kUnpack2X16Snorm:
             return GLSLstd450UnpackSnorm2x16;
-        case core::BuiltinFn::kUnpack2X16Unorm:
+        case wgsl::BuiltinFn::kUnpack2X16Unorm:
             return GLSLstd450UnpackUnorm2x16;
-        case core::BuiltinFn::kUnpack2X16Float:
+        case wgsl::BuiltinFn::kUnpack2X16Float:
             return GLSLstd450UnpackHalf2x16;
         default:
             break;
@@ -2329,21 +2329,21 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::BuiltinF
     };
 
     switch (builtin->Fn()) {
-        case core::BuiltinFn::kAny:
+        case wgsl::BuiltinFn::kAny:
             if (builtin->Parameters()[0]->Type()->Is<core::type::Bool>()) {
                 // any(v: bool) just resolves to v.
                 return get_arg_as_value_id(0);
             }
             op = spv::Op::OpAny;
             break;
-        case core::BuiltinFn::kAll:
+        case wgsl::BuiltinFn::kAll:
             if (builtin->Parameters()[0]->Type()->Is<core::type::Bool>()) {
                 // all(v: bool) just resolves to v.
                 return get_arg_as_value_id(0);
             }
             op = spv::Op::OpAll;
             break;
-        case core::BuiltinFn::kArrayLength: {
+        case wgsl::BuiltinFn::kArrayLength: {
             auto* address_of = call->Arguments()[0]->Declaration()->As<ast::UnaryOpExpression>();
             if (!address_of || address_of->op != core::UnaryOp::kAddressOf) {
                 TINT_ICE() << "arrayLength() expected pointer to member access, got " +
@@ -2380,10 +2380,10 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::BuiltinF
             }
             return result_id;
         }
-        case core::BuiltinFn::kCountOneBits:
+        case wgsl::BuiltinFn::kCountOneBits:
             op = spv::Op::OpBitCount;
             break;
-        case core::BuiltinFn::kDot: {
+        case wgsl::BuiltinFn::kDot: {
             op = spv::Op::OpDot;
             auto* vec_ty = builtin->Parameters()[0]->Type()->As<core::type::Vector>();
             if (vec_ty->type()->is_integer_scalar()) {
@@ -2424,42 +2424,42 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::BuiltinF
             }
             break;
         }
-        case core::BuiltinFn::kDpdx:
+        case wgsl::BuiltinFn::kDpdx:
             op = spv::Op::OpDPdx;
             break;
-        case core::BuiltinFn::kDpdxCoarse:
+        case wgsl::BuiltinFn::kDpdxCoarse:
             op = spv::Op::OpDPdxCoarse;
             break;
-        case core::BuiltinFn::kDpdxFine:
+        case wgsl::BuiltinFn::kDpdxFine:
             op = spv::Op::OpDPdxFine;
             break;
-        case core::BuiltinFn::kDpdy:
+        case wgsl::BuiltinFn::kDpdy:
             op = spv::Op::OpDPdy;
             break;
-        case core::BuiltinFn::kDpdyCoarse:
+        case wgsl::BuiltinFn::kDpdyCoarse:
             op = spv::Op::OpDPdyCoarse;
             break;
-        case core::BuiltinFn::kDpdyFine:
+        case wgsl::BuiltinFn::kDpdyFine:
             op = spv::Op::OpDPdyFine;
             break;
-        case core::BuiltinFn::kExtractBits:
+        case wgsl::BuiltinFn::kExtractBits:
             op = builtin->Parameters()[0]->Type()->is_unsigned_integer_scalar_or_vector()
                      ? spv::Op::OpBitFieldUExtract
                      : spv::Op::OpBitFieldSExtract;
             break;
-        case core::BuiltinFn::kFwidth:
+        case wgsl::BuiltinFn::kFwidth:
             op = spv::Op::OpFwidth;
             break;
-        case core::BuiltinFn::kFwidthCoarse:
+        case wgsl::BuiltinFn::kFwidthCoarse:
             op = spv::Op::OpFwidthCoarse;
             break;
-        case core::BuiltinFn::kFwidthFine:
+        case wgsl::BuiltinFn::kFwidthFine:
             op = spv::Op::OpFwidthFine;
             break;
-        case core::BuiltinFn::kInsertBits:
+        case wgsl::BuiltinFn::kInsertBits:
             op = spv::Op::OpBitFieldInsert;
             break;
-        case core::BuiltinFn::kMix: {
+        case wgsl::BuiltinFn::kMix: {
             auto std450 = Operand(GetGLSLstd450Import());
 
             auto a_id = get_arg_as_value_id(0);
@@ -2486,13 +2486,13 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::BuiltinF
             }
             return result_id;
         }
-        case core::BuiltinFn::kQuantizeToF16:
+        case wgsl::BuiltinFn::kQuantizeToF16:
             op = spv::Op::OpQuantizeToF16;
             break;
-        case core::BuiltinFn::kReverseBits:
+        case wgsl::BuiltinFn::kReverseBits:
             op = spv::Op::OpBitReverse;
             break;
-        case core::BuiltinFn::kSelect: {
+        case wgsl::BuiltinFn::kSelect: {
             // Note: Argument order is different in WGSL and SPIR-V
             auto cond_id = get_arg_as_value_id(2);
             auto true_id = get_arg_as_value_id(1);
@@ -2524,10 +2524,10 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::BuiltinF
             }
             return result_id;
         }
-        case core::BuiltinFn::kTranspose:
+        case wgsl::BuiltinFn::kTranspose:
             op = spv::Op::OpTranspose;
             break;
-        case core::BuiltinFn::kAbs:
+        case wgsl::BuiltinFn::kAbs:
             if (builtin->ReturnType()->is_unsigned_integer_scalar_or_vector()) {
                 // abs() only operates on *signed* integers.
                 // This is a no-op for unsigned integers.
@@ -2539,7 +2539,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::BuiltinF
                 glsl_std450(GLSLstd450SAbs);
             }
             break;
-        case core::BuiltinFn::kDot4I8Packed: {
+        case wgsl::BuiltinFn::kDot4I8Packed: {
             auto first_param_id = get_arg_as_value_id(0);
             auto second_param_id = get_arg_as_value_id(1);
             if (!push_function_inst(spv::Op::OpSDotKHR,
@@ -2551,7 +2551,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::BuiltinF
             }
             return result_id;
         }
-        case core::BuiltinFn::kDot4U8Packed: {
+        case wgsl::BuiltinFn::kDot4U8Packed: {
             auto first_param_id = get_arg_as_value_id(0);
             auto second_param_id = get_arg_as_value_id(1);
             if (!push_function_inst(spv::Op::OpUDotKHR,
@@ -2563,7 +2563,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::BuiltinF
             }
             return result_id;
         }
-        case core::BuiltinFn::kSubgroupBallot: {
+        case wgsl::BuiltinFn::kSubgroupBallot: {
             module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
             if (!push_function_inst(
                     spv::Op::OpGroupNonUniformBallot,
@@ -2574,7 +2574,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::BuiltinF
             }
             return result_id;
         }
-        case core::BuiltinFn::kSubgroupBroadcast: {
+        case wgsl::BuiltinFn::kSubgroupBroadcast: {
             module_.PushCapability(SpvCapabilityGroupNonUniformBallot);
             auto first_param_id = get_arg_as_value_id(0);
             auto second_param_id = get_arg_as_value_id(1);
@@ -2778,7 +2778,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     };
 
     switch (builtin->Fn()) {
-        case core::BuiltinFn::kTextureDimensions: {
+        case wgsl::BuiltinFn::kTextureDimensions: {
             // Number of returned elements from OpImageQuerySize[Lod] may not match
             // those of textureDimensions().
             // This might be due to an extra vector scalar describing the number of
@@ -2823,7 +2823,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             }
             break;
         }
-        case core::BuiltinFn::kTextureNumLayers: {
+        case wgsl::BuiltinFn::kTextureNumLayers: {
             uint32_t spirv_dims = 0;
             switch (texture_type->dim()) {
                 default:
@@ -2853,19 +2853,19 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             }
             break;
         }
-        case core::BuiltinFn::kTextureNumLevels: {
+        case wgsl::BuiltinFn::kTextureNumLevels: {
             op = spv::Op::OpImageQueryLevels;
             append_result_type_and_id_to_spirv_params();
             spirv_params.emplace_back(gen_arg(Usage::kTexture));
             break;
         }
-        case core::BuiltinFn::kTextureNumSamples: {
+        case wgsl::BuiltinFn::kTextureNumSamples: {
             op = spv::Op::OpImageQuerySamples;
             append_result_type_and_id_to_spirv_params();
             spirv_params.emplace_back(gen_arg(Usage::kTexture));
             break;
         }
-        case core::BuiltinFn::kTextureLoad: {
+        case wgsl::BuiltinFn::kTextureLoad: {
             op = texture_type->Is<core::type::StorageTexture>() ? spv::Op::OpImageRead
                                                                 : spv::Op::OpImageFetch;
             append_result_type_and_id_to_spirv_params_for_read();
@@ -2885,7 +2885,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
 
             break;
         }
-        case core::BuiltinFn::kTextureStore: {
+        case wgsl::BuiltinFn::kTextureStore: {
             op = spv::Op::OpImageWrite;
             spirv_params.emplace_back(gen_arg(Usage::kTexture));
             if (!append_coords_to_spirv_params()) {
@@ -2894,7 +2894,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             spirv_params.emplace_back(gen_arg(Usage::kValue));
             break;
         }
-        case core::BuiltinFn::kTextureGather: {
+        case wgsl::BuiltinFn::kTextureGather: {
             op = spv::Op::OpImageGather;
             append_result_type_and_id_to_spirv_params();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -2908,7 +2908,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             }
             break;
         }
-        case core::BuiltinFn::kTextureGatherCompare: {
+        case wgsl::BuiltinFn::kTextureGatherCompare: {
             op = spv::Op::OpImageDrefGather;
             append_result_type_and_id_to_spirv_params();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -2917,7 +2917,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             spirv_params.emplace_back(gen_arg(Usage::kDepthRef));
             break;
         }
-        case core::BuiltinFn::kTextureSample: {
+        case wgsl::BuiltinFn::kTextureSample: {
             op = spv::Op::OpImageSampleImplicitLod;
             append_result_type_and_id_to_spirv_params_for_read();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -2925,7 +2925,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             }
             break;
         }
-        case core::BuiltinFn::kTextureSampleBias: {
+        case wgsl::BuiltinFn::kTextureSampleBias: {
             op = spv::Op::OpImageSampleImplicitLod;
             append_result_type_and_id_to_spirv_params_for_read();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -2935,7 +2935,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
                 ImageOperand{SpvImageOperandsBiasMask, gen_arg(Usage::kBias)});
             break;
         }
-        case core::BuiltinFn::kTextureSampleLevel: {
+        case wgsl::BuiltinFn::kTextureSampleLevel: {
             op = spv::Op::OpImageSampleExplicitLod;
             append_result_type_and_id_to_spirv_params_for_read();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -2963,7 +2963,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             image_operands.emplace_back(ImageOperand{SpvImageOperandsLodMask, level});
             break;
         }
-        case core::BuiltinFn::kTextureSampleGrad: {
+        case wgsl::BuiltinFn::kTextureSampleGrad: {
             op = spv::Op::OpImageSampleExplicitLod;
             append_result_type_and_id_to_spirv_params_for_read();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -2975,7 +2975,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
                 ImageOperand{SpvImageOperandsGradMask, gen_arg(Usage::kDdy)});
             break;
         }
-        case core::BuiltinFn::kTextureSampleCompare: {
+        case wgsl::BuiltinFn::kTextureSampleCompare: {
             op = spv::Op::OpImageSampleDrefImplicitLod;
             append_result_type_and_id_to_spirv_params();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -2984,7 +2984,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
             spirv_params.emplace_back(gen_arg(Usage::kDepthRef));
             break;
         }
-        case core::BuiltinFn::kTextureSampleCompareLevel: {
+        case wgsl::BuiltinFn::kTextureSampleCompareLevel: {
             op = spv::Op::OpImageSampleDrefExplicitLod;
             append_result_type_and_id_to_spirv_params();
             if (!append_image_and_coords_to_spirv_params()) {
@@ -3039,17 +3039,17 @@ bool Builder::GenerateControlBarrierBuiltin(const sem::BuiltinFn* builtin) {
 
     // TODO(crbug.com/tint/661): Combine sequential barriers to a single
     // instruction.
-    if (builtin->Fn() == core::BuiltinFn::kWorkgroupBarrier) {
+    if (builtin->Fn() == wgsl::BuiltinFn::kWorkgroupBarrier) {
         execution = static_cast<uint32_t>(spv::Scope::Workgroup);
         memory = static_cast<uint32_t>(spv::Scope::Workgroup);
         semantics = static_cast<uint32_t>(spv::MemorySemanticsMask::AcquireRelease) |
                     static_cast<uint32_t>(spv::MemorySemanticsMask::WorkgroupMemory);
-    } else if (builtin->Fn() == core::BuiltinFn::kStorageBarrier) {
+    } else if (builtin->Fn() == wgsl::BuiltinFn::kStorageBarrier) {
         execution = static_cast<uint32_t>(spv::Scope::Workgroup);
         memory = static_cast<uint32_t>(spv::Scope::Workgroup);
         semantics = static_cast<uint32_t>(spv::MemorySemanticsMask::AcquireRelease) |
                     static_cast<uint32_t>(spv::MemorySemanticsMask::UniformMemory);
-    } else if (builtin->Fn() == core::BuiltinFn::kTextureBarrier) {
+    } else if (builtin->Fn() == wgsl::BuiltinFn::kTextureBarrier) {
         execution = static_cast<uint32_t>(spv::Scope::Workgroup);
         memory = static_cast<uint32_t>(spv::Scope::Workgroup);
         semantics = static_cast<uint32_t>(spv::MemorySemanticsMask::AcquireRelease) |
@@ -3125,7 +3125,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
     Operand semantics = Operand(semantics_id);
 
     switch (builtin->Fn()) {
-        case core::BuiltinFn::kAtomicLoad:
+        case wgsl::BuiltinFn::kAtomicLoad:
             return push_function_inst(spv::Op::OpAtomicLoad, {
                                                                  result_type,
                                                                  result_id,
@@ -3133,14 +3133,14 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                  memory,
                                                                  semantics,
                                                              });
-        case core::BuiltinFn::kAtomicStore:
+        case wgsl::BuiltinFn::kAtomicStore:
             return push_function_inst(spv::Op::OpAtomicStore, {
                                                                   pointer,
                                                                   memory,
                                                                   semantics,
                                                                   value,
                                                               });
-        case core::BuiltinFn::kAtomicAdd:
+        case wgsl::BuiltinFn::kAtomicAdd:
             return push_function_inst(spv::Op::OpAtomicIAdd, {
                                                                  result_type,
                                                                  result_id,
@@ -3149,7 +3149,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                  semantics,
                                                                  value,
                                                              });
-        case core::BuiltinFn::kAtomicSub:
+        case wgsl::BuiltinFn::kAtomicSub:
             return push_function_inst(spv::Op::OpAtomicISub, {
                                                                  result_type,
                                                                  result_id,
@@ -3158,7 +3158,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                  semantics,
                                                                  value,
                                                              });
-        case core::BuiltinFn::kAtomicMax:
+        case wgsl::BuiltinFn::kAtomicMax:
             return push_function_inst(
                 is_value_signed() ? spv::Op::OpAtomicSMax : spv::Op::OpAtomicUMax, {
                                                                                        result_type,
@@ -3168,7 +3168,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                                        semantics,
                                                                                        value,
                                                                                    });
-        case core::BuiltinFn::kAtomicMin:
+        case wgsl::BuiltinFn::kAtomicMin:
             return push_function_inst(
                 is_value_signed() ? spv::Op::OpAtomicSMin : spv::Op::OpAtomicUMin, {
                                                                                        result_type,
@@ -3178,7 +3178,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                                        semantics,
                                                                                        value,
                                                                                    });
-        case core::BuiltinFn::kAtomicAnd:
+        case wgsl::BuiltinFn::kAtomicAnd:
             return push_function_inst(spv::Op::OpAtomicAnd, {
                                                                 result_type,
                                                                 result_id,
@@ -3187,7 +3187,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                 semantics,
                                                                 value,
                                                             });
-        case core::BuiltinFn::kAtomicOr:
+        case wgsl::BuiltinFn::kAtomicOr:
             return push_function_inst(spv::Op::OpAtomicOr, {
                                                                result_type,
                                                                result_id,
@@ -3196,7 +3196,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                semantics,
                                                                value,
                                                            });
-        case core::BuiltinFn::kAtomicXor:
+        case wgsl::BuiltinFn::kAtomicXor:
             return push_function_inst(spv::Op::OpAtomicXor, {
                                                                 result_type,
                                                                 result_id,
@@ -3205,7 +3205,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                 semantics,
                                                                 value,
                                                             });
-        case core::BuiltinFn::kAtomicExchange:
+        case wgsl::BuiltinFn::kAtomicExchange:
             return push_function_inst(spv::Op::OpAtomicExchange, {
                                                                      result_type,
                                                                      result_id,
@@ -3214,7 +3214,7 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                      semantics,
                                                                      value,
                                                                  });
-        case core::BuiltinFn::kAtomicCompareExchangeWeak: {
+        case wgsl::BuiltinFn::kAtomicCompareExchangeWeak: {
             auto comparator = GenerateExpression(call->Arguments()[1]);
             if (comparator == 0) {
                 return false;

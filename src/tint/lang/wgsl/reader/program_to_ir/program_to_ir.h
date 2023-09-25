@@ -28,10 +28,9 @@ class Program;
 
 namespace tint::wgsl::reader {
 
-/// Builds an core::ir::Module from the given Program
+/// Builds a WGSL-dialect core::ir::Module from the given Program
 /// @param program the Program to use.
-/// @returns the `utiils::Result` of generating the IR. The result will contain the
-/// `core::ir::Module` on success, otherwise the `std::string` error.
+/// @returns the WGSL-dialect IR module.
 ///
 /// @note this assumes the `program.IsValid()`, and has had const-eval done so
 /// any abstract values have been calculated and converted into the relevant

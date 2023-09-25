@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_LANG_WGSL_READER_READER_H_
 #define SRC_TINT_LANG_WGSL_READER_READER_H_
 
+#include "src/tint/lang/core/ir/module.h"
 #include "src/tint/lang/wgsl/program/program.h"
 
 namespace tint::wgsl::reader {
@@ -25,7 +26,12 @@ namespace tint::wgsl::reader {
 /// `program.Diagnostics()` will describe the error.
 /// @param file the source file
 /// @returns the parsed program
-Program Parse(Source::File const* file);
+Program Parse(const Source::File* file);
+
+/// Parse a WGSL program from source, and return an IR module.
+/// @param file the input WGSL file
+/// @returns the resulting IR module, or failure
+Result<core::ir::Module> WgslToIR(const Source::File* file);
 
 }  // namespace tint::wgsl::reader
 

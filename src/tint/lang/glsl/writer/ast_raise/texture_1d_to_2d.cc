@@ -140,7 +140,7 @@ struct Texture1DTo2D::State {
                 return nullptr;
             }
 
-            if (builtin->Fn() == core::BuiltinFn::kTextureDimensions) {
+            if (builtin->Fn() == wgsl::BuiltinFn::kTextureDimensions) {
                 // If this textureDimensions() call is in a CallStatement, we can leave it
                 // unmodified since the return value will be dropped on the floor anyway.
                 if (call->Stmt()->Declaration()->Is<ast::CallStatement>()) {

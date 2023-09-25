@@ -17,9 +17,9 @@
 
 #include <string>
 
-#include "src/tint/lang/core/builtin_fn.h"
 #include "src/tint/lang/wgsl/ast/internal_attribute.h"
 #include "src/tint/lang/wgsl/ast/transform/transform.h"
+#include "src/tint/lang/wgsl/builtin_fn.h"
 
 namespace tint::spirv::reader {
 
@@ -41,7 +41,7 @@ class Atomics final : public Castable<Atomics, ast::transform::Transform> {
         /// @param pid the identifier of the program that owns this node
         /// @param nid the unique node identifier
         /// @param builtin the atomic builtin this stub represents
-        Stub(GenerationID pid, ast::NodeID nid, core::BuiltinFn builtin);
+        Stub(GenerationID pid, ast::NodeID nid, wgsl::BuiltinFn builtin);
         /// Destructor
         ~Stub() override;
 
@@ -55,7 +55,7 @@ class Atomics final : public Castable<Atomics, ast::transform::Transform> {
         const Stub* Clone(ast::CloneContext& ctx) const override;
 
         /// The type of the intrinsic
-        const core::BuiltinFn builtin;
+        const wgsl::BuiltinFn builtin;
     };
 
     /// @copydoc ast::transform::Transform::Apply

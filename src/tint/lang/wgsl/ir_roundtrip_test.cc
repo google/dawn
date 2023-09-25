@@ -31,28 +31,18 @@ class IRToProgramRoundtripTest : public helpers::IRProgramTest {
     void Test(std::string_view input_wgsl, std::string_view expected_wgsl) {
         auto input = tint::TrimSpace(input_wgsl);
         Source::File file("test.wgsl", std::string(input));
-        auto input_program = wgsl::reader::Parse(&file);
-        ASSERT_TRUE(input_program.IsValid()) << input_program.Diagnostics();
-
-        auto ir_module = wgsl::reader::ProgramToIR(input_program);
+        auto ir_module = wgsl::reader::WgslToIR(&file);
         ASSERT_TRUE(ir_module) << ir_module;
 
         tint::core::ir::Disassembler d{ir_module.Get()};
         auto disassembly = d.Disassemble();
 
-        auto output_program = wgsl::writer::IRToProgram(ir_module.Get());
-        if (!output_program.IsValid()) {
-            FAIL() << output_program.Diagnostics() << std::endl  //
-                   << "IR:" << std::endl                         //
-                   << disassembly << std::endl                   //
-                   << "AST:" << std::endl                        //
-                   << Program::printer(output_program) << std::endl;
+        auto output = wgsl::writer::WgslFromIR(ir_module.Get());
+        if (!output) {
+            FAIL() << output.Failure() << std::endl  //
+                   << "IR:" << std::endl             //
+                   << disassembly << std::endl;
         }
-
-        ASSERT_TRUE(output_program.IsValid()) << output_program.Diagnostics();
-
-        auto output = wgsl::writer::Generate(output_program, {});
-        ASSERT_TRUE(output) << output.Failure();
 
         auto expected = expected_wgsl.empty() ? input : tint::TrimSpace(expected_wgsl);
         auto got = tint::TrimSpace(output->wgsl);

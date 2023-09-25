@@ -55,7 +55,7 @@ using ResolverBuiltinTest = ResolverTest;
 
 struct BuiltinData {
     const char* name;
-    core::BuiltinFn builtin;
+    wgsl::BuiltinFn builtin;
 };
 
 inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
@@ -78,9 +78,9 @@ TEST_F(ResolverBuiltinTest, SameOverloadReturnsSameCallTarget) {
     // let a = select(1_i, 2_i, true);
     // let b = select(3_i, 4_i, false);
     // let c = select(5_u, 6_u, true);
-    auto* select_a = Call(core::BuiltinFn::kSelect, 1_i, 2_i, true);
-    auto* select_b = Call(core::BuiltinFn::kSelect, 3_i, 4_i, false);
-    auto* select_c = Call(core::BuiltinFn::kSelect, 5_u, 6_u, true);
+    auto* select_a = Call(wgsl::BuiltinFn::kSelect, 1_i, 2_i, true);
+    auto* select_b = Call(wgsl::BuiltinFn::kSelect, 3_i, 4_i, false);
+    auto* select_c = Call(wgsl::BuiltinFn::kSelect, 5_u, 6_u, true);
     WrapInFunction(Decl(Let("i", Expr(42_i))),  //
                    Decl(Let("a", select_a)),    //
                    Decl(Let("b", select_b)),    //
@@ -273,7 +273,7 @@ namespace float_builtin_tests {
 struct BuiltinDataWithParamNum {
     uint32_t args_number;
     const char* name;
-    core::BuiltinFn builtin;
+    wgsl::BuiltinFn builtin;
 };
 
 inline std::ostream& operator<<(std::ostream& out, BuiltinDataWithParamNum data) {
@@ -700,55 +700,55 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Vector_f16) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_FloatBuiltin_IdenticalType,
-    testing::Values(BuiltinDataWithParamNum{1, "abs", core::BuiltinFn::kAbs},
-                    BuiltinDataWithParamNum{1, "acos", core::BuiltinFn::kAcos},
-                    BuiltinDataWithParamNum{1, "acosh", core::BuiltinFn::kAcos},
-                    BuiltinDataWithParamNum{1, "asin", core::BuiltinFn::kAsin},
-                    BuiltinDataWithParamNum{1, "asinh", core::BuiltinFn::kAsin},
-                    BuiltinDataWithParamNum{1, "atan", core::BuiltinFn::kAtan},
-                    BuiltinDataWithParamNum{1, "atanh", core::BuiltinFn::kAtan},
-                    BuiltinDataWithParamNum{2, "atan2", core::BuiltinFn::kAtan2},
-                    BuiltinDataWithParamNum{1, "ceil", core::BuiltinFn::kCeil},
-                    BuiltinDataWithParamNum{3, "clamp", core::BuiltinFn::kClamp},
-                    BuiltinDataWithParamNum{1, "cos", core::BuiltinFn::kCos},
-                    BuiltinDataWithParamNum{1, "cosh", core::BuiltinFn::kCosh},
+    testing::Values(BuiltinDataWithParamNum{1, "abs", wgsl::BuiltinFn::kAbs},
+                    BuiltinDataWithParamNum{1, "acos", wgsl::BuiltinFn::kAcos},
+                    BuiltinDataWithParamNum{1, "acosh", wgsl::BuiltinFn::kAcos},
+                    BuiltinDataWithParamNum{1, "asin", wgsl::BuiltinFn::kAsin},
+                    BuiltinDataWithParamNum{1, "asinh", wgsl::BuiltinFn::kAsin},
+                    BuiltinDataWithParamNum{1, "atan", wgsl::BuiltinFn::kAtan},
+                    BuiltinDataWithParamNum{1, "atanh", wgsl::BuiltinFn::kAtan},
+                    BuiltinDataWithParamNum{2, "atan2", wgsl::BuiltinFn::kAtan2},
+                    BuiltinDataWithParamNum{1, "ceil", wgsl::BuiltinFn::kCeil},
+                    BuiltinDataWithParamNum{3, "clamp", wgsl::BuiltinFn::kClamp},
+                    BuiltinDataWithParamNum{1, "cos", wgsl::BuiltinFn::kCos},
+                    BuiltinDataWithParamNum{1, "cosh", wgsl::BuiltinFn::kCosh},
                     // cross: (vec3<T>, vec3<T>) -> vec3<T>
-                    BuiltinDataWithParamNum{1, "degrees", core::BuiltinFn::kDegrees},
+                    BuiltinDataWithParamNum{1, "degrees", wgsl::BuiltinFn::kDegrees},
                     // distance: (T, T) -> T, (vecN<T>, vecN<T>) -> T
-                    BuiltinDataWithParamNum{1, "exp", core::BuiltinFn::kExp},
-                    BuiltinDataWithParamNum{1, "exp2", core::BuiltinFn::kExp2},
+                    BuiltinDataWithParamNum{1, "exp", wgsl::BuiltinFn::kExp},
+                    BuiltinDataWithParamNum{1, "exp2", wgsl::BuiltinFn::kExp2},
                     // faceForward: (vecN<T>, vecN<T>, vecN<T>) -> vecN<T>
-                    BuiltinDataWithParamNum{1, "floor", core::BuiltinFn::kFloor},
-                    BuiltinDataWithParamNum{3, "fma", core::BuiltinFn::kFma},
-                    BuiltinDataWithParamNum{1, "fract", core::BuiltinFn::kFract},
+                    BuiltinDataWithParamNum{1, "floor", wgsl::BuiltinFn::kFloor},
+                    BuiltinDataWithParamNum{3, "fma", wgsl::BuiltinFn::kFma},
+                    BuiltinDataWithParamNum{1, "fract", wgsl::BuiltinFn::kFract},
                     // frexp
-                    BuiltinDataWithParamNum{1, "inverseSqrt", core::BuiltinFn::kInverseSqrt},
+                    BuiltinDataWithParamNum{1, "inverseSqrt", wgsl::BuiltinFn::kInverseSqrt},
                     // ldexp: (T, i32) -> T, (vecN<T>, vecN<i32>) -> vecN<T>
                     // length: (vecN<T>) -> T
-                    BuiltinDataWithParamNum{1, "log", core::BuiltinFn::kLog},
-                    BuiltinDataWithParamNum{1, "log2", core::BuiltinFn::kLog2},
-                    BuiltinDataWithParamNum{2, "max", core::BuiltinFn::kMax},
-                    BuiltinDataWithParamNum{2, "min", core::BuiltinFn::kMin},
+                    BuiltinDataWithParamNum{1, "log", wgsl::BuiltinFn::kLog},
+                    BuiltinDataWithParamNum{1, "log2", wgsl::BuiltinFn::kLog2},
+                    BuiltinDataWithParamNum{2, "max", wgsl::BuiltinFn::kMax},
+                    BuiltinDataWithParamNum{2, "min", wgsl::BuiltinFn::kMin},
                     // Note that `mix(vecN<f32>, vecN<f32>, f32) -> vecN<f32>` is not tested here.
-                    BuiltinDataWithParamNum{3, "mix", core::BuiltinFn::kMix},
+                    BuiltinDataWithParamNum{3, "mix", wgsl::BuiltinFn::kMix},
                     // modf
                     // normalize: (vecN<T>) -> vecN<T>
-                    BuiltinDataWithParamNum{2, "pow", core::BuiltinFn::kPow},
+                    BuiltinDataWithParamNum{2, "pow", wgsl::BuiltinFn::kPow},
                     // quantizeToF16 is not implemented yet.
-                    BuiltinDataWithParamNum{1, "radians", core::BuiltinFn::kRadians},
+                    BuiltinDataWithParamNum{1, "radians", wgsl::BuiltinFn::kRadians},
                     // reflect: (vecN<T>, vecN<T>) -> vecN<T>
                     // refract: (vecN<T>, vecN<T>, T) -> vecN<T>
-                    BuiltinDataWithParamNum{1, "round", core::BuiltinFn::kRound},
+                    BuiltinDataWithParamNum{1, "round", wgsl::BuiltinFn::kRound},
                     // saturate not implemented yet.
-                    BuiltinDataWithParamNum{1, "sign", core::BuiltinFn::kSign},
-                    BuiltinDataWithParamNum{1, "sin", core::BuiltinFn::kSin},
-                    BuiltinDataWithParamNum{1, "sinh", core::BuiltinFn::kSinh},
-                    BuiltinDataWithParamNum{3, "smoothstep", core::BuiltinFn::kSmoothstep},
-                    BuiltinDataWithParamNum{1, "sqrt", core::BuiltinFn::kSqrt},
-                    BuiltinDataWithParamNum{2, "step", core::BuiltinFn::kStep},
-                    BuiltinDataWithParamNum{1, "tan", core::BuiltinFn::kTan},
-                    BuiltinDataWithParamNum{1, "tanh", core::BuiltinFn::kTanh},
-                    BuiltinDataWithParamNum{1, "trunc", core::BuiltinFn::kTrunc}));
+                    BuiltinDataWithParamNum{1, "sign", wgsl::BuiltinFn::kSign},
+                    BuiltinDataWithParamNum{1, "sin", wgsl::BuiltinFn::kSin},
+                    BuiltinDataWithParamNum{1, "sinh", wgsl::BuiltinFn::kSinh},
+                    BuiltinDataWithParamNum{3, "smoothstep", wgsl::BuiltinFn::kSmoothstep},
+                    BuiltinDataWithParamNum{1, "sqrt", wgsl::BuiltinFn::kSqrt},
+                    BuiltinDataWithParamNum{2, "step", wgsl::BuiltinFn::kStep},
+                    BuiltinDataWithParamNum{1, "tan", wgsl::BuiltinFn::kTan},
+                    BuiltinDataWithParamNum{1, "tanh", wgsl::BuiltinFn::kTanh},
+                    BuiltinDataWithParamNum{1, "trunc", wgsl::BuiltinFn::kTrunc}));
 
 using ResolverBuiltinFloatTest = ResolverTest;
 
@@ -1430,7 +1430,7 @@ namespace integer_builtin_tests {
 struct BuiltinDataWithParamNum {
     uint32_t args_number;
     const char* name;
-    core::BuiltinFn builtin;
+    wgsl::BuiltinFn builtin;
 };
 
 inline std::ostream& operator<<(std::ostream& out, BuiltinDataWithParamNum data) {
@@ -1826,18 +1826,18 @@ INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_IntegerBuiltin_IdenticalType,
     testing::Values(
-        BuiltinDataWithParamNum{1, "abs", core::BuiltinFn::kAbs},
-        BuiltinDataWithParamNum{3, "clamp", core::BuiltinFn::kClamp},
-        BuiltinDataWithParamNum{1, "countLeadingZeros", core::BuiltinFn::kCountLeadingZeros},
-        BuiltinDataWithParamNum{1, "countOneBits", core::BuiltinFn::kCountOneBits},
-        BuiltinDataWithParamNum{1, "countTrailingZeros", core::BuiltinFn::kCountTrailingZeros},
+        BuiltinDataWithParamNum{1, "abs", wgsl::BuiltinFn::kAbs},
+        BuiltinDataWithParamNum{3, "clamp", wgsl::BuiltinFn::kClamp},
+        BuiltinDataWithParamNum{1, "countLeadingZeros", wgsl::BuiltinFn::kCountLeadingZeros},
+        BuiltinDataWithParamNum{1, "countOneBits", wgsl::BuiltinFn::kCountOneBits},
+        BuiltinDataWithParamNum{1, "countTrailingZeros", wgsl::BuiltinFn::kCountTrailingZeros},
         // extractBits: (T, u32, u32) -> T
-        BuiltinDataWithParamNum{1, "firstLeadingBit", core::BuiltinFn::kFirstLeadingBit},
-        BuiltinDataWithParamNum{1, "firstTrailingBit", core::BuiltinFn::kFirstTrailingBit},
+        BuiltinDataWithParamNum{1, "firstLeadingBit", wgsl::BuiltinFn::kFirstLeadingBit},
+        BuiltinDataWithParamNum{1, "firstTrailingBit", wgsl::BuiltinFn::kFirstTrailingBit},
         // insertBits: (T, T, u32, u32) -> T
-        BuiltinDataWithParamNum{2, "max", core::BuiltinFn::kMax},
-        BuiltinDataWithParamNum{2, "min", core::BuiltinFn::kMin},
-        BuiltinDataWithParamNum{1, "reverseBits", core::BuiltinFn::kReverseBits}));
+        BuiltinDataWithParamNum{2, "max", wgsl::BuiltinFn::kMax},
+        BuiltinDataWithParamNum{2, "min", wgsl::BuiltinFn::kMin},
+        BuiltinDataWithParamNum{1, "reverseBits", wgsl::BuiltinFn::kReverseBits}));
 
 }  // namespace integer_builtin_tests
 
@@ -2576,8 +2576,8 @@ using ResolverBuiltinTest_DataPacking = ResolverTestWithParam<BuiltinData>;
 TEST_P(ResolverBuiltinTest_DataPacking, InferType) {
     auto param = GetParam();
 
-    bool pack4 = param.builtin == core::BuiltinFn::kPack4X8Snorm ||
-                 param.builtin == core::BuiltinFn::kPack4X8Unorm;
+    bool pack4 = param.builtin == wgsl::BuiltinFn::kPack4X8Snorm ||
+                 param.builtin == wgsl::BuiltinFn::kPack4X8Unorm;
 
     auto* call = pack4 ? Call(param.name, Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f))
                        : Call(param.name, Call<vec2<f32>>(1_f, 2_f));
@@ -2591,8 +2591,8 @@ TEST_P(ResolverBuiltinTest_DataPacking, InferType) {
 TEST_P(ResolverBuiltinTest_DataPacking, Error_IncorrectParamType) {
     auto param = GetParam();
 
-    bool pack4 = param.builtin == core::BuiltinFn::kPack4X8Snorm ||
-                 param.builtin == core::BuiltinFn::kPack4X8Unorm;
+    bool pack4 = param.builtin == wgsl::BuiltinFn::kPack4X8Snorm ||
+                 param.builtin == wgsl::BuiltinFn::kPack4X8Unorm;
 
     auto* call = pack4 ? Call(param.name, Call<vec4<i32>>(1_i, 2_i, 3_i, 4_i))
                        : Call(param.name, Call<vec2<i32>>(1_i, 2_i));
@@ -2617,8 +2617,8 @@ TEST_P(ResolverBuiltinTest_DataPacking, Error_NoParams) {
 TEST_P(ResolverBuiltinTest_DataPacking, Error_TooManyParams) {
     auto param = GetParam();
 
-    bool pack4 = param.builtin == core::BuiltinFn::kPack4X8Snorm ||
-                 param.builtin == core::BuiltinFn::kPack4X8Unorm;
+    bool pack4 = param.builtin == wgsl::BuiltinFn::kPack4X8Snorm ||
+                 param.builtin == wgsl::BuiltinFn::kPack4X8Unorm;
 
     auto* call = pack4 ? Call(param.name, Call<vec4<f32>>(1_f, 2_f, 3_f, 4_f), 1_f)
                        : Call(param.name, Call<vec2<f32>>(1_f, 2_f), 1_f);
@@ -2632,11 +2632,11 @@ TEST_P(ResolverBuiltinTest_DataPacking, Error_TooManyParams) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_DataPacking,
-    testing::Values(BuiltinData{"pack4x8snorm", core::BuiltinFn::kPack4X8Snorm},
-                    BuiltinData{"pack4x8unorm", core::BuiltinFn::kPack4X8Unorm},
-                    BuiltinData{"pack2x16snorm", core::BuiltinFn::kPack2X16Snorm},
-                    BuiltinData{"pack2x16unorm", core::BuiltinFn::kPack2X16Unorm},
-                    BuiltinData{"pack2x16float", core::BuiltinFn::kPack2X16Float}));
+    testing::Values(BuiltinData{"pack4x8snorm", wgsl::BuiltinFn::kPack4X8Snorm},
+                    BuiltinData{"pack4x8unorm", wgsl::BuiltinFn::kPack4X8Unorm},
+                    BuiltinData{"pack2x16snorm", wgsl::BuiltinFn::kPack2X16Snorm},
+                    BuiltinData{"pack2x16unorm", wgsl::BuiltinFn::kPack2X16Unorm},
+                    BuiltinData{"pack2x16float", wgsl::BuiltinFn::kPack2X16Float}));
 
 }  // namespace data_packing_builtin_tests
 
@@ -2647,8 +2647,8 @@ using ResolverBuiltinTest_DataUnpacking = ResolverTestWithParam<BuiltinData>;
 TEST_P(ResolverBuiltinTest_DataUnpacking, InferType) {
     auto param = GetParam();
 
-    bool pack4 = param.builtin == core::BuiltinFn::kUnpack4X8Snorm ||
-                 param.builtin == core::BuiltinFn::kUnpack4X8Unorm;
+    bool pack4 = param.builtin == wgsl::BuiltinFn::kUnpack4X8Snorm ||
+                 param.builtin == wgsl::BuiltinFn::kUnpack4X8Unorm;
 
     auto* call = Call(param.name, 1_u);
     WrapInFunction(call);
@@ -2666,11 +2666,11 @@ TEST_P(ResolverBuiltinTest_DataUnpacking, InferType) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_DataUnpacking,
-    testing::Values(BuiltinData{"unpack4x8snorm", core::BuiltinFn::kUnpack4X8Snorm},
-                    BuiltinData{"unpack4x8unorm", core::BuiltinFn::kUnpack4X8Unorm},
-                    BuiltinData{"unpack2x16snorm", core::BuiltinFn::kUnpack2X16Snorm},
-                    BuiltinData{"unpack2x16unorm", core::BuiltinFn::kUnpack2X16Unorm},
-                    BuiltinData{"unpack2x16float", core::BuiltinFn::kUnpack2X16Float}));
+    testing::Values(BuiltinData{"unpack4x8snorm", wgsl::BuiltinFn::kUnpack4X8Snorm},
+                    BuiltinData{"unpack4x8unorm", wgsl::BuiltinFn::kUnpack4X8Unorm},
+                    BuiltinData{"unpack2x16snorm", wgsl::BuiltinFn::kUnpack2X16Snorm},
+                    BuiltinData{"unpack2x16unorm", wgsl::BuiltinFn::kUnpack2X16Unorm},
+                    BuiltinData{"unpack2x16float", wgsl::BuiltinFn::kUnpack2X16Float}));
 
 }  // namespace data_unpacking_builtin_tests
 
@@ -2703,8 +2703,8 @@ TEST_P(ResolverBuiltinTest_Barrier, Error_TooManyParams) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_Barrier,
-    testing::Values(BuiltinData{"storageBarrier", core::BuiltinFn::kStorageBarrier},
-                    BuiltinData{"workgroupBarrier", core::BuiltinFn::kWorkgroupBarrier}));
+    testing::Values(BuiltinData{"storageBarrier", wgsl::BuiltinFn::kStorageBarrier},
+                    BuiltinData{"workgroupBarrier", wgsl::BuiltinFn::kWorkgroupBarrier}));
 
 }  // namespace synchronization_builtin_tests
 

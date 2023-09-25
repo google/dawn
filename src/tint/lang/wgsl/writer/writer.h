@@ -26,6 +26,9 @@
 namespace tint {
 class Program;
 }  // namespace tint
+namespace tint::core::ir {
+class Module;
+}  // namespace tint::core::ir
 
 namespace tint::wgsl::writer {
 
@@ -35,6 +38,11 @@ namespace tint::wgsl::writer {
 /// @param options the configuration options to use when generating WGSL
 /// @returns the resulting WGSL, or failure
 Result<Output> Generate(const Program& program, const Options& options);
+
+/// Generate WGSL from a core-dialect ir::Module.
+/// @param module the core-dialect ir::Module.
+/// @returns the resulting WGSL, or failure
+Result<Output> WgslFromIR(core::ir::Module& module);
 
 }  // namespace tint::wgsl::writer
 
