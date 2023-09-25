@@ -132,9 +132,15 @@ ResultOrError<std::vector<VkPhysicalDevice>> GatherPhysicalDevices(
     }
 
     std::vector<VkPhysicalDevice> vkPhysicalDevices(count);
-    DAWN_TRY(CheckVkSuccess(
-        vkFunctions.EnumeratePhysicalDevices(instance, &count, vkPhysicalDevices.data()),
-        "vkEnumeratePhysicalDevices"));
+
+    // crbug.com/1475146: Some PowerVR devices return a device count of 0, which may be causing a
+    // crash on the subsequent vkEnumeratePhysicalDevices call, so only call it if at least one
+    // physical device is reported.
+    if (count > 0) {
+        DAWN_TRY(CheckVkSuccess(
+            vkFunctions.EnumeratePhysicalDevices(instance, &count, vkPhysicalDevices.data()),
+            "vkEnumeratePhysicalDevices"));
+    }
 
     return std::move(vkPhysicalDevices);
 }
