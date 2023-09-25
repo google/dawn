@@ -44,7 +44,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 S = struct @align(4) {
@@ -73,7 +73,7 @@ fn f(S : S) -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 S = struct @align(4) {
@@ -100,7 +100,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %b1 = block {  # root
@@ -133,7 +133,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %b1 = block {  # root
@@ -166,7 +166,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %f = func():i32 -> %b1 {
@@ -206,7 +206,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %f = func():i32 -> %b1 {
@@ -241,7 +241,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %f = func():i32 -> %b1 {
@@ -288,7 +288,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %f = func():i32 -> %b1 {
@@ -332,7 +332,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %f = func():i32 -> %b1 {
@@ -376,7 +376,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %f = func():i32 -> %b1 {
@@ -420,7 +420,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %f = func():i32 -> %b1 {
@@ -468,7 +468,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %f = func():i32 -> %b1 {
@@ -519,7 +519,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %f = func():i32 -> %b1 {
@@ -574,7 +574,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %f = func():i32 -> %b1 {
@@ -628,7 +628,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %f = func():i32 -> %b1 {
@@ -679,7 +679,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %f = func():i32 -> %b1 {
@@ -729,7 +729,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %f = func():i32 -> %b1 {
@@ -778,7 +778,7 @@ fn f() -> i32 {
 }
 )");
 
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ("\n" + Disassemble(m.Get()), R"(
 %f = func():i32 -> %b1 {

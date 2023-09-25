@@ -17,7 +17,6 @@
 
 #include <string>
 
-#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
@@ -29,14 +28,14 @@ namespace tint::core::ir {
 
 /// Validates that a given IR module is correctly formed
 /// @param mod the module to validate
-/// @returns true on success, an error result otherwise
-Result<SuccessType, diag::List> Validate(Module& mod);
+/// @returns success or failure
+Result<SuccessType> Validate(Module& mod);
 
 /// Validates the module @p ir and dumps its contents if required by the build configuration.
 /// @param ir the module to transform
 /// @param msg the msg to accompany the output
-/// @returns an error string if the module is not valid
-Result<SuccessType, std::string> ValidateAndDumpIfNeeded(Module& ir, const char* msg);
+/// @returns success or failure
+Result<SuccessType> ValidateAndDumpIfNeeded(Module& ir, const char* msg);
 
 }  // namespace tint::core::ir
 

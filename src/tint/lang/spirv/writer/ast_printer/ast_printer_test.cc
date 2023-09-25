@@ -27,7 +27,7 @@ TEST_F(SpirvASTPrinterTest, InvalidProgram) {
     ASSERT_FALSE(program.IsValid());
     auto result = Generate(program, Options{});
     EXPECT_FALSE(result);
-    EXPECT_EQ(result.Failure(), "input program is not valid");
+    EXPECT_EQ(result.Failure().reason.str(), "error: make the program invalid");
 }
 
 TEST_F(SpirvASTPrinterTest, UnsupportedExtension) {
@@ -36,7 +36,7 @@ TEST_F(SpirvASTPrinterTest, UnsupportedExtension) {
     auto program = resolver::Resolve(*this);
     auto result = Generate(program, Options{});
     EXPECT_FALSE(result);
-    EXPECT_EQ(result.Failure(),
+    EXPECT_EQ(result.Failure().reason.str(),
               R"(12:34 error: SPIR-V backend does not support extension 'undefined')");
 }
 

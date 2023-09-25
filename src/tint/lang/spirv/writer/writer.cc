@@ -32,9 +32,9 @@ Output::Output() = default;
 Output::~Output() = default;
 Output::Output(const Output&) = default;
 
-Result<Output, std::string> Generate(const Program& program, const Options& options) {
+Result<Output> Generate(const Program& program, const Options& options) {
     if (!program.IsValid()) {
-        return std::string("input program is not valid");
+        return Failure{program.Diagnostics()};
     }
 
     bool zero_initialize_workgroup_memory =
@@ -46,7 +46,7 @@ Result<Output, std::string> Generate(const Program& program, const Options& opti
         // Convert the AST program to an IR module.
         auto converted = wgsl::reader::ProgramToIR(program);
         if (!converted) {
-            return "IR converter: " + converted.Failure();
+            return converted.Failure();
         }
 
         auto ir = converted.Move();
@@ -74,7 +74,7 @@ Result<Output, std::string> Generate(const Program& program, const Options& opti
         // Sanitize the program.
         auto sanitized_result = Sanitize(program, options);
         if (!sanitized_result.program.IsValid()) {
-            return sanitized_result.program.Diagnostics().str();
+            return Failure{sanitized_result.program.Diagnostics()};
         }
 
         // Generate the SPIR-V code.
@@ -82,7 +82,7 @@ Result<Output, std::string> Generate(const Program& program, const Options& opti
             sanitized_result.program, zero_initialize_workgroup_memory,
             options.experimental_require_subgroup_uniform_control_flow);
         if (!impl->Generate()) {
-            return impl->Diagnostics().str();
+            return Failure{impl->Diagnostics()};
         }
         output.spirv = std::move(impl->Result());
     }

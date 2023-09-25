@@ -148,11 +148,7 @@ MaybeError OwnedCompilationMessages::AddMessage(const tint::diag::Diagnostic& di
                                            fileStart + offsetInBytes, lengthInBytes)));
     }
 
-    if (diagnostic.code) {
-        mMessageStrings.push_back(std::string(diagnostic.code) + ": " + diagnostic.message);
-    } else {
-        mMessageStrings.push_back(diagnostic.message);
-    }
+    mMessageStrings.push_back(diagnostic.message);
 
     mMessages.push_back({nullptr, nullptr, tintSeverityToMessageType(diagnostic.severity), lineNum,
                          linePosInBytes, offsetInBytes, lengthInBytes, linePosInUTF16,

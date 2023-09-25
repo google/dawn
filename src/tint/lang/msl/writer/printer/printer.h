@@ -47,8 +47,8 @@ class Printer : public tint::TextGenerator {
     explicit Printer(core::ir::Module* module);
     ~Printer() override;
 
-    /// @returns true on successful generation; false otherwise
-    tint::Result<SuccessType, std::string> Generate();
+    /// @returns success or failure
+    tint::Result<SuccessType> Generate();
 
     /// @copydoc tint::TextGenerator::Result
     std::string Result() const override;

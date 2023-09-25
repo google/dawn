@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
@@ -29,8 +30,8 @@ namespace tint::spirv::writer::raise {
 /// MergeReturn is a transform merges multiple return statements in a function into a single return
 /// at the end of the function.
 /// @param module the module to transform
-/// @returns an error string on failure
-Result<SuccessType, std::string> MergeReturn(core::ir::Module* module);
+/// @returns success or failure
+Result<SuccessType> MergeReturn(core::ir::Module* module);
 
 }  // namespace tint::spirv::writer::raise
 

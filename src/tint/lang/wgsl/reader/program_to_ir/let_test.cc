@@ -29,7 +29,7 @@ TEST_F(ProgramToIRLetTest, Constant) {
     WrapInFunction(Let("a", Expr(42_i)));
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -45,7 +45,7 @@ TEST_F(ProgramToIRLetTest, BinaryOp) {
     WrapInFunction(Let("a", Add(1_i, 2_i)));
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -63,7 +63,7 @@ TEST_F(ProgramToIRLetTest, Chain) {
                    Let("c", Expr("b")));
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {

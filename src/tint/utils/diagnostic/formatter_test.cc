@@ -22,17 +22,12 @@
 namespace tint::diag {
 namespace {
 
-Diagnostic Diag(Severity severity,
-                Source source,
-                std::string message,
-                System system,
-                const char* code = nullptr) {
+Diagnostic Diag(Severity severity, Source source, std::string message, System system) {
     Diagnostic d;
     d.severity = severity;
     d.source = source;
     d.message = std::move(message);
     d.system = system;
-    d.code = code;
     return d;
 }
 
@@ -64,8 +59,7 @@ class DiagFormatterTest : public testing::Test {
     Diagnostic ascii_diag_err = Diag(Severity::Error,
                                      Source{Source::Range{{3, 16}, {3, 21}}, &ascii_file},
                                      "hiss",
-                                     System::Test,
-                                     "abc123");
+                                     System::Test);
     Diagnostic ascii_diag_ice = Diag(Severity::InternalCompilerError,
                                      Source{Source::Range{{4, 16}, {4, 19}}, &ascii_file},
                                      "unreachable",
@@ -86,8 +80,7 @@ class DiagFormatterTest : public testing::Test {
     Diagnostic utf8_diag_err = Diag(Severity::Error,
                                     Source{Source::Range{{3, 15}, {3, 20}}, &utf8_file},
                                     "hiss",
-                                    System::Test,
-                                    "abc123");
+                                    System::Test);
     Diagnostic utf8_diag_ice = Diag(Severity::InternalCompilerError,
                                     Source{Source::Range{{4, 15}, {4, 18}}, &utf8_file},
                                     "unreachable",
@@ -103,7 +96,7 @@ TEST_F(DiagFormatterTest, Simple) {
     auto got = fmt.format(List{ascii_diag_note, ascii_diag_warn, ascii_diag_err});
     auto* expect = R"(1:14: purr
 2:14: grrr
-3:16 abc123: hiss)";
+3:16: hiss)";
     ASSERT_EQ(expect, got);
 }
 
@@ -112,7 +105,7 @@ TEST_F(DiagFormatterTest, SimpleNewlineAtEnd) {
     auto got = fmt.format(List{ascii_diag_note, ascii_diag_warn, ascii_diag_err});
     auto* expect = R"(1:14: purr
 2:14: grrr
-3:16 abc123: hiss
+3:16: hiss
 )";
     ASSERT_EQ(expect, got);
 }
@@ -130,7 +123,7 @@ TEST_F(DiagFormatterTest, WithFile) {
     auto got = fmt.format(List{ascii_diag_note, ascii_diag_warn, ascii_diag_err});
     auto* expect = R"(file.name:1:14: purr
 file.name:2:14: grrr
-file.name:3:16 abc123: hiss)";
+file.name:3:16: hiss)";
     ASSERT_EQ(expect, got);
 }
 
@@ -139,7 +132,7 @@ TEST_F(DiagFormatterTest, WithSeverity) {
     auto got = fmt.format(List{ascii_diag_note, ascii_diag_warn, ascii_diag_err});
     auto* expect = R"(1:14 note: purr
 2:14 warning: grrr
-3:16 error abc123: hiss)";
+3:16 error: hiss)";
     ASSERT_EQ(expect, got);
 }
 
@@ -154,7 +147,7 @@ the  cat  says  meow
 the  dog  says  woof
                 ^^^^
 
-3:16 abc123: hiss
+3:16: hiss
 the  snake  says  quack
                   ^^^^^
 )";
@@ -171,7 +164,7 @@ TEST_F(DiagFormatterTest, UnicodeWithLine) {
         "2:15: grrr\n"
         "the  \xf0\x9f\x90\x95  says  woof\n"
         "\n"
-        "3:15 abc123: hiss\n"
+        "3:15: hiss\n"
         "the  \xf0\x9f\x90\x8d  says  quack\n";
     ASSERT_EQ(expect, got);
 }
@@ -187,7 +180,7 @@ file.name:2:14 warning: grrr
 the  dog  says  woof
                 ^^^^
 
-file.name:3:16 error abc123: hiss
+file.name:3:16 error: hiss
 the  snake  says  quack
                   ^^^^^
 )";
@@ -234,7 +227,7 @@ file.name:2:14 warning: grrr
 the    dog    says    woof
                       ^^^^
 
-file.name:3:16 error abc123: hiss
+file.name:3:16 error: hiss
 the    snake    says    quack
                         ^^^^^
 )";

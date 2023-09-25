@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
@@ -29,8 +30,8 @@ namespace tint::spirv::writer::raise {
 /// ExpandImplicitSplats is a transform that expands implicit vector splat operands in construct
 /// instructions and binary instructions where not supported by SPIR-V.
 /// @param module the module to transform
-/// @returns an error string on failure
-Result<SuccessType, std::string> ExpandImplicitSplats(core::ir::Module* module);
+/// @returns success or failure
+Result<SuccessType> ExpandImplicitSplats(core::ir::Module* module);
 
 }  // namespace tint::spirv::writer::raise
 

@@ -290,7 +290,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType, std::string> MergeReturn(core::ir::Module* ir) {
+Result<SuccessType> MergeReturn(core::ir::Module* ir) {
     auto result = ValidateAndDumpIfNeeded(*ir, "MergeReturn transform");
     if (!result) {
         return result;

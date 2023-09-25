@@ -111,7 +111,7 @@ using namespace tint::core::fluent_types;     // NOLINT
 namespace tint::wgsl::reader {
 namespace {
 
-using ResultType = tint::Result<core::ir::Module, diag::List>;
+using ResultType = tint::Result<core::ir::Module>;
 
 /// Impl is the private-implementation of FromProgram().
 class Impl {
@@ -251,10 +251,10 @@ class Impl {
         }
 
         if (diagnostics_.contains_errors()) {
-            return ResultType(std::move(diagnostics_));
+            return Failure{std::move(diagnostics_)};
         }
 
-        return ResultType{std::move(mod)};
+        return std::move(mod);
     }
 
     core::Interpolation ExtractInterpolation(const ast::InterpolateAttribute* interp) {
@@ -1417,15 +1417,15 @@ class Impl {
 
 }  // namespace
 
-tint::Result<core::ir::Module, std::string> ProgramToIR(const Program& program) {
+tint::Result<core::ir::Module> ProgramToIR(const Program& program) {
     if (!program.IsValid()) {
-        return std::string("input program is not valid");
+        return Failure{program.Diagnostics()};
     }
 
     Impl b(program);
     auto r = b.Build();
     if (!r) {
-        return r.Failure().str();
+        return r.Failure();
     }
 
     return r.Move();

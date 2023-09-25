@@ -33,8 +33,8 @@ namespace tint::core::ir::transform {
 /// derivative operations. We do this by setting a global flag and masking all writes to storage
 /// buffers and textures.
 /// @param module the module to transform
-/// @returns an error string on failure
-Result<SuccessType, std::string> DemoteToHelper(Module* module);
+/// @returns success or failure
+Result<SuccessType> DemoteToHelper(Module* module);
 
 }  // namespace tint::core::ir::transform
 

@@ -21,21 +21,21 @@
 
 namespace tint::hlsl::writer {
 
-Result<Output, std::string> Generate(const Program& program, const Options& options) {
+Result<Output> Generate(const Program& program, const Options& options) {
     if (!program.IsValid()) {
-        return std::string("input program is not valid");
+        return Failure{program.Diagnostics()};
     }
 
     // Sanitize the program.
     auto sanitized_result = Sanitize(program, options);
     if (!sanitized_result.program.IsValid()) {
-        return sanitized_result.program.Diagnostics().str();
+        return Failure{sanitized_result.program.Diagnostics()};
     }
 
     // Generate the HLSL code.
     auto impl = std::make_unique<ASTPrinter>(sanitized_result.program);
     if (!impl->Generate()) {
-        return impl->Diagnostics().str();
+        return Failure{impl->Diagnostics()};
     }
 
     Output output;

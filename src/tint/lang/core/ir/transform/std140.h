@@ -29,8 +29,8 @@ namespace tint::core::ir::transform {
 /// Std140 is a transform that rewrites matrix types in the uniform address space to conform to
 /// GLSL's std140 layout rules.
 /// @param module the module to transform
-/// @returns an error string on failure
-Result<SuccessType, std::string> Std140(Module* module);
+/// @returns success or failure
+Result<SuccessType> Std140(Module* module);
 
 }  // namespace tint::core::ir::transform
 

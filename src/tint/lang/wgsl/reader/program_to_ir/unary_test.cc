@@ -31,7 +31,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Not) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():bool -> %b1 {
   %b1 = block {
@@ -54,7 +54,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Not_Vector) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():vec4<bool> -> %b1 {
   %b1 = block {
@@ -77,7 +77,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Complement) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():u32 -> %b1 {
   %b1 = block {
@@ -100,7 +100,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Negation) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():i32 -> %b1 {
   %b1 = block {
@@ -124,7 +124,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_AddressOf) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v1:ptr<private, i32, read_write> = var
@@ -148,7 +148,7 @@ TEST_F(ProgramToIRUnaryTest, EmitExpression_Unary_Indirection) {
     WrapInFunction(stmts);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %v1:ptr<private, i32, read_write> = var

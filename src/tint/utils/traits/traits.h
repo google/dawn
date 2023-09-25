@@ -209,6 +209,9 @@ struct CharArrayToCharPtrImpl<const char[N]> {
 template <typename T>
 using CharArrayToCharPtr = typename traits::detail::CharArrayToCharPtrImpl<T>::type;
 
+////////////////////////////////////////////////////////////////////////////////
+// IsOStream
+////////////////////////////////////////////////////////////////////////////////
 namespace detail {
 /// Helper for determining whether the type T can be used as a stream writer
 template <typename T, typename ENABLE = void>
@@ -238,6 +241,26 @@ static constexpr bool IsOStream = detail::IsOStream<T>::value;
 /// If `CONDITION` is true then EnableIfIsOStream resolves to type T, otherwise an invalid type.
 template <typename T = void>
 using EnableIfIsOStream = EnableIf<IsOStream<T>, T>;
+
+////////////////////////////////////////////////////////////////////////////////
+// HasOperatorShiftLeft
+////////////////////////////////////////////////////////////////////////////////
+namespace detail {
+/// Helper for determining whether the operator<<(LHS, RHS) exists
+template <typename LHS, typename RHS, typename = void>
+struct HasOperatorShiftLeft : std::false_type {};
+/// Specialization to detect operator
+template <typename LHS, typename RHS>
+struct HasOperatorShiftLeft<LHS,
+                            RHS,
+                            std::void_t<decltype((std::declval<LHS>() << std::declval<RHS>()))>>
+    : std::true_type {};
+
+}  // namespace detail
+
+/// Is true if operator<<(LHS, RHS) exists
+template <typename LHS, typename RHS>
+static constexpr bool HasOperatorShiftLeft = detail::HasOperatorShiftLeft<LHS, RHS>::value;
 
 }  // namespace tint::traits
 

@@ -19,9 +19,10 @@
 #include <ostream>
 #include <string>
 #include <utility>
-#include <vector>
 
+#include "src/tint/utils/containers/vector.h"
 #include "src/tint/utils/diagnostic/source.h"
+#include "src/tint/utils/traits/traits.h"
 
 namespace tint::diag {
 
@@ -53,6 +54,7 @@ enum class System {
     Type,
     Utils,
     Writer,
+    Unknown,
 };
 
 /// Diagnostic holds all the information for a single compiler diagnostic
@@ -78,9 +80,6 @@ class Diagnostic {
     std::string message;
     /// system is the Tint system that raised the diagnostic.
     System system;
-    /// code is the error code, for example a validation error might have the code
-    /// `"v-0001"`.
-    const char* code = nullptr;
     /// A shared pointer to a Source::File. Only used if the diagnostic Source
     /// points to a file that was created specifically for this diagnostic
     /// (usually an ICE).
@@ -91,7 +90,7 @@ class Diagnostic {
 class List {
   public:
     /// iterator is the type used for range based iteration.
-    using iterator = std::vector<Diagnostic>::const_iterator;
+    using iterator = const Diagnostic*;
 
     /// Constructs the list with no elements.
     List();
@@ -128,7 +127,7 @@ class List {
         if (diag.severity >= Severity::Error) {
             error_count_++;
         }
-        entries_.emplace_back(std::move(diag));
+        entries_.Push(std::move(diag));
     }
 
     /// adds a list of diagnostics to the end of this list.
@@ -189,25 +188,6 @@ class List {
         add(std::move(error));
     }
 
-    /// adds the error message with the given code and Source to the end of this
-    /// list.
-    /// @param system the system raising the error message
-    /// @param code the error code
-    /// @param err_msg the error message
-    /// @param source the source of the error diagnostic
-    void add_error(System system,
-                   const char* code,
-                   std::string_view err_msg,
-                   const Source& source) {
-        diag::Diagnostic error{};
-        error.code = code;
-        error.severity = diag::Severity::Error;
-        error.system = system;
-        error.source = source;
-        error.message = err_msg;
-        add(std::move(error));
-    }
-
     /// adds an internal compiler error message to the end of this list.
     /// @param system the system raising the error message
     /// @param err_msg the error message
@@ -232,11 +212,11 @@ class List {
     /// @returns the number of error diagnostics (or of higher severity).
     size_t error_count() const { return error_count_; }
     /// @returns the number of entries in the list.
-    size_t count() const { return entries_.size(); }
+    size_t count() const { return entries_.Length(); }
     /// @returns true if the diagnostics list is empty
-    bool empty() const { return entries_.empty(); }
+    bool empty() const { return entries_.IsEmpty(); }
     /// @returns the number of entrise in the diagnostics list
-    size_t size() const { return entries_.size(); }
+    size_t size() const { return entries_.Length(); }
     /// @returns the first diagnostic in the list.
     iterator begin() const { return entries_.begin(); }
     /// @returns the last diagnostic in the list.
@@ -246,7 +226,7 @@ class List {
     std::string str() const;
 
   private:
-    std::vector<Diagnostic> entries_;
+    Vector<Diagnostic, 0> entries_;
     size_t error_count_ = 0;
 };
 
@@ -254,7 +234,10 @@ class List {
 /// @param out the output stream
 /// @param list the list to emit
 /// @returns the output stream
-std::ostream& operator<<(std::ostream& out, const List& list);
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, const List& list) {
+    return out << list.str();
+}
 
 }  // namespace tint::diag
 

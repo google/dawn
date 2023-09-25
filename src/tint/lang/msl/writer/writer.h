@@ -19,6 +19,7 @@
 
 #include "src/tint/lang/msl/writer/common/options.h"
 #include "src/tint/lang/msl/writer/output.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
@@ -29,11 +30,11 @@ class Program;
 namespace tint::msl::writer {
 
 /// Generate MSL for a program, according to a set of configuration options.
-/// The result will contain the MSL and supplementary information, or an error string.
+/// The result will contain the MSL and supplementary information, or failure.
 /// @param program the program to translate to MSL
 /// @param options the configuration options to use when generating MSL
-/// @returns the resulting MSL and supplementary information, or an error string
-Result<Output, std::string> Generate(const Program& program, const Options& options);
+/// @returns the resulting MSL and supplementary information, or failure
+Result<Output> Generate(const Program& program, const Options& options);
 
 }  // namespace tint::msl::writer
 

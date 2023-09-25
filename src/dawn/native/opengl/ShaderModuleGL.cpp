@@ -299,8 +299,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(
             tintOptions.texture_builtins_from_uniform = r.textureBuiltinsFromUniform;
 
             auto result = tint::glsl::writer::Generate(program, tintOptions, r.entryPointName);
-            DAWN_INVALID_IF(!result, "An error occured while generating GLSL: %s.",
-                            result.Failure());
+            DAWN_INVALID_IF(!result, "An error occurred while generating GLSL:\n%s",
+                            result.Failure().reason.str());
 
             return GLSLCompilation{{std::move(result->glsl), needsPlaceholderSampler,
                                     result->needs_internal_uniform_buffer,

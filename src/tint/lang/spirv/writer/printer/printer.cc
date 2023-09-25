@@ -153,10 +153,10 @@ const core::type::Type* DedupType(const core::type::Type* ty, core::type::Manage
 Printer::Printer(core::ir::Module* module, bool zero_init_workgroup_mem)
     : ir_(module), b_(*module), zero_init_workgroup_memory_(zero_init_workgroup_mem) {}
 
-Result<std::vector<uint32_t>, std::string> Printer::Generate() {
+Result<std::vector<uint32_t>> Printer::Generate() {
     auto valid = core::ir::ValidateAndDumpIfNeeded(*ir_, "SPIR-V writer");
     if (!valid) {
-        return std::move(valid.Failure());
+        return valid.Failure();
     }
 
     // TODO(crbug.com/tint/1906): Check supported extensions.

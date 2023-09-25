@@ -31,8 +31,13 @@ tint_add_target(tint_utils_result lib
 )
 
 tint_target_add_dependencies(tint_utils_result lib
+  tint_utils_containers
+  tint_utils_diagnostic
   tint_utils_ice
   tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
+  tint_utils_rtti
   tint_utils_text
   tint_utils_traits
 )
@@ -46,9 +51,14 @@ tint_add_target(tint_utils_result_test test
 )
 
 tint_target_add_dependencies(tint_utils_result_test test
+  tint_utils_containers
+  tint_utils_diagnostic
   tint_utils_ice
   tint_utils_macros
+  tint_utils_math
+  tint_utils_memory
   tint_utils_result
+  tint_utils_rtti
   tint_utils_text
   tint_utils_traits
 )

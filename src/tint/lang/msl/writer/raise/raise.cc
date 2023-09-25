@@ -18,7 +18,7 @@
 
 namespace tint::msl::raise {
 
-Result<SuccessType, std::string> Raise(core::ir::Module*) {
+Result<SuccessType> Raise(core::ir::Module*) {
     // #define RUN_TRANSFORM(name)
     //     do {
     //         auto result = core::ir::transform::name(module);

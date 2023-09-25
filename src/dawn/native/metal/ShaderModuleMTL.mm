@@ -281,8 +281,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
 
             TRACE_EVENT0(r.platform.UnsafeGetValue(), General, "tint::msl::writer::Generate");
             auto result = tint::msl::writer::Generate(program, options);
-            DAWN_INVALID_IF(!result, "An error occured while generating MSL: %s.",
-                            result.Failure());
+            DAWN_INVALID_IF(!result, "An error occurred while generating MSL:\n%s",
+                            result.Failure().reason.str());
 
             // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall
             // category. -Wunused-variable in particular comes up a lot in generated code, and some

@@ -39,7 +39,7 @@ TEST(ResultTest, SuccessStruct) {
 }
 
 TEST(ResultTest, Failure) {
-    auto r = Result<int>(Failure);
+    auto r = Result<int>(Failure{});
     EXPECT_FALSE(r);
     EXPECT_TRUE(!r);
 }

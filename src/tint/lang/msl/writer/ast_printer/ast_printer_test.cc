@@ -32,7 +32,7 @@ TEST_F(MslASTPrinterTest, InvalidProgram) {
     ASSERT_FALSE(program.IsValid());
     auto result = Generate(program, Options{});
     EXPECT_FALSE(result);
-    EXPECT_EQ(result.Failure(), "input program is not valid");
+    EXPECT_EQ(result.Failure().reason.str(), "error: make the program invalid");
 }
 
 TEST_F(MslASTPrinterTest, UnsupportedExtension) {

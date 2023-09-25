@@ -131,10 +131,10 @@ void Run(core::ir::Module* ir) {
 
 }  // namespace
 
-Result<SuccessType, std::string> ExpandImplicitSplats(core::ir::Module* ir) {
+Result<SuccessType> ExpandImplicitSplats(core::ir::Module* ir) {
     auto result = ValidateAndDumpIfNeeded(*ir, "ExpandImplicitSplats transform");
     if (!result) {
-        return result;
+        return result.Failure();
     }
 
     Run(ir);

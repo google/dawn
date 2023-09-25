@@ -67,7 +67,7 @@ Printer::Printer(core::ir::Module* module) : ir_(module) {}
 
 Printer::~Printer() = default;
 
-tint::Result<SuccessType, std::string> Printer::Generate() {
+tint::Result<SuccessType> Printer::Generate() {
     auto valid = core::ir::ValidateAndDumpIfNeeded(*ir_, "MSL writer");
     if (!valid) {
         return std::move(valid.Failure());

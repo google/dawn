@@ -400,9 +400,9 @@ Options:
         options.ShowHelp(std::cout);
     };
 
-    auto result = options.Parse(std::cerr, arguments);
+    auto result = options.Parse(arguments);
     if (!result) {
-        std::cerr << std::endl;
+        std::cerr << result.Failure() << std::endl;
         show_usage();
         return false;
     }

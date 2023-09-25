@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
@@ -28,8 +29,8 @@ namespace tint::msl::raise {
 
 /// Raise a core IR module to the MSL dialect of the IR.
 /// @param mod the core IR module to raise to MSL dialect
-/// @returns success or an error string
-Result<SuccessType, std::string> Raise(core::ir::Module* mod);
+/// @returns success or failure
+Result<SuccessType> Raise(core::ir::Module* mod);
 
 }  // namespace tint::msl::raise
 

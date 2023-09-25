@@ -274,7 +274,7 @@ TEST_F(CommandBufferEncodingTests, ComputePassEncoderIndirectDispatchStateRestor
 }
 
 // Test that after restoring state, it is fully applied to the state tracker
-// and does not leak state changes that occured between a snapshot and the
+// and does not leak state changes that occurred between a snapshot and the
 // state restoration.
 TEST_F(CommandBufferEncodingTests, StateNotLeakedAfterRestore) {
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

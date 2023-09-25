@@ -40,7 +40,7 @@ void GenerateGLSL(benchmark::State& state, std::string input_name) {
         for (auto& ep : entry_points) {
             auto res = Generate(program, {}, ep);
             if (!res) {
-                state.SkipWithError(res.Failure().c_str());
+                state.SkipWithError(res.Failure().reason.str());
             }
         }
     }

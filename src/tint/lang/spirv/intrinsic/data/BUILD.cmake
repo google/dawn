@@ -40,6 +40,7 @@ tint_target_add_dependencies(tint_lang_spirv_intrinsic_data lib
   tint_lang_core_type
   tint_lang_spirv_type
   tint_utils_containers
+  tint_utils_diagnostic
   tint_utils_ice
   tint_utils_id
   tint_utils_macros

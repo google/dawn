@@ -22,23 +22,23 @@
 
 namespace tint::glsl::writer {
 
-Result<Output, std::string> Generate(const Program& program,
-                                     const Options& options,
-                                     const std::string& entry_point) {
+Result<Output> Generate(const Program& program,
+                        const Options& options,
+                        const std::string& entry_point) {
     if (!program.IsValid()) {
-        return std::string("input program is not valid");
+        return Failure{program.Diagnostics()};
     }
 
     // Sanitize the program.
     auto sanitized_result = Sanitize(program, options, entry_point);
     if (!sanitized_result.program.IsValid()) {
-        return sanitized_result.program.Diagnostics().str();
+        return Failure{sanitized_result.program.Diagnostics()};
     }
 
     // Generate the GLSL code.
     auto impl = std::make_unique<ASTPrinter>(sanitized_result.program, options.version);
     if (!impl->Generate()) {
-        return impl->Diagnostics().str();
+        return Failure{impl->Diagnostics()};
     }
 
     Output output;

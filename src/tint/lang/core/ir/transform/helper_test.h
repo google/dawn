@@ -45,7 +45,7 @@ class TransformTestBase : public BASE {
 
         // Validate the output IR.
         auto valid = ir::Validate(mod);
-        EXPECT_TRUE(valid) << valid.Failure().str();
+        EXPECT_TRUE(valid) << valid.Failure().reason.str();
     }
 
     /// @returns the transformed module as a disassembled string

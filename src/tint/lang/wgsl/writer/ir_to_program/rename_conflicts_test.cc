@@ -36,7 +36,7 @@ class IRToProgramRenameConflictsTest : public testing::Test {
         // Validate the input IR.
         {
             auto res = core::ir::Validate(mod);
-            EXPECT_TRUE(res) << res.Failure().str();
+            EXPECT_TRUE(res) << res.Failure().reason.str();
             if (!res) {
                 return;
             }
@@ -48,7 +48,7 @@ class IRToProgramRenameConflictsTest : public testing::Test {
 
         // Validate the output IR.
         auto res = core::ir::Validate(mod);
-        EXPECT_TRUE(res) << res.Failure().str();
+        EXPECT_TRUE(res) << res.Failure().reason.str();
     }
 
     /// @returns the transformed module as a disassembled string

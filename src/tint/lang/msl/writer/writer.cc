@@ -24,9 +24,9 @@
 
 namespace tint::msl::writer {
 
-Result<Output, std::string> Generate(const Program& program, const Options& options) {
+Result<Output> Generate(const Program& program, const Options& options) {
     if (!program.IsValid()) {
-        return std::string("input program is not valid");
+        return Failure{program.Diagnostics()};
     }
 
     Output output;
@@ -35,7 +35,7 @@ Result<Output, std::string> Generate(const Program& program, const Options& opti
         // Convert the AST program to an IR module.
         auto converted = wgsl::reader::ProgramToIR(program);
         if (!converted) {
-            return std::string("IR converter: " + converted.Failure());
+            return converted.Failure();
         }
 
         auto ir = converted.Move();
@@ -43,7 +43,7 @@ Result<Output, std::string> Generate(const Program& program, const Options& opti
         // Raise the IR to the MSL dialect.
         auto raised = raise::Raise(&ir);
         if (!raised) {
-            return std::move(raised.Failure());
+            return raised.Failure();
         }
 
         // Generate the MSL code.
@@ -57,7 +57,7 @@ Result<Output, std::string> Generate(const Program& program, const Options& opti
         // Sanitize the program.
         auto sanitized_result = Sanitize(program, options);
         if (!sanitized_result.program.IsValid()) {
-            return sanitized_result.program.Diagnostics().str();
+            return Failure{sanitized_result.program.Diagnostics()};
         }
         output.needs_storage_buffer_sizes = sanitized_result.needs_storage_buffer_sizes;
         output.used_array_length_from_uniform_indices =
@@ -66,7 +66,7 @@ Result<Output, std::string> Generate(const Program& program, const Options& opti
         // Generate the MSL code.
         auto impl = std::make_unique<ASTPrinter>(sanitized_result.program);
         if (!impl->Generate()) {
-            return impl->Diagnostics().str();
+            return Failure{impl->Diagnostics()};
         }
         output.msl = impl->Result();
         output.has_invariant_attribute = impl->HasInvariant();

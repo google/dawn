@@ -129,7 +129,6 @@ void Formatter::format(const List& list, Printer* printer) const {
 void Formatter::format(const Diagnostic& diag, State& state) const {
     auto const& src = diag.source;
     auto const& rng = src.range;
-    bool has_code = diag.code != nullptr && diag.code[0] != '\0';
 
     state.set_style({Color::kDefault, true});
 
@@ -169,9 +168,6 @@ void Formatter::format(const Diagnostic& diag, State& state) const {
     }
     if (style_.print_severity) {
         prefix.emplace_back(TextAndColor{to_str(diag.severity), severity_color, true});
-    }
-    if (has_code) {
-        prefix.emplace_back(TextAndColor{diag.code, severity_color});
     }
 
     for (size_t i = 0; i < prefix.size(); i++) {

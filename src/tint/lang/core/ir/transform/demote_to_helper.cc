@@ -203,7 +203,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType, std::string> DemoteToHelper(Module* ir) {
+Result<SuccessType> DemoteToHelper(Module* ir) {
     auto result = ValidateAndDumpIfNeeded(*ir, "DemoteToHelper transform");
     if (!result) {
         return result;

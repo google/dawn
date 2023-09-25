@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
@@ -31,8 +32,8 @@ namespace tint::spirv::writer::raise {
 /// SPIR-V writer as there is no SPIR-V instruction that can dynamically index a non-pointer
 /// composite.
 /// @param module the module to transform
-/// @returns an error string on failure
-Result<SuccessType, std::string> VarForDynamicIndex(core::ir::Module* module);
+/// @returns success or failure
+Result<SuccessType> VarForDynamicIndex(core::ir::Module* module);
 
 }  // namespace tint::spirv::writer::raise
 

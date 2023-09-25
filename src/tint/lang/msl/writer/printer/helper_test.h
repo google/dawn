@@ -72,13 +72,13 @@ class MslPrinterTestHelperBase : public BASE {
     bool Generate() {
         auto raised = raise::Raise(&mod);
         if (!raised) {
-            err_ = raised.Failure();
+            err_ = raised.Failure().reason.str();
             return false;
         }
 
         auto result = writer_.Generate();
         if (!result) {
-            err_ = result.Failure();
+            err_ = result.Failure().reason.str();
             return false;
         }
         output_ = writer_.Result();

@@ -38,6 +38,7 @@ cc_library(
     "//src/tint/lang/core/intrinsic",
     "//src/tint/lang/core/type",
     "//src/tint/utils/containers",
+    "//src/tint/utils/diagnostic",
     "//src/tint/utils/ice",
     "//src/tint/utils/id",
     "//src/tint/utils/macros",

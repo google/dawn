@@ -19,6 +19,7 @@
 
 #include "src/tint/lang/glsl/writer/common/options.h"
 #include "src/tint/lang/glsl/writer/output.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations
@@ -29,15 +30,15 @@ class Program;
 namespace tint::glsl::writer {
 
 /// Generate GLSL for a program, according to a set of configuration options.
-/// The result will contain the GLSL and supplementary information, or an error string.
+/// The result will contain the GLSL and supplementary information, or failure.
 /// information.
 /// @param program the program to translate to GLSL
 /// @param options the configuration options to use when generating GLSL
 /// @param entry_point the entry point to generate GLSL for
-/// @returns the resulting GLSL and supplementary information, or an error string
-Result<Output, std::string> Generate(const Program& program,
-                                     const Options& options,
-                                     const std::string& entry_point);
+/// @returns the resulting GLSL and supplementary information, or failure
+Result<Output> Generate(const Program& program,
+                        const Options& options,
+                        const std::string& entry_point);
 
 }  // namespace tint::glsl::writer
 

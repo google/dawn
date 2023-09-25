@@ -33,7 +33,7 @@ TEST_F(ProgramToIRCallTest, EmitExpression_Bitcast) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func():f32 -> %b1 {
   %b1 = block {
@@ -58,7 +58,7 @@ TEST_F(ProgramToIRCallTest, EmitStatement_Discard) {
          });
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test_function = @fragment func():void -> %b1 {
   %b1 = block {
@@ -75,7 +75,7 @@ TEST_F(ProgramToIRCallTest, EmitStatement_UserFunction) {
     auto* stmt = CallStmt(Call("my_func", Mul(2_a, 3_a)));
     WrapInFunction(stmt);
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%my_func = func(%p:f32):void -> %b1 {
   %b1 = block {
@@ -97,7 +97,7 @@ TEST_F(ProgramToIRCallTest, EmitExpression_Convert) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %i:ptr<private, i32, read_write> = var, 1i
@@ -118,7 +118,7 @@ TEST_F(ProgramToIRCallTest, EmitExpression_ConstructEmpty) {
     GlobalVar("i", core::AddressSpace::kPrivate, expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %i:ptr<private, vec3<f32>, read_write> = var, vec3<f32>(0.0f)
@@ -133,7 +133,7 @@ TEST_F(ProgramToIRCallTest, EmitExpression_Construct) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %i:ptr<private, f32, read_write> = var, 1.0f

@@ -83,9 +83,8 @@ class Validator {
     ~Validator();
 
     /// Runs the validator over the module provided during construction
-    /// @returns the results of validation, either a success result object or the diagnostics of
-    /// validation failures.
-    Result<SuccessType, diag::List> IsValid();
+    /// @returns success or failure
+    Result<SuccessType> Run();
 
   protected:
     /// @param inst the instruction
@@ -284,7 +283,7 @@ void Validator::DisassembleIfNeeded() {
     mod_.disassembly_file = std::make_unique<Source::File>("", dis_.Disassemble());
 }
 
-Result<SuccessType, diag::List> Validator::IsValid() {
+Result<SuccessType> Validator::Run() {
     CheckRootBlock(mod_.root_block);
 
     for (auto* func : mod_.functions) {
@@ -295,7 +294,7 @@ Result<SuccessType, diag::List> Validator::IsValid() {
         DisassembleIfNeeded();
         diagnostics_.add_note(tint::diag::System::IR,
                               "# Disassembly\n" + mod_.disassembly_file->content.data, {});
-        return std::move(diagnostics_);
+        return Failure{std::move(diagnostics_)};
     }
     return Success;
 }
@@ -863,13 +862,13 @@ const core::type::Type* Validator::GetVectorPtrElementType(Instruction* inst, si
 
 }  // namespace
 
-Result<SuccessType, diag::List> Validate(Module& mod) {
+Result<SuccessType> Validate(Module& mod) {
     Validator v(mod);
-    return v.IsValid();
+    return v.Run();
 }
 
-Result<SuccessType, std::string> ValidateAndDumpIfNeeded([[maybe_unused]] Module& ir,
-                                                         [[maybe_unused]] const char* msg) {
+Result<SuccessType> ValidateAndDumpIfNeeded([[maybe_unused]] Module& ir,
+                                            [[maybe_unused]] const char* msg) {
 #if TINT_DUMP_IR_WHEN_VALIDATING
     Disassembler disasm(ir);
     std::cout << "=========================================================" << std::endl;
@@ -881,10 +880,7 @@ Result<SuccessType, std::string> ValidateAndDumpIfNeeded([[maybe_unused]] Module
 #ifndef NDEBUG
     auto result = Validate(ir);
     if (!result) {
-        diag::List errors;
-        StringStream ss;
-        ss << "validating input to " << msg << " failed" << std::endl << result.Failure().str();
-        return ss.str();
+        return result.Failure();
     }
 #endif
 

@@ -59,8 +59,8 @@ struct RobustnessConfig {
 /// Robustness is a transform that prevents out-of-bounds memory accesses.
 /// @param module the module to transform
 /// @param config the robustness configuration
-/// @returns an error string on failure
-Result<SuccessType, std::string> Robustness(Module* module, const RobustnessConfig& config);
+/// @returns success or failure
+Result<SuccessType> Robustness(Module* module, const RobustnessConfig& config);
 
 }  // namespace tint::core::ir::transform
 

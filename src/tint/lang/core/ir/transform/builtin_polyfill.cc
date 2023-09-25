@@ -457,7 +457,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType, std::string> BuiltinPolyfill(Module* ir, const BuiltinPolyfillConfig& config) {
+Result<SuccessType> BuiltinPolyfill(Module* ir, const BuiltinPolyfillConfig& config) {
     auto result = ValidateAndDumpIfNeeded(*ir, "BuiltinPolyfill transform");
     if (!result) {
         return result;

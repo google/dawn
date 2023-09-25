@@ -220,7 +220,7 @@ Result<Overload> MatchIntrinsic(Context& context,
         // Sort the candidates with the most promising first
         SortCandidates(candidates);
         on_no_match(std::move(candidates));
-        return Failure;
+        return Failure{};
     }
 
     Candidate match;
@@ -232,7 +232,7 @@ Result<Overload> MatchIntrinsic(Context& context,
                                  std::move(templates));
         if (!match.overload) {
             // Ambiguous overload. ResolveCandidate() will have already raised an error diagnostic.
-            return Failure;
+            return Failure{};
         }
     }
 
@@ -246,7 +246,7 @@ Result<Overload> MatchIntrinsic(Context& context,
                           .Type(&any);
         if (TINT_UNLIKELY(!return_type)) {
             TINT_ICE() << "MatchState.Match() returned null";
-            return Failure;
+            return Failure{};
         }
     } else {
         return_type = context.types.void_();
@@ -638,7 +638,7 @@ Result<Overload> Lookup(Context& context,
             break;
         default:
             TINT_UNREACHABLE() << "invalid unary op: " << op;
-            return Failure;
+            return Failure{};
     }
 
     Vector args{arg};

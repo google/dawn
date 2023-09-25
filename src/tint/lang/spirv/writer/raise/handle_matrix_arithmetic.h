@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
@@ -29,8 +30,8 @@ namespace tint::spirv::writer::raise {
 /// HandleMatrixArithmetic is a transform that converts arithmetic instruction that use matrix into
 /// SPIR-V intrinsics or polyfills.
 /// @param module the module to transform
-/// @returns an error string on failure
-Result<SuccessType, std::string> HandleMatrixArithmetic(core::ir::Module* module);
+/// @returns success or failure
+Result<SuccessType> HandleMatrixArithmetic(core::ir::Module* module);
 
 }  // namespace tint::spirv::writer::raise
 

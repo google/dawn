@@ -39,7 +39,7 @@ void Run(ir::Module* ir) {
 
 }  // namespace
 
-Result<SuccessType, std::string> AddEmptyEntryPoint(Module* ir) {
+Result<SuccessType> AddEmptyEntryPoint(Module* ir) {
     auto result = ValidateAndDumpIfNeeded(*ir, "AddEmptyEntryPoint transform");
     if (!result) {
         return result;

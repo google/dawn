@@ -38,7 +38,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraySingleIndex) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -64,7 +64,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Multiple) {
     WrapInFunction(Decl(a), expr, expr2);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -87,7 +87,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorSingleIndex) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -109,7 +109,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_ArraysMultiIndex) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -132,7 +132,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MatrixMultiIndex) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -159,7 +159,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_SingleMember) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(MyStruct = struct @align(4) {
@@ -195,7 +195,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiMember) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(Inner = struct @align(4) {
@@ -240,7 +240,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_Mixed) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(Inner = struct @align(16) {
@@ -274,7 +274,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_AssignmentLHS) {
     WrapInFunction(Decl(a), assign);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -297,7 +297,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_VectorElementSwizzle) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -319,7 +319,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzle) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -342,7 +342,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzleOfSwizzle) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -373,7 +373,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Var_MultiElementSwizzle_MiddleOfChain) 
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(MyStruct = struct @align(16) {
@@ -403,7 +403,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleIndex) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -425,7 +425,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiIndex) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -451,7 +451,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleMember) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(MyStruct = struct @align(4) {
@@ -486,7 +486,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiMember) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(Inner = struct @align(4) {
@@ -530,7 +530,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_Mixed) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(Inner = struct @align(16) {
@@ -563,7 +563,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_SingleElement) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -585,7 +585,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzle) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -607,7 +607,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzleOfSwizzle) {
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -637,7 +637,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Let_MultiElementSwizzle_MiddleOfChain) 
     WrapInFunction(Decl(a), expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(MyStruct = struct @align(16) {
@@ -669,7 +669,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Const_AbstractVectorWithIndex) {
     WrapInFunction(v, i, b);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -694,7 +694,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Const_AbstractVectorWithSwizzleAndIndex
     WrapInFunction(v, i, b);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -719,7 +719,7 @@ TEST_F(ProgramToIRAccessorTest, Accessor_Const_ExpressionIndex) {
     WrapInFunction(v, i, b);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {

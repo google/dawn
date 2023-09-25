@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
@@ -38,8 +39,8 @@ struct ShaderIOConfig {
 /// global variables to prepare them for SPIR-V codegen.
 /// @param module the module to transform
 /// @param config the configuration
-/// @returns an error string on failure
-Result<SuccessType, std::string> ShaderIO(core::ir::Module* module, const ShaderIOConfig& config);
+/// @returns success or failure
+Result<SuccessType> ShaderIO(core::ir::Module* module, const ShaderIOConfig& config);
 
 }  // namespace tint::spirv::writer::raise
 

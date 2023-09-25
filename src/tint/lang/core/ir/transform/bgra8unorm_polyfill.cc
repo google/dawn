@@ -170,7 +170,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType, std::string> Bgra8UnormPolyfill(Module* ir) {
+Result<SuccessType> Bgra8UnormPolyfill(Module* ir) {
     auto result = ValidateAndDumpIfNeeded(*ir, "Bgra8UnormPolyfill transform");
     if (!result) {
         return result;

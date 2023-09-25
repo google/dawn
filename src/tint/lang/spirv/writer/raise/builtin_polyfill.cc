@@ -851,10 +851,10 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType, std::string> BuiltinPolyfill(core::ir::Module* ir) {
+Result<SuccessType> BuiltinPolyfill(core::ir::Module* ir) {
     auto result = ValidateAndDumpIfNeeded(*ir, "BuiltinPolyfill transform");
     if (!result) {
-        return result;
+        return result.Failure();
     }
 
     State{ir}.Process();

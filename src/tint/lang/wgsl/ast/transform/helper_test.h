@@ -39,7 +39,7 @@ inline std::string str(const Program& program) {
     wgsl::writer::Options options;
     auto result = wgsl::writer::Generate(program, options);
     if (!result) {
-        return "WGSL writer failed:\n" + result.Failure();
+        return result.Failure().reason.str();
     }
 
     auto res = result->wgsl;

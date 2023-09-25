@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
@@ -30,8 +31,8 @@ namespace tint::wgsl::writer {
 /// resolving to the correct declaration, and those with identical identifiers declared in the same
 /// scope.
 /// @param module the module to transform
-/// @returns an error string on failure
-Result<SuccessType, std::string> RenameConflicts(core::ir::Module* module);
+/// @returns success or failure
+Result<SuccessType> RenameConflicts(core::ir::Module* module);
 
 }  // namespace tint::wgsl::writer
 

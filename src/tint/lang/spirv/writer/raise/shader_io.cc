@@ -195,7 +195,7 @@ struct StateImpl : core::ir::transform::ShaderIOBackendState {
 };
 }  // namespace
 
-Result<SuccessType, std::string> ShaderIO(core::ir::Module* ir, const ShaderIOConfig& config) {
+Result<SuccessType> ShaderIO(core::ir::Module* ir, const ShaderIOConfig& config) {
     auto result = ValidateAndDumpIfNeeded(*ir, "ShaderIO transform");
     if (!result) {
         return result;

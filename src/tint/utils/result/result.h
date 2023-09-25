@@ -18,6 +18,7 @@
 #include <utility>
 #include <variant>
 
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/ice/ice.h"
 #include "src/tint/utils/text/string_stream.h"
 #include "src/tint/utils/traits/traits.h"
@@ -30,11 +31,31 @@ struct SuccessType {};
 /// An instance of SuccessType that can be used as a generic success value for a Result.
 static constexpr const SuccessType Success;
 
-/// Empty structure used as the default FAILURE_TYPE for a Result.
-struct FailureType {};
+/// The default Result error type.
+struct Failure {
+    /// Constructor with no diagnostics
+    Failure();
 
-/// An instance of FailureType which can be used as a generic failure value by Result
-static constexpr const FailureType Failure;
+    /// Constructor with a single diagnostic
+    /// @param err the single error diagnostic
+    explicit Failure(std::string_view err);
+
+    /// Constructor with a list of diagnostics
+    /// @param diagnostics the failure diagnostics
+    explicit Failure(diag::List diagnostics);
+
+    /// The diagnostics explaining the failure reason
+    diag::List reason;
+};
+
+/// Write the Failure to the given stream
+/// @param out the output stream
+/// @param failure the Failure
+/// @returns the output stream
+template <typename STREAM, typename = traits::EnableIfIsOStream<STREAM>>
+auto& operator<<(STREAM& out, const Failure& failure) {
+    return out << failure.reason;
+}
 
 /// Result is a helper for functions that need to return a value, or an failure value.
 /// Result can be constructed with either a 'success' or 'failure' value.
@@ -42,7 +63,7 @@ static constexpr const FailureType Failure;
 /// @tparam FAILURE_TYPE the 'failure' value type. Defaults to FailureType which provides no
 ///         information about the failure, except that something failed. Must not be the same type
 ///         as SUCCESS_TYPE.
-template <typename SUCCESS_TYPE, typename FAILURE_TYPE = FailureType>
+template <typename SUCCESS_TYPE, typename FAILURE_TYPE = Failure>
 struct [[nodiscard]] Result {
     static_assert(!std::is_same_v<SUCCESS_TYPE, FAILURE_TYPE>,
                   "Result must not have the same type for SUCCESS_TYPE and FAILURE_TYPE");
@@ -168,8 +189,20 @@ template <typename STREAM,
           typename SUCCESS,
           typename FAILURE,
           typename = traits::EnableIfIsOStream<STREAM>>
-auto& operator<<(STREAM& out, Result<SUCCESS, FAILURE> res) {
-    return res ? (out << "success: " << res.Get()) : (out << "failure: " << res.Failure());
+auto& operator<<(STREAM& out, const Result<SUCCESS, FAILURE>& res) {
+    if (res) {
+        if constexpr (traits::HasOperatorShiftLeft<STREAM&, SUCCESS>) {
+            return out << "success: " << res.Get();
+        } else {
+            return out << "success";
+        }
+    } else {
+        if constexpr (traits::HasOperatorShiftLeft<STREAM&, FAILURE>) {
+            return out << "failure: " << res.Failure();
+        } else {
+            return out << "failure";
+        }
+    }
 }
 
 }  // namespace tint

@@ -40,17 +40,17 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
 
     /// Build the module, cleaning up the program before returning.
     /// @returns the generated module
-    tint::Result<core::ir::Module, std::string> Build() {
+    tint::Result<core::ir::Module> Build() {
         Program program{resolver::Resolve(*this)};
         if (!program.IsValid()) {
-            return program.Diagnostics().str();
+            return Failure{program.Diagnostics()};
         }
 
         auto result = wgsl::reader::ProgramToIR(program);
         if (result) {
             auto validated = core::ir::Validate(result.Get());
             if (!validated) {
-                return validated.Failure().str();
+                return validated.Failure();
             }
         }
         return result;
@@ -59,25 +59,25 @@ class IRProgramTestBase : public BASE, public ProgramBuilder {
     /// Build the module from the given WGSL.
     /// @param wgsl the WGSL to convert to IR
     /// @returns the generated module
-    tint::Result<core::ir::Module, std::string> Build(std::string wgsl) {
+    tint::Result<core::ir::Module> Build(std::string wgsl) {
 #if TINT_BUILD_WGSL_READER
         Source::File file("test.wgsl", std::move(wgsl));
         auto program = wgsl::reader::Parse(&file);
         if (!program.IsValid()) {
-            return program.Diagnostics().str();
+            return Failure{program.Diagnostics()};
         }
 
         auto result = wgsl::reader::ProgramToIR(program);
         if (result) {
             auto validated = core::ir::Validate(result.Get());
             if (!validated) {
-                return validated.Failure().str();
+                return validated.Failure();
             }
         }
         return result;
 #else
         (void)wgsl;
-        return std::string("error: Tint not built with the WGSL reader");
+        return Failure{"error: Tint not built with the WGSL reader"};
 #endif
     }
 

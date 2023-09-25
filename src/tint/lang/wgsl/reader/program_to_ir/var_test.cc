@@ -30,7 +30,7 @@ TEST_F(ProgramToIRVarTest, Emit_GlobalVar_NoInit) {
     GlobalVar("a", ty.u32(), core::AddressSpace::kPrivate);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %a:ptr<private, u32, read_write> = var
@@ -44,7 +44,7 @@ TEST_F(ProgramToIRVarTest, Emit_GlobalVar_Init) {
     GlobalVar("a", ty.u32(), core::AddressSpace::kPrivate, expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %a:ptr<private, u32, read_write> = var, 2u
@@ -57,7 +57,7 @@ TEST_F(ProgramToIRVarTest, Emit_GlobalVar_GroupBinding) {
     GlobalVar("a", ty.u32(), core::AddressSpace::kStorage, Vector{Group(2_u), Binding(3_u)});
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %a:ptr<storage, u32, read> = var @binding_point(2, 3)
@@ -71,7 +71,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_NoInit) {
     WrapInFunction(a);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -89,7 +89,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Init_Constant) {
     WrapInFunction(a);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -107,7 +107,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Init_NonConstant) {
     WrapInFunction(a, b);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -127,7 +127,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_42i) {
                    Assign("a", 42_i));
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -164,7 +164,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfArray_EvalOrder) {
         Assign(lhs, rhs));
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%f = func(%p:i32):i32 -> %b1 {
@@ -210,7 +210,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfVec_EvalOrder) {
                    Assign(lhs, rhs));
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%f = func(%p:i32):i32 -> %b1 {
@@ -258,7 +258,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_Assign_ArrayOfMatrix_EvalOrder) {
                    Assign(lhs, rhs));
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%f = func(%p:i32):i32 -> %b1 {
@@ -290,7 +290,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_42i) {
                    CompoundAssign("a", 42_i, core::BinaryOp::kAdd));
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test_function = @compute @workgroup_size(1, 1, 1) func():void -> %b1 {
@@ -329,7 +329,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_ArrayOfArray_EvalOrder) {
         CompoundAssign(lhs, rhs, core::BinaryOp::kAdd));
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%f = func(%p:i32):i32 -> %b1 {
@@ -381,7 +381,7 @@ TEST_F(ProgramToIRVarTest, Emit_Var_CompoundAssign_ArrayOfMatrix_EvalOrder) {
                    CompoundAssign(lhs, rhs, core::BinaryOp::kAdd));
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%f = func(%p:i32):i32 -> %b1 {

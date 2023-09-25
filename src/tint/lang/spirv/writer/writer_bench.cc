@@ -30,7 +30,7 @@ void RunBenchmark(benchmark::State& state, std::string input_name, Options optio
     for (auto _ : state) {
         auto res = Generate(program, options);
         if (!res) {
-            state.SkipWithError(res.Failure());
+            state.SkipWithError(res.Failure().reason.str());
         }
     }
 }

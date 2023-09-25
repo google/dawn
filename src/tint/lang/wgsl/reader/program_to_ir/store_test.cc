@@ -32,7 +32,7 @@ TEST_F(ProgramToIRStoreTest, EmitStatement_Assign) {
     WrapInFunction(expr);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%b1 = block {  # root
   %a:ptr<private, u32, read_write> = var

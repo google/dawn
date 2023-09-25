@@ -19,6 +19,7 @@
 
 #include "src/tint/lang/core/ir/constant.h"
 #include "src/tint/lang/core/type/type.h"
+#include "src/tint/utils/diagnostic/diagnostic.h"
 #include "src/tint/utils/result/result.h"
 
 // Forward declarations.
@@ -32,8 +33,8 @@ namespace tint::spirv::writer::raise {
 /// BuiltinPolyfill is a transform that replaces calls to builtins with polyfills and calls to
 /// SPIR-V backend intrinsic functions.
 /// @param module the module to transform
-/// @returns an error string on failure
-Result<SuccessType, std::string> BuiltinPolyfill(core::ir::Module* module);
+/// @returns success or failure
+Result<SuccessType> BuiltinPolyfill(core::ir::Module* module);
 
 /// LiteralOperand is a type of constant value that is intended to be emitted as a literal in
 /// the SPIR-V instruction stream.

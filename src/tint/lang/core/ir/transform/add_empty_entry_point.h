@@ -28,8 +28,8 @@ namespace tint::core::ir::transform {
 
 /// Add an empty entry point to the module, if no other entry points exist.
 /// @param module the module to transform
-/// @returns an error string on failure
-Result<SuccessType, std::string> AddEmptyEntryPoint(Module* module);
+/// @returns success or failure
+Result<SuccessType> AddEmptyEntryPoint(Module* module);
 
 }  // namespace tint::core::ir::transform
 

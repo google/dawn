@@ -40,6 +40,7 @@ libtint_source_set("data") {
     "${tint_src_dir}/lang/core/type",
     "${tint_src_dir}/lang/spirv/type",
     "${tint_src_dir}/utils/containers",
+    "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",
     "${tint_src_dir}/utils/id",
     "${tint_src_dir}/utils/macros",

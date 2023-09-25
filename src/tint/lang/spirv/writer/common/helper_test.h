@@ -105,13 +105,13 @@ class SpirvWriterTestHelperBase : public BASE {
     bool Generate(Printer& writer, Options options = {}) {
         auto raised = raise::Raise(&mod, options);
         if (!raised) {
-            err_ = raised.Failure();
+            err_ = raised.Failure().reason.str();
             return false;
         }
 
         auto spirv = writer.Generate();
         if (!spirv) {
-            err_ = spirv.Failure();
+            err_ = spirv.Failure().reason.str();
             return false;
         }
 

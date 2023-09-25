@@ -14,9 +14,14 @@
 
 #include "src/tint/utils/result/result.h"
 
-#if defined(__clang__)
-#pragma clang diagnostic ignored "-Wmissing-variable-declarations"
-#endif
+namespace tint {
 
-// A placeholder symbol used to emit a symbol for this lib target.
-int tint_utils_result_symbol = 1;
+Failure::Failure() = default;
+
+Failure::Failure(std::string_view err) {
+    reason.add_error(diag::System::Unknown, err, Source{});
+}
+
+Failure::Failure(diag::List diagnostics) : reason(diagnostics) {}
+
+}  // namespace tint

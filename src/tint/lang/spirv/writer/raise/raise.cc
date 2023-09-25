@@ -34,7 +34,7 @@
 
 namespace tint::spirv::writer::raise {
 
-Result<SuccessType, std::string> Raise(core::ir::Module* module, const Options& options) {
+Result<SuccessType> Raise(core::ir::Module* module, const Options& options) {
 #define RUN_TRANSFORM(name, ...)         \
     do {                                 \
         auto result = name(__VA_ARGS__); \

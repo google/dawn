@@ -100,14 +100,14 @@ class State {
         {
             auto result = RenameConflicts(&mod);
             if (!result) {
-                b.Diagnostics().add_error(diag::System::Transform, result.Failure());
+                b.Diagnostics().add(result.Failure().reason);
                 return Program(std::move(b));
             }
         }
 
         if (auto res = core::ir::Validate(mod); !res) {
             // IR module failed validation.
-            b.Diagnostics() = res.Failure();
+            b.Diagnostics() = res.Failure().reason;
             return Program{resolver::Resolve(b)};
         }
 

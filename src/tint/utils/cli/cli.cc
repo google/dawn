@@ -118,16 +118,14 @@ void OptionSet::ShowHelp(std::ostream& s_out) {
     }
 }
 
-Result<OptionSet::Unconsumed> OptionSet::Parse(std::ostream& s_err,
-                                               VectorRef<std::string_view> arguments_raw) {
+Result<OptionSet::Unconsumed> OptionSet::Parse(VectorRef<std::string_view> arguments_raw) {
     // Build a map of name to option, and set defaults
     Hashmap<std::string, Option*, 32> options_by_name;
     for (auto* opt : options.Objects()) {
         opt->SetDefault();
         for (auto name : {opt->Name(), opt->Alias(), opt->ShortName()}) {
             if (!name.empty() && !options_by_name.Add(name, opt)) {
-                s_err << "multiple options with name '" << name << "'" << std::endl;
-                return Failure;
+                return Failure{"multiple options with name '" + name + "'"};
             }
         }
     }
@@ -158,21 +156,19 @@ Result<OptionSet::Unconsumed> OptionSet::Parse(std::ostream& s_err,
         }
         if (auto opt = options_by_name.Find(name)) {
             if (auto err = (*opt)->Parse(arguments); !err.empty()) {
-                s_err << err << std::endl;
-                return Failure;
+                return Failure{err};
             }
         } else {
-            s_err << "unknown flag: " << arg << std::endl;
+            StringStream err;
+            err << "unknown flag: " << arg << std::endl;
             auto names = options_by_name.Keys();
             auto alternatives =
                 Transform(names, [&](const std::string& s) { return std::string_view(s); });
-            StringStream ss;
             tint::SuggestAlternativeOptions opts;
             opts.prefix = "--";
             opts.list_possible_values = false;
-            SuggestAlternatives(arg, alternatives.Slice(), ss, opts);
-            s_err << ss.str();
-            return Failure;
+            SuggestAlternatives(arg, alternatives.Slice(), err, opts);
+            return Failure{err.str()};
         }
     }
 

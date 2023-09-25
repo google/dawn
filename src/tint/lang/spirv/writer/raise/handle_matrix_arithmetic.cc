@@ -153,10 +153,10 @@ void Run(core::ir::Module* ir) {
 
 }  // namespace
 
-Result<SuccessType, std::string> HandleMatrixArithmetic(core::ir::Module* ir) {
+Result<SuccessType> HandleMatrixArithmetic(core::ir::Module* ir) {
     auto result = ValidateAndDumpIfNeeded(*ir, "HandleMatrixArithmetic transform");
     if (!result) {
-        return result;
+        return result.Failure();
     }
 
     Run(ir);

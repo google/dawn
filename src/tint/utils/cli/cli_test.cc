@@ -150,10 +150,8 @@ TEST_F(CLITest, ParseBool_Flag) {
     OptionSet opts;
     auto& opt = opts.Add<BoolOption>("my_option", "a boolean value");
 
-    std::stringstream err;
-    auto res = opts.Parse(err, Split("--my_option unconsumed", " "));
-    ASSERT_TRUE(res) << err.str();
-    EXPECT_TRUE(err.str().empty());
+    auto res = opts.Parse(Split("--my_option unconsumed", " "));
+    ASSERT_TRUE(res) << res;
     EXPECT_THAT(ToStringList(res.Get()), testing::ElementsAre("unconsumed"));
     EXPECT_EQ(opt.value, true);
 }
@@ -162,10 +160,8 @@ TEST_F(CLITest, ParseBool_ExplicitTrue) {
     OptionSet opts;
     auto& opt = opts.Add<BoolOption>("my_option", "a boolean value");
 
-    std::stringstream err;
-    auto res = opts.Parse(err, Split("--my_option true", " "));
-    ASSERT_TRUE(res) << err.str();
-    EXPECT_TRUE(err.str().empty());
+    auto res = opts.Parse(Split("--my_option true", " "));
+    ASSERT_TRUE(res) << res;
     EXPECT_THAT(ToStringList(res.Get()), testing::ElementsAre());
     EXPECT_EQ(opt.value, true);
 }
@@ -174,10 +170,8 @@ TEST_F(CLITest, ParseBool_ExplicitFalse) {
     OptionSet opts;
     auto& opt = opts.Add<BoolOption>("my_option", "a boolean value", Default{true});
 
-    std::stringstream err;
-    auto res = opts.Parse(err, Split("--my_option false", " "));
-    ASSERT_TRUE(res) << err.str();
-    EXPECT_TRUE(err.str().empty());
+    auto res = opts.Parse(Split("--my_option false", " "));
+    ASSERT_TRUE(res) << res;
     EXPECT_THAT(ToStringList(res.Get()), testing::ElementsAre());
     EXPECT_EQ(opt.value, false);
 }
@@ -186,10 +180,8 @@ TEST_F(CLITest, ParseInt) {
     OptionSet opts;
     auto& opt = opts.Add<ValueOption<int>>("my_option", "an integer value");
 
-    std::stringstream err;
-    auto res = opts.Parse(err, Split("--my_option 42", " "));
-    ASSERT_TRUE(res) << err.str();
-    EXPECT_TRUE(err.str().empty());
+    auto res = opts.Parse(Split("--my_option 42", " "));
+    ASSERT_TRUE(res) << res;
     EXPECT_THAT(ToStringList(res.Get()), testing::ElementsAre());
     EXPECT_EQ(opt.value, 42);
 }
@@ -198,10 +190,8 @@ TEST_F(CLITest, ParseUint64) {
     OptionSet opts;
     auto& opt = opts.Add<ValueOption<uint64_t>>("my_option", "a uint64_t value");
 
-    std::stringstream err;
-    auto res = opts.Parse(err, Split("--my_option 1000000", " "));
-    ASSERT_TRUE(res) << err.str();
-    EXPECT_TRUE(err.str().empty());
+    auto res = opts.Parse(Split("--my_option 1000000", " "));
+    ASSERT_TRUE(res) << res;
     EXPECT_THAT(ToStringList(res.Get()), testing::ElementsAre());
     EXPECT_EQ(opt.value, 1000000);
 }
@@ -210,10 +200,8 @@ TEST_F(CLITest, ParseFloat) {
     OptionSet opts;
     auto& opt = opts.Add<ValueOption<float>>("my_option", "a float value");
 
-    std::stringstream err;
-    auto res = opts.Parse(err, Split("--my_option 1.25", " "));
-    ASSERT_TRUE(res) << err.str();
-    EXPECT_TRUE(err.str().empty());
+    auto res = opts.Parse(Split("--my_option 1.25", " "));
+    ASSERT_TRUE(res) << res;
     EXPECT_THAT(ToStringList(res.Get()), testing::ElementsAre());
     EXPECT_EQ(opt.value, 1.25f);
 }
@@ -222,10 +210,8 @@ TEST_F(CLITest, ParseString) {
     OptionSet opts;
     auto& opt = opts.Add<StringOption>("my_option", "a string value");
 
-    std::stringstream err;
-    auto res = opts.Parse(err, Split("--my_option blah", " "));
-    ASSERT_TRUE(res) << err.str();
-    EXPECT_TRUE(err.str().empty());
+    auto res = opts.Parse(Split("--my_option blah", " "));
+    ASSERT_TRUE(res) << res;
     EXPECT_THAT(ToStringList(res.Get()), testing::ElementsAre());
     EXPECT_EQ(opt.value, "blah");
 }
@@ -240,10 +226,8 @@ TEST_F(CLITest, ParseEnum) {
                                             EnumName(E::Y, "Y"),
                                             EnumName(E::Z, "Z"),
                                         });
-    std::stringstream err;
-    auto res = opts.Parse(err, Split("--my_option Y", " "));
-    ASSERT_TRUE(res) << err.str();
-    EXPECT_TRUE(err.str().empty());
+    auto res = opts.Parse(Split("--my_option Y", " "));
+    ASSERT_TRUE(res) << res;
     EXPECT_THAT(ToStringList(res.Get()), testing::ElementsAre());
     EXPECT_EQ(opt.value, E::Y);
 }
@@ -252,10 +236,8 @@ TEST_F(CLITest, ParseShortName) {
     OptionSet opts;
     auto& opt = opts.Add<ValueOption<int>>("my_option", "an integer value", ShortName{"o"});
 
-    std::stringstream err;
-    auto res = opts.Parse(err, Split("-o 42", " "));
-    ASSERT_TRUE(res) << err.str();
-    EXPECT_TRUE(err.str().empty());
+    auto res = opts.Parse(Split("-o 42", " "));
+    ASSERT_TRUE(res) << res;
     EXPECT_THAT(ToStringList(res.Get()), testing::ElementsAre());
     EXPECT_EQ(opt.value, 42);
 }
@@ -264,10 +246,8 @@ TEST_F(CLITest, ParseUnconsumed) {
     OptionSet opts;
     auto& opt = opts.Add<ValueOption<int32_t>>("my_option", "a int32_t value");
 
-    std::stringstream err;
-    auto res = opts.Parse(err, Split("abc --my_option -123 def", " "));
-    ASSERT_TRUE(res) << err.str();
-    EXPECT_TRUE(err.str().empty());
+    auto res = opts.Parse(Split("abc --my_option -123 def", " "));
+    ASSERT_TRUE(res) << res;
     EXPECT_THAT(ToStringList(res.Get()), testing::ElementsAre("abc", "def"));
     EXPECT_EQ(opt.value, -123);
 }
@@ -276,10 +256,8 @@ TEST_F(CLITest, ParseUsingEquals) {
     OptionSet opts;
     auto& opt = opts.Add<ValueOption<int>>("my_option", "an int value");
 
-    std::stringstream err;
-    auto res = opts.Parse(err, Split("--my_option=123", " "));
-    ASSERT_TRUE(res) << err.str();
-    EXPECT_TRUE(err.str().empty());
+    auto res = opts.Parse(Split("--my_option=123", " "));
+    ASSERT_TRUE(res) << res;
     EXPECT_THAT(ToStringList(res.Get()), testing::ElementsAre());
     EXPECT_EQ(opt.value, 123);
 }
@@ -288,10 +266,8 @@ TEST_F(CLITest, SetValueToDefault) {
     OptionSet opts;
     auto& opt = opts.Add<BoolOption>("my_option", "a boolean value", Default{true});
 
-    std::stringstream err;
-    auto res = opts.Parse(err, tint::Empty);
-    ASSERT_TRUE(res) << err.str();
-    EXPECT_TRUE(err.str().empty());
+    auto res = opts.Parse(tint::Empty);
+    ASSERT_TRUE(res) << res;
     EXPECT_EQ(opt.value, true);
 }
 

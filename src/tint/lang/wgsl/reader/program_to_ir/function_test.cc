@@ -32,7 +32,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_Vertex) {
          Vector{Builtin(core::BuiltinValue::kPosition)});
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = @vertex func():vec4<f32> [@position] -> %b1 {
   %b1 = block {
@@ -47,7 +47,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_Fragment) {
          Vector{Stage(ast::PipelineStage::kFragment)});
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = @fragment func():void -> %b1 {
   %b1 = block {
@@ -62,7 +62,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_Compute) {
          Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(8_i, 4_i, 2_i)});
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test = @compute @workgroup_size(8, 4, 2) func():void -> %b1 {
@@ -78,7 +78,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_Return) {
          tint::Empty);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():vec3<f32> -> %b1 {
   %b1 = block {
@@ -93,7 +93,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_UnreachableEnd_ReturnValue) {
          Vector{If(true, Block(Return(0_f)), Else(Block(Return(1_f))))}, tint::Empty);
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = func():f32 -> %b1 {
   %b1 = block {
@@ -117,7 +117,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnPosition) {
          Vector{Builtin(core::BuiltinValue::kPosition)});
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = @vertex func():vec4<f32> [@position] -> %b1 {
   %b1 = block {
@@ -133,7 +133,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnPositionInvariant) {
          Vector{Builtin(core::BuiltinValue::kPosition), Invariant()});
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test = @vertex func():vec4<f32> [@invariant, @position] -> %b1 {
@@ -149,7 +149,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnLocation) {
          Vector{Stage(ast::PipelineStage::kFragment)}, Vector{Location(1_i)});
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()),
               R"(%test = @fragment func():vec4<f32> [@location(1)] -> %b1 {
@@ -167,7 +167,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnLocation_Interpolate) {
                                            core::InterpolationSampling::kCentroid)});
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(
         Disassemble(m.Get()),
@@ -185,7 +185,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnFragDepth) {
          Vector{Builtin(core::BuiltinValue::kFragDepth)});
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = @fragment func():f32 [@frag_depth] -> %b1 {
   %b1 = block {
@@ -201,7 +201,7 @@ TEST_F(ProgramToIRFunctionTest, EmitFunction_ReturnSampleMask) {
          Vector{Builtin(core::BuiltinValue::kSampleMask)});
 
     auto m = Build();
-    ASSERT_TRUE(m) << (!m ? m.Failure() : "");
+    ASSERT_TRUE(m) << m;
 
     EXPECT_EQ(Disassemble(m.Get()), R"(%test = @fragment func():u32 [@sample_mask] -> %b1 {
   %b1 = block {

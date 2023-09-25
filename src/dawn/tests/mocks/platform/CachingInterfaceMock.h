@@ -34,7 +34,7 @@
         EXPECT_EQ(N, after - before);         \
     } while (0)
 
-// Check that |HitN| cache hits occured, and |AddN| entries were added.
+// Check that |HitN| cache hits occurred, and |AddN| entries were added.
 // Usage: EXPECT_CACHE_STATS(myMockCache, Hit(42), Add(3), ...)
 // Hit / Add help readability, and enforce the args are passed correctly in the expected order.
 #define EXPECT_CACHE_STATS(cache, HitN, AddN, statement)                    \

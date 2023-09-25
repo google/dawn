@@ -35,6 +35,9 @@ libtint_source_set("generator") {
     "${tint_src_dir}/utils/diagnostic",
     "${tint_src_dir}/utils/ice",
     "${tint_src_dir}/utils/macros",
+    "${tint_src_dir}/utils/math",
+    "${tint_src_dir}/utils/memory",
+    "${tint_src_dir}/utils/rtti",
     "${tint_src_dir}/utils/text",
     "${tint_src_dir}/utils/traits",
   ]

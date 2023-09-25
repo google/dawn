@@ -232,7 +232,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType, std::string> BinaryPolyfill(Module* ir, const BinaryPolyfillConfig& config) {
+Result<SuccessType> BinaryPolyfill(Module* ir, const BinaryPolyfillConfig& config) {
     auto result = ValidateAndDumpIfNeeded(*ir, "BinaryPolyfill transform");
     if (!result) {
         return result;

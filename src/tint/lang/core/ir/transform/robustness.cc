@@ -335,7 +335,7 @@ struct State {
 
 }  // namespace
 
-Result<SuccessType, std::string> Robustness(Module* ir, const RobustnessConfig& config) {
+Result<SuccessType> Robustness(Module* ir, const RobustnessConfig& config) {
     auto result = ValidateAndDumpIfNeeded(*ir, "Robustness transform");
     if (!result) {
         return result;

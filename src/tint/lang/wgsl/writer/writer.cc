@@ -26,7 +26,7 @@
 
 namespace tint::wgsl::writer {
 
-Result<Output, std::string> Generate(const Program& program, const Options& options) {
+Result<Output> Generate(const Program& program, const Options& options) {
     (void)options;
 
     Output output;
@@ -35,7 +35,7 @@ Result<Output, std::string> Generate(const Program& program, const Options& opti
         // Generate the WGSL code.
         auto impl = std::make_unique<SyntaxTreePrinter>(program);
         if (!impl->Generate()) {
-            return impl->Diagnostics().str();
+            return Failure{impl->Diagnostics()};
         }
         output.wgsl = impl->Result();
     } else  // NOLINT(readability/braces)
@@ -44,7 +44,7 @@ Result<Output, std::string> Generate(const Program& program, const Options& opti
         // Generate the WGSL code.
         auto impl = std::make_unique<ASTPrinter>(program);
         if (!impl->Generate()) {
-            return impl->Diagnostics().str();
+            return Failure{impl->Diagnostics()};
         }
         output.wgsl = impl->Result();
     }

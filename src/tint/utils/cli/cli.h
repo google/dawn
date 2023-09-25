@@ -172,10 +172,9 @@ class OptionSet {
     void ShowHelp(std::ostream& out);
 
     /// Parses all the options in @p options.
-    /// @param err the error stream
     /// @param arguments the command line arguments, excluding the initial executable name
     /// @return a Result holding a list of arguments that were not consumed as options
-    Result<Unconsumed> Parse(std::ostream& err, VectorRef<std::string_view> arguments);
+    Result<Unconsumed> Parse(VectorRef<std::string_view> arguments);
 
   private:
     /// The list of options to parse
